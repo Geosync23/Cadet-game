@@ -612,7 +612,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 **Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
 
-- **A commendation** comes at an event's all-clear if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. (Timing: the commendation used to come when the event ended. Moving it to the all-clear is the events planner's proposal, plans/events-plan.html v3.1, waiting on the user; see Open questions.) **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them, in hours as well as days: at most one Captain's scene a day, none on a test day, and never across a night shift. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 (at an hour clear of that day's training) and the table on Day 20 (ending by 20:30, before the night shift).
+- **A commendation** comes at an event's all-clear if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. (Timing, the user 2026-10-20: at the all-clear, not when the event ends as it used to. The event's threads stop counting there too.) **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them, in hours as well as days: at most one Captain's scene a day, none on a test day, and never across a night shift. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 (at an hour clear of that day's training) and the table on Day 20 (ending by 20:30, before the night shift).
 - **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons on the first day the career-beat guard leaves free, at an hour it leaves free (after the storm: Day 18). She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
 - **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour after the first ship-wide event has ended (day 22, a Monday, in a new game), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
@@ -620,11 +620,16 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 - Each is an appointment that opens its door for its window. If you miss one, a short Mail tells you; nothing is lost.
 
 **Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
-- **Day 6 (Saturday):** a new one-day short event, the first chronologically. It's the user's "one more short one" (to be confirmed). Which event is still open; the recommendation is "Crossing the Line", a plaza ceremony and a supper.
+- **Sunday Day 7: Crossing the Line**, a new one-day short event and the first chronologically. It's the user's "one more short one". It's on Sunday so that the player keeps Saturday as a completely free day. The Wren crosses into the Veyli reach.
+  - 14:30: the horn and gold hull lights, then the Captain's short address.
+  - 14:30-15:15: the ceremony for first-timers on the plaza (you included).
+  - 18:00-19:15: the Line supper, which takes the Sunday table's place in the mess.
+  - Afterwards: a certificate and a plaque.
+  - Saturday Day 6 at 17:00 is the fallback.
 - **Days 11-15:** the ion storm, one day later than built, with a shorter afterglow.
   - Thursday 11: the warning, and Calder's briefing at 14:00, after the first team job and the tea break.
   - Friday 12, 14:00: the front.
-  - Sunday 14, 10:00: the all-clear, with the party that evening.
+  - Sunday 14, 10:00: the all-clear, with the party that evening. Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15 at 20:30.
 - **Tuesday Day 16, 21:30:** comet viewing, one day long.
 - **Days 26-30:** the diplomatic visit, shortened into a weekend finale.
   - Day 22: named as next week's business.
@@ -633,12 +638,16 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - Sunday 28: one dinner.
   - Monday 29: the farewell.
 
-Build order: the ion storm first, then the Day 6 event, the comet and the visit. Each event is built switched off, then switched on. Pillar 5 steps 5-6 come later and fit around these days.
+Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. Pillar 5 steps 5-6 come later and fit around these days.
+
+**Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
+
+**Crowds:** up to about 60 per gathering for now (the user), with standing places around the mess's 44 seats. This goes up after a test on the user's phone.
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
 
 **Large groups (the user's playtest, relayed by lead 20, 2026-10-20: "Love the moments with large groups — need more, especially in ship-wide events").** Every event gets big gatherings:
-- the Day 6 event's two crowds;
+- Crossing the Line's two crowds;
 - the storm's lantern supper in the mess and its party;
 - the comet at the windows;
 - the whole crew lining the shuttle bay to greet and see off the Veyli.
@@ -651,7 +660,7 @@ Build order: the ion storm first, then the Day 6 event, the comet and the visit.
 
 | Order | Event | Kind | In short |
 | --- | --- | --- | --- |
-| — | The Day 6 event (new; which one is open) | Short, Day 6 | One day: the whole crew gathers, with two big crowd moments. Recommended: "Crossing the Line", a plaza ceremony for first-timers and a supper in the mess. |
+| — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A plaza ceremony for first-timers and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
 | — | Comet viewing | Short, Day 16 | One gentle evening at the observatory and the bow lounge windows. |
 | 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
@@ -805,14 +814,6 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
-- **Ship-wide events, v3** (plans/events-plan.html section 6, recommendations in brackets):
-  - Is the Day 6 event the "one more short one", or are two wanted? [one]
-  - Which Day 6 event? [Crossing the Line]
-  - Saturday Day 6 or Friday Day 5? [Saturday]
-  - On the storm's Sunday all-clear, do the four of its five people who are off that day come in? [yes]
-  - How big should crowds be for now? [about 60 per gathering until a phone test, with standing places in the 44-seat mess]
-  - Should rec talent night move and Lap of the Wren pause on the party night? [yes]
-  - Should the storm commendation arrive at the all-clear, the planner's proposal? [yes]
 
 **The decks:**
 
@@ -820,6 +821,13 @@ Done so far:
 
 **Answered:**
 
+- Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
+  - The one extra short event is Crossing the Line, on Sunday Day 7, so Saturday stays free.
+  - The cast is called in on their day off, with lines about it.
+  - Crowds up to about 60.
+  - Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15.
+  - The commendation comes at the all-clear.
+  - See "Ship-wide events".
 - Ship-wide events (the user, 2026-10-20; plans/events-plan.html v2):
   - Scope: only the events before the career's end; the rest are parked.
   - The storm moves to Days 11-15.

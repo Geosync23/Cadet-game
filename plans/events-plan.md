@@ -1,4 +1,4 @@
-# Ship-wide events plan: summary (version 3.1)
+# Ship-wide events plan: summary (version 3.2: all answered)
 
 Events planner EP1, 2026-10-20. Branch `claude/events-plan`, build 0.64.2.
 
@@ -99,3 +99,20 @@ The crew rotation day, then the garden creature, power surge, illness, the Found
   - The threads stop counting at the all-clear.
   - The Day 6 event's pause on other traditions ends by 19:59.
   - The playtest quote's source is noted (lead 20).
+
+## v3.2: the user's answers to v3.1 (saved 12:25 UTC). No open questions.
+1. **The one extra short event is Crossing the Line.**
+2. **It's on Sunday Day 7, so Saturday stays a completely free day** (the user: "Maybe Sunday your 2nd day off. Let the player have 1 free day"). I checked Day 7 and it works:
+   - The market ends at 12:30, so the plaza is free from 13:00 to 16:00.
+   - 14:30: the horn and gold hull lights, then the Captain's address. She's called in.
+   - 14:30-15:15: the ceremony on the plaza.
+   - 17:15: "one week aboard" in the bow lounge, as built, now about your crossing.
+   - 18:00-19:15: the Line supper, which takes the Sunday table's place in the mess. Brennan works that day.
+   - 20:30: Lap of the Wren, as usual.
+   - Fallback: Saturday Day 6 at 17:00.
+3. **People called in on their day off are marked as called in.** Their lines and the crew's chatter mention it (the head writer). This covers the Captain on Days 7 and 27, and four of the five at the storm's all-clear.
+4. **Crowds are up to about 60**, with standing places around the mess's 44 seats.
+5. **Rec talent night moves a week.** Lap of the Wren moves to **Monday Day 15 at 20:30**, led by Tomas. That day has the running club until 20:00 and book circle from 20:15, so it stays within two traditions at once.
+6. **The commendation comes at the all-clear.** This is now the user's answer, and design-doc credits it to them.
+
+The page's questions are replaced by a list of the answers, plus one general comment box (`ev-v32-general`). design-doc's Open questions moved to Answered.
