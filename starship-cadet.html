@@ -39121,7 +39121,7 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
 // flagSet), the stand-ins below keep the flags in SHIP.intro.flags and hand this section's own notes to settleNote.
 // =====================================================================
 const INTRO_ESCORT = 'torres-zeke';                      // the user: a future friend, one notch above you in Works
-const INTRO_KEY = 'starship-cadet-arrived';              // set once you've finished or ended an intro: New game offers the skip (outside the save)
+const INTRO_KEY = 'starship-cadet-arrived' + (DEVMODE ? '-dev' : '');              // set once you've finished or ended an intro: New game offers the skip (outside the save)
 const INTRO_START = { day: 0, min: 17 * 60 + 30, deck: 5, tile: [5, 7], face: 0 };   // inside the Tern, in its aisle facing the door (south; the deck architect's DECKS[5].tern.start, 0.38.18)
 const introAbs = (day, min) => (day - 1) * 1440 + min;
 const INTRO_REACH = 2;                                   // a step is done when you're in its checkpoint's room, this many tiles from it at most
@@ -39380,7 +39380,7 @@ function introBegin(name) {
 // you've arrived before, wave 2's choice will ask; until then a returning player starts on Monday as before), and the
 // intro's side of the fresh start, called after section 13 has cleared the flags and set the clock
 // (a function declaration reading the key directly: section 13 asks this at load, before this section has run)
-function introWanted() { try { return !NOSAVE && !localStorage.getItem('starship-cadet-arrived'); } catch (e) { return false; } }
+function introWanted() { try { return !NOSAVE && !localStorage.getItem(INTRO_KEY); } catch (e) { return false; } }
 function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriving) introBegin(); else SHIP.intro = introBlank(); }
 // what the evening in play keeps between frames, back to a fresh start on New game (reviewer 1: on a second arrival
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
