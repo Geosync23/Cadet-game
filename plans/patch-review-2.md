@@ -125,3 +125,4 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - d26:47 the surprise after dinner.
   - Crossing the Line's own cake.
 - The cross-check was done with a helper agent and its key points verified by me. Its `flag:promoted` finding was wrong: the flag exists.
+- **EW1's fixes 407fd07: PASS.** Every fix and the lead's calls are in. Left for EV1: myrank, myshift:night, {leavers} and the .address bake.
