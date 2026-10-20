@@ -12400,7 +12400,9 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   // playtest 2 (0.72.5, HUD U; texts: the head writer's tip.device and tip.laundry.day2, read when shown): item 9, once on your
   // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift).
   // The patch (#28): any time on Day 2 you're up and not clocked in, in the words for the time (before, late, after the shift)
-  ['t:devwork', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
+  // the patch (#13): it waits for a long work step under way (a hold of 10 ship minutes or more), any day of your first week
+  ['t:devwork', c => c.d >= 1 && c.d <= 7 && !c.app && !!ACT && ACT.phase === 'do' && WORK_ACTS.has(ACT.kind) && ACT.def.mins >= 10 && ACT.done > 0 && ACT.done < ACT.def.mins,
+    () => careerText('tip.device') || 'While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.', { sure: true }],
   ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && !sleeping && !(typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut()),
     () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.'
       : SHIP.time.min < DAY_SHIFT[1] ? careerText('tip.laundry.day2.late') || 'Laundry\'s for after your shift. Clock in first; the washers will wait.'
@@ -32322,7 +32324,7 @@ const LINES = JSON.parse([
   ',"tip.clothes":[',
   '{"text":"Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.","id":"19o8qsh"}]',
   ',"tip.device":[',
-  '{"text":"Working is a good chance to check out your device. Have a look at the apps between jobs.","id":"t5ivqy"}]',
+  '{"text":"While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.","id":"1hdhyql"}]',
   ',"tip.eve.call":[',
   '{"text":"Your people at home would love to hear from you. The call booths are on Deck 3.","id":"4ujlfr"}]',
   ',"tip.eve.hobby":[',
