@@ -49757,6 +49757,7 @@ function tap(cx, cy) {
     return;
   }
   if (ud.item && ud.item.lift) { enterLift(); return; }
+  if (ud.item && ud.item.see && ud.item.t === 'Spine ladder' && typeof ladderTap === 'function' && ladderTap(null)) return;   // patch #5: the ladder behind its glass takes you to its hatch (LADDER_ON)
   if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
   if (ud.item) {
     const it = ud.item; it.hit.getWorldPosition(_wp);
@@ -49766,6 +49767,7 @@ function tap(cx, cy) {
   }
   if (ud.liftDoor) { enterLift(); return; }
   if (ud.youLock) { const c = youLockTap(ud.youLock); if (c) { const e = EDGES.get(ud.youLock); approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x)); return; } }   // 0.47.11
+  if (ud.closedDoor && typeof ladderTap === 'function' && ladderTap(ud.closedDoor)) return;   // patch #5: a ladder hatch opens the Spine ladder panel (LADDER_ON)
   if (ud.closedDoor) {
     const e = EDGES.get(ud.closedDoor), c = CLOSED_DOORS[ud.closedDoor];
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
@@ -49981,6 +49983,7 @@ function startRide(n) {
 const RIDE = { shut: .55, dark: .95, light: 1.35, done: 1.8 };
 function updateRide(dt) {
   const r = ride; r.t += dt; const T_ = r.t;
+  if (r.ladder && typeof ladderStep === 'function') { ladderStep(r, dt); return; }   // patch #5: a climb on the spine ladder (section 15's slot): no lift doors
   for (const d of liftDoors()) d.force = T_ >= RIDE.light && r.swapped ? 1 : 0;
   if (!r.swapped) {
     fadeEl.style.opacity = THREE.MathUtils.clamp((T_ - RIDE.shut) / (RIDE.dark - RIDE.shut), 0, 1);
