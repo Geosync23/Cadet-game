@@ -29,3 +29,12 @@ Set them up in step 2, alongside the split (the split's plan page shows the user
 
 ## Check speed (talked through with the user, 2026-10-20)
 Keep the full checks as they are (play from Day 1). With the split, add the quick check on GitHub; also run checks side by side across helpers, and let number-only checks skip drawing. Saved starting points (e.g. start of Day 5, stamped with the game version and rebuilt whenever the game changes, with a full from-Day-1 run before every release) only if check time is still the bottleneck after the split.
+
+## The user's calls on the split plan (2026-10-20; the user asked lead 20 to take them as described)
+Plan page: https://claude.ai/artifact/9v7C1oRCJUUTGkAujsAoUt (claude/split-plan cc833f8). Not yet signed off: the user asked for a deeper test first (rehearsal SX1, second reviewer SR2) and may still choose not to split.
+- Keep the glued starship-cadet.html committed in git: yes.
+- The GitHub check on every push: yes (free while the repo is public).
+- Build number: the build master sets it when merging into the shared branch; helpers stop bumping it (CLAUDE.md change in turn 4).
+- Owners: small edits in another seat's piece are fine, the owner reviews before merge; changes to a shared function's inputs or a shared table's shape go to the owner first.
+- GitHub Releases tag: skip; the frozen branch + archive copy keep the whole file.
+- Public or private: open, the user's call (the plan covers both).
