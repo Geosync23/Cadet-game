@@ -14309,7 +14309,9 @@ function mugTick() {                                     // each frame (section 
   if (!d || !MUG_DRINKS.has(d)) { MUG = null; return; }
   if (!MUG || MUG.drink !== d) MUG = { drink: d, from: shipNow() };
   const busy = P.cart || P.carry.length > 0 || P.tray || (typeof hamperHeld === 'function' && hamperHeld()) || ACT && ACT.kind === 'eat';
-  if (busy || shipNow() - MUG.from >= MUG_MINS) mugFinish(false);
+  // PP1: asleep, a time skip, or another activity under way (a shower, a repair...): finished quietly, never a hidden mug
+  const quiet = (typeof sleeping !== 'undefined' && sleeping) || shipNow() - MUG.from > MUG_MINS + 5 || !!ACT && ACT.kind !== 'ixDrink' && ACT.phase !== 'walk';
+  if (quiet) mugFinish(true); else if (busy || shipNow() - MUG.from >= MUG_MINS) mugFinish(false);
 }
 // section 15's hold: 'mug' while it's in hand and you're walking or standing (an activity's own pose wins, but walking to it)
 const mugHeld = () => MUG_ON && MUG && SHIP.player.drink === MUG.drink && (!ACT || ACT.phase === 'walk') ? 'mug' : null;
