@@ -1,6 +1,6 @@
 # Short Fridays and the Captain's address: summary
 
-The page is `plans/fridays-plan.html` (questions `fp-q1`..`fp-q7` and `fp-general` in `form#answers`; save to db `answers/fridays-plan`). Planned by PP1 for lead 21, 2026-10-20, from the user's decision:
+The page is `plans/fridays-plan.html` (questions `fp-q1`..`fp-q7` and `fp-general` in `form#answers`; save to db `answers/fridays-plan` (revision 1) and `answers/fridays-plan-v2` (revision 2)). Planned by PP1 for lead 21, 2026-10-20, from the user's decision:
 
 > "Friday is good. Let's make it so everyone gets off work early on Friday. Get off at 1530, then meeting at 1600. Then dinner at 1700. We need dialog explaining the short work day Fridays."
 
