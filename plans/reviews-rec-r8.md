@@ -14,6 +14,32 @@ Needs, then Tracked (fixed, never moves), then the activity bar at the very bott
 overlap with the activity bar, heads-up/tip cards or the round buttons at 390 and 320 px; Tracked doesn't move at all as the bar
 shows/hides; the bar sits below Tracked; non-phone layout unchanged (cadet_test shots at 900 px should be 0 px different).
 
+## claude/ways-of-working 928d49a (step 2, WW1 session_0192KVdPtywdv7sp3mXUXGHU) vs c575a8e: PASS WITH FIXES
+
+1. **Slots (ff32ddd)**: 17 inserts, 51 lines, all `// ---- slot:` / `// ---- end of slot:` comment pairs plus a blank;
+   removing them gives c575a8e's game byte for byte. Each sits between two top-level statements, just before a section
+   heading (add_slots.py checks that with acorn too), so none is inside a string, template or regex. cadet_test c575a8e
+   vs 928d49a (re-run here): ALL IDENTICAL. The archive copy's sha256 = c575a8e's game (e4897023...).
+2. **Exit codes**: cadet_test, day, deck, disc, food, machine, path, perf, social: one `sys.exit` after the unchanged
+   OK/FAILED line, on the same `ok`/`bad` that picks the line (inside `with sync_playwright()` after g.close(): fine).
+   arc_check's default mode likewise (`arc_ok`). **FIX: arc_check's two other modes still exit 0 on failure**: `booth`
+   (line 163 `sys.exit(0)` after "BOOTH CHECK: ...") and `calls` (line 176, after "CALLS CHECK: ..."). Make them
+   `sys.exit(1 if bad else 0)` and `sys.exit(0 if (not bad and not g.errors and not any(r['unheard'].values())) else 1)`.
+   Not in check_fast, so no false green there today. perf_check now exits 1 on the old memory note (backlog 14): known.
+3. **names_check.js / check_fast.sh**: names_check OK on 928d49a; a planted file (a second `function machinesNow`, a
+   key added twice with Object.assign, a "Deck 7" string) gives three FAILs and exit 1; a const twice fails as "does not
+   parse". check_fast: a step passes only on exit 0 AND its OK line; the lanes are waited by PID (`wait $A`, `wait $B`),
+   not a bare wait; the planted file stops it at "parse, names, text" with exit 1. Clean run here: QUICK CHECK OK in
+   210 s (rc 0). Limits (documented in the file): names inside if/blocks aren't checked; only "Deck 7" for naming.
+4. **1b75316**: CLAUDE.md has the user's two rules (room to comment on every published page; cut things parked, never
+   deleted), the build number as the build master's, early merging into claude/integration, owners, slots, backlog,
+   check_fast before every push. Build table: all 1036 rows taken out of DEV_NOTES are in plans/build-table.md in the
+   same order (plus the new step 2 row); the old "Current build 0.60.7" notes went there too; the old section list is
+   replaced by plans/map.md / tools/section.py. Start messages (plans/start-prompts-step2.md) read fine.
+5. **quick-check.yml**: valid YAML, `on: workflow_dispatch` only (manual); it installs playwright, three r128 and acorn
+   8.12.1 under $RUNNER_TEMP/cw and runs `bash check_fast.sh` with CADET_CHROME '' (Playwright's own Chromium), which is
+   what it says. content_gen.py, leave_check.py and device_check.py exist and exit 1 on failure.
+
 ## bf71e7a (claude/rc-wip, 0.64.2, vs claude/rec-cand-s1 cf55b35): PASS
 
 Note: the candidate ships with `REC_DECK = true` (0.84.11), so "on" is the build as is; "off" = a copy flipped to false.
