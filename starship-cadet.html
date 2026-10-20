@@ -38599,7 +38599,7 @@ if (typeof deviceApp === 'function') deviceApp({ id: 'crew', title: 'Relationshi
   view: () => {
     const c = CREW_PICK && crewContacts({ all: true }).find(x => x.id === CREW_PICK);
     if (c) return { title: c.name, blocks: [
-      { kind: 'text', text: (typeof rankCardRole === 'function' ? rankCardRole(SOC.crew[SOC.idx.get(c.id)]) : c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
+      { kind: 'text', text: (typeof rankCardRole === 'function' && rankCardRole(SOC.crew[SOC.idx.get(c.id)]) || c.role) + '. ' + c.tierName[0].toUpperCase() + c.tierName.slice(1) + (c.toNext !== null ? ' (' + c.toNext + ' more to ' + REL_NAMES[c.tier + 1] + ')' : '') + '.' },
       ...(typeof knowBlocks === 'function' ? knowBlocks(c.id) : [{ kind: 'list', rows: c.known.length ? c.known.map(k => ({ text: k })) : [{ text: 'Nothing yet. Ask them about themselves.' }] }]),   // what you know, by section (20c)
       { kind: 'buttons', items: [{ label: 'Where are they?', action: { app: 'roster', who: c.id } }].concat(c.met !== null ? [{ label: 'Meet up', action: { app: 'appointments', with: c.id } }] : [], [{ label: 'Back', action: { app: 'crew', do: 'back' } }]) }] };
     const cs = crewContacts(), mo = movedOn(), gone = mo.length ? [{ kind: 'text', text: 'Moved on', mark: 'head' }, { kind: 'list', rows: mo.map(x => ({ text: x.name, sub: x.to ? 'Now on the ' + x.to.replace(/^the /i, '') : 'Transferred', mark: 'past' })) }] : [];
