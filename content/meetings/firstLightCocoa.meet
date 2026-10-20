@@ -1,0 +1,30 @@
+@meeting firstLightCocoa
+// First Light Cocoa (patch plan #26): the windows, three tips, then the season's arrivals and you. No wrong answer.
+// All five tips are here; section 15's flcScript plays three of them, picked per save (holt, kowalczyk, brennan,
+// halloran-emeka, sato). Holt's tip is the user's own example (for fun); the others are true in the game.
+// "Hollis Reach" and "Corvane Drift" are PP1's placeholders until the Wren's route is written (the head writer's).
+title: First Light Cocoa
+from: Dev Raman
+gist: First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.
+== lines
+raman: Lights down, please. Thank you. Right. Mugs up, everyone got one?   [gesture]
+raman: Out there, port side. That smudge is the Hollis Reach. We left it six weeks ago.
+raman: Dead ahead, too faint to see yet: the Corvane Drift. We'll be there before the season turns.   [gesture]
+raman > you: And somewhere behind us, the little shuttle that brought you. I flew it. Gently.   [laugh]
+raman: Old hands. One thing you wish you'd known on your first day. Go on.
+holt: Never sit in my chair. Bridge lobby, by the door. That's the whole tip.   [nod]
+kowalczyk: Track what matters. Tap it on your device and an arrow takes you there. Saved me years.
+brennan: Breakfast is six till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship.
+halloran-emeka: Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know.
+sato: The big windows on the promenade. Five minutes there and the day sits better.
+raman: Now the new faces. One thing you've noticed about her. Tomas?   [listen]
+tomas: The lift hums a different note on every deck. Deck 4's is the friendliest.   [laugh]
+raman > you: {me}. Your turn. What have you noticed?   [listen]
+? choice
+* She never stops. Even at night you can feel her going.   rel:raman+1 flavour:share mem:firstlight.going
+  raman: That's the drive. Zeke'll tell you it's coil three. It's always coil three.   [laugh]
+* Everyone says hello. Even the ones who look busy.   rel:raman+1,tomas+1 flavour:warm mem:firstlight.hello
+  raman: That's the Wren. Small ship, long way from anywhere. We look after each other.
+* The cocoa's better than the coffee.   rel:raman+1 flavour:funny mem:firstlight.cocoa
+  raman: Don't let Brennan hear you. Actually, do. She'll be thrilled.   [laugh]
+raman: Right. To the next season, and the new faces in it. Drink up, it's going cold.   [gesture]
