@@ -4535,7 +4535,7 @@ DECKS[5] = {
     { id: '5-timeclock-1', type: 'timeclock', at: [20, 0], xy: [20.6, .5], face: 'n', pose: 'stand', room: 'w' },   // the time clock (0.61.13), past the tool wall by the tea corner door: crew clock in and out here
     { id: '5-toolwall-1', type: 'work:works', at: [19, 1], face: 'n', pose: 'stand', room: 'w' },
     { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w', xy: [11.57, 3.63], y: 0.49 },
-    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5, cush: 0.5 },
+    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5, cush: 0.5, desk: 'calder' },   // desk: whose own desk it is (the patch, #1)
     { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.66, 0.6], y: 0.44, cush: 0.44 },
     { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true, xy: [21.64, 0.64], y: 0.49 },
     { id: '5-tea-3', type: 'lounge-seat', at: [21, 1], face: 's', pose: 'stand', room: 't' },
@@ -9305,6 +9305,14 @@ function schedDesks(people, shared) {
     const d = pool.find(pl => !(used.get(p.shift + '|' + pl.id) || []).some(h => clash(h, hrs)));
     if (d) (used.get(p.shift + '|' + d.id) || used.set(p.shift + '|' + d.id, []).get(p.shift + '|' + d.id)).push(hrs || null);
     desks.set(p.id, d ? d.id : null);
+  }
+  // a place with `desk: '<id>'` is that person's own (the Chief's chair in her office, the patch #1): whoever was given it
+  // trades with them, so nobody else's desk moves
+  for (const pl of [...shared.values()].flat()) {
+    const mine = pl.desk && desks.has(pl.desk) ? desks.get(pl.desk) : undefined; if (mine === undefined || mine === pl.id) continue;
+    const sh = (order.find(q => q.id === pl.desk) || {}).shift;
+    for (const q of order) if (q.id !== pl.desk && q.shift === sh && desks.get(q.id) === pl.id) desks.set(q.id, mine);
+    desks.set(pl.desk, pl.id);
   }
   return desks;
 }
