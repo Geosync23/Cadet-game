@@ -14,7 +14,7 @@
 | clash_kinds.py | not ported | It reads the split rehearsal's sweep output (a split-only measurement); nothing to port for the one file. The build master's clash count (the evidence gate) is by hand, in the start-prompts draft. |
 | Section finder | `tools/section.py` | list / print a section / `--where LINE` / `--diff [A [B]]` with owners from owners.md. |
 | Shared-names lister | `tools/shared.js` | functions and UPPER_CASE tables/state used outside their own section, with exact signatures; `--md` makes owners.md's list. Uses acorn only. |
-| GitHub check | `.github/workflows/quick-check.yml` | **DISABLED: `on: workflow_dispatch` only** (runs only if started by hand). Two commented `on:` blocks for the lead: A = shared branch `claude/integration` only, B = every claude/ branch. Validated as YAML. Pushing it triggers nothing. |
+| GitHub check | `.github/workflows/quick-check.yml` | ON since 46afa3c (see "Later" 6). |
 | Owners | `plans/owners.md` | the user's rule, sections → seats (the split plan's owners), contracts by hand, SHIP's records, the generated list (187 names used by 4+ other sections). |
 | Map | `plans/map.md` | how to find things, file order vs section numbers, a topic → section table. |
 | Backlog | `plans/backlog.md` | 13 rows + fixed. Item 3 (the "double clock hold") was dropped by lead 20 and the user: no record, probably the Day 0 evening's two designed holds (kept under "Dropped"). |
@@ -45,7 +45,9 @@ Each of the 10 checks run three times on 0.64.2, each in its own CADET_WORK: the
 2. `archive/starship-cadet-0.64.2-whole.html`, sha256 e4897023…27624 = the published game. **The frozen branch is the lead's:** name `claude/whole-file-0.64.2`, at commit **c575a8e** (claude/rec-cand-s1, the published rec deck).
 3. Slots: `python3 tools/add_slots.py` → 17 slots, 51 comment and blank lines. cadet_test vs c575a8e ALL IDENTICAL (0 px on all 15 shots), names_check OK, content_gen --check up to date, check_fast OK in 317 s. Build number unchanged (0.64.2); a "0.64.2 (step 2)" row at the end of plans/build-table.md.
 4. Applied: CLAUDE.md (Read first 5, Files, How we work, the user's two rules, determinism line); DEV_NOTES (Builds summary, Rules "Shared work", Testing top, File map pointer, Working method); `plans/build-table.md` (1046 rows, unchanged; DEV_NOTES 1.42 → 0.47 MB); `plans/start-prompts-step2.md`. Not applied: DEV_NOTES' stale top paragraph (lines 3-8) and TEAM.md (the lead's files).
-5. The GitHub check stays switched off.
+5. R8: step 2 PASS (928d49a with fixes; 518d0fb: arc_check's booth and calls modes exit 1 too; no open fixes).
+6. **The GitHub check is ON** (the user's call via lead 20, 46afa3c): every push to claude/** or main touching the game, the checks or the words; per-branch cancel-in-progress; the user mutes the emails. First run: #1 (id 39373662360) on 46afa3c, **green**, 05:12:37-05:18:07. A push of plans/ only (eb33070) starts no run, as meant.
+7. `plans/roadmap-after-recdeck.md` copied from claude/start-here-review-3qoht9 (latest: Dev mode can jump to any day of the career).
 
 ## Gotchas
 
