@@ -1,4 +1,4 @@
-# Talk a while: work pools (plan, for review)
+# Talk a while: work pools (plan, decided 2026-10-20)
 
 **TW1, for the user and lead 20; reviewed by TR1 (plans/work-pools-review.md on claude/talk-pack-review) and its fixes
 folded in.** The full page with samples and the answer form is `plans/work-pools-plan.html`. The user's ask: a pool
@@ -56,11 +56,11 @@ Works 36, Watch 20, Survey 20, Bridge 10 (6 helm, 4 command), Infirmary 8, Galle
 - No new condition words: `dept:` splits helm from command; engine crew, bartenders and the Counsellor are `who:` lists.
   (`role:` was proposed and dropped.)
 
-## Questions for the user (answer on the page)
+## Decided (the user, 2026-10-20): every recommendation, no comments
 
-1. Order: own, then work and shared taking turns (recommended) / own, all work, then shared / shared first.
-2. Work talks follow your once-per-save rule (recommended) / once per person.
-3. Pools: nine as listed (recommended) / fewer, bigger / more (split Works).
-4. Size: about 120 (recommended) / about 90 / about 160.
-5. Friend tier: what the job means, ending warm (recommended) / all light / also worries (overlaps the struggle stories).
-6. Works treats you as a workmate (recommended) / same as other pools.
+1. Order: own talks, then work and shared taking turns (preferring the one not had lately), then small talk.
+2. Work talks follow the once-per-save rule.
+3. The nine pools as listed.
+4. About 120 talks (sizes above).
+5. Friend tier: what the job means, who they do it for, a proud moment, a habit it gave them, ending warm.
+6. Works talks treat you as a workmate.
