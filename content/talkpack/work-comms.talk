@@ -1,0 +1,102 @@
+@talks work:comms
+// TW1, the Talk a while work pools: Comms (plans/work-pools-plan.html, decided 2026-10-20). Ids work.comms.<slug>;
+// topic always "work". Messages home, the relay, the ship's channels, languages. Discreet: never what's in anyone's
+// messages. Ferreira (Comms Chief) learns Veyli; Takahashi on nights. Stuck (Santos), burnout (Tran), notgood
+// (Quaye): no doubt or leaving talk.
+
+== static
+when: tier>=acquaintance
+them: Some nights the relay's all static. You tune and tune and then, there. A voice.
+them: Like picking a lock with your ears. Best feeling in Comms.   #warm
+ask: What's the most satisfying fiddly thing you do?
+listen: Whose voice was it?
+  them: Can't say. Comms rules. But it made my whole night.   #warm
+share: Getting a stuck bolt free.
+  them: Same feeling. Fiddle, fiddle, then it gives. Very good.
+cheer: Untangling a headphone cable.
+  them: Impossible. Nobody's ever done it. You're a legend if you have.   #funny
+
+== sorting
+when: tier>=acquaintance !who:ferreira
+them: Every message home passes through Comms. Sorted, sent, queued after storms.
+them: We never read them. We read the envelopes. Envelopes are lovely, actually.   #warm
+ask: Who do you write to most, back home?
+listen: What makes an envelope lovely?
+  them: People draw on them. Little stars, little ships. Kids especially. Makes my day.   #warm
+share: My sibling. Every week, short.
+  them: Short and every week beats long and never. They'll keep them all.   #warm
+cheer: Nobody. They write to me. Badly.
+  them: Bad letters are the best letters. Keep every one.   #funny
+
+== voices
+when: tier>=acquaintance !who:farouk-olu
+them: Farouk knows every voice on the ship's channels. One word and he'll name you.
+them: I'm trying to learn it. I'm at about thirty voices. You're one of them now.   #warm
+ask: What's a voice from home you'd know anywhere?
+listen: How does he do it?
+  them: He listens to how people breathe before they talk. He says it's like a signature.
+share: My mum's. Even through static.
+  them: That's the one everyone says. The relay can't hide a mum.   #warm
+cheer: Pell's. He's very loud.
+  them: Ha. Pell needs no channel. Pell is a channel.   #funny
+
+== languages
+when: tier>=colleague !who:ferreira|rossi-femi|takahashi-wen
+them: Ferreira speaks four languages, and now Veyli. She practises on the Envoy. Gets corrected.
+them: She says Veyli has many words for quiet. She's learnt three. She's very proud.   #warm
+ask: Is there a language you'd love to speak?
+listen: What are the three words for quiet?
+  them: She won't say them out loud. Says they're too quiet to repeat. Very Veyli.   #funny
+share: My family's old language. I only know bits.
+  them: Learn a few more bits. Send them home. They'll be thrilled.   #warm
+cheer: Engine. Fluently.
+  them: You're halfway there. You talk to machines already. We've all seen it.   #funny
+
+== night-comms
+when: tier>=colleague who:takahashi-wen
+them: Nights, the channels go quiet and I sing. Badly. Every song in the record cabinet.
+them: The relay doesn't mind. It's heard worse. It's heard Torres.   #funny
+ask: What do you do, when you're alone at work?
+listen: Do you know all the words?
+  them: Every one. Four other people say the same. We disagree on all of them.   #funny
+share: Talk to the machine I'm fixing.
+  them: Ha. Then we're both talking to something that won't answer. Good company.   #funny
+cheer: Eat the snacks I said I'd save.
+  them: Classic night shift crime. I'll never tell.   #funny
+
+== discreet
+when: tier>=colleague !who:santos-zofia|tran-chloe
+them: Comms is mostly keeping quiet. Everything passes through us. Nothing passes out of us.
+them: People trust you with their news before anyone else knows it. That's a lot to hold.   #warm
+ask: What's something people trust you with?
+listen: Is it hard, keeping it in?
+  them: Sometimes. Good news is hardest. I want to cheer and I can't. I cheer later. Quietly.   #funny
+share: Their machines. Fixing them right.
+  them: That's big trust too. Every warm room aboard is somebody trusting you.   #warm
+cheer: The spare key to my locker.
+  them: A sacred trust. I'm not sure I believe you.   #funny
+
+== comms-means
+when: tier>=friend
+them: Know what Comms means to me? A call home that finally gets through, after the storm queue.
+them: Somebody's dad says goodnight across all that dark. I put that call through. Me.   #warm
+ask: What part of your work do you hope people remember?
+listen: Does it ever not get through?
+  them: Sometimes. Then we try again. And again. Until it does. That's the job.   #warm
+share: The things that just worked.
+  them: That's the best memory to leave. "It just worked." Sounds dull. It isn't.   #warm
+cheer: That I was nice at the tea corner.
+  them: Underrated legacy. Very Wren.   #funny
+
+== comms-habit
+when: tier>=friend
+them: The job gave me patience. Everything we send waits hours in the dark before it lands.
+them: I used to hate the wait. Now I like it. It's a kind of hope, travelling.   #warm
+ask: What's the longest you've waited for good news?
+listen: Does the waiting ever end badly?
+  them: Hardly ever. Mostly it ends with someone grinning at the booths. I'll take those odds.   #warm
+share: A letter from home. Weeks, once.
+  them: Then you know the hope. Comms just gets to hold it for everyone.   #warm
+cheer: For the lift. On a Monday.
+  them: That's not a wait. That's a test of character.   #funny
+

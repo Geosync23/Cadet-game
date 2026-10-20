@@ -1,0 +1,54 @@
+@talks tomas
+// TW1, the Talk a while pack: Tomas Lind's own talks. Earnest, curious, a little lost and honest about it; lots of
+// questions; "I think", "sort of"; the stars; thanks too much. Never the failed exam or the transfer list (arc beats 5-6).
+
+== windows
+topic: ship
+them: I've counted the windows. Twenty-two. I think. I might've counted one twice.
+them: The Watch office has the best view of the lift. And so of everyone. Sort of a perk.
+ask: Have you got a favourite window yet? Or is that odd? It might be odd.
+listen: Which window do you like best?
+  them: The junior common room, at night. You can see right out the back of us.   #warm
+share: Not yet. I'm still learning the doors.
+  them: Me too. I took the long way round Deck 2 again today. On purpose. Mostly.   #funny
+cheer: The one in the lift door. It's got me in it.
+  them: Ha! I'll count that. Twenty-three. Probably.   #funny
+
+== brother
+topic: home
+when: tier>=acquaintance
+them: I write to my little brother every week. I make the job sound really exciting.
+them: Yesterday's letter was mostly about the lift. I said it was fast. It's not that fast.   #funny
+ask: Do you write to anyone at home? What do you tell them?
+listen: What does he write back?
+  them: Questions. Hundreds. Have I seen a comet. Is the Captain tall. I'm sort of his hero.   #warm
+share: My family. I tell them it's going well.
+  them: Is it? Going well? I think it is. You look like it is.
+cheer: I tell them I'm basically in charge.
+  them: Same! Well. I say "helping". Then I underline it.   #funny
+
+== treadmill
+topic: crew
+when: tier>=colleague
+them: Commander Vance talked me onto the treadmill. I didn't say yes. I don't think I said yes.
+them: I'm fourth on his board now. He looked at me like I was a regulation he approved of.   #funny
+ask: Have you been talked into anything yet, since you came aboard?
+listen: Do you actually like running?
+  them: I sort of do? Don't tell him. He'll make a new board.   #funny
+share: A few things. All good ones, so far.
+  them: That's the Wren. You say yes to one thing and it's a whole life.   #warm
+cheer: Taking the long way round Deck 2.
+  them: That's mine! You can share it. We'll be late together.   #funny
+
+== star-map
+topic: plans
+when: tier>=friend
+them: You know my star map? See the pencil circle? Top left.
+them: Never been. Nobody I know has. I just like it there, first thing every morning.
+ask: If you could go anywhere out there, where would it be?
+listen: Why that star?
+  them: It had a nice name. That's it. I was fourteen. I'm sort of still fourteen about it.   #warm
+share: Somewhere no one's charted yet.
+  them: Yes! That. Survey might let us tag along one day. I'll ask. Will you come?
+cheer: Somewhere with better biscuits.
+  them: I'll draw a little biscuit on the map. For you. Right next to mine.   #funny
