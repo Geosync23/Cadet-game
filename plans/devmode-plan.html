@@ -73,14 +73,14 @@ code{font-size:12.5px}
 <main>
 <button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
 <h1>Dev mode: the plan</h1>
-<div class="sub">Dev mode planner DP1, 2026-10-20, <b>version 2</b>, after two reviews and a helper's measurements:
+<div class="sub">Dev mode planner DP1, 2026-10-20, <b>version 2.1</b> (v2 plus both reviewers' re-checks: DR1 fc40cfb, DR2 785d88d), after two reviews and a helper's measurements:
 <ul>
 <li>DR1, technical: <code>claude/devmode-review-1</code>, <code>plans/devmode-plan-review-1.md</code></li>
 <li>DR2, use on a phone: <code>claude/devmode-review-2</code>, <code>plans/devmode-plan-review-2.md</code> and its addendum</li>
 <li>DJ1, day-jump measurements: <code>claude/devmode-dayjump</code></li>
 <li>lead 20's call on the order (the playtest kit first)</li>
 </ul>
-It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of working), on branch <code>claude/devmode-plan</code>. Planning only: the game is unchanged. What changed since version 1 is in section 10.</div>
+It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of working), on branch <code>claude/devmode-plan</code>. Planning only: the game is unchanged. What changed since version 1 is in section 10; version 2.1's changes are at its end.</div>
 
 <div class="card key">
 <b>In short</b>
@@ -99,7 +99,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 </ul></li>
 <li><b>Three stops, your next job first:</b>
 <ul>
-<li><b>Stop 1, the playtest kit,</b> for the playtest patch: move the clock, top up your needs, <b>Take me to…</b> any room or your next appointment, <b>Mark this moment / Back to mark</b> (retry the same minute), <b>Undo</b>, start any ship tradition, and copy your real game into Dev.</li>
+<li><b>Stop 1, the playtest kit, in two parts.</b> <b>Stop 1a, the patch kit</b> (published as soon as it passes, after four turns): move the clock, top up your needs, <b>Take me to…</b>, <b>Mark this moment / Back to mark</b>, <b>Undo my last Dev action</b> and copy your real game into Dev. <b>Stop 1b</b> adds starting any ship tradition. Altogether, for the playtest patch: move the clock, top up your needs, <b>Take me to…</b> any room or your next appointment, <b>Mark this moment / Back to mark</b> (retry the same minute), <b>Undo</b>, start any ship tradition, and copy your real game into Dev.</li>
 <li><b>Stop 2, the day jump and the Career tab:</b> arrive on any day from 0 to 30 with the career, rank, jobs, friendships and ship a steady player would have.</li>
 <li><b>Stop 3, ship-wide events:</b> start any, even one switched off; see its threads; end it, with "End and undo" so later events don't move.</li>
 </ul></li>
@@ -114,7 +114,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 <li>It needs a line for each of the 17 career trainings and for the arrival week, written with each part's owner.</li>
 <li>Some must be done in person: the first week's meetings only start with you in the room with the speaker.</li>
 </ul></li>
-<li><b>About 13-17 build turns.</b> There are <b>15 questions</b> in section 8; 11-15 are new.</li>
+<li><b>About 13-17 build turns.</b> There are <b>16 questions</b> in section 8; 11-16 are new.</li>
 </ul>
 </div>
 
@@ -164,7 +164,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 <li>The game has exactly one random draw: a seed made when your career starts, deciding sick days and who comes looking for you. With saving on it differs every game.</li>
 <li>DR1 replayed to Day 14 twice that way: one run was sick on Day 11 and ended with 92 xp; the other wasn't, and ended with 104.</li>
 <li>Dev mode fixes the seed before the career starts: 1 by default, shown on the Jump tab, changeable for a different run of luck.</li>
-<li>A copied real game keeps its own seed.</li>
+<li>A copied real game has its random seed replaced by the Dev seed, so jumps and replays from a copy are repeatable too. (From that moment its luck, such as sick days, can differ from your real game's.)</li>
 <li>devmode_check replays twice with saving on and requires identical saves.</li>
 </ul></li>
 <li><b>Marked.</b> Anything set by hand or replayed is noted in the Dev save ("xp set", "replayed to Day 14, seed 1"), so a bug found later can be traced.</li>
@@ -175,7 +175,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 <p class="sub">Sketches of a 390 × 844 screen, drawn smaller.</p>
 <ul class="sub">
 <li>A sheet across the lower screen (on the right in landscape) that can be pulled down to a strip.</li>
-<li>Six tabs in two rows of three, in words.</li>
+<li>Six tabs in two rows of three, in words (about 120 px each at 390 px wide, so "Traditions" and "Big events" fit; checked in Stop 1a's screenshot).</li>
 <li>Buttons 44 points tall (the game's own size for buttons), at most three to a row, the most used first.</li>
 <li>It never opens over the device's own sheet, and pop-up messages stay clear of it.</li>
 </ul>
@@ -187,7 +187,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 <div class="lab2">Take me to…</div>
 <div class="btns"><b class="go">Next appointment</b><b>A room…</b><b>The ladder</b></div>
 <div class="lab2">This moment</div>
-<div class="btns"><b>Mark here</b><b>Back to mark</b><b class="rose">Undo last</b></div>
+<div class="btns"><b>Mark here</b><b>Back to mark</b><b class="rose">Undo my last Dev action</b></div>
 <div class="btns"><b>Top up needs</b><b>Copy my real game</b><b>Clear Dev save</b></div>
 <div class="ln"><span>Mark</span><i>Day 2 08:38, Works Chief's office</i></div>
 <div class="ln"><span>Undo</span><i>before "Skip to 08:40"</i></div>
@@ -257,7 +257,7 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 
 <h3>3.1 What every Dev action does first</h3>
 <ul>
-<li><b>Keeps an Undo.</b> The Dev save is copied to the Undo slot first. "Undo last" puts it back and reloads, so even a skip that got you let go can be undone.</li>
+<li><b>Keeps an Undo.</b> The Dev save is copied to the Undo slot first. "Undo my last Dev action" puts it back and reloads, so even a skip that got you let go can be undone.</li>
 <li><b>Settles what's in progress.</b>
 <ul>
 <li>A conversation on screen ends, and its gist goes to Mail, as when you walk away.</li>
@@ -290,12 +290,12 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 </ul></li>
 <li><b>Your shift</b> (question 5):
 <ul>
-<li><b>Excused (the default for quick hops).</b> A skipped workday counts as leave. You're testing something else.</li>
+<li><b>Excused (the default for quick hops).</b> A skipped workday counts as leave. You're testing something else. Under the hood: a Dev-only "excused" list in the Dev save, read by <code>careerOff</code>, set before the day is planned. For today, part-way through a shift, one line in <code>careerTick</code>'s missed-shift loop skips an excused day. Both are the career engineer's (section 20), reviewed first.</li>
 <li><b>Counts as missed:</b> the game's rule, for testing the career warnings. A skip-only player is let go on Day 20 (DR1); Undo brings them back.</li>
 <li>Skipping while clocked in keeps you clocked in, and the shift counts as worked.</li>
 <li>"Play it steady" (the steady player lives the hours) comes with Stop 2, and is then the default for whole days.</li>
 </ul></li>
-<li><b>Needs</b> (question 15): after a skip they're set as a normal day would leave them, not drained to 0. DR2 measured hunger, hygiene and bathroom at 0 after skipping to Day 2, and the warnings then take over the screen. <b>Top up needs</b> fills them any time.</li>
+<li><b>Needs</b> (question 15): after a skip they're set as a normal day would leave them, not drained to 0. DR2 measured hunger, hygiene and bathroom at 0 after skipping to Day 2, and the warnings then take over the screen. <b>Top up needs</b> fills them any time. Under the hood: a Dev-only hook in section 15's skip step (its <code>SIM_ADVANCE</code> entry that calls <code>needsDrain</code>), the player engineer's, reviewed first.</li>
 <li><b>Measured:</b>
 <ul>
 <li>A plain skip takes 0.2 s for a day and 1.1 s for ten on a computer (DR2).</li>
@@ -311,25 +311,28 @@ It's based on <code>claude/integration</code> (0.64.2 and the step 2 ways of wor
 <li>"A room…": by deck.</li>
 <li>Testing spots: the ladder, the time clock, the job board.</li>
 </ul>
-It moves you the way the lift does (a fade, the deck built, you on the nearest free tile), and the clock doesn't move. A walk across two decks, 1-2 real minutes on a phone, becomes one tap.</li>
+It moves you the way the lift does (a fade, the deck built, you on the nearest free tile), and the clock doesn't move. A walk across two decks, 1-2 real minutes on a phone, becomes one tap.
+<ul>
+<li><b>Refused, with the reason on the button,</b> during the arrival evening (Zeke's escort checks where you stand) and inside a meeting. Otherwise it first settles what's in progress (a conversation, a seated meal), like every Dev action. devmode_check tries it during the escort's walk and expects a refusal.</li>
+</ul></li>
 <li><b>Mark here / Back to mark.</b>
 <ul>
 <li>One saved moment: the whole Dev save, where you stand and the time.</li>
 <li>"Back to mark" loads it, with a reload, through the game's normal load path, so it's exact.</li>
 <li>Try the Day 2 08:40 meeting six times, each from the same minute.</li>
+<li>It's the step repeated most, so Stop 1a checks on a phone that the reload keeps <code>#dev</code> and lands within a couple of seconds.</li>
 </ul></li>
-<li><b>Top up needs</b>, <b>Undo last</b>, <b>Copy my real game into Dev</b>, <b>Clear Dev save</b>: see section 2.</li>
+<li><b>Top up needs</b>, <b>Undo my last Dev action</b> (named in full so it isn't confused with the playtest patch's own undo for clocking in; it's only inside the panel), <b>Copy my real game into Dev</b>, <b>Clear Dev save</b>: see section 2.</li>
 <li><b>The Day 2 meeting at Stop 1:</b>
 <ol>
-<li>A new Dev game by shuttle, played through the arrival (or Copy my real game).</li>
-<li>Next morning, twice.</li>
-<li>To 08:30.</li>
+<li>Play Day 0 and Day 1 once in a new Dev game, as a player would (about 25 real minutes for Day 1), or Copy my real game if it's past Day 1.</li>
+<li>On Day 2, to 08:30.</li>
 <li>Take me to: next appointment.</li>
 <li>Mark here.</li>
 <li>Watch.</li>
 <li>Back to mark, as often as needed.</li>
 </ol>
-A Day 2 that depends on what you really did on Day 1 is best reached by playing Day 1 once and then marking, or by copying your real game. Stop 2's jump makes that automatic.</li>
+Then every retry is one tap. Skipping Day 1 instead (Next morning, twice) gives a player who <i>missed</i> the Day 1 briefing: the first week's meetings need you in the room, and the briefing's Settling-in item and Zeke's Day 1 line read whether you were there. So <b>when a skip passes a first-week meeting, the panel says so in words</b>: "Skipped: the Day 1 briefing counted as missed. This isn't a real player's Day 2." That way a test result isn't trusted by mistake. Stop 2's jump makes a real Day 2 automatic.</li>
 </ul>
 
 <h3>3.4 Traditions (Stop 1)</h3>
@@ -539,7 +542,7 @@ So "Promotion test…" shows that list with ticks.
 <li>Frozen between pieces.</li>
 <li>devmode_check replays to Day 10 twice the live way and compares.</li>
 </ul></td></tr>
-<tr><td><b>An action that can't be taken back</b></td><td>Undo last, Mark / Back to mark, Clear Dev save.</td></tr>
+<tr><td><b>An action that can't be taken back</b></td><td>Undo my last Dev action, Mark / Back to mark, Clear Dev save.</td></tr>
 <tr><td><b>Phone speed</b></td><td>Half-day pieces, progress, Stop, kept days; the first long jump may take minutes (question 13).</td></tr>
 <tr><td><b>Traditions and events out of their slot</b></td><td>The readers table (3.4), the start-day rule and End and undo (3.7), refusals with reasons.</td></tr>
 <tr><td><b>The steady player lags the game</b></td><td>
@@ -578,12 +581,13 @@ So "Promotion test…" shows that list with ticks.
 <li>cadet_test identical.</li>
 <li>devmode_check v1: the real save untouched (also with <code>#dev.debug</code>); nothing without <code>#dev</code>.</li>
 </ul></td></tr>
-<tr><td>D2</td><td>Storage and safety: IndexedDB, the space check, Clear, Undo last, Copy my real game, the fixed seed (owner-reviewed)</td><td>devmode_check: storage filled and the real save still writes; Undo round trip; two saving-on runs identical</td></tr>
+<tr><td>D2</td><td>Storage and safety: IndexedDB, the space check, Clear, Undo my last Dev action, Copy my real game, the fixed seed (owner-reviewed)</td><td>devmode_check: storage filled and the real save still writes; Undo round trip; two saving-on runs identical</td></tr>
 <tr><td>D3</td><td>Clock: the freeze, settling, excused or missed, needs kept, Top up needs</td><td>devmode_check: +1 day like sleeping; to 16:55 still clocked in; leave_check unchanged</td></tr>
-<tr><td>D4</td><td>Take me to…, Mark / Back to mark</td><td>devmode_check: every room on every deck; Mark and Back twice, the same save</td></tr>
-<tr><td>D5-D6</td><td>Traditions: the list, search, start, Mail, honorees, the <code>eventsOn</code> hook (traditions engineer), the readers checked</td><td>events_check and join_check unchanged; five kinds started; people go; decor</td></tr>
-<tr><td colspan="3"><b>Stop 1, the playtest kit:</b> your Dev link. Check the Day 2 meeting, the ladder and undoing a clock-in. Screenshots at 390 × 844 and in landscape. The playtest patch can be checked as it's built.</td></tr>
-<tr><td>D7</td><td><code>DEV_PLAYER</code>'s frame; Days 0-2: the arrival and first week's meetings in person, clock, meals, jobs</td><td>A Day 2 08:40 replay with every first-week beat met; twice identical</td></tr>
+<tr><td>D4</td><td>Take me to… (with its refusals), Mark / Back to mark, the "skipped a first-week meeting" notice</td><td>devmode_check: every room on every deck; refused during the escort's walk; Mark and Back twice, the same save; the reload keeps <code>#dev</code></td></tr>
+<tr><td colspan="3"><b>Stop 1a, the patch kit:</b> published as soon as D4 passes, with your Dev link. The playtest patch can be checked against it: the Day 2 meeting (the recipe in 3.3), the ladder, undoing a clock-in. Screenshots at 390 × 844 and in landscape.</td></tr>
+<tr><td>D5-D6</td><td>Traditions (the traditions engineer reviews the <code>eventsOn</code> hook first): the list, search, start, Mail, honorees, the <code>eventsOn</code> hook (traditions engineer), the readers checked</td><td>events_check and join_check unchanged; five kinds started; people go; decor</td></tr>
+<tr><td colspan="3"><b>Stop 1b:</b> traditions added; Stop 1 complete (question 16).</td></tr>
+<tr><td>D7</td><td><code>DEV_PLAYER</code>'s frame; Days 0-2: the arrival and first week's meetings in person (the deck loaded with <code>goToDeck</code>, the player stood in the room), clock, meals, jobs</td><td>A Day 2 08:40 replay with every first-week beat met; twice identical; the time the deck loads add, and memory after them (no growth)</td></tr>
 <tr><td>D8-D10</td><td>Each career part's line, with its owner (17 rows); chats and stories</td><td>Officer on Day 10; trainings on their days; no row without a line</td></tr>
 <tr><td>D11</td><td>Career: names, the promotion test's list, Open the test now, Next step</td><td>career_check unchanged; an opened test runs to the ceremony</td></tr>
 <tr><td>D12-D13</td><td>Jump: the fresh-page request, frozen pieces, progress and Stop, kept days and their fingerprint, loading in</td><td>jump = a straight replay; a kept-day jump; one changed character drops them; timing on a phone stand-in</td></tr>
@@ -609,7 +613,7 @@ The Day 2 meeting is also the first real case for the steady player at Stop 2. T
 </ul>
 
 <h2>8. Questions for you</h2>
-<p class="sub">Pick an option and add a comment if you like. Each question has an id for saving. My recommendation is marked. Questions 11-15 are new in version 2.</p>
+<p class="sub">Pick an option and add a comment if you like. Each question has an id for saving. My recommendation is marked. Questions 11-15 are new in version 2, and 16 in version 2.1.</p>
 
 <form id="answers" onsubmit="return false">
 
@@ -737,7 +741,7 @@ The Day 2 meeting is also the first real case for the steady player at Stop 2. T
 <h3>11. Should every Dev action be undoable?</h3>
 <p class="why">A skip can end your Dev career for good (let go on Day 20). Undo keeps one copy of the Dev save from before the last action, about 120 KB.</p>
 <fieldset><legend>Question 11</legend>
-<label class="opt"><input type="radio" name="dm-q11" value="last"> Yes: "Undo last" for every Dev action <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-q11" value="last"> Yes: "Undo my last Dev action" for every Dev action <span class="recd">recommended</span></label>
 <label class="opt"><input type="radio" name="dm-q11" value="several"> Yes, several steps back</label>
 <label class="opt"><input type="radio" name="dm-q11" value="mark-only"> No Undo: Mark / Back to mark is enough</label>
 <label class="opt"><input type="radio" name="dm-q11" value="other"> Something else (say below)</label>
@@ -793,6 +797,18 @@ The Day 2 meeting is also the first real case for the steady player at Stop 2. T
 <label class="cl" for="dm-q15-c">Your comment</label><textarea id="dm-q15-c" name="dm-q15-comment"></textarea>
 </div>
 
+<div class="q" data-qid="dm-q16">
+<h3>16. Should the patch kit be published on its own first?</h3>
+<p class="why">The patch needs only the first four turns. Traditions (two more turns, and the riskiest part of Stop 1, since today's plans are remade) aren't needed for any patch item.</p>
+<fieldset><legend>Question 16</legend>
+<label class="opt"><input type="radio" name="dm-q16" value="split"> Yes: Stop 1a (the patch kit) after four turns, then Stop 1b adds traditions <span class="recd">recommended</span></label>
+<label class="opt"><input type="radio" name="dm-q16" value="whole"> No: one Stop 1 with traditions included</label>
+<label class="opt"><input type="radio" name="dm-q16" value="later"> Patch kit now; traditions moved to Stop 2</label>
+<label class="opt"><input type="radio" name="dm-q16" value="other"> Something else (say below)</label>
+</fieldset>
+<label class="cl" for="dm-q16-c">Your comment</label><textarea id="dm-q16-c" name="dm-q16-comment"></textarea>
+</div>
+
 <div class="q" data-qid="dm-general">
 <h3>Anything else?</h3>
 <label class="cl" for="dm-general-c">Your comment</label><textarea id="dm-general-c" name="dm-general-comment"></textarea>
@@ -817,6 +833,8 @@ The Day 2 meeting is also the first real case for the steady player at Stop 2. T
 <li>One line in <code>eventsOn</code> for the Dev list.</li>
 <li>Later, with the events plan: the ending split out of <code>eventAdvance</code>, and, if wanted, a minute offset for starts.</li>
 </ul></li>
+<li><b>20 (career engineer):</b> a Dev-only excused list read by <code>careerOff</code>, and one line in <code>careerTick</code>'s missed-shift loop for today.</li>
+<li><b>15 (player engineer):</b> a Dev-only hook in the skip step (<code>SIM_ADVANCE</code> → <code>needsDrain</code>) so needs are kept as a normal day.</li>
 <li><b>24 (Works career engineer):</b> Dev mode may call <code>ladderOpen</code> for t2 once only the day is missing.</li>
 <li><b>Each career part (24a-24s), 21, 20:</b> their lines in <code>DEV_PLAYER</code>.</li>
 <li><b>page (HUD seat):</b>
@@ -859,6 +877,19 @@ The Day 2 meeting is also the first real case for the steady player at Stop 2. T
 <tr><td>DR2 S6, N1-N3</td><td>26-point buttons; "Trad."; codes; no Day 2</td><td>44-point buttons, words, names, beat shortcuts (3)</td></tr>
 <tr><td>DR1 N2, N4, N6-N8; DR2 N4-N6</td><td>The device's sheet, hash changes, q6's wording, Stop's delay, saving's cost, Day 0 refusals, <code>#debug</code></td><td>Taken in (2, 3, 4.2, q6); <code>#debug</code> to the small-bugs list</td></tr>
 <tr><td>Both reviews</td><td>Missing questions</td><td>q11 Undo, q12 kept days, q13 a phone's first jump, q14 Take me to / Mark, q15 needs</td></tr>
+</table></div>
+<h3>Version 2.1</h3>
+<div class="scroll"><table>
+<tr><th>From</th><th>Finding</th><th>Now</th></tr>
+<tr><td>DR2 R1, the lead</td><td>Stop 1 grew to six turns; the patch needs four</td><td>Stop 1a (the patch kit) published after D4; Stop 1b adds traditions; question 16</td></tr>
+<tr><td>DR2 R2</td><td>The Day 2 recipe skipped Day 1</td><td>Play Day 0-1 once (or copy), Mark at Day 2 08:30; a notice in words when a skip passes a first-week meeting (3.3)</td></tr>
+<tr><td>DR2 R3</td><td>Take me to mid-story</td><td>Refused during the arrival evening and inside a meeting; checked (3.3)</td></tr>
+<tr><td>DR2 R4</td><td>Two "undo"s</td><td>"Undo my last Dev action", inside the panel only</td></tr>
+<tr><td>DR2 R5, R6</td><td>Tabs at 390 px; Back to mark's reload</td><td>Two rows of three, checked in the shot; the reload checked on a phone (3, 3.3)</td></tr>
+<tr><td>DR1 V2-1</td><td>"Excused" had no mechanism</td><td>A Dev-only excused list in <code>careerOff</code> + one line in <code>careerTick</code> (section 20, owner first) (3.2, 9)</td></tr>
+<tr><td>DR1 V2-2</td><td>"Needs kept" had no mechanism</td><td>A Dev-only hook in section 15's skip step (owner first) (3.2, 9)</td></tr>
+<tr><td>DR1 V2-3</td><td>In-person meetings cost deck loads</td><td>D7 measures the <code>goToDeck</code> time and checks memory (6)</td></tr>
+<tr><td>DR1 gap, the lead</td><td>A copied save's random seed</td><td>Replaced with the Dev seed, so jumps from a copy are repeatable (2)</td></tr>
 </table></div>
 
 <h2>11. How this was measured</h2>

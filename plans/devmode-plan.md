@@ -1,4 +1,4 @@
-# Dev mode plan: summary (version 2)
+# Dev mode plan: summary (version 2.1)
 
 Dev mode planner DP1, 2026-10-20. Version 2 takes in:
 - DR1's technical review (`claude/devmode-review-1`, `plans/devmode-plan-review-1.md`)
@@ -26,7 +26,7 @@ Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2). T
   - places the deck's crew once, at the end.
 
 ## Stops and turns (about 13-17)
-**Stop 1: the playtest kit**
+**Stop 1: the playtest kit** (v2.1: published in two parts. **Stop 1a, the patch kit,** comes after D4: switch, Dev save and storage, clock and Top up, Take me to and Mark, Undo my last Dev action, Copy my real game. **Stop 1b** adds traditions in D5-D6, with the traditions engineer reviewing first; question 16.)
 - **D1:** the switch, the Dev save, the card as the way in, the empty sheet, section 25.
 - **D2:** IndexedDB, the space check, Clear, Undo, Copy my real game, the fixed seed.
 - **D3:** Clock:
@@ -97,3 +97,16 @@ Branch `claude/devmode-plan`, based on `claude/integration` (0.64.2 + step 2). T
 13. A first long jump on a phone: **minutes is acceptable, with progress; then kept days.**
 14. Take me to and Mark in Stop 1: **yes, both.**
 15. Needs when skipping: **kept as a normal day would leave them, plus Top up.**
+16. Publish the patch kit first: **yes, Stop 1a then 1b.**
+
+## v2.1 (both reviewers' re-checks: DR1 fc40cfb, DR2 785d88d)
+- **DR2 R1:** Stop 1a / 1b, and question 16.
+- **DR2 R2:** the Day 2 recipe is now: play Day 0-1 once (or Copy my real game), then Mark at Day 2 08:30. When a skip passes a first-week meeting, the panel says so in words.
+- **DR2 R3:** Take me to is refused during the arrival evening and inside a meeting; devmode_check tries it during the escort's walk.
+- **DR2 R4:** the button is named "Undo my last Dev action" and stays inside the panel only.
+- **DR2 R5:** two rows of tabs, checked in the screenshot.
+- **DR2 R6:** Back to mark's reload is checked on a phone.
+- **DR1 V2-1:** "Excused" gets a mechanism: a Dev-only excused list read by `careerOff`, set before the day is planned, plus one line in `careerTick`'s missed-shift loop for today (section 20, owner first).
+- **DR1 V2-2:** "Needs kept" gets a mechanism: a Dev-only hook in section 15's skip step (`SIM_ADVANCE` → `needsDrain`), owner first.
+- **DR1 V2-3:** D7 measures the `goToDeck` time for the in-person meetings and checks memory.
+- **Copy my real game:** the copy's random seed is replaced with the Dev seed, so jumps from a copy are repeatable.
