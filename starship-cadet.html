@@ -15049,7 +15049,8 @@ function turnInShow(j, a) {
 // ---- slot: Interactions engineer (section 15b). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // the patch, #11 (plans/patch-plan.html): a tracked arrow clears itself, by kind, so the next arrows (the arrival week's)
 // can show. Something on at a time (a meeting, tradition, appointment, meal...: the goal's trkFrom/trkTo, from Tracked):
-// once it has started with you in its room, or once it's over. A place: when you arrive (in its room, or within 1.5 m).
+// once it has started with you in its room, or once it's over. A place: when you arrive (in its room, or within 1.5 m,
+// having been away from it since you tracked it: tracking your bunk from your bunk keeps the arrow till you're back).
 // Your job (SHIP.player.track) clears as before, when it's taken or done.
 function trkDoneCheck() {
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
@@ -15057,7 +15058,9 @@ function trkDoneCheck() {
   if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
   const w = ixGoalWorld(g); if (!w) return;
   const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));
-  if (inRoom || g.trkFrom == null && Math.hypot(w.x - p.x, w.z - p.z) < 1.5) clearGoal();
+  if (g.trkFrom != null) { if (inRoom) clearGoal(); return; }
+  const there = inRoom || Math.hypot(w.x - p.x, w.z - p.z) < 1.5;
+  if (!there) g.trkAway = true; else if (g.trkAway) clearGoal();
 }
 // ---- end of slot: Interactions engineer ----
 
