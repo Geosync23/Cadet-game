@@ -40482,7 +40482,7 @@ function introNightTick() {
 }
 function introBedTick() {
   const I = SHIP.intro; if (I.done.bed !== undefined || typeof setGoal !== 'function') return;
-  const now = Math.floor(shipNow()), on = (now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0));
+  const now = Math.floor(shipNow()), on = ((now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0))) && !(typeof flcBusy === 'function' && flcBusy(now));   // patch #26: not while First Light Cocoa is on
   const bed = typeof playerBed === 'function' ? playerBed() : '4-B1-4', pl = (DECKS[4].places || []).find(q => q.id === bed), me = player.here();
   // (reviewer 1: only when you have no arrow of your own, and it never clears one it didn't set)
   const mine = typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === INTRO_BED_GOAL;
