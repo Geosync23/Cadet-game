@@ -19,7 +19,18 @@
   - `plans/fridays-plan.html` and `.md`. Revisions: 8e407ba (first), 155433a (Crossing the Line note), eb7a5d6 (revision 2, the user's answers).
   - Published at https://claude.ai/artifact/8UwSCYe3LsQGoDBgxYeJQp; db `answers/fridays-plan`.
   - design-doc.md updated in eb7a5d6: the shifts section, weekly traditions and weekday shapes.
-  - **Open:** fp-v2-q1 (Day 12's address during the ion storm; recommended: as usual, in the auditorium) and fp-v2-general.
+  - Later revisions: 498b576 (the form saves to `answers/fridays-plan-v2`), e881597 (revision 3), **cdeb1ff (revision 4, final)**.
+  - The user's answers:
+    - the rec deck auditorium;
+    - a skeleton crew keeps working;
+    - the address is spoken in bubbles;
+    - it's expected (a small work-reputation dip if you miss it);
+    - the weekly shape;
+    - "both" when an event falls on a Friday;
+    - auto sign-out at 16:00;
+    - Day 12 held as usual with the storm at its heart;
+    - **the normal clock: 16:00-16:50, about 16 lines a speech** (the slowed clock is parked).
+  - Only fp-v2-general is open.
 - **Backlog #15:** the goal arrow lowercases a name ("zeke Torres", section 15b).
 
 ## Reviews done (verdicts sent to the builder and the lead)
@@ -32,7 +43,7 @@
 | DB1 claude/devmode 375827b + c1036ae | #29 | PASS | Passed to PE, who now owns DB1's work |
 | PE claude/patch-e ab685bb | #5 ladder + fixes | PASS | Nit: `|| c.role` on the Relationships card; at switch-on, day_check on Decks 2/6 |
 
-**Next in the queue:** PE's #26 First Light Cocoa, when PE pushes. Then PB's batches D and F, and PA's batches B and C, as they report.
+**Next in the queue (now PR2's):** PE's #26 First Light Cocoa, when PE pushes. Then PB's batches D and F, and PA's batches B and C, as they report.
 
 ## How I review (the start-prompts-step2.md "Reviewer" list, plus the plan's pass marks)
 
@@ -63,4 +74,4 @@
 
 ## Memory
 
-537k of 1M when this was written (2026-10-20 ~18:31 UTC). The rule: tell the lead at 500k; hand over and stay idle at 600k.
+537k of 1M when this was written (2026-10-20 ~18:31 UTC); updated at ~594k (19:11), when I stopped as lead 21 asked. The rule: tell the lead at 500k; hand over and stay idle at 600k.
