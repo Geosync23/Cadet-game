@@ -14544,9 +14544,9 @@ function mugPut() {                                      // 15b's Put down: the 
 // you're in the lounge the lights go down (flcDim, read by section 5's applyLight). The intro's bed arrow waits (flcBusy,
 // section 21). Off = identical; ?firstlight (with ?mug for the mugs).
 let FLC_ON = URL_FLAGS.has('firstlight');
-const FLC = { id: 'first-light', script: 'firstLightCocoa', asked: 'firstlight.asked', tips: ['holt', 'kowalczyk', 'brennan', 'halloran-emeka', 'sato'], n: 3,
+const FLC = { id: 'first-light', script: 'firstLightCocoa', asked: 'firstlight.asked', shown: 'firstlight.shown', tips: ['holt', 'kowalczyk', 'brennan', 'halloran-emeka', 'sato'], n: 3,
   invite: [18 * 60 + 15, 19 * 60 + 45], late: 19 * 60 + 30, near: 4, dim: .35, room: 'L' };
-var FLC_DIM = 0, FLC_SHOWN = -1;                         // the lounge's dimming now (0..FLC.dim); the day the meeting last played (var: section 5 may ask first)
+var FLC_DIM = 0;                                         // the lounge's dimming now (0..FLC.dim) (var: section 5 may ask first). The day the meeting played is the saved flag FLC.shown (PR2: a reload mustn't play it again)
 function flcDim() { return FLC_DIM || 0; }
 function flcScript() {                                    // the meeting with three of the five tips, the same three all save long
   const sc = MEETING_SCRIPTS[FLC.script]; if (!sc) return null;
@@ -14556,9 +14556,9 @@ function flcScript() {                                    // the meeting with th
   return keep;
 }
 function flcShow(d, now) {
-  if (!FLC_ON || FLC_SHOWN === d || typeof dialogueShow !== 'function' || DIALOGUE) return false;
+  if (!FLC_ON || flag(FLC.shown) === d || typeof dialogueShow !== 'function' || DIALOGUE) return false;
   const keep = flcScript(); if (!keep) return false;
-  FLC_SHOWN = d;
+  flagSet(FLC.shown, d);
   return dialogueShow(FLC.script + '.today', { id: FLC.script + '@' + d, who: ['raman', 'tomas', ...keep], at: now, where: { deck: 3, room: /^Bow lounge$/ } });
 }
 function flcJoin(e, d, now) {                            // section 18's eventJoin: you're in
@@ -14566,7 +14566,12 @@ function flcJoin(e, d, now) {                            // section 18's eventJo
   if (MUG_ON && !SHIP.player.drink && !SHIP.player.carry.length && !SHIP.player.tray) SHIP.player.drink = 'cocoa';   // a free cocoa (the mug, #30)
   flcShow(d, now); return true;
 }
-function flcBusy(now) { return FLC_ON && (typeof tradOn === 'function' && !!tradOn(FLC.id, now) || typeof DIALOGUE !== 'undefined' && !!DIALOGUE && DIALOGUE.id === FLC.script + '.today'); }
+function flcBusy(now) {                                 // it's on, or its meeting is; or (PR2) you've been asked and haven't said no, until it's over
+  if (!FLC_ON) return false;
+  if (typeof tradOn === 'function' && tradOn(FLC.id, now) || typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === FLC.script + '.today') return true;
+  const d = Math.floor(now / 1440) + 1, e = flag(FLC.asked) === d && typeof eventsOn === 'function' ? eventsOn(d).find(x => x.id === FLC.id) : null;
+  return !!e && now < (d - 1) * 1440 + e.to && !(SHIP.device && (SHIP.device.appts || []).some(a => a.trad === FLC.id && a.status === 'no'));
+}
 function flcTick() {                                     // each frame (section 15's player tick)
   if (!FLC_ON || typeof SHIP === 'undefined' || !SHIP.time) return;
   const d = SHIP.time.day, m = SHIP.time.min, now = shipNow();
@@ -14576,12 +14581,12 @@ function flcTick() {                                     // each frame (section 
     if (near || m >= FLC.late) {
       flagSet(FLC.asked, d);
       const ev = (typeof SHIP_TRADITIONS !== 'undefined' ? SHIP_TRADITIONS : []).find(t => t.id === FLC.id), line = ev && ev.invite && ev.invite.line;
-      if (near && line && typeof bubbleSay === 'function') bubbleSay(z, line);
+      if (near && line && z.h && typeof bubbleSay === 'function') bubbleSay(z.h, line);   // the crowd handle, as every caller passes (PR2)
       socialInvite({ from: 'torres-zeke', trad: FLC.id, day: d });
     }
   }
   const on = typeof tradOn === 'function' && !!tradOn(FLC.id, now);
-  if (on && SHIP.events && SHIP.events.joined.includes(FLC.id + '@' + d) && FLC_SHOWN !== d && deckDef.num === 3 && roomAt(...player.here()) === FLC.room) flcShow(d, now);   // joined while another card was open
+  if (on && SHIP.events && SHIP.events.joined.includes(FLC.id + '@' + d) && flag(FLC.shown) !== d && deckDef.num === 3 && roomAt(...player.here()) === FLC.room) flcShow(d, now);   // joined while another card was open
   const want = flcBusy(now) && deckDef.num === 3 && roomAt(...player.here()) === FLC.room ? FLC.dim : 0, was = FLC_DIM;   // down till the meeting's over too
   FLC_DIM = Math.abs(want - FLC_DIM) < .01 ? want : FLC_DIM + (want - FLC_DIM) * .05;
   if (FLC_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
