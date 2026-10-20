@@ -9870,6 +9870,10 @@ function schedBuild(p, d, occ, S) {
   // don't get on with (-30 or less) last. Without affinityPlan, or with nobody either way, seats are chosen as before
   const mates = SEAT_SOCIAL && occ.who && seatMates(p, S, d);
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
+  const hereXY = () => {                                 // where the plan has them now, on this deck (a place's spot, or the lift they came out of); null: not known
+    for (let i = segs.length - 1; i >= 0; i--) { const g = segs[i]; if (g.deck !== deck) return null; if (g.act === 'commute') return DECKS[deck].lift || null; const q = g.placeId && S.byId.get(g.placeId); if (q) return q.xy || [q.at[0] + .5, q.at[1] + .5]; }
+    return null;
+  };
   const go = dk => {
     if (dk === deck) return;
     const l = segs[segs.length - 1];                      // a minute waiting by the lift, from the end of what you were doing
@@ -9894,13 +9898,15 @@ function schedBuild(p, d, occ, S) {
   // (a gathering's crowd spots, `gather` places from the deck architect, fill in their order: nearest the focus first)
   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
   const take = (act, opts, dur, o = {}) => {
+    const fromXY = o.lead && (dk => dk !== deck ? DECKS[dk].lift : hereXY());   // o.lead: the walk there comes first (WALK_LEAD, #9)
     for (const [dk, type] of opts) {
       if (dk === 3 && act === 'leisure' && !o.event && DECK3_EVENING_MAX < Infinity && deck3Full(t + (deck !== 3 ? C : 0), o.by !== undefined ? o.by : t + dur)) continue;
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       let pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
       const soc = mates && SEAT_SOCIAL.has(type) && (mates.fr.length || mates.foe.length);
-      const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
+      if (fromXY) { const f0 = fromXY(dk), ld = new Map(pool.map(q => [q.id, walkLead(f0, q)])); pool = pool.slice().sort((x, y) => ld.get(x.id) - ld.get(y.id)); }   // a walk first (#9): the nearest first
+      const fav = pool[0].gather || fromXY ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       if (pool[0].gather && p.partner && occ.who) {      // couples stand together in a crowd: the spots nearest your partner's first, if they're already there (0.26.38)
         const ids = new Set(pool.map(q => q.id)), at = (occ.who.get(p.partner) || []).find(([x, y, id]) => ids.has(id) && x < B + arrive + dur && B + arrive < y), q0 = at && S.byId.get(at[2]);
@@ -9919,14 +9925,16 @@ function schedBuild(p, d, occ, S) {
           const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
-          if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
+          const lead = fromXY ? walkLead(fromXY(dk), pl) : 0, s0 = s + lead, e0 = o.by !== undefined ? Math.min(s0 + dur, o.by) : s0 + dur;   // the place is held from arrival
+          if (lead && e0 - s0 < (o.min || Math.min(dur, 10))) continue;
+          if (!mine && !isFree(pl.id, s0, lead ? e0 : end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
           else { linger(s - (dk !== deck ? C : 0)); go(dk); }
-          if (!mine) hold(pl.id, s, end);
+          if (!mine) hold(pl.id, s0, lead ? e0 : end);
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
-          seg(act, end, pl.type, pl.id, ex);
+          seg(act, lead ? e0 : end, pl.type, pl.id, ex);
           return pl.id;
         }
       }
@@ -9956,8 +9964,8 @@ function schedBuild(p, d, occ, S) {
     seg('work', to, pl ? pl.type : wtype, pid, ex);
   };
   const toilet = k => {                                  // a toilet on the deck you're on, then hands at a basin; nothing if they're busy
-    if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2 })) return false;
-    take('wash', [[deck, 'basin']], 1, { tag: 'hands', min: 1 });   // no waiting: both busy, skip it
+    if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2, lead: WALK_LEAD })) return false;
+    take('wash', [[deck, 'basin']], 1, { tag: 'hands', min: 1, lead: WALK_LEAD });   // no waiting: both busy, skip it
     return true;
   };
   // the shift from now to `to`, with its breaks: tea (the habit, or about one day in three for anyone) on a seat
@@ -10779,6 +10787,15 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
+// the tiles, times a detour factor, at the crew's walking pace), never the loaded deck's paths, because a day is planned
+// for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets and the basin after them
+const WALK_LEAD = true, WALK_DETOUR = 1.3;
+function walkLead(from, pl) {
+  if (!from || !pl || !pl.at) return 0;
+  const [x, z] = pl.xy || [pl.at[0] + .5, pl.at[1] + .5];
+  return Math.ceil(WALK_DETOUR * Math.hypot(x - from[0], z - from[1]) / 1.15 * SHIP_RATE);   // 1.15: CREW_SPEED (section 10), tiles per real second
+}
 // ---- end of slot: Sim engineer ----
 
 // =====================================================================
