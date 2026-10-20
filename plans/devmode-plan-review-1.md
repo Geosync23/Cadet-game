@@ -309,3 +309,18 @@ Stop 1a's six hooks, final: 13 (`DEVMODE`, `SAVE_KEY`; `freezeSync`/`saveGame` a
 - **slowreload.py:** with the reload held 6 s, the Undo **happened** and its record was used up. At 2 s the same.
 - **cadet_test** against integration: **ALL IDENTICAL**. **devmode_check: OK**, including its new "slow" part (Undo and Back to mark with a 6 s reload). names_check OK.
 - **savecmp / savecmp2:** the real storage is byte-identical to integration's in all five modes and with the arrived key. A `#dev` session leaves the real keys untouched.
+
+## Owner stand-in review: patch E (claude/patch-e 2e2575d), sections 20, 19 and the deck signs
+
+**PASS.** With the switches off, the game is the same as integration's apart from #25's deliberate rename. The patch-to-Dev-mode interplay works on a scratch merge.
+
+- **cadet_test**, integration against patch-e: 0 px. The only difference is `state ['items']`, the deck directory's text (#25's rename, not behind a switch, as the user asked). With #25 taken out (a scratch revert of bc66e30's game lines): **ALL IDENTICAL** (renderer noise only). Run alone, that is: run at the same time as another cadet_test on 4 cores, it showed false pixel differences in f_noshadow/g_nocrew/h_crewback, so cadet_tests shouldn't be run side by side.
+- **savecmp:** the real save is byte-identical to integration's in all five modes. names_check OK on patch-e and on a scratch merge with claude/devmode fa394b3 (the game merges cleanly; only `plans/build-table.md` clashes).
+- **Shared functions, section 20:** `careerClock(now, quiet, hold)`: every existing caller passes two arguments, and with no `hold` the side effects run at once, exactly as before. `clockScreen(said, ask, after)`: the existing callers pass at most two, and the new path runs only under `CLOCK_UNDO_ON`. `rankCardRole(p)` returns `p.role` when `RANK_CARD_ON` is off, so the chat card's role and section 19's roster row (9e276a4) are unchanged. `shopMenuButton` returns null when off.
+- **#25's sign:** `fillText(name, 38, y, w - 46)` applies only to names over 20 characters, and `w` is the texture callback's width. Fine.
+- **The Undo window with Dev mode merged** (`undowin.py`, scratch merge, `#dev.clockundo`, Day 9 08:56):
+  - A, a clock-in then a Dev jump (+3 h): the window settles before the jump, through `devmodeKeep`'s save. The clock-in stands, the note keeps 08:56, and the day isn't excused.
+  - B, a save inside the window: settled.
+  - C, a clock-in at 08:58 with frames played on: the window had closed by 09:00. Undo then does nothing; the shift counts, and the next morning shows no miss. If an Undo ever lands after `shiftStart`, `flag('shiftSent') === u.keep.sent` keeps `c.on`, as the comment says.
+  - careerOff is untouched by the patch. Dev mode's excuse checks `careerClockedIn`, and a punch counts at once, so a jump straight after clocking in is never excused.
+- **Nit:** the held side effects run at settle time, so the `clock` note is stamped then (C: `in@09:00` for an 08:58 punch). It's at most the window's 5 ship minutes, and nothing reads the note's minute today. Leave it, or note it in the comment.
