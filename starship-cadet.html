@@ -9927,24 +9927,18 @@ function schedBuild(p, d, occ, S) {
           const i = j % pool.length, pass = Math.floor(j / pool.length);
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
-          let lead = 0, push = 0;                        // the walk (#9): out of the end of what came before (at most half of it), the rest (at most WALK_PUSH) later
-          if (fromXY && dk === deck) {
-            lead = walkLead(fromXY(dk), pl); const l = segs[segs.length - 1];
-            const room = l && l.deck === deck && l.act !== 'commute' ? Math.max(0, Math.floor((s - l.from) / 2)) : 0;
-            push = Math.max(0, Math.min(WALK_PUSH, lead - room, 1435 - end));
-          }
-          if (!mine && !isFree(pl.id, s + push, end + push, o.tag)) continue;
+          if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
           if (shut && evClosed(pl, B + s)) continue;          // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
           else { linger(s - (dk !== deck ? C : 0)); go(dk); }
-          if (lead > push) {                             // they set off earlier: the walk comes out of the end of what they were doing
-            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' ? Math.min(lead - push, Math.floor((l.to - l.from) / 2)) : 0;
+          if (fromXY && dk === deck) {                   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it)
+            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
             if (cut > 0) { l.to -= cut; t -= cut; }
           }
-          if (!mine) hold(pl.id, s + push, end + push);   // held from arrival
+          if (!mine) hold(pl.id, s, end);                // held from arrival, as planned
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
-          seg(act, end + push, pl.type, pl.id, ex);
+          seg(act, end, pl.type, pl.id, ex);
           return pl.id;
         }
       }
@@ -10800,9 +10794,10 @@ SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 // the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
 // the tiles, times a detour factor of 1.6 (1.3 left about a quarter short on the deck), at the crew's walking pace), never the loaded deck's paths, because a day is planned
 // for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets (the basin after is a step away, and keeps the old way).
-// The walk is taken off the end of what came before (at most half of it), and only what that can't cover (at most
-// WALK_PUSH, never past 23:55) pushes the stay later; the place is held from arrival
-const WALK_LEAD = true, WALK_DETOUR = 1.6, WALK_PUSH = 8;   // WALK_PUSH: the most a walk may push the visit later (ship minutes)
+// The stay keeps its planned time and place hold; the walk is taken off the end of what came before (at most half of
+// it), so they set off earlier and nothing after moves. (Pushing the stay later instead made days end past midnight,
+// a tradition overrun, and the Commons lose a person in day_check's rec-deck comparison)
+const WALK_LEAD = true, WALK_DETOUR = 1.6;
 function walkLead(from, pl) {
   if (!from || !pl || !pl.at) return 0;
   const [x, z] = pl.xy || [pl.at[0] + .5, pl.at[1] + .5];
