@@ -11,7 +11,7 @@
 ? cue:event.crossingLine.warning dept:galley
 - Line punch on Sunday. Brennan's recipe. We don't ask what's in it.   #funny
 ? cue:event.crossingLine.warning dept:helm
-- Sunday at half two we cross the Line. I'm flying it. Gently.
+- Sunday at half two we cross the Line. Helm's flying it. Gently.
 ? cue:event.crossingLine.warning dept:survey
 - New reach, new charts. Survey's been waiting months for Sunday.
 ? cue:event.crossingLine.warning tier>=friend

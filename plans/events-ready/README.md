@@ -10,6 +10,7 @@ moves an event's files in and runs `content_gen.py` in the turn that builds that
 | ionStorm | calderStorm, calderStorm.officer (rank: officer and up), captainAllClear.smooth / .bumpy / .rough | event.ionStorm.warning / .escalation / .resolution; calledIn (shared: Days 7, 14, 27) | event-ionStorm (addresses, Mail, status, the lantern supper, the party, the all-clear's line to you, the commendation, Lap of the Wren on Day 15) |
 | crossingLine | crossingCeremony (the oath) | event.crossingLine.warning / .onset / .afterglow | event-crossingLine (Vance's Mail, the banner, status, the ceremony's tap lines, the Line supper, the certificate and plaque) |
 | comet | (none) | event.comet.onset / .afterglow | event-comet (Sato's Mail, news, status, both gatherings) |
+| firstLightCocoa | firstLightCocoa (Raman's two lines: the Pale Shoals and Tavessa, the user's picks; facts.md has them) | | |
 | diplomatic | veyliGreeting (replaces the game's; Veyli they/them), veyliDinner (new) | event.diplomatic.warning / .escalation / .afterglow | event-diplomatic (the memo, the warning, news, status, the greeting line, the dinner's Mail, the farewell) |
 
 **Tested** (a scratch copy with everything moved in, baked, then lines_check):

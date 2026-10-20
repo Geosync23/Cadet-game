@@ -26,7 +26,7 @@ Your first Friday. Beats: why Fridays are short; the Line on Sunday; the week be
 - **Marrow:** The week behind. The board was busy, and Works kept up with it. Thank you, Chief Calder.
 - **Marrow:** This week's nod goes to the galley. Three meals a day, and the biscuit tin never ran dry.
 - **Marrow:** Somebody tell Chef Brennan I said so. She'll pretend not to be pleased.
-- **Marrow:** And a welcome to our newest hand, {me}, five days aboard. You picked a good ship.
+- **Marrow:** Welcome, {me}, our newest hand, five days aboard. You picked a good ship.
 - **Marrow:** The Chief tells me you're "fine". From Chief Calder, that's very nearly a medal.
 - **Marrow:** Works has a tea for you tonight, after dinner. Go. You'll see why.
 - **Marrow:** Next week: the tasting table Wednesday, postcard night Thursday. And a quiet ship, I hope.
@@ -46,18 +46,18 @@ The ion storm hit at 14:00, two hours before (the jolt and her short "We're in i
 - **Marrow:** We expect it to blow through by Sunday morning. Two nights, perhaps a little less.
 - **Marrow:** What's down: calls home and outside Mail. The booths and the bow lounge are shut for now.
 - **Marrow:** I know that's hard. Your people will be there on Sunday. So, I'm afraid, will the queue.
-- *(if the shielded lamp ballasts were fitted in time)* **Marrow:** What's held: the new lamp ballasts went in yesterday. That's why the lights only flicker.
+- *(if the shielded lamp ballasts were fitted in time)* **Marrow:** What's held: the new lamp ballasts went in before it hit. So the lights only flicker.
 - *(if they weren't)* **Marrow:** Not every lamp got its new ballast in time. Expect a dark corridor. Walk, don't run.
 - *(if the battery packs reached the bridge (and you didn't carry them))* **Marrow:** The bridge has its spare battery packs, carried up from the bay by hand. Thank you.
 - **Marrow:** Chief Calder's crew have been on the board since the jolt. They'll be on it all weekend.
-- *(if you carried the battery packs)* **Marrow:** {me} carried the bridge its battery packs. It says thank you, between sandwiches.
-- *(if you fitted ballasts)* **Marrow:** {me} fitted some of those ballasts. If your corridor's bright, that's who to thank.
+- *(if you carried the battery packs)* **Marrow:** {me} carried the bridge its battery packs. The bridge says thanks.
+- *(if you fitted ballasts)* **Marrow:** {me} fitted some of those ballasts. Bright corridor? That's who to thank.
 - **Marrow:** What I need from you. Stay in when you can. Check on your neighbours. Eat the stew.
 - **Marrow:** Some of you will be called in on your days off. I'm sorry. And thank you, in advance.
 - **Marrow:** Tomorrow at six, supper in the mess by lantern light. If you're staying in, come and sit.
-- *(if you're an Officer (on track))* **Marrow:** Happier news. Works gained an Officer this week. Officer {me}, stand up a moment.
+- *(if you're an Officer (on track))* **Marrow:** Happier news: Works gained an Officer. Officer {me}, stand up a moment.
 - *(if you're an Officer (on track))* **Marrow:** There. First time I've said it in front of everyone. Sit down before the lights go.
-- *(if you're still a junior (behind))* **Marrow:** Happier news. {me}, not two weeks aboard and learning fast. The Chief has noticed.
+- *(if you're still a junior (behind))* **Marrow:** Happier news: {me} is learning fast. The Chief has noticed.
 - *(if you're still a junior (behind))* **Marrow:** She says you ask good questions. Keep asking them. A storm is full of answers.
 - **Marrow:** The all-clear, I hope, on Sunday morning. I'll tell you myself. Until then: steady.
 - **Marrow:** Dinner's at five. Enjoy your weekend, those of you who have one.
@@ -76,18 +76,18 @@ The all-clear was Sunday, the comet Tuesday, your commendation talk in the ready
 - *(if it was bumpy)* **Marrow:** A relay burnt out on the bridge and some decks went dark. It's patched now. Thanks, Works.
 - *(if it was rough)* **Marrow:** The storm's five days behind us. It was a hard one, and parts of the ship still show it.
 - *(if it was rough)* **Marrow:** Long blackouts, a scorched relay room, food lost. We're putting it right, together.
-- **Marrow:** Works closed {stormjobs} storm jobs in four days. The Chief made it look easy. It wasn't.
+- **Marrow:** Storm jobs closed in four days: {stormjobs}. The Chief made it look easy. It wasn't.
 - **Marrow:** And everyone who sat up with a neighbour by lantern light: that counted too.
 - **Marrow:** Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.
 - **Marrow:** Half of you were at the windows. The other half were asleep, and I don't blame you.
-- **Marrow:** My letters of thanks for the storm went to a long list this week. You know who you are.
-- *(if you were commended for the storm)* **Marrow:** {me} was on it. We talked in the ready room yesterday. Nobody tripped. A first.
-- *(if you're a Senior Officer)* **Marrow:** And on Tuesday, Senior Officer {me} moved up to Deck 2. The senior corridor is lucky.
-- *(if you're an Officer)* **Marrow:** Officer {me}, a busy fortnight. Chief Calder has plans for you. That's a warning.
-- *(if you're still a junior (behind))* **Marrow:** {me}, three weeks with us. The Chief says you're finding your feet. I can see it.
+- **Marrow:** My letters of thanks for the storm went out on Sunday. You know who you are.
+- *(if you were commended for the storm)* **Marrow:** {me} was on it. We talked in the ready room yesterday. Nobody tripped.
+- *(if you're a Senior Officer)* **Marrow:** On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.
+- *(if you're an Officer)* **Marrow:** Officer {me}, a busy fortnight. The Chief says you keep her on her toes.
+- *(if you're still a junior (behind))* **Marrow:** {me}, three weeks with us. The Chief says you're finding your feet.
 - **Marrow:** Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees.
-- *(if your night shifts have started (you're asleep; you get it by Mail))* **Marrow:** That includes our newest night hand, {me}, who is asleep right now, I hope. Good.
-- **Marrow:** This week we say goodbye to {leavers}. Wherever you go next, they're lucky to have you.
+- *(if your night shifts have started (you're asleep; you get it by Mail))* **Marrow:** And our newest night hand, {me}, who should be asleep. Good.
+- **Marrow:** This week we say goodbye to {leavers}. Wherever you go next, go well.
 - **Marrow:** And on Sunday a new junior comes up the Tern's ramp. Be to them what this ship was to you.
 - **Marrow:** This Sunday, the regatta in the morning and talent night at half seven, a week late.
 - **Marrow:** Dinner's at five. Enjoy your weekend, those of you who have one.
@@ -102,14 +102,14 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 
 - **Vance:** Settle, please. The Captain.
 - **Marrow:** Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
-- **Marrow:** A month ago {me} came up the Tern's ramp. Since then: the Line, a storm, a comet.
+- **Marrow:** A month ago {me} came aboard. Since then: the Line, a storm, a comet.
 - *(if the storm went smoothly)* **Marrow:** The storm crew's roster is still pinned up in the tea corner. I read it some evenings.
 - *(if it was bumpy or rough)* **Marrow:** There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
-- *(if you're an Engine Specialist)* **Marrow:** {me}. Four weeks ago, a junior. Today, an Engine Specialist. Rarely done so fast.
-- *(if you're a Senior Officer)* **Marrow:** {me}. Four weeks ago, a junior. Today, a Senior Officer with a cabin on Deck 2.
-- *(if you're an Officer)* **Marrow:** {me}. Four weeks ago, a junior. Today, an Officer of the Wren, with your own key.
-- *(if you're still a junior (behind))* **Marrow:** {me}. Four weeks with us. Not every road up is quick. The good ones rarely are.
-- **Marrow:** {myjobs} jobs on the Works board have your name on them. The ship runs better for it.
+- *(if you're an Engine Specialist)* **Marrow:** {me}: a junior four weeks ago, an Engine Specialist today. Rare.
+- *(if you're a Senior Officer)* **Marrow:** {me}: a junior four weeks ago, a Senior Officer today, on Deck 2.
+- *(if you're an Officer)* **Marrow:** {me}: a junior four weeks ago, an Officer today, with your own key.
+- *(if you're still a junior (behind))* **Marrow:** {me}, four weeks with us. The good roads up are rarely quick.
+- **Marrow:** Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it.
 - **Marrow:** Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
 - **Marrow:** Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
 - **Marrow:** The Veyli are our neighbours out here. Proud, careful, and very good at noticing things.
@@ -118,7 +118,7 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 - **Vance:** Three items. It's a short list.
 - **Marrow:** What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.
 - **Marrow:** Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.
-- **Marrow:** Works has something for {me} after dinner. I'm told I'm not allowed to say what.
+- **Marrow:** Works has something for {me} after dinner. I'm not allowed to say what.
 - **Marrow:** Dinner's at five. Enjoy your weekend, those of you who have one.
 
 *Mail for anyone not there:* "All hands: the Captain's Friday address": Four Fridays, a storm and a comet behind us. Tomorrow at ten a Veyli delegation comes aboard, led by Speaker Teshavi: line the shuttle bay with me if you're free. Commander Vance's Mail tonight has the details.
@@ -128,9 +128,9 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 ## Explaining short Fridays (part E of the plan)
 
 - **Day 0, Zeke's goodnight** (two bubbles, between "Off at five..." and "Then the evening's yours..."): "Fridays we knock off at half three." / "Captain talks to all of us at four, then dinner."
-- **Thursday Day 4 at 18:00, the Captain's Mail:** "Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially." Later Thursdays: "Tomorrow's a short Friday: the day shift stops at half past three. The Captain's address is at four in the auditorium, deck R. Dinner at five."
-- **Day 5 at 13:00, Halloran at the tea corner** (after he gives you your mug): "Short day today. Half three, clock out." / "Then the auditorium at four. Deck R. She'll say your name." / "Don't hide. Have a biscuit first. Have you eaten?"
-- **Every Friday:** the time clock's screen says "Short Friday: clock out from 15:30.", and at 15:20 a heads-up: "The Captain's address at 16:00 · the auditorium, deck R".
+- **Thursday Day 4 at 18:00, the Captain's Mail:** "Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially." Later Thursdays: "Tomorrow's a short Friday: the day shift stops at half past three. The Captain's address is at four in the rec deck auditorium. Dinner at five."
+- **Day 5 at 13:00, Halloran at the tea corner** (after he gives you your mug): "Short day today. Half three, clock out." / "Then the auditorium at four. Rec dec. She'll say your name." / "Don't hide. Have a biscuit first. Have you eaten?"
+- **Every Friday:** the time clock's screen says "Short Friday: clock out from 15:30.", and at 15:20 a heads-up: "The Captain's address at 16:00 · the rec deck auditorium".
 - **Friday breakfasts after your first week** (now and then): "Short one today." / "Half three, then the Captain." / "Short Friday. I've planned my whole afternoon. It's a nap." / "Captain at four. I'm sitting at the back. Again." / "Friday. Half a day's work and a whole speech."
 - **Crew going, and talking about it afterwards:** "Captain at four. Back row's mine. Don't tell anyone." / "She always says one thing you remember all week. Come and hear it." / "'Those of you who have one.' She says it every Friday. I wait for it."
 
@@ -148,6 +148,6 @@ A month aboard. Tomorrow a Veyli delegation comes aboard; Commander Vance's own 
 | q1 Length | **Decided:** keep 16-19 lines, spread evenly over 16:00-16:48 |
 | q2 Day 12 and the closed rec deck | **Decided:** "I've borrowed this room for an hour, then it shuts." The rec deck opens for the Friday address, 16:00-16:50, during the storm (the events engineer builds it in the storm update) |
 | q3 "And a quiet ship, I hope" (Day 5) | **Decided:** keep it |
-| q4 The two place names for First Light Cocoa | Open (see `plans/events-lines-events.md`) |
+| q4 The two place names for First Light Cocoa | **Decided:** the Pale Shoals (behind us) and Tavessa, a star cluster the Veyli named (ahead). In facts.md; the cocoa's swap is ready in `plans/events-ready/firstLightCocoa/` |
 
 design-doc.md: the short Fridays section comes with the Fridays plan's own design-doc changes (on claude/patch-plan, not yet in claude/integration); these three decisions go into it when it's merged: the addresses are 16-19 lines spread over 16:00-16:48, and Day 12's opens the closed rec deck for its hour.

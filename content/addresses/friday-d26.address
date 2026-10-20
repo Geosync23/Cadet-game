@@ -17,22 +17,22 @@ mail: All hands: the Captain's Friday address | Four Fridays, a storm and a come
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had.
 // beat 1: a month of Fridays: who came, who went, the storm remembered
-marrow: A month ago {me} came up the Tern's ramp. Since then: the Line, a storm, a comet.   [gesture]
+marrow: A month ago {me} came aboard. Since then: the Line, a storm, a comet.   [gesture]
 ? band:smooth
 marrow: The storm crew's roster is still pinned up in the tea corner. I read it some evenings.   #warm
 ? band:bumpy|rough
 marrow: There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.
 // beat 2: what you've become (your rank, your work)
 ? myrank:specialist
-marrow > you: {me}. Four weeks ago, a junior. Today, an Engine Specialist. Rarely done so fast.   #warm
+marrow > you: {me}: a junior four weeks ago, an Engine Specialist today. Rare.   #warm
 ? myrank:senior
-marrow > you: {me}. Four weeks ago, a junior. Today, a Senior Officer with a cabin on Deck 2.   #warm
+marrow > you: {me}: a junior four weeks ago, a Senior Officer today, on Deck 2.   #warm
 ? myrank:officer
-marrow > you: {me}. Four weeks ago, a junior. Today, an Officer of the Wren, with your own key.   #warm
+marrow > you: {me}: a junior four weeks ago, an Officer today, with your own key.   #warm
 ? myrank:junior
-marrow > you: {me}. Four weeks with us. Not every road up is quick. The good ones rarely are.   #warm
+marrow > you: {me}, four weeks with us. The good roads up are rarely quick.   #warm
 ?
-marrow: {myjobs} jobs on the Works board have your name on them. The ship runs better for it.
+marrow: Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it.
 marrow: Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
 // beat 3: the Veyli, who they are and how we host them
 marrow: Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
@@ -44,5 +44,5 @@ vance: Three items. It's a short list.   [nod]
 marrow: What I ask: be yourselves, be kind, and answer their questions. They'll have a great many.
 marrow: Line the shuttle bay with me tomorrow, if you're free. Let's show them the ship we are.   #warm
 // beat 5: four weeks aboard tonight, and the close
-marrow: Works has something for {me} after dinner. I'm told I'm not allowed to say what.   #funny
+marrow: Works has something for {me} after dinner. I'm not allowed to say what.   #funny
 marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]

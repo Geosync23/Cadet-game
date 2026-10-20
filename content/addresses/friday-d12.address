@@ -26,7 +26,7 @@ marrow: We expect it to blow through by Sunday morning. Two nights, perhaps a li
 marrow: What's down: calls home and outside Mail. The booths and the bow lounge are shut for now.
 marrow: I know that's hard. Your people will be there on Sunday. So, I'm afraid, will the queue.   #warm
 ? done:stormBallasts
-marrow: What's held: the new lamp ballasts went in yesterday. That's why the lights only flicker.
+marrow: What's held: the new lamp ballasts went in before it hit. So the lights only flicker.
 ? !done:stormBallasts
 marrow: Not every lamp got its new ballast in time. Expect a dark corridor. Walk, don't run.
 ? done:stormBatteries !done:stormBatteries.you
@@ -34,9 +34,9 @@ marrow: The bridge has its spare battery packs, carried up from the bay by hand.
 ?
 marrow: Chief Calder's crew have been on the board since the jolt. They'll be on it all weekend.   [nod]
 ? done:stormBatteries.you
-marrow: {me} carried the bridge its battery packs. It says thank you, between sandwiches.   #funny
+marrow: {me} carried the bridge its battery packs. The bridge says thanks.   #funny
 ? done:stormBallasts.you
-marrow: {me} fitted some of those ballasts. If your corridor's bright, that's who to thank.
+marrow: {me} fitted some of those ballasts. Bright corridor? That's who to thank.
 // beat 3: what she needs from everyone this weekend
 ?
 marrow: What I need from you. Stay in when you can. Check on your neighbours. Eat the stew.   #funny
@@ -44,10 +44,10 @@ marrow: Some of you will be called in on your days off. I'm sorry. And thank you
 marrow: Tomorrow at six, supper in the mess by lantern light. If you're staying in, come and sit.   #warm
 // beat 4: your promotion, said plainly, with a joke to let the room breathe
 ? myrank:officer|senior|specialist
-marrow: Happier news. Works gained an Officer this week. Officer {me}, stand up a moment.   [gesture]
+marrow: Happier news: Works gained an Officer. Officer {me}, stand up a moment.   [gesture]
 marrow: There. First time I've said it in front of everyone. Sit down before the lights go.   #funny
 ? myrank:junior
-marrow: Happier news. {me}, not two weeks aboard and learning fast. The Chief has noticed.   [nod]
+marrow: Happier news: {me} is learning fast. The Chief has noticed.   [nod]
 marrow: She says you ask good questions. Keep asking them. A storm is full of answers.
 // beat 5: the all-clear she expects, and dinner
 ?

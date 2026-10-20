@@ -27,7 +27,7 @@
 ? cue:event.crossingLine.warning dept:galley
 - Line punch on Sunday. Brennan's recipe. We don't ask what's in it.   #funny
 ? cue:event.crossingLine.warning dept:helm
-- Sunday at half two we cross the Line. I'm flying it. Gently.
+- Sunday at half two we cross the Line. Helm's flying it. Gently.
 ? cue:event.crossingLine.warning dept:survey
 - New reach, new charts. Survey's been waiting months for Sunday.
 ? cue:event.crossingLine.warning tier>=friend
@@ -40,7 +40,7 @@
 // ================================================================================================= the moment
 == address.onset
 // the banner at 14:30, after the horn. She's called in on her day off.
-- This is the Captain, on my day off. We have just crossed the Line.
+- This is the Captain. I'm off today, so I'll be brief. We've crossed the Line.
 - Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.
 - First-timers, to the plaza. The rest of you, be kind. Marrow out.
 
@@ -71,7 +71,7 @@ marrow > you: {me}. A week ago you came up the Tern's ramp. How does it feel?   
 brennan: Line punch. One mug each. You drink it all. That's the dunking. No complaints.   [gesture]
 first2: It's... green. Why is it green?
 brennan: Tradition. Drink.   [nod]
-marrow: There. You're Line-crossers now. Supper's at six. Brennan made a cake to take the taste away.   [laugh]
+marrow: There. You're Line-crossers now. Supper's at six. Something to take the taste away.   [laugh]
 
 == ceremony.here
 // tap lines on the plaza during it (crew, not first-timers)
@@ -92,19 +92,19 @@ marrow: There. You're Line-crossers now. Supper's at six. Brennan made a cake to
 title: The Line supper
 from: brennan
 == mail
-- The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and cake. No punch. I promise.
+- The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and a pudding. No punch. I promise.
 == ask
-- Line supper at six. Brennan's done a cake to make up for the punch.   #funny
+- Line supper at six. Proper food, to make up for the punch.   #funny
 - Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
 == here
 - To the Line, and everyone who crossed it today.   #warm
-- The cake's to get rid of the taste. It's working.   #funny
+- The roast's to get rid of the taste. It's working.   #funny
 - First-timers eat first. That's the rule tonight.
 == thanks
 - The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
 == chatter
 - Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
-- The Line supper ran out of cake in ten minutes. Brennan was thrilled.
+- The Line supper ran out of roast in ten minutes. Brennan was thrilled.
 
 // ================================================================================================= afterglow (Monday)
 == reactions.afterglow

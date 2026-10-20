@@ -57,7 +57,7 @@ calder: Right. Storm jobs are on the board. Off you go.   [gesture]
 == address.onset
 // the banner at 14:00 (SHIP_EVENTS.ionStorm.address.onset). One change: she points to the 16:00 Friday address.
 - This is the Captain. We're in it.
-- Expect flickers, and no calls home for a while. The bow lounge and the rec deck are closed.
+- Expect flickers, and no calls home for a while. The bow lounge and rec deck are closed.
 - Look after each other. I'll say more at four. Marrow out.
 
 == mail.onset
@@ -105,7 +105,7 @@ from: Lukas Dlamini
 // meeting). band: as the game's c.band. Three replies at most.
 title: The all-clear
 from: Commander Teo Vance
-gist: Notes from the observation room: the storm passed at 09:40. (The debrief line for the band.) Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.
+gist: Notes from the observation room: the storm passed at 09:40. {debrief} Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.
 == lines
 vance: The Captain. Who is, for the record, off duty today.   [nod]
 marrow: So is most of this room. Thank you for coming in. Dr. Sato?   [gesture]
@@ -125,10 +125,10 @@ holt: Watch reports no injuries. Some short tempers. Mine included. It's my day 
 calder: Mine too. Nobody tell my rota.   [laugh]
 ? commended
 marrow > you: And our newest Works hand did more than their share. There's a letter in your Mail. A commendation.
-? !commended mine.jobs
+// (not commended, but some storm jobs; then none: superseded by the bank keys event.ionStorm.allclear.you.jobs | .none,
+// plans/events-ready/ionStorm)
+? !commended
 marrow > you: And I'm told our newest Works hand did their share. Thank you, {me}.
-? !commended !mine.jobs
-marrow: Comms are back. Expect a queue at the booths.
 ?
 ? choice
 * It was good to be useful.   rel:marrow+1,calder+1

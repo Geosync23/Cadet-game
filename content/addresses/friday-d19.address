@@ -26,28 +26,28 @@ marrow: A relay burnt out on the bridge and some decks went dark. It's patched n
 marrow: The storm's five days behind us. It was a hard one, and parts of the ship still show it.
 marrow: Long blackouts, a scorched relay room, food lost. We're putting it right, together.   [sigh]
 ?
-marrow: Works closed {stormjobs} storm jobs in four days. The Chief made it look easy. It wasn't.   [nod]
+marrow: Storm jobs closed in four days: {stormjobs}. The Chief made it look easy. It wasn't.   [nod]
 marrow: And everyone who sat up with a neighbour by lantern light: that counted too.   #warm
 // beat 2: the comet, a gift after the storm
 marrow: Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.   [gesture]
 marrow: Half of you were at the windows. The other half were asleep, and I don't blame you.   #funny
 // beat 3: commendations and ranks, yours among them
-marrow: My letters of thanks for the storm went to a long list this week. You know who you are.
+marrow: My letters of thanks for the storm went out on Sunday. You know who you are.
 ? commended
-marrow: {me} was on it. We talked in the ready room yesterday. Nobody tripped. A first.   #funny
+marrow: {me} was on it. We talked in the ready room yesterday. Nobody tripped.   #funny
 ? myrank:senior|specialist
-marrow: And on Tuesday, Senior Officer {me} moved up to Deck 2. The senior corridor is lucky.   #warm
+marrow: On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.   #warm
 ? myrank:officer
-marrow: Officer {me}, a busy fortnight. Chief Calder has plans for you. That's a warning.   #funny
+marrow: Officer {me}, a busy fortnight. The Chief says you keep her on her toes.   #funny
 ? myrank:junior
-marrow: {me}, three weeks with us. The Chief says you're finding your feet. I can see it.
+marrow: {me}, three weeks with us. The Chief says you're finding your feet.
 // beat 4: tonight's night watch, a goodbye and a welcome
 ?
 marrow: Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees.
 ? myshift:night
-marrow: That includes our newest night hand, {me}, who is asleep right now, I hope. Good.   #funny
+marrow: And our newest night hand, {me}, who should be asleep. Good.   #funny
 ?
-marrow: This week we say goodbye to {leavers}. Wherever you go next, they're lucky to have you.   #warm
+marrow: This week we say goodbye to {leavers}. Wherever you go next, go well.   #warm
 marrow: And on Sunday a new junior comes up the Tern's ramp. Be to them what this ship was to you.   #warm
 // beat 5: the week ahead, and the close
 marrow: This Sunday, the regatta in the morning and talent night at half seven, a week late.

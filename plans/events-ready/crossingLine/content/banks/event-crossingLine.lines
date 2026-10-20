@@ -8,7 +8,7 @@
 - Tomorrow at 14:30 we cross the Line into the Veyli reach.
 // the banner at 14:30, after the horn: the Captain is called in on her day off
 == event.crossingLine.address.onset.1
-- This is the Captain, on my day off. We have just crossed the Line.
+- This is the Captain. I'm off today, so I'll be brief. We've crossed the Line.
 == event.crossingLine.address.onset.2
 - Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.
 == event.crossingLine.address.onset.3
@@ -26,19 +26,19 @@
 == event.crossingLine.gather.lineSupper.name
 - The Line supper
 == event.crossingLine.gather.lineSupper.mail
-- The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and cake. No punch. I promise.
+- The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and a pudding. No punch. I promise.
 == event.crossingLine.gather.lineSupper.ask
-- Line supper at six. Brennan's done a cake to make up for the punch.   #funny
+- Line supper at six. Proper food, to make up for the punch.   #funny
 - Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
 == event.crossingLine.gather.lineSupper.here
 - To the Line, and everyone who crossed it today.   #warm
-- The cake's to get rid of the taste. It's working.   #funny
+- The roast's to get rid of the taste. It's working.   #funny
 - First-timers eat first. That's the rule tonight.
 == event.crossingLine.gather.lineSupper.thanks
 - The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
 == event.crossingLine.gather.lineSupper.chatter
 - Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
-- The Line supper ran out of cake in ten minutes. Brennan was thrilled.
+- The Line supper ran out of roast in ten minutes. Brennan was thrilled.
 // tap texts: the certificate on your shelf (a keepsake) and the plaque on the plaza (the deck architect's props)
 == event.crossingLine.keepsake
 - Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."

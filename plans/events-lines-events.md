@@ -35,6 +35,8 @@ Events writer EW1, 2026-10-20, branch `claude/events-lines`. Words only (drafts 
 
 ## Two place names for First Light Cocoa (job 3)
 
+**Decided (the user, 2026-10-20): the recommended pair, the Pale Shoals and Tavessa.** They're in `content/facts.md`, and the meeting's swap is ready to bake in `plans/events-ready/firstLightCocoa/content/meetings/firstLightCocoa.meet`.
+
 `content/meetings/firstLightCocoa.meet` has two placeholders, in Dev Raman's lines: "Hollis Reach" (behind us, "we left it six weeks ago") and "Corvane Drift" (dead ahead). I suggest:
 
 | Placeholder | Recommended | Why | Other options |
