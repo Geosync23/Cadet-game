@@ -14814,6 +14814,7 @@ function ixJobStep() {
 function ixGoalWorld(g) {
   if (g.crew && typeof DECK_CREW !== 'undefined') { const a = DECK_CREW.find(c => c.p && c.p.id === g.crew); if (a) return { x: a.x, z: a.z }; }   // someone on the deck (section 18's tradition leader, 0.70.0)
   if (g.xz) return g.xz;                                  // a spot on the floor (the set-down crate, 0.28.60)
+  if (g.beam && typeof beamSlotWorld === 'function') { const b = beamSlotWorld(); if (b) return b; }   // your name's spot on the Works beam, at its height (the patch, #19; section 21's)
   if (g.item) { const it = ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item); if (it) { it.hit.getWorldPosition(ixP); return { x: ixP.x, z: ixP.z }; } }
   if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
   if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
@@ -14888,7 +14889,7 @@ function ixFrame() {
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
   const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
-  ixV.set(w.x, 1.2, w.z).project(camera);
+  ixV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);   // a goal with a height (the beam's name spot, the patch #19)
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
   const dx = sx - W2, dy = sy - H2, k = Math.min(dx > 0 ? (R0 - W2) / dx : dx < 0 ? (L0 - W2) / dx : Infinity, dy > 0 ? (B0 - H2) / dy : dy < 0 ? (T0 - H2) / dy : Infinity);
