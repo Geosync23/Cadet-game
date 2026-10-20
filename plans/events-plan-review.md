@@ -193,3 +193,37 @@ Missing questions:
   | `B2-1-front-hud-deck3.png` | the front |
   | `B2-2-tracked-onset.png` | Tracked offering the closed booths |
   | `B2-3-blackout-deck4.png` | a blackout on Deck 4 |
+
+---
+
+## Re-review of version 2 (claude/events-plan 15d04602), for lead 20
+
+The checks behind this re-review were run in the page (scratchpad `C/v2.py`): the comet set to Day 16 at 21:30 for one day, the traditions on Days 16-26 with and without it, and who is on shift on Days 19-27. Version 2 took in all of X1-X4 and S1-S17 correctly. The findings below are tied to the question each one affects.
+
+- **Q2 (storm vs the first promotion): agree with (a), keep Days 10-15.**
+  - Under (a), and under (b)'s shorter afterglow, the storm ends at Day 16 00:00, so the comet on Day 16 fits beside it in F0's one-event slot.
+  - Option (c) (Days 17-21) collides with the Day 17 toast, Vance's days off on 17-18, and both night shifts. If the user picks (c), the comet and the visit must move too, and the page should say so under (c).
+- **Q3 (the comet): agree with Day 16 at 21:30.**
+  - Checked: no tradition that Tuesday is cancelled. Tiles night and Knit and natter end at 21:30, and `eventPauses` tests the minute before the end.
+  - Sato is on shift. Vance's 17:00 walk is long over by 21:30.
+  - The draft's gatherings must be re-registered for the new date: `EV_SHIPWIDE` is built when the game loads, so a comet added later draws nobody. That's a build note, not a question.
+- **Q4 (the visit): don't recommend Days 19-26. Recommend a short weekend visit on Days 26-29, as the career's hand-off on purpose.** Four problems with Days 19-26:
+  1. **It takes Pillar 5's whole Tier 4 week.** With version 2's own narrow `eventDay` (front, escalation and all-clear), every day from 22 to 26 is an event day. That means no head-scratchers, incidents or team jobs in the week when P6, P7 and P8 first appear (Days 22, 23 and 25) and the puzzle rate rises to 1 in 3. M24, leading a team on Day 25, is itself a team job, and team jobs skip event days (`teamBusy` → `incShipEvent`, :44977).
+  2. **The warning falls on the night-shift weekend.** Calder sends you home at 13:00 on Friday Day 19 to sleep (p5:355), and you work the nights of Days 19 and 20. The "weekend jobs" and Vance's Mail come while you're asleep or on nights.
+  3. **Days 22, 23 and 26 are crowded.**
+     - **Day 22:** the greeting would follow the Monday briefing and the Tier 4 test, which is held 09:00-15:00 if it works like Tier 2's.
+     - **Day 23:** the dinner is the same evening as the Engine Specialist welcome.
+     - **Day 26:** a whole day of mentoring, plus the gift exchange at 09:00, the farewell at 10:00 and the debrief, then Calder's question. Day 26 also has no Works Friday tea (four-weeks-aboard takes 18:40; checked).
+  4. **It still runs 8 days from warning to farewell (Days 19-26),** against the design's 2-4. Only the time aboard was shortened.
+
+  **Better:**
+  - The Day 22 Monday briefing names the visit as next week's business (an F5 senior memo). This keeps question 1's "pays off the Senior rank".
+  - Vance's warning Mail comes on Friday Day 26 after Calder's question.
+  - The greeting is Saturday Day 27 at 10:00, with one dinner Sunday Day 28 and the gift exchange and farewell Monday Day 29 at 10:00. The afterglow is Tuesday Day 30.
+  - Vance works Days 26-30 and Marrow works on Day 29. Weekend meetings work without the cast on shift: the storm's all-clear already runs on Saturday Day 13.
+  - The event days are then Saturday, Sunday and Monday 29, so the Tier 4 week is untouched. Warning to farewell takes 4 days, within the design. The career's last scene hands straight into the ship's next story ("the ship carries on", p5's "after" row).
+  - It runs 3 days past Day 26, so put it to the user as "the finale, on purpose". Ending the visit before Day 22 doesn't work: Days 17-21 hold the toast, Vance's days off and both night shifts, and Day 21 has the new junior's arrival.
+- **Q1:** unchanged (yes), but its line "the visit is where your Senior rank pays off" still holds under the Days 26-29 option, through the Day 22 briefing.
+- **Q8 (folding scenes):** agree. Under (a) the commendation comes at the all-clear on Day 13. The ready room would otherwise summon you on Monday Day 15, the Tier 3 test day, so folding it into the Day 16 scene is right. Say "no summons on Day 15" outright.
+- **Q5, Q6, Q7 and Q9:** no new findings. Q7 under (a): the rec deck is closed from Thursday Day 11 14:00 to Saturday Day 13 10:00.
+- **Nit:** in the shift check, `torres` isn't a roster id, so check his rota under his real id before F0's cast check.
