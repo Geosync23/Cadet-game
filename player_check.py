@@ -379,7 +379,10 @@ with sync_playwright() as pw:
       const sv = {}; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) { /* not ours */ } out.bytes = JSON.stringify([sv.news, sv.newsUsed, sv.newsAt, sv.newsRows]).length;
       deviceShow('ship'); const body = document.getElementById('devBody').textContent; out.app = [DEVICE_APPS.get('ship').title, !!SHIP.news[0] && body.includes(SHIP.news[0].text), body.includes('Systems')];
       deviceShow('crew'); out.rel = DEVICE_APPS.get('crew').title; deviceClose();
-      const tp = SHIP.news.filter(x => x.id === 'tntoday'); out.trad = tp.length ? tp.every(x => !/-/.test(x.text) && /On today: [a-z]/.test(x.text)) : SHIP.news.some(x => /^Today aboard/.test(x.text)) || null; out.tradText = tp.length ? tp[0].text : null;
+      const tp = SHIP.news.filter(x => x.id === 'tntoday'); const tps = Object.values(per).flatMap(o => Object.values(o)).filter(x => x.src === 'trad'), lc = s => String(s).toLowerCase();   // with the real bank: every tradition post of the 14 days (BM10, 0.64.0: the rec deck's traditions take the slots, so the "Today aboard" fallback may not be among the last 40)
+      const tids = (typeof TRADITIONS !== 'undefined' ? TRADITIONS : []).filter(e => /-/.test(e.id) && e.id !== lc(e.name)).map(e => e.id), tnames = (typeof TRADITIONS !== 'undefined' ? TRADITIONS : []).map(e => lc(e.name));
+      out.trad = tp.length ? tp.every(x => !/-/.test(x.text) && /On today: [a-z]/.test(x.text)) : tps.length && !tps.some(x => tids.some(id => x.text.includes(id))) && tps.some(x => tnames.some(n => lc(x.text).includes(n))) || null;
+      out.tradText = tp.length ? tp[0].text : (tps.find(x => tids.some(id => x.text.includes(id))) || {}).text || null;
       for (const k of added) delete LINES['news.' + k]; Object.assign(SHIP, { news: keep.news, newsUsed: keep.used, newsAt: keep.at, newsRows: keep.rows });
       return JSON.stringify(out); })()"""))
     print('  ', nf)
