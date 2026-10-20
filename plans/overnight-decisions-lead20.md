@@ -1,0 +1,10 @@
+# Overnight decisions, lead 20 (night of 2026-10-20)
+
+The user went to overnight mode (~05:35 UTC 2026-10-20): "5 worker cap". Overnight rules (as before): no phone notifications; the lead makes technical and pacing calls and logs every call made on the user's behalf here; design calls that need the user wait in a list at the end; no merging to main, no change to the main game link; every new game feature is built switched off (the normal game identical) until the user sees it.
+
+## The plan for the night
+1. Dev mode plan: DP1 writes it with DJ1's measurements; DR1 (technical) and DR2 (phone usability) review it. The lead applies the recommended answers provisionally (logged here), and the user confirms in the morning on the page.
+2. Playtest patch plan: PP1 reproduces and plans the user's 28 notes; reviewed after.
+3. If the Dev mode plan is reviewed and sound: a builder starts Dev mode on claude/integration, gated (Dev mode off = cadet_test 0 px), so the user can try it in the morning. Never more than 5 working seats at once.
+
+## Calls made (time UTC | situation | call | why)
