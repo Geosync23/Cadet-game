@@ -52,6 +52,29 @@ New order after Dev mode (the user): **Dev mode → playtest patch → "Talk a w
 5. **Maintenance access:** no more tiered (rank-based) access to maintenance areas like the ladder. And the ladder must work: tap it and a panel like the lift's comes up, with up/down and which deck is which.
 6. **Clocking in/out:** it's too easy to clock in and out by accident; add a way to undo a clock-out (and clock-in) right after punching.
 
+7. **Captain on Deck 4:** she hangs out there too often; occasionally is fine.
+8. **Washroom light:** should actually show red when a toilet is in use.
+9. **Toilets:** the user sees few or no crew using them; crew should visibly use them.
+10. **Crew walking inside each other:** two crew with the same destination who leave the lift together stay overlapped for long stretches; they should keep apart.
+11. **Arrow after the Chief's first briefing (Day 1):** if you track the briefing, the arrow doesn't then point to the job board.
+12. **Stuck on Zeke on training day:** with hold-to-walk you get stuck on him (collision drops only after ~2 s of pushing); tap-to-walk gets past. Hold-to-walk must slide past him.
+13. **The green tip about checking your device while working:** great timing, keep it, but make it more specific: it's about using the device while a long work action fills up (don't say "meters", don't say "in between jobs"); it popping during a long work action makes it clear.
+14. **The device button the first time you get the device:** an arrow to it, or it lights up.
+15. **Welcome tour:** Zeke points out the laundry room, but it's on the other side of the ship. Fix where he points (or what he says).
+16. **Repair times, Tier 1:** have got a bit slow (tuning).
+17. **Zeke and the player clip into the same spot** during the welcome tour and training day; they should stand apart.
+18. **End of training day:** Zeke mentions breakfast instead of dinner and gets the time wrong (it's after 5). When the shift ends he should say good job and that you'll be on your own tomorrow.
+19. **Your name on the Works beam:** should happen before dinner so players don't miss it; and the arrow must point to the right spot on the beam (upper left, where your name goes).
+20. **Hunger** should go down more during a work day (tuning).
+21. **Clicking someone:** show their rank and title along with their name.
+22. **Social** should go down faster, the same as fitness (tuning).
+23. **Large-group moments:** the user loves them; more of them, especially in ship-wide events (feeds the events plan).
+24. **The shopkeeper:** tapping them opens a simple buy menu.
+25. **Lift panel label:** should read "Officer's Quarters - Science" (which deck: to confirm with the user in the patch plan).
+26. **One more tradition on Day 1,** so a new player sees how traditions flow.
+27. **Waking up:** it shouldn't be so easy to wake up with Energy at 100 (tuning).
+28. **Day 2 laundry tutorial** breaks if you don't wake up at 06:00; it must work whenever you get up.
+
 **"Talk a while" dialogue pack (after the patch):**
 - First rule: **no repeats** — once a conversation fires, it's done for that save.
 - A **shared pool** any character can draw from (unless it really doesn't fit them), plus **a few of their own** per character.
