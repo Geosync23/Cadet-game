@@ -24,7 +24,7 @@ th,td{text-align:left;padding:5px 8px;border-bottom:1px solid var(--line);vertic
 th{color:var(--muted);font-weight:500}
 td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
 .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
-code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(255,255,255,.06);padding:1px 4px;border-radius:4px}
+code{overflow-wrap:anywhere;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(255,255,255,.06);padding:1px 4px;border-radius:4px}
 pre{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;background:rgba(0,0,0,.3);border:1px solid var(--line);border-radius:10px;padding:10px;overflow-x:auto;color:#cfe3e0}
 details{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:10px 16px;margin:10px 0}
 summary{cursor:pointer;font-weight:600;color:#bdeee6;font-size:14px}
@@ -42,20 +42,20 @@ ol.turns>li{margin-bottom:8px}
 <body>
 <main>
 <h1>Step 2: splitting the game into pieces</h1>
-<div class="sub">Plan page for the user's review (split architect, 2026-10-20). Nothing is cut until you sign this off. Based on the rec deck build 0.64.0 (branch <code>claude/rec-cand-s1</code>).</div>
+<div class="sub">Plan page for the user's review (split architect SA1, checked and revised by the split reviewer SR1, 2026-10-20; the review: <code>plans/split-plan-review.md</code>). Nothing is cut until you sign this off. Based on the final rec deck build (0.64.2 today, branch <code>claude/rec-cand-s1</code>); the cut is made on whatever that build is when you sign it off.</div>
 
 <div class="card">
 <b>In one breath.</b>
-<p>Today the whole game is one file of about 49,800 lines that every helper edits at once, which is how yesterday's late name clash and the long hand merges happened. We cut it into <b>39 smaller files ("pieces")</b> along the section lines the file already has: Deck 4, the galley, the device, the crew's schedules and so on. A tiny script then glues the pieces back, in order, into the <b>same single <code>starship-cadet.html</code></b> you play today. Your link, the published game and every check keep working exactly as now.</p>
-<p><b>The proof:</b> the glued file is identical to today's file down to the last letter, so it is the same game and every test result still holds. We already tried this on a copy of 0.64.0: <span class="ok">it came back identical</span>, and every piece can be checked on its own.</p>
+<p>Today the whole game is one file of about 49,800 lines that every helper edits at once, which is how yesterday's late name clash and the long hand merges happened. We cut it into <b>40 smaller files ("pieces")</b> along the section lines the file already has: Deck 4, the galley, the device, the crew's schedules and so on. A tiny script then glues the pieces back, in order, into the <b>same single <code>starship-cadet.html</code></b> you play today. Your link, the published game and every check keep working exactly as now.</p>
+<p><b>The proof:</b> the glued file is identical to today's file down to the last letter, so it is the same game and every test result still holds. We already tried this twice, on 0.64.0 and on 0.64.2, by two helpers working separately: <span class="ok">both times it came back identical</span>, and every piece can be checked on its own. And if the split ever turns out to be a bad idea, going back is easy (section 6).</p>
 <p>Alongside the split we add the new ways of working you approved: who owns which piece, a quick check before every push, the same check run by GitHub on every push, and one shared branch everyone merges into early.</p>
 </div>
 
 <h2>What you need to decide</h2>
 <div class="card decide">
 <p><b class="q">1. The pieces and who owns them.</b> The list below follows the file's own sections, so the cut is mechanical and nothing is rewritten. Happy with this list? (We can split big pieces further later, during the clean-up.)</p>
-<p><b class="q">2. Keep the glued game file in git?</b> <i>Recommended: yes.</i> After each change the helper runs the glue script and saves both the piece and the glued file. <b>Good:</b> your link, the published game, every check, and "fetch an old version" all keep working with no change; anyone can grab the whole game in one file at any time. <b>Cost:</b> each change appears twice in the history (piece + glued file), and when two helpers' work is combined the glued file is never fixed by hand, just rebuilt by the script (the quick check refuses a glued file that doesn't match its pieces). The other choice, gluing only when needed, saves that duplication but means every check, every publish and every helper must remember to glue first, and an old version can't be opened directly.</p>
-<p><b class="q">3. Automatic checks on GitHub on every push.</b> Your repository is <b>public</b> (anyone with the link can read it), so GitHub runs these checks <b>free, with no monthly limit</b>. OK to switch it on? If you ever make the repository private, the free allowance (2,000 minutes a month) would last only a few days at our pace, and we'd limit it to the shared branch.</p>
+<p><b class="q">2. Keep the glued game file in git?</b> <i>Recommended: yes.</i> After each change the helper runs the glue script and saves both the piece and the glued file. <b>Good:</b> your link, the published game, every check, and "fetch an old version" all keep working with no change; anyone can grab the whole game in one file at any time. <b>Cost:</b> each change appears twice in the history (piece + glued file), and the glued file is never fixed by hand: the quick check refuses a glued file that doesn't match its pieces, and a small script puts them back in step the safe way (section 6). The other choice, gluing only when needed, saves that duplication but means every check, every publish and every helper must remember to glue first, and an old version can't be opened directly.</p>
+<p><b class="q">3. Automatic checks on GitHub on every push.</b> Your repository is <b>public</b> (anyone with the link can read it), so GitHub runs these checks <b>free, with no monthly limit</b>. OK to switch it on? If you ever make the repository private: GitHub's free plan includes 2,000 minutes a month, which at our pace would last a day or two, so we would run the GitHub check only on the shared branch (about 9 runs a day fits). Helpers would still run the quick check themselves before every push. You would never get a surprise bill: GitHub's spending limit starts at $0, so the checks just pause until the next month.</p>
 </div>
 
 <h2>1. The pieces</h2>
@@ -65,20 +65,20 @@ ol.turns>li{margin-bottom:8px}
 <div class="card" id="piece"><b>Tap a piece</b><br><span class="sub">Its name, lines, what it holds and its owner.</span></div>
 
 <div class="tw"><table id="tbl"><thead><tr><th>#</th><th>Piece</th><th class="n">Lines</th><th>What's in it (file sections)</th><th>Owner seat</th></tr></thead><tbody></tbody></table></div>
-<p class="sub">Pieces live in a new <code>pieces/</code> folder: <code>pieces/page/</code> (the page around the game: its look and on-screen panels), <code>pieces/js/</code> (the game code, numbered in the order they're glued) and <code>pieces/content/</code> (generated words). The numbers keep today's order exactly, which is why the result is identical. The owners table goes into <code>plans/owners.md</code>, with each piece's shared functions and their exact inputs (e.g. <code>recShow(state)</code>); a change in someone else's piece goes through its owner.</p>
+<p class="sub">Pieces live in a new <code>pieces/</code> folder: <code>pieces/page/</code> (the page around the game: its look and on-screen panels), <code>pieces/js/</code> (the game code) and <code>pieces/content/</code> (generated words). Each piece is named after the file section it holds (<code>s19-device.js</code> is section 19, as the code's own notes call it), and <code>pieces/ORDER</code> lists them in today's order exactly, which is why the result is identical. The owners table goes into <code>plans/owners.md</code>, with each piece's shared functions and their exact inputs (e.g. <code>recShow(state)</code>); a change in someone else's piece goes through its owner.</p>
 
 <h2>2. The glue script</h2>
 <div class="card">
-<p><code>build.py</code>: about 30 lines of python3, nothing to install (the checks already use python3). It reads the list of pieces in order from <code>pieces/ORDER</code> and joins them into <code>starship-cadet.html</code>. It takes a quarter of a second, and the same pieces always give the same file. <code>python3 build.py --check</code> only compares and says whether the game file is up to date.</p>
-<p>A second small script, <code>split.py</code>, does the cut itself, by finding the section headings. It can be run again on any old whole file, which is how a helper's unfinished work from before the split is carried over (see Risks).</p>
-<p>Two writers' tools change one line each: <code>content_gen.py</code> writes the crew's words into <code>pieces/content/words.gen.js</code> instead of the game file (tested: it reads that piece unchanged and says "up to date"), and the crew roster generator writes into the crew data piece.</p>
+<p><code>build.py</code>: well under 100 lines of python3, nothing to install (the checks already use python3). It reads the list of pieces in order from <code>pieces/ORDER</code> and joins them into <code>starship-cadet.html</code>. It takes a quarter of a second, and the same pieces always give the same file. <code>python3 build.py --check</code> only compares and says whether the game file is up to date, and if not, which pieces differ.</p>
+<p>A second small script, <code>split.py</code>, does the cut itself, by finding the section headings (not line numbers, so it still works after the file changes). Run on a glued file it gives back exactly its pieces, which is how work that reached the glued file but not the pieces is carried over safely (see Risks).</p>
+<p>Two writers' tools change one line each: <code>content_gen.py</code> writes the crew's words into <code>pieces/content/words.gen.js</code> instead of the game file (tested: it reads that piece unchanged and says "up to date"), and the crew roster generator writes into the crew data piece. Both refuse to write into <code>starship-cadet.html</code> from then on, so nobody's words are lost to the next glue.</p>
 </div>
 
 <h2>3. The proof, and keeping the whole file</h2>
 <div class="card">
 <ol>
-<li><b>Keep the whole file first</b> (your rule): when 0.64.0 is signed off, tag it in git as <code>whole-file-0.64.0</code> and keep a copy at <code>archive/starship-cadet-0.64.0-whole.html</code>. The whole game can always be fetched in one piece from there.</li>
-<li>Cut, glue, and compare: the glued file must match 0.64.0 byte for byte. We show both files' fingerprints (a 64-letter code that changes if even one letter changes); they must be the same. Trial on 0.64.0 today: both <code>534ceeda…918aa</code>.</li>
+<li><b>Keep the whole file first</b> (your rule): when the rec deck build is signed off, keep a copy at <code>archive/starship-cadet-0.64.2-whole.html</code> (number as it is then) and a branch <code>claude/whole-file-0.64.2</code> that never changes. The whole game can always be fetched in one piece from there. A git "tag" would be the usual way, but our helper sessions aren't allowed to push tags (we tried: GitHub's connection refused it), so the branch does the same job; if you'd also like a tag, it's one click on GitHub's Releases page.</li>
+<li>Cut, glue, and compare: the glued file must match the build byte for byte. We show both files' fingerprints (a 64-letter code that changes if even one letter changes); they must be the same. Trials today: 0.64.0 both <code>534ceeda…918aa</code>; 0.64.2 both <code>e4897023…27624</code>.</li>
 <li>Because the file is identical, every check's last result carries over; we still run the quick check once on GitHub to prove the new set-up works. Nothing new to publish: the game hasn't changed.</li>
 </ol>
 </div>
@@ -90,17 +90,18 @@ ol.turns>li{margin-bottom:8px}
 <tr><th>Step</th><th>What it catches</th><th class="n">Time</th></tr>
 <tr><td>Glued file matches its pieces</td><td>a forgotten glue, or a hand-edited game file</td><td class="n">&lt;1 s</td></tr>
 <tr><td>Words are up to date (<code>content_gen.py --check</code>)</td><td>a writer's change not baked in</td><td class="n">~5 s</td></tr>
-<tr><td>Every piece reads as valid code (<code>node --check</code>, piece by piece, then the whole)</td><td>a typo that stops the game loading, and says which piece</td><td class="n">~1 s</td></tr>
-<tr><td>No name made twice across the pieces (3,359 names today, no repeats)</td><td>yesterday's clash: two helpers making the same name</td><td class="n">~1 s</td></tr>
+<tr><td>Every piece reads as valid code (piece by piece, then the whole game as the browser reads it), and every piece ends cleanly with a new line</td><td>a typo that stops the game loading, and says which piece</td><td class="n">~1 s</td></tr>
+<tr><td>No name made twice (3,807 names and 2,740 entries in shared lists today, no repeats)</td><td>yesterday's clash: two helpers making the same name, or adding the same entry to a shared list (a silent one: the second quietly wins)</td><td class="n">~1 s</td></tr>
 <tr><td>On-screen text search (e.g. "Deck 7" in shown text, not notes)</td><td>words that must never reach the screen</td><td class="n">~1 s</td></tr>
-<tr><td><code>deck_check</code> then <code>machine_check</code> then <code>leave_check</code>, side by side with <code>device_check</code></td><td>the game loads; every deck reachable; machines, careers and the device behave</td><td class="n">~4 min</td></tr>
+<tr><td><code>deck_check</code> then <code>machine_check</code> then <code>leave_check</code>, side by side with <code>device_check</code></td><td>the game loads; every deck reachable; machines, careers and the device behave</td><td class="n">~4.5 min</td></tr>
 </table>
-<p class="sub">Picked from measured times: deck ~2.5 min, device ~4, machines ~15 s, leave ~1 min. The events check (~5 min) and the full set stay for the build master's full runs before a release; it doesn't fit under 5 minutes. All full checks stay exactly as they are.</p>
+<p class="sub">Measured on 0.64.2, the two lanes side by side on a 4-core machine (like GitHub's): deck 3 min 20 s, machines 46 s, leave 20 s; device 3 min 44 s alongside; 4 min 26 s in all, all passing. That leaves only about half a minute spare, so if the checks grow, one moves out to the full runs. The events check (~5 min) and the full set stay for the build master's full runs before a release. All full checks stay exactly as they are. Two of the four (deck and machines) today report a failure only in words, not to the computer; turn 3 fixes that (two lines, checks only), otherwise a failing check would still show a green tick.</p>
 </div>
 
 <h2>5. One shared branch, merged into early</h2>
 <div class="card">
 <p>A new branch <code>claude/integration</code> starts from the split. Each helper works on its own branch, started from it. When a piece of work is reviewed, the build master merges it into <code>claude/integration</code> straight away (helpers can only push to their own branch), runs the glue and the quick check, and pushes. Helpers bring the shared branch into theirs often, so nobody drifts days apart. When you approve a milestone, it goes to <code>main</code> as today, with your OK.</p>
+<p><b>The build number</b> (the "0.64.2" in the game's corner) sits on two lines that every helper changes every turn, so with early merging it would clash on every single merge (we already keep a small tool just for those clashes). From the split on, the build master sets the build number when merging into the shared branch; helpers note their own work in their branch's notes instead.</p>
 <p>Two new notes keep everyone oriented: <code>plans/map.md</code> ("where things live": which piece holds what, kept current by whoever moves code), and <code>plans/backlog.md</code> (small known bugs, so things found in passing aren't lost), started from the roadmap's list: the unclosed style comment near the top, the hidden door gear, the double clock hold in the evenings, two wall faults leaving you queued, rec talent night only skipping day 152, the Tracked panel filling small phones, and the "seven decks" Deck 4 texts not gated.</p>
 </div>
 
@@ -112,19 +113,21 @@ ol.turns>li{margin-bottom:8px}
 <tr><td>Two pieces make the same name</td><td>The duplicate-name step in the quick check, on every push.</td></tr>
 <tr><td>Load order (a piece using something made in a later piece)</td><td>Today's order is kept exactly. The game's code all runs as one block, as now, so nothing new can break here.</td></tr>
 <tr><td>A piece edited in two places at once</td><td>The owners map: one owner per piece, changes elsewhere go through them. Combining early on the shared branch keeps any overlap small.</td></tr>
-<tr><td>The glued file gets out of step, or two helpers' glued files clash in a merge</td><td>Never fixed by hand: rerun <code>build.py</code>. The quick check and GitHub refuse a glued file that doesn't match its pieces.</td></tr>
-<tr><td>Checks and tools that read the single file</td><td>They keep reading <code>starship-cadet.html</code>, which still exists and is identical. Only the two writers' tools change (one line each).</td></tr>
-<tr><td>Helpers with unfinished work on the old whole file</td><td>The cut happens at a quiet moment, after 0.64.0, with nobody mid-change. Any branch that still has work is carried over by running <code>split.py</code> on its file and merging the pieces.</td></tr>
+<tr><td>The glued file gets out of step with its pieces</td><td>The quick check and GitHub refuse it. Which way to fix it depends on why, and the script says which: <b>after your own edit to a piece</b>, glue again (<code>build.py</code>). <b>After a merge</b>, cut the glued file again (<code>split.py</code>): a branch from before the split carries its work in the glued file only, and git merges it in without a word, so gluing again would quietly throw that work away (we tried it: it did). Never fix the glued file by hand.</td></tr>
+<tr><td>Two helpers' changes clash in a merge</td><td>Fix the clash in the pieces, then glue again. The glued file clashes in the same place; it's never fixed by hand.</td></tr>
+<tr><td>Checks and tools that read the single file</td><td>They keep reading <code>starship-cadet.html</code>, which still exists and is identical. Only the two writers' tools change (one line each). Two checks find their part of the game by its section heading, so a heading is never renamed without updating them (it goes in <code>plans/map.md</code>).</td></tr>
+<tr><td>Helpers with unfinished work on the old whole file</td><td>The cut happens at a quiet moment, after the rec deck build, with nobody mid-change. A branch that still has work is merged into the shared branch as usual; its changes land in the glued file, and cutting that file again (<code>split.py</code>) carries them into the right pieces. Tried on a copy: the old branch's fix and a newer piece edit both survived.</td></tr>
 <tr><td>Old notes say "around line 1724"</td><td><code>plans/map.md</code> turns old line numbers into piece names; new notes name the piece and section instead.</td></tr>
-<tr><td>GitHub may refuse a helper session adding the GitHub check's settings file</td><td>If it does, we give you the short file and one paste in GitHub's website adds it (once).</td></tr>
+<tr><td>GitHub may refuse a helper session adding the GitHub check's settings file</td><td>Tried: it doesn't (a do-nothing test file went up and came straight down again, nothing ran). If that ever changes, we give you the short file and one paste in GitHub's website adds it.</td></tr>
+<tr><td>The split turns out to be a bad idea</td><td>Easy to undo: the glued file is always complete and up to date, so we delete <code>pieces/</code> and the two scripts and go back to editing the one file. Nothing is lost, the game doesn't change, and no old version has to be fetched.</td></tr>
 </table></div>
 
 <h2>7. The order of work, and what you see at each stop</h2>
 <ol class="turns">
 <li><b>Now:</b> you review this page. <i>You:</i> the three decisions above.</li>
-<li><b>Turn 1, keep the whole file</b> (after 0.64.0 is signed off and on <code>main</code>): the tag <code>whole-file-0.64.0</code> and the archive copy. <i>You see:</i> a one-line note with the tag's name.</li>
+<li><b>Turn 1, keep the whole file</b> (after the rec deck build is signed off and on <code>main</code>): the archive copy and the <code>claude/whole-file-…</code> branch. <i>You see:</i> a one-line note with the branch's name. <i>You (optional):</i> a tag on GitHub's Releases page.</li>
 <li><b>Turn 2, the cut:</b> <code>split.py</code>, <code>build.py</code>, the <code>pieces/</code> folder, the two tools' one-line changes. <i>You see:</i> the two matching fingerprints and the piece list; the game is unchanged, so nothing new to play.</li>
-<li><b>Turn 3, the checks:</b> <code>check_fast.sh</code> and the GitHub check. <i>You see:</i> a green tick next to the push on GitHub (link sent). <i>You:</i> possibly nothing; if GitHub shows its checks ("Actions") as turned off, one switch in the repository's Settings, or one paste if the settings file is refused.</li>
+<li><b>Turn 3, the checks:</b> <code>check_fast.sh</code> and the GitHub check. <i>You see:</i> a green tick next to the push on GitHub (link sent). <i>You:</i> probably nothing; if GitHub shows its checks ("Actions") as turned off, one switch in the repository's Settings.</li>
 <li><b>Turn 4, the ways of working:</b> <code>plans/owners.md</code>, <code>plans/map.md</code>, <code>plans/backlog.md</code>, the shared branch; yesterday's rules written into DEV_NOTES "Rules that keep it working"; CLAUDE.md's "How we work" and the helpers' start messages updated. <i>You see:</i> a short summary and the owners table.</li>
 <li><b>Then (its own review):</b> the light clean-up of clearly unused code, one area at a time, each with checks; and splitting any still-big piece (the deck kit, work, social) if helpers find it useful. Then step 3, Dev mode, with its own plan page.</li>
 </ol>
@@ -132,24 +135,29 @@ ol.turns>li{margin-bottom:8px}
 <details>
 <summary>Technical detail (for the team)</summary>
 <h3>Where the cuts fall</h3>
-<p>Each cut is at a section header (<code>// ====</code> line + numbered title) or a generated-block marker. The script's opening <code>(() =&gt; {</code> goes in <code>page/body.html</code> and the closing <code>})();</code> in <code>page/tail.html</code>, so every <code>.js</code> piece is whole and passes <code>node --check</code> on its own (verified on all 35). The file's sections aren't in numeric order (6, 7, 8 come after 24); the pieces keep file order, not section numbers. The FILE MAP comment stays at the top of <code>01-setup-materials.js</code>. Each piece file ends with a newline except <code>tail.html</code>; joining is plain concatenation, no separators.</p>
+<p>Each cut is at a section header (<code>// ====</code> line + numbered title) or a generated-block marker. The script's opening <code>(() =&gt; {</code> goes in <code>page/body.html</code> and the closing <code>})();</code> in <code>page/tail.html</code>, so every <code>.js</code> piece is whole and passes <code>node --check</code> on its own (verified on all 36, on 0.64.0 and 0.64.2). Cuts are found by marker, never by line number: the script's opener is the <i>first</i> column-0 <code>(() =&gt; {</code> (there are 5) and the closer the <i>last</i> column-0 <code>})();</code> (there are 17); the shared places piece starts at <code>// ---- Big gatherings</code>. Each marker must be found exactly once (in order), or <code>split.py</code> stops. The file's sections aren't in numeric order (6, 7, 8 come after 24); the pieces keep file order, not section numbers. The FILE MAP comment stays at the top of <code>01-setup-materials.js</code>. Every piece ends with a newline (<code>tail.html</code> too: the file ends with <code>&lt;/html&gt;</code> and a newline); joining is plain concatenation, no separators. <code>build.py</code> refuses a piece without its final newline: otherwise the piece's last line and the next piece's first line become one line, and a <code>//</code> note at the end of one would silently swallow the next piece's first line of code.</p>
 <h3>build.py (sketch)</h3>
 <pre>order = [l for l in open('pieces/ORDER').read().split('\n') if l.strip()]
 data = b''.join(open('pieces/' + n, 'rb').read() for n in order)
 if '--check' in sys.argv: sys.exit(0 if open(GAME, 'rb').read() == data else 1)
-open(GAME, 'wb').write(data)</pre>
+open(GAME, 'wb').write(data)
+# plus: every piece must end with b'\n'; --check names the pieces that differ
+#       (split the game file in memory and compare piece by piece)</pre>
+<h3>Getting back in step (the one rule that loses work if done wrong)</h3>
+<p><code>build.py --check</code> fails in two different situations. <b>(a) A piece changed and the glue was forgotten:</b> run <code>build.py</code>. <b>(b) A merge brought in changes to the glued file only</b> (a branch from before the split, or a helper who edited the glued file by mistake): git merges <code>starship-cadet.html</code> cleanly and silently, the pieces don't change, and <code>build.py</code> would then overwrite that work. Run <code>split.py</code> on the glued file instead: it cuts the merged file back into pieces, keeping both sides. Tried on a copy of 0.64.2: an old-branch edit plus a newer piece edit; <code>build.py</code> lost the old-branch edit, <code>split.py</code> kept both. The scripts decide which case it is and say so, so nobody has to remember the rule: they compare against the commit before (for a merge, which git commits on its own, the shared branch's side of it, <code>HEAD^1</code>; for unsaved edits, <code>HEAD</code>): pieces changed and glued didn't, glue; glued changed and pieces didn't, cut; both changed and still out of step, stop and ask the build master.</p>
 <p>Bytes in, bytes out: no line-ending or encoding handling, so it can't alter a letter. Trial: 0.25 s for split + join on 0.64.0 (5,129,461 bytes, sha256 <code>534ceeda1449f7cb886b80b78ecffb75af257c7c177ac77889afad7319e918aa</code>).</p>
 <h3>Duplicate-name scan</h3>
-<p>All game code runs inside one function, so a repeated <code>const</code>/<code>let</code> stops the game loading, and a repeated <code>function</code> silently replaces the first (the dangerous one). The scan lists names declared at column 0 (<code>function</code>, <code>const</code>, <code>let</code>, <code>var</code>, <code>class</code>) across all pieces and fails on any repeat, naming both pieces. 0.64.0: 3,359 names (1,538 functions, 1,659 const), no repeats. Names added by <code>Object.assign(PLAYER_ACTS, …)</code>-style merges aren't covered; a later step can add a key-clash scan for the shared tables.</p>
+<p>All game code runs inside one function, so a repeated <code>const</code>/<code>let</code> stops the game loading (the parse step catches it), and a repeated <code>function</code> silently replaces the first (the dangerous one). A column-0 text search misses names after the first in <code>let W = 0, D = 0, …</code> (3,359 found against 3,807 real) and every one-line <code>Object.assign(PLAYER_ACTS, { … })</code>. So the scan reads the glued script with a real JavaScript reader (acorn, fetched once with <code>npm pack</code> like three.js; the reviewer's sketch is <code>plans/split-tools/names_check.js</code>): every name declared at the top of the game function, and every key added to a shared table by <code>const TABLE = {…}</code> or <code>Object.assign(TABLE, {…})</code>. 0.64.2: 3,807 names, 2,740 table keys, no repeats, 1.1 s. It caught all three planted mistakes (a second function, a second <code>PLAYER_ACTS.tidy</code>, a second <code>let</code>). It reads the script as the browser does (a script, not a node module), so it also replaces <code>node --check</code> on the whole, which accepts things a browser refuses (a stray top-level <code>return</code>).</p>
 <h3>GitHub check (workflow sketch)</h3>
-<pre>on: push (paths: pieces/**, starship-cadet.html, build.py, split.py, *_check.py, check_fast.sh, content/**, .github/**)
+<pre>on: push (paths: pieces/**, starship-cadet.html, build.py, split.py, cadet_test.py, *_check.py, check_fast.sh,
+          content_gen.py, content/**, plans/trad_parse.py, plans/crew-roster-gen.py, plans/split-tools/**, .github/**)
 concurrency: one per branch, cancel-in-progress
 runs-on: ubuntu-latest
-steps: checkout; setup-python; pip install playwright;
+steps: checkout; setup-python; pip install playwright numpy pillow;   (every check loads cadet_test.py, which imports numpy and PIL)
   python -m playwright install --with-deps chromium   (cached)
-  npm pack three@0.128.0 into $CADET_WORK/three        (cached)
+  npm pack three@0.128.0 and acorn into $CADET_WORK    (cached)
   CADET_CHROME=&lt;playwright's chromium&gt; bash check_fast.sh</pre>
-<p>About 6-7 minutes a run (1-2 min set-up, under 5 min checks). We push hundreds of commits a day (786 on 10-19 across all branches); the path filter skips notes-only pushes and the per-branch cancel drops runs a newer push replaces, so perhaps 100-300 runs a day, roughly 600-2,000 minutes a day. Public repository: standard runners are free and unmetered (up to 20 jobs at once). If it went private, that would exhaust the free 2,000 minutes a month in a day or two, so it would be limited to <code>claude/integration</code> and <code>main</code>. If the session's push token lacks permission for <code>.github/workflows/</code>, the user adds the file once through the website.</p>
+<p>About 6-7 minutes a run (1-2 min set-up, under 5 min checks). We push hundreds of commits a day (786 on 10-19 across all branches); the path filter skips notes-only pushes and the per-branch cancel drops runs a newer push replaces, so perhaps 100-300 runs a day, roughly 600-2,000 minutes a day. Public repository: standard runners are free and unmetered (up to 20 jobs at once). If it went private, that would exhaust the free 2,000 minutes a month in a day or two, so it would be limited to <code>claude/integration</code> and <code>main</code>. A session can push a workflow file (tested 2026-10-20: 618087d added a manual-only file, 2122b1c removed it, nothing ran). If the repository goes private: 2,000 included minutes a month on GitHub Free (3,000 on Pro), default spending limit $0, so runs stop rather than bill; at ~7 minutes a run that is about 285 runs a month, so the workflow's <code>on: push</code> narrows to <code>branches: [claude/integration, main]</code>.</p>
 <h3>check_fast.sh parallel runs</h3>
 <p>The two lanes each get their own <code>CADET_WORK</code> (DEV_NOTES "Testing": parallel runs on one machine otherwise load each other's copies and pass falsely).</p>
 </details>
@@ -159,41 +167,42 @@ const P = [
  ['page/head.html',7,'page','The page\'s opening lines','HUD seat'],
  ['page/css.css',231,'page','The look of every panel, button and screen (the style sheet)','HUD seat'],
  ['page/body.html',48,'page','The on-screen panels\' layout, the three.js line, the opening of the game code','HUD seat'],
- ['js/01-setup-materials.js',279,'look','The file map, 1 Setup (renderer, seeded random), 2 Textures, 3 Materials','Performance engineer'],
- ['js/02-deck-kit.js',2537,'deck','4 the ship state, 4a the current deck and hull, 4b the shared art kit (furniture builders, room contents, room templates)','Deck architect'],
- ['js/03-deck-build.js',507,'deck','4c Build and unload a deck','Deck architect'],
- ['js/04-deck-utility-kit.js',346,'deck','4d Deck definitions start: the utility rooms kit','Deck architect'],
- ['js/05-deck4-quarters.js',451,'deck','Deck 4: Quarters','Deck architect'],
- ['js/06-deck5-operations.js',568,'deck','Deck 5: Operations','Deck architect'],
- ['js/07-deck3-commons.js',556,'deck','Deck 3: Commons','Deck architect'],
- ['js/08-deck2-command.js',1075,'deck','Deck 2: Command and Science, with its kit','Deck architect'],
- ['js/09-deck6-engineering.js',379,'deck','Deck 6: Engineering','Deck architect'],
- ['js/10-deck1-bridge.js',1101,'deck','Deck 1: Bridge, then the places added for traditions and jobs on every deck (moved to their decks in the clean-up)','Deck architect'],
- ['js/11-rec-deck.js',715,'rec','4e The rec deck','Rec engineer'],
- ['js/12-lighting.js',46,'look','5 Lighting, day and night','Performance engineer'],
- ['js/13-time-save.js',307,'crew','13 Ship time and saving','Sim engineer (save size: player engineer)'],
- ['js/14-schedules.js',1620,'crew','14 Schedules: the crew\'s days','Sim engineer'],
- ['js/15-device.js',1340,'you','19 Your device and its apps','Device engineer'],
- ['js/16-player-needs.js',2156,'you','15 Your needs, activities and the device\'s player side','Player engineer'],
- ['js/17-interactions.js',739,'you','15b Using what the crew use, the job board, the goal pointer','Interactions engineer'],
- ['js/18-rec-activities.js',182,'rec','15r The rec deck\'s activities','Rec engineer'],
- ['js/19-galley.js',1024,'ship','16 Galley and food','Galley engineer'],
- ['js/20-machines-jobs.js',2329,'ship','17 Machines, wear, jobs and supplies','Systems engineer'],
- ['js/21-lines-engine-1.js',23,'words','22 Lines: the start of the dialogue engine','Dialogue engineer'],
- ['content/words.gen.js',14707,'gen','The crew\'s words, meetings and traditions, made by content_gen.py from content/ (never hand-edited)','Writers, through content/ only'],
- ['js/22-lines-engine-2.js',410,'words','22 Lines: the rest of the dialogue engine','Dialogue engineer'],
- ['js/23-events.js',2197,'social','18 Ship events and traditions','Traditions engineer'],
- ['js/24-social.js',3165,'social','20 Social life: friendships, news, favours','Social engineer'],
- ['js/25-arrival-clothes.js',1306,'you','21 The arrival, 21b Clothes and laundry','Onboarding engineer'],
- ['js/26-tiles-lightdisc.js',1171,'rec','23 Tiles, 23b Lightdisc','Games engineer (tiles, lightdisc)'],
- ['js/27-work.js',2197,'work','24 Work: the career core, and mechanics 24m tool upkeep, 24n logbook, 24g scanner, 24i tracing, 24j workshop, 24t off shift, 24s lift roof','Works career engineer (mechanics: their seats)'],
- ['js/28-cases.js',2343,'work','24k Cases: the head-scratchers','Puzzles seat H'],
- ['js/29-camera-grid.js',181,'look','6 Camera, 7 Grid and pathfinding','Performance engineer'],
- ['js/30-characters-crowd.js',1576,'look','8 Character kit, 8b Crowd','Performance engineer'],
- ['js/31-crew-data.js',223,'crew','9 Crew data, with the roster made by the roster generator','Crew designer'],
- ['js/32-walkers.js',710,'crew','10 Walkers: the crew moving on the deck','Sim engineer'],
- ['js/33-rec-moves.js',619,'rec','8c The rec deck\'s moves (animation)','Rec engineer'],
- ['js/34-ui-main-loop.js',432,'page','11 Interaction and the on-screen panels, 12 the main loop','HUD seat'],
+ ['js/s01-setup-materials.js',279,'look','The file map, 1 Setup (renderer, seeded random), 2 Textures, 3 Materials','Performance engineer'],
+ ['js/s04-deck-kit.js',2537,'deck','4 the ship state, 4a the current deck and hull, 4b the shared art kit (furniture builders, room contents, room templates)','Deck architect'],
+ ['js/s04c-deck-build.js',507,'deck','4c Build and unload a deck','Deck architect'],
+ ['js/s04d-utility-kit.js',346,'deck','4d Deck definitions start: the utility rooms kit','Deck architect'],
+ ['js/s04d-deck4-quarters.js',451,'deck','Deck 4: Quarters','Deck architect'],
+ ['js/s04d-deck5-operations.js',568,'deck','Deck 5: Operations','Deck architect'],
+ ['js/s04d-deck3-commons.js',556,'deck','Deck 3: Commons','Deck architect'],
+ ['js/s04d-deck2-command.js',1075,'deck','Deck 2: Command and Science, with its kit','Deck architect'],
+ ['js/s04d-deck6-engineering.js',379,'deck','Deck 6: Engineering','Deck architect'],
+ ['js/s04d-deck1-bridge.js',225,'deck','Deck 1: Bridge','Deck architect'],
+ ['js/s04d-places-all-decks.js',876,'deck','Places and small kit added later for every deck: big gatherings, the Tern, keepsakes, wall kit, deliveries, dressing (used by many seats)','Deck architect (changes agreed with the seat that uses the place)'],
+ ['js/s04e-rec-deck.js',715,'rec','4e The rec deck','Rec engineer'],
+ ['js/s05-lighting.js',46,'look','5 Lighting, day and night','Performance engineer'],
+ ['js/s13-time-save.js',307,'crew','13 Ship time and saving','Sim engineer (save size: player engineer)'],
+ ['js/s14-schedules.js',1621,'crew','14 Schedules: the crew\'s days','Sim engineer'],
+ ['js/s19-device.js',1340,'you','19 Your device and its apps','Device engineer'],
+ ['js/s15-player-needs.js',2158,'you','15 Your needs, activities and the device\'s player side','Player engineer'],
+ ['js/s15b-interactions.js',740,'you','15b Using what the crew use, the job board, the goal pointer','Interactions engineer'],
+ ['js/s15r-rec-activities.js',186,'rec','15r The rec deck\'s activities','Rec engineer'],
+ ['js/s16-galley.js',1024,'ship','16 Galley and food','Galley engineer'],
+ ['js/s17-machines-jobs.js',2343,'ship','17 Machines, wear, jobs and supplies','Systems engineer'],
+ ['js/s22-lines-engine-1.js',23,'words','22 Lines: the start of the dialogue engine','Dialogue engineer'],
+ ['content/s22-words.gen.js',14707,'gen','The crew\'s words, meetings and traditions, made by content_gen.py from content/ (never hand-edited)','Writers, through content/ only'],
+ ['js/s22-lines-engine-2.js',410,'words','22 Lines: the rest of the dialogue engine','Dialogue engineer'],
+ ['js/s18-events.js',2197,'social','18 Ship events and traditions','Traditions engineer'],
+ ['js/s20-social.js',3165,'social','20 Social life: friendships, news, favours','Social engineer'],
+ ['js/s21-arrival-clothes.js',1306,'you','21 The arrival, 21b Clothes and laundry','Onboarding engineer'],
+ ['js/s23-tiles-lightdisc.js',1171,'rec','23 Tiles, 23b Lightdisc','Games engineer (tiles, lightdisc)'],
+ ['js/s24-work.js',2197,'work','24 Work: the career core, and mechanics 24m tool upkeep, 24n logbook, 24g scanner, 24i tracing, 24j workshop, 24t off shift, 24s lift roof','Works career engineer (mechanics: their seats)'],
+ ['js/s24k-cases.js',2343,'work','24k Cases: the head-scratchers','Puzzles seat H'],
+ ['js/s06-camera-grid.js',181,'look','6 Camera, 7 Grid and pathfinding','Performance engineer'],
+ ['js/s08-characters-crowd.js',1576,'look','8 Character kit, 8b Crowd','Performance engineer'],
+ ['js/s09-crew-data.js',223,'crew','9 Crew data, with the roster made by the roster generator','Crew designer'],
+ ['js/s10-walkers.js',710,'crew','10 Walkers: the crew moving on the deck','Sim engineer'],
+ ['js/s08c-rec-moves.js',619,'rec','8c The rec deck\'s moves (animation)','Rec engineer'],
+ ['js/s11-ui-main-loop.js',432,'page','11 Interaction and the on-screen panels, 12 the main loop','HUD seat'],
  ['page/tail.html',4,'page','The closing lines of the code and page','Build master'],
 ];
 const C = {page:['#7aa7d8','Page and on-screen panels'],look:['#9a86c9','Drawing: setup, lights, camera, people'],deck:['#4cc3b5','Decks'],rec:['#58b0d6','Rec deck'],crew:['#8fd9b0','Crew life'],you:['#e0a96d','You: needs, device, arrival'],ship:['#c98a6a','Ship: galley, machines'],words:['#d9cf8f','Dialogue engine'],gen:['#e9c46a','Generated words'],social:['#e07a9a','Social and traditions'],work:['#b7c46a','Work and cases']};
@@ -215,7 +224,7 @@ P.forEach((p, i) => {
   tb.appendChild(r);
 });
 const tr = document.createElement('tr');
-tr.innerHTML = '<td></td><td><b>Total</b></td><td class="n"><b>' + total.toLocaleString() + '</b></td><td>= every line of 0.64.0</td><td></td>';
+tr.innerHTML = '<td></td><td><b>Total</b></td><td class="n"><b>' + total.toLocaleString() + '</b></td><td>= every line of 0.64.2</td><td></td>';
 tb.appendChild(tr);
 document.getElementById('legend').innerHTML = Object.values(C).map(c => '<span><i style="background:' + c[0] + '"></i>' + c[1] + '</span>').join('');
 </script>
