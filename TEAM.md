@@ -213,3 +213,5 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 **~16:12-16:47 UTC: every seat stopped on the 5-hour usage limit ("You've hit your session limit · resets 4:40pm UTC").** Resumed at 16:48 on the user's "Resume": PA, PB, PE, DB1, DR1 each told to push WIP first, then carry on. Lesson: 6-7 seats at once use up the 5-hour allowance in about 2.5 h.
 
 **~17:55 UTC:** DB1 stopped at its memory line after #29 (handover plans/handover-patch-e2.md on claude/devmode 375827b). PE (half of batch E done incl. the ladder, ab685bb) takes #26 First Light Cocoa. User decision: weekly Captain's address on Fridays (off work 15:30, address 16:00, dinner 17:00, first in week one; dialogue explaining short Fridays); PP1 plans it. Lead memory 52%.
+
+**~18:15 UTC: LEAD HANDOVER.** Lead 20 handed over at 56% memory (note: plans/handover-lead20.md, final section, a12910a). **Lead 21: session_01KYPEbF745ZQ9g9kr4XJgre, branch claude/lead-21.** All working seats (PA, PB, PE, PP1, DR1, BM11) told to report to lead 21. Lead 20's hourly check-in disabled; lead 20 idle.
