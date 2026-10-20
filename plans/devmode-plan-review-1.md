@@ -302,3 +302,10 @@ DB1's reasoning ("the next save would overwrite the kept save anyway") is the pr
 And in `devmodeUndo`, don't delete the Undo record before the reload: drop `localStorage.removeItem(DM_KEY.undo)`. A second Undo then goes back to the same moment, which is harmless. If DB1 wants it gone, set a `sessionStorage` flag before the reload and remove the record on the new page when the flag is there. devmodeLoad's "browser wouldn't store it" branch already lets go correctly, since nothing was written.
 
 Stop 1a's six hooks, final: 13 (`DEVMODE`, `SAVE_KEY`; `freezeSync`/`saveGame` ask `devmodeHold`), 21 (`INTRO_KEY`, `introWanted`), 20 (`careerOff` reads `devmodeExcused`), 15 (needs kept while held), 11 (`deckCrewFill` once). All are reviewed and proven no-ops with Dev off.
+
+## Final Stop 1a verdict (claude/devmode fa394b3, with c521577)
+
+**PASS.** The slow-reload fix is exactly the patch: the hold stays on through the reload, the 4 s note only says "still reloading", and `devmodeUndo` keeps its record until the new page drops it (a `sessionStorage` note). Also in: section 25's start-up line moved to the section's end (it ran before `DM_KEY` existed), and the two rooms with no way back are marked "(no way back)" (`DM_SHUT`, which devmode_check keeps true).
+- **slowreload.py:** with the reload held 6 s, the Undo **happened** and its record was used up. At 2 s the same.
+- **cadet_test** against integration: **ALL IDENTICAL**. **devmode_check: OK**, including its new "slow" part (Undo and Back to mark with a 6 s reload). names_check OK.
+- **savecmp / savecmp2:** the real storage is byte-identical to integration's in all five modes and with the arrived key. A `#dev` session leaves the real keys untouched.
