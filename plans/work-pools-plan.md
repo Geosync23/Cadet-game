@@ -64,3 +64,11 @@ Works 36, Watch 20, Survey 20, Bridge 10 (6 helm, 4 command), Infirmary 8, Galle
 4. About 120 talks (sizes above).
 5. Friend tier: what the job means, who they do it for, a proud moment, a habit it gave them, ending warm.
 6. Works talks treat you as a workmate.
+
+## Written (TW1, 2026-10-20)
+
+All nine pools are in `content/talkpack/work-<pool>.talk`: Works 36, Watch 20, Survey 20, Bridge 10, Infirmary 8,
+Galley 8, Comms 8, Garden 6, Store 4: **120 talks, 1,080 lines**, ids `work.<pool>.<slug>` (unique across the whole
+pack). Each file's header comment names who it skips and why (arcs, struggle themes, cadets, night or engine crews).
+Shape, lengths, banned words and British spelling checked by TW1's scratch checker; TR1 reviews next. The whole pack
+is now 280 talks, 2,556 lines.
