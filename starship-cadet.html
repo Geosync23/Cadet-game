@@ -2576,13 +2576,13 @@ const WALL_KIT = {
     const t = tex(200, 260, (c, w, h) => {
       c.fillStyle = '#0d1a1f'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 20px system-ui,sans-serif'; c.fillText('CSV WREN', 16, 30);
-      const rows = [['1', 'Bridge'], ['2', 'Command & Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
+      const rows = [['1', 'Bridge'], ['2', 'Officer\'s Quarters - Science'], ['3', 'Commons'], ['4', 'Quarters'], ['5', 'Operations'], ['6', 'Engineering']], dy = REC_DECK ? 27 : 32;
       if (REC_DECK) rows.splice(4, 0, ['R', 'Recreation']);   // 0.84.0 (rec engineer B): the rec deck's row, between 4 and 5
       rows.forEach(([n, name], k) => {
         const y = 62 + k * dy, here = n === deckLabel(deckDef.num);
         if (here) { c.fillStyle = 'rgba(95,214,198,.18)'; c.fillRect(8, y - (REC_DECK ? 19 : 21), w - 16, REC_DECK ? 25 : 29); }
         c.fillStyle = here ? '#5fd6c6' : '#e8c06a'; c.font = '700 17px system-ui,sans-serif'; c.fillText(n, 16, y);
-        c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y);
+        c.fillStyle = here ? '#e8f4f1' : '#a9c4bf'; c.font = '500 15px system-ui,sans-serif'; c.fillText(name, 38, y, ...(name.length > 20 ? [w - 46] : []));   // patch #25: Deck 2's long name squeezed to the sign
       });
       c.fillStyle = '#7fa9a3'; c.font = '500 12px system-ui,sans-serif'; c.fillText('You are on ' + (deckDef.num === 7 ? 'the Recreation Deck' : deckWord(deckDef.num)), 16, h - 12);
     });
@@ -4364,7 +4364,7 @@ DECKS[4] = {
     place('+', 'plant', .45, 9.55, 'w', { band: '#5fd6c6' });
     place('+', 'bench', 5.7, 3.0, 'e', { snug: true, it: IT('Bench', 'Officers wait here. They wait more upright than the juniors do.') });
     place('+', 'plant', 5.55, 9.55, 'e', { band: '#c45a3f' });
-    placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Quarters.') });
+    placeOnEdge('deckDirectory', 'v,24,8', 'w', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Quarters.') });
     // ---- utility rooms (Pillar 2, 0.30.2). Last in dress() and free of R(), so nothing above them changes ----
     // air scrubbers: two units on the port hull, a duct riser between them, the duct across the ceiling
     for (const [x, n] of [[.5, 1], [2.5, 2]]) place('s', 'utilScrubber', x, 1.0, 'n', { it: IT('Air scrubber ' + n, 'One of the two units that keep Deck 4\'s air clean. The filter drawer is at the front; the screen shows how full it is.') });
@@ -5310,7 +5310,7 @@ DECKS[3] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,20,9', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Commons.') });
+    placeOnEdge('deckDirectory', 'h,20,9', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Commons.') });
     placeOnEdge('notices', 'h,22,16', 'n', { it: IT('Notice board', 'The week\'s menu, a sign-up sheet for the gym rota, and a card that says CALL YOUR MOTHER in three different hands.') });
     // the ladder, behind glass below the car
     NO_FADE.add('Z');
@@ -6143,7 +6143,7 @@ Object.assign(WALL_KIT, {
   },
 });
 DECKS[2] = {
-  num: 2, name: 'Command & Science', seed: 20219,
+  num: 2, name: 'Officer\'s Quarters - Science', seed: 20219,   // patch #25: was 'Command & Science'
   blurb: 'Senior quarters, Survey labs, Watch office', arrive: 'Senior quarters out of the stern door, so keep it down. Science out of the bow door.',
   lift: [20, 11],                                  // car rows 9-11, trunks row 8 above it, ladder row 12: the same world spot as every deck
   map: [
@@ -6443,7 +6443,7 @@ DECKS[2] = {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw, text] of d.nameplates) placeOnEdge('brassPlate', key, tw, d2Plate(d.sealed[key], text));
     for (const [key, tw] of [['v,19,12', 'w'], ['v,21,12', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Command & Science, one below the bridge.') });
+    placeOnEdge('deckDirectory', 'v,17,10', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Officer\'s Quarters - Science, one below the bridge.') });
     // the spine behind glass: the trunks above the car, the ladder below it
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
@@ -6710,7 +6710,7 @@ DECKS[6] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,18,7', 'w'], ['v,20,7', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Engineering, the bottom of the line.') });
+    placeOnEdge('deckDirectory', 'v,16,8', 'e', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Engineering, the bottom of the line.') });
     // the foot of the spine: the trunks start behind glass above the car, the ladder ends behind glass below it
     for (const r of ['Y', 'Z', 'K', 'R']) NO_FADE.add(r);             // the locked rooms behind glass stay solid
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
@@ -7139,7 +7139,7 @@ DECKS[1] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,7,7', 'w'], ['v,9,7', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,8,2', 's', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Bridge, the top of the line.') });
+    placeOnEdge('deckDirectory', 'h,8,2', 's', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: Bridge, the top of the line.') });
     // the top of the spine: the trunks end behind glass above the car, the ladder behind glass below it
     for (const r of ['Y', 'Z', 'R']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Trunk head', x: 'The power and air trunks end here, in a trunk head with a brass plate: CSV WREN, TRUNK HEAD, DECK 1. Everything the bridge runs on comes up these.', see: true } });
@@ -8663,7 +8663,7 @@ DECKS[7] = {
     recMats();
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of [['v,19,10', 'w'], ['v,21,10', 'e']]) placeOnEdge('liftPanel', key, tw);
-    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Command & Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the Recreation Deck, between Quarters and Operations.') });
+    placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the Recreation Deck, between Quarters and Operations.') });
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
     place('Z', 'spineLadder', 1, .5, 'n', { it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });
@@ -49655,7 +49655,7 @@ function goToDeck(n, at) {
 
 // ---- the main lift: tap a lift door for the deck panel. A ride opens the doors, you step in, they close,
 // the view fades, the new deck is built behind the black, and the doors open on it. Timed by the game clock. ----
-const DECK_NAMES = { 1: 'Bridge', 2: 'Officers\' quarters and science',   /* 0.72.5 (playtest 2, item 18): was 'Command & Science' */ 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
+const DECK_NAMES = { 1: 'Bridge', 2: 'Officer\'s Quarters - Science',   /* 0.72.5 (playtest 2, item 18): was 'Command & Science'; patch #25: the user's capitals and dash, as written */ 3: 'Commons', 4: 'Quarters', 5: 'Operations', 6: 'Engineering', 7: 'Recreation' };
 const liftEl = document.getElementById('lift'), liftList = document.getElementById('liftList'), fadeEl = document.getElementById('fade');
 let ride = null, liftReturn = null;
 const inLift = () => roomAt(...player.here()) === '@';
