@@ -103,3 +103,31 @@ working. TW1 should, in one small commit:
 
 Taking them out of the file is its own reviewed step later, once the switch itself is retired (CLAUDE.md, "Cut things
 are parked, never deleted").
+
+---
+
+## Addendum: T4, the work-pool wiring (`claude/talk-wire` ebd69b6, section 22 and content_gen)
+
+**Verdict for T4: PASS WITH FIXES** (one fix in `talk_check.py`, before the pools are merged).
+
+Checked on ebd69b6 alone, and on a local merge of ebd69b6 with `claude/talk-pack` 7d88673 (all nine work files; not
+pushed anywhere):
+- **The reader:** `@talks work:<pool>` against the fixed list of nine, ids `work.<pool>.<slug>`, topic always `work`
+  (a `topic:` line is an error), `TALKS.work = { <pool>: [...] }`, ids unique across pool, own and work. Baked: 280
+  talks. `lines_check` PASS (0 errors). ✓
+- **`TALK_WORK_POOLS`** (one table: helm and command → bridge, the rest to themselves, guests none) and the work source
+  in `TALK_SOURCES`; **`talkPackOrder`** alternates the two `turns` sources per person (the one not had last with them
+  goes first, work first if neither). Played over 20 days at friend tier (my script): Volkov `work.works, pool.food,
+  work.works, pool.crew...`; Shah the same with `work.watch`; Janssen alternates until the Bridge talks he can have run
+  out, then the pool only; Pell has his four own talks first, then alternates; Saruth their own four, then small talk
+  only (no work, no pool). Exactly the user's decided order. ✓
+- **The phone:** with the work files in, all 2,520 card views fit at 390 × 844 (tallest 378 px, nothing clipped). ✓
+- **`check_fast` on the merged build:** QUICK CHECK OK in 395 s. ✓
+
+**W7 (should fix, TE1): `talk_check.py` crashes once the work files are baked.** Part (d) builds its condition table
+from pool and own talks only: `KeyError: 'work.bridge.status-lights'` (talk_check.py:131). Part (h) passed on ebd69b6
+because there were no work files yet. Build `cond` (and part (a)'s counts) from `pool + own + work`, and in (b) count
+work talks as work, not own (it prints "172 own" for 54 own + 118 work).
+
+**W8 (nit):** once W1 is fixed, "nothing left" must count the work source too (the fix as written,
+`TALK_SOURCES.some(...)`, already does, since the work source is in the list).
