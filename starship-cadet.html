@@ -14345,6 +14345,67 @@ function clockButtons(row, act, s) {                     // the screen's two hal
   else L.push(gap(), close());   // nothing to punch
   L.forEach(half);
 }
+// patch #24 (plans/patch-plan.html, decided: today's goods): when a storekeeper is at the counter (the crew store's
+// work:store place, Deck 3), their card has "Buy something" (section 20's chat card asks shopMenuButton). It opens a simple
+// menu: your credits, then every shelf's goods (STORE, by shelf) and the hobby supplies you don't have yet, at today's
+// prices; what you can't afford is greyed out ("3 more credits"). Choosing one puts it in your basket and runs the
+// counter's pay step (playerTap on the counter: you step up to the till and the storekeeper rings it up), so eating,
+// the locker, gifts and hobbies work as before. The shelves keep browse-and-pick. Off = identical; ?shopmenu.
+let SHOP_MENU_ON = URL_FLAGS.has('shopmenu');
+const shopMenuText = (k, d, n) => (typeof talkText === 'function' ? talkText('shop.menu.' + k, d) : d).split('{n}').join(n);
+function shopMenuClerk(p) {                              // p is serving at the counter now: the work:store place on this deck, settled there
+  if (!SHOP_MENU_ON || !p || typeof DECK_CREW === 'undefined') return false;
+  const a = DECK_CREW.find(x => x.p === p), pl = a && PLACE_OF.get(a.goalId);
+  return !!(pl && pl.type === 'work:store' && a.settled);
+}
+function shopMenuButton(p) { return shopMenuClerk(p) ? { id: 'shop-menu', label: shopMenuText('button', 'Buy something') } : null; }
+function shopMenuGoods() {                               // [[shelf, [item as storePick gives it]]]: today's goods by shelf, then hobby supplies
+  const out = ['snack', 'drink', 'comfort'].map(k => [k, STORE[k].map(([name, price, gain, gift]) => ({ kind: k, name, price, gain, gift: gift || null }))]);
+  if (typeof HOBBIES !== 'undefined') {
+    const h = ['draw', 'puzzle', 'knit'].filter(id => HOBBIES[id] && !hobbyHas(id)).map(id => { let name = null; try { name = careerText('hobby.store.' + id); } catch (e) { name = null; }
+      return { kind: 'hobby', name: (name || HOBBIES[id].prop).replace(/\s*·\s*\d+ credits?$/i, ''), price: HOBBIES[id].price, gain: 0, gift: null, hobby: id }; });   // the store's name without its price (the menu shows it)
+    if (h.length) out.push(['hobby', h]);
+  }
+  return out;
+}
+const shopMenuName = n => { const t = n.replace(/^an? /i, ''); return t[0].toUpperCase() + t.slice(1); };   // 'a bag of dried apple' -> 'Bag of dried apple'
+function shopMenuOpen(p) {
+  let el = document.getElementById('shopMenu');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'shopMenu'; el.className = 'devdlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Crew store');
+    el.style.maxHeight = '72vh'; el.style.overflowY = 'auto';
+    el.addEventListener('pointerdown', e => e.stopPropagation()); document.body.appendChild(el);
+    addEventListener('keydown', e => { if (e.key === 'Escape' && !el.hidden) el.hidden = true; });
+  }
+  const mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; }, cr = SHIP.player.credits;
+  el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
+  const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', shopMenuText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
+  el.append(x, mk('small', '', shopMenuText('title', 'CREW STORE') + ' · ' + p.name), mk('p', '', shopMenuText('credits', 'You have {n} credits.', cr)));
+  for (const [k, list] of shopMenuGoods()) {
+    el.appendChild(mk('small', '', shopMenuText(k, { snack: 'Snacks', drink: 'Drinks', comfort: 'Things for your locker', hobby: 'Hobby supplies' }[k]).toUpperCase()));
+    const row = mk('div', 'btns'); row.style.marginBottom = '10px';
+    for (const it of list) {
+      const short = it.price - cr, b = mk('button', 'act', shopMenuName(it.name) + ' · ' + it.price + (short > 0 ? ' (' + (short === 1 ? shopMenuText('short1', '1 more credit', 1) : shopMenuText('short', '{n} more credits', short)) + ')' : ''));
+      b.type = 'button'; b.style.flex = '1 1 100%'; b.style.textAlign = 'left';
+      if (short > 0) { b.disabled = true; b.style.opacity = '.45'; }
+      else b.onclick = e => { e.stopPropagation(); el.hidden = true; shopMenuBuy(p, it); };
+      row.appendChild(b);
+    }
+    el.appendChild(row);
+  }
+  try { x.focus(); } catch (e) { /* no focus */ }
+  return true;
+}
+function shopMenuBuy(p, item) {                          // into the basket, then the counter's own pay step
+  if (typeof chatClose === 'function') chatClose();
+  basket = { ...item };
+  const sp = placeSpot('3-store-1'), v = new THREE.Vector3();
+  const counter = ITEMS.filter(i => /^counter$/i.test(i.t) && i.hit).map(i => { i.hit.getWorldPosition(v); return [i, v.clone()]; })
+    .sort((m, n) => (sp ? Math.hypot(m[1].x - sp.x, m[1].z - sp.z) - Math.hypot(n[1].x - sp.x, n[1].z - sp.z) : 0))[0];
+  if (counter && playerTap(counter[0], counter[1].clone(), counter[1].clone())) return true;
+  actStart('pay', null, { title: 'Counter', after: p.name + ' rings it up.' });   // no counter in reach: pay where you stand
+  return true;
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -31346,6 +31407,26 @@ const LINES = JSON.parse([
   '{"text":"Try a hobby","id":"1967191"}]',
   ',"settle.talk":[',
   '{"text":"Talk a while with someone","id":"1wlo0t3"}]',
+  ',"shop.menu.button":[',
+  '{"text":"Buy something","id":"9qzszg"}]',
+  ',"shop.menu.close":[',
+  '{"text":"Close","id":"tt0oto"}]',
+  ',"shop.menu.comfort":[',
+  '{"text":"Things for your locker","id":"4tekcz"}]',
+  ',"shop.menu.credits":[',
+  '{"text":"You have {n} credits.","id":"lhbxf7"}]',
+  ',"shop.menu.drink":[',
+  '{"text":"Drinks","id":"1gaofjh"}]',
+  ',"shop.menu.hobby":[',
+  '{"text":"Hobby supplies","id":"x59233"}]',
+  ',"shop.menu.short":[',
+  '{"text":"{n} more credits","id":"u51415"}]',
+  ',"shop.menu.short1":[',
+  '{"text":"1 more credit","id":"1ehjfqk"}]',
+  ',"shop.menu.snack":[',
+  '{"text":"Snacks","id":"o67ah5"}]',
+  ',"shop.menu.title":[',
+  '{"text":"CREW STORE","id":"oocg62"}]',
   ',"sick.better":[',
   '{"text":"Colour\'s back in your face. Good.","id":"otazkn","tier":[1,4]},',
   '{"text":"Better? Glad. You looked half-mopped yesterday.","id":"57yh3f","tier":[1,4]},',
@@ -38112,6 +38193,7 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
+  if (!C.ask && !C.offer && !talking && SHOP_MENU_ON) { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
   if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
   const v = { who: p.name, role: rankCardRole(p), tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
@@ -38169,6 +38251,7 @@ function chatDo(id) {
   else if (id === 'talk-stop') talkEnd(C, 'stop');
   else if (id.startsWith('reply:')) talkAnswer(C, id.slice(6));
   else if (id === 'ask') { C.ask = true; chatShow(); }
+  else if (id === 'shop-menu') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }

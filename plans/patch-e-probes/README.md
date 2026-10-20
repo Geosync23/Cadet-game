@@ -5,3 +5,4 @@ After-probes for batch E's first half, on PP1's harness (`plans/patch-plan-probe
 - `sign25.py OUT`: Deck 2's directory sign and text (#25).
 - `c21after.py OUT`: the storekeeper's card with `?rankcard` (#21), and every distinct rank line.
 - `e6.py OUT` with `Q='&clockundo'`: the time clock (#6): a double tap on Clock in, Undo, the 5 s window, a double tap on an early Clock out (Cancel where it was), Undo after 17:00, walking away, a save in the window, a Dev-style clock jump in the window.
+- `e24.py OUT` with `Q='&shopmenu'`: the storekeeper at the counter at 15:00 (Orla), her card's Buy something, the menu with 5 credits (greyed lines), buying the dried apple through the counter's pay step, and no button on someone else's card (#24).
