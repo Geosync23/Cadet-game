@@ -51,6 +51,7 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - "Shown" is kept in the save as the flag `firstlight.shown`.
 - flcBusy runs from the invite until the tradition ends, unless declined (`e.to` is minute of day, correct).
 - cadet_test cf45e2a→b3fed46 ALL IDENTICAL.
+- PE's intro_check (FLC_ON + MUG_ON, after the fixes): no FAIL in parts 1-11 and 13. The run stopped at its 2-hour limit inside part 12; the timeouts were slowness, not a hang.
 
 ## PB batch D: claude/patch-b 2e517ff (#7, #9, #10, #8). PASS
 
