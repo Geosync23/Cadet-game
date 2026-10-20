@@ -268,3 +268,37 @@ A jump that ends before 12:30 leaves you late but able to clock in, as in the ga
 - **Mark** goes through `devmodeWrite` (space check) and keeps the arrived key too. **Back to mark** keeps an Undo, then reloads through `devmodeLoad`. The real keys are only ever read.
 - **Nit: two rooms you can't walk out of.** `locked.py` took me to every room of every deck. All rooms except two have a walking way back to the lift: the **Probe bay (Deck 2, P)** and the **Bay door gear (Deck 5, d**, the hidden door gear already on the backlog). devmode_check lists the same two. Take me to works from anywhere, so it's never a dead end, but mark them in the room list ("no way out on foot: use Take me to").
 - Still open from round 2 (in DB1's fixes commit): the excuse rule, `queueOut` in `devmodeSettle`, and the reload safety. devmode_check's clock part expects `excused [1, 2, 3, 4, 5, 8]`; with the patch it becomes `[8]` (Days 1-5 are in the grace week), so the check changes with the fix.
+
+## Final check for Stop 1a: DB1's fixes (claude/devmode 305b572 + 0c33f5a)
+
+**PASS for merging into claude/integration, with one fix to make before the user gets the Dev link.** With Dev off the game is proven unchanged, and every round 1, round 2 and D4 item is in. DB1's 4-second safety loses an Undo when the reload is merely slow, which on a phone over the Claude app is likely.
+
+Re-run on 305b572:
+- **cadet_test** against integration: **ALL IDENTICAL** (renderer noise only). **devmode_check: OK**, now with the arrived-key and short-hop tests, excused `[8, 9]`. names_check OK.
+- **savecmp / savecmp2:** the real storage is byte-identical to integration's with no switch, `#debug`, `?nosave`, `#nosave.dev`, `#debug.nosave` and the arrived key. A `#dev` session leaves the real keys untouched.
+- **excuse.py:** Day 2 08:00→09:30, Day 9 08:00→10:00 and Day 9 09:30→09:40 now excuse **nothing**, and you can clock in after each, as in the game. The rule is exactly my patch.
+- `queueOut(false)` in `devmodeSettle`, the `#dev-…` parse, and 21's comment (0c33f5a) are all in. owners.md and map.md are updated.
+
+**Should fix before the user's Dev link: the 4 s safety can undo an Undo.** `devmodeReload` lets go of the hold after 4 s and calls `saveGame()`. But a reload that's only slow keeps the old page running until the new page arrives. So the old page writes its current game over the kept save, and the new page then loads that. `devmodeUndo` has also already deleted the Undo record. Measured (`slowreload.py`: Dev on, a +3 h jump, then Undo, with the page served over http and its reload held back):
+
+| Reload takes | After the reload | Undo record |
+|---|---|---|
+| 2 s | Day 1 06:00: **Undo happened** | gone (used) |
+| 6 s | Day 1 09:00: **Undo didn't happen**, with no message (the reload wiped the panel) | **gone: it can't be tried again** |
+
+The same goes for Back to mark and Copy my real game: they silently don't happen, though their records survive. Clear: Mark and Undo are cleared, and the Dev save is written back.
+
+DB1's reasoning ("the next save would overwrite the kept save anyway") is the problem: the next save only happens because the hold lets go. Keep the hold until the new page takes over. Then the kept save stays in place however long the reload takes. If the tab is closed, the `pagehide` save is held too, so the next opening loads the kept save and the action happened. Patch:
+```js
+-function devmodeReload(why) {                             // reload; if the browser hasn't after 4 s, carry on as you were and say so
+-  devmodeSay(why + ': reloading…'); location.reload();
+-  setTimeout(() => { DM_HOLD = false; saveGame(); devmodeSay('The page didn\'t reload, so ' + why + ' didn\'t happen. Try again.'); }, 4000);
+-}
++function devmodeReload(why) {                             // reload, staying held (frozen, unsaved) until the new page takes over: the kept save stays in place
++  devmodeSay(why + ': reloading…'); location.reload();
++  setTimeout(() => devmodeSay(why + ': still reloading. If the page doesn\'t come back, reload it yourself: nothing is lost.'), 4000);
++}
+```
+And in `devmodeUndo`, don't delete the Undo record before the reload: drop `localStorage.removeItem(DM_KEY.undo)`. A second Undo then goes back to the same moment, which is harmless. If DB1 wants it gone, set a `sessionStorage` flag before the reload and remove the record on the new page when the flag is there. devmodeLoad's "browser wouldn't store it" branch already lets go correctly, since nothing was written.
+
+Stop 1a's six hooks, final: 13 (`DEVMODE`, `SAVE_KEY`; `freezeSync`/`saveGame` ask `devmodeHold`), 21 (`INTRO_KEY`, `introWanted`), 20 (`careerOff` reads `devmodeExcused`), 15 (needs kept while held), 11 (`deckCrewFill` once). All are reviewed and proven no-ops with Dev off.
