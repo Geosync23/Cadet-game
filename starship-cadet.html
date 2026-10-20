@@ -4598,7 +4598,7 @@ DECKS[5] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
-    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) placeOnEdge('liftPanel', key, tw);
+    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) if (!(LADDER_ON && key === LADDER.d5)) placeOnEdge('liftPanel', key, tw);   // patch #5: the east wall is the ladder hatch while LADDER_ON
 
     // Works bay: the job board and tool wall on the hull side, two benches, parts racks by the tea corner, kit lockers by the lobby doors
     placeWall('w', 'jobBoard', 'n', 5.6, { hitW: 2.6, cards: [
@@ -6569,7 +6569,7 @@ DECKS[2] = {
     for (const x of [.8, 2.0, 3.2]) place('P', 'launchTube', x, 7.6, 's');
     // ---- the sensor array (locked, seen through the window at the end of the corridor) ----
     NO_FADE.add('A');
-    place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once. Tier 3, when the array opens.') });
+    place('A', 'sensorDish', 3.2, 10.5, 'n', { turn: Math.PI / 2, light: true, it: SEE('Sensor dish', 'The main sensor dish, turning slowly under blue light, listening to the whole frontier at once.' + (LADDER_ON ? '' : ' Tier 3, when the array opens.')) });   // patch #5: the array is open while LADDER_ON
     place('A', 'signalRacks', 1.9, 3.8, 'n', { n: 3, it: SEE('Signal processors', 'Racks of them, blinking. Everything the dish hears goes through here before anyone on the bridge sees it.') });
     place('A', 'signalRacks', 1.9, 16.2, 's', { n: 3 });
     place('A', 'mastBase', 5.4, 10.5, 'n', { it: SEE('Comms mast', 'The base of the comms mast, running up through the bridge to the outside. Every call home leaves the ship up this.') });
@@ -6734,7 +6734,7 @@ DECKS[6] = {
     for (const z of [1.2, 2.8]) place('K', 'chair', 3.4, z, 'w');
     placeWall('K', 'mimicPanel', 'n', 2.5, { hitW: 3.0, it: { t: 'Mimic panel', x: 'The whole ship\'s power on one board: the reactor, both junctions and a line up to every deck. Deck 3\'s line is amber; the galley ovens are drawing hard.', see: true } });
     // the reactor door at the end of the alcove: a radiation sign either side
-    for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. Tier 4, and only ever on a team job.') });
+    for (const [key, tw] of [['h,26,3', 's'], ['h,26,4', 'n']]) placeOnEdge('trefoil', key, tw, { it: IT('Radiation sign', 'Painted either side of the reactor\'s shielded door. ' + (LADDER_ON ? 'Sealed for safety: only ever on a team job.' : 'Tier 4, and only ever on a team job.')) });   // patch #5
     // the watch room (4 x 4, the overlook's south end): two armchairs and a tea table at the window onto the coils,
     // the kettle in the corner, a lamp, a panel heater nobody needs and a shelf of old engine logs. The door is on the lobby side.
     place('S', 'rug', 1.9, 2.0, 'n', { tex: rugLounge, w: 2.8, d: 3.0 });
