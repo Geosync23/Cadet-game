@@ -8,6 +8,10 @@ tagged out + the holds roping off the other route -> recShut().belays is 1 so re
 is empty with nobody on the wall -> queued forever). Review C for: a refusal instead of queueing when no belay can free
 up; a player already queued released with the refusal if the second fault lands mid-wait; wording ("the rec deck");
 REC_DECK=false identical; the new check case.
+Item D added (the user's ask): on phones the Tracked button (#trkBtn, placed by section 15b's trkPlace) moves under the
+needs strip's left end, lined up with its left edge, word kept; under the activity bar when one shows. Review D for: no
+overlap with the activity bar, heads-up/tip cards or the round buttons at 390 and 320 px; no jitter as the bar
+shows/hides; non-phone layout unchanged (cadet_test shots at 900 px should be 0 px different).
 
 ## 1030f4d (claude/rc-wip, WIP 0.64.1, vs 50d55ef): PASS WITH FIXES (pre-review of work in progress)
 
