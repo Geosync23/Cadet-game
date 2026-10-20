@@ -14,6 +14,12 @@ Needs, then Tracked (fixed, never moves), then the activity bar at the very bott
 overlap with the activity bar, heads-up/tip cards or the round buttons at 390 and 320 px; Tracked doesn't move at all as the bar
 shows/hides; the bar sits below Tracked; non-phone layout unchanged (cadet_test shots at 900 px should be 0 px different).
 
+## claude/ways-of-working 518d0fb (arc_check booth/calls exit codes): PASS. Step 2 as a whole: PASS
+
+The two lines exactly as asked; WW1 reports booth/calls OK exit 0 on 0.64.2 and exit 1 with a planted page error. On the
+row count: my 1036 counted only rows no longer in DEV_NOTES (identical rows that also stay in DEV_NOTES' other tables
+weren't counted); WW1's sorted diff of all 1046 '| ' lines matches. No open fixes.
+
 ## claude/ways-of-working 4bcbaa9 (docs only, DEV_NOTES' top paragraphs): PASS
 
 The facts check out: archive/starship-cadet-0.64.2-whole.html is there, claude/whole-file-0.64.2 is at c575a8e, the
