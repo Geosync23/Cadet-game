@@ -1,0 +1,7 @@
+name: sr1 permission probe (does nothing)
+on: workflow_dispatch
+jobs:
+  noop:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo probe
