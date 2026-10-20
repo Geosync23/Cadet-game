@@ -830,7 +830,7 @@ with sync_playwright() as pw:
     # the same twice, never a load, a setting only from Day 4, and over many hours every allowed cause comes up, the
     # commonest most. Then the real crew with a scripted steady player (from Day 2, on each shift hour with nothing in
     # hand, takes the top job on the board and finishes it in its minutes): of the machine jobs you do, 40-60% are
-    # repairs, 3-6 jobs a shift day, ship health 85+, nothing broken, every repair from Day 2 has a cause, and Days 0-1
+    # repairs, 3-8 jobs a shift day (3-6 before the patch's #16), ship health 85+, nothing broken, every repair from Day 2 has a cause, and Days 0-1
     # have none
     if g.ev("typeof FAULT_CAUSES === 'object'"):
         fc = g.ev("""(() => {
@@ -897,7 +897,7 @@ with sync_playwright() as pw:
         print(f"    lowest ship health {st['minHealth']:.1f}, worst state {MSTATES[st['worst']] if 'MSTATES' in dir() else st['worst']}, repairs from Day 2 without a cause {st['noCause'][:4]}, causes on Days 0-1 {st['early'][:4]}, the same twice {st['sig'] == st2['sig']}")
         print('    causes seen: ' + ' '.join(f"{k}:{v}" for k, v in sorted(st['causes'].items())))
         if not (40 <= share <= 60): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does (want 40-60%)")
-        if not (3 <= per <= 6): fail(f"a steady player does {per:.1f} jobs a shift day (want 3-6)")
+        if not (3 <= per <= 8): fail(f"a steady player does {per:.1f} jobs a shift day (want 3-8)")   # 3-6 until the patch's #16 (your jobs at JOB_PACE .72: about a third more where the board has work)
         if st['minHealth'] < 85 or st['worst'] >= 4: fail('ship health or a broken machine with the steady player')
         if st['sig'] != st2['sig']: print('    first run only', sorted(set(json.loads(st['sig'])) - set(json.loads(st2['sig'])))[:6], 'second only', sorted(set(json.loads(st2['sig'])) - set(json.loads(st['sig'])))[:6])
         if st['noCause'] or st['early'] or st['sig'] != st2['sig']: fail('causes missing, early or not the same twice')
