@@ -10071,7 +10071,7 @@ function schedBuild(p, d, occ, S) {
         for (let i = 0; i < pool.length; i++) { const q = pool[(off + i) % pool.length]; if (isFree(q.id, s, e)) { pl = q; s0 = s; e0 = e; break; } }
       }
     }
-    if (!pl || !capOk(a0, e0 + post)) return false;       // full, or a long wait: they go elsewhere (rest as before)
+    if (!pl || !capOk(a0 - C, e0 + post)) return false;   // full, or a long wait: they go elsewhere (rest as before). From the ride down: it's counted on the rec deck (RE20, 0.64.1: day 5 had 16 at 22:22)
     if (ride) ride.go(); else if (deck !== bedDeck) go(7); else { deck = 7; seg('commute', t + C, 'lift', null, { fromDeck: bedDeck }); }   // from their bunk: the ride alone (no wait by Deck 4's lift, so nobody else's day moves)
     const stop = (act, until, type, tag, anim) => {      // a short stop at a free place of that type, else standing about
       const q = type && free1(type, t, until); if (q) hold(q.id, t, until);
