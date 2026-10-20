@@ -17,7 +17,7 @@
 | GitHub check | `.github/workflows/quick-check.yml` | **DISABLED: `on: workflow_dispatch` only** (runs only if started by hand). Two commented `on:` blocks for the lead: A = shared branch `claude/integration` only, B = every claude/ branch. Validated as YAML. Pushing it triggers nothing. |
 | Owners | `plans/owners.md` | the user's rule, sections → seats (the split plan's owners), contracts by hand, SHIP's records, the generated list (187 names used by 4+ other sections). |
 | Map | `plans/map.md` | how to find things, file order vs section numbers, a topic → section table. |
-| Backlog | `plans/backlog.md` | 13 rows + fixed. **Item 3 (the double clock hold in the evenings) has no details anywhere I could read: ask lead 20.** |
+| Backlog | `plans/backlog.md` | 13 rows + fixed. Item 3 (the double clock hold) is recorded as unconfirmed, to reproduce (lead 20's wording); lead 20 is asking the user. |
 | Drafts (not applied) | `plans/step2-drafts/` | README (order), claude-md.md, dev-notes-rules.md, build-table-move.md, slots.md + add_slots.py (tried on a scratch copy: 17 slots, names_check OK; merge test: clean with slots, clash without), whole-file.md, start-prompts.md. |
 
 ## Proof of the exit-code fixes
@@ -52,6 +52,5 @@ node names_check.js; bash check_fast.sh; python3 tools/section.py --diff HEAD~3 
 
 ## Open questions (for the lead)
 
-- The double clock hold in the evenings (backlog 3): what was seen?
 - The shared branch's name: the split plan said `claude/integration`; the workflow's option A and the drafts use it.
 - Who applies the slots: the drafts say the build master (it's the shared file).
