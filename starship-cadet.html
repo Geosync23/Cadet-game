@@ -8083,6 +8083,9 @@ function dressShow(list) {
 }
 const dressingOn = () => [...DRESS.on.keys()];
 
+// ---- slot: Deck architect (section 4d). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Deck architect ----
+
 // =====================================================================
 // 4e. THE REC DECK (DECKS[7], shown as R; the rec deck architect, 0.80.x; plans/recdeck-plan.html v3)
 // Phase 1 (the user's rule): the deck and its animations for the player only. `playerOnly` keeps it out of the crew's
@@ -8797,6 +8800,9 @@ function recMats() {
   };
   PULSES.push({ m: RK.net, key: 'opacity', base: .14, amp: .16, w: 3.1, ph: 0 }, { m: RK.field, key: 'opacity', base: .03, amp: .04, w: 1.3, ph: 1 });   // the net shimmers, the side fields breathe
 }
+
+// ---- slot: Rec engineer (section 4e). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Rec engineer ----
 
 // =====================================================================
 // 5. LIGHTING
@@ -10772,6 +10778,9 @@ function dayReport(day) {
 // sleeping (sleepUntil) and other jumps: plan the days you skip into, so arriving anywhere is instant
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
+// ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Sim engineer ----
+
 // =====================================================================
 // 19. DEVICE
 // Your personal device (Pillar 3, the device engineer, 0.35.x): the game's one
@@ -12111,6 +12120,9 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
     return { text: w.charAt(0).toUpperCase() + w.slice(1), sub: 'From ' + (k.name || k.from || 'a friend') + (Number.isFinite(k.day) ? ', Day ' + k.day : '') }; }) });
   return { title: 'Wallet', blocks: B };
 } });
+
+// ---- slot: Device engineer (section 19). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Device engineer ----
 
 // =====================================================================
 // 15. PLAYER NEEDS & DEVICE
@@ -14270,6 +14282,9 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 
 // ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
+// ---- slot: Player engineer (section 15). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Player engineer ----
+
 // =====================================================================
 // 15b. PLAYER INTERACTIONS
 // More things to use, the job board and a pointer to where you're going (the interactions engineer).
@@ -15009,6 +15024,9 @@ function turnInShow(j, a) {
   for (const c of list) { const b = document.createElement('b'); b.textContent = c.text; if (c.rep) b.className = 'rep'; row.appendChild(b); }
   x.appendChild(row); return list;
 }
+
+// ---- slot: Interactions engineer (section 15b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Interactions engineer ----
 
 // =====================================================================
 // 15r. THE REC DECK'S ACTIVITIES (the rec deck architect, 0.80.6-0.80.7; plans/recdeck-plan.html section 9 "For you: tap and do")
@@ -16219,6 +16237,9 @@ function galleyTick() {
   galleyAdvance(shipNow()); galleyShow();
   if (GALLEY_JOINED.has('player') && typeof ACT !== 'undefined' && !(ACT && ACT.kind === 'queue')) galleyLeave('player');   // walked away from the line
 }
+
+// ---- slot: Galley engineer (section 16). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Galley engineer ----
 
 // =====================================================================
 // 17. MACHINES & JOBS
@@ -18562,6 +18583,9 @@ function machinesLoad(s) {
 }
 machinesLoad(SAVED);
 jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
+
+// ---- slot: Systems engineer (section 17). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Systems engineer ----
 
 // =====================================================================
 // 22. LINES
@@ -33703,6 +33727,9 @@ function linesLegacy(kind) {
   return o;
 }
 
+// ---- slot: Dialogue engineer (section 22). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Dialogue engineer ----
+
 // =====================================================================
 // 18. SHIP EVENTS
 // The ship's small traditions: quiz night, the music jam, observatory night, birthdays, the Sunday swap meet...
@@ -35899,6 +35926,9 @@ function upcomingTraditions(fromMin, toMin) {
 
 var EV_READY = true;                                     // section 14's hooks wait for this (it's read before section 18 runs)
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
+
+// ---- slot: Traditions engineer (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Traditions engineer ----
 
 // =====================================================================
 // 20. SOCIAL
@@ -39065,6 +39095,9 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
 }
 // ---- end of 20c ----
 
+// ---- slot: Social engineer (section 20c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Social engineer ----
+
 // =====================================================================
 // 21. ARRIVAL
 // The arrival and the first week (plans/pillar4-plan.md, Part 1; the social side is plans/social-deep-plan.md,
@@ -40371,6 +40404,9 @@ function clothesRemark(C) {
   if (text) bubbleSay(a.h, text, 4);
 }
 
+// ---- slot: Onboarding engineer (section 21b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Onboarding engineer ----
+
 // =====================================================================
 // 23. TILES
 // The Tiles game (plans/tiles-plan.html, approved by the user 2026-10-17): a two-player tile game you play against
@@ -41541,6 +41577,9 @@ function discEvent(e) {
   }
   if (e.k === 'over') { discOver(); discBoard(); discResult(); }
 }
+
+// ---- slot: Games engineer (section 23b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Games engineer ----
 
 // =====================================================================
 // 24. WORK
@@ -44632,6 +44671,9 @@ function p2ShowFirst(C, c, j, now) {                     // its witnesses over [
   return false;
 }
 
+// ---- slot: Puzzles seat (section 24k). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Puzzles seat ----
+
 // ---------------------------------------------------------------------
 // 24e TUNING (M5, seat M2, 0.51.x; plans/mechanics/m5-tuning.html). Some faults are a machine out of adjustment: an
 // oven running hot, a light relay chattering, a cart dock charging slow. Section 17 (seat S) keeps the drift
@@ -46080,6 +46122,9 @@ function promoCerEscort(p, t) {                          // worksEscort's 24p pa
   return r && r.f && r.f.seek && !r.met && p.id === 'calder' && t < r.at + r.len ? { mode: 'lead', to: { deck: 1, room: 'O' } } : null;
 }
 WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('ceremony2')) promoPip(); });
+
+// ---- slot: Works career engineer (section 24p). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Works career engineer ----
 
 
 // =====================================================================
@@ -47838,6 +47883,9 @@ const CROWD_DEMO = (() => {
     },
   };
 })();
+
+// ---- slot: Performance engineer (section 8b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Performance engineer ----
 
 // =====================================================================
 // 9. CREW DATA
@@ -49702,6 +49750,9 @@ function updateRide(dt) {
 var LIFT_HOLD = null;
 function liftHold(on, until) { LIFT_HOLD = on ? { from: shipNow(), until: Number.isFinite(until) ? until : shipNow() + 60 } : LIFT_HOLD && liftHeld() ? { ...LIFT_HOLD, until: shipNow() } : LIFT_HOLD; return liftHeld(); }
 function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t = shipNow(); return t >= LIFT_HOLD.from && t < LIFT_HOLD.until; }
+
+// ---- slot: HUD seat (section 11). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: HUD seat ----
 
 // =====================================================================
 // 12. MAIN LOOP

@@ -13,6 +13,32 @@ Started by the ways-of-working engineer WW1 (2026-10-20). **Whoever moves code, 
 
 **The file's order is not the sections' number order.** Sections were added where they had to load (a section must come after what it reads at load). Today's order: page, 1, 2, 3, 4 (4a-4e), 5, **13, 14, 19, 15, 15b, 15r, 16, 17, 22, 18, 20, 20c, 21, 21b, 23, 23b, 24 (24a ... 24p)**, 6, 7, 8, 8b, 9, 10, 8c, 11, 12. A section heading is a column-0 line `// 19. DEVICE` or `// 24a ROUNDS`, between two `// ====` or `// ----` rule lines.
 
+## Each seat's slot (from step 2)
+
+One labelled, empty block per seat at the end of its main section, where that seat adds new top-level code (just above the end line), so two seats never add lines at the same spot. Find yours with `grep -n "slot: <seat>" starship-cadet.html`. Added with `tools/add_slots.py` (comment lines only; the game is unchanged).
+
+| Seat | At the end of section |
+|---|---|
+| Deck architect | 4d |
+| Rec engineer | 4e |
+| Sim engineer | 14 |
+| Device engineer | 19 |
+| Player engineer | 15 |
+| Interactions engineer | 15b |
+| Galley engineer | 16 |
+| Systems engineer | 17 |
+| Dialogue engineer | 22 |
+| Traditions engineer | 18 |
+| Social engineer | 20c |
+| Onboarding engineer | 21b |
+| Games engineer | 23b |
+| Puzzles seat | 24k |
+| Works career engineer | 24p |
+| Performance engineer | 8b |
+| HUD seat | 11 |
+
+No slot for the crew designer (section 9's roster is generated). A new feature (Dev mode, step 3) gets its own section and slot from its plan page; another slot for a seat: ask the lead.
+
 ## Where to look, by topic
 
 | You want to change ... | Section | Start with |
@@ -58,5 +84,5 @@ Started by the ways-of-working engineer WW1 (2026-10-20). **Whoever moves code, 
 
 - `content/`: the crew's words (the writers' guide is `content/README.md`); `content_gen.py` bakes them into section 22.
 - Checks: one `*_check.py` per area (see CLAUDE.md "Files" and DEV_NOTES "Testing"), `cadet_test.py` (two builds compared), `names_check.js` (names, keys, registrations, "Deck 7"), `check_fast.sh` (the quick check), `.github/workflows/quick-check.yml` (the GitHub check, off until the lead switches it on).
-- `tools/`: `section.py`, `shared.js` (this map's helpers); `resolve.py`, `fixrate.py` (old build-number clash helpers); `kitdup.py`, probes.
+- `tools/`: `section.py`, `shared.js` (this map's helpers), `add_slots.py` (the seats' slots); `resolve.py`, `fixrate.py` (old build-number clash helpers); `kitdup.py`, probes.
 - `plans/`: deck plans, pillar plans, `handover-<role>.md` notes, `owners.md`, `map.md`, `backlog.md`, `roadmap-after-recdeck.md`.

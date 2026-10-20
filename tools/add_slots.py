@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """add_slots.py: put one labelled, empty append slot per seat into the game file (comment lines only).
 
-    python3 plans/step2-drafts/add_slots.py [GAME.html] [OUT.html]     default: starship-cadet.html in place
+    python3 tools/add_slots.py [GAME.html] [OUT.html]     default: starship-cadet.html in place
 
 Each slot goes at the end of its seat's main section, just before the next section's heading (the blank line and the
 "// =====" rule above it stay where they are):
@@ -22,7 +22,7 @@ removing exactly the added lines gives back the original file, byte for byte.
 """
 import json, os, subprocess, sys
 
-ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # (seat, its main section, the heading of the section that follows it in the file)
 SLOTS = [
     ('Deck architect', '4d', '// 4e. '),
