@@ -1,0 +1,7 @@
+# Patch E probes (patch builder PE, 2026-10-20)
+
+After-probes for batch E's first half, on PP1's harness (`plans/patch-plan-probes/pp.py`). Run from the repo with `CADET_WORK` set; the first argument is a folder for screenshots. Each turns its feature's switch on with its URL flag.
+
+- `sign25.py OUT`: Deck 2's directory sign and text (#25).
+- `c21after.py OUT`: the storekeeper's card with `?rankcard` (#21), and every distinct rank line.
+- `e6.py OUT` with `Q='&clockundo'`: the time clock (#6): a double tap on Clock in, Undo, the 5 s window, a double tap on an early Clock out (Cancel where it was), Undo after 17:00, walking away, a save in the window, a Dev-style clock jump in the window.

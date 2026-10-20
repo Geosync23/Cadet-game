@@ -14293,6 +14293,58 @@ function rankCardWord(p) {
   return typeof talkText === 'function' ? talkText('card.rank.' + p.rank, RANK_CARD_WORDS[p.rank]) : RANK_CARD_WORDS[p.rank];
 }
 function rankCardRole(p) { const w = rankCardWord(p); return w ? w + (p.role ? ' · ' + p.role : '') : p && p.role; }
+// patch #6 (plans/patch-plan.html, the user chose "both"): the time clock. Every punch: taps are ignored for half a second
+// after the screen changes, and the next button is never where the last one was (two fixed halves, left and right). An
+// early clock-out (before 17:00) is confirmed, Cancel where "Clock out" was. Clocking in, and out at or after 17:00, get
+// Undo on the other side for 5 real seconds, or until you walk away, close the screen, change deck or ship time jumps
+// (Dev mode). The punch counts at once (careerClock); only its side effects (the remark, the clock note) wait, held in
+// CLOCK_UNDO.fx. Undo puts the kept copy of the clock record back. A save settles the window first. Off = identical; ?clockundo.
+let CLOCK_UNDO_ON = URL_FLAGS.has('clockundo');
+const CLOCK_UNDO_S = 5, CLOCK_TAP_GUARD = 500, CLOCK_WALK = 1.5;   // real seconds of Undo; ms of the tap guard; tiles you may step away
+let CLOCK_UNDO = null, CLOCK_DRAWN = -1e9;               // the open window { what, t, d, keep, fx, said, at, deck, x, z }; the screen's last draw
+function clockPunch(early) {                             // a punch from the screen -> careerClock's result; held unless it's an early clock-out
+  const C = careerInit(), d = SHIP.time.day, keep = { ci: C.ci, co: C.co, on: C.on, log: SHIP.player.clockLog[d], sent: flag('shiftSent') };
+  clockUndoSettle(false);
+  let fx = null; const r = careerClock(shipNow(), true, early ? null : f => { fx = f; });
+  if (r && fx) { const p = player.obj.position; CLOCK_UNDO = { what: r, t: shipNow(), d, keep, fx, at: performance.now(), deck: deckDef.num, x: p.x, z: p.z }; requestAnimationFrame(clockUndoFrame); }
+  return r;
+}
+function clockUndo() {                                   // Undo: the kept copy back; the side effects never happen
+  const u = CLOCK_UNDO; if (!u) return null; CLOCK_UNDO = null;
+  const C = careerInit(); C.ci = u.keep.ci; C.co = u.keep.co; if (flag('shiftSent') === u.keep.sent) C.on = u.keep.on;   // section 14 started the shift in the window (its shiftStart note is out): that stands
+  if (u.keep.log === undefined) delete SHIP.player.clockLog[u.d]; else SHIP.player.clockLog[u.d] = u.keep.log;
+  return u.what;
+}
+function clockUndoSettle(redraw) {                       // the window ends: the punch's side effects run now
+  const u = CLOCK_UNDO; if (!u) return; CLOCK_UNDO = null;
+  try { u.fx(); } catch (e) { /* the remark or a listener's problem; the punch stands */ }
+  const el = document.getElementById('clockScreen'); if (redraw && el && !el.hidden) clockScreen(u.said, false, 'settled-' + u.what);
+}
+function clockUndoFrame() {
+  const u = CLOCK_UNDO; if (!u) return;
+  const el = document.getElementById('clockScreen'), p = player.obj.position;
+  if (!el || el.hidden || performance.now() - u.at > CLOCK_UNDO_S * 1000 || deckDef.num !== u.deck || Math.hypot(p.x - u.x, p.z - u.z) > CLOCK_WALK
+      || Math.abs(shipNow() - u.t) > 5 || SHIP.time.day !== u.d) clockUndoSettle(true);
+  else requestAnimationFrame(clockUndoFrame);
+}
+SAVE_EXTRA.unshift(() => clockUndoSettle(false));       // a save ends the window first, so the note and the remark aren't lost
+function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
+  const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
+  const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
+  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= CAREER.clockOut;
+  const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
+    : r === 'out' ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
+  const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
+  const undo = () => { const r = clockUndo(); clockScreen(r ? csText('undone.' + r, r === 'in' ? 'Undone. You\'re not clocked in.' : 'Undone. Still on shift.') : null, false, r && 'undone-' + r); };
+  const L = [], open = s.on && !s.out && !(s.inn ? false : ends || m < CAREER.clockIn);
+  if (u && !s.ask) { if (u.what === 'in') L.push(gap(), act(csText('undo', 'Undo'), undo)); else L.push(act(csText('undo', 'Undo'), undo), gap()); }   // Undo on the other side from the punch
+  else if (s.ask) L.push(act(csText('earlyyes', 'Clock out early'), punch(true)), act(csText('cancel', 'Cancel'), () => clockScreen()));   // Cancel where "Clock out" was
+  else if (s.after === 'settled-in') L.push(close(), gap());   // the window just ended: Close on the left, where Undo wasn't
+  else if (open && !s.inn) L.push(act(csText('in', 'Clock in'), punch(false)), s.after === 'undone-in' ? gap() : close());
+  else if (open) L.push(s.after === 'undone-out' ? gap() : close(), act(csText('out', 'Clock out'), ends ? punch(false) : () => clockScreen(null, true)));   // before 17:00 it asks first
+  else L.push(gap(), close());   // nothing to punch
+  L.forEach(half);
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -28256,6 +28308,8 @@ const LINES = JSON.parse([
   '{"text":"Save me a seat at dinner if you get there first.","id":"u89fbu","dept":"works","tier":[3,4]},',
   '{"text":"Rough one. Tomorrow\'s a fresh board.","id":"s6rni1","dept":"works","mood":"low"},',
   '{"text":"You fixed it today. I heard it start up. Lovely sound.","id":"1qd6a1y","tone":"warm","cue":"repair.you@dept","dept":"works"}]',
+  ',"clock.screen.cancel":[',
+  '{"text":"Cancel","id":"163j2u6"}]',
   ',"clock.screen.close":[',
   '{"text":"Close","id":"1kmpzga"}]',
   ',"clock.screen.day":[',
@@ -28268,6 +28322,10 @@ const LINES = JSON.parse([
   '{"text":"Shift done. See you tomorrow.","id":"1fmaekr"}]',
   ',"clock.screen.early":[',
   '{"text":"Before 17:00. Clock out early?","id":"16pe1pa"}]',
+  ',"clock.screen.earlyask":[',
+  '{"text":"Clock out early? It\'ll be noted.","id":"skklk3"}]',
+  ',"clock.screen.earlyyes":[',
+  '{"text":"Clock out early","id":"1j69f55"}]',
   ',"clock.screen.hours":[',
   '{"text":"YOUR HOURS","id":"hqtumr"}]',
   ',"clock.screen.in":[',
@@ -28294,6 +28352,12 @@ const LINES = JSON.parse([
   '{"text":"WORKS TIME CLOCK","id":"1xjlfe5"}]',
   ',"clock.screen.today":[',
   '{"text":"Today: {hours} h","id":"11a3kkj"}]',
+  ',"clock.screen.undo":[',
+  '{"text":"Undo","id":"vo5aa2"}]',
+  ',"clock.screen.undone.in":[',
+  '{"text":"Undone. You\'re not clocked in.","id":"bndb1r"}]',
+  ',"clock.screen.undone.out":[',
+  '{"text":"Undone. Still on shift.","id":"c9983z"}]',
   ',"clock.screen.week":[',
   '{"text":"This week: {hours} h","id":"1vao3qb"}]',
   ',"clock.screen.weekend":[',
@@ -37045,7 +37109,8 @@ function careerAtWork() {
 const careerClockedIn = (d = SHIP.time.day) => !!SHIP.career && SHIP.career.ci > 0 && Math.floor(SHIP.career.ci / 1440) + 1 === d;
 const careerClockedOut = (d = SHIP.time.day) => careerClockedIn(d) && SHIP.career.co > SHIP.career.ci;
 const careerFullDay = d => d <= CAREER.grace || !careerClockedIn(d) || !careerClockedOut(d) || SHIP.career.co % 1440 >= CAREER.earlyOut;   // not a short shift (no clock record: the first week, or on paper)
-function careerClock(now = shipNow(), quiet) {           // -> 'in' | 'out' | null, with a toast (quiet: the time clock's screen says it instead, 0.28.63)
+function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | null, with a toast (quiet: the time clock's screen says it instead, 0.28.63)
+  // hold (patch #6, the Undo window): f(fx) gets the punch's side effects (the remark, the clock note) to run later; the punch itself counts at once
   const toast = quiet ? () => {} : TOAST_FN;
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
@@ -37053,14 +37118,14 @@ function careerClock(now = shipNow(), quiet) {           // -> 'in' | 'out' | nu
     if (m >= CAREER.clockOut) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
     c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
-    careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); return 'in';
+    const fx = () => { careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); }; if (hold) hold(fx); else fx(); return 'in';
   }
   if (careerClockedOut(d)) { toast('Time clock', 'You\'re clocked out for the day.'); return null; }
   c.co = Math.floor(now); const h = c.co - c.ci, early = m < CAREER.earlyOut;
   if (SHIP.player.clockLog) SHIP.player.clockLog[d] = h;   // every clock-out counts for the screen's hours (0.28.65, reviewer 0607)
   if (early) repAdd(null, 0, { work: -2 }, 'early');   // a short shift: a small dip, like being late, never a missed shift (the user's choice, 0.61.18)
   toast('Time clock', 'Clocked out at ' + hhmm(m) + '. ' + Math.floor(h / 60) + 'h ' + String(h % 60).padStart(2, '0') + 'm today.' + (early ? ' An early finish: it\'s noted.' : ''));
-  careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); return 'out';
+  const fx = () => { careerRemark(early ? 'early' : 'out', now); simNote('clock', { what: 'out' }); }; if (hold) hold(fx); else fx(); return 'out';
 }
 function careerClockTap(it, at) {                        // section 15's PLAYER_TAPS: walk up to the clock and use it
   if (it.t !== 'Time clock' || typeof approach !== 'function') return false;
@@ -37075,7 +37140,7 @@ const csText = (k, fb, ctx) => { let t = null; try { t = careerText('clock.scree
 SHIP.player.clockLog = (() => { const l = SAVED && SAVED.player && SAVED.player.clockLog, out = {}; if (l && typeof l === 'object') for (const k in l) if (/^\d+$/.test(k) && Number.isFinite(l[k]) && l[k] >= 0) out[k] = Math.min(1440, Math.floor(l[k])); return out; })();
 SAVE_EXTRA.push(s => { const L = SHIP.player.clockLog, d = SHIP.time.day; for (const k in L) if (+k < d - 14) delete L[k]; (s.player || (s.player = {})).clockLog = { ...L }; });
 const hrs = mins => (Math.round(mins / 6) / 10).toString();
-function clockScreen(said, ask) {
+function clockScreen(said, ask, after) {                // after (patch #6): 'undone-in' | 'undone-out' | 'settled-in' after Undo or its window, so the next button isn't where Undo was
   let el = document.getElementById('clockScreen');
   if (!el) {
     el = document.createElement('div'); el.id = 'clockScreen'; el.className = 'devdlg'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Time clock');
@@ -37088,12 +37153,14 @@ function clockScreen(said, ask) {
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
     : m >= CAREER.clockOut ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
+  if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
-  el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? csText('early', 'Before 17:00. Clock out early?') : st));
+  el.append(x, mk('small', '', csText('title', 'WORKS TIME CLOCK') + ' · ' + csText('sub', 'CSV Wren · Works bay')), mk('p', '', ask ? (CLOCK_UNDO_ON ? csText('earlyask', 'Clock out early? It\'ll be noted.') : csText('early', 'Before 17:00. Clock out early?')) : st));
   const today = inn ? (out ? C.co : Math.floor(now)) - C.ci : 0;
   let week = today; for (let k = d - wd; k < d; k++) week += SHIP.player.clockLog[k] || 0;
   el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
-  const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); f(); }; row.appendChild(b); return b; };
+  const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); if (CLOCK_UNDO_ON && performance.now() - CLOCK_DRAWN < CLOCK_TAP_GUARD) return; f(); }; row.appendChild(b); return b; };   // patch #6: taps just after a redraw are ignored
+  if (CLOCK_UNDO_ON) { clockButtons(row, act, { on, inn, out, m, ask, after }); el.appendChild(row); try { (row.querySelector('button:not([disabled])') || x).focus(); } catch (e) { /* no focus */ } return; }
   if (on && !out && !(inn ? false : m >= CAREER.clockOut || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
     else if (SHIP.time.min < CAREER.clockOut && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first

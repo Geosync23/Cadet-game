@@ -65,3 +65,22 @@
 
 == clock.screen.weekend
 - Shift done. See you Monday.
+
+// ---- patch #6 (the user chose "both"): an early clock-out is confirmed; clocking in, or out at or after 17:00, gets a short Undo
+== clock.screen.earlyask
+- Clock out early? It'll be noted.
+
+== clock.screen.earlyyes
+- Clock out early
+
+== clock.screen.cancel
+- Cancel
+
+== clock.screen.undo
+- Undo
+
+== clock.screen.undone.in
+- Undone. You're not clocked in.
+
+== clock.screen.undone.out
+- Undone. Still on shift.
