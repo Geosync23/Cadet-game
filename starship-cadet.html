@@ -40288,11 +40288,16 @@ function introTernTick() {
 // tap-to-ask (0.42.24; section 10's tapCrew calls it first, sim 0.26.31): while Torres is still showing you round (the
 // evening up to 'free'), tapping him at a tour place with extras left has him say the next at once; else it opens the writers' introAsk (three questions) instead of the chat card; three asks
 // at most (each counts as a meeting), then he's a plain tap again. Returns true when it opened.
+// "Ask Zeke" is parked (the patch's #31, 2026-10-20): a tap on him while he shows you round plays his next tour line if
+// there is one, else does nothing; the introAsk panel and its lines stay in the file, off behind INTRO_ASK_ON
+const INTRO_ASK_ON = false;
 function introTap(p) {
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
-  if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
   const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
   if (h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())) { INTRO_UI.next = 0; return true; }
+  if (!INTRO_ASK_ON) return true;                       // parked (#31): the tap does nothing more, and never opens the chat card
+  if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk) return false;
   const I = SHIP.intro, n = [1, 2, 3].find(k => I.done['ask:' + k] === undefined); if (!n) return false;
   I.done['ask:' + n] = Math.floor(shipNow());
   if (typeof player !== 'undefined' && player.stop) player.stop();
