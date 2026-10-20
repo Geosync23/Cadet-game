@@ -174,5 +174,5 @@ GitHub check: ON for every push to claude/** and main (the user, 2026-10-20; the
 | Day-jump engineer DJ1 | session_01Ud7J18L1xbrwMP2yiCiqp6 | `claude/devmode-dayjump` | helps DP1: measures day-jump options, clock jumps, tradition/event start on the real game (the user: "hire help") |
 | Dev mode reviewer DR1 | session_01WfFmjT31bVcy4mvsNVi5Mz | `claude/devmode-review-1` | adversarial technical review of the Dev mode plan, runs everything |
 | Dev mode reviewer DR2 | session_012GxodCR3fkT9KyQCeLTd4D | `claude/devmode-review-2` | fresh-eyes review: usable on a phone for the user's real tests |
-| Patch planner PP1 | (see below) | `claude/patch-plan` | the user's 28 playtest notes: reproduce, cause, fix, owner, order, questions; `plans/patch-plan.html` |
+| Patch planner PP1 | session_01QfLuMmrJSgMQ3A4tBtXAmf | `claude/patch-plan` | the user's 28 playtest notes: reproduce, cause, fix, owner, order, questions; `plans/patch-plan.html` |
 **Overnight mode (the user, ~05:35 UTC 2026-10-20): 5 working seats at most; no phone notifications; calls logged in `plans/overnight-decisions-lead20.md`.**
