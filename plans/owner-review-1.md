@@ -64,3 +64,21 @@ cadet_test integration vs 2e517ff: DIFFERENCES FOUND (expected). Split with a co
 
 ### Part 4 corrected (2026-10-20, after PB's revert 319f541)
 My reasoning for 9e34423 was wrong. I assumed that quicker jobs give more points an hour in career_check. But its paper players don't time jobs, so they get the same points a day before and after JOB_PACE. Checked: career_check on integration 5d6ee1c (before batch F) gives the busy player exactly the same, 33 "trusted" on Day 3 and 43 "relied" on Day 4, and fails `busy: "Relied on" before Day 5` (backlog row 12, which the user accepted until a balancing pass; now row 17 too). So 48 changed the target to hide a known, accepted failure, not because batch F moved anything. The revert is right, and so is my design note's corollary: the early "Trusted" predates batch F too. machine_check's 3-7 (6.0 before F, 6.2 after) is a better limit than 3-8. The 22c4442 (openJobs) verdict stands.
+
+## 5. EV1's events base brief, claude/events-base a909e9d (plans/events-base-brief.md), 2026-10-20
+
+**Verdict: PASS WITH FIXES** (the brief; no code yet). Checked against the events plan (claude/events-plan f6996d86, section 5 and the calendar) and the Fridays plan (claude/patch-plan cdeb1ff, rev 4), and against the code on events-base.
+
+What matches: F0-F8 and their sizes (13-15 turns, the plan's 12-15); the calendar (Day 0 arrival, Day 1 Monday: Fridays 5, 12, 19, 26; Sundays 7, 14; storm warning Day 11, front Day 12, all-clear Day 14); the storm's move to Days 11-15 switched on only with the storm update; the Friday hold 15:30-17:00 from Day 5 (the address is 16:00-16:50 in rev 4, dinner 17:00); "both happen" on Day 12; no auditorium all-hands for the storm; called-in people (Days 7, 14, 27); `eventDay` defined false when off (24k's cases at line ~44691 see what they see today); `upcomingTraditions` left alone (a new `eventItems` instead); load-time tables, no `R()`; `isWorkDay` is rota-only (pure), good for `eventCalledIn`.
+
+Fixes:
+1. **One source for the Friday hold.** F0a's `evHeld(t)` and F1b's `EV_BEATS` Friday row say the same thing twice. Make `evHeld` read the `EV_BEATS` row (or the other way round), so a change to the Fridays plan's hours is one edit.
+2. **Move F7a (the on-paper check) up to just after F1** (turn 5-6), so F2-F6 are built against it. F7b-c (live, crowds) stay late.
+3. **`EV_CAL_ON` alone puts today's storm, with its old hours, on Day 11**, onto the team job (09:30) and the ceremony (17:15). Say what F0a's "day_check Day 11 (on)" should show, or check Day 11 only with the storm update. Add career_check and leave_check with the piece on.
+4. **`eventDay(d)` and `eventCalledIn(p, d)` must come only from `EV_CALENDAR` and the events' own data, never `eventNow`, `SHIP.event` or anything saved.** 24k's incidents plan is saved per day, so a runtime read would make plans differ after a reload.
+5. **`EV_SHIPWIDE` (read through `evTable` -> `eventsOn`, so section 14's planner sees it):** with the switch off, the same table byte for byte (events_check compares its JSON). Give each moment its own hash key rather than `350 + push order`, so the party keeps k 340 whatever is added.
+6. **Owners to tell:** the storm's day change and new gatherings reach section 14's planner through `eventsOn`: tell PB (sim, live seat) at F0a. The Fridays plan's part A changes `eventFree` (the 17:15 rule), as the storm update will. Name `eventFree` as shared between them, so the two don't clash.
+7. **Patch clashes:** patch-a edits section 18 (`tradJoinMinute`, `tradGoal`: `beam: true`), 20 (`socialChatter`) and 22. Patch-b's batch F edits 15 and 17. Bring both in before F0b (section 20's `SOC_CUE_OF`) and F8 (20c, and 15's Mail).
+8. **F7c perf:** coordinate with the Fridays plan's part G (the auditorium at 16:10, the lift lobby at 16:52). The worst case is Day 12's address during the storm's onset routines (storm lighting plus about 65 seated). Add that scene.
+9. **F3a `eventClosed`:** build the user question 3 exception in from the start (the auditorium and the way to it open for the Day 12 address), or Tracked and "show on map" hide the address's room.
+10. **F3b phones:** the status line is one line. Cap its words (about 60 characters) and take the shot at 360 px wide as well as 390.
