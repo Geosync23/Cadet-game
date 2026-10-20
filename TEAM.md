@@ -207,3 +207,5 @@ PP1 now reviews patch turns. Batch E (small features incl. First Light Cocoa, th
 **~15:00 UTC, the user: split batch E between two builders.** Patch builder PE, session_01H7weuTSkTfuSAqhxvdx1EK, `claude/patch-e`: #25 #21 #6 #24 #5. DB1 after Dev mode is published, `claude/patch-e2`: #30 → #29 → #26. PP1 reviews both. (Over the 5-seat limit for a while, the user's call.)
 
 **~15:40 UTC: Dev mode PUBLISHED.** Build 0.64.3 (claude/integration da5e2aa, GitHub check #32 green) as a new page: https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf (published copy only adds a first-line script that sets #dev, so Dev mode is always on there; repo unchanged). Smoke-tested at 390x844: DEV tag shown, only starship-cadet-save-dev written, no errors. DB1 now on patch #30 → #29 → #26 (claude/patch-e2). BM11 next merges claude/talk-wire 6484d3e as 0.64.4.
+
+**~15:53 UTC: 0.64.4 in claude/integration** (5d6ee1c = talk-wire 6484d3e: Talk a while pack, 280 talks incl. nine work pools; GitHub check #35 green; all checks OK). TE1, TW1 idle; TR1 stopped (handover cb6dd07 on claude/talk-pack-review). DB1 builds patch #30/#29 on claude/devmode (its only push branch), maybe #26.
