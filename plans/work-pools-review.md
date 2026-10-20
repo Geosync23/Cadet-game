@@ -150,7 +150,7 @@ All ten keep the question (their ask, three replies, an answer each), have no lu
 placeholders in the replies, and replies within 44. Notes:
 
 - **S-lengths (should fix): four openers are over 90 characters.**
-  - `:194` (95) → `I chose this because of one nurse. I was nine, my arm was broken. She explained it all.` (86)
+  - `:194` (95) → `I chose this because of one nurse. I was nine, my arm was broken. She explained it all.` (87)
   - `:202` (99) → `Dinner rush: seventy-five people in three hours. You stop being a person. You're hands.` (87)
   - `:226` (102) → `On the Watch you think about what could go wrong, all shift. Then you take it to dinner.` (88)
   - `:234` (93) → `A long turn takes four hours. You hardly touch anything. You watch, wait, stay ready.` (85)
