@@ -38,3 +38,10 @@
 - **Optional (#9):** more crew go to the toilet after waking (.5 -> .7). Not done.
 - **Reputation pace (backlog rows 12 and 17):** the busy player's early "Trusted" (Day 3) and "Relied on" (Day 4) predate batch F; the user will balance them later. career_check FAILs on row 12 by the user's decision: don't "fix" it. JOB_PACE doesn't speed reputation up much: career_check's paper players don't time jobs (identical points a day before and after F), and in timed play a steady player does 6.0 jobs a shift day before F, 6.2 after, because the board's work is the limit.
 - **Dev mode:** the "Set career" table should be re-measured after batch F.
+
+## Heads-up from the events engineer (EV1, claude/events-base, 2026-10-20)
+Nothing to do yet. Once `EVENTS_ON` is switched on (with the storm update, after the user's review):
+- The ion storm starts on Day 11, not Day 10 (a fixed calendar, `EV_CALENDAR` in section 18). Its phases, meetings and news can wait out a held hour: every Friday 15:30-17:00 from Day 5 (the Captain's address).
+- New gatherings (the lantern supper, the Line ceremony and supper, the comet) reach section 14's planner the same way the all-clear party does: `EV_SHIPWIDE` → `evTable`/`eventsOn`, each with its own hash key.
+- Switched off, it is all byte-identical to 0.64.5.
+- `eventFree` (section 14) is shared between the Fridays plan's part A (the 15:30 Friday end) and the storm update: neither should change it without the other.
