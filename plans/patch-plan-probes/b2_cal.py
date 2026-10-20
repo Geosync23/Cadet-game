@@ -1,0 +1,10 @@
+from pp import *
+g = start(); g.step(10); sign(g); g.secs(2)
+g.ev("""(() => { for (let t = shipNow(); t <= 20*60+30; t++) { setShipNow(t); introAdvance(t, null); } })()""")
+g.ev("skipTo(1440 + 8*60+20)")
+print(g.ev("JSON.stringify(planDay(ROSTER.find(p => p.id==='calder'), 2).slice(0,3))")[:1500])
+print(g.ev("JSON.stringify(Object.keys(ROSTER.find(p => p.id==='silva-bea')))"))
+print(g.ev("JSON.stringify((({id,name,role,rank,dept,hair,look,desk,bed,shift})=>({id,name,role,rank,dept,hair,look,desk,bed,shift}))(ROSTER.find(p => p.id==='silva-bea')))"))
+print(g.ev("JSON.stringify((({id,name,role,rank,dept,hair,look,desk,bed,shift})=>({id,name,role,rank,dept,hair,look,desk,bed,shift}))(ROSTER.find(p => p.id==='calder')))"))
+print(g.ev("JSON.stringify(introBeats('calder', 2))"))
+print(g.ev("JSON.stringify(introPlan(ROSTER.find(p => p.id==='calder'), 2))"))
