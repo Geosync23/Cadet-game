@@ -49343,7 +49343,7 @@ class CrewAgent {
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
     if (key !== this.esc && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
-      this.esc = key; this.escT = .5; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
+      this.esc = key; this.escT = .5; this.gapT = 0; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
       let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
       if (goal) { const p = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this); if (p) this.path = p; }
     }
@@ -49353,7 +49353,7 @@ class CrewAgent {
     if (this.path.length && !this.escHeld && !near) {
       const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * (e.pace || 1) * dt;   // pace: section 21's stroll
       const nx = d <= st ? c.x : this.x + dx / d * st, nz = d <= st ? c.z : this.z + dz / d * st, nd = Math.hypot(pp.x - nx, pp.z - nz);
-      if (!e.after && e.mode !== 'lead' && typeof escToYou === 'function' && escToYou(this.path, pp) && nd < ESC_GAP && nd < dist) { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // the patch (#17): never closer than ESC_GAP to you
+      if (!e.after && e.mode !== 'lead' && typeof escToYou === 'function' && escToYou(this.path, pp) && nd < ESC_GAP && nd < dist && (this.gapT = (this.gapT || 0) + dt) < 2) { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // the patch (#17): never closer than ESC_GAP to you (for 2 s at most: with you in his way he walks on)
       else { if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
         this.pose = 'walk'; }
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
