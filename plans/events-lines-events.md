@@ -46,6 +46,6 @@ Events writer EW1, 2026-10-20, branch `claude/events-lines`. Words only (drafts 
 
 Raman's lines would become:
 - "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."
-- "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. We cross the Line on Sunday to get there."
+- "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound." (No mention of the Line: the cocoa ships before the events.)
 
 New names go into `content/facts.md` first (the head writer's rule), then into the line. I haven't changed the meeting, because it's baked into the game; whoever holds it (the head writer, or the lead's choice) makes the swap.
