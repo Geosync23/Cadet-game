@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.11
+   STARSHIP CADET: CSV Wren                           build 0.64.12
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8871,7 +8871,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.11';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.12';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -48206,8 +48206,8 @@ function placeCam() {
 }
 frame();
 // the opening view (the user, 2026-10-21: "just slightly too zoomed out", then "zoom in another 10-15 percent"): 1.5 and
-// 1.15 until then, 1.65 and 1.25 for a turn
-camera.zoom = innerWidth / innerHeight < .8 ? 1.85 : 1.4; camera.updateProjectionMatrix();
+// 1.15 until then, 1.65 and 1.25 for a turn, 1.85 and 1.4 in 0.64.11; then "it's too much. Go back 10-15 percent" (0.64.12)
+camera.zoom = innerWidth / innerHeight < .8 ? 1.62 : 1.22; camera.updateProjectionMatrix();
 // 0.27.18 (the user: a decent zoom out, but no visible culling): the widest zoom is 0.55, or 0.7 on a tall screen
 // (which already sees far more of the deck top to bottom); shadows and the near and far planes follow the zoom.
 const ZOOM_MAX = 2.4; let ZOOM_MIN = .55;
