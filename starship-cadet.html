@@ -369,9 +369,19 @@ function tex(w, h, draw, rx = 1, ry = 1, srgb = true) {
   t.userData = { g, c };
   return t;
 }
+// Optimization pass #6 (the render seat): the same specks from the same random numbers, faster. R() is inlined on a
+// local copy of seed (written back once at the end), and its % 2147483647 is done exactly without a division: for
+// m = 2^31 - 1, x mod m = (x mod 2^31) + floor(x / 2^31), less m if that reaches m (x = s * 16807 < 2^46, so every step
+// is exact in a double). The same pixels and the same seed after (opt-probes/grain_bench.py, grain_load.py).
 function grain(g, w, h, amt) {
-  const d = g.getImageData(0, 0, w, h), p = d.data;
-  for (let i = 0; i < p.length; i += 4) { const n = (R() - .5) * amt; p[i] += n; p[i + 1] += n; p[i + 2] += n; }
+  const d = g.getImageData(0, 0, w, h), p = d.data, L = p.length;
+  let s = seed;
+  for (let i = 0; i < L; i += 4) {
+    const x = s * 16807, hi = Math.floor(x / 2147483648);
+    s = x - hi * 2147483648 + hi; if (s >= 2147483647) s -= 2147483647;   // = (s * 16807) % 2147483647
+    const n = (s / 2147483647 - .5) * amt; p[i] += n; p[i + 1] += n; p[i + 2] += n;
+  }
+  seed = s;
   g.putImageData(d, 0, 0);
 }
 
