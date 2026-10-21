@@ -7,3 +7,4 @@ Decided by the user before bed (not overnight calls): storm plan all (a); Line p
 | Time (UTC) | Question | Taken | Why |
 |---|---|---|---|
 | 03:36 | Storm brief says "nothing about the Veyli", but the lore plan puts Saruth's cord-by-touch line at the lantern supper: keep it? | Keep it, merged into one line | PR2's recommendation: it is a lore step (no visit, no rite); the storm guard rail was about spoilers |
+| 03:38 | TS1 found reloaded pages draw every simulated frame (cadet_test.py turns drawing off only on first open): apply the fix tonight? | Yes: BM11 applies it as a check-only commit with a same-results proof, then finishes 0.64.7 with it | Likely explains intro_check part 9 timeouts and most of its 2 h; small, test-harness only, keeps within 5 seats |
