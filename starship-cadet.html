@@ -3678,6 +3678,11 @@ function unloadDeck() {
   geos.forEach(g => g.dispose()); mats.forEach(m => m.dispose());
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
+  // optimization pass #5 (the render seat): the old deck's tree taken apart. Small handles to one object on a deck (a
+  // bench's bar, the day's decor, the Tern's hinge, deckRoot itself) are kept by other sections until that deck is built
+  // again, and through .parent they held the whole unloaded deck, shapes and all (~78 MB after visiting every deck).
+  // Now a stale handle holds only itself. Nothing of an unloaded deck is ever shown again (opt-probes/detach_test.py).
+  { const all = []; deckRoot.traverse(o => all.push(o)); for (const o of all) { o.parent = null; o.children = []; } }
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
   LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = []; SHADOW_PROXY = []; SHADOW_JOB = null;
   if (typeof deckUnloaded === 'function') deckUnloaded();   // 0.27.43: section 8b's per-deck caches let go of the old deck
