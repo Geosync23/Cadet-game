@@ -3,3 +3,13 @@
 ? cue:event.ionStorm.resolution
 - Talent night's moved to next week. Tonight's for the party.
 - The lounge is open again. I'm going to sit in every chair.   #funny
+
+// EW2 (events writer 2), story A "Sixty by lamplight": the crew retell the lantern supper on Sunday
+? cue:event.ionStorm.resolution
+- Lukas ran the lantern supper on two rings. Or six. Depends who you ask.   #funny
+? cue:event.ionStorm.resolution dept:galley !who:brennan|dlamini-lukas
+- The lantern supper was all Lukas. We carried bowls and kept quiet.   #warm
+? cue:event.ionStorm.resolution who:varga-tariq
+- Lukas fed sixty-one by lamp light. Still slower than me at onions.   #funny
+? cue:event.ionStorm.resolution who:brennan
+- Back in my galley. Every pan nearly where I left it. Nearly.   #funny

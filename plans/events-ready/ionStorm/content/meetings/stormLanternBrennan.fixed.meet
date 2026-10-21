@@ -1,0 +1,12 @@
+@meeting stormLanternBrennan.fixed
+// EW2 (events writer 2), the ion storm story A: Brennan at the lantern supper (18:05-18:32, when you're in the mess),
+// off duty and there to eat. One of three versions by your Saturday flag: .fixed (storm.lukas.fixed), .asked
+// (storm.lukas.asked), .own (storm.lukas.own, or no flag). GUARD RAILS as stormBrennanErrand; nothing about the food
+// being late or short.
+title: The lantern supper
+from: Chef Auda Brennan
+gist: Brennan came to the lantern supper to eat, and noticed her range had all six rings.
+== lines
+brennan: Six rings on a storm night. Somebody's been in my galley with a spanner.   [laugh]
+brennan > you: Thank you, love.   [nod]
+brennan: Lukas. Good.   [nod]

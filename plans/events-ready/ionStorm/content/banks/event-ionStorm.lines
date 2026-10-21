@@ -47,7 +47,7 @@
 == event.ionStorm.gather.lanternSupper.chatter
 - The lantern supper was the best meal of the storm. Also the only one.   #funny
 - Sixty people in the mess by lamp light. Nobody wanted to leave.   #warm
-- Lukas cut the bread so thin you could read through it. We still ran out.   #funny
+- Lukas cut the bread so thin you could read through it. Everyone got some.   #funny
 
 // ---- resolution, Sunday Day 14 (the all-clear at 10:00: content/meetings/captainAllClear.<band>.meet)
 // the line the Captain says to you in the all-clear ({allClearYou}): commended (two storm jobs, or one and a
@@ -87,3 +87,36 @@
 - Tomas is leading the lap tonight. He's promised to walk slowly. He won't.   #funny
 == event.ionStorm.trad.lap-of-the-wren.thanks
 - You fall in with the walkers behind Tomas. After three days indoors, the long way round feels like a holiday.   #warm
+
+// ---- story A, "Sixty by lamplight" (EW2, events writer 2; storm plan v1.2, the user's choice; brief
+// plans/event-storm-lines-brief.md). GUARD RAILS: Lukas's numbers are covers, never his days until home; nothing of the
+// person he married or his worry theme. Brennan: nothing of her own story, no hint of handing the galley on. The dead
+// rings are words only: nobody says the supper was late or short. Nothing about the Veyli or the visit.
+// the first line of stormLukasFri, by the save: still in Bunk 1 (.bunk) or moved to the officers' corridor (.moved)
+== event.ionStorm.lukas.hi.bunk
+- Hey, bunkmate. Sixty.
+== event.ionStorm.lukas.hi.moved
+- Hm. Hello. Not seen you since you moved. Sixty.
+// his Mail at about 20:50 on Friday if you didn't meet him (unsigned: the game adds Lukas as the sender)
+== event.ionStorm.mail.lukas
+- Sixty | Lantern supper tomorrow, my galley. Sixty bowls by lamp light. If you've got hands, I've got onions.
+// Lukas's bubbles: the range job done; you bring back Brennan's message; the last bowl out at the supper (the covers)
+== event.ionStorm.lukas.fixed
+- Six rings. Huh. Not bad. Ta, {me}.
+== event.ionStorm.lukas.asked
+- Low and slow, lid on. My galley tonight. She said that? Huh.
+== event.ionStorm.lukas.covers
+- Sixty-one.
+// the job titles (cards)
+== event.ionStorm.job.stormRange
+- Storm: reset the galley range
+== event.ionStorm.job.stormLanterns
+- Lantern supper: carry the lanterns up from storage
+// the device notices, Saturday 14:00: the lantern job posted; .held when you promised Lukas (storm.lukas.promised)
+== event.ionStorm.notice.lanterns
+- Lantern supper: the lantern job is on the board. Deck 5 storage to the mess.
+== event.ionStorm.notice.lanterns.held
+- Lukas's lanterns: the job's held for you. Deck 5 storage to the mess.
+// the trace: the storm lantern left on the galley pass from Sunday (a tap card)
+== event.ionStorm.trace.lantern
+- A storm lantern on the galley pass. Nobody's moved it since the lantern supper.

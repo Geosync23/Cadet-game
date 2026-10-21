@@ -5,3 +5,9 @@
 ? cue:event.ionStorm.escalation dept:works weekday:sat
 - Called in on a Saturday. The board doesn't know what a weekend is.
 - My day off, they said. Then the surge, they said.   #funny
+
+// EW2, the Veyli lore (plans/veyli-lore-plan.md section 3): Saruth at the lantern supper, the cord read by touch. The
+// mess is lamp-lit on purpose: never tied to a blackout. Never the first knot (Holt's arc), never a rite.
+? cue:event.ionStorm.escalation who:saruth place:mess time:evening
+- On the long ship, when the lights failed, we read the cord by touch.
+- Here. Hold it. Close your eyes. You can feel the months.   #warm

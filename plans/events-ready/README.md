@@ -34,3 +34,12 @@ No new keys, flags or meetings: only lines inside the files already here, so the
   lineTomasSat (two lines before "Right. Bed."), crossingCeremony (the Captain's two-line preface before the oath),
   the certificate keepsake, Zeke at One week aboard (resolution), and content/addresses/friday-d5.address (one line).
   The canon is in content/facts.md, section 1, "What the Line means".
+- **The ion storm, story A "Sixty by lamplight"** (storm plan v1.2, brief `plans/event-storm-lines-brief.md` on
+  claude/event-plan-storm), for turn S7. New meetings: `stormLukasFri`, `stormLukasSat`, `stormBrennanErrand`,
+  `stormLanternBrennan.fixed|asked|own` (versions by flag, as captainAllClear). New bank keys in event-ionStorm:
+  `event.ionStorm.lukas.hi.bunk|moved` (stormLukasFri's first line, by the save: still in Bunk 1 or moved; the builder
+  names the real flag), `mail.lukas`, `lukas.fixed|asked|covers`, `job.stormRange|stormLanterns`,
+  `notice.lanterns|lanterns.held`, `trace.lantern`. Flags set by replies: `storm.lukas.promised|fixed|asked|own`;
+  stormLukasSat's first reply carries `job:stormRange` (the brief's key: the builder checks the reply reader takes it).
+  Reactions: four retelling lines on Sunday (resolution), two Saruth lantern-supper lines (escalation; the Veyli lore).
+  One fix: the supper chatter's "We still ran out" is now "Everyone got some" (the brief: nobody says the supper was short).
