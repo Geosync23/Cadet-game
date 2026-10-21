@@ -10,12 +10,12 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
-| RN1 | perf_check busy event scenes | claude/opt-render 3af9f15 + 0ad9b5d | PASS WITH FIXES (F1 needed; F2-F4 small) |
+| RN1 | perf_check busy event scenes | claude/opt-render 3af9f15 + 0ad9b5d, fixes fe0726b | **PASS** (F1-F4 fixed in fe0726b, confirmed) |
 | RN1 | #10 faster deck builds (4a-4c) | ab86ff7 (+ 960f2ce, 5358a60 docs) | PASS |
 | RN1 | #6 grain loop | c1bf6f1 (+ 9604b97, 1a62fc7 docs) | PASS |
 | TS2 | player_check fix A + fix B | claude/opt-tests 4775488 + e4acbf8 | PASS WITH FIXES (F1 needed, small) |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
-| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (nits N1, N2; section 25's owner to look) |
+| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (N1 fixed 7d84c86, N2 fixed 5850ddb; f75dd23 moves the block for DB2's nit: devmode_check/check_fast to re-run on it) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
 
 ## RN1: perf_check busy event scenes (3af9f15 + 0ad9b5d), PASS WITH FIXES
@@ -98,6 +98,11 @@ Mutant:
 Fix:
 - **F1 (needed): make the drawn parts prove they drew.** In `_run_activity` and `_servery_seat`, read `renderer.info.render.frame` before and after (three r128 adds one per drawn picture) and fail if it didn't move ("the activity wasn't drawn"); or have STATE return `calls` only when the frame moved since the last read. pmA should then FAIL. The rule is the user's exception's own condition ("activities and the servery's draw-call budget still drawn"), so the check should guard it, not just follow it.
 - The rest reads right: everything outside `drawn()` still simulates every frame; the screen-click parts (treadmills, Repair) project and ray-cast with the same camera matrices, and the output diff shows they land the same.
+
+## RN1 perf_check fixes (fe0726b), confirmed
+
+- F1: `PERF_SCENES='lantern|all-clear|Tern'` on integration 0.64.8: all three WAITING; last line "PERF CHECK OK (0 skipped: switch not in this build; 3 waiting: not built yet)" (F4). On claude/storm-update `PERF_SCENES=lantern`: measured (62 people, 260 / 417 / 293 ...), equal to opt-measure's row.
+- F2: DEV_NOTES says about 11 minutes alone. F3: the search is case-sensitive now ('Tern' ran only the Tern row).
 
 ## Log
 
