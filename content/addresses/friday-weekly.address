@@ -1,0 +1,126 @@
+@address friday-weekly
+// EW1 (events writer), 2026-10-21: the Captain's Friday address for every Friday after Day 26 (Day 33 on), the
+// plan's "weekly shape" (plans/fridays-plan.md, part C). The lead's brief: a pool per beat, slots for real things,
+// generic enough to repeat well, enough for about 6-8 weeks without obvious repeats, no arc spoilers.
+// FORMAT (for FR1; the same .address rules as friday-d5): the speaker is marrow unless a line says otherwise. Each
+// "== <beat>" section is a pool, played in the order below. Each week the game picks ONE line from each pool (seeded
+// by the week, never the line it used in the last 6 weeks if another fits). "? conditions" over a line limit it, as in
+// .lines (a line whose condition fails or whose placeholder can't be filled isn't picked; if nothing fits, the beat is
+// skipped). Pools marked "pick: 2" take two different lines. About 11-14 lines a week, spread over 16:00-16:48.
+// Slots (new, read when she speaks, never by the planner): {dept} this week's nod (rotating Works, the galley, the
+// Watch, Survey, the infirmary, the garden), with nod:<dept> to pick its lines; health:good|ok|poor (the ship health
+// boards, section 17); {arrivals} and {leavers} (this week's crew rotation, first names; ROSTER_ROTATIONS); {trad1} and
+// {day1} (one of next week's traditions and its weekday, seeded; upcomingTraditions); {winner}
+// (a tradition's winner this week, tallyLast: the tasting table, the department cup).
+// Existing conditions used: season:, cue:repair.you, cue:tradition.<id>.you; myrank: as in the dated addresses.
+from: Captain Odile Marrow
+mail: All hands: the Captain's Friday address | The week behind, this week's nod to {dept}, and what's on next week. Dinner at five.
+
+== open
+vance: Settle, please. The Captain.   [nod]
+
+== hello
+- Afternoon, everyone. Sit down, please. You've earned the chair.   [gesture]
+- Afternoon, everyone. Another week. The ship's still in one piece, so let's begin.   #funny
+- Afternoon, everyone. Good turnout. I'll try to be worth it.
+- Afternoon, everyone. Short Friday. Let's not waste it on me.   #funny
+- Afternoon, everyone. Thank you for coming. I'll be brief. Ish.   #funny
+- Afternoon, everyone. The back row's full again. I do notice.   #funny
+- Afternoon, everyone. Someone's brought biscuits. Pass them round, please.
+- Afternoon, everyone. A quiet week, mostly. That's my favourite kind.
+
+== headline
+? season:sowing
+- The garden's planting the new beds. By next season we'll be eating them.
+? season:greening
+- The garden is at its greenest. Tove Cruz says we're not allowed to touch anything.   #funny
+? season:harvest
+- Harvest season. Brennan has started looking at the garden the way I look at a chart.   #funny
+? season:lanterns
+- Lanterns season. The evenings feel longer. Make good use of them.
+?
+- The Wren is right on course. Dev Raman says that's his doing. I believe him.
+- Out of the windows: Tavessa, a little brighter every week.
+- The board was busy and the ship hummed along. That's what a good week sounds like.
+- We had a week with nothing on fire. I'd like more of those, please.   #funny
+
+== behind
+pick: 2
+? health:good
+- The ship health boards are green on every deck. Thank you, Works.
+? health:ok
+- The health boards are mostly green, with a few amber corners. Works is on them.
+? health:poor
+- The health boards were amber more than I'd like. Works could use a hand.
+?
+- Every job on the board got done, or nearly. The Chief says "nearly" means Monday.   #funny
+- The galley served three meals a day, every day. Nobody went hungry on Brennan's watch.
+- Watch walked every deck, every night. You don't see it. That's the point.
+- Survey sent home another chart this week. Somewhere, someone will use it.
+- The infirmary was quiet, which is the best news it ever gives me.
+- The garden's lamps never went off once. The beans have no idea how lucky they are.   #funny
+? cue:tradition.tasting-table
+- {winner} won the tasting table. Brennan says it was close. She always does.   #funny
+? cue:tradition.department-cup
+- The department cup went to {winner}. The rest of you have four weeks to plan revenge.   #funny
+
+== people
+// welcomes and goodbyes from the rota (ROSTER_ROTATIONS): skipped in a week with nobody arriving or leaving
+pick: 2
+- This week we welcomed {arrivals} aboard. Say hello. Show them the good armchair.   #warm
+- New faces this week: {arrivals}. If they look lost, walk them to the mess.   #warm
+- And we said goodbye to {leavers}. Wherever you go next, go well.   #warm
+- {leavers} left us on Sunday's shuttle. The ship's a little quieter. We'll miss you.   #warm
+
+== nod
+// the department of the week, in turn: Works, the galley, the Watch, Survey, the infirmary, the garden
+? nod:works
+- This week's nod: Works. Every light you switched on today, Works kept it on.
+- This week's nod is Works. The machines don't say thank you, so I will.
+? nod:galley
+- This week's nod: the galley. Seventy-odd of us, three meals a day, always hot.
+- This week's nod is the galley. Somebody tell Brennan. She'll pretend she didn't hear.   #funny
+? nod:watch
+- This week's nod goes to the Watch. Every door checked, every deck walked, every night.
+- This week's nod is the Watch. Chief Holt asked me not to make a fuss. So I won't.   #funny
+? nod:survey
+- This week's nod goes to Survey. They write down what's out there, so nobody gets lost.
+- This week's nod is Survey. Dr. Sato will tell you about it. For an hour. Ask anyway.   #funny
+? nod:infirmary
+- This week's nod: the infirmary. Dr. Nandakumar's team are always there.
+- This week's nod is the infirmary. Drink your water. That's from them, not me.   #funny
+? nod:garden
+- This week's nod: the garden. Every salad, every herb, every bit of green aboard.
+- This week's nod is the garden. Tove says the tomatoes are doing well. I say I'm hungry.   #funny
+
+== you
+// now and then you, from what really happened this week (the game picks this beat about one week in three)
+? cue:repair.you
+- Thank you, {me}, for fixing something I didn't know was broken.   #warm
+? cue:tradition.tiles-ladder.you
+- {me} climbed the Tiles ladder this week. Rina has been informed.   #funny
+? myrank:junior
+- {me}: still learning, still asking. Keep asking. That's the job.
+? myrank:officer|senior|specialist
+- {me}, the Chief says you're keeping her on her toes. Good.   #funny
+
+== ahead
+// one of next week's traditions ({trad1} on {day1}); tradition names run up to about 25 characters
+- Next week: {trad1}, {day1}. Go to one you've never tried.
+- Coming up: {trad1} on {day1}. I'll be there. At the back.   #funny
+- On {day1}, {trad1}. Bring a friend. Or make one.   #warm
+- Next week's on the board: {trad1}, {day1}. And every day, the jobs.   #funny
+
+== thought
+// the closing thought before dinner
+- Look after each other this weekend. That's the whole speech, really.   #warm
+- If someone's been quiet this week, sit with them at dinner. That's an order, of a kind.   #warm
+- Get some rest. The ship will still need you on Monday.
+- Find a window this weekend. It's a long way out here, and it's beautiful.   #warm
+- Thank you for this week. All of you. I mean that.   #warm
+- Ask someone a question you've never asked them. You'll learn something. I always do.
+- Take your two days. Really take them. The ship can manage.
+- Somebody tell me something good at dinner. I'm collecting.   #funny
+
+== close
+- Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]
