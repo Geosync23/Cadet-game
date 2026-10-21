@@ -9669,6 +9669,7 @@ function gatherings(p, d, F) {
     const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
     out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0 });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
   }
+  if (typeof eventMeetPlan === 'function') out.push(...eventMeetPlan(p, d, F));   // a ship-wide event's meeting that names p (section 18, F0b; [] while the events are off): meet: true is a break in the shift
   // social B2's farewell friends (20c's farewellCrew(leaver, d) -> ids, pure per day): on a crew member's last day, each
   // of their friends who is free stands with them in the shuttle bay while they wait to board, 14:30-15:00 (0.26.38)
   if (!p.guest && typeof farewellCrew === 'function') {
@@ -9697,12 +9698,12 @@ const EV_DAY = new Map(); let EV_SIG = '';
 // evSig's parts, compared without building its string (shipDay asks on every whereIs: the garbage count, 0.26.40)
 const EV_K = [null, null, -1, null];
 function evChanged() {
-  const e = SHIP.event, a = e ? e.id : '', b = e ? e.startDay : '', c = SHIP.eventLog ? SHIP.eventLog.length : 0, i = typeof introSig === 'function' ? introSig() : '';
+  const e = SHIP.event, a = e ? e.id : '', b = e ? e.startDay : '', c = SHIP.eventLog ? SHIP.eventLog.length : 0, i = (typeof introSig === 'function' ? introSig() : '') + (SHIP.evFrom != null ? '/' + SHIP.evFrom : '');   // F0b: the day the events came on (the calendar's skips; null while off)
   if (a === EV_K[0] && b === EV_K[1] && c === EV_K[2] && i === EV_K[3]) return false;
   EV_K[0] = a; EV_K[1] = b; EV_K[2] = c; EV_K[3] = i; return true;
 }
 const evSig = () => (SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : '') + '/' + (SHIP.eventLog ? SHIP.eventLog.length : 0)
-  + (typeof introSig === 'function' ? '/' + introSig() : '');   // section 21: the intro's state (on, skipped, ended) changes who's busy
+  + (typeof introSig === 'function' ? '/' + introSig() : '') + (SHIP.evFrom != null ? '/' + SHIP.evFrom : '');   // section 21: the intro's state (on, skipped, ended) changes who's busy; F0b: the day the events came on
 function evDay(d) {
   if (EV_DAY.has(d)) return EV_DAY.get(d);
   let out = null;
@@ -9933,8 +9934,8 @@ function schedBuild(p, d, occ, S) {
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
           else { linger(s - (dk !== deck ? C : 0)); go(dk); }
-          if (fromXY && dk === deck) {                   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it)
-            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
+          if (fromXY && dk === deck) {                   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
+            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
             if (cut > 0) { l.to -= cut; t -= cut; }
           }
           if (!mine) hold(pl.id, s, end);                // held from arrival, as planned
@@ -9988,9 +9989,18 @@ function schedBuild(p, d, occ, S) {
     if (REC_ON && p.id === REC_ROUND.who && wd === 5) br.push([REC_ROUND.at[0] + Math.round((REC_ROUND.at[1] - REC_ROUND.at[0]) * schedU(p.seed, d, 1039)), 'recRound']);   // Maeve's round of the rec deck's machines (0.83.2, RA)
     const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
     if (ru && !called && evOwed(p, evAt(B + 600), d)) br.push([Math.max(ra[0], t + 15) + Math.round((Math.min(ra[1], to) - 60 - Math.max(ra[0], t + 15)) * U(37)), 'call']);
-    for (const [bt, kind] of br.sort((a, b) => a[0] - b[0])) {
-      if (bt <= t + 10 || bt >= to - 25) continue;
+    const mt = meet.filter(e => e.meet && !e.done && e.at >= t && e.at < to);   // an event meeting on shift (F0b): at its minute, whatever the edges
+    for (let i = br.length - 1; i >= 0; i--) if (mt.some(e => br[i][0] > e.at - 30 && br[i][0] < e.at + e.dur)) br.splice(i, 1);   // and it wins: no tea or toilet break runs into it (PB)
+    for (const e of mt) br.push([e.at, 'meet', e]);
+    for (const [bt, kind, e] of br.sort((a, b) => a[0] - b[0])) {
+      if (kind !== 'meet' && (bt <= t + 10 || bt >= to - 25)) continue;
+      if (bt < t) { if (e) e.done = true; continue; }    // an earlier break ran over it (a meeting that can't be planned isn't taken late in free time)
       work(bt);
+      if (kind === 'meet') {                            // there and back on the shift's time (the rides tagged as the meeting), then work carries on
+        const n0 = segs.length;
+        if (take(e.act || 'work', e.where, e.dur, { tag: e.tag, min: e.min, by: to, event: true, anim: e.anim })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = e.tag; }
+        e.done = true; continue;
+      }
       if (kind === 'tea') { if (!take('leisure', [[wd, 'lounge-seat'], [wd, 'bench']], 15, { tag: 'tea' })) work(t + 15); }
       else if (kind === 'wtea') { if (!take('leisure', [[5, 'lounge-seat']], WORKS_TEA.dur, { tag: 'tea', wait: WORKS_TEA.wait, min: 8, anim: 'drink' })) work(t + 5); }   // the tea corner full: back to the job
       else if (kind === 'staff') seg('dinner', t + 20, wtype, desk, { tag: 'staff' });
@@ -10144,6 +10154,7 @@ function schedBuild(p, d, occ, S) {
     if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })) seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
   };
   const leisureUntil = (end, k) => {
+    for (const e of meet) if (e.host && !e.done && e.at + 10 > t && e.at < end && e.at + e.dur > end && typeof eventMeetTag === 'function' && eventMeetTag(e.tag)) end = e.at + e.dur;   // F0b: named for an event meeting, they stay to its end
     for (let n = 0; end - t >= 20 && n < 12; n++) {
       for (const e of meet) if (!e.done && e.meal && t > e.at && t < e.at + e.dur - (e.min || 20) && end - t >= (e.min || 20)) {   // late for a meal tradition (the handover ran on): join it while there's time to eat
         e.done = true; tradMeal(e, end);                 // through the line too (reviewer 1d, 0.26.42)
@@ -10754,7 +10765,7 @@ function dayReport(day) {
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
       const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + SHIFTS.day[1]]];
-      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush', 'round'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
+      const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush', 'round'].includes(s.tag) || /^intro/.test(s.tag || '') || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag)));   // an intro beat on shift is work too, and an event meeting (F0b)
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
         if (worked < b - a) rep.work.push(p.id + ' ' + worked + '/' + (b - a));
@@ -11579,6 +11590,7 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
   B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
   if (today.length) say('Today aboard' + (today.length > 1 ? ', ' + today.length + ' traditions' : '') + ': ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');   // 0.34.51: how many, then each
+  try { const es = typeof eventStatus === 'function' ? eventStatus(t) : null; if (es) B.push({ kind: 'text', text: es, mark: 'hot' }); } catch (e) { /* not yet */ }   // section 18's Ship status line (the events base F3b)
   say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery.'   // 0.35.27: no guessed wait (the user: no invented numbers)
     : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
@@ -11912,6 +11924,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
       .concat(rv.depts.some(x => x.band === 'new') ? [{ text: 'Elsewhere', sub: 'A new face: ' + rv.depts.filter(x => x.band === 'new').map(x => DN[x.dept] || x.dept).join(', '), mark: 'past' }] : []) });
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
+  try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
   return { title: 'Record', blocks: B };
@@ -18260,9 +18273,10 @@ function eventJob(spec, ev, t, key) {
     stops = [{ deck: st.deck, placeId: st.placeId, mins: spec.mins || 20, tag: spec.kind || 'event', at: st.at || null }];
     title = title || (EVENT_JOB_TEXT[spec.kind] || 'Event job') + (st.room ? ': ' + roomName(st.deck, st.room) : '');
   }
-  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
+  const j = { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
            bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
            claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
+  return typeof eventJobRank === 'function' ? Object.assign(j, eventJobRank(spec)) : j;   // section 18's F5: a job for a rank ({} while off)
 }
 function eventJobsHour(h, jobs) {
   if (typeof eventNow !== 'function') return;
@@ -35946,6 +35960,7 @@ function eventsTick() {
   eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
+  if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
   if (REC_DECK) { recShowCue(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
@@ -36020,6 +36035,7 @@ const EV_CAL_ON = EVENTS_ON;                             // F0: events come by t
 const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
 const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as each phase begins (crew lines react)
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
+const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -36395,7 +36411,7 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, ranks: m.ranks, scriptBy: m.scriptBy, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
     const at = evBeatAt(e.startDay, n.at);
@@ -36423,18 +36439,22 @@ function eventAdvance(t = shipNow(), quiet) {
     e.mine['mail:' + key] = 1; out.push('mail ' + key);
     mailSend({ at, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e, at)), quiet: !!quiet });
   }
-  if (t >= end) {
-    const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
-    for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
-    SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
-    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
-    const mine = e.mine || {};
-    if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
-      SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
-      if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
-    }
-    SHIP.event = null; out.push('end ' + band);
+  if (t >= end) eventFinish(e, def, t, quiet, out);
+  return out;
+}
+// the end of a run (split out of eventAdvance, the events base F4a; Dev mode's End and keep uses it too): its band
+// from the threads, the traces, the log, the debrief, your commendation; SHIP.event cleared
+function eventFinish(e, def, t, quiet, out = []) {
+  const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
+  for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
+  SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
+  if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+  const mine = e.mine || {};
+  if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
+    SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
+    if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
   }
+  SHIP.event = null; out.push('end ' + band);
   return out;
 }
 const traceOn = id => SHIP.traces.some(x => (x.id || x) === id);   // for the architects' trace props: a scorch mark, a plaque, a pet
@@ -36481,13 +36501,11 @@ let DIALOGUE_EL = null;
 const DIALOGUE_AUTO = 7000;                              // real ms before a line moves on by itself
 // the cast: ROSTER ids as they are; 'works:2' -> two Works juniors on shift that day (by hash), as tech1 and tech2
 function meetingCast(m) {
-  const d = Math.floor(m.at / 1440) + 1, ppl = schedPeople(), cast = {};
+  const d = Math.floor(m.at / 1440) + 1, cast = {};
   for (const w of m.who || []) {
     const mm = /^(\w+):(\d+)$/.exec(w);
     if (!mm) { const p = evPerson(w); if (p) cast[w] = p; continue; }
-    const pool = ppl.filter(p => p.dept === mm[1] && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !(m.who || []).includes(p.id))
-      .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337));
-    pool.slice(0, +mm[2]).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
+    evSlotCrew(mm[1], +mm[2], d, m.who || []).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
   }
   return cast;
 }
@@ -36562,6 +36580,7 @@ function eventTakeJob(job) {
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
+  if (EV_REPLAY_ON && D.m && D.m.id) { const f = meetingFlags(D.m); if (f) delete f['open:' + D.m.id]; }   // F4b: no longer open
   { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') try { sc.onEnd(finished); } catch (e) { /* closes anyway */ } }   // a moment ending (20c)
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
   if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
@@ -36585,10 +36604,17 @@ function meetingFlags(m) {
 function meetingsTick(now, quiet) {                     // quiet: a sleep or skip (no notice, no panel; the gists still come)
   for (const m of MEETINGS) {
     const k = m.id, f = meetingFlags(m); if (!f) continue;
-    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); } continue; }
-    if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
-    if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
-    if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
+    const sc = evScriptOf(m), asked = evInvited(m);      // F5: your rank's version of it, and whether it's for your rank
+    // F4b: a meeting still open when the game was saved (f['open:<id>'], an event's, kept with it): after a reload it plays
+    // again if you're still there in its window (counted once toward a commendation), else its gist comes
+    if (EV_REPLAY_ON && f['open:' + k] && !DIALOGUE) {
+      if (now >= m.at + (m.len || 15)) { delete f['open:' + k]; if (!f['gist:' + k]) { f['gist:' + k] = 1; meetingGist(sc); } }
+      else if (!quiet && inMeeting(m)) { dialogueShow(sc, m); eventMine('meetings', -1); }
+    }
+    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(sc); } continue; }
+    if (m.notify && asked && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[sc].title, m.notify); }
+    if (!DIALOGUE && asked && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(sc, m); if (EV_REPLAY_ON && m.event !== 'occasion') f['open:' + k] = 1; }
+    if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(sc); }
     if (m.event === 'occasion' && f['met:' + k]) { const r = SHIP.occasions.find(x => x.key === k); if (r) r.met = true; }
   }
   if (DIALOGUE && !inMeeting(DIALOGUE.m)) dialogueClose();
@@ -36623,7 +36649,8 @@ function eventMomentsTick(from, to) {
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
     const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;
-    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len); }
+    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key) && !(EV_REPLAY_ON && e.mine['felt:' + mo.id])) { FEEL_DONE.add(key); if (EV_REPLAY_ON) e.mine['felt:' + mo.id] = 1; eventFeel(mo.feel, mo.len);   // F4b: felt once, kept with the event (a reload doesn't jolt again)
+      if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventMoment', { id: e.id, moment: mo.id, day: e.startDay, t: at }); }   // F2b: the cue event.<id>.<moment> (the jolt, the horn)
   }
 }
 
@@ -36978,8 +37005,9 @@ function eventItems(a, b) {
     const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;
     const def = SHIP_EVENTS[g.event], mt = (def.meetings || []).find(x => x.id === g.id), mo = !mt && (def.moments || []).find(x => x.id === g.id), m = mt || mo;
     if (mo && EV_SHIPWIDE.some(x => x.id === mo.id)) continue;   // a gathering in EV_SHIPWIDE is listed already, as a tradition (PR2's shots: the party twice)
+    if (mt && !evInvited(mt)) continue;                  // F5: a meeting for another rank isn't on your Schedule (its gist comes by Mail)
     const deck = m.where.deck, room = evRoomKey(deck, m.where.room), rm = room && DECKS[deck].rooms[room];
-    const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[mt.script];
+    const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[evScriptOf(mt)];
     out.push({ id: g.id + '@' + d, kind: mt ? 'meeting' : 'gathering', title: m.title || (sc && sc.title) || (sw && sw.name) || def.title, at, to: at + (g.len || 15),
       where: (rm ? rm.name + ', ' : '') + deckWord(deck), deck, room });
   }
@@ -37005,10 +37033,116 @@ function eventBandOf(id) {                                // the running event's
   const l = [...SHIP.eventLog].reverse().find(x => x.id === id); return l ? l.band : null;
 }
 // an event's jobs done by minute t (by anyone, or `you` only): the board's ids are 'event:<event>:<job id>@<start>'
+// (event and job ids must stay letters, digits and _ only: anything else is stripped before matching, PR2)
 const evJobsDone = (re, you, t) => (SHIP.jobs || []).filter(j => typeof j.id === 'string' && re.test(j.id) && j.status === 'done' && j.doneBy && !j.lapsed && (!you || j.doneBy === 'you') && (t == null || j.doneAt <= t));
 function eventJobDone(jobId, you, t = shipNow()) { return evJobsDone(new RegExp('^event:[^:]+:' + String(jobId).replace(/\W/g, '') + '@'), you, t).length > 0; }
 function eventJobsCount(id, you, t = shipNow()) { return evJobsDone(new RegExp('^event:' + String(id).replace(/\W/g, '') + ':'), you, t).length; }
+// F3b, on your device: a short status while an event runs (about 60 characters: about three lines in the device's font on a phone), the writers'
+// event.<id>.status.<phase> (baked, through quizText), else the event's own `status: { <phase>: text }`, else none.
+// The Record's blocks: each event you lived through in words (the writers' event.<id>.record, else its title and days),
+// how it went (never a score) and your commendation. Both [] / null while EV_DEVICE_ON is off
+const EV_RECORD_BAND = { smooth: 'The ship came through it well.', bumpy: 'The ship came through, with a few bumps.', rough: 'A hard one, but the ship came through.' };
+function eventStatus(t = shipNow()) {
+  if (!EV_DEVICE_ON) return null;
+  const n = eventNow(t); if (!n || !SHIP.event || SHIP.event.id !== n.id) return null;
+  const def = SHIP_EVENTS[n.id], ctx = evCtx(SHIP.event, t);
+  return quizText('event.' + n.id + '.status.' + n.phase, SHIP.event.startDay, ctx) || (def.status && def.status[n.phase] ? evText(def.status[n.phase], ctx) : null);
+}
+function eventRecord() {
+  if (!EV_DEVICE_ON || !SHIP.eventLog.length) return [];
+  const rows = SHIP.eventLog.map(l => { const def = SHIP_EVENTS[l.id] || { title: l.id }, c = SHIP.commendations.find(x => x.event === l.id);
+    return { text: quizText('event.' + l.id + '.record', l.startDay, {}) || def.title + (l.endDay - 1 > l.startDay ? ', Days ' + l.startDay + '-' + (l.endDay - 1) : ', Day ' + l.startDay) + '.',
+      sub: (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });
+  return [{ kind: 'text', text: 'Ship-wide events', mark: 'head' }, { kind: 'list', rows: rows.reverse() }];
+}
 // ---- end of slot: Traditions engineer ----
+// ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the events base, F0b (EV2; plans/events-base-brief.md): called in on a day off, and an event meeting's cast in
+// the crew's plans. Inert while EV_CALLIN_ON is off ----
+const EV_CALLIN_ON = EV_CAL_ON;                          // F0b: follows the calendar (its days are the calendar's)
+// the meetings on day d by the calendar's plan alone (never eventNow, SHIP.event or the log: section 14 plans from it):
+// { id, event, venue, at, len (minutes of day d), who, anim }. Gathering moments aren't here: they're traditions (EV_SHIPWIDE)
+function evMeetsOn(d) {
+  const out = []; if (!EV_CALLIN_ON) return out;
+  for (const r of evCalPlan()) {
+    const def = SHIP_EVENTS[r.id]; if (d < r.day || d >= r.day + def.days) continue;
+    for (const m of def.meetings || []) {
+      if (!m.where || !m.where.venue) continue;
+      const at = evBeatAt(r.day, m.at) - (d - 1) * 1440; if (at < 0 || at >= 1440) continue;
+      out.push({ id: m.id, event: r.id, venue: m.where.venue, at, len: m.len || 15, who: m.who || [], anim: m.anim || null });
+    }
+  }
+  return out;
+}
+// a '<dept>:N' slot's crew on day d: N juniors of that department on the day shift and at work that day, in a fixed
+// order (hash 337), never one already named, and (with the events base on) aboard that day. meetingCast fills tech1..techN from this same list, so the plan and the
+// scene agree. Pure (the roster and the rota)
+function evSlotCrew(dept, n, d, named) {
+  return schedPeople().filter(p => p.dept === dept && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !named.includes(p.id) && (!EV_CALLIN_ON || aboard(p, d)))
+    .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337)).slice(0, n);
+}
+// a meeting's people on day d: [{ p, named }] (named: a ROSTER id or a guest in its who; else one of a slot's crew)
+function evMeetCast(g, d) {
+  const out = [];
+  for (const w of g.who) {
+    const mm = /^(\w+):(\d+)$/.exec(w);
+    if (mm) { for (const p of evSlotCrew(mm[1], +mm[2], d, g.who)) out.push({ p, named: false }); continue; }
+    const p = schedPeople().find(x => x.id === w); if (p) out.push({ p, named: true });
+  }
+  return out;
+}
+// called in: a meeting on day d names p, and it's p's rota day off. Pure (the calendar, the events' data, the rota)
+function eventCalledIn(p, d) {
+  return EV_CALLIN_ON && !!p && !!p.work && !isWorkDay(p, d) && evMeetsOn(d).some(g => g.who.includes(p.id));
+}
+// section 14's gatherings(p, d, F): p's meetings on day d in its gathering shape. The named come 5 minutes early; on
+// shift (a day worker at work that day) it's a 'meet' break in the shift, act work (shiftWithBreaks); off duty, free
+// time's gathering. The venue's crowd spots: '@gather-<venue>'. [] while off
+function eventMeetPlan(p, d, F) {
+  const out = []; if (!EV_CALLIN_ON || !p) return out;
+  for (const g of evMeetsOn(d)) {
+    const c = evMeetCast(g, d).find(x => x.p.id === p.id), v = c && gatherVenue(g.venue); if (!v) continue;
+    const early = c.named ? 5 : 0, shift = !!(F && F.works && !F.night);
+    out.push({ at: g.at - early, dur: g.len + early, where: [[v.deck, '@gather-' + g.venue]], tag: 'ev-' + g.event + '-' + g.id, anim: g.anim,
+      min: Math.min(g.len, 10), host: c.named, meet: shift, act: shift ? 'work' : undefined });
+  }
+  return out;
+}
+// an event meeting's tag ('ev-<event>-<meeting>'), for section 14's dayReport: time at it on shift counts as work
+const EV_MEET_TAGS = new Set(Object.entries(SHIP_EVENTS).flatMap(([id, def]) => (def.meetings || []).map(m => 'ev-' + id + '-' + m.id)));
+const eventMeetTag = tag => EV_CALLIN_ON && EV_MEET_TAGS.has(tag);   // false while off: section 14's old path (PR3)
+// the note simNote('calledIn', { id: event, meeting, who, day, at }) as each called-in person's meeting begins (section
+// 20's cue calledIn; cue:calledIn@me for the one called in). In play and after a sleep or skip, once each (the notes
+// ring is saved, so a reload doesn't send it again)
+function eventCallInTick(from, to) {
+  if (!EV_CALLIN_ON || !(to > from) || typeof simNote !== 'function') return;
+  for (let d = Math.floor(Math.max(from, to - 2880) / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++)
+    for (const g of evMeetsOn(d)) {
+      const at = (d - 1) * 1440 + g.at; if (at < from || at >= to) continue;
+      for (const w of g.who) {
+        const p = schedPeople().find(x => x.id === w);
+        if (p && eventCalledIn(p, d) && !simNotes('calledIn', at).some(n => n.who === w && n.meeting === g.id && n.day === d))
+          simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 });   // a minute in, once they're there (and after the hour's own notes at :00: the cues' cap keeps the newest)
+      }
+    }
+}
+SIM_ADVANCE.push((from, to) => eventCallInTick(from, to));
+// ---- F5 (EV2): small parts by rank. Only your part changes (the crew's plans never read your rank). Inert while off ----
+// An event meeting may say which of your ranks it's for, `ranks: ['officer', 'senior', 'specialist']` (section 17's
+// RANKS; none: everyone): at one of them you're invited (its heads-up, the panel when you're in the room, the Schedule);
+// otherwise you get its gist by Mail as everyone else does. `scriptBy: { <rank>: scriptId }`: the version of the scene
+// for your rank (the Officer's briefing), else `script`. An event job may carry `rank`: 'junior' (held for juniors, as
+// section 17's j.junior) or the lowest rank that may take it (j.only)
+const EV_RANK_ON = EVENTS_ON;
+const evInvited = m => !EV_RANK_ON || !m || !Array.isArray(m.ranks) || m.ranks.includes(playerRank());
+const evScriptOf = m => (EV_RANK_ON && m && m.scriptBy && MEETING_SCRIPTS[m.scriptBy[playerRank()]] ? m.scriptBy[playerRank()] : m.script);
+const eventJobRank = spec => !EV_RANK_ON || !spec || !RANKS.includes(spec.rank) ? {} : spec.rank === 'junior' ? { junior: true } : { only: spec.rank };
+// ---- F8 (EV2): comms down. Calls home (20c's homeCallable) are off in every phase whose event lists the effect
+// 'commsDown' (the storm: the front and the escalation), not only the front. Calls only (lead 21: outside Mail later if
+// the user wants it). The crew's booths already follow the event's 'closed' routine. False while off ----
+const EV_COMMS_ON = EVENTS_ON;
+const eventCommsDown = (t = shipNow()) => EV_COMMS_ON && !!eventMod('effect', 'commsDown', t);
+// ---- end of slot: Events engineer 2 ----
 
 // =====================================================================
 // 20. SOCIAL
@@ -37341,8 +37475,9 @@ function cue(kind) {
 // reputation (A6) listen here too
 const SOC_CUE_OF = {
   repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || d.job || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
-  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
+  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], eventMoment: [d => 'event.' + d.id + '.' + d.moment, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
   gift: [d => 'gift' + (d.tag ? '.' + d.tag : ''), 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
+  calledIn: [d => 'calledIn', 1],                       // called in on a day off for an event's meeting (section 18, F0b; only with the events on)
 };
 const CUE_MAX = 24;                                    // ship notes kept at once (0.36.78: was 30)
 function socNote(kind, d) {
@@ -37350,7 +37485,7 @@ function socNote(kind, d) {
   const c = SOC_CUE_OF[kind]; if (!c) return;
   const now = Math.floor(socNow()), key = c[0](d), you = d.who === 'you' || d.from === 'you' || d.you === true || (Array.isArray(d.came) && d.came.includes('you'));
   const m = kind === 'repair' && typeof machineById === 'function' && d.machine ? machineById(d.machine) : null;   // who it's about (the dialogue engineer's cue:...@me)
-  const who = kind === 'gift' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
+  const who = kind === 'gift' || kind === 'calledIn' ? d.who || d.to || null : kind === 'favour' ? d.from || d.for || null : kind === 'repair' ? (d.who !== 'you' ? d.who : null) || null : null;
   SHIP.social.cues.push({ key, at: now, until: now + c[1] * 1440, you, deck: d.deck || (m && m.deck) || null, who, dept: m ? repDeptOf(m) : null, room: m ? m.room || null : null });
   SHIP.social.cues = SHIP.social.cues.filter(x => x.until > now).sort((a, b) => a.at - b.at || (a.key < b.key ? -1 : a.key > b.key ? 1 : 0) || (String(a.who) < String(b.who) ? -1 : String(a.who) > String(b.who) ? 1 : 0) || (a.you === b.you ? 0 : a.you ? -1 : 1)).slice(-CUE_MAX);   // in time order, whatever order they came in
 }
@@ -37358,10 +37493,11 @@ function socNote(kind, d) {
 // big time jump and the same hours played one by one come out the same (0.36.49)
 let SOC_T = null;
 const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floor(socNow() / 1440) + 1;
-const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
+const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', 'calledIn', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
 function socHear(kind, d) {
   socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
   if (t < (SOC_IN != null ? SOC_IN : SHIP.social.hour) * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
+  if ((kind === 'eventPhase' || kind === 'eventMoment') && typeof EV_NOTES_ON !== 'undefined' && EV_NOTES_ON) { socApply(kind, d, t); return; }   // a ship-wide event's phase or felt moment: now, so crew react within minutes (section 18, the events base F2b)
   Q.push([t, kind, JSON.parse(JSON.stringify(d))]);
 }
 function socApply(kind, d, t) {
@@ -40047,6 +40183,7 @@ const homeDue = (k, t = shipNow()) => homeNext(k, t);    // the beat a call now 
 function homeCallable(t = shipNow()) {
   const [HC, HM] = homeBaked(); if (!HC || homeCalledToday(t)) return [];
   let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return [];   // the relay's down while a ship-wide event starts
+  if (typeof eventCommsDown === 'function' && eventCommsDown(t)) return [];   // section 18's F8: and in every phase whose event says comms are down (the storm's escalation too); false while off
   const ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
   return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homeNext(k, t) || homeChatPick(k, t)).map(k => {   // only someone with something to play (reviewer 1c)
     const n = homeNext(k, t), d = n && HM[n];
