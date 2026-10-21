@@ -24,6 +24,9 @@
 | EC1 bigevents_check turns 9-13 | ac32382 .. a54ff25 | PASS (mutants p1, p3, p4, isTrad, g30 caught) |
 | DB2's section 18 hook (eventsOn) | d2612749 | OK (nit: a Dev start uses the plain tradition, not the day's dressed copy; DB2 noted it for after the merge) |
 | EV6 lantern supper in seated sittings | 829f242c | PASS |
+| EV6 storm S10 (EVENTS_ON = true) | ab3e2fb7 / dc0ebe0b | PASS (check fixes owed: devmode seed, done by DB2 841a9d0; mech m17) |
+| EV5/EV7 Crossing the Line L1-L5d | 4306fd1 / c9fa161 | PASS WITH NOTES (both notes since handled in L5e/L5f) |
+| DB2 devmode_check seed | 841a9d0b | OK |
 | EV5 Line L1, L2/L3 | 5c3c003, 9188428 | Findings sent to EV7 (all built in L5b-L5d): the Captain late for the oath (14:52 for 14:40); the Line supper had standing spots; PB's evClosed fix |
 | EV5 Line L4/L5 | 0032351 | Finding: story flags set as the panel opens (a reload lost the moment and Tomas's Mail). Fixed in 4306fd1, confirmed by `tomas_probe.py` |
 | The dinner-wait regression | bisect | Not the storm's, Line's or Fridays'. First bad 4ee3fdc0 (integration 0.64.7: LADDER_ON, MUG_ON, FLC_ON on). FD1's root cause: FLC_ON wears range-1/oven-2 into faults by Day 11 and food_check's forecasts held them; a check-only fix on claude/food-waits 0f808c3 |
@@ -41,6 +44,15 @@
    - Each mutant must FAIL. Then send EC1 one verdict for 14-18.
 
 To resume in a fresh container: make the worktrees again (`git worktree add <dir> <commit>`), on-copies by sed (`EVENTS_ON` to true; for the Line `EV_LINE_ON` to true too; for bigevents a copy with `const EV_LINE_ON = EVENTS_ON;` only when the check wants part 3), and run the steps above one at a time.
+
+## Next pass (after the account move)
+
+- **EV7's L5e/L5f** (claude/line-update b42b6d8, e3870c1; tip 8bfff3b; EV7's note plans/handover-line-builder-2.md):
+  - L5e: evDressed reads 'everyone' as a pull floor (my note 1), and ownFor (first-timers' own ceremony): ER3 counted 46 + you on 835bcfc.
+  - L5f (lead 24's call): the supper at everyone 1 with 30-45 minute sittings, 18:00-19:45 (59 come, at most 40 at once).
+  - **Known open:** L5f's day_check 7 FAILs on a double-dinner diner sent to the lounge (EV7's handover, step 1).
+  - Review as usual: off identical, events/day 6-8/food 6 3/bigevents (EC1's latest), line_probe 390/360, a mutant on the supper's seats.
+- **Owed check fixes, not the game's:** mech_check m17 with the storm on (crew repair jobs in the first pass only; EV6 says seat E4). DB2's devmode seed fix 841a9d0 is OK.
 
 ## How to test
 
