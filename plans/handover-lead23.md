@@ -21,7 +21,7 @@ Lead session session_01XXiKm9iPgm565SZ4n1knmU, branch `claude/lead-23` (push onl
 - **Ion storm:** S1-S9 built on claude/storm-update f32d901 (EV4; S4/S8 by EV2). ER2's adversarial build review of f32d901 in progress. PR4 turn reviews: S1, S3-S7 (with fixes, folded), S4 PASS; S8, b9aa775, props 96bb2c6 (4d + 8b stand-in), f32d901 queued. S10 (switch on) after ER2 PASS + PR4. S2 (Captain/Vance off the double shift for the Day 12 address: Marrow 15:30, Vance 15:45 to 16:50) after Fridays reaches claude/integration.
 - **Fridays:** FR2 on claude/fridays, turns 1-7 built (turn 7 86d0c80); reviewer PR5 (turns 5-fix, 6, 7 on); PB owner-reviews s13/14/10 (all OK so far). Turns 8-10 left. FR2 ~440k: handover note at 500k → a fresh FR3.
 - **Build master:** BM11 handed over (plans/handover-build-master.md, claude/integration 3a48846). Start a fresh BM12 from that note when Fridays is ready to merge (then the storm).
-- **Crossing the Line:** not started. Plan decided (claude/event-plan-line ee590ed; lines on claude/events-lines-2). Needs a builder (L1-L6 behind EV_LINE_ON, after the storm update) + a turn reviewer + ER2 build review.
+- **Crossing the Line:** EV5 session_012DBTAAiTTNJYugQL4YLScJ started 09:24 on claude/line-update (from storm-update); L1-L6 behind EV_LINE_ON; reviewer PR4 for now; ER2 before switch-on.
 - **Optimization pass:** plan published; team of 4 + the build master after the events (test-speed, render, game code, reviewer); TS1's notes on claude/test-speed bd7d61f.
 
 ## Seats (lead 23)
