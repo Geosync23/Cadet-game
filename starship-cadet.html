@@ -37458,7 +37458,7 @@ function stormScripts() {
   for (const b of EVENT_BANDS) {
     const sc = B['captainAllClear.' + b]; if (!sc) return;
     const L = sc.lines.slice(); let i = L.findIndex(l => l.who === 'calder' && typeof l.text === 'string' && /^Mine too/.test(l.text));
-    if (i < 0) i = L.findIndex(l => l.choice) - 1;
+    if (i < 0) { const c = L.findIndex(l => l.choice); i = c >= 0 ? c - 1 : L.length - 1; }   // else before the reply's choice, else at the end (PR3/PR4: was -2 with neither)
     L.splice(i + 1, 0, you); ver[b] = { ...sc, lines: L };
   }
   MEETING_SCRIPTS.captainAllClear = { title: ver.smooth.title, from: ver.smooth.from, gist: c => evText(ver[c.band].gist, c), get lines() { return ver[stormBandNow()].lines; } };
