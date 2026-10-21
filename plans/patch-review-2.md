@@ -179,3 +179,9 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - With heads-ups off, devHeadsTick skips 'event' items while the meeting notify is now null, so there's no notice at all. Let them through like 'beat'.
   - The phone shots don't show the event rows; retakes asked for.
 - **EW1 dfd083a (story A): PASS.** The Lap stop is at the bow lounge doorway (3-lap-6), so "This is where it happened today" is right again.
+
+## EV1 F0c: claude/events-base bb285a0 (code 8b0c8dc; SHIP.evFrom, evCalPlan, the readers). PASS
+
+- **Off:** check_fast OK (280 s); cadet_test ALL IDENTICAL; no save key.
+- **On (`f0c.py`):** the plan is [ionStorm Day 11]; due is Day 11; eventDay is true on 12 and 13; evSkippedFor(20) is crossingLine, ionStorm, comet. My F1a note is settled (eventDay reads evCalPlan).
+- **Nit:** the job readers strip \W, so job ids must stay \w-only (they are today).
