@@ -14,6 +14,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 |---|---|---|---|
 | PT1 | T1: first rotation to Day 21; opening view closer | claude/patch-crew 1badd51 + e597de2 | PASS (doc fixes for T2) |
 | DB2 | D5 Traditions tab | claude/devmode-2 d261274 | PASS |
+| DB2 | D6a+D6b+D7 Set career, the Career tab | claude/devmode-2 261f7ad + d686b86 | PASS |
 | RN1 (for lead 24) | opt #4 shaders kept | claude/opt-render 6fd3505 (game 8a9de48) | PASS |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
@@ -55,3 +56,12 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - Mutants (trad part): tr not in SAVE_EXTRA, eventsOn hook removed, SHIP_DAYS not cleared: all FAIL.
 - dm_trad_probe.py (real taps, 390 and 360, reloads): quiz in 20 minutes (17:25, 22 going), listed after a reload, Take me there to the Bow lounge, 22 at the quiz at 17:40 on the deck, Stop it restores Day 3's calendar, Undo brings it back, birthday whose by taps (38 going; quiz gives way), real keys untouched, no errors.
 - The gives-way rule: agreed by lead 24.
+
+## DB2 D6a + D6b + D7: Set career and the Career tab (261f7ad, d686b86), PASS
+
+- Reviewed as one (D6a's runs hadn't started when D6b and D7 came).
+- cadet_test 0.64.8 -> 261f7ad (no #dev) ALL IDENTICAL; check_fast OK 263 s; devmode_check (261f7ad's) OK with trad, set and career.
+- Mutants, all FAIL: DM_CAREER m4 on Day 4; W.op not written; devmodeWeekMet skipped; devmodeFriends off; Officer by hand without PROMO.home; devmodeTestOpen without ladderOpen.
+- dm_set_probe.py (taps; 390 Day 12, 360 Day 10): landing, rank, trainings, cabin 4-23, nothing asked, foot "approximate", worksClean's keys kept, the same after a reload, played to 19:00 with nothing re-opened, Undo, real keys untouched. Its "ship.works byte-equal" line was a timing artefact: a direct check shows the Dev save's ship.works byte-identical across a reload; a plain game's 'cases' moves on across a reload by itself.
+- D7 nit (/2$/ in devmodeRank) fixed by DB2 in d686b86 (DM_PROMO_DONE), read.
+- Design note to the lead: Set career to Day N = the end of day N (the plan's D6 test); the Day 9 and Day 10 beat shortcuts give the before-the-beat states.
