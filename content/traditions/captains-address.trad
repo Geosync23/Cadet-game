@@ -1,0 +1,41 @@
+@tradition captains-address
+// The Captain's Friday address (EW1's words, moved in by FR1 for Short Fridays, plans/fridays-build-brief.md turn 5):
+// every Friday from Day 5, 16:00-16:50 in the rec deck auditorium, the day shift off at 15:30, dinner at 17:00. Its
+// rules live in the game (section 18f's FRI_ADDRESS, like the rec deck's REC_TRADS): Marrow and Vance at the lectern,
+// everyone else in the seats; the Friday skeleton (a helm and a watch rating, a medic, the galley) never; night shift
+// half. This file brings its words; the rules below say the same, for the check. It's in the game only with
+// SHORT_FRIDAY on. The speech itself: content/addresses/ (turn 6). The first week's Mail (Day 4, your first week) is
+// content/banks/fridays.lines' fri.mail.week1.
+k: 499
+title: The Captain's Friday address
+when: weekly friday from day 5
+at: 16:00-16:50
+min: 20
+prio: 3
+where: 7 pool rec:lectern
+where: 7 pool rec-aud
+hold: none
+who: marrow always, vance always, night-shift 50%, everyone 90%
+host: marrow
+from: Captain Odile Marrow
+
+== mail
+- Tomorrow's a short Friday: the day shift stops at half past three. The Captain's address is at four in the rec deck auditorium. Dinner at five.
+
+== ask
+- Captain at four. Back row's mine. Don't tell anyone.   #funny
+- Half three, clock out, then the auditorium. Coming?
+- She always says one thing you remember all week. Come and hear it.   #warm
+
+== here
+- Shh. She's starting.
+- Good turnout. She'll notice. She notices everything.
+- Budge up. There's a seat by me.
+
+== thanks
+- You find a seat in the auditorium as Captain Marrow steps up to the lectern. Commander Vance stands beside her.
+
+== chatter
+- Did you hear the Captain's address? She named the galley again.   #warm
+- "Those of you who have one." She says it every Friday. I wait for it.   #funny
+- Best part of a Friday: half three. Second best: the Captain.

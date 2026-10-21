@@ -142,6 +142,13 @@ F0a is in claude/integration.
 - `myshift:night` never matches until Pillar 5's night shifts exist (its line is skipped).
 - The full list: EW1's `content/addresses/README.md` (claude/events-lines f869a07).
 
+## Turn 5 notes (2026-10-21)
+
+- Dev mode's Traditions tab ("start any tradition") is Dev mode's own Stop 1b, not built yet; it lists the traditions
+  table, so the address appears there once that's built. Part F's second half waits for it.
+- Day 12: the storm's `keep` lists `captains-address` (I added it, EV1 agreed); Marrow and Vance's release from the
+  storm's double shift is EV1's storm update. fridays_check prints a note for Day 12's lectern until then.
+
 ## Rules I keep
 
 - Shared kit at load never calls `R()`; the skeleton list and dinner spread use `schedU` seeded keys (new key numbers
