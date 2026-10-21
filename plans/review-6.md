@@ -65,3 +65,17 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   - after a save and reload at 16:19 the plans are the same.
   - the supper's light, Day 13 18:27: mess .74 (still easing up), promenade .03, mess again .81. Mess-only, as decided.
     (The probe printed CHECK only because my threshold .8 caught the lamp mid-ease; no errors.)
+- Framed menu (`menu_probe.py`, Day 21 09:00 on Deck 4, the trace planted, 390 and 360): on-copy, framedMenu shown, 157
+  calls, kept through a save and reload; off copy, never shown (155 calls). Shot `shots/menu_on_390.png` is from the
+  bunk room's door (the frame is small at that distance; EV4's own shots are close-ups).
+
+## EC1 bigevents_check turns 9-13 (ac32382, e3f1da9, 037a149, 541ae52, a54ff25): PASS
+- OK on EC1's own branch (037a149, 541ae52) and on the storm heads adb71aa and ab58e7b (037a149, 541ae52, a54ff25).
+- Mutants: p1 party who 1 → "crowd of 80, over 60"; p3 supper .95 → over 60, over places; isTrad by identity → "the
+  planted book-circle was not caught"; p4 the party on its 34 seats with stay [110, 120] → "36 there at once (19:07)
+  for 34 places"; g30 a Captain's beat 30 minutes off the party → "guard: gathering party ... meets ['mutCap']". All caught.
+  g10 (10 minutes off) is excused by the 15-minute rule, as designed; only "two of the Captain's scenes on Day 14" fails.
+  p2 (stay [110, 120] with 94 places) is rightly OK.
+- Note: the 15-minute excuse is any Captain's beat, not the gathering's own (the meetings' rule too).
+- Gap (for the Line, not these turns): nothing checks that Saruth stays away from the Line ceremony (the Line plan says
+  bigevents_check does); a mutant is queued with L2.
