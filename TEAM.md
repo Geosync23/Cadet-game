@@ -472,3 +472,4 @@ Working (12): FR3, PR5, PR8, EV6, PR6, EV7, ER3, BM12, PT1, PR7, TS2, RN1, OR1 (
 | Opt reviewer OR2 | session_01AnRKXUUGi8mwREwvt4WbaV | `claude/review-opt` | RN1 #5 memory fix, TS2 F1, #8 nits |
 
 Next seat: a publisher (Playtest + Dev pages from claude/integration) once BM13 pushes 0.64.12. Spare: 2 (later a Line build reviewer, and test speed once the user picks TS2's option).
+**~18:18 UTC:** OR2: TS2's player_check F1 (claude/opt-tests 26e6902) PASS (5 m 44 s on 0.64.11; mutant pmA fails as it should). Merge note for BM13 after the storm + Fridays release: merge claude/opt-render first (it already holds f5d6815 and RN1's later perf_check), then claude/opt-tests taking opt-render's perf_check.py; plans/build-table.md clash; run player_check once on the release build. PR10: storm S10 mech m17 (storm on) OK, rest running. PR9: c3b76f4 (FR3's Day 19 `arriving`, pushed 17:56) under review; FR4 told to do only find 3 + quiet-watch Day 300.
