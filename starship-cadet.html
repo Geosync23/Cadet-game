@@ -9727,7 +9727,7 @@ function gatherings(p, d, F) {
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
     const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
-    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0 });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal
+    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2): a break in a double shift
   }
   if (typeof eventMeetPlan === 'function') out.push(...eventMeetPlan(p, d, F));   // a ship-wide event's meeting that names p (section 18, F0b; [] while the events are off): meet: true is a break in the shift
   // social B2's farewell friends (20c's farewellCrew(leaver, d) -> ids, pure per day): on a crew member's last day, each
@@ -35777,6 +35777,7 @@ function evStay(p, d, e) {
 function evArrive(p, d, e) {
   const ev = e.ev;
   if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, e))) return null;
+  const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
   if (!ev.afterShift) return null;
@@ -35814,7 +35815,9 @@ function eventPlan(p, d) {
     let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
     if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
     if (ev.lead) from = ev.lead(p, d, from, e);            // set off ahead, so they're seated by the start (the Captain's Friday address, 18f)
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null, meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
+    if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null, ...(meet ? { meet: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];
@@ -36685,6 +36688,14 @@ if (EV_STORM_ON) {
     name: evWord('event.ionStorm.gather.lanternSupper.name') || 'Lantern supper', ask: lw('ask'), here: lw('here'),
     thanks: c => evWordAt('event.ionStorm.gather.lanternSupper.thanks', 0) || 'You squeeze in at a long table in the lamp light.' });
   for (const r of S.routines.escalation) if (r.rule === 'stayIn') r.off = [[2, 1065, 1185]];
+  // S2 (EV4; FR2's minutes): the Captain and the Commander step off the bridge's double shift for the Friday address
+  // (Day 12, 18f's captains-address, 16:00-16:50; Marrow sets off at 15:30, Vance at 15:45, so the lectern is ready by
+  // 16:00): an `except` on the command double shift (evDoubleExcept), a break in their shift (eventPlan's meet); and
+  // staying in pauses in the Friday hold (15:30-17:00)
+  for (const r of S.routines.onset) {
+    if (r.rule === 'doubleShift' && r.who === 'dept:command') r.except = [{ id: 'marrow', day: 1, at: [935, 1010] }, { id: 'vance', day: 1, at: [945, 1010] }];   // Marrow 935: a host comes 5 minutes early, so she sets off at 15:30, as the auditorium opens (EV_BEATS' hold)
+    if (r.rule === 'stayIn') r.off = [[1, 930, 1020]];
+  }
   S.dressing.escalation = [{ id: 'lanternMess', title: 'Lantern supper', at: [2, 1050, 1185] }];   // the lanterns and the low light, 17:30-19:45 (the long tables' chairs are its decor, longTables)
   { const m = evBankMail('event.ionStorm.gather.lanternSupper.mail', null); if (m) S.mail.lanternSupper = { ...m, at: [2, 720], from: 'Lukas Dlamini' }; }
   S.jobs.escalation = [{ id: 'stormLanterns', title: evWord('event.ionStorm.job.stormLanterns') || 'Lantern supper: carry the lanterns up from storage', tier: 1, at: 840, bring: 'a crate of storm lanterns',
@@ -37853,6 +37864,15 @@ function evStandTray(pl, w) {
 // second): .85 while the lantern supper's lanterns are out on this deck (DECK_DRESS.lanternMess, drawn only on Deck 3),
 // else 0. Visual only; 0 while the storm update is off
 function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') ? .85 : 0; }
+// S2 (EV4): the window [from, to] (minutes of day d) someone on a ship-wide event's double shift is let off it that
+// day (the rule's except: [{ id, day (the event's day), at }]: the storm's Captain and Commander for the Friday address),
+// else null. Pure: the planner's own evAt
+function evDoubleExcept(p, d) {
+  if (!EV_STORM_ON || !p) return null;
+  const sl = evAt((d - 1) * 1440 + 960), r = sl && sl.rules.find(x => x.rule === 'doubleShift' && x.except && evWho(x.who, p));
+  const x = r && r.except.find(y => y.id === p.id && y.day === d - sl.startDay);
+  return x ? x.at : null;
+}
 // ---- end of slot: Storm builder ----
 
 // =====================================================================
