@@ -348,3 +348,8 @@ Working (5): EV2 (base F0b/F5/F8), EV3, FR2, BM11, PR3.
 |---|---|---|---|
 | Storm builder EV4 | session_01MqpjPG6mDFe5avrDxcNWTU | `claude/storm-update` | S1 fix 2, standing-tray scoping, props lanternMess + stormLantern, bigevents crowd finds, S9 → ER2 → S10; S2 after Fridays in integration |
 Working (5): EV2 (S8), EV4, FR2, BM11, PR4.
+**~06:18 UTC:** EV2 storm part done (S8 claude/storm-s4s8 5cb698a → PR4; ~440k): stands by for PR4's S4/S8 fixes (on call). Optimization plan started early, in the freed seat (plan only; the build team comes after the events):
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Optimization planner OP1 | session_01RxxLLT9jpvagqJpCW99dop | `claude/opt-plan` | measure 0.64.7, then plans/opt-plan.html with questions; TS1's notes join; adversarial review before publishing |
+Working (5): EV4, FR2, BM11, PR4, OP1.
