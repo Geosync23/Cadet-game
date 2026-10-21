@@ -54,7 +54,21 @@ The build didn't get slower to open between 0.64.4 and 0.64.5. The 14 s → 16-1
 
 - **Headroom:** the junior common room zoomed out is at 433 of 450. Quiz night zoomed out 396.
 - **Memory:** flat. Geometries/textures/JS heap 548/43/228 MB → 548/43/228 → 550/43/228 over deck round trips (the +2 is known since 0.64.6 and perf_check flags it); a week of play 548/43/228 → 550/43/228.
-- **The JS heap is 228 MB after a forced collection.** perf-p4 measured about 105-125 MB at 0.60.3 and 141-150 MB at 0.27.25. What fills it hasn't been broken down yet (a heap snapshot is turn 1's job, see the plan).
+- **The JS heap: 95 MB after opening, 229 MB after visiting every deck once, then flat** (heap snapshots, `opt-probes/deck_heap.py`, `deck_heap2.py`; `performance.memory` doesn't update often enough to show the steps). Right after opening: 48 MB of raw arrays (mostly geometry kept on the CPU side after upload), 16.5 MB of object arrays, 11.5 MB of strings held outside the heap (the script's own text and the dialogue). After every deck: raw arrays 129 MB (+81), object arrays 56 MB (+40), the rest about the same. GPU geometries come back to 548 on Deck 4 every time, so the extra ~134 MB is kept on the JavaScript side for decks you've already left (or kit made on first visit), not leaked: it stops growing after one visit to each deck. perf-p4's "105-125 MB after load" (0.60.3) compares with the 95 MB after opening; perf_check's 228 MB is the after-every-deck number. What exactly holds the 134 MB needs a retainers walk (the load seat's turn 1).
+
+### Deck changes (`goToDeck`, then the first drawn frame; phone portrait; `opt-probes/deck_heap.py`)
+
+| Deck | 1 | 2 | 3 | 4 | 5 | 6 | 7 (rec) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Build, first visit | 360 ms | 904 | 1,058 | 824 | 384 | 207 | 445 |
+| Build, second visit | 186 | 682 | 1,102 | 783 | 389 | 122 | 325 |
+| First frame after it | 2.5-3.3 s | 0.6-1.0 | 2.6-3.0 | 3.0-3.5 | 3.0-3.5 | 2.8-2.9 | 1.7-1.9 |
+
+The build is the game's own code (×4-5 on a phone: Deck 3 about 4-5 s). The first frame after a change is the software renderer uploading the new deck's geometry and compiling shaders, and costs as much on the second visit as on the first, so it's mostly uploads; a phone's GPU does that far faster.
+
+### Test browsers keeping compiled shaders between launches (`opt-probes/shader_cache.py`)
+
+A persistent browser profile (Chrome's GPU shader disk cache, with and without `--enable-gpu-shader-disk-cache`): open 10.3-11.2 s against 11.5 s with a fresh profile, a deck change and frame 2.2-2.9 s against 2.4-3.4 s (another check running alongside). Within the noise: SwiftShader doesn't reuse them. Not worth doing.
 
 ## 3. Game code a frame (CPU profile, `opt-probes/sim_prof.py`)
 
