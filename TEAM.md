@@ -402,3 +402,4 @@ Working (6): FR3, PR5, PR6, BM12, EV6, PT1 (EV5 stopping). Day rules: up to 7.
 |---|---|---|---|
 | Dev mode builder DB2 | session_01RAw82oHw329cHYC7wapKu8 | `claude/devmode-2` | Stop 1b + Stop 2; turn list to the lead first; reviewer PR5 after Fridays |
 Working (7): FR3, PR5, PR6, BM12, EV6, PT1, DB2.
+**~11:56 UTC:** PT1 plan agreed (lead): rotation 1 Day 35→21 (Theo Teague leaves, Basil Bramwell, Works cadet, arrives 17:40; farewell supper Sat 20, Name on the beam Mon 22); new hand's tea on the first THURSDAY for every rotation (Day 25 18:40); arrivals come down the Tern's ramp, greeted by Zeke (Works) or their dept's senior; new small tradition 'Off the Tern' (17:35-17:55, shuttle bay); switch ROT_TERN on; opening camera 1.5/1.15 → 1.65/1.25 (~10% closer). Later rotations stay 77/119/161/203/245.
