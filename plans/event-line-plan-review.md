@@ -277,3 +277,16 @@ lead to take overnight.
   - **R2-4:** `galley-line` isn't defined yet.
 
 Verdict unchanged: **PASS WITH FIXES** (R2-2 to R2-4). Then it's a PASS.
+
+### Round 2, final: c9d92db
+I checked the 5879dbf..c9d92db diff:
+- **R2-2:** his post is `2-watch-6` in Deck 2's lift lobby, and the mug stop finds him from his own plan. No
+  "watch room" is left.
+- **R2-3:** Zeke and Pell get a pull of 1 on the Lap, and bigevents_check confirms it. The Captain walks it with no
+  line.
+- **R2-4:** `galley-line` is defined, and 50-60 is marked as an estimate (45 or more is fine).
+
+R2-1 was already in 54e36dc.
+
+**Verdict on claude/event-plan-line c9d92db: PASS.** The plan's recommendations, including line-q9 A "The one on
+watch", are safe to take. Next for me: the build review of this event, turn by turn, once L1 is pushed.
