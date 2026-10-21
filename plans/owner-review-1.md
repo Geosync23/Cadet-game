@@ -118,3 +118,12 @@ Fixes:
 - `friSkeleton(p, d)` (18f, FR1's) caches per day from the roster, `isWorkDay` and `aboardAllDay` (s14's pure guest-stay test). So it's deterministic, and safe for the planner.
 - **Fix (s20 words):** on a short Friday the forgotten-clock-out toast still says "signed you out at 17:00" (the fallback and both `clock.auto` lines in content/banks/career.lines), but it signs you out at 15:30. Use the time: the fallback as `'... signed you out at ' + hhmm(dayShiftEnd(cd)) + '.'`, and a `{time}` slot in `clock.auto` (or a `clock.auto.friday` key) for the writer.
 - Loose ends (Part B's list): the team job on even-week Fridays at 14:00 (`TEAM_FRI`) still holds until 17:00 (`until: ... + DAY_SHIFT[1]`, line ~46148), so it can run past your 15:30 end ("Friday team jobs fit by 15:30" isn't done yet). Section 24's other "held for you until 17:00" ends (reserved jobs, leaks, incidents; about 15 `DAY_SHIFT[1]` readers) just hold a job 1.5 hours longer on Fridays. Harmless, but decide on purpose. s17's job board canvas says "day shift" until 17:00 (cosmetic).
+
+## 10. FR1's Short Fridays turn 4 (claude/fridays 6b6abae) and the clock.auto fix (56fbd2b), 2026-10-21
+
+**Verdict: PASS.** cadet_test 3a76b2a (the branch before turn 4, with patch-a and patch-b merged) vs 56fbd2b: **ALL IDENTICAL**. check_fast alone: **QUICK CHECK OK in 211 s**. FR1 also reports mech, machine, device, interactions and devmode checks OK with the switch on.
+- 56fbd2b: my part 9 fix, done (`clock.auto.friday`, three lines saying 15:30, baked; the fallback uses `hhmm(dayShiftEnd(cd))`).
+- s24 (a/d/i/k/e/f/h/l/o/q): every "held for you until 17:00" / `leave` end now reads `dayShiftEnd(day)`, with the right day number at each site (`worksDay(t)`, `floor(t / 1440) + 1`, `d`). Decided on purpose, so the crew can still take a job before they stop at 15:30. Find the fault's post window ends at `dayShiftEnd - 120` (13:30 on a Friday).
+- s24 `friTeamSlot(w)`: the Friday is `w * 7 + 1 + 4` with `teamWeek = floor((d - 1) / 7)`. That's right (week 0's Friday is Day 5). 13:30 on a short Friday; the saved per-day team plan keeps its slot. `friHaulUntil` 14:30. `TEAM_FRI` and `HAUL_UNTIL` are consts further down the file, read only at run time.
+- s19: the Schedule's "On shift" row ends at `dayShiftEnd(d)`, and `devOnShift` too (the quiet on-shift badge for traditions). s25: `friDevTimes` swaps "To 16:55" for "To 15:25" on a short Friday; `devmodeGo`'s label slice still works.
+- Left on purpose: s17's job board canvas "day shift" label (cosmetic).
