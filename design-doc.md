@@ -645,7 +645,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - Sunday 28: one dinner.
   - Monday 29: the farewell.
 
-Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. Pillar 5 steps 5-6 come later and fit around these days.
+Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. Pillar 5 steps 5-6 come later and fit around these days.
 
 **The events base's three answers (the user, 2026-10-21, each the recommended option; `plans/events-base-brief.md`):**
 - **A save already past an event's day** when the events are switched on: that event is **skipped**, never run late. Dev mode can still start it. The skip is decided once, the first time a save loads with events on, and kept with the save.
@@ -654,9 +654,19 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
-**Crowds:** up to about 60 per gathering for now (the user), with standing places around the mess's 44 seats. This goes up after a test on the user's phone.
+**Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Other gatherings (the party) still use standing places. (Whether Crossing the Line's supper follows the same rule is an open question.)
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
+
+**The storm update's eight answers (the user, 2026-10-21 02:29 UTC, each the recommended option; `plans/event-storm-plan.md` v1.2 on claude/event-plan-storm):**
+- **The story is A, "Sixty by lamplight".** Brennan is off on Friday and Saturday, so Lukas Dlamini runs her galley through the storm and the lantern supper is his. The surge kills four of his six rings. Your one choice: fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan eats at the supper, and what she says depends on your choice.
+- **Each prep job moves its own thread:** the ballasts shorten the blackouts, the batteries feed the bridge, and the booth rota shortens the queue. Left alone the storm comes out bumpy; with all three it's smooth.
+- **The lantern supper:** Saturday 18:00-19:30, the mess dimmed to emergency level with lanterns on the long tables, about 55-60 people (60 at most). Staying in pauses 17:45-19:45, so the supper is where everyone stays in. **Seated sittings, no standing (the user's change, 2026-10-21 11:45 UTC):** the crew stagger their arrival like a regular dinner: each comes through the line and sits for 45-60 minutes somewhere between 18:00 and 19:45 (the supper runs on to 19:45, when the lanterns go out, so a late arrival still has time to eat), then goes, so the mess never holds more than its 48 seats at once and nobody stands with a tray: about 51 come, at most about 41 at once. (Replaces the overnight call of about 22 eating standing at the mess's standing spots, now dropped.)
+- **The rec deck's first all-hands** is the first Friday address (Day 5), so film night moves to the auditorium from Saturday Day 6.
+- **The all-clear** is as it was: the five (four of them called in on their day off) and you, in the observation room.
+- **The bow lounge is put back together** on Sunday at 10:30.
+- **The commendation** counts storm jobs and storm meetings up to the all-clear, including the range job and the lantern job.
+- **The hours** (built in the storm update): five days, Thursday Day 11 to Monday Day 15. Calder's briefing is Thursday at 14:00 and the storm jobs go up as it ends, with the one you pick held for you. The result is settled as the all-clear begins (Sunday 10:00) and your commendation comes as it ends. Calder's debrief Mail comes on Monday at 18:00, and the event ends that midnight.
 
 **Large groups (the user's playtest, relayed by lead 20, 2026-10-20: "Love the moments with large groups — need more, especially in ship-wide events").** Every event gets big gatherings:
 - Crossing the Line's two crowds;
@@ -826,6 +836,7 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
+- Crossing the Line's supper (Day 7, the mess) is built (on claude/line-update, behind its switch) with those who don't get a seat eating standing with a tray at the mess's standing spots (`lineStandTray`). Should it sit down in sittings too, like the storm's lantern supper since 2026-10-21?
 
 **The decks:**
 
