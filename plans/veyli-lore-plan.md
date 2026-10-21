@@ -1,6 +1,6 @@
 # Who the Veyli are: the plan
 
-LW1 (Veyli lore planner), 2026-10-21, version 1.1 (ER2's review: PASS WITH FIXES, all four folded in: audit rows 19-21, the storm step moved to the lantern supper, the line count). Branch `claude/veyli-lore`, from `claude/events-lines`.
+LW1 (Veyli lore planner), 2026-10-21, version 2: **your answers are in (03:09 UTC)**, marked Decided. New: the proposed pronoun for each Veyli (section 4), the audit redone for your pronoun answer (section 5b), and the canon text ready to apply (section 6). Version 1.1 had ER2's review (PASS WITH FIXES, all four folded in). Branch `claude/veyli-lore`, from `claude/events-lines`.
 Planning and words only: the game hasn't changed. The page with the answer form is `plans/veyli-lore-plan.html`.
 
 **Your decision (02:50 UTC):** "We also need to learn as players who the Veyli are. I think they should be human
@@ -9,7 +9,7 @@ into the distance." Also decided: Crossing the Line means **"guests in someone e
 
 ## In short
 
-- **Recommended history (A, "The ones who went on"):** about six hundred years ago, early in the age of leaving
+- **Decided history (A, "The ones who went on"):** about six hundred years ago, early in the age of leaving
   Earth, a slow ship went much further than anyone else. It took four lifetimes to get past Tavessa, and its people
   settled a world out there. Nobody heard from them for centuries, and the Concord grew up behind them among the near
   stars. About eighty years ago a Concord survey ship reached the Line and found them. The Veyli say: **"We did not
@@ -22,12 +22,13 @@ into the distance." Also decided: Crossing the Line means **"guests in someone e
   the same thing on a small scale.
 - **How you learn it:** a plain fact from the first week ("They're people. They just went further out."), then
   deeper, a little at a time, through the month: Ferreira, the Envoy's tea, the Line, the storm, the comet, the
-  visit. About **23 new lines and 15 changed ones**. Nothing about why Saruth is aboard, Holt's beats or the visit's
+  visit. About **23 new lines and 17 changed ones**. Nothing about why Saruth is aboard, Holt's beats or the visit's
   turns.
-- **Pronouns:** they/them for all Veyli stays, now as a **Veyli custom** that the crew respect (their language has
-  no he or she). The old rule "the Veyli are not described in human terms" is retired.
-- **What must change:** 15 lines that set "humans" against the Veyli or call a Veyli "she", plus the canon notes in
-  facts.md and design-doc.md. Nothing in Holt's arc changes. The full audit is in section 5.
+- **Pronouns (decided: each Veyli has their own, like the crew):** proposed Saruth she, Teshavi she, Kesrin he,
+  Moleth they, Ithra she, Taavek he, following the game's own words where they exist (section 4). The old rule "the
+  Veyli are not described in human terms" is retired.
+- **What must change:** 17 on-screen lines ("humans" set against the Veyli, and five pronouns), writers' notes,
+  and the canon in facts.md and design-doc.md (ready-to-apply text in section 6). Nothing in Holt's arc changes. The full audit is in section 5.
 
 ## 1. Who the Veyli are (three histories)
 
@@ -47,7 +48,7 @@ Already written, and every option must keep it:
 - Tavessa, "a star cluster the Veyli named"
 - the Line, where the Concord's charts grow thin
 
-### A. "The ones who went on" (recommended)
+### A. "The ones who went on" (decided, vl-q1 a)
 
 - **When and why:** about six hundred years ago. Early in the age of leaving Earth, one slow ship set out to go
   further than anyone had. It wasn't fleeing anything and there was no quarrel. It wanted to see how far people could
@@ -136,7 +137,7 @@ your answers.
 | After Day 30 | Holt's beat 3 (only when you're close to him) | The six-hour silence was a mourning rite (unchanged) | 0 |
 | Later (friend tier and up, after `beat:holt.3`) | Saruth, a later talk or arc beat | Where the mourning silence comes from (the long ship). Not in the first month | later |
 
-**About 23 new lines and 15 changed ones** (section 5), all short, in voices that already exist.
+**About 23 new lines and 17 changed ones** (section 5), all short, in voices that already exist.
 
 ### What stays secret, and when it comes out
 
@@ -150,31 +151,41 @@ your answers.
 | Veyli rites in full | Never | "Some things are kept": the lore explains why customs exist, never how a rite is done |
 | The déjà vu day (Saruth hints at it, a later event) | That event | Nothing about time or the long ship "repeating" |
 
-## 4. Pronouns and how the Veyli are described
+## 4. Pronouns: each Veyli has their own (decided, vl-q3 b)
 
-Today the rule is: "the Veyli are not described in human terms", they/them for every Veyli, and "the Envoy" is always
-safe. Now that the Veyli are human, the first part goes.
+**Your answer (03:09 UTC): (b)**, each Veyli has their own pronouns, like the crew. The old rule ("the Veyli are not
+described in human terms", they/them for every Veyli) is retired, and so is the idea that the Veyli language has no
+he or she (Ferreira's line about it is dropped). "The Envoy" and "the Speaker" stay safe in any line.
 
-- **Recommended (a): they/them stays, as a Veyli custom.** The Veyli language has no "he" or "she"; it grew that way
-  on the long ship. A Veyli asks to be "they", and the crew respect it. It's plain courtesy, like learning to knock
-  twice. "The Envoy" and "the Speaker" stay safe.
-  - It changes nothing already written except three slips in the game (Teshavi as "she" and "her", the Envoy as "she" at the Captain's table) and one code comment.
-  - It gives Ferreira one more thing to learn, and the player one more small custom.
-  - It's never explained at length: one line from Ferreira at most ("No 'he' or 'she' in Veyli. Just the person.").
-- **(b) Each Veyli gets their own pronouns,** like the crew. It's more ordinary, but the writers would choose six sets
-  of pronouns, and old drafts would need checking.
-- **(c) they/them stays, with no reason given.** Less work, but now that they're human it reads as odd.
+### The proposed pronouns (for your one quick question)
 
-**The description rule** (for facts.md and the voice bible, after your answers): "The Veyli are people: a human
-culture that went further out, centuries ago. Describe them as people with their own ways. Never call them strange,
-never 'aliens', never 'their kind', and never point at their bodies. Crew call themselves 'us' or 'Concord folk', never
-'humans' set against the Veyli. A Veyli speaks of 'your people' and 'my people'."
+I checked the drawn models (game section 9: all six share the crew's body, tall and slim, with a headband) and every
+line already written. The models don't settle anything, so the lines decide where they can.
+
+| Who | Proposed | Why |
+| --- | --- | --- |
+| Envoy Saruth | **she / her** | The deck builder already wrote "she" twice: on screen at the Captain's table ("the Envoy when she accepts", game 6495) and in the cabin's code note ("a quilt in her own colours", 5601). No line says otherwise |
+| Speaker Teshavi | **she / her** | The game already says "she" twice: "her aide Kesrin" (the greeting's summary, 36686) and "tells me she has rarely been made so welcome" (the Captain, 36102) |
+| Kesrin, the Speaker's aide | **he / him** | Guest cabin F's text in the game already has "a delegation's secretary, travelling ahead of the delegation. He writes everything down" (4024), and Kesrin is the aide who writes everything down |
+| Moleth, the scholar | **they / them** | Nothing written settles it. Like the crew (Takahashi, Rahman, Esposito, Zamora, Shah, Farouk), the Veyli have someone who is "they"; Moleth's lines never use a pronoun, so nothing changes |
+| Ithra, the pilot and guard | **she / her** | Nothing written settles it. She mirrors Holt at the doors, and "she and Holt" reads clearly in the visit's lines without muddling the two |
+| Taavek, the engineer | **he / him** | Nothing written settles it. It keeps the six a mix (three she, two he, one they), like the crew |
+
+If you'd rather change any of them, only the "Why" column's lines move; the audit below names every line.
+
+**The description rule** (for facts.md and the voice bible): "The Veyli are people: a human culture that went further
+out, centuries ago. Describe them as people with their own ways. Never call them strange, never 'aliens', never 'their
+kind', and never point at their bodies. Crew say 'us' or 'Concord folk', never 'humans' set against the Veyli. A Veyli
+speaks of 'your people' and 'my people'. Each Veyli has their own pronouns (facts.md section 4)."
 
 ## 5. The audit: every mention that conflicts, and the fix
 
-Searched the whole repo for Veyli, Saruth, Teshavi, the other delegates, "human(s)" and "alien". `starship-cadet.html`
-was read, not edited. Line numbers are for this branch. Each game line is fixed in its source file, then baked; the
-source is named.
+Searched the whole repo for Veyli, Saruth, Teshavi, the other delegates, "human(s)", "alien" and every pronoun used
+for a Veyli. `starship-cadet.html` was read, not edited. Line numbers are for this branch. Each game line is fixed in
+its source file and then baked; the source is named. Rows 10, 11, 20 and 21 of version 1 are gone: with the pronouns
+above, those "she" lines are right as they are.
+
+### 5a. "Humans" set against the Veyli, and the setting
 
 | # | Where | Today | Fix |
 | --- | --- | --- | --- |
@@ -187,65 +198,142 @@ source is named.
 | 7 | `content/lines/moleth.lines:22` (game 23374) | "I study human ships." | "I study Concord ships." |
 | 8 | `content/voices/moleth.voice:2, 5, 8, 9` (game 23365); `plans/crew-roster-gen.py:448` (game 48860, bio) | "Studies human ships"; "rude about a human thing"; "asks why humans say 'cheers'" | "Concord ships"; "a Concord thing"; "asks why the Concord still says 'cheers'" |
 | 9 | `content/events/visit.draft:57` and `plans/events-ready/diplomatic/content/meetings/veyliGreeting.meet:16` (game 36691) | Teshavi: "The humans are treating you kindly, then." | "Your hosts are treating you kindly, then." |
-| 10 | Game 36686, the greeting gist (section 18; `visit.draft:49` already fixes it) | "Speaker Teshavi, her aide Kesrin" | "their aide Kesrin" (EW1's draft; goes in with the visit) |
-| 11 | Game 36102, the Captain's smooth all-clear for the visit (section 18) | "Speaker Teshavi tells me she has rarely been made so welcome." | "...tells me they have rarely been made so welcome." (only if pronouns (a) or (c); with (b), the writers choose) |
 | 12 | `content/overheard/booths.lines:151` (game 33050) | "They're people. Very polite people." | "They're people. Like us. They just went further out." (Lines 150 and 152, "aliens" and "tentacles, Grandad", stay: now they confirm it) |
-| 13 | `content/facts.md:21` | "The Veyli: proud, ritual-minded, courteous, hard to read." | Add the chosen history (section 6's facts block) |
-| 14 | `content/facts.md:226` and `:272` | "the Veyli are not described in human terms" | "a Veyli custom: their language has no he or she; the crew respect it" |
+| 13 | `content/facts.md:21-24` | "The Veyli: proud, ritual-minded, courteous, hard to read." | Section 6's text |
 | 15 | `content/facts.md:496` and `plans/handover-writer-command.md:75` | "humans knock twice" | "the Concord's people knock twice" (canon notes only) |
-| 16 | `design-doc.md:64-66` | "the Veyli, a proud, ritual-minded people ... stay in the background for now" | "the Veyli, a human people who went further out centuries ago: proud, ritual-minded and courteous. The player learns who they are through the first month" (section 6) |
-| 17 | `content/voice-bible.md:38` and `content/README.md:386` | Holt's rule (no change needed) | Add the description rule (section 4) beside it |
-| 18 | The route kiosk map (game 2053, section 4b) | "Veyli reaches" | Facts.md and every line say "the Veyli reach". A backlog row: make it "Veyli reach" (map text, owner of 4b) |
-| 19 | `content/facts.md:19` | "The Concord: the human union that runs the Survey Service" | "The Concord: the union of the near stars' worlds that runs the Survey Service" (with the Veyli human, "the human union" reads as if they aren't, or belong to it) |
-| 20 | Game 6495, the Captain's table tap text (section 4d) | "...and the Envoy when she accepts." | "...and the Envoy when they accept." |
-| 21 | Game 5601, a code comment (section 4d; not on screen) | "a quilt in her own colours" | "a quilt in their own colours" |
-| 22 | Saruth's clothes (game 48940, `rosterSpec`, section 9) | Saruth has no `spec` and `uniform: null`, so they fall back to `dept: 'command'`: the Concord's red Command uniform (from the code; not seen on screen) | Not lore, but it's wrong for a Veyli guest. A backlog row (crew data owner): give Saruth a civilian outfit in Veyli colours, like the delegates |
+| 16 | `design-doc.md:64-66` | "a proud, ritual-minded people ... stay in the background for now" | Section 6's text |
+| 17 | `content/voice-bible.md:38` and `content/README.md:386` | Holt's rule (no change) | Add the description rule (section 4) beside it |
+| 18 | The route kiosk map (game 2053, section 4b) | "Veyli reaches" | Everything else says "the Veyli reach". A backlog row for the map's owner |
+| 19 | `content/facts.md:19` | "The Concord: the human union that runs the Survey Service" | Section 6's text ("the union of the near stars' worlds") |
+| 22 | Saruth's clothes (game 48940, `rosterSpec`, section 9) | No outfit is set, so the code falls back to the red Command uniform (read from the code, not seen on screen) | Not lore, but wrong for a Veyli guest. A backlog row: plain clothes in Veyli colours, like the delegates |
+
+### 5b. Pronouns (vl-q3 b), file by file
+
+On screen (each changes a line the player can see or will see):
+
+| # | Where | Today | Fix |
+| --- | --- | --- | --- |
+| P1 | `content/talkpack/holt.talk:49` (game 33806) | "You talk to the Envoy. What do you make of them?" | "...What do you make of her?" |
+| P2 | `content/reactions/guests.lines:16` (game 28715) | "The Envoy said good morning to me. By name. I don't know how they knew it." | "...I don't know how she knew it." |
+| P3 | `plans/crew-roster-gen.py:444` (game 48859, Kesrin's bio) and `content/voices/kesrin.voice:2-3` | "Carries the Speaker's schedule in their head and their tea set in a satchel." | "...in his head and his tea set in a satchel." |
+| P4 | `content/events/visit.draft:105` and `plans/events-ready/diplomatic/content/meetings/veyliDinner.meet:24` (a reply you choose; not in the game yet) | "Ask the Envoy. They've lived with both of us." | "Ask the Envoy. She's lived with both of us." |
+| P5 | `content/events/visit.draft:49` and `plans/events-ready/diplomatic/content/meetings/veyliGreeting.meet:8` (the greeting's summary) | "Speaker Teshavi, their aide Kesrin, the scholar Moleth and their pilot Ithra" | "Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra" (back to the game's own words at 36686; "their pilot" is the delegation's) |
+
+Stay as they are: game 6495 ("the Envoy when she accepts"), 36686 ("her aide"), 36102 ("she has rarely been made so
+welcome"), the 5601 code note, game 4024 (the secretary, "He"). Plural "they" (the Veyli as a people, "Their pilot
+and Holt had words. Then they shook hands", "since they were both students of the cord") stays.
+
+Writers' notes and canon (not on screen; each header says the person's pronouns):
+
+| # | Where | Fix |
+| --- | --- | --- |
+| P6 | `content/voices/saruth.voice:2, 6, 8, 10, 12, 34` | "(they/them)" becomes "(she/her)"; "HOW THEY TALK" becomes "HOW SHE TALKS", "WHAT THEY NOTICE" becomes "WHAT SHE NOTICES"; "they watch", "their voice", "they find him", "why they were sent" become "she watches", "her voice", "she finds him", "why she was sent" |
+| P7 | `content/talkpack/saruth.talk:2, 4` | "(they/them)" becomes "(she/her)"; "why they were sent" becomes "why she was sent" |
+| P8 | `content/arcs/holt.arc:5` | "Envoy Saruth (they/them)" becomes "(she/her)" |
+| P9 | `content/voices/teshavi.voice:2, 5` | "(they/them)" becomes "(she/her)"; "HOW THEY TALK" becomes "HOW SHE TALKS" |
+| P10 | `content/voices/kesrin.voice:2, 3, 5, 24` | "(he/him)"; "HOW HE TALKS"; "his head", "his tea set", "his notebook" |
+| P11 | `content/voices/ithra.voice:2, 5` | "(she/her)"; "HOW SHE TALKS" ("they both know it" is Ithra and Holt: stays) |
+| P12 | `content/voices/taavek.voice:2, 5` | "(he/him)"; "HOW HE TALKS" |
+| P13 | `content/voices/moleth.voice` | No change ("they/them" stays) |
+| P14 | `content/events/visit.draft:12`, `plans/events-ready/README.md:14`, `plans/events-ready/diplomatic/content/banks/event-diplomatic.lines:5`, `.../veyliGreeting.meet:2`, `.../crossingLine/content/reactions/event.crossingLine.afterglow.lines:18`, `content/addresses/friday-d26.address:5` | Comments saying "the Veyli are they/them": "each Veyli has their own pronouns (facts.md 4)"; the afterglow note's "(they/them)" becomes "(she/her)" |
+| P15 | `content/facts.md:226` and `:272` | Section 6's table text |
+
+**Totals:** about 23 new lines (section 3) and 17 changed on-screen lines (5a rows 1-9 and 12, 5b P1-P5).
 
 **Checked and fine as they are** (no change):
-- Holt's whole arc and lines: the silence was a rite, "years ago", never against the Veyli as a people.
+- Holt's whole arc and lines: the silence was a rite, "years ago", never against the Veyli as a people. Holt's
+  lines say "the Envoy", never a pronoun.
 - Taavek's "no common words": fits six centuries of drift.
 - Ferreira's and Rossi's Veyli, and "many/nine words for quiet": fit.
 - "The Veyli like it warm", the seedlings, the tea table, the cord sculpture, "each knot is a promise": all fit.
 - "Your people / my people" (Saruth, Teshavi, the talk pack): fits a culture.
 - Mum's call: "he asked if you'd met any aliens. I said not yet": fits (there are none).
-- Saruth's roster `home: 'the Veyli homeworld'` and "studied the cord for twenty years": fine; the homeworld is the
-  world the long ship settled (question 5 on naming it).
-- The Line plan: "guests in someone else's sky", the afterglow's "another people's rite", the oath: all fit; no
-  change.
-- Guest cabin F's secretary ("He writes everything down", game 4024): an unnamed delegation, not stated to be Veyli.
-  Leave as is; if it's ever a Veyli, "they".
+- Saruth's roster `home: 'the Veyli homeworld'` and "studied the cord for twenty years": the homeworld is the world
+  the long ship settled (not named yet, vl-q5 a).
+- The Line plan: "guests in someone else's sky", the afterglow's "another people's rite", the oath: all fit.
 - The two-years fact ("a quiet charting run") and "Veyli ships are rare visitors": fit eighty years of careful contact.
 
-## 6. What goes into the canon after your answers (with recommended answers)
+## 6. Canon text, ready to apply
 
-**facts.md, the Veyli (the head writer's seat writes it):**
-- The Veyli are human. About six hundred years ago a slow ship left Earth to go further than anyone. Four lifetimes
-  later its people settled a world past Tavessa ("the Veyli homeworld"). No contact for centuries. A Concord survey
-  ship met them about eighty years ago, at the Line. Careful, courteous neighbours since; Veyli ships are rare. Their
-  saying: "We did not leave. We went on."
-- Their customs come from the long ship: the knot cord (the months, read by touch), the still tea hour, quiet as
-  attention, warm rooms, a bow they changed, one name each, a language grown from old Earth tongues.
-- Use round numbers only ("about six hundred years", "four lifetimes", "about eighty years ago"). No dates. No war,
-  ever. Nothing links the eighty years to Holt's bad day.
+These are your answers made into canon. The head writer's seat applies the facts.md text, and the lead applies the
+design-doc.md text, each in the same commit as the first lines that depend on it. The pronoun rows wait for your
+quick answer on the table in section 4.
 
-**design-doc.md:** the setting paragraph (audit row 16) and its Open questions, in the same commit as the
-first lines that depend on it.
+### facts.md
 
-## 7. Questions for you
+**Line 19, replace** "the human union that runs the Survey Service" **with**:
 
-1. **vl-q1, the history.** (a) "The ones who went on", recommended. (b) "A quiet parting". (c) "Lost and found".
-2. **vl-q2, when the player learns they're human.** (a) It's a plain fact from the first week; the depth comes through
-   the month (recommended). (b) Hinted, then said plainly at the Line on Day 7. (c) Kept back until the visit.
-3. **vl-q3, pronouns.** (a) they/them as a Veyli custom the crew respect (recommended). (b) Each Veyli has their own.
-   (c) they/them with no reason given.
-4. **vl-q4, what the Veyli call the Concord's people.** (a) "Your people" and "the Concord", plainly (recommended).
-   (b) A Veyli name, "the near ones" (after "the near stars"). (c) "Humans", said drily, as a Veyli joke.
-5. **vl-q5, names for the long ship and the Veyli world.** (a) Not yet: "the long ship" and "home" (recommended; you
-   asked to be asked before new places). (b) Name them now; the writer proposes three of each.
-6. **vl-q6, how the Veyli look.** (a) As drawn now: ordinary people, often tall and slim, a cord band at the brow, some
-   hair dyed in cord colours (recommended). (b) No difference at all from the crew. (c) Their own clothes too (long
-   coats in cord colours, a later art job).
-7. **veyli-general:** anything else.
+> - **The Concord:** the union of the near stars' worlds that runs the Survey Service. "The Concord academy" trains officers (the Captain's
+
+(the rest of the bullet unchanged.)
+
+**Lines 21-24, replace the Veyli bullet with:**
+
+> - **The Veyli** (the user, 2026-10-21): **people, human like everyone in this world.** About six hundred years ago a
+>   slow ship left Earth to go further than anyone had. It wasn't fleeing anything; it wanted to see how far people
+>   could go. The voyage took four lifetimes, and its people settled a world past Tavessa ("the Veyli homeworld", not
+>   named yet). No contact for centuries; the Concord grew up behind them among the near stars. About eighty years
+>   ago a Concord survey ship met a Veyli ship at the Line. Careful, courteous neighbours since; Veyli ships are rare
+>   visitors. Their saying: **"We did not leave. We went on."** No war, ever. Round numbers only ("about six hundred
+>   years", "four lifetimes", "about eighty years ago"), never dates. Nothing links the eighty years to Holt's bad day.
+> - **Veyli ways, all from the long voyage:** the knot cord (the voyage counted its months in knots, read by touch in
+>   the dark; still their calendar and record; "students of the cord"); tea at the same hour (the long ship's still
+>   hour); quiet as attention (many words for "quiet"; their silence rites are kept: the six-hour mourning silence waits for `beat:holt.3`, section 10); warm
+>   rooms (the voyage ran cold); a bow they kept and changed (so the Concord's looks "done wrong"); one name each, no
+>   family name; their own language, grown from old Earth tongues, with an old root showing here and there; seedlings
+>   from seeds the long ship carried. They look like anyone, often tall and slim, a cord band at the brow, some hair
+>   dyed in cord colours.
+> - **How the Veyli speak of the Concord:** "your people" and "the Concord", never "humans". The crew say "us" or
+>   "Concord folk". Proud, ritual-minded, courteous, hard to read.
+> - **Envoy Saruth** lives aboard (Deck 2, guest cabin E). Knot cord on the door = visitors by invitation only; a new
+>   knot each month aboard. Takes tea kneeling at a low table at the same hour every day. Holt's distrust of the Veyli
+>   is voiced and argued with, never a slur, never a joke about them as a people.
+
+**Line 226, replace the Saruth row with:**
+
+> | Envoy Saruth | she / her | the user's call (2026-10-21: each Veyli has their own pronouns); the game's own "the Envoy when she accepts" |
+
+**Line 272, replace the guests' row with:**
+
+> | Guests: Speaker Teshavi, Ithra (the Veyli) | she / her |
+> | Guests: Kesrin, Taavek (the Veyli) | he / him |
+> | Guests: Moleth (the Veyli), Jonah Petrie | they / them |
+
+**Line 496:** "humans knock twice" becomes "the Concord's people knock twice".
+
+### design-doc.md
+
+**Setting & names, lines 64-66, replace both paragraphs with:**
+
+> You serve in the Concord Survey Service, a peaceful exploration fleet, aboard the CSV Wren: a 75-person survey ship
+> on a long tour of a frontier shared with the Veyli.
+>
+> **The Veyli** (the user, 2026-10-21; plans/veyli-lore-plan.md) are human, like everyone in this world: the people of
+> a slow ship that left Earth about six hundred years ago to go further than anyone. The voyage took four lifetimes;
+> they settled a world past Tavessa and were met again by a Concord survey ship about eighty years ago. Their saying is
+> "We did not leave. We went on." Their customs (the knot cord, the tea hour, quiet, warm rooms, a bow they changed, one
+> name each, their own language) come from the voyage. They stand for the game's reach into the distance: the Wren
+> follows where they went first. The player learns who they are as a plain fact in the first week, and in more depth
+> through the first month (the Line, the storm's lantern supper, the comet, the visit). They stay a gentle background
+> thread, never a war, and each Veyli has their own pronouns, like the crew.
+
+**Open questions, under the answered list (after "Envoy Saruth is a guest, not one of the 75 crew."), add:**
+
+> - Who the Veyli are (answered 2026-10-21, plans/veyli-lore-plan.md): human, "the ones who went on" (vl-q1 a); a plain
+>   fact from the first week (q2 a); each Veyli has their own pronouns (q3 b); the Veyli say "your people" and "the
+>   Concord" (q4 a); the long ship and the Veyli world aren't named yet (q5 a); they look as drawn now (q6 a).
+
+## 7. Your answers (decided 03:09 UTC)
+
+1. **vl-q1, the history: (a)** "The ones who went on".
+2. **vl-q2, when the player learns they're human: (a)** a plain fact from the first week; the depth through the month.
+3. **vl-q3, pronouns: (b)** each Veyli has their own, like the crew. The proposed table (section 4) goes to you as one
+   quick question before any writer applies it.
+4. **vl-q4, what the Veyli call the Concord's people: (a)** "your people" and "the Concord".
+5. **vl-q5, names for the long ship and the Veyli world: (a)** not yet.
+6. **vl-q6, how the Veyli look: (a)** as drawn now.
+7. **vl-q7 (new), the pronoun for each Veyli:** (a) as proposed in section 4 (recommended); (b) change some (say which).
+8. **veyli-general:** open for anything else.
 
 ## Judgement calls
 
@@ -256,3 +344,4 @@ first lines that depend on it.
 - "Four lifetimes" is said, never a number of years for the voyage.
 - The Line plan's 14 lines are unchanged in count: two of the Saturday old-hand lines carry the Veyli fact.
 - Saruth's Talk a while lines can't be heard until backlog #15 is fixed. The plan doesn't depend on them.
+- The pronouns follow the game's own words where they exist (Saruth, Teshavi, Kesrin), so the fewest lines change.
