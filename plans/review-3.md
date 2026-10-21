@@ -131,3 +131,4 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
   - m11: the early table runs 95 min.
 
 **Still open:** turn 1's nits.
+- **0c48458 (turn 1 nits 1-2): PASS.** The room is listed once, and the cast slots print SKIP. Nits 3-4 are parked for F7c and FR1. The lead has routed the eventGatherings gap to EV1 + PB in F0b.
