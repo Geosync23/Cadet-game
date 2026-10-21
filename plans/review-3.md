@@ -186,3 +186,19 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - n4: no cue made.
 
 **Gotcha in my mutants:** n2's second simNote sits outside the `if`, so it also fires while off. The "on" part still catches the doubling.
+
+## FR1 turn 3 (B1: dayShiftEnd, your Friday clock, the skeleton by day): 4d270ac (head 3a76b2a, with patch-a and patch-b merged). PASS
+
+**Checks:**
+- The reference is head 3a76b2a with 4d270ac reversed. cadet_test ref→off: ALL IDENTICAL.
+- check_fast OK in 207 s.
+- career_check fails only backlog #12, the same on the reference, off and on.
+- leave_check, day_check Day 5 and mech_check off are all OK.
+- mech_check on fails only m4 (the Friday haul): fixed in turn 4.
+
+**Probe `fr3_clock.py` (Friday Day 5):**
+- The shift ends at 15:30.
+- Still clocked in at 15:45; auto sign-out at 16:00, recorded as 15:30 (6.5 h logged).
+- Clocking in at 15:40 is refused.
+
+**Fix found:** the forgotten-clock-out toast said 17:00 on a Friday. It's fixed in turn 4's 56fbd2b.
