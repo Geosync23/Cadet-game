@@ -36022,6 +36022,7 @@ const EV_CAL_ON = EVENTS_ON;                             // F0: events come by t
 const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
 const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as each phase begins (crew lines react)
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
+const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -36425,18 +36426,22 @@ function eventAdvance(t = shipNow(), quiet) {
     e.mine['mail:' + key] = 1; out.push('mail ' + key);
     mailSend({ at, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e, at)), quiet: !!quiet });
   }
-  if (t >= end) {
-    const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
-    for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
-    SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
-    if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
-    const mine = e.mine || {};
-    if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
-      SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
-      if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
-    }
-    SHIP.event = null; out.push('end ' + band);
+  if (t >= end) eventFinish(e, def, t, quiet, out);
+  return out;
+}
+// the end of a run (split out of eventAdvance, the events base F4a; Dev mode's End and keep uses it too): its band
+// from the threads, the traces, the log, the debrief, your commendation; SHIP.event cleared
+function eventFinish(e, def, t, quiet, out = []) {
+  const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
+  for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
+  SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
+  if (typeof mailSend === 'function' && def.debrief && def.debrief[band]) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+  const mine = e.mine || {};
+  if ((mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (mine.meetings || 0) >= 1)) {   // your part: commended (Part 2, "How outcomes are scored")
+    SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
+    if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
   }
+  SHIP.event = null; out.push('end ' + band);
   return out;
 }
 const traceOn = id => SHIP.traces.some(x => (x.id || x) === id);   // for the architects' trace props: a scorch mark, a plaque, a pet
@@ -36564,6 +36569,7 @@ function eventTakeJob(job) {
 function dialogueEnd(finished) {
   const D = DIALOGUE; if (!D) return;
   DIALOGUE = null;
+  if (EV_REPLAY_ON && D.m && D.m.id) { const f = meetingFlags(D.m); if (f) delete f['open:' + D.m.id]; }   // F4b: no longer open
   { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') try { sc.onEnd(finished); } catch (e) { /* closes anyway */ } }   // a moment ending (20c)
   if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
   if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
@@ -36587,9 +36593,15 @@ function meetingFlags(m) {
 function meetingsTick(now, quiet) {                     // quiet: a sleep or skip (no notice, no panel; the gists still come)
   for (const m of MEETINGS) {
     const k = m.id, f = meetingFlags(m); if (!f) continue;
+    // F4b: a meeting still open when the game was saved (f['open:<id>'], an event's, kept with it): after a reload it plays
+    // again if you're still there in its window (counted once toward a commendation), else its gist comes
+    if (EV_REPLAY_ON && f['open:' + k] && !DIALOGUE) {
+      if (now >= m.at + (m.len || 15)) { delete f['open:' + k]; if (!f['gist:' + k]) { f['gist:' + k] = 1; meetingGist(m.script); } }
+      else if (!quiet && inMeeting(m)) { dialogueShow(m.script, m); eventMine('meetings', -1); }
+    }
     if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); } continue; }
     if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
-    if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
+    if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); if (EV_REPLAY_ON && m.event !== 'occasion') f['open:' + k] = 1; }
     if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
     if (m.event === 'occasion' && f['met:' + k]) { const r = SHIP.occasions.find(x => x.key === k); if (r) r.met = true; }
   }
@@ -36625,7 +36637,7 @@ function eventMomentsTick(from, to) {
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
     const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;
-    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len);
+    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key) && !(EV_REPLAY_ON && e.mine['felt:' + mo.id])) { FEEL_DONE.add(key); if (EV_REPLAY_ON) e.mine['felt:' + mo.id] = 1; eventFeel(mo.feel, mo.len);   // F4b: felt once, kept with the event (a reload doesn't jolt again)
       if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventMoment', { id: e.id, moment: mo.id, day: e.startDay, t: at }); }   // F2b: the cue event.<id>.<moment> (the jolt, the horn)
   }
 }
