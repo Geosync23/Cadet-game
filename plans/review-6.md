@@ -235,3 +235,24 @@ Runs (on = EVENTS_ON and EV_LINE_ON true; bv = EV_LINE_ON = EVENTS_ON):
 - Note (lead's call, as PR6's note 2): live in the lounge 31 at 14:38, 32 at 14:43, 34 at 14:47, then 44 at 14:52 and 47
   from 14:56: about 15 still arrive after the oath's 14:40 (PR6 saw 35 then on 4306fd1). Paper says 49 planned.
 ### Verdict: the Line L5e-L5h (230495d): PASS WITH NOTES (day_check 7 waits on PB2's double-dinner fix; the oath's crowd arrives late, the lead's call). Re-check when L5h is undone and the crowd cap is measured.
+
+## PR10: ER3's fixes 4-6 and nits, read on claude/line-update ee21dd72
+Fix 4 (thanks at joinAt 900), fix 5 (savedYou 4 ship minutes after story:saved), fix 6 (the punch job's workDone counts
+for the mug): done. Nits 8, 9, 10, 12: done (the words). 13: the double dinner (PB2). 11 (the 14:30 banner still up as the
+oath opens): not touched, optional.
+
+## PR10: LB3's L5h undo, L5i (bigevents P4 menu), L5j (CROWD 80; the seated supper's min 20) on ee21dd72
+Code read: the undo is the one line back; L5i reads the off menus of Days 6-8 with linePudding emptied (fine); CROWD 80 with
+LB3's measure in the comment; L5j: evDressed takes `min`, eventPlan and gatherings pass `seated`, tradMeal's second take
+for the least time when seated (section 14: PB2's PASS, plans storm-alone identical Days 1-30).
+- off: cadet_test 230495d -> ee21dd72 ALL IDENTICAL; check_fast OK 227 s.
+- Line on: events_check OK (a note "lineCeremony: nobody went (61 meant to; the room was full)": events_check's tradition
+  count can't see the ceremony; the same note on 230495d; not a FAIL); day_check 6, 7, 8 OK (Day 7's double dinner gone);
+  food_check 7 1 only "garden, good" (backlog 23); bigevents OK (the supper 83 mean to go, 71 came, at most 42 at once, 48 seats).
+- storm on alone (EVENTS_ON true, EV_LINE_ON false): day_check 13 OK (the rec skip); events_check OK; bigevents OK.
+- Plants: P4 (Day 7's pudding before the switch test): FAIL "off: the galley's menu differs ... apple crumble" (caught).
+  `min: 20` dropped from the supper (12 eat standing again): bigevents_check OK (NOT caught: 59 came, 39 at once);
+  day_check 7 FAILs only through eklund-leila's double dinner, not the standing diners.
+### Verdict: L5h undo / L5i / L5j (ee21dd72): PASS WITH ONE CHECK GAP
+Gap (for bigevents_check's owner, LB3 now): nothing fails when a seated gathering's diner eats standing (a placeless
+meal segment). Suggest: for a seated gathering, everyone who came has a seat for their sitting (came == seated), FAIL otherwise.
