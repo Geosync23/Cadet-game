@@ -1128,9 +1128,11 @@ EXTRA['ff'] = extra_ff
 # asks you to bring the parts (24d's manifestRun, E1: held for you till the start); brought: on time, side.parts + 1;
 # not brought: the run withdrawn, the lead fetches them, 10 minutes late, never a fail; before stage 2 or Day 18 the
 # old Mail and no run; the same twice
-TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
+TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), S0 = { ...SHIP.stores };
+ // each run starts with the team parts on the shelves: an empty shelf rightly means no parts run (R5), and how many
+ // are left by Day 18 depends on the crew's plans (FLC_ON's tradition used up the last bearing: BM11, 0.64.7)
  const reset = (t, uses) => { SHIP.works = JSON.parse(W0); machinesNew(); SHIP.jobs = []; SHIP.mail = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t);
-   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; return W; };
+   W.team = { plan: {} }; W.inc = { plan: {}, open: null }; W.tier = 2; W.rank = 'officer'; W.tr.t2 = 10; W.tr.m8 = 11; W.use.m8 = uses; if (worksSide()) worksSide().parts = 0; for (const k of Object.values(TEAM_PARTS).flat()) SHIP.stores[k] = Math.max(SHIP.stores[k] || 0, 3); return W; };
  const run = (t0, t1, uses, bring, d0 = 18) => { const W = reset(t0, uses), r = {}; let j = null;
    for (let t = t0; t <= t1; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false);
      j = j || SHIP.jobs.find(x => x.kind === 'team' && x.claimedBy === 'you' && worksDay(x.start) >= d0); if (!j || j.status === 'done') continue;
@@ -1149,7 +1151,7 @@ TPARTS = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.stage0 = run(16 * 1440 + 900, 18 * 1440 + 800, 0, false);
  out.early = run(14 * 1440 + 900, 16 * 1440 + 800, 2, false, 0);
  worksSide().parts = 'x'; out.junk = teamPartsN(); worksSide().parts = 3; out.three = teamPartsN();
- SHIP.works = JSON.parse(W0); return out; })()"""
+ SHIP.works = JSON.parse(W0); SHIP.stores = S0; return out; })()"""
 def extra_tparts(g):
     if not g.ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul && typeof worksSide === 'function'"):
         print("  tparts: (not checked: 24d's manifestRun (E1) not in this build)"); return

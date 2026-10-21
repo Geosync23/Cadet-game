@@ -11,6 +11,8 @@ starship-cadet.html), everything between these markers, which sit in section 22 
     // ---- BEGIN MEETINGS ...    // ---- END MEETINGS ----     MEETINGS_BAKED (merged into MEETING_SCRIPTS)
     // ---- BEGIN TALKS ...       // ---- END TALKS ----        TALKS, the Talk a while pack (content/talkpack/*.talk)
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
+    // ---- BEGIN ADDRESSES ...   // ---- END ADDRESSES ----    FRI_ADDRESSES, the Captain's Friday addresses (content/addresses/*.address;
+                                                                 section 18f's player, the Fridays builder's)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
 --check changes nothing and exits 1 if the game file is out of date. The shapes are the social plan's Part 9
@@ -780,8 +782,108 @@ def parse_home_rest(lines, path, rel, cid, who, out):
     out['HOME_CHAT'][cid] = [{k: c[k] for k in ('when', 'lines') if k in c} for c in chats]
 
 
+# the Captain's Friday addresses (content/addresses/*.address, README there; the Fridays builder's, section 18f). A file:
+# "@address <id>", header lines "day:", "from:", "mail:" ("Subject | body"), then "== <beat>" sections (a dated speech
+# has one, "== lines"; the weekly one a pool a beat, with "pick: 2" for two). Lines: "who: text [pose] #tone",
+# "who > you: text", or "- text" (Marrow's). "? terms" limits the lines under it until the next "?" or "==" (a bare
+# "?" clears it): every term must hold, "!" turns one round, "a|b" inside a term is either. Read when she speaks
+# (section 18f), so the terms here are only checked for their words
+ADDR_KEYS = ('band', 'done', 'commended', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week')
+ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
+ADDR_POSES = ('nod', 'gesture', 'laugh', 'sigh', 'listen', 'play')
+ADDR_WHO = ('marrow', 'vance')
+
+
+def parse_address(path, rel, out):
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'address' or len(hd) != 2:
+        raise GenError(f'{path}: the header is "@address <id>"')
+    aid = hd[1]
+    if aid in out['ADDRESSES']:
+        raise GenError(f'{path}: a second address "{aid}"')
+    a, beat, cond, seen = {}, None, None, set()
+    started = False
+    for i, l in lines:
+        where = f'{path}:{i}'
+        t = l.strip()
+        if not t:
+            continue
+        if not started:
+            started = True                         # the @address line
+            continue
+        if t.startswith('=='):
+            beat = {'id': t[2:].strip(), 'pick': 1, 'lines': []}
+            if not beat['id'] or beat['id'] in seen:
+                raise GenError(f'{where}: a beat needs a name of its own ("== open")')
+            seen.add(beat['id'])
+            a.setdefault('beats', []).append(beat)
+            cond = None
+            continue
+        if beat is None:
+            m = re.fullmatch(r'(day|from|mail):\s*(.+)', t)
+            if not m:
+                raise GenError(f'{where}: before the first "==", only day:, from: and mail:')
+            k, v = m.groups()
+            if k == 'day':
+                if not v.isdigit():
+                    raise GenError(f'{where}: day needs a number')
+                v = int(v)
+            elif k == 'mail':
+                if v.count('|') != 1:
+                    raise GenError(f'{where}: mail is "Subject | body"')
+                v = [x.strip() for x in v.split('|')]
+            a[k] = v
+            continue
+        m = re.fullmatch(r'pick:\s*(\d+)', t)
+        if m:
+            beat['pick'] = int(m.group(1))
+            continue
+        if t.startswith('?'):
+            terms = t[1:].split()
+            for term in terms:                     # key:value, key:a|b (either value), !key:value; commended alone
+                k, _, v = term.lstrip('!').partition(':')
+                if k not in ADDR_KEYS or (k == 'commended') == bool(v) or any(not x for x in v.split('|')) and k != 'commended':
+                    raise GenError(f'{where}: unknown condition "{term}" ({", ".join(ADDR_KEYS)}: see content/addresses/README.md)')
+            cond = terms or None
+            continue
+        m = re.fullmatch(r'(?:(\w+)\s*(>\s*you)?\s*:|-)\s*(.+)', t)
+        if not m:
+            raise GenError(f'{where}: a line is "who: text", "who > you: text" or "- text"')
+        who, to, text = m.group(1) or 'marrow', m.group(2), m.group(3)
+        if who not in ADDR_WHO:
+            raise GenError(f'{where}: only {" and ".join(ADDR_WHO)} speak in an address')
+        text, tone = split_tone(text, where)
+        pose = None
+        pm = re.search(r'\s*\[(\w+)\]\s*$', text)
+        if pm:
+            pose, text = pm.group(1), text[:pm.start()].strip()
+            if pose not in ADDR_POSES:
+                raise GenError(f'{where}: unknown pose [{pose}] ({", ".join(ADDR_POSES)})')
+        for slot in re.findall(r'\{([^}]*)\}', text):
+            if slot not in ADDR_SLOTS:
+                raise GenError(f'{where}: unknown slot {{{slot}}} ({", ".join("{" + x + "}" for x in ADDR_SLOTS)})')
+        if '{' in re.sub(r'\{\w+\}', '', text) or '}' in re.sub(r'\{\w+\}', '', text):
+            raise GenError(f'{where}: a stray brace')
+        e = {'id': line_id(rel, beat['id'], text), 'who': who, 'text': text}
+        if to:
+            e['to'] = 'you'
+        if pose:
+            e['pose'] = pose
+        if tone != 'light':
+            e['tone'] = tone
+        if cond:
+            e['if'] = cond
+        beat['lines'].append(e)
+    if not a.get('beats') or not any(b['lines'] for b in a['beats']):
+        raise GenError(f'{path}: no lines')
+    if 'from' not in a or 'mail' not in a:
+        raise GenError(f'{path}: an address needs from: and mail:')
+    out['ADDRESSES'][aid] = a
+
+
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [],
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -802,6 +904,8 @@ def bake():
             parse_arc(path, rel, out, home=True)
         elif ext == 'talk':
             parse_talk_file(path, rel, out)
+        elif ext == 'address':
+            parse_address(path, rel, out)
     # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
     # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
@@ -920,7 +1024,17 @@ def blocks(out):
                for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])
     meet = ['const MEETINGS_BAKED = {'] + [f'  {js(k)}: {js(out["MEETINGS_BAKED"][k])},' for k in sorted(out['MEETINGS_BAKED'])] + ['};']
     trad = ['const TRADITIONS = ['] + [f'  {js(t)},' for t in out['TRADITIONS']] + ['];']
-    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS'])}
+    addr = ['const FRI_ADDRESSES = {']
+    for k in sorted(out['ADDRESSES']):
+        a = out['ADDRESSES'][k]
+        addr.append(f'  {js(k)}: {{' + ', '.join(f'{js(f)}: {js(a[f])}' for f in ('day', 'from', 'mail') if f in a) + ', "beats": [')
+        for b in a['beats']:
+            addr.append(f'    {{"id": {js(b["id"])}, "pick": {b["pick"]}, "lines": [')
+            addr += [f'      {js(e)},' for e in b['lines']]
+            addr.append('    ]},')
+        addr.append('  ]},')
+    addr.append('};')
+    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr}
 
 
 def talks_parsed(name, T):
@@ -966,7 +1080,7 @@ def main(argv):
         return 2
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
-               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, '
+               f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, {len(out["ADDRESSES"])} addresses, '
                f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)

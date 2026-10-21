@@ -469,10 +469,12 @@ with sync_playwright() as pw:
         r = g.ev("""(() => { const out = {}, D = SHIP.device; D.settings.tips = true; SHIP.intro.on = false; clearGoal();
           const run = (day, min) => { setShipNow((day - 1) * 1440 + min); POP.busy = false; POP.toast = POP.tip = POP.card = POP.warn = -1e9; TEACH_CK = -1e9; TIP_Q.length = 0; if (DEV.open) deviceClose(); return teachTick(performance.now() + 1e7); };
           for (const [id] of TEACH) D.tipsSeen[id] = true; delete D.tipsSeen['t:devwork']; delete D.tipsSeen['t:laund2'];
-          out.d1 = run(1, 10 * 60); out.d2 = run(2, 6 * 60 + 30); out.again = [run(1, 11 * 60), run(2, 7 * 60)];
+          // the patch (#13): the device tip waits for a long work step under way (a stand-in 40-minute job here)
+          const longJob = f => { const old = ACT; ACT = { kind: 'job', def: { mins: 40 }, done: 5, phase: 'do', o: {} }; try { return f(); } finally { ACT = old; } };
+          out.idle = run(1, 10 * 60); out.d1 = longJob(() => run(1, 10 * 60)); out.d2 = run(2, 6 * 60 + 30); out.again = [longJob(() => run(1, 11 * 60)), run(2, 7 * 60)];
           delete D.tipsSeen['career.late']; TIP_Q.length = 0; out.ct = [careerTip('late'), (TIP_Q.length = 0, careerTip('late')), !!D.tipsSeen['career.late']];
           return out; })()""")
-        check(r['d1'] == 't:devwork' and r['d2'] == 't:laund2' and r['again'] == [None, None], f'the training-day device tip and the Day 2 laundry tip, each once ({r})')
+        check(r['idle'] is None and r['d1'] == 't:devwork' and r['d2'] == 't:laund2' and r['again'] == [None, None], f'the device tip (only with a long job under way) and the Day 2 laundry tip, each once ({r})')
         check(r['ct'][0] is not False and r['ct'][1] is False and r['ct'][2], f'a career warning shows once a save, saved like the other tips ({r["ct"]})')
         if g.ev("typeof devDay === 'function' && typeof DECK_NAMES !== 'undefined'"):   # batch B (0.72.6): tea and the delivery on the Schedule, tea a little food, Deck 2's lift label
             r = g.ev("""(() => { const k = d => devDay(d).filter(x => x.kind === 'tea' || x.kind === 'delivery').map(x => x.title + ' ' + hhmm(x.from) + (devItemGoal(x) ? '' : ' (no goal)'));

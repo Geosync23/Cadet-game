@@ -44,6 +44,7 @@ first, then `plans/handover-events-engineer-1.md` (EV1, the base's first pieces)
 - **day_check on meeting days** (PB's ask): rerun with the events on when the Line (Day 7) and the visit add meetings.
 - **Already failing before my turns** (not mine): food_check started on Day 12 (menu board, garden carry; on: the
   storm threads), bigevents_check's clash list (talent night and the Lap on the party night: EV3's S6).
+- **Reviews:** S4 PASS (PR4; its nit, blackoutHour's comment, fixed in e723f1d), S8 PASS (PR6, who took over from PR4). PR6's nit, no change asked: the banner's top is set once as it shows, so a phone rotated mid-banner keeps the old position for its 20 seconds.
 - `eventHelp` reads only the running event (SHIP.event): after the event ends nothing reads it.
 
 ## Gotchas

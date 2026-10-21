@@ -229,3 +229,14 @@
 ? flag:train.m10.lead
 - Set the lathe going. Come back in ten. Lovely.
 - Now the hand work. Slow strokes. There.
+
+// ---- EW1 (events writer), short Fridays part E (moved in by FR2, turn 8): Day 5 at 13:00, after he hands you your mug
+// (d5-mug), said in order as bubbles while you're in the tea corner, only when SHORT_FRIDAY is on (section 18f's
+// friBeatLines; off, nothing asks for these keys)
+== week1
+? flag:beat.d5-friday.1
+- Short day today. Half three, clock out.
+? flag:beat.d5-friday.2
+- Then the auditorium at four. Rec deck. She'll say your name.
+? flag:beat.d5-friday.3
+- Don't hide. Have a biscuit first. Have you eaten?   #funny

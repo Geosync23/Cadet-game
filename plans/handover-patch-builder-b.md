@@ -16,8 +16,8 @@
   - #20: `WORK_HUNGER` 3 an hour extra at work.
   - #22: social drains [3, .25].
   - #27: `SLEEP_TAPER` [90, 1/3].
-  - Hooks: 22c4442 (17, the job board) and 9e34423 (24, Tier 1 "Relied on" 40 -> 48).
-  - machine_check now allows 3-8 jobs a shift. player_check's paper week has company at meals and chats.
+  - Hook: 22c4442 (17, the job board). 9e34423 (24, Tier 1 "Relied on" 40 -> 48) was REVERTED: its reason was wrong (see below).
+  - machine_check now allows 3-7 jobs a shift (6.0 before batch F, 6.2 after). player_check's paper week has company at meals and chats.
   - Details: DEV_NOTES "The playtest patch, batch F".
 - **#10 follow-up** 6c7be04: the escort and walk-up steps ease the drawn lane to the middle.
 - **#31** 95c22e7 and the reason commit: "Ask Zeke" parked behind `INTRO_ASK_ON = false` (section 21, PA's); intro_check part 8 flipped; design-doc's arrival paragraph marks it cut, with the user's reason. Waiting on PR2's review.
@@ -36,5 +36,5 @@
 
 ## Loose ends
 - **Optional (#9):** more crew go to the toilet after waking (.5 -> .7). Not done.
-- **For the lead or the user (PR2 and OR1):** with quicker jobs, the lower Tier 1 ratings also come about 1.4 times sooner, and nothing tests them.
+- **Reputation pace (backlog rows 12 and 17):** the busy player's early "Trusted" (Day 3) and "Relied on" (Day 4) predate batch F; the user will balance them later. career_check FAILs on row 12 by the user's decision: don't "fix" it. JOB_PACE doesn't speed reputation up much: career_check's paper players don't time jobs (identical points a day before and after F), and in timed play a steady player does 6.0 jobs a shift day before F, 6.2 after, because the board's work is the limit.
 - **Dev mode:** the "Set career" table should be re-measured after batch F.

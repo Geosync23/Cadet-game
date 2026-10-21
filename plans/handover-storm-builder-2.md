@@ -8,7 +8,7 @@ Written 2026-10-21 by EV4 (session_01MqpjPG6mDFe5avrDxcNWTU), after S9. Read EV3
 - **Role:** the ion storm update (plans/event-storm-plan.md v1.2 on claude/event-plan-storm), section 18's storm block
   and slot `// ---- slot: Storm builder`, with small hooks elsewhere. **Never set the build lines** (lead 23 confirmed):
   name each turn in a build-table row ("Ion storm update" table, plans/build-table.md).
-- **Branch:** `claude/storm-update`, tip 2228a05 (plus this note). Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
+- **Branch:** `claude/storm-update`: claude/fridays 7a0e5f7 merged in (lead 23's call) and S2 built on it (see the build table's 'storm S2' row). Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
   Take `bigevents_check.py` from `claude/bigevents-check` (EC1) as is (last: e3f1da9); never edit it.
 - **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight: questions to the lead only, never the user).
 - **Reviews:** PR4 (session_014WyaZtasY32m5fnkBxuR9d) every turn, also as the stand-in owner of 4d (props) and 8b
@@ -41,10 +41,33 @@ Shots: plans/storm-shots/ (`git add -f`: *.png is in .gitignore).
 - **S9's 'old placeholder code':** skipped; lead 23 makes it an open question for the user.
 - **Deck 4 '454':** not reproducible (common room at most 323 on; perf_check's row stands in Cabin 4-05, 433-436).
 - **Backlog 18b** (perf_check's scenes use tile numbers as world x,z in nearestOpen: they may measure the wrong room) and
-  **18c** (join_check first-light FAIL, off too): for their owners.
-- **S2** waits for claude/fridays to reach claude/integration (never merge claude/fridays). FR2: the Day 12 address's
-  goers leave up to 30 minutes early, so the doubleShift exception needs Marrow off from 15:30 and Vance from 15:45,
-  through 16:50 (not [960, 1010]). Agree the exact minutes with FR2. EV3's S2 design is in its note.
+  **#19** (join_check first-light FAIL, off too: FLC_ON): for their owners.
+- **S2: built** on this branch with claude/fridays merged in (Marrow 15:35 so she leaves at 15:30, Vance 15:45, to 16:50). The Fridays builder is FR3 (session_01935gmiyLoy5fgvs3xQd7QC); the storm reviewer is PR6 (session_01LVHLJHrAR5iGJFS7HK9E7i; PR4 handed over). fridays_check FAILs only on the storm's own address lines while the storm is off: FR3's to fix. Then S10 (the switch) after ER2's and PR6's PASS on S2.
+
+## S10, the switch-on (for EV5, session_012DBTAAiTTNJYugQL4YLScJ; lead 23's call)
+
+**When:** after PR6's PASS on this branch (ab58e7b / 892af70) and FR3's fridays_check fix (its "lines that never fill"
+must leave out the storm's own address lines while EV_STORM_ON is off). ER2 has passed S1-S9 and S2.
+
+**What (the plan's S10 row: "Switch on (`EVENTS_ON = true`) after the user's review; the full round; design-doc and
+DEV_NOTES"):**
+1. Section 18, one line: `const EVENTS_ON = false;` → `true` (it turns on EV_CAL_ON, EV_GUARD_ON, EV_NOTES_ON,
+   EV_DEVICE_ON, EV_REPLAY_ON, EV_STORM_ON, EV_RANK_ON, EV_COMMS_ON with it). Keep its comment truthful. Short Fridays
+   has its own switch (`SHORT_FRIDAY`), FR3's, which isn't S10's to flip; S2 only matters when both are on.
+2. cadet_test now differs on purpose (the game changes): prove it like 0.15.1 did. A copy of the new build with the
+   line put back to false must be ALL IDENTICAL to the build before S10. Then judge the new shots by eye.
+3. The full round on the new build, as built (no copies needed now): check_fast; events_check; bigevents_check (EC1's
+   newest from claude/bigevents-check; its 'off' parts then test a switched-off copy); day_check on Days 11-15 and a
+   quiet day (7); food_check `BUILD 11 4` (days 28/31 known, pre-existing); join_check (first-light = backlog #19);
+   social_check; devmode_check; player_check; interactions_check; device_check; perf_check (the 'lantern supper' scene;
+   mind backlog 18b, its scenes stand you in the wrong room); intro_check in pieces (the plan says so); deck_check,
+   machine_check, clothes_check, leave_check, career_check, mech_check. Note each FAIL against the same check on 892af70
+   switched on (the old state) so only new ones count.
+4. design-doc.md: the ion storm section to "built and on" (the plan's decisions, story A "Sixty by lamplight", the
+   lantern supper at about 60 with 22 standing, the party drop-in, S2's address); move answered questions out of Open
+   questions. DEV_NOTES: the storm update's section says it's on, and how to switch it off (the one line).
+5. Build-table row "storm S10" (never the build lines: the build master's), push, then PR6 and ER2 review, and the
+   lead tells the user in the morning. It reaches the user's game only through the build master's merge (Fridays first).
 
 ## Gotchas (new)
 
