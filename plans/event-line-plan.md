@@ -223,6 +223,7 @@ The build number is the build master's.
 - the storm update (the base is switched on with it);
 - EV1's F0b (called in, and named people placed into an event's meetings: the gap EC1 found, being fixed with PB), F2b (reactions within about 5 ship minutes), F3 (device) and F4 (reloads);
 - EC1's `bigevents_check.py`;
+- **a Mail at a fixed minute** in an event's data (`mail: { <id>: { at: [day, min], ... } }`, not only at a phase's start): Vance's 18:00 Mail on Saturday needs it (the warning now starts at 08:00), and so does the storm's 18:00 debrief. Asked of EV1 as one base feature for both (ER2's note);
 - patch E's `MUG_ON`;
 - the Fridays plan's `SHORT_FRIDAY`, for Friday's mention.
 
@@ -307,7 +308,7 @@ What's already true (content/facts.md):
 Three ways to give the Line its meaning:
 
 - **A (recommended): "Guests in someone else's sky."**
-  - **What it is:** the Line is where the Concord's charts end and the Veyli reach begins. Past it, every star already has a Veyli name, the Wren travels by the Veyli's leave, and the nearest Concord port is a long way behind.
+  - **What it is:** the Line is where the Veyli reach begins, and the Concord's charts grow thin: a few runs, never a full survey. Past it, every star already has a Veyli name, the Wren travels as a guest, and the nearest Concord port is a long way behind.
   - **Why ships mark it:** you can't call for help and expect it soon, and you're the Concord's face to whoever you meet. So the old oath is a promise to each other: "we did not go alone", "we bring each other home".
   - **For the Wren:** the real work of the tour starts here. Survey charts Tavessa, and everyone, first-timer or not, is a long way from home together.
   - **Why A:** it explains the oath's words. It makes the day matter to every crew member, not just the first-timers. It fits a peaceful, unarmed ship, and it gives the later Veyli events a quiet ground without saying anything about them.
@@ -317,9 +318,9 @@ Three ways to give the Line its meaning:
 **Where the game explains it** (A; about 14 lines in all, all in places the player already passes through; EW1 writes them):
 | Where | When | What it says | Lines |
 | --- | --- | --- | --- |
-| The Captain's Friday address (Day 5) | Fri 16:00 | Sunday we leave the Concord's charts; past the Line, the stars have other names | 2 |
+| The Captain's Friday address (Day 5) | Fri 16:00 | Sunday we cross into the Veyli reach; past the Line, the stars have other names | 2 |
 | Saturday-morning chatter (q1 = b) | Sat from 08:00 | old hands explain in bits: "Past the Line, every star's got a Veyli name already.", "Help's a long way off out there. That's what the oath's about.", "Survey's been waiting months for this." | 5 |
-| Vance's Mail | Sat 18:00 | one sentence added: "Beyond it, we travel by the Veyli's leave, on their charts." | 1 |
+| Vance's Mail | Sat 18:00 | one sentence added: "Beyond it, the Wren travels as a guest." | 1 |
 | Tomas on Saturday evening | Sat evening | he asks you, "Why does it matter, anyway? It's just a line." You can answer, or say you're not sure (Pell told him "guests") | 2 |
 | The oath's preface | Sun 14:40 | the Captain, before she reads: "Past this point the stars have other names, and help is a long way off. So we make each other a promise." | 2 |
 | The certificate and the Record | Sun 15:15 | "Crossed into the Veyli reach, where the Wren travels as a guest." | 1 |
@@ -328,8 +329,8 @@ Three ways to give the Line its meaning:
 **Spoiler and canon checks:**
 - **The visit:** nothing about a delegation, a meeting or anyone coming aboard. "Guests" is the Wren's side only.
 - **Holt:** nothing about his border day. His one line stays about the here and now, and nobody links the Line to "last time" (the two-years fact stays "a quiet charting run").
-- **The Envoy:** nothing about why Envoy Saruth is aboard (their card says "until close"). The meaning never names the Envoy or an agreement, only "the Veyli's leave".
-- **Facts first:** two new facts go into content/facts.md through the head writer before any line uses them: "the Concord's charts end at the Line" and "the nearest Concord port is a long way behind".
+- **The Envoy:** nothing about why Envoy Saruth is aboard (their card says "until close"). The meaning never names the Envoy, an agreement or anyone's permission: only "as guests" (ER2's M1).
+- **Facts first:** two new facts go into content/facts.md through the head writer before any line uses them: "past the Line the Concord's charts are thin: a few runs, never a full survey" (ER2's M3: it fits the quiet charting run two years ago; the head writer confirms) and "the nearest Concord port is a long way behind".
 - **Unarmed ship:** no danger talk. "Help is a long way off" is about distance, not threat.
 - **Cost:** about 14 lines, inside the story turn (L4) and L1's bake. No new code.
 
@@ -369,3 +370,4 @@ Three ways to give the Line its meaning:
 - **ER2's verdict on c9d92db: PASS** (claude/event-plan-review-2). The story was decided by the user in chat (A, 01:30); q1-q8 are on the page.
 - **v2.1 (the user, 01:42, via lead 22):** the ceremony moves from the plaza to the bow lounge; section "The ceremony in the bow lounge". ER2 reviews the change.
 - **ER2's round 3 (on 84946af): PASS WITH FIXES.** R3-1: the lead spots were re-picked on the column-50 window tiles, with seat 27 as the fallback. R3-2: the bowl and the ribbons go at 15:15, before the reading corner.
+- **ER2 on 61f81be: PASS WITH FIXES, folded in.** M1: "as guests" only, never "by the Veyli's leave" (it would hint at an arrangement, and the Envoy's reason is "until close"). M2: "on their charts" dropped. M3: the fact is now "past the Line the Concord's charts are thin: a few runs, never a full survey". The fixed-minute Mail is asked of EV1.
