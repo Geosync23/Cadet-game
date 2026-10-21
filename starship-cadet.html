@@ -36883,33 +36883,48 @@ function evHeldEnd(t) {
   return t;
 }
 const evHeld = t => evHeldEnd(t) !== t;
-// the calendar's events passed over for good: with EV_LATE 'skip', those whose day was already gone when this save
-// loaded (and never ran). Decided once at load (a new game: none), so plans made on any day agree
+// the calendar's events passed over for good (the user, 2026-10-21: a save already past an event's day skips it). F0c
+// (OR1): decided from the day the events were first on in this game, SHIP.evFrom: set once, on the first load with the
+// calendar on (a new game: 0), saved, never changed, so a reload on Day 20 skips nothing an unbroken run wouldn't.
+// The save only gains the key once the calendar is on (off: today's save). EV_LOAD_DAY: the day this page loaded
+SHIP.evFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.evFrom) ? SAVED.ship.evFrom : EV_CAL_ON ? (SHIP.time ? SHIP.time.day : 0) : null;
+SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });
 let EV_LOAD_DAY = SHIP.time ? SHIP.time.day : 0;
-const EV_SKIPPED = new Set(EV_LATE === 'skip' ? EV_CALENDAR.filter(r => r.day < EV_LOAD_DAY && !SHIP.eventLog.some(l => l.id === r.id) && !(SHIP.event && SHIP.event.id === r.id)).map(r => r.id) : []);
-if (typeof onSim === 'function') onSim('newGame', () => { EV_SKIPPED.clear(); EV_LOAD_DAY = 0; });
-// the next event by the calendar: the first built one not run and not passed over; it waits for the last one to end
-// (one event at a time), and with EV_LATE 'next', for the day the save loaded
+// the rows passed over, for a game whose events came on on day `from`: those due before it that never ran or started.
+// Pure (EC1's checks call it with any from, log and running event)
+function evSkippedFor(from, log, current) {
+  return EV_LATE !== 'skip' || from == null ? [] : EV_CALENDAR.filter(r => r.day < from && !(log || []).some(l => l.id === r.id) && !(current && current.id === r.id)).map(r => r.id);
+}
+const EV_SKIPPED = new Set(evSkippedFor(SHIP.evFrom, SHIP.eventLog, SHIP.event));
+if (typeof onSim === 'function') onSim('newGame', () => { EV_SKIPPED.clear(); EV_LOAD_DAY = 0; SHIP.evFrom = EV_CAL_ON ? 0 : null; });
+// the calendar's plan, from its own data only (PR2): each built row not passed over, on its day or, one event at a
+// time, on the day the one before it ends. eventDay reads this; evCalDue starts from it. Pure
+function evCalPlan() {
+  const out = []; let end = 0;
+  for (const r of EV_CALENDAR) {
+    const def = SHIP_EVENTS[r.id]; if (!def || def.draft || EV_SKIPPED.has(r.id)) continue;
+    const day = Math.max(r.day, end); out.push({ id: r.id, day, kind: r.kind }); end = day + def.days;
+  }
+  return out;
+}
+// the next event by the calendar: the first in the plan not yet run, on its planned day, or later if the last one ran
+// late (one event at a time), and with EV_LATE 'next', not before the events were on
 function evCalDue() {
   const last = SHIP.eventLog[SHIP.eventLog.length - 1];
-  for (const r of EV_CALENDAR) {
-    const def = SHIP_EVENTS[r.id];
-    if (!def || def.draft || EV_SKIPPED.has(r.id) || SHIP.eventLog.some(l => l.id === r.id)) continue;
-    return { id: r.id, day: Math.max(r.day, last ? last.endDay : 0, EV_LATE === 'next' ? EV_LOAD_DAY : 0) };
+  for (const r of evCalPlan()) {
+    if (SHIP.eventLog.some(l => l.id === r.id)) continue;
+    return { id: r.id, day: Math.max(r.day, last ? last.endDay : 0, EV_LATE === 'next' ? SHIP.evFrom || 0 : 0) };
   }
   return null;
 }
 // F1a: the ship-wide event's big days (the front, the escalation, the all-clear: its phases onset, escalation and
-// resolution), when section 24k's cases stay away. Only from EV_CALENDAR and the events' data (never eventNow,
-// SHIP.event or anything saved: 24k's incidents plan is saved by the day); a row the calendar passed over at load
-// (EV_SKIPPED) has none. False while EV_GUARD_ON is off (today: nothing defined it, so 24k saw no event day)
+// resolution), when section 24k's cases stay away. Only from the calendar's plan and the events' data (never eventNow,
+// SHIP.event or the log: 24k's incidents plan is saved by the day); the skip set it reads is fixed for the game
+// (SHIP.evFrom, F0c). False while EV_GUARD_ON is off (today: nothing defined it, so 24k saw no event day)
 const EV_BIG_PHASES = ['onset', 'escalation', 'resolution'];
 function eventDay(d) {
   if (!EV_GUARD_ON) return false;
-  for (const r of EV_CALENDAR) {
-    const def = SHIP_EVENTS[r.id]; if (!def || def.draft || EV_SKIPPED.has(r.id)) continue;
-    if (def.phases.some(p => EV_BIG_PHASES.includes(p.id) && r.day + p.at[0] === d)) return true;
-  }
+  for (const r of evCalPlan()) if (SHIP_EVENTS[r.id].phases.some(p => EV_BIG_PHASES.includes(p.id) && r.day + p.at[0] === d)) return true;
   return false;
 }
 // F1b, the career-beat guard: the beats on day d (a night shift from the day before reaches into this morning, as
@@ -36972,6 +36987,16 @@ function eventClosed(g, t = shipNow()) {
   const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
   return !EV_OPEN_FOR.some(o => o.deck === g.deck && o.room === g.room && evBeatsOn(d).some(b => b.id === o.beat && m >= b.from && m < b.to));
 }
+// readers for the writers' address lines (EW1, content/addresses: band:, done:<job>, {stormjobs}, {myjobs}). They read
+// what happened in play, so they're for what you see and hear only: never for the crew's planner
+function eventBandOf(id) {                                // the running event's band so far, else its last run's; null if never
+  const e = SHIP.event; if (e && e.id === id) return eventBand(id, e.threads || {});
+  const l = [...SHIP.eventLog].reverse().find(x => x.id === id); return l ? l.band : null;
+}
+// an event's jobs done by minute t (by anyone, or `you` only): the board's ids are 'event:<event>:<job id>@<start>'
+const evJobsDone = (re, you, t) => (SHIP.jobs || []).filter(j => typeof j.id === 'string' && re.test(j.id) && j.status === 'done' && j.doneBy && !j.lapsed && (!you || j.doneBy === 'you') && (t == null || j.doneAt <= t));
+function eventJobDone(jobId, you, t = shipNow()) { return evJobsDone(new RegExp('^event:[^:]+:' + String(jobId).replace(/\W/g, '') + '@'), you, t).length > 0; }
+function eventJobsCount(id, you, t = shipNow()) { return evJobsDone(new RegExp('^event:' + String(id).replace(/\W/g, '') + ':'), you, t).length; }
 // ---- end of slot: Traditions engineer ----
 
 // =====================================================================
