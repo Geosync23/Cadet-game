@@ -17,13 +17,17 @@
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
 | PT1 | T1: first rotation to Day 21; opening camera 1.65/1.25 | 1badd51 + e597de2 | PASS (doc fixes done in e07ad8a) |
-| PT1 | T2 + T3: Off the Tern, the tea on Thursday, the ramp both ways, camera 1.85/1.40 | 37c0d57, a5e78d3 | PASS WITH ONE FIX (below) |
+| PT1 | T2 + T3: Off the Tern, the tea on Thursday, the ramp both ways, camera 1.85/1.40 | 37c0d57, a5e78d3 | PASS WITH ONE FIX, done in T3b |
+| PT1 | T3b: the ramp left alone on ordinary days; events_check 9d2 Off the Tern on paper | d66f568 | PASS (3 mutants caught) |
 | DB2 | D5 Traditions tab | d261274 | PASS |
 | DB2 | D6a + D6b + D7 Set career, the Career tab | 261f7ad + d686b86 | PASS |
 | TS2 | perf_check right rooms | c2a32e2 | PASS |
 | RN1 | opt #4 shaders kept | 6fd3505 | PASS |
 
 ## Open: what's left in hand
+
+Nothing: T3b (d66f568) closed item 1 below (PASS, 15:55 UTC). Kept for the record:
+
 
 1. **PT1's check fix (T2+T3's one fix).** No real check notices arrivals or leavers going by the lift instead of the Tern's ramp: the mutant `rotTernIndex -> -1` passes events_check; `rotTernBoard -> -1` was run only against my probe. Asked PT1 for a paper check of the rotation day's plan segments (arrive at 5-tern-aisle-1 from 17:40 + 3k, then ev-off-the-tern-talk at a held crowd spot to 17:55; board at the aisle ending 15:00 - 3(n-1-k), then away; the greeter's 'greet' at 5-tern-ramp-foot), shown to fail on both mutants. When it lands: run it on the real build (OK) and on both mutants (FAIL); the mutant copies are easy to remake from a5e78d3 (one-line replacements of `rotTernIndex` and `rotTernBoard`).
    - As of 15:33 UTC claude/patch-crew had only df3fc6c after a5e78d3 (a backlog row: the Tern's tap text on a rotation afternoon, PB's note), so the fix hasn't arrived.

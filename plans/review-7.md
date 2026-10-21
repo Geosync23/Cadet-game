@@ -17,6 +17,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 | DB2 | D6a+D6b+D7 Set career, the Career tab | claude/devmode-2 261f7ad + d686b86 | PASS |
 | RN1 (for lead 24) | opt #4 shaders kept | claude/opt-render 6fd3505 (game 8a9de48) | PASS |
 | PT1 | T2 + T3: Off the Tern, the tea on Thursday, the ramp both ways, camera 1.85/1.40 | claude/patch-crew 37c0d57, a5e78d3 | PASS WITH ONE FIX (a check guarding the ramp walk) |
+| PT1 | T3b: the ramp left alone on ordinary days; events_check's Off the Tern on paper (the T2+T3 fix) | claude/patch-crew d66f568 | PASS |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
 ## Log
@@ -78,3 +79,9 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - The fix: arrivals by the lift (rotTernIndex -1) passes events_check; only the probe catches it (and the leavers-by-the-lift mutant, run against the probe only). Asked for a paper check of the rotation day's segments (arrive/aisle, the crowd spot, board/aisle, greet/foot).
 - Nits: the ramp swings shut on a reload at 17:38 (not saved: expected); a day with leavers but no arrivals would leave the ramp shut after 17:40 (none exist).
 - Shots: plans/review-7/shots/ramp_390_1741.png, ramp_390_1748.png, ramp_360_1456.png.
+
+## PT1 T3b (d66f568), PASS: T2+T3's fix done
+
+- Code read: rotTernTick returns on a day with no leavers and no arrivals (PT1's own T3 bug: the ramp shut at 17:36 every day); a leavers-only day opens it again at 17:40; the thanks line reworded.
+- events_check (d66f568's) on the real build OK. 9d2 "Off the Tern on paper" FAILs each mutant: arrivals by the lift (21 bramwell-basil, 77 achebe-lumi...), leavers by the lift (21 teague-theo, 77 alvarez-luca, moreau-signe...), the guard removed ("the ramp shut on an ordinary day (20 17:37)").
+- PT1's T2+T3+T3b: mergeable. PR7 idle (lead 24, the account move).
