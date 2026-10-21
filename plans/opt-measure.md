@@ -193,3 +193,23 @@ The last 20 non-merge commits that changed the game on `claude/integration`, map
 - **Published (the panels):** cover screen 6.5", 1080 × 2520 px, 21:9 (Wikipedia, "Samsung Galaxy Z TriFold"; SamMobile's pre-launch report said 1080 × 2560); inner screen 10", 1584 × 2160 px, about 269 ppi (Samsung's developer emulator page, SamMobile, 91mobiles).
 - **Not published: its browser size.** No device database lists the TriFold's CSS viewport or pixel ratio (searched 2026-10-21). perf_check's `TRIFOLD` sizes are **derived** from Samsung's foldable defaults (Galaxy Z Fold7: cover 2.625 device px per CSS px, inner 2.0): **folded 412 × 960** (960 × 412 turned), **open 792 × 1080** (1080 × 792 turned). The browser's own bars take some height off. The Dev Speed card (#8) should show `innerWidth × innerHeight` and `devicePixelRatio`, so the user's phone can confirm them; then change the one `TRIFOLD` table in perf_check.py.
 - Sources: https://en.wikipedia.org/wiki/Samsung_Galaxy_Z_TriFold, https://www.sammobile.com/news/samsung-galaxy-z-trifold-display-specs-features/, https://developer.samsung.com/galaxy-emulator-skin/galaxy-z.html, https://www.91mobiles.com/samsung-galaxy-z-trifold-price-in-india?ty=specs
+
+### The busy event scenes, switched on (perf_check's new scenes; RN1, 2026-10-21)
+
+Measured on local merges, not pushed: claude/opt-render (0.64.8 + #4 + TS2's room fix) with claude/storm-update, claude/fridays and claude/patch-crew (T1: the first rotation on Day 21); the Line scenes on claude/line-update as it stands (be75d10), because its game code clashes in five places with the newer storm update (for the build master and the Line builder). Draw calls in the picture (the 450 budget) / every GPU draw with shadows; people on the deck. Every view is in the scene's own room.
+
+| Scene (switches) | portrait 1.5 | portrait wide 0.7 | landscape 1.15 | TriFold folded / turned | TriFold open / turned | game code ms | people |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Captain's address, auditorium Fri 16:10 (SHORT_FRIDAY) | 174 | 209 | 171 | 174 / 172 | 167 / 157 | 1.2-2.0 | 49 |
+| after the address, rec lift lobby 16:52 (SHORT_FRIDAY) | 204 | 274 | 232 | 208 / 236 | 192 / 199 | 0.6-1.3 | 15 |
+| Friday dinner, the mess 17:20 (SHORT_FRIDAY) | 203 | 361 | 237 | 210 / 253 | 187 / 176 | 1.3-2.2 | 49 |
+| lantern supper, the mess Sat 18:30 (EVENTS_ON) | 260 | **417** | 293 | 267 / 309 | 244 / 233 | 1.5-2.7 | 62 |
+| storm all-clear party, bow lounge Sun 19:30 (EVENTS_ON) | 271 | 363 | 252 | 277 / 258 | 244 / 234 | 1.4-2.2 | 63 |
+| the Line ceremony, bow lounge Sun 14:45 (EVENTS_ON, EV_LINE_ON) | 309 | 396 | 285 | 312 / 286 | 270 / 263 | 1.2-1.6 | 57 |
+| the Line supper, the mess Sun 18:30 (EVENTS_ON, EV_LINE_ON) | 262 | **419** | 294 | 269 / 310 | 246 / 234 | 1.6-2.0 | 70 |
+| first new crew off the Tern, shuttle bay Sun 17:40 (patch-crew T1; the Tern moment T2 not in yet) | 113 | 191 | 138 | 113 / 145 | 104 / 106 | 0.4-0.7 | 1 |
+
+- **All under 450.** The busiest are the two suppers in the mess zoomed out: the Line supper 419 (31 to spare), the lantern supper 417. That's the mess hall headroom of item 13 (Sunday dinner 418): the user's answer to question 7 is to watch it and act only when something new goes in there. The Line supper is becoming seated sittings (EV7); re-measure then.
+- **The TriFold** (sizes derived, see above): folded it draws about what a phone in portrait does; open, a little less (the camera's view takes in the same room). Turned (landscape) folded is the heaviest TriFold view: 309-310 in the suppers.
+- Game code a frame stays 1.2-2.7 ms here in every event scene (Sunday dinner 2.0-3.0).
+- **Day 21:** with only T1, the scene measures an empty shuttle bay at 17:40 (just you). The row stays as is: with T2 (the Tern moment) it measures the arrival itself; on a build without a Day 21 rotation it prints WAITING.
