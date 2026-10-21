@@ -1,0 +1,7 @@
+13. First-time arrows, calling home, Zeke's Day 1 tea
+  the Chief says eat, no tray: arrow 'Get your dinner at the servery', call card held back True; with a tray: arrow 'None', call card up
+  Track it: arrow 'Call home from the booths'; in the booths: arrow None, done True
+  Day 1 after the briefing: 'Clock in at the time clock'; clocked in: 'Take a job at the job board'; job taken True: None
+  13:01, first job done: {'go': True, 'told': True, 'g': 'Tea and biscuits with Zeke', 'mode': 'lead', 'lead': True}; in the Tea corner: {'at': True, 'g': None, 'mode': 'wait'}; after your tea: {'end': 791, 'mode': 'follow'}
+OK
+rc=0 secs=52

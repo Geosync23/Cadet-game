@@ -1,0 +1,13 @@
+12. The week in the real game: each beat's teacher says their lines in its room in its window (the writers' beat.<id>.<n>); Tomas comes to Sowing
+  d1-wash (Day 1, Monday 06:01, plan [4, 'intro', None]): heard 4/4
+  d1-dinner (Day 1, Monday 18:01, plan [3, 'intro', '3-mess-1']): heard 5/5
+  d2-booths (Day 2, Tuesday 18:01, plan [3, 'intro', '3-bench-17']): heard 4/4
+  d3-pick (Day 3, Wednesday 09:01, plan [5, 'intro', '5-stool-1']): heard 5/5
+  d3-store (Day 3, Wednesday 16:31, plan [3, 'intro', '3-shop-1']): heard 5/5
+  d4-quiz (Day 4, Thursday 20:01, plan [3, 'intro', '3-bar-order-1']): heard 5/5
+  d5-mug (Day 5, Friday 13:01, plan [5, 'intro', '5-tea-1']): heard 3/3
+  d5-invite (Day 5, Friday 18:01, plan [3, 'dinner', '3-mess-2']): heard 4/4
+  d6-sowing (Day 6, Saturday 11:46, plan [3, 'intro', '3-crates-1']): heard 5/5
+  Sowing: Tomas brought to the garden {'sow': True, 'at': '3-tend-3'}
+OK
+rc=0 secs=358
