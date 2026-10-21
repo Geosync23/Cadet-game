@@ -389,3 +389,4 @@ Working (5): EV4, EV5, PR5, PR6, FR3. On call: ER2, EC1, PB, OP1.
 |---|---|---|---|
 | Build master BM12 | session_01Pdzb8wT4UA5tPgwQStRoqd | `claude/integration` | from BM11's note: Fridays (0.64.9) → storm → the Line, each on the lead's go; dry-run Fridays merge now |
 Working (5): FR3, EV5, PR5, PR6, BM12.
+**~11:25 UTC check-in (lead ~435k):** PR6 (~250k): storm adb71aa all green (party 241/325 calls, supper 220), S8 PASS, now S2 then the Line's L1-L3 (EV5 kept sending to PR4; connected directly). PB: L2/L3 s14 OK except evClosed's gather rule (overlap check) → EV5; section 16 linePudding → PR6 as galley stand-in. EV5 (~520k+) pushing L2+L3, then stops; a fresh EV6 takes S10 + L4-L6 from plans/handover-line-builder.md. EW2: EV5's small words OK; ready lines on claude/events-lines-2 af19fbe. BM12 dry-run of Fridays clean (4 simple clashes), waits for PR5's pass on turns 5-9. FR3 turn 9 de18921 → PR5; fridays_check storm-lines fix next.
