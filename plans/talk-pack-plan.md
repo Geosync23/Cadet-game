@@ -104,7 +104,7 @@ rank, trait, who) and **you with them** (tier, mem, flag, beat, rep). What the p
 | `rank:junior`, `!rank:captain` | talks about bunks or "my boss" | yes |
 | `!newhere` | "my first month..." needs someone who's been aboard a while | yes |
 | `beat:<arc>.<n>`, `flag:<key>`, `rep:` | own talks that follow an arc beat or your Works record | yes |
-| `!moved:<id>` | talks naming crew who leave mid-year (Teague day 35, Lindqvist, Santos, Grieve, Haddad...) | yes |
+| `!moved:<id>` | talks naming crew who leave mid-year (Teague day 21 (was 35), Lindqvist, Santos, Grieve, Haddad...) | yes |
 | `!dept:` | "I'd like to see the bridge" (not helm, command); "{boss} said nice work" (not Works: Calder never says it) | yes |
 | **`thread:<theme>` / `!thread:<theme>`** (new) | the speaker's roster `thread` (the struggle theme): pool talks that would tell a theme's story early skip people on it (`talent`, `homesick`, `notgood`, `leaving`, `family`) | **no: please add** (lines_check too) |
 
