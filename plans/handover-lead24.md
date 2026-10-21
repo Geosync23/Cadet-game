@@ -27,7 +27,7 @@ Read first (new lead): CLAUDE.md; this note; TEAM.md bottom; plans/handover-lead
 
 ## Builds
 - **0.64.9** claude/integration f782c5d = 0.64.8 + Dev mode Stop 1b + Stop 2. Dev page https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf version 4. Playtest page still 0.64.7 https://claude.ai/artifact/82sEvZTAtj1ezCuv6iAAad.
-- **0.64.10 candidate** (BM12, NOT pushed to integration; asked to park on claude/integration-next): Fridays switch-off (11b2220) + FD1's food_check fix. Waits on PR5's pass of Fridays turns 7-9.
+- **0.64.10** claude/integration c6f665b (Fridays off + food_check fix). Playtest https://claude.ai/artifact/Vx6uXaHnAfZsMQs8DHZJmh ; Dev page v5.
 - **Next:** one release with storm S10 (EV6) + Fridays turn 10 (FR3 0dc45624) switched on together → NEW playtest page + Dev page. Then PT1's crew patch (T1-T3 + check fix), opt (#4, #10, #6, perf scenes, #8, #5, TS2 item 2), then the Line (after ER3 round 2 + L6).
 
 ## Seats (15:35 UTC) — see TEAM.md for branches
