@@ -264,3 +264,16 @@ does.
 **Verdict on 221c492: PASS WITH FIXES** (R2-1 to R2-4, all small and exact). Once they're in, it's a PASS; I don't
 need another full round, only a look at the diff. The recommendations, A for line-q9 and the rest, are safe for the
 lead to take overnight.
+
+### Round 2, update: 5879dbf (54e36dc + EW1's Holt guard rail)
+- **R2-1: done.** The Saturday moment follows Tomas until bed, and the Mail comes at about 22:50.
+- **The Holt line and the neutral two-years fact ("a quiet charting run"): good.** They keep his arc's border-patrol
+  story untouched. The head writer's timeline check before facts.md is the right gate.
+- **Still open:**
+  - **R2-2:** "watch room" is still in the story's opening line, in "What it needs" (the second stop) and in
+    risk 11, which now says both `2-watch-6` and "the watch room's door". His post is in Deck 2's lift lobby.
+  - **R2-3:** the Lap's re-dress doesn't yet give Zeke and Pell a pull of 1. "She isn't on the Lap" still stands in
+    the judgement calls.
+  - **R2-4:** `galley-line` isn't defined yet.
+
+Verdict unchanged: **PASS WITH FIXES** (R2-2 to R2-4). Then it's a PASS.
