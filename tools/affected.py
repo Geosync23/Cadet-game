@@ -13,10 +13,12 @@ runs check_fast plus the checks this prints; the full round runs at every releas
 How it picks (the union of two lists; it never picks fewer than either):
   1. The rules: DEV_NOTES "Testing"'s "run it whenever ..." lines, by section (RULES below). Sections everything reads
      (setup, the deck builder, the current deck, ship time and save, the main loop) run every check.
-  2. The map from real runs: each check run once under tools/check_cover.py, recording the game's functions it made
-     run after the page was up. A change inside a top-level function picks the checks that ran it; a change to a table
-     or other top-level name picks the checks that ran any function that uses it (tools/fn_index.js's refs); a new
-     function picks the checks of the functions that use it. Code that only runs while the page opens picks LOAD_CHECKS.
+  2. The map from real runs (tools/check_map.json): each check run once under tools/check_cover.py, recording the game
+     lines it made run after the page was up (block coverage). A change picks every check that ran one of the changed
+     lines of the old side (a pure insertion: the lines either side), moved into the map's own game by a diff; a changed
+     table or other top-level value picks every check that ran a line reading it (tools/fn_index.js's uses). Lines that
+     ran only while the page opened pick LOAD_CHECKS. This is option (a), the user's "Careful" (2026-10-21): any check
+     that runs a changed line is picked; tools/affected_replay.py proves it on history and the known failures.
   Files outside the game: a check's own file picks that check; cadet_test.py (every check's runner) picks all;
   content/ picks the lines checks and section 22's rules; tools/, plans/ and notes pick nothing.
 check_fast.sh always runs on top (words baked, names, deck, machine, leave, device), so those four aren't listed.
@@ -42,7 +44,7 @@ CHECKS = {
     'food': ('python3 food_check.py {g}', 2), 'career': ('python3 career_check.py {g}', 2),
     'social': ('python3 social_check.py {g}', 1), 'talk': ('python3 talk_check.py {g}', 1),
     'arc': ('python3 arc_check.py {g}', 1), 'lines': ('python3 lines_check.py {g}', 1),
-    'bigevents': ('python3 bigevents_check.py {g}', 5),
+    'bigevents': ('python3 bigevents_check.py {g}', 5), 'fridays': ('python3 fridays_check.py {g}', 4),
     # in check_fast already (listed only so a check file of theirs is known)
     'deck': ('python3 deck_check.py {g}', 4), 'machine': ('python3 machine_check.py {g}', 1),
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
@@ -60,7 +62,8 @@ RULES = {
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents'],
     '19': ['device', 'puzzle', 'player'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
-    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents'], '20': ['social', 'arc', 'bubble', 'lines'],
+    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays'],
+    '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf'], '20': ['social', 'arc', 'bubble', 'lines'],
     '20c': ['social', 'arc'], '21': ['intro', 'clothes'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck'],
     '10': ['day1', 'cadet', 'deck', 'events'], '8c': ['disc', 'day1', 'perf'], '11': ['cadet', 'interactions', 'bubble'],
