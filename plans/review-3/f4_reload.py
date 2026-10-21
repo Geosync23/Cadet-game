@@ -37,6 +37,18 @@ for k in range(80):
     if not ev("!!DIALOGUE"): break
     ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(0); else dialogueNext(); })()"); step(2)
 r2 = ev(ST); print('ended', r2, flush=True)
-ok = r1['dlg'] == 'stormBriefing' and r2['mine'].get('meetings') == 1 and 'open:stormBriefing' not in r2['mine']
-print('REPLAY', 'OK' if ok else 'FAILED', '| errors', errs[:3])
+ok = r1['dlg'] == 'calderStorm' and r1['i'] == 0 and r2['mine'].get('meetings') == 1 and 'open:stormBriefing' not in r2['mine']
+print('REPLAY', 'OK' if ok else 'FAILED')
+# case 2: saved mid-meeting, the save's clock moved past the meeting's window: no replay, its gist instead
+ev("skipTo(10 * 1440 + 9 * 60 + 13)"); step(3)
+ev("(() => { const f = SHIP.event.mine; delete f['met:stormBriefing']; delete f['gist:stormBriefing']; delete f['choice:calderStorm']; f.meetings = 0; })()")
+ev(GO)
+for k in range(300):
+    step(15)
+    if ev("!!DIALOGUE"): break
+ev("DIALOGUE && dialogueNext()"); step(3); ev("saveGame()"); m0 = ev(ST)
+pg.evaluate("(() => { const s = JSON.parse(localStorage.getItem('starship-cadet-save')); s.time.min = 9 * 60 + 45; localStorage.setItem('starship-cadet-save', JSON.stringify(s)); Storage.prototype.setItem = () => {}; })()")
+load(); step(40); r3 = ev(ST); print('reloaded past the window', r3, flush=True)
+ok2 = not r3['dlg'] and 'open:stormBriefing' not in r3['mine'] and r3['mine'].get('gist:stormBriefing') == 1
+print('GIST', 'OK' if ok2 else 'FAILED', '| errors', errs[:3])
 b.close(); pw.stop()
