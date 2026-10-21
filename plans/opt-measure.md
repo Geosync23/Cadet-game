@@ -213,3 +213,16 @@ Measured on local merges, not pushed: claude/opt-render (0.64.8 + #4 + TS2's roo
 - **The TriFold** (sizes derived, see above): folded it draws about what a phone in portrait does; open, a little less (the camera's view takes in the same room). Turned (landscape) folded is the heaviest TriFold view: 309-310 in the suppers.
 - Game code a frame stays 1.2-2.7 ms here in every event scene (Sunday dinner 2.0-3.0).
 - **Day 21:** with only T1, the scene measures an empty shuttle bay at 17:40 (just you). The row stays as is: with T2 (the Tern moment) it measures the arrival itself; on a build without a Day 21 rotation it prints WAITING.
+
+### Faster deck builds (#10): built
+
+- Profile of building Decks 3, 2 and 4 (`opt-probes/build_prof.py`, three builds each, with Deck 5 between): `mergeMeshes` about 40% (its traverse pushing into plain arrays, `toNonIndexed` and `applyMatrix4` through getX/setXYZ), `tallCombine` 10%, `hullDist` 7% (every tile and wall end measured to every hull segment), the floor painter, three's own shape constructors.
+- After: `mergeMeshes` counts then fills exact typed arrays with three's sums done inline; `tallCombine` copies whole arrays; `hullBeyond` skips far segments. Best of 5 builds (`opt-probes/merge_bytes.py`):
+
+| Deck | 1 | 2 | 3 | 4 | 5 | 6 | rec |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| before (ms) | 103 | 486 | 599 | 451 | 278 | 88 | 266 |
+| after | 47 | 264 | 346 | 270 | 160 | 47 | 191 |
+
+- Every mesh's bytes, the standing tiles, the map, the trimmed walls, the tall pieces and the seed are identical on all seven decks; cadet_test ALL IDENTICAL.
+- What's left in a build: three's BoxGeometry/CylinderGeometry making Float32BufferAttributes from plain arrays for each furniture piece (~15%; caching shapes would mean changing the kit), the floor painter (canvas and grain: #6), `place` and the decks' `dress`.
