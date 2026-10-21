@@ -214,6 +214,7 @@ a{color:var(--teal)}
 
 <details class="item"><summary><span class="n">7</span><span class="t">Lighter busy frames</span><span class="s">sections 8b, 10, 14, 11, 15, 19 · game-code seat</span></summary><div class="body">
 <div class="chips"><span class="chip gain">gain: medium (aim: a quarter off the 2-3 ms)</span><span class="chip risk">risk: medium (many owners)</span></div>
+<p><b>Parked: measured, small (RN1, 2026-10-21; lead 24 agreed).</b> At Sunday dinner in the mess the frame's game code is 2.4 ms here; half is the crowd's posing, which the skinning really needs (everyone is on screen). The three pieces below would save at most about 0.15-0.2 ms, across four or five owners' sections. A phone already runs this frame in about 10-12 ms of the 16.7 ms a smooth frame allows. Numbers: plans/opt-measure.md "Lighter busy frames".</p>
 <p><b>What:</b> small, separate savings, one area at a time:</p>
 <ul>
 <li><b>The screen-size answers and the HUD's button positions</b> (<code>matchMedia</code>, <code>getBoundingClientRect</code>) are remembered instead of measured every frame. They're forgotten whenever the screen changes size or turns, and whenever the HUD itself changes: the needs strip, the device opening or closing, a button appearing.</li>
