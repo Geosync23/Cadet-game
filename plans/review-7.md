@@ -12,6 +12,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
+| PT1 | T1: first rotation to Day 21; opening view closer | claude/patch-crew 1badd51 + e597de2 | PASS (doc fixes for T2) |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
 ## Log
@@ -23,3 +24,12 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - Test-only diff. perf_check (TS2's) on 0.64.8: every scene's three views stand in its room; the numbers equal plans/opt-measure.md's "with the fix" column, scene for scene.
 - Mutant: the old `nearestOpen(tile)` call: 18 "you stand in" PROBLEMs (Machine shop, Fan hall, Bow lounge x2, Cabin 4-05, Gym), exit 1.
 - Known, not TS2's: perf_check exits 1 on 0.64.8 for the +2 geometries on the third deck round trip (since 0.64.6).
+
+## PT1 T1: first rotation to Day 21, opening camera 1.65/1.25 (1badd51, e597de2), PASS
+
+- crew-roster-gen.py on the branch rebuilds the ROSTER block byte for byte.
+- cadet_test 0.64.8 -> T1 with the camera line reverted: ALL IDENTICAL. With it: shots, mem/calls/tris, screen taps and steer walks differ (the same pixel lands elsewhere); deck data, paths, collisions, crew identical; no errors.
+- day_check 20, 21, 22 OK; events_check OK; GitHub quick check on 1badd51 green.
+- rot_probe.py (real save, 390 and 360, reloads at D20 21:00, D21 14:40/15:20/18:00, D22 08:00): state the same after each reload; Theo in moved once; Basil aboard; no errors. The keys a reload changes are the same on 0.64.8 (catch-up after a skip), so not the patch.
+- Mutants: Basil aboard [35,null] (m1) and ROSTER_ROTATIONS day 35 (m2): events_check FAILs both; day_check 21 passes both.
+- Doc fixes sent for T2: DEV_NOTES ~1182 (Days 35, 77...), plans/handover-sim.md, talk-pack-plan.md, work-pools-plan.md. Nit: ?seats labels show at zoom > 1.2 (landscape opening now 1.25), demo only.
