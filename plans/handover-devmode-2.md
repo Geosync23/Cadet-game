@@ -29,7 +29,7 @@ Read DB1's note first for Stop 1a (`plans/handover-patch-e2.md` on claude/devmod
 
 ## Decisions taken (lead 23 agreed 1-5 at ~11:58; one change)
 1. Flag traditions: shown once, flag NOT set.
-2. **Changed after the agreement:** a calendar tradition in the same room gives way to a Dev start; only a clash with another Dev start is refused. Reason: the room rule is wide, so refusing blocked most evening starts. Told lead 24 and PR7; a 3-line revert if they prefer refusal.
+2. **Changed after the agreement, then agreed by lead 24:** a calendar tradition in the same room gives way to a Dev start; only a clash with another Dev start is refused (the room rule is wide, so refusing blocked most evening starts).
 3. A start keeps its own length; refused past 23:30.
 4. No special rows for the storm, Fridays or rotations: Set career runs the game's own catch-up through them, and "What's set" says so.
 5. A progress line under the fade: done.
@@ -56,5 +56,7 @@ Read DB1's note first for Stop 1a (`plans/handover-patch-e2.md` on claude/devmod
 - Stop 2 review/publish: the lead decides who publishes the Dev link build (the build master republished the Dev page for 0.64.8).
 - Stop 3 (Big events, D8-D9): not started. It waits for the storm/Line merges into integration. `EVENTS_ON` is false in 0.64.8.
 
+- **PR6's nit, for when the storm/Line merge in:** a Dev start uses the plain `SHIP_TRADITIONS` entry, not a day's dressed copy (EV_DAY_DRESS / evTable on the storm branch; not in 0.64.8). On a dressed day outside a big event's day (the storm's Monday Day 15 Lap with Tomas, the Line's Day 7 rows) a Dev start would replace the dressed version with the plain one. Fix then: take `ev` from `evTable().find(e => e.id === r.id)` in `devmodeTradsOn` (and the tab's card).
+
 ## Open questions for the user
-None of mine. The lead may ask the user about decision 2 (gives way vs refuse).
+None.
