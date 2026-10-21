@@ -51242,7 +51242,7 @@ var DM_ST = null;                                         // the Dev state (save
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
   if (!DEVMODE) return null;
-  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr), set: s && s.set && Number.isInteger(s.set.day) ? { day: s.set.day, at: String(s.set.at || '') } : null }; }
+  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr), set: s && s.set && Number.isInteger(s.set.day) ? { day: s.set.day, at: String(s.set.at || ''), ...(typeof s.set.beat === 'string' ? { beat: s.set.beat } : {}) } : null }; }
   return DM_ST;
 }
 if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last, tr: st.tr.slice(-20), set: st.set }; });
@@ -51388,7 +51388,7 @@ function devmodeLoad(rec, why) {                          // reload into a kept 
   } catch (e) { DM_HOLD = false; return devmodeSay('The browser wouldn\'t store it: ' + why + ' didn\'t happen.'); }
   devmodeReload(why);
 }
-function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); return false; }
+function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); if (text && DM_UI.el) DM_UI.el.querySelector('.dmBody').scrollTop = 0; return false; }   // the message in view (DB2)
 function devmodeBusy() {                                  // why a Dev action can't run just now, or null
   if (DM_HOLD) return 'Dev mode is still working on the last one.';
   if (typeof ride !== 'undefined' && ride) return 'Not during a lift ride. Try again when the doors open.';
@@ -51812,25 +51812,66 @@ function devmodeWake() {                                 // into your bed's room
   const id = playerBed(), n = deckOf(id), bed = (DECKS[n].places || []).find(p => p.id === id); if (!bed) return null;
   const room = roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);
 }
-function devmodeSetCareerTo(n) {                         // the action (under devmodeRun): -> the panel's words
-  const st = devmodeState();
+// the story's beats as shortcuts (the user's q3: they go on to the beat's time and place): the career by the end of
+// day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
+const DM_BEATS = [
+  { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
+  { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, at: 650, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00
+];
+// starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
+// (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
+const DM_FRIENDS = [['torres-zeke', 70, 1], ['tomas', 65, 1], ['pell', 50, 3], ['calder', 35, 1], ['halloran-emeka', 32, 1], ['esposito-yara', 30, 3], ['brennan', 22, 1],
+  ['rina', 18, 2], ['kovac-zainab', 18, 4], ['eklund-leila', 12, 2], ['ishikawa-orla', 12, 3], ['sato', 12, 3], ['vance', 14, 10], ['marrow', 12, 10]];
+function devmodeFriends(n) {                             // -> how many now know you
+  let k = 0; if (typeof relAdd !== 'function') return 0;
+  for (const [id, pts, from] of DM_FRIENDS) {
+    if (n < from) continue;
+    const want = Math.round(pts * Math.min(1, (n - from + 1) / 10)), r = typeof relGet === 'function' ? relGet(id) : null;
+    if (r && want > r.pts && relAdd(id, 'intro:dev', want - r.pts) >= 0) k++;
+  }
+  return k;
+}
+// Set career, a step at a time (a generator: each yield is a day done, for the progress line); its return is the panel's words
+function* devmodeCareerSteps(n, beat) {
+  const st = devmodeState(), land = beat ? (beat.day - 1) * 1440 + beat.at : (n - 1) * 1440 + WAKE_AT, upto = d => beat && d === beat.day ? beat.by : d;
   INTRO_BOOT = false; newGameStart(n === 0); if (n > 0) introSkip();
   st.ex = []; st.tr = []; st.note = ''; st.set = null;
   if (n === 0) { st.set = { day: 0, at: clockText() }; return 'A new Dev game by shuttle: the arrival evening, Day 0.'; }
   careerInit(); SHIP.career.gs = DM_SEED;                 // the career's seed, the same every time
-  const land = (n - 1) * 1440 + WAKE_AT, met = devmodeWeekMet(land), ex = [];
-  devmodeCareerSet(1, shipNow());
+  const met = devmodeWeekMet(land);
+  devmodeCareerSet(upto(1), shipNow());
   for (let d = 2; d <= n; d++) {
+    yield d;
     devmodeSkipTo((d - 1) * 1440 + 300);
-    devmodeCareerSet(d, shipNow());
+    devmodeCareerSet(upto(d), shipNow());
   }
+  if (beat && beat.set) beat.set(SHIP.works);
   if (shipNow() < land) devmodeSkipTo(land);
-  ex.push(...st.ex); promoPip(); devmodeWake();
-  st.set = { day: n, at: clockText() };
-  return 'Career set to Day ' + n + ' (approximate): ' + RANK_TITLE[SHIP.works.rank] + ', ' + BAND_WORD[worksBand() || 'new'] + '. ' + clockText() + ', in your bed. '
-    + (met.length ? 'The first week\'s beats marked as attended. ' : '') + (ex.length ? ex.length + ' workday' + (ex.length > 1 ? 's' : '') + ' excused. ' : '') + 'What\'s set is listed below.';
+  const fr = devmodeFriends(n);
+  promoPip(); if (beat) devmodeMove(beat.where.deck, () => ixGoalWorld({ room: beat.where.room }), r => r === beat.where.room); else devmodeWake();
+  st.set = { day: n, at: clockText(), ...(beat ? { beat: beat.id } : {}) };
+  const ex = st.ex.length, where = beat ? 'in ' + ((ROOMS[roomAt(...player.here())] || {}).name || 'place') : 'in your bed';
+  return (beat ? beat.label + ': career set to Day ' + beat.by + '\'s' : 'Career set to Day ' + n) + ' (approximate): ' + RANK_TITLE[SHIP.works.rank] + ', ' + BAND_WORD[worksBand() || 'new'] + '. ' + clockText() + ', ' + where + '. '
+    + (met.length ? 'The first week\'s beats marked as attended. ' : '') + (ex ? ex + ' workday' + (ex > 1 ? 's' : '') + ' excused. ' : '') + (fr ? fr + ' of the crew know you. ' : '') + 'What\'s set is listed below.';
 }
-function devmodeSetCareer(n) { devmodeDo('Set career to Day ' + n, () => devmodeSetCareerTo(n)); }
+function devmodeSetCareerTo(n, beat) { const g = devmodeCareerSteps(n, beat); let r = g.next(); while (!r.done) r = g.next(); return r.value; }   // all at once (devmode_check, under devmodeRun)
+// the panel's way: as a Dev action (refused when busy, the Undo kept, settled, frozen), a day at a time under the fade,
+// the progress on the panel (the sheet sits above the fade), then one save
+function devmodeSetCareer(n, beat) {
+  const label = beat ? 'Set career: ' + beat.label : 'Set career to Day ' + n, why = devmodeBusy(); if (why) return devmodeSay(why);
+  const kept = devmodeKeep(label); if (kept) return devmodeSay('Not done: ' + kept);
+  devmodeSettle(); DM_HOLD = true; fadeEl.style.transition = 'opacity .25s'; fadeEl.style.opacity = 1;
+  const g = devmodeCareerSteps(n, beat), end = out => {
+    DM_HOLD = false; devmodeState().last = label; saveGame(); devmodeSay(out);
+    fadeEl.style.opacity = 0; setTimeout(() => { fadeEl.style.transition = ''; }, 300);
+  };
+  const step = () => {
+    let r; try { r = g.next(); } catch (e) { console.error(e); return end('Something went wrong (' + e.message + '). Undo my last Dev action puts it back.'); }
+    if (r.done) return end(r.value);
+    devmodeSay('Setting career: Day ' + r.value + ' of ' + n + '…'); setTimeout(step, 0);
+  };
+  devmodeSay('Setting career: a new Dev game…'); setTimeout(step, 280);
+}
 // what Set career gave and what it gets wrong (plan 4.3), for the panel
 function devmodeWhatsSet(n) {
   if (n == null) return [];
@@ -51844,7 +51885,7 @@ function devmodeWhatsSet(n) {
     n > 1 ? 'The first week: its meetings and beats marked as attended' + (n > 7 ? ', the Settling-in list ticked, the mug and the seedling' : '') + '.' : '',
     later.length ? 'Not built yet: ' + later.join('; ') + '.' : '',
     'Real: the ship ran those days without you (machines, jobs, galley, Mail, traditions' + (n > 11 ? ', the ion storm (your part: none; its briefing by Mail)' : '') + (n > 21 ? ', the first rotation on Day 21' : '') + ').',
-    'Thin or empty: friendships and stories (no conversations played), your work log, right-first-time counts, commendations; tips already seen and the Works app\'s history are fresh. Needs and clothes: a normal morning.',
+    'Friendships: a starting level with ' + DM_FRIENDS.filter(f => n >= f[2]).length + ' people a steady player meets (Torres, Tomas, Pell, Calder...). Thin or empty: stories (no conversations played), your work log, right-first-time counts, commendations; tips already seen and the Works app\'s history are fresh. Needs and clothes: a normal morning.',
     W ? '' : 'No career record yet.',
   ].filter(Boolean);
 }
@@ -51857,9 +51898,12 @@ function devmodeSet(body) {
     ['+ 1 day', () => { DM_UI.day = Math.min(DM_MAXDAY, p + 1); devmodeDraw(); }, { aria: 'A day later' }]]);
   const days = [1, 2, 5, 8, 10, 12, 16, 21, 26];
   for (let i = 0; i < days.length; i += 3) devmodeRow(body, days.slice(i, i + 3).map(d => ['Day ' + d, () => { DM_UI.day = d; devmodeDraw(); }, { ask: d === p }]));
+  devmodeHead(body, 'Go to a story beat');
+  devmodeRow(body, DM_BEATS.map(bt => [bt.label, b => devmodeTwice(b, 'Tap again: a new Dev game', () => devmodeSetCareer(bt.day, bt))]));
+  devmodeText(body, 'The first week\'s meetings (the Day 1 briefing, the Day 2 solo job) need the arrival played: play Day 0-1 once (or Copy my real game), then Mark at Day 2 08:30 (Quick).');
   if (st.set) {
-    devmodeHead(body, 'What\'s set: Day ' + st.set.day + ' (approximate)');
-    for (const l of devmodeWhatsSet(st.set.day)) devmodeText(body, l);
+    devmodeHead(body, 'What\'s set: Day ' + st.set.day + (st.set.beat ? ', ' + ((DM_BEATS.find(x => x.id === st.set.beat) || {}).label || '') : '') + ' (approximate)');
+    for (const l of devmodeWhatsSet(st.set.beat ? (DM_BEATS.find(x => x.id === st.set.beat) || { by: st.set.day }).by : st.set.day)) devmodeText(body, l);
   }
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists

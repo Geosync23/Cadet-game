@@ -17,7 +17,8 @@
 #          put while the old page waits, and the new page has it (the Undo happened, its record used up)
 #   set:   Set career (Stop 2): the table's days are CAREER_LADDER's; Days 2, 10, 12, 26 from new Dev games land at 06:00
 #          with the table's career, in your bed's room, no miss, no first-week meeting notes, no sick day; Day 11 opens
-#          no trained row again; two Set careers to Day 12 give the same save; Undo; the tab
+#          no trained row again; two Set careers to Day 12 give the same save; starting friendships; the Day 9 test
+#          and Day 10 promotion beats; the panel's way (a day at a time, the progress shown, one save); Undo; the tab
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 #   trad:  Traditions (Stop 1b): refused on Day 0; five kinds started (in 20 minutes, at the usual time, tomorrow) with
 #          people going and at the room; whose for a birthday; a clash with a Dev start, too late, a usual time gone
@@ -449,18 +450,41 @@ def part_set(b):
     diff = [k for k in set(saves[0]) | set(saves[1]) if saves[0].get(k) != saves[1].get(k)]
     deep = [k for k in set(saves[0].get('ship', {})) | set(saves[1].get('ship', {})) if saves[0]['ship'].get(k) != saves[1]['ship'].get(k)]
     check(not diff, f'set: two Set careers to Day 12 differ in {sorted(diff)} (ship: {sorted(deep)})')
+    # starting friendships (Day 12): the people a steady player meets, through relAdd
+    fr = pg.ev("(socInit(), { gone: DM_FRIENDS.filter(f => !SOC.idx.has(f[0])).map(f => f[0]), zeke: relTier('torres-zeke'), tomas: relTier('tomas'), calder: relTier('calder'), known: DM_FRIENDS.filter(f => relTier(f[0]) >= 1).length })")
+    check(not fr['gone'] and fr['zeke'] >= 3 and fr['tomas'] >= 3 and fr['calder'] >= 2 and fr['known'] >= 10, f'set: Day 12 friendships: {fr}')
     # Undo brings the game before back
     pg.ev_reload('devmodeUndo()')
     check(pg.ev('devmodeState().set && devmodeState().set.day') == 12, f'set: Undo of the second Day 12 isn\'t the first: {pg.ev("devmodeState().set")}')
+    # the beats: Day 9's test job (08:50, the bay, the test held for you) and Day 10's promotion (10:50, the summons at 11:00)
+    beat = lambda id: pg.ev(f"devmodeRun('Set career: beat', () => devmodeSetCareerTo(DM_BEATS.find(b => b.id === '{id}').day, DM_BEATS.find(b => b.id === '{id}')))")
+    beat('t2'); pg.step(20)
+    T = pg.ev("({ clock: clockText(), room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, test: SHIP.works.test, cur: SHIP.works.cur && SHIP.works.cur.id, tr: 't2' in SHIP.works.tr, m6: 'm6' in SHIP.works.tr })")
+    check(T['clock'] == 'Day 9, Tuesday 08:50' and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day 9 test beat: {T}')
+    beat('promo'); pg.step(20)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + 11 * 60 + 2))")
+    P = pg.ev("({ clock: clockText(), rank: SHIP.works.rank, passed: SHIP.works.test && SHIP.works.test.passed, summons: SHIP.occasions.some(o => o.id === 'promoSummons') })")
+    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at 11:02 the summons is booked, still a junior): {P}')
+    # the panel's way: a day at a time under the fade, the progress on the panel, then one save
+    pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 5; devmodeDraw()')
+    pg.page.click('#dmSheet button:has-text("Set career to Day 5")'); pg.page.click('#dmSheet button:has-text("Tap again")')
+    seen = set()
+    for _ in range(100):
+        pg.page.wait_for_timeout(80); seen.add(pg.ev('DM_UI.msg'))
+        if not pg.ev('DM_HOLD') and 'Career set to Day 5' in pg.ev('DM_UI.msg'): break
+    check(any(m.startswith('Setting career: Day') and m.endswith('of 5…') for m in seen) and pg.ev('clockText()') == 'Day 5, Friday 06:00' and not pg.ev('DM_HOLD'), f'set: the panel\'s Set career (progress {sorted(seen)[:4]}, {pg.ev("clockText()")})')
+    check(pg.ev('devmodeState().last') == 'Set career to Day 5' and json.loads(pg.ev('localStorage.getItem(SAVE_KEY)'))['dev']['set']['day'] == 5, 'set: the panel\'s Set career wasn\'t saved')
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev("devmodeState().set && devmodeState().set.beat") == 'promo', f'set: Undo after the panel\'s Set career: {pg.ev("devmodeState().set")}')
     # the tab draws at phone size
     pg.ev('devmodeOpen(true); DM_UI.tab = "set"; devmodeDraw()')
     txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
-    check('What\'s set: Day 12' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
+    check('What\'s set: Day 10, Day 10: the promotion' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
     small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
     check(not small, f'set: buttons under 44px: {small}')
     check(not pg.errors, f'set: errors {pg.errors[:3]}')
     pg.close(); ctx.close()
-    print(f'  set: table = ladder; Days 2, 10, 12, 26: ' + '; '.join(f'{n} {g["rank"]} T{g["tier"]} xp {g["xp"]}, {len(g["tr"].split(",")) if g["tr"] else 0} trained, {g["room"]}' for n, g in got.items()) + '; no miss or notes Mail; Day 11 opens nothing trained; two Day 12s identical; Undo; the tab')
+    print(f'  set: table = ladder; Days 2, 10, 12, 26: ' + '; '.join(f'{n} {g["rank"]} T{g["tier"]} xp {g["xp"]}, {len(g["tr"].split(",")) if g["tr"] else 0} trained, {g["room"]}' for n, g in got.items()) + f'; no miss or notes Mail; Day 11 opens nothing trained; two Day 12s identical; friends (Zeke {fr["zeke"]}, {fr["known"]} known); test and promotion beats; the panel\'s progress; Undo; the tab')
 
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
