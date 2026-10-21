@@ -10299,11 +10299,11 @@ function schedBuild(p, d, occ, S) {
         const ru = evRule(B + t, 'rush'), ra = ru && (ru.at || [600, 1080]);
         if (ru && !called && t >= ra[0] && t < ra[1] - 20 && evOwed(p, evAt(B + t), d)) { called = true; rang = !!take('callhome', [[3, 'callhome']], 20 + Math.round(15 * U(63)), { wait: 30, min: 12, by: to, tag: 'rush', queue: 'boothq' }); }
       }
-      const si = !rang && EVD && evRule(B + t, 'stayIn', p);
+      const si = !rang && EVD && evRule(B + t, 'stayIn', p), stay = !!si && schedU(p.seed, d, 700 + k + n) < si.share;   // stayIn: this block is one of the share spent in their quarters (backlog 18, PB2: the rec deck gated on the rule alone, so nobody went all storm)
       const n0 = segs.length;
-      if (!rang && ((si && schedU(p.seed, d, 700 + k + n) < si.share) || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
-        if (deck !== bedDeck && to - t < C + 15) linger(to); else { if (pick[1] === 'rest' && !si) recVisit(to); go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }   // rest, or the rec deck in its place (RA, 0.83.0)
-      } else if (REC_ON && !rang && !si && segs.length > n0) recSwap(segs[segs.length - 1]);
+      if (!rang && (stay || pick[1] === 'rest' || !take('leisure', opts.filter(o => o[1] !== 'rest'), 1440, { by: to, min: 15 }))) {
+        if (deck !== bedDeck && to - t < C + 15) linger(to); else { if (pick[1] === 'rest' && !stay) recVisit(to); go(bedDeck); seg('leisure', Math.max(t, to), 'bed', p.bed, { tag: 'rest' }); }   // rest, or the rec deck in its place (RA, 0.83.0)
+      } else if (REC_ON && !rang && !stay && segs.length > n0) recSwap(segs[segs.length - 1]);
       if (F.shape.drill && t === F.shape.drill) { if (!take('off', [[deck, 'lift-wait']], 15, { tag: 'drill' })) seg('off', t + 15, null, null, { tag: 'drill' }); }
       for (const e of meet) if (!e.done && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {
         e.done = true;
