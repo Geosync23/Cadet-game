@@ -35244,8 +35244,8 @@ const TRAD_LIST = Array.isArray(TRAD_SRC) ? TRAD_SRC : Object.keys(TRAD_SRC).sor
 for (const t of TRAD_LIST) {
   const ev = tradLoad(t); if (!ev) continue;
   if (ev.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: First Light Cocoa only with its switch (section 15's FLC_ON)
-  if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;
-  if (ev.id === 'off-the-tern' && !(typeof ROT_TERN !== 'undefined' && ROT_TERN)) continue;   // section 14's switch (PT1)   // the rec deck's own (0.83, RA): only with the deck switched on
+  if (!REC_DECK && ev.where.every(w => w.deck === 7)) continue;   // the rec deck's own (0.83, RA): only with the deck switched on
+  if (ev.id === 'off-the-tern' && !(typeof ROT_TERN !== 'undefined' && ROT_TERN)) continue;   // section 14's switch (PT1)
   const r = REC_TRADS.find(x => x.id === ev.id);           // one of the rec deck's: the writer's file brings the words; the rules stay REC_TRADS' (whereFor, first, the rota)
   if (r) { for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(ev, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(r, k, ds); } r.baked = true; continue; }
   const i = SHIP_TRADITIONS.findIndex(x => x.id === ev.id);
