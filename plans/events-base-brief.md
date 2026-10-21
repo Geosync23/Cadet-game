@@ -84,8 +84,10 @@ master's. I merge claude/integration in at the start of each turn (0.64.6 and pa
   (`isWorkDay`). Pure, from `EV_CALENDAR`, the events' data and the rota only: never `eventNow`, `SHIP.event` or
   anything saved. Days 7 (the Captain), 14 (Marrow, Calder, Sato, Holt) and 27
   (the Captain).
-- Section 14 already brings named people to a meeting on their day off (the all-clear works today), so no schedule
-  change is needed; F0b only marks them.
+- **Corrected (EC1's finding, PR3 confirmed):** nothing in section 14 plans an event meeting's cast today
+  (`eventGatherings` has no caller), so F0b adds the call in section 14's `gatherings(p, d, F)`, in PB's shape (PB
+  reviews): named crew planned in on a day off **and on shift** (a 'meet' break in the shift: Calder's briefing, Tomas
+  at the Line), `dept:N` by a fixed order, a chance by its own hash key; planner-safe, from the calendar only.
 - A ship note `simNote('calledIn', { id: event, who, day, at })` at the meeting's start, so lines can say so. Hook:
   section 20's `SOC_CUE_OF` gains `calledIn` (a new key in a registry, plus `who` for `@me`): **social engineer's
   section, owner review (OR1)**. The cues: `cue:calledIn@me` (I was called in), `cue:calledIn` (crew chatter about it).
@@ -256,6 +258,8 @@ Nothing new for the writers' tools unless EW1 asks:
   format); the base only needs Day 12's to exist as a tradition the storm keeps.
 
 ## Questions for the user (each with a recommendation)
+
+**Answered (the user, 2026-10-21, via lead 21): the recommended option on all three** (in design-doc.md, "Ship-wide events"). 1: skipped, decided once on the first load with events on and kept with the save (OR1's fix: never "the save's day at each load"). 2: 19:00-20:15. 3: the auditorium opens for the address.
 
 1. **A save that's already past an event's day when events are switched on** (for example a save on Day 20 that never
    saw Crossing the Line): **recommended: it's skipped** (the calendar is the calendar; Dev mode can still start it).
