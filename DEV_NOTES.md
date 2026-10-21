@@ -1487,6 +1487,27 @@ with
 - `keepShaders()` (section 1), called by the main loop right after `renderer.render`, adds one use (`usedTimes`, a three r128 internal) to every shader program the first time it exists, so disposing a deck's materials never deletes a program and the next deck's materials with the same key reuse it. 22 programs in all, reached after one lap of the decks at phone portrait and landscape. If three.js is ever upgraded, check `renderer.info.programs` and `usedTimes` still exist.
 - **Timing a frame in our test browser needs a real wait.** `gl.finish()` returns at once in this Chromium with SwiftShader, so a frame's drawing is billed to whichever later call syncs (a buffer upload, a shader compile). Probes that time one frame wait with `gl.readPixels` of one pixel after it (`plans/opt-probes/keep_true.py`, `buf_true.py`). Without it, day_check's drawing looked like crowd uploads (plans/opt-measure.md section 5).
 
+## The Dev mode Speed card (section 25, the render seat RN1, optimization pass #8)
+
+- **What it is:** a seventh Dev mode tab, Speed, there only with the Dev link (#dev). It shows how the game runs on the phone in hand:
+  - the screen in CSS pixels and its pixel ratio, and every size seen since the page opened, so folding, unfolding or turning the phone lists each one;
+  - how long opening took: the page read, the game set up, the first picture;
+  - frames a second (median, the slowest 1 in 20, the worst);
+  - a frame's game code, and the time handing the picture to the graphics chip. The chip's own drawing time can't be read from a web page, so a low frame rate with little game code means the chip is the limit;
+  - draw calls (the 450 budget) and triangles;
+  - shapes, textures, shaders and JS memory;
+  - the last deck change (its build, and the first picture after it);
+  - the build and the ship time.
+  It has two buttons: Copy (the lines, as text) and Start again (forget the frames so far).
+- **How the user reads it on the TriFold:**
+  1. Open the Dev link.
+  2. Tap the gold card at the top, then Speed.
+  3. Wait a few seconds and screenshot it, folded.
+  4. Unfold, wait, screenshot again.
+  5. Take the lift once to time a deck change.
+  The screen sizes it shows replace perf_check's derived `TRIFOLD` table (`perf_check.py`) and plans/opt-measure.md "The trifold's sizes".
+- **How it measures:** only in Dev mode, by wrapping three things: the main loop's frames (`requestAnimationFrame` callbacks that are `loop`), `renderer.render` and `goToDeck`. Each wrapper calls the same function with the same arguments and only reads the clock. Without #dev nothing is wrapped or stored; devmode_check's off part checks that. Its card part checks the seven tabs and the card's first line. In the test browsers the clock is virtual, so the card's times read 0 there.
+
 ## Rules that keep it working
 
 Phones:
