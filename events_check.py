@@ -745,9 +745,11 @@ with sync_playwright() as pw:
     if not U or not all(u[3] for u in U) or not any(u[2] for u in U): fail(f"upcomingTraditions' deck/room: {[u for u in U if not u[3]][:5]}")
 
     # 9d. crew rotation traditions (0.34.43): the farewell supper the day before each rotation day (its leavers), the
-    # crew welcome tea the first Friday after (its arrivals); {names} filled; the honorees' friends, department, cabin
-    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day };
-      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (4 - weekday(r.day + 1) + 7) % 7, r.in]]) {
+    # crew welcome tea the first Thursday after (its arrivals; the first Friday until PT1, 2026-10-21: the weekday is read
+    # from the tradition), and Off the Tern on the day itself (its arrivals, with ROT_TERN on; PT1); {names} filled; the
+    # honorees' friends, department, cabin
+    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day }, tw = (SHIP_TRADITIONS.find(t => t.id === 'crew-welcome-tea') || { when: { weekday: 4 } }).when.weekday;
+      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (tw - weekday(r.day + 1) + 7) % 7, r.in]].concat(typeof ROT_TERN !== 'undefined' && ROT_TERN ? [['off-the-tern', r.day, r.in]] : [])) {
         const e = eventsOn(d).find(x => x.id === id), go = e ? schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-' + id))) : [];
         row[id] = e ? { d, hon: e.honorees.map(p => p.id).sort().join(',') === ids.slice().sort().join(','), names: e.names, mail: !!(e.ev.mail && e.ev.mail(e)), went: go.length,
           honWent: go.filter(p => e.honorees.includes(p)).map(p => p.id + (p.shift === 'night' ? '(night)' : '')), others: go.filter(p => !e.honorees.includes(p)).length } : { d, missing: true, dropped: (EV_DROPPED.get(d) || []).includes(id) };

@@ -461,7 +461,7 @@ with sync_playwright() as pw:
       step(7, 10); o.news = NEWS.some(n => n.id === 'leaving:pell') && NEWS.some(n => n.id === 'arriving:' + x.id);
       o.before = crewContacts({ all: true }).some(c => c.id === x.id);
       step(11, 18); o.bye = chatLine(pell, shipNow()).kind; o.byeText = chatLine(pell, shipNow()).text;
-      const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id); o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
+      const m0 = SHIP.social.mail.length; step(19, 21); o.moved = movedOn().map(m => m.id).filter(id => !ROSTER_ROTATIONS.some(r => r.out.includes(id)));   // the roster's own leavers aside (Theo leaves on day 21 since PT1) o.sorry = SHIP.social.mail.slice(m0).some(m => /missed you/.test(m.subject));
       o.gone = !crewContacts({ all: true }).some(c => c.id === 'pell') && movedOff('pell') && !movedOff('tomas') && newHere(x.id, 16); o.newHere = [newHere(x, 16), newHere(x, 23)];
       const m1 = SHIP.social.mail.length; step(22, 50); o.letters = SHIP.social.mail.slice(m1).filter(m => m.from.startsWith(pell.name)).length;
       const s = JSON.stringify(socSave()); socLoad(JSON.parse(s)); o.saved = s === JSON.stringify(socSave());
