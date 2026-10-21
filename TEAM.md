@@ -453,3 +453,22 @@ Working (12): FR3, PR5, PR8, EV6, PR6, EV7, ER3, BM12, PT1, PR7, TS2, RN1, OR1 (
 **~16:20-17:40 UTC: the account's 5-hour session limit stopped every seat** (reset 17:40). Nothing was lost (all work pushed as of ~16:15). **17:42 lead 24 resumed** the in-flight seats: BM12 (0.64.11 crew patch, not yet pushed), FR3 (Day 19 `arriving`), EV7 (L5f + handover), RN1 (#5 proofs), TS2 (F1), DB2 (devmode seed), EV6 (mech m17), PR5 (mutants), PR8 (turn 10), PR6 (Line/EV6/EC1 reviews), OR1. Stopped for the move: PT1, ER3 (part A done d1bf2eb), EC1, FD1, PR7, PB, EW2.
 **~17:45 UTC: 0.64.11 PUSHED by BM12** (claude/integration 70aa91f = 0.64.10 + PT1's crew patch T1-T3b + FD1 food_check part 2; cadet_test differs only by the camera, identical with it put back; check_fast, events, day 21/25, join, food 11 4 OK). Published **Playtest 0.64.11** https://claude.ai/artifact/MMoknq9PDzBk264PjmkoLa + Dev page v6. User notified.
 **~17:55 UTC: USAGE NEARLY OUT, ACCOUNT HANDOFF.** All seats told to stop now, push and idle. Lead handover with START HERE for lead 25: plans/handover-lead24.md. Current build 0.64.11 (claude/integration 70aa91f).
+
+## Lead 25 (new account, from 2026-10-21 ~18:00 UTC)
+
+**Lead 25:** session_01J2aTyEohBf8KFHCsTqt3LW, branch `claude/lead-25` (from claude/lead-24). Hourly check-in trig_01KAvJhBaP2WS636Si64iZ6H (minute 6). Read plans/handover-lead24.md first.
+**The user (18:03):** yes to republishing both game pages, lead 25 on claude/lead-25, the hourly check-in, and up to **10 helper seats**; close old sessions and start new ones. **Camera:** the default is too zoomed in; go back 10-15% → 1.62 / 1.22 (was 1.85 / 1.40; 0.64.10 had 1.5 / 1.15), build 0.64.12.
+**Old sessions on this account:** 25 archived. 5 could not be archived (the permission check refused): lead 19 01FsGspstkG61e9AWadSi36y, traditions 0.60.7 018vCE4Nv4tCR3YvNX7GTE3c, social 0.60.7 01Q6zXcCnBpTeJQrUP8qPKUP, Pillar 4 lead 01KPJMYjXAPkNUcrQ8VRkhLE, Pillar 3 lead 01PxXKwc5mkC7tV5MPi3p7PP. "Transcription document" (not this project) left alone.
+**FR3's unpushed work:** the Day 19 `arriving` fix and the old-save Friday fix never reached GitHub, and neither did handover-fridays-builder-3.md. FR4 redoes both.
+
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Build master BM13 | session_01ExFoVfhiFG3wYTFv2QrojC | `claude/integration` | integration-next fast-forward; 0.64.12 camera; then the storm + Fridays release |
+| Fridays builder FR4 | session_01YDM1FcnY4nLuD7PN3JMK8R | `claude/fridays` | Day 19 `arriving`; old-save Friday dip; quiet-watch Day 300 |
+| Fridays reviewer PR9 | session_01B1FUTc4sJR4Q5FFnx7L6Db | `claude/review-8` | PR8's open verdicts, FR4's fixes, the final release verdict |
+| Storm + Line reviewer PR10 | session_01KG4WKkSL57buDyiygrA5tF | `claude/review-6` | S10 verdict (3 re-runs, Day 13 rec deck), EC1 mutants, Line L5e/L5f |
+| Section 14 owner PB2 | session_01NWyw8ebj9kTTRiEnAj2bGo | `claude/patch-b2` | double-dinner root fix (Line day 7, base Day 21) |
+| Line builder LB3 | session_01VGHVEQ9kkwqbdcWURcvp1E | `claude/line-update` | ER3 fix 9, Brennan rota line, ER3 part B; Line stays off |
+| Opt reviewer OR2 | session_01AnRKXUUGi8mwREwvt4WbaV | `claude/review-opt` | RN1 #5 memory fix, TS2 F1, #8 nits |
+
+Next seat: a publisher (Playtest + Dev pages from claude/integration) once BM13 pushes 0.64.12. Spare: 2 (later a Line build reviewer, and test speed once the user picks TS2's option).
