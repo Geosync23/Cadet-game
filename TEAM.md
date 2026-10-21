@@ -442,3 +442,4 @@ Working (11, one over for the overlap): EV5 stopping. Game-code seat + opt revie
 | Fridays reviewer PR8 | session_01Nrvf1SYaXHTLwssGoBfJ54 | `claude/review-8` | FR3's turn 10 (switch on) + fix turn (player_check, SIM_ADVANCE); PR5 keeps 7-9 |
 | Dinner-wait investigator FD1 | session_01YJhagf6oyF6SeT5XGvrL5H | `claude/food-waits` | food_check ON dinner waits Days 12-32: commit, root cause, smallest fix → EV6/FR3 (took over from PR6) |
 Working (14): FR3, PR5, PR8, EV6, PR6, EV7, ER3, FD1, BM12, PT1, PR7, TS2, RN1, OR1. On call: EC1, PB, EW2. Idle: DB2.
+**~14:27 UTC: 0.64.9 PUSHED by BM12** (claude/integration f782c5d = 0.64.8 + Dev mode Stop 1b + Stop 2, claude/devmode-2 d686b86; check_fast OK, cadet_test vs 0.64.8 ALL IDENTICAL, devmode_check + events_check OK). **Dev page republished** https://claude.ai/artifact/EWB21cTQnXc8ZT71zCeEzf (version 4 = 0.64.9). User notified. Next: Fridays-off 0.64.10 on PR5's pass.
