@@ -110,7 +110,8 @@ SIM = r"""(async ({ d, id, step }) => {
         if (a.settled && a.spot) {
           if (held.has(a.spot.id)) { r.shared++; if (r.sharedWho.length < 4) r.sharedWho.push(a.spot.id + ' ' + held.get(a.spot.id) + '/' + a.p.id + ' ' + hhmm(now - B)); }
           held.set(a.spot.id, a.p.id);
-          const s = att.get(a.p.id); if (s && s.deck === n && now >= s.from && now < s.to && a.spot.id === s.placeId) got.add(a.p.id);
+          const s = att.get(a.p.id), w = s && planWhere(a.p, now);   // the seat their plan gives now: the deck running makes the day's plans again with the week's friendships (backlog #24)
+          if (s && w && w.deck === n && w.tag && w.tag.startsWith('ev-' + id) && a.spot.id === w.placeId) got.add(a.p.id);
         }
       }
       if (Math.abs(now - (B + e.from + Math.min(30, (e.to - e.from) / 2))) < step * SHIP_RATE / 2 + 1e-9) {   // a frame over the crowd, at the event
