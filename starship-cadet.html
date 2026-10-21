@@ -10893,6 +10893,7 @@ function devDay(d) {
   for (const x of DEV_WEEK[weekday(d)]) if (!x.tradition) out.push({ from: x.at, to: x.at + x.len, title: x.title, where: x.where, kind: 'ship' });
   for (const x of devTraditions(B, B + 1439)) out.push({ from: x.at - B, to: x.at - B + 60, title: x.title, where: x.where, kind: 'tradition', id: x.id, tkind: x.kind, deck: x.deck, room: x.room });
   for (const o of devOccasions(B, B + 1439)) out.push({ from: o.at - B, to: o.at - B + o.len, title: o.title, where: o.where, kind: 'occasion', deck: o.deck, room: o.room });
+  try { if (typeof eventItems === 'function') for (const x of eventItems(B, B + 1439)) out.push({ from: x.at - B, to: x.to - B, title: x.title, where: x.where, kind: 'event', deck: x.deck, room: x.room }); } catch (e) { /* not yet */ }   // section 18's ship-wide event: its meetings and gatherings (the events base F3a)
   // playtest 2 (0.72.5, items 10-11): tea and biscuits on your shift days (section 14's crew tea times, else section 15's), and
   // the week's supply delivery to the cargo hold (section 17's DELIVERY, a day or two late some weeks: deliveryLate)
   try { const T = typeof WORKS_TEA !== 'undefined' && WORKS_TEA && Number.isFinite(WORKS_TEA.at) ? WORKS_TEA : typeof TEA_FROM !== 'undefined' ? { at: TEA_FROM, until: TEA_TO } : null;
@@ -10959,7 +10960,7 @@ function devItemGoal(x) {
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
   if (x.kind === 'tea') return { deck: 5, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5
   if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
-  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
@@ -15221,7 +15222,7 @@ function trkItems() {
         tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), goal: trkGoalOf(x) });
     }
   }
-  for (const q of TRK_PLACES) out.push({ sec: 'place', key: q.key, title: q.title, sub: q.sub, tag: '', goal: q.goal() });
+  for (const q of TRK_PLACES) { const g = q.goal(); let shut = false; try { shut = typeof eventClosed === 'function' && eventClosed(g); } catch (e) { /* not yet */ } if (shut) continue; out.push({ sec: 'place', key: q.key, title: q.title, sub: q.sub, tag: '', goal: g }); }   // a place a ship-wide event has closed isn't offered (section 18, the events base F3a)
   return out;
 }
 const trkOn = it => { if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
@@ -35924,6 +35925,7 @@ const EVENTS_ON = false;                                 // the master switch: o
 const EV_CAL_ON = EVENTS_ON;                             // F0: events come by the calendar (a check may flip this line alone)
 const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
 const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as each phase begins (crew lines react)
+const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -36299,7 +36301,7 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: m.notify });
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
     const at = evBeatAt(e.startDay, n.at);
@@ -36845,6 +36847,36 @@ const occReadyDay = d => occOnShift('marrow', d) && occReadyAt(d) != null;
 function occTableSlot(d) {
   if (guardFree(d, 1170, 1260, 'captain')) return { at: 1170, len: 90 };
   return EV_TABLE_EARLY && guardFree(d, 1140, 1215, 'captain') ? { at: 1140, len: 75 } : null;
+}
+// F3a, on your device: the running (or due) event's meetings and gatherings between two ship minutes, for section 19's
+// Schedule (and so Tracked): { id, kind: 'meeting' | 'gathering', title, at, to, where, deck, room (key) }, in time
+// order. [] while EV_DEVICE_ON is off. Pure, from eventGatherings
+const evRoomKey = (deck, re) => { const R = DECKS[deck] && DECKS[deck].rooms; if (!R || !re) return null; for (const k in R) if (re.test(R[k].name)) return k; return null; };
+function eventItems(a, b) {
+  if (!EV_DEVICE_ON) return [];
+  const out = [];
+  for (let d = Math.floor(a / 1440) + 1; d <= Math.floor(b / 1440) + 1; d++) for (const g of eventGatherings(d)) {
+    const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;
+    const def = SHIP_EVENTS[g.event], mt = (def.meetings || []).find(x => x.id === g.id), mo = !mt && (def.moments || []).find(x => x.id === g.id), m = mt || mo;
+    const deck = m.where.deck, room = evRoomKey(deck, m.where.room), rm = room && DECKS[deck].rooms[room];
+    const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[mt.script];
+    out.push({ id: g.id + '@' + d, kind: mt ? 'meeting' : 'gathering', title: m.title || (sc && sc.title) || (sw && sw.name) || def.title, at, to: at + (g.len || 15),
+      where: (rm ? rm.name + ', ' : '') + deckWord(deck), deck, room });
+  }
+  return out.sort((x, y) => x.at - y.at);
+}
+// F3a: is a place closed by the event at minute t (its 'closed' routines: '<deck>|<room key>', 'type:<place type>',
+// 'deck:<n>')? g: { deck, room (key), place (id) }, as a goal is. A room the event opens for a held beat (EV_OPEN_FOR:
+// user question 3, recommended: the auditorium for the Friday address while the storm has the rec deck shut) isn't.
+// false while EV_DEVICE_ON is off. Pure, from eventRoutines
+const EV_OPEN_FOR = [{ deck: 7, room: 'A', beat: 'fridayAddress' }];
+function eventClosed(g, t = shipNow()) {
+  if (!EV_DEVICE_ON || !g || !Number.isInteger(g.deck)) return false;
+  const rules = eventRoutines(t).filter(r => r.rule === 'closed'); if (!rules.length) return false;
+  const pl = g.place && typeof placeById === 'function' ? placeById(g.place) : null;
+  if (!rules.some(r => (g.room && r.where === g.deck + '|' + g.room) || (pl && r.where === 'type:' + pl.type) || r.where === 'deck:' + g.deck)) return false;
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  return !EV_OPEN_FOR.some(o => o.deck === g.deck && o.room === g.room && evBeatsOn(d).some(b => b.id === o.beat && m >= b.from && m < b.to));
 }
 // ---- end of slot: Traditions engineer ----
 
