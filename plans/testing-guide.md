@@ -264,13 +264,15 @@ The rules, as of 0.64.12 (`RULES` in tools/affected.py is the master; `python3 t
 ### 4.4 The settings: (a) Careful and (b) Middle
 
 - **(a) Careful, in use** (the user, 2026-10-21): the rules plus the whole map, as above. Over the last 20 game
-  commits it picked on average 17 of 24 checks, about 77 minutes (before the event days were added; the full round
-  was 104 minutes then). Picks vary with what a turn's lines reach, not its area: in the replay most Dev mode turns pick 1 check but one
+  commits it picks on average 24 of 33 checks, about 132 minutes (the full round with the event days: 176 minutes;
+  the rules alone: 12 checks, 73 minutes). Before the event days were added it was 17 of 24 checks, 77 of 104 minutes.
+  The event days come together: every day_check day runs nearly the same planner code, so a change one day runs,
+  most days run. Picks vary with what a turn's lines reach, not its area: in the replay most Dev mode turns pick 1 check but one
   picked 23; most crew, events and Fridays turns pick 20-24 (close to the full round), but one crew turn picked 6 and
   one events turn 10.
 - **(b) Middle, tried and not used** (`--middle`): lines that nearly every check runs (at least 23 of 28: about 2,000
   of the 50,000 lines any check runs) pick by the rules only, and **a change to one of those shared lines runs the full
-  round** (the shared-code safeguard). It picked every known failure, but saved nothing (17.4 checks, 77 min): the
+  round** (the shared-code safeguard). It picked every known failure, but saved nothing (17.4 checks, 77 min before the event days; 24.7, 133 min with them): the
   safeguard fires on 9 of 20 commits, because most turns touch the shared crew and clock code. **Known hole** (OR2's
   F1): a changed table read only by shared lines escapes both the map and the safeguard (222 such tables; DAY's hemi
   .85 → .86 picks 21 checks under (a), 3 under (b)). Fix before any second look: fire the safeguard on such tables too;
