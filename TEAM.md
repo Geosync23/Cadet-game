@@ -289,3 +289,8 @@ Working: BM11 (release round), EV1, PR2, OR1, FR1, EC1, PR3 = 7. Idle: EW1, PA, 
 **~01:11 UTC: lead 22 takes over** (session_01BGQCZLK6gYTnqu6mwZ61jB, branch `claude/lead-22` from claude/lead-21). Hourly check-in trig_01RQUBV6hC27VjnzqcdQpBer (minute 10). Seats report to lead 22. Waiting on: BM11's 0.64.7 release round (then publish patch page + republish Dev), EV1 F3a, FR1 turn 2, ER2 on the Crossing the Line plan.
 **~01:30 UTC, the user:** Crossing the Line story A "The one on watch" as written (Tomas stays on watch, gets his crossing on the Lap; no "Tomas attends" option). EW1 starts the ~30 story lines; EP2 folds ER2 round 2 (aafb364, PASS WITH 4 FIXES) then the page goes out for q1-q8.
 **~01:40 UTC: Crossing the Line plan PUBLISHED** https://claude.ai/artifact/4xY3hQUWBtUcWj8gK23BF4 (claude/event-plan-line a64fb68 + save script; db answers/event-line-plan; q9 pre-ticked A = the user's chat answer). ER2 PASS at c9d92db. Waiting on the user's q1-q8.
+**~01:33 UTC:** Crossing the Line plan final (claude/event-plan-line 7040dc8, ER2 PASS; ceremony in the bow lounge per the user 01:42-ish; Lap stop + plaque at the lounge doorway). Page republished (same URL 4xY3hQUWBtUcWj8gK23BF4). EW1's lines PASS (PR2; claude/events-lines 8e2433b/dfd083a). FR1 turn 1 PASS (PR3), turn 2 3ae4bec with PR3+PB, turn 3 on patch-a+b merged. EV1 F3a 18f0d9d → PR2 + OR1 (hooks); F2b OK'd.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Storm planner EP3 | session_01PC5DMnhFSWXqPZSk8wa779 | `claude/event-plan-storm` | ion storm event plan page with its story (model: event-line-plan); ER2 reviews |
+EP2 (~400k) idle, done.
