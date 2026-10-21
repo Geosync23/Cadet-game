@@ -126,3 +126,14 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - Crossing the Line's own cake.
 - The cross-check was done with a helper agent and its key points verified by me. Its `flag:promoted` finding was wrong: the flag exists.
 - **EW1's fixes 407fd07: PASS.** Every fix and the lead's calls are in. Left for EV1: myrank, myshift:night, {leavers} and the .address bake.
+
+## PA fix round: claude/patch-a 75aa54a (batch B fixes, C's #19 nudges, the nits, OR1's 2 s give-up). PASS
+
+- **Checks:** check_fast OK (272 s). cadet_test 0.64.5→75aa54a ALL IDENTICAL. intro_check --evening OK.
+- **rvB:** the pointer shows from 18:19 with no dialogue open and is gone at 18:36 (about 30 real s); the glow is kept (`a2_dinner_pointer_gone.png`). The goodnight bubbles 18:55-19:01, hushed.
+- **rvC:**
+  - The clock-out arrow at 16:52, right after his first line.
+  - The beam arrow straight after clocking out (`a2_beam.png`).
+  - Zeke's good job only once; Theo Teague gives the clock-out remark.
+  - The gap is 2 m or more.
+- **Not walked by me:** the owed-goodnight path and its Mail (code read OK; asked PA for a probe line).
