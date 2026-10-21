@@ -36513,7 +36513,8 @@ if (EV_STORM_ON) {
   // 7); Lap of the Wren moves to Monday at 20:30 with Tomas and the rec deck's talent night a week on (EV_DAY_DRESS,
   // dayDress: { trad, day (the event's day), drop | set | add }, the shape the Line reuses)
   const party = S.moments.find(m => m.id === 'party'), pw = k => (c, p) => evWordAt('event.ionStorm.gather.party.' + k, p ? p.seed + c.day : 0) || undefined;
-  party.stay = [30, 60];   // drop in and leave (evStay): at most its 34 places' worth at once (lead 23's call on PR4's crowd find)
+  party.places = [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, room: /^Bow lounge$/, types: ['bench', 'common-room'] }, { deck: 3, pool: '@gather-bow-lounge' }];   // its 34 seats and the bow lounge's standing spots (lead 23: standing counts as places)
+  party.stay = [30, 60];   // and people drop in and leave (evStay): at most about 27 there at once (lead 23's call on PR4's crowd find)
   Object.assign(party, { name: evWord('event.ionStorm.gather.party.name') || undefined, ask: pw('ask'), here: pw('here'), thanks: c => evWordAt('event.ionStorm.gather.party.thanks', 0) || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.' });
   S.jobs.resolution = S.jobs.afterglow.map(j => ({ ...j, at: 630 })); delete S.jobs.afterglow;
   // S5, the lantern supper (the user's answers 3 and 4): Saturday 18:00-19:30 in the mess by lamp light, the storm's
@@ -36525,7 +36526,7 @@ if (EV_STORM_ON) {
   // The notice Mail at noon; the lantern job up at 14:00 (held for you if you promised Lukas: story A, S7)
   const lw = k => (c, p) => evWordAt('event.ionStorm.gather.lanternSupper.' + k, p ? p.seed + c.day : 0) || undefined;
   S.moments.push({ id: 'lanternSupper', phase: 'escalation', at: [2, 1080], len: 90, k: 352, where: { venue: 'mess', deck: 3, room: /^Mess hall$/ }, gathering: true,
-    who: p => p.id === 'brennan' ? 1 : .77, anim: 'talk', meal: 'dinner',   // .77 (EV4, bigevents_check): about 63 mean to go, under its crowd line of 66 (.85 gave 68)
+    who: p => p.id === 'brennan' ? 1 : .73, anim: 'talk', meal: 'dinner',   // .73 (EV4; lead 23: at most 60 meaning to go, the user's number; .85 gave 68)
     ties: { galley: { meal: 'dinner' }, decor: 'longTables' }, from: 'Lukas Dlamini',
     places: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'] }, { deck: 3, room: /^Mess hall$/, types: ['@long-table'] }, { deck: 3, pool: '@gather-mess' }],
     name: evWord('event.ionStorm.gather.lanternSupper.name') || 'Lantern supper', ask: lw('ask'), here: lw('here'),
@@ -37678,10 +37679,10 @@ if (typeof onSim === 'function') onSim('newGame', () => evDressMake());   // aft
 // mess: Brennan's line by your choice (fixed: the job done; asked: the message carried; else his own way); 19:20-19:35
 // his covers. The moments are 'moment:' scripts: they never count toward a commendation (the jobs do)
 const STORM_RANGE_JOB = { id: 'stormRange', tier: 1, stops: [{ deck: 3, machine: 'range', mins: 20, tag: 'reset' }] };
-function stormMoment(id, who, first, onPick) {
+function stormMoment(id, who, first, onPick, onEnd) {   // onEnd: when the panel closes, however (ER2: a story flag set then, not as it opens, so a reload mid-panel offers it again)
   const sc = MEETING_SCRIPTS[id]; if (!sc || DIALOGUE) return false;
   const key = 'moment:' + id;
-  MEETING_SCRIPTS[key] = { ...sc, lines: (first ? [first] : []).concat(sc.lines), onPick, onEnd: () => { delete MEETING_SCRIPTS[key]; } };
+  MEETING_SCRIPTS[key] = { ...sc, lines: (first ? [first] : []).concat(sc.lines), onPick, onEnd: f => { delete MEETING_SCRIPTS[key]; if (onEnd) onEnd(f); } };
   return dialogueShow(key, { id: key, who, at: shipNow(), where: hereWhere() });
 }
 const stormAtSupper = (id, t) => { const p = schedPeople().find(x => x.id === id), w = p && typeof whereIs === 'function' ? whereIs(p, t) : null; return !!(w && !w.moving && /^ev-lanternSupper/.test(w.tag || '')); };
@@ -37692,22 +37693,23 @@ function stormStoryTick(now) {
   const near = (id, r) => DECK_CREW.find(a => a.p && a.p.id === id && a.h && Math.hypot(a.x - P.x, a.z - P.z) < r) || null;
   const say = (id, key, r = 6) => { const a = near(id, r), text = evWord(key, c); return !!(a && text && typeof bubbleSay === 'function' && bubbleSay(a.h, text, 5)); };
   const galley = /^3\|(Mess hall|Galley)$/.test(room);
-  if (!M['story:fri'] && now >= at(1, 1020) && now < at(1, 1230) && galley && near('dlamini-lukas', 4)) {
+  const LR = 6.5;                                         // Lukas's reach: the mess side of the servery from the galley line (ER2: 4 m caught one spot in five)
+  if (!M['story:fri'] && now >= at(1, 1020) && now < at(1, 1230) && galley && near('dlamini-lukas', LR)) {
     const hi = { who: 'dlamini-lukas', to: 'you', text: x => evWord('event.ionStorm.lukas.hi.' + (typeof promoDone === 'function' && promoDone('move2') ? 'moved' : 'bunk'), x) || 'Sixty.' };
-    if (stormMoment('stormLukasFri', ['dlamini-lukas'], hi, k => { if (k === 0) eventTakeJob('stormLanterns'); })) M['story:fri'] = 1;
+    stormMoment('stormLukasFri', ['dlamini-lukas'], hi, k => { M['story:fri'] = 1; if (k === 0) eventTakeJob('stormLanterns'); }, () => { M['story:fri'] = 1; });
   }
   if (!M['story:lanterns'] && now >= at(2, 840) && now < at(2, 1020)) { M['story:lanterns'] = 1;   // the lantern job up (S5): yours if you promised
     const t = evWord('event.ionStorm.notice.lanterns' + (M['wants:stormLanterns'] ? '.held' : ''), c); if (t) toast('Lantern supper', t); }
-  if (!M['story:sat'] && now >= at(2, 870) && now < at(2, 1020) && galley && near('dlamini-lukas', 4)) {
-    if (stormMoment('stormLukasSat', ['dlamini-lukas'], null, k => {
+  if (!M['story:sat'] && now >= at(2, 870) && now < at(2, 1020) && galley && near('dlamini-lukas', LR)) {
+    stormMoment('stormLukasSat', ['dlamini-lukas'], null, k => { M['story:sat'] = 1;
       const id = k === 0 && typeof postEventJob === 'function' ? postEventJob({ ...STORM_RANGE_JOB, title: evWord('event.ionStorm.job.stormRange') || 'Storm: reset the galley range' }, { event: 'ionStorm', forYou: true }) : null;
       const j = id && SHIP.jobs.find(x => x.id === id); if (j && !j.claimedBy) Object.assign(j, { reserved: 'storm', until: at(2, 1080), shareSeen: true });   // on another job already (the lanterns): held for you to 18:00 (section 17's heldForYou), then the crew's
-      if (k === 1) M['story:errand'] = 1; })) M['story:sat'] = 1;
+      if (k === 1) M['story:errand'] = 1; }, () => { M['story:sat'] = 1; });
   }
   const bw = M['story:errand'] === 1 && typeof whereIs === 'function' ? whereIs(schedPeople().find(x => x.id === 'brennan'), now) : null;   // not while she's at the washroom
   if (M['story:errand'] === 1 && now < at(2, 1080) && bw && bw.act !== 'wash' && near('brennan', 3) && stormMoment('stormBrennanErrand', ['brennan'], null, null)) M['story:errand'] = 2;
-  if (M['story:errand'] === 2 && now < at(2, 1080) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.asked', 4)) M['story:errand'] = 3;
-  if (!M['story:fixed'] && now < at(2, 1080) && eventJobDone('stormRange', true) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.fixed', 5)) M['story:fixed'] = 1;
+  if (M['story:errand'] === 2 && now < at(2, 1080) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.asked', LR)) M['story:errand'] = 3;
+  if (!M['story:fixed'] && now < at(2, 1080) && eventJobDone('stormRange', true) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.fixed', LR)) M['story:fixed'] = 1;
   if (!M['story:supper'] && now >= at(2, 1085) && now < at(2, 1160) && room === '3|Mess hall' && stormAtSupper('brennan', now)) {   // once she's through the line and sat down
     const v = flag('storm.lukas.fixed') && eventJobDone('stormRange', true, at(2, 1080)) ? 'fixed' : flag('storm.lukas.asked') && M['story:errand'] >= 2 ? 'asked' : 'own';
     if (stormMoment('stormLanternBrennan.' + v, ['brennan', 'dlamini-lukas'], null, null)) M['story:supper'] = v;

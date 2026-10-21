@@ -8,8 +8,8 @@ Written 2026-10-21 by EV4 (session_01MqpjPG6mDFe5avrDxcNWTU), after S9. Read EV3
 - **Role:** the ion storm update (plans/event-storm-plan.md v1.2 on claude/event-plan-storm), section 18's storm block
   and slot `// ---- slot: Storm builder`, with small hooks elsewhere. **Never set the build lines** (lead 23 confirmed):
   name each turn in a build-table row ("Ion storm update" table, plans/build-table.md).
-- **Branch:** `claude/storm-update`, tip f32d901. Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
-  Take `bigevents_check.py` from `claude/bigevents-check` (EC1) as is (last: ac32382); never edit it.
+- **Branch:** `claude/storm-update`, tip 2228a05 (plus this note). Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
+  Take `bigevents_check.py` from `claude/bigevents-check` (EC1) as is (last: e3f1da9); never edit it.
 - **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight: questions to the lead only, never the user).
 - **Reviews:** PR4 (session_014WyaZtasY32m5fnkBxuR9d) every turn, also as the stand-in owner of 4d (props) and 8b
   (shipFeelFrame's hook). PB (session_01FWW2piuXkFYaRRzLXZiqYb) owns 10/13/14. EC1 (session_01QgShGXD6P24DDxTp8npN41)
@@ -26,22 +26,22 @@ Written 2026-10-21 by EV4 (session_01MqpjPG6mDFe5avrDxcNWTU), after S9. Read EV3
 | 4fa198f | day_check: the R6 rec-deck FAIL is a printed line on a day the storm shuts Deck 7 (PR4: PASS). |
 | 05865b7 | events_check: the day-10 pick hold: you're on the Works drill (drill-pressure@10) that day, so section 17 rightly leaves the pick open; a FAIL again otherwise (PR4: fine). |
 | 74c216e, 9c1a441 | Crowds (lead 23's call: supper at most 60, party at most its 34 places at once, the rest drop in): supper pull .77 (63 mean to go, 54 at once); party `stay: [30, 60]` (EV_SHIPWIDE passes a moment's `stay`): 45 come, at most 27 at once. PR4's S6 fix 1: `evDressed` keeps `base`, `evIsTrad(ev)` replaces the identity tests (the Monday Lap joinable). S1 nit: stormScripts' fallback. |
+| 2228a05 | Crowds, lead 23's final rule (at most 60 meaning to go; never more at once than the places, standing counted): supper pull .73 (59 mean to go, at most 51 at once); the party has the bow lounge's standing spots again (94 places) plus its stays (at most 27 at once; 343-416 draw calls at 390 px). bigevents_check OK. |
 | f32d901 | S9: DECK_DRESS `framedMenu` (the Captain's table's trace) above your keepsake shelf, bunk or cabin 4-23; a DECK_DRESS entry's `on()` (dressShow skips it while false) keeps it off with the switch. join_check allows the storm's Monday Lap. |
 
 Shots: plans/storm-shots/ (`git add -f`: *.png is in .gitignore).
 
 ## Open (after f32d901)
 
-- **PR4's review of f32d901** (S3-S7 fixes, S9) and of 96bb2c6 (props, 8b hook): waiting.
-- **EC1:** asked to count the party at once for a gathering with `stay` (its check says "53 people for 34 places":
-  everyone over the evening). Until then bigevents_check FAILs on that row only.
+- **PR4's review** of 96bb2c6 (props, 8b hook), f32d901 (S3-S7 fixes, S9) and 2228a05 (crowds): waiting (b9aa775 PASS).
+- **ER2's adversarial build review** (lead 23 asked it; pointed at 2228a05): findings come to this role. S10 waits for
+  ER2's PASS and the user's review.
 - **Not done, told PR4:** "There's a commendation in your Mail" is said at 10:00, the Mail comes at commendAt 10:12
   (a words/timing call); `allclear.you.jobs` can't be reached (harmless).
 - **S9's 'old placeholder code':** skipped; lead 23 makes it an open question for the user.
 - **Deck 4 '454':** not reproducible (common room at most 323 on; perf_check's row stands in Cabin 4-05, 433-436).
 - **Backlog 18b** (perf_check's scenes use tile numbers as world x,z in nearestOpen: they may measure the wrong room) and
   **18c** (join_check first-light FAIL, off too): for their owners.
-- **Then:** ask the lead for ER2's adversarial build review; then S10 (switch-on) only after the user's review.
 - **S2** waits for claude/fridays to reach claude/integration (never merge claude/fridays). FR2: the Day 12 address's
   goers leave up to 30 minutes early, so the doubleShift exception needs Marrow off from 15:30 and Vance from 15:45,
   through 16:50 (not [960, 1010]). Agree the exact minutes with FR2. EV3's S2 design is in its note.
