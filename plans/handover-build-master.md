@@ -55,6 +55,7 @@ Fridays (FR2's turns) when they pass review, then the storm update. Event switch
 
 - **`claude/integration` = 0.64.11, 70aa91f** (GitHub quick check success): 0.64.10 c6f665b + FD1's food_check part 2 (claude/food-waits 2a0ffe3, check only; backlog row 23) + PT1's crew patch (claude/patch-crew eb86a00: Day 21 rotation, camera 1.85/1.40, the Tern). cadet_test vs 0.64.10 differs only by the camera (ALL IDENTICAL with the camera line put back); check_fast, events, day 21/25, join OK.
 - **Parked on `claude/integration-next`, NOT on integration:** DB2's claude/devmode-2 841a9d0 (devmode_check's new games take the Dev seed; check only; lead 24's ask and yes) merged as 9ecd66d on 70aa91f (build-table clash: DB2's row moved under the Dev mode heading), plus this note. devmode_check OK twice; check_fast was stopped unfinished at the handoff. To finish: run check_fast on integration-next's tip, then fast-forward claude/integration to it (no new build number: check only) and read the GitHub check.
+- **Later, DB2 moved claude/devmode-2 to 21bdec7** (integration 70aa91f merged in + the same 841a9d0 check fix + the 36 Stop 1b/Stop 2 phone shots force-added under plans/devmode-2-shots/, since *.png is git-ignored; its row already under the Dev mode heading). Better to merge 21bdec7 onto claude/integration instead of my 9ecd66d (game file identical; PR6 OK), then check_fast and push.
 - Merge note (FD1): when claude/line-update's food_check.py meets food-waits', keep both: the fresh() calls and EV5's eventMeetTag line (~526).
 
 ## Earlier state (the 0.64.10 round)
