@@ -13,8 +13,8 @@
 #   by the saved or live state; the career-beat guard (EV_BEATS, guardFree): every meeting and gathering clear of the
 #   beats' hours (its own beat aside), one Captain's scene a day, none on a test day or across a night shift; the
 #   summons on Day 18 at 16:00 and the Captain's table on Day 20 19:00-20:15 (a night-shift week); the meetings' casts on
-#   shift or called in (eventCalledIn), and planned in the meeting's room; gatherings fit their places (crowds at most
-#   60, never more there at once than its places; a seated one (no standing, the user's) never more at once than its seats); no tradition in a gathering's or meeting's room while it's on, and the
+#   shift or called in (eventCalledIn), and planned in the meeting's room; gatherings fit their places (unseated crowds
+#   at most 60, never more there at once than its places; a seated one (no standing, the user's) never more at once than its seats, any number meaning to go: lead 24); no tradition in a gathering's or meeting's room while it's on, and the
 #   plan's clashes (talent night and Lap of the Wren off the party night, the lap on Day 15 at 20:30); the run twice
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
@@ -42,7 +42,7 @@ if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2
     SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
     (WORK / 'test').mkdir(parents=True, exist_ok=True)
     OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
-CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above
+CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above; lead 24: unseated crowds only
 MESS_SEATS = 44                # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 LINE_SUPPER_MIN = 40           # the Line supper: at least about 40 should come (ER3's review)
 
@@ -395,7 +395,7 @@ def check_line(g, tag):
     sp = L.get('supper')
     if not sp: fail(f"{tag}: no Line supper (the Sunday table) on Day {L['day']}")
     else:
-        if sp['want'] > CROWD: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")
+        if sp['want'] > CROWD and not sp['seated']: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")   # seated: no cap on meaning to go (lead 24), only at once <= seats
         if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
         say(f"  the Line supper {sp['at']}: {sp['want']} mean to go, {sp['came']} came, at most {sp['peak']} at once, {sp['seats']} seats")
         if sp['came'] < LINE_SUPPER_MIN: fail(f"{tag}: the Line supper: only {sp['came']} came (want {sp['want']}), fewer than {LINE_SUPPER_MIN}: the ship's supper of the year is empty")
@@ -540,7 +540,7 @@ def judge(a, tag):
         say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}){', dropping in for ' + str(c['stay'][0]) + '-' + str(c['stay'][1]) + ' min' if c['stay'] else ''}, {c['cap']} places ({c['seats']} seats{', seated only' if c['seated'] else ''}) in {c['rooms']}")
         if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
         if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
-        if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")
+        if c['want'] > CROWD and not c['seated']: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")   # seated sittings (staggered): no cap on meaning to go (lead 24); at once <= seats below
         if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
         if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
             if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
