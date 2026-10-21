@@ -27,7 +27,15 @@ Three options, each with a beginning, a middle where your one choice matters, an
   
   Then Brennan's punch, as written.
 - **Payoff, Monday (Day 8).** The brass plaque on the plaza carries the words you chose under the date. The crew quote them back ("Nervous and came anyway. I liked that."). Tomas has a line for each ending: proud of you; amazed at himself ("I said it. Out loud. In front of the Captain."); or glad he wasn't alone. Your certificate is on your shelf.
-- **If you miss the ceremony,** Tomas answers alone with his line, and on Monday he tells you how it went. It's his words on the plaque, so the story still ends well.
+- **EW1's guard rails (01:07, agreed):**
+  - Tomas's Saturday nerves are only about speaking in front of everyone: no exam, no "I always mess up", no Holt (his arc's beat 5).
+  - "We'd like to stay" is only ever your answer. Tomas never says it or reacts to it, and his Monday lines stay on the punch, the crowd and thanking you (beat 7 is his choice to stay).
+  - If you missed it, Tomas answers with the plainest line, "We're new, and we're nervous, and we came anyway."
+  - The 22:30 message is Mail (the game has no phones).
+  - Length limits: bubbles 60 characters, cards 90, meeting lines 140, the plaque under about 100.
+- **Who lets Tomas go:** EW1 suggests Holt ("Go on, Lind. I'll hold the plaza."). But Holt is off on Day 7, and anyone a meeting names on a day off is marked as called in. **Recommended:** a Watch hand on shift says it (cast slot `watch:1`: "Go on, Lind. I've got the plaza."), with nothing warm about Tomas. Holt's own moment with Tomas stays in his arc.
+- **This replaces an earlier wording of the user's:** the events plan v3.2 recorded "one reply to choose (proud, nervous, joking)". Story A swaps those three replies for "Who answers for the first-timers?"; question line-q9 says so.
+- **If you miss the ceremony,** Tomas answers alone with the plain line, and on Monday he tells you how it went. It's his words on the plaque, so the story still ends well.
 - **No spoilers:** Tomas's nerves here are only about speaking in front of everyone. Nothing about home, his exam or the transfer list (his arc beats 5-7 stay untouched and ungated). Pell's part is a single chatter line.
 - **What it needs:**
   - a Saturday moment in Bunk 1 (section 20c's moments, like `moment:quiz`; the social seat);
@@ -78,7 +86,7 @@ The `onset` phase starts at 14:30, so `cue:event.crossingLine.onset` lines can p
 | Sun 7, 14:15 | Device notice: "The Crossing the Line ceremony, on the plaza at 14:30", with "show on map" | device | F3a |
 | **Sun 7, 14:30** | **Onset.** The horn moment (felt everywhere: a soft gold pulse, crew stop and look up); the hull lights turn gold; the Captain's banner (3 lines, she's called in) | every deck | moment `horn`, `address.onset`, F0b called in |
 | 14:30-14:40 | The crowd gathers: first-timers nearest the Captain, everyone else behind and down the promenade | plaza | gathering `lineCeremony` (k 353) |
-| 14:40-14:55 | **The oath** (meeting `crossingCeremony`): the Captain reads it, then asks who answers for the first-timers; your one choice (story A: you, Tomas, or both together) and its words go on Monday's plaque | plaza | meeting, cast `tomas`, `first:2` |
+| 14:40-14:55 | **The oath** (meeting `crossingCeremony`): the Captain reads it, then asks who answers for the first-timers; your one choice (story A: you, Tomas, or both together) and its words go on Monday's plaque | plaza | meeting, cast `tomas`, `watch:1`, `first:2` |
 | 14:55-15:15 | The "dunking": everyone drinks Brennan's Line punch (mugs out) | plaza | gathering anim `drink` |
 | 15:15 | **Resolution** begins: Brennan's Mail "The Line supper tonight at six"; your certificate is on your shelf | Mail, your cabin | `mail.resolution`, trace `lineCertificate` |
 | 16:00-17:00 | The reading corner, as usual | bow lounge | (unchanged) |
@@ -138,7 +146,7 @@ Each turn: small exact edits, a build-table row under "Crossing the Line", the a
 11. **Reactions unlock at 14:30:** the onset lines must not mention the punch or the oath's result (moved to the resolution file).
 
 ## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
-- **(line-q9, new in 1.1) Which story?** Recommended: A, "Who answers the oath" (Tomas and you; your choice goes on the plaque). Others: B, "The missing recipe"; C, "The Line roll".
+- **(line-q9, new in 1.1) Which story?** Recommended: A, "Who answers the oath" (Tomas and you; your choice goes on the plaque). It replaces the v3.2 wording "one reply (proud, nervous, joking)" with the choice of who answers. Others: B, "The missing recipe"; C, "The Line roll".
 1. **When does the ship start talking about it?** Recommended: with Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address). Others: Saturday morning; Friday's new-hands tea.
 2. **What do the gold hull lights look like?** Recommended: a warm gold in every window and slightly warmer light indoors, 14:30-19:15. Others: windows only; also gold light strips along the promenade (a few more draw calls).
 3. **The horn (the game has no sound):** Recommended: a felt moment: one soft gold pulse of the lights, crew stop and look up, a one-line notice. Others: also add the game's first sound, one horn note (sound is new work: a mute switch, phones on silent); the banner only.
