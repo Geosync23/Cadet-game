@@ -134,9 +134,9 @@ Each turn: small exact edits, a build-table row under "Crossing the Line", the a
 7. **An event with no threads and no jobs-for-commendation** must end cleanly (no band words, no debrief, no commendation). The event's `commend: false` and a check for it.
 8. **A gold that reads as "something wrong":** the storm's mood shifts the space outside to violet; the gold must look warm and festive, not alarming. Screenshots at phone size.
 9. **The ceremony's 45 minutes** must end before the reading corner (16:00): it ends 15:15; the punch stays at the plaza.
-
 10. **Story A puts Tomas on the plaza while he's on shift:** the meeting names him, so F0b's fix must bring a named person who is on shift (not only people called in on a day off). Watch keeping the plaza is a believable post for that hour.
 11. **Reactions unlock at 14:30:** the onset lines must not mention the punch or the oath's result (moved to the resolution file).
+
 ## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
 - **(line-q9, new in 1.1) Which story?** Recommended: A, "Who answers the oath" (Tomas and you; your choice goes on the plaque). Others: B, "The missing recipe"; C, "The Line roll".
 1. **When does the ship start talking about it?** Recommended: with Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address). Others: Saturday morning; Friday's new-hands tea.
