@@ -203,3 +203,4 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - No spoilers (six hours, Saruth's reason, the visit). Lore steps by tier.
 - lines_check: only "not baked" (expected).
 - **Decision for lead 22:** two Saruth lines in Crossing the Line's afterglow, against story A's "one line" rule.
+- **712d8e8, why the crossing matters (line-q10 A): PASS.** The guard rails hold; `!who:saruth|holt` is supported; the Mail is 316/400. The Saruth fold isn't in yet.
