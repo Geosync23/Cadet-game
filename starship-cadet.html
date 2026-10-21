@@ -10277,6 +10277,7 @@ function schedBuild(p, d, occ, S) {
     if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
       && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
       seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
   };
   const leisureUntil = (end, k) => {
     for (const e of meet) if (e.host && !e.done && e.at + 10 > t && e.at < end && e.at + e.dur > end && typeof eventMeetTag === 'function' && eventMeetTag(e.tag)) end = e.at + e.dur;   // F0b: named for an event meeting, they stay to its end
@@ -10355,7 +10356,7 @@ function schedBuild(p, d, occ, S) {
     if (mt) { dinnerAt = Math.max(t, mt.at + mt.dur); dinnerBy = 1440; }
     if (sp.length && t + 45 < dinnerAt && clear(70)) sp.shift()();
     leisureUntil(Math.min(dinnerAt, until - 40), 71);
-    if (mt && segs.some(s => s.act === 'dinner' && s.tag === mt.tag)) ateDinner = true;   // they got a seat at it (else the ordinary dinner after)
+    if (mt && (meet.some(e => e.meal === 'dinner' && e.ate) || segs.some(s => s.act === 'dinner' && s.tag === mt.tag))) ateDinner = true;   // they ate at it, seated or standing (else the ordinary dinner after)
     if (ateDinner) {}
     else if (t < MEALS.dinner[1] - 15) meal('dinner', 72, Math.min(MEALS.dinner[1], until - (toWork ? C : 0), dinnerBy));
     else grab('dinner', 72);
@@ -10385,7 +10386,7 @@ function schedBuild(p, d, occ, S) {
     const pre = meet.find(e => !e.meal && !e.done && (e.at >= t || REC_ON && /^ev-rec-/.test(e.tag || '') && e.at + e.dur - t >= (e.min || 20)) && e.at + e.dur <= by - (REC_ON && /^ev-rec-/.test(e.tag || '') ? 8 : 25));   // a rec one (Dawn swim) already begun still counts (0.83.1)   // a gathering before breakfast (Sunrise stretch, Pick-your-own; 0.36.86): to it, then breakfast
     if (pre) leisureUntil(pre.at + pre.dur, k + 11);
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
-    if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
+    if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (meet.some(e => e.meal === 'breakfast' && e.ate) || segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
     if (H.has('skips-breakfast') && U(k + 1) < .7) { if (!pre) linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
     const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(100 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));   // spread over the morning (playtest 2: not everyone at 08:00-08:30)
     if (want > t + C + 5 && !pre) linger(want - (deck !== 3 ? C : 0));   // after a gathering: straight to breakfast (waiting would only stretch the gathering)
