@@ -13,7 +13,7 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 | RN1 | perf_check busy event scenes | claude/opt-render 3af9f15 + 0ad9b5d | PASS WITH FIXES (F1 needed; F2-F4 small) |
 | RN1 | #10 faster deck builds (4a-4c) | ab86ff7 (+ 960f2ce, 5358a60 docs) | PASS |
 | RN1 | #6 grain loop | c1bf6f1 (+ 9604b97, 1a62fc7 docs) | PASS |
-| TS2 | player_check Fix A+B | not pushed yet | waiting |
+| TS2 | player_check fix A + fix B | claude/opt-tests 4775488 + e4acbf8 | PASS WITH FIXES (F1 needed, small) |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
 | RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (nits N1, N2; section 25's owner to look) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
@@ -83,6 +83,21 @@ Nits:
 - N1: section 25's header comment (game line ~51308) still says "six tabs, two rows of three".
 - N2: DEV_NOTES has nothing on the Speed card yet: what it shows, that its times read 0 under the checks' virtual clock, and that its screen sizes are what perf_check's `TRIFOLD` table waits for.
 - Owner: the `DM_TABS` line and the `devmodeDraw` line are in DB2's section 25 (the build-table row says the Dev mode engineer reviews); the lead routes that.
+
+## TS2: player_check fix A (4775488) + fix B (e4acbf8), PASS WITH FIXES
+
+Test-only (player_check.py, DEV_NOTES "Testing", build table). Fix A: the three places that stepped `window.__step` by hand now draw only each batch's last frame, as `Game.step` does. Fix B (the user's exception): `Game.step` is replaced in player_check by one that draws nothing unless inside `drawn()`; `run_activity`, `servery_seat` and the phone-layout block are inside it. The phone-layout block now sets the toast itself (it read a real-time 5.6 s `setTimeout` before).
+
+What I ran, on integration 0.64.9 (f782c5d), alone:
+- integration's player_check: PLAYER CHECK OK, 21 min 45 s.
+- opt-tests' (fix A + B): PLAYER CHECK OK, **5 min 54 s**. Output identical line for line except "phone, at rest", where the toast is now cleared by the check (TS2's reported difference, explained).
+
+Mutant:
+- pmA, `with drawn()` taken out of `run_activity` (activities no longer drawn, against the user's rule): **PLAYER CHECK OK**, exit 0. Every activity reports `calls<=196`: `renderer.info` keeps the last drawn frame's numbers, so the 450-budget check (`peak < BUDGET`) read a stale count from somewhere else. Not caught.
+
+Fix:
+- **F1 (needed): make the drawn parts prove they drew.** In `_run_activity` and `_servery_seat`, read `renderer.info.render.frame` before and after (three r128 adds one per drawn picture) and fail if it didn't move ("the activity wasn't drawn"); or have STATE return `calls` only when the frame moved since the last read. pmA should then FAIL. The rule is the user's exception's own condition ("activities and the servery's draw-call budget still drawn"), so the check should guard it, not just follow it.
+- The rest reads right: everything outside `drawn()` still simulates every frame; the screen-click parts (treadmills, Repair) project and ray-cast with the same camera matrices, and the output diff shows they land the same.
 
 ## Log
 
