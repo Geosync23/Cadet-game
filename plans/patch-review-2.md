@@ -137,3 +137,10 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - Zeke's good job only once; Theo Teague gives the clock-out remark.
   - The gap is 2 m or more.
 - **Not walked by me:** the owed-goodnight path and its Mail (code read OK; asked PA for a probe line).
+
+## EV1 F0a: claude/events-base 835ab24 (the event calendar, behind EVENTS_ON). PASS
+
+- **Switch off:** check_fast OK (261 s); cadet_test 0.64.5→835ab24 ALL IDENTICAL. The code reads correctly; the load order is safe.
+- **Switch on, in a copy:** events_check fails 8 lines.
+  - Nearly all are its hard-coded Day 10 storm: the storm day, the all-clear party on Day 13, the routines, the guest days, film night, rec-slow-stretch on Day 14.
+  - One is unexplained: quiet-watch day 300, Deck 3, 2 not reached. Sent to EV1.
