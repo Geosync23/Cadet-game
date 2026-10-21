@@ -107,10 +107,10 @@
 // Brennan offers the two volunteer jobs in person (EV7's L5b: a bubble, Sunday 10:30-14:15 wherever you find her,
 // once; the jobs go up at 12:45, so the line names the time), the toast after it (a card), and the mug she saves you at
 // the Line supper if you missed the ceremony (the user's line-q6 a; Tomas's is punch.saved). EW2 wrote them over EV7's
-// stand-ins. The punch's secret stays in punch.secret only
+// stand-ins. Both bubbles 60 at most (5 s over Brennan). The punch's secret stays in punch.secret only
 == event.crossingLine.punch.offer
-- Two Line jobs going, love: carry my punch, hang the ribbons. Mess sheet, quarter to one.
+- Two Line jobs, love: punch and ribbons. Mess sheet, 12:45.
 == event.crossingLine.notice.offer
 - Brennan's Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.
 == event.crossingLine.punch.savedYou
-- Missed the Line, love? I saved you a mug. All of it, mind. Then you've crossed.   #warm
+- Missed the Line, love? Saved you a mug. All of it, mind.   #warm
