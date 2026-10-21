@@ -111,3 +111,61 @@ and .done). Probes are in `plans/review-5/`; shots are in `plans/review-5/shots/
 - A probe that plays every frame from 15:35 to 16:24 on Day 5 at 390x844 takes more than 25 minutes. Start the save at 15:55 or 16:18, with step(20).
 - A page reload inside a probe needs `goto(..., timeout=240000)`. Don't use `wait_until='commit'`: wait_for_function then never saw __sc.
 - fridays_check takes about 8 minutes here (493 s); player_check about 30 minutes.
+
+## FR2/FR3: turn 7 (86d0c80), turn 8 (12def3a), the 0.64.8 merge (0f41dbd9), turn 9 (de18921), the check fix 11b2220. Reviewed as one block at 11b2220; base integration 0.64.8 (3a48846)
+
+**Checks** (all at 11b2220; the switch-on copy as before):
+- cadet_test from 0.64.8 to 11b2220, off: ALL IDENTICAL.
+- check_fast OK in 446 s.
+- lines_check: PASS.
+- fridays_check OK in 924 s.
+  - Missed on Day 26 (a shift day): work 6.54 → 6.03, the count +1.
+  - On a leave day (Day 33): no dip, but the Mail.
+  - Dinner on Day 5: the 51 who went start 17:04-17:48 (median 17:30), 7 before 17:10.
+  - The rec lift: no queue at 16:52 or 17:10.
+  - Part E: Zeke's six goodnight lines, Halloran's three, the flag set and not saved, the clock's words.
+- events_check, on: OK.
+- day_check Day 5, on: OK.
+- day_check Day 12 fails "no rec counts" on, AND on plain integration 0.64.8. So it's backlog #18, not Fridays'.
+- food_check, on and off: OK.
+- player_check, on: OK. The first job at this head is no longer 7-aud-seats; the turn-6 fix 1 was still needed, and FR3 made it in 208581c8.
+- intro_check --evening, on: OK.
+- devmode_check, on: OK.
+- perf_check, on: the only PROBLEM is backlog #14 (548→550 geometries on round trips). The new scenes (calls/gl, at portrait zoom 1.5 / zoom 0.7 / landscape):
+  - auditorium Fri 16:10: 174/293, 209/354, 171/285 (49 people);
+  - rec lift lobby 16:52: 204/320, 274/397, 232/336 (15);
+  - Friday dinner in the mess 17:20: 203/353, 361/524, 237/353 (49).
+  - All under 450 calls. The highest scene overall is the old junior wing at 433.
+
+**Code read:**
+- **Turn 7:**
+  - recCap reads dayShiftEnd (pure; 1020 when off).
+  - friDinner is seeded with key 1184, applies only to those at the address, and late diners keep their own time. It's read in 14's evening, before the handover rule.
+  - The dip is `repAdd(null, 0, { work: -2 }, 'address')`, the same as being late (section 20's -2 at 20+ minutes).
+  - It applies only when playerShiftOn(d). careerOff covers leave, sick, let go and devmodeExcused.
+- **Turn 8:**
+  - friNightKeys and friBeatLines are function declarations, read by section 21; a missing Friday key is skipped.
+  - The 'shortFriday' flag is set at load and on newGame. newGame clears SHIP.flags before simNote. The flag is deleted from a copy of the save's flags.
+  - The 15:20 heads-up is a toast (FR2's stand-in for the device's queue), once a day, saved as FRI.hu.
+  - friClock replaces the 'onshift' and 'didout' words only on a short Friday.
+- **The 0.64.8 merge:** dayReport's iv keeps friCrewEnd and takes eventMeetTag's filter. That matches both sides.
+- **Turn 9:**
+  - perf_check's 'cells' path applies only to the three new scenes. The old scenes take `nearestOpen(mi, mj, player)` as before.
+- **11b2220:** with the storm off, fridays_check's "never fills" rule leaves out the storm's own lines. That's right, because the game's own readers now shadow the stubs.
+
+**Live probe** `fr78.py` (a real save, 390x844):
+- The 15:20 heads-up shows once ("Your shift ends at 15:30. The Captain's address is at 16:00, in the rec deck auditorium."). After a real reload at 15:23 it doesn't come again (FRI.hu = 5).
+- The clock: "Short Friday: on shift since 09:00. Clock out from 15:30. The Captain's at four." and "Clocked out at 15:35. The Captain's address is at four, in the rec deck auditorium."
+- At 17:10, 13 people are still on Deck 7 while their plans have them on Deck 3. All 13 are walking to the lift (dinner, leisure, commute), none stuck. That fits FR3's explanation: everyone stays to 16:52, and some sit on until their next plan starts.
+
+**Mutants for turns 7-8** (`mutants9.py`, MH=h9): running at the time of writing; results in `mutants9.out` when pushed.
+- t1: no dip;
+- t2: a dip on a leave day;
+- t3: friDinner null;
+- t4: the flag saved;
+- t5: the flag never set;
+- t6: no Friday goodnight keys;
+- t7: recCap back to 17:00 (expected missed);
+- t8: no 15:20 heads-up (expected missed: fridays_check doesn't test the heads-up; my probe does).
+
+**Verdict (provisional, pending the mutants): PASS.** No fixes; notes only. Turn 6's fixes and turn 10 are PR8's (claude/review-8).

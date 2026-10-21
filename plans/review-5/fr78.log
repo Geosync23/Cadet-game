@@ -1,0 +1,6 @@
+loaded Day 5, Friday 15:16 [True, 0]
+A at Day 5, Friday 15:23 toasts [['Short Friday', "Your shift ends at 15:30. The Captain's address is at 16:00, in the rec deck auditorium.", 'Day 5, Friday 15:20']] hu 5
+A after reload Day 5, Friday 15:28 toasts [] hu 5
+A clock words ["Short Friday: on shift since 09:00. Clock out from 15:30. The Captain's at four.", "Clocked out at 15:35. The Captain's address is at four, in the rec deck auditorium.", None]
+B Day 5, Friday 17:10 [["vance", "walk", 2, "@", 3, "leisure", 1], ["calder", "walk", 0.3, "@", 3, "leisure", 1], ["nandakumar", "walk", 9.7, "f", 3, "dinner", 10], ["lindqvist-isak", "walk", 1.1, "+", 3, "leisure", 3], ["farouk-olu", "walk", 9.2, "=", 3, "dinner", 11], ["halloran-emeka", "walk", 9.6, "f", 3, "dinner", 11], ["achterberg-lars", "walk", 16, "A", 3, "commute", 18], ["kovac-zainab", "walk", 4.5, "=", 3, "dinner", 5], ["salo-saad", "walk", 1.5, "+", 3, "leisure", 2], ["garcia-greta", "walk", 7.5, "=", 3, "dinner", 9], ["fonseca-arjun", "walk", 4.9, "=", 3, "dinner", 5], ["kim-yusuf", "walk", 8.8, "=", 3, "dinner", 9], ["alvarez-luca", "walk", 15.2, "A", 3, "commute", 18]]
+errors []
