@@ -35930,10 +35930,31 @@ const EV_CALENDAR = [
   { id: 'ionStorm', day: 11, kind: 'main' },            // the warning Thursday Day 11; the front Friday Day 12, 14:00
   { id: 'comet', day: 16, kind: 'short' },              // Tuesday Day 16, 21:30
   { id: 'diplomatic', day: 26, kind: 'main' }];         // the warning Friday Day 26; the finale Days 27-30
+const EV_TABLE_EARLY = true;   // user question 2 (pending; recommended): a Captain's table the guard won't allow at 19:30 starts at 19:00 and ends by 20:15 (false: your seat moves to the next table)
 const EV_LATE = 'skip';   // a save already past an event's day (user question 1, recommended 'skip'): 'skip', or 'next' (from the day it loads)
 // F1's table of held hours. F0 adds its Friday row first (one source for the Friday hold: the Captain's address,
 // plans/fridays-plan.md rev 4, 16:00-16:50, held 15:30-17:00 on every Friday from Day 5). weekday: 0 = Monday
-const EV_BEATS = [{ id: 'fridayAddress', kind: 'held', weekday: 4, fromDay: 5, at: [930, 1020] }];
+const EV_BEATS = [{ id: 'fridayAddress', kind: 'held', weekday: 4, fromDay: 5, at: [930, 1020] },
+  // F1b, the career-beat guard's list (plans/events-plan.html section 1; Pillar 5 reads the same list when it's built).
+  // kind: 'beat' (its hours are taken), 'captain' (one of the Captain's scenes, its hours taken), 'test' (a test day: no
+  // Captain's scene), 'night' (your night shift, from its start into the next morning: nothing may cross it). The
+  // first promotion's beats (24p: Day 9 test, Day 10 summons 11:00 and move 17:00, Day 11 team job 09:30 and the
+  // ceremony 17:15 with the Captain); Pillar 5's beats are held now, at the plan's hours where it gives them (est.: ours)
+  { id: 'officerTest', kind: 'test', day: 9, at: [540, 1020] },
+  { id: 'officerSummons', kind: 'beat', day: 10, at: [630, 720] }, { id: 'officerMove', kind: 'beat', day: 10, at: [1020, 1080] },
+  { id: 'teamJob', kind: 'beat', day: 11, at: [570, 780] }, { id: 'officerCeremony', kind: 'captain', day: 11, at: [1020, 1110] },
+  { id: 'stormAllClear', kind: 'captain', day: 14, at: [600, 660] },        // the commendation letter comes with it
+  { id: 'tier3Test', kind: 'test', day: 15, at: [540, 1020] },
+  { id: 'seniorOfficer', kind: 'captain', day: 16, at: [600, 720] },        // est.: the ready room and the suite
+  { id: 'seniorToast', kind: 'captain', day: 17, at: [1140, 1260] },        // est.: the toast at a Captain's table
+  { id: 'shutdownsTraining', kind: 'beat', day: 18, at: [540, 720] },       // est.
+  { id: 'nightAssigned', kind: 'beat', day: 18, at: [840, 900] },           // est.: Calder assigns your night shift
+  // the night shifts from 21:00 (Days 19-20), held from 20:30 so you can get there (the Captain's table ends by 20:30)
+  { id: 'nightShift1', kind: 'night', day: 19, at: [1230, 1860] }, { id: 'nightShift2', kind: 'night', day: 20, at: [1230, 1860] },
+  { id: 'mondayBriefing', kind: 'beat', day: 22, at: [510, 570] },          // est.: Vance's memo rides on it
+  { id: 'engineSpecialist', kind: 'beat', day: 23, at: [600, 720] },        // est.
+  { id: 'caldersQuestion', kind: 'beat', day: 26, at: [1080, 1140] },       // est.: at the Friday tea's hour
+  { id: 'seniorBriefing', kind: 'beat', day: 29, at: [510, 540] }];         // 08:30, before the gift exchange at 09:00
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
@@ -36581,15 +36602,17 @@ const OCCASIONS = {
     due: d => { const c = SHIP.commendations[0], from = c ? c.day + 1 : null;
       if (from === null && occRel('vance') < 3) return false;
       if (from !== null && d < from) return false;
-      for (let k = from || d; k < d; k++) if (occOnShift('marrow', k)) return false;   // only the first such day
-      return occOnShift('marrow', d); },
-    mail: { from: 'Commander Teo Vance', subject: 'The Captain would like a word', body: 'The Captain would like to see you in her ready room on Deck 1 at 11:00 today. The door will be open. No need to change.' } },
+      for (let k = from || d; k < d; k++) if (occReadyDay(k)) return false;   // only the first such day
+      return occReadyDay(d); },
+    slot: d => ({ at: occReadyAt(d), len: 25 }),          // 11:00, or (the events base's guard, F1c) the first hour it leaves free
+    mail: { from: 'Commander Teo Vance', subject: 'The Captain would like a word', body: r => 'The Captain would like to see you in her ready room on Deck 1 at ' + hhmm(r.at % 1440) + ' today. The door will be open. No need to change.' } },
   // the Captain's table: a dinner in her quarters every 28 days (days 20, 48...), one junior who stood out invited
   captainsTable: { title: 'The Captain\'s table', kind: 'invite', by: 'marrow', deck: 2, room: 'C', at: 1170, len: 90, script: 'captainsTable', notice: 1,
-    due: d => d % 28 === 20 && (SHIP.commendations.some(c => c.day > d - 28 && c.day <= d)
+    due: d => d % 28 === 20 && !!occTableSlot(d) && (SHIP.commendations.some(c => c.day > d - 28 && c.day <= d)
       || (typeof SHIP.rel === 'object' && SHIP.rel ? Object.keys(SHIP.rel).filter(id => occRel(id) >= 3).length >= 3 : false)),
+    slot: d => occTableSlot(d),                            // 19:30 for 90 minutes, or what the guard leaves (F1c)
     galley: { batch: { meals: 8, label: 'the Captain\'s table' } }, trace: 'framedMenu',
-    mail: { from: 'Captain Odile Marrow', subject: 'Dinner at my table', body: 'You\'re invited to dinner in my quarters on Deck 2 tomorrow at 19:30. Chef Brennan is cooking. Come as you are, but do come.' } },
+    mail: { from: 'Captain Odile Marrow', subject: 'Dinner at my table', body: r => 'You\'re invited to dinner in my quarters on Deck 2 tomorrow at ' + hhmm(r.at % 1440) + '. Chef Brennan is cooking. Come as you are, but do come.' } },
   // a progress talk in the Chief's office: you ask for one (the device's Appointments app calls occasionAsk)
   progressTalk: { title: 'A progress talk', kind: 'meeting', by: 'calder', deck: 5, room: 'o', len: 20, script: 'calderProgress', ask: true,
     mail: { from: 'Chief Ines Calder', subject: 'Your progress talk', body: 'My office, at the time you asked for. Bring nothing; I have your record.' } },
@@ -36615,7 +36638,7 @@ function occasionAdd(id, at, quiet, len) {
   const r = { id, key, at, len: len || o.len, deck: o.deck, room: o.room, by: o.by, kind: o.kind, status: 'asked' };
   SHIP.occasions.push(r);
   if (!o.chance && typeof apptAdd === 'function') apptAdd({ id: key, with: [o.by, ...(o.with || [])], at, len: o.len, where: o.deck + '|' + o.room, kind: o.kind, status: 'yes', by: o.by, title: o.title });
-  if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: o.mail.body, quiet: !!quiet });
+  if (o.mail && typeof mailSend === 'function') mailSend({ at: Math.min(shipNow(), at), from: o.mail.from, subject: o.mail.subject, body: evText(o.mail.body, r), quiet: !!quiet });
   return r;
 }
 // you ask for one (ask: true): at ship minute `at`, if its person is on shift that day; returns the record or null
@@ -36789,6 +36812,36 @@ function eventDay(d) {
     if (def.phases.some(p => EV_BIG_PHASES.includes(p.id) && r.day + p.at[0] === d)) return true;
   }
   return false;
+}
+// F1b, the career-beat guard: the beats on day d (a night shift from the day before reaches into this morning, as
+// [at - 1440]), from EV_BEATS alone. guardFree(d, from, to, kind): may a beat go at minutes [from, to) of day d? Never
+// over a held or taken hour; a Captain's scene ('captain') also never on a test day, never a second one that day, and
+// never across a night shift. Everything else is true while EV_GUARD_ON is off (no guard: today's game). Pure
+function evBeatsOn(d) {
+  const out = [];
+  for (const b of EV_BEATS) {
+    if (b.weekday != null) { if (weekday(d) === b.weekday && d >= (b.fromDay || 0)) out.push({ ...b, from: b.at[0], to: b.at[1] }); continue; }
+    if (b.day === d) out.push({ ...b, from: b.at[0], to: b.at[1] });
+    else if (b.day === d - 1 && b.at[1] > 1440) out.push({ ...b, from: b.at[0] - 1440, to: b.at[1] - 1440 });
+  }
+  return out;
+}
+function guardFree(d, from, to, kind) {
+  if (!EV_GUARD_ON) return true;
+  const on = evBeatsOn(d), cross = b => from < b.to && to > b.from;
+  if (on.some(b => b.kind !== 'test' && cross(b))) return false;
+  if (kind === 'captain' && on.some(b => b.kind === 'test' || b.kind === 'captain')) return false;
+  return true;
+}
+// F1c: the occasions the guard places (section 18's OCCASIONS). The ready room's summons: the Captain on shift and a
+// free hour for a Captain's scene, the first of 11:00, 16:00, 15:00, 14:00, 10:00 (11:00 while the guard is off: today's).
+// The Captain's table: 19:30-21:00, else (EV_TABLE_EARLY) 19:00-20:15, else none that day (your seat moves on)
+const OCC_READY_AT = [660, 960, 900, 840, 600];
+const occReadyAt = d => OCC_READY_AT.find(at => guardFree(d, at, at + 25, 'captain'));
+const occReadyDay = d => occOnShift('marrow', d) && occReadyAt(d) != null;
+function occTableSlot(d) {
+  if (guardFree(d, 1170, 1260, 'captain')) return { at: 1170, len: 90 };
+  return EV_TABLE_EARLY && guardFree(d, 1140, 1215, 'captain') ? { at: 1140, len: 75 } : null;
 }
 // ---- end of slot: Traditions engineer ----
 
