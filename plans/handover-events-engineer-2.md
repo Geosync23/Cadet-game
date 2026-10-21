@@ -30,6 +30,12 @@ first, then `plans/handover-events-engineer-1.md` (EV1, the base's first pieces)
 | S4 your help counts | f2a0eaa, af568f9 | Behind `EV_STORM_ON`: `stormRota` prep job; `help` table; `callMins: 25`; `eventHelp`, `eventHelpKeep`, `evCallMins`; hooks s17 blackoutHour, s16 bridgeHungry, s18 stormCallBacklog. Left alone bumpy (117/6/4.8), all three smooth (59/3/2.9). Sent to PR4. |
 | S8 device and banner | ad8fd8a, then the S8 commits | The Officers' briefing (`calderStorm.officer` registered, `scriptBy` from officer up); the banner below the HUD's buttons on phones (`addrBelowHud`, s19 skin hook). Schedule, status line and Record needed no code (EW1's words, EV3's S1). Shots: `plans/storm-shots/`. |
 
+## For EV3 / the storm builder (sent 2026-10-21 ~05:55)
+
+- Merge `claude/storm-s4s8` into `claude/storm-update` (clean apart from build-table rows).
+- Don't replace `SHIP_EVENTS.ionStorm.jobs.warning` (S4 pushes `stormRota` into it) or the `stormBriefing` meeting
+  object (S8 sets its `scriptBy`); don't also register `calderStorm.officer` in `stormScripts` (S8 does, in my slot).
+
 ## Loose ends
 
 - **Backlog 17** (social seat): about 21 `lateMeal` cues land at one minute on Day 14 10:00 and the 24-cue cap cuts
