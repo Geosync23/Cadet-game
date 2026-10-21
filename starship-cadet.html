@@ -51237,15 +51237,15 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
-const DM_LATER = { career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
+const DM_LATER = { career: 'Your career by hand: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
 var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
   if (!DEVMODE) return null;
-  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr) }; }
+  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr), set: s && s.set && Number.isInteger(s.set.day) ? { day: s.set.day, at: String(s.set.at || '') } : null }; }
   return DM_ST;
 }
-if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last, tr: st.tr.slice(-20) }; });
+if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last, tr: st.tr.slice(-20), set: st.set }; });
 function devmodeCss() {
   const st = document.createElement('style');
   st.textContent = '.devmode .hud{pointer-events:auto;cursor:pointer;border:2px solid #e8c06a;box-shadow:0 0 0 1px rgba(232,192,106,.35),0 0 14px rgba(232,192,106,.3)}'
@@ -51329,11 +51329,12 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
   else if (DM_UI.tab === 'clock') devmodeClock(body);
   else if (DM_UI.tab === 'trad') devmodeTrad(body);
+  else if (DM_UI.tab === 'set') devmodeSet(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
 }
-function devmodeFoot() { const m = devmodeRead(DM_KEY.mark); return m ? 'Mark: ' + m.label : 'No mark yet'; }
+function devmodeFoot() { const m = devmodeRead(DM_KEY.mark), c = devmodeState().set; return (c && c.day ? 'Career set to Day ' + c.day + ', approximate · ' : '') + (m ? 'Mark: ' + m.label : 'No mark yet'); }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
   const on = location.hash.slice(1).split('.').some(t => (t.includes('-') ? t.slice(0, t.indexOf('-')) : t) === 'dev');   // as section 13 reads the link
@@ -51737,6 +51738,129 @@ function devmodeTradWho(body, ev) {                      // whose birthday, or w
   for (let i = 0; i < crew.length; i += 3) devmodeRow(body, crew.slice(i, i + 3).map(p => [p.name, () => {
     const k = who.indexOf(p.id); if (k >= 0) who.splice(k, 1); else if (who.length < 6) who.push(p.id); devmodeDraw();
   }, { ask: who.includes(p.id) }])).classList.add('dmWho');
+}
+// ---- D6 (Stop 2): Set career: a new Dev game moved to Day N with what a steady player has by then (approximate) ----
+// Always a new Dev game, the Skip-to-Monday way (newGameStart(false) + introSkip(); the arrival's start-up cleared), the
+// first week's beats marked met up to the day, then the clock moved day by day (devmodeSkipTo: workdays excused, needs
+// kept) to Day N 06:00. Each morning at 05:00, before that day runs, SHIP.works is set from DM_CAREER: everything a
+// steady player has by the end of that day (its trainings trained and opened on their day, tools, the band's xp, the
+// test and the first promotion's beats done), then promoPip(). The ship (machines, jobs, galley, Mail, traditions, the
+// storm, rotations) runs those days with the game's own catch-up, without you. You wake in your bed. The career's own
+// seed (SHIP.career.gs) is DM_SEED, so two Set careers to the same day give the same save, and no sick day comes. Nothing here calls R().
+// DM_CAREER: what a steady player has by the end of day N (plan 4.2; the ladder's days, Pillar 5's dates). Days not
+// listed carry on from the row before; devmode_check keeps every training's day equal to CAREER_LADDER's.
+const DM_CAREER = [
+  { day: 1, band: 'new' },
+  { day: 2, train: ['m1'], band: 'steady' },
+  { day: 3, train: ['m4', 'm3d'], band: 'reliable' },
+  { day: 4, train: ['m5', 'm3i'], band: 'trusted' },
+  { day: 5, train: ['m7', 'p3'], band: 'trusted' },
+  { day: 8, train: ['m6', 'm2'], band: 'relied' },
+  { day: 9, train: ['t2'], band: 'relied', test: true },
+  { day: 10, rank: 'officer', band: 'new', promo: true },
+  { day: 11, train: ['m8'], band: 'new' },
+  { day: 12, train: ['m9', 'p1', 'm10', 'm11', 'm12', 'm13'], band: 'steady' },
+  { day: 13, train: ['m14'], band: 'steady' },
+  { day: 15, train: ['p2'], band: 'reliable' },
+  { day: 16, later: 'Senior Officer (not built yet: still an Officer)' },
+  { day: 17, train: ['m15'], band: 'trusted' },
+  { day: 18, train: ['m17'], band: 'trusted' },
+  { day: 23, later: 'Engine Specialist (not built yet)' },
+  { day: 26, later: 'Calder\'s question (not built yet)' },
+];
+const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
+function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
+  const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
+  const promo = rows.some(r => r.promo), tier = promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];
+  const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
+  for (const r of rows) for (const id of r.train || []) {
+    const row = ladderRow(id); if (!row) continue;
+    out.tr[id] = r.day; (out.op[r.day] = out.op[r.day] || []).push(id);
+    out.use[id] = Math.min(9, 1 + Math.floor((n - r.day) / 2));   // about a use every other day (approximate)
+    if (row.tool && WORK_TOOLS[row.tool]) out.tools[row.tool] = [r.day, 0];   // fresh: no wear
+  }
+  if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
+  if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
+  return out;
+}
+function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
+  const W = SHIP.works || worksInit(Math.max(now, WORKS_START)), c = devmodeCareerFor(n);
+  Object.assign(W, c, { cur: null }); W.op = c.op;
+  if (n >= 8 && typeof flagSet === 'function') flagSet('works.oily', true);   // your work uniform's row needs it
+  if (c.done.includes('ceremony2') && typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
+  for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked') r.status = 'done';   // nothing left asking for what's now set
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: the tier's jobs
+}
+function devmodeWeekMet(upTo) {                          // the first week's beats before `upTo` marked as attended (section 21's records)
+  const I = SHIP.intro; if (!I || typeof INTRO_WEEK === 'undefined') return [];
+  const out = [];
+  for (const b of INTRO_WEEK) {
+    const t = introAbs(b.day, b.at); if (t >= upTo) continue;
+    if (b.meeting || b.moment || b.says) I.done[b.id + ':met'] = t;
+    if (b.who) I.done[b.id + ':said'] = t;
+    if (b.seek) I.done[b.id + ':seek'] = 1;
+    if (b.release) I.done[b.id + ':end'] = introAbs(b.day, b.until);
+    if (b.id === 'd1-shadow' || b.id === 'd1-lead') I.done[b.id + ':job'] = t;
+    for (const f of b.flags || []) introFlagSet(f);
+    if (b.settle && !I.settle[b.settle]) I.settle[b.settle] = t;
+    if (b.meeting || b.moment) out.push(b.id);
+  }
+  if (upTo > introAbs(8, 0)) { for (const s of SETTLE) if (!I.settle[s.id]) I.settle[s.id] = introAbs(7, 12 * 60); if (!I.settle.all) I.settle.all = introAbs(7, 12 * 60); }
+  return out;
+}
+function devmodeWake() {                                 // into your bed's room, beside it (the bunk room, or cabin 4-23)
+  const id = playerBed(), n = deckOf(id), bed = (DECKS[n].places || []).find(p => p.id === id); if (!bed) return null;
+  const room = roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);
+}
+function devmodeSetCareerTo(n) {                         // the action (under devmodeRun): -> the panel's words
+  const st = devmodeState();
+  INTRO_BOOT = false; newGameStart(n === 0); if (n > 0) introSkip();
+  st.ex = []; st.tr = []; st.note = ''; st.set = null;
+  if (n === 0) { st.set = { day: 0, at: clockText() }; return 'A new Dev game by shuttle: the arrival evening, Day 0.'; }
+  careerInit(); SHIP.career.gs = DM_SEED;                 // the career's seed, the same every time
+  const land = (n - 1) * 1440 + WAKE_AT, met = devmodeWeekMet(land), ex = [];
+  devmodeCareerSet(1, shipNow());
+  for (let d = 2; d <= n; d++) {
+    devmodeSkipTo((d - 1) * 1440 + 300);
+    devmodeCareerSet(d, shipNow());
+  }
+  if (shipNow() < land) devmodeSkipTo(land);
+  ex.push(...st.ex); promoPip(); devmodeWake();
+  st.set = { day: n, at: clockText() };
+  return 'Career set to Day ' + n + ' (approximate): ' + RANK_TITLE[SHIP.works.rank] + ', ' + BAND_WORD[worksBand() || 'new'] + '. ' + clockText() + ', in your bed. '
+    + (met.length ? 'The first week\'s beats marked as attended. ' : '') + (ex.length ? ex.length + ' workday' + (ex.length > 1 ? 's' : '') + ' excused. ' : '') + 'What\'s set is listed below.';
+}
+function devmodeSetCareer(n) { devmodeDo('Set career to Day ' + n, () => devmodeSetCareerTo(n)); }
+// what Set career gave and what it gets wrong (plan 4.3), for the panel
+function devmodeWhatsSet(n) {
+  if (n == null) return [];
+  if (n === 0) return ['A new Dev game by shuttle: nothing else set.'];
+  const W = SHIP.works, c = devmodeCareerFor(n), tr = Object.keys(c.tr), later = DM_CAREER.filter(r => r.later && r.day <= n).map(r => r.later);
+  return [
+    'Rank ' + RANK_TITLE[c.rank] + ', Tier ' + c.tier + ', Works reputation ' + BAND_WORD[(WORK_BANDS[c.tier].filter(b => c.xp >= b[0]).pop() || [0, 'new'])[1]] + ' (set from the table).',
+    tr.length ? 'Trained (' + tr.length + '): ' + tr.map(id => mechName(id) + ' (' + id + ')').join(', ') + '.' : 'No trainings yet.',
+    Object.keys(c.tools).length ? 'Tools: ' + Object.keys(c.tools).map(k => WORK_TOOLS[k].name).join(', ') + ', fresh (no wear).' : 'No tools yet.',
+    c.done.length ? 'The promotion: test passed Day 9, Officer Day 10, cabin 4-23, the ceremony and your pip, the framed commission.' : c.test ? 'The Tier 2 test job: passed (Day 9).' : '',
+    n > 1 ? 'The first week: its meetings and beats marked as attended' + (n > 7 ? ', the Settling-in list ticked, the mug and the seedling' : '') + '.' : '',
+    later.length ? 'Not built yet: ' + later.join('; ') + '.' : '',
+    'Real: the ship ran those days without you (machines, jobs, galley, Mail, traditions' + (n > 11 ? ', the ion storm (your part: none; its briefing by Mail)' : '') + (n > 21 ? ', the first rotation on Day 21' : '') + ').',
+    'Thin or empty: friendships and stories (no conversations played), your work log, right-first-time counts, commendations; tips already seen and the Works app\'s history are fresh. Needs and clothes: a normal morning.',
+    W ? '' : 'No career record yet.',
+  ].filter(Boolean);
+}
+function devmodeSet(body) {
+  const st = devmodeState(), p = DM_UI.day == null ? Math.max(1, Math.min(DM_MAXDAY, (st.set && st.set.day) || SHIP.time.day || 1)) : DM_UI.day;
+  devmodeHead(body, 'Set career to a day');
+  devmodeText(body, 'A new Dev game, moved to that day at 06:00 with what a steady player has by then: approximate. Undo my last Dev action (Quick) brings this game back.');
+  devmodeRow(body, [['− 1 day', () => { DM_UI.day = Math.max(0, p - 1); devmodeDraw(); }, { aria: 'A day earlier' }],
+    ['Set career to Day ' + p, b => devmodeTwice(b, 'Tap again: a new Dev game', () => { DM_UI.day = null; devmodeSetCareer(p); }), { ask: true }],
+    ['+ 1 day', () => { DM_UI.day = Math.min(DM_MAXDAY, p + 1); devmodeDraw(); }, { aria: 'A day later' }]]);
+  const days = [1, 2, 5, 8, 10, 12, 16, 21, 26];
+  for (let i = 0; i < days.length; i += 3) devmodeRow(body, days.slice(i, i + 3).map(d => ['Day ' + d, () => { DM_UI.day = d; devmodeDraw(); }, { ask: d === p }]));
+  if (st.set) {
+    devmodeHead(body, 'What\'s set: Day ' + st.set.day + ' (approximate)');
+    for (const l of devmodeWhatsSet(st.set.day)) devmodeText(body, l);
+  }
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----

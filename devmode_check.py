@@ -15,6 +15,9 @@
 #          inside a meeting; Mark here then Back to mark reloads into the same save, byte for byte
 #   slow:  the reload after Undo and Back to mark held back 6 s (a phone on a weak link; DR1's probe): the kept save stays
 #          put while the old page waits, and the new page has it (the Undo happened, its record used up)
+#   set:   Set career (Stop 2): the table's days are CAREER_LADDER's; Days 2, 10, 12, 26 from new Dev games land at 06:00
+#          with the table's career, in your bed's room, no miss, no first-week meeting notes, no sick day; Day 11 opens
+#          no trained row again; two Set careers to Day 12 give the same save; Undo; the tab
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
 #   trad:  Traditions (Stop 1b): refused on Day 0; five kinds started (in 20 minutes, at the usual time, tomorrow) with
 #          people going and at the room; whose for a birthday; a clash with a Dev start, too late, a usual time gone
@@ -403,6 +406,62 @@ def part_trad(b):
     pg.close(); ctx.close()
     print('  trad: Day 0 refused; ' + ', '.join(f'{i} {r.get("going")}' for i, r in out) + ' going; whose asked; room clash, too late, usual gone refused; Mail; crew at the quiz; saved; Undo; Stop it back to the calendar; list and search')
 
+
+def part_set(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    # the table's days are the ladder's (a moved training fails here, not silently)
+    bad = pg.ev("""(() => { const out = [], seen = new Set();
+      for (const r of DM_CAREER) for (const id of r.train || []) { seen.add(id); const row = ladderRow(id); if (!row || row.day !== r.day) out.push(id + ': table ' + r.day + ', ladder ' + (row ? row.day : 'none')); }
+      for (const row of CAREER_LADDER) if (row.day <= DM_MAXDAY && !seen.has(row.id)) out.push(row.id + ': on the ladder (Day ' + row.day + '), not in the table');
+      return out; })()""")
+    check(not bad, f'set: the table and CAREER_LADDER disagree: {bad}')
+    setc = lambda n: pg.ev(f"devmodeRun('Set career to Day {n}', () => devmodeSetCareerTo({n}))")
+    pg.ev("devmodeRun('Clock: +3 hours', () => devmodeSkipTo(shipNow() + 180))"); before = pg.ev('clockText()')
+    got = {}
+    for n in (2, 10, 12, 26):
+        check(setc(n) is True, f'set: Day {n} refused: {pg.ev("DM_UI.msg")}')
+        pg.step(20)
+        S = pg.ev(f"""(() => {{ const W = SHIP.works, c = devmodeCareerFor({n}); return {{ clock: clockText(), rank: W && W.rank, tier: W && W.tier, xp: W && W.xp, tr: W && Object.keys(W.tr).sort().join(), want: Object.keys(c.tr).sort().join(),
+          wrank: c.rank, cur: W && W.cur, room: ROOMS[roomAt(...player.here())].name, bed: roomAt(...player.here()) === roomAt(...(DECKS[deckOf(playerBed())].places.find(p => p.id === playerBed()) || {{ at: [0, 0] }}).at), deck: deckDef.num, pip: PLAYER_SPEC.rank || 0,
+          ms: SHIP.career.ms, st: SHIP.career.st, missed: SHIP.mail.filter(m => /missed|summons|warning/i.test(m.subject || '') || Object.values(INTRO_MEETINGS).some(x => m.subject === x.title + ' (notes)')).map(m => m.subject), open: SHIP.occasions.filter(o => o.status === 'asked').map(o => o.id),
+          met: INTRO_WEEK.filter(b => b.meeting && introAbs(b.day, b.at) < shipNow()).every(b => SHIP.intro.done[b.id + ':met'] >= 0), set: devmodeState().set, settle: !!SHIP.intro.settle.all }}; }})()""")
+        got[n] = S
+        check(S['clock'].startswith(f'Day {n},') and S['clock'].endswith('06:00'), f'set: Day {n} landed at {S["clock"]}')
+        check(S['rank'] == S['wrank'] and S['tr'] == S['want'] and S['cur'] is None, f'set: Day {n}: the career isn\'t the table\'s: {S}')
+        check(S['bed'] and S['deck'] == 4, f'set: Day {n}: not woken in your bed\'s room ({S["room"]})')
+        check(S['ms'] == 0 and S['st'] == 0 and not S['missed'] and not S['open'], f'set: Day {n}: a miss, a first-week meeting\'s notes, a summons or something still asking: {S}')
+        check(S['met'] and S['set']['day'] == n and (S['settle'] == (n > 7)), f'set: Day {n}: the first week or the Dev record: {S}')
+    sick = pg.ev("Array.from({ length: DM_MAXDAY + 15 }, (_, i) => i + 1).filter(d => sickDue(d))")
+    check(not sick and not pg.ev('sickNow()'), f'set: the Dev seed brings sick days {sick}')
+    check(got[10]['rank'] == 'officer' and got[10]['tier'] == 2 and got[10]['pip'] == 1 and got[2]['pip'] == 0, f'set: Day 10 isn\'t an officer with the pip: {got[10]}')
+    check(got[10]['room'] != got[2]['room'], f'set: Day 10 not woken in cabin 4-23: {got[10]["room"]}')
+    # play Day 11 hour by hour: the ladder never opens a trained row again
+    setc(10); pg.step(10)
+    again = pg.ev("""(() => { const tr = new Set(Object.keys(SHIP.works.tr)), out = [];
+      for (let h = 10 * 24 + 6; h <= 10 * 24 + 16; h++) { devmodeSkipTo(h * 60); for (const id of ladderTick(h)) if (tr.has(id)) out.push(id); }
+      if (SHIP.works.cur && tr.has(SHIP.works.cur.id)) out.push('cur ' + SHIP.works.cur.id); return out; })()""")
+    check(not again, f'set: Day 11 opened trained rows again: {again}')
+    # two Set careers to Day 12 give the same save, byte for byte (the Dev seed)
+    saves = []
+    for _ in range(2):
+        setc(12); pg.ev('saveGame()'); saves.append(json.loads(pg.ev('localStorage.getItem(SAVE_KEY)')))
+    diff = [k for k in set(saves[0]) | set(saves[1]) if saves[0].get(k) != saves[1].get(k)]
+    deep = [k for k in set(saves[0].get('ship', {})) | set(saves[1].get('ship', {})) if saves[0]['ship'].get(k) != saves[1]['ship'].get(k)]
+    check(not diff, f'set: two Set careers to Day 12 differ in {sorted(diff)} (ship: {sorted(deep)})')
+    # Undo brings the game before back
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev('devmodeState().set && devmodeState().set.day') == 12, f'set: Undo of the second Day 12 isn\'t the first: {pg.ev("devmodeState().set")}')
+    # the tab draws at phone size
+    pg.ev('devmodeOpen(true); DM_UI.tab = "set"; devmodeDraw()')
+    txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
+    check('What\'s set: Day 12' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
+    small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
+    check(not small, f'set: buttons under 44px: {small}')
+    check(not pg.errors, f'set: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  set: table = ladder; Days 2, 10, 12, 26: ' + '; '.join(f'{n} {g["rank"]} T{g["tier"]} xp {g["xp"]}, {len(g["tr"].split(",")) if g["tr"] else 0} trained, {g["room"]}' for n, g in got.items()) + '; no miss or notes Mail; Day 11 opens nothing trained; two Day 12s identical; Undo; the tab')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
@@ -410,7 +469,7 @@ with sync_playwright() as pw:
         if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
