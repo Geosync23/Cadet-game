@@ -19,7 +19,9 @@
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
 #   gathering in the hold) must each be caught;
-#   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load.
+#   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load;
+#   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
+#   its minute, its cue, a crew reaction line for the front; none while EV_NOTES_ON is off.
 # Each part skips (SKIP, or WAITING with what it waits for) while its switch or code isn't there yet, so it runs on
 # today's integration and grows as the events base is built. Exits 1 on a FAIL. About 2 minutes.
 # Setup and environment as for cadet_test.py (three.js in $CADET_WORK/three, CADET_CHROME a Chromium).
@@ -179,6 +181,27 @@ PLANT = r"""(() => {
 })()"""
 PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 
+# F2, the phase notes, live on paper (EV1's part, made from the data): the clock run every 5 ship minutes from 05:00 on
+# the first built event's calendar day to 15:00 the next (the storm's warning and front) through eventAdvance(t, quiet)
+# and section 20's socialTick; each phase's note once, at its own minute (evBeatAt); the cue event.<id>.<phase> made
+# (cues last a ship day: read at 12:00 on the first day and at the end); someone's reaction line for the last phase
+# (section 22's lineFor, kind 'cue'). Switched off (EV_NOTES_ON): no note at all
+NOTES = r"""((a, b) => {
+  const out = { notes: [], cues: [], lines: 0, want: [], err: null, on: typeof EV_NOTES_ON !== 'undefined' ? EV_NOTES_ON : null };
+  try {
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    if (r) out.want = SHIP_EVENTS[r.id].phases.map(p => [r.id, p.id, evBeatAt(r.day, p.at)]).filter(x => x[2] >= a && x[2] <= b).map(x => x[0] + ':' + x[1] + '@' + x[2]);
+    for (let t = a; t <= b; t += 5) { setShipNow(t); eventAdvance(t, true); if (typeof socialTick === 'function') socialTick();
+      if (t === a + 420 || t === b) out.cues.push(...((SHIP.social && SHIP.social.cues) || []).map(c => c.key).filter(k => /^event\./.test(k))); }
+    out.notes = simNotes('eventPhase').map(n => n.id + ':' + n.phase + '@' + n.t);
+    const last = out.want[out.want.length - 1], cue = last && 'event.' + last.split('@')[0].replace(':', '.');
+    out.cue = cue || null;
+    if (cue && typeof lineFor === 'function') for (const p of schedPeople()) { const l = lineFor(p, 'cue', { t: shipNow(), keep: () => true }); if (l && [].concat(l.cue || []).some(c => c.startsWith(cue))) out.lines++; }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  out.cues = [...new Set(out.cues)].sort();
+  return out;
+})"""
+
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
     if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True): fail(f'{tag}: the events on paper came out differently the second time')
@@ -206,6 +229,25 @@ def check_hold(a, tag, on):
             note(f"{tag}: {b['ev']} meeting {b['id']} runs into the Friday hold ({b['at']}, {b['len']} min)")
     for x in a['gath']:
         if x['held']: (note if x['draft'] else fail)(f"{tag}: gathering {x['id']} (D{x['day']} {hhmm_py(x['at'][0])}) is in the Friday hold (gatherings aren't moved)")
+
+def check_notes(pw, path, tag, want_on):
+    # the phase notes (F2) in their own page (the clock is run): the storm's calendar day 05:00 to 15:00 the next day
+    if 'EV_NOTES_ON' not in SRC: waiting('the phase notes (F2, EV_NOTES_ON)'); return
+    g = Game(pw, path); day = g.ev("typeof EV_CALENDAR !== 'undefined' ? (EV_CALENDAR.find(r => r.id === 'ionStorm') || {}).day || 11 : 11")
+    a0, b0 = (day - 1) * 1440 + 300, day * 1440 + 900
+    N = g.ev(f"({NOTES})({a0}, {b0})"); errs = g.errors[:3]; g.close()
+    say(f"  phase notes D{day} 05:00 to D{day + 1} 15:00: {N['notes']} | cues: {N['cues']} | crew with a reaction line for {N['cue']}: {N['lines']}")
+    if N['err']: fail(f"{tag}: phase notes: {N['err']}")
+    for e in errs: fail(f"{tag}: phase notes: page error: {e}")
+    if not want_on:
+        if N['notes']: fail(f"{tag}: phase notes while EV_NOTES_ON is off: {N['notes']}")
+        return
+    if not N['on']: fail(f"{tag}: EV_NOTES_ON is off in this copy"); return
+    if N['notes'] != N['want']: fail(f"{tag}: phase notes {N['notes']}, wanted {N['want']} (each once, at its own minute)")
+    for w in N['want']:
+        c = 'event.' + w.split('@')[0].replace(':', '.')
+        if c not in N['cues']: fail(f"{tag}: no cue {c}")
+    if N['cue'] and N['lines'] < 1: fail(f"{tag}: nobody has a reaction line for {N['cue']}")
 
 def judge(a, tag):
     # everything on paper with the calendar on (parts 2-3, and the self-test)
@@ -335,6 +377,7 @@ with sync_playwright() as pw:
     check_hold(a, 'off', False)
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
+    if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
@@ -342,6 +385,7 @@ with sync_playwright() as pw:
         g = Game(pw, variant(tag, on)); a = paper(g, tag); show(a); judge(a, tag)
         for e in g.errors[:3]: fail(f'{tag}: page error: {e}')
         g.close()
+        check_notes(pw, variant(tag, on), tag, on == 'all')
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
@@ -385,7 +429,7 @@ with sync_playwright() as pw:
 
     # 6. live (F7b) and crowds (F7c): with F2-F4 and the storm update
     print('\n6. Live phases and crowds:')
-    waiting('F7b (jumps, reloads mid-phase and mid-meeting, phase notes to a reaction line, the device) comes with F2-F4; F7c (draw calls at about 60, phone size) with the storm update')
+    waiting('F7b (jumps, reloads mid-phase and mid-meeting, the device) comes with F3-F4 (the phase notes are in parts 1-3); F7c (draw calls at about 60, phone size) with the storm update')
 
 print('\nBIGEVENTS CHECK OK' if ok else '\nBIGEVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)

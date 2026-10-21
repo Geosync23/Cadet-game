@@ -36017,6 +36017,7 @@ const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 const EVENTS_ON = false;                                 // the master switch: on with the storm update, after the user's review
 const EV_CAL_ON = EVENTS_ON;                             // F0: events come by the calendar (a check may flip this line alone)
 const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
+const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as each phase begins (crew lines react)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -36404,6 +36405,8 @@ function eventAdvance(t = shipNow(), quiet) {
     const from = e.phase ? def.phases.findIndex(p => p.id === e.phase) + 1 : 0, to = def.phases.findIndex(p => p.id === now.phase);
     for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
       const ph = def.phases[k].id; out.push('phase ' + ph);
+      // F2: the ship note section 20 makes the cue event.<id>.<phase> of (the reaction lines' cue:), at the phase's own minute
+      if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });
       for (const [th, f] of Object.entries((def.scores && def.scores[ph]) || {})) eventScore(th, f(e));
       if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: evBeatAt(e.startDay, def.phases[k].at), quiet: quiet || k < to });
       const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
