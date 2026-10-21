@@ -5,13 +5,14 @@
 
 The check runs exactly as it would on its own (same file, same arguments, same pages; its output is printed as
 usual and its exit code is kept). Every page it opens gets Chrome's precise coverage (Profiler.startPreciseCoverage,
-call counts, function level), switched on before the game's script runs. Two sets are kept, by game line:
-  load  functions that ran while a page was opening (until the game is ready: window.__sc defined)
-  run   functions that ran after that, i.e. the ones the check itself made the game run
+block level), switched on before the game's script runs. Two sets of game lines are kept:
+  load  lines that ran only while a page was opening (until the game is ready: window.__sc defined)
+  run   lines that ran after that, i.e. the ones the check itself made the game run
+A line counts as run if any block that ran touches it (an if's untaken branch, a function never called: not run).
 Coverage is read when a page is ready, every 200 page.evaluate calls, before a reload or goto, and when the page
-closes; each read resets the counts. Functions are named by the line they start on in the game file (the test copy
-adds its hook after the game's last line, so lines are the same) and by their name. Writes OUT.json:
-  {"check": ..., "args": [...], "exit": N, "seconds": S, "game_sha1": ..., "load": [[line, end, name], ...], "run": [...]}
+closes; each read resets the counts. Lines are the game file's (the test copy adds its hook after the game's last line,
+so they're the same). Writes OUT.json:
+  {"check": ..., "args": [...], "exit": N, "seconds": S, "game_sha1": ..., "load": [[first, last], ...], "run": [...]}
 tools/affected.py reads these (tools/check_map.json is all of them in one file: tools/affected.py --merge).
 Used to make the map, never to judge a check: its results count only from a normal run (the map run is separate).
 """
@@ -24,7 +25,7 @@ sys.argv = [CHECK] + sys.argv[3:]
 sys.path.insert(0, os.path.dirname(CHECK))
 from playwright.sync_api import Browser, BrowserContext, Page
 
-LOAD, RUN = {}, {}                                   # (line, end) -> name
+LOAD, RUN = set(), set()                             # game lines that ran
 LINES = {}                                           # url -> (html text, offset of the main script's source, newline offsets)
 
 
@@ -51,6 +52,7 @@ def line_at(nl, i):
 
 
 def take(page, into):
+    """read and reset the page's coverage; add the game lines that ran to `into` (a set)"""
     s = getattr(page, '_cov', None)
     if not s:
         return
@@ -63,18 +65,25 @@ def take(page, into):
         if not h:
             continue
         html, base, nl = h
-        for f in sc['functions']:
-            r = f['ranges'][0]
-            if r['count'] <= 0 or (r['startOffset'] == 0 and not f['functionName']):
-                continue                             # never ran, or the script's own top level
-            a, b = line_at(nl, base + r['startOffset']), line_at(nl, base + r['endOffset'] - 1)
-            into.setdefault((a, b), f['functionName'])
+        # every block range of every function, outer before inner: a range that ran marks the lines it touches; one that
+        # didn't run unmarks the lines wholly inside it (a function never called, an if's untaken branch)
+        rs = sorted((r['startOffset'], r['endOffset'], r['count']) for f in sc['functions'] for r in f['ranges'])
+        ran = {}
+        for a, b, c in rs:
+            la, lb = line_at(nl, base + a), line_at(nl, base + max(a, b - 1))
+            if c > 0:
+                for n in range(la, lb + 1): ran[n] = True
+            else:
+                lo = la if (base + a == 0 or html[base + a - 1] == '\n' or html[nl[la - 2] + 1:base + a].strip() == '') else la + 1
+                hi = lb if (base + b >= len(html) or html[base + b:nl[lb - 1]].strip() == '') else lb - 1
+                for n in range(lo, hi + 1): ran[n] = False
+        into.update(n for n, v in ran.items() if v)
 
 
 def arm(page):
     try:
         s = page.context.new_cdp_session(page)
-        s.send('Profiler.enable'); s.send('Profiler.startPreciseCoverage', {'callCount': True, 'detailed': False})
+        s.send('Profiler.enable'); s.send('Profiler.startPreciseCoverage', {'callCount': True, 'detailed': True})
         page._cov = s; page._ready = False; page._n = 0
     except Exception as e:
         print('check_cover: no coverage for a page:', e)
@@ -139,6 +148,14 @@ def close_browser(self, *a, **k):
     return _close_b(self, *a, **k)
 Page.close, Browser.close = close_page, close_browser
 
+def runs(lines):                                     # [[first, last], ...]
+    out = []
+    for n in sorted(lines):
+        if out and out[-1][1] == n - 1: out[-1][1] = n
+        else: out.append([n, n])
+    return out
+
+
 T0, code = time.time(), 0
 try:
     exec(compile(open(CHECK).read(), CHECK, 'exec'), {'__name__': '__main__', '__file__': CHECK})
@@ -147,7 +164,7 @@ except SystemExit as e:
 game = next((a for a in sys.argv[1:] if a.endswith('.html')), None)
 json.dump({'check': os.path.basename(CHECK).replace('.py', ''), 'args': sys.argv[1:], 'exit': code, 'seconds': round(time.time() - T0),
            'game_sha1': hashlib.sha1(open(game, 'rb').read()).hexdigest() if game and os.path.exists(game) else None,
-           'load': sorted([a, b, n] for (a, b), n in LOAD.items()), 'run': sorted([a, b, n] for (a, b), n in RUN.items())},
+           'load': runs(LOAD - RUN), 'run': runs(RUN)},
           open(OUT, 'w'))
-print(f'check_cover: {len(LOAD)} functions at load, {len(RUN)} while the check ran -> {OUT}')
+print(f'check_cover: {len(LOAD - RUN)} game lines ran only while pages opened, {len(RUN)} while the check ran -> {OUT}')
 sys.exit(code)

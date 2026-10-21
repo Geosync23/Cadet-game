@@ -1,5 +1,6 @@
 // fn_index.js: the game's top-level declarations by line, and who reads each (for tools/affected.py and check_cover maps).
-//   node tools/fn_index.js [GAME.html]      prints JSON: { decls: [[first line, last line, name, kind, section]], refs: { name: [top-level names that use it] } }
+//   node tools/fn_index.js [GAME.html]      prints JSON: { decls: [[first line, last line, name, kind, section]], refs: { name: [top-level names that use it] },
+//                                            uses: { name: [game lines where another declaration mentions it] } }
 // A declaration is a top-level statement inside the game's IIFE: a function, a const/let/var (each declarator), a class;
 // any other top-level statement is named '<section: its first line>' (with ' #2'... if repeated).
 // kind: 'function' (functions and arrow/function consts), 'class', 'table' (object/array/new ...), 'state' (anything else).
@@ -35,10 +36,10 @@ for (const s of iife.expression.callee.body.body) {
     anon[k] = (anon[k] || 0) + 1; one(s, '<' + k + (anon[k] > 1 ? ' #' + anon[k] : '') + '>', 'statement');
   }
 }
-const declared = new Set(decls.map(d => d[2])), refs = {};
+const declared = new Set(decls.map(d => d[2])), refs = {}, uses = {};
 const walk = (node, owner) => {
   if (!node || typeof node.type !== 'string') return;
-  if (node.type === 'Identifier' && declared.has(node.name) && node.name !== owner) (refs[node.name] = refs[node.name] || new Set()).add(owner);
+  if (node.type === 'Identifier' && declared.has(node.name) && node.name !== owner) { (refs[node.name] = refs[node.name] || new Set()).add(owner); (uses[node.name] = uses[node.name] || new Set()).add(lineOf(node.start)); }
   for (const k in node) {
     if (k === 'type' || k === 'start' || k === 'end') continue;
     const v = node[k];
@@ -48,5 +49,5 @@ const walk = (node, owner) => {
   }
 };
 for (const [node, name] of owners) walk(node, name);
-const out = {}; for (const k in refs) out[k] = [...refs[k]].sort();
-process.stdout.write(JSON.stringify({ game: path.basename(GAME), decls, refs: out }));
+const out = {}, at = {}; for (const k in refs) { out[k] = [...refs[k]].sort(); at[k] = [...uses[k]].sort((x, y) => x - y); }
+process.stdout.write(JSON.stringify({ game: path.basename(GAME), decls, refs: out, uses: at }));

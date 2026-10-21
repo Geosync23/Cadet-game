@@ -8,7 +8,7 @@ runs check_fast plus the checks this prints; the full round runs at every releas
     --why                                        say which change picked each check
     --cmd                                        print the commands to run them (one browser check at a time)
     --map FILE                                   the map from real runs (default tools/check_map.json; missing: rules only)
-    python3 tools/affected.py --merge OUT.json COVER.json ...   make the map from tools/check_cover.py runs
+    python3 tools/affected.py --merge OUT.json COMMIT COVER.json ...   the map from tools/check_cover.py runs on COMMIT's game
 
 How it picks (the union of two lists; it never picks fewer than either):
   1. The rules: DEV_NOTES "Testing"'s "run it whenever ..." lines, by section (RULES below). Sections everything reads
@@ -22,7 +22,7 @@ How it picks (the union of two lists; it never picks fewer than either):
 check_fast.sh always runs on top (words baked, names, deck, machine, leave, device), so those four aren't listed.
 Changes nothing. Exits 0.
 """
-import json, os, re, subprocess, sys
+import hashlib, json, os, re, subprocess, sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GAME = 'starship-cadet.html'
@@ -122,32 +122,46 @@ def container(decls, n):
     return d if d and d[0] <= n <= d[1] else None
 
 
-def merge(out, covers):
-    """the map: for each check, the top-level declarations whose functions it ran (after load, and at load)"""
-    m = {'made_from': [], 'checks': {}}
-    idx = {}
+def lines_of(ranges):
+    return {n for a, b in ranges for n in range(a, b + 1)}
+
+
+def merge(out, commit, covers):
+    """the map: for each check, the game lines it ran (after the page was up) and those that ran only while it opened"""
+    m = {'commit': commit, 'game_sha1': None, 'made_from': [], 'checks': {}}
+    want = hashlib.sha1(show(commit, GAME).encode()).hexdigest()
     for c in covers:
         j = json.load(open(c))
-        game = next((x for x in j['args'] if x.endswith('.html')), None)
-        key = j.get('game_sha1')
-        if key not in idx:
-            idx[key] = index(open(game, encoding='utf-8').read()) if game and os.path.exists(game) else None
-        fi = idx[key]
-        if not fi:
-            print('no game file for', c); continue
-        decls = sorted(fi['decls'])
+        if j.get('game_sha1') != want:
+            print(f'{c}: ran on another game than {commit}\'s: left out'); continue
         name = 'day1' if j['check'] == 'day_check' else 'cadet' if j['check'] == 'cadet_test' else j['check'].replace('_check', '')
-        e = m['checks'].setdefault(name, {'run': set(), 'load': set(), 'exit': [], 'seconds': 0})
-        for part in ('run', 'load'):
-            for a, b, fname in j[part]:
-                d = container(decls, a)
-                if d: e[part].add(d[2])
-        e['exit'].append(j['exit']); e['seconds'] += j['seconds']
-        m['made_from'].append({'cover': os.path.basename(c), 'check': name, 'args': j['args'], 'game_sha1': key, 'exit': j['exit']})
-    for e in m['checks'].values():
-        e['run'], e['load'] = sorted(e['run']), sorted(e['load'] - e['run'])
-    json.dump(m, open(out, 'w'), indent=0)
-    print(f"map: {len(m['checks'])} checks -> {out}")
+        m['checks'][name] = {'run': j['run'], 'load': j['load'], 'exit': j['exit'], 'seconds': j['seconds'], 'args': j['args']}
+        m['made_from'].append(os.path.basename(c))
+    m['game_sha1'] = want
+    json.dump(m, open(out, 'w'))
+    print(f"map: {len(m['checks'])} checks on {commit} -> {out}")
+
+
+def translate(src, dst, lines):
+    """game lines of revision src -> the same lines in revision dst (a line in a changed stretch -> that whole stretch)"""
+    if src == dst or show(src, GAME) == show(dst, GAME):
+        return set(lines)
+    hunks = [(int(m[1]), int(m[2] or 1), int(m[3]), int(m[4] or 1))
+             for m in re.finditer(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@', git('diff', '-U0', src, *([dst] if dst else []), '--', GAME), re.M)]
+    out = set()
+    for n in lines:
+        shift = 0
+        for o, on, d, dn in hunks:
+            o_end = o + on - 1 if on else o
+            if on and o <= n <= o_end:                # inside a changed stretch
+                out.update(range(d, d + dn) if dn else (d, d + 1)); break
+            if (o_end if on else o) < n:
+                shift = (d + dn - 1 if dn else d) - o_end
+            else:
+                out.add(n + shift); break
+        else:
+            out.add(n + shift)
+    return out
 
 
 def pick(a, b, mp):
@@ -157,60 +171,68 @@ def pick(a, b, mp):
         for c in (ALL if '*' in cs else cs):
             if c in ALL and c not in FAST and reason not in why.get(c, []):
                 why.setdefault(c, []).append(reason)
-    files = [f for f in (git('diff', '--name-only', a, *( [b] if b else [])).split()) if f]
+    files = [f for f in (git('diff', '--name-only', a, *([b] if b else [])).split()) if f]
     if b is None:
         files += [f for f in git('ls-files', '--others', '--exclude-standard').split() if f not in files]
     for f in files:
-        base = os.path.basename(f)
         if f == GAME:
             continue
         if f == 'cadet_test.py':
             add(['*'], 'cadet_test.py (every check runs on it)')
         elif re.fullmatch(r'[a-z0-9]+_check\.py', f) or f == 'day_check.py':
-            c = 'day1' if f == 'day_check.py' else f[:-9]
-            add([c], f)
+            add(['day1' if f == 'day_check.py' else f[:-9]], f)
         elif f.startswith('content/'):
             add(RULES['22'], f + ' (the words; content_gen --check is in check_fast)')
     if GAME not in files:
         return why, files
     old_t, new_t = show(a, GAME), show(b, GAME)
     old_l, new_l = changed_lines(a, b)
-    fis = {'old': index(old_t) if mp and old_t else None, 'new': index(new_t) if mp and new_t else None}
-    for side, text, lines in (('old', old_t, old_l), ('new', new_t, new_l)):
-        if not lines:
-            continue
+    for text, lines in ((old_t, old_l), (new_t, new_l)):
         secs = S.sections(text.split('\n'))
         for s in sorted({S.where(secs, n)[0] for n in lines if S.where(secs, n)}):
             add(RULES.get(s, ['*']), f'section {s} (the rules)')
-        if not mp:
+    if not mp:
+        return why, files
+    # the map: the old side's changed lines (a pure insertion: the lines either side), in the map's own game
+    base = mp['commit']
+    fo, fm = index(old_t), index(show(base, GAME))
+    if not fo or not fm:
+        add(['*'], 'the game does not parse'); return why, files
+    od = sorted(fo['decls'])
+    here = set(old_l) | {n + 1 for n in old_l}
+    at = translate(a, base, here) if a != base else here
+    runs = {c: lines_of(e['run']) for c, e in mp['checks'].items()}
+    loads = {c: lines_of(e['load']) for c, e in mp['checks'].items()}
+    md = sorted(fm['decls'])
+    def name_at(n):
+        d = container(md, n); return d[2] if d else f'line {n}'
+    # 1. the changed lines themselves: which checks ran them
+    hit = {}
+    for n in sorted(at):
+        for c in runs:
+            if n in runs[c]: hit.setdefault(c, set()).add(name_at(n))
+    for c, names in hit.items():
+        add([c], f'{", ".join(sorted(names)[:3])}{" ..." if len(names) > 3 else ""} (the map: {c} ran the changed lines)')
+    if not hit and any(n in loads[c] for n in at for c in loads):
+        add(LOAD_CHECKS, 'changed lines run only while the page opens (the map)')
+    # 2. a changed table or other top-level value: which checks ran a line that reads it
+    for n in sorted(old_l):
+        d = container(od, n)
+        if not d or d[3] not in ('table', 'state'):
             continue
-        fi = fis[side]
-        if not fi:
-            add(['*'], f'the {side} game does not parse'); continue
-        decls = sorted(fi['decls']); refs = fi['refs']
-        names = {}
-        for n in lines:
-            d = container(decls, n)
-            if d: names[d[2]] = d[3]
-        o = fis['old' if side == 'new' else 'new']
-        other = {d[2] for d in o['decls']} if o else set()
-        for nm, kind in sorted(names.items()):
-            users = [nm] if kind in ('function', 'class', 'statement') else []
-            if kind not in ('function', 'class', 'statement') or nm not in other:
-                users += refs.get(nm, [])             # a table, or a new / removed function: whoever uses it
-            hit = False
-            for c, e in mp['checks'].items():
-                if any(u in e['run'] for u in users):
-                    add([c], f'{nm} (the map: {c} ran {"it" if nm in e["run"] else "code that uses it"})'); hit = True
-            if not hit and any(any(u in e['load'] for u in users) for e in mp['checks'].values()):
-                add(LOAD_CHECKS, f'{nm} (the map: runs only while the page opens)')
+        uses = set(fm['uses'].get(d[2], []))
+        got = [c for c in runs if uses & runs[c]]
+        for c in got:
+            add([c], f'{d[2]} (the map: {c} ran a line that reads it)')
+        if not got and any(uses & loads[c] for c in loads):
+            add(LOAD_CHECKS, f'{d[2]} (read only while the page opens, by the map)')
     return why, files
 
 
 if __name__ == '__main__':
     argv = sys.argv[1:]
     if argv[:1] == ['--merge']:
-        merge(argv[1], argv[2:]); sys.exit(0)
+        merge(argv[1], argv[2], argv[3:]); sys.exit(0)
     flags = {x for x in argv if x.startswith('--')}
     mpath = os.path.join(ROOT, 'tools', 'check_map.json')
     if '--map' in argv:
