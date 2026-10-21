@@ -9358,7 +9358,7 @@ function shiftBlocks(p, d) {
   const hrs = p.rota && p.rota.hours;
   if (p.dept !== 'galley' || !(typeof galleyDay === 'function' || typeof galleyShift === 'function')) {
     if (!Array.isArray(hrs) || !hrs.length || !isWorkDay(p, d)) return null;
-    return { blocks: hrs.filter(x => x[1] > x[0]).map(x => [x[0], x[1], null, null]).sort((x, y) => x[0] - y[0]), wake: null, bedBy: null, meals: null, desk: true };
+    return { blocks: friHours(p, d, hrs.filter(x => x[1] > x[0])).map(x => [x[0], x[1], null, null]).sort((x, y) => x[0] - y[0]), wake: null, bedBy: null, meals: null, desk: true };
   }
   if (typeof galleyDay === 'function') {
     const g = galleyDay(p, d); if (!g) return null;
@@ -9401,8 +9401,8 @@ function gardenDay(p, d) {
   // their hours today: the rota.hoursOn item whose `days` hold today's weekday (covering someone's days off), else
   // rota.hours, else 07:00-15:30
   const r = p.rota || {}, oi = Array.isArray(r.hoursOn) ? r.hoursOn.find(x => x && Array.isArray(x.days) && x.days.includes(weekday(d))) : null, on = oi && oi.hours;
-  const hrs = (Array.isArray(on) && on.length ? on : Array.isArray(r.hours) && r.hours.length ? r.hours : [GARDEN_SHIFT])
-    .filter(x => x[1] > x[0]).slice().sort((x, y) => x[0] - y[0]);
+  const hrs = friHours(p, d, (Array.isArray(on) && on.length ? on : Array.isArray(r.hours) && r.hours.length ? r.hours : [GARDEN_SHIFT])
+    .filter(x => x[1] > x[0]).slice().sort((x, y) => x[0] - y[0]));   // a short Friday's 15:30-17:00 off (18f)
   const [p0, p1] = hv ? [hv.from, hv.to] : GARDEN_PICK, blocks = [];
   const add = (from, to, placeId, task) => { if (to > from) blocks.push({ from, to, placeId, task }); };
   for (const [a, b] of hrs) {
@@ -36857,6 +36857,15 @@ function friSkeleton(p) {
 // when a day-shift crew member's shift ends on day d (minutes after midnight): 15:30 on a short Friday, else 17:00.
 // The skeleton and the galley keep their hours. Read by section 14's schedFrame and dayReport
 function friCrewEnd(p, d) { return friShort(d) && p.dept !== 'galley' && !friSkeleton(p) ? WEEK_SHAPE[4].end : SHIFTS.day[1]; }
+// the hours of anyone on an hours rota (the gardeners, the storekeepers: section 14's shiftBlocks and gardenDay) on day d:
+// on a short Friday 15:30-17:00 is taken out of any block that covers it (a block ending in it ends at 15:30; one running
+// through it is split), so they can go to the address. [[from, to], ...] in, the same shape out; off: hrs unchanged
+function friHours(p, d, hrs) {
+  if (!friShort(d) || friSkeleton(p)) return hrs;
+  const a = WEEK_SHAPE[4].end, b = SHIFTS.day[1], out = [];
+  for (const [x, y] of hrs) { if (y <= a || x >= b) out.push([x, y]); else { if (x < a) out.push([x, a]); if (y > b) out.push([b, y]); } }
+  return out;
+}
 
 // ---- slot: Fridays builder (section 18f). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- end of slot: Fridays builder ----
