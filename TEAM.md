@@ -435,3 +435,10 @@ Working (11, one over for the overlap): EV5 stopping. Game-code seat + opt revie
 **~14:00 UTC, the user:** (1) opening camera 1.85/1.40 is good (keep); (2) YES, leavers board the Tern up its ramp (→ PT1 T3); (3) **don't change the look of the game**: RN1's CPU-canvas option (page open 6.5→4.7 s, 101/106 textures change pixels) dropped. Lead: EV7's Line volunteer jobs held to 13:45 (was 14:15) so the punch is carried before the horn. ER3 started on the Line build.
 **~14:06 UTC, the user (standing rule, every lead):** PUSH A NOTIFICATION whenever there is a question for the user, and for every new build and milestone.
 **~14:13 UTC, the user:** YES to TS2's Fix B: player_check may skip drawing in polling/arrive steps nothing reads (18 → ~5.5 min); activities, draw-call budget and phone layout still drawn; other checks unchanged. PR7 PASSED Dev mode Stop 2 (D5 + D6a/b + D7): BM12 releases it FIRST as 0.64.9; Fridays-off becomes 0.64.10. DB2 idle (~450k, plans/handover-devmode-2.md).
+**~14:21 UTC, the user: up to 14 working seats now** (future peak ~18-20 with two leads). Three new seats:
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Optimization reviewer OR1 | session_015np4rHB2UHzet5Y1zFrBzm | `claude/review-opt` | RN1's perf scenes, #10, #6, #8, #7; TS2's player_check A+B and item 1 (off PR7's queue) |
+| Fridays reviewer PR8 | session_01Nrvf1SYaXHTLwssGoBfJ54 | `claude/review-8` | FR3's turn 10 (switch on) + fix turn (player_check, SIM_ADVANCE); PR5 keeps 7-9 |
+| Dinner-wait investigator FD1 | session_01YJhagf6oyF6SeT5XGvrL5H | `claude/food-waits` | food_check ON dinner waits Days 12-32: commit, root cause, smallest fix → EV6/FR3 (took over from PR6) |
+Working (14): FR3, PR5, PR8, EV6, PR6, EV7, ER3, FD1, BM12, PT1, PR7, TS2, RN1, OR1. On call: EC1, PB, EW2. Idle: DB2.
