@@ -51308,7 +51308,7 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // six tabs, two rows of three, 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
-const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
+const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events'], ['speed', 'Speed']];   // Speed: the render seat's (opt #8)
 const DM_LATER = { events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
 var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
@@ -51403,6 +51403,7 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'trad') devmodeTrad(body);
   else if (DM_UI.tab === 'set') devmodeSet(body);
   else if (DM_UI.tab === 'career') devmodeCareer(body);
+  else if (DM_UI.tab === 'speed') devmodeSpeed(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
@@ -52084,6 +52085,70 @@ function devmodeCareer(body) {
   for (let i = 0; i < give.length; i += 3) devmodeRow(body, give.slice(i, i + 3).map(k => ['Give ' + toolName(k), () => devmodeDo('Career: give ' + toolName(k), () => (toolGive(k), 'You have ' + toolName(k) + ' now.'))]));
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
+// ---- the Speed card (optimization pass #8, the render seat RN1; plans/opt-plan.html) ----
+// The Speed tab shows how the game runs on this phone, to read out or screenshot: the screen's size in CSS pixels and
+// its pixel ratio (and every size seen since the page opened, so folding or turning the phone shows both), how long
+// opening took, frames a second, a frame's game code and the time handing the picture to the graphics chip, draw calls,
+// shaders, memory, and the last deck change. Measuring only, and only with the Dev link: three wrappers (around the main
+// loop's frames, renderer.render and goToDeck), installed only in Dev mode, call the same functions with the same
+// arguments and change nothing they do. The graphics chip's own drawing time can't be read from a web page: a low
+// rate with little game code means the chip is the limit. Nothing here calls R().
+const DM_SPEED = { fr: [], k: 0, render: 0, calls: 0, tris: 0, first: 0, ready: performance.now(), deck: null, sizes: [], drawn: 0 };
+function devmodeSpeedSize() {                            // a new screen size or ratio joins the list (folding, unfolding, turning)
+  const k = innerWidth + ' x ' + innerHeight + ' at ' + (Math.round(devicePixelRatio * 1000) / 1000);
+  if (!DM_SPEED.sizes.includes(k)) { DM_SPEED.sizes.push(k); if (DM_SPEED.sizes.length > 8) DM_SPEED.sizes.shift(); }
+}
+if (DEVMODE) {
+  const now = () => performance.now(), rr = renderer.render.bind(renderer), raf = window.requestAnimationFrame.bind(window), go = goToDeck;
+  renderer.render = (sc, cam) => {
+    const a = now(); rr(sc, cam); const b = now(); DM_SPEED.render += b - a;
+    DM_SPEED.calls = renderer.info.render.calls; DM_SPEED.tris = renderer.info.render.triangles;
+    if (!DM_SPEED.first) DM_SPEED.first = b;
+    const d = DM_SPEED.deck; if (d && !d.first) d.first = b - d.at;
+  };
+  window.requestAnimationFrame = cb => cb !== loop ? raf(cb) : raf(t => {   // the main loop's frames only
+    const a = now(); DM_SPEED.render = 0; cb(t); const b = now();
+    const F = DM_SPEED.fr, row = [t, b - a, DM_SPEED.render]; if (F.length < 240) F.push(row); else F[DM_SPEED.k] = row; DM_SPEED.k = (DM_SPEED.k + 1) % 240;
+    if (DM_UI.open && DM_UI.tab === 'speed' && b - DM_SPEED.drawn > 1000) devmodeSpeedText();
+  });
+  goToDeck = function (...args) { const a = now(), r = go.apply(this, args); DM_SPEED.deck = { n: deckDef && deckDef.num, ms: now() - a, at: now(), first: 0 }; return r; };
+  devmodeSpeedSize(); addEventListener('resize', devmodeSpeedSize);
+}
+function devmodeSpeedLines() {
+  const S = DM_SPEED, f1 = v => (Math.round(v * 10) / 10).toFixed(1), s2 = v => (v / 1000).toFixed(2) + ' s';
+  const F = S.fr.slice().sort((x, y) => x[0] - y[0]), L = [];
+  const o = innerWidth > innerHeight ? 'held sideways' : 'held upright';
+  L.push('Screen: ' + innerWidth + ' x ' + innerHeight + ' CSS px, pixel ratio ' + devicePixelRatio + ' (the game draws at ' + renderer.getPixelRatio() + '), ' + o);
+  L.push('Seen since opening: ' + S.sizes.join('; '));
+  const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  L.push('Opening: the page read ' + (nav ? s2(nav.responseEnd) : '?') + ', the game set up ' + s2(S.ready) + ', the first picture ' + (S.first ? s2(S.first) : '?') + ' after you opened the link');
+  if (F.length > 10) {
+    const gaps = []; for (let i = 1; i < F.length; i++) if (F[i][0] - F[i - 1][0] < 1000) gaps.push(F[i][0] - F[i - 1][0]);
+    const q = (a, p) => { const b = a.slice().sort((x, y) => x - y); return b[Math.min(b.length - 1, Math.floor(b.length * p))] || 0; };
+    const code = F.map(r => r[1] - r[2]), hand = F.map(r => r[2]), med = q(gaps, .5);
+    L.push('Frames: ' + (med ? Math.round(1000 / med) : '?') + ' a second (' + f1(med) + ' ms apart; the slowest 1 in 20: ' + f1(q(gaps, .95)) + ' ms; worst ' + f1(q(gaps, 1)) + ' ms), over the last ' + F.length + ' frames');
+    L.push('Game code a frame: ' + f1(q(code, .5)) + ' ms (1 in 20 over ' + f1(q(code, .95)) + ', worst ' + f1(q(code, 1)) + ')');
+    L.push('Handing the picture to the graphics chip: ' + f1(q(hand, .5)) + ' ms (worst ' + f1(q(hand, 1)) + ')');
+  } else L.push('Frames: keep the panel open a few seconds');
+  L.push('Draw calls: ' + S.calls + ' (the budget is 450), triangles ' + Math.round(S.tris / 1000) + ' thousand');
+  const m = renderer.info.memory, hp = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'not shown by this browser';
+  L.push('Memory: ' + m.geometries + ' shapes, ' + m.textures + ' textures, ' + renderer.info.programs.length + ' shaders, game memory ' + hp);
+  const d = S.deck; L.push(d ? 'Last deck change: ' + deckWord(d.n) + ' built in ' + Math.round(d.ms) + ' ms, the first picture ' + (d.first ? Math.round(d.first) + ' ms' : '…') + ' after it' : 'Last deck change: none yet (take the lift to time one)');
+  L.push('Build ' + GAME_BUILD + ', ' + (deckDef ? deckWord(deckDef.num) : '') + ', ' + clockText());
+  return L;
+}
+function devmodeSpeedText() {                            // the card's lines, refreshed in place once a second while it's open
+  DM_SPEED.drawn = performance.now();
+  const el = DM_UI.el && DM_UI.el.querySelector('#dmSpeed'); if (!el) return;
+  el.textContent = devmodeSpeedLines().join('\n');
+}
+function devmodeSpeed(body) {
+  devmodeText(body, 'How the game runs on this phone. Screenshot it, or Copy and paste it to us. Fold, unfold or turn the phone and it adds the new size.');
+  const pre = document.createElement('p'); pre.id = 'dmSpeed'; pre.style.whiteSpace = 'pre-wrap'; pre.style.fontVariantNumeric = 'tabular-nums'; body.appendChild(pre);
+  devmodeRow(body, [['Copy', b => { const t = devmodeSpeedLines().join('\n'); try { navigator.clipboard.writeText(t).then(() => { b.textContent = 'Copied'; }, () => { b.textContent = 'Copy failed'; }); } catch (e) { b.textContent = 'Copy failed'; } }],
+    ['Start again', () => { DM_SPEED.fr = []; DM_SPEED.k = 0; devmodeSpeedText(); }, { aria: 'Forget the frames so far and measure from now' }]]);
+  devmodeSpeedText();
+}
 // ---- end of slot: Dev mode engineer ----
 
 // =====================================================================
