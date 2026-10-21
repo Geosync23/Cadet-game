@@ -306,3 +306,4 @@ EP2 (~400k) idle, done.
 | Seat | Session | Branch | Job |
 |---|---|---|---|
 | Test-speed engineer TS1 | session_01611xjntKRmJmXQ4vdwW8MV | `claude/test-speed` | measure first, plan to lead, then fixtures + stale guard, affected-checks runner, resumable parts, spread runs; results must stay identical |
+**~03:05 UTC: Veyli lore plan PUBLISHED** https://claude.ai/artifact/VgUz2anstybAB6AFBSrYXD (claude/veyli-lore 9fa7521, ER2 PASS WITH FIXES folded; db answers/veyli-lore, vl-q1..q6). User steer on test speed: step 3 (affected-checks runner) first; fixtures cautious, never the only check.
