@@ -51,3 +51,13 @@ Saruth's roster tiers, Holt's arc lines, the Line and storm plans, and facts.md.
 
 **Verdict: PASS WITH FIXES** (fixes 1-3; 4 is a nit). All six recommendations are safe to take once the audit gains
 fixes 1-2.
+
+## Round 2 (9fa7521): PASS
+All four are in:
+- facts.md:19 is now "the union of the near stars' worlds" (audit row 19).
+- The "she" at game 6495 is now "they", and the 5601 comment is tidied (rows 20-21). Section 4 now says there are
+  three slips.
+- The cord-by-touch step sits at the lantern supper.
+- The count reads about 23 new and 15 changed.
+
+**Verdict on claude/veyli-lore 9fa7521: PASS.** vl-q1 to vl-q6 (a) are all safe to take.
