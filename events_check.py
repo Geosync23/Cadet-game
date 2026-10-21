@@ -135,7 +135,7 @@ SIM = r"""(async ({ d, id, step }) => {
 STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm')); SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
     const recKeep = typeof recClean === 'function' ? { rec: JSON.stringify(SHIP.rec), f: ['rec.allHands', 'rec.filmMoved'].map(k => [k, SHIP.flags && SHIP.flags[k]]) } : null;   // the rec deck's first all-hands comes with the storm's first address (0.83): from a clean slate each run
     if (recKeep) { SHIP.rec = recClean(null); for (const [k] of recKeep.f) if (SHIP.flags) delete SHIP.flags[k]; }
     const due = eventDueDay();                           // as in a new game
@@ -162,7 +162,7 @@ STORM = r"""(() => {
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
     ADDRESSES.length = a0; MEETINGS.length = 0; MEETINGS.push(...m0); EV_DAYS.clear();
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog.filter(l => l.id === 'ionStorm'))), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
       scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     if (recKeep) { SHIP.rec = recClean(JSON.parse(recKeep.rec)); for (const [k, v] of recKeep.f) if (SHIP.flags) { if (v === undefined) delete SHIP.flags[k]; else SHIP.flags[k] = v; } EV_DAYS.clear(); }
@@ -182,7 +182,7 @@ LIVE = r"""(() => {
   if (hadDress) dressShow = l => { spy(l); return ds(l); }; else window.dressShow = spy;
   const D = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
   const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm')); SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
   const put = (n, id) => { if (deckDef.num !== n) goToDeck(n); const at = DECKS[n].places.find(p => p.id === id).at;
     player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player))); target.copy(player.obj.position).setY(.7); };
   const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
@@ -211,7 +211,7 @@ LIVE = r"""(() => {
   D.allClear = DIALOGUE ? dialogueView() : null; D.calls3 = frames();
   put(1, '1-works-1'); tick(12 * 1440 + 10 * 60 + 2, 12 * 1440 + 10 * 60 + 2); D.walked = !DIALOGUE;
   skipTo(15 * 1440 + 10);
-  D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
+  D.log = JSON.parse(JSON.stringify(SHIP.eventLog.filter(l => l.id === 'ionStorm'))); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
   D.dress = dress; if (hadDress) dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
   MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true; if (typeof deviceAddress === 'function') deviceAddress(null);
@@ -310,7 +310,7 @@ DIPLO = r"""(() => {
   SHIP_EVENTS.diplomatic.draft = false;                  // as it will be when it's switched on
   const run = () => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
-    SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
+    SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
     const due = eventDueDay(), sd = due.day, a0 = ADDRESSES.length, mails = [], send = mailSend;
     mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - sd + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
     eventStart('diplomatic', sd); EV_DAYS.clear();
@@ -324,14 +324,14 @@ DIPLO = r"""(() => {
     const R = { due, steps, batch, guestsOn, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
       farewell: eventsOn(sd + 7).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + 7).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
       guests: ['teshavi', 'kesrin'].map(id => { const g = typeof GUESTS !== 'undefined' && GUESTS.find(x => x.id === id); return g ? id + ':' + (eventGuestDays(g) || []).map(d => d - sd).join('-') : id + ':-'; }),
-      log: SHIP.eventLog.slice(1).map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
+      log: SHIP.eventLog.filter(l => l.id === 'diplomatic').map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
     ADDRESSES.length = a0; return R;
   };
   const a = run(), b = run();
   const sc = MEETING_SCRIPTS.veyliGreeting; dialogueShow('veyliGreeting', { id: 'veyliGreeting', who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], at: shipNow() });
   const names = []; let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); names.push(v.choices ? '[choice]' : v.who); dialogueStep(v.choices ? 1 : undefined); }
   // live: the greeting plays when you're in the shuttle bay at 10:00 on the visit's day 2
-  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
   const sd = a.due.day; eventStart('diplomatic', sd); EV_DAYS.clear();
   skipTo((sd + 1) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
   player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
@@ -642,6 +642,9 @@ with sync_playwright() as pw:
 
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
+    # the calendar's events before one (with Crossing the Line on: the Line, Days 6-8, before the storm), as already
+    # run: the storm's and the visit's runs below log them first, as a game that got there would have
+    g.ev("window.EV_BEFORE = id => { if (typeof EV_CAL_ON === 'undefined' || !EV_CAL_ON) return []; const r0 = EV_CALENDAR.find(r => r.id === id); return evCalPlan().filter(r => r.id !== id && r0 && r.day < r0.day).map(r => ({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} })); }")
     st = g.ev(STORM); a = st['a']
     print('Ion storm on paper (days 10-16):'); [print('  ' + x) for x in a['steps']]
     print(f"  wear and flicker by phase: {a['mods']}; result {a['log'][0]['band'] if a['log'] else '-'}, threads {a['log'][0]['threads'] if a['log'] else '-'}, traces {a['traces']}")

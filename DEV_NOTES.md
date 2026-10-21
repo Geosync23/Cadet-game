@@ -328,6 +328,7 @@ Everything behind `const EV_LINE_ON` (section 18, by the other EV_ switches): `f
 
 - **Where:** the data is one block after the storm's (`if (EV_LINE_ON) { SHIP_EVENTS.crossingLine = ... }`), before EV_SHIPWIDE and the meeting tags are made; the functions in the slot `// ---- slot: Line builder` after the storm builder's.
 - **L1, the data:** 3 days from Saturday Day 6 (warning 08:00, Vance's Mail 18:00; onset Sunday 14:30; resolution 15:15; afterglow 19:15 to Monday midnight); `commend: false` (eventFinish) and `threads: []` (no score); the oath `crossingCeremony` 14:40 (cast `marrow`, `brennan`, `first:2`: `lineFirst()` and `lineFirstCrew`, named first1, first2); EV_BEATS `lineCeremony`. The words: content/banks/event-crossingLine.lines, content/meetings/{crossingCeremony,lineTomasSat,lineTomasMug,lineLap,lineSupperGuess}.meet, content/reactions/event.crossingLine.<phase>.lines.
+- **Two events in the calendar (L1):** `eventNow` adds the calendar's later events as spans (`evLaterSpans`), `eventAdvance` catches up every event already due, and section 14's galley-rota stints take an event meeting break (Brennan at the oath). Calendar on only. events_check logs the calendar's earlier events before its storm and visit runs (`EV_BEFORE`).
 
 ## The answers pass (sections 14 and 10, the sim engineer, 0.26.8–0.26.9)
 

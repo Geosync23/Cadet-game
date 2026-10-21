@@ -10343,6 +10343,11 @@ function schedBuild(p, d, occ, S) {
         const [, w1] = MEALS[m];
         if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
       }
+      for (const e of meet.filter(x => x.meet && !x.done && x.at >= Math.max(t, a) && x.at < b)) {   // an event meeting during a stint (F0b; Crossing the Line's oath: Brennan with the punch): there and back on the stint's time
+        workAt(pid, task, e.at); const n0 = segs.length;
+        if (take(e.act || 'work', e.where, e.dur, { tag: e.tag, min: e.min, by: b, event: true, anim: e.anim })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = e.tag; }
+        e.done = true;
+      }
       workAt(pid, task, Math.min(b, 1440));
     });
     if (t < 1440) evening(specials(50, false), Math.max(t + 30, F.bed), false, ate.dinner);
@@ -36675,6 +36680,7 @@ function eventNow(t = shipNow()) {
   if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay });
   if (typeof SHIP !== 'undefined' && SHIP.eventLog) for (const l of SHIP.eventLog) spans.push(l);
   if (!e) { const due = eventDueDay(); if (due) spans.push({ id: due.id, startDay: due.day }); }
+  if (EV_CAL_ON) evLaterSpans(e, spans);                 // the calendar's later events too (the Line, then the storm: a day planned ahead sees both; slot 'Line builder')
   for (const sp of spans) {
     const def = SHIP_EVENTS[sp.id]; if (!def) continue;
     const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || rel >= def.days * 1440) continue;
@@ -36787,7 +36793,7 @@ function eventDueDay() {
 }
 // move the event on to minute t: start one when due, run each phase's actions as it begins (the address, a notice),
 // and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
-function eventAdvance(t = shipNow(), quiet) {
+function eventAdvance(t = shipNow(), quiet, depth) {
   const out = [];
   if (EV_STORM_ON) stormAllHandsTick(t);                 // the rec deck's first all-hands: the first Friday address (the storm update, S3)
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
@@ -36824,6 +36830,7 @@ function eventAdvance(t = shipNow(), quiet) {
   }
   if (def.commendAt && !e.mine['commend:at'] && t >= evBeatAt(e.startDay, def.commendAt)) eventCommend(e, def, t, quiet, out);   // the storm update: at the all-clear's end
   if (t >= end) eventFinish(e, def, t, quiet, out);
+  if (EV_CAL_ON && !SHIP.event && t >= end && (depth | 0) < 4) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) return out.concat(eventAdvance(t, quiet, (depth | 0) + 1)); }   // a late load or a long sleep: the next one too, if it's already due (two events in the calendar)
   return out;
 }
 // the end of a run (split out of eventAdvance, the events base F4a; Dev mode's End and keep uses it too): its band
@@ -37737,6 +37744,12 @@ function lineFirstCrew(n, d, named) {
   const F = lineFirst();
   return schedPeople().filter(p => F.has(p.id) && !named.includes(p.id) && !isWorkDay(p, d) && aboard(p, d))
     .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337)).slice(0, n);
+}
+// the calendar's events after the next due one (eventNow's spans: a day planned ahead, before the event in front of it
+// has run, sees it). From the calendar's plan only, never the running one or one already logged. With one event in
+// the calendar it adds nothing (today's storm)
+function evLaterSpans(e, spans) {
+  for (const r of evCalPlan()) if (!(e && e.id === r.id) && !spans.some(s => s.id === r.id) && !SHIP.eventLog.some(l => l.id === r.id)) spans.push({ id: r.id, startDay: r.day });
 }
 // ---- end of slot: Line builder ----
 
