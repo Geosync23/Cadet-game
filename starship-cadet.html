@@ -36978,13 +36978,14 @@ if (EV_LINE_ON) {
   L.routines = { onset: [{ who: 'all', rule: 'standEasy', at: [870, 915], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] },
     { where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true }] };   // the lounge is the ceremony's alone for its 45 minutes (section 14's evClosed lets its own crowd in); Saruth stays away
   // the Line supper (the user's line-q4 a): the Sunday table re-dressed on Day 7 (EV_DAY_DRESS, the storm's shape), the
-  // crew's voted dish and Brennan's pudding (linePudding, section 16's menu), 18:00-19:15, everyone at .85 with the
-  // mess's standing spots too (up to about 60: they eat standing with a tray, lineStandTray); its Saturday Mail left out
+  // crew's voted dish and Brennan's pudding (linePudding, section 16's menu), 18:00-19:15, everyone at .85, in seated
+  // sittings like the storm's lantern supper (the user, 2026-10-21: no standing at meals): its own seats only, each
+  // diner through the line and sat for 45-60 minutes of it (`stay`, evStay; `seated`); its Saturday Mail left out
   // (Vance's covers it; Brennan's comes at 15:15). The galley cooks 12 more portions. Lap of the Wren the same night:
   // Tomas (off shift), Zeke and Pell come (pull 1)
   L.galley = { resolution: { extra: 12 } };
   L.dayDress = [{ trad: 'sunday-table', day: 1, set: { name: evWord('event.crossingLine.gather.lineSupper.name') || 'The Line supper', at: [1080, 1155], jitter: 0, who: [['everyone', .85]],
-    words: 'event.crossingLine.gather.lineSupper', mail: false, where: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'] }, { deck: 3, room: /^Mess hall$/, types: ['@long-table'] }, { deck: 3, pool: '@gather-mess' }] } },
+    words: 'event.crossingLine.gather.lineSupper', mail: false, stay: [45, 60], seated: true, pudding: true } },
     { trad: 'lap-of-the-wren', day: 1, set: { who: [['tomas', 1], ['torres-zeke', 1], ['pell', 1]] } }];
   lineVenue();
 }
@@ -38041,7 +38042,8 @@ function evDressed(ev, o) {
   if (o.who) { const pull = new Map(o.who), own = ev.who; x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : own(p, d, e); }
   if (o.words) for (const k of ['mail', 'ask', 'here', 'thanks']) if (typeof LINES !== 'undefined' && LINES[o.words + '.' + k]) x[k] = (c, p) => evWordAt(o.words + '.' + k, (p ? p.seed : 0) + (c && c.day || 0));
   if (o.mail === false) x.mail = null;
-  if (o.where) x.where = o.where;                         // Crossing the Line: the Line supper's standing spots too
+  if (o.where) x.where = o.where;
+  if (o.stay) x.stay = o.stay.slice(); if (o.seated) x.seated = true;   // Crossing the Line: the Line supper in seated sittings (evStay), as the lantern supper
   return x;
 }
 evDressMake();
@@ -38166,17 +38168,11 @@ function lineEasy(p, d, e) {
   const r = evRule((d - 1) * 1440 + e.from, 'standEasy', p);
   return !!r && !(r.not || []).includes('dept:' + p.dept);
 }
-// the Line supper's standing diners: a mess crowd spot, at dinner, at the Sunday table on a day it's dressed with
-// standing spots (EV_DAY_DRESS 'sunday-table@<day>' with `where`). Section 10's trayTo asks, through evStandTray. Pure
-function lineStandTray(pl, w) {
-  if (!EV_LINE_ON || pl.gather !== 'mess' || w.act !== 'dinner' || !/^ev-sunday-table(-|$)/.test(w.tag)) return false;
-  const x = EV_DAY_DRESS.get('sunday-table@' + (Math.floor(w.from / 1440) + 1)); return !!(x && x.o && x.o.where);
-}
 // the Line supper's pudding (section 16's galleyMenu asks, for any day): on the day the Sunday table is the Line supper,
 // the next week's pudding with the voted dish. Pure (the calendar's plan); nothing while it's off, or before section 18 ran
 function linePudding(d, out) {
   try { if (!EV_LINE_ON) return; } catch (e) { return; }
-  const x = EV_DAY_DRESS.get('sunday-table@' + d); if (!x || !x.o || !x.o.where) return;
+  const x = EV_DAY_DRESS.get('sunday-table@' + d); if (!x || !x.o || !x.o.pudding) return;
   out.pudding = MENU.pudding[(Math.floor((d - 1) / 7) + 1) % MENU.pudding.length];
   out.note = (out.note ? out.note + '; ' : '') + 'the Line supper, with ' + out.pudding;
 }
