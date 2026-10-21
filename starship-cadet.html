@@ -17980,7 +17980,8 @@ function jobRun(p, j, t, makeMin) {
     go(m.deck); at(Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (K.tier - 1)) * (j.logged ? .9 : 1)), 'job', panelPlace(m.id));   // j.logged: 24n's handover, 10% quicker
   }
   const done = c; go(home);
-  return c <= w.until ? { segs, done, end: c } : null;
+  const panelHeld = segs.some(sg => sg.placeId && (placeById(sg.placeId) || {}).machine && SHIP.jobs.some(o => o !== j && o.status !== 'done' && [o.segs, ...Object.values(o.segsBy || {})].some(ss => ss && ss.some(s => s.placeId === sg.placeId && s.from < sg.to && sg.from < s.to))));   // a machine's panel another job has then (a service and a chore of one machine, a storm chore): not now, so the hour's next crew member or the next hour (PB2, backlog PB2-3: the second one waited by it till their time ran out)
+  return c <= w.until && !panelHeld ? { segs, done, end: c } : null;
 }
 // a job is finished: its machine put right, or its cargo moved
 function jobFinish(j, t, by) {
