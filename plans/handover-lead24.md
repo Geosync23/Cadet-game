@@ -46,3 +46,4 @@ On call: PB session_01FWW2piuXkFYaRRzLXZiqYb (13/14/10), EW2 session_0138EzUAZjA
 - TS2 item 1 (affected-checks runner): batch 1 map done; options (a)/(b)/(c) in plans/handover-test-speed-2.md; TS2 leans (b) (ignore near-universal shared lines, prove by replay with batch 2). Lead leans (b) too; not yet asked of the user.
 - Opt in review with OR1: TS2 item 2 (player_check A+B); RN1 #5 memory fix (proofs ~17:00). Passed: #4, #10, #6, perf scenes (+F1-F4), #8 Speed card (DB2 owner OK; nits to RN1).
 - Ready for the move: PT1, BM12 (after 0.64.11), ER3, DB2, EC1, FD1, EV6, PR7, TS2, PB, EW2.
+- 17:45: 0.64.11 claude/integration 70aa91f (crew patch). Playtest https://claude.ai/artifact/MMoknq9PDzBk264PjmkoLa ; Dev page v6. The 5-hour limit paused all seats 16:20-17:40; resumed.
