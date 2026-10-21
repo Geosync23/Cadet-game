@@ -18343,7 +18343,7 @@ function postEventJob(spec, o = {}) {
 
 // blackouts (Pillar 3, C7: section 18's eventMod('effect', 'blackouts')): while it's on, now and then one deck goes to
 // emergency lighting for 15-60 minutes, likelier the worse the power (from the conditions at the hour's start). At most
-// one an hour, inside its hour, so only ever one deck at a time. blackoutHour(h) -> { deck, from, to } | null is pure;
+// one an hour, inside its hour, so only ever one deck at a time. blackoutHour(h) -> { deck, from, to } | null is pure but for your storm help (section 18's eventHelp, fixed once the front has passed);
 // jobsHour scores each one as the event's 'blackout' thread (eventScore('blackout', minutes)) as its hour is run;
 // blackoutAt(t) -> the blackout at minute t or null; deckLook(deck).dark while it's that deck's
 const BLACKOUT_SEED = machSeed('blackout');
