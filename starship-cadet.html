@@ -10162,8 +10162,8 @@ function schedBuild(p, d, occ, S) {
       for (const e of meet) if (!e.done && e.meal && t > e.at && t < e.at + e.dur - (e.min || 20) && end - t >= (e.min || 20)) {   // late for a meal tradition (the handover ran on): join it while there's time to eat
         e.done = true; tradMeal(e, end);                 // through the line too (reviewer 1d, 0.26.42)
       }
-      if (REC_ON) for (const e of meet) if (!e.done && /^ev-rec-/.test(e.tag || '') && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {   // a rec tradition due right now goes first (0.83.1, RA: one starting the minute a block ended was missed)
-        e.done = true; take(e.act || 'leisure', e.where, e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });
+      if (REC_ON) for (const e of meet) if (!e.done && /^ev-(rec-|captains-address)/.test(e.tag || '') && t >= e.at && t < e.at + (e.host ? Math.max(10, e.dur / 2) : 10) && end - t >= Math.min(25, e.dur)) {   // a rec tradition due right now goes first (0.83.1, RA: one starting the minute a block ended was missed)
+        e.done = true; take(e.act || 'leisure', e.where, e.tag === 'ev-captains-address' ? e.at + e.dur - t : e.dur, { wait: 5, by: end, min: e.min || (e.dur < 20 ? 5 : 15), tag: e.tag, anim: e.anim, event: true });   // the Captain's address (18f's friLead): still over at 16:50, however late they joined
       }
       if (end - t < 20) break;
       let to = Math.min(end, t + 30 + Math.round(70 * U(k + n * 3)));
@@ -35604,6 +35604,7 @@ function eventPlan(p, d) {
     const anim = ev.anim(p, d) || null;
     let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
     if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
+    if (ev.lead) from = ev.lead(p, d, from, e);            // set off ahead, so they're seated by the start (the Captain's Friday address, 18f)
     out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
@@ -37146,6 +37147,24 @@ const FRI_ADDRESS = { id: 'captains-address', name: 'The Captain\'s Friday addre
   whereFor: (p, d, o) => o.filter(([, k]) => (p.id === 'marrow' || p.id === 'vance') === (k === 'rec:lectern')),
   who: (p, d) => p.id === 'marrow' || p.id === 'vance' ? 1 : p.rank === 'guest' || friSkeleton(p, d) ? 0 : p.shift === 'night' ? .5 : .9, anim: () => null,
   from: 'Captain Odile Marrow', mail: null, ask: null, here: null, thanks: 'You find a seat in the auditorium as Captain Marrow steps up to the lectern.' };
+// the trip there, planned ahead (PR3's turn-5 fix: setting off at 16:00, fifty people queue for the rec deck's lifts and
+// Marrow reached the lectern at 16:12, Vance 16:27, the seats full only by 16:36). The plan has them seated once out of
+// the lift, but out of it is one at a time a lift tile (LIFT_STEP), and the walk from the rec deck's lift to the lectern
+// is about 17 ship minutes (the auditorium's back rows a little less), so each goer's stay starts 18-28 minutes early
+// (seeded, key 1183, so the lifts are spread): a day worker no sooner than 8 minutes after their shift's end, since a
+// gathering already begun when they're free is joined only within its first 10 minutes (section 14's leisure, as the rec
+// deck's own traditions: the address's tag beside theirs); anyone else as early as they're free (section 18's
+// eventFree), else at the start. Marrow, its host, 30 minutes early whatever her shift (section 14 gets a host to their
+// own gathering, from work too, any time in its first half); Vance as soon as his shift ends (the command shift's runs to
+// 15:44 on a Friday, so he's at the lectern about 16:03). Read by section 18's eventPlan (ev.lead); a function
+// declaration, as the planner calls it
+function friLead(p, d, at, e) {
+  if (p.id === 'marrow') return at - 30;
+  const L = p.id === 'vance' ? 30 : 18 + Math.round(10 * schedU(p.seed, d, 1183)), F = schedFrame(p, d);
+  if (F.works && !F.night) return Math.min(at, Math.max(at - L, F.workEnd + (p.id === 'vance' ? 2 : 8)));
+  return eventFree(p, d, at - L, e.to, e.ev.wake) ? at - L : at;
+}
+FRI_ADDRESS.lead = friLead;
 // a bank text (content/banks/fridays.lines), or null
 function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null; return e && typeof e.text === 'string' ? e.text : null; }
 (() => {
@@ -37164,8 +37183,8 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 // ---- the speech (part C, turn 6): the Captain's words, line by line, from the baked FRI_ADDRESSES (content/addresses/) ----
 // Day 5, 12, 19 and 26 have their own speech (friday-d<day>); from Day 33 the weekly one (friday-weekly) picks a line
 // from each beat's pool (two where it says pick: 2), seeded by the week and never one used in the last 6 weeks while
-// another fits; the "you" beat about one week in three. Line i of n is said at 16:02 + i x 46/n ship minutes (Vance
-// reaches the lectern at 16:02, so the speech starts as he does), by the clock: a reload, a late arrival or a skip lands
+// another fits; the "you" beat about one week in three. Line i of n is said at 16:04 + i x 44/n ship minutes (Vance
+// reaches the lectern about 16:03, his command shift running to 15:44, so the speech starts as he's there), by the clock: a reload, a late arrival or a skip lands
 // on the line of the moment, never a replay. Bubbles over Marrow or Vance while you're in the auditorium (a line whose
 // speaker isn't on the deck yet waits for them within its turn; the chatter hushed meanwhile); anyone not there by 16:50 gets a banner and the
 // file's Mail. Conditions and slots are read when she speaks, never by the planner; a line whose reader is missing, or
@@ -37192,7 +37211,7 @@ const friWeek = d => Math.floor((d - 1) / 7);
 const friNod = d => FRI_NOD[((friWeek(d) - 4) % 7 + 7) % 7];          // Day 33's week (the first weekly speech) is Works'
 const friList = a => a.length < 2 ? a.join('') : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
 const friAt = d => (d - 1) * 1440 + 960;                                // 16:00 on day d, in ship minutes
-const FRI_TALK = [962, 1008];                                           // the speech's span (16:02-16:48), inside the address's 16:00-16:50
+const FRI_TALK = [964, 1008];                                           // the speech's span (16:04-16:48), inside the address's 16:00-16:50
 // the ship health boards (section 17) as one word: good (every board fine), poor (any poor or failing), else ok
 function friHealth() {
   if (typeof shipHealthRows !== 'function') return null;

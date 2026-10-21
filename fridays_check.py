@@ -126,7 +126,22 @@ with sync_playwright() as pw:
         res[on]['speech'] = g.ev(SPEECH) if on else g.ev(SAVE_OFF)
         if g.errors: check(False, ('on' if on else 'off') + ': page errors ' + str(g.errors[:3]))
         g.b.close()
-    # the speech in the auditorium on Day 5 (on): in order, over its speakers, the crowd hushed; then a reload mid-speech
+    # the room fills in real play (PR3's turn-5 fix): from 15:45 on Day 5, frames played on the rec deck (no jump into the
+    # address), who's seated in the auditorium at 16:00 and 16:05, and who's at the lectern
+    g = Game(pw, str(copies[True]), 390, 844)
+    g.ev("skipTo((5 - 1) * 1440 + 945)"); aud(g)
+    CNT = "(() => { const l = DECKS[7].places.find(p => p.type === 'rec:lectern'), L = cellPos(...l.at); let s = 0, lec = []; for (const a of DECK_CREW) { const dd = Math.hypot(a.x - L.x, a.z - L.z); if (dd < 12 && /sit/.test(a.pose || '')) s++; if (dd < 2.5 && a.p) lec.push(a.p.id); } return [Math.floor(shipNow() % 1440), s, lec.sort()]; })()"
+    fill = {}
+    for k in range(600):
+        g.step(10); r = g.ev(CNT)
+        for want in (960, 964, 965):
+            if r[0] >= want and want not in fill: fill[want] = r[1:]
+        if r[0] >= 966: break
+    planned = g.ev("schedPeople().filter(p => planWhere(p, 4 * 1440 + 970) && planWhere(p, 4 * 1440 + 970).deck === 7 && /captains/.test(planWhere(p, 4 * 1440 + 970).tag || '')).length")
+    fill['planned'] = planned
+    if g.errors: check(False, 'on: page errors in the fill run ' + str(g.errors[:3]))
+    g.b.close()
+        # the speech in the auditorium on Day 5 (on): in order, over its speakers, the crowd hushed; then a reload mid-speech
     g = Game(pw, str(copies[True]), 390, 844)
     g.ev("skipTo((5 - 1) * 1440 + 958)"); aud(g)
     speech = g.ev("friSpeech(5).map(l => [l.who, l.text])")
@@ -200,6 +215,12 @@ never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]
 check(not never, 'on: lines that never fill %s' % never)
 check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
 check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])
+print('  Day 5 in real play from 15:45: at 16:00 %d seated, lectern %s; at 16:04 %s; at 16:05 %d seated, lectern %s (%d planned there at 16:10)' % (fill[960][0], fill[960][1], fill[964][1], fill[965][0], fill[965][1], fill['planned']))
+# Marrow by 16:00; Vance's command shift runs to 15:44 on a Friday and the walk from the lift is about 17 minutes, so the
+# speech (FRI_TALK) starts at 16:04, when he's there
+check('marrow' in fill[960][1], 'on: Day 5, Marrow not at the lectern at 16:00 %s' % fill[960][1])
+check(fill[964][1] == ['marrow', 'vance'], 'on: Day 5, the lectern at 16:04 %s (want Marrow and Vance)' % fill[964][1])
+check(fill[965][0] >= .8 * fill['planned'], 'on: Day 5, %d of %d seated by 16:05' % (fill[965][0], fill['planned']))
 print('  Day 5 in the auditorium:', {k: live[k] for k in ('n', 'said', 'order', 'hush', 'idx', 'heard', 'mailed')})
 check(live['said'] == live['n'] and live['order'], 'on: Day 5, %d of %d lines said in order' % (live['said'], live['n']))
 check(live['hush'] == 0, 'on: Day 5, the chatter not hushed in %d samples' % live['hush'])
