@@ -32,7 +32,7 @@ Results of the S10 round: `plans/storm-s10-round/` (summaries, each FAIL's lines
 
 1. **Done (see the build table's 'storm S10 findings' row):** devmode_check's failure is chance (a random game seed can make Day 8 a sick
    day; re-run OK); career_check fails the same way switched off (not new); mech m17 is a check problem (storm wear leaves crew
-   repair jobs in its Day 18 window, so its two passes differ). Fixes belong to the checks' owners (DB2; seat E4 for mech).
+   repair jobs in its Day 18 window, so its two passes differ). The devmode fix is DB2's; the mech m17 check fix is done (the build table's "storm S10 mech_check fix" row).
 2. Nothing in the game needs changing for S10.
 3. Take FR3's fridays_check fix (storm lines filled with the storm on) and FD1's food_check fix (claude/food-waits
    0f808c3) when they land; re-run those two.
