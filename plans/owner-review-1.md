@@ -127,3 +127,7 @@ Fixes:
 - s24 `friTeamSlot(w)`: the Friday is `w * 7 + 1 + 4` with `teamWeek = floor((d - 1) / 7)`. That's right (week 0's Friday is Day 5). 13:30 on a short Friday; the saved per-day team plan keeps its slot. `friHaulUntil` 14:30. `TEAM_FRI` and `HAUL_UNTIL` are consts further down the file, read only at run time.
 - s19: the Schedule's "On shift" row ends at `dayShiftEnd(d)`, and `devOnShift` too (the quiet on-shift badge for traditions). s25: `friDevTimes` swaps "To 16:55" for "To 15:25" on a short Friday; `devmodeGo`'s label slice still works.
 - Left on purpose: s17's job board canvas "day shift" label (cosmetic).
+
+## 11. EV1's lines_check edit (claude/events-base 22266b2, recorded in bb285a0), 2026-10-21
+
+**Verdict: PASS.** The new rule sits in an `if kind.startswith('event.')` branch. The `else` branch is the old line word for word, so no other key's limit changes (talk.reply 44, bubbles 60/90, trad, tips, Mail, `LONG_KINDS` 140, the card's 90). Before this edit every `event.*` line fell through to the card's 90: none is in `BUBBLE_KINDS` (smalltalk, rumour, overheard) or `LONG_KINDS`. Now only an `event.<id>.mail.*` Mail gets 400, and keys ending in `.mail`, `.thanks` or `.keepsake` (optionally numbered), or holding `.plaque.`, get 200. Everything else in `event.*`, the storm's reaction cues included, stays at 90.

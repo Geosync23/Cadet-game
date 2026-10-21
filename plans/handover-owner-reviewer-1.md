@@ -1,6 +1,6 @@
 # Handover: owner stand-in reviewer (OR1)
 
-OR1, session_01W7AHxrcgBM3rJNtCFKwp9W, written 2026-10-21 at about 50% memory, ahead of the 60% line. Took over from DR1 (handover on claude/devmode-review-1: `plans/handover-devmode-reviewer.md`). Reports to **lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB)**; lead 21 handed over. Never contact the user directly.
+OR1, session_01W7AHxrcgBM3rJNtCFKwp9W, written 2026-10-21 at about 50% memory, ahead of the 60% line. Took over from DR1 (handover on claude/devmode-review-1: `plans/handover-devmode-reviewer.md`). Reports to **lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB)**; lead 21 handed over. Never contact the user directly. **Stopped at about 58% memory on lead 22's word (2026-10-21), after part 11: idle; lead 22 starts a fresh owner reviewer when needed.**
 
 ## Role
 - Review HOOK commits that builders put into sections whose owner has no live seat (see plans/owners.md; live seats when I left: PB = sim, sections 14 and 10; EV1 = section 18; FR1 = Short Fridays, 18f). I stand in for 11, 13, 15, 15b, 17, 19, 20, 21, 22, 24, 25, the page CSS and the performance seat.
@@ -20,6 +20,7 @@ OR1, session_01W7AHxrcgBM3rJNtCFKwp9W, written 2026-10-21 at about 50% memory, a
   8. EV1's F3a hooks (18f0d9d): PASS WITH FIXES: meetings get no notice with heads-ups off (two one-line fixes sent).
   9. FR1's Short Fridays turn 3 (fridays 4d270ac): PASS WITH FIXES: the auto clock-out words say 17:00 on Fridays; the Friday team job and section 24's "held until 17:00" ends are loose ends.
   10. FR1's Short Fridays turn 4 + clock.auto fix (6b6abae, 56fbd2b): PASS.
+  11. EV1's lines_check event.* lengths (22266b2): PASS.
 - BM11's events_check FLC_ON skip (c58c7d2): OK (message only, no part).
 
 ## Open items to follow up
