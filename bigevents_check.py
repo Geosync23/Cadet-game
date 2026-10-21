@@ -22,7 +22,8 @@
 #   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load;
 #   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
 #   its minute, its cue, a crew reaction line for the front; none while EV_NOTES_ON is off; and the device (F3a): the
-#   Schedule's event items at the meetings' and gatherings' minutes, Tracked's booths only while open, eventClosed
+#   Schedule's event items at the meetings' minutes (each EV_SHIPWIDE gathering once as a tradition, nothing twice), a
+#   meeting's own toast only while the device's heads-ups are off, Tracked's booths only while open, eventClosed
 #   (the auditorium opened just for the Friday address); nothing while EV_DEVICE_ON is off.
 # Each part skips (SKIP, or WAITING with what it waits for) while its switch or code isn't there yet, so it runs on
 # today's integration and grows as the events base is built. Exits 1 on a FAIL. About 2 minutes.
@@ -218,10 +219,18 @@ DEVICE = r"""(() => {
     const sd = r ? r.day : (eventDueDay() || {}).day;
     out.off = { items: [sd, sd + 1, sd + 2, sd + 3].map(d => eventItems(ab(d, 0), ab(d, 1439)).length), lounge: eventClosed({ deck: 3, room: 'L' }, ab(sd + 1, 900)) };
     if (!out.on) return out;
+    const meets = new Set((SHIP_EVENTS[r.id].meetings || []).map(m => m.id)), shipwide = new Set(EV_SHIPWIDE.map(g => g.id));
     for (let d = sd; d < sd + SHIP_EVENTS[r.id].days; d++) {
-      const want = eventGatherings(d).map(g => g.at).sort((x, y) => x - y), items = devDay(d).filter(x => x.kind === 'event');
-      out.days.push({ d, want, got: items.map(x => x.from).sort((x, y) => x - y), goals: items.filter(x => { const g = devItemGoal(x); return !(g && Number.isInteger(g.deck) && g.room); }).map(x => x.title + ' ' + hhmm(x.from)) });
+      const G = eventGatherings(d), all = devDay(d), items = all.filter(x => x.kind === 'event'), trads = all.filter(x => x.kind === 'tradition');
+      const want = G.filter(g => meets.has(g.id) || !shipwide.has(g.id)).map(g => g.at).sort((x, y) => x - y);   // a meeting (or a gathering not in EV_SHIPWIDE) once as 'event'
+      const asTrad = G.filter(g => shipwide.has(g.id)).map(g => [g.id, g.at, trads.filter(x => String(x.id).split('@')[0] === g.id && x.from === g.at).length]);   // an EV_SHIPWIDE gathering once as 'tradition'
+      const seen = {}, twice = []; for (const x of all) { const k = x.title + '@' + x.from; if (seen[k]) twice.push(k); seen[k] = 1; }
+      out.days.push({ d, want, got: items.map(x => x.from).sort((x, y) => x - y), asTrad, twice, goals: items.filter(x => { const g = devItemGoal(x); return !(g && Number.isInteger(g.deck) && g.room); }).map(x => x.title + ' ' + hhmm(x.from)) });
     }
+    // a meeting's own toast (m.notify): none while the device's heads-ups are on (the Schedule gives it), kept when they're off
+    const R0 = SHIP.device && SHIP.device.calendarRemind, ev0 = SHIP.event, toast = on => { MEETINGS.length = 0; SHIP.event = null; if (R0) R0.on = on; eventAdvance(ab(sd, 0) + 1, true);
+      return (SHIP_EVENTS[r.id].meetings || []).map(m => { const x = MEETINGS.find(y => y.id === m.id); return [m.id, x ? x.notify || null : 'missing', m.notify || null]; }); };
+    if (R0) { const was = R0.on; out.toast = { on: toast(true), off: toast(false) }; R0.on = was; MEETINGS.length = 0; SHIP.event = ev0; }
     const calls = TRK_PLACES.find(q => q.key === 'place:calls');
     for (const [d, m] of [[sd + 1, 600], [sd + 1, 900], [sd + 2, 720], [sd + 3, 720], [sd + 4, 720]]) {
       setShipNow(ab(d, m)); const shut = eventRoutines(ab(d, m)).some(x => x.rule === 'closed' && (x.where === 'type:callhome' || x.where === '3|B'));
@@ -245,7 +254,11 @@ def check_device(g, tag, want_on):
     if not D['on']: fail(f"{tag}: EV_DEVICE_ON is off in this copy"); return
     for x in D['days']:
         say(f"  Schedule D{x['d']}: event items at {[hhmm_py(m) for m in x['got']]}")
-        if x['got'] != x['want']: fail(f"{tag}: the Schedule on Day {x['d']} has event items at {[hhmm_py(m) for m in x['got']]}, the event's meetings and gatherings are at {[hhmm_py(m) for m in x['want']]}")
+        if x['got'] != x['want']: fail(f"{tag}: the Schedule on Day {x['d']} has event items at {[hhmm_py(m) for m in x['got']]}, the event's meetings are at {[hhmm_py(m) for m in x['want']]}")
+        for i, at, n in x['asTrad']:
+            say(f"  Schedule D{x['d']}: {i} {hhmm_py(at)} as a tradition x{n}")
+            if n != 1: fail(f"{tag}: the gathering {i} on Day {x['d']} {hhmm_py(at)} is listed {n} times as a tradition, not once")
+        for k in x['twice']: fail(f"{tag}: the Schedule on Day {x['d']} lists {k} twice")
         for t in x['goals']: fail(f"{tag}: Schedule item {t} on Day {x['d']} has no goal to walk to")
     for x in D['trk']:
         say(f"  Tracked D{x['d']} {hhmm_py(x['m'])}: call booths {'closed' if x['shut'] else 'open'}, offered {x['offered']}")
@@ -253,6 +266,14 @@ def check_device(g, tag, want_on):
     if [c[2] for c in D['closed']] != [True, False, False]: fail(f"{tag}: eventClosed for the bow lounge (front day 15:00, warning day 15:00, all-clear day 20:00): {D['closed']}")
     if D['open7'] is not None and [c[2] for c in D['open7']] != [True, False, True, True]: fail(f"{tag}: with Deck 7 closed, the auditorium should open just for the Friday address (15:00 shut, 16:10 open, 17:10 shut; the common room shut): {D['open7']}")
     say(f"  eventClosed: bow lounge {D['closed']}; Deck 7 closed in the onset: {D['open7']}")
+    T = D.get('toast')
+    if T is None: waiting(f"{tag}: the meetings' toasts (no SHIP.device.calendarRemind)")
+    else:
+        say(f"  meeting toasts: heads-ups on {T['on']}; off {T['off']}")
+        for i, got, want in T['on']:
+            if got is not None: fail(f"{tag}: meeting {i} keeps its own toast while the device's heads-ups are on: {got}")
+        for i, got, want in T['off']:
+            if got != want: fail(f"{tag}: meeting {i} with heads-ups off should keep its toast {want!r}: {got!r}")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)

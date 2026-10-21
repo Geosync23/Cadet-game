@@ -344,7 +344,12 @@ def main(argv):
                             errors.append(f'{tag}: beat is like beat:tomas.3 (arc id, a dot, beats told)')
         # length, with names filled in
         n = len(re.sub(r'\{[^}]*\}', 'x' * NAME_W, t))
-        lim = 44 if kind == 'talk.reply' else 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') or kind in ('promo.announce.mail', 'promo.mail', 'promo.captain', 'promo.ceremony.mail', 'promo.move.mail', 'promo.ceremony.invite') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+        # the ship-wide events' own words (the events base; EW1's content/banks/event-<id>.lines): a Mail body 400 (as mail.*),
+        # a gathering's Mail or thanks toast, the keepsake and plaque texts 200 (as a tradition's), the rest a card's 90
+        if kind.startswith('event.'):
+            lim = 400 if re.match(r'event\.[^.]+\.mail\.', kind) else 200 if re.search(r'\.(mail|thanks|keepsake)(\.\d+)?$|\.plaque\.', kind) else CARD
+        else:
+            lim = 44 if kind == 'talk.reply' else 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') or kind in ('promo.announce.mail', 'promo.mail', 'promo.captain', 'promo.ceremony.mail', 'promo.move.mail', 'promo.ceremony.invite') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
         if not e.get('old'):
             if n > (90 if kind in BUBBLE_KINDS else lim):
                 errors.append(f'{tag}: {n} characters (at most {lim})')
