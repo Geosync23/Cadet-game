@@ -37315,6 +37315,12 @@ function eventHelpKeep() { const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; i
 SIM_ADVANCE.push(() => eventHelpKeep());
 // a call's minutes in the backlog: 40 (today's), or with the storm update the event's callMins, less with the rota
 const evCallMins = e => { const def = e && SHIP_EVENTS[e.id], h = eventHelp('calls'); return !EV_STORM_ON || !def || !def.callMins ? 40 : h ? h.mins : def.callMins; };
+// ---- the ion storm update, S8 (EV2): your rank's briefing. Calder's briefing has an Officers' version (the writers'
+// calderStorm.officer.meet): from officer up you hear that one (F5's scriptBy); a junior hears calderStorm as today ----
+if (EV_STORM_ON && typeof linesMeetings === 'function') {
+  const B = {}; linesMeetings(B); const id = 'calderStorm.officer', m = SHIP_EVENTS.ionStorm.meetings.find(x => x.id === 'stormBriefing');
+  if (B[id] && m) { MEETING_SCRIPTS[id] = B[id]; m.scriptBy = { officer: id, senior: id, specialist: id }; }
+}
 // ---- end of slot: Events engineer 2 ----
 // ---- slot: Storm builder (section 18; EV3, the ion storm update S1-S9, plans/event-storm-plan.md v1.2). New code of this seat's goes here ----
 // the writers' words for an event (content/banks/event-<id>.lines, baked), placeholders filled from an event context c
