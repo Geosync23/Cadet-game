@@ -162,7 +162,10 @@ PAPER = r"""(() => {
       const from = b.t - ab(b.day, 0), own = evBeatsOn(b.day).filter(x => from < x.to && from + b.len > x.from && x.id !== b.beat);
       G.items.push({ what: b.ev + ' meeting ' + b.id, when: b.at, ok: guardFree(b.day, from, from + b.len, 'beat') || own.every(x => x.kind === 'captain' && Math.abs(x.from - from) <= 15), beats: own.map(x => x.id) });
     }
-    for (const g of out.gath.filter(g => !g.draft && g.day)) G.items.push({ what: 'gathering ' + g.id, when: dm(ab(g.day, g.at[0])), ok: guardFree(g.day, g.at[0], g.at[1], 'beat'), beats: evBeatsOn(g.day).filter(x => g.at[0] < x.to && g.at[1] > x.from).map(x => x.id) });
+    for (const g of out.gath.filter(g => !g.draft && g.day)) {   // its own beat aside, as a meeting's: one with its id, or a Captain's beat that day within 15 minutes (EV5: the Line's ceremony)
+      const own = evBeatsOn(g.day).filter(x => g.at[0] < x.to && g.at[1] > x.from && x.id !== g.id);
+      G.items.push({ what: 'gathering ' + g.id, when: dm(ab(g.day, g.at[0])), ok: guardFree(g.day, g.at[0], g.at[1], 'beat') || own.every(x => x.kind === 'captain' && Math.abs(x.from - g.at[0]) <= 15), beats: own.map(x => x.id) });
+    }
     for (const b of EV_BEATS) if (b.kind === 'captain') G.captainDays[b.day] = (G.captainDays[b.day] || 0) + 1;
     // test day; Day 18 16:00 free; the table at 19:30 on Day 20 crosses the night shift, at 19:00 it doesn't; Day 21 05:00 is the night shift; Friday 16:00
     G.samples = [guardFree(15, 600, 625, 'captain'), guardFree(18, 960, 985, 'captain'), guardFree(20, 1170, 1260, 'captain'), guardFree(20, 1140, 1215, 'captain'), guardFree(21, 300, 330, 'beat'), guardFree(12, 960, 990, 'beat')];
