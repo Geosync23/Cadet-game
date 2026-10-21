@@ -493,3 +493,4 @@ Next seat: a publisher (Playtest + Dev pages from claude/integration) once BM13 
 | CR2 | session_01BgMQaB1LQmhfU1rSJ2ATvv | `claude/checks-cr2` | talk, social, join, lines, food, mech, career |
 | CR3 | session_016oCbvvzgcqzzCTsBFCkYRB | `claude/checks-cr3` | perf, arc, path, tiles, disc, puzzle, deck |
 PR9 keeps its probes, day 5/19/21 and the mutants, then collates the final verdict. BM13 on go: merge as 0.64.13, game file must match the runners' (apart from the build line), then check_fast + cadet_test only. Active seats: 13 of 14.
+**~21:15 UTC:** CR2 done (claude/checks-cr2 37b9383; RC sha256 23fb9118…): talk, social, join, lines (49 warnings, storm meeting repeats), mech OK; career = backlog 12 only; food_check 11 4 FAIL "harvest salad" is OLD (from 0.64.11's crew patch 376469c: Day 20 farewell supper on the harvest day), not a release blocker → PB2 investigates on claude/patch-b2. CR1 same sha256. FR4's revert of 2078010 pending (checks running).
