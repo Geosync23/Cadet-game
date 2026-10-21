@@ -297,9 +297,11 @@ The build number is the build master's.
   - q7: the day shift stands easy 14:30-15:15;
   - q8: two volunteer jobs on the mess sheet.
 - **The ceremony is in the bow lounge** (the user, 01:42).
+- **line-q10, why the crossing matters:** **A, "guests in someone else's sky"** (the user, via lead 22, 02:52). Its ~14 lines are the first teaching step of the Veyli lore.
+- **The Veyli are human** (a new user decision, 02:52): a culture that splintered from Earth long ago ("they represent reaching into the distance"), and the player must learn who they are. The new seat **LW1** (branch `claude/veyli-lore`, reporting to lead 22) plans that lore and how the player learns it over the month. This plan's lines never describe the Veyli as non-human, and any Veyli history is left to LW1. The ~14 "why it matters" lines are checked with LW1 before EW1 writes them.
 - **The user's comment:** "We really need to come up with and explain and talk about why it matters to cross." See "Why the crossing matters" below, and question line-q10.
 
-## Why the crossing matters (new, for the user's comment; question line-q10)
+## Why the crossing matters (decided: A, the user 02:52; question line-q10)
 What's already true (content/facts.md):
 - The Wren is a Concord survey ship, unarmed, on a long tour of a frontier shared with the Veyli.
 - Tavessa, dead ahead past the Line, is "a star cluster the Veyli named".
