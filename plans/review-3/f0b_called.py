@@ -9,9 +9,9 @@ print(g.ev("""(() => { const d = 14, out = {}; for (const g of evMeetsOn(d)) { o
   const segs = planDay(p, d).filter(s => s.from < B + g.at + g.len && s.to > B + g.at);
   return [p.id, c.named, eventCalledIn(p, d), segs.map(s => [s.act, s.tag || null, s.deck, s.from - B, s.to - B])]; }) }; } return out; })()"""))
 g.ev("skipTo(13 * 1440 + 9 * 60 + 50)"); g.step(10)
-for k in range(30):
+for k in range(45):
     g.shipmins(2)
-    if g.ev("SHIP.time.min") >= 10 * 60 + 5: break
+    if g.ev("SHIP.time.min") >= 11 * 60 + 5: break
 print('notes', g.ev("simNotes('calledIn').map(n => [n.who, n.meeting, n.day, n.at])"))
 print('cues', g.ev("(SHIP.social && SHIP.social.cues || []).filter(c => /calledIn/.test(c.key)).map(c => [c.key, c.who])"))
 print('hears calledIn?', g.ev("typeof SOC_HEARS !== 'undefined' && SOC_HEARS.includes('calledIn')"))

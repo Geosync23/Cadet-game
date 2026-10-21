@@ -312,3 +312,15 @@ This covers EV1/EV2's events-base and storm/Line turns, FR1's Fridays turns and 
 **Fixes:**
 1. **Bug:** 'calledIn' is missing from SOC_HEARS, so the cue is never made (`cues []`). Add it, and add a check case.
 2. eventMeetTag should also need EV_CALLIN_ON.
+
+**EV2 F0b fixes, ca2f9d6 + 394182b: PASS.** 'calledIn' is in SOC_HEARS, and the four calledIn cues are made (with who). eventMeetTag is false while off.
+
+## EV2 F5 (parts by rank) + F8 (comms down) + PB's F0b fix 1: claude/events-base-2 80c4963. PASS
+
+- Off: cadet_test 13bb264→80c4963 ALL IDENTICAL. check_fast OK in 203 s.
+- **F8, live (`f5f8.py`):**
+  - The warning: 4 contacts callable.
+  - The onset and the escalation: comms down, 0 callable.
+  - The all-clear: 4 callable again.
+- **F5:** right on paper. No meeting has ranks or scriptBy yet, so it gets exercised with EV3's S8.
+- **Hooks I reviewed as owner stand-in:** section 17's eventJob and 20c's homeCallable. OK.
