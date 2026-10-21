@@ -313,6 +313,7 @@ Everything behind `const EV_STORM_ON = EVENTS_ON` (section 18, by the other EV_ 
 - **S6, `EV_DAY_DRESS`:** declared beside `eventsOn`, filled by `evDressMake()` from the calendar's plan and each event's `dayDress` (`{ trad, day, drop | set | add }`); the dressed copy made on first use (`evDressed`). The Line reuses it.
 - **S1 fix 2 (EV4):** `eventFinish` sends the debrief unless a timed `mail.debrief` already went (`e.mine['mail:debrief']`), so an event ended early (Dev mode's End) still gets one, once.
 - **Standing diners (EV4):** at the lantern supper 22 eat standing with a tray at the mess's crowd spots: section 10's `trayTo(id, w)` asks `evStandTray(pl, w)` (slot) for any crowd spot while the switch is on, so only a meal gathering's own spots at its meal get one; day_check allows exactly that. To drop them, take `{ deck: 3, pool: '@gather-mess' }` out of the supper's places (about 48).
+- **Props (EV4):** section 4d's `dressLantern` and DECK_DRESS `lanternMess` (12 lanterns on the long tables) and `stormLantern` (the trace on the galley pass), 2 draw calls each; while lanternMess is out, Deck 3 goes to emergency light (8b's `FEEL_S.lamp` from `stormSupperDim`).
 - **S7, story A:** `stormStoryTick(now)` from `eventsTick`, play only, `e.mine['story:*']` and the reply flags; moments are `moment:` scripts (`stormMoment`), so they never count toward a commendation.
 - **events_check** reads the calendar when it's on (the storm's day, the guard's ready-room hour, the day dress). bigevents_check is EC1's.
 
