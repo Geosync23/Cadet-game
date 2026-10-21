@@ -1,0 +1,1 @@
+t1_nodip CAUGHT ['  FAIL on: missing the address on a shift day: work [6.54, 0, True] -> [6.28, 0]', 'FRIDAYS CHECK FAILED (1)']
