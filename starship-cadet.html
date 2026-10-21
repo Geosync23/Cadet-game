@@ -36485,7 +36485,7 @@ const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm', 'diplomatic'];   // the main events with the short ones between (Part 2, "The full order")                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the events base (EV1, 0.64.x; plans/events-base-brief.md): every piece behind EVENTS_ON, off = today's game ----
-const EVENTS_ON = false;                                 // the master switch: on with the storm update, after the user's review
+const EVENTS_ON = true;                                  // the master switch: on with the storm update (S10, the user's yes, 2026-10-21); false = the game before it
 const EV_CAL_ON = EVENTS_ON;                             // F0: events come by the calendar (a check may flip this line alone)
 const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
 const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as each phase begins (crew lines react)
