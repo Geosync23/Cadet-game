@@ -22,13 +22,11 @@ Verdicts are PASS, PASS WITH FIXES (with the exact fixes) or FAIL, sent to the b
 
 - check_fast on integration 675588c (0.64.6) passed in 213 s (CADET_WORK=/tmp/work-RV3).
 
-## A clash found: Friday traditions in 15:30-17:00 (sent to FR1 and the lead)
+## Withdrawn: a Friday clash that wasn't (2026-10-21)
 
-The Fridays plan says "Nothing runs between 15:30 and 17:00" on a Friday. At 675588c two live TRADITIONS do:
-- cook-along: Fri 15:30-16:30, the mess (line 33728).
-- tiles-ladder: Fri 15:00-16:30 with jitter 15, the bow lounge (line 33772).
+I first reported that the Cook-along and the Tiles ladder overlap the address on Fridays. That was wrong. TRADITIONS count weekdays with 0 = Monday (`weekday()`, line 8928), so their `"weekday": 5` is Saturday. With the right numbering, nothing in TRADITIONS or REC_TRADS overlaps Friday 15:30-17:00. The plan's fact holds. The correction went to the lead, FR1 and EW1.
 
-With SHORT_FRIDAY on, both clash with the 16:00-16:50 address. Where they move is the user's call. On review: with the switch on, no tradition overlaps a Friday 15:30-17:00; with it off, both are unchanged.
+**Gotcha:** `weekday(d)` is 0 = Monday ... 6 = Sunday, in WEEK_SHAPE, TRADITIONS and EV_BEATS alike. Day 0 (the arrival) is a Sunday.
 
 ## EW1 friday-weekly.address: claude/events-lines d15803c (content, sent by EW1). PASS WITH FIXES
 
@@ -39,8 +37,8 @@ With SHORT_FRIDAY on, both clash with the 16:00-16:50 address. Where they move i
 - Every line fits 90 characters with a 24-character {me} (NAME_MAX) and the longest tradition name, apart from fix 4.
 
 **Fixes:**
-1. `cue:tradition.tasting-table` (Tuesday) and `cue:tradition.department-cup` (Sunday) never fire: the tradition cue lasts 1 day (SOC_CUE_OF). Add a "this week" condition with FR1, or drop the two lines. {winner} must read as a team name.
-2. `cue:tradition.tiles-ladder.you`: the ladder sits on the address (the clash above). Hold it until that's decided.
+1. `cue:tradition.tasting-table` (Wednesday) and `cue:tradition.department-cup` (Monday) never fire: the tradition cue lasts 1 day (SOC_CUE_OF). Add a "this week" condition with FR1, or drop the two lines. {winner} must read as a team name.
+2. `cue:tradition.tiles-ladder.you`: the ladder is on Saturday, so its 1-day cue has expired by Friday too. Same remedy as 1.
 3. The people pool's `pick: 2` can repeat a welcome or a goodbye. Split it into an arrivals pool and a leavers pool.
 4. Line 73 is 94 characters with three leavers (Day 161). "This week" for rotations means since last Friday's address, because they land on Sundays.
 
@@ -49,3 +47,33 @@ With SHORT_FRIDAY on, both clash with the 16:00-16:50 address. Where they move i
 - The new slots and conditions are FR1's to build; health: is section 17's.
 
 **For the lead:** the nod rotation has no Bridge/helm week.
+
+## FR1 build brief: claude/fridays e420082 (turn 0). PASS WITH FIXES
+
+**Matches the plan** rev 4 and the user's answers:
+- the 15:30 crew end and the 16:00-16:50 address in the auditorium;
+- the skeleton crew;
+- bubbles, the banner and the Mail;
+- the expected dip and its exemptions;
+- "both happen" when an event falls on a Friday;
+- the 16:00 auto sign-out and the normal clock (revision 3 parked).
+
+**The hold, owners and switch:**
+- The hold is one table: EV_BEATS `fridayAddress` {weekday 4, fromDay 5, at [930, 1020]} at events-base 835ab24.
+- Owners: PB for sections 13 and 14, OR1 for the rest, EV1 for the storm's keep.
+- Off = identical, and each turn has its checks.
+
+**Fixes:**
+1. **(Before turn 5, in the brief now.)** Don't gate captains-address with a story flag `fri.on`.
+   - `flag()` reads the saved SHIP.flags, and `eventsOn` reads `ev.flag` (line 35169), which feeds the crew's planner. A save from an "on" build would bring the address into an "off" build.
+   - rec-all-hands' `rec.on` is set nowhere. The rec traditions are gated by `REC_TRAD_ON` at load (line 34970). Do the same with SHORT_FRIDAY.
+2. eventFree is in section 18 (line 35291), not 14. Keep the workaholic tail at most 15:45 (`over()` is strict, so 15:45 + 15 is still free at 16:00).
+3. Turn 6's saved no-repeat ring: add player_check, devmode_check and a reload mid-speech. Off adds nothing to the save.
+4. Turn 7: define "missed it" exactly; the 16:00 auto sign-out never counts against you.
+5. Take a draw-call reading at turn 5, when about 65 first sit in the auditorium.
+
+**Notes:**
+- EV_BEATS isn't in integration yet, so the hold assert stays in the check or typeof-guarded.
+- TEAM_FRI is [4, 840].
+- There are 27 `DAY_SHIFT[1]` reads.
+- The day shift has been 09:00-17:00 since 0.71.1.
