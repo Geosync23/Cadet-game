@@ -8,7 +8,7 @@
 // .lines (a line whose condition fails or whose placeholder can't be filled isn't picked; if nothing fits, the beat is
 // skipped). Pools marked "pick: 2" take two different lines. About 11-14 lines a week, spread over 16:00-16:48.
 // Slots (new, read when she speaks, never by the planner): {dept} this week's nod (rotating Works, the galley, the
-// Watch, Survey, the infirmary, the garden), with nod:<dept> to pick its lines; health:good|ok|poor (the ship health
+// Watch, Survey, the infirmary, the bridge, the garden: a 7-week turn), with nod:<dept> to pick its lines; health:good|ok|poor (the ship health
 // boards, section 17); {arrivals} and {leavers} (this week's crew rotation, first names; ROSTER_ROTATIONS); {trad1} and
 // {day1} (one of next week's traditions and its weekday, seeded; upcomingTraditions); {winner}
 // (a tradition's winner this week, tallyLast: the tasting table, the department cup).
@@ -79,7 +79,8 @@ pick: 2
 - {leavers} left on Sunday's shuttle. The ship's quieter. We'll miss you.   #warm
 
 == nod
-// the department of the week, in turn: Works, the galley, the Watch, Survey, the infirmary, the garden
+// the department of the week, in turn: Works, the galley, the Watch, Survey, the infirmary, the bridge (helm and comms),
+// the garden
 ? nod:works
 - This week's nod: Works. Every light you switched on today, Works kept it on.
 - This week's nod is Works. The machines don't say thank you, so I will.
@@ -95,6 +96,9 @@ pick: 2
 ? nod:infirmary
 - This week's nod: the infirmary. Dr. Nandakumar's team are always there.
 - This week's nod is the infirmary. Drink your water. That's from them, not me.   #funny
+? nod:bridge
+- This week's nod: the bridge. Helm and comms, day and night, keeping us on course.
+- This week's nod is the bridge. Dev Raman says the stars did most of it. Modest man.   #funny
 ? nod:garden
 - This week's nod: the garden. Every salad, every herb, every bit of green aboard.
 - This week's nod is the garden. Tove says the tomatoes are doing well. I say I'm hungry.   #funny
