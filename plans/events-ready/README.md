@@ -13,9 +13,7 @@ moves an event's files in and runs `content_gen.py` in the turn that builds that
 | firstLightCocoa | firstLightCocoa (Raman's two lines: the Pale Shoals and Tavessa, the user's picks; facts.md has them) | | |
 | diplomatic | veyliGreeting (replaces the game's; Veyli they/them), veyliDinner (new) | event.diplomatic.warning / .escalation / .afterglow | event-diplomatic (the memo, the warning, news, status, the greeting line, the dinner's Mail, the farewell) |
 
-**Tested** (a scratch copy with everything moved in, baked, then lines_check):
-- The bake is fine.
-- lines_check's only errors are length limits: every `event.*` bank key is held to 90 characters, so the Mail bodies (up to about 320) and the toasts, keepsake and plaque texts (up to about 120) fail. Needed: a lines_check rule (the dialogue engineer's file) giving `event.*.mail.*` 400 characters, as `mail.*`, and `event.*.gather.*.thanks|mail`, `event.*.trad.*.mail|thanks`, `event.*.keepsake` and `event.*.plaque` 200, as a tradition's Mail and toast. Everything else passes.
+**Tested** (a scratch copy with everything moved in, baked, then lines_check): the bake is fine. The only lines_check errors were the 90-character limit on `event.*` keys, and EV1's rule fixes that (claude/events-base bb285a0): Mail (`event.<id>.mail.*`) 400; a gathering's `.mail` and `.thanks`, `.keepsake` and `.plaque.*` 200; the rest 90. Run lines_check again on the build that has EV1's rule.
 
 **For EV1's code:**
 - The all-clear's line to you is inserted after Calder's "Mine too" line, from `event.ionStorm.allclear.you.commended | .jobs | .none`.

@@ -8,11 +8,13 @@ engineer) agrees or changes this shape, and content_gen learns to bake it.
 - `? conditions` above lines applies to them until the next `?`; a bare `?` clears it. A line whose conditions fail, or
   whose placeholder can't be filled, is left out. `//` lines are notes.
 - Conditions and placeholders, and who has agreed them (2026-10-20):
-  - Agreed with EV1, who gives section 18 readers in F0a: `band:smooth|bumpy|rough` (eventBandOf), `done:<jobId>` and
-    `done:<jobId>.you` (eventJobDone), `commended` (SHIP.commendations), `{stormjobs}` and `{myjobs}`
-    (eventJobsCount). The lines put the counts after a colon ("Storm jobs closed in four days: 12."), so a count of 1
-    reads right; a count of 0 should drop the line (asked of EV1).
-  - Still to agree: `myrank:junior|officer|senior|specialist` (your rank, SHIP.works.rank: Works career's) and
+  - Agreed with EV1, whose section 18 readers are pushed (claude/events-base bb285a0): `band:smooth|bumpy|rough` =
+    eventBandOf(id) ('smooth'|'bumpy'|'rough' or null); `done:<jobId>` and `done:<jobId>.you` = eventJobDone(jobId,
+    you, t); `commended` = !!SHIP.commendations.length; `{stormjobs}` = eventJobsCount('ionStorm'), `{myjobs}` =
+    eventJobsCount(id, true). The lines put the counts after a colon ("Storm jobs closed in four days: 12."), so a count of 1
+    reads right; a count of 0 drops the line (FR1's address player).
+  - Still to agree: `myrank:junior|officer|senior|specialist` (your rank, SHIP.works.rank; `rank:` is the speaker's, so
+    it needs a small condition in section 22's engine, the dialogue engineer's, or FR1's player reading it) and
     `myshift:night` (your night shifts: Pillar 5, not built yet); `{leavers}` (this week's leavers' first names,
     from ROSTER_ROTATIONS); the `.address` file itself and its bake (the Fridays builder, the dialogue engineer and the
     lead); `week1:true` in the .trad Mail is existing.
