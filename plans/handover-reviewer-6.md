@@ -45,6 +45,13 @@
 
 To resume in a fresh container: make the worktrees again (`git worktree add <dir> <commit>`), on-copies by sed (`EVENTS_ON` to true; for the Line `EV_LINE_ON` to true too; for bigevents a copy with `const EV_LINE_ON = EVENTS_ON;` only when the check wants part 3), and run the steps above one at a time.
 
+## Stopped (~17:52, lead 24: the account handoff)
+
+Partial results are in plans/review-6.md's last section. Left for the next reviewer:
+- EC1 turns 17-19: my mutant runs (turn 17 on an EVENTS_ON = true build with a guardFree mutant; turn 18/19's watch mutant). Code read OK; EC1's own runs are OK.
+- EV6's clean-up 4a48fac: events_check, bubble_check and check_fast on my side (code read OK, off identical, EV6's runs OK).
+- The Line: the 360 probe and a third off cadet_test on 4306fd1, now superseded by L5e/L5f (below).
+
 ## Next pass (after the account move)
 
 - **EV7's L5e/L5f** (claude/line-update b42b6d8, e3870c1; tip 8bfff3b; EV7's note plans/handover-line-builder-2.md):

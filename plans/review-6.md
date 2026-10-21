@@ -178,3 +178,17 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   EV6: movers 12 / waiting 62 in both passes, storm on and off; MECH CHECK OK on. Nit: such crew also leave the hold's
   "bad" list (a job route across decks during the hold would go unseen); fine while jobs don't wait for the hold.
   With DB2's 841a9d0, S10's two owed check fixes are in.
+
+## Stopped at lead 24's word (~17:52, the account handoff): partial results
+**EC1 turns 14-19 (3f9a458 .. 7c7d4eb):** code read OK for all six.
+- Verified: turn 14's Saruth mutant caught (twice: 9188428, 4306fd1); turn 16 (12901c9) on 829f242c OK; mutS2
+  (crowd spots while seated) FAIL "has 22 standing crowd spots" (caught); mutS3 (seated dropped) FAIL "isn't seated" (caught).
+- mutS1 (stay [100, 105] while seated) OK: probably inert, the planner can't seat more than the 48 seats, so the
+  peak can't pass them. Not a check miss as far as I can tell; untested whether evStay lets anyone stand.
+- Not run: turn 17 (2de5554) on 4a48fac (on, a guardFree mutant, off); turn 18/19 (f4fb3f7/7c7d4eb) on 4306fd1 (clean,
+  the watch mutant). EC1 reports them OK on its own runs, with its own mutants caught. Verdict: PASS on code read and
+  EC1's runs, my mutant runs for 17-19 left for the next reviewer.
+**EV6's clean-up 4a48faca:** code read OK (no names left); cadet_test fd11d82→4a48fac off ALL IDENTICAL. Not run:
+events_check on, bubble_check on, check_fast (EV6 reports all OK). Verdict: PASS on code read, the off identity and EV6's runs.
+**EV6's mech m17 fix 0b77dfcb:** OK (above).
+**Not run:** the Line's 360 probe and the third off cadet_test on 4306fd1 (two runs: one a_start bubble flicker, one ALL IDENTICAL).
