@@ -30,16 +30,10 @@ Results of the S10 round: `plans/storm-s10-round/` (summaries, each FAIL's lines
 
 ## In flight / exact next step
 
-1. **devmode_check FAILs with S10, OK with it off (new, mine):** "clock: the excused days": after `+7 days` to Day 8 06:00
-   then `+1 day`, `careerOff(8)` is already true before the jump, so `devmodeSkipTo` (section 25, ~line 52405) skips Day 8
-   and `devmodeState().ex` is []. careerOff = SHIP.career.b (leave) / .s (sick) / .go / devmodeExcused. Next: a probe on
-   the on build after the +7 days jump: which of c.b / c.s holds 8, and what in the events base puts it there (a sick day
-   from a needs change? leave?). Then the smallest fix behind EVENTS_ON, or a check fix if the check assumes no events.
-2. **career_check** ("Relied on" before Day 5, a busy player) and **mech_check** (m17 "the paper part differs after
-   the rides") FAIL with S10; their runs on the switched-off copy were still going at writing
-   (scratch, lost with the container): re-run `python3 career_check.py OFF.html` and `python3 mech_check.py OFF.html m17`
-   on a copy made with `sed 's/^const EVENTS_ON = true; /const EVENTS_ON = false;/' starship-cadet.html`. If OK off,
-   they're new with S10: find why.
+1. **Done (see the build table's 'storm S10 findings' row):** devmode_check's failure is chance (a random game seed can make Day 8 a sick
+   day; re-run OK); career_check fails the same way switched off (not new); mech m17 is a check problem (storm wear leaves crew
+   repair jobs in its Day 18 window, so its two passes differ). Fixes belong to the checks' owners (DB2; seat E4 for mech).
+2. Nothing in the game needs changing for S10.
 3. Take FR3's fridays_check fix (storm lines filled with the storm on) and FD1's food_check fix (claude/food-waits
    0f808c3) when they land; re-run those two.
 4. Report to PR6 and lead 24. BM12 merges S10 with FR3's turn 10 (SHORT_FRIDAY on) together, only on lead 24's go.
