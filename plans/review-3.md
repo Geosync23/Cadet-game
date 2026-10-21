@@ -202,3 +202,17 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - Clocking in at 15:40 is refused.
 
 **Fix found:** the forgotten-clock-out toast said 17:00 on a Friday. It's fixed in turn 4's 56fbd2b.
+
+## FR1 turn 4 (B2 + F: the Works holds, the Friday haul and team job, the device row, Dev's To 15:25; the Friday toast): claude/fridays 56fbd2b. PASS
+
+**Checks:**
+- cadet_test t3→off: ALL IDENTICAL.
+- check_fast OK in 204 s.
+- On: mech_check (m4 fixed), machine_check, device_check, interactions_check and devmode_check are all OK. career_check fails only #12.
+
+**Probe:**
+- The device row on Friday reads 09:00-15:30.
+- Dev's Clock row has To 15:25 on Fridays.
+- The team slot is at 13:30, and the haul is held to 14:30.
+
+**To do:** OR1 signs off the 24x hooks (section.py lists no owner for several of them).
