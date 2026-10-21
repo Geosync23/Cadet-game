@@ -19,8 +19,8 @@ No visual change at all: cadet_test ALL IDENTICAL and deck shots identical. No t
 
 ## Open (in order)
 1. **TS2's F1** on player_check: re-run the mutant pmA (`with drawn()` removed from `run_activity`): it must now FAIL; and the new player_check on integration must still give the same output as `plans/review-opt/player_new_0.64.9.log` (5 min 54 s).
-2. **RN1 f75dd23** (the Speed card's block moved above section 25's start-up line, DB2's nit): code moved only; re-run devmode_check and cadet_test (no #dev) on it.
-3. **RN1 #5** (unloadDeck takes the old deck's tree apart; 2 lines in 4c; ~78 MB freed after a tour): due ~17:00. Proof to ask for/run: cadet_test ALL IDENTICAL, keep_shots (deck shots identical, all 7 decks, 2 sizes), merge_all.py, deck_check, perf_check memory, a tour of every deck twice with no errors, and a mutant (e.g. disposing a shared kit geometry/material) that a check must catch. Watch for kit shared between decks being disposed (textures/materials reused on the next deck), and anything holding the old deck (ITEMS, LAMPS, walkers) after unload.
+2. RN1 f75dd23: done (devmode_check OK, speed_probe OK).
+3. **RN1 #5** (lead 24: run its full proof round when it arrives, no need to ask) (unloadDeck takes the old deck's tree apart; 2 lines in 4c; ~78 MB freed after a tour): due ~17:00. Proof to ask for/run: cadet_test ALL IDENTICAL, keep_shots (deck shots identical, all 7 decks, 2 sizes), merge_all.py, deck_check, perf_check memory, a tour of every deck twice with no errors, and a mutant (e.g. disposing a shared kit geometry/material) that a check must catch. Watch for kit shared between decks being disposed (textures/materials reused on the next deck), and anything holding the old deck (ITEMS, LAMPS, walkers) after unload.
 4. **TS2 item 1** (affected-checks runner): after the account move, per lead 24.
 5. #7: parked by lead 24, nothing to review.
 

@@ -15,7 +15,7 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 | RN1 | #6 grain loop | c1bf6f1 (+ 9604b97, 1a62fc7 docs) | PASS |
 | TS2 | player_check fix A + fix B | claude/opt-tests 4775488 + e4acbf8 | PASS WITH FIXES (F1 needed, small) |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
-| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (N1 fixed 7d84c86, N2 fixed 5850ddb; f75dd23 moves the block for DB2's nit: devmode_check/check_fast to re-run on it) |
+| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (N1 fixed 7d84c86, N2 fixed 5850ddb; f75dd23 moves the start-up line below the Speed block (DB2's nit): devmode_check OK and speed_probe OK on it, confirmed) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
 
 ## RN1: perf_check busy event scenes (3af9f15 + 0ad9b5d), PASS WITH FIXES
@@ -103,6 +103,10 @@ Fix:
 
 - F1: `PERF_SCENES='lantern|all-clear|Tern'` on integration 0.64.8: all three WAITING; last line "PERF CHECK OK (0 skipped: switch not in this build; 3 waiting: not built yet)" (F4). On claude/storm-update `PERF_SCENES=lantern`: measured (62 people, 260 / 417 / 293 ...), equal to opt-measure's row.
 - F2: DEV_NOTES says about 11 minutes alone. F3: the search is case-sensitive now ('Tern' ran only the Tern row).
+
+## RN1 f75dd23 (Dev start-up line moved below the Speed block), confirmed
+
+- The only change: `if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }` now runs after the Speed card's wrappers are in place. devmode_check: DEVMODE CHECK OK. speed_probe.py: SPEED PROBE OK (a Dev game with and without the wrappers ends the same: save, clock, deck, place, walkers; nothing wrapped without #dev; sizes listed).
 
 ## Log
 
