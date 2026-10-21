@@ -77,6 +77,21 @@ PAPER = r"""(() => {
   return out;
 })()"""
 
+# F2: the phase notes, live on paper: the clock run from Day 11 05:00 to Day 12 15:00 (the warning and the front) through
+# eventAdvance and section 20's socialTick; each phase's note once, at its own minute; the cue event.<id>.<phase> made;
+# (cues last a ship day: read at Day 11 12:00 and Day 12 15:00); someone's reaction line for the front found (section 22's lineFor, kind 'cue')
+NOTES = r"""(() => {
+  const out = { notes: [], cues: [], lines: 0, err: null };
+  try {
+    for (let t = 10 * 1440 + 300; t <= 11 * 1440 + 900; t += 5) { setShipNow(t); eventAdvance(t, true); if (typeof socialTick === 'function') socialTick();
+      if (t === 10 * 1440 + 720 || t === 11 * 1440 + 900) out.cues.push(...((SHIP.social && SHIP.social.cues) || []).map(c => c.key).filter(k => /^event\./.test(k))); }
+    out.notes = simNotes('eventPhase').map(n => n.id + ':' + n.phase + '@' + n.t);
+    const t = shipNow();
+    for (const p of schedPeople()) { const l = lineFor(p, 'cue', { t, keep: () => true }); if (l && [].concat(l.cue || []).some(c => /^event\.ionStorm\.onset/.test(c))) out.lines++; }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  return out;
+})()"""
+
 OFF = r"""(() => ({ on: EVENTS_ON, eventDay: [...Array(41).keys()].filter(d => eventDay(d)), guard: [guardFree(15, 600, 625, 'captain'), guardFree(12, 960, 990, 'beat'), guardFree(21, 300, 330, 'beat')],
   hold: evBeatAt(12, [0, 960]) === 11 * 1440 + 960, at: evBeatAt(11, [1, 840]) === 11 * 1440 + 840 }))()"""
 
@@ -92,6 +107,8 @@ with sync_playwright() as pw:
         g = Game(pw, str(on_path), 390, 844)
         runs.append(g.ev(PAPER)); errs = g.errors[:5]; g.b.close()
         if errs: fail('page errors (on): ' + ' | '.join(errs))
+    g = Game(pw, str(on_path), 390, 844); N = g.ev(NOTES); errs = g.errors[:5]; g.b.close()
+    if errs: fail('page errors (notes): ' + ' | '.join(errs))
     g = Game(pw, sys.argv[1], 390, 844); off = g.ev(OFF); errs = g.errors[:5]; g.b.close()
     if errs: fail('page errors (off): ' + ' | '.join(errs))
 
@@ -124,6 +141,13 @@ if P['holdSamples'] != want_hold: fail('the Friday hold: ' + str(P['holdSamples'
 if P['guardSamples'] != [False, True, False, True, False]: fail('the guard samples: ' + str(P['guardSamples']) + ' (test day, Day 18 16:00, table 19:30, table 19:00, the night shift)')
 for n in P['notes']: print(' ', n)
 if json.dumps(runs[0], sort_keys=True) != json.dumps(runs[1], sort_keys=True): fail('two runs on paper differ')
+print('phase notes:', N['notes'], '| cues:', sorted(set(N['cues'])), '| crew with a reaction line for the front:', N['lines'])
+if N['err']: fail('phase notes: ' + N['err'])
+want_notes = ['ionStorm:warning@' + str(10 * 1440 + 360), 'ionStorm:onset@' + str(11 * 1440 + 840)]
+if N['notes'] != want_notes: fail('phase notes ' + str(N['notes']) + ', wanted ' + str(want_notes))
+for c in ['event.ionStorm.warning', 'event.ionStorm.onset']:
+    if c not in N['cues']: fail('no cue ' + c)
+if N['lines'] < 1: fail('nobody has a reaction line for the front')
 print('switched off:', off)
 if off != {'on': False, 'eventDay': [], 'guard': [True, True, True], 'hold': True, 'at': True}: fail('switched off, the base still acts: ' + str(off))
 
