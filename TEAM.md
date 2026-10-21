@@ -397,3 +397,8 @@ Working (5): FR3, EV5, PR5, PR6, BM12.
 | Events builder EV6 | session_012u45Yq4bSmo6bgqe5phZ9b | `claude/storm-update` → `claude/line-update` | supper change, storm S10, placeholder hunt, then the Line L4-L6 |
 | Patch builder PT1 | session_013KBHqs7JLoNRVFCVWdfngN | `claude/patch-crew` | first rotation Day 21 + tea Day 25; opening camera closer |
 Working (6): FR3, PR5, PR6, BM12, EV6, PT1 (EV5 stopping). Day rules: up to 7.
+**~11:55 UTC, the user: Dev mode up to Stop 2** (Stop 1b Traditions + Stop 2 Set career; lean plan v3.1). Lead's call (the user asked wait or first): first, alongside the events; the optimization pass waits on the user's plan answers.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Dev mode builder DB2 | session_01RAw82oHw329cHYC7wapKu8 | `claude/devmode-2` | Stop 1b + Stop 2; turn list to the lead first; reviewer PR5 after Fridays |
+Working (7): FR3, PR5, PR6, BM12, EV6, PT1, DB2.
