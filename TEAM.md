@@ -385,3 +385,7 @@ Working (5): EV4, EV5, PR5, PR6, FR3. On call: ER2, EC1, PB, OP1.
 **~10:14 UTC: ER2 storm build PASS** (claude/storm-update 5f3fc3f: all 4 fixes in; full story plays; supper 51 / 272 calls). S10 after S2 lands with the Fridays. ER2 (~460k) writes plans/handover-event-reviewer-2.md and goes idle; a fresh ER3 for the Line build review later. EV5 L1 5c3c003 (Line data, two-events base fixes; PB OK s14) → PR6. FR3 on Fridays turn 9 (new perf scenes in the right rooms, measured on a switch-on copy).
 **~10:55 UTC:** EV4 pushed storm S2: claude/storm-update ab58e7b (claude/fridays merged in; Marrow + Vance at the lectern, back on the bridge 16:54; supper light in the mess only; off ALL IDENTICAL; check_fast OK) → PR6, ER2 (quick look), PB (s14). Open: fridays_check "lines that never fill" (the storm's address lines with the storm off) → FR3. Then S10. EV4 ~550k+: a fresh storm builder from plans/handover-storm-builder-2.md if the fixes run late.
 **~11:00 UTC:** EV4 stopped at its memory line (claude/storm-update 582cd21: S1-S9 + S2, Fridays merged; ER2 PASS through S2; PB OK s10/s14; PR6 reviewing). S10 (switch on) goes to EV5 (brief in plans/handover-storm-builder-2.md) after PR6's pass + FR3's fridays_check fix. Working (4): FR3, EV5, PR5, PR6.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Build master BM12 | session_01Pdzb8wT4UA5tPgwQStRoqd | `claude/integration` | from BM11's note: Fridays (0.64.9) → storm → the Line, each on the lead's go; dry-run Fridays merge now |
+Working (5): FR3, EV5, PR5, PR6, BM12.
