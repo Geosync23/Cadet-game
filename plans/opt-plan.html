@@ -244,6 +244,7 @@ a{color:var(--teal)}
 
 <details class="item"><summary><span class="n">10</span><span class="t">Faster deck changes</span><span class="s">sections 4b, 4c · render seat</span></summary><div class="body">
 <div class="chips"><span class="chip gain">gain: medium (Deck 3 builds in 1.1 s here, about 4-5 s on a phone)</span><span class="chip risk">risk: low</span></div>
+<p><b>Built (RN1, 2026-10-21, claude/opt-render):</b> all seven decks build in 1.33 s instead of 2.27 s here (Deck 3 599 → 346 ms, Deck 2 486 → 264, Deck 4 451 → 270), with every merged shape, standing tile, wall and the random seed identical to the bit; cadet_test ALL IDENTICAL. Numbers: plans/opt-measure.md "Faster deck builds".</p>
 <p><b>What:</b> building a deck merges thousands of furniture pieces into a few shapes; the merge first copies every piece into a slower form (<code>toNonIndexed</code>, 0.3 s of Deck 4's build) and measures the hull edge by edge. Both can make exactly the same result with less copying. Measured already: building takes 0.1-0.4 s on Decks 1, 5, 6 and the rec deck, 0.7-0.9 s on Decks 2 and 4, 1.1 s on Deck 3 (plans/opt-measure.md). Turn 2 profiles Decks 3, 2 and 4 and works on their slowest parts.</p>
 <p><b>Why it's safe:</b> every merged shape is compared byte for byte with the old build's on all seven decks (the method used for the shadow stand-ins in 0.27.33); cadet_test ALL IDENTICAL; deck_check OK.</p>
 </div></details>
