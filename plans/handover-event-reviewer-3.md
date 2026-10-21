@@ -27,19 +27,25 @@ A fresh reviewer reads `plans/handover-event-reviewer-2.md` first (the method), 
 - Check gaps: 8. Plants P2 (the supper emptied) and P3 (Tomas off watch) pass bigevents_check; P4 (an off leak in
   linePudding) passes cadet_test.
 
-## Where I stopped: round 2 not started
-Round 2 waits for EV7's fix turn (L5e). Its list is at the end of the review file. In short:
-1. Fix 1's repro `p_reload.py`: the Saturday moment is offered again after a reload, and Tomas's Mail comes if you walk away.
-2. Re-plant P2 and P3 (and P4 if EC1 adds the off check): they must now FAIL.
-3. Fix 2: on paper, the supper count (came / peak; about 55 / no more than 48). Pell planned at it. Walk `p3b.py` to see
-   `lineSupperGuess` play.
-4. Fix 3: the first-timers at the ceremony; the crowd about 49.
-5. Lead 24's known items:
-   - the jobs are held to 13:45 (Eklund no longer in two places);
-   - PR6's late Captain: she must be at `3-bow-lounge-line-lead-1` by 14:40. The oath opens when *you* are in the room,
-     so check her place at 14:40 with `whereIs` and on the deck.
-6. bigevents_check, day_check 7, food_check 7 (on), cadet_test off against the storm tip, check_fast.
-   Keep each run short: lead 24 says no round over ~60 minutes without asking.
+## Where I stopped: round 2 part A done (claude/line-update 835bcfc); part B after the account move
+- **Part A, verified:**
+  - fix 1 (reloads re-offer the moments);
+  - fix 2 (59 at the supper, at most 39 at once, Pell's guess plays);
+  - fix 3 mostly (14 of 22 first-timers, the crowd 46 plus you);
+  - PR6's Captain (at the glass from 14:30);
+  - the jobs held to 13:45;
+  - fix 8: plants Q2 and Q3 now FAIL bigevents_check 7c7d4eb.
+- **Open:** fix 9 (sent to EV7). Lemaire (a day off) and Reyes and Yoon (night workers awake by 14:29) still skip their own
+  ceremony.
+- **Part B, to do after the move (lead 24's call), on the then tip:**
+  - cadet_test off against the storm tip (the merge base, still b991877 at 835bcfc);
+  - check_fast;
+  - events_check, day_check 6/7/8 and food_check 7 (on);
+  - fix 9's repro (`r2.js`: `firstNot`);
+  - P4 (the off menu leak: did EC1 add the off-part reads?);
+  - a quick look at fixes 4-6 (the thanks at 15:00, Brennan's two lines spaced, the punch counted when the work is done)
+    and nits 8-10, 12 (EW2 c2ee4e4).
+  - Then the final verdict and a summary to lead 24.
 
 ## How to test (what worked)
 - **Setup:**

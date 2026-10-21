@@ -4,7 +4,7 @@ Reviewer ER3 (session_017jM4m1bcqPHbSesi2kSfLr), 2026-10-21. Branch `claude/even
 Build reviewed: `claude/line-update` b4efc66 (L1-L5c), builder EV7 (session_01WeSNWT2a7Fs8HS3j9HWamK). Reports to lead 24.
 Base: `claude/storm-update` b991877 (the merge base). Method: ER2's (`plans/handover-event-reviewer-2.md`).
 
-## Verdict, round 1: PASS WITH FIXES
+## Verdict: round 1 PASS WITH FIXES; round 2 part A (835bcfc): fixes 1-3 and 8 verified, one small leftover (fix 9); part B after the account move
 
 The Line is well built and safe to keep switched off: off, the game is identical, and with it on only Day 7 changes.
 The story plays end to end at phone size when walked. Three things need fixing before the switch-on (fixes 1-3).
@@ -28,6 +28,33 @@ so it isn't "already on the base" as the build table says. In a fresh game, Day 
 Day 8 11:00 pick and crates) is identical on both builds. So it's state an earlier part of the check leaves behind,
 and the extra 12 portions or the event's galley key are the likely route. Fix 7 below: EV7 to find which, and
 say so in the build table.
+
+## Round 2 (part A): fixes verified on claude/line-update 835bcfc (L5d-L5f)
+
+**Part A only, by lead 24's call before the account move.** Part B (the full check set again: cadet_test off, check_fast,
+events, day 6-8, food 7) comes after the move.
+
+| Round 1 | Now (a new game, 390x844 where walked) |
+| --- | --- |
+| 1. A reload mid-panel loses the moment | **Fixed.** `p_reload.py`: the Saturday moment is offered again after the reload. `pell.py`: Pell's guess is offered again after a reload mid-panel, then plays to the end. |
+| 2. The supper is one sitting, and Pell isn't at it | **Fixed.** 59 come, at most 39 at once, all seated (mess seats and the long tables' chairs, type `event`/sit). Pell is seated 18:30-19:19, and his guess plays when walked to with the secret set. |
+| 3. First-timers miss their ceremony | **Mostly fixed.** 14 of 22 are there (was 12); the crowd is 46 plus you (was 43). **Leftover (fix 9 below).** |
+| PR6's late Captain | **Fixed.** She's at `3-bow-lounge-line-lead-1` from 14:30; Brennan at lead 2 from 14:40 to 14:55. |
+| Jobs held to 13:45 | **Done** (`hold: 825`). |
+| 8. Check gaps: P2, P3 | **Closed.** Re-planted against bigevents_check 7c7d4eb: Q2 (the supper unseated, so empty) FAILs ("only 0 came ... fewer than 40" and "isn't seated"). Q3 (the watch stands easy) FAILs ("tomas is off watch ...", "ueda-vera is off watch ...", "a crowd of 63, over 60"). |
+| Saruth, Tomas | Saruth is in the garden at 14:45. Tomas is at `2-watch-6` through 14:30-15:00 and on the Lap at 20:40. |
+
+Not re-checked in part A: fixes 4-6 and 7 (EV7 and FD1 report them done), P4 (the off menu leak), and the nits.
+
+### 9. Leftover from fix 3: three first-timers still skip their own ceremony (small; after the move if EV7 has stopped)
+- **Lemaire** (night shift, a day off on Day 7, `ownFor` true) sits on a bench, `3-bench-14`, 14:17-15:44, through his own
+  ceremony.
+- **Reyes** (works) and **Yoon** (infirmary), both night shift, wake at 14:22-14:29 and go to the music corner and the gym
+  14:29-15:24.
+- (Madsen is the galley line, Varga cooking, Keane asleep, Tomas and Ueda on watch: those are right.)
+- **Repro:** `plans/er3-probes/r2.js` and `r2b.js` (probe.py ON.html): `firstNot`, and each one's plans 14:00-15:15.
+- **Fix:** an off-duty honouree's leisure block gives way to the ceremony (Lemaire). A night worker who wakes before
+  14:30 comes before their leisure (Reyes, Yoon). That would put 17 of 22 there.
 
 ## How I tested
 

@@ -1,0 +1,3 @@
+(() => { skipTo(6 * 1440 + 600); goToDeck(3); const P = schedPeople();
+  return { lt: ['3-longtable-1','3-longtable-3'].map(id => { const p = DECKS[3].places.find(x => x.id === id); return p && [p.type, p.pose, (DECKS[3].rooms[p.room]||{}).name]; }),
+    who: ['reyes-alejandro','yoon-elif','lemaire-nils','madsen-ivo','bakshi-sol','hart-ravi'].map(id => { const p = P.find(x => x.id === id); return [id, p.shift, p.dept, isWorkDay(p, 7), JSON.stringify(SHIP_EVENTS.crossingLine.moments[0].ownFor ? SHIP_EVENTS.crossingLine.moments[0].ownFor(p, 7) : 'no ownFor'), planDay(p, 7).filter(s => s.from < 6*1440+915 && s.to > 6*1440+860).map(s => hhmm(s.from%1440)+'-'+hhmm(s.to%1440)+' '+(s.tag||s.act)).join(', ')]; }) }; })()

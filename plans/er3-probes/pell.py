@@ -1,0 +1,15 @@
+exec(open('/tmp/claude-0/-home-user-Cadet-game/1a3acdee-25ba-54ef-8a48-f94140cf1be8/scratchpad/common.py').read())
+with sync_playwright() as pw:
+    g = mk(pw, sys.argv[1])
+    g.ev("skipTo(__at(7, 770))"); pid = g.ev("(jobsBoard().find(j => /linePunch/.test(j.id)) || {}).id"); g.ev(f"claimJob('{pid}')")
+    g.ev("goToDeck(3)"); g.ev("__put(37, 6)"); g.step(60); print('secret', g.ev("SHIP.event.mine['story:secret']"))
+    g.ev("skipTo(__at(7, 1112)); goToDeck(3); __put(24, 7)"); g.step(10)
+    print('walk to Pell:', near_walk(g, 'pell', 5), g.ev("__w('pell')"))
+    print('opened:', run(g, 4, "!!DIALOGUE"), g.ev("DIALOGUE && DIALOGUE.m.id"))
+    if g.ev("!!DIALOGUE"):
+        g.ev("dialogueStep()"); g.step(3)
+        keep = g.ev("(() => { const keep = JSON.parse(JSON.stringify(SHIP.event.mine)); DIALOGUE = null; for (const k in MEETING_SCRIPTS) if (k.startsWith('moment:')) delete MEETING_SCRIPTS[k]; SHIP.event.mine = keep; return JSON.stringify(Object.keys(keep).filter(k => /guess/.test(k))); })()")
+        print('reload mid-panel, guess keys kept:', keep)
+        g.step(5); print('walk again:', near_walk(g, 'pell', 4)); print('offered again:', run(g, 4, "!!DIALOGUE"), g.ev("DIALOGUE && DIALOGUE.m.id"))
+        print('\n'.join(g.ev("__dlg(0)"))); print('after', g.ev("SHIP.event.mine['story:guess']"))
+    print('errors', g.errors[:5]); g.close()
