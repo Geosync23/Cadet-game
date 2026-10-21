@@ -114,7 +114,40 @@ Planning (14) 281 ms, machines (17) 225, events (18) 199, social stories (20c) 1
 
 (Two lanes side by side, each in its own CADET_WORK, as the build master runs them; a check alone is roughly 10-30% faster.)
 
-TABLE_CHECKS
+| Check | Took | Result |
+| --- | --- | --- |
+| player | 36 min 39 s | PLAYER CHECK OK (the longest check) |
+| intro | 11 min 09 s | OK |
+| day1 | 7 min 46 s | DAY CHECK OK (one day; a release runs Days 0-8) |
+| interactions | 7 min 35 s | INTERACTIONS CHECK OK |
+| perf | 7 min 26 s | PERF CHECK: 1 problem (the known +2 geometries) |
+| mech | 5 min 10 s | MECH CHECK OK |
+| events | 5 min 02 s | EVENTS CHECK OK |
+| bubble | 4 min 49 s | BUBBLE CHECK OK |
+| devmode | 4 min 13 s | DEVMODE CHECK OK |
+| device | 4 min 01 s | device_check: OK |
+| deck | 3 min 09 s | DECK CHECK OK |
+| disc | 2 min 34 s | ALL OK |
+| tiles | 2 min 25 s | ALL OK |
+| join | 2 min 21 s | JOIN CHECK OK |
+| cadet | 1 min 34 s | DIFFERENCES FOUND (vs 0.64.6: differences as the 0.64.7 release round explained (First Light Cocoa moves the crew)) |
+| clothes | 1 min 25 s | ALL OK |
+| path | 1 min 24 s | PATH CHECK OK |
+| puzzle | 1 min 11 s | PUZZLE CHECK OK |
+| food | 1 min 06 s | FOOD CHECK OK |
+| career | 1 min 03 s | CAREER CHECK FAILED (known: backlog row 12) |
+| machine | 0 min 52 s | MACHINE CHECK OK |
+| social | 0 min 30 s | SOCIAL CHECK OK |
+| talk | 0 min 28 s | TALK CHECK OK |
+| leave | 0 min 26 s | LEAVE CHECK OK |
+| arc | 0 min 22 s | ARC CHECK OK |
+| lines | 0 min 04 s | lines_check: PASS (0 errors, 6 warnings) |
+| **all of them, one after another** | **1 h 54 min** | |
+
+- **check_fast alone: 270 s** (QUICK CHECK OK; deck 192 s, device 231 s, machine 53 s, leave 24 s), about the same as each inside the lanes, so two lanes cost little on this box. A third browser does: a page opened while two lanes ran took 11.5 s against 7.5 s alone.
+- intro_check whole, alone: 11 min 09 s (BM11's reload fix took it from over 2 hours).
+- **player_check is a third of the round** (36 min 39 s); day_check is 7 min 46 s for one day, and a release runs Days 0-8 (about an hour). Then interactions, perf, day, events, mech, bubble, devmode and device, 4-8 min each.
+- Not timed here: bigevents_check (on the events branch), and the build master's smoke and newgame checks.
 
 ## 5. What this means
 
