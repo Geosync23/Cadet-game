@@ -175,3 +175,15 @@ The last 20 non-merge commits that changed the game on `claude/integration`, map
 - **The time wasn't uploads either.** Here `gl.finish()` returns at once, so the software renderer's queued drawing is billed to the next call that has to wait for the GPU process. With a real wait after each drawn frame (`gl.readPixels` of one pixel, ~600-900 ms a frame on Deck 3), the day's `bufferSubData` calls take **30 ms** in all and `bufferData` 0.3 s, against 15.6 s and 11 s without the wait. In isolation, 20 uploads of 4 MB take 15 ms. So day_check's ~31 s on Deck 3 is drawing about 50 frames, and nothing in the crowd's uploads can shorten it.
 - **Any timing of a single frame needs that wait** (a first frame after a deck change, a shader compile): otherwise the drawing lands in whichever frame syncs next.
 - Parked by lead 23 (plan item 3): fixed slots would change section 8b's buffer layout to save about a millisecond in a rare frame on a phone.
+
+### Shaders kept across deck changes (#4): built
+
+- **The plan's 9.2 → 6.3 s was partly drawing time.** `keep_probe.py` timed the first frame without a wait, so a kept program (no compile, so no sync) left its drawing to be billed to a later frame. With a real wait after each frame (`opt-probes/keep_true.py`, 390×844, three laps of decks 3, 5, 2, 1, 6, 7, 4):
+
+| | lap 1 | lap 2 | lap 3 |
+| --- | --- | --- | --- |
+| plain: first frames after the 7 changes | 13.9 s | 12.4 s | 11.1 s |
+| kept | 11.8 s | 10.9 s | 10.6 s |
+
+- Plain keeps 16-18 programs alive and rebuilds the ones its unload deleted on every change (2-5 a change); kept, they stop at **22** after the first lap at 390×844 and at 844×390 (`opt-probes/keep_shots.py`). The rest of the first frame here is SwiftShader uploading and drawing the new deck. On a phone each saved compile is the part that costs (tens to hundreds of ms of hitch on arrival); uploads are far faster there.
+- Proof: cadet_test ALL IDENTICAL; every deck's third-lap shot identical at both sizes; memory after each lap the same as before.

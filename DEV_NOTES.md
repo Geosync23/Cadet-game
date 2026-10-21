@@ -1481,6 +1481,11 @@ with
 - Lamps (0.27.10): `lamps(t)` runs in the main loop right after `applyLight` (which resets the lamps every frame); while any of the deck's `lights` machines flickers, lamps 0, 3, 6, ... (and 1, 4, 7, ... at full flicker) drop to 15% at moments picked by a hash of the time.
 - Shower spray (0.27.10): the deck's `shower` places; for each one `placeBusy`, 12 streaks (3-sided, r .012, .28 long, see-through) fall from 1.9 m round the spot. Weak water: `shipSystems()` water or heat under 50 gives 7 streaks and cuts out 45% of the time; under 25, 4 streaks and 60%. Cabin wash pods are closed boxes, so the spray mostly shows in the open stalls of the washrooms.
 
+## Shaders kept across deck changes (section 1, the render seat RN1, optimization pass #4)
+
+- `keepShaders()` (section 1), called by the main loop right after `renderer.render`, adds one use (`usedTimes`, a three r128 internal) to every shader program the first time it exists, so disposing a deck's materials never deletes a program and the next deck's materials with the same key reuse it. 22 programs in all, reached after one lap of the decks at phone portrait and landscape. If three.js is ever upgraded, check `renderer.info.programs` and `usedTimes` still exist.
+- **Timing a frame in our test browser needs a real wait.** `gl.finish()` returns at once in this Chromium with SwiftShader, so a frame's drawing is billed to whichever later call syncs (a buffer upload, a shader compile). Probes that time one frame wait with `gl.readPixels` of one pixel after it (`plans/opt-probes/keep_true.py`, `buf_true.py`). Without it, day_check's drawing looked like crowd uploads (plans/opt-measure.md section 5).
+
 ## Rules that keep it working
 
 Phones:
