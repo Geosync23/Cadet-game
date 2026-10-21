@@ -28,7 +28,7 @@
 // ---- escalation, Saturday Day 13
 == event.ionStorm.status.escalation
 - Ion storm: blackouts deck by deck. Lantern supper 18:00.
-// the lantern supper, 18:00-19:30, the mess by emergency light (up to about 60: the 44 seats and standing places).
+// the lantern supper, 18:00-19:45, the mess by emergency light (up to about 60, in seated sittings: nobody stands; the user, 2026-10-21).
 // Brennan is off on Saturdays; Lukas Dlamini cooks. Its notice goes out at noon (the Friday address announced it).
 == event.ionStorm.gather.lanternSupper.name
 - Lantern supper

@@ -35,7 +35,7 @@ SCENES = [
     {'name': 'Tiles night, bow lounge Tue 20:30', 'day': 2, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'quiz night, bow lounge 20:30', 'day': 4, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'breakfast rush, the mess 07:10', 'day': 2, 'time': '07:10', 'deck': 3, 'room': r'^Mess'},
-    # the storm update's lantern supper (switched on: about 60 in the mess, 22 standing with a tray; off: a Saturday dinner)
+    # the storm update's lantern supper (switched on: about 51 in the mess in seated sittings, at most about 41 at once; off: a Saturday dinner)
     {'name': 'lantern supper, the mess Sat 18:30', 'day': 13, 'time': '18:30', 'deck': 3, 'room': r'^Mess'},
 ]
 
