@@ -94,7 +94,7 @@ PAPER = r"""(() => {
   // the gatherings made at load (EV_SHIPWIDE): their day and hours (not moved by the hold)
   for (const g of (typeof EV_SHIPWIDE !== 'undefined' ? EV_SHIPWIDE : [])) {
     const r = CAL.find(x => x.id === g.when.ship), sd = r ? r.day : null, d = sd != null ? sd + g.when.day : null;
-    out.gath.push({ id: g.id, ev: g.when.ship, k: g.k, day: d, at: g.at, held: d != null && (heldAt(ab(d, g.at[0])) || heldAt(ab(d, g.at[1] - 1))), rooms: evRooms(g), draft: !r || !built(r) });
+    out.gath.push({ id: g.id, ev: g.when.ship, k: g.k, day: d, at: g.at, held: d != null && (heldAt(ab(d, g.at[0])) || heldAt(ab(d, g.at[1] - 1))), rooms: [...new Set(evRooms(g))], draft: !r || !built(r) });
   }
   // the due day, and the calendar played forward on paper (each event logged as run)
   const dueOf = () => { const x = eventDueDay(); return x ? { id: x.id, day: x.day } : null; };
@@ -114,7 +114,7 @@ PAPER = r"""(() => {
   // the meetings' casts (F0b): on shift, or called in on a day off; planned in the meeting's room at its start
   const people = schedPeople(), pById = id => people.find(p => p.id === id), S = schedData();
   for (const b of out.beats.filter(b => b.what === 'meeting' && !b.draft && Array.isArray(b.who))) for (const id of b.who) {
-    if (typeof id !== 'string' || /:/.test(id)) continue;   // a cast slot ('works:2') is filled from who's there
+    if (typeof id !== 'string' || /:/.test(id)) { out.called.push({ meet: b.id, day: b.day, at: b.at, id: String(id), slot: true }); continue; }   // a cast slot ('works:2') is filled from who's there (F7b checks it live)
     const p = pById(id); if (!p) { out.called.push({ meet: b.id, day: b.day, at: b.at, id, aboard: false }); continue; }
     const off = !isWorkDay(p, b.day), c = has('eventCalledIn') ? !!eventCalledIn(p, b.day) : null;
     const seg = planDay(p, b.day).find(s => s.from <= b.t && b.t < s.to);
@@ -278,6 +278,7 @@ def judge(a, tag):
     # the meetings' casts (F0b)
     called_built = any(c.get('called') is not None for c in a['called'])
     for c in a['called']:
+        if c.get('slot'): say(f"  SKIP: {c['meet']}'s cast slot {c['id']} (filled from who's there; checked live in F7b)"); continue
         if not c['aboard']: fail(f"{tag}: {c['id']} for {c['meet']} on Day {c['day']}: not aboard"); continue
         if c['called'] is not None and c['called'] != c['off']: fail(f"{tag}: {c['id']} at {c['meet']} D{c['day']}: {'off' if c['off'] else 'on shift'} but called in = {c['called']}")
         if not c['there']: (fail if called_built else waiting)(f"{tag}: {c['id']} ({'off' if c['off'] else 'on shift'}) isn't planned at {c['meet']} ({c['at']}, Deck {c['want']} {c['wantRoom']}): {c['act']} at {c['place']} ({c['roomName']}, Deck {c['deck']}){'' if called_built else ' (F0b brings them)'}")
