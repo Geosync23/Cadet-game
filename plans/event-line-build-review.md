@@ -178,5 +178,12 @@ Four mistakes planted in copies (`plans/er3-probes/`: the plants are one-line ed
   `lineCeremony`), and that the 'bow-lounge-line' venue doesn't exist.
 
 ## What to re-check in round 2
+Known from others (lead 24), to verify after EV7's fix turn:
+- The volunteer jobs held to 13:45, not 14:15: a skipped punch job went to the crew at 15:00 and put Eklund in two
+  places.
+- PR6: the Captain reaches the bow glass only at 14:52-14:56 for a 14:40 oath, and the crowd arrives 14:43-14:52. In my
+  walk the oath panel opened at 14:40 anyway, because it opens when *you* are in the room. So the Captain reads the oath
+  while still walking in. Check that she's at the glass at 14:40.
+
 Fix 1's repro; P2 and P3 planted again once fix 8 is in (they must now FAIL); fix 2's numbers (came, peak, Pell's guess played when walked); fix 3's crowd and first-timers at the
 front; then bigevents_check, day_check 7, food_check 7 and cadet_test off again.
