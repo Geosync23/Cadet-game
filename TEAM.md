@@ -328,3 +328,8 @@ EW1 idle (handover f474073).
 |---|---|---|---|
 | Fridays builder 2 FR2 | session_019m7hCEtBsPA3ascA2Bqu9V | `claude/fridays` | turns 6-10 from FR1's note; PR3 reviews, PB s13/14 |
 Working (5): EV1 (finishing F4 → handover), EV2, FR2, BM11, PR3. ER2 on call for the events' build reviews.
+**~04:06 UTC:** EV1 handed over (claude/events-base 13bb264, plans/handover-events-engineer-1.md; F4 → PR3). EV1 idle.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Storm builder EV3 | session_01ReekSsFi1ToaTpSq926Drq | `claude/storm-update` | ion storm S1-S10 (plan decided), split with EV2; PR3 turns, ER2 before S10 |
+Working (5): EV2 (base F0b/F5/F8), EV3, FR2, BM11, PR3.
