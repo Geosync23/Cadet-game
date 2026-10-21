@@ -169,3 +169,4 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 
 - **Guard rails hold:** Tomas never touches exams, tests, Holt or staying; Holt has one here-and-now line; Saruth has one line; no cake, no visit spoilers. The reach fact is neutral.
 - **Fix:** the ceremony moved to the bow lounge, so every plaza line needs changing: notice.ceremony, job.ribbons, the plaque comment, two onset reactions, Holt's warning line, Zeke's worst-face line, lineLap's "where it happened today" and the ceremony header comment.
+- **8e2433b: PASS.** Every plaza line is fixed; the only "plaza" left is the header comment noting the move.
