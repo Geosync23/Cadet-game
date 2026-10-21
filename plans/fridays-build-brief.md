@@ -120,13 +120,10 @@ a quarter-turn in section 25 next to B's clock).
   table's dish or the cup's team); the nod rotation is 7 weeks (Works, galley, watch, survey, infirmary, bridge,
   garden).
 
-## Open for the user (through the lead; I don't pick)
+## Checked: nothing else on a Friday afternoon
 
-- **Two traditions sit in the Friday afternoon** (PR3's find at 675588c; the plan's "nothing runs 15:30-17:00" was
-  wrong): `cook-along` (Lukas Dlamini, the mess, Friday 15:30-16:30) and `tiles-ladder` (Farouk Olu, the bow lounge,
-  Friday 15:00-16:30, jitter 15). With the switch on they clash with the address. Where they move is the user's call.
-  Whatever is decided is built behind `SHORT_FRIDAY` (off: both unchanged), and my check asserts that with the switch
-  on no tradition overlaps Friday 15:30-17:00. Needed before turn 5.
+- PR3 first flagged `cook-along` and `tiles-ladder`, then corrected it: both are `weekday: 5`, Saturday (0 = Monday).
+  No tradition overlaps Friday 15:30-17:00 today; my check still asserts that with the switch on.
 
 ## Rules I keep
 
