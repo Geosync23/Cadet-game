@@ -170,3 +170,11 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Guard rails hold:** Tomas never touches exams, tests, Holt or staying; Holt has one here-and-now line; Saruth has one line; no cake, no visit spoilers. The reach fact is neutral.
 - **Fix:** the ceremony moved to the bow lounge, so every plaza line needs changing: notice.ceremony, job.ribbons, the plaque comment, two onset reactions, Holt's warning line, Zeke's worst-face line, lineLap's "where it happened today" and the ceremony header comment.
 - **8e2433b: PASS.** Every plaza line is fixed; the only "plaza" left is the header comment noting the move.
+
+## EV1 F3a: claude/events-base 18f0d9d (code 9ddea29; the event on your device). PASS WITH FIXES
+
+- **Off:** check_fast OK (291 s); cadet_test 0.64.6→18f0d9d ALL IDENTICAL.
+- **On (`f3.py`):** the Day 11 Storm briefing at 09:15; Day 14 the all-clear at 10:00 and the party 19:00-21:00; the closed call booths are dropped from Tracked on Day 12.
+- **Fixes:**
+  - With heads-ups off, devHeadsTick skips 'event' items while the meeting notify is now null, so there's no notice at all. Let them through like 'beat'.
+  - The phone shots don't show the event rows; retakes asked for.
