@@ -277,6 +277,7 @@ def firsts(g):
     if not (at['at'] and at['mode'] == 'wait' and not at['g']): fail(f'tea at the Tea corner went wrong: {at}')
     if after['end'] is None or after['end'] < 0 or after['mode'] == 'lead' or after['mode'] == 'wait': fail(f'the tea walk did not end after your tea: {after}')
 
+RELOAD_MS = 120000   # parts 9 and 11 reload the page right after part 8's long evening: in a cloud container that load took 31-32 s, past Playwright's 30 s default (BM11, 0.64.7)
 FIRSTS_ONLY = '--firsts' in sys.argv
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
@@ -548,14 +549,14 @@ with sync_playwright() as pw:
     else:
         url = g.page.url.split('?')[0]
         g.page.evaluate('localStorage.clear()')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         g.step(5)
         f = g.ev("({ t: clockText(), deck: deckDef.num, on: introOn(), step: SHIP.intro.step, form: !!document.querySelector('form input[maxlength=\"24\"]') })")
         print(f"  {f['t']}, Deck {f['deck']}, intro {'on' if f['on'] else 'off'} at {f['step']}, manifest {'up' if f['form'] else 'not up'}")
         if not (f['t'].startswith('Day 0, Sunday 17:30') and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(30)
         g.ev('saveGame()'); before = g.ev('({ step: SHIP.intro.step, day: SHIP.time.day })')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
         after = g.ev("({ step: SHIP.intro.step, day: SHIP.time.day, form: !!document.querySelector('form input[maxlength=\"24\"]'), name: SHIP.player.name })")
         print(f"  saved at {before}, loaded at step {after['step']} on Day {after['day']}, manifest {'up' if after['form'] else 'gone'}, name {after['name']}")
         if after['step'] != before['step'] or after['day'] != 0 or after['form']: fail('a Day 0 save did not load at its step')
@@ -569,7 +570,7 @@ with sync_playwright() as pw:
             far = r['step'] in ('lift', 'wing') and g.ev(f"(() => {{ const c = introStepById('{r['step']}').checkpoint, h = player.here(); return c.deck !== deckDef.num || Math.max(Math.abs(h[0] - c.tile[0]), Math.abs(h[1] - c.tile[1])) > INTRO_REACH; }})()")
             if far: mid = r; break
         g.ev('saveGame()')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
         back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
         print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
         if not mid or back['step'] != mid['step'] or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')

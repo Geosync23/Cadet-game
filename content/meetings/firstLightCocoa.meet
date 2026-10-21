@@ -2,14 +2,15 @@
 // First Light Cocoa (patch plan #26): the windows, three tips, then the season's arrivals and you. No wrong answer.
 // All five tips are here; section 15's flcScript plays three of them, picked per save (holt, kowalczyk, brennan,
 // halloran-emeka, sato). Holt's tip is the user's own example (for fun); the others are true in the game.
-// "Hollis Reach" and "Corvane Drift" are PP1's placeholders until the Wren's route is written (the head writer's).
+// The places are the user's picks (2026-10-20, facts.md: the Pale Shoals behind us, Tavessa ahead). It ships before the
+// ship-wide events, so it doesn't mention the Line (the lead's call).
 title: First Light Cocoa
 from: Dev Raman
 gist: First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.
 == lines
 raman: Lights down, please. Thank you. Right. Mugs up, everyone got one?   [gesture]
-raman: Out there, port side. That smudge is the Hollis Reach. We left it six weeks ago.
-raman: Dead ahead, too faint to see yet: the Corvane Drift. We'll be there before the season turns.   [gesture]
+raman: Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago.
+raman: Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.   [gesture]
 raman > you: And somewhere behind us, the little shuttle that brought you. I flew it. Gently.   [laugh]
 raman: Old hands. One thing you wish you'd known on your first day. Go on.
 holt: Never sit in my chair. Bridge lobby, by the door. That's the whole tip.   [nod]
