@@ -100,7 +100,11 @@ condition on a Day 20-21 arrival (FR3's `arriving` fix, announced); (3) the old-
 - Probe (the game's own sleepUntil, Friday Day 19 15:00 → Saturday 07:00, 208581c8): mailed 19, work 50 → 48,
   one banner, the Mail at 16:50 on Day 19. PR5's C2 is fixed.
 - cadet_test t10off → f11off: ALL IDENTICAL. check_fast at 208581c8: OK in 308 s.
-- player_check (switch on), mutants m11 (no hook) and m12 (Mail stamped at the jump's end): see below.
+- **Not run** (stopped by lead 24 for the account move): player_check on 208581c (fix 1) and mutants m11/m12.
+
+**Verdict: PASS WITH FIXES (provisional).** Fixes 2 and 3 are verified. Fix 1 (player_check's TOK) was code-read only:
+run `player_check.py` on 208581c with the switch on before merging. The open fix from turn 10 (the old-save Friday
+dip) still stands.
 
 ## FR3: backlog #20 (e18844fb)
 
@@ -108,4 +112,6 @@ Section 14 (PB reviews the section): an intro beat with only `alts` now reserves
 shipDay's intro reservations, and introLay takes `alts[0]` when none is free ("they wait by it") instead of null.
 Not behind a switch. Every intro beat without a named place is like this, not only d5-mug, so it can move crew who
 used to sit in a beat room's first seat on any arrival-week day. FR3 ran intro --week/--evening/--firsts, day 1 and
-day 5. Mine below.
+day 5. Mine: cadet_test f11off → e18off ALL IDENTICAL (Day 1). **Not run** (stopped): intro --week on and off,
+day_check 5. **Verdict: not given.** Left for the next reviewer: intro_check `--week` (d5-mug heard 3 of 3) on and off,
+`--firsts` and `--evening` (other alts-only beats now hold their first seat), day_check 1 and 5; PB reviews section 14.
