@@ -1,4 +1,4 @@
-# Crossing the Line: the event plan (version 2, ER2's 12 fixes and the story reworked)
+# Crossing the Line: the event plan (version 2: ER2 PASS; the story decided)
 
 Event planner EP2 (session_01GpiqZ9jCYbS9XTNPF8adHr), 2026-10-21. Branch `claude/event-plan-line`, from claude/integration 0.64.6 (675588c). Reports to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB). **Planning only: the game is unchanged.**
 
@@ -22,7 +22,7 @@ Event planner EP2 (session_01GpiqZ9jCYbS9XTNPF8adHr), 2026-10-21. Branch `claude
 ## The story
 Each option has a beginning, a middle where your one choice matters, and a payoff. All three use crew already aboard, and none touches an arc's later beats.
 
-### Option A (recommended): "The one on watch"
+### Option A: "The one on watch" (the user's choice, decided in chat 01:30 UTC via lead 22)
 Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1, is the newest hand after you. He's on watch at a standing watch post in Deck 2's lift lobby (`2-watch-6`) from 08:51 to 17:00 on Sunday, so he'll miss his own crossing. Someone has to watch the ship as she crosses.
 
 - **Beginning, Saturday evening (Day 6), wherever Tomas is.** His Saturday runs the mess and the garden 19:14-22:05, climbing on the rec deck 22:08-22:40, then bed at 22:46 (ER2's S1). His plans don't move: the moment follows him from 19:00 until bed (it opens when you're near him), or at the latest at his bedtime in Bunk 1 (about 22:45). He can't settle: "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen." One moment, three replies:
@@ -61,7 +61,7 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 
   About 30-35 lines from EW1.
 
-### Option A2: "The one on watch", but Tomas comes to the ceremony
+### Option A2: "The one on watch", but Tomas comes to the ceremony (not chosen)
 Asked for by the user (via lead 22, 01:22): is Tomas missing his own ceremony intended? Yes, in A, and this is the other way.
 - **Saturday:** the same evening moment, but his worry is standing up in front of everyone, not missing it.
 - **Sunday 14:40:** the Captain sends for him ("I asked the watch to spare you for ten minutes"). A Watch hand on shift comes down from Deck 2 to cover his post for 15 minutes; Nakamura or Ueda, named by his plan. Tomas stands beside you in the front row.
@@ -74,13 +74,13 @@ Asked for by the user (via lead 22, 01:22): is Tomas missing his own ceremony in
   - EW1's guard rails stay: his nerves are about speaking only, never about exams or Holt.
 - **Turns:** the same, about 6.
 
-### Option B: "What's in the punch?"
+### Option B: "What's in the punch?" (not chosen)
 - **Beginning, Sunday morning.** Carrying the punch up, Brennan tells you one ingredient and swears you to secrecy.
 - **Middle.** All afternoon the crew try to get it out of you. At the supper you choose: keep the secret, tell everyone, or make up something worse.
 - **Payoff, Monday.** The crew's guesses go round, and Brennan's card stays locked in the galley (or the truth is out).
 - **Weaker:** funny, but only Brennan's story, and the oath isn't part of it. (In A it's a small side thread.)
 
-### Option C: "The Line roll"
+### Option C: "The Line roll" (not chosen)
 - **Beginning, Saturday.** Commander Vance asks you to bring the Wren's Line roll up from stores; every first-timer since she launched has signed it.
 - **Middle.** At the ceremony each first-timer signs it, and you choose the line beside your name.
 - **Payoff, Monday.** The roll hangs by the plaque.
@@ -245,7 +245,7 @@ The build number is the build master's.
 11. **Tomas's day must be as the plan says** (ER2's S2 and S4, in the new shape): at his post (`2-watch-6`) 08:51-17:00 and never pulled away, reachable for the mug, and on the Lap at 20:30 (`EV_DAY_DRESS` brings him); bigevents_check shows all three. His post is a standing watch post in Deck 2's lift lobby (ER2's R2-2); the mug stop finds him from his plan. Tomas must be at his post, not on his break, when you bring the mug (15:15-17:00): day_check Day 7.
 
 ## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
-- **line-q9, the story:** recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: A2, the same but Tomas comes (a Watch hand covers his post; smaller story, no Lap payoff); B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
+- **line-q9, the story: DECIDED (the user, in chat, 01:30 UTC): A**, Tomas stays on watch and gets his crossing on the Lap. It was recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: A2, the same but Tomas comes (a Watch hand covers his post; smaller story, no Lap payoff); B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
 1. **When does the ship start talking about it?** Recommended: with Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address). Others: Saturday morning (talk only, so your free day stays free); Friday's new-hands tea.
 2. **What do the gold hull lights look like?** Recommended: a warm gold in every window and slightly warmer light indoors, 14:30-19:15. Others: windows only; also gold light strips along the promenade (a few more draw calls).
 3. **The horn (the game has no sound):** Recommended: a felt moment: one soft gold pulse of the lights, crew stop and look up, a one-line notice. Others: also add the game's first sound, one horn note (sound is new work: a mute switch, phones on silent); the banner only.
@@ -277,3 +277,4 @@ The build number is the build master's.
 12. **Small things:** the warning comment (EW1); `SHORT_FRIDAY` in "Needed first"; L6's design-doc note on `commend: false`. L2 is gated on F0b.
 - **ER2's story fixes S1-S4 (round 1b, on 1.1):** S1 the Saturday moment follows Tomas until his bedtime (the Mail at about 22:50); S2, S3 and the watch:1 slot no longer apply (Tomas stays at his post in v2, and "eighty people" is gone); S4 becomes bigevents_check showing Tomas at his post through the ceremony and on the Lap at 20:30.
 - **ER2's round 2 (aafb364, on 221c492):** R2-1 was already in 54e36dc (the Saturday moment follows Tomas); R2-2 his post is `2-watch-6` in Deck 2's lift lobby, and the mug stop finds him from his plan; R2-3 Zeke and Pell get a pull of 1 on the Lap (checked), and the Captain walks it with no line; R2-4 `galley-line` defined, and 50-60 marked as an estimate (45 or more is fine).
+- **ER2's verdict on c9d92db: PASS** (claude/event-plan-review-2). The story was decided by the user in chat (A, 01:30); q1-q8 are on the page.
