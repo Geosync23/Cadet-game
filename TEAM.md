@@ -403,3 +403,10 @@ Working (6): FR3, PR5, PR6, BM12, EV6, PT1 (EV5 stopping). Day rules: up to 7.
 | Dev mode builder DB2 | session_01RAw82oHw329cHYC7wapKu8 | `claude/devmode-2` | Stop 1b + Stop 2; turn list to the lead first; reviewer PR5 after Fridays |
 Working (7): FR3, PR5, PR6, BM12, EV6, PT1, DB2.
 **~11:56 UTC:** PT1 plan agreed (lead): rotation 1 Day 35→21 (Theo Teague leaves, Basil Bramwell, Works cadet, arrives 17:40; farewell supper Sat 20, Name on the beam Mon 22); new hand's tea on the first THURSDAY for every rotation (Day 25 18:40); arrivals come down the Tern's ramp, greeted by Zeke (Works) or their dept's senior; new small tradition 'Off the Tern' (17:35-17:55, shuttle bay); switch ROT_TERN on; opening camera 1.5/1.15 → 1.65/1.25 (~10% closer). Later rotations stay 77/119/161/203/245.
+**~11:57 UTC, the user: up to 10 daytime workers** (to move the crew patch, events and optimization along).
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Line builder EV7 | session_01WeSNWT2a7Fs8HS3j9HWamK | `claude/line-update` | Line: PB's fix, L4/L5 from EV5's note, L6; no standing trays at the Line supper; then ER3, switch-on |
+| Reviewer PR7 | session_01LyKAVtCEedL1bP73vqzu9v | `claude/review-7` | PT1's crew patch + DB2's Dev mode |
+| Test-speed engineer TS2 | session_019Ue76BxEtDwCcqQjJHjFHp | `claude/opt-tests` | optimization items 0 (perf_check rooms) and 2 (player_check), test-only; item 1 after the user's answer |
+Working (10): FR3, PR5 (Fridays), PR6 (storm + Line), BM12, EV6 (storm), EV7 (Line), PT1, DB2, PR7, TS2.
