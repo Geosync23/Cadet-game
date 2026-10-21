@@ -192,3 +192,15 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 events_check on, bubble_check on, check_fast (EV6 reports all OK). Verdict: PASS on code read, the off identity and EV6's runs.
 **EV6's mech m17 fix 0b77dfcb:** OK (above).
 **Not run:** the Line's 360 probe and the third off cadet_test on 4306fd1 (two runs: one a_start bubble flicker, one ALL IDENTICAL).
+
+## PR10 (taking over from PR6, new account): storm S10 re-runs on claude/storm-update 0b77dfcb (2026-10-21)
+Runs in /tmp/cadet-work/s10 (on = the build, EVENTS_ON true; off = EVENTS_ON false by sed).
+- devmode_check with DB2's seed fix (841a9d0's two lines; this build has no DM_SEED yet, so the literal 8): on OK twice, off OK.
+- mech_check m17 (EV6's 0b77dfcb fix): on OK (movers 12, waiting 62, bad []), off OK.
+- career_check: FAIL "busy: Relied on before Day 5" on AND off: backlog row 12, known and accepted by the user. Not the storm's.
+- RN1's note, day_check 13 on: OK ("the rec deck is shut for the ship-wide event this evening: its evening comparison
+  is skipped"; rec counts 0 by design); off OK (rec mean 3.9, peak 8). Cause of RN1's FAIL: claude/opt-render's and
+  claude/integration's day_check.py don't have EV4's 4fa198f skip (only storm-update's does). The combined build must
+  take storm-update's day_check.py; nothing in the game.
+
+### Verdict: storm S10 (0b77dfcb): PASS
