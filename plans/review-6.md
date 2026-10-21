@@ -152,3 +152,16 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   differs after the rides": movers 14, waiting 78 in the first pass), OK off (EV6: the storm's extra wear leaves crew
   repair jobs on Day 18 in the first pass only; a check fix for its owner: crew job visits left out, or SHIP.jobs and
   the machines reset alike for both passes). **S10: PASS**, with those two check fixes owed (not the game's).
+- 4306fd1, the rest: check_fast OK (237 s); events_check on OK; day_check 7 OK; interactions_check on OK; bigevents
+  2de5554 OK; the Saruth mutant FAIL "Saruth is at the Line's ceremony" (caught).
+- `line_probe.py` 390: Marrow at the glass (50.5, 10.2) by 14:34 and settled at lead-1 from 14:38; the lounge 20
+  (14:29), 30 (14:34), 35 (14:38-14:47), 43-44 (14:52-15:01); 216-237 calls; the ceremony's thanks toast; nobody
+  strays in 14:35-15:10; Saruth away; the 10 front spots first-timers; 40 planned (tag at 14:50).
+  Reload at 15:02: 44 still there. Ribbons gone by 16:05. Supper 45-47 in the mess, 202 calls, apple crumble.
+- `cert_probe.py`: the certificate on in Bunk 1 at 19:42 (155 calls), kept through a reload.
+
+### Verdict: EV5/EV7's Crossing the Line L1-L5d (head 4306fd1, c9fa161): PASS WITH NOTES
+1. (EV7, open) the Line supper's `who: [['everyone', .85]]` matches nobody (evDressed reads by person id): fix it or drop it.
+2. (lead's call) 35 in the lounge at the oath's 14:40, 44 from 14:52, 40 planned to go; the plan said "45 or more is
+   fine". EV7's own run had 42 at 14:40: within reach; not blocking.
+3. The 360 probe and a third off cadet_test are still queued.
