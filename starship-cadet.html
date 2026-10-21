@@ -342,6 +342,16 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#151d2c');
 const maxAniso = renderer.capabilities.getMaxAnisotropy();
+// Optimization pass #4 (the render seat): three r128 deletes a compiled shader program when the last material using it is
+// disposed, so each deck change compiled again the ones its unload threw away. keepShaders() (called by the main loop right
+// after each render) holds one extra use (usedTimes) of every program once it exists, so it's never deleted and a later
+// material with the same key reuses it: the same shader, the same pixels. About 22 programs in all; three internals named
+// here only. Nothing new: one length check a frame.
+const KEPT_PROGRAMS = new Set();
+function keepShaders() {
+  const ps = renderer.info.programs; if (!ps || ps.length === KEPT_PROGRAMS.size) return;
+  for (const p of ps) if (!KEPT_PROGRAMS.has(p)) { KEPT_PROGRAMS.add(p); p.usedTimes++; }
+}
 
 let seed = 11;
 const R = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -51716,6 +51726,7 @@ function loop() {
   discFrame();                                           // section 23b: a game of Lightdisc on the court (0.82.0), frozen or not
   camera.updateMatrixWorld(); bubbles.place();           // 0.47.9: the speech bubbles, with this frame's camera (they shook on phones)
   renderer.render(scene, DISC.cam || camera);
+  keepShaders();                                         // section 1: compiled shaders kept across deck changes (opt #4)
   requestAnimationFrame(loop);
 }
 drawScreen(0); applyLight(0); loop();
