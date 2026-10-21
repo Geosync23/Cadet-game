@@ -371,3 +371,8 @@ Working (5): EV4, FR2, BM11, PR4, PR5. On call: ER2 (storm build review at S9), 
 |---|---|---|---|
 | Crossing the Line builder EV5 | session_012DBTAAiTTNJYugQL4YLScJ | `claude/line-update` (from storm-update) | L1-L6 behind EV_LINE_ON (plan decided, lines on events-lines-2); PR4 reviews for now; ER2 before switch-on |
 Working (5): EV4, FR2, PR4, PR5, EV5. ER2 on call (re-checks the storm fixes).
+**~09:49 UTC:** EV4 2228a05 (crowds to the final rule: supper 59 mean to go / 51 at once; party 45 come / 27 at once, 94 places; calls 343 at phone sizes, 416 widest). PR4 ~475k: b9aa775 PASS; props in progress (call: only the mess dimmed, per plan); handover draft claude/review-4 plans/handover-reviewer-4.md. FR2 ~500k: turn 8 → PR5, then handover (plans/handover-fridays-builder-3.md) → FR3 for turn 9.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Events reviewer PR6 | session_01LVHLJHrAR5iGJFS7HK9E7i | `claude/review-6` | EV5's Line turns; then PR4's storm leftovers |
+Working: EV4, FR2 (handing over), PR4 (handing over), PR5, EV5, PR6 (6 for the overlap, back to 5 when PR4/FR2 go idle; FR3 waits until FR2 is idle).
