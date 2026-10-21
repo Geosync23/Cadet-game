@@ -2,6 +2,10 @@
 // Short Fridays (FR1, plans/fridays-build-brief.md; EW1's words from content/addresses/captains-address.trad.draft).
 // Read only with SHORT_FRIDAY on (section 18f). TEXTS are shown by the game, said by nobody.
 
-== fri.mail.week1
+== mail.fri.week1
 // the first Thursday's Mail (Day 4, your first week): the captains-address tradition's Mail that evening
 - Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially.
+
+== fri.missed
+// the banner at 16:50 for anyone who wasn't in the auditorium for the Captain's Friday address (her words come by Mail)
+- You missed the Captain's address. Her words are in your Mail.

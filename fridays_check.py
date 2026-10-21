@@ -9,7 +9,13 @@ With SHORT_FRIDAY off (the build as it is): no short Friday, no address in the t
 Fridays; the address is on every Friday from Day 5 at 16:00-16:50 and on no other day; it sits inside the events
 base's Friday hold (EV_BEATS' 'fridayAddress' row, when the build has it); no other tradition overlaps Friday
 15:30-17:00; Marrow and Vance plan the lectern, nobody of the Friday skeleton comes, and the auditorium fills
-(Days 5 and 12); the Thursday Mail is the first week's on Day 4 and the usual one after. Prints FRIDAYS CHECK OK.
+(Days 5 and 12); the Thursday Mail is the first week's on Day 4 and the usual one after.
+The speech (turn 6): every line of every address (content/addresses/, baked as FRI_ADDRESSES) fills or is left out,
+never showing a { or a stray ?, at most 90 characters, under every rank, with the events base's readers there and
+missing; each Friday's speech has 9-22 lines (the weekly one 9-14), and the weekly pools don't repeat a line within 6
+weeks while another fits; in the auditorium on Day 5 the lines come over Marrow and Vance in order, one each turn, the
+crowd hushed; a reload mid-speech says the line of the moment, never from the top; anyone not there gets the banner and
+the Mail at 16:50 (once); off: nothing new in the save. Prints FRIDAYS CHECK OK.
 """
 import os, sys, re, json, pathlib
 
@@ -53,18 +59,102 @@ PAPER = r"""(() => {
   }
   const e5 = eventsOn(5).find(x => x.id === A), e12 = eventsOn(12).find(x => x.id === A);
   out.mail = [e5 && e5.ev.mail ? evText(e5.ev.mail, e5) : null, e12 && e12.ev.mail ? evText(e12.ev.mail, e12) : null];
-  out.week1 = friText('fri.mail.week1');
+  out.week1 = friText('mail.fri.week1');
   out.errors = TRAD_ERRORS.filter(x => /captains/.test(x));
   return out;
 })()"""
+
+# the speech on paper (turn 6): every line, every rank, the events base's readers there (stubbed) and missing
+SPEECH = r"""(() => {
+  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null };
+  const ranks = ['junior', 'officer', 'senior', 'specialist'], A = FRI_ADDRESSES, filled = new Set();
+  // the events base's readers (stubbed: which storm jobs were done, and by you), the ship health boards, your repair
+  // cue, a job of yours on the board, the Tiles ladder joined: each way, so every line gets its chance
+  const DONE = [[], ['stormBallasts', 'stormBatteries'], ['stormBallasts', 'stormBallasts.you'], ['stormBatteries', 'stormBatteries.you']];
+  const stub = (on, k) => { if (on) { window.eventBandOf = () => window.__band; window.eventJobDone = (j, you) => DONE[k % 4].includes(j + (you ? '.you' : '')); window.eventJobsCount = () => 12; }
+    else for (const x of ['eventBandOf', 'eventJobDone', 'eventJobsCount']) delete window[x]; };
+  const rows0 = shipHealthRows, health = ['fine', 'worn', 'poor'];
+  if (!SHIP.works) SHIP.works = { rank: 'junior' };
+  const rank0 = SHIP.works.rank, com0 = SHIP.commendations, jobs0 = SHIP.jobs, cues0 = SHIP.social && SHIP.social.cues, joined0 = SHIP.events.joined;
+  socInit();
+  let k = 0;
+  for (const st of [false, true]) for (const band of ['smooth', 'bumpy', 'rough']) for (const rank of ranks) for (const com of [false, true]) {
+    k++; stub(st, k); window.__band = band; SHIP.works.rank = rank; SHIP.commendations = com ? [{ event: 'ionStorm', day: 14 }] : [];
+    shipHealthRows = () => [{ state: health[k % 3] }];
+    SHIP.jobs = com ? [{ id: 'x', status: 'done', doneBy: 'you' }] : [];
+    SHIP.social.cues = com ? [{ key: 'repair.fan', you: true, at: 0, until: 1e9 }] : [];
+    for (const [id, a] of Object.entries(A)) for (const d of a.day ? [a.day] : Array.from({ length: 52 }, (_, i) => 33 + 7 * i)) for (const b of a.beats) for (const l of b.lines) {
+      SHIP.events.joined = com ? Array.from({ length: 7 }, (_, i) => 'tiles-ladder@' + (d - i)) : [];
+      const t = friFill(l, d); if (t == null) continue; filled.add(l.id);
+      if (/[{}]/.test(t) || /^\s*\?/.test(t) || t.length > 90 || !['marrow', 'vance'].includes(l.who)) out.bad.push([id, d, t]);
+    }
+  }
+  for (const [id, a] of Object.entries(A)) for (const b of a.beats) for (const l of b.lines) if (!filled.has(l.id)) out.never.push([id, l.text, l.if || []]);
+  // each Friday's speech, readers there, a junior then an officer; the weekly speech over 12 weeks in order
+  stub(true, 1); window.__band = 'bumpy';
+  for (const rank of ['junior', 'officer']) {
+    SHIP.works.rank = rank; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
+    for (let d = 5; d <= 96; d += 7) {
+      const L = friSpeech(d) || []; out.counts[rank + ' ' + d] = L.length;
+      for (const l of L) if (/[{}]/.test(l.text) || l.text.length > 90) out.bad.push(['speech', d, l.text]);
+      if (rank === 'junior' && d >= 33) out.weekly.push([d, L.map(l => l.text)]);
+    }
+    // repeats: a weekly line again within 6 weeks while its pool had a line it hadn't used then
+    const W = FRI_ADDRESSES['friday-weekly'], seen = {};
+    // (pools whose lines always fit and have 7 a pick or more: hello, thought)
+    for (const r of FRI.ring) for (const id of r.slice(1)) { const b = W.beats.find(b => b.lines.some(l => l.id === id)); if (seen[id] != null && r[0] - seen[id] < 7 && b && b.lines.length >= 7 * b.pick && b.lines.every(l => !l.if)) out.repeats.push([rank, r[0], b.id, id]); seen[id] = r[0]; }
+  }
+  out.full = JSON.stringify(FRI).length;                  // the save's fri part after 13 weeks
+  stub(false); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
+  const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: {}, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} out.save = 'fri' in sv ? JSON.stringify(sv.fri).length : null;
+  return out;
+})()"""
+SAVE_OFF = "(() => { const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: {}, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} return ['fri' in sv, typeof friAddressTick, typeof FRI_ADDRESSES === 'object' && Object.keys(FRI_ADDRESSES).length]; })()"
+
+def aud(g):   # you in the middle of the auditorium (Deck 7's room A)
+    g.ev("goToDeck(7)"); g.step(5)
+    g.ev("(() => { const M = DECKS[7].map, c = []; for (let j = 0; j < M.length; j++) for (let i = 0; i < M[j].length; i++) if (M[j][i] === 'A') c.push([i, j]); const t = cellPos(...c[Math.floor(c.length / 2)]); player.obj.position.set(t.x, 0, t.z); })()")
+    g.step(10)
+
+LIVE = "[shipNow() % 1440, bubbles.list.map(b => [(bubblePerson(b.who) || {}).id, b.text]), FRI_SAID && FRI_SAID[1], simNow() - CHATTER_AT]"
 
 with sync_playwright() as pw:
     res = {}
     for on in (False, True):
         g = Game(pw, str(copies[on]), 390, 844)
         res[on] = g.ev(PAPER)
+        res[on]['speech'] = g.ev(SPEECH) if on else g.ev(SAVE_OFF)
         if g.errors: check(False, ('on' if on else 'off') + ': page errors ' + str(g.errors[:3]))
         g.b.close()
+    # the speech in the auditorium on Day 5 (on): in order, over its speakers, the crowd hushed; then a reload mid-speech
+    g = Game(pw, str(copies[True]), 390, 844)
+    g.ev("skipTo((5 - 1) * 1440 + 958)"); aud(g)
+    speech = g.ev("friSpeech(5).map(l => [l.who, l.text])")
+    said, hush, idx = [], 0, []
+    for k in range(420):
+        g.step(20)
+        m, bub, i, gap = g.ev(LIVE)
+        for who, t in bub:
+            if [who, t] in speech and (not said or said[-1] != [who, t]): said.append([who, t])
+        if 962 <= m < 1008 and gap > 1000: hush += 1
+        if i is not None and (not idx or idx[-1] != i): idx.append(i)
+        if m >= 1012: break
+    live = { 'n': len(speech), 'said': len(said), 'order': said == [x for x in speech if x in said], 'hush': hush, 'idx': idx[:3], 'heard': g.ev('FRI.heard'), 'mailed': g.ev('FRI.mailed') }
+    # a reload mid-speech (the save's today list kept, the line shown forgotten): the line of the moment, not the first
+    g.ev("skipTo((19 - 1) * 1440 + 958)"); aud(g); g.step(40)
+    g.ev("skipTo((19 - 1) * 1440 + 985)"); aud(g)
+    keep = g.ev("JSON.stringify(FRI.today)")
+    g.ev("FRI_SPEECH = null; FRI_SAID = null; bubbleClear()"); g.step(10)
+    live['reload'] = g.ev("[FRI_SAID && FRI_SAID[1], Math.floor((shipNow() % 1440 - FRI_TALK[0]) * friSpeech(19).length / (FRI_TALK[1] - FRI_TALK[0])), JSON.stringify(FRI.today)]")
+    live['reloadKeep'] = keep == live['reload'][2]
+    # missed (Day 26 on Deck 4 all afternoon): the banner and the Mail at 16:50, once
+    g.ev("goToDeck(4)"); g.ev("skipTo((26 - 1) * 1440 + 1005)"); g.step(5)
+    g.ev("window.__toasts = []; { const t0 = toast; toast = (t, x) => { window.__toasts.push([t, x]); t0(t, x); }; }")
+    for k in range(40): g.step(20)
+    live['missed'] = g.ev("[FRI.mailed, FRI.heard, window.__toasts.filter(x => /missed/.test(x[1])).length]")
+    live['mails'] = g.ev("(SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d26'].mail[0] && m.at >= 25 * 1440 + 1000).length")
+    live['errors'] = g.errors[:3]
+    g.b.close()
 
 off, on = res[False], res[True]
 print('off:', json.dumps({k: off[k] for k in ('inTable', 'ends', 'on')}))
@@ -96,5 +186,29 @@ print('  Mail:', on['mail'])
 check(on['mail'][0] == on['week1'] and on['week1'], 'on: Day 4 Mail is not the first week\'s')
 check(on['mail'][1] and on['mail'][1] != on['week1'], 'on: Day 11 Mail is the first week\'s')
 check(not on['errors'], 'on: tradition errors %s' % on['errors'])
+so = off['speech']
+check(so[0] is False and so[1] == 'function' and so[2] == 5, 'off: the save gains fri, or the speech isn\'t baked %s' % so)
+sp = on['speech']
+print('  speech lines a Friday:', sp['counts'])
+print('  the weekly speech, Day 33:', len(sp['weekly'][0][1]), 'lines;', sp['weekly'][0][1][:3], '...')
+print('  lines that never fill (want only myshift:night\'s):', sp['never'])
+print('  the save\'s fri part: %s bytes fresh, %s with a full ring (7 weeks)' % (sp['save'], sp['full']))
+check(sp['full'] < 1200, 'on: the save\'s fri part is %s bytes' % sp['full'])
+check(not sp['bad'], 'on: lines showing a slot or a ?, too long, or not Marrow\'s or Vance\'s %s' % sp['bad'][:4])
+# never: your night shifts (Pillar 5's); the Day 19 leavers (nobody's rota leaves before Day 35)
+never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and '{leavers}' in x[1])]
+check(not never, 'on: lines that never fill %s' % never)
+check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
+check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])
+print('  Day 5 in the auditorium:', {k: live[k] for k in ('n', 'said', 'order', 'hush', 'idx', 'heard', 'mailed')})
+check(live['said'] == live['n'] and live['order'], 'on: Day 5, %d of %d lines said in order' % (live['said'], live['n']))
+check(live['hush'] == 0, 'on: Day 5, the chatter not hushed in %d samples' % live['hush'])
+check(live['heard'] == 5 and live['mailed'] != 5, 'on: Day 5, heard %s mailed %s' % (live['heard'], live['mailed']))
+print('  a reload at 16:25 on Day 19:', live['reload'][:2], 'kept the speech:', live['reloadKeep'])
+check(live['reload'][0] == live['reload'][1] and live['reload'][0] > 0, 'on: a reload mid-speech said line %s, not %s' % tuple(live['reload'][:2]))
+check(live['reloadKeep'], 'on: a reload changed the speech')
+print('  missed on Day 26 (mailed, heard, banners):', live['missed'], 'mails', live['mails'])
+check(live['missed'][0] == 26 and live['missed'][1] != 26 and live['missed'][2] == 1 and live['mails'] == 1, 'on: the missed banner and Mail %s %s' % (live['missed'], live['mails']))
+check(not live['errors'], 'on: page errors in the live run %s' % live['errors'])
 print('FRIDAYS CHECK OK' if not fails else 'FRIDAYS CHECK FAILED (%d)' % len(fails))
 sys.exit(1 if fails else 0)
