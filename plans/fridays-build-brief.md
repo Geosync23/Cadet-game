@@ -21,9 +21,10 @@ with parts that change. An event on a Friday: both happen. Your auto sign-out at
 - **Off = identical game.** Every new function is defined when off (names_check sees it) and returns what today's code
   returns. Every turn: cadet_test ALL IDENTICAL against claude/integration with the switch off, and events_check,
   day_check and food_check's output unchanged off.
-- The words are baked but silent while off: the tradition carries `flag: fri.on` (the trad format's existing gate, as
-  `rec-all-hands` uses `rec.on`), set only when `SHORT_FRIDAY` is on; the new banks and lines use new flag keys
-  nothing sets while off. The address lines go in their own generated block, read only by code that's switched off.
+- The words are baked but silent while off. **The tradition is gated by the const at load, never a story flag**
+  (PR3's fix 1: `flag()` reads the saved `SHIP.flags`, and `eventsOn` feeds the planner): `captains-address` is taken
+  out of `SHIP_TRADITIONS` at load when `SHORT_FRIDAY` is off (as `REC_TRAD_ON` gates `REC_TRADS`). The breakfast
+  lines' `flag:shortFriday` is set from the const at load, never saved. The address lines go in their own generated block, read only by code that's switched off.
 - On: a test copy with the line flipped (`sed 's/const SHORT_FRIDAY = false/const SHORT_FRIDAY = true/'`) for my area
   checks every turn. Switching it on in the real build is its own reviewed step after the user's review (turn 10).
 
@@ -49,8 +50,9 @@ with parts that change. An event on a Friday: both happen. Your auto sign-out at
   asserts the address sits inside EV_BEATS' row, so the two can't drift apart.
 - Day 12, "both happen": the storm's `pause` lists `captains-address` in `keep` (whoever builds second adds it; key
   agreed with EV1).
-- `eventFree` (section 14): **part A doesn't change it.** It already reads `schedFrame`'s `workEnd`, so a 15:30
-  Friday end frees the day shift for 16:00 by itself. EV1's note (neither side changes eventFree alone) is kept.
+- `eventFree` (section 18, line 35291): **part A doesn't change it.** It already reads `schedFrame`'s `workEnd`, so a 15:30
+  Friday end frees the day shift for 16:00 by itself (with its 15-minute margin and a strict
+  overlap, so the workaholics' tail stops at 15:45 at most, or they'd miss the address). EV1's note (neither side changes eventFree alone) is kept.
 - EV1's answer is folded in here before turn 5. If EV1 prefers otherwise, the brief changes, not the code.
 
 ## The turns
@@ -65,9 +67,9 @@ hooks); design-doc.md in the same commit as the decision it depends on. No build
 | 2 | A2 | The skeleton list (made at load from the roster, no `R()`: helm and watch ratings on the bridge, one medic, the dinner cooks; fp-q2); the night shift sleeps on (they come at 50%, from their own schedule); garden (already to 15:30), store and galley hours checked; the bridge staffed 15:30-17:00 | 14 (sim: PB), 16 read only | day_check 5/12 (nobody stuck, bridge never empty), food_check, events_check |
 | 3 | B1 | Your clock: a shared `dayShiftEnd(d)` (1020, or 930 on a Friday when on) in section 14 beside `playerShiftOn`; `DAY_SHIFT`'s readers that mean "your shift ends" read it (about 27 reads of `DAY_SHIFT[1]`; each listed); `CAREER` clock-out from 15:30 and auto sign-out 16:00 on Fridays (fp-q7); early-out 15:00, the 12:30 miss line and leave unchanged | 14 (sim: PB), 17 `DAY_SHIFT` (systems: OR1), 20 `CAREER` (social / Works career: OR1): `dayShiftEnd` **asked of PB at turn 0** (a new shared function) | leave_check, career_check (a steady player 09:00-15:30 on Fridays), machine_check, mech_check |
 | 4 | B2 + F | Friday team jobs (`TEAM_FRI`, 14:00 in even weeks) fit by 15:30; the device's Schedule row and the time clock screen say 15:30 on Fridays; Dev mode's Clock tab gets "To 15:25" on Fridays (part F); the address can be started from Dev's tradition list | 24h (Works career), 19 (device), 25 (Dev mode): OR1 | mech_check, device_check, interactions_check, devmode_check |
-| 5 | C1 | The tradition: `content/traditions/captains-address.trad` (EW1's draft moved in, its `k:`, `flag: fri.on`), weekly Friday 16:00-16:50 from Day 5, the auditorium's `rec:seat`, Marrow at `rec:lectern` with Vance; who: Marrow and Vance always, the skeleton never, night shift 50%, everyone 90%; Thursday 18:00 Mail (Day 4's first-week words); `recShow('allhands')` for the room's lights; the hold assert | content (baked by content_gen), 18 (`recShow` call: rec engineer, OR1) | events_check on and off, join_check, content_gen --check, day_check 5/12 (about 60-70 in the auditorium) |
-| 6 | C2 | The speech: content_gen bakes `content/addresses/*.address` into a new generated block `ADDRESSES` (section 22: the dialogue engineer's tool, OR1); the player in 18f: line *i* at 16:00 + *i*·(48/n) ship minutes, by the clock (a reload, a late arrival or a skip lands on the right line, never a replay), bubbles over Marrow and Vance while you're in the auditorium, the chatter hushed (`linesHush` hook, section 22); the banner and a Mail for anyone not there; conditions and placeholders read when she speaks, never by the planner; Day 12 keeps the storm (`keep`); Days 33+ play EW1's `friday-weekly.address` (pools, below) | 22 (content_gen.py, `linesHush`: OR1), 18 (storm `keep`: EV1) | events_check, lines_check, content_gen --check, bubble_check (the auditorium, phone size) |
-| 7 | C3 + D | Missing it: a work-reputation dip the size of being late (set with the Works career engineer: OR1), none on leave, sick, a rota day off, a Dev excuse or nights; dinner: each attendee's dinner time spread over 17:00-17:50 (seeded keys), some wash first on Deck 4; the rec lift queue clears by about 17:10 | 20 (career: OR1), 14 (dinner: sim, PB), 16 read | career_check, leave_check, food_check (a Friday case: Day 12), day_check 5/12 (the lift) |
+| 5 | C1 | The tradition: `content/traditions/captains-address.trad` (EW1's draft moved in, its `k:`, `flag: fri.on`), weekly Friday 16:00-16:50 from Day 5, the auditorium's `rec:seat`, Marrow at `rec:lectern` with Vance; who: Marrow and Vance always, the skeleton never, night shift 50%, everyone 90%; Thursday 18:00 Mail (Day 4's first-week words); `recShow('allhands')` for the room's lights; the hold assert | content (baked by content_gen), 18 (`recShow` call: rec engineer, OR1) | events_check on and off, join_check, content_gen --check, day_check 5/12 (about 60-70 in the auditorium), one draw-call reading in the full auditorium at phone size (deck_check on, or a single perf scene) |
+| 6 | C2 | The speech: content_gen bakes `content/addresses/*.address` into a new generated block `ADDRESSES` (section 22: the dialogue engineer's tool, OR1); the player in 18f: line *i* at 16:00 + *i*·(48/n) ship minutes, by the clock (a reload, a late arrival or a skip lands on the right line, never a replay), bubbles over Marrow and Vance while you're in the auditorium, the chatter hushed (`linesHush` hook, section 22); the banner and a Mail for anyone not there; conditions and placeholders read when she speaks, never by the planner; Day 12 keeps the storm (`keep`); Days 33+ play EW1's `friday-weekly.address` (pools, below) | 22 (content_gen.py, `linesHush`: OR1), 18 (storm `keep`: EV1) | events_check, lines_check, content_gen --check, bubble_check (the auditorium, phone size), player_check (the whole-save budget) and devmode_check (Dev's save and Undo) for the ring, a reload mid-speech; off: nothing new in the save |
+| 7 | C3 + D | Missing it (defined exactly in the turn and in design-doc.md: proposed, never in the auditorium 16:00-16:50; the 16:00 auto sign-out never counts against you): a work-reputation dip the size of being late (set with the Works career engineer: OR1), none on leave, sick, a rota day off, a Dev excuse or nights; dinner: each attendee's dinner time spread over 17:00-17:50 (seeded keys), some wash first on Deck 4; the rec lift queue clears by about 17:10 | 20 (career: OR1), 14 (dinner: sim, PB), 16 read | career_check, leave_check, food_check (a Friday case: Day 12), day_check 5/12 (the lift) |
 | 8 | E | Explaining it: Zeke's two goodnight lines on Day 0; the Captain's Thursday Mail on Day 4 (turn 5's); Halloran's three lines after the mug at 13:00 Day 5; the 15:20 heads-up and the Friday time clock screen; your name in Day 5's address (turn 6's); Friday breakfast lines (`flag:shortFriday`). EW1's `part-e.draft` moved into its files | 21 (onboarding: OR1), 19, content | intro_check alone in pieces (`--evening`, `--week`, `--firsts`), lines_check, device_check |
 | 9 | G | perf_check scenes: the auditorium at 16:10 on a Friday with about 65 seated, and the rec lift lobby at 16:52, at zoom 1.5, 0.7 and landscape (budget 450); agreed with EV1's F7c (Day 12's address in the storm's onset is theirs) | perf_check (performance engineer: OR1) | perf_check, deck_check |
 | 10 | switch on | Only after the user's review: `SHORT_FRIDAY = true`; the full round alone (intro_check in pieces); design-doc and DEV_NOTES final | 13 | everything |
@@ -104,6 +106,12 @@ a quarter-turn in section 25 next to B's clock).
   `{leavers}` (`ROSTER_ROTATIONS`), `{trad1}` and `{day1}` (one of next week's traditions, from `upcomingTraditions`),
   `{winner}` (`tallyLast`); existing `season:`, `cue:repair.you`, `cue:tradition.<id>.you`. If C2 gets too big, the
   weekly pools are their own half-turn (6b) right after it.
+
+## PR3's review (2026-10-21): PASS WITH FIXES
+
+Fix 1 is in "The switch"; fixes 2-5 are in their turns (eventFree's section and the 15:45 tail; turn 6's save checks;
+turn 7's "missed it"; a draw-call reading at turn 5). The hold assert lives in my check, typeof-guarded, until EV1's
+F0a is in claude/integration.
 
 ## Owners' answers so far
 
