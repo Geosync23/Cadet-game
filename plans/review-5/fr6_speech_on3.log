@@ -1,0 +1,14 @@
+loaded Day 5, Friday 16:18 True
+seat [34, 9]
+['Day 5, Friday 16:18', 49, ['marrow', 'vance'], 6]
+['Day 5, Friday 16:22', 49, ['marrow', 'vance'], 8]
+fill log [['Day 5, Friday 16:18', 49, ['marrow', 'vance'], 6], ['Day 5, Friday 16:22', 49, ['marrow', 'vance'], 8]]
+A 16:06 [["Day 5, Friday 16:18", 49, ["marrow", "vance"], 6], [{"who": "marrow", "stand": true, "shown": true, "top": 340, "bot": 425, "left": 142, "right": 382, "x": 262, "y": 434.2, "t": "On Sunday afternoon the Wren crosses the"}]]
+A 16:20 [["Day 5, Friday 16:20", 49, ["marrow", "vance"], 6], [{"who": "marrow", "stand": true, "shown": true, "top": 340, "bot": 425, "left": 142, "right": 382, "x": 262, "y": 434.2, "t": "On Sunday afternoon the Wren crosses the"}]]
+D still [[(262, 434.2, 'marrow')], [(262, 434.2, 'marrow')], [(262, 434.2, 'marrow')], [(262, 434.2, 'marrow')], []]
+B before ['[5,"cpxxag","gmf1hk","74cgpy","z000ed","1f24h6d","1sfm4g9","13jz15q","1jnvft4","snu1f1","x8wi6j","1d7yovx","1ujjhrc","mfz3t4","hgd98b","19kwfrw","1vp1xrl","hrghfv","hf4wnl","1ntcpot"]', [5, 8], 'Day 5, Friday 16:24'] saved fri {"ring": [], "today": [5, "cpxxag", "gmf1hk", "74cgpy", "z000ed", "1f24h6d", "1sfm4g9", "13jz15q", "1jnvft4", "snu1f1", "x8wi6j", "1d7yovx", "1ujjhrc", "mfz3t4", "hgd98b", "19kwfrw", "1vp1xrl", "hrghf
+B after reload ['[5,"cpxxag","gmf1hk","74cgpy","z000ed","1f24h6d","1sfm4g9","13jz15q","1jnvft4","snu1f1","x8wi6j","1d7yovx","1ujjhrc","mfz3t4","hgd98b","19kwfrw","1vp1xrl","hrghfv","hf4wnl","1ntcpot"]', [5, 9], 'Day 5, Friday 16:24', 9]
+B seat after reload [7, 'A'] [{'who': 'marrow', 'stand': True, 'shown': True, 'top': 320, 'bot': 425, 'left': 142, 'right': 382, 'x': 262, 'y': 434.2, 't': 'At half two the horn sounds on every dec'}]
+C1 Day 12 missed [5, 12, [["The Captain's Friday address", "You missed the Captain's address. Her words are in your Mail.", "Day 12, Friday 16:50"]], [[1010.0199999999968, "Captain Odile Marrow", "All hands: the Captain's Friday address"], [1005, "Chief Ines Calder", "A word with the Chief (notes)"], [960, "Stores", "Food stores low"]]]
+C2 Day 19 skipped over ["Day 20, Saturday 07:03", 5, 12, [[1080, "The Wren", "Ship traditions tomorrow: Long breakfast 08:00; Harvest morning 09:30; Garden hour 14:00; Tiles ladder 15:00; Cook-along 15:30; Film night 20:00; Observatory night 21:15"], [960, "Stores", "Food stores low"]]]
+errors []
