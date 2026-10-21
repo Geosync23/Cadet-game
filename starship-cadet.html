@@ -28607,6 +28607,10 @@ const LINES = JSON.parse([
   '{"text":"The clock signed you out at 17:00. It does that.","id":"b89c73"},',
   '{"text":"17:00. The clock signed you out for you. Go and eat.","id":"14d7qkk"},',
   '{"text":"Shift over: the clock signed you out at 17:00.","id":"apntzo"}]',
+  ',"clock.auto.friday":[',
+  '{"text":"The clock signed you out at half three. Short Friday. It does that.","id":"1j03xzw"},',
+  '{"text":"Half three. The clock signed you out for you. The Captain\'s at four.","id":"sxfj0b"},',
+  '{"text":"Short Friday: the clock signed you out at 15:30.","id":"5shmnd"}]',
   ',"clock.back":[',
   '{"text":"You\'re back! Good to see you, {nick}.","id":"1uvkge1","tone":"warm","dept":"works"},',
   '{"text":"Welcome back. Bay wasn\'t the same.","id":"1cv7a49","tone":"warm","dept":"works"},',
@@ -38179,7 +38183,7 @@ function careerTick(now = shipNow()) {
   const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
   if (c.on !== d && m >= CAREER.clockIn && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
-    if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText('clock.auto', d) || 'You forgot to clock out. The clock signed you out at 17:00.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
+    if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText(friShort(cd) ? 'clock.auto.friday' : 'clock.auto', d) || 'You forgot to clock out. The clock signed you out at ' + hhmm(dayShiftEnd(cd)) + '.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
   if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }

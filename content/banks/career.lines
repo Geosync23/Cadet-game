@@ -41,6 +41,13 @@
 - 17:00. The clock signed you out for you. Go and eat.
 - Shift over: the clock signed you out at 17:00.
 
+== clock.auto.friday
+// FR1, Short Fridays (plans/fridays-build-brief.md): a short Friday's shift ends at 15:30 and the clock signs you out
+// at 16:00, logged at 15:30. Read only when SHORT_FRIDAY is on (section 20's careerTick); EW1 may reword
+- The clock signed you out at half three. Short Friday. It does that.
+- Half three. The clock signed you out for you. The Captain's at four.
+- Short Friday: the clock signed you out at 15:30.
+
 == career.mail.chief
 - My office | Come to my office, Deck 5, today. Missed shifts. We'll talk it through.
 
