@@ -2,7 +2,7 @@
 
 **Role:** found why `food_check.py BUILD 11 4` failed dinner waits after the Fridays merge into claude/storm-update, and fixed it. Lead 24. Done; idle.
 
-**Branch:** `claude/food-waits`, from `claude/integration` f782c5d. Commits 0f808c3 (food_check, backlog row 20) and 2ad7db8 (build-table row), plus this note. Check-only: the game file is unchanged. PB reviewed it (OK). BM12 was asked to merge it into integration.
+**Branch:** `claude/food-waits`, from `claude/integration` f782c5d. Commits 0f808c3 (food_check, backlog row 20, renumbered 22 by BM12) and 2ad7db8 (build-table row), plus this note. Check-only: the game file is unchanged. PB reviewed it (OK). BM12 merged it (2ad7db8) into the 0.64.10 candidate; food_check 11 4 OK there.
 
 ## The cause
 - The first bad commit is 4ee3fdc (integration 0.64.7 merged into claude/fridays), which reached storm-update through 4311ffe. PR6's bisect found it too. The trigger is `FLC_ON = true` (First Light Cocoa): the tip with only FLC_ON false gives adb71aa's result. LADDER_ON and MUG_ON play no part.
@@ -20,7 +20,7 @@
 - check_fast: OK.
 
 ## Loose ends
-- Backlog row 20: the cookers fault every 2-4 days, and with the machines run for real, Days 11-24 on the storm tip have 7 dinners with 10-36 minute queues (adb71aa: 1). It's a design call for the galley and systems seats (fault frequency vs "meals run late"). The user hasn't been asked yet.
+- Backlog row 22 (was 20 on this branch): the cookers fault every 2-4 days, and with the machines run for real, Days 11-24 on the storm tip have 7 dinners with 10-36 minute queues (adb71aa: 1). It's a design call for the galley and systems seats (fault frequency vs "meals run late"). The user hasn't been asked yet.
 - A fresh container needs `/tmp/cadet-work/three` (DEV_NOTES) and `/tmp/cadet-work/acorn` (`npm pack acorn`, then untar) for check_fast.
 - Gotcha: don't switch branches while a check runs from the repo folder. It picks up the other branch's check files (events_check failed on DIALOGUE_EL that way).
 
