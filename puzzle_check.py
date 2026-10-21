@@ -371,7 +371,7 @@ P1 = r"""(() => {
     if (d === 20 && SHIP.machines['3-filter-1']) { SHIP.machines['3-filter-1'].cond = 30; SHIP.machines['3-filter-1'].state = 'faulty'; }   // Day 20: the filter bank runs badly all day
     for (let h = 0; h < 24; h++) { setShipNow((d - 1) * 1440 + h * 60); machinesNow(); }
     if (d === 20 && SHIP.machines['3-filter-1']) SHIP.machines['3-filter-1'].cond = 90;
-    const t = d * 1440 + 600; if (!playerShiftOn(d + 1)) continue;
+    const t = d * 1440 + 600; if (!playerShiftOn(d + 1) || (typeof eventDay === 'function' && eventDay(d + 1))) continue;   // no cases on a ship-wide event's big days (section 18's eventDay, the events base F1a)
     setShipNow(t); machinesNow();
     for (const m of ms) for (const f of line(m.id)) {
       C.open = []; SHIP.jobs = SHIP.jobs.filter(x => !x.case);
