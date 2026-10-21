@@ -204,3 +204,9 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - lines_check: only "not baked" (expected).
 - **Decision for lead 22:** two Saruth lines in Crossing the Line's afterglow, against story A's "one line" rule.
 - **712d8e8, why the crossing matters (line-q10 A): PASS.** The guard rails hold; `!who:saruth|holt` is supported; the Mail is 316/400. The Saruth fold isn't in yet.
+
+## EV1 F3b: claude/events-base 1c86ab4 (Home's status line, Record's events; the s19 hooks covered for OR1). PASS
+
+- **Off:** check_fast OK (271 s); cadet_test ALL IDENTICAL.
+- **Shots:** the status line on Home (3 lines at 360, fine: keep 60); Record: "Ion storm, Days 11-16" with its band.
+- **Nits:** the moved 0.34.51 comment; "Days 11-11" for a one-day event; the staged HUD day.
