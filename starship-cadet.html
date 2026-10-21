@@ -14461,7 +14461,7 @@ function clockButtons(row, act, s) {                     // the screen's two hal
   const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
   const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= dayShiftEnd(SHIP.time.day);
   const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
-    : r === 'out' ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
+    : r === 'out' ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
   const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
   const undo = () => { const r = clockUndo(); clockScreen(r ? csText('undone.' + r, r === 'in' ? 'Undone. You\'re not clocked in.' : 'Undone. Still on shift.') : null, false, r && 'undone-' + r); };
   const L = [], open = s.on && !s.out && !(s.inn ? false : ends || m < CAREER.clockIn);
@@ -21684,7 +21684,10 @@ const VOICE = JSON.parse([
   '{"text":"Every new hand gets a mug on their first Friday. It\'s the law. Well, it\'s me.","id":"1th2zww","tone":"funny","week1":"true","weekday":"fri"},',
   '{"text":"Hook\'s the one on the end of the rack. Yours from now on. Nobody else touches it.","id":"1gvqln","week1":"true","weekday":"fri"},',
   '{"text":"Your mug\'s still on the rack. I gave it a rinse. Don\'t tell anyone I\'m soft.","id":"13zhvsi","tone":"funny","flag":"mug"},',
-  '{"text":"Your mug | Missed you at tea. Your mug\'s on the end hook. It\'s the law. Well, it\'s me.","id":"og9bw6","flag":"mail.d5-mug"}]',
+  '{"text":"Your mug | Missed you at tea. Your mug\'s on the end hook. It\'s the law. Well, it\'s me.","id":"og9bw6","flag":"mail.d5-mug"},',
+  '{"text":"Short day today. Half three, clock out.","id":"1vhlssc","flag":"beat.d5-friday.1"},',
+  '{"text":"Then the auditorium at four. Rec deck. She\'ll say your name.","id":"8f5pyz","flag":"beat.d5-friday.2"},',
+  '{"text":"Don\'t hide. Have a biscuit first. Have you eaten?","id":"4304q9","tone":"funny","flag":"beat.d5-friday.3"}]',
   ',"work":[',
   '{"text":"Follow me. It\'s a short walk. I\'ll tell you a joke on the way.","id":"flyoz1","tone":"funny","flag":"train.m7.lead.take"},',
   '{"text":"Watch. Panel, scanner, and a moment\'s patience.","id":"zov2kw","flag":"train.m7.lead.hold"},',
@@ -26603,7 +26606,9 @@ const VOICE = JSON.parse([
   '{"text":"Right. Everyone stay put. New hand\'s turn.","id":"181fb7v","flag":"trad.beam.1"},',
   '{"text":"Here. The pen. It\'s the same one we all used.","id":"5gpczq","tone":"warm","flag":"trad.beam.2"},',
   '{"text":"Tap the beam where you want it. Next to mine, if you like.","id":"gveb6y","tone":"warm","flag":"trad.beam.3"},',
-  '{"text":"There. You\'re part of the bay now. Properly.","id":"yx7heb","tone":"warm","flag":"trad.beam.4"}]',
+  '{"text":"There. You\'re part of the bay now. Properly.","id":"yx7heb","tone":"warm","flag":"trad.beam.4"},',
+  '{"text":"Fridays we knock off at half three.","id":"w90aeb","flag":"walk.goodnight.friday.1"},',
+  '{"text":"Captain talks to all of us at four, then dinner.","id":"4yezt6","flag":"walk.goodnight.friday.2"}]',
   ',"work":[',
   '{"text":"Watch. Panel, scanner, and a little patience.","id":"vj83c4","flag":"train.m7.lead.hold"},',
   '{"text":"That one\'s at twenty. Sulking badly. There\'s our part.","id":"1otmtk7","flag":"train.m7.lead.hold"},',
@@ -29946,6 +29951,12 @@ const LINES = JSON.parse([
   '{"text":"{sigh}. The board kept filling up faster than I could empty it.","id":"zwx8dw","dept":"works","mood":"low"},',
   '{"text":"Good day. Every job closed, nothing came back.","id":"6irr4v","dept":"works","mood":"high"},',
   '{"text":"Good shift. The machine shop had every part I needed, first try.","id":"159q3bj","dept":"works","mood":"high"}]',
+  ',"fri.clock.didout":[',
+  '{"text":"Clocked out at {time}. The Captain\'s address is at four, in the rec deck auditorium.","id":"1totd5"}]',
+  ',"fri.clock.onshift":[',
+  '{"text":"Short Friday: on shift since {time}. Clock out from 15:30. The Captain\'s at four.","id":"mq3e2y"}]',
+  ',"fri.headsup":[',
+  '{"text":"Your shift ends at 15:30. The Captain\'s address is at 16:00, in the rec deck auditorium.","id":"1xuicjf"}]',
   ',"fri.missed":[',
   '{"text":"You missed the Captain\'s address. Her words are in your Mail.","id":"18mlkj8"}]',
   ',"greet":[',
@@ -31981,6 +31992,11 @@ const LINES = JSON.parse([
   '{"text":"Sat in the garden for an hour. Bliss.","id":"1ff1qlu","act":"off"},',
   '{"text":"Look at those stars through the bow windows.","id":"i9jodd","place":"lounge"},',
   '{"text":"New comic on the wall. Someone\'s in it.","id":"1p0h0el","tone":"funny","place":"commons"},',
+  '{"text":"Short one today.","id":"szj0ly","act":"breakfast","flag":"shortFriday","weekday":"fri","not":{"week1":"true"}},',
+  '{"text":"Half three, then the Captain.","id":"d3cgt2","act":"breakfast","flag":"shortFriday","weekday":"fri","not":{"week1":"true"}},',
+  '{"text":"Short Friday. I\'ve planned my whole afternoon. It\'s a nap.","id":"18kfyff","tone":"funny","act":"breakfast","flag":"shortFriday","weekday":"fri","not":{"week1":"true"}},',
+  '{"text":"Captain at four. I\'m sitting at the back. Again.","id":"12zg62c","tone":"funny","act":"breakfast","flag":"shortFriday","weekday":"fri","not":{"week1":"true"}},',
+  '{"text":"Friday. Half a day\'s work and a whole speech.","id":"1wedhq6","tone":"funny","act":"breakfast","flag":"shortFriday","weekday":"fri","not":{"week1":"true"}},',
   '{"text":"Which deck is this again?","id":"1v5khrn","dept":"guest"},',
   '{"text":"Lovely view from here.","id":"13xfyeo","dept":"guest"},',
   '{"text":"Is the lift always this slow?","id":"gv7j1h","tone":"funny","dept":"guest"},',
@@ -37204,14 +37220,14 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 // heard: the last day you were there, mailed: the last day you got its Mail }. Seeded keys 1180-1182
 const FRI_NOD = [['works', 'Works'], ['galley', 'the galley'], ['watch', 'the Watch'], ['survey', 'Survey'], ['infirmary', 'the infirmary'], ['bridge', 'the bridge'], ['garden', 'the garden']];
 const FRI_TEAM = { works: 'Works', watch: 'the Watch', survey: 'Survey', bridge: 'the bridge', commons: 'the commons', galley: 'the galley', infirmary: 'the infirmary', garden: 'the garden' };
-const friFresh = () => ({ ring: [], today: null, heard: 0, mailed: 0 });
+const friFresh = () => ({ ring: [], today: null, heard: 0, mailed: 0, hu: 0 });   // hu: the last day of the 15:20 heads-up (turn 8)
 let FRI = friFresh(), FRI_SAID = null, FRI_SPEECH = null;   // FRI_SAID: [day, i], the line shown last (not saved); FRI_SPEECH: [day, lines]
 if (SHORT_FRIDAY) {
   const s = SAVED && SAVED.fri, num = x => Number.isInteger(x) && x >= 0;   // a missing or junk save part: start fresh
   if (s && typeof s === 'object') {
     if (Array.isArray(s.ring)) FRI.ring = s.ring.filter(r => Array.isArray(r) && num(r[0]) && r.slice(1).every(x => typeof x === 'string')).slice(-7);
     if (Array.isArray(s.today) && num(s.today[0]) && s.today.slice(1).every(x => typeof x === 'string')) FRI.today = s.today;
-    if (num(s.heard)) FRI.heard = s.heard; if (num(s.mailed)) FRI.mailed = s.mailed;
+    if (num(s.heard)) FRI.heard = s.heard; if (num(s.mailed)) FRI.mailed = s.mailed; if (num(s.hu)) FRI.hu = s.hu;
   }
   SAVE_EXTRA.push(save => { save.fri = FRI; });
   onSim('newGame', () => { FRI = friFresh(); FRI_SAID = null; FRI_SPEECH = null; });
@@ -37327,6 +37343,9 @@ function friHere(e) {
 // banner and the Mail at 16:50 for anyone who never came
 function friAddressTick() {
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (friShort(d) && m >= 920 && m < 930 && FRI.hu !== d && d >= FRI_ADDRESS.when.from && typeof playerShiftOn === 'function' && playerShiftOn(d)) {   // 15:20 (turn 8): a heads-up, once
+    FRI.hu = d; toast('Short Friday', friText('fri.headsup') || 'Your shift ends at 15:30. The Captain\'s address is at 16:00.');
+  }
   if (!friShort(d) || m < 960) return;
   const e = eventsOn(d).find(x => x.id === FRI_ADDRESS.id); if (!e) return;
   if (m < e.to) {
@@ -37352,6 +37371,31 @@ function friAddressTick() {
   toast(e.name, friText('fri.missed') || 'You missed the Captain\'s address. Her words are in your Mail.');
   if (typeof mailSend === 'function') mailSend({ at: now, from: A.from, subject: fill(A.mail[0]), body: fill(A.mail[1]), quiet: true });
 }
+// ---- explaining it (part E, turn 8): EW1's words in the arrival week and at Friday breakfasts ----
+// Zeke's goodnight on Day 0 (section 21's introNightTick and introNightLines): his walk.goodnight lines 1-4 in order,
+// with the two Friday ones (walk.goodnight.friday.1-2) after the second when on. A Friday key with no line is skipped
+function friNightKeys() {
+  const k = n => 'walk.goodnight.' + n;
+  return SHORT_FRIDAY ? [k(1), k(2), k('friday.1'), k('friday.2'), k(3), k(4)] : [k(1), k(2), k(3), k(4)];
+}
+// Halloran's three lines after he hands you your mug at 13:00 on Day 5 (section 21's introBeatLines, beat d5-mug): the
+// writers' beat.d5-friday.1-3, when on; [] otherwise
+function friBeatLines(b) {
+  const out = []; if (!SHORT_FRIDAY || !b || b.id !== 'd5-mug' || typeof introWriterLine !== 'function') return out;
+  for (let n = 1; n <= 3; n++) { const l = introWriterLine('beat.d5-friday.' + n, b.who); if (!l) break; out.push(l[0]); }
+  return out;
+}
+// the Friday breakfast lines (content/banks/fridays.lines, smalltalk: flag:shortFriday): the flag is set from the switch
+// at load and after a new game, and never saved (taken out of the save's flags)
+if (SHORT_FRIDAY) {
+  flagSet('shortFriday');
+  onSim('newGame', () => flagSet('shortFriday'));
+  SAVE_EXTRA.push(save => { if (save.flags && save.flags.shortFriday) { save.flags = { ...save.flags }; delete save.flags.shortFriday; } });
+}
+
+// the time clock on a short Friday (sections 15 and 20's clock screen): 'onshift' and 'didout' say when the shift ends
+// and where the address is (fri.clock.*, content/banks/fridays.lines, {time} filled); null otherwise (the usual words)
+function friClock(k, min) { const t = friShort(SHIP.time.day) && friText('fri.clock.' + k); return t ? t.split('{time}').join(hhmm(min)) : null; }
 // ---- end of slot: Fridays builder ----
 
 // =====================================================================
@@ -38488,7 +38532,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   const now = shipNow(), d = SHIP.time.day, m = SHIP.time.min, C = SHIP.career, mk = (t, c, x) => { const e = document.createElement(t); if (c) e.className = c; if (x !== undefined) e.textContent = x; return e; };
   const on = playerShiftOn(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
-    : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
+    : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? friClock('onshift', C.ci % 1440) || csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
     : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
   if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
@@ -38502,7 +38546,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   if (on && !out && !(inn ? false : m >= dayShiftEnd(d) || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
     else if (SHIP.time.min < dayShiftEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
-    else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
+    else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? friClock('didout', SHIP.time.min) || csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
   }
   act(csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
   el.appendChild(row);
@@ -41103,7 +41147,7 @@ function introNightTick() {
   if (!U.night) {
     if (U.tour.some(q => q.core.length)) return;          // his last tour lines first
     if (!near) { I.done.goodnight = null; I.done['goodnight:owed'] = 1; introDone('free'); return; }   // the patch (#4): said later that evening, or by Mail (introNightOwedTick)
-    U.night = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; U.night.push(l[0]); }
+    U.night = []; for (const k of friNightKeys()) { const l = introWriterLine(k); if (!l) { if (/friday/.test(k)) continue; break; } U.night.push(l[0]); }   // friNightKeys (18f): 1-4, with Short Fridays' two after the second when on
     if (!U.night.length) U.night = INTRO_GOODNIGHT.slice();
   }
   if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); I.done['goodnight:owed'] = 1; U.night = null; introDone('free'); return; }   // you went: the arrow anyway (and the rest later, introNightOwedTick)
@@ -41243,7 +41287,7 @@ function introHealthMissed(n) {
 // they stop while they talk; leave and the rest is dropped. A beat with no room of its own (Friday's invite) plays when they're within
 // INTRO_BEAT_NEAR tiles of you in the four hours after it.
 const INTRO_BEAT_NEAR = 6;
-function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) break; out.push(l[0]); } return out; }
+function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) break; out.push(l[0]); } return out.concat(friBeatLines(b)); }   // friBeatLines (18f): Halloran's Friday lines after the mug, when on
 function introBeatHere(b, a) {
   if (!a || typeof player === 'undefined') return false;
   const P = player.obj.position, room = c => (ROOMS[roomAt(...c)] || {}).name;
@@ -41978,7 +42022,7 @@ function tapBeside(to) {
 // 1 owed, 2 said, 3 by Mail.
 const INTRO_NIGHT_BED = 22 * 60;
 function introNightLines() {
-  const out = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; out.push(l[0]); }
+  const out = []; for (const k of friNightKeys()) { const l = introWriterLine(k); if (!l) { if (/friday/.test(k)) continue; break; } out.push(l[0]); }   // friNightKeys: 18f
   return out.length ? out : INTRO_GOODNIGHT.slice();
 }
 function introNightOwedTick() {

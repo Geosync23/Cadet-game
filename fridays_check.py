@@ -106,10 +106,14 @@ SPEECH = r"""(() => {
   }
   out.full = JSON.stringify(FRI).length;                  // the save's fri part after 13 weeks
   stub(false); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
-  const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: {}, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} out.save = 'fri' in sv ? JSON.stringify(sv.fri).length : null;
+  const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: SHIP.flags, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} out.save = 'fri' in sv ? JSON.stringify(sv.fri).length : null;
+  // turn 8: Zeke's goodnight keys and lines, Halloran's after the mug, the breakfast flag (set, never saved), the clock
+  const b5 = INTRO_WEEK.find(b => b.id === 'd5-mug'), SD = SHIP.time.day; SHIP.time.day = 5;
+  out.e = { keys: friNightKeys(), night: friNightKeys().map(k => (introWriterLine(k, 'torres-zeke') || [null])[0]), beat: friBeatLines(b5), flag: flag('shortFriday'), saved: 'shortFriday' in (sv.flags || {}), still: flag('shortFriday'), clock: friClock('didout', 940) };
+  SHIP.time.day = SD;
   return out;
 })()"""
-SAVE_OFF = "(() => { const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: {}, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} return ['fri' in sv, typeof friAddressTick, typeof FRI_ADDRESSES === 'object' && Object.keys(FRI_ADDRESSES).length]; })()"
+SAVE_OFF = "(() => { const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: {}, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} SHIP.time.day = 5; return ['fri' in sv, typeof friAddressTick, typeof FRI_ADDRESSES === 'object' && Object.keys(FRI_ADDRESSES).length, friNightKeys().length, friBeatLines(INTRO_WEEK.find(b => b.id === 'd5-mug')).length, flag('shortFriday') === undefined, friClock('didout', 940)]; })()"
 
 def aud(g):   # you in the middle of the auditorium (Deck 7's room A)
     g.ev("goToDeck(7)"); g.step(5)
@@ -230,6 +234,10 @@ check(on['mail'][1] and on['mail'][1] != on['week1'], 'on: Day 11 Mail is the fi
 check(not on['errors'], 'on: tradition errors %s' % on['errors'])
 so = off['speech']
 check(so[0] is False and so[1] == 'function' and so[2] == 5, 'off: the save gains fri, or the speech isn\'t baked %s' % so)
+check(so[3:] == [4, 0, True, None], 'off: part E is on (goodnight keys, Halloran\'s lines, the breakfast flag, the clock words) %s' % so[3:])
+e = on['speech']['e']
+print('  part E (on): goodnight %s; Halloran %s; flag %s (saved: %s); clock: %s' % (e['night'], e['beat'], e['flag'], e['saved'], e['clock']))
+check(len(e['keys']) == 6 and all(e['night']) and len(e['beat']) == 3 and e['flag'] is True and not e['saved'] and e['still'] is True and e['clock'] and '15:40' in e['clock'], 'on: part E %s' % e)
 sp = on['speech']
 print('  speech lines a Friday:', sp['counts'])
 print('  the weekly speech, Day 33:', len(sp['weekly'][0][1]), 'lines;', sp['weekly'][0][1][:3], '...')
