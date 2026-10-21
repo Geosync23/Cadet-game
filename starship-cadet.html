@@ -9989,10 +9989,12 @@ function schedBuild(p, d, occ, S) {
     if (REC_ON && p.id === REC_ROUND.who && wd === 5) br.push([REC_ROUND.at[0] + Math.round((REC_ROUND.at[1] - REC_ROUND.at[0]) * schedU(p.seed, d, 1039)), 'recRound']);   // Maeve's round of the rec deck's machines (0.83.2, RA)
     const ru = EVD && evRule(B + 600, 'rush'), ra = ru && (ru.at || [600, 1080]);
     if (ru && !called && evOwed(p, evAt(B + 600), d)) br.push([Math.max(ra[0], t + 15) + Math.round((Math.min(ra[1], to) - 60 - Math.max(ra[0], t + 15)) * U(37)), 'call']);
-    for (const e of meet) if (e.meet && !e.done && e.at >= t && e.at < to) br.push([e.at, 'meet', e]);   // an event meeting on shift (F0b): at its minute, whatever the edges
+    const mt = meet.filter(e => e.meet && !e.done && e.at >= t && e.at < to);   // an event meeting on shift (F0b): at its minute, whatever the edges
+    for (let i = br.length - 1; i >= 0; i--) if (mt.some(e => br[i][0] > e.at - 30 && br[i][0] < e.at + e.dur)) br.splice(i, 1);   // and it wins: no tea or toilet break runs into it (PB)
+    for (const e of mt) br.push([e.at, 'meet', e]);
     for (const [bt, kind, e] of br.sort((a, b) => a[0] - b[0])) {
       if (kind !== 'meet' && (bt <= t + 10 || bt >= to - 25)) continue;
-      if (bt < t) continue;                              // an earlier break ran over it
+      if (bt < t) { if (e) e.done = true; continue; }    // an earlier break ran over it (a meeting that can't be planned isn't taken late in free time)
       work(bt);
       if (kind === 'meet') {                            // there and back on the shift's time (the rides tagged as the meeting), then work carries on
         const n0 = segs.length;
@@ -37135,6 +37137,11 @@ const EV_RANK_ON = EVENTS_ON;
 const evInvited = m => !EV_RANK_ON || !m || !Array.isArray(m.ranks) || m.ranks.includes(playerRank());
 const evScriptOf = m => (EV_RANK_ON && m && m.scriptBy && MEETING_SCRIPTS[m.scriptBy[playerRank()]] ? m.scriptBy[playerRank()] : m.script);
 const eventJobRank = spec => !EV_RANK_ON || !spec || !RANKS.includes(spec.rank) ? {} : spec.rank === 'junior' ? { junior: true } : { only: spec.rank };
+// ---- F8 (EV2): comms down. Calls home (20c's homeCallable) are off in every phase whose event lists the effect
+// 'commsDown' (the storm: the front and the escalation), not only the front. Calls only (lead 21: outside Mail later if
+// the user wants it). The crew's booths already follow the event's 'closed' routine. False while off ----
+const EV_COMMS_ON = EVENTS_ON;
+const eventCommsDown = (t = shipNow()) => EV_COMMS_ON && !!eventMod('effect', 'commsDown', t);
 // ---- end of slot: Events engineer 2 ----
 
 // =====================================================================
@@ -40176,6 +40183,7 @@ const homeDue = (k, t = shipNow()) => homeNext(k, t);    // the beat a call now 
 function homeCallable(t = shipNow()) {
   const [HC, HM] = homeBaked(); if (!HC || homeCalledToday(t)) return [];
   let ev = null; try { ev = typeof eventNow === 'function' ? eventNow(t) : null; } catch (e) { ev = null; } if (ev && ev.phase === 'onset') return [];   // the relay's down while a ship-wide event starts
+  if (typeof eventCommsDown === 'function' && eventCommsDown(t)) return [];   // section 18's F8: and in every phase whose event says comms are down (the storm's escalation too); false while off
   const ord = k => HOME_ORDER.includes(k) ? HOME_ORDER.indexOf(k) : 99;
   return Object.keys(HC).sort((a, b) => ord(a) - ord(b) || (a < b ? -1 : 1)).filter(k => homeNext(k, t) || homeChatPick(k, t)).map(k => {   // only someone with something to play (reviewer 1c)
     const n = homeNext(k, t), d = n && HM[n];
