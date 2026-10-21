@@ -4,7 +4,7 @@
 #   CADET_CHROME=/opt/pw-browsers/chromium python3 perf_check.py NEW.html [OLD.html]
 #
 # For each busy moment in SCENES it starts a fresh game (?nosave&debug), skips to that ship time, goes to the deck,
-# stands you in the room, lets the crew settle, and measures on phone-sized views (portrait 390x844 at the usual zoom
+# stands you in the room (and checks you really are in it), lets the crew settle, and measures on phone-sized views (portrait 390x844 at the usual zoom
 # 1.5 and the widest 0.7; landscape 844x390 at 1.15):
 #   calls   draw calls in the main pass (renderer.info, the budget's number; shadows aren't counted there)
 #   tris    triangles drawn (thousands)
@@ -43,7 +43,7 @@ SCENE_JS = r"""(sc => {
   if (deckDef.num !== sc.deck) goToDeck(sc.deck);
   const re = new RegExp(sc.room, 'i'), k = Object.keys(ROOM_BOX).find(k => ROOMS[k] && re.test(ROOMS[k].name));
   if (!k) return { room: null };
-  const b = ROOM_BOX[k], at = nearestOpen(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2), player);
+  const b = ROOM_BOX[k], mid = cellPos(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2)), at = nearestOpen(mid.x, mid.z, player);   // nearestOpen takes a position, not a tile (backlog 18b)
   player.obj.position.copy(cellPos(...at)); target.copy(player.obj.position).setY(.7);
   return { room: ROOMS[k].name };
 })"""
@@ -79,6 +79,7 @@ def run(path):
                 g.ev(f"camera.zoom = {zoom}; camera.updateProjectionMatrix()")
                 g.step(90)
                 row['views'][vname] = g.page.evaluate("s => window.__sc(s)(20)", MEASURE_JS)
+                row['views'][vname]['stood'] = g.ev("(r => r && ROOMS[r] ? ROOMS[r].name : null)(roomAt(...player.here()))")   # the room you really stand in
                 g.close()
             out['scenes'].append(row)
         # the deck round trip: every deck twice, memory after each lap back on Deck 4
@@ -106,6 +107,8 @@ def show(tag, o):
     for s in o['scenes']:
         v = '  '.join(f"{k} {x['calls']}c/{x.get('gl', '?')}gl {x['tris']}kt {x['js']}ms {x['crew']}p" for k, x in s['views'].items())
         print(f"  {s['name']:<42} [{s.get('room')}]  {v}")
+        off = sorted({x.get('stood') for x in s['views'].values() if x.get('stood') != s.get('room')}, key=str)
+        if off: print(f"  {'':<42} but you stand in: {', '.join(map(str, off))}")
     print(f"  file {o['size'] / 1e6:.2f} MB, load {o['load']} s")
     if o.get('long'): print('  a week of play (geometries, textures, JS heap MB): after day 1', '/'.join(str(v) for v in o['long'][0].values()), '-> after day 8', '/'.join(str(v) for v in o['long'][1].values()))
     print('  deck round trips (geometries, textures, JS heap MB):', ' -> '.join(f"{m['geo']}/{m['tex']}/{m['heap']}" for m in o['trip']))
@@ -115,6 +118,7 @@ def problems(new, old):
     for i, s in enumerate(new['scenes']):
         if not s.get('room'): bad.append(f"{s['name']}: room not found")
         for k, x in s['views'].items():
+            if 'stood' in x and x['stood'] != s.get('room'): bad.append(f"{s['name']} {k}: you stand in {x['stood']}, not {s.get('room')}")
             if x['calls'] > BUDGET: bad.append(f"{s['name']} {k}: {x['calls']} draw calls (budget {BUDGET})")
             if old:
                 y = old['scenes'][i]['views'][k]
