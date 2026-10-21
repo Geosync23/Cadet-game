@@ -36952,7 +36952,7 @@ if (EV_LINE_ON) {
   cer.where.venue = 'bow-lounge-line'; cer.len = 35;   // the oath, then the punch: the Captain and Brennan stay to 15:15
   cer.early = 25;   // the cast at the glass by the horn (PR6: 5 minutes early, the Captain set off from Deck 2 at 14:35 and reached her spot at 14:52)
   L.moments = [{ id: 'lineCeremony', phase: 'onset', at: [1, 870], len: 45, k: 353, where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, gathering: true, easy: true,
-    who: (p, d) => p.id === 'saruth' || cer.who.includes(p.id) || lineFirstCrew(2, d, cer.who).some(q => q.id === p.id) ? 0 : lineFirst().has(p.id) ? 1 : .95, anim: 'talk', from: 'Captain Odile Marrow',
+    who: (p, d) => p.id === 'saruth' || cer.who.includes(p.id) || lineFirstCrew(2, d, cer.who).some(q => q.id === p.id) ? 0 : 1, anim: 'talk', from: 'Captain Odile Marrow',
     places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
     whereFor: (p, d, opts) => lineFirst().has(p.id) ? [[3, '@bow-lounge-line-front']].concat(opts) : opts,   // the first-timers at the front (the ten spots nearest the Captain are theirs)
     lead: lineLead,   // the crowd sets off ahead of the horn, so most are in by the oath (PR6)
