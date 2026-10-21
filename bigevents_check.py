@@ -42,7 +42,13 @@ if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2
     SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
     (WORK / 'test').mkdir(parents=True, exist_ok=True)
     OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
-CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above; lead 24: unseated crowds only
+CROWD = 80                     # a standing crowd's limit on meaning to go, set by performance tests, not a fixed 60 (the user, 2026-10-21: "60 was just a guess
+                               # on performance. We can go higher. Just need to test for performance."; was the events plan v3.2 answer 4's 60; lead 24: unseated only).
+                               # LB3's measure (perf_check's Line ceremony scene with 0-90 extra people stood in the bow lounge, the phone and trifold sizes): draw
+                               # calls barely move (the crowd packs 12 to a call: 391 -> 397 at the widest view from 59 to 149 on Deck 3, budget 450); triangles grow
+                               # about 4k a person (516k -> 598k at 79, 794k at 149); game code 1.5-3.5 ms a frame throughout. About 3 in 4 of those meaning to go
+                               # get there (the ceremony: 61 -> 45), so 80 is about 60 in the room and 75-80 on the deck: about 600k triangles, the busiest scene
+                               # already shipped (Sunday dinner, 69 on Deck 3, 565k) plus a little. Raise it only after measuring again (plans/build-table.md, line L5j)
 MESS_SEATS = 44                # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 LINE_SUPPER_MIN = 40           # the Line supper: at least about 40 should come (ER3's review)
 

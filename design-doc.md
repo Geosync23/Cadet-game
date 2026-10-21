@@ -655,7 +655,7 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
-**Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Crossing the Line's supper follows the same rule (the user, 2026-10-21, via lead 24): seated sittings with staggered arrival. A seated gathering's cap is its seats at once, not the 60 meaning to go (lead 24). Other gatherings (the party, the Line ceremony) still use standing places.
+**Crowds:** a standing crowd's limit is set by performance tests, not a fixed 60 (the user, 2026-10-21: "60 was just a guess on performance. We can go higher. Just need to test for performance."). Measured at phone and TriFold sizes (the Line ceremony with up to 149 people on Deck 3): draw calls stay flat because the crowd is drawn 12 people to a call, and the cost that grows is triangles, about 4,000 a person. The limit is now 80 meaning to go (bigevents_check's `CROWD`), which is about 60 in the room and about as heavy as the busiest scene already in the game (Sunday dinner). It goes higher only after measuring again, and after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Crossing the Line's supper follows the same rule (the user, 2026-10-21, via lead 24): seated sittings with staggered arrival. A seated gathering's cap is its seats at once, not the 60 meaning to go (lead 24). Other gatherings (the party, the Line ceremony) still use standing places.
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
 
@@ -858,7 +858,7 @@ Done so far:
 - Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
   - The one extra short event is Crossing the Line, on Sunday Day 7, so Saturday stays free.
   - The cast is called in on their day off, with lines about it.
-  - Crowds up to about 60.
+  - Crowds up to about 60 (since 2026-10-21: set by performance tests, now 80 meaning to go; see "Ship-wide events").
   - Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15.
   - The commendation comes at the all-clear.
   - See "Ship-wide events".
