@@ -181,13 +181,15 @@ Left alone: four bumpy (after the calls retune) = **bumpy**. With the three help
 - **The first all-hands (S3).** Today it's set by the first event's first address (`recFirstAllHands`, section 18). Unhooked: question 5.
 - **The lantern supper (S5).** A moment `{ id: 'lanternSupper', phase: 'escalation', at: [2, 1080], len: 90, k: 352, where: { venue: 'mess', deck: 3, room: /^Mess hall$/ }, gathering: true, who: .85, anim: 'talk' }` with `brennan` at 1, Lukas on the line (the galley line, never pulled), `stayIn` paused 17:45-19:45. **The lantern job** (ER2's fix 1): `jobs.escalation: [{ id: 'stormLanterns', title: 'Lantern supper: carry the lanterns up from storage', tier: 1, at: 840, bring: 'a crate of storm lanterns', stops: [{ deck: 5, room: /^Main storage$/, mins: 5, tag: 'pickup' }, { deck: 3, room: /^Mess hall$/, types: ['mess-seat'], mins: 15, tag: 'drop' }] }]`, posted at 14:00 Saturday, held for you if you promised Lukas, else open on the board (and the mess sign-up sheet); left for a galley hand at 17:00 if nobody takes it. The lanterns on the tables show from 18:00 whoever carried them (the look never waits for the job). The look: the mess's lights at emergency level and lanterns on the long tables (one instanced prop, `DECK_DRESS.lanternMess`, 1-2 draw calls), 18:00-19:30 only. The galley: storm stew for 60.
 - **The all-clear day (S6).** The tidy job to 10:30 Sunday (question 7); talent night and the Lap moved by `EV_DAY_DRESS`.
-- **`EV_DAY_DRESS`, one shape shared with the Line plan (ER2's fix 5; sent to EP2).** Built here first (S6); the Line's L2 reuses it. Section 18, made at load from `EV_CALENDAR` and each event's own `dayDress` data only (never `eventNow`, `SHIP.event` or anything saved), read by `eventsOn(d)` so plans made on any day agree. One row per tradition and ship day:
-  - `{ trad, day, drop: true }`: that day's run doesn't happen;
-  - `{ trad, day, add: true, at, jitter, ... }`: a run on a day it wouldn't happen (same `k`, so its hashes don't move);
-  - `{ trad, day, ...changes }`: that day's run re-dressed. Changes: `name`, `words` (a bank prefix, e.g. `event.ionStorm.trad.lap-of-the-wren`), `at`, `jitter`, `who` (extra `[id, pull]` pairs in front of the tradition's own), `stop` (a place the walk pauses at), `mail: false`.
-  - In an event's data, `dayDress: [{ trad, day: <the event's day>, ... }]`; the table adds the calendar day.
-  - **The storm's rows:** `lap-of-the-wren` Day 14 drop, Day 15 add at `[1230, 1275]` with `words` (EW1's) and Tomas (already its host, pull 1); `rec-talent-night` Day 14 drop, Day 21 add (its usual hours).
-  - **The Line's rows (its L2):** `sunday-table` Day 7 re-dressed (name, words, `[1080, 1155]`, jitter 0, `who` everyone .85, `mail: false`); `lap-of-the-wren` Day 7 re-dressed (`who` tomas, torres-zeke, pell at 1, `stop: '3-lap-6'`).
+- **`EV_DAY_DRESS`, one shape shared with the Line plan (ER2's fix 5; EP2's proposal, agreed; lead 22: one table serves both, EV1 owns the final shape).** Built here first (S6); the Line's L2 reuses it.
+  - **Where:** section 18, a Map keyed `'<tradition id>@<ship day>'`, made at load from `EV_CALENDAR` and each event's own `dayDress` list. Never `eventNow`, `SHIP.event` or anything saved. An event the calendar skips (`EV_SKIPPED`) adds no rows. With `EVENTS_ON` off the Map is empty, so `eventsOn(d)` comes out byte-identical.
+  - **An event's data:** `dayDress: [{ trad, day, drop: true } | { trad, day, set: {...} } | { trad, day, add: {...} }]`, where `day` is the event's own day, turned into a ship day through its calendar row.
+    - `drop: true`: the tradition doesn't happen that day;
+    - `set`: it happens with some fields replaced: `name`, `at`, `jitter: 0`, `who` (extra pulls such as `[['tomas', 1]]`, added to its own), `words` (a bank prefix) and `mail: false`;
+    - `add`: a one-off copy on a day it doesn't normally fall, keeping the tradition's `k`.
+  - **Who reads it:** `eventsOn(d)`, as it builds the day's list. A stop on a walk (the Line's `3-lap-6`) is a 20c moment, not dress.
+  - **The storm's rows** (its day 0 = Day 11): `{ trad: 'lap-of-the-wren', day: 3, drop: true }`; `{ trad: 'lap-of-the-wren', day: 4, add: { at: [1230, 1275], who: [['tomas', 1]], words: 'event.ionStorm.trad.lap-of-the-wren' } }`; `{ trad: 'rec-talent-night', day: 3, drop: true }`; `{ trad: 'rec-talent-night', day: 10, add: {} }` (Day 21, its usual hours).
+  - **The Line's rows** are EP2's (Day 7: `sunday-table` set, `lap-of-the-wren` set).
 - **Determinism.** Everything the crew's planner reads comes from the calendar, the event's data and the rota. Your replies (the briefing, Lukas, the errand) only set saved flags and hold jobs; nothing in the planner reads them.
 
 ## The build turns (after the events base; switch: the base's `EVENTS_ON`, on with this update after the user's review)
@@ -256,13 +258,13 @@ Each turn: small exact edits; a build-table row under "Ion storm update"; the ar
 - The story's range job is a real Works job (it counts); the four dead rings are words, not a machine fault.
 - Saruth goes to the supper and the party like anyone off duty (no visit spoilers in either).
 
-## For EV1 and lead 22 (not the user): a delayed promotion during the storm (ER2's fix 3)
-The promotion can be delayed, never failed, so a slower player's summons, move or commissioning can fall on Days 12-14. F1's guard holds only the default days (Days 9-11). **Proposed:** `guardFree` treats the storm's onset, escalation and resolution hours as held for career beats, so a delayed summons, move or ceremony waits until after the all-clear (Sunday from 10:12, or Monday), and never displaces the front, the Friday address, the lantern supper or the all-clear. Story A never assumes your rank or cabin (its lines read the save). EV1 decides; it touches F1b-c, not this plan's turns.
+## A delayed promotion during the storm (ER2's fix 3; decided by lead 22)
+The promotion can be delayed, never failed, so a slower player's summons, move or commissioning can fall on Days 12-14. F1's guard holds only the default days (Days 9-11). **Lead 22's decision:** a delayed career scene on storm days is held by the guard until after the all-clear. `guardFree` treats the storm's onset, escalation and resolution hours as held for career beats, so a delayed summons, move or ceremony waits until after the all-clear (Sunday from 10:12, or Monday), and never displaces the front, the Friday address, the lantern supper or the all-clear. Story A never assumes your rank or cabin (its lines read the save). EV1 builds it in F1b-c; bigevents_check holds a slow player's summons on Day 12 until after the all-clear.
 
 ## ER2's round 1 (69629c7), as taken
 1. **The lantern job:** built in S5 as `stormLanterns` (Deck 5 storage to the mess's long tables, tier 1, posted Saturday 14:00, held for you if you promised Lukas). q8 now names it.
 2. **"He's ready":** reworded to "tell him it's his galley tonight", with a new guard rail: nothing that hints at handing the galley on.
-3. **Rank and cabin:** Lukas's lines read the save ("bunkmate" or "since you moved"); "I'm Works" works at any rank. The delayed-promotion question is above, for EV1 and the lead.
+3. **Rank and cabin:** Lukas's lines read the save ("bunkmate" or "since you moved"); "I'm Works" works at any rank. A delayed career scene on storm days is held until after the all-clear (lead 22's decision, above).
 4. **The range stop:** `{ deck: 3, machine: 'range' }`. Note: `'3-range-1'` as the machine wouldn't resolve: `eventStopOf` matches a kind, or the middle part of an id (`id.split('-')[1]`), so the kind is the way the ballasts job does it (`'lights'`); it lands on `3-range-1`'s panel `3-range-1-panel`.
-5. **`EV_DAY_DRESS`:** one shape, above, built here in S6; sent to EP2 so the Line's L2 says "reuses".
+5. **`EV_DAY_DRESS`:** EP2's shape (Map `trad@day`; `drop` / `set` / `add`), above, built here in S6; the Line's L2 reuses it; EV1 owns the final shape.
 - **Nits:** S5's perf_check scene measures about 60 in the mess plus the lanterns at 390x844; story A begins "at the servery".
