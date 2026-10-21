@@ -1,6 +1,6 @@
 # Who the Veyli are: the plan
 
-LW1 (Veyli lore planner), 2026-10-21, version 1. Branch `claude/veyli-lore`, from `claude/events-lines`.
+LW1 (Veyli lore planner), 2026-10-21, version 1.1 (ER2's review: PASS WITH FIXES, all four folded in: audit rows 19-21, the storm step moved to the lantern supper, the line count). Branch `claude/veyli-lore`, from `claude/events-lines`.
 Planning and words only: the game hasn't changed. The page with the answer form is `plans/veyli-lore-plan.html`.
 
 **Your decision (02:50 UTC):** "We also need to learn as players who the Veyli are. I think they should be human
@@ -22,11 +22,11 @@ into the distance." Also decided: Crossing the Line means **"guests in someone e
   the same thing on a small scale.
 - **How you learn it:** a plain fact from the first week ("They're people. They just went further out."), then
   deeper, a little at a time, through the month: Ferreira, the Envoy's tea, the Line, the storm, the comet, the
-  visit. About **24 new lines and 14 changed ones**. Nothing about why Saruth is aboard, Holt's beats or the visit's
+  visit. About **23 new lines and 15 changed ones**. Nothing about why Saruth is aboard, Holt's beats or the visit's
   turns.
 - **Pronouns:** they/them for all Veyli stays, now as a **Veyli custom** that the crew respect (their language has
   no he or she). The old rule "the Veyli are not described in human terms" is retired.
-- **What must change:** 14 lines that set "humans" against the Veyli or call a Veyli "she", plus the canon notes in
+- **What must change:** 15 lines that set "humans" against the Veyli or call a Veyli "she", plus the canon notes in
   facts.md and design-doc.md. Nothing in Holt's arc changes. The full audit is in section 5.
 
 ## 1. Who the Veyli are (three histories)
@@ -127,7 +127,7 @@ your answers.
 | Day 7, Sun 14:40 | The oath (no Veyli present; Saruth stays away by courtesy) | Unchanged. The parallel with "We went on" is left for the player to notice | 0 |
 | Day 8, Mon | The afterglow: "a Veyli doesn't watch another people's rite" (Line plan) | Plus one Saruth line that day (acquaintance and up): "You crossed. Now you are further from home than your grandparents were. We know it." | 1 |
 | Days 8-10 | Saruth at acquaintance or colleague tier (new `life` and `chat` lines) | The long ship: "My people's ship took four lifetimes to get here. The tea hour kept the days in order." "The cord counted the months. We read it in the dark." | 3 |
-| Days 11-15 | The ion storm, emergency lighting (Saruth in the corridor, or a reaction line) | The cord read by touch when the lights fail: "On the long ship, when the lights failed, we read the cord by touch. Here. Hold it." (once, during the blackout, Deck 2 or the mess) | 2 |
+| Day 13, Sat 18:00-19:30 | The ion storm's lantern supper (the mess by lamp light on purpose; Saruth at the table) | The cord read by touch: "On the long ship, when the lights failed, we read the cord by touch. Here. Hold it." (Not tied to a blackout: in a new game blackouts only reach Decks 1 and 6) | 2 |
 | Day 16, Tue 21:30 | The comet (observatory or bow lounge) | Saruth, if there: "On the long ship, a comet was a calendar. Somebody always tied a knot for it." | 1 |
 | Days 17-25 | Saruth's Talk a while (once backlog #15 is fixed) | A new friend-tier talk, "went-on": "We did not leave. We went on." Your replies: listen, share (your own leaving), cheer. | 4 (one talk) |
 | Day 22, Mon | Vance's memo (visit warning) | Unchanged (practical) | 0 |
@@ -136,7 +136,7 @@ your answers.
 | After Day 30 | Holt's beat 3 (only when you're close to him) | The six-hour silence was a mourning rite (unchanged) | 0 |
 | Later (friend tier and up, after `beat:holt.3`) | Saruth, a later talk or arc beat | Where the mourning silence comes from (the long ship). Not in the first month | later |
 
-**About 24 new lines and 14 changed ones** (section 5), all short, in voices that already exist.
+**About 23 new lines and 15 changed ones** (section 5), all short, in voices that already exist.
 
 ### What stays secret, and when it comes out
 
@@ -158,7 +158,7 @@ safe. Now that the Veyli are human, the first part goes.
 - **Recommended (a): they/them stays, as a Veyli custom.** The Veyli language has no "he" or "she"; it grew that way
   on the long ship. A Veyli asks to be "they", and the crew respect it. It's plain courtesy, like learning to knock
   twice. "The Envoy" and "the Speaker" stay safe.
-  - It changes nothing already written except two slips in the game (Teshavi as "she" and "her").
+  - It changes nothing already written except three slips in the game (Teshavi as "she" and "her", the Envoy as "she" at the Captain's table) and one code comment.
   - It gives Ferreira one more thing to learn, and the player one more small custom.
   - It's never explained at length: one line from Ferreira at most ("No 'he' or 'she' in Veyli. Just the person.").
 - **(b) Each Veyli gets their own pronouns,** like the crew. It's more ordinary, but the writers would choose six sets
@@ -196,7 +196,10 @@ source is named.
 | 16 | `design-doc.md:64-66` | "the Veyli, a proud, ritual-minded people ... stay in the background for now" | "the Veyli, a human people who went further out centuries ago: proud, ritual-minded and courteous. The player learns who they are through the first month" (section 6) |
 | 17 | `content/voice-bible.md:38` and `content/README.md:386` | Holt's rule (no change needed) | Add the description rule (section 4) beside it |
 | 18 | The route kiosk map (game 2053, section 4b) | "Veyli reaches" | Facts.md and every line say "the Veyli reach". A backlog row: make it "Veyli reach" (map text, owner of 4b) |
-| 19 | Saruth's clothes (game 48940, `rosterSpec`, section 9) | Saruth has no `spec` and `uniform: null`, so they fall back to `dept: 'command'`: the Concord's red Command uniform (from the code; not seen on screen) | Not lore, but it's wrong for a Veyli guest. A backlog row (crew data owner): give Saruth a civilian outfit in Veyli colours, like the delegates |
+| 19 | `content/facts.md:19` | "The Concord: the human union that runs the Survey Service" | "The Concord: the union of the near stars' worlds that runs the Survey Service" (with the Veyli human, "the human union" reads as if they aren't, or belong to it) |
+| 20 | Game 6495, the Captain's table tap text (section 4d) | "...and the Envoy when she accepts." | "...and the Envoy when they accept." |
+| 21 | Game 5601, a code comment (section 4d; not on screen) | "a quilt in her own colours" | "a quilt in their own colours" |
+| 22 | Saruth's clothes (game 48940, `rosterSpec`, section 9) | Saruth has no `spec` and `uniform: null`, so they fall back to `dept: 'command'`: the Concord's red Command uniform (from the code; not seen on screen) | Not lore, but it's wrong for a Veyli guest. A backlog row (crew data owner): give Saruth a civilian outfit in Veyli colours, like the delegates |
 
 **Checked and fine as they are** (no change):
 - Holt's whole arc and lines: the silence was a rite, "years ago", never against the Veyli as a people.
