@@ -18271,9 +18271,10 @@ function eventJob(spec, ev, t, key) {
     stops = [{ deck: st.deck, placeId: st.placeId, mins: spec.mins || 20, tag: spec.kind || 'event', at: st.at || null }];
     title = title || (EVENT_JOB_TEXT[spec.kind] || 'Event job') + (st.room ? ': ' + roomName(st.deck, st.room) : '');
   }
-  return { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
+  const j = { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
            bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
            claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
+  return typeof eventJobRank === 'function' ? Object.assign(j, eventJobRank(spec)) : j;   // section 18's F5: a job for a rank ({} while off)
 }
 function eventJobsHour(h, jobs) {
   if (typeof eventNow !== 'function') return;
@@ -36407,7 +36408,7 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, ranks: m.ranks, scriptBy: m.scriptBy, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
     const at = evBeatAt(e.startDay, n.at);
@@ -36595,10 +36596,11 @@ function meetingFlags(m) {
 function meetingsTick(now, quiet) {                     // quiet: a sleep or skip (no notice, no panel; the gists still come)
   for (const m of MEETINGS) {
     const k = m.id, f = meetingFlags(m); if (!f) continue;
-    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); } continue; }
-    if (m.notify && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[m.script].title, m.notify); }
-    if (!DIALOGUE && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(m.script, m); }
-    if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(m.script); }
+    const sc = evScriptOf(m), asked = evInvited(m);      // F5: your rank's version of it, and whether it's for your rank
+    if (quiet) { if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(sc); } continue; }
+    if (m.notify && asked && !f['told:' + k] && now >= m.at - 15 && now < m.at) { f['told:' + k] = 1; toast(MEETING_SCRIPTS[sc].title, m.notify); }
+    if (!DIALOGUE && asked && !f['met:' + k] && now >= m.at && now < m.at + (m.len || 15) && inMeeting(m)) { f['met:' + k] = 1; dialogueShow(sc, m); }
+    if (!f['met:' + k] && !f['gist:' + k] && now >= m.at + (m.len || 15)) { f['gist:' + k] = 1; meetingGist(sc); }
     if (m.event === 'occasion' && f['met:' + k]) { const r = SHIP.occasions.find(x => x.key === k); if (r) r.met = true; }
   }
   if (DIALOGUE && !inMeeting(DIALOGUE.m)) dialogueClose();
@@ -36989,8 +36991,9 @@ function eventItems(a, b) {
     const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;
     const def = SHIP_EVENTS[g.event], mt = (def.meetings || []).find(x => x.id === g.id), mo = !mt && (def.moments || []).find(x => x.id === g.id), m = mt || mo;
     if (mo && EV_SHIPWIDE.some(x => x.id === mo.id)) continue;   // a gathering in EV_SHIPWIDE is listed already, as a tradition (PR2's shots: the party twice)
+    if (mt && !evInvited(mt)) continue;                  // F5: a meeting for another rank isn't on your Schedule (its gist comes by Mail)
     const deck = m.where.deck, room = evRoomKey(deck, m.where.room), rm = room && DECKS[deck].rooms[room];
-    const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[mt.script];
+    const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[evScriptOf(mt)];
     out.push({ id: g.id + '@' + d, kind: mt ? 'meeting' : 'gathering', title: m.title || (sc && sc.title) || (sw && sw.name) || def.title, at, to: at + (g.len || 15),
       where: (rm ? rm.name + ', ' : '') + deckWord(deck), deck, room });
   }
@@ -37109,6 +37112,16 @@ function eventCallInTick(from, to) {
     }
 }
 SIM_ADVANCE.push((from, to) => eventCallInTick(from, to));
+// ---- F5 (EV2): small parts by rank. Only your part changes (the crew's plans never read your rank). Inert while off ----
+// An event meeting may say which of your ranks it's for, `ranks: ['officer', 'senior', 'specialist']` (section 17's
+// RANKS; none: everyone): at one of them you're invited (its heads-up, the panel when you're in the room, the Schedule);
+// otherwise you get its gist by Mail as everyone else does. `scriptBy: { <rank>: scriptId }`: the version of the scene
+// for your rank (the Officer's briefing), else `script`. An event job may carry `rank`: 'junior' (held for juniors, as
+// section 17's j.junior) or the lowest rank that may take it (j.only)
+const EV_RANK_ON = EVENTS_ON;
+const evInvited = m => !EV_RANK_ON || !m || !Array.isArray(m.ranks) || m.ranks.includes(playerRank());
+const evScriptOf = m => (EV_RANK_ON && m && m.scriptBy && MEETING_SCRIPTS[m.scriptBy[playerRank()]] ? m.scriptBy[playerRank()] : m.script);
+const eventJobRank = spec => !EV_RANK_ON || !spec || !RANKS.includes(spec.rank) ? {} : spec.rank === 'junior' ? { junior: true } : { only: spec.rank };
 // ---- end of slot: Events engineer 2 ----
 
 // =====================================================================
