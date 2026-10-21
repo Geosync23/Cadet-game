@@ -342,3 +342,9 @@ Verdict on 84946af: **PASS WITH FIXES** (R3-1, R3-2). Once the spots are on clea
 - **R3-2 done.** The bowl and ribbons are shown 14:30-15:15 only.
 
 **Verdict on claude/event-plan-line 7040dc8: PASS.**
+
+### d01acd6: reuses the storm's EV_DAY_DRESS
+L2 now adds its two Day 7 rows (the Sunday table, the Lap) to the storm's `EV_DAY_DRESS` instead of building its
+own. Only text changed. The shape EP2 proposed to EP3 (a Map keyed `<trad>@<day>`, rows of drop, set or add, made at
+load, empty when off) is fine. One condition: the add row keeps its k, so the Lap moved to Day 15 keeps 442 and a
+plan's hash stays the same. The storm's review checks the final shape. **PASS stands.**
