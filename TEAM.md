@@ -338,3 +338,4 @@ Working (5): EV2 (base F0b/F5/F8), EV3, FR2, BM11, PR3.
 | Seat | Session | Branch | Job |
 |---|---|---|---|
 | Events reviewer PR4 | session_014WyaZtasY32m5fnkBxuR9d | `claude/review-4` | turn reviews for the events team from EV3's S1 on |
+**~04:57 UTC:** PR3 idle (handover plans/handover-reviewer-3.md on claude/review-3). Events base fully PASS: claude/events-base-2 394182b (F0a-F4, F0b, F5, F8) → BM11 merges after 0.64.7. PR4 takes EV3 S1 (PR3 partial in its note). EC1 adding the calledIn case → PR4. BM11 diagnosing 0.64.7 FLC vs Day-18 parts ask (~1 h).
