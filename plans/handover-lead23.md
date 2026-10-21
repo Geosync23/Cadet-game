@@ -17,16 +17,17 @@ Lead session session_01XXiKm9iPgm565SZ4n1knmU, branch `claude/lead-23` (push onl
 - **Dev page** v2 = 0.64.7, v3 = **0.64.8** (claude/integration 0ca6a58 = 0.64.7 + events base + bigevents check, every event switch off; plays the same as 0.64.7).
 - **Optimization plan** https://claude.ai/artifact/LK2gXYXbnTqRhjt7k28Q5N (claude/opt-plan acadf6e, OP1, ER2 PASS round 2; db answers/opt-plan, opt-q1..q8 + opt-general). Unanswered: for the user in the morning.
 
-## State (keep current; see FINAL STATE when handing over)
-- **Ion storm:** S1-S9 built on claude/storm-update f32d901 (EV4; S4/S8 by EV2). ER2's adversarial build review of f32d901 in progress. PR4 turn reviews: S1, S3-S7 (with fixes, folded), S4 PASS; S8, b9aa775, props 96bb2c6 (4d + 8b stand-in), f32d901 queued. S10 (switch on) after ER2 PASS + PR4. S2 (Captain/Vance off the double shift for the Day 12 address: Marrow 15:30, Vance 15:45 to 16:50) after Fridays reaches claude/integration.
-- **Fridays:** FR2 on claude/fridays, turns 1-7 built (turn 7 86d0c80); reviewer PR5 (turns 5-fix, 6, 7 on); PB owner-reviews s13/14/10 (all OK so far). Turns 8-10 left. FR2 ~440k: handover note at 500k → a fresh FR3.
-- **Build master:** BM11 handed over (plans/handover-build-master.md, claude/integration 3a48846). Start a fresh BM12 from that note when Fridays is ready to merge (then the storm).
-- **Crossing the Line:** EV5 session_012DBTAAiTTNJYugQL4YLScJ started 09:24 on claude/line-update (from storm-update); L1-L6 behind EV_LINE_ON; reviewer PR4 for now; ER2 before switch-on.
-- **Optimization pass:** plan published; team of 4 + the build master after the events (test-speed, render, game code, reviewer); TS1's notes on claude/test-speed bd7d61f.
+## State (keep current; see FINAL STATE when handing over) — as of 10:22 UTC
+- **Ion storm:** claude/storm-update 5f3fc3f = S1, S3-S9 + every review fix; **ER2 build review PASS** (10:14). PR4 passed S1, S3-S7 (fixed), S4, b9aa775, props (mess only dimmed); PR6 passed S8; PR6 has the rest of PR4's queue (f32d901 + 2228a05 round, props shot, EC1 turns 9-11 + 541ae52). EV4 now on **S2** (merging claude/fridays; Marrow 15:30, Vance 15:45, to 16:50); then S10 (switch on) on PR6's pass. Merge order for the build master: Fridays first, then the storm (with S2) in one go.
+- **Fridays:** claude/fridays 7a0e5f7, turns 1-8 built (FR1, FR2). FR3 on turn 9 (new perf scenes in the right rooms, measured on a switch-on copy). PR5 reviewing turns 5-fix/6 (8415d1e: all OK so far; one real find = player_check's job loop taps the lectern on Deck 7: a check fix, re-running on 12def3a), then 7 and 8. Turn 10 (switch on) on the lead's go after reviews.
+- **Crossing the Line:** EV5 on claude/line-update: L1 5c3c003 (data, two-events base fixes; PB OK) → PR6; L2 (crowds) in progress. ER3 (fresh, from plans/handover-event-reviewer-2.md on claude/event-plan-review-2) for the Line build review near the end.
+- **Build master:** none live. Start BM12 from plans/handover-build-master.md (claude/integration 3a48846) when Fridays + storm S2 are reviewed: Fridays, then the storm, then the Line.
+- **Optimization pass:** plan published, waiting for the user's answers; build team after the events.
 
-## Seats (lead 23)
-Working: EV4 session_01MqpjPG6mDFe5avrDxcNWTU (storm builder, ~420k, handover plans/handover-storm-builder-2.md) · FR2 session_019m7hCEtBsPA3ascA2Bqu9V (Fridays) · PR4 session_014WyaZtasY32m5fnkBxuR9d (storm reviewer, ~410k) · PR5 session_01Eh4drBZjJ82DjYx6XaTt1F (Fridays reviewer) · ER2 session_01S8pboNujAzZgMSWFK84CxD (adversarial reviewer, ~400k).
-On call / idle: EC1 session_01QgShGXD6P24DDxTp8npN41 (bigevents_check owner) · PB session_01FWW2piuXkFYaRRzLXZiqYb (s13/14/10 owner reviews, ~58%) · OP1 session_01RxxLLT9jpvagqJpCW99dop (opt planner, done, ~25%) · EV2 session_017S7eVMgX34nSt8fxZ5kat9 (~440k, S4/S8 fixes only) · EV3, BM11, lead 22 (done).
+## Seats (lead 23, 10:22 UTC)
+Working (5): EV4 session_01MqpjPG6mDFe5avrDxcNWTU (storm, ~450k, handover plans/handover-storm-builder-2.md) · FR3 session_01935gmiyLoy5fgvs3xQd7QC (Fridays) · EV5 session_012DBTAAiTTNJYugQL4YLScJ (the Line) · PR5 session_01Eh4drBZjJ82DjYx6XaTt1F (Fridays reviewer) · PR6 session_01LVHLJHrAR5iGJFS7HK9E7i (storm + Line reviewer).
+On call: EC1 session_01QgShGXD6P24DDxTp8npN41 (bigevents_check; adds Line cases) · PB session_01FWW2piuXkFYaRRzLXZiqYb (s13/14/10) · ER2 session_01S8pboNujAzZgMSWFK84CxD (~460k, quick S2 look only) · OP1 session_01RxxLLT9jpvagqJpCW99dop (opt plan done).
+Done/idle: EV2, EV3, FR2, PR4, BM11, lead 22.
 
 ## Backlog notes from lead 23's shift
 - 18b perf_check scenes stand you in the wrong room (6 of 8) → optimization item 0.
