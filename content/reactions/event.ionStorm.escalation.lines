@@ -1,0 +1,12 @@
+@reactions event.ionStorm.escalation
+// EW1 (events writer), the storm update: Saturday Day 13 (the surge at 11:20, storm stew, the lantern supper at 18:00).
+? cue:event.ionStorm.escalation time:evening
+- Lantern supper tonight. I've saved you a spot on the bench.   #warm
+? cue:event.ionStorm.escalation dept:works weekday:sat
+- Called in on a Saturday. The board doesn't know what a weekend is.
+- My day off, they said. Then the surge, they said.   #funny
+
+// EW2, the Veyli lore (plans/veyli-lore-plan.md section 3): Saruth at the lantern supper, the cord read by touch. The
+// mess is lamp-lit on purpose: never tied to a blackout. Never the first knot (Holt's arc), never a rite.
+? cue:event.ionStorm.escalation who:saruth place:mess time:evening
+- We read the cord by touch, on the long ship. Here. Hold it.   #warm

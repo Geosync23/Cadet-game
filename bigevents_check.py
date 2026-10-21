@@ -19,10 +19,12 @@
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
 #   gathering in the hold) must each be caught;
-#   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load;
+#   5. late saves (F0c): evSkippedFor for any day, evCalPlan; real saves: SHIP.evFrom (the day events first came on,
+#   saved) decides what's passed over (evFrom 0 on Day 20: the storm it missed is run at load and logged), kept through a save and a reload, null and unsaved while off;
 #   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
 #   its minute, its cue, a crew reaction line for the front; none while EV_NOTES_ON is off; and the device (F3a): the
-#   Schedule's event items at the meetings' and gatherings' minutes, Tracked's booths only while open, eventClosed
+#   Schedule's event items at the meetings' minutes (each EV_SHIPWIDE gathering once as a tradition, nothing twice), a
+#   meeting's own toast only while the device's heads-ups are off, Tracked's booths only while open, eventClosed
 #   (the auditorium opened just for the Friday address); nothing while EV_DEVICE_ON is off.
 # Each part skips (SKIP, or WAITING with what it waits for) while its switch or code isn't there yet, so it runs on
 # today's integration and grows as the events base is built. Exits 1 on a FAIL. About 2 minutes.
@@ -218,10 +220,18 @@ DEVICE = r"""(() => {
     const sd = r ? r.day : (eventDueDay() || {}).day;
     out.off = { items: [sd, sd + 1, sd + 2, sd + 3].map(d => eventItems(ab(d, 0), ab(d, 1439)).length), lounge: eventClosed({ deck: 3, room: 'L' }, ab(sd + 1, 900)) };
     if (!out.on) return out;
+    const meets = new Set((SHIP_EVENTS[r.id].meetings || []).map(m => m.id)), shipwide = new Set(EV_SHIPWIDE.map(g => g.id));
     for (let d = sd; d < sd + SHIP_EVENTS[r.id].days; d++) {
-      const want = eventGatherings(d).map(g => g.at).sort((x, y) => x - y), items = devDay(d).filter(x => x.kind === 'event');
-      out.days.push({ d, want, got: items.map(x => x.from).sort((x, y) => x - y), goals: items.filter(x => { const g = devItemGoal(x); return !(g && Number.isInteger(g.deck) && g.room); }).map(x => x.title + ' ' + hhmm(x.from)) });
+      const G = eventGatherings(d), all = devDay(d), items = all.filter(x => x.kind === 'event'), trads = all.filter(x => x.kind === 'tradition');
+      const want = G.filter(g => meets.has(g.id) || !shipwide.has(g.id)).map(g => g.at).sort((x, y) => x - y);   // a meeting (or a gathering not in EV_SHIPWIDE) once as 'event'
+      const asTrad = G.filter(g => shipwide.has(g.id)).map(g => [g.id, g.at, trads.filter(x => String(x.id).split('@')[0] === g.id && x.from === g.at).length]);   // an EV_SHIPWIDE gathering once as 'tradition'
+      const seen = {}, twice = []; for (const x of all) { const k = x.title + '@' + x.from; if (seen[k]) twice.push(k); seen[k] = 1; }
+      out.days.push({ d, want, got: items.map(x => x.from).sort((x, y) => x - y), asTrad, twice, goals: items.filter(x => { const g = devItemGoal(x); return !(g && Number.isInteger(g.deck) && g.room); }).map(x => x.title + ' ' + hhmm(x.from)) });
     }
+    // a meeting's own toast (m.notify): none while the device's heads-ups are on (the Schedule gives it), kept when they're off
+    const R0 = SHIP.device && SHIP.device.calendarRemind, ev0 = SHIP.event, toast = on => { MEETINGS.length = 0; SHIP.event = null; if (R0) R0.on = on; eventAdvance(ab(sd, 0) + 1, true);
+      return (SHIP_EVENTS[r.id].meetings || []).map(m => { const x = MEETINGS.find(y => y.id === m.id); return [m.id, x ? x.notify || null : 'missing', m.notify || null]; }); };
+    if (R0) { const was = R0.on; out.toast = { on: toast(true), off: toast(false) }; R0.on = was; MEETINGS.length = 0; SHIP.event = ev0; }
     const calls = TRK_PLACES.find(q => q.key === 'place:calls');
     for (const [d, m] of [[sd + 1, 600], [sd + 1, 900], [sd + 2, 720], [sd + 3, 720], [sd + 4, 720]]) {
       setShipNow(ab(d, m)); const shut = eventRoutines(ab(d, m)).some(x => x.rule === 'closed' && (x.where === 'type:callhome' || x.where === '3|B'));
@@ -245,7 +255,11 @@ def check_device(g, tag, want_on):
     if not D['on']: fail(f"{tag}: EV_DEVICE_ON is off in this copy"); return
     for x in D['days']:
         say(f"  Schedule D{x['d']}: event items at {[hhmm_py(m) for m in x['got']]}")
-        if x['got'] != x['want']: fail(f"{tag}: the Schedule on Day {x['d']} has event items at {[hhmm_py(m) for m in x['got']]}, the event's meetings and gatherings are at {[hhmm_py(m) for m in x['want']]}")
+        if x['got'] != x['want']: fail(f"{tag}: the Schedule on Day {x['d']} has event items at {[hhmm_py(m) for m in x['got']]}, the event's meetings are at {[hhmm_py(m) for m in x['want']]}")
+        for i, at, n in x['asTrad']:
+            say(f"  Schedule D{x['d']}: {i} {hhmm_py(at)} as a tradition x{n}")
+            if n != 1: fail(f"{tag}: the gathering {i} on Day {x['d']} {hhmm_py(at)} is listed {n} times as a tradition, not once")
+        for k in x['twice']: fail(f"{tag}: the Schedule on Day {x['d']} lists {k} twice")
         for t in x['goals']: fail(f"{tag}: Schedule item {t} on Day {x['d']} has no goal to walk to")
     for x in D['trk']:
         say(f"  Tracked D{x['d']} {hhmm_py(x['m'])}: call booths {'closed' if x['shut'] else 'open'}, offered {x['offered']}")
@@ -253,6 +267,14 @@ def check_device(g, tag, want_on):
     if [c[2] for c in D['closed']] != [True, False, False]: fail(f"{tag}: eventClosed for the bow lounge (front day 15:00, warning day 15:00, all-clear day 20:00): {D['closed']}")
     if D['open7'] is not None and [c[2] for c in D['open7']] != [True, False, True, True]: fail(f"{tag}: with Deck 7 closed, the auditorium should open just for the Friday address (15:00 shut, 16:10 open, 17:10 shut; the common room shut): {D['open7']}")
     say(f"  eventClosed: bow lounge {D['closed']}; Deck 7 closed in the onset: {D['open7']}")
+    T = D.get('toast')
+    if T is None: waiting(f"{tag}: the meetings' toasts (no SHIP.device.calendarRemind)")
+    else:
+        say(f"  meeting toasts: heads-ups on {T['on']}; off {T['off']}")
+        for i, got, want in T['on']:
+            if got is not None: fail(f"{tag}: meeting {i} keeps its own toast while the device's heads-ups are on: {got}")
+        for i, got, want in T['off']:
+            if got != want: fail(f"{tag}: meeting {i} with heads-ups off should keep its toast {want!r}: {got!r}")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -449,34 +471,86 @@ with sync_playwright() as pw:
         print(f"  {p}: " + ('caught: ' + hit[0] if hit else 'NOT caught'))
         if not hit: fail(f'the self-test: the planted {p} was not caught')
 
-    # 5. late saves (in the browser): a save made on Day 20 before events were on passes over the storm for good;
-    # a Day 9 save keeps it; one that already ran it doesn't pass it over; decided once, at load
+    # 5. late saves (F0c, OR1): the skip comes from SHIP.evFrom, the day the calendar was first on in this game, set
+    # once and saved (ship.evFrom), never from the day a page loads. On paper, evSkippedFor for any day; then real saves
+    # in the browser: evFrom 20 passes over the storm for good, evFrom 0 on Day 20 passes over nothing, a save with no
+    # evFrom key loaded with the calendar on takes the day it loads and keeps it through a save and a reload; with the
+    # calendar off, SHIP.evFrom is null and the save has no key
     print('\n5. Late saves:')
-    if 'EV_SKIPPED' not in SRC: waiting('EV_SKIPPED (F0a)')
+    if 'function evSkippedFor' not in SRC:
+        waiting('evSkippedFor and SHIP.evFrom (F0c)')
     else:
-        tmp = WORK / 'test' / '_run_bigev_late.html'; tmp.write_text(instrument(pathlib.Path(variant('late', 'all')).read_text()))
-        b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-        errs = []
-        for day, log, want in [(20, [], {'skip': ['crossingLine', 'ionStorm', 'comet'], 'due': None}),
-                               (9, [], {'skip': ['crossingLine'], 'due': {'id': 'ionStorm', 'day': 11}}),
-                               (20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], {'skip': ['crossingLine', 'comet'], 'due': None})]:
-            save = {'v': 2, 'build': 'x', 'time': {'day': day, 'min': 600}, 'player': {'deck': 4, 'tile': [7, 3], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': log}, 'crew': {}}
+        g = Game(pw, variant('on', 'all'))
+        P5 = g.ev("""(() => {
+          const want = (from, log, cur) => from == null || EV_LATE !== 'skip' ? [] : EV_CALENDAR.filter(r => r.day < from && !log.some(l => l.id === r.id) && !(cur && cur.id === r.id)).map(r => r.id);
+          const cases = [[20, [], null], [9, [], null], [20, [{ id: 'ionStorm' }], null], [20, [], { id: 'ionStorm' }], [0, [], null], [1, [], null], [null, [], null], [40, [], null]];
+          const plan = evCalPlan();
+          return { evFrom: SHIP.evFrom, late: EV_LATE, cases: cases.map(([f, l, c]) => ({ f, l: l.map(x => x.id), c: c && c.id, got: evSkippedFor(f, l, c), want: want(f, l, c) })),
+            plan, due: evCalDue(), days: plan.map(r => SHIP_EVENTS[r.id].days),
+            cal: EV_CALENDAR.filter(r => SHIP_EVENTS[r.id] && !SHIP_EVENTS[r.id].draft && !EV_SKIPPED.has(r.id)).map(r => r.id) };
+        })()""")
+        g.close()
+        print(f"  a new page: SHIP.evFrom {P5['evFrom']}, EV_LATE {P5['late']}; the plan {P5['plan']}; due {P5['due']}")
+        if P5['evFrom'] not in (0, 1): fail(f"a new game's SHIP.evFrom is {P5['evFrom']}, not 0 or 1 (its first day)")
+        for c in P5['cases']:
+            print(f"  evSkippedFor({c['f']}, log {c['l']}, running {c['c']}) = {c['got']}")
+            if c['got'] != c['want']: fail(f"evSkippedFor({c['f']}, {c['l']}, {c['c']}) = {c['got']}, want {c['want']}")
+        if P5['late'] == 'skip':
+            named = {(20, ()): ['crossingLine', 'ionStorm', 'comet'], (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine', 'comet'], (0, ()): [], (1, ()): []}
+            for c in P5['cases']:
+                k = (c['f'], tuple(c['l']))
+                if k in named and not c['c'] and c['got'] != named[k]: fail(f"evSkippedFor({c['f']}, {c['l']}): {c['got']}, the brief says {named[k]}")
+        # the plan: built rows not passed over, in the calendar's order, each on or after its day, one at a time; due = its first
+        if [r['id'] for r in P5['plan']] != P5['cal']: fail(f"evCalPlan lists {[r['id'] for r in P5['plan']]}, the calendar's built rows are {P5['cal']}")
+        for x, y, n in zip(P5['plan'], P5['plan'][1:], P5['days']):
+            if y['day'] < x['day'] + n: fail(f"evCalPlan: {y['id']} on Day {y['day']} before {x['id']} ends (Day {x['day'] + n - 1})")
+        if P5['plan'] and P5['due'] != {'id': P5['plan'][0]['id'], 'day': P5['plan'][0]['day']}: fail(f"evCalDue {P5['due']} isn't the plan's first {P5['plan'][0]}")
+
+        def load(b, path, save, reload=False, errs=None):
             pg = b.new_page(viewport={'width': 900, 'height': 760})
             pg.on('pageerror', lambda e: errs.append(str(e)))
             pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
-            pg.add_init_script(INIT + "try { localStorage.clear(); localStorage.setItem('starship-cadet-save', " + json.dumps(json.dumps(save)) + "); localStorage.setItem('starship-cadet-arrived', '1'); Storage.prototype.setItem = () => {}; } catch (e) {}")
-            pg.goto('file://' + str(tmp))
-            pg.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
-            r = pg.evaluate('s => window.__sc(s)', """(() => { const sk = [...EV_SKIPPED], due = evCalDue(), ed = [...Array(31).keys()].filter(d => eventDay(d)), d0 = SHIP.time.day;
-              SHIP.time.day = 3; const sk2 = [...EV_SKIPPED], ed2 = [...Array(31).keys()].filter(d => eventDay(d)); SHIP.time.day = d0;
-              return { day: d0, sk, due, ed, same: JSON.stringify([sk, ed]) === JSON.stringify([sk2, ed2]) }; })()""")
-            pg.close()
-            print(f"  a Day {day} save{' (storm logged)' if log else ''}: loaded on Day {r['day']}, passes over {r['sk']}, due {r['due']}, eventDay {r['ed']}")
-            if r['day'] != day: fail(f"the Day {day} save loaded on Day {r['day']}"); continue
-            if sorted(r['sk']) != sorted(want['skip']): fail(f"a Day {day} save should pass over {sorted(want['skip'])}: {r['sk']}")
-            if r['due'] != want['due']: fail(f"a Day {day} save: due {r['due']}, want {want['due']} (the visit is still a draft)")
-            if not r['same']: fail(f"a Day {day} save: what's passed over changed after load")
-            if day == 20 and not log and r['ed']: fail(f"a Day 20 save (storm passed over) still has eventDays {r['ed']}")
+            seed = "if (!sessionStorage.getItem('__bev')) { sessionStorage.setItem('__bev', '1'); localStorage.clear(); localStorage.setItem('starship-cadet-save', " + json.dumps(json.dumps(save)) + "); localStorage.setItem('starship-cadet-arrived', '1'); }"
+            pg.add_init_script(INIT + "try { " + seed + " } catch (e) {}")
+            pg.goto('file://' + str(path)); pg.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
+            return pg
+        def state(pg):
+            return pg.evaluate('s => window.__sc(s)', """(() => { const sk = [...EV_SKIPPED].sort(), ed = [...Array(31).keys()].filter(d => eventDay(d)), d0 = SHIP.time.day, due = evCalDue();
+              SHIP.time.day = 3; const same = JSON.stringify([[...EV_SKIPPED].sort(), [...Array(31).keys()].filter(d => eventDay(d))]) === JSON.stringify([sk, ed]); SHIP.time.day = d0;
+              return { day: d0, evFrom: SHIP.evFrom, sk, ed, due, same, log: SHIP.eventLog.map(l => l.id + ':' + l.startDay + '-' + l.endDay), ev: SHIP.event && SHIP.event.id + ':' + SHIP.event.startDay + ':' + SHIP.event.phase }; })()""")
+        def saved_from(pg):
+            return pg.evaluate('s => window.__sc(s)', "(() => { saveGame(); const s = JSON.parse(localStorage.getItem(SAVE_KEY) || '{}'); return s.ship && 'evFrom' in s.ship ? s.ship.evFrom : 'no key'; })()")
+        def mk(day, log=None, frm='none'):
+            ship = {'decks': {}, 'eventLog': log or []}
+            if frm != 'none': ship['evFrom'] = frm
+            return {'v': 2, 'build': 'x', 'time': {'day': day, 'min': 600}, 'player': {'deck': 4, 'tile': [7, 3], 'facing': 0}, 'ship': ship, 'crew': {}}
+        on_html = WORK / 'test' / '_run_bigev_late.html'; on_html.write_text(instrument(pathlib.Path(variant('late', 'all')).read_text()))
+        off_html = WORK / 'test' / '_run_bigev_lateoff.html'; off_html.write_text(instrument(SRC))
+        errs = []
+        b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+        storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
+        big = [12, 13, 14] if storm else []
+        for title, save, want in [
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': [], 'due': None, 'log': []}),
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': ['ionStorm:11-17'] if storm else []}),   # the storm it missed is run on load, as an unbroken game ran it
+            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big, 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big, 'due': None})]:
+            pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
+            print(f"  {title}: evFrom {r['evFrom']}, passes over {r['sk']}, eventDay {r['ed']}, due {r['due']}, log {r['log']}, running {r['ev']}")
+            for k in ('evFrom', 'sk', 'ed', 'due', 'log'):
+                if k in want and r[k] != want[k]: fail(f"{title}: {k} {r[k]}, want {want[k]}")
+            if not r['same']: fail(f"{title}: what's passed over changed with the clock")
+        # no evFrom key: takes the day it loads, kept through a save and a reload
+        pg = load(b, on_html, mk(20), errs=errs); r1 = state(pg); k1 = saved_from(pg)
+        pg.reload(); pg.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); r2 = state(pg); pg.close()
+        print(f"  a Day 20 save with no evFrom: evFrom {r1['evFrom']} (saved {k1}), passes over {r1['sk']}; after a reload evFrom {r2['evFrom']}, passes over {r2['sk']}")
+        if r1['evFrom'] != 20 or k1 != 20: fail(f"a save with no evFrom loaded on Day 20 should take evFrom 20 and save it: {r1['evFrom']}, saved {k1}")
+        if (r2['evFrom'], r2['sk'], r2['ed']) != (r1['evFrom'], r1['sk'], r1['ed']): fail(f"after a save and a reload: evFrom {r2['evFrom']}, {r2['sk']}, eventDay {r2['ed']} (was {r1['evFrom']}, {r1['sk']}, {r1['ed']})")
+        # the calendar off (the build as it is): no evFrom, and the save gains no key
+        if 'const EVENTS_ON = false;' in SRC:
+            pg = load(b, off_html, mk(20), errs=errs); ro = pg.evaluate('s => window.__sc(s)', 'SHIP.evFrom'); ko = saved_from(pg); pg.close()
+            print(f"  switched off: SHIP.evFrom {ro}, saved {ko}")
+            if ro is not None or ko != 'no key': fail(f"switched off, SHIP.evFrom should be null and the save have no evFrom key: {ro}, {ko}")
         b.close()
         for e in errs[:3]: fail(f'late saves: page error: {e}')
 

@@ -52,7 +52,7 @@ PLANS = r"""(days => {
     }
     const S = schedData(), went = {}, places = {};
     for (const p of schedPeople()) for (const s of planDay(p, d)) {
-      if (!s.tag || !/^ev-/.test(s.tag)) continue;
+      if (!s.tag || !/^ev-/.test(s.tag) || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag))) continue;   // a ship-wide event's meeting (F0b), not a tradition
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
       if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41)
@@ -186,8 +186,9 @@ LIVE = r"""(() => {
   const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
   const frames = () => { window.__skip = false; window.__step(1, 1); window.__step(2, 16); return renderer.info.render.calls; };
   skipTo(9 * 1440 + 7 * 60); eventStart('ionStorm', 10); EV_DAYS.clear(); eventAdvance(shipNow(), true);
-  // the briefing: day 10, 09:15, the Works bay (0.70.1: the 09:00 shift)
-  put(5, '5-jobboard-1'); tick(9 * 1440 + 8 * 60 + 50, 9 * 1440 + 9 * 60 + 16);
+  // the briefing: day 10 at its data's minute, the Works bay (09:15 since 0.70.1; 14:00 with the storm update, EV_STORM_ON)
+  const bm = SHIP_EVENTS.ionStorm.meetings.find(m => m.id === 'stormBriefing').at[1];
+  put(5, '5-jobboard-1'); tick(9 * 1440 + bm - 25, 9 * 1440 + bm + 1);
   D.briefing = DIALOGUE ? { open: true, cast: Object.fromEntries(Object.entries(DIALOGUE.cast).map(([k, p]) => [k, p.name])), first: dialogueView() } : { open: false };
   const devDlg = document.getElementById('devDlg');   // section 19's panel (deviceDialogue) when the device is merged, else the plain strip
   D.panel = !!(DIALOGUE_EL && !DIALOGUE_EL.hidden && DIALOGUE_EL.textContent.length > 5) || !!(devDlg && !devDlg.hidden && devDlg.textContent.length > 5);
@@ -646,7 +647,8 @@ with sync_playwright() as pw:
     if len(a['addr']) != 2 or 'in it' not in a['addr'][0] or 'passed' not in a['addr'][1]: fail(f"the Captain's addresses: {a['addr']}")
     if not any('Storm prep' in x for x in a['mails']) or not any('how it went' in x for x in a['mails']): fail(f"the storm's Mail: {a['mails']}")
     if len(a['news']) != 7 or not all('@10 ' in x for x in a['news']): fail(f"the storm's news: {a['news']}")
-    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or 'stormBriefing works-bay 09:15' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
+    bt = g.ev("hhmm(SHIP_EVENTS.ionStorm.meetings.find(m => m.id === 'stormBriefing').at[1])")   # 09:15, or 14:00 with the storm update
+    if a['on'] != ['10:0 warning@360', '11:1 warning@0 onset@840', '13:3 escalation@0 resolution@600 afterglow@1320', '16:-'] or f'stormBriefing works-bay {bt}' not in a['gath'][0] or 'party bow-lounge 19:00' not in a['gath'][1]: fail(f"eventOn / eventGatherings: {a['on']} {a['gath']}")
     if len(a['meets']) != 2: fail(f"the storm's meetings: {a['meets']}")
     if m.get('menu') != 'stormStew': fail('eventMod at t: no storm stew in the escalation')
     if a['log'] and 'calls' not in a['log'][0]['threads']: fail('the call-home backlog was not scored')
@@ -685,7 +687,7 @@ with sync_playwright() as pw:
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
-    if not L['allClear'] or L['allClear']['name'] != 'Captain Odile Marrow' or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')
+    if not L['allClear'] or L['allClear']['name'] not in ('Captain Odile Marrow', 'Commander Teo Vance') or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')   # the writers' all-clear (the storm update) opens with Vance
     if max(L['calls1'], L['calls2'], L['calls3']) >= 450: fail('draw calls over 450 in the storm')
     if len(L['log']) != 1 or L['left'] is not None or not L['traces'] or not any('how it went' in x for x in L['mails']): fail(f"the live storm didn't end cleanly: {L['log']}")
 
