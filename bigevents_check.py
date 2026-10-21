@@ -358,8 +358,9 @@ LINE = r"""(() => {
       const want = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table')).length, B = ab(d, 0);
       const segs = people.flatMap(p => planDay(p, d).filter(s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-'))));
       let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
-      const cap = new Set(sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []).map(q => q.id)).size;
-      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap };
+      const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
+      const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap, seats, crowd, seated: !!sup.ev.seated };
     }
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
@@ -387,6 +388,10 @@ def check_line(g, tag):
     else:
         if sp['want'] > CROWD: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")
         if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
+        if not sp['seated']: waiting(f"{tag}: the Line supper seated (the user's call; EV7 marks it seated): today {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
+        else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
+            if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
+            if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -520,6 +525,7 @@ def judge(a, tag):
         if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
         if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
         if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")
+        if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
         if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
             if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
             if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
