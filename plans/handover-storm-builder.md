@@ -59,6 +59,17 @@ Off = today's storm: cadet_test ALL IDENTICAL against the turn before, every tur
   for 14:12 at 14:00 (the board hides future postings, so claimJob failed): eventTakeJob holds it directly; events_check
   LIVE asserts the battery job is claimedBy 'you' after the briefing.
 
+## Open finds (after ff16dd5)
+
+- **The pick held, day-10 path:** events_check's LIVE part (the storm started on day 10) shows the battery job you picked
+  is posted at 14:12 with `wants:stormBatteries` set but stays open (claimedBy null), though `playerShiftOn(10)` is true;
+  a probe with the storm started on Day 11 (the calendar's) holds it ('claimed:you'). It prints a NOTE, not a FAIL.
+  Find why section 17's claim-on-post (eventJobsHour, `wants:` and `!mine`) refuses on day 10, then make it a FAIL again.
+- **bigevents_check (EC1's cdf80ce) switched on:** "party: 45 people for 34 places"; "lanternSupper: a crowd of 68, over
+  about 60" (my probe counted 59 at the supper's places: see what EC1 counts, likely everyone in the mess at 18:30);
+  "Lap of the Wren not on D15 at 20:30" (my probe has it on: check how its 'calendar'/'on' parts flip the switches;
+  EV_DAY_DRESS needs EV_STORM_ON and EV_CAL_ON); plus its known 'off:'/'calendar:' rows that test a switched-on copy.
+
 ## Left to do
 
 1. **S2 (waits on lead 22's call about Fridays):** the 'captains-address' tradition exists only on claude/fridays.
