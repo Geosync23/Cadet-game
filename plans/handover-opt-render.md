@@ -17,7 +17,7 @@ From RN1 (the render seat), 2026-10-21, for whoever picks up the render items or
 | 2 | where player_check's 37 minutes go | test-speed seat's | TS2 |
 | 3 | the crowd sends less to the graphics chip | **parked: measured, not worth it** (the plan's bytes were a miscount, and day_check's "upload" time was drawing) | RN1 |
 | 4 | keep compiled shaders across deck changes | **done, PASSED** (PR7); ready for the build master (6fd3505) | RN1 |
-| 5 | find what fills the extra 134 MB | **not started** (the game-code seat, never staffed) | a game-code or memory seat |
+| 5 | find what fills the extra 134 MB | **built** (lead 24's OK): `unloadDeck` takes the old deck's tree apart, so ~78 MB of stale decks is let go; proofs running at the push (see the row), then OR1 | RN1 |
 | 6 | paint texture grain faster, same pixels | **loop built, in review** (OR1); the rest **parked: the only real gain changes pixels, the user said no** | RN1 |
 | 7 | lighter busy frames | **parked: measured, small** (at most ~0.15-0.2 ms of 2.4 across 4-5 owners) | RN1 |
 | 8 | Dev mode Speed card | **built, in review** (OR1) | RN1 |
@@ -38,6 +38,7 @@ From RN1 (the render seat), 2026-10-21, for whoever picks up the render items or
 | Building all seven decks | 2.27 s | 1.33 s (Deck 3 599 → 346 ms, Deck 2 486 → 264, Deck 4 451 → 270) | `opt-probes/merge_bytes.py`, best of 5 |
 | The grain at load (17 calls, 3 runs each) | 685-744 ms | 621-667 ms (the loop itself is 26 ms of it now; the rest is `getImageData`'s readback) | `opt-probes/grain_load.py`, `grain_split.py` |
 | Busiest event scene (draw calls) | not measured | the Line supper 419, the lantern supper 417 of 450 (zoomed out, the mess) | perf_check event scenes |
+| Array storage after visiting every deck (Deck 4) | 134.6 MB | 61.3 MB (perf_check's JS heap after round trips 228 → 87 MB) | `opt-probes/heap_tour.py`, perf_check |
 | Crowd uploads in play (Sunday dinner) | (plan: 4.4 MB spikes) | measured right: 31 KB typical, 1.69 MB at most; left as is | `opt-probes/buf_play_true.py` |
 
 Every built change was proven with the same pictures: cadet_test ALL IDENTICAL, plus each item's own proof (shots of every deck, merged bytes, grain fingerprints and the seed), and check_fast OK.
@@ -82,7 +83,8 @@ Every built change was proven with the same pictures: cadet_test ALL IDENTICAL, 
 - The TriFold's CSS sizes in `perf_check.py`'s `TRIFOLD` are derived (412×960 folded, 792×1080 open). Once the user's Speed card screenshots come back, put the real ones in that one table and in opt-measure "The trifold's sizes".
 - Re-measure the Line supper when it becomes seated sittings (EV7).
 - The known +2 geometries on deck round trips (since 0.64.6) still shows in perf_check. It isn't mine and it isn't new.
-- #5 (the 134 MB of memory after visiting every deck) was never started.
+- #5's proof rounds were still running at the push (account move): player_check, check_fast, then `scratchpad/proof5b.sh`'s event-build runs (day_check Days 13, 14, 21 on storm + Fridays + Tern switched on, and the Line's Day 7, each old vs new line by line). If the container is gone, rerun them: the builds are a local merge of claude/opt-render + storm-update + fridays + patch-crew with EVENTS_ON flipped, and claude/line-update with the two-line patch and EVENTS_ON + EV_LINE_ON flipped. Then send #5 to OR1.
+- OR1's F1-F4 on perf_check are done (fe0726b); OR1 was reviewing #8 next.
 
 ## Open questions for the user
 None. The two the user answered today: no visual change from the CPU-drawn textures, and the phone is the Galaxy Z TriFold.
