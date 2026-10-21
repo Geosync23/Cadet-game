@@ -46,13 +46,13 @@
 - The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. Whatever the crew voted for, and a pudding. No punch. I promise.
 == event.crossingLine.gather.lineSupper.ask
 - Line supper at six. Proper food, to make up for the punch.   #funny
-- Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
+- Everyone's at the Line supper tonight. Come and squeeze onto a bench.
 == event.crossingLine.gather.lineSupper.here
 - To the Line, and everyone who crossed it today.   #warm
 - Supper's to get rid of the taste. It's working.   #funny
 - First-timers eat first. That's the rule tonight.
 == event.crossingLine.gather.lineSupper.thanks
-- The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
+- The mess is full, every bench taken. Someone hands you a plate, and someone else budges up to make you room.   #warm
 == event.crossingLine.gather.lineSupper.chatter
 - Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
 - The Line supper ran out of seconds in ten minutes. Brennan was thrilled.
@@ -70,7 +70,7 @@
 == event.crossingLine.plaque.proud
 - The CSV Wren crossed the Line into the Veyli reach, Day 7. "We came a long way. We're glad we did."
 == event.crossingLine.plaque.watch
-- The CSV Wren crossed the Line into the Veyli reach, Day 7. "We crossed together. Even the ones on watch."
+- The CSV Wren crossed the Line into the Veyli reach, Day 7. "We crossed together, all of us. Even the ones on watch."
 == event.crossingLine.plaque.punch
 - The CSV Wren crossed the Line into the Veyli reach, Day 7. "Is this the part with the punch?"
 == event.crossingLine.plaque.missed
