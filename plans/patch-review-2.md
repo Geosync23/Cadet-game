@@ -196,3 +196,10 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 
 - **Off:** check_fast OK (272 s); cadet_test ALL IDENTICAL.
 - **On:** the onset and front cues are there at 14:04 on Day 12. social_check OK on the switched-on copy (play and jump agree).
+
+## EW2 Veyli lore: claude/events-lines-2 bd69395. PASS, with one decision
+
+- Every user decision is applied: human, "went on", "your people"/"the Concord", own pronouns everywhere, nothing named, the description rule.
+- No spoilers (six hours, Saruth's reason, the visit). Lore steps by tier.
+- lines_check: only "not baked" (expected).
+- **Decision for lead 22:** two Saruth lines in Crossing the Line's afterglow, against story A's "one line" rule.
