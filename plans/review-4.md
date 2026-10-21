@@ -18,7 +18,7 @@ writes res/<name>.log and .done), because the container restarts.
 - check_fast OK in 245 s.
 - events_check off: OK. lines_check: PASS (0 errors, 50 warnings).
 - bigevents_check (S1's own copy) fails only on the party-night clashes (S6) and the typed 11-17 (EC1's cdf80ce reads 11-16).
-- events_check on: 9 FAILs; compared with the base switched on (below).
+- events_check on: 9 FAILs, all also on the base switched on (which had 10 more: the meeting tags S1's check change skips). Nothing new.
 
 **Probe `s1_hours.py` (on-copy, a real save Day 11 13:30):**
 - The briefing opens at 14:00 in the Works bay, and Calder's new script plays.
@@ -29,6 +29,8 @@ writes res/<name>.log and .done), because the container restarts.
 - The Captain's line to you is spliced in after Calder's "Mine too" (shot `s1_allclear_you.png`).
 - The commendation comes once: the Mail at 10:12 (614 after a skip), across a reload before and after.
 - The debrief comes once, Day 15 18:00, from Calder. The event ends Monday midnight (log 11-16). Nothing is sent twice.
+
+Verdict sent to EV3 and lead 23 at ~06:05.
 
 **Fixes:**
 1. **(Blocking) Your briefing pick isn't held** (`s1_pick.py`).
