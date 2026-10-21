@@ -1,6 +1,6 @@
 # Handover: patch builder B (PB), 2026-10-20
 
-**Role.** Sim engineer for the playtest patch (`plans/patch-plan.html`, final): I own sections 13, 14 and 10 (ship time and saving, the crew's schedules, the crew walking). My new code is in the slot `// ---- slot: Sim engineer (section 14)`. I report to lead 21 (session_01KYPEbF745ZQ9g9kr4XJgre). PR2 (session_013ttt3gV3DaF9y4caBtFnh9) reviews the patch, and OR1 (session_01W7AHxrcgBM3rJNtCFKwp9W) stands in for the section owners.
+**Role.** Sim engineer for the playtest patch (`plans/patch-plan.html`, final): I own sections 13, 14 and 10 (ship time and saving, the crew's schedules, the crew walking). My new code is in the slot `// ---- slot: Sim engineer (section 14)`. I report to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB; lead 21 handed over 2026-10-21). PR2 (session_013ttt3gV3DaF9y4caBtFnh9) reviews the patch, and OR1 (session_01W7AHxrcgBM3rJNtCFKwp9W) stands in for the section owners.
 
 **Branch.** `claude/patch-b`, from `claude/integration` 0.64.4 (merged in). I haven't changed the build number. check_fast was OK on every push.
 
@@ -45,3 +45,12 @@ Nothing to do yet. Once `EVENTS_ON` is switched on (with the storm update, after
 - New gatherings (the lantern supper, the Line ceremony and supper, the comet) reach section 14's planner the same way the all-clear party does: `EV_SHIPWIDE` → `evTable`/`eventsOn`, each with its own hash key.
 - Switched off, it is all byte-identical to 0.64.5.
 - `eventFree` (section 14) is shared between the Fridays plan's part A (the 15:30 Friday end) and the storm update: neither should change it without the other.
+
+## Owner reviews since (2026-10-21)
+- FR1's Short Fridays hooks ffb3b98 (claude/fridays): OK. Suggested, not required: pick the Friday skeleton per day from crew aboard on that day, so it survives crew rotations.
+- EV1's event-meetings hook (F0b, after 0.64.7): shape agreed, and EV1 writes it.
+  - gatherings() adds event meetings inside EVENTS_ON.
+  - A meeting during the shift is a 'meet' break in shiftWithBreaks, counted as work in dayReport by its exact tag.
+  - Who goes comes from the calendar only, plus a skip list that is set once and never changes; shipDay's cache must change if the list is (re)set.
+  - To review when it arrives.
+- Backlog #18 (day_check Day 12, the rec deck guard) fails the same way on 0.64.4, so it isn't from this patch.
