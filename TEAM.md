@@ -334,3 +334,7 @@ Working (5): EV1 (finishing F4 → handover), EV2, FR2, BM11, PR3. ER2 on call f
 | Storm builder EV3 | session_01ReekSsFi1ToaTpSq926Drq | `claude/storm-update` | ion storm S1-S10 (plan decided), split with EV2; PR3 turns, ER2 before S10 |
 Working (5): EV2 (base F0b/F5/F8), EV3, FR2, BM11, PR3.
 **~04:12 UTC check-in (lead 442k):** handover draft written (plans/handover-lead22.md); lead hands over at ~600k by starting lead 23. Working (5): EV2 (F5), EV3 (storm S1), FR2 (Fridays turn-5 fix + turn 6), BM11 (0.64.7 + harness fix proof), PR3. Decisions so far logged in plans/overnight-decisions-lead22.md.
+**~04:51 UTC:** PR3 at 476k: finishes EV2's F5/F8/F0b review, then handover (plans/handover-reviewer-3.md). EV2 base done (claude/events-base-2 80c4963). EV3 storm S1 pushed (claude/storm-update 9561f48). PB OK on F0b s14 + Fridays 1-3,5.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Events reviewer PR4 | session_014WyaZtasY32m5fnkBxuR9d | `claude/review-4` | turn reviews for the events team from EV3's S1 on |
