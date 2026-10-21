@@ -265,7 +265,7 @@ check(not sp['bad'], 'on: lines showing a slot or a ?, too long, or not Marrow\'
 # claude/patch-crew brings it to Day 21); with the storm update
 # off (EV_STORM_ON, or none in the build), its own lines: done:storm*, band: and {stormjobs} (the game's readers say nothing)
 stormy = lambda x: not sp['storm'] and (any(re.search(r'(^|[ !|])(done:storm|band:)', c) for c in x[2]) or '{stormjobs}' in x[1])
-never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and '{sunleavers}' in x[1] and not sp['rot21']) and not stormy(x)]
+never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and ('{sunleavers}' in x[1] or 'arriving' in x[2]) and not sp['rot21']) and not stormy(x)]
 check(not never, 'on: lines that never fill %s' % never)
 check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
 check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])

@@ -34211,7 +34211,7 @@ const FRI_ADDRESSES = {
       {"id": "1eitiu9", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
-  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome this Sunday for our new junior. To the night watch tonight: good watch."], "beats": [
+  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, the comet, this week's commendations and ranks, and the weekend ahead. To the night watch tonight: good watch."], "beats": [
     {"id": "lines", "pick": 1, "lines": [
       {"id": "17i8haf", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "1n7xzsa", "who": "marrow", "text": "Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.", "tone": "funny"},
@@ -34234,7 +34234,7 @@ const FRI_ADDRESSES = {
       {"id": "1s5uqqu", "who": "marrow", "text": "And our newest night hand, {me}, who should be asleep. Good.", "tone": "funny", "if": ["myshift:night"]},
       {"id": "rs0808", "who": "marrow", "text": "Sunday's a full one. The regatta in the morning, talent night at half seven, a week late."},
       {"id": "vwvwab", "who": "marrow", "text": "In between, we say goodbye to {sunleavers}. Wherever you go next, go well.", "tone": "warm"},
-      {"id": "1tvwp26", "who": "marrow", "text": "And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.", "tone": "warm"},
+      {"id": "1tvwp26", "who": "marrow", "text": "And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.", "tone": "warm", "if": ["arriving"]},
       {"id": "xap3x6", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
@@ -37579,6 +37579,7 @@ function friCond(term, d) {
   if (k === 'band') r = typeof eventBandOf === 'function' ? vs.includes(eventBandOf('ionStorm')) : null;
   else if (k === 'done') r = typeof eventJobDone === 'function' ? vs.some(x => { const you = /\.you$/.test(x); return eventJobDone(you ? x.slice(0, -4) : x, you, t); }) : null;
   else if (k === 'commended') r = Array.isArray(SHIP.commendations) ? SHIP.commendations.length > 0 : null;
+  else if (k === 'arriving') r = typeof ROSTER_ROTATIONS === 'undefined' ? null : ROSTER_ROTATIONS.some(x => x.day > d && x.day <= d + 2 && (x.in || []).length > 0);   // new crew on this weekend's rotation (PR8's find: Day 19's welcome)
   else if (k === 'myrank') r = vs.includes((SHIP.works && SHIP.works.rank) || 'junior');
   else if (k === 'myshift') r = false;                                  // your night shifts are Pillar 5's: none yet
   else if (k === 'season') r = vs.includes(seasonOf(d).id);

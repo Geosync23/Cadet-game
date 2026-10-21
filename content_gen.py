@@ -788,7 +788,7 @@ def parse_home_rest(lines, path, rel, cid, who, out):
 # "who > you: text", or "- text" (Marrow's). "? terms" limits the lines under it until the next "?" or "==" (a bare
 # "?" clears it): every term must hold, "!" turns one round, "a|b" inside a term is either. Read when she speaks
 # (section 18f), so the terms here are only checked for their words
-ADDR_KEYS = ('band', 'done', 'commended', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week')
+ADDR_KEYS = ('band', 'done', 'commended', 'arriving', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week')
 ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'sunleavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
 ADDR_POSES = ('nod', 'gesture', 'laugh', 'sigh', 'listen', 'play')
 ADDR_WHO = ('marrow', 'vance')
@@ -841,9 +841,10 @@ def parse_address(path, rel, out):
             continue
         if t.startswith('?'):
             terms = t[1:].split()
-            for term in terms:                     # key:value, key:a|b (either value), !key:value; commended alone
+            for term in terms:                     # key:value, key:a|b (either value), !key:value; commended and arriving alone
                 k, _, v = term.lstrip('!').partition(':')
-                if k not in ADDR_KEYS or (k == 'commended') == bool(v) or any(not x for x in v.split('|')) and k != 'commended':
+                bare = k in ('commended', 'arriving')
+                if k not in ADDR_KEYS or bare == bool(v) or any(not x for x in v.split('|')) and not bare:
                     raise GenError(f'{where}: unknown condition "{term}" ({", ".join(ADDR_KEYS)}: see content/addresses/README.md)')
             cond = terms or None
             continue

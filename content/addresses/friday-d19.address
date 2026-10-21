@@ -7,11 +7,12 @@
 // Beats: the storm's tally and the people who carried it (Works first); the comet; commendations and ranks, yours among
 // them; tonight's night watch; the week ahead (Sunday: the regatta, a goodbye, a welcome, talent night), and the close.
 // Versions: band:smooth|bumpy|rough = the storm's result (as the debrief); commended = your storm commendation;
-// myrank:; myshift:night = your night shifts have started. Placeholders: {stormjobs} (storm jobs closed, all crew)
+// myrank:; myshift:night = your night shifts have started; arriving = new crew come aboard on this weekend's rotation
+// (the welcome line; the Mail doesn't name it, so it's true either way). Placeholders: {stormjobs} (storm jobs closed, all crew)
 // and {sunleavers} (first names of this weekend's leavers, from the rota): a line is left out when one can't be filled.
 day: 19
 from: Captain Odile Marrow
-mail: All hands: the Captain's Friday address | The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome this Sunday for our new junior. To the night watch tonight: good watch.
+mail: All hands: the Captain's Friday address | The storm's tally and my thanks, the comet, this week's commendations and ranks, and the weekend ahead. To the night watch tonight: good watch.
 == lines
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.   #funny
@@ -50,5 +51,7 @@ marrow: And our newest night hand, {me}, who should be asleep. Good.   #funny
 // beat 5: the week ahead (Sunday in its order: EW2's words, 2026-10-21), and the close
 marrow: Sunday's a full one. The regatta in the morning, talent night at half seven, a week late.
 marrow: In between, we say goodbye to {sunleavers}. Wherever you go next, go well.   #warm
+? arriving
 marrow: And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.   #warm
+?
 marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]
