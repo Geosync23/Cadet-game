@@ -36955,10 +36955,11 @@ function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[
 (() => {
   const i = SHIP_TRADITIONS.findIndex(x => x.id === FRI_ADDRESS.id), baked = i >= 0 ? SHIP_TRADITIONS[i] : null;
   if (i >= 0) SHIP_TRADITIONS.splice(i, 1);              // off: not in the game at all
-  if (!SHORT_FRIDAY) return;
+  if (!SHORT_FRIDAY || !REC_TRAD_ON) return;            // a rec deck tradition: with the rec deck's traditions (REC_TRAD_ON, as REC_TRADS)
   if (baked) for (const k of ['from', 'mail', 'ask', 'here', 'thanks', 'chatter', 'text', 'invite']) { const ds = Object.getOwnPropertyDescriptor(baked, k); if (ds && (ds.get || ds.value != null)) Object.defineProperty(FRI_ADDRESS, k, ds); }
   const mail = FRI_ADDRESS.mail;                         // the first week's Mail (Day 4, for Day 5): fri.mail.week1
   FRI_ADDRESS.mail = (c, p) => (c && c.day <= 7 && friText('fri.mail.week1')) || evText(mail, c, p);
+  FRI_ADDRESS.baked = true;                             // its words came from the baked file (events_check looks for it)
   SHIP_TRADITIONS.push(FRI_ADDRESS);
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the address
 })();
