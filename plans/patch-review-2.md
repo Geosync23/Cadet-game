@@ -178,3 +178,4 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Fixes:**
   - With heads-ups off, devHeadsTick skips 'event' items while the meeting notify is now null, so there's no notice at all. Let them through like 'beat'.
   - The phone shots don't show the event rows; retakes asked for.
+- **EW1 dfd083a (story A): PASS.** The Lap stop is at the bow lounge doorway (3-lap-6), so "This is where it happened today" is right again.
