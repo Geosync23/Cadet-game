@@ -17,8 +17,8 @@ Written 2026-10-21 by PR8 (session_01Nrvf1SYaXHTLwssGoBfJ54) before the account 
 | --- | --- | --- |
 | 0dc4562 | Turn 10: SHORT_FRIDAY on; Day 19's Sunday lines, `{sunleavers}` | PASS WITH FIXES (sent) |
 | 208581c | PR5's turn-6 fixes: friMissed + SIM_ADVANCE hook; player_check TOK; fridays_check cases | PASS WITH FIXES, provisional (player_check not run) |
-| e18844f | Backlog #20 (section 14: an alts-only intro beat holds its first alt); fridays_check storm stubs | no verdict: only cadet_test (ALL IDENTICAL) run |
-| (to come) | FR3's `arriving` fix for Day 19's welcome line | not reviewed |
+| e18844f | Backlog #20 (section 14: an alts-only intro beat holds its first alt); fridays_check storm stubs | no verdict: only cadet_test (ALL IDENTICAL) run; PB OK'd section 14 (FR3) |
+| c3b76f47 | Turn-10 find 2: a bare `arriving` condition (rotation `in` on Days d+1..d+2) on Day 19's welcome; the Mail body ends "and the weekend ahead." (FR3: fridays_check OK with rotation on Day 35 and Day 21, lines PASS, check_fast OK) | not reviewed (arrived after the stop) |
 
 Open fixes for FR3: the old-save Friday-evening dip (find 3); Day 19's welcome (FR3's `arriving`). Release rule:
 Fridays + EVENTS_ON + EV4's storm update together, or Day 12 is a silent hall.
