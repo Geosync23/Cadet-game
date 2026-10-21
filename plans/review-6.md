@@ -46,3 +46,22 @@ Setup: `pip install playwright`; three and acorn in /tmp/cadet-work (npm pack th
   - isTrad back to includes(): FAIL "the planted book-circle was not caught". Caught.
   - p2 party.stay [110, 120]: OK, not caught, and rightly so. Since 481a5b4a the party has 94 places (standing counts),
     so 45 goers staying all evening never fill it. Replaced by p4 (seats only plus stay [110, 120]): queued.
+
+## EV4 storm adb71aa (f32d901 + 2228a05): PASS (the framed-menu shots follow)
+Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23's rule per EC1's check, Day 14 dinner).
+
+## EV4 storm ab58e7b (5f3fc3f ER2's fixes 3-4, f9eeb72 mess-only light + menu nit, 4311ffe Fridays merge, 2ec6f17/b9256d19 S2): PASS
+- cadet_test off: 4311ffe→ab58e7b ALL IDENTICAL; adb71aa→5f3fc3f ALL IDENTICAL. 892af70/582cd21: comment and note only.
+- check_fast OK in 245 s. events_check on (storm) OK; on (storm + SHORT_FRIDAY) OK. day_check 12 (storm + Fridays) OK, 13 OK.
+  bigevents 541ae52 and a54ff25 on ab58e7b: OK.
+- Code read: evDoubleExcept (pure: evAt at 16:00 of the day, the rule's except by id and event day); eventPlan and
+  gatherings mark the address a meet break (act work); stayIn off 15:30-17:00 on the Friday (evRuleOff). Section 14's
+  one line is PB's. stormSupperDim: the mess hall ('M') only; the galley keeps its light (EV4: intended, "the kitchen
+  still running"; accepted).
+- `s2_probe.py` (storm + Fridays on, a real save Day 12 15:00, 390x844):
+  - whereIs: Marrow on the bridge to 15:25, sets off 15:30, at 7-lectern-2 15:35-16:50, back on the bridge 16:55;
+    Vance on the bridge to 15:40, sets off 15:45, at 7-lectern-1 15:50-16:50, back 16:55. 53 planned at the address at 16:05.
+  - live in the auditorium 16:01-16:19: 51-52 there, Marrow and Vance both, 145 draw calls. Shot `shots/s2_address.png`.
+  - after a save and reload at 16:19 the plans are the same.
+  - the supper's light, Day 13 18:27: mess .74 (still easing up), promenade .03, mess again .81. Mess-only, as decided.
+    (The probe printed CHECK only because my threshold .8 caught the lamp mid-ease; no errors.)
