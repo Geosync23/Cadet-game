@@ -1519,6 +1519,10 @@ Extrude geometry:
 
 **Every check exits 1 when it fails** (step 2): deck, machine, day, food, path, perf, disc, arc, social and cadet_test used to print FAILED and exit 0, so a script or GitHub saw a pass. Their printed lines are unchanged.
 
+**Checks play the real, drawn game** (the user's rule, 2026-10-21): no headless-only or no-drawing runs. `Game.step` simulates every frame and draws the last one of each step, as always. **The one exception: player_check's polling steps may skip drawing (user OK, 21 Oct); everything else draws.** In player_check a step draws its last frame only inside an activity (`run_activity`, `servery_seat`: their draw calls are the 450 budget) and in the phone-layout block (`drawn()` / `DRAWN` at its top); walking-until-you-arrive and set-up steps simulate every frame but draw none. 1083 s → about 5.5 min on 0.64.8 (opt item 2, TS2). A check that steps `window.__step` itself must set `window.__skip` around all but the last frame, as `Game.step` does (player_check's `page_step`): otherwise every frame is drawn, about 0.7 s each.
+
+**Real time in a check:** toasts hide on a real-time 5.6 s `setTimeout`, not the checks' virtual clock, so a check that reads whether a toast is up must set it itself (`clearTimeout(toastTimer)`, as player_check's phone-layout block does), or its result depends on how fast the machine runs.
+
 **names_check.js** (step 2, from the split rehearsal): `node names_check.js [GAME.html]`, 1 second. On a FAIL it names the section and game line of both copies. Repeats that are meant are listed in its `MEANT` set with the reason (section 19's 'crew' app shell, replaced by section 20's; `SHIP.tiles` reloaded from the save); a table key declared `null` and filled once later by its owner is allowed.
 
 **Finding your way:** `python3 tools/section.py` (list), `tools/section.py 19` (print a section), `--where LINE`, `--diff A B` (sections and owners a change touches); `node tools/shared.js` (functions and tables used outside their section; `--md` makes the list in `plans/owners.md`).
