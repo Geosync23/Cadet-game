@@ -16075,6 +16075,7 @@ function galleyMenu(d) {
     else { out.dinner = MENU.treat[w % MENU.treat.length]; out.note = 'a farewell supper'; }
   } else if (dt) out.dinner = dish(dt);
   if (dt === 'first-fruits' || dt === 'harvest-supper') out.supper = true;
+  if (out.salad && !/garden salad/.test(out.note)) add('with fresh garden salad');   // a farewell supper on a harvest day (every rotation since 0.64.11): its note took the place of the salad's (PB2, backlog PB2-2)
   const tz = galleyTasting(d); if (tz) add(`tasting table at ${hhmm(tz.from)}: ${tz.choices.join(' and ')}`);
   if (T.dinner && T.dinner.side === 'tasting') {         // Sunday's side: the last tasting table's winner (within the week)
     for (let k = 1; k <= 7; k++) { const z = galleyTasting(d - k); if (z) { if (z.winner) { out.side = z.winner; add(`with Wednesday's winner: ${z.winner}`); } break; } }
