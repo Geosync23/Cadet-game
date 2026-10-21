@@ -10208,7 +10208,7 @@ function schedBuild(p, d, occ, S) {
       take('wash', U(35) < .3 ? [[wd, 'shower'], [wd, 'basin']] : [[wd, 'basin']], U(35) < .3 ? 8 : 3, { wait: 4, min: 2, tag: 'hands' });
     let dinnerAt = Math.max(t, H.has('late-diner') ? 1165 + Math.round(15 * U(70)) : 1030 + Math.round(70 * U(70)));
     // answer 11: some days (about 2 in 5) half the day shift heads straight for dinner when the shift ends: a rush at the servery
-    if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, F.workEnd + 3 + Math.round(10 * U(74)));
+    if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, Math.max(F.workEnd, MEALS.dinner[0]) + 3 + Math.round(10 * U(74)));   // never before the servery opens (a short Friday ends at 15:30, 18f)
     const ho = meet.find(e => e.tag === 'handover'); if (ho && dinnerAt < ho.at + ho.dur && S.shared.has('1|@handover')) dinnerAt = ho.at + ho.dur;   // eat after the handover
     let dinnerBy = 1440;                                 // dinner before a gathering ends when it starts (a grab if that's too soon)
     for (const e of meet) if (e !== ho && !e.done && !e.meal && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt) {   // dinner clear of a gathering: after it if there's time, else before
