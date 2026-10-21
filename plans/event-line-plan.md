@@ -1,4 +1,4 @@
-# Crossing the Line: the event plan (version 2.1: the ceremony in the bow lounge)
+# Crossing the Line: the event plan (version 2.2: the user's answers; why the crossing matters)
 
 Event planner EP2 (session_01GpiqZ9jCYbS9XTNPF8adHr), 2026-10-21. Branch `claude/event-plan-line`, from claude/integration 0.64.6 (675588c). Reports to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB). **Planning only: the game is unchanged.**
 
@@ -129,7 +129,8 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 | When | What | Where | The piece |
 | --- | --- | --- | --- |
 | Fri 5, 16:00 | The Captain's first weekly address mentions Sunday's crossing | rec deck auditorium | Fridays plan, `friday-d5.address` (needs `SHORT_FRIDAY`) |
-| Sat 6, 18:00 | **Warning** begins: Vance's Mail "Tomorrow we cross the Line"; crew ask "First crossing?" (Pell: he crossed two years ago; Holt's one line) | Mail, every deck | F2 phase note, cue `event.crossingLine.warning` |
+| Sat 6, 08:00 | **Warning** begins (the user's q1 = b): crew start talking about the Line from Saturday morning, "First crossing?" and why it matters (Pell crossed two years ago; Holt's one line). Talk only, so your free day stays free | every deck | F2 phase note, cue `event.crossingLine.warning` |
+| Sat 6, 18:00 | Vance's Mail "Tomorrow we cross the Line" (at a fixed minute, like the storm's debrief) | Mail | `mail.warning` at `[0, 1080]` |
 | Sat 6, 19:00-22:46 | Story A begins: Tomas, on watch tomorrow (a moment wherever he is: the mess, the garden, the rec deck, or Bunk 1 at bedtime; else his Mail at about 22:50) | Deck 3, rec deck, Deck 4 | 20c moment |
 | Sun 7, 10:30-12:30 | The swap meet, as usual | promenade, plaza | (unchanged) |
 | 12:45-14:15 | Two small volunteer jobs on the mess sign-up sheet (Brennan offers them too): carry the punch from the galley to the lounge; hang gold ribbons in the lounge | galley, bow lounge | event `jobs` (17), `DECK_DRESS.signupMess` |
@@ -148,7 +149,7 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 | **20:30-21:15** | **Lap of the Wren**, Tomas at the front; the old hands give him the oath's last line at the bow turn, by the lounge doorway | promenade | Lap re-dressed on Day 7, 20c moment |
 | Mon 8 | The afterglow: the plaque quoted back, the worst face retold; status line "First day in the Veyli reach"; the event ends at midnight | every deck | cue `event.crossingLine.afterglow` |
 
-**The phases:** `warning [0, 1080]`, `onset [1, 870]`, `resolution [1, 915]`, `afterglow [1, 1155]` (clears), `days: 3`. `eventDay` is true on Day 7 only. No phase pauses a tradition.
+**The phases:** `warning [0, 480]` (Saturday 08:00, the user's q1; Vance's Mail stays at 18:00, `[0, 1080]`), `onset [1, 870]`, `resolution [1, 915]`, `afterglow [1, 1155]` (clears), `days: 3`. `eventDay` is true on Day 7 only. No phase pauses a tradition.
 
 ## What you can do
 - **Saturday night:** keep Tomas company; promise him punch.
@@ -283,7 +284,56 @@ The build number is the build master's.
 10. **Reactions within about 5 ship minutes of the horn:** the onset lines must not mention the punch or the answer.
 11. **Tomas's day must be as the plan says** (ER2's S2 and S4, in the new shape): at his post (`2-watch-6`) 08:51-17:00 and never pulled away, reachable for the mug, and on the Lap at 20:30 (`EV_DAY_DRESS` brings him); bigevents_check shows all three. His post is a standing watch post in Deck 2's lift lobby (ER2's R2-2); the mug stop finds him from his plan. Tomas must be at his post, not on his break, when you bring the mug (15:15-17:00): day_check Day 7.
 
-## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
+## Decided (the user, 02:33 UTC, via lead 22)
+- **line-q9, the story:** A, "The one on watch" (decided in chat at 01:30).
+- **line-q1:** **b**. The crew start talking from Saturday morning, and Vance's Mail still comes at 18:00. The warning phase starts at `[0, 480]`.
+- **line-q2 to line-q8:** all **a**, as recommended:
+  - q2: the gold is a warm gold in the windows and slightly warmer light indoors;
+  - q3: the horn is a gold pulse, the crew look up, and a one-line notice;
+  - q4: the Sunday table re-dressed, with the voted dish plus a pudding;
+  - q5: first-timers are everyone aboard under two years;
+  - q6: if you miss it, you still crossed, and Brennan saves you a mug;
+  - q7: the day shift stands easy 14:30-15:15;
+  - q8: two volunteer jobs on the mess sheet.
+- **The ceremony is in the bow lounge** (the user, 01:42).
+- **The user's comment:** "We really need to come up with and explain and talk about why it matters to cross." See "Why the crossing matters" below, and question line-q10.
+
+## Why the crossing matters (new, for the user's comment; question line-q10)
+What's already true (content/facts.md):
+- The Wren is a Concord survey ship, unarmed, on a long tour of a frontier shared with the Veyli.
+- Tavessa, dead ahead past the Line, is "a star cluster the Veyli named".
+- The Wren was last in the reach two years ago, on a quiet charting run.
+
+Three ways to give the Line its meaning:
+
+- **A (recommended): "Guests in someone else's sky."**
+  - **What it is:** the Line is where the Concord's charts end and the Veyli reach begins. Past it, every star already has a Veyli name, the Wren travels by the Veyli's leave, and the nearest Concord port is a long way behind.
+  - **Why ships mark it:** you can't call for help and expect it soon, and you're the Concord's face to whoever you meet. So the old oath is a promise to each other: "we did not go alone", "we bring each other home".
+  - **For the Wren:** the real work of the tour starts here. Survey charts Tavessa, and everyone, first-timer or not, is a long way from home together.
+  - **Why A:** it explains the oath's words. It makes the day matter to every crew member, not just the first-timers. It fits a peaceful, unarmed ship, and it gives the later Veyli events a quiet ground without saying anything about them.
+- **B: "The edge of the map."** The Line is where the Concord's charts stop being complete. Past it, Survey charts what nobody has charted properly, and the Wren starts her real job. It's lighter and all about exploration. Weaker: it doesn't explain why the oath is about each other.
+- **C: "Just an old custom."** Spacers have always marked a border, like sailors crossing the equator. It's a rite of passage, a punch and a plaque, and nothing more. Weaker: it's what the user said is missing.
+
+**Where the game explains it** (A; about 14 lines in all, all in places the player already passes through; EW1 writes them):
+| Where | When | What it says | Lines |
+| --- | --- | --- | --- |
+| The Captain's Friday address (Day 5) | Fri 16:00 | Sunday we leave the Concord's charts; past the Line, the stars have other names | 2 |
+| Saturday-morning chatter (q1 = b) | Sat from 08:00 | old hands explain in bits: "Past the Line, every star's got a Veyli name already.", "Help's a long way off out there. That's what the oath's about.", "Survey's been waiting months for this." | 5 |
+| Vance's Mail | Sat 18:00 | one sentence added: "Beyond it, we travel by the Veyli's leave, on their charts." | 1 |
+| Tomas on Saturday evening | Sat evening | he asks you, "Why does it matter, anyway? It's just a line." You can answer, or say you're not sure (Pell told him "guests") | 2 |
+| The oath's preface | Sun 14:40 | the Captain, before she reads: "Past this point the stars have other names, and help is a long way off. So we make each other a promise." | 2 |
+| The certificate and the Record | Sun 15:15 | "Crossed into the Veyli reach, where the Wren travels as a guest." | 1 |
+| Zeke at One week aboard | Sun 17:15 | "Your first week, and you're already off the map. Not bad." | 1 |
+
+**Spoiler and canon checks:**
+- **The visit:** nothing about a delegation, a meeting or anyone coming aboard. "Guests" is the Wren's side only.
+- **Holt:** nothing about his border day. His one line stays about the here and now, and nobody links the Line to "last time" (the two-years fact stays "a quiet charting run").
+- **The Envoy:** nothing about why Envoy Saruth is aboard (their card says "until close"). The meaning never names the Envoy or an agreement, only "the Veyli's leave".
+- **Facts first:** two new facts go into content/facts.md through the head writer before any line uses them: "the Concord's charts end at the Line" and "the nearest Concord port is a long way behind".
+- **Unarmed ship:** no danger talk. "Help is a long way off" is about distance, not threat.
+- **Cost:** about 14 lines, inside the story turn (L4) and L1's bake. No new code.
+
+## Questions for the user (answered 02:33 except line-q10; the record of what was asked)
 - **line-q9, the story: DECIDED (the user, in chat, 01:30 UTC): A**, Tomas stays on watch and gets his crossing on the Lap. It was recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: A2, the same but Tomas comes (a Watch hand covers his post; smaller story, no Lap payoff); B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
 1. **When does the ship start talking about it?** Recommended: with Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address). Others: Saturday morning (talk only, so your free day stays free); Friday's new-hands tea.
 2. **What do the gold hull lights look like?** Recommended: a warm gold in every window and slightly warmer light indoors, 14:30-19:15. Others: windows only; also gold light strips along the promenade (a few more draw calls).

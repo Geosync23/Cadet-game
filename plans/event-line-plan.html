@@ -66,7 +66,7 @@ blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--gold);font-
 <main>
 <button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
 <h1>Crossing the Line: the plan</h1>
-<div class="sub">Event planner EP2, 2026-10-21, version 2.1: the ceremony moves to the bow lounge, as you asked. It folds in the adversarial reviewer's 12 fixes (ER2) and reworks the story you asked for. Branch <code>claude/event-plan-line</code>, from build 0.64.6. Planning only: the game hasn't changed. The first ship-wide event in the story, built after the ion storm. Your answers go in section 8.</div>
+<div class="sub">Event planner EP2, 2026-10-21, version 2.2: your answers are in, and a new section explains why the crossing matters. The ceremony is in the bow lounge, as you asked. It folds in the adversarial reviewer's 12 fixes (ER2) and reworks the story you asked for. Branch <code>claude/event-plan-line</code>, from build 0.64.6. Planning only: the game hasn't changed. The first ship-wide event in the story, built after the ion storm. Your answers go in section 8.</div>
 
 <div class="card key">
 <b>In short</b>
@@ -77,7 +77,7 @@ blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--gold);font-
 <li><b>The story:</b> Tomas, your bunkmate, is the other newest hand, and he's on watch through the whole crossing. He misses his own Line. You can take him a mug, and that night the crew give him his crossing on Lap of the Wren.</li>
 <li><b>18:00-19:15, the mess:</b> the Line supper takes the Sunday table's place: the dish the crew voted for, plus Brennan's pudding. Up to about 60.</li>
 <li><b>Monday:</b> the plaque with your words, your Line certificate on your shelf, and the crew retelling it all.</li>
-<li><b>About 6 build turns</b>, switched off until you've reviewed it. <b>8 questions</b> for you, each with a recommended answer (section 8). You've already chosen the story.</li>
+<li><b>About 6 build turns</b>, switched off until you've reviewed it. You've answered every question; <b>one new question</b> (number 10, section 8) asks what the crossing means.</li>
 </ul>
 </div>
 
@@ -142,6 +142,38 @@ Then the punch. If you helped carry it up, Brennan has already told you one of i
 <p><b>You chose A</b> (in chat, 01:30). <b>Why it was recommended:</b> it's true to the ship's own rota, a friend wants something he can't have, your answer goes on the plaque in front of everyone, it pays off the same evening, and it still works if you miss the ceremony.</p>
 <p class="sub"><b>Crew react within about 5 ship minutes of the horn,</b> so the first things they say are about the gold pulse, the gold windows and the walk to the lounge (<i>"Did you feel that? The whole deck went gold."</i>). Talk about the punch and your answer waits until the ceremony is over at 15:15.</p>
 
+<h2>Why the crossing matters (new)</h2>
+<p>You asked us to explain why crossing the Line matters. What's already true: the Wren is an unarmed Concord survey ship on a long tour of a frontier shared with the Veyli. Tavessa, dead ahead, is a star cluster the Veyli named, and the Wren was last in the reach two years ago, on a quiet charting run.</p>
+<details open>
+<summary>A. Guests in someone else's sky (recommended)</summary>
+<ul>
+<li><b>What the Line is:</b> where the Concord's charts end and the Veyli reach begins. Past it, every star already has a Veyli name, the Wren travels by the Veyli's leave, and the nearest Concord port is a long way behind.</li>
+<li><b>Why ships mark it:</b> out there you can't call for help and expect it soon, and you're the Concord's face to whoever you meet. So the old oath is a promise to each other: <i>"we did not go alone... we bring each other home."</i></li>
+<li><b>What it means for the Wren:</b> the real work of the tour starts here. Survey charts Tavessa, and everyone aboard, first-timer or not, is a long way from home together.</li>
+<li><b>Why this one:</b> it explains the oath's own words, it matters to the whole crew and not just the first-timers, and it fits a peaceful ship. It also gives the later Veyli events a quiet ground without saying anything about them.</li>
+</ul>
+</details>
+<details>
+<summary>B. The edge of the map</summary>
+<ul><li>Past the Line the Concord's charts are incomplete, and Survey starts the Wren's real job. It's lighter and all about exploration, but it doesn't explain why the oath is about each other.</li></ul>
+</details>
+<details>
+<summary>C. Just an old custom</summary>
+<ul><li>Spacers mark a border the way sailors marked the equator: a rite of passage, a punch and a plaque. It's the "why" you said is missing.</li></ul>
+</details>
+<p><b>Where the game tells you</b> (with A, about 14 lines, all in places you already pass through):</p>
+<div class="scroll"><table>
+<tr><th>Where</th><th>When</th><th>What you hear</th></tr>
+<tr><td>The Captain's Friday address</td><td>Fri 16:00</td><td>Sunday we leave the Concord's charts; past the Line, the stars have other names.</td></tr>
+<tr><td>The crew's chatter</td><td>Sat from the morning</td><td><i>"Past the Line, every star's got a Veyli name already."</i> <i>"Help's a long way off out there. That's what the oath's about."</i></td></tr>
+<tr><td>Vance's Mail</td><td>Sat 18:00</td><td><i>"Beyond it, we travel by the Veyli's leave, on their charts."</i></td></tr>
+<tr><td>Tomas</td><td>Sat evening</td><td><i>"Why does it matter, anyway? It's just a line."</i> You can tell him, or admit you're not sure.</td></tr>
+<tr><td>The Captain, before the oath</td><td>Sun 14:40</td><td><i>"Past this point the stars have other names, and help is a long way off. So we make each other a promise."</i></td></tr>
+<tr><td>Your certificate and the Record</td><td>Sun 15:15</td><td><i>"Crossed into the Veyli reach, where the Wren travels as a guest."</i></td></tr>
+<tr><td>Zeke, at One week aboard</td><td>Sun 17:15</td><td><i>"Your first week, and you're already off the map. Not bad."</i></td></tr>
+</table></div>
+<p class="sub">No spoilers: nothing about the later visit, nothing about Chief Holt's past, and nothing about why the Envoy is aboard. Two small new facts ("the Concord's charts end at the Line", "the nearest port is a long way behind") go into the ship's fact list first.</p>
+
 <h2>1. The day at a glance</h2>
 <p>Sunday Day 7, from 08:00 to 22:00. Grey is what already happens; gold is the event; teal is up to you. Scroll sideways on a phone.</p>
 <div class="scroll"><div class="day" id="day"></div></div>
@@ -151,7 +183,8 @@ Then the punch. If you helped carry it up, Brennan has already told you one of i
 <div class="scroll"><table>
 <tr><th>When</th><th>What happens</th><th>Where</th></tr>
 <tr><td>Fri 5, 16:00</td><td>The Captain's first weekly address mentions Sunday's crossing.</td><td>Rec deck auditorium</td></tr>
-<tr><td>Sat 6, 18:00</td><td><b>The warning.</b> Vance's Mail: <i>"Tomorrow at 14:30 the Wren crosses into the Veyli reach... Attendance is not required. It is, however, expected."</i> Crew start asking "First crossing?". Pell crossed two years ago and has opinions about the punch.</td><td>Mail; every deck</td></tr>
+<tr><td>Sat 6, from 08:00</td><td><b>The warning</b> (your answer 1): the crew start talking about the Line, and why it matters.</td><td>Every deck</td></tr>
+<tr><td>Sat 6, 18:00</td><td>Vance's Mail: <i>"Tomorrow at 14:30 the Wren crosses into the Veyli reach... Attendance is not required. It is, however, expected."</i> Pell crossed two years ago and has opinions about the punch.</td><td>Mail; every deck</td></tr>
 <tr><td>Sat 6, 19:00-22:45</td><td>The story begins: Tomas, on watch tomorrow (a moment wherever you meet him, or at his bedtime; else his Mail at about 22:50).</td><td>Wherever he is</td></tr>
 <tr><td>Sun 7, 10:30-12:30</td><td>The swap meet, as usual.</td><td>Promenade and plaza</td></tr>
 <tr><td>12:45-14:15</td><td>Two small volunteer jobs on the mess sign-up sheet, and Brennan asks too (question 8): carry the punch to the lounge; hang the gold ribbons.</td><td>Galley; bow lounge</td></tr>
@@ -259,8 +292,19 @@ Then the punch. If you helped carry it up, Brennan has already told you one of i
 </ol>
 
 <h2>8. Your answers</h2>
-<p>Pick one option per question (the recommended one is marked), and add a comment if you like. Questions 5 and 7 are new versions, rewritten with the reviewer's true numbers.</p>
+<p>You answered questions 1-9 (thank you). One new question, number 10, follows your comment about why the crossing matters. You can still add a comment to any of them.</p>
 <form id="answers" data-collection="answers" data-doc="event-line-plan" onsubmit="return false">
+
+<div class="q" data-qid="line-q10">
+<h3>10. Why does crossing the Line matter? (new, for your comment)</h3>
+<p class="why">You asked us to explain why the crossing matters. The three meanings are in the section "Why the crossing matters" near the top. Whichever you pick, the writer adds about 14 lines in places you already pass through.</p>
+<fieldset><legend>Question 10</legend>
+<label class="opt"><input type="radio" name="line-q10" value="a"><span>A. Guests in someone else's sky: past the Line the charts and the star names are the Veyli's, the Wren travels by their leave, and help is a long way off. That's why the oath is about going together and bringing each other home<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="line-q10" value="b"><span>B. The edge of the map: past the Line the Concord's charts are incomplete, and the Wren's real survey work begins</span></label>
+<label class="opt"><input type="radio" name="line-q10" value="c"><span>C. Just an old custom, like sailors crossing the equator: a rite of passage, and nothing more</span></label>
+</fieldset>
+<label class="cl" for="line-q10-c">Comment</label><textarea id="line-q10-c" name="line-q10-comment"></textarea>
+</div>
 
 <div class="q" data-qid="line-q9">
 <h3>The story: decided</h3>
@@ -270,86 +314,49 @@ Then the punch. If you helped carry it up, Brennan has already told you one of i
 
 <div class="q" data-qid="line-q1">
 <h3>1. When does the ship start talking about it?</h3>
-<p class="why">The event's warning starts the crew's chatter ("First crossing?"). Talk isn't a task, so Saturday stays free either way.</p>
-<fieldset><legend>Question 1</legend>
-<label class="opt"><input type="radio" name="line-q1" value="a"><span>With Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address)<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q1" value="b"><span>From Saturday morning (the Mail still at 18:00)</span></label>
-<label class="opt"><input type="radio" name="line-q1" value="c"><span>From Friday's new-hands tea (Friday 18:40)</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): b.</b> From Saturday morning; Vance's Mail still at 18:00</p>
 <label class="cl" for="line-q1-c">Comment</label><textarea id="line-q1-c" name="line-q1-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q2">
 <h3>2. What do the gold hull lights look like?</h3>
-<p class="why">Today the hull lights are only words (the hull-lights evening changes nothing on screen). This is new.</p>
-<fieldset><legend>Question 2</legend>
-<label class="opt"><input type="radio" name="line-q2" value="a"><span>A warm gold in every window, and slightly warmer light indoors, 14:30-19:15<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q2" value="b"><span>The windows only</span></label>
-<label class="opt"><input type="radio" name="line-q2" value="c"><span>As the first, plus gold light strips along the promenade (a few more draw calls on phones)</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> A warm gold in every window, and slightly warmer light indoors, 14:30-19:15</p>
 <label class="cl" for="line-q2-c">Comment</label><textarea id="line-q2-c" name="line-q2-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q3">
 <h3>3. The horn: the game has no sound at all</h3>
-<p class="why">So "the horn sounds on every deck" has to be something you see.</p>
-<fieldset><legend>Question 3</legend>
-<label class="opt"><input type="radio" name="line-q3" value="a"><span>A felt moment: every light pulses gold once, the crew stop and look up, and a one-line notice says the horn sounds<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q3" value="b"><span>That, plus the game's first sound: one horn note (new work: a mute switch, and phones on silent)</span></label>
-<label class="opt"><input type="radio" name="line-q3" value="c"><span>Just the Captain's banner</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> A felt moment: every light pulses gold once, the crew stop and look up, and a one-line notice says the horn sounds</p>
 <label class="cl" for="line-q3-c">Comment</label><textarea id="line-q3-c" name="line-q3-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q4">
 <h3>4. The Line supper</h3>
-<p class="why">It takes the Sunday table's place. The Sunday dish is the crew's vote (fish and chips, in a new game), so the writer's "proper roast" lines change to fit any dish.</p>
-<fieldset><legend>Question 4</legend>
-<label class="opt"><input type="radio" name="line-q4" value="a"><span>The Sunday table re-dressed for the day: the crew's voted dish plus Brennan's pudding, renamed, 18:00-19:15, up to about 60<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q4" value="b"><span>A set Line dinner in place of the vote (changes the galley's menu board and vote)</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> The Sunday table re-dressed for the day: the crew's voted dish plus Brennan's pudding, renamed, 18:00-19:15, up to about 60</p>
 <label class="cl" for="line-q4-c">Comment</label><textarea id="line-q4-c" name="line-q4-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q5">
 <h3>5. Who stands at the front as first-timers? (new version)</h3>
-<p class="why">The reviewer counted the real roster: only Tomas has been aboard under two weeks, and only 4 crew under six months (2 of them free at 14:30). So the first version's numbers were wrong.</p>
-<fieldset><legend>Question 5</legend>
-<label class="opt"><input type="radio" name="line-q5" value="a"><span>Everyone aboard under two years, with a new fact: "the Wren was last in the reach two years ago, on a quiet charting run" (21 crew; about 8 free at 14:30, more if the day shift stands easy)<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q5" value="b"><span>Everyone aboard under six months (4 crew, 2 of them there)</span></label>
-<label class="opt"><input type="radio" name="line-q5" value="c"><span>Only you; everyone else watches</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> Everyone aboard under two years, with a new fact: "the Wren was last in the reach two years ago, on a quiet charting run" (21 crew; about 8 free at 14:30, more if the day shift stands easy)</p>
 <label class="cl" for="line-q5-c">Comment</label><textarea id="line-q5-c" name="line-q5-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q6">
 <h3>6. If you miss the ceremony</h3>
-<p class="why">You might be asleep, on the rec deck, or just elsewhere. Sitting things out is always fine.</p>
-<fieldset><legend>Question 6</legend>
-<label class="opt"><input type="radio" name="line-q6" value="a"><span>You still crossed: the gist by Mail and the certificate anyway (a first-timer's plain line goes on the plaque), and Brennan saves you a mug of punch at supper ("Nobody escapes the punch.")<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q6" value="b"><span>The gist by Mail and the certificate, nothing more</span></label>
-<label class="opt"><input type="radio" name="line-q6" value="c"><span>The certificate only if you were there</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> You still crossed: the gist by Mail and the certificate anyway (a first-timer's plain line goes on the plaque), and Brennan saves you a mug of punch at supper ("Nobody escapes the punch.")</p>
 <label class="cl" for="line-q6-c">Comment</label><textarea id="line-q6-c" name="line-q6-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q7">
 <h3>7. Does the day shift step out for the ceremony? (new version)</h3>
-<p class="why">This replaces the Winner Stays On question: that game holds only 3 crew at 14:30. What keeps the crowd small is the 25 crew at work.</p>
-<fieldset><legend>Question 7</legend>
-<label class="opt"><input type="radio" name="line-q7" value="a"><span>Yes, 14:30-15:15: everyone at a post that can wait stands easy, except the bridge, the watch and the galley line (about 50-60 at the ceremony)<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q7" value="b"><span>No, only off-duty crew come (about 35-45)</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> Yes, 14:30-15:15: everyone at a post that can wait stands easy, except the bridge, the watch and the galley line (about 50-60 at the ceremony)</p>
 <label class="cl" for="line-q7-c">Comment</label><textarea id="line-q7-c" name="line-q7-comment"></textarea>
 </div>
 
 <div class="q" data-qid="line-q8">
 <h3>8. Something to do beforehand?</h3>
-<p class="why">The storm has prep jobs. This event has no score, so these would just be for fun.</p>
-<fieldset><legend>Question 8</legend>
-<label class="opt"><input type="radio" name="line-q8" value="a"><span>Two small volunteer jobs on Sunday 12:45-14:15, on the mess sign-up sheet: carry the punch up with Brennan, hang the gold ribbons. Never scored<span class="recd">recommended</span></span></label>
-<label class="opt"><input type="radio" name="line-q8" value="b"><span>None; you just turn up</span></label>
-</fieldset>
+<p class="why"><b>Your answer (02:33): a.</b> Two small volunteer jobs on Sunday 12:45-14:15, on the mess sign-up sheet: carry the punch up with Brennan, hang the gold ribbons. Never scored</p>
 <label class="cl" for="line-q8-c">Comment</label><textarea id="line-q8-c" name="line-q8-comment"></textarea>
 </div>
 
