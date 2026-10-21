@@ -35,15 +35,15 @@ PUT = """((deck, rx) => { if (deckDef.num !== deck) goToDeck(deck); const R = DE
   player.obj.position.copy(cellPos(...o)); player.path.length = 0; target.copy(player.obj.position).setY(.7); return [key, R[key].name]; })"""
 IN = lambda rx, deck=3: """(() => { const R = DECKS[%d].rooms; return DECK_CREW.filter(a => a.p && a.h && (() => { const c = [Math.round(a.x + OX), Math.round(a.z + OZ)]; const k = roomAt(...c); return k && R[k] && %s.test(R[k].name || ''); })()); })()""" % (deck, rx)
 PAPER = """(() => { const out = { stray: [], saruth: [], front: [], lead: [] }, F = lineFirst();
-  for (let m = 875; m <= 910; m += 5) for (const p of ROSTER) { const w = whereIs(p, 6 * 1440 + m); if (!w || w.deck !== 3 || !w.placeId) continue;
+  for (let m = 875; m <= 910; m += 5) for (const p of schedPeople()) { const w = whereIs(p, 6 * 1440 + m); if (!w || w.deck !== 3 || !w.placeId) continue;
     const pl = (DECKS[3].places || []).find(x => x.id === w.placeId); if (!pl || pl.room !== 'L') continue;
     if (!/^ev-(lineCeremony|crossingLine)/.test(w.tag || '')) out.stray.push(hhmm(m) + ' ' + p.id + ' ' + w.placeId + ' ' + (w.tag || w.act));
     if (p.id === 'saruth') out.saruth.push(hhmm(m) + ' ' + w.placeId); }
-  for (const p of ROSTER) { const w = whereIs(p, 6 * 1440 + 890); if (!w || !w.placeId) continue;
+  for (const p of schedPeople()) { const w = whereIs(p, 6 * 1440 + 890); if (!w || !w.placeId) continue;
     if (/-front|crowd-([1-9]|10)$/.test(w.placeId)) out.front.push(p.id + (F.has(p.id) ? '' : '(NOT first)'));
     if (/-lead-/.test(w.placeId)) out.lead.push(p.id + ' ' + w.placeId); }
-  const sw = whereIs(ROSTER.find(p => p.id === 'saruth'), 6 * 1440 + 890); out.saruthAt = sw ? sw.deck + ':' + (sw.placeId || sw.act) : null;
-  out.goers = ROSTER.filter(p => { const w = whereIs(p, 6 * 1440 + 890); return w && /^ev-lineCeremony/.test(w.tag || ''); }).length;
+  const sw = (() => { const q = schedPeople().find(p => p.id === "saruth"); return q ? whereIs(q, 6 * 1440 + 890) : null; })(); out.saruthAt = sw ? sw.deck + ':' + (sw.placeId || sw.act) : null;
+  out.goers = schedPeople().filter(p => { const w = whereIs(p, 6 * 1440 + 890); return w && /^ev-lineCeremony/.test(w.tag || ''); }).length;
   return out; })()"""
 r1 = ev(PAPER); res['paper'] = r1; print('paper', r1, flush=True)
 ev("skipTo(6 * 1440 + 14 * 60 + 25)"); step(5); print('lounge', ev(PUT + "(3, /^Bow lounge$/)"), flush=True)
