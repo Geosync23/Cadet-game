@@ -10508,13 +10508,11 @@ function shipDay(d) {
   }
   // section 21's named seats (Calder's across from yours) are held for whoever has them before anyone is planned, so an
   // earlier riser never takes one (introLay books it; no 'ev-' tag matches 'intro:<id>', so nobody else may) (0.26.32)
-  if (typeof introPlan === 'function') for (const p of order) {   // in planning order, so an alts beat holds the seat introLay would give it
+  if (typeof introPlan === 'function') for (const p of S.people) {
     let add = null; try { add = introPlan(p, d); } catch (e) { add = null; }
-    for (const e of Array.isArray(add) ? add : []) if (e && e.alts && e.alts.length && e.to > e.from) {   // a beat with alts (the room's places; introPlan names the first as placeId too) holds its first, so a rota plans round it (backlog #20, PB's design: Halloran's d5-mug seat, the 13:00 tea turns)
-      const a = (d - 1) * 1440 + Math.max(0, e.from), b = (d - 1) * 1440 + Math.min(1440, e.to);
-      const id = e.alts.find(x => !(occ.res.get(x) || []).some(([u, v, w]) => u < b && a < v && /^intro:/.test(w))) || e.alts[0];   // one not held for another beat then (Torres and Calder at Monday's briefing)
-      if (!occ.res.has(id)) occ.res.set(id, []);
-      occ.res.get(id).push([a, b, 'intro:' + p.id]);
+    for (const e of Array.isArray(add) ? add : []) if (e && !e.placeId && e.alts && e.alts.length && e.to > e.from) {   // a beat with only alts (the room's places) holds its first, so a rota plans round it (backlog #20, PB's design: Halloran's d5-mug seat, the 13:00 tea turns)
+      if (!occ.res.has(e.alts[0])) occ.res.set(e.alts[0], []);
+      occ.res.get(e.alts[0]).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
     }
     for (const e of Array.isArray(add) ? add : []) if (e && e.placeId && !e.alts && e.to > e.from) {
       if (!occ.res.has(e.placeId)) occ.res.set(e.placeId, []);
@@ -10595,7 +10593,7 @@ function introLay(p, d, occ, segs) {
   const mine = [];
   if (occ.res) for (const [id, rs] of occ.res) for (const [x, y, ev] of rs) if (ev === 'intro:' + p.id && y > B && x < B + 1440) mine.push([id, x, y]);
   const named = Array.isArray(add) ? add : (add = []);
-  for (const [id, x, y] of mine) if (!named.some(e => e && (e.placeId === id && !e.alts || e.alts && e.alts.includes(id)))) { const pl = byId.get(id); if (pl) named.unshift({ from: x - B, to: y - B, deck: pl.deck, placeId: id, alts: null, tag: 'intro-seat' }); }
+  for (const [id, x, y] of mine) if (!named.some(e => e && (e.placeId === id && !e.alts || !e.placeId && e.alts && e.alts[0] === id))) { const pl = byId.get(id); if (pl) named.unshift({ from: x - B, to: y - B, deck: pl.deck, placeId: id, alts: null, tag: 'intro-seat' }); }
   if (!add.length) return segs;
   let out = segs.slice();
   for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
