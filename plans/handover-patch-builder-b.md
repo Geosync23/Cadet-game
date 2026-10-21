@@ -1,6 +1,6 @@
 # Handover: patch builder B (PB), 2026-10-20
 
-**Role.** Sim engineer for the playtest patch (`plans/patch-plan.html`, final): I own sections 13, 14 and 10 (ship time and saving, the crew's schedules, the crew walking). My new code is in the slot `// ---- slot: Sim engineer (section 14)`. I report to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB; lead 21 handed over 2026-10-21). PR2 (session_013ttt3gV3DaF9y4caBtFnh9) reviews the patch, and OR1 (session_01W7AHxrcgBM3rJNtCFKwp9W) stands in for the section owners.
+**Role.** Sim engineer for the playtest patch (`plans/patch-plan.html`, final): I own sections 13, 14 and 10 (ship time and saving, the crew's schedules, the crew walking). My new code is in the slot `// ---- slot: Sim engineer (section 14)`. I report to lead 23 (session_01XXiKm9iPgm565SZ4n1knmU; leads 21 and 22 handed over 2026-10-21). PR2 (session_013ttt3gV3DaF9y4caBtFnh9) reviews the patch, and OR1 (session_01W7AHxrcgBM3rJNtCFKwp9W) stands in for the section owners.
 
 **Branch.** `claude/patch-b`, from `claude/integration` 0.64.4 (merged in). I haven't changed the build number. check_fast was OK on every push.
 
@@ -54,3 +54,4 @@ Nothing to do yet. Once `EVENTS_ON` is switched on (with the storm update, after
   - Who goes comes from the calendar only, plus a skip list that is set once and never changes; shipDay's cache must change if the list is (re)set.
   - To review when it arrives.
 - Backlog #18 (day_check Day 12, the rec deck guard) fails the same way on 0.64.4, so it isn't from this patch.
+- Later on 2026-10-21, all OK: FR1's Short Fridays turns 2-3 (37b7eb2, 3ae4bec, 4d270ac; turn 5 doesn't touch 13/14), and EV2's events base F0b (claude/events-base-2 955b16e and bc8bb31). In F0b a meeting wins over the shift's random breaks; it was checked with day_check on Days 7, 11 and 14 with the events on, and must be rerun when new events add meeting days.
