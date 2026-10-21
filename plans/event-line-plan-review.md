@@ -36,13 +36,13 @@ EW1 wrote for it (claude/events-lines 307addc) and First Light Cocoa's meeting (
   Winner Stays On. With only off-duty crew coming, the ceremony tops out at **about 35-45, not 50-60**.
 - **First-timers.** The roster's `since` gives one person aboard less than two weeks: Tomas ("one week"). Four crew
   have been aboard less than six months: Teague (3 months), Rossi (2), Eklund (2) and Quist (5). The guest Saruth
-  (5 months) would count too, but she's Veyli. Of those four, **only Teague and Quist are off at 14:30**. Tomas,
+  (5 months) would count too, but they're Veyli. Of those four, **only Teague and Quist are off at 14:30**. Tomas,
   Rossi and Eklund are on shift (Tomas is on watch in Deck 2's watch room, 08:51-17:00). The plan's "13 in two
   weeks, 17 in six months" isn't in the game. Under question 5's recommendation, the front row would be you plus
   two people.
 - **Sunday dinner is the crew's vote.** `galleyMenu(7)` is fish and chips (19 votes), with herb flatbread on the side.
   EW1's supper lines promise "a proper roast" and say "the roast ran out".
-- **Saruth is at the Sunday table today** (planned 18:16-18:59). She's also at Winner Stays On from 15:01, and in
+- **Saruth is at the Sunday table today** (planned 18:16-18:59). They're also at Winner Stays On from 15:01, and in
   the `everyone` pool for any gathering. The plan's "No Veyli at the ceremony" needs her taken out on purpose, and
   the supper needs a decision either way.
 - **Winner Stays On isn't what keeps the crowd small.** It holds 3 crew at 14:30 (Brennan leaves it at 14:28).
@@ -78,7 +78,7 @@ EW1 wrote for it (claude/events-lines 307addc) and First Light Cocoa's meeting (
    that overrides the vote, also changes the menu board and the vote note, so it needs the galley owner.
 5. **Saruth and Ulla: say what they do.** Recommended:
    - Saruth isn't at the ceremony, by courtesy (a Veyli doesn't watch another people's rite: one afterglow
-     reaction line can say so, and nothing about the visit). She's at the Line supper as she is at every Sunday
+     reaction line can say so, and nothing about the visit). They're at the Line supper as they are at every Sunday
      table.
    - Ulla is a guest first-timer and goes like anyone off duty.
    - Build it as an explicit `not: ['saruth']` (or `rank: guest`) rule in the ceremony's `who`, checked by
@@ -209,8 +209,58 @@ numbers, the dish, Saruth and the rest. This pass is on the story, which I check
   14:40-14:55 and back at his post afterwards. L2 waits on F0b's on-shift case (risk 10), not only its called-in
   case. Without it the story's middle is empty.
 
-Note: under round 1's fix 2(a), Ueda (ten months, on watch) is a first-timer too. That's fine: she stays at her
+Note: under round 1's fix 2(a), Ueda (ten months, on watch) is a first-timer too. That's fine: Ueda stays at the
 post, as the watch does.
 
 **Verdict on 85d49ce: PASS WITH FIXES.** That's round 1's fixes 1-12 plus S1-S4. The story itself (A) is good and
 should be recommended. I'll review EP2's fix round when it's pushed.
+
+## Round 2: plan v2 (221c492), EP2's fix round and the reworked story
+
+**Round 1's fixes 1-12 are all taken, and taken properly.**
+- The facts are true.
+- The replacements for q5 and q7 are honest choices, with recommendations I'd stand behind.
+- `EV_DAY_DRESS` is named and pure, with what changes and what stays.
+- The hash-key table is right (341 is the one-offs' key, as built).
+- L2 is gated on F0b.
+
+**The reworked story A, "The one on watch", is the best version yet.**
+- It comes from the real rota: Tomas works 08:51-17:00 on Day 7, and he really is the host of that night's Lap of
+  the Wren (he's planned on it, 20:27-21:11).
+- The choice on the plaque speaks to him ("even the ones on watch").
+- The payoff is the same evening, on a walk you may take anyway.
+- It works if you miss it, and it keeps EW1's guard rails (nothing about his exam, the list or staying).
+- B and C are fairly called weaker. line-q9 says plainly that it changes v3.2's reply wording.
+
+I checked the new parts in a new game. Four fixes:
+
+- **R2-1. Saturday night is still timed for Bunk 1 (round 1b's S1, not taken yet).** On Day 6 Tomas is in the mess
+  and the garden 19:14-22:05, climbing on the rec deck 22:08-22:40, and in bed at 22:46. "21:00-22:30, Bunk 1" and
+  "not in the bunk room by 22:30" never line up with him. Two fixes, and the planner isn't changed:
+  - the moment follows Tomas wherever he is from 19:00 until bed, or it's at his bedtime in Bunk 1 (about 22:45);
+  - the fallback Mail comes about 22:50, when he goes to bed.
+
+  The minute-by-minute row and the story text need the same change.
+- **R2-2. Tomas's post isn't "the watch room".** On Day 7 his place is `2-watch-6`, a standing watch post in Deck 2's
+  lift lobby. The watch office (`2-watch-1..5`) is a different room. My round 1 said "watch room", my mistake. The
+  mug's stop should find Tomas at his post from his own plan, not a fixed room: a watch post can change by day.
+  Risk 11 then reads "Tomas at his post (2-watch-6 in a new game), reachable from the lift". Lines like "Nobody
+  brings things to the watch room" should say "up here" or "to the watch".
+- **R2-3. Zeke and Pell aren't on the Lap.** On Day 7 in a new game, 17 walk it: Tomas, the Captain, Raman, Oduya,
+  Halloran, Cruz, Lemaire and others. Zeke is in the bow lounge (20:17-21:21) and Pell is on a bench, then in the
+  lounge. The Lap's re-dress in `EV_DAY_DRESS` must give `torres-zeke` and `pell` a pull of 1 that night, and
+  events_check or bigevents_check should check that both are planned on it.
+  - **The judgement call "She isn't on the Lap" is false:** the Captain walks it that night. It's harmless (walking
+    isn't a scene), but say so and give her no line in the Lap moment, so the guard's one Captain's scene a day
+    still means the ceremony.
+- **R2-4. `galley-line` isn't an existing group.** Define it in the plan: galley crew on shift whose plan has them
+  cooking 14:30-15:15, with Brennan brought as cast. Also say that "about 50-60" with standing easy is an estimate:
+  about 25 are at work and maybe half stand easy. day_check Day 7 gives the real number, and anything from 45 up
+  fits the user's "up to about 60".
+
+Note: I've corrected my own round 1 to use they/them for Saruth (facts.md: the Veyli are they/them), as the plan
+does.
+
+**Verdict on 221c492: PASS WITH FIXES** (R2-1 to R2-4, all small and exact). Once they're in, it's a PASS; I don't
+need another full round, only a look at the diff. The recommendations, A for line-q9 and the rest, are safe for the
+lead to take overnight.
