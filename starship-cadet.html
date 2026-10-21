@@ -35919,6 +35919,20 @@ function eventsDress(now) {
 const SHIP_EVENTS = {};
 const EVENT_ORDER = ['ionStorm', 'diplomatic'];   // the main events with the short ones between (Part 2, "The full order")                        // the main and short events, in the plan's order (Part 2, "The full order")
 const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
+// ---- the events base (EV1, 0.64.x; plans/events-base-brief.md): every piece behind EVENTS_ON, off = today's game ----
+const EVENTS_ON = false;                                 // the master switch: on with the storm update, after the user's review
+const EV_CAL_ON = EVENTS_ON;                             // F0: events come by the calendar (a check may flip this line alone)
+// F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
+// Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
+const EV_CALENDAR = [
+  { id: 'crossingLine', day: 6, kind: 'short' },        // Vance's Mail on Saturday Day 6 at 18:00; the crossing Sunday Day 7
+  { id: 'ionStorm', day: 11, kind: 'main' },            // the warning Thursday Day 11; the front Friday Day 12, 14:00
+  { id: 'comet', day: 16, kind: 'short' },              // Tuesday Day 16, 21:30
+  { id: 'diplomatic', day: 26, kind: 'main' }];         // the warning Friday Day 26; the finale Days 27-30
+const EV_LATE = 'skip';   // a save already past an event's day (user question 1, recommended 'skip'): 'skip', or 'next' (from the day it loads)
+// F1's table of held hours. F0 adds its Friday row first (one source for the Friday hold: the Captain's address,
+// plans/fridays-plan.md rev 4, 16:00-16:50, held 15:30-17:00 on every Friday from Day 5). weekday: 0 = Monday
+const EV_BEATS = [{ id: 'fridayAddress', kind: 'held', weekday: 4, fromDay: 5, at: [930, 1020] }];
 // ---- the ion storm (event 1; plans/pillar3-plan.md, "The main events"). The prose's Days 1-4 are days 0-3 here;
 // the afterglow runs on to the end of day 5.
 SHIP_EVENTS.ionStorm = {
@@ -35987,7 +36001,7 @@ SHIP_EVENTS.ionStorm = {
   moments: [
     { id: 'front', phase: 'onset', at: [1, 840], where: 'shipwide', feel: ['jolt', 'lightsDip', 'flicker'], len: 6 },
     { id: 'surge', phase: 'escalation', at: [2, 680], where: 'shipwide', feel: ['jolt', 'lightsDip'], len: 4 },
-    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, gathering: true, who: .7, anim: 'talk' },
+    { id: 'party', phase: 'resolution', at: [3, 1140], len: 120, k: 340, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, gathering: true, who: .7, anim: 'talk' },
   ],
   // meetings with dialogue: who: ROSTER ids, or 'works:2' (two Works crew on shift there, the script's tech1 and tech2)
   meetings: [
@@ -36124,12 +36138,13 @@ const VEYLI_RETELL = {
   rough: ['Their cabin was freezing the first night. Nobody\'s owning up.', 'Holt and their pilot still won\'t look at each other.'],
 };
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
-// hash key k (the storm's party 340, then 351 up)
+// hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
+// carry its own name, ask, here, thanks, from and places (where: lists), else the party's
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
-  id: m.id, name: m.name || 'All-clear party', k: EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
-  where: [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
+  id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
+  where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
   who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
-  thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: 'Commander Teo Vance' });
+  thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
 (() => {
@@ -36150,7 +36165,7 @@ function eventNow(t = shipNow()) {
   for (const sp of spans) {
     const def = SHIP_EVENTS[sp.id]; if (!def) continue;
     const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || rel >= def.days * 1440) continue;
-    let ph = null; for (const p of def.phases) if (rel >= p.at[0] * 1440 + p.at[1]) ph = p.id;
+    let ph = null; for (const p of def.phases) if (t >= evBeatAt(sp.startDay, p.at)) ph = p.id;
     if (ph) return { id: sp.id, phase: ph, day: Math.floor(rel / 1440) };
   }
   return null;
@@ -36180,7 +36195,7 @@ function eventOn(d) {
   const t0 = (d - 1) * 1440, n0 = eventNow(t0), n1 = eventNow(t0 + 1439), n = n0 || n1; if (!n) return null;
   const def = SHIP_EVENTS[n.id], sd = n0 ? d - n0.day : d - n1.day, phases = [];
   if (n0) phases.push({ id: n0.phase, from: 0 });
-  for (const p of def.phases) { const at = (sd - 1 + p.at[0]) * 1440 + p.at[1] - t0; if (at > 0 && at < 1440) phases.push({ id: p.id, from: at }); }
+  for (const p of def.phases) { const at = evBeatAt(sd, p.at) - t0; if (at > 0 && at < 1440) phases.push({ id: p.id, from: at }); }
   return { id: n.id, day: d - sd, phases };
 }
 // the gatherings on day d (the meetings and gathering moments), for section 14's gathering(): { id, where: venue,
@@ -36189,7 +36204,7 @@ function eventGatherings(d) {
   const o = eventOn(d); if (!o) return [];
   const def = SHIP_EVENTS[o.id], out = [];
   for (const m of (def.meetings || []).concat((def.moments || []).filter(x => x.gathering))) if (m.at[0] === o.day && m.where && m.where.venue)
-    out.push({ id: m.id, event: o.id, where: m.where.venue, at: m.at[1], len: m.len || 15, who: m.who, anim: m.anim || null });
+    out.push({ id: m.id, event: o.id, where: m.where.venue, at: evBeatAt(d - o.day, m.at) - (d - 1) * 1440, len: m.len || 15, who: m.who, anim: m.anim || null });
   return out;
 }
 // a ship tradition paused by a ship-wide event (no observatory night or quiz in a storm): its start or end falls in one
@@ -36245,6 +36260,7 @@ function eventStart(id, day) {
 // `earliest` day plus 0-2 days by hash, at least `gap` days (default 7) after the last one ended, then on to the first
 // day its `need` people are all on shift
 function eventDueDay() {
+  if (EV_CAL_ON) return evCalDue();
   const id = EVENT_ORDER.find(x => SHIP_EVENTS[x] && !SHIP_EVENTS[x].draft && !SHIP.eventLog.some(l => l.id === x));
   if (!id) return null;
   const def = SHIP_EVENTS[id], last = SHIP.eventLog[SHIP.eventLog.length - 1];
@@ -36260,10 +36276,10 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: (e.startDay - 1 + m.at[0]) * 1440 + m.at[1], len: m.len, who: m.who, script: m.script, notify: m.notify });
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: m.notify });
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
-    const at = (e.startDay - 1 + n.at[0]) * 1440 + n.at[1];
+    const at = evBeatAt(e.startDay, n.at);
     if (at > t || e.mine['news:' + n.id] || typeof newsAdd !== 'function') continue;
     e.mine['news:' + n.id] = 1;
     newsAdd({ id: n.id + '@' + e.startDay, about: def.title, lines: evText(n.lines, evCtx(e, at)), weight: n.weight || 1, seed: newsSeed((n.from ? [n.from] : []).concat(n.seed || [])), born: at, kind: 'event', event: e.id, life: 2 });
@@ -36273,7 +36289,7 @@ function eventAdvance(t = shipNow(), quiet) {
     for (let k = from; k <= to; k++) {                   // every phase begun since last time, in order (a sleep can pass several)
       const ph = def.phases[k].id; out.push('phase ' + ph);
       for (const [th, f] of Object.entries((def.scores && def.scores[ph]) || {})) eventScore(th, f(e));
-      if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: (e.startDay - 1) * 1440 + def.phases[k].at[0] * 1440 + def.phases[k].at[1], quiet: quiet || k < to });
+      if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: evBeatAt(e.startDay, def.phases[k].at), quiet: quiet || k < to });
       const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
     }
     e.phase = now.phase;
@@ -36477,7 +36493,7 @@ function eventMomentsTick(from, to) {
   FEEL.flicker = !!eventMod('effect', 'flicker', to);
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
-    const at = (e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1], key = mo.id + '@' + e.startDay;
+    const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;
     if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len); }
   }
 }
@@ -36733,6 +36749,33 @@ var EV_READY = true;                                     // section 14's hooks w
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
 // ---- slot: Traditions engineer (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the events base, F0 (EV1; plans/events-base-brief.md). Inert while EV_CAL_ON is off ----
+// the ship minute a beat at [day, minute] of an event starting on startDay begins (its phases, meetings, news, felt
+// moments). With the calendar on, a beat that would begin in a held hour (EV_BEATS) waits for that hour's end: a storm
+// phase waits for the Friday address. Pure. (Gatherings, made at load, aren't moved: the events check fails on one held.)
+function evBeatAt(startDay, at) { const t = (startDay - 1 + at[0]) * 1440 + at[1]; return EV_CAL_ON ? evHeldEnd(t) : t; }
+function evHeldEnd(t) {
+  const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  for (const b of EV_BEATS) if (b.kind === 'held' && weekday(d) === b.weekday && d >= b.fromDay && m >= b.at[0] && m < b.at[1]) return (d - 1) * 1440 + b.at[1];
+  return t;
+}
+const evHeld = t => evHeldEnd(t) !== t;
+// the calendar's events passed over for good: with EV_LATE 'skip', those whose day was already gone when this save
+// loaded (and never ran). Decided once at load (a new game: none), so plans made on any day agree
+let EV_LOAD_DAY = SHIP.time ? SHIP.time.day : 0;
+const EV_SKIPPED = new Set(EV_LATE === 'skip' ? EV_CALENDAR.filter(r => r.day < EV_LOAD_DAY && !SHIP.eventLog.some(l => l.id === r.id) && !(SHIP.event && SHIP.event.id === r.id)).map(r => r.id) : []);
+if (typeof onSim === 'function') onSim('newGame', () => { EV_SKIPPED.clear(); EV_LOAD_DAY = 0; });
+// the next event by the calendar: the first built one not run and not passed over; it waits for the last one to end
+// (one event at a time), and with EV_LATE 'next', for the day the save loaded
+function evCalDue() {
+  const last = SHIP.eventLog[SHIP.eventLog.length - 1];
+  for (const r of EV_CALENDAR) {
+    const def = SHIP_EVENTS[r.id];
+    if (!def || def.draft || EV_SKIPPED.has(r.id) || SHIP.eventLog.some(l => l.id === r.id)) continue;
+    return { id: r.id, day: Math.max(r.day, last ? last.endDay : 0, EV_LATE === 'next' ? EV_LOAD_DAY : 0) };
+  }
+  return null;
+}
 // ---- end of slot: Traditions engineer ----
 
 // =====================================================================
