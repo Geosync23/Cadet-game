@@ -115,10 +115,11 @@ FAIL, or one of these with a different message, is new (see 8.3).
 | Check | FAIL | What it means |
 |---|---|---|
 | career_check | `busy: "Relied on" before Day 5` | Known and accepted (backlog 12 and 17): waits for the user's balancing pass. Never "fix" it by changing the check. |
-| perf_check | `memory grows across deck round trips` (+2 geometries, e.g. 520 → 520 → 522) | Known (backlog 14). perf_check exits 1 on this alone. A single frame-time spike can also show; measure again. |
+| perf_check | `memory grows across deck round trips` (+2 geometries: 548 → 548 → 550 in backlog 14; 520 → 520 → 522 on the storm + Fridays candidate) | Known (backlog 14). perf_check exits 1 on this alone. A single frame-time spike can also show; measure again. |
 | tiles_check | `phone 390 (or 320): opening the board adds nothing to the 3D scene` | Known since 0.64.11 (backlog 24, CR3's row 26): the check's own timing. It counts while the device's framing still eases on real time and something comes into view. Not a game bug. |
 | devmode_check | the clock part: `clocked in, the jump didn't keep you clocked in` | A flake (backlog 21): real-time waits plus, before DB2's fix, a random seed giving an early sick day about 1 run in 28. Run it alone; open until full runs stay green. |
-| day_check Day 12/13 (storm on) | `the rec deck is on but nobody came to it in the evening` | Backlog 18: the storm shuts the rec deck on its Saturday; EV4's 4fa198f skips that comparison only on days the storm shuts the deck. Check it on the combined storm build. |
+| day_check Day 12 | `the rec deck is on but nobody came to it in the evening` | Backlog 18: on Day 12 (a Friday) the plans' rec-deck evening is empty **with the storm off too** (0.64.6; claude/fridays with SHORT_FRIDAY off); Day 5 passes. Open. |
+| day_check Day 13 (storm on) | the same message, on the storm's Saturday | A separate case: the storm shuts the rec deck that day; EV4's 4fa198f skips the comparison only on days the storm shuts the deck. Check it on the combined storm build. |
 | day_check Day 3 | two crew in one breakfast seat (e.g. 3-mess-42) | Backlog 11. |
 | food_check `11 4` | `harvest salad` (part 4g) | Since 0.64.11's crew patch Day 20 is the farewell supper (CR2's find; no backlog row yet). `1 7` passes. |
 | food_check from Day 7 | `garden, good` (4j) | Backlog 23. |
@@ -169,8 +170,10 @@ Days 12-13). From the game's calendar (`EV_CALENDAR`, `EV_BEATS`, `ROSTER_ROTATI
 | 27 | the diplomatic visit's finale (warning Day 26, Days 27-30) | `day27` |
 
 Others worth a run when their area changes: Day 9 (the officer's test), 10-11 (summons, ceremony), 14 (the storm's
-all-clear), 35 (the next rotation). The picker already names the ten above (`EVENT_DAYS`); add a day there and to
-`plans/opt-cover/cov_run.sh` when the calendar gains an event.
+all-clear), 77 (the next rotation). The picker already names the ten above (`EVENT_DAYS`). When the calendar gains
+an event day: add it to `EVENT_DAYS` **and** its own `CHECKS` entry (the `dayN` line) in tools/affected.py, to the
+rules of the section that holds the event, and to `ALL` in `plans/opt-cover/cov_run.sh` (its `day[0-9]*` case runs
+whichever days are named); its cover lands in the map at the next remake.
 
 With the event days the full round is 33 checks, about 176 minutes alone, plus check_fast.
 
@@ -218,7 +221,7 @@ It picks the **union** of two lists and never fewer than either:
    ran. A change picks every check that **ran one of the changed lines** (for a pure insertion, the lines either
    side), and for a changed table or other top-level value, every check that **ran a line reading it**. The changed
    lines are moved into the map's own game by a diff, so a map from a slightly older build still lines up. Lines that
-   ran only while the page opened pick cadet and deck.
+   ran only while the page opened pick cadet (and deck, which check_fast runs anyway).
 
 Other files: a check file picks that check (day_check.py picks every day); cadet_test.py picks everything (every check
 runs on it); `content/` picks section 22's checks (lines, talk, bubble). tools/, plans/ and notes pick nothing.
@@ -262,8 +265,9 @@ The rules, as of 0.64.12 (`RULES` in tools/affected.py is the master; `python3 t
 
 - **(a) Careful, in use** (the user, 2026-10-21): the rules plus the whole map, as above. Over the last 20 game
   commits it picked on average 17 of 24 checks, about 77 minutes (before the event days were added; the full round
-  was 104 minutes then). A turn that only touches Dev mode picks 1 check; a crew, events or Fridays turn picks 20-24,
-  close to the full round.
+  was 104 minutes then). Picks vary with what a turn's lines reach, not its area: in the replay most Dev mode turns pick 1 check but one
+  picked 23; most crew, events and Fridays turns pick 20-24 (close to the full round), but one crew turn picked 6 and
+  one events turn 10.
 - **(b) Middle, tried and not used** (`--middle`): lines that nearly every check runs (at least 23 of 28: about 2,000
   of the 50,000 lines any check runs) pick by the rules only, and **a change to one of those shared lines runs the full
   round** (the shared-code safeguard). It picked every known failure, but saved nothing (17.4 checks, 77 min): the
@@ -293,8 +297,8 @@ coverage roughly doubles a check's time, and its results never judge a check.
 
 1. Start from the branch you'll merge, clean (`git status` empty), integration merged in.
 2. Run every check once under coverage, one at a time, on a frozen copy (the branch can move meanwhile):
-   `bash plans/opt-cover/cov_run.sh /tmp/cov-<build>` (all checks; about 2 h 15 for the 28, plus ~1 h 15 for the 9
-   event days). Name checks to run only those. A cover already in the folder is kept, so a stopped run resumes.
+   `bash plans/opt-cover/cov_run.sh /tmp/cov-<build>` (all checks in its `ALL` list, the event days included; about 2 h 15 for the
+   28 and ~45 min for the 9 event days). Name checks to run only those. A cover already in the folder is kept, so a stopped run resumes.
    Background jobs stop at 2 hours: run it in two or three pieces, e.g.
    `cov_run.sh /tmp/cov intro day1 interactions fridays player perf`, then the rest.
 3. Read `/tmp/cov-<build>/log/_summary.txt`: each check's exit. A check that fails its normal run fails here too
@@ -318,8 +322,8 @@ to `ALL` in `plans/opt-cover/cov_run.sh`; until the map is remade it's picked by
 `python3 tools/affected_replay.py [--middle] [--last N] [--branch REF] [--map FILE]` (about 2 minutes, CPU only;
 needs the whole git history: `git fetch --unshallow`). It does two things:
 
-1. For the last N (20) game commits on claude/integration: the checks the rules alone, (a) and (b) would pick, and
-   their minutes. This is the cost.
+1. For the last N (20) game commits on claude/integration: the checks the rules alone and (a) would pick (and (b),
+   with `--middle`), and their minutes. This is the cost.
 2. For each **known failure** (below): was the check that really failed picked, by check_fast, the rules or the map?
    Exits 1 on any miss.
 
@@ -350,13 +354,13 @@ Add a row whenever a check catches a real failure at review or merge: the commit
 that only carried an earlier commit's failure gets "Inherited from <commit>" in its row, with the proof.
 
 **What the known failures prove, and what they don't** (OR2's point): only 3 of the 14 commits are ones where (a)
-picks fewer than all checks, so "23 of 23" proves less than it sounds. That's why there are planted faults too.
+picks well under all checks (two more pick 23 of 24), so "23 of 23" proves less than it sounds. That's why there are planted faults too.
 
 ### 6.3 The planted faults (`tools/affected_planted.py`)
 
 Six one-line faults, each in **one** section, each breaking a check that section's rules **don't** name, so only the
-map can pick it. `python3 tools/affected_planted.py` checks the picks on paper (40 s); `--run` also runs each fault's
-check on its faulty copy and requires it to FAIL (a fault its check doesn't notice proves nothing).
+map can pick it. `python3 tools/affected_planted.py` checks the picks on paper (under a minute);
+`--run` also runs each fault's check on its faulty copy (about 40 minutes, one at a time) and requires it to FAIL (a fault its check doesn't notice proves nothing).
 
 | Fault | Section | Must pick | Rules alone |
 |---|---|---|---|

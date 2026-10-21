@@ -1571,7 +1571,7 @@ Extrude geometry:
 - **Setup in a fresh container:**
 
   ```
-  pip install playwright
+  pip install playwright numpy pillow
   mkdir -p /tmp/cadet-work/three && cd /tmp/cadet-work/three
   npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
   ```

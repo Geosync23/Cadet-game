@@ -64,7 +64,7 @@ for line in open(os.path.join(ROOT, 'plans', 'opt-cover', 'failures.md')):
         print(f'  {h}: its failure was inherited from {inh[1]} (failures.md): checked against {inh[1]}')
         h = inh[1]
     want = [w.split('(')[0].strip() for w in m[2].split(',')]
-    want = ['day1' if w.startswith('day') else w for w in want if w]
+    want = [('day1' if w in ('day', 'day_check') else w) for w in want if w]   # 'day1', 'day13': a day of its own
     if A.git('cat-file', '-t', h).strip() != 'commit':
         print(f'  {h}: not in this clone (git fetch --unshallow)'); missed.append((h, '?')); continue
     rules, _ = A.pick(f'{h}~1', h, None)
