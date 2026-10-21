@@ -64,6 +64,11 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .devbtn b{min-width:16px;padding:0 4px;border-radius:8px;background:var(--teal);color:#08201d;font-size:11px;line-height:16px;margin-left:2px}
 .devbtn.compact span{display:none}                        /* 0.28.59: the narrowest phones, so Pause fits beside it (its aria-label still says Device) */
 .devbtn.low::after{content:"";width:7px;height:7px;border-radius:50%;background:#e8a04c;margin-left:2px}
+/* the patch, #14: the device just handed over, until you first open it (section 21's introDevGlowTick) */
+.devbtn.devglow{animation:devglow 1.6s ease-in-out infinite}
+@keyframes devglow{0%,100%{box-shadow:0 0 0 0 rgba(76,195,181,.6)}50%{box-shadow:0 0 0 7px rgba(76,195,181,0)}}
+#devPoint{position:fixed;z-index:3;pointer-events:none;padding:4px 9px;border-radius:9px;background:rgba(8,32,29,.9);border:1px solid var(--teal);color:#e8fffb;font-size:12px;white-space:nowrap}
+#devPoint::before{content:"";position:absolute;left:16px;top:-6px;border:6px solid transparent;border-top:0;border-bottom-color:var(--teal)}
 /* 0.72.0 (HUD U): the Tracked button, in the Device button's row (section 15b's trkPlace lines it up), and its panel */
 .trkbtn{position:fixed;left:140px;top:86px;z-index:2;padding:6px 11px;font-size:12.5px}
 .trkbtn.compact span{display:none}
@@ -4536,7 +4541,7 @@ DECKS[5] = {
     { id: '5-timeclock-1', type: 'timeclock', at: [20, 0], xy: [20.6, .5], face: 'n', pose: 'stand', room: 'w' },   // the time clock (0.61.13), past the tool wall by the tea corner door: crew clock in and out here
     { id: '5-toolwall-1', type: 'work:works', at: [19, 1], face: 'n', pose: 'stand', room: 'w' },
     { id: '5-stool-1', type: 'work:works', at: [11, 3], face: 'e', pose: 'sit', room: 'w', xy: [11.57, 3.63], y: 0.49 },
-    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5, cush: 0.5 },
+    { id: '5-office-1', type: 'work:works', at: [11, 1], face: 'n', pose: 'sit', room: 'o', xy: [11.5, 1.4], y: 0.5, cush: 0.5, desk: 'calder' },   // desk: whose own desk it is (the patch, #1)
     { id: '5-tea-1', type: 'lounge-seat', at: [23, 0], face: 'w', pose: 'sit', room: 't', window: true, xy: [23.66, 0.6], y: 0.44, cush: 0.44 },
     { id: '5-tea-2', type: 'lounge-seat', at: [21, 0], face: 'e', pose: 'sit', room: 't', window: true, xy: [21.64, 0.64], y: 0.49 },
     { id: '5-tea-3', type: 'lounge-seat', at: [21, 1], face: 's', pose: 'stand', room: 't' },
@@ -9309,6 +9314,14 @@ function schedDesks(people, shared) {
     if (d) (used.get(p.shift + '|' + d.id) || used.set(p.shift + '|' + d.id, []).get(p.shift + '|' + d.id)).push(hrs || null);
     desks.set(p.id, d ? d.id : null);
   }
+  // a place with `desk: '<id>'` is that person's own (the Chief's chair in her office, the patch #1): whoever was given it
+  // trades with them, so nobody else's desk moves
+  for (const pl of [...shared.values()].flat()) {
+    const mine = pl.desk && desks.has(pl.desk) ? desks.get(pl.desk) : undefined; if (mine == null || mine === pl.id) continue;   // no desk of their own: nobody's moved
+    const sh = (order.find(q => q.id === pl.desk) || {}).shift;
+    for (const q of order) if (q.id !== pl.desk && q.shift === sh && desks.get(q.id) === pl.id) desks.set(q.id, mine);
+    desks.set(pl.desk, pl.id);
+  }
   return desks;
 }
 
@@ -10540,7 +10553,7 @@ function introPlan(p, d) {
     const near = w.tile ? cand.filter(q => q.type !== 'event').sort((a, b) => dist(a) - dist(b)) : cand;   // a tile: the places nearest it first
     const pl = w.placeId && S.byId.get(w.placeId) ? S.byId.get(w.placeId) : near[0];   // a named place (Calder's seat across from yours)
     const seat = !!(w.placeId && pl), alts = w.placeId ? null : near.map(q => q.id);   // introLay takes the first of these free then
-    return { from: seat ? x.at - INTRO_EARLY : x.at, to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id };   // a named seat: there and sitting when it starts
+    return { from: x.at - (x.early != null ? x.early : seat ? INTRO_EARLY : 0), to: x.until, deck: w.deck, placeId: pl ? pl.id : null, alts, tag: 'intro-' + x.id };   // a named seat: there and sitting when it starts; a beat's own `early` (the patch, #1: the Chief 20 minutes early at her desk)
   });
 }
 function introLay(p, d, occ, segs) {
@@ -10994,7 +11007,7 @@ function devDay(d) {
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
   return out.sort((x, y) => x.from - y.from);
 }
-const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
+const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
 const devWhen = t => hhmm(((t % 1440) + 1440) % 1440);
 const devDayName = d => d === SHIP.time.day ? 'Today' : d === SHIP.time.day + 1 ? 'Tomorrow' : WEEKDAYS[weekday(d)] + ', Day ' + d;
 function devNow() {                                      // the strip: where you're expected right now, and what's next
@@ -11089,6 +11102,7 @@ function devHeadsTick(t) {
 function devHeadsShow(t = shipNow()) {
   if (DEV.hu || !HU_Q.length) return;
   if (devHuBusy()) return;
+  if (typeof introHoldNudges === 'function' && introHoldNudges()) { const k = HU_Q.findIndex(h => !/^meal\|/.test(h.key)); if (k < 0) return; if (k > 0) HU_Q.unshift(HU_Q.splice(k, 1)[0]); }   // section 21: training day's end, the beam first: a meal's heads-up waits (the patch, #19)
   const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
   DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + ' starts in ' + left + ' min' : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
     where: h.where, soft: h.stage === 'start', go: !!h.goal });
@@ -12439,8 +12453,9 @@ function needWarnTick(now) {
     if (l > (WARN_SAID[k] || 0) && (!pick || n[k] < n[pick])) { pick = k; lvl = l; }
   }
   if (!pick || POP.busy || DEV.open || Math.max(POP.toast, POP.card, POP.warn) > now - WARN_GAP) return null;
+  const hold = typeof introHoldNudges === 'function' && introHoldNudges(); if (hold && lvl === 1) return null;   // section 21: the end of training day (the patch, #19): only the firm one, and no marker over the beam's arrow
   const w = NEED_WARN[pick][lvl - 1]; WARN_SAID[pick] = lvl; POP.warn = POP.toast = now;
-  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
+  if (lvl === 1) needPop(pick); else toast(w[0], bedText(w[1]) + (!hold && needGoal(pick) ? ' Follow the marker.' : ''));  // the first one: a pop-up in plain words (0.28.62); the firm one stays a toast, with the way (playtest 1)
   return pick;
 }
 // the low-need pop-up (0.28.62, the user's "in plain words: 'You need to pee'"): one line beside the need's icon on the
@@ -12479,9 +12494,15 @@ const teachRecent = (at, c, ms = 120000) => at !== undefined && c.now - at < ms;
 const teachMeal = m => m >= MEALS.breakfast[0] && m < MEALS.breakfast[1] || m >= MEALS.dinner[0] && m < MEALS.dinner[1];   // breakfast and dinner at the servery
 const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown when due whatever the 3-minute and 60 s pacing says
   // playtest 2 (0.72.5, HUD U; texts: the head writer's tip.device and tip.laundry.day2, read when shown): item 9, once on your
-  // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift)
-  ['t:devwork', c => c.d === 1 && c.work && c.min >= 9 * 60 + 30 && c.min < 17 * 60 && !c.app, () => careerText('tip.device') || 'Working is a good chance to check out your device. Schedule, Jobs and Tracked are a tap away.'],
-  ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && c.min < 9 * 60, () => careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.', { sure: true }],
+  // training day while you're on shift; item 19, the laundry tip at the start of Day 2 (from 06:00, before 09:00's shift).
+  // The patch (#28): any time on Day 2 you're up and not clocked in, in the words for the time (before, late, after the shift)
+  // the patch (#13): it waits for a long work step under way (a hold of 10 ship minutes or more), any day of your first week
+  ['t:devwork', c => c.d >= 1 && c.d <= 7 && !c.app && !!ACT && ACT.phase === 'do' && WORK_ACTS.has(ACT.kind) && ACT.def.mins >= 10 && ACT.done > 0 && ACT.done < ACT.def.mins,
+    () => careerText('tip.device') || 'While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.', { sure: true }],
+  ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && !sleeping && !(typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut()),
+    () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.'
+      : SHIP.time.min < DAY_SHIFT[1] ? careerText('tip.laundry.day2.late') || 'Laundry\'s for after your shift. Clock in first; the washers will wait.'
+      : careerText('tip.laundry.day2.after') || 'Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.', { sure: true }],
   ['t:rep', c => c.d >= 1 && (c.S.turnin !== undefined && shipNow() - c.S.turnin >= 30 || c.min >= 1020 || c.d >= 2), 'Not just jobs: kindness and joining in count too. Each department has its own view of you, and so does the ship.', { sure: true }],   // the user's: on the 2nd day (Monday), after your first job's turned in or at the shift's end; half an hour after the turn-in, so Zeke says his part first (0.28.50)
   // free time (0.28.63, the 0.60.7 plan's "Tips for your first evenings"; the plan's approved words): off shift, then one an evening, Days 1-4
   ['t:offshift', c => c.d >= 1 && c.min >= 1020 && c.min < 1290, 'Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.', { sure: true }],
@@ -12541,7 +12562,7 @@ if (typeof onSim === 'function') {
 }
 // the intro's arrival (day 0's scripted steps) teaches by itself: tips wait for it. Its first week runs on (introOn() till
 // day 8) with tips, which is when they're most use.
-const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1);
+const teachHeld = () => typeof introOn === 'function' && introOn() && (!!SHIP.intro.step || SHIP.time.day < 1 || typeof introHoldNudges === 'function' && introHoldNudges());   // (the patch, #19: and the end of training day, till your name's on the beam)
 function teachTick(now) {
   if (now - TEACH_CK < 1000) return null; TEACH_CK = now;
   const S = teachWatch(now), D = SHIP.device;
@@ -13574,7 +13595,7 @@ function squeezeStep() {                                 // each frame: slow dow
 const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
 const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
 const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
-const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';
+const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0 && !(a.esc && /^follow\|/.test(a.esc))) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';   // the patch (#12): an escort following you steps aside even while talking (and talks on)
 const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
   const di = c[0] - b[0], dj = c[1] - b[1]; if (Math.abs(di) > 1 || Math.abs(dj) > 1) return false;
   if (!di || !dj) return edgeOpen(b[0], b[1], c[0], c[1], null);
@@ -15199,6 +15220,7 @@ function ixJobStep() {
 function ixGoalWorld(g) {
   if (g.crew && typeof DECK_CREW !== 'undefined') { const a = DECK_CREW.find(c => c.p && c.p.id === g.crew); if (a) return { x: a.x, z: a.z }; }   // someone on the deck (section 18's tradition leader, 0.70.0)
   if (g.xz) return g.xz;                                  // a spot on the floor (the set-down crate, 0.28.60)
+  if (g.beam && typeof beamSlotWorld === 'function') { const b = beamSlotWorld(); if (b) return b; }   // your name's spot on the Works beam, at its height (the patch, #19; section 21's)
   if (g.item) { const it = ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item); if (it) { it.hit.getWorldPosition(ixP); return { x: ixP.x, z: ixP.z }; } }
   if (g.place && PLACE_OF.has(g.place)) { const s = placeSpot(g.place); if (s) return { x: s.x, z: s.z }; }
   if (g.at) { const p = cellPos(...g.at); return { x: p.x, z: p.z }; }
@@ -15262,7 +15284,7 @@ function ixFrame() {
   // a chore's stop is done once its minutes are in: seen as it steps out, or (if it ended between our frames) once it's gone
   const L = ixStopLast; ixStopLast = ACT && ACT.kind === 'ixStop' ? ACT : null;
   for (const A of [ACT, L]) if (A && A.kind === 'ixStop' && !A.o.ixDone && (A.phase === 'out' || A !== ACT && A.done >= A.def.mins)) { A.o.ixDone = true; ixStopDone(A); }
-  ixTips(); ixHealth.tick();
+  ixTips(); ixHealth.tick(); trkDoneCheck();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
@@ -15273,7 +15295,7 @@ function ixFrame() {
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
   const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
-  ixV.set(w.x, 1.2, w.z).project(camera);
+  ixV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);   // a goal with a height (the beam's name spot, the patch #19)
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
   const dx = sx - W2, dy = sy - H2, k = Math.min(dx > 0 ? (R0 - W2) / dx : dx < 0 ? (L0 - W2) / dx : Infinity, dy > 0 ? (B0 - H2) / dy : dy < 0 ? (T0 - H2) / dy : Infinity);
@@ -15312,7 +15334,7 @@ function trkItems() {
     for (const x of list) {
       if (x.kind === 'off' || x.from >= upto || (day === d && x.to <= m)) continue;
       out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where,
-        tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), goal: trkGoalOf(x) });
+        tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), goal: trkGoalOf(x), span: [(day - 1) * 1440 + x.from, (day - 1) * 1440 + x.to] });   // span: when it's on (trkDoneCheck)
     }
   }
   for (const q of TRK_PLACES) out.push({ sec: 'place', key: q.key, title: q.title, sub: q.sub, tag: '', goal: q.goal() });
@@ -15323,7 +15345,7 @@ function trkTap(key) {                                  // the app's tap: track 
   const it = trkItems().find(x => x.key === key); if (!it) return false;
   if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); return false; }
   if (it.job) { SHIP.player.track = it.job; clearGoal(); }
-  else if (it.goal) { SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key }); }
+  else if (it.goal) { SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key, ...(it.span ? { trkFrom: it.span[0], trkTo: it.span[1] } : {}) }); }
   else return false;
   return true;
 }
@@ -15429,6 +15451,21 @@ function turnInShow(j, a) {
 }
 
 // ---- slot: Interactions engineer (section 15b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the patch, #11 (plans/patch-plan.html): a tracked arrow clears itself, by kind, so the next arrows (the arrival week's)
+// can show. Something on at a time (a meeting, tradition, appointment, meal...: the goal's trkFrom/trkTo, from Tracked):
+// once it has started with you in its room, or once it's over. A place: when you arrive (in its room, or within 1.5 m,
+// having been away from it since you tracked it: tracking your bunk from your bunk keeps the arrow till you're back).
+// Your job (SHIP.player.track) clears as before, when it's taken or done.
+function trkDoneCheck() {
+  const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
+  const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { clearGoal(); return; }
+  if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
+  const w = ixGoalWorld(g); if (!w) return;
+  const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));
+  if (g.trkFrom != null) { if (inRoom) clearGoal(); return; }
+  const there = inRoom || Math.hypot(w.x - p.x, w.z - p.z) < 1.5;
+  if (!there) g.trkAway = true; else if (g.trkAway) clearGoal();
+}
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -20465,7 +20502,7 @@ const VOICE = JSON.parse([
   '{"text":"First week. Nobody expects you to be fast. I expect you to be right.","id":"oa5e77","week1":"true"},',
   '{"text":"You ate something on Sunday. Good. Keep doing that.","id":"1wjwivy","tone":"funny","mem":"intro.dinner","week1":"true"},',
   '{"text":"Briefing\'s done. You\'re with Torres. Watch his hands, not his mouth.","id":"w1oh9j","week1":"true","weekday":"mon"},',
-  '{"text":"Your first job\'s mine. Glass office, quarter to nine. I\'ll pick it. You\'ll do it.","id":"14dl0t6","week1":"true","weekday":"tue"},',
+  '{"text":"Your first solo job\'s mine. Glass office, quarter to nine. I\'ll pick it. You\'ll do it.","id":"1cqq761","week1":"true","weekday":"tue"},',
   '{"text":"Rina has you at two. Health check. Go. It isn\'t optional.","id":"wzk5ku","week1":"true","weekday":"tue"},',
   '{"text":"Pick your own job today. Read the whole card. Then pick.","id":"ctv3zu","week1":"true","weekday":"wed"},',
   '{"text":"Torres is off. Board\'s yours. Questions come to me.","id":"1d4hnts","week1":"true","weekday":"thu"},',
@@ -26335,7 +26372,7 @@ const VOICE = JSON.parse([
   ',"sick.getwell":[',
   '{"text":"Off you go, shipmate. Board\'ll keep. Coil three\'s had colds. She recovered.","id":"wefkzl","tone":"funny","tier":[1,4]}]',
   ',"smalltalk":[',
-  '{"text":"Ten more minutes with the coils. Breakfast in five.","id":"ykb3ua"},',
+  '{"text":"Ten more minutes with the coils. Breakfast in five.","id":"ykb3ua","time":"morning"},',
   '{"text":"Row forty-two of the scarf. It\'s getting long.","id":"q3pta1","tone":"funny","mem":"moment.torres.scarf"},',
   '{"text":"Hot water\'s gone. Character-building, that.","id":"82eqno","tone":"funny","time":"evening"},',
   '{"text":"Friday jam. I know every word. Every one.","id":"1ylfhz","tone":"funny","trad":"jam"},',
@@ -26362,8 +26399,13 @@ const VOICE = JSON.parse([
   '{"text":"One week aboard. Look at you. You know where the tea is and everything.","id":"dyoboo","tone":"warm","week1":"true","weekday":"sun"},',
   '{"text":"Dinner. Mess is on Deck 3. You know the lift now.","id":"8gucz3","flag":"walk.toMess"},',
   '{"text":"Brennan\'s cooking. Trust me, you want to be early.","id":"ydrqbw","flag":"walk.toMess"},',
-  '{"text":"Right, that\'s me. Evening\'s yours. Have a wander, explore.","id":"1mre9oi","flag":"walk.goodnight.1"},',
-  '{"text":"Shift\'s at nine tomorrow. Get some sleep soon.","id":"1o3qo2u","tone":"warm","flag":"walk.goodnight.2"},',
+  '{"text":"Right, that\'s me. Breakfast from six, shift at nine, tea at one.","id":"l4ojcm","flag":"walk.goodnight.1"},',
+  '{"text":"Off at five. Dinner till half eight. Weekends off, like most of Works.","id":"d9nqgz","flag":"walk.goodnight.2"},',
+  '{"text":"Then the evening\'s yours. Have a wander. Gym, lounge, Tiles, bed.","id":"4vcq7d","flag":"walk.goodnight.3"},',
+  '{"text":"Shift\'s at nine tomorrow. Get some sleep soon.","id":"1o3qo2u","tone":"warm","flag":"walk.goodnight.4"},',
+  '{"text":"Good job today. Proper work, that.","id":"1ar7mfd","tone":"warm","flag":"walk.trainend.1"},',
+  '{"text":"Tomorrow you\'re on your own. You\'ll be fine. Read the card twice.","id":"1dma1m0","flag":"walk.trainend.2"},',
+  '{"text":"Clock out first, then come to the beam. They\'re waiting for you.","id":"a9poi3","tone":"warm","flag":"walk.trainend.3"},',
   '{"text":"Every fault on the ship lands on that board. Pick one.","id":"146xcvy","flag":"walk.job.take"},',
   '{"text":"Glass office is the Chief\'s. She sees the whole bay.","id":"1db2796","flag":"walk.job.take"},',
   '{"text":"That one\'s ours. It\'s on your device now, under Jobs.","id":"1x2e7ad","flag":"walk.job.take"},',
@@ -26420,7 +26462,7 @@ const VOICE = JSON.parse([
   '{"text":"Washrooms. Hot water till ten, then it\'s character-building.","id":"1z8h6n","tone":"funny","flag":"walk.wing.3"},',
   '{"text":"Common room\'s at the end, by the windows. Tiles, mostly.","id":"1n1yntp","flag":"walk.wing.4"},',
   '{"text":"Don\'t play Rina at Tiles. Or do. Just don\'t expect to win.","id":"mcrug4","tone":"funny","flag":"walk.wing.5"},',
-  '{"text":"Laundry there. Put your name in everything. Trust me.","id":"shqjiw","tone":"funny","flag":"walk.wing.6"},',
+  '{"text":"Laundry\'s on the far corridor, past Bunk 4. Put your name in everything.","id":"ci1atr","tone":"funny","flag":"walk.wing.6"},',
   '{"text":"Officers\' corridor. Cabins, all the way along.","id":"143rgm6","flag":"walk.officers.1"},',
   '{"text":"Fourteen\'s mine. The one with the music. Sorry in advance.","id":"1deimsk","tone":"funny","flag":"walk.officers.2"},',
   '{"text":"Need anything, knock on fourteen. I mean it.","id":"ojhhg2","tone":"warm","flag":"walk.officers.3"},',
@@ -32741,7 +32783,7 @@ const LINES = JSON.parse([
   ',"tip.clothes":[',
   '{"text":"Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.","id":"19o8qsh"}]',
   ',"tip.device":[',
-  '{"text":"Working is a good chance to check out your device. Have a look at the apps between jobs.","id":"t5ivqy"}]',
+  '{"text":"While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.","id":"1hdhyql"}]',
   ',"tip.eve.call":[',
   '{"text":"Your people at home would love to hear from you. The call booths are on Deck 3.","id":"4ujlfr"}]',
   ',"tip.eve.hobby":[',
@@ -32758,6 +32800,10 @@ const LINES = JSON.parse([
   '{"text":"Out of clean clothes. Carry the hamper to the laundry on Deck 4, past the washrooms in the junior wing. Load a washer, and come back when it\'s done.","id":"bsfjuc"}]',
   ',"tip.laundry.day2":[',
   '{"text":"Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.","id":"1rnyvjy"}]',
+  ',"tip.laundry.day2.after":[',
+  '{"text":"Laundry day: your hamper\'s in Bunk 1, the washers are on the far corridor.","id":"1eagq7c"}]',
+  ',"tip.laundry.day2.late":[',
+  '{"text":"Laundry\'s for after your shift. Clock in first; the washers will wait.","id":"1hsjxic"}]',
   ',"tip.offshift":[',
   '{"text":"Off shift. Your evening is yours: call home from the booths on Deck 3, go to a ship tradition (Calendar), talk a while with someone, or try a hobby.","id":"1kzqg2"}]',
   ',"tip.round.done":[',
@@ -33673,8 +33719,8 @@ const MEETINGS_BAKED = {
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.", "lines": [{"who": "calder", "text": "Ten to nine. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea and biscuits at one. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"who": "calder", "text": "Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.", "to": "you"}, {"who": "torres-zeke", "text": "I do talk a lot. It's mostly useful.", "pose": "laugh"}, {"who": "calder", "text": "Three things. Gloves on before the panel comes off. Not after.", "to": "you"}, {"who": "calder", "text": "If you don't know, ask. Asking takes a minute. Guessing takes a shift.", "to": "you"}, {"who": "calder", "text": "And put tools back where you found them. The wall has outlines. Use them.", "to": "you"}, {"who": "tech2", "text": "She means it about the wall.", "pose": "gesture"}, {"who": "calder", "text": "Last thing. Work ends at five. The ship doesn't.", "to": "you"}, {"who": "calder", "text": "Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.", "to": "you"}, {"who": "calder", "text": "The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.", "to": "you"}, {"who": "calder", "text": "People who join in settle in. I've watched it for years. Go to things.", "to": "you"}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your wardrobe, and handed you your device. He sent you a Mail on it.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. This is you. This is where you sleep.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "The top bunk in the middle is yours."}, {"who": "torres-zeke", "text": "Bag in your wardrobe. Go on, it's yours now.", "to": "you"}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "And this is yours. Your device.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "I've sent you a Mail on it. Open it when you've a minute. The rest is in there."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
-  "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to nine in the Works bay. Your first job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to nine, the Works bay. Not nine. Ten to."}, {"who": "calder", "text": "Tuesday, your first job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
-  "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, how a ship day runs, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "How a day runs, then. Breakfast from six. Shift at nine. Tea and biscuits at one.", "to": "you"}, {"who": "torres-zeke", "text": "Off at five. Dinner from five till half eight. Then the evening's yours. Gym, lounge, Tiles, bed."}, {"who": "torres-zeke", "text": "Two days off in a row each week. Yours are the weekend, like most of Works."}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
+  "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to nine in the Works bay. Your first solo job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to nine, the Works bay. Not nine. Ten to."}, {"who": "calder", "text": "Tuesday, your first solo job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
+  "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, coil three, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
   "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your six needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Food, energy, hygiene, social, fitness, bathroom. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must. You know where the toilets are."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
   "introSoloJob": {"title": "Your first solo job", "from": "Chief Ines Calder", "gist": "Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.", "lines": [{"who": "calder", "text": "Come in. Don't sit. This won't take long.", "pose": "gesture"}, {"who": "calder", "text": "Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.", "to": "you"}, {"who": "calder", "text": "You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once."}, {"who": "calder", "text": "Every job you finish goes in your Record. So does every job you leave half done. I read the Record."}, {"who": "calder", "text": "Progress talks: any time. Book one on your device. I'll keep it."}, {"choice": [{"text": "What if I need help?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Ask. Asking isn't failing. Hiding it is.", "pose": "nod"}}, {"text": "I won't let you down, Chief.", "rel": {"calder": 1}, "flavour": "cheer", "reply": {"who": "calder", "text": "Don't let the machine down. I'll be fine."}}, {"text": "(Take the job and go)", "reply": {"who": "calder", "text": "Good. That's an answer too."}}]}, {"who": "calder", "text": "One more thing. Finish what you start. Off you go."}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Well done.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
@@ -34368,7 +34414,8 @@ function linesHeard(id, day, tone) {
   L.ring.push([id, day]); if (L.ring.length > LINES_RING_MAX) L.ring.shift();
   if (tone === 'serious') L.serious = day;
 }
-const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping);
+const linesHush = () => (typeof CHAT !== 'undefined' && !!CHAT) || (typeof DIALOGUE !== 'undefined' && !!DIALOGUE) || (typeof sleeping !== 'undefined' && sleeping)
+  || (typeof introHush === 'function' && introHush());   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
 // the minute's tries (goodbyes, reactions, then conversations) are worked in the minute's own frame, before section 20's
 // chatter rolls (0.43.28, reviewer 2b: 0.43.26 spread them over frames, so the chatter could speak in between and a
 // conversation was lost). Each try is about half the cost it was (0.43.26), and performance engineer 2 found section 22
@@ -35639,7 +35686,7 @@ function tradJoinMinute(now) {
   const here = deckDef.num + '|' + roomAt(...player.here()), name = tjFirst(TJ_NOW.lead), s = TRAD_JOIN[TJ_NOW.e.id];
   if (!TJ_NOW.e.rooms.has(here)) return;
   const beam = s.act === 'beam', label = tradWords(TJ_NOW.e, 'tip', { name }) || (beam ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
-  if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
+  if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
   ixTip('t:join:' + TJ_NOW.e.id, label + (beam ? '. The Works crew are waiting to see it go up.' : '. Anyone taking part will do: you join in with them.'));
 }
 // a goal arrow pointing at this tradition's room (the device's heads-up, the Tracked list): { deck, room (key or name) }
@@ -35790,7 +35837,7 @@ SIM_ADVANCE.push((from, to) => { BEAM_ALL = false; beamTraces(to); });
 function tradGoal(x) {
   if (!x || !TJ_NOW || TJ_NOW.e.id !== (x.tkind || String(x.id || '').split('@')[0])) return null;
   const s = TRAD_JOIN[TJ_NOW.e.id], name = tjFirst(TJ_NOW.lead), label = tradWords(TJ_NOW.e, 'tip', { name }) || (s.act === 'beam' ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
-  return s.act === 'beam' ? { deck: 5, item: /^The beam$/, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key };
+  return s.act === 'beam' ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key };
 }
 // the walks (Lap of the Wren, the Lantern walk): joined, the leader sets off round the promenade loop (the deck
 // architect's 3-lap-1..12, in walking order) and you fall in behind them, then up to TJ_LINE of the others at it, each
@@ -38015,7 +38062,7 @@ function careerRemark(what, now, late = 0) {             // a Works crew member 
   if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function') return null;
   const d = Math.floor(now / 1440) + 1; if (CLOCK_SAID[what] === d || schedU(CAREER.clockSeed, Math.floor(now), what === 'in' ? 951 : 952) >= CAREER.remarkOdds) return null;
   const P = player.obj.position, dist = x => Math.hypot(x.x - P.x, x.z - P.z);
-  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;
+  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && dist(x) < 5 && !(what !== 'in' && typeof introQuiet === 'function' && introQuiet(x.p.id))).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;   // (section 21: not Zeke, just after his end-of-day good job; the patch #18)
   const wd = weekday(d), kinds = what === 'in' ? [careerBack(d) && 'clock.back', late >= 20 && 'clock.late', wd === 0 && 'clock.monday', 'clock.in'] : what === 'early' ? ['clock.early', 'clock.out'] : [wd === 4 && 'clock.friday', 'clock.out'];
   for (const k of kinds.filter(Boolean)) { const l = socLine(a.p, k, { t: now, tier: relTier(a.p.id) }); if (l) { CLOCK_SAID[what] = d; bubbleSay(a.h, l.text); return k; } }
   return null;
@@ -38509,6 +38556,7 @@ function socialChatter(m) {
   if (typeof bubbles !== 'undefined' && bubbles) bubbles.hidden = !!CHAT;
   if (!CHAT && !sleeping && cheerTick(m)) return;
   if (CHAT || sleeping || simNow() - CHATTER_AT < CHATTER_GAP * 1000 || schedU(m, 0, 635) >= CHATTER_ODDS) return;
+  if (typeof introHush === 'function' && introHush()) return;   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
   const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a))
@@ -40082,7 +40130,9 @@ const INTRO_STEPS = [
   { id: 'chief', day: 0, at: 18 * 60 + 20, who: 'calder', mode: 'meet', where: 'your table in the mess', meeting: 'introChief',
     checkpoint: { deck: 3, tile: [28, 1], room: 'Mess hall' }, rel: { calder: 3 }, flags: ['met.calder'],
     seats: { you: '3-mess-10', [INTRO_ESCORT]: '3-mess-12', calder: '3-mess-9' },   // you, Torres beside you, the Chief across
-    // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she sits across from you from the start of the dinner, not at the far table (0.42.64's away)
+    // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she's at the dinner from its start; (the patch, #3: "she should
+    // walk up to you") she eats at the next table, facing yours, and walks over on Zeke's "Look who's coming over" (introTick's calderGo)
+    away: { calder: '3-mess-26' },
     fallback: { until: 19 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
   { id: 'free', day: 0, at: 19 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:30 at the latest (reviewer 1c: no fixed 19:00)
   { id: 'tomas', day: 0, at: 19 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
@@ -40092,7 +40142,7 @@ const INTRO_STEPS = [
 const INTRO_MEETINGS = {
   introBunk: { title: 'Your bunk', cast: [INTRO_ESCORT, 'tomas'], gist: 'Torres showed you Bunk 1 and your locker, and handed you your device.' },
   introDinner: { title: 'Dinner with Torres', cast: [INTRO_ESCORT], choice: true, gist: 'Dinner with Zeke Torres: engines, coil three, and how the ship runs.' },
-  introChief: { title: 'The Chief stops by', cast: ['calder', INTRO_ESCORT], choice: true, gist: 'Chief Calder: Torres has you on Monday; your first job on Tuesday is hers.' },
+  introChief: { title: 'The Chief stops by', cast: ['calder', INTRO_ESCORT], choice: true, gist: 'Chief Calder: Torres has you on Monday; your first solo job on Tuesday is hers.' },
   introBriefing: { title: 'Monday briefing', cast: ['calder', INTRO_ESCORT, 'works:2'], gist: 'The Monday briefing: you shadow Torres today.' },
   introSoloJob: { title: 'Your first solo job', cast: ['calder'], gist: 'Your first solo job is on your device. Book a progress talk any time.' },
 };
@@ -40108,9 +40158,11 @@ const INTRO_WEEK = [
     flags: ['intro.device', 'met.calder'] },   // if you missed them on Sunday, Torres hands you the device here
   { id: 'd1-shadow', day: 1, at: 9 * 60 + 5, until: 13 * 60, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:1', settle: 'shadow' },   // he stays at your side and talks you through it (introJobLines); the arrow shows the way
   { id: 'd1-lead', day: 1, at: 13 * 60, until: 16 * 60 + 30, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow', job: 'reserved:2', settle: 'lead' },
+  { id: 'd1-end', day: 1, at: 16 * 60 + 44, until: 17 * 60 + 5, who: INTRO_ESCORT, where: { deck: 5, room: 'Works bay' }, escort: 'follow' },   // the patch (#18/#19): he comes to find you (by 16:50): good job, clock out, the beam (introDayEndTick)
   { id: 'd1-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: 'brennan', where: { deck: 3, room: 'Mess hall' }, settle: 'eat' },
   { id: 'd1-zeke-dinner', day: 1, at: 18 * 60, until: 19 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' } },   // 0.42.41: he eats in the mess (section 21b's evening and laundry lines, CLOTHES_BEATS)
-  { id: 'd2-solo', day: 2, at: 8 * 60 + 45, until: 9 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office' }, meeting: 'introSoloJob', settle: 'solo' },
+  { id: 'd2-solo', day: 2, at: 8 * 60 + 45, until: 10 * 60, who: 'calder', where: { deck: 5, room: 'Works Chief\'s office', placeId: '5-office-1' }, meeting: 'introSoloJob', settle: 'solo',
+    early: 20, release: true, hold: { till: 9 * 60 + 15, after: 20 }, stand: '5-office-visit-1' },   // the patch (#1): at her own desk from 08:25, free once it's done; you stand (introWeekBeat)
   { id: 'd2-tea', day: 2, at: 13 * 60, until: 13 * 60 + 45, who: INTRO_ESCORT, where: { deck: 5, room: 'Tea corner' }, says: 'walk.job3.tea' },   // his one check-in on your solo day
   { id: 'd2-health', day: 2, at: 14 * 60, until: 14 * 60 + 30, who: 'rina', where: { deck: 3, room: 'Infirmary' }, appt: 'intro-health', settle: 'health' },
   { id: 'd2-booths', day: 2, at: 18 * 60, until: 19 * 60, who: 'eklund-leila', where: { deck: 3, room: 'Call-home booths' }, settle: 'call' },
@@ -40299,7 +40351,7 @@ function introUiReset() {
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
-const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '');
+const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased();   // + a meeting done early frees its speaker (the patch, #1)
 
 // one step done: its points, its flags, its note; then the next step (the evening) or none (the week runs by the clock)
 function introDone(id, at = Math.floor(shipNow())) {
@@ -40419,7 +40471,7 @@ function introBeats(id, d) {
   if (!introOn()) return [];
   const out = [];
   for (const st of INTRO_STEPS) if (st.day === d && st.who === id && st.checkpoint) { const f = st.fallback || {}, seat = (st.away && st.away[id]) || st.seats && st.seats[id], tb = st.id === 'chief' && st.seats && introStepById('table'); out.push({ id: st.id, at: tb && tb.at != null ? Math.min(st.at, tb.at) : st.at, until: f.until !== undefined ? f.until : st.at + (f.wait || 20), where: seat ? { ...st.checkpoint, placeId: seat } : st.checkpoint }); }
-  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push({ id: b.id, at: b.at, until: b.until, where: b.where });
+  for (const b of INTRO_WEEK) if (b.day === d && (b.who === id || (b.also || []).includes(id)) && b.until) out.push(introWeekBeat(b));
   return out;
 }
 
@@ -40433,7 +40485,7 @@ const INTRO_LINES = {
   haulway: ['Cargo hold on the left, Cart bay on the right.', 'Mind the carts. They don\'t mind you.'],
   works: ['That\'s us. The board, the tea corner, the Chief\'s glass office.', 'Tomorrow, ten to nine. Right here.'],
   lift: ['Four, please. Panel\'s all yours.'],
-  wing: ['Washrooms. Hot water till ten, then it\'s character-building.', 'Laundry, common room. Nearly there.'],
+  wing: ['Washrooms. Hot water till ten, then it\'s character-building.', 'Laundry\'s on the far corridor, past Bunk 4. Common room, then nearly there.'],
   toMess: ['Dinner. Mess is on Three.'],
   servery: ['Grab a tray. Brennan doesn\'t bite. Much.'],
   free: ['You\'re free. Bunk\'s yours any time from eight.', 'I\'m on Four if you need me. Fourteen, the one with the music.'],
@@ -40447,7 +40499,7 @@ const INTRO_STUB_SCRIPTS = {
     { who: INTRO_ESCORT, text: 'Right. Dinner. Come on.' }] },
   introChief: { title: 'The Chief stops by', from: 'I. Calder', lines: [
     { who: 'calder', text: 'I\'m not here. Day off. Welcome aboard.' },
-    { who: 'calder', text: 'Torres has you tomorrow. Ten to eight, the Works bay. Tuesday, your first job is mine.' },
+    { who: 'calder', text: 'Torres has you tomorrow. Ten to nine, the Works bay. Tuesday, your first solo job is mine.' },
     { choice: [
       { text: 'Looking forward to it.', rel: { calder: 1 }, reply: { who: 'calder', text: 'Good.' } },
       { text: 'What should I read up on?', rel: { calder: 2 }, reply: { who: 'calder', text: 'The scrubber manual. Chapter three. Nobody reads chapter three.' } },
@@ -40572,13 +40624,13 @@ function introNightTick() {
   const p = player.obj.position, U = INTRO_UI, now = simNow(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
   if (!U.night) {
     if (U.tour.some(q => q.core.length)) return;          // his last tour lines first
-    if (!near) { I.done.goodnight = null; introDone('free'); return; }
+    if (!near) { I.done.goodnight = null; I.done['goodnight:owed'] = 1; introDone('free'); return; }   // the patch (#4): said later that evening, or by Mail (introNightOwedTick)
     U.night = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; U.night.push(l[0]); }
     if (!U.night.length) U.night = INTRO_GOODNIGHT.slice();
   }
-  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); return; }   // you went: the arrow anyway
+  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { I.done.goodnight = Math.floor(shipNow()); I.done['goodnight:owed'] = 1; U.night = null; introDone('free'); return; }   // you went: the arrow anyway (and the rest later, introNightOwedTick)
   if (DIALOGUE || now < U.next || typeof bubbleSay !== 'function') return;
-  bubbleSay(a.h, U.night.shift(), 4.5); U.next = now + INTRO_TOUR_GAP;
+  bubbleSay(a.h, U.night.shift(), 4.5); U.next = now + INTRO_TOUR_GAP; U.hushTo = now + 4500;   // the crowd's chatter waits (introHush)
   if (!U.night.length) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); }   // and he lets you go
 }
 function introBedTick() {
@@ -40776,6 +40828,7 @@ function introMoments(now) {
 }
 function introWeekMeetings(now) {
   const I = SHIP.intro;
+  introMeetEnded(now);
   for (const b of INTRO_WEEK) {
     if (!b.meeting || I.done[b.id + ':met'] !== undefined) continue;
     const at = introAbs(b.day, b.at), until = introAbs(b.day, b.until); if (now < at) continue;
@@ -40783,7 +40836,7 @@ function introWeekMeetings(now) {
     const m = { id: 'intro-' + b.id, who: INTRO_MEETINGS[b.meeting].cast.filter(w => !/:/.test(w)), where: { deck: b.where.deck, room }, at };
     // it starts once its speaker is there too (or 10 minutes on, so a late speaker never holds it up for good)
     const speakerIn = typeof DECK_CREW !== 'undefined' && DECK_CREW.some(a => a.p.id === b.who && room.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || ''));
-    if (now < until && (speakerIn || now >= at + 10) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(introScriptHere(b.meeting, m, b.who), m); }
+    if (now < until && (speakerIn || now >= introMeetFallback(b, at, m, now)) && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && typeof inMeeting === 'function' && inMeeting(m)) { I.done[b.id + ':met'] = now; dialogueShow(introScriptHere(b.meeting, m, b.who), m); introMeetStand(b); }
     else if (now >= until) { I.done[b.id + ':met'] = -1; if (typeof meetingGist === 'function') meetingGist(b.meeting); }
     else continue;
     if (b.id === 'd2-solo' && typeof jobReserved === 'function' && typeof claimJob === 'function') { const id = jobReserved(3); if (id) claimJob(id); }
@@ -40837,10 +40890,10 @@ function introArrowWant(now) {
     }
   }
   if (I.done['arrow:board'] === undefined && careerClockedIn(1)) {
-    if (out || typeof myJob === 'function' && myJob()) fin('board');
+    if (out || typeof myJob === 'function' && myJob() || I.done['d1-end:start'] !== undefined) fin('board');   // (the patch, #19: or Zeke's begun his end of the day)
     else return 'board';
   }
-  return null;
+  return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
 }
 function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
@@ -40848,7 +40901,7 @@ function introArrowTick() {
   const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) || cur.label === INTRO_BED_GOAL && id === 'call');   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
-  if (cur && !ours) return;                               // someone else's arrow is up: ours waits for it
+  if (cur && !ours && !((id === 'clockout' || id === 'beam') && introHoldNudges())) return;   // someone else's arrow is up: ours waits for it (not the end of training day's: the beam wins, the patch #19)
   if (!cur || cur.label !== g.label) setGoal(g);
   INTRO_UI.arrow = id;
 }
@@ -40923,7 +40976,7 @@ function introCalderIn() {
 }
 function introTick() {
   if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
-  if (!introOn() || typeof player === 'undefined') return;
+  if (!introOn() || typeof player === 'undefined') { if (document.getElementById('devPoint') || INTRO_DEV_GLOW) introDevGlowTick(); return; }   // (the patch, #14: an intro skipped mid-glow)
   const I = SHIP.intro;
   if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; if (typeof ternRamp === 'function') ternRamp(false, 0); introManifest(); return; }
   const now = Math.floor(shipNow());
@@ -40960,7 +41013,7 @@ function introTick() {
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)
   const cur = introStepById(I.step);
   if (I.step !== INTRO_UI.step && !DIALOGUE && (!cur || Math.floor(shipNow()) >= introAbs(cur.day, cur.at))) { INTRO_UI.step = I.step; }   // ('free' said walk.free here until 0.42.27: his goodnight, introNightTick, says it now)
-  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introFollowTick(); introArrowTick();
+  introTourTick(); introNightTick(); introBedTick(); introTernTick(); introBeatTick(); introDayEndTick(); introNightOwedTick(); introFollowTick(); introArrowTick(); introDevGlowTick();
   // the goal arrow points at him while he's leading you (section 15b's setGoal), and is cleared when he lets you go
   const st = introStep(), lead = !DIALOGUE && introEscorting(st) && !INTRO_UI.arrow;   // while he's yours, not over a meeting (nor over a first-time arrow: the servery after the Chief's "Eat something")
   if (lead) {
@@ -41317,6 +41370,163 @@ function clothesRemark(C) {
 }
 
 // ---- slot: Onboarding engineer (section 21b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the patch, #1 (Day 2's first solo job, plans/patch-plan.html): a week beat's own timing. `early`: the speaker's block
+// starts that many minutes before `at` (section 14's introPlan reads it); `release`: their block ends when the meeting's
+// done (I.done '<id>:end', saved; introSig changes, so the day is planned again); `hold`: with the speaker not in the room
+// yet, it starts anyway only at the later of `till` and `after` minutes from when you came in (her walk is 14); `stand`:
+// the place you're walked to when it starts (the visitor's spot by her desk: "Come in. Don't sit.").
+const INTRO_MEET_IN = {};                                // beat id -> the minute you were first in its room (not saved)
+function introWeekBeat(b) {
+  const e = b.release ? SHIP.intro.done[b.id + ':end'] : undefined, d0 = introAbs(b.day, 0);
+  const o = { id: b.id, at: b.at, until: e >= 0 ? Math.min(b.until, Math.max(b.at + 1, e - d0)) : b.until, where: b.where };
+  if (b.early != null) o.early = b.early;
+  return o;
+}
+function introReleased() {
+  if (!introOn()) return '';
+  let s = ''; for (const b of INTRO_WEEK) if (b.release && SHIP.intro.done[b.id + ':end'] >= 0) s += '|' + b.id;
+  return s;
+}
+function introMeetFallback(b, at, m, now) {
+  if (!b.hold) return at + 10;
+  if (INTRO_MEET_IN[b.id] === undefined && typeof inMeeting === 'function' && inMeeting(m)) INTRO_MEET_IN[b.id] = now;
+  return INTRO_MEET_IN[b.id] === undefined ? Infinity : Math.max(introAbs(b.day, b.hold.till), INTRO_MEET_IN[b.id] + b.hold.after);
+}
+function introMeetStand(b) {
+  const pl = b.stand && (DECKS[b.where.deck].places || []).find(q => q.id === b.stand);
+  if (!pl || deckDef.num !== b.where.deck || typeof playerGo !== 'function') return;
+  const to = (DECKS[b.where.deck].places || []).find(q => q.id === (b.where.placeId || '')), face = () => {
+    if (to) { const p = player.obj.position, c = cellPos(...to.at); player.face = Math.atan2(c.x - p.x, c.z - p.z); } };
+  if (K(pl.at) === K(player.here()) && !player.path.length) face(); else playerGo(pl.at, face);
+}
+function introMeetEnded(now) {                          // a released beat's meeting is over once its panel has closed
+  const I = SHIP.intro, open = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null;
+  for (const b of INTRO_WEEK) if (b.release && I.done[b.id + ':met'] >= 0 && I.done[b.id + ':end'] === undefined && open !== 'intro-' + b.id) I.done[b.id + ':end'] = now;
+}
+// the patch, #4: while Zeke says his goodnight (the evening's yours, how a day runs), the overheard chatter near you is
+// held back (section 22's linesHush asks), so only two bubbles never push his off early
+function introHush() {
+  return typeof INTRO_UI !== 'undefined' && (!!INTRO_UI.night || simNow() < (INTRO_UI.hushTo || 0));
+}
+// the patch, #14: the device button the first time it's yours. From the handover (flag intro.device) until you first open
+// it (section 19's SHIP.device.booted), its ring pulses and a small "Tap your device" sits under it; both go on the first
+// open and never come back. Only with the intro on (test URLs never), so nothing changes elsewhere.
+const INTRO_DEV_POINT = 'Tap your device', INTRO_DEV_POINT_MS = 30000;
+const INTRO_DEV_SEEN = { ms: 0, at: 0, xy: '' };   // real ms the pointer has shown (not saved: a reload shows it again)
+let INTRO_DEV_GLOW = false;
+function introDevGlowTick() {
+  const b = document.getElementById('devBtn'); if (!b) return;
+  const on = introOn() && typeof introFlag === 'function' && introFlag('intro.device') && !!SHIP.device && !SHIP.device.booted
+    && !(typeof DEV !== 'undefined' && DEV.open) && !document.body.classList.contains('ld-on');
+  let pt = document.getElementById('devPoint');
+  if (!on) { if (INTRO_DEV_GLOW) b.classList.remove('devglow'); INTRO_DEV_GLOW = false; if (pt) pt.remove(); return; }
+  if (!INTRO_DEV_GLOW) b.classList.add('devglow'); INTRO_DEV_GLOW = true;
+  // the pointer (PR2, phones first): it covers the needs strip, so never over a dialogue and about 30 real seconds in all; the glow stays
+  const now = performance.now(), dt = INTRO_DEV_SEEN.at ? Math.min(250, now - INTRO_DEV_SEEN.at) : 0; INTRO_DEV_SEEN.at = now;
+  const show = !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && INTRO_DEV_SEEN.ms < INTRO_DEV_POINT_MS;
+  if (!show) { if (pt) pt.remove(); return; }
+  INTRO_DEV_SEEN.ms += dt;
+  if (!pt) { pt = document.createElement('div'); pt.id = 'devPoint'; pt.textContent = INTRO_DEV_POINT; document.body.appendChild(pt); INTRO_DEV_SEEN.xy = ''; }
+  const r = b.getBoundingClientRect(), xy = Math.round(r.left) + ',' + Math.round(r.bottom + 8);
+  if (xy !== INTRO_DEV_SEEN.xy) { INTRO_DEV_SEEN.xy = xy; pt.style.left = Math.round(r.left) + 'px'; pt.style.top = Math.round(r.bottom + 8) + 'px'; }
+}
+// the patch, #18 and #19: the end of training day. Name on the beam is at 17:05 (the Works crew's day is unchanged), so
+// at 16:50 Zeke comes to find you (INTRO_WEEK's d1-end, follow) and says good job, you're on your own tomorrow, clock out
+// and come to the beam (the writers' walk.trainend.1-3, as bubbles). Then the arrow goes to the time clock and, once
+// you've clocked out (or if you never clocked in), to your name's spot on the beam (BEAM.slots[0], at the beam's height:
+// beamSlotWorld, which section 15b's goal arrow and section 18's own beam arrow ask through the goal's `beam: true`),
+// until your name's painted or the tradition's over. I.done 'd1-end:told' (saved): when he said it (null: never will).
+const INTRO_DAYEND = { at: 16 * 60 + 50, find: 14, trad: 'name-on-the-beam', end: 17 * 60 + 40,
+  lines: ['Good job today. Proper work, that.', 'Tomorrow you\'re on your own. You\'ll be fine. Read the card twice.', 'Clock out first, then come to the beam. They\'re waiting for you.'] };
+INTRO_ARROWS.clockout = { deck: 5, place: '5-timeclock-1', label: 'Clock out at the time clock' };
+INTRO_ARROWS.beam = { deck: 5, item: /^The beam$/, beam: true, label: 'Your name goes on the beam' };
+INTRO_ARROW_LABELS.add(INTRO_ARROWS.clockout.label); INTRO_ARROW_LABELS.add(INTRO_ARROWS.beam.label);
+const introNamePainted = () => (SHIP.traces || []).some(x => x && x.id === 'nameYours');
+function introBeamToday() { try { return typeof eventsOn === 'function' && eventsOn(1).some(e => e.id === INTRO_DAYEND.trad); } catch (e) { return false; } }
+function beamSlotWorld() {                              // your name's spot on the beam, in the world (Deck 5 only), or null
+  if (typeof deckDef === 'undefined' || deckDef.num !== 5 || !ROOM_BOX[BEAM.room]) return null;
+  const r = ROOM_BOX[BEAM.room], [sa, sy] = BEAM.slots[0];
+  return { x: X0(r.i0) + sa, z: Z0(r.j0) + T / 2 + .14, y: BEAM.y + sy };
+}
+function introDayEndTick() {
+  const I = SHIP.intro, U = INTRO_UI, d = SHIP.time.day, m = SHIP.time.min;
+  if (d !== 1 || m < INTRO_DAYEND.at || I.done['d1-end:told'] !== undefined) return;
+  if (m >= INTRO_DAYEND.end || introNamePainted() || !introBeamToday()) { I.done['d1-end:told'] = null; U.endQ = null; return; }
+  const a = introWalker(), p = player.obj.position, near = !!a && deckDef.num === 5 && Math.hypot(a.x - p.x, a.z - p.z) <= 4;
+  if (!U.endQ) {
+    if (!near && m < INTRO_DAYEND.at + INTRO_DAYEND.find) return;   // he's on his way over
+    if (!near) { I.done['d1-end:told'] = Math.floor(shipNow()); return; }   // he never found you: the arrows anyway
+    U.endQ = []; for (let n = 1; n <= 3; n++) { const l = introWriterLine('walk.trainend.' + n); U.endQ.push(l ? l[0] : INTRO_DAYEND.lines[n - 1]); }
+  }
+  if (!a || DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
+  bubbleSay(a.h, U.endQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP;
+  if (I.done['d1-end:start'] === undefined) I.done['d1-end:start'] = Math.floor(shipNow());   // his first line: the clock's arrow now (PR2)
+  if (!U.endQ.length) { I.done['d1-end:told'] = Math.floor(shipNow()); U.endQ = null; }
+}
+function introDayEndWant(now, m) {                      // introArrowWant's last word on Day 1: 'clockout', 'beam' or null
+  const I = SHIP.intro; if (typeof I.done['d1-end:told'] !== 'number' && I.done['d1-end:start'] === undefined || I.done['arrow:beam'] !== undefined) return null;
+  if (introNamePainted() || m >= INTRO_DAYEND.end) { I.done['arrow:beam'] = Math.floor(now); return null; }
+  return careerClockedIn(1) && !(typeof careerClockedOut === 'function' && careerClockedOut(1)) ? 'clockout' : 'beam';
+}
+// the patch, #17: Zeke and you never in the same spot. Walking up to you (follow, or to a tile to wait at) he stops ESC_GAP
+// short of you (section 10's escortStep: only when his way ends by you, escToYou; never while leading), and when his spot is yours (the tile the arrow sent you to) he takes the free tile
+// beside you, the one nearest him (escBeside). A tap that would end on someone standing there ends on the free tile
+// next to them instead (tapBeside, section 11's floor tap); paths still pass through people, as before.
+const ESC_GAP = .9;
+const escToYou = (path, pp) => { const g = path.length && cellPos(...path[path.length - 1]); return !!g && Math.hypot(g.x - pp.x, g.z - pp.z) < ESC_GAP + 1.5; };   // walking up to you, not past you
+function escBeside(goal, pp, a) {
+  const g = cellPos(...goal); if (Math.hypot(g.x - pp.x, g.z - pp.z) >= ESC_GAP) return goal;
+  const you = cellAt(pp.x, pp.z), taken = occupiedBy(a); let best = null, bd = Infinity;
+  for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const c = [you[0] + di, you[1] + dj]; if (!free(...c) || taken.has(K(c)) || !shuffleStep(you, c)) continue;
+    const q = cellPos(...c); if (Math.hypot(q.x - pp.x, q.z - pp.z) < ESC_GAP) continue;
+    const d = Math.hypot(q.x - a.x, q.z - a.z) + (di && dj ? .3 : 0); if (d < bd) { bd = d; best = c; }   // straight beside you first
+  }
+  return best || goal;
+}
+function tapBeside(to) {
+  if (!to || typeof DECK_CREW === 'undefined') return to;
+  const k = K(to), by = DECK_CREW.find(a => a.pose === 'stand' && K(cellAt(a.x, a.z)) === k); if (!by) return to;
+  const here = player.here(), taken = occupiedBy(player); let best = null, bd = Infinity;
+  for (const [di, dj] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+    const c = [to[0] + di, to[1] + dj]; if (!free(...c) || taken.has(K(c)) || !shuffleStep(to, c) || DECK_CREW.some(a => a.pose === 'stand' && K(cellAt(a.x, a.z)) === K(c))) continue;
+    const d = Math.hypot(c[0] - here[0], c[1] - here[1]) + (di && dj ? .3 : 0); if (d < bd) { bd = d; best = c; }   // the side you're coming from
+  }
+  return best || to;
+}
+// the patch (#4, lead 21): Zeke's goodnight is how a ship day runs, so it mustn't be missable. If you weren't near him
+// when he said it (or walked off before the end), he says it all the next time you're within 6 tiles of him that
+// evening; not by bedtime (22:00, or you go to sleep first), it comes as a short Mail. I.done 'goodnight:owed' (saved):
+// 1 owed, 2 said, 3 by Mail.
+const INTRO_NIGHT_BED = 22 * 60;
+function introNightLines() {
+  const out = []; for (let n = 1; n <= 4; n++) { const l = introWriterLine('walk.goodnight.' + n); if (!l) break; out.push(l[0]); }
+  return out.length ? out : INTRO_GOODNIGHT.slice();
+}
+function introNightOwedTick() {
+  const I = SHIP.intro, U = INTRO_UI; if (I.done['goodnight:owed'] !== 1 || U.night) return;
+  const now = Math.floor(shipNow());
+  if (now >= introAbs(0, INTRO_NIGHT_BED) || (typeof sleeping !== 'undefined' && sleeping)) {
+    I.done['goodnight:owed'] = 3; U.owedQ = null;
+    introMail({ from: 'Zeke Torres', subject: 'How a day runs', body: introNightLines().join(' ') + ' — Z.' }, now); return;
+  }
+  const a = introWalker(), p = player.obj.position;
+  if (!U.owedQ) { if (!a || DIALOGUE || Math.hypot(a.x - p.x, a.z - p.z) > 6) return; U.owedQ = introNightLines(); }
+  if (!a || Math.hypot(a.x - p.x, a.z - p.z) > 10) { U.owedQ = null; return; }   // gone again: all of it, next time
+  if (DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
+  bubbleSay(a.h, U.owedQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP; U.hushTo = U.next + 900;
+  if (!U.owedQ.length) { I.done['goodnight:owed'] = 2; U.owedQ = null; }
+}
+// the patch, #19's "the dinner nudges wait" (PP1, lead 21): from Zeke's 16:50 word until your name's up (painted, or 17:40)
+// the usual pulls elsewhere hold off: section 15's green tips and gentle low-need pop-ups (a firm one still shows, without
+// its marker), and section 19's meal heads-up; the arrows are this section's (clock, then the beam). Day 1, intro on only
+function introHoldNudges() {
+  if (!introOn() || SHIP.time.day !== 1) return false;
+  const I = SHIP.intro, m = SHIP.time.min;
+  return m >= INTRO_DAYEND.at && m < INTRO_DAYEND.end && I.done['d1-end:told'] !== null && I.done['arrow:beam'] === undefined && !introNamePainted();
+}
+// section 20's clock-out remark skips Zeke on training day once he's said his own good job (PR2: not twice)
+function introQuiet(id) { return introOn() && SHIP.time.day === 1 && id === SHIP.intro.escort && SHIP.intro.done['d1-end:start'] !== undefined; }
 // ---- end of slot: Onboarding engineer ----
 
 // =====================================================================
@@ -49661,11 +49871,12 @@ class CrewAgent {
   escortStep(dt, e) {
     if (e.scene) this.hold = e.hold || null;             // a stage direction's box (crewScene, 0.71.2); escorts as before
     const pp = e.after ? e.after : player.obj.position, dist = Math.hypot(pp.x - this.x, pp.z - this.z), you = cellAt(pp.x, pp.z);
-    const goal = e.mode === 'follow' ? you : escortGoal(e, this);
+    let goal = e.mode === 'follow' ? you : escortGoal(e, this);
+    if (goal && e.mode !== 'follow' && !e.after && typeof escBeside === 'function') goal = escBeside(goal, pp, this);   // the patch (#17): his spot is yours: the free tile beside you
     const key = e.mode + '|' + (goal ? goal.join(',') : '-');
     this.escT = (this.escT || 0) - dt;
     if (key !== this.esc && (this.escT <= 0 || !this.esc || this.esc.split('|')[0] !== e.mode)) {
-      this.esc = key; this.escT = .5; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
+      this.esc = key; this.escT = .5; this.gapT = 0; this.goalId = '@escort'; this.settled = false; this.spot = null; this.path = [];
       let from = this.here(); if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
       if (goal) { const p = crewPath(from, goal, new Set([...this.rooms, roomAt(...from), roomAt(...goal)]), this); if (p) this.path = p; }
     }
@@ -49674,8 +49885,10 @@ class CrewAgent {
     const near = e.mode === 'follow' && dist <= ESC_NEAR;
     if (this.path.length && !this.escHeld && !near) {
       const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * (e.pace || 1) * dt;   // pace: section 21's stroll
-      if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
-      this.pose = 'walk';
+      const nx = d <= st ? c.x : this.x + dx / d * st, nz = d <= st ? c.z : this.z + dz / d * st, nd = Math.hypot(pp.x - nx, pp.z - nz);
+      if (!e.after && e.mode !== 'lead' && typeof escToYou === 'function' && escToYou(this.path, pp) && nd < ESC_GAP && nd < dist && (this.gapT = (this.gapT || 0) + dt) < 2) { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // the patch (#17): never closer than ESC_GAP to you (for 2 s at most: with you in his way he walks on)
+      else { if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); } else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+        this.pose = 'walk'; }
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
     walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone starts escorting mid-walk)
@@ -50455,7 +50668,7 @@ function tap(cx, cy) {
     return;
   }
   if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
-  playerGo(nearestOpen(h.point.x, h.point.z, player));
+  const to = nearestOpen(h.point.x, h.point.z, player); playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to);   // the patch (#17): not onto someone standing there
 }
 
 // pointer: tap to walk somewhere, press and hold to walk toward your finger, pinch or wheel to zoom
