@@ -11,8 +11,8 @@ with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     for w, h, day in ((390, 844, 12), (360, 780, 10)):
         ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1)
-        pg = Page(ctx, '?debug'); pg.ev('newGameStart(false); introSkip(); saveGame()'); real = {k: v for k, v in store(pg).items() if not k.endswith('-dev') and 'dev-' not in k}; pg.page.close()
-        pg = Page(ctx, '#dev'); pg.ev('newGameStart(false); introSkip()'); pg.step(10)
+        pg = Page(ctx, '?debug'); pg.sign(); pg.ev('newGameStart(false); introSkip(); saveGame()'); real = {k: v for k, v in store(pg).items() if not k.endswith('-dev') and 'dev-' not in k}; pg.page.close()
+        pg = Page(ctx, '#dev'); pg.sign(); pg.ev('newGameStart(false); introSkip()'); pg.step(10)
         pg.ev('devmodeOpen(true); DM_UI.tab = "set"; devmodeDraw()'); pg.step(2)
         check(pg.tap('Day ' + str(day)), f'{w}: the Day {day} shortcut')
         pg.shot(OUT / f'd6a_{w}_tab.png')

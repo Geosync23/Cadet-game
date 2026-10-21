@@ -29,6 +29,9 @@ class Page:
         loc.first.click(); self.step(2); return True
     def fade(self):                      # devmodeDo: a 280 ms real-time fade, then the action
         self.page.wait_for_timeout(700); self.step(10)
+    def sign(self):                      # the arrival's manifest, if it's up (as devmode_check does)
+        if self.page.locator('text=Sign and go aboard').count():
+            self.page.fill('form input', 'Ada'); self.page.click('text=Sign and go aboard'); self.step(30)
     def reload_ready(self):
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000); self.ready()
 def store(pg): return pg.page.evaluate('() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))')
@@ -37,8 +40,8 @@ with sync_playwright() as pw:
     for w, h in ((390, 844), (360, 780)):
         ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1)
         # a real game first, to protect
-        pg = Page(ctx, '?debug'); pg.ev('newGameStart(false); introSkip(); saveGame()'); real = {k: v for k, v in store(pg).items() if not k.endswith('-dev') and 'dev-' not in k}; pg.page.close()
-        pg = Page(ctx, '#dev')
+        pg = Page(ctx, '?debug'); pg.sign(); pg.ev('newGameStart(false); introSkip(); saveGame()'); real = {k: v for k, v in store(pg).items() if not k.endswith('-dev') and 'dev-' not in k}; pg.page.close()
+        pg = Page(ctx, '#dev'); pg.sign()
         pg.ev('newGameStart(false); introSkip()'); pg.step(10)
         pg.ev("devmodeRun('Clock', () => devmodeSkipTo(2 * 1440 + 17 * 60))"); pg.step(5)
         base = pg.ev("JSON.stringify(eventsOn(3).map(e => [e.id, e.from, e.to]))")
