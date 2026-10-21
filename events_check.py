@@ -762,6 +762,28 @@ with sync_playwright() as pw:
             if k in ('day', 'teaWeekday'): continue
             if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
 
+    # 9d2. off the Tern on paper (PT1, PR7's ask): with ROT_TERN on, on each rotation day each arrival (id order, up to 3)
+    # has 'arrive' at 5-tern-aisle-1 from 17:40 + 3k, then Off the Tern's tag at a crowd spot until 17:55; each leaver has
+    # 'board' at 5-tern-aisle-1 ending at 15:00 - 3(n-1-k), then away; the greeter has 'greet' at 5-tern-ramp-foot.
+    # Expected times worked out here from the roster, not from section 14's helpers
+    TT = g.ev("""(() => { if (typeof ROT_TERN === 'undefined' || !ROT_TERN) return { off: true };
+      const bad = [], P = schedPeople(), by = id => P.find(p => p.id === id), hm = m => hhmm(m % 1440);
+      for (const r of ROSTER_ROTATIONS) { const B = (r.day - 1) * 1440, arr = r.in.slice().sort().slice(0, 3), lv = r.out.slice().sort().slice(0, 3);
+        arr.forEach((id, k) => { const pl = planDay(by(id), r.day), i = pl.findIndex(s => s.placeId === '5-tern-aisle-1' && s.tag === 'arrive' && s.from === B + 1060 + 3 * k), nx = i >= 0 && pl[i + 1];
+          if (i < 0 || !nx || !/^ev-off-the-tern/.test(nx.tag || '') || nx.to !== B + 1075 || !/shuttle-bay-crowd/.test(nx.placeId || '')) bad.push(r.day + ' arrival ' + id + ': ' + JSON.stringify(pl.filter(s => s.from >= B + 1050 && s.from < B + 1090).map(s => [hm(s.from), hm(s.to), s.act, s.placeId, s.tag]))); });
+        lv.forEach((id, k) => { const pl = planDay(by(id), r.day), i = pl.findIndex(s => s.placeId === '5-tern-aisle-1' && s.tag === 'board' && s.to === B + 900 - 3 * (lv.length - 1 - k)), nx = i >= 0 && pl[i + 1];
+          if (i < 0 || !nx || nx.act !== 'away') bad.push(r.day + ' leaver ' + id + ': ' + JSON.stringify(pl.filter(s => s.from >= B + 860 && s.from < B + 910).map(s => [hm(s.from), hm(s.to), s.act, s.placeId, s.tag]))); });
+        const gr = P.filter(p => planDay(p, r.day).some(s => s.tag === 'greet' && s.placeId === '5-tern-ramp-foot' && s.from < B + 1060 && s.to > B + 1060)).map(p => p.id);
+        if (gr.length !== 1) bad.push(r.day + ' greeter at the ramp foot: ' + JSON.stringify(gr)); }
+      if (deckDef.num !== 5) goToDeck(5);                 // the ramp itself (rotTernTick): left alone on an ordinary day, shut on a rotation day before 17:40
+      const keep = player.obj.position.clone(); player.obj.position.copy(cellPos(...nearestOpen(...cellPos(12, 12).toArray().filter((_, i) => i !== 1), null)));
+      const R = ROSTER_ROTATIONS[0].day; ternRamp(true, 0); rotTernTick((R - 2) * 1440 + 1057, 5); const ord = TERN.target;
+      ternRamp(true, 0); rotTernTick((R - 1) * 1440 + 1057, 5); const rot = TERN.target; ternRamp(true, 0); player.obj.position.copy(keep); ROT_TERN_UI.shut = -1;
+      if (ord !== 1) bad.push('the ramp shut on an ordinary day (' + (R - 1) + ' 17:37)'); if (rot !== 0) bad.push('the ramp not shut on rotation day ' + R + ' at 17:37');
+      return { off: false, bad }; })()""")
+    print('Off the Tern on paper:', 'switched off' if TT['off'] else ('ok on every rotation' if not TT['bad'] else TT['bad'][:4]))
+    if not TT['off'] and TT['bad']: fail(f"off the Tern on paper: {TT['bad'][:4]}")
+
     # 9e. Quiz night's mini-game (0.34.51): three questions from the pool (a stand-in pool here, unless the build has the
     # head writer's), the same three for a day, different the next week; joining the quiz in the bow lounge opens it;
     # a right and a wrong answer each get Tomas's remark, the score at the end
