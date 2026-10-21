@@ -244,3 +244,26 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - e2: the party is missing from the traditions;
 - e3: the toast is kept with heads-ups on;
 - e4: the toast is dropped with heads-ups off.
+
+## Overnight (lead 22, 2026-10-21 ~03:35): PR3 is the events team's turn reviewer
+
+This covers EV1/EV2's events-base and storm/Line turns, FR1's Fridays turns and EC1's checks. PB reviews hooks in sections 13, 14 and 10; I cover the others. Questions go to lead 22, not the user.
+
+## EW2 nit fixes: claude/events-lines-2 47a99a6. PASS
+
+- Saruth's cord line is now one line (59 characters), inside the lore rule.
+- The Sunday retellings are all 60 characters or fewer.
+- The guard rails hold.
+- **Nit:** resolution.lines line 9 ("Lukas's lantern supper...") needs `!who:dlamini-lukas`.
+
+## EC1 turn 6 (the late-save rework for F0c): claude/bigevents-check 818add7. PASS
+
+- Only the check changed. It's OK.
+- **Mutants f1-f6, all caught:**
+  - f1: the skip taken from EV_LOAD_DAY;
+  - f2: evFrom not saved;
+  - f3: the key written while off;
+  - f4: the log ignored;
+  - f5: the running event ignored;
+  - f6: evFrom reset on reload.
+- **Design point sent to the lead:** an evFrom-0 save loaded on Day 20 runs the missed storm in catch-up at load.

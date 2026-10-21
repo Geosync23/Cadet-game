@@ -26,6 +26,12 @@ M = {
  'e2_partyNotTrad': ("const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;", "const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin || e.id === 'party') continue;"),
  'e3_toastKeptOn': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? m.notify : m.notify }"),
  'e4_toastDroppedOff': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? null : null }"),
+ 'f1_skipFromLoadDay': ("const EV_SKIPPED = new Set(evSkippedFor(SHIP.evFrom, SHIP.eventLog, SHIP.event));", "const EV_SKIPPED = new Set(evSkippedFor(EV_LOAD_DAY, SHIP.eventLog, SHIP.event));"),
+ 'f2_notSaved': ("SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });", ""),
+ 'f3_keyWhileOff': ("SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });", "SAVE_EXTRA.push(s => { s.ship.evFrom = SHIP.evFrom == null ? 0 : SHIP.evFrom; });"),
+ 'f4_ignoreLog': ("r.day < from && !(log || []).some(l => l.id === r.id) && !(current", "r.day < from && !(current"),
+ 'f5_ignoreRunning': (" && !(current && current.id === r.id)).map(r => r.id);", ").map(r => r.id);"),
+ 'f6_resetOnReload': ("Number.isInteger(SAVED.ship.evFrom) ? SAVED.ship.evFrom :", "false ? 0 :"),
  'm8_ladderSun': ('"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990]',
                   '"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 6}, "at": [1150, 1200]'),
 }
