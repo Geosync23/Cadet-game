@@ -172,3 +172,9 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 - Lead 24 (17:43): the Line's note 2 (the crowd at the oath) is answered by EV7's L5d-f (ER3: the Captain at the glass
   from 14:30, 46 + you at the ceremony on 835bcfc); note 1 (the supper's pull) is being fixed by EV7.
 - The 5-hour limit stopped every seat ~16:20 to 17:40; runners resumed.
+
+## EV6's mech_check m17 fix (claude/storm-update 0b77dfcb, check only): OK
+- Per pass, anyone on a 'job' segment in the Day 18 15:35-16:50 window is left out of that pass's lift-hold counts;
+  EV6: movers 12 / waiting 62 in both passes, storm on and off; MECH CHECK OK on. Nit: such crew also leave the hold's
+  "bad" list (a job route across decks during the hold would go unseen); fine while jobs don't wait for the hold.
+  With DB2's 841a9d0, S10's two owed check fixes are in.
