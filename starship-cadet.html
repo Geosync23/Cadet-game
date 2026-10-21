@@ -37514,6 +37514,16 @@ function stormStoryTick(now) {
   }
   if (!M['story:covers'] && now >= at(2, 1160) && now < at(2, 1175) && room === '3|Mess hall' && say('dlamini-lukas', 'event.ionStorm.lukas.covers', 10)) M['story:covers'] = 1;
 }
+// the lantern supper's standing diners (EV4; PB's scoping, decided overnight): a crowd spot ('<deck>-<venue>-crowd-N',
+// type 'event') gets a tray, and so a diner eating standing, only while w (the walker's whereIs) has them at that
+// spot for a meal gathering of the spot's own venue, at its meal, in its window. Section 10's trayTo asks; pure.
+// Off with EV_STORM_ON; dropping the supper's { pool: '@gather-mess' } places drops the standing diners (about 48 then)
+function evStandTray(pl, w) {
+  if (!EV_STORM_ON || !pl || pl.type !== 'event' || !pl.gather || !w || !w.tag || w.placeId !== pl.id) return false;
+  const m = ((w.from % 1440) + 1440) % 1440;
+  return EV_SHIPWIDE.some(g => g.meal && g.meal === w.act && g.venue === pl.gather && (w.tag === 'ev-' + g.id || w.tag.startsWith('ev-' + g.id + '-'))
+    && m >= g.at[0] - 30 && m < g.at[1]);
+}
 // ---- end of slot: Storm builder ----
 
 // =====================================================================
@@ -49994,7 +50004,7 @@ const ALT_SEAT = new Set(['mess-seat', 'lounge-seat', 'bench']);   // places whe
 let MESS_ONLY = null;                                    // Deck 3's tiles outside the mess hall, for findPath's avoid (made once a deck)
 const messOnly = () => { if (!MESS_ONLY || MESS_ONLY.d !== deckDef) { MESS_ONLY = new Set(); MESS_ONLY.d = deckDef; for (const r in ROOM_TILES) if (r !== 'M') for (const t of ROOM_TILES[r]) MESS_ONLY.add(t[0] + ',' + t[1]); } return MESS_ONLY; };
 const lineSeg = w => w.type === 'servery-queue' || w.tag === 'queue';   // the plan's walk to the line, its queue stop, a grab at the servery
-const trayTo = id => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M'; };   // a tray only to a seat in the mess hall
+const trayTo = (id, w) => { const pl = id && PLACE_OF.get(id); return !!pl && pl.room === 'M' && (!EV_STORM_ON || pl.type !== 'event' || evStandTray(pl, w)); };   // a tray only to a seat in the mess hall (the storm update: a crowd spot only at its own meal gathering, evStandTray)
 // the shower queue's stand-in spots (0.36.91): open tiles of the washroom beside its way out, '@wq-<room>-<k>'
 let WQ_TILES = null;
 function washDoorTiles(rk) {
@@ -50311,8 +50321,8 @@ class CrewAgent {
       m = this.meal = { key, served: !q, tray: false };
       if (!q) {
         const pv = whereIs(this.p, w.from - .01), queued = !!(pv && pv.act === w.act && lineSeg(pv));
-        if (queued && trayTo(w.placeId) && roomAt(...this.here()) !== 'M') m.served = false;   // up late (out of the lift): the line first, so a tray's only ever in the mess hall (the performance engineer, 0.26.34)
-        else m.tray = queued && trayTo(w.placeId);
+        if (queued && trayTo(w.placeId, w) && roomAt(...this.here()) !== 'M') m.served = false;   // up late (out of the lift): the line first, so a tray's only ever in the mess hall (the performance engineer, 0.26.34)
+        else m.tray = queued && trayTo(w.placeId, w);
       }
     }
     if (!m.served) return this.mealLine(now);
@@ -50323,7 +50333,7 @@ class CrewAgent {
     // 0.27.47: the same after the queue: their seat still taken and no free one beside it (the Sunday table, day 35's
     // quist-ilse at 17:59), so they'd wait nearby holding a tray; no tray till they sit
     if (m.tray && !lineSeg(w) && w.placeId && BUSY.has(w.placeId) && !(this.settled && this.spot && this.spot.id === w.placeId) && !this.elsewhere(w.placeId)) { m.tray = false; m.trayLate = true; LINE_LOG.trays--; }
-    if (m.trayLate && this.settled && this.spot && trayTo(this.spot.id)) { m.tray = true; m.trayLate = false; LINE_LOG.trays++; }
+    if (m.trayLate && this.settled && this.spot && trayTo(this.spot.id, w)) { m.tray = true; m.trayLate = false; LINE_LOG.trays++; }
     if (m.seat && !w.placeId) return m.seat;             // no seat planned: the one picked at the counter
     return undefined;
   }
@@ -50339,7 +50349,7 @@ class CrewAgent {
     m.served = true; LINE_LOG.served++; LINE_LOG.wait = Math.max(LINE_LOG.wait, now - (this.lineAt || now)); this.lineAt = 0;
     let nx = w; while (lineSeg(nx) && nx.act === w.act) nx = whereIs(this.p, nx.until);   // past the walk-in and the queue stop
     const same = nx.act === w.act && w.act + Math.floor(w.from / 1440) === m.key && nx.deck === 3;
-    m.tray = same && trayTo(nx.placeId);
+    m.tray = same && trayTo(nx.placeId, nx);
     if (lineSeg(w)) m.next = nx.deck !== 3 || nx.act === 'commute' ? '@lift' : nx.placeId || (same ? seatsBeside(LINE_Q[0], 1, ['mess-seat'])[0] || null : null);   // a meal with no seat planned: the nearest free one
     if (same && !nx.placeId && m.next) { m.tray = true; m.seat = m.next; }
     if (m.tray) LINE_LOG.trays++;

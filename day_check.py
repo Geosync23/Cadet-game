@@ -34,7 +34,12 @@ SIM = r"""(async ({ n, day, step, draw }) => {
       if (a.stuckMax > out.stuck) { out.stuck = a.stuckMax; out.stuckWho = a.p.id + ' ' + hhmm(now - B); }
       if (a.noPath && !out.noPath.includes(a.p.id)) out.noPath.push(a.p.id);
       if (a.hold === 'tray' && roomAt(...a.here()) !== 'M') { out.trayOut++; if (out.trayWho.length < 6) out.trayWho.push(a.p.id + ' ' + hhmm(now - B)); }   // a tray only in the mess hall
-      if (a.hold !== 'tray' || a.settled && a.spot && a.spot.pose === 'sit') still.delete(a.p.id);   // standing still a ship minute with a tray, not sat down
+      let ws = a.hold === 'tray' && a.settled && a.spot && /^\d+-[a-z0-9-]+-crowd-\d+$/.test(a.spot.id) ? whereIs(a.p, now) : null;
+      for (let i = 0; i < 3 && ws && ws.placeId !== a.spot.id && ws.act === 'dinner' && ws.tag === 'queue'; i++) ws = whereIs(a.p, ws.until);   // served before the plan's queue time was up: on to the next stop already
+      const wm = ws ? ((ws.from % 1440) + 1440) % 1440 : 0;
+      const standMeal = !!ws && typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON && ws.placeId === a.spot.id && ws.act === 'dinner' && /^ev-/.test(ws.tag || '')
+        && typeof EV_SHIPWIDE !== 'undefined' && EV_SHIPWIDE.some(g => g.meal === 'dinner' && (ws.tag === 'ev-' + g.id || ws.tag.startsWith('ev-' + g.id + '-')) && a.spot.id.startsWith(n + '-' + g.venue + '-crowd-') && wm >= g.at[0] - 30 && now % 1440 < g.at[1]);   // the storm update's standing diners: a gathering's own crowd spot, its dinner, its ev- tag, in its window (PB)
+      if (a.hold !== 'tray' || a.settled && a.spot && a.spot.pose === 'sit' || standMeal) still.delete(a.p.id);   // standing still a ship minute with a tray, not sat down
       else { const s = still.get(a.p.id); if (!s || Math.hypot(s.x - a.x, s.z - a.z) > .05) still.set(a.p.id, { x: a.x, z: a.z, t: now });
         else if (now - s.t >= 1 && !s.n) { s.n = 1; out.trayStill++; if (out.stillWho.length < 6) out.stillWho.push(a.p.id + ' ' + hhmm(now - B) + ' ' + a.goalId); } }
       if (a.settled && a.spot) {
