@@ -318,6 +318,8 @@ Everything behind `const EV_STORM_ON = EVENTS_ON` (section 18, by the other EV_ 
 - **Dressed traditions (EV4, PR4's S6 fix):** `evDressed` keeps `base` (the original); test 'is it a ship tradition' with `evIsTrad(ev)`, never `SHIP_TRADITIONS.includes(ev)`.
 - **The party drops in (EV4):** `stay: [30, 60]` on the party moment (EV_SHIPWIDE passes `stay`): 45 come, at most 27 at once.
 - **Framed menu (EV4, S9):** DECK_DRESS.framedMenu above your keepsake shelf; a DECK_DRESS entry may have `on()` (dressShow skips it while false): it's shown only with the storm update on.
+- **Merge order with the Fridays (ER2's fix 2):** the storm update needs S2 with claude/fridays: merge them together, or S2 first. With Fridays alone, the Captain and Vance stay on the bridge's double shift at 16:00 on Day 12 and the lectern is empty. S2's exception (FR2's minutes): Marrow off from 15:30, Vance from 15:45, through 16:50.
+- **Lukas's moments (EV4, ER2's fixes 3-4):** reach 6.5 m; `stormMoment(id, who, first, onPick, onEnd)`: the story flags are set on the reply or onEnd. Probe: plans/storm-probes/walk_servery.py.
 - **Props (EV4):** section 4d's `dressLantern` and DECK_DRESS `lanternMess` (12 lanterns on the long tables) and `stormLantern` (the trace on the galley pass), 2 draw calls each; while lanternMess is out, Deck 3 goes to emergency light (8b's `FEEL_S.lamp` from `stormSupperDim`).
 - **S7, story A:** `stormStoryTick(now)` from `eventsTick`, play only, `e.mine['story:*']` and the reply flags; moments are `moment:` scripts (`stormMoment`), so they never count toward a commendation.
 - **events_check** reads the calendar when it's on (the storm's day, the guard's ready-room hour, the day dress). bigevents_check is EC1's.
