@@ -530,9 +530,11 @@ with sync_playwright() as pw:
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
         big = [12, 13, 14] if storm else []
+        sday = next((r['day'] for r in P5['plan'] if r['id'] == 'ionStorm'), 11)
+        slog = [f"ionStorm:{sday}-{sday + n}" for r, n in zip(P5['plan'], P5['days']) if r['id'] == 'ionStorm']   # the log's span from the game's own data (SHIP_EVENTS.ionStorm.days)
         for title, save, want in [
             ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': [], 'due': None, 'log': []}),
-            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': ['ionStorm:11-17'] if storm else []}),   # the storm it missed is run on load, as an unbroken game ran it
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': slog}),   # the storm it missed is run on load, as an unbroken game ran it
             ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big, 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
             ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big, 'due': None})]:
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
