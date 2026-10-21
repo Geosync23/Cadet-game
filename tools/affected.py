@@ -8,6 +8,8 @@ runs check_fast plus the checks this prints; the full round runs at every releas
     --why                                        say which change picked each check
     --cmd                                        print the commands to run them (one browser check at a time)
     --map FILE                                   the map from real runs (default tools/check_map.json; missing: rules only)
+    --middle                                     option (b), on trial: lines nearly every check runs pick by the rules only,
+                                                 and changing one runs the full round
     python3 tools/affected.py --merge OUT.json COMMIT COVER.json ...   the map from tools/check_cover.py runs on COMMIT's game
 
 How it picks (the union of two lists; it never picks fewer than either):
@@ -167,8 +169,13 @@ def translate(src, dst, lines):
     return out
 
 
-def pick(a, b, mp):
-    """{check: [reasons]} for the change a..b (b None: the working tree)"""
+SHARED = 23   # option (b): a line that at least this many of the map's checks ran (of 28: about 80%) is everyone's
+
+
+def pick(a, b, mp, middle=False):
+    """{check: [reasons]} for the change a..b (b None: the working tree). middle: option (b), on trial (the user,
+    2026-10-21 21:45): the map leaves out lines nearly every check runs (SHARED), and a change to one of those runs the
+    full round (the safeguard)"""
     why = {}
     def add(cs, reason):
         for c in (ALL if '*' in cs else cs):
@@ -207,6 +214,26 @@ def pick(a, b, mp):
     runs = {c: lines_of(e['run']) for c, e in mp['checks'].items()}
     loads = {c: lines_of(e['load']) for c, e in mp['checks'].items()}
     md = sorted(fm['decls'])
+    shared = set()
+    if middle:
+        cnt = {}
+        for c in runs:
+            for n in runs[c]: cnt[n] = cnt.get(n, 0) + 1
+        shared = {n for n, k in cnt.items() if k >= SHARED}
+        # the safeguard: a changed shared line (a pure insertion: when the lines both sides of it are shared) runs everything
+        hunks = re.finditer(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@', git('diff', '-U0', a, *([b] if b else []), '--', GAME), re.M)
+        hard = set()
+        for m in hunks:
+            o, on = int(m[1]), int(m[2] or 1)
+            if on:
+                hard |= translate(a, base, set(range(o, o + on))) if a != base else set(range(o, o + on))
+            else:
+                both = translate(a, base, {o, o + 1}) if a != base else {o, o + 1}
+                if both and both <= shared: hard |= both
+        if hard & shared:
+            add(['*'], f'changed lines nearly every check runs ({len(hard & shared)}): option (b)\'s safeguard, the full round')
+            return why, files
+        runs = {c: r - shared for c, r in runs.items()}
     def name_at(n):
         d = container(md, n); return d[2] if d else f'line {n}'
     # 1. the changed lines themselves: which checks ran them
@@ -223,7 +250,7 @@ def pick(a, b, mp):
         d = container(od, n)
         if not d or d[3] not in ('table', 'state'):
             continue
-        uses = set(fm['uses'].get(d[2], []))
+        uses = set(fm['uses'].get(d[2], [])) - shared
         got = [c for c in runs if uses & runs[c]]
         for c in got:
             add([c], f'{d[2]} (the map: {c} ran a line that reads it)')
@@ -246,7 +273,7 @@ if __name__ == '__main__':
         revs = [base]
     a, b = revs[0], (revs[1] if len(revs) > 1 else None)
     mp = json.load(open(mpath)) if os.path.exists(mpath) else None
-    why, files = pick(a, b, mp)
+    why, files = pick(a, b, mp, '--middle' in flags)
     mins = sum(CHECKS[c][1] for c in why)
     print(f"changes {a}..{b or 'now'}: {len(files)} file(s){'' if mp else ' (no map: the rules only)'}")
     print(f"run: check_fast + {len(why)} check(s), about {mins} min alone: {' '.join(sorted(why)) or '(nothing more)'}")
