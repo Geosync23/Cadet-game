@@ -8,7 +8,7 @@ import os, sys, json, re, pathlib
 os.environ.setdefault('CADET_WORK', '/tmp/work-RV4')
 exec(open('/home/user/cadet-game/plans/review-4/pp.py').read())
 path = sys.argv[1]; OUT = pathlib.Path('/home/user/cadet-game/plans/review-4/shots'); OUT.mkdir(exist_ok=True)
-save = {'v': 2, 'build': 'x', 'time': {'day': 12, 'min': 840}, 'player': {'deck': 3, 'tile': [20, 10], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': []}, 'crew': {}}
+save = {'v': 2, 'build': 'x', 'time': {'day': 12, 'min': 840}, 'player': {'deck': 3, 'tile': [20, 10], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': [], 'evFrom': 0}, 'crew': {}}
 pw = sync_playwright().start()
 b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME'), args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
 ctx = b.new_context(viewport={'width': 390, 'height': 844}, has_touch=True); pg = ctx.new_page(); errs = []
