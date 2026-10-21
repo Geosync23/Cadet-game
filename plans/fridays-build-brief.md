@@ -61,7 +61,7 @@ hooks); design-doc.md in the same commit as the decision it depends on. No build
 
 | Turn | Part | What | Sections touched (owner) | Checks besides check_fast and cadet_test off |
 |---|---|---|---|---|
-| 1 | A1 | The switch; section 18f; the crew's Friday: `WEEK_SHAPE[4]` gains `end: 930`, read by `schedFrame` only when `SHORT_FRIDAY` (day shift's `workEnd` 15:30, workaholics to 15:35-15:45); the skeleton keeps 17:00 | 13 (switch), 14 `schedFrame` (sim: PB) | day_check Days 5 and 12 on and off; events_check |
+| 1 | A1 | The switch; section 18f; the crew's Friday: `WEEK_SHAPE[4]` gains `end: 930`, read by `schedFrame` only when `SHORT_FRIDAY` (day shift's `workEnd` 15:30, workaholics to 15:35-15:45); the skeleton keeps 17:00 | 13 (switch), 14 `schedFrame` and `dayReport` (sim: PB) | day_check Days 5 and 12 on and off; events_check |
 | 2 | A2 | The skeleton list (made at load from the roster, no `R()`: helm and watch ratings on the bridge, one medic, the dinner cooks; fp-q2); the night shift sleeps on (they come at 50%, from their own schedule); garden (already to 15:30), store and galley hours checked; the bridge staffed 15:30-17:00 | 14 (sim: PB), 16 read only | day_check 5/12 (nobody stuck, bridge never empty), food_check, events_check |
 | 3 | B1 | Your clock: a shared `dayShiftEnd(d)` (1020, or 930 on a Friday when on) in section 14 beside `playerShiftOn`; `DAY_SHIFT`'s readers that mean "your shift ends" read it (about 27 reads of `DAY_SHIFT[1]`; each listed); `CAREER` clock-out from 15:30 and auto sign-out 16:00 on Fridays (fp-q7); early-out 15:00, the 12:30 miss line and leave unchanged | 14 (sim: PB), 17 `DAY_SHIFT` (systems: OR1), 20 `CAREER` (social / Works career: OR1): `dayShiftEnd` **asked of PB at turn 0** (a new shared function) | leave_check, career_check (a steady player 09:00-15:30 on Fridays), machine_check, mech_check |
 | 4 | B2 + F | Friday team jobs (`TEAM_FRI`, 14:00 in even weeks) fit by 15:30; the device's Schedule row and the time clock screen say 15:30 on Fridays; Dev mode's Clock tab gets "To 15:25" on Fridays (part F); the address can be started from Dev's tradition list | 24h (Works career), 19 (device), 25 (Dev mode): OR1 | mech_check, device_check, interactions_check, devmode_check |
@@ -104,6 +104,29 @@ a quarter-turn in section 25 next to B's clock).
   `{leavers}` (`ROSTER_ROTATIONS`), `{trad1}` and `{day1}` (one of next week's traditions, from `upcomingTraditions`),
   `{winner}` (`tallyLast`); existing `season:`, `cue:repair.you`, `cue:tradition.<id>.you`. If C2 gets too big, the
   weekly pools are their own half-turn (6b) right after it.
+
+## Owners' answers so far
+
+- **PB (13/14/10), 2026-10-21: OK** to the switch, `WEEK_SHAPE[4].end`, `dayShiftEnd(d)`, the saved ring and the
+  dinner spread, with: turn 1 also moves **`dayReport`'s "shift short" interval** (end of section 14) to the person's
+  own Friday end (else day_check flags everyone off at 15:30), and greps every other crew read of `SHIFTS.day[1]`;
+  `dayShiftEnd`'s comment states its contract (d = ship day, 1 = the first Monday; minutes after midnight; Friday =
+  `weekday(d) === 4`; night shifts not covered); `DAY_SHIFT` stays; only readers meaning "your shift ends today" move,
+  each outside 14 to its owner; the ring's load accepts missing or junk, its bytes told to the player engineer;
+  seeded keys unused today (not the 30s, 60s-110s or 1030s).
+- **EW1:** `friday-weekly.address` now at claude/events-lines c053470: pools open, hello, headline, behind (pick 2),
+  arrivals, leavers (each one line, skipped when empty, since the last address), nod, you, ahead, thought, close; a new
+  condition `week:tradition.<id>` (that tradition ran since last Friday's address); `{winner}` as words (the tasting
+  table's dish or the cup's team); the nod rotation is 7 weeks (Works, galley, watch, survey, infirmary, bridge,
+  garden).
+
+## Open for the user (through the lead; I don't pick)
+
+- **Two traditions sit in the Friday afternoon** (PR3's find at 675588c; the plan's "nothing runs 15:30-17:00" was
+  wrong): `cook-along` (Lukas Dlamini, the mess, Friday 15:30-16:30) and `tiles-ladder` (Farouk Olu, the bow lounge,
+  Friday 15:00-16:30, jitter 15). With the switch on they clash with the address. Where they move is the user's call.
+  Whatever is decided is built behind `SHORT_FRIDAY` (off: both unchanged), and my check asserts that with the switch
+  on no tradition overlaps Friday 15:30-17:00. Needed before turn 5.
 
 ## Rules I keep
 
