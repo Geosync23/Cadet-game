@@ -78,8 +78,8 @@ a{color:var(--teal)}
 <li><b>Opening the page takes about 7 seconds in our test machine</b> on 0.64.4, 0.64.5 and 0.64.7 alike. The jump to 16-18 seconds seen last night happened because several checks were running on the same machine at once. The game itself didn't get slower.</li>
 <li><b>Three things cost the most when the game opens:</b> painting the "grain" noise into every texture (1.0 s here, roughly 4 s on a mid-range phone), building the first deck (1.3 s), and preparing the 3D shaders for the first picture (about 3.5 s here, but much less on a real phone's graphics chip).</li>
 <li><b>One hidden cost stands out:</b> when the crowd changes (someone sits, stands or picks up a tray), the game re-sends a big block of crowd shape data to the graphics chip, sometimes 4 MB in one frame. On a phone that's a small hitch. In the checks it's 74% of day_check's time on a busy deck.</li>
-<li><b>The busiest frame (Sunday dinner, 72 people) spends about 2 ms</b> of game code before drawing here, so about 8-10 ms on a mid phone, out of the 16.7 ms a smooth frame allows.</li>
-<li><b>11 changes are proposed</b>, ranked by how much they help against how risky they are, built over about 3 turns by 4 builders and a reviewer, merged by the build master.</li>
+<li><b>The busiest frame (Sunday dinner in the mess, 69 people) spends 2-3 ms</b> of game code before drawing here, so about 8-14 ms on a mid phone, out of the 16.7 ms a smooth frame allows. Half of it is posing the crowd.</li>
+<li><b>12 changes are proposed</b> (items 0-11), ranked by how much they help against how risky they are, built over about 3 turns by 4 builders and a reviewer, merged by the build master.</li>
 </ul>
 </div>
 
@@ -97,21 +97,21 @@ a{color:var(--teal)}
 </div>
 
 <div class="card">
-<h3>A busy frame (Sunday dinner in the mess, 72 people, drawing aside)</h3>
-<div class="hb"><span class="l">Crowd: posing people</span><span class="b alt" style="width:141px"></span><span class="v">0.47 ms (section 8b)</span></div>
-<div class="hb"><span class="l">Crowd: each person</span><span class="b alt" style="width:117px"></span><span class="v">0.39 ms (8b)</span></div>
-<div class="hb"><span class="l">Crew on this deck</span><span class="b alt" style="width:81px"></span><span class="v">0.27 ms (10, 8c)</span></div>
-<div class="hb"><span class="l">Walkers</span><span class="b alt" style="width:60px"></span><span class="v">0.20 ms (10)</span></div>
-<div class="hb"><span class="l">You (needs, walking)</span><span class="b alt" style="width:27px"></span><span class="v">0.09 ms (15)</span></div>
-<div class="hb"><span class="l">Walls, doors, screens, clock</span><span class="b alt" style="width:39px"></span><span class="v">0.13 ms (4a, 4b, 2, 13)</span></div>
-<div class="hb"><span class="l">Reading the screen layout</span><span class="b alt" style="width:16px"></span><span class="v">0.05 ms (11, 15, 19)</span></div>
-<p class="legend">With the profiler on, 1.25 ms a frame; perf_check measures 1.7-2.0 ms. Galley, events, social, lines and the arrival each cost 0.01 ms or less. The HUD measures its own buttons on screen every frame; on a phone that can make the browser lay the page out again each frame.</p>
+<h3>A busy frame (Sunday dinner, standing in the mess hall, 69 people, drawing aside)</h3>
+<div class="hb"><span class="l">Crowd: posing everyone</span><span class="b alt" style="width:170px"></span><span class="v">1.13 ms (sections 8b, 8)</span></div>
+<div class="hb"><span class="l">Crew on this deck</span><span class="b alt" style="width:71px"></span><span class="v">0.47 ms (10, 8c)</span></div>
+<div class="hb"><span class="l">Walkers</span><span class="b alt" style="width:41px"></span><span class="v">0.27 ms (10)</span></div>
+<div class="hb"><span class="l">You (needs, walking)</span><span class="b alt" style="width:26px"></span><span class="v">0.17 ms (15)</span></div>
+<div class="hb"><span class="l">Walls, doors, screens, clock</span><span class="b alt" style="width:44px"></span><span class="v">0.29 ms (4a, 4b, 8b, 8c, 2, 13)</span></div>
+<div class="hb"><span class="l">Reading the screen layout</span><span class="b alt" style="width:15px"></span><span class="v">0.10 ms (11, 15, 19)</span></div>
+<p class="legend">With the profiler on, 2.6 ms a frame; perf_check (fixed) measures 2.0-3.0 ms, so roughly 8-14 ms on a mid phone. Galley, events, social, lines and the day's plan each cost 0.02 ms or less. The HUD measures its own buttons on screen every frame; on a phone that can make the browser lay the page out again each frame.</p>
 </div>
 
 <div class="card">
 <h3>Pictures and memory</h3>
 <ul>
-<li><b>Draw calls</b> (the 450 budget): the busiest is the junior common room zoomed out on a portrait phone at <b>433</b>, then quiz night at 396. With shadows, the graphics chip gets 617 draws there.</li>
+<li><b>Our speed check was measuring the wrong rooms.</b> perf_check stands you in the room for each busy moment, but a mix-up between tile numbers and positions put you in the next room over in 6 of its 8 scenes (Sunday dinner was measured in the bow lounge). Found by EV4, confirmed here. Fixing it is item 0.</li>
+<li><b>Draw calls</b> (the 450 budget), in the right rooms: the busiest is <b>the mess hall at Sunday dinner zoomed out, 418</b>, then breakfast in the mess 409 and quiz night 396. (The old "433 in the junior common room" was really a cabin next door; the common room itself is 305.)</li>
 <li><b>Memory is steady</b>: it comes back to the same numbers after visiting every deck and after a week of play.</li>
 <li><b>Memory grows from 95 MB to 229 MB as you visit the decks</b>, then stays there. Opening the game takes the same as in the last pass (about 100 MB); the extra 134 MB is kept for decks you've already left. It isn't a leak (it stops after one visit to each deck), but on a phone it's a lot to hold. Finding out exactly what holds it is the first job of item 3.</li>
 </ul>
@@ -124,6 +124,12 @@ CHECKTABLE
 
 <h2>The changes, ranked by gain against risk</h2>
 <p class="legend">Gain: <span class="chip gain">big</span> <span class="chip gain">medium</span> <span class="chip gain">small</span> &nbsp; Risk: <span class="chip risk">none</span> <span class="chip risk">low</span> <span class="chip risk">medium</span>. Each item says how it is proven to change nothing you see or play. "Section" names the part of the game file it touches; its owner reviews it (plans/owners.md).</p>
+
+<details class="item" open><summary><span class="n">0</span><span class="t">Make the speed check measure the right rooms</span><span class="s">perf_check.py · test-speed seat, first</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: true numbers for everything below</span><span class="chip risk">risk: none to the game</span></div>
+<p><b>What:</b> one line in perf_check: turn the room's middle tile into a position before asking for the nearest free spot (<code>cellPos</code> first). Then a new baseline on 0.64.7, so the before/after numbers of this pass are in the right rooms.</p>
+<p><b>Why it's safe:</b> it's a check, not the game. Its own proof: every scene prints the room you actually stand in, and it must match the scene's room.</p>
+</div></details>
 
 <details class="item" open><summary><span class="n">1</span><span class="t">Run only the checks a change affects</span><span class="s">checks · test-speed seat</span></summary><div class="body">
 <div class="chips"><span class="chip gain">gain: big</span><span class="chip risk">risk: none to the game</span><span class="chip q">question 3</span></div>
@@ -153,7 +159,7 @@ CHECKTABLE
 </div></details>
 
 <details class="item"><summary><span class="n">5</span><span class="t">Lighter busy frames</span><span class="s">sections 8b, 10, 14, 11, 15, 19 · frame seat</span></summary><div class="body">
-<div class="chips"><span class="chip gain">gain: medium (aim: a quarter off the 2 ms)</span><span class="chip risk">risk: medium (many owners)</span></div>
+<div class="chips"><span class="chip gain">gain: medium (aim: a quarter off the 2-3 ms)</span><span class="chip risk">risk: medium (many owners)</span></div>
 <p><b>What:</b> small, separate savings, one area at a time: remember the screen-size answers (<code>matchMedia</code>) and the HUD's button positions until the screen actually changes, instead of measuring every frame; ask "where should this person be now?" (<code>whereIs</code>, <code>planWhere</code>, <code>walkGap</code>) once per person per ship moment instead of several times a frame; trim the crowd's posing work.</p>
 <p><b>Why it's safe:</b> after 900 frames of Sunday dinner with zoom changes, every crew member's position, pose and goal, the save and the random-number position are compared with the old build: they must match exactly (the method used for 0.27.27). cadet_test ALL IDENTICAL, day_check's output line for line. Each owner reviews their area.</p>
 </div></details>
@@ -188,9 +194,9 @@ CHECKTABLE
 <p><b>What:</b> start a long check from a saved game (say the start of Day 5) instead of playing from Day 1, as you allowed "with caution" on 2026-10-20. Only if items 1, 2 and 9 still leave the checks too slow. Each saved start carries the build and a fingerprint of the planning code, fails loudly if they don't match, and a full from-Day-1 run still happens before every release.</p>
 </div></details>
 
-<details class="item"><summary><span class="n">11</span><span class="t">Draw-call headroom in the junior common room</span><span class="s">section 4d · watch only</span></summary><div class="body">
+<details class="item"><summary><span class="n">11</span><span class="t">Draw-call headroom in the mess hall</span><span class="s">section 4d · watch only</span></summary><div class="body">
 <div class="chips"><span class="chip gain">gain: safety margin</span><span class="chip risk">risk: low</span><span class="chip q">question 7</span></div>
-<p>At 433 of 450 when zoomed out, any new decor there breaks the budget. The proposal is to watch it (perf_check already does) and not touch it in this pass, unless you'd rather we free up room now by merging more of its still furniture (same picture, checked shot for shot).</p>
+<p>At Sunday dinner, zoomed out, the mess hall is at 418 of 450 (breakfast 409). A new tradition's decor there could break the budget. The proposal is to watch it (perf_check, once item 0 is in) and not touch it in this pass, unless you'd rather we free up room now by merging more of its still furniture (same picture, checked shot for shot).</p>
 </div></details>
 
 <div class="card">
@@ -218,7 +224,7 @@ CHECKTABLE
 <h2>Turns</h2>
 <div class="tw"><table>
 <tr><th>Turn</th><th>Test-speed seat</th><th>Render seat</th><th>Load seat</th><th>Frame seat</th></tr>
-<tr><td>0</td><td colspan="4">The bench tool and the baseline row (the planner's probes in <code>plans/opt-probes/</code> become one tool); each seat reads its sections and owners.</td></tr>
+<tr><td>0</td><td colspan="4">#0 perf_check's rooms fixed (test-speed seat), then the bench tool and the baseline row (the planner's probes in <code>plans/opt-probes/</code> become one tool); each seat reads its sections and owners.</td></tr>
 <tr><td>1</td><td>#1 affected checks: the coverage map and <code>tools/affected.py</code>, checked against recent merges</td><td>#2 crowd uploads, with the byte-compare probe</td><td>#3 memory snapshot and its short list; #4 faster grain</td><td>#6 the speed card (with the Dev mode owner); screen-size and HUD answers remembered (#5, part 1)</td></tr>
 <tr><td>2</td><td>#9 resumable long checks</td><td>#8 deck changes measured, then the slowest part</td><td>the memory fixes from turn 1's list; #7 texture cache (if you say yes)</td><td>#5 part 2: "where should this person be" asked once; crowd posing</td></tr>
 <tr><td>3</td><td>#9 the full round shared out; the cadence written into DEV_NOTES</td><td colspan="3">Final bench against the baseline, the full round on the combined build, review, and the results page for you with your phone's before/after (if #6 is in).</td></tr>
@@ -227,7 +233,7 @@ CHECKTABLE
 <h2>The team</h2>
 <div class="tw"><table>
 <tr><th>Seat</th><th>Does</th><th>Touches</th></tr>
-<tr><td><b>Test-speed</b> (TS1 back, or a fresh session from its handover)</td><td>#1, #9, #10</td><td>tools/, check harness files (cadet_test.py with the build master), DEV_NOTES "Testing"</td></tr>
+<tr><td><b>Test-speed</b> (TS1 back, or a fresh session from its handover)</td><td>#0, #1, #9, #10</td><td>tools/, check harness files (cadet_test.py with the build master), DEV_NOTES "Testing"</td></tr>
 <tr><td><b>Render</b></td><td>#2, #8, #11</td><td>sections 8b, 4b, 4c</td></tr>
 <tr><td><b>Load</b></td><td>#3, #4, #7, the memory fixes</td><td>sections 2, 4b, and whoever owns what the snapshot finds</td></tr>
 <tr><td><b>Frame</b></td><td>#5, #6</td><td>sections 8b, 10, 14, 11, 15, 19, 25 (each owner reviews)</td></tr>
@@ -270,7 +276,7 @@ CHECKTABLE
 <label><input type="radio" name="opt-q6" value="show-me"><span>Make one and show me side-by-side pictures before deciding</span></label>
 <textarea name="opt-q6-comment" placeholder="Anything to add"></textarea></div>
 
-<div class="q" data-qid="opt-q7"><div class="qh">QUESTION 7 · THE BUSIEST ROOM (#11)</div><div class="qt">The junior common room is at 433 of its 450 draw-call budget when zoomed out. Free up room now?</div>
+<div class="q" data-qid="opt-q7"><div class="qh">QUESTION 7 · THE BUSIEST ROOM (#11)</div><div class="qt">The mess hall at Sunday dinner is at 418 of its 450 draw-call budget when zoomed out. Free up room now?</div>
 <label><input type="radio" name="opt-q7" value="watch"><span>Watch it; only act when something new goes in there <span class="rec">recommended</span></span></label>
 <label><input type="radio" name="opt-q7" value="now"><span>Free up room now (same picture, merged furniture)</span></label>
 <textarea name="opt-q7-comment" placeholder="Anything to add"></textarea></div>

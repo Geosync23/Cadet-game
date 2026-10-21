@@ -52,7 +52,20 @@ The build didn't get slower to open between 0.64.4 and 0.64.5. The 14 s → 16-1
 
 ("calls" = the picture, the 450 budget's number; "GPU draws" adds the shadow pass; ms = game code a frame, drawing skipped.)
 
-- **Headroom:** the junior common room zoomed out is at 433 of 450. Quiz night zoomed out 396.
+- **But 6 of the 8 scenes measure the wrong room** (EV4's find, backlog 18b on claude/storm-update; confirmed here with `opt-probes/perf_room.py`). `SCENE_JS` passes the room's middle tile (column, row) to `nearestOpen(x, z, who)`, which wants world coordinates, so you stand wherever is nearest that point. Where you actually stand, and the numbers with the fix (`cellPos(i, j)` first), portrait 1.5 / portrait wide 0.7:
+
+| Scene | Stands in now | Now | With the fix (the right room) |
+| --- | --- | --- | --- |
+| arrival: shuttle bay | Machine shop | 180 / 343 calls | Shuttle bay: 112 / 189 |
+| arrival: Works bay door | Fan hall | 156 / 262 | Works bay: 173 / 279 |
+| **Sunday dinner, mess** | Bow lounge | 217 / 351, 2.2 ms | **Mess hall: 261 / 418 calls, 2.0-3.0 ms, 69 people** |
+| junior wing | Cabin 4-05 | 202 / 433 | Junior common room: 199 / 305 |
+| Sowing morning, garden | Gym | 218 / 371 | Hydroponics garden: 189 / 286 |
+| Tiles night, bow lounge | Bow lounge (right) | 214 / 345 | 260 / 345 (a different tile of the same room) |
+| quiz night, bow lounge | Bow lounge (right) | 264 / 396 | 310 / 396 |
+| **breakfast rush, mess** | Bow lounge | 212 / 343 | **Mess hall: 248 / 409** |
+
+- **Headroom, corrected:** the busiest real scene is the mess hall at Sunday dinner zoomed out, **418 of 450**, then breakfast in the mess 409 and quiz night 396. The "433" was Cabin 4-05, not the junior common room (305). Every perf_check baseline since the scenes were added has measured these rooms; the build table's perf numbers should be read with that in mind.
 - **Memory:** flat. Geometries/textures/JS heap 548/43/228 MB → 548/43/228 → 550/43/228 over deck round trips (the +2 is known since 0.64.6 and perf_check flags it); a week of play 548/43/228 → 550/43/228.
 - **The JS heap: 95 MB after opening, 229 MB after visiting every deck once, then flat** (heap snapshots, `opt-probes/deck_heap.py`, `deck_heap2.py`; `performance.memory` doesn't update often enough to show the steps). Right after opening: 48 MB of raw arrays (mostly geometry kept on the CPU side after upload), 16.5 MB of object arrays, 11.5 MB of strings held outside the heap (the script's own text and the dialogue). After every deck: raw arrays 129 MB (+81), object arrays 56 MB (+40), the rest about the same. GPU geometries come back to 548 on Deck 4 every time, so the extra ~134 MB is kept on the JavaScript side for decks you've already left (or kit made on first visit), not leaked: it stops growing after one visit to each deck. perf-p4's "105-125 MB after load" (0.60.3) compares with the 95 MB after opening; perf_check's 228 MB is the after-every-deck number. What exactly holds the 134 MB needs a retainers walk (the load seat's turn 1).
 
@@ -72,19 +85,20 @@ A persistent browser profile (Chrome's GPU shader disk cache, with and without `
 
 ## 3. Game code a frame (CPU profile, `opt-probes/sim_prof.py`)
 
-### Sunday dinner, the mess, 72 people, 900 frames, drawing skipped: 1.25 ms a frame with the profiler on (perf_check: 1.72-1.99 ms)
+### Sunday dinner, standing in the mess hall, 69 people, 900 frames, drawing skipped: 2.59 ms a frame with the profiler on (`opt-probes/sim_prof_mess.py`; perf_check with item 0's fix: 1.95-3.04 ms)
 
 | Part of the main loop (inclusive) | ms a frame | Section |
 | --- | --- | --- |
-| crowd: `crowd.update` (posing, chunks) | 0.47 | 8b |
-| crowd: the people's own `update` (rig, activity) | 0.39 | 8b |
-| `updateDeckCrew` (the scheduled crew on the deck) | 0.27 | 8c / 10 |
-| walkers' `update` | 0.20 | 10 |
-| `playerUpdate` | 0.09 | 15 |
-| `writeWalls`, `doorLeavesSync`, `drawScreen`, `tickShip` | 0.05, 0.04, 0.03, 0.03 | 4b, 4a, 2, 13 |
-| galley, events, social, lines, intro ticks | 0.01 each or less | 16, 18, 20, 22, 21 |
+| `crowd.update` (posing everyone on screen, chunks), which includes each person's `update` (1.04 ms: rig, activity) | 1.13 | 8b, 8 |
+| `updateDeckCrew` (the scheduled crew on the deck) | 0.47 | 8c / 10 |
+| walkers' `update` | 0.27 | 10 |
+| `playerUpdate` | 0.17 | 15 |
+| `writeWalls`, `shipFeelFrame`, `crewNearDoor`, `drawScreen`, `tickShip`, `doorLeavesSync` | 0.07, 0.06, 0.05, 0.04, 0.04, 0.03 | 4b, 8b, 8c, 2, 13, 4a |
+| galley, events, social, lines, the day plan | 0.01-0.02 each | 16, 18, 20, 22, 14 |
 
-Self time: `(program)` (V8 internals, inline-cache misses) 22%, three.js 17% (matrix updates), 8b 14%, the loop body 6%, 10 6%, 14 5% (`whereIs`, `walkGap`, `planWhere` asked every frame), 8c 4%, 8 3%. **Layout reads every frame:** `getBoundingClientRect` 0.042 ms and `matchMedia` 0.012 ms a frame (sections 11, 15, 19: the HUD placing itself); cheap on a desktop, but a forced layout on a phone when a style changed in the same frame.
+Self time: three.js 22% (0.64 ms: the bones' matrices, 69 people × about 21 bones), 8b 19%, `(program)` 10%, the loop body 7%, 8 (`animateRig`) 6%, 8c 4%, 14 4% (`whereIs`, `walkGap`, `planWhere` asked every frame), 10 4%, 15 3%, **`getBoundingClientRect` 3% (0.095 ms a frame)**, 18 3%, GC 3%. Everyone is on screen in the mess, so everyone is posed every frame (0.27.27 poses only the people on screen; standing in the bow lounge, as the old scene did, cost 1.25 ms). **Layout reads every frame** (`getBoundingClientRect`, `matchMedia`; sections 11, 15, 19: the HUD placing itself) are cheap on a desktop but force the browser to lay the page out again on a phone when a style changed in the same frame.
+
+(The first profile, standing in the bow lounge because of the scene bug, gave 1.25 ms a frame: crowd 0.47, deck crew 0.27, walkers 0.20.)
 
 ### Skipping 8 ship days on paper (`skipTo(1440 * 8)`): 1.4 s
 
