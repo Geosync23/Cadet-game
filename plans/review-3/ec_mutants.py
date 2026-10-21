@@ -16,6 +16,12 @@ M = {
  'n2_noteTwice': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) }); simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });"),
  'n3_noteLate': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) + 5 });"),
  'n4_noCue': ("eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1]", "eventPhase: [d => 'evx.' + d.id + '.' + d.phase, 1]"),
+ 'd1_itemsWhileOff': ("function eventItems(a, b) {\n  if (!EV_DEVICE_ON) return [];", "function eventItems(a, b) {\n  if (false) return [];"),
+ 'd2_itemLate': ("const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;", "const at = (d - 1) * 1440 + g.at + 5; if (at < a || at > b) continue;"),
+ 'd3_itemDropped': ("for (const g of eventGatherings(d)) {\n    const at", "for (const g of eventGatherings(d).slice(1)) {\n    const at"),
+ 'd4_trackedClosed': ("if (shut) continue; out.push({ sec: 'place'", "if (false) continue; out.push({ sec: 'place'"),
+ 'd5_openForIgnored': ("return !EV_OPEN_FOR.some(o =>", "return true || !EV_OPEN_FOR.some(o =>"),
+ 'd6_openForDeck': ("o.deck === g.deck && o.room === g.room && evBeatsOn(d)", "o.deck === g.deck && evBeatsOn(d)"),
  'm8_ladderSun': ('"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990]',
                   '"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 6}, "at": [1150, 1200]'),
 }

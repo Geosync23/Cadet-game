@@ -216,3 +216,19 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - The team slot is at 13:30, and the haul is held to 14:30.
 
 **To do:** OR1 signs off the 24x hooks (section.py lists no owner for several of them).
+
+## EC1 turn 4 (F3a's device part: Schedule, Tracked, closed places, the auditorium for the address): claude/bigevents-check b6fcaef. PASS
+
+**Checks:**
+- The game change is F3a's lines only.
+- The check is OK; check_fast is OK in 216 s.
+
+**Mutants d1-d6, all caught:**
+- d1: the items act while off;
+- d2: an item is 5 minutes late;
+- d3: an item is dropped;
+- d4: Tracked offers closed booths;
+- d5: EV_OPEN_FOR is ignored;
+- d6: EV_OPEN_FOR opens the whole deck.
+
+**Note:** EV_OPEN_FOR opens 7A for fridayAddress (15:30-17:00), which covers FR1's 16:00-16:50.
