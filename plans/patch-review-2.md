@@ -191,3 +191,8 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - notify is kept with heads-ups off, so the s19 line needs no change (covered for OR1). The party is listed once. The timed Mail mail.<key>.at is unused today.
 - check_fast OK (274 s); cadet_test ALL IDENTICAL.
 - The retaken shots show the briefing (Day 11) and the all-clear plus party (Day 14). Nit: the Day 11 shot's HUD says Day 1.
+
+## EV1 F2b: claude/events-base 5189d08 (cues at once; the s20 socHear hook, covered for OR1). PASS
+
+- **Off:** check_fast OK (272 s); cadet_test ALL IDENTICAL.
+- **On:** the onset and front cues are there at 14:04 on Day 12. social_check OK on the switched-on copy (play and jump agree).
