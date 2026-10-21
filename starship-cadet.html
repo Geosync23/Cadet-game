@@ -7784,6 +7784,16 @@ function messExtra(s) {
   const W = '#7a5a3e';
   for (const [x, z, f] of MESS_EXTRA.heads) { dressBox(s, .42, .05, .42, W, x, .45, z); dressBox(s, .06, .5, .42, W, x - f * .19, .72, z); for (const dx of [-.17, .17]) for (const dz of [-.17, .17]) dressBox(s, .04, .43, .04, W, x + dx, .215, z + dz); }
 }
+// a storm lantern standing at y (the storm update, EV4 as the deck architect's stand-in): an iron foot and cap, a
+// glowing globe (glow: an unlit material, so it shines in the dark) and a wire handle. The parts overlap, so no two faces
+// lie in one plane; about 0.26 tall
+function dressLantern(s, x, y, z, glow) {
+  const iron = dressMat('#34322e'), cy = (rt, rb, h, m, y0) => { const k = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, 10), m); k.position.set(x, y + y0 + h / 2, z); s.add(k); };
+  cy(.075, .085, .035, iron, 0);                         // the foot
+  cy(.058, .064, .16, glow, .025);                       // the globe, its foot end inside the foot
+  cy(.025, .07, .05, iron, .175);                        // the cap, over the globe's top
+  const h = new THREE.Mesh(new THREE.TorusGeometry(.038, .006, 4, 12, Math.PI), iron); h.position.set(x, y + .222, z); s.add(h);   // the handle, its ends in the cap
+}
 const DECK_DRESS = {
   signupMess: { deck: 3, what: 'a sign-up sheet beside the mess menu board', make(g, o) {
     dressSheet(dressAt(g, 'M', 'e', 2.55), o, .016, 1.75);
@@ -7989,6 +7999,22 @@ const DECK_DRESS = {
     pts.forEach(([x, y, z], k) => { im.setMatrixAt(k, m.compose(new THREE.Vector3(x, y, z), q, k < hung ? sc : sb)); im.setColorAt(k, col(C[k % 4])); });
     im.userData.noMerge = true; im.frustumCulled = false; s.add(im);
     return { t: 'Lanterns', x: 'Paper lanterns all the way down the promenade, one for every name on the crew list, and a few spares for the ones who have left.', floor: ['=', pts[12][0], pts[12][2]], y: pts[12][1], w: .3, h: .4, d: .3 };
+  } },
+  // the storm update (EV4, the deck architect's stand-in; PR4 reviews): lanternMess, the lantern supper (Saturday 17:30-
+  // 19:45, section 18's dressing): three storm lanterns down each long table, 12, on the runners the long table lays
+  // (longTables, its decor); the mess goes to emergency light while they're out (section 8b's shipFeelFrame asks
+  // stormSupperDim). The iron merged, the globes one unlit material: 2 draw calls, no shadows
+  lanternMess: { deck: 3, what: 'the lantern supper: storm lanterns down the mess\'s long tables', make(g) {
+    const s = dressAt(g, 'M', 'floor', 0, 0), glow = new THREE.MeshBasicMaterial({ color: col('#ffc46b'), toneMapped: false });
+    for (const [x, z] of MESS_LONG) for (const dx of [-1.15, 0, 1.15]) dressLantern(s, x + dx, .776, z, glow);
+    return { t: 'Storm lanterns', x: 'Storm lanterns down the long tables, carried up from storage in a crate. The mess is on emergency lights tonight, and nobody seems to mind.', floor: ['M', MESS_LONG[1][0] + 1.15, MESS_LONG[1][1]], y: .9, w: .3, h: .35, d: .3 };
+  } },
+  // stormLantern: the lantern supper's trace (section 18's settleTraces, from the all-clear): one storm lantern left on
+  // the galley pass, at the counter's bow end (row 4, no plate there). 2 draw calls
+  stormLantern: { deck: 3, what: 'a storm lantern left on the galley pass after the lantern supper', make(g) {
+    const s = dressAt(g, 'M', 'floor', 0, 0), glow = new THREE.MeshBasicMaterial({ color: col('#ffc46b'), toneMapped: false });
+    dressLantern(s, 11.83, SILL + .052, 4.3, glow);
+    return { t: 'Storm lantern', x: (typeof evWord === 'function' && evWord('event.ionStorm.trace.lantern')) || 'A storm lantern on the galley pass. Nobody\'s moved it since the lantern supper.', floor: ['M', 11.83, 4.3], y: SILL + .18, w: .25, h: .35, d: .25 };
   } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
@@ -37524,6 +37550,10 @@ function evStandTray(pl, w) {
   return EV_SHIPWIDE.some(g => g.meal && g.meal === w.act && g.venue === pl.gather && (w.tag === 'ev-' + g.id || w.tag.startsWith('ev-' + g.id + '-'))
     && m >= g.at[0] - 30 && m < g.at[1]);
 }
+// the lantern supper's light (EV4): how far toward emergency light Deck n goes now (section 8b's shipFeelFrame, twice a
+// second): .85 while the lantern supper's lanterns are out on this deck (DECK_DRESS.lanternMess, drawn only on Deck 3),
+// else 0. Visual only; 0 while the storm update is off
+function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') ? .85 : 0; }
 // ---- end of slot: Storm builder ----
 
 // =====================================================================
@@ -49018,7 +49048,7 @@ const FEEL_MOODS = {                                     // by event id: its moo
   ionStorm: { phases: { warning: .15, onset: .75, escalation: 1 }, a: col('#7a3cff'), b: col('#19d6c8'), light: col('#a99cff'), bg: col('#4a2488') },
 };
 const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
-const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false };
+const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false, lamp: 0, lampT: 0 };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = simNow() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
 // ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
 // bean trellises grow with the galley's beds (SHIP.galley.garden.beds: [crop, grown, days]): bare soil just after a
@@ -49147,13 +49177,15 @@ function shipFeelFrame(t, dt) {
     s.dark = dark; s.deck = dn;
     const e = ev && SHIP.event, sd = e && SHIP_EVENTS[e.id], tn = shipNow();   // one of the event's gatherings on this deck, now (for 8b's crowd)
     s.gather = !!sd && (sd.moments || []).some(mo => mo.gathering && mo.where && mo.where.deck === dn && (at => tn >= at - 30 && tn < at + (mo.len || 60) + 30)((e.startDay - 1 + mo.at[0]) * 1440 + mo.at[1]));
+    s.lampT = typeof stormSupperDim === 'function' ? stormSupperDim(dn) : 0;   // the storm update's lantern supper: the mess on emergency light (0 while off)
     if (s.first) { s.mood = s.moodT; s.first = false; }
   }
+  if (s.lamp !== s.lampT) { s.lamp += (s.lampT - s.lamp) * Math.min(1, dt * .8); if (Math.abs(s.lamp - s.lampT) < .002) s.lamp = s.lampT; }
   s.mood += (s.moodT - s.mood) * Math.min(1, dt * .4); if (Math.abs(s.mood - s.moodT) < .002) s.mood = s.moodT;
   const se = now - s.t0, felt = now < s.until, de = now - s.darkT;
-  if (!s.mood && !felt && !s.flick && !s.dark && de > 2) { SKY.mat.uniforms.uWash.value = 0; return; }
+  if (!s.mood && !felt && !s.flick && !s.dark && de > 2 && !s.lamp) { SKY.mat.uniforms.uWash.value = 0; return; }
   const has = k => felt && s.kinds.includes(k);
-  let k = 1, emerg = s.dark ? 1 : 0, flash = 0;
+  let k = 1, emerg = s.dark ? 1 : s.lamp, flash = 0;
   // a felt moment: the shake, the dip, then flickers
   if (has('jolt') && se < .8 && !FEEL_CALM) {
     const a = 5 * (1 - se / .8) ** 2 * (camera.top - camera.bottom) / camera.zoom / renderer.domElement.height;   // about 5 pixels
