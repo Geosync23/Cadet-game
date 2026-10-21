@@ -109,7 +109,7 @@ with sync_playwright() as pw:
     rt = g.ev("SHIP.traces.filter(t => t && t.id === 'nameNew').map(t => t.name + '@' + t.day)")
     g.ev("localStorage.clear()")
     print('nameNew traces after a reload at day 100:', rt)
-    if rt != ['Basil@36', 'Rafe@78']: fail(f"nameNew traces through the save: {rt}")
+    if rt != ['Basil@22', 'Rafe@78']: fail(f"nameNew traces through the save: {rt}")   # Basil joins on day 21 since PT1 (was 35: Basil@36)
     for e in g.errors: fail('page: ' + e)
     g.close()
 print('JOIN CHECK ' + ('FAILED' if FAILS else 'OK'))
