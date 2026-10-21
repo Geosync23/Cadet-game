@@ -53,3 +53,23 @@ the 390 phone, both with and without the board).
   pass when the check waits for the slide to finish (`DEV.fr === 1`) before its first count.
 - So the opening zoom only decides which object is at the edge; the cause is the check counting mid-slide. Not fixed (brief).
   Backlog row 26 (on this branch; fridays has a row 25).
+
+## The fix (lead 25's ask): tiles_check waits for the device's framing
+
+`tiles_check.py` `board()`: after `deviceShow('home')`, it waits until `DEV.fr` reaches its target (`DEV.frOn ? 1 : 0`:
+1 on a phone, 0 on the wide screen where the device doesn't slide), up to 10 s of real time (100 x 100 ms, a step each),
+draws one more frame, and only then takes the "before" count. If the slide never settles it FAILs out loud:
+`<view>: the device's framing settles within 10 s (DEV.fr …, frOn …)`. Check only; no game change.
+
+| Build | Result |
+|---|---|
+| a4a5735 (0.64.12) | ALL OK |
+| the release build (sha256 23fb9118…cb7df), run twice | ALL OK, ALL OK |
+| 4dbdca8 (patch crew T2, the first that failed) | ALL OK |
+| planted: `tilesPlay` adds a mesh to the scene | FAIL "adds nothing to the 3D scene" on 320, 390 and wide |
+| planted: `tilesPlay` adds a mesh inside a deck group, in the middle of the view (the scene's child count unchanged) | FAIL on 320, 390 and wide |
+| planted: the framing stops at 0.6 | FAIL "the device's framing settles within 10 s (DEV.fr 0.6, frOn True)" on 320 and 390 |
+
+(A first try of the group plant put the mesh 5 m in front of the camera, nearer than the camera's near plane (about 15 m),
+and on a phone the slid view's centre line falls just above the screen; the plant, not the check, was wrong. Placed at the
+view's middle (`unproject` of (0, 0, 0)) it fails on every view.) Backlog #26 moved to Fixed.
