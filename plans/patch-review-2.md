@@ -185,3 +185,9 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Off:** check_fast OK (280 s); cadet_test ALL IDENTICAL; no save key.
 - **On (`f0c.py`):** the plan is [ionStorm Day 11]; due is Day 11; eventDay is true on 12 and 13; evSkippedFor(20) is crossingLine, ionStorm, comet. My F1a note is settled (eventDay reads evCalPlan).
 - **Nit:** the job readers strip \W, so job ids must stay \w-only (they are today).
+
+## EV1 F3a fixes: claude/events-base d88c78f. PASS
+
+- notify is kept with heads-ups off, so the s19 line needs no change (covered for OR1). The party is listed once. The timed Mail mail.<key>.at is unused today.
+- check_fast OK (274 s); cadet_test ALL IDENTICAL.
+- The retaken shots show the briefing (Day 11) and the all-clear plus party (Day 14). Nit: the Day 11 shot's HUD says Day 1.
