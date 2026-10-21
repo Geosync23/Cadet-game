@@ -92,3 +92,11 @@ Fixes:
 - 6484320 (15): `teachHeld` and `needWarnTick` ask `introHoldNudges` (intro on, Day 1, 16:50 until the beam). A gentle pop-up isn't marked said (`WARN_SAID`), so it comes later. The firm toast shows without "Follow the marker".
 - b623325 (19): during the hold, `devHeadsShow` moves the first non-meal heads-up to the front, or waits. It only runs while nothing is showing, and `devHeadsTick` still drops stale entries ('soon' at its start, 'start' 10 minutes after), so a meal's heads-up never shows late.
 - 8e8f584 (14): `mine == null` also skips a named desk that went to nobody (null), so the trade never hands out "no desk". The planner is still deterministic; it's all load-time data.
+
+## 7. EV1's F1a, claude/events-base 0313e52: eventDay(d) and puzzle_check P1 (2026-10-21)
+
+**Verdict: PASS** (two notes for later turns).
+- **puzzle_check is honest.** The game's own gate is `caseOffer` (section 24k), which refuses a case when `eventDay(d)`. P1 calls `caseOf` directly, so skipping event days copies what the game does. Off: `eventDay` is false, so P1 is unchanged (puzzle_check OK, 76 P1 cases). With `EV_GUARD_ON` alone flipped on in a copy: puzzle_check OK, **57 cases** (the event workdays drop out), every line machine still covered, far above its floor of 10.
+- **eventDay reads only `EV_CALENDAR`, `SHIP_EVENTS`' phases and `EV_SKIPPED`.** Storm: warning Day 11, so onset 12, escalation 13, resolution 14, as the plan says.
+- Note 1: `EV_SKIPPED` is made once at load from the save (`SHIP.time.day`, `SHIP.eventLog`, `SHIP.event`; loaded before line 36766), so it never changes during play. An event that ran is in the log, so a reload agrees with an unbroken run. But the comment "never ... anything saved" isn't quite true; say "only a set fixed at load". One gap remains for F4: an event whose day passed while it was still waiting (one at a time, or after a Dev mode start) would be skipped by a reload and not by an unbroken run. Save the skipped set once (e.g. `ship.evSkip`) when F4 adds the event save.
+- Note 2: today's diplomatic phases give eventDay 28, 29 and 33 (resolution at day +7), not the plan's 27-29. Recheck when the visit update rewrites its phases.
