@@ -51,6 +51,12 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     print('Food reaches the cold store by:', g.ev("FOOD.restock === 'carts' && typeof cartClaim === 'function' ? 'hover cart only (cartClaim)' : 'the 10:30 top-up'"))
     print(f"Days {DAY}-{DAY + DAYS - 1} from {g.ev(f'WEEKDAYS[weekday({DAY})]')}, {g.ev('schedPeople().length')} people, {g.ev('galleyStaff().length')} galley staff")
+    # the forecasts below (4b, 4c, 4e) read the machines' record, whose last hour stands for every hour after it: after
+    # the live visits (Deck 3 at 18:00, the menu board) that's whatever is broken then (two cookers faulty on Day 11 since
+    # 0.64.7's First Light Cocoa moved Day 1's evenings: dinner 30 portions, not 40, for four weeks). So each starts the
+    # machines afresh at the load time, as part 1 read them (machinesNow: a clock before the machines' starts afresh)
+    T0 = g.ev("shipNow()")
+    fresh = lambda: g.ev(f"setShipNow({T0}); machinesNow(); 0")
 
     # 1. the days
     rep = g.ev(f"galleyReport({DAY}, {DAYS})")
@@ -132,6 +138,7 @@ with sync_playwright() as pw:
     # 4b. hover carts (B3): the cold store fed only by cartClaim. Section 17's rule when it's there, else a stand-in of
     # the agreed rule (a daily run from 09:00 when under 250, an urgent one under 90; carry up to 150, never past the
     # cap; 40 minutes on the way). A week with no shortage, then no carts on days 2 and 3, to show the shortage and the queue
+    fresh()
     carts = g.ev(f"""(() => {{ const real = typeof cartClaim === 'function', was = FOOD.restock;
       if (!real) window.__sc("cartClaim = (t, cold) => {{ const md = t % 1440, n = Math.min(150, FOOD.coldCap - cold); return n > 0 && (cold < 90 || (cold < 250 && md >= 540 && md < 1020)) ? {{ meals: n, arriveAt: t + 40 }} : null; }}");
       FOOD.restock = 'carts';
@@ -147,8 +154,10 @@ with sync_playwright() as pw:
 
     # 4c. spoilage: a broken chiller for a week, through a stand-in chillerAt (section 17's, 0.33.17: spoil 0.05 an hour
     # at its worst), which the galley reads before shipEffectsAt
+    fresh()
     sp = g.ev(f"""(() => {{ window.__keepCh = typeof chillerAt === 'function' ? chillerAt : undefined; window.__sc("chillerAt = t => ({{ cond: 0, state: 'broken', spoil: .05 }})");
       const week = galleyReport({DAY}, {DAYS}).map(st => ({{ spoiled: st.spoiled, coldOut: st.coldOut, coldMin: st.coldMin, maxWait: st.maxWait, mealMax: st.mealMax, busy: st.busy }}));
+      setShipNow({B} + 1440 + 9 * 60 + 30); machinesNow();   // the machines' own Mail (stores run out) before the galley's is caught
       const mail = []; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)"); window.__mailBox = mail;
       SHIP.galley = null; setShipNow({B} + 1440 + 9 * 60 + 30); goToDeck(3); galleyAdvance(shipNow()); galleyTick();
       const out = {{ week, mail: mail.map(x => x.subject + ' ' + x.at + ': ' + x.body), bin: SHIP.galley.bin, bags: GV && GV.bin ? GV.bin.count : -1, text: galleyText('cold') }};
@@ -178,6 +187,7 @@ with sync_playwright() as pw:
     if not bd['text'].startswith(('Serving: ' + bd['dinner'] + '.', 'The pans')) or not str(bd['board']).startswith(f"{DAY}|") or bd['dinner'] not in bd['tap']: fail(f"menu: servery or board: {bd}")
 
     # 4e. busy windows over four weeks: queues only in them, nobody gives up, and rushes make queues
+    fresh()
     bz = g.ev(f"""(() => {{ for (const E of GALLEY_EV.values()) E.k = 0;
       return galleyReport({DAY}, 28).map(st => ({{ day: st.day, busy: st.busy, mealMax: st.mealMax, waited: st.waited, missed: st.missed.length }})); }})()""")
     rush = [x for x in bz if any(b['kind'] == 'rush' for b in x['busy'])]
