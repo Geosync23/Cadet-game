@@ -65,3 +65,5 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - dm_set_probe.py (taps; 390 Day 12, 360 Day 10): landing, rank, trainings, cabin 4-23, nothing asked, foot "approximate", worksClean's keys kept, the same after a reload, played to 19:00 with nothing re-opened, Undo, real keys untouched. Its "ship.works byte-equal" line was a timing artefact: a direct check shows the Dev save's ship.works byte-identical across a reload; a plain game's 'cases' moves on across a reload by itself.
 - D7 nit (/2$/ in devmodeRank) fixed by DB2 in d686b86 (DM_PROMO_DONE), read.
 - Design note to the lead: Set career to Day N = the end of day N (the plan's D6 test); the Day 9 and Day 10 beat shortcuts give the before-the-beat states.
+
+- Lead 24 moved RN1's perf_check scenes (3af9f15 + 0ad9b5d), opt #10 (5358a60) and opt #6 (1a62fc7) to OR1 (session_015np4rHB2UHzet5Y1zFrBzm); my reading notes and planned runs sent to OR1. My node check of opt #6's reduction: 40M steps, 0 differ.
