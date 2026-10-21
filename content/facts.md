@@ -31,6 +31,10 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **Out of the windows** (the Wren's route; the user's pick, 2026-10-20, via EW1): **the Pale Shoals**, a pale smudge of
   dust behind us ("we left them six weeks ago" on Day 1), and **Tavessa**, a star cluster the Veyli named, dead ahead past
   the Line (crossed into the Veyli reach on Day 7). Raman names both at First Light Cocoa. Ask before adding more.
+- **The Veyli reach:** the Wren was last in the reach two years ago, on a quiet charting run (nothing happened; never
+  tie an incident to it). So crew aboard under two years are first-timers at the Line (Day 7), and older hands crossed
+  then (Pell, for one). Checked by EW1 against Holt's and Saruth's arcs: no clash (Holt's bad day is "years ago, on a
+  border patrol", no ship or date; never link the two).
 - **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
   09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),

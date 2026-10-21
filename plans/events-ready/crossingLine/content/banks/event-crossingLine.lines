@@ -26,21 +26,64 @@
 == event.crossingLine.gather.lineSupper.name
 - The Line supper
 == event.crossingLine.gather.lineSupper.mail
-- The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. A proper roast, and a pudding. No punch. I promise.
+- The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. Whatever the crew voted for, and a pudding. No punch. I promise.
 == event.crossingLine.gather.lineSupper.ask
 - Line supper at six. Proper food, to make up for the punch.   #funny
 - Everyone's at the Line supper tonight. Come and find a seat. Or a wall.
 == event.crossingLine.gather.lineSupper.here
 - To the Line, and everyone who crossed it today.   #warm
-- The roast's to get rid of the taste. It's working.   #funny
+- Supper's to get rid of the taste. It's working.   #funny
 - First-timers eat first. That's the rule tonight.
 == event.crossingLine.gather.lineSupper.thanks
 - The mess is full to the walls. Someone hands you a plate, and someone else saves you a corner of the bench.   #warm
 == event.crossingLine.gather.lineSupper.chatter
 - Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
-- The Line supper ran out of roast in ten minutes. Brennan was thrilled.
+- The Line supper ran out of seconds in ten minutes. Brennan was thrilled.
 // tap texts: the certificate on your shelf (a keepsake) and the plaque on the plaza (the deck architect's props)
 == event.crossingLine.keepsake
 - Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."
-== event.crossingLine.plaque
-- A small brass plaque: "The CSV Wren crossed the Line into the Veyli reach on Day 7." Someone has already polished it.
+
+// ---- story A, "The one on watch" (event-line plan v2; the user's choice). GUARD RAILS for Tomas (his arc, beats 5
+// and 7): only about missing his crossing; nothing about failing, tests, Holt, or staying.
+// Saturday, if you don't meet Tomas before his bedtime: his Mail at about 22:50 (unsigned; from Tomas Lind)
+== event.crossingLine.mail.tomas
+- On watch tomorrow | On watch tomorrow, all day. You'll have to cross for both of us. Tell me everything after.
+// the plaque on the plaza (from the night of Day 7), with your answer under the date (flag:line.answer.<answer>);
+// .missed when you weren't at the ceremony (a first-timer answered)
+== event.crossingLine.plaque.proud
+- The CSV Wren crossed the Line into the Veyli reach, Day 7. "We came a long way. We're glad we did."
+== event.crossingLine.plaque.watch
+- The CSV Wren crossed the Line into the Veyli reach, Day 7. "We crossed together. Even the ones on watch."
+== event.crossingLine.plaque.punch
+- The CSV Wren crossed the Line into the Veyli reach, Day 7. "Is this the part with the punch?"
+== event.crossingLine.plaque.missed
+- The CSV Wren crossed the Line into the Veyli reach, Day 7. "We're new, and we're nervous, and we came anyway."
+// the missed-it answer, said by a first-timer in the ceremony when you're not there
+== event.crossingLine.answer.missed
+- We're new, and we're nervous, and we came anyway.
+// the Lap (meeting lineLap): Tomas's line to you after Pell's, by your day
+== event.crossingLine.lap.tomas.watch
+- You said "even the ones on watch". Deck 2 heard about it in five minutes.   #warm
+== event.crossingLine.lap.tomas.mug
+- I've still got the mug. I'm keeping it. Is that allowed? I'm keeping it.   #warm
+== event.crossingLine.lap.tomas.none
+- Next Line, you're on watch and I'm drinking the punch. Deal?   #funny
+// the punch secret: Brennan, while you carry the punch up from the galley (the volunteer job's first stop)
+== event.crossingLine.punch.secret
+- What's in it? Pickle brine. One spoon. Every Line since I joined. Tell no one.
+// if you promised Tomas punch and didn't go up: Brennan saves him one (at the supper)
+== event.crossingLine.punch.saved
+- Tomas is on watch, so I've saved him a mug. Don't look at me like that. I'm not soft.
+// the horn's one-line notice (14:30, every deck), and the device's notice (14:15, with "show on map")
+== event.crossingLine.notice.horn
+- The ship's horn: the Wren has crossed the Line.
+== event.crossingLine.notice.ceremony
+- Crossing the Line: the ceremony on the plaza at 14:30. First-timers to the front.
+// the two volunteer jobs (the mess sign-up sheet; Brennan offers them too)
+== event.crossingLine.job.punch
+- Crossing the Line: carry the punch up from the galley
+== event.crossingLine.job.ribbons
+- Crossing the Line: hang the gold ribbons on the plaza
+// the Record line (never a score)
+== event.crossingLine.record
+- Crossed the Line into the Veyli reach, Day 7.

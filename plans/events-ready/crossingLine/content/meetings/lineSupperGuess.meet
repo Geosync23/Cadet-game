@@ -1,0 +1,16 @@
+@meeting lineSupperGuess
+// EW1 (events writer), Crossing the Line story A side thread: at the Line supper (Sunday 18:00-19:15), someone guesses
+// what's in the punch. Only if Brennan told you its secret (you carried the punch up). Keeping it: Brennan +1. Pell
+// guesses (off on Tue/Wed: at the supper). Three replies.
+title: What's in the punch?
+from: Pell Okafor
+gist: At the Line supper, Pell tried to guess what's in Brennan's punch.
+== lines
+pell > you: You carried it up. You know. What's in the punch? It's ginger. It's definitely ginger.   [listen]
+? choice
+* No idea. Ask Brennan.   rel:brennan+1 flavour:practical mem:line.secret.kept
+  pell: She'd tell me. She wouldn't. You're both the same. Unbearable.   [laugh]
+* It's pickle brine.   rel:pell+1 flavour:share mem:line.secret.told
+  pell: Pickle... no. No. I've had three mugs. Why would you tell me that?   [laugh]
+* Ginger. Definitely ginger.   rel:brennan+1 flavour:funny mem:line.secret.kept
+  pell: I knew it! Ha. Ginger. I'm never wrong about these things.   [laugh]

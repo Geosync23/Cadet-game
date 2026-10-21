@@ -1,0 +1,15 @@
+@reactions event.crossingLine.resolution
+// EW1 (events writer), Crossing the Line: Sunday from 15:15 (after the ceremony) to 19:15. One week aboard (17:15,
+// the bow lounge) is about your crossing, and Zeke owns up to the worst face at his own first Line.
+? cue:event.crossingLine.resolution
+- How was the punch? Be honest. I won't tell Brennan.   #funny
+- You answered the oath! In front of everyone. Brave.   #warm
+? cue:event.crossingLine.resolution flag:line.answer.punch
+- "Is this the part with the punch?" Best answer in years.   #funny
+? cue:event.crossingLine.resolution flag:line.answer.watch
+- "Even the ones on watch." Tomas will love that.   #warm
+? cue:event.crossingLine.resolution flag:line.answer.proud
+- "We're glad we did." That's going to look good on a plaque.   #warm
+? cue:event.crossingLine.resolution who:torres-zeke
+- A week aboard and a Line crossed. Not a bad first week.   #warm
+- My first Line, I pulled the worst face on the plaza. There's a sketch. It's gone.   #funny

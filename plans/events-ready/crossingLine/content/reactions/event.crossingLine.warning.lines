@@ -1,18 +1,23 @@
 @reactions event.crossingLine.warning
-// EW1 (events writer), Crossing the Line: from the Friday new-hand's tea (Day 5) to Sunday 14:30, crew talk about
-// "the Line"; some ask "first crossing?".
+// EW1 (events writer), Crossing the Line: from Saturday 18:00 (Vance's Mail) to Sunday 14:30, crew talk about "the
+// Line"; some ask "first crossing?".
 ? cue:event.crossingLine.warning
-- We cross the Line on Sunday. First time? You'll love it. Mostly.   #funny
+- We cross the Line tomorrow. First time? You'll love it. Mostly.   #funny
 - First crossing? Lucky you. Don't drink the punch. You'll drink the punch.   #funny
-- The Line's on Sunday. The horn goes on every deck. Don't jump.
-- Sunday we cross into the Veyli reach. New stars out of the windows.
+- The Line's tomorrow. The horn goes on every deck. Don't jump.
+- Tomorrow we cross into the Veyli reach. New stars out of the windows.
 ? cue:event.crossingLine.warning tier>=acquaintance
-- First crossing, {nick}? Stand at the front on Sunday. That's the rule.
+- First crossing, {nick}? Stand at the front tomorrow. That's the rule.
 ? cue:event.crossingLine.warning dept:galley
-- Line punch on Sunday. Brennan's recipe. We don't ask what's in it.   #funny
+- Line punch tomorrow. Brennan's recipe. We don't ask what's in it.   #funny
 ? cue:event.crossingLine.warning dept:helm
-- Sunday at half two we cross the Line. Helm's flying it. Gently.
+- Tomorrow at half two we cross the Line. Helm's flying it. Gently.
 ? cue:event.crossingLine.warning dept:survey
-- New reach, new charts. Survey's been waiting months for Sunday.
+- New reach, new charts. Survey's been waiting months for this.
 ? cue:event.crossingLine.warning tier>=friend
-- I'll stand with you on Sunday. Everyone needs someone at their first Line.   #warm
+- I'll stand with you tomorrow. Everyone needs someone at their first Line.   #warm
+? cue:event.crossingLine.warning who:pell
+- My first Line was two years ago. I still dream about that punch.   #funny
+// Holt's one line: the here and now only (his arc: nothing of borders, past crossings or the Veyli)
+? cue:event.crossingLine.warning who:holt
+- Crossing or no crossing, the plaza stays tidy. No punch on my deck.

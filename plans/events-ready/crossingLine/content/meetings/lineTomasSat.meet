@@ -1,0 +1,21 @@
+@meeting lineTomasSat
+// EW1 (events writer), Crossing the Line story A: Saturday Day 6, a moment that follows Tomas from 19:00 to his bed
+// (the mess, the garden, the rec deck, or Bunk 1 at about 22:45; section 20c, like moment:quiz). He's on watch tomorrow,
+// 08:51-17:00 at the Deck 2 lift lobby post, so he'll miss his first Line. GUARD RAILS (his arc, beats 5 and 7): only
+// about missing the ceremony; nothing about failing, tests, Holt, or staying. Three replies; the first sets
+// flag:line.promised. If you don't meet him, his Mail (event.crossingLine.mail.tomas) comes at about 22:50.
+title: Tomas, the night before
+from: Tomas Lind
+gist: Tomas is on watch all day tomorrow, so he'll miss his first Line.
+== lines
+tomas: Hey. Can I complain at you for a minute? A small complaint. Medium.   [sigh]
+tomas: I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen.
+tomas > you: Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.   [listen]
+? choice
+* I'll bring you some punch.   rel:tomas+1 flavour:practical flag:line.promised
+  tomas: Would you? Even if it's awful? Especially if it's awful. I want the whole thing.   [laugh]
+* I'll tell you every bit of it.   rel:tomas+1 flavour:cheer
+  tomas: Every bit. Who cries, who spills, what the Captain says. I'll want it twice.   [laugh]
+* Can't you swap?   rel:tomas+1 flavour:listen
+  tomas: Not on a crossing. Someone has to watch her cross.   [nod]
+tomas: Right. Bed. Early start. Cross well for me, {me}.

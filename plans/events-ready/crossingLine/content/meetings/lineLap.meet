@@ -1,0 +1,15 @@
+@meeting lineLap
+// EW1 (events writer), Crossing the Line story A, the payoff: Sunday 20:30, Lap of the Wren. Tomas is off shift and
+// walks at the front; halfway round, at the plaza, the old hands give him the oath's last line. A short 20c moment when
+// you're walking it. Cast: torres-zeke, pell, tomas (the Captain walks the Lap too, with no line). FOR EV1: after
+// Pell's line the game adds Tomas's line to you from event.crossingLine.lap.tomas.watch (you named the watch in your
+// answer) | .mug (you took him the mug) | .none (neither). No choice. GUARD RAILS: nothing about staying or Holt.
+title: Lap of the Wren
+from: Zeke Torres
+gist: On the Lap of the Wren, the old hands gave Tomas his crossing at the plaza.
+== lines
+torres-zeke: Hold up. Stop here, everyone. This is where it happened today.   [gesture]
+torres-zeke: Tomas Lind. You missed your Line watching the ship. So here it is.
+torres-zeke: From today, this reach knows your name, Lind.   [nod]
+pell: And the last of the punch. I saved it. It's not got better.   [laugh]
+tomas: That's... thank you. That's the nicest thing. It's horrible. Thank you.   [laugh]

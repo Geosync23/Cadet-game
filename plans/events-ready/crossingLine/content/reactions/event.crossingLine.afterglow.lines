@@ -1,11 +1,20 @@
 @reactions event.crossingLine.afterglow
-// EW1 (events writer), Crossing the Line: Monday Day 8, the afterglow (the certificate, the plaque, the faces).
+// EW1 (events writer), Crossing the Line: Sunday 19:15 to Monday Day 8 (the plaque quoted back, the worst face).
 ? cue:event.crossingLine.afterglow
 - Did you see the first-timers' faces at the punch? I'll remember that for years.   #funny
-- Somebody pulled the worst face at the punch. I think it was me.   #funny
+- Zeke says his face at his first Line was worse. I don't believe him.   #funny
 - There's a plaque on the plaza now. With the date. We were there.   #warm
 - First morning in the Veyli reach. The stars look different from the mess.
 ? cue:event.crossingLine.afterglow tier>=acquaintance
 - Your first Line, {nick}. Keep the certificate. Everyone does.   #warm
+? cue:event.crossingLine.afterglow flag:line.answer.punch
+- I read the plaque. "Is this the part with the punch?" Classic.   #funny
+? cue:event.crossingLine.afterglow flag:line.answer.watch
+- "Even the ones on watch." The whole Watch has read that plaque.   #warm
+? cue:event.crossingLine.afterglow flag:line.answer.proud
+- "We came a long way. We're glad we did." I read it twice.   #warm
 ? cue:event.crossingLine.afterglow dept:survey
 - New reach. Survey's had their noses to the windows since yesterday.   #funny
+// the Envoy stays away from the rite by courtesy (they/them); one line, nothing more
+? cue:event.crossingLine.afterglow who:saruth
+- A Veyli does not watch another people's rite. I hope it was a good one.
