@@ -36623,7 +36623,8 @@ function eventMomentsTick(from, to) {
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
     const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;
-    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len); }
+    if (at > from && at <= to && to - at < 3 && !FEEL_DONE.has(key)) { FEEL_DONE.add(key); eventFeel(mo.feel, mo.len);
+      if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventMoment', { id: e.id, moment: mo.id, day: e.startDay, t: at }); }   // F2b: the cue event.<id>.<moment> (the jolt, the horn)
   }
 }
 
@@ -37341,7 +37342,7 @@ function cue(kind) {
 // reputation (A6) listen here too
 const SOC_CUE_OF = {
   repair: [d => 'repair.' + ((typeof machineById === 'function' && d.machine && machineById(d.machine) || {}).kind || d.job || (d.kind !== 'repair' && d.kind) || 'machine'), 2],   // the machine's own kind first (the bus's note has its own `kind`)
-  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
+  tradition: [d => 'tradition.' + d.id, 1], eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1], eventMoment: [d => 'event.' + d.id + '.' + d.moment, 1], favour: [d => 'favour' + (d.fav ? '.' + d.fav : ''), 1],
   gift: [d => 'gift' + (d.tag ? '.' + d.tag : ''), 1], harvest: [d => 'harvest', 2], lateMeal: [d => 'lateMeal', 1],
 };
 const CUE_MAX = 24;                                    // ship notes kept at once (0.36.78: was 30)
@@ -37358,10 +37359,11 @@ function socNote(kind, d) {
 // big time jump and the same hours played one by one come out the same (0.36.49)
 let SOC_T = null;
 const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floor(socNow() / 1440) + 1;
-const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
+const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
 function socHear(kind, d) {
   socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
   if (t < (SOC_IN != null ? SOC_IN : SHIP.social.hour) * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
+  if ((kind === 'eventPhase' || kind === 'eventMoment') && typeof EV_NOTES_ON !== 'undefined' && EV_NOTES_ON) { socApply(kind, d, t); return; }   // a ship-wide event's phase or felt moment: now, so crew react within minutes (section 18, the events base F2b)
   Q.push([t, kind, JSON.parse(JSON.stringify(d))]);
 }
 function socApply(kind, d, t) {
