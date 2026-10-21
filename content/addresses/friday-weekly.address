@@ -3,7 +3,7 @@
 // plan's "weekly shape" (plans/fridays-plan.md, part C). The lead's brief: a pool per beat, slots for real things,
 // generic enough to repeat well, enough for about 6-8 weeks without obvious repeats, no arc spoilers.
 // FORMAT (for FR1; the same .address rules as friday-d5): the speaker is marrow unless a line says otherwise. Each
-// "== <beat>" section is a pool, played in the order below. Each week the game picks ONE line from each pool (seeded
+// "== <beat>" section is a pool, played in the order below (open, hello, headline, behind, arrivals, leavers, nod, you, ahead, thought, close). Each week the game picks ONE line from each pool (seeded
 // by the week, never the line it used in the last 6 weeks if another fits). "? conditions" over a line limit it, as in
 // .lines (a line whose condition fails or whose placeholder can't be filled isn't picked; if nothing fits, the beat is
 // skipped). Pools marked "pick: 2" take two different lines. About 11-14 lines a week, spread over 16:00-16:48.
@@ -12,7 +12,7 @@
 // boards, section 17); {arrivals} and {leavers} (this week's crew rotation, first names; ROSTER_ROTATIONS); {trad1} and
 // {day1} (one of next week's traditions and its weekday, seeded; upcomingTraditions); {winner}
 // (a tradition's winner this week, tallyLast: the tasting table, the department cup).
-// Existing conditions used: season:, cue:repair.you, cue:tradition.<id>.you; myrank: as in the dated addresses.
+// Existing conditions used: season:, cue:repair.you; myrank: as in the dated addresses; new: week:tradition.<id>.
 from: Captain Odile Marrow
 mail: All hands: the Captain's Friday address | The week behind, this week's nod to {dept}, and what's on next week. Dinner at five.
 
@@ -59,18 +59,24 @@ pick: 2
 - Survey sent home another chart this week. Somewhere, someone will use it.
 - The infirmary was quiet, which is the best news it ever gives me.
 - The garden's lamps never went off once. The beans have no idea how lucky they are.   #funny
-? cue:tradition.tasting-table
-- {winner} won the tasting table. Brennan says it was close. She always does.   #funny
-? cue:tradition.department-cup
+// week:tradition.<id> (new, FR1's): that tradition ran since last Friday's address (the day-long cue: has expired by
+// Friday). {winner} is its tally's winner as words: the tasting table's dish ("the pickled beans"), the cup's team
+// ("Works", "the commons").
+? week:tradition.tasting-table
+- The tasting table voted for {winner}. Brennan says it was close. She always does.   #funny
+? week:tradition.department-cup
 - The department cup went to {winner}. The rest of you have four weeks to plan revenge.   #funny
 
-== people
-// welcomes and goodbyes from the rota (ROSTER_ROTATIONS): skipped in a week with nobody arriving or leaving
-pick: 2
+== arrivals
+// welcomes from the rota (ROSTER_ROTATIONS), since last Friday's address (rotations land on Sundays): skipped when
+// nobody arrived
 - This week we welcomed {arrivals} aboard. Say hello. Show them the good armchair.   #warm
 - New faces this week: {arrivals}. If they look lost, walk them to the mess.   #warm
+
+== leavers
+// goodbyes from the rota, the same window: skipped when nobody left
 - And we said goodbye to {leavers}. Wherever you go next, go well.   #warm
-- {leavers} left us on Sunday's shuttle. The ship's a little quieter. We'll miss you.   #warm
+- {leavers} left on Sunday's shuttle. The ship's quieter. We'll miss you.   #warm
 
 == nod
 // the department of the week, in turn: Works, the galley, the Watch, Survey, the infirmary, the garden
@@ -97,8 +103,10 @@ pick: 2
 // now and then you, from what really happened this week (the game picks this beat about one week in three)
 ? cue:repair.you
 - Thank you, {me}, for fixing something I didn't know was broken.   #warm
-? cue:tradition.tiles-ladder.you
-- {me} climbed the Tiles ladder this week. Rina has been informed.   #funny
+// HELD (PR3): the Tiles ladder runs Fridays 15:00-16:30, over the address; this line waits for FR1 and the lead to
+// decide where the ladder goes. Commented out until then:
+// ? week:tradition.tiles-ladder.you
+// - {me} climbed the Tiles ladder this week. Rina has been informed.   #funny
 ? myrank:junior
 - {me}: still learning, still asking. Keep asking. That's the job.
 ? myrank:officer|senior|specialist
