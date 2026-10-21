@@ -123,6 +123,24 @@ def aud(g):   # you in the middle of the auditorium (Deck 7's room A)
     g.ev("(() => { const M = DECKS[7].map, c = []; for (let j = 0; j < M.length; j++) for (let i = 0; i < M[j].length; i++) if (M[j][i] === 'A') c.push([i, j]); const t = cellPos(...c[Math.floor(c.length / 2)]); player.obj.position.set(t.x, 0, t.z); })()")
     g.step(10)
 
+# PR8's find 3: a save without the fri part (every save from the published game) loaded on a Friday (Day 5, its
+# localStorage as a player's), then played on (Deck 4, never in the auditorium): [mailed, heard, work, address count,
+# address Mails] at the load and at the end
+def old_save(pw, path, day, mn, frames):
+    sv = {'v': 2, 'build': 'x', 'time': {'day': day, 'min': mn}, 'player': {'deck': 4, 'tile': [20, 4], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': []}, 'crew': {}}
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    pg = b.new_page(viewport={'width': 390, 'height': 844}); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    pg.add_init_script(INIT + "try { if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1'); localStorage.clear(); localStorage.setItem('starship-cadet-save', " + json.dumps(json.dumps(sv)) + "); localStorage.setItem('starship-cadet-arrived', '1'); } } catch (e) {}")
+    tmp = work / '_fri_oldsave.html'; tmp.write_text(instrument(pathlib.Path(path).read_text()))
+    pg.goto('file://' + str(tmp) + '?debug', timeout=240000); pg.wait_for_function('window.__sc !== undefined || window.__err', timeout=240000)
+    ev = lambda x: pg.evaluate('s => window.__sc(s)', x)
+    got = "[FRI.mailed, FRI.heard, repInit().ship.work, repInit().cnt.address || 0, (SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d5'].mail[0]).length, clockText()]"
+    pg.evaluate('window.__step(2, 1000/30)'); r0 = ev(got)
+    for k in range(frames): pg.evaluate('window.__step(20, 1000/30)')
+    r = [r0, ev(got), errs[:3]]; b.close(); return r
+
 LIVE = "[shipNow() % 1440, bubbles.list.map(b => [(bubblePerson(b.who) || {}).id, b.text]), FRI_SAID && FRI_SAID[1], simNow() - CHATTER_AT]"
 
 with sync_playwright() as pw:
@@ -217,6 +235,8 @@ with sync_playwright() as pw:
     live['weekly'] = g.ev("(() => { SHIP.works.rank = 'junior'; FRI_SPEECH = null; const a = friSpeech(47).map(l => l.id); FRI_SPEECH = null; SHIP.works.rank = 'senior'; const b = friSpeech(47).map(l => l.id); return [a.length, b.length, b.every((id, i) => a.includes(id) && (i === 0 || a.indexOf(id) > a.indexOf(b[i - 1])))]; })()")
     live['errors'] = g.errors[:3]
     g.b.close()
+    live['old'] = old_save(pw, copies[True], 5, 18 * 60, 30)      # after the address: nothing missed
+    live['oldBefore'] = old_save(pw, copies[True], 5, 16 * 60 + 47, 40)   # before its end: missed at 16:50 as usual
 
 off, on = res[False], res[True]
 print('off:', json.dumps({k: off[k] for k in ('inTable', 'ends', 'on')}))
@@ -300,6 +320,12 @@ print('  the weekly speech on Day 47 reloaded with your rank changed (lines befo
 check(live['weekly'][0] >= 9 and live['weekly'][2], 'on: a reload of the weekly speech picked again %s' % live['weekly'])
 print('  the address on Day 5, planned stays (gone by 16:52, sitting on until later plans, the last minute):', sit_on, 'too late:', late)
 check(not late, 'on: people planned in the address too long on Day 5 (a late joiner past 16:52, anyone past 17:20) %s' % late[:6])
+print('  an old save (no fri) loaded on Day 5 at 18:00, then played [mailed, heard, work, count, Mails, clock] at load / later:', live['old'][:2])
+o0, o1, oe = live['old']
+check(o0[0] == 5 and o1[:5] == o0[:5] and o0[3] == 0 and o0[4] == 0 and not oe, 'on: an old save loaded on a Friday evening got the missed address %s' % live['old'])
+print('  the same loaded at 16:47 and played past 16:50:', live['oldBefore'][:2])
+b0, b1, be = live['oldBefore']
+check(b0[0] == 0 and b1[0] == 5 and b1[4] == 1 and not be, 'on: an old save loaded before 16:50 not missed at 16:50 %s' % live['oldBefore'])
 check(not live['errors'], 'on: page errors in the live run %s' % live['errors'])
 print('FRIDAYS CHECK OK' if not fails else 'FRIDAYS CHECK FAILED (%d)' % len(fails))
 sys.exit(1 if fails else 0)

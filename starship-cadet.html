@@ -37629,15 +37629,16 @@ const FRI_NOD = [['works', 'Works'], ['galley', 'the galley'], ['watch', 'the Wa
 const FRI_TEAM = { works: 'Works', watch: 'the Watch', survey: 'Survey', bridge: 'the bridge', commons: 'the commons', galley: 'the galley', infirmary: 'the infirmary', garden: 'the garden' };
 const friFresh = () => ({ ring: [], today: null, heard: 0, mailed: 0, hu: 0 });   // hu: the last day of the 15:20 heads-up (turn 8)
 let FRI = friFresh(), FRI_SAID = null, FRI_SPEECH = null;   // FRI_SAID: [day, i], the line shown last (not saved); FRI_SPEECH: [day, lines]
+let FRI_OLD = 0;                                         // the day of a save loaded without fri (every save from before Fridays), till the first frame: an address already over isn't missed (PR8's find 3)
 if (SHORT_FRIDAY) {
   const s = SAVED && SAVED.fri, num = x => Number.isInteger(x) && x >= 0;   // a missing or junk save part: start fresh
   if (s && typeof s === 'object') {
     if (Array.isArray(s.ring)) FRI.ring = s.ring.filter(r => Array.isArray(r) && num(r[0]) && r.slice(1).every(x => typeof x === 'string')).slice(-7);
     if (Array.isArray(s.today) && num(s.today[0]) && s.today.slice(1).every(x => typeof x === 'string')) FRI.today = s.today;
     if (num(s.heard)) FRI.heard = s.heard; if (num(s.mailed)) FRI.mailed = s.mailed; if (num(s.hu)) FRI.hu = s.hu;
-  }
+  } else if (SAVED && SAVED.time) FRI_OLD = SAVED.time.day;
   SAVE_EXTRA.push(save => { save.fri = FRI; });
-  onSim('newGame', () => { FRI = friFresh(); FRI_SAID = null; FRI_SPEECH = null; });
+  onSim('newGame', () => { FRI = friFresh(); FRI_SAID = null; FRI_SPEECH = null; FRI_OLD = 0; });
 }
 // the speech for Friday d (its baked file), or null
 function friScript(d) { return typeof FRI_ADDRESSES === 'undefined' ? null : FRI_ADDRESSES['friday-d' + d] || (d >= 33 ? FRI_ADDRESSES['friday-weekly'] : null) || null; }
@@ -37751,7 +37752,8 @@ function friHere(e) {
 // every frame (section 18's eventsTick, only when on): the line of the moment over its speaker while you're there; the
 // banner and the Mail at 16:50 for anyone who never came
 function friAddressTick() {
-  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, old = FRI_OLD === d;
+  FRI_OLD = 0;
   if (friShort(d) && m >= 920 && m < 930 && FRI.hu !== d && d >= FRI_ADDRESS.when.from && typeof playerShiftOn === 'function' && playerShiftOn(d)) {   // 15:20 (turn 8): a heads-up, once
     FRI.hu = d; toast('Short Friday', friText('fri.headsup') || 'Your shift ends at 15:30. The Captain\'s address is at 16:00.');
   }
@@ -37769,6 +37771,7 @@ function friAddressTick() {
     bubbleSay(friSpeaker(a), l.text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
     return;
   }
+  if (old) { FRI.mailed = d; return; }                   // an old save loaded after 16:50 (its first frame): over before the save knew of it
   friMissed(d, e, now);
 }
 // missed it (turn 7): never in the auditorium 16:00-16:50 while it was on. A small dip in your work reputation, the
