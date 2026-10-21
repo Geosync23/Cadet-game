@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ion Storm Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--violet:#a99cff;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--field:#0e1520}
+:root[data-theme="light"]{--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--violet:#5a45c9;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--violet:#5a45c9;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:21px;margin:4px 0 2px;font-weight:600;padding-right:100px}
+h2{font-size:17px;margin:26px 0 8px;color:var(--teal);font-weight:600}
+h3{font-size:15px;margin:14px 0 4px}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0}
+.card.key{border-color:var(--teal)}
+p,li{font-size:14px}
+ul,ol{padding-left:20px;margin:6px 0}
+details{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0 14px}
+details[open]{padding-bottom:10px}
+summary{cursor:pointer;padding:10px 0;font-size:14px;font-weight:600}
+summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.w{white-space:nowrap}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll table.wide{min-width:600px}
+.small{font-size:12px;color:var(--muted)}
+.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:4px}
+code{font-size:12.5px;overflow-wrap:anywhere}
+tr.big td{font-weight:600}
+/* the days bar */
+.days{position:relative;min-width:640px;margin:8px 0 2px}
+.hrs{display:grid;grid-template-columns:repeat(16,1fr);font-size:10.5px;color:var(--muted);margin-left:70px}
+.lane{display:flex;align-items:center;min-height:30px;border-top:1px solid var(--line)}
+.lane .lab{width:70px;flex:none;font-size:12px;color:var(--muted)}
+.lane .trk{position:relative;flex:1;height:26px}
+.b{position:absolute;top:3px;height:20px;border-radius:5px;font-size:10.5px;font-weight:600;color:#0c1118;padding:0 4px;white-space:nowrap;overflow:hidden;display:flex;align-items:center}
+.b.tr{background:#7d8f99}.b.ev{background:#e07a7a}.b.vi{background:linear-gradient(90deg,#7a3cff,#a99cff);opacity:.45}.b.you{background:#4cc3b5}.b.cap{background:#e9c46a}
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin:6px 0}
+.legend i{display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+/* questions */
+.q{background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:10px 14px;margin:12px 0}
+.q h3{font-size:14.5px;margin:0 0 4px}
+.q .why{font-size:13px;color:var(--muted);margin:0 0 6px}
+.q fieldset{border:0;margin:0;padding:0;min-width:0}
+.q legend{position:absolute;left:-9999px}
+.q label.opt{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q label.opt input{margin-top:3px;accent-color:var(--teal);flex:none}
+.q .recd{font-size:11px;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.q textarea{width:100%;min-height:54px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;padding:6px 8px}
+.q textarea:focus-visible{outline:2px solid var(--teal)}
+.q .cl{font-size:12px;color:var(--muted);display:block;margin:4px 0 2px}
+.theme{float:right;appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--gold);font-size:14px;font-style:italic}
+.res{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}
+.res div{background:var(--glass);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px}
+.res b{display:block;font-size:15px}
+.res .bumpy b{color:var(--gold)}.res .smooth b{color:var(--teal)}.res .rough b{color:var(--rose)}
+</style>
+</head>
+<body>
+<main>
+<button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
+<h1>The ion storm: the plan</h1>
+<div class="sub">Event planner EP3, 2026-10-21, version 1. Branch <code>claude/event-plan-storm</code>, from build 0.64.6 with the events base. Planning only: the game hasn't changed. The storm already runs in the game; this is its update, Thursday Day 11 to Monday Day 15, built straight after the events base. Every number here was measured in a new game. Your answers go in section 10.</div>
+
+<div class="card key">
+<b>In short</b>
+<ul>
+<li><b>Thursday 14:00:</b> Chief Calder's briefing in the Works bay, after the tea. The storm jobs go up when it ends, and the one you pick is kept for you.</li>
+<li><b>Friday 14:00, the front:</b> a jolt, the lights dip, and the Captain's short banner. The bow lounge, the call booths and the rec deck close, the bridge goes on double shifts, and calls home stop. <b>16:00:</b> her regular Friday address in the auditorium, opened just for that hour.</li>
+<li><b>Saturday:</b> the worst of it: blackouts deck by deck, storm stew, the surge at 11:20. <b>18:00-19:30, the lantern supper:</b> the mess by lamp light, about 55-60 people.</li>
+<li><b>The story (recommended):</b> Brennan is off on Friday and Saturday, so Lukas Dlamini, your bunkmate until Wednesday, runs her galley alone through the storm, and the lantern supper is his. The surge kills four of his six rings. <b>Your one choice:</b> fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan comes to the supper to eat, and what she says depends on you.</li>
+<li><b>Sunday 10:00, the all-clear:</b> the Captain, Calder, Sato and Holt come in on their day off (and say so). Your commendation comes here, and the storm's result is settled. The booths reopen to a queue, and <b>the party</b> fills the bow lounge 19:00-21:00.</li>
+<li><b>Your help counts:</b> left alone, the storm comes out <b>bumpy</b> (measured). Fit the ballasts, carry the batteries up and draw up the booth rota, and it comes out <b>smooth</b>.</li>
+<li><b>Monday:</b> Calder's debrief at 18:00 and Lap of the Wren at 20:30, led by Tomas. The storm ends at midnight, so Tuesday's comet stands alone.</li>
+<li><b>About 10 build turns</b>, switched off until you've reviewed it. <b>8 questions</b> for you, each with a recommended answer (section 10).</li>
+</ul>
+</div>
+
+<h2>1. The story</h2>
+<p>Each option has a beginning, a middle where your one choice matters, and a payoff. All three use crew already aboard and their real rotas, and none touches the later chapters of anyone's personal story.</p>
+<details open>
+<summary>A. "Sixty by lamplight" (recommended)</summary>
+<p>It comes straight from the ship's rota. Brennan's days off are Friday and Saturday, and the ship's facts already say Lukas Dlamini covers for her. So the storm's two worst days fall on Lukas's watch, and the lantern supper is his. He's a galley hand, eight months aboard, from Port Halloran: few words, dry, and he cares about one thing above all, that Brennan's galley doesn't slip on his watch. He slept in Bunk 1 with you until you moved to the officers' corridor on Wednesday.</p>
+<ul>
+<li><b>Friday evening, the galley.</b> The front hit at two. Lukas is on the galley line all through dinner. When you're near him, he says a number, the way he does: <i>"Sixty."</i> Covers. Tomorrow. The lantern supper, by lamp light, on her day off. You can:
+<ul><li>offer a hand tomorrow (he'll keep the lantern job for you);</li><li>tell him she left him in charge for a reason (<i>"She left me a list. Eleven of the twelve lines say don't panic."</i>);</li><li>ask what the worst could be (he just says the number again).</li></ul>
+If you don't see him before his bunk, he sends a Mail: <i>"Lantern supper tomorrow. If you've got hands, I've got onions."</i></li>
+<li><b>Saturday afternoon, the galley.</b> The surge went through the ship at 11:20. When Lukas comes on at 14:30, the range is down to two rings of six: <i>"Surge took four rings. Works has a list. I'm near the bottom. Sixty bowls on two rings. Or I go and knock on her door."</i> <b>Your one choice:</b>
+<ul>
+<li><b>"I'm Works. Let me look at it."</b> A small job is kept for you: reset the galley range (about 20 minutes). Done before five, he has all six rings.</li>
+<li><b>"Ask her. I'll go."</b> You carry his question down to Brennan, wherever she is that afternoon (her cabin or a bench on Deck 4). She won't come in: <i>"It's his night."</i> She sends one line back: <i>"Tell him: one pot, low and slow, lid on. And tell him I said he's ready."</i></li>
+<li><b>"Two rings is plenty. Stew's one pot."</b> He nearly laughs. His aunt was a pilot and cooked on two rings in a cockpit for twenty years. He makes her stew.</li>
+</ul>
+If you're not there, nothing is lost: he manages on two rings, his way.</li>
+<li><b>Saturday 18:00, the lantern supper.</b> The mess by lamp light, about 55-60 people. Brennan comes to eat: she's off, and her own day already has her at dinner in the mess then. She finishes every bit and says one thing:
+<ul>
+<li>if you fixed the range: <i>"Six rings on a storm night. Somebody's been in my galley with a spanner."</i> A nod to you, then to Lukas: <i>"Good."</i></li>
+<li>if you asked her: <i>"Low and slow. He listened. Nobody listens."</i></li>
+<li>if he did it his way: <i>"That's not my stew."</i> A pause. <i>"Make it again on Friday."</i></li>
+</ul>
+When the last bowl goes out, Lukas says a number (the covers), and that's all he says.</li>
+<li><b>Sunday.</b> Brennan is back before five. The crew retell it (<i>"Lukas ran the lantern supper on two rings. Or six. Depends who you ask."</i>), and a storm lantern stays on the galley pass from then on.</li>
+<li><b>If you skip all of it,</b> the supper still happens, Lukas still runs it, and Brennan still eats it. You hear about it on Sunday.</li>
+<li><b>No spoilers:</b> Lukas only talks about tonight's supper and Brennan's galley, never his own worries, the person he married or his count of days. Brennan's lines never touch her own story (the restaurant, the soup, her book, any offer). Calder never says "well done" (that's saved for her story). Nothing about the Veyli.</li>
+<li><b>Cost:</b> about one turn, and about 30-35 new lines from the writer.</li>
+</ul>
+</details>
+<details>
+<summary>B. "First in the queue" (not recommended)</summary>
+<ul>
+<li><b>Who:</b> Femi Rossi, a Works hand two months aboard (your department), who calls his younger brother every week and works Friday to Sunday.</li>
+<li><b>Friday:</b> comms go down with the front. At the Works tea he tells you his brother starts flight school on Monday, and he promised to call on Sunday.</li>
+<li><b>Saturday, your choice:</b> draw up the booth rota and put him first; ask Commander Vance for one line on the bridge's storm channel (<i>"Storm traffic only."</i>); or help him write it, to go out the moment comms are back.</li>
+<li><b>Sunday:</b> the booths reopen to a queue of about 39 people (measured). With the rota he's first; without, he waits until mid-afternoon. On Monday he tells you what his brother said.</li>
+<li><b>Weaker:</b> the payoff happens inside a booth, out of sight, and lands in a Mail. Waiting for news from home is close to Rina's story, already told.</li>
+</ul>
+</details>
+<details>
+<summary>C. "What the storm is called" (not recommended)</summary>
+<ul>
+<li><b>Who:</b> Dr. Sato, off on Saturday but in the observation room anyway, afternoon and evening (measured). <i>"You don't sleep through the end of a storm."</i></li>
+<li><b>Friday's address:</b> <i>"Dr. Sato says it's bigger than a moon. She's thrilled."</i> That evening she asks for a hand with the readings.</li>
+<li><b>Saturday evening, your choice:</b> while the storm's heart passes the windows in violet, she lets you name it for the ship's log (three names).</li>
+<li><b>Sunday:</b> she says the name at the all-clear, and the crew use it afterwards.</li>
+<li><b>Weaker:</b> quiet, one person; it clashes with the lantern supper; and naming things is Sato's own moment two days later, at the comet.</li>
+</ul>
+</details>
+<p><b>Why A:</b> it's true to the rota and the ship's facts. It gives a guarded friend something he wants. Your choice sits where your trade is (a Works officer and a dead range) or where your heart is (carry the question, or trust him). It pays off at the storm's big crowd moment, in front of everyone, and it still works if you miss it.</p>
+
+<h2>2. The days at a glance</h2>
+<p>A new game: you work Thursday, Friday and Monday, and you're off on Saturday and Sunday.</p>
+<div class="legend"><span><i style="background:#e07a7a"></i>the storm</span><span><i style="background:#e9c46a"></i>the Captain</span><span><i style="background:#4cc3b5"></i>the story</span><span><i style="background:#7d8f99"></i>usual traditions</span><span><i style="background:#a99cff"></i>the storm overhead</span></div>
+<div class="scroll"><div class="days" id="days"></div></div>
+<div class="scroll"><table>
+<tr><th>Day</th><th>What happens</th></tr>
+<tr><td class="w">Thu 11</td><td><b>Warning</b> from 06:00 (Calder's Mail). The team job and the tea as usual. <b>14:00 Calder's briefing</b>; storm jobs go up at 14:12, your pick kept. Nothing from the storm 17:00-18:30 (your officer ceremony is at 17:15).</td></tr>
+<tr><td class="w">Fri 12</td><td><b>14:00 the front.</b> Closures, double shifts, no calls home. 15:30 the short Friday. <b>16:00-16:50 the Captain's address</b> in the auditorium. The story begins at dinner.</td></tr>
+<tr><td class="w">Sat 13</td><td><b>The worst of it</b> from 06:00. <b>11:20 the surge.</b> The story's choice from 14:30. <b>18:00-19:30 the lantern supper.</b></td></tr>
+<tr><td class="w">Sun 14</td><td><b>10:00 the all-clear</b> and your commendation. The booths reopen to a queue. The market, Winner Stays On, the reading corner and the Sunday table as usual. <b>19:00-21:00 the party.</b> Talent night moves a week, Lap of the Wren to Monday.</td></tr>
+<tr><td class="w">Mon 15</td><td>The afterglow. <b>18:00 Calder's debrief.</b> <b>20:30 Lap of the Wren</b>, led by Tomas. The storm ends at midnight.</td></tr>
+<tr><td class="w">Thu 18</td><td>The Captain sends for you about your commendation, at an hour clear of that day's training.</td></tr>
+</table></div>
+
+<h2>3. Minute by minute</h2>
+<div class="scroll"><table>
+<tr><th>When</th><th>What</th><th>Where, and the piece</th></tr>
+<tr><td class="w">Thu 06:00</td><td><b>Warning:</b> Calder's Mail (briefing at 14:00, after tea; jobs when it ends), the status line, Survey's news; the crew start talking within minutes</td><td class="small">Mail, device; every deck</td></tr>
+<tr><td class="w">09:30-13:15</td><td>The team job and the Works tea, as usual</td><td class="small">Deck 5</td></tr>
+<tr><td class="w">13:45</td><td>Device notice: the briefing at 14:00</td><td class="small">device</td></tr>
+<tr class="big"><td class="w">14:00-14:12</td><td>Calder's briefing: Calder, two Works hands, you (the Officer's version once you're promoted). Your reply keeps a job for you.</td><td class="small">Works bay, the job board</td></tr>
+<tr><td class="w">14:12</td><td><b>The storm jobs go up:</b> the lounge glassware, the ballasts, the battery packs, the junctions (tier 3), and the new booth rota</td><td class="small">the job board</td></tr>
+<tr><td class="w">17:00-18:30</td><td>Nothing from the storm (your officer ceremony at 17:15)</td><td class="small">held by the events base</td></tr>
+<tr class="big"><td class="w">Fri 14:00</td><td><b>The front:</b> jolt, lights dip and flicker; the Captain's 3-line banner (sized for phones); Vance's Mail. The bow lounge, booths and rec deck close; double shifts on the bridge; the Watch patrols; 4 in 10 free crew stay in; no calls home</td><td class="small">every deck</td></tr>
+<tr><td class="w">14:05 on</td><td>Crew react (89 storm lines already written)</td><td class="small">every deck</td></tr>
+<tr><td class="w">15:30</td><td>The short Friday: the day shift stops</td><td class="small">the Fridays plan</td></tr>
+<tr class="big"><td class="w">16:00-16:50</td><td><b>The Captain's address</b>, the storm at its heart. The auditorium and the way to it open 15:30-17:00 only. The Captain and Vance step off the double shift for it.</td><td class="small">rec deck auditorium</td></tr>
+<tr><td class="w">17:00-20:30</td><td>Dinner. <b>The story begins</b> (Lukas on the line). Works tea, the jam and tap night are paused</td><td class="small">galley, mess</td></tr>
+<tr class="big"><td class="w">Sat 06:00</td><td><b>The worst of it:</b> blackouts deck by deck (none on Deck 3 in a new game), storm stew, half the free crew stay in, sleep refills slower</td><td class="small">every deck</td></tr>
+<tr class="big"><td class="w">11:20</td><td><b>The surge:</b> a second jolt</td><td class="small">every deck</td></tr>
+<tr><td class="w">12:00</td><td>The lantern supper's notice and Mail</td><td class="small">Mail</td></tr>
+<tr><td class="w">14:30-17:00</td><td><b>The story's choice</b>: Lukas and the range</td><td class="small">galley</td></tr>
+<tr><td class="w">18:00</td><td>Trays to the bridge</td><td class="small">Deck 3 to the bridge</td></tr>
+<tr class="big"><td class="w">18:00-19:30</td><td><b>The lantern supper:</b> the mess dimmed to lamp light, lanterns on the long tables, storm stew; about 55-60; Brennan comes to eat; <b>the story's payoff</b></td><td class="small">mess, spilling onto the promenade</td></tr>
+<tr><td class="w">(all day)</td><td>Paused: long breakfast, garden hour, the Tiles ladder, cook-along, film night, observatory night</td><td class="small"></td></tr>
+<tr><td class="w">Sun 09:45</td><td>Device notice: the all-clear at 10:00</td><td class="small">device</td></tr>
+<tr class="big"><td class="w">10:00-10:12</td><td><b>The all-clear:</b> the Captain, Calder, Sato and Holt (called in on their day off), Vance on duty, you. The Captain's line to you, <b>your commendation letter</b>, <b>the result settled</b>, her banner to the ship</td><td class="small">observation room, Deck 1</td></tr>
+<tr><td class="w">10:00-18:00</td><td>The rec deck and booths reopen; <b>the booth queue</b> (in booked slots, if you drew up the rota)</td><td class="small">call booths</td></tr>
+<tr><td class="w">10:30</td><td>The bow lounge is put back together (question 7)</td><td class="small">bow lounge</td></tr>
+<tr><td class="w">10:30-19:00</td><td>The market, Winner Stays On, the reading corner, the Sunday table, as usual</td><td class="small">Deck 3, rec deck</td></tr>
+<tr class="big"><td class="w">19:00-21:00</td><td><b>The party</b>, about 50-60</td><td class="small">bow lounge</td></tr>
+<tr><td class="w">22:00</td><td>The afterglow: the crew retell it, by how it went</td><td class="small">every deck</td></tr>
+<tr class="big"><td class="w">Mon 18:00</td><td><b>Calder's debrief</b> Mail, with your part in it</td><td class="small">Mail</td></tr>
+<tr class="big"><td class="w">20:30-21:15</td><td><b>Lap of the Wren</b>, led by Tomas (his day off)</td><td class="small">promenade</td></tr>
+<tr><td class="w">24:00</td><td>The storm ends</td><td class="small"></td></tr>
+</table></div>
+
+<h2>4. Places and crowds (measured)</h2>
+<div class="scroll"><table>
+<tr><th>Place</th><th>Room for</th><th>What it holds</th><th>Draw calls (phone)</th></tr>
+<tr><td>Works bay</td><td>21 (3 at the front)</td><td>the briefing: the cast of three and you</td><td>190</td></tr>
+<tr><td>Rec deck auditorium</td><td>84 seats</td><td>Friday's address (about 60-70, the Fridays plan's count)</td><td>the Fridays plan measures it</td></tr>
+<tr><td>Mess</td><td>67 in the room (44 seats, 22 standing, 1 at the front), then the promenade</td><td>the lantern supper, about 55-60</td><td>239 (49 crew on the deck)</td></tr>
+<tr><td>Observation room</td><td>37 in the room, 7 more in the lobby</td><td>the all-clear: six</td><td>101</td></tr>
+<tr><td>Bow lounge</td><td>95 (60 standing, 34 seats, 1 at the front), then the promenade</td><td>the party, about 50-60</td><td>207 (34 on the deck)</td></tr>
+<tr><td>Call booths</td><td>4</td><td>Sunday's queue: 39 owed a call</td><td></td></tr>
+</table></div>
+<p class="small">Budget 450 draw calls. The crowd is drawn in one go, so more people cost little: the party measured up to 367 with 64 crew in the lounge. The lanterns add 1-2 and the galley's lantern 1.</p>
+
+<h2>5. What you can do</h2>
+<ul>
+<li><b>Thursday:</b> go to the briefing and pick a job; take storm jobs from the board.</li>
+<li><b>Friday:</b> feel the front; go to the Captain's address; find Lukas at dinner.</li>
+<li><b>Saturday (your day off):</b> help Lukas your way; carry the lanterns up; go to the lantern supper.</li>
+<li><b>Sunday:</b> the all-clear and your commendation (if you earned it); queue for a call home; the party.</li>
+<li><b>Monday:</b> read the debrief; walk the Lap with Tomas.</li>
+<li><b>Miss any of it</b> and you're still part of it: meetings send their gist by Mail, and the supper and the party go on without you.</li>
+</ul>
+
+<h2>6. Your help and the result</h2>
+<p>You asked for help to count: left alone the storm comes out bumpy, and with good help, smooth. Here's how, with a new game's real numbers.</p>
+<div class="scroll"><table>
+<tr><th>Your help</th><th>What it changes</th><th>Left alone (measured)</th><th>With it</th></tr>
+<tr><td>Fit the shielded ballasts before the front</td><td>blackouts rarer and shorter</td><td>117 minutes of blackout (bumpy)</td><td>60 or under (smooth)</td></tr>
+<tr><td>Carry the battery packs to the bridge</td><td>the bridge's urn and hot plate keep going, so the double shift eats on time</td><td>12 hungry hours (bumpy)</td><td>6 or under (smooth)</td></tr>
+<tr><td>Draw up the booth rota (new)</td><td>Sunday's queue runs in booked slots</td><td>7.8 hours of queue (rough; retuned to about 4.5, bumpy)</td><td>3 or under (smooth)</td></tr>
+<tr><td>(the galley's own)</td><td>food spoiled</td><td>18 (bumpy)</td><td>stays bumpy</td></tr>
+</table></div>
+<div class="res">
+<div class="bumpy">Left alone<b>bumpy</b>four bumpy parts</div>
+<div class="smooth">All three helps<b>smooth</b>three smooth, one bumpy</div>
+<div class="rough">A worn ship, no help<b>rough</b>possible, rare</div>
+</div>
+<p class="small">The storm's result is the average of its four parts. Two smooth and two bumpy still rounds to bumpy, so it takes all three helps (yours or anyone's you rope in). The exact numbers belong to the seats that own each part; the events check runs the storm all three ways.</p>
+
+<h2>7. Who's there (measured, a new game)</h2>
+<ul>
+<li><b>Aboard:</b> 74 crew, plus Envoy Saruth (and one other guest until Thursday). 69 work days, 17 nights.</li>
+<li><b>Off:</b> Thursday: Vance, Zeke. Friday: Brennan, Zeke. Saturday: the Captain, Calder, Sato, Holt, Brennan, Rina, Raman. Sunday: the Captain, Calder, Sato, Holt, Rina, Raman (Brennan and Vance work). Monday: Tomas.</li>
+<li><b>The galley on Saturday:</b> Lukas runs the line (04:50-09:00 and 14:30-20:45), with Ivo, Tariq, Tamsin and Agnes (one week aboard).</li>
+<li><b>At the supper's hour on Saturday:</b> 65 free, 9 working, nobody asleep. 25 are already in the mess for dinner today.</li>
+<li><b>At the party's hour on Sunday today:</b> 69 free, but 32 head for the rec deck's talent night, leaving 17 in the lounge. So talent night moving a week matters.</li>
+<li><b>At the all-clear today, nobody is in the room:</b> the Captain is in the music room, Calder at the gym, Sato at her desk, Holt in his cabin. The events base's "called in" piece fixes that before this is built.</li>
+<li><b>The Captain on Friday</b> is on the bridge's double shift 08:00-20:30, so she and Vance must step off it for the address.</li>
+</ul>
+
+<h2>8. How it gets built</h2>
+<p>Ten turns, after the events base, each switched off (the game identical) until your review. Each turn: small edits, the area's checks, then the quick check, the regression test with the switch off, push and report.</p>
+<div class="scroll"><table class="wide">
+<tr><th>Turn</th><th>What</th><th>Whose part of the file</th><th>Checks</th></tr>
+<tr><td>S1</td><td>The new hours, the shorter storm (ends Monday midnight), the briefing at 14:00, jobs at 14:12, the result and commendation at the all-clear, the debrief Monday; the writer's storm files moved in</td><td>traditions, writers</td><td>events, big events, lines, career, leave</td></tr>
+<tr><td>S2</td><td>The cast: four called in for the all-clear; the Captain and Vance off the double shift for the address; nobody kept in during it</td><td>schedules, traditions</td><td>day check Days 11-14</td></tr>
+<tr><td>S3</td><td>The rec deck closed front to all-clear, the auditorium open for the address; the first all-hands unhooked; talent night a week later</td><td>traditions, rec deck</td><td>events, join, day 12, Dev mode</td></tr>
+<tr><td>S4</td><td>Your help counts: ballasts, batteries, the booth rota job and sheet, the calls retune</td><td>machines, galley, traditions, decks</td><td>machine, food 12-14, big events results</td></tr>
+<tr><td>S5</td><td>The lantern supper: the crowd, stay-in paused, Brennan's place, stew for 60, the lamp-light look</td><td>traditions, schedules, galley, crowd</td><td>food 13, day 13, crowds, phone draw calls</td></tr>
+<tr><td>S6</td><td>Sunday: the party's words, the tidy job, Lap of the Wren to Monday with Tomas, talent night, the booth queue</td><td>traditions</td><td>events, day 14-15, social</td></tr>
+<tr><td>S7</td><td>The story: three moments, the range job, the errand, Lukas's Mail, the galley's lantern</td><td>social stories, traditions, machines, decks</td><td>social, events, big events live</td></tr>
+<tr><td>S8</td><td>Your device and the banner on phones; the Officer's briefing</td><td>HUD, device</td><td>device, interactions, bubbles, shots at 390 and 360</td></tr>
+<tr><td>S9</td><td>Small things: old placeholder code, the framed menu prop, Deck 4's common room draw calls (454 of 450)</td><td>traditions, decks, performance</td><td>deck, perf</td></tr>
+<tr><td>S10</td><td>Switch on after your review; the full round; design doc and dev notes</td><td>traditions</td><td>everything</td></tr>
+</table></div>
+<details>
+<summary>The 13 update items from the events plan, and where each is fixed</summary>
+<ol>
+<li>It lands on your promotion: moved to Days 11-15 (events base; S1).</li>
+<li>The 89 storm lines never play: the base's phase notes.</li>
+<li>Nothing you do changes the result: S4.</li>
+<li>The device misses meetings and offers closed places: the base, S8.</li>
+<li>Skips and reloads lose phases and meetings: the base.</li>
+<li>Calls home blocked only on the front day: the base (Friday and Saturday now).</li>
+<li>No proper "event day": the base (Days 12-14, measured).</li>
+<li>The rec deck tied into the storm: S3.</li>
+<li>Your briefing choice never holds a job: S1.</li>
+<li>The banner covers the HUD on phones: S8.</li>
+<li>Small parts by rank: the base, S8.</li>
+<li>The ready room and the Captain's table spaced out: the base.</li>
+<li>Small things, including a reload replaying the jolt (the base) and too many traditions on the party evening (S6): S9.</li>
+</ol>
+</details>
+
+<h2>9. Risks</h2>
+<ol>
+<li><b>The base must place people in meetings first:</b> today the all-clear room is empty at 10:00. Turn S2 waits for it.</li>
+<li><b>Off must stay identical</b> every turn (the regression test).</li>
+<li><b>The double shift and staying in meet the Friday address:</b> without the exceptions, the Captain and Vance would miss their own address, and 4 in 10 free crew would stay in their cabins.</li>
+<li><b>Staying in meets the supper:</b> without the pause, half the free crew stay in, and the supper gets about 30.</li>
+<li><b>Talent night pulls the party's crowd away</b> (measured), so its move lands with the party.</li>
+<li><b>The result must really move with your help:</b> the check runs it left alone, helped, and on a worn ship.</li>
+<li><b>Words and the game must agree:</b> the four dead rings are only in the story's words; the galley's cooking isn't touched.</li>
+<li><b>Moving the first all-hands moves film night</b> (question 5): the rec deck's check runs.</li>
+<li><b>Sixty in the mess plus the lanterns</b> on a phone: a draw-call check at phone size.</li>
+<li><b>Spoilers:</b> the story's guard rails, read by the writer and the head writer.</li>
+</ol>
+
+<h2>10. Your answers</h2>
+<p>Pick one option per question (the recommended one is marked), and add a comment if you like.</p>
+<form id="answers" data-collection="answers" data-doc="event-storm-plan" onsubmit="return false">
+
+<div class="q" data-qid="storm-q1">
+<h3>1. The story</h3>
+<p class="why">Section 1 has all three, with their beginning, middle and payoff.</p>
+<fieldset><legend>Question 1</legend>
+<label class="opt"><input type="radio" name="storm-q1" value="a"><span>A, "Sixty by lamplight": Lukas runs the galley through the storm, the range dies, your choice, and Brennan at the lantern supper<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q1" value="b"><span>B, "First in the queue": Femi's promised call home, and the booth queue on Sunday</span></label>
+<label class="opt"><input type="radio" name="storm-q1" value="c"><span>C, "What the storm is called": Sato's readings, and the name you give it</span></label>
+</fieldset>
+<label class="cl" for="storm-q1-c">Comment</label><textarea id="storm-q1-c" name="storm-q1-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q2">
+<h3>2. How does your help count?</h3>
+<p class="why">You said help should move the result. This says how (section 6).</p>
+<fieldset><legend>Question 2</legend>
+<label class="opt"><input type="radio" name="storm-q2" value="a"><span>Each prep job moves its own part: the ballasts the blackouts, the batteries a fed bridge, the booth rota the calls home. Left alone bumpy, all three smooth<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q2" value="b"><span>All your storm jobs add up into one score, whichever they are</span></label>
+<label class="opt"><input type="radio" name="storm-q2" value="c"><span>Help only softens what happens; the result itself is luck</span></label>
+</fieldset>
+<label class="cl" for="storm-q2-c">Comment</label><textarea id="storm-q2-c" name="storm-q2-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q3">
+<h3>3. The lantern supper's light</h3>
+<p class="why">In a new game no blackout falls on Deck 3 during the supper (measured), so "by emergency light" has to be on purpose.</p>
+<fieldset><legend>Question 3</legend>
+<label class="opt"><input type="radio" name="storm-q3" value="a"><span>The mess's lights dimmed to emergency level, with lanterns on the long tables, 18:00-19:30<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q3" value="b"><span>Only when a real blackout lands on Deck 3 (rare)</span></label>
+<label class="opt"><input type="radio" name="storm-q3" value="c"><span>Normal lights; the lanterns only in words</span></label>
+</fieldset>
+<label class="cl" for="storm-q3-c">Comment</label><textarea id="storm-q3-c" name="storm-q3-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q4">
+<h3>4. Staying in, or the supper?</h3>
+<p class="why">On Saturday half the free crew stay in their quarters for the storm. That would halve the supper.</p>
+<fieldset><legend>Question 4</legend>
+<label class="opt"><input type="radio" name="storm-q4" value="a"><span>The supper is where everyone stays in: off-duty crew come (about 55-60, at most 60), and staying in pauses 17:45-19:45<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q4" value="b"><span>Staying in holds; a smaller supper (about 30)</span></label>
+</fieldset>
+<label class="cl" for="storm-q4-c">Comment</label><textarea id="storm-q4-c" name="storm-q4-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q5">
+<h3>5. The rec deck's first all-hands, now that it's unhooked from the storm</h3>
+<p class="why">Today the first ship-wide event's first address counts as the rec deck's first all-hands, and that's when film night moves to the auditorium. You asked for it to have its own date.</p>
+<fieldset><legend>Question 5</legend>
+<label class="opt"><input type="radio" name="storm-q5" value="a"><span>The first Friday address (Day 5) counts as it, so film night moves to the auditorium from Saturday Day 6<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q5" value="b"><span>The first Monday of the next season</span></label>
+<label class="opt"><input type="radio" name="storm-q5" value="c"><span>Film night moves on Day 6 anyway; the season's all-hands waits for later</span></label>
+</fieldset>
+<label class="cl" for="storm-q5-c">Comment</label><textarea id="storm-q5-c" name="storm-q5-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q6">
+<h3>6. Who's at the all-clear?</h3>
+<p class="why">It's a short meeting in the observation room on Deck 1 at 10:00 on Sunday. Everyone gets the Captain's banner either way.</p>
+<fieldset><legend>Question 6</legend>
+<label class="opt"><input type="radio" name="storm-q6" value="a"><span>As today: the five officers (four called in) and you<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q6" value="b"><span>Open to anyone nearby (up to 37 in the room)</span></label>
+</fieldset>
+<label class="cl" for="storm-q6-c">Comment</label><textarea id="storm-q6-c" name="storm-q6-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q7">
+<h3>7. When is the bow lounge put back together?</h3>
+<p class="why">Its glassware is packed away before the storm. Today the tidy-up job comes on Monday, after the party.</p>
+<fieldset><legend>Question 7</legend>
+<label class="opt"><input type="radio" name="storm-q7" value="a"><span>Sunday 10:30, just after the all-clear, so the room's itself again for the reading corner and the party<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q7" value="b"><span>Monday morning, as today (the party has paper cups)</span></label>
+</fieldset>
+<label class="cl" for="storm-q7-c">Comment</label><textarea id="storm-q7-c" name="storm-q7-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-q8">
+<h3>8. What counts toward your commendation?</h3>
+<p class="why">Today: two storm jobs, or one job and a storm meeting. It's now settled at the all-clear (your earlier answer).</p>
+<fieldset><legend>Question 8</legend>
+<label class="opt"><input type="radio" name="storm-q8" value="a"><span>Storm jobs and storm meetings up to the all-clear, including Saturday's range and lantern jobs<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="storm-q8" value="b"><span>Only the prep jobs posted at Thursday's briefing</span></label>
+</fieldset>
+<label class="cl" for="storm-q8-c">Comment</label><textarea id="storm-q8-c" name="storm-q8-comment"></textarea>
+</div>
+
+<div class="q" data-qid="storm-general">
+<h3>Anything else?</h3>
+<p class="why">About the plan, the judgement calls below, or anything you'd like the storm to have.</p>
+<label class="cl" for="storm-general-c">Your comment</label><textarea id="storm-general-c" name="storm-general-comment"></textarea>
+</div>
+</form>
+
+<h2>11. Already decided (yours) and judgement calls</h2>
+<ul>
+<li><b>Yours:</b> no all-hands of its own for the storm; the Day 12 address is the regular Friday one, and the auditorium opens for it; the four at the all-clear are called in on their day off, and the crew mention it; the commendation comes at the all-clear; crowds of about 60 at most until a test on your phone; the crew react within a few ship minutes of each big moment; talent night moves a week and Lap of the Wren moves to Monday.</li>
+<li>The front's banner stays short (3 lines); the full words come at 16:00.</li>
+<li>The Captain's scene that weekend is the all-clear; Thursday's is your officer ceremony.</li>
+<li>The party keeps the bow lounge; the Sunday table and the reading corner run as usual that day.</li>
+<li>The lantern supper is Saturday's dinner (there's no other dinner tradition that day).</li>
+<li>The story's range job is a real Works job; the four dead rings are only words, not a machine fault.</li>
+<li>Envoy Saruth comes to the supper and the party like anyone off duty, with nothing about the visit.</li>
+</ul>
+</main>
+<script>
+(function(){
+  const root=document.documentElement,btn=document.getElementById('theme');
+  try{const t=localStorage.getItem('esp-theme');if(t)root.dataset.theme=t;}catch(e){}
+  btn.addEventListener('click',()=>{const dark=root.dataset.theme?root.dataset.theme==='dark':!matchMedia('(prefers-color-scheme: light)').matches;root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('esp-theme',root.dataset.theme);}catch(e){}});
+  const el=document.getElementById('days'),A=6*60,B=22*60,pct=m=>((m-A)/(B-A)*100).toFixed(2)+'%';
+  const hm=m=>String(Math.floor(m/60)).padStart(2,'0')+':'+String(m%60).padStart(2,'0');
+  let h='<div class="hrs">';for(let x=6;x<22;x++)h+='<span>'+String(x).padStart(2,'0')+'</span>';h+='</div>';
+  const lane=(lab,bars)=>'<div class="lane"><div class="lab">'+lab+'</div><div class="trk">'+bars.map(([a,b,c,t])=>'<div class="b '+c+'" style="left:'+pct(a)+';width:calc('+pct(b)+' - '+pct(a)+')" title="'+t+' '+hm(a)+'-'+hm(b)+'">'+t+'</div>').join('')+'</div></div>';
+  h+=lane('Thu 11',[[360,1320,'vi',''],[570,780,'tr','Team job'],[840,852,'ev','Brief'],[852,1020,'ev','Prep jobs'],[1035,1110,'cap','Ceremony'],[1200,1290,'tr','Quiz']]);
+  h+=lane('Fri 12',[[840,1320,'vi',''],[840,870,'ev','Front'],[960,1010,'cap','Address'],[1020,1230,'you','Lukas']]);
+  h+=lane('Sat 13',[[360,1320,'vi',''],[680,700,'ev','Surge'],[870,1020,'you','Range'],[1080,1170,'ev','Lantern supper']]);
+  h+=lane('Sun 14',[[360,600,'vi',''],[600,612,'cap','All-clear'],[612,1080,'tr','Booths, market, games'],[1140,1260,'ev','Party']]);
+  h+=lane('Mon 15',[[1080,1095,'ev','Debrief'],[1230,1275,'tr','Lap: Tomas']]);
+  el.innerHTML=h;
+})();
+</script>
+</body>
+</html>
