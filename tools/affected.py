@@ -37,6 +37,10 @@ import section as S                                  # tools/section.py: the sec
 CHECKS = {
     'cadet': ('python3 cadet_test.py OLD.html {g}', 2), 'player': ('python3 player_check.py {g}', 6),
     'intro': ('python3 intro_check.py {g}', 11), 'day1': ('python3 day_check.py {g} 1', 8),
+    # the event days (lead 25, 2026-10-21: day_check on Day 1 alone misses an event day's own failures): Day 0 the
+    # arrival, the first Friday's address 5, the Line 7, the storm's front 12 and its Saturday 13, the comet 16, Day 19's
+    # address and night shift, the first crew rotation 21, the diplomatic finale 27 (EV_CALENDAR, EV_BEATS, ROSTER_ROTATIONS)
+    **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 16, 19, 21, 27)},
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
     'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5),
@@ -52,7 +56,8 @@ CHECKS = {
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
 }
 FAST = {'deck', 'machine', 'leave', 'device'}
-FILE_OF = {'cadet': 'cadet_test.py', 'day1': 'day_check.py'}
+EVENT_DAYS = ['day0', 'day5', 'day7', 'day12', 'day13', 'day16', 'day19', 'day21', 'day27']
+FILE_OF = {'cadet': 'cadet_test.py', 'day1': 'day_check.py', **{d: 'day_check.py' for d in EVENT_DAYS}}
 ALL = {c for c in CHECKS if os.path.exists(os.path.join(ROOT, FILE_OF.get(c, c + '_check.py')))}
 LOAD_CHECKS = {'cadet', 'deck'}                       # code that runs only while the page opens: the pictures and the decks
 
@@ -61,13 +66,13 @@ LOAD_CHECKS = {'cadet', 'deck'}                       # code that runs only whil
 RULES = {
     'page': ['cadet', 'interactions', 'bubble'], '1': ['*'], '2': ['cadet', 'deck'], '3': ['cadet', 'deck'], '4': ['*'], '4a': ['*'],
     '4b': ['cadet', 'deck', 'perf'], '4c': ['*'], '4d': ['cadet', 'deck', 'day1', 'events', 'path'], '4e': ['cadet', 'deck', 'disc', 'day1'],
-    '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents'],
+    '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
     '19': ['device', 'puzzle', 'player'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
-    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays'],
-    '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf'], '20': ['social', 'arc', 'bubble', 'lines'],
-    '20c': ['social', 'arc'], '21': ['intro', 'clothes'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
-    '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck'],
+    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
+    '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
+    '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
+    '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],
     '10': ['day1', 'cadet', 'deck', 'events'], '8c': ['disc', 'day1', 'perf'], '11': ['cadet', 'interactions', 'bubble'],
     '25': ['devmode'], '12': ['*'],
 }
@@ -139,7 +144,7 @@ def merge(out, commit, covers):
         j = json.load(open(c))
         if j.get('game_sha1') != want:
             print(f'{c}: ran on another game than {commit}\'s: left out'); continue
-        name = 'day1' if j['check'] == 'day_check' else 'cadet' if j['check'] == 'cadet_test' else j['check'].replace('_check', '')
+        name = 'day' + (j['args'][1] if len(j['args']) > 1 else '1') if j['check'] == 'day_check' else 'cadet' if j['check'] == 'cadet_test' else j['check'].replace('_check', '')
         m['checks'][name] = {'run': j['run'], 'load': j['load'], 'exit': j['exit'], 'seconds': j['seconds'], 'args': j['args']}
         m['made_from'].append(os.path.basename(c))
     m['game_sha1'] = want
@@ -190,7 +195,7 @@ def pick(a, b, mp, middle=False):
         if f == 'cadet_test.py':
             add(['*'], 'cadet_test.py (every check runs on it)')
         elif re.fullmatch(r'[a-z0-9]+_check\.py', f) or f == 'day_check.py':
-            add(['day1' if f == 'day_check.py' else f[:-9]], f)
+            add(['day1'] + EVENT_DAYS if f == 'day_check.py' else [f[:-9]], f)
         elif f.startswith('content/'):
             add(RULES['22'], f + ' (the words; content_gen --check is in check_fast)')
     if GAME not in files:
@@ -243,7 +248,7 @@ def pick(a, b, mp, middle=False):
             if n in runs[c]: hit.setdefault(c, set()).add(name_at(n))
     for c, names in hit.items():
         add([c], f'{", ".join(sorted(names)[:3])}{" ..." if len(names) > 3 else ""} (the map: {c} ran the changed lines)')
-    if not hit and any(n in loads[c] for n in at for c in loads):
+    if any(n in loads[c] for n in at for c in loads):
         add(LOAD_CHECKS, 'changed lines run only while the page opens (the map)')
     # 2. a changed table or other top-level value: which checks ran a line that reads it
     for n in sorted(old_l):
@@ -272,7 +277,10 @@ if __name__ == '__main__':
         base = git('merge-base', 'origin/claude/integration', 'HEAD').strip() or 'HEAD'
         revs = [base]
     a, b = revs[0], (revs[1] if len(revs) > 1 else None)
-    mp = json.load(open(mpath)) if os.path.exists(mpath) else None
+    try:
+        mp = json.load(open(mpath)) if os.path.exists(mpath) else None
+    except ValueError:
+        print(f'{mpath}: not a map (tools/affected.py --merge makes one)'); sys.exit(2)
     why, files = pick(a, b, mp, '--middle' in flags)
     mins = sum(CHECKS[c][1] for c in why)
     print(f"changes {a}..{b or 'now'}: {len(files)} file(s){'' if mp else ' (no map: the rules only)'}")

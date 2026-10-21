@@ -15,7 +15,7 @@ for n in ${@:-$ALL}; do
   [ -s "$OUT/$n.json" ] && continue
   case $n in
     cadet) f=cadet_test.py; a="$G $G";;
-    day1) f=day_check.py; a="$G 1";;
+    day[0-9]*) f=day_check.py; a="$G ${n#day}";;
     *) f=${n}_check.py; a="$G";;
   esac
   t=$SECONDS; timeout 5400 python3 -u tools/check_cover.py "$OUT/$n.json" $f $a > "$OUT/log/$n.txt" 2>&1
