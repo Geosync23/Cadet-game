@@ -392,7 +392,7 @@ with sync_playwright() as pw:
       // one room (birthdays aside), and what it left out; and every weekday (Monday to Friday) has 2 or more
       out.dropped = [];
       for (let d = 0; d <= 364; d++) {
-        const all = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev) && !e.ev.when.birthday), recOnly = e => e.ev.where.every(w => w.deck === 7);
+        const all = eventsOn(d).filter(e => SHIP_TRADITIONS.some(t => t === e.ev || t.id === e.ev.id) && !e.ev.when.birthday), recOnly = e => e.ev.where.every(w => w.deck === 7);
         const t = all.filter(e => !recOnly(e));   // the rec deck's own are budgeted among themselves (0.83, RA): one at a time in a room, checked below with the rest
         for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
         for (const a of all) for (const b of all) if (a !== b && recOnly(a) && recOnly(b) && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');

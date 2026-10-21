@@ -35363,7 +35363,7 @@ const evRooms = ev => ev.where.map(w => w.deck + '|' + (w.room ? w.room.source.r
 // an evening's tradition starts at 17:00 or later and runs past 18:00 (one-week-aboard's tea after shift, 17:15-17:55, doesn't)
 const evEvening = e => e.from >= 1020 && e.to > 1080;
 function evBudget(list) {
-  const rank = e => SHIP_TRADITIONS.indexOf(e.ev), recOnly = e => e.ev.where.every(w => w.deck === 7);
+  const rank = e => SHIP_TRADITIONS.indexOf(e.ev.base || e.ev), recOnly = e => e.ev.where.every(w => w.deck === 7);
   // the rec deck's own (0.83, RA) are budgeted among themselves (one at a time in a room), so the ship's others never change
   const rec = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday && recOnly(e)), t = list.filter(e => rank(e) >= 0 && !e.ev.when.birthday && !recOnly(e));
   const recDrop = []; if (rec.length) { rec.sort((a, b) => (b.ev.prio || 0) - (a.ev.prio || 0) || evRare(b.ev.when) - evRare(a.ev.when) || a.from - b.from || rank(a) - rank(b));
@@ -35604,7 +35604,7 @@ function eventsNoted(from, to) {
     if (at <= from || at > to || SHIP.events.noted.includes(key)) continue;
     SHIP.events.noted.push(key); if (SHIP.events.noted.length > 60) SHIP.events.noted.shift();
     const came = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
-    simNote('tradition', { id: e.id, day: d, at, came, you: SHIP.events.joined.includes(key), host: e.ev.host || null, src: SHIP_TRADITIONS.includes(e.ev) ? 'tradition' : e.ev.when.ship ? 'shipwide' : 'oneoff', tally: e.ev.ties && e.ev.ties.tally ? tallyOf(e.id, d) : null });
+    simNote('tradition', { id: e.id, day: d, at, came, you: SHIP.events.joined.includes(key), host: e.ev.host || null, src: evIsTrad(e.ev) ? 'tradition' : e.ev.when.ship ? 'shipwide' : 'oneoff', tally: e.ev.ties && e.ev.ties.tally ? tallyOf(e.id, d) : null });
   }
 }
 // ---- the Sunday "This week aboard" Mail (Pillar 4; the monthly tradition designer's words and rules, in
@@ -35628,7 +35628,7 @@ function weekMail(d) {                                   // d: a Sunday; -> { at
   for (let x = d + 1; x <= d + 7; x++) {
     const on = eventsOn(x), lines = [];
     for (const e of on) {
-      if (!SHIP_TRADITIONS.includes(e.ev)) continue;
+      if (!evIsTrad(e.ev)) continue;
       if (e.ev.when.birthday) { const l = fill(pick('birthday'), { names: e.names }); if (l) lines.push([e.from, l]); continue; }
       if (evWeekly(e.ev.when) && !first) continue;
       const l = fill(pick('item'), { trad: e.name, time: hhmm(e.from), place: evPlaceName(e.ev), weekday: WEEKDAYS[weekday(x)] }); if (l) lines.push([e.from, l]);
@@ -35774,7 +35774,7 @@ for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act || s.act === 'beam')
   const def = { need: s.need || 'social', gain: s.gain || 12, mins: s.act === 'beam' ? 3 : TJ_MINS, also: s.also || { leisure: 10 }, with: 4, title: id, until: s.act === 'beam' ? A => A.done >= A.def.mins : tjEnd };   // the beam: a few minutes' painting
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 }
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && SHIP_TRADITIONS.includes(e.ev));
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && evIsTrad(e.ev));
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -36373,7 +36373,7 @@ if (EV_STORM_ON) {
   // 7); Lap of the Wren moves to Monday at 20:30 with Tomas and the rec deck's talent night a week on (EV_DAY_DRESS,
   // dayDress: { trad, day (the event's day), drop | set | add }, the shape the Line reuses)
   const party = S.moments.find(m => m.id === 'party'), pw = k => (c, p) => evWordAt('event.ionStorm.gather.party.' + k, p ? p.seed + c.day : 0) || undefined;
-  party.places = [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, room: /^Bow lounge$/, types: ['bench', 'common-room'] }, { deck: 3, pool: '@gather-bow-lounge' }];   // a standing party: the bow lounge's crowd spots beside its 34 seats (EV4, bigevents_check: 45 mean to go)
+  party.stay = [30, 60];   // drop in and leave (evStay): at most its 34 places' worth at once (lead 23's call on PR4's crowd find)
   Object.assign(party, { name: evWord('event.ionStorm.gather.party.name') || undefined, ask: pw('ask'), here: pw('here'), thanks: c => evWordAt('event.ionStorm.gather.party.thanks', 0) || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.' });
   S.jobs.resolution = S.jobs.afterglow.map(j => ({ ...j, at: 630 })); delete S.jobs.afterglow;
   // S5, the lantern supper (the user's answers 3 and 4): Saturday 18:00-19:30 in the mess by lamp light, the storm's
@@ -36493,7 +36493,7 @@ const VEYLI_RETELL = {
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
   id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
-  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}),   // a pull by person, a meal, ties (the storm update's lantern supper)
+  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}),   // a pull by person, a meal, ties (the storm update's lantern supper)
   anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
@@ -37486,8 +37486,10 @@ function evDressMake() {
     EV_DAY_DRESS.set(x.trad + '@' + (r.day + x.day), x.drop ? { drop: true } : { add: !!x.add, o: x.add || x.set || {}, ev: null });   // the dressed copy made when first asked (eventsOn): a tradition's fields aren't all readable at load
   }
 }
+// a ship tradition, or a day's dressed copy of one (EV_DAY_DRESS, the storm update S6: evDressed's x.base); PR4's S6 fix 1
+function evIsTrad(ev) { return !!ev && SHIP_TRADITIONS.includes(ev.base || ev); }
 function evDressed(ev, o) {
-  const x = { ...ev };
+  const x = { ...ev, base: ev.base || ev };   // base: the tradition it's a copy of (evIsTrad; PR4's S6 fix 1)
   if (o.name) x.name = o.name; if (o.at) x.at = o.at.slice(); if (o.jitter != null) x.jitter = o.jitter;
   if (o.who) { const pull = new Map(o.who), own = ev.who; x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : own(p, d, e); }
   if (o.words) for (const k of ['mail', 'ask', 'here', 'thanks']) if (typeof LINES !== 'undefined' && LINES[o.words + '.' + k]) x[k] = (c, p) => evWordAt(o.words + '.' + k, (p ? p.seed : 0) + (c && c.day || 0));
