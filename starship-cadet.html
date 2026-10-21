@@ -11462,6 +11462,7 @@ const DEVICE_SKIN = (() => {
       simClear(c._t); c.hidden = !a; if (!a) return;
       devHeadsBack(); c.dataset.ph = SHIP.device.settings.phosphor; c.textContent = '';
       c.append(mk('small', '', ((a.from || 'The Captain') + ', to all hands').toUpperCase()), mk('p', '', a.text));
+      if (typeof addrBelowHud === 'function') addrBelowHud(c);   // section 18's storm update S8: on a phone, below the HUD's buttons (nothing while off)
       c._t = simTimeout(() => skin.address(null), 20000);
     },
     chat(el, v) {                              // section 20's chat card (CHAT_SKIN.draw), in the screen's style
@@ -37320,6 +37321,14 @@ const evCallMins = e => { const def = e && SHIP_EVENTS[e.id], h = eventHelp('cal
 if (EV_STORM_ON && typeof linesMeetings === 'function') {
   const B = {}; linesMeetings(B); const id = 'calderStorm.officer', m = SHIP_EVENTS.ionStorm.meetings.find(x => x.id === 'stormBriefing');
   if (B[id] && m) { MEETING_SCRIPTS[id] = B[id]; m.scriptBy = { officer: id, senior: id, specialist: id }; }
+}
+// the Captain's banner on a phone (S8, the events plan's item 10): it sat over the device, pause and Tracked buttons for its
+// 20 seconds. On a narrow screen (under 600 px) it starts just below the lowest of them. Off: unchanged (top 10 px)
+const ADDR_HUD = ['devBtn', 'pauseBtn', 'trkBtn'];
+function addrBelowHud(c) {
+  if (!EV_STORM_ON || typeof window === 'undefined' || window.innerWidth >= 600) return;
+  let y = 0; for (const id of ADDR_HUD) { const e = document.getElementById(id); if (e && e.offsetWidth > 0) y = Math.max(y, e.getBoundingClientRect().bottom); }
+  c.style.top = y ? Math.round(y + 8) + 'px' : '';
 }
 // ---- end of slot: Events engineer 2 ----
 // ---- slot: Storm builder (section 18; EV3, the ion storm update S1-S9, plans/event-storm-plan.md v1.2). New code of this seat's goes here ----
