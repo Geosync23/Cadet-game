@@ -8,7 +8,7 @@ Written 2026-10-21 by EV4 (session_01MqpjPG6mDFe5avrDxcNWTU), after S9. Read EV3
 - **Role:** the ion storm update (plans/event-storm-plan.md v1.2 on claude/event-plan-storm), section 18's storm block
   and slot `// ---- slot: Storm builder`, with small hooks elsewhere. **Never set the build lines** (lead 23 confirmed):
   name each turn in a build-table row ("Ion storm update" table, plans/build-table.md).
-- **Branch:** `claude/storm-update`, tip 2228a05 (plus this note). Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
+- **Branch:** `claude/storm-update`: claude/fridays 7a0e5f7 merged in (lead 23's call) and S2 built on it (see the build table's 'storm S2' row). Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
   Take `bigevents_check.py` from `claude/bigevents-check` (EC1) as is (last: e3f1da9); never edit it.
 - **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight: questions to the lead only, never the user).
 - **Reviews:** PR4 (session_014WyaZtasY32m5fnkBxuR9d) every turn, also as the stand-in owner of 4d (props) and 8b
@@ -42,9 +42,7 @@ Shots: plans/storm-shots/ (`git add -f`: *.png is in .gitignore).
 - **Deck 4 '454':** not reproducible (common room at most 323 on; perf_check's row stands in Cabin 4-05, 433-436).
 - **Backlog 18b** (perf_check's scenes use tile numbers as world x,z in nearestOpen: they may measure the wrong room) and
   **#19** (join_check first-light FAIL, off too: FLC_ON): for their owners.
-- **S2** waits for claude/fridays to reach claude/integration (never merge claude/fridays). FR2: the Day 12 address's
-  goers leave up to 30 minutes early, so the doubleShift exception needs Marrow off from 15:30 and Vance from 15:45,
-  through 16:50 (not [960, 1010]). Agree the exact minutes with FR2. EV3's S2 design is in its note.
+- **S2: built** on this branch with claude/fridays merged in (Marrow 15:35 so she leaves at 15:30, Vance 15:45, to 16:50). The Fridays builder is FR3 (session_01935gmiyLoy5fgvs3xQd7QC); the storm reviewer is PR6 (session_01LVHLJHrAR5iGJFS7HK9E7i; PR4 handed over). fridays_check FAILs only on the storm's own address lines while the storm is off: FR3's to fix. Then S10 (the switch) after ER2's and PR6's PASS on S2.
 
 ## Gotchas (new)
 
