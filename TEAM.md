@@ -272,3 +272,10 @@ Working: PA, BM11, EV1, EW1 (+ PR2/OR1 reviewing on call, PB finishing a small r
 **~00:08 UTC:** OR1 PASS on PA's final hooks (75aa54a). BM11: 0.64.6 clean (check_fast, cadet_test = trace, day/events/food/player/career, intro --evening/--firsts) → push now; --week continues until the patch-a order. Release round plan sent to BM11: patch-a + patch-b 319f541 + cocoa names bake, switch on LADDER_ON/MUG_ON/FLC_ON (EVENTS_ON and INTRO_ASK_ON off), full round alone.
 **~00:12 UTC check-in (lead 411k):** handover draft written (plans/handover-lead21.md). PR2 (390k) re-reviewing patch-a 75aa54a; BM11 pushing 0.64.6; EV1 on F1a; EW1, PA, PB idle; OR1 on call. All "allowed".
 **~00:15 UTC: 0.64.6 PUSHED** (claude/integration 675588c = patch-b; check #63 green; intro --week OK alone). PR2 PASS on patch-a 75aa54a. **RELEASE ROUND ordered to BM11**: patch-a efba55a + patch-b 319f541 + cocoa names bake (events-lines fdf4339) + LADDER_ON/MUG_ON/FLC_ON on → 0.64.7, full round alone. Then lead publishes the patch page + republishes Dev.
+**~00:20 UTC, the user: up to 7 workers to speed up step 4.**
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Fridays builder FR1 | session_01FXFdUaCbBurQbdY9E58HKs | `claude/fridays` | Short Fridays + Captain's address (plan rev 4 cdeb1ff, ~8 turns behind SHORT_FRIDAY); turn 0 brief first; agrees the Friday hold with EV1 |
+| Events check writer EC1 | session_01QgShGXD6P24DDxTp8npN41 | `claude/bigevents-check` | bigevents_check.py (F7), outside check_fast |
+| Reviewer PR3 | session_01EtHMLLsjDYDHPG3JgCMbGi | `claude/review-3` | reviews FR1 and EC1 (PR2 keeps EV1) |
+Working: BM11 (release round), EV1, PR2, OR1, FR1, EC1, PR3 = 7. Idle: EW1, PA, PB. Watch the 5-hour limit; pause the newest seats first on "allowed_warning".
