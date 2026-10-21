@@ -3,7 +3,7 @@
 // keys (see content/banks/event-ionStorm.lines). Mail is "Subject | body", unsigned (the warning is Vance's).
 // Gatherings: event.crossingLine.gather.<id>.<...>; the ceremony is the meeting crossingCeremony.
 == event.crossingLine.mail.warning
-- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. The horn will sound on every deck. First crossing? The ceremony is in the bow lounge, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
+- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. Beyond it, the Wren travels as a guest. The horn will sound on every deck. First crossing? The ceremony is in the bow lounge, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
 == event.crossingLine.status.warning
 - Tomorrow at 14:30 we cross the Line into the Veyli reach.
 // the banner at 14:30, after the horn: the Captain is called in on her day off
@@ -41,7 +41,7 @@
 - The Line supper ran out of seconds in ten minutes. Brennan was thrilled.
 // tap texts: the certificate on your shelf (a keepsake) and the plaque (where EP2 places it; the deck architect's props)
 == event.crossingLine.keepsake
-- Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."
+- Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7, where the Wren travels as a guest. This reach knows your name."
 
 // ---- story A, "The one on watch" (event-line plan v2; the user's choice). GUARD RAILS for Tomas (his arc, beats 5
 // and 7): only about missing his crossing; nothing about failing, tests, Holt, or staying.

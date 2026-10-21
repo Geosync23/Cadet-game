@@ -1,6 +1,7 @@
 @reactions event.crossingLine.warning
-// EW1 (events writer), Crossing the Line: from Saturday 18:00 (Vance's Mail) to Sunday 14:30, crew talk about "the
-// Line"; some ask "first crossing?".
+// EW1 (events writer), Crossing the Line: from Saturday 08:00 (the user's line-q1 b; Vance's Mail stays at 18:00) to
+// Sunday 14:30, crew talk about "the Line"; some ask "first crossing?". The lines say "tomorrow", so they read right all
+// Saturday and the Sunday morning lines are the Sunday-only ones EV1 adds, if any.
 ? cue:event.crossingLine.warning
 - We cross the Line tomorrow. First time? You'll love it. Mostly.   #funny
 - First crossing? Lucky you. Don't drink the punch. You'll drink the punch.   #funny
@@ -21,3 +22,14 @@
 // Holt's one line: the here and now only (his arc: nothing of borders, past crossings or the Veyli)
 ? cue:event.crossingLine.warning who:holt
 - Crossing or no crossing, this ship stays tidy. No punch on my decks.
+
+// EW2 (events writer 2), why the crossing matters (line plan, line-q10 A "guests in someone else's sky"; the user):
+// old hands explain it in bits. The first two carry the Veyli fact (plans/veyli-lore-plan.md section 3). Never the
+// visit, never why the Envoy is aboard, never Holt's border day or "last time"; "help is far" is distance, not danger.
+? cue:event.crossingLine.warning !who:saruth|holt
+- Past the Line every star's got a Veyli name. They got there first.
+- Six hundred years the Veyli have been out there. We're the new ones.
+- Past the Line we're guests in someone else's sky. Best manners, all of us.   #warm
+- Help's a long way off out there. That's what the oath's about. Each other.
+? cue:event.crossingLine.warning dept:survey !who:saruth
+- Our charts go thin past the Line. A few runs, never a full survey. Until now.

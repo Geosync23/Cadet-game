@@ -57,6 +57,11 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   tie an incident to it). So crew aboard under two years are first-timers at the Line (Day 7), and older hands crossed
   then (Pell, for one). Checked by EW1 against Holt's and Saruth's arcs: no clash (Holt's bad day is "years ago, on a
   border patrol", no ship or date; never link the two).
+- **What the Line means** (the user, 2026-10-21, line-q10 A: "guests in someone else's sky"): the Line is where the
+  Veyli reach begins. Past it the Concord's charts are thin (a few runs, never a full survey; they grow thin, they
+  don't end), every star already has a Veyli name, and the nearest Concord port is a long way behind. The Wren travels
+  there as a guest (only "as guests": never by anyone's leave, permission or agreement). Help is a long way off (about
+  distance, never danger), so the old oath is a promise to each other. Survey's real work of the tour starts there.
 - **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
   09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
