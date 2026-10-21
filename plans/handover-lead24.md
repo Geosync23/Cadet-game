@@ -38,3 +38,11 @@ On call: PB session_01FWW2piuXkFYaRRzLXZiqYb (13/14/10), EW2 session_0138EzUAZjA
 - #20 Halloran never reaches the tea corner Day 5 (PB's fix, FR3 builds). #21 devmode_check clock flake. #22 cooker fault churn vs late meals (design call). #18 day 12, #12 career, #14 perf memory (old).
 - Dev mode Stop 3 (Big events) when the user asks.
 - The user to screenshot the Dev Speed card on the TriFold folded + open once #8 is published.
+
+## Later updates (16:15 UTC)
+- 0.64.10 published (Playtest https://claude.ai/artifact/Vx6uXaHnAfZsMQs8DHZJmh, Dev page v5). 0.64.11 = crew patch (PT1, all reviewed) + food_check part 2, BM12 running checks.
+- Storm S10's 3 FAILs were check problems (EV6); PR6 re-runs them for its verdict. Storm + Fridays release = BM12 merges claude/storm-update (dc0ebe0b+) and claude/fridays (e18844fb + FR3's `arriving` Day 19 fix) together, after PR8's verdict on turn 10/fixes and PR5's mutants.
+- Line: L5e pushed, L5f (bigger supper) in its round; then ER3 round 2, then L6 (switch on). Brennan rota clash at the ceremony (EV7). Merge note: keep both food_check changes when food-waits meets line-update (FD1 handover).
+- TS2 item 1 (affected-checks runner): batch 1 map done; options (a)/(b)/(c) in plans/handover-test-speed-2.md; TS2 leans (b) (ignore near-universal shared lines, prove by replay with batch 2). Lead leans (b) too; not yet asked of the user.
+- Opt in review with OR1: TS2 item 2 (player_check A+B); RN1 #5 memory fix (proofs ~17:00). Passed: #4, #10, #6, perf scenes (+F1-F4), #8 Speed card (DB2 owner OK; nits to RN1).
+- Ready for the move: PT1, BM12 (after 0.64.11), ER3, DB2, EC1, FD1, EV6, PR7, TS2, PB, EW2.
