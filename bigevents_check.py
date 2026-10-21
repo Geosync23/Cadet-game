@@ -18,7 +18,7 @@
 #   plan's clashes (talent night and Lap of the Wren off the party night, the lap on Day 15 at 20:30); the run twice
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
-#   gathering in the hold) must each be caught;
+#   gathering in the hold, a dressed copy of a tradition in the party's room) must each be caught;
 #   5. late saves (F0c): evSkippedFor for any day, evCalPlan; real saves: SHIP.evFrom (the day events first came on,
 #   saved) decides what's passed over (evFrom 0 on Day 20: the storm it missed is run at load and logged), kept through a save and a reload, null and unsaved while off;
 #   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
@@ -141,11 +141,12 @@ PAPER = r"""(() => {
     out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
+  const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
   const span = []; for (const r of CAL.filter(built)) for (let d = r.day; d <= r.day + SHIP_EVENTS[r.id].days; d++) span.push(d);
-  for (const d of [...new Set(span)]) out.named[d] = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev)).map(e => [e.id, e.from, e.to]);
+  for (const d of [...new Set(span)]) out.named[d] = eventsOn(d).filter(isTrad).map(e => [e.id, e.from, e.to]);
   const things = out.gath.filter(g => !g.draft && g.day).map(g => ({ id: g.id, day: g.day, from: g.at[0], to: g.at[1], rooms: g.rooms }))
     .concat(out.beats.filter(b => b.what === 'meeting' && !b.draft && b.room).map(b => ({ id: b.id, day: b.day, from: b.t - ab(b.day, 0), to: b.t - ab(b.day, 0) + b.len, rooms: [b.deck + '|' + b.room] })));
-  for (const x of things) for (const e of eventsOn(x.day).filter(e => SHIP_TRADITIONS.includes(e.ev))) {
+  for (const x of things) for (const e of eventsOn(x.day).filter(isTrad)) {
     const rooms = evRooms(e.ev); if (e.from < x.to && x.from < e.to && rooms.some(r => x.rooms.includes(r))) out.clash.push('D' + x.day + ' ' + e.id + ' ' + hhmm(e.from) + '-' + hhmm(e.to) + ' in ' + rooms.join(',') + ' during ' + x.id + ' ' + hhmm(x.from) + '-' + hhmm(x.to));
   }
   // the Captain's scenes in the events' meetings, a day at a time
@@ -182,7 +183,11 @@ PLANT = r"""(() => {
   M.push({ id: 'plantHold', at: [1, 945], len: 10, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, who: [] });
   M.push({ id: 'plantGuard', at: [0, 1040], len: 20, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, who: [] });
   const p = EV_SHIPWIDE.find(g => g.id === 'party'); EV_SHIPWIDE.push({ ...p, id: 'plantGath', k: 9999, when: { ship: 'ionStorm', day: 1 }, at: [960, 1000] });
-  return true;
+  // a dressed tradition (a copy, as S6's EV_DAY_DRESS makes) put in the party's room during the party
+  const t = SHIP_TRADITIONS.find(e => e.id === 'book-circle') || SHIP_TRADITIONS[0], pd = EV_CALENDAR.find(r => r.id === 'ionStorm').day + p.when.day;
+  const copy = { ...t, where: p.where.map(w => ({ ...w })) }, on0 = eventsOn;
+  eventsOn = d => { const l = on0(d); return d === pd ? l.concat([{ id: t.id, name: t.name, ev: copy, day: d, from: p.at[0] + 10, to: p.at[0] + 50, honorees: [], names: '', first: '' }]) : l; };
+  return t.id;
 })()"""
 PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 
@@ -502,10 +507,10 @@ with sync_playwright() as pw:
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
-    g = Game(pw, variant('on', 'all')); g.ev(PLANT); a = g.ev(PAPER); g.close()
+    g = Game(pw, variant('on', 'all')); dressed = g.ev(PLANT); a = g.ev(PAPER); g.close()
     SINK = []; judge(a, 'planted'); caught, SINK = SINK, None
-    for p in PLANTED:
-        hit = [c for c in caught if p in c]
+    for p in PLANTED + [dressed + ' ']:
+        hit = [c for c in caught if p in c and (p != dressed + ' ' or 'during party' in c)]
         print(f"  {p}: " + ('caught: ' + hit[0] if hit else 'NOT caught'))
         if not hit: fail(f'the self-test: the planted {p} was not caught')
 
