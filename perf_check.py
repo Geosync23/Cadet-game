@@ -37,6 +37,9 @@ SCENES = [
     {'name': 'breakfast rush, the mess 07:10', 'day': 2, 'time': '07:10', 'deck': 3, 'room': r'^Mess'},
     # the storm update's lantern supper (switched on: about 60 in the mess, 22 standing with a tray; off: a Saturday dinner)
     {'name': 'lantern supper, the mess Sat 18:30', 'day': 13, 'time': '18:30', 'deck': 3, 'room': r'^Mess'},
+    # Crossing the Line (switched on: about 45 in the bow lounge for the oath, the ribbons and the punch bowl; the Line supper in the mess; off: a Sunday)
+    {'name': 'the Line ceremony, bow lounge Sun 14:45', 'day': 7, 'time': '14:45', 'deck': 3, 'room': r'^Bow lounge$'},
+    {'name': 'the Line supper, the mess Sun 18:30', 'day': 7, 'time': '18:30', 'deck': 3, 'room': r'^Mess'},
 ]
 
 SCENE_JS = r"""(sc => {

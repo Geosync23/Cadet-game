@@ -8036,6 +8036,60 @@ const DECK_DRESS = {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .028); s.add(p);   // .003 in front of the frame
     return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, 'n', along], y: 2.47, w: .26, h: .32 };
   } },
+  // Crossing the Line (EV5, L3, the deck architect's stand-in; PR4 reviews; all behind EV_LINE_ON by `on`, so a game with it
+  // off never shows them). lineRibbons, the ceremony (Sunday 14:30-15:15, section 18's dressing; gone before the reading
+  // corner at 16:00): three gold ribbon swags across the bow lounge's window end with a bow at each drop (one merged
+  // gold, 1 draw call), and Brennan's punch bowl on a small stand beside her spot at the glass (51, 9; blocked while
+  // out): the stand merged, the green punch unlit, 2 draw calls
+  lineRibbons: { deck: 3, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'gold ribbons at the bow glass and the Line punch bowl', make(g) {
+    const r = ROOM_BOX.L, s = dressAt(g, 'L', 'floor', 0, 0), gold = '#e8b83a';
+    for (const x of [46.5, 48.6, 50.8]) {                  // a swag across the room, rows 5.4 to 15.6, dipping in the middle
+      const z0 = 5.4, z1 = 15.6, n = 12;
+      for (let k = 0; k < n; k++) { const za = z0 + (z1 - z0) * k / n, zb = z0 + (z1 - z0) * (k + 1) / n, y = z => 2.32 - .32 * Math.sin(Math.PI * (z - z0) / (z1 - z0)), ya = y(za), yb = y(zb);
+        const m = dressBox(s, .02, .12, Math.hypot(zb - za, yb - ya) + .01, gold, x - r.i0, (ya + yb) / 2, (za + zb) / 2 - r.j0); m.rotation.x = Math.atan2(ya - yb, zb - za); }   // a ribbon, on edge
+      for (const z of [z0, (z0 + z1) / 2, z1]) { const y = z === z0 || z === z1 ? 2.28 : 1.96; dressBox(s, .05, .16, .24, gold, x - r.i0, y, z - r.j0); dressBox(s, .03, .42, .06, gold, x - r.i0, y - .28, z - r.j0 - .05); dressBox(s, .03, .36, .06, gold, x - r.i0, y - .25, z - r.j0 + .06); }   // a bow, its two tails
+    }
+    const b = dressAt(g, 'L', 'floor', 51.45 - r.i0, 9.45 - r.j0);   // the stand and the bowl
+    dressBox(b, .44, .04, .44, '#5a4632', 0, .78, 0); dressBox(b, .08, .76, .08, '#5a4632', 0, .38, 0); dressBox(b, .3, .03, .3, '#5a4632', 0, .02, 0);
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), dressMat('#d9e4e6')); bowl.position.set(0, 1.0, 0); bowl.rotation.x = Math.PI; b.add(bowl);
+    const punch = new THREE.Mesh(new THREE.CircleGeometry(.185, 16), new THREE.MeshBasicMaterial({ color: col('#7bc44a'), toneMapped: false })); punch.rotation.x = -Math.PI / 2; punch.position.set(0, .985, 0); punch.userData.noMerge = true; b.add(punch);
+    return { t: 'Line punch', x: 'Chef Brennan\'s Line punch, in the big bowl. It is green. Nobody asks why.', floor: ['L', 51.45 - r.i0, 9.45 - r.j0], y: .9, w: .5, h: .4, d: .5, block: [[51, 9]] };
+  } },
+  // linePlaque: the plaque by the bow lounge's doorway, on the promenade's north wall at its bow end (40, 9: the Lap of
+  // the Wren turns there, and everyone passing sees it): from the afterglow (Sunday 19:15) on, a trace for good after the event. Your answer
+  // from the oath under the date (flag line.answer.<proud|watch|punch>), else a first-timer's (missed). 2 draw calls
+  linePlaque: { deck: 3, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'the plaque for Crossing the Line, by the bow lounge door', make(g) {
+    const ans = ['proud', 'watch', 'punch'].find(a => typeof flag === 'function' && flag('line.answer.' + a)) || 'missed';
+    const text = (typeof evWord === 'function' && evWord('event.crossingLine.plaque.' + ans)) || 'The CSV Wren crossed the Line into the Veyli reach, Day 7.';
+    const q = /"(.*)"/.exec(text), quote = q ? q[1] : '', s = dressAt(g, '=', 'n', 28.5);
+    dressBox(s, .52, .34, .03, '#8a6a2a', 0, 1.55, .015);            // the brass plate's backing, flat on the wall
+    const t = tex(260, 170, (c, w, h) => {
+      c.fillStyle = '#c99b3e'; c.fillRect(0, 0, w, h); c.strokeStyle = '#7a5a1e'; c.lineWidth = 4; c.strokeRect(6, 6, w - 12, h - 12);
+      c.fillStyle = '#3a2a0c'; c.textAlign = 'center'; c.font = '700 17px Georgia,serif'; c.fillText('CROSSING THE LINE', w / 2, 36);
+      c.font = 'italic 500 13px Georgia,serif'; c.fillText('CSV Wren, into the Veyli reach, Day 7', w / 2, 58);
+      c.font = '500 14px Georgia,serif'; const words = ('\u201c' + quote + '\u201d').split(' '), lines = []; let l = '';
+      for (const wd of words) { const tryL = l ? l + ' ' + wd : wd; if (c.measureText(tryL).width > w - 40 && l) { lines.push(l); l = wd; } else l = tryL; } if (l) lines.push(l);
+      lines.slice(0, 3).forEach((x, k) => c.fillText(x, w / 2, 92 + k * 20));
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.48, .3), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.55, .033); s.add(p);   // .003 in front of the plate
+    return { t: 'The Line plaque', x: text, wall: ['=', 'n', 28.5], y: 1.55, w: .52, h: .34 };
+  } },
+  // lineCertificate: your Line certificate (section 18's settleTraces, from the oath's end), framed beside the
+  // Captain's table menu above your keepsake shelf: the bunk's, or your officer cabin's once SHIP.works.home is '4-23'
+  // (moved with the next deck build, as framedMenu is). 2 draw calls
+  lineCertificate: { deck: 4, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
+    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .9 : 2.05;
+    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet';
+    dressBox(s, .22, .28, .025, '#3a3024', 0, 2.45, .0125);
+    const t = tex(176, 224, (c, w, h) => {
+      c.fillStyle = '#f6efd8'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c9a23e'; c.lineWidth = 5; c.strokeRect(8, 8, w - 16, h - 16);
+      c.fillStyle = '#7a5a1e'; c.textAlign = 'center'; c.font = '700 14px Georgia,serif'; c.fillText('THE LINE', w / 2, 40);
+      c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));
+      c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(52, 192); for (let i = 1; i <= 16; i++) c.lineTo(52 + i * 4.5, 192 - 5 * Math.sin(i * 1.4)); c.stroke();   // the Captain's signature
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.45, .028); s.add(p);
+    return { t: 'Line certificate', x: (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
+  } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
   spiceJars: { deck: 3, what: 'spice jars from home on the mess hall\'s spice shelf', make(g, o) {
@@ -36265,6 +36319,7 @@ function eventsTick() {
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
+  if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -36589,8 +36644,16 @@ if (EV_LINE_ON) {
   L.moments = [{ id: 'lineCeremony', phase: 'onset', at: [1, 870], len: 45, k: 353, where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, gathering: true, easy: true,
     who: (p, d) => p.id === 'saruth' || cer.who.includes(p.id) || lineFirstCrew(2, d, cer.who).some(q => q.id === p.id) ? 0 : 1, anim: 'talk', from: 'Captain Odile Marrow',
     places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
+    whereFor: (p, d, opts) => lineFirst().has(p.id) ? [[3, '@bow-lounge-line-front']].concat(opts) : opts,   // the first-timers at the front (the ten spots nearest the Captain are theirs)
     name: 'Crossing the Line', ask: 'The ceremony\'s at half two, in the bow lounge. Coming?', here: (c, p) => evWordAt('event.crossingLine.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
     thanks: 'You squeeze into the bow lounge with the crew. Gold light comes through the bow glass.' }];
+  // L3, the look: the horn at 14:30 (a felt moment, 'horn': a gold pulse, section 8b) with its one-line notice
+  // (lineStoryTick), the gold hull lights to 19:15 (8b's FEEL_MOODS.crossingLine), the ribbons and the punch bowl in the
+  // lounge for the ceremony only, the plaque by the lounge door from the afterglow (then a trace), your certificate on
+  // your shelf from 15:15 (settle: the resolution; it has no score to settle)
+  L.moments.push({ id: 'horn', phase: 'onset', at: [1, 870], where: 'shipwide', feel: ['horn'], len: 3 });
+  L.dressing = { onset: [{ id: 'lineRibbons', title: 'Crossing the Line', at: [1, 870, 915] }], afterglow: [{ id: 'linePlaque' }] };
+  L.settle = 'resolution'; L.settleTraces = ['lineCertificate']; L.traces = { smooth: ['linePlaque'], bumpy: ['linePlaque'], rough: ['linePlaque'] };
   L.routines = { onset: [{ who: 'all', rule: 'standEasy', at: [870, 915], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] },
     { where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true }] };   // the lounge is the ceremony's alone for its 45 minutes (section 14's evClosed lets its own crowd in); Saruth stays away
   // the Line supper (the user's line-q4 a): the Sunday table re-dressed on Day 7 (EV_DAY_DRESS, the storm's shape), the
@@ -36695,7 +36758,7 @@ const VEYLI_RETELL = {
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
   id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
-  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.easy ? { easy: true } : {}),   // a pull by person, a meal, ties (the storm update's lantern supper)
+  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.easy ? { easy: true } : {}), ...(m.whereFor ? { whereFor: m.whereFor } : {}),   // a pull by person, a meal, ties (the storm update's lantern supper)
   anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
@@ -37798,12 +37861,12 @@ function lineVenue() {                                   // (called from the dat
   const LINE_DROP = ['49,6', '49,7', '49,8', '49,13', '49,14', '50,9', '50,10', '50,11', '50,12'];
   const v = 'bow-lounge-line', d = DECKS[3], P = d.places || (d.places = []), src = d.gathers['bow-lounge'];
   const g = d.gathers[v] = { name: 'the bow lounge', focus: [50.5, 10.5], rooms: src.rooms, seats: src.seats.slice(), also: ['plaza'], lead: LINE_LEADS.map(l => l.slice()),
-    at: src.at.split(' ').filter(x => !LINE_DROP.includes(x)).join(' ') };
+    at: src.at.split(' ').filter(x => !LINE_DROP.includes(x)).map(x => [x, x.split(',').map(Number)]).sort((p, q) => Math.hypot(p[1][0] + .5 - 50.5, p[1][1] + .5 - 10.5) - Math.hypot(q[1][0] + .5 - 50.5, q[1][1] + .5 - 10.5) || (p[0] < q[0] ? -1 : 1)).map(x => x[0]).join(' ') };   // nearest the Captain first (the crowd fills the spots in this order: the first-timers at the front)
   const face = (x, z) => Math.round(Math.atan2(g.focus[0] - x, g.focus[1] - z) * 180 / Math.PI);
   g.lead.forEach(([x, z, f], i) => P.push({ id: `3-${v}-lead-${i + 1}`, type: 'event', gather: v, lead: i + 1, event: `${v}-lead-${i + 1}`, at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', room: d.map[Math.floor(z)][Math.floor(x)] }));
   g.at.split(' ').forEach((t, i) => {
     const [c, r] = t.split(',').map(Number), x = c + .5 + ((c * 37 + r * 11) % 7 - 3) * .04, z = r + .5 + ((c * 13 + r * 29) % 7 - 3) * .04;   // as section 4d's venues
-    P.push({ id: `3-${v}-crowd-${i + 1}`, type: 'event', gather: v, at: [c, r], xy: [+x.toFixed(2), +z.toFixed(2)], face: face(x, z), pose: 'stand', room: d.map[r][c] });
+    P.push({ id: `3-${v}-crowd-${i + 1}`, type: 'event', ...(i < 10 ? { event: v + '-front' } : { gather: v }), at: [c, r], xy: [+x.toFixed(2), +z.toFixed(2)], face: face(x, z), pose: 'stand', room: d.map[r][c] });   // the first ten: the first-timers' own ('@bow-lounge-line-front')
   });
   PLACE_IDX = null; GATHER_SPOTS.delete(v);
 }
@@ -37837,6 +37900,17 @@ function linePudding(d, out) {
   const x = EV_DAY_DRESS.get('sunday-table@' + d); if (!x || !x.o || !x.o.where) return;
   out.pudding = MENU.pudding[(Math.floor((d - 1) / 7) + 1) % MENU.pudding.length];
   out.note = (out.note ? out.note + '; ' : '') + 'the Line supper, with ' + out.pudding;
+}
+// standing easy on shift counts as work, the walk there and back too, as a meeting's does (section 14's dayReport reads
+// eventMeetTag): the ceremony's tags join the meetings'
+if (EV_LINE_ON) for (const t of ['ev-lineCeremony', 'ev-lineCeremony-talk']) EV_MEET_TAGS.add(t);
+// Crossing the Line in play, once a minute from eventsTick (never the crew's planner): it reads and writes the running
+// event's e.mine ('story:*', 'notice:*', saved with it). L3: the horn's one-line notice as it sounds (14:30, a few
+// minutes' grace for a frame that's late; a sleep passes it)
+function lineStoryTick(now) {
+  const e = SHIP.event; if (!e || e.id !== 'crossingLine') return;
+  const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e);
+  if (!M['notice:horn'] && now >= at(1, 870) && now < at(1, 875)) { M['notice:horn'] = 1; const t = evWord('event.crossingLine.notice.horn', c); if (t && typeof toast === 'function') toast('Crossing the Line', t); }
 }
 // ---- end of slot: Line builder ----
 
@@ -49331,7 +49405,8 @@ const FEEL_CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FEEL_MOODS = {                                     // by event id: its mood (0-1) in each phase, and its colours
   ionStorm: { phases: { warning: .15, onset: .75, escalation: 1 }, a: col('#7a3cff'), b: col('#19d6c8'), light: col('#a99cff'), bg: col('#4a2488') },
 };
-const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
+if (EV_LINE_ON) FEEL_MOODS.crossingLine = { phases: { onset: .5, resolution: .5 }, a: col('#ffd36a'), b: col('#ffae42'), light: col('#ffe2a8'), bg: col('#4a3512') };   // Crossing the Line (EV5, L3): the hull lights gold from the horn to the end of the Line supper (the afterglow fades it), a warm gold through the windows and a slightly warmer light indoors (the user's line-q2 a)
+const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1), FEEL_GOLD = col('#ffd36a');
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false, lamp: 0, lampT: 0 };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = simNow() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
 // ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
@@ -49476,6 +49551,8 @@ function shipFeelFrame(t, dt) {
     camera.position.addScaledVector(_r, a * Math.sin(se * 58)).addScaledVector(_u, a * .7 * Math.sin(se * 43 + 1)); camera.updateMatrixWorld();
   }
   if (has('jolt') && se < .9) flash = 1 - se / .9;
+  const horn = has('horn') && se < 1.8 ? Math.sin(Math.PI * se / 1.8) : 0;   // Crossing the Line's horn (no sound): one soft gold pulse, no shake; reduced motion: a soft dip
+  if (horn && !FEEL_CALM) flash = Math.max(flash, .7 * horn);
   if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
   if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
   // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
@@ -49497,6 +49574,7 @@ function shipFeelFrame(t, dt) {
     const e = emerg; hemi.color.lerp(FEEL_EMERG, .62 * e); hemi.intensity *= 1 - .58 * e; sun.color.lerp(FEEL_EMERG, .6 * e); sun.intensity *= 1 - .85 * e;
     for (const L of LAMPS) L.l.intensity *= 1 - .75 * e;
   }
+  if (horn) { if (FEEL_CALM) k *= 1 - .15 * horn; else { hemi.color.lerp(FEEL_GOLD, .35 * horn); sun.color.lerp(FEEL_GOLD, .3 * horn); hemi.intensity *= 1 + .25 * horn; } }
   if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
 }
 
