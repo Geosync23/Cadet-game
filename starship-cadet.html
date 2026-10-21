@@ -8038,7 +8038,7 @@ const DECK_DRESS = {
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5;                    // the signatures: a few loops of pen along the bottom
       for (let k = 0; k < 6; k++) { const x0 = 22 + (k % 3) * 52, y0 = 196 + Math.floor(k / 3) * 22; c.beginPath(); c.moveTo(x0, y0); for (let i = 1; i <= 8; i++) c.lineTo(x0 + i * 4.5, y0 - 5 * Math.sin(i * (1.3 + k * .2))); c.stroke(); }
     });
-    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .028); s.add(p);   // .003 in front of the frame
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
     return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, 'n', along], y: 2.47, w: .26, h: .32 };
   } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
@@ -37860,10 +37860,11 @@ function evStandTray(pl, w) {
   return EV_SHIPWIDE.some(g => g.meal && g.meal === w.act && g.venue === pl.gather && (w.tag === 'ev-' + g.id || w.tag.startsWith('ev-' + g.id + '-'))
     && m >= g.at[0] - 30 && m < g.at[1]);
 }
-// the lantern supper's light (EV4): how far toward emergency light Deck n goes now (section 8b's shipFeelFrame, twice a
-// second): .85 while the lantern supper's lanterns are out on this deck (DECK_DRESS.lanternMess, drawn only on Deck 3),
-// else 0. Visual only; 0 while the storm update is off
-function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') ? .85 : 0; }
+// the lantern supper's light (EV4): how far toward emergency light it is now (section 8b's shipFeelFrame, twice a
+// second): .85 while the lantern supper's lanterns are out (DECK_DRESS.lanternMess, drawn only on Deck 3) and you're in
+// the mess hall, else 0, so the rest of Deck 3 keeps its light (the plan; lead 23 on PR4's props review), as First Light
+// Cocoa dims only the bow lounge. Visual only; 0 while the storm update is off
+function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' ? .85 : 0; }
 // S2 (EV4): the window [from, to] (minutes of day d) someone on a ship-wide event's double shift is let off it that
 // day (the rule's except: [{ id, day (the event's day), at }]: the storm's Captain and Commander for the Friday address),
 // else null. Pure: the planner's own evAt
