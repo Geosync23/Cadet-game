@@ -13,6 +13,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
 | PT1 | T1: first rotation to Day 21; opening view closer | claude/patch-crew 1badd51 + e597de2 | PASS (doc fixes for T2) |
+| RN1 (for lead 24) | opt #4 shaders kept | claude/opt-render 6fd3505 (game 8a9de48) | PASS |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
 ## Log
@@ -39,3 +40,9 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - D5's first devmode_check run used the integration copy of devmode_check.py (no 'trad' part), so its OK and the mutant d5_ma "OK" didn't count; rerun with d261274's devmode_check.py. Probes sign the arrival manifest first (it covered the sheet: my setup, not a game bug).
 - D6a and D6b reviewed together on 39b2acd.
 - RN1 (lead 24's asks): opt #4 shaders kept (6fd3505), perf_check event scenes (3af9f15). Early finding sent for the latter: switched() doesn't count `const NAME = true;` as on, so a switched-on feature's busy scene SKIPs.
+
+## RN1 opt #4: shaders kept (6fd3505), PASS
+
+- cadet_test 0.64.8 -> 6fd3505 ALL IDENTICAL; keep_shots.py 14/14 deck shots identical (programs 22 after lap 1; memory as old); deck_check OK; GitHub quick check green.
+- keep_probe7.py (day, night, a week on, day again; 2 laps of 7 decks each): 22 programs from mid lap 1, none unkept, bounded. 0.64.8 at most 20 alive; mutant without usedTimes++ the same as 0.64.8.
+- Section 12's one line reviewed for the HUD seat: fine.
