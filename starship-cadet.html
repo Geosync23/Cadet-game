@@ -9724,7 +9724,8 @@ const evAt = abs => { const d = Math.floor(abs / 1440) + 1, sl = evDay(d); retur
 const evWho = (who, p) => !who || who === 'all' || who === 'dept:' + p.dept;
 const evRule = (abs, rule, p) => { const e = evAt(abs); return e && e.rules.find(r => r.rule === rule && (!p || evWho(r.who, p))) || null; };
 // a place closed at ship minute abs: where 'type:<type>' or '<deck>|<room key>'
-const evClosed = (pl, abs) => { const e = evAt(abs); return !!e && e.rules.some(r => r.rule === 'closed' && (r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room)); };
+const evClosed = (pl, abs) => { const e = evAt(abs); return !!e && e.rules.some(r => r.rule === 'closed' && (r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room
+  || (r.where === 'deck:' + pl.deck && !(typeof evOpenFor === 'function' && evOpenFor(pl.deck, pl.room, abs))))); };   // a whole deck (the storm update: the rec deck), but a room opened for a held beat (the auditorium for the Friday address)
 // owed a call when comms come back: section 18's callOwed (the calls-home crew and about a third of the rest)
 const evOwed = (p, e, d) => p.rank !== 'guest' && (typeof callOwed === 'function' ? callOwed(p, e.startDay) : habitsOn(p, d).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33);
 function schedFrame(p, d) {
@@ -10070,6 +10071,7 @@ function schedBuild(p, d, occ, S) {
   let recN = 0;
   const recVisit = (to, odds = 1, ride = null) => {   // ride: { a0, go } when the ride down is already planned (recSwap)
     if (!REC_ON || !occ.rec || p.rank === 'guest' || p.guest) return false;
+    if (shut && (evClosed({ deck: 7 }, B + t + C) || evClosed({ deck: 7 }, B + to - 1))) return false;   // the rec deck closed for a ship-wide event (the storm update): no visit, no odds rolled
     const n = recN++, vu = j => schedU(p.seed + 7919 * n, d, 1031 + j), hab = Object.keys(REC_HABITS).find(h => H.has(h));
     let kind = null;
     if (hab && vu(0) < odds * (F.works ? REC_ODDS.habit : REC_ODDS.habitOff)) kind = REC_HABITS[hab];
@@ -15469,6 +15471,8 @@ Object.assign(PLAYER_ACTS, {
 const REC = { chain: null, last: null, q: null, wso: null, cup: null };
 const recKitOn = () => PLAYER_SPEC.kit === 'rec';
 const recOpen = () => SHIP.time.min >= DECKS[7].open[0] * 60;   // 06:00 to midnight
+// closed for a ship-wide event where you stand (the storm update, S3: the front to the all-clear; the auditorium open for the Friday address)
+const recEventShut = () => { try { return typeof eventClosed === 'function' && eventClosed({ deck: 7, room: roomAt(...player.here()) }); } catch (e) { return false; } };
 // where things are: spots in world units (from deck tile coordinates), moves in deck coordinates (section 8c's)
 const recSpot = (walk, x, z, face, pose) => ({ id: null, walk, x: x - OX, z: z - OZ, y: 0, face, pose });
 const recLocker = () => recSpot([19, 1], 19.35, 1.25, Math.PI, 'browse');
@@ -15478,6 +15482,7 @@ const REC_LOOP = [[11.4, 4.85], [4.8, 4.85], [4.8, 1.3], [13.8, 1.3, 1], [13.8, 
 function recTap(it, at, point) {
   if (typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 7) return false;
   const t = it.t;
+  if (t !== 'Lockers' && t !== 'Scoreboard' && recEventShut()) { toast(t, 'The rec deck\'s closed for the storm. It opens again at the all-clear.'); return true; }   // the storm update (S3)
   if ((t === 'Lightdisc court' || t === 'Ask someone to play') && recShut().court) { toast('Lightdisc', worksText('rec.shut.net', 'The net\'s down. No Lightdisc till Works fix the emitters.')); return true; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if ((t === 'Lightdisc court' || t === 'Ask someone to play') && (recCupTap() || recWsoTap())) return true;   // Winner Stays On: skip the line (0.83.1); Cup day: your match (0.83.2)
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(recCourtWaiting()); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
@@ -15491,7 +15496,7 @@ function recTap(it, at, point) {
 PLAYER_TAPS.push(recTap);
 // 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
 function recRoomIn(r) {
-  if (r !== 'F' || !deckDef || deckDef.num !== 7 || ACT || !recOpen()) return;
+  if (r !== 'F' || !deckDef || deckDef.num !== 7 || ACT || !recOpen() || recEventShut()) return;
   recGo('float', null, 'Float room', 'A fifth of a g. The padding is soft underfoot.');
 }
 function recGo(kind, point, title, flavour) {
@@ -16282,9 +16287,11 @@ function galleyStep(S, m, st) {
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
+  // the storm update (EV_STORM_ON): on a day with trays for the bridge, the bridge's portions are kept back from 16:00 until they're plated at 18:00 (the lantern supper's line would empty the pans)
+  const keep = typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON && S.ev && S.ev.trays && md >= FOOD.trayAt - 120 && md < FOOD.trayAt ? Math.round(galleyEvNum(S.ev.trays, 0)) : 0;
   const serve = (kind, plate) => {
     if (kind === 'grab' && S.grab.items > 0) { S.grab.items--; return 'grab'; }
-    if (line > 0 && S.servery.portions > 0 && (!plate || FOOD.plates - S.dirty - S.inUse > 0)) { S.servery.portions--; line--; return 'servery'; }
+    if (line > 0 && S.servery.portions > keep && (!plate || FOOD.plates - S.dirty - S.inUse > 0)) { S.servery.portions--; line--; return 'servery'; }
     return null;
   };
   const got = (x, how, eat) => {
@@ -35281,6 +35288,7 @@ function evOneOffDefs() {
 const evTable = () => SHIP_TRADITIONS.concat(EV_SHIPWIDE, evOneOffDefs());
 // the events on a day: when it's due, and for a birthday who it's for (one gathering for everyone that day)
 const EV_DAYS = new Map();
+const EV_DAY_DRESS = new Map();                          // the storm update (S6): '<tradition id>@<ship day>' -> { drop } | { add, o, ev }, filled by evDressMake (slot 'Storm builder'); empty while the events are off
 let EV_ARR = null;
 function eventsOn(d) {
   const arr = evArrival() + '|' + SHIP_TRADITIONS.filter(e => e.flag || e.unflag).map(e => typeof flag === 'function' && (e.flag && flag(e.flag) ? 1 : 0) + (e.unflag && flag(e.unflag) ? 2 : 0)).join('');
@@ -35291,13 +35299,14 @@ function eventsOn(d) {
   }
   if (EV_DAYS.has(d)) return EV_DAYS.get(d);
   const out = [], yd = shipYearDay(d);
-  for (const ev of evTable()) {
-    const w = ev.when; let honorees = [];
+  for (const ev0 of evTable()) {
+    const dd = EV_DAY_DRESS.size ? EV_DAY_DRESS.get(ev0.id + '@' + d) : null; if (dd && dd.drop) continue;   // a ship-wide event's day dress: not today, or today as changed (S6)
+    const ev = dd ? dd.ev || (dd.ev = evDressed(ev0, dd.o)) : ev0, w = ev.when; let honorees = [];
     if (w.birthday) { honorees = schedPeople().filter(p => birthdayOf(p) === yd && (typeof aboard !== 'function' || (aboard(p, d) && (typeof guestStay !== 'function' || guestStay(p, d) !== 'leave')))); if (!honorees.length) continue; }   // only crew aboard that evening (reserve crew aren't yet; a leaver's gone by 15:00)
     else if (w.rotation != null) { const ids = evRotation(w, d) || []; honorees = schedPeople().filter(p => ids.includes(p.id) && (!w.dept || p.dept === w.dept) && (typeof aboard !== 'function' || aboard(p, d))); if (!honorees.length) continue; }   // a rotation's leavers or arrivals
     else if (w.ship) { const o = typeof eventOn === 'function' ? eventOn(d) : null; if (!o || o.id !== w.ship || o.day !== w.day) continue; }
     else if (w.date) { if (d !== w.date) continue; }
-    else if (!evDue(w, d)) continue;
+    else if (!(dd && dd.add) && !evDue(w, d)) continue;   // a day-dress 'add': a one-off copy on a day it doesn't fall
     if (ev.flag && !(typeof flag === 'function' && flag(ev.flag))) continue;   // waits for a story beat (bridge hour: 'bridge.invited')
     if (ev.unflag && typeof flag === 'function' && flag(ev.unflag)) continue;
     if (ev.skip && ev.skip(d)) continue;                   // 0.83.2 (RA): a day it stands down (the rec talent night near the yearly one)   // 0.83 (RA): until a flag (film night in the junior common room, until it moves)
@@ -36077,6 +36086,7 @@ function eventsTick() {
   eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
+  if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
@@ -36117,7 +36127,7 @@ function tradDecor(now) {
 function eventsDress(now) {
   if (typeof dressShow !== 'function') return;
   const n = eventNow(now), e = SHIP.event, def = n && SHIP_EVENTS[n.id], c = e ? evCtx(e) : { band: 'smooth', mine: {}, you: 'Cadet' };
-  const list = (def && def.dressing && def.dressing[n.phase] || []).map(x => ({ ...x, lines: x.lines ? evText(x.lines, c) : undefined }));
+  const list = (def && def.dressing && def.dressing[n.phase] || []).filter(x => !x.at || (n.day === x.at[0] && now % 1440 >= x.at[1] && now % 1440 < x.at[2])).map(x => ({ ...x, lines: x.lines ? evText(x.lines, c) : undefined }));   // at: [event day, from, to] for a dressing only then (the storm update: the supper's lanterns)
   dressShow(list.concat(tradDecor(now), SHIP.traces));
 }
 // ---- ship-wide events (Pillar 3, C6): the big ones, 2-4 days, a layer over normal life ----
@@ -36323,6 +36333,40 @@ if (EV_STORM_ON) {
   S.mail.debrief = { at: [4, 1080], from: S.debrief.from, subject: S.title + ': how it went', body: c => S.debrief[c.band] + evText(S.debrief.mine, c) };
   S.address.onset = S.address.onset.map((l, i) => evWord('event.ionStorm.address.onset.' + (i + 1)) || l);
   S.commendation = evBankMail('event.ionStorm.mail.commendation', null);
+  // S3, the rec deck: closed from the front to the all-clear (eventClosed and section 14's evClosed read 'deck:<n>'),
+  // except the auditorium and its way from the lift for the Friday address (EV_OPEN_FOR, evOpenFor). Its first
+  // all-hands is no longer the storm's: it's the first Friday address, Day 5 (stormAllHandsTick; the user's answer 5)
+  for (const ph of ['onset', 'escalation']) S.routines[ph].push({ where: 'deck:7', name: 'the rec deck', rule: 'closed' });
+  // S6, the all-clear day: the party in the writers' words; the bow lounge tidied on Sunday at 10:30 (the user's answer
+  // 7); Lap of the Wren moves to Monday at 20:30 with Tomas and the rec deck's talent night a week on (EV_DAY_DRESS,
+  // dayDress: { trad, day (the event's day), drop | set | add }, the shape the Line reuses)
+  const party = S.moments.find(m => m.id === 'party'), pw = k => (c, p) => evWordAt('event.ionStorm.gather.party.' + k, p ? p.seed + c.day : 0) || undefined;
+  Object.assign(party, { name: evWord('event.ionStorm.gather.party.name') || undefined, ask: pw('ask'), here: pw('here'), thanks: c => evWordAt('event.ionStorm.gather.party.thanks', 0) || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.' });
+  S.jobs.resolution = S.jobs.afterglow.map(j => ({ ...j, at: 630 })); delete S.jobs.afterglow;
+  // S5, the lantern supper (the user's answers 3 and 4): Saturday 18:00-19:30 in the mess by lamp light, the storm's
+  // big crowd (about 55-60). A meal gathering like the Sunday table (through the servery line, a tray, then a seat, a
+  // place at the long tables or a standing spot); Brennan, off that day, comes to eat (pull 1); Lukas is on the galley
+  // line, so never pulled. Staying in pauses 17:45-19:45 (a rule's `off`: eventRoutines leaves it out then). Its look:
+  // the long tables (decor longTables, with their extra chairs) and the lanterns and low light (the escalation's timed
+  // dressing 'lanternMess', the deck architect's to come), 17:30-19:45.
+  // The notice Mail at noon; the lantern job up at 14:00 (held for you if you promised Lukas: story A, S7)
+  const lw = k => (c, p) => evWordAt('event.ionStorm.gather.lanternSupper.' + k, p ? p.seed + c.day : 0) || undefined;
+  S.moments.push({ id: 'lanternSupper', phase: 'escalation', at: [2, 1080], len: 90, k: 352, where: { venue: 'mess', deck: 3, room: /^Mess hall$/ }, gathering: true,
+    who: p => p.id === 'brennan' ? 1 : .85, anim: 'talk', meal: 'dinner', ties: { galley: { meal: 'dinner' }, decor: 'longTables' }, from: 'Lukas Dlamini',
+    places: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'] }, { deck: 3, room: /^Mess hall$/, types: ['@long-table'] }, { deck: 3, pool: '@gather-mess' }],
+    name: evWord('event.ionStorm.gather.lanternSupper.name') || 'Lantern supper', ask: lw('ask'), here: lw('here'),
+    thanks: c => evWordAt('event.ionStorm.gather.lanternSupper.thanks', 0) || 'You squeeze in at a long table in the lamp light.' });
+  for (const r of S.routines.escalation) if (r.rule === 'stayIn') r.off = [[2, 1065, 1185]];
+  S.dressing.escalation = [{ id: 'lanternMess', title: 'Lantern supper', at: [2, 1050, 1185] }];   // the lanterns and the low light, 17:30-19:45 (the long tables' chairs are its decor, longTables)
+  { const m = evBankMail('event.ionStorm.gather.lanternSupper.mail', null); if (m) S.mail.lanternSupper = { ...m, at: [2, 720], from: 'Lukas Dlamini' }; }
+  S.jobs.escalation = [{ id: 'stormLanterns', title: evWord('event.ionStorm.job.stormLanterns') || 'Lantern supper: carry the lanterns up from storage', tier: 1, at: 840, bring: 'a crate of storm lanterns',
+    stops: [{ deck: 5, room: /^Main storage$/, mins: 5, tag: 'pickup' }, { deck: 3, room: /^Mess hall$/, types: ['mess-seat'], mins: 15, tag: 'drop' }] }];
+  // S7, story A "Sixty by lamplight" (the user's answer 1; the moments are stormStoryTick's, in play): Lukas's Mail on
+  // Friday at 20:50 unless you met him (`unless`: a key in e.mine); the storm lantern on the galley pass from the all-clear
+  { const m = evBankMail('event.ionStorm.mail.lukas', null); if (m) S.mail.lukas = { ...m, at: [1, 1250], from: 'Lukas Dlamini', unless: 'story:fri' }; }
+  S.settleTraces = ['stormLantern'];
+  S.dayDress = [{ trad: 'lap-of-the-wren', day: 3, drop: true }, { trad: 'lap-of-the-wren', day: 4, add: { at: [1230, 1275], who: [['tomas', 1]], words: 'event.ionStorm.trad.lap-of-the-wren' } },
+    { trad: 'rec-talent-night', day: 3, drop: true }, { trad: 'rec-talent-night', day: 10, add: {} }];
 }
 // ---- the diplomatic visit (event 2; plans/pillar3-plan.md, "The main events"): a Veyli delegation of four (GUESTS with
 // event 'diplomatic', section 9) aboard for five days. Day 0 Vance's warning; day 2 10:00 the greeting in the shuttle
@@ -36373,7 +36417,7 @@ SHIP_EVENTS.diplomatic = {
     { id: 'veyli-told', phase: 'afterglow', at: [7, 720], seed: ['all'], weight: 2, lines: c => VEYLI_RETELL[c.band] },
   ],
   moments: [
-    { id: 'farewell', phase: 'resolution', at: [7, 600], len: 30, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: .8, anim: null,   // mid-morning: only those off shift can come
+    { id: 'farewell', phase: 'resolution', at: [7, 600], len: 30, k: 351, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, gathering: true, who: .8, anim: null,   // mid-morning: only those off shift can come; k 351 (the one it had by its place in the list, pinned by the storm update so the lantern supper's 352 doesn't move it)
       name: 'The Veyli farewell', ask: 'The Veyli leave at ten. I want to see them off.', here: 'Safe travels.', thanks: 'You line the shuttle bay to see the delegation off.' },
   ],
   meetings: [
@@ -36415,7 +36459,8 @@ const VEYLI_RETELL = {
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
   id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
-  who: () => m.who, anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
+  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}),   // a pull by person, a meal, ties (the storm update's lantern supper)
+  anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
 SHIP.event = null; SHIP.eventLog = []; SHIP.traces = [];
@@ -36501,9 +36546,11 @@ const evCtx = (e, t) => ({ dark: t === undefined ? null : lastDark(t), band: e ?
 function eventRoutines(t) {
   const now = eventNow(t); if (!now) return [];
   const def = SHIP_EVENTS[now.id], i = def.phases.findIndex(p => p.id === now.phase);
-  for (let k = i; k >= 0; k--) { const l = def.routines && def.routines[def.phases[k].id]; if (l) return l; if (def.phases[k].clears) return []; }
+  for (let k = i; k >= 0; k--) { const l = def.routines && def.routines[def.phases[k].id]; if (l) return l.some(r => r.off) ? l.filter(r => !evRuleOff(r, now.day, t)) : l; if (def.phases[k].clears) return []; }
   return [];
 }
+// a rule's `off`: [[event day, from, to], ...] minutes it doesn't apply (the storm update: staying in pauses for the lantern supper)
+const evRuleOff = (r, day, t) => !!r.off && r.off.some(([dd, a, b]) => { const m = ((t % 1440) + 1440) % 1440; return day === dd && m >= a && m < b; });
 // an event guest's stay (section 14, C8): [arriveDay, leaveDay] in ship days, from the event's start day (running,
 // logged or next due): they arrive arriveOffset days after it starts (default the event's `guestsArrive`, else its
 // onset's day) and stay `stay` days. null when that event isn't running, logged or due. Pure
@@ -36546,6 +36593,7 @@ function eventDueDay() {
 // and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
 function eventAdvance(t = shipNow(), quiet) {
   const out = [];
+  if (EV_STORM_ON) stormAllHandsTick(t);                 // the rec deck's first all-hands: the first Friday address (the storm update, S3)
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
   for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
@@ -36574,7 +36622,8 @@ function eventAdvance(t = shipNow(), quiet) {
   for (const [key, m] of Object.entries(def.mail || {})) {
     if (!m || !Array.isArray(m.at) || e.mine['mail:' + key] || typeof mailSend !== 'function') continue;
     const at = evBeatAt(e.startDay, m.at); if (at > t) continue;
-    e.mine['mail:' + key] = 1; out.push('mail ' + key);
+    e.mine['mail:' + key] = 1; if (m.unless && e.mine[m.unless]) continue;   // unless: not if that happened first (the storm update: you met Lukas)
+    out.push('mail ' + key);
     mailSend({ at, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e, at)), quiet: !!quiet });
   }
   if (def.commendAt && !e.mine['commend:at'] && t >= evBeatAt(e.startDay, def.commendAt)) eventCommend(e, def, t, quiet, out);   // the storm update: at the all-clear's end
@@ -36607,7 +36656,7 @@ let ADDRESS_EL = null, ADDRESS_T = 0;
 const ADDRESSES = [];                                    // every address so far (for the checks and the Ship app)
 function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', quiet = false }) {
   const text = (lines || []).join(' ');
-  if (REC_DECK && SHIP.event && SHIP.rec && SHIP.rec.ah == null) recFirstAllHands(at);   // the first ship-wide event's address is the first all-hands (0.83.2, RA)
+  if (REC_DECK && SHIP.event && !EV_STORM_ON && SHIP.rec && SHIP.rec.ah == null) recFirstAllHands(at);   // (the storm update: the first Friday address, stormAllHandsTick)   // the first ship-wide event's address is the first all-hands (0.83.2, RA)
   ADDRESSES.push({ at, from, text });
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
@@ -37161,8 +37210,12 @@ function eventClosed(g, t = shipNow()) {
   const rules = eventRoutines(t).filter(r => r.rule === 'closed'); if (!rules.length) return false;
   const pl = g.place && typeof placeById === 'function' ? placeById(g.place) : null;
   if (!rules.some(r => (g.room && r.where === g.deck + '|' + g.room) || (pl && r.where === 'type:' + pl.type) || r.where === 'deck:' + g.deck)) return false;
+  return !evOpenFor(g.deck, g.room, t);
+}
+// a room the event opens for a held beat at minute t (EV_OPEN_FOR): pure, so section 14's evClosed reads it too
+function evOpenFor(deck, room, t) {
   const d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
-  return !EV_OPEN_FOR.some(o => o.deck === g.deck && o.room === g.room && evBeatsOn(d).some(b => b.id === o.beat && m >= b.from && m < b.to));
+  return EV_OPEN_FOR.some(o => o.deck === deck && o.room === room && evBeatsOn(d).some(b => b.id === o.beat && m >= b.from && m < b.to));
 }
 // readers for the writers' address lines (EW1, content/addresses: band:, done:<job>, {stormjobs}, {myjobs}). They read
 // what happened in play, so they're for what you see and hear only: never for the crew's planner
@@ -37271,6 +37324,7 @@ SIM_ADVANCE.push((from, to) => eventCallInTick(from, to));
 // ({me} your name, {band}, {dark} a deck that went dark); null when the key isn't baked. A Mail's text is 'Subject | body'
 function evFill(text, c) { return c ? text.replace(/\{(me|band|dark)\}/g, (m, w) => w === 'me' ? c.you : w === 'band' ? c.band : c.dark ? deckWord(c.dark) : m) : text; }   // a function: the storm's data uses it at load
 function evWord(key, c) { const L = typeof LINES !== 'undefined' && LINES[key], x = Array.isArray(L) && L[0] && L[0].text; return typeof x === 'string' ? evFill(x, c) : null; }
+function evWordAt(key, k, c) { const L = typeof LINES !== 'undefined' && LINES[key], x = Array.isArray(L) && L.length && L[((k | 0) % L.length + L.length) % L.length].text; return typeof x === 'string' ? evFill(x, c) : null; }   // one of several, by k (a seed)
 function evBankMail(key, alt) {
   const L = typeof LINES !== 'undefined' && LINES[key], x = Array.isArray(L) && L[0] && L[0].text; if (typeof x !== 'string' || !x.includes(' | ')) return alt;
   const i = x.indexOf(' | '), body = x.slice(i + 3);
@@ -37283,6 +37337,7 @@ const evCommended = mine => (mine.jobs || 0) >= 2 || ((mine.jobs || 0) >= 1 && (
 function eventSettle(e, out) {
   if (typeof machinesNow === 'function') machinesNow();
   e.mine.settled = eventBand(e.id, e.threads); out.push('settled ' + e.mine.settled);
+  const def = SHIP_EVENTS[e.id]; for (const tr of (def && def.settleTraces) || []) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);   // a trace from the all-clear on, whatever the band
 }
 // your commendation at the event's `commendAt` minute (the storm: the all-clear's end), once a run; the letter is the
 // writers' (the event's `commendation`: { subject, body }) else the base's words. eventFinish then leaves it alone
@@ -37309,6 +37364,85 @@ function stormScripts() {
     L.splice(i + 1, 0, you); ver[b] = { ...sc, lines: L };
   }
   MEETING_SCRIPTS.captainAllClear = { title: ver.smooth.title, from: ver.smooth.from, gist: c => evText(ver[c.band].gist, c), get lines() { return ver[stormBandNow()].lines; } };
+}
+// S3: the rec deck's first all-hands is the first Friday address (Day 5, 16:00-16:50: EV_BEATS' Friday row), the
+// user's answer 5: from its end the season's all-hands and film night in the auditorium (recFirstAllHands), once a
+// game, whether or not the address itself is in the build. A game already past it gets it now
+function stormAllHandsTick(t) {
+  if (!REC_DECK || !SHIP.rec || SHIP.rec.ah != null) return;
+  const b = EV_BEATS.find(x => x.id === 'fridayAddress'), at = (b.fromDay + (b.weekday - weekday(b.fromDay) + 7) % 7 - 1) * 1440 + 1010;   // 16:50
+  if (t >= at) recFirstAllHands(at);
+}
+// S6, EV_DAY_DRESS (declared beside eventsOn, which reads it): one shape for every event (the storm builds it, the Line
+// reuses it; plans/event-storm-plan.md "EV_DAY_DRESS"). From the calendar's plan and each event's own `dayDress` only
+// (never eventNow, SHIP.event or the save), so the crew's planner can read it; an event the calendar passes over adds
+// nothing, and with the calendar off it stays empty (eventsOn as today). Rows: { trad, day, drop: true } (not that
+// day), { trad, day, set: {...} } (that day with fields changed), { trad, day, add: {...} } (a one-off copy on a day
+// it doesn't fall, keeping its k); the fields: name, at, jitter, who (extra pulls [[id, chance]] over its own), words
+// (a bank prefix: its .mail .ask .here .thanks), mail: false. Made at load and for a New game
+function evDressMake() {
+  EV_DAY_DRESS.clear(); EV_DAYS.clear();
+  if (!EV_CAL_ON) return;
+  for (const r of evCalPlan()) for (const x of SHIP_EVENTS[r.id].dayDress || []) {
+    const ev = evTable().find(e => e.id === x.trad); if (!ev) continue;
+    EV_DAY_DRESS.set(x.trad + '@' + (r.day + x.day), x.drop ? { drop: true } : { add: !!x.add, o: x.add || x.set || {}, ev: null });   // the dressed copy made when first asked (eventsOn): a tradition's fields aren't all readable at load
+  }
+}
+function evDressed(ev, o) {
+  const x = { ...ev };
+  if (o.name) x.name = o.name; if (o.at) x.at = o.at.slice(); if (o.jitter != null) x.jitter = o.jitter;
+  if (o.who) { const pull = new Map(o.who), own = ev.who; x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : own(p, d, e); }
+  if (o.words) for (const k of ['mail', 'ask', 'here', 'thanks']) if (typeof LINES !== 'undefined' && LINES[o.words + '.' + k]) x[k] = (c, p) => evWordAt(o.words + '.' + k, (p ? p.seed : 0) + (c && c.day || 0));
+  if (o.mail === false) x.mail = null;
+  return x;
+}
+evDressMake();
+if (typeof onSim === 'function') onSim('newGame', () => evDressMake());   // after F0c's own newGame (EV_SKIPPED cleared): registered later, so it runs later
+// S7, story A "Sixty by lamplight" (storm plan v1.2, the user's answer 1; EW2's lines, content/meetings/storm*.meet and
+// the bank's event.ionStorm.lukas.*). In play only, once a minute from eventsTick; it reads and writes the running
+// storm's e.mine ('story:*', saved with it) and the flags the replies set (storm.lukas.promised|fixed|asked|own), never
+// the crew's planner. Friday 17:00-20:30: near Lukas in the mess or the galley, his moment (the first line by the save:
+// still in Bunk 1, or moved); "I'll give you a hand" holds the lantern job for you. Saturday 14:30-17:00, the same (the servery's in the mess):
+// the range choice ("I'm Works" posts the range job, yours: `stormRange`, Deck 3's range); the errand to Brennan
+// wherever she is, then his bubble when you're back; his bubble when the range is done. The supper, 18:05-19:20 in the
+// mess: Brennan's line by your choice (fixed: the job done; asked: the message carried; else his own way); 19:20-19:35
+// his covers. The moments are 'moment:' scripts: they never count toward a commendation (the jobs do)
+const STORM_RANGE_JOB = { id: 'stormRange', tier: 1, stops: [{ deck: 3, machine: 'range', mins: 20, tag: 'reset' }] };
+function stormMoment(id, who, first, onPick) {
+  const sc = MEETING_SCRIPTS[id]; if (!sc || DIALOGUE) return false;
+  const key = 'moment:' + id;
+  MEETING_SCRIPTS[key] = { ...sc, lines: (first ? [first] : []).concat(sc.lines), onPick, onEnd: () => { delete MEETING_SCRIPTS[key]; } };
+  return dialogueShow(key, { id: key, who, at: shipNow(), where: hereWhere() });
+}
+const stormAtSupper = (id, t) => { const p = schedPeople().find(x => x.id === id), w = p && typeof whereIs === 'function' ? whereIs(p, t) : null; return !!(w && !w.moving && /^ev-lanternSupper/.test(w.tag || '')); };
+function stormStoryTick(now) {
+  const e = SHIP.event; if (!e || e.id !== 'ionStorm' || typeof DECK_CREW === 'undefined' || !deckDef) return;
+  const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e), P = player.obj.position;
+  const room = (() => { try { const r = DECKS[deckDef.num].rooms[roomAt(...player.here())]; return deckDef.num + '|' + (r && r.name || ''); } catch (x) { return ''; } })();
+  const near = (id, r) => DECK_CREW.find(a => a.p && a.p.id === id && a.h && Math.hypot(a.x - P.x, a.z - P.z) < r) || null;
+  const say = (id, key, r = 6) => { const a = near(id, r), text = evWord(key, c); return !!(a && text && typeof bubbleSay === 'function' && bubbleSay(a.h, text, 5)); };
+  const galley = /^3\|(Mess hall|Galley)$/.test(room);
+  if (!M['story:fri'] && now >= at(1, 1020) && now < at(1, 1230) && galley && near('dlamini-lukas', 4)) {
+    const hi = { who: 'dlamini-lukas', to: 'you', text: x => evWord('event.ionStorm.lukas.hi.' + (typeof promoDone === 'function' && promoDone('move2') ? 'moved' : 'bunk'), x) || 'Sixty.' };
+    if (stormMoment('stormLukasFri', ['dlamini-lukas'], hi, k => { if (k === 0) eventTakeJob('stormLanterns'); })) M['story:fri'] = 1;
+  }
+  if (!M['story:lanterns'] && now >= at(2, 840) && now < at(2, 1020)) { M['story:lanterns'] = 1;   // the lantern job up (S5): yours if you promised
+    const t = evWord('event.ionStorm.notice.lanterns' + (M['wants:stormLanterns'] ? '.held' : ''), c); if (t) toast('Lantern supper', t); }
+  if (!M['story:sat'] && now >= at(2, 870) && now < at(2, 1020) && galley && near('dlamini-lukas', 4)) {
+    if (stormMoment('stormLukasSat', ['dlamini-lukas'], null, k => {
+      const id = k === 0 && typeof postEventJob === 'function' ? postEventJob({ ...STORM_RANGE_JOB, title: evWord('event.ionStorm.job.stormRange') || 'Storm: reset the galley range' }, { event: 'ionStorm', forYou: true }) : null;
+      const j = id && SHIP.jobs.find(x => x.id === id); if (j && !j.claimedBy) Object.assign(j, { reserved: 'storm', until: at(2, 1080), shareSeen: true });   // on another job already (the lanterns): held for you to 18:00 (section 17's heldForYou), then the crew's
+      if (k === 1) M['story:errand'] = 1; })) M['story:sat'] = 1;
+  }
+  const bw = M['story:errand'] === 1 && typeof whereIs === 'function' ? whereIs(schedPeople().find(x => x.id === 'brennan'), now) : null;   // not while she's at the washroom
+  if (M['story:errand'] === 1 && now < at(2, 1080) && bw && bw.act !== 'wash' && near('brennan', 3) && stormMoment('stormBrennanErrand', ['brennan'], null, null)) M['story:errand'] = 2;
+  if (M['story:errand'] === 2 && now < at(2, 1080) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.asked', 4)) M['story:errand'] = 3;
+  if (!M['story:fixed'] && now < at(2, 1080) && eventJobDone('stormRange', true) && galley && say('dlamini-lukas', 'event.ionStorm.lukas.fixed', 5)) M['story:fixed'] = 1;
+  if (!M['story:supper'] && now >= at(2, 1085) && now < at(2, 1160) && room === '3|Mess hall' && stormAtSupper('brennan', now)) {   // once she's through the line and sat down
+    const v = flag('storm.lukas.fixed') && eventJobDone('stormRange', true, at(2, 1080)) ? 'fixed' : flag('storm.lukas.asked') && M['story:errand'] >= 2 ? 'asked' : 'own';
+    if (stormMoment('stormLanternBrennan.' + v, ['brennan', 'dlamini-lukas'], null, null)) M['story:supper'] = v;
+  }
+  if (!M['story:covers'] && now >= at(2, 1160) && now < at(2, 1175) && room === '3|Mess hall' && say('dlamini-lukas', 'event.ionStorm.lukas.covers', 10)) M['story:covers'] = 1;
 }
 // ---- end of slot: Storm builder ----
 
