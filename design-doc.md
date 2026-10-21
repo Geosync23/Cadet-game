@@ -643,6 +643,11 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. Pillar 5 steps 5-6 come later and fit around these days.
 
+**The events base's three answers (the user, 2026-10-21, each the recommended option; `plans/events-base-brief.md`):**
+- **A save already past an event's day** when the events are switched on: that event is **skipped**, never run late. Dev mode can still start it. The skip is decided once, the first time a save loads with events on, and kept with the save.
+- **The Captain's table and your night shift:** on a night-shift week (Day 20) the table starts at **19:00 and ends by 20:15**, so you can go and still be at your 21:00 shift.
+- **Day 12, the storm and the Friday address:** the rec deck stays closed from the front to the all-clear, but **the auditorium and the way to it open just for the address** (16:00-16:50). The Captain says she's borrowed the room for an hour.
+
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
 **Crowds:** up to about 60 per gathering for now (the user), with standing places around the mess's 44 seats. This goes up after a test on the user's phone.
