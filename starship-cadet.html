@@ -10989,7 +10989,7 @@ function devOccasions(a, b) {
 function devDay(d) {
   const B = (d - 1) * 1440, out = [
     { from: MEALS.breakfast[0], to: MEALS.breakfast[1], title: 'Breakfast', where: 'the mess, Deck 3', kind: 'meal' },
-    { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },
+    { from: DEV_SHIFT.from, to: dayShiftEnd(d), title: 'On shift', where: DEV_SHIFT.where, kind: 'shift' },   // 15:30 on a short Friday (14's dayShiftEnd)
     { from: MEALS.dinner[0], to: MEALS.dinner[1], title: 'Dinner', where: 'the mess, Deck 3', kind: 'meal' }];
   if (!devShiftOn(d)) out.splice(1, 1, { from: DEV_SHIFT.from, to: DEV_SHIFT.to, title: 'Day off', where: 'no shift today, your time is your own', kind: 'off' });
   for (const g of apptGroups(SHIP.device.appts.filter(a => (a.status === 'yes' || a.status === 'kept') && a.at >= B && a.at < B + 1440)))
@@ -11143,7 +11143,7 @@ function deviceDo(action) {
 }
 // Quiet off shift (0.35.11, a setting): work notifications (DEV_WORK_APPS) are quiet badges, not toasts, when you're off shift
 const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
-const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < DEV_SHIFT.to;
+const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < dayShiftEnd(SHIP.time.day);
 function deviceNotify({ app, text, urgent } = {}) {
   if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
@@ -36925,6 +36925,13 @@ function friHours(p, d, hrs) {
 // your time clock on a short Friday (fp-q7): forget to clock out and it signs you out at 16:00 (else CAREER.autoOut,
 // 18:00). Read by section 20's careerTick. Your shift's end itself is section 14's dayShiftEnd(d)
 function friAutoOut(d) { return friShort(d) ? 960 : CAREER.autoOut; }
+// the Works mechanics on a short Friday (section 24, the Works career engineer's): the even weeks' Friday team job
+// starts at 13:30, not 14:00 (TEAM_FRI), so even a slow one (TEAM_SLOW) is done by 15:30; a delivery's haul is held for
+// you to 14:30, not 16:00 (HAUL_UNTIL), leaving the crew an hour before they stop. w: teamWeek(d)
+function friTeamSlot(w) { return friShort(w * 7 + 1 + TEAM_FRI[0]) ? [TEAM_FRI[0], 810] : TEAM_FRI; }
+function friHaulUntil(d) { return friShort(d) ? 870 : HAUL_UNTIL; }
+// Dev mode's Clock tab (section 25, part F): on a short Friday "To 16:55" (just before your shift ends) is "To 15:25"
+function friDevTimes(times, d) { return friShort(d) ? times.map(x => x[1] === 16 * 60 + 55 ? ['To 15:25', 15 * 60 + 25] : x) : times; }
 
 // ---- slot: Fridays builder (section 18f). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- end of slot: Fridays builder ----
@@ -43372,7 +43379,7 @@ function roundJob(day, at, o = {}) {
   if (route.length < (o.train ? 1 : 4)) return null;
   const m0 = machineById(route[0]), n = m0.deck, t = (day - 1) * 1440 + at;
   const j = jobMake('rounds', { id: 'round' + (o.slot ? o.slot : '') + '-d' + n + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: n, room: m0.room, h: Math.floor(t / 60),
-    title: o.train ? roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n }) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + DAY_SHIFT[1] } : { leave: ROUND_HELD }) });
+    title: o.train ? roundText('round.title.first', 'Your first round, Deck {deck}', { deck: n }) : roundText('round.title', 'Morning round, Deck {deck}', { deck: n }), route, marks: {}, ...(o.slot ? { reserved: o.slot, until: (day - 1) * 1440 + dayShiftEnd(day) } : { leave: ROUND_HELD }) });
   j.posted = j.found = t; j.shareSeen = true;            // held to 11:00 as the page says: never shared out early (section 17's shareOut)
   return j;
 }
@@ -43688,7 +43695,7 @@ const haulOpen = () => SHIP.jobs.some(j => j.kind === 'haul' && !j.src && j.stat
 function haulJob(t, crates, o = {}) {
   const j = jobMake('haul', { id: 'haul' + (o.slot || '') + '@' + Math.floor(t / 60) + (o.yours ? 'y' : ''), deck: 5, room: 'r', h: Math.floor(t / 60),
     title: roundText('haul.title', 'Manifest run: {n} crates', { n: crates.length }).replace(/: 1 crates$/, ': 1 crate'), crates, got: [],
-    ...(o.slot ? { reserved: o.slot, until: Math.floor(t / 1440) * 1440 + DAY_SHIFT[1] } : o.crew ? { released: true } : { leave: Math.max(30, HAUL_UNTIL - Math.max(t % 1440, DAY_SHIFT[0])) }) });
+    ...(o.slot ? { reserved: o.slot, until: Math.floor(t / 1440) * 1440 + dayShiftEnd(Math.floor(t / 1440) + 1) } : o.crew ? { released: true } : { leave: Math.max(30, friHaulUntil(Math.floor(t / 1440) + 1) - Math.max(t % 1440, DAY_SHIFT[0])) }) });
   j.posted = j.found = t; j.shareSeen = true;            // held for you as the page says: never shared out to the crew early (section 17's shareOut)
   return j;
 }
@@ -43717,7 +43724,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
     return first >= 0 && st[first].done && !(last >= 0 && st[last].done) ? 'cartfull' : 'cart'; },
   post(h, jobs) {                                        // delivery days: once the unload's done (or from 13:00), the manifest's run
     const d = Math.floor(h / 24) + 1, m = (h % 24 + 24) % 24 * 60, W = SHIP.works;
-    if (!haulDay(d) || m < DELIVERY.hour * 60 + 60 || m > DAY_SHIFT[1] || !(SHIP.manifest || []).length || jobs.some(j => j.kind === 'haul' && !j.src && j.status !== 'done')) return;
+    if (!haulDay(d) || m < DELIVERY.hour * 60 + 60 || m > dayShiftEnd(d) || !(SHIP.manifest || []).length || jobs.some(j => j.kind === 'haul' && !j.src && j.status !== 'done')) return;
     const unloading = jobs.some(j => j.kind === 'restock' && j.cargo === 'stores' && j.status !== 'done');
     if (unloading && m < HAUL_FROM) return;
     if (W && W.cur && W.cur.id === 'm4' && W.cur.d === d) return;   // Yara's training run has them today
@@ -43784,7 +43791,7 @@ function manifestRun(list, to, o = {}) {
   const parts = (Array.isArray(list) ? list : []).filter(p => typeof p === 'string' && p && !(p in STOCK && !(SHIP.stores[p] > 0))).slice(0, CART_CRATES);   // none on its shelf: not on the run (R5, 0.45.17)
   const m = typeof machineById === 'function' && to ? machineById(to) : null, dest = m ? panelPlace(m.id) : to;
   if (!parts.length || !dest || !placeById(dest) || !haulDock()) return null;
-  const t = Number.isFinite(o.at) ? Math.floor(o.at) : Math.floor(shipNow()), until = Number.isFinite(o.until) ? o.until : Math.floor(t / 1440) * 1440 + DAY_SHIFT[1];
+  const t = Number.isFinite(o.at) ? Math.floor(o.at) : Math.floor(shipNow()), until = Number.isFinite(o.until) ? o.until : Math.floor(t / 1440) * 1440 + dayShiftEnd(Math.floor(t / 1440) + 1);
   const j = jobMake('haul', { id: 'parts' + (o.for ? '-' + String(o.for).replace(/[^a-z0-9-]/gi, '').slice(0, 30) : '') + '@' + t, deck: 5, room: 'r', h: Math.floor(t / 60),
     title: typeof o.title === 'string' ? o.title : roundText('haul.parts', 'Bring the parts: {parts}', { parts: parts.join(', ') }),
     crates: parts.map((p, i) => ({ id: p, dest, part: true, key: 'p' + i })), got: [], src: 'stores', ...(o.for ? { for: String(o.for) } : {}), reserved: MANIFEST_SLOT, until });
@@ -44325,7 +44332,7 @@ function traceDemoJob(d, at) {
   const t = (d - 1) * 1440 + at, pid = panelPlace(TRACE_TRAIN.middle); if (!pid || !JOB_KINDS.tracedemo) return null;
   SHIP.jobs = SHIP.jobs.filter(x => !(x.kind === 'tracedemo' && x.status !== 'done'));
   const j = jobMake('tracedemo', { id: 'tracedemo:' + TRACE_TRAIN.middle + '@' + t, deck: 5, room: (machineById(TRACE_TRAIN.middle) || {}).room || null, h: Math.floor(t / 60),
-    title: worksText('trace.demo', 'Read the line with Calder'), tier: 2, reserved: TRACE_SLOT, until: (d - 1) * 1440 + DAY_SHIFT[1], train: 'm9' });
+    title: worksText('trace.demo', 'Read the line with Calder'), tier: 2, reserved: TRACE_SLOT, until: (d - 1) * 1440 + dayShiftEnd(d), train: 'm9' });
   j.posted = j.found = t; SHIP.jobs.push(j);
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
   return j.id;
@@ -45096,7 +45103,7 @@ function caseMake(j, kid, k, d) {
 // on the board: the head-scratcher card, held for you to the end of the shift it appears in
 function caseShow(c, j) {
   const t = caseNow(), m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause);
-  c.wait = false; c.until = Math.floor(t / 1440) * 1440 + DAY_SHIFT[1]; c.posted = t;
+  c.wait = false; c.until = Math.floor(t / 1440) * 1440 + dayShiftEnd(Math.floor(t / 1440) + 1); c.posted = t;
   j.parts = []; j.stepsDone = (j.stepsDone || []).filter(k => k !== 0);   // the part is yours to find
   const shows = f && f.shows || 'acts up', fb = 'Head-scratcher: ' + caseMachName(j) + ' ' + shows;
   c.title = (typeof worksText === 'function' && worksText('case.title', null) || '').replace('{machine}', caseMachName(j)).replace('{shows}', shows).replace(/\.$/, '') || fb;   // a card's title: no full stop
@@ -45891,7 +45898,7 @@ function tuneJob(id, t, o = {}) {
   const m = machineById(id); if (!m) return null;
   const j = jobMake('tune', { id: 'tune' + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60),
     title: worksText('tune.title', 'Tune: {machine} ({word})', { machine: machineLabel(m).split(',')[0], word: tuneWord(m.kind, tuneDrift(id)) }), tier: MACHINE_KINDS[m.kind].tier || 1,
-    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : {}), ...(o.train ? { train: o.train } : {}) });
+    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) } : {}), ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
   return j;
 }
@@ -46022,7 +46029,7 @@ function incDone(j, t, by) {
   if (by === 'you') {
     worksUse('m6');
     const F = fix && SHIP.jobs.find(x => x.id === fix), c = SHIP.works.cur;
-    if (F) { F.leave = Math.max(INC_HELD, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); F.incFix = j.inc; }
+    if (F) { F.leave = Math.max(INC_HELD, (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) - t); F.incFix = j.inc; }
     if (F && j.train && c && c.id === 'm6' && c.j === j.id) { F.reserved = j.reserved; F.until = j.until; F.train = 'm6'; c.j = F.id;   // the training ends at the fix: trained when it's turned in
       worksTeach('m6', c.by, 'do.fix', ['Now the cause. A seal from stores, and fit it at the burst. I\'ll watch.']); }
   }
@@ -46033,7 +46040,7 @@ function incDone(j, t, by) {
 function incJob(kind, deck, t, o = {}) {
   const j = jobMake('incident', { id: 'incident' + (o.slot || '') + ':' + kind + deck + (o.walk ? 'w' : '') + '@' + Math.floor(t / 60), inc: kind, deck, room: null, h: Math.floor(t / 60), urgency: 2,
     title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: worksFirst(o.by || 'calder') }) : ''),
-    ...(o.walk ? { walk: true } : {}), ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : { leave: o.held ? INC_HELD : 1 }), ...(o.train ? { train: o.train } : {}) });
+    ...(o.walk ? { walk: true } : {}), ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) } : { leave: o.held ? INC_HELD : 1 }), ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
   const P = placeById(jobStops(j).map(s => s.places && s.places[0]).find(Boolean)); if (P) j.room = P.room;
   return j;
@@ -46052,7 +46059,7 @@ function incStart(kind, deck, t, train) {
 }
 function incPost(t, by) {                                // the open incident's job on the board
   const I = incState(), O = I && I.open; if (!O || O.j) return null;
-  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && playerShiftOn(d) && t - (d - 1) * 1440 < DAY_SHIFT[1];
+  const W = SHIP.works, d = worksDay(t), mine = W.tr.m6 !== undefined && playerShiftOn(d) && t - (d - 1) * 1440 < dayShiftEnd(d);
   const j = incJob(O.kind, O.deck, t, { held: mine });
   SHIP.jobs.push(j); O.j = j.id;
   if (mine && t >= shipNow() - 1) try { toast(j.title, worksText('inc.call.' + O.kind, 'It\'s on the board, top of the list.')); } catch (e) { /* no UI */ }
@@ -46198,7 +46205,7 @@ function teamNeed(kind) { const ms = TEAM_JOBS[kind].machines.filter(id => SHIP.
 function teamPlan(w) {
   const T = teamState(), W = SHIP.works; if (!T) return [];
   if (T.plan[w]) return T.plan[w];
-  const slots = TEAM_ROTA.slice(); if ((w + 1) % 2 === 0) slots.push(TEAM_FRI);
+  const slots = TEAM_ROTA.slice(); if ((w + 1) % 2 === 0) slots.push(friTeamSlot(w));
   const out = [], used = new Set(), taken = new Set();
   for (const [wd, at] of slots) {
     let d = w * 7 + 1 + wd; if (d < TEAM_FIRST.day || TEAM_SKIP.includes(d)) continue;
@@ -46231,7 +46238,7 @@ function teamJob(kind, d, at, o = {}) {
     title: teamText('team.card', '{job}, {time}, Deck {deck}, a team of {n}', { job: teamText('team.name.' + kind, TEAM_NAME[kind]), time: hhmm(at), deck: m0.deck, n: crew.length + (you ? 1 : 0) }) });
   const j = id && SHIP.jobs.find(x => x.id === id); if (!j) return null;
   j.seq = T.steps.map(([who, part, how, mm]) => ({ who: who === 'you' ? (j.claimedBy === 'you' ? 'you' : j.lead) : j.team[who] || j.lead, part, how, mins: mm }));
-  Object.assign(j, { team_kind: kind, machines: ms, cur: -1, stepAt: null, late: false, ...(o.train ? { train: o.train } : {}), ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + DAY_SHIFT[1] } : {}) });
+  Object.assign(j, { team_kind: kind, machines: ms, cur: -1, stepAt: null, late: false, ...(o.train ? { train: o.train } : {}), ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + dayShiftEnd(d) } : {}) });
   return j;
 }
 function teamPost(P, w, t) {                             // a plan entry posted (16:00 the day before): the job, the crew's plans, Mail
@@ -46354,7 +46361,7 @@ if (typeof teamJobPost === 'function') WORK_MECH.m8 = {
     let j = P && P[2] && SHIP.jobs.find(x => x.id === P[2] && x.status !== 'done');
     if (j && j.claimedBy !== 'you') { SHIP.jobs = SHIP.jobs.filter(x => x !== j); j = null; }
     if (!j) { j = teamJob(P ? P[3] : TEAM_FIRST.kind, d, P ? P[1] : Math.max(at + 20, TEAM_FIRST.at), { you: true, slot, train: 'm8' }); if (!j) return null; if (P) P[2] = j.id; }
-    j.reserved = slot; j.until = (d - 1) * 1440 + DAY_SHIFT[1]; j.train = 'm8';
+    j.reserved = slot; j.until = (d - 1) * 1440 + dayShiftEnd(d); j.train = 'm8';
     if (typeof MACH_REV !== 'undefined') MACH_REV++;
     return j.id;
   },
@@ -46510,7 +46517,7 @@ function ffPick(d) {
 function ffPost(t) {
   const F = ffState(), C = typeof caseState === 'function' ? caseState() : null, d = worksDay(t); if (!F || !C || typeof jobReserve !== 'function') return null;
   const P = ffPick(d); if (!P) return null;
-  const { m, f } = P, id = jobReserve(m.id, d, t % 1440, FF_SLOT, { tier: 2, until: (d - 1) * 1440 + DAY_SHIFT[1], cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
+  const { m, f } = P, id = jobReserve(m.id, d, t % 1440, FF_SLOT, { tier: 2, until: (d - 1) * 1440 + dayShiftEnd(d), cause: f.id }), j = id && SHIP.jobs.find(x => x.id === id);
   if (!j) return null;
   delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; j.ticket = true;
   const kinds = caseKindsOpen().filter(k => { try { return !!CASE_KINDS[k].fits(f, m); } catch (e) { return false; } });
@@ -46572,7 +46579,7 @@ if (typeof caseMake === 'function') WORK_TICKS.push((now, skip) => {
     return;
   }
   if (F.job && !j) F.job = null;
-  if (F.grade >= 1 || d < Math.max(FF_FROM, F.next) || !playerShiftOn(d) || m < FF_POST || m > DAY_SHIFT[1] - 120) return;
+  if (F.grade >= 1 || d < Math.max(FF_FROM, F.next) || !playerShiftOn(d) || m < FF_POST || m > dayShiftEnd(d) - 120) return;
   if (SHIP.jobs.some(x => x.ticket && worksDay(x.posted) === d)) return;   // one a day
   ffPost(now);
 });
@@ -46636,7 +46643,7 @@ function leakPost(t, w = incWeek(worksDay(t))) {
   const P = leakPick(w); if (!P) return null;
   const { J, worn } = P, p = placeById(J.place), d = worksDay(t);
   const j = jobMake('leak', { id: 'leak:' + J.place + '@' + Math.floor(t / 60), deck: J.deck, room: null, h: Math.floor(t / 60), joint: J.place, worn, urgency: 1,
-    title: worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
+    title: worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: J.deck }), leave: Math.max(60, (d - 1) * 1440 + dayShiftEnd(d) - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 });
   j.posted = j.found = t;
   SHIP.jobs.push(j); L.push({ id: j.id, joint: J.place, room: p.room || null, deck: J.deck, day: d, worn, found: null });
   if (L.length > LEAK_KEEP) L.splice(0, L.length - LEAK_KEEP);
@@ -46678,7 +46685,7 @@ function leakDone(j, t, by) {
     try { toast(j.title, worksText('leak.done', 'Dry. Found it yourself.')); } catch (e) { /* no UI */ }
     if (j.worn && typeof jointJobPost === 'function') {
       const p = placeById(j.joint), F = jointJobPost({ placeId: j.joint, title: worksText('leak.fix.replace', 'Replace the joint ({part})', { part: 'a seal' }) + ': ' + ((p && roomName(p.deck, p.room)) || 'corridor') }), J = F && SHIP.jobs.find(x => x.id === F);
-      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - t); J.xp = 0; j.fix = F; }   // no rep of its own: the leak's +1 covers it (24 core skips j.xp === 0; lead 17)
+      if (J) { J.leave = Math.max(60, (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) - t); J.xp = 0; j.fix = F; }   // no rep of its own: the leak's +1 covers it (24 core skips j.xp === 0; lead 17)
     }
   } else if (SHIP.works.tr.m13 !== undefined && t >= shipNow() - 1) try { toast(worksText('leak.card', 'A pipe drips somewhere on Deck {deck}', { deck: j.deck }), worksText('leak.found.crew', 'The crew found the drip on Deck {deck}. The long way.', { deck: j.deck })); } catch (e) { /* no UI */ }
   simNote('leak', { id: j.id, step: 'fixed', by: by || null });
@@ -46811,7 +46818,7 @@ function rewJob(id, t, o = {}) {
   const k = o.key !== undefined ? o.key : worksDay(t), { chart, faded, order } = rewChart(k, o.stage || 0);
   const j = jobMake('rewire', { id: 'rewire' + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 2, urgency: 0,
     title: worksText('rewire.card', 'Rewire junction {junction}', { junction: rewName(id) }), chart, faded, order, pairs: {}, wrongs: 0,
-    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] } : { leave: Math.max(60, (worksDay(t) - 1) * 1440 + DAY_SHIFT[1] - Math.max(t, (worksDay(t) - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
+    ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) } : { leave: Math.max(60, (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) - Math.max(t, (worksDay(t) - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
     ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
   return j;
@@ -51235,7 +51242,7 @@ function devmodeClock(body) {
       ['Go to ' + hhmm(p), () => { DM_UI.pick = null; devmodeGo('to ' + hhmm(p), () => devmodeNext(p)); }, { ask: true }],
       ['+ 30 min', () => { DM_UI.pick = (p + 30) % 1440; devmodeDraw(); }, { aria: 'Later' }]]);
   }
-  devmodeRow(body, DM_TIMES.map(([l, m]) => [l, () => devmodeGo(l.slice(3), () => devmodeNext(m))]));
+  devmodeRow(body, friDevTimes(DM_TIMES, SHIP.time.day).map(([l, m]) => [l, () => devmodeGo(l.slice(3), () => devmodeNext(m))]));   // "To 15:25" on a short Friday (18f)
   devmodeRow(body, [['+1 day', () => devmodeGo('+1 day', () => shipNow() + 1440)], ['+7 days', () => devmodeGo('+7 days', () => shipNow() + 7 * 1440)], ['+3 hours', () => devmodeGo('+3 hours', () => shipNow() + 180)]]);
   devmodeText(body, 'A workday you skip past 12:30 without clocking in is excused, not missed. Needs kept as a normal day. Undo my last Dev action (Quick) puts the clock back.');
 }
