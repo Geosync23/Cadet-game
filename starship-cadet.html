@@ -9781,7 +9781,7 @@ function gatherings(p, d, F) {
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
     const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
-    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2: a break in a double shift; Crossing the Line's standing easy: a break in the shift)
+    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}), ...(e.seated ? { seated: true } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2: a break in a double shift; Crossing the Line's standing easy: a break in the shift)
   }
   if (typeof eventMeetPlan === 'function') out.push(...eventMeetPlan(p, d, F));   // a ship-wide event's meeting that names p (section 18, F0b; [] while the events are off): meet: true is a break in the shift
   // social B2's farewell friends (20c's farewellCrew(leaver, d) -> ids, pure per day): on a crew member's last day, each
@@ -10274,7 +10274,9 @@ function schedBuild(p, d, occ, S) {
     const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);
     go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
     take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
-    if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })) seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
+      && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
+      seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
   };
   const leisureUntil = (end, k) => {
     for (const e of meet) if (e.host && !e.done && e.at + 10 > t && e.at < end && e.at + e.dur > end && typeof eventMeetTag === 'function' && eventMeetTag(e.tag)) end = e.at + e.dur;   // F0b: named for an event meeting, they stay to its end
@@ -36021,7 +36023,7 @@ function eventPlan(p, d) {
     const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
     if (!meet && ev.easy && lineEasy(p, d, e)) meet = true;   // Crossing the Line's standing easy: a break in the shift (section 14's 'meet')
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}), ...(ev.seated ? { seated: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];
@@ -36993,7 +36995,7 @@ if (EV_LINE_ON) {
   // Tomas (off shift), Zeke and Pell come (pull 1)
   L.galley = { resolution: { extra: 12 } };
   L.dayDress = [{ trad: 'sunday-table', day: 1, set: { name: evWord('event.crossingLine.gather.lineSupper.name') || 'The Line supper', at: [1080, 1185], jitter: 0, who: [['everyone', 1], ['pell', 1]],
-    words: 'event.crossingLine.gather.lineSupper', mail: false, stay: [30, 45], seated: true, pudding: true } },
+    words: 'event.crossingLine.gather.lineSupper', mail: false, stay: [30, 45], min: 20, seated: true, pudding: true } },
     { trad: 'lap-of-the-wren', day: 1, set: { who: [['tomas', 1], ['torres-zeke', 1], ['pell', 1]] } }];
   lineVenue();
 }
@@ -38052,6 +38054,7 @@ function evDressed(ev, o) {
   if (o.mail === false) x.mail = null;
   if (o.where) x.where = o.where;
   if (o.stay) x.stay = o.stay.slice(); if (o.seated) x.seated = true;   // Crossing the Line: the Line supper in seated sittings (evStay), as the lantern supper
+  if (o.min != null) x.min = o.min;                     // Crossing the Line: the least time seated (the Line supper's 20: a long servery line ate into a 30-45 minute sitting, and under the tradition's 30 left, they ate standing)
   return x;
 }
 evDressMake();
