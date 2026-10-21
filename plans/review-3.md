@@ -115,3 +115,19 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - Agree with FR1 which check asserts the address sits inside the hold.
 
 **Gotcha:** planDay's segments are in absolute ship minutes ((d-1)*1440 + minute), not minutes of the day.
+
+## EC1 turn 2 (one merged check with EV1's parts; F1b-c): claude/bigevents-check 85d4ee8. PASS
+
+**Checks:**
+- The game's change since turn 1 is exactly events-base 0313e52→1030626.
+- The check is OK in 58 s with 17 WAITING lines; check_fast is OK in 206 s.
+- The self-test catches its 3 planted clashes.
+
+**Mutants (`ec_mutants.py`, now taking names to run only some):** 10 of 10 caught.
+- The turn 1 set; m1 rewritten for EV_BEATS' new multi-row table.
+- New for the guard:
+  - m9: the guard ignores EV_BEATS;
+  - m10: the Captain is allowed two scenes a day;
+  - m11: the early table runs 95 min.
+
+**Still open:** turn 1's nits.
