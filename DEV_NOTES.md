@@ -138,6 +138,22 @@ Pillar 1, workstream 3a; the format is in plans/pillar1-plan.md, "Places". Each 
     - Someone told to stand anywhere while still sliding into a seat set off from the seat's furniture tile into the next room. Agents now always set off from the place's walk-to tile.
     - Someone at an overflow desk in the locked ready room couldn't get out. Agents can always pass the doors of the room they're in.
 
+## The playtest patch, batch D (sections 14 and 10, patch builder B, 2026-10-20; plans/patch-plan.html #7, #9, #10, #8)
+
+- **#7, the Captain's evenings.** Her `music` habit is gone (`plans/crew-roster-gen.py`; only her row in section 9 changes) and her musician evening is `captain ? (Thursday ? 1 : .15) : .55`. About 4 hours a week on Deck 4 instead of 11. The generator now also carries the hand edits made in section 9 since (the bar staff, Cruz's 09:00 start), applied last, so running it with no edits changes nothing.
+- **#9, the walk to the toilet.** `take(act, opts, dur, { lead: WALK_LEAD })` starts a stay with the walk there: `walkLead(from, place)` is 1.6 x the straight line between the decks' own tiles (`DECKS[n].places`, the lift for a ride) at the crew's pace, in whole ship minutes, never the loaded deck's paths. The walk is taken off the end of the segment before it (at most half of it): they set off earlier, and the visit, its stall hold and everything after keep their planned times. (Pushing the visit later instead made days end past midnight, a tradition overrun, and the Commons lose a person in day_check's rec-deck comparison; it reached no more stalls.) The stall is held from arrival. The nearest stall first. The basin after is a step away and keeps the old way (giving it a walk took its minutes out of the toilet visit itself). Only the toilet and the basin after it use it. Deck 4's two shared toilets are at its west end, so a walk from the east bunks is about 20 minutes.
+- **#10, walking apart.** Out of the lift one at a time per lift tile (`LIFT_OUT`, `LIFT_STEP` 0.3 ship min, about half a real second; not on a deck fill). `walkGap`: within `WALK_GAP` (0.45 tiles) behind a walker going the same way, take their pace, less as the gap shrinks (at least a third, so two can never hold each other up). `walkLaneStep`: a seeded lane of up to `WALK_LANE` (0.18 tiles) to one side, eased, back to the middle through doorways and when settled; it moves only the drawn body (`a.lx`, `a.lz`), never `a.x`/`a.z`, so stuck checks, doors and your bump test are unchanged. Crew still don't block each other otherwise.
+- **#8, the red light.** The toilet stall kit (4b) calls `stallCapAdd(g)`: a red cap enclosing the green light, a `noMerge` child of the stall, made from one geometry and material made at load. `stallCapsTick` (from `updateDeckCrew`) matches each stall to the nearest toilet place once a deck and shows it while `placeBusy` and the stall isn't faded.
+- **Probes:** `plans/patch-plan-probes/c9c.py` (toilet visits that reach the stall, on the deck) and `c10c.py` (pairs within 0.3 tiles for over 3 real seconds), with drawing skipped.
+
+## The playtest patch, batch F (section 15's numbers, patch builder B, 2026-10-20; plans/patch-plan.html #16, #20, #22, #27)
+
+- **#16:** `JOB_PACE = .72` (section 15) multiplies `jobMins` for your machine jobs at every tier (the 1.25 tier step kept): a Tier 1 repair is 32.4 base minutes, about 30 with a normal day's needs (PP1's fnet.py). The job board's minutes for you (`openJobs('you')`, section 17) use the same; the crew's job minutes are unchanged. With quicker jobs a very busy player reached "Relied on" on Day 4, so Tier 1's `WORK_BANDS` 'relied' is 48 (was 40; section 24, the Works career engineer's; career_check's band spot test follows).
+- **#20:** `WORK_HUNGER = 3` an hour on top of `NEED_DRAIN` while `workingNow()` (`workHunger`, beside `workLeisure`): 7 at work.
+- **#22:** `NEED_DRAIN.social` [3, .25] (was [1, .25]).
+- **#27:** `SLEEP_TAPER = [90, 1/3]` in `needsDrain`: above 90 sleep gives a third. 8 hours from 20 wakes at 100; 7 hours from 25 at 97.5. The alarm clock's preview uses `needsDrain`, so it shows the new number.
+- **player_check's paper week** now eats at a table of three and has two chats a day (as fnet.py's steady player) and the work hunger: social lowest 63, hunger lowest 36.5.
+
 ## Every room in use (sections 14 and 10, the sim engineer, 0.26.x)
 
 Pillar 2, workstream A1 (plans/pillar2-plan.md).

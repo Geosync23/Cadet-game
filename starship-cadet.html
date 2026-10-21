@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.5
+   STARSHIP CADET: CSV Wren                           build 0.64.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -1437,6 +1437,7 @@ const KIT = {
     box(1.1, 1.9, .05, KM.partition, 0, 1.05, .525, g);                            // door
     box(.04, .14, .04, M.metal, .38, 1.05, .565, g);
     box(.12, .05, .02, KM.vacant, .38, 1.32, .555, g);                             // the trusted green light
+    if (typeof stallCapAdd === 'function') stallCapAdd(g);                          // its red cap while taken (#8, section 14's slot)
     box(.36, .36, .02, KM.wcSign, 0, 1.6, .555, g);                                // WC, so it doesn't read as a shower (0.27.42)
     for (const sx of [-.575, .575]) box(.06, .12, .06, M.metal, sx, .06, .45, g);
     cyl(.18, .14, .4, M.ceramic, 0, .2, -.15, g, 18); box(.36, .3, .14, M.ceramic, 0, .55, -.45, g);
@@ -8870,7 +8871,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.5';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.6';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -9885,6 +9886,10 @@ function schedBuild(p, d, occ, S) {
   // don't get on with (-30 or less) last. Without affinityPlan, or with nobody either way, seats are chosen as before
   const mates = SEAT_SOCIAL && occ.who && seatMates(p, S, d);
   const seg = (act, to, type, placeId, extra) => { if (to > t) segs.push({ from: t, to, act, deck, type, placeId, ...extra }); t = Math.max(t, to); };
+  const hereXY = () => {                                 // where the plan has them now, on this deck (a place's spot, or the lift they came out of); null: not known
+    for (let i = segs.length - 1; i >= 0; i--) { const g = segs[i]; if (g.deck !== deck) return null; if (g.act === 'commute') return DECKS[deck].lift || null; const q = g.placeId && S.byId.get(g.placeId); if (q) return q.xy || [q.at[0] + .5, q.at[1] + .5]; }
+    return null;
+  };
   const go = dk => {
     if (dk === deck) return;
     const l = segs[segs.length - 1];                      // a minute waiting by the lift, from the end of what you were doing
@@ -9909,13 +9914,15 @@ function schedBuild(p, d, occ, S) {
   // (a gathering's crowd spots, `gather` places from the deck architect, fill in their order: nearest the focus first)
   // where you are first; `by` caps the end, `min` is the shortest stay worth having. Returns the place or null.
   const take = (act, opts, dur, o = {}) => {
+    const fromXY = o.lead && (dk => dk !== deck ? DECKS[dk].lift : hereXY());   // o.lead: the walk there comes first (WALK_LEAD, #9)
     for (const [dk, type] of opts) {
       if (dk === 3 && act === 'leisure' && !o.event && DECK3_EVENING_MAX < Infinity && deck3Full(t + (deck !== 3 ? C : 0), o.by !== undefined ? o.by : t + dur)) continue;
       const ownL = (S.own.get(p.bed) || []).filter(pl => pl.type === type && pl.deck === dk);
       let pool = ownL.length ? ownL : (S.shared.get(dk + '|' + type) || []);
       if (!pool.length) continue;
       const soc = mates && SEAT_SOCIAL.has(type) && (mates.fr.length || mates.foe.length);
-      const fav = pool[0].gather ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
+      if (fromXY) { const f0 = fromXY(dk), ld = new Map(pool.map(q => [q.id, walkLead(f0, q)])); pool = pool.slice().sort((x, y) => ld.get(x.id) - ld.get(y.id)); }   // a walk first (#9): the nearest first
+      const fav = pool[0].gather || fromXY ? 0 : Math.floor(pool.length * (U(40 + type.length) < .7 ? schedU(p.seed, 0, 41 + type.length) : U(42 + type.length)));
       const arrive = t + (dk !== deck ? C : 0), wait = o.wait || 0;
       if (pool[0].gather && p.partner && occ.who) {      // couples stand together in a crowd: the spots nearest your partner's first, if they're already there (0.26.38)
         const ids = new Set(pool.map(q => q.id)), at = (occ.who.get(p.partner) || []).find(([x, y, id]) => ids.has(id) && x < B + arrive + dur && B + arrive < y), q0 = at && S.byId.get(at[2]);
@@ -9939,7 +9946,11 @@ function schedBuild(p, d, occ, S) {
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           if (o.queue && s - arrive >= SHOWER_Q) { go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths)
           else { linger(s - (dk !== deck ? C : 0)); go(dk); }
-          if (!mine) hold(pl.id, s, end);
+          if (fromXY && dk === deck) {                   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it)
+            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
+            if (cut > 0) { l.to -= cut; t -= cut; }
+          }
+          if (!mine) hold(pl.id, s, end);                // held from arrival, as planned
           const an = o.anim || placeAnim(pl), ex = {}; if (o.tag) ex.tag = o.tag; if (an) ex.anim = an;
           seg(act, end, pl.type, pl.id, ex);
           return pl.id;
@@ -9971,7 +9982,7 @@ function schedBuild(p, d, occ, S) {
     seg('work', to, pl ? pl.type : wtype, pid, ex);
   };
   const toilet = k => {                                  // a toilet on the deck you're on, then hands at a basin; nothing if they're busy
-    if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2 })) return false;
+    if (!take('wash', [[deck, 'toilet']], 3 + Math.round(3 * U(k)), { wait: 4, tag: 'toilet', min: 2, lead: WALK_LEAD })) return false;
     take('wash', [[deck, 'basin']], 1, { tag: 'hands', min: 1 });   // no waiting: both busy, skip it
     return true;
   };
@@ -10197,7 +10208,7 @@ function schedBuild(p, d, occ, S) {
     // room's instruments, tending the garden, a drink at the bar, the observatory
     const wk = F.works;
     if (H.has('runner') && U(100) < (wk ? .7 : .6)) out.unshift(() => take('gym', [[3, 'gym-run'], [3, 'gym']], 25 + Math.round(15 * U(101)), { wait: 10, min: 15, tag: 'run' }));
-    if (H.has('musician') && U(102) < (weekday(d) === 3 && p.rank === 'captain' ? 1 : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play', anim: 'play' }));
+    if (H.has('musician') && U(102) < (p.rank === 'captain' ? (weekday(d) === 3 ? 1 : .15) : .55)) out.push(() => take('leisure', [[4, 'music']], 45 + Math.round(30 * U(103)), { wait: 10, min: 25, tag: 'play', anim: 'play' }));
     if (H.has('gardener') && U(104) < .6) out.push(() => take('leisure', [[3, 'garden-tend'], [3, 'garden']], 30 + Math.round(30 * U(105)), { wait: 5, min: 20, tag: 'tend' }));
     if (H.has('bar-regular') && U(106) < .75) out.push(() => take('leisure', [[3, 'bar'], [3, 'lounge-seat']], 30 + Math.round(30 * U(107)), { wait: 5, min: 20, tag: 'bar', anim: 'drink' }));
     if (H.has('stargazer') && U(108) < .5) out.push(() => take('leisure', [[2, 'observatory'], [2, 'lounge-seat']], 45 + Math.round(45 * U(109)), { wait: 5, min: 25, tag: 'stars' }));
@@ -10794,6 +10805,81 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
+// the tiles, times a detour factor of 1.6 (1.3 left about a quarter short on the deck), at the crew's walking pace), never the loaded deck's paths, because a day is planned
+// for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets (the basin after is a step away, and keeps the old way).
+// The stay keeps its planned time and place hold; the walk is taken off the end of what came before (at most half of
+// it), so they set off earlier and nothing after moves. (Pushing the stay later instead made days end past midnight,
+// a tradition overrun, and the Commons lose a person in day_check's rec-deck comparison)
+const WALK_LEAD = true, WALK_DETOUR = 1.6;
+function walkLead(from, pl) {
+  if (!from || !pl || !pl.at) return 0;
+  const [x, z] = pl.xy || [pl.at[0] + .5, pl.at[1] + .5];
+  return Math.ceil(WALK_DETOUR * Math.hypot(x - from[0], z - from[1]) / 1.15 * SHIP_RATE);   // 1.15: CREW_SPEED (section 10), tiles per real second
+}
+// crew walking apart (#10, the patch; section 10's walkers): out of the lift one at a time, a gap kept behind someone
+// going the same way, and a lane each, by seed, that moves only where the body is drawn (their tiles and paths are
+// unchanged, so being stuck, the doors and your bump test still go by the tile position)
+const WALK_GAP = .45, WALK_LANE = .18, LIFT_STEP = .3;   // tiles; tiles either side; ship minutes between two out of one lift tile (about half a real second)
+const LIFT_OUT = new Map();                              // lift tile -> when the last one stepped out of it (ship minutes)
+function liftOutOk(at, now) {
+  if (!at) return true;
+  const k = at[0] + ',' + at[1], t = LIFT_OUT.get(k);
+  if (t !== undefined && now >= t && now - t < LIFT_STEP) return false;
+  LIFT_OUT.set(k, now); return true;
+}
+// the pace (a fraction of CREW_SPEED) for a walker heading (ux, uz): closing on someone ahead going the same way, within
+// WALK_GAP, they take that walker's pace, and less as the gap shrinks (never under a third, so two can't hold each other up)
+function walkGap(a, ux, uz) {
+  let f = 1;
+  for (let i = 0; i < DECK_CREW.length; i++) {
+    const o = DECK_CREW[i]; if (o === a || o.pose !== 'walk' || !o.spd) continue;
+    const rx = o.x - a.x, rz = o.z - a.z; if (rx >= WALK_GAP || rx <= -WALK_GAP || rz >= WALK_GAP || rz <= -WALK_GAP) continue;
+    const d = Math.hypot(rx, rz); if (d >= WALK_GAP) continue;
+    const ahead = rx * ux + rz * uz;
+    if (ahead < -1e-3 || ahead <= 1e-3 && o.p.id > a.p.id) continue;   // behind (side by side: the first by id leads)
+    if (o.ux * ux + o.uz * uz < .5) continue;            // not the same way
+    f = Math.min(f, Math.max(1 / 3, o.spd * Math.min(1, Math.max(0, (d - .2) / (WALK_GAP - .2)))));
+  }
+  return f;
+}
+// the lane: about a fifth of a tile to one side of the way they're walking, eased round corners; back to the middle
+// through a doorway, when stopping at their place or standing about
+function walkLaneStep(a, dt, mid) {                    // mid: ease to the middle (escorting, coming over to you)
+  let tx = 0, tz = 0;
+  if (!mid && a.pose === 'walk' && a.path.length && a.lane) {
+    if (a.laneAt !== a.path[0]) {                        // a doorway on the next two steps? Looked up once a step, not every frame
+      const h = a.here(), n = a.path[0], n2 = a.path[1];
+      const door = (p, q) => (p[0] !== q[0]) !== (p[1] !== q[1]) && (e => !!e && e.type !== 'open')(EDGES.get(p[0] !== q[0] ? `v,${Math.max(p[0], q[0])},${p[1]}` : `h,${p[0]},${Math.max(p[1], q[1])}`));
+      a.laneAt = n; a.laneDoor = door(h, n) || !!n2 && door(n, n2);
+    }
+    if (!a.laneDoor) { tx = -a.uz * a.lane; tz = a.ux * a.lane; }
+  }
+  const k = Math.min(1, dt * 4);
+  a.lx += (tx - a.lx) * k; a.lz += (tz - a.lz) * k;
+  if (a.settled) { a.lx = 0; a.lz = 0; }
+}
+// the washroom stall's red light (#8, the patch): a red cap round the green light (not on its surfaces: it encloses it,
+// its back inside the door), shown only while someone (crew or you) is using that stall and the stall isn't faded.
+// Made at load with no random calls; one draw call for each taken stall in view
+const STALL_CAP = { geo: new THREE.BoxGeometry(.13, .06, .04), mat: std('#ff2a22', .3, 0, { emissive: col('#c81410'), emissiveIntensity: 1 }), list: [], of: null };
+function stallCapAdd(g) {                                // the toilet stall kit (4b), at build: g is placed already
+  const m = new THREE.Mesh(STALL_CAP.geo, STALL_CAP.mat);
+  m.position.set(.38, 1.32, .56); m.visible = false; m.castShadow = m.receiveShadow = false; m.raycast = () => {}; m.userData.noMerge = true;
+  g.add(m); STALL_CAP.list.push({ m, g, root: deckRoot, id: undefined, tall: undefined });
+}
+function stallCapsTick() {
+  const L = STALL_CAP.list; if (!L.length) return;
+  if (STALL_CAP.of !== deckRoot) {                       // a new deck: drop the old deck's, and match each stall to its toilet place (the nearest spot)
+    STALL_CAP.of = deckRoot; for (let i = L.length - 1; i >= 0; i--) if (L[i].root !== deckRoot) L.splice(i, 1);
+    const T = (deckDef.places || []).filter(q => q.type === 'toilet').map(q => [q.id, placeSpot(q.id)]).filter(x => x[1]);
+    for (const c of L) {
+      let best = null, bd = .9; for (const [id, sp] of T) { const d = Math.hypot(sp.x - c.g.position.x, sp.z - c.g.position.z); if (d < bd) { bd = d; best = id; } }
+      c.id = best; c.tall = null; for (let o = c.g.parent; o && !c.tall; o = o.parent) c.tall = TALL.find(t => t.g === o) || null;
+    }
+  }
+  for (let i = 0; i < L.length; i++) { const c = L[i]; c.m.visible = !!c.id && placeBusy(c.id) && (!c.tall || c.tall.o > .99); }
+}
 // ---- end of slot: Sim engineer ----
 
 // =====================================================================
@@ -12177,8 +12263,9 @@ const NEED_LABEL = { hunger: 'Food', energy: 'Energy', hygiene: 'Hygiene', fitne
 // about six hours, so it comes up three or four times a day (on waking, midday, dinner, bedtime); 3 asleep.
 // Leisure (0.28.61, the 0.60.7 plan): 0.8 an hour awake, none asleep, so about 6 ship days from full to the low line;
 // hobbies, traditions, Tiles, the bar, a full talk, calling home and a few places fill it (leisureAdd, below)
-const NEED_DRAIN = { hunger: [4, 2], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [1, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
+const NEED_DRAIN = { hunger: [4, 2], energy: [4.8, 0], hygiene: [2.5, 1], fitness: [.6, .3], social: [3, .25], bathroom: [6, 1.5], leisure: [.8, 0] };   // bathroom halved in 0.28.62 (the 0.60.7 plan: about two visits a day); energy 4.4 -> 4.8 in 0.73.0 (playtest 2, the lead's tuning: a normal 16-hour day ends near 20-25)
 const SLEEP_GAIN = 12.5;                                 // energy per ship hour asleep: 8 hours fills it
+const SLEEP_TAPER = [90, 1 / 3];                         // above 90, sleep gives a third as much (the patch's #27, the user's "100 after 8 hours"): bed at 22:00 wakes at 100, 23:00 at about 95
 const NEEDS_FRESH = { hunger: 60, energy: 100, hygiene: 60, fitness: 70, social: 70, bathroom: 60, leisure: 70 };   // a new game: just woken, before breakfast
 const NEEDS_OLD = 80;                                    // a v 1 save had no needs: start them here
 const SLOW_BELOW = 25, SLOW_SPEED = .8;                  // fitness or energy under this: walk at this speed (each one counts)
@@ -12260,7 +12347,7 @@ function needsDrain(mins, asleep, fx, except) {          // except: the need an 
   for (let left = mins; left > 0;) {                     // in steps of up to half an hour, so a long skip feels the bonuses change
     const step = Math.min(left, 30), h = step / 60, ed = asleep ? 1 : needEffects(n).drain; left -= step;
     for (const k of NEED_KEYS) if (k !== except) n[k] = needClamp(n[k] - NEED_DRAIN[k][asleep ? 1 : 0] * fxD(fx, k) * (k === 'energy' ? ed : 1) * h);
-    if (asleep) n.energy = needClamp(n.energy + SLEEP_GAIN * fxR(fx, 'energy') * h);
+    if (asleep) { const g = SLEEP_GAIN * fxR(fx, 'energy') * h, full = Math.max(0, Math.min(g, SLEEP_TAPER[0] - n.energy)); n.energy = needClamp(n.energy + full + (g - full) * SLEEP_TAPER[1]); }
   }
 }
 // walking speed (needEffects): SLOW_SPEED for low fitness, times SLOW_SPEED again for low energy; 105% when fit
@@ -12336,6 +12423,12 @@ function workingNow() {
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (A && A.phase === 'do' && WORK_ACTS.has(A.kind)) return true;
   return typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut() && typeof DAY_SHIFT !== 'undefined' && SHIP.time.min < DAY_SHIFT[1] + 60;
+}
+// and hunger (the patch's #20, the user's 7 an hour at work): WORK_HUNGER an hour on top of NEED_DRAIN's while working
+const WORK_HUNGER = 3;
+function workHunger(mins, fx, except) {
+  if (except === 'hunger' || !(mins > 0) || !workingNow()) return;
+  const N = SHIP.player.needs; N.hunger = needClamp(N.hunger - WORK_HUNGER / 60 * mins * fxD(fx, 'hunger'));
 }
 function workLeisure(mins, fx, except) {                 // mins awake (playerUpdate); fx the ship's effects
   if (except === 'leisure' || !(mins > 0) || !workingNow()) return;
@@ -13423,7 +13516,7 @@ function playerUpdate(dt, t) {
     if (sat) fx = { ...fx, drain: { ...fx.drain, energy: fxD(fx, 'energy') * SIT_REST } };   // sitting rests you (0.28.12)
     const lay = A && A.kind === 'lie' && A.phase === 'do';
     if (lay) fx = { ...fx, drain: { ...fx.drain, energy: 0 } };   // lying in your bunk: no tiring, a little rest (0.28.29)
-    needsT = now; needsDrain(dm, false, fx, doing || null); workLeisure(dm, fx, doing);
+    needsT = now; needsDrain(dm, false, fx, doing || null); workLeisure(dm, fx, doing); workHunger(dm, fx, doing);
     if (lay) n.energy = needClamp(n.energy + LIE_GAIN * dm);
     if (sat) n.social = needClamp(n.social + SIT_GAIN * sitCompany(A) * needEffects(n).socialGain * dm);
     if (A && A.phase === 'do') {
@@ -13618,7 +13711,8 @@ function careerSpeed(kind) {
   return n >= 15 ? .65 : n >= 5 ? .8 : 1;
 }
 const jobKindOfMachine = j => j && j.machine && typeof machineById === 'function' ? (machineById(j.machine) || {}).kind || null : null;
-const jobMins = j => JOB_TYPES[j.kind].work * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
+const JOB_PACE = .72;                                    // your own machine jobs, every tier (the patch's #16, the user's 30 minutes for a Tier 1 repair on a normal day); the job board (17) shows the same
+const jobMins = j => JOB_TYPES[j.kind].work * JOB_PACE * (1 + .25 * ((typeof jobTier === 'function' ? jobTier(j) : 1) - 1)) * careerSpeed(jobKindOfMachine(j)) * (j.logged ? .9 : 1);   // j.logged: written up in the Works log (24n), 10% quicker
 function myWork() {                                      // the job you hold, and how far you've got with it (null: none)
   const j = jobsOn() ? myJob() : null, P = SHIP.player;
   if (!j || !j.machine) { P.work = null; return null; }
@@ -18643,7 +18737,7 @@ function openJobs(forWho = 'you') {
     const [title, where, state] = jobCard(j), m = j.machine && machineById(j.machine);
     const stops = jobStops(j).filter(x => x.step !== 'fetch'), main = jobByStops(j) ? stops[stops.length - 1] : j.kind === 'restock' ? stops[2] : stops[0];
     const place = main && main.places[0] || null, pl = placeById(place);
-    const mins = jobKindOf(j) ? kindStops(j).reduce((a, x) => a + (x.mins || 0), 0) : j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (1 + .25 * (jobTier(j) - 1)));
+    const mins = jobKindOf(j) ? kindStops(j).reduce((a, x) => a + (x.mins || 0), 0) : j.kind === 'chore' ? j.stops.reduce((a, x) => a + x.mins, 0) : j.kind === 'restock' ? 33 : Math.round(JOB_TYPES[j.kind].work * (you && typeof JOB_PACE !== 'undefined' ? JOB_PACE : 1) * (1 + .25 * (jobTier(j) - 1)));   // yours at your pace (15's JOB_PACE, the patch's #16)
     const verb = { service: 'Service', repair: 'Repair', overhaul: 'Overhaul' }[j.kind];
     const o = { id: j.id, title: jobByStops(j) ? j.title : verb ? verb + ': ' + title : title, kind: j.chore || j.kind, deck: main ? main.deck : j.deck, at: pl ? pl.at.slice() : m ? m.panel.slice() : main && main.at ? main.at.slice() : null,
              room: pl ? pl.room : m ? m.room : j.room || null, place, tier: jobTier(j), mins, parts: j.parts.slice(), bring: j.bring || (j.kind === 'restock' ? 'a hover cart' : null), urgency: j.urgency, state, where, event: j.event || null, asked: heldForYou(j) };
@@ -40616,11 +40710,16 @@ function introTernTick() {
 // tap-to-ask (0.42.24; section 10's tapCrew calls it first, sim 0.26.31): while Torres is still showing you round (the
 // evening up to 'free'), tapping him at a tour place with extras left has him say the next at once; else it opens the writers' introAsk (three questions) instead of the chat card; three asks
 // at most (each counts as a meeting), then he's a plain tap again. Returns true when it opened.
+// "Ask Zeke" is parked (the patch's #31, 2026-10-20): a tap on him while he shows you round plays his next tour line if
+// there is one, else does nothing; the introAsk panel and its lines stay in the file, off behind INTRO_ASK_ON
+const INTRO_ASK_ON = false;
 function introTap(p) {
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
-  if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return false;
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
   const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
   if (h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())) { INTRO_UI.next = 0; return true; }
+  if (!INTRO_ASK_ON) return true;                       // parked (#31): the tap does nothing more, and never opens the chat card
+  if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk) return false;
   const I = SHIP.intro, n = [1, 2, 3].find(k => I.done['ask:' + k] === undefined); if (!n) return false;
   I.done['ask:' + n] = Math.floor(shipNow());
   if (typeof player !== 'undefined' && player.stop) player.stop();
@@ -42677,7 +42776,8 @@ const WORK_TOOLS = {
 };
 // your Works reputation in your rank: five words; numbers stay inside. Tier 1 is tuned by career_check (a steady
 // player reaches "Relied on" by the end of Day 8, a very busy one not before Day 5); later tiers get theirs on their steps' pages
-const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
+// (the patch's #16, 2026-10-20: 'relied' 40 -> 48, as jobs got quicker, JOB_PACE; a busy player had 43 by Day 4)
+const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [48, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -48983,7 +49083,7 @@ const HABITS = {
   "stargazer": "Evenings in the Deck 2 observatory at the bow windows, on the observatory-night list."
 };
 const ROSTER = [
-  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "music", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542, "birthday": 335, "plate": {"rank": "Captain", "name": "Odile Marrow"}, "habitShifts": [{"add": "stargazer", "why": "Captain Marrow has started coming to observatory night, to see what the juniors see."}], "about": [{"tier": 0, "topic": "work", "text": "Asks every new junior one question about the ship, and remembers the answer."}, {"tier": 1, "topic": "hobby", "text": "Learnt the piano as a girl and took it up again on her first command."}, {"tier": 3, "topic": "home", "text": "Has a daughter at the Concord academy who doesn't write often enough."}, {"tier": 4, "topic": "secret", "text": "Thinks about retiring, and can't imagine anyone else in the ready room."}, {"tier": 2, "topic": "past", "text": "Commanded a freighter before the Wren, and hated every day of it."}, {"tier": 3, "topic": "hobby", "text": "Plays the piano best when she thinks the music room is empty."}], "tpl": "steady", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["tea", "book"], "joy": "the piano on Thursday nights", "thread": "arc:marrow", "keepsake": "a page of sheet music she wrote", "home": "Port Halloran", "family": "daughter at the Concord academy", "mentors": true, "stays": true, "aboard": null, "hobby": "playing the piano", "since": "six years", "kin": "my daughter", "lost": "", "hobbyNoun": "piano"},
+  {"id": "marrow", "name": "Captain Odile Marrow", "story": true, "rank": "captain", "dept": "command", "uniform": "command", "role": "Captain", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "2-C", "work": {"deck": 1, "place": "work:command"}, "habits": ["early-riser", "musician"], "traits": ["patient", "curious", "quietly funny"], "looks": {"skin": 4, "hair": "bun", "hairColor": "grey", "height": 1.03, "build": "slim", "acc": ["earrings"]}, "bio": "Calm, fair, and always testing you with questions.", "life": ["Plays the grand piano in the music room late on Thursdays.", "Has commanded the Wren for six years and knows every captain in her portrait gallery by name."], "seed": 633542, "birthday": 335, "plate": {"rank": "Captain", "name": "Odile Marrow"}, "habitShifts": [{"add": "stargazer", "why": "Captain Marrow has started coming to observatory night, to see what the juniors see."}], "about": [{"tier": 0, "topic": "work", "text": "Asks every new junior one question about the ship, and remembers the answer."}, {"tier": 1, "topic": "hobby", "text": "Learnt the piano as a girl and took it up again on her first command."}, {"tier": 3, "topic": "home", "text": "Has a daughter at the Concord academy who doesn't write often enough."}, {"tier": 4, "topic": "secret", "text": "Thinks about retiring, and can't imagine anyone else in the ready room."}, {"tier": 2, "topic": "past", "text": "Commanded a freighter before the Wren, and hated every day of it."}, {"tier": 3, "topic": "hobby", "text": "Plays the piano best when she thinks the music room is empty."}], "tpl": "steady", "openness": "guarded", "needs": "listen", "loves": ["music"], "likes": ["tea", "book"], "joy": "the piano on Thursday nights", "thread": "arc:marrow", "keepsake": "a page of sheet music she wrote", "home": "Port Halloran", "family": "daughter at the Concord academy", "mentors": true, "stays": true, "aboard": null, "hobby": "playing the piano", "since": "six years", "kin": "my daughter", "lost": "", "hobbyNoun": "piano"},
   {"id": "vance", "name": "Commander Teo Vance", "story": true, "rank": "xo", "dept": "command", "uniform": "command", "role": "Executive Officer", "shift": "day", "rota": {"offDays": [2, 3]}, "bed": "2-X", "work": {"deck": 1, "place": "work:command"}, "habits": ["workaholic", "gym-regular"], "traits": ["precise", "competitive", "loyal"], "looks": {"skin": 1, "hair": "short", "hairColor": "black", "height": 1.08, "build": "average", "acc": []}, "bio": "By the book. Every page of it.", "life": ["Top of the rowing leaderboard in the gym, and taped the leaderboard there himself.", "Keeps the waiting list for the good records.", "Has two messages from home waiting."], "seed": 826440, "birthday": 179, "plate": {"rank": "Executive Officer", "name": "Teo Vance"}, "habitShifts": [{"add": "runner", "drop": "gym-regular", "why": "Commander Vance has moved from the rowing machine to the treadmills, to start a new leaderboard."}, {"drop": "workaholic", "why": "Commander Vance has started leaving the bridge on time, on the Counsellor's advice."}], "about": [{"tier": 0, "topic": "work", "text": "Has read the ship's regulations cover to cover, twice."}, {"tier": 1, "topic": "hobby", "text": "Rowed for his academy, and still checks the gym leaderboard every morning."}, {"tier": 2, "topic": "work", "text": "Keeps a list of every junior he has recommended for promotion."}, {"tier": 4, "topic": "past", "text": "Was a junior who broke every rule once, which is why he knows them all."}, {"tier": 1, "topic": "home", "text": "Grew up in New Aberdeen, where his brother still teases him about the rules."}, {"tier": 3, "topic": "hobby", "text": "Rows at 05:00 so nobody sees him lose to the machine."}], "tpl": "brisk", "openness": "guarded", "needs": "practical", "loves": ["game"], "likes": ["made", "tea"], "joy": "the rowing leaderboard", "thread": "arc:vance", "keepsake": "his old academy rowing medal", "home": "New Aberdeen", "family": "brother in the Concord navy", "mentors": false, "stays": true, "aboard": null, "hobby": "rowing", "since": "four years", "kin": "my brother", "lost": "", "hobbyNoun": "rowing"},
   {"id": "sato", "name": "Dr. Imra Sato", "story": true, "rank": "chief", "dept": "survey", "uniform": "survey", "role": "Head of Survey", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "2-V", "work": {"deck": 2, "place": "work:survey"}, "habits": ["workaholic", "quiet-corner", "tea-break"], "traits": ["brilliant", "absent-minded", "stubborn"], "looks": {"skin": 0, "hair": "long", "hairColor": "grey", "height": 0.94, "build": "slim", "acc": ["glasses"]}, "bio": "Head of Survey. Her lab, her rules, her terrible tea.", "life": ["Brews a tea nobody else will drink.", "Labels every sample in the specimen store in her own handwriting."], "seed": 8968, "birthday": 47, "plate": {"rank": "Department Chief", "name": "Dr. Imra Sato"}, "habitShifts": [{"add": "gardener", "why": "Dr. Sato has started growing sample plants in the garden, and tends them every evening."}], "about": [{"tier": 0, "topic": "hobby", "text": "Will explain the tea to anyone, at length."}, {"tier": 1, "topic": "work", "text": "Named three comets, and pretends not to care about the third."}, {"tier": 2, "topic": "past", "text": "Turned down a university post to stay on the frontier."}, {"tier": 4, "topic": "secret", "text": "Worries the survey she is proudest of was mostly luck."}, {"tier": 2, "topic": "home", "text": "Has a partner on a research station, and they send each other comet photographs."}, {"tier": 3, "topic": "hobby", "text": "Grows a single tea plant in the garden, badly."}], "tpl": "dreamy", "openness": "normal", "needs": "share", "loves": ["tea", "star"], "likes": ["book", "plant"], "joy": "her terrible tea", "thread": "notgood", "keepsake": "a tin of the terrible tea", "home": "Lisk", "family": "partner on a research station", "mentors": false, "stays": true, "aboard": null, "hobby": "brewing terrible tea", "since": "seven years", "kin": "", "lost": "", "hobbyNoun": "tea brewing"},
   {"id": "holt", "name": "Chief Bram Holt", "story": true, "rank": "chief", "dept": "watch", "uniform": "watch", "role": "Head of Watch", "shift": "day", "rota": {"offDays": [5, 6]}, "bed": "2-T", "work": {"deck": 2, "place": "work:watch"}, "habits": ["early-riser", "late-diner"], "traits": ["suspicious", "dependable", "gruff"], "looks": {"skin": 2, "hair": "bald", "hairColor": "grey", "height": 1.05, "build": "broad", "acc": ["moustache"]}, "bio": "Head of Watch. Does not trust the Veyli, and says so.", "life": ["Asked for the cabin next door to the Envoy's.", "Only his deputy can make him laugh."], "seed": 682911, "birthday": 267, "plate": {"rank": "Department Chief", "name": "Bram Holt"}, "habitShifts": [{"add": "gym-regular", "why": "Chief Holt has started training in the gym after shift."}], "about": [{"tier": 0, "topic": "work", "text": "Walks every deck before breakfast, the long way."}, {"tier": 1, "topic": "past", "text": "Served on a border patrol before the Wren, and doesn't talk about it much."}, {"tier": 3, "topic": "past", "text": "Distrusts the Veyli because of one bad day years ago, and knows it isn't fair."}, {"tier": 4, "topic": "secret", "text": "Asked for the cabin next to the Envoy's so he could keep an eye out, and has started to like the Envoy."}, {"tier": 2, "topic": "home", "text": "Writes to his old patrol crew every month, by hand."}, {"tier": 3, "topic": "work", "text": "Respects Kofi Mensah more than he has ever told him."}], "tpl": "gruff", "openness": "guarded", "needs": "practical", "loves": ["made"], "likes": ["tea", "game"], "joy": "walking the decks before breakfast", "thread": "arc:holt", "keepsake": "his first Watch badge", "home": "Marra Station", "family": "old border-patrol crew, who I still write to", "mentors": false, "stays": true, "aboard": null, "hobby": "writing letters by hand", "since": "eight years", "kin": "", "lost": "", "hobbyNoun": "letter writing"},
@@ -49618,6 +49718,7 @@ class CrewAgent {
     this.face = idHash(p.id) % 628 / 100; this.pose = 'stand';
     this.path = []; this.spot = null; this.goalId = undefined; this.settled = false; this.talking = 0;
     this.stuck = 0; this.stuckMax = 0; this.lastX = this.x; this.lastZ = this.z; this.noPath = 0;
+    this.lx = 0; this.lz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace
     const bed = PLACE_OF.get(p.bed); this.bedRooms = bed ? [bed.room] : []; this.rooms = new Set(this.bedRooms);
     this.liftCell = (() => { const l = liftTiles(); return l.length ? l[idHash(p.id) % l.length] : cell; })();
   }
@@ -49652,7 +49753,7 @@ class CrewAgent {
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this)); return true;
+      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N) goalId = '@lift';
@@ -49678,10 +49779,12 @@ class CrewAgent {
     }
     if (goalId !== this.goalId) this.retarget(goalId);
     const ox = this.x, oz = this.z;
+    this.spd = 0;
     if (this.path.length) {
-      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt;
+      const c = cellPos(...this.path[0]), dx = c.x - this.x, dz = c.z - this.z, d = Math.hypot(dx, dz), st = CREW_SPEED * dt * (d > 1e-6 ? walkGap(this, dx / d, dz / d) : 1);
       if (d <= st) { this.x = c.x; this.z = c.z; this.path.shift(); }
       else { this.x += dx / d * st; this.z += dz / d * st; this.face = Math.atan2(dx, dz); }
+      if (d > 1e-6) { this.ux = dx / d; this.uz = dz / d; this.spd = Math.min(d, st) / (CREW_SPEED * dt); }
       this.pose = 'walk'; this.y = 0;
     } else if (this.spot && !this.settled && spotTaken(this, this.spot.id)) { this.pose = 'stand';   // someone sat down in it first (this very frame, before BUSY knew: 0.36.91, day 3's 3-mess-42): wait on the walk-to tile; next frame finds another
     } else if (this.spot && !this.settled) {             // the last step, from the walk-to tile onto the spot itself
@@ -49694,7 +49797,8 @@ class CrewAgent {
     const going = this.path.length > 0 || (this.spot && !this.settled);
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
     if ((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt)) return true;   // 0.84.6: swimming the lane, up the wall (8c)
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt);
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   // someone's in your place: a free seat of the same kind close by (kept while the plan's place stays the same), else
@@ -49787,7 +49891,8 @@ class CrewAgent {
         this.pose = 'walk'; }
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone starts escorting mid-walk)
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   // section 20's walk-up (0.71.0): over to you (re-aimed as you move), then standing by you, facing you, while the chip is up
@@ -49810,7 +49915,8 @@ class CrewAgent {
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }
     if (!go && SEEK_COME && SEEK_COME.p === this.p) seekArrive(this);
     this.y = 0; this.stuck = 0; this.settled = false; this.tag = null;
-    this.h.set({ x: this.x, y: this.y, z: this.z }, this.face, heldPose(this));
+    walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone comes over mid-walk)
+    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
     return true;
   }
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
@@ -50345,7 +50451,7 @@ function crewDetail() {                                  // who gets a full rig:
 const BUSY = new Set(); let PLAYER_PLACE = null;
 const placeBusy = id => BUSY.has(id) || PLAYER_PLACE === id;
 let crewCheckT = 0;
-function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); CREW_WAY.clear(); }
+function deckCrewClear() { for (const a of DECK_CREW) a.remove(); DECK_CREW.length = 0; BUSY.clear(); LINE.length = 0; CREW_HELD.clear(); CREW_WAY.clear(); LIFT_OUT.clear(); }
 // everyone whereIs puts on this deck, mid-activity: at their place, partway there, or still in the lift
 function deckCrewFill() {
   deckCrewClear();
@@ -50405,7 +50511,9 @@ function crewArrive(p, w, now, mid) {
   }
   if (w.act === 'commute') {                             // riding in: step out of the car when the ride's done
     if (now < w.until - .5) return;
-    const a = new CrewAgent(p, lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null)); DECK_CREW.push(a); return;
+    const at = lift.length ? lift[idHash(p.id) % lift.length] : nearestOpen(LIFT_AT[0], LIFT_AT[1], null);
+    if (!mid && !liftOutOk(at, now)) return;             // #10: out of the car one at a time, about half a second apart
+    const a = new CrewAgent(p, at); DECK_CREW.push(a); return;
   }
   const spot = w.placeId && placeSpot(w.placeId);
   const prev = whereIs(p, w.from - .01);
@@ -50429,6 +50537,7 @@ function updateDeckCrew(dt) {
   for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.h.full) { a.h.update(dt, clock.elapsedTime); a.h.rig.root.visible = crowd.visible; } }   // indexed: no iterator a frame (0.26.40)
   BUSY.clear(); for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (a.settled && a.spot) BUSY.add(a.spot.id); }
   PLAYER_PLACE = typeof playerHolds === 'function' ? playerHolds() : null;
+  stallCapsTick();                                       // #8: the stalls' red lights
   if ((crewCheckT -= dt) > 0) return;
   crewCheckT = .25;
   crewDetail();
