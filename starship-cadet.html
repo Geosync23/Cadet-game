@@ -35982,6 +35982,7 @@ function evArrive(p, d, e) {
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
   if (ev.easy && lineEasy(p, d, e)) return e.from;        // Crossing the Line: the day shift stands easy for the ceremony (slot 'Line builder')
+  if (ev.ownFor && ev.ownFor(p, d) && lineOwnUp(p, d, e)) return e.from;   // Crossing the Line: a first-timer up from a night shift's day sleep comes to their own (ER3 fix 9)
   if (!ev.afterShift) return null;
   const F = schedFrame(p, d), gp = shiftBlocks(p, d);
   const host = p.id === ev.host, need = host ? 5 : ev.min || 20, at = Math.max(e.from, F.workEnd + (host ? 15 : 2));   // a host comes even for the last few minutes (Calder works late some days), after the whole end of shift
@@ -38174,6 +38175,16 @@ function lineEasy(p, d, e) {
   if (gb && p.dept === 'galley') return false;                  // the galley line stays (the supper's prep); a garden or stores stint can wait
   const r = evRule((d - 1) * 1440 + e.from, 'standEasy', p);
   return !!r && !(r.not || []).includes('dept:' + p.dept);
+}
+// ER3 fix 9: a first-timer on the night shift who slept through the day after last night's shift (eventFree keeps
+// them out until 15:00) is free for their own ceremony from its start, when off duty through it and not in bed by then:
+// up before the horn, the planner holds their errands and leisure for it (section 14's clear and leisureUntil; Reyes
+// woke 14:29, Yoon 14:22, Lemaire 14:00). One still asleep at the horn misses it, as before. Pure (the plan's frames)
+function lineOwnUp(p, d, e) {
+  if (!EV_LINE_ON || p.rank === 'guest' || e.from < 840) return false;
+  const F = schedFrame(p, d), P = schedFrame(p, d - 1);
+  if (!F.night || !P.works || e.from < P.workEnd || e.to > F.bed - 20) return false;
+  return !(F.works && e.to > F.workStart - 10);
 }
 // the ceremony's crowd sets off ahead of the horn (PR6: setting off at 14:30, most came in 14:43-14:52, after the oath's
 // start at 14:40), as the Fridays' friLead: the gathering's `lead`, read by eventPlan. Someone standing easy leaves the
