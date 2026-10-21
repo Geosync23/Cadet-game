@@ -330,3 +330,15 @@ One fix, and one small point:
   dressing must be gone by 16:00, when the reading corner uses the room. Say so in L3.
 
 Verdict on 84946af: **PASS WITH FIXES** (R3-1, R3-2). Once the spots are on clear tiles, it's a PASS.
+
+### 7040dc8: round 3's fixes
+- **R3-1 done.** I checked it in a new game after `goToDeck(3)`:
+  - Tiles 50,9, 50,10, 50,11 and 50,12 are open, in the lounge, and hold no daily place or walk tile. Their only
+    places are the party venue's crowd spots 51, 48, 52 and 56, which belong to the separate party venue, so that's
+    fine.
+  - 49,10 and 49,11 are blocked: the furniture in front of the Captain. The deck architect's check that it's low
+    furniture, in L2, is the right one.
+  - The fallback (hold seat 27) is stated.
+- **R3-2 done.** The bowl and ribbons are shown 14:30-15:15 only.
+
+**Verdict on claude/event-plan-line 7040dc8: PASS.**
