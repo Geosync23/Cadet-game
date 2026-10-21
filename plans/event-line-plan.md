@@ -46,7 +46,7 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 - **If you miss the ceremony,** a first-timer answers with the plain line ("We're new, and we're nervous, and we came anyway."), and that goes on the plaque. You can still take Tomas his mug and walk the Lap.
 - **No spoilers** (EW1's guard rails, 01:07):
   - Tomas's lines are only about missing the ceremony. Nothing about failing, tests or Holt (his arc's beat 5), and nothing about staying (beat 7). He never says or reacts to "stay".
-  - Holt has one warning reaction line about the here and now (EW1's bubble: "Crossing or no crossing, the plaza stays tidy. No punch on my deck."; the plaza is the Watch's patch every day, so it still fits with the ceremony in the lounge), never a scene. EW1 (01:20): his distrust of the Veyli comes from "one bad day on a border patrol, years ago" (his arc), so on a border-crossing day his line says nothing about borders, past crossings, "last time" or the Veyli.
+  - Holt has one warning reaction line about the here and now (EW1's reviewed bubble, place-neutral: "Crossing or no crossing, this ship stays tidy. No punch on my decks."), never a scene. EW1 (01:20): his distrust of the Veyli comes from "one bad day on a border patrol, years ago" (his arc), so on a border-crossing day his line says nothing about borders, past crossings, "last time" or the Veyli.
   - The two-years fact is neutral: "on a quiet charting run", with no incident attached, so nobody asks "what happened last time?". The head writer's seat confirms it doesn't clash with Holt's or Saruth's timeline before it goes in facts.md.
   - Nothing about a delegation, guests or the Envoy's purpose.
 - **What it needs** (about one turn more than a plain ceremony):
@@ -251,6 +251,7 @@ The build number is the build master's.
     - `event.crossingLine.record`;
   - **meetings:** `lineTomasSat`, `lineTomasMug`, `lineLap`, `lineSupperGuess` (Pell; `mem:line.secret.kept|told`);
   - **facts.md:** the two-years line is in;
+  - **the Lap stop:** `lineLap` names `3-lap-6`, and Zeke opens it with "Hold up. Stop here, everyone. This is where it happened today." (dfd083a);
   - **place:** only six lines name "the bow lounge" (Vance's Mail, the banner, the status line, the device notice, and the Day 5 address's Mail and line); everything else is place-neutral;
   - **answers they lean on:** q4 (the supper: "whatever the crew voted for, and a pudding"), q5 (the facts line) and q6 (the missed-it lines). EW1 adjusts if the user answers differently.
 - **New small lines:**
