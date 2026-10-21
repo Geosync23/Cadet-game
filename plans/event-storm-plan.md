@@ -1,7 +1,8 @@
-# The ion storm: the event plan (version 1: the storm update, Days 11-15)
+# The ion storm: the event plan (version 1.1: the storm update, Days 11-15)
 
 Event planner EP3, 2026-10-21. Branch `claude/event-plan-storm`, from `claude/event-plan-line` (7040dc8; build 0.64.6). Reports to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB). **Planning only: the game is unchanged.**
 
+- **The review:** ER2, claude/event-plan-review-2 69629c7, `plans/event-storm-plan-review.md`: PASS WITH FIXES (5 fixes, 2 nits). How each was taken is at the end.
 - **The full page:** `plans/event-storm-plan.html` (with the answer form, `data-doc="event-storm-plan"`).
 - **Screenshots:** `plans/event-storm-plan-shots/` (390x844, a new game, the storm's days as they run today).
 - **What it builds on:**
@@ -17,7 +18,7 @@ Event planner EP3, 2026-10-21. Branch `claude/event-plan-storm`, from `claude/ev
 - **Thursday 14:00:** Calder's briefing in the Works bay, after the tea. The storm jobs go up when it ends, and the one you pick is held for you.
 - **Friday 14:00, the front:** the jolt, the lights dip, the Captain's short banner. The bow lounge, the call booths and the rec deck close; the bridge goes on double shifts; comms go down. **16:00:** the Captain's regular Friday address in the auditorium, opened just for it.
 - **Saturday:** the worst of it: blackouts deck by deck, storm stew, the surge at 11:20. **18:00-19:30, the lantern supper** in the mess by lamp light, about 55-60 people.
-- **The story (recommended: A, "Sixty by lamplight"):** Brennan is off on Friday and Saturday, so Lukas Dlamini, your bunkmate until Wednesday, runs her galley alone through the worst of the storm, and the lantern supper is his. The surge takes out four of his six rings. Your one choice: fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan comes to the supper as a diner, and what she says depends on your choice.
+- **The story (recommended: A, "Sixty by lamplight"):** Brennan is off on Friday and Saturday, so Lukas Dlamini, from your old bunk room, runs her galley alone through the worst of the storm, and the lantern supper is his. The surge takes out four of his six rings. Your one choice: fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan comes to the supper as a diner, and what she says depends on your choice.
 - **Sunday 10:00, the all-clear** in the observation room: the Captain, Calder, Sato and Holt come in on their day off (and say so), Vance is on duty. Your commendation letter comes here, and the storm's result is settled. The booths reopen to a queue, and **the party** fills the bow lounge 19:00-21:00.
 - **Your help counts:** left alone, a new game's storm comes out **bumpy** (measured). Fitting the ballasts, carrying the batteries up and drawing up the booth rota make it **smooth**.
 - **Monday:** the afterglow, Calder's debrief at 18:00, Lap of the Wren at 20:30 led by Tomas. The event ends at midnight, so Tuesday's comet stands alone.
@@ -27,17 +28,17 @@ Event planner EP3, 2026-10-21. Branch `claude/event-plan-storm`, from `claude/ev
 Each option has a beginning, a middle where your one choice matters, and a payoff. All three use crew already aboard and the real rota (measured in a new game with the base switched on), and none touches anyone's later story beats.
 
 ### Option A: "Sixty by lamplight" (recommended)
-The ship's own facts: Brennan's days off are Friday and Saturday (`offDays [4, 5]`), and `content/facts.md` already says "Lukas Dlamini covers for Brennan Fri-Sat". So the storm's two worst days fall on Lukas's watch, and the lantern supper is his. He's a galley junior, eight months aboard, from Port Halloran, dry, few words, and he cares about one thing above all (his card): "Brennan's galley not slipping on his watch". He slept in Bunk 1 with you until you moved to the officers' corridor on Wednesday (Day 10).
+The ship's own facts: Brennan's days off are Friday and Saturday (`offDays [4, 5]`), and `content/facts.md` already says "Lukas Dlamini covers for Brennan Fri-Sat". So the storm's two worst days fall on Lukas's watch, and the lantern supper is his. He's a galley junior, eight months aboard, from Port Halloran, dry, few words, and he cares about one thing above all (his card): "Brennan's galley not slipping on his watch". He sleeps in Bunk 1 (berth 5), where you started. On track you've moved to the officers' corridor on Wednesday (Day 10); the promotion can be delayed, never failed, so a slower player is still his bunkmate. **His lines read the save** ("since you moved" only if you have; "bunkmate" if you haven't), never a rank or day assumed.
 
-- **Beginning, Friday Day 12, 17:00-20:30, the galley.** The front hit at 14:00. Lukas is on the galley line through dinner (measured: cooking 16:50-20:30, tea at 20:30). The moment opens when you're near him (the galley or the servery, both open to you). He says a number, the way he does: *"Sixty."* Covers. Tomorrow. The lantern supper, by lamp light, on her day off. Three replies:
-  - "I'll give you a hand tomorrow." (practical; sets `storm.lukas.promised` and holds the supper's lantern job for you)
+- **Beginning, Friday Day 12, 17:00-20:30, at the servery.** The front hit at 14:00. Lukas is on the galley line through dinner (measured: cooking 16:50-20:30, tea at 20:30). The moment opens when you're near him: at the servery (the queue 17:00-18:00 is the natural place) or in the galley, both open to you. He says a number, the way he does: *"Sixty."* Covers. Tomorrow. The lantern supper, by lamp light, on her day off. Three replies:
+  - "I'll give you a hand tomorrow." (practical; sets `storm.lukas.promised` and holds the lantern job `stormLanterns` for you)
   - "She left you in charge for a reason." (cheer; *"She left me a list. Eleven of the twelve lines say don't panic."*)
   - "What's the worst that could happen?" (he just says the number again)
 
   If you don't meet him before he goes to his bunk (20:47), he sends a short Mail at about 20:50: *"Lantern supper tomorrow. If you've got hands, I've got onions."*
 - **Middle, Saturday Day 13, the galley, 14:30-17:00.** At 11:20 the surge goes through the ship (a felt moment). When Lukas comes on at 14:30 (measured) the range is down to two rings of six: *"Surge took four rings. Works has a list. I'm near the bottom. Sixty bowls on two rings. Or I go and knock on her door."* Your one choice:
-  - **"I'm Works. Let me look at it."** A story job is held for you: reset the galley range (`3-range-1`, one stop, about 20 minutes). Done before 17:00, he has all six rings.
-  - **"Ask her. I'll go."** You carry his question to Brennan, wherever her own plan has her (on Deck 4 that afternoon: her cabin 4-05 or a bench; measured). She won't come in (*"It's his night."*) and sends one line back: *"Tell him: one pot, low and slow, lid on. And tell him I said he's ready."*
+  - **"I'm Works. Let me look at it."** (any rank: you're a Works hand either way) A story job is held for you: reset the galley range (`stormRange`, one stop `{ deck: 3, machine: 'range', mins: 20, tag: 'reset' }`, which resolves to `3-range-1` at its panel `3-range-1-panel`, the only range on Deck 3). Done before 17:00, he has all six rings.
+  - **"Ask her. I'll go."** You carry his question to Brennan, wherever her own plan has her (on Deck 4 that afternoon: her cabin 4-05 or a bench; measured). She won't come in (*"It's his night."*) and sends one line back: *"Tell him: one pot, low and slow, lid on. And tell him it's his galley tonight."*
   - **"Two rings is plenty. Stew's one pot."** He nearly laughs. His aunt was a pilot (his card) and cooked on two rings in a cockpit for twenty years. He makes her stew.
 
   If you're not there, nothing is lost: he manages on two rings, his way, and the supper goes on.
@@ -51,15 +52,16 @@ The ship's own facts: Brennan's days off are Friday and Saturday (`offDays [4, 5
 - **If you skip all of it,** the supper still happens, Lukas still runs it, and Brennan still eats it (her "his way" line). You hear about it on Sunday.
 - **No spoilers:**
   - Lukas talks only about tonight's supper and Brennan's galley. Nothing of his own worry theme (`notgood`: a mistake on an old ship, checking his work twice), nothing about the person he married (unnamed in facts.md) or his count of days.
-  - Brennan's lines never touch her own story: no restaurant, fire, soup, blue sage, Hesper Dock, her book of favourite dishes or leaving.
+  - Brennan's lines never touch her own story: no restaurant, fire, soup, blue sage, Hesper Dock, her book of favourite dishes or leaving, **and nothing that hints at handing the galley on** (no "he's ready", no "one day this'll be yours": her later beats keep that question). "His galley" is for tonight only.
   - Calder never says "well done" (her arc's payoff).
   - Nothing about the Veyli or the visit.
 - **What it needs** (about one turn):
   - three moments (section 20c, like `moment:quiz`): Friday with Lukas, the Saturday galley choice, Brennan at the supper; each reads saved flags (`storm.lukas.promised|fixed|asked|own`), never the planner;
-  - the range job: one stop at `3-range-1`, held for you from the moment's reply, the way `calderStorm`'s `job:` works; the galley's own cooking isn't changed (the four dead rings are words);
+  - the range job `stormRange`: one stop `{ deck: 3, machine: 'range' }` (the kind on Deck 3, as the ballasts job writes `machine: 'lights'`; `eventStopOf` reads a kind or the middle part of an id, so `'3-range-1'` itself wouldn't resolve), held for you from the moment's reply, the way `calderStorm`'s `job:` works; the galley's own cooking isn't changed (the four dead rings are words);
   - the errand: a stop at Brennan found from her own plan, like the Line's mug for Tomas;
   - Brennan's pull of 1 at the supper (the event's data, not your choice: the planner never reads your reply);
   - the lantern trace on the galley pass (deck architect, 1 draw call);
+  - the lantern job `stormLanterns` (built in S5);
   - Lukas's Mail; about 30-35 lines from EW1.
 
 ### Option B: "First in the queue" (not recommended)
@@ -127,13 +129,14 @@ Dr. Sato is off on Saturday and Sunday, but spends Saturday afternoon and evenin
 | 15:00 | News: the bridge on double shifts | | `storm-bridge` |
 | 15:30 | The short Friday: the day shift stops | | Fridays plan |
 | **16:00-16:50** | **The Captain's address** (`friday-d12`: the storm at its heart); the auditorium and its way from the lift open 15:30-17:00 only; Marrow and Vance step off the double shift; stay-in doesn't apply | rec deck auditorium | Fridays plan, `keep`, S2, S3 |
-| 17:00-20:30 | Dinner. **Story A begins** (Lukas on the line) | galley, mess | 20c moment |
+| 17:00-20:30 | Dinner. **Story A begins at the servery** (Lukas on the line) | servery, galley | 20c moment |
 | 18:45-21:15 | Works tea, jam, tap night paused | | `pause` |
 | **Sat 13, 06:00** | **Escalation**: blackouts (none on Deck 3 in a new game), storm stew, stay in (50%), sleep and social needs | every deck | routines, needs, galley |
 | 07:00, 11:00 | News: a deck went dark; storm stew again | | `storm-dark`, `storm-stew` |
 | **11:20** | **The surge** (jolt, lights dip) | every deck | moment `surge` |
 | 12:00 | The lantern supper's notice and Mail | Mail | gathering `lanternSupper` |
-| 14:30-17:00 | **Story A's choice** (Lukas, the range) | galley | 20c moment, story job |
+| 14:00 | The lantern job goes up (held for you if you promised Lukas) | Deck 5 storage to the mess | `stormLanterns` |
+| 14:30-17:00 | **Story A's choice** (Lukas, the range) | galley | 20c moment, story job `stormRange` |
 | 18:00 | Trays to the bridge (the galley's cart run) | Deck 3 to Deck 1 | `galley.trays` |
 | **18:00-19:30** | **The lantern supper**: the mess dimmed to lamp light, lanterns on the long tables, storm stew; about 55-60; stay-in pauses 17:45-19:45; Brennan dines; **story A's payoff** | mess (spills to the promenade) | gathering k 352 |
 | (all day) | Long breakfast, garden hour, Tiles ladder, cook-along, film night, observatory night paused | | `pause` |
@@ -155,7 +158,7 @@ Dr. Sato is off on Saturday and Sunday, but spends Saturday afternoon and evenin
 ## What you can do
 - **Thursday:** go to Calder's briefing and pick a job; take the storm jobs from the board (the lounge, the ballasts, the batteries, the booth rota; the junctions at tier 3).
 - **Friday:** feel the front; go to the Captain's address; meet Lukas at dinner.
-- **Saturday (your day off):** help Lukas (the range, the errand to Brennan, or a word); carry the lanterns; go to the lantern supper.
+- **Saturday (your day off):** help Lukas (the range, the errand to Brennan, or a word); carry the lanterns up from storage (`stormLanterns`); go to the lantern supper.
 - **Sunday:** the all-clear (your commendation, if earned); the booth queue; the party.
 - **Monday:** read the debrief; walk the Lap with Tomas.
 - **Miss any of it** and still be part of it: meetings send their gist by Mail; the supper and the party go on without you.
@@ -176,8 +179,15 @@ Left alone: four bumpy (after the calls retune) = **bumpy**. With the three help
 - **The double shift and the address (S2).** The routine gets an exception: `{ who: 'dept:command', rule: 'doubleShift', except: [{ ids: ['marrow', 'vance'], day: 1, at: [960, 1010] }] }`, and `stayIn` doesn't apply in the Friday hold (15:30-17:00). Section 14 (the sim seat).
 - **The rec deck (S3).** A routine `{ where: '7|*', rule: 'closed' }` in onset and escalation, with the auditorium and its way from the lift open 15:30-17:00 on Day 12 (`eventClosed` already carries the exception, F3a). Blackouts still skip the rec deck. The rec engineer reviews.
 - **The first all-hands (S3).** Today it's set by the first event's first address (`recFirstAllHands`, section 18). Unhooked: question 5.
-- **The lantern supper (S5).** A moment `{ id: 'lanternSupper', phase: 'escalation', at: [2, 1080], len: 90, k: 352, where: { venue: 'mess', deck: 3, room: /^Mess hall$/ }, gathering: true, who: .85, anim: 'talk' }` with `brennan` at 1, Lukas on the line (the galley line, never pulled), `stayIn` paused 17:45-19:45. The look: the mess's lights at emergency level and lanterns on the long tables (one instanced prop, `DECK_DRESS.lanternMess`, 1-2 draw calls), 18:00-19:30 only. The galley: storm stew for 60.
-- **The all-clear day (S6).** The tidy job to 10:30 Sunday (question 7); talent night's skip on Day 14 and a one-off on Day 21; the Lap: `EV_DAY_DRESS` drops Day 14's and adds Day 15 20:30 with Tomas at 1. **`EV_DAY_DRESS` is built here first** (the Line reuses it for its Sunday table and Lap): section 18, made at load from `EV_CALENDAR` and the event's data only.
+- **The lantern supper (S5).** A moment `{ id: 'lanternSupper', phase: 'escalation', at: [2, 1080], len: 90, k: 352, where: { venue: 'mess', deck: 3, room: /^Mess hall$/ }, gathering: true, who: .85, anim: 'talk' }` with `brennan` at 1, Lukas on the line (the galley line, never pulled), `stayIn` paused 17:45-19:45. **The lantern job** (ER2's fix 1): `jobs.escalation: [{ id: 'stormLanterns', title: 'Lantern supper: carry the lanterns up from storage', tier: 1, at: 840, bring: 'a crate of storm lanterns', stops: [{ deck: 5, room: /^Main storage$/, mins: 5, tag: 'pickup' }, { deck: 3, room: /^Mess hall$/, types: ['mess-seat'], mins: 15, tag: 'drop' }] }]`, posted at 14:00 Saturday, held for you if you promised Lukas, else open on the board (and the mess sign-up sheet); left for a galley hand at 17:00 if nobody takes it. The lanterns on the tables show from 18:00 whoever carried them (the look never waits for the job). The look: the mess's lights at emergency level and lanterns on the long tables (one instanced prop, `DECK_DRESS.lanternMess`, 1-2 draw calls), 18:00-19:30 only. The galley: storm stew for 60.
+- **The all-clear day (S6).** The tidy job to 10:30 Sunday (question 7); talent night and the Lap moved by `EV_DAY_DRESS`.
+- **`EV_DAY_DRESS`, one shape shared with the Line plan (ER2's fix 5; sent to EP2).** Built here first (S6); the Line's L2 reuses it. Section 18, made at load from `EV_CALENDAR` and each event's own `dayDress` data only (never `eventNow`, `SHIP.event` or anything saved), read by `eventsOn(d)` so plans made on any day agree. One row per tradition and ship day:
+  - `{ trad, day, drop: true }`: that day's run doesn't happen;
+  - `{ trad, day, add: true, at, jitter, ... }`: a run on a day it wouldn't happen (same `k`, so its hashes don't move);
+  - `{ trad, day, ...changes }`: that day's run re-dressed. Changes: `name`, `words` (a bank prefix, e.g. `event.ionStorm.trad.lap-of-the-wren`), `at`, `jitter`, `who` (extra `[id, pull]` pairs in front of the tradition's own), `stop` (a place the walk pauses at), `mail: false`.
+  - In an event's data, `dayDress: [{ trad, day: <the event's day>, ... }]`; the table adds the calendar day.
+  - **The storm's rows:** `lap-of-the-wren` Day 14 drop, Day 15 add at `[1230, 1275]` with `words` (EW1's) and Tomas (already its host, pull 1); `rec-talent-night` Day 14 drop, Day 21 add (its usual hours).
+  - **The Line's rows (its L2):** `sunday-table` Day 7 re-dressed (name, words, `[1080, 1155]`, jitter 0, `who` everyone .85, `mail: false`); `lap-of-the-wren` Day 7 re-dressed (`who` tomas, torres-zeke, pell at 1, `stop: '3-lap-6'`).
 - **Determinism.** Everything the crew's planner reads comes from the calendar, the event's data and the rota. Your replies (the briefing, Lukas, the errand) only set saved flags and hold jobs; nothing in the planner reads them.
 
 ## The build turns (after the events base; switch: the base's `EVENTS_ON`, on with this update after the user's review)
@@ -189,7 +199,7 @@ Each turn: small exact edits; a build-table row under "Ion storm update"; the ar
 | S2 | The cast: the all-clear's four called in (F0b), `works:2` at the briefing on shift; Marrow and Vance off the double shift 16:00-16:50 Day 12; stay-in not in the Friday hold | 14 (sim), 18 | day_check Days 11-14, bigevents_check cast |
 | S3 | The rec deck: closed front to all-clear, the auditorium open 15:30-17:00 Day 12; the first all-hands unhooked (question 5); talent night to Day 21 | 18, 4e/15r/8c (rec engineer) | events_check, join_check, day_check 12, devmode_check |
 | S4 | Your help counts: the ballasts, batteries and booth rota effects; the calls retune; the booth rota job and its sheet | 17 (systems), 16 (galley), 18, 4d (the sheet) | machine_check, food_check 12-14, bigevents_check results |
-| S5 | The lantern supper: k 352, the crowd, stay-in paused, Brennan's pull, storm stew for 60, the lamp-light look and lanterns | 18, 14, 16, 8b/4d | food_check 13, day_check 13, bigevents_check crowds, perf_check scene |
+| S5 | The lantern supper: k 352, the crowd, stay-in paused, Brennan's pull, storm stew for 60, the lamp-light look and lanterns, **the lantern job `stormLanterns`** | 18, 14, 16, 17 (the job), 8b/4d | food_check 13, day_check 13, bigevents_check crowds, perf_check scene **with about 60 in the mess and the lanterns at 390x844** (239 was measured with 20 in the room) |
 | S6 | The all-clear day: the party's words, the tidy job, `EV_DAY_DRESS` (Lap to Monday with Tomas), talent night's move, the booth rush | 18, 16 (if the party gets food) | events_check, day_check 14-15, social_check |
 | S7 | Story A: the three moments, the range job, the errand stop, Lukas's Mail, the lantern trace, ~30-35 lines | 20c (social), 18, 17 (the job), 4d (trace) | social_check, events_check, bigevents_check live (Lukas on the line Fri-Sat, Brennan at the supper) |
 | S8 | Your device and the banner: the banner on phones (HUD), status lines, Schedule, Record, the Officer's briefing (F5) | page/11 (HUD), 19 (device), 18 | device_check, interactions_check, bubble_check, shots at 390 and 360 |
@@ -235,7 +245,7 @@ Each turn: small exact edits; a build-table row under "Ion storm update"; the ar
 5. **The rec deck's first all-hands, unhooked from the storm.** Recommended: the first Friday address (Day 5) counts as it, so film night moves to the auditorium from Saturday Day 6. Others: the first Monday of the next season; film night moves on Day 6 anyway and the season's all-hands waits.
 6. **Who's at the all-clear?** Recommended: as today, the five (four called in) and you, in the observation room; everyone else gets the Captain's banner. Other: open to anyone nearby (up to 37 in the room).
 7. **When is the bow lounge tidied?** Recommended: Sunday 10:30, just after the all-clear, so the room's back to normal for the reading corner and the party. Other: Monday 08:00 as today (the party has paper cups: the glassware's still packed).
-8. **What counts toward your commendation?** Recommended: storm jobs and storm meetings up to the all-clear, including Saturday's range job and lantern job (two jobs, or one and a meeting). Other: only the prep jobs posted at the briefing.
+8. **What counts toward your commendation?** Recommended: storm jobs and storm meetings up to the all-clear, including Saturday's range job (`stormRange`) and lantern job (`stormLanterns`, built in S5) (two jobs, or one and a meeting). Other: only the prep jobs posted at the briefing.
 
 ## Judgement calls (tell me if any is wrong)
 - The storm is the regular Friday address's heart on Day 12; no all-hands of its own (the user's decision).
@@ -245,3 +255,14 @@ Each turn: small exact edits; a build-table row under "Ion storm update"; the ar
 - The lantern supper is the storm's Saturday dinner (no other dinner tradition that day).
 - The story's range job is a real Works job (it counts); the four dead rings are words, not a machine fault.
 - Saruth goes to the supper and the party like anyone off duty (no visit spoilers in either).
+
+## For EV1 and lead 22 (not the user): a delayed promotion during the storm (ER2's fix 3)
+The promotion can be delayed, never failed, so a slower player's summons, move or commissioning can fall on Days 12-14. F1's guard holds only the default days (Days 9-11). **Proposed:** `guardFree` treats the storm's onset, escalation and resolution hours as held for career beats, so a delayed summons, move or ceremony waits until after the all-clear (Sunday from 10:12, or Monday), and never displaces the front, the Friday address, the lantern supper or the all-clear. Story A never assumes your rank or cabin (its lines read the save). EV1 decides; it touches F1b-c, not this plan's turns.
+
+## ER2's round 1 (69629c7), as taken
+1. **The lantern job:** built in S5 as `stormLanterns` (Deck 5 storage to the mess's long tables, tier 1, posted Saturday 14:00, held for you if you promised Lukas). q8 now names it.
+2. **"He's ready":** reworded to "tell him it's his galley tonight", with a new guard rail: nothing that hints at handing the galley on.
+3. **Rank and cabin:** Lukas's lines read the save ("bunkmate" or "since you moved"); "I'm Works" works at any rank. The delayed-promotion question is above, for EV1 and the lead.
+4. **The range stop:** `{ deck: 3, machine: 'range' }`. Note: `'3-range-1'` as the machine wouldn't resolve: `eventStopOf` matches a kind, or the middle part of an id (`id.split('-')[1]`), so the kind is the way the ballasts job does it (`'lights'`); it lands on `3-range-1`'s panel `3-range-1-panel`.
+5. **`EV_DAY_DRESS`:** one shape, above, built here in S6; sent to EP2 so the Line's L2 says "reuses".
+- **Nits:** S5's perf_check scene measures about 60 in the mess plus the lanterns at 390x844; story A begins "at the servery".
