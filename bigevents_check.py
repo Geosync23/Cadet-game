@@ -14,7 +14,7 @@
 #   beats' hours (its own beat aside), one Captain's scene a day, none on a test day or across a night shift; the
 #   summons on Day 18 at 16:00 and the Captain's table on Day 20 19:00-20:15 (a night-shift week); the meetings' casts on
 #   shift or called in (eventCalledIn), and planned in the meeting's room; gatherings fit their places (crowds at most
-#   60, never more there at once than its places, the mess's 44 seats plus standing); no tradition in a gathering's or meeting's room while it's on, and the
+#   60, never more there at once than its places; a seated one (no standing, the user's) never more at once than its seats); no tradition in a gathering's or meeting's room while it's on, and the
 #   plan's clashes (talent night and Lap of the Wren off the party night, the lap on Day 15 at 20:30); the run twice
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
@@ -37,7 +37,7 @@ from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
 CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above
-MESS_SEATS = 44
+MESS_SEATS = 44                 # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 
 ok = True
 SINK = None                    # the self-test collects the FAILs here instead of printing them
@@ -137,11 +137,11 @@ PAPER = r"""(() => {
     const want = people.filter(p => eventPlan(p, g.day).some(x => x.id === g.id)).length;
     const went = people.filter(p => planDay(p, g.day).some(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-')))).length;
     const pls = e.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':' + i : w.pool)) || []);
-    const cap = new Set(pls.map(pl => pl.id)).size, seats = new Set(pls.filter(pl => /seat|chair|bench|stool|sofa/.test(pl.type)).map(pl => pl.id)).size;
+    const cap = new Set(pls.map(pl => pl.id)).size, seats = new Set(pls.filter(pl => pl.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(pl.type)).map(pl => pl.id)).size, crowd = new Set(pls.filter(pl => pl.gather).map(pl => pl.id)).size;   // a seat: any place sat at (the long tables' chairs are type 'event'); a crowd spot: a gather place
     // the most crew there at once (lead 23: never over its places at any one time), minute by minute through the gathering
     const B = (g.day - 1) * 1440, segs = people.flatMap(p => planDay(p, g.day).filter(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-'))));
     let peak = 0, peakAt = null; for (let m = B + e.from - 30; m < B + e.to + 30; m++) { const n = segs.filter(s => s.from <= m && m < s.to).length; if (n > peak) { peak = n; peakAt = m - B; } }
-    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
+    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
   const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
@@ -516,11 +516,14 @@ def judge(a, tag):
     # the gatherings fit their places
     for c in a['caps']:
         if c.get('missing'): fail(f"{tag}: gathering {c['id']} isn't on Day {c['day']}"); continue
-        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}){', dropping in for ' + str(c['stay'][0]) + '-' + str(c['stay'][1]) + ' min' if c['stay'] else ''}, {c['cap']} places ({c['seats']} seats) in {c['rooms']}")
+        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}){', dropping in for ' + str(c['stay'][0]) + '-' + str(c['stay'][1]) + ' min' if c['stay'] else ''}, {c['cap']} places ({c['seats']} seats{', seated only' if c['seated'] else ''}) in {c['rooms']}")
         if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
         if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
         if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")
-        if c['mess'] and c['want'] > MESS_SEATS and c['cap'] - c['seats'] < c['want'] - MESS_SEATS: fail(f"{tag}: {c['id']} in the mess: {c['want']} people, {c['seats']} seats and too few standing places")
+        if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
+            if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
+            if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
+        # (the old rule, a mess gathering over 44 needing standing places, is dropped: the user removed standing at meals)
         if c['went'] < c['want']: note(f"{c['id']}: {c['want'] - c['went']} meant to go but aren't planned there")
     # no tradition in a gathering's or meeting's room while it's on; the plan's clashes (with the storm's new hours)
     for x in a['clash']: fail(f"{tag}: {x}")
