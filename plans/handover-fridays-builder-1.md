@@ -43,6 +43,14 @@ Deck 2 (the plan said "on the bridge"; say so to the user in the summary).
 
 ## Next: turns 6-10 (as in the brief)
 
+- **First, PR3's fix from turn 5's review (PASS WITH FIXES, 78112ef; full verdict with lead 22):** in real play the
+  crew set off at 16:00 and arrive late: Marrow at the lectern 16:12, Vance 16:27, 49 seated only by 16:36
+  (plans/review-3/fr5_fill.py on claude/review-3). Plan the trip ahead so people are seated by about 16:00 (patch
+  #9's walk lead, `walkLead` in section 14, or an earlier crew segment for the address: a deck 7 ride from Deck 3/4
+  takes several minutes), and add a live part to fridays_check (step the day on the deck from 15:45 and count who is
+  seated at 16:00 and 16:05, Marrow and Vance at the lectern by 16:00). The rest of turn 5 passed: off identical, the
+  gate right, 140-172 draw calls in the full room.
+
 - **Turn 6 (C2), the speech.** The big one.
   - **Bake:** content_gen.py (the dialogue engineer's tool) learns `.address` files into a new generated block
     `ADDRESSES` (add `// ---- BEGIN ADDRESSES ...` / `// ---- END ADDRESSES ----` markers in section 22's generated
