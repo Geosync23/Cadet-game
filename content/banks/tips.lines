@@ -10,9 +10,15 @@
 - Call home from the booths
 
 // ---- Playtest 2 (head writer W2): green tips (seat U). Each shows once per save.
-// item 9: once, on the training day
+// item 9: once, on the training day; the patch (#13): once, while a long job's bar fills, any day of the first week
 == tip.device
-- Working is a good chance to check out your device. Have a look at the apps between jobs.
+- While a long job's bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.
 // item 19: at the start of Day 2 (the laundry day)
 == tip.laundry.day2
 - Tuesday is laundry day. Take your hamper to the laundry on Deck 4, before your shift or after it.
+// the patch (#28): the same tip, any time on Day 2 you're up and not clocked in. Up late, the shift already on:
+== tip.laundry.day2.late
+- Laundry's for after your shift. Clock in first; the washers will wait.
+// after the shift (17:00 on):
+== tip.laundry.day2.after
+- Laundry day: your hamper's in Bunk 1, the washers are on the far corridor.

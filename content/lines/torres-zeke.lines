@@ -154,9 +154,21 @@
 // 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
 // ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
 ? flag:walk.goodnight.1
-- Right, that's me. Evening's yours. Have a wander, explore.
+- Right, that's me. Breakfast from six, shift at nine, tea at one.
 ? flag:walk.goodnight.2
+- Off at five. Dinner till half eight. Weekends off, like most of Works.
+? flag:walk.goodnight.3
+- Then the evening's yours. Have a wander. Gym, lounge, Tiles, bed.
+? flag:walk.goodnight.4
 - Shift's at nine tomorrow. Get some sleep soon.   #warm
+// step: the end of training day (the patch, #18/#19): at 16:50 on Day 1 he comes to find you and says these in order
+// (section 21b's introDayEndTick), then the arrow goes to the time clock and, once you've clocked out, to the beam.
+? flag:walk.trainend.1
+- Good job today. Proper work, that.   #warm
+? flag:walk.trainend.2
+- Tomorrow you're on your own. You'll be fine. Read the card twice.
+? flag:walk.trainend.3
+- Clock out first, then come to the beam. They're waiting for you.   #warm
 
 // ---- Day 1: his talk-through on the shadow job (said as bubbles while you work; replaces INTRO_JOB_LINES on
 // claude/arrival). Each step is gated by flag:walk.job.<step>, which the onboarding hook sets. 60 characters or fewer.
@@ -292,7 +304,7 @@
 ? flag:walk.wing.5
 - Don't play Rina at Tiles. Or do. Just don't expect to win.   #funny
 ? flag:walk.wing.6
-- Laundry there. Put your name in everything. Trust me.   #funny
+- Laundry's on the far corridor, past Bunk 4. Put your name in everything.   #funny
 // point: officers
 ? flag:walk.officers.1
 - Officers' corridor. Cabins, all the way along.
@@ -373,6 +385,7 @@
 
 // ---- Writer 2, batch 6: bubbles (smalltalk, rumour), at most one in five about work. 60 characters.
 == smalltalk
+? time:morning
 - Ten more minutes with the coils. Breakfast in five.
 ? mem:moment.torres.scarf
 - Row forty-two of the scarf. It's getting long.   #funny
