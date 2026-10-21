@@ -204,3 +204,17 @@ Runs in /tmp/cadet-work/s10 (on = the build, EVENTS_ON true; off = EVENTS_ON fal
   take storm-update's day_check.py; nothing in the game.
 
 ### Verdict: storm S10 (0b77dfcb): PASS
+
+## PR10: EC1's bigevents_check turns 17-19, my mutant runs (2026-10-21)
+Turn 17 (2de5554, on claude/storm-update 0b77dfcb, EVENTS_ON on in the build):
+- clean OK (parts 1-2 on its own off copy); the off copy (EVENTS_ON false) OK.
+- s_guardOpen (guardFree's "a beat crossed" line removed): FAIL x4 (the guard's samples, the summons at 11:00, the
+  Captain's table at 19:30, the self-test's plantGuard not caught). Caught.
+Turns 18/19 (f4fb3f7/7c7d4eb, on claude/line-update 8bfff3b, EV_LINE_ON = EVENTS_ON):
+- clean OK (the Line supper 18:00-19:45: 83 mean to go, 59 came, at most 40 at once, 48 seats).
+- l_watchEasy (lineEasy lets the watch stand easy): FAIL "tomas / ueda-vera is off watch ... 3-bow-lounge-line-crowd-6/7"
+  (and the ceremony's crowd 67 over 60). Caught.
+- l_unseated (the supper's `seated` dropped): FAIL "the Line supper isn't seated" (and 83 over 60, the unseated cap). Caught.
+- l_short (supper 18:00-18:30): FAIL "only 38 came ... fewer than 40". Caught.
+- l_offVenue (lineVenue() run with the Line off): FAIL "off: the Line's venue ('bow-lounge-line') is there ... 55 places". Caught.
+### Verdict: EC1 turns 14-19: PASS (every planted break caught; clean builds OK)
