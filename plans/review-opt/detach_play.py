@@ -19,7 +19,7 @@ with sync_playwright() as pw:
         for k in range(20):
             g.step(300); r = g.ev(CHECK); log.append(('arrival', k, g.ev('deckDef.num'), r[0]))
             if r[0]: print('BACK', tag, 'arrival', r); bad += 1
-        for d, m in ((0, 19 * 60), (2, 7 * 60 + 10), (4, 20 * 60 + 30), (5, 16 * 60 + 10), (7, 18 * 60 + 30)):
+        for d, m in (eval(os.environ['DP_TIMES']) if os.environ.get('DP_TIMES') else ((0, 19 * 60), (2, 7 * 60 + 10), (4, 20 * 60 + 30), (5, 16 * 60 + 10), (7, 18 * 60 + 30))):
             g.ev(f'setShipNow({d * 1440 + m})')
             for n in (3, 5, 2, 1, 6, 7, 4):
                 g.ev(f'goToDeck({n}); updateDeckCrew(0.05)'); g.step(90); r = g.ev(CHECK); log.append((d, m, n, r[0]))

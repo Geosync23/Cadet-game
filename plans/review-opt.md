@@ -17,6 +17,8 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 | TS2 | player_check F1 (activities prove they drew) | claude/opt-tests 26e6902 | **PASS** (OR2: OK on 0.64.11, mutant pmA fails) |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
 | RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (N1 fixed 7d84c86, N2 fixed 5850ddb; f75dd23 moves the start-up line below the Speed block (DB2's nit): devmode_check OK and speed_probe OK on it, confirmed) |
+| RN1 | #5 stale decks let go (unloadDeck) | claude/opt-render cd9d030 (row dfd662d), tip 862722f | **PASS** (OR2, below) |
+| RN1 | #8 Dev Speed card, final | tip 862722f | **PASS**, no nits left (OR2: devmode_check OK on integration 0.64.11 + opt-render) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
 
 ## RN1: perf_check busy event scenes (3af9f15 + 0ad9b5d), PASS WITH FIXES
@@ -125,3 +127,14 @@ Fix:
 - opt-tests' player_check on integration 0.64.11 (70aa91f): PLAYER CHECK OK, exit 0, 5 m 44 s. Against `player_new_0.64.9.log`: the same lines except the `calls<=` counts, all lower on 0.64.11 (its closer camera); needs, times and poses identical.
 - Mutant pmA (`with drawn()` taken out of run_activity): FAIL on every activity ("Shower: drawn ... frame 1 -> 1"), exit 1. Caught.
 - Merge note: opt-tests clashes with integration in perf_check.py (f5d6815 vs the Fridays scenes de18921) and the build table; opt-render carries f5d6815 and RN1's later perf_check, so merge opt-render first and take its perf_check.
+
+### RN1 #5 (cd9d030, tip 862722f): PASS
+Builds (in /tmp/or2, made by merging, nothing pushed): **r5** = integration 0.64.11 (70aa91f) + claude/opt-render 862722f (the game merges cleanly; perf_check.py and the build table clash, see below); **sf5** = integration + claude/storm-update 0b77dfc + claude/fridays 6e8e0af + opt-render (EVENTS_ON and SHORT_FRIDAY on, as the release will have them). The "old" of each is the same file with #5's one line taken out (r5_no5, sf_no5).
+- detach_play.py (OR1's probe; now takes `DP_TIMES`): r5, events off and on: DETACH PLAY OK, 43 decks unloaded each, no errors. sf5: OK on Days 0-7, and again with `DP_TIMES` = Day 11 19:00, Day 12 14:30 / 16:15 / 17:25 (the storm front, the address, the Friday dinner), Day 13 20:00, Day 14 10:30, Day 19 16:15, Day 21 11:00: 64 decks unloaded, no errors.
+- Mutant m5a (one Group shared between decks, added to each new deckRoot): BACK on every deck change. Caught.
+- cadet_test r5_no5 -> r5: ALL IDENTICAL. sf_no5 -> sf5: ALL IDENTICAL (one earlier run had 1-level noise on j_steer1/2; the rerun and old vs old were exact). int -> r5 (all of opt-render on 0.64.11): ALL IDENTICAL.
+- keep_shots r5_no5 -> r5: DECK SHOTS IDENTICAL. **sf_no5 -> sf5: 2 pixels 1 level off on Deck 7 at 390x844, both runs; old vs old identical.** Found why: they are on the glow of the REC DEC sign (KIT.recBigSign, a 1024x300 canvas drawn with `shadowBlur`, no R()). With the test browser's graphics-chip canvases on, that canvas's pixels change from lap to lap **in the old build too** (scene_dump2.py: three laps, three different hashes in each build), because Chromium draws a canvas on the chip or not depending on what else it holds, and #5 changes what it holds. Every object, matrix, material and light in the Deck 7 scene is the same old vs new (scene_dump.py). With `--disable-accelerated-2d-canvas` the sign is the same on every lap and in both builds, and keep_shots_cpu.py gives DECK SHOTS IDENTICAL on sf. So it's the browser, not the game: the game draws the same thing. (The same could show on any later change that moves memory around; the deck-shot proof with that switch is the steady one.)
+- merge_all r5_no5 -> r5: MERGE ALL IDENTICAL.
+- day_check Day 12 on sf_no5 and sf5: output identical line for line; both DAY CHECK FAILED with "the rec deck is on but nobody came to it in the evening" (the storm; RN1 saw it on Day 13; **Day 12 too on the combined release build**: not #5's, for the release).
+- check_fast on r5: QUICK CHECK OK in 256 s. devmode_check on r5: DEVMODE CHECK OK (also closes #8).
+- Merge: claude/opt-render into integration: the game merges cleanly; perf_check.py clashes (opt-render's room fix f5d6815 + event scenes vs integration's Fridays scenes de18921: keep both, opt-render's code with de18921's three scenes) and the build table (keep both rows).
