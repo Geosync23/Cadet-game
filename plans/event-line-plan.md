@@ -61,6 +61,19 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 
   About 30-35 lines from EW1.
 
+### Option A2: "The one on watch", but Tomas comes to the ceremony
+Asked for by the user (via lead 22, 01:22): is Tomas missing his own ceremony intended? Yes, in A, and this is the other way.
+- **Saturday:** the same evening moment, but his worry is standing up in front of everyone, not missing it.
+- **Sunday 14:40:** the Captain sends for him ("I asked the watch to spare you for ten minutes"). A Watch hand on shift comes down from Deck 2 to cover his post for 15 minutes; Nakamura or Ueda, named by his plan. Tomas stands beside you in the front row.
+- **The answers:** the same three, plus "We'll answer together" with Tomas. The answer still goes on the plaque.
+- **Monday:** the plaque, and Tomas's thanks.
+- **The trade-off:**
+  - There's nothing to miss, so the mug to his post and the Lap of the Wren payoff lose their reason. The evening walk is just the usual walk.
+  - The story is smaller: his nerves and your answer.
+  - The build is a little harder: F0b must bring an on-shift person to a meeting and send him back to his post, with someone covering it. bigevents_check must show both.
+  - EW1's guard rails stay: his nerves are about speaking only, never about exams or Holt.
+- **Turns:** the same, about 6.
+
 ### Option B: "What's in the punch?"
 - **Beginning, Sunday morning.** Carrying the punch up, Brennan tells you one ingredient and swears you to secrecy.
 - **Middle.** All afternoon the crew try to get it out of you. At the supper you choose: keep the secret, tell everyone, or make up something worse.
@@ -232,7 +245,7 @@ The build number is the build master's.
 11. **Tomas's day must be as the plan says** (ER2's S2 and S4, in the new shape): at his post (`2-watch-6`) 08:51-17:00 and never pulled away, reachable for the mug, and on the Lap at 20:30 (`EV_DAY_DRESS` brings him); bigevents_check shows all three. His post is a standing watch post in Deck 2's lift lobby (ER2's R2-2); the mug stop finds him from his plan. Tomas must be at his post, not on his break, when you bring the mug (15:15-17:00): day_check Day 7.
 
 ## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
-- **line-q9, the story:** recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
+- **line-q9, the story:** recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: A2, the same but Tomas comes (a Watch hand covers his post; smaller story, no Lap payoff); B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
 1. **When does the ship start talking about it?** Recommended: with Vance's Mail on Saturday at 18:00 (and the Captain's mention at Friday's address). Others: Saturday morning (talk only, so your free day stays free); Friday's new-hands tea.
 2. **What do the gold hull lights look like?** Recommended: a warm gold in every window and slightly warmer light indoors, 14:30-19:15. Others: windows only; also gold light strips along the promenade (a few more draw calls).
 3. **The horn (the game has no sound):** Recommended: a felt moment: one soft gold pulse of the lights, crew stop and look up, a one-line notice. Others: also add the game's first sound, one horn note (sound is new work: a mute switch, phones on silent); the banner only.
