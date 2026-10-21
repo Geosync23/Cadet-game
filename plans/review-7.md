@@ -12,7 +12,14 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
+| TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
 ## Log
 
 - 2026-10-21: started; told PT1 and DB2. Neither branch is on origin yet.
+
+## TS2: perf_check right rooms (c2a32e2), PASS
+
+- Test-only diff. perf_check (TS2's) on 0.64.8: every scene's three views stand in its room; the numbers equal plans/opt-measure.md's "with the fix" column, scene for scene.
+- Mutant: the old `nearestOpen(tile)` call: 18 "you stand in" PROBLEMs (Machine shop, Fan hall, Bow lounge x2, Cabin 4-05, Gym), exit 1.
+- Known, not TS2's: perf_check exits 1 on 0.64.8 for the +2 geometries on the third deck round trip (since 0.64.6).
