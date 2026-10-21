@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veyli Lore Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--gold:#e9c46a;--rose:#e07a7a;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--field:#0e1520}
+:root[data-theme="light"]{--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#1d2a30;--muted:#55666d;--teal:#1f8a7e;--gold:#a67c12;--rose:#b54848;--glass:rgba(255,255,255,.85);--line:rgba(40,80,80,.2);--bg:#eef2f3;--field:#fff}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif;line-height:1.5}
+main{max-width:1000px;margin:0 auto;padding:16px}
+h1{font-size:21px;margin:4px 0 2px;font-weight:600;padding-right:100px}
+h2{font-size:17px;margin:26px 0 8px;color:var(--teal);font-weight:600}
+h3{font-size:15px;margin:14px 0 4px}
+.sub{font-size:13px;color:var(--muted)}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 16px;margin:10px 0}
+.card.key{border-color:var(--teal)}
+p,li{font-size:14px}
+ul,ol{padding-left:20px;margin:6px 0}
+details{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0 14px}
+details[open]{padding-bottom:10px}
+summary{cursor:pointer;padding:10px 0;font-size:14px;font-weight:600}
+summary:focus-visible{outline:2px solid var(--teal);outline-offset:2px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{border-bottom:1px solid var(--line);padding:5px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.scroll table.wide{min-width:600px}
+.tag{display:inline-block;font-size:11.5px;padding:1px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin-right:4px}
+.tag.ev{border-color:var(--gold);color:var(--gold)}
+code{font-size:12.5px;overflow-wrap:anywhere}
+/* questions */
+.q{background:var(--glass);border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:12px;padding:10px 14px;margin:12px 0}
+.q h3{font-size:14.5px;margin:0 0 4px}
+.q .why{font-size:13px;color:var(--muted);margin:0 0 6px}
+.q fieldset{border:0;margin:0;padding:0;min-width:0}
+.q legend{position:absolute;left:-9999px}
+.q label.opt{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q label.opt input{margin-top:3px;accent-color:var(--teal);flex:none}
+.q .recd{font-size:11px;color:var(--teal);border:1px solid var(--teal);border-radius:999px;padding:0 6px;margin-left:4px;white-space:nowrap}
+.q textarea{width:100%;min-height:54px;background:var(--field);color:var(--ink);border:1px solid var(--line);border-radius:8px;font:inherit;font-size:13px;padding:6px 8px}
+.q textarea:focus-visible{outline:2px solid var(--teal)}
+.q .cl{font-size:12px;color:var(--muted);display:block;margin:4px 0 2px}
+.theme{float:right;appearance:none;border:1px solid var(--line);background:var(--glass);color:var(--ink);font:inherit;font-size:12px;padding:5px 10px;border-radius:999px;cursor:pointer}
+blockquote{margin:6px 0;padding:6px 12px;border-left:3px solid var(--gold);font-size:14px;font-style:italic}
+</style>
+</head>
+<body>
+<main>
+<button class="theme" id="theme" aria-label="Switch light or dark">Light / dark</button>
+<h1>Who the Veyli are: the plan</h1>
+<div class="sub">Veyli lore planner LW1, 2026-10-21, version 1. Branch <code>claude/veyli-lore</code>, from <code>claude/events-lines</code>. Planning and words only: the game hasn't changed. Your answers go in section 7.</div>
+
+<div class="card">
+<b>Your decision (02:50 UTC):</b>
+<blockquote>"We also need to learn as players who the Veyli are. I think they should be human somehow, only humans in this world. Maybe another culture that splintered from Earth. Hence they represent reaching into the distance."</blockquote>
+Also decided: Crossing the Line means <b>"guests in someone else's sky"</b> (line-q10 A).
+</div>
+
+<div class="card key">
+<b>In short</b>
+<ul>
+<li><b>Recommended history (A, "The ones who went on"):</b> about six hundred years ago, early in the age of leaving Earth, a slow ship went much further than anyone else. It took four lifetimes to get past Tavessa, and its people settled a world out there. Nobody heard from them for centuries, and the Concord grew up behind them among the near stars. About eighty years ago a Concord survey ship reached the Line and found them. The Veyli say: <b>"We did not leave. We went on."</b></li>
+<li><b>What grew different</b> comes from the long voyage, so every custom already written now has a reason: the knot cord, tea at the same hour, silence, warm rooms, no bowing, single names, their own language.</li>
+<li><b>The theme:</b> the Veyli are what reaching into the distance does to people. They're still people, still kind, and changed by how far they went. The Wren follows where they went first, and you, far from home, are doing the same thing on a small scale.</li>
+<li><b>How you learn it:</b> a plain fact from the first week ("They're people. They just went further out."), then more, a little at a time, through the month: Ferreira, the Envoy's tea, the Line, the storm, the comet, the visit. About <b>24 new lines and 14 changed ones</b>. Nothing about why Saruth is aboard, Holt's beats or the visit's turns.</li>
+<li><b>Pronouns:</b> they/them for all Veyli stays, now as a <b>Veyli custom</b> that the crew respect (their language has no he or she). The old rule "the Veyli are not described in human terms" is retired.</li>
+<li><b>What must change:</b> 14 lines that set "humans" against the Veyli or call a Veyli "she", plus the canon notes in facts.md and design-doc.md. Nothing in Holt's arc changes.</li>
+</ul>
+</div>
+
+<h2>1. Who the Veyli are: three histories</h2>
+<details><summary>What's already written, and every option keeps</summary>
+<ul>
+<li>The knot cord on the door, a new knot each month aboard.</li>
+<li>Tea kneeling at a low table, at the same hour every day.</li>
+<li>Silence preferred, and many words for "quiet".</li>
+<li>Warm cabins.</li>
+<li>"Do not bow. Most of you do it wrong."</li>
+<li>A council, and students of the cord.</li>
+<li>Veyli seedlings.</li>
+<li>Their own language: Taavek has "no common words for most of the parts".</li>
+<li>Veyli ships are rare visitors, and the frontier is "shared with the Veyli".</li>
+<li>Holt's bad day "years ago", and a Veyli ship's six-hour silence.</li>
+<li>The Wren in the reach two years ago, on a quiet charting run.</li>
+<li>Saruth aboard five months, and "the Veyli homeworld".</li>
+<li>Tavessa, "a star cluster the Veyli named".</li>
+<li>The Line, where the Concord's charts grow thin.</li>
+</ul>
+</details>
+
+<div class="card key">
+<h3>A. "The ones who went on" <span class="tag ev">recommended</span></h3>
+<ul>
+<li><b>When and why:</b> about six hundred years ago. Early in the age of leaving Earth, one slow ship set out to go further than anyone had. It wasn't fleeing anything and there was no quarrel. It wanted to see how far people could go. The voyage took four lifetimes. Past Tavessa they found a world and stayed.</li>
+<li><b>How long apart:</b> centuries with no word either way. The Concord formed among the near stars without them. About eighty years ago a Concord survey ship reached the Line and met a Veyli ship. Since then the two have been careful, courteous neighbours: rare ships and a few envoys.</li>
+<li><b>What grew different (all from the voyage):</b>
+<ul>
+<li><b>The knot cord.</b> On the long ship they counted the months in knots, a cord you could read by touch in the dark. It's still their calendar, their record and their way of saying things that matter. Saruth's "a new knot each month aboard" is exactly this: they're on a voyage too.</li>
+<li><b>Tea at the same hour.</b> The long ship kept one still hour a day, so the day had a fixed point. ("A fixed point is a kindness you give yourself.")</li>
+<li><b>Silence.</b> On a long ship you listen to the air and the hull, so quiet is a kind of attention, and there are many words for it. Their silence rites stay secret (section 3).</li>
+<li><b>Warmth.</b> The voyage ran cold, so a warm room is hospitality.</li>
+<li><b>No bowing.</b> The Concord bows the way old Earth pictures show it. The Veyli kept bowing and changed it, so a Concord bow looks to them like an old drawing done wrong.</li>
+<li><b>Names.</b> One name each, no family name. That's already true of all six: Saruth, Teshavi, Kesrin, Moleth, Ithra and Taavek.</li>
+<li><b>The language</b> grew out of old Earth tongues over six centuries and is now its own. Here and there an old root still shows, which is a small joy for Ferreira.</li>
+<li><b>Seedlings</b> from seeds the long ship carried from Earth, changed over the centuries.</li>
+<li><b>Looks</b> (as drawn today): ordinary people, often tall and slim, with a cord band at the brow. Some dye their hair in cord colours (teal, white, grey). Nothing else.</li>
+</ul></li>
+<li><b>Their own saying:</b> "We did not leave. We went on." It's gentle pride, not a dispute.</li>
+<li><b>Why A:</b> it explains every custom already written without changing one. It fits the oath ("we left the near stars behind us") and your "reaching into the distance" best. Eighty years of acquaintance fits the Wren's run two years ago, rare Veyli ships and a "shared" frontier. No war anywhere in it.</li>
+</ul>
+</div>
+<div class="card">
+<h3>B. "A quiet parting"</h3>
+<p>About a hundred and fifty years ago, a movement on the Concord's own worlds wanted a slower, more ritual life and went out past the Line together. They were never lost, so there are family stories on both sides.</p>
+<p><b>Weaker:</b> 150 years is too short for a language with "no common words" and many words for quiet. It's more a neighbour than a distance. And "parted from us" can sound like a falling-out, which needs care to stay gentle.</p>
+</div>
+<div class="card">
+<h3>C. "Lost and found"</h3>
+<p>A colony from over a thousand years ago lost all contact and kept only legends of Earth until they were found again.</p>
+<p><b>Weaker:</b> it raises questions the game doesn't want ("did they know they were human?"), and a lost colony reads as a mystery to solve rather than a people to meet. It's also hard to square with their pride, their council and their envoys.</p>
+</div>
+
+<h2>2. Why they matter: "reaching into the distance"</h2>
+<ul>
+<li><b>They are the reach, made into people.</b> They're the far edge of how far humans have gone, and still people: tea, courtesy, a joke a sentence late. Distance changed their customs, not their kindness.</li>
+<li><b>The Wren follows where they went first.</b> Past the Line (Day 7) the stars have Veyli names because the Veyli got there first. "Guests in someone else's sky" gains a warm second meaning: it's a cousin's sky.</li>
+<li><b>The oath answers the Veyli saying.</b> The oath has "We left the near stars behind us, and we did not go alone." The Veyli say "We did not leave. We went on." Both are about going far together. The game never spells it out; the player can notice it.</li>
+<li><b>You're reaching too.</b> You're the newest hand, far from Mum and Gran, counting your days aboard. Saruth is the one person aboard further from home than you, alone of their people, counting months in knots. Their tea hour is your mirror.</li>
+<li><b>The visit is near meeting far:</b> two branches of one family, careful and curious. Moleth's forty questions are about what each side kept.</li>
+</ul>
+
+<h2>3. How you learn it, through the first month</h2>
+<p>It's never a twist: everyone aboard knows the Veyli are people who went further, and you learn that in week one. What you learn over the month is the depth: the voyage, the cord, the tea, the saying. Each step is somewhere you already pass through. Line counts are rough; the head writer's seat and EW1 (events) write the words after your answers.</p>
+<div class="scroll"><table class="wide">
+<tr><th>When</th><th>Where and who</th><th>What you learn</th><th>Lines</th></tr>
+<tr><td>Days 0-1</td><td>Arrival; Zeke's intro ("The Veyli share it. Their Envoy's aboard.")</td><td>There's a people called the Veyli out here, and one lives aboard</td><td>0</td></tr>
+<tr><td>Day 1, Mon 20:00</td><td>First Light Cocoa, Raman: "Tavessa. The Veyli named it."</td><td>They got out there first. One line added: "Named it centuries ago. They got there first."</td><td>1</td></tr>
+<tr><td>Days 1-5</td><td>The call-home booths, overheard: "No, there aren't any aliens. Just the Veyli."</td><td><b>The plain fact:</b> "They're people. Like us. They just went further out."</td><td>1 changed</td></tr>
+<tr><td>Days 1-6</td><td>Saruth on Deck 2 and in the garden; the tea table; the cord on the door</td><td>The cord, the tea hour, "do not bow". Two new lines: "We are cousins, your people and mine. Distant ones. Very distant." and "Your bow is from an old picture. We kept bowing. We changed it."</td><td>2</td></tr>
+<tr><td>Days 2-10</td><td>Ferreira and Rossi learning Veyli</td><td>The language grew from old Earth tongues. Ferreira: "Found an old root in a Veyli word today. Six hundred years old, and I knew it." Rossi: "Ferreira says Veyli started out as our words. It doesn't sound it."</td><td>3</td></tr>
+<tr><td>Day 5, Fri 16:00</td><td>The Captain's first Friday address (beat 2)</td><td>After "into the Veyli reach": "The Veyli went that way centuries ago, on a slow ship. We're the ones catching up."</td><td>1</td></tr>
+<tr><td>Day 6, Sat from 08:00</td><td>The Line's warning chatter (inside the Line plan's 14 lines)</td><td>Two of the old hands' lines carry it: "Past the Line every star's got a Veyli name. They got there first." and "Six hundred years they've been out there. We're the new ones."</td><td>0 extra</td></tr>
+<tr><td>Day 6 evening, Day 7</td><td>Tomas's question; the oath (no Veyli there)</td><td>Unchanged. The oath and "We went on" are left for you to notice</td><td>0</td></tr>
+<tr><td>Day 8, Mon</td><td>The Line's afterglow</td><td>Saruth, acquaintance and up: "You crossed. Now you are further from home than your grandparents were. We know it."</td><td>1</td></tr>
+<tr><td>Days 8-10</td><td>Saruth, acquaintance or colleague tier</td><td>The long ship: "My people's ship took four lifetimes to get here. The tea hour kept the days in order." "The cord counted the months. We read it in the dark."</td><td>3</td></tr>
+<tr><td>Days 11-15</td><td>The ion storm, by emergency light</td><td>Once, during the blackout: "On the long ship, when the lights failed, we read the cord by touch. Here. Hold it."</td><td>2</td></tr>
+<tr><td>Day 16, Tue 21:30</td><td>The comet</td><td>Saruth, if there: "On the long ship, a comet was a calendar. Somebody always tied a knot for it."</td><td>1</td></tr>
+<tr><td>Days 17-25</td><td>Saruth's Talk a while (once backlog #15 is fixed)</td><td>A new friend-tier talk: "We did not leave. We went on." You can listen, share your own leaving, or cheer them up</td><td>4</td></tr>
+<tr><td>Day 26, Fri 16:00</td><td>The Captain's address, beat 3</td><td>"The Veyli are our neighbours out here" becomes "The Veyli are our cousins out here. They came this way long before us." Plus: "Ask them about the long ship. They like being asked."</td><td>1 + 1 changed</td></tr>
+<tr><td>Days 27-29</td><td>The visit: greeting, Moleth, the dinner</td><td>Near meets far. Teshavi: "You came a long way. We came further. It is good to meet in the middle." Moleth: "You still say 'cheers'. We stopped. Why did you keep it?"</td><td>4</td></tr>
+<tr><td>After Day 30</td><td>Holt's beat 3 (close to Holt)</td><td>The six-hour silence was a mourning rite (unchanged)</td><td>0</td></tr>
+<tr><td>Later</td><td>Saruth, friend tier, after Holt's beat 3</td><td>Where the mourning silence comes from: the long ship</td><td>later</td></tr>
+</table></div>
+
+<h3>What stays secret, and when it comes out</h3>
+<div class="scroll"><table class="wide">
+<tr><th>Secret</th><th>Kept until</th><th>Rule for the lore lines</th></tr>
+<tr><td>Why Saruth was sent (their close-friend secret)</td><td>Close-friend tier with Saruth</td><td>Never say why the Envoy is aboard, what the posting is for, or who sent them</td></tr>
+<tr><td>Holt's bad day: Hanne Rook, the six hours, the mourning rite</td><td>Holt's beat 3</td><td>Before then Veyli silence is only "preferred", many words for quiet, the tea hour's quiet. Never "six hours", "mourning" or "a ship that didn't answer". The eighty years of contact and the Line are never linked to his patrol</td></tr>
+<tr><td>Where the mourning silence comes from</td><td>After Holt's beat 3, Saruth at friend tier</td><td>Not in the first month</td></tr>
+<tr><td>Holt's other beats (the cord, the tea, "About time")</td><td>Their beats</td><td>No lore line puts Holt at the Envoy's door or tea</td></tr>
+<tr><td>The visit's turns: Holt and Ithra, how it goes, the seven knots</td><td>The visit (the seven knots: never)</td><td>Nobody mentions a delegation before Day 22; lore lines never preview it</td></tr>
+<tr><td>Veyli rites in full</td><td>Never</td><td>"Some things are kept": the lore says why a custom exists, never how a rite is done</td></tr>
+<tr><td>The déjà vu day (Saruth hints at it)</td><td>That event</td><td>Nothing about time or the long ship "repeating"</td></tr>
+</table></div>
+
+<h2>4. Pronouns and how the Veyli are described</h2>
+<p>Today: "the Veyli are not described in human terms", they/them for every Veyli, and "the Envoy" is always safe. Now that the Veyli are human, the first part goes.</p>
+<ul>
+<li><b>Recommended (a): they/them stays, as a Veyli custom.</b> The Veyli language has no "he" or "she"; it grew that way on the long ship. A Veyli asks to be "they", and the crew respect it, like learning to knock twice. "The Envoy" and "the Speaker" stay safe. It changes nothing already written except two slips in the game (Teshavi as "she" and "her"). One line from Ferreira at most: "No 'he' or 'she' in Veyli. Just the person."</li>
+<li><b>(b) Each Veyli gets their own pronouns,</b> like the crew. More ordinary, but six sets to choose and old drafts to check.</li>
+<li><b>(c) they/them stays, with no reason given.</b> Less work, but it reads oddly now they're human.</li>
+</ul>
+<div class="card"><b>The new description rule</b> (for facts.md and the voice bible, after your answers): "The Veyli are people: a human culture that went further out, centuries ago. Describe them as people with their own ways. Never call them strange, never 'aliens', never 'their kind', and never point at their bodies. Crew say 'us' or 'Concord folk', never 'humans' set against the Veyli. A Veyli speaks of 'your people' and 'my people'."</div>
+
+<h2>5. The audit: every mention that conflicts, and the fix</h2>
+<p>I searched the whole repo for Veyli, Saruth, Teshavi, the other delegates, "human(s)" and "alien". The game file was read, not edited. Each game line gets fixed in its source file and then baked; the source is named.</p>
+<div class="scroll"><table class="wide">
+<tr><th>#</th><th>Where</th><th>Today</th><th>Fix</th></tr>
+<tr><td>1</td><td><code>content/lines/saruth.lines:37</code> (game 25154)</td><td>"Why do humans knock twice? ..."</td><td>"Why do your people knock twice? ..."</td></tr>
+<tr><td>2</td><td><code>content/lines/saruth.lines:40</code> (game 25156)</td><td>"Tell me a human custom. A small one. I collect them."</td><td>"Tell me a Concord custom. ..."</td></tr>
+<tr><td>3</td><td><code>content/talkpack/saruth.talk:9</code> (game 33838)</td><td>"Not one human aboard knocks three times."</td><td>"Not one person aboard knocks three times."</td></tr>
+<tr><td>4</td><td><code>content/talkpack/saruth.talk:29</code> (game 33839)</td><td>"A very human one."</td><td>"A very Wren one."</td></tr>
+<tr><td>5</td><td><code>content/voices/saruth.voice:9, 14, 19</code> (game 25147); <code>plans/crew-roster-gen.py:396</code> (game 48852)</td><td>"human customs"; "finds humans exhausting and very kind, often at once"</td><td>"Concord customs"; "finds Concord folk exhausting and very kind, often at once"</td></tr>
+<tr><td>6</td><td><code>content/lines/moleth.lines:19</code> (game 23377)</td><td>"Humans eat three times a day, together, talking."</td><td>"Your people eat three times a day, ..."</td></tr>
+<tr><td>7</td><td><code>content/lines/moleth.lines:22</code> (game 23374)</td><td>"I study human ships."</td><td>"I study Concord ships."</td></tr>
+<tr><td>8</td><td><code>content/voices/moleth.voice:2, 5, 8, 9</code> (game 23365); <code>plans/crew-roster-gen.py:448</code> (game 48860)</td><td>"human ships"; "a human thing"; "why humans say 'cheers'"</td><td>"Concord ships"; "a Concord thing"; "why the Concord still says 'cheers'"</td></tr>
+<tr><td>9</td><td><code>content/events/visit.draft:57</code>, <code>plans/events-ready/diplomatic/.../veyliGreeting.meet:16</code> (game 36691)</td><td>Teshavi: "The humans are treating you kindly, then."</td><td>"Your hosts are treating you kindly, then."</td></tr>
+<tr><td>10</td><td>Game 36686, the greeting's summary (section 18)</td><td>"Speaker Teshavi, her aide Kesrin"</td><td>"their aide Kesrin" (EW1's <code>visit.draft:49</code> already has it)</td></tr>
+<tr><td>11</td><td>Game 36102, the Captain's thanks after a smooth visit (section 18)</td><td>"tells me she has rarely been made so welcome"</td><td>"tells me they have ..." (with pronouns (a) or (c))</td></tr>
+<tr><td>12</td><td><code>content/overheard/booths.lines:151</code> (game 33050)</td><td>"They're people. Very polite people."</td><td>"They're people. Like us. They just went further out." The "aliens" and "tentacles, Grandad" lines stay: now they confirm it</td></tr>
+<tr><td>13</td><td><code>content/facts.md:21</code></td><td>"proud, ritual-minded, courteous, hard to read"</td><td>Add the chosen history (section 6)</td></tr>
+<tr><td>14</td><td><code>content/facts.md:226</code> and <code>:272</code></td><td>"the Veyli are not described in human terms"</td><td>"a Veyli custom: their language has no he or she; the crew respect it"</td></tr>
+<tr><td>15</td><td><code>content/facts.md:496</code>, <code>plans/handover-writer-command.md:75</code></td><td>"humans knock twice"</td><td>"the Concord's people knock twice"</td></tr>
+<tr><td>16</td><td><code>design-doc.md:64-66</code></td><td>"a proud, ritual-minded people ... stay in the background for now"</td><td>"a human people who went further out centuries ago: proud, ritual-minded and courteous; you learn who they are through the first month"</td></tr>
+<tr><td>17</td><td><code>content/voice-bible.md:38</code>, <code>content/README.md:386</code></td><td>Holt's rule (fine)</td><td>Add the description rule (section 4) beside it</td></tr>
+<tr><td>18</td><td>The route kiosk map (game 2053, section 4b)</td><td>"Veyli reaches"</td><td>Everything else says "the Veyli reach". A backlog row for the map's owner</td></tr>
+<tr><td>19</td><td>Saruth's clothes (game 48940, section 9)</td><td>No outfit is set, so the code falls back to the red Command uniform (read from the code, not seen on screen)</td><td>Not lore, but wrong for a Veyli guest. A backlog row: plain clothes in Veyli colours, like the delegates</td></tr>
+</table></div>
+<details><summary>Checked and fine as they are (no change)</summary>
+<ul>
+<li>Holt's whole arc and lines: the silence was a rite, "years ago", never against the Veyli as a people.</li>
+<li>Taavek's "no common words": fits six centuries of drift. Ferreira's and Rossi's Veyli and the words for quiet: fit.</li>
+<li>Warm cabins, the seedlings, the tea table, the cord sculpture ("each knot is a promise"): fit.</li>
+<li>"Your people" and "my people" (Saruth, Teshavi, the talk pack): fits a culture.</li>
+<li>Mum's call ("he asked if you'd met any aliens. I said not yet"): fits, because there are none.</li>
+<li>Saruth's home, "the Veyli homeworld", and "studied the cord for twenty years": the homeworld is the world the long ship settled (question 5).</li>
+<li>The Line plan: "guests in someone else's sky", "another people's rite", the oath. No change.</li>
+<li>Guest cabin F's secretary ("He writes everything down"): an unnamed delegation, not said to be Veyli. If it ever is, "they".</li>
+<li>The two-years fact and "Veyli ships are rare visitors": fit eighty years of careful contact.</li>
+</ul>
+</details>
+
+<h2>6. What goes into the canon after your answers</h2>
+<div class="card"><b>facts.md, the Veyli</b> (the head writer's seat writes it; with the recommended answers):
+<ul>
+<li>The Veyli are human. About six hundred years ago a slow ship left Earth to go further than anyone. Four lifetimes later its people settled a world past Tavessa ("the Veyli homeworld"). No contact for centuries. A Concord survey ship met them about eighty years ago, at the Line. Careful, courteous neighbours since; Veyli ships are rare. Their saying: "We did not leave. We went on."</li>
+<li>Their customs come from the long ship: the knot cord, the still tea hour, quiet as attention, warm rooms, a bow they changed, one name each, a language grown from old Earth tongues.</li>
+<li>Round numbers only ("about six hundred years", "four lifetimes", "about eighty years ago"). No dates. No war, ever. Nothing links the eighty years to Holt's bad day.</li>
+</ul>
+<b>design-doc.md:</b> the setting paragraph (audit row 16) and its Open questions, in the same commit as the first lines that use it.</div>
+
+<h2>7. Your answers</h2>
+<form id="answers" data-collection="answers" data-doc="veyli-lore" onsubmit="return false">
+<div class="q" data-qid="vl-q1">
+<h3>1. Who the Veyli are: the history</h3>
+<p class="why">Section 1 has all three. Whichever you pick, the customs already written stay as they are.</p>
+<fieldset><legend>1. Who the Veyli are: the history</legend>
+<label class="opt"><input type="radio" name="vl-q1" value="a"><span>(a) A. "The ones who went on": a slow ship left Earth about six hundred years ago to go further than anyone, settled past Tavessa, and was met again about eighty years ago. "We did not leave. We went on."<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q1" value="b"><span>(b) B. "A quiet parting": about 150 years ago a movement left the Concord's worlds for a slower, more ritual life past the Line</span></label>
+<label class="opt"><input type="radio" name="vl-q1" value="c"><span>(c) C. "Lost and found": a colony from over a thousand years ago that lost all contact and kept only legends of Earth</span></label>
+</fieldset>
+<label class="cl" for="vl-q1-c">Comment</label><textarea id="vl-q1-c" name="vl-q1-comment"></textarea>
+</div>
+
+<div class="q" data-qid="vl-q2">
+<h3>2. When do you learn they're human?</h3>
+<p class="why">Section 3 has the month step by step.</p>
+<fieldset><legend>2. When do you learn they're human?</legend>
+<label class="opt"><input type="radio" name="vl-q2" value="a"><span>(a) A plain fact from the first week ("They're people. They just went further out."), with the depth coming through the month<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q2" value="b"><span>(b) Hinted at first, then said plainly at the Line on Day 7</span></label>
+<label class="opt"><input type="radio" name="vl-q2" value="c"><span>(c) Kept back until the visit (Days 27-29)</span></label>
+</fieldset>
+<label class="cl" for="vl-q2-c">Comment</label><textarea id="vl-q2-c" name="vl-q2-comment"></textarea>
+</div>
+
+<div class="q" data-qid="vl-q3">
+<h3>3. Pronouns for the Veyli</h3>
+<p class="why">Section 4. The old reason ("not described in human terms") goes either way.</p>
+<fieldset><legend>3. Pronouns for the Veyli</legend>
+<label class="opt"><input type="radio" name="vl-q3" value="a"><span>(a) they/them for every Veyli, as a Veyli custom the crew respect (their language has no he or she)<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q3" value="b"><span>(b) Each Veyli has their own pronouns, like the crew</span></label>
+<label class="opt"><input type="radio" name="vl-q3" value="c"><span>(c) they/them, with no reason given</span></label>
+</fieldset>
+<label class="cl" for="vl-q3-c">Comment</label><textarea id="vl-q3-c" name="vl-q3-comment"></textarea>
+</div>
+
+<div class="q" data-qid="vl-q4">
+<h3>4. What do the Veyli call the Concord's people?</h3>
+<p class="why">Today some Veyli lines say "humans" for the crew (audit rows 1-9).</p>
+<fieldset><legend>4. What do the Veyli call the Concord's people?</legend>
+<label class="opt"><input type="radio" name="vl-q4" value="a"><span>(a) "Your people" and "the Concord", plainly<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q4" value="b"><span>(b) A Veyli name, "the near ones" (after "the near stars" in the oath)</span></label>
+<label class="opt"><input type="radio" name="vl-q4" value="c"><span>(c) "Humans", said drily, as a Veyli joke (they know they are human too)</span></label>
+</fieldset>
+<label class="cl" for="vl-q4-c">Comment</label><textarea id="vl-q4-c" name="vl-q4-comment"></textarea>
+</div>
+
+<div class="q" data-qid="vl-q5">
+<h3>5. Names for the long ship and the Veyli world</h3>
+<p class="why">You asked to be asked before new places are added.</p>
+<fieldset><legend>5. Names for the long ship and the Veyli world</legend>
+<label class="opt"><input type="radio" name="vl-q5" value="a"><span>(a) Not yet: "the long ship" and "home" (or "the Veyli homeworld")<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q5" value="b"><span>(b) Name them now: the writer proposes three of each for you to choose</span></label>
+</fieldset>
+<label class="cl" for="vl-q5-c">Comment</label><textarea id="vl-q5-c" name="vl-q5-comment"></textarea>
+</div>
+
+<div class="q" data-qid="vl-q6">
+<h3>6. How the Veyli look</h3>
+<p class="why">Today they are drawn with the same body as everyone: tall and slim, a headband, white, grey or teal hair.</p>
+<fieldset><legend>6. How the Veyli look</legend>
+<label class="opt"><input type="radio" name="vl-q6" value="a"><span>(a) As drawn now: ordinary people, often tall and slim, a cord band at the brow, some hair dyed in cord colours<span class="recd">recommended</span></span></label>
+<label class="opt"><input type="radio" name="vl-q6" value="b"><span>(b) No difference at all from the crew</span></label>
+<label class="opt"><input type="radio" name="vl-q6" value="c"><span>(c) Their own clothes too (long coats in cord colours): a later art job</span></label>
+</fieldset>
+<label class="cl" for="vl-q6-c">Comment</label><textarea id="vl-q6-c" name="vl-q6-comment"></textarea>
+</div>
+
+<div class="q" data-qid="veyli-general">
+<h3>Anything else?</h3>
+<p class="why">About the Veyli, the plan, the lines, or anything you'd like them to be.</p>
+<label class="cl" for="veyli-general-c">Your comment</label><textarea id="veyli-general-c" name="veyli-general-comment"></textarea>
+</div>
+</form>
+
+<h2>Judgement calls (tell me if any is wrong)</h2>
+<ul>
+<li>Every proposed line fits a 90-character bubble; the final wording is the writers'.</li>
+<li>No twist: the crew already know; only you are new.</li>
+<li>Eighty years of contact is long enough for "rare ships" and anyone's "years ago", and short enough that the two peoples are still learning each other.</li>
+<li>"Four lifetimes" is said, never a number of years for the voyage.</li>
+<li>The Line plan's 14 lines stay 14: two of the Saturday old-hand lines carry the Veyli fact.</li>
+<li>Saruth's Talk a while can't be heard until backlog #15 is fixed. Nothing else in the plan depends on it.</li>
+</ul>
+</main>
+<script>
+(function(){
+  const root=document.documentElement,btn=document.getElementById('theme');
+  try{const t=localStorage.getItem('vlp-theme');if(t)root.dataset.theme=t;}catch(e){}
+  btn.addEventListener('click',()=>{const dark=root.dataset.theme?root.dataset.theme==='dark':!matchMedia('(prefers-color-scheme: light)').matches;root.dataset.theme=dark?'light':'dark';try{localStorage.setItem('vlp-theme',root.dataset.theme);}catch(e){}});
+})();
+</script>
+</body>
+</html>
