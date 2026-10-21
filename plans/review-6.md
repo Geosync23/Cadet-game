@@ -140,3 +140,9 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 - The dinner waits (FD1, 15:22): FLC_ON. First Light Cocoa shifts Day 1's evenings, machine wear drifts, and by Day 11
   range-1 and oven-2 are faulty; food_check's 4-week forecasts after its Day 11 visit held that state. A check-only fix
   (fresh machines before 4b/4c/4e): claude/food-waits 0f808c3, PB-reviewed, to integration via BM12. Not the builders'.
+
+## EV6 storm S10 ab3e2fb7 (EVENTS_ON = true): HOLD (15:40)
+- The game diff is the one line; EV6's proof: the line back to false is ALL IDENTICAL to db60020a; its full round is in
+  the build table (plans/storm-s10-round/ on the branch).
+- Held for three FAILs new with the switch on: devmode_check "the excused days" (careerOff(8) true before the jump; OK
+  off), career_check, mech m17 (off runs pending). Asked EV6 for the causes; I re-run just those three on and off.
