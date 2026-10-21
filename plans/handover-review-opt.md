@@ -17,12 +17,11 @@ No visual change at all: cadet_test ALL IDENTICAL and deck shots identical. No t
 | RN1 #8 Dev Speed card | 3a77cfe (tip bddbc48) | PASS; nits fixed in 5850ddb, 7d84c86 |
 | TS2 player_check fix A + B | opt-tests 4775488 + e4acbf8 | PASS WITH FIXES: F1 (activities must prove they drew) being made by TS2 |
 
-## Open (in order)
-1. **TS2's F1** on player_check: re-run the mutant pmA (`with drawn()` removed from `run_activity`): it must now FAIL; and the new player_check on integration must still give the same output as `plans/review-opt/player_new_0.64.9.log` (5 min 54 s).
-2. RN1 f75dd23: done (devmode_check OK, speed_probe OK).
-3. **RN1 #5** (lead 24: run its full proof round when it arrives, no need to ask) (unloadDeck takes the old deck's tree apart; 2 lines in 4c; ~78 MB freed after a tour): due ~17:00. Proof to ask for/run: cadet_test ALL IDENTICAL, keep_shots (deck shots identical, all 7 decks, 2 sizes), merge_all.py, deck_check, perf_check memory, a tour of every deck twice with no errors, and a mutant (e.g. disposing a shared kit geometry/material) that a check must catch. Watch for kit shared between decks being disposed (textures/materials reused on the next deck), and anything holding the old deck (ITEMS, LAMPS, walkers) after unload.
-4. **TS2 item 1** (affected-checks runner): after the account move, per lead 24.
-5. #7: parked by lead 24, nothing to review.
+## Open (in order), as of 17:55 on 2026-10-21 (stopped by lead 24 for the account handoff)
+1. **TS2's player_check F1**: claude/opt-tests 26e6902 (handover c2c7955). run_activity and servery_seat read `renderer.info.render.frame` before and after and FAIL if it didn't move. TS2 reports: PLAYER CHECK OK in 310 s on 0.64.8, output identical to A+B; mutant pmA exits 1 ("FAIL Shower: drawn ... frame 1 -> 1"). To do: re-run pmA and the new player_check on integration yourself; diff against `plans/review-opt/player_new_0.64.9.log`; check_fast (TS2 didn't re-run it).
+2. **RN1 #5** (unloadDeck takes the old deck's tree apart; claude/opt-render cd9d030, row in dfd662d; lead 24: run its full proof round when you resume). Done so far: code read (walkers and the player are added to `scene`, not deckRoot; the `.parent` reads either rebuild per deck, allow null, or only touch stale invisible pieces: REC_SHOW's `!m.parent` early returns, GV checks `GV.root !== deckRoot`, `rigProps` runs on rigs in `scene`); **cadet_test cd9d030^ -> dfd662d ALL IDENTICAL**. Not done: `plans/review-opt/detach_play.py BUILD` (my probe: arrival evening, every deck at five times over Days 0-7, a 2-day skip, events off and on; no unloaded-deck object back in the scene, no errors; it was killed mid-run), its mutant (the scratch file m5a: a Group shared between decks added to each new deckRoot right after `deckRoot = new THREE.Group(); scene.add(deckRoot);`: the probe must report BACK), keep_shots (deck shots, 2 sizes), merge_all.py, check_fast. RN1's own proofs are in the dfd662d build-table row.
+3. **TS2 item 1** (affected-checks runner): not ready (plans/handover-test-speed-2.md); after the account move.
+4. #7: parked by lead 24.
 
 ## How to test (my probes, plans/review-opt/)
 - Setup: `pip install playwright`; three r128 and acorn 8.12.1 in /tmp/cadet-work (DEV_NOTES "Testing"); `CADET_CHROME=/opt/pw-browsers/chromium`; `mkdir -p /tmp/cadet-work/test`.

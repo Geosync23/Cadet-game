@@ -108,6 +108,10 @@ Fix:
 
 - The only change: `if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }` now runs after the Speed card's wrappers are in place. devmode_check: DEVMODE CHECK OK. speed_probe.py: SPEED PROBE OK (a Dev game with and without the wrappers ends the same: save, clock, deck, place, walkers; nothing wrapped without #dev; sizes listed).
 
+## Where this stopped (17:55, account handoff)
+
+- TS2's F1 (26e6902) arrived, not yet re-run here. RN1 #5: code read, cadet_test ALL IDENTICAL; the rest of its proofs are listed in plans/handover-review-opt.md.
+
 ## Log
 
 - 2026-10-21: took over PR7's opt queue; told PR7. RN1 has since written plans/handover-opt-render.md (RN1 idle); #7 measured and proposed parked (nothing built), #8 built.
