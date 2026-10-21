@@ -305,3 +305,28 @@ Verdict stays **PASS**, with A2-1 and A2-2 as wording fixes for EP2. Neither cha
 ### 9361008: the story decided
 The user chose A (01:30, via lead 22). The only changes since a64fb68 mark line-q9 as decided and A2, B and C as
 "not chosen". A2-1 and A2-2 no longer matter, because A2 is parked. **PASS stands at 9361008.**
+
+### 84946af: the ceremony moves to the bow lounge (the user, 01:42)
+The move is sound. I checked it in a new game on 0.64.6:
+- The lounge's 34 seats and its standing spots (60 in the party's venue, 51 of them west of column 49) give room for
+  about 50-60, with the promenade and plaza for overflow.
+- The new venue `bow-lounge-line` is switched on only with `EV_LINE_ON`, so the party's venue stays identical.
+- The Lap's bow turn is 3-lap-6 at (40, 10), on the promenade by the lounge doorway, so moving the old hands' stop
+  there needs no route change.
+- One week aboard and the reading corner come later in the same room, with no clash.
+
+One fix, and one small point:
+- **R3-1. Two of the four lead spots aren't clear.** The venue rule (section 4d's gathers comment) says every
+  existing place's tile stays clear. On Deck 3:
+  - **(48.5, 10.5), the Captain:** tile 48,10 is where you walk to for lounge seat `3-lounge-27` (seated at 47.84,
+    10.2, facing the windows). She'd stand on that seat's spot, half a metre from whoever sits in it.
+  - **(47.8, 11.7), a speaker:** tile 47,11 is blocked by furniture.
+  - (48.5, 9.3) and (48.6, 12.1) are on tiles 48,9 and 48,12. Those are free, but they're the party venue's crowd
+    spots 29 and 36. That's fine in the new venue, as long as its standing list leaves those two tiles out.
+
+  Re-pick the Captain's and the speaker's spots on open tiles that no place uses (deck_check's places check will
+  confirm). Or hold `3-lounge-27` for the ceremony and say so.
+- **R3-2 (small).** Risk 9 still says "the punch stays at the plaza". In the lounge, the bowl and the ceremony's
+  dressing must be gone by 16:00, when the reading corner uses the room. Say so in L3.
+
+Verdict on 84946af: **PASS WITH FIXES** (R3-1, R3-2). Once the spots are on clear tiles, it's a PASS.
