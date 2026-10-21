@@ -10793,6 +10793,10 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// your day shift's end on ship day d (FR1, Short Fridays turn 3; PB's contract): d is the ship day number (SHIP.time.day,
+// 1 = the first Monday); minutes after midnight: DAY_SHIFT[1] (17:00, section 17), or 15:30 on a short Friday
+// (weekday(d) === 4, 0 = Monday, with SHORT_FRIDAY: section 18f's friShort). The night shift isn't covered. Off: DAY_SHIFT[1]
+function dayShiftEnd(d) { return friShort(d) ? WEEK_SHAPE[4].end : DAY_SHIFT[1]; }
 // the walk to a place, in ship minutes, for a plan (#9, the patch): from the decks' own data (the straight line between
 // the tiles, times a detour factor of 1.6 (1.3 left about a quarter short on the deck), at the crew's walking pace), never the loaded deck's paths, because a day is planned
 // for every deck while only one is loaded. WALK_LEAD is take()'s switch (o.lead): the toilets (the basin after is a step away, and keeps the old way).
@@ -12409,7 +12413,7 @@ let WORK_LS = 0;
 function workingNow() {
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (A && A.phase === 'do' && WORK_ACTS.has(A.kind)) return true;
-  return typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut() && typeof DAY_SHIFT !== 'undefined' && SHIP.time.min < DAY_SHIFT[1] + 60;
+  return typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut() && typeof DAY_SHIFT !== 'undefined' && SHIP.time.min < dayShiftEnd(SHIP.time.day) + 60;
 }
 // and hunger (the patch's #20, the user's 7 an hour at work): WORK_HUNGER an hour on top of NEED_DRAIN's while working
 const WORK_HUNGER = 3;
@@ -14433,7 +14437,7 @@ SAVE_EXTRA.unshift(() => clockUndoSettle());       // a save ends the window fir
 function clockButtons(row, act, s) {                     // the screen's two halves, left and right: [Clock in | Close], [ | Undo] ...
   const gap = () => { const b = act('', () => {}); b.disabled = true; b.style.visibility = 'hidden'; b.setAttribute('aria-hidden', 'true'); return b; };
   const half = b => { b.style.flex = '1 1 0'; return b; }, close = () => act(csText('close', 'Close'), () => { document.getElementById('clockScreen').hidden = true; });
-  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= CAREER.clockOut;
+  const u = CLOCK_UNDO && CLOCK_UNDO.d === SHIP.time.day ? CLOCK_UNDO : null, m = SHIP.time.min, ends = m >= dayShiftEnd(SHIP.time.day);
   const said = (r, k) => r === 'in' ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) }))
     : r === 'out' ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null;
   const punch = early => () => { const r = clockPunch(early); const t = said(r); if (CLOCK_UNDO) CLOCK_UNDO.said = t; clockScreen(t); };
@@ -17721,10 +17725,10 @@ function leaveEnd(j) {
   for (let k = 0; k < 14 && left > 0; k++) {
     const d0 = Math.floor(t / 1440) * 1440;
     if (!playerShiftOn(d0 / 1440 + 1)) return t;         // your day off: the crew take it
-    const a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, d0 + DAY_SHIFT[1] - a);
+    const e = d0 + dayShiftEnd(d0 / 1440 + 1), a = Math.max(t, d0 + DAY_SHIFT[0]), n = Math.min(left, e - a);   // your shift's end (15:30 on a short Friday, 14)
     if (n > 0) { left -= n; t = a + n; }
     if (left > 0) t = d0 + 1440;
-    else if (!j.leave) t = Math.max(t, d0 + DAY_SHIFT[1]);   // held to the end of that shift
+    else if (!j.leave) t = Math.max(t, e);   // held to the end of that shift
   }
   return t;
 }
@@ -18097,7 +18101,7 @@ function cartPost() {
     // books: it's history, never a job for anyone now (0.33.20: three stale runs once took both carts at once)
     if (r.arriveAt <= shipNow()) { j.status = 'done'; j.doneAt = r.arriveAt; j.doneBy = null; MACH_REV++; continue; }
     const md = t % 1440;
-    if (!r.urgent && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { MACH_REV++; continue; }   // left for you first
+    if (!r.urgent && md >= DAY_SHIFT[0] && md < dayShiftEnd(Math.floor(t / 1440) + 1)) { MACH_REV++; continue; }   // left for you first
     const busy = new Map(); for (const x of SHIP.jobs) if (x.status === 'claimed' && x.claimedBy !== 'you') busy.set(x.claimedBy, Math.max(busy.get(x.claimedBy) || 0, x.end));
     const crew = schedPeople().filter(p => jobCrew(p) === 'works').sort((a, b) => (CREW_TIER[a.rank] || 0) - (CREW_TIER[b.rank] || 0) || (a.id < b.id ? -1 : 1));
     for (const p of crew) {
@@ -18403,7 +18407,7 @@ const RESERVE_MAKE_MINS = 30;                            // how long you take to
 const heldForYou = j => (!!j.reserved && !j.freed && j.status !== 'done') || (typeof caseHeld === 'function' && j.status !== 'done' && !!caseHeld(j));   // 24k: a case's job is kept for you while it runs (0.33.47)
 function jobReserve(kind, day, at, slot = 1, o = {}) {
   machinesNow();
-  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : (day - 1) * 1440 + DAY_SHIFT[1];
+  const due = (day - 1) * 1440 + at, until = Number.isFinite(o.until) ? o.until : (day - 1) * 1440 + dayShiftEnd(day);
   const old = SHIP.jobs.find(j => j.reserved === slot && heldForYou(j));
   if (old && old.claimedBy) return old.id;
   if (old) SHIP.jobs = SHIP.jobs.filter(j => j !== old);
@@ -36841,31 +36845,39 @@ if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // 
 // =====================================================================
 var FRI_SKEL = null;
 function friShort(d) { return SHORT_FRIDAY && weekday(d) === 4; }   // a short Friday (weekday 4; 0 = Monday)
-// the skeleton: the same people every Friday (rotas are by weekday)
-function friSkeleton(p) {
-  if (!FRI_SKEL) {
-    const order = ['junior', 'officer', 'senior', 'chief'];
-    FRI_SKEL = new Set();
+// the skeleton on day d: of the crew aboard all that day (crew rotations come and go on Sundays, PB's note), the
+// lowest-ranked helm, watch and infirmary day crew on shift, story crew aside; roster order within a rank. Made once a
+// day (FRI_SKEL: day -> Set), from the roster and the day only
+function friSkeleton(p, d) {
+  if (!FRI_SKEL) FRI_SKEL = new Map();
+  let S = FRI_SKEL.get(d);
+  if (!S) {
+    const order = ['junior', 'officer', 'senior', 'chief'], all = ROSTER.concat(typeof ROSTER_RESERVE !== 'undefined' ? ROSTER_RESERVE : []);
+    S = new Set();
     for (const dept of ['helm', 'watch', 'infirmary']) {
-      const c = ROSTER.filter(q => q.dept === dept && q.shift === 'day' && !q.story && order.includes(q.rank) && isWorkDay(q, 5));   // ship day 5 is a Friday
+      const c = all.filter(q => q.dept === dept && q.shift === 'day' && !q.story && order.includes(q.rank) && isWorkDay(q, d) && aboardAllDay(q, d));
       c.sort((a, b) => order.indexOf(a.rank) - order.indexOf(b.rank));   // stable: roster order within a rank
-      if (c[0]) FRI_SKEL.add(c[0].id);
+      if (c[0]) S.add(c[0].id);
     }
+    FRI_SKEL.set(d, S);
   }
-  return FRI_SKEL.has(p.id);
+  return S.has(p.id);
 }
 // when a day-shift crew member's shift ends on day d (minutes after midnight): 15:30 on a short Friday, else 17:00.
 // The skeleton and the galley keep their hours. Read by section 14's schedFrame and dayReport
-function friCrewEnd(p, d) { return friShort(d) && p.dept !== 'galley' && !friSkeleton(p) ? WEEK_SHAPE[4].end : SHIFTS.day[1]; }
+function friCrewEnd(p, d) { return friShort(d) && p.dept !== 'galley' && !friSkeleton(p, d) ? WEEK_SHAPE[4].end : SHIFTS.day[1]; }
 // the hours of anyone on an hours rota (the gardeners, the storekeepers: section 14's shiftBlocks and gardenDay) on day d:
 // on a short Friday 15:30-17:00 is taken out of any block that covers it (a block ending in it ends at 15:30; one running
 // through it is split), so they can go to the address. [[from, to], ...] in, the same shape out; off: hrs unchanged
 function friHours(p, d, hrs) {
-  if (!friShort(d) || friSkeleton(p)) return hrs;
+  if (!friShort(d) || friSkeleton(p, d)) return hrs;
   const a = WEEK_SHAPE[4].end, b = SHIFTS.day[1], out = [];
   for (const [x, y] of hrs) { if (y <= a || x >= b) out.push([x, y]); else { if (x < a) out.push([x, a]); if (y > b) out.push([b, y]); } }
   return out;
 }
+// your time clock on a short Friday (fp-q7): forget to clock out and it signs you out at 16:00 (else CAREER.autoOut,
+// 18:00). Read by section 20's careerTick. Your shift's end itself is section 14's dayShiftEnd(d)
+function friAutoOut(d) { return friShort(d) ? 960 : CAREER.autoOut; }
 
 // ---- slot: Fridays builder (section 18f). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- end of slot: Fridays builder ----
@@ -37969,7 +37981,7 @@ function careerClock(now = shipNow(), quiet, hold) {     // -> 'in' | 'out' | nu
   const c = careerInit(now), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (!playerShiftOn(d)) { toast('Time clock', careerOn(d) ? 'You\'re on leave today. No need to clock in.' : sickToday(d) ? 'You\'re off sick. No need to clock in.' : 'No shift today. The clock can wait.'); return null; }
   if (!careerClockedIn(d)) {
-    if (m >= CAREER.clockOut) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
+    if (m >= dayShiftEnd(d)) { toast('Time clock', 'The day shift is over. See you tomorrow.'); return null; }
     if (m < CAREER.clockIn) { toast('Time clock', 'Too early: the clock opens at 08:00. The shift starts at 09:00.'); return null; }   // reviewer 1e
     c.ci = Math.floor(now); c.co = 0; careerStarted(now); toast('Time clock', 'Clocked in at ' + hhmm(m) + '.');
     const fx = () => { careerRemark('in', now, m - DAY_SHIFT[0]); simNote('clock', { what: 'in' }); }; if (hold) hold(fx); else fx(); return 'in';
@@ -38005,7 +38017,7 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   const on = playerShiftOn(d), inn = careerClockedIn(d), out = careerClockedOut(d), wd = weekday(d);
   const st = said || (!on ? (careerOn(d) ? csText('leave', 'On leave today. Enjoy it.') : sickToday(d) ? csText('sick', 'Off sick. Get well.') : csText('offday', 'Day off. No clocking today.'))
     : out ? (wd === 4 ? csText('weekend', 'Shift done. See you Monday.') : csText('done', 'Shift done. See you tomorrow.')) : inn ? csText('onshift', 'On shift since {time}.', { time: hhmm(C.ci % 1440) })
-    : m >= CAREER.clockOut ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
+    : m >= dayShiftEnd(d) ? csText('done', 'Shift done. See you tomorrow.') : csText('ready', 'Shift starts at {time}. Tap to clock in.', { time: hhmm(DAY_SHIFT[0]) }));
   el.dataset.ph = SHIP.device.settings.phosphor; el.textContent = ''; el.hidden = false;
   if (CLOCK_UNDO_ON) CLOCK_DRAWN = performance.now();   // patch #6: the tap guard's start
   const x = mk('button', 'x', '×'); x.type = 'button'; x.setAttribute('aria-label', csText('close', 'Close')); x.onclick = e => { e.stopPropagation(); el.hidden = true; };
@@ -38015,9 +38027,9 @@ function clockScreen(said, ask, after) {                // after (patch #6): 'un
   el.append(mk('small', '', csText('hours', 'YOUR HOURS')), mk('p', '', csText('today', 'Today: {hours} h', { hours: hrs(today) }) + ' · ' + csText('week', 'This week: {hours} h', { hours: hrs(week) })));
   const row = mk('div', 'btns'), act = (label, f) => { const b = mk('button', 'act', label); b.type = 'button'; b.onclick = e => { e.stopPropagation(); if (CLOCK_UNDO_ON && performance.now() - CLOCK_DRAWN < CLOCK_TAP_GUARD) return; f(); }; row.appendChild(b); return b; };   // patch #6: taps just after a redraw are ignored
   if (CLOCK_UNDO_ON) { clockButtons(row, act, { on, inn, out, m, ask, after }); el.appendChild(row); try { (row.querySelector('button:not([disabled])') || x).focus(); } catch (e) { /* no focus */ } return; }
-  if (on && !out && !(inn ? false : m >= CAREER.clockOut || m < CAREER.clockIn)) {
+  if (on && !out && !(inn ? false : m >= dayShiftEnd(d) || m < CAREER.clockIn)) {
     if (!inn) act(csText('in', 'Clock in'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? (SHIP.time.min - DAY_SHIFT[0] > 5 ? csText('late', 'Clocked in at {time}. A little late. It happens.', { time: hhmm(SHIP.time.min) }) : csText('didin', 'Clocked in at {time}. Have a good shift.', { time: hhmm(SHIP.time.min) })) : null); });
-    else if (SHIP.time.min < CAREER.clockOut && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
+    else if (SHIP.time.min < dayShiftEnd(d) && !ask) act(csText('out', 'Clock out'), () => clockScreen(null, true));   // before the shift ends (17:00): asks first
     else act(csText('out', 'Clock out'), () => { const r = careerClock(shipNow(), true); clockScreen(r ? csText('didout', 'Clocked out at {time}. Evening\'s yours.', { time: hhmm(SHIP.time.min) }) : null); });
   }
   act(csText('close', 'Close'), () => { el.hidden = true; }).classList.add('next');
@@ -38113,8 +38125,8 @@ function careerTick(now = shipNow()) {
   const g = Math.max(0, Math.floor((d - 1) / CAREER.every)); while (c.w < g) { c.w++; c.l = Math.min(CAREER.max, c.l + 1); }
   if (c.on !== d && m >= CAREER.clockIn && m < CAREER.missBy && careerRota(d) && !careerOff(d) && careerAtWork()) c.on = d;
   if (c.ci > 0 && !(c.co > c.ci)) { const cd = Math.floor(c.ci / 1440) + 1;   // forgot to clock out: signed out at 17:00, no harm done
-    if (cd < d || m >= CAREER.autoOut) { c.co = (cd - 1) * 1440 + CAREER.clockOut; if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText('clock.auto', d) || 'You forgot to clock out. The clock signed you out at 17:00.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
-  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < CAREER.clockOut && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
+    if (cd < d || m >= friAutoOut(d)) { c.co = (cd - 1) * 1440 + dayShiftEnd(cd); if (SHIP.player.clockLog) SHIP.player.clockLog[cd] = c.co - c.ci; if (cd === d) toast('Time clock', careerText('clock.auto', d) || 'You forgot to clock out. The clock signed you out at 17:00.'); } }   // the auto clock-out counts for the time clock screen's hours too (0.28.65)
+  if (c.rm !== d && d > CAREER.grace && m >= CAREER.clockIn && m < dayShiftEnd(d) && playerShiftOn(d) && !careerClockedIn(d)) {   // in the Works bay, not clocked in: a reminder, once a day
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (inBay) { c.rm = d; toast('Time clock', 'Don\'t forget to clock in: the time clock is past the tool wall, by the tea corner.'); }
   }
