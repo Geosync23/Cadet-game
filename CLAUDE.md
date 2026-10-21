@@ -16,6 +16,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `day_check.py`: fast-forwards one ship day and checks the crew's schedules (sleep, meals, shifts, places, nobody stuck, draw calls).
 - `player_check.py`: checks the player's needs, activities, walking speed and saving.
 - `events_check.py`: steps a few weeks of ship days and checks the ship traditions: each happens when it's due, people go, Mail the evening before, decor on the deck.
+- `bigevents_check.py`: the ship-wide events on paper with the events base switched on (in a copy): each event on its calendar day, phases at their minutes, the Friday hold, the career-beat guard, casts; and nothing with it off.
 - `food_check.py`: runs the galley over whole ship days and checks food is ready, nobody waits too long, the dish pit clears and the rota holds.
 - `machine_check.py`: runs the ship's machines on paper and checks wear, faults, repairs, the jobs left for the player and ship health.
 - `clothes_check.py`: checks changing at your wardrobe, yesterday's clothes, the laundry hamper, the washers and saving mid-wash.

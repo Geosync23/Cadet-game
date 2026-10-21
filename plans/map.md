@@ -29,6 +29,7 @@ One labelled, empty block per seat at the end of its main section, where that se
 | Systems engineer | 17 |
 | Dialogue engineer | 22 |
 | Traditions engineer | 18 |
+| Events engineer 2 | 18 (its slot is right after the Traditions engineer's) |
 | Social engineer | 20c |
 | Onboarding engineer | 21b |
 | Games engineer | 23b |
