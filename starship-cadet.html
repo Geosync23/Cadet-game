@@ -36395,7 +36395,7 @@ function eventAdvance(t = shipNow(), quiet) {
   const out = [];
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
   const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return out;
-  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead
+  for (const m of def.meetings || []) meeting({ id: m.id, event: e.id, where: m.where, at: evBeatAt(e.startDay, m.at), len: m.len, who: m.who, script: m.script, notify: EV_DEVICE_ON && typeof deviceApp === 'function' && SHIP.device && SHIP.device.calendarRemind && SHIP.device.calendarRemind.on ? null : m.notify });   // F3a: the device's Schedule gives the heads-up instead, unless your heads-ups are off (PR2, OR1)
   const now = eventNow(t), end = (e.startDay - 1 + def.days) * 1440;
   for (const n of def.news || []) {                      // section 20 (social) spreads it from its seed people
     const at = evBeatAt(e.startDay, n.at);
@@ -36886,7 +36886,9 @@ const evHeld = t => evHeldEnd(t) !== t;
 // the calendar's events passed over for good (the user, 2026-10-21: a save already past an event's day skips it). F0c
 // (OR1): decided from the day the events were first on in this game, SHIP.evFrom: set once, on the first load with the
 // calendar on (a new game: 0), saved, never changed, so a reload on Day 20 skips nothing an unbroken run wouldn't.
-// The save only gains the key once the calendar is on (off: today's save). EV_LOAD_DAY: the day this page loaded
+// The save only gains the key once the calendar is on (off: today's save). So an old save first loaded with events on
+// mid-game skips the calendar's events before that day: on purpose (the user's answer 1), not a bug. It's set before
+// any event day is planned (section 14 waits for EV_READY, the end of section 18's load). EV_LOAD_DAY: the day this page loaded
 SHIP.evFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.evFrom) ? SAVED.ship.evFrom : EV_CAL_ON ? (SHIP.time ? SHIP.time.day : 0) : null;
 SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });
 let EV_LOAD_DAY = SHIP.time ? SHIP.time.day : 0;
@@ -36957,7 +36959,7 @@ function occTableSlot(d) {
   if (guardFree(d, 1170, 1260, 'captain')) return { at: 1170, len: 90 };
   return EV_TABLE_EARLY && guardFree(d, 1140, 1215, 'captain') ? { at: 1140, len: 75 } : null;
 }
-// F3a, on your device: the running (or due) event's meetings and gatherings between two ship minutes, for section 19's
+// F3a, on your device: the running (or due) event's meetings (and any gathering not already a tradition) between two ship minutes, for section 19's
 // Schedule (and so Tracked): { id, kind: 'meeting' | 'gathering', title, at, to, where, deck, room (key) }, in time
 // order. [] while EV_DEVICE_ON is off. Pure, from eventGatherings
 const evRoomKey = (deck, re) => { const R = DECKS[deck] && DECKS[deck].rooms; if (!R || !re) return null; for (const k in R) if (re.test(R[k].name)) return k; return null; };
@@ -36967,6 +36969,7 @@ function eventItems(a, b) {
   for (let d = Math.floor(a / 1440) + 1; d <= Math.floor(b / 1440) + 1; d++) for (const g of eventGatherings(d)) {
     const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;
     const def = SHIP_EVENTS[g.event], mt = (def.meetings || []).find(x => x.id === g.id), mo = !mt && (def.moments || []).find(x => x.id === g.id), m = mt || mo;
+    if (mo && EV_SHIPWIDE.some(x => x.id === mo.id)) continue;   // a gathering in EV_SHIPWIDE is listed already, as a tradition (PR2's shots: the party twice)
     const deck = m.where.deck, room = evRoomKey(deck, m.where.room), rm = room && DECKS[deck].rooms[room];
     const sw = mo && EV_SHIPWIDE.find(x => x.id === mo.id), sc = mt && MEETING_SCRIPTS[mt.script];
     out.push({ id: g.id + '@' + d, kind: mt ? 'meeting' : 'gathering', title: m.title || (sc && sc.title) || (sw && sw.name) || def.title, at, to: at + (g.len || 15),
