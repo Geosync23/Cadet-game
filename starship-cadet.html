@@ -11578,7 +11578,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (sn) B.push({ kind: 'text', text: 'Season: ' + sn + '.' });
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
   B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
-  if (today.length) say('Today aboard' + (today.length > 1 ? ', ' + today.length + ' traditions' : '') + ': ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');   // 0.34.51: how many, then each
+  if (today.length) say('Today aboard' + (today.length > 1 ? ', ' + today.length + ' traditions' : '') + ': ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');
+  try { const es = typeof eventStatus === 'function' ? eventStatus(t) : null; if (es) B.push({ kind: 'text', text: es, mark: 'hot' }); } catch (e) { /* not yet */ }   // section 18's Ship status line (the events base F3b)   // 0.34.51: how many, then each
   say(ACT && ACT.phase !== 'walk' ? ACT.kind === 'queue' ? 'In the queue for the servery.'   // 0.35.27: no guessed wait (the user: no invented numbers)
     : (ACT.o.title || ACT.def.title) + (ACT.def.need ? ': ' + Math.max(0, Math.ceil((ACT.def.mins - ACT.done) / needEffects().task)) + ' min to go.' : '.') : needsLine());
   const P = SHIP.player, w = P.work, mj = jobsOn() ? myJob() : null;
@@ -11912,6 +11913,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
       .concat(rv.depts.some(x => x.band === 'new') ? [{ text: 'Elsewhere', sub: 'A new face: ' + rv.depts.filter(x => x.band === 'new').map(x => DN[x.dept] || x.dept).join(', '), mark: 'past' }] : []) });
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
+  try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
   return { title: 'Record', blocks: B };
@@ -37009,6 +37011,24 @@ function eventBandOf(id) {                                // the running event's
 const evJobsDone = (re, you, t) => (SHIP.jobs || []).filter(j => typeof j.id === 'string' && re.test(j.id) && j.status === 'done' && j.doneBy && !j.lapsed && (!you || j.doneBy === 'you') && (t == null || j.doneAt <= t));
 function eventJobDone(jobId, you, t = shipNow()) { return evJobsDone(new RegExp('^event:[^:]+:' + String(jobId).replace(/\W/g, '') + '@'), you, t).length > 0; }
 function eventJobsCount(id, you, t = shipNow()) { return evJobsDone(new RegExp('^event:' + String(id).replace(/\W/g, '') + ':'), you, t).length; }
+// F3b, on your device: one plain line while an event runs (about 60 characters: one line on a phone), the writers'
+// event.<id>.status.<phase> (baked, through quizText), else the event's own `status: { <phase>: text }`, else none.
+// The Record's blocks: each event you lived through in words (the writers' event.<id>.record, else its title and days),
+// how it went (never a score) and your commendation. Both [] / null while EV_DEVICE_ON is off
+const EV_RECORD_BAND = { smooth: 'The ship came through it well.', bumpy: 'The ship came through, with a few bumps.', rough: 'A hard one, but the ship came through.' };
+function eventStatus(t = shipNow()) {
+  if (!EV_DEVICE_ON) return null;
+  const n = eventNow(t); if (!n || !SHIP.event || SHIP.event.id !== n.id) return null;
+  const def = SHIP_EVENTS[n.id], ctx = evCtx(SHIP.event, t);
+  return quizText('event.' + n.id + '.status.' + n.phase, SHIP.event.startDay, ctx) || (def.status && def.status[n.phase] ? evText(def.status[n.phase], ctx) : null);
+}
+function eventRecord() {
+  if (!EV_DEVICE_ON || !SHIP.eventLog.length) return [];
+  const rows = SHIP.eventLog.map(l => { const def = SHIP_EVENTS[l.id] || { title: l.id }, c = SHIP.commendations.find(x => x.event === l.id);
+    return { text: quizText('event.' + l.id + '.record', l.startDay, {}) || def.title + ', Days ' + l.startDay + '-' + (l.endDay - 1) + '.',
+      sub: (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });
+  return [{ kind: 'text', text: 'Ship-wide events', mark: 'head' }, { kind: 'list', rows: rows.reverse() }];
+}
 // ---- end of slot: Traditions engineer ----
 
 // =====================================================================
