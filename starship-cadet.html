@@ -9002,7 +9002,7 @@ const urlFlag = name => URL_FLAGS.has(name) ? URL_FLAGS.get(name) : null;   // a
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses') || URL_FLAGS.has('seats'),   // the crowd, pose and seat demos (section 8b) never touch the save
       DEBUG = URL_FLAGS.has('debug');
 const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 25; plans/devmode-plan.html): only with #dev, and its own save ("-dev" on the names); off, nothing changes
-const SHORT_FRIDAY = false;                              // Short Fridays and the Captain's address (section 18f; plans/fridays-build-brief.md): off, nothing changes
+const SHORT_FRIDAY = true;                               // Short Fridays and the Captain's address (section 18f; plans/fridays-build-brief.md): on (the user's yes, 2026-10-21); false gives the game without them
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
   if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -34207,7 +34207,7 @@ const FRI_ADDRESSES = {
       {"id": "1eitiu9", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
-  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome on Sunday for our new junior. To the night watch tonight: good watch."], "beats": [
+  "friday-d19": {"day": 19, "from": "Captain Odile Marrow", "mail": ["All hands: the Captain's Friday address", "The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome this Sunday for our new junior. To the night watch tonight: good watch."], "beats": [
     {"id": "lines", "pick": 1, "lines": [
       {"id": "17i8haf", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "1n7xzsa", "who": "marrow", "text": "Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.", "tone": "funny"},
@@ -34228,9 +34228,9 @@ const FRI_ADDRESSES = {
       {"id": "lziopr", "who": "marrow", "text": "{me}, three weeks with us. The Chief says you're finding your feet.", "if": ["myrank:junior"]},
       {"id": "1ch4sm1", "who": "marrow", "text": "Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees."},
       {"id": "1s5uqqu", "who": "marrow", "text": "And our newest night hand, {me}, who should be asleep. Good.", "tone": "funny", "if": ["myshift:night"]},
-      {"id": "wzryn0", "who": "marrow", "text": "This week we say goodbye to {leavers}. Wherever you go next, go well.", "tone": "warm"},
-      {"id": "ksn7cy", "who": "marrow", "text": "And on Sunday a new junior comes up the Tern's ramp. Be to them what this ship was to you.", "tone": "warm"},
-      {"id": "1htx56r", "who": "marrow", "text": "This Sunday, the regatta in the morning and talent night at half seven, a week late."},
+      {"id": "rs0808", "who": "marrow", "text": "Sunday's a full one. The regatta in the morning, talent night at half seven, a week late."},
+      {"id": "vwvwab", "who": "marrow", "text": "In between, we say goodbye to {sunleavers}. Wherever you go next, go well.", "tone": "warm"},
+      {"id": "1tvwp26", "who": "marrow", "text": "And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.", "tone": "warm"},
       {"id": "xap3x6", "who": "marrow", "text": "Dinner's at five. Enjoy your weekend, those of you who have one.", "pose": "gesture"},
     ]},
   ]},
@@ -37590,12 +37590,13 @@ function friFill(l, d, max = 90) {
   for (const term of l.if || []) if (friCond(term, d) !== true) return null;
   const w = friWeek(d), all = ROSTER.concat(typeof ROSTER_RESERVE !== 'undefined' ? ROSTER_RESERVE : []);
   const names = ids => ids.map(id => { const p = all.find(q => q.id === id); return p ? firstName(p.name) : null; }).filter(Boolean);
-  const rot = k => typeof ROSTER_ROTATIONS === 'undefined' ? [] : names(ROSTER_ROTATIONS.filter(r => r.day > d - 7 && r.day <= d).flatMap(r => r[k] || []));
+  const rot = (k, a = d - 7, b = d) => typeof ROSTER_ROTATIONS === 'undefined' ? [] : names(ROSTER_ROTATIONS.filter(r => r.day > a && r.day <= b).flatMap(r => r[k] || []));   // the last 7 days, or (a, b]
   const slot = {
     me: () => chatName(), dept: () => friNod(d)[1],
     stormjobs: () => typeof eventJobsCount === 'function' ? eventJobsCount('ionStorm', false, friAt(d)) || null : null,
     myjobs: () => typeof yourJobsDone === 'function' ? yourJobsDone() || null : null,
     leavers: () => friList(rot('out')) || null, arrivals: () => friList(rot('in')) || null,
+    sunleavers: () => friList(rot('out', d, d + 2)) || null,   // this weekend's (Day 19: the Sunday shuttle)
     trad1: () => friAhead(d, w)[0], day1: () => friAhead(d, w)[1],
     winner: () => { const m = (l.if || []).map(x => /^week:tradition\.([^.|]+)$/.exec(x)).find(Boolean), x = m && friWeekRan(m[1], d);
       const r = x && tallyOf(m[1], x); return r && r.winner ? FRI_TEAM[r.winner] || tallyLabel(r.winner) : null; },

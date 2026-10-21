@@ -66,7 +66,7 @@ PAPER = r"""(() => {
 
 # the speech on paper (turn 6): every line, every rank, the events base's readers there (stubbed) and missing
 SPEECH = r"""(() => {
-  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON };
+  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, rot21: typeof ROSTER_ROTATIONS !== 'undefined' && ROSTER_ROTATIONS.some(r => r.day > 19 && r.day <= 21 && (r.out || []).length), storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON };
   const ranks = ['junior', 'officer', 'senior', 'specialist'], A = FRI_ADDRESSES, filled = new Set();
   // the events base's readers (stubbed: which storm jobs were done, and by you), the ship health boards, your repair
   // cue, a job of yours on the board, the Tiles ladder joined: each way, so every line gets its chance
@@ -245,10 +245,11 @@ print('  lines that never fill (want only myshift:night\'s, and the storm\'s whi
 print('  the save\'s fri part: %s bytes fresh, %s with a full ring (7 weeks)' % (sp['save'], sp['full']))
 check(sp['full'] < 1200, 'on: the save\'s fri part is %s bytes' % sp['full'])
 check(not sp['bad'], 'on: lines showing a slot or a ?, too long, or not Marrow\'s or Vance\'s %s' % sp['bad'][:4])
-# never: your night shifts (Pillar 5's); the Day 19 leavers (nobody's rota leaves before Day 35); with the storm update
+# never: your night shifts (Pillar 5's); the Day 19 leavers ({sunleavers}: none before the first rotation, Day 35 until
+# claude/patch-crew brings it to Day 21); with the storm update
 # off (EV_STORM_ON, or none in the build), its own lines: done:storm*, band: and {stormjobs} (the game's readers say nothing)
 stormy = lambda x: not sp['storm'] and (any(re.search(r'(^|[ !|])(done:storm|band:)', c) for c in x[2]) or '{stormjobs}' in x[1])
-never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and '{leavers}' in x[1]) and not stormy(x)]
+never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and '{sunleavers}' in x[1] and not sp['rot21']) and not stormy(x)]
 check(not never, 'on: lines that never fill %s' % never)
 check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
 check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])

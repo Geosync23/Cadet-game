@@ -789,7 +789,7 @@ def parse_home_rest(lines, path, rel, cid, who, out):
 # "?" clears it): every term must hold, "!" turns one round, "a|b" inside a term is either. Read when she speaks
 # (section 18f), so the terms here are only checked for their words
 ADDR_KEYS = ('band', 'done', 'commended', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week')
-ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
+ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'sunleavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
 ADDR_POSES = ('nod', 'gesture', 'laugh', 'sigh', 'listen', 'play')
 ADDR_WHO = ('marrow', 'vance')
 

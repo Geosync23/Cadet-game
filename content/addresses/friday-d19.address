@@ -3,15 +3,15 @@
 // (Day 14, 10:00), the debrief Mail Monday; the comet Tuesday (Day 16, 21:30); Senior Officer Tuesday (Day 16, Pillar
 // 5); your commendation summons yesterday (Day 18) in the ready room. Your night shifts start tonight (Days 19-20), so
 // a player on track is excused and asleep: they get this by Mail, and the night-watch line names them. A new junior
-// joins on Sunday (Day 21). This Sunday: the regatta (09:30) and talent night (19:30, moved a week).
+// joins this Sunday (Day 21: the first rotation, the user's choice 2026-10-21; PT1's claude/patch-crew). This Sunday: the regatta (09:30), the leaver's shuttle (15:00), the Tern (17:40) and talent night (19:30, moved a week).
 // Beats: the storm's tally and the people who carried it (Works first); the comet; commendations and ranks, yours among
-// them; tonight's night watch, a goodbye and a welcome; the week ahead, and the close.
+// them; tonight's night watch; the week ahead (Sunday: the regatta, a goodbye, a welcome, talent night), and the close.
 // Versions: band:smooth|bumpy|rough = the storm's result (as the debrief); commended = your storm commendation;
 // myrank:; myshift:night = your night shifts have started. Placeholders: {stormjobs} (storm jobs closed, all crew)
-// and {leavers} (first names of this week's leavers, from the rota): a line is left out when one can't be filled.
+// and {sunleavers} (first names of this weekend's leavers, from the rota): a line is left out when one can't be filled.
 day: 19
 from: Captain Odile Marrow
-mail: All hands: the Captain's Friday address | The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome on Sunday for our new junior. To the night watch tonight: good watch.
+mail: All hands: the Captain's Friday address | The storm's tally and my thanks, the comet, this week's commendations and ranks, and a welcome this Sunday for our new junior. To the night watch tonight: good watch.
 == lines
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.   #funny
@@ -41,14 +41,14 @@ marrow: On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.   #w
 marrow: Officer {me}, a busy fortnight. The Chief says you keep her on her toes.   #funny
 ? myrank:junior
 marrow: {me}, three weeks with us. The Chief says you're finding your feet.
-// beat 4: tonight's night watch, a goodbye and a welcome
+// beat 4: tonight's night watch
 ?
 marrow: Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees.
 ? myshift:night
 marrow: And our newest night hand, {me}, who should be asleep. Good.   #funny
 ?
-marrow: This week we say goodbye to {leavers}. Wherever you go next, go well.   #warm
-marrow: And on Sunday a new junior comes up the Tern's ramp. Be to them what this ship was to you.   #warm
-// beat 5: the week ahead, and the close
-marrow: This Sunday, the regatta in the morning and talent night at half seven, a week late.
+// beat 5: the week ahead (Sunday in its order: EW2's words, 2026-10-21), and the close
+marrow: Sunday's a full one. The regatta in the morning, talent night at half seven, a week late.
+marrow: In between, we say goodbye to {sunleavers}. Wherever you go next, go well.   #warm
+marrow: And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.   #warm
 marrow: Dinner's at five. Enjoy your weekend, those of you who have one.   [gesture]
