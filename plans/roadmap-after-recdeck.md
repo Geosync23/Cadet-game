@@ -100,3 +100,8 @@ The user answered the Dev mode plan (artifact https://claude.ai/artifact/2ugbTkk
 ## Weekly Captain's address and short Fridays (the user, 2026-10-20 ~17:55 UTC)
 - No all-hands in the auditorium for the ion storm.
 - A weekly Captain's address with the whole crew, first one in week one, on Fridays: everyone gets off work early on Friday (shift ends 15:30), the address at 16:00, dinner at 17:00. Needs dialogue explaining the short Friday workday. Place not named (lead recommended the plaza). PP1 is planning it (patch item #31 or its own page), with questions for the user.
+
+## Order change and overnight rule (the user, 2026-10-21 ~00:55 UTC)
+- **An optimization pass comes right after the ship-wide events** (step 4), before Pillar 5 steps 5-6 and the character arcs. Not tonight. Known input: the page reload in the test container rose from 14 s (0.64.4) to 16-18 s (0.64.5); intro_check now takes >2 h whole.
+- Ship-wide events are planned and built one at a time, in story order (Crossing the Line Day 7 → ion storm Days 11-15 → comet Day 16 → visit Days 26-30), each plan and each build adversarially reviewed. The first events should carry "a really interesting little story", not just ceremony.
+- Overnight mode: the lead takes the recommended answer to each plan question and logs it (plans/overnight-decisions-<lead>.md) so the user can change any in the morning ("as always").
