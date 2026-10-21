@@ -6,3 +6,4 @@ Decided by the user before bed (not overnight calls): storm plan all (a); Line p
 
 | Time (UTC) | Question | Taken | Why |
 |---|---|---|---|
+| 03:36 | Storm brief says "nothing about the Veyli", but the lore plan puts Saruth's cord-by-touch line at the lantern supper: keep it? | Keep it, merged into one line | PR2's recommendation: it is a lore step (no visit, no rite); the storm guard rail was about spoilers |
