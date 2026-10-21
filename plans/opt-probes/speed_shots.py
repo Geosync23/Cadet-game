@@ -7,7 +7,7 @@ OUT = pathlib.Path(sys.argv[2]); OUT.mkdir(parents=True, exist_ok=True)
 TMP = WORK / 'test' / '_speed.html'; TMP.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
-    for (w, h, dpr) in [(390, 844, 3), (412, 960, 2.625), (792, 1080, 2)]:
+    for (w, h, dpr) in [tuple(float(v) if '.' in v else int(v) for v in x.split('x')) for x in (sys.argv[3].split(',') if len(sys.argv) > 3 else ['390x844x3', '412x960x2.625', '792x1080x2'])]:
         ctx = b.new_context(viewport={'width': w, 'height': h}, device_scale_factor=dpr); pg = ctx.new_page(); errs = []
         pg.on('pageerror', lambda e: errs.append(str(e))); pg.on('console', lambda m: m.type == 'error' and errs.append(m.text))
         pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
