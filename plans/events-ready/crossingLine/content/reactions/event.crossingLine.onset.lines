@@ -1,12 +1,12 @@
 @reactions event.crossingLine.onset
 // EW1 (events writer), Crossing the Line: Sunday 14:30-15:15, from a few minutes after the horn (F2b): the gold pulse,
-// the gold windows, the walk to the plaza.
+// the gold windows, the walk to the ceremony.
 ? cue:event.crossingLine.onset
 - Did you feel that? The whole deck went gold.
 - Look at the windows. Everything's gold. Even the stars.   #warm
-- That's it, then. We're over the Line. To the plaza!
+- That's it, then. We're over the Line. To the ceremony!
 - First-timers to the front. Go on. We'll be at the back.   #funny
 ? cue:event.crossingLine.onset tier>=acquaintance
 - Your first Line, {nick}! Go on, to the front.   #warm
 ? cue:event.crossingLine.onset dept:watch
-- Plaza's filling up. Mind the punch bowl. It's heavier than it looks.
+- It's filling up in there. Mind the punch bowl. It's heavier than it looks.

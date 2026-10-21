@@ -1,6 +1,6 @@
 @meeting crossingCeremony
 // EW1 (events writer), Crossing the Line (event-line plan v2, story A "The one on watch", the user's choice), Sunday
-// Day 7, 14:40-14:55, the plaza (about 50-60). Cast: marrow, brennan, and two first-timers (the cast slot first:2;
+// Day 7, 14:40-14:55, the bow lounge (moved from the plaza by the user; about 50-60). Cast: marrow, brennan, and two first-timers (the cast slot first:2;
 // first1 and first2 here). The Captain reads the old oath, then asks who answers for the first-timers: your answer goes
 // on the plaque (flag:line.answer.proud | .watch | .punch; the plaque texts are event.crossingLine.plaque.<answer>).
 // It replaces events plan v3.2's "one reply (proud, nervous, joking)" (question line-q9). If you're not there, a

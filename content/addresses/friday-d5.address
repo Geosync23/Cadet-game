@@ -8,7 +8,7 @@
 // No storm here: on Day 5 nobody aboard knows it's coming (the warning is Day 11).
 day: 5
 from: Captain Odile Marrow
-mail: All hands: the Captain's Friday address | Short Friday, short speech. Why we stop at half three, the Line on Sunday (14:30, the plaza: first-timers, come forward), the galley's nod, and a welcome to our newest hand, {me}. Dinner at five.
+mail: All hands: the Captain's Friday address | Short Friday, short speech. Why we stop at half three, the Line on Sunday (14:30, the bow lounge: first-timers, come forward), the galley's nod, and a welcome to our newest hand, {me}. Dinner at five.
 == lines
 vance: Settle, please. The Captain.   [nod]
 marrow: Afternoon, everyone. Sit anywhere. Seventy-six seats, so nobody stands at the back.   [gesture]
@@ -20,7 +20,7 @@ marrow: A few stay on duty: the bridge, a medic, the cooks. They get this by Mai
 // beat 2: where the Wren is going, and the Line on Sunday
 marrow: On Sunday afternoon the Wren crosses the Line, into the Veyli reach.
 marrow: At half two the horn sounds on every deck and the hull lights go gold. Hold your mugs.   [gesture]
-marrow: First crossing? Come to the plaza. There's an old oath and Brennan's Line punch. Be brave.   #funny
+marrow: First crossing? Come to the bow lounge. There's an old oath and Brennan's punch. Be brave.   #funny
 // beat 3: the week behind, and the galley's nod
 marrow: The week behind. The board was busy, and Works kept up with it. Thank you, Chief Calder.   [nod]
 marrow: This week's nod goes to the galley. Three meals a day, and the biscuit tin never ran dry.

@@ -32,7 +32,7 @@ Your first Friday. Beats: why Fridays are short; the Line on Sunday; the week be
 - **Marrow:** Next week: the tasting table Wednesday, postcard night Thursday. And a quiet ship, I hope.
 - **Marrow:** Dinner's at five. Enjoy your weekend, those of you who have one.
 
-*Mail for anyone not there:* "All hands: the Captain's Friday address": Short Friday, short speech. Why we stop at half three, the Line on Sunday (14:30, the plaza: first-timers, come forward), the galley's nod, and a welcome to our newest hand, {me}. Dinner at five.
+*Mail for anyone not there:* "All hands: the Captain's Friday address": Short Friday, short speech. Why we stop at half three, the Line on Sunday (14:30, the bow lounge: first-timers, come forward), the galley's nod, and a welcome to our newest hand, {me}. Dinner at five.
 
 ## Day 12: Steady in the storm
 

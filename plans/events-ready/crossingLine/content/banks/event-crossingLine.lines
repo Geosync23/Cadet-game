@@ -3,7 +3,7 @@
 // keys (see content/banks/event-ionStorm.lines). Mail is "Subject | body", unsigned (the warning is Vance's).
 // Gatherings: event.crossingLine.gather.<id>.<...>; the ceremony is the meeting crossingCeremony.
 == event.crossingLine.mail.warning
-- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. The horn will sound on every deck. First crossing? The ceremony is on the plaza, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
+- Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. The horn will sound on every deck. First crossing? The ceremony is in the bow lounge, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.
 == event.crossingLine.status.warning
 - Tomorrow at 14:30 we cross the Line into the Veyli reach.
 // the banner at 14:30, after the horn: the Captain is called in on her day off
@@ -12,12 +12,12 @@
 == event.crossingLine.address.onset.2
 - Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.
 == event.crossingLine.address.onset.3
-- First-timers, to the plaza. The rest of you, be kind. Marrow out.
+- First-timers, to the bow lounge. The rest of you, be kind. Marrow out.
 == event.crossingLine.status.onset
-- We've crossed the Line. Ceremony on the plaza; the Line supper at 18:00.
+- We've crossed the Line. Ceremony in the bow lounge; the Line supper at 18:00.
 == event.crossingLine.status.afterglow
 - First day in the Veyli reach.
-// tap lines on the plaza during the ceremony (crew, not first-timers)
+// tap lines at the ceremony (the bow lounge) (crew, not first-timers)
 == event.crossingLine.gather.ceremony.here
 - Front row's for first-timers. We old hands stand at the back and laugh.   #funny
 - Watch their faces when the punch goes round. Best bit.   #funny
@@ -39,7 +39,7 @@
 == event.crossingLine.gather.lineSupper.chatter
 - Best Sunday table we've had. And it wasn't even the Sunday table.   #funny
 - The Line supper ran out of seconds in ten minutes. Brennan was thrilled.
-// tap texts: the certificate on your shelf (a keepsake) and the plaque on the plaza (the deck architect's props)
+// tap texts: the certificate on your shelf (a keepsake) and the plaque (where EP2 places it; the deck architect's props)
 == event.crossingLine.keepsake
 - Your Line certificate, signed by the Captain: "Crossed into the Veyli reach, Day 7. This reach knows your name."
 
@@ -48,7 +48,7 @@
 // Saturday, if you don't meet Tomas before his bedtime: his Mail at about 22:50 (unsigned; from Tomas Lind)
 == event.crossingLine.mail.tomas
 - On watch tomorrow | On watch tomorrow, all day. You'll have to cross for both of us. Tell me everything after.
-// the plaque on the plaza (from the night of Day 7), with your answer under the date (flag:line.answer.<answer>);
+// the plaque (from the night of Day 7), with your answer under the date (flag:line.answer.<answer>);
 // .missed when you weren't at the ceremony (a first-timer answered)
 == event.crossingLine.plaque.proud
 - The CSV Wren crossed the Line into the Veyli reach, Day 7. "We came a long way. We're glad we did."
@@ -78,12 +78,12 @@
 == event.crossingLine.notice.horn
 - The ship's horn: the Wren has crossed the Line.
 == event.crossingLine.notice.ceremony
-- Crossing the Line: the ceremony on the plaza at 14:30. First-timers to the front.
+- Crossing the Line: the ceremony in the bow lounge at 14:30. First-timers to the front.
 // the two volunteer jobs (the mess sign-up sheet; Brennan offers them too)
 == event.crossingLine.job.punch
 - Crossing the Line: carry the punch up from the galley
 == event.crossingLine.job.ribbons
-- Crossing the Line: hang the gold ribbons on the plaza
+- Crossing the Line: hang the gold ribbons for the ceremony
 // the Record line (never a score)
 == event.crossingLine.record
 - Crossed the Line into the Veyli reach, Day 7.
