@@ -279,3 +279,4 @@ Working: PA, BM11, EV1, EW1 (+ PR2/OR1 reviewing on call, PB finishing a small r
 | Events check writer EC1 | session_01QgShGXD6P24DDxTp8npN41 | `claude/bigevents-check` | bigevents_check.py (F7), outside check_fast |
 | Reviewer PR3 | session_01EtHMLLsjDYDHPG3JgCMbGi | `claude/review-3` | reviews FR1 and EC1 (PR2 keeps EV1) |
 Working: BM11 (release round), EV1, PR2, OR1, FR1, EC1, PR3 = 7. Idle: EW1, PA, PB. Watch the 5-hour limit; pause the newest seats first on "allowed_warning".
+**~00:26 UTC:** PR2 PASS on EV1 F0a (heads-up: with events on, events_check needs the storm's Day 11; one unexplained day-300 lounge miss, EV1 looking). FR1 brief pushed (claude/fridays 4bbfee3: 10 turns, section 18f, one hold = EV1's EV_BEATS row) → PR3 reviews; FR1 builds turn 1 on PR3's pass; PB asked to own the s14 dayShiftEnd hook. EW1 wrote friday-weekly.address (d15803c) for Fridays after Day 26 → PR3.
