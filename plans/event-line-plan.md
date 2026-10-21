@@ -64,8 +64,8 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 ### Option A2: "The one on watch", but Tomas comes to the ceremony (not chosen)
 Asked for by the user (via lead 22, 01:22): is Tomas missing his own ceremony intended? Yes, in A, and this is the other way.
 - **Saturday:** the same evening moment, but his worry is standing up in front of everyone, not missing it.
-- **Sunday 14:40:** the Captain sends for him ("I asked the watch to spare you for ten minutes"). A Watch hand on shift comes down from Deck 2 to cover his post for 15 minutes; Nakamura or Ueda, named by his plan. Tomas stands beside you in the front row.
-- **The answers:** the same three, plus "We'll answer together" with Tomas. The answer still goes on the plaque.
+- **Sunday 14:40:** the Captain sends for him ("I asked the watch to spare you for ten minutes"). A Watch hand on shift walks across from the watch office to cover his post (both are on Deck 2) for 15 minutes; Nakamura or Ueda, named by his plan. Tomas comes down to the plaza. Tomas stands beside you in the front row.
+- **The answers** (three at most): proud, "We'll answer together" with Tomas, and the punch joke. "Even the ones on watch" makes no sense once Tomas is standing there. The answer still goes on the plaque.
 - **Monday:** the plaque, and Tomas's thanks.
 - **The trade-off:**
   - There's nothing to miss, so the mug to his post and the Lap of the Wren payoff lose their reason. The evening walk is just the usual walk.
