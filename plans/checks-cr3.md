@@ -21,7 +21,7 @@ Run 2026-10-21 by CR3 for lead 25 and PR9. No game change; this note is the only
 | perf_check (vs plain a4a5735) | exit 1, 8 "problems", all explained: **no budget broken** | Busiest on the RC: junior common room portrait-wide 433 calls (same as plain), quiz night 396, Friday dinner 361 (was 378), lantern supper (storm) 351 (same). Game code at most 2.16 ms a frame (Friday dinner landscape). Every scene under the 450 budget on every phone view. Flags: Captain's address 120→174 / 155→209 / 117→171 calls and 0.36→1.63 ms; after the address, rec lift lobby 169→204 / 240→274 / 198→232 calls. Plain 0.64.12 has SHORT_FRIDAY off, so it measures an empty auditorium (5 people) against 49 at the address: the feature itself, not a regression, and well under 450. Memory 520→520→522 across round trips: the same on plain 0.64.12 (backlog #14). Week of play flat (520/40/228 → 522/40/228, both builds). File 5.66 MB (was 5.60). |
 | arc_check | **OK** | Every arc finished (brennan 5/5 ... pell 8/8, rina 7/7, tomas 7/7, torres-zeke 6/6); calls 68, beats 24; errors []; ARC CHECK OK |
 | path_check | **OK** | 7 decks x 3000 searches the same; a played day 3102/3102 real calls the same; 4.3x faster; PATH CHECK OK |
-| tiles_check | **FAIL (old)** | One line: `FAIL phone 390: opening the board adds nothing to the 3D scene`. Rules, balance (full and quick), the game by taps, How to play, the seated game, night odds and news all pass. **Plain a4a5735 fails the same line** (and a second RC run too), so it's not new to the release. No backlog row found for it. |
+| tiles_check | **FAIL (old, the check's timing, not the game; backlog #26)** | One line: `FAIL phone 390: opening the board adds nothing to the 3D scene`. Rules, balance (full and quick), the game by taps, How to play, the seated game, night odds and news all pass. **Plain a4a5735 fails the same line** (and a second RC run too), so it's not new to the release. No backlog row found for it. |
 | disc_check | **OK** | 34 ok lines; the game view draws in 129 calls (under 200); 60/30/20 fps the same game; ALL OK |
 | puzzle_check | **OK** | PUZZLE CHECK OK |
 | deck_check | **OK** | Draw calls by the lift: D1 156, D2 146, D3 209, D4 176, D5 168, D6 122, D7 169; DECK CHECK OK |
@@ -33,3 +33,23 @@ Run 2026-10-21 by CR3 for lead 25 and PR9. No game change; this note is the only
   The line compares the scene's memory counts before and after `tilesPlay` + `step(2)`, so something else in the scene changing
   in those two steps would trip it as well as the board.
 - perf_check has no storm scene other than the lantern supper (storm on: 351 calls, same as plain's Saturday dinner).
+
+## Follow-up (lead 25): what makes tiles_check fail
+
+**Not a game bug, and not the board.** tiles_check opens the device, waits 2 steps, counts the 3D scene's geometries,
+opens the Tiles board, waits 2 steps and counts again. On a phone, opening the device slides the camera's view down
+(section 19's C11 framing, `deviceFrameStep`) over about a second of *real* time, not ship time, so the view is still
+sliding during the check's steps. Something already on the deck slides into view, and three.js loads its shape the first
+time it draws it, so the count goes up by one or a few. The same happens with no board at all (a control run: 421 → 422 on
+the 390 phone, both with and without the board).
+
+- What gets loaded: on 0.64.12 / the release build (390 phone), one deck mesh (432 points) near (-5.5, 0.35, 8.75);
+  on 0.64.11 (320 phone), a door's two leaves and its tap box at (-4.5, 6). Not crew, not the board.
+- When it started: every integration build from 8a86e18 (the start of the history) to 0.64.10 passes. It starts with
+  **patch crew T2, 4dbdca8** ("the opening view another step closer": phone zoom 1.65 → 1.85), merged in 0.64.11
+  (376469c); T1 1badd51 (1.65) still passes. 0.64.12's 1.62 moved what sits at the view's edge, so the failure moved
+  from the 320 phone to the 390 one.
+- Proof: the release build with only the zoom line back at 1.5 / 1.15 passes; the release build and 4dbdca8 unchanged both
+  pass when the check waits for the slide to finish (`DEV.fr === 1`) before its first count.
+- So the opening zoom only decides which object is at the edge; the cause is the check counting mid-slide. Not fixed (brief).
+  Backlog row 26 (on this branch; fridays has a row 25).
