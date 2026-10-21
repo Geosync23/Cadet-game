@@ -36,6 +36,12 @@ exec(open(__file__.replace('bigevents_check.py', 'cadet_test.py')).read().split(
 from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
+OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
+ON_ALREADY = 'const EVENTS_ON = true;' in SRC
+if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
+    SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
+    (WORK / 'test').mkdir(parents=True, exist_ok=True)
+    OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
 CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above
 MESS_SEATS = 44                 # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 
@@ -358,8 +364,9 @@ LINE = r"""(() => {
       const want = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table')).length, B = ab(d, 0);
       const segs = people.flatMap(p => planDay(p, d).filter(s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-'))));
       let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
-      const cap = new Set(sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []).map(q => q.id)).size;
-      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap };
+      const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
+      const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap, seats, crowd, seated: !!sup.ev.seated };
     }
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
@@ -387,6 +394,10 @@ def check_line(g, tag):
     else:
         if sp['want'] > CROWD: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")
         if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
+        if not sp['seated']: waiting(f"{tag}: the Line supper seated (the user's call; EV7 marks it seated): today {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
+        else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
+            if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
+            if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -520,6 +531,7 @@ def judge(a, tag):
         if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
         if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
         if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")
+        if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
         if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
             if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
             if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
@@ -540,14 +552,15 @@ with sync_playwright() as pw:
     # 0. the switches
     base = 'const EVENTS_ON = false;' in SRC
     cal_alone = bool(re.search(r'const EV_CAL_ON = EVENTS_ON;', SRC))
-    print('Switches:', 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
+    print('Switches:', 'EVENTS_ON (on in the build; a switched-off copy for parts 1-2)' if ON_ALREADY else 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
     if not base and 'const EVENTS_ON = true;' not in SRC:
         print('  SKIP: no events base in this build (EVENTS_ON): nothing to check')
         print('BIGEVENTS CHECK OK (nothing built yet)'); sys.exit(0)
 
     # 1. off: today's game
     print('\n1. Switched off (the build as it is):')
-    g = Game(pw, sys.argv[1]); a = paper(g, 'off'); show(a)
+    if ON_ALREADY: note('EVENTS_ON is on in this build: parts 1-2 run on a switched-off copy of it (EVENTS_ON = false), part 3 on the build as switched on')
+    g = Game(pw, OFF_BUILD); a = paper(g, 'off'); show(a)
     if a['sw']['EVENTS_ON']: note('EVENTS_ON is already on in this build: part 1 checks the build as it is')
     else:
         if a['eventDay']: fail(f"off: eventDay is true on {a['eventDay']}")
@@ -568,8 +581,8 @@ with sync_playwright() as pw:
     if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
-    if not a['sw']['EVENTS_ON']: check_callin(pw, sys.argv[1], 'off', False)
-    if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
+    if not a['sw']['EVENTS_ON']: check_callin(pw, OFF_BUILD, 'off', False)
+    if not a['sw']['EVENTS_ON']: check_notes(pw, OFF_BUILD, 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
