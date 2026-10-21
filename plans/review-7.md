@@ -33,3 +33,9 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - rot_probe.py (real save, 390 and 360, reloads at D20 21:00, D21 14:40/15:20/18:00, D22 08:00): state the same after each reload; Theo in moved once; Basil aboard; no errors. The keys a reload changes are the same on 0.64.8 (catch-up after a skip), so not the patch.
 - Mutants: Basil aboard [35,null] (m1) and ROSTER_ROTATIONS day 35 (m2): events_check FAILs both; day_check 21 passes both.
 - Doc fixes sent for T2: DEV_NOTES ~1182 (Days 35, 77...), plans/handover-sim.md, talk-pack-plan.md, work-pools-plan.md. Nit: ?seats labels show at zoom > 1.2 (landscape opening now 1.25), demo only.
+
+## Log (cont.)
+
+- D5's first devmode_check run used the integration copy of devmode_check.py (no 'trad' part), so its OK and the mutant d5_ma "OK" didn't count; rerun with d261274's devmode_check.py. Probes sign the arrival manifest first (it covered the sheet: my setup, not a game bug).
+- D6a and D6b reviewed together on 39b2acd.
+- RN1 (lead 24's asks): opt #4 shaders kept (6fd3505), perf_check event scenes (3af9f15). Early finding sent for the latter: switched() doesn't count `const NAME = true;` as on, so a switched-on feature's busy scene SKIPs.
