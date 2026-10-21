@@ -52,6 +52,10 @@ for line in open(os.path.join(ROOT, 'plans', 'opt-cover', 'failures.md')):
     if not m:
         continue
     h = m[1]
+    inh = re.search(r'Inherited from ([0-9a-f]{7,40})', line)   # a failure the commit only carried from an earlier one (proved)
+    if inh:
+        print(f'  {h}: its failure was inherited from {inh[1]} (failures.md): checked against {inh[1]}')
+        h = inh[1]
     want = [w.split('(')[0].strip() for w in m[2].split(',')]
     want = ['day1' if w.startswith('day') else w for w in want if w]
     if A.git('cat-file', '-t', h).strip() != 'commit':
