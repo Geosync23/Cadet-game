@@ -25,12 +25,12 @@ Each option has a beginning, a middle where your one choice matters, and a payof
 ### Option A (recommended): "The one on watch"
 Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1, is the newest hand after you. He's on watch in Deck 2's watch room from 08:51 to 17:00 on Sunday, so he'll miss his own crossing. Someone has to watch the ship as she crosses.
 
-- **Beginning, Saturday night (Day 6), Bunk 1.** After his shift Tomas can't settle: "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen." One moment, three replies:
+- **Beginning, Saturday evening (Day 6), wherever Tomas is.** His Saturday runs the mess and the garden 19:14-22:05, climbing on the rec deck 22:08-22:40, then bed at 22:46 (ER2's S1). His plans don't move: the moment follows him from 19:00 until bed (it opens when you're near him), or at the latest at his bedtime in Bunk 1 (about 22:45). He can't settle: "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen." One moment, three replies:
   - "I'll bring you some punch." (practical; sets `line.promised`)
   - "I'll tell you every bit of it." (cheer)
   - "Can't you swap?" (He: "Not on a crossing. Someone has to watch her cross.")
 
-  If you're not in the bunk room by 22:30, he sends you a short Mail instead ("On watch tomorrow. You'll have to cross for both of us."), so the thread still starts.
+  If you haven't met him by the time he's in bed, he sends you a short Mail at about 22:50 instead ("On watch tomorrow. You'll have to cross for both of us."), so the thread still starts.
 - **Middle, Sunday 14:40, the plaza.** After the oath the Captain asks, "Who answers for the first-timers?" Two first-timers look at you. Your one choice is the answer, and it goes on the plaque:
   - "We came a long way. We're glad we did." (proud)
   - "We crossed together, all of us, even the ones on watch." (for Tomas and the watch)
@@ -49,7 +49,7 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
   - Holt has one warning reaction line ("Veyli reach. Hm. Keep your wits."), never a scene; his arc's beat 4 is untouched.
   - Nothing about a delegation, guests or the Envoy's purpose.
 - **What it needs** (about one turn more than a plain ceremony):
-  - the Saturday moment in Bunk 1 (section 20c's moments, like `moment:quiz`: the social seat);
+  - the Saturday moment that follows Tomas from 19:00 to bed (section 20c's moments, like `moment:quiz`: the social seat), never moving his plans;
   - the oath meeting's choice reworked (EW1), setting `line.answer`;
   - the plaque reading `flag('line.answer')` (the deck architect's dress kit: it reads a saved flag, never the planner);
   - the watch room as the punch job's second stop;
@@ -97,7 +97,7 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 | --- | --- | --- | --- |
 | Fri 5, 16:00 | The Captain's first weekly address mentions Sunday's crossing | rec deck auditorium | Fridays plan, `friday-d5.address` (needs `SHORT_FRIDAY`) |
 | Sat 6, 18:00 | **Warning** begins: Vance's Mail "Tomorrow we cross the Line"; crew ask "First crossing?" (Pell: he crossed two years ago; Holt's one line) | Mail, every deck | F2 phase note, cue `event.crossingLine.warning` |
-| Sat 6, 21:00-22:30 | Story A begins: Tomas in Bunk 1, on watch tomorrow (a moment, or his Mail at 22:30) | Deck 4, Bunk 1 | 20c moment |
+| Sat 6, 19:00-22:46 | Story A begins: Tomas, on watch tomorrow (a moment wherever he is: the mess, the garden, the rec deck, or Bunk 1 at bedtime; else his Mail at about 22:50) | Deck 3, rec deck, Deck 4 | 20c moment |
 | Sun 7, 10:30-12:30 | The swap meet, as usual | promenade, plaza | (unchanged) |
 | 12:45-14:15 | Two small volunteer jobs on the mess sign-up sheet (Brennan offers them too): carry the punch up from the galley; hang gold ribbons on the plaza | galley, plaza | event `jobs` (17), `DECK_DRESS.signupMess` |
 | 14:15 | Device notice: the ceremony on the plaza at 14:30, with "show on map" | device | F3a |
@@ -173,7 +173,7 @@ The build number is the build master's.
 | L1 | The event's data: `SHIP_EVENTS.crossingLine` only when `EV_LINE_ON` (phases, address, Mails, news, status, `commend: false`, no threads); `lineFirst`; the cast slot `first:2`; the oath meeting with story A's choice (`line.answer`); the `EV_BEATS` row (the ceremony is the Captain's one scene that day); EW1's files moved into `content/` and baked; facts.md's line | 18 (traditions: EV1's seat), 22 generated (writers, through content_gen.py) | events_check, bigevents_check on paper, lines_check, social_check |
 | L2 | The crowds: the ceremony gathering (k 353, `not: saruth`), `standEasy` (14), `EV_DAY_DRESS` for the Sunday table and the Lap, the galley's batch and pudding, the three lead spots. **Gated on F0b:** bigevents_check's cast part must show the Captain and Brennan planned on the plaza at 14:40 | 18, 14 (sim), 16 (galley), 4d (deck architect) | day_check Days 6-8 (on), food_check Day 7, events_check, bigevents_check crowds (draw calls at 390x844) |
 | L3 | The look: gold hull lights (`FEEL_MOODS.crossingLine`); the horn (a new `horn` feel: one soft gold pulse, no shake; reduced motion: a soft dip); the ribbons (`DECK_DRESS.lineRibbons`); the punch bowl; the plaque (`linePlaque`, with the answer); the certificate (`lineCertificate`, which moves with you to cabin 4-23 on Day 10 like the Tiles trophy) | 8b (performance), 4d (deck architect), 18 | deck_check Decks 3-4, perf_check (the ceremony and the supper), screenshots at 390x844 and 360 wide |
-| L4 | Story A's moments: Saturday in Bunk 1, the watch-room mug, the Lap moment, Tomas's and Zeke's lines, the punch secret | 20c (social), 18 | social_check, events_check, bigevents_check (live: a reload mid-oath) |
+| L4 | Story A's moments: Saturday evening with Tomas (wherever he is, until bed), the watch-room mug, the Lap moment, Tomas's and Zeke's lines, the punch secret | 20c (social), 18 | social_check, events_check, bigevents_check (live: a reload mid-oath; Tomas at his post 08:51-17:00 and on the Lap at 20:30) |
 | L5 | Your part: the two jobs (sign-up sheet), the device's Schedule and status line (F3), the Record line ("Crossed the Line into the Veyli reach, Day 7", never a score), missing it (Brennan's mug) | 17 (systems: posting), 19 (device), 18 | player_check, device_check, interactions_check, devmode_check, intro_check `--week` alone |
 | L6 | Switch it on (`EV_LINE_ON = EVENTS_ON`) after the user's review; the full round; design-doc (including "a short event may say `commend: false`") and DEV_NOTES | 18 | the full round (intro_check in pieces) |
 
@@ -226,7 +226,7 @@ The build number is the build master's.
 8. **A gold that reads as "something wrong":** the storm turns the windows violet. The gold must look warm and festive. Screenshots at phone size.
 9. **The ceremony ends at 15:15,** well before the reading corner (16:00).
 10. **Reactions within about 5 ship minutes of the horn:** the onset lines must not mention the punch or the answer.
-11. **Tomas's watch room** is on Deck 2. The mug's stop must be reachable on a Sunday (the watch room's door), and Tomas must be at his post, not on his break, between 15:15 and 17:00: day_check Day 7.
+11. **Tomas's day must be as the plan says** (ER2's S2 and S4, in the new shape): at his post (`2-watch-6`) 08:51-17:00 and never pulled away, reachable for the mug, and on the Lap at 20:30 (`EV_DAY_DRESS` brings him); bigevents_check shows all three. Tomas's watch room is on Deck 2. The mug's stop must be reachable on a Sunday (the watch room's door), and Tomas must be at his post, not on his break, between 15:15 and 17:00: day_check Day 7.
 
 ## Questions for the user (each with a recommended answer; ids `line-q1` to `line-q9`, plus `line-general`)
 - **line-q9, the story:** recommended: A, "The one on watch" (Tomas misses his own crossing; your answer goes on the plaque; his crossing on the Lap that night). Others: B, "What's in the punch?"; C, "The Line roll". A changes v3.2's "one reply (proud, nervous, joking)".
@@ -259,3 +259,4 @@ The build number is the build master's.
 10. **The jobs:** on the mess sign-up sheet, and Brennan offers them.
 11. **Hash keys:** the table above.
 12. **Small things:** the warning comment (EW1); `SHORT_FRIDAY` in "Needed first"; L6's design-doc note on `commend: false`. L2 is gated on F0b.
+- **ER2's story fixes S1-S4 (round 1b, on 1.1):** S1 the Saturday moment follows Tomas until his bedtime (the Mail at about 22:50); S2, S3 and the watch:1 slot no longer apply (Tomas stays at his post in v2, and "eighty people" is gone); S4 becomes bigevents_check showing Tomas at his post through the ceremony and on the Lap at 20:30.
