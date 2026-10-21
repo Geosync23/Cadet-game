@@ -123,8 +123,12 @@ STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.
 def state(g): return json.loads(g.ev(STATE))
 UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
 
+FRAME = 'renderer.info.render.frame'                       # counts drawn frames: a drawn part proves it drew (OR1's F1)
 def servery_seat(g, label):
-    with drawn(): return _servery_seat(g, label)
+    f0 = g.ev(FRAME)
+    with drawn(): r = _servery_seat(g, label)
+    check(g.ev(FRAME) > f0, f'{label}: drawn (its draw calls are the budget), frame {f0} -> {g.ev(FRAME)}')
+    return r
 def _servery_seat(g, label):
     """the servery's line (0.28.31): served, you hold your tray and get control back; then you tap a mess table yourself"""
     tp, b, seen, e, pk = run_activity(g, 'Servery', label=label)
@@ -150,7 +154,10 @@ def _servery_seat(g, label):
     return tp, b, seen, e, pk
 
 def run_activity(g, title, near=None, limit=4000, label=None):
-    with drawn(): return _run_activity(g, title, near, limit, label)
+    f0 = g.ev(FRAME)
+    with drawn(): r = _run_activity(g, title, near, limit, label)
+    check(g.ev(FRAME) > f0, f'{label or title}: drawn (its draw calls are the budget), frame {f0} -> {g.ev(FRAME)}')
+    return r
 def _run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
     before = state(g)
