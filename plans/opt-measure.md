@@ -187,3 +187,9 @@ The last 20 non-merge commits that changed the game on `claude/integration`, map
 
 - Plain keeps 16-18 programs alive and rebuilds the ones its unload deleted on every change (2-5 a change); kept, they stop at **22** after the first lap at 390×844 and at 844×390 (`opt-probes/keep_shots.py`). The rest of the first frame here is SwiftShader uploading and drawing the new deck. On a phone each saved compile is the part that costs (tens to hundreds of ms of hitch on arrival); uploads are far faster there.
 - Proof: cadet_test ALL IDENTICAL; every deck's third-lap shot identical at both sizes; memory after each lap the same as before.
+
+### The trifold's sizes (the user's phone: Samsung Galaxy Z TriFold)
+
+- **Published (the panels):** cover screen 6.5", 1080 × 2520 px, 21:9 (Wikipedia, "Samsung Galaxy Z TriFold"; SamMobile's pre-launch report said 1080 × 2560); inner screen 10", 1584 × 2160 px, about 269 ppi (Samsung's developer emulator page, SamMobile, 91mobiles).
+- **Not published: its browser size.** No device database lists the TriFold's CSS viewport or pixel ratio (searched 2026-10-21). perf_check's `TRIFOLD` sizes are **derived** from Samsung's foldable defaults (Galaxy Z Fold7: cover 2.625 device px per CSS px, inner 2.0): **folded 412 × 960** (960 × 412 turned), **open 792 × 1080** (1080 × 792 turned). The browser's own bars take some height off. The Dev Speed card (#8) should show `innerWidth × innerHeight` and `devicePixelRatio`, so the user's phone can confirm them; then change the one `TRIFOLD` table in perf_check.py.
+- Sources: https://en.wikipedia.org/wiki/Samsung_Galaxy_Z_TriFold, https://www.sammobile.com/news/samsung-galaxy-z-trifold-display-specs-features/, https://developer.samsung.com/galaxy-emulator-skin/galaxy-z.html, https://www.91mobiles.com/samsung-galaxy-z-trifold-price-in-india?ty=specs
