@@ -65,3 +65,21 @@ for bigevents_check (it flips EVENTS_ON itself) a copy with `const EV_LINE_ON = 
 - Background checks: give `timeout: 7200000` (the default 30 minutes killed a chained run in perf_check).
 - `pkill -f <pattern>` can kill your own shell; kill by PID.
 - One browser check at a time; separate copies for each run; never edit the main file while check_fast runs on it.
+
+## Messages that came in after the note (for EV7), 12:23 UTC
+
+- **L4+L5 are pushed** (239c697, shots 0032351): all checks above OK. Nothing is left only in EV5's container.
+- **PB's fix, NOT applied:** section 14's `evClosed` with `gather` rules checks only the stay's first and last minute, so
+  a stay spanning the whole 14:30-15:15 window (a lounge seat 14:00-15:30) sits through the ceremony. Check every
+  10-minute slot from abs to to-1 (evAt is per slot), then send it to PB.
+- **EV6's storm change clashes:** claude/storm-update 829f242c removes `evStandTray` (the user made the lantern supper
+  seated sittings). `lineStandTray` extends it. Ask lead 23 whether "seated" covers the Line supper; if so drop
+  lineStandTray and the Line supper's `@gather-mess` standing places, and use EV6's `seated` mark in eventPools.
+- **EW2's words** (claude/events-lines-2 af19fbe, plans/events-ready/crossingLine/content/banks/event-crossingLine.lines):
+  copy over content/banks/event-crossingLine.lines and bake, then read the new keys with evWord, keeping mine as
+  fallbacks: status.resolution, gather.ceremony.ask (3) and .thanks, tap.punch, notice.mug (EW2: only with
+  flag:line.promised).
+- **EC1's bigevents_check 3f9a458** has the Line cases (part 3b) and passes on 9188428: take that file.
+- **PB's L2 watch-list:** each standing-easy 'meet' finds a spot (count who got there); Works job claims during the break
+  (none in two places).
+- **Reviewer:** PR6 (session_01LVHLJHrAR5iGJFS7HK9E7i), not PR4. Merge claude/fridays 11b2220 per FR3 when doing S10.
