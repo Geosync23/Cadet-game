@@ -35,6 +35,12 @@ SCENES = [
     {'name': 'Tiles night, bow lounge Tue 20:30', 'day': 2, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'quiz night, bow lounge 20:30', 'day': 4, 'time': '20:30', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'breakfast rush, the mess 07:10', 'day': 2, 'time': '07:10', 'deck': 3, 'room': r'^Mess'},
+    # Short Fridays (section 18f; empty rooms until SHORT_FRIDAY is on): the address, filing out, the Friday dinner.
+    # 'cells': you stand on the room's own open tile nearest its middle (the scenes above pass a tile to nearestOpen, which
+    # takes world coordinates: backlog 18b, left for the performance engineer so their numbers stay comparable)
+    {'name': "Captain's address, auditorium Fri 16:10", 'day': 5, 'time': '16:10', 'deck': 7, 'room': r'^Auditorium$', 'cells': True},
+    {'name': 'after the address, rec lift lobby 16:52', 'day': 5, 'time': '16:52', 'deck': 7, 'room': r'^Lift lobby$', 'cells': True},
+    {'name': 'Friday dinner, the mess 17:20', 'day': 5, 'time': '17:20', 'deck': 3, 'room': r'^Mess', 'cells': True},
 ]
 
 SCENE_JS = r"""(sc => {
@@ -43,7 +49,10 @@ SCENE_JS = r"""(sc => {
   if (deckDef.num !== sc.deck) goToDeck(sc.deck);
   const re = new RegExp(sc.room, 'i'), k = Object.keys(ROOM_BOX).find(k => ROOMS[k] && re.test(ROOMS[k].name));
   if (!k) return { room: null };
-  const b = ROOM_BOX[k], at = nearestOpen(Math.floor((b.i0 + b.i1) / 2), Math.floor((b.j0 + b.j1) / 2), player);
+  const b = ROOM_BOX[k], mi = Math.floor((b.i0 + b.i1) / 2), mj = Math.floor((b.j0 + b.j1) / 2), taken = occupiedBy(player);
+  let at = null, bd = 1e9;                       // 'cells': the room's own open tile nearest its middle (a lobby's middle may be the lift)
+  if (sc.cells) { for (let i = b.i0; i <= b.i1; i++) for (let j = b.j0; j <= b.j1; j++) if (roomAt(i, j) === k && free(i, j) && !taken.has(i + ',' + j) && (i - mi) ** 2 + (j - mj) ** 2 < bd) { bd = (i - mi) ** 2 + (j - mj) ** 2; at = [i, j]; } }
+  else at = nearestOpen(mi, mj, player);
   player.obj.position.copy(cellPos(...at)); target.copy(player.obj.position).setY(.7);
   return { room: ROOMS[k].name };
 })"""
