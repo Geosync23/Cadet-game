@@ -376,3 +376,8 @@ Working (5): EV4, FR2, PR4, PR5, EV5. ER2 on call (re-checks the storm fixes).
 |---|---|---|---|
 | Events reviewer PR6 | session_01LVHLJHrAR5iGJFS7HK9E7i | `claude/review-6` | EV5's Line turns; then PR4's storm leftovers |
 Working: EV4, FR2 (handing over), PR4 (handing over), PR5, EV5, PR6 (6 for the overlap, back to 5 when PR4/FR2 go idle; FR3 waits until FR2 is idle).
+**~10:08 UTC:** FR2 handed over (~530k; plans/handover-fridays-builder-2.md on claude/fridays; turn 8 12def3a: Zeke/Halloran Friday lines, Friday breakfast lines, time-clock words, 15:20 heads-up toast). PR5 has turns 5-fix/6, 7, 8. PR4 handed over (plans/handover-reviewer-4.md 9546f2d); PR6 PASS S8 (EV2's storm part done; EV2 idle). EC1 541ae52: bigevents handles several events. Open for the user/writers: Day 19 address says a new junior arrives Sunday but the first rotation is Day 35 (writers); 15:20 heads-up is a toast (device engineer later); save.fri ~790 bytes.
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Fridays builder FR3 | session_01935gmiyLoy5fgvs3xQd7QC | `claude/fridays` | turn 9 (perf scenes, right rooms), PR5's fixes, turn 10 on the lead's go |
+Working (5): EV4, EV5, PR5, PR6, FR3. On call: ER2, EC1, PB, OP1.
