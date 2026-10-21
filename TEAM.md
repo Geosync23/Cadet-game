@@ -333,3 +333,4 @@ Working (5): EV1 (finishing F4 → handover), EV2, FR2, BM11, PR3. ER2 on call f
 |---|---|---|---|
 | Storm builder EV3 | session_01ReekSsFi1ToaTpSq926Drq | `claude/storm-update` | ion storm S1-S10 (plan decided), split with EV2; PR3 turns, ER2 before S10 |
 Working (5): EV2 (base F0b/F5/F8), EV3, FR2, BM11, PR3.
+**~04:12 UTC check-in (lead 442k):** handover draft written (plans/handover-lead22.md); lead hands over at ~600k by starting lead 23. Working (5): EV2 (F5), EV3 (storm S1), FR2 (Fridays turn-5 fix + turn 6), BM11 (0.64.7 + harness fix proof), PR3. Decisions so far logged in plans/overnight-decisions-lead22.md.
