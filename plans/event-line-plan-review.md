@@ -301,3 +301,7 @@ A2's text:
   The covering hand walks across Deck 2 to his post, and Tomas comes down to the plaza.
 
 Verdict stays **PASS**, with A2-1 and A2-2 as wording fixes for EP2. Neither changes the recommendation.
+
+### 9361008: the story decided
+The user chose A (01:30, via lead 22). The only changes since a64fb68 mark line-q9 as decided and A2, B and C as
+"not chosen". A2-1 and A2-2 no longer matter, because A2 is parked. **PASS stands at 9361008.**
