@@ -71,3 +71,20 @@ Chromium. I read `schedPeople`, `aboard`, `isWorkDay`, `planDay`, `eventsOn`, `e
 
 **Verdict: PASS WITH FIXES** (fixes 1-5). Story A and questions q1-q7 are safe to take overnight. q8 is safe once
 fix 1 adds the lantern job, or once q8 stops counting it.
+
+## Round 2 (91ab377): PASS
+- **1, the lantern job:** `stormLanterns` is built in S5, from Deck 5's Main storage to the mess's seats. It's held
+  for you if you promised Lukas, and q8 names it.
+- **2, Brennan's line:** "it's his galley tonight", plus a new guard rail against anything that hints at handing the
+  galley on.
+- **3, rank-neutral lines:** Lukas's lines read the save. The delayed-promotion question is put to EV1 and the lead,
+  with a sound proposal: `guardFree` holds the storm's onset-to-all-clear hours for career beats.
+- **4, the range stop: EP3 is right, and my fix was wrong.** `eventStopOf` matches a machine's `kind`, or the second
+  part of its id ("range"), never the whole id. So `{ deck: 3, machine: 'range' }` is correct and lands on
+  `3-range-1-panel`.
+- **5, `EV_DAY_DRESS`:** one shape, with rows of drop, add (same `k`) or changes, made at load from each event's
+  `dayDress` data. Both plans' rows are written out, and they match EP2's d01acd6.
+- **Nits:** both done. The supper's perf_check is at about 60 plus the lanterns, and A begins "at the servery".
+
+**Verdict on claude/event-plan-storm 91ab377: PASS.** All recommendations, q1-q8 and story A, are safe to take
+overnight.
