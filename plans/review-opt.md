@@ -185,3 +185,11 @@ Test-only: tools/affected.py, tools/affected_replay.py, tools/check_map.json (al
   9. L358: planted "on paper (40 s)": no source; --run is "about 40 min".
   10. L352 "only 3 of the 14": two more commits pick 23 of 24; say "well under all" for 3.
   11. DEV_NOTES' setup says only `pip install playwright`; the guide's `playwright numpy pillow` is right (cadet_test imports both). Fix DEV_NOTES.
+
+### PB2: backlog 18's fix (claude/patch-b2 38424f0, row 8bffab5): FAIL for now (a new day_check 13 failure); the code change itself is right
+Run on integration a4a5735 old vs a4a5735 + 38424f0's lines (applies unchanged).
+- Code read: `schedU` is a pure hash, so rolling it once earlier changes no other number; `si` is read nowhere else; with `stay` true the old branch is taken exactly as before; the only change is the intended one (a stayIn block that loses the roll can go to the rec deck again).
+- plan_days.py (every plan, Days 1-35, events off): only Days 11, 12, 13 change (30, 29, 21 people). Rec deck segments ending after 17:00: Day 11 65 -> 217, Day 12 0 -> 158, Day 13 200 -> 227 (ordinary days 254-313).
+- cadet_test: ALL IDENTICAL. check_fast on the new build: QUICK CHECK OK in 227 s.
+- day_check 12: old FAILED (backlog 18), new **OK** (rec deck mean 4.1, peak 11). day_check 11: new OK.
+- **day_check 13: old OK, new FAILED, "deck 3: kovac-zainab 09:31 stuck 15.7 ship minutes"; the same on a second run** (logs b18_day13_old.log / _new.log). Her plan is the same old and new (09:15 lift to Deck 3, the grab shelf 3-grab-1, 09:17 lift to Deck 5 for her 09:20 shift), and nobody's Deck 3 plan before 15:00 differs. What does differ is the crew's needs going into Day 13 (06:30 lowest social 38 -> 17; Day 12's evenings changed), so the live crowd on Deck 3 that morning behaves differently and she is held 15.7 min between the grab shelf and the lift. Probably a crowd/lift weakness this only exposes, but a check that passed now fails: find out why before merging (CLAUDE.md).
