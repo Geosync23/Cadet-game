@@ -33,7 +33,7 @@ import section as S                                  # tools/section.py: the sec
 
 # check -> (command, minutes alone on 4 cores; plans/opt-measure.md section 4, rounded up)
 CHECKS = {
-    'cadet': ('python3 cadet_test.py OLD.html {g}', 2), 'player': ('python3 player_check.py {g}', 37),
+    'cadet': ('python3 cadet_test.py OLD.html {g}', 2), 'player': ('python3 player_check.py {g}', 6),
     'intro': ('python3 intro_check.py {g}', 11), 'day1': ('python3 day_check.py {g} 1', 8),
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),

@@ -1,12 +1,23 @@
 #!/bin/bash
-# usage: cov_run.sh name... ; runs each check under coverage on 0.64.8
-export CADET_CHROME=/opt/pw-browsers/chromium CADET_WORK=/tmp/cadet-work
-G=/tmp/claude-0/-home-user-Cadet-game/1433b1df-649c-573b-b9ed-81a889f61fcc/scratchpad/b0648.html; cd /tmp/claude-0/-home-user-Cadet-game/1433b1df-649c-573b-b9ed-81a889f61fcc/scratchpad/snap
-for n in "$@"; do
+# The map run (tools/check_map.json), in a run that doesn't count: every check once under tools/check_cover.py, one
+# browser at a time, on a frozen copy so the branch can move meanwhile. About 2 h 15 on 4 cores (2026-10-21, 0.64.12).
+#   bash plans/opt-cover/cov_run.sh OUT_DIR [check ...]      (no checks named: all of them; a cover already in OUT_DIR is kept)
+# then: python3 tools/affected.py --merge tools/check_map.json COMMIT OUT_DIR/*.json   (COMMIT = the game the run used)
+set -u
+OUT=$(realpath -m "$1"); shift; mkdir -p "$OUT/log"
+ROOT=$(cd "$(dirname "$0")/../.." && pwd); SNAP=$OUT/snap
+[ -d "$SNAP" ] || { mkdir -p "$SNAP"; git -C "$ROOT" archive HEAD | tar x -C "$SNAP"; }
+G=$SNAP/starship-cadet.html
+export CADET_CHROME=${CADET_CHROME:-/opt/pw-browsers/chromium} CADET_WORK=${CADET_WORK:-/tmp/cadet-work}
+ALL="lines arc talk leave social machine cadet clothes career food deck disc puzzle device path tiles join bubble mech bigevents devmode events intro day1 interactions fridays player perf"
+cd "$SNAP"
+for n in ${@:-$ALL}; do
+  [ -s "$OUT/$n.json" ] && continue
   case $n in
     cadet) f=cadet_test.py; a="$G $G";;
     day1) f=day_check.py; a="$G 1";;
     *) f=${n}_check.py; a="$G";;
   esac
-  t=$SECONDS; python3 -u ../snap/tools/check_cover.py /tmp/claude-0/-home-user-Cadet-game/1433b1df-649c-573b-b9ed-81a889f61fcc/scratchpad/cov/$n.json $f $a > /tmp/claude-0/-home-user-Cadet-game/1433b1df-649c-573b-b9ed-81a889f61fcc/scratchpad/covlog/$n.txt 2>&1; echo "$n exit $? $((SECONDS-t)) s" >> /tmp/claude-0/-home-user-Cadet-game/1433b1df-649c-573b-b9ed-81a889f61fcc/scratchpad/covlog/_summary.txt
+  t=$SECONDS; timeout 5400 python3 -u tools/check_cover.py "$OUT/$n.json" $f $a > "$OUT/log/$n.txt" 2>&1
+  echo "$n exit $? $((SECONDS-t)) s $(date -u +%H:%M)" | tee -a "$OUT/log/_summary.txt"
 done
