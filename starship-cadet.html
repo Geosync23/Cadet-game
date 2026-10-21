@@ -51237,7 +51237,7 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
-const DM_LATER = { career: 'Your career by hand: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
+const DM_LATER = { events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
 var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
@@ -51330,6 +51330,7 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'clock') devmodeClock(body);
   else if (DM_UI.tab === 'trad') devmodeTrad(body);
   else if (DM_UI.tab === 'set') devmodeSet(body);
+  else if (DM_UI.tab === 'career') devmodeCareer(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
@@ -51905,6 +51906,110 @@ function devmodeSet(body) {
     devmodeHead(body, 'What\'s set: Day ' + st.set.day + (st.set.beat ? ', ' + ((DM_BEATS.find(x => x.id === st.set.beat) || {}).label || '') : '') + ' (approximate)');
     for (const l of devmodeWhatsSet(st.set.beat ? (DM_BEATS.find(x => x.id === st.set.beat) || { by: st.set.day }).by : st.set.day)) devmodeText(body, l);
   }
+}
+// ---- D7 (Stop 2): the Career tab: your career as it is, set by hand (the user's q8), and the promotion test's needs ----
+// Shows the rank, tier, Works reputation (the band, and the xp to the next), each training by name with its code,
+// the tools, missed shifts and the ship's view of your work. By hand, each a Dev action (undoable): xp − / +, to the
+// next band, the next training (the game's own worksTrained: its tool and toast), a tool, and the rank (approximate:
+// Officer gets the first promotion's beats done, Junior takes them away). The promotion test's needs have ticks: Day 9 or
+// later, Relied on, Making it safe, a teacher on shift, before 14:00; "Open the test now" sets the test for today and
+// calls the ladder's own ladderOpen (section 24's) when all but the day hold. "Next step" moves the clock to five
+// minutes before the promotion's next beat (the test job, the summons, the cake, the move, the ceremony).
+const DM_XP = 5;
+function devmodeW() { return SHIP.works || worksInit(Math.max(shipNow(), WORKS_START)); }   // the career record, made if it's not yet (as from Day 1 17:00)
+function devmodeBandNext(W) { const B = WORK_BANDS[W.tier] || WORK_BANDS[1], i = B.findIndex(b => b[0] > W.xp); return i < 0 ? null : B[i]; }
+function devmodeTestNeeds(W, d = SHIP.time.day, m = SHIP.time.min) {   // [[label, ok], ...] (pure)
+  const row = ladderRow('t2'), B = WORK_BANDS[W.tier] || WORK_BANDS[1];
+  return [['Day ' + row.day + ' or later', d >= row.day], [BAND_WORD.relied + ' (xp ' + B[B.length - 1][0] + ')', ladderNeeds({ rep: 'relied' }, W)],
+    [mechName('m6') + ' (m6) trained', W.tr.m6 !== undefined], ['Your workday, with ' + row.by.map(worksFirst).join(' or ') + ' on shift', !!ladderTeacher(row, d) && playerShiftOn(d)],
+    ['Before ' + hhmm(PROMO.until - 60), m < PROMO.until - 60]];
+}
+function devmodeTestOpen() {                             // the test today, through the ladder's own ladderOpen
+  devmodeDo('Career: open the test now', () => {
+    const W = devmodeW(), d = SHIP.time.day, row = ladderRow('t2');
+    W.test = { tier: 2, day: d, tries: W.test ? W.test.tries : 0, passed: false };
+    const ok = ladderOpen(row, d, shipNow());
+    return ok ? 'The test job is open: ' + (W.cur && W.cur.j ? 'held for you on the board, Calder with you.' : 'see the board.') : 'The ladder wouldn\'t open it now (no teacher on shift, or too late today).';
+  }, () => {
+    const W = SHIP.works; if (!W || W.tier !== 1) return 'Only as a junior: the test is for Tier 2.';
+    if (W.test && W.test.passed) return 'Already passed.';
+    if (W.cur) return 'A training is under way (' + mechName(W.cur.id) + '): finish it first.';
+    const n = devmodeTestNeeds(W); return n.slice(1).every(x => x[1]) ? null : 'Not all the needs hold (apart from the day): see the ticks.';
+  });
+}
+function devmodePromoSteps() {                           // the promotion's beats, in order: [{ label, at (absolute minutes), done }]
+  const W = SHIP.works; if (!W) return [];
+  const out = [], P = typeof promoPlan === 'function' ? promoPlan() : null, abs = (d, m) => (d - 1) * 1440 + m;
+  if (W.test) out.push({ label: 'Your test job', at: abs(W.test.day, PROMO.jobAt), done: !!W.test.passed });
+  if (P) {
+    out.push({ label: 'The summons', at: abs(P.summons.day, P.summons.at), done: promoDone('summons2') });
+    out.push({ label: 'Cake in the tea corner', at: abs(P.gather.day, PROMO.cake[0]), done: promoDone('cake2') });
+    out.push({ label: 'Your cabin', at: abs(P.move.day, P.move.at), done: promoDone('move2') });
+    out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
+  }
+  return out;
+}
+function devmodePromoNext() {
+  const s = devmodePromoSteps().find(x => !x.done && x.at - 5 > shipNow());
+  if (!s) return devmodeSay('No promotion beat ahead: the test isn\'t set yet, or it\'s all done.');
+  devmodeGo('to ' + s.label.toLowerCase(), () => s.at - 5);
+}
+function devmodeRank(rank) {                             // set by hand: approximate
+  devmodeDo('Career: rank ' + RANK_TITLE[rank], () => {
+    const W = devmodeW(), d = SHIP.time.day;
+    if (rank === 'officer') Object.assign(W, { tier: 2, rank, xp: 0, cur: null, test: { tier: 2, day: Math.min(d, (W.test && W.test.day) || d), tries: Math.max(1, (W.test && W.test.tries) || 0), passed: true }, home: PROMO.home,
+      done: [...new Set(W.done.concat(['summons2', 'cake2', 'move2', 'ceremony2']))], ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned').concat([['officer', d], ['commissioned', d]]) });
+    else Object.assign(W, { tier: 1, rank, cur: null, test: null, home: 'bunk', done: W.done.filter(x => !/2$/.test(x)), ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned') });
+    if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    promoPip();
+    return 'Rank: ' + RANK_TITLE[rank] + ', Tier ' + W.tier + ' (set by hand: approximate). Your bed is ' + (rank === 'officer' ? 'in cabin 4-23' : 'in Bunk 1') + ' now.';
+  });
+}
+function devmodeXp(add, label) {
+  devmodeDo('Career: ' + label, () => { const W = devmodeW(); W.xp = Math.max(0, Math.min(9999, typeof add === 'function' ? add(W) : W.xp + add)); return 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + ').'; });
+}
+function devmodeNextTraining() {
+  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  if (!row) return devmodeSay(W ? 'Every training open to your tier is done.' : 'No career record yet.');
+  devmodeDo('Career: train ' + mechName(row.id), () => {
+    const d = SHIP.time.day; if (W.cur && W.cur.id === row.id) W.cur = null;
+    if (!worksOpened(W).has(row.id)) (W.op[d] = W.op[d] || []).push(row.id);
+    W.use[row.id] = Math.max(1, W.use[row.id] || 0); worksTrained(row.id);
+    return 'Trained: ' + mechName(row.id) + ' (' + row.id + ')' + (row.tool ? ', with ' + toolName(row.tool) : '') + '.';
+  });
+}
+function devmodeCareer(body) {
+  const W = SHIP.works, d = SHIP.time.day;
+  if (!W) {
+    devmodeText(body, 'No career record yet: it starts once Day 1\'s shift ends (17:00). Set career (the next tab) makes one, or start it now.');
+    devmodeRow(body, [['Start it now', () => devmodeDo('Career: start', () => { devmodeW(); return 'A career record, Tier 1, nothing trained.'; }), { off: d < 1 }]]);
+    return;
+  }
+  const nb = devmodeBandNext(W), C = SHIP.career;
+  devmodeHead(body, RANK_TITLE[W.rank] + ', Tier ' + W.tier);
+  devmodeText(body, 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + (nb ? '; ' + BAND_WORD[nb[1]] + ' at ' + nb[0] : '') + '). Missed shifts in a row: ' + (C ? C.ms : 0)
+    + (C && C.st ? ', the Chief\'s talk step ' + C.st : '') + '. The ship on your work: ' + Math.round(careerWork()) + ' of 100.'
+    + (devmodeState().set ? ' Career set to Day ' + devmodeState().set.day + ': approximate.' : ''));
+  devmodeRow(body, [['− ' + DM_XP + ' xp', () => devmodeXp(-DM_XP, 'xp −' + DM_XP)], [nb ? 'To ' + BAND_WORD[nb[1]] : 'Top band', () => devmodeXp(w => (devmodeBandNext(w) || [w.xp])[0], 'next band'), { off: !nb }], ['+ ' + DM_XP + ' xp', () => devmodeXp(DM_XP, 'xp +' + DM_XP)]]);
+  const next = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  devmodeRow(body, [[next ? 'Train: ' + mechName(next.id) : 'All trained', devmodeNextTraining, { off: !next }], ['Rank: Junior', () => devmodeRank('junior'), { off: W.rank === 'junior', ask: W.rank === 'junior' }], ['Rank: Officer', () => devmodeRank('officer'), { off: W.rank === 'officer', ask: W.rank === 'officer' }]]);
+  devmodeText(body, 'Senior Officer and Engine Specialist aren\'t built yet. A rank set by hand is approximate.');
+  if (W.tier === 1) {
+    devmodeHead(body, 'The promotion test');
+    const needs = devmodeTestNeeds(W);
+    devmodeText(body, needs.map(([l, ok]) => (ok ? '✓ ' : '✗ ') + l).join('   ') + (W.test ? '. Set for Day ' + W.test.day + (W.test.passed ? ', passed' : '') + '.' : '.'));
+    devmodeRow(body, [['Open the test now', devmodeTestOpen, { off: !!(W.test && W.test.passed) || !!W.cur || !needs.slice(1).every(x => x[1]), ask: needs.every(x => x[1]) || needs.slice(1).every(x => x[1]) }], ['Next step ›', devmodePromoNext]]);
+  } else if (devmodePromoSteps().some(x => !x.done)) devmodeRow(body, [['Next step ›', devmodePromoNext]]);
+  const steps = devmodePromoSteps();
+  if (steps.length) devmodeText(body, 'The promotion: ' + steps.map(s => (s.done ? '✓ ' : '') + s.label + ' (Day ' + (Math.floor(s.at / 1440) + 1) + ' ' + hhmm(s.at % 1440) + ')').join(', ') + '.');
+  devmodeHead(body, 'Trainings');
+  const opened = worksOpened(W);
+  devmodeText(body, CAREER_LADDER.filter(r => r.day <= Math.max(DM_MAXDAY, d)).map(r => mechName(r.id) + ' (' + r.id + '): ' + (W.tr[r.id] !== undefined ? 'trained Day ' + W.tr[r.id] : W.cur && W.cur.id === r.id ? 'under way' : opened.has(r.id) ? 'open' : 'from Day ' + r.day)).join('; ') + '.');
+  devmodeHead(body, 'Tools');
+  const have = Object.keys(W.tools);
+  devmodeText(body, have.length ? have.map(k => toolName(k) + ' (since Day ' + W.tools[k][0] + ', wear ' + Math.round(W.tools[k][1] * 100) + '%)').join(', ') + '.' : 'None yet.');
+  const give = Object.keys(WORK_TOOLS).filter(k => !W.tools[k]);
+  for (let i = 0; i < give.length; i += 3) devmodeRow(body, give.slice(i, i + 3).map(k => ['Give ' + toolName(k), () => devmodeDo('Career: give ' + toolName(k), () => (toolGive(k), 'You have ' + toolName(k) + ' now.'))]));
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----

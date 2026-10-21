@@ -15,6 +15,8 @@
 #          inside a meeting; Mark here then Back to mark reloads into the same save, byte for byte
 #   slow:  the reload after Undo and Back to mark held back 6 s (a phone on a weak link; DR1's probe): the kept save stays
 #          put while the old page waits, and the new page has it (the Undo happened, its record used up)
+#   career: the Career tab (Stop 2): xp, the next band, the next training, a tool, the rank by hand, each undoable; the
+#          promotion test opened on Day 8 with only the day missing (ladderOpen), passed, and Next step to the ceremony
 #   set:   Set career (Stop 2): the table's days are CAREER_LADDER's; Days 2, 10, 12, 26 from new Dev games land at 06:00
 #          with the table's career, in your bed's room, no miss, no first-week meeting notes, no sick day; Day 11 opens
 #          no trained row again; two Set careers to Day 12 give the same save; starting friendships; the Day 9 test
@@ -486,6 +488,59 @@ def part_set(b):
     pg.close(); ctx.close()
     print(f'  set: table = ladder; Days 2, 10, 12, 26: ' + '; '.join(f'{n} {g["rank"]} T{g["tier"]} xp {g["xp"]}, {len(g["tr"].split(",")) if g["tr"] else 0} trained, {g["room"]}' for n, g in got.items()) + f'; no miss or notes Mail; Day 11 opens nothing trained; two Day 12s identical; friends (Zeke {fr["zeke"]}, {fr["known"]} known); test and promotion beats; the panel\'s progress; Undo; the tab')
 
+
+def part_career(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    run = lambda src: pg.ev(f"devmodeRun('Career', () => {{ {src} }})")
+    # by hand, from a fresh Day 1 evening (the record is made), each an undoable Dev action
+    pg.ev("devmodeRun('Set', () => devmodeSetCareerTo(1)); devmodeRun('Clock', () => devmodeSkipTo(17 * 60 + 30))")
+    W0 = pg.ev('JSON.stringify(SHIP.works)')
+    pg.ev("devmodeRun('xp', () => { const W = devmodeW(); W.xp += DM_XP; return null; })")
+    check(pg.ev('SHIP.works.xp') == 5, 'career: xp + 5')
+    pg.ev("devmodeRun('band', () => { const W = devmodeW(); W.xp = devmodeBandNext(W)[0]; return null; })")
+    check(pg.ev('worksBand()') == 'steady' and pg.ev('SHIP.works.xp') == 8, f'career: to the next band: {pg.ev("worksBand()")}')
+    pg.ev("(() => { const W = SHIP.works, row = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2'); devmodeRun('train', () => { if (!worksOpened(W).has(row.id)) (W.op[SHIP.time.day] = W.op[SHIP.time.day] || []).push(row.id); W.use[row.id] = 1; worksTrained(row.id); return null; }); })()")
+    check(pg.ev("SHIP.works.tr.m1 === 1 && !!SHIP.works.tools.clipboard && worksIsOpen('m1')"), 'career: the next training (Rounds, with the clipboard)')
+    pg.ev("devmodeRun('tool', () => (toolGive('tester'), null))"); check(pg.ev('!!SHIP.works.tools.tester'), 'career: give a tool')
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev('!SHIP.works.tools.tester && SHIP.works.tr.m1 === 1'), 'career: Undo of the tool')
+    # the rank by hand: Officer (the pip, cabin 4-23's bed), then Junior again
+    pg.ev("DM_HOLD = false; devmodeRank('officer')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, pip: PLAYER_SPEC.rank || 0, bed: playerBed(), done: SHIP.works.done })")
+    check(R['rank'] == 'officer' and R['tier'] == 2 and R['pip'] == 1 and R['bed'] == '4-23' and 'ceremony2' in R['done'], f'career: rank Officer by hand: {R}')
+    pg.ev("devmodeRank('junior')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, pip: PLAYER_SPEC.rank || 0, bed: playerBed() })")
+    check(R['rank'] == 'junior' and R['tier'] == 1 and R['pip'] == 0 and R['bed'] != '4-23', f'career: rank Junior by hand: {R}')
+    # the promotion opened from Day 8 (only the day missing) runs to the ceremony
+    pg.ev("devmodeRun('Set', () => devmodeSetCareerTo(8))"); pg.step(10)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(7 * 1440 + 9 * 60 + 30))")
+    N = pg.ev("devmodeTestNeeds(SHIP.works).map(x => x[1])")
+    check(N == [False, True, True, True, True], f'career: Day 8 09:30 test needs (only the day missing): {N}')
+    pg.ev("DM_HOLD = false; devmodeTestOpen()"); pg.page.wait_for_timeout(700); pg.step(5)
+    T = pg.ev("({ msg: DM_UI.msg, cur: SHIP.works.cur && SHIP.works.cur.id, j: SHIP.works.cur && SHIP.works.cur.j, test: SHIP.works.test })")
+    check(T['cur'] == 't2' and T['j'] and T['test']['day'] == 8, f'career: Open the test now: {T}')
+    pg.ev("devmodeRun('Turn in', () => { worksDone('t2', shipNow()); return null; })")
+    check(pg.ev('SHIP.works.test.passed'), 'career: the test passed when turned in')
+    seen = []
+    for _ in range(7):
+        pg.ev("DM_HOLD = false; devmodePromoNext()"); pg.page.wait_for_timeout(700); pg.step(10)
+        seen.append(pg.ev('clockText()'))
+        if pg.ev("promoDone('ceremony2')"): break
+        pg.ev("devmodeRun('Clock', () => devmodeSkipTo(shipNow() + 40))"); pg.step(5)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(devmodeNext(20 * 60)))")
+    E = pg.ev("({ rank: SHIP.works.rank, done: SHIP.works.done, home: SHIP.works.home, pip: PLAYER_SPEC.rank || 0 })")
+    check(E['rank'] == 'officer' and all(k in E['done'] for k in ('summons2', 'move2', 'ceremony2')) and E['home'] == '4-23' and E['pip'] == 1, f'career: the promotion didn\'t run to the ceremony: {E} (steps at {seen})')
+    # the tab draws at phone size
+    pg.ev('devmodeOpen(true); DM_UI.tab = "career"; DM_UI.msg = ""; devmodeDraw()')
+    txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
+    check('Works Officer, Tier 2' in txt and 'Trainings' in txt and '(m6)' in txt and 'Tools' in txt, f'career: the tab: {txt[:160]}')
+    small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
+    check(not small, f'career: buttons under 44px: {small}')
+    check(not pg.errors, f'career: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  career: xp, next band, next training (Rounds + clipboard), a tool, Undo; rank Officer and Junior by hand; Day 8 test opened (only the day missing), passed, Next step through {seen} to the ceremony; the tab')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
@@ -493,7 +548,7 @@ with sync_playwright() as pw:
         if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
