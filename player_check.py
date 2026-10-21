@@ -254,7 +254,8 @@ with sync_playwright() as pw:
     check(rs == [False, True, 0] and json.loads(a2)[1] != json.loads(a1)[1], f'resumed: the overlay goes, time runs again, the pacing stamps moved on by the pause: {rs} {a2}')
     g.ev("player.stop(); actEnd(true)"); g.step(30)
     # the frozen clock (0.28.50): a simTimeout (the tip card's, the heads-up's) waits out a pause; simNow doesn't jump
-    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
+    # (its 80 frames are stepped inside one ev: __skip keeps them undrawn, as Game.step does; the next step draws. TS2, opt item 2)
+    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); window.__skip = true; pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); window.__skip = false; return [held, out.length, Math.round(s1 - s0)]; })()")
     print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
     check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
     # the pause card and the keyboard (0.28.54, reviewer 1f): Resume is focused, Tab stays on it, Enter resumes, Escape resumes; dust stands still
@@ -1331,7 +1332,10 @@ with sync_playwright() as pw:
     url = 'file://' + str(tmp)
     def load(q=''):
         page.goto(url + q); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+        page.evaluate('s => window.__sc(s)', SKIP_SWITCH)   # draw only the last frame of each page_step, as Game.step does (TS2)
         return lambda s: page.evaluate('s => window.__sc(s)', s)
+    def page_step(n):
+        page.evaluate(f'window.__skip = true; window.__step({n - 1}, 1000 / 30); window.__skip = false; window.__step(1, 1000 / 30)')
     ev = load()
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, build: '0.25.2', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
@@ -1387,8 +1391,8 @@ with sync_playwright() as pw:
       out.push([!!pt, pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null, bagLockerTap(new THREE.Vector3(999, 0, 999))]);
       return JSON.stringify(out);
     })()"""))
-    for _ in range(60):                                  # frames are stepped by hand here (window.__step)
-        page.evaluate('window.__step(30, 1000 / 30)')
+    for _ in range(60):                                  # frames are stepped by hand here (window.__step), the last of each 30 drawn
+        page_step(30)
         if ev('!bagHeld()'): break
     walked = ev('!bagHeld()')
     kb2 = json.loads(ev("""(() => {
@@ -1411,7 +1415,7 @@ with sync_playwright() as pw:
       const w = cellPos(28, 2), c = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...c)); player.path.length = 0;
       const mine = typeof introSeat === 'function' ? introSeat('you') : null, h = mine && heldBy(mine);   // crew already heading for your seat?
       return JSON.stringify([real, c, h ? h.p.id : null]); })()"""))
-    for _ in range(10): page.evaluate('window.__step(15, 1000 / 30)')
+    for _ in range(10): page_step(15)
     dn = json.loads(ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.placeId, DINNER_SAT, typeof introSeat === 'function' ? introSeat('you') : null])"))
     print('  the arrival dinner (0.28.28):', dn0, dn)
     check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True and (dn[4] is None or dn[2] == dn[4] or dn0[2]), f'at your table for the dinner you sit down (in your own seat when section 21 names one and nobody is heading for it): {dn}')
