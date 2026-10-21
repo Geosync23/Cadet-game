@@ -9596,7 +9596,9 @@ function guestTrim(p, d, segs, spot) {
     const last = out[out.length - 1], bay = (schedData().shared.get('5|event') || []).filter(pl => /shuttle-bay-crowd/.test(pl.id));
     const placeId = spot || (last && last.deck === 5 && /shuttle-bay/.test(last.placeId || '') ? last.placeId : bay.length ? bay[strSeed(p.id) % bay.length].id : null);   // spot: held for them by shipDay (0.26.38)
     if (last && last.deck !== 5 && last.to - last.from > SCHED_COMMUTE) { last.to = w0 - SCHED_COMMUTE; out.push({ from: w0 - SCHED_COMMUTE, to: w0, act: 'commute', deck: 5, type: 'lift', placeId: null, fromDeck: last.deck }); }
-    out.push({ from: w0, to: cut, act: 'off', deck: 5, type: null, placeId, tag: 'leave' }, away(cut, B + 1440));
+    const kb = typeof rotTernBoard === 'function' ? rotTernBoard(p, d) : -1;   // ROT_TERN: up the Tern's ramp into its aisle, one every 3 minutes, the last at 15:00
+    if (kb >= 0) out.push({ from: w0, to: kb - 3, act: 'off', deck: 5, type: null, placeId, tag: 'leave' }, { from: kb - 3, to: kb, act: 'off', deck: 5, type: 'event', placeId: ROT_TERN_AISLE, tag: 'board' }, away(kb, B + 1440));
+    else out.push({ from: w0, to: cut, act: 'off', deck: 5, type: null, placeId, tag: 'leave' }, away(cut, B + 1440));
   }
   return out;
 }
@@ -10908,7 +10910,8 @@ function stallCapsTick() {
 // greeter (rotTernGreeter: Zeke for a Works arrival, else the most senior of their department aboard and off shift
 // then, else the most senior aboard) waits at the ramp's foot 17:28-17:55 (rotTernGreet, a gathering; section 18's
 // "Off the Tern" brings the crowd, the Schedule and Mail the evening before). rotTernTick (section 10, four times a
-// second) shuts the ramp as the Tern comes in (from 17:36, on Deck 5, once nobody's on it) and at 17:40 Dev Raman says a
+// second) shuts the ramp behind the day's leavers (from 15:00) or as the Tern comes in (from 17:36), on Deck 5, once
+// nobody's on it, and at 17:40 Dev Raman says a
 // word and it opens. Pure: the roster's aboard days and the day's rota only. Off: arrivals come out of the lift, as before.
 const ROT_TERN_END = ROTA_ON + 15, ROT_TERN_MAX = 3, ROT_TERN_AISLE = '5-tern-aisle-1', ROT_TERN_FOOT = '5-tern-ramp-foot';
 function rotTernArrivals(d) {                            // the crew the Tern brings on day d, in id order
@@ -10917,6 +10920,15 @@ function rotTernArrivals(d) {                            // the crew the Tern br
   return c.get(d);
 }
 function rotTernIndex(p, d) { const k = rotTernArrivals(d).indexOf(p); return k < ROT_TERN_MAX ? k : -1; }
+// leavers (the user, 2026-10-21: "leavers board the Tern up its ramp, the same way arrivals come down"): the crew leaving
+// on day d (in id order, up to ROT_TERN_MAX) walk from their crowd spot up the ramp into the aisle, one every 3 minutes,
+// the last gone at 15:00 (ROTA_OFF). rotTernBoard(p, d) -> the absolute minute they're gone (the aisle the 3 before), or -1
+function rotTernLeavers(d) {
+  const c = rotTernLeavers.c || (rotTernLeavers.c = new Map());
+  if (!c.has(d)) c.set(d, ROT_TERN ? schedPeople().filter(p => !p.guest && !p.player && crewLeaving(p) === d).sort((a, b) => a.id < b.id ? -1 : 1).slice(0, ROT_TERN_MAX) : []);
+  return c.get(d);
+}
+function rotTernBoard(p, d) { const L = rotTernLeavers(d), k = L.indexOf(p); return k < 0 ? -1 : (d - 1) * 1440 + ROTA_OFF - 3 * (L.length - 1 - k); }
 function rotTernGreeter(d) {
   const c = rotTernGreeter.c || (rotTernGreeter.c = new Map());
   if (c.has(d)) return c.get(d);
@@ -10949,8 +10961,12 @@ const ROT_TERN_UI = { shut: -1, said: -1 };              // the day the ramp was
 function rotTernTick(now, N) {
   if (!ROT_TERN || N !== 5 || typeof ternRamp !== 'function') return;
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  if (!rotTernArrivals(d).length || m < ROTA_ON - 4 || m >= ROT_TERN_END) return;
-  if (m < ROTA_ON) { if (ROT_TERN_UI.shut !== d && ternRampOpen() > 0 && ternClear() && ternRamp(false, 3)) ROT_TERN_UI.shut = d; return; }
+  const lv = rotTernLeavers(d).length > 0, arr = rotTernArrivals(d).length > 0;
+  if (m >= (lv ? ROTA_OFF : ROTA_ON - 4) && m < ROTA_ON) {   // the Tern away: the ramp shut behind the leavers (from 15:00) or as it comes in (17:36)
+    if (TERN.target > 0 && ternClear() && !(typeof ternInside === 'function' && ternInside()) && ternRamp(false, 3)) ROT_TERN_UI.shut = d;   // never with you inside
+    return;
+  }
+  if (!arr || m < ROTA_ON || m >= ROT_TERN_END) return;
   if (ROT_TERN_UI.said === d) return;
   ROT_TERN_UI.said = d;
   if (ROT_TERN_UI.shut !== d && ternRampOpen() >= 1) return;   // you came down after it landed: the ramp's already open
@@ -50144,7 +50160,8 @@ class CrewAgent {
       if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this)); return true;
     }
     let goalId;
-    if (w.deck !== N) goalId = '@lift';
+    if (w.deck !== N && w.act === 'away' && this.goalId && /^5-tern-/.test(this.goalId)) { if (this.settled) return false; goalId = this.goalId; }   // boarding the Tern (section 14's ROT_TERN): into its aisle, then gone
+    else if (w.deck !== N) goalId = '@lift';
     else if (w.act === 'commute') { const nx = whereIs(this.p, w.until); goalId = nx.deck === N ? nx.placeId || null : '@lift'; }
     else goalId = w.placeId || (w.tag === 'showerq' ? showerQSpot(this, w) : null);   // the shower queue with no place: inside the washroom door
     if (goalId !== '@lift' && QUEUE_SPOT.get(this.p.id)) goalId = QUEUE_SPOT.get(this.p.id);   // past the line's last spot: the old way (inside the washroom door, or where they are)   // in a line at the booths or the showers, in turn (queueTick, 0.71.4)
