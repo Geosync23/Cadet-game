@@ -43,7 +43,8 @@ if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2
     (WORK / 'test').mkdir(parents=True, exist_ok=True)
     OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
 CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above
-MESS_SEATS = 44                 # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
+MESS_SEATS = 44                # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
+LINE_SUPPER_MIN = 40           # the Line supper: at least about 40 should come (ER3's review)
 
 ok = True
 SINK = None                    # the self-test collects the FAILs here instead of printing them
@@ -359,14 +360,16 @@ LINE = r"""(() => {
     for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && front.has(s.placeId) && s.from < ab(d, gTo) && ab(d, gFrom) < s.to) { out.front.inFront.push(p.id); if (!first.has(p.id)) out.front.notFirst.push(p.id); }
     out.tomas = { post: at('tomas', 600), lap: at('tomas', 1240) };
     out.lapWith = ['torres-zeke', 'pell'].map(id => [id, at(id, 1240)]);
+    out.watch = ['tomas', 'ueda-vera'].map(id => { const l = []; for (let m = 870; m <= 915; m += 5) l.push([hhmm(m), at(id, m)]); return [id, l]; });   // 14:30-15:15: the crossing's afternoon
     const sup = eventsOn(d).find(e => e.id === 'sunday-table'), people = schedPeople();
     if (sup) {
       const want = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table')).length, B = ab(d, 0);
-      const segs = people.flatMap(p => planDay(p, d).filter(s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-'))));
+      const isSup = s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-')), segs = people.flatMap(p => planDay(p, d).filter(isSup));
+      const came = people.filter(p => planDay(p, d).some(isSup)).length;
       let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
       const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
       const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
-      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap, seats, crowd, seated: !!sup.ev.seated };
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated };
     }
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
@@ -394,10 +397,17 @@ def check_line(g, tag):
     else:
         if sp['want'] > CROWD: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")
         if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
-        if not sp['seated']: waiting(f"{tag}: the Line supper seated (the user's call; EV7 marks it seated): today {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
+        say(f"  the Line supper {sp['at']}: {sp['want']} mean to go, {sp['came']} came, at most {sp['peak']} at once, {sp['seats']} seats")
+        if sp['came'] < LINE_SUPPER_MIN: fail(f"{tag}: the Line supper: only {sp['came']} came (want {sp['want']}), fewer than {LINE_SUPPER_MIN}: the ship's supper of the year is empty")
+        if not sp['seated']: fail(f"{tag}: the Line supper isn't seated (the user's call: no standing at meals): {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
         else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
             if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
             if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
+    # the watch keeps the ship through the crossing's afternoon: Tomas and Ueda at their posts every 5 minutes from 14:30
+    # to 15:15 (a short toilet or hand-wash on Deck 2 is fine), never at an event
+    for i, l in L['watch']:
+        off = [f"{m} {a['place'] if a else None}/{a['tag'] if a else None}" for m, a in l if not a or str(a['tag'] or '').startswith('ev-') or not (str(a['place'] or '').startswith('2-watch-') or str(a['place'] or '').startswith('2-wc'))]
+        if off: fail(f"{tag}: {i} is off watch in the crossing's afternoon (14:30-15:15): {off}")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -579,6 +589,13 @@ with sync_playwright() as pw:
     if set(ks) & set(trk): fail(f'a ship-wide gathering shares a hash key with a tradition: {sorted(set(ks) & set(trk))}')
     check_hold(a, 'off', False)
     if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
+    if not a['sw']['EVENTS_ON'] and 'EV_LINE_ON' in SRC:   # the Line off: no Line in the menu, no ceremony, no venue
+        lo = g.ev(r"""(() => { const S = schedData(), d = (EV_CALENDAR.find(x => x.id === 'crossingLine') || { day: 6 }).day + 1;
+          return { d, menu: /Line/.test(JSON.stringify(galleyMenu(d))), cer: eventsOn(d).some(e => e.id === 'lineCeremony'),
+            keys: [...S.shared.keys()].filter(k => /bow-lounge-line/.test(k)), places: [...S.byId.keys()].filter(k => /bow-lounge-line/.test(k)).length }; })()""")
+        if lo['menu']: fail(f"off: the galley's menu for Day {lo['d']} mentions the Line")
+        if lo['cer']: fail(f"off: the Line's ceremony (lineCeremony) is on Day {lo['d']}")
+        if lo['keys'] or lo['places']: fail(f"off: the Line's venue ('bow-lounge-line') is there: {lo['keys'][:4]}, {lo['places']} places")
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
     if not a['sw']['EVENTS_ON']: check_callin(pw, OFF_BUILD, 'off', False)
