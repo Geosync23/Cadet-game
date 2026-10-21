@@ -8,7 +8,7 @@ ST = r"""(() => { const ag = id => { const a = DECK_CREW.find(a => a.p.id === id
   return { t: hhmm(SHIP.time.min), deck: deckDef.num, ramp: +ternRampOpen().toFixed(2), basil: ag('bramwell-basil'), basilPlan: w('bramwell-basil'), zeke: ag('torres-zeke'), zekePlan: w('torres-zeke'),
     toast: (document.querySelector('#toast') || {}).textContent || '', going: schedPeople().filter(p => { const s = whereIs(p, shipNow()); return s && s.tag && s.tag.startsWith('ev-off-the-tern'); }).length }; })()"""
 def minute(pg, n=1):
-    for _ in range(n): pg.step(1000, 100)          # 100 s real a ship minute at SHIP_RATE 0.6: 1000 frames of 0.1 s
+    for _ in range(n): pg.step(50, 1000 / 30)      # a ship minute is 1/0.6 = 1.67 s real (SHIP_RATE): 50 frames at 30 a second
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     for w, h, reload_at in ((390, 844, None), (360, 780, '17:38')):
