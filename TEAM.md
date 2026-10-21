@@ -381,3 +381,4 @@ Working: EV4, FR2 (handing over), PR4 (handing over), PR5, EV5, PR6 (6 for the o
 |---|---|---|---|
 | Fridays builder FR3 | session_01935gmiyLoy5fgvs3xQd7QC | `claude/fridays` | turn 9 (perf scenes, right rooms), PR5's fixes, turn 10 on the lead's go |
 Working (5): EV4, EV5, PR5, PR6, FR3. On call: ER2, EC1, PB, OP1.
+**~10:12 UTC:** EV4 5f3fc3f: ER2's storm fixes 1/3/4 (walking probe meets Lukas at the servery 17:10; reload mid-scene offers it again; bigevents OK, supper 59) → ER2 + PR6. EV4 now on S2, merging claude/fridays into storm-update (lead's 09:24 call; replaces lead 22's "S2 waits for integration").
