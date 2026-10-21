@@ -267,3 +267,22 @@ This covers EV1/EV2's events-base and storm/Line turns, FR1's Fridays turns and 
   - f5: the running event ignored;
   - f6: evFrom reset on reload.
 - **Design point sent to the lead:** an evFrom-0 save loaded on Day 20 runs the missed storm in catch-up at load.
+
+## FR1 turn 5 (C1: the address as a tradition, fridays_check): claude/fridays 78112ef. PASS WITH FIXES (to the next Fridays builder)
+
+**Checks:**
+- cadet_test off: ALL IDENTICAL. check_fast OK in 203 s.
+- fridays_check, events_check (on and off) and day_check 5 on are all OK.
+- join_check fails only #19.
+- The gate is the const at load. ionStorm.keep has the address.
+- Draw calls in the full room: 140-172 at 390×844. Shot `fr5_aud_1635.png`.
+
+**Fix (before turn 6):** the crew arrive 12-36 minutes late in real play (`fr5_fill.py`, frames from 15:45).
+- Everyone sets off at 16:00.
+- Marrow is at the lectern at 16:12, Vance at 16:27.
+- Seated: 0 at 16:12, 18 at 16:21, 30 at 16:27, 49 at 16:36.
+- Remedy: plan the trip ahead (patch #9's walk lead), or start the crew's segment around 15:40. Add a live part to fridays_check.
+
+**Notes:**
+- 49-51 seated against the plan's 60-70.
+- Day 12's lectern is empty until EV2's storm update exempts Marrow and Vance.
