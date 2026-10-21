@@ -24,6 +24,8 @@ INIT = """
 })();
 """
 HOOK = "window.__sc = src => eval(src);\n"
+# draw only the last frame of each step (installed once per page; Game.step puts it back after a reload)
+SKIP_SWITCH = "(() => { const rr = renderer.render.bind(renderer); window.__skip = false; renderer.render = (s, c) => { if (!window.__skip) rr(s, c); }; })()"
 
 def instrument(html):
     # expose the game's scope to tests: direct eval inside the IIFE, added just before the closing of it
@@ -58,10 +60,13 @@ class Game:
         if self.page.evaluate('window.__sc === undefined'):
             raise RuntimeError('game failed to start: ' + ' | '.join(self.errors[:6]))
         # headless rendering is slow: simulate every frame, but only draw the last one of each step
-        self.ev("(() => { const rr = renderer.render.bind(renderer); window.__skip = false; renderer.render = (s, c) => { if (!window.__skip) rr(s, c); }; })()")
+        self.ev(SKIP_SWITCH)
     def ev(self, src):
         return self.page.evaluate('s => window.__sc(s)', src)
     def step(self, n, dt=1000/30):
+        # a check that reloads the page (page.goto / page.reload) gets a new page without the switch: put it back
+        # (TS1's find, plans/handover-test-speed.md: after a reload every simulated frame was drawn, ~1 s a frame)
+        self.page.evaluate('s => { if (window.__skip === undefined && window.__sc) window.__sc(s); }', SKIP_SWITCH)
         if n > 1: self.page.evaluate(f'window.__skip = true; window.__step({n - 1}, {dt}); window.__skip = false')
         self.page.evaluate(f'window.__step(1, {dt})')
     def shot(self, path):

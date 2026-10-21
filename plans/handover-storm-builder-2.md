@@ -41,7 +41,7 @@ Shots: plans/storm-shots/ (`git add -f`: *.png is in .gitignore).
 - **S9's 'old placeholder code':** skipped; lead 23 makes it an open question for the user.
 - **Deck 4 '454':** not reproducible (common room at most 323 on; perf_check's row stands in Cabin 4-05, 433-436).
 - **Backlog 18b** (perf_check's scenes use tile numbers as world x,z in nearestOpen: they may measure the wrong room) and
-  **18c** (join_check first-light FAIL, off too): for their owners.
+  **#19** (join_check first-light FAIL, off too: FLC_ON): for their owners.
 - **S2** waits for claude/fridays to reach claude/integration (never merge claude/fridays). FR2: the Day 12 address's
   goers leave up to 30 minutes early, so the doubleShift exception needs Marrow off from 15:30 and Vance from 15:45,
   through 16:50 (not [960, 1010]). Agree the exact minutes with FR2. EV3's S2 design is in its note.

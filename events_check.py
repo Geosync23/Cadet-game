@@ -57,7 +57,7 @@ PLANS = r"""(days => {
       if (!s.tag || !/^ev-/.test(s.tag) || (typeof eventMeetTag === 'function' && eventMeetTag(s.tag))) continue;   // a ship-wide event's meeting (F0b), not a tradition
       const id = tagId(s.tag), e = on.find(x => x.id === id), B = (d - 1) * 1440;
       if (!e) { out.bad.push(d + ' ' + p.id + ' at ' + id + ', which is not on'); continue; }
-      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41)
+      if (s.from < B + e.from - Math.max(e.ev.early || 0, p.id === e.ev.host ? 5 : 0, e.ev.meal && typeof TRAD_LINE !== 'undefined' ? TRAD_LINE[1] : 0, e.ev.lead ? 35 : 0) ||   // the sim plans a host 5 minutes early; a meal tradition's diners sit as the line serves them, up to TRAD_LINE[1] early (sim 0.26.41); the Captain's address seats them up to 30 minutes early (18f's friLead), its host 5 more
          s.to > B + e.to + LINGER) out.bad.push(d + ' ' + p.id + ' at ' + id + ' ' + hhmm(s.from - B) + '-' + hhmm(s.to - B) + ' outside ' + hhmm(e.from) + '-' + hhmm(e.to));
       const pools = eventOpts(e.ev, p).map(([n, k]) => S.shared.get(n + '|' + k) || []).flat().map(pl => pl.id);
       if (!pools.includes(s.placeId)) out.bad.push(d + ' ' + p.id + ' at ' + id + ' in ' + s.placeId + ', not one of its places');
@@ -407,6 +407,7 @@ with sync_playwright() as pw:
         if (!schedPeople().some(p => p.id === v.host) || !(v.odds > 0 && v.odds <= 1) || typeof v.line !== 'string' || !v.line || v.line.length > 140) out.bad.push(e.id + ': invite ' + JSON.stringify(v)); }
       for (const t of TRAD_LIST) {
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
+        if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
@@ -450,9 +451,11 @@ with sync_playwright() as pw:
     print(f"Tradition files: {len(files)} ({', '.join(want_ids)}); loaded from the baked block or stand-in: {', '.join(loaded) or 'none'}")
     rec_on = g.ev("typeof REC_DECK !== 'undefined' && REC_DECK")
     flc_on = g.ev("typeof FLC_ON !== 'undefined' && FLC_ON")
+    fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
+        if i == 'captains-address' and not fri_on: continue  # the Captain's Friday address (Short Fridays, 18f) loads only with SHORT_FRIDAY
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo

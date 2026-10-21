@@ -59,6 +59,8 @@ RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
 # one look at the real game for part 8: the player follows Torres (or walks to a step that isn't his), rides the lift
 # when he does, and taps through meetings, choosing the second reply
 CALDER_D = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = placeSpot(introSeat('calder') || '3-mess-9'); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
+# the patch (#3): during the dinner chat she eats at the next table (the chief step's `away` seat), then walks over
+CALDER_AWAY = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), st = introStepById('chief'), sp = st.away && placeSpot(st.away.calder); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
 WALK_TICK = r"""((mode) => {
   const I = SHIP.intro, st = introStepById(I.step), pp = player.obj.position, here = cellAt(pp.x, pp.z);
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
@@ -275,6 +277,7 @@ def firsts(g):
     if not (at['at'] and at['mode'] == 'wait' and not at['g']): fail(f'tea at the Tea corner went wrong: {at}')
     if after['end'] is None or after['end'] < 0 or after['mode'] == 'lead' or after['mode'] == 'wait': fail(f'the tea walk did not end after your tea: {after}')
 
+RELOAD_MS = 120000   # parts 9 and 11 reload the page right after part 8's long evening: in a cloud container that load took 31-32 s, past Playwright's 30 s default (BM11, 0.64.7)
 FIRSTS_ONLY = '--firsts' in sys.argv
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
@@ -467,10 +470,10 @@ with sync_playwright() as pw:
                 if tmin > 19 * 60 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
             if chat is None and g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"):   # the dinner chat at your table (0.42.63, the user: the game sits you down for it)
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
-                chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D) }
-                print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat")
+                chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D), 'away': g.ev(CALDER_AWAY) }
+                print(f"  the dinner chat at {chat['t']}: sat down by the game in {chat['sat']} (your seat {chat['seat']}); the Chief {chat['calder']} m from her seat at your table, {chat['away']} m from hers at the next table")
                 if chat['seat'] and chat['sat'] != chat['seat'] and not DAWDLE: fail(f"you weren't sat down at your table for the dinner chat: {chat}")
-                if chat['calder'] is not None and chat['calder'] >= 2: fail(f"the Chief wasn't at your table when the dinner chat began (0.71.3, the user's playtest 2: she sits at the dinner with Zeke; 0.42.64 had her walk over at its end): {chat}")
+                if chat['away'] is None or chat['away'] >= 2: fail(f"the Chief wasn't at the next table when the dinner chat began (the patch #3: she eats there, in view, and walks over on \"Look who's coming over\"): {chat}")
             if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
                 chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
                 print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
@@ -546,14 +549,14 @@ with sync_playwright() as pw:
     else:
         url = g.page.url.split('?')[0]
         g.page.evaluate('localStorage.clear()')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
         g.step(5)
         f = g.ev("({ t: clockText(), deck: deckDef.num, on: introOn(), step: SHIP.intro.step, form: !!document.querySelector('form input[maxlength=\"24\"]') })")
         print(f"  {f['t']}, Deck {f['deck']}, intro {'on' if f['on'] else 'off'} at {f['step']}, manifest {'up' if f['form'] else 'not up'}")
         if not (f['t'].startswith('Day 0, Sunday 17:30') and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(30)
         g.ev('saveGame()'); before = g.ev('({ step: SHIP.intro.step, day: SHIP.time.day })')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
         after = g.ev("({ step: SHIP.intro.step, day: SHIP.time.day, form: !!document.querySelector('form input[maxlength=\"24\"]'), name: SHIP.player.name })")
         print(f"  saved at {before}, loaded at step {after['step']} on Day {after['day']}, manifest {'up' if after['form'] else 'gone'}, name {after['name']}")
         if after['step'] != before['step'] or after['day'] != 0 or after['form']: fail('a Day 0 save did not load at its step')
@@ -567,7 +570,7 @@ with sync_playwright() as pw:
             far = r['step'] in ('lift', 'wing') and g.ev(f"(() => {{ const c = introStepById('{r['step']}').checkpoint, h = player.here(); return c.deck !== deckDef.num || Math.max(Math.abs(h[0] - c.tile[0]), Math.abs(h[1] - c.tile[1])) > INTRO_REACH; }})()")
             if far: mid = r; break
         g.ev('saveGame()')
-        g.page.goto(url + '?debug'); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
+        g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
         back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
         print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
         if not mid or back['step'] != mid['step'] or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
