@@ -5,12 +5,13 @@
 // Placeholders: {me} your name, {dark} a deck that went dark, {band}. Keys not here keep today's words in
 // SHIP_EVENTS.ionStorm (the news lines, STORM_RETELL, the debrief): they're right as they are.
 // Gatherings (tradition-shaped, for EV_SHIPWIDE): event.ionStorm.gather.<id>.<mail|ask|here|thanks|chatter>.
+// Status lines (event.<id>.status.<phase>, the device's one-line Ship status) are 60 characters at most.
 
 // ---- warning, Thursday Day 11
 == event.ionStorm.mail.warning
 - Storm prep | Ion storm due tomorrow, about 14:00. Briefing at the job board, 14:00 today, after tea. Storm jobs go up when it ends. Until then, the usual board.
 == event.ionStorm.status.warning
-- Ion storm due tomorrow at 14:00. Storm prep jobs on the board.
+- Ion storm due tomorrow, 14:00. Prep jobs on the board.
 
 // ---- onset, Friday Day 12 (the front at 14:00; the Friday address at 16:00 is content/addresses/friday-d12)
 == event.ionStorm.address.onset.1
@@ -22,11 +23,11 @@
 == event.ionStorm.mail.onset
 - Storm stations | The bridge is on double shifts. The bow lounge and the rec deck are closed, except the auditorium for the Captain's address at 16:00. The call-home booths are off line until it's over.
 == event.ionStorm.status.onset
-- Ion storm. Comms down. Bow lounge, booths and rec deck closed.
+- Ion storm. Comms down. Lounge, booths, rec deck shut.
 
 // ---- escalation, Saturday Day 13
 == event.ionStorm.status.escalation
-- Ion storm, the worst of it. Blackouts deck by deck. Lantern supper at 18:00.
+- Ion storm: blackouts deck by deck. Lantern supper 18:00.
 // the lantern supper, 18:00-19:30, the mess by emergency light (up to about 60: the 44 seats and standing places).
 // Brennan is off on Saturdays; Lukas Dlamini cooks. Its notice goes out at noon (the Friday address announced it).
 == event.ionStorm.gather.lanternSupper.name
@@ -61,7 +62,7 @@
 == event.ionStorm.mail.commendation
 - Commendation: Ion storm | For your work during the ion storm, noted on your record with thanks. Chief Calder spoke well of you. I'd like to say so in person this week; Commander Vance will find a time.
 == event.ionStorm.status.resolution
-- All clear. Comms are back; expect a queue at the booths. Party, bow lounge, 19:00.
+- All clear. Comms back. Party, bow lounge, 19:00.
 // the party, 19:00-21:00, the bow lounge (its moment 'party')
 == event.ionStorm.gather.party.name
 - All-clear party
