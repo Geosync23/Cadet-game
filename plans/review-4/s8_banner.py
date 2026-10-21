@@ -4,7 +4,7 @@ import os, sys, json, re, pathlib
 os.environ.setdefault('CADET_WORK', '/tmp/work-RV4')
 exec(open('/home/user/cadet-game/plans/review-4/pp.py').read())
 path = sys.argv[1]; OUT = pathlib.Path('/home/user/cadet-game/plans/review-4/shots'); OUT.mkdir(exist_ok=True)
-save = {'v': 2, 'build': 'x', 'time': {'day': 12, 'min': 835}, 'player': {'deck': 3, 'tile': [20, 10], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': []}, 'crew': {}}
+save = {'v': 2, 'build': 'x', 'time': {'day': 12, 'min': 835}, 'player': {'deck': 3, 'tile': [20, 10], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': [], 'evFrom': 0}, 'crew': {}}
 pw = sync_playwright().start()
 b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME'), args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
@@ -19,7 +19,7 @@ for w, h in [(390, 844), (360, 780)]:
     ev = lambda s: pg.evaluate('s => window.__sc(s)', s)
     step = lambda n: pg.evaluate(f'window.__step({n}, 1000/30)')
     step(20)
-    for k in range(400):
+    for k in range(120):
         step(10)
         if ev("(() => { const c = document.getElementById('devAddr') || ADDRESS_EL; return !!(c && !c.hidden && c.offsetWidth > 0 && c.textContent.length > 5); })()"): break
     box = ev("""(() => { const r = e => { const el = typeof e === 'string' ? document.getElementById(e) : e; if (!el || !el.offsetWidth) return null; const b = el.getBoundingClientRect(); return [Math.round(b.top), Math.round(b.bottom), Math.round(b.left), Math.round(b.right)]; };
