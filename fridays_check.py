@@ -157,6 +157,10 @@ with sync_playwright() as pw:
     if g.errors: check(False, 'on: page errors in the fill run ' + str(g.errors[:3]))
     g.b.close()
         # turn 7, dinner after the address (on paper): each goer's dinner start, and who washes first
+    # PR5's 3b: on paper on Day 5, section 14's late joiners (in after 16:00) leave with the rest, by 16:52 (16:50 and the
+    # planner's 2 minutes before the walk out); anyone else may sit on until their later plans (a dinner), but not past 17:20
+    late = g2.ev("schedPeople().flatMap(p => planDay(p, 5).filter(s => /captains/.test(s.tag || '') && s.to > 4 * 1440 + (s.from > 4 * 1440 + 960 ? 1012 : 1040)).map(s => [p.id, s.from - 4 * 1440, s.to - 4 * 1440]))")
+    sit_on = g2.ev("(() => { const t = schedPeople().flatMap(p => planDay(p, 5).filter(s => /captains/.test(s.tag || '')).map(s => s.to - 4 * 1440)); return [t.filter(x => x <= 1012).length, t.filter(x => x > 1012).length, Math.max(...t)]; })()")
     dinner = g2.ev("""(() => { const b = 4 * 1440, st = [], wash = [];
       for (const p of schedPeople()) { const P = planDay(p, 5); if (!P.some(s => /captains/.test(s.tag || ''))) continue;
         const dn = P.find(s => s.act === 'dinner' && s.from >= b + 1000); if (dn) st.push(dn.from - b);
@@ -199,6 +203,15 @@ with sync_playwright() as pw:
     for k in range(40): g.step(20)
     live['leave'] = [w33, g.ev("[repInit().ship.work, repInit().cnt.address || 0, FRI.mailed]")]
     live['mails'] = g.ev("(SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d26'].mail[0] && m.at >= 25 * 1440 + 1000 && m.at < 26 * 1440).length")
+    # PR5's turn-6 fix 2: a jump across Friday's 16:50 (Day 40, 15:00 to Saturday 07:00, as a sleep would): the banner,
+    # the Mail (stamped 16:50) and the dip all the same, once
+    g.ev("goToDeck(4)"); g.ev("skipTo((40 - 1) * 1440 + 900)"); g.step(5)
+    w40 = g.ev("window.__toasts = []; [repInit().ship.work, repInit().cnt.address || 0, playerShiftOn(40)]")
+    g.ev("skipTo((41 - 1) * 1440 + 420)"); g.step(5)
+    live['skip'] = [w40, g.ev("[repInit().ship.work, repInit().cnt.address || 0, FRI.mailed, window.__toasts.filter(x => /missed/.test(x[1])).length, (SHIP.mail || []).filter(m => m.at === 39 * 1440 + 1010).length]")]
+    # PR5's 3a: a weekly speech (Day 47) reloaded with the cache cleared and a condition changed (your rank) keeps its
+    # lines (the save's FRI.today), not a fresh pick: only lines of the day's list, in its order (a rank line may drop)
+    live['weekly'] = g.ev("(() => { SHIP.works.rank = 'junior'; FRI_SPEECH = null; const a = friSpeech(47).map(l => l.id); FRI_SPEECH = null; SHIP.works.rank = 'senior'; const b = friSpeech(47).map(l => l.id); return [a.length, b.length, b.every((id, i) => a.includes(id) && (i === 0 || a.indexOf(id) > a.indexOf(b[i - 1])))]; })()")
     live['errors'] = g.errors[:3]
     g.b.close()
 
@@ -277,6 +290,13 @@ print('  dinner after the address, Day 5 (planned; spread: first and 80th percen
 check(dinner['n'] >= 30 and dinner['spread'][0] >= 1020 and dinner['spread'][1] <= 1080 and dinner['by10'] <= .45 * dinner['n'], 'on: Day 5 dinner after the address not spread over 17:00-17:50 %s' % dinner)
 print('  the rec deck lift after the address, Day 5 in play [queued at the lift, still walking out]: at 16:52 %s, at 17:10 %s' % (lift.get(1012), lift.get(1030)))
 check(lift.get(1030, [99])[0] <= 3, 'on: Day 5, %s queued at the rec deck lift at 17:10' % lift.get(1030))
+print('  a jump across 16:50 on Day 40 (work, count, shift day | work, count, mailed, banners, Mails at 16:50):', live['skip'])
+sk0, sk1 = live['skip']
+check(sk1[2] == 40 and sk1[3] == 1 and sk1[4] == 1 and (sk1[1] == sk0[1] + 1 if sk0[2] else sk1[1] == sk0[1]), 'on: a jump across Friday 16:50 without the banner, Mail or dip %s' % live['skip'])
+print('  the weekly speech on Day 47 reloaded with your rank changed (lines before, after, only the day\'s in order):', live['weekly'])
+check(live['weekly'][0] >= 9 and live['weekly'][2], 'on: a reload of the weekly speech picked again %s' % live['weekly'])
+print('  the address on Day 5, planned stays (gone by 16:52, sitting on until later plans, the last minute):', sit_on, 'too late:', late)
+check(not late, 'on: people planned in the address too long on Day 5 (a late joiner past 16:52, anyone past 17:20) %s' % late[:6])
 check(not live['errors'], 'on: page errors in the live run %s' % live['errors'])
 print('FRIDAYS CHECK OK' if not fails else 'FRIDAYS CHECK FAILED (%d)' % len(fails))
 sys.exit(1 if fails else 0)

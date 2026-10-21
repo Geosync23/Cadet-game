@@ -37676,17 +37676,30 @@ function friAddressTick() {
     bubbleSay(friSpeaker(a), l.text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
     return;
   }
+  friMissed(d, e, now);
+}
+// missed it (turn 7): never in the auditorium 16:00-16:50 while it was on. A small dip in your work reputation, the
+// size of being late (section 20: work -2), but none when it wasn't your shift day: leave, sick, a rota day off, let go,
+// a day Dev mode excused (playerShiftOn, section 14). Your 16:00 auto sign-out is never counted: only where you were.
+// Then the banner and the file's Mail, once a Friday
+function friMissed(d, e, at) {
   if (FRI.heard === d || FRI.mailed === d) return;
   FRI.mailed = d;
-  // missed it (turn 7): never in the auditorium 16:00-16:50 while it was on. A small dip in your work reputation, the
-  // size of being late (section 20: work -2), but none when it wasn't your shift day: leave, sick, a rota day off, let go,
-  // a day Dev mode excused (playerShiftOn, section 14). Your 16:00 auto sign-out is never counted: only where you were
   if (typeof playerShiftOn === 'function' && playerShiftOn(d) && typeof repAdd === 'function') repAdd(null, 0, { work: -2 }, 'address');
   const A = friScript(d); if (!A) return;
   const fill = s => friFill({ text: s }, d, Infinity) || s.replace(/\{\w+\}/g, '').replace(/\s+([,.])/g, '$1');
   toast(e.name, friText('fri.missed') || 'You missed the Captain\'s address. Her words are in your Mail.');
-  if (typeof mailSend === 'function') mailSend({ at: now, from: A.from, subject: fill(A.mail[0]), body: fill(A.mail[1]), quiet: true });
+  if (typeof mailSend === 'function') mailSend({ at, from: A.from, subject: fill(A.mail[0]), body: fill(A.mail[1]), quiet: true });
 }
+// a time jump (sleep, a nap, Dev's clock) across a Friday's 16:50 (PR5's turn-6 fix 2): the same as the tick at 16:50,
+// so a slept or skipped address still has its banner, Mail and dip (heard only if you were there when the jump began)
+if (SHORT_FRIDAY) SIM_ADVANCE.push((from, to) => {
+  for (let d = Math.floor(from / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++) {
+    if (!friShort(d)) continue;
+    const e = eventsOn(d).find(x => x.id === FRI_ADDRESS.id), end = e && (d - 1) * 1440 + e.to;
+    if (e && from < end && to >= end) friMissed(d, e, end);
+  }
+});
 // ---- explaining it (part E, turn 8): EW1's words in the arrival week and at Friday breakfasts ----
 // Zeke's goodnight on Day 0 (section 21's introNightTick and introNightLines): his walk.goodnight lines 1-4 in order,
 // with the two Friday ones (walk.goodnight.friday.1-2) after the second when on. A Friday key with no line is skipped
