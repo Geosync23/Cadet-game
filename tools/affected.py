@@ -174,7 +174,7 @@ def translate(src, dst, lines):
     return out
 
 
-SHARED = 23   # option (b): a line that at least this many of the map's checks ran (of 28: about 80%) is everyone's
+SHARED = .8   # option (b): a line that at least this share of the map's checks ran (rounded up; 23 of 28) is everyone's
 
 
 def pick(a, b, mp, middle=False):
@@ -224,7 +224,8 @@ def pick(a, b, mp, middle=False):
         cnt = {}
         for c in runs:
             for n in runs[c]: cnt[n] = cnt.get(n, 0) + 1
-        shared = {n for n, k in cnt.items() if k >= SHARED}
+        need = -(-int(SHARED * 100) * len(runs) // 100)
+        shared = {n for n, k in cnt.items() if k >= need}
         # the safeguard: a changed shared line (a pure insertion: when the lines both sides of it are shared) runs everything
         hunks = re.finditer(r'^@@ -(\d+)(?:,(\d+))? \+(\d+)(?:,(\d+))? @@', git('diff', '-U0', a, *([b] if b else []), '--', GAME), re.M)
         hard = set()
