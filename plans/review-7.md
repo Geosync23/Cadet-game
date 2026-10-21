@@ -16,6 +16,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 | DB2 | D5 Traditions tab | claude/devmode-2 d261274 | PASS |
 | DB2 | D6a+D6b+D7 Set career, the Career tab | claude/devmode-2 261f7ad + d686b86 | PASS |
 | RN1 (for lead 24) | opt #4 shaders kept | claude/opt-render 6fd3505 (game 8a9de48) | PASS |
+| PT1 | T2 + T3: Off the Tern, the tea on Thursday, the ramp both ways, camera 1.85/1.40 | claude/patch-crew 37c0d57, a5e78d3 | PASS WITH ONE FIX (a check guarding the ramp walk) |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
 ## Log
@@ -67,3 +68,13 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - Design note to the lead: Set career to Day N = the end of day N (the plan's D6 test); the Day 9 and Day 10 beat shortcuts give the before-the-beat states.
 
 - Lead 24 moved RN1's perf_check scenes (3af9f15 + 0ad9b5d), opt #10 (5358a60) and opt #6 (1a62fc7) to OR1 (session_015np4rHB2UHzet5Y1zFrBzm); my reading notes and planned runs sent to OR1. My node check of opt #6's reduction: 40M steps, 0 differ.
+
+## PT1 T2 + T3: the Tern's ramp both ways (37c0d57, a5e78d3), PASS WITH ONE FIX
+
+- cadet_test: T1 -> T2 (camera put back) ALL IDENTICAL; T2 with ROT_TERN false (camera put back) vs T1 ALL IDENTICAL; T2 -> T3 ALL IDENTICAL.
+- day_check 21, 25 (T2) and 21, 161 (T3) OK; events_check, join_check OK; check_fast OK (261 s, 253 s).
+- The tea pinned to Thursday (37c0d57, my ask): the Friday mutant FAILs events_check.
+- ramp_probe.py (real save, 390 and 360, Day 21): Theo in the aisle 14:57-14:59 (also after a reload at 14:58), gone by 15:02, ramp shut by 15:04; reload at 16:00 shuts it again; shut 17:36-17:38, Raman's toast 17:40, open by 17:42; Basil aisle 17:40-17:42, crowd spot by 17:47; Zeke at the ramp foot with 'greet'; reloads at 17:38 and 17:50 clean; no errors. (The 360 "Zeke at 17:39" line is a probe artefact: that minute was logged under the reload, where Zeke is at the foot.)
+- The fix: arrivals by the lift (rotTernIndex -1) passes events_check; only the probe catches it (and the leavers-by-the-lift mutant, run against the probe only). Asked for a paper check of the rotation day's segments (arrive/aisle, the crowd spot, board/aisle, greet/foot).
+- Nits: the ramp swings shut on a reload at 17:38 (not saved: expected); a day with leavers but no arrivals would leave the ramp shut after 17:40 (none exist).
+- Shots: plans/review-7/shots/ramp_390_1441.png, ramp_390_1748.png, ramp_360_1456.png.
