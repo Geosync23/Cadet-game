@@ -1,0 +1,8 @@
+words baked                  OK (1 s)
+parse, names, text           OK (1 s)
+deck_check                   OK (282 s)
+device_check                 OK (311 s)
+machine_check                OK (75 s)
+leave_check                  OK (34 s)
+QUICK CHECK OK in 393 s
+rc=0 secs=393

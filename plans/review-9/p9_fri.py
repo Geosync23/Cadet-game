@@ -5,7 +5,7 @@
 #  d12: Day 12 (the storm Friday) in the auditorium: which lines are said, who's at the lectern
 # usage: p8_fri.py BUILD TAG SCENARIO [DAY MIN]
 import os, sys, json, re, pathlib
-H = '/tmp/claude-0/-home-user-Cadet-game/c90be8f5-63df-55cd-b247-474233586f38/scratchpad/wt_comb'
+H = '/tmp/claude-0/-home-user-Cadet-game/c90be8f5-63df-55cd-b247-474233586f38/scratchpad/wt_rc'
 exec(open(H + '/cadet_test.py').read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 path, tag, sc = sys.argv[1], sys.argv[2], sys.argv[3]
@@ -42,13 +42,13 @@ if sc == 'd5':
     res['rep0'] = ev(REP)
     while mm() < 15 * 60 + 24: step(20)
     res['headsup'] = ev("window.__toasts.slice()"); res['hu'] = ev("FRI.hu"); print('heads-up', res['headsup'], flush=True)
-    pg.screenshot(path=str(OUT / (tag + '_d5_1524.png')))
+    pg.screenshot(path=str(OUT / (tag + '_d5_1524.png')), timeout=180000)
     res['clock'] = ev("[typeof friClock === 'function' && friClock('onshift', dayShiftEnd(5)), typeof friClock === 'function' && friClock('didout', dayShiftEnd(5)), dayShiftEnd(5)]"); print('clock words', res['clock'], flush=True)
     ev("skipTo(4 * 1440 + 15 * 60 + 56)"); step(5); print('seat', ev(SEAT)); step(10)
     log = []; shot = {}
     while True:
         step(20); c = ev(CNT); m = mm(); log.append(c)
-        if m >= 965 and 'a' not in shot: shot['a'] = 1; pg.screenshot(path=str(OUT / (tag + '_d5_1605.png'))); res['A_1605'] = [c, ev(BUB)]
+        if m >= 965 and 'a' not in shot: shot['a'] = 1; pg.screenshot(path=str(OUT / (tag + '_d5_1605.png')), timeout=180000); res['A_1605'] = [c, ev(BUB)]
         if m >= 970: break
     res['fill'] = log[::8]; print('fill', res['fill'], flush=True); print('16:05', json.dumps(res.get('A_1605')), flush=True)
     res['speech'] = ev("friSpeech(5).map(l => l.who + ': ' + l.text)")
@@ -60,7 +60,7 @@ if sc == 'd5':
     while mm() < 17 * 60 + 52:
         step(20); x = ev(MESS); m = mm()
         if len(ml) == 0 or m - ml[-1][0] >= 4: ml.append([m, x]); print('mess', x, flush=True)
-        if m >= 1040 and 'm' not in shot: shot['m'] = 1; pg.screenshot(path=str(OUT / (tag + '_d5_1720.png')))
+        if m >= 1040 and 'm' not in shot: shot['m'] = 1; pg.screenshot(path=str(OUT / (tag + '_d5_1720.png')), timeout=180000)
     res['mess'] = ml
     res['diners'] = ev("(() => { const S = schedData(), o = []; for (const p of ROSTER) { const pl = planDay(p, 5); const dn = pl.find(s => s.act === 'meal' && s.from >= 990 && s.from < 1200); if (dn) o.push(dn.from); } o.sort((a, b) => a - b); const h = {}; for (const x of o) { const k = Math.floor(x / 10) * 10; h[hhmm(k)] = (h[hhmm(k)] || 0) + 1; } return h; })()")
     print('dinner starts by 10 min', res['diners'], flush=True)
@@ -69,14 +69,14 @@ elif sc == 'up':
     for k in range(30): step(20)
     res['after'] = [ev("clockText()"), ev("[FRI.heard, FRI.mailed]"), ev(REP), ev("window.__toasts.slice()"), ev("(SHIP.mail || []).filter(m => m.at > (SHIP.time.day - 1) * 1440 + 900).map(m => [m.at % 1440, m.from, m.subject])")]
     print('old save loaded on a Friday evening: clock, [heard, mailed], rep, toasts, mail', json.dumps(res['after']), flush=True)
-    pg.screenshot(path=str(OUT / (tag + '_up.png')))
+    pg.screenshot(path=str(OUT / (tag + '_up.png')), timeout=180000)
 elif sc == 'd12':
     print('seat', ev(SEAT)); step(10); log = []
     while mm() < 16 * 60 + 30:
         step(20); c = ev(CNT); log.append(c)
     res['fill'] = log[::10]; print('fill', res['fill'], flush=True)
     res['speech'] = ev("(friSpeech(%d) || []).map(l => l.who + ': ' + l.text)" % day0)
-    res['said'] = ev("FRI_SAID"); res['bub'] = ev(BUB); pg.screenshot(path=str(OUT / (tag + '_d%d_1630.png' % day0)))
+    res['said'] = ev("FRI_SAID"); res['bub'] = ev(BUB); pg.screenshot(path=str(OUT / (tag + '_d%d_1630.png' % day0)), timeout=180000)
     res['storm'] = ev("[typeof eventBandOf === 'function', typeof eventOn === 'function' ? eventOn('ionStorm') : null, eventsOn(%d).map(e => e.id + ' ' + hhmm(e.from %% 1440) + '-' + hhmm(e.to %% 1440))]" % day0)
     print('speech', json.dumps(res['speech'], indent=0), flush=True); print('said', res['said'], 'bubbles', res['bub'], 'storm', res['storm'], flush=True)
 elif sc == 'skip':

@@ -1,0 +1,39 @@
+Day 5 (Friday), 76 people aboard (1 of them guests)
+Schedules: sleep < 6 h 0 | meals < 2 0 | shift short 0 | double-booked 0 | gaps 0
+  peak headcount by deck: 0: 72 at 00:00, 1: 12 at 15:10, 2: 19 at 10:00, 3: 64 at 17:50, 4: 54 at 00:00, 5: 13 at 08:50, 6: 2 at 00:00, 7: 52 at 16:00
+  moments with no place (standing about): {'off': 14}
+Rooms in use over the week from day 5: 76 of 87 place types (deck and type) used
+  never used: 2 work:command, 3 bar-order, 3 patient-bed, 3 storage, 4 event, 5 storage, 6 bench, 6 lift-wait, 7 event, 7 rec:act, 7 rec:booth
+  used by fewer than 3 people: 1 work:helm (2), 1 work:ops (1), 1 work:watch (1), 3 bar-staff (2), 3 work:store (2), 7 rec:climbq (2), 7 rec:floatq (2), 7 rec:kayakq (2), 7 rec:lectern (2), 7 rec:poolq (1), 7 rec:stool (1)
+Crew needs (lowest/middle):
+  06:30  hunger 0/34  energy 37/98  hygiene 40/83  fitness 9/87  social 75/81
+  12:00  hunger 23/78  energy 72/79  hygiene 35/89  fitness 7/91  social 87/100
+  19:00  hunger 0/96  energy 45/53  hygiene 30/75  fitness 5/96  social 92/100
+  23:00  hunger 14/74  energy 32/39  hygiene 21/79  fitness 3/95  social 86/100
+Energy at the end of the day: crew lowest [34, 'oneill-imani'] | you (no meals, nothing): at 22:00 23 at midnight 13 | leisure 22 | your workday True
+The Commons and the rec deck, 17:00-24:00 (from the plans): Deck 3 mean 39.6 peak 62 without the rec deck; 39.6 / 62 with its everyday use; 39.4 / 64 with its traditions too (none today)
+  the rec deck: mean 7.8 peak 18 (everyday use alone: mean 7.7 peak 13)
+Plans the same twice: True
+Works tea at 13:00: {'on': 11, 'went': 8, 'outside': [], 'peak': 2}
+Mornings of the day shift: 41 | woke {'05:00': 1, '05:30': 18, '06:00': 9, '06:30': 10, '07:00': 3} | first thing {'breakfast': 2, 'wash': 22, 'workout': 10, 'wash, then a coffee or read': 7}
+Deck 1: up to 12 crew, worst stuck 0.0 ship min (pell 11:12), draw calls peak 203 (budget 450)
+  busiest frames: 12:52 crowd 203 calls, 11 crew, 11:52 crowd 202 calls, 10 crew
+Deck 2: up to 20 crew, worst stuck 0.0 ship min (ferreira 07:04), draw calls peak 186 (budget 450)
+  busiest frames: 08:54 crowd 186 calls, 17 crew, 15:50 crowd 183 calls, 4 crew
+Deck 3: up to 65 crew, worst stuck 0.0 ship min (bakshi-sol 06:12), draw calls peak 241 (budget 450)
+  busiest frames: 17:49 crowd 241 calls, 65 crew, 07:55 lift 234 calls, 37 crew
+  servery line: 138 joined, 138 served, longest 10, longest wait 5.8 ship min, trays 136, gone with the meal 136, gave up 0 []
+Deck 4: up to 54 crew, worst stuck 0.8 ship min (teague-theo 05:49), draw calls peak 211 (budget 450)
+  busiest frames: 05:56 crowd 211 calls, 50 crew, 21:46 crowd 211 calls, 15 crew
+Deck 5: up to 14 crew, worst stuck 0.0 ship min (eklund-leila 08:00), draw calls peak 194 (budget 450)
+  busiest frames: 07:55 crowd 194 calls, 3 crew, 08:54 crowd 184 calls, 13 crew
+Deck 6: up to 2 crew, worst stuck 0.0 ship min (), draw calls peak 144 (budget 450)
+  busiest frames: 00:00 crowd 144 calls, 2 crew, 00:59 crowd 144 calls, 2 crew
+Deck 7: up to 52 crew, worst stuck 0.0 ship min (holt 21:11), draw calls peak 195 (budget 450)
+  busiest frames: 15:50 lift 195 calls, 50 crew, 00:00 lift 184 calls, 0 crew
+Job visits (jobs on the books after the day): 1 work:works (panel): 2 at 2, 2 lift-wait: 1 at 1, 2 work:works (panel): 4 at 4, 3 storage: 2 at 2, 3 work:works (panel): 8 at 8, 4 work:works (panel): 3 at 2, 5 storage: 29 at 4, 5 work:works (panel): 10 at 8, 6 work:works (panel): 1 at 1, 7 work:works (panel): 9 at 9
+Deck 4 the same twice: True
+Arrival on, days 0 and 1, places booked twice: none
+errors []
+DAY CHECK OK
+rc=0 secs=351

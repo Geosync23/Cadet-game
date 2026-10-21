@@ -1,0 +1,25 @@
+off: {"inTable": false, "ends": [[4, 1020], [5, 1020], [6, 1020], [12, 1020]], "on": []}
+on: ends [[4, 1020], [5, 930], [6, 1020], [12, 930]] | address on [[5, 960, 1010], [12, 960, 1010], [19, 960, 1010], [26, 960, 1010], [33, 960, 1010], [40, 960, 1010]] | hold {'at': [930, 1020], 'fromDay': 5, 'weekday': 4}
+  Day 5 at 16:10: 49 in the seats, lectern ['marrow', 'vance'], skeleton ['strand-erik', 'shah-dara', 'larsen-hamid'] (here: []), night shift 5 of 17
+  Day 12 at 16:10: 51 in the seats, lectern ['marrow', 'vance'], skeleton ['strand-erik', 'shah-dara', 'larsen-hamid'] (here: []), night shift 7 of 17
+  Mail: ["Tomorrow's a short Friday. The day shift stops at half past three; I'll see all of you in the auditorium at four. Dinner at five. Our new hands especially.", "Tomorrow's a short Friday: the day shift stops at half past three. The Captain's address is at four in the rec deck auditorium. Dinner at five."]
+  part E (on): goodnight ["Right, that's me. Breakfast from six, shift at nine, tea at one.", 'Off at five. Dinner till half eight. Weekends off, like most of Works.', 'Fridays we knock off at half three.', 'Captain talks to all of us at four, then dinner.', "Then the evening's yours. Have a wander. Gym, lounge, Tiles, bed.", "Shift's at nine tomorrow. Get some sleep soon."]; Halloran ['Short day today. Half three, clock out.', "Then the auditorium at four. Rec deck. She'll say your name.", "Don't hide. Have a biscuit first. Have you eaten?"]; flag True (saved: False); clock: Clocked out at 15:40. The Captain's address is at four, in the rec deck auditorium.
+  speech lines a Friday: {'junior 5': 19, 'junior 12': 18, 'junior 19': 16, 'junior 26': 17, 'junior 33': 9, 'junior 40': 9, 'junior 47': 10, 'junior 54': 10, 'junior 61': 9, 'junior 68': 9, 'junior 75': 9, 'junior 82': 12, 'junior 89': 10, 'junior 96': 9, 'officer 5': 19, 'officer 12': 18, 'officer 19': 16, 'officer 26': 17, 'officer 33': 9, 'officer 40': 9, 'officer 47': 10, 'officer 54': 10, 'officer 61': 9, 'officer 68': 9, 'officer 75': 9, 'officer 82': 12, 'officer 89': 10, 'officer 96': 9}
+  the weekly speech, Day 33: 9 lines; ['Settle, please. The Captain.', "Afternoon, everyone. A quiet week, mostly. That's my favourite kind.", "We had a week with nothing on fire. I'd like more of those, please."] ...
+  lines that never fill (want only myshift:night's, and the storm's while it is off): [['friday-d19', 'And our newest night hand, {me}, who should be asleep. Good.', ['myshift:night']]]
+  the save's fri part: 52 bytes fresh, 793 with a full ring (7 weeks)
+  Day 5 in real play from 15:45: at 16:00 26 seated, lectern ['marrow']; at 16:04 ['marrow', 'vance']; at 16:05 48 seated, lectern ['marrow', 'vance'] (51 planned there at 16:10)
+  Day 5 in the auditorium: {'n': 19, 'said': 19, 'order': True, 'hush': 0, 'idx': [0, 1, 2], 'heard': 5, 'mailed': 0}
+  a reload at 16:25 on Day 19: [6, 6] kept the speech: True
+  missed on Day 26 (mailed, heard, banners): [26, 19, 1] mails 1
+  missed it on Day 26 (work, count, shift day): before [6.53, 1, True], after [6.02, 2]
+  missed it on a leave day (Day 33): before [6.31, 2, False], after [6.31, 2, 33]
+  dinner after the address, Day 5 (planned; spread: first and 80th percentile; the rest have later plans): {'n': 51, 'spread': [1024, 1068], 'median': 1050, 'by10': 7, 'wash': 0}
+  the rec deck lift after the address, Day 5 in play [queued at the lift, still walking out]: at 16:52 [0, 34], at 17:10 [0, 11]
+  a jump across 16:50 on Day 40 (work, count, shift day | work, count, mailed, banners, Mails at 16:50): [[5.95, 2, True], [5.71, 3, 40, 1, 1]]
+  the weekly speech on Day 47 reloaded with your rank changed (lines before, after, only the day's in order): [10, 9, True]
+  the address on Day 5, planned stays (gone by 16:52, sitting on until later plans, the last minute): [38, 13, 1031] too late: []
+  an old save (no fri) loaded on Day 5 at 18:00, then played [mailed, heard, work, count, Mails, clock] at load / later: [[5, 0, 50, 0, 0, 'Day 5, Friday 18:00'], [5, 0, 50, 0, 0, 'Day 5, Friday 18:12']]
+  the same loaded at 16:47 and played past 16:50: [[0, 0, 50, 0, 0, 'Day 5, Friday 16:47'], [5, 0, 46.08, 1, 1, 'Day 5, Friday 17:03']]
+FRIDAYS CHECK OK
+rc=0 secs=1542

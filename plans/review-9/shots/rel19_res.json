@@ -1,0 +1,130 @@
+{
+ "sc": "d12",
+ "build": "starship-cadet.html",
+ "fill": [
+  [
+   "Day 19, Friday 15:55",
+   45,
+   [
+    "marrow",
+    "vance"
+   ],
+   null
+  ],
+  [
+   "Day 19, Friday 15:59",
+   48,
+   [
+    "marrow",
+    "vance"
+   ],
+   null
+  ],
+  [
+   "Day 19, Friday 16:03",
+   48,
+   [
+    "marrow",
+    "vance"
+   ],
+   null
+  ],
+  [
+   "Day 19, Friday 16:07",
+   48,
+   [
+    "marrow",
+    "vance"
+   ],
+   1
+  ],
+  [
+   "Day 19, Friday 16:11",
+   48,
+   [
+    "marrow",
+    "vance"
+   ],
+   2
+  ],
+  [
+   "Day 19, Friday 16:15",
+   49,
+   [
+    "marrow",
+    "vance"
+   ],
+   3
+  ],
+  [
+   "Day 19, Friday 16:19",
+   49,
+   [
+    "marrow",
+    "vance"
+   ],
+   4
+  ],
+  [
+   "Day 19, Friday 16:23",
+   49,
+   [
+    "marrow",
+    "vance"
+   ],
+   5
+  ],
+  [
+   "Day 19, Friday 16:27",
+   49,
+   [
+    "marrow",
+    "vance"
+   ],
+   6
+  ]
+ ],
+ "speech": [
+  "vance: Settle, please. The Captain.",
+  "marrow: Afternoon, everyone. Full lights all week. I'd forgotten how bright this room is.",
+  "marrow: And everyone who sat up with a neighbour by lantern light: that counted too.",
+  "marrow: Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.",
+  "marrow: Half of you were at the windows. The other half were asleep, and I don't blame you.",
+  "marrow: My letters of thanks for the storm went out on Sunday. You know who you are.",
+  "marrow: cadet, three weeks with us. The Chief says you're finding your feet.",
+  "marrow: Tonight the night watch takes the ship. Thank you, all of you, for the hours nobody sees.",
+  "marrow: Sunday's a full one. The regatta in the morning, talent night at half seven, a week late.",
+  "marrow: In between, we say goodbye to Theo. Wherever you go next, go well.",
+  "marrow: And at dinner a new junior comes up the Tern's ramp. Be to them what this ship was to you.",
+  "marrow: Dinner's at five. Enjoy your weekend, those of you who have one."
+ ],
+ "said": [
+  19,
+  7
+ ],
+ "bub": [
+  {
+   "who": "marrow",
+   "stand": true,
+   "shown": true,
+   "top": 310,
+   "bot": 415,
+   "left": 142,
+   "right": 382,
+   "t": "Tonight the night watch takes the ship. Thank you, all of yo"
+  }
+ ],
+ "storm": [
+  true,
+  null,
+  [
+   "works-tea 18:45-19:30",
+   "jam 19:45-21:15",
+   "birthday 20:15-21:10",
+   "sunrise-stretch 06:30-07:00",
+   "tap-night 20:00-22:00",
+   "captains-address 16:00-16:50"
+  ]
+ ],
+ "errors": []
+}

@@ -1,0 +1,133 @@
+Switches: EVENTS_ON (on in the build; a switched-off copy for parts 1-2) | EV_CAL_ON, EV_GUARD_ON, EV_NOTES_ON, EV_DEVICE_ON, EV_REPLAY_ON, EV_RANK_ON, EV_COMMS_ON
+
+1. Switched off (the build as it is):
+  note: EVENTS_ON is on in this build: parts 1-2 run on a switched-off copy of it (EVENTS_ON = false), part 3 on the build as switched on
+  calendar: crossingLine D6 short (not built), ionStorm D11 main, comet D16 short (not built), diplomatic D26 main (draft)
+  due: {'id': 'ionStorm', 'day': 10} | played forward: ionStorm D10-15
+  eventDay: []
+    ionStorm phase warning D11 Thu 06:00
+    ionStorm phase onset D12 Fri 14:00
+    ionStorm phase escalation D13 Sat 06:00
+    ionStorm phase resolution D14 Sun 10:00
+    ionStorm phase afterglow D14 Sun 22:00
+    ionStorm meeting stormBriefing D11 Thu 09:15
+    ionStorm meeting allClear D14 Sun 10:00
+    ionStorm moment front D12 Fri 14:00
+    ionStorm moment surge D13 Sat 11:20
+    diplomatic (draft) phase warning D26 Fri 09:00
+    diplomatic (draft) phase onset D28 Sun 10:00
+    diplomatic (draft) phase escalation D29 Mon 06:00
+    diplomatic (draft) phase resolution D33 Fri 09:00
+    diplomatic (draft) phase afterglow D33 Fri 12:00
+    diplomatic (draft) meeting veyliGreeting D28 Sun 10:00
+    diplomatic (draft) meeting veyliGifts D33 Fri 09:00
+  called in (off): notes []
+  phase notes D11 05:00 to D12 15:00: [] | cues: [] | crew with a reaction line for None: 0
+
+2. The calendar alone (EV_CAL_ON):
+  calendar: crossingLine D6 short (not built), ionStorm D11 main, comet D16 short (not built), diplomatic D26 main (draft)
+  due: {'id': 'ionStorm', 'day': 11} | played forward: ionStorm D11-16
+  eventDay: []
+    ionStorm phase warning D11 Thu 06:00
+    ionStorm phase onset D12 Fri 14:00
+    ionStorm phase escalation D13 Sat 06:00
+    ionStorm phase resolution D14 Sun 10:00
+    ionStorm phase afterglow D14 Sun 22:00
+    ionStorm meeting stormBriefing D11 Thu 09:15
+    ionStorm meeting allClear D14 Sun 10:00
+    ionStorm moment front D12 Fri 14:00
+    ionStorm moment surge D13 Sat 11:20
+    diplomatic (draft) phase warning D26 Fri 09:00
+    diplomatic (draft) phase onset D28 Sun 10:00
+    diplomatic (draft) phase escalation D29 Mon 06:00
+    diplomatic (draft) phase resolution D33 Fri 09:00
+    diplomatic (draft) phase afterglow D33 Fri 12:00
+    diplomatic (draft) meeting veyliGreeting D28 Sun 10:00
+    diplomatic (draft) meeting veyliGifts D33 Fri 09:00
+  note: calendar: Day 11 has today's storm hours (the storm update gives the new ones): phase warning 06:00, meeting stormBriefing 09:15, news storm-readings 06:00, news storm-prep 09:00, job stormLounge 08:30, job stormBallasts 08:30, job stormBatteries 08:30, job stormJunctions 09:00
+  occasions: the summons on Day 18 {'at': 660, 'len': 25}; the Captain's table Day 20 {'at': 1170, 'len': 90} (a night-shift week), Day 48 {'at': 1170, 'len': 90}
+  SKIP: stormBriefing's cast slot works:2 (filled from who's there; checked live in F7b)
+  called in: marrow@allClear D14, sato@allClear D14, holt@allClear D14, calder@allClear D14
+  gathering party D14 19:00-21:00: 15 mean to go, 12 planned there, at most 12 at once (19:00), 34 places (34 seats) in ['3|bow lounge']
+  note: party: 3 meant to go but aren't planned there
+  WAITING: calendar: the plan's clashes (the storm update moves them): rec-talent-night on the party night (D14 19:30); lap-of-the-wren on the party night (D14 20:30); Lap of the Wren not on D15 at 20:30
+  traditions by day: D11: quiz 20:00, rec-dawn-swim 06:15, late-piano 21:45, postcard-night 18:45; D12: sunrise-stretch 06:30, captains-address 16:00; D13: ; D14: market 10:30, rec-wso 11:30, rec-talent-night 19:30, lap-of-the-wren 20:30, reading-corner 16:00, sunday-table 18:00; D15: running 19:15, book-circle 20:15, sunrise-stretch 06:30; D16: rec-dawn-swim 06:15, rec-wall-night 18:30, knit-and-natter 20:00, spice-shelf-supper 18:15, tiles-night 20:00; D17: rec-paddle-club 18:30, rec-float-hour 21:30, late-piano 21:45, open-door 16:40, pick-your-own 06:15, tasting-table 18:15
+  phase notes D11 05:00 to D12 15:00: [] | cues: [] | crew with a reaction line for event.ionStorm.onset: 0
+
+3. Everything on (EVENTS_ON):
+  calendar: crossingLine D6 short (not built), ionStorm D11 main, comet D16 short (not built), diplomatic D26 main (draft)
+  due: {'id': 'ionStorm', 'day': 11} | played forward: ionStorm D11-15
+  eventDay: [12, 13, 14]
+    ionStorm phase warning D11 Thu 06:00
+    ionStorm phase onset D12 Fri 14:00
+    ionStorm phase escalation D13 Sat 06:00
+    ionStorm phase resolution D14 Sun 10:00
+    ionStorm phase afterglow D14 Sun 22:00
+    ionStorm meeting stormBriefing D11 Thu 14:00
+    ionStorm meeting allClear D14 Sun 10:00
+    ionStorm moment front D12 Fri 14:00
+    ionStorm moment surge D13 Sat 11:20
+    diplomatic (draft) phase warning D26 Fri 09:00
+    diplomatic (draft) phase onset D28 Sun 10:00
+    diplomatic (draft) phase escalation D29 Mon 06:00
+    diplomatic (draft) phase resolution D33 Fri 09:00
+    diplomatic (draft) phase afterglow D33 Fri 12:00
+    diplomatic (draft) meeting veyliGreeting D28 Sun 10:00
+    diplomatic (draft) meeting veyliGifts D33 Fri 09:00
+  guard: ionStorm meeting stormBriefing D11 Thu 14:00 clear
+  guard: ionStorm meeting allClear D14 Sun 10:00 clear
+  guard: gathering party D14 Sun 19:00 clear
+  guard: gathering lanternSupper D13 Sat 18:00 clear
+  occasions: the summons on Day 18 {'at': 960, 'len': 25}; the Captain's table Day 20 {'at': 1140, 'len': 75} (a night-shift week), Day 48 {'at': 1170, 'len': 90}
+  SKIP: stormBriefing's cast slot works:2 (filled from who's there; checked live in F7b)
+  called in: marrow@allClear D14, sato@allClear D14, holt@allClear D14, calder@allClear D14
+  gathering party D14 19:00-21:00: 53 mean to go, 45 planned there, at most 27 at once (19:46), dropping in for 30-60 min, 94 places (34 seats) in ['3|bow lounge', '3|@gather-bow-lounge']
+  note: party: 8 meant to go but aren't planned there
+  gathering lanternSupper D13 18:00-19:45: 59 mean to go, 51 planned there, at most 42 at once (18:55), dropping in for 45-60 min, 48 places (48 seats, seated only) in ['3|mess hall']
+  note: lanternSupper: 8 meant to go but aren't planned there
+  traditions by day: D11: quiz 20:00, rec-dawn-swim 06:15, late-piano 21:45, postcard-night 18:45; D12: sunrise-stretch 06:30, captains-address 16:00; D13: ; D14: market 10:30, rec-wso 11:30, reading-corner 16:00, sunday-table 18:00; D15: running 19:15, book-circle 20:15, lap-of-the-wren 20:30, sunrise-stretch 06:30; D16: rec-dawn-swim 06:15, rec-wall-night 18:30, knit-and-natter 20:00, spice-shelf-supper 18:15, tiles-night 20:00
+  Schedule D11: event items at ['14:00']
+  Schedule D12: event items at []
+  Schedule D13: event items at []
+  Schedule D13: lanternSupper 18:00 as a tradition x1
+  Schedule D14: event items at ['10:00']
+  Schedule D14: party 19:00 as a tradition x1
+  Schedule D15: event items at []
+  Tracked D12 10:00: call booths open, offered True
+  Tracked D12 15:00: call booths closed, offered False
+  Tracked D13 12:00: call booths closed, offered False
+  Tracked D14 12:00: call booths open, offered True
+  Tracked D15 12:00: call booths open, offered True
+  eventClosed: bow lounge [[12, 900, True], [11, 900, False], [14, 1200, False]]; Deck 7 closed in the onset: [['7A', 900, True], ['7A', 970, False], ['7A', 1030, True], ['7C', 970, True]]
+  meeting toasts: heads-ups on [['stormBriefing', None, "Chief Calder's storm briefing, at the job board in the Works bay at 14:00."], ['allClear', None, None]]; off [['stormBriefing', "Chief Calder's storm briefing, at the job board in the Works bay at 14:00.", "Chief Calder's storm briefing, at the job board in the Works bay at 14:00."], ['allClear', None, None]]
+  phase notes D11 05:00 to D12 15:00: ['ionStorm:warning@14760', 'ionStorm:onset@16680'] | cues: ['event.ionStorm.onset', 'event.ionStorm.warning'] | crew with a reaction line for event.ionStorm.onset: 34
+  called in: allClear D14 10:00: notes [['calder', 19321], ['holt', 19321], ['marrow', 19321], ['sato', 19321]]; cues ['calder', 'holt', 'marrow', 'sato']
+
+4. Self-test (clashes planted in a copy):
+  plantHold: caught: planted: ionStorm meeting plantHold falls in the Friday hold and waits to 17:00 (D12 Fri 17:00); none should be planned there
+  plantGuard: caught: planted: guard: ionStorm meeting plantGuard at D11 Thu 17:20 meets ['officerCeremony']
+  plantGath: caught: planted: gathering plantGath (D12 16:00) is in the Friday hold (gatherings aren't moved)
+  book-circle : caught: planted: D14 book-circle 19:10-19:50 in 3|bow lounge,3|bow lounge,3|@gather-bow-lounge during party 19:00-21:00
+
+5. Late saves:
+  a new page: SHIP.evFrom 1, EV_LATE skip; the plan [{'id': 'ionStorm', 'day': 11, 'kind': 'main'}]; due {'id': 'ionStorm', 'day': 11}
+  evSkippedFor(20, log [], running None) = ['crossingLine', 'ionStorm', 'comet']
+  evSkippedFor(9, log [], running None) = ['crossingLine']
+  evSkippedFor(20, log ['ionStorm'], running None) = ['crossingLine', 'comet']
+  evSkippedFor(20, log [], running ionStorm) = ['crossingLine', 'comet']
+  evSkippedFor(0, log [], running None) = []
+  evSkippedFor(1, log [], running None) = []
+  evSkippedFor(None, log [], running None) = []
+  evSkippedFor(40, log [], running None) = ['crossingLine', 'ionStorm', 'comet', 'diplomatic']
+  a Day 20 save, events first on at Day 20: evFrom 20, passes over ['comet', 'crossingLine', 'ionStorm'], eventDay [], due None, log [], running None
+  a Day 20 save, events on from the start (evFrom 0): evFrom 0, passes over [], eventDay [12, 13, 14], due None, log ['ionStorm:11-16'], running None
+  a Day 9 save, events first on at Day 9: evFrom 9, passes over ['crossingLine'], eventDay [12, 13, 14], due {'id': 'ionStorm', 'day': 11}, log [], running None
+  a Day 20 save, evFrom 20, the storm logged: evFrom 20, passes over ['comet', 'crossingLine'], eventDay [12, 13, 14], due None, log ['ionStorm:11-17'], running None
+  a Day 20 save with no evFrom: evFrom 20 (saved 20), passes over ['comet', 'crossingLine', 'ionStorm']; after a reload evFrom 20, passes over ['comet', 'crossingLine', 'ionStorm']
+  switched off: SHIP.evFrom None, saved no key
+
+6. Live phases and crowds:
+  WAITING: F7b (jumps, reloads mid-phase and mid-meeting) comes with F4 (the phase notes and the device are in parts 1-3); F7c (draw calls at about 60, phone size) with the storm update
+
+BIGEVENTS CHECK OK
+rc=0 secs=232

@@ -1,0 +1,24 @@
+{
+ "sc": "up",
+ "build": "starship-cadet.html",
+ "after": [
+  "Day 5, Friday 18:12",
+  [
+   0,
+   5
+  ],
+  {
+   "work": 50,
+   "address": 0
+  },
+  [],
+  [
+   [
+    1010,
+    "Pell Okafor",
+    "Film night has moved"
+   ]
+  ]
+ ],
+ "errors": []
+}

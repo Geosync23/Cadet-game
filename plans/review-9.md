@@ -81,4 +81,84 @@ the checks. Both switches on as merged (`SHORT_FRIDAY = true`, `EVENTS_ON = true
 rotation Day 21. content_gen `--check`: up to date. names_check: OK. (For BM13: the backlog numbers 18b/20-23 come from
 three branches; renumber when merging.)
 
-Round: running (results below when done).
+(That first merge used fridays 6e8e0af; it was rebuilt on f83c8db once FR4's 5b55f84 landed. The round below is on
+the rebuilt one, game = f83c8db's = 3bd9b2c's = 951c0cd's.)
+
+**The round on it (each alone):**
+- check_fast: QUICK CHECK OK (393 s).
+- cadet_test integration 0.64.11 → the combined build with both switches off: ALL IDENTICAL.
+- fridays_check: FRIDAYS CHECK OK (1721 s). Day 12 at 16:10: 51 seated, **lectern ['marrow', 'vance']** (PR8's find 1
+  closed by the storm update); the storm's lines all fill (only `myshift:night`'s never do); the old save at 18:00:
+  `[5, 0, 50, 0, 0]` (mailed, heard, work, count, Mails).
+- day_check 5, 12, 13, 19, 21: DAY CHECK OK each. 12 and 13 print "the rec deck is shut for the ship-wide event this
+  evening (the storm update): its evening comparison is skipped". The combined day_check.py is storm-update's
+  byte for byte; the Day 12/13 FAILs others saw came from an older day_check.py without EV4's 4fa198f.
+- events_check: EVENTS CHECK OK, **quiet-watch Day 300 Deck 3: 8/8** even with the old check (PR8's 7/9 knock-on
+  doesn't show on the real combined build). The control copy (Fridays off): OK, the same 8/8.
+- bigevents_check: BIGEVENTS CHECK OK.
+
+**Live probes (`p9_fri.py`, a real save, 390x844):**
+- Day 12 from 15:56: 49 → 54 seated by 16:16, lectern Marrow from 15:56, Marrow + Vance from 16:04, lines 0 → 9 said
+  by 16:28 (FRI_SAID). (The 16:30 shot timed out on the software renderer; re-taken on the RC below.)
+- Day 19 from 15:55: lectern Marrow + Vance all through, 45 → 49 seated; the 12 lines include "In between, we say
+  goodbye to Theo" and "And at dinner a new junior comes up the Tern's ramp", said in order (line 7 at 16:30).
+  Shot `shots/rel19_d19_1630.png`: Marrow's named bubble readable. ("cadet, three weeks with us": `{me}` is the
+  probe save's default name; real players type one. A game-wide pattern, not Fridays'.)
+- An old save (no fri) at Day 5 18:00: at 18:12 `[heard, mailed] [0, 5]`, work 50, address 0, no toasts; the one Mail
+  is Pell's "Film night has moved" (the events base), not the Captain's. Shot `shots/relup_up.png`.
+
+## 5b55f84 (FR4: PR8's find 3, an old save on a Friday evening): PASS
+
+Code: `FRI_OLD` = the save's day when it has no `fri` part (cleared by a new game); friAddressTick reads and clears it
+on its first frame; after the address's end it sets `FRI.mailed = d` instead of friMissed. A save loaded before 16:50
+still misses at 16:50 (a judgement call: an old save loaded at 16:47 gets the dip with no heads-up; the same as a new
+save at 16:47, and once).
+- fridays_check (FR4's two real localStorage loads): OK on the combined build (above).
+- Mutants against FR4's fridays_check (f83c8db): `m14_noold` (the guard gone) **CAUGHT** ("an old save loaded on a
+  Friday evening got the missed address [[5, 0, 48, 1, 1, ...]]"); `m15_noclear` (FRI_OLD never cleared) **CAUGHT**
+  ("an old save loaded before 16:50 not missed at 16:50").
+- Live on the combined build: no dip, no banner, no Captain's Mail (above).
+
+## 3bd9b2c (FR4: events_check's deck walks, backlog #24): PASS
+
+Check only. A walker counts if they settle in the seat `planWhere` gives them at that minute (an `ev-<id>` segment on
+that deck), so a re-plan by the week's friendships doesn't count as a miss; a no-show still counts as missing (they stay
+in `att`). It is what my own probe (dropped once the combined build showed 8/8) would have counted. FR4's planted
+no-show: still FAILs.
+
+## 2078010 (FR4: the #20 hold fix): withdrawn
+
+PB2 failed it (Day 0's arrival dinner); reverted in 951c0cd (game = 3bd9b2c's: `git diff f83c8db 951c0cd --
+starship-cadet.html` is empty). Not in the release; the release ships e18844f as reviewed above (its hold doesn't fire;
+the fallback gets Halloran to the tea corner). The proper fix is on claude/fridays-20 (PB2: PASS), after the release.
+
+## The release candidate (0.64.12): integration a4a5735 + storm 0b77dfc + fridays 951c0cd
+
+Built locally: sha256 `23fb9118abc3679fd1eea658a072817fd6f2831a9560f1bf86358ada768cb7df`, the same as CR1, CR2 and
+CR3's. Against the build of the round above it differs only in the build number and 0.64.12's camera zoom (1.62/1.22).
+
+Lead 25's check runners on it (their notes on claude/checks-cr1 90bc8b3, checks-cr2 37b9383, checks-cr3 5a609c8):
+- CR1: player, intro --week (on; and a Fridays-off copy), --firsts, --evening, interactions, clothes, bubble, devmode:
+  all OK.
+- CR2: talk, social, join, lines (0 errors; 49 warnings, all the storm meetings' "same line also in"), lines --day,
+  food_check 1 7, mech: OK. career_check FAIL (backlog #12, the same on integration). food_check 11 4 FAIL (the
+  harvest salad: Day 20 is now the farewell supper; the same on plain a4a5735, from the crew patch 0.64.11).
+- CR3: arc, path, disc, puzzle, deck OK; perf under 450 everywhere (flags: the Friday scenes, Fridays off on plain;
+  memory #14); tiles_check's old FAIL was the check's timing (fixed in the check, after the release).
+
+Mine on it: check_fast QUICK CHECK OK (353 s); fridays_check FRIDAYS CHECK OK (1542 s). (events_check with 3bd9b2c
+and the Day 12 shot follow below when done; not needed for the verdict.)
+
+## FINAL VERDICT: the release (Short Fridays on, with the storm update and EVENTS_ON): PASS
+
+For 0.64.12 = integration a4a5735 + storm-update 0b77dfc + fridays 951c0cd, both switches on as merged, game sha256
+23fb9118...cb7df. No blocking finds. PR8's three turn-10 finds are closed: (1) Day 12's lectern (by the storm update:
+Marrow and Vance speak, live and on paper); (2) Day 19's welcome (c3b76f4, PASS); (3) the old save's Friday evening
+(5b55f84, PASS, mutants caught, live). PR8's quiet-watch knock-on doesn't show on the real combined build (8/8), and
+the check is sturdier anyway (3bd9b2c, PASS). Off is identical to integration (cadet_test).
+
+Not blocking, after the release: backlog #20's proper fix (claude/fridays-20, PB2 PASS; e18844f's hold doesn't fire,
+the game copes live); backlog 25 (intro beats sharing a stand-in station on Days 1-3); the fridays_check gap for a
+welcome said with nobody arriving; the old fails career #12 and food 11 4 (the harvest salad, from 0.64.11).
+For BM13: plans/backlog.md conflicts on both merges (keep both sides' rows); take fridays' build-table block (it
+already carries integration's rows); day_check.py must be storm-update's.

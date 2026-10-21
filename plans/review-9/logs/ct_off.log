@@ -1,0 +1,19 @@
+a_start        differing px      0  max 0
+b_wander10s    differing px      0  max 0
+c_rotated      differing px      0  max 0
+d_wallslow     differing px      0  max 0
+e_night        differing px      0  max 0
+f_noshadow     differing px      0  max 0
+g_nocrew       differing px      0  max 0
+h_crewback     differing px      0  max 0
+i_tap0         differing px      0  max 0
+i_tap1         differing px      0  max 0
+i_tap2         differing px      0  max 0
+i_tap3         differing px      0  max 0
+i_tap4         differing px      0  max 0
+j_steer1       differing px      0  max 0
+j_steer2       differing px      0  max 0
+errors A [] errors B []
+taps ['Very hungry', 'Bursting', 'Bursting', 'Bursting', 'Bursting']
+ALL IDENTICAL
+rc=0 secs=89
