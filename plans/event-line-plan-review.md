@@ -290,3 +290,14 @@ R2-1 was already in 54e36dc.
 
 **Verdict on claude/event-plan-line c9d92db: PASS.** The plan's recommendations, including line-q9 A "The one on
 watch", are safe to take. Next for me: the build review of this event, turn by turn, once L1 is pushed.
+
+### a64fb68: option A2 (Tomas comes, added for the user's question)
+A fair alternative, with the trade-off stated honestly, and A is still the right recommendation. Two small fixes to
+A2's text:
+- **A2-1. Three answers, not four.** The meeting takes three replies at most (EW1's format). In A2, "even the ones on
+  watch" no longer means anything, because Tomas is standing there. A2's answers should be: proud, "We'll answer
+  together", and the punch joke.
+- **A2-2. Nobody "comes down".** Tomas's post (`2-watch-6`, the lift lobby) and the watch office are both on Deck 2.
+  The covering hand walks across Deck 2 to his post, and Tomas comes down to the plaza.
+
+Verdict stays **PASS**, with A2-1 and A2-2 as wording fixes for EP2. Neither changes the recommendation.
