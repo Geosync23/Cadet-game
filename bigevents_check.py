@@ -141,7 +141,7 @@ PAPER = r"""(() => {
     // the most crew there at once (lead 23: never over its places at any one time), minute by minute through the gathering
     const B = (g.day - 1) * 1440, segs = people.flatMap(p => planDay(p, g.day).filter(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-'))));
     let peak = 0, peakAt = null; for (let m = B + e.from - 30; m < B + e.to + 30; m++) { const n = segs.filter(s => s.from <= m && m < s.to).length; if (n > peak) { peak = n; peakAt = m - B; } }
-    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
+    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
   const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
@@ -448,9 +448,9 @@ def judge(a, tag):
     # the gatherings fit their places
     for c in a['caps']:
         if c.get('missing'): fail(f"{tag}: gathering {c['id']} isn't on Day {c['day']}"); continue
-        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}), {c['cap']} places ({c['seats']} seats) in {c['rooms']}")
+        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}){', dropping in for ' + str(c['stay'][0]) + '-' + str(c['stay'][1]) + ' min' if c['stay'] else ''}, {c['cap']} places ({c['seats']} seats) in {c['rooms']}")
         if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
-        if c['want'] > c['cap']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")
+        if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
         if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")
         if c['mess'] and c['want'] > MESS_SEATS and c['cap'] - c['seats'] < c['want'] - MESS_SEATS: fail(f"{tag}: {c['id']} in the mess: {c['want']} people, {c['seats']} seats and too few standing places")
         if c['went'] < c['want']: note(f"{c['id']}: {c['want'] - c['went']} meant to go but aren't planned there")
