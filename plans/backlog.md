@@ -34,3 +34,4 @@ Lines are at 0.64.2 (rec-cand-s1 1eeb99c); `python3 tools/section.py --where LIN
 | Bug | Fixed in |
 |---|---|
 | Two wall faults at once could leave you queued for a climb that never comes (`recBelaysUsable`) | 0.64.1 (RE20, item C, the user's) |
+| 17 | **Works reputation pace: the user plans a later balancing pass** (lead 21, 2026-10-20). Measured by patch builder B: a very busy player is "Trusted" on Day 3 and "Relied on" on Day 4 (row 12), and both predate batch F (career_check gives the same points a day before and after `JOB_PACE` .72, since its paper players don't time jobs; in timed play a steady player does 6.0 jobs a shift day before, 6.2 after). Left as they are until the pass. | `24` | Works career engineer | PB | **Waits for the user's balancing pass.** |

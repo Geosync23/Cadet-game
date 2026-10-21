@@ -183,7 +183,7 @@ with sync_playwright() as pw:
 
     print('(e) Bands, skill words, tools, penalties:')
     e = ev("""(() => { SHIP.works = null; setShipNow(1440 + 600); const W = worksInit(), out = {};
-      out.bands = [0, 7, 8, 17, 18, 29, 30, 47, 48, 90].map(x => { W.xp = x; return worksBand(); });   // the patch's #16: "relied" at 48 (was 40)
+      out.bands = [0, 7, 8, 17, 18, 29, 30, 39, 40, 90].map(x => { W.xp = x; return worksBand(); });
       W.rank = 'officer'; W.xp = 0; out.officer = worksBandWord(); W.rank = 'junior';
       out.words = [0, 4, 5, 14, 15].map(n => { W.sk.oven = n; return skillWord('oven'); });
       out.give = toolGive('scanner'); out.again = toolGive('scanner'); out.has = hasTool('scanner'); W.tr.m7 = 5; for (let k = 0; k < 10; k++) worksUse('m7'); out.useWear = toolWear('scanner'); (W.op[99] = W.op[99] || []).push('m11'); for (let k = 0; k < 10; k++) toolWear('scanner', 2); delete W.op[99]; out.wear = toolWear('scanner');   // M11 (0.45.7): a use doesn't wear the scanner, a scan does (toolWear(id, n of 100))
