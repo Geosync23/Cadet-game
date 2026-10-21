@@ -46,7 +46,8 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 - **If you miss the ceremony,** a first-timer answers with the plain line ("We're new, and we're nervous, and we came anyway."), and that goes on the plaque. You can still take Tomas his mug and walk the Lap.
 - **No spoilers** (EW1's guard rails, 01:07):
   - Tomas's lines are only about missing the ceremony. Nothing about failing, tests or Holt (his arc's beat 5), and nothing about staying (beat 7). He never says or reacts to "stay".
-  - Holt has one warning reaction line ("Veyli reach. Hm. Keep your wits."), never a scene; his arc's beat 4 is untouched.
+  - Holt has one warning reaction line about the here and now ("Crossing or no crossing, the plaza stays tidy. And nobody spills that punch on my deck."), never a scene. EW1 (01:20): his distrust of the Veyli comes from "one bad day on a border patrol, years ago" (his arc), so on a border-crossing day his line says nothing about borders, past crossings, "last time" or the Veyli.
+  - The two-years fact is neutral: "on a quiet charting run", with no incident attached, so nobody asks "what happened last time?". The head writer's seat confirms it doesn't clash with Holt's or Saruth's timeline before it goes in facts.md.
   - Nothing about a delegation, guests or the Envoy's purpose.
 - **What it needs** (about one turn more than a plain ceremony):
   - the Saturday moment that follows Tomas from 19:00 to bed (section 20c's moments, like `moment:quiz`: the social seat), never moving his plans;
@@ -144,7 +145,7 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 - **The punch bowl (fix 8):** one prop at the front of the plaza, 14:30-15:15, 1-2 draw calls (performance seat, L3).
 - **The mugs (fix 9):** "mugs out" uses the crowd's drink pose with patch E's mug, so `MUG_ON` is needed first.
 - **The jobs (fix 10):** on the mess sign-up sheet (`DECK_DRESS.signupMess`, built for the storm) and offered by Brennan in the mess, not the Works bay board two decks down.
-- **The first-timers (fix 2, question 5):** `lineFirst`, made at load from the roster's `since` (under two years), never `R()`, never saved, never a guest. The fact "the Wren was last in the reach two years ago" goes in `content/facts.md` (the head writer's). The cast slot `first:2` is two of them off shift that day, by hash.
+- **The first-timers (fix 2, question 5):** `lineFirst`, made at load from the roster's `since` (under two years), never `R()`, never saved, never a guest. The fact "the Wren was last in the reach two years ago, on a quiet charting run" goes in `content/facts.md` (the head writer's). The cast slot `first:2` is two of them off shift that day, by hash.
 
 ## Hash keys (fix 11)
 | k | What | Status |
@@ -201,7 +202,7 @@ The build number is the build master's.
   - the Lap moment (Zeke's last line, Pell's punch, Tomas's three replies);
   - Zeke's worst face;
   - the punch secret (Brennan, and the supper guess);
-  - Holt's one warning line;
+  - Holt's one warning line (the here and now only: duty, the plaza, the punch);
   - Saruth's one afterglow line;
   - the onset/resolution split;
   - the supper's dish words;
@@ -212,7 +213,7 @@ The build number is the build master's.
   - Brennan's saved mug;
   - the device notice;
   - the Record line;
-  - facts.md: "the Wren was last in the reach two years ago".
+  - facts.md: "the Wren was last in the reach two years ago, on a quiet charting run".
 - **Lengths:** bubbles 60 characters, cards 90, meeting lines 140, the plaque about 100. lines_check still needs its length rule for event Mail, keepsake and plaque texts (EV1 or the dialogue engineer).
 
 ## Risks
@@ -234,7 +235,7 @@ The build number is the build master's.
 2. **What do the gold hull lights look like?** Recommended: a warm gold in every window and slightly warmer light indoors, 14:30-19:15. Others: windows only; also gold light strips along the promenade (a few more draw calls).
 3. **The horn (the game has no sound):** Recommended: a felt moment: one soft gold pulse of the lights, crew stop and look up, a one-line notice. Others: also add the game's first sound, one horn note (sound is new work: a mute switch, phones on silent); the banner only.
 4. **The Line supper:** Recommended: the Sunday table re-dressed for the day: the crew's voted dish plus Brennan's pudding, renamed, 18:00-19:15, up to about 60. Other: a set Line dinner in place of the vote (the galley owner's change: the menu board and the vote note).
-5. **Who are the first-timers at the front? (redone with the true numbers)** Recommended: everyone aboard under two years, with the written fact "the Wren was last in the reach two years ago" (21 crew; about 8 off at 14:30, more with question 7's yes). Others: under six months (4 crew, 2 of them there); only you.
+5. **Who are the first-timers at the front? (redone with the true numbers)** Recommended: everyone aboard under two years, with the written fact "the Wren was last in the reach two years ago, on a quiet charting run" (21 crew; about 8 off at 14:30, more with question 7's yes). Others: under six months (4 crew, 2 of them there); only you.
 6. **If you miss the ceremony:** Recommended: you still crossed (the gist by Mail, the certificate anyway; a first-timer's plain line goes on the plaque), and Brennan saves you a mug at supper. Others: the gist and the certificate only; the certificate only if you were there.
 7. **Does the day shift step out for the ceremony? (replaces the Winner Stays On question)** Recommended: yes, 14:30-15:15, everyone at a post that can wait stands easy, except the bridge, the watch and the galley line (about 50-60). Other: only off-duty crew come (about 35-45).
 8. **Something to do beforehand:** Recommended: two small volunteer jobs on Sunday 12:45-14:15 on the mess sign-up sheet (carry the punch, hang the ribbons), never scored. Other: none, just turn up.
