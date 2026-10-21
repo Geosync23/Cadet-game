@@ -105,3 +105,8 @@ The user answered the Dev mode plan (artifact https://claude.ai/artifact/2ugbTkk
 - **An optimization pass comes right after the ship-wide events** (step 4), before Pillar 5 steps 5-6 and the character arcs. Not tonight. Known input: the page reload in the test container rose from 14 s (0.64.4) to 16-18 s (0.64.5); intro_check now takes >2 h whole.
 - Ship-wide events are planned and built one at a time, in story order (Crossing the Line Day 7 → ion storm Days 11-15 → comet Day 16 → visit Days 26-30), each plan and each build adversarially reviewed. The first events should carry "a really interesting little story", not just ceremony.
 - Overnight mode: the lead takes the recommended answer to each plan question and logs it (plans/overnight-decisions-<lead>.md) so the user can change any in the morning ("as always").
+
+## Overnight goals (the user, ~03:30 UTC 2026-10-21; overnight mode not started yet)
+1. Make and implement two ship-wide events: the ion storm (plan claude/event-plan-storm, decided) and Crossing the Line (plan claude/event-plan-line, decided), on the events base, each build adversarially reviewed (ER2), switched on after review.
+2. Then the optimization pass (page load, sim cost, check run time), planned first with a plan page.
+In overnight mode: no notifications; recommended answer to every plan question, logged in plans/overnight-decisions-lead22.md.

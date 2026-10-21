@@ -318,3 +318,4 @@ EP2 (~400k) idle, done.
 |---|---|---|---|
 | Events writer 2 EW2 | session_0138EzUAZjAJ3rUMiwyK3m3p | `claude/events-lines-2` | (1) Veyli lore: canon into facts.md + design-doc, audit fixes, ~23 new lines; (2) the Line's ~14 "why it matters" lines; (3) storm story lines (brief ad470a1). PR2 reviews |
 EW1 idle (handover f474073).
+**~03:30 UTC, the user: overnight goals** = build the ion storm and Crossing the Line (both plans decided), then the optimization pass. Overnight mode not started yet.
