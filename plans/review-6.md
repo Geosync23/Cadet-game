@@ -23,3 +23,15 @@ Setup: `pip install playwright`; three and acorn in /tmp/cadet-work (npm pack th
 
 ## Storm head adb71aa (f32d901 + 2228a05), base 74c216e
 - cadet_test 74c216e→adb71aa off: ALL IDENTICAL.
+- check_fast on adb71aa: QUICK CHECK OK in 237 s.
+- events_check on: EVENTS CHECK OK. day_check on, Days 13 and 14: DAY CHECK OK both.
+- PR4's fix 1 (`lap_d15.py`, on-copy): the Monday Day 15 Lap of the Wren is in eventsOn(15) at 20:30, TRAD_JOIN and
+  joinable:true (inTraditions:false there is the raw identity test on the dressed copy, expected; evIsTrad is what the game uses).
+- PR4's fix 3 (food_check on, 11 4): no Day 11-14 FAIL; the Day 14 dinner wait is gone (carts wait 2 that day).
+  Only Days 28 and 31 fail, as on S1 (known).
+- Props (`props_probe.py`, on-copy, Day 13 18:23 in the mess): 56 in the mess, Brennan in, Lukas out; FEEL_S.lamp .85;
+  lanternMess on; at most 220 draw calls. Shot `shots/props_supper.png`: lanterns on the long tables, full supper, readable.
+  The mess-only dimming (lead 23's call) is not pushed yet: re-check FEEL_S.lamp outside the mess when it lands.
+- EC1's 037a149 on its own branch: BIGEVENTS CHECK OK.
+- Gotcha (PR6): bigevents_check finds cadet_test.py from its own file name; a renamed copy dies with a SyntaxError.
+  Keep copies as `<dir>/bigevents_check.py` next to a cadet_test.py.
