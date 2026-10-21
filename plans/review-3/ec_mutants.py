@@ -22,6 +22,10 @@ M = {
  'd4_trackedClosed': ("if (shut) continue; out.push({ sec: 'place'", "if (false) continue; out.push({ sec: 'place'"),
  'd5_openForIgnored': ("return !EV_OPEN_FOR.some(o =>", "return true || !EV_OPEN_FOR.some(o =>"),
  'd6_openForDeck': ("o.deck === g.deck && o.room === g.room && evBeatsOn(d)", "o.deck === g.deck && evBeatsOn(d)"),
+ 'e1_partyAsEvent': ("    if (mo && EV_SHIPWIDE.some(x => x.id === mo.id)) continue;", ""),
+ 'e2_partyNotTrad': ("const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;", "const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin || e.id === 'party') continue;"),
+ 'e3_toastKeptOn': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? m.notify : m.notify }"),
+ 'e4_toastDroppedOff': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? null : null }"),
  'm8_ladderSun': ('"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990]',
                   '"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 6}, "at": [1150, 1200]'),
 }

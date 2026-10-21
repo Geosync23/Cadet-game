@@ -232,3 +232,15 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - d6: EV_OPEN_FOR opens the whole deck.
 
 **Note:** EV_OPEN_FOR opens 7A for fridayAddress (15:30-17:00), which covers FR1's 16:00-16:50.
+
+## EC1 turn 5 (the device part after F3a's fixes and F0c): claude/bigevents-check f5c1599. PASS
+
+**Checks:**
+- The game change is EV1's (PR2 reviews it).
+- The check is OK; check_fast is OK in 203 s.
+
+**Mutants e1-e4, all caught:**
+- e1: the party is an event item again;
+- e2: the party is missing from the traditions;
+- e3: the toast is kept with heads-ups on;
+- e4: the toast is dropped with heads-ups off.
