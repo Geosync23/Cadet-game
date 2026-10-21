@@ -1,0 +1,62 @@
+{
+ "sc": "skip",
+ "build": "/tmp/claude-0/-home-user/ede8ebf0-4d7f-58dc-8854-06cbdac645fa/scratchpad/b/f11.html",
+ "sleep": [
+  {
+   "work": 50,
+   "address": 0
+  },
+  "Day 20, Saturday 07:00",
+  [
+   0,
+   19
+  ],
+  {
+   "work": 48,
+   "address": 1
+  },
+  [
+   [
+    "The Captain's Friday address",
+    "You missed the Captain's address. Her words are in your Mail.",
+    "Day 20, Saturday 07:00"
+   ]
+  ],
+  [
+   [
+    19,
+    "16:50",
+    "All hands: the Captain's Friday address"
+   ]
+  ]
+ ],
+ "two": [
+  {
+   "work": 48,
+   "address": 1
+  },
+  "Day 34, Saturday 07:00",
+  [
+   0,
+   33
+  ],
+  {
+   "work": 6.71,
+   "address": 3
+  },
+  2,
+  [
+   [
+    33,
+    "16:50",
+    "All hands: the Captain's Friday address"
+   ],
+   [
+    26,
+    "16:50",
+    "All hands: the Captain's Friday address"
+   ]
+  ]
+ ],
+ "errors": []
+}

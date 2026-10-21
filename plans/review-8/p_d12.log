@@ -1,0 +1,9 @@
+loaded Day 12, Friday 15:56 SHORT_FRIDAY True EVENTS_ON False
+seat [34, 9]
+fill [['Day 12, Friday 15:56', 46, [], None], ['Day 12, Friday 16:00', 48, [], None], ['Day 12, Friday 16:04', 49, [], None], ['Day 12, Friday 16:08', 50, [], None], ['Day 12, Friday 16:12', 50, [], None], ['Day 12, Friday 16:16', 51, [], None], ['Day 12, Friday 16:20', 51, [], None], ['Day 12, Friday 16:24', 51, [], None], ['Day 12, Friday 16:28', 51, [], None]]
+Traceback (most recent call last):
+  File "/home/user/r8/plans/review-8/p8_fri.py", line 80, in <module>
+    res['storm'] = ev("[typeof eventBandOf === 'function', typeof eventOn === 'function' ? eventOn('ionStorm') : null, eventsOn(%d).map(e => e.id + ' ' + hhmm(e.from % 1440) + '-' + hhmm(e.to % 1440))]" % day0)
+                      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+TypeError: not enough arguments for format string
+rc=1 secs=1138

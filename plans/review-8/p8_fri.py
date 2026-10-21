@@ -77,7 +77,7 @@ elif sc == 'd12':
     res['fill'] = log[::10]; print('fill', res['fill'], flush=True)
     res['speech'] = ev("(friSpeech(%d) || []).map(l => l.who + ': ' + l.text)" % day0)
     res['said'] = ev("FRI_SAID"); res['bub'] = ev(BUB); pg.screenshot(path=str(OUT / (tag + '_d%d_1630.png' % day0)))
-    res['storm'] = ev("[typeof eventBandOf === 'function', typeof eventOn === 'function' ? eventOn('ionStorm') : null, eventsOn(%d).map(e => e.id + ' ' + hhmm(e.from % 1440) + '-' + hhmm(e.to % 1440))]" % day0)
+    res['storm'] = ev("[typeof eventBandOf === 'function', typeof eventOn === 'function' ? eventOn('ionStorm') : null, eventsOn(%d).map(e => e.id + ' ' + hhmm(e.from %% 1440) + '-' + hhmm(e.to %% 1440))]" % day0)
     print('speech', json.dumps(res['speech'], indent=0), flush=True); print('said', res['said'], 'bubbles', res['bub'], 'storm', res['storm'], flush=True)
 elif sc == 'skip':
     # PR5's C2 with the game's own sleep (sleepUntil), then one jump across two Fridays (as Dev's clock could)
