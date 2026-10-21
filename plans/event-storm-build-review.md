@@ -81,3 +81,22 @@ Both are under 450.
 I'll check those in the fix round if lead 23 wants.
 
 **Verdict: PASS WITH FIXES** (fixes 1-4). After them, and with a clean bigevents_check, S10 can go to the user's review.
+
+## Round 2 (5f3fc3f): PASS
+- **Fix 1:** bigevents_check from EC1's 037a149, which judges a gathering with `stay` by the most there at once, is OK
+  on 5f3fc3f (EV4's run).
+- **Fix 2:** DEV_NOTES now says "Fridays and S2 together, or S2 first", with FR2's minutes. EV4 builds S2 next, with
+  claude/fridays merged in (lead 23's call).
+- **Fix 3:** Lukas's reach is now 6.5 m, for the moments and for his bubbles. EV4's walking probe
+  (`plans/storm-probes/walk_servery.py`) has the player walk to the servery and queue with a real tap. It now opens at
+  17:10 in the queue, 5.5 m from him; before the fix it never opened all evening.
+- **Fix 4:** `story:fri` and `story:sat` are now set on the reply, or through the moment's new `onEnd` when the panel
+  closes, not when it opens. A reload mid-panel offers the moment again. While the panel is open, `DIALOGUE` stops it
+  opening twice. Walking away still closes it for good.
+- **My re-run on a switched-on copy of 5f3fc3f:** Friday, the Saturday errand and Brennan's "asked" line at supper all
+  play as before. The supper has 51 at once (22 standing) at 272 calls. No errors.
+
+The nits (commendation timing, gist order after a long skip) stay noted. Neither blocks S10.
+
+**Verdict on claude/storm-update 5f3fc3f: PASS.** S10 can go to the user's review once S2 is in with the Fridays, as
+DEV_NOTES now says.
