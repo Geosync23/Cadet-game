@@ -77,4 +77,4 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - ramp_probe.py (real save, 390 and 360, Day 21): Theo in the aisle 14:57-14:59 (also after a reload at 14:58), gone by 15:02, ramp shut by 15:04; reload at 16:00 shuts it again; shut 17:36-17:38, Raman's toast 17:40, open by 17:42; Basil aisle 17:40-17:42, crowd spot by 17:47; Zeke at the ramp foot with 'greet'; reloads at 17:38 and 17:50 clean; no errors. (The 360 "Zeke at 17:39" line is a probe artefact: that minute was logged under the reload, where Zeke is at the foot.)
 - The fix: arrivals by the lift (rotTernIndex -1) passes events_check; only the probe catches it (and the leavers-by-the-lift mutant, run against the probe only). Asked for a paper check of the rotation day's segments (arrive/aisle, the crowd spot, board/aisle, greet/foot).
 - Nits: the ramp swings shut on a reload at 17:38 (not saved: expected); a day with leavers but no arrivals would leave the ramp shut after 17:40 (none exist).
-- Shots: plans/review-7/shots/ramp_390_1441.png, ramp_390_1748.png, ramp_360_1456.png.
+- Shots: plans/review-7/shots/ramp_390_1741.png, ramp_390_1748.png, ramp_360_1456.png.
