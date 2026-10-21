@@ -149,7 +149,18 @@ Planning (14) 281 ms, machines (17) 225, events (18) 199, social stories (20c) 1
 - **player_check is a third of the round** (36 min 39 s); day_check is 7 min 46 s for one day, and a release runs Days 0-8 (about an hour). Then interactions, perf, day, events, mech, bubble, devmode and device, 4-8 min each.
 - Not timed here: bigevents_check (on the events branch), and the build master's smoke and newgame checks.
 
-## 5. What this means
+## 5. After the review (ER2, round 1)
+
+### Shaders within one run (`opt-probes/compile_probe.py`, `keep_probe.py`; phone portrait; another check not running)
+
+- **`renderer.compile(scene, camera)` right after `goToDeck`:** the first frame falls to 37-144 ms (from 0.9-3.7 s), but the compile itself takes 0.7-2.4 s, so the total is the same; it compiles one extra program per deck (things not yet drawn). It moves the wait, it doesn't remove it.
+- **Keeping every compiled program** (one extra `usedTimes` on each WebGLProgram once it exists, so three r128 never deletes it when a deck's materials are disposed): 22 programs after one lap, then no more. First frames after each change over a second lap of all seven decks: **6.3 s, against 9.2 s** without (Decks 5, 1, 6 and 7 at 10-30 ms instead of 0.5-2 s; Decks 3, 2 and 4 still 1.5-2.9 s, so their first frame is something else: uploads, the crowd or shadows).
+
+### Affected checks, a lower bound (`opt-probes/affected_estimate.py`)
+
+The last 20 non-merge commits that changed the game on `claude/integration`, mapped section by section through the DEV_NOTES "run it whenever" rules (condensed in the script), with check_fast's own four on top and this file's check times: **4.2 checks and 28 minutes a turn on average**, against 22 checks and 106 minutes for all of them. One turn (0.64.7's, sections 13 and page) runs everything; a turn touching section 15 costs about 45 minutes because of player_check. The map from real runs (coverage) can only add checks, so this is the least. Whether those picks would have caught every real failure isn't measured here: it needs the build table's failures per merge, which is turn 1's replay.
+
+## 6. What this means
 
 - **For the player:** opening the page costs about 3 s of game script on this machine (~10-14 s on a mid phone, by the 4-5× rule), a third of it painting texture noise; the busiest frames spend ~2 ms (8-10 ms on a phone) in game code before drawing; multi-megabyte crowd uploads make occasional hitches.
 - **For the checks:** every page open costs ~7.5 s alone (about half shader compiling in software), more when lanes share the box; drawn frames after skipped ones pay for the crowd's catch-up uploads; and every turn runs all its checks whatever it touched.
