@@ -52089,7 +52089,6 @@ function devmodeCareer(body) {
   const give = Object.keys(WORK_TOOLS).filter(k => !W.tools[k]);
   for (let i = 0; i < give.length; i += 3) devmodeRow(body, give.slice(i, i + 3).map(k => ['Give ' + toolName(k), () => devmodeDo('Career: give ' + toolName(k), () => (toolGive(k), 'You have ' + toolName(k) + ' now.'))]));
 }
-if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- the Speed card (optimization pass #8, the render seat RN1; plans/opt-plan.html) ----
 // The Speed tab shows how the game runs on this phone, to read out or screenshot: the screen's size in CSS pixels and
 // its pixel ratio (and every size seen since the page opened, so folding or turning the phone shows both), how long
@@ -52154,6 +52153,7 @@ function devmodeSpeed(body) {
     ['Start again', () => { DM_SPEED.fr = []; DM_SPEED.k = 0; devmodeSpeedText(); }, { aria: 'Forget the frames so far and measure from now' }]]);
   devmodeSpeedText();
 }
+if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----
 
 // =====================================================================
