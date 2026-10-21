@@ -162,3 +162,55 @@ nobody wants anything. The game's own data already holds a small story. I'd look
 
 **Verdict: PASS WITH FIXES** (fixes 1-12). The story section is still to come: I'll review it, and EP2's fix
 round, next.
+
+## Round 1b: plan 1.1 (85d49ce), the story section (line-q9)
+
+85d49ce was written alongside round 1, so **round 1's fixes 1-12 are all still open**: questions 5 and 7, the crowd
+numbers, the dish, Saruth and the rest. This pass is on the story, which I checked against the game the same way
+(a new game on 0.64.6).
+
+### Is it a good story? Yes. A is the right recommendation.
+- It has a person who wants something: Tomas, your real bunkmate, is in Bunk 1 (`4-B1-1`) with you. He came aboard
+  "one week" ago, as you did, and he's the other new face at First Light.
+- It has a turn ("the wind-up is half true"), a choice made in front of the crew, and a lasting trace (your words on
+  the plaque).
+- It still ends well if you miss it.
+- It keeps EW1's guard rails: nothing about his exam (beat 5), the list (beat 6) or staying (beat 7), and no Holt.
+- Pell (two years aboard) is a believable old hand for the wind-up. With round 1's fix 2(a) ("last in the reach two
+  years ago") he's exactly not a first-timer, which is neat.
+- B and C are described fairly as weaker. line-q9 says plainly that A replaces the v3.2 "one reply (proud, nervous,
+  joking)" wording. No visit spoilers.
+
+### Fixes for the story (S1-S4)
+- **S1. Tomas isn't in Bunk 1 on Saturday evening.** On Day 6 in a new game he finishes his shift, then:
+  - 19:14-20:36 in the mess;
+  - 20:36-21:15 in the garden;
+  - 21:15-22:05 in the mess again;
+  - 22:08-22:40 climbing on the rec deck;
+  - 22:42 in Deck 4's common room, and in bed at 22:46.
+
+  So "21:00-22:30 in the bunk room" never happens, and a 22:30 message would come from the climbing wall. Don't
+  move his plans; that's the planner, and it would change Day 6 for everyone near him. Instead:
+  - the moment finds him wherever he is from 19:00 until bed (a 20c moment that goes with Tomas, not with a room);
+  - or it's at his bedtime in Bunk 1 (from about 22:45);
+  - and the fallback Mail comes when he goes to bed (about 22:50), not at 22:30.
+- **S2. His post is Deck 2's watch room, not the plaza.** On Day 7 he's at `2-watch-6`, 08:51-17:00, so "keeping the
+  plaza is his post that hour" isn't true. Recommended:
+  - the Captain sent for him ("I asked the watch to spare you for ten minutes"), and he arrives in his Watch
+    uniform;
+  - drop the `watch:1` cast slot. The watch hands actually on shift at 14:40 (Nakamura and Ueda in a new game) are
+    in the watch room, two decks up, so a line from one "on the plaza" would need F0b to move a second on-shift
+    person for one line.
+
+  If a watch line is wanted, it's a Mail or a bubble in the watch room, never a plaza line.
+- **S3. "Eighty people."** 76 are aboard, and the crowd will be about 45-60. Use "Everyone. The whole ship." It's
+  truer, and just as scary to him.
+- **S4. A check that he's there.** bigevents_check's cast part must show Tomas (on shift) planned at the plaza for
+  14:40-14:55 and back at his post afterwards. L2 waits on F0b's on-shift case (risk 10), not only its called-in
+  case. Without it the story's middle is empty.
+
+Note: under round 1's fix 2(a), Ueda (ten months, on watch) is a first-timer too. That's fine: she stays at her
+post, as the watch does.
+
+**Verdict on 85d49ce: PASS WITH FIXES.** That's round 1's fixes 1-12 plus S1-S4. The story itself (A) is good and
+should be recommended. I'll review EP2's fix round when it's pushed.
