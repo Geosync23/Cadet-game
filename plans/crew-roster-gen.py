@@ -784,7 +784,7 @@ RES_BIOS = {'cadet': ['Brand new, and trying very hard not to look it.', 'Fresh 
             'other': ['Transferred in from another survey ship, with stories.', 'Has served on three ships and likes this one already.', 'Arrives with a good reputation and a bad haircut.']}
 RES_LIFE = ['Has never seen a nebula.', 'Brought a plant from home that is not doing well.', 'Writes letters home every week.', 'Plays the harmonica, quietly.',
             'Is trying to learn everyone\'s name in a week.', 'Has a cat back home, and talks about it a lot.', 'Collects mission patches.', 'Bakes on rest days.']
-ROTATION_DAYS = [35, 77, 119, 161, 203, 245]      # Sundays, every six ship weeks from week 5
+ROTATION_DAYS = [21, 77, 119, 161, 203, 245]      # Sundays: the first in week 3 (Day 21, the user 2026-10-21; was 35), then every six ship weeks from week 11
 ROTATION_IN = [1, 2, 2, 3, 2, 2]                  # arrivals each time (the same number leave); the first brings a new cadet
 def reserve(out):
     used_last = {e['name'].split()[-1] for e in out}; used_first = {e['name'].split()[0] for e in out}

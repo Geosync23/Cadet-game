@@ -20,7 +20,7 @@ of talks for each type of work, so crew can talk about something a little more p
 | Store | Esposito, Ishikawa | 2 | could merge with Garden |
 
 Guests and the roster's `civilian` group (empty today) have no work pool. Later arrivals draw their pool from day one;
-leavers stop. Four arrivals are new cadets (days 35, 77, 161, 203): talks with a past in the job skip them.
+leavers stop. Four arrivals are new cadets (days 21 (was 35), 77, 161, 203): talks with a past in the job skip them.
 
 ## More personal, by tier (no stranger-tier work talks)
 

@@ -920,3 +920,12 @@
 - Great question! Right, so, picture a coil. A moody one.
 == talk.listen
 - Thanks for listening! Right, onward. Mind the coils.
+
+// ---- EW1 (events writer), short Fridays part E (plans/fridays-plan.md; moved in by FR2, turn 8): two goodnight lines
+// on Day 0, said between walk.goodnight.2 and walk.goodnight.3 only when SHORT_FRIDAY is on (section 18f's
+// friNightKeys; off, nothing asks for these keys)
+== week1
+? flag:walk.goodnight.friday.1
+- Fridays we knock off at half three.
+? flag:walk.goodnight.friday.2
+- Captain talks to all of us at four, then dinner.
