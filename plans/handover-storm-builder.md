@@ -70,6 +70,15 @@ Off = today's storm: cadet_test ALL IDENTICAL against the turn before, every tur
   "Lap of the Wren not on D15 at 20:30" (my probe has it on: check how its 'calendar'/'on' parts flip the switches;
   EV_DAY_DRESS needs EV_STORM_ON and EV_CAL_ON); plus its known 'off:'/'calendar:' rows that test a switched-on copy.
 
+## PR4's S1 review (PASS WITH FIXES)
+
+- Fix 1 (the pick held): done in 3367aab (see the open find above for the day-10 path).
+- Fix 2 (an event ended early, Dev mode's End, got no debrief): done after fc23557 (eventFinish sends its own debrief
+  unless the timed one already went: `e.mine['mail:debrief']`).
+- Nits, open: "There's a commendation in your Mail" is said about 12 minutes before the letter (send it as the all-clear
+  opens, or reword); `event.ionStorm.allclear.you.jobs` can't be reached (one job + the all-clear is always a
+  commendation); stormScripts' fallback index is -2 when neither "Mine too" nor a choice is found.
+
 ## Left to do
 
 1. **S2 (waits on lead 22's call about Fridays):** the 'captains-address' tradition exists only on claude/fridays.

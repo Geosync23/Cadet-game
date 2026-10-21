@@ -36642,7 +36642,7 @@ function eventFinish(e, def, t, quiet, out = []) {
   const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
   for (const tr of traces) if (!SHIP.traces.includes(tr)) SHIP.traces.push(tr);
   SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
-  if (typeof mailSend === 'function' && def.debrief && def.debrief[band] && !(def.mail && def.mail.debrief)) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
+  if (typeof mailSend === 'function' && def.debrief && def.debrief[band] && !(def.mail && def.mail.debrief && e.mine['mail:debrief'])) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
   const mine = e.mine || {};
   if (!def.commendAt && evCommended(mine)) {   // your part: commended (Part 2, "How outcomes are scored"); the storm update's comes at the all-clear
     SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
