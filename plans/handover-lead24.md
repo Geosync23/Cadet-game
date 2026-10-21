@@ -1,5 +1,27 @@
 # Handover: lead 24
 
+## START HERE (new account, new lead 25)
+1. Clone github.com/Geosync23/Cadet-game (the new account needs GitHub access to it). Start your branch claude/lead-25 from claude/lead-24.
+2. Read CLAUDE.md, this whole note, TEAM.md (bottom), plans/handover-lead23.md (publishing recipes + standing rules).
+3. Every old seat is stopped; their sessions belong to the old account and can't be messaged. Start FRESH seats from each role's handover note (list below). Keep to the user's seat count and watch usage.
+4. Republish the game pages from claude/integration (the old pages belong to the old account): a Playtest page (title "Starship Cadet Playtest <build>") and a Dev page (first-line #dev script, recipe in handover-lead23.md). Tell the user the new links.
+5. Make your own hourly check-in scheduled task.
+
+**Current build: 0.64.11** = claude/integration 70aa91f (Dev mode Stop 2, Fridays groundwork switched off, new crew Day 21 + Tern ramp both ways, closer camera, food_check fixes). Possibly + DB2's check-only devmode seed fix on top (see BM12's handover).
+
+**Next release (top priority):** storm S10 (claude/storm-update 0b77dfcb, PR6 PASS) + Fridays turn 10 (claude/fridays) switched on TOGETHER. Before it: FR3's `arriving` Day 19 fix and PR8's old-save-on-Friday 18f fix (see handover-fridays-builder-3.md), PR8's final verdict, and check RN1's day_check Day 13 rec-deck note on the combined build.
+
+**Role handover notes (one fresh seat per row as needed):**
+- Build master: plans/handover-build-master.md (claude/integration)
+- Storm builder: plans/handover-events-builder-6.md (claude/storm-update)
+- Fridays builder: plans/handover-fridays-builder-3.md (claude/fridays)
+- Line builder: plans/handover-line-builder-2.md (claude/line-update) — next: double-dinner root fix in section 14 (lead's call), ER3 fix 9, Brennan rota line, then ER3 part B, then L6 switch-on
+- Line reviewer: plans/handover-event-reviewer-3.md (claude/event-plan-review-3)
+- Reviewers: plans/handover-reviewer-5.md, -6.md, -7.md, -8.md (claude/review-5/6/7/8)
+- Optimization: plans/handover-opt-render.md (claude/opt-render), plans/handover-test-speed-2.md (claude/opt-tests), plans/handover-review-opt.md (claude/review-opt)
+- Events check: plans/handover-events-check-1.md (claude/bigevents-check); food check: plans/handover-food-waits.md (claude/food-waits)
+- Crew patch (done, merged): plans/handover-patch-crew.md; Dev mode (Stop 3 when the user asks): plans/handover-devmode-2.md; patch/section owner: plans/handover-patch-builder-b.md
+
 Lead session session_01SDe7z5Nr7u69uH1k4sjZ8r, branch `claude/lead-24` (push only there; started from claude/lead-23). Took over from lead 23 at ~12:43 UTC 2026-10-21. Hourly check-in: trig_01C2doV45RKiUmbkRUeJqZSk (minute 41): a successor disables it and makes its own.
 
 **ACCOUNT MOVE (the user, ~15:31 UTC):** the project is moving to another account. All seats were told: push everything after every step, finish the current turn, no new round over ~60 min without asking, refresh handover notes, reply with stopping point + ETA. Published artifacts (Playtest / Dev pages) belong to the old account: the new lead republishes them from the branches (recipes in plans/handover-lead23.md).
