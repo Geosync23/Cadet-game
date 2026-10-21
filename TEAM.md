@@ -432,3 +432,4 @@ Working (11, one over for the overlap): EV5 stopping. Game-code seat + opt revie
 | Seat | Session | Branch | Job |
 |---|---|---|---|
 | Line build reviewer ER3 | session_017jM4m1bcqPHbSesi2kSfLr | `claude/event-plan-review-3` | adversarial build review of claude/line-update L1-L5c |
+**~14:00 UTC, the user:** (1) opening camera 1.85/1.40 is good (keep); (2) YES, leavers board the Tern up its ramp (→ PT1 T3); (3) **don't change the look of the game**: RN1's CPU-canvas option (page open 6.5→4.7 s, 101/106 textures change pixels) dropped. Lead: EV7's Line volunteer jobs held to 13:45 (was 14:15) so the punch is carried before the horn. ER3 started on the Line build.
