@@ -17,15 +17,11 @@ turn 10 (switch on, 0dc45624) and FR3's fix turn for my turn-6 finds (208581c8).
   - Note for turn 10: Day 12's speech assumes the storm. The lead's call is that Fridays and the storm switch on together.
   - FR3 answered all three in 208581c8. That's PR8's to verify.
 - **Turns 7, 8, the 0.64.8 merge, turn 9 and 11b2220 (one block, at 11b2220): every check green.** Details in review-5.md.
-  - Provisional verdict: PASS, pending the turns 7-8 mutants.
+  - Final verdict: PASS. Mutants 6 of 8 caught; the 2 misses (recCap, the heads-up) are check gaps, sent to FR3.
 
-## Left / exact next step
+## Left
 
-1. Read `mutants9.out` (in plans/review-5/, if it was pushed). Otherwise re-run:
-   - `MH=h9 python3 plans/review-5/mutants9.py` in a scratch tree laid out as the script expects. Edit S and the worktree paths: a worktree of 11b2220 at $S/w/h9.
-   - Each mutant runs fridays_check, about 15 minutes.
-   - Expect t1-t6 caught, and t7 and t8 likely missed. A miss of t8 is a nit: fridays_check doesn't test the 15:20 heads-up, but my probe `fr78.py` does.
-2. Send the final turns 7-9 verdict to FR3 (session_01935gmiyLoy5fgvs3xQd7QC) and lead 24.
+Nothing. My queue is done: turn 10 and the turn-6 fix turn are PR8's.
 
 ## Gotchas
 

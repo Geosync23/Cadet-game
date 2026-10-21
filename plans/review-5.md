@@ -158,14 +158,17 @@ and .done). Probes are in `plans/review-5/`; shots are in `plans/review-5/shots/
 - The clock: "Short Friday: on shift since 09:00. Clock out from 15:30. The Captain's at four." and "Clocked out at 15:35. The Captain's address is at four, in the rec deck auditorium."
 - At 17:10, 13 people are still on Deck 7 while their plans have them on Deck 3. All 13 are walking to the lift (dinner, leisure, commute), none stuck. That fits FR3's explanation: everyone stays to 16:52, and some sit on until their next plan starts.
 
-**Mutants for turns 7-8** (`mutants9.py`, MH=h9): running at the time of writing; results in `mutants9.out` when pushed.
-- t1: no dip;
-- t2: a dip on a leave day;
-- t3: friDinner null;
-- t4: the flag saved;
-- t5: the flag never set;
-- t6: no Friday goodnight keys;
-- t7: recCap back to 17:00 (expected missed);
-- t8: no 15:20 heads-up (expected missed: fridays_check doesn't test the heads-up; my probe does).
+**Mutants for turns 7-8** (`mutants9.py`, MH=h9; `mutants9.out`): 6 of 8 caught.
+- Caught:
+  - t1: no dip;
+  - t2: a dip on a leave day;
+  - t3: friDinner null;
+  - t4: the flag saved;
+  - t5: the flag never set;
+  - t6: no Friday goodnight keys.
+- Missed:
+  - t7: recCap back to 17:00 on a short Friday. Nothing checks the rec deck's caps on Friday 15:30-17:00.
+  - t8: no 15:20 heads-up. fridays_check doesn't look at it; my probe fr78.py does, and it's right.
+- Both misses are check gaps, sent to FR3: (a) the heads-up once at 15:20 on a shift day and none on leave; (b) recCap(5, 940) is busy when on.
 
-**Verdict (provisional, pending the mutants): PASS.** No fixes; notes only. Turn 6's fixes and turn 10 are PR8's (claude/review-8).
+**Verdict: PASS.** No game fixes; the two check gaps go to FR3. Sent to FR3 and lead 24. (Lead 24 released 0.64.10 with Fridays off on the provisional PASS.)
