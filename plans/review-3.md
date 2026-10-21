@@ -77,3 +77,14 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - TEAM_FRI is [4, 840].
 - There are 27 `DAY_SHIFT[1]` reads.
 - The day shift has been 09:00-17:00 since 0.71.1.
+
+**Re-review, ac5236a: PASS.**
+- All five fixes are in, and the false clash is withdrawn in the brief.
+- PB's `dayReport` "shift short" note is in turn 1.
+- Leftover: turn 5's row still says `flag: fri.on`, to drop the next time FR1 edits the brief.
+
+**EW1 re-review, claude/events-lines 307addc: PASS.**
+- New condition `week:tradition.<id>` (since last Friday's address), for FR1 to build. {winner} reads as words.
+- Separate arrivals and leavers pools.
+- The leavers line is 74 characters.
+- The bridge week is added (the lead's call; a 7-week rotation).
