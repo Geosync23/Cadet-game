@@ -860,7 +860,7 @@ The case engine (plans/mechanics/case-engine.html on `claude/p5-design`). A real
 
 ## Short Fridays and the Captain's address (section 18f, the Fridays builder FR1; claude/fridays)
 
-All behind `SHORT_FRIDAY` (section 13), off = identical. Turns 1-5 of 10 built (the crew's and your 15:30 Friday, the skeleton, your clock, the Works holds, the device and Dev rows, the address as a tradition in the auditorium); turns 6-10 (the speech, the missed-it dip and dinner spread, the explaining lines, the perf scenes, switching on) are next. Plan: `plans/fridays-build-brief.md`; state, gotchas and how to test: `plans/handover-fridays-builder-1.md`. Check: `fridays_check.py`.
+All behind `SHORT_FRIDAY` (section 13), **on since turn 10** (2026-10-21, the user's yes passed on by lead 23; `false` gives the game without it, and fridays_check still makes both copies). All 10 turns built (FR1 1-5: the crew's and your 15:30 Friday, the skeleton, your clock, the Works holds, the device and Dev rows, the address as a tradition in the auditorium; FR2 6-8: the speech, the missed-it dip and dinner spread, the explaining lines; FR3 9-10: the perf scenes, switching on). Plan: `plans/fridays-build-brief.md`; state, gotchas and how to test: `plans/handover-fridays-builder-1.md` and `-2.md`. Check: `fridays_check.py`; perf_check's three Friday scenes.
 
 ## Hook register
 
