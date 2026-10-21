@@ -322,6 +322,13 @@ Everything behind `const EV_STORM_ON = EVENTS_ON` (section 18, by the other EV_ 
 - **S7, story A:** `stormStoryTick(now)` from `eventsTick`, play only, `e.mine['story:*']` and the reply flags; moments are `moment:` scripts (`stormMoment`), so they never count toward a commendation.
 - **events_check** reads the calendar when it's on (the storm's day, the guard's ready-room hour, the day dress). bigevents_check is EC1's.
 
+## The Crossing the Line update (section 18, the Line builder EV5, claude/line-update; plans/event-line-plan.md v2.2)
+
+Everything behind `const EV_LINE_ON` (section 18, by the other EV_ switches): `false` through L1-L5, `EVENTS_ON` from L6 (the switch-on, after ER2's review). Off, `SHIP_EVENTS.crossingLine` doesn't exist, so the calendar passes over its row (cadet_test ALL IDENTICAL each turn). A test copy: `sed -e 's/^const EVENTS_ON = false;/const EVENTS_ON = true;/' -e 's/^const EV_LINE_ON = false;/const EV_LINE_ON = true;/'`; for bigevents_check (which flips EVENTS_ON itself) a copy with `const EV_LINE_ON = EVENTS_ON;`.
+
+- **Where:** the data is one block after the storm's (`if (EV_LINE_ON) { SHIP_EVENTS.crossingLine = ... }`), before EV_SHIPWIDE and the meeting tags are made; the functions in the slot `// ---- slot: Line builder` after the storm builder's.
+- **L1, the data:** 3 days from Saturday Day 6 (warning 08:00, Vance's Mail 18:00; onset Sunday 14:30; resolution 15:15; afterglow 19:15 to Monday midnight); `commend: false` (eventFinish) and `threads: []` (no score); the oath `crossingCeremony` 14:40 (cast `marrow`, `brennan`, `first:2`: `lineFirst()` and `lineFirstCrew`, named first1, first2); EV_BEATS `lineCeremony`. The words: content/banks/event-crossingLine.lines, content/meetings/{crossingCeremony,lineTomasSat,lineTomasMug,lineLap,lineSupperGuess}.meet, content/reactions/event.crossingLine.<phase>.lines.
+
 ## The answers pass (sections 14 and 10, the sim engineer, 0.26.8–0.26.9)
 
 plans/answers-pass-plan.md, the sim engineer's rows.
