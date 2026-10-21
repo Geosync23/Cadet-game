@@ -1,4 +1,4 @@
-# The ion storm: the event plan (version 1.1: the storm update, Days 11-15)
+# The ion storm: the event plan (version 1.2: the storm update, Days 11-15; the user's answers in)
 
 Event planner EP3, 2026-10-21. Branch `claude/event-plan-storm`, from `claude/event-plan-line` (7040dc8; build 0.64.6). Reports to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB). **Planning only: the game is unchanged.**
 
@@ -12,6 +12,19 @@ Event planner EP3, 2026-10-21. Branch `claude/event-plan-storm`, from `claude/ev
   - EW1's storm lines, ready (claude/events-lines, `plans/events-ready/ionStorm/`);
   - the Crossing the Line plan (this branch, 7040dc8) as the model, and ER2's review of it, so the numbers here are measured, not assumed.
 - **Order:** the events base, then **this storm update** (the base is switched on with it), then Crossing the Line, the comet and the visit.
+
+## Decided (the user, 2026-10-21 02:29 UTC, via lead 22)
+All eight questions answered **(a)**, the recommendations, with no comments:
+1. The story: **A, "Sixty by lamplight"**.
+2. Each prep job moves its own part (ballasts the blackouts, batteries the fed bridge, the booth rota the calls); left alone bumpy, all three smooth.
+3. The lantern supper: the mess dimmed to emergency level with lanterns on the long tables, 18:00-19:30.
+4. The supper is where everyone stays in (about 55-60, at most 60); stay-in pauses 17:45-19:45.
+5. The rec deck's first all-hands is the first Friday address (Day 5); film night moves to the auditorium from Saturday Day 6.
+6. The all-clear: the five (four called in) and you, in the observation room.
+7. The bow lounge is put back together on Sunday at 10:30.
+8. The commendation counts storm jobs and meetings up to the all-clear, including `stormRange` and `stormLanterns`.
+
+The writer's brief for story A's lines: `plans/event-storm-lines-brief.md`. design-doc.md takes these answers in the storm update's first turn (S1), with the work that depends on them.
 
 ## In short
 - **Thursday Day 11 to Monday Day 15.** The storm already runs in the game (built before most of it). This update moves it a day later, gives it its new hours, makes your help count, adds the lantern supper and a small story, and fixes the 13 items the events plan found.
@@ -239,7 +252,7 @@ Each turn: small exact edits; a build-table row under "Ion storm update"; the ar
 9. **Draw calls with 60 in the mess** plus the lanterns: perf_check's supper scene at phone size.
 10. **Spoilers:** the guard rails above; EW1 and the head writer read the lines.
 
-## Questions for the user (ids `storm-q1` to `storm-q8`, plus `storm-general`)
+## Questions for the user (ids `storm-q1` to `storm-q8`, plus `storm-general`): ANSWERED, all (a); see "Decided" at the top
 1. **The story.** Recommended: A, "Sixty by lamplight". Others: B, "First in the queue"; C, "What the storm is called".
 2. **How much does your help count?** Recommended: each prep job moves its own part (ballasts the blackouts, batteries the fed bridge, the booth rota the calls); left alone bumpy, all three smooth. Others: the jobs add up into one score; help only softens the effects, and the result is luck.
 3. **The lantern supper's light.** Recommended: the mess dimmed to emergency level with lanterns on the long tables, 18:00-19:30, on purpose (no blackout lands on Deck 3 in a new game). Others: wait for a real blackout on Deck 3 (rare); normal light, the lanterns only in words.
