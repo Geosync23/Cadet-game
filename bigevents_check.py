@@ -594,6 +594,15 @@ with sync_playwright() as pw:
           return { d, menu: /Line/.test(JSON.stringify(galleyMenu(d))), cer: eventsOn(d).some(e => e.id === 'lineCeremony'),
             keys: [...S.shared.keys()].filter(k => /bow-lounge-line/.test(k)), places: [...S.byId.keys()].filter(k => /bow-lounge-line/.test(k)).length }; })()""")
         if lo['menu']: fail(f"off: the galley's menu for Day {lo['d']} mentions the Line")
+        # the menu around the Line's day as it is, then with the Line's menu hook (linePudding) taken out, as a build with no
+        # Line code: off, the two must match, pudding and note too (ER3's plant P4: a pudding set on Day 7 before the switch's test)
+        mn = g.ev(r"""(() => { const d = (EV_CALENDAR.find(x => x.id === 'crossingLine') || { day: 6 }).day + 1, ds = [d - 1, d, d + 1];
+          const read = () => { GALLEY_MENU.clear(); return ds.map(x => JSON.stringify(galleyMenu(x))); };
+          const was = read(), keep = typeof linePudding === 'function' ? linePudding : null;
+          if (keep) window.__sc('linePudding = () => {}'); const bare = read(); if (keep) { window.__keepLP = keep; window.__sc('linePudding = window.__keepLP'); } GALLEY_MENU.clear();
+          return ds.map((x, i) => { if (was[i] === bare[i]) return null; const A = JSON.parse(was[i]), Z = JSON.parse(bare[i]);
+            return 'Day ' + x + ': ' + [...new Set(Object.keys(A).concat(Object.keys(Z)))].filter(k => JSON.stringify(A[k]) !== JSON.stringify(Z[k])).map(k => k + ' ' + JSON.stringify(A[k]) + ', without the Line ' + JSON.stringify(Z[k])).join('; '); }).filter(Boolean); })()""")
+        for m in mn: fail(f"off: the galley's menu differs from a build without the Line: {m[:300]}")
         if lo['cer']: fail(f"off: the Line's ceremony (lineCeremony) is on Day {lo['d']}")
         if lo['keys'] or lo['places']: fail(f"off: the Line's venue ('bow-lounge-line') is there: {lo['keys'][:4]}, {lo['places']} places")
     for e in g.errors[:3]: fail(f'off: page error: {e}')
