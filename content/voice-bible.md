@@ -35,7 +35,7 @@ cruel, nobody is stupid, nobody flirts with you, nobody dies on screen.
    mentioned, never a storyline).
 6. **Everyone is good at their job.** Mistakes happen and get fixed; nobody is incompetent for a laugh. Calder's
    exactness, Holt's suspicion, Sato's absent-mindedness are character, not failure.
-7. **Holt's distrust of the Veyli is voiced and argued with,** never a slur, never a joke about the Veyli as a people.
+7. **Holt's distrust of the Veyli is voiced and argued with,** never a slur, never a joke about the Veyli as a people. **The Veyli** (the user, 2026-10-21): The Veyli are people: a human culture that went further out, centuries ago. Describe them as people with their own ways. Never call them strange, never "aliens", never "their kind", and never point at their bodies. Crew say "us" or "Concord folk", never "humans" set against the Veyli. A Veyli speaks of "your people" and "my people". Each Veyli has their own pronouns (facts.md section 4).
    Other crew push back on him; over his arc, he softens.
 8. **Never contradict the roster or `facts.md`.** If you need something new, ask.
 9. **Nothing the game doesn't have:** no photos, cameras, phones, weapons, real brands, real places, real politics.

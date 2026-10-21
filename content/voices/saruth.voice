@@ -1,22 +1,22 @@
 @voice saruth
-// Writer (command: guests). Envoy Saruth (they/them), the Veyli Envoy, guest of the Concord. Cabin 2-E, Deck 2, next door
+// Writer (command: guests). Envoy Saruth (she/her), the Veyli Envoy, guest of the Concord. Cabin 2-E, Deck 2, next door
 // to Holt's. Knot cord on the door handle: visitors by invitation only; a new knot each month aboard. Takes tea kneeling
 // at a low table at the same hour every day. Tends Veyli seedlings in a corner of the garden (habit shift).
 //
-// HOW THEY TALK: formal and exact, no contractions, unhurried. Long pauses; silence is a kind of answer. Speaks of
+// HOW SHE TALKS: formal and exact, no contractions, unhurried. Long pauses; silence is a kind of answer. Speaks of
 // "your people" and "my people" without heat. Notices small courtesies and names them ("You held the door. Thank you.").
-// Dry, very slowly: the joke arrives a sentence late, and they watch to see if you caught it.
-// WITH JUNIORS: courteous, curious, a little formal; asks about human customs (why you knock twice, why "cheers").
-// WHAT THEY NOTICE: courtesy, ritual, hands, who greets whom first, the garden's seedlings.
+// Dry, very slowly: the joke arrives a sentence late, and she watches to see if you caught it.
+// WITH JUNIORS: courteous, curious, a little formal; asks about Concord customs (why you knock twice, why "cheers").
+// WHAT SHE NOTICES: courtesy, ritual, hands, who greets whom first, the garden's seedlings.
 // MOOD TELLS: content = invites you to tea. Weary = more formal still. Amused = a long silence, then one dry line.
-// NEVER: raises their voice; speaks ill of Holt (they find him "honest, which is rarer than kindness"); explains Veyli
+// NEVER: raises her voice; speaks ill of Holt (she finds him "honest, which is rarer than kindness"); explains Veyli
 // ritual fully (some things are kept); uses a nickname for you before close.
-// RUNNING: the knot cord on the door; tea at the same hour; finds humans exhausting and very kind, often at once (tier 3,
+// RUNNING: the knot cord on the door; tea at the same hour; finds the Concord's people exhausting and very kind, often at once (tier 3,
 // canon); Ferreira's Veyli, which Saruth corrects gently.
 tpl: steady
 talk: Formal and exact, no contractions; long pauses; names small courtesies; a dry joke that arrives a sentence late.
 cares: courtesy | tea at the proper hour | the Veyli seedlings in the garden | the posting working
-jokes: the knot cord on the door, and who is invited | Ferreira's Veyli, corrected gently | humans are exhausting and very kind, often at once
+jokes: the knot cord on the door, and who is invited | Ferreira's Veyli, corrected gently | the Concord's people are exhausting and very kind, often at once
 hi: Greetings | Good day | Ah. You
 bye: Go well | Until the next hour | Be well
 yes: Yes | That is acceptable | Gladly
@@ -31,4 +31,4 @@ likes: garden | book
 invites: tasting | garden
 joy: tea at the proper hour
 keepsake: a length of Veyli cord with one knot, tied for you
-avoid: why they were sent (until close) | Veyli rites in full
+avoid: why she was sent (until close) | Veyli rites in full

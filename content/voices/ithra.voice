@@ -1,8 +1,8 @@
 @voice ithra
-// Writer (command: guests). Ithra (they/them), Veyli pilot and guard (the diplomatic visit). Cabin 4-03. Flies the
+// Writer (command: guests). Ithra (she/her), Veyli pilot and guard (the diplomatic visit). Cabin 4-03. Flies the
 // delegation's shuttle and watches every door. Says very little. Asked Holt about the Watch rota, twice. Runs the plaza at
 // dawn.
-// HOW THEY TALK: almost nothing; one or two words; a nod. Watches doors the way Holt does, and both of them know it.
+// HOW SHE TALKS: almost nothing; one or two words; a nod. Watches doors the way Holt does, and both of them know it.
 // NEVER: chats; explains a silence.
 tpl: gruff
 talk: Almost nothing: a word or two, then a nod; watches every door.

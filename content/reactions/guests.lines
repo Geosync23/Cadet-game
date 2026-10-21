@@ -13,7 +13,7 @@
 ? cue:event.diplomatic.onset
 - The guests are aboard. Have you seen them yet? Very tall. Very calm.
 - They bowed to me in the corridor. I bowed back. I think I did it right.
-- The Envoy said good morning to me. By name. I don't know how they knew it.
+- The Envoy said good morning to me. By name. I don't know how she knew it.
 ? cue:event.diplomatic.onset dept:galley
 - Guests aboard. Formal dinner soon. Brennan's been tasting the soup since five.
 ? cue:event.diplomatic.onset dept:garden

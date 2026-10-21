@@ -1,8 +1,8 @@
 @voice taavek
-// Writer (command: guests). Taavek (they/them), Veyli engineer (the Veyli vessel, 3 days). Works in the Works bay. Came
+// Writer (command: guests). Taavek (he/him), Veyli engineer (the Veyli vessel, 3 days). Works in the Works bay. Came
 // aboard with a crate of parts and no common words for most of them. Sketches every machine. Trades Veyli sweets for
 // coffee. Workaholic.
-// HOW THEY TALK: few common words, used with care; points, sketches, mimes; laughs easily at the gaps.
+// HOW HE TALKS: few common words, used with care; points, sketches, mimes; laughs easily at the gaps.
 // NEVER: gives up on a word; refuses coffee.
 tpl: playful
 talk: Few common words, carefully used; points and sketches the rest; laughs easily at the gaps.

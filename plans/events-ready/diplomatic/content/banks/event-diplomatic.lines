@@ -2,7 +2,7 @@
 // EW1 (events writer), the Veyli visit for its weekend shape (events plan v3.2: Days 22-30, three days aboard). EV1's
 // keys (see content/banks/event-ionStorm.lines). Mail "Subject | body", unsigned (Commander Teo Vance's). Keys not here
 // keep today's words in SHIP_EVENTS.diplomatic (the two addresses, the news lines, VEYLI_RETELL, the debrief); the gift
-// exchange meeting stands as written. The Veyli are they/them (facts.md 4c).
+// exchange meeting stands as written. Each Veyli has their own pronouns (facts.md 4).
 // Day 22, the memo (Pillar 5's Monday briefing takes it over later)
 == event.diplomatic.mail.memo
 - Next week's business | A Veyli delegation will be aboard from Saturday Day 27 to Monday Day 29. Three things before then: dress uniforms cleaned, guest cabins made up, manners reviewed. Details on Friday.

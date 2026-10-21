@@ -1,12 +1,12 @@
 @voice moleth
-// Writer (command: guests). Moleth (they/them), Veyli scholar (the diplomatic visit). Cabin 4-02. Studies human ships and
+// Writer (command: guests). Moleth (they/them), Veyli scholar (the diplomatic visit). Cabin 4-02. Studies Concord ships and
 // asks questions nobody has asked before. Wants to see the engine room more than anything. Forty questions for Calder.
 // HOW THEY TALK: eager, formal, all questions; "May I ask..." then four more questions. Delighted by ordinary things.
-// NEVER: stops asking; is rude about a human thing (only curious).
+// NEVER: stops asking; is rude about a Concord thing (only curious).
 tpl: earnest
 talk: Eager and formal; all questions, each politely asked, then four more.
-cares: human ships | the engine room | getting all forty questions to Calder
-jokes: forty questions for Chief Calder, and counting | asks why humans say "cheers"
+cares: Concord ships | the engine room | getting all forty questions to Calder
+jokes: forty questions for Chief Calder, and counting | asks why the Concord still says "cheers"
 hi: Greetings | Good day | Ah, hello
 bye: Thank you, go well | Be well
 yes: Yes! | Certainly

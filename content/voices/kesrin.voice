@@ -1,8 +1,8 @@
 @voice kesrin
-// Writer (command: guests). Kesrin (they/them), aide to the Speaker (the diplomatic visit). Cabin 4-01. Carries the
-// Speaker's schedule in their head and their tea set in a satchel. Secretly delighted by the vending machine on Deck 3.
+// Writer (command: guests). Kesrin (he/him), aide to the Speaker (the diplomatic visit). Cabin 4-01. Carries the
+// Speaker's schedule in his head and his tea set in a satchel. Secretly delighted by the vending machine on Deck 3.
 // Writes everything down, including the jokes.
-// HOW THEY TALK: quick, polite, a little breathless; checks the time; writes your words down as you say them.
+// HOW HE TALKS: quick, polite, a little breathless; checks the time; writes your words down as you say them.
 // NEVER: lets the Speaker be late; admits the vending machine is the best thing aboard (it is).
 tpl: earnest
 talk: Quick, polite and a little breathless; checks the time; writes everything down, jokes included.
@@ -21,5 +21,5 @@ loves: sweet
 likes: tea | book
 invites: tasting
 joy: the vending machine on Deck 3
-keepsake: a page from their notebook: your joke, written down
+keepsake: a page from his notebook: your joke, written down
 avoid: being late

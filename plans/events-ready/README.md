@@ -11,7 +11,7 @@ moves an event's files in and runs `content_gen.py` in the turn that builds that
 | crossingLine | crossingCeremony (the oath) | event.crossingLine.warning / .onset / .afterglow | event-crossingLine (Vance's Mail, the banner, status, the ceremony's tap lines, the Line supper, the certificate and plaque) |
 | comet | (none) | event.comet.onset / .afterglow | event-comet (Sato's Mail, news, status, both gatherings) |
 | firstLightCocoa | firstLightCocoa (Raman's two lines: the Pale Shoals and Tavessa, the user's picks; facts.md has them) | | |
-| diplomatic | veyliGreeting (replaces the game's; Veyli they/them), veyliDinner (new) | event.diplomatic.warning / .escalation / .afterglow | event-diplomatic (the memo, the warning, news, status, the greeting line, the dinner's Mail, the farewell) |
+| diplomatic | veyliGreeting (replaces the game's; each Veyli has their own pronouns, facts.md 4), veyliDinner (new) | event.diplomatic.warning / .escalation / .afterglow | event-diplomatic (the memo, the warning, news, status, the greeting line, the dinner's Mail, the farewell) |
 
 **Tested** (a scratch copy with everything moved in, baked, then lines_check): the bake is fine. The only lines_check errors were the 90-character limit on `event.*` keys, and EV1's rule fixes that (claude/events-base bb285a0): Mail (`event.<id>.mail.*`) 400; a gathering's `.mail` and `.thanks`, `.keepsake` and `.plaque.*` 200; the rest 90. Run lines_check again on the build that has EV1's rule.
 

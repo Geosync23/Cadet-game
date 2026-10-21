@@ -72,7 +72,7 @@ never lost. Hm." ("stood up" reads as dating language). Watch for words like tha
 - Ferreira: the Veyli have many words for "quiet". Vasquez: new last Sowing, her mum feeds her fish. Ueda: a paper
   letter from Valo takes six weeks. Sato's tea: smoked leaf, dried kelp, a pinch of pepper. Nandakumar's chillies:
   the same seeds her mother grew.
-- Saruth: "Do not bow. Most of you do it wrong."; why humans knock twice; Holt's plain distrust is "a kind of honesty
+- Saruth: "Do not bow. Most of you do it wrong."; why the Concord's people knock twice; Holt's plain distrust is "a kind of honesty
   I respect"; the cord tied loose means "you are expected".
 - The salvage: nobody died; the derelict's crew were all rescued. Quill cooked for 22; Petrie navigated for 11 years.
   (Head writer approved; the lead is confirming with the events engineer. If the events engineer says otherwise,

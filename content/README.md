@@ -383,7 +383,7 @@ indented under it. A choice can carry `rel:calder+2,tech2+1`, `job:<id>`, `flavo
 
 Generally light, cozy and funny; warmth over wit. Serious moments are earned by friendship and are about ordinary
 things (homesickness, a failed exam, a parent getting older). Gentle grief is allowed; nobody dies on screen. No
-cruelty played for laughs. Holt's distrust of the Veyli is voiced and argued with, never a slur. Everyone is good at
+cruelty played for laughs. Holt's distrust of the Veyli is voiced and argued with, never a slur. The Veyli are people: a human culture that went further out, centuries ago. Describe them as people with their own ways. Never call them strange, never "aliens", never "their kind", and never point at their bodies. Crew say "us" or "Concord folk", never "humans" set against the Veyli. A Veyli speaks of "your people" and "my people". Each Veyli has their own pronouns (facts.md section 4). Everyone is good at
 their job. Never contradict the roster: bio, life lines, habits and birthdays are canon.
 
 ## For the engineers

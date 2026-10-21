@@ -61,9 +61,9 @@ V4 redesigns the ship around a daily loop across three decks and folds in everyt
 
 ## Setting & names
 
-You serve in the Concord Survey Service, a peaceful exploration fleet, aboard the CSV Wren: a 75-person survey ship on a long tour of a frontier shared with the Veyli, a proud, ritual-minded people.
+You serve in the Concord Survey Service, a peaceful exploration fleet, aboard the CSV Wren: a 75-person survey ship on a long tour of a frontier shared with the Veyli.
 
-The Veyli and the frontier stay in the background for now. They are where story events will come from later, not the main thread of the game.
+**The Veyli** (the user, 2026-10-21; plans/veyli-lore-plan.md) are human, like everyone in this world: the people of a slow ship that left Earth about six hundred years ago to go further than anyone. The voyage took four lifetimes; they settled a world past Tavessa and were met again by a Concord survey ship about eighty years ago. Their saying is "We did not leave. We went on." Their customs (the knot cord, the tea hour, quiet, warm rooms, a bow they changed, one name each, their own language) come from the voyage. They stand for the game's reach into the distance: the Wren follows where they went first. The player learns who they are as a plain fact in the first week, and in more depth through the first month (the Line, the storm's lantern supper, the comet, the visit). They stay a gentle background thread, never a war, and each Veyli has their own pronouns, like the crew.
 
 Uniforms follow the classic three-colour split: red for command, gold for operations, blue-green for sciences. Departments that share a colour are told apart by their badge.
 
@@ -821,5 +821,9 @@ Done so far:
 - Deck 2's second visitors' cabin stays a cabin, not a senior lounge: ship-wide events bring visitors (2026-10-16).
 - Answered no (2026-10-16), so not to be re-asked: the player helping in the galley, lunch, binning the grab shelf overnight, opening the store every day, extra gym kit or booked gym slots (more later), and the ship running while the game is closed. Unanswered, so kept as it is: faulty machines slow only the crew, not the player.
 - Envoy Saruth is a guest, not one of the 75 crew.
+- Who the Veyli are (answered 2026-10-21, plans/veyli-lore-plan.md): human, "the ones who went on" (vl-q1 a); a plain
+  fact from the first week (q2 a); each Veyli has their own pronouns (q3 b: Saruth she, Teshavi she, Kesrin he, Moleth
+  they, Ithra she, Taavek he; vl-q7 a); the Veyli say "your people" and "the Concord" (q4 a); the long ship and the
+  Veyli world aren't named yet (q5 a); they look as drawn now (q6 a).
 - Deck 2's six senior officers are confirmed (Second Officer, Senior Helm Officer, Ship's Counsellor, Comms Chief, Deputy Survey Chief, Senior Watch Officer), moved up from Deck 4's officers. The six cabins they leave on Deck 4 become guest cabins, so the deck stays lived-in (agreed 2026-10-15).
 - Deck 4's guest cabins are the six nearest the lift: 4-01, 4-02, 4-03 and 4-04 (the first column, two with windows) and the inner pair 4-07 and 4-08, so guests don't walk the corridor and officers keep 10 of the 12 window cabins. The two spares are 4-23 and 4-24, the inner pair at the music-room end. Guest cabins never use bunks (built in 0.14.0).

@@ -46,7 +46,7 @@ topic: crew
 when: tier>=friend beat:holt.2
 them: The Envoy's door. Cord tied loose today. Means "you are expected". Didn't know I was.
 them: I don't trust the Veyli. Told them so. They thanked me. Don't know what to make of it.
-ask: You talk to the Envoy. What do you make of them?
+ask: You talk to the Envoy. What do you make of her?
 listen: Did you go in?
   them: No. Stood at the door a while. Walked on. Another time, maybe.
 share: Courteous. Kind, under the formal bit.

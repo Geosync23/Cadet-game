@@ -2,7 +2,7 @@
 who: holt
 // Writer (command), from outlines.md section 9, "One bad day". His card's needs: practical (beat 3: listen and practical
 // both fit, so both get a warmer answer). His distrust is his, about one day; never a word against the Veyli as a people.
-// Hanne Rook (she/her, from the outline) only from beat 3. Envoy Saruth (they/them) speaks in beat 4.
+// Hanne Rook (she/her, from the outline) only from beat 3. Envoy Saruth (she/her) speaks in beat 4.
 
 == beat 1
 tone: light

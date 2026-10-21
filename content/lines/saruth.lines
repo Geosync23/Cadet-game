@@ -34,10 +34,10 @@
 
 == chat
 ? tier=stranger
-- Why do humans knock twice? Once is a question. Twice is a demand. Which are you?   #funny
+- Why do your people knock twice? Once is a question. Twice is a demand. Which are you?   #funny
 ? tier>=acquaintance
 - Chief Ferreira is learning my language. She is very brave. She is very wrong.   #funny
-- Tell me a human custom. A small one. I collect them.
+- Tell me a Concord custom. A small one. I collect them.
 
 == life
 ? tier>=acquaintance
@@ -58,3 +58,17 @@
 
 == decline
 - Not today. Forgive me. Another hour would be better.
+
+// EW2 (events writer 2), the Veyli lore (plans/veyli-lore-plan.md section 3): the plain fact in week one (stranger),
+// the long ship at acquaintance and colleague. Never why she was sent, never a rite in full, never Holt's six hours.
+== chat
+? tier=stranger
+- We are cousins, your people and mine. Distant ones. Very distant.   #funny
+- Your bow is from an old picture. We kept bowing. We changed it.
+
+== life
+? tier>=acquaintance
+- Our long ship took four lifetimes to reach home. The tea hour kept the days in order.
+? tier>=colleague
+- The cord counted the months on the long ship. We read it in the dark, by touch.
+- On the long ship you listened to the hull. That is why we have so many words for quiet.

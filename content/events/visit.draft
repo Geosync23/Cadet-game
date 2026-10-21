@@ -9,7 +9,7 @@
 // clash; Mon 29 08:30 Pillar 5's senior briefing, 09:00 the gift exchange (observation room), 10:00 the farewell
 // (shuttle bay, a big crowd again); Tue 30 the afterglow, the cord sculpture in the bow lounge, the debrief.
 // The delegation (four): Speaker Teshavi, the aide Kesrin, the scholar Moleth and the pilot Ithra. Envoy Saruth lives
-// aboard. All Veyli are they/them (facts.md 4c): the game's veyliGreeting gist says "her aide"; this draft fixes it.
+// aboard. Each Veyli has their own pronouns (facts.md 4): Teshavi she, Kesrin he, Moleth they, Ithra she.
 // Holt's distrust is voiced and argued with, never a slur or a joke about the Veyli as a people; nothing of his past.
 
 // ================================================================================================= Day 22, the memo
@@ -46,7 +46,7 @@
 // Saturday 10:00, the shuttle bay; the crew line the bay. The Captain is called in (off on Saturdays) and says so.
 title: The Veyli greeting
 from: Commander Teo Vance
-gist: The Veyli delegation came aboard at 10:00: Speaker Teshavi, their aide Kesrin, the scholar Moleth and their pilot Ithra. They're in the visitors' cabin and the guest cabins on Deck 4 until Monday.
+gist: The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They're in the visitors' cabin and the guest cabins on Deck 4 until Monday.
 == lines
 vance: Dress uniforms, everyone. Straight lines. The Captain.   [nod]
 marrow: Speaker Teshavi. Welcome aboard the Wren.   [gesture]
@@ -54,7 +54,7 @@ teshavi: Captain. Your ship is warmer than the reports said. That is a complimen
 teshavi: And your whole crew is here. On a rest day, I am told.
 marrow: Mine too. You're worth it.   [laugh]
 saruth: Speaker. It has been too long.
-teshavi: Saruth. You look well fed. The humans are treating you kindly, then.
+teshavi: Saruth. You look well fed. Your hosts are treating you kindly, then.
 kesrin > you: The Speaker would like to meet the crew who keep the ship running. Informally.
 teshavi > you: You. The young one in Works. What do you do aboard?
 ? choice
@@ -102,7 +102,7 @@ marrow > you: {me}. You've been in every corner of this ship. How would you sett
 ? choice
 * Outside the door, where both of you can see them.   rel:marrow+1,holt+1 thread:discourtesy-1
   ithra: Outside. Yes. That we can accept.   [nod]
-* Ask the Envoy. They've lived with both of us.   rel:saruth+1 thread:discourtesy-1
+* Ask the Envoy. She's lived with both of us.   rel:saruth+1 thread:discourtesy-1
   saruth: Outside the door, and a knock before every change of watch. Two knocks.   [nod]
 * I'd rather not take sides.   rel:holt+1
   holt: Fair enough. Neither would I, normally.   [sigh]

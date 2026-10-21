@@ -5,3 +5,6 @@
 - Three days. Felt like a month. A good month.   #warm
 ? cue:event.diplomatic.afterglow tier>=acquaintance
 - You did well with the Veyli, {nick}. People noticed.   #warm
+// EW2, the Veyli lore (plans/veyli-lore-plan.md section 3): near meets far, what each side kept
+? cue:event.diplomatic.afterglow
+- Moleth asked me what we kept from Earth. I said biscuits. They wrote it down.   #funny

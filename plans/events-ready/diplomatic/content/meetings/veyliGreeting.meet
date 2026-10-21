@@ -1,19 +1,20 @@
 @meeting veyliGreeting
-// EW1 (events writer), the visit (events plan v3.2): replaces MEETING_SCRIPTS.veyliGreeting; Veyli they/them.
+// EW1 (events writer), the visit (events plan v3.2): replaces MEETING_SCRIPTS.veyliGreeting; each Veyli has their own pronouns (facts.md 4).
 // Saturday 10:00, the shuttle bay; the crew line the bay. The Captain is called in (off on Saturdays) and says so.
 // FOR EV1: the .meet reader has no thread: key; "Welcome aboard. Ask me anything" eases the courtesy thread
 // (discourtesy -1), as today.
 title: The Veyli greeting
 from: Commander Teo Vance
-gist: The Veyli delegation came aboard at 10:00: Speaker Teshavi, their aide Kesrin, the scholar Moleth and their pilot Ithra. They're in the visitors' cabin and the guest cabins on Deck 4 until Monday.
+gist: The Veyli delegation came aboard at 10:00: Speaker Teshavi, her aide Kesrin, the scholar Moleth and their pilot Ithra. They're in the visitors' cabin and the guest cabins on Deck 4 until Monday.
 == lines
 vance: Dress uniforms, everyone. Straight lines. The Captain.   [nod]
 marrow: Speaker Teshavi. Welcome aboard the Wren.   [gesture]
 teshavi: Captain. Your ship is warmer than the reports said. That is a compliment.   [nod]
+teshavi: You came a long way. We came further. It is good to meet in the middle.
 teshavi: And your whole crew is here. On a rest day, I am told.
 marrow: Mine too. You're worth it.   [laugh]
 saruth: Speaker. It has been too long.
-teshavi: Saruth. You look well fed. The humans are treating you kindly, then.
+teshavi: Saruth. You look well fed. Your hosts are treating you kindly, then.
 kesrin > you: The Speaker would like to meet the crew who keep the ship running. Informally.
 teshavi > you: You. The young one in Works. What do you do aboard?
 ? choice

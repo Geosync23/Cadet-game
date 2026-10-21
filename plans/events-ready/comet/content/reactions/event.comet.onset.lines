@@ -8,3 +8,7 @@
 - Sato's been tracking it for weeks. She'd never say so, but she's thrilled.
 ? cue:event.comet.onset rank:senior
 - My cabin has a window. I'm not leaving it tonight.   #funny
+
+// EW2, the Veyli lore (plans/veyli-lore-plan.md section 3): Saruth, if she's at a window
+? cue:event.comet.onset who:saruth
+- On the long ship, a comet was a calendar. Somebody always tied a knot for it.

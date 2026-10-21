@@ -393,7 +393,7 @@ ABOUT = {
                 (4, 'secret', 'Left the restaurant after a fire, and finds the galley\'s order comforting.')],
     'saruth': [(0, 'home', 'Takes tea at the same hour every day, and will sometimes invite you.'),
                (1, 'home', 'Ties a new knot in the cord on the cabin door for every month aboard.'),
-               (3, 'work', 'Finds humans exhausting and very kind, often at once.'),
+               (3, 'work', 'Finds Concord folk exhausting and very kind, often at once.'),
                (4, 'secret', 'Was sent to the Wren because no one at home expected the posting to work.')],
 }
 
@@ -441,11 +441,11 @@ EVENT_GUESTS = [
          life=['Has known Envoy Saruth since they were both students of the cord.', 'Brought a gift for the Captain wrapped in seven knots.'],
          habits=['quiet-corner', 'early-riser']),
     dict(id='kesrin', name='Kesrin', role='Aide to the Speaker', template='delegate', cabin='4-01', event='diplomatic', stay=5,
-         outfit='#6b4a8a', bio='Carries the Speaker\'s schedule in their head and their tea set in a satchel.',
+         outfit='#6b4a8a', bio='Carries the Speaker\'s schedule in his head and his tea set in a satchel.',
          life=['Is secretly delighted by the vending machine on Deck 3.', 'Writes everything down, including the jokes.'],
          habits=['window-seat']),
     dict(id='moleth', name='Moleth', role='Veyli scholar', template='delegate', cabin='4-02', event='diplomatic', stay=5,
-         outfit='#7a5a3a', bio='Studies human ships, and asks the crew questions nobody has asked before.',
+         outfit='#7a5a3a', bio='Studies Concord ships, and asks the crew questions nobody has asked before.',
          life=['Wants to see the engine room more than anything.', 'Has a list of forty questions for Chief Calder.'],
          habits=['garden-lover', 'stargazer']),
     dict(id='ithra', name='Ithra', role='Veyli pilot and guard', template='delegate', cabin='4-03', event='diplomatic', stay=5,

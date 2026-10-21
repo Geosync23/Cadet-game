@@ -1,8 +1,8 @@
 @voice teshavi
-// Writer (command: guests). Speaker Teshavi (they/them), leader of the Veyli delegation (the diplomatic visit, 5 days).
+// Writer (command: guests). Speaker Teshavi (she/her), leader of the Veyli delegation (the diplomatic visit, 5 days).
 // Cabin 2-U. Patient, precise, fond of long silences. Has known Saruth since they were both students of the cord. Brought
 // the Captain a gift wrapped in seven knots.
-// HOW THEY TALK: grave, slow, ceremonial; every word chosen. Silences are long and meant. Kind to juniors in a grand way.
+// HOW SHE TALKS: grave, slow, ceremonial; every word chosen. Silences are long and meant. Kind to juniors in a grand way.
 // NEVER: hurries; jokes about the Concord; says what is in the seven knots.
 tpl: steady
 talk: Grave, slow and ceremonial; every word chosen; long silences, meant.

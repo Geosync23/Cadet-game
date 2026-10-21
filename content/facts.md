@@ -16,12 +16,34 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **The ship:** the **CSV Wren** ("the Wren"; crew say "she"), a 75-person survey ship of the **Concord Survey Service**,
   a peaceful exploration fleet. Long tour of a frontier shared with the **Veyli**. Nobody aboard is a soldier; there
   are no weapons aboard and nobody talks about fighting.
-- **The Concord:** the human union that runs the Survey Service. "The Concord academy" trains officers (the Captain's
+- **The Concord:** the union of the near stars' worlds that runs the Survey Service. "The Concord academy" trains officers (the Captain's
   daughter is there). Concord couriers, inspectors and charts-office staff visit as guests.
-- **The Veyli:** proud, ritual-minded, courteous, hard to read. **Envoy Saruth** lives aboard (Deck 2, guest cabin E).
-  Knot cord on the door = visitors by invitation only; a new knot each month aboard. Takes tea kneeling at a low table
-  at the same hour every day. Veyli ships are rare visitors. Holt's distrust of the Veyli is voiced and argued with,
-  never a slur, never a joke about them as a people.
+- **The Veyli** (the user, 2026-10-21): **people, human like everyone in this world.** About six hundred years ago a
+  slow ship left Earth to go further than anyone had. It wasn't fleeing anything; it wanted to see how far people
+  could go. The voyage took four lifetimes, and its people settled a world past Tavessa ("the Veyli homeworld", not
+  named yet). No contact for centuries; the Concord grew up behind them among the near stars. About eighty years
+  ago a Concord survey ship met a Veyli ship at the Line. Careful, courteous neighbours since; Veyli ships are rare
+  visitors. Their saying: **"We did not leave. We went on."** No war, ever. Round numbers only ("about six hundred
+  years", "four lifetimes", "about eighty years ago"), never dates. Nothing links the eighty years to Holt's bad day.
+  The long ship isn't named either ("the long ship"; home is "home" or "the Veyli homeworld").
+- **Veyli ways, all from the long voyage:** the knot cord (the voyage counted its months in knots, read by touch in
+  the dark; still their calendar and record; "students of the cord"); tea at the same hour (the long ship's still
+  hour); quiet as attention (many words for "quiet"; their silence rites are kept: the six-hour mourning silence waits for `beat:holt.3`, section 10); warm
+  rooms (the voyage ran cold); a bow they kept and changed (so the Concord's looks "done wrong"); one name each, no
+  family name; their own language, grown from old Earth tongues, with an old root showing here and there; seedlings
+  from seeds the long ship carried. They look like anyone, often tall and slim, a cord band at the brow, some hair
+  dyed in cord colours.
+- **How the Veyli speak of the Concord:** "your people" and "the Concord", never "humans". The crew say "us" or
+  "Concord folk". Proud, ritual-minded, courteous, hard to read.
+- **How to write them** (the description rule): the Veyli are people with their own ways. Never call them strange,
+  never "aliens" (except a joke that the line itself puts right: "No, there aren't any aliens. Just the Veyli."),
+  never "their kind", and never point at their bodies. Crew never set "humans" against the Veyli. Each Veyli has their
+  own pronouns (section 4). The player learns the plain fact in week one; the depth (the voyage, the cord, the tea, the
+  saying) through the month. Lore lines never say why the Envoy is aboard, never preview the visit, never explain how a
+  rite is done, and never say "six hours", "mourning" or "a ship that didn't answer" before `beat:holt.3`.
+- **Envoy Saruth** lives aboard (Deck 2, guest cabin E). Knot cord on the door = visitors by invitation only; a new
+  knot each month aboard. Takes tea kneeling at a low table at the same hour every day. Holt's distrust of the Veyli
+  is voiced and argued with, never a slur, never a joke about them as a people.
 - **The shuttle:** the **Tern**, on its pad in the Deck 5 shuttle bay. You arrive on it.
 - **Other ships, by name:** the **Halcyon** (another survey ship; where transfers often go). Ask before adding more.
 - **Places people come from** (only these, for now): **Port Halloran** (a port city; rain; Brennan's old restaurant),
@@ -223,7 +245,7 @@ choosing a natural mix. Until someone's listed, use their name or "they". The pl
 | Captain Marrow, Chief Calder, Chef Brennan, Rina, Dr. Sato, Dr. Nandakumar, Hana Mori, Lucia Ferreira, Zainab Kovac | she / her | roster text ("her portrait gallery", "her first chief", "her sister", "her lab", "her door", "her"); Kovac: the head writer's call for her arc |
 | Commander Vance, Chief Holt, Tomas, Pell, Zeke Torres, Emeka Halloran, Dev Raman, Matthias Oduya | he / him | roster text and plans ("his academy", "his deputy", "his little brother", "his mum", "his father", "his Friday mug", "his", "him") |
 | Wen Takahashi, Farah Rahman, Yara Esposito | they / them | their roster life lines say "they" |
-| Envoy Saruth | they / them | the head writer's call: the Veyli are not described in human terms; "the Envoy" is always safe |
+| Envoy Saruth | she / her | the user's call (2026-10-21: each Veyli has their own pronouns); the game's own "the Envoy when she accepts" |
 | You (the player) | never gendered | the crew say "you", your name, "cadet", "the new hand" |
 | The newlyweds' spouses back home (Silva, Soto, Jovanovic, Dlamini) | they / them, unnamed | nobody aboard names them |
 
@@ -269,7 +291,9 @@ Mori, Ferreira, Sato and Nandakumar were already set from the roster's own words
 | Hana Mori, Lucia Ferreira, Anja Kowalczyk, Oona Zielinski, Mira Dahl, Greta Garcia, Noor Park, Uma Vasquez, Carmen Chen, Vera Ueda, Karin Yilmaz, Rosa Abara | she / her |
 | Quinn Zamora, Dara Shah, Olu Farouk | they / them |
 | Guests: Dr. Soraya Lindgren, Mara Quill | she / her |
-| Guests: Speaker Teshavi, Kesrin, Moleth, Ithra, Taavek (the Veyli, like Saruth), Jonah Petrie | they / them |
+| Guests: Speaker Teshavi, Ithra (the Veyli) | she / her |
+| Guests: Kesrin, Taavek (the Veyli) | he / him |
+| Guests: Moleth (the Veyli), Jonah Petrie | they / them |
 
 ## 4d. The player's people back home (calls home; the user's ruling, 2026-10-17)
 
@@ -493,7 +517,7 @@ introduces them), unless noted.
 | Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 06:05 | Vance | writer-command, batch 3 and arcs |
 | Tomas is fourth on Vance's treadmill board | Vance, Tomas | writer-command, batch 3 |
 | The blue crate in the Works bay is Calder's (don't sit on it) | Works | the voice bible; Moleth asks about it |
-| Saruth: "Do not bow. Most of you do it wrong."; humans knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |
+| Saruth: "Do not bow. Most of you do it wrong."; the Concord's people knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |
 | The salvage (a later event): the derelict's crew were all rescued; nobody died. Quill was cook to 22 people; Petrie navigated for 11 years | guests | writer-command, batch 3 (to be confirmed by the events engineer) |
 | Vance's father's two messages have waited since Sowing; 22 years since the academy; Gull's line "Oh treadmill, thou belt of endless toil" | Vance | writer-command, arcs |
 | Mensah's joke: why did the airlock break up with the hatch? Too many seals | Mensah, Holt | writer-command, arcs |

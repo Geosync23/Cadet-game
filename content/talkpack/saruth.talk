@@ -1,12 +1,12 @@
 @talks saruth
-// TW1, the Talk a while pack: Envoy Saruth's own talks (they/them). Formal and exact, NO contractions; unhurried;
+// TW1, the Talk a while pack: Envoy Saruth's own talks (she/her). Formal and exact, NO contractions; unhurried;
 // names small courtesies; a dry joke a sentence late. Guests don't draw the pool, so Saruth has these, then small
-// talk. Never why they were sent (until close); never Veyli rites in full; never a nickname before close.
+// talk. Never why she was sent (until close); never Veyli rites in full; never a nickname before close.
 
 == knock-twice
 topic: ship
 them: May I ask you something about your people? You knock twice. Always twice. Never once.
-them: I have counted. Not one human aboard knocks three times. It is very consistent.   #funny
+them: I have counted. Not one person aboard knocks three times. It is very consistent.   #funny
 ask: Why twice? I would like the true answer, if there is one.
 listen: How do the Veyli ask to come in?
   them: A cord on the door. Tied loose, you are expected. Otherwise, by invitation only.
@@ -26,7 +26,7 @@ listen: What does the hour mean, for you?
 share: Breakfast. Same seat, most days.
   them: Then you understand. A fixed point is a kindness you give yourself.   #warm
 cheer: Get lost on Deck 2. Reliably.
-  them: That is also a ritual. A very human one. I have seen several of you perform it.   #funny
+  them: That is also a ritual. A very Wren one. I have seen several of you perform it.   #funny
 
 == seedlings
 topic: hobby
@@ -53,3 +53,18 @@ share: I don't know you well enough yet.
   them: An honest answer. Then we are both still learning. I find that a comfort.   #warm
 cheer: Knowing when you've made a joke.
   them: Ah. We have the same trouble with you. A sentence late, every time. We are even.   #funny
+
+// EW2 (events writer 2), the Veyli lore (plans/veyli-lore-plan.md section 3): the Veyli saying, at friend tier.
+// The long voyage only: never why she was sent, never the mourning silence (that waits for beat:holt.3).
+== went-on
+topic: home
+when: tier>=friend
+them: Your people say mine left. Long ago, on a slow ship, further than anyone else would go.
+them: We say it differently. We did not leave. We went on.   #warm
+ask: You went on too, I think. Away from your family, to here. Was it leaving, for you?
+listen: What's the difference, for you?
+  them: Leaving is about what is behind you. Going on is about the road. We kept the road.
+share: It felt like leaving. Now it's going on.
+  them: Then you are further along than my people were after one lifetime. I will tell them.   #warm
+cheer: We went on. With biscuits.
+  them: ... Yes. That is exactly how it was. Fewer biscuits. Otherwise, exactly.   #funny

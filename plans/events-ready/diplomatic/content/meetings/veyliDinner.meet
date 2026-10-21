@@ -14,6 +14,8 @@ marrow: Please, sit. Chef Brennan has cooked with herbs from our own garden toni
 teshavi: Fresh herbs, so far out. That is a courtesy. We notice courtesies.   [nod]
 moleth: Captain, may I ask about your engines? I have a list.
 vance: Of course you do.   [laugh]
+moleth: First, though. You still say 'cheers'. We stopped. Why did you keep it?
+marrow: Habit, mostly. And we like the sound of it. Cheers, Moleth.   [laugh]
 ithra: Chief Holt. Your guard stood inside our door last night. Among us that is rude.
 holt: Among us it's a guard doing their job. I won't apologise for keeping people safe.
 saruth: Both of you are right. That is what makes it difficult.
@@ -21,7 +23,7 @@ marrow > you: {me}. You've been in every corner of this ship. How would you sett
 ? choice
 * Outside the door, where both of you can see them.   rel:marrow+1,holt+1
   ithra: Outside. Yes. That we can accept.   [nod]
-* Ask the Envoy. They've lived with both of us.   rel:saruth+1
+* Ask the Envoy. She's lived with both of us.   rel:saruth+1
   saruth: Outside the door, and a knock before every change of watch. Two knocks.   [nod]
 * I'd rather not take sides.   rel:holt+1
   holt: Fair enough. Neither would I, normally.   [sigh]

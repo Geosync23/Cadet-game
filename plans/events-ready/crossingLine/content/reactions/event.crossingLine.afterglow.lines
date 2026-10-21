@@ -15,6 +15,10 @@
 - "We came a long way. We're glad we did." I read it twice.   #warm
 ? cue:event.crossingLine.afterglow dept:survey
 - New reach. Survey's had their noses to the windows since yesterday.   #funny
-// the Envoy stays away from the rite by courtesy (they/them); one line, nothing more
+// the Envoy stays away from the rite by courtesy (she/her); one line, nothing more
 ? cue:event.crossingLine.afterglow who:saruth
 - A Veyli does not watch another people's rite. I hope it was a good one.
+
+// EW2, the Veyli lore (plans/veyli-lore-plan.md section 3): Saruth the day after, to someone she knows
+? cue:event.crossingLine.afterglow who:saruth tier>=acquaintance
+- You crossed. You are further from home now than your grandparents were. We know it.   #warm

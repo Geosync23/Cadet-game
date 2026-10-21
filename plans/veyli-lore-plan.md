@@ -7,6 +7,14 @@ Planning and words only: the game hasn't changed. The page with the answer form 
 somehow, only humans in this world. Maybe another culture that splintered from Earth. Hence they represent reaching
 into the distance." Also decided: Crossing the Line means **"guests in someone else's sky"** (line-q10 A).
 
+**Applied (EW2, 2026-10-21, `claude/events-lines-2`):** section 6's canon text is in `content/facts.md` and
+`design-doc.md`; every audit row (5a, 5b) is fixed in its source file (rows 18 and 22 are backlog #17 and #18); the
+description rule is in the voice bible and `content/README.md`. New lines: Raman (First Light Cocoa), Saruth (2
+stranger, 3 acquaintance/colleague, the Line's afterglow, the comet, the "went-on" talk), Ferreira, Rossi, the Day 5
+and Day 26 addresses, the visit (Teshavi's greeting, Moleth's "cheers" and the Captain's answer, one afterglow line).
+The Line's two old-hand lines and the lantern supper's two cord lines come with EW2's Line and storm jobs. Not baked:
+the builders bake `content/` (lines_check PASS in a test bake on events-base with plans/events-ready laid over it).
+
 ## In short
 
 - **Decided history (A, "The ones who went on"):** about six hundred years ago, early in the age of leaving
