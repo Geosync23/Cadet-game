@@ -35,7 +35,8 @@ for k in range(36):   # play frames, about a ship minute each 30 steps; read eve
         r = ev("""(() => { const R = DECKS[3].rooms, inMess = DECK_CREW.filter(a => a.p && a.h && (() => { const c = [Math.round(a.x + OX), Math.round(a.z + OZ)]; const k = roomAt(...c); return k && R[k] && /^Mess hall$/.test(R[k].name || ''); })());
           window.__skip = false; window.__step(1, 16); return [clockText(), inMess.length, inMess.some(a => a.p.id === 'brennan'), inMess.some(a => a.p.id === 'dlamini-lukas'), renderer.info.render.calls, eventRoutines(shipNow()).map(r => r.rule).join(',')]; })()""")
         dc.append(r); print('  ', r, flush=True)
-pg.screenshot(path=str(OUT / 'props_supper.png'))
+res['lamp'] = ev("[FEEL_S.lamp, DRESS.on.has('lanternMess')]"); print('lamp', res['lamp'], flush=True)
+pg.screenshot(path=str(OUT / 'props_supper.png'), timeout=180000)
 res['b'] = dc[-1] if dc else None; res['b_maxcalls'] = max(x[4] for x in dc) if dc else None
 ok = res['b'] and res['b'][1] >= 40 and res['b'][2] and res['b_maxcalls'] < 450
 res['lamp'] = ev("[FEEL_S.lamp, DRESS.on.has('lanternMess')]"); print('RESULT', res); print('errors', errs[:5]); print('S37', 'OK' if ok and not errs else 'CHECK')
