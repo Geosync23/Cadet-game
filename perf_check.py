@@ -24,7 +24,7 @@
 #          that isn't in the build (its branch not merged yet) makes the scene SKIP, not fail.
 #   busy   also measured at the user's phone's sizes (TRIFOLD below), folded and open, both ways up.
 #   cells  you stand on the room's own open tile nearest its middle (FR3: for rooms whose middle is the lift or blocked).
-#   PERF_SCENES=regexp (environment) runs only the matching scenes and no memory runs: a quick look, not the check.
+#   PERF_SCENES=regexp (environment) runs only the matching scenes (case matters) and no memory runs: a quick look, not the check.
 #   needs  JS that must be true in the game (e.g. a rotation on that day) or the scene prints WAITING: it isn't built yet.
 import sys, os, json, re, time
 exec(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -55,8 +55,9 @@ SCENES = [
     {'name': 'after the address, rec lift lobby 16:52', 'day': 5, 'time': '16:52', 'deck': 7, 'room': r'^Lift lobby$', 'cells': True, 'on': ['SHORT_FRIDAY'], 'busy': True},
     {'name': 'Friday dinner, the mess 17:20', 'day': 5, 'time': '17:20', 'deck': 3, 'room': r'^Mess', 'cells': True, 'on': ['SHORT_FRIDAY'], 'busy': True},
     # the ion storm (claude/storm-update): the lantern supper (51 in seated sittings, at most about 41 at once), the all-clear party (at most about 27)
-    {'name': 'lantern supper, the mess Sat 18:30', 'day': 13, 'time': '18:30', 'deck': 3, 'room': r'^Mess', 'on': ['EVENTS_ON'], 'busy': True},
-    {'name': 'storm all-clear party, bow lounge Sun 19:30', 'day': 14, 'time': '19:30', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EVENTS_ON'], 'busy': True},
+    # (EVENTS_ON is in the base since 0.64.8, so these wait for the storm update itself: OR1's F1)
+    {'name': 'lantern supper, the mess Sat 18:30', 'day': 13, 'time': '18:30', 'deck': 3, 'room': r'^Mess', 'on': ['EVENTS_ON'], 'busy': True, 'needs': "typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON"},
+    {'name': 'storm all-clear party, bow lounge Sun 19:30', 'day': 14, 'time': '19:30', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EVENTS_ON'], 'busy': True, 'needs': "typeof EV_STORM_ON !== 'undefined' && EV_STORM_ON"},
     # Crossing the Line (claude/line-update): the oath (about 43 and you) and the Line supper (up to about 60)
     {'name': 'the Line ceremony, bow lounge Sun 14:45', 'day': 7, 'time': '14:45', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EVENTS_ON', 'EV_LINE_ON'], 'busy': True},
     {'name': 'the Line supper, the mess Sun 18:30', 'day': 7, 'time': '18:30', 'deck': 3, 'room': r'^Mess', 'on': ['EVENTS_ON', 'EV_LINE_ON'], 'busy': True},
@@ -113,7 +114,7 @@ def run(path):
             t = time.time(); g = Game(pw, path, 390, 844, out['errors']); out['load'].append(round(time.time() - t, 1)); g.close()
         only = os.environ.get('PERF_SCENES')               # PERF_SCENES=regexp: only those scenes, and no memory runs (a quick look, not the check)
         for sc in SCENES:
-            if only and not re.search(only, sc['name'], re.I): continue
+            if only and not re.search(only, sc['name']): continue   # case matters: 'Tern' isn't 'lantern' (OR1's F3)
             row = {'name': sc['name'], 'views': {}}
             p = switched(path, sc.get('on'))
             if not p:
@@ -196,5 +197,7 @@ if __name__ == '__main__':
     json.dump({'new': new, 'old': old}, open('perf_check.json', 'w'), indent=1)
     bad = problems(new, old)
     for b in bad: print('PROBLEM', b)
-    print('PERF CHECK OK' if not bad else f'PERF CHECK: {len(bad)} problem(s)')
+    sk = [s for s in new['scenes'] if s.get('skip') and not s.get('nospot')]
+    waits = f" ({sum(1 for s in sk if s['skip'].startswith('SKIP'))} skipped: switch not in this build; {sum(1 for s in sk if s['skip'].startswith('WAITING'))} waiting: not built yet)" if sk else ''
+    print(('PERF CHECK OK' if not bad else f'PERF CHECK: {len(bad)} problem(s)') + waits)
     sys.exit(1 if bad else 0)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

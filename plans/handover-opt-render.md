@@ -74,7 +74,7 @@ Every built change was proven with the same pictures: cadet_test ALL IDENTICAL, 
 - #4: `python3 plans/opt-probes/keep_shots.py OLD NEW OUTDIR` → DECK SHOTS IDENTICAL, programs stop at 22.
 - #6: `python3 plans/opt-probes/grain_load.py BUILD TMP.html` on both builds and compare the FP lines.
 - #8: `python3 devmode_check.py BUILD` (or `... off card`).
-- Event scenes: `PERF_SCENES='address|dinner|lantern|all-clear|Line|Tern' python3 perf_check.py BUILD` on a build with those branches merged. The full `perf_check.py` is the check itself.
+- Event scenes: `PERF_SCENES='address|dinner|lantern|all-clear|Line|Tern' (case matters) python3 perf_check.py BUILD` on a build with those branches merged. The full `perf_check.py` is the check itself.
 - Every command needs `CADET_CHROME=/opt/pw-browsers/chromium`, plus three and acorn in `$CADET_WORK` (DEV_NOTES "Testing").
 
 ## Loose ends
