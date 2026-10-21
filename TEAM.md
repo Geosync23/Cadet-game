@@ -353,3 +353,4 @@ Working (5): EV2 (S8), EV4, FR2, BM11, PR4.
 |---|---|---|---|
 | Optimization planner OP1 | session_01RxxLLT9jpvagqJpCW99dop | `claude/opt-plan` | measure 0.64.7, then plans/opt-plan.html with questions; TS1's notes join; adversarial review before publishing |
 Working (5): EV4, FR2, BM11, PR4, OP1.
+**~06:40 UTC:** FR2 Fridays turn 6 (speech) a22d651 (0.64.7 merged in; check_fast OK, off identical); turn-5 arrival fix nearly done (26 seated at 16:00, 48/51 by 16:05; speech 16:04) → PR4 + PB (s14 hook). EV4 job 1 4476186 → PR4; on standing trays. OP1 measuring: page open 7.0-7.5 s on 0.64.4/5/7 alike (the reload rise was a busy box); ~3.5-4 s is first-frame shader compile; day_check 74% GPU buffer uploads (crowd re-upload up to 15 MB after skipped frames); heap 228 MB after load (was ~150).
