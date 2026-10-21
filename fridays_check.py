@@ -137,10 +137,28 @@ with sync_playwright() as pw:
         for want in (960, 964, 965):
             if r[0] >= want and want not in fill: fill[want] = r[1:]
         if r[0] >= 966: break
+    # on to 17:11: who's still waiting for the rec deck's lift (Deck 7) at 16:52 and 17:10
+    # [the minute, standing within 4 tiles of the rec deck's lift (a queue), still on the deck while their plan has them
+    # elsewhere (on the walk out: the auditorium to the lift is about 10 ship minutes)]
+    LIFTQ = "(() => { const t = shipNow(), c = cellPos(...DECKS[7].lift); return [Math.floor(t % 1440), DECK_CREW.filter(a => Math.hypot(a.x - c.x, a.z - c.z) < 4 && !/walk/.test(a.pose || '')).length, DECK_CREW.filter(a => { const w = a.p && whereIs(a.p, t); return w && w.deck !== 7; }).length]; })()"
+    lift = {}
+    for k in range(1500):
+        g.step(10); m, *n = g.ev(LIFTQ)
+        for want in (1012, 1030):
+            if m >= want and want not in lift: lift[want] = n
+        if m >= 1031: break
     planned = g.ev("schedPeople().filter(p => planWhere(p, 4 * 1440 + 970) && planWhere(p, 4 * 1440 + 970).deck === 7 && /captains/.test(planWhere(p, 4 * 1440 + 970).tag || '')).length")
     fill['planned'] = planned
+    g2 = Game(pw, str(copies[True]), 390, 844)
     if g.errors: check(False, 'on: page errors in the fill run ' + str(g.errors[:3]))
     g.b.close()
+        # turn 7, dinner after the address (on paper): each goer's dinner start, and who washes first
+    dinner = g2.ev("""(() => { const b = 4 * 1440, st = [], wash = [];
+      for (const p of schedPeople()) { const P = planDay(p, 5); if (!P.some(s => /captains/.test(s.tag || ''))) continue;
+        const dn = P.find(s => s.act === 'dinner' && s.from >= b + 1000); if (dn) st.push(dn.from - b);
+        const a = P.findIndex(s => /captains/.test(s.tag || '')); if (P.slice(a + 1).some(s => s.act === 'wash' && s.deck === 4 && (!dn || s.from < dn.from))) wash.push(p.id); }
+      st.sort((x, y) => x - y); return { n: st.length, spread: [st[0], st[Math.floor(st.length * .8)]], median: st[st.length >> 1], by10: st.filter(x => x < 1030).length, wash: wash.length }; })()""")
+    g2.b.close()
         # the speech in the auditorium on Day 5 (on): in order, over its speakers, the crowd hushed; then a reload mid-speech
     g = Game(pw, str(copies[True]), 390, 844)
     g.ev("skipTo((5 - 1) * 1440 + 958)"); aud(g)
@@ -165,9 +183,18 @@ with sync_playwright() as pw:
     # missed (Day 26 on Deck 4 all afternoon): the banner and the Mail at 16:50, once
     g.ev("goToDeck(4)"); g.ev("skipTo((26 - 1) * 1440 + 1005)"); g.step(5)
     g.ev("window.__toasts = []; { const t0 = toast; toast = (t, x) => { window.__toasts.push([t, x]); t0(t, x); }; }")
+    live['w26'] = g.ev("[repInit().ship.work, repInit().cnt.address || 0, playerShiftOn(26)]")
     for k in range(40): g.step(20)
     live['missed'] = g.ev("[FRI.mailed, FRI.heard, window.__toasts.filter(x => /missed/.test(x[1])).length]")
-    live['mails'] = g.ev("(SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d26'].mail[0] && m.at >= 25 * 1440 + 1000).length")
+    live['dip'] = g.ev("[window.__w0 = repInit().ship.work, repInit().cnt.address || 0]")
+    # turn 7: missed it on a shift day (Day 26 just now): a dip the size of being late; on a leave day (Day 33): none
+    g.ev("goToDeck(4)"); g.ev("skipTo((33 - 1) * 1440 + 400)"); g.step(5)
+    g.ev("careerInit(); SHIP.career.b.push(33)")
+    g.ev("skipTo((33 - 1) * 1440 + 1005)"); g.step(5)
+    w33 = g.ev("[repInit().ship.work, repInit().cnt.address || 0, playerShiftOn(33)]")
+    for k in range(40): g.step(20)
+    live['leave'] = [w33, g.ev("[repInit().ship.work, repInit().cnt.address || 0, FRI.mailed]")]
+    live['mails'] = g.ev("(SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d26'].mail[0] && m.at >= 25 * 1440 + 1000 && m.at < 26 * 1440).length")
     live['errors'] = g.errors[:3]
     g.b.close()
 
@@ -230,6 +257,15 @@ check(live['reload'][0] == live['reload'][1] and live['reload'][0] > 0, 'on: a r
 check(live['reloadKeep'], 'on: a reload changed the speech')
 print('  missed on Day 26 (mailed, heard, banners):', live['missed'], 'mails', live['mails'])
 check(live['missed'][0] == 26 and live['missed'][1] != 26 and live['missed'][2] == 1 and live['mails'] == 1, 'on: the missed banner and Mail %s %s' % (live['missed'], live['mails']))
+print('  missed it on Day 26 (work, count, shift day): before %s, after %s' % (live['w26'], live['dip']))
+# (the dip is repAdd's work -2, as being late; near the bottom of the scale it counts for less, so only its count and direction)
+check(live['w26'][2] and live['dip'][1] == live['w26'][1] + 1 and live['dip'][0] < live['w26'][0], 'on: missing the address on a shift day: work %s -> %s' % (live['w26'], live['dip']))
+print('  missed it on a leave day (Day 33): before %s, after %s' % tuple(live['leave']))
+check(live['leave'][0][2] is False and live['leave'][1][:2] == live['leave'][0][:2] and live['leave'][1][2] == 33, 'on: a dip (or no Mail) on a leave day %s' % live['leave'])
+print('  dinner after the address, Day 5 (planned; spread: first and 80th percentile; the rest have later plans): %s' % dinner)
+check(dinner['n'] >= 30 and dinner['spread'][0] >= 1020 and dinner['spread'][1] <= 1080 and dinner['by10'] <= .45 * dinner['n'], 'on: Day 5 dinner after the address not spread over 17:00-17:50 %s' % dinner)
+print('  the rec deck lift after the address, Day 5 in play [queued at the lift, still walking out]: at 16:52 %s, at 17:10 %s' % (lift.get(1012), lift.get(1030)))
+check(lift.get(1030, [99])[0] <= 3, 'on: Day 5, %s queued at the rec deck lift at 17:10' % lift.get(1030))
 check(not live['errors'], 'on: page errors in the live run %s' % live['errors'])
 print('FRIDAYS CHECK OK' if not fails else 'FRIDAYS CHECK FAILED (%d)' % len(fails))
 sys.exit(1 if fails else 0)

@@ -9838,7 +9838,7 @@ function recHostEarly(p, d, shiftAt) {                  // shiftAt: their shift'
 }
 const REC_ROUND = { who: 'volkov-maeve', at: [600, 690], stops: 5, mins: 6 };   // her round: from 10:00-11:30, five machines, six minutes each
 const REC_CAP = { busy: 15, quiet: 6 }, REC_Q = 10, REC_TURN = [20, 40];
-const recCap = (d, m) => weekday(d) >= 5 || m >= 1020 || m < 540 ? REC_CAP.busy : REC_CAP.quiet;   // weekday daytime (09:00-17:00) is quiet
+const recCap = (d, m) => weekday(d) >= 5 || m >= dayShiftEnd(d) || m < 540 ? REC_CAP.busy : REC_CAP.quiet;   // weekday daytime (09:00-17:00) is quiet (to 15:30 on a short Friday: dayShiftEnd, 18f)
 // a visit's odds from a rest block: with a habit, most of them; without, now and then the stands, a beanbag or the float room
 const REC_ODDS = { habit: .9, habitOff: .9, casual: .35, away: .6 };   // away: the share of those for a pick on another deck than the Commons (Deck 4's rooms, the officers' lounges)
 
@@ -10222,6 +10222,7 @@ function schedBuild(p, d, occ, S) {
     let dinnerAt = Math.max(t, H.has('late-diner') ? 1165 + Math.round(15 * U(70)) : 1030 + Math.round(70 * U(70)));
     // answer 11: some days (about 2 in 5) half the day shift heads straight for dinner when the shift ends: a rush at the servery
     if (!H.has('late-diner') && F.works && !F.night && schedU(9200, d, 0) < .4 && U(73) < .5) dinnerAt = Math.max(t, Math.max(F.workEnd, MEALS.dinner[0]) + 3 + Math.round(10 * U(74)));   // never before the servery opens (a short Friday ends at 15:30, 18f)
+    if (!H.has('late-diner') && typeof friDinner === 'function') { const fd = friDinner(p, d, meet); if (fd != null) dinnerAt = Math.max(t, fd); }   // after the Captain's address: dinner spread over 17:00-17:50 (18f)
     const ho = meet.find(e => e.tag === 'handover'); if (ho && dinnerAt < ho.at + ho.dur && S.shared.has('1|@handover')) dinnerAt = ho.at + ho.dur;   // eat after the handover
     let dinnerBy = 1440;                                 // dinner before a gathering ends when it starts (a grab if that's too soon)
     for (const e of meet) if (e !== ho && !e.done && !e.meal && e.at < dinnerAt + 40 && e.at + e.dur > dinnerAt) {   // dinner clear of a gathering: after it if there's time, else before
@@ -37165,6 +37166,16 @@ function friLead(p, d, at, e) {
   return eventFree(p, d, at - L, e.to, e.ev.wake) ? at - L : at;
 }
 FRI_ADDRESS.lead = friLead;
+// dinner after the address (turn 7): everyone from the auditorium at once would queue at the servery at 17:00 (and on
+// the days of the rush, answer 11, half the day shift 17:03-17:13), so each of them is given a dinner time spread over
+// 17:00-17:50 (seeded, key 1184): the minute, or null (not a short Friday, or not at the address). Read by section 14's
+// evening (late diners keep their own time); pure (the roster, the day and the plan's gatherings), a function
+// declaration. (The brief's "some wash first on Deck 4" isn't built: section 14 plans the evening before the address
+// sits in it, so a wash there would come before the address, not after)
+function friDinner(p, d, meet) {
+  if (!friShort(d) || !meet.some(e => /^ev-captains-address/.test(e.tag || ''))) return null;
+  return MEALS.dinner[0] + Math.round(50 * schedU(p.seed, d, 1184));
+}
 // a bank text (content/banks/fridays.lines), or null
 function friText(kind, k = 0) { const L = typeof LINES !== 'undefined' && LINES[kind], e = Array.isArray(L) && L.length ? L[k % L.length] : null; return e && typeof e.text === 'string' ? e.text : null; }
 (() => {
@@ -37332,6 +37343,10 @@ function friAddressTick() {
   }
   if (FRI.heard === d || FRI.mailed === d) return;
   FRI.mailed = d;
+  // missed it (turn 7): never in the auditorium 16:00-16:50 while it was on. A small dip in your work reputation, the
+  // size of being late (section 20: work -2), but none when it wasn't your shift day: leave, sick, a rota day off, let go,
+  // a day Dev mode excused (playerShiftOn, section 14). Your 16:00 auto sign-out is never counted: only where you were
+  if (typeof playerShiftOn === 'function' && playerShiftOn(d) && typeof repAdd === 'function') repAdd(null, 0, { work: -2 }, 'address');
   const A = friScript(d); if (!A) return;
   const fill = s => friFill({ text: s }, d, Infinity) || s.replace(/\{\w+\}/g, '').replace(/\s+([,.])/g, '$1');
   toast(e.name, friText('fri.missed') || 'You missed the Captain\'s address. Her words are in your Mail.');
