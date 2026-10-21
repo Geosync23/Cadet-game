@@ -154,7 +154,9 @@ PAPER = r"""(() => {
     // the most crew there at once (lead 23: never over its places at any one time), minute by minute through the gathering
     const B = (g.day - 1) * 1440, segs = people.flatMap(p => planDay(p, g.day).filter(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-'))));
     let peak = 0, peakAt = null; for (let m = B + e.from - 30; m < B + e.to + 30; m++) { const n = segs.filter(s => s.from <= m && m < s.to).length; if (n > peak) { peak = n; peakAt = m - B; } }
-    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
+    // a seated one (the user: nobody eats standing): each who means to go, a meal with no place (not the servery queue) in its window = eaten standing (PR10's gap)
+    const standing = e.ev.seated ? people.filter(p => eventPlan(p, g.day).some(x => x.id === g.id) && planDay(p, g.day).some(s => (s.act === 'dinner' || s.act === 'breakfast') && !s.placeId && s.tag !== 'queue' && s.from < B + e.to + 30 && B + e.from - 30 < s.to)).map(p => p.id) : [];
+    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, standing, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
   const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
@@ -375,7 +377,8 @@ LINE = r"""(() => {
       let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
       const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
       const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
-      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated };
+      const standing = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table') && planDay(p, d).some(s => s.act === 'dinner' && !s.placeId && s.tag !== 'queue' && s.from < B + sup.to + 30 && B + sup.from - 30 < s.to)).map(p => p.id);   // eaten standing (PR10's gap)
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated, standing };
     }
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
@@ -408,6 +411,7 @@ def check_line(g, tag):
         if not sp['seated']: fail(f"{tag}: the Line supper isn't seated (the user's call: no standing at meals): {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
         else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
             if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
+            if sp['standing']: fail(f"{tag}: the Line supper (seated): {len(sp['standing'])} eat standing, no seat for their sitting: {sp['standing'][:8]}")
             if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
     # the watch keeps the ship through the crossing's afternoon: Tomas and Ueda at their posts every 5 minutes from 14:30
     # to 15:15 (a short toilet or hand-wash on Deck 2 is fine), never at an event
@@ -550,6 +554,7 @@ def judge(a, tag):
         if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
         if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
             if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
+            if c.get('standing'): fail(f"{tag}: {c['id']} (seated): {len(c['standing'])} eat standing, no seat for their sitting: {c['standing'][:8]}")
             if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
         # (the old rule, a mess gathering over 44 needing standing places, is dropped: the user removed standing at meals)
         if c['went'] < c['want']: note(f"{c['id']}: {c['want'] - c['went']} meant to go but aren't planned there")
