@@ -71,8 +71,11 @@ SPEECH = r"""(() => {
   // the events base's readers (stubbed: which storm jobs were done, and by you), the ship health boards, your repair
   // cue, a job of yours on the board, the Tiles ladder joined: each way, so every line gets its chance
   const DONE = [[], ['stormBallasts', 'stormBatteries'], ['stormBallasts', 'stormBallasts.you'], ['stormBatteries', 'stormBatteries.you']];
-  const stub = (on, k) => { if (on) { window.eventBandOf = () => window.__band; window.eventJobDone = (j, you) => DONE[k % 4].includes(j + (you ? '.you' : '')); window.eventJobsCount = () => 12; }
-    else for (const x of ['eventBandOf', 'eventJobDone', 'eventJobsCount']) delete window[x]; };
+  // (since 0.64.8 the game has its own readers, which a window stub can't shadow: they're swapped for the stubs here,
+  // missing = undefined, and put back after; a build without them gets globals, as before)
+  const R0 = [typeof eventBandOf === 'function' ? eventBandOf : undefined, typeof eventJobDone === 'function' ? eventJobDone : undefined, typeof eventJobsCount === 'function' ? eventJobsCount : undefined];
+  const set = (b, j, c) => { eventBandOf = b; eventJobDone = j; eventJobsCount = c; };
+  const stub = (on, k) => on ? set(() => window.__band, (j, you) => DONE[k % 4].includes(j + (you ? '.you' : '')), () => 12) : set(undefined, undefined, undefined);
   const rows0 = shipHealthRows, health = ['fine', 'worn', 'poor'];
   if (!SHIP.works) SHIP.works = { rank: 'junior' };
   const rank0 = SHIP.works.rank, com0 = SHIP.commendations, jobs0 = SHIP.jobs, cues0 = SHIP.social && SHIP.social.cues, joined0 = SHIP.events.joined;
@@ -105,7 +108,7 @@ SPEECH = r"""(() => {
     for (const r of FRI.ring) for (const id of r.slice(1)) { const b = W.beats.find(b => b.lines.some(l => l.id === id)); if (seen[id] != null && r[0] - seen[id] < 7 && b && b.lines.length >= 7 * b.pick && b.lines.every(l => !l.if)) out.repeats.push([rank, r[0], b.id, id]); seen[id] = r[0]; }
   }
   out.full = JSON.stringify(FRI).length;                  // the save's fri part after 13 weeks
-  stub(false); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
+  set(...R0); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
   const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: SHIP.flags, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} out.save = 'fri' in sv ? JSON.stringify(sv.fri).length : null;
   // turn 8: Zeke's goodnight keys and lines, Halloran's after the mug, the breakfast flag (set, never saved), the clock
   const b5 = INTRO_WEEK.find(b => b.id === 'd5-mug'), SD = SHIP.time.day; SHIP.time.day = 5;
