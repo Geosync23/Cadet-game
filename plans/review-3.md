@@ -88,3 +88,30 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - Separate arrivals and leavers pools.
 - The leavers line is 74 characters.
 - The bridge week is added (the lead's call; a 7-week rotation).
+
+## EC1 bigevents_check.py turn 1 (F7a on paper, plus late saves): claude/bigevents-check bfb2b76. PASS
+
+**Runs:**
+- OK in 43 s, exit 0. Plain integration 675588c gives SKIP, exit 0.
+- check_fast OK in 211 s. The game is unchanged from the merge d5c2284 (integration + events-base 0313e52).
+
+**It fails when it should:** `plans/review-3/ec_mutants.py` breaks 7 copies of the game, and every one fails with exit 1:
+- m1: the hold starts at 15:00;
+- m2: the party's hash key is 341;
+- m3: eventDay reads SHIP.event;
+- m4: the storm's front is at 15:45;
+- m5: the hold applies while the calendar is off;
+- m6: late saves pass nothing over;
+- m8: a tradition in the bow lounge during the party.
+
+**EC1's finding, confirmed and sent to the lead:**
+- `eventGatherings(d)` (line 36298) has no caller, so no event meeting's named crew is planned into it. This contradicts F0b's "no schedule change needed".
+- It's for section 14 (PB) and EV1. eventOn goes through eventNow, so check it doesn't read live state.
+
+**Nits:**
+- The room prints twice in the gathering line.
+- Who-slots like 'works:2' are skipped by the "there" check.
+- The party's "3 not planned there" is only a note.
+- Agree with FR1 which check asserts the address sits inside the hold.
+
+**Gotcha:** planDay's segments are in absolute ship minutes ((d-1)*1440 + minute), not minutes of the day.
