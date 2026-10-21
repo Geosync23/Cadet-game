@@ -133,6 +133,15 @@ F0a is in claude/integration.
 - PR3 first flagged `cook-along` and `tiles-ladder`, then corrected it: both are `weekday: 5`, Saturday (0 = Monday).
   No tradition overlaps Friday 15:30-17:00 today; my check still asserts that with the switch on.
 
+## Readers for the speeches (agreed 2026-10-21)
+
+- EV1's (claude/events-base bb285a0): `band:` = `eventBandOf(id)`; `done:<job>` / `.you` = `eventJobDone(jobId, you, t)`;
+  `commended` = `!!SHIP.commendations.length`; `{stormjobs}` = `eventJobsCount('ionStorm')`; `{myjobs}` =
+  `eventJobsCount(id, true)`. Dropping a count line at 0 is mine.
+- `myrank:` is mine (lead 22): the address player reads `SHIP.works.rank` (`playerRank()`); no section 22 change.
+- `myshift:night` never matches until Pillar 5's night shifts exist (its line is skipped).
+- The full list: EW1's `content/addresses/README.md` (claude/events-lines f869a07).
+
 ## Rules I keep
 
 - Shared kit at load never calls `R()`; the skeleton list and dinner spread use `schedU` seeded keys (new key numbers
