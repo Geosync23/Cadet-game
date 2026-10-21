@@ -11,6 +11,7 @@
 
 ## The fix
 - `fresh()` in food_check: `setShipNow(T0); machinesNow()`, where T0 is the load time. A clock earlier than the machines' record starts them afresh (`machinesReset`: jobs, MACH_HIST, and plans that read `recAt`). It's called before 4b, 4c and 4e. 4c also runs the machines to 09:30 before catching Mail, otherwise the stores' "Out of filters" Mail is mail[0].
+- Follow-up (lead 24, EV7's garden carry FAIL with the Line on): `fresh()` also before 4k (the garden reads the machines' record: irrigation, grow lights). FD1 couldn't reproduce EV7's FAIL (line-update c9fa161 with EVENTS_ON and EV_LINE_ON true passes 1 7 with the old check too), so it's a precaution: with it, off 1 7 output is identical to before, off 11 4 OK, Line-on 1 7 and 11 4 OK, check_fast OK. If EV7's FAIL still shows, ask EV7 for the exact copy recipe.
 - Gotcha (PB): the rewind clears jobs from earlier parts. Any new forecast part added after 4e must call `fresh()` itself.
 
 ## Proof
