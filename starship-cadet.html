@@ -665,6 +665,24 @@ function hullDist(x, z) {
   }
   return inHull(x, z) ? best : -best;
 }
+// opt #10 (the render seat): hullDist(x, z) > d, for d >= 0, the same answer without measuring to every segment: a
+// segment whose box (widened by d + .01) doesn't hold the point is farther than d, so only the near ones are measured,
+// the same way. buildDeck asks it for every tile and every wall end. The boxes are made once per HULL_SEGS.
+let HULL_BOX = null, HULL_BOX_OF = null;
+function hullBeyond(x, z, d) {
+  if (!inHull(x, z)) return false;                       // outside, hullDist is -best <= 0 <= d
+  if (HULL_BOX_OF !== HULL_SEGS) {
+    HULL_BOX_OF = HULL_SEGS; HULL_BOX = new Float64Array(HULL_SEGS.length * 4);
+    HULL_SEGS.forEach((s, k) => { HULL_BOX[k * 4] = Math.min(s.ax, s.bx); HULL_BOX[k * 4 + 1] = Math.max(s.ax, s.bx); HULL_BOX[k * 4 + 2] = Math.min(s.az, s.bz); HULL_BOX[k * 4 + 3] = Math.max(s.az, s.bz); });
+  }
+  const m = d + .01, B = HULL_BOX;
+  for (let k = 0; k < HULL_SEGS.length; k++) {
+    if (x < B[k * 4] - m || x > B[k * 4 + 1] + m || z < B[k * 4 + 2] - m || z > B[k * 4 + 3] + m) continue;
+    const s = HULL_SEGS[k], t = Math.max(0, Math.min(1, ((x - s.ax) * s.dx + (z - s.az) * s.dz) / s.l2));
+    if (!(Math.hypot(x - s.ax - s.dx * t, z - s.az - s.dz * t) > d)) return false;
+  }
+  return true;
+}
 const tileInHull = (i, j) => [[.15, .15], [.85, .15], [.15, .85], [.85, .85]].some(([a, b]) => inHull(i + a, j + b));
 const roomAt = (i, j) => (i < 0 || j < 0 || i >= W || j >= D || MAP[j][i] === '.') ? null : MAP[j][i];
 const isVoid = (i, j) => { const r = roomAt(i, j); return !r || !!ROOMS[r].void || !STAND.has(i + ',' + j); };
@@ -2947,16 +2965,18 @@ function tallCombine() {
       const base = o.isMesh && !o.userData.noMerge && !Array.isArray(o.material) && t.src.get(o.material);
       if (!base || base.transparent || base.opacity < 1) continue;
       const key = base.uuid + (o.castShadow ? '' : '-ns');
-      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, P: [], N: [], U: [], ranges: [] });
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, parts: [], nP: 0, nN: 0, nU: 0, ranges: [] });
       const a = o.geometry.attributes, n = a.position.count;
-      b.ranges.push([ti, b.P.length / 3, n]); for (const [d, s] of [[b.P, a.position], [b.N, a.normal], [b.U, a.uv]]) for (const v of s.array) d.push(v);
+      // opt #10: the arrays are kept and copied whole at the end (they were pushed one number at a time; the same numbers)
+      b.ranges.push([ti, b.nP / 3, n]); b.parts.push([a.position.array, a.normal.array, a.uv.array]); b.nP += a.position.array.length; b.nN += a.normal.array.length; b.nU += a.uv.array.length;
       o.visible = false; t.own.push(o);
     }
   });
   for (const b of buckets.values()) {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
-    geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2)); geo.computeBoundingSphere();
+    const geo = new THREE.BufferGeometry(), P = new Float32Array(b.nP), N = new Float32Array(b.nN), U = new Float32Array(b.nU);
+    let p = 0, q = 0, u = 0; for (const [a, n, w] of b.parts) { P.set(a, p); N.set(n, q); U.set(w, u); p += a.length; q += n.length; u += w.length; }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, [b.mat]); mesh.castShadow = b.shadow; mesh.receiveShadow = true; mesh.raycast = () => {}; deckRoot.add(mesh);
     TALL_ALL.push({ mesh, ranges: b.ranges });
   }
@@ -3083,28 +3103,60 @@ function tallSync() {
     b.mesh.geometry.groups = gr; b.mesh.visible = gr.length > 0;
   }
 }
+// Optimization pass #10 (the render seat): each piece is read once, straight from its own (indexed or not) arrays, with
+// three r128's own sums in the same order (Vector3.applyMatrix4 for positions; the normal matrix, applyMatrix3 and
+// normalize for normals), into typed arrays sized by a first pass that only counts. Before, each piece was copied
+// (toNonIndexed or clone), transformed through BufferAttribute's getX/setXYZ and copied again into plain arrays. A value
+// is rounded to 32 bits once either way, so the merged shapes are the same to the bit, in the same order
+// (opt-probes/merge_bytes.py). A piece in a form this doesn't read (interleaved, not 3 + 3 + 2 numbers a corner) is
+// copied and transformed the old way first (g below), then read the same way.
+const MERGE_N3 = new THREE.Matrix3();
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
-  const buckets = new Map(), done = [];
-  root.traverse(o => {
+  const buckets = new Map(), done = [], jobs = [];
+  root.traverse(o => {                                   // 1: the buckets (in the order they were always made) and their sizes
     if (!o.isMesh || o.userData.noMerge) return;
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
-    const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
-    g.applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld));
-    const groups = Array.isArray(o.material) ? g.groups : [{ start: 0, count: g.attributes.position.count, materialIndex: 0 }];
-    const P = g.attributes.position.array, Nn = g.attributes.normal.array, U = g.attributes.uv ? g.attributes.uv.array : null;
+    const mats = Array.isArray(o.material) ? o.material : [o.material], src = o.geometry, A = src.attributes;
+    const direct = A.position && A.normal && !A.position.isInterleavedBufferAttribute && !A.normal.isInterleavedBufferAttribute && A.position.itemSize === 3 && A.normal.itemSize === 3
+      && (!A.uv || !A.uv.isInterleavedBufferAttribute && A.uv.itemSize === 2) && (!src.index || !src.index.isInterleavedBufferAttribute);
+    let g = null, groups;
+    if (direct) groups = Array.isArray(o.material) ? src.groups : [{ start: 0, count: src.index ? src.index.array.length : A.position.count, materialIndex: 0 }];
+    else { g = src.index ? src.toNonIndexed() : src.clone(); g.applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld)); groups = Array.isArray(o.material) ? g.groups : [{ start: 0, count: g.attributes.position.count, materialIndex: 0 }]; }
+    const parts = [];
     for (const gr of groups) {
       const mat = mats[gr.materialIndex]; if (!mat) continue;
       const key = mat.uuid + (o.userData.noShadow ? '-ns' : '');
-      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat, P: [], N: [], U: [], shadow: !o.userData.noShadow });
-      for (let v = gr.start; v < gr.start + gr.count; v++) {
-        b.P.push(P[v * 3], P[v * 3 + 1], P[v * 3 + 2]); b.N.push(Nn[v * 3], Nn[v * 3 + 1], Nn[v * 3 + 2]);
-        if (U) b.U.push(U[v * 2], U[v * 2 + 1]); else b.U.push(0, 0);
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat, need: 0, n: 0, shadow: !o.userData.noShadow });
+      b.need += Math.max(0, gr.count); parts.push([gr, b]);
+    }
+    jobs.push({ o, g, parts }); done.push(o);
+  });
+  for (const b of buckets.values()) { b.P = new Float32Array(b.need * 3); b.N = new Float32Array(b.need * 3); b.U = new Float32Array(b.need * 2); }
+  for (const { o, g, parts } of jobs) {                  // 2: the corners, in the same order
+    const A = (g || o.geometry).attributes, ix = !g && o.geometry.index ? o.geometry.index.array : null;
+    const P = A.position.array, Nn = A.normal.array, U = A.uv ? A.uv.array : null;
+    if (!g) m4.multiplyMatrices(inv, o.matrixWorld);
+    const e = m4.elements, n3 = MERGE_N3.getNormalMatrix(m4).elements;
+    for (const [gr, b] of parts) {
+      const BP = b.P, BN = b.N, BU = b.U, end = gr.start + gr.count;
+      for (let v = gr.start; v < end; v++, b.n++) {
+        const s = ix ? ix[v] : v, k = b.n * 3;
+        if (g) { BP[k] = P[s * 3]; BP[k + 1] = P[s * 3 + 1]; BP[k + 2] = P[s * 3 + 2]; BN[k] = Nn[s * 3]; BN[k + 1] = Nn[s * 3 + 1]; BN[k + 2] = Nn[s * 3 + 2]; }   // already moved
+        else {
+          let x = P[s * 3], y = P[s * 3 + 1], z = P[s * 3 + 2];
+          const w = 1 / (e[3] * x + e[7] * y + e[11] * z + e[15]);   // Vector3.applyMatrix4
+          BP[k] = (e[0] * x + e[4] * y + e[8] * z + e[12]) * w; BP[k + 1] = (e[1] * x + e[5] * y + e[9] * z + e[13]) * w; BP[k + 2] = (e[2] * x + e[6] * y + e[10] * z + e[14]) * w;
+          x = Nn[s * 3]; y = Nn[s * 3 + 1]; z = Nn[s * 3 + 2];
+          const nx = n3[0] * x + n3[3] * y + n3[6] * z, ny = n3[1] * x + n3[4] * y + n3[7] * z, nz = n3[2] * x + n3[5] * y + n3[8] * z;   // applyMatrix3
+          const r = 1 / (Math.sqrt(nx * nx + ny * ny + nz * nz) || 1);   // normalize: divideScalar(length() || 1)
+          BN[k] = nx * r; BN[k + 1] = ny * r; BN[k + 2] = nz * r;
+        }
+        if (U) { BU[b.n * 2] = U[s * 2]; BU[b.n * 2 + 1] = U[s * 2 + 1]; }   // else 0, 0 (a new Float32Array is zeros)
       }
     }
-    g.dispose(); done.push(o);
-  });
+    if (g) g.dispose();
+  }
   for (const o of done) o.parent.remove(o);
   for (const b of buckets.values()) {
     const geo = new THREE.BufferGeometry();
@@ -3155,7 +3207,7 @@ function buildDeck(def) {
   });
   MAP = def.map.map((row, j) => [...row].map((c, i) => tileInHull(i, j) ? c : '.').join(''));
   STAND = new Set();         // tiles whose centre sits well inside the hull, where people can stand
-  for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (hullDist(i + .5, j + .5) > .45) STAND.add(i + ',' + j);
+  for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (hullBeyond(i + .5, j + .5, .45)) STAND.add(i + ',' + j);
   for (const [key, type] of Object.entries(DOORS)) {          // locked rooms say what they are
     if ((type !== 'closed' && type !== 'hatch') || CLOSED_DOORS[key] || !def.lockedRoom || (def.service || []).some(sv => (sv.key || sv) === key)) continue;
     const [k, a, b] = key.split(','), i = +a, j = +b, r = (k === 'h' ? [roomAt(i, j - 1), roomAt(i, j)] : [roomAt(i - 1, j), roomAt(i, j)]).find(r => r && !ROOMS[r].hall);
@@ -3331,12 +3383,12 @@ function buildDeck(def) {
   // inner walls that run into a curved stretch of hull are cut short, running just into the hull wall
   for (const e of edgeList) {
     const ax = e.i, az = e.j, bx = e.horiz ? e.i + 1 : e.i, bz = e.horiz ? e.j : e.j + 1;
-    const ina = hullDist(ax, az) > 0, inb = hullDist(bx, bz) > 0;
+    const ina = hullBeyond(ax, az, 0), inb = hullBeyond(bx, bz, 0);   // hullDist(...) > 0 (opt #10)
     e.wx = e.cx; e.wz = e.cz; e.sx = 1;
     if (ina === inb) continue;
     const [x0, z0, x1, z1] = ina ? [ax, az, bx, bz] : [bx, bz, ax, az];
     let lo = 0, hi = 1;
-    for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; if (hullDist(x0 + (x1 - x0) * m, z0 + (z1 - z0) * m) > 0) lo = m; else hi = m; }
+    for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; if (hullBeyond(x0 + (x1 - x0) * m, z0 + (z1 - z0) * m, 0)) lo = m; else hi = m; }
     const len = Math.min(1, lo + .3);
     e.sx = len / SEG > 1 ? 1 : len; e.wx = x0 + (x1 - x0) * len / 2 - OX; e.wz = z0 + (z1 - z0) * len / 2 - OZ;
   }
