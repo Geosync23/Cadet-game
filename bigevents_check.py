@@ -36,6 +36,12 @@ exec(open(__file__.replace('bigevents_check.py', 'cadet_test.py')).read().split(
 from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
+OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
+ON_ALREADY = 'const EVENTS_ON = true;' in SRC
+if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
+    SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
+    (WORK / 'test').mkdir(parents=True, exist_ok=True)
+    OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
 CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above
 MESS_SEATS = 44                 # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 
@@ -546,14 +552,15 @@ with sync_playwright() as pw:
     # 0. the switches
     base = 'const EVENTS_ON = false;' in SRC
     cal_alone = bool(re.search(r'const EV_CAL_ON = EVENTS_ON;', SRC))
-    print('Switches:', 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
+    print('Switches:', 'EVENTS_ON (on in the build; a switched-off copy for parts 1-2)' if ON_ALREADY else 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
     if not base and 'const EVENTS_ON = true;' not in SRC:
         print('  SKIP: no events base in this build (EVENTS_ON): nothing to check')
         print('BIGEVENTS CHECK OK (nothing built yet)'); sys.exit(0)
 
     # 1. off: today's game
     print('\n1. Switched off (the build as it is):')
-    g = Game(pw, sys.argv[1]); a = paper(g, 'off'); show(a)
+    if ON_ALREADY: note('EVENTS_ON is on in this build: parts 1-2 run on a switched-off copy of it (EVENTS_ON = false), part 3 on the build as switched on')
+    g = Game(pw, OFF_BUILD); a = paper(g, 'off'); show(a)
     if a['sw']['EVENTS_ON']: note('EVENTS_ON is already on in this build: part 1 checks the build as it is')
     else:
         if a['eventDay']: fail(f"off: eventDay is true on {a['eventDay']}")
@@ -574,8 +581,8 @@ with sync_playwright() as pw:
     if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
-    if not a['sw']['EVENTS_ON']: check_callin(pw, sys.argv[1], 'off', False)
-    if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
+    if not a['sw']['EVENTS_ON']: check_callin(pw, OFF_BUILD, 'off', False)
+    if not a['sw']['EVENTS_ON']: check_notes(pw, OFF_BUILD, 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
