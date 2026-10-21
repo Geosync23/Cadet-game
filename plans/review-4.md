@@ -75,3 +75,32 @@ Verdict sent to EV3 and lead 23 at ~06:05.
 - A probe save that starts after an event's day has that event passed over (F0c, evFrom = the load day). Put `'evFrom': 0` in the save's ship.
 - `pkill -f <name>` also matches your own shell's command line: kill by PID.
 - events_check's LIVE part runs the storm on Day 10 (a day off for you): the briefing pick isn't held there by design (a NOTE).
+
+## S1 re-review (EV3 3367aab, EV4 4476186): PASS
+- Fix 1, live on fc23557, Day 11 (`s1_pick.py`): stormBatteries is claimed:you at the pick and still at 14:24.
+- Fix 2 reads correctly (the timed debrief marks mail:debrief; eventFinish sends its own only without it).
+- events_check's Day-10 NOTE is fine. 4fa198f (day_check skips R6 while the rec deck is shut at 20:00): PASS.
+
+## EV3 storm S3/S5/S6/S7: d3bf237, base 9561f48. PASS WITH FIXES (sent to EV4, the builder now)
+
+**Checks:**
+- cadet_test off: ALL IDENTICAL. check_fast OK.
+- events_check off/on OK. devmode on OK.
+- day_check on: 14 and 15 OK; 12 fails only #18 (off too); 13's two FAILs were fixed by b9aa775 and 4fa198f.
+
+**Probe `s37_probe.py`** (events on from Day 0: `'evFrom': 0`):
+- rec deck shut at 15:00;
+- Lukas's moment at 17:14 Friday; the promise holds stormLanterns (claimed:you at Saturday 14:00);
+- no Lukas Mail;
+- 60 in the mess at 18:16, Brennan in and Lukas out, stayIn off, 219 calls.
+
+**Fixes:**
+1. EV_DAY_DRESS copies fail section 18's identity tests (`SHIP_TRADITIONS.includes(e.ev)` / `indexOf`):
+   - the Monday Lap isn't joinable (`lap_d15.py`);
+   - dressed rows are left out of evBudget and the week's Mail;
+   - the note's src isn't 'tradition'.
+2. Crowds (bigevents on fc23557): supper 68 meant against the user's "at most 60"; party 45 for 34 places. A call for the lead and EV4.
+3. food_check on, Days 11-14: Day 14 dinner waits 6 against 5 (2 on S1), failing the carts and chiller weeks. Friday is unchanged at 18.
+4. bigevents/events_check use the same identity filter (sent to EC1), hence "Lap not on D15".
+
+**Nit:** the automatic EV_SHIPWIDE k could collide with the pinned 351/352 for later events.
