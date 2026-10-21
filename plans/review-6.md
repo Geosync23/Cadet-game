@@ -85,3 +85,32 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   function declarations; without #dev, one false test. Ends capped at 23:30 (DM_LATEST on from + len).
 - Nit sent: a Dev start uses the plain SHIP_TRADITIONS entry, not that day's dressed copy (evTable), so on a dressed
   day outside eventDay (the storm's Monday Lap) it would replace the dressed version.
+
+## EV6 storm 829f242c (the lantern supper in seated sittings, the user's change): supper PASS; food_check open
+- cadet_test off 582cd21→829f242c: ALL IDENTICAL. check_fast OK (239 s). day_check 13 on OK. events_check on OK
+  (lanternSupper 18:00-19:45 went 51/59, places 48).
+- `sit_probe.py` (on-copy, Day 13 from 17:40, 390x844): the mess 5→48 at most (18:52), 45 at 18:59; trays held
+  standing 0 throughout; 199-236 calls; lamp .85; Brennan in, Lukas out. Code read: standing diners gone (trayTo plain
+  again; day_check's standMeal allowance gone), `seated` keeps eventPools off the crowd spots, stay [45, 60].
+- bigevents 3f9a458: FAILs only the old "mess over 44 needs standing places" rule, dropped in EC1's ef9d7fc/12901c9.
+- food_check on (11 4): FAILs dinner waits on Days 12 (43), 14 (26), 15, 17 (43), 20, 21 (26), 24 (46), 25, 27, 28,
+  31 (51), 32 and the carts and chiller weeks. adb71aa failed only 28 and 31. EV6 saw the same list on 582cd21, so it
+  started before this change. Bisect running: 582cd21, 4311ffe (the Fridays merge), ab58e7b.
+  (ab58e7b's PASS above did not include a food_check; my miss.)
+
+## EV5 Crossing the Line L1-L3 (5c3c003, 94254b4/9188428): findings so far
+- cadet_test off: 347c573→5c3c003 ALL IDENTICAL; b071f0e→9188428 ALL IDENTICAL.
+- events_check on: OK. day_check on, Days 6 and 7: OK.
+- `line_probe.py` (on-copy, a real save Day 7 14:10, evFrom 0, 390x844):
+  - paper: nobody but the ceremony in the bow lounge 14:35-15:10 (PB's evClosed find doesn't show on Day 7);
+    Saruth at 3-tend-16, never at the ceremony; the 10 front spots all first-timers; the four lead spots Marrow,
+    Brennan, cruz-tove, walsh-esme; 39 planned at the ceremony (plan "45 or more is fine"; EV5 counted ~43).
+  - live in the lounge: horn toast at 14:30, ribbons on at 14:34; crowd 4 (14:29), 6 (14:38), 13 (14:43), 37 (14:47),
+    41-43 (14:52-15:01); 214-236 calls.
+  - **Marrow arrives late**: walking the promenade at 14:38 (23.5, 9.5), 14:43 (31.8), 14:47 (39.8), at the glass
+    (50.5, 10.5) only by 14:52-14:56. The oath is at 14:40. eventMeetPlan gives a named cast 5 minutes' early start:
+    she leaves her quarters at 14:35. The crowd arrives 14:43-14:52 too.
+  - reload at 15:02: 43 still there, the event on (the panel's state not read by my probe: untested).
+  - ribbons gone by 16:05. Line supper 18:26-18:44: 45-47 in the mess, 219 calls, pudding apple crumble.
+  - plaque on at 19:41 (calls 237), gold fading (.21). Certificate: trace 'lineCertificate' saved, but not shown on
+    Deck 4 thirty steps after goToDeck(4): re-checking (may be my probe's timing).
