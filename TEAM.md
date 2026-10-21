@@ -302,3 +302,7 @@ EP2 (~400k) idle, done.
 | Seat | Session | Branch | Job |
 |---|---|---|---|
 | Veyli lore planner LW1 | session_01FDk7X14eAEbCZtr59mLxPi | `claude/veyli-lore` | Veyli history options, how the player learns it over the month, pronoun rule, audit of every existing mention; plan page with questions |
+**~02:58 UTC, the user: speed up the checks** with saved-game starting points, only-affected checks per turn (check_fast still every turn), resumable long runs, the full round spread across containers; NOT headless (no-drawing) runs; large checks still run fairly often (cadence into DEV_NOTES).
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Test-speed engineer TS1 | session_01611xjntKRmJmXQ4vdwW8MV | `claude/test-speed` | measure first, plan to lead, then fixtures + stale guard, affected-checks runner, resumable parts, spread runs; results must stay identical |
