@@ -24,32 +24,42 @@
 | EV3 storm S3/S5/S6/S7 | d3bf237 | PASS WITH FIXES (sent to EV4): 1, the dressed Lap not joinable; 2, crowds; 3, Day 14 dinner wait; 4, the check's filter (EC1) |
 | EV4 day_check R6 skip | 4fa198f | PASS |
 | EV4 standing diners | b9aa775 | PASS (section 18; section 10 is PB's) |
+| EV4 props + 8b hook | 96bb2c6 | PASS WITH FIXES (the mess only, not all of Deck 3) |
 
-## In flight when this was written (results in the scratchpad's res/, see "How to test")
+## The queue left for PR6 (session_01LVHLJHrAR5iGJFS7HK9E7i): re-run in your own container
 
-- **EV2 S8 (5cb698a).**
-  - Checked: cadet_test off ALL IDENTICAL against af568f9; check_fast OK. Code read OK: scriptBy from officer up; addrBelowHud in the 19 skin, `#devAddr`.
-  - Still to come: the banner shots at 390/360 (`s8_banner.py`, run last in the queue).
-  - Nit to send: addrBelowHud sets the top once, when the banner shows (no re-layout on rotation). EV2's shots never reached the branch (*.png ignored).
-- **EV4 props + 8b hook (96bb2c6).**
-  - Checked: code read OK (no R(), col()/dressMat, overlapping parts, 2 draw calls each; the 8b hook is lamp eased toward stormSupperDim, 0 while off).
-  - Live: the props probe at Day 13 18:23 gives 60 in the mess and 219-220 calls. The shot timed out twice; it's re-running with a 180 s timeout (`props_probe.py`).
-  - Judgement call for the lead: **the whole of Deck 3 dims, the plan says the mess.**
-  - Still to come: pr_ct, pr_cf.
-- **EV4 f32d901 (S3-S7 fixes, crowds, S9 framedMenu).**
-  - Code read OK: evIsTrad plus x.base; party.stay [30, 60] on its 34 seats; the stormScripts fallback; framedMenu behind `on()`.
-  - Nit: framedMenu's card plane sits 0.003 in front of the frame's face. Check for shimmer on a phone.
-  - Queued: cadet_test against 74c216e, events_check on, bigevents, lap_d15, day_check 14, food_check 11-14, check_fast.
-  - Open: the supper has 63 meaning to go, against EC1's CROWD of 60 (peak 54 at once). This needs the lead's call or EV4's trim.
-- **EC1 turns 9-11 (ac32382, e3f1da9, 037a149).**
-  - Code read OK: isTrad by id; CROWD 60; peak at once; stay gatherings judged by peak.
-  - Queued: ec10_own (the branch), ec9_mut (isTrad reverted to includes: the planted dressed clash must go uncaught, so exit 1), ec10_f32, and game mutants in res/../mut10 (p1 party who 1, p2 party stay [110, 120], p3 supper who .95). Each must add a FAIL beyond f32d901's baseline (the supper's 63).
+My runners were stopped at the handover. None of the items below has a result yet, apart from what's listed as done.
+
+1. **EV2 storm S8 (claude/storm-s4s8 5cb698a, base af568f9).**
+   - Done: cadet_test off ALL IDENTICAL; check_fast OK; code read OK (scriptBy officer/senior/specialist → calderStorm.officer; addrBelowHud in section 19's skin on `#devAddr`, under 600 px only, behind EV_STORM_ON).
+   - Left: the phone shots, `plans/review-4/s8_banner.py S8_ON.html` (the save has 'evFrom': 0; Day 12 13:55; it checks the banner top against devBtn/pauseBtn/trkBtn at 390 and 360). Then the verdict to EV2 and the lead.
+   - Nit to send: the top is set once, when the banner shows (no re-layout on rotation). EV2's own shots never reached the branch (*.png ignored).
+2. **EV4 props (96bb2c6): verdict sent, PASS WITH FIXES** (dim the mess only, lead 23's call; the framedMenu 0.003 nit).
+   - Left: one phone shot of the supper with the lanterns (`props_probe.py PR_ON.html`, shot timeout 180 s) and FEEL_S.lamp ≈ .85 there.
+   - Check EV4's mess-only dimming when it lands.
+3. **EV4 f32d901 (S3-S7 fixes, S9 framedMenu) and 2228a05 (crowd caps), base 74c216e.**
+   - Code read: OK for both (evIsTrad plus x.base replaces the four identity tests; party places plus stay [30, 60]; supper .73; the stormScripts fallback; framedMenu behind `on()`).
+   - Left to run:
+     - cadet_test off (74c216e→2228a05);
+     - events_check on;
+     - bigevents_check (EC1's 037a149);
+     - `lap_d15.py ON.html` (D15 Lap joinable:true expected);
+     - day_check 13 and 14 on;
+     - food_check on, 11 4 (Day 14 dinner wait must be ≤ 5);
+     - check_fast;
+     - phone shots of the framed menu (S9; deck 4, your bunk).
+   - EV4 reports: the supper 59 mean to go, at most 51 at once; the party 45 come, at most 27 at once, 94 places, **416 calls at zoom 0.7** (watch the 450 budget).
+4. **EC1 turns 9-11 (claude/bigevents-check ac32382, e3f1da9, 037a149):** check-only; EC1 reports check_fast OK.
+   - Code read: OK (isTrad by id; CROWD 60; peak at once from the plans; stay gatherings judged by the peak; a planted dressed copy in the party's room in the self-test).
+   - Left: the check on its branch, and on 2228a05 (expect OK). Then the mutants:
+     - (a) isTrad reverted to `SHIP_TRADITIONS.includes(e.ev)`: exit 1 (the planted dressed clash uncaught);
+     - game mutants on 2228a05: party `who: .7` → 1, party.stay → [110, 120] (peak over places), supper `.73` → .95 (over 60). Each must FAIL.
 
 ## Open items to follow
 
 1. The S1 nits are left as is (EV4's call): "There's a commendation in your Mail" comes 12 minutes before the Mail; `allclear.you.jobs` can't be reached.
-2. The supper's means-to-go (63) against the check's 60: the lead's call.
-3. The S8 banner shots; the props shot.
+2. The crowd rule is settled (lead 23): at most 60 meaning to go; never more at once than its places, standing counted. 2228a05 follows it.
+3. The props: the mess dimmed only (lead 23), not all of Deck 3.
 4. Backlog: #18 (day_check Day 12 rec guard, fails off too); 18b (perf_check scenes in the wrong room, confirmed by OP1); 18c (join_check first-light).
 
 ## How to test (this container)
@@ -82,4 +92,4 @@
 
 ## Memory
 
-About 460k of 1M when this was written (2026-10-21 ~09:35 UTC).
+About 485k of 1M at the handover (2026-10-21 ~09:55 UTC). Handed to PR6 on lead 23's word; PR4 is idle.
