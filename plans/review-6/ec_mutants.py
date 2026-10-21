@@ -1,0 +1,51 @@
+# PR3, then PR4 (c1-c5 for EC1 turns 7-8): break copies of the game and check bigevents_check.py fails on each (EC1 turn 1, bfb2b76).
+# Run from a worktree of the branch:  python3 plans/review-4/ec_mutants.py starship-cadet.html [names]
+import sys, subprocess, pathlib
+src = pathlib.Path(sys.argv[1]).read_text(); out = pathlib.Path(__import__('os').environ.get('MUT_DIR', '/tmp/rv/mut')); out.mkdir(parents=True, exist_ok=True)
+M = {
+ 'm1_hold1500': ("id: 'fridayAddress', kind: 'held', weekday: 4, fromDay: 5, at: [930, 1020] }", "id: 'fridayAddress', kind: 'held', weekday: 4, fromDay: 5, at: [900, 1020] }"),
+ 'm2_party341': ("len: 120, k: 340, where:", "len: 120, k: 341, where:"),
+ 'm3_eventDayLive': ("function eventDay(d) {", "function eventDay(d) { if (SHIP.event) return true;"),
+ 'm4_onset1545': ("{ id: 'onset', at: [1, 840] }", "{ id: 'onset', at: [1, 945] }"),
+ 'm5_heldAlways': ("return EV_CAL_ON ? evHeldEnd(t) : t; }", "return evHeldEnd(t); }"),
+ 'm6_noSkip': ("filter(r => r.day < EV_LOAD_DAY &&", "filter(r => r.day < 0 &&"),
+ 'm9_guardOpen': ("if (on.some(b => b.kind !== 'test' && cross(b))) return false;", ""),
+ 'm10_captainTwice': ("if (kind === 'captain' && on.some(b => b.kind === 'test' || b.kind === 'captain')) return false;", ""),
+ 'm11_tableLate': ("? { at: 1140, len: 75 } : null;", "? { at: 1140, len: 95 } : null;"),
+ 'n1_notesWhileOff': ("if (EV_NOTES_ON && typeof simNote === 'function') simNote(", "if (true && typeof simNote === 'function') simNote("),
+ 'n2_noteTwice': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) }); simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });"),
+ 'n3_noteLate': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) + 5 });"),
+ 'n4_noCue': ("eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1]", "eventPhase: [d => 'evx.' + d.id + '.' + d.phase, 1]"),
+ 'd1_itemsWhileOff': ("function eventItems(a, b) {\n  if (!EV_DEVICE_ON) return [];", "function eventItems(a, b) {\n  if (false) return [];"),
+ 'd2_itemLate': ("const at = (d - 1) * 1440 + g.at; if (at < a || at > b) continue;", "const at = (d - 1) * 1440 + g.at + 5; if (at < a || at > b) continue;"),
+ 'd3_itemDropped': ("for (const g of eventGatherings(d)) {\n    const at", "for (const g of eventGatherings(d).slice(1)) {\n    const at"),
+ 'd4_trackedClosed': ("if (shut) continue; out.push({ sec: 'place'", "if (false) continue; out.push({ sec: 'place'"),
+ 'd5_openForIgnored': ("return !EV_OPEN_FOR.some(o =>", "return true || !EV_OPEN_FOR.some(o =>"),
+ 'd6_openForDeck': ("o.deck === g.deck && o.room === g.room && evBeatsOn(d)", "o.deck === g.deck && evBeatsOn(d)"),
+ 'e1_partyAsEvent': ("    if (mo && EV_SHIPWIDE.some(x => x.id === mo.id)) continue;", ""),
+ 'e2_partyNotTrad': ("const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin) continue;", "const at = (d - 1) * 1440 + e.from; if (at < fromMin || at > toMin || e.id === 'party') continue;"),
+ 'e3_toastKeptOn': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? m.notify : m.notify }"),
+ 'e4_toastDroppedOff': ("SHIP.device.calendarRemind.on ? null : m.notify }", "SHIP.device.calendarRemind.on ? null : null }"),
+ 'f1_skipFromLoadDay': ("const EV_SKIPPED = new Set(evSkippedFor(SHIP.evFrom, SHIP.eventLog, SHIP.event));", "const EV_SKIPPED = new Set(evSkippedFor(EV_LOAD_DAY, SHIP.eventLog, SHIP.event));"),
+ 'f2_notSaved': ("SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });", ""),
+ 'f3_keyWhileOff': ("SAVE_EXTRA.push(s => { if (SHIP.evFrom != null) s.ship.evFrom = SHIP.evFrom; });", "SAVE_EXTRA.push(s => { s.ship.evFrom = SHIP.evFrom == null ? 0 : SHIP.evFrom; });"),
+ 'f4_ignoreLog': ("r.day < from && !(log || []).some(l => l.id === r.id) && !(current", "r.day < from && !(current"),
+ 'f5_ignoreRunning': (" && !(current && current.id === r.id)).map(r => r.id);", ").map(r => r.id);"),
+ 'f6_resetOnReload': ("Number.isInteger(SAVED.ship.evFrom) ? SAVED.ship.evFrom :", "false ? 0 :"),
+ 'm8_ladderSun': ('"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990]',
+                  '"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 6}, "at": [1150, 1200]'),
+ 'c1_notHeard': ("const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', 'calledIn', ", "const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', "),
+ 'c2_noteTwice': ("simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 });", "{ simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 }); simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 }); }"),
+ 'c3_noteAt0': ("simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 });", "simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at });"),
+ 'c4_onShiftToo': ("if (p && eventCalledIn(p, d) && !simNotes(", "if (p && !simNotes("),
+ 'c5_offStillOn': ("const EV_CALLIN_ON = EV_CAL_ON;", "const EV_CALLIN_ON = true;"),
+ 'c6_logSpan': ("endDay: e.startDay + def.days, band", "endDay: e.startDay + def.days + 1, band"),
+}
+only = sys.argv[2:]
+for k, (a, b) in M.items():
+    if only and k not in only: continue
+    if src.count(a) != 1: print(k, 'SKIP (text not found once)'); continue
+    p = out / f'{k}.html'; p.write_text(src.replace(a, b))
+    r = subprocess.run([sys.executable, 'bigevents_check.py', str(p)], capture_output=True, text=True)
+    fails = [l for l in r.stdout.splitlines() if l.startswith('  FAIL')]
+    print(k, 'caught' if r.returncode == 1 and fails else 'NOT CAUGHT', r.returncode, len(fails), (fails[:1] or [''])[0][:160])
