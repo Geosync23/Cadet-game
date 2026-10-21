@@ -36411,9 +36411,17 @@ function eventAdvance(t = shipNow(), quiet) {
       if (EV_NOTES_ON && typeof simNote === 'function') simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });
       for (const [th, f] of Object.entries((def.scores && def.scores[ph]) || {})) eventScore(th, f(e));
       if (def.address && def.address[ph]) captainAddress({ lines: evText(def.address[ph], evCtx(e)), at: evBeatAt(e.startDay, def.phases[k].at), quiet: quiet || k < to });
-      const m = def.mail && def.mail[ph]; if (m && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
+      const m = def.mail && def.mail[ph]; if (m && !m.at && typeof mailSend === 'function') mailSend({ at: t, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e)), quiet: !!quiet });
     }
     e.phase = now.phase;
+  }
+  // Mail at a fixed minute (EP2/EP3, the events base): mail: { <key>: { at: [day, min], from, subject, body } }, beside the
+  // per-phase form; sent once a run (marked in e.mine, saved with the event), at its own minute, after a sleep or skip too
+  for (const [key, m] of Object.entries(def.mail || {})) {
+    if (!m || !Array.isArray(m.at) || e.mine['mail:' + key] || typeof mailSend !== 'function') continue;
+    const at = evBeatAt(e.startDay, m.at); if (at > t) continue;
+    e.mine['mail:' + key] = 1; out.push('mail ' + key);
+    mailSend({ at, from: m.from, subject: m.subject, body: evText(m.body, evCtx(e, at)), quiet: !!quiet });
   }
   if (t >= end) {
     const band = eventBand(e.id, e.threads), traces = (def.traces && def.traces[band]) || [];
