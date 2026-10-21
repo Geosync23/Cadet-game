@@ -130,7 +130,7 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 | --- | --- | --- | --- |
 | Fri 5, 16:00 | The Captain's first weekly address mentions Sunday's crossing | rec deck auditorium | Fridays plan, `friday-d5.address` (needs `SHORT_FRIDAY`) |
 | Sat 6, 08:00 | **Warning** begins (the user's q1 = b): crew start talking about the Line from Saturday morning, "First crossing?" and why it matters (Pell crossed two years ago; Holt's one line). Talk only, so your free day stays free | every deck | F2 phase note, cue `event.crossingLine.warning` |
-| Sat 6, 18:00 | Vance's Mail "Tomorrow we cross the Line" (at a fixed minute, like the storm's debrief) | Mail | `mail.warning` at `[0, 1080]` |
+| Sat 6, 18:00 | Vance's Mail "Tomorrow we cross the Line" (at a fixed minute, like the storm's debrief) | Mail | `mail.vanceLine` at `[0, 1080]` (EV1's fixed-minute Mail) |
 | Sat 6, 19:00-22:46 | Story A begins: Tomas, on watch tomorrow (a moment wherever he is: the mess, the garden, the rec deck, or Bunk 1 at bedtime; else his Mail at about 22:50) | Deck 3, rec deck, Deck 4 | 20c moment |
 | Sun 7, 10:30-12:30 | The swap meet, as usual | promenade, plaza | (unchanged) |
 | 12:45-14:15 | Two small volunteer jobs on the mess sign-up sheet (Brennan offers them too): carry the punch from the galley to the lounge; hang gold ribbons in the lounge | galley, bow lounge | event `jobs` (17), `DECK_DRESS.signupMess` |
@@ -223,7 +223,7 @@ The build number is the build master's.
 - the storm update (the base is switched on with it);
 - EV1's F0b (called in, and named people placed into an event's meetings: the gap EC1 found, being fixed with PB), F2b (reactions within about 5 ship minutes), F3 (device) and F4 (reloads);
 - EC1's `bigevents_check.py`;
-- **a Mail at a fixed minute** in an event's data (`mail: { <id>: { at: [day, min], ... } }`, not only at a phase's start): Vance's 18:00 Mail on Saturday needs it (the warning now starts at 08:00), and so does the storm's 18:00 debrief. Asked of EV1 as one base feature for both (ER2's note);
+- **a Mail at a fixed minute** in an event's data (`mail: { <id>: { at: [day, min], ... } }`, not only at a phase's start): Vance's 18:00 Mail on Saturday needs it (the warning now starts at 08:00), and so does the storm's 18:00 debrief. EV1 agreed (02:47) to build it in the base: `mail: { <key>: { at: [day, min], from, subject, body } }`, beside today's per-phase form (a phase id with no `at` keeps today's meaning). It's sent once per run, through `evBeatAt` (the Friday hold applies), marked in the event's record and saved (not resent after a reload). The Line's key is `mail.vanceLine: { at: [0, 1080], ... }`;
 - patch E's `MUG_ON`;
 - the Fridays plan's `SHORT_FRIDAY`, for Friday's mention.
 
