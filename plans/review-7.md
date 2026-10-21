@@ -13,6 +13,7 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 | Builder | What | Commit | Verdict |
 |---|---|---|---|
 | PT1 | T1: first rotation to Day 21; opening view closer | claude/patch-crew 1badd51 + e597de2 | PASS (doc fixes for T2) |
+| DB2 | D5 Traditions tab | claude/devmode-2 d261274 | PASS |
 | RN1 (for lead 24) | opt #4 shaders kept | claude/opt-render 6fd3505 (game 8a9de48) | PASS |
 | TS2 (for lead 24) | perf_check right rooms | claude/opt-tests c2a32e2 | PASS |
 
@@ -46,3 +47,11 @@ Method per turn: the diff read; cadet_test (what changes and why); check_fast; t
 - cadet_test 0.64.8 -> 6fd3505 ALL IDENTICAL; keep_shots.py 14/14 deck shots identical (programs 22 after lap 1; memory as old); deck_check OK; GitHub quick check green.
 - keep_probe7.py (day, night, a week on, day again; 2 laps of 7 decks each): 22 programs from mid lap 1, none unkept, bounded. 0.64.8 at most 20 alive; mutant without usedTimes++ the same as 0.64.8.
 - Section 12's one line reviewed for the HUD seat: fine.
+
+## DB2 D5: the Traditions tab (d261274), PASS
+
+- cadet_test 0.64.8 -> D5 (no #dev) ALL IDENTICAL; also with the DEVMODE guard removed from the eventsOn line (devmodeState() is null off).
+- devmode_check (d261274's copy; my first run wrongly used integration's, without 'trad') OK incl. trad; events_check OK; check_fast OK 261 s.
+- Mutants (trad part): tr not in SAVE_EXTRA, eventsOn hook removed, SHIP_DAYS not cleared: all FAIL.
+- dm_trad_probe.py (real taps, 390 and 360, reloads): quiz in 20 minutes (17:25, 22 going), listed after a reload, Take me there to the Bow lounge, 22 at the quiz at 17:40 on the deck, Stop it restores Day 3's calendar, Undo brings it back, birthday whose by taps (38 going; quiz gives way), real keys untouched, no errors.
+- The gives-way rule: agreed by lead 24.
