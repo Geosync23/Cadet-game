@@ -100,3 +100,15 @@ The nits (commendation timing, gist order after a long skip) stay noted. Neither
 
 **Verdict on claude/storm-update 5f3fc3f: PASS.** S10 can go to the user's review once S2 is in with the Fridays, as
 DEV_NOTES now says.
+
+## S2 (ab58e7b, claude/fridays merged in): PASS
+I checked a new game with both `EVENTS_ON` and `SHORT_FRIDAY` on, on Day 12:
+- The Captain is on the bridge until 15:30, at the lectern 15:32-16:52, and back on the bridge 16:54.
+- Vance is on the bridge until 15:45, at the lectern 15:47-16:52, and back at 16:54.
+- At 16:20, 53 are at the address.
+- `eventsOn(12)` has the address at 16:00-16:50, kept through the storm's pause.
+
+With `EVENTS_ON` alone (Fridays still off), there's no address, and both stay on the double shift, which is right
+for that state. EV4's build-table row has cadet_test off.
+
+**Verdict on S2: PASS.** S10 can go to the user's review.
