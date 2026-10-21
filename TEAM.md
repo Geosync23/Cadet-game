@@ -363,3 +363,4 @@ Working (5): EV4, FR2, BM11, PR4, OP1.
 |---|---|---|---|
 | Fridays reviewer PR5 | session_01Eh4drBZjJ82DjYx6XaTt1F | `claude/review-5` | FR2's turn-5 fix + turn 6 (8415d1e), then turns 7-10 |
 Working (5): EV4, FR2, BM11, PR4, PR5. On call: ER2 (storm build review at S9), EC1 (filter fix 4), OP1 (plan done), PB, EV2.
+**~08:31 UTC: 0.64.8 PUSHED by BM11** (claude/integration 0ca6a58 = 0.64.7 + events base a1f2344 + bigevents f9b2b0b, every event switch off; quick check #122 green; cadet_test vs 0.64.7 ALL IDENTICAL; full round OK apart from career row 12; dinner frame time was noise). Dev page republished with 0.64.8 (version 3). BM11 idle, handover plans/handover-build-master.md (claude/integration 3a48846). A fresh build master (BM12) starts when Fridays is ready to merge. EC1 fixing bigevents identity match (dressed traditions) → PR4.
