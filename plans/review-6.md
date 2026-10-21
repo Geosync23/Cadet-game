@@ -118,3 +118,11 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   Fridays branch 7a0e5f7 on/off = 14-15 busy days. Bisect on the Fridays branch (first-parent 675588c..7a0e5f7):
   first bad 4ee3fdc0, the merge of integration 0.64.7: its game change is LADDER_ON, MUG_ON, FLC_ON switched on.
   Handed to FD1 (session_01YJhagf6oyF6SeT5XGvrL5H, lead 24's call); PR6 stops here. Not the storm's or the supper's.
+- L2/L3 9188428, the rest: day_check 8 on OK; check_fast OK (240 s); lines_check PASS (0 errors, 51 warnings).
+  food_check on 6 3: only the garden FAILs (on the base too, EV5's note) and an empty "crew late meals: []".
+  EC1's 3f9a458 on 9188428: OK (cast on lead-1/lead-2, 10 of 10 front first-timers, Tomas 2-watch-6, supper 55
+  meaning to go, at most 45 at once, 70 places). Mutant Saruth pull 1: FAIL "Saruth is at the Line's ceremony" (caught).
+  Mutant the Line supper's everyone .85 → 1: no change (55 again), an inert mutant, not a check miss.
+- The container restarted at about 14:25; the queued runs on 0032351 were dropped. L4/L5 is reviewed on EV7's head
+  4306fd1 (L5b-L5d: PB's evClosed fix, the seated Line supper, the oath's early 25 and the crowd's lead, the story
+  flags at the panel's end, jobs held to 13:45).
