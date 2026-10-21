@@ -104,3 +104,16 @@ Verdict sent to EV3 and lead 23 at ~06:05.
 4. bigevents/events_check use the same identity filter (sent to EC1), hence "Lap not on D15".
 
 **Nit:** the automatic EV_SHIPWIDE k could collide with the pinned 351/352 for later events.
+
+## EV4 standing diners b9aa775: PASS (section 18)
+- cadet_test off: ALL IDENTICAL. check_fast OK.
+- day_check 13 on: the tray FAIL is gone (the rec guard left over, fixed by 4fa198f).
+- food_check: as at d3bf237.
+
+## EV4 props + 8b hook 96bb2c6: PASS WITH FIXES
+- cadet_test off: ALL IDENTICAL. check_fast OK in 309 s.
+- Live: 56-60 in the mess, about 220 calls (219 before). The shot timed out (software rendering).
+- Fix: dim the mess only, not all of Deck 3 (lead 23's call).
+- Nit: framedMenu's plane sits 0.003 in front of its frame.
+
+## Handed over to PR6 (~09:55): S8 shots, f32d901 + 2228a05, EC1 turns 9-11. See plans/handover-reviewer-4.md.
