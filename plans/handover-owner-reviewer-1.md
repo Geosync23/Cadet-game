@@ -19,11 +19,12 @@ OR1, session_01W7AHxrcgBM3rJNtCFKwp9W, written 2026-10-21 at about 50% memory, a
   7. EV1's F1a eventDay + puzzle_check (0313e52): PASS, two notes (save the skip set in F4; the visit's old phases give days 28/29/33).
   8. EV1's F3a hooks (18f0d9d): PASS WITH FIXES: meetings get no notice with heads-ups off (two one-line fixes sent).
   9. FR1's Short Fridays turn 3 (fridays 4d270ac): PASS WITH FIXES: the auto clock-out words say 17:00 on Fridays; the Friday team job and section 24's "held until 17:00" ends are loose ends.
+  10. FR1's Short Fridays turn 4 + clock.auto fix (6b6abae, 56fbd2b): PASS.
 - BM11's events_check FLC_ON skip (c58c7d2): OK (message only, no part).
 
 ## Open items to follow up
 - EV1: F3a's meeting-notice fix; F4 must save the calendar's skip set; F5 keeps meetings you're not in out of your Schedule; recheck eventDay for the visit's new phases.
-- FR1: clock.auto words; TEAM_FRI fitting by 15:30.
+- FR1: done (part 10). claude/integration still read 0.64.5 (7958332) at my last fetch; compare a branch against the base it actually merged.
 - Known and accepted, not to "fix": career_check `busy: "Relied on" before Day 5` (backlog rows 12, 17).
 
 ## How to test (fresh container)
