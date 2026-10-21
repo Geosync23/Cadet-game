@@ -1,0 +1,62 @@
+# Handover: storm builder 2 (EV4), the ion storm update
+
+Written 2026-10-21 by EV4 (session_01MqpjPG6mDFe5avrDxcNWTU), after S9. Read EV3's note first
+(`plans/handover-storm-builder.md`: the whole design, what S1-S8 built, the gotchas), then this one.
+
+## Role, branch, people
+
+- **Role:** the ion storm update (plans/event-storm-plan.md v1.2 on claude/event-plan-storm), section 18's storm block
+  and slot `// ---- slot: Storm builder`, with small hooks elsewhere. **Never set the build lines** (lead 23 confirmed):
+  name each turn in a build-table row ("Ion storm update" table, plans/build-table.md).
+- **Branch:** `claude/storm-update`, tip f32d901. Merge `claude/storm-s4s8` (EV2) whenever EV2 pushes (last: e723f1d).
+  Take `bigevents_check.py` from `claude/bigevents-check` (EC1) as is (last: ac32382); never edit it.
+- **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight: questions to the lead only, never the user).
+- **Reviews:** PR4 (session_014WyaZtasY32m5fnkBxuR9d) every turn, also as the stand-in owner of 4d (props) and 8b
+  (shipFeelFrame's hook). PB (session_01FWW2piuXkFYaRRzLXZiqYb) owns 10/13/14. EC1 (session_01QgShGXD6P24DDxTp8npN41)
+  owns bigevents_check. EV2 (session_017S7eVMgX34nSt8fxZ5kat9) S4/S8. FR2 (session_019m7hCEtBsPA3ascA2Bqu9V) Fridays.
+  ER2 (session_01S8pboNujAzZgMSWFK84CxD): the adversarial build review after S9, before S10.
+
+## What I built (all off with `EV_STORM_ON` = `EVENTS_ON` false; cadet_test ALL IDENTICAL every turn)
+
+| Commit | What |
+| --- | --- |
+| 4476186 | S1 fix 2: `eventFinish` sends the debrief unless the timed one already went (`e.mine['mail:debrief']`), then marks it. (EV3's 5b81161 was the same fix; merged, my line kept.) |
+| b9aa775 | Standing diners: section 10's `trayTo(id, w)` asks the slot's pure `evStandTray(pl, w)` for crowd spots: a tray only at a meal gathering's own crowd spots, its meal, its ev- tag, its window. day_check allows exactly that. perf_check scene 'lantern supper, the mess Sat 18:30'. PB: OK. |
+| 96bb2c6 | Props (4d): `dressLantern`, DECK_DRESS `lanternMess` (12 lanterns on the long tables) and `stormLantern` (the trace on the galley pass), 2 draw calls each. 8b's shipFeelFrame: `FEEL_S.lamp` eased toward the slot's `stormSupperDim(deck)` (.85 while lanternMess is out on Deck 3): the emergency-light level. |
+| 4fa198f | day_check: the R6 rec-deck FAIL is a printed line on a day the storm shuts Deck 7 (PR4: PASS). |
+| 05865b7 | events_check: the day-10 pick hold: you're on the Works drill (drill-pressure@10) that day, so section 17 rightly leaves the pick open; a FAIL again otherwise (PR4: fine). |
+| 74c216e, 9c1a441 | Crowds (lead 23's call: supper at most 60, party at most its 34 places at once, the rest drop in): supper pull .77 (63 mean to go, 54 at once); party `stay: [30, 60]` (EV_SHIPWIDE passes a moment's `stay`): 45 come, at most 27 at once. PR4's S6 fix 1: `evDressed` keeps `base`, `evIsTrad(ev)` replaces the identity tests (the Monday Lap joinable). S1 nit: stormScripts' fallback. |
+| f32d901 | S9: DECK_DRESS `framedMenu` (the Captain's table's trace) above your keepsake shelf, bunk or cabin 4-23; a DECK_DRESS entry's `on()` (dressShow skips it while false) keeps it off with the switch. join_check allows the storm's Monday Lap. |
+
+Shots: plans/storm-shots/ (`git add -f`: *.png is in .gitignore).
+
+## Open (after f32d901)
+
+- **PR4's review of f32d901** (S3-S7 fixes, S9) and of 96bb2c6 (props, 8b hook): waiting.
+- **EC1:** asked to count the party at once for a gathering with `stay` (its check says "53 people for 34 places":
+  everyone over the evening). Until then bigevents_check FAILs on that row only.
+- **Not done, told PR4:** "There's a commendation in your Mail" is said at 10:00, the Mail comes at commendAt 10:12
+  (a words/timing call); `allclear.you.jobs` can't be reached (harmless).
+- **S9's 'old placeholder code':** skipped; lead 23 makes it an open question for the user.
+- **Deck 4 '454':** not reproducible (common room at most 323 on; perf_check's row stands in Cabin 4-05, 433-436).
+- **Backlog 18b** (perf_check's scenes use tile numbers as world x,z in nearestOpen: they may measure the wrong room) and
+  **18c** (join_check first-light FAIL, off too): for their owners.
+- **Then:** ask the lead for ER2's adversarial build review; then S10 (switch-on) only after the user's review.
+- **S2** waits for claude/fridays to reach claude/integration (never merge claude/fridays). FR2: the Day 12 address's
+  goers leave up to 30 minutes early, so the doubleShift exception needs Marrow off from 15:30 and Vance from 15:45,
+  through 16:50 (not [960, 1010]). Agree the exact minutes with FR2. EV3's S2 design is in its note.
+
+## Gotchas (new)
+
+- `nearestOpen(x, z, who)` takes world coordinates: `const c = cellPos(i, j); nearestOpen(c.x, c.z, player)`.
+- A gathering moment (non-meal) plans its goers onto the venue's crowd spots ('@<id>' / the venue pool), not its
+  `places`; bigevents_check's "places" counts the `places` list.
+- `DRESS.on` fills on eventsTick, not on goToDeck: call `EV_MIN = -1; eventsTick()` in a probe before reading it.
+- Test copies: regenerate the switched-on copy after every edit (I lost a run to a stale one).
+- Three lanes in parallel are fine with separate CADET_WORK dirs (cw, cw2, cw3 symlinking three/ and acorn/).
+
+## How to test a turn
+
+names_check → probe on a switched-on copy → the area's checks off and on (events_check, day_check 13/14, food_check
+`BUILD 11 4`, join_check, bigevents_check) → cadet_test against the last pushed tip → check_fast → build-table row and
+DEV_NOTES line → commit, push → PR4 (+ owners) and lead 23.
