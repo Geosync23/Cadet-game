@@ -6,10 +6,10 @@
 
 // EW2 (events writer 2), story A "Sixty by lamplight": the crew retell the lantern supper on Sunday
 ? cue:event.ionStorm.resolution
-- Lukas ran the lantern supper on two rings. Or six. Depends who you ask.   #funny
+- Lukas's lantern supper: two rings. Or six. Ask around.   #funny
 ? cue:event.ionStorm.resolution dept:galley !who:brennan|dlamini-lukas
-- The lantern supper was all Lukas. We carried bowls and kept quiet.   #warm
+- Supper was all Lukas. We carried bowls and kept quiet.   #warm
 ? cue:event.ionStorm.resolution who:varga-tariq
-- Lukas fed sixty-one by lamp light. Still slower than me at onions.   #funny
+- Lukas fed sixty-one. Still slower than me at onions.   #funny
 ? cue:event.ionStorm.resolution who:brennan
-- Back in my galley. Every pan nearly where I left it. Nearly.   #funny
+- Back in my galley. Pans nearly where I left them. Nearly.   #funny
