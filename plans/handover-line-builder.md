@@ -31,11 +31,13 @@ for bigevents_check (it flips EVENTS_ON itself) a copy with `const EV_LINE_ON = 
 | --- | --- | --- |
 | L1 | b01eaf0, 5c3c003 (pushed) | The event's data; `lineFirst`, `lineFirstCrew` and the cast slot `first:2`; the oath meeting; EV_BEATS `lineCeremony`; EW1/EW2's files moved into content/ and baked; facts.md bullets. Two events in the calendar: `eventNow` sees later calendar events (`evLaterSpans`), `eventAdvance` catches up every due event, section 14's galley-rota stint takes a meeting break. events_check's `EV_BEFORE`. |
 | L2 + L3 | 94254b4 (+ design-doc, food_check and events_check fixes after it) | The ceremony's venue `bow-lounge-line` (`lineVenue`, first-timers' front pool, lead spots via `evLeadWhere`), standing easy (`lineEasy`, eventPlan `meet`), the lounge closed to all but the ceremony (`gather: true`), the Line supper and Lap dressed (`evDressed` `where`, `lineStandTray`), `linePudding`, extra 12; the gold mood and the `horn` feel (8b), DECK_DRESS `lineRibbons`, `linePlaque`, `lineCertificate` (4d), the horn's notice. Shots: plans/line-shots/. |
-| L4 + L5 | see the build table (applied after 94254b4) | Story A: `lineMoment`, Saturday's Tomas moment (else his Mail 22:50), the mug at his post, the Lap moment at 3-lap-6 while you walk it (TJ_WALK), the supper guess and Brennan's saved mug. Your part: two jobs on Sunday 12:45 (`day: 1`, `hold: 855`: section 17's eventJobsHour/eventJob), the sign-up sheet, Brennan's secret as you take the punch, the Record line with no score sub. |
+| L4 + L5 | 239c697 (pushed with 18d's backlog row) | Story A: `lineMoment`, Saturday's Tomas moment (else his Mail 22:50), the mug at his post, the Lap moment at 3-lap-6 while you walk it (TJ_WALK), the supper guess and Brennan's saved mug. Your part: two jobs on Sunday 12:45 (`day: 1`, `hold: 855`: section 17's eventJobsHour/eventJob), the sign-up sheet, Brennan's secret as you take the punch, the Record line with no score sub. |
 
 ## Test results so far (switched on unless said)
 
-- Off: cadet_test ALL IDENTICAL, check_fast OK (L1; L2/L3 run pending at writing).
+- Off: cadet_test ALL IDENTICAL and check_fast OK after every turn (L1, L2+L3, L4+L5).
+- L4+L5 on: events_check, social_check, device_check, interactions_check, devmode_check, player_check OK; intro_check --week OK.
+- perf_check on: the Line's scenes fine; its one PROBLEM (geometry +2 on round trips) is on the storm tip already (backlog 18d).
 - events_check OK off, storm-only and Line-on (L1); L2/L3 Line-on FAILed only "no Mail for" the Line supper and the
   gathering: fixed in the check (they send none on purpose).
 - day_check Days 6, 7, 8 OK; deck_check (on) OK.
