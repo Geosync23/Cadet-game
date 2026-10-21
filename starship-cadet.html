@@ -51915,7 +51915,7 @@ function devmodeSet(body) {
 // later, Relied on, Making it safe, a teacher on shift, before 14:00; "Open the test now" sets the test for today and
 // calls the ladder's own ladderOpen (section 24's) when all but the day hold. "Next step" moves the clock to five
 // minutes before the promotion's next beat (the test job, the summons, the cake, the move, the ceremony).
-const DM_XP = 5;
+const DM_XP = 5, DM_PROMO_DONE = ['summons2', 'cake2', 'move2', 'ceremony2'];   // the first promotion's beats (24p's W.done keys)
 function devmodeW() { return SHIP.works || worksInit(Math.max(shipNow(), WORKS_START)); }   // the career record, made if it's not yet (as from Day 1 17:00)
 function devmodeBandNext(W) { const B = WORK_BANDS[W.tier] || WORK_BANDS[1], i = B.findIndex(b => b[0] > W.xp); return i < 0 ? null : B[i]; }
 function devmodeTestNeeds(W, d = SHIP.time.day, m = SHIP.time.min) {   // [[label, ok], ...] (pure)
@@ -51958,8 +51958,8 @@ function devmodeRank(rank) {                             // set by hand: approxi
   devmodeDo('Career: rank ' + RANK_TITLE[rank], () => {
     const W = devmodeW(), d = SHIP.time.day;
     if (rank === 'officer') Object.assign(W, { tier: 2, rank, xp: 0, cur: null, test: { tier: 2, day: Math.min(d, (W.test && W.test.day) || d), tries: Math.max(1, (W.test && W.test.tries) || 0), passed: true }, home: PROMO.home,
-      done: [...new Set(W.done.concat(['summons2', 'cake2', 'move2', 'ceremony2']))], ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned').concat([['officer', d], ['commissioned', d]]) });
-    else Object.assign(W, { tier: 1, rank, cur: null, test: null, home: 'bunk', done: W.done.filter(x => !/2$/.test(x)), ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned') });
+      done: [...new Set(W.done.concat(DM_PROMO_DONE))], ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned').concat([['officer', d], ['commissioned', d]]) });
+    else Object.assign(W, { tier: 1, rank, cur: null, test: null, home: 'bunk', done: W.done.filter(x => !DM_PROMO_DONE.includes(x)), ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned') });
     if (typeof MACH_REV !== 'undefined') MACH_REV++;
     promoPip();
     return 'Rank: ' + RANK_TITLE[rank] + ', Tier ' + W.tier + ' (set by hand: approximate). Your bed is ' + (rank === 'officer' ? 'in cabin 4-23' : 'in Bunk 1') + ' now.';
