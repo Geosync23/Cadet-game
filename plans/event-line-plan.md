@@ -1,4 +1,4 @@
-# Crossing the Line: the event plan (version 2: ER2 PASS; the story decided)
+# Crossing the Line: the event plan (version 2.1: the ceremony in the bow lounge)
 
 Event planner EP2 (session_01GpiqZ9jCYbS9XTNPF8adHr), 2026-10-21. Branch `claude/event-plan-line`, from claude/integration 0.64.6 (675588c). Reports to lead 22 (session_01BGQCZLK6gYTnqu6mwZ61jB). **Planning only: the game is unchanged.**
 
@@ -13,7 +13,7 @@ Event planner EP2 (session_01GpiqZ9jCYbS9XTNPF8adHr), 2026-10-21. Branch `claude
 ## In short
 - **Sunday Day 7**, your second day off (Saturday stays free). The Wren crosses into the Veyli reach. One day, no score, nothing breaks.
 - **14:30:** a gold pulse runs through every light (the horn: the game has no sound), the hull lights turn gold until the supper ends, and the Captain gives a short banner address. She's called in on her day off and says so.
-- **14:30-15:15, the plaza:** about 50-60 crew, because the day shift stands easy for the ceremony (except the bridge, the watch and the galley line). The first-timers stand at the front, you among them. The Captain reads the old oath, you answer it for the first-timers, and your words go on Monday's plaque. Then everyone drinks Brennan's green Line punch.
+- **14:30-15:15, the bow lounge** (the user, 01:42: "We should gather in the lounge"): about 50-60 crew, because the day shift stands easy for the ceremony (except the bridge, the watch and the galley line). The first-timers stand at the front, you among them. The Captain reads the old oath, you answer it for the first-timers, and your words go on Monday's plaque. Then everyone drinks Brennan's green Line punch.
 - **The story:** Tomas, your bunkmate and the other newest hand, is on watch through the whole crossing and misses his own Line. You can carry him a mug, and the crew give him his crossing on Lap of the Wren that night.
 - **18:00-19:15, the mess:** the Line supper. It's the Sunday table re-dressed: the crew's voted dish, plus Brennan's pudding. Up to about 60 (44 seats and 22 standing spots, already built).
 - **Monday Day 8:** the plaque with your words, your certificate on your shelf, and the crew retelling it (Zeke's worst face included).
@@ -31,14 +31,14 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
   - "Can't you swap?" (He: "Not on a crossing. Someone has to watch her cross.")
 
   If you haven't met him by the time he's in bed, he sends you a short Mail at about 22:50 instead ("On watch tomorrow. You'll have to cross for both of us."), so the thread still starts.
-- **Middle, Sunday 14:40, the plaza.** After the oath the Captain asks, "Who answers for the first-timers?" Two first-timers look at you. Your one choice is the answer, and it goes on the plaque:
+- **Middle, Sunday 14:40, the bow lounge.** After the oath the Captain asks, "Who answers for the first-timers?" Two first-timers look at you. Your one choice is the answer, and it goes on the plaque:
   - "We came a long way. We're glad we did." (proud)
   - "We crossed together, all of us, even the ones on watch." (for Tomas and the watch)
   - "Is this the part with the punch?" (the joke: the crowd laughs; the Captain: "It is. I'm so sorry.")
 
   Then Brennan's punch. Carrying it up before 14:30 (the volunteer job), Brennan tells you one of its ingredients and swears you to secrecy.
 - **After the ceremony (15:15-17:00), optional.** Take a mug of punch up to Tomas (the punch job's second stop, which finds him from his own plan, not a fixed room; never scored). Tomas: "You brought it up. Nobody brings things to the watch." If you promised on Saturday and don't go, nothing bad happens: Brennan saves him one.
-- **Payoff, Lap of the Wren, Sunday 20:30.** Tomas is off shift and walks at the front. Halfway round, the old hands stop at the plaza and give him the oath's last line: "From today, this reach knows your name, Lind." (Zeke says it; Pell hands him the last of the punch.) What Tomas says to you depends on your day:
+- **Payoff, Lap of the Wren, Sunday 20:30.** Tomas is off shift and walks at the front. At the bow turn, by the lounge doorway where the ceremony was (and where the plaque will hang), the old hands stop and give him the oath's last line: "From today, this reach knows your name, Lind." (Zeke says it; Pell hands him the last of the punch.) What Tomas says to you depends on your day:
   - you named the watch: "You said 'the ones on watch'. Deck 2 heard about it in five minutes.";
   - you brought the mug: he raises it;
   - you did neither: "Next Line, you're on watch and I'm drinking the punch."
@@ -46,7 +46,7 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
 - **If you miss the ceremony,** a first-timer answers with the plain line ("We're new, and we're nervous, and we came anyway."), and that goes on the plaque. You can still take Tomas his mug and walk the Lap.
 - **No spoilers** (EW1's guard rails, 01:07):
   - Tomas's lines are only about missing the ceremony. Nothing about failing, tests or Holt (his arc's beat 5), and nothing about staying (beat 7). He never says or reacts to "stay".
-  - Holt has one warning reaction line about the here and now ("Crossing or no crossing, the plaza stays tidy. And nobody spills that punch on my deck."), never a scene. EW1 (01:20): his distrust of the Veyli comes from "one bad day on a border patrol, years ago" (his arc), so on a border-crossing day his line says nothing about borders, past crossings, "last time" or the Veyli.
+  - Holt has one warning reaction line about the here and now ("Crossing or no crossing, the lounge stays tidy. And nobody spills that punch on my deck."), never a scene. EW1 (01:20): his distrust of the Veyli comes from "one bad day on a border patrol, years ago" (his arc), so on a border-crossing day his line says nothing about borders, past crossings, "last time" or the Veyli.
   - The two-years fact is neutral: "on a quiet charting run", with no incident attached, so nobody asks "what happened last time?". The head writer's seat confirms it doesn't clash with Holt's or Saruth's timeline before it goes in facts.md.
   - Nothing about a delegation, guests or the Envoy's purpose.
 - **What it needs** (about one turn more than a plain ceremony):
@@ -54,7 +54,7 @@ Built from the game's own rota (ER2's find): Tomas Lind, your bunkmate in Bunk 1
   - the oath meeting's choice reworked (EW1), setting `line.answer`;
   - the plaque reading `flag('line.answer')` (the deck architect's dress kit: it reads a saved flag, never the planner);
   - the punch job's second stop: Tomas himself, found from his own plan (`2-watch-6` that day), not a fixed room;
-  - Lap of the Wren on Day 7 re-dressed (Tomas at the front, the plaza stop: a short 20c moment when you're walking it);
+  - Lap of the Wren on Day 7 re-dressed (Tomas at the front, a stop at the bow turn by the lounge doorway: a short 20c moment when you're walking it);
   - Tomas's lines;
   - Zeke's worst-face line at One week aboard;
   - the punch-secret reply at the supper.
@@ -90,6 +90,22 @@ Asked for by the user (via lead 22, 01:22): is Tomas missing his own ceremony in
 
 **It changes something you agreed earlier:** the events plan v3.2 had "one reply to choose (proud, nervous, joking)". A keeps a proud and a joking answer, swaps "nervous" for "even the ones on watch", and puts your answer on the plaque. Question line-q9 says so.
 
+## The ceremony in the bow lounge (the user, 01:42, via lead 22: "We should gather in the lounge")
+Measured in a new game on 0.64.6 at 390x844:
+- **How many fit:** the lounge venue (`DECKS[3].gathers['bow-lounge']`, built for the storm's party) has **61 standing spots and 34 lounge seats: 95 places** before anyone spills. About 50-60 are expected, so the lounge holds them all. Any overflow goes, by the venue's own `also: ['plaza']`, to the promenade and plaza nearest the lounge doorway, where they can still see in. The bar stays as it is: its 2 staff spots and 2 order spots are the bar's own, not crowd spots.
+- **The Captain's spot and the three lead spots:** today the lounge's one lead spot is in the middle of the room (44.5, 10.5), facing the windows (the party's toast). For the ceremony she should face the room with the bow windows and the stars behind her.
+  - **The build:** a second venue `bow-lounge-line`, added only when `EV_LINE_ON`, so the party's venue and Deck 3's places stay identical with it off. It has the lounge's standing tiles west of column 49, so nobody stands between her and the windows. That's 52 of the 61 (the 9 dropped: 49,6 49,7 49,8 49,13 49,14 50,9 50,10 50,11 50,12), plus the 34 seats, 86 places. Its focus is at the window end (48.5, 10.5).
+  - **Lead 1, the Captain:** (48.5, 10.5), facing west into the room (-90).
+  - **Lead 2, Brennan with the punch bowl:** (48.5, 9.3).
+  - **Leads 3-4, the two first-timer speakers:** (47.8, 11.7) and (48.6, 12.1).
+  - The crowd fills nearest-first from her, so the first-timers stand at the front. The deck architect (4d) checks the four tiles are clear of the sofas and the rug, and moves them a tile if not.
+- **The plaque:** in the lounge, on the wall by its doorway from the promenade. Everyone passing sees it, and the Lap of the Wren turns right there. It's one draw call; `linePlaque` reads `line.answer`.
+- **One week aboard (17:15-17:55, the lounge, Zeke) has no clash.** The ceremony ends at 15:15 and the reading corner (16:00-17:00) is in the lounge too, so the room has 45 minutes to empty. The punch bowl goes at 15:15. The gold ribbons can stay until 19:15: they're festive, not in anyone's seat. Zeke's scene now happens in the room where you crossed, which reads well ("A week aboard and a Line crossed. Right here.").
+- **The Lap's stop for Tomas:** the Lap of the Wren route (`3-lap-1` to `3-lap-12`) loops the promenade and the plaza and turns at its bow end, at `3-lap-6` (40, 10). That's the lounge doorway (the lounge starts at column 41). It never enters the lounge. **Recommended:** the old hands' stop moves from the plaza to that bow turn, by the doorway where the ceremony was and the plaque hangs. The route doesn't change.
+- **Draw calls:** with the camera in the lounge on Day 7, 284 at 14:45, 290 at 17:35 and 302 at 21:00. The lounge is Deck 3's busiest view: the bar, the bottles and the bow glass. The storm's party measured up to 367 here with 64 crew (the crowd is instanced). With the ceremony's additions (ribbons 1-2, the punch bowl 1-2, the plaque 1), expect about 300-375, under the budget of 450. bigevents_check's crowd part measures it with the real crowd in L2.
+- **Gold through the windows:** the lounge's bow glass is the best view of the gold hull lights (question 2), behind the Captain as she reads the oath.
+- **Nothing here needs the user:** the lounge was their call, and the rest follows from it.
+
 ## Reactions after the horn (lead 22: EV1's F2b, approved)
 Crew react to an event moment **within about 5 ship minutes**, so `cue:event.crossingLine.onset` lines start a few minutes after 14:30, before the ceremony. The onset file holds lines for 14:30-15:15 (the gold pulse, the gold windows, the walk to the plaza: "Did you feel that? The whole deck went gold."). After-the-ceremony lines ("How was the punch?", "A week aboard and a Line crossed", quoting the answer) move to a new `event.crossingLine.resolution` file (from 15:15). The warning lines run from Saturday 18:00 (EW1 fixes the comment that says "from the Friday new-hand's tea").
 
@@ -101,7 +117,7 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 - **First-timers by the roster's `since`:** one person aboard under two weeks (Tomas), four under six months (Teague, Rossi, Eklund, Quist), 21 under two years (8 of them off at 14:30: Rina, Cruz, Bakshi, Silva, Teague, Quist, Lemaire, Abara). Guests are never counted.
 - **Sunday dinner is the crew's vote:** `galleyMenu(7)` is fish and chips (19 votes), herb flatbread on the side.
 - **Saruth** is at the Sunday table (18:16-18:59), at Winner Stays On from 15:01, and in the `everyone` pool for any gathering.
-- **Places:** the plaza venue has one lead spot (east of the lift, facing down the promenade) and 71 standing spots. The mess has 44 seats, 22 standing spots and one lead, and it spills onto the plaza.
+- **Places:** the bow lounge venue has one lead spot (mid-room) and 61 standing spots plus 34 seats (see "The ceremony in the bow lounge"); the plaza venue has one lead spot and 71 standing spots (the overflow). The mess has 44 seats, 22 standing spots and one lead, and it spills onto the plaza.
 - **No sound** anywhere. `FEEL_MOODS` holds only the storm. The hull-lights evening changes nothing on screen.
 - **Draw calls** (ER2, 390x844, Deck 3, Day 7 at 14:45 and 18:35, 73 crew on the deck): 240-256, against a budget of 450.
 - **The base:** `EV_CALENDAR` has `{ id: 'crossingLine', day: 6, kind: 'short' }`, passed over until `SHIP_EVENTS.crossingLine` exists. With `day: 6`, `onset [1, 870]` is Sunday 14:30, and `eventDay(7)` is true. Hash keys 352-354 are free today.
@@ -113,20 +129,20 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
 | Sat 6, 18:00 | **Warning** begins: Vance's Mail "Tomorrow we cross the Line"; crew ask "First crossing?" (Pell: he crossed two years ago; Holt's one line) | Mail, every deck | F2 phase note, cue `event.crossingLine.warning` |
 | Sat 6, 19:00-22:46 | Story A begins: Tomas, on watch tomorrow (a moment wherever he is: the mess, the garden, the rec deck, or Bunk 1 at bedtime; else his Mail at about 22:50) | Deck 3, rec deck, Deck 4 | 20c moment |
 | Sun 7, 10:30-12:30 | The swap meet, as usual | promenade, plaza | (unchanged) |
-| 12:45-14:15 | Two small volunteer jobs on the mess sign-up sheet (Brennan offers them too): carry the punch up from the galley; hang gold ribbons on the plaza | galley, plaza | event `jobs` (17), `DECK_DRESS.signupMess` |
-| 14:15 | Device notice: the ceremony on the plaza at 14:30, with "show on map" | device | F3a |
+| 12:45-14:15 | Two small volunteer jobs on the mess sign-up sheet (Brennan offers them too): carry the punch from the galley to the lounge; hang gold ribbons in the lounge | galley, bow lounge | event `jobs` (17), `DECK_DRESS.signupMess` |
+| 14:15 | Device notice: the ceremony in the bow lounge at 14:30, with "show on map" | device | F3a |
 | **14:30** | **Onset.** The horn (a soft gold pulse through every light; crew stop and look up), the gold hull lights, the Captain's banner (3 lines; she's called in) | every deck | moment `horn`, `address.onset`, F0b called in |
 | 14:30-15:15 | The day shift stands easy (not the bridge, the watch or the galley line) | every deck | routine `standEasy` (14) |
-| 14:30-14:40 | The crowd gathers: the Captain, Brennan with the punch bowl, the first-timers nearest; Saruth stays away by courtesy | plaza | gathering `lineCeremony` (k 353) |
-| 14:40-14:55 | **The oath** (meeting `crossingCeremony`): the Captain reads it, asks who answers for the first-timers; your answer (story A) | plaza | meeting, cast `marrow`, `brennan`, `first:2` |
-| 14:55-15:15 | The "dunking": a mug of Line punch each | plaza | gathering anim `drink` (with `MUG_ON`) |
+| 14:30-14:40 | The crowd gathers: the Captain at the window end with the stars behind her, Brennan with the punch bowl, the first-timers nearest; Saruth stays away by courtesy; overflow onto the promenade and plaza | bow lounge | gathering `lineCeremony` (k 353) |
+| 14:40-14:55 | **The oath** (meeting `crossingCeremony`): the Captain reads it, asks who answers for the first-timers; your answer (story A) | bow lounge | meeting, cast `marrow`, `brennan`, `first:2` |
+| 14:55-15:15 | The "dunking": a mug of Line punch each | bow lounge | gathering anim `drink` (with `MUG_ON`) |
 | 15:15 | **Resolution** begins: Brennan's supper Mail; your certificate is on your shelf | Mail, your cabin | `mail.resolution`, trace `lineCertificate` |
 | 15:15-17:00 | Optional: a mug of punch to Tomas at his post | Deck 2, lift lobby | the punch job's second stop |
 | 16:00-17:00 | The reading corner, as usual | bow lounge | (unchanged) |
 | 17:15-17:55 | One week aboard with Zeke, as built, plus two lines about your crossing and his worst face | bow lounge | reactions `event.crossingLine.resolution` |
 | **18:00-19:15** | **The Line supper**: the Sunday table re-dressed; the voted dish and a pudding; up to about 60; Saruth at their usual Sunday seat; the punch-secret reply | mess (spills onto the plaza) | Sunday table on Day 7 |
-| 19:15 | **Afterglow** begins: the gold fades back over a minute; the plaque goes up overnight | plaza | trace `linePlaque` |
-| **20:30-21:15** | **Lap of the Wren**, Tomas at the front; the old hands give him the oath's last line at the plaza | promenade | Lap re-dressed on Day 7, 20c moment |
+| 19:15 | **Afterglow** begins: the gold fades back over a minute; the plaque goes up overnight | bow lounge | trace `linePlaque` |
+| **20:30-21:15** | **Lap of the Wren**, Tomas at the front; the old hands give him the oath's last line at the bow turn, by the lounge doorway | promenade | Lap re-dressed on Day 7, 20c moment |
 | Mon 8 | The afterglow: the plaque quoted back, the worst face retold; status line "First day in the Veyli reach"; the event ends at midnight | every deck | cue `event.crossingLine.afterglow` |
 
 **The phases:** `warning [0, 1080]`, `onset [1, 870]`, `resolution [1, 915]`, `afterglow [1, 1155]` (clears), `days: 3`. `eventDay` is true on Day 7 only. No phase pauses a tradition.
@@ -148,16 +164,16 @@ Crew react to an event moment **within about 5 ship minutes**, so `cue:event.cro
   - "About 50-60" is an estimate; day_check Day 7 confirms it, and 45 or more is fine.
   - Section 14 (the sim seat, PB) lets anyone at a post that can wait leave it for that window and join the gathering.
   - It's pure: from the event's data and the rota only. day_check Day 7 counts the crowd (bigevents_check's crowd cap of 66 holds).
-- **Saruth and Ulla (fix 5):** the ceremony's `who` carries `not: ['saruth']`. One afterglow line says a Veyli doesn't watch another people's rite, and nothing more. Saruth keeps their usual Sunday table seat (the Veyli are they/them, facts.md) at the supper. Ulla goes like anyone off duty (she's in the crowd, not the front row). bigevents_check checks Saruth isn't on the plaza.
+- **Saruth and Ulla (fix 5):** the ceremony's `who` carries `not: ['saruth']`. One afterglow line says a Veyli doesn't watch another people's rite, and nothing more. Saruth keeps their usual Sunday table seat (the Veyli are they/them, facts.md) at the supper. Ulla goes like anyone off duty (she's in the crowd, not the front row). bigevents_check checks Saruth isn't at the ceremony.
 - **The re-dressed Sunday table (fix 6):**
   - **Where:** a row in section 18, `EV_DAY_DRESS`, made at load from `EV_CALENDAR` and the event's data only (never `eventNow`, `SHIP.event` or anything saved). `eventsOn(d)` reads it, so plans made on any day agree.
   - **What it changes on Day 7:** the name ("The Line supper"); the words (`event.crossingLine.gather.lineSupper.*`); the window, 18:00-19:15 with no jitter; the pull, which grows (who: everyone .85); and the Saturday 18:00 Mail, which is left out (Vance's covers it, and Brennan's comes at 15:15).
   - **What stays:** k 440, `ties.galley` (the voted meal, the seating, the tasting side) and `decor: longTables`. food_check Day 7 is the test.
   - The galley's `resolution` key adds the extra batch and the pudding (section 16, the galley owner's review).
-  - **The same row re-dresses Lap of the Wren** on Day 7: Tomas at the front, and `tomas`, `torres-zeke` and `pell` with a pull of 1 (today Zeke is in the bow lounge 20:17-21:21 and Pell on a bench, then in the lounge, so neither would be there; ER2's R2-3), plus the plaza stop. bigevents_check confirms all three are planned on the Lap. The Captain already walks the Lap: she has no line there.
+  - **The same row re-dresses Lap of the Wren** on Day 7: Tomas at the front, and `tomas`, `torres-zeke` and `pell` with a pull of 1 (today Zeke is in the bow lounge 20:17-21:21 and Pell on a bench, then in the lounge, so neither would be there; ER2's R2-3), plus the stop at the bow turn (`3-lap-6`, the lounge doorway). bigevents_check confirms all three are planned on the Lap. The Captain already walks the Lap: she has no line there.
 - **The dish (fix 4):** the crew's vote stands (fish and chips on a new game's Day 7). EW1 rewrites "a proper roast", "The roast's to get rid of the taste" and "ran out of roast" to fit any dish.
-- **Spots for the cast (fix 7):** three lead spots added to `DECKS[3].gathers.plaza` (Brennan with the punch bowl, the two first-timer speakers beside the Captain), only when `EV_LINE_ON`, so Deck 3's places stay identical with it off. The deck architect's seat (4d).
-- **The punch bowl (fix 8):** one prop at the front of the plaza, 14:30-15:15, 1-2 draw calls (performance seat, L3).
+- **Spots for the cast (fix 7, now in the lounge):** see "The ceremony in the bow lounge" below: a new venue `bow-lounge-line` with four lead spots, only when `EV_LINE_ON`.
+- **The punch bowl (fix 8):** one prop at the window end of the lounge beside Brennan's spot, 14:30-15:15, 1-2 draw calls (performance seat, L3).
 - **The mugs (fix 9):** "mugs out" uses the crowd's drink pose with patch E's mug, so `MUG_ON` is needed first.
 - **The jobs (fix 10):** on the mess sign-up sheet (`DECK_DRESS.signupMess`, built for the storm) and offered by Brennan in the mess, not the Works bay board two decks down.
 - **The first-timers (fix 2, question 5):** `lineFirst`, made at load from the roster's `since` (under two years), never `R()`, never saved, never a guest. The fact "the Wren was last in the reach two years ago, on a quiet charting run" goes in `content/facts.md` (the head writer's). The cast slot `first:2` is two of them off shift that day, by hash.
@@ -187,7 +203,7 @@ The build number is the build master's.
 | Turn | What | Sections (owners) | Checks besides check_fast |
 | --- | --- | --- | --- |
 | L1 | The event's data: `SHIP_EVENTS.crossingLine` only when `EV_LINE_ON` (phases, address, Mails, news, status, `commend: false`, no threads); `lineFirst`; the cast slot `first:2`; the oath meeting with story A's choice (`line.answer`); the `EV_BEATS` row (the ceremony is the Captain's one scene that day); EW1's files moved into `content/` and baked; facts.md's line | 18 (traditions: EV1's seat), 22 generated (writers, through content_gen.py) | events_check, bigevents_check on paper, lines_check, social_check |
-| L2 | The crowds: the ceremony gathering (k 353, `not: saruth`), `standEasy` (14), `EV_DAY_DRESS` for the Sunday table and the Lap, the galley's batch and pudding, the three lead spots. **Gated on F0b:** bigevents_check's cast part must show the Captain and Brennan planned on the plaza at 14:40 | 18, 14 (sim), 16 (galley), 4d (deck architect) | day_check Days 6-8 (on), food_check Day 7, events_check, bigevents_check crowds (draw calls at 390x844) |
+| L2 | The crowds: the ceremony gathering (k 353, `not: saruth`), `standEasy` (14), `EV_DAY_DRESS` for the Sunday table and the Lap, the galley's batch and pudding, the `bow-lounge-line` venue and its four lead spots (4d). **Gated on F0b:** bigevents_check's cast part must show the Captain and Brennan planned in the lounge at 14:40 | 18, 14 (sim), 16 (galley), 4d (deck architect) | day_check Days 6-8 (on), food_check Day 7, events_check, bigevents_check crowds (draw calls at 390x844) |
 | L3 | The look: gold hull lights (`FEEL_MOODS.crossingLine`); the horn (a new `horn` feel: one soft gold pulse, no shake; reduced motion: a soft dip); the ribbons (`DECK_DRESS.lineRibbons`); the punch bowl; the plaque (`linePlaque`, with the answer); the certificate (`lineCertificate`, which moves with you to cabin 4-23 on Day 10 like the Tiles trophy) | 8b (performance), 4d (deck architect), 18 | deck_check Decks 3-4, perf_check (the ceremony and the supper), screenshots at 390x844 and 360 wide |
 | L4 | Story A's moments: Saturday evening with Tomas (wherever he is, until bed), the watch-room mug, the Lap moment, Tomas's and Zeke's lines, the punch secret | 20c (social), 18 | social_check, events_check, bigevents_check (live: a reload mid-oath; Tomas at his post 08:51-17:00 and on the Lap at 20:30) |
 | L5 | Your part: the two jobs (sign-up sheet), the device's Schedule and status line (F3), the Record line ("Crossed the Line into the Veyli reach, Day 7", never a score), missing it (Brennan's mug) | 17 (systems: posting), 19 (device), 18 | player_check, device_check, interactions_check, devmode_check, intro_check `--week` alone |
@@ -217,7 +233,7 @@ The build number is the build master's.
   - the Lap moment (Zeke's last line, Pell's punch, Tomas's three replies);
   - Zeke's worst face;
   - the punch secret (Brennan, and the supper guess);
-  - Holt's one warning line (the here and now only: duty, the plaza, the punch);
+  - Holt's one warning line (the here and now only: duty, the lounge, the punch);
   - Saruth's one afterglow line;
   - the onset/resolution split;
   - the supper's dish words;
@@ -232,7 +248,7 @@ The build number is the build master's.
 - **Lengths:** bubbles 60 characters, cards 90, meeting lines 140, the plaque about 100. lines_check still needs its length rule for event Mail, keepsake and plaque texts (EV1 or the dialogue engineer).
 
 ## Risks
-1. **The base's gap:** today nobody is placed into an event's meeting. Until F0b fixes it, the Captain and Brennan wouldn't be on the plaza. L2 is gated on it.
+1. **The base's gap:** today nobody is placed into an event's meeting. Until F0b fixes it, the Captain and Brennan wouldn't be in the lounge. L2 is gated on it.
 2. **Off must stay identical:** the event, its gatherings, `EV_DAY_DRESS` rows and the lead spots go in only when `EV_LINE_ON`, so `EV_SHIPWIDE`, `eventsOn` and Deck 3's places come out byte-identical with it off.
 3. **Standing easy** is a new routine rule in section 14's planner: the sim owner's review, and day_check's counts on Day 7 (nobody stuck, every shift's other hours kept).
 4. **Re-dressing the Sunday table and the Lap** touches the galley's tie and a social tradition: food_check Day 7 and the owners' review.
@@ -257,7 +273,7 @@ The build number is the build master's.
 
 ## Judgement calls made (tell me if any is wrong)
 - No phase pauses any tradition. Two are re-dressed for the day (the Sunday table, Lap of the Wren). Winner Stays On is left alone (it holds 3 crew at 14:30).
-- The plaque goes on the plaza wall beside the lift; the certificate on your shelf.
+- The plaque goes in the bow lounge, on the wall by its doorway from the promenade (seen from the Lap's bow turn); the certificate on your shelf.
 - The ceremony counts as the Captain's one scene on Day 7 (`EV_BEATS` row, kind 'captain'). She walks the Lap as one of the crowd that evening (she already does), with no line.
 - No Veyli at the ceremony (Saruth stays away by courtesy) and nothing of the visit.
 - Pell is no first-timer: he crossed two years ago, and says so.
@@ -278,3 +294,4 @@ The build number is the build master's.
 - **ER2's story fixes S1-S4 (round 1b, on 1.1):** S1 the Saturday moment follows Tomas until his bedtime (the Mail at about 22:50); S2, S3 and the watch:1 slot no longer apply (Tomas stays at his post in v2, and "eighty people" is gone); S4 becomes bigevents_check showing Tomas at his post through the ceremony and on the Lap at 20:30.
 - **ER2's round 2 (aafb364, on 221c492):** R2-1 was already in 54e36dc (the Saturday moment follows Tomas); R2-2 his post is `2-watch-6` in Deck 2's lift lobby, and the mug stop finds him from his plan; R2-3 Zeke and Pell get a pull of 1 on the Lap (checked), and the Captain walks it with no line; R2-4 `galley-line` defined, and 50-60 marked as an estimate (45 or more is fine).
 - **ER2's verdict on c9d92db: PASS** (claude/event-plan-review-2). The story was decided by the user in chat (A, 01:30); q1-q8 are on the page.
+- **v2.1 (the user, 01:42, via lead 22):** the ceremony moves from the plaza to the bow lounge; section "The ceremony in the bow lounge". ER2 reviews the change.
