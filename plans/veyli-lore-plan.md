@@ -1,6 +1,6 @@
 # Who the Veyli are: the plan
 
-LW1 (Veyli lore planner), 2026-10-21, version 2: **your answers are in (03:09 UTC)**, marked Decided. New: the proposed pronoun for each Veyli (section 4), the audit redone for your pronoun answer (section 5b), and the canon text ready to apply (section 6). Version 1.1 had ER2's review (PASS WITH FIXES, all four folded in). Branch `claude/veyli-lore`, from `claude/events-lines`.
+LW1 (Veyli lore planner), 2026-10-21, version 2.1: **your answers are in (03:09 UTC), and the pronouns too (03:17)**, all marked Decided. New: the proposed pronoun for each Veyli (section 4), the audit redone for your pronoun answer (section 5b), and the canon text ready to apply (section 6). Version 1.1 had ER2's review (PASS WITH FIXES, all four folded in). Branch `claude/veyli-lore`, from `claude/events-lines`.
 Planning and words only: the game hasn't changed. The page with the answer form is `plans/veyli-lore-plan.html`.
 
 **Your decision (02:50 UTC):** "We also need to learn as players who the Veyli are. I think they should be human
@@ -157,7 +157,7 @@ your answers.
 described in human terms", they/them for every Veyli) is retired, and so is the idea that the Veyli language has no
 he or she (Ferreira's line about it is dropped). "The Envoy" and "the Speaker" stay safe in any line.
 
-### The proposed pronouns (for your one quick question)
+### The pronouns (decided, vl-q7 a, 03:17 UTC: as proposed)
 
 I checked the drawn models (game section 9: all six share the crew's body, tall and slim, with a headband) and every
 line already written. The models don't settle anything, so the lines decide where they can.
@@ -256,8 +256,7 @@ Writers' notes and canon (not on screen; each header says the person's pronouns)
 ## 6. Canon text, ready to apply
 
 These are your answers made into canon. The head writer's seat applies the facts.md text, and the lead applies the
-design-doc.md text, each in the same commit as the first lines that depend on it. The pronoun rows wait for your
-quick answer on the table in section 4.
+design-doc.md text, each in the same commit as the first lines that depend on it. The pronoun rows are decided too (vl-q7 a).
 
 ### facts.md
 
@@ -327,12 +326,12 @@ quick answer on the table in section 4.
 
 1. **vl-q1, the history: (a)** "The ones who went on".
 2. **vl-q2, when the player learns they're human: (a)** a plain fact from the first week; the depth through the month.
-3. **vl-q3, pronouns: (b)** each Veyli has their own, like the crew. The proposed table (section 4) goes to you as one
-   quick question before any writer applies it.
+3. **vl-q3, pronouns: (b)** each Veyli has their own, like the crew. The table (section 4) was decided as vl-q7.
 4. **vl-q4, what the Veyli call the Concord's people: (a)** "your people" and "the Concord".
 5. **vl-q5, names for the long ship and the Veyli world: (a)** not yet.
 6. **vl-q6, how the Veyli look: (a)** as drawn now.
-7. **vl-q7 (new), the pronoun for each Veyli:** (a) as proposed in section 4 (recommended); (b) change some (say which).
+7. **vl-q7, the pronoun for each Veyli: (a)** as proposed (decided by the user via lead 22, 03:17 UTC): Saruth she,
+   Teshavi she, Kesrin he, Moleth they, Ithra she, Taavek he.
 8. **veyli-general:** open for anything else.
 
 ## Judgement calls
