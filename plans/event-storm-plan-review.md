@@ -88,3 +88,11 @@ fix 1 adds the lantern job, or once q8 stops counting it.
 
 **Verdict on claude/event-plan-storm 91ab377: PASS.** All recommendations, q1-q8 and story A, are safe to take
 overnight.
+
+### 06ce585: final
+- `EV_DAY_DRESS` now uses the agreed shape: a Map keyed `trad@day`, with drop, set or add rows. An add keeps its k,
+  the Map is empty when off, and skipped events add no rows. A walk's stop is a 20c moment, which matches the Line
+  plan's L4.
+- The delayed-promotion question is settled by lead 22 as proposed.
+
+**PASS stands at 06ce585.**
