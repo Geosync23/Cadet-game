@@ -59,3 +59,19 @@ Verdict sent to EV3 and lead 23 at ~06:05.
   - c5: notes while off;
   - c6: the log's endDay +1.
 - Nit: cues are read once, at +65.
+
+## EV2 storm S4 (your help counts): claude/storm-s4s8 f2a0eaa + af568f9, base 6608a07. PASS
+
+- cadet_test off: ALL IDENTICAL. check_fast OK in 356 s. events_check off OK. machine_check on OK.
+- Probe `s4_help.py`, skipped to Sunday 10:05:
+  - left alone: blackout 117, spoiled 31, bridgeHungry 12, calls 4.8 → bumpy;
+  - with all three prep jobs done by you Thursday 15:00, and a reload Saturday: 59 / 31 / 6 / 2.9 → smooth, helped:* kept.
+- Hooks (16, 17 stand-in): typeof-guarded and null while off. Blackouts come only after the front, and the help is fixed by then, so replays stay consistent.
+- Nit: blackoutHour's comment still says "pure".
+
+## Gotchas (PR4)
+
+- `*.png` is in .gitignore: shots need `git add -f`. EV2's plans/storm-shots and EV4's props shots were never pushed for that reason.
+- A probe save that starts after an event's day has that event passed over (F0c, evFrom = the load day). Put `'evFrom': 0` in the save's ship.
+- `pkill -f <name>` also matches your own shell's command line: kill by PID.
+- events_check's LIVE part runs the storm on Day 10 (a day off for you): the briefing pick isn't held there by design (a NOTE).
