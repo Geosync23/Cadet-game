@@ -29,7 +29,7 @@ Memory used: about a quarter. A fresh session taking the role reads this, then E
 | L5c | 0aae259 | the Line supper seated (the user's answer): `stay`, `seated`, `pudding: true`; `lineStandTray` gone |
 | L5d | 4306fd1 | PR6's fix 1: the oath's cast 25 min early (a meeting's `early`), the crowd's `lead` (lineLead); moments' flags set when the panel ends; the volunteer jobs held to 13:45 |
 | L5e | b42b6d8 | ER3 round-1 fixes 2-7: supper 18:00-19:45 + Pell; 'everyone' in a day-dress `who` read as a floor; first-timers' own ceremony (`ownFor`); thanks at 15:00 (`joinAt`); Brennan's two bubbles 4 min apart; punch job's workDone counts |
-| L5f | after b42b6d8 | lead 24: supper everyone at 1, 30-45 min sittings (59 come, at most 40 at once, 83 mean to go; widest 416 draw calls); EW2's c2ee4e4 words ("The Line oath") |
+| L5f | e3870c1 | lead 24: supper everyone at 1, 30-45 min sittings (59 come, at most 40 at once, 83 mean to go; widest 416 draw calls); EW2's c2ee4e4 words ("The Line oath") |
 
 ## Shared things I touched (optional fields: absent = as before)
 
@@ -40,12 +40,25 @@ Memory used: about a quarter. A fresh session taking the role reads this, then E
 
 ## Loose ends (for the next session)
 
-1. **L5f's results**: its check round was running at writing (cadet off, check_fast, day 7, events, bigevents). If its
-   row still says RESULTS, run them and fill it in. **bigevents_check 12901c9 FAILs the Line supper's 83 meaning to go
-   (over 60)** until EC1 changes it to cap seated gatherings by seats at once (lead 24 asked EC1). Don't work around it.
-2. **ER3 round 2**: send ER3 the tip once L5f is pushed. Its re-check list: the reload repro (fixed in L5d), P2/P3 planted
-   again once EC1's check gaps are in, the supper's numbers and Pell's guess, the first-timers at the front, then
-   bigevents, day 7, food 7 and cadet off.
+1. **day_check 7 FAILs on L5f (the next job).** eklund-leila (not at the Line supper) eats her ordinary dinner twice:
+   queued 18:13, a placeless 'dinner' 18:13-18:36, queues again, then 18:51-19:19 at 3-lounge-34 holding a tray
+   ("a tray outside the mess hall", "standing still with a tray"). It's the two-dinner shape ER3 noted for Vance (its
+   nit 13; also on the base on Day 21: section 14's, PB), made visible because the bigger supper fills the mess's
+   seats so her second sitting lands in the lounge. Options: ask PB about the double dinner in section 14 (the real
+   fix), or keep the supper's peak lower (e.g. stays [30, 40]) and re-measure. Ask lead 24 which. L5e (stays 45-60,
+   own pulls) passed day_check 7.
+2. **ER3's fix 9** (round 2 part A on 835bcfc, plans/event-line-build-review.md on claude/event-plan-review-3 d1bf2eb):
+   three first-timers still skip their own ceremony: Lemaire (night shift, a day off on Day 7, ownFor true) sits on
+   3-bench-14 14:17-15:44; Reyes and Yoon (night shift) wake 14:22-14:29 and go to music and the gym 14:29-15:24. ER3's
+   fix: an off-duty honouree's leisure block gives way to the ceremony, and a night worker awake before 14:30 comes
+   first (17 of 22 then). Cause I found: `eventFree` (section 18) says a night worker isn't free before 15:00 the day
+   after a night shift (`P.works && a < 900`) and while asleep; Lemaire's case is that rule. A Line-only exception in
+   `evArrive` for `ownFor` people (free from their wake + a few minutes) would do it. Repro: ER3's plans/er3-probes/r2.js
+   (`firstNot`) and r2b.js. ER3's part A otherwise verified fixes 1-4 and EC1's check gaps; part B (the full set) after
+   the account move.
+3. **The Brennan rota clash** (FD1, food_check "rota vs plans": brennan 14:30 3-galley-1 → the oath's lead-2): only on
+   claude/food-waits' food_check, which lacks EV5's line (an event meeting during a galley stint is a break). When
+   food-waits and line-update meet, keep both (FD1's fresh() and that line). Nothing to change in the game.
 3. **food_check 7 "garden carry"** FAILs with the Line on: the check's leftover machine history (gardenCond(8) light .877
    vs 1), not the game. FD1 extends its `fresh()` rewind (claude/food-waits) to part 4k; PB reviews. Check after it that
    4k passes on 7 with the Line on and off. "garden, good" FAILs on every build (not the Line's).
