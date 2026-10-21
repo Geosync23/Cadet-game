@@ -159,3 +159,8 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
   - The ready room: Day 10 at 16:00, Day 18 at 16:00, none on the test and captain days.
   - The Captain's table: 19:00+75 before the night shifts (Days 19-20); none on Day 17.
   - The Friday hold and the night shifts are honoured.
+
+## EV1 F2: claude/events-base a2d9f40 (a ship note per phase, behind EV_NOTES_ON). PASS
+
+- cadet_test alone: ALL IDENTICAL, with no noise. check_fast OK (273 s).
+- **On (`f2cue.py`):** notes at 14:00 Day 12 (onset), escalation and resolution. The cue event.ionStorm.onset appears once the social hour has run (15:04), stamped 14:00 and lasting 1 day: an hour's lag, by section 20's design.
