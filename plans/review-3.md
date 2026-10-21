@@ -153,3 +153,21 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 - section.py doesn't find 18f's owner.
 - recCap and deck3Full treat Friday 15:30-17:00 as working hours (for turn 5/7).
 - The watch rating is on Deck 2, not the bridge (say so to the user).
+
+## FR1 turn 2 (A2: the hours rotas' Friday, the dinner rush at 17:00): claude/fridays 3ae4bec. PASS
+
+**Checks:**
+- cadet_test off: ALL IDENTICAL.
+- check_fast OK in 202 s.
+- food_check OK on and off.
+- day_check Day 5 on: OK.
+- events_check on: OK.
+
+**Probe:**
+- The non-Fridays are identical on and off.
+- The garden is empty from 15:35 on Day 5.
+- The skeleton and the galley stay until 17:00.
+
+**Code:**
+- friHours splits a rota block correctly (13:00-21:00 becomes 13:00-15:30 and 17:00-21:00).
+- The rush's max(workEnd, 1020) does nothing while off.
