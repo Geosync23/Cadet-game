@@ -202,7 +202,7 @@ PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 NOTES = r"""((a, b) => {
   const out = { notes: [], cues: [], lines: 0, want: [], err: null, on: typeof EV_NOTES_ON !== 'undefined' ? EV_NOTES_ON : null };
   try {
-    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? (EV_CALENDAR.find(x => x.id === 'ionStorm' && SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) || EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft)) : null;   // the storm's own row (EV5: the Line comes first)
     if (r) out.want = SHIP_EVENTS[r.id].phases.map(p => [r.id, p.id, evBeatAt(r.day, p.at)]).filter(x => x[2] >= a && x[2] <= b).map(x => x[0] + ':' + x[1] + '@' + x[2]);
     for (let t = a; t <= b; t += 5) { setShipNow(t); eventAdvance(t, true); if (typeof socialTick === 'function') socialTick();
       if (t === a + 420 || t === b) out.cues.push(...((SHIP.social && SHIP.social.cues) || []).map(c => c.key).filter(k => /^event\./.test(k))); }
@@ -225,7 +225,7 @@ DEVICE = r"""(() => {
   const keep = { ...SHIP.time }, out = { on: typeof EV_DEVICE_ON !== 'undefined' ? EV_DEVICE_ON : null, days: [], trk: [], closed: [], open7: null, off: null, err: null };
   const ab = (d, m) => (d - 1) * 1440 + m;
   try {
-    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? (EV_CALENDAR.find(x => x.id === 'ionStorm' && SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) || EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft)) : null;   // the storm's own row (EV5: the Line comes first)
     const sd = r ? r.day : (eventDueDay() || {}).day;
     out.off = { items: [sd, sd + 1, sd + 2, sd + 3].map(d => eventItems(ab(d, 0), ab(d, 1439)).length), lounge: eventClosed({ deck: 3, room: 'L' }, ab(sd + 1, 900)) };
     if (!out.on) return out;
@@ -400,7 +400,7 @@ def judge(a, tag):
     # eventDay, and nothing reads the saved or live state
     if guard_on and a['eventDay'] is not None:
         if a['eventDay'] != a['bigDays']: fail(f"{tag}: eventDay is true on {a['eventDay']}, the big phases fall on {a['bigDays']}")
-        if 'ionStorm' in days and a['eventDay'][:3] != [12, 13, 14]: fail(f"{tag}: the storm's eventDays are {a['eventDay']}, not 12-14")
+        if 'ionStorm' in days and not {12, 13, 14} <= set(a['eventDay']): fail(f"{tag}: the storm's eventDays {sorted({12, 13, 14} - set(a['eventDay']))} are missing from {a['eventDay']}")
     elif a['eventDay'] is None: waiting('eventDay (F1a)')
     if a['eventDayLive'] != a['eventDay']: fail(f"{tag}: eventDay changed with the saved/live state: {a['eventDay']} -> {a['eventDayLive']}")
     if a['skippedLive'] != a['skipped']: fail(f"{tag}: the passed-over events changed after load: {a['skipped']} -> {a['skippedLive']}")
@@ -533,7 +533,7 @@ with sync_playwright() as pw:
           const cases = [[20, [], null], [9, [], null], [20, [{ id: 'ionStorm' }], null], [20, [], { id: 'ionStorm' }], [0, [], null], [1, [], null], [null, [], null], [40, [], null]];
           const plan = evCalPlan();
           return { evFrom: SHIP.evFrom, late: EV_LATE, cases: cases.map(([f, l, c]) => ({ f, l: l.map(x => x.id), c: c && c.id, got: evSkippedFor(f, l, c), want: want(f, l, c) })),
-            plan, due: evCalDue(), days: plan.map(r => SHIP_EVENTS[r.id].days),
+            plan, due: evCalDue(), days: plan.map(r => SHIP_EVENTS[r.id].days), bigs: plan.map(r => SHIP_EVENTS[r.id].phases.filter(p => ['onset', 'escalation', 'resolution'].includes(p.id)).map(p => r.day + p.at[0])),
             cal: EV_CALENDAR.filter(r => SHIP_EVENTS[r.id] && !SHIP_EVENTS[r.id].draft && !EV_SKIPPED.has(r.id)).map(r => r.id) };
         })()""")
         g.close()
@@ -576,14 +576,16 @@ with sync_playwright() as pw:
         errs = []
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
-        big = [12, 13, 14] if storm else []
-        sday = next((r['day'] for r in P5['plan'] if r['id'] == 'ionStorm'), 11)
-        slog = [f"ionStorm:{sday}-{sday + n}" for r, n in zip(P5['plan'], P5['days']) if r['id'] == 'ionStorm']   # the log's span from the game's own data (SHIP_EVENTS.ionStorm.days)
+        # from the game's own data, every planned event (EV5: the Line comes before the storm): its big days, and its span
+        # in the log once a late load has caught it up (each one ended by Day 20)
+        bigs = {r['id']: b for r, b in zip(P5['plan'], P5['bigs'])}
+        big_but = lambda *skip: sorted({d for i, b in bigs.items() if i not in skip for d in b})
+        slog = [f"{r['id']}:{r['day']}-{r['day'] + n}" for r, n in zip(P5['plan'], P5['days']) if r['day'] + n <= 20]
         for title, save, want in [
-            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': [], 'due': None, 'log': []}),
-            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': slog}),   # the storm it missed is run on load, as an unbroken game ran it
-            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big, 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
-            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big, 'due': None})]:
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': big_but('crossingLine', 'ionStorm', 'comet'), 'due': None, 'log': []}),
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
+            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big_but('crossingLine', 'comet'), 'due': None})]:
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
             print(f"  {title}: evFrom {r['evFrom']}, passes over {r['sk']}, eventDay {r['ed']}, due {r['due']}, log {r['log']}, running {r['ev']}")
             for k in ('evFrom', 'sk', 'ed', 'due', 'log'):
