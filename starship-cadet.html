@@ -37867,7 +37867,8 @@ function evStandTray(pl, w) {
 function stormSupperDim(n) { return EV_STORM_ON && n === 3 && typeof DRESS !== 'undefined' && DRESS.on.has('lanternMess') && roomAt(...player.here()) === 'M' ? .85 : 0; }
 // S2 (EV4): the window [from, to] (minutes of day d) someone on a ship-wide event's double shift is let off it that
 // day (the rule's except: [{ id, day (the event's day), at }]: the storm's Captain and Commander for the Friday address),
-// else null. Pure: the planner's own evAt
+// else null. Pure: the planner's own evAt. The windows start at or after the short Friday's 15:30 (friCrewEnd), so
+// dayReport's required hours (to 15:30) never overlap the break: it needn't count the address's tag as work (PB)
 function evDoubleExcept(p, d) {
   if (!EV_STORM_ON || !p) return null;
   const sl = evAt((d - 1) * 1440 + 960), r = sl && sl.rules.find(x => x.rule === 'doubleShift' && x.except && evWho(x.who, p));
