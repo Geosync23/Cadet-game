@@ -207,6 +207,7 @@ a{color:var(--teal)}
 
 <details class="item"><summary><span class="n">6</span><span class="t">Paint texture grain faster, same pixels</span><span class="s">section 2 · game-code seat</span></summary><div class="body">
 <div class="chips"><span class="chip gain">gain: medium (at most about half of the 1.0 s here, ~2 s on a phone)</span><span class="chip risk">risk: low</span></div>
+<p><b>Built in part (RN1, 2026-10-21, claude/opt-render):</b> the grain loop, with the same pixels and the same random numbers, saves about 25 ms here: the loop was 26 ms of the "1.0 s". The rest (735 ms) is the browser reading each texture back from the graphics chip. The only way round that, drawing the textures on the CPU, would open the page 1.8 s sooner here but changes the pixels of 101 of 106 textures. <b>Parked: the user said don't change the look of the game.</b> Numbers: plans/opt-measure.md "Faster texture painting".</p>
 <p><b>What:</b> the grain painter adds a random speck to every pixel of every texture, one by one (8 textures, all while the game opens). The same specks, in the same order, can be made with a much tighter loop, with no change to the numbers drawn. "Half" is the most we expect, not a promise: each speck still needs its own random number.</p>
 <p><b>Why it's safe:</b> a probe fingerprints every painted texture and the game's random-number position after opening; both must match the old build exactly. Then cadet_test ALL IDENTICAL.</p>
 </div></details>

@@ -226,3 +226,9 @@ Measured on local merges, not pushed: claude/opt-render (0.64.8 + #4 + TS2's roo
 
 - Every mesh's bytes, the standing tiles, the map, the trimmed walls, the tall pieces and the seed are identical on all seven decks; cadet_test ALL IDENTICAL.
 - What's left in a build: three's BoxGeometry/CylinderGeometry making Float32BufferAttributes from plain arrays for each furniture piece (~15%; caching shapes would mean changing the kit), the floor painter (canvas and grain: #6), `place` and the decks' `dress`.
+
+### Faster texture painting (#6): the grain loop built; the rest parked
+
+- **Where the "1.0 s of grain" goes** (`opt-probes/grain_load.py`, `grain_split.py`, at load, 390×844): 17 `grain()` calls on 1.05 M pixels, 700-750 ms in all, of which **`getImageData` 735 ms** and the loop 26 ms (`putImageData` ~0). Reading a canvas back makes the browser finish drawing it on the graphics chip and copy it back (the first call 144 ms, then 12-53 ms each). A phone's browser does the same readback.
+- **Built:** the loop with `R()` inlined on a local seed and an exact modulus (x mod (2³¹−1) = (x mod 2³¹) + ⌊x / 2³¹⌋, less m if that reaches m; 50 M steps checked equal in node). Warm, 1.9× the old loop at 4096×2048 (`grain_bench.py`); at load, all 17 calls' pixels and the seed after them are identical to the old build. It saves about 25 ms here, because the loop was never the cost.
+- **Parked (the user's answer, 2026-10-21: don't change the look of the game):** drawing the texture canvases on the CPU (`getContext('2d', { willReadFrequently: true })`) removes the readback: page open 6.5 → 4.7 s here, grain 762 → 32 ms (`opt-probes/wrf.py`). But 101 of the 106 textures at load come out with different pixels (CPU and GPU draw gradients and edges differently), so it changes the look. Not built; kept here on record. Nothing else can remove the readback with the pixels kept: the grain needs the drawn pixels.
