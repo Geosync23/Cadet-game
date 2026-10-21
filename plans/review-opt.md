@@ -137,4 +137,4 @@ Builds (in /tmp/or2, made by merging, nothing pushed): **r5** = integration 0.64
 - merge_all r5_no5 -> r5: MERGE ALL IDENTICAL.
 - day_check Day 12 on sf_no5 and sf5: output identical line for line; both DAY CHECK FAILED with "the rec deck is on but nobody came to it in the evening" (the storm; RN1 saw it on Day 13; **Day 12 too on the combined release build**: not #5's, for the release).
 - check_fast on r5: QUICK CHECK OK in 256 s. devmode_check on r5: DEVMODE CHECK OK (also closes #8).
-- Merge: claude/opt-render into integration: the game merges cleanly; perf_check.py clashes (opt-render's room fix f5d6815 + event scenes vs integration's Fridays scenes de18921: keep both, opt-render's code with de18921's three scenes) and the build table (keep both rows).
+- Merge: claude/opt-render into integration: the game merges cleanly; perf_check.py clashes in two places (SCENES and SCENE_JS): take opt-render's side in both, since it already holds de18921's three Friday scenes (with 'on'/'busy') and FR3's 'cells' on top of the room fix. The build table: keep both sides' rows.
