@@ -132,3 +132,24 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 
 **Still open:** turn 1's nits.
 - **0c48458 (turn 1 nits 1-2): PASS.** The room is listed once, and the cast slots print SKIP. Nits 3-4 are parked for F7c and FR1. The lead has routed the eventGatherings gap to EV1 + PB in F0b.
+
+## FR1 turn 1 (A1: the switch, 18f, the crew's 15:30 Friday end, the skeleton): claude/fridays b1720a1. PASS
+
+**Checks:**
+- Build lines untouched.
+- cadet_test 675588c→off: ALL IDENTICAL.
+- check_fast OK in 207 s.
+- day_check Day 5: OK on and off.
+- day_check Day 12 fails the same way on, off and on 675588c (the rec deck's evening guard): it was already there (backlog #18).
+
+**Probe `fr1_t1.py`:**
+- Days 4, 6, 11 and 13 are identical on and off.
+- The skeleton is strand-erik, shah-dara and larsen-hamid.
+- Friday 16:00: helm 1 (Deck 1), watch 1 (Deck 2), infirmary 1, galley 3.
+- Day 12 also keeps command and helm, from the storm's double shift.
+- 8 Works crew finish a job or clock out by 15:45, inside eventFree's margin.
+
+**Nits:**
+- section.py doesn't find 18f's owner.
+- recCap and deck3Full treat Friday 15:30-17:00 as working hours (for turn 5/7).
+- The watch rating is on Deck 2, not the bridge (say so to the user).
