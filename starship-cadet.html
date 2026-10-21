@@ -37893,7 +37893,7 @@ function eventMeetPlan(p, d, F) {
   const out = []; if (!EV_CALLIN_ON || !p) return out;
   for (const g of evMeetsOn(d)) {
     const c = evMeetCast(g, d).find(x => x.p.id === p.id), v = c && gatherVenue(g.venue); if (!v) continue;
-    const early = c.named ? g.early || 5 : 0, shift = !!(F && F.works && !F.night);   // a named cast member comes 5 minutes early, or the meeting's own `early`
+    const early = c.named ? g.early || 5 : EV_LINE_ON && g.early || 0, shift = !!(F && F.works && !F.night);   // a named cast member comes 5 minutes early, or the meeting's own `early`; a slot's crew the meeting's own `early` too (Crossing the Line: the two first-timer speakers reached the glass at 14:43, after the oath; lead 25)
     out.push({ at: g.at - early, dur: g.len + early, where: (EV_LINE_ON && evLeadWhere(g, d, p, v)) || [[v.deck, '@gather-' + g.venue]], tag: 'ev-' + g.event + '-' + g.id, anim: g.anim,
       min: Math.min(g.len, 10), host: c.named, meet: shift, act: shift ? 'work' : undefined });
   }
