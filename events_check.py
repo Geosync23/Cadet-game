@@ -559,7 +559,7 @@ with sync_playwright() as pw:
         if len(x) != 1: fail(f"tradition note for {w['key']}: {len(x)} sent")
         elif x[0]['n'] != w['n'] or x[0]['kind'] != 'tradition': fail(f"tradition note for {w['key']}: came {x[0]['n']}, planned {w['n']}")
     m = g.ev("EV_MAILBOX.map(x => [x.event, x.at, x.subject])")
-    due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).filter(e => !(e.ev.quiet === 'career' && typeof recBigDay === 'function' && recBigDay(d))).map(e => e.id + '@' + d))")   # the rec deck's weekly sport ones send none on the career's big days (0.83)
+    due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).filter(e => !(e.ev.quiet === 'career' && typeof recBigDay === 'function' && recBigDay(d)) && !e.ev.when.ship && e.ev.mail !== null).map(e => e.id + '@' + d))")   # the rec deck's weekly sport ones send none on the career's big days (0.83); a ship-wide event's gatherings (its own Mail and banner announce them) and a day it dresses with no Mail (Crossing the Line's supper: Vance's Mail covers it) send none
     got = [x[0] for x in m]
     print(f"Mail: {len(m)} announcements for days 2-8 ({len(due)} events due); e.g. {m[0][2] if m else '-'}")
     for k in due:

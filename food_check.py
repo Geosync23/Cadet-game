@@ -523,7 +523,7 @@ with sync_playwright() as pw:
     else:
         off = g.ev(f"""(() => {{ const out = [];
           for (const p of galleyStaff()) for (const k of galleyDay(p, {DAY}).blocks) {{ const w = whereIs(p, {B} + (k.from + k.to) / 2);
-            if (w.deck !== 3 || w.placeId !== k.placeId) out.push(p.id + ' ' + hhmm(k.from) + ' ' + k.placeId + ' -> ' + w.deck + ' ' + w.placeId); }}
+            if ((w.deck !== 3 || w.placeId !== k.placeId) && !(typeof eventMeetTag === 'function' && eventMeetTag(w.tag))) out.push(p.id + ' ' + hhmm(k.from) + ' ' + k.placeId + ' -> ' + w.deck + ' ' + w.placeId); }}   // an event meeting during a stint (F0b: Crossing the Line's oath casts Brennan) is a break, there and back
           return out; }})()""")
         print("Galley staff at the rota's stations (mid-block):", 'all' if not off else f"{len(off)} not")
         if off: fail(f"rota vs plans: {off[:6]}")

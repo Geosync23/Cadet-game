@@ -626,11 +626,12 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 **Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
 - **Sunday Day 7: Crossing the Line**, a new one-day short event and the first chronologically. It's the user's "one more short one". It's on Sunday so that the player keeps Saturday as a completely free day. The Wren crosses into the Veyli reach.
-  - 14:30: the horn and gold hull lights, then the Captain's short address.
-  - 14:30-15:15: the ceremony for first-timers on the plaza (you included).
+  - 14:30: the horn (a gold pulse; the game has no sound) and gold hull lights, then the Captain's short address.
+  - 14:30-15:15: the ceremony for first-timers in the bow lounge (you included), the oath at 14:40, then Brennan's punch.
   - 18:00-19:15: the Line supper, which takes the Sunday table's place in the mess.
-  - Afterwards: a certificate and a plaque.
+  - Afterwards: your certificate on your shelf, and a plaque with your answer by the bow lounge door.
   - Saturday Day 6 at 17:00 is the fallback.
+  - The details are below ("Crossing the Line's answers").
 - **Days 11-15:** the ion storm, one day later than built, with a shorter afterglow.
   - Thursday 11: the warning, and Calder's briefing at 14:00, after the first team job and the tea break.
   - Friday 12, 14:00: the front.
@@ -656,6 +657,15 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
 
+**Crossing the Line's answers (the user, 2026-10-21, 01:30-02:52 UTC via lead 22; `plans/event-line-plan.md` v2.2 on claude/event-plan-line; built in the Line update, claude/line-update):**
+- **The story is A, "The one on watch".** Tomas, your bunkmate, is on watch on Deck 2 through the whole crossing and misses his own Line. On Saturday evening he tells you (or Mails you at 22:50 if you don't meet him). After the oath you can carry him a mug of punch at his post. On Lap of the Wren that night the old hands stop at the bow turn by the lounge door and give him his crossing ("From today, this reach knows your name, Lind"), and what he says to you depends on your day.
+- **Your answer goes on the plaque.** At the oath the Captain asks who answers for the first-timers: "We came a long way. We're glad we did.", "We crossed together, all of us. Even the ones on watch." or "Is this the part with the punch?". If you miss it, a first-timer's plain line goes up instead.
+- **The ceremony is in the bow lounge** (01:42), the Captain at the bow glass with the stars behind her, Brennan with the punch bowl, the two first-timer speakers beside them and the first-timers at the front of the crowd. About 45 come (everyone free, and the day shift standing easy). Envoy Saruth stays away by courtesy, and the lounge is the ceremony's alone for its 45 minutes.
+- **q1 (b):** the crew talk about the Line from Saturday 08:00; Vance's Mail still comes at 18:00.
+- **q2-q8 (all a):** a warm gold in the windows and slightly warmer light indoors until the supper ends; the horn as a gold pulse with a one-line notice; the Sunday table re-dressed as the Line supper (the crew's voted dish and Brennan's pudding, up to about 60, some standing with a tray); first-timers are everyone aboard under two years (the Wren was last in the reach two years ago, on a quiet charting run); if you miss the ceremony you still crossed (the gist by Mail, the certificate anyway); the day shift stands easy 14:30-15:15 except the bridge, the watch and the galley line; two small volunteer jobs on Sunday from 12:45 (carry the punch, hang the ribbons), held for you until 14:15.
+- **q10 (A), why it matters: "guests in someone else's sky".** Past the Line the Concord's charts are thin, every star has a Veyli name, and help is a long way off, so the old oath is a promise to each other. About 14 lines carry it through the week (content/facts.md, "What the Line means").
+- **No score:** a short event can say `commend: false`. The Line has no threads, no debrief and never a commendation, and its Record line is plain ("Crossed the Line into the Veyli reach, Day 7.").
+
 **The storm update's eight answers (the user, 2026-10-21 02:29 UTC, each the recommended option; `plans/event-storm-plan.md` v1.2 on claude/event-plan-storm):**
 - **The story is A, "Sixty by lamplight".** Brennan is off on Friday and Saturday, so Lukas Dlamini runs her galley through the storm and the lantern supper is his. The surge kills four of his six rings. Your one choice: fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan eats at the supper, and what she says depends on your choice.
 - **Each prep job moves its own thread:** the ballasts shorten the blackouts, the batteries feed the bridge, and the booth rota shortens the queue. Left alone the storm comes out bumpy; with all three it's smooth.
@@ -680,7 +690,7 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 | Order | Event | Kind | In short |
 | --- | --- | --- | --- |
-| — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A plaza ceremony for first-timers and a supper in the mess. |
+| — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A ceremony for first-timers in the bow lounge and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
 | — | Comet viewing | Short, Day 16 | One gentle evening at the observatory and the bow lounge windows. |
 | 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
