@@ -654,7 +654,7 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
-**Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. Nobody eats standing with a tray (the user, 2026-10-21): a meal gathering bigger than the mess's 48 seats (its 44 and the long tables' extra chairs) comes and goes in sittings like a regular dinner, so the room never holds more than its seats at once. Other gatherings (the party) may still use standing places.
+**Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Other gatherings (the party) still use standing places. (Whether Crossing the Line's supper follows the same rule is an open question.)
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
 
@@ -836,6 +836,7 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
+- Crossing the Line's supper (Day 7, the mess) is built (on claude/line-update, behind its switch) with those who don't get a seat eating standing with a tray at the mess's standing spots (`lineStandTray`). Should it sit down in sittings too, like the storm's lantern supper since 2026-10-21?
 
 **The decks:**
 
