@@ -348,3 +348,28 @@ L2 now adds its two Day 7 rows (the Sunday table, the Lap) to the storm's `EV_DA
 own. Only text changed. The shape EP2 proposed to EP3 (a Map keyed `<trad>@<day>`, rows of drop, set or add, made at
 load, empty when off) is fine. One condition: the add row keeps its k, so the Lap moved to Day 15 keeps 442 and a
 plan's hash stays the same. The storm's review checks the final shape. **PASS stands.**
+
+### 61f81be: the user's answers, and "Why the crossing matters" (line-q10)
+- **The answers are marked decided** (q1 b; q2-q8 a). The warning starts at Saturday 08:00 as talk only, so the
+  free day stays free. Vance's Mail at a fixed minute needs a phase Mail time of its own (`at`) from the base. The
+  storm's Monday debrief at a fixed minute needs the same, so ask EV1 for one feature that serves both.
+- **Meaning A ("guests in someone else's sky") is the right recommendation.** It explains the oath's words ("we did
+  not go alone"), it matters to everyone aboard, and it fits an unarmed survey ship. The lines sit where the player
+  already goes. Three wording fixes:
+  - **M1. "by the Veyli's leave" brushes the Envoy, as EP2 feared.** "Leave" means permission someone granted, which
+    implies an arrangement. Envoy Saruth is the arrangement's obvious face, and their card keeps "why they were
+    sent (until close)", which nothing in content/facts.md answers yet. A player will put the two together, and the
+    head writer's later answer would have to fit it. Use **"as guests"** only. It says the same thing, and nobody
+    granted anything. That means Vance's sentence ("Beyond it, the Wren travels as a guest") and the certificate,
+    which already says "as a guest".
+  - **M2. "on their charts" contradicts the survey.** Survey "charts Tavessa", "New reach, new charts", and B is
+    about charting. If the Wren travels on Veyli charts, what is Survey doing? It also implies a second arrangement
+    (charts shared). Drop "on their charts". "Every star already has a Veyli name" carries the meaning.
+  - **M3. The new fact "the Concord's charts end at the Line" contradicts the other new fact.** The Wren was last
+    in the reach two years ago "on a quiet charting run", so the Concord has some charts past the Line. Write it as
+    **"past the Line the Concord's charts are thin: a few runs, never a full survey"**. That fits Zeke's "off the
+    map", the two-years fact and the work Survey is about to do. The head writer confirms it in facts.md.
+- **Spoilers otherwise: fine.** Nothing on the visit, nothing on Holt's patrol day (his partner Hanne Rook, the six
+  hours of silence), and "help is a long way off" is about distance, not danger.
+
+Verdict: **PASS WITH FIXES** (M1-M3, wording only). The rest of the plan's PASS stands.
