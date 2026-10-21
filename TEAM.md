@@ -313,3 +313,8 @@ EP2 (~400k) idle, done.
 | Seat | Session | Branch | Job |
 |---|---|---|---|
 | Events engineer 2 EV2 | session_017S7eVMgX34nSt8fxZ5kat9 | `claude/events-base-2` | EV1's second builder (storm parts outside s18), then F5, F8, F0b and the storm update after EV1's handover |
+**~03:18 UTC, the user:** Veyli pronouns as proposed (Saruth she, Teshavi she, Kesrin he, Moleth they, Ithra she, Taavek he). Short Fridays turns 1-4 all PASS (PR3 + PB + OR1).
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Events writer 2 EW2 | session_0138EzUAZjAJ3rUMiwyK3m3p | `claude/events-lines-2` | (1) Veyli lore: canon into facts.md + design-doc, audit fixes, ~23 new lines; (2) the Line's ~14 "why it matters" lines; (3) storm story lines (brief ad470a1). PR2 reviews |
+EW1 idle (handover f474073).
