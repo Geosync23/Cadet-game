@@ -35,3 +35,14 @@ Setup: `pip install playwright`; three and acorn in /tmp/cadet-work (npm pack th
 - EC1's 037a149 on its own branch: BIGEVENTS CHECK OK.
 - Gotcha (PR6): bigevents_check finds cadet_test.py from its own file name; a renamed copy dies with a SyntaxError.
   Keep copies as `<dir>/bigevents_check.py` next to a cadet_test.py.
+- EC1's check 037a149 on adb71aa: BIGEVENTS CHECK OK. 541ae52 on adb71aa and on EC1's own branch: OK.
+- The party live (`party_probe.py`, on-copy, Day 14 19:20-19:56 in the bow lounge, 390x844): 25-35 in the lounge
+  (the check's "at most 27 at once" counts the party's own goers; the live count adds the bar's staff and people
+  passing), 241 draw calls at the default zoom, 325 at ZOOM_MIN 0.7 (EV4 measured 416 at a wider view; under 450).
+  Shot `shots/party_390.png`.
+- Mutants (037a149's check on adb71aa copies):
+  - p1 party who .7 → 1: FAIL "party: a crowd of 80, over 60". Caught.
+  - p3 supper .73 → .95: FAIL 74 over 60, 74 for 70 places, too few standing. Caught.
+  - isTrad back to includes(): FAIL "the planted book-circle was not caught". Caught.
+  - p2 party.stay [110, 120]: OK, not caught, and rightly so. Since 481a5b4a the party has 94 places (standing counts),
+    so 45 goers staying all evening never fill it. Replaced by p4 (seats only plus stay [110, 120]): queued.

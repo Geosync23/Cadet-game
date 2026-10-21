@@ -11,7 +11,7 @@ pw = sync_playwright().start()
 b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME'), args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 tmp = WORK / 'test' / ('_menu_' + tag + '.html'); tmp.write_text(instrument(pathlib.Path(path).read_text()))
-PUT = """(() => { const R = DECKS[4].rooms, o = DRESS_INFO && DRESS_INFO.find ? null : null; const key = 'a';
+PUT = """(() => { const R = DECKS[4].rooms, key = "a";
   const pl = DECKS[4].places.find(p => p.room === key) ; const c = pl ? pl.at : [20, 10], P = cellPos(...c), q = nearestOpen(P.x, P.z, player) || c;
   player.obj.position.copy(cellPos(...q)); player.path.length = 0; target.copy(player.obj.position).setY(.7); return [key, R[key] && R[key].name, c]; })()"""
 res = {}
