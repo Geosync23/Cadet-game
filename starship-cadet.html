@@ -35236,6 +35236,7 @@ function eventsOn(d) {
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
   const drop = evBudget(out); if (drop.length) { EV_DROPPED.set(d, drop.map(e => e.id)); for (const e of drop) out.splice(out.indexOf(e), 1); }
+  if (DEVMODE) devmodeTradsOn(d, out);                   // section 25: a tradition started from the Dev panel (only with the Dev link)
   EV_DAYS.set(d, out);
   for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
   return out;
@@ -51236,15 +51237,15 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
-const DM_LATER = { trad: 'Start any ship tradition: coming in Stop 1b.', career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
-var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last }; var: section 20 may ask before this line runs
+const DM_LATER = { career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
+var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
   if (!DEVMODE) return null;
-  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '' }; }
+  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr) }; }
   return DM_ST;
 }
-if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last }; });
+if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last, tr: st.tr.slice(-20) }; });
 function devmodeCss() {
   const st = document.createElement('style');
   st.textContent = '.devmode .hud{pointer-events:auto;cursor:pointer;border:2px solid #e8c06a;box-shadow:0 0 0 1px rgba(232,192,106,.35),0 0 14px rgba(232,192,106,.3)}'
@@ -51266,6 +51267,7 @@ function devmodeCss() {
     + '#dmSheet p.dmNote{color:#f1d79a}'
     + '#dmSheet button.dmAsk{background:#e8c06a;color:#1a1408}'
     + '#dmSheet button:disabled{opacity:.42}'
+    + '#dmSheet input.dmFind{width:100%;box-sizing:border-box;min-height:44px;margin-top:8px;padding:8px 12px;border-radius:12px;border:1px solid rgba(232,192,106,.5);background:rgba(255,255,255,.06);color:var(--ink);font-size:16px}'
     + '#dmSheet .dmFoot{flex:none;margin-top:6px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     + 'body.dmOpen .toast{bottom:calc(56vh + 12px)}'
     + '@media (orientation:landscape) and (max-height:500px),(min-width:900px){#dmSheet{left:auto;top:0;width:min(400px,52vw);height:auto;border-top:0;border-left:2px solid #e8c06a;border-radius:16px 0 0 16px}'
@@ -51326,6 +51328,7 @@ function devmodeDraw() {
   if (DM_LATER[DM_UI.tab]) devmodeText(body, DM_LATER[DM_UI.tab]);
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
   else if (DM_UI.tab === 'clock') devmodeClock(body);
+  else if (DM_UI.tab === 'trad') devmodeTrad(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
@@ -51595,6 +51598,145 @@ function devmodeQuick(body) {
     ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
     ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
   if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
+}
+// ---- D5 (Stop 1b): Traditions: start any ship tradition, in 20 minutes, at its usual time or tomorrow ----
+// A Dev start is a row in the Dev state (DM_ST.tr: { id, day, from, who? }, kept in the Dev save), which section 18's
+// eventsOn adds to that day's list through devmodeTradsOn (its one line), with the tradition's own length; that day's
+// showing by the calendar gives way to it, it's never dropped by the voice budget, and any calendar tradition in the
+// same room at the same time gives way to it (the panel names it). Whoever's free and willing goes, by the tradition's
+// own rules. Today's and that day's plans are made again under the fade (the crew move at once), so the deck is filled afresh. What was decided before (a cake, an
+// invitation) isn't there for it, and a tradition waiting on a story flag shows once without the flag being set.
+// Refused on Day 0, on a big event's day, too late in the evening, and in a room another Dev start holds then.
+// Birthdays and rotation teas ask whose. Nothing here calls R().
+const DM_SOON = 20, DM_LATEST = 1410;                    // "in 20 minutes" (rounded up to 5); nothing past 23:30
+function devmodeTradsClean(a) {                          // the saved starts read back (pure; section 18 may ask at load)
+  return Array.isArray(a) ? a.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Number.isInteger(r.from) && r.from >= 0 && r.from < 1440)
+    .map(r => ({ id: r.id.slice(0, 60), day: r.day, from: r.from, ...(Array.isArray(r.who) ? { who: r.who.filter(x => typeof x === 'string').slice(0, 6) } : {}) })).slice(-20) : [];
+}
+function devmodeTradsOn(d, out) {                        // section 18's eventsOn: add day d's Dev starts to its list
+  const st = devmodeState(); if (!st || !st.tr.length) return;
+  for (const r of st.tr) {
+    if (r.day !== d) continue;
+    const ev = SHIP_TRADITIONS.find(e => e.id === r.id); if (!ev) continue;
+    const i = out.findIndex(e => e.id === r.id); if (i >= 0) out.splice(i, 1);
+    const hon = r.who ? schedPeople().filter(p => r.who.includes(p.id)) : [], names = hon.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');
+    out.push({ id: ev.id, name: ev.name, ev, day: d, from: r.from, to: r.from + ev.at[1] - ev.at[0], honorees: hon, names, first: hon.length ? hon[0].name.split(' ').slice(-2)[0] : '', dev: true });
+  }
+  for (let i = out.length - 1; i >= 0; i--) if (!out[i].dev && devmodeTradClash(out[i], out.filter(e => e.dev))) out.splice(i, 1);   // the calendar's give way in that room
+}
+function devmodeTradClash(e, list) { const rooms = evRooms(e.ev); return list.find(x => x !== e && x.id !== e.id && x.from < e.to && e.from < x.to && evRooms(x.ev).some(r => rooms.includes(r))) || null; }   // (a function: eventsOn asks at load)
+const devmodeWhose = ev => !!(ev.when.birthday || ev.when.rotation != null);   // asks whose
+function devmodeWhen(ev) {                               // the tradition's usual rhythm, in words
+  const w = ev.when, wd = w.weekday != null ? WEEKDAYS[w.weekday] : '';
+  if (w.birthday) return 'on a crew birthday';
+  if (w.rotation != null) return 'with a crew rotation';
+  if (w.ship) return 'during a ship-wide event';
+  if (w.rota) return 'by its rota';
+  if (w.after) return 'in your first weeks aboard';
+  if (w.yearDay || w.every === 'year') return 'once a year';
+  if (w.every === 'quarter') return 'once a quarter';
+  if (EV_CYCLE[w.every]) return (w.every === 'week' ? 'every ' : 'every ' + EV_CYCLE[w.every] + ' weeks, ') + (wd || 'week');
+  if (typeof w.every === 'number') return 'every ' + w.every + ' days';
+  if (w.date) return 'on Day ' + w.date;
+  return wd ? wd + 's' : 'now and then';
+}
+function devmodeWhere(ev) {                              // its first room, in words
+  const w = ev.where[0]; if (!w) return '';
+  const r = w.room ? w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').replace(/\(([^|)]*)\|.*\)/, '$1') : EV_POOL_ROOM[w.pool] || w.pool;
+  return r.charAt(0).toUpperCase() + r.slice(1) + ', ' + deckWord(w.deck);
+}
+function devmodeTradNext(ev, from) {                     // the next day (from `from`) it's on by the calendar, or null (two months)
+  for (let d = from; d < from + 60; d++) if (eventsOn(d).some(e => e.id === ev.id && !e.dev)) return d;
+  return null;
+}
+// when a start would be: { d, from } or why not (a string)
+function devmodeTradAt(ev, how) {
+  if (SHIP.time.day < 1 || devmodeArrival()) return 'Not on Day 0: the arrival evening is the story\'s.';
+  const now = shipNow(), today = SHIP.time.day, m = now - (today - 1) * 1440, len = ev.at[1] - ev.at[0];
+  const d = how === 'tomorrow' ? today + 1 : today, from = how === 'soon' ? Math.ceil((m + DM_SOON) / 5) * 5 : ev.at[0];
+  if (how === 'usual' && from <= m) return 'Its usual time today (' + hhmm(from) + ') has gone. Try In 20 minutes, or Tomorrow.';
+  if (from + len > DM_LATEST) return 'Too late tonight: it would run past ' + hhmm(DM_LATEST) + '. Try Tomorrow.';
+  const big = typeof eventOn === 'function' && eventOn(d);
+  if (big) return 'Not on a big event\'s day (' + ((SHIP_EVENTS[big.id] || {}).title || big.id) + '): the ship\'s evening is the event\'s.';
+  if (devmodeWhose(ev) && !(DM_UI.who && DM_UI.who.length)) return 'Pick whose first (below).';
+  const me = { id: ev.id, ev, from, to: from + len }, list = eventsOn(d), clash = devmodeTradClash(me, list.filter(e => e.dev));
+  if (clash) return clash.name + ', started from here too, is in the same room then (' + hhmm(clash.from) + '-' + hhmm(clash.to) + '). Stop it first, or pick another time.';
+  return { d, from, gives: list.filter(e => !e.dev && devmodeTradClash(e, [me])).map(e => e.name) };
+}
+function devmodeTradsAgain(d) {                          // the days' lists and plans made again; the deck filled afresh
+  EV_DAYS.clear(); EV_GOERS.clear(); try { TALLY_MEMO.clear(); } catch (e) { /* none */ }
+  const today = SHIP.time.day; for (const x of [...SHIP_DAYS.keys()]) if (x >= today && x <= Math.max(d, today) + 1) SHIP_DAYS.delete(x);
+  if (typeof deckCrewFill === 'function') deckCrewFill();
+}
+const devmodeGoing = (id, d) => schedPeople().filter(p => !p.player && planDay(p, d).some(s => evTagId(s.tag) === id)).length;
+function devmodeTradMail(ev, d) {                        // its Mail now (the evening before's), once
+  const e = eventsOn(d).find(x => x.id === ev.id), key = ev.id + '@' + d; if (!e || !ev.mail || SHIP.events.sent.includes(key)) return false;
+  SHIP.events.sent.push(key);
+  mailSend({ at: shipNow(), from: ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(ev.mail, e), event: key });
+  return true;
+}
+function devmodeTradStart(id, how) {
+  const ev = SHIP_TRADITIONS.find(e => e.id === id); if (!ev) return devmodeSay('No tradition ' + id + '.');
+  const refuse = () => { const a = devmodeTradAt(ev, how); return typeof a === 'string' ? a : null; };
+  devmodeDo('Tradition: ' + ev.name + (how === 'soon' ? ' in 20 minutes' : how === 'usual' ? ' at its usual time' : ' tomorrow'), () => {
+    const a = devmodeTradAt(ev, how), st = devmodeState();
+    st.tr = st.tr.filter(r => !(r.id === id && r.day === a.d)).concat([{ id, day: a.d, from: a.from, ...(devmodeWhose(ev) ? { who: DM_UI.who.slice(0, 6) } : {}) }]).slice(-20);
+    devmodeTradsAgain(a.d);
+    const mail = DM_UI.tmail && devmodeTradMail(ev, a.d), n = devmodeGoing(id, a.d);
+    return ev.name + (a.d === SHIP.time.day ? ' today' : ' tomorrow') + ' at ' + hhmm(a.from) + ': ' + n + ' going.' + (mail ? ' Its Mail is in.' : '')
+      + (a.gives.length ? ' ' + a.gives.join(' and ') + (a.gives.length > 1 ? ' give' : ' gives') + ' way in that room.' : '') + (ev.cake || ev.invite ? ' No ' + [ev.cake ? 'cake' : '', ev.invite ? 'invitation' : ''].filter(Boolean).join(' or ') + ': decided ahead.' : '') + (ev.flag ? ' Shown without its story flag.' : '');
+  }, refuse);
+}
+function devmodeTradStop(r) {
+  const ev = SHIP_TRADITIONS.find(e => e.id === r.id);
+  devmodeDo('Tradition: ' + (ev ? ev.name : r.id) + ' stopped', () => { const st = devmodeState(); st.tr = st.tr.filter(x => x !== r && !(x.id === r.id && x.day === r.day)); devmodeTradsAgain(r.day); return (ev ? ev.name : r.id) + ': back to its calendar.'; });
+}
+function devmodeTradThere(id, d) {                       // Take me there: its first room with places
+  const ev = SHIP_TRADITIONS.find(e => e.id === id), S = schedData(); if (!ev) return;
+  for (const [i, w] of ev.where.entries()) {
+    const pl = (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + id + ':' + i : w.pool)) || [])[0];
+    if (pl) return devmodeTake(ev.name, pl.deck, () => ixGoalWorld({ room: pl.room }), r => r === pl.room);
+  }
+  devmodeSay('Nowhere to go for ' + ev.name + '.');
+}
+function devmodeTrad(body) {
+  const st = devmodeState(), today = SHIP.time.day, mine = st.tr.filter(r => r.day >= today);
+  if (mine.length) {
+    devmodeHead(body, 'Started by Dev mode');
+    for (const r of mine) {
+      const ev = SHIP_TRADITIONS.find(e => e.id === r.id), e = eventsOn(r.day).find(x => x.id === r.id && x.dev); if (!ev || !e) continue;
+      devmodeText(body, ev.name + (e.names ? ' (' + e.names + ')' : '') + ', ' + (r.day === today ? 'today' : 'Day ' + r.day) + ' ' + hhmm(e.from) + '-' + hhmm(e.to) + ' · ' + devmodeGoing(r.id, r.day) + ' going');
+      devmodeRow(body, [['Take me there', () => devmodeTradThere(r.id, r.day)], ['Stop it', () => devmodeTradStop(r)]]);
+    }
+  }
+  const all = SHIP_TRADITIONS.slice().sort((a, b) => a.name.localeCompare(b.name)), sel = all.find(e => e.id === DM_UI.trad);
+  if (sel) {
+    devmodeHead(body, sel.name);
+    const nx = devmodeTradNext(sel, today);
+    devmodeText(body, 'Usually ' + devmodeWhen(sel) + ', ' + hhmm(sel.at[0]) + '-' + hhmm(sel.at[1]) + (devmodeWhere(sel) ? ', ' + devmodeWhere(sel) : '') + '. ' + (nx == null ? 'Not on the calendar in the next 60 days.' : nx === today ? 'On today.' : 'Next: Day ' + nx + '.'));
+    devmodeRow(body, [['In 20 minutes', () => devmodeTradStart(sel.id, 'soon'), { ask: true }], ['At its usual time', () => devmodeTradStart(sel.id, 'usual')], ['Tomorrow', () => devmodeTradStart(sel.id, 'tomorrow')]]);
+    devmodeRow(body, [[DM_UI.tmail ? 'Its Mail now: on' : 'Its Mail now: off', () => { DM_UI.tmail = !DM_UI.tmail; devmodeDraw(); }, { ask: !!DM_UI.tmail }], ['Back to the list', () => { DM_UI.trad = null; DM_UI.who = null; devmodeDraw(); }]]);
+    if (devmodeWhose(sel)) devmodeTradWho(body, sel);
+    if (sel.cake || sel.invite || sel.flag) devmodeText(body, (sel.cake || sel.invite ? 'Decided ahead, so not there for a Dev start: ' + [sel.cake ? 'the cake' : '', sel.invite ? 'the invitation' : ''].filter(Boolean).join(' and ') + '. ' : '') + (sel.flag ? 'It waits on a story beat: shown once without it.' : ''));
+    return;
+  }
+  devmodeHead(body, 'Start a tradition (' + all.length + ')');
+  const q = document.createElement('input'); q.type = 'search'; q.className = 'dmFind'; q.placeholder = 'Search traditions'; q.setAttribute('aria-label', 'Search traditions'); q.value = DM_UI.tq || '';
+  const list = document.createElement('div'); body.appendChild(q); body.appendChild(list);
+  const fill = () => {
+    list.textContent = ''; const t = (DM_UI.tq || '').trim().toLowerCase(), hit = all.filter(e => !t || e.name.toLowerCase().includes(t));
+    for (let i = 0; i < hit.length; i += 3) devmodeRow(list, hit.slice(i, i + 3).map(e => [e.name, () => { DM_UI.trad = e.id; DM_UI.who = null; DM_UI.tq = ''; devmodeDraw(); }]));
+    if (!hit.length) devmodeText(list, 'None by that name.');
+  };
+  q.oninput = () => { DM_UI.tq = q.value; fill(); }; fill();
+}
+function devmodeTradWho(body, ev) {                      // whose birthday, or whose rotation: up to six of the crew aboard
+  const d = SHIP.time.day, who = DM_UI.who || (DM_UI.who = []);
+  devmodeHead(body, 'Whose? ' + (who.length ? schedPeople().filter(p => who.includes(p.id)).map(p => p.name).join(', ') : 'tap up to six'));
+  const crew = schedPeople().filter(p => !p.player && (typeof aboard !== 'function' || aboard(p, d))).sort((a, b) => a.name.localeCompare(b.name));
+  for (let i = 0; i < crew.length; i += 3) devmodeRow(body, crew.slice(i, i + 3).map(p => [p.name, () => {
+    const k = who.indexOf(p.id); if (k >= 0) who.splice(k, 1); else if (who.length < 6) who.push(p.id); devmodeDraw();
+  }, { ask: who.includes(p.id) }])).classList.add('dmWho');
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----
