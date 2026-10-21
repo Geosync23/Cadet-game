@@ -165,3 +165,10 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 2. (lead's call) 35 in the lounge at the oath's 14:40, 44 from 14:52, 40 planned to go; the plan said "45 or more is
    fine". EV7's own run had 42 at 14:40: within reach; not blocking.
 3. The 360 probe and a third off cadet_test are still queued.
+
+## DB2's devmode_check seed fix (claude/devmode-2 841a9d0b): OK
+- The check's three new games take careerInit(); SHIP.career.gs = DM_SEED (the game's const, 8: no sick day before
+  Day 46). Check-only. Clears S10's random "excused days" FAIL (a sick Day 8 one run in 28).
+- Lead 24 (17:43): the Line's note 2 (the crowd at the oath) is answered by EV7's L5d-f (ER3: the Captain at the glass
+  from 14:30, 46 + you at the ceremony on 835bcfc); note 1 (the supper's pull) is being fixed by EV7.
+- The 5-hour limit stopped every seat ~16:20 to 17:40; runners resumed.
