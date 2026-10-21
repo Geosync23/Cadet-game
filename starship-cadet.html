@@ -16280,7 +16280,7 @@ function galleyStep(S, m, st) {
     const sent = S.trays && S.trays.d === d, ta = GALLEY_TEST.traysArrivedAt || (typeof traysArrivedAt === 'function' ? traysArrivedAt : null);
     const arr = sent && S.trays.job && ta ? ta(d, 'bridge') : undefined;
     const hungry = arr === undefined ? md < FOOD.trayAt && !sent : arr === null || m < arr;
-    if (hungry) galleyScore(m, 'bridgeHungry', 1);
+    if (hungry) { const hp = typeof eventHelp === 'function' ? eventHelp('bridgeHungry') : null; galleyScore(m, 'bridgeHungry', hp ? hp.n : 1); }   // section 18's storm update S4: your battery packs (null while off)
   }
   // serving: those already waiting first, then whoever reaches the front this minute (in a rush, only so many a minute)
   let line = busy('rush') ? FOOD.rushRate : Infinity;
@@ -18316,8 +18316,9 @@ const BLACKOUT_SEED = machSeed('blackout');
 function blackoutHour(h) {
   if (typeof eventMod !== 'function' || eventMod('effect', 'blackouts', h * 60) !== true) return null;
   const c = MACH_HIST.get(histHour((h - 1) * 60)), power = c ? systemsFrom(c).power : 100, u = k => schedU(BLACKOUT_SEED, h, k);
-  if (u(1) >= .15 + .45 * (1 - power / 100)) return null;
-  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly && n !== 7).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = 15 + Math.floor(46 * u(3));
+  const hp = typeof eventHelp === 'function' ? eventHelp('blackout') : null;   // section 18's storm update S4: your ballasts (null while off)
+  if (u(1) >= (.15 + .45 * (1 - power / 100)) * (hp ? hp.odds : 1)) return null;
+  const decks = Object.keys(DECKS).map(Number).filter(n => !DECKS[n].playerOnly && n !== 7).sort(), deck = decks[Math.floor(u(2) * decks.length)], len = Math.round((15 + Math.floor(46 * u(3))) * (hp ? hp.len : 1));
   const from = h * 60 + Math.floor(u(4) * (61 - len));
   return { deck, from, to: from + len };
 }
@@ -36081,6 +36082,7 @@ function eventsTick() {
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
+  eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
   occasionsTick(now);                                    // C10: summons, invitations, progress talks
   if (REC_DECK) { recShowCue(now); recMyTalk(now); }    // the auditorium's show state for rec engineer B's recShow; your own talk's ask (0.83.1, RA)
@@ -36306,7 +36308,7 @@ function stormCallBacklog(e) {
   const ppl = schedPeople().filter(p => p.rank !== 'guest');
   const owed = ppl.filter(p => callOwed(p, e.startDay)).length;
   const booths = Math.max(1, placesOf(['callhome']).length), comms = typeof shipSystems === 'function' ? shipSystems().comms : 100;
-  return Math.round(owed * 40 / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;
+  return Math.round(owed * (typeof evCallMins === 'function' ? evCallMins(e) : 40) / booths / 60 * (1 + (100 - comms) / 100) * 10) / 10;   // the storm update S4: 25 a call, 15 with your rota
 }
 // ---- the ion storm update (EV3; plans/event-storm-plan.md v1.2, the user's answers of 2026-10-21): the plan's changes,
 // laid over the storm above only while EV_STORM_ON is on (off: today's storm, unchanged). Here, before EV_SHIPWIDE and
@@ -37285,6 +37287,34 @@ const eventJobRank = spec => !EV_RANK_ON || !spec || !RANKS.includes(spec.rank) 
 // the user wants it). The crew's booths already follow the event's 'closed' routine. False while off ----
 const EV_COMMS_ON = EVENTS_ON;
 const eventCommsDown = (t = shipNow()) => EV_COMMS_ON && !!eventMod('effect', 'commsDown', t);
+// ---- the ion storm update, S4 (EV2; plans/event-storm-plan.md, "Your help and the result", the user's answer 2): each
+// prep job YOU did before the front moves its own thread (left alone a new game's storm comes out bumpy, all three
+// smooth). An event's `help: { <thread>: { job, ... } }`; the storm's, laid over its data only while EV_STORM_ON is on:
+// the ballasts make blackouts rarer and shorter (section 17's blackoutHour), the battery packs halve the bridge's
+// hungry hours (section 16), the booth rota (a new prep job) shortens each call in the backlog. The calls retune: 25
+// minutes a call left alone (was 40), 15 with the rota. callOwed (section 14's rush rule) is untouched ----
+if (EV_STORM_ON) {
+  const S = SHIP_EVENTS.ionStorm;
+  S.jobs.warning.push({ id: 'stormRota', title: 'Storm prep: draw up a booth rota for after the storm', tier: 1, at: 852,
+    stops: [{ placeId: '3-callhome-1', mins: 10, tag: 'survey' }, { placeId: '5-jobboard-1', mins: 15, tag: 'rota' }] });
+  S.callMins = 25;
+  S.help = { blackout: { job: 'stormBallasts', odds: .5, len: .5 }, bridgeHungry: { job: 'stormBatteries', n: .5 }, calls: { job: 'stormRota', mins: 15 } };
+}
+// the running event's help for a thread: its `help` entry when you did that job before the front (the onset begins),
+// else null. Kept in the event's own record as soon as it's done (saved with it): done jobs are tidied off SHIP.jobs
+// after a day or two, and a job done before the front stays so. Play state (your jobs): never read by the crew's planner
+function eventHelp(thread) {
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id], h = def && def.help && def.help[thread]; if (!h || !EV_STORM_ON) return null;
+  const k = 'helped:' + h.job; if (e.mine[k]) return h;
+  const on = def.phases.find(p => p.id === 'onset'), front = on ? evBeatAt(e.startDay, on.at) : null;
+  if (front == null || !eventJobDone(h.job, true, front)) return null;
+  e.mine[k] = 1; return h;
+}
+// once a ship minute and after a skip, while an event with help runs: note each help as its job is done
+function eventHelpKeep() { const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (EV_STORM_ON && def && def.help) for (const th in def.help) eventHelp(th); }
+SIM_ADVANCE.push(() => eventHelpKeep());
+// a call's minutes in the backlog: 40 (today's), or with the storm update the event's callMins, less with the rota
+const evCallMins = e => { const def = e && SHIP_EVENTS[e.id], h = eventHelp('calls'); return !EV_STORM_ON || !def || !def.callMins ? 40 : h ? h.mins : def.callMins; };
 // ---- end of slot: Events engineer 2 ----
 // ---- slot: Storm builder (section 18; EV3, the ion storm update S1-S9, plans/event-storm-plan.md v1.2). New code of this seat's goes here ----
 // the writers' words for an event (content/banks/event-<id>.lines, baked), placeholders filled from an event context c
