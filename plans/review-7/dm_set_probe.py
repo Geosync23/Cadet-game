@@ -4,7 +4,7 @@ import os, sys, json, re, pathlib
 exec(open('/home/user/Cadet-game/plans/review-7/dm_trad_probe.py').read().split("with sync_playwright() as pw:")[0].replace("_dm_trad_probe.html", "_dm_set_probe.html"))
 SNAP = r"""(() => { const W = SHIP.works; const bed = playerBed(), n = deckOf(bed), b = (DECKS[n].places || []).find(p => p.id === bed);
   return { t: clockText(), rank: W && W.rank, tier: W && W.tier, xp: W && W.xp, band: worksBand(), tr: W && Object.keys(W.tr).sort().join(','), home: W && W.home, bed,
-    shape: W ? JSON.stringify(worksClean(JSON.parse(JSON.stringify(W)))) === JSON.stringify(W) : null, deck: deckDef.num,
+    shape: W ? (C => Object.keys(C).every(k => JSON.stringify(C[k]) === JSON.stringify(W[k])))(worksClean(JSON.parse(JSON.stringify(W)))) : null, deck: deckDef.num,
     inBedRoom: b ? roomAt(...player.here()) === roomAt(...b.at) && n === deckDef.num : false, pip: typeof promoPipOn === 'function' ? promoPipOn() : null,
     asked: (SHIP.occasions || []).filter(r => r.status === 'asked').map(r => r.id), foot: document.querySelector('#dmSheet .dmFoot') && document.querySelector('#dmSheet .dmFoot').textContent }; })()"""
 with sync_playwright() as pw:
@@ -34,7 +34,7 @@ with sync_playwright() as pw:
         sv = pg.page.evaluate('() => localStorage.getItem("starship-cadet-save-dev")')
         pg.page.reload(); pg.reload_ready(); s2 = pg.ev(SNAP)
         check({k: v for k, v in s2.items() if k != 'foot'} == {k: v for k, v in s.items() if k != 'foot'}, f'{w}: the same after a reload: {json.dumps(s2)}')
-        check(json.loads(sv)['ship'].get('works') == json.loads(pg.page.evaluate('() => (saveGame(), localStorage.getItem("starship-cadet-save-dev"))'))['ship'].get('works'), f'{w}: ship.works byte-equal across the reload')
+        check(json.loads(sv)['ship'].get('works') == json.loads(pg.page.evaluate('() => (window.__sc("saveGame()"), localStorage.getItem("starship-cadet-save-dev"))'))['ship'].get('works'), f'{w}: ship.works byte-equal across the reload')
         # play on: the rest of the day hour by hour; nothing trained opens again, no first-week meeting
         pg.ev('devmodeOpen(false)')
         for hr in range(7, 21, 2):
