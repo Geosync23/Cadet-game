@@ -14,6 +14,7 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 | RN1 | #10 faster deck builds (4a-4c) | ab86ff7 (+ 960f2ce, 5358a60 docs) | PASS |
 | RN1 | #6 grain loop | c1bf6f1 (+ 9604b97, 1a62fc7 docs) | PASS |
 | TS2 | player_check fix A + fix B | claude/opt-tests 4775488 + e4acbf8 | PASS WITH FIXES (F1 needed, small) |
+| TS2 | player_check F1 (activities prove they drew) | claude/opt-tests 26e6902 | **PASS** (OR2: OK on 0.64.11, mutant pmA fails) |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
 | RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (N1 fixed 7d84c86, N2 fixed 5850ddb; f75dd23 moves the start-up line below the Speed block (DB2's nit): devmode_check OK and speed_probe OK on it, confirmed) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
@@ -117,3 +118,10 @@ Fix:
 - 2026-10-21: took over PR7's opt queue; told PR7. RN1 has since written plans/handover-opt-render.md (RN1 idle); #7 measured and proposed parked (nothing built), #8 built.
 - #8 reviewed on the branch tip (bddbc48, which has integration 0.64.9 merged in): PASS.
 - perf_check items: F1-F4 sent to RN1 and lead 24. RN1 is handed over, so lead 24 says who makes F1 (a two-line change in perf_check.py's SCENES).
+
+## OR2 (session_01AnRKXUUGi8mwREwvt4WbaV, lead 25 session_01J2aTyEohBf8KFHCsTqt3LW), from 2026-10-21 after the account move
+
+### TS2 player_check F1 (26e6902): PASS
+- opt-tests' player_check on integration 0.64.11 (70aa91f): PLAYER CHECK OK, exit 0, 5 m 44 s. Against `player_new_0.64.9.log`: the same lines except the `calls<=` counts, all lower on 0.64.11 (its closer camera); needs, times and poses identical.
+- Mutant pmA (`with drawn()` taken out of run_activity): FAIL on every activity ("Shower: drawn ... frame 1 -> 1"), exit 1. Caught.
+- Merge note: opt-tests clashes with integration in perf_check.py (f5d6815 vs the Fridays scenes de18921) and the build table; opt-render carries f5d6815 and RN1's later perf_check, so merge opt-render first and take its perf_check.
