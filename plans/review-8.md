@@ -24,8 +24,11 @@ Copies: `t10` = 0dc4562 as pushed (SHORT_FRIDAY on, EVENTS_ON off); `t10off` = t
 - lines_check: PASS (0 errors, the 6 old warnings).
 - events_check t10: OK. t10ev: FAILED, 21 FAILs, all the events base's own (ionStorm-stormBriefing / allClear "not on",
   the storm not due on day 10, ready room, Captain's table, all-clear party, eventRoutines, eventGuestDays,
-  rec-slow-stretch missing Day 14, the film night move). The control copy (EVENTS_ON on, Fridays off) is queued to
-  confirm that none is Fridays'.
+  rec-slow-stretch missing Day 14, the film night move). The control copy `t10evoff` (EVENTS_ON on, Fridays off)
+  fails 20 of the 21 the same. The one more with Fridays on: **quiet-watch Day 300 (a Saturday), Deck 3: 7/9 reached**
+  ('rina>3-lounge-3 21:30', 'nordqvist-dmitri>3-lounge-1 21:32'); off it's 8/9 (rina only, under the threshold), and
+  with EVENTS_ON off it's 8/9 too. A small knock-on of the two switches together (Nordqvist's Saturday evening walk);
+  not blocking, but the combined release's events_check will show it: for FR3 / EV to look at when they merge.
 - day_check 5 OK; 19 OK; 12 FAILS only backlog #18 (also with EVENTS_ON).
 - bigevents_check t10: OK. t10ev: 3 FAILs, all in its own "switch off" parts (it flips the switches itself from an
   EVENTS_ON-off build): a check limit, not the game.
