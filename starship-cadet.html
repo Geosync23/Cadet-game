@@ -35922,6 +35922,7 @@ const EVENT_BANDS = ['smooth', 'bumpy', 'rough'];
 // ---- the events base (EV1, 0.64.x; plans/events-base-brief.md): every piece behind EVENTS_ON, off = today's game ----
 const EVENTS_ON = false;                                 // the master switch: on with the storm update, after the user's review
 const EV_CAL_ON = EVENTS_ON;                             // F0: events come by the calendar (a check may flip this line alone)
+const EV_GUARD_ON = EVENTS_ON;                           // F1: eventDay and the career-beat guard
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -36775,6 +36776,19 @@ function evCalDue() {
     return { id: r.id, day: Math.max(r.day, last ? last.endDay : 0, EV_LATE === 'next' ? EV_LOAD_DAY : 0) };
   }
   return null;
+}
+// F1a: the ship-wide event's big days (the front, the escalation, the all-clear: its phases onset, escalation and
+// resolution), when section 24k's cases stay away. Only from EV_CALENDAR and the events' data (never eventNow,
+// SHIP.event or anything saved: 24k's incidents plan is saved by the day); a row the calendar passed over at load
+// (EV_SKIPPED) has none. False while EV_GUARD_ON is off (today: nothing defined it, so 24k saw no event day)
+const EV_BIG_PHASES = ['onset', 'escalation', 'resolution'];
+function eventDay(d) {
+  if (!EV_GUARD_ON) return false;
+  for (const r of EV_CALENDAR) {
+    const def = SHIP_EVENTS[r.id]; if (!def || def.draft || EV_SKIPPED.has(r.id)) continue;
+    if (def.phases.some(p => EV_BIG_PHASES.includes(p.id) && r.day + p.at[0] === d)) return true;
+  }
+  return false;
 }
 // ---- end of slot: Traditions engineer ----
 
