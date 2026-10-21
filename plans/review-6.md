@@ -126,3 +126,14 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 - The container restarted at about 14:25; the queued runs on 0032351 were dropped. L4/L5 is reviewed on EV7's head
   4306fd1 (L5b-L5d: PB's evClosed fix, the seated Line supper, the oath's early 25 and the crowd's lead, the story
   flags at the panel's end, jobs held to 13:45).
+
+## EV7's Line head 4306fd1 (L5b-L5d on L1-L5; storm b991877 merged in)
+- cadet_test b991877→4306fd1 off: run 1 DIFFERENCES only in a_start (13097 px: Esme Walsh's "Planted mine in a
+  straight line" bubble a few pixels apart; every other shot 0); run 2 ALL IDENTICAL. A third run at the end.
+- Code read (24020ef, 0aae259, 4306fd1): evClosed checks a gather closure every 10 minutes through the stay (PB's
+  fix); the Line supper seated (stay [45, 60], seated, pudding: true; lineStandTray gone); the oath's cast early 25
+  (eventMeetPlan reads g.early); the ceremony crowd's lead (lineLead: standing easy 10 minutes before the horn, others
+  10-20 when free, hash 1190; pure); lineMoment sets its story flag in onEnd; jobs held to 13:45 (825); Brennan's offer,
+  the dunking pose (looks only), the goal pointer to Tomas.
+- `tomas_probe.py` (on-copy, Day 6 19:10): the moment opens at the mess (3-mess-5); saved and reloaded with the panel
+  open, no story flag set, and it's offered again at the next minute. Fix confirmed (it was the L4 finding).
