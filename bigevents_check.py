@@ -19,7 +19,11 @@
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
 #   gathering in the hold) must each be caught;
-#   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load.
+#   5. late saves (in the browser, real saves): a Day 20 save passes over the storm for good, decided once at load;
+#   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
+#   its minute, its cue, a crew reaction line for the front; none while EV_NOTES_ON is off; and the device (F3a): the
+#   Schedule's event items at the meetings' and gatherings' minutes, Tracked's booths only while open, eventClosed
+#   (the auditorium opened just for the Friday address); nothing while EV_DEVICE_ON is off.
 # Each part skips (SKIP, or WAITING with what it waits for) while its switch or code isn't there yet, so it runs on
 # today's integration and grows as the events base is built. Exits 1 on a FAIL. About 2 minutes.
 # Setup and environment as for cadet_test.py (three.js in $CADET_WORK/three, CADET_CHROME a Chromium).
@@ -179,6 +183,77 @@ PLANT = r"""(() => {
 })()"""
 PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 
+# F2, the phase notes, live on paper (EV1's part, made from the data): the clock run every 5 ship minutes from 05:00 on
+# the first built event's calendar day to 15:00 the next (the storm's warning and front) through eventAdvance(t, quiet)
+# and section 20's socialTick; each phase's note once, at its own minute (evBeatAt); the cue event.<id>.<phase> made
+# (cues last a ship day: read at 12:00 on the first day and at the end); someone's reaction line for the last phase
+# (section 22's lineFor, kind 'cue'). Switched off (EV_NOTES_ON): no note at all
+NOTES = r"""((a, b) => {
+  const out = { notes: [], cues: [], lines: 0, want: [], err: null, on: typeof EV_NOTES_ON !== 'undefined' ? EV_NOTES_ON : null };
+  try {
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    if (r) out.want = SHIP_EVENTS[r.id].phases.map(p => [r.id, p.id, evBeatAt(r.day, p.at)]).filter(x => x[2] >= a && x[2] <= b).map(x => x[0] + ':' + x[1] + '@' + x[2]);
+    for (let t = a; t <= b; t += 5) { setShipNow(t); eventAdvance(t, true); if (typeof socialTick === 'function') socialTick();
+      if (t === a + 420 || t === b) out.cues.push(...((SHIP.social && SHIP.social.cues) || []).map(c => c.key).filter(k => /^event\./.test(k))); }
+    out.notes = simNotes('eventPhase').map(n => n.id + ':' + n.phase + '@' + n.t);
+    const last = out.want[out.want.length - 1], cue = last && 'event.' + last.split('@')[0].replace(':', '.');
+    out.cue = cue || null;
+    if (cue && typeof lineFor === 'function') for (const p of schedPeople()) { const l = lineFor(p, 'cue', { t: shipNow(), keep: () => true }); if (l && [].concat(l.cue || []).some(c => c.startsWith(cue))) out.lines++; }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  out.cues = [...new Set(out.cues)].sort();
+  return out;
+})"""
+
+# F3a, on your device (in the same page, after the paper part; the clock put back after): for each day of the first
+# built event, the Schedule (devDay) holds an 'event' item at each of eventGatherings' minutes, with a goal
+# (devItemGoal) to walk to; Tracked (trkItems) offers the call booths exactly while the event hasn't closed them
+# ('closed' routines at that minute: Day 12 10:00 yes, 15:00 no, Day 14 12:00 yes); eventClosed: the bow lounge on Day 12
+# 15:00 and not Day 11; with a test rule closing Deck 7 in the onset, the auditorium is shut at 15:00, open 16:10 (the
+# Friday address, EV_OPEN_FOR) and shut at 17:10, the common room shut at 16:10. Off (EV_DEVICE_ON): no items, nothing closed
+DEVICE = r"""(() => {
+  const keep = { ...SHIP.time }, out = { on: typeof EV_DEVICE_ON !== 'undefined' ? EV_DEVICE_ON : null, days: [], trk: [], closed: [], open7: null, off: null, err: null };
+  const ab = (d, m) => (d - 1) * 1440 + m;
+  try {
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    const sd = r ? r.day : (eventDueDay() || {}).day;
+    out.off = { items: [sd, sd + 1, sd + 2, sd + 3].map(d => eventItems(ab(d, 0), ab(d, 1439)).length), lounge: eventClosed({ deck: 3, room: 'L' }, ab(sd + 1, 900)) };
+    if (!out.on) return out;
+    for (let d = sd; d < sd + SHIP_EVENTS[r.id].days; d++) {
+      const want = eventGatherings(d).map(g => g.at).sort((x, y) => x - y), items = devDay(d).filter(x => x.kind === 'event');
+      out.days.push({ d, want, got: items.map(x => x.from).sort((x, y) => x - y), goals: items.filter(x => { const g = devItemGoal(x); return !(g && Number.isInteger(g.deck) && g.room); }).map(x => x.title + ' ' + hhmm(x.from)) });
+    }
+    const calls = TRK_PLACES.find(q => q.key === 'place:calls');
+    for (const [d, m] of [[sd + 1, 600], [sd + 1, 900], [sd + 2, 720], [sd + 3, 720], [sd + 4, 720]]) {
+      setShipNow(ab(d, m)); const shut = eventRoutines(ab(d, m)).some(x => x.rule === 'closed' && (x.where === 'type:callhome' || x.where === '3|B'));
+      out.trk.push({ d, m, shut, offered: trkItems().some(x => x.key === 'place:calls'), closed: calls ? eventClosed(calls.goal(), ab(d, m)) : null });
+    }
+    out.closed = [[sd + 1, 900], [sd, 900], [sd + 3, 1200]].map(([d, m]) => [d, m, eventClosed({ deck: 3, room: 'L' }, ab(d, m))]);
+    const R = SHIP_EVENTS[r.id].routines, ph = R && R.onset; if (ph) { ph.push({ where: 'deck:7', rule: 'closed' });
+      out.open7 = [[7, 'A', 900], [7, 'A', 970], [7, 'A', 1030], [7, 'C', 970]].map(([dk, rm, m]) => [dk + rm, m, eventClosed({ deck: dk, room: rm }, ab(sd + 1, m))]); ph.pop(); }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  Object.assign(SHIP.time, keep);
+  return out;
+})()"""
+
+def check_device(g, tag, want_on):
+    if 'EV_DEVICE_ON' not in SRC: waiting('the device (F3a, EV_DEVICE_ON)'); return
+    D = g.ev(DEVICE)
+    if D['err']: fail(f"{tag}: device: {D['err']}"); return
+    if not want_on:
+        if any(D['off']['items']) or D['off']['lounge']: fail(f"{tag}: the device part acts while EV_DEVICE_ON is off: {D['off']}")
+        return
+    if not D['on']: fail(f"{tag}: EV_DEVICE_ON is off in this copy"); return
+    for x in D['days']:
+        say(f"  Schedule D{x['d']}: event items at {[hhmm_py(m) for m in x['got']]}")
+        if x['got'] != x['want']: fail(f"{tag}: the Schedule on Day {x['d']} has event items at {[hhmm_py(m) for m in x['got']]}, the event's meetings and gatherings are at {[hhmm_py(m) for m in x['want']]}")
+        for t in x['goals']: fail(f"{tag}: Schedule item {t} on Day {x['d']} has no goal to walk to")
+    for x in D['trk']:
+        say(f"  Tracked D{x['d']} {hhmm_py(x['m'])}: call booths {'closed' if x['shut'] else 'open'}, offered {x['offered']}")
+        if x['offered'] == x['shut'] or x['closed'] != x['shut']: fail(f"{tag}: Tracked on Day {x['d']} {hhmm_py(x['m'])}: the booths are {'closed' if x['shut'] else 'open'} but offered = {x['offered']}, eventClosed = {x['closed']}")
+    if [c[2] for c in D['closed']] != [True, False, False]: fail(f"{tag}: eventClosed for the bow lounge (front day 15:00, warning day 15:00, all-clear day 20:00): {D['closed']}")
+    if D['open7'] is not None and [c[2] for c in D['open7']] != [True, False, True, True]: fail(f"{tag}: with Deck 7 closed, the auditorium should open just for the Friday address (15:00 shut, 16:10 open, 17:10 shut; the common room shut): {D['open7']}")
+    say(f"  eventClosed: bow lounge {D['closed']}; Deck 7 closed in the onset: {D['open7']}")
+
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
     if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True): fail(f'{tag}: the events on paper came out differently the second time')
@@ -206,6 +281,25 @@ def check_hold(a, tag, on):
             note(f"{tag}: {b['ev']} meeting {b['id']} runs into the Friday hold ({b['at']}, {b['len']} min)")
     for x in a['gath']:
         if x['held']: (note if x['draft'] else fail)(f"{tag}: gathering {x['id']} (D{x['day']} {hhmm_py(x['at'][0])}) is in the Friday hold (gatherings aren't moved)")
+
+def check_notes(pw, path, tag, want_on):
+    # the phase notes (F2) in their own page (the clock is run): the storm's calendar day 05:00 to 15:00 the next day
+    if 'EV_NOTES_ON' not in SRC: waiting('the phase notes (F2, EV_NOTES_ON)'); return
+    g = Game(pw, path); day = g.ev("typeof EV_CALENDAR !== 'undefined' ? (EV_CALENDAR.find(r => r.id === 'ionStorm') || {}).day || 11 : 11")
+    a0, b0 = (day - 1) * 1440 + 300, day * 1440 + 900
+    N = g.ev(f"({NOTES})({a0}, {b0})"); errs = g.errors[:3]; g.close()
+    say(f"  phase notes D{day} 05:00 to D{day + 1} 15:00: {N['notes']} | cues: {N['cues']} | crew with a reaction line for {N['cue']}: {N['lines']}")
+    if N['err']: fail(f"{tag}: phase notes: {N['err']}")
+    for e in errs: fail(f"{tag}: phase notes: page error: {e}")
+    if not want_on:
+        if N['notes']: fail(f"{tag}: phase notes while EV_NOTES_ON is off: {N['notes']}")
+        return
+    if not N['on']: fail(f"{tag}: EV_NOTES_ON is off in this copy"); return
+    if N['notes'] != N['want']: fail(f"{tag}: phase notes {N['notes']}, wanted {N['want']} (each once, at its own minute)")
+    for w in N['want']:
+        c = 'event.' + w.split('@')[0].replace(':', '.')
+        if c not in N['cues']: fail(f"{tag}: no cue {c}")
+    if N['cue'] and N['lines'] < 1: fail(f"{tag}: nobody has a reaction line for {N['cue']}")
 
 def judge(a, tag):
     # everything on paper with the calendar on (parts 2-3, and the self-test)
@@ -333,15 +427,18 @@ with sync_playwright() as pw:
     trk = g.ev("SHIP_TRADITIONS.map(e => e.k)")
     if set(ks) & set(trk): fail(f'a ship-wide gathering shares a hash key with a tradition: {sorted(set(ks) & set(trk))}')
     check_hold(a, 'off', False)
+    if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
+    if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
         print(f'\n{n}. {title}:')
-        g = Game(pw, variant(tag, on)); a = paper(g, tag); show(a); judge(a, tag)
+        g = Game(pw, variant(tag, on)); a = paper(g, tag); show(a); judge(a, tag); check_device(g, tag, on == 'all')
         for e in g.errors[:3]: fail(f'{tag}: page error: {e}')
         g.close()
+        check_notes(pw, variant(tag, on), tag, on == 'all')
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
@@ -385,7 +482,7 @@ with sync_playwright() as pw:
 
     # 6. live (F7b) and crowds (F7c): with F2-F4 and the storm update
     print('\n6. Live phases and crowds:')
-    waiting('F7b (jumps, reloads mid-phase and mid-meeting, phase notes to a reaction line, the device) comes with F2-F4; F7c (draw calls at about 60, phone size) with the storm update')
+    waiting('F7b (jumps, reloads mid-phase and mid-meeting) comes with F4 (the phase notes and the device are in parts 1-3); F7c (draw calls at about 60, phone size) with the storm update')
 
 print('\nBIGEVENTS CHECK OK' if ok else '\nBIGEVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)
