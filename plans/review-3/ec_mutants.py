@@ -12,6 +12,10 @@ M = {
  'm9_guardOpen': ("if (on.some(b => b.kind !== 'test' && cross(b))) return false;", ""),
  'm10_captainTwice': ("if (kind === 'captain' && on.some(b => b.kind === 'test' || b.kind === 'captain')) return false;", ""),
  'm11_tableLate': ("? { at: 1140, len: 75 } : null;", "? { at: 1140, len: 95 } : null;"),
+ 'n1_notesWhileOff': ("if (EV_NOTES_ON && typeof simNote === 'function') simNote(", "if (true && typeof simNote === 'function') simNote("),
+ 'n2_noteTwice': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) }); simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });"),
+ 'n3_noteLate': ("simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) });", "simNote('eventPhase', { id: e.id, phase: ph, day: e.startDay, t: evBeatAt(e.startDay, def.phases[k].at) + 5 });"),
+ 'n4_noCue': ("eventPhase: [d => 'event.' + d.id + '.' + d.phase, 1]", "eventPhase: [d => 'evx.' + d.id + '.' + d.phase, 1]"),
  'm8_ladderSun': ('"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990]',
                   '"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 6}, "at": [1150, 1200]'),
 }

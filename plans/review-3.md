@@ -171,3 +171,18 @@ I first reported that the Cook-along and the Tiles ladder overlap the address on
 **Code:**
 - friHours splits a rota block correctly (13:00-21:00 becomes 13:00-15:30 and 17:00-21:00).
 - The rush's max(workEnd, 1020) does nothing while off.
+
+## EC1 turn 3 (F2's phase notes from the data): claude/bigevents-check 4438336. PASS
+
+**Checks:**
+- The game change is EV1's F2 alone.
+- The check is OK in 76 s; check_fast is OK in 206 s.
+- The notes come out none off, none with the calendar alone, and once each at their minutes when on, with both cues and 34 crew with a reaction line.
+
+**Mutants n1-n4 caught:**
+- n1: notes sent while off;
+- n2: a note sent twice;
+- n3: a note 5 minutes late;
+- n4: no cue made.
+
+**Gotcha in my mutants:** n2's second simNote sits outside the `if`, so it also fires while off. The "on" part still catches the doubling.
