@@ -218,3 +218,20 @@ Turns 18/19 (f4fb3f7/7c7d4eb, on claude/line-update 8bfff3b, EV_LINE_ON = EVENTS
 - l_short (supper 18:00-18:30): FAIL "only 38 came ... fewer than 40". Caught.
 - l_offVenue (lineVenue() run with the Line off): FAIL "off: the Line's venue ('bow-lounge-line') is there ... 55 places". Caught.
 ### Verdict: EC1 turns 14-19: PASS (every planted break caught; clean builds OK)
+
+## PR10: the Line L5e-L5h (claude/line-update 230495d, LB3's head; L5h to be undone by lead 25's word) (2026-10-21)
+Code read: L5e/L5f (EV7: 'everyone' as a pull floor, ownFor, joinAt, the supper 18:00-19:45 seated with 30-45 min stays),
+L5g (LB3: lineOwnUp in evArrive, pure, Line-only; food_check from integration with EV5's rota line), L5h (the
+ceremony's pull .95 for all but first-timers: one line). Fine.
+Runs (on = EVENTS_ON and EV_LINE_ON true; bv = EV_LINE_ON = EVENTS_ON):
+- off: cadet_test 4306fd1 -> 230495d ALL IDENTICAL.
+- on: events_check OK; day_check 6 OK, 8 OK; day_check 7 FAILS only on the known double dinner (eklund-leila: a tray
+  in 3-lounge-34 at 18:52-19:04; PB2's section 14 fix, lead's call); food_check 7 1: only "garden, good" (backlog 23, every build).
+- bigevents_check 7c7d4eb OK (supper: 83 mean to go, 59 came, at most 39 at once, 48 seats); the unseated-supper mutant FAILs (caught).
+- line_probe 390 and 360: no page errors; no strays in the lounge, Saruth away, the 10 front spots first-timers
+  (Reyes, Yoon, Lemaire among them: fix 9 works live); Marrow at the glass (50.5, 10.2) by 14:34; 216-237 draw calls;
+  a reload at 15:02 keeps 47; ribbons gone 16:05; the supper 37-55 in the mess hall (servery queue and walkers
+  included; 200-235 calls), apple crumble; the plaque 19:41 (257 calls). Shots in plans/review-6/shots/line_*.png.
+- Note (lead's call, as PR6's note 2): live in the lounge 31 at 14:38, 32 at 14:43, 34 at 14:47, then 44 at 14:52 and 47
+  from 14:56: about 15 still arrive after the oath's 14:40 (PR6 saw 35 then on 4306fd1). Paper says 49 planned.
+### Verdict: the Line L5e-L5h (230495d): PASS WITH NOTES (day_check 7 waits on PB2's double-dinner fix; the oath's crowd arrives late, the lead's call). Re-check when L5h is undone and the crowd cap is measured.
