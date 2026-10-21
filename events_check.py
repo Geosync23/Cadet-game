@@ -745,10 +745,10 @@ with sync_playwright() as pw:
     if not U or not all(u[3] for u in U) or not any(u[2] for u in U): fail(f"upcomingTraditions' deck/room: {[u for u in U if not u[3]][:5]}")
 
     # 9d. crew rotation traditions (0.34.43): the farewell supper the day before each rotation day (its leavers), the
-    # crew welcome tea the first Thursday after (its arrivals; the first Friday until PT1, 2026-10-21: the weekday is read
-    # from the tradition), and Off the Tern on the day itself (its arrivals, with ROT_TERN on; PT1); {names} filled; the
+    # crew welcome tea the first Thursday after (its arrivals; the first Friday until PT1: the user's decision of 2026-10-21,
+    # pinned here, so the tea's data moving off Thursday fails), and Off the Tern on the day itself (its arrivals, with ROT_TERN on; PT1); {names} filled; the
     # honorees' friends, department, cabin
-    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day }, tw = (SHIP_TRADITIONS.find(t => t.id === 'crew-welcome-tea') || { when: { weekday: 4 } }).when.weekday;
+    RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day, teaWeekday: (SHIP_TRADITIONS.find(t => t.id === 'crew-welcome-tea') || { when: {} }).when.weekday }, tw = 3;
       for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (tw - weekday(r.day + 1) + 7) % 7, r.in]].concat(typeof ROT_TERN !== 'undefined' && ROT_TERN ? [['off-the-tern', r.day, r.in]] : [])) {
         const e = eventsOn(d).find(x => x.id === id), go = e ? schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-' + id))) : [];
         row[id] = e ? { d, hon: e.honorees.map(p => p.id).sort().join(',') === ids.slice().sort().join(','), names: e.names, mail: !!(e.ev.mail && e.ev.mail(e)), went: go.length,
@@ -756,9 +756,10 @@ with sync_playwright() as pw:
       }
       return row; }))()""")
     for r in RT:
-        print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k != 'day'))
+        print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k not in ('day', 'teaWeekday')))
+        if r['teaWeekday'] != 3: fail(f"crew-welcome-tea's weekday is {r['teaWeekday']}, not Thursday (3), the user's decision")
         for k, v in r.items():
-            if k == 'day': continue
+            if k in ('day', 'teaWeekday'): continue
             if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")
 
     # 9e. Quiz night's mini-game (0.34.51): three questions from the pool (a stand-in pool here, unless the build has the
