@@ -79,3 +79,9 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
 - Note: the 15-minute excuse is any Captain's beat, not the gathering's own (the meetings' rule too).
 - Gap (for the Line, not these turns): nothing checks that Saruth stays away from the Line ceremony (the Line plan says
   bigevents_check does); a mutant is queued with L2.
+
+## DB2's section 18 hook (claude/devmode-2 d2612749, one line in eventsOn): OK (section 18 stand-in)
+- After evBudget, before EV_DAYS.set; DEVMODE declared at ~9004 (before eventsOn's first run); section 25's helpers are
+  function declarations; without #dev, one false test. Ends capped at 23:30 (DM_LATEST on from + len).
+- Nit sent: a Dev start uses the plain SHIP_TRADITIONS entry, not that day's dressed copy (evTable), so on a dressed
+  day outside eventDay (the storm's Monday Lap) it would replace the dressed version.
