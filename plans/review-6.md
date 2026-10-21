@@ -256,3 +256,25 @@ for the least time when seated (section 14: PB2's PASS, plans storm-alone identi
 ### Verdict: L5h undo / L5i / L5j (ee21dd72): PASS WITH ONE CHECK GAP
 Gap (for bigevents_check's owner, LB3 now): nothing fails when a seated gathering's diner eats standing (a placeless
 meal segment). Suggest: for a seated gathering, everyone who came has a seat for their sitting (came == seated), FAIL otherwise.
+
+## PR10: LB3's round on claude/line-update 2ee2724 (L5k oath arrivals, L5l standing-diner check, PB2's merge 9656451)
+Code read: f8143ac (a slot's cast takes the meeting's own `early` when EV_LINE_ON; only the oath has `early`, so it's
+Line-only in effect); d3f244b (a seated gathering's goer with a placeless meal in its window FAILs); 9656451 kept both
+tradMeal lines (PB2's note).
+- off: cadet_test ee21dd72 -> 2ee2724: first run a_start 13097 px (the known start-bubble flicker), re-run ALL IDENTICAL;
+  check_fast OK 219 s.
+- on: day_check 6, 7, 8 OK; events_check OK (the same ceremony note); bigevents OK (ceremony 61 mean to go, 45 at once;
+  supper 71 came, 42 at once, 48 seats).
+- my gap: the supper's `min: 20` dropped FAILs "12 eat standing ... vance, tomas, ..." (caught).
+- Perf (perf_check PERF_SCENES=Line, the 3 phone views and the TriFold's 4): OK; ceremony portrait 301 calls 519k tris,
+  widest 391 calls, landscape 282; supper 260 / widest 417 / landscape 293, 565k tris; game code 1.25-2.1 ms.
+  Stress (every day-shift dept stands easy, the galley too: 73 mean to go, 54 at once, 68 on the deck): perf OK,
+  302 / widest 392 / 283 calls, 548k tris, 1.5-1.6 ms. Draw calls are flat with headcount, as LB3 measured; 80 meaning
+  to go is about 60 there, so the cap of 80 is safe on calls; triangles stay near the busiest scene shipped (565k).
+- The oath (oath_probe, plans/review-10/): a game played from 13:30: 46 in the lounge at 14:40, all 49 by 14:52; the
+  3 not in at 14:40 are Reyes, Yoon, Lemaire (planned 14:32, up from the night shift's sleep), still on the corridor
+  at (35-36, 9.5). My line_probe's 36 at 14:40 is the probe's skipTo(14:25): ten people placed on their commute at once
+  queue at the same door tile (34-35, 9.5). Real play doesn't do that.
+### Verdict: 2ee2724: PASS
+Note (not blocking): the night-shift three reach the glass ~8+ minutes after their planned 14:32 (the lounge door near
+(35, 9.5) is slow); they still miss the oath's start, as LB3 says.
