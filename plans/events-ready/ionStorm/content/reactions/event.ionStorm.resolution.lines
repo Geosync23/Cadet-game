@@ -5,7 +5,7 @@
 - The lounge is open again. I'm going to sit in every chair.   #funny
 
 // EW2 (events writer 2), story A "Sixty by lamplight": the crew retell the lantern supper on Sunday
-? cue:event.ionStorm.resolution
+? cue:event.ionStorm.resolution !who:dlamini-lukas
 - Lukas's lantern supper: two rings. Or six. Ask around.   #funny
 ? cue:event.ionStorm.resolution dept:galley !who:brennan|dlamini-lukas
 - Supper was all Lukas. We carried bowls and kept quiet.   #warm
