@@ -31,6 +31,23 @@ the release.
 | e18844fb | Backlog #20 fixed (PB's design, section 14, not behind a switch): a beat with only `alts` holds `alts[0]` in shipDay's intro reservations; introLay skips that hold as an intro-seat; the fallback takes `alts[0]`. fridays_check swaps the game's own storm readers for its stubs (lexically), so the storm's lines are tested with EVENTS_ON on |
 | (see git log) | PR8's find 2: the bare address condition `arriving` (content_gen ADDR_KEYS, 18f friCond: new crew on this weekend's rotation); Day 19's welcome line under `? arriving`; its Mail now "...and the weekend ahead" (the Mail field takes no conditions) |
 
+## Done and next (at the stop, 2026-10-21 ~17:58, lead 24's STOP for the account handoff)
+
+- **Done, pushed:** everything in the table above, including the `arriving` Day 19 fix (c3b76f47, sent to PR8).
+- **PR5: PASS** on turns 7, 8, the 0.64.8 merge, turn 9 and 11b2220 (plans/review-5.md on claude/review-5 6465f67).
+- **PR8: turn 10 PASS WITH FIXES** (plans/review-8.md on claude/review-8 d3a4f67): (1) Day 12's lectern is empty with
+  or without EVENTS_ON: the release must carry Fridays + EVENTS_ON + EV4's storm update together (the lead's plan).
+  (2) Fixed by c3b76f47. The fix turn 208581c8 is green so far; e18844fb is next in PR8's queue.
+- **Next, not started:**
+  1. **PR8's find 3 (18f):** a save without the `fri` part (every save from the published game) loaded on a short
+     Friday after 16:50 gets, on its first frame, the dip (work -2), the banner and the address Mail stamped at load.
+     Repro: PR8's p8_fri.py (Day 5 18:00 → mailed 5, cnt.address 1, a Mail at 18:00). PR8's suggested fix: at load, when
+     the save has no `fri` and today is a short Friday past the address's end, set `FRI.mailed = today`. Add a
+     fridays_check case (a save without `fri` loaded at Day 5 18:00: no dip, no banner, no Mail).
+  2. **PR5's check gaps (fridays_check only):** (a) the 15:20 heads-up: once at 15:20 on a shift day, none on a leave
+     day; (b) `recCap(5, 940) === REC_CAP.busy` when on, and quiet on a Thursday at 15:40.
+  Then the usual: fridays_check, cadet_test, check_fast, a build-table row, push, send to PR8.
+
 ## Loose ends
 
 - **Reviews pending:** PR5 (7-9, 11b2220), PR8 (the rest). PR8 is probing an old save loaded on a Friday (its find 3).
