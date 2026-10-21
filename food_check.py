@@ -51,7 +51,7 @@ with sync_playwright() as pw:
     g.ev("player.steer = null; player.stop()")
     print('Food reaches the cold store by:', g.ev("FOOD.restock === 'carts' && typeof cartClaim === 'function' ? 'hover cart only (cartClaim)' : 'the 10:30 top-up'"))
     print(f"Days {DAY}-{DAY + DAYS - 1} from {g.ev(f'WEEKDAYS[weekday({DAY})]')}, {g.ev('schedPeople().length')} people, {g.ev('galleyStaff().length')} galley staff")
-    # the forecasts below (4b, 4c, 4e) read the machines' record, whose last hour stands for every hour after it: after
+    # the forecasts below (4b, 4c, 4e, and 4k's garden) read the machines' record, whose last hour stands for every hour after it: after
     # the live visits (Deck 3 at 18:00, the menu board) that's whatever is broken then (two cookers faulty on Day 11 since
     # 0.64.7's First Light Cocoa moved Day 1's evenings: dinner 30 portions, not 40, for four weeks). So each starts the
     # machines afresh at the load time, as part 1 read them (machinesNow: a clock before the machines' starts afresh)
@@ -306,6 +306,7 @@ with sync_playwright() as pw:
     # 4k. the garden's carry, crew and Mail (0.29.24): the crates wait while the carry job (a stand-in) says so and land
     # when it's done or when you unload (galleyCarryLand); no gardener on duty means no daily pick; a dry harvest morning
     # sends a Mail
+    fresh()                                # the garden reads the machines too (irrigation, grow lights): as part 1 did
     gk = g.ev(f"""(() => {{ const d = {DAY} + 1, B = (d - 1) * 1440, posted = [], held = new Set(); const mail = []; window.__mailBox = mail; window.__keepMail = window.mailSend; window.__sc("mailSend = x => window.__mailBox.push(x)");
       GALLEY_TEST.gardenCarry = o => {{ posted.push(o); const id = 'garden@' + o.at; held.add(id); return id; }}; GALLEY_TEST.carryWaiting = id => held.has(id);
       SHIP.galley = null; setShipNow(B + 11 * 60); galleyAdvance(shipNow()); const out = {{ posted: posted.map(o => o.title), waiting: SHIP.galley.garden.crates.length, produce: produceMeals(SHIP.galley) }};
