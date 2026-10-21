@@ -25,7 +25,8 @@
 #   its minute, its cue, a crew reaction line for the front; none while EV_NOTES_ON is off; and the device (F3a): the
 #   Schedule's event items at the meetings' minutes (each EV_SHIPWIDE gathering once as a tradition, nothing twice), a
 #   meeting's own toast only while the device's heads-ups are off, Tracked's booths only while open, eventClosed
-#   (the auditorium opened just for the Friday address); nothing while EV_DEVICE_ON is off.
+#   (the auditorium opened just for the Friday address); nothing while EV_DEVICE_ON is off; called in (F0b): skipping
+#   through the all-clear, one calledIn note and one cue each for the four off that day; none while off.
 # Each part skips (SKIP, or WAITING with what it waits for) while its switch or code isn't there yet, so it runs on
 # today's integration and grows as the events base is built. Exits 1 on a FAIL. About 2 minutes.
 # Setup and environment as for cadet_test.py (three.js in $CADET_WORK/three, CADET_CHROME a Chromium).
@@ -276,6 +277,41 @@ def check_device(g, tag, want_on):
         for i, got, want in T['off']:
             if got != want: fail(f"{tag}: meeting {i} with heads-ups off should keep its toast {want!r}: {got!r}")
 
+# F0b, called in (EV2, ca2f9d6; PR3's ask): in its own page, skipTo 10 minutes before the first event meeting that
+# calls someone in (the storm's all-clear, Day 14 10:00), then 5 minutes after it and an hour after it: one
+# simNote('calledIn') for each named person off that day (eventCalledIn), at a minute in; one 'calledIn' cue each in
+# section 20's cues (read at the hour after: notes are applied when their social hour runs); nobody else. Off (EV_CALLIN_ON): no calledIn note at all
+CALLIN = r"""(() => {
+  const out = { on: typeof EV_CALLIN_ON !== 'undefined' ? EV_CALLIN_ON : null, meet: null, want: [], notes: [], cues: [], err: null };
+  try {
+    let m = null, d = 0;
+    if (out.on && typeof evMeetsOn === 'function') for (d = 1; d <= 40 && !m; d++) { const dd = d; m = evMeetsOn(dd).find(g => g.who.some(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, dd); })); if (m) break; }
+    const day = m ? d : 14, at = m ? m.at : 600, ab = (day - 1) * 1440 + at;
+    if (m) { out.meet = m.id + ' D' + day + ' ' + hhmm(at); out.want = m.who.filter(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, day); }).sort(); }
+    for (const t of [ab - 10, ab + 5, ab + 65]) { skipTo(t); if (t === ab + 65) out.cues = ((SHIP.social && SHIP.social.cues) || []).filter(c => c.key === 'calledIn').map(c => c.who).sort(); }
+    out.notes = simNotes('calledIn').map(n => [n.who, n.meeting, n.day, n.t]).sort();
+    out.at = ab;
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  return out;
+})()"""
+
+def check_callin(pw, path, tag, want_on):
+    if 'EV_CALLIN_ON' not in SRC: waiting('called in (F0b, EV_CALLIN_ON)'); return
+    g = Game(pw, path); C = g.ev(CALLIN); errs = g.errors[:3]; g.close()
+    say(f"  called in: {C['meet']}: notes {C['notes']}; cues {C['cues']}")
+    if C['err']: fail(f"{tag}: called in: {C['err']}"); return
+    for e in errs: fail(f"{tag}: called in: page error: {e}")
+    if not want_on:
+        if C['notes']: fail(f"{tag}: calledIn notes while EV_CALLIN_ON is off: {C['notes']}")
+        return
+    if not C['meet']: fail(f"{tag}: no event meeting calls anyone in"); return
+    got = sorted(n[0] for n in C['notes'])
+    if got != C['want']: fail(f"{tag}: calledIn notes for {got}, want one each for {C['want']}")
+    for n in C['notes']:
+        if n[3] != C['at'] + 1: fail(f"{tag}: {n[0]}'s calledIn note at minute {n[3]}, want {C['at'] + 1} (a minute into the meeting)")
+    if C['cues'] != C['want']: fail(f"{tag}: calledIn cues for {C['cues']}, want one each for {C['want']}")
+    if 'ionStorm' in SRC and C['meet'].startswith('allClear') and C['want'] != ['calder', 'holt', 'marrow', 'sato']: fail(f"{tag}: the all-clear's called in are {C['want']}, the plan says Marrow, Sato, Holt and Calder")
+
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
     if json.dumps(a, sort_keys=True) != json.dumps(b, sort_keys=True): fail(f'{tag}: the events on paper came out differently the second time')
@@ -452,6 +488,7 @@ with sync_playwright() as pw:
     if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
+    if not a['sw']['EVENTS_ON']: check_callin(pw, sys.argv[1], 'off', False)
     if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
@@ -461,6 +498,7 @@ with sync_playwright() as pw:
         for e in g.errors[:3]: fail(f'{tag}: page error: {e}')
         g.close()
         check_notes(pw, variant(tag, on), tag, on == 'all')
+        if on == 'all': check_callin(pw, variant(tag, on), tag, True)
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
@@ -530,9 +568,11 @@ with sync_playwright() as pw:
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
         big = [12, 13, 14] if storm else []
+        sday = next((r['day'] for r in P5['plan'] if r['id'] == 'ionStorm'), 11)
+        slog = [f"ionStorm:{sday}-{sday + n}" for r, n in zip(P5['plan'], P5['days']) if r['id'] == 'ionStorm']   # the log's span from the game's own data (SHIP_EVENTS.ionStorm.days)
         for title, save, want in [
             ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': [], 'due': None, 'log': []}),
-            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': ['ionStorm:11-17'] if storm else []}),   # the storm it missed is run on load, as an unbroken game ran it
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': slog}),   # the storm it missed is run on load, as an unbroken game ran it
             ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big, 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
             ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big, 'due': None})]:
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
