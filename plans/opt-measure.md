@@ -240,3 +240,21 @@ Sunday dinner in the mess hall, 69 people, 900 frames, drawing skipped, profiler
 - `updateDeckCrew` 0.47, the walkers 0.28, `playerUpdate` 0.14; `whereIs` + `planWhere` + `walkGap` 0.09 together.
 - HUD layout reads (`opt-probes/layout_reads.py`, 390×844 and 844×390): about 3 a frame on average, already spread over frames (`trkPlace`, `hudFit`, `hits`, the button-overlap checks), plus one `matchMedia` a frame (`floatsTick`); `getBoundingClientRect` 0.05 ms a frame in all.
 - So the plan's three pieces could save at most ~0.15-0.2 ms (about 7%), across four or five owners' sections and with caches bound by the planner rule. A phone runs this frame's game code in roughly 10-12 ms of the 16.7 ms a smooth frame allows.
+
+### The memory walk (#5): measured; one fix proposed (RN1)
+
+- **After a real garbage collection** (CDP `Runtime.getHeapUsage`, `opt-probes/heap_tour.py`): the JavaScript heap itself is 21.5 MB after load and 30-36 MB after a tour of every deck; the plan's 95 → 229 MB was `performance.memory`, which counts garbage not yet collected. What grows is the **array storage** (shapes' number arrays, outside the heap): on Deck 4, 56.8 MB after load, **134.6 MB after one tour, the same after a second**.
+- **Who holds it** (two heap snapshots of one page, each array buffer's shortest path from the roots, summed by the game variable it hangs from; `opt-probes/heap_walk2.py`), after load → after the tour:
+
+| Held by (section) | MB |
+| --- | --- |
+| `BENCH_BAR` (4b: the gym bench's bar) | 0 → 35.3 |
+| `EV_DECOR` (18: the day's decorations) | 0 → 20.0 |
+| `TERN` (4d: the shuttle's ramp) | 0 → 7.2 |
+| `CROWD_KEPT` (8b: bodies kept for coming back, by design) | 0.3 → 5.7 |
+| `REC_SIGNS` (17), `REC_SHOW` (4e) | 0 → 4.2 each |
+| `DRILL_EXT` (4d: the drill's extinguisher) | 0 → 2.4 |
+
+  Each is a small handle to one object on a deck (a bar, a group, a hinge, an extinguisher, or the deck's root itself). Through `.parent` links, the handle keeps **that whole unloaded deck's tree, shapes and all**, until its own deck is built again. That's why it stops growing after one tour.
+- **Option B, tried in a scratch copy only** (`opt-probes/detach_test.py`): `unloadDeck` (4c) also takes the old deck's tree apart (each object's `parent` = null, `children` = []), so a stale handle holds only itself. Two tours, then Deck 4: array storage **134.6 → 61.3 MB**, heap 36.3 → 25.1 MB. No object of an unloaded deck ever comes back into a scene. No errors.
+- **The risk:** code that reads a stale handle's `.parent` after a deck change. There are 15 `.parent` reads in the game; they all allow for a missing parent, or run only on their own deck (`galleyShow` rebuilds `GV` when `deckRoot` changes, `recShowTick` only on the rec deck, `recPoolsSet` returns early either way).
