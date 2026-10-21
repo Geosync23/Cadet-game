@@ -137,3 +137,6 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   the dunking pose (looks only), the goal pointer to Tomas.
 - `tomas_probe.py` (on-copy, Day 6 19:10): the moment opens at the mess (3-mess-5); saved and reloaded with the panel
   open, no story flag set, and it's offered again at the next minute. Fix confirmed (it was the L4 finding).
+- The dinner waits (FD1, 15:22): FLC_ON. First Light Cocoa shifts Day 1's evenings, machine wear drifts, and by Day 11
+  range-1 and oven-2 are faulty; food_check's 4-week forecasts after its Day 11 visit held that state. A check-only fix
+  (fresh machines before 4b/4c/4e): claude/food-waits 0f808c3, PB-reviewed, to integration via BM12. Not the builders'.
