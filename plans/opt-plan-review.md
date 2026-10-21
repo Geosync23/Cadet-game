@@ -102,3 +102,25 @@ Q8 needs fix 6.
 
 **Verdict: PASS WITH FIXES** (fixes 1-7). Items 0, 4, 6 and 11 are ready to build as written. Items 1, 2, 5 and 7
 need their fixes in the plan first.
+
+## Round 2 (d1a6516): PASS
+All seven fixes are folded in, and the items are renumbered 0-13:
+- **Crowd (#3):** fixed slots with one `updateRange` from the first changed slot to the last, which fits r128 with
+  no internals hook. The proof reads back the triangles each chunk draws, skips the empty ones and compares the rest
+  with the old build, then the pictures. Smaller chunks are ruled out. The gain is re-estimated honestly: the real
+  check gain is probably the double-send found in turn 1.
+- **Texture cache (#9):** never under `?nosave`, kept in IndexedDB, and falls back to painting. One probe compares a
+  cached and a painted open: the same pixels and the same seed.
+- **Frame caches (#7):** frame code only, keyed by everything they read, cleared on every plan-changing case, with a
+  probe for each. The HUD cache is proven by interactions_check and bubble_check at 390 and 360.
+- **Affected checks (#1):** a measured lower bound. Over the last 20 turns it picks 4.2 checks (28 min) against
+  22 (106 min). Q3's answer applies only after the replay of caught failures passes.
+- **player_check (#2):** turn 0.
+- **Seats:** four, with the build master outside.
+- **The warm-up:** measured. It only moves the wait, so OP1 found a better change instead: #4 keeps compiled shaders
+  across deck changes. A second lap's first frames take 6.3 s instead of 9.2 s. It's one named internals hook in
+  three r128, which is pinned. The probe checks that the shader count stops growing. One condition for its build
+  review: decks with different lights or fog make more shader variants, so the count must be measured after every
+  deck at both phone sizes, and the flat memory over round trips must hold.
+
+**Verdict on claude/opt-plan d1a6516: PASS.** All recommendations are safe to take.
