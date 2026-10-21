@@ -35308,6 +35308,7 @@ function eventsOn(d) {
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
   const drop = evBudget(out); if (drop.length) { EV_DROPPED.set(d, drop.map(e => e.id)); for (const e of drop) out.splice(out.indexOf(e), 1); }
+  if (DEVMODE) devmodeTradsOn(d, out);                   // section 25: a tradition started from the Dev panel (only with the Dev link)
   EV_DAYS.set(d, out);
   for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
   return out;
@@ -51308,15 +51309,15 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
-const DM_LATER = { trad: 'Start any ship tradition: coming in Stop 1b.', career: 'Your career by hand: coming in Stop 2.', set: 'Set career to a day: coming in Stop 2.', events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
-var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last }; var: section 20 may ask before this line runs
+const DM_LATER = { events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
+var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
 function devmodeState() {                                // the Dev state, from the Dev save the first time
   if (!DEVMODE) return null;
-  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '' }; }
+  if (!DM_ST) { const s = typeof SAVED !== 'undefined' && SAVED && SAVED.dev; DM_ST = { ex: s && Array.isArray(s.ex) ? s.ex.filter(Number.isInteger).slice(-60) : [], note: s && typeof s.note === 'string' ? s.note : '', last: s && typeof s.last === 'string' ? s.last : '', tr: devmodeTradsClean(s && s.tr), set: s && s.set && Number.isInteger(s.set.day) ? { day: s.set.day, at: String(s.set.at || ''), ...(typeof s.set.beat === 'string' ? { beat: s.set.beat } : {}) } : null }; }
   return DM_ST;
 }
-if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last }; });
+if (DEVMODE) SAVE_EXTRA.push(s => { const st = devmodeState(); s.dev = { ex: st.ex.slice(-60), note: st.note, last: st.last, tr: st.tr.slice(-20), set: st.set }; });
 function devmodeCss() {
   const st = document.createElement('style');
   st.textContent = '.devmode .hud{pointer-events:auto;cursor:pointer;border:2px solid #e8c06a;box-shadow:0 0 0 1px rgba(232,192,106,.35),0 0 14px rgba(232,192,106,.3)}'
@@ -51338,6 +51339,7 @@ function devmodeCss() {
     + '#dmSheet p.dmNote{color:#f1d79a}'
     + '#dmSheet button.dmAsk{background:#e8c06a;color:#1a1408}'
     + '#dmSheet button:disabled{opacity:.42}'
+    + '#dmSheet input.dmFind{width:100%;box-sizing:border-box;min-height:44px;margin-top:8px;padding:8px 12px;border-radius:12px;border:1px solid rgba(232,192,106,.5);background:rgba(255,255,255,.06);color:var(--ink);font-size:16px}'
     + '#dmSheet .dmFoot{flex:none;margin-top:6px;font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
     + 'body.dmOpen .toast{bottom:calc(56vh + 12px)}'
     + '@media (orientation:landscape) and (max-height:500px),(min-width:900px){#dmSheet{left:auto;top:0;width:min(400px,52vw);height:auto;border-top:0;border-left:2px solid #e8c06a;border-radius:16px 0 0 16px}'
@@ -51398,11 +51400,14 @@ function devmodeDraw() {
   if (DM_LATER[DM_UI.tab]) devmodeText(body, DM_LATER[DM_UI.tab]);
   else if (DM_UI.tab === 'quick') devmodeQuick(body);
   else if (DM_UI.tab === 'clock') devmodeClock(body);
+  else if (DM_UI.tab === 'trad') devmodeTrad(body);
+  else if (DM_UI.tab === 'set') devmodeSet(body);
+  else if (DM_UI.tab === 'career') devmodeCareer(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
 }
-function devmodeFoot() { const m = devmodeRead(DM_KEY.mark); return m ? 'Mark: ' + m.label : 'No mark yet'; }
+function devmodeFoot() { const m = devmodeRead(DM_KEY.mark), c = devmodeState().set; return (c && c.day ? 'Career set to Day ' + c.day + ', approximate · ' : '') + (m ? 'Mark: ' + m.label : 'No mark yet'); }
 // the Dev link changed in an open page (a hash change doesn't reload): offer a reload, both ways
 addEventListener('hashchange', () => {
   const on = location.hash.slice(1).split('.').some(t => (t.includes('-') ? t.slice(0, t.indexOf('-')) : t) === 'dev');   // as section 13 reads the link
@@ -51456,7 +51461,7 @@ function devmodeLoad(rec, why) {                          // reload into a kept 
   } catch (e) { DM_HOLD = false; return devmodeSay('The browser wouldn\'t store it: ' + why + ' didn\'t happen.'); }
   devmodeReload(why);
 }
-function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); return false; }
+function devmodeSay(text) { DM_UI.msg = text || ''; devmodeDraw(); if (text && DM_UI.el) DM_UI.el.querySelector('.dmBody').scrollTop = 0; return false; }   // the message in view (DB2)
 function devmodeBusy() {                                  // why a Dev action can't run just now, or null
   if (DM_HOLD) return 'Dev mode is still working on the last one.';
   if (typeof ride !== 'undefined' && ride) return 'Not during a lift ride. Try again when the doors open.';
@@ -51667,6 +51672,416 @@ function devmodeQuick(body) {
     ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
     ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
   if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
+}
+// ---- D5 (Stop 1b): Traditions: start any ship tradition, in 20 minutes, at its usual time or tomorrow ----
+// A Dev start is a row in the Dev state (DM_ST.tr: { id, day, from, who? }, kept in the Dev save), which section 18's
+// eventsOn adds to that day's list through devmodeTradsOn (its one line), with the tradition's own length; that day's
+// showing by the calendar gives way to it, it's never dropped by the voice budget, and any calendar tradition in the
+// same room at the same time gives way to it (the panel names it). Whoever's free and willing goes, by the tradition's
+// own rules. Today's and that day's plans are made again under the fade (the crew move at once), so the deck is filled afresh. What was decided before (a cake, an
+// invitation) isn't there for it, and a tradition waiting on a story flag shows once without the flag being set.
+// Refused on Day 0, on a big event's day, too late in the evening, and in a room another Dev start holds then.
+// Birthdays and rotation teas ask whose. Nothing here calls R().
+const DM_SOON = 20, DM_LATEST = 1410;                    // "in 20 minutes" (rounded up to 5); nothing past 23:30
+function devmodeTradsClean(a) {                          // the saved starts read back (pure; section 18 may ask at load)
+  return Array.isArray(a) ? a.filter(r => r && typeof r.id === 'string' && Number.isInteger(r.day) && Number.isInteger(r.from) && r.from >= 0 && r.from < 1440)
+    .map(r => ({ id: r.id.slice(0, 60), day: r.day, from: r.from, ...(Array.isArray(r.who) ? { who: r.who.filter(x => typeof x === 'string').slice(0, 6) } : {}) })).slice(-20) : [];
+}
+function devmodeTradsOn(d, out) {                        // section 18's eventsOn: add day d's Dev starts to its list
+  const st = devmodeState(); if (!st || !st.tr.length) return;
+  for (const r of st.tr) {
+    if (r.day !== d) continue;
+    const ev = SHIP_TRADITIONS.find(e => e.id === r.id); if (!ev) continue;
+    const i = out.findIndex(e => e.id === r.id); if (i >= 0) out.splice(i, 1);
+    const hon = r.who ? schedPeople().filter(p => r.who.includes(p.id)) : [], names = hon.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');
+    out.push({ id: ev.id, name: ev.name, ev, day: d, from: r.from, to: r.from + ev.at[1] - ev.at[0], honorees: hon, names, first: hon.length ? hon[0].name.split(' ').slice(-2)[0] : '', dev: true });
+  }
+  for (let i = out.length - 1; i >= 0; i--) if (!out[i].dev && devmodeTradClash(out[i], out.filter(e => e.dev))) out.splice(i, 1);   // the calendar's give way in that room
+}
+function devmodeTradClash(e, list) { const rooms = evRooms(e.ev); return list.find(x => x !== e && x.id !== e.id && x.from < e.to && e.from < x.to && evRooms(x.ev).some(r => rooms.includes(r))) || null; }   // (a function: eventsOn asks at load)
+const devmodeWhose = ev => !!(ev.when.birthday || ev.when.rotation != null);   // asks whose
+function devmodeWhen(ev) {                               // the tradition's usual rhythm, in words
+  const w = ev.when, wd = w.weekday != null ? WEEKDAYS[w.weekday] : '';
+  if (w.birthday) return 'on a crew birthday';
+  if (w.rotation != null) return 'with a crew rotation';
+  if (w.ship) return 'during a ship-wide event';
+  if (w.rota) return 'by its rota';
+  if (w.after) return 'in your first weeks aboard';
+  if (w.yearDay || w.every === 'year') return 'once a year';
+  if (w.every === 'quarter') return 'once a quarter';
+  if (EV_CYCLE[w.every]) return (w.every === 'week' ? 'every ' : 'every ' + EV_CYCLE[w.every] + ' weeks, ') + (wd || 'week');
+  if (typeof w.every === 'number') return 'every ' + w.every + ' days';
+  if (w.date) return 'on Day ' + w.date;
+  return wd ? wd + 's' : 'now and then';
+}
+function devmodeWhere(ev) {                              // its first room, in words
+  const w = ev.where[0]; if (!w) return '';
+  const r = w.room ? w.room.source.replace(/^\^|\$$/g, '').replace(/\\/g, '').replace(/\(([^|)]*)\|.*\)/, '$1') : EV_POOL_ROOM[w.pool] || w.pool;
+  return r.charAt(0).toUpperCase() + r.slice(1) + ', ' + deckWord(w.deck);
+}
+function devmodeTradNext(ev, from) {                     // the next day (from `from`) it's on by the calendar, or null (two months)
+  for (let d = from; d < from + 60; d++) if (eventsOn(d).some(e => e.id === ev.id && !e.dev)) return d;
+  return null;
+}
+// when a start would be: { d, from } or why not (a string)
+function devmodeTradAt(ev, how) {
+  if (SHIP.time.day < 1 || devmodeArrival()) return 'Not on Day 0: the arrival evening is the story\'s.';
+  const now = shipNow(), today = SHIP.time.day, m = now - (today - 1) * 1440, len = ev.at[1] - ev.at[0];
+  const d = how === 'tomorrow' ? today + 1 : today, from = how === 'soon' ? Math.ceil((m + DM_SOON) / 5) * 5 : ev.at[0];
+  if (how === 'usual' && from <= m) return 'Its usual time today (' + hhmm(from) + ') has gone. Try In 20 minutes, or Tomorrow.';
+  if (from + len > DM_LATEST) return 'Too late tonight: it would run past ' + hhmm(DM_LATEST) + '. Try Tomorrow.';
+  const big = typeof eventOn === 'function' && eventOn(d);
+  if (big) return 'Not on a big event\'s day (' + ((SHIP_EVENTS[big.id] || {}).title || big.id) + '): the ship\'s evening is the event\'s.';
+  if (devmodeWhose(ev) && !(DM_UI.who && DM_UI.who.length)) return 'Pick whose first (below).';
+  const me = { id: ev.id, ev, from, to: from + len }, list = eventsOn(d), clash = devmodeTradClash(me, list.filter(e => e.dev));
+  if (clash) return clash.name + ', started from here too, is in the same room then (' + hhmm(clash.from) + '-' + hhmm(clash.to) + '). Stop it first, or pick another time.';
+  return { d, from, gives: list.filter(e => !e.dev && devmodeTradClash(e, [me])).map(e => e.name) };
+}
+function devmodeTradsAgain(d) {                          // the days' lists and plans made again; the deck filled afresh
+  EV_DAYS.clear(); EV_GOERS.clear(); try { TALLY_MEMO.clear(); } catch (e) { /* none */ }
+  const today = SHIP.time.day; for (const x of [...SHIP_DAYS.keys()]) if (x >= today && x <= Math.max(d, today) + 1) SHIP_DAYS.delete(x);
+  if (typeof deckCrewFill === 'function') deckCrewFill();
+}
+const devmodeGoing = (id, d) => schedPeople().filter(p => !p.player && planDay(p, d).some(s => evTagId(s.tag) === id)).length;
+function devmodeTradMail(ev, d) {                        // its Mail now (the evening before's), once
+  const e = eventsOn(d).find(x => x.id === ev.id), key = ev.id + '@' + d; if (!e || !ev.mail || SHIP.events.sent.includes(key)) return false;
+  SHIP.events.sent.push(key);
+  mailSend({ at: shipNow(), from: ev.from, subject: 'Ship tradition: ' + e.name + ', ' + WEEKDAYS[weekday(d)] + ' ' + hhmm(e.from), body: evText(ev.mail, e), event: key });
+  return true;
+}
+function devmodeTradStart(id, how) {
+  const ev = SHIP_TRADITIONS.find(e => e.id === id); if (!ev) return devmodeSay('No tradition ' + id + '.');
+  const refuse = () => { const a = devmodeTradAt(ev, how); return typeof a === 'string' ? a : null; };
+  devmodeDo('Tradition: ' + ev.name + (how === 'soon' ? ' in 20 minutes' : how === 'usual' ? ' at its usual time' : ' tomorrow'), () => {
+    const a = devmodeTradAt(ev, how), st = devmodeState();
+    st.tr = st.tr.filter(r => !(r.id === id && r.day === a.d)).concat([{ id, day: a.d, from: a.from, ...(devmodeWhose(ev) ? { who: DM_UI.who.slice(0, 6) } : {}) }]).slice(-20);
+    devmodeTradsAgain(a.d);
+    const mail = DM_UI.tmail && devmodeTradMail(ev, a.d), n = devmodeGoing(id, a.d);
+    return ev.name + (a.d === SHIP.time.day ? ' today' : ' tomorrow') + ' at ' + hhmm(a.from) + ': ' + n + ' going.' + (mail ? ' Its Mail is in.' : '')
+      + (a.gives.length ? ' ' + a.gives.join(' and ') + (a.gives.length > 1 ? ' give' : ' gives') + ' way in that room.' : '') + (ev.cake || ev.invite ? ' No ' + [ev.cake ? 'cake' : '', ev.invite ? 'invitation' : ''].filter(Boolean).join(' or ') + ': decided ahead.' : '') + (ev.flag ? ' Shown without its story flag.' : '');
+  }, refuse);
+}
+function devmodeTradStop(r) {
+  const ev = SHIP_TRADITIONS.find(e => e.id === r.id);
+  devmodeDo('Tradition: ' + (ev ? ev.name : r.id) + ' stopped', () => { const st = devmodeState(); st.tr = st.tr.filter(x => x !== r && !(x.id === r.id && x.day === r.day)); devmodeTradsAgain(r.day); return (ev ? ev.name : r.id) + ': back to its calendar.'; });
+}
+function devmodeTradThere(id, d) {                       // Take me there: its first room with places
+  const ev = SHIP_TRADITIONS.find(e => e.id === id), S = schedData(); if (!ev) return;
+  for (const [i, w] of ev.where.entries()) {
+    const pl = (S.shared.get(w.deck + '|' + (w.room ? 'ev:' + id + ':' + i : w.pool)) || [])[0];
+    if (pl) return devmodeTake(ev.name, pl.deck, () => ixGoalWorld({ room: pl.room }), r => r === pl.room);
+  }
+  devmodeSay('Nowhere to go for ' + ev.name + '.');
+}
+function devmodeTrad(body) {
+  const st = devmodeState(), today = SHIP.time.day, mine = st.tr.filter(r => r.day >= today);
+  if (mine.length) {
+    devmodeHead(body, 'Started by Dev mode');
+    for (const r of mine) {
+      const ev = SHIP_TRADITIONS.find(e => e.id === r.id), e = eventsOn(r.day).find(x => x.id === r.id && x.dev); if (!ev || !e) continue;
+      devmodeText(body, ev.name + (e.names ? ' (' + e.names + ')' : '') + ', ' + (r.day === today ? 'today' : 'Day ' + r.day) + ' ' + hhmm(e.from) + '-' + hhmm(e.to) + ' · ' + devmodeGoing(r.id, r.day) + ' going');
+      devmodeRow(body, [['Take me there', () => devmodeTradThere(r.id, r.day)], ['Stop it', () => devmodeTradStop(r)]]);
+    }
+  }
+  const all = SHIP_TRADITIONS.slice().sort((a, b) => a.name.localeCompare(b.name)), sel = all.find(e => e.id === DM_UI.trad);
+  if (sel) {
+    devmodeHead(body, sel.name);
+    const nx = devmodeTradNext(sel, today);
+    devmodeText(body, 'Usually ' + devmodeWhen(sel) + ', ' + hhmm(sel.at[0]) + '-' + hhmm(sel.at[1]) + (devmodeWhere(sel) ? ', ' + devmodeWhere(sel) : '') + '. ' + (nx == null ? 'Not on the calendar in the next 60 days.' : nx === today ? 'On today.' : 'Next: Day ' + nx + '.'));
+    devmodeRow(body, [['In 20 minutes', () => devmodeTradStart(sel.id, 'soon'), { ask: true }], ['At its usual time', () => devmodeTradStart(sel.id, 'usual')], ['Tomorrow', () => devmodeTradStart(sel.id, 'tomorrow')]]);
+    devmodeRow(body, [[DM_UI.tmail ? 'Its Mail now: on' : 'Its Mail now: off', () => { DM_UI.tmail = !DM_UI.tmail; devmodeDraw(); }, { ask: !!DM_UI.tmail }], ['Back to the list', () => { DM_UI.trad = null; DM_UI.who = null; devmodeDraw(); }]]);
+    if (devmodeWhose(sel)) devmodeTradWho(body, sel);
+    if (sel.cake || sel.invite || sel.flag) devmodeText(body, (sel.cake || sel.invite ? 'Decided ahead, so not there for a Dev start: ' + [sel.cake ? 'the cake' : '', sel.invite ? 'the invitation' : ''].filter(Boolean).join(' and ') + '. ' : '') + (sel.flag ? 'It waits on a story beat: shown once without it.' : ''));
+    return;
+  }
+  devmodeHead(body, 'Start a tradition (' + all.length + ')');
+  const q = document.createElement('input'); q.type = 'search'; q.className = 'dmFind'; q.placeholder = 'Search traditions'; q.setAttribute('aria-label', 'Search traditions'); q.value = DM_UI.tq || '';
+  const list = document.createElement('div'); body.appendChild(q); body.appendChild(list);
+  const fill = () => {
+    list.textContent = ''; const t = (DM_UI.tq || '').trim().toLowerCase(), hit = all.filter(e => !t || e.name.toLowerCase().includes(t));
+    for (let i = 0; i < hit.length; i += 3) devmodeRow(list, hit.slice(i, i + 3).map(e => [e.name, () => { DM_UI.trad = e.id; DM_UI.who = null; DM_UI.tq = ''; devmodeDraw(); }]));
+    if (!hit.length) devmodeText(list, 'None by that name.');
+  };
+  q.oninput = () => { DM_UI.tq = q.value; fill(); }; fill();
+}
+function devmodeTradWho(body, ev) {                      // whose birthday, or whose rotation: up to six of the crew aboard
+  const d = SHIP.time.day, who = DM_UI.who || (DM_UI.who = []);
+  devmodeHead(body, 'Whose? ' + (who.length ? schedPeople().filter(p => who.includes(p.id)).map(p => p.name).join(', ') : 'tap up to six'));
+  const crew = schedPeople().filter(p => !p.player && (typeof aboard !== 'function' || aboard(p, d))).sort((a, b) => a.name.localeCompare(b.name));
+  for (let i = 0; i < crew.length; i += 3) devmodeRow(body, crew.slice(i, i + 3).map(p => [p.name, () => {
+    const k = who.indexOf(p.id); if (k >= 0) who.splice(k, 1); else if (who.length < 6) who.push(p.id); devmodeDraw();
+  }, { ask: who.includes(p.id) }])).classList.add('dmWho');
+}
+// ---- D6 (Stop 2): Set career: a new Dev game moved to Day N with what a steady player has by then (approximate) ----
+// Always a new Dev game, the Skip-to-Monday way (newGameStart(false) + introSkip(); the arrival's start-up cleared), the
+// first week's beats marked met up to the day, then the clock moved day by day (devmodeSkipTo: workdays excused, needs
+// kept) to Day N 06:00. Each morning at 05:00, before that day runs, SHIP.works is set from DM_CAREER: everything a
+// steady player has by the end of that day (its trainings trained and opened on their day, tools, the band's xp, the
+// test and the first promotion's beats done), then promoPip(). The ship (machines, jobs, galley, Mail, traditions, the
+// storm, rotations) runs those days with the game's own catch-up, without you. You wake in your bed. The career's own
+// seed (SHIP.career.gs) is DM_SEED, so two Set careers to the same day give the same save, and no sick day comes. Nothing here calls R().
+// DM_CAREER: what a steady player has by the end of day N (plan 4.2; the ladder's days, Pillar 5's dates). Days not
+// listed carry on from the row before; devmode_check keeps every training's day equal to CAREER_LADDER's.
+const DM_CAREER = [
+  { day: 1, band: 'new' },
+  { day: 2, train: ['m1'], band: 'steady' },
+  { day: 3, train: ['m4', 'm3d'], band: 'reliable' },
+  { day: 4, train: ['m5', 'm3i'], band: 'trusted' },
+  { day: 5, train: ['m7', 'p3'], band: 'trusted' },
+  { day: 8, train: ['m6', 'm2'], band: 'relied' },
+  { day: 9, train: ['t2'], band: 'relied', test: true },
+  { day: 10, rank: 'officer', band: 'new', promo: true },
+  { day: 11, train: ['m8'], band: 'new' },
+  { day: 12, train: ['m9', 'p1', 'm10', 'm11', 'm12', 'm13'], band: 'steady' },
+  { day: 13, train: ['m14'], band: 'steady' },
+  { day: 15, train: ['p2'], band: 'reliable' },
+  { day: 16, later: 'Senior Officer (not built yet: still an Officer)' },
+  { day: 17, train: ['m15'], band: 'trusted' },
+  { day: 18, train: ['m17'], band: 'trusted' },
+  { day: 23, later: 'Engine Specialist (not built yet)' },
+  { day: 26, later: 'Calder\'s question (not built yet)' },
+];
+const DM_MAXDAY = 30, DM_SEED = 8;                      // the seed: no sick day (section 20's sickDue) before Day 46, so you never land unwell (devmode_check)
+function devmodeCareerFor(n) {                           // pure: SHIP.works's career part by the end of day n
+  const rows = DM_CAREER.filter(r => r.day <= n), last = k => { for (let i = rows.length - 1; i >= 0; i--) if (rows[i][k] !== undefined) return rows[i][k]; return undefined; };
+  const promo = rows.some(r => r.promo), tier = promo ? 2 : 1, rank = last('rank') || 'junior', B = WORK_BANDS[tier] || WORK_BANDS[1];
+  const out = { tier, rank, xp: (B.find(b => b[1] === (last('band') || 'new')) || B[0])[0], tr: {}, op: {}, use: {}, tools: {}, test: null, home: promo ? PROMO.home : 'bunk', done: [], ms: [] };
+  for (const r of rows) for (const id of r.train || []) {
+    const row = ladderRow(id); if (!row) continue;
+    out.tr[id] = r.day; (out.op[r.day] = out.op[r.day] || []).push(id);
+    out.use[id] = Math.min(9, 1 + Math.floor((n - r.day) / 2));   // about a use every other day (approximate)
+    if (row.tool && WORK_TOOLS[row.tool]) out.tools[row.tool] = [r.day, 0];   // fresh: no wear
+  }
+  if (rows.some(r => r.test)) out.test = { tier: 2, day: 9, tries: 1, passed: true };
+  if (promo) { out.done = ['summons2', 'cake2', 'move2', 'ceremony2']; out.ms = [['officer', 10], ['commissioned', Math.min(n, 11)]]; }
+  return out;
+}
+function devmodeCareerSet(n, now) {                      // SHIP.works set to day n's (the log, notes and side jobs kept)
+  const W = SHIP.works || worksInit(Math.max(now, WORKS_START)), c = devmodeCareerFor(n);
+  Object.assign(W, c, { cur: null }); W.op = c.op;
+  if (n >= 8 && typeof flagSet === 'function') flagSet('works.oily', true);   // your work uniform's row needs it
+  if (c.done.includes('ceremony2') && typeof giftKeepsake === 'function') try { giftKeepsake({ id: 'marrow' }, worksText('works.keepsake.commission', worksText('promo.keepsake', 'your framed commission'))); } catch (e) { /* no social */ }
+  for (const r of SHIP.occasions || []) if (/^(works\.|promo)/.test(r.id) && r.status === 'asked') r.status = 'done';   // nothing left asking for what's now set
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;       // the board: the tier's jobs
+}
+function devmodeWeekMet(upTo) {                          // the first week's beats before `upTo` marked as attended (section 21's records)
+  const I = SHIP.intro; if (!I || typeof INTRO_WEEK === 'undefined') return [];
+  const out = [];
+  for (const b of INTRO_WEEK) {
+    const t = introAbs(b.day, b.at); if (t >= upTo) continue;
+    if (b.meeting || b.moment || b.says) I.done[b.id + ':met'] = t;
+    if (b.who) I.done[b.id + ':said'] = t;
+    if (b.seek) I.done[b.id + ':seek'] = 1;
+    if (b.release) I.done[b.id + ':end'] = introAbs(b.day, b.until);
+    if (b.id === 'd1-shadow' || b.id === 'd1-lead') I.done[b.id + ':job'] = t;
+    for (const f of b.flags || []) introFlagSet(f);
+    if (b.settle && !I.settle[b.settle]) I.settle[b.settle] = t;
+    if (b.meeting || b.moment) out.push(b.id);
+  }
+  if (upTo > introAbs(8, 0)) { for (const s of SETTLE) if (!I.settle[s.id]) I.settle[s.id] = introAbs(7, 12 * 60); if (!I.settle.all) I.settle.all = introAbs(7, 12 * 60); }
+  return out;
+}
+function devmodeWake() {                                 // into your bed's room, beside it (the bunk room, or cabin 4-23)
+  const id = playerBed(), n = deckOf(id), bed = (DECKS[n].places || []).find(p => p.id === id); if (!bed) return null;
+  const room = roomAt(...bed.at); return devmodeMove(n, () => cellPos(...bed.at), r => r === room);
+}
+// the story's beats as shortcuts (the user's q3: they go on to the beat's time and place): the career by the end of
+// day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
+const DM_BEATS = [
+  { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
+  { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, at: 650, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00
+];
+// starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
+// (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
+const DM_FRIENDS = [['torres-zeke', 70, 1], ['tomas', 65, 1], ['pell', 50, 3], ['calder', 35, 1], ['halloran-emeka', 32, 1], ['esposito-yara', 30, 3], ['brennan', 22, 1],
+  ['rina', 18, 2], ['kovac-zainab', 18, 4], ['eklund-leila', 12, 2], ['ishikawa-orla', 12, 3], ['sato', 12, 3], ['vance', 14, 10], ['marrow', 12, 10]];
+function devmodeFriends(n) {                             // -> how many now know you
+  let k = 0; if (typeof relAdd !== 'function') return 0;
+  for (const [id, pts, from] of DM_FRIENDS) {
+    if (n < from) continue;
+    const want = Math.round(pts * Math.min(1, (n - from + 1) / 10)), r = typeof relGet === 'function' ? relGet(id) : null;
+    if (r && want > r.pts && relAdd(id, 'intro:dev', want - r.pts) >= 0) k++;
+  }
+  return k;
+}
+// Set career, a step at a time (a generator: each yield is a day done, for the progress line); its return is the panel's words
+function* devmodeCareerSteps(n, beat) {
+  const st = devmodeState(), land = beat ? (beat.day - 1) * 1440 + beat.at : (n - 1) * 1440 + WAKE_AT, upto = d => beat && d === beat.day ? beat.by : d;
+  INTRO_BOOT = false; newGameStart(n === 0); if (n > 0) introSkip();
+  st.ex = []; st.tr = []; st.note = ''; st.set = null;
+  if (n === 0) { st.set = { day: 0, at: clockText() }; return 'A new Dev game by shuttle: the arrival evening, Day 0.'; }
+  careerInit(); SHIP.career.gs = DM_SEED;                 // the career's seed, the same every time
+  const met = devmodeWeekMet(land);
+  devmodeCareerSet(upto(1), shipNow());
+  for (let d = 2; d <= n; d++) {
+    yield d;
+    devmodeSkipTo((d - 1) * 1440 + 300);
+    devmodeCareerSet(upto(d), shipNow());
+  }
+  if (beat && beat.set) beat.set(SHIP.works);
+  if (shipNow() < land) devmodeSkipTo(land);
+  const fr = devmodeFriends(n);
+  promoPip(); if (beat) devmodeMove(beat.where.deck, () => ixGoalWorld({ room: beat.where.room }), r => r === beat.where.room); else devmodeWake();
+  st.set = { day: n, at: clockText(), ...(beat ? { beat: beat.id } : {}) };
+  const ex = st.ex.length, where = beat ? 'in ' + ((ROOMS[roomAt(...player.here())] || {}).name || 'place') : 'in your bed';
+  return (beat ? beat.label + ': career set to Day ' + beat.by + '\'s' : 'Career set to Day ' + n) + ' (approximate): ' + RANK_TITLE[SHIP.works.rank] + ', ' + BAND_WORD[worksBand() || 'new'] + '. ' + clockText() + ', ' + where + '. '
+    + (met.length ? 'The first week\'s beats marked as attended. ' : '') + (ex ? ex + ' workday' + (ex > 1 ? 's' : '') + ' excused. ' : '') + (fr ? fr + ' of the crew know you. ' : '') + 'What\'s set is listed below.';
+}
+function devmodeSetCareerTo(n, beat) { const g = devmodeCareerSteps(n, beat); let r = g.next(); while (!r.done) r = g.next(); return r.value; }   // all at once (devmode_check, under devmodeRun)
+// the panel's way: as a Dev action (refused when busy, the Undo kept, settled, frozen), a day at a time under the fade,
+// the progress on the panel (the sheet sits above the fade), then one save
+function devmodeSetCareer(n, beat) {
+  const label = beat ? 'Set career: ' + beat.label : 'Set career to Day ' + n, why = devmodeBusy(); if (why) return devmodeSay(why);
+  const kept = devmodeKeep(label); if (kept) return devmodeSay('Not done: ' + kept);
+  devmodeSettle(); DM_HOLD = true; fadeEl.style.transition = 'opacity .25s'; fadeEl.style.opacity = 1;
+  const g = devmodeCareerSteps(n, beat), end = out => {
+    DM_HOLD = false; devmodeState().last = label; saveGame(); devmodeSay(out);
+    fadeEl.style.opacity = 0; setTimeout(() => { fadeEl.style.transition = ''; }, 300);
+  };
+  const step = () => {
+    let r; try { r = g.next(); } catch (e) { console.error(e); return end('Something went wrong (' + e.message + '). Undo my last Dev action puts it back.'); }
+    if (r.done) return end(r.value);
+    devmodeSay('Setting career: Day ' + r.value + ' of ' + n + '…'); setTimeout(step, 0);
+  };
+  devmodeSay('Setting career: a new Dev game…'); setTimeout(step, 280);
+}
+// what Set career gave and what it gets wrong (plan 4.3), for the panel
+function devmodeWhatsSet(n) {
+  if (n == null) return [];
+  if (n === 0) return ['A new Dev game by shuttle: nothing else set.'];
+  const W = SHIP.works, c = devmodeCareerFor(n), tr = Object.keys(c.tr), later = DM_CAREER.filter(r => r.later && r.day <= n).map(r => r.later);
+  return [
+    'Rank ' + RANK_TITLE[c.rank] + ', Tier ' + c.tier + ', Works reputation ' + BAND_WORD[(WORK_BANDS[c.tier].filter(b => c.xp >= b[0]).pop() || [0, 'new'])[1]] + ' (set from the table).',
+    tr.length ? 'Trained (' + tr.length + '): ' + tr.map(id => mechName(id) + ' (' + id + ')').join(', ') + '.' : 'No trainings yet.',
+    Object.keys(c.tools).length ? 'Tools: ' + Object.keys(c.tools).map(k => WORK_TOOLS[k].name).join(', ') + ', fresh (no wear).' : 'No tools yet.',
+    c.done.length ? 'The promotion: test passed Day 9, Officer Day 10, cabin 4-23, the ceremony and your pip, the framed commission.' : c.test ? 'The Tier 2 test job: passed (Day 9).' : '',
+    n > 1 ? 'The first week: its meetings and beats marked as attended' + (n > 7 ? ', the Settling-in list ticked, the mug and the seedling' : '') + '.' : '',
+    later.length ? 'Not built yet: ' + later.join('; ') + '.' : '',
+    'Real: the ship ran those days without you (machines, jobs, galley, Mail, traditions' + (n > 11 ? ', the ion storm (your part: none; its briefing by Mail)' : '') + (n > 21 ? ', the first rotation on Day 21' : '') + ').',
+    'Friendships: a starting level with ' + DM_FRIENDS.filter(f => n >= f[2]).length + ' people a steady player meets (Torres, Tomas, Pell, Calder...). Thin or empty: stories (no conversations played), your work log, right-first-time counts, commendations; tips already seen and the Works app\'s history are fresh. Needs and clothes: a normal morning.',
+    W ? '' : 'No career record yet.',
+  ].filter(Boolean);
+}
+function devmodeSet(body) {
+  const st = devmodeState(), p = DM_UI.day == null ? Math.max(1, Math.min(DM_MAXDAY, (st.set && st.set.day) || SHIP.time.day || 1)) : DM_UI.day;
+  devmodeHead(body, 'Set career to a day');
+  devmodeText(body, 'A new Dev game, moved to that day at 06:00 with what a steady player has by then: approximate. Undo my last Dev action (Quick) brings this game back.');
+  devmodeRow(body, [['− 1 day', () => { DM_UI.day = Math.max(0, p - 1); devmodeDraw(); }, { aria: 'A day earlier' }],
+    ['Set career to Day ' + p, b => devmodeTwice(b, 'Tap again: a new Dev game', () => { DM_UI.day = null; devmodeSetCareer(p); }), { ask: true }],
+    ['+ 1 day', () => { DM_UI.day = Math.min(DM_MAXDAY, p + 1); devmodeDraw(); }, { aria: 'A day later' }]]);
+  const days = [1, 2, 5, 8, 10, 12, 16, 21, 26];
+  for (let i = 0; i < days.length; i += 3) devmodeRow(body, days.slice(i, i + 3).map(d => ['Day ' + d, () => { DM_UI.day = d; devmodeDraw(); }, { ask: d === p }]));
+  devmodeHead(body, 'Go to a story beat');
+  devmodeRow(body, DM_BEATS.map(bt => [bt.label, b => devmodeTwice(b, 'Tap again: a new Dev game', () => devmodeSetCareer(bt.day, bt))]));
+  devmodeText(body, 'The first week\'s meetings (the Day 1 briefing, the Day 2 solo job) need the arrival played: play Day 0-1 once (or Copy my real game), then Mark at Day 2 08:30 (Quick).');
+  if (st.set) {
+    devmodeHead(body, 'What\'s set: Day ' + st.set.day + (st.set.beat ? ', ' + ((DM_BEATS.find(x => x.id === st.set.beat) || {}).label || '') : '') + ' (approximate)');
+    for (const l of devmodeWhatsSet(st.set.beat ? (DM_BEATS.find(x => x.id === st.set.beat) || { by: st.set.day }).by : st.set.day)) devmodeText(body, l);
+  }
+}
+// ---- D7 (Stop 2): the Career tab: your career as it is, set by hand (the user's q8), and the promotion test's needs ----
+// Shows the rank, tier, Works reputation (the band, and the xp to the next), each training by name with its code,
+// the tools, missed shifts and the ship's view of your work. By hand, each a Dev action (undoable): xp − / +, to the
+// next band, the next training (the game's own worksTrained: its tool and toast), a tool, and the rank (approximate:
+// Officer gets the first promotion's beats done, Junior takes them away). The promotion test's needs have ticks: Day 9 or
+// later, Relied on, Making it safe, a teacher on shift, before 14:00; "Open the test now" sets the test for today and
+// calls the ladder's own ladderOpen (section 24's) when all but the day hold. "Next step" moves the clock to five
+// minutes before the promotion's next beat (the test job, the summons, the cake, the move, the ceremony).
+const DM_XP = 5, DM_PROMO_DONE = ['summons2', 'cake2', 'move2', 'ceremony2'];   // the first promotion's beats (24p's W.done keys)
+function devmodeW() { return SHIP.works || worksInit(Math.max(shipNow(), WORKS_START)); }   // the career record, made if it's not yet (as from Day 1 17:00)
+function devmodeBandNext(W) { const B = WORK_BANDS[W.tier] || WORK_BANDS[1], i = B.findIndex(b => b[0] > W.xp); return i < 0 ? null : B[i]; }
+function devmodeTestNeeds(W, d = SHIP.time.day, m = SHIP.time.min) {   // [[label, ok], ...] (pure)
+  const row = ladderRow('t2'), B = WORK_BANDS[W.tier] || WORK_BANDS[1];
+  return [['Day ' + row.day + ' or later', d >= row.day], [BAND_WORD.relied + ' (xp ' + B[B.length - 1][0] + ')', ladderNeeds({ rep: 'relied' }, W)],
+    [mechName('m6') + ' (m6) trained', W.tr.m6 !== undefined], ['Your workday, with ' + row.by.map(worksFirst).join(' or ') + ' on shift', !!ladderTeacher(row, d) && playerShiftOn(d)],
+    ['Before ' + hhmm(PROMO.until - 60), m < PROMO.until - 60]];
+}
+function devmodeTestOpen() {                             // the test today, through the ladder's own ladderOpen
+  devmodeDo('Career: open the test now', () => {
+    const W = devmodeW(), d = SHIP.time.day, row = ladderRow('t2');
+    W.test = { tier: 2, day: d, tries: W.test ? W.test.tries : 0, passed: false };
+    const ok = ladderOpen(row, d, shipNow());
+    return ok ? 'The test job is open: ' + (W.cur && W.cur.j ? 'held for you on the board, Calder with you.' : 'see the board.') : 'The ladder wouldn\'t open it now (no teacher on shift, or too late today).';
+  }, () => {
+    const W = SHIP.works; if (!W || W.tier !== 1) return 'Only as a junior: the test is for Tier 2.';
+    if (W.test && W.test.passed) return 'Already passed.';
+    if (W.cur) return 'A training is under way (' + mechName(W.cur.id) + '): finish it first.';
+    const n = devmodeTestNeeds(W); return n.slice(1).every(x => x[1]) ? null : 'Not all the needs hold (apart from the day): see the ticks.';
+  });
+}
+function devmodePromoSteps() {                           // the promotion's beats, in order: [{ label, at (absolute minutes), done }]
+  const W = SHIP.works; if (!W) return [];
+  const out = [], P = typeof promoPlan === 'function' ? promoPlan() : null, abs = (d, m) => (d - 1) * 1440 + m;
+  if (W.test) out.push({ label: 'Your test job', at: abs(W.test.day, PROMO.jobAt), done: !!W.test.passed });
+  if (P) {
+    out.push({ label: 'The summons', at: abs(P.summons.day, P.summons.at), done: promoDone('summons2') });
+    out.push({ label: 'Cake in the tea corner', at: abs(P.gather.day, PROMO.cake[0]), done: promoDone('cake2') });
+    out.push({ label: 'Your cabin', at: abs(P.move.day, P.move.at), done: promoDone('move2') });
+    out.push({ label: 'The ceremony', at: abs(P.ceremony.day, P.ceremony.at), done: promoDone('ceremony2') });
+  }
+  return out;
+}
+function devmodePromoNext() {
+  const s = devmodePromoSteps().find(x => !x.done && x.at - 5 > shipNow());
+  if (!s) return devmodeSay('No promotion beat ahead: the test isn\'t set yet, or it\'s all done.');
+  devmodeGo('to ' + s.label.toLowerCase(), () => s.at - 5);
+}
+function devmodeRank(rank) {                             // set by hand: approximate
+  devmodeDo('Career: rank ' + RANK_TITLE[rank], () => {
+    const W = devmodeW(), d = SHIP.time.day;
+    if (rank === 'officer') Object.assign(W, { tier: 2, rank, xp: 0, cur: null, test: { tier: 2, day: Math.min(d, (W.test && W.test.day) || d), tries: Math.max(1, (W.test && W.test.tries) || 0), passed: true }, home: PROMO.home,
+      done: [...new Set(W.done.concat(DM_PROMO_DONE))], ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned').concat([['officer', d], ['commissioned', d]]) });
+    else Object.assign(W, { tier: 1, rank, cur: null, test: null, home: 'bunk', done: W.done.filter(x => !DM_PROMO_DONE.includes(x)), ms: W.ms.filter(x => x[0] !== 'officer' && x[0] !== 'commissioned') });
+    if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    promoPip();
+    return 'Rank: ' + RANK_TITLE[rank] + ', Tier ' + W.tier + ' (set by hand: approximate). Your bed is ' + (rank === 'officer' ? 'in cabin 4-23' : 'in Bunk 1') + ' now.';
+  });
+}
+function devmodeXp(add, label) {
+  devmodeDo('Career: ' + label, () => { const W = devmodeW(); W.xp = Math.max(0, Math.min(9999, typeof add === 'function' ? add(W) : W.xp + add)); return 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + ').'; });
+}
+function devmodeNextTraining() {
+  const W = SHIP.works, row = W && CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  if (!row) return devmodeSay(W ? 'Every training open to your tier is done.' : 'No career record yet.');
+  devmodeDo('Career: train ' + mechName(row.id), () => {
+    const d = SHIP.time.day; if (W.cur && W.cur.id === row.id) W.cur = null;
+    if (!worksOpened(W).has(row.id)) (W.op[d] = W.op[d] || []).push(row.id);
+    W.use[row.id] = Math.max(1, W.use[row.id] || 0); worksTrained(row.id);
+    return 'Trained: ' + mechName(row.id) + ' (' + row.id + ')' + (row.tool ? ', with ' + toolName(row.tool) : '') + '.';
+  });
+}
+function devmodeCareer(body) {
+  const W = SHIP.works, d = SHIP.time.day;
+  if (!W) {
+    devmodeText(body, 'No career record yet: it starts once Day 1\'s shift ends (17:00). Set career (the next tab) makes one, or start it now.');
+    devmodeRow(body, [['Start it now', () => devmodeDo('Career: start', () => { devmodeW(); return 'A career record, Tier 1, nothing trained.'; }), { off: d < 1 }]]);
+    return;
+  }
+  const nb = devmodeBandNext(W), C = SHIP.career;
+  devmodeHead(body, RANK_TITLE[W.rank] + ', Tier ' + W.tier);
+  devmodeText(body, 'Works reputation: ' + BAND_WORD[worksBand()] + ' (xp ' + W.xp + (nb ? '; ' + BAND_WORD[nb[1]] + ' at ' + nb[0] : '') + '). Missed shifts in a row: ' + (C ? C.ms : 0)
+    + (C && C.st ? ', the Chief\'s talk step ' + C.st : '') + '. The ship on your work: ' + Math.round(careerWork()) + ' of 100.'
+    + (devmodeState().set ? ' Career set to Day ' + devmodeState().set.day + ': approximate.' : ''));
+  devmodeRow(body, [['− ' + DM_XP + ' xp', () => devmodeXp(-DM_XP, 'xp −' + DM_XP)], [nb ? 'To ' + BAND_WORD[nb[1]] : 'Top band', () => devmodeXp(w => (devmodeBandNext(w) || [w.xp])[0], 'next band'), { off: !nb }], ['+ ' + DM_XP + ' xp', () => devmodeXp(DM_XP, 'xp +' + DM_XP)]]);
+  const next = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2');
+  devmodeRow(body, [[next ? 'Train: ' + mechName(next.id) : 'All trained', devmodeNextTraining, { off: !next }], ['Rank: Junior', () => devmodeRank('junior'), { off: W.rank === 'junior', ask: W.rank === 'junior' }], ['Rank: Officer', () => devmodeRank('officer'), { off: W.rank === 'officer', ask: W.rank === 'officer' }]]);
+  devmodeText(body, 'Senior Officer and Engine Specialist aren\'t built yet. A rank set by hand is approximate.');
+  if (W.tier === 1) {
+    devmodeHead(body, 'The promotion test');
+    const needs = devmodeTestNeeds(W);
+    devmodeText(body, needs.map(([l, ok]) => (ok ? '✓ ' : '✗ ') + l).join('   ') + (W.test ? '. Set for Day ' + W.test.day + (W.test.passed ? ', passed' : '') + '.' : '.'));
+    devmodeRow(body, [['Open the test now', devmodeTestOpen, { off: !!(W.test && W.test.passed) || !!W.cur || !needs.slice(1).every(x => x[1]), ask: needs.every(x => x[1]) || needs.slice(1).every(x => x[1]) }], ['Next step ›', devmodePromoNext]]);
+  } else if (devmodePromoSteps().some(x => !x.done)) devmodeRow(body, [['Next step ›', devmodePromoNext]]);
+  const steps = devmodePromoSteps();
+  if (steps.length) devmodeText(body, 'The promotion: ' + steps.map(s => (s.done ? '✓ ' : '') + s.label + ' (Day ' + (Math.floor(s.at / 1440) + 1) + ' ' + hhmm(s.at % 1440) + ')').join(', ') + '.');
+  devmodeHead(body, 'Trainings');
+  const opened = worksOpened(W);
+  devmodeText(body, CAREER_LADDER.filter(r => r.day <= Math.max(DM_MAXDAY, d)).map(r => mechName(r.id) + ' (' + r.id + '): ' + (W.tr[r.id] !== undefined ? 'trained Day ' + W.tr[r.id] : W.cur && W.cur.id === r.id ? 'under way' : opened.has(r.id) ? 'open' : 'from Day ' + r.day)).join('; ') + '.');
+  devmodeHead(body, 'Tools');
+  const have = Object.keys(W.tools);
+  devmodeText(body, have.length ? have.map(k => toolName(k) + ' (since Day ' + W.tools[k][0] + ', wear ' + Math.round(W.tools[k][1] * 100) + '%)').join(', ') + '.' : 'None yet.');
+  const give = Object.keys(WORK_TOOLS).filter(k => !W.tools[k]);
+  for (let i = 0; i < give.length; i += 3) devmodeRow(body, give.slice(i, i + 3).map(k => ['Give ' + toolName(k), () => devmodeDo('Career: give ' + toolName(k), () => (toolGive(k), 'You have ' + toolName(k) + ' now.'))]));
 }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----

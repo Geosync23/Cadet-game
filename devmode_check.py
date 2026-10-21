@@ -15,9 +15,19 @@
 #          inside a meeting; Mark here then Back to mark reloads into the same save, byte for byte
 #   slow:  the reload after Undo and Back to mark held back 6 s (a phone on a weak link; DR1's probe): the kept save stays
 #          put while the old page waits, and the new page has it (the Undo happened, its record used up)
+#   career: the Career tab (Stop 2): xp, the next band, the next training, a tool, the rank by hand, each undoable; the
+#          promotion test opened on Day 8 with only the day missing (ladderOpen), passed, and Next step to the ceremony
+#   set:   Set career (Stop 2): the table's days are CAREER_LADDER's; Days 2, 10, 12, 26 from new Dev games land at 06:00
+#          with the table's career, in your bed's room, no miss, no first-week meeting notes, no sick day; Day 11 opens
+#          no trained row again; two Set careers to Day 12 give the same save; starting friendships; the Day 9 test
+#          and Day 10 promotion beats; the panel's way (a day at a time, the progress shown, one save); Undo; the tab
 #   card:  in Dev mode the place-and-clock card has the DEV tag and opens the sheet "Dev mode: not your real game"
+#   trad:  Traditions (Stop 1b): refused on Day 0; five kinds started (in 20 minutes, at the usual time, tomorrow) with
+#          people going and at the room; whose for a birthday; a clash with a Dev start, too late, a usual time gone
+#          refused; a calendar tradition in the same room gives way; its Mail now; the starts ride in the Dev save and
+#          through Undo; Stop it puts the day back to its calendar; the list, the search, 44px buttons
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
-# Run:  python3 devmode_check.py BUILD.html          Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
+# Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
 exec(open(__file__.replace('devmode_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
@@ -34,6 +44,7 @@ def check(cond, msg):
 REAL = ('starship-cadet-save', 'starship-cadet-arrived')
 DEV_OWN = ('starship-cadet-dev-mark', 'starship-cadet-dev-undo')   # Dev mode's Mark and Undo (D2, D4)
 GAME = sys.argv[1]
+ONLY = set(sys.argv[2:])                          # optional: run only these parts (e.g. trad)
 TMP = WORK / 'test' / '_devmode_check.html'
 TMP.write_text(instrument(pathlib.Path(GAME).read_text()))
 
@@ -324,13 +335,221 @@ def part_slow(b):
     ctx.close(); srv.shutdown()
     print(f'  slow: Undo and Back to mark with the reload held back 6 s: the kept save stayed put; the Undo happened and was used up')
 
+
+TRAD = r"""(({ id, how, who, mail }) => {
+  DM_UI.who = who || null; DM_UI.tmail = !!mail;
+  const ev = SHIP_TRADITIONS.find(e => e.id === id), a = devmodeTradAt(ev, how);
+  if (typeof a === 'string') return { refused: a };
+  const ok = devmodeRun('Tradition', () => { const st = devmodeState(); st.tr = st.tr.filter(r => !(r.id === id && r.day === a.d)).concat([{ id, day: a.d, from: a.from, ...(who ? { who } : {}) }]);
+    devmodeTradsAgain(a.d); if (mail) devmodeTradMail(ev, a.d); return null; });
+  const e = eventsOn(a.d).find(x => x.id === id && x.dev);
+  return { ok, d: a.d, from: a.from, on: !!e, to: e && e.to, len: ev.at[1] - ev.at[0], going: devmodeGoing(id, a.d), crew: DECK_CREW.length };
+})"""
+
+def part_trad(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev')
+    start = lambda id, how, who=None, mail=False: pg.page.evaluate('([s, a]) => window.__sc(s)(a)', [TRAD, {'id': id, 'how': how, 'who': who, 'mail': mail}])
+    r = start('quiz', 'soon')
+    check('Day 0' in (r.get('refused') or ''), f'trad: not refused on Day 0: {r}')
+    pg.ev('newGameStart(false); introSkip(); devmodeState().ex = []; devmodeState().note = ""; devmodeState().tr = []'); pg.step(10)
+    n = pg.ev('SHIP_TRADITIONS.length')
+    check(n >= 40, f'trad: only {n} traditions to start')
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(2 * 1440 + 17 * 60))")    # Day 3, Wednesday 17:00
+    base = pg.ev("JSON.stringify(eventsOn(3).map(e => [e.id, e.from, e.to]))")
+    out = []
+    # five kinds: weekly (quiz, a Thursday's, on a Wednesday), every 14 days (harvest), yearly (founding), a birthday (whose), the gym club with its spare machines
+    cases = [('quiz', 'soon', None), ('harvest', 'tomorrow', None), ('founding', 'usual', None), ('running', 'tomorrow', None)]
+    for id, how, who in cases:
+        r = start(id, how, who); out.append((id, r))
+        check(r.get('ok') and r.get('on') and r['to'] - r['from'] == r['len'], f'trad: {id} {how} not started: {r}')
+        check(r.get('going', 0) >= (1 if id == 'running' else 3), f'trad: {id} {how}: only {r.get("going")} going')   # gym club: the gym's regulars (two machines kept free)
+    q = out[0][1]
+    check(q['d'] == 3 and q['from'] == 17 * 60 + 20, f'trad: quiz in 20 minutes at {q}')
+    check(q['crew'] > 0, 'trad: nobody on the deck after the plans were made again')
+    who = pg.ev("schedPeople().filter(p => !p.player && aboard(p, 4)).slice(0, 2).map(p => p.id)")
+    r = start('birthday', 'tomorrow', None); check('whose' in (r.get('refused') or ''), f'trad: a birthday without whose: {r}')
+    r = start('birthday', 'tomorrow', who); out.append(('birthday', r))
+    check(r.get('ok') and r.get('on') and r.get('going', 0) >= 3, f'trad: birthday not started: {r}')
+    hon = pg.ev("eventsOn(4).find(e => e.id === 'birthday' && e.dev).honorees.map(p => p.id)")
+    check(hon == who, f'trad: the birthday is not for whose was picked: {hon} vs {who}')
+    # the same room at the same time: hull lights in the bow lounge during the quiz
+    r = start('hull-lights', 'soon'); check('same room' in (r.get('refused') or ''), f'trad: a clash with another Dev start not refused: {r}')
+    gave = pg.ev("eventsOn(4).some(e => e.id === 'quiz')")
+    check(not gave, 'trad: Thursday\'s quiz didn\'t give way to the Dev-started birthday (the mess, then the bow lounge)')
+    # its Mail now
+    m0 = pg.ev('SHIP.mail.length'); r = start('jam', 'tomorrow', None, True)
+    check(r.get('ok') and pg.ev('SHIP.mail.length') == m0 + 1 and 'Music jam' in pg.ev('SHIP.mail[0].subject'), f'trad: its Mail now: {pg.ev("SHIP.mail[0].subject")}')
+    # the crew really go: the quiz minute by minute, crew in the bow lounge
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(2 * 1440 + 17 * 60 + 40))"); pg.step(30)
+    there = pg.ev("schedPeople().filter(p => { const w = whereIs(p, shipNow()); return w && w.tag && evTagId(w.tag) === 'quiz'; }).length")
+    check(there >= 3, f'trad: only {there} at the Dev quiz at 17:40')
+    # too late tonight; a usual time gone
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(2 * 1440 + 23 * 60))")
+    r = start('quiz', 'soon'); check('Too late' in (r.get('refused') or ''), f'trad: 23:20 not refused: {r}')
+    r = start('market', 'usual'); check('has gone' in (r.get('refused') or ''), f'trad: a usual time gone not refused: {r}')
+    # the saved starts ride in the Dev save; Undo takes the last one away
+    pg.ev('saveGame()'); saved = json.loads(pg.ev('localStorage.getItem(SAVE_KEY)'))['dev']['tr']
+    check([x['id'] for x in saved] == ['quiz', 'harvest', 'founding', 'running', 'birthday', 'jam'], f'trad: the Dev save holds {saved}')
+    pg.ev("devmodeRun('Tradition: stop', () => { devmodeTradsAgain(4); return null; })")
+    pg.ev_reload('devmodeUndo()')
+    check(len(pg.ev('devmodeState().tr')) == 6, 'trad: Undo lost the starts')
+    # Stop it: back to the calendar (Day 3's own list again)
+    pg.ev("devmodeState().tr.filter(r => r.day === 3).forEach(r => devmodeRun('stop', () => { devmodeState().tr = devmodeState().tr.filter(x => x !== r); devmodeTradsAgain(3); return null; }))")
+    check(pg.ev("JSON.stringify(eventsOn(3).map(e => [e.id, e.from, e.to]))") == base, 'trad: Day 3 not back to its calendar after Stop it')
+    # the tab draws: the list, a search, a tradition's card at phone size
+    pg.ev('devmodeOpen(true); DM_UI.tab = "trad"; DM_UI.trad = null; devmodeDraw()')
+    rows = pg.ev("document.querySelectorAll('#dmSheet .dmBody .dmRow button').length")
+    pg.page.fill('#dmSheet input.dmFind', 'quiz'); pg.step(2)
+    hits = pg.ev("[...document.querySelectorAll('#dmSheet .dmBody .dmRow button')].map(b => b.textContent)")
+    check(rows >= n and any('Quiz' in h for h in hits) and len(hits) < rows, f'trad: the list ({rows}) or search ({hits})')
+    small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
+    check(not small, f'trad: buttons under 44px: {small}')
+    check(not pg.errors, f'trad: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print('  trad: Day 0 refused; ' + ', '.join(f'{i} {r.get("going")}' for i, r in out) + ' going; whose asked; room clash, too late, usual gone refused; Mail; crew at the quiz; saved; Undo; Stop it back to the calendar; list and search')
+
+
+def part_set(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    # the table's days are the ladder's (a moved training fails here, not silently)
+    bad = pg.ev("""(() => { const out = [], seen = new Set();
+      for (const r of DM_CAREER) for (const id of r.train || []) { seen.add(id); const row = ladderRow(id); if (!row || row.day !== r.day) out.push(id + ': table ' + r.day + ', ladder ' + (row ? row.day : 'none')); }
+      for (const row of CAREER_LADDER) if (row.day <= DM_MAXDAY && !seen.has(row.id)) out.push(row.id + ': on the ladder (Day ' + row.day + '), not in the table');
+      return out; })()""")
+    check(not bad, f'set: the table and CAREER_LADDER disagree: {bad}')
+    setc = lambda n: pg.ev(f"devmodeRun('Set career to Day {n}', () => devmodeSetCareerTo({n}))")
+    pg.ev("devmodeRun('Clock: +3 hours', () => devmodeSkipTo(shipNow() + 180))"); before = pg.ev('clockText()')
+    got = {}
+    for n in (2, 10, 12, 26):
+        check(setc(n) is True, f'set: Day {n} refused: {pg.ev("DM_UI.msg")}')
+        pg.step(20)
+        S = pg.ev(f"""(() => {{ const W = SHIP.works, c = devmodeCareerFor({n}); return {{ clock: clockText(), rank: W && W.rank, tier: W && W.tier, xp: W && W.xp, tr: W && Object.keys(W.tr).sort().join(), want: Object.keys(c.tr).sort().join(),
+          wrank: c.rank, cur: W && W.cur, room: ROOMS[roomAt(...player.here())].name, bed: roomAt(...player.here()) === roomAt(...(DECKS[deckOf(playerBed())].places.find(p => p.id === playerBed()) || {{ at: [0, 0] }}).at), deck: deckDef.num, pip: PLAYER_SPEC.rank || 0,
+          ms: SHIP.career.ms, st: SHIP.career.st, missed: SHIP.mail.filter(m => /missed|summons|warning/i.test(m.subject || '') || Object.values(INTRO_MEETINGS).some(x => m.subject === x.title + ' (notes)')).map(m => m.subject), open: SHIP.occasions.filter(o => o.status === 'asked').map(o => o.id),
+          met: INTRO_WEEK.filter(b => b.meeting && introAbs(b.day, b.at) < shipNow()).every(b => SHIP.intro.done[b.id + ':met'] >= 0), set: devmodeState().set, settle: !!SHIP.intro.settle.all }}; }})()""")
+        got[n] = S
+        check(S['clock'].startswith(f'Day {n},') and S['clock'].endswith('06:00'), f'set: Day {n} landed at {S["clock"]}')
+        check(S['rank'] == S['wrank'] and S['tr'] == S['want'] and S['cur'] is None, f'set: Day {n}: the career isn\'t the table\'s: {S}')
+        check(S['bed'] and S['deck'] == 4, f'set: Day {n}: not woken in your bed\'s room ({S["room"]})')
+        check(S['ms'] == 0 and S['st'] == 0 and not S['missed'] and not S['open'], f'set: Day {n}: a miss, a first-week meeting\'s notes, a summons or something still asking: {S}')
+        check(S['met'] and S['set']['day'] == n and (S['settle'] == (n > 7)), f'set: Day {n}: the first week or the Dev record: {S}')
+    sick = pg.ev("Array.from({ length: DM_MAXDAY + 15 }, (_, i) => i + 1).filter(d => sickDue(d))")
+    check(not sick and not pg.ev('sickNow()'), f'set: the Dev seed brings sick days {sick}')
+    check(got[10]['rank'] == 'officer' and got[10]['tier'] == 2 and got[10]['pip'] == 1 and got[2]['pip'] == 0, f'set: Day 10 isn\'t an officer with the pip: {got[10]}')
+    check(got[10]['room'] != got[2]['room'], f'set: Day 10 not woken in cabin 4-23: {got[10]["room"]}')
+    # play Day 11 hour by hour: the ladder never opens a trained row again
+    setc(10); pg.step(10)
+    again = pg.ev("""(() => { const tr = new Set(Object.keys(SHIP.works.tr)), out = [];
+      for (let h = 10 * 24 + 6; h <= 10 * 24 + 16; h++) { devmodeSkipTo(h * 60); for (const id of ladderTick(h)) if (tr.has(id)) out.push(id); }
+      if (SHIP.works.cur && tr.has(SHIP.works.cur.id)) out.push('cur ' + SHIP.works.cur.id); return out; })()""")
+    check(not again, f'set: Day 11 opened trained rows again: {again}')
+    # two Set careers to Day 12 give the same save, byte for byte (the Dev seed)
+    saves = []
+    for _ in range(2):
+        setc(12); pg.ev('saveGame()'); saves.append(json.loads(pg.ev('localStorage.getItem(SAVE_KEY)')))
+    diff = [k for k in set(saves[0]) | set(saves[1]) if saves[0].get(k) != saves[1].get(k)]
+    deep = [k for k in set(saves[0].get('ship', {})) | set(saves[1].get('ship', {})) if saves[0]['ship'].get(k) != saves[1]['ship'].get(k)]
+    check(not diff, f'set: two Set careers to Day 12 differ in {sorted(diff)} (ship: {sorted(deep)})')
+    # starting friendships (Day 12): the people a steady player meets, through relAdd
+    fr = pg.ev("(socInit(), { gone: DM_FRIENDS.filter(f => !SOC.idx.has(f[0])).map(f => f[0]), zeke: relTier('torres-zeke'), tomas: relTier('tomas'), calder: relTier('calder'), known: DM_FRIENDS.filter(f => relTier(f[0]) >= 1).length })")
+    check(not fr['gone'] and fr['zeke'] >= 3 and fr['tomas'] >= 3 and fr['calder'] >= 2 and fr['known'] >= 10, f'set: Day 12 friendships: {fr}')
+    # Undo brings the game before back
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev('devmodeState().set && devmodeState().set.day') == 12, f'set: Undo of the second Day 12 isn\'t the first: {pg.ev("devmodeState().set")}')
+    # the beats: Day 9's test job (08:50, the bay, the test held for you) and Day 10's promotion (10:50, the summons at 11:00)
+    beat = lambda id: pg.ev(f"devmodeRun('Set career: beat', () => devmodeSetCareerTo(DM_BEATS.find(b => b.id === '{id}').day, DM_BEATS.find(b => b.id === '{id}')))")
+    beat('t2'); pg.step(20)
+    T = pg.ev("({ clock: clockText(), room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, test: SHIP.works.test, cur: SHIP.works.cur && SHIP.works.cur.id, tr: 't2' in SHIP.works.tr, m6: 'm6' in SHIP.works.tr })")
+    check(T['clock'] == 'Day 9, Tuesday 08:50' and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day 9 test beat: {T}')
+    beat('promo'); pg.step(20)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + 11 * 60 + 2))")
+    P = pg.ev("({ clock: clockText(), rank: SHIP.works.rank, passed: SHIP.works.test && SHIP.works.test.passed, summons: SHIP.occasions.some(o => o.id === 'promoSummons') })")
+    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at 11:02 the summons is booked, still a junior): {P}')
+    # the panel's way: a day at a time under the fade, the progress on the panel, then one save
+    pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 5; devmodeDraw()')
+    pg.page.click('#dmSheet button:has-text("Set career to Day 5")'); pg.page.click('#dmSheet button:has-text("Tap again")')
+    seen = set()
+    for _ in range(100):
+        pg.page.wait_for_timeout(80); seen.add(pg.ev('DM_UI.msg'))
+        if not pg.ev('DM_HOLD') and 'Career set to Day 5' in pg.ev('DM_UI.msg'): break
+    check(any(m.startswith('Setting career: Day') and m.endswith('of 5…') for m in seen) and pg.ev('clockText()') == 'Day 5, Friday 06:00' and not pg.ev('DM_HOLD'), f'set: the panel\'s Set career (progress {sorted(seen)[:4]}, {pg.ev("clockText()")})')
+    check(pg.ev('devmodeState().last') == 'Set career to Day 5' and json.loads(pg.ev('localStorage.getItem(SAVE_KEY)'))['dev']['set']['day'] == 5, 'set: the panel\'s Set career wasn\'t saved')
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev("devmodeState().set && devmodeState().set.beat") == 'promo', f'set: Undo after the panel\'s Set career: {pg.ev("devmodeState().set")}')
+    # the tab draws at phone size
+    pg.ev('devmodeOpen(true); DM_UI.tab = "set"; devmodeDraw()')
+    txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
+    check('What\'s set: Day 10, Day 10: the promotion' in txt and 'approximate' in txt and 'Trained' in txt, f'set: the tab: {txt[:200]}')
+    small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
+    check(not small, f'set: buttons under 44px: {small}')
+    check(not pg.errors, f'set: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  set: table = ladder; Days 2, 10, 12, 26: ' + '; '.join(f'{n} {g["rank"]} T{g["tier"]} xp {g["xp"]}, {len(g["tr"].split(",")) if g["tr"] else 0} trained, {g["room"]}' for n, g in got.items()) + f'; no miss or notes Mail; Day 11 opens nothing trained; two Day 12s identical; friends (Zeke {fr["zeke"]}, {fr["known"]} known); test and promotion beats; the panel\'s progress; Undo; the tab')
+
+
+def part_career(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    run = lambda src: pg.ev(f"devmodeRun('Career', () => {{ {src} }})")
+    # by hand, from a fresh Day 1 evening (the record is made), each an undoable Dev action
+    pg.ev("devmodeRun('Set', () => devmodeSetCareerTo(1)); devmodeRun('Clock', () => devmodeSkipTo(17 * 60 + 30))")
+    W0 = pg.ev('JSON.stringify(SHIP.works)')
+    pg.ev("devmodeRun('xp', () => { const W = devmodeW(); W.xp += DM_XP; return null; })")
+    check(pg.ev('SHIP.works.xp') == 5, 'career: xp + 5')
+    pg.ev("devmodeRun('band', () => { const W = devmodeW(); W.xp = devmodeBandNext(W)[0]; return null; })")
+    check(pg.ev('worksBand()') == 'steady' and pg.ev('SHIP.works.xp') == 8, f'career: to the next band: {pg.ev("worksBand()")}')
+    pg.ev("(() => { const W = SHIP.works, row = CAREER_LADDER.find(r => W.tr[r.id] === undefined && r.tier <= W.tier && r.id !== 't2'); devmodeRun('train', () => { if (!worksOpened(W).has(row.id)) (W.op[SHIP.time.day] = W.op[SHIP.time.day] || []).push(row.id); W.use[row.id] = 1; worksTrained(row.id); return null; }); })()")
+    check(pg.ev("SHIP.works.tr.m1 === 1 && !!SHIP.works.tools.clipboard && worksIsOpen('m1')"), 'career: the next training (Rounds, with the clipboard)')
+    pg.ev("devmodeRun('tool', () => (toolGive('tester'), null))"); check(pg.ev('!!SHIP.works.tools.tester'), 'career: give a tool')
+    pg.ev_reload('devmodeUndo()')
+    check(pg.ev('!SHIP.works.tools.tester && SHIP.works.tr.m1 === 1'), 'career: Undo of the tool')
+    # the rank by hand: Officer (the pip, cabin 4-23's bed), then Junior again
+    pg.ev("DM_HOLD = false; devmodeRank('officer')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, pip: PLAYER_SPEC.rank || 0, bed: playerBed(), done: SHIP.works.done })")
+    check(R['rank'] == 'officer' and R['tier'] == 2 and R['pip'] == 1 and R['bed'] == '4-23' and 'ceremony2' in R['done'], f'career: rank Officer by hand: {R}')
+    pg.ev("devmodeRank('junior')"); pg.page.wait_for_timeout(700); pg.step(5)
+    R = pg.ev("({ rank: SHIP.works.rank, tier: SHIP.works.tier, pip: PLAYER_SPEC.rank || 0, bed: playerBed() })")
+    check(R['rank'] == 'junior' and R['tier'] == 1 and R['pip'] == 0 and R['bed'] != '4-23', f'career: rank Junior by hand: {R}')
+    # the promotion opened from Day 8 (only the day missing) runs to the ceremony
+    pg.ev("devmodeRun('Set', () => devmodeSetCareerTo(8))"); pg.step(10)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(7 * 1440 + 9 * 60 + 30))")
+    N = pg.ev("devmodeTestNeeds(SHIP.works).map(x => x[1])")
+    check(N == [False, True, True, True, True], f'career: Day 8 09:30 test needs (only the day missing): {N}')
+    pg.ev("DM_HOLD = false; devmodeTestOpen()"); pg.page.wait_for_timeout(700); pg.step(5)
+    T = pg.ev("({ msg: DM_UI.msg, cur: SHIP.works.cur && SHIP.works.cur.id, j: SHIP.works.cur && SHIP.works.cur.j, test: SHIP.works.test })")
+    check(T['cur'] == 't2' and T['j'] and T['test']['day'] == 8, f'career: Open the test now: {T}')
+    pg.ev("devmodeRun('Turn in', () => { worksDone('t2', shipNow()); return null; })")
+    check(pg.ev('SHIP.works.test.passed'), 'career: the test passed when turned in')
+    seen = []
+    for _ in range(7):
+        pg.ev("DM_HOLD = false; devmodePromoNext()"); pg.page.wait_for_timeout(700); pg.step(10)
+        seen.append(pg.ev('clockText()'))
+        if pg.ev("promoDone('ceremony2')"): break
+        pg.ev("devmodeRun('Clock', () => devmodeSkipTo(shipNow() + 40))"); pg.step(5)
+    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(devmodeNext(20 * 60)))")
+    E = pg.ev("({ rank: SHIP.works.rank, done: SHIP.works.done, home: SHIP.works.home, pip: PLAYER_SPEC.rank || 0 })")
+    check(E['rank'] == 'officer' and all(k in E['done'] for k in ('summons2', 'move2', 'ceremony2')) and E['home'] == '4-23' and E['pip'] == 1, f'career: the promotion didn\'t run to the ceremony: {E} (steps at {seen})')
+    # the tab draws at phone size
+    pg.ev('devmodeOpen(true); DM_UI.tab = "career"; DM_UI.msg = ""; devmodeDraw()')
+    txt = pg.ev("document.querySelector('#dmSheet .dmBody').textContent")
+    check('Works Officer, Tier 2' in txt and 'Trainings' in txt and '(m6)' in txt and 'Tools' in txt, f'career: the tab: {txt[:160]}')
+    small = pg.ev("[...document.querySelectorAll('#dmSheet button')].filter(b => b.offsetParent && b.getBoundingClientRect().height < 44).map(b => b.textContent)")
+    check(not small, f'career: buttons under 44px: {small}')
+    check(not pg.errors, f'career: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  career: xp, next band, next training (Rounds + clipboard), a tool, Undo; rank Officer and Junior by hand; Day 8 test opened (only the day missing), passed, Next step through {seen} to the ceremony; the tab')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     for name, part in (('off', part_off), ('real', part_real), ('card', part_card), ('store', part_store)):
+        if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career)):
+        if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
