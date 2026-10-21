@@ -164,3 +164,8 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 
 - cadet_test alone: ALL IDENTICAL, with no noise. check_fast OK (273 s).
 - **On (`f2cue.py`):** notes at 14:00 Day 12 (onset), escalation and resolution. The cue event.ionStorm.onset appears once the social hour has run (15:04), stamped 14:00 and lasting 1 day: an hour's lag, by section 20's design.
+
+## EW1 Crossing the Line story A: claude/events-lines 172e556 (for lead 22). PASS WITH FIXES
+
+- **Guard rails hold:** Tomas never touches exams, tests, Holt or staying; Holt has one here-and-now line; Saruth has one line; no cake, no visit spoilers. The reach fact is neutral.
+- **Fix:** the ceremony moved to the bow lounge, so every plaza line needs changing: notice.ceremony, job.ribbons, the plaque comment, two onset reactions, Holt's warning line, Zeke's worst-face line, lineLap's "where it happened today" and the ceremony header comment.
