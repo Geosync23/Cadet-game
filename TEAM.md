@@ -323,3 +323,8 @@ EW1 idle (handover f474073).
 **~03:37 UTC: OVERNIGHT MODE ON** (the user went to bed). No notifications; recommended answers logged in plans/overnight-decisions-lead22.md; cap 5 working seats: EV1 (until handover) / EV2, FR1, BM11, PR3; ER2 when a build review is due. PR2 hands its last reviews (EW2 storm lines 2a0f57e + fold 8ccd97c) to PR3 and idles.
 **~03:38 UTC:** TS1 idle (handover claude/test-speed bd7d61f). Its find (reloads lose the draw-skip switch: step(30) 27-29 s vs 0.03 s) → BM11 applies the cadet_test.py fix tonight with a same-results proof.
 **~03:39 UTC:** EW2 all writing done and reviewed (claude/events-lines-2 7a9761a: Veyli lore, Line "why it matters", storm story A; PR2/PR3 PASS). EW2 idle. Builders take the ready files from claude/events-lines-2.
+**~03:52 UTC:** FR1 handed over (claude/fridays af86b15, plans/handover-fridays-builder-1.md; turn 5 → PR3). Its 3 open questions answered overnight (logged).
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| Fridays builder 2 FR2 | session_019m7hCEtBsPA3ascA2Bqu9V | `claude/fridays` | turns 6-10 from FR1's note; PR3 reviews, PB s13/14 |
+Working (5): EV1 (finishing F4 → handover), EV2, FR2, BM11, PR3. ER2 on call for the events' build reviews.
