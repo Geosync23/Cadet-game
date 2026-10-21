@@ -420,10 +420,12 @@ with sync_playwright() as pw:
             if 'Raman' not in r1['toast']: fail('no pilot\'s line when the ramp opened')
         shut, reopened = None, None
         tap = g.ev("typeof introTap === 'function' && typeof MEETING_SCRIPTS !== 'undefined' && !!MEETING_SCRIPTS.introAsk && typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")
-        if tap:   # tap-to-ask: tapping Torres while he's showing you round opens the writers' introAsk (the walk answers it)
-            t1 = g.ev("(() => { const ok = introTap(ROSTER.find(p => p.id === INTRO_ESCORT)); return { ok, dlg: DIALOGUE && DIALOGUE.id, other: introTap(ROSTER.find(p => p.id === 'calder')) }; })()")
-            print(f"  tapping Torres on the ramp: {t1['dlg']} (tapping someone else: {t1['other']})")
-            if not t1['ok'] or t1['dlg'] != 'introAsk': fail('tapping Torres during the evening did not open introAsk')
+        if tap:   # "Ask Zeke" parked (the patch's #31): tapping Torres while he shows you round plays his next tour line or does nothing; never the introAsk panel, never the chat card
+            t1 = g.ev("(() => { const ok = introTap(ROSTER.find(p => p.id === INTRO_ESCORT)); return { ok, dlg: DIALOGUE && DIALOGUE.id, parked: typeof INTRO_ASK_ON !== 'undefined' && !INTRO_ASK_ON, other: introTap(ROSTER.find(p => p.id === 'calder')) }; })()")
+            print(f"  tapping Torres on the ramp: taken {t1['ok']}, panel {t1['dlg']} (tapping someone else: {t1['other']})")
+            if t1['parked']:
+                if not t1['ok'] or t1['dlg']: fail('tapping Torres during the evening should do nothing (no panel, no chat card): "Ask Zeke" is parked')
+            elif not t1['ok'] or t1['dlg'] != 'introAsk': fail('tapping Torres during the evening did not open introAsk')
             if t1['other']: fail('introTap answered for someone who is not the escort')
         else: print('  not yet: tap-to-ask (needs introTap, the writers\' introAsk and sim 0.26.31\'s hook in tapCrew)')
         tl2 = g.ev("(() => { const L = (typeof VOICE !== 'undefined' && VOICE['torres-zeke'] && VOICE['torres-zeke'].lines && VOICE['torres-zeke'].lines.week1) || []; return INTRO_TOUR.map(x => [x.id, introTourLines(x.id, x.stub).length, L.filter(e => (e.flag || '').startsWith('walk.' + x.id + '.')).length]); })()")
