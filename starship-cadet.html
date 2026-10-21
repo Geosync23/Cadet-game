@@ -36020,7 +36020,7 @@ function eventPlan(p, d) {
     const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
     if (!meet && ev.easy && lineEasy(p, d, e)) meet = true;   // Crossing the Line's standing easy: a break in the shift (section 14's 'meet')
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null, ...(meet ? { meet: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];
@@ -36164,6 +36164,7 @@ function eventsPlayer(now) {
   if (key !== EV_IN.key) EV_IN = { key, since: now };
   if (key && e.id === 'quiz' && QUIZ_PLAYED !== d && SHIP.events.joined.includes(key) && !DIALOGUE) quizStart(d, now);   // joined while another card was open: the game when it's free
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key) || TJ_WALK) return;   // not on the way past, in a walk's line (0.70.0)
+  if (e.ev.joinAt != null && m < e.ev.joinAt) return;    // joined (its thanks) no sooner than that minute (Crossing the Line: after the punch, ER3 fix 4)
   if (tradJoinable(e) && !tradDoingIt(e)) return;        // 0.70.0: one with something to do together is joined by a tap (tradJoinTap), or by doing it at one of its places
   eventJoin(e, d, now);
 }
@@ -36954,6 +36955,7 @@ if (EV_LINE_ON) {
     places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
     whereFor: (p, d, opts) => lineFirst().has(p.id) ? [[3, '@bow-lounge-line-front']].concat(opts) : opts,   // the first-timers at the front (the ten spots nearest the Captain are theirs)
     lead: lineLead,   // the crowd sets off ahead of the horn, so most are in by the oath (PR6)
+    ownFor: p => lineFirst().has(p.id), joinAt: 900,   // its thanks (the oath read, a mug of punch) at 15:00, after the punch (ER3 fix 4: it came at 14:36)   // the first-timers' own, as a birthday is its honorees': it comes before a game or a tradition at the same time (ER3 fix 3: Bakshi and Hart were at Winner Stays On)
     name: 'Crossing the Line', ask: (c, p) => evWordAt('event.crossingLine.gather.ceremony.ask', p ? p.seed + c.day : 0) || 'The ceremony\'s at half two, in the bow lounge. Coming?', here: (c, p) => evWordAt('event.crossingLine.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
     thanks: c => evWordAt('event.crossingLine.gather.ceremony.thanks', 0, c) || 'You squeeze into the bow lounge with the crew. Gold light comes through the bow glass.' }];   // EW2's ask and thanks (af19fbe)
   // L3, the look: the horn at 14:30 (a felt moment, 'horn': a gold pulse, section 8b) with its one-line notice
@@ -36980,13 +36982,15 @@ if (EV_LINE_ON) {
   L.routines = { onset: [{ who: 'all', rule: 'standEasy', at: [870, 915], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] },
     { where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true }] };   // the lounge is the ceremony's alone for its 45 minutes (section 14's evClosed lets its own crowd in); Saruth stays away
   // the Line supper (the user's line-q4 a): the Sunday table re-dressed on Day 7 (EV_DAY_DRESS, the storm's shape), the
-  // crew's voted dish and Brennan's pudding (linePudding, section 16's menu), 18:00-19:15, everyone at .85, in seated
-  // sittings like the storm's lantern supper (the user, 2026-10-21: no standing at meals): its own seats only, each
-  // diner through the line and sat for 45-60 minutes of it (`stay`, evStay; `seated`); its Saturday Mail left out
+  // crew's voted dish and Brennan's pudding (linePudding, section 16's menu), 18:00-19:45 (the gold ends at 19:15 all
+  // the same), in seated sittings like the storm's lantern supper (the user, 2026-10-21: no standing at meals): its own
+  // seats only, each diner through the line and sat for 45-60 minutes of it (`stay`, evStay; `seated`), the table's own
+  // pulls (an 'everyone' floor took those meaning to go past lead 23's 60) and Pell at 1 (his guess at the punch, ER3
+  // fix 2): about 56 mean to go, 46 come, at most 43 at once in a new game; its Saturday Mail left out
   // (Vance's covers it; Brennan's comes at 15:15). The galley cooks 12 more portions. Lap of the Wren the same night:
   // Tomas (off shift), Zeke and Pell come (pull 1)
   L.galley = { resolution: { extra: 12 } };
-  L.dayDress = [{ trad: 'sunday-table', day: 1, set: { name: evWord('event.crossingLine.gather.lineSupper.name') || 'The Line supper', at: [1080, 1155], jitter: 0, who: [['everyone', .85]],
+  L.dayDress = [{ trad: 'sunday-table', day: 1, set: { name: evWord('event.crossingLine.gather.lineSupper.name') || 'The Line supper', at: [1080, 1185], jitter: 0, who: [['pell', 1]],
     words: 'event.crossingLine.gather.lineSupper', mail: false, stay: [45, 60], seated: true, pudding: true } },
     { trad: 'lap-of-the-wren', day: 1, set: { who: [['tomas', 1], ['torres-zeke', 1], ['pell', 1]] } }];
   lineVenue();
@@ -37082,7 +37086,7 @@ const VEYLI_RETELL = {
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
   id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
-  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.seated ? { seated: true } : {}), ...(m.easy ? { easy: true } : {}), ...(m.whereFor ? { whereFor: m.whereFor } : {}), ...(m.lead ? { lead: m.lead } : {}),   // a pull by person, a meal, ties, seats only (the storm update's lantern supper); standing easy and a place by person (Crossing the Line)
+  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.seated ? { seated: true } : {}), ...(m.easy ? { easy: true } : {}), ...(m.whereFor ? { whereFor: m.whereFor } : {}), ...(m.lead ? { lead: m.lead } : {}), ...(m.ownFor ? { ownFor: m.ownFor } : {}), ...(m.joinAt != null ? { joinAt: m.joinAt } : {}),   // a pull by person, a meal, ties, seats only (the storm update's lantern supper); standing easy and a place by person (Crossing the Line)
   anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
@@ -38041,7 +38045,7 @@ function evIsTrad(ev) { return !!ev && SHIP_TRADITIONS.includes(ev.base || ev); 
 function evDressed(ev, o) {
   const x = { ...ev, base: ev.base || ev };   // base: the tradition it's a copy of (evIsTrad; PR4's S6 fix 1)
   if (o.name) x.name = o.name; if (o.at) x.at = o.at.slice(); if (o.jitter != null) x.jitter = o.jitter;
-  if (o.who) { const pull = new Map(o.who), own = ev.who; x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : own(p, d, e); }
+  if (o.who) { const pull = new Map(o.who), own = ev.who, all = pull.get('everyone'); x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : all != null ? Math.max(all, own(p, d, e)) : own(p, d, e); }   // 'everyone': at least that pull (the Line supper's .85; ER3: it was read as an id and did nothing)
   if (o.words) for (const k of ['mail', 'ask', 'here', 'thanks']) if (typeof LINES !== 'undefined' && LINES[o.words + '.' + k]) x[k] = (c, p) => evWordAt(o.words + '.' + k, (p ? p.seed : 0) + (c && c.day || 0));
   if (o.mail === false) x.mail = null;
   if (o.where) x.where = o.where;
@@ -38226,7 +38230,7 @@ function lineStoryTick(now) {
   const pj = (SHIP.jobs || []).find(j => j.event === 'crossingLine' && j.eventJob === 'linePunch' && j.claimedBy === 'you' && j.status !== 'done');
   const inGalley = (() => { try { const r = DECKS[dn].rooms[roomAt(...player.here())]; return dn === 3 && !!r && r.name === 'Galley'; } catch (x) { return false; } })();
   if (!M['story:secret'] && pj && inGalley && now < at(1, 900)) { M['story:secret'] = 1; const t = evWord('event.crossingLine.punch.secret', c); if (t && typeof toast === 'function') toast('Chef Brennan', t); }   // her note on the bowl if she's not there
-  if (!M['story:mug'] && (M['met:crossingCeremony'] || eventJobDone('linePunch', true)) && now >= at(1, 915) && now < at(1, 1020)) { M['story:mug'] = 1; note(flag('line.promised') && evWord('event.crossingLine.notice.mug', c) || 'Brennan hands you a spare mug of punch. "For Tomas. He\'s on watch: Deck 2, the lift lobby."'); }
+  if (!M['story:mug'] && (M['met:crossingCeremony'] || eventJobDone('linePunch', true) || (SHIP.jobs || []).some(j => j.event === 'crossingLine' && j.eventJob === 'linePunch' && j.claimedBy === 'you' && j.workDone)) && now >= at(1, 915) && now < at(1, 1020)) { M['story:mug'] = 1; note(flag('line.promised') && evWord('event.crossingLine.notice.mug', c) || 'Brennan hands you a spare mug of punch. "For Tomas. He\'s on watch: Deck 2, the lift lobby."'); }
   if (M['story:mug'] === 1 && dn === 2 && now >= at(1, 915) && now < at(1, 1020) && tw && tw.act === 'work' && near('tomas', 3)) lineMoment('lineTomasMug', ['tomas'], null, ['story:mug', 2]);
   // L5b: Brennan offers the two jobs in person (the plan: on the sheet, and Brennan offers them): Sunday 10:30-13:45
   // wherever you find her (the lounge in the morning, Winner Stays On from 12:17: she's never in the mess before the
@@ -38245,11 +38249,12 @@ function lineStoryTick(now) {
   if (LINE_GOAL && (M['story:mug'] !== 1 || now >= at(1, 1020))) { if (IX_GOAL && IX_GOAL.label === LINE_GOAL.label) clearGoal(); LINE_GOAL = false; }
   // the Line supper, in the mess
   let room = ''; try { const r = DECKS[dn].rooms[roomAt(...player.here())]; room = dn + '|' + (r && r.name || ''); } catch (x) { /* between rooms */ }
-  if (room === '3|Mess hall' && now >= at(1, 1085) && now < at(1, 1155)) {
+  if (room === '3|Mess hall' && now >= at(1, 1085) && now < at(1, 1185)) {
     if (!M['story:guess'] && M['story:secret'] && near('pell', 4)) lineMoment('lineSupperGuess', ['pell'], null, ['story:guess', 1]);
-    if (!M['story:saved'] && flag('line.promised') && M['story:mug'] !== 2 && say('brennan', 'event.crossingLine.punch.saved', 8)) M['story:saved'] = 1;
-    // L5b: you missed the ceremony (the user's line-q6 a): Brennan saved you a mug (after her Tomas line, if that's due too)
-    else if (!M['story:savedYou'] && !M['met:crossingCeremony'] && say('brennan', 'event.crossingLine.punch.savedYou', 8)) M['story:savedYou'] = 1;
+    if (!M['story:saved'] && flag('line.promised') && M['story:mug'] !== 2 && say('brennan', 'event.crossingLine.punch.saved', 8)) M['story:saved'] = now;   // the minute (truthy)
+    // L5b: you missed the ceremony (the user's line-q6 a): Brennan saved you a mug, 4 ship minutes after her Tomas line
+    // if that came too (ER3 fix 5: a minute apart, the second bubble cut the first short)
+    else if (!M['story:savedYou'] && !M['met:crossingCeremony'] && !(M['story:saved'] > now - 4) && say('brennan', 'event.crossingLine.punch.savedYou', 8)) M['story:savedYou'] = 1;
   }
   // the Lap, walked with Tomas leading (section 18's TJ_WALK, you in the line): as he reaches its bow turn by the lounge door
   const lw = typeof TJ_WALK !== 'undefined' && TJ_WALK && TJ_WALK.e.id === 'lap-of-the-wren' ? TJ_WALK : null, ld = lw && near(lw.lead, 30);
