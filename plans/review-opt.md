@@ -15,7 +15,7 @@ Method per item: the diff read against the code it replaces; cadet_test old -> n
 | RN1 | #6 grain loop | c1bf6f1 (+ 9604b97, 1a62fc7 docs) | PASS |
 | TS2 | player_check Fix A+B | not pushed yet | waiting |
 | TS2 | item 1 affected-checks runner | claude/opt-tests dffcfa1 is a draft ("rules half working") | waiting for TS2 to say it's ready |
-| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d | next |
+| RN1 | #8 Dev Speed card | 3a77cfe + 08e380d (checked on the branch tip bddbc48) | PASS (nits N1, N2; section 25's owner to look) |
 | RN1 | #7 lighter busy frames | ff6a712 measured, proposed parked | nothing built to review |
 
 ## RN1: perf_check busy event scenes (3af9f15 + 0ad9b5d), PASS WITH FIXES
@@ -65,7 +65,27 @@ What I ran:
 - cadet_test ab86ff7 -> c1bf6f1: ALL IDENTICAL. Deck shots and check_fast as under #10 (they ran on the branch's game, which has both).
 - Mutant m6a, the "less m" line removed: GRAIN DIFFERS at load. Caught.
 
+## RN1 #8: the Dev Speed card (3a77cfe), PASS
+
+Read: a seventh tab in `DM_TABS` and one line in `devmodeDraw` (section 25, the Dev mode engineer's), the rest in its own labelled block in the Dev mode slot. Three wrappers (renderer.render, requestAnimationFrame for `loop` only, goToDeck) installed only `if (DEVMODE)`, which needs #dev and real saving; each calls the wrapped function with the same arguments and returns its result. There's one `renderer.render` call in the game and nothing holds an old `goToDeck` reference, so every deck change is timed. Nothing calls R(); nothing goes into a save.
+
+What I ran:
+- cadet_test f13dc48 -> 3a77cfe (no #dev): ALL IDENTICAL.
+- devmode_check (the branch tip's) on bddbc48: DEVMODE CHECK OK, 4 min 10 s, incl. "seven tabs ... the Speed card" and "off: the Speed card measured without #dev". check_fast on bddbc48: QUICK CHECK OK in 247 s.
+- **speed_probe.py** (mine): a Dev game (#dev, real saving, 390x844) played 600 frames, Deck 3 and back, 600 more, with the card's wrappers and with them taken out: the clock, the deck, where you stand, every walker and the Dev save the same. (The save's only difference was `ship.career.gs`, a new game's own seed from Date.now and Math.random; it differs between two runs of the same build too, so the probe now blanks it.) Without #dev, render, rAF and goToDeck are the game's own and no size is recorded. The card at 390x844, turned 844x390 and the TriFold's 412x960: each size added to "Seen since opening"; the deck change, draw calls, shaders and memory lines filled; Copy's lines; Start again empties the frames. No errors.
+- speed_shots.py (mine): the sheet at 390x844, 360x740, 412x960 and 960x412: seven 44px tabs (Speed alone on a third row), nothing wider than the screen, the card's text readable; the sheet scrolls to Copy and Start again.
+
+Mutants (devmode_check off card):
+- m8a, the wrappers installed without #dev (`if (true)`): "FAIL off: the Speed card measured without #dev". Caught.
+- m8b, the Speed line taken out of devmodeDraw: "FAIL card: the Speed card says ''". Caught.
+
+Nits:
+- N1: section 25's header comment (game line ~51308) still says "six tabs, two rows of three".
+- N2: DEV_NOTES has nothing on the Speed card yet: what it shows, that its times read 0 under the checks' virtual clock, and that its screen sizes are what perf_check's `TRIFOLD` table waits for.
+- Owner: the `DM_TABS` line and the `devmodeDraw` line are in DB2's section 25 (the build-table row says the Dev mode engineer reviews); the lead routes that.
+
 ## Log
 
 - 2026-10-21: took over PR7's opt queue; told PR7. RN1 has since written plans/handover-opt-render.md (RN1 idle); #7 measured and proposed parked (nothing built), #8 built.
+- #8 reviewed on the branch tip (bddbc48, which has integration 0.64.9 merged in): PASS.
 - perf_check items: F1-F4 sent to RN1 and lead 24. RN1 is handed over, so lead 24 says who makes F1 (a two-line change in perf_check.py's SCENES).
