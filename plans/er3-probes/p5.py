@@ -1,0 +1,12 @@
+exec(open('/tmp/claude-0/-home-user-Cadet-game/1a3acdee-25ba-54ef-8a48-f94140cf1be8/scratchpad/common.py').read())
+with sync_playwright() as pw:
+    g = mk(pw, sys.argv[1])
+    g.ev("skipTo(__at(7, 875))"); g.ev("goToDeck(3)"); g.ev("__put(48, 10)"); g.step(5); run(g, 7, "!!DIALOGUE"); g.ev("__dlg(2)")
+    g.ev("skipTo(__at(8, 600)); goToDeck(4)"); g.step(150)
+    print('certificate item', g.ev("(ITEMS.find(i => i.t === 'Line certificate') || {}).x"), 'calls', g.ev("renderer.info.render.calls"), g.ev("SHIP.works && SHIP.works.home"))
+    g.ev("(() => { const it = ITEMS.find(i => i.t === 'Line certificate'); if (it) { const v = new THREE.Vector3(); it.hit.getWorldPosition(v); const c = cellAt(v.x, v.z); __put(c[0], c[1] + 1); } })()"); g.step(30); g.shot(S + '/shots/d8-cert.png')
+    g.ev("skipTo(__at(9, 600)); goToDeck(3)"); g.step(150)
+    print('Tue record', g.ev("JSON.stringify(eventRecord())"), 'plaque', g.ev("(ITEMS.find(i => i.t === 'The Line plaque') || {}).x"))
+    print('Tue status', g.ev("eventStatus()"), 'event', g.ev("JSON.stringify(SHIP.event)"))
+    print('Day 14 (storm) still ok:', g.ev("(() => { skipTo(__at(12, 840)); return JSON.stringify({ ev: SHIP.event && SHIP.event.id, phase: SHIP.event && SHIP.event.phase, log: SHIP.eventLog.map(l => l.id) }); })()"))
+    print('errors', g.errors[:5]); g.close()
