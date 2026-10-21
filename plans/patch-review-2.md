@@ -144,3 +144,4 @@ Harness gotcha (new): speech bubbles pop in with a real-time CSS animation (`.bu
 - **Switch on, in a copy:** events_check fails 8 lines.
   - Nearly all are its hard-coded Day 10 storm: the storm day, the all-clear party on Day 13, the routines, the guest days, film night, rec-slow-stretch on Day 14.
   - One is unexplained: quiet-watch day 300, Deck 3, 2 not reached. Sent to EV1.
+- **e73bacb:** PA's probe p4owed covers the owed goodnight. Away: a Mail at 22:01 (owed=3). Near at 20:30: the bubbles (owed=2). check_fast and --evening OK after integration came in.
