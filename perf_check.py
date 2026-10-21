@@ -77,6 +77,7 @@ SCENE_JS = r"""(sc => {
     const taken = occupiedBy(player); let bd = 1e9; at = null;
     for (let i = b.i0; i <= b.i1; i++) for (let j = b.j0; j <= b.j1; j++) if (roomAt(i, j) === k && free(i, j) && !taken.has(i + ',' + j) && (i - mi) ** 2 + (j - mj) ** 2 < bd) { bd = (i - mi) ** 2 + (j - mj) ** 2; at = [i, j]; }
   }
+  if (!at) return { room: ROOMS[k].name, noSpot: true };   // nowhere free to stand in the room (PR7)
   player.obj.position.copy(cellPos(...at)); target.copy(player.obj.position).setY(.7);
   return { room: ROOMS[k].name };
 })"""
@@ -100,8 +101,9 @@ def switched(path, on):                                  # a copy of the build w
     if not on: return path
     src = open(path).read()
     for name in on:
+        if re.search(r'const ' + name + r' = true\b', src): continue      # already on in the build (PR7's find: it shipped)
         src, n = re.subn(r'const ' + name + r' = (?:false|[A-Z_]+);', 'const ' + name + ' = true;', src, count=1)
-        if not n: return None
+        if not n: return None                                        # no such switch: its branch isn't in this build
     tmp = WORK / 'test' / ('_on_' + '_'.join(on) + '_' + os.path.basename(path)); tmp.write_text(src); return str(tmp)
 
 def run(path):
@@ -125,6 +127,7 @@ def run(path):
                 g.ev(GL_JS)
                 r = g.page.evaluate(f"s => window.__sc(s)({json.dumps(sc)})", SCENE_JS)
                 row['room'] = r.get('room')
+                if r.get('noSpot'): row['skip'] = f"FAIL: no free tile to stand on in {r['room']}"; row['nospot'] = True; g.close(); break
                 g.ev(f"camera.zoom = {zoom}; camera.updateProjectionMatrix()")
                 g.step(90)
                 row['views'][vname] = g.page.evaluate("s => window.__sc(s)(20)", MEASURE_JS)
@@ -168,6 +171,7 @@ def problems(new, old):
     bad = []
     olds = {s['name']: s for s in old['scenes']} if old else {}
     for s in new['scenes']:
+        if s.get('nospot'): bad.append(f"{s['name']}: {s['skip']}")
         if s.get('skip'): continue
         if not s.get('room'): bad.append(f"{s['name']}: room not found")
         for k, x in s['views'].items():
