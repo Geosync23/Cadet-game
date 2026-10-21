@@ -37110,7 +37110,7 @@ function eventMeetPlan(p, d, F) {
 }
 // an event meeting's tag ('ev-<event>-<meeting>'), for section 14's dayReport: time at it on shift counts as work
 const EV_MEET_TAGS = new Set(Object.entries(SHIP_EVENTS).flatMap(([id, def]) => (def.meetings || []).map(m => 'ev-' + id + '-' + m.id)));
-const eventMeetTag = tag => EV_MEET_TAGS.has(tag);
+const eventMeetTag = tag => EV_CALLIN_ON && EV_MEET_TAGS.has(tag);   // false while off: section 14's old path (PR3)
 // the note simNote('calledIn', { id: event, meeting, who, day, at }) as each called-in person's meeting begins (section
 // 20's cue calledIn; cue:calledIn@me for the one called in). In play and after a sleep or skip, once each (the notes
 // ring is saved, so a reload doesn't send it again)
@@ -37118,11 +37118,11 @@ function eventCallInTick(from, to) {
   if (!EV_CALLIN_ON || !(to > from) || typeof simNote !== 'function') return;
   for (let d = Math.floor(Math.max(from, to - 2880) / 1440) + 1; d <= Math.floor(to / 1440) + 1; d++)
     for (const g of evMeetsOn(d)) {
-      const at = (d - 1) * 1440 + g.at; if (at <= from || at > to) continue;
+      const at = (d - 1) * 1440 + g.at; if (at < from || at >= to) continue;
       for (const w of g.who) {
         const p = schedPeople().find(x => x.id === w);
         if (p && eventCalledIn(p, d) && !simNotes('calledIn', at).some(n => n.who === w && n.meeting === g.id && n.day === d))
-          simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at });
+          simNote('calledIn', { id: g.event, meeting: g.id, who: w, day: d, at: g.at, t: at + 1 });   // a minute in, once they're there (and after the hour's own notes at :00: the cues' cap keeps the newest)
       }
     }
 }
@@ -37493,7 +37493,7 @@ function socNote(kind, d) {
 // big time jump and the same hours played one by one come out the same (0.36.49)
 let SOC_T = null;
 const socNow = () => SOC_T != null ? SOC_T : shipNow(), socDay = () => Math.floor(socNow() / 1440) + 1;
-const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
+const SOC_HEARS = ['repair', 'tradition', 'eventPhase', 'eventMoment', 'calledIn', 'favour', 'gift', 'harvest', 'lateMeal', 'choice', 'introStep', 'jobAbandoned', 'jobUnclaimed', 'shiftStart', 'moment'];
 function socHear(kind, d) {
   socInit(); d = d || {}; const t = isFinite(d.t) ? d.t : shipNow(), Q = SHIP.social.noteq || (SHIP.social.noteq = []);
   if (t < (SOC_IN != null ? SOC_IN : SHIP.social.hour) * 60) { socApply(kind, d, t); return; }   // its hour has already run (a late note): now, at its own time
