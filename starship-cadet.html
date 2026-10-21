@@ -51310,7 +51310,7 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // hashchange line, which only offers a reload when #dev is added or taken away). In Dev mode the game keeps its own
 // save (section 13's SAVE_KEY and section 21's INTRO_KEY get "-dev"), so the real game is never written. The place-and-
 // clock card gets a gold outline and the word DEV, and tapping it opens the sheet ("Dev mode: not your real game"):
-// six tabs, two rows of three, 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
+// seven tabs (the render seat's Speed card, opt #8, on a third row), 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
 const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events'], ['speed', 'Speed']];   // Speed: the render seat's (opt #8)
