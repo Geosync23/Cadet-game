@@ -114,3 +114,7 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   - ribbons gone by 16:05. Line supper 18:26-18:44: 45-47 in the mess, 219 calls, pudding apple crumble.
   - plaque on at 19:41 (calls 237), gold fading (.21). Certificate: trace 'lineCertificate' saved, but not shown on
     Deck 4 thirty steps after goToDeck(4): re-checking (may be my probe's timing).
+- food_check bisect (off, 11 4; "bad" = more than the 2 old busy days): 5f3fc3f on = baseline; 4311ffe on/off, the
+  Fridays branch 7a0e5f7 on/off = 14-15 busy days. Bisect on the Fridays branch (first-parent 675588c..7a0e5f7):
+  first bad 4ee3fdc0, the merge of integration 0.64.7: its game change is LADDER_ON, MUG_ON, FLC_ON switched on.
+  Handed to FD1 (session_01YJhagf6oyF6SeT5XGvrL5H, lead 24's call); PR6 stops here. Not the storm's or the supper's.
