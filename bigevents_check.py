@@ -293,15 +293,21 @@ def check_device(g, tag, want_on):
 # simNote('calledIn') for each named person off that day (eventCalledIn), at a minute in; one 'calledIn' cue each in
 # section 20's cues (read at the hour after: notes are applied when their social hour runs); nobody else. Off (EV_CALLIN_ON): no calledIn note at all
 CALLIN = r"""(() => {
-  const out = { on: typeof EV_CALLIN_ON !== 'undefined' ? EV_CALLIN_ON : null, meet: null, want: [], notes: [], cues: [], err: null };
+  const out = { on: typeof EV_CALLIN_ON !== 'undefined' ? EV_CALLIN_ON : null, meets: [], notes: [], err: null };
   try {
-    let m = null, d = 0;
-    if (out.on && typeof evMeetsOn === 'function') for (d = 1; d <= 40 && !m; d++) { const dd = d; m = evMeetsOn(dd).find(g => g.who.some(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, dd); })); if (m) break; }
-    const day = m ? d : 14, at = m ? m.at : 600, ab = (day - 1) * 1440 + at;
-    if (m) { out.meet = m.id + ' D' + day + ' ' + hhmm(at); out.want = m.who.filter(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, day); }).sort(); }
-    for (const t of [ab - 10, ab + 5, ab + 65]) { skipTo(t); if (t === ab + 65) out.cues = ((SHIP.social && SHIP.social.cues) || []).filter(c => c.key === 'calledIn').map(c => c.who).sort(); }
+    const ab = (d, m) => (d - 1) * 1440 + m, list = [];
+    if (out.on && typeof evMeetsOn === 'function') for (let d = 1; d <= 40; d++) for (const m of evMeetsOn(d)) {
+      const want = m.who.filter(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, d); }).sort();
+      if (want.length) list.push({ id: m.id, day: d, at: m.at, t: ab(d, m.at), want });
+    }
+    if (!list.length) skipTo(ab(14, 590)), skipTo(ab(14, 665));   // off: the all-clear's hour, where it would be
+    for (const m of list.sort((a, b) => a.t - b.t)) {   // each meeting that calls someone in, in turn: 10 minutes before, 5 after, an hour after (its cues: the hour after)
+      for (const t of [m.t - 10, m.t + 5, m.t + 65]) if (t > shipNow()) skipTo(t);
+      const cues = ((SHIP.social && SHIP.social.cues) || []).filter(c => c.key === 'calledIn' && c.at >= m.t - 1).map(c => c.who).sort();
+      const notes = simNotes('calledIn').filter(n => n.meeting === m.id && n.day === m.day).map(n => [n.who, n.t]).sort();
+      out.meets.push({ meet: m.id + ' D' + m.day + ' ' + hhmm(m.at), id: m.id, want: m.want, at: m.t, notes, cues });
+    }
     out.notes = simNotes('calledIn').map(n => [n.who, n.meeting, n.day, n.t]).sort();
-    out.at = ab;
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
 })()"""
@@ -309,19 +315,78 @@ CALLIN = r"""(() => {
 def check_callin(pw, path, tag, want_on):
     if 'EV_CALLIN_ON' not in SRC: waiting('called in (F0b, EV_CALLIN_ON)'); return
     g = Game(pw, path); C = g.ev(CALLIN); errs = g.errors[:3]; g.close()
-    say(f"  called in: {C['meet']}: notes {C['notes']}; cues {C['cues']}")
     if C['err']: fail(f"{tag}: called in: {C['err']}"); return
     for e in errs: fail(f"{tag}: called in: page error: {e}")
     if not want_on:
+        say(f"  called in (off): notes {C['notes']}")
         if C['notes']: fail(f"{tag}: calledIn notes while EV_CALLIN_ON is off: {C['notes']}")
         return
-    if not C['meet']: fail(f"{tag}: no event meeting calls anyone in"); return
-    got = sorted(n[0] for n in C['notes'])
-    if got != C['want']: fail(f"{tag}: calledIn notes for {got}, want one each for {C['want']}")
-    for n in C['notes']:
-        if n[3] != C['at'] + 1: fail(f"{tag}: {n[0]}'s calledIn note at minute {n[3]}, want {C['at'] + 1} (a minute into the meeting)")
-    if C['cues'] != C['want']: fail(f"{tag}: calledIn cues for {C['cues']}, want one each for {C['want']}")
-    if 'ionStorm' in SRC and C['meet'].startswith('allClear') and C['want'] != ['calder', 'holt', 'marrow', 'sato']: fail(f"{tag}: the all-clear's called in are {C['want']}, the plan says Marrow, Sato, Holt and Calder")
+    if not C['meets']: fail(f"{tag}: no event meeting calls anyone in"); return
+    for M in C['meets']:
+        say(f"  called in: {M['meet']}: notes {M['notes']}; cues {M['cues']}")
+        got = sorted(n[0] for n in M['notes'])
+        if got != M['want']: fail(f"{tag}: {M['meet']}: calledIn notes for {got}, want one each for {M['want']}")
+        for w, t in M['notes']:
+            if t != M['at'] + 1: fail(f"{tag}: {M['meet']}: {w}'s calledIn note at minute {t}, want {M['at'] + 1} (a minute into the meeting)")
+        if M['cues'] != M['want']: fail(f"{tag}: {M['meet']}: calledIn cues for {M['cues']}, want one each for {M['want']}")
+        if M['id'] == 'allClear' and M['want'] != ['calder', 'holt', 'marrow', 'sato']: fail(f"{tag}: the all-clear's called in are {M['want']}, the plan says Marrow, Sato, Holt and Calder")
+    stray = [n for n in C['notes'] if not any(n[1] == M['id'] and n[0] in M['want'] for M in C['meets'])]
+    if stray: fail(f"{tag}: calledIn notes for nobody's meeting: {stray}")
+
+# Crossing the Line (EV5, claude/line-update; plans/event-line-plan.md), in a copy with EV_LINE_ON switched on too:
+# the oath ceremony's cast at the glass (Marrow and Brennan on the lead spots, Brennan on her galley stint), the front
+# spots for first-timers only (lineFirst), Saruth never at the ceremony (a Veyli does not watch another people's rite),
+# Tomas at his post through the day and on the Lap at 20:30 with Torres-Zeke and Pell, the Line supper (the Sunday table
+# dressed) at most 60 and never more there at once than its places, and no commendation (commend: false)
+LINE = r"""(() => {
+  const out = { err: null }, ab = (d, m) => (d - 1) * 1440 + m, P = id => schedPeople().find(p => p.id === id), S = schedData();
+  try {
+    const r = EV_CALENDAR.find(x => x.id === 'crossingLine'), def = SHIP_EVENTS.crossingLine, d = r.day + 1;   // the crossing: its day 1 (Sunday Day 7)
+    out.day = d; out.commend = def.commend;
+    const at = (p, m) => { const q = P(p); const s = q && planDay(q, d).find(s => s.from <= ab(d, m) && ab(d, m) < s.to); return s ? { place: s.placeId || null, tag: s.tag || null, act: s.act, from: s.from - ab(d, 0), to: s.to - ab(d, 0) } : null; };
+    const cer = def.meetings.find(m => m.id === 'crossingCeremony'), cm = cer.at[1];
+    out.cast = ['marrow', 'brennan'].map(id => [id, at(id, cm + 5)]);
+    const g = EV_SHIPWIDE.find(x => x.id === 'lineCeremony'), gFrom = g.at[0], gTo = g.at[1];
+    out.saruth = (P('saruth') ? planDay(P('saruth'), d) : []).filter(s => s.from < ab(d, gTo) && ab(d, gFrom) < s.to && /^ev-(lineCeremony|crossingLine)/.test(s.tag || '')).map(s => s.tag + '@' + (s.placeId || ''));
+    const front = new Set((S.shared.get('3|@bow-lounge-line-front') || []).map(q => q.id)), first = typeof lineFirst === 'function' ? lineFirst() : new Set();
+    out.front = { spots: front.size, inFront: [], notFirst: [] };
+    for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && front.has(s.placeId) && s.from < ab(d, gTo) && ab(d, gFrom) < s.to) { out.front.inFront.push(p.id); if (!first.has(p.id)) out.front.notFirst.push(p.id); }
+    out.tomas = { post: at('tomas', 600), lap: at('tomas', 1240) };
+    out.lapWith = ['torres-zeke', 'pell'].map(id => [id, at(id, 1240)]);
+    const sup = eventsOn(d).find(e => e.id === 'sunday-table'), people = schedPeople();
+    if (sup) {
+      const want = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table')).length, B = ab(d, 0);
+      const segs = people.flatMap(p => planDay(p, d).filter(s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-'))));
+      let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
+      const cap = new Set(sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []).map(q => q.id)).size;
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, peak, cap };
+    }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  return out;
+})()"""
+
+def check_line(g, tag):
+    L = g.ev(LINE)
+    if L['err']: fail(f"{tag}: the Line: {L['err']}"); return
+    say(f"  the Line D{L['day']}: cast {L['cast']}; front spots {L['front']['spots']}, in them {len(L['front']['inFront'])}; Tomas {L['tomas']}; at the Lap {L['lapWith']}; supper {L.get('supper')}")
+    if L['commend'] is not False: fail(f"{tag}: the Line should never commend (commend: false): {L['commend']}")
+    for i, a in L['cast']:
+        if not a or not str(a['place'] or '').startswith('3-bow-lounge-line-lead'): fail(f"{tag}: {i} isn't on a lead spot at the oath: {a}")
+    b = dict(L['cast']).get('brennan')
+    if b and b['place'] != '3-bow-lounge-line-lead-2': fail(f"{tag}: Brennan should be at 3-bow-lounge-line-lead-2 for the oath: {b}")
+    if L['saruth']: fail(f"{tag}: Saruth is at the Line's ceremony: {L['saruth']}")
+    if not L['front']['spots']: fail(f"{tag}: no front spots ('@bow-lounge-line-front')")
+    if L['front']['notFirst']: fail(f"{tag}: not first-timers in the front spots: {L['front']['notFirst']}")
+    t = L['tomas']
+    if not t['post'] or t['post']['place'] != '2-watch-6': fail(f"{tag}: Tomas isn't at his post (2-watch-6) at 10:00 on the Line's day: {t['post']}")
+    if not t['lap'] or not str(t['lap']['tag'] or '').startswith('ev-lap-of-the-wren'): fail(f"{tag}: Tomas isn't on the Lap at 20:40: {t['lap']}")
+    for i, a in L['lapWith']:
+        if not a or not str(a['tag'] or '').startswith('ev-lap-of-the-wren'): fail(f"{tag}: {i} isn't on the Lap at 20:40: {a}")
+    sp = L.get('supper')
+    if not sp: fail(f"{tag}: no Line supper (the Sunday table) on Day {L['day']}")
+    else:
+        if sp['want'] > CROWD: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")
+        if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -507,10 +572,23 @@ with sync_playwright() as pw:
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
         print(f'\n{n}. {title}:')
         g = Game(pw, variant(tag, on)); a = paper(g, tag); show(a); judge(a, tag); check_device(g, tag, on == 'all')
+        if on == 'all' and g.ev("typeof SHIP_EVENTS.crossingLine !== 'undefined' && !SHIP_EVENTS.crossingLine.draft"): check_line(g, tag)
         for e in g.errors[:3]: fail(f'{tag}: page error: {e}')
         g.close()
         check_notes(pw, variant(tag, on), tag, on == 'all')
         if on == 'all': check_callin(pw, variant(tag, on), tag, True)
+
+    # 3b. with Crossing the Line on (EV_LINE_ON; it follows EVENTS_ON from L6): everything again, and the Line's own cases
+    if 'const EV_LINE_ON = false;' in SRC:
+        print('\n3b. With Crossing the Line (EV_LINE_ON):')
+        lsrc = SRC.replace('const EVENTS_ON = false;', 'const EVENTS_ON = true;', 1).replace('const EV_LINE_ON = false;', 'const EV_LINE_ON = EVENTS_ON;', 1)
+        lp = WORK / 'test' / 'bigev_line.html'; lp.write_text(lsrc)
+        g = Game(pw, str(lp)); a = paper(g, 'line'); show(a); judge(a, 'line'); check_device(g, 'line', True); check_line(g, 'line')
+        for e in g.errors[:3]: fail(f'line: page error: {e}')
+        g.close()
+        check_callin(pw, str(lp), 'line', True)
+    elif "SHIP_EVENTS.crossingLine" in SRC and 'EV_LINE_ON' in SRC:
+        note('EV_LINE_ON already follows EVENTS_ON: the Line is checked in part 3')
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
