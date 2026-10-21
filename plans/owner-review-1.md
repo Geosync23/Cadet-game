@@ -83,3 +83,12 @@ Fixes:
 9. **F3a `eventClosed`:** build the user question 3 exception in from the start (the auditorium and the way to it open for the Day 12 address), or Tracked and "show on map" hide the address's room.
 10. **F3b phones:** the status line is one line. Cap its words (about 60 characters) and take the shot at 360 px wide as well as 390.
 - **Re-check of 6e71069:** all ten fixes are in. One new problem in F1a: "an event the calendar skips is decided once at load, from the save's day" would mark the storm skipped when a Day 20 save is reloaded, so `eventDay(12-14)` would differ between a reload and an unbroken run. Sent to EV1: decide the skip once, on the first load with events on, and save it (`SHIP.evFrom` or a list of skipped ids). Or, simpler, keep `eventDay` purely from the calendar and apply the skip only where an event is started.
+
+## 6. PA, claude/patch-a 75aa54a: final hooks cc93550 (10), 6170b46 (20), 6484320 (15), b623325 (19), 8e8f584 (14), 2026-10-21
+
+**Verdict: PASS.** cadet_test integration 0.64.5 (7958332) vs patch-a: **ALL IDENTICAL**. check_fast on the head (efba55a, which adds only PA's handover note over 75aa54a), alone: **QUICK CHECK OK in 211 s**.
+- cc93550 (10): my 2 s give-up, as suggested. `gapT` is reset on a new goal and only counts while he's stopped.
+- 6170b46 (20): `careerRemark` leaves Zeke out of the pick via `introQuiet` (section 21: intro on, Day 1, after `d1-end:start`), so the next Works crew member can still speak. The `schedU` odds come first, so the hash order is unchanged.
+- 6484320 (15): `teachHeld` and `needWarnTick` ask `introHoldNudges` (intro on, Day 1, 16:50 until the beam). A gentle pop-up isn't marked said (`WARN_SAID`), so it comes later. The firm toast shows without "Follow the marker".
+- b623325 (19): during the hold, `devHeadsShow` moves the first non-meal heads-up to the front, or waits. It only runs while nothing is showing, and `devHeadsTick` still drops stale entries ('soon' at its start, 'start' 10 minutes after), so a meal's heads-up never shows late.
+- 8e8f584 (14): `mine == null` also skips a named desk that went to nobody (null), so the trade never hands out "no desk". The planner is still deterministic; it's all load-time data.
