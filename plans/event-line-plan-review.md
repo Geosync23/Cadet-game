@@ -373,3 +373,11 @@ plan's hash stays the same. The storm's review checks the final shape. **PASS st
   hours of silence), and "help is a long way off" is about distance, not danger.
 
 Verdict: **PASS WITH FIXES** (M1-M3, wording only). The rest of the plan's PASS stands.
+
+### 9ea6ec7: M1-M3 in
+- "As guests" is used everywhere, and "the Veyli's leave" appears only in the record of the fix.
+- "On their charts" is gone.
+- The fact now reads "the charts are thin: a few runs, never a full survey".
+- The fixed-minute Mail is asked of EV1 for both events and listed under "Needed first".
+
+**PASS at 9ea6ec7.**
