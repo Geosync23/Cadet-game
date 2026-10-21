@@ -286,3 +286,29 @@ This covers EV1/EV2's events-base and storm/Line turns, FR1's Fridays turns and 
 **Notes:**
 - 49-51 seated against the plan's 60-70.
 - Day 12's lectern is empty until EV2's storm update exempts Marrow and Vance.
+
+## EV1 F4 (eventFinish, a meeting replayed after a reload, felt moments kept): claude/events-base 13bb264. PASS
+
+**Checks:**
+- Off: cadet_test ALL IDENTICAL.
+- check_fast OK in 205 s.
+- events_check, player_check and devmode_check are OK.
+- bigevents_check fails only the known "party as an event item" (the older copy of EC1's file).
+
+**Probe `f4_reload.py`** (a real save, reloaded):
+- Reloaded inside the meeting's window: the briefing replays from line 1, counted once, and the open mark clears.
+- Reloaded past the window: you get the gist, with no replay.
+
+**Harness gotcha:** the game saves again on unload. Block setItem before reloading an edited save.
+
+**Nit:** the event log's `mine` copy carries the open: and felt: keys.
+
+## EV2 F0b (called in; the meeting's cast in the crew's plans; section 20's calledIn cue): claude/events-base-2 ab67c99 (code 955b16e). PASS WITH FIXES
+
+**Probe `f0b_called.py`** (Day 14's all-clear):
+- The four called-in crew are planned there 09:57-10:14, and Vance is at work there.
+- Each of their notes is sent once.
+
+**Fixes:**
+1. **Bug:** 'calledIn' is missing from SOC_HEARS, so the cue is never made (`cues []`). Add it, and add a check case.
+2. eventMeetTag should also need EV_CALLIN_ON.
