@@ -36762,6 +36762,9 @@ function eventTakeJob(job) {
   const e = SHIP.event; if (!e) return false;
   e.mine['wants:' + job] = 1;
   const j = (SHIP.jobs || []).find(x => x.event === e.id && x.eventJob === job && x.status === 'open');
+  if (j && EV_STORM_ON && !j.claimedBy && j.posted > shipNow() && !(SHIP.jobs || []).some(x => x.claimedBy === 'you' && x.status === 'claimed' && x.kind !== 'favour')) {   // the storm update (PR4's find): posted for a minute still to come (the board hides it, so claimJob can't), held for you as section 17 holds a 'wants:' job
+    Object.assign(j, { claimedBy: 'you', status: 'claimed', start: j.posted }); if (typeof MACH_REV !== 'undefined') MACH_REV++; return true;
+  }
   if (j && typeof claimJob === 'function') return claimJob(j.id);
   return false;
 }
