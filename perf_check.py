@@ -156,9 +156,8 @@ def show(tag, o):
     print(f'== {tag}')
     for s in o['scenes']:
         if s.get('skip'): print(f"  {s['name']:<42} {s['skip']}"); continue
-        if s.get('on'): print(f"  {s['name']:<42} (switched on: {', '.join(s['on'])})")
         v = '  '.join(f"{k} {x['calls']}c/{x.get('gl', '?')}gl {x['tris']}kt {x['js']}ms {x['crew']}p" for k, x in s['views'].items())
-        print(f"  {s['name']:<42} [{s.get('room')}]  {v}")
+        print(f"  {s['name']:<42} [{s.get('room')}]{' (switched on: ' + ', '.join(s['on']) + ')' if s.get('on') else ''}  {v}")
         off = sorted({x.get('stood') for x in s['views'].values() if x.get('stood') != s.get('room')}, key=str)
         if off: print(f"  {'':<42} but you stand in: {', '.join(map(str, off))}")
     print(f"  file {o['size'] / 1e6:.2f} MB, load {o['load']} s")
@@ -180,7 +179,7 @@ def problems(new, old):
                 if x['js'] > y['js'] * 1.3 and x['js'] > y['js'] + 1: bad.append(f"{s['name']} {k}: js {y['js']} -> {x['js']} ms a frame")
     if old and new['size'] > old['size'] * 1.25: print(f"NOTE file size {old['size'] / 1e6:.2f} -> {new['size'] / 1e6:.2f} MB (more to download on a phone; not a failure)")
     t = new['trip']
-    if t and t[-1]['geo'] != t[1]['geo'] or t[-1]['tex'] != t[1]['tex']: bad.append(f"memory grows across deck round trips: {t}")
+    if t and (t[-1]['geo'] != t[1]['geo'] or t[-1]['tex'] != t[1]['tex']): bad.append(f"memory grows across deck round trips: {t}")
     L = new.get('long')
     if L and (L[1]['geo'] > L[0]['geo'] + 20 or L[1]['tex'] > L[0]['tex'] + 2 or (L[1]['heap'] or 0) > (L[0]['heap'] or 0) + 60): bad.append(f"memory grows over a week of play: {L}")
     if new['errors']: bad.append(f"errors: {new['errors'][:4]}")
