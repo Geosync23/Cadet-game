@@ -104,12 +104,13 @@
 // the Record line (never a score)
 == event.crossingLine.record
 - Crossed the Line into the Veyli reach, Day 7.
-// EV7's stand-ins (L5b), for EW2 to check: Brennan offering the two volunteer jobs in person (a bubble, Sunday
-// 12:45-14:15, near her), the toast after it, and the mug she saved you at the Line supper if you missed the ceremony
-// (the user's line-q6 a; the Tomas line punch.saved is separate)
+// Brennan offers the two volunteer jobs in person (EV7's L5b: a bubble, Sunday 10:30-14:15 wherever you find her,
+// once; the jobs go up at 12:45, so the line names the time), the toast after it (a card), and the mug she saves you at
+// the Line supper if you missed the ceremony (the user's line-q6 a; Tomas's is punch.saved). EW2 wrote them over EV7's
+// stand-ins. The punch's secret stays in punch.secret only
 == event.crossingLine.punch.offer
-- Two jobs for the Line if you're free. Sheet's in the mess.
+- Two Line jobs going, love: carry my punch, hang the ribbons. Mess sheet, quarter to one.
 == event.crossingLine.notice.offer
-- Brennan's two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.
+- Brennan's Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.
 == event.crossingLine.punch.savedYou
-- Missed the Line? I saved you a mug. Drink up, crosser.   #warm
+- Missed the Line, love? I saved you a mug. All of it, mind. Then you've crossed.   #warm

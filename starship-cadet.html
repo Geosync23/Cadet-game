@@ -29470,7 +29470,7 @@ const LINES = JSON.parse([
   ',"event.crossingLine.notice.mug":[',
   '{"text":"A mug of Line punch for Tomas: he\'s at his post by the Deck 2 lift until five.","id":"px9kha"}]',
   ',"event.crossingLine.notice.offer":[',
-  '{"text":"Brennan\'s two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.","id":"qzxba6"}]',
+  '{"text":"Brennan\'s Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.","id":"13sv5js"}]',
   ',"event.crossingLine.plaque.missed":[',
   '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We\'re new, and we\'re nervous, and we came anyway.\\"","id":"1i583ko"}]',
   ',"event.crossingLine.plaque.proud":[',
@@ -29480,11 +29480,11 @@ const LINES = JSON.parse([
   ',"event.crossingLine.plaque.watch":[',
   '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We crossed together. Even the ones on watch.\\"","id":"1x6pp46"}]',
   ',"event.crossingLine.punch.offer":[',
-  '{"text":"Two jobs for the Line if you\'re free. Sheet\'s in the mess.","id":"ohkghy"}]',
+  '{"text":"Two Line jobs going, love: carry my punch, hang the ribbons. Mess sheet, quarter to one.","id":"1t0seb2"}]',
   ',"event.crossingLine.punch.saved":[',
   '{"text":"Tomas is on watch, so I\'ve saved him a mug. Don\'t look at me like that. I\'m not soft.","id":"kv5rwo"}]',
   ',"event.crossingLine.punch.savedYou":[',
-  '{"text":"Missed the Line? I saved you a mug. Drink up, crosser.","id":"abshkl","tone":"warm"}]',
+  '{"text":"Missed the Line, love? I saved you a mug. All of it, mind. Then you\'ve crossed.","id":"1ocwn6t","tone":"warm"}]',
   ',"event.crossingLine.punch.secret":[',
   '{"text":"What\'s in it? Pickle brine. One spoon. Every Line since I joined. Tell no one.","id":"1u7618m"}]',
   ',"event.crossingLine.record":[',
@@ -38220,7 +38220,7 @@ function lineStoryTick(now) {
   // horn), before they're up at 12:45 or while one's still open and neither is yours; once (a bubble, and a toast)
   const lj = (SHIP.jobs || []).filter(j => j.event === 'crossingLine' && /^line(Punch|Ribbons)$/.test(j.eventJob || ''));
   if (!M['story:offer'] && (now < at(1, 765) ? !lj.length : lj.some(j => j.status === 'open' && !j.claimedBy) && !lj.some(j => j.claimedBy === 'you')) && now >= at(1, 630) && now < at(1, 855) && say('brennan', 'event.crossingLine.punch.offer', 5)) {
-    M['story:offer'] = 1; note(evWord('event.crossingLine.notice.offer', c) || 'Brennan\'s two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.'); }
+    M['story:offer'] = 1; note(evWord('event.crossingLine.notice.offer', c) || 'Brennan\'s Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.'); }
   // L5b: the punch "dunking" (the plan's 14:55-15:15, a mug each): the ceremony's crowd on this deck drink from a mug
   // (the crowd's mug pose, patch #30's 'cocoa', with MUG_ON) from the oath's end; looks only (the planner's tag is unchanged)
   if (dn === 3 && now >= at(1, 895) && now < at(1, 915) && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has('cocoa'))
