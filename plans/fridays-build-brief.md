@@ -142,6 +142,11 @@ F0a is in claude/integration.
 - `myshift:night` never matches until Pillar 5's night shifts exist (its line is skipped).
 - The full list: EW1's `content/addresses/README.md` (claude/events-lines f869a07).
 
+## Status (2026-10-21, FR1's handover)
+
+Turns 1-5 built and pushed (head 78112ef); turns 6-10 go to the next builder: read
+`plans/handover-fridays-builder-1.md` first.
+
 ## Turn 5 notes (2026-10-21)
 
 - Dev mode's Traditions tab ("start any tradition") is Dev mode's own Stop 1b, not built yet; it lists the traditions

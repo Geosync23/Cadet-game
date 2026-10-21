@@ -820,6 +820,10 @@ The case engine (plans/mechanics/case-engine.html on `claude/p5-design`). A real
 - **Saved:** nothing of 24i's own (the job's `symptom`, `read`, `traceFound` are section 17's; `ship.works.tools.pipekit`, `ship.works.use.m9`). No `R()`, no 3D objects; key 879 spare.
 - **Test:** `mech_check.py BUILD.html m9`, and the tap path by hand in a browser.
 
+## Short Fridays and the Captain's address (section 18f, the Fridays builder FR1; claude/fridays)
+
+All behind `SHORT_FRIDAY` (section 13), off = identical. Turns 1-5 of 10 built (the crew's and your 15:30 Friday, the skeleton, your clock, the Works holds, the device and Dev rows, the address as a tradition in the auditorium); turns 6-10 (the speech, the missed-it dip and dinner spread, the explaining lines, the perf scenes, switching on) are next. Plan: `plans/fridays-build-brief.md`; state, gotchas and how to test: `plans/handover-fridays-builder-1.md`. Check: `fridays_check.py`.
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.
