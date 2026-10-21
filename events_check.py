@@ -200,6 +200,7 @@ LIVE = r"""(() => {
   D.lines = seen; D.mine = { ...SHIP.event.mine }; D.closed = !DIALOGUE;
   tick(9 * 1440 + bm + 2, 9 * 1440 + bm + 14); machinesNow();   // PR4: the job you picked is yours once it's up (not only wanted)
   D.claimed = ((SHIP.jobs || []).find(x => x.event === 'ionStorm' && x.eventJob === 'stormBatteries') || {}).claimedBy || null;
+  D.onShift = typeof playerShiftOn === 'function' ? !!playerShiftOn(10) : true;   // this part runs the storm from day 10; held only on a day you work (the calendar's briefing is Day 11, a workday)
   D.choiceNotes = (window.__notes || []).filter(x => x.kind === 'choice').map(x => x.script + ':' + x.k + ':' + x.who.length);   // the ship note for your reply
   // the front: day 11, 14:00, on Deck 3
   skipTo(10 * 1440 + 13 * 60 + 50); put(3, '3-grab-1'); tick(10 * 1440 + 13 * 60 + 51, 10 * 1440 + 14 * 60 + 1);
@@ -701,7 +702,7 @@ with sync_playwright() as pw:
     if not any(x.startswith('stormBriefing:0:') or x.startswith('calderStorm:0:') for x in L.get('choiceNotes') or []): fail(f"no simNote('choice') for the briefing reply: {L.get('choiceNotes')}")
     if L['mine'].get('choice:calderStorm') != 1 or not (L['mine'].get('wants:stormBatteries') or L['mine'].get('jobs')): fail(f"the briefing choice was not recorded: {L['mine']}")
     if any('Storm briefing (notes)' in x for x in L['mails']): fail('a gist was mailed for a briefing played to the end')
-    if L.get('claimed') != 'you': fail(f"the battery job picked at the briefing isn't yours once it's up: claimedBy {L.get('claimed')}")
+    if L.get('claimed') != 'you' and (L.get('onShift') or L.get('claimed') is not None): fail(f"the battery job picked at the briefing isn't yours once it's up: claimedBy {L.get('claimed')}")
     if not L['feel'] or 'jolt' not in L['feel'][0] or not L['banner'] or not L['flicker']: fail('the front was not felt (jolt, banner, flicker)')
     if not L['allClear'] or L['allClear']['name'] not in ('Captain Odile Marrow', 'Commander Teo Vance') or not L['walked'] or not any('The all-clear (notes)' in x for x in L['mails']): fail('the all-clear did not open, or walking out sent no gist')   # the writers' all-clear (the storm update) opens with Vance
     if max(L['calls1'], L['calls2'], L['calls3']) >= 450: fail('draw calls over 450 in the storm')

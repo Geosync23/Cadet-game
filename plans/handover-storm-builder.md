@@ -10,11 +10,14 @@ storm builder reads this, then `plans/handover-events-engineer-1.md` (EV1's, on 
   small hooks elsewhere. Never set the build number.
 - **Branch:** `claude/storm-update` (from claude/events-base 13bb264 + claude/events-base-2 merged, 89b976f). Pushed:
   9561f48 (S1), d3bf237 (S3, S5, S6, S7). Merge claude/events-base-2 again as EV2 pushes (F5 ranks, F8 comms).
-- **Lead:** lead 22, session_01BGQCZLK6gYTnqu6mwZ61jB (overnight: questions to the lead only). **Reviews:** PR3
-  (session_01EtHMLLsjDYDHPG3JgCMbGi) each turn and the hooks outside 13/14/10; PB (session_01FWW2piuXkFYaRRzLXZiqYb) for
+- **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (lead 22 has handed over; overnight: questions to the lead
+  only). **Reviews:** PR4 (session_014WyaZtasY32m5fnkBxuR9d) each turn, the hooks outside 13/14/10 and the props as the
+  4d stand-in (PR3 has handed over; its partial S1 notes are in claude/review-3 plans/handover-reviewer-3.md); PB (session_01FWW2piuXkFYaRRzLXZiqYb) for
   sections 13/14/10; EC1 (session_01QgShGXD6P24DDxTp8npN41) owns bigevents_check.py (never edit it; I took 818add7 as is);
   ER2 (session_01S8pboNujAzZgMSWFK84CxD) does the adversarial build review after S9, before S10. EV2
-  (session_017S7eVMgX34nSt8fxZ5kat9, claude/events-base-2) finishes the base; I asked it to take S4 and S8 (no answer yet).
+  (session_017S7eVMgX34nSt8fxZ5kat9) built S4 and S8 on claude/storm-s4s8 (merged into claude/storm-update, ff16dd5);
+  read plans/handover-events-engineer-2.md: don't replace `S.jobs.warning` (it pushes stormRota), don't replace the
+  stormBriefing meeting object (it sets scriptBy, F5), don't register 'calderStorm.officer' (it does).
   FR2 (session_019m7hCEtBsPA3ascA2Bqu9V) builds the Fridays (the Day 12 address).
 
 ## What's built (all behind `const EV_STORM_ON = EVENTS_ON`, section 18 by the other EV_ lines)
@@ -39,6 +42,23 @@ Off = today's storm: cadet_test ALL IDENTICAL against the turn before, every tur
   via postEventJob + `reserved`/`until` when you're on another job; Mail `unless`; `settleTraces` stormLantern.
 - **Words:** EW1/EW2's ionStorm files are in content/ (moved from plans/events-ready/ionStorm, claude/events-lines-2 7a9761a).
 
+## Decided tonight (leads 22 and 23)
+
+- **Props:** no deck architect seat is live: the storm builder builds DECK_DRESS 'lanternMess' (S5) and the trace
+  'stormLantern' (S7) in the deck kit's style (col() for every colour, no coplanar surfaces, shared kit made at load
+  never calls R()), with phone shots (390x844) and draw calls measured with ~60 in the mess (budget 450). PR4 reviews.
+- **Standing diners:** the supper keeps its 22 standing places and they eat standing with a tray, scoped as PB said:
+  (1) section 14's tradMeal gives the tray and standing pose only when the place is one of that gathering's own crowd
+  spots (type 'event', `gather` = its venue) during its meal; (2) day_check allows exactly that (a '<deck>-<venue>-crowd-N'
+  spot, act dinner, the gathering's ev- tag, in its window); (3) behind EV_STORM_ON; (4) a perf_check scene at 18:30.
+  The user confirms in the morning: keep it easy to switch off (dropping `{ deck: 3, pool: '@gather-mess' }` from the
+  supper's places gives about 48). NOT BUILT YET.
+- **S2:** wait until claude/fridays reaches claude/integration (never merge claude/fridays); the Marrow/Vance window is
+  [940, 1010] (15:40-16:50): agree the exact minute with FR2.
+- **PR4's S1 find, fixed** (after d3bf237): the briefing pick wasn't held when section 17 had already posted the job
+  for 14:12 at 14:00 (the board hides future postings, so claimJob failed): eventTakeJob holds it directly; events_check
+  LIVE asserts the battery job is claimedBy 'you' after the briefing.
+
 ## Left to do
 
 1. **S2 (waits on lead 22's call about Fridays):** the 'captains-address' tradition exists only on claude/fridays.
@@ -51,10 +71,11 @@ Off = today's storm: cadet_test ALL IDENTICAL against the turn before, every tur
    `promoSummonsDay()` skipping a day d when [d, summonsAt], [d, 17:00 move] or [d+1, 17:15 ceremony] falls in the
    storm's held span (a new pure `evHeldFor(d, m)` from evCalPlan: onset start to the all-clear's end). PB reviews 14,
    PR3 reviews 24p.
-2. **S4 (EV2 may take it):** ballasts → blackout, batteries → bridgeHungry, booth rota job → calls; calls retune in
+0. **The standing-tray scoping and the two props** (above).
+2. **S4: built by EV2** (merged). ballasts → blackout, batteries → bridgeHungry, booth rota job → calls; calls retune in
    `stormCallBacklog` only (about 25 min a call left alone, 15 with the rota), never `callOwed`. bigevents_check runs
    the three ways.
-3. **S8 (EV2 may take it):** banner on phones (HUD), status/Schedule/Record, the Officer's briefing
+3. **S8: built by EV2** (merged; check its scriptBy officer works with stormScripts' baked calderStorm). banner on phones (HUD), status/Schedule/Record, the Officer's briefing
    (`calderStorm.officer`, rank officer+, via F5's ranks; stormScripts currently installs the junior version only).
 4. **S9:** small things (placeholder code, the framed menu prop, Deck 4 common room draw calls 454) and the supper's
    perf_check scene (about 60 in the mess, 390x844).
