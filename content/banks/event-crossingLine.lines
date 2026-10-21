@@ -17,11 +17,28 @@
 - Crossed the Line. Ceremony, bow lounge. Supper 18:00.
 == event.crossingLine.status.afterglow
 - First day in the Veyli reach.
+// EW2: the resolution's status line (15:15-19:15; the builder's fallback was "Crossed the Line. The Line supper at 18:00.")
+== event.crossingLine.status.resolution
+- Crossed the Line. The Line supper's in the mess at 18:00.
 // tap lines at the ceremony (the bow lounge) (crew, not first-timers)
 == event.crossingLine.gather.ceremony.here
 - Front row's for first-timers. We old hands stand at the back and laugh.   #funny
 - Watch their faces when the punch goes round. Best bit.   #funny
 - I cried at my first Line. Don't tell anyone.   #warm
+// EW2: the ceremony's ask (crew asking you along, 14:00-14:30) and thanks (your card after it; 200 at most). The
+// thanks never names your answer (the plaque does) and never the punch's secret (Brennan's, on the punch job)
+== event.crossingLine.gather.ceremony.ask
+- Bow lounge at half two. First-timers stand at the front. That's you.   #funny
+- Coming to the Line? Half two, the bow lounge. Bring a brave face.
+- The Captain's reading the oath at half two. Come and hear it.   #warm
+== event.crossingLine.gather.ceremony.thanks
+- You stand with the crowd in the bow lounge while the Captain reads the old oath, the stars at her back. Then a mug of Line punch, all of it. You're a Line-crosser now.   #warm
+// EW2: the punch bowl's tap text (a card, the bow lounge, 14:30-15:15). Keeps the secret
+== event.crossingLine.tap.punch
+- Brennan's Line punch. Green, faintly fizzy. Nobody will tell you what's in it.   #funny
+// EW2: the mug notice, 15:15, only if you promised Tomas punch (flag:line.promised): the job's second stop
+== event.crossingLine.notice.mug
+- A mug of Line punch for Tomas: he's at his post by the Deck 2 lift until five.
 // the Line supper, 18:00-19:15, the mess, in place of the Sunday table (an extra batch and a pudding; Brennan is on duty; no cake in the words: the four-weeks cake is the cake moment)
 == event.crossingLine.gather.lineSupper.name
 - The Line supper
@@ -87,3 +104,12 @@
 // the Record line (never a score)
 == event.crossingLine.record
 - Crossed the Line into the Veyli reach, Day 7.
+// EV7's stand-ins (L5b), for EW2 to check: Brennan offering the two volunteer jobs in person (a bubble, Sunday
+// 12:45-14:15, near her), the toast after it, and the mug she saved you at the Line supper if you missed the ceremony
+// (the user's line-q6 a; the Tomas line punch.saved is separate)
+== event.crossingLine.punch.offer
+- Two jobs for the Line if you're free. Sheet's in the mess.
+== event.crossingLine.notice.offer
+- Brennan's two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.
+== event.crossingLine.punch.savedYou
+- Missed the Line? I saved you a mug. Drink up, crosser.   #warm

@@ -8058,7 +8058,7 @@ const DECK_DRESS = {
     dressBox(b, .44, .04, .44, '#5a4632', 0, .78, 0); dressBox(b, .08, .76, .08, '#5a4632', 0, .38, 0); dressBox(b, .3, .03, .3, '#5a4632', 0, .02, 0);
     const bowl = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), dressMat('#d9e4e6')); bowl.position.set(0, 1.0, 0); bowl.rotation.x = Math.PI; b.add(bowl);
     const punch = new THREE.Mesh(new THREE.CircleGeometry(.185, 16), new THREE.MeshBasicMaterial({ color: col('#7bc44a'), toneMapped: false })); punch.rotation.x = -Math.PI / 2; punch.position.set(0, .985, 0); punch.userData.noMerge = true; b.add(punch);
-    return { t: 'Line punch', x: 'Chef Brennan\'s Line punch, in the big bowl. It is green. Nobody asks why.', floor: ['L', 51.45 - r.i0, 9.45 - r.j0], y: .9, w: .5, h: .4, d: .5, block: [[51, 9]] };
+    return { t: 'Line punch', x: (typeof evWord === 'function' && evWord('event.crossingLine.tap.punch')) || 'Chef Brennan\'s Line punch, in the big bowl. It is green. Nobody asks why.', floor: ['L', 51.45 - r.i0, 9.45 - r.j0], y: .9, w: .5, h: .4, d: .5, block: [[51, 9]] };
   } },
   // linePlaque: the plaque by the bow lounge's doorway, on the promenade's north wall at its bow end (40, 9: the Lap of
   // the Wren turns there, and everyone passing sees it): from the afterglow (Sunday 19:15) on, a trace for good after the event. Your answer
@@ -9841,9 +9841,12 @@ const evRule = (abs, rule, p) => { const e = evAt(abs); return e && e.rules.find
 const evShut = (pl, abs, r) => r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room
   || (r.where === 'deck:' + pl.deck && !(typeof evOpenFor === 'function' && evOpenFor(pl.deck, pl.room, abs)));   // a whole deck (the storm update: the rec deck), but a room opened for a held beat (the auditorium for the Friday address)
 // ev: the take is for a gathering (o.event), which a rule with `gather: true` lets in (Crossing the Line: the bow lounge
-// is the ceremony's alone); to: the stay's end, which such a rule also checks, so nobody sits on into it
-const evClosed = (pl, abs, ev, to) => { const e = evAt(abs), f = !ev && to > abs ? evAt(to - 1) : null;
-  return (!!e && e.rules.some(r => r.rule === 'closed' && !(ev && r.gather) && evShut(pl, abs, r))) || (!!f && f.rules.some(r => r.rule === 'closed' && r.gather && evShut(pl, to - 1, r))); };
+// is the ceremony's alone); to: the stay's end: such a rule is checked in every 10-minute slot of the stay (evAt's), so
+// nobody sits on into it nor through it (a lounge seat 14:00-15:30 spans the whole 14:30-15:15: PB's fix)
+const evClosed = (pl, abs, ev, to) => { const e = evAt(abs);
+  if (!!e && e.rules.some(r => r.rule === 'closed' && !(ev && r.gather) && evShut(pl, abs, r))) return true;
+  if (ev || !(to > abs)) return false;
+  for (let m = abs; ; m = Math.min(m + 10, to - 1)) { const f = evAt(m); if (f && f.rules.some(r => r.rule === 'closed' && r.gather && evShut(pl, m, r))) return true; if (m >= to - 1) return false; } };
 // owed a call when comms come back: section 18's callOwed (the calls-home crew and about a third of the rest)
 const evOwed = (p, e, d) => p.rank !== 'guest' && (typeof callOwed === 'function' ? callOwed(p, e.startDay) : habitsOn(p, d).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33);
 function schedFrame(p, d) {
@@ -29418,10 +29421,16 @@ const LINES = JSON.parse([
   '{"text":"First-timers, to the bow lounge. The rest of you, be kind. Marrow out.","id":"pp8v7w"}]',
   ',"event.crossingLine.answer.missed":[',
   '{"text":"We\'re new, and we\'re nervous, and we came anyway.","id":"zmbzi1"}]',
+  ',"event.crossingLine.gather.ceremony.ask":[',
+  '{"text":"Bow lounge at half two. First-timers stand at the front. That\'s you.","id":"146f80v","tone":"funny"},',
+  '{"text":"Coming to the Line? Half two, the bow lounge. Bring a brave face.","id":"gfr69z"},',
+  '{"text":"The Captain\'s reading the oath at half two. Come and hear it.","id":"rxdj23","tone":"warm"}]',
   ',"event.crossingLine.gather.ceremony.here":[',
   '{"text":"Front row\'s for first-timers. We old hands stand at the back and laugh.","id":"dup5gn","tone":"funny"},',
   '{"text":"Watch their faces when the punch goes round. Best bit.","id":"10z73b3","tone":"funny"},',
   '{"text":"I cried at my first Line. Don\'t tell anyone.","id":"x1fiz0","tone":"warm"}]',
+  ',"event.crossingLine.gather.ceremony.thanks":[',
+  '{"text":"You stand with the crowd in the bow lounge while the Captain reads the old oath, the stars at her back. Then a mug of Line punch, all of it. You\'re a Line-crosser now.","id":"6oreif","tone":"warm"}]',
   ',"event.crossingLine.gather.lineSupper.ask":[',
   '{"text":"Line supper at six. Proper food, to make up for the punch.","id":"1e9lmha","tone":"funny"},',
   '{"text":"Everyone\'s at the Line supper tonight. Come and find a seat. Or a wall.","id":"1a4i4mv"}]',
@@ -29458,6 +29467,10 @@ const LINES = JSON.parse([
   '{"text":"Crossing the Line: the ceremony in the bow lounge at 14:30. First-timers to the front.","id":"ji8jrg"}]',
   ',"event.crossingLine.notice.horn":[',
   '{"text":"The ship\'s horn: the Wren has crossed the Line.","id":"skmjcn"}]',
+  ',"event.crossingLine.notice.mug":[',
+  '{"text":"A mug of Line punch for Tomas: he\'s at his post by the Deck 2 lift until five.","id":"px9kha"}]',
+  ',"event.crossingLine.notice.offer":[',
+  '{"text":"Brennan\'s two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.","id":"qzxba6"}]',
   ',"event.crossingLine.plaque.missed":[',
   '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We\'re new, and we\'re nervous, and we came anyway.\\"","id":"1i583ko"}]',
   ',"event.crossingLine.plaque.proud":[',
@@ -29466,8 +29479,12 @@ const LINES = JSON.parse([
   '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"Is this the part with the punch?\\"","id":"hfeac2"}]',
   ',"event.crossingLine.plaque.watch":[',
   '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We crossed together. Even the ones on watch.\\"","id":"1x6pp46"}]',
+  ',"event.crossingLine.punch.offer":[',
+  '{"text":"Two jobs for the Line if you\'re free. Sheet\'s in the mess.","id":"ohkghy"}]',
   ',"event.crossingLine.punch.saved":[',
   '{"text":"Tomas is on watch, so I\'ve saved him a mug. Don\'t look at me like that. I\'m not soft.","id":"kv5rwo"}]',
+  ',"event.crossingLine.punch.savedYou":[',
+  '{"text":"Missed the Line? I saved you a mug. Drink up, crosser.","id":"abshkl","tone":"warm"}]',
   ',"event.crossingLine.punch.secret":[',
   '{"text":"What\'s in it? Pickle brine. One spoon. Every Line since I joined. Tell no one.","id":"1u7618m"}]',
   ',"event.crossingLine.record":[',
@@ -29476,8 +29493,12 @@ const LINES = JSON.parse([
   '{"text":"First day in the Veyli reach.","id":"1ou5ip6"}]',
   ',"event.crossingLine.status.onset":[',
   '{"text":"Crossed the Line. Ceremony, bow lounge. Supper 18:00.","id":"pcrcpu"}]',
+  ',"event.crossingLine.status.resolution":[',
+  '{"text":"Crossed the Line. The Line supper\'s in the mess at 18:00.","id":"2ludkb"}]',
   ',"event.crossingLine.status.warning":[',
   '{"text":"Tomorrow at 14:30 we cross the Line into the Veyli reach.","id":"mnvjhf"}]',
+  ',"event.crossingLine.tap.punch":[',
+  '{"text":"Brennan\'s Line punch. Green, faintly fizzy. Nobody will tell you what\'s in it.","id":"3da9n7","tone":"funny"}]',
   ',"event.ionStorm.address.onset.1":[',
   '{"text":"This is the Captain. We\'re in it.","id":"7u0nc0"}]',
   ',"event.ionStorm.address.onset.2":[',
@@ -36932,8 +36953,8 @@ if (EV_LINE_ON) {
     who: (p, d) => p.id === 'saruth' || cer.who.includes(p.id) || lineFirstCrew(2, d, cer.who).some(q => q.id === p.id) ? 0 : 1, anim: 'talk', from: 'Captain Odile Marrow',
     places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
     whereFor: (p, d, opts) => lineFirst().has(p.id) ? [[3, '@bow-lounge-line-front']].concat(opts) : opts,   // the first-timers at the front (the ten spots nearest the Captain are theirs)
-    name: 'Crossing the Line', ask: 'The ceremony\'s at half two, in the bow lounge. Coming?', here: (c, p) => evWordAt('event.crossingLine.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
-    thanks: 'You squeeze into the bow lounge with the crew. Gold light comes through the bow glass.' }];
+    name: 'Crossing the Line', ask: (c, p) => evWordAt('event.crossingLine.gather.ceremony.ask', p ? p.seed + c.day : 0) || 'The ceremony\'s at half two, in the bow lounge. Coming?', here: (c, p) => evWordAt('event.crossingLine.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
+    thanks: c => evWordAt('event.crossingLine.gather.ceremony.thanks', 0, c) || 'You squeeze into the bow lounge with the crew. Gold light comes through the bow glass.' }];   // EW2's ask and thanks (af19fbe)
   // L3, the look: the horn at 14:30 (a felt moment, 'horn': a gold pulse, section 8b) with its one-line notice
   // (lineStoryTick), the gold hull lights to 19:15 (8b's FEEL_MOODS.crossingLine), the ribbons and the punch bowl in the
   // lounge for the ceremony only, the plaque by the lounge door from the afterglow (then a trace), your certificate on
@@ -38223,6 +38244,7 @@ function lineMoment(id, who, add) {
   MEETING_SCRIPTS[key] = { ...sc, lines: L, onEnd: () => { delete MEETING_SCRIPTS[key]; } };
   return dialogueShow(key, { id: key, who, at: shipNow(), where: hereWhere() });
 }
+let LINE_GOAL = null;                                    // the pointer to Tomas lineStoryTick set (false: done this load); never saved
 function lineStoryTick(now) {
   const e = SHIP.event; if (!e || e.id !== 'crossingLine' || typeof DECK_CREW === 'undefined' || !deckDef) return;
   const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e), P = player.obj.position, dn = deckDef.num;
@@ -38238,13 +38260,30 @@ function lineStoryTick(now) {
   const pj = (SHIP.jobs || []).find(j => j.event === 'crossingLine' && j.eventJob === 'linePunch' && j.claimedBy === 'you' && j.status !== 'done');
   const inGalley = (() => { try { const r = DECKS[dn].rooms[roomAt(...player.here())]; return dn === 3 && !!r && r.name === 'Galley'; } catch (x) { return false; } })();
   if (!M['story:secret'] && pj && inGalley && now < at(1, 900)) { M['story:secret'] = 1; const t = evWord('event.crossingLine.punch.secret', c); if (t && typeof toast === 'function') toast('Chef Brennan', t); }   // her note on the bowl if she's not there
-  if (!M['story:mug'] && (M['met:crossingCeremony'] || eventJobDone('linePunch', true)) && now >= at(1, 915) && now < at(1, 1020)) { M['story:mug'] = 1; note(evWord('event.crossingLine.notice.mug', c) || 'Brennan hands you a spare mug of punch. "For Tomas. He\'s on watch: Deck 2, the lift lobby."'); }
+  if (!M['story:mug'] && (M['met:crossingCeremony'] || eventJobDone('linePunch', true)) && now >= at(1, 915) && now < at(1, 1020)) { M['story:mug'] = 1; note(flag('line.promised') && evWord('event.crossingLine.notice.mug', c) || 'Brennan hands you a spare mug of punch. "For Tomas. He\'s on watch: Deck 2, the lift lobby."'); }
   if (M['story:mug'] === 1 && dn === 2 && now >= at(1, 915) && now < at(1, 1020) && tw && tw.act === 'work' && near('tomas', 3) && lineMoment('lineTomasMug', ['tomas'])) M['story:mug'] = 2;
+  // L5b: Brennan offers the two jobs in person (the plan: on the sheet, and Brennan offers them): Sunday 10:30-14:15
+  // wherever you find her (the lounge in the morning, Winner Stays On from 12:17: she's never in the mess before the
+  // horn), before they're up at 12:45 or while one's still open and neither is yours; once (a bubble, and a toast)
+  const lj = (SHIP.jobs || []).filter(j => j.event === 'crossingLine' && /^line(Punch|Ribbons)$/.test(j.eventJob || ''));
+  if (!M['story:offer'] && (now < at(1, 765) ? !lj.length : lj.some(j => j.status === 'open' && !j.claimedBy) && !lj.some(j => j.claimedBy === 'you')) && now >= at(1, 630) && now < at(1, 855) && say('brennan', 'event.crossingLine.punch.offer', 5)) {
+    M['story:offer'] = 1; note(evWord('event.crossingLine.notice.offer', c) || 'Brennan\'s two Line jobs, the punch and the ribbons: on the job board and the mess sign-up sheet from 12:45.'); }
+  // L5b: the punch "dunking" (the plan's 14:55-15:15, a mug each): the ceremony's crowd on this deck drink from a mug
+  // (the crowd's mug pose, patch #30's 'cocoa', with MUG_ON) from the oath's end; looks only (the planner's tag is unchanged)
+  if (dn === 3 && now >= at(1, 895) && now < at(1, 915) && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has('cocoa'))
+    for (const a of DECK_CREW) if (a.settled && a.tag === 'ev-lineCeremony-talk' && a.pose === 'talk') a.pose = 'cocoa';
+  // L5b: while the mug's yours to take (15:15-17:00), the goal pointer to Tomas at his post, once a load, if no other
+  // goal is set; cleared when he has it or the time's up
+  if (M['story:mug'] === 1 && now < at(1, 1020) && LINE_GOAL === null && typeof setGoal === 'function' && typeof goalNow === 'function' && !IX_GOAL && tw && tw.act === 'work' && tw.placeId) {
+    LINE_GOAL = { deck: tw.deck || 2, place: tw.placeId, label: 'Take Tomas his mug of punch' }; setGoal(LINE_GOAL); }
+  if (LINE_GOAL && (M['story:mug'] !== 1 || now >= at(1, 1020))) { if (IX_GOAL && IX_GOAL.label === LINE_GOAL.label) clearGoal(); LINE_GOAL = false; }
   // the Line supper, in the mess
   let room = ''; try { const r = DECKS[dn].rooms[roomAt(...player.here())]; room = dn + '|' + (r && r.name || ''); } catch (x) { /* between rooms */ }
   if (room === '3|Mess hall' && now >= at(1, 1085) && now < at(1, 1155)) {
     if (!M['story:guess'] && M['story:secret'] && near('pell', 4) && lineMoment('lineSupperGuess', ['pell'])) M['story:guess'] = 1;
     if (!M['story:saved'] && flag('line.promised') && M['story:mug'] !== 2 && say('brennan', 'event.crossingLine.punch.saved', 8)) M['story:saved'] = 1;
+    // L5b: you missed the ceremony (the user's line-q6 a): Brennan saved you a mug (after her Tomas line, if that's due too)
+    else if (!M['story:savedYou'] && !M['met:crossingCeremony'] && say('brennan', 'event.crossingLine.punch.savedYou', 8)) M['story:savedYou'] = 1;
   }
   // the Lap, walked with Tomas leading (section 18's TJ_WALK, you in the line): as he reaches its bow turn by the lounge door
   const lw = typeof TJ_WALK !== 'undefined' && TJ_WALK && TJ_WALK.e.id === 'lap-of-the-wren' ? TJ_WALK : null, ld = lw && near(lw.lead, 30);
