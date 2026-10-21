@@ -324,3 +324,7 @@ This covers EV1/EV2's events-base and storm/Line turns, FR1's Fridays turns and 
   - The all-clear: 4 callable again.
 - **F5:** right on paper. No meeting has ranks or scriptBy yet, so it gets exercised with EV3's S8.
 - **Hooks I reviewed as owner stand-in:** section 17's eventJob and 20c's homeCallable. OK.
+
+## Handed over (2026-10-21 ~05:00, lead 22's call)
+
+EV3's storm S1 (claude/storm-update 9561f48) and EC1's turn 7 (cdf80ce) go to PR4 (session_014WyaZtasY32m5fnkBxuR9d). My partial on S1: cadet_test 89b976f→9561f48 off is ALL IDENTICAL, plus a code read with two edge cases. Both are in `plans/handover-reviewer-3.md`, open item 8. PR3 is idle.

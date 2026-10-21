@@ -32,7 +32,8 @@ A fresh session taking over reads this first, then `plans/review-3.md` (every ve
 | EV1 F4, replay through reloads | 13bb264 | PASS |
 | EV2 F0b, called in | ab67c99 | PASS WITH FIXES (calledIn missing from SOC_HEARS); fixed in ca2f9d6/394182b, PASS |
 | EV2 F5 + F8 + PB's F0b fix | 80c4963 | PASS |
-| EV3 storm S1 | 9561f48 | in progress at the time of writing; see the end of review-3.md |
+| EV3 storm S1 | 9561f48 | **not reviewed: handed to PR4** (session_014WyaZtasY32m5fnkBxuR9d) by lead 22. My partial: cadet_test 89b976f→9561f48 off ALL IDENTICAL; code read, see open item 8 |
+| EC1 turn 7 (the storm's log span from data) | cdf80ce | **not reviewed: for PR4** |
 
 ## Open items to follow
 
@@ -42,7 +43,11 @@ A fresh session taking over reads this first, then `plans/review-3.md` (every ve
 4. **F5's rank parts** have no data yet (no meeting has ranks or scriptBy). Exercise them when EV3's S8 lands.
 5. EC1's bigevents_check needs updating for S1's 5-day storm (11-16, not 11-17) and the party-night clashes (EV3's S6).
 6. A design point sent to lead 22: an evFrom-0 save loaded on Day 20 runs the whole missed storm in catch-up at load.
-7. Backlog rows found or confirmed: #18 (day_check Day 12's rec-deck evening guard, already failing on 0.64.6) and #19 (join_check with FLC_ON off).
+8. **S1's code read, for PR4.** All behind EV_STORM_ON; SHIP_EVENTS.ionStorm is changed once at load (planner-safe); the base edits in 18 only act when a new field is set.
+   - Edge 1: stormScripts falls back to `L.findIndex(l => l.choice) - 1`. If the "Mine too" line and the choice are both missing, that gives -2, and the Captain's line is spliced before the last line.
+   - Edge 2: with `def.mail.debrief` set, eventFinish skips the debrief. An event ended early (Dev mode's End and keep) before Day 15 18:00 then gets no debrief at all.
+   - Still to check: check_fast, events_check off, lines_check, bigevents_check (EC1's cdf80ce expects 11-16), and an on-copy probe of settle at 10:00, commend at 10:12 and the debrief at D15 18:00.
+9. Backlog rows found or confirmed: #18 (day_check Day 12's rec-deck evening guard, already failing on 0.64.6) and #19 (join_check with FLC_ON off).
 
 ## How to review (PP1's method, as used here)
 
@@ -69,4 +74,4 @@ A fresh session taking over reads this first, then `plans/review-3.md` (every ve
 
 ## Memory
 
-About 495k of 1M when this was written (2026-10-21 ~05:00 UTC). The rule: tell the lead at 500k; at 600k finish this note, push and stay idle.
+About 495k of 1M when this was written (2026-10-21 ~05:00 UTC). Lead 22 then asked me to stop after EV2's F5/F8 and go idle; PR4 takes S1 and everything after. The rule: tell the lead at 500k; at 600k finish this note, push and stay idle.
