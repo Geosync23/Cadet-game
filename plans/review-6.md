@@ -146,3 +146,9 @@ Everything above. PR4's three S3-S7 fixes hold (Lap joinable, crowds by lead 23'
   the build table (plans/storm-s10-round/ on the branch).
 - Held for three FAILs new with the switch on: devmode_check "the excused days" (careerOff(8) true before the jump; OK
   off), career_check, mech m17 (off runs pending). Asked EV6 for the causes; I re-run just those three on and off.
+- S10's three re-run (dc0ebe0b, on = the build, off = EVENTS_ON false): devmode_check on OK twice, off OK (EV6: the
+  earlier FAIL was a random gs giving a sick Day 8, 1/28; a check fix for DB2: a fixed gs or accept it);
+  career_check FAILs "Relied on before Day 5" on AND off (backlog row 12, old); mech m17 FAILs on ("the paper part
+  differs after the rides": movers 14, waiting 78 in the first pass), OK off (EV6: the storm's extra wear leaves crew
+  repair jobs on Day 18 in the first pass only; a check fix for its owner: crew job visits left out, or SHIP.jobs and
+  the machines reset alike for both passes). **S10: PASS**, with those two check fixes owed (not the game's).
