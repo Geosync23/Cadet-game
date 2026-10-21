@@ -30,5 +30,5 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - **Phones first:** no coplanar surfaces, every colour through `col()`, watch draw calls.
 - Keep `DEV_NOTES.md` current so a fresh session can pick up from it.
 - **Update `design-doc.md` when a design decision is made,** in the same commit as the work that depends on it: edit the section it belongs to, and move answered questions out of its Open questions.
-- The user is new to Claude Code and git: explain in plain language, no jargon.
+- The user is new to Claude Code and git: explain in plain language, no jargon. No emojis in anything for the user (the user, 2026-10-21).
 - **Handover before auto-summarizing (the user's rule).** Warn early when your memory is getting full, or when the next task looks big enough to fill it: helpers tell the lead, and the lead tells the user in plain words. Don't wait for the automatic summary. Then write a handover note for a fresh session (`plans/handover-<role>.md`: role, branch and builds, what you own and built, shared formats, loose ends, gotchas, how to test, open questions for the user), push it, and stay idle. A fresh session taking over a role reads its predecessor's note first. The lead keeps `TEAM.md` current and writes its own handover brief the same way.
