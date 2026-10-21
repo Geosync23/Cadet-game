@@ -7,8 +7,9 @@ Left to do: turn 9 (perf scenes) and turn 10 (switch on, only after the user's r
 ## Role, branch, people
 
 - **Branch:** `claude/fridays`. Push only there. No build number (the build master's).
-- **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight mode: questions go to the lead). **Turn reviews:** PR4,
-  session_014WyaZtasY32m5fnkBxuR9d (PR3 has handed over). **Section 14/13/10 owner:** PB, session_01FWW2piuXkFYaRRzLXZiqYb.
+- **Lead:** lead 23, session_01XXiKm9iPgm565SZ4n1knmU (overnight mode: questions go to the lead). **Turn reviews:** PR5,
+  session_01Eh4drBZjJ82DjYx6XaTt1F (lead 23's change; PR4 keeps the storm). PR4's copy of PR3's fill probe:
+  claude/review-4 plans/review-4/fr5_fill.py. **Section 14/13/10 owner:** PB, session_01FWW2piuXkFYaRRzLXZiqYb.
   **Storm update (Day 12):** EV4, session_01MqpjPG6mDFe5avrDxcNWTU (claude/storm-update): Marrow released from the
   double shift from 15:30, Vance from 15:45, through 16:50 (EV2 passed this on); EV_OPEN_FOR opens the auditorium.
 - **Base:** claude/integration 0.64.7 (6ea5acf) is merged in (4ee3fdc). **Off reference** for cadet_test = claude/integration
@@ -18,10 +19,10 @@ Left to do: turn 9 (perf scenes) and turn 10 (switch on, only after the user's r
 
 | Turn | Commit | What | Review |
 | --- | --- | --- | --- |
-| 6 (C2) | a22d651 | The speech. content_gen.py bakes `content/addresses/*.address` into `FRI_ADDRESSES` (block after TALKS; `ADDRESSES` was taken by section 18). 18f: `friSpeech`, `friFill`, `friCond`, `friAddressTick` (from 18's eventsTick), `friSpeaker` (a bubble's stand-in at the screen edge when Marrow is off a phone's screen: lead's yes), `save.fri` (ring/today/heard/mailed/hu, only when on, about 790 B full) | sent to PR4 |
-| fix | 8415d1e | PR3's turn-5 fix: `friLead` (ev.lead in 18's eventPlan) seats people early; 14's leisure join regex + stay end for the address's tag (PB OK). Speech 16:04-16:48 (lead's yes) | PB OK; PR4 |
-| 7 (C3+D) | 86d0c80 | Missed it: work -2 (as late) at 16:50 unless `!playerShiftOn(d)`; `friDinner` (14's evening) 17:00-17:50; `recCap` reads `dayShiftEnd` | sent to PR4, PB |
-| 8 (E) | see git log (after 86d0c80) | Part E: `friNightKeys`, `friBeatLines`, `flag:shortFriday` (set at load, never saved), `friClock` (clock screen words), the 15:20 toast; EW1's lines in torres-zeke.lines, halloran-emeka.lines, banks/fridays.lines | to send to PR4 |
+| 6 (C2) | a22d651 | The speech. content_gen.py bakes `content/addresses/*.address` into `FRI_ADDRESSES` (block after TALKS; `ADDRESSES` was taken by section 18). 18f: `friSpeech`, `friFill`, `friCond`, `friAddressTick` (from 18's eventsTick), `friSpeaker` (a bubble's stand-in at the screen edge when Marrow is off a phone's screen: lead's yes), `save.fri` (ring/today/heard/mailed/hu, only when on, about 790 B full) | sent to PR5 |
+| fix | 8415d1e | PR3's turn-5 fix: `friLead` (ev.lead in 18's eventPlan) seats people early; 14's leisure join regex + stay end for the address's tag (PB OK). Speech 16:04-16:48 (lead's yes) | PB OK; PR5 |
+| 7 (C3+D) | 86d0c80 | Missed it: work -2 (as late) at 16:50 unless `!playerShiftOn(d)`; `friDinner` (14's evening) 17:00-17:50; `recCap` reads `dayShiftEnd` | PB OK; PR5 |
+| 8 (E) | see git log (after 86d0c80) | Part E: `friNightKeys`, `friBeatLines`, `flag:shortFriday` (set at load, never saved), `friClock` (clock screen words), the 15:20 toast; EW1's lines in torres-zeke.lines, halloran-emeka.lines, banks/fridays.lines | sent to PR5 |
 
 Seeded keys in use: 1180 (weekly picks), 1181 (you beat), 1182 (trad1), 1183 (lead), 1184 (dinner). Free next: 1185+.
 
@@ -50,7 +51,7 @@ Seeded keys in use: 1180 (weekly picks), 1181 (you beat), 1182 (trad1), 1183 (le
 - **Words that never show:** Day 19's night-hand line (no night shifts for you until Pillar 5) and its `{leavers}` line
   (nobody's rota leaves before Day 35). Day 19 also says a new junior arrives "on Sunday" (Day 21), but the first
   rotation is Day 35: for the writers.
-- **The player engineer** should hear: `save.fri` adds up to about 790 bytes when on (asked the lead who that is).
+- **The save:** `save.fri` adds up to about 790 bytes when on (PB's note; there's no player engineer seat now, so it's in DEV_NOTES and PR5 checks it with player_check).
 - food_check fails the same 13 cases off and on (run as `food_check.py BUILD 5`): pre-existing, not Fridays'.
 - career_check fails only backlog #12; day_check Day 12 only backlog #18.
 - Turnout (decided, ~50), the late gardener's split Friday and the empty garden 15:30-17:00: lead 22 said keep.
@@ -76,4 +77,4 @@ Seeded keys in use: 1180 (weekly picks), 1181 (you beat), 1182 (trad1), 1183 (le
 2. cadet_test against claude/integration: ALL IDENTICAL.
 3. On a test copy (`sed 's/^const SHORT_FRIDAY = false;/const SHORT_FRIDAY = true;/'`): events_check, day_check 5,
    lines_check, the area's own; intro_check `--evening` for part E.
-4. `bash check_fast.sh` alone. Then commit, push, send PR4 (and PB for 13/14/10).
+4. `bash check_fast.sh` alone. Then commit, push, send PR5 (and PB for 13/14/10).
