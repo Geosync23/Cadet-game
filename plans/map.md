@@ -36,6 +36,7 @@ One labelled, empty block per seat at the end of its main section, where that se
 | Works career engineer | 24p |
 | Performance engineer | 8b |
 | HUD seat | 11 |
+| Fridays builder | 18f (its own section, after 18; the slot is at its end) |
 | Dev mode engineer | 25 (its own section, after 11; the slot is at its end) |
 
 No slot for the crew designer (section 9's roster is generated). A new feature (Dev mode, step 3) gets its own section and slot from its plan page; another slot for a seat: ask the lead.

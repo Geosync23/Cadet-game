@@ -8997,6 +8997,7 @@ const urlFlag = name => URL_FLAGS.has(name) ? URL_FLAGS.get(name) : null;   // a
 const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.has('poses') || URL_FLAGS.has('seats'),   // the crowd, pose and seat demos (section 8b) never touch the save
       DEBUG = URL_FLAGS.has('debug');
 const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 25; plans/devmode-plan.html): only with #dev, and its own save ("-dev" on the names); off, nothing changes
+const SHORT_FRIDAY = false;                              // Short Fridays and the Captain's address (section 18f; plans/fridays-build-brief.md): off, nothing changes
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
   if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -9187,7 +9188,7 @@ const WEEK_SHAPE = [
   {},
   { drill: 900 },                                        // Wednesday: a drill at 15:00; anyone off duty musters by the lift for 15 minutes
   { inspect: true },                                     // Thursday: bunk inspection, juniors tidy their bunks after washing
-  { late: 30 },                                          // Friday: bedtimes 30 minutes later
+  { late: 30, end: 930 },                                // Friday: bedtimes 30 minutes later; with SHORT_FRIDAY the day shift ends at 15:30 (end, read by friCrewEnd, 18f)
   { late: 20 },                                          // Saturday: a little later too
   { lieIn: 30 },                                         // Sunday: anyone off duty lies in 30 minutes longer
 ];
@@ -9741,7 +9742,7 @@ function schedFrame(p, d) {
   bed = Math.round(Math.min(1430, bed));
   const f = { U, H, shape, works, bed, night: p.shift === 'night' };
   if (f.night) { f.workStart = 1260 - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = 360 + (wa ? Math.round(15 + 15 * U(8)) : 0); }
-  else { f.workStart = SHIFTS.day[0] - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = SHIFTS.day[1] + (wa ? Math.round(5 + 10 * U(8)) : 0); }   // workaholics stay on to 17:05-17:15 (was to 17:30; the user's 'make the crew finish work on time', 0.71.1)
+  else { f.workStart = SHIFTS.day[0] - (shape.early || 0) - (wa ? Math.round(15 + 15 * U(7)) : 0); f.workEnd = friCrewEnd(p, d) + (wa ? Math.round(5 + 10 * U(8)) : 0); }   // workaholics stay on to 17:05-17:15 (was to 17:30; the user's 'make the crew finish work on time', 0.71.1)
   if (works && p.work && evRule(f.night ? d * 1440 + 360 : (d - 1) * 1440 + f.workEnd, 'doubleShift', p)) {   // a ship-wide event's double shift (C7)
     f.double = true; f.workEnd = f.night ? Math.max(f.workEnd, 435) : Math.max(f.workEnd, Math.min(1230, bed - 45));   // the gaps closed, never past the other shift's start (desks are shared)
   }
@@ -10753,7 +10754,7 @@ function dayReport(day) {
     if (meals.size < 2) rep.meals.push(p.id + ' ' + [...meals]);
     const gp = shiftBlocks(p, day), gb = gp && gp.blocks;
     if (gb || (isWorkDay(p, day) && !(galleyRotaOn() && p.dept === 'galley'))) {   // the whole shift worked (breaks and a galley staff meal count)
-      const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + SHIFTS.day[1]]];
+      const iv = gb ? gb.map(([a, b]) => [B + a, B + Math.min(b, 1440)]) : [p.shift === 'night' ? [B + 1260, B + 1440 + 360] : [B + SHIFTS.day[0], B + friCrewEnd(p, day)]];
       const both = planDay(p, day).concat(planDay(p, day + 1)).filter(s => s.act === 'work' || ['tea', 'toilet', 'hands', 'staff', 'patrol', 'rush', 'round'].includes(s.tag) || /^intro/.test(s.tag || ''));   // an intro beat on shift is work too
       for (const [a, b] of iv) {
         const worked = both.reduce((n, s) => n + Math.max(0, Math.min(s.to, b) - Math.max(s.from, a)), 0);
@@ -36828,6 +36829,37 @@ if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // 
 
 // ---- slot: Traditions engineer (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- end of slot: Traditions engineer ----
+
+// =====================================================================
+// 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
+// Every Friday the day shift stops at 15:30; the Captain's address is 16:00-16:50 in the rec deck auditorium, from
+// Day 5; dinner at 17:00 as ever. A skeleton keeps working to 17:00: a helm rating, a watch rating and a medic (the
+// lowest-ranked of each on shift that Friday, story crew aside), and the galley on its own rota. Everything here is
+// behind SHORT_FRIDAY (section 13): off, every function returns what the game did before. Pure functions of the
+// roster and the day, no R(), nothing read from live state (the planner rule). Section 14 plans before this section
+// runs, so what the planner calls here are function declarations and a var (FRI_SKEL, filled on first use).
+// =====================================================================
+var FRI_SKEL = null;
+function friShort(d) { return SHORT_FRIDAY && weekday(d) === 4; }   // a short Friday (weekday 4; 0 = Monday)
+// the skeleton: the same people every Friday (rotas are by weekday)
+function friSkeleton(p) {
+  if (!FRI_SKEL) {
+    const order = ['junior', 'officer', 'senior', 'chief'];
+    FRI_SKEL = new Set();
+    for (const dept of ['helm', 'watch', 'infirmary']) {
+      const c = ROSTER.filter(q => q.dept === dept && q.shift === 'day' && !q.story && order.includes(q.rank) && isWorkDay(q, 5));   // ship day 5 is a Friday
+      c.sort((a, b) => order.indexOf(a.rank) - order.indexOf(b.rank));   // stable: roster order within a rank
+      if (c[0]) FRI_SKEL.add(c[0].id);
+    }
+  }
+  return FRI_SKEL.has(p.id);
+}
+// when a day-shift crew member's shift ends on day d (minutes after midnight): 15:30 on a short Friday, else 17:00.
+// The skeleton and the galley keep their hours. Read by section 14's schedFrame and dayReport
+function friCrewEnd(p, d) { return friShort(d) && p.dept !== 'galley' && !friSkeleton(p) ? WEEK_SHAPE[4].end : SHIFTS.day[1]; }
+
+// ---- slot: Fridays builder (section 18f). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Fridays builder ----
 
 // =====================================================================
 // 20. SOCIAL

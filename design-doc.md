@@ -338,6 +338,8 @@ Every crew member is a simulated agent with a job, a shift, a bed, needs and opi
 | Day | About 80% | 09:00–17:00 (the playtest answer, 2026-10-18; was 08:00) | 17:00–23:00 | 23:00–07:00 |
 | Night | About 20% | 21:00–06:00 | 14:00–21:00 | 06:00–14:00 |
 
+**Short Fridays** (the user, 2026-10-20; `plans/fridays-plan.md` rev 4; built behind `SHORT_FRIDAY`, off until the user's review). Every Friday the day shift stops at 15:30, the Captain's address is 16:00-16:50 in the rec deck auditorium (from Day 5), and dinner is at 17:00 as ever. A skeleton keeps working to 17:00 (fp-q2): a helm rating and a watch rating on duty, a medic on call, and the dinner cooks on the galley's own rota. Built in turn 1 (2026-10-21): the skeleton is the lowest-ranked helm, watch and infirmary day crew on shift that Friday, story crew aside (the same three every week, since rotas are by weekday); everyone else on the day shift finishes at 15:30 (workaholics at 15:35-15:45). Night shift unchanged.
+
 During the night, only urgent jobs and essential systems get attention. Routine work waits for morning, which is when the job list is busiest.
 
 **A day moves through three decks.** Crew wake on Deck 4, eat on Deck 3 and work wherever their department is, so the lift and the lobbies have rush hours. The day crew wake between about 05:30 and 07:15 and spread breakfast across the morning, so the washrooms and the servery are busy but never all at once; not everyone goes straight to breakfast: some eat first and wash after, some work out first, some have a coffee or a read, and everyone has eaten and is at work by 09:00 (the user's playtest answer, 2026-10-19; built in 0.71.5).
