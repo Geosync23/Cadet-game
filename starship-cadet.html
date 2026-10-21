@@ -36402,7 +36402,6 @@ function eventsDecor(now) {
 }
 let EV_MIN = -1;
 function eventsTick() {
-  eventFeelFrame();                                      // a ship-wide event's jolt and light dip (inert with none)
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
@@ -36995,8 +36994,7 @@ function traceAdd(id, day) { if (id && !traceOn(id)) SHIP.traces.push({ id, day 
 SIM_ADVANCE.push((from, to) => { eventAdvance(to, true); });
 
 // ---- the Captain's ship-wide address: a banner across the top on every deck for about 20 seconds, copied to Mail.
-// The device engineer owns the look; this is the plain stand-in. Time never stops.
-let ADDRESS_EL = null, ADDRESS_T = 0;
+// Section 19's deviceAddress draws it (its plain stand-in banner went in the storm's clean-up, S9). Time never stops.
 const ADDRESSES = [];                                    // every address so far (for the checks and the Ship app)
 function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', quiet = false }) {
   const text = (lines || []).join(' ');
@@ -37005,18 +37003,10 @@ function captainAddress({ lines, at = shipNow(), from = 'Captain Odile Marrow', 
   if (typeof mailSend === 'function') mailSend({ at, from, subject: 'All hands', body: text, quiet: true });
   if (quiet || typeof document === 'undefined') return;
   if (typeof deviceAddress === 'function') return deviceAddress({ from, text });   // section 19's CRT banner (0.35.7)
-  if (!ADDRESS_EL) {
-    ADDRESS_EL = document.createElement('div');
-    ADDRESS_EL.style.cssText = 'position:fixed;left:50%;top:12px;transform:translateX(-50%);max-width:min(560px,92vw);padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.92);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:30;pointer-events:none;box-shadow:0 4px 18px rgba(0,0,0,.4)';
-    document.body.appendChild(ADDRESS_EL);
-  }
-  ADDRESS_EL.innerHTML = '<div style="font-weight:600;color:#9fe0cf;margin-bottom:2px">' + from + ', to all hands</div>';
-  ADDRESS_EL.appendChild(document.createTextNode(text));
-  ADDRESS_EL.hidden = false; simClear(ADDRESS_T); ADDRESS_T = simTimeout(() => { if (ADDRESS_EL) ADDRESS_EL.hidden = true; }, 20000);
 }
 
 // ---- meetings with dialogue (the fourth kind of moment): scripts are data; section 19 (the device engineer) draws
-// the panel; until section 19 provides deviceDialogue(view, onTap), a plain strip at the bottom stands in.
+// the panel (deviceDialogue; its plain stand-in strip went in the storm's clean-up, S9).
 // MEETING_SCRIPTS.<id> = { title, gist, lines: [{ who, text, pose? } | { choice: [{ text, rel?, job? }, ...] }] }
 const MEETING_SCRIPTS = {};
 if (typeof linesMeetings === 'function') linesMeetings(MEETING_SCRIPTS);   // section 22: the baked meetings in, {me} texts made functions
@@ -37026,10 +37016,8 @@ function meeting(m) { if (m && m.id && !MEETINGS.some(x => x.id === m.id && x.at
 // line by line, tap to go on (or it moves on by itself after a few seconds; a choice waits for you). Walking out of the
 // room closes it and the gist comes by Mail; if you weren't there at all, the gist comes when it ends. The panel is
 // section 19's: deviceDialogue(view) when it exists (view = { title, who: the speaker's name, role, text, choices,
-// and id, to, pose, i, n }; null hides it), and its taps call dialogueNext(), dialogueChoose(k) and dialogueClose();
-// else the plain strip below.
+// and id, to, pose, i, n }; null hides it), and its taps call dialogueNext(), dialogueChoose(k) and dialogueClose().
 let DIALOGUE = null;                                     // { id, m, cast, ctx, queue, i, at }: the script being shown
-let DIALOGUE_EL = null;
 const DIALOGUE_AUTO = 7000;                              // real ms before a line moves on by itself
 // the cast: ROSTER ids as they are; 'works:2' -> two Works juniors on shift that day (by hash), as tech1 and tech2
 function meetingCast(m) {
@@ -37062,23 +37050,6 @@ function dialogueDraw() {
   if (!v) return dialogueEnd(true);
   DIALOGUE.at = performance.now();
   if (typeof deviceDialogue === 'function') return deviceDialogue(v);
-  if (typeof document === 'undefined') return;
-  if (!DIALOGUE_EL) {
-    DIALOGUE_EL = document.createElement('div');
-    DIALOGUE_EL.style.cssText = 'position:fixed;left:50%;bottom:14px;transform:translateX(-50%);width:min(560px,92vw);box-sizing:border-box;padding:10px 14px;border-radius:10px;background:rgba(14,20,24,.94);color:#e8f4ef;font:14px/1.4 system-ui,sans-serif;z-index:31;box-shadow:0 4px 18px rgba(0,0,0,.4)';
-    DIALOGUE_EL.addEventListener('click', e => { if (DIALOGUE && !e.target.dataset.c && !dialogueView().choices) dialogueStep(); });
-    document.body.appendChild(DIALOGUE_EL);
-  }
-  DIALOGUE_EL.innerHTML = '';
-  const h = document.createElement('div'); h.style.cssText = 'font-weight:600;color:#9fe0cf;margin-bottom:2px';
-  h.textContent = v.choices ? v.title + ': your reply' : v.name; DIALOGUE_EL.appendChild(h);
-  if (!v.choices) DIALOGUE_EL.appendChild(document.createTextNode(v.text));
-  else v.choices.forEach((c, k) => {
-    const b = document.createElement('button'); b.textContent = c; b.dataset.c = '1';
-    b.style.cssText = 'display:block;width:100%;margin-top:6px;padding:8px 10px;border-radius:8px;border:1px solid #3d5a52;background:#1d2b2a;color:#e8f4ef;font:inherit;text-align:left';
-    b.addEventListener('click', () => dialogueStep(k)); DIALOGUE_EL.appendChild(b);
-  });
-  DIALOGUE_EL.hidden = false;
 }
 // on to the next line; on a choice line, k is the reply picked: its nudges, its job, and the reply said back
 function dialogueStep(k) {
@@ -37117,7 +37088,7 @@ function dialogueEnd(finished) {
   DIALOGUE = null;
   if (EV_REPLAY_ON && D.m && D.m.id) { const f = meetingFlags(D.m); if (f) delete f['open:' + D.m.id]; }   // F4b: no longer open
   { const sc = MEETING_SCRIPTS[D.id]; if (sc && typeof sc.onEnd === 'function') try { sc.onEnd(finished); } catch (e) { /* closes anyway */ } }   // a moment ending (20c)
-  if (typeof deviceDialogue === 'function') deviceDialogue(null); else if (DIALOGUE_EL) DIALOGUE_EL.hidden = true;
+  if (typeof deviceDialogue === 'function') deviceDialogue(null);
   if (!finished && D.m.event !== 'occasion') meetingGist(D.id);   // an occasion's gist is for missing it, not leaving early
 }
 const dialogueClose = () => dialogueEnd(false);          // walking away: the gist arrives in Mail
@@ -37156,31 +37127,17 @@ function meetingsTick(now, quiet) {                     // quiet: a sleep or ski
 }
 
 // ---- felt everywhere (the first kind of moment): the front hits, every light dips, then flickers. The performance
-// engineer owns the real effect, shipFeel(kinds, len) (sections 5, 8b), used when it exists; until then this plain
-// stand-in: the camera shakes, the lights dip and come back, a rare flicker while the event's 'flicker' effect is on.
-// Visual only (real time, never the simulation), on the current deck; nothing happens with no event.
-const FEEL = { until: 0, t0: 0, kinds: [], flicker: false, log: [] };
+// engineer owns the effect, shipFeel(kinds, len) (sections 5, 8b: the shake, the dip, the flickers; its plain stand-in
+// here went in the storm's clean-up, S9). Visual only (real time, never the simulation); FEEL.log is for the checks.
+const FEEL = { log: [] };
 function eventFeel(kinds, len = 4) {
   FEEL.log.push({ at: shipNow(), kinds: kinds.slice() }); if (FEEL.log.length > 20) FEEL.log.shift();
   if (typeof shipFeel === 'function') return shipFeel(kinds, len);
-  FEEL.t0 = simNow(); FEEL.until = FEEL.t0 + len * 1000; FEEL.kinds = kinds.slice();
-}
-function eventFeelFrame() {                              // every frame, after the lights and camera are set, before the render
-  if (typeof shipFeel === 'function') return;
-  const now = simNow(); let k = 1;
-  if (now < FEEL.until) {
-    const s = (now - FEEL.t0) / 1000;
-    if (FEEL.kinds.includes('jolt') && s < .7) { const a = .25 * (1 - s / .7); camera.position.x += a * Math.sin(s * 60); camera.position.y += a * .6 * Math.sin(s * 47 + 1); }
-    if (FEEL.kinds.includes('lightsDip')) k = s < .3 ? 1 - s / .3 * .6 : s < 1.5 ? .4 : Math.min(1, .4 + (s - 1.5) * .4);
-    if (FEEL.kinds.includes('flicker') && s > 1.5 && Math.floor(s * 9) % 5 === 0) k *= .6;
-  } else if (FEEL.flicker && (Math.imul(Math.floor(now / 110), 2654435761) >>> 0) % 97 < 3) k = .7;
-  if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
 }
 // the event's felt moments as their minute comes, in play only (a sleep or skip passes them quietly)
 const FEEL_DONE = new Set();
 function eventMomentsTick(from, to) {
-  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) { FEEL.flicker = false; return; }
-  FEEL.flicker = !!eventMod('effect', 'flicker', to);
+  const e = SHIP.event, def = e && SHIP_EVENTS[e.id]; if (!def) return;
   for (const mo of def.moments || []) {
     if (!mo.feel) continue;
     const at = evBeatAt(e.startDay, mo.at), key = mo.id + '@' + e.startDay;

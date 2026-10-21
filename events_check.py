@@ -193,7 +193,7 @@ LIVE = r"""(() => {
   put(5, '5-jobboard-1'); tick(9 * 1440 + bm - 25, 9 * 1440 + bm + 1);
   D.briefing = DIALOGUE ? { open: true, cast: Object.fromEntries(Object.entries(DIALOGUE.cast).map(([k, p]) => [k, p.name])), first: dialogueView() } : { open: false };
   const devDlg = document.getElementById('devDlg');   // section 19's panel (deviceDialogue) when the device is merged, else the plain strip
-  D.panel = !!(DIALOGUE_EL && !DIALOGUE_EL.hidden && DIALOGUE_EL.textContent.length > 5) || !!(devDlg && !devDlg.hidden && devDlg.textContent.length > 5);
+  D.panel = !!(devDlg && !devDlg.hidden && devDlg.textContent.length > 5);   // section 19's panel (the plain strip went in the storm's clean-up, S9)
   D.calls1 = frames();
   const seen = []; let n = 0;
   while (DIALOGUE && n++ < 30) { const v = dialogueView(); seen.push((v.choices ? '[choice] ' + v.choices.join(' / ') : v.name + ': ' + v.text)); dialogueStep(v.choices ? 0 : undefined); }
@@ -205,7 +205,7 @@ LIVE = r"""(() => {
   D.choiceNotes = (window.__notes || []).filter(x => x.kind === 'choice').map(x => x.script + ':' + x.k + ':' + x.who.length);   // the ship note for your reply
   // the front: day 11, 14:00, on Deck 3
   skipTo(10 * 1440 + 13 * 60 + 50); put(3, '3-grab-1'); tick(10 * 1440 + 13 * 60 + 51, 10 * 1440 + 14 * 60 + 1);
-  D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(ADDRESS_EL && !ADDRESS_EL.hidden) || !!(document.getElementById('devAddr') && !document.getElementById('devAddr').hidden); D.flicker = FEEL.flicker; D.calls2 = frames();   // the banner: the plain one, or section 19's
+  D.feel = FEEL.log.map(f => f.kinds.join('+')); D.banner = !!(document.getElementById('devAddr') && !document.getElementById('devAddr').hidden); D.flicker = !!eventMod('effect', 'flicker'); D.calls2 = frames();   // section 19's banner; the flicker 8b's shipFeelFrame reads (the plain stand-ins went in the storm's clean-up, S9)
   // the all-clear: day 13, 10:00, the observation room; then walk out to the bridge
   skipTo(12 * 1440 + 9 * 60 + 50); put(1, '1-tea-1'); tick(12 * 1440 + 9 * 60 + 51, 12 * 1440 + 10 * 60 + 1);
   D.allClear = DIALOGUE ? dialogueView() : null; D.calls3 = frames();
@@ -214,7 +214,7 @@ LIVE = r"""(() => {
   D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
   D.dress = dress; if (hadDress) dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
-  MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (ADDRESS_EL) ADDRESS_EL.hidden = true; if (typeof deviceAddress === 'function') deviceAddress(null);
+  MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null);
   return D;
 })()"""
 
@@ -337,7 +337,7 @@ DIPLO = r"""(() => {
   player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
   for (let t = (sd + 1) * 1440 + 581; t <= (sd + 1) * 1440 + 602; t++) { setShipNow(t); eventsTick(); }
   const live = { room: roomAt(...player.here()), open: DIALOGUE ? DIALOGUE.id : null, first: DIALOGUE ? dialogueView().who : null };
-  if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null); if (ADDRESS_EL) ADDRESS_EL.hidden = true;
+  if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null);
   SHIP_EVENTS.diplomatic.draft = keep.draft;
   SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); EV_DAYS.clear();
   return { a, same: JSON.stringify(a) === JSON.stringify(b), names, live };
