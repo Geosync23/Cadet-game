@@ -316,6 +316,27 @@ def solo(g):
     if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
+def clock_tracked(g):
+    # fresh-eyes (FE1 item 36): on Day 1 you tap Tracked's "Clock in" on Deck 4, Zeke walks you down, you step out on Deck 5:
+    # the arrow stays the clock's until you've clocked in (it was replaced by Zeke's and cleared when he let you go)
+    print('13b. Tracked "Clock in" stays up on the training day until you punch')
+    if not g.ev("typeof clockTrkItem === 'function'"):
+        print('  not yet: no clockTrkItem'); return
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("skipTo(introAbs(1, 8 * 60 + 30))"); g.ev("(() => { if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(); goToDeck(4); })()"); g.step(10)
+    G = "(IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : null)"
+    tap = g.ev("(() => { const it = clockTrkItem(); if (!it) return null; setGoal(it.goal); return it.goal.trk; })()")
+    seen = []
+    for k in range(4): g.step(30); seen.append(g.ev(G))
+    g.ev("goToDeck(5)"); g.step(5)
+    for k in range(12): g.step(30); seen.append(g.ev(G))
+    print('  tracked', tap, '| the arrow after, on Deck 4 then Deck 5:', sorted(set(map(str, seen))))
+    if tap != 'clock:in' or any(x != 'clock:in' for x in seen): fail(f'Tracked "Clock in" did not stay up till you punched: {seen}')
+    punched = g.ev("(() => { careerClock(shipNow()); for (let i = 0; i < 3; i++) clockRemindTick(shipNow()); return [careerClockedIn(SHIP.time.day), IX_GOAL && IX_GOAL.trk || null]; })()")
+    print('  punched in:', punched)
+    if not punched[0] or punched[1] == 'clock:in': fail(f'after clocking in the clock arrow should go: {punched}')
+
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
     if not g.ev("typeof introArrowTick === 'function'"):
@@ -375,7 +396,7 @@ with sync_playwright() as pw:
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
     if FIRSTS_ONLY:
-        firsts(g)
+        firsts(g); clock_tracked(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if WEEK_ONLY:
