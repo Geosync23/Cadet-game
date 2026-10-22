@@ -1,0 +1,5 @@
+305c305,306
+<   if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
+---
+>   if (window.__tapKey2 === key) return pin();
+>   if (typeof ixChore === 'function' && ixChore() && !ixChore().workDone && !sh) return pin();   // RV7: a real tap at the laundry stop's pin (the follower's direct playerTap has no ray)             // the thing didn't answer: a real tap on the floor at the pin, as a player would
