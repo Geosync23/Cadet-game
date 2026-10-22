@@ -154,7 +154,7 @@
 // 'free' step, or you leave the table after introChief); then the first-night bed arrow. Sim engineer 5's key; said IN
 // ORDER, one flag key per line. Replaces walk.free (removed 0.48.58).
 ? flag:walk.goodnight.1
-- Right, that's me. Breakfast from six, shift at nine, tea at one.
+- Right, that's me. Breakfast from seven, shift at nine, tea at one.
 ? flag:walk.goodnight.2
 - Off at five. Dinner till half eight. Weekends off, like most of Works.
 ? flag:walk.goodnight.3
@@ -296,7 +296,7 @@
 ? flag:walk.wing.1
 - Deck 4. Quarters. The junior wing's this way.
 ? flag:walk.wing.2
-- Eight bunk rooms. You're in One. Good room, One.
+- Eight bunk rooms. You're in One. First, we drop your bag.
 ? flag:walk.wing.3
 - Washrooms. Hot water till ten, then it's character-building.   #funny
 ? flag:walk.wing.4
@@ -850,7 +850,7 @@
 
 // Zeke's welcome Mail on your device (the arrival evening: he tells you to open it). "Subject | body", unsigned.
 == mail.zeke.cabin
-- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from six till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
+- Everything I didn't say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast's from seven till nine. Shift starts at nine in the Works bay; Calder's briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.
 
 // Name on the beam (first Monday after shift, the Works bay cross beam; seat T's flags trad.beam.<n>, in order).
 // Restored in playtest 1: 2799442 (0.48.82) cut these by mistake. He hands you the pen and tells you to tap the beam.

@@ -1425,8 +1425,9 @@ with sync_playwright() as pw:
       out.push([bagHeld(), P.locker.slice()]);              // a missed bunk: still in your hands
       const d4 = DECKS[4], bunk = d4 && Object.keys(d4.rooms).find(k => d4.rooms[k].name === 'Bunk 1'); let cell = null;
       if (deckDef.num === 4 && bunk) for (let j = 0; j < d4.map.length && !cell; j++) for (let i = 0; i < d4.map[j].length; i++) if (d4.map[j][i] === bunk) { cell = [i, j]; break; }
-      const pt = cell ? cellPos(...cell) : null;
-      out.push([!!pt, pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null, bagLockerTap(new THREE.Vector3(999, 0, 999))]);
+      const w = typeof clothesWardrobe === 'function' ? clothesWardrobe() : null, pt = w ? { x: w.x, z: w.z } : cell ? cellPos(...cell) : null;   // (playtest patch 1, #2: at your wardrobe only)
+      let far = false; if (w) for (let j = 0; j < d4.map.length; j++) for (let i = 0; i < d4.map[j].length; i++) { const q = cellPos(i, j); if (!far && d4.map[j][i] === bunk && Math.hypot(q.x - w.x, q.z - w.z) > 2) far = bagLockerTap(new THREE.Vector3(q.x, 0, q.z)) ? 'stowed' : 'walks'; }
+      out.push([!!pt, far || 'walks', bagLockerTap(new THREE.Vector3(999, 0, 999)), pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null]);
       return JSON.stringify(out);
     })()"""))
     for _ in range(60):                                  # frames are stepped by hand here (window.__step), the last of each 30 drawn
@@ -1464,7 +1465,7 @@ with sync_playwright() as pw:
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
     check(kb[3] == [True, []], f'a missed bunk step leaves the bag in your hands: {kb[3]}')
-    check(kb[4] == [True, True, False] and walked and kb2[0] == ['kitbag'], f'a tap in Bunk 1 walks you there and stows the bag: {kb[4]} {walked} {kb2[0]}')
+    check(kb[4] == [True, 'walks', False, True] and walked and kb2[0] == ['kitbag'], f'a tap at your wardrobe in Bunk 1 walks you there and stows the bag; elsewhere in the room a tap just walks (playtest patch 1): {kb[4]} {walked} {kb2[0]}')
     check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'the bunk step done: the bag in your locker, the device opens: {kb2[1]}')
     check(kb2[2] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb2[2]}')
     ev("localStorage.removeItem(SAVE_KEY)")
