@@ -149,3 +149,17 @@ OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check handed to CR3 (ag
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | OK (CR3, accepted baseline) | Only `the Line ceremony ... portrait: draw calls 301 -> 335` (the accepted baseline); no backlog-14 memory flag, no js spike (claude/checks-cr3 4a681ec1) |
 | lines_check --day | OK | PASS (0 errors) |
+
+# Round 8: 0.91.0 (claude/integration-next 989fd566: CP1's controller, PAD_ON off, + fresh-eyes batch 1), CR2's share — **OK**
+
+NEW 989fd566, sha256 `da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee` (matches BM14's).
+OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check and lines_check --day handed to CR4 (agreed, cc BM14, lead 30).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW | DIFFERENCES, exactly as BM14 expected | 3638 px in all 15 shots (the old HUD New game button); extra only in e_night..i_tap3 (15023-15633 px: the lift-panel arrow's label); no DIFF in state, paths, collide, crew or taps; no page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check, lines_check --day | CR4 | handed over |
