@@ -1,0 +1,13 @@
+== b_old
+[
+"day 13 13:02 3-oven-1-panel tune:3-oven-1@299/chore-round:deck3@301 (quist-ilse/pell)",
+"day 30 10:12 1-relay-1-panel 1-relay-1@674/chore-calibrate:1-relay-1@704 (halloran-emeka/calder)"
+]
+== b_new
+[
+"day 13 13:02 3-oven-1-panel tune:3-oven-1@299/chore-round:deck3@301 (pell/kovac-zainab)",
+"day 40 09:10 5-cartdock-1-svc chore-calibrate:5-cartdock-1@927/5-cartdock-1@932 (pell/soto-marta)",
+"day 57 09:12 2-works-5 2-repeater-1@1340/chore-calibrate:2-repeater-1@1353 (halloran-emeka/calder)"
+]
+== b2_new
+[]
