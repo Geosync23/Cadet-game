@@ -16051,6 +16051,15 @@ function trkItems() {
   return out;
 }
 const trkOn = it => { if (it.work) return !IX_GOAL && SHIP.player.track !== null && !(typeof myJob === 'function' && myJob()); if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
+// (fresh-eyes 41, 2026-10-22) the row the arrow is following: the one tracked (trkOn), else the first row for today whose
+// own goal is where the arrow points (goalNow: a meeting's, the round's or the queue's arrow, set without a Tracked tap)
+function trkFollowKey(items) {
+  const on = items.find(trkOn); if (on) return on.key;
+  let g = null; try { g = goalNow(); } catch (e) { g = null; } if (!g || !g.deck) return '';
+  const same = (a, b) => a.deck === b.deck && (a.place || b.place ? a.place === b.place : (a.room || '') === (b.room || '') && String(a.item || '') === String(b.item || ''));
+  const it = items.find(x => !x.later && (g.trk ? g.trk === x.key : x.goal && x.goal.deck && (same(g, x.goal) || !!g.label && g.label === x.goal.label)));
+  return it ? it.key : '';
+}
 // a row for a later day (tomorrow morning) can't be followed yet: its tap says so on the row (TRK_SAID, for a few ship
 // minutes) instead of setting an arrow for now (fresh-eyes 2026-10-22: "The Chief's office: your first solo job" said Tomorrow)
 const TRK_SAID = { key: '', at: -1e9 };
@@ -16070,16 +16079,16 @@ const trkEl = document.getElementById('trkPanel'), trkList = document.getElement
 const trkKey = () => Math.floor(shipNow()) + '|' + (IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : '') + '|' + SHIP.player.track;
 let trkSig = '';
 function trkDraw() {
-  const items = trkItems(); trkList.textContent = ''; trkSig = trkKey();
+  const items = trkItems(), fk = trkFollowKey(items); trkList.textContent = ''; trkSig = trkKey();
   for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
     const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
     const h = document.createElement('h3'), box = document.createElement('div'); h.textContent = head; box.className = 'decks'; trkList.append(h, box);
     for (const it of rows) {
-      const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
+      const on = it.key === fk, b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
       b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal && !it.work; b.setAttribute('aria-pressed', String(on));
       if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
       t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : '') + trkSaid(it); sp.append(t, sm); b.appendChild(sp);
-      if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
+      if (on) { const e = document.createElement('em'); e.textContent = trkOn(it) ? 'Tracking' : 'Arrow'; b.appendChild(e); }
       b.onclick = e => { e.stopPropagation(); if (trkTap(it.key)) trkClose(); else trkDraw(); };   // on its way: the arrow shows; a stop stays open
       box.appendChild(b);
     }
@@ -16116,12 +16125,12 @@ addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
 deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
   act(verb, key) { if (verb === 'track' && trkTap(key)) deviceClose(); },   // on its way: the device closes so the arrow shows
   view: () => {
-    const items = trkItems(), B = [{ kind: 'text', text: 'Tap one to follow the arrow there. Tap it again to stop.' }];
+    const items = trkItems(), fk = trkFollowKey(items), B = [{ kind: 'text', text: 'Tap one to follow the arrow there. Tap it again to stop.' }];
     for (const [sec, head] of [['job', 'Your job'], ['on', 'On and coming up'], ['place', 'Places']]) {
       const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
       B.push({ kind: 'text', text: head, mark: 'head' });
-      B.push({ kind: 'list', rows: rows.map(it => { const on = trkOn(it), can = on || it.job || it.goal;
-        return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : can ? '' : ' · no arrow for this one') + trkSaid(it), mark: on ? 'hot' : null,
+      B.push({ kind: 'list', rows: rows.map(it => { const on = trkOn(it), arrow = it.key === fk, can = on || it.job || it.goal;
+        return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : arrow ? ' · The arrow points here' : can ? '' : ' · no arrow for this one') + trkSaid(it), mark: arrow ? 'hot' : null,
           action: can ? { app: 'tracked', do: 'track', arg: it.key } : null }; }) });
     }
     return { title: 'Tracked', blocks: B };

@@ -688,7 +688,8 @@ with sync_playwright() as pw:
     g.close()
 
 # Tracked (fresh-eyes batch 2, 2026-10-22): (24) a row for tomorrow morning can't be followed yet: its tap sets no arrow
-# and the row says "That's tomorrow" (the panel and the device app); a row for today still sets its arrow
+# and the row says "That's tomorrow" (the panel and the device app); a row for today still sets its arrow; (41) the row
+# the arrow follows is highlighted, also for an arrow set without a Tracked tap
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1], 390, 844); g.step(3)
     print('== Tracked: a row for tomorrow (fresh-eyes 24)')
@@ -704,6 +705,19 @@ with sync_playwright() as pw:
         check(r['tap'] is False and r['goal'] is False, f'Tracked: a tomorrow row sets no arrow ({r})')
         check("That's tomorrow" in r['panelSub'] and r['appSub'], f'Tracked: the row says That\'s tomorrow, in the panel and the app ({r})')
         if r['has'][1]: check(r['todayTap'] is True and r['todayGoal'] is True, f'Tracked: a row for today still sets its arrow ({r})')
+    # (41) the row the arrow is following is highlighted, also when the arrow was set without a Tracked tap
+    print('== Tracked: the row the arrow follows (fresh-eyes 41)')
+    r = g.ev("""(() => { const o = {}, P = SHIP.player, t0 = P.track; P.track = null; clearGoal();
+      const lit = () => { trkOpen(); const b = [...trkList.querySelectorAll('button.goal')].map(x => x.textContent); trkClose(); return b; };
+      o.none = lit();
+      setGoal({ deck: 5, item: /job board/i, room: 'w', label: 'Take your first round at the job board' });   // as the round guide sets it
+      o.lit = lit(); deviceShow('tracked'); o.app = document.getElementById('devBody').textContent.includes('The Works bay, Deck 5 · The arrow points here'); deviceClose();
+      clearGoal(); const k = trkItems().find(x => x.key === 'place:board'); trkTap(k.key); o.tracked = lit(); clearGoal(); P.track = t0;
+      return o; })()""")
+    print('  ', r)
+    check(r['none'] == [], f'Tracked: no arrow, no row highlighted ({r})')
+    check(len(r['lit']) == 1 and 'The job board' in r['lit'][0] and r['lit'][0].endswith('Arrow') and r['app'], f'Tracked: the job board row is highlighted for an arrow set elsewhere ({r})')
+    check(len(r['tracked']) == 1 and r['tracked'][0].endswith('Tracking'), f'Tracked: a tracked row still says Tracking ({r})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
