@@ -177,3 +177,17 @@ Exit 1, **1 flag, the one CR2 named as the accepted baseline**: `the Line ceremo
 (59 → 49 people in the scene; portrait-wide 391 → 411, landscape 282 → 299, not flagged). Everything under 450 on every view
 (busiest 418, portrait-wide). No memory flag this time (round trips 521 → 521 → 521; 0.64.16 was 521 → 523, backlog #14).
 No js spike (backlog #32). File 5.80 MB.
+
+# Round on 0.91.0 (claude/integration-next 989fd566), BM14's start (lead 29's go; reported to lead 30 and BM14)
+
+sha256 **da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee** (BM14's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 252; worst stuck 0.0; 267 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 250; worst stuck 0.0; 251 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 267; worst stuck 0.0; 249 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0 |
+| controller_check (all parts but reach) | **handed to CR1** (CR1's offer, agreed before it started; my queued copy cancelled, never ran) | see CR1's notes |
+
+No FAIL in my part. (Day numbers the same as 0.64.16's: breakfast isn't in 0.91.0.)
