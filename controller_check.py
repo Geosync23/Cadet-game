@@ -533,6 +533,8 @@ def pad_moves(r, n):
         x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
     return seen, order
 pad_moves.nameless = set()
+# things the D-pad needn't reach, each with its reason (and who ruled)
+PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
     fails = []; pad_moves.nameless = set()
     for st in states.values():
@@ -544,7 +546,14 @@ def part_reach_pad(pw, src, tag, states):
         want = {i['k'] for i in st['items']}
         seen, order = pad_moves(sw.r, min(12, len(want) + 2))
         now = {i['k'] for i in Sweep.inner(sw.scan())}
-        missing = sorted((want & now) - seen)
+        missing = sorted((want & now) - seen - set(PAD_COVERED))
+        for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
+        # (CP1) the zigzag above covers a dozen rows; anything it missed: steer the highlight straight at it, up to 40
+        # presses (pad_to: the bigger gap first), as a player aiming for it would
+        for k in list(missing):
+            it = next((i for i in Sweep.inner(sw.scan()) if i['k'] == k), None)
+            if it and sw.r.ev(f"(() => {{ const e = document.elementFromPoint({it['x']}, {it['y']}); for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt'); if (!e) return false; (e.closest('button,a,input,select,textarea,[tabindex],[role]') || e).setAttribute('data-ctt', '1'); return true; }})()") and pad_to(sw.r, '[data-ctt]', 40):
+                missing.remove(k); seen.add(k)
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
