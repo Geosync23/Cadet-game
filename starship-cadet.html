@@ -14368,7 +14368,10 @@ function jobTap(it, at) {
   // past it still start the work (jobSpotTap), as does Repair
   const dm = Math.hypot(mc.x - at.x, mc.z - at.z), dp = Math.hypot(spot.x - at.x, spot.z - at.z), mine = Math.min(dm, dp);
   if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== (m.room || PLACE_OF.get(pid).room)   // a stand-in with no room (the main lift): its panel place's room
-    || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) return false;
+    || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) {
+    if (!(typeof ray !== 'undefined' && jobRayDist(spot) < JOB_RAY)) return false;   // the tap passed over your job's spot (the arrow's pin) though something else caught it first (FX3: the chiller in front of the galley plant's panel)
+    it = { ...it, t: machineName(m).replace(/^./, x => x.toUpperCase()) };   // named for your machine, not the thing in front
+  }
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
 }
@@ -15856,7 +15859,8 @@ const ixShelf = need => { const id = typeof shelfOf === 'function' && need.lengt
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
-  const j = myJob(); if (!j) return ixWorkStep();
+  const j = myJob(), lo = ixLoose(j); if (lo) return lo;
+  if (!j) return ixWorkStep();
   if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
     const c = SHIP.player.cart && SHIP.player.cart.job === j.id ? SHIP.player.cart : null, step = !c ? 'cart' : c.stage === 'empty' ? 'load' : c.stage === 'full' ? 'unload' : 'return';
@@ -15885,7 +15889,16 @@ function ixJobStep() {
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
-  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a tune job (24e) is tuned, not repaired (p5-fix2)
+  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (j.kind === 'chore' && !need.length && j.title) || (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a chore on a machine says what it is ("Calibrate the galley plant": FX3); a tune job (24e) is tuned, scan first (p5-fix2)
+}
+// parts in your hands that nothing you hold needs (a dropped job's relay, FX3): put them back first, since a cart won't take
+// full hands. Only with no job, or one that needs no part from storage (a cart run, a chore without parts); a tap on any
+// shelf in main storage puts them back (section 15's stow). A repair needing other parts keeps its own words ("fit those first")
+function ixLoose(j) {
+  const P = SHIP.player, held = (P.carry || []).filter(p => p !== KIT_BAG && typeof STOCK !== 'undefined' && p in STOCK); if (!held.length) return null;
+  if (j && (j.machine || (j.parts || []).length && !j.workDone)) return null;
+  const sh = typeof shelfOf === 'function' ? shelfOf(held[0]) : null;
+  return { deck: 5, room: 'r', place: sh || null, label: typeof worksText === 'function' ? worksText('job.putback', 'Put the {part} back: main storage', { part: held[0] }) : 'Put the ' + held[0] + ' back: main storage' };
 }
 // no job yet on a shift day (playtest 1, note 9): the time clock till you've clocked in, then the job board while it
 // has a job for you; then your job's steps as above. From the clock's opening to the shift's end; Day 1 has section 21's own
@@ -31510,6 +31523,8 @@ const LINES = JSON.parse([
   '{"text":"Tonight\'s salad is extra crunchy. The garden says thank you.","id":"1qiff8a"}]',
   ',"irr.title":[',
   '{"text":"Rack {n} · nozzles","id":"1g15d39"}]',
+  ',"job.putback":[',
+  '{"text":"Put the {part} back: main storage","id":"1ydh1yu"}]',
   ',"join.book-circle.notice":[',
   '{"text":"Book circle: sit with the circle and talk about this month\'s book. Leisure and social up.","id":"1fkquvp"}]',
   ',"join.book-circle.tip":[',
