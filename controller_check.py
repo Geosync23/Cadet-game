@@ -6,7 +6,7 @@
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   firstuse: (lead 27) a drifting stick or a light trigger at connect is not a use (no body.pad, nothing new); a
-#           firm push held 0.15 s is, a press at once; after a touch a drift doesn't take the screen back
+#           firm push held 0.15 s is, a press at once; after a touch a drift doesn't take the screen back; a drift never walks you
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
 #   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   lists:  (P1) the right stick scrolls a long list, the triggers page; the D-pad follows into it; a text box: A keeps
@@ -579,7 +579,10 @@ def part_firstuse(pw):
     p = Pad(pw, ON)
     shape = "[PAD.used, PAD.lastUse > -1e9, document.body.classList.contains('pad'), document.querySelectorAll('style').length, document.body.children.length]"
     p.plug(); p.step(2); s0 = p.ev(shape)
+    pos0 = p.ev('[player.obj.position.x, player.obj.position.z]')
     p.axes([.35, .12, -.3, .2]); p.step(45)                # past the dead zone, a gentle drift on both sticks for 1.5 s
+    pos1 = p.ev('[player.obj.position.x, player.obj.position.z]')
+    check(pos0 == pos1 and p.ev('player.steer') is None, f'firstuse: a drifting stick at connect walked the player: {pos0} -> {pos1}')
     check(p.ev(shape) == s0 and s0[0] is False and s0[1] is False, f'firstuse: a drifting stick at connect counted as a use: {s0} -> {p.ev(shape)}')
     p.btn('lt', .4); p.step(30); p.btn('lt', 0); p.step(1)  # a light, steady trigger
     check(p.ev('PAD.used') is False, 'firstuse: a light trigger counted as a use')

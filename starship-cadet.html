@@ -53334,7 +53334,7 @@ function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; if (!s
 padOn('frame', () => {
   const free = !ride && !padLayer() && !FREEZE.frozen, [x, y] = PAD.ls, m = Math.hypot(x, y);
   // walking: up on the stick is up the screen, whichever way the view faces (section 12's camera: right is (cos az, -sin az))
-  if (free && m && !steering) {
+  if (free && m && !steering && PAD.used) {   // (only once the pad is in use: a drifting stick never walks you)
     const rx = Math.cos(az), rz = -Math.sin(az), fx = -Math.sin(az), fz = -Math.cos(az);
     const wx = rx * x - fx * y, wz = rz * x - fz * y, d = Math.hypot(wx, wz) || 1;
     if (!PAD_DECK.walking) { PAD_DECK.walking = true; player.stop(); }
