@@ -53722,11 +53722,13 @@ function padSaid(el) {                                     // what a screen read
   const by = el.getAttribute('aria-labelledby');
   if (by) { const t = tidy(by.split(/\s+/).map(id => { const e = document.getElementById(id); return e ? e.textContent : ''; }).join(' ')); if (t) return t; }
   if (el.labels && el.labels.length) { const t = tidy([...el.labels].map(x => x.textContent).join(' ')); if (t) return t; }
-  const t = tidy(el.textContent) || tidy([...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')); if (t) return t;
+  const t = tidy(el.textContent) || tidy([...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')); if (/\p{L}/u.test(t)) return t;   // a mark alone ("✕", "+") says nothing
   return tidy(el.getAttribute('title') || el.getAttribute('placeholder') || (el.tagName === 'INPUT' && /^(button|submit)$/.test(el.type) ? el.value : ''));
 }
 // [selector, name or (el) => name]: for a button that shows only a picture (the check's 'a11y' part lists any it finds)
-const PAD_NAMES = [];
+const PAD_NAMES = [
+  ['#device button', el => DEV.app === 'maps' && /^\d+$/.test(el.textContent.trim()) ? 'Deck ' + el.textContent.trim() : ''],   // Maps' deck row: "4" is Deck 4
+];
 function padNameIt(el) {                                   // give el a readable name before it takes the focus, if it has none
   if (!PAD.used || padSaid(el)) return;
   for (const [sel, nm] of PAD_NAMES) if (el.matches(sel)) { const t = typeof nm === 'function' ? nm(el) : nm; if (t) el.setAttribute('aria-label', t); return; }
@@ -53739,16 +53741,21 @@ function padNameIt(el) {                                   // give el a readable
 // View the action button, the stick's click Pause. Right hand: A, B, X, Y as normal; the bumper and trigger step
 // through things nearby (RB left, RT right), Menu reaches the screen's edge, the stick's click is Pause. Walking with the
 // right hand needs the sticks swapped (P4's choice): with them swapped the right stick walks and moves the highlight.
+// Left hand has no zoom (the triggers' and right stick's zoom are on the far side, and no button on the screen's edge
+// zooms): the view stays at its opening zoom, and two hands bring zoom back.
 const PAD_LAYOUTS = {
   left: { a: 'lt', b: 'lb', y: 'down', x: 'view', menu: 'ls', up: 'up', left: 'left', right: 'right', rb: 'rb', rt: 'rt', rs: 'rs',
     lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'a' },
   right: { a: 'a', b: 'b', x: 'x', y: 'y', up: 'menu', left: 'rb', right: 'rt', menu: 'rs', lb: 'lb', lt: 'lt', view: 'view', ls: 'ls', down: 'down',
     rb: 'up', rt: 'right', rs: 'left' },
 };
-padOn('use', () => {                                       // toasts are read out once the controller is in use
-  if (PAD_A11Y.toast) return; PAD_A11Y.toast = true;
-  if (!toastEl.hasAttribute('role')) toastEl.setAttribute('role', 'status');
-  if (!toastEl.hasAttribute('aria-live')) toastEl.setAttribute('aria-live', 'polite');
+padOn('use', () => {                                       // toasts are read out while the controller is in use
+  if (PAD_A11Y.toast) return; PAD_A11Y.toast = [];
+  if (!toastEl.hasAttribute('role')) { toastEl.setAttribute('role', 'status'); PAD_A11Y.toast.push('role'); }
+  if (!toastEl.hasAttribute('aria-live')) { toastEl.setAttribute('aria-live', 'polite'); PAD_A11Y.toast.push('aria-live'); }
+});
+padOn('unuse', () => {                                     // a touch takes back: the toast as it was
+  if (!PAD_A11Y.toast) return; for (const a of PAD_A11Y.toast) toastEl.removeAttribute(a); PAD_A11Y.toast = false;
 });
 // ---- end of slot: Controller engineer ----
 

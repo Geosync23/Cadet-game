@@ -420,10 +420,25 @@ def part_lists(pw):
     p.close()
 
 # P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
-NAMELESS = """(() => {
+# The names are the browser's own accessible names (CDP Accessibility.getPartialAXTree), not padSaid's guess; a name
+# with no letters in it (a mark alone: "✕", "+") counts as none.
+AX_ITEMS = """(() => {
   const L = padLayer(); if (!L) return null;
-  return padItems(L).filter(e => { padNameIt(e); return !padSaid(e); }).map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
+  window.__ax = padItems(L); window.__ax.forEach(e => padNameIt(e));
+  return window.__ax.map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
 })()"""
+def nameless(p):
+    """the buttons of the layer on top with no accessible name a screen reader can say, or None with no layer"""
+    descr = p.ev(AX_ITEMS)
+    if descr is None: return None
+    if not hasattr(p, 'cdp'): p.cdp = p.g.page.context.new_cdp_session(p.g.page); p.cdp.send('Accessibility.enable')
+    out = []
+    for i, d in enumerate(descr):
+        oid = p.cdp.send('Runtime.evaluate', {'expression': f'window.__ax[{i}]'})['result'].get('objectId')
+        nodes = p.cdp.send('Accessibility.getPartialAXTree', {'objectId': oid, 'fetchRelatives': False})['nodes'] if oid else []
+        name = str(((nodes[0].get('name') or {}).get('value')) if nodes else '' or '')
+        if not re.search(r'[^\W\d_]', name or ''): out.append(f'{d} (heard: {name!r})')
+    return out
 
 def part_a11y(pw):
     p = Pad(pw, ON)
@@ -447,10 +462,13 @@ def part_a11y(pw):
     check(all(right[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the right-hand layout should put use, back, device, action, Pause and the screen edge on the right side: {right}')
     # toasts are read out once the controller is in use
     check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
+    p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)
+    check(p.ev("!toastEl.hasAttribute('role') && !toastEl.hasAttribute('aria-live')"), 'a11y: a touch taking back should leave the toast as it was')
+    p.press('x'); p.step(2)
     # the highlight: thick, teal, with a dark edge
     p.press('up'); p.step(2)
     st = p.ev("(() => { const c = getComputedStyle(document.activeElement); return [c.outlineWidth, c.outlineColor, c.outlineStyle, c.boxShadow]; })()")
-    check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and 'rgb(13, 21, 33)' in st[3], f'a11y: the highlight should be a 4px teal outline with a dark edge: {st}')
+    check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and st[3].count('rgb(13, 21, 33)') == 2, f'a11y: the highlight should be a 4px teal outline with a dark edge on both sides (two dark shadows): {st}')
     p.press('b'); p.step(2)
     # the deck ring: pulses, and stays still when the phone asks for reduced motion (asked live)
     ring = p.ev('!!(PAD_PICK.ring && PAD_PICK.ring.visible)')
@@ -466,7 +484,7 @@ def part_a11y(pw):
     gaps, n = {}, 0
     def look(what):
         nonlocal n
-        p.step(3); r = p.ev(NAMELESS)
+        p.step(3); r = nameless(p)
         if check(r is not None, f'a11y: {what}: no panel on top'): n += 1
         if r: gaps[what] = r
     p.press('up'); look('screen edge'); p.press('b')
