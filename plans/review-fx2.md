@@ -19,9 +19,23 @@ How each part is judged (lead 27's brief): its new check part FAILs on 2b4a05db 
 
 **Notes (not blocking):** the step toasts are titled "Your job" and say "about 1 minutes" (old wording in 15b's chore path); Calder's word "Two minutes ten" is a fixed line, not the real time (old).
 
-## B. The scanner: not received yet
+## FX2 tip cc2bb2be (A1 a76ec6c0, B 03f9eb9f + a3b93ced + cc2bb2be, C 1ae2d27c): PASS
 
-## C. Wording, the galley plant's calibrate, a dropped part left in hand: not received yet
+In it: A1, no side-job taps before the job is announced (`ixSides`: `!(j.found > shipNow())`). B: scan first on every faulty job once you have the scanner (`scanFirst`: the arrow says "Look over the <machine>", the look-over fits nothing and opens the scanner; the part is named after the reading); the use counts with no Fetch pressed (`scanFitted` takes the named part); jobEnd now asks 24k's `caseFitted` (a repair before the head-scratcher is called leaves the machine faulty); the teacher's watch job is off your board for every lesson (`worksWatching` in `jobsBoard` and `boardForYou`); m7 trains only once scanned (`WORK_MECH.m7.counts`); the clue toast has a title. C: one time and place in the Tuning and Hauling asks, "Tune the" on a tune job's arrow, the inspection's Calendar time 06:30.
+
+| Test | Result |
+| --- | --- |
+| mech_check m3d m7 m4 m5 on 2b4a05db | FAIL: the drill by taps (6 lines), m7's clue toast, scan first, the use count, "a repair before the call leaves it faulty", "a training job finished without a scan doesn't train you" (and the fix2 part), as they should |
+| mech_check (all parts) on cc2bb2be | MECH CHECK OK |
+| puzzle_check, career_check on cc2bb2be | OK, both (jobEnd's caseFitted touches every head-scratcher) |
+| cadet_test 2b4a05db -> cc2bb2be | ALL IDENTICAL |
+| A1 by hand | a tap on the extinguisher at 14:13: nothing starts (e10d81a4 started the drill) |
+| Honest play Days 2-8 (follower, drops a job to take a training) | Hauling and Tuning: the teacher's job is no longer on your board while you watch (board at 12:50 lists only your run; Day 4 only "Tune: Oven 2"); Day 5: after the watch "Repair: Washer 2 (leaks)", the arrow "Look over the washer", "You open the panel... with the scanner", the clue toasts "Fault notes / + clue: Eklund", the case called, "Trained: the scanner" at 10:37; afterwards "Look over the seat hinges", the scanner reads, then Fetch; Day 8: Making it safe opens (the use counted) and Calder's call comes at 10:30 (its wrong-deck arrow is FX3's fix, passed) |
+| arrows_check week on cc2bb2be | as on e10d81a4; the m7/p3/scanner/m6 lines can't turn green on FX2 alone, as the follower's chain still stops at Day 2's m1 (FX1). Nothing new red |
+
+Not in this push (from lead 27's list for C): the galley plant's calibrate (the stuck "Repair the galley plant" arrow; arrows_check names "nobody yet") and a dropped job's part left in hand (backlog AR2-1). Asked FX2 whether they're coming or someone else's.
+
+Watch for (not FX2's): during a lesson's watch step there's still no arrow, so a follower only gets through it by being near the teacher by chance (Day 4's tuning watch took 08:46-10:22). That's the arrows plan's T2 (follow the teacher).
 
 ## FX3's delta e6bcf827 (on b063f86, which PR9 passed with fixes): PASS
 
