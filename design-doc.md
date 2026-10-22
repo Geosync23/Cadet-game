@@ -433,6 +433,15 @@ What higher tiers unlock:
 
 **The first story arcs** (agreed 2026-10-16) belong to the three crew closest to you: Tomas, Pell and Rina. Each has four beats that open at acquaintance, colleague, friend and close friend: a small personal thread told through chats, an appointment or two, Mail and one small gathering. Arcs for the Captain, Vance, Calder, Brennan, Holt and Saruth come later.
 
+**Crew stories** (the user, 2026-10-22, `plans/crew-stories-pitch.html`; pitch only, nothing written or built until after the user's playtest). A crew story is four ordinary story moments (spark, thread with a favour, weight, turn) and then a **crescendo**: a short scene with other crew there, played at a gathering that already happens (a Friday tea, the open-door tea, Knit and natter, the Day 21 send-off, the storm, comet viewing, your night shift, Calder's question), so nobody's day is re-planned. The user's choices:
+- **Ten stories:** Pell (his practical at the open-door tea, Day 17 or 24), Zeke (the finished scarf at Knit and natter on Day 23, the evening you become Engine Specialist), Calder ("well done" inside Calder's question, Day 26), Kovac (the lift club rides to the Friday address), Theo Teague (leaves Day 21: the last page of his comic at the send-off), Basil Bramwell (arrives Day 21: his plant at his new hand's tea, Day 25), Halloran (the Works crew tell him terrible jokes, Friday tea Day 19), Saad Salo (an old mistake faced in the storm, Day 13), Dev Raman (comet viewing, Day 16) and Anja Kowalczyk (the beacon's light pattern at dawn on your first night shift, Day 20). Leila Eklund's story is **parked** (not picked, 2026-10-22), kept on the pitch page.
+- **Order:** Pell, Zeke and Theo first; then Calder and Halloran; then the rest.
+- **Tone: lighter**, "some grief and past pain": nobody ill or in trouble now; old grief and old hurts told gently; every story ends warm. Nobody dies on screen.
+- **Endings:** two, both kind: a full one if you were part of it, a quiet one (a Mail, a smaller moment later) if you weren't. Never a bad ending.
+- **Repeats:** the same stories every game; which you meet depends on who you befriend and the calendar.
+- **The existing stories** (Pell, Zeke, Calder, Kovac) keep their words and gain a crescendo; their old last step becomes the afterglow. Tomas, Rina, Brennan, Vance, Marrow and Holt stay as they are for now.
+- **Pace:** at most one crescendo a day (and one heavy moment a day, as now).
+
 **Guests** (agreed 2026-10-16). Guests live like crew, but for a while: they eat, sleep, use rooms, turn up in chatter and can be befriended. Between events, an everyday guest (a specialist for a week, a transfer waiting for their ship) arrives about once a ship week, so Deck 4's corridor always has a new face. Events bring their own guests; a delegation leader or dignitary gets one of Deck 2's visitor rooms.
 
 **Ship traditions** (agreed 2026-10-16; "ship traditions" is the official name, while the big ones are "ship-wide events"; built in 0.34.0). Alongside the big ship-wide events, the Wren has small, recurring traditions, "lots of little holiday-like things, almost like Stardew Valley". The crew who are free simply go, and talk about them; nothing stops daily life, and there are no menus or cutscenes. One events system runs them. They're announced in Mail the evening before, shown on the device's Calendar, and the Calendar reminds you before each one:
@@ -836,6 +845,7 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
+- Crew stories, from the user's answers (2026-10-22, `plans/crew-stories-pitch.html`): park Leila Eklund or make her the eleventh (recommended: park)? Zeke's dad losing his memory is illness in the present, which the lighter tone rules out: make his dad well and retiring (recommended) or keep it as written? Halloran's mum in hospital: make the jokes his late dad's instead (recommended)? Pell's mum's stiff hands: keep (recommended)?
 - Crossing the Line's supper (Day 7, the mess) is built (on claude/line-update, behind its switch) with those who don't get a seat eating standing with a tray at the mess's standing spots (`lineStandTray`). Should it sit down in sittings too, like the storm's lantern supper since 2026-10-21?
 
 **The decks:**
@@ -843,6 +853,8 @@ Done so far:
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 
 **Answered:**
+
+- Crew stories (the user, 2026-10-22, plans/crew-stories-pitch.html): ten stories, Pell, Zeke and Theo first; a lighter tone with some grief and past pain; two kind endings; the same stories every game; Zeke's crescendo on Day 23; the existing stories keep their words and gain a crescendo; one crescendo a day. See "Social life".
 
 - Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
   - The one extra short event is Crossing the Line, on Sunday Day 7, so Saturday stays free.
