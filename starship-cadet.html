@@ -53365,7 +53365,7 @@ padOn('b', () => {                                         // B on the deck: a t
 // order (crew, then what pick() hits: a walker, an item, the lift, a door; then on the floor your job's stop, your crate,
 // your hamper and wardrobe, a seat or a machine to use), without doing anything. The ring and the line are made at the
 // first use and shown only while the controller is in use and nothing is open.
-const PAD_PICK = { reach: 3.2, every: 8, n: 0, list: [], sel: null, chosen: false, ring: null, hint: null, rm: false, of: null, items: [], pof: null, places: null, cs: null, wr: null, job: null, max: 8, budget: 6, used: 0 };
+const PAD_PICK = { reach: 3.2, every: 8, n: 0, list: [], sel: null, chosen: false, ring: null, hint: null, of: null, items: [], pof: null, places: null, cs: null, wr: null, job: null, max: 8, budget: 6, used: 0 };
 function padWhat(cx, cy, want) {                           // what a tap at (cx, cy) would reach: a key, or null ('floor' when the
   // floor can't matter: want, the key being looked for, isn't one of the floor's)
   const a = PAD_PICK.cs ? padCrewAt(cx, cy) : crewAtScreen(cx, cy); if (a) return 'crew:' + a.p.id;
@@ -53489,7 +53489,6 @@ function padPickShow(on) {                                 // the ring and the l
       + '#padHint .m{color:#93a6ae;font-size:12px}';
     document.head.appendChild(st);
     P.hint = document.createElement('div'); P.hint.id = 'padHint'; P.hint.hidden = true; P.hint.setAttribute('aria-live', 'polite'); document.body.appendChild(P.hint);
-    P.rm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
   if (!P.ring) return;
   const t = on && P.sel;
@@ -53514,7 +53513,7 @@ padOn('frame', () => {
     const v = P.sel.key.startsWith('crew:') ? DECK_CREW.find(a => 'crew:' + a.p.id === P.sel.key) : null;
     if (v) { P.sel.x = v.x; P.sel.z = v.z; }
     P.ring.position.set(P.sel.x, .035, P.sel.z);
-    const s = P.rm ? 1 : 1 + .06 * Math.sin(performance.now() / 260); P.ring.scale.set(s, s, s);
+    const s = padStill() ? 1 : 1 + .06 * Math.sin(performance.now() / 260); P.ring.scale.set(s, s, s);
   }
 });
 padOn('unuse', () => { if (PAD_PICK.ring) padPickShow(false); });
@@ -53572,7 +53571,8 @@ function padPanelAdd(sel, o = {}) {
   if (o.first) PAD_FIRST[k] = o.first;
   if (o.back) PAD_BACK[k] = o.back;
 }
-const PAD_FOCUS_CSS = 'body.pad :focus{outline:3px solid #4cc3b5!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(76,195,181,.28)!important}';
+const PAD_FOCUS_CSS = 'body.pad :focus{outline:4px solid #4cc3b5!important;outline-offset:3px!important;box-shadow:0 0 0 3px #0d1521,0 0 0 9px #0d1521!important}'
+  + '@media (forced-colors:active){body.pad :focus{outline:4px solid Highlight!important;box-shadow:none!important}}';   // P5: thick, with a dark edge both sides
 const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
 const PAD_HUD = { id: 'hud', hud: true };
 // (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
@@ -53585,6 +53585,7 @@ function padItems(L) {                                     // the buttons the hi
 }
 function padFocusTo(el) {
   if (!el) return; if (el.tabIndex < 0 && !el.hasAttribute('tabindex')) el.tabIndex = -1;   // a card you tap (a div) takes the focus too
+  padNameIt(el);
   try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
   try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
 }
@@ -53698,6 +53699,42 @@ padOn('x', e => {                                          // the action button 
   const L = padLayer(); if (L) return padOwnDo('x', L, e) || undefined;
   if (ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
+});
+// ---- P5 (accessibility, CP5; plan section 8). Nothing needs a button held down or pressed fast: walking stops the
+// frame the stick is let go, every other action is one press, and a held D-pad (or the stick in a menu) repeats at
+// PAD_REP's calm pace (half a second, then four steps a second), which the Controller settings page can change. The
+// highlight is a thick teal outline with a dark edge on both sides, so it shows on light and dark panels alike (the
+// system's own highlight colour when the phone forces its colours). The deck ring pulses gently unless the phone asks
+// for reduced motion, asked each frame so changing the phone's setting takes at once (padStill). Screen readers hear
+// each button through the page's real focus: one the highlight lands on that has no readable name gets one from
+// PAD_NAMES first (padNameIt, from padFocusTo), and toasts are read out (a polite live region) once the controller is
+// in use. Vibration (off unless turned on in Settings) only ever comes with a sign on screen. Nothing here runs or
+// changes the page before a pad button is pressed.
+const PAD_A11Y = { rmq: null, toast: false };
+function padStill() {                                      // the phone asks for reduced motion (now, not at load)
+  const A = PAD_A11Y; if (!A.rmq && typeof matchMedia === 'function') A.rmq = matchMedia('(prefers-reduced-motion: reduce)');
+  return !!(A.rmq && A.rmq.matches);
+}
+function padName(el) {                                     // what a screen reader says for el: '' when nothing
+  if (!el || !el.getAttribute) return '';
+  const tidy = t => String(t || '').replace(/\s+/g, ' ').trim();
+  const l = tidy(el.getAttribute('aria-label')); if (l) return l;
+  const by = el.getAttribute('aria-labelledby');
+  if (by) { const t = tidy(by.split(/\s+/).map(id => { const e = document.getElementById(id); return e ? e.textContent : ''; }).join(' ')); if (t) return t; }
+  if (el.labels && el.labels.length) { const t = tidy([...el.labels].map(x => x.textContent).join(' ')); if (t) return t; }
+  const t = tidy(el.textContent) || tidy([...el.querySelectorAll('img[alt]')].map(i => i.alt).join(' ')); if (t) return t;
+  return tidy(el.getAttribute('title') || el.getAttribute('placeholder') || (el.tagName === 'INPUT' && /^(button|submit)$/.test(el.type) ? el.value : ''));
+}
+// [selector, name or (el) => name]: for a button that shows only a picture (the check's 'a11y' part lists any it finds)
+const PAD_NAMES = [];
+function padNameIt(el) {                                   // give el a readable name before it takes the focus, if it has none
+  if (!PAD.used || padName(el)) return;
+  for (const [sel, nm] of PAD_NAMES) if (el.matches(sel)) { const t = typeof nm === 'function' ? nm(el) : nm; if (t) el.setAttribute('aria-label', t); return; }
+}
+padOn('use', () => {                                       // toasts are read out once the controller is in use
+  if (PAD_A11Y.toast) return; PAD_A11Y.toast = true;
+  if (!toastEl.hasAttribute('role')) toastEl.setAttribute('role', 'status');
+  if (!toastEl.hasAttribute('aria-live')) toastEl.setAttribute('aria-live', 'polite');
 });
 // ---- end of slot: Controller engineer ----
 

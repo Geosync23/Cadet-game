@@ -14,6 +14,9 @@
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
 #           is in charge); a disconnect lets go of everything and says whether the pad was in use; the last pad going
 #           leaves PAD.live false
+#   a11y:   (CP5) walking stops the frame the stick is let go; the menu repeat's pace and "no repeat"; toasts read out;
+#           the highlight's look; the ring pulses, and stays still with reduced motion; every button the highlight can
+#           land on, panel by panel, has a name a screen reader can say
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 controller_check.py BUILD.html [part ...]    Good is CONTROLLER CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -416,7 +419,65 @@ def part_lists(pw):
     check(p.ev("DEV.open && DEV.app") == 'home', f'lists: RB in an app should go home ({p.ev("DEV.app")})')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists)]
+# P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
+NAMELESS = """(() => {
+  const L = padLayer(); if (!L) return null;
+  return padItems(L).filter(e => { padNameIt(e); return !padName(e); }).map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
+})()"""
+
+def part_a11y(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log(); p.step(3)
+    # no holds: the stick walks only while pushed, and stops the frame it's let go
+    p.axes([0, -1, 0, 0]); p.step(6); walking = p.ev('!!player.steer')
+    p.axes([0, 0, 0, 0]); p.step(1)
+    check(walking and p.ev('!player.steer && !PAD_DECK.walking'), f'a11y: walking should stop the frame the stick is let go (was walking: {walking})')
+    # the menu repeat is calm (0.5 s, then 4 a second) and follows PAD_REP when Settings changes it: "no repeat" is one step
+    check(p.ev('PAD_REP.first') == .5 and p.ev('PAD_REP.every') == .25, 'a11y: the menu repeat should start at 0.5 s, then 4 steps a second')
+    p.ev('PAD_REP.first = Infinity'); p.log(); p.btn('down'); p.step(90); p.btn('down', 0); p.step(1)
+    fired = [x for x in p.log() if x.startswith('down')]
+    check(fired == ['down', 'down:up'], f'a11y: with no repeat, holding down three seconds should be one step: {fired}')
+    p.ev('PAD_REP.first = .5')
+    # toasts are read out once the controller is in use
+    check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
+    # the highlight: thick, teal, with a dark edge
+    p.press('up'); p.step(2)
+    st = p.ev("(() => { const c = getComputedStyle(document.activeElement); return [c.outlineWidth, c.outlineColor, c.outlineStyle, c.boxShadow]; })()")
+    check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and 'rgb(13, 21, 33)' in st[3], f'a11y: the highlight should be a 4px teal outline with a dark edge: {st}')
+    p.press('b'); p.step(2)
+    # the deck ring: pulses, and stays still when the phone asks for reduced motion (asked live)
+    ring = p.ev('!!(PAD_PICK.ring && PAD_PICK.ring.visible)')
+    if check(ring, 'a11y: no ring on the deck where the game starts (needed for the pulse test)'):
+        sc = []
+        for _ in range(8): p.step(2); sc.append(p.ev('PAD_PICK.ring.scale.x'))
+        check(len(set(sc)) > 1, f'a11y: the ring should pulse gently: {sc}')
+        p.g.page.emulate_media(reduced_motion='reduce'); sc = []
+        for _ in range(8): p.step(2); sc.append(p.ev('PAD_PICK.ring.scale.x'))
+        check(set(sc) == {1}, f'a11y: with reduced motion the ring should stay still: {sc}')
+        p.g.page.emulate_media(reduced_motion='no-preference')
+    # every button the highlight can land on has a name, panel by panel
+    gaps, n = {}, 0
+    def look(what):
+        nonlocal n
+        p.step(3); r = p.ev(NAMELESS)
+        if check(r is not None, f'a11y: {what}: no panel on top'): n += 1
+        if r: gaps[what] = r
+    p.press('up'); look('screen edge'); p.press('b')
+    p.press('menu'); look('pause card'); p.press('b')
+    p.ev('openLiftPanel()'); look('lift'); p.press('b')
+    p.ev('alarmOpen()'); look('alarm'); p.press('b')
+    p.press('view'); look('Tracked'); p.press('b')
+    p.ev('ixBoard.open()'); look('job board'); p.press('b')
+    if p.ev("DECK_CREW.some(a => { chatOpen(a.p); const c = document.getElementById('chat'); return c && !c.hidden; })"): look('chat'); p.press('b')
+    p.press('y'); look('device home')
+    for app in p.ev("[...DEVICE_APPS.values()].filter(a => !(a.hidden && a.hidden()) && a.id !== 'home' && a.id !== 'boot').map(a => a.id)"):
+        p.ev(f'deviceShow({json.dumps(app)})'); look('device app ' + app); p.press('b'); p.step(2)
+    p.press('b'); p.step(2)
+    for what, r in gaps.items(): fail(f'a11y: {what}: buttons with no name a screen reader can say: {r[:4]}')
+    print(f'  a11y: {n} panels looked at for names, {sum(len(r) for r in gaps.values())} nameless')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('a11y', part_a11y)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
