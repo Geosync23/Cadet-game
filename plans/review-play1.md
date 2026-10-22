@@ -27,7 +27,23 @@ Merge notes:
 
 ## J. Clock-in and clock-out reminders (note 20), CK1: claude/patch-play1-j 1188cbdf
 
-(in progress)
+**Verdict: PASS WITH ONE FIX** (one guarded line in J's clockRemindTick; then no re-review needed beyond a look at the line and check_fast).
+
+Sections touched: 15 (+108 in its slot, one call in playerUpdate's once-a-minute block), 15b (one line in trkItems, FR4 agreed), 22 (the baked words only, through content/). No build-number lines. No R(); nothing the crew's planner reads; SHIP.player.clockRm saved (about 35 bytes).
+
+Driven in the browser (390 x 844, Day 9, no job, not clocked in, needs held up so no need arrow; on Deck 3 at first):
+- Clock in: "pre" at 08:30 (Tracked: "Clock in 09:00"), "start" at 09:00 (Tracked: "Clock in Now"), "late" at 09:15, "later" at 10:00. Clocked in for real at the time clock: the Tracked row goes.
+- Clock out: "end0" at 16:50 with the clock-out arrow, "end" at 17:00; I left Deck 5 for Deck 4 at 17:02: "You left without clocking out. Pop back to the time clock, or it signs you out for you at 18:00." and the arrow says "Take the lift to Deck 5: clock out at the time clock".
+- On J alone there's no clock-in arrow (by design: it's B's ixWorkStep); on B + J merged, the clock-in arrow is B's and J's Tracked row sits alongside it.
+- No console errors.
+
+Checks I ran on 1188cbdf: cadet_test against 32b699a6 **ALL IDENTICAL** (renderer noise only); check_fast **QUICK CHECK OK** (292 s); career_check: the new part (l) all OK over Days 9-17 (easing off after three good days, back on a slip, the two Mails, the Tracked rows); the only FAIL is the known old `busy: "Relied on" before Day 5` (backlog 12). CK1 also reports intro_check OK twice. design-doc rule added ("Clocking in and out: the reminders"); DEV_NOTES and build-table updated.
+
+**The fix (found on B + J merged, 4d062c45 + 1188cbdf, a test merge; only plans/build-table.md clashes):** when the clock's own goal is done, clockRemindTick calls `clearGoal()`. With B, a goal tracked from Tracked over your job carries `back`, and B's `trkDone(g)` turns job tracking back on; clearGoal doesn't. So: in the Works bay at 08:35 with no job, tap "Clock in" in Tracked (track goes null), clock in: the arrow is gone (track stays null), and B's "Take a job at the job board" arrow never comes. Probed: from far away it's fine (B's trkDoneCheck clears it with trkDone on arrival), but anywhere in the Works bay (the clock's room, where the board is) it's lost. Fix, in J's line `if (typeof IX_GOAL !== 'undefined' && IX_GOAL && /^clock:/.test(...)) { ... clearGoal(); }`: use `typeof trkDone === 'function' ? trkDone(IX_GOAL) : clearGoal()`. Same for the clock-out row.
+
+Notes (no change needed):
+- The first morning a day there can be one more toast than the reminders (section 20's own in-bay toast and tips), as CK1 says; they're spaced 5.6 s apart at least.
+- Owner review: section 15 is the player engineer's; J sits in that seat's slot. The lead may want PB2 (or whoever holds that seat) to glance at it.
 
 ## E. Ladder taps and the rower (notes 14, 16), LD1: claude/patch-play1-e
 
