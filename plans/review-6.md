@@ -278,3 +278,13 @@ tradMeal lines (PB2's note).
 ### Verdict: 2ee2724: PASS
 Note (not blocking): the night-shift three reach the glass ~8+ minutes after their planned 14:32 (the lounge door near
 (35, 9.5) is slow); they still miss the oath's start, as LB3 says.
+
+## PR10: LB3's integration merge into claude/line-update (merge 2c53e49f, tip cee209a4; integration ed57dd78 = 0.64.14 in) (2026-10-22)
+Read: the game diff to 0.64.14 is the Line's code plus the base fields already reviewed in L5b-L5k; tradMeal keeps L5j's
+seated retry then PB2's `e.ate = true`; food_check = integration's + EV5's rota line; day_check keeps EV4's storm rec skip;
+events_check's EV_BEFORE lines only act with the Line on; bigevents_check the Line's (CROWD 80, off menu, standing diners).
+- Line off: cadet_test 0.64.14 (ed57dd78) -> cee209a4 ALL IDENTICAL; check_fast OK 328 s.
+- food_check 7 1 "garden, good" FAILs on 0.64.14 itself with the same numbers (delivered 3893) as on the tip: old (backlog 23), not the merge's.
+- Line on (a copy, EV_LINE_ON true; storm and Fridays on as in 0.64.14): day_check 6, 7, 8 OK; events_check OK;
+  bigevents OK (supper 83 / 71 came / 42 at once / 48 seats); food_check 11 4 OK; the min-dropped plant FAILs "12 eat standing" (caught).
+### Verdict: cee209a4: PASS (the Line off is 0.64.14 exactly; my earlier Line PASS holds with it on)
