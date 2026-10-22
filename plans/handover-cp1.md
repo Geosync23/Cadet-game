@@ -63,3 +63,12 @@ once gave screenshot noise once), check_fast. Setup: pip install playwright; thr
 - The five reach "gaps": CTT3 walked straight to each on 0.91.0 and reached all (the svg Deck plan is covered by its list). Done.
 - Lift vs ladder: on the 0.64.17 build A on "Lift" reached a ladder hatch (its new ladder taps). On 0.64.16 A on Lift opens the
   lift panel (checked). When 0.64.17's ladder change returns, padWhat (section 26, turn 3) must learn its ladder hatch taps.
+
+## Controller follow-up list (before any switch-on; lead 29, 2026-10-22 ~21:30 UTC)
+1. Swap in CTT2/CTT3's newer controller_check (touch and day route fixes for 0.64.15/16) once CTT3 confirms it on 9a8eac0b.
+2. Mess seat 3-mess-1 (Deck 3): the ring offers the long-table seat on the same spot, never 3-mess-1 itself (same on 0.90.8).
+   First find out whether any finger tap can reach 3-mess-1 there (padWhat follows playerFloorTap's order: the nearest place
+   spot to the ray within FLOOR_NEAR). If a tap can't either, it's a game question for the place's owner (two places on one
+   spot), not the ring's; if a tap can, padWhat/padFind must find that point.
+3. CTT3's full reach sweep on 0.91.0: anything it finds.
+4. When 0.64.17's ladder change returns: padWhat learns its ladder hatch taps (A on "Lift" reached a hatch there).
