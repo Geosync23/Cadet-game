@@ -15577,6 +15577,7 @@ function ixTap(it, at, point) {
   if (!near.length) return false;
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
   const free = near.find(([pl]) => !busy(pl.id));
+  if (!free && room === 't' && deckDef.num === 5 && typeof teaOut === 'function' && teaOut() && ixTeaAnywhere(it, point, busy)) return true;   // tea in the Tea corner: any chair will do (fresh-eyes, FE1 item 48)
   if (!free) { const a = heldBy(near[0][0].id); toast(it.t, 'In use' + (a ? ': ' + a.p.name + ' is there.' : '.') + ' ' + it.x); return true; }
   const [pl, spot, kind] = free, company = ixBond(spot);   // 0 or the best bond (0.28.43; truthy as before)
   const pose = kind === 'gym' ? (typeof poseOf === 'function' ? poseOf(pl) : pl.anim || 'lift') : ixPose(kind, pl, spot, company);
@@ -15584,6 +15585,24 @@ function ixTap(it, at, point) {
   return true;
 }
 PLAYER_TAPS.push(ixTap);
+// tea in the Tea corner (Deck 5, room 't') while it's out, and the seat you tapped is taken (the user, on FE1's item 48:
+// "tapping ANY chair in the tea corner should sit you down for tea"): another free seat there, else your tea standing on a
+// free tile in the corner by the table; either is tea and biscuits (actBegin's teaHere / teaBegin), Zeke's Day 1 tea too
+function ixTeaAnywhere(it, point, busy) {
+  const seats = [...PLACE_OF.values()].filter(pl => pl.room === 't' && !privatePlace(pl) && !busy(pl.id)).map(pl => [pl, placeSpot(pl.id)]).filter(([, s]) => s)
+    .sort((m, n) => (m[0].pose === 'sit' ? 0 : 1) - (n[0].pose === 'sit' ? 0 : 1) || Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
+  if (seats.length) {
+    const [pl, spot] = seats[0], kind = pl.pose === 'sit' ? 'ixLounge' : 'ixTea';
+    actStart(kind, pl.id, { pose: ixPose(kind, pl, spot, ixBond(spot)), title: it.t, flavour: it.x, company: ixBond(spot) }); return true;
+  }
+  const tiles = (typeof ROOM_TILES !== 'undefined' && ROOM_TILES.t || []).filter(([c, r]) => free(c, r) && !BUSY_TILE(c, r)).map(([c, r]) => [c, r, cellPos(c, r)])
+    .sort((m, n) => Math.hypot(m[2].x - point.x, m[2].z - point.z) - Math.hypot(n[2].x - point.x, n[2].z - point.z));
+  if (!tiles.length) return false;
+  const [c, r, w] = tiles[0];
+  actStart('ixTea', null, { pose: 'drink', title: it.t, flavour: it.x, spot: { id: null, x: w.x, z: w.z, y: 0, face: Math.atan2(point.x - w.x, point.z - w.z), pose: 'stand', walk: [c, r] } });
+  return true;
+}
+const BUSY_TILE = (c, r) => typeof DECK_CREW !== 'undefined' && DECK_CREW.some(a => { const [i, j] = cellAt(a.x, a.z); return i === c && j === r; });   // someone standing there
 
 // ---- Put down (0.28.60, the design doc's Repair step: "whenever your hands hold anything, a small 'Put down' button
 // lets you set it down; nothing is lost and the job stays yours"). A thumb-sized button, bottom right (#putDown), shown

@@ -335,6 +335,22 @@ with sync_playwright() as pw:
     print('  [seat, activity, fed, tray in hand, food change]:', anyseat)
     check(all(r[1] == 'eat' and r[2] is True and r[3] is None and r[4] > 1 for r in anyseat if g.ev(f"!!placeSpot('{r[0]}')")), f'with a tray, a tap on any seat eats it (the long table, the lounge, a mess seat): {anyseat}')
 
+    print('Tea in the Tea corner, every seat taken (fresh-eyes, FE1 item 48: "any chair in the tea corner should sit you down for tea"):')
+    teas = []
+    for taken in (['5-tea-1', '5-tea-2'], ['5-tea-1', '5-tea-2', '5-tea-3']):
+        r = g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 5) goToDeck(5); setShipNow(1 * 1440 + 13 * 60 + 5); SHIP.player.teaDay = null; needsT = null;
+          if (typeof teaOut !== 'function' || !teaOut()) return ['no tea'];
+          const it = ITEMS.find(i => i.t === 'Armchair'); if (!it) return ['no armchair']; it.hit.getWorldPosition(_wp); const q = _wp.clone();
+          const gl = nearestOpen(q.x, q.z, player); player.obj.position.copy(cellPos(...gl)); player.stop();
+          for (const id of {json.dumps(taken)}) BUSY.add(id);
+          const ok = ixTap(it, q, q); return [ok, ACT && ACT.kind, ACT && ACT.placeId, ACT && ACT.spot && roomAt(...cellAt(ACT.spot.x, ACT.spot.z))]; }})()""")
+        for k in range(200):
+            g.step(10)
+            if g.ev("!ACT || ACT.phase === 'do'"): break
+        r += [g.ev("ACT && ACT.def && ACT.def.title"), g.ev("SHIP.player.teaDay")]; g.ev("actEnd(true)"); teas.append([len(taken)] + r)
+    print('  [seats taken, tapped, activity, place, room, title, tea day]:', teas)
+    check(all(t[1] is True and t[2] in ('ixLounge', 'ixTea') and t[4] == 't' and t[5] == 'Tea and biscuits' and t[6] == 2 for t in teas), f'tea: a tap on a taken armchair still gives you tea in the Tea corner: {teas}')
+
     print('Need warnings (0.28.41):')
     wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
       let t = performance.now() + 1e6;
