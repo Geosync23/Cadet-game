@@ -1060,7 +1060,8 @@ def part_games(pw, src, tag):
 # lift home, set the alarm and sleep.
 STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, player); if (!s || !g) return null;
   const pp = player.obj.position, gp = cellPos(...g); if (Math.hypot(gp.x - pp.x, gp.z - pp.z) < .45) return { there: true };
-  const path = findPath(s, g, null, player); if (!path || !path.length) return { nopath: true };
+  // (around people if it can; else through them: the game lets you push past someone after 2 s)
+  let path = findPath(s, g, null, player); if (!path || !path.length) path = findPath(s, g); if (!path || !path.length) return { nopath: true };
   // the stick for that way, by the view's own axes (up on the stick is away from the camera: right (cos az, -sin az),
   // forward (-sin az, -cos az)); the way it looks on screen is squashed by the camera's tilt, so it isn't used
   const w = cellPos(...path[Math.min(1, path.length - 1)]), dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
@@ -1153,7 +1154,7 @@ def part_day(pw, src, tag):
     # bed: the evening, the lift home, your bunk, Set alarm
     r.ev("skipTo((SHIP.time.day - 1) * 1440 + 22 * 60)"); r.step(20)
     if r.ev("player.deck") == 4 or ride(r, 4, fails, 'bedtime'):
-        bp = r.ev("(() => { const s = placeSpot(playerBed()); return s ? [s.x, s.z] : null; })()")
+        bp = r.ev("(() => { const s = placeSpot(playerBed()); if (!s) return null; const w = s.walk ? cellPos(...s.walk) : s; return [w.x, w.z]; })()")   # (its walk-to tile)
         if bp and walk_to(r, bp[0], bp[1]):
             # your own bunk, not a neighbour's (the game offers sleep only within 1.2 m of your bed): its ring key
             mine = r.ev(MY_BUNK); got = None
