@@ -82,3 +82,22 @@ not filed.)
 - The same day with the switches off (FX3's arrow on the valve panel, Deck 4): at 10:32 the follower took the lift to
   Deck 4, Calder came down after, and at 10:33 the training moved on to your turn ('do'). The lesson goes on with the
   panel arrow and stalls with the arrow on Calder.
+
+## Re-check of AC1's fixes (claude/arrows-c 3519abab): PASS
+
+| Check | Result |
+|---|---|
+| cadet_test 1f2ce27d vs 3519abab, alone | ALL IDENTICAL |
+| arrows_f_check on 3519abab | arrows_f_check: OK |
+| My 10 planted faults (af_*) | 10 of 10 caught (were 6) |
+| Day 8 played, queue and pointer on, the follower (`p_inc.py`) | lift to Deck 4 at 10:32, Calder follows, your turn ('do') at 10:33 |
+| Day 8, real screen taps at the pin (`p_inc2.py`) | the same: lift 10:32, 'do' 10:33 |
+
+Item 1 fixed (INC_NEAR: on Calder only while more than 4 tiles away, else onward); item 3 fixed (the four missing
+lines); item 4 fixed ("Calder" in the call and the follow with the queue on; off as before); item 6 fixed (console.warn).
+Item 2 withdrawn (above). Item 5 is with the lead (owners of 24f and caseAct's line; FX3 to see incGoalSet(g, by)).
+AC1's own extra: Call it now comes before Where next? once one suspect is left.
+
+Note, not F4's: after the follow, the burst job is your turn while you still hold the vent job, so the job's arrow
+stays on the vent (the same "another job in hand" pattern as Rounds' board arrow on Day 2); the follower didn't reach
+the pipe job by 10:41. For FX3 / the lead.
