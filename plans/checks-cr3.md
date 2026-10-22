@@ -96,3 +96,18 @@ sha256 of starship-cadet.html **94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86
 | day_check 7 (taken from CR1's share, agreed with CR1) | **OK** | DAY CHECK OK; peak 260; worst stuck 3.7 |
 
 No FAIL outside the known-old list.
+
+# Round on 0.64.15 (claude/integration-next c5c43293), lead 26's full round, CR3's share
+
+Share (plans/testing-guide.md's six-way split): `day_check` Days 0, 1, 5, 7, on the candidate, checked out as it is.
+sha256 of starship-cadet.html **e955d667fe946b3e1e0a21c0b1f3049694460096f675dad5019c328e5d7d4a25**, the lead's
+(OLD 32b699a6 = 94f32868…881e9, 0.64.14, also matched). Own CADET_WORK (/tmp/work-cr3), one at a time.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; draw calls peak 252; worst stuck 0.0 ship min; 276 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 250; worst stuck 0.0; 261 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 267; worst stuck 0.0; 267 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 257 s |
+
+No FAIL.
