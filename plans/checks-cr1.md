@@ -100,3 +100,33 @@ Checked out as is. **sha256 of starship-cadet.html: `70f9427354a398ef25e355e7428
 | fridays_check | **OK** | 999 s | FRIDAYS CHECK OK |
 
 No FAILs, so no OLD (0.64.15, 2b4a05db) runs were needed.
+
+# Round 6: 0.64.17 (claude/integration-next 8193458e, 2026-10-22)
+
+Checked out as is. **sha256 of starship-cadet.html: `225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5`**
+(matches BM13's). One at a time, CADET_WORK=/tmp/work-cr1. OLD = 0.64.16 (b9f053ba, 70f94273…a6c7).
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 335 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 247 s | DEVMODE CHECK OK |
+| bubble_check | **FAIL (NEW)** | 264 s | "a bubble jumped 49.8 px more than its speaker moved" (limit 45) |
+| puzzle_check | **OK** | 64 s | PUZZLE CHECK OK |
+| social_check | **OK** | 23 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 29 s | TALK CHECK OK |
+| fridays_check | **OK** | 1125 s | FRIDAYS CHECK OK |
+
+## bubble_check: NEW, not known old
+
+| Run | Build | Speakers | Largest move beyond the speaker | Result |
+|---|---|---|---|---|
+| 1 | NEW 0.64.17 | kim-yusuf, kovac-zainab | 49.8 px | FAILED |
+| 2 | NEW 0.64.17 | kim-yusuf, kovac-zainab | 49.8 px | FAILED |
+| 3 | NEW 0.64.17 | kim-yusuf, kovac-zainab | 49.8 px | FAILED |
+| 4 | OLD 0.64.16 | kim-yusuf, saruth | 30.0 px | OK |
+
+The same every time, so not a flake. bubble_check.py is unchanged between the two builds. The other parts pass on NEW (tail
+aim 0.00 px, no shakes, no hide-and-show, no side swaps). Different speakers stand in the scene on NEW: most likely the
+breakfast change (07:00) moves who is chatting there at the check's moment, and the 45 px limit is crossed with the new pair.
+Whether that is a game bug (a bubble really jumping) or the check's limit meeting a new scene isn't settled here: for the
+bubble owner. Not fixed (check runner).
