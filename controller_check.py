@@ -817,7 +817,8 @@ def pick_one(pw, src, tag, by_pad, n):
         r.ev("skipTo((SHIP.time.day - 1) * 1440 + 7 * 60 + 40); goToDeck(3, null)"); r.step(240)
         t = r.ev(CROWDED_SEAT)
         if not t: r.close(); return ['crowded seat (none free beside someone)', 'nowhere to stand', None, None], len(ts)
-    else: t = ts[n]; name = t['kind'] + ' (' + str(t.get('name')) + ')'
+    else: t = ts[n]
+    name = t['kind'] + ' (' + str(t.get('name')) + ')'
     r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
     r.step(12); hints = []; found = not by_pad
