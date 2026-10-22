@@ -6,6 +6,7 @@
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
+#   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   base:   hello; a press fires once and marks the controller in use (body.pad); its release; the dead zones (sticks,
 #           triggers); a held D-pad repeats (after 0.5 s, then every 0.25 s); a touch, the mouse or the wheel hands
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
@@ -330,7 +331,30 @@ def part_panels(pw):
     print(f'  panels: {n} panels swept, device apps {len(apps)}')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels)]
+def part_api(pw):
+    # the panel helper's API (P1) for the other packages: padPanelAdd (order, first, back), padOwn (move, a, b, frame)
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstPanel'; d.style.cssText = 'position:fixed;left:20px;top:200px;z-index:99;display:grid;grid-template-columns:90px 90px;gap:8px';
+      d.innerHTML = '<button id="t1">one</button><button id="t2">two</button><button id="t3">three</button>'; document.body.appendChild(d);
+      window.__tst = { back: 0, a: 0, moves: [], frames: 0 };
+      padPanelAdd('tstPanel', { before: 'lift', first: '#t2', back: () => { __tst.back++; d.hidden = true; } }); })()""")
+    p.step(3)
+    check(p.ev("(padLayer() || {}).id") == 'tstPanel', 'api: an added panel should be on top')
+    check(p.ev("PAD_PANELS.findIndex(r => r[0] === 'tstPanel') + 1 === PAD_PANELS.findIndex(r => r[0] === 'lift')"), 'api: before: should put it just above the lift')
+    check(p.ev("document.activeElement && document.activeElement.id") == 't2', 'api: first: should land the highlight on #t2')
+    p.press('left'); check(p.ev("document.activeElement.id") == 't1', 'api: D-pad left should move to #t1')
+    p.press('down'); check(p.ev("document.activeElement.id") == 't3', 'api: D-pad down should move to #t3')
+    # a screen of its own takes the D-pad and A, not B
+    p.ev("padOwn(L => L && L.id === 'tstPanel', { move: d => { __tst.moves.push(d); return true; }, a: () => { __tst.a++; return true; }, frame: () => { __tst.frames++; } })")
+    p.press('right'); p.press('a'); p.step(2)
+    check(p.ev("__tst.moves.join()") == 'right' and p.ev("__tst.a") == 1 and p.ev("document.activeElement.id") == 't3', f'api: padOwn should take the D-pad and A: {p.ev("JSON.stringify(__tst)")}')
+    check(p.ev("__tst.frames") > 0, 'api: padOwn frame should run while its panel is on top')
+    p.press('b'); p.step(2)
+    check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
