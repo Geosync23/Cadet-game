@@ -1064,7 +1064,9 @@ STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, play
   let path = findPath(s, g, null, player); if (!path || !path.length) path = findPath(s, g); if (!path || !path.length) return { nopath: true };
   // the stick for that way, by the view's own axes (up on the stick is away from the camera: right (cos az, -sin az),
   // forward (-sin az, -cos az)); the way it looks on screen is squashed by the camera's tilt, so it isn't used
-  const w = cellPos(...path[Math.min(1, path.length - 1)]), dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
+  // the next cell of the way (the one after it once you're on it): aiming further cuts corners and sticks on them
+  let w = cellPos(...path[0]); if (path.length > 1 && Math.hypot(w.x - pp.x, w.z - pp.z) < .3) w = cellPos(...path[1]);
+  const dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
   const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
 def walk_to(r, x, z, frames=900):
     for k in range(frames // 6):
