@@ -103,3 +103,22 @@ build table.
   again in eight more runs (2 full, 6 of FX3's part alone), so it's 1 in 9 and I couldn't reproduce it. Note for CP4: if it shows up again, the
   pin acts on 'click' after stopping 'pointerdown'; if the pin moves between press and release no click comes, and
   the press was already swallowed.
+
+## Third round
+
+- **CP4 016fc65e (the pin acts on release, as a deck tap does): PASS.** On FB1 228de58 + CP4's 38 change (scratch build,
+  applies cleanly, names_check OK), p_board2.py, 10 press-3-frames-release taps per camera turn, three runs at once:
+  900x760 crew hidden 40/40 twice, 390x844 crew on 20/20 (the other two turns have the board off screen). check_fast OK;
+  cadet_test alone f59b471e vs 016fc65e ALL IDENTICAL. Note: like a deck tap, the release must come within HOLD_MS
+  (240 ms, real time) of the press; a check that holds the press over many rendered frames on a slow runner could miss.
+  **The earlier 1-in-9 miss** (on the click version): not reproduced in 12 more runs, 3 of them with every pointer event
+  and ixGoalTap logged (each showed down, up, click, ixGoalTap, playerTap true, the board open). In the test harness the
+  pin can't move between press and release (animations off, frames stepped by hand), so bobbing doesn't explain that
+  miss; its cause stays unknown. The click path it went through is gone in 016fc65e.
+- **FB1 claude/fe-cartdock 228de58 (a52aad0 + 228de58, on FX3 3b7b13d): PASS.** choreThingTap: carrying for a haul or a
+  delivery, anything within 1.5 m of the next stop does the stop; other registered kinds only a machine. jobTap's no-job
+  stow goes to the nearest main-storage spot. FB1's three parts with real taps: OK on 228de58; on 3b7b13d the stops part
+  FAILS (24 taps: Washer 1 started a load at the linen drop, the store's drop pin started the gym weights, Cart dock 2
+  did nothing); on a52aad0 only the put-back part FAILS (4 turns). check_fast OK; cadet_test alone 3b7b13d vs 228de58
+  ALL IDENTICAL. Note: "anything in reach" would also take a lift panel or a door within 1.5 m of a stop; FB1 measured
+  none today (the docks, Folding table, Laundry drop sign, the Till). 776c4ff not pushed yet when this was written.
