@@ -557,3 +557,14 @@ Build master: BM13 session_01ExFoVfhiFG3wYTFv2QrojC. Lead: lead 25 session_01J2a
 |---|---|---|---|
 | ON1 onboarding builder | session_01BJNi1oqxnQ3jUusXHbHDGW | `claude/patch-play1-a` | patch A: arrival 16:30, Zeke + the Chief, device handover, Chief's first job, hygiene and clothes |
 Seat count: patch takes PB2, FR4, ON1, OR2, so the controller team starts 3 package builders now, 2 more when LB3/PR10 go idle (user's limit 14 active).
+**~03:22 UTC, the user:** it's the Chief's first SOLO job that's broken; **hire as many as needed for the patch.** Patch now six branches (plan 14c39b5e):
+| Seat | Session | Branch | Notes |
+|---|---|---|---|
+| ON1 | session_01BJNi1oqxnQ3jUusXHbHDGW | `claude/patch-play1-a` | 1-6 arrival, Zeke, the Chief comes over |
+| FR4 | session_01YDM1FcnY4nLuD7PN3JMK8R | `claude/patch-play1-b` | 9-13 pointer, tea arrow, lift "Tracked", more jobs |
+| PB2 | session_01NWyw8ebj9kTTRiEnAj2bGo | `claude/patch-play1-c` | 17 wall clipping (bisect) |
+| CJ1 (new) | session_01XA9AiA3XhXBD8Qph3ybJnu | `claude/patch-play1-d` | 7-8 Chief's first solo job, hygiene + clothes |
+| LD1 (new) | session_018J3kc7NfDuWydbXjC7AoMf | `claude/patch-play1-e` | 14-16 ladder taps, ladder rooms, rower |
+| SC1 (new) | session_01BBC5dx3LtPPiWkTdurPTmJ | `claude/patch-play1-f` | 18-19 breakfast 07:00, toilet queue |
+| RV3 (new) reviewer | session_01Uct2TvRPoFYViyU1X9Fpjx | `claude/review-play1` | reviews B, E, F (OR2 reviews A, C, D) |
+Seat limit lifted for the patch, so the controller team keeps all five package builders.
