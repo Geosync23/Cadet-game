@@ -9,6 +9,6 @@ with sync_playwright() as pw:
     for app in ('home', 'roster', 'calendar'):
         if app != 'home': p.ev(f"deviceShow('{app}')")
         p.step(5)
-        r = p.ev("(() => { const n = padItems(padLayer()).length, t0 = performance.now(); for (let i = 0; i < 50; i++) padTick(1 / 60); return [n, (performance.now() - t0) / 50]; })()")
-        print(app, 'items', r[0], 'padTick ms', round(r[1], 2))
+        r = p.ev("(() => { const it = padItems(padLayer()), n = it.length; padFocusTo(it[Math.min(10, n - 1)]); const inL = padLayer().contains(document.activeElement), t0 = performance.now(); for (let i = 0; i < 200; i++) padTick(1 / 60); return [n, (performance.now() - t0) / 200, inL, PAD.live, PAD.used]; })()")
+        print(app, 'items', r[0], 'padTick ms', round(r[1], 3), 'focus in panel', r[2], 'live/used', r[3], r[4])
     p.close()
