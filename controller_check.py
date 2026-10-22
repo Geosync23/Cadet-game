@@ -288,8 +288,24 @@ REACH = """(() => {
   const name = e => (e.id ? '#' + e.id : '') + ' ' + (e.getAttribute('aria-label') || e.textContent || '').trim().slice(0, 30);
   return { layer: L.id || L.className, items: items.length, reached: seen.size, missing: items.filter(e => !seen.has(e)).map(name) };
 })()"""
+# (P1, PR9's cross-check) the same panel read from the page, not from padItems: every visible thing a finger could press
+# (a button or form box, role=button, an onclick, a pointer cursor) that the highlight can't land on (not in padItems, not
+# inside one). Allowed: disabled buttons; the Maps app's drawing (its room taps are the Rooms list's buttons).
+CLICKY = """(() => { const L = padLayer(); if (!L || L === PAD_HUD) return []; const items = padItems(L);
+  const vis = e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden' && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true';
+  const out = [];
+  for (const e of L.querySelectorAll('*')) {
+    if (!vis(e) || e.disabled || e.closest('button:disabled') || items.includes(e) || items.some(i => i.contains(e) || e.contains(i))) continue;
+    if (DEV.app === 'maps' && e.closest('svg')) continue;
+    const cs = getComputedStyle(e), clicky = e.onclick || cs.cursor === 'pointer' || e.getAttribute('role') === 'button' || /^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(e.tagName);
+    if (!clicky || cs.pointerEvents === 'none' || e.parentElement && out.some(o => o.el === e.parentElement)) continue;
+    out.push({ el: e, d: e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ' ' + (e.textContent || '').trim().slice(0, 24) + (e.onclick ? ' [onclick]' : '') });
+  }
+  return out.map(o => o.d); })()"""
 def sweep(p, what, back=True, must=False):
     p.step(3)
+    miss = p.ev(CLICKY)
+    check(not miss, f'panels: {what}: things a finger can press that the highlight cannot reach: {miss[:6]}')
     r = p.ev(REACH)
     if not check(r is not None, f'panels: {what}: no panel on top'): return None
     check(r['items'] > 0 and not r['missing'], f'panels: {what} ({r["layer"]}): {r["reached"]} of {r["items"]} buttons reached by the D-pad; missing {r["missing"][:6]}')
@@ -372,6 +388,9 @@ def part_api(pw):
       padPanelAdd('tstPanel', { before: 'lift', first: '#t2', back: () => { __tst.back++; d.hidden = true; } }); })()""")
     p.step(3)
     check(p.ev("(padLayer() || {}).id") == 'tstPanel', 'api: an added panel should be on top')
+    p.ev("(() => { const c = document.createElement('div'); c.id = 'tClk'; c.textContent = 'tap me'; c.onclick = () => {}; document.getElementById('tstPanel').appendChild(c); })()")
+    check(any('tClk' in m for m in p.ev(CLICKY)), 'api: the page cross-check should find a box with an onclick the highlight cannot reach')
+    p.ev("document.getElementById('tClk').remove()")
     check(p.ev("PAD_PANELS.findIndex(r => r[0] === 'tstPanel') + 1 === PAD_PANELS.findIndex(r => r[0] === 'lift')"), 'api: before: should put it just above the lift')
     check(p.ev("document.activeElement && document.activeElement.id") == 't2', 'api: first: should land the highlight on #t2')
     p.press('left'); check(p.ev("document.activeElement.id") == 't1', 'api: D-pad left should move to #t1')
@@ -381,6 +400,22 @@ def part_api(pw):
     p.press('right'); p.press('a'); p.step(2)
     check(p.ev("__tst.moves.join()") == 'right' and p.ev("__tst.a") == 1 and p.ev("document.activeElement.id") == 't3', f'api: padOwn should take the D-pad and A: {p.ev("JSON.stringify(__tst)")}')
     check(p.ev("__tst.frames") > 0, 'api: padOwn frame should run while its panel is on top')
+    # (P1, CP2's alarm case) a far button in the same row beats a wide one just below; (CP4's) a redraw keeps the place
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstRow'; d.style.cssText = 'position:fixed;left:20px;top:420px;width:340px;z-index:99';
+      const draw = () => { d.innerHTML = '<div style="display:flex;justify-content:space-between"><button id="rm" style="width:40px">-</button><button id="rp" style="width:40px">+</button></div><button id="rw" style="width:100%;margin-top:6px">Set</button><button id="rx">Again</button>';
+        d.querySelector('#rx').onclick = draw; d.querySelector('#rw').onclick = draw; };
+      draw(); document.body.appendChild(d); padPanelAdd('tstRow', { before: 'pauseCard', first: '#rp', back: () => { d.hidden = true; } }); })()""")
+    p.step(3); check(p.ev("document.activeElement.id") == 'rp', 'api: the row panel should start on +')
+    p.press('left'); check(p.ev("document.activeElement.id") == 'rm', f'api: D-pad left from + should go across to -, not {p.ev("document.activeElement.id")}')
+    p.press('down'); p.press('down'); check(p.ev("document.activeElement.id") == 'rx', f'api: two downs should reach Again ({p.ev("document.activeElement.id")})')
+    p.press('a'); p.step(3); check(p.ev("document.activeElement.id") == 'rx', f'api: after a redraw the highlight should stay on Again, not {p.ev("document.activeElement.id")}')
+    p.press('b'); p.step(2)
+    # (PR9) a touch after the pad: the button the pad highlighted loses its focus (no outline for a touch player)
+    p.ev("padFocusTo(document.getElementById('t1'))"); p.step(1)
+    p.ev("document.querySelector('canvas').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)   # a touch that moves no focus itself
+    check(p.ev("document.activeElement && document.activeElement.id") != 't1', 'api: a touch should take the focus off the pad\'s highlighted button')
+    check(p.ev("getComputedStyle(document.getElementById('t1')).outlineStyle") == 'none', 'api: no outline left on it after a touch')
+    p.press('x'); p.step(2); p.ev("padFocusTo(document.getElementById('t3'))")
     p.press('b'); p.step(2)
     check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
     p.close()
