@@ -53,15 +53,74 @@ Notes for the build master and owners:
 
 ## G: more jobs on the board (note 13; JB1, claude/patch-play1-g)
 
-(in progress)
+**Tip reviewed: 3ffb604f** (game sha256 0ef144c3...e159). **Verdict: see the verdict line below.**
+
+What it does: each hour of your shift (45 minutes or more left), if fewer than 2 jobs you may take are on the board,
+small no-part chores at your tier are posted (vent, calibrate, delivery, small fault; seals first for an officer),
+held for you to the end of the shift and gone after it, so the crew's own work is unchanged; no Works reputation
+(`xp: 0`, the existing "paid elsewhere" route). 3ffb604f adds: none while a job kept for you that day (Day 1's two with
+Zeke, a training job) is due within the hour or untaken (the lead's ask).
+
+Driven in the browser (390 x 844, the first tip 1b3e18f1): a quick player on Day 1, taking the top job and finishing it
+in its minutes + 20, checked every 15 minutes when idle:
+- base: 8 jobs; the board was empty at 12 of 20 checks (13:00-16:55 mostly nothing).
+- G: 13 jobs; the board was never empty (13 of 13 checks had 1-5 jobs). Extras seen: "Calibrate the cold store
+  chiller", "Clean a vent: lift lobby", "Calibrate the cart dock 1", "Reset a tripped breaker: light relays 2",
+  "Take dry goods to the galley, Deck 3". The same chiller calibration came up twice in one afternoon (13:01 and
+  16:30): a small repeat, worth knowing, not a fault.
+
+Code: data and logic in section 17's slot and one line in `jobsHour`; it only touches the job list (live state, which
+the machines already use; the crew's planner never reads it). Extras keep their fields through the save (the job list
+is saved whole) and lapse before the crew's claim step in the same hour, so the crew never take one (machine_check 5z
+confirms). `j.xp === 0` is honoured by 24 core's turn-in.
+
+Checks (first tip, then the new tip, below): check_fast OK (239 s; machine_check: steady player 9.0 a day, range now
+7-12; 5z: Days 1-5 10/0 10/0 10/0 10/0 8/0 jobs/empty minutes, off 3/300; ship health lowest 93.5), intro_check OK,
+career_check OK (steady player Relied on by Day 5 at 45 xp, base 48: pace about the same), interactions_check OK,
+player_check OK, cadet_test vs base ALL IDENTICAL.
+
+machine_check's expectations moved (each explained in the file): the steady player's range 3-7 to 7-12, and the ship
+meters part no longer counts a job without meter gain once the board reads 97 or more (13 such jobs: the ship's
+upkeep is all done by about Day 11). Both follow from the note; the second is in the design doc's open questions for
+the user's balancing pass, with "should the extra jobs earn reputation?".
 
 ## I: toilet queue (note 19; TQ1, claude/patch-play1-i)
 
-(waiting for the branch)
+**Tip reviewed: 0c05e856** (game sha256 89f593a6...beb7). **Verdict: PASS** (one follow-up for the user, below).
 
 Base repro, before the fix: on Deck 3 with all four toilets empty (nobody in them) but each "targeted" by a crew
 member in another room, tapping a toilet says "Occupied: the little light is red". Cause: `playerTap` (section 15)
 asks `heldBy()`, which counts anyone whose goal is that toilet, wherever they are on the deck.
+
+Driven in the browser:
+- The same probe on I: the toilet visit starts ("About 3 minutes; walk away to stop"). Fixed.
+- Live on Deck 3, Day 2 18:50-19:26 (a planned rush after a supper talk), with you taking toilet 1 at 19:05: you go
+  in; the two crew planned to queue stand in the washroom's line; the two whose toilet you took join the line (no
+  free toilet nobody else was heading for), then at 19:20 the line clears into toilets 2 and 3 (one moves to another
+  toilet because you're still in theirs). Nobody ever sat on a toilet with someone else; two moments of two crew
+  passing within 0.25 m (the old build had four in the same window).
+- Live on Deck 4, Day 1 21:15-22:05: Shah Dara queues alone 21:25-21:56 for the washroom's one toilet, then goes in.
+
+Crew plans, compared on paper for every crew member, Days 0-14: 68 person-days differ, every one only by the new
+toilet-line wait (`toiletq`); outside each wait the day is identical, and the toilet visit itself keeps its place and
+end. Shower and booth plans are unchanged (the walk-lead reorder in `schedBuild` changes nothing there in 15 days).
+
+Checks: check_fast OK (310 s), cadet_test vs base ALL IDENTICAL (renderer noise only), interactions_check (I's own
+copy, with the new "the toilets" section) OK, day_check 2 OK (stuck 0.0 on every deck), events_check OK,
+food_check OK. TQ1 also ran day_check 0, 1, 5, 12, 13, player_check and path_check. Design doc updated (the toilet
+rule, under "Showers only on Decks 2 and 4").
+
+**Follow-up for the user (not a fail):** the crew's planned toilet waits are now visible as a line, and some are
+long while the toilet's light is off. Shah Dara stands in the line from 21:25 to 21:56 although the toilet is empty
+21:25-21:29 and 21:38-21:56: the planner books toilet slots that the live crew reach late (TQ1's judgement call 4:
+the walk-time estimate is about twice the real walk), and it gives later arrivals earlier slots (two others are booked
+in before her on paper). The old build had the same timing (she waited beside the toilet until 21:55, which is what
+blocked you), so this isn't new waiting, only now you can see it. A possible fix, runtime only (plans unchanged):
+whoever is at the front of a toilet line goes into any toilet in that washroom whose light is off and that nobody
+else is heading for, as you can. Suggest a backlog row; section 14/10's owner (PB2) to decide.
+
+Owners: TQ1 touches sections 10 and 14 (PB2, who agreed the lines), 15 (the player's tap, 5 lines) and 22 (baked
+words).
 
 ## Answers from the user
 
