@@ -1,6 +1,6 @@
 @meeting bridgeInvite
 // The first invitation to the bridge (the user's ask, via the lead, 2026-10-17). Commander Vance at breakfast (he
-// breakfasts at 06:05), the day before your first bridge hour after the first ship-wide event (Pillar 5 Step 3, seat
+// breakfasts at 07:05), the day before your first bridge hour after the first ship-wide event (Pillar 5 Step 3, seat
 // C2: the bridge room is locked until you're invited; day 22 in a new game). Every reply sets flag bridge.invited, which
 // the traditions engineer's bridge-hour gate reads; C2's SHIP.bridgeInvited opens the bridge doors with it. Reworded by
 // head writer W2 for Step 3 (the storm behind us, the bridge itself open from now on).
