@@ -53439,10 +53439,11 @@ function padCrewAt(cx, cy) {                               // crewAtScreen(cx, c
 function padRaw() {                                       // what's in reach, before asking where a finger would tap it: cheap, nearest first
   const pp = player.obj.position, R = PAD_PICK.reach, out = [], seen = new Set();
   const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);
-  const add = (key, x, z, ys, r) => {
-    if (seen.has(key)) return; const d = Math.hypot(x - pp.x, z - pp.z); if (d > R) return; seen.add(key);
+  const add = (key, x, z, ys, r) => {                     // (a thing can come twice, from two places: the lift's car and its door;
+    const d = Math.hypot(x - pp.x, z - pp.z); if (d > R) return;   // the search keeps the first that a finger can reach)
+    const at = Math.round(x * 10) + ',' + Math.round(z * 10); if (seen.has(key + '@' + at)) return; seen.add(key + '@' + at);
     const ahead = d > .01 ? ((x - pp.x) * fx + (z - pp.z) * fz) / d : 1;
-    out.push({ key, x, z, ys, r, d, s: null, score: d * (1.25 - .45 * ahead) });   // ahead of you counts as nearer
+    out.push({ key, x, z, ys, r, d, s: null, score: ahead >= .7 ? d : d * (2.6 - .4 * ahead) });   // the way you face first (within about 45 degrees), then beside, then behind
   };
   if (crowd.visible) for (const a of DECK_CREW) add('crew:' + a.p.id, a.x, a.z, [(a.settled && a.spot ? a.spot.pose : a.pose) === 'lie' ? .15 : .9, .5, 1.3].map(h => a.y + h), 0);
   for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
@@ -53471,7 +53472,7 @@ function padSearch(budget) {
   if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
   const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
   try {
-    while (J.i < J.raw.length && J.out.length < P.max && P.used < budget) { const t = J.raw[J.i++]; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+    while (J.i < J.raw.length && J.out.length < P.max && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key)) continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
   } finally { P.cs = null; P.wr = null; }
   if (J.i < J.raw.length && J.out.length < P.max) return null;
   P.job = null; return J.out;
@@ -53557,7 +53558,7 @@ padOn('a', () => {                                         // A: the tap, where 
 //   padStep(dir)  one D-pad step ('up', 'down', 'left', 'right'): the screen's own move first, else padMove(dir), the
 //       nearest button that way. padPress(): what A does. padBack(L): what B does. padScroll(dy): scroll the list.
 //   PAD_REP (section 26's base) is the menu repeat's pace; PAD_FOCUS_CSS the outline's look (P5 may make them settable).
-const PAD_BUILT = ['base', 'deck', 'pick', 'panels'];   // the parts built so far (controller_check's black-box parts read it)
+const PAD_BUILT = ['base', 'deck', 'pick', 'panels', 'games'];   // the parts built so far (controller_check's black-box parts read it)
 const PAD_MUST = () => {};                                 // B on a card you must answer: nothing (its buttons take the highlight)
 const PAD_OWN = [];
 function padOwn(when, h) { PAD_OWN.unshift([when, h]); }
