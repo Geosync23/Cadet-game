@@ -196,3 +196,12 @@ Nits, not blocking (PB2's two in backlog 26, plus one):
 3. No check in the repo guards #20 or #25: day_check runs with the intro off, and intro --week passes with and without
    the fix. A small intro_check case (no two people on one place at once Days 0-8 with the intro on, my p9_seats rule)
    would.
+
+## claude/fridays-20 169f0b3 (FR4: intro_check's seat-clash guard, check only): PASS
+
+intro_check `--week` part 12 now runs my p9_seats rule first, on paper, Days 0-8 (Day 0 included): two people planned
+in one seated place at overlapping minutes, one of them on an intro beat, FAIL (each named, the first 8; the count of
+all). Run alone (`--week --beats=none`): on 951c0cd's game **FAILED**, "10 shared", the 8 named are exactly my list
+(Day 1 Torres/Halloran 5-stool-1 x6, Day 2 Rina/Oduya 3-infirmary-6, Day 3 Salo/Torres 5-stool-1); on fridays-20 0,
+**OK**. Nit: with `--beats=none` it also prints "not yet: the writers' beat lines are not in this build", which is
+misleading there (the beats are only filtered out), harmless.
