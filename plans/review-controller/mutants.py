@@ -61,6 +61,12 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'ac_nocover': ("const hit = document.elementFromPoint(x, y); if (!hit || hit !== el && !el.contains(hit)) return null;", "", '-'),
  'ac_tapkeeps': ("  if (st && st.press && st.el === POINT.aim) pointDrop(c.id);", "", '-'),
  'ac_firststep': ("    const s = e.path[i]; if (s.open && s.open()) continue;", "    const s = e.path[i];", '-'),
+ # arrows B 5dd6b6f (AR1's tip with RV2's points)
+ 'ar2_direct': ("  if (IX_GOAL && e.level > 1) { GUIDE.shown = null; GUIDE.covered = e.id; return null; }", "", '-'),
+ 'ar2_body': ("  if (e.level >= 5 && jobGoal) { GUIDE.shown = null; return null; }", "", '-'),
+ 'ar2_nomerge': ("  if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;", "", '-'),
+ 'ar2_norecheck': ("  if (fin) { guideDrop(e.id); e = guidePick(); if (!e) { GUIDE.shown = null; return null; } }", "", '-'),
+ 'ar2_retime': ("  if (shown === t + '|' + x && !GUIDE.tq.length) return false;", "", '-'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}

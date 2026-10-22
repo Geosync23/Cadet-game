@@ -327,3 +327,9 @@ Alone: cadet_test off/on ALL IDENTICAL; CP5's controller_check OK; mutants 6/6 C
 Two optional nits from RV5 (not blocking): padNameIt returns at the first PAD_NAMES selector that matches even when its
 name is '' ('#device button' is broad, so a later device-button entry is never reached: `continue` when the name is
 empty); the aria-label it sets stays after a touch (harmless: device views redraw their buttons).
+
+## Arrows B 5dd6b6f (AR1's tip with my points): diff read OK
+guideGoal re-checks the pick's done() and picks again at once; a direct goal covering the pick sets GUIDE.covered (in
+guideList) and clears GUIDE.shown; counting per ask (GUIDE.counted, cleared on drop) so covered-then-uncovered counts
+once; a repeat of the toast on screen shows again (re-timed) when nothing is waiting. Toast overflow kept (left to the
+migration pieces; o.now exists). Mutants refreshed (ar2_*). Runs queued (queue 13, after C's).
