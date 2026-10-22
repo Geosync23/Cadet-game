@@ -1378,6 +1378,8 @@ Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The on
 
 | arrows-d (AC2): the job arrow rests after clock-out; the real-tap follower (lead 29) | **15b's `ixJobStep`, one line:** once you've clocked out today, no job arrow (its steps, Turn it in, Take a job): off shift you're free (lead 29, the design); a job you hold stays in Tracked; a part in your hands still gets its put-back arrow. arrows_d_check: after clock-out a held job has no arrow and stays in Tracked (fails on its planted fault). **arrows_check's follower:** your job's own step (a chore's stop, a machine, the board) gets a real screen tap at its pin, not a direct `playerTap`, so the week shows what a player gets (RV7's arrows_check_rt, widened to every job step; a shelf still by its name). |
 
+| arrows-d (AC2): RV7's notes on 69d1ed9/78fef90 and 86faa86 (lead 29) | **The pop-up queue keeps a training's word** (15b slot, piece B, on with GUIDE_ON only): when more than three wait, the oldest that isn't "Trained: ..." or "Works reputation ..." goes (`TQ_KEEP`); "Trained: rounds" was dropped when six came at Day 2 11:00. arrows_d_check: six at once, the training's word still waits (fails on its planted fault). **arrows_check's follower:** the real tap at the pin only for your held job's own step (not the board, the time clock or a named thing: with the arrows off it never clocked in, RV7); while you hold a job, a tap that starts anything that isn't a job act (the climbing wall all Day 5) is ended, then the floor at the pin. |
+
 ### Pillar 5 fixes, part 2 (builder FX2, claude/p5-fix2 from claude/integration 2b4a05db, 0.64.15; AR1's findings; the build master sets the number)
 | Build | What changed |
 |---|---|

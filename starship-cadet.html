@@ -16330,14 +16330,15 @@ function guideStage(id, st) { const c = SHIP.works && SHIP.works.cur; return !c 
 // pop-ups: section 11's toast(t, x, o) asks guideToast first. While one has been up under TQ_MIN (real) ms, a new one
 // waits (at most TQ_MAX; the oldest waiting drops first, never the one on screen); the same words aren't queued twice;
 // o.now shows at once. Each waiting one is shown in turn from the frame loop below.
-const TQ_MIN = 2500, TQ_MAX = 3;
+const TQ_MIN = 2500, TQ_MAX = 3, TQ_KEEP = /^(Trained: |Works reputation)/;   // a training's or your reputation's word is never dropped
 function guideToast(t, x, o) {
   if (!GUIDE_ON || GUIDE.pass || o && o.now) return false;
   const shown = (document.getElementById('tt').textContent || '') + '|' + (document.getElementById('tx').textContent || '');
   if (performance.now() - TOAST_AT >= TQ_MIN && !GUIDE.tq.length) return false;   // nothing fresh on screen: show it now
   if (shown === t + '|' + x && !GUIDE.tq.length) return false;   // the one on screen again: shown again (its time starts over), as before (RV2)
   if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
-  GUIDE.tq.push([t, x]); if (GUIDE.tq.length > TQ_MAX) GUIDE.tq.shift();
+  GUIDE.tq.push([t, x]);
+  if (GUIDE.tq.length > TQ_MAX) { const i = GUIDE.tq.findIndex(q => !TQ_KEEP.test(String(q[1]))); if (i >= 0) GUIDE.tq.splice(i, 1); }   // the oldest that isn't a keeper goes (lead 29, RV7: "Trained: rounds" was dropped when six came at once)
   guideStart(); return true;
 }
 function guideTick() {

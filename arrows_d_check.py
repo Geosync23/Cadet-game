@@ -16,6 +16,7 @@
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
 #   reputation (S9): a new word reached: a toast once; never again for that word (a word first met on a drop still is, when reached going up); a drop: the toast "Works reputation down: <word>" only
 #   pointers:       each panel pointer three times at most, then not asked
+#   pop-ups:        six at once: a training's word ("Trained: ...") still waits its turn, another is dropped
 #   tick:           guideTick asks the shift chain itself once a ship minute
 #   the drill:      (the build as it is) the 14:50 drill arrow has no trk tag and stays up once you reach the Works bay
 # And in the build as it is (both off): no entries, no pointer, section 15's clock-out arrow as before.
@@ -210,6 +211,12 @@ def part_on2(pg):
       return { direct, lab: g && g.label }; })()""")
     print('  meeting:', r)
     check(r['direct'] is None and 'meet Yara' in str(r['lab']), f'meeting: no direct arrow from trainArrow with the queue on; T1 leads ({r})')
+    # the pop-up queue never drops a training's word (lead 29, RV7: "Trained: rounds" was lost when six came at once)
+    r = pg.ev("""(() => { GUIDE.tq.length = 0; toast('A', 'first, on screen'); TOAST_AT = performance.now();
+      toast('Zeke Torres', 'Trained: rounds, with Zeke Torres.'); for (const k of [2, 3, 4, 5]) toast('B', 'pop-up ' + k);
+      const q = GUIDE.tq.map(x => x[1]); GUIDE.tq.length = 0; return q; })()""")
+    print('  pop-ups waiting after six at once:', r)
+    check('Trained: rounds, with Zeke Torres.' in r and len(r) <= 3, f'pop-ups: a training\'s word is kept when the queue is full, something else goes ({r})')
     # three times at most
     r = pg.ev("""(() => { SHIP.device.pointsSeen['p:clock:out'] = 3; pointDrop('p:clock:out'); const now = Math.floor(shipNow());
       setShipNow(8 * 1440 + 1030); SHIP.career.co = 0; guideShift(); const q = POINT_Q.some(x => x.id === 'p:clock:out'); setShipNow(now); return q; })()""")
