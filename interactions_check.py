@@ -135,9 +135,9 @@ with sync_playwright() as pw:
     check(sv is None and g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return 'track' in s.player; })()"), 'the save keeps tracking off')
     g.ev("SHIP.player.track = myJob().id"); g.step(3); s = st()
     g.ev("goToDeck(4)"); g.step(3); s = st()
-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 5'), f'another deck: take the lift ({s["goal"]})')
+    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 5'), f'another deck: the lift panel ({s["goal"]})')   # (FX3: was "Take the lift to Deck 5")
     g.ev("SHIP.player.carry = [" + json.dumps(job[1]) + "]"); g.step(40); s = st()
-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
+    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
     g.ev("goToDeck(3)"); g.step(3); s = st()
     check(s['goal'] and s['goal'].startswith('Repair the'), f'on its deck: repair it ({s["goal"]})')
     g.ev("(() => { const m = machineById(myJob().machine), sp = placeSpot(panelPlace(m.id)); player.obj.position.copy(cellPos(...sp.walk)); player.stop(); })()"); g.step(45)
@@ -342,6 +342,43 @@ with sync_playwright() as pw:
         check(all(t in tips for t in ['board', 'taken', 'machine', 'turnin']), f'the four job-loop tips fire (board, taken, machine, turn in): {tips}')
     print('   draw-call peak while doing things:', peak)
     check(peak < BUDGET, f'draw calls under {BUDGET} ({peak})')
+    check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FX3 (the user's, lead 28): a goal on another deck points at the lift's control panel (the thing you tap to choose a deck),
+# not the middle of the landing; following it and tapping there opens the deck picker, and the goal's deck takes you there
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    print('== FX3: the arrow to the lift panel')
+    LP = r"""(() => { const el = document.getElementById('ixGoal'), m = (el.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/) || []).slice(1).map(Number);
+      const its = ITEMS.filter(i => i.lift && isShown(i.hit)).map(i => { i.hit.getWorldPosition(_wp); const v = _wp.clone().project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; });
+      return { hidden: el.hidden, label: el.children[2].textContent, at: m, panels: its }; })()"""
+    # on Decks 5, 3 and 4, inside the car and at the landing: the arrow on a lift panel you can see, and a real tap there opens the deck picker (FE1, lead 28)
+    for deck, goal in ((5, 4), (3, 5), (4, 5)):
+        for spot in ('inside', 'landing'):
+            g.ev(f"goToDeck({deck})"); g.step(3)
+            g.ev("(w => { const t = w === 'inside' ? ROOM_TILES['@'][Math.floor(ROOM_TILES['@'].length / 2)] : null; if (t) player.obj.position.copy(cellPos(...t)); else player.obj.position.set(LIFT_AT[0] + 3, 0, LIFT_AT[1]); player.stop(); SHIP.player.track = null; })('" + spot + "')")
+            g.ev(f"setGoal({{ deck: {goal}, item: /job board/i, room: 'w', label: 'The job board' }})"); g.step(90)
+            lp = g.ev(LP)
+            near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
+            opened = False
+            if lp['at'] and near < 3:
+                g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
+                for k in range(120):
+                    g.step(10)
+                    if g.ev("!document.getElementById('lift').hidden"): opened = True; break
+            print(f"   Deck {deck}, {spot}: {lp['label']} | {round(near, 1)} px from a panel you can see | picker {opened}")
+            check(not lp['hidden'] and lp['label'].startswith(f'Tap the lift: Deck {goal}') and 'job board' in lp['label'], f"Deck {deck} {spot}: the label names the lift, the deck and the goal ({lp['label']})")
+            check(near < 3, f"Deck {deck} {spot}: the arrow points at a lift panel you can see, not the landing ({near:.1f} px)")
+            check(opened, f'Deck {deck} {spot}: tapping where the arrow points opens the deck picker')
+            if opened and (deck, spot) == (4, 'landing'):
+                g.ev("document.querySelector('#liftList button.goal').click()")
+                for k in range(200):
+                    g.step(10)
+                    if g.ev("deckDef.num") == 5 and not g.ev("ride"): break
+                check(g.ev("deckDef.num") == 5, f'the goal\'s deck button takes you there (Deck {g.ev("deckDef.num")})')
+            elif opened: g.ev("closeLiftPanel()"); g.step(2)
+    g.ev("clearGoal()")
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 

@@ -15213,7 +15213,7 @@ function clockRemindTick(now = shipNow()) {
 // The job board: tap it for the open jobs; take one (section 17's claimJob, as the device's Jobs section does).
 // The goal pointer: setGoal({ deck, at: [i, j] | place: id | room: key or name, label }) and clearGoal(). While
 // you hold a job the pointer follows it by itself (storage, the machine shop, the machine). On screen: a marker
-// over the place; off screen: an arrow at the edge; on another deck: "Take the lift to Deck N". DOM only, so
+// over the place; off screen: an arrow at the edge; on another deck: the lift panel, "Tap the lift: Deck N" (FX3). DOM only, so
 // no draw calls. Hidden with no goal.
 // Hooks: one line in section 15's playerTap (PLAYER_TAPS). Nothing here calls R() or makes geometry.
 // =====================================================================
@@ -15781,6 +15781,17 @@ function roundGuide() {
 }
 const ixV = new THREE.Vector3();
 let ixLast = '';
+// the lift's control panel nearest you on this deck (a Lift panel item, section 11's lift: true; the deck picker opens on a
+// tap): where the arrow points for a goal on another deck (FX3; it was LIFT_AT, the middle of the landing). One you can see:
+// the car's wall nearest the camera is cut away, and its panel with it (FE1 tapped where it was, and nothing came). Cached per deck
+const IX_LIFT = { deck: null, its: [] };
+function ixLiftPanel() {
+  const key = deckDef.num + ':' + ITEMS.length;
+  if (IX_LIFT.deck !== key || !IX_LIFT.its.length) { IX_LIFT.deck = key; IX_LIFT.its = ITEMS.filter(i => i.lift && i.hit).map(i => { i.hit.getWorldPosition(ixP); return { x: ixP.x, y: ixP.y, z: ixP.z, hit: i.hit }; }); }
+  const p = player.obj.position; let best = null, bd = Infinity;
+  for (const q of IX_LIFT.its) { const d = Math.hypot(q.x - p.x, q.z - p.z) + (typeof isShown === 'function' && !isShown(q.hit) ? 100 : 0); if (d < bd) { bd = d; best = q; } }   // a hidden one only if none shows
+  return best;
+}
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
@@ -15795,9 +15806,10 @@ function ixFrame() {
   const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
-  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
+  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
-  const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
+  const gw = g.label ? g.label.replace(new RegExp(',? (on )?Deck ' + g.deck + '$'), '') : '';   // "Food, Deck 3": the deck said once
+  const label = here ? g.label : 'Tap the lift: ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (gw ? ' · ' + gw : '');   // the panel you tap to choose a deck (FX3, the user's: "an arrow pointing to the control panel")
   ixV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);   // a goal with a height (the beam's name spot, the patch #19)
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
