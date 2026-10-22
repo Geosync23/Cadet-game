@@ -1212,6 +1212,7 @@ with sync_playwright() as pw:
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
         if '--mutants' in FLAGS:
             for name, code in MUTANTS.get(part, {}).items():
+                if os.environ.get('CTL_MUT') and os.environ['CTL_MUT'] not in name: continue   # only the planted faults named
                 # caught only by a failure the clean run didn't have (a part already failing proves nothing)
                 norm = lambda f: re.sub(r'-?[\d.]+', 'N', f)   # the same failure with other numbers is the same failure
                 try: msrc = plant(psrc if part not in SELF_BOTH else SRC, code)
