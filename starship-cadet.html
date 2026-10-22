@@ -13219,7 +13219,7 @@ function playerTap(it, at, point) {
     return true;
   }
   if (kind === 'grab' && !foodFrom('grab', true).ok) { toast(it.t, foodFrom('grab', true).why); return true; }
-  let free = near.find(([pl]) => kind === 'toilet' ? !placeBusy(pl.id) : !heldBy(pl.id)), member = false;   // a toilet is yours unless its red light is on (someone inside): crew only on their way queue for it (section 10; the user's playtest notes, patch 1)
+  let free = near.find(([pl]) => !heldBy(pl.id)), member = false;
   if (!free && kind === 'gym' && gymClubOn()) {          // Gym club (0.28.62, the 0.60.7 plan): you're a member, so the machine is yours; whoever had it picks another (section 10: nobody keeps the place you're using)
     free = near[0]; const a = heldBy(free[0].id);
     if (a && a.h && typeof bubbleSay === 'function') { let l = null; try { l = typeof lineFor === 'function' && lineFor(a.p.id, 'gym.yield', {}); } catch (e) { l = null; } bubbleSay(a.h, l && l.text || 'All yours. I\'ll take another.'); }
@@ -13337,10 +13337,9 @@ function actStart(kind, placeId, o = {}) {
 }
 function actBegin() {
   const A = ACT; if (!A) return;
-  const loo = A.kind === 'toilet', inUse = id => loo ? DECK_CREW.find(a => a.settled && a.spot && a.spot.id === id) : heldBy(id);   // a toilet: only someone in it (its red light), not someone on their way (patch 1)
-  const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && !A.o.member && inUse(pl.id);   // a Gym club member's machine is theirs (0.28.62)
+  const pl = A.placeId && PLACE_OF.get(A.placeId), who = pl && !A.o.member && heldBy(pl.id);   // a Gym club member's machine is theirs (0.28.62)
   if (who) {                                             // someone got there first: the next free one of its kind nearby, if any
-    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !inUse(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
+    const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !heldBy(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
     if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
@@ -51044,8 +51043,7 @@ function queueTick(dt, now) {
     const a = DECK_CREW[i], w = whereIs(a.p, now); if (!w || w.deck !== N) continue;
     let type = QUEUE_TAGS[w.tag], pl = null, line = !!type;
     if (type) { const nx = whereIs(a.p, w.until); pl = nx && nx.placeId && PLACE_OF.get(nx.placeId); }
-    else if (w.placeId && (w.type === 'callhome' || w.type === 'shower' || w.type === 'toilet') && !(a.settled && a.spot && a.spot.id === w.placeId)) { pl = PLACE_OF.get(w.placeId); type = pl && pl.type; }   // on the way to one
-    if (pl && type === 'toilet' && !line) line = pl.id === PLAYER_PLACE || BUSY.has(pl.id);   // a toilet (patch 1, the user's): its red light on (you, or someone still in it), so they wait in line in the washroom, in turn
+    else if (w.placeId && (w.type === 'callhome' || w.type === 'shower') && !(a.settled && a.spot && a.spot.id === w.placeId)) { pl = PLACE_OF.get(w.placeId); type = pl && pl.type; }   // on the way to one
     if (!pl || pl.type !== type) continue;
     if (!QUEUE_IN.has(a.p.id) && roomAt(...a.here()) === pl.room) QUEUE_IN.set(a.p.id, now);
     const from = QUEUE_IN.has(a.p.id) ? QUEUE_IN.get(a.p.id) : Infinity; seen.add(a.p.id);
@@ -51056,19 +51054,9 @@ function queueTick(dt, now) {
   if (Y) add(Y.type, Y.room, { id: 'player', from: Y.at === null ? Infinity : Y.at });
   for (const [k, L] of QUEUE_NOW) {
     L.sort((x, y) => x.from - y.from || (x.id === 'player' ? 1 : y.id === 'player' ? -1 : x.id < y.id ? -1 : 1));
-    if (k.startsWith('toilet|')) continue;               // the toilets' lines last (toiletLine): they borrow what the showers' line leaves free
     const sp = queueSpots(...k.split('|')); for (let i = 0; i < L.length; i++) if (L[i].id !== 'player') QUEUE_SPOT.set(L[i].id, sp[i] || null);
   }
-  for (const [k, L] of QUEUE_NOW) if (k.startsWith('toilet|')) toiletLine(k.slice(7), L);
   if (QUEUE_YOU) queueYou(dt, true);
-}
-// a toilet's line (patch 1, the user's: "the crew queue for it"): its own spots, then inside the washroom door, then the
-// shower line's spots nobody else is on (Deck 4's washrooms have no room of their own for it); past those, where they are
-function toiletLine(rm, L) {
-  const mine = new Set(L.map(e => e.id)), held = new Set(QUEUE_SPOT.values());
-  for (const a of DECK_CREW) if (a.settled && a.spot && !mine.has(a.p.id)) held.add(a.spot.id);
-  const sp = queueSpots('toilet', rm).concat(washDoorTiles(rm).map((t, n) => '@wq-' + rm + '-' + n), (deckDef.places || []).filter(q => q.room === rm && q.type === 'shower-queue').map(q => q.id)).filter(id => !held.has(id));
-  for (let i = 0, n = 0; i < L.length; i++) if (L[i].id !== 'player') QUEUE_SPOT.set(L[i].id, sp[n++] || null);
 }
 function queueOf(type) {
   let k = null; for (const key of QUEUE_NOW.keys()) if (key.startsWith(type + '|') && (!k || QUEUE_YOU && key === QUEUE_YOU.type + '|' + QUEUE_YOU.room)) k = key;
