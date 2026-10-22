@@ -26,9 +26,9 @@ The rules as always: small exact-string edits, new code in your slot, no build n
 13. **Not enough jobs on the board**: the user cleared it on Day 1. More jobs, sensibly paced (keep machine_check's player jobs and ship health sane).
 ### E. Ladder taps and the rower (notes 14, 16): LD1 (new), branch `claude/patch-play1-e` (sections 11, 4d, 15r/8c)
 14. **Ladders**: tapping the ladder itself works (today only the door of the ladder room does).
+16. **The rowing machine**: the bar moves, but not in time with the pull. Sync the animation.
 ### H. Open ladder rooms (note 15): LR1 (new), branch `claude/patch-play1-h` (sections 4d, 4b, 7)
 15. **Every ladder room can be entered** (a map change: deck_check, path_check and tiles_check must stay OK; it's the one place the look may change).
-16. **The rowing machine**: the bar moves, but not in time with the pull. Sync the animation.
 
 ### C. Wall clipping (note 17): PB2, branch `claude/patch-play1-c` (sections 7, 10, 14, 15b toilet use, 16)
 17. **Crew clip through walls when walking alongside them** (not straight at them). This is NEW: it didn't happen before. Bisect between builds (0.64.11 / 0.64.12 camera / 0.64.13 storm / 0.64.14 opt-render) to find the commit that caused it, fix the cause, and add a check (path_check or day_check) that would have caught it. **Top priority of the patch.**
