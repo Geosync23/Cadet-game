@@ -1996,9 +1996,23 @@ const KIT = {
     if (o.place) {                                       // Pillar 2: the seat slides while someone rows (MOVERS); the handle comes with them (playtest 2, 0.71.3)
       seat.userData.noMerge = true; bar.userData.noMerge = true;
       let v = 0, ph = 0;
+      // playtest patch 1 #16 (LD1): in time with the rower. The seat stays under their hips and the handle in their hands
+      // (8b's ACTS.row moves the body: a quick drive, a slow return): you on it (section 15's ACT.body), or whoever of the
+      // crew is settled on it (section 10's DECK_CREW). Nobody's body to follow (a check with the crew off): the old swing
+      const rig = () => { if (typeof PLAYER_PLACE !== 'undefined' && PLAYER_PLACE === o.place) return typeof ACT !== 'undefined' && ACT && ACT.body ? ACT.body.rig : null;
+        const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.settled && x.spot && x.spot.id === o.place); return a && a.h && a.h.rig || null; };
+      const hp = new THREE.Vector3(), hd = new THREE.Vector3(), hv = new THREE.Vector3();
       MOVERS.push({ place: o.place, tick(dt, on) {
         if (!on && v === 0) return;
         v += ((on ? 1 : 0) - v) * Math.min(1, dt * 3); if (!on && v < .01) v = 0;
+        const r = on && g.parent ? rig() : null;
+        if (r && r.hips && r.arms) {
+          g.updateWorldMatrix(true, false); r.hips.getWorldPosition(hp); g.worldToLocal(hp); hd.set(0, 0, 0);
+          for (const a of r.arms) { a.hand.getWorldPosition(hv); hd.add(g.worldToLocal(hv)); } hd.multiplyScalar(1 / r.arms.length);
+          seat.position.z = L(.2, THREE.MathUtils.clamp(hp.z + .04, -.25, .6), v);   // the seat's middle just behind the hips
+          bar.position.z = L(-.7, THREE.MathUtils.clamp(hd.z, -.8, .3), v); bar.position.y = L(.55, THREE.MathUtils.clamp(hd.y - .03, .4, .9), v);   // in the hands
+          return;
+        }
         ph += dt * 3.2; seat.position.z = .2 + Math.sin(ph) * .32 * v;
         bar.position.z = -.7 + (Math.sin(ph) + 1) * .3 * v; bar.position.y = .55 + (Math.sin(ph) + 1) * .06 * v;   // pulled in to the chest as the seat slides back, out again on the return
       } });
@@ -14803,12 +14817,40 @@ if (LADDER_ON) {
   }
   Object.assign(SPINE_IT.ladder, { x: 'The maintenance ladder, top to bottom of the ship beside the lift. Tap it to climb.' });   // also backlog #7's "seven decks" here
 }
+// Playtest patch 1 #14 (LD1): tapping the ladder itself works. The ladder's tap box (4b's place, 1.2 m tall) missed the
+// rungs and cage you mostly see above the lobby's low wall: those taps hit the car wall behind or the glass in front and
+// walked you to the floor. ladderAimed (section 11's tap, right after pick) takes any tap whose ray goes through the
+// ladder's rails and rungs, from the floor to just under the ceiling, with nothing solid in front of it (glass doesn't count), or a tap on the
+// ladder room's door or hatch. With note 15's open ladder rooms (LR1, section 4d's ladderStand(): { e, i, j, ... }, the
+// tile inside the ladder room's door, or null) the tap walks you in to that tile, you face the ladder and the panel
+// opens, and a climb lands you there facing out; without it (no such function, or null on this deck), the hatch as before.
 function ladderHatch() {                                 // this deck's ladder hatch edge, or null
   for (const [k, c] of Object.entries(CLOSED_DOORS)) if (c && c.t === 'Spine ladder') { const e = EDGES.get(k); if (e && e.type === 'hatch') return e; }
   return null;
 }
+const ladderRoom = () => { const s = typeof ladderStand === 'function' ? ladderStand() : null; return s && s.e && Number.isFinite(s.i) && Number.isFinite(s.j) ? s : null; };   // LR1's (4d), if built
+const _lv = new THREE.Vector3(), _lb = new THREE.Box3();
+function ladderAt() {                                    // the middle of the rungs, against the car wall (world), or null
+  const it = ITEMS.find(i => i.t === 'Spine ladder'); if (!it) return null;
+  it.hit.getWorldPosition(_lv); return { x: _lv.x, z: _lv.z - .36 };   // spineLadder (4b): rungs at z -.36, placed facing 'n' on every deck
+}
+function ladderAimed(h) {                                // section 11's tap, right after pick: on the ladder, or its room's door or hatch?
+  if (!LADDER_ON || !h) return false;
+  const lr = ladderRoom(), e = lr ? lr.e : ladderHatch(), d = e && DOOR_OBJS.find(o => o.e === e); if (d && h.object.parent === d.g) return true;
+  const L = ladderAt(); if (!L) return false;
+  _lb.min.set(L.x - .3, 0, L.z - .06); _lb.max.set(L.x + .3, H - .25, L.z + .06);   // the rails and rungs (not the air round them), up to just under the ceiling: its very top pokes up past cut-away walls over the lobby behind, and a tap there is a walk
+  if (!ray.ray.intersectBox(_lb, _lv)) return false;
+  const near = ray.intersectObjects(pickables, true).find(x => x.object !== paneIM && x.object !== sillIM && !x.object.isSprite && !x.object.isPoints && isShown(x.object) && !(x.object.userData.walker && x.object.userData.walker.isPlayer));
+  return !near || _lv.distanceTo(ray.ray.origin) <= near.distance + .01;   // nothing solid in front of it
+}
 function ladderTap(key) {                                // section 11's tap: a ladder hatch (key), or the ladder itself (null)
   if (!LADDER_ON || (typeof ride !== 'undefined' && ride)) return false;
+  const lr = !key && ladderRoom(), L = ladderAt();
+  if (lr && L) {                                         // into the ladder room, up to the ladder
+    const done = () => { player.face = Math.atan2(L.x - player.obj.position.x, L.z - player.obj.position.z); ladderPanel(); };
+    if (K([lr.i, lr.j]) === K(player.here()) && !player.path.length) { done(); return true; }
+    if (playerGo([lr.i, lr.j], done)) return true;
+  }
   const e = key ? (CLOSED_DOORS[key] && CLOSED_DOORS[key].t === 'Spine ladder' ? EDGES.get(key) : null) : ladderHatch(); if (!e) return false;
   approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => ladderPanel()); return true;
 }
@@ -14853,7 +14895,7 @@ function ladderStep(r, dt) {                             // section 11's updateR
     skipTo(shipNow() + L.k * LADDER.mins);               // about a ship minute a deck
     const N = SHIP.player.needs; N.energy = needClamp(N.energy - LADDER.energy * L.k); N.fitness = needClamp(N.fitness + LADDER.fitness * L.k);
     goToDeck(r.n, null);
-    const e = ladderHatch(), s = e && reachableSide(e);
+    const lr = ladderRoom(), e = lr ? null : ladderHatch(), la = lr && ladderAt(), s = lr ? [lr.i, lr.j, la ? Math.atan2(la.x - cellPos(lr.i, lr.j).x, la.z - cellPos(lr.i, lr.j).z) : 0] : e && reachableSide(e);   // #14 with LR1's open ladder rooms: by the ladder, facing out
     if (s && free(s[0], s[1])) { player.obj.position.copy(cellPos(s[0], s[1])); player.face = player.obj.rotation.y = s[2] + Math.PI; target.copy(player.obj.position).setY(.7); }
     r.swapped = true; r.t = LADDER.fade; return;
   }
@@ -52109,6 +52151,7 @@ function tap(cx, cy) {
     if (typeof playerChat === 'function') playerChat(s);  // section 15
     return;
   }
+  if (typeof ladderAimed === 'function' && ladderAimed(h) && ladderTap(null)) return;   // patch #5, playtest patch 1 #14: the ladder (all of it, through glass) or its hatch: into the ladder room and climb (LADDER_ON)
   if (ud.item && ud.item.lift) { enterLift(); return; }
   if (ud.item && ud.item.see && ud.item.t === 'Spine ladder' && typeof ladderTap === 'function' && ladderTap(null)) return;   // patch #5: the ladder behind its glass takes you to its hatch (LADDER_ON)
   if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
