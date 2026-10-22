@@ -50299,6 +50299,24 @@ function trainArrow(c, now) {                           // (its state on the fun
     A.mine = IX_GOAL; A.up = true;
   } else if (!want && A.up) { if (ours) clearGoal(); A.up = false; }
 }
+// AC1 (lead 29, AR2's find with FX1-FX3 together): the training's watch had no arrow with the arrow queue off, so you
+// walked off, were never near the teacher's job and the training lapsed at 17:00 (Hauling, Tuning, the Scanner). Now,
+// while the stage is 'watch', a direct arrow on the job's spot, "Watch Yara: Main storage": what trainNear counts (its
+// room, or within TRAIN_NEAR tiles), not the teacher herself (an arrow on someone walking stalls: RV6). Over the board
+// and job arrows; another direct arrow put up meanwhile is left alone and ours comes back after; down when your turn
+// starts or the training ends. The queue on: E's T2 (15b) does this instead. Once a ship minute (WORK_TICKS)
+function trainWatchArrow() {
+  const S = trainWatchArrow.s || (trainWatchArrow.s = { mine: null }), c = SHIP.works && SHIP.works.cur;
+  if (typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined') return;
+  const ours = !!S.mine && IX_GOAL === S.mine;
+  const j = c && c.st === 'watch' && SHIP.jobs.find(x => x.id === c.j), sp = j && typeof trainSpot === 'function' ? trainSpot(j) : null;
+  if (!sp || typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { if (ours) clearGoal(); S.mine = null; return; }
+  if (IX_GOAL && !ours) return;                            // someone else's arrow: wait for it to go
+  const who = typeof guideWho === 'function' ? guideWho(c.by) : worksFirst(c.by), rm = ((DECKS[sp.deck] || {}).rooms || {})[sp.room];
+  const label = 'Watch ' + who + (rm && rm.name ? ': ' + rm.name : '');
+  if (!ours || S.mine.label !== label) { setGoal({ deck: sp.deck, at: sp.tile, room: sp.room, label }); S.mine = IX_GOAL; }
+}
+if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => trainWatchArrow());
 // ---- end of slot: Works career engineer ----
 
 

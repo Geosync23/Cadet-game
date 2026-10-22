@@ -195,6 +195,24 @@ def part_queue(pg):
             if pg.ev('Math.floor(shipNow())') > tk + 1: break
         got = pg.ev("""(() => { const has = GUIDE.list.some(e => e.id.startsWith('train:m4:meet')); SHIP.works.cur = __tk.keep; SHIP.occasions.splice(SHIP.occasions.indexOf(__tk.occ), 1); GUIDE.list.length = 0; GUIDE.rev++; return has; })()""")
         check(got, 'train: the minute tick did not ask the training arrows')
+    # the watch's own arrow with the queue off (lead 29, AR2's find): on the training job's spot, over the job arrow,
+    # another direct arrow left alone and ours back after, down at 'do'; with the queue on, none (T2 does it)
+    w = pg.ev("""(() => { if (typeof trainWatchArrow !== 'function' || !SHIP.works) return null; const W = SHIP.works, keep = W.cur, on = GUIDE_ON, now = shipNow(), out = {};
+      GUIDE_ON = false; GUIDE.list.length = 0; clearGoal(); trainWatchArrow.s = null;
+      const mc = machineList().find(x => !x.stub) || machineList()[0], sp0 = { deck: mc.deck, room: mc.room };
+      SHIP.jobs.push({ id: 'arrows-wj', machine: mc.id, deck: mc.deck, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: 'esposito-yara', parts: [], status: 'claimed' });
+      W.cur = { id: 'm4', st: 'watch', d: SHIP.time.day, by: 'esposito-yara', j: 'arrows-wj', w: 0 };
+      trainWatchArrow(); out.a = IX_GOAL && [IX_GOAL.label, IX_GOAL.deck, IX_GOAL.room, !!IX_GOAL.crew]; out.spot = trainSpot(SHIP.jobs.find(j => j.id === 'arrows-wj'));
+      setGoal({ deck: 4, room: 'w', label: 'someone else' }); trainWatchArrow(); out.other = IX_GOAL && IX_GOAL.label;
+      clearGoal(); trainWatchArrow(); out.back = IX_GOAL && IX_GOAL.label;
+      W.cur.st = 'do'; trainWatchArrow(); out.atDo = IX_GOAL && IX_GOAL.label;
+      W.cur.st = 'watch'; GUIDE_ON = true; trainWatchArrow(); out.queueOn = IX_GOAL && IX_GOAL.label;
+      GUIDE_ON = on; clearGoal(); W.cur = keep; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-wj'); trainWatchArrow.s = null; return out; })()""")
+    if w is not None:
+        print('  watch arrow (queue off):', w)
+        check(w['a'] and w['a'][0].startswith('Watch Yara') and w['a'][1] == w['spot']['deck'] and w['a'][2] == w['spot']['room'] and not w['a'][3], f'watch: the arrow should be on the training job\'s spot, "Watch Yara: ..." ({w})')
+        check(w['other'] == 'someone else' and str(w['back'] or '').startswith('Watch Yara'), f'watch: another arrow left alone, ours back after ({w})')
+        check(w['atDo'] is None and w['queueOn'] is None, f'watch: down at your turn, and none with the queue on ({w})')
 
 def part_once(ctx, path):
     pg = Page(ctx, path); pg.day2()
