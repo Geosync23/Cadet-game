@@ -425,3 +425,31 @@ does it; B = the × and PAD_FIRST.devDlg stay. (Name matching would pick the fir
 card's are "−" and "+", so it holds.) cadet_test 67df90a → 5b4d9f0 (switch off): ALL IDENTICAL. controller_check screens:
 OK. Mutant breaking P1's keeping (`pr9_p2_nokeep`: `const was = null`): **CAUGHT** ("A three times on + should keep the
 place as the card asks again").
+
+# Pillar 5 fixes (FX1-FX3), reviewer PR9 (lead 27's ask, 2026-10-22 ~13:00)
+
+Base: claude/integration 2b4a05db (0.64.15). Proof test: AR1's `arrows_check.py` (claude/arrows-plan 61dfcb2), a player who
+only follows the arrow. Baseline on 2b4a05db (logs/ar_base_*.log): shift FAILs 2 (not clocked out; stuck at "Repair the
+galley plant", fix "nobody yet"); week FAILs 18 (each names its fixer).
+
+## FX1 (claude/p5-fix1 1433e5f): FIXES NEEDED
+
+Code: `trackFresh()` (15b, each tick): a tracked job that's no longer yours resets `SHIP.player.track` to undefined (on,
+nothing tracked); `trainArrow` (24p): the meeting's arrow from TRAIN_LEAD (30) ship minutes before until you're in the room,
+it starts or it's over; not over a dialogue; another arrow that takes over is left alone.
+Runs (each alone): career_check `--fx` on 2b4a05db FAILED (bug 1 "track 1-lights-1@9", bug 2 "arrow up 29 min before:
+None"); on 1433e5f CAREER CHECK OK. cadet_test 2b4a05db → 1433e5f: ALL IDENTICAL.
+arrows_check on 1433e5f: shift the same 2 FAILs. Week: **worse in places**. New FAILs: "Day 3: never clocked in" and
+"Day 8: never clocked in" (both passed on 2b4a05db); a new arrow "Take your first round at the job board" (Rounds, m1 now
+`again`) stuck from Day 2 10:48 for over 3 ship hours, again from Day 3 06:00 and Day 8 06:01, covering Clock in; the follower
+stands at the board with nothing to take. Day 2's m1 still not learned (now `again`). Still red as on the base: Days 4-5
+clock in, m3d/m3i/m4/m5/m7/p3/m6, Making it safe, the main lift (FX3), the fire drill arrow.
+Fix requests (sent): (1) TRAIN_LEAD 15 (the user's word); (2) the meeting arrow comes back when a borrowed arrow clears
+(A.lost never resets); (3) the regression: with tracking now "on", section 24's "Take your first round at the job board"
+arrow owns the screen when the board can't give the round (from 06:00, before Clock in): show it only when the board offers
+the round job, and never over Clock in before you're clocked in; find out why m1 lapses to `again` on Day 2 for a follower.
+
+## FX3 (claude/p5-fix3 b063f86): in review
+
+Merges with FX1 with only a build-table conflict. Early fix request (sent): `clearGoal()` unconditionally at your turn at the
+pipe and in incRetry wipes whatever arrow is up (FX1's meeting arrow, a needs arrow, a Tracked pick): clear only its own.

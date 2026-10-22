@@ -1,0 +1,7 @@
+(p) FX1, the guidance in the real game (bugs 1-2: tracking after a job, the meeting arrow's window):
+   a job taken and turned in: 1-lights-1@9 -> tracking 1-lights-1@9
+FAIL bug 1: after turning in a tracked job, tracking is on with nothing tracked (track 1-lights-1@9)
+   the ask at 541 for m1:meet at 645 Deck 5 w | arrow at the ask: None
+   before the lead: None | 29 before: None | in the room: None | out again: None | back in: None | started: m1:meet train.m1.torres-zeke | after: ['Take your first round at the job board', 'Take your first round at the job board', 'Take your first round at the job board']
+FAIL bug 2: the meeting arrow is up 29 minutes before (None)
+CAREER CHECK FAILED

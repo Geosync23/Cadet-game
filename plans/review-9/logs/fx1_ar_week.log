@@ -1,0 +1,32 @@
+== week (following only the arrow)
+FAIL week: Day 2: "m1" not learned by following the arrow (fix: FX1 (meeting arrows)); training m1:again, opened ['m1']
+  week: Day 2: learned [], training m1:again, clocked 540 min, stuck so far 3
+FAIL week: Day 3: never clocked in following the arrow (fix: FX1)
+FAIL week: Day 3: "m4" not learned by following the arrow (fix: FX3 (Hauling) and FX1); training m1:again, opened ['m1', 'm3d']
+FAIL week: Day 3: "m3d" not learned by following the arrow (fix: FX2 (the drill)); training m1:again, opened ['m1', 'm3d']
+  week: Day 3: learned [], training m1:again, clocked 0 min, stuck so far 5
+FAIL week: Day 4: never clocked in following the arrow (fix: FX1)
+FAIL week: Day 4: "m3i" not learned by following the arrow (fix: the arrows plan (Day 4 warning) and FX1); training m1:again, opened ['m3i']
+FAIL week: Day 4: "m5" not learned by following the arrow (fix: FX1 (meeting arrows) and FX2 (Tuning)); training m1:again, opened ['m3i']
+  week: Day 4: learned [], training m1:again, clocked 0 min, stuck so far 5
+FAIL week: Day 5: never clocked in following the arrow (fix: FX1)
+FAIL week: Day 5: "m7" not learned by following the arrow (fix: FX2 (the scanner job)); training m1:again, opened None
+FAIL week: Day 5: "p3" not learned by following the arrow (fix: FX2 (the scanner job) and piece C (Fault notes pointers)); training m1:again, opened None
+FAIL week: Day 5: the scanner never counted as used (fix: FX2)
+  week: Day 5: learned [], training m1:again, clocked 0 min, stuck so far 5
+  week: Day 6: learned [], training m1:again, clocked 0 min, stuck so far 5
+  week: Day 7: learned [], training m1:again, clocked 0 min, stuck so far 5
+FAIL week: Day 8: never clocked in following the arrow (fix: FX1)
+FAIL week: Day 8: "m6" not learned by following the arrow (fix: FX3 (the burst pipe) and FX2 (the scanner count)); training m1:again, opened ['m1']
+FAIL week: Day 8: Making it safe did not open (fix: FX3 (the burst pipe) and FX2 (the scanner count))
+  week: Day 8: learned [], training m1:again, clocked 0 min, stuck so far 6
+FAIL week: stuck from Day 2 08:37 at "Repair the main lift" (Deck 5) (fix: FX3 (the lift service))
+FAIL week: stuck from Day 2 10:48 at "Take your first round at the job board" (Deck 5) (fix: FX1 (arrows and tracking) or FX3 (the lift))
+FAIL week: stuck from Day 2 17:00 at "Repair the main lift" (Deck 5) (fix: FX3 (the lift service))
+FAIL week: stuck from Day 3 06:00 at "Take your first round at the job board" (Deck 5) (fix: FX1 (arrows and tracking) or FX3 (the lift))
+FAIL week: stuck from Day 3 14:50 at "Fire drill, 15:00" (Deck 5) (fix: FX1 (arrows and tracking) or FX3 (the lift))
+FAIL week: stuck from Day 8 06:01 at "Take your first round at the job board" (Deck 5) (fix: FX1 (arrows and tracking) or FX3 (the lift))
+FAIL week: the arrow "Take your first round at the job board" stayed up over 3 ship hours from Day 2 10:48 (fix: FX1 (arrows that never clear))
+FAIL week: the arrow "Repair the main lift" stayed up over 3 ship hours from Day 2 17:00 (fix: FX1 (arrows that never clear))
+FAIL week: the arrow "Fire drill, 15:00" stayed up over 3 ship hours from Day 3 14:50 (fix: FX1 (arrows that never clear))
+ARROWS CHECK FAILED

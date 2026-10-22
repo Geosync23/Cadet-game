@@ -1,0 +1,5 @@
+== shift (following only the arrow)
+FAIL shift: not clocked out by the player at the end (still in: True, the clock signed you out: False) (fix: FX1)
+FAIL shift: stuck from 13:13 at "Repair the galley plant" (Deck 3): the arrow points where nothing can be done (fix: nobody yet (the calibrate chore: its pin sits where the chiller takes the tap; the label says Repair))
+  shift: Day 9, 9 jobs, stuck 1; last actions: ['tap Sign: false', 'tap the floor at the pin: Repair the galley plant', 'tap Sign: false', 'tap the floor at the pin: Repair the galley plant']
+ARROWS CHECK FAILED

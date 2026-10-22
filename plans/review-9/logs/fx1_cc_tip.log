@@ -1,0 +1,5 @@
+(p) FX1, the guidance in the real game (bugs 1-2: tracking after a job, the meeting arrow's window):
+   a job taken and turned in: 1-lights-1@9 -> tracking on
+   the ask at 541 for m1:meet at 645 Deck 5 w | arrow at the ask: None
+   before the lead: None | 29 before: Rounds with Zeke, 10:45 | in the room: None | out again: Rounds with Zeke, 10:45 | back in: None | started: m1:meet train.m1.torres-zeke | after: ['Take your first round at the job board', 'Take your first round at the job board', 'Take your first round at the job board']
+CAREER CHECK OK
