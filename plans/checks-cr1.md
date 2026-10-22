@@ -50,3 +50,19 @@ Checked out as is (no merging). **sha256 of starship-cadet.html: `94f32868dbe7f2
 
 No FAILs, so no comparison runs on 0.64.13 (a7477a9) were needed. day_check 0 started late because of a bug
 in CR1's own wait script (it waited on itself), not the game.
+
+# Round 3: 0.64.15 (claude/integration-next c5c43293, 2026-10-22)
+
+Checked out as is. **sha256 of starship-cadet.html: `e955d667fe946b3e1e0a21c0b1f3049694460096f675dad5019c328e5d7d4a25`**
+(matches the lead's). Share from `plans/testing-guide.md`'s six-way split, one check at a time, own CADET_WORK (/tmp/work-cr1).
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 324 s | PLAYER CHECK OK (same 194 output lines as on 0.64.14; faster because player_check.py itself changed in this patch) |
+| devmode_check | **OK** | 227 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 234 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 56 s | PUZZLE CHECK OK |
+| social_check | **OK** | 21 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 28 s | TALK CHECK OK |
+
+No FAILs, so no OLD (0.64.14, 32b699a6) runs were needed.
