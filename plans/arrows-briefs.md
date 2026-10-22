@@ -10,6 +10,9 @@ fixes first; the shift's arrows every shift while the shift is tracked, panel po
 (`once: 3`); a training meeting may take the arrow from 15 minutes before, the job's arrow back straight after (level 2
 over level 4); a Settings switch for teaching arrows, all / first time only / off, default first time only (C builds
 it, B reads it: see "The Settings switch"); the burst pipe's job taken at the pipe (F4).
+Two more (AR2's questions, as passed on by lead 27): scan first, every faulty-machine job starts with "Look it over"
+once you have the scanner (FX2 builds it; F3's arrows assume it); the inspection, Tomas warns you in Bunk 1 on the first
+Wednesday evening, then F2's Thursday 06:00 arrows.
 
 **Both pieces start switched off** (`GUIDE_ON = false`, `POINT_ON = false`): with the switch off the game is identical
 (cadet_test ALL IDENTICAL, no new save keys written). Nothing here calls `R()`. Neither adds anything to the 3D scene:
