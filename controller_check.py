@@ -138,7 +138,7 @@ class Run:
         except Exception: pass
         self.page.wait_for_timeout(300)
     def reload(self):
-        self.page.reload()
+        self.page.reload(timeout=90000)
         self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
         self.ev(SKIP_SWITCH); self.page.wait_for_timeout(300)
     def ev(self, s): return self.page.evaluate('s => window.__sc(s)', s)
@@ -361,7 +361,7 @@ class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
-    MAX_DEPTH, MAX_PRESSES = 4, int(os.environ.get('CTL_PRESSES', 700))
+    MAX_DEPTH, MAX_PRESSES = 6, int(os.environ.get('CTL_PRESSES', 700))
     SKIP = {'#newgame'}   # pressed once at the top only (twice starts a new game; nothing new to find behind it)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
@@ -370,8 +370,13 @@ class Sweep:
         self.cands = None; self.opened = set(); self.seen_keys = set(); self.groups = {}
         self.r = None
     def load(self):
-        if self.r: self.r.reload()
-        else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
+        try:
+            if self.r: self.r.reload()
+            else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
+        except Exception:   # a reload that hangs on a busy machine: a fresh browser instead
+            try: self.r.close()
+            except Exception: pass
+            self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
         self.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); self.r.step(20); self.reloads += 1
     def scan(self):
         sc = self.r.ev(SCAN)
