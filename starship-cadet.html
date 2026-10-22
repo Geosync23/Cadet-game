@@ -42335,7 +42335,7 @@ const INTRO_ARROWS = {
   board: { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' },
   eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
   stow: { deck: 4, place: '4-B1-4-wardrobe', label: 'Put your bag in your wardrobe' },   // the arrival's 'stow' step (playtest patch 1, #2)
-  tea: { deck: 5, room: 't', label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below)
+  tea: { deck: 5, room: 't', item: /^tea table$/i, label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below); at the tea table, like FR4's quest arrow (playtest patch 1, #10)
   call: { deck: 3, room: 'B', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick)
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
