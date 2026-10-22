@@ -335,7 +335,7 @@ with sync_playwright() as pw:
     check(wt[0] == 'eat' and wt[1] is True and wt[2] is True and wt[3] is None and wt[4] > 1, f'with a tray from the servery: it goes on the table and food rises as you eat: {wt}')
 
     print('Tea in the Tea corner, every seat taken (fresh-eyes, FE1 item 48: "any chair in the tea corner should sit you down for tea"):')
-    teas = []
+    teas = []; keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], tea: SHIP.player.teaDay })")
     for taken in (['5-tea-1', '5-tea-2'], ['5-tea-1', '5-tea-2', '5-tea-3']):
         r = g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 5) goToDeck(5); setShipNow(1 * 1440 + 13 * 60 + 5); SHIP.player.teaDay = null; needsT = null;
           if (typeof teaOut !== 'function' || !teaOut()) return ['no tea'];
@@ -347,6 +347,7 @@ with sync_playwright() as pw:
             g.step(10)
             if g.ev("!ACT || ACT.phase === 'do'"): break
         r += [g.ev("ACT && ACT.def && ACT.def.title"), g.ev("SHIP.player.teaDay")]; g.ev("actEnd(true)"); teas.append([len(taken)] + r)
+    g.ev(f"(() => {{ const k = {keep}; actEnd(true); setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; SHIP.player.teaDay = k.tea; }})()"); g.step(3)   # as it was, for the parts after
     print('  [seats taken, tapped, activity, place, room, title, tea day]:', teas)
     check(all(t[1] is True and t[2] in ('ixLounge', 'ixTea') and t[4] == 't' and t[5] == 'Tea and biscuits' and t[6] == 2 for t in teas), f'tea: a tap on a taken armchair still gives you tea in the Tea corner: {teas}')
 
