@@ -2,7 +2,7 @@
 
 - **Session:** OR2, session_01AnRKXUUGi8mwREwvt4WbaV. Took over from OR1 (plans/handover-review-opt.md) after the account move, 2026-10-21 ~18:00 UTC. Leads: 25 (session_01J2aTyEohBf8KFHCsTqt3LW), then 26 (session_015mHBLCf5jpnzBkFY1iBTqv, from ~02:10 UTC 22 Oct).
 - **Branch:** `claude/review-opt`. Notes only: `plans/review-opt.md` (every verdict with how it was proven) and `plans/review-opt/` (probes and logs). Never changes the game or the build number.
-- **State at handover (~06:40 UTC 22 Oct):** idle, nothing open. Memory ~500k.
+- **State at handover (updated ~12:15 UTC 22 Oct):** one review open: ON1's Zeke fix on `claude/patch-zeke` (lead 27, session_017UHW78qnvRTQwYpDxpodHz). Tip 40fbd0d5 was put on hold by ON1 (its INTRO_HOLD_MAX cap also cut the wait when Zeke wasn't near you; the full intro_check's paper part 2 failed); a new tip with the cap gated on introWithEscort(here) is coming. Memory ~600k.
 
 ## Verdicts (details in plans/review-opt.md)
 
@@ -38,3 +38,7 @@
 
 ## Open questions for the user
 None of mine. For the lead: backlog rows suggested and not confirmed: the first-night bunk arrow in `intro_check --dawdle` (now passes on A's tip); the six check gaps' owners (closed by TS3).
+
+## The Zeke review (open)
+- The user's 0.64.15 report: after the bag, Zeke stands in Bunk 1. Reproduced on 2b4a05db with `plans/review-opt/intro_tap.py` (copy it next to cadet_test.py, delete its first comment line; `NOTAP=1 TICKS=60 EVERY=5 python3 intro_tap.py BUILD --evening`): without the bag stowed, 'stow' holds 17:14 to ~18:05. Cause: introAdvance's "his own steps never time out while he's within 10 tiles of you (until 18:00)". ON1 found the second way in (leaving Bunk 1 during 'device'); 'bunk' and 'table' had the same hold.
+- To check on the new tip: `intro_check.py BUILD --leave` FAILS on 2b4a05db (/tmp logs lost with the container: rerun) and passes on the tip; the full intro_check (incl. paper part 2, a player 10 minutes behind) passes; intro_tap NOTAP on the tip: Zeke leads on within ~10 ship minutes; lines_check; cadet_test vs 2b4a05db; check_fast. Also the cases lead 27 named: leaving Deck 4 by lift during stow/device, reload mid-step, standing outside Bunk 1 during 'bunk', away from the table during 'table'. Verdict to lead 27 and ON1 (session_01BJNi1oqxnQ3jUusXHbHDGW).
