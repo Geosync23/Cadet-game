@@ -15031,7 +15031,7 @@ function clockRemindTick(now = shipNow()) {
     const t = clockRmText('career.mail.clock.out', 'You didn\'t clock out | The clock signed you out at {time}. Next time, tap it on your way out: Works bay, by the tea corner.', { time: hhmm(dayShiftEnd(cd)) }, cd), i = t.indexOf(' | ');
     if (typeof mailSend === 'function' && i > 0) mailSend({ at: now, from: 'Works time clock', subject: t.slice(0, i), body: t.slice(i + 3) });
   }
-  if (typeof IX_GOAL !== 'undefined' && IX_GOAL && /^clock:/.test(IX_GOAL.trk || '')) { const due = clockRmDue(now); if (!due || 'clock:' + due.want !== IX_GOAL.trk) clearGoal(); }   // punched (or past): the clock's arrow goes
+  if (typeof IX_GOAL !== 'undefined' && IX_GOAL && /^clock:/.test(IX_GOAL.trk || '')) { const due = clockRmDue(now); if (!due || 'clock:' + due.want !== IX_GOAL.trk) { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); } }   // punched (or past): the clock's arrow goes (15b's trkDone, FR4's: your job's tracking comes back if the Tracked tap paused it; RV3)
   const due = clockRmDue(now); if (!due) return null;
   if (due.want === 'in' && due.late) C.n = 0;
   const train = typeof introOn === 'function' && introOn() && d === 1, easy = clockRmEasy() || train, S = DAY_SHIFT[0], E = dayShiftEnd(d), A = friAutoOut(d);
