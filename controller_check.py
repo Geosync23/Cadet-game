@@ -104,7 +104,9 @@ def check(cond, msg):
     if not cond: ok = False; print('FAIL', msg)
     return cond
 
-QUIET = '#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important}'
+QUIET = '#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important} .bubw{opacity:0!important}'
+# .bubw (speech bubbles) out of the pictures: mid-fade, one in three runs drew a bubble's layer a shade differently with
+# the same DOM and styles (a compositor quirk). Their text, place and fade are still compared through the page state.
 class Run:
     """One page of the game with the pretend controller in a given mode. extra: JS put into the game's scope at load."""
     def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None, touch=False):
@@ -557,6 +559,16 @@ def WRAP(body):
 OUTLINES = r"""(() => { const out = []; for (const e of document.querySelectorAll('*')) { const cs = getComputedStyle(e);
   if (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 && e.getBoundingClientRect().width > 0) out.push((e.id || e.tagName) + ' ' + cs.outlineWidth); }
   const a = document.activeElement; return { outlines: out.slice(0, 5), focus: a && a !== document.body ? (a.id || a.tagName) : null }; })()"""
+# what you can see: the rendered elements (hash of tag, id, classes, inline style, text), the body's classes, the 3D
+# objects drawn. Things made on the pad's first use and hidden again after a touch (the ring, the bottom line) are listed
+# apart, as information: the rule is that touch looks and behaves as without a pad, not that nothing is ever made.
+SEEN_STATE = r"""(() => { let h = 0, n = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
+  for (const e of document.body.querySelectorAll('*')) { if (e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
+    if (e.checkVisibility && !e.checkVisibility({ visibilityProperty: true })) continue;   // not opacity: the bubbles are hidden from pictures that way
+    const b = e.getBoundingClientRect(); if (b.width <= 0 || b.height <= 0) continue;
+    n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '')); for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
+  let drawn = 0; scene.traverseVisible(o => { if (o.isMesh || o.isLine || o.isPoints || o.isSprite) drawn++; });
+  return { seen: n, seenHash: h, body: document.body.className, drawn, all: document.querySelectorAll('*').length, scene: scene.children.length }; })()"""
 PRE = 40   # frames before the first tap, the same in every run (each press is 3 frames and 4 after it)
 def touch_play(pw, src, tag, mode, presses):
     r = Run(pw, src, tag, mode=mode, plug={} if mode != 'none' else None, touch=True)
@@ -570,22 +582,27 @@ def touch_play(pw, src, tag, mode, presses):
         if k == 0: r.page.mouse.click(x, y)
         else: r.page.touchscreen.tap(x, y)
         r.step(90)
-        shots.append((f'tap{k}', r.shot(f'{tag}_tap{k}'))); g = r.ev(GAME_STATE); g.pop('calls', None)
-        pg = r.js(PAGE_STATE); pg.pop('listeners', None)
-        st.append([g, r.js(OUTLINES), pg])
+        shots.append((f'tap{k}', r.shot(f'{tag}_tap{k}'))); g = r.ev(GAME_STATE)
+        for x in ('calls', 'tris', 'mem', 'scene'): g.pop(x, None)   # made on first use and kept: not what you see
+        st.append([g, r.js(OUTLINES), r.ev(SEEN_STATE)])
     r.close(); return shots, st
 def part_touch(pw, src, tag):
     fails = []
-    a, sa = touch_play(pw, src, f'{tag}_touch_none', 'none', [])
+    a, sa0 = touch_play(pw, src, f'{tag}_touch_none', 'none', [])
     # B (put away a message: none on screen) and D-pad up then down (to the screen's edge buttons and back); not LB/RB,
     # which really turn the view (a different picture by design)
-    for presses in (['B'], ['UP', 'DOWN'], ['UP']):
-        b, sb = touch_play(pw, src, f'{tag}_touch_{"".join(presses)}', 'pad', presses)
-        d = same_pics(a, b) + [x for k in range(2) for x in diff_state(sa[k][0], sb[k][0], f'tap{k}') + diff_state(sa[k][2], sb[k][2], f'tap{k}.page')]
+    for presses in ([], ['B'], ['UP', 'DOWN'], ['UP']):   # [] first: no pad again, the check's own steadiness
+        b, sb = touch_play(pw, src, f'{tag}_touch_{"".join(presses) or "again"}', 'pad' if presses else 'none', presses)
+        sa = json.loads(json.dumps(sa0))
+        kept = {x: (sa[1][2][x], sb[1][2][x]) for x in ('all', 'scene') if sa[1][2][x] != sb[1][2][x]}
+        if kept: print(f'    kept hidden after the touch (information): ' + ', '.join(f'{x} {u} -> {v}' for x, (u, v) in kept.items()))
+        for k in range(2):
+            for x in ('all', 'scene'): sa[k][2].pop(x, None); sb[k][2].pop(x, None)
+        d = same_pics(a, b) + [x for k in range(2) for x in diff_state(sa[k][0], sb[k][0], f'tap{k}') + diff_state(sa[k][2], sb[k][2], f'tap{k}.seen')]
         for k in range(2):
             if sb[k][1]['outlines']: d.append(f'tap{k}: a focus outline is left: {sb[k][1]["outlines"]}')
             if sb[k][1]['focus'] != sa[k][1]['focus']: d.append(f'tap{k}: focus on {sb[k][1]["focus"]}, without a pad {sa[k][1]["focus"]}')
-        print(f'  pressed {" then ".join(presses)}, then a click and a touch: {"the no-pad game" if not d else str(len(d)) + " differences"}')
+        print(f'  {"pressed " + " then ".join(presses) if presses else "no pad again"}, then a click and a touch: {"the no-pad game" if not d else str(len(d)) + " differences"}')
         fails += [f'after {"+".join(presses)}: {x}' for x in d[:5]]
     return fails
 
