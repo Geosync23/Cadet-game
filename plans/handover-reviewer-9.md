@@ -8,7 +8,7 @@ logs in `plans/review-9/logs/`, shots in `plans/review-9/shots/`, tools in `plan
 - **Role:** reviewer. Took over from PR8 (Short Fridays), then controller support (foundation, P1, P2, P4), now the
   Pillar 5 fixes FX1-FX3.
 - **Branch:** `claude/review-8` (push only there). Never changes the game.
-- **Lead:** lead 27, session_017UHW78qnvRTQwYpDxpodHz (leads 25 and 26 handed over; TEAM.md on the lead branch is the
+- **Lead:** lead 28, session_01S7AdxK1ZyXiEFowP3k5gng (leads 25-27 handed over; TEAM.md on the lead branch is the
   source).
 - **Builders now:** FX1 session_01WmdPR5B5QC56Hid3F5M1wv (claude/p5-fix1), FX2 session_01JRCSTi6r1qQ51mTgwgJ7es
   (claude/p5-fix2, nothing received yet), FX3 session_01UZWrZRivwQJPKL3x7c8Ft9 (claude/p5-fix3). AR1
@@ -51,3 +51,10 @@ New red for AR1/FX1 (exposed by FX3): "Repair the light relays" arrow up over 3 
 ## Open questions for the user
 
 None from me (the name question was answered: "George", no rename).
+
+## Stopped (2026-10-22 ~14:20, memory near 60%)
+
+Left for the next reviewer: (1) FX1's re-check when FX1 pushes (its three fix requests; arrows_check week must not turn
+Days 3 and 8 clock-in red; compare with logs/ar_base_week.log and logs/fx1_ar_week.log); (2) FX3's next push: the INC_GOAL
+delta (mech_check fx3's new "Food" arrow case should fail with the old unconditional clearGoal), hauling's lesson on any
+day, the promotion talk readable; cadet_test and arrows_check week again.
