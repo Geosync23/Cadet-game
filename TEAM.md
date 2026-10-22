@@ -568,3 +568,11 @@ Seat count: patch takes PB2, FR4, ON1, OR2, so the controller team starts 3 pack
 | SC1 (new) | session_01BBC5dx3LtPPiWkTdurPTmJ | `claude/patch-play1-f` | 18-19 breakfast 07:00, toilet queue |
 | RV3 (new) reviewer | session_01Uct2TvRPoFYViyU1X9Fpjx | `claude/review-play1` | reviews B, E, F (OR2 reviews A, C, D) |
 Seat limit lifted for the patch, so the controller team keeps all five package builders.
+**~03:25 UTC, the user:** go higher on workers; lead's recommendation adopted: **nine builders + three reviewers** (one builder per area so nobody edits the same lines; more would mostly wait on review and the one file). Split off (plan f317a979):
+| Seat | Session | Branch | Notes |
+|---|---|---|---|
+| JB1 (new) | session_011sWEL7Nb4ojpWaztZLehvM | `claude/patch-play1-g` | 13 more jobs on the board |
+| LR1 (new) | session_013nRsDeXwg5pP529R3y7dAm | `claude/patch-play1-h` | 15 open every ladder room (map change) |
+| TQ1 (new) | session_01EkwwgFpDwsdmD6EYHZ4yJT | `claude/patch-play1-i` | 19 toilet queue |
+| RV4 (new) reviewer | session_01GpAWYxQbS4y8rcB5LWDVE7 | `claude/review-play1b` | reviews G, H, I |
+FR4 keeps 9-12, LD1 keeps 14 + 16, SC1 keeps 18. Merge order C, F, I, A, D, B, G, E, H.
