@@ -5,6 +5,7 @@ Lead 27 (session_017UHW78qnvRTQwYpDxpodHz, claude/lead-27; took over from lead 2
 first reviewer PR9 (session_01B1FUTc4sJR4Q5FFnx7L6Db, notes on claude/review-8, `plans/review-9.md`).
 
 ## Split (lead 26's plans/controller-team.md, claude/lead-26 31151143; replaces the 02:00 split)
+- (11:25, lead 27: P4 moved to PR9.) CTT's successor: CTT2 session_011yMob9ZzgmCFENoNhjJ44z.
 - RV2: **P3** button pictures + connect/disconnect (CP3 session_01AkfeDe7MBN8RYd5n6obGRm, claude/controller-p3),
   **P4** the Controller settings page (CP4 session_01VTXDwLqWGJVRh95HozqhCu, claude/controller-p4), **P5** accessibility
   + docs (CP5 session_01VcdDgzyHa1dqdmcRLELbiS, claude/controller-p5), and CTT's checks.
@@ -211,7 +212,7 @@ action name, the stick swap), turn 2's zoom line (flip, speed), section 19's Set
 - Note 2: a trigger bound to a face action (e.g. 'a' on RT) fires at the browser's own `pressed` threshold, not past
   half way as before (the `> .5` rule now follows the action name, not the physical trigger). A light squeeze could press.
 - Note 3: P5's left-hand preset leaves no zoom (above); the page offers it as is.
-Runs queued (queue 5): cadet_test off/on, its check, device_check off/on, 7 mutants, check_fast.
+**Moved to PR9 by lead 27 (11:25)**; my queue 5 cancelled before it ran. These notes and the p4_* mutants were sent to PR9.
 
 ### P3 958421a: runs
 - cadet_test off ALL IDENTICAL; on ALL IDENTICAL apart from 1-level noise (located above; control pending).
