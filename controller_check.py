@@ -1125,11 +1125,14 @@ def ride(r, deck, fails, scene):
     lp = r.ev("(() => { const d = DOOR_OBJS.find(d => d.e.type === 'lift'); return d ? [d.e.cx, d.e.cz] : null; })()")
     if not lp or not walk_to(r, *lp): fails.append(f'{scene}: could not walk to the lift by the stick'); return False
     if not ring_and_A(r, ['lift']): fails.append(f'{scene}: the ring never named the lift'); return False
-    for k in range(20):
+    for k in range(60):   # (you walk in first; at breakfast the lift can be busy: up to 20 s)
         if r.ev("!document.getElementById('lift').hidden"): break
         r.step(10)
-    # the deck's button by its place in the game's own deck order (its words changed in 0.64.17: deckLabel)
-    res = press_in_panel(r, f"document.querySelectorAll('#liftList button')[DECK_ORDER.indexOf({deck})]")
+    if r.ev("document.getElementById('lift').hidden"): fails.append(f'{scene}: the lift panel never opened'); return False
+    # the deck's button by its label (deckLabel since 0.64.17: 'R' for the rec deck, 7; else the number; DECK_ORDER and
+    # deckLabel are in a script the check can't see)
+    lab = 'R' if deck == 7 else str(deck)
+    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{lab}')")
     if res != 'ok': fails.append(f'{scene}: the lift\'s Deck {deck} button: {res}'); return False
     for k in range(60):
         r.step(10)
