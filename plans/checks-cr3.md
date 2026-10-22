@@ -92,5 +92,7 @@ sha256 of starship-cadet.html **94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86
 | day_check 19 | **OK** | DAY CHECK OK; draw calls peak 265; worst stuck 3.7 ship min |
 | day_check 21 | **OK** | DAY CHECK OK; peak 258; worst stuck 5.2 |
 | day_check 27 | **OK** | DAY CHECK OK; peak 258; worst stuck 3.6 |
+| day_check 5 (taken from CR1's share, agreed with CR1) | **OK** | DAY CHECK OK; peak 267; worst stuck 0.8 |
+| day_check 7 (taken from CR1's share, agreed with CR1) | **OK** | DAY CHECK OK; peak 260; worst stuck 3.7 |
 
 No FAIL outside the known-old list.
