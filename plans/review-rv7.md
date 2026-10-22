@@ -87,3 +87,42 @@ Notes: (1) the arrows_check follower calls `playerTap` directly with no screen t
 (it stays stuck at the laundry); a real tap does work (my follower variant). (2) The same trap is now on the haul's cart
 stop (pin beside Cart dock 1: a tap on the dock says "in good order"), see item 1. `choreRayTap` helps only when the
 tap's line passes within 0.6 m of the pin.
+
+## 3. claude/arrows-c 69d1ed9 + 78fef90 (AC2: the FX3 merge, the tea arrow, my 6610dc7 fixes, follower changes): PASS
+
+In it: 00f4436 merges p5-fix3 2cdc1df (FX3 fixes 10-14); 695cf6e the tea arrow carries FX1's trk window (gone when tea's
+over, 14:00, or once you reach the Tea corner); 78fef90 the board's Take it only for rounds and hauls (`BOARD_KINDS`,
+lead 29) and the check lines I asked for; c26f194 / 7ff2c27 / 69d1ed9 the arrows_check follower only (a job held for
+you first at the board; a tap that answers but starts nothing, or starts a sit-down or laundry, is followed by a real
+tap at the pin; up from a sit-down once its minutes are in).
+
+The merge's one clash (the burst pipe) keeps both sides: AC1's F4 queue entries and `incGoalNow`, FX3's `incPark` and
+its WORK_TICKS, `incWho` "Calder" with the queue off too, and FX1's trk window on the call's arrow.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 6610dc7 -> 69d1ed9, alone | differs in e_night ... i_tap3 only (up to 12k px): the other-deck arrow's words, "Take the lift to Deck 3: food, Deck 3" -> "Tap the lift: Deck 3 · Food" (FX3's fix 10, passed by AR2). Same place, same arrow. Intended |
+| cadet_test 69d1ed9 -> 78fef90, alone | ALL IDENTICAL |
+| player_check on 695cf6e~1 | FAILED on "tea not taken: the arrow goes when tea is over" only |
+| player_check on 69d1ed9 | PLAYER CHECK OK |
+| Planted: tea's trkTo a day late | caught (player_check) |
+| interactions_check on 69d1ed9 | OK |
+| arrows_d_check on 78fef90 | OK |
+| My planted faults on 78fef90: no dialogue hold, no training hold, the drill trk tag back, S9's old seen marking, guideTakeable's old rule (arrows_d); any non-side kind takeable (interactions) | all 6 caught |
+| Week (`p_week.py`, 78fef90's own follower), arrows off | learned m1 Day 2, m3d and m4 Day 3, m5 Day 4, m2 Day 8. Not: m3i, m7, p3, m6. "Trained" toasts once each |
+| the same, arrows on | m1 Day 2, m3d and m4 Day 3, m5 Day 4. **No "Trained: ..." toast reached the screen at all** (see A) |
+
+A. **The pop-up queue drops "Trained: ..." (arrows on; piece B, AR1's design, not this commit).** At most 3 wait; the
+oldest waiting is dropped. At 11:00 on Day 2 six arrive at once (Round done, Zeke's line, "That's a round", Work done,
+Trained: rounds, Job complete) and "Trained: rounds" is pushed out before its turn (`p_toast.py`). Earlier runs showed
+it only by luck of timing. Suggest: a training's toast is never dropped ({ now: true }, or the queue drops the least
+important first, or merges a job's own run of toasts).
+B. **Day 5 lost to the climbing wall (the follower):** it taps the Climbing wall nearest the holds' pin and climbs all
+day (recClimb isn't one of the sit-downs 69d1ed9 ends), so the scanner meeting is missed (m7 meet -> ask). A player
+tapping the floor at the pin gets the job (FX3 fix 8/12). Follower fix: end any activity that isn't the job's stop.
+C. **"Put the seal back: main storage" up from Day 6 05:50 over the weekend** (seals left in hand from the abandoned
+holds job; FX3's put-back arrow, fix 9). Over 3 hours on a day off. FX3's call whether it should wait for a workday.
+D. Still stuck once: "Linen to the laundry, Deck 4" (a haul drop; with FX3). The inspection (m3i) isn't reached on
+Day 4 (the arrows plan's Day 4 warning).
+E. A real rewire job has a machine, so it gets a Take it through the old machine rule (as before 6610dc7; tier 2). The
+interactions line tests `{ kind: 'rewire' }` without a machine, so it doesn't prove "never a rewire". Lead 29's call.
