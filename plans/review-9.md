@@ -336,3 +336,27 @@ and on 'unuse' blur it if it still has the focus (never a focus the game set its
 
 **Fix (check): the panels sweep is circular.** REACH starts from `padItems(L)`, the controller's own list, so a clickable
 `div` with an onclick (not focusable) would never be found missing. Add the page-derived cross-check (as `p9_reach.py`).
+
+## Controller P2, mini-games and special screens (CP2: claude/controller-p2 e62efcc, on P1 86d45aba): PASS
+
+Code read (section 26's slot only, all on P1's padOwn / padPanelAdd / PAD_FIRST; no hooks elsewhere):
+- Tiles: the board's own buttons by the helper's nearest-button move; A is the board's own click; the highlight lands on
+  How to play's Next, else your last square, else a tile you can move; Again when it ends; kept across redraws.
+- Lightdisc: the left stick's full range writes `DISC.inp.kx/kz` (the arrow keys' own path; a let-go zeroes it once, and
+  a keyboard player's arrows are untouched when the stick is idle); padOwn frame returns true while playing, so the stick
+  never moves the highlight; A never presses Leave unless you moved onto it; B = Leave.
+- Question cards (deviceChoose): land on the first answer; the same button when a turn card asks again; B = the ×.
+- Alarm: Set alarm first; − and + across (CP1's same-row padNearest makes this padOwn redundant: CP2 to drop it).
+- The arrival manifest: an id set from section 26 once the pad is in use; A on Sign with the box empty fills in
+  PAD_NAME 'Alex Morrow', A again signs; B only leaves the box (PAD_MUST).
+
+Runs (each alone): cadet_test integration 0.64.14 → e62efcc: off ALL IDENTICAL; on ALL IDENTICAL (renderer noise only).
+controller_check: OK (tiles, disc, screens). Mutants, all **CAUGHT**: `p2_ldnostick` (Lightdisc ignores the stick),
+`p2_ldleave` (A can press Leave), `p2_noname` (no suggested name), `p2_tilesnoland` (the highlight never lands on the
+board).
+
+**For the user (via the lead):** the plan's Q6 answer says the suggested name "can be changed later", but the game has no
+rename (the name is set only on the manifest, and it's on your cabin plate and the beam). Add a rename (P5's settings
+could) or drop the promise. "Alex Morrow" is close to Captain Marrow; another name would avoid the echo.
+Not covered (CP2's note): Dev mode's sheet by pad (needs #dev). P2 inherits P1's focus-after-touch fix when it takes
+cff5bab7.
