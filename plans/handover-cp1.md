@@ -54,3 +54,12 @@ once gave screenshot noise once), check_fast. Setup: pip install playwright; thr
   picks, all in the Rooms list (PR9's ruling). To do on top of 0.91.0: walk straight to each with padMove on 0.91.0's game
   and fix padNearest if one is truly unreachable; the new tester raises the sweep's depth or walks to targets directly
   and allows the Deck plan as covered.
+
+## Update 2026-10-22 ~20:35 UTC
+- claude/controller is 9a8eac0b = 0.90.9 on 0.64.16 (breakfast and 0.64.17 rolled back by the user; f929c0b0 dropped).
+  Game sha256 0b7b91548f58c5199ef350b0037c818286a530c98ff4036bfadef004249325e7. BM14 rebuilds 0.91.0 (batch 1) on it.
+- controller_check on it with CTT2's 09cac1b file: touch and day FAIL (check routes vs 0.64.15/16's lift words and ladders);
+  CTT2's newer file fixes them; CTT3 confirms, then swap that file into claude/controller.
+- The five reach "gaps": CTT3 walked straight to each on 0.91.0 and reached all (the svg Deck plan is covered by its list). Done.
+- Lift vs ladder: on the 0.64.17 build A on "Lift" reached a ladder hatch (its new ladder taps). On 0.64.16 A on Lift opens the
+  lift panel (checked). When 0.64.17's ladder change returns, padWhat (section 26, turn 3) must learn its ladder hatch taps.
