@@ -439,11 +439,12 @@ def part_marks(pw):
         if SHOTS: p.g.shot(SHOTS + f'/marks-{fam}.png')
     check(p.ev("padWord('a')") == 'B', 'marks: on a Nintendo pad the bottom button is B')
     # P4's Settings: Off (no marks on the buttons, a plain one on the bottom line), and Y's action moved to LB
-    p.ev("window.padMarkFamily = () => null"); p.step(12)
+    p4 = p.ev("typeof PAD_SET === 'object' && typeof padSetBind === 'function'")   # (with P4 built, its own settings; else stand-ins)
+    p.ev("PAD_SET.marks = 'off'" if p4 else "window.padMarkFamily = () => null"); p.step(12)
     check(not any(a != 'padHint' for a, _ in marks(p)), f'marks: marks on the buttons with Off: {marks(p)}')
-    p.ev("window.padMarkFamily = () => PAD.fam; window.padButtonFor = a => a === 'y' ? 'lb' : a; PAD.fam = 'xbox'"); p.step(2)
+    p.ev("PAD_SET.marks = 'auto'; padSetBind('y', 'lb'); PAD.fam = 'xbox'" if p4 else "window.padMarkFamily = () => PAD.fam; window.padButtonFor = a => a === 'y' ? 'lb' : a; PAD.fam = 'xbox'"); p.step(2)
     check(marks(p).get(('devBtn', 'y')) == ('xbox:lb', True) and p.ev("document.querySelector('#devBtn > .padk').textContent") == 'LB', f'marks: Device should show LB after rebinding: {marks(p)}')
-    p.ev("delete window.padMarkFamily; delete window.padButtonFor"); p.step(12)
+    p.ev("padSetBind('y', 'y')" if p4 else "delete window.padMarkFamily; delete window.padButtonFor"); p.step(12)
     # Lightdisc's Leave: B
     if p.ev("(() => { const a = DECK_CREW[0]; if (!a) return false; discBegin(a); return !!(DISC.view && DISC.view.leave); })()"):
         p.press('x'); p.step(12)
