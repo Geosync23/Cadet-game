@@ -45,11 +45,11 @@ def evening(pg, f, d):                                  # Day d's evening: to be
     f.run((d - 1) * 1440 + 21 * 60 + 30)
     pg.ev("devmodeSettle(); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)")
     pg.ev(BED); pg.ev("sleepGo(360)")
-    for _ in range(80):
-        pg.step(3, 50); pg.page.wait_for_timeout(50)
+    for _ in range(100):                                # the fade's timers are real time; no frames meanwhile, so it wakes at 06:00 exactly
+        pg.page.wait_for_timeout(50)
         if not pg.ev('sleeping') and pg.ev('SHIP.time.day') == d + 1: break
-    s = pg.ev('[SHIP.time.day, Math.floor(SHIP.time.min)]')
-    if s[0] != d + 1 or not 360 <= s[1] <= 365: raise RuntimeError(f'Day {d}: woke at Day {s[0]} {s[1]} min, not Day {d + 1} 06:00')   # the wake-up's frames pass a ship minute or so
+    s = pg.ev('[SHIP.time.day, SHIP.time.min]')
+    if s != [d + 1, 360]: raise RuntimeError(f'Day {d}: woke at Day {s[0]} {s[1]} min, not Day {d + 1} 06:00')
 
 def kept_up(pg, d):                                     # did the follower do Day d as a player should?
     s = pg.ev(STATE); why = []
