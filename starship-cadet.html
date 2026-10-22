@@ -2296,11 +2296,13 @@ const KIT = {
     return { w: 2, d: 1, noBlock: true };
   },
   spineLadder(g) {                                       // the ladder against the car wall, a hole in the deck under it, a cage and a rail
-    box(1.0, .03, .78, std('#0b0e12', .9, 0), 0, .016, 0, g);
-    for (const [w, d, x, z] of [[1.2, .1, 0, -.44], [1.2, .1, 0, .44], [.1, .98, -.55, 0], [.1, .98, .55, 0]]) box(w, .035, d, WM.hazard, x, .02, z, g);
+    // note 15 (playtest patch 1, LR1): the ladder rooms open, so the hole is a narrow well under the ladder (clear of the
+    // tile centres either side, where you stand) and the cage starts above head height. Same rails and rungs.
+    box(.5, .03, .7, std('#0b0e12', .9, 0), 0, .016, -.05, g);
+    for (const [w, d, x, z] of [[.66, .08, 0, .34], [.08, .72, -.29, -.06], [.08, .72, .29, -.06]]) box(w, .035, d, WM.hazard, x, .02, z, g);
     for (const x of [-.24, .24]) box(.05, H, .05, WM.steelTop, x, H / 2, -.36, g);
     for (let y = .3; y < H; y += .3) box(.48, .03, .03, WM.steel, 0, y, -.36, g);
-    for (let y = 1.0; y < H; y += .5) { const r = new THREE.Mesh(new THREE.TorusGeometry(.36, .02, 6, 20, Math.PI), WM.paintGold); r.rotation.x = Math.PI / 2; r.position.set(0, y, -.36); g.add(r); }
+    for (let y = 2.1; y < H; y += .5) { const r = new THREE.Mesh(new THREE.TorusGeometry(.3, .02, 6, 20, Math.PI), WM.paintGold); r.rotation.x = Math.PI / 2; r.position.set(0, y, -.36); g.add(r); }
     return { w: 2, d: 1, noBlock: true };
   },
   // Deck 4's spine has room for a trunk junction: a branch duct into the deck, valve wheels and a status box
@@ -4079,7 +4081,7 @@ DECKS[4] = {
     'h,43,16': 'hatch', 'v,44,9': 'door', 'v,44,10': 'door', 'v,20,10': 'lift', 'v,20,9': 'lift', 'v,20,8': 'lift', 'v,22,10': 'lift', 'v,22,9': 'lift', 'v,22,8': 'lift',
     // the spine: glass onto the air and power trunks above the car and the ladder well below it; a hatch down the ladder
     'v,20,6': 'glass', 'v,22,6': 'glass', 'h,20,6': 'glass', 'h,21,6': 'glass',
-    'v,20,12': 'glass', 'v,20,13': 'glass', 'v,22,12': 'glass', 'v,22,13': 'glass', 'h,21,14': 'glass', 'h,20,14': 'hatch',
+    'v,20,12': 'glass', 'v,20,13': 'glass', 'v,22,12': 'glass', 'v,22,13': 'glass', 'h,21,14': 'glass', 'h,20,14': 'door',   // note 15: the hatch is a door, the ladder room open
   },
   // door plates [edge, the side the corridor is on, text]
   plates: [
@@ -4128,7 +4130,6 @@ DECKS[4] = {
   windows: ['j', 'a', 'b', 'c', 'd', 'n', 'A', 'D', 'E', 'H', 'I', 'L', 'M', 'P', 'Q', 'T', 'U', 'X'].map(room => ({ room })),
   // doors that stay shut, and what they say when you tap them (locked rooms are filled in by lockedRoom)
   closedDoors: {
-    'h,20,14': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
     'h,43,4': { t: 'Port supply closet', x: 'Bulbs, filters and cleaning kit for the officers\' wing.' },
   },
   // service hatches into the utility rooms (0.30.2): the player and Works crew pass (see hatchPassable)
@@ -4440,8 +4441,8 @@ DECKS[4] = {
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, 1.5, 'n', { it: SPINE_IT.trunks });
     place('Y', 'trunkJunction', 1, .6, 'n', { it: { t: 'Trunk junction', x: 'Where Deck 4 takes its air and power off the spine. Two valves, one status box, and a label that says DO NOT in three languages.', see: true } });
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
-    place('Z', 'harnessRack', 1, 2.3, 'n');
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[1, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
+    place('Z', 'harnessRack', 1.72, 2.1, 'e');   // note 15: against the east glass, out of the way of the door (was 1, 2.3, 'n')
     // the lobbies either side of the lift: somewhere to sit, a plant, a directory
     place('+', 'bench', .3, 3.0, 'w', { snug: true, it: IT('Bench', 'For waiting for the lift, or pretending to while someone finishes in the washroom.') });
     place('+', 'plant', .45, 9.55, 'w', { band: '#5fd6c6' });
@@ -4681,7 +4682,7 @@ DECKS[5] = {
   dress(d) {
     for (const [key, tw, text] of d.plates) placeOnEdge('plate', key, tw, { text });
     for (const [key, tw] of d.workLights) placeOnEdge('workLight', key, tw);
-    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) if (!(LADDER_ON && key === LADDER.d5)) placeOnEdge('liftPanel', key, tw);   // patch #5: the east wall is the ladder hatch while LADDER_ON
+    for (const [key, tw] of [['v,17,9', 'w'], ['v,19,9', 'e']]) if (!(LADDER_ON && key === LADDER.d5)) placeOnEdge('liftPanel', key, tw);   // patch #5: the east wall is the ladder hatch while LADDER_ON (note 15: its door)
 
     // Works bay: the job board and tool wall on the hull side, two benches, parts racks by the tea corner, kit lockers by the lobby doors
     placeWall('w', 'jobBoard', 'n', 5.6, { hitW: 2.6, cards: [
@@ -4749,7 +4750,7 @@ DECKS[5] = {
     place('d', 'doorGear', 1.5, 2.0, 'w');               // stays put: you watch it through the window
     // the spine: the ladder below the car, as on Deck 4. The trunks run behind the car's back wall here.
     NO_FADE.add('Z');
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[0, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
     place('F', 'bigFan', 2.6, 3.0, 'n', { block: [[1, 2], [2, 2], [3, 2], [1, 3], [2, 3], [3, 3]], it: IT('Main fan', 'The ship\'s lungs. Every deck\'s air comes through these five blades. Its panel is on the walkway in front.') });   // faces the default camera; the corridor window sees it side-on (0.47.3: you can walk in, so it blocks its tiles)
     // ---- utility rooms (Pillar 2, 0.30.3). Last in dress() and free of R(), so nothing above them changes ----
     // air plant: the electrolyser on the stern wall feeds two banks of oxygen cells on the port hull; two scrubber stacks on the Fan hall wall
@@ -5091,7 +5092,7 @@ DECKS[3] = {
   ],
   doors: {
     'v,19,9': 'lift', 'v,19,10': 'lift', 'v,19,11': 'lift', 'v,21,9': 'lift', 'v,21,10': 'lift', 'v,21,11': 'lift',
-    'h,19,13': 'glass', 'h,20,13': 'hatch',                                                // the ladder, behind glass, with its hatch
+    'h,19,13': 'glass', 'h,20,13': 'door',                                                 // the ladder, behind glass, with its door (note 15: was a hatch)
     'v,12,10': 'door', 'v,12,11': 'door', 'v,12,9': 'glass', 'v,12,12': 'glass',          // glass doors into the garden at the promenade's aft end
     'h,19,6': 'door', 'h,20,6': 'door', 'h,18,6': 'glass', 'h,21,6': 'glass',            // infirmary: wide doors off the plaza
     'h,14,6': 'door',                                                                       // ward to exam room
@@ -5140,7 +5141,6 @@ DECKS[3] = {
   },
   windows: ['M', 'L', 'I', 'G', 'F', 'B'].map(room => ({ room })),
   closedDoors: {
-    'h,20,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 2, bowFrom: 40, bowLen: 11.6, byFace: true },   // one hull piece per facing: smooth stripes (answers pass, row 33)
   // the bow lounge's curves: the bar sweeping out from the aft wall round the galley door, and two planted glass
@@ -5397,7 +5397,7 @@ DECKS[3] = {
     placeOnEdge('notices', 'h,22,16', 'n', { it: IT('Notice board', 'The week\'s menu, a sign-up sheet for the gym rota, and a card that says CALL YOUR MOTHER in three different hands.') });
     // the ladder, behind glass below the car
     NO_FADE.add('Z');
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[0, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
     // the plaza: somewhere to wait, and plants at the corners
     place('+', 'bench', 5.7, 8.5, 'e', { snug: true, it: IT('Bench', 'Where people wait for whoever is always last to breakfast.') });
     place('+', 'bench', .3, 1.5, 'w', { snug: true, it: IT('Bench', 'Facing the infirmary doors, which makes it the worried-friend bench.') });
@@ -6258,7 +6258,7 @@ DECKS[2] = {
   doors: {
     'v,19,9': 'lift', 'v,19,10': 'lift', 'v,19,11': 'lift', 'v,21,9': 'lift', 'v,21,10': 'lift', 'v,21,11': 'lift',   // stern door to the quarters, bow door to science
     'h,19,8': 'glass', 'h,20,8': 'glass', 'v,19,8': 'glass', 'v,21,8': 'glass',   // the trunks, behind glass above the car
-    'h,19,13': 'hatch', 'h,20,13': 'glass',                   // the ladder, behind glass, with its hatch
+    'h,19,13': 'door', 'h,20,13': 'glass',                    // the ladder, behind glass, with its door (note 15: was a hatch)
     // the quarters: every bedroom has its own door onto the loop or the lobby
     'v,7,10': 'closed',                                       // the Captain's quarters, off the middle of the gallery
     'h,7,5': 'closed', 'h,9,5': 'closed', 'h,13,5': 'closed', 'h,17,5': 'closed', 'h,19,5': 'closed',      // port hull: Vance, Works Chief, Infirmary Chief, Dr. Sato, Second Officer
@@ -6356,7 +6356,6 @@ DECKS[2] = {
   },
   windows: ['C', 'X', 'O', 'I', 'V', 'S', 'E', 'T', 'B', 'H', 'R', 'W', 'K', 'L', 'J', 'Q'].map(room => ({ room })),
   closedDoors: {
-    'h,19,13': { t: 'Spine ladder', x: 'The maintenance ladder runs the whole height of the ship, beside the lift. Crawlways branch off it on every deck. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 3, bowFrom: 40, bowLen: 11.6, byFace: true },   // Deck 3's hull, with rounder stern corners; one hull piece per facing
   light: { sky: col('#e9e6ff'), sun: col('#fff0dc'), hemi: .94, sunI: .96 },   // calm: a touch cooler in the shade, a touch softer in the sun
@@ -6530,7 +6529,7 @@ DECKS[2] = {
     // the spine behind glass: the trunks above the car, the ladder below it
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[1, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
     // the lobby ring: a bench by the washroom, plants in the far corners, clear of every doorway and both ends of the loop
     place('+', 'bench', 4.5, 11.68, 's', { snug: true, it: IT('Bench', 'Somewhere to wait for the lift without looking as if you are waiting outside the Captain\'s door.') });
     for (const [x, z, band] of [[5.55, .45, '#c9a24a'], [5.55, 11.55, '#c9a24a']]) place('+', 'plant', x, z, 'n', { band, big: true });
@@ -6717,7 +6716,7 @@ DECKS[6] = {
   doors: {
     'v,18,4': 'lift', 'v,18,5': 'lift', 'v,18,6': 'lift', 'v,20,4': 'lift', 'v,20,5': 'lift', 'v,20,6': 'lift',   // one wide door each side
     'h,18,3': 'glass', 'h,19,3': 'glass',                     // the foot of the trunks, behind glass above the car
-    'h,18,8': 'hatch', 'h,19,8': 'glass',                     // the bottom of the ladder, with its hatch
+    'h,18,8': 'door', 'h,19,8': 'glass',                      // the bottom of the ladder, with its door (note 15: was a hatch)
     'v,16,5': 'door', 'v,16,6': 'door', 'v,16,4': 'glass',  // onto the overlook
     'v,12,1': 'glass', 'v,12,2': 'glass', 'v,12,3': 'glass', 'v,12,4': 'glass', 'v,12,6': 'glass',   // the overlook's window onto the engine room...
     'v,12,5': 'door',                                                            // ...and the door down onto the coil floor
@@ -6750,7 +6749,6 @@ DECKS[6] = {
   },
   windows: [],
   closedDoors: {
-    'h,18,8': { t: 'Spine ladder', x: 'The bottom of the maintenance ladder. It runs the whole height of the ship from here to the bridge. Tier 2 access.' },
   },
   hull: { sternX: 2, stern: 1, bowFrom: 27, bowLen: 8.6, byFace: true },   // flat stern with tight corners for the drive, a short blunt bow; one hull piece per facing (0.27.3: was 234 pieces)
   // service hatches into the utility rooms (0.30.4): the player and Works crew pass (see hatchPassable)
@@ -6797,7 +6795,7 @@ DECKS[6] = {
     // the foot of the spine: the trunks start behind glass above the car, the ladder ends behind glass below it
     for (const r of ['Y', 'Z', 'K', 'R']) NO_FADE.add(r);             // the locked rooms behind glass stay solid
     place('Y', 'spineTrunks', 1, .5, 'n', { it: { t: 'Foot of the trunks', x: 'The power and air trunks start their climb here, insulated and warm to the touch through the glass. Everything every deck runs on goes up these.', see: true } });
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[1, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
     // the engine room, through the door from the overlook: the drive housing across the stern, three drive coils down
     // the middle cycling one after another behind a rail, copper feeds between them, and open aisles either side.
     // Room-local: the coils block rows 5-6 from x 1 to 8; rows 1-4 and 7-10 and column 9 (inside the door) stay clear.
@@ -7097,7 +7095,7 @@ DECKS[1] = {
   doors: {
     'v,7,4': 'lift', 'v,7,5': 'lift', 'v,7,6': 'lift', 'v,9,4': 'lift', 'v,9,5': 'lift', 'v,9,6': 'lift',   // one wide door each side
     'h,7,3': 'glass', 'h,8,3': 'glass',                       // the trunk head, behind glass above the car
-    'h,7,8': 'hatch', 'h,8,8': 'glass',                       // the top of the ladder, with its hatch
+    'h,7,8': 'door', 'h,8,8': 'glass',                        // the top of the ladder, with its door (note 15: was a hatch)
     'v,10,5': 'door', 'v,10,6': 'door', 'v,10,4': 'glass', 'v,10,7': 'glass',   // bridge doors, straight ahead of the bow-side lift door
     'v,6,5': 'door', 'v,6,6': 'door', 'v,6,4': 'glass', 'v,6,7': 'glass',       // glass doors into the observation room, aft
     'h,11,4': 'closed',                                       // the ready room, from the aft edge of the bridge
@@ -7128,7 +7126,6 @@ DECKS[1] = {
   },
   windows: ['O', 'R'].map(room => ({ room })),
   closedDoors: {
-    'h,7,8': { t: 'Spine ladder', x: 'The top of the maintenance ladder. It runs the whole height of the ship, beside the lift, and this is where it ends. Tier 2 access.' },
   },
   hull: { sternX: 1, stern: 3, bowFrom: 15, bowLen: 6.6, byFace: true },   // a short, round hull: big stern corners, a blunt elliptical bow; one hull piece per facing
   light: { sky: col('#d4e2ff'), sun: col('#dfe8ff'), hemi: .96, sunI: .9 },   // cooler than the decks below
@@ -7273,7 +7270,7 @@ DECKS[1] = {
     place('w', 'compactToilet', 2.62, 1.45, 'e', { it: IT('Toilet', 'Compact, spotless, and the only one on Deck 1. The watch is grateful.') });
     place('w', 'smallBasin', 2.5, .32, 'n', { it: IT('Basin', 'A small basin and a mirror. Someone has stuck a note to the glass: STRAIGHTEN YOUR COLLAR.') });
     place('B', 'tapSpot', 10.4, 6, 'e', { it: { t: 'Viewscreen', x: 'The whole bow wall is a screen. Right now it shows what\'s ahead: stars, a smudge of nebula, and a ringed planet the navigator swears is on the way to nowhere.' } });
-    place('Z', 'spineLadder', 1, .5, 'n', { it: SPINE_IT.ladder });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[1, 0]], it: SPINE_IT.ladder });   // note 15: the tile beside the well blocked; you stand on the other
     // ---- the utility spaces (A5b; plans/deck1-plan.html "Utility rooms"): closet k from (6, 0), relay room u from (6, 9),
     // sub-floor crawl c from (10, 10). A walkway runs from each hatch past every machine's panel.
     place('u', 'relayBank', 1.5, .35, 'n', { w: 2.8, it: IT('Relay racks', 'The helm and ops circuits, clicking softly under blue status lights.') });
@@ -8213,6 +8210,19 @@ function dressShow(list) {
 const dressingOn = () => [...DRESS.on.keys()];
 
 // ---- slot: Deck architect (section 4d). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// note 15 (playtest patch 1, LR1): every ladder room (room Z beside the car) can be walked into. Its hatch is a sliding
+// door now (Deck 5's is v,19,9, section 15's LADDER.d5), the ladder kit's hole is a narrow well, and the tile on the far
+// side of the well is blocked. `stand` is the tile beside the ladder you walk to (just inside the door on the one-row
+// rooms, the row by the ladder on Deck 4); the crew have no places there, so their paths don't change. Section 15's
+// ladder (ladderTap, ladderStep) walks you to ladderStand() and lands you there. Data only: nothing here calls R().
+const LADDER_ROOMS = { 1: { door: 'h,7,8', stand: [7, 7] }, 2: { door: 'h,19,13', stand: [19, 12] }, 3: { door: 'h,20,13', stand: [20, 12] },
+  4: { door: 'h,20,14', stand: [20, 11] }, 5: { door: 'v,19,9', stand: [18, 9] }, 6: { door: 'h,18,8', stand: [18, 7] }, 7: { door: 'h,20,11', stand: [20, 10] } };
+function ladderStand() {                                 // this deck's ladder room: { e, i, j, x, z, face } (face: the ladder, north), or null
+  const L = deckDef && LADDER_ROOMS[deckDef.num], e = L && EDGES.get(L.door);
+  if (!e || e.type !== 'door' || roomAt(L.stand[0], L.stand[1]) !== 'Z') return null;
+  const p = cellPos(L.stand[0], L.stand[1]);
+  return { e, i: L.stand[0], j: L.stand[1], x: p.x, z: p.z, face: 'n' };
+}
 // ---- end of slot: Deck architect ----
 
 // =====================================================================
@@ -8731,7 +8741,7 @@ DECKS[7] = {
   doors: {
     'v,19,7': 'lift', 'v,19,8': 'lift', 'v,19,9': 'lift', 'v,21,7': 'lift', 'v,21,8': 'lift', 'v,21,9': 'lift',   // one wide door each side
     'v,19,6': 'glass', 'v,21,6': 'glass',                    // the trunks, behind glass above the car
-    'h,19,11': 'glass', 'h,20,11': 'hatch',                  // the ladder, with its hatch
+    'h,19,11': 'glass', 'h,20,11': 'door',                   // the ladder, with its door (note 15: was a hatch)
     'h,17,6': 'pass', 'h,18,6': 'pass', 'h,22,6': 'door',    // kit hire: the counter onto the lobby, and its door
     'h,21,4': 'door',                                        // kit hire through to the changing rooms
     'v,17,1': 'door', 'v,17,2': 'glass',                     // changing rooms to the river hall (the wet way)
@@ -8776,7 +8786,6 @@ DECKS[7] = {
   },
   windows: ['P', 'K', 'A'].map(room => ({ room })),
   closedDoors: {
-    'h,20,11': { t: 'Spine ladder', x: 'The maintenance ladder, up to Quarters and down to Operations, through the rec deck on the way. Tier 2 access.' },
   },
   hull: { sternX: 1, stern: 2, bowFrom: 34, bowLen: 11.6, byFace: true },
   service: [{ key: 'v,4,8', tier: 2 }, { key: 'v,4,15', tier: 2 }, { key: 'v,32,3', tier: 1 }, { key: 'h,31,11', tier: 1 }, { key: 'v,34,11', tier: 1 }],
@@ -8795,7 +8804,7 @@ DECKS[7] = {
     placeOnEdge('deckDirectory', 'h,20,12', 'n', { it: IT('Deck directory', 'Seven decks, top to bottom. Bridge, Officer\'s Quarters - Science, Commons, Quarters, the Recreation Deck (R), Operations, Engineering. You are here: the Recreation Deck, between Quarters and Operations.') });
     for (const r of ['Y', 'Z']) NO_FADE.add(r);
     place('Y', 'spineTrunks', 1, .5, 'n', { it: SPINE_IT.trunks });
-    place('Z', 'spineLadder', 1, .5, 'n', { it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });
+    place('Z', 'spineLadder', 1, .5, 'n', { block: [[0, 0]], it: { t: 'Spine ladder', x: 'The maintenance ladder, passing through on its way from Quarters down to Operations.', see: true } });   // note 15: the tile beside the well blocked; you stand on the other
     // kit hire (6 x 2): self-serve shelves on the back wall, the counter at the lobby's opening, a returns bin and the sign
     for (const x of [.7, 1.95, 3.2]) place('k', 'shelving', x, .33, 'n', { it: IT('Kit shelves', 'Rec kit in every size, towels, helmets, buoyancy vests, paddles, climbing shoes and harnesses, disc gloves and grip socks. Nobody staffs it: take what you need.') });
     place('k', 'counter', 1.0, 1.62, 's', { it: IT('Kit hire', 'A self-serve counter onto the lobby. Someone has left a single flipper on it.') });
@@ -14793,7 +14802,7 @@ const ladderText = n => +n === 1 ? 'The top of the maintenance ladder, beside th
   : +n === 6 ? 'The bottom of the maintenance ladder, beside the lift. Tap the hatch to climb up.'
   : 'The maintenance ladder runs the whole height of the ship, beside the lift. Tap the hatch to climb up or down.';
 if (LADDER_ON) {
-  DECKS[5].doors[LADDER.d5] = 'hatch'; DECKS[5].closedDoors[LADDER.d5] = { t: 'Spine ladder', x: ladderText(5) };
+  DECKS[5].doors[LADDER.d5] = 'door';                   // note 15 (LR1): the ladder room's door, as on every deck (was a hatch with closedDoors text)
   for (const [n, key] of LADDER.open) { DECKS[n].doors[key] = 'door'; delete DECKS[n].closedDoors[key]; }
   for (const n of DECK_ORDER) {                          // the tier wording out of the deck texts (the Reactor: sealed for safety)
     const d = DECKS[n]; if (!d) continue;
@@ -14805,7 +14814,8 @@ if (LADDER_ON) {
 }
 function ladderHatch() {                                 // this deck's ladder hatch edge, or null
   for (const [k, c] of Object.entries(CLOSED_DOORS)) if (c && c.t === 'Spine ladder') { const e = EDGES.get(k); if (e && e.type === 'hatch') return e; }
-  return null;
+  const st = typeof ladderStand === 'function' ? ladderStand() : null;   // note 15 (LR1): the ladder rooms are open, their hatch a door (4d)
+  return st ? st.e : null;
 }
 function ladderTap(key) {                                // section 11's tap: a ladder hatch (key), or the ladder itself (null)
   if (!LADDER_ON || (typeof ride !== 'undefined' && ride)) return false;
