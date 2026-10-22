@@ -1,5 +1,42 @@
 # CR6 check results
 
+## 0.64.17 full round (2026-10-22): FAIL (2 new)
+
+- **Build:** `claude/integration-next` 8193458e (breakfast at 07:00, SC1's claude/patch-play1-f), `starship-cadet.html`
+  sha256 `225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5` (matches BM13's).
+- **OLD:** `claude/integration` b9f053ba (0.64.16, sha256 70f94273...e6a5c7).
+- Share: check_fast, mech, bigevents, disc, tiles (alone), join, food 1 7, food 11 4, clothes. One at a time (my m12 re-runs
+  overlapped bigevents; BM14 then re-ran bigevents alone on both builds).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 272 s) | `QUICK CHECK OK in 272 s`; machine_check's watch point: `a steady player, Days 2-14: 80 jobs ..., machine jobs 42, repairs 17 (40%)`: 40.5%, inside 40-60 at the edge |
+| mech_check | **FAIL** (exit 1, 209 s) | m12, two lines (below) |
+| bigevents_check | **FAIL** (exit 1, 184 s) | `FAIL line: the Line supper (seated): 1 eat standing, no seat for their sitting: ['silva-bea']` |
+| disc_check | OK (exit 0, 92 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 110 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 138 s) | `JOIN CHECK OK` |
+| food_check 1 7 | OK (exit 0, 66 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 72 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 90 s) | `ALL OK` |
+
+### mech_check m12 (the logbook): NEW
+
+```
+FAIL m12: the open job written up is 10% quicker ([None, 1])
+FAIL m12: the flagged machine seen to by the night crew at 22:00 (['open', None, ['4-washer-3']])
+```
+
+- NEW: the flagged Washer 3 is still open at 22:00, claimed by nobody; so the written-up job's 10% never applies.
+- OLD (0.64.16, `mech_check.py OLD m12`): passes; `"night": ["done", "navarro-mateo", ["4-washer-3"]]`, `"logged": [12, 0.9]`.
+- Re-run of m12 alone on NEW (own CADET_WORK): the same two FAILs. Likely the breakfast patch's night-shift changes
+  (b006ad0, 8d65f86). Reported to lead 28 and BM13 at once; SC1 is fixing it (lead 28).
+
+### bigevents_check: NEW
+
+- The Line supper, Day 7 18:00-19:45: 83 mean to go, 70 came, at most 44 at once, 48 seats; one (silva-bea) eats standing.
+- BM14 re-ran bigevents alone: 0.64.17 FAILED the same way, 0.64.16 OK. Reported to lead 28 (BM14).
+
 ## 0.64.16 full round (2026-10-22): OK
 
 - **Build:** `claude/integration-next` b9f053ba, `starship-cadet.html` sha256
