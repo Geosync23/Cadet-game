@@ -1994,6 +1994,33 @@ MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
   'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
 }
+MUTANTS['settings'] = {   # CP4, claude/controller-p4 db80eb0
+  'an unchanged save writes s.pad': ('src', "SAVE_EXTRA.push(s => { const d = padSetDiff(); if (d) s.pad = d; });   // nothing changed: nothing written", "SAVE_EXTRA.push(s => { s.pad = padSetDiff() || {}; });"),
+  'the stick swap not loading': ('src', "    if (d.sticks === true) S.sticks = true;", "    if (d.sticks === true) S.sticks = false;"),
+  'the button map not saving': ('src', "  if (Object.keys(S.map).length) d.map = Object.assign({}, S.map);", "  if (false) d.map = Object.assign({}, S.map);"),
+  'gentle walking lost': ('src', "    if (PAD_SET.walk === 'gentle' && PAD_DECK.walking && player.steer && !steering) player.steer.k = Math.min(player.steer.k, .6);", "    // gentle walking lost (planted)"),
+  'an odd save loading as it is': ('src', "    const all = PAD_BTN.map(n => S.map[n] || n); if (new Set(all).size !== all.length) S.map = {};   // not one button each: back to normal", "    // odd maps kept (planted)"),
+  'a clash not swapping': ('src', "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n) return;", "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n || true) return;"),
+  'padTick ignoring the map': ('src', "    const n = PAD_MAPK[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;   // a trigger counts as pressed past half way (n: the action on button k, P4's Settings)", "    const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;"),
+}
+# CP2, claude/controller-p2 67df90a (its parts as at e62efcc)
+MUTANTS['disc'] = {
+  'no full range: a light push is a full one': ('src', "    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = x; inp.kz = y; PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once", "    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = Math.sign(x); inp.kz = Math.sign(y); PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once"),
+  'the stick also moves the highlight': ('src', "    return play;                                           // (while you play the stick is yours, not the highlight's)", "    return false;                                          // (while you play the stick is yours, not the highlight's)"),
+  'A presses Leave by itself': ('src', "    if (a && V.root.contains(a) && padShown(a) && (a !== V.leave || PAD_LD.chose)) { a.click(); return true; }", "    if (a && V.root.contains(a) && padShown(a)) { a.click(); return true; }"),
+}
+MUTANTS['tiles'] = {
+  'the highlight never lands': ('src', "  if (to && to !== a) padFocusTo(to);", "  if (to && to !== a && !to) padFocusTo(to);"),
+  'a redraw loses your place': ('src', "  const to = !T.shown || over && !T.over ? padTlLand() : lost ? padTlFind(T.key) || padTlLand() : null;   // arriving, the game ending, a redraw", "  const to = !T.shown || over && !T.over ? padTlLand() : lost ? padTlLand() : null;   // arriving, the game ending, a redraw"),
+}
+MUTANTS['screens'] = {
+  'a question card lands on the x': ('src', "PAD_FIRST.devDlg = '#devDlg .act';", "PAD_FIRST.devDlg = '#devDlg';"),
+  'B on a question does nothing': ('src', "  b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },", "  b: () => true,"),
+  'a turn card asking again jumps back': ('src', "    if (D.el && !D.el.isConnected && D.i >= 0 && acts[D.i] && acts[D.i] !== a) padFocusTo(acts[D.i]);   // asked again: the same button", "    if (false) padFocusTo(acts[D.i]);"),
+  'the alarm lands on minus': ('src', "PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck", "PAD_FIRST.sleepAsk = '#alarmDn';"),
+  'no suggested name': ('src', "  box.value = PAD_NAME; return true;                       // shown in the box first; A again signs", "  return;"),
+  'the manifest is never a panel': ('src', "padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });", "padOn('frame', () => {});"),
+}
 MUTANTS['a11y'] = {   # CP5, claude/controller-p5 8216ad4
   'outline 3px': ('src', "outline:4px solid #4cc3b5!important;outline-offset:3px", "outline:3px solid #4cc3b5!important;outline-offset:3px"),
   'padStill false': ('src', "  return !!(A.rmq && A.rmq.matches);", "  return false;"),
