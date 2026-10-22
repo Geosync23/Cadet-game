@@ -1,5 +1,24 @@
 # CR6 check results
 
+## 0.64.16 full round (2026-10-22): OK
+
+- **Build:** `claude/integration-next` b9f053ba, `starship-cadet.html` sha256
+  `70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7` (matches BM13's).
+- **OLD:** `claude/integration` 2b4a05db (0.64.15, sha256 0c1f6fb4...259d2e). Not needed: no FAIL.
+- Share: check_fast, mech, bigevents, disc, tiles (alone), join, food 1 7, food 11 4, clothes. One at a time.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 277 s) | `QUICK CHECK OK in 277 s` |
+| mech_check | OK (exit 0, 220 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 178 s) | `BIGEVENTS CHECK OK` |
+| disc_check | OK (exit 0, 94 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 117 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 148 s) | `JOIN CHECK OK` |
+| food_check 1 7 | OK (exit 0, 69 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 66 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 87 s) | `ALL OK` |
+
 ## 0.64.15 re-run (2026-10-22): OK
 
 - **Build:** `claude/integration-next` 31c44cb9 (merge of claude/patch-play1-d 836db6c7), `starship-cadet.html` sha256
