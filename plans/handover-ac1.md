@@ -1,0 +1,37 @@
+# Handover: AC1, arrows builder (pieces B, C, E; D-F callers next)
+
+Started 2026-10-22 by AC1 (session_01LDmfZ93ttCJ4XfoSDkJqx2), kept up as work goes. Lead: lead 28
+(session_01S7AdxK1ZyXiEFowP3k5gng). Read CLAUDE.md, DEV_NOTES ("The panel pointer", "The arrow queue"),
+plans/arrows-briefs.md and plans/handover-ar1.md first.
+
+## Branch and state
+`claude/arrows-c` (from claude/integration 2b4a05db, 0.64.15, with claude/arrows-plan merged in). All three pieces are
+switched off (`POINT_ON = false` in section 19's slot, `var GUIDE_ON = false` in 15b's slot); cadet_test vs 2b4a05db
+ALL IDENTICAL; check_fast OK.
+- **B, the arrow queue** (AR1's, 15b slot): RV2 PASS WITH FIXES; the two check cases added (5dd6b6f's review), plus
+  `guideGoal` clears `GUIDE.shown` on an empty goal.
+- **C, the panel pointer** (mine, 19 slot): `pointAsk` and its helpers; the lift's deck picker pointer; Settings'
+  Teaching arrows (`teachMode()`, B reads it via `guideMode()`). One hook outside 19: 15b ixBoard `row()`'s data-job.
+  RV2 reviewing (asked for the covered-target case: added, 5a783387).
+- **E, the training arrows T1-T3** (AR1's, fixed by me for RV6, 15b slot): RV6 PASS on d99a9e50.
+
+## Checks
+- `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.
+- `arrows_check.py BUILD.html queue` (about 4 min): B and E. Parts `shift` and `week` fail by design until FX1-FX3.
+- Mutants: write each as an exact-string replace on a copy, run the part, expect one FAIL naming it.
+
+## Loose ends (for D-F)
+- RV6: while T3 returns a null goal (you hold another job) it is still the queue's pick, so lower entries (D's level 4,
+  e.g. clock out) can't show then either. D should make guidePick skip an entry whose goal() is empty, or T3 drop itself.
+- RV6 item 5: trainTell's direct setGoal still wins over T1 when nothing is tracked: moves to the queue in D (after FX1).
+- RV6 (Checked and fine): when D makes clock-out a level-4 entry, T3 (level 3, `until` sliding 8 h) would beat it at the
+  shift's end: D must order these.
+- T4 (the device pointer for "Trained") not built: use `pointAsk({ path: [...pointToApp('works', ...), tab step] })`.
+- Lead 28's merge note: section 19's Settings last line clashes with controller P4: keep both.
+- The galley plant's calibrate pin is FX3's, not ours.
+
+## Gotchas
+- Tips (`#devTip`, top 128 px) sit just under the Device button; the pointer hides only if a tip covers the ring itself.
+- A check that opens the device gets the 'device' tip first: `while (TIP_Q.length) tipDone()` before pointer asserts.
+- `myJob()` needs `status: 'claimed'` and `claimedBy: 'you'`.
+- `worksInit()` refuses before WORKS_START: pass `WORKS_START` in tests.
