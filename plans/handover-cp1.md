@@ -84,3 +84,12 @@ once gave screenshot noise once), check_fast. Setup: pip install playwright; thr
   master asks; the controller line's numbers are mine on claude/controller), and swap controller_check.py to CTT3's final file
   (claude/controller-tests-3; CTT3 sends the commit after its pick fix and the 3-mess-1 case). Usual set before the push.
 - Items 2 and 4 on the follow-up list above are done by follow-up 1 (item 4: the ladder, real on 0.64.16 too).
+
+## Final (2026-10-22 ~23:20 UTC): CP1 stopped
+- claude/controller = dcdfe944: follow-up 1 (RV9 PASS) + controller_check.py at CTT3's claude/controller-tests-3 2a76b818.
+  Game sha256 a82cfb822641faec67f98f77f3ab8d89b337fd0e7b8ea59b77487bf39fdefa9b (0.90.9's number kept; the build master
+  numbers it when it goes into integration). controller_check all 27 parts but reach OK on it; cadet_test ALL IDENTICAL off/on
+  vs 9a8eac0b and check_fast OK on the same game (3f17ac95's).
+- Open, for whoever picks up: RV9's information note: standing at each of the 44 Deck 3 mess seats, the ring offers 23 (was 7);
+  the 21 missed may be the 8-thing cap in a crowded mess or a person on the seat's point (not proven). CTT3's full reach
+  sweep on 9a8eac0b is running. Lift vs ladder done. Switch-on only on the user's go.
