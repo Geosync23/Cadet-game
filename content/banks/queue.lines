@@ -5,6 +5,8 @@
 - You're {nth} in line for a booth.
 == queue.shower
 - You're {nth} in line for the showers.
+== queue.toilet
+- You're {nth} in line for the toilets.
 == queue.next
 - You're next.
 == queue.go

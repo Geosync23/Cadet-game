@@ -547,5 +547,71 @@ with sync_playwright() as pw:
         print('== the climbing wall: the rec deck is off in this build, skipped')
     g.close()
 
+# the toilets (TQ1, the user's playtest note 19): you can use a toilet unless its red light is on (someone's in it), never
+# blocked by crew only heading for it; with every light on you join the washroom's line and go in when one comes free.
+# The crew: a wait for a toilet is spent in the washroom's line (tag 'toiletq'), they go in in turn, nobody shares a
+# place or gets stuck; and when you take the toilet someone is about to use, they take another or wait, never in yours
+TQ_SIM = r"""(({ day, deck, m0, m1, who, you }) => {
+  const B = (day - 1) * 1440, step = .05, out = { line: false, went: false, inYours: false, shared: 0, stuck: 0, alt: null, left: 0 };
+  setShipNow(B + m0); goToDeck(deck); if (typeof ACT !== 'undefined' && ACT) actEnd(true);
+  for (let k = 0; B + m0 + k * step * SHIP_RATE < B + m1; k++) {
+    const now = B + m0 + k * step * SHIP_RATE; setShipNow(now);
+    if (you && !you.on && now >= B + you.at) { you.on = true; actStart('toilet', you.id, { pose: 'sit', title: 'Toilet' }); }
+    if (you && you.on && !you.off && now >= B + you.end) { you.off = true; actEnd(true); }
+    updateDeckCrew(step);
+    const held = new Map();
+    for (const a of DECK_CREW) { if (a.settled && a.spot) { if (held.has(a.spot.id)) out.shared++; held.set(a.spot.id, a.p.id); } out.stuck = Math.max(out.stuck, a.stuckMax); }
+    const a = DECK_CREW.find(x => x.p.id === who.id); if (!a) continue;
+    if (QUEUE_SPOT.get(who.id)) out.line = true;
+    if (a.settled && a.spot && PLACE_OF.get(a.spot.id) && PLACE_OF.get(a.spot.id).type === 'toilet') { out.went = true; if (a.spot.id !== who.toilet) out.alt = a.spot.id; }
+    if (a.settled && a.spot && you && you.on && !you.off && a.spot.id === you.id) out.inYours = true;
+  }
+  out.left = [...QUEUE_NOW.values()].reduce((n, L) => n + L.length, 0); return out; })"""
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    if g.ev("typeof QUEUE_TAGS !== 'undefined' && !!QUEUE_TAGS.toiletq"):
+        print('== the toilets: the red light and the line (note 19)')
+        tap = lambda title, near=None, place=True: g.ev(f"({TAP})({json.dumps({'title': title, 'near': near, 'place': place})})")
+        g.ev("skipTo(600)"); g.step(3); g.ev("goToDeck(3)"); g.step(3); g.ev("actEnd(true)")
+        r = g.ev("""(() => { const T = [...PLACE_OF.values()].filter(q => q.type === 'toilet' && !privatePlace(q)), far = T.map(q => ({ goalId: q.id, p: { id: 'far-' + q.id, name: 'Someone' } }));
+          DECK_CREW.push(...far); let r; try { r = (%s)({ title: 'Toilet' }); } finally { for (const f of far) DECK_CREW.splice(DECK_CREW.indexOf(f), 1); }
+          return [r, ACT && ACT.kind, ACT && ACT.placeId, T.length, document.getElementById('tx').textContent]; })()""" % TAP)
+        print('   every toilet only heading-for by crew far off, tap:', r)
+        check(r[0] is True and r[1] == 'toilet' and r[2] and r[2].startswith('3-toilet'), f'a toilet crew are only heading for (light off) is yours: no "Occupied" ({r})')
+        g.ev("actEnd(true)"); g.step(2)
+        r = g.ev("""(() => { const T = [...PLACE_OF.values()].filter(q => q.type === 'toilet' && !privatePlace(q)); for (const q of T) BUSY.add(q.id);
+          const r = (%s)({ title: 'Toilet' }); const lit = (stallCapsTick(), STALL_CAP.list.filter(c => c.id && placeBusy(c.id)).length);
+          return [r, ACT && ACT.kind, QUEUE_YOU && QUEUE_YOU.type, document.getElementById('tx').textContent, lit]; })()""" % TAP)
+        print('   every red light on, tap:', r)
+        check(r[0] is True and r[1] != 'toilet' and r[2] == 'toilet' and 'line' in r[3], f'every red light on: no toilet, you join the washroom\'s line ({r})')
+        check(r[4] > 0, f'the stalls of the toilets in use have their red light on ({r[4]})')
+        for k in range(40):
+            g.step(5)
+            if g.ev("!!ACT && ACT.kind === 'toilet'"): break
+        r = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, QUEUE_YOU && QUEUE_YOU.type]")
+        print('   the lights off again:', r)
+        check(r[0] == 'toilet' and r[2] is None, f'a light goes off: out of the line and into that toilet ({r})')
+        g.ev("actEnd(true)"); g.step(2)
+        # the crew's line, from the plans: the first planned wait for a toilet on Deck 3 or 4 in the first week, not straight off the lift (a walk from the lift can take longer than the visit)
+        q = g.ev("""(() => { for (let d = 1; d <= 7; d++) for (const p of schedPeople()) { const S = planDay(p, d);
+            for (let i = 1; i + 1 < S.length; i++) if (S[i].tag === 'toiletq' && [3, 4].includes(S[i].deck) && S[i + 1].placeId && S[i - 1].act !== 'commute' && S[i - 1].deck === S[i].deck) return { day: d, deck: S[i].deck, id: p.id, from: S[i].from - (d - 1) * 1440, at: S[i + 1].from - (d - 1) * 1440, to: S[i + 1].to - (d - 1) * 1440, toilet: S[i + 1].placeId }; }
+          return null; })()""")
+        n = g.ev("(() => { let n = 0; for (let d = 1; d <= 7; d++) for (const p of schedPeople()) n += planDay(p, d).filter(s => s.tag === 'toiletq').length; return n; })()")
+        print('   planned waits for a toilet in week 1:', n, '| first on Deck 3 or 4:', q)
+        check(n > 0 and q, f'the crew plan waits for a toilet in the washroom\'s line ({n}, {q})')
+        if q:
+            w = {'id': q['id'], 'toilet': q['toilet']}
+            r = g.ev(f"({TQ_SIM})({json.dumps({'day': q['day'], 'deck': q['deck'], 'm0': q['from'] - 15, 'm1': q['to'] + 3, 'who': w})})")
+            print(f"   {q['id']}, the line from {q['from'] // 60:02d}:{q['from'] % 60:02d}:", r)
+            check(r['line'] and r['went'] and r['shared'] == 0 and r['stuck'] < 1 and r['left'] == 0, f'the line forms, they go in in turn, nobody shares a place or gets stuck, and it clears ({r})')
+            r = g.ev(f"({TQ_SIM})({json.dumps({'day': q['day'], 'deck': q['deck'], 'm0': q['from'] - 15, 'm1': q['to'] + 3, 'who': w, 'you': {'id': q['toilet'], 'at': q['at'] - 1, 'end': q['at'] + 3}})})")
+            print(f"   you take {q['toilet']} first:", r)
+            check(not r['inYours'] and r['shared'] == 0 and r['stuck'] < 1 and (r['alt'] or r['line']), f'you took theirs first: they take another or wait in the line, never in yours ({r})')
+        g.ev("actEnd(true)")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    else:
+        print('== the toilets: no toilet line in this build, skipped')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
