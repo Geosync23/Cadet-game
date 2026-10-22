@@ -288,9 +288,10 @@ def m7_taps(g):
         for k in range(300):
             g.step(10)
             if not g.ev("ACT && ACT.kind"): break
-    watch = g.ev(f"({M7_WATCH})('m7')")
-    print('  24g the teacher\'s job while you watch:', watch)
-    check(watch['st'] == 'watch' and not watch['board'] and not watch['took'], f"m7: the teacher's job isn't on your board and can't be taken ({watch})")
+    for rid in ('m7', 'm4', 'm5'):                         # any training's watch job (AR2: Yara's load-only run, Calder's oven)
+        watch = g.ev(f"({M7_WATCH})('{rid}')")
+        print(f'  the teacher\'s job while you watch ({rid}):', watch)
+        check(watch['st'] == 'watch' and not watch['board'] and not watch['took'], f"{rid}: the teacher's job isn't on your board and can't be taken ({watch})")
     g.ev("window.__kt = toast; window.__said = []; toast = (a, b) => { window.__said.push(a + ' | ' + b); return window.__kt(a, b); }")
     st = g.ev(f"({M7_SETUP})('m7')"); took = g.ev("claimJob(window.__m7j)"); seen = [g.ev(M7_SEE)]
     for f in (M7_PANEL, M7_PANEL):
