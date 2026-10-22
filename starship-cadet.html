@@ -12706,6 +12706,24 @@ function pointDraw(v) {
   Object.assign(lab.style, { left: lx + 'px', top: ly + 'px' });
   arr.className = 'ptarr ' + (above ? 'dn' : 'up'); Object.assign(arr.style, { left: (Math.max(L + 4, Math.min(R - 18, cx - 7))) + 'px', top: (above ? T - 11 : Bt + 2) + 'px' });
 }
+// the lift (lead 28, the user's "make the lift obvious"): while the deck picker is open and the arrow wants another deck,
+// the pointer sits on that deck's button, the first three times. Found by its deck letter (section 11's panel, unchanged)
+function liftButton(n) {
+  const l = document.getElementById('lift'); if (!l || l.hidden || typeof deckLabel !== 'function') return null;
+  for (const b of document.querySelectorAll('#liftList button')) { const i = b.querySelector('i'); if (!b.disabled && i && i.textContent === String(deckLabel(n))) return b; }
+  return null;
+}
+const pointLiftOpen = () => { const l = document.getElementById('lift'); return !!l && !l.hidden; };
+function pointLiftStep() {                               // each frame while POINT_ON: ask when the picker opens with the arrow on another deck
+  requestAnimationFrame(pointLiftStep);
+  const open = pointLiftOpen(); if (open === POINT.lift) return; POINT.lift = open;
+  if (!open) return;
+  let g = null; try { g = typeof goalNow === 'function' ? goalNow() : null; } catch (e) { g = null; }
+  if (!g || !g.deck || typeof deckDef === 'undefined' || g.deck === deckDef.num) return;
+  const n = g.deck;
+  pointAsk({ id: 'p:lift', once: 3, path: [{ el: () => liftButton(n), label: 'Your arrow\'s deck' }], done: () => !pointLiftOpen() });
+}
+if (POINT_ON) requestAnimationFrame(pointLiftStep);
 // a tap on the pointer's own button (a step with no open: the one to press) ends it; the tap itself goes on as normal
 if (POINT_ON) document.addEventListener('click', e => {
   const c = POINT.cur; if (!c || !POINT.aim || !e.target || !POINT.aim.contains(e.target)) return;
