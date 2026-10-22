@@ -606,3 +606,10 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 **~09:12 UTC check-in (lead 26):** 0.64.15 re-run (31c44cb9): CR3 OK (a76cc679), CR4 OK (8a343e0), CR5 OK (9503ab9d), CR6 OK (b09d06c, busy-washer fixed). CR1 (with fridays) and CR2 still running. No new FAILs so far. Lead memory ~53%.
 **~09:30 UTC, the user (morning):** start the controller team. CT1, CTT, PR9, RV2 unpaused; CT1 asked (again) to write plans/controller-team.md first, then the lead starts five package builders. 0.64.15 re-run: CR1 OK (225b1e9), CR3-CR6 OK; CR2 still running. Breakfast still waits for the user (SC1 "go" or the SC2 redo).
 **~09:50 UTC, the user:** "write the controller split yourself and start the builders" → plans/controller-team.md (claude/lead-26) by the lead: P1 panels (+ merges into claude/controller), P2 mini-games and special screens, P3 button pictures + connect/disconnect, P4 settings page, P5 accessibility + docs; all from claude/controller a2c80df6; PR9 reviews P1-P2, RV2 P3-P5; CTT the tests.
+| Seat | Session | Branch | Package | Reviewer |
+|---|---|---|---|---|
+| CP1 | session_015ZhJRKCEditHrVhwdhszYq | `claude/controller-p1` | panels (turn 4) + merges into claude/controller | PR9 |
+| CP2 | session_016zb2DTsTLqNNNeuegePDgE | `claude/controller-p2` | mini-games, special screens | PR9 |
+| CP3 | session_01AkfeDe7MBN8RYd5n6obGRm | `claude/controller-p3` | button pictures, connect/disconnect | RV2 |
+| CP4 | session_01VTXDwLqWGJVRh95HozqhCu | `claude/controller-p4` | Controller settings page | RV2 |
+| CP5 | session_01VcdDgzyHa1dqdmcRLELbiS | `claude/controller-p5` | accessibility + docs | RV2 |
