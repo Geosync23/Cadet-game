@@ -41924,6 +41924,9 @@ function introSeat(who) {
 // (playtest patch 1, #6) after their last word at the arrival dinner, Zeke and the Chief stay sat a little before they go:
 // Zeke INTRO_LINGER ship minutes past his goodnight (the 'free' step's minute), the Chief as long past her welcome (introTick)
 const INTRO_LINGER = 10;
+// (playtest patch 1, #5, OR2's find) her walk to your table holds until her welcome is over (then INTRO_LINGER more), with
+// only this late cap: a fixed end (19:00, then her step's 18:30) let a slow player's welcome start from the next table
+const INTRO_CALDER_UNTIL = 20 * 60;
 function introLingers(id, t) {
   const I = SHIP.intro; if (!introOn() || id !== I.escort || I.done.free === undefined || I.missed.includes('chief')) return false;
   return t >= I.done.free && t < I.done.free + INTRO_LINGER && t < introAbs(1, 0);
@@ -42492,11 +42495,11 @@ function introTick() {
   const chat = INTRO_UI.tableD && DIALOGUE === INTRO_UI.tableD && DIALOGUE.i >= DIALOGUE.queue.length - 1;
   const calderGo = I.done['table:end'] !== undefined || chat || I.missed.includes('table') || I.step === 'free' && I.done['chief:met'] !== undefined || I.done.chief !== undefined && now >= I.done.chief + 10;   // (the last: a reload mid-chat, or a chat that never came)
   if ((I.step === 'chief' || I.step === 'free') && calderGo && !INTRO_UI.calder && introSeat('calder') && typeof crewComeTo === 'function' && deckDef.num === 3) {
-    INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, introStepById('chief').fallback.until) });
+    INTRO_UI.calder = true; crewComeTo('calder', introSeat('calder'), null, { until: introAbs(0, INTRO_CALDER_UNTIL) });   // (playtest patch 1, #5) until her welcome's over (below), not a clock time
   }
   // (playtest patch 1, #6: "they stand up and walk off straight after speaking") once her welcome is over she stays at your
   // table INTRO_LINGER minutes more, then goes back to her own evening (her beat's seat at the next table, then her plan)
-  if (INTRO_UI.calder === true && I.done['chief:end'] !== undefined && !INTRO_UI.chiefD && typeof crewComeTo === 'function') {
+  if (INTRO_UI.calder === true && (I.done['chief:end'] !== undefined || I.missed.includes('chief')) && !INTRO_UI.chiefD && typeof crewComeTo === 'function') {
     INTRO_UI.calder = 'stay'; crewComeTo('calder', introStepById('chief').seats.calder, null, { until: now + INTRO_LINGER });
   }
   // his lines for a step once its time has come and no meeting is on ("I'm on Four if you need me" waits for 19:00)

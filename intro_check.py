@@ -500,7 +500,7 @@ with sync_playwright() as pw:
             if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
                 chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
                 print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
-                if not chiefAt['in'] and not DAWDLE: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")
+                if not chiefAt['in']: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")   # (playtest patch 1, #5: --dawdle too, the user's late arrival)
                 if not chiefAt['chat'] and not DAWDLE: fail(f"the Chief's welcome came before the dinner chat with Torres: {chiefAt}")
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
@@ -541,6 +541,7 @@ with sync_playwright() as pw:
             if hand['given'] is None or hand['stowAt'] is None or hand['given'] < hand['stowAt']: fail(f"the device was not handed over in person after the bag: {hand}")
             if hand['cabin'] is None or hand['given'] < hand['cabin']: fail(f"his wardrobe lines did not come between the bag and the device: {hand}")
             if any(x in ('Everything I didn\'t say', 'Settling in') for x in hand['mail']): fail('Zeke\'s cabin Mail is back (parked, playtest patch 1 #4)')
+        if True:   # (playtest patch 1, #6: on any build, so an old one fails it)
             for who in ('torres-zeke', 'calder'):
                 if who not in linger: fail(f'{who}: never sampled after their last word (the linger check)')
                 elif linger[who]['d'] is None or linger[who]['d'] > 1.2: fail(f'{who} left the table straight after speaking: {linger[who]}')
