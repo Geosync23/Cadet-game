@@ -89,3 +89,6 @@ What the failures are (all but 8.4 the check's, not the game's):
     nothing until the pad is used (`padUnuse` returns when not used), so nothing changes for the player; but the hard
     rule is "nothing until a press". Suggest `padListen()` on the first `padUse()` instead of at the hello; then
     mode (b) is fully identical and the check can keep counting listeners.
+
+## Paused (2026-10-22 06:02, lead 26: the 06:00 pare-down)
+Where it stands: early notes 1-11 on CTT's controller_check sent to CTT, CT1, lead 26; no P3-P5 branch had landed. On waking: fetch claude/controller-p3..p5 and claude/controller-tests, re-run CTT's parts on the switch-on copy, then the per-package round above.
