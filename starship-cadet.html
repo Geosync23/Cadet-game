@@ -15091,15 +15091,15 @@ function flcTick() {                                     // each frame (section 
 // Each one is a toast (the head writer's career.clock.<stage>, career.mail.clock.in/out; clock.remind.in/out for the
 // crew), the clock-out arrow when no other arrow is up (clocking in: section 15b's own arrow), and a "Clock in" / "Clock out" row in
 // Tracked while it's due (clockTrkItem, section 15b's trkItems). Never during a dialogue, a panel, a tip card, sleep,
-// the lift, a meeting you've been called to, nor the arrival and the end of training day (teachHeld); nor within a
-// toast's 5.6 s: a held reminder waits for its window to pass, then is dropped. Training day (Day 1, the intro on):
+// the lift, a meeting you've been called to, nor the arrival and the end of training day (teachHeld); never over a
+// toast still on screen (an answer to something you just did), nor within CLOCK_RM.gap (10 s) after it goes, so you've time to read it and act on it: a held reminder waits for its window to pass, then is dropped. Training day (Day 1, the intro on):
 // Zeke and the first-time arrows teach the clock, so only the "you forgot" ones.
 // Easing off: a workday you clock in by 5 minutes past the start and clock out yourself adds one to a run; late past
 // 15 minutes, no clock-in, or the clock signing you out ends it. With a run of CLOCK_RM.ease (3) days the reminders
 // before you're due ('pre', 'start', 'end0', 'end') and the early Tracked rows stop; the "you forgot" ones always stay.
 // SHIP.player.clockRm = { d, s: stages said that day (bits), n: the run, o: the last day you clocked out yourself,
 // a: the last day the auto clock-out was mailed } (saved; under 60 bytes). No R(); nothing the crew's planner reads.
-const CLOCK_RM = { ease: 3, pre: 30, start: 10, late: 15, later: 60, last: 30, end0: 10, end: 15, stillin: 30, onTime: 5, near: 5,
+const CLOCK_RM = { ease: 3, gap: 10000, pre: 30, start: 10, late: 15, later: 60, last: 30, end0: 10, end: 15, stillin: 30, onTime: 5, near: 5,
   bit: { pre: 1, start: 2, late: 4, later: 8, last: 16, mailIn: 32, end0: 64, end: 128, left: 256, stillin: 512, sayIn: 1024, sayOut: 2048 } };
 SHIP.player.clockRm = (() => { const s = SAVED && SAVED.player && SAVED.player.clockRm, i = (v, x) => Number.isInteger(v) ? v : x;
   return s && typeof s === 'object' ? { d: i(s.d, 0), s: i(s.s, 0), n: Math.max(0, i(s.n, 0)), o: i(s.o, 0), a: i(s.a, 0) } : { d: 0, s: 0, n: 0, o: 0, a: 0 }; })();
@@ -15113,7 +15113,8 @@ const clockRmText = (k, fb, ctx, v = 0) => { let t = null; try { t = careerText(
 const clockRmEasy = () => SHIP.player.clockRm.n >= CLOCK_RM.ease;
 function clockRmHeld(now) {                              // not now: something's up, or a toast is still showing
   if (typeof POP !== 'undefined' && POP.busy || typeof DIALOGUE !== 'undefined' && DIALOGUE || sleeping || typeof ride !== 'undefined' && ride) return true;
-  if (typeof teachHeld === 'function' && teachHeld() || performance.now() - TOAST_AT < 5600) return true;
+  if (typeof teachHeld === 'function' && teachHeld() || performance.now() - TOAST_AT < 5600 + CLOCK_RM.gap) return true;   // a toast up, and a short gap after it
+  const te = document.getElementById('toast'); if (te && te.classList.contains('show')) return true;   // never over a toast still on screen (an answer to your own tap: CR6's find, lead 26's rule; it hides on a real-time timer, so its stamp alone isn't enough)
   return (SHIP.occasions || []).some(r => r.status === 'asked' && now >= r.at - 5 && now < r.at + r.len);   // a meeting you've been called to
 }
 function clockRmDue(now = shipNow()) {                   // -> 'in' | 'out' | null: what the clock wants of you now, and from when
