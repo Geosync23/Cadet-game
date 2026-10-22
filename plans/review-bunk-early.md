@@ -13,7 +13,7 @@ What: `git diff b9f053ba 6b8bb392`: section 15, two small edits, and player_chec
 |---|---|
 | cadet_test b9f053ba vs 6b8bb392, alone | ALL IDENTICAL |
 | player_check | PLAYER CHECK OK (by day: "Too early to sleep..."; bedtime at 19:59/20:00/05:29/05:30; Tomas's bunk says "Yours is the next one", Pell's in Bunk 2 doesn't) |
-| check_fast on 6b8bb392 | (running; DS1 reports QUICK CHECK OK) |
+| check_fast on 6b8bb392 | QUICK CHECK OK in 243 s |
 | Planted faults (be_*, 4) | 4 of 4 caught: the old words; any room; no "Yours is the next one"; the other-bunk branch off |
 
 ## Small points (not blocking)
