@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.14
+   STARSHIP CADET: CSV Wren                           build 0.90.0
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8994,7 +8994,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.14';                           // keep in step with the header's build line
+const GAME_BUILD = '0.90.0';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -53221,6 +53221,95 @@ if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once e
 // ---- end of slot: Dev mode engineer ----
 
 // =====================================================================
+// 26. CONTROLLER (controller support CT1, 0.90.x; plans/controller-plan.html, the user's answers of 2026-10-22)
+// Playing with a game controller through the browser's Gamepad API: Xbox, PlayStation and Switch-style pads and phone
+// clip-ons. The hard rule: with no controller, nothing here changes the game for touch and mouse players. Behind PAD_ON
+// (off until its reviewed switch-on turn); with it on and no pad, all that runs is a listener waiting for a pad to say
+// hello (browsers reveal one only at its first button press) and the main loop's `if (PAD.live)`. Nothing is drawn,
+// styled, saved or listened to before then, and nothing here calls R() or reaches the crew's planner.
+// Buttons are named by position on the standard layout: a (bottom face), b (right), x (left), y (top), lb, rb, lt, rt,
+// view, menu, ls, rs (stick clicks), up, down, left, right (the D-pad). Turns add what each press does through
+// padOn(name, fn): fn(e) with e = { name, pad }, called on the press (and on D-pad repeats, e.repeat).
+// =====================================================================
+const PAD_ON = false;                                     // the switch (controller support)
+const PAD_BTN = ['a', 'b', 'x', 'y', 'lb', 'rb', 'lt', 'rt', 'view', 'menu', 'ls', 'rs', 'up', 'down', 'left', 'right'];   // the standard layout's order
+const PAD_DEAD = { stick: .22, trig: .12 };               // how far a stick or trigger moves before it counts
+const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeats: after half a second, then four steps a second
+// live: a pad is connected; idx: the pad in charge (the last to press anything); used: the controller is the input in
+// use (its marks and highlight show); lastUse: when (performance.now) it was last used; down / held: buttons this frame,
+// and how long each has been held (s); ls, rs: the sticks after the dead zone, [x, y] in -1..1 (y down); lt, rt: 0..1
+const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, log: null };
+function padOn(name, fn) { (PAD.on[name] = PAD.on[name] || []).push(fn); }
+function padFire(name, rep) {
+  if (PAD.log) PAD.log.push(name + (rep ? '+' : ''));     // controller_check reads what fired
+  const l = PAD.on[name]; if (!l) return;
+  for (const fn of l.slice()) { try { if (fn({ name, pad: PAD, repeat: !!rep }) === true) return; } catch (e) { console.error(e); } }   // true: taken, later ones skip
+}
+function padFamily(id) {                                  // whose button marks to show, from the name the pad gives the browser
+  const s = String(id || '').toLowerCase();
+  if (/xbox|045e|xinput/.test(s)) return 'xbox';            // first: an Xbox pad is a "Wireless Controller" too
+  if (/054c|playstation|dualshock|dualsense|ps[345]|wireless controller/.test(s)) return 'ps';
+  if (/057e|nintendo|switch|joy-con|pro controller/.test(s)) return 'nin';
+  return 'xbox';
+}
+const padStick = (x, y) => {                              // a round dead zone, rescaled so a push just past it starts from 0
+  const m = Math.hypot(x, y); if (m < PAD_DEAD.stick) return [0, 0];
+  const k = Math.min(1, (m - PAD_DEAD.stick) / (1 - PAD_DEAD.stick)) / m; return [x * k, y * k];
+};
+const padTrig = v => v < PAD_DEAD.trig ? 0 : Math.min(1, (v - PAD_DEAD.trig) / (1 - PAD_DEAD.trig));
+function padList() { try { return navigator.getGamepads ? Array.from(navigator.getGamepads() || []).filter(g => g && g.connected !== false) : []; } catch (e) { return []; } }
+function padUse() {                                        // the controller is in use: its marks and highlight show (later turns)
+  PAD.lastUse = performance.now(); if (PAD.used) return;
+  PAD.used = true; document.body.classList.add('pad'); padFire('use');
+}
+function padUnuse() { if (!PAD.used) return; PAD.used = false; document.body.classList.remove('pad'); padFire('unuse'); }
+function padListen() {                                    // once a pad has said hello: a touch, the mouse or the wheel hands back to them
+  if (PAD.listening) return; PAD.listening = true;
+  const back = () => padUnuse();
+  addEventListener('pointerdown', back, true); addEventListener('wheel', back, { capture: true, passive: true });
+  addEventListener('mousemove', e => { if (e.movementX || e.movementY) back(); }, true);
+}
+function padRelease() {                                   // let go of everything (a disconnect, or the pad in charge changing)
+  for (const n of PAD_BTN) if (PAD.down[n]) padFire(n + ':up');
+  PAD.down = {}; PAD.held = {}; PAD.rep = {}; PAD.ls = [0, 0]; PAD.rs = [0, 0]; PAD.lt = PAD.rt = 0; padFire('release');
+}
+function padTick(dt) {                                    // every frame while a pad is connected (section 12)
+  const pads = padList();
+  if (!pads.length) { PAD.live = false; padRelease(); return; }
+  for (const g of pads) if (g.index !== PAD.idx && g.buttons.some(b => b && b.pressed)) { padRelease(); PAD.idx = g.index; }   // two pads: the last to press anything is in charge
+  const g = pads.find(p => p.index === PAD.idx) || pads[0];
+  if (g.index !== PAD.idx) { padRelease(); PAD.idx = g.index; }
+  if (g.id !== PAD.id) { PAD.id = g.id; PAD.std = g.mapping === 'standard'; PAD.fam = padFamily(g.id); }   // not standard: the same order is the best guess (Settings remaps it, turn 7)
+  const ax = g.axes || [], bt = g.buttons || [];
+  PAD.ls = padStick(+ax[0] || 0, +ax[1] || 0); PAD.rs = padStick(+ax[2] || 0, +ax[3] || 0);
+  PAD.lt = padTrig(bt[6] ? +bt[6].value || (bt[6].pressed ? 1 : 0) : 0); PAD.rt = padTrig(bt[7] ? +bt[7].value || (bt[7].pressed ? 1 : 0) : 0);
+  let any = PAD.ls[0] || PAD.ls[1] || PAD.rs[0] || PAD.rs[1] || PAD.lt || PAD.rt;
+  for (let k = 0; k < PAD_BTN.length; k++) {
+    const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || k === 6 && PAD.lt > .5 || k === 7 && PAD.rt > .5;   // a trigger counts as pressed past half way
+    if (on) any = true;
+    if (on && !PAD.down[n]) { PAD.down[n] = true; PAD.held[n] = 0; PAD.rep[n] = PAD_REP.first; padUse(); padFire(n); }
+    else if (on) {
+      PAD.held[n] += dt;
+      if (k >= 12 && (PAD.rep[n] -= dt) <= 0) { PAD.rep[n] += PAD_REP.every; padFire(n, true); }   // the D-pad repeats while held
+    } else if (PAD.down[n]) { PAD.down[n] = false; PAD.held[n] = 0; padFire(n + ':up'); }
+  }
+  if (any) padUse();
+  padFire('frame');                                       // the turns' per-frame work (walking, the ring) hangs here
+}
+function padHello(e) {                                    // a pad said hello (its first button press)
+  PAD.live = true; padListen();
+  if (e && e.gamepad && PAD.idx < 0) PAD.idx = e.gamepad.index;
+}
+function padBye(e) {                                      // a pad went (battery, Bluetooth, unclipped)
+  const gone = e && e.gamepad ? e.gamepad.index : -1, wasUsed = PAD.used && performance.now() - PAD.lastUse < 30000;
+  if (gone === PAD.idx || gone < 0) { padRelease(); PAD.idx = -1; PAD.goneUsed = wasUsed; padFire('gone'); }   // goneUsed: it was in use in the last half minute (the pause, turn 6)
+  if (!padList().filter(g => g.index !== gone).length) PAD.live = false;
+}
+if (PAD_ON) { addEventListener('gamepadconnected', padHello); addEventListener('gamepaddisconnected', padBye); }
+// ---- slot: Controller engineer (section 26). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Controller engineer ----
+
+// =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
 const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the wall cut below
@@ -53228,6 +53317,7 @@ const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws
+  if (PAD.live) padTick(dt);                             // section 26: a game controller, once one has said hello (frozen or not: the panels)
   if (!run) clock.elapsedTime -= dt;                     // the frame clock too, so poses and blinks carry on where they stopped (0.28.50)
   if (run) {
   updateSteer();
