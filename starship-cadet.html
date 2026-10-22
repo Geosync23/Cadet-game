@@ -31067,6 +31067,8 @@ const LINES = JSON.parse([
   '{"text":"Ideas for tonight","id":"1d0308s"}]',
   ',"ideas.trad":[',
   '{"text":"{trad} at {time}","id":"1rf1eo"}]',
+  ',"inc.again":[',
+  '{"text":"Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.","id":"1qux7e9"}]',
   ',"inc.card.alarm":[',
   '{"text":"! Galley alarm","id":"1iy9g2w"}]',
   ',"inc.card.burst":[',
@@ -31079,8 +31081,12 @@ const LINES = JSON.parse([
   '{"text":"Mopped. Dry enough to walk on.","id":"7izt27"}]',
   ',"inc.clean.lift":[',
   '{"text":"Out safe. Nobody hurt.","id":"1atkvj4"}]',
+  ',"inc.do.yours":[',
+  '{"text":"Your turn. Make it safe. I\'m right behind you.","id":"ijzsfo"}]',
   ',"inc.done":[',
   '{"text":"Safe, clean, fixed.","id":"1j6a271"}]',
+  ',"inc.goal.follow":[',
+  '{"text":"Follow {name} to the burst pipe, Deck {deck}","id":"2e5p4f"}]',
   ',"inc.missed":[',
   '{"text":"The crew dealt with it. You\'ll hear about it at dinner.","id":"jglniw"}]',
   ',"inc.safe.alarm":[',
@@ -31105,6 +31111,10 @@ const LINES = JSON.parse([
   '{"text":"Burst pipe on Deck {deck}. Make it safe.","id":"1dyqkyz"}]',
   ',"inc.toast.lift":[',
   '{"text":"The lift\'s stuck between decks. Someone\'s inside.","id":"ib0hqb"}]',
+  ',"inc.warn":[',
+  '{"text":"This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.","id":"14p0cj0"}]',
+  ',"inc.warn.soon":[',
+  '{"text":"Ten minutes. Stay on Deck 5.","id":"neenny"}]',
   ',"inc.wrong.valve":[',
   '{"text":"Still running. That one\'s downstream.","id":"1437nn2"}]',
   ',"inspect.bed":[',
@@ -45260,7 +45270,7 @@ for (const r of SHIP.occasions) if (/^works\./.test(r.id) && ladderRow(r.id.slic
 function trainOffer(row, c, d, t) {                      // the ask, or the ask again: an appointment today at a time in both shifts
   const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
   c.by = by; c.d = d; c.w = 0;
-  if (c.st === 'again') return trainWatch(row, c, t, true);
+  if (c.st === 'again' && !(WORK_MECH[row.id] || {}).againAsk) return trainWatch(row, c, t, true);   // againAsk (24f's m6): asked again with its own offer, not restarted at 06:00
   const M = WORK_MECH[row.id] || {}; if (M.offer) { try { return !!M.offer(row, c, d, t); } catch (e) { console.error(e); return false; } }   // the sub-block's own ask (24f: m6's urgent call); it sets c.st = 'meet', c.occ, c.by
   let early = 0; try { early = M.at ? +M.at(d) || 0 : 0; } catch (e) { early = 0; }   // a sub-block's earliest meeting (24d: m4 after the delivery's unload)
   const at = Math.min(Math.max(900, early), Math.max(m + 60, 510, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);
@@ -45311,7 +45321,7 @@ function trainDo(row, c, t) {                            // your turn: the same 
   if (!id) { c.st = 'again'; return false; }
   c.st = 'do'; c.j = id; const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
   if (M.hold) c.hold = true;                             // the teacher stays with you until worksEscortEnd (24g's m7: until P3's case is called)
-  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
+  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || [(M.doSay && M.doSay(c, id)) || 'Your turn. It\'s on the board for you; I\'ll be right behind you.']);   // M.doSay: a sub-block's own word (24f: the job's already yours, at the pipe)
   return true;
 }
 function trainNear(spot) {                               // you're watching: on its deck, in its room or within a few tiles of it
@@ -48376,14 +48386,44 @@ if (typeof jobKindAdd === 'function') jobKindAdd('incident', { tier: 1, work: 0,
 // there), then the incident's job, yours
 function incOffer(row, c, d, t) {
   const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
+  if (c.st === 'again') incTrainClear(t);                // FX3: a lapsed try's leftovers first, so today's call can come
   const at = m <= INC_FIRST.at - 10 ? INC_FIRST.at : Math.min(INC_WIN[1], m + 10), o = trainSetup(row);
   o.by = by; o.script = trainScript(row, by);
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, true, 15); if (!r) return false;
   c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key;
+  incWarn(c, (d - 1) * 1440 + at, t);
   return true;
 }
+// FX3 (AR1's play of 0.64.15): the training's call came with no warning, its arrow stayed on the office while the teacher
+// walked to the pipe, a training you didn't follow sat to the end of the shift and came back at 06:00 with no place or time,
+// and your job waited on the board on Deck 5. Now: a word when it's set (Mail, and a toast in play) and ten minutes before;
+// the arrow follows the teacher to the pipe (setGoal: the step's own target; 15b's rules say when arrows show and clear);
+// your turn is yours at once, at the pipe; not there in INC_FOLLOW minutes, or the day's training lapsed, the teacher makes
+// it safe with the crew and tells you the next try's day, 10:30 and the office (the same call again, not a 06:00 restart)
+const INC_FOLLOW = 30, INC_WARN = 10;
+const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
+function incWarn(c, at, now) {
+  const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'This morning', body: i > 0 ? t.slice(i + 3) : t, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(by), i > 0 ? t.slice(i + 3) : t); } catch (e) { /* no UI */ }
+}
+function incTrainClear(now) {                            // the open training incident cleared by the crew; the training's walk or turn gone
+  const I = incState(), O = I && I.open;
+  if (O && O.train) { if (!O.j) incPost(now); const j = O.j && SHIP.jobs.find(x => x.id === O.j); if (j && j.status !== 'done') jobFinish(j, now, 'crew'); I.open = null; incFx(); }
+  for (const x of SHIP.jobs) if (x.train === 'm6' && x.status !== 'done' && x.claimedBy !== 'you') { x.status = 'done'; x.doneAt = now; x.doneBy = null; }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function incRetry(c, now) {                              // the training's next try, said with its day, time and place
+  const row = ladderRow('m6'), d = worksDay(now); incTrainClear(now);
+  let d2 = d; for (let k = 0; k < 14; k++) { d2 = promoWorkday(d2); if (ladderTeacher(row, d2)) break; }
+  c.st = 'ask'; c.d = d; c.j = null; c.occ = null; c.rt = d;
+  if (typeof clearGoal === 'function') clearGoal();
+  const t = worksText('inc.again', 'Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.', { day: dayName(d2), time: hhmm(INC_FIRST.at), place: incWhere() }), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(c.by), subject: i > 0 ? t.slice(0, i) : 'Next time', body: i > 0 ? t.slice(i + 3) : t, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(c.by), i > 0 ? t.slice(i + 3) : t); } catch (e) { /* no UI */ }
+}
 if (JOB_KINDS.incident) WORK_MECH.m6 = {
-  offer: incOffer,
+  offer: incOffer, againAsk: true,
   reserve(d, at, slot, o = {}) {
     const t = (d - 1) * 1440 + at, I = incState(); if (!I) return null;
     if (!I.open) incStart(INC_FIRST.kind, INC_FIRST.deck, t, true);
@@ -48392,8 +48432,11 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    if (!o.yours && t >= shipNow() - 1 && typeof setGoal === 'function') setGoal({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
+    if (o.yours) { if (!myJob()) claimJob(j.id); if (typeof clearGoal === 'function') clearGoal(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
+  doSay: c => { const j = c && SHIP.jobs.find(x => x.id === c.j); return j && j.claimedBy === 'you' ? worksText('inc.do.yours', 'Your turn. Make it safe. I\'m right behind you.') : null; },
   watch: 1,                                              // a minute at the pipe with Calder, then it's yours
 };
 // the clock: the training's call at its minute; the week's incident at its minute; the stuck lift lets go after 20
@@ -48403,6 +48446,13 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   const I = incState(); if (!I) return;
   const d = worksDay(now), m = now - (d - 1) * 1440, c = SHIP.works.cur, O = I.open;
   if (I.fix) { const F = SHIP.jobs.find(x => x.id === I.fix.id); if (!F || F.status === 'done') { simNote('incident', { id: I.fix.kind, step: 'fixed', by: F ? F.doneBy : null }); I.fix = null; } }
+  if (c && c.id === 'm6') {                              // FX3: not following, a lapsed or missed day: the next try said, with its day, time and place
+    const wj = !skip && c.st === 'watch' && SHIP.jobs.find(x => x.id === c.j);
+    if (c.st === 'again' || wj && !c.w && now >= wj.posted + INC_FOLLOW) incRetry(c, now);
+    else if (c.st === 'ask' && c.d === d && c.rt !== d && O && O.train) incRetry(c, now);
+  }
+  const Rw = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;
+  if (Rw && !skip && !c.wn && now >= Rw.at - INC_WARN && now < Rw.at) { c.wn = 1; try { toast(worksName(c.by), worksText('inc.warn.soon', 'Ten minutes. Stay on Deck 5.')); } catch (e) { /* no UI */ } }
   const R0 = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;   // the call at the meeting's minute
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);

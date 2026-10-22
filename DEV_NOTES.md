@@ -1023,6 +1023,7 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 20c `homeCallable` (events base F8, EV2) | `if (typeof eventCommsDown === 'function' && eventCommsDown(t)) return [];` (18; false while off): no calls home while the event's comms are down | EV2 (PR3 for 20c) | events base F8 |
 | section 17 `eventJob` (events base F5, EV2) | `return typeof eventJobRank === 'function' ? Object.assign(j, eventJobRank(spec)) : j;` (18; {} while off): an event job's `rank` -> `junior` / `only` | EV2 (OR1 for the systems seat) | events base F5 |
 | section 20 `SOC_CUE_OF`, `socNote` (events base F0b, EV2) | `calledIn: [d => 'calledIn', 1]`; `who` from the note (cue:calledIn@me) | EV2 (OR1 reviews) | events base F0b |
+| section 24 core `trainDo`, `trainOffer` (FX3, Making it safe) | `WORK_MECH[id].doSay(c, id)` (a sub-block's own "your turn" word) and `WORK_MECH[id].againAsk` (asked again through its own `offer`, not restarted by `trainWatch` at 06:00); 24f's m6 sets both | FX3 (C reviews) | patch-p5-fix3 |
 | section 15b `turnInGains` (FX3, your reputation) | `j.gains.rep` entries with `dept: 'you'` (24 core's turn-in handler, when it raised your reputation) show as "Your reputation up"; the department's as "{dept} team's standing up" | FX3 (U reviews) | patch-p5-fix3 |
 
 ## Patch batch E, first half (patch builder PE, claude/patch-e; `plans/patch-plan.html`)

@@ -158,6 +158,18 @@
 - Safe, clean, fixed.
 == inc.missed
 - The crew dealt with it. You'll hear about it at dinner.
+// FX3: the training (Day 8): Calder's word when it's set (Mail "Subject | body", and a toast) and ten minutes before;
+// the arrow as she walks you to the pipe; your turn, yours at once; not followed, the next try with its day, time and place
+== inc.warn
+- This morning | At {time} I'll show you how to make an incident safe. Stay on Deck 5.
+== inc.warn.soon
+- Ten minutes. Stay on Deck 5.
+== inc.goal.follow
+- Follow {name} to the burst pipe, Deck {deck}
+== inc.do.yours
+- Your turn. Make it safe. I'm right behind you.
+== inc.again
+- Next time | The crew made it safe. We'll try again on {day}: {time}, {place}.
 
 // ---- M2 your work uniform (24b)
 == uniform.rule
