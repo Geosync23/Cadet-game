@@ -689,6 +689,58 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FB1 (lead 29, arrows_check week Day 4): "Clean a vent: hydroponics garden" stuck over 3 hours from 13:12: its stop is the
+# garden's tending spot (3-tend-1) by the Orange tree, and from two camera turns of four the arrow's pin stands over the tree
+# (or the Salad bed), which took the tap as "Tend a bed". Now any chore: a tap on the line to its next stop does the stop,
+# whatever caught it (FX3's fix 14, past machines). Every vent and lamp chore stop, real taps at the pin, four camera turns;
+# and the Orange tree tapped off the pin is still the garden (0.28.55)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof choreWhere === 'function' && choreWhere('vent').some(c => c.key === '3-tend-1')"):
+        print('== FB1: a tap at a chore\'s pin does the stop, whatever is under it (vents and lamps)')
+        g.page.click('#crew'); g.step(5)
+        PIN = r"""(() => { const el = document.getElementById('ixGoal'), m = (el.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/) || []).slice(1).map(Number);
+          return el.hidden || !m.length ? null : [m[0], m[1], el.children[2].textContent]; })()"""
+        SET = r"""(([kind, key]) => { actEnd(true); for (const k of NEED_KEYS) SHIP.player.needs[k] = 100; needsT = null; NEED_GOAL = null; clearGoal(); if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const tp = document.getElementById('devTip'); if (tp) tp.hidden = true;
+          setShipNow(1440 * 3 + 13 * 60 + 10); machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id));
+          const c = choreWhere(kind).find(c => c.key === key), t = shipNow(), st = c.stops[0];
+          SHIP.jobs.push({ id: 'fb1-chore', machine: null, deck: st.deck, room: c.room, kind: 'chore', chore: kind, target: c.key, title: c.title, tier: 1, stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: null, status: 'open', parts: kind === 'lamp' ? ['lamp'] : [] });
+          MACH_REV++; claimJob('fb1-chore'); SHIP.player.track = 'fb1-chore'; SHIP.player.carry = kind === 'lamp' ? ['lamp'] : []; SHIP.player.work = null; if (deckDef.num !== st.deck) goToDeck(st.deck);
+          jobStops(myJob()).forEach((x, i) => { if (x.step === 'fetch') jobStepDone('fb1-chore', i); });   // the lamp in hand (as 0.28.55's test)
+          const s = placeSpot(st.placeId); player.obj.position.copy(cellPos(...(nearestOpen(s.x + 1.3, s.z + 1.3, player) || nearestOpen(s.x, s.z, player)))); player.stop(); return ixNextStop(myJob()).k; })"""
+        UNDER = "(p => { const h = pick(p[0], p[1]); return h && h.object.userData.item ? h.object.userData.item.t : 'floor'; })"
+        stops = g.ev("['vent', 'lamp'].flatMap(k => choreWhere(k).map(c => [k, c.key]))")
+        bad, things, n = [], set(), 0
+        for cs in stops:
+            row = []
+            for rot in range(4):
+                k = g.ev(f"({SET})({json.dumps(cs)})"); g.step(40); want = json.dumps(['ixStop', k]).replace(' ', '')
+                for _ in range(rot): g.page.click('#rot'); g.step(30)
+                g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); p = g.ev(PIN)
+                if not p: row.append('-'); continue
+                u = g.ev(f"({UNDER})({json.dumps(p)})"); g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20)
+                a = g.ev("JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep])"); n += 1
+                if u != 'floor': things.add(u)
+                row.append(('ok' if a == want else a) + '(' + u + ')')
+                if a != want: bad.append([cs, rot, u, a])
+                g.page.click('#rot'); g.step(30)
+            print(f'   {cs[0]} {cs[1]}:', ' '.join(row))
+        print(f'   {n} taps at the pin; things under it: {sorted(things)}')
+        check(n >= 3 * len(stops) and ('Orange tree' in things or 'Salad bed' in things), f'the pin under the finger in most turns, over the garden in some ({n} taps, {sorted(things)})')
+        for b in bad: check(False, f'a real tap at a chore\'s pin does the stop: {b}')
+        # off the pin, the Orange tree is the garden still (0.28.55: a thing you can use does its own thing)
+        g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
+        off = g.ev(r"""(() => { const s = placeSpot('3-tend-1'), i = ITEMS.filter(i => i.t === 'Orange tree' && isShown(i.hit)).sort((a, b) => ixDist(a, s) - ixDist(b, s))[0]; if (!i) return null; const b = new THREE.Box3().setFromObject(i.hit);
+          for (const fy of [.6, .8, .4]) for (const fx of [.5, .3, .7]) for (const fz of [.5, .3, .7]) { const v = new THREE.Vector3(b.min.x + (b.max.x - b.min.x) * fx, b.min.y + (b.max.y - b.min.y) * fy, b.min.z + (b.max.z - b.min.z) * fz).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight, h = pick(x, y);
+            if (h && h.object.userData.item === i && (ray.setFromCamera(new THREE.Vector2(v.x, v.y), camera), jobRayDist(s) >= JOB_RAY)) return [x, y]; }
+          return null; })()""")
+        if off:
+            g.page.mouse.move(*off); g.page.mouse.down(); g.page.mouse.up(); g.step(20); a = g.ev("ACT && ACT.kind")
+            print('   the Orange tree off the pin:', a); check(a == 'ixGarden', f'the Orange tree tapped off the pin is the garden, not the vent ({a})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id))")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:
