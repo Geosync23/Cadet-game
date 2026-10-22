@@ -346,3 +346,10 @@ inside padNameIt (runs only with a pad in use). The PASS carries over to 9325b3f
   pixel for pixel, as P3 958421a-on's noisy run** (a_start 11 px, b_wander 22, c_rotated 27, d_wallslow 46 ... same
   boxes), with different builds and bases: a property of the run conditions, not of either build. This run likely
   overlapped P5's check_fast (my queue's wait missed it). Re-running strictly alone (queue 14, waits for no chromium).
+
+## Arrows B 5dd6b6f: runs
+- cadet_test 2b4a05db -> 5dd6b6f (off), alone: ALL IDENTICAL.
+- arrows_check whole: FAILED, but only in parts shift and week (20 FAILs, each naming its fix: FX1, FX2, FX3, nobody yet):
+  AR2's played-shift parts that record known broken items on purpose. Piece B's own part, queue: no FAIL. Mutants re-run
+  on part queue only (the first whole-check run was stopped).
+- E (training arrows, 14cffba): asked lead 28 to pass it to a new reviewer (my handover point).
