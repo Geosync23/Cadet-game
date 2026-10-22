@@ -360,3 +360,23 @@ rename (the name is set only on the manifest, and it's on your cabin plate and t
 could) or drop the promise. "Alex Morrow" is close to Captain Marrow; another name would avoid the echo.
 Not covered (CP2's note): Dev mode's sheet by pad (needs #dev). P2 inherits P1's focus-after-touch fix when it takes
 cff5bab7.
+
+## Controller P1 re-review (CP1: cff5bab7, with 1afcaca4 + 825378d2): PASS
+
+The two fixes: (1) `PAD_FOCUS.el` is what the pad focused; on 'unuse' it is blurred if it still has the focus (a focus
+the game set itself stays), and the tabindex the helper gave tap-cards is removed (PAD_FOCUS.tabs). (2) The panels
+sweep first runs a page-derived CLICKY cross-check (allowed: disabled buttons, Maps' svg); the api part plants a div
+with an onclick and checks CLICKY finds it. Also read: padNearest prefers a button overlapping on the cross axis (same
+row/column), and after a redraw of the same screen the highlight returns to the same-named button (else the same index).
+
+Runs (each alone): cadet_test integration 0.64.14 → cff5bab7 off ALL IDENTICAL, on ALL IDENTICAL. My focus probe: after a
+touch the focus is on the body, outline none (was 2px). My page sweep: nothing unreachable. controller_check OK (30 panels,
+17 apps). Mutants, all **CAUGHT**: p1_devbackno; p1b_nolanding; **p1_noblur** (the blur line removed: "a touch should
+take the focus off the pad's highlighted button"). The frame-cost probe (`p9_cost.py`) can't time anything in the test
+page (the harness fixes the clock): the per-frame `padItems` over a 152-row Roster is left to turn 8's frame-time check.
+
+## Controller P2 follow-up (CP2: 67df90a): PASS
+
+Merges P1 cff5bab7 (drops CP2's alarm padOwn: P1's same-row move does it), and the user's answer: PAD_NAME 'George', no
+rename promised. One word: the cabin plate shows the whole name, the beam `firstName` ('George'). cadet_test cff5bab7 →
+67df90a (switch off): ALL IDENTICAL. CP2's own: controller_check OK, tiles/disc/names/check_fast OK.

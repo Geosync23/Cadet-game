@@ -1,0 +1,2 @@
+p1b_nolanding CAUGHT ['FAIL panels: something still open before X: device', 'FAIL panels: X with no action button opened device', 'FAIL api: first: should land the highlight on #t2']
+p1_noblur CAUGHT ["FAIL api: a touch should take the focus off the pad's highlighted button", 'FAIL api: no outline left on it after a touch', 'CONTROLLER CHECK FAILED']

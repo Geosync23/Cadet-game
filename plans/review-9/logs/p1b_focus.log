@@ -1,0 +1,3 @@
+pad in use ['BUTTON', '▦︎Calendar', 'solid', '3px', 'rgba(76, 195, 181, 0.28) 0px 0px 0px 6px', True, True]
+after a touch (synthetic pointerdown) ['BODY', 'Bunk 1\n  Deck 4,', 'none', '0px', 'none', False, False]
+after a real mouse move ['BODY', 'Bunk 1\n  Deck 4,', 'none', '0px', 'none', False, False]

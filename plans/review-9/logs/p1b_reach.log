@@ -1,0 +1,27 @@
+screen edge {"layer": "hud", "items": 9, "unreach": []}
+pause {"layer": "pauseCard", "items": 1, "unreach": []}
+lift {"layer": "lift", "items": 7, "unreach": ["button.deckbtn 4QuartersYou are here [onclick] default"]}
+alarm {"layer": "sleepAsk", "items": 3, "unreach": ["button#alarmDn.deckbtn \u2212 [onclick] default"]}
+tracked {"layer": "trkPanel", "items": 15, "unreach": []}
+job board {"layer": "ixBoard", "items": 3, "unreach": []}
+chat {"layer": "chat", "items": 6, "unreach": []}
+ladder {"layer": "ladderPanel", "items": 7, "unreach": ["button.deckbtn 4QuartersYou are here default"]}
+queue {"layer": "qAsk", "items": 2, "unreach": []}
+device home {"layer": "device", "items": 19, "unreach": ["button#devBack Back [onclick] pointer"]}
+app schedule {"layer": "device", "items": 5, "unreach": []}
+app calendar {"layer": "device", "items": 55, "unreach": []}
+app jobs {"layer": "device", "items": 4, "unreach": []}
+app maps {"layer": "device", "items": 25, "unreach": ["svg  [onclick] auto"]}
+app roster {"layer": "device", "items": 152, "unreach": []}
+app memos {"layer": "device", "items": 4, "unreach": []}
+app ship {"layer": "device", "items": 3, "unreach": []}
+app record {"layer": "device", "items": 3, "unreach": []}
+app crew {"layer": "device", "items": 4, "unreach": []}
+app appointments {"layer": "device", "items": 4, "unreach": []}
+app needs {"layer": "device", "items": 3, "unreach": []}
+app mail {"layer": "device", "items": 4, "unreach": []}
+app settings {"layer": "device", "items": 19, "unreach": []}
+app wallet {"layer": "device", "items": 3, "unreach": []}
+app hobbies {"layer": "device", "items": 7, "unreach": []}
+app tracked {"layer": "device", "items": 17, "unreach": []}
+app tiles {"layer": "device", "items": 4, "unreach": []}
