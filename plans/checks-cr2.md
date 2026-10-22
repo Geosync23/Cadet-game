@@ -65,3 +65,29 @@ Checked out as is (no merging). sha256 of starship-cadet.html `94f32868dbe7f27fc
 | career_check | FAIL (known): only `FAIL busy: "Relied on" before Day 5`, backlog 12. The same on 0.64.13 a7477a9. |
 | bigevents_check | OK |
 | day_check Days 1, 12, 13, 16 | OK, OK, OK, OK |
+
+# Round 3: 0.64.15 candidate (claude/integration-next c5c43293, 2026-10-22), CR2's six-way share
+
+NEW c5c43293, sha256 `e955d667fe946b3e1e0a21c0b1f3049694460096f675dad5019c328e5d7d4a25` (matches lead 26's).
+OLD claude/integration 32b699a6 (0.64.14), sha256 `94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86563d8ca4652881e9` (matches).
+Share (plans/testing-guide.md): intro (whole), perf NEW OLD, cadet_test OLD NEW, path, arc, lines, lines --day. CADET_WORK=/tmp/work-cr2.
+
+| Check | Result | Key lines |
+|---|---|---|
+| intro_check (whole) | **FAIL, NEW** | part 14: `FAIL the solo job's arrow does not walk its steps like a board job: ['Make a relay in the machine shop', 'Take the lift to Deck 4: look over the light relays', 'Take the lift to Deck 4: repair the light relays', 'Turn it in at the job board']` (the only FAIL) |
+| perf_check NEW OLD | FAIL, known old (backlog 14) | `memory grows across deck round trips` 521 → 521 → 523 geometries. First run also had `storm all-clear party ... landscape: js 1.61 -> 3.39 ms`; **re-measured: doesn't repeat** (1.52 → 1.65 ms; second run `PERF CHECK: 1 problem(s)`, backlog 14 only) |
+| cadet_test OLD NEW | DIFFERENCES, all explained | Shots differ (a_start 3799 px ... h_crewback 40517, e_night/j_steer 0): the same counts already at d64d4495 (patch C alone), = PB2's recorded crew lanes; OLD vs OLD: ALL IDENTICAL. State edges/blocked/roomTiles/closed/doors + collide probes: first at c89f3f3f (patch H), = LR1's recorded ladder-room change (lead 26 and BM13 confirm). |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings; 0.64.14 had 49: new "Attendance looks like a name" in event.crossingLine.mail.warning, and a "(Just nod)" repeat moved from introBunk to introDevice) |
+| lines_check --day | OK | PASS (0 errors) |
+
+## intro_check part 14: NEW, a merge interaction of patches A and D
+
+- Part 14 alone (a driver running only intro_check's `solo(g)`, c5c43293's check, ~40 s) on each integration-next merge:
+  OK at a8e989d2, 2570df99, 17384f27, 313c8ace, e33d8ac8, fb2f95d5, c665e1c6; FAIL at 1fc77140 (patch A, ON1 8c8bf8fd),
+  c89f3f3f, 52e5c347 and c5c43293. Patch D's own tip ede7432b with its own check: OK.
+- Cause: the solo job (reserve3:4-junction-2) needs a relay and a bracket. Lights shelf relays at 08:59: 3 on both;
+  at 10:41 (after the check's walk to 10:40, crew running): 1 before A, **0 after A**, so the arrow rightly falls
+  back to "Make a relay in the machine shop" (section 15b's goal: stores empty → make).
+- Not fixed. CJ1 is on it (lead 26). Owners' call: keep a relay for the solo job, or the check takes make as step 1.
