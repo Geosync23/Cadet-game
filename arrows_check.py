@@ -291,7 +291,7 @@ FOLLOW = r"""(() => {
 STATE = r"""(() => { const W = SHIP.works, d = SHIP.time.day, g = goalNow();
   return { clock: clockText(), day: d, min: Math.floor(SHIP.time.min), arrow: g ? g.label : null, deck: deckDef.num, at: player.here().join(','),
     tr: W ? Object.assign({}, W.tr) : {}, use: W ? Object.assign({}, W.use) : {}, op: W ? W.op : {}, cur: W && W.cur ? W.cur.id + ':' + W.cur.st : null,
-    inn: typeof careerClockedIn === 'function' ? !!careerClockedIn(d) : null, log: (SHIP.player.clockLog || {})[d] || 0,
+    inn: typeof careerClockedIn === 'function' ? !!careerClockedIn(d) : null, out: typeof careerClockedOut === 'function' ? !!careerClockedOut(d) : null, log: (SHIP.player.clockLog || {})[d] || 0,
     done: (SHIP.jobs || []).filter(j => j.doneBy === 'you' && Math.floor((j.doneAt || 0) / 1440) + 1 === d).length }; })()"""
 FIX = { 'clock in': 'FX1', 'stuck': 'FX1 (arrows and tracking) or FX3 (the lift)', 'clock out': 'FX1', 'm1': 'FX1 (meeting arrows)', 'm4': 'FX3 (Hauling) and FX1',
         'm3d': 'FX2 (the drill)', 'm3i': 'the arrows plan (Day 4 warning) and FX1', 'm5': 'FX1 (meeting arrows) and FX2 (Tuning)', 'm7': 'FX2 (the scanner job)',
@@ -339,7 +339,7 @@ def part_shift(ctx, path):
     f.run(8 * 1440 + 17 * 60 + 40); s = pg.ev(STATE)
     check(s['done'] >= 3, f'shift: {s["done"]} jobs turned in on Day 9 following the arrow (want 3 or more)')
     out = pg.ev("(() => { const L = SHIP.mail.filter(m => /didn.t clock out/i.test(m.subject || '')); return L.length; })()")
-    check(not s['inn'] and not out, f'shift: not clocked out by the player at the end (still in: {s["inn"]}, the clock signed you out: {bool(out)}) (fix: {FIX["clock out"]})')
+    check(s['out'] and not out, f'shift: not clocked out by the player at the end (clocked out: {s["out"]}, the clock signed you out: {bool(out)}) (fix: {FIX["clock out"]})')   # careerClockedIn stays true after clocking out (AC2)
     for t, lab, dk in f.stuck: fail(f'shift: stuck from {hhmm(t)} at "{lab}" (Deck {dk}): the arrow points where nothing can be done (fix: {stuck_fix(lab)})')
     print(f'  shift: Day 9, {s["done"]} jobs, stuck {len(f.stuck)}; last actions: {[a[1] for a in f.acts[-4:]]}')
     check(not pg.errors, f'shift: page errors {pg.errors[:3]}')
