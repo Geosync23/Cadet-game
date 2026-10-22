@@ -15,6 +15,9 @@ from playwright.sync_api import sync_playwright
 
 BUDGET = 450
 ok = True
+# with no job on a shift, the arrow shows the time clock till you've clocked in, then the job board (playtest 1, note 9)
+NO_JOB_GOALS = (None, 'Clock in at the time clock', 'Take a job at the job board')
+
 def check(cond, msg):
     global ok
     if not cond: ok = False; print('FAIL', msg)
@@ -149,7 +152,7 @@ with sync_playwright() as pw:
     check(s['goal'] and s['goal'].startswith('Repair the'), 'clearGoal: back to the job')
     g.ev("goToDeck(5)"); g.step(3); tap('Job board'); g.step(150)
     g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-    check(not g.ev("myJob()") and s['goal'] is None, f'Drop it: no job and the pointer hides ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
+    check(not g.ev("myJob()") and s['goal'] in NO_JOB_GOALS, f'Drop it: no job and the pointer hides (or shows the clock or the board) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
     g.ev("ixBoard.close(); SHIP.player.carry = []")
     # a cart run (section 15's cartTap): the pointer starts at the Cart bay's docks
     if g.ev("typeof jobStops === 'function'"):
@@ -213,7 +216,7 @@ with sync_playwright() as pw:
             btn = g.ev("(document.querySelector('#ixBoardL .ixjob button') || {}).textContent")
             check(btn == 'Turn it in', f'{kind}: the board offers Turn it in ({btn})')
             g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-            check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
+            check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] in NO_JOB_GOALS, f'{kind}: turned in, complete, no pointer (or the clock or the board) ({s["toast"][:80]})')
             check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
             g.ev("ixBoard.close()")
     # a tap at your job's stop starts the work (0.28.52, the user's lamp report from 0.60.5b): a real screen tap at the spot the
@@ -545,6 +548,30 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     else:
         print('== the climbing wall: the rec deck is off in this build, skipped')
+    # playtest 1, notes 9-11, on paper: no job on a shift day, the arrow shows the time clock, then (clocked in) the job
+    # board, and nothing after the shift; a tracked tea points at the tea table, not the room's middle; tracking
+    # something else over your job, then done with it, tracking goes back to your job
+    if g.ev("typeof ixWorkStep === 'function'"):
+        print('== the arrow with no job, tea, back to the job (playtest 1, notes 9-11)')
+        g.ev("goToDeck(5)"); g.step(3)
+        r = g.ev("""(() => { const o = {}, P = SHIP.player; careerInit(); const C = SHIP.career, ci0 = C.ci;
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          let d = 2; while (!playerShiftOn(d)) d++; setShipNow((d - 1) * 1440 + 600); P.track = undefined; clearGoal();
+          C.ci = 0; o.clock = (ixWorkStep() || {}).label;
+          C.ci = (d - 1) * 1440 + 560; o.open = openJobs('you').length; o.board = (ixWorkStep() || {}).label;
+          setShipNow((d - 1) * 1440 + dayShiftEnd(d) + 30); o.after = ixWorkStep(); C.ci = ci0;
+          const tg = devItemGoal({ kind: 'tea' }), w = ixGoalWorld(tg), mid = ixGoalWorld({ deck: 5, room: 't' }), it = ITEMS.find(i => i.t === 'Tea table');
+          const ip = it && it.hit.getWorldPosition(new THREE.Vector3());
+          o.table = !!(w && ip && Math.hypot(w.x - ip.x, w.z - ip.z) < .05); o.notMid = !!(w && mid && Math.hypot(w.x - mid.x, w.z - mid.z) > .3);
+          const x = trkItems().find(q => !q.job && q.goal); P.track = undefined;
+          if (x) { trkTap(x.key); o.tapped = [P.track === null, !!(IX_GOAL && IX_GOAL.back)]; trkDone(IX_GOAL); o.back = [P.track === undefined, IX_GOAL === null]; }
+          P.track = null; setGoal({ ...tg, trk: 'tea' }); trkDone(IX_GOAL); o.off = P.track === null;   // tracking was off before: it stays off
+          P.track = undefined; clearGoal();
+          return o; })()""")
+        print('  ', r)
+        check(r['clock'] == 'Clock in at the time clock' and r['board'] == ('Take a job at the job board' if r['open'] else None) and r['after'] is None, f'no job: the clock, then the board (while it has a job for you), nothing once the shift is over ({r})')
+        check(r['table'] and r['notMid'], f'a tracked tea points at the tea table ({r})')
+        check(r.get('tapped') == [True, True] and r.get('back') == [True, True] and r['off'], f'tracking goes back to your job when the other thing is done ({r})')
     g.close()
 
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')

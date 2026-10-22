@@ -11302,7 +11302,7 @@ function devItemGoal(x) {
   if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
   if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
-  if (x.kind === 'tea') return { deck: 5, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5
+  if (x.kind === 'tea') return { deck: 5, item: /^tea table$/i, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5; the arrow at the table (playtest 1, note 10)
   if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
   if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
   return null;
@@ -14548,7 +14548,7 @@ function teaBegin(A) {
   SHIP.player.teaDay = SHIP.time.day; teaDismiss(); if (typeof simNote === 'function') simNote('tea', { day: SHIP.time.day, who: 'you' });
 }
 const teaHad = (d = SHIP.time.day) => SHIP.player.teaDay === d;   // for section 21's Day 1 tea walk (O5)
-const teaGoal = () => teaOut() ? { deck: 5, room: 't', label: TEA_GOAL } : null;
+const teaGoal = () => teaOut() ? { deck: 5, item: /^tea table$/i, room: 't', label: TEA_GOAL } : null;   // the arrow at the table (playtest 1, note 10)
 function teaOffer() {
   const P = SHIP.player; if (!teaOut() || teaHad() || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL) return false;
   if (typeof introTeaLead === 'function' && introTeaLead()) return false;   // Day 1: Zeke leads you there himself (section 21)
@@ -14827,7 +14827,7 @@ function ladderPanel() {
     const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
     const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
     b.append(mk('i', '', deckLabel(n)), sp);
-    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Goal')); }
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Tracked')); }   // the deck of what you're tracking (playtest 1, the user's word)
     if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
     return b;
   };
@@ -15436,7 +15436,7 @@ const ixShelf = need => { const id = typeof shelfOf === 'function' && need.lengt
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
-  const j = myJob(); if (!j) return null;
+  const j = myJob(); if (!j) return ixWorkStep();
   if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
     const c = SHIP.player.cart && SHIP.player.cart.job === j.id ? SHIP.player.cart : null, step = !c ? 'cart' : c.stage === 'empty' ? 'load' : c.stage === 'full' ? 'unload' : 'return';
@@ -15464,6 +15464,15 @@ function ixJobStep() {
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length ? 'Look over the ' : 'Repair the ') + name };
+}
+// no job yet on a shift day (playtest 1, note 9): the time clock till you've clocked in, then the job board while it
+// has a job for you; then your job's steps as above. From the clock's opening to the shift's end; Day 1 has section 21's own
+function ixWorkStep() {
+  if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return null;
+  const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
+  if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
+  return typeof openJobs === 'function' && openJobs('you').length ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
@@ -15594,7 +15603,7 @@ function trkTap(key) {                                  // the app's tap: track 
   const it = trkItems().find(x => x.key === key); if (!it) return false;
   if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); return false; }
   if (it.job) { SHIP.player.track = it.job; clearGoal(); }
-  else if (it.goal) { SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key, ...(it.span ? { trkFrom: it.span[0], trkTo: it.span[1] } : {}) }); }
+  else if (it.goal) { const back = SHIP.player.track !== null; SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key, ...(back ? { back } : {}), ...(it.span ? { trkFrom: it.span[0], trkTo: it.span[1] } : {}) }); }   // back: your job was tracked (playtest 1, note 11)
   else return false;
   return true;
 }
@@ -15705,15 +15714,17 @@ function turnInShow(j, a) {
 // once it has started with you in its room, or once it's over. A place: when you arrive (in its room, or within 1.5 m,
 // having been away from it since you tracked it: tracking your bunk from your bunk keeps the arrow till you're back).
 // Your job (SHIP.player.track) clears as before, when it's taken or done.
+// Done with it, tracking goes back to your job if it was tracked before (playtest 1, note 11: after tea)
+const trkDone = g => { clearGoal(); if (g.back && SHIP.player.track === null) SHIP.player.track = undefined; };
 function trkDoneCheck() {
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
-  const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { clearGoal(); return; }
+  const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { trkDone(g); return; }
   if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
   const w = ixGoalWorld(g); if (!w) return;
   const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));
-  if (g.trkFrom != null) { if (inRoom) clearGoal(); return; }
+  if (g.trkFrom != null) { if (inRoom) trkDone(g); return; }
   const there = inRoom || Math.hypot(w.x - p.x, w.z - p.z) < 1.5;
-  if (!there) g.trkAway = true; else if (g.trkAway) clearGoal();
+  if (!there) g.trkAway = true; else if (g.trkAway) trkDone(g);
 }
 // ---- end of slot: Interactions engineer ----
 
@@ -52316,8 +52327,8 @@ function openLiftPanel() {
     i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
-    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Goal'; b.appendChild(g); }
-    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Tracked'; b.appendChild(g); }   // playtest 1: the user's word
+    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. What you\'re tracking is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
   }
