@@ -881,6 +881,17 @@ The case engine (plans/mechanics/case-engine.html on `claude/p5-design`). A real
 
 All behind `SHORT_FRIDAY` (section 13), **on since turn 10** (2026-10-21, the user's yes passed on by lead 23; `false` gives the game without it, and fridays_check still makes both copies). All 10 turns built (FR1 1-5: the crew's and your 15:30 Friday, the skeleton, your clock, the Works holds, the device and Dev rows, the address as a tradition in the auditorium; FR2 6-8: the speech, the missed-it dip and dinner spread, the explaining lines; FR3 9-10: the perf scenes, switching on). Plan: `plans/fridays-build-brief.md`; state, gotchas and how to test: `plans/handover-fridays-builder-1.md` and `-2.md`. Check: `fridays_check.py`; perf_check's three Friday scenes.
 
+## The arrow queue (section 15b's slot, piece B of the arrows plan, AR1, 2026-10-22; switched off: `GUIDE_ON`)
+One place that decides what the world arrow shows. Callers `guideAsk({ id, level, goal: () => setGoal-shaped goal,
+from, until, done: () => bool, once, tip, owner })`; `goalNow()` (and so `ixFrame`, the lift panel, Tracked's button)
+shows the queue's pick first when `GUIDE_ON`. Levels: 1 right now, 2 next 15 minutes, 3 learning, 4 your shift, 5 your
+body, 6 you chose. Every entry needs an `until`; `done` helpers `guideAt/Near/Met/Taken/Clocked/Trained/Stage`. A goal
+still set directly with `setGoal` keeps working and stays over levels 2-6 (only a level 1 borrows it), so callers can
+move to the queue one at a time (pieces D-F, each in its owner's section; the list of all 31 setGoal calls and what each
+becomes is in plans/arrows-briefs.md). Also on the switch: a pop-up queue (`guideToast`, asked by section 11's `toast`)
+and the teaching-arrows setting (`SHIP.guide.arrows`: 'all' | 'first' | 'off'; a Settings row wrapped in from 15b).
+Saved under the save's top-level `guide` key, only while on. Test: `python3 arrows_check.py BUILD.html` (about 1 minute).
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.

@@ -15660,7 +15660,7 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); if (SHIP.player.tr
 function setGoal(g) { IX_GOAL = g && g.deck ? { ...g } : null; }
 function clearGoal() { IX_GOAL = null; }
 // the goal the arrow is showing, the same rule as ixFrame (0.28.58: the lift panel marks its deck); null with none
-function goalNow() { return IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal); }
+function goalNow() { const j = SHIP.player.track === null ? null : ixJobGoal; return (GUIDE_ON && guideGoal(j)) || IX_GOAL || j; }   // the arrow queue first when it's on (piece B, AR1)
 // the shelf a part's on (section 17's shelfOf, 0.33.41): the arrow points at it and the label names it ("Fetch a relay:
 // the Lights shelf"); without section 17's shelves, main storage as before
 const ixShelf = need => { const id = typeof shelfOf === 'function' && need.length ? shelfOf(need[0]) : null; return id ? { place: id, say: ': the ' + shelfName(id) + ' shelf' } : { place: null, say: ' from main storage' }; };
@@ -15778,7 +15778,7 @@ function ixFrame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
-  const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
+  const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
@@ -15958,6 +15958,115 @@ function trkDoneCheck() {
   const there = inRoom || Math.hypot(w.x - p.x, w.z - p.z) < 1.5;
   if (!there) g.trkAway = true; else if (g.trkAway) trkDone(g);
 }
+// ---- the arrow queue (piece B of plans/arrows-pillar5-plan.html; AR1; brief plans/arrows-briefs.md). Off by default
+// (GUIDE_ON): off, nothing here runs and the game is as before. On: things that want the world arrow ask the queue with
+// guideAsk({ id, level, goal, from, until, done, once, tip, owner }); goalNow() shows the most important live entry.
+// Levels: 1 right now (an emergency, a summons, the drill), 2 in the next 15 minutes (a meeting), 3 learning (a first-time
+// step), 4 your shift, 5 your body, 6 something you chose. Lower wins; ties go to the earlier `from`, then the earlier ask.
+// An entry goes once its `done()` is true (a throw counts as done), its `until` (absolute ship minutes) has passed, or
+// guideDrop(id). Tracking off (SHIP.player.track === null): only levels 1-2. A goal set directly with setGoal (not yet
+// moved to the queue, or the player's own Tracked choice) stays in charge, and only a level-1 entry shows over it, giving
+// it back when done. Levels 5-6 only show when your job has no step to point at. `once: n` shows an entry at most n times
+// ever (SHIP.guide.seen, saved); the teaching-arrows setting (SHIP.guide.arrows: 'all' | 'first' | 'off', in Settings)
+// ignores `once` on 'all' and drops level-3 entries on 'off'. Also here, on the same switch: a short queue for pop-ups
+// (section 11's toast asks guideToast first), so a new one waits a moment instead of wiping the one on screen.
+var GUIDE_ON = false;                                    // var: goalNow and toast (above and below) may ask before this line has run
+const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, warn: [], loop: false, tq: [], pass: false };
+SHIP.guide = (() => {
+  const g = SAVED && SAVED.guide, seen = {};
+  if (g && g.seen && typeof g.seen === 'object') for (const k in g.seen) if (typeof k === 'string' && k.length < 60 && Number.isInteger(g.seen[k]) && g.seen[k] > 0) seen[k] = Math.min(99, g.seen[k]);
+  return { seen, arrows: g && ['all', 'first', 'off'].includes(g.arrows) ? g.arrows : 'first' };
+})();
+SAVE_EXTRA.push(s => { if (!GUIDE_ON) return; const S = SHIP.guide.seen, ks = Object.keys(S); if (ks.length > 300) for (const k of ks.slice(0, ks.length - 300)) delete S[k]; s.guide = { seen: { ...S }, arrows: SHIP.guide.arrows }; });
+const guideMode = () => SHIP.guide.arrows;
+const guideLimit = e => e.once === true ? 1 : Number.isInteger(e.once) && e.once > 0 ? e.once : 0;   // 0: no limit
+const guideTeach = e => e.level === 3;
+function guideOverSeen(e) { const L = guideLimit(e); return !!L && !(guideMode() === 'all' && guideTeach(e)) && (SHIP.guide.seen[e.id] || 0) >= L; }
+function guideAsk(e) {
+  if (!GUIDE_ON || !e || typeof e.id !== 'string' || !e.id || e.id.length >= 60 || typeof e.goal !== 'function' || !(e.level >= 1 && e.level <= 6)) return false;
+  if (guideTeach(e) && guideMode() === 'off') return false;
+  const i = GUIDE.list.findIndex(x => x.id === e.id);
+  if (guideOverSeen(e) && !(i >= 0 && GUIDE.shown === e.id)) return false;
+  if (!Number.isFinite(e.until) && !GUIDE.warn.includes(e.id)) GUIDE.warn.push(e.id);   // every entry should have a time limit (guideList shows these)
+  const x = { ...e, at: i >= 0 ? GUIDE.list[i].at : ++GUIDE.n, t: i >= 0 ? GUIDE.list[i].t : Math.floor(shipNow()) };   // t: when asked (a missing `from` counts from then)
+  if (i >= 0) GUIDE.list[i] = x; else GUIDE.list.push(x);
+  GUIDE.rev++; guideStart(); return true;
+}
+function guideDrop(id) { const i = GUIDE.list.findIndex(x => x.id === id); if (i < 0) return false; GUIDE.list.splice(i, 1); if (GUIDE.shown === id) GUIDE.shown = null; GUIDE.rev++; return true; }
+function guideLive(now) {                                // drop what's done or past; the rest, in order
+  const out = [];
+  for (const e of GUIDE.list.slice()) {
+    let done = false; try { done = typeof e.done === 'function' && !!e.done(); } catch (err) { done = true; }
+    if (done || Number.isFinite(e.until) && now >= e.until || guideOverSeen(e) && GUIDE.shown !== e.id) { guideDrop(e.id); continue; }
+    if (!(Number.isFinite(e.from) && now < e.from)) out.push(e);
+  }
+  const from = e => Number.isFinite(e.from) ? e.from : e.t;
+  return out.sort((a, b) => a.level - b.level || from(a) - from(b) || a.at - b.at);
+}
+function guidePick() {                                   // the entry that may show now (rules above), at most once a ship minute
+  const now = Math.floor(shipNow()), key = now + '|' + GUIDE.rev + '|' + (SHIP.player.track === null ? 0 : 1);
+  if (key === GUIDE.key) return GUIDE.pick;
+  const live = guideLive(now).filter(e => SHIP.player.track !== null || e.level <= 2);
+  GUIDE.key = key; GUIDE.pick = live[0] || null;
+  return GUIDE.pick;
+}
+function guideGoal(jobGoal) {                            // goalNow's: the queue's goal, or null to leave it to IX_GOAL and the job
+  if (!GUIDE_ON || !GUIDE.list.length) { GUIDE.shown = null; return null; }
+  const e = guidePick(); if (!e) { GUIDE.shown = null; return null; }
+  if (IX_GOAL && e.level > 1) return null;               // a direct goal (not yet in the queue, or your own choice) stays in charge
+  if (e.level >= 5 && jobGoal) return null;              // your body and your own choices after your job's next step
+  let g = null; try { g = e.goal(); } catch (err) { g = null; }
+  if (!g || !g.deck) return null;
+  if (GUIDE.shown !== e.id) {                            // shown for the first time: count it, and its tip
+    GUIDE.shown = e.id;
+    if (guideLimit(e)) SHIP.guide.seen[e.id] = (SHIP.guide.seen[e.id] || 0) + 1;
+    if (e.tip && e.tip.id && e.tip.text && !(guideTeach(e) && guideMode() === 'off')) ixTip(e.tip.id, e.tip.text);
+  }
+  return { ...g, guide: e.id };
+}
+function guideNow() { return GUIDE_ON && GUIDE.shown ? GUIDE.list.find(x => x.id === GUIDE.shown) || null : null; }
+function guideList() { return GUIDE.list.map(e => ({ id: e.id, level: e.level, from: e.from || null, until: Number.isFinite(e.until) ? e.until : null, owner: e.owner || '', shown: e.id === GUIDE.shown, noLimit: GUIDE.warn.includes(e.id) })); }
+// "done when" helpers, so askers don't each write their own (each safe to call any time)
+const guideHere = () => { try { return deckDef && player ? { deck: deckDef.num, room: roomAt(...player.here()) } : null; } catch (e) { return null; } };
+function guideAt(deck, room) { const h = guideHere(); return !!h && h.deck === deck && (room == null || h.room === room); }
+function guideNear(g, m) { try { if (!g || deckDef.num !== g.deck) return false; const w = ixGoalWorld(g), p = player.obj.position; return !!w && Math.hypot(w.x - p.x, w.z - p.z) <= m; } catch (e) { return false; } }
+function guideMet(key) { const r = (SHIP.occasions || []).find(x => x.key === key); return !r || r.met || r.status !== 'asked'; }
+function guideTaken(id) { const j = (SHIP.jobs || []).find(x => x.id === id); return !j || j.claimedBy === 'you' || j.status === 'done'; }
+function guideClocked(want) { try { const d = SHIP.time.day, inn = careerClockedIn(d); return want === 'in' ? inn : !inn; } catch (e) { return true; } }
+function guideTrained(id) { return !!(SHIP.works && SHIP.works.tr && SHIP.works.tr[id] !== undefined); }
+function guideStage(id, st) { const c = SHIP.works && SHIP.works.cur; return !c || c.id !== id || c.st !== st; }
+// pop-ups: section 11's toast(t, x, o) asks guideToast first. While one has been up under TQ_MIN (real) ms, a new one
+// waits (at most TQ_MAX; the oldest waiting drops first, never the one on screen); the same words aren't queued twice;
+// o.now shows at once. Each waiting one is shown in turn from the frame loop below.
+const TQ_MIN = 2500, TQ_MAX = 3;
+function guideToast(t, x, o) {
+  if (!GUIDE_ON || GUIDE.pass || o && o.now) return false;
+  const shown = (document.getElementById('tt').textContent || '') + '|' + (document.getElementById('tx').textContent || '');
+  if (performance.now() - TOAST_AT >= TQ_MIN && !GUIDE.tq.length) return false;   // nothing fresh on screen: show it now
+  if (shown === t + '|' + x || GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
+  GUIDE.tq.push([t, x]); if (GUIDE.tq.length > TQ_MAX) GUIDE.tq.shift();
+  guideStart(); return true;
+}
+function guideTick() {
+  if (!GUIDE_ON) { GUIDE.loop = false; GUIDE.tq.length = 0; return; }
+  requestAnimationFrame(guideTick);
+  if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
+}
+function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
+// the teaching-arrows switch in Settings (section 19's app, wrapped here while the queue is on; the user's answer 4)
+{
+  const A = DEVICE_APPS.get('settings');
+  if (A) {
+    const view = A.view, act = A.act, MODE = [['all', 'All'], ['first', 'First time only'], ['off', 'Off']];
+    A.view = (...a) => { const v = view(...a); if (!GUIDE_ON || !v || !Array.isArray(v.blocks)) return v;
+      const i = v.blocks.findIndex(b => b && b.kind === 'text' && b.text === 'Tips'), at = i >= 0 ? i + 2 : v.blocks.length;
+      v.blocks.splice(at, 0, { kind: 'text', text: 'Teaching arrows (the arrow and pointers that show you something new)' },
+        { kind: 'buttons', items: MODE.map(([k, label]) => ({ label, action: { app: 'settings', do: 'arrows', arg: k }, on: guideMode() === k })) });
+      return v; };
+    A.act = (verb, arg) => { if (GUIDE_ON && verb === 'arrows' && MODE.some(m => m[0] === arg)) { SHIP.guide.arrows = arg; GUIDE.rev++; return; } return act ? act(verb, arg) : undefined; };
+  }
+}
+if (GUIDE_ON) guideStart();
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -52954,7 +53063,8 @@ function refreshPickables() { pickables = [floor, wallIM, ...(sillIM ? [sillIM, 
 refreshPickables();
 
 const toastEl = document.getElementById('toast'); let toastTimer;
-function toast(t, x) {
+function toast(t, x, o) {
+  if (typeof guideToast === 'function' && guideToast(t, x, o)) return;   // the arrow queue's pop-up queue (15b, AR1), when it's on
   TOAST_AT = performance.now();                          // section 15's quiet moments (0.28.48)
   document.getElementById('tt').textContent = t; document.getElementById('tx').textContent = x;
   toastEl.classList.add('show'); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600);
