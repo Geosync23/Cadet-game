@@ -321,3 +321,9 @@ job id -> `data-job` (two callers): reviewed as the interactions seat, fine.
   Teaching arrows row, P4 adds `.concat(padSetBlocks())`): whoever merges second resolves it by hand.
 Runs queued (queue 12, alone): cadet_test off, arrows_pointer_check, 6 mutants (MUT_CHECK=arrows_pointer_check.py),
 device_check, interactions_check, check_fast.
+
+## P5 4892a0b verdict: PASS (all five fixes in)
+Alone: cadet_test off/on ALL IDENTICAL; CP5's controller_check OK; mutants 6/6 CAUGHT; check_fast QUICK CHECK OK (391 s).
+Two optional nits from RV5 (not blocking): padNameIt returns at the first PAD_NAMES selector that matches even when its
+name is '' ('#device button' is broad, so a later device-button entry is never reached: `continue` when the name is
+empty); the aria-label it sets stays after a touch (harmless: device views redraw their buttons).
