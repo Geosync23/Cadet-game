@@ -6,7 +6,7 @@ the check they break chosen OUTSIDE that section's rules, so only the map can pi
     python3 tools/affected_planted.py            on paper: each fault's picks by the rules, (a) and (b) (--middle)
     python3 tools/affected_planted.py --run [--only TEXT] [--out DIR]
                                                  also runs each fault's check on its faulty copy: it must FAIL there
-                                                 with a FAIL the game as it is doesn't print (known FAILs don't count),
+                                                 with a FAIL or error the game as it is doesn't print (known FAILs don't count),
                                                  or exit 1 where the game as it is exits 0 (a crash, page errors);
                                                  --only runs the faults whose name holds TEXT; --out keeps each output
                                                  (one browser check at a time; about 40 min; CADET_CHROME as usual)
@@ -50,7 +50,8 @@ def git(*a, cwd=ROOT):
 
 def fails(text):
     """a check's FAIL lines, numbers taken out (so a known FAIL with other numbers is still the known one)"""
-    return {re.sub(r'[0-9.]+', '#', l.strip())[:120] for l in text.splitlines() if re.search(r'\bFAIL\b|PROBLEM', l) and 'FAILED' not in l}
+    return {re.sub(r'[0-9.]+', '#', l.strip())[:120] for l in text.splitlines()
+            if (re.search(r'\bFAIL\b|PROBLEM', l) and 'FAILED' not in l) or re.search(r'pageerror|Error:|Traceback', l)}
 
 
 def run_check(want, game):
