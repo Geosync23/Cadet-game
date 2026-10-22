@@ -1,5 +1,22 @@
 # Check runner CR4: results
 
+## 0.64.17 full round (2026-10-22; breakfast at 07:00)
+
+- **Candidate:** `claude/integration-next` 8193458e
+- **starship-cadet.html sha256:** `225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5` (matches BM13's)
+- **OLD:** `claude/integration` b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`; not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, one at a time, alone, checked out at 8193458e (day_check.py unchanged since b9f053ba), `CADET_WORK=/tmp/work-cr4`
+- Reported to BM14 (took over from BM13) and lead 28. The round is held for CR6's m12 FAIL (not in this share).
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 270 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped, as designed); draw calls peak 249 / 450 |
+| day_check 13 | OK (exit 0, 251 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped); draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 261 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 279 / 450 |
+| day_check 19 | OK (exit 0, 257 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+
+**CR4: OK.** No FAILs. Peaks moved a little from 0.64.16 (breakfast moved), all well under 450.
+
 ## 0.64.16 full round (2026-10-22)
 
 - **Candidate:** `claude/integration-next` b9f053ba ("0.64.16: the Zeke patch (ON1's claude/patch-zeke ce2f77bc)")
