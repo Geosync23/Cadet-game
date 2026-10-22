@@ -14144,6 +14144,10 @@ const handsFix = what => bagHeld() ? 'Put your bag in your locker first' : giftH
 const partList = a => { const n = {}; for (const k of a) n[k] = (n[k] || 0) + 1; return Object.entries(n).map(([k, c]) => (c > 1 ? c + ' × ' : /^[aeiou]/i.test(k) ? 'an ' : 'a ') + k).join(' and '); };
 const machineName = m => (typeof MACHINE_KINDS !== 'undefined' && MACHINE_KINDS[m.kind] ? MACHINE_KINDS[m.kind].name : m.kind).toLowerCase();
 // a tap (section 11, through playerTap): main storage, or the machine of the job you hold. False: not the job's business
+// a machine on a bigger thing with its own name and its own tap (FX3, the week guide's Day 5): Deck 7's climbing holds are
+// on the Climbing wall, 4.6 m of it, so a tap on the wall missed the holds' own test and started a climb, and the holds'
+// job (its look-over, once you have the scanner) never moved. With a job on the machine, a tap on the thing in its room is the job
+const JOB_THING = { wallholds: /^Climbing wall$/ };
 function jobTap(it, at) {
   if (!jobsOn() || typeof deckDef === 'undefined') return false;
   if (typeof traceHidden === 'function' && traceTap(it, at)) return true;   // 24i: a traced job not yet found: the pipe kit's reading (Pillar 5, M3)
@@ -14192,6 +14196,8 @@ function jobTap(it, at) {
   const m = machineById(mw.j.machine), pid = m && m.deck === deckDef.num && typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   const spot = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; if (!spot) return false;
   const mc = cellPos(...(m.at || PLACE_OF.get(pid).at));
+  if (JOB_THING[m.kind] && JOB_THING[m.kind].test(String(it && it.t || '')) && roomAt(...c) === m.room) {   // the thing the machine is on, by its own name (FX3, below)
+    actStart('job', pid, { title: machineName(m).replace(/^./, x => x.toUpperCase()), pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' }); return true; }
   // the machine itself (0.28.55, reviewer 1f and the lead: anything within 3 m of its panel took over a washer next to it,
   // the welding bench, the Works station): the thing tapped is in its room, within MACHINE_NEAR of it or .8 m of its panel
   // (Deck 4's light relays), and no other machine in the room is nearer. The floor at its panel and glass-backed things

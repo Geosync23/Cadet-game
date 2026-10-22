@@ -434,7 +434,17 @@ with sync_playwright() as pw:
         r = g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, document.getElementById('tt').textContent])")
         print('   under the pin:', under, '| tapped:', r)
         check('"job","7-wall-holds-svc"' in r, f'a tap at the holds job\'s pin (over the {under}) starts the job, not a climb ({r})')
-        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-holds')")
+        # anywhere on the wall, away from the pin (the week guide's Day 5, lead 29): the wall is the holds (JOB_THING), not a climb
+        g.ev("actEnd(false); { const t = shipNow(), m = machineById('7-wall-holds'); SHIP.jobs = SHIP.jobs.filter(j => j.machine !== m.id); SHIP.player.work = null; SHIP.jobs.push({ id: 'fx3-holds', machine: m.id, deck: 7, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['seal'], status: 'open' }); MACH_REV++; claimJob('fx3-holds'); }"); g.step(5)   # a fresh job: the first tap's look-over is done
+        r2 = g.ev(r"""(() => { const it = ITEMS.find(i => i.t === 'Climbing wall'); if (!it) return 'no wall'; it.hit.getWorldPosition(_wp); const s = placeSpot(panelPlace('7-wall-holds'));
+          const far = new THREE.Vector3(_wp.x + (_wp.x - s.x), 1.5, _wp.z + (_wp.z - s.z)).project(camera); ray.setFromCamera(new THREE.Vector2(far.x, far.y), camera);
+          const r = playerTap(it, _wp.clone(), _wp.clone()); return JSON.stringify([r, ACT && ACT.kind, ACT && ACT.placeId, +jobRayDist(s).toFixed(2)]); })()""")
+        print('   a tap on the wall away from the pin:', r2)
+        check('"job","7-wall-holds-svc"' in r2, f'a tap on the Climbing wall away from the pin, with the holds job yours, starts the job, not a climb ({r2})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-holds')"); g.step(5)
+        r3 = g.ev(r"""(() => { const it = ITEMS.find(i => i.t === 'Climbing wall'); it.hit.getWorldPosition(_wp); const r = jobTap(it, _wp.clone()); return JSON.stringify([r, ACT && ACT.kind]); })()""")
+        check(r3.startswith('[false'), f'with no job on the holds, the wall is not taken by the job loop ({r3})')
+        g.ev("actEnd(true)")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
