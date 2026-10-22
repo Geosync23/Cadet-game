@@ -417,3 +417,11 @@ drifting at connect counts as a use; that is turn 2's drift nit, for turn 7's de
 integration 0.64.14 → f904532 off ALL IDENTICAL, on ALL IDENTICAL; controller_check settings OK. Mutants undoing each fix,
 both **CAUGHT** by CP4's new cases: `pr9_p4_seenlive` ("a pad connected but never pressed changed Settings"),
 `pr9_p4_trigpressed` ("a light squeeze of LT (bound to confirm) pressed it").
+
+## Controller P2 follow-up 2 (CP2: 5b4d9f0): PASS
+
+Drops P2's own place-keeping for question cards (PAD_DLG): P1 part 3's keeping after a redraw (same name, else same index)
+does it; B = the × and PAD_FIRST.devDlg stay. (Name matching would pick the first of two same-labelled buttons; a turn
+card's are "−" and "+", so it holds.) cadet_test 67df90a → 5b4d9f0 (switch off): ALL IDENTICAL. controller_check screens:
+OK. Mutant breaking P1's keeping (`pr9_p2_nokeep`: `const was = null`): **CAUGHT** ("A three times on + should keep the
+place as the card asks again").

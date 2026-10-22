@@ -36,6 +36,7 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p4_noeat': ("  for (const n of PAD_BTN) for (const e of [n, n + ':up']) (PAD.on[e] = PAD.on[e] || []).unshift(() => PAD_SET_UI.listen || PAD_SET_UI.eat ? true : undefined);", "", 'settings'),
  'pr9_p4_seenlive': ("const padSetSeen = () => PAD_ON && (PAD.lastUse > -1e9 || !!padSetDiff());", "const padSetSeen = () => PAD_ON && (PAD.live || !!PAD.id || !!padSetDiff());", 'settings'),   # PR9: f904532's fix 1 undone
  'pr9_p4_trigpressed': ("trig = k === 6 || k === 7, on = trig ? padTrig(b ? +b.value || (b.pressed ? 1 : 0) : 0) > .5 : !!(b && b.pressed);", "trig = k === 6 || k === 7, on = !!(b && b.pressed);", 'settings'),   # PR9: fix 2 undone
+ 'pr9_p2_nokeep': ("const was = PAD_FOCUS.last;", "const was = null;", 'screens'),   # PR9: P1's keeping after a redraw gone (5b4d9f0 relies on it for turn cards)
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
