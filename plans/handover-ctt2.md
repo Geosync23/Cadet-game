@@ -59,6 +59,18 @@ first use counts a push on an unused pad after 0.15 s, by design); all 17 builde
 one-time "Controller connected" message (by design, real-time timer); rerun alone pending. reach: running.
 Leads since: lead 28 (session_01S7AdxK1ZyXiEFowP3k5gng), now lead 29 (session_01A9rNreAGVbsY1HgPucDMA7): report to lead 29.
 
+## 0.64.17 in the controller (0.90.9, claude/controller-p1 54a5c5a8) and the 0.91.0 candidate (claude/integration-next-fe1 e27b8bfe), 19:30-
+CP1 found 3 FAILs on 0.90.9 (touch, pick's crowded seat, day): all the check's routes meeting 0.64.17. Fixed: touch's view
+counts the message box but doesn't compare its text/classes (hidden welcome text vs "Controller connected"); the day's
+lift picks the deck button by DECK_ORDER (labels are deckLabel now); walk_to presses B when a panel opens on the way
+(ladder hatches); the crowded mess tried at 07:20/07:40/08:00/08:20. The sweep's SKIP {'#newgame'} dropped (gone in 0.91.0).
+Runs on 0.90.9 then 0.91.0 (touch alone, day, pick) were in progress at this writing: logs in the scratchpad logs/g9, logs/g10.
+Send the results and the commit to CP1 and BM14 (session_016mhGtsCxEgPCFn9C767yjq); BM14 builds 0.91.0 on CP1's 0.90.9.
+The reach sweep on 0.90.8 (stopped partway): its pad half missed Roster, two Tracked rows, Calendar's 2nd "Don't" and
+the Maps plan svg. CP1 showed all four buttons are reachable (the zigzag covers a dozen rows only): now a second chance
+steers straight at each (pad_to, 40 presses); the plan svg is in PAD_COVERED (covered by the Rooms list, PR9's ruling).
+A full sweep to confirm: ~2-3 h alone, not yet run.
+
 ## Loose ends
 - CP3 says the Pause card's line now has id="pauseLine": the unplug part could read it instead of the card's whole text.
 - The day part now runs (STEER by the view's axes, next cell, through people if no way round; MY_BUNK; FREE_SEAT).
