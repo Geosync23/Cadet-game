@@ -26,3 +26,27 @@ Check runner CR1, for lead 25 and release reviewer PR9. Results only; the game w
 | devmode_check | **OK** | 236 s | DEVMODE CHECK OK |
 
 No FAILs, so no runs on plain a4a5735 were needed.
+
+# Round 2: 0.64.14 (claude/integration 8e239328, 2026-10-22)
+
+Checked out as is (no merging). **sha256 of starship-cadet.html: `94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86563d8ca4652881e9`**
+(matches the lead's). `SHORT_FRIDAY = true` (line 9128), `EVENTS_ON = true` (line 36673). Each check run alone, one CADET_WORK.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 1173 s | PLAYER CHECK OK |
+| intro_check --week | **OK** | 231 s | all beats heard; d5-mug (Day 5 13:01, plan [5, intro, 5-tea-1]): heard 3/3 |
+| intro_check --firsts | **OK** | 26 s | OK |
+| intro_check --evening | **OK** | 249 s | OK |
+| interactions_check | **OK** | 398 s | INTERACTIONS CHECK OK |
+| clothes_check | **OK** | 80 s | ALL OK |
+| bubble_check | **OK** | 251 s | BUBBLE CHECK OK |
+| devmode_check | **OK** | 230 s | DEVMODE CHECK OK |
+| events_check | **OK** | 237 s | EVENTS CHECK OK |
+| fridays_check | **OK** | ~25 min | FRIDAYS CHECK OK |
+| day_check 0 | **OK** | 258 s | Deck 4 up to 53 crew, worst stuck 1.8 min, draw peak 250; Decks 5-7 peaks 209/149/211; DAY CHECK OK |
+| day_check 5 | **OK** (run by CR3) | | draw peak 267, worst stuck 0.8 min (plans/checks-cr3.md) |
+| day_check 7 | **OK** (run by CR3) | | draw peak 260, worst stuck 3.7 min (plans/checks-cr3.md) |
+
+No FAILs, so no comparison runs on 0.64.13 (a7477a9) were needed. day_check 0 started late because of a bug
+in CR1's own wait script (it waited on itself), not the game.
