@@ -1,0 +1,5 @@
+== shift (following only the arrow)
+FAIL shift: not clocked out by the player at the end (clocked out: False, the clock signed you out: False) (fix: FX1)
+FAIL shift: stuck from 14:42 at "Take clean linen to the laundry, Deck 4" (Deck 4): the arrow points where nothing can be done (fix: FX1 (arrows and tracking) or FX3 (the lift))
+  shift: Day 9, 11 jobs, stuck 1; last actions: ['tap Washer 1: true', 'tap Washer 1: true', 'tap Washer 1: true', 'tap Washer 1: true']
+ARROWS CHECK FAILED

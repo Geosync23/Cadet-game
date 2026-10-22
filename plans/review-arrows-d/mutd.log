@@ -1,0 +1,6 @@
+ad_s7level ['-'] CAUGHT ["FAIL S#: from #:# for an hour, over the held job and T# (Fetch a pump: the Plumbing shelf, {'id': 'shift:out:#', 'level': #, 'from': #, 'until': #, 'owner': '#b (piece D)', 'shown': False, 'covered': False, 'noLimit': False})", 'FAIL S#: over T# with your hands free too (Fetch a pump: the Plumbing shelf)']
+ad_t3over ['-'] CAUGHT ['FAIL S#: over T# with your hands free too (Your turn: hauling and stores)']
+ad_nopass ['-'] CAUGHT ["FAIL S#: from #:# for an hour, over the held job and T# (Fetch a pump: the Plumbing shelf, {'id': 'shift:out:#', 'level': #, 'from': #, 'until': #, 'owner': '#b (piece D)', 'shown': False, 'covered': False, 'noLimit': False})", 'FAIL S#: over T# with your hands free too (Fetch a pump: the Plumbing shelf)', "FAIL pass#over: T# (the pick) has nothing to show, the next live entry should ({'lab': 'Fetch a pump: the Plumbing shelf', 't#': True, 'pick': 'train:m#:do'})"]
+ad_emptyeach ['-'] CAUGHT ['FAIL S#: an empty board: no arrow, said once an hour, not with tracking off (None; said #, #, #)']
+ad_clockrm ['-'] CAUGHT ["FAIL S#: section #'s direct clock#out arrow should stay off with the queue on (Clock out at the time clock)"]
+ad_heldfirst ['-'] MISSED []
