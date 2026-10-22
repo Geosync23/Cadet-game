@@ -417,6 +417,27 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FX3 (RV6, lead 29): the climbing holds' job (rec deck, 7-wall-holds): its arrow's pin stands over the Climbing wall, and a tap
+# there started a climb instead of the job's look-over (the same as the galley plant's chiller: jobTap now takes a tap over its spot)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof REC_DECK !== 'undefined' && REC_DECK && !!machineById('7-wall-holds') && !!panelPlace('7-wall-holds')"):
+        print('== FX3: the climbing holds\' pin')
+        g.ev(r"""(() => { setShipNow(1440 * 2 + 10 * 60); machinesNow(); const t = shipNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const m = machineById('7-wall-holds'); SHIP.jobs = SHIP.jobs.filter(j => j.machine !== m.id);
+          SHIP.jobs.push({ id: 'fx3-holds', machine: m.id, deck: 7, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['seal'], status: 'open' }); MACH_REV++;
+          claimJob('fx3-holds'); goToDeck(7); const s = placeSpot(panelPlace(m.id)); player.obj.position.set(s.x + 1.2, 0, s.z + 1.2); player.stop(); })()""")
+        g.page.click('#rot'); g.step(80)
+        xy = g.ev("(() => { const s = placeSpot(panelPlace('7-wall-holds')), v = new THREE.Vector3(s.x, 1.2, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+        under = g.ev(f"(() => {{ const h = pick({xy[0]}, {xy[1]}); return h && h.object.userData.item ? h.object.userData.item.t : 'floor'; }})()")
+        g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+        r = g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, document.getElementById('tt').textContent])")
+        print('   under the pin:', under, '| tapped:', r)
+        check('"job","7-wall-holds-svc"' in r, f'a tap at the holds job\'s pin (over the {under}) starts the job, not a climb ({r})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-holds')")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:
