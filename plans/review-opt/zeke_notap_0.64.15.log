@@ -1,0 +1,49 @@
+8. The evening in the real game (New game arriving, a player who follows Torres and taps through meetings)
+  the Tern: you start at [5, 7] (start [5, 7], INTRO_START [5, 7]), ramp 0
+  the ramp right after signing 0, 5 s later 1; the pilot (the writers' line): Dev Raman, the pilotDown gently. Ramp's opening. Welcome to the Wren.
+  tapping Torres on the ramp: taken True, panel None (tapping someone else: False)
+  tour lines with the week under way (place, played, written): [['shuttle', 5, 5], ['up', 8, 8], ['works', 2, 2], ['lift', 5, 5], ['officers', 6, 6], ['wing', 6, 6], ['deck3', 8, 8], ['servery', 6, 6]]
+  Day 0, Sunday 16:33  ramp  (you: Deck 5 [5, 8]; Torres [5, 11])
+  Day 0, Sunday 16:38  haulway  (you: Deck 5 [5, 10]; Torres [5, 11])
+  Day 0, Sunday 16:39  the ramp closes behind you (you at [6, 11], ramp 0.79)
+  Day 0, Sunday 16:45  works  (you: Deck 5 [11, 8]; Torres [11, 8])
+  Day 0, Sunday 16:50  lift  (you: Deck 5 [15, 9]; Torres [15, 7])
+  Day 0, Sunday 16:51  wing  (you: Deck 5 [15, 9]; Torres [15, 7])
+  Day 0, Sunday 17:11  bunk  (you: Deck 4 [13, 4]; Torres [13, 4])
+  Day 0, Sunday 17:13  stow  (you: Deck 4 [8, 3]; Torres [9, 4])
+  TAP the wardrobe at {'x': 325.86392568512645, 'y': 265.1147143708314, 'w': [-18.6, -6.75], 'me': [-16.5, -6.5], 'goal': 'Put your bag in your wardrobe'}
+    {'t': '17:14', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': False, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '17:22', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '17:30', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '17:38', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '17:46', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '17:54', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+    {'t': '18:02', 'step': 'stow', 'bag': True, 'beat': None, 'said': None, 'quiet': True, 'act': None, 'sheet': False, 'zeke': [9, 4], 'me': [8, 3], 'dlg': None}
+  Day 0, Sunday 18:07  toMess  (you: Deck 4 [8, 3]; Torres [10, 5])
+  Day 0, Sunday 18:15  servery  (you: Deck 3 [21, 8]; Torres [21, 9])
+  Day 0, Sunday 18:22  table  (you: Deck 3 [32, 4]; Torres [30, 5]; his seat 3-mess-12)
+  at the table Day 0, Sunday 18:22: servery 13 portions of tacos (dinner), 46 crew in the mess, seats you 3-mess-10, Torres 3-mess-12
+  FAIL the walk is too long: you reach the table at 18:22, more than 90 minutes after the arrival (reviewer 1c; the scenes wait till the Chief's step ends)
+  Day 0, Sunday 18:25  free  (you: Deck 3 [28, 2]; Torres [28, 2]; his seat 3-mess-12)
+  the dinner seats at Day 0, Sunday 18:26: yours ['3-mess-10', None, '3-mess-10'], Torres ['3-mess-12', 'torres-zeke'], Calder ['3-mess-9', None]
+  the dinner chat at Day 0, Sunday 18:28: sat down by the game in 3-mess-10 (your seat 3-mess-10); the Chief 4.2 m from her seat at your table, 0 m from hers at the next table
+  the Chief's welcome at Day 0, Sunday 18:31: she's 0.2 m from her seat (at it: True), after the chat True, you in 3-mess-10
+  Day 0, Sunday 18:40: calder 5 ship minutes after chief:end: 0 m from the seat at your table
+  Day 0, Sunday 18:46  tomas  (you: Deck 3 [28, 1]; Torres [29, 1])
+  Day 0, Sunday 18:50: torres-zeke 5 ship minutes after free: 0 m from the seat at your table
+  Day 0, Sunday 19:00  night  (you: Deck 3 [28, 1]; Torres [28, 2])
+  Day 0, Sunday 19:05  the arrow points to your bunk
+  Day 0, Sunday 19:30  None  (you: Deck 3 [28, 1]; Torres [9, 10])
+  the Chief's welcome (introChief): shown -329, ended -325 (None: cut short), goodnight -315
+  his goodnight at -315 (ship minute; None: not with you), last lines said: ['Day 0, Sunday 19:10 Night shift? Sorry.', "Day 0, Sunday 19:12 Don't be. It's the best view on the ship.", "Day 0, Sunday 19:18 First week's a lot. Want to talk it through?"]
+  draw-call peaks by deck {5: 189, 4: 203, 3: 267}; Torres led you for 214 looks
+  FAIL the real walk missed stow
+  the bag and the device: stowed by you None, device handed over at -353 (stow step -355, device step -353); Zeke's Mail []
+  FAIL the bag did not go into the wardrobe by your tap, with its arrow: {'cabin': None, 'stow': None, 'given': -353, 'stowAt': -355, 'devMet': -353, 'bag': False, 'mail': []}
+  FAIL his wardrobe lines did not come between the bag and the device: {'cabin': None, 'stow': None, 'given': -353, 'stowAt': -355, 'devMet': -353, 'bag': False, 'mail': []}
+  after each ride (from, to, time, you, Torres, tiles apart): [[5, 4, 'Day 0, Sunday 16:58', [20, 10], [20, 10], 0], [4, 3, 'Day 0, Sunday 18:10', [19, 9], [19, 9], 0]]
+  the walk to the lift: 12 s with him on Deck 5 (18 looks), paused 0.0 s, longest standing still 0.0 s
+  said up to the lift: ["16:33 Hello, cadet. I'm Zeke Torre", "16:35 I'm from the Works Departmen", "16:37 That's the Tern behind you. ", '16:38 Six weeks to Valo, by post.', '16:40 Long trip? I bet. Tell me al', '16:42 Bag all right? Right, onward', "16:44 Don't learn it all tonight. ", "16:46 Honestly? We've all been wai", "16:48 And that's us. The Works Dep", "16:50 This is where we'll be most ", '16:53 The lift. Runs right up the ']
+  the tour, following: core lines heard 18/18, all lines 28/46; per place shuttle 3/3+2, up 2/8+0, works 2/2+0, lift 3/3+0, officers 3/3+1, wing 2/2+4, deck3 2/2+1, servery 3/3+0
+  the ramp: closed behind you at ('Day 0, Sunday 16:39', 'haulway', [6, 11]), open again at ('Day 0, Sunday 18:25', 'free') (target 1)
+FAILED
