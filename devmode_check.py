@@ -553,14 +553,15 @@ def part_career(b):
     print(f'  career: xp, next band, next training (Rounds + clipboard), a tool, Undo; rank Officer and Junior by hand; Day 8 test opened (only the day missing), passed, Next step through {seen} to the ceremony; the tab')
 
 DAY_SUM = ('tr', 'use', 'band', 'tier', 'rank', 'jobs')
+DAY_LESSONS = {2: ['m1'], 3: ['m4', 'm3d'], 4: ['m3i', 'm5'], 5: ['m7', 'p3'], 8: ['m6']}   # arrows_check's WEEK: taught on that day, so not yet at its 06:00
 def part_days(b):
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
-    pg = Page(ctx, ''); pg.sign(); pg.step(30); pg.ev('saveGame()'); real0 = store(pg).get('starship-cadet-save'); pg.close()
+    pg = Page(ctx, ''); pg.sign(); pg.step(30); check(pg.ev('DM_DAYS') is None, 'days: the day record was made without #dev'); pg.ev('saveGame()'); real0 = store(pg).get('starship-cadet-save'); pg.close()
     pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
-    days = pg.ev("Object.keys(DM_DAYS.days).map(Number).sort((a, b) => a - b)")
-    if not check(days, 'days: no days recorded in DM_DAYS (python3 tools/day_saves.py BUILD.html --write)'): pg.close(); ctx.close(); return
+    days = pg.ev("Object.keys(devmodeDays().days).map(Number).sort((a, b) => a - b)")
+    if not check(days, 'days: no days recorded in devmodeDaysData (python3 tools/day_saves.py BUILD.html --write)'): pg.close(); ctx.close(); return
     check(days == list(range(1, len(days) + 1)), f'days: the recorded days are not Day 1 on, in a row: {days}')
-    played = pg.ev("Object.keys(DM_DAYS.days).filter(d => DM_DAYS.days[d].played !== false).length")
+    played = pg.ev("Object.keys(devmodeDays().days).filter(d => devmodeDays().days[d].played !== false).length")
     # refused, the Dev game untouched: no DecompressionStream, then a damaged record (not base64; not a save)
     pg.ev('saveGame()'); s0 = store(pg)['starship-cadet-save-dev']
     pg.ev("window.__DS = window.DecompressionStream; window.DecompressionStream = undefined; DM_HOLD = false; devmodeStartDay(1)"); pg.page.wait_for_timeout(300); pg.step(2)
@@ -568,9 +569,9 @@ def part_days(b):
           f'days: without DecompressionStream: {pg.ev("DM_UI.msg")!r}, or the Dev game changed')
     pg.ev("window.DecompressionStream = window.__DS")
     for bad in ('not base64!', 'eJzLSM3JyQcABiwCFQ=='):
-        pg.ev(f"window.__z = DM_DAYS.days[1].z; DM_DAYS.days[1].z = {json.dumps(bad)}; devmodeStartDay(1)"); pg.page.wait_for_timeout(500); pg.step(2)
+        pg.ev(f"window.__z = devmodeDays().days[1].z; devmodeDays().days[1].z = {json.dumps(bad)}; devmodeStartDay(1)"); pg.page.wait_for_timeout(500); pg.step(2)
         check("couldn't be read" in pg.ev('DM_UI.msg') and not pg.ev('DM_DAYBUSY') and store(pg)['starship-cadet-save-dev'] == s0, f'days: a damaged Day 1 ({bad}): {pg.ev("DM_UI.msg")!r}, or the Dev game changed')
-        pg.ev("DM_DAYS.days[1].z = window.__z")
+        pg.ev("devmodeDays().days[1].z = window.__z")
     # every day, from the tab's row for the first, then devmodeStartDay
     for n in days:
         pg.ev('saveGame()'); before = store(pg)['starship-cadet-save-dev']
@@ -582,11 +583,14 @@ def part_days(b):
             pg.page.wait_for_function('window.__sc !== undefined', timeout=90000); first = pg.page.evaluate('() => localStorage.getItem("starship-cadet-save-dev")'); pg.ready()
         else:
             first = pg.ev_reload(f'devmodeStartDay({n})')
-        rec = pg.ev(f'DM_DAYS.days[{n}]'); now = pg.ev('devmodeDaySum()'); sv = json.loads(first or '{}')
+        rec = pg.ev(f'devmodeDays().days[{n}]'); now = pg.ev('devmodeDaySum()'); sv = json.loads(first or '{}')
         check(sv.get('time', {}).get('day') == n and 360 <= now['min'] <= 366 and now['day'] == n, f'days: Day {n} started at Day {now["day"]} {now["min"]} min')
         diff = [k for k in DAY_SUM if now[k] != rec['sum'][k]]
         check(not diff, f'days: Day {n} does not match its recording in {diff}: now {[now[k] for k in diff]}, recorded {[rec["sum"][k] for k in diff]} (re-record: tools/day_saves.py)')
         check(now['track'] == 'on', f'days: Day {n} started with job tracking off')
+        if rec.get('played') is not False and n >= 3: check(rec['sum']['jobs'] > 0, f'days: Day {n} is marked as played but its work log is empty (lead 28: a played day shows the jobs done)')
+        early = [m for m in DAY_LESSONS.get(n, []) if m in now['tr']]
+        check(not early, f'days: Day {n} starts with its own lessons already learned: {early} (RV6: the career set a day ahead)')
         check(pg.ev("(() => { const id = playerBed(), n = deckOf(id), bed = DECKS[n].places.find(p => p.id === id); return deckDef.num === n && roomAt(...player.here()) === roomAt(...bed.at); })()"), f'days: Day {n} did not start beside your bed')
         check(pg.ev('devmodeState().note').startswith(f'Started at Day {n}'), f'days: Day {n}: the notice says {pg.ev("devmodeState().note")!r}')
         check(pg.ev('devmodeRead(DM_KEY.undo) && devmodeRead(DM_KEY.undo).label') == f'Start at Day {n}' and (lambda u, v: u == v if n != days[0] else u['time']['day'] == v['time']['day'] and abs(u['time']['min'] - v['time']['min']) < 5)(json.loads(pg.ev('devmodeRead(DM_KEY.undo).save')), json.loads(before)), f'days: Day {n} kept no Undo of the game before')   # (the tab's two taps let a frame or two pass)

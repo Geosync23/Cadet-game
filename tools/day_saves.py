@@ -1,4 +1,4 @@
-# Starship Cadet: record the Dev page's "Start at a day, as played" saves (section 25's DM_DAYS; DS1, 2026-10-22).
+# Starship Cadet: record the Dev page's "Start at a day, as played" saves (section 25's devmodeDaysData; DS1, 2026-10-22).
 # A player who only follows the arrow (arrows_check.py's follower: FOLLOW, Follower, Page; imported, not copied) plays
 # a new Dev game from the shuttle (Day 0, 16:30) to Day 8. Each evening at 21:30 it stops, is washed and fed as after a
 # normal evening (needs to 85 at least, as arrows_check's night does), stands by its bed and sleeps the game's own way
@@ -6,11 +6,11 @@
 # toasts), saves, and keeps the Dev save (save.dev dropped, job tracking on) deflated and base64'd, with the "arrived"
 # key and a summary (section 25's devmodeDaySum, which the check compares after loading).
 # A day is "played" while the follower keeps up: clocked in every workday so far and each lesson learned on its day
-# (arrows_check's WEEK). From the first day it doesn't, the rest are recorded through Set career (devmodeSetCareerTo,
-# 06:00 in bed) and marked played: false (the Dev page says so: for testing only).
+# (arrows_check's WEEK). From the first day it doesn't, the rest are recorded through Set career (devmodeSetCareerTo(d) by the end of
+# the day before, then 06:00 in bed) and marked played: false (the Dev page says so: for testing only).
 # The career's seed is DM_SEED (no sick day), as Set career's.
 # Run:   python3 tools/day_saves.py BUILD.html [--write] [--twice] [--last N]
-#   --write  writes DM_DAYS into BUILD.html between the "day saves" lines (else prints the sizes only)
+#   --write  writes devmodeDaysData into BUILD.html between the "day saves" lines (else prints the sizes only)
 #   --twice  records Days 1-2 twice and checks the saves are byte-identical (the recorder's self-test)
 #   --last N stop after Day N's morning (default 8)
 # Needs arrows_check.py: the repo's root, or ARROWS_CHECK=path. Setup as cadet_test.py. About 15-20 minutes.
@@ -74,7 +74,9 @@ def record(ctx, last):
             played = False; log.append(f'Day {d}: the follower stopped ({str(e)[:200]}); Day {d + 1} on: through Set career')
         if not played:
             pg2 = Page(ctx, PATH)
-            pg2.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({d + 1}))"); pg2.step(10)
+            if d == 0: pg2.ev("devmodeRun('Set career', () => devmodeSetCareerTo(1))")   # Day 1 06:00 (nothing is taught before Day 2)
+            else: pg2.ev(f"devmodeRun('Set career', () => {{ devmodeSetCareerTo({d}); devmodeSkipTo({d * 1440 + 360}); devmodeWake(); }})")   # the career by the end of Day d, then Day d+1 06:00 in bed (RV6: not d+1's, a day ahead)
+            pg2.step(10)
             t = pg2.ev(TAKE); pg2.page.close()
         else:
             t = pg.ev(TAKE)
@@ -112,5 +114,5 @@ print(f'day saves: {len(days)} days, {total} chars packed')
 if WRITE:
     a, z = '// ---- day saves: start', '// ---- day saves: end ----'
     i = html.index(a); i = html.index('\n', i) + 1; j = html.index(z)
-    html = html[:i] + 'const DM_DAYS = ' + json.dumps(block, separators=(',', ':')) + ';\n' + html[j:]
+    html = html[:i] + 'function devmodeDaysData() { return ' + json.dumps(block, separators=(',', ':')) + '; }\n' + html[j:]
     pathlib.Path(PATH).write_text(html); print(f'day saves: written into {PATH}')
