@@ -209,7 +209,66 @@ def part_deck(pw):
     check(p.ev('padLayer()') is None, 'deck: nothing should be open at the end')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck)]
+# what a tap (or A) led to, a second of game later: where you are and are going, what you're doing, what's open
+OUTCOME = """(() => ({ at: [Math.round(player.obj.position.x * 100), Math.round(player.obj.position.z * 100)], goal: player.goal || null,
+  path: player.path.length, act: typeof ACT !== 'undefined' && ACT ? ACT.kind + ':' + (ACT.phase || '') : null,
+  toast: document.getElementById('tt').textContent + '|' + document.getElementById('tx').textContent,   // its text (it fades on a real-time timer)
+  chat: (document.getElementById('chat') || { hidden: true }).hidden ? null : document.getElementById('chat').textContent.slice(0, 80),
+  lift: !liftEl.hidden, dev: DEV.open, layer: (padLayer() || { id: null }).id }))()"""
+SPOTS = """(() => {   // places to stand: by the lift, by people, by items, by seats, the most open floor (free tiles, sorted, at most 10)
+  const out = [], seen = new Set(), put = (x, z) => { const c = nearestOpen(x, z, player); if (c && !seen.has(c.join())) { seen.add(c.join()); out.push(c); } };
+  for (const d of DOOR_OBJS) if (d.e.type === 'lift') { put(d.cx + 1, d.cz); break; }
+  for (const a of DECK_CREW.slice(0, 3)) put(a.x + 1, a.z);
+  for (const it of ITEMS.filter(i => i.hit && !i.wall).slice(0, 40).filter((_, k) => k % 10 === 0)) { const p = new THREE.Vector3(); it.hit.getWorldPosition(p); put(p.x, p.z); }
+  for (const pl of [...PLACE_OF.values()].filter(pl => SIT_TYPES.has(pl.type)).slice(0, 2)) { const sp = placeSpot(pl.id); if (sp) put(sp.x + .8, sp.z); }
+  return out.slice(0, 10); })()"""
+def go_to(p, cell):
+    p.ev(f'player.stop(); if (typeof ACT !== "undefined" && ACT) actEnd(true); player.obj.position.copy(cellPos({cell[0]}, {cell[1]})); target.copy(player.obj.position).setY(.7); player.face = 0')
+    p.step(8)
+
+def part_pick(pw):
+    a = Pad(pw, ON); b = Pad(pw, ON)                 # a presses A; b taps the same spot by hand: the same game, in lockstep
+    kids0 = a.ev('scene.children.length')
+    for q in (a, b): q.plug(); q.press('x'); q.log()
+    check(a.ev('PAD_PICK.ring !== null') and a.ev('scene.children.length') == kids0 + 1, 'pick: the ring should be made at the first use, one object')
+    spots = a.ev(SPOTS); check(len(spots) >= 5, f'pick: too few places to stand: {spots}')
+    kinds, tried = set(), 0
+    for cell in spots:
+        for q in (a, b): go_to(q, cell)
+        for q in (a, b): q.ev('PAD_PICK.n = 0; PAD_PICK.job = null; PAD_PICK.list = []; PAD_PICK.sel = null'); q.step(2)
+        la, lb = a.ev('PAD_PICK.list.map(t => t.key)'), b.ev('PAD_PICK.list.map(t => t.key)')
+        check(la == lb, f'pick: the two games see different things at {cell}: {la} vs {lb}')
+        if not la: continue
+        check(a.ev('PAD_PICK.ring.visible') is True, f'pick: no ring at {cell}')
+        hint = a.ev('document.getElementById("padHint").textContent')
+        check(a.ev('padLabel(PAD_PICK.sel.key)') in hint and hint.startswith('A'), f'pick: the line should name the ringed thing: {hint!r}')
+        for k in range(min(3, len(la))):
+            key = la[k]
+            for q in (a, b): go_to(q, cell); q.ev('PAD_PICK.n = 0; PAD_PICK.job = null; PAD_PICK.list = []; PAD_PICK.sel = null'); q.step(2)
+            for _ in range(k):                            # D-pad right k times (b steps along: the same game): each the next in the list
+                want = a.ev('(() => { const L = PAD_PICK.list, i = L.indexOf(PAD_PICK.sel); return L[(i + 1) % L.length].key; })()')
+                a.btn('right'); a.step(1); got = a.ev('PAD_PICK.sel && PAD_PICK.sel.key'); b.step(1); a.btn('right', 0); a.step(1); b.step(1)
+                check(got == want, f'pick: D-pad right should ring the next thing, {want}, not {got}')
+            key = a.ev('PAD_PICK.sel && PAD_PICK.sel.key')
+            s = a.ev('PAD_PICK.sel.s')
+            b.ev(f'tap({s[0]}, {s[1]})')                 # b: a finger, at the same moment
+            a.btn('a'); a.step(1); b.step(1); a.btn('a', 0)
+            a.step(40); b.step(40)
+            oa, ob = a.ev(OUTCOME), b.ev(OUTCOME)
+            check(oa == ob, f'pick: A on {key} at {cell} differs from a tap there:\n   A  {oa}\n   tap {ob}')
+            kinds.add(key.split(':')[0]); tried += 1
+            for q in (a, b):                              # put away whatever opened
+                q.ev("chatClose && chatClose(); if (!liftEl.hidden) closeLiftPanel(); if (DEV.open) deviceClose(); toastEl.classList.remove('show'); trkClose()"); q.step(2)
+    print(f'  pick: {tried} things pressed, kinds {sorted(kinds)}')
+    check(tried >= 8 and {'lift', 'crew'} & kinds and 'item' in kinds, f'pick: too few kinds tried: {tried} {sorted(kinds)}')
+    # the ring and the line go with a touch, and while a panel is open
+    a.press('y'); a.step(2); check(a.ev('PAD_PICK.ring.visible') is False and a.ev('document.getElementById("padHint").hidden') is True, 'pick: the ring or line showed with the device open')
+    a.press('y'); a.step(8)
+    a.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); a.step(2)
+    check(a.ev('PAD_PICK.ring.visible') is False and a.ev('document.getElementById("padHint").hidden') is True, 'pick: the ring or line stayed after a touch')
+    a.close(); b.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue

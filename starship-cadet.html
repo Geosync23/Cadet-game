@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.90.1
+   STARSHIP CADET: CSV Wren                           build 0.90.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8994,7 +8994,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.90.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.90.2';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -53352,6 +53352,183 @@ padOn('menu', () => { pauseSet(!PAUSE.on); return true; });   // what the Pause 
 padOn('y', () => { if (DEV.open) { deviceClose(); return true; } if (padLayer()) return; return padClick('devBtn'); });
 padOn('view', () => { if (!trkEl.hidden) { trkClose(); return true; } if (padLayer()) return; return padClick('trkBtn'); });
 padOn('b', () => { if (padLayer()) return; toastEl.classList.remove('show'); return true; });
+// ---- turn 3 (0.90.2): picking things on the deck. The nearest thing you can use within PAD_PICK.reach m (the way you
+// face first) gets a soft ring at its feet and a line at the bottom naming it; D-pad left and right step through the
+// others nearby, nearest first; A taps it through section 11's own tap(), at a point on screen where a finger would hit
+// it. A thing is offered only where such a point exists: padWhat(x, y) says what a tap there would reach, in tap()'s
+// order (crew, then what pick() hits: a walker, an item, the lift, a door; then on the floor your job's stop, your crate,
+// your hamper and wardrobe, a seat or a machine to use), without doing anything. The ring and the line are made at the
+// first use and shown only while the controller is in use and nothing is open.
+const PAD_PICK = { reach: 3.2, every: 8, n: 0, list: [], sel: null, chosen: false, ring: null, hint: null, rm: false, of: null, items: [], pof: null, places: null, cs: null, wr: null, job: null, max: 8, budget: 6, used: 0 };
+function padWhat(cx, cy, want) {                           // what a tap at (cx, cy) would reach: a key, or null ('floor' when the
+  // floor can't matter: want, the key being looked for, isn't one of the floor's)
+  const a = PAD_PICK.cs ? padCrewAt(cx, cy) : crewAtScreen(cx, cy); if (a) return 'crew:' + a.p.id;
+  const h = pick(cx, cy); if (!h) return null;
+  const ud = h.object.userData;
+  if (ud.walker && ud.walker.active) return 'walker:' + ud.walker.spec.name;
+  if (ud.item) return ud.item.lift ? 'lift' : 'item:' + ITEMS.indexOf(ud.item);
+  if (ud.liftDoor) return 'lift';
+  if (ud.youLock) return 'lock:' + ud.youLock;
+  if (ud.closedDoor) return 'door:' + ud.closedDoor;
+  if (want && !/^(job|crate|hamper|wardrobe|place:)/.test(want)) return 'floor';
+  const p = h.point;                                     // the floor: playerFloorTap's order, read only
+  if (typeof jobHere === 'function' && jobHere(p, true)) return 'job';
+  const c = SHIP.player.crate; if (c && c.deck === deckDef.num && Math.hypot(p.x - c.x, p.z - c.z) <= PUT_NEAR) return 'crate';
+  if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) {
+    const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num && Math.hypot(p.x - hm.x, p.z - hm.z) <= HAMPER_NEAR) return 'hamper';
+    const w = PAD_PICK.cs ? PAD_PICK.wr : clothesWardrobe(); if (w && Math.hypot(p.x - w.x, p.z - w.z) <= WARDROBE_NEAR) return 'wardrobe';
+  }
+  const o = ray.ray.origin, d = ray.ray.direction; let best = null, bd = FLOOR_NEAR;
+  for (const [pl, sp] of padPlaces()) {                   // (a ray that passes within FLOOR_NEAR of a spot below 1.2 m lands within 2.3 m of it)
+    if (Math.abs(sp.x - p.x) > 2.3 || Math.abs(sp.z - p.z) > 2.3) continue;
+    for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; const dd = Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z); if (dd < bd) { bd = dd; best = pl; } }
+  }
+  return best ? 'place:' + best.id : null;
+}
+function padPlaces() {                                     // the places a floor tap can use (playerFloorTap's rule), with their spots, once a deck
+  const P = PAD_PICK; if (P.pof === deckDef && P.places) return P.places;
+  P.pof = deckDef; P.places = [];
+  for (const pl of PLACE_OF.values()) {
+    const use = FLOOR_ACTS[pl.type] && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl)) || SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl); if (!use) continue;
+    const sp = placeSpot(pl.id); if (sp) P.places.push([pl, sp]);
+  }
+  return P.places;
+}
+function padLabel(key) {                                   // the line at the bottom: what A does
+  const [k, v] = [key.slice(0, key.indexOf(':') < 0 ? key.length : key.indexOf(':')), key.slice(key.indexOf(':') + 1)];
+  if (k === 'crew') { const a = DECK_CREW.find(x => x.p.id === v); return a ? 'Talk to ' + a.p.name : 'Talk'; }
+  if (k === 'walker') return 'Talk to ' + v;
+  if (k === 'item') { const it = ITEMS[+v]; return it ? it.t : 'Look'; }
+  if (k === 'lift') return 'Lift';
+  if (k === 'door' || k === 'lock') { const c = CLOSED_DOORS[v]; return c && c.t ? c.t : 'Door'; }
+  if (k === 'job') return 'Your job';
+  if (k === 'crate') return 'Your crate';
+  if (k === 'hamper') return 'Laundry hamper';
+  if (k === 'wardrobe') return 'Your wardrobe';
+  if (k === 'place') { const pl = PLACE_OF.get(v); return pl && FLOOR_ACTS[pl.type] ? FLOOR_ACTS[pl.type](pl) : 'Sit'; }
+  return 'Look';
+}
+const _pp = new THREE.Vector3();
+function padScreen(x, y, z) { _pp.set(x, y, z).project(camera); return _pp.z < 1 && Math.abs(_pp.x) < 1 && Math.abs(_pp.y) < 1 ? [(_pp.x + 1) / 2 * innerWidth, (1 - _pp.y) / 2 * innerHeight] : null; }
+function padFind(key, x, z, ys, r) {                       // a point on screen where a tap reaches key: [cx, cy] or null
+  for (const y of ys) for (const [ox, oz] of r ? [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]] : [[0, 0]]) {
+    const s = padScreen(x + ox, y, z + oz); PAD_PICK.used++; if (s && padWhat(s[0], s[1], key) === key) return s;
+  }
+  return null;
+}
+function padCrewSeen() {                                   // section 10's crewAtScreen, its screen points worked out once for a whole search
+  const out = []; if (!crowd.visible) return out;
+  const mine = PLACE_OF.get(playerBed()), myBunk = mine && placeSpot(mine.id);
+  for (const a of DECK_CREW) for (const hy of (bp => bp === 'lie' && myBunk && Math.hypot(a.x - myBunk.x, a.z - myBunk.z) < .6 ? [] :
+    bp === 'lie' ? [.15] : bp === 'sit' ? [.5, .9] : [.5, 1.0, 1.4])(a.settled && a.spot ? a.spot.pose : a.pose)) {
+    _pp.set(a.x, a.y + hy, a.z).project(camera); out.push([(_pp.x + 1) / 2 * innerWidth, (1 - _pp.y) / 2 * innerHeight, a]);
+  }
+  return out;
+}
+function padCrewAt(cx, cy) {                               // crewAtScreen(cx, cy), from padCrewSeen's points
+  let best = null, bd = 26 * Math.max(.8, camera.zoom);
+  for (const [x, y, a] of PAD_PICK.cs) { const d = Math.hypot(x - cx, y - cy); if (d < bd) { bd = d; best = a; } }
+  return best;
+}
+function padRaw() {                                       // what's in reach, before asking where a finger would tap it: cheap, nearest first
+  const pp = player.obj.position, R = PAD_PICK.reach, out = [], seen = new Set();
+  const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);
+  const add = (key, x, z, ys, r) => {
+    if (seen.has(key)) return; const d = Math.hypot(x - pp.x, z - pp.z); if (d > R) return; seen.add(key);
+    const ahead = d > .01 ? ((x - pp.x) * fx + (z - pp.z) * fz) / d : 1;
+    out.push({ key, x, z, ys, r, d, s: null, score: d * (1.25 - .45 * ahead) });   // ahead of you counts as nearer
+  };
+  if (crowd.visible) for (const a of DECK_CREW) add('crew:' + a.p.id, a.x, a.z, [(a.settled && a.spot ? a.spot.pose : a.pose) === 'lie' ? .15 : .9, .5, 1.3].map(h => a.y + h), 0);
+  for (const w of crew) if (w.active && !w.isPlayer) add('walker:' + w.spec.name, w.obj.position.x, w.obj.position.z, [.9, .5, 1.3], 0);
+  if (PAD_PICK.of !== ITEMS) {                             // the items' middles and heights, once a deck (they don't move)
+    const box = new THREE.Box3(), c = new THREE.Vector3(); PAD_PICK.of = ITEMS;
+    PAD_PICK.items = ITEMS.map((it, i) => { if (!it.hit) return null; box.setFromObject(it.hit); box.getCenter(c); return [it.lift ? 'lift' : 'item:' + i, c.x, c.z, [c.y, (c.y + box.max.y) / 2, (c.y + box.min.y) / 2]]; }).filter(Boolean);
+  }
+  for (const [key, x, z, ys] of PAD_PICK.items) add(key, x, z, ys, .25);
+  for (const dobj of DOOR_OBJS) {                         // the lift and shut doors (an open doorway is only somewhere to walk)
+    const hit = dobj.g.children.find(o => o.userData.liftDoor || o.userData.youLock || o.userData.closedDoor), ud = hit ? hit.userData : null; if (!ud) continue;
+    add(ud.liftDoor ? 'lift' : ud.youLock ? 'lock:' + ud.youLock : 'door:' + ud.closedDoor, dobj.cx, dobj.cz, [1, .5, 1.5], .2);
+  }
+  if (typeof jobHere === 'function' && jobsOn() && typeof ixChore === 'function') { const j = ixChore(), nx = j && !j.workDone && ixNextStop(j), pid = nx && nx.s.deck === deckDef.num && nx.s.places[0], sp = pid && PLACE_OF.has(pid) && placeSpot(pid); if (sp) add('job', sp.x, sp.z, [.05, .4, .8], .2); }
+  const cr = SHIP.player.crate; if (cr && cr.deck === deckDef.num) add('crate', cr.x, cr.z, [.05, .3], .15);
+  if (typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON) { const hm = SHIP.clothes.hamper; if (hm && hm.at === 'floor' && hm.deck === deckDef.num) add('hamper', hm.x, hm.z, [.05, .3], .15);
+    const w = PAD_PICK.wr; if (w) add('wardrobe', w.x, w.z, [.05, .5, 1], .2); }
+  for (const [pl, sp] of padPlaces()) if (Math.hypot(sp.x - pp.x, sp.z - pp.z) <= R) add('place:' + pl.id, sp.x, sp.z, [.5, .9, .2], .1);
+  return out.sort((a, b) => a.score - b.score);
+}
+// A search: the raw list, then each thing asked in turn where a finger would tap it (padFind), until PAD_PICK.max are
+// found. PAD_PICK.job holds one in progress; padSearch(budget) carries it on for about budget screen points (Infinity:
+// to the end) and returns the list when it's done, else null. The crew's screen points and your wardrobe are worked out
+// once a search (padCrewSeen; a person moving during it is found again when A is pressed).
+function padSearch(budget) {
+  const P = PAD_PICK;
+  if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
+  const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
+  try {
+    while (J.i < J.raw.length && J.out.length < P.max && P.used < budget) { const t = J.raw[J.i++]; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+  } finally { P.cs = null; P.wr = null; }
+  if (J.i < J.raw.length && J.out.length < P.max) return null;
+  P.job = null; return J.out;
+}
+const padTargets = () => { PAD_PICK.job = null; return padSearch(Infinity); };   // all at once: [{ key, x, z, d, s: [cx, cy] }], best first
+function padPickShow(on) {                                 // the ring and the line, made at the first use
+  const P = PAD_PICK;
+  if (on && !P.ring) {
+    P.ring = new THREE.Mesh(new THREE.RingGeometry(.4, .5, 40), new THREE.MeshBasicMaterial({ color: col('#4cc3b5'), transparent: true, opacity: .85, depthWrite: false, toneMapped: false }));
+    P.ring.rotation.x = -Math.PI / 2; P.ring.renderOrder = 5; P.ring.visible = false; scene.add(P.ring);
+    const st = document.createElement('style');
+    st.textContent = '#padHint{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:2;max-width:calc(100% - 24px);display:flex;align-items:center;gap:8px;'
+      + 'padding:7px 14px;border-radius:999px;background:var(--glass);border:1px solid var(--line);color:var(--ink);font-size:14px;pointer-events:none;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}'
+      + '#padHint[hidden]{display:none}#padHint .k{flex:none;min-width:22px;height:22px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;background:#4cc3b5;color:#0d1521}'
+      + '#padHint .m{color:#93a6ae;font-size:12px}';
+    document.head.appendChild(st);
+    P.hint = document.createElement('div'); P.hint.id = 'padHint'; P.hint.hidden = true; P.hint.setAttribute('aria-live', 'polite'); document.body.appendChild(P.hint);
+    P.rm = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+  if (!P.ring) return;
+  const t = on && P.sel;
+  P.ring.visible = !!t;
+  const text = t ? padLabel(t.key) : '', more = t && P.list.length > 1;
+  if (P.hint.dataset.t !== text + more) {
+    P.hint.dataset.t = text + more; P.hint.textContent = '';
+    if (t) { const k = document.createElement('span'); k.className = 'k'; k.textContent = 'A'; const m = document.createElement('span'); m.className = 'm'; m.textContent = more ? '◀ ▶' : '';
+      P.hint.append(k, document.createTextNode(text), m); }
+  }
+  P.hint.hidden = !t || toastEl.classList.contains('show');
+}
+padOn('frame', () => {
+  const P = PAD_PICK, free = PAD.used && !ride && !padLayer() && !FREEZE.frozen && !DISC.view;
+  if (!free) { if (P.ring) padPickShow(false); P.n = 0; P.job = null; return; }
+  if (P.job || --P.n <= 0) {                               // a few times a second: what's in reach, a little each frame (keep the one you chose)
+    const L = padSearch(P.list.length || P.sel ? P.budget : Infinity);   // (the first search at once)
+    if (L) { P.n = P.every; const was = P.sel && P.sel.key; P.list = L; P.sel = L.find(t => t.key === was && P.chosen) || L[0] || null; }
+  }
+  padPickShow(true);                                       // (makes the ring at the first use)
+  if (P.sel) {                                             // the ring follows a person who moves
+    const v = P.sel.key.startsWith('crew:') ? DECK_CREW.find(a => 'crew:' + a.p.id === P.sel.key) : null;
+    if (v) { P.sel.x = v.x; P.sel.z = v.z; }
+    P.ring.position.set(P.sel.x, .035, P.sel.z);
+    const s = P.rm ? 1 : 1 + .06 * Math.sin(performance.now() / 260); P.ring.scale.set(s, s, s);
+  }
+});
+padOn('unuse', () => { if (PAD_PICK.ring) padPickShow(false); });
+padOn('gone', () => { if (PAD_PICK.ring) padPickShow(false); });
+function padPickStep(dir) {                                // D-pad left and right: the next or previous thing in reach
+  const P = PAD_PICK; if (padLayer() || ride || FREEZE.frozen || !P.list.length) return;
+  const i = P.list.indexOf(P.sel); P.sel = P.list[(i + dir + P.list.length) % P.list.length]; P.chosen = true; P.n = P.every; P.job = null; padPickShow(true); return true;
+}
+padOn('left', () => padPickStep(-1));
+padOn('right', () => padPickStep(1));
+padOn('a', () => {                                         // A: the tap, where a finger would tap it now
+  const P = PAD_PICK; if (padLayer() || ride || !PAD.used) return;
+  if (FREEZE.frozen) return;
+  const t = P.sel; if (!t) return;
+  const v = t.key.startsWith('crew:') ? DECK_CREW.find(a => 'crew:' + a.p.id === t.key) : null;
+  let s = padWhat(t.s[0], t.s[1], t.key) === t.key ? t.s : null;
+  if (!s) { P.list = padTargets(); const n = P.list.find(x => x.key === t.key); s = n ? n.s : null; }   // it moved: find it again
+  if (!s) return true;
+  P.chosen = false; tap(s[0], s[1]); P.n = 0; P.job = null; return true;
+});
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================
