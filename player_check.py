@@ -313,10 +313,18 @@ with sync_playwright() as pw:
             g.step(10)
             if g.ev("!ACT || ACT.phase === 'do'"): break
         h0 = g.ev("SHIP.player.needs.hunger"); r0 = g.ev("JSON.stringify([ACT && ACT.kind, ACT && !!ACT.o.fed, TRAY_ON.visible, SHIP.player.tray])")
+        card = g.ev("(() => { const r = document.getElementById('toast').getBoundingClientRect(), it = ITEMS.find(i => /^Long table$/.test(i.t)); return [document.getElementById('tx').textContent, it.x, Math.round(r.top), Math.round(r.bottom), innerHeight]; })()")
+        if tray is None: CARD.append(card)
         g.step(150)
         h1 = g.ev("SHIP.player.needs.hunger"); r = json.loads(r0) + [round(h1 - h0, 1), g.ev("TRAY_ON.visible")]
         g.ev("actEnd(true); SHIP.player.tray = null"); return r
+    CARD = []
     nt = table_go(None); wt = table_go('Test soup')
+    # fresh eyes #27: the table's words once, and the card on the screen
+    tx, desc, top, bot, ih = CARD[0]
+    print('  the card at a table with no tray:', repr(tx[:90]), 'top', top, 'bottom', bot, 'of', ih)
+    check(tx.count(desc) == 1, f'the table\'s words should show once: {tx!r}')
+    check(0 <= top and bot <= ih, f'the card should fit on the screen: top {top}, bottom {bot}, screen {ih}')
     print('  a table, no tray: [activity, fed, tray on the table, tray in hand, food change, tray later]', nt)
     print('  a table with a served tray:', wt)
     check(nt[0] == 'sit' and nt[1] is False and nt[2] is False and nt[4] <= 0 and nt[5] is False, f'sitting at a mess table without a meal: just sitting, no tray, no food: {nt}')
