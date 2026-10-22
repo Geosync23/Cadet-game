@@ -54,6 +54,13 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'ar_nomerge': ("  if (shown === t + '|' + x || GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;", "", '-'),
  'ar_saveoff': ("SAVE_EXTRA.push(s => { if (!GUIDE_ON) return;", "SAVE_EXTRA.push(s => {", '-'),
  'ar_throwkeeps': ("catch (err) { done = true; }", "catch (err) { done = false; }", '-'),
+ # arrows piece C (AC1 47e55bb4): MUT_CHECK=arrows_pointer_check.py, parts '-'
+ 'ac_showrow': ("const teachShown = () => { let g = false;", "const teachShown = () => true, _ts0 = () => { let g = false;", '-'),
+ 'ac_nocount': ("  if (show && !show.e.shown) { show.e.shown = true; pointCount(show.e.id); }", "  if (show && !show.e.shown) { show.e.shown = true; }", '-'),
+ 'ac_offlets': ("return m === 'off' ? 0 : m === 'all'", "return m === 'off' ? 1 : m === 'all'", '-'),
+ 'ac_nocover': ("const hit = document.elementFromPoint(x, y); if (!hit || hit !== el && !el.contains(hit)) return null;", "", '-'),
+ 'ac_tapkeeps': ("  if (st && st.press && st.el === POINT.aim) pointDrop(c.id);", "", '-'),
+ 'ac_firststep': ("    const s = e.path[i]; if (s.open && s.open()) continue;", "    const s = e.path[i];", '-'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}

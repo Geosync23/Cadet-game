@@ -301,3 +301,23 @@ Code read (section 15b's slot + goalNow/ixFrame in 15b + one line in section 11'
   restarts its 5.6 s); a queued toast can be stale by the time it shows (a need toast after the need is met).
 Runs queued (queue 11, alone): cadet_test off, arrows_check, 9 mutants (MUT_CHECK=arrows_check.py), a play probe with
 GUIDE_ON true (p_arrows.py), check_fast.
+
+## P5 4892a0b: round so far
+Alone: cadet_test 825378d -> 4892a0b off and on ALL IDENTICAL; CP5's controller_check OK; mutants 6/6 CAUGHT (p5_rmonce,
+p5_thin, **p5_noedge now caught**, p5b_keepattr, p5b_glyphname, p5b_nomaps). check_fast pending.
+
+## Arrows B: AR1 is pushing a new tip (done() re-checked in guideGoal, `covered` in guideList and GUIDE.shown cleared
+while covered, a repeated toast re-timed; toast overflow left to the migration pieces). My B runs held for it.
+
+## Arrows piece C (AC1 47e55bb4 on 2b4a05db; lead 27's ask 13:21): code read
+Section 19's slot (POINT_ON off): pointAsk/pointDrop/pointFrame/pointDraw (#ptr made at the first show), TEACH_MODES /
+teachMode() (B reads it), path helpers. Outside the slot: the skin's act() records each button's action in a WeakMap
+(actOf); deviceLoad keeps settings.teach and pointsSeen only when present (an old save loads the same; nothing new is
+saved until chosen or shown); Settings' "Teaching arrows" row only when POINT_ON or GUIDE_ON; 15b's ixBoard row() takes a
+job id -> `data-job` (two callers): reviewed as the interactions seat, fine.
+- Off: no listener (the click hook is inside `if (POINT_ON)`), no rAF, no DOM, no save change. One always-on change:
+  `data-job` on the job board's rows for everyone (an invisible attribute, like P3's pauseLine id).
+- **Merge clash ahead:** C and P4 (db80eb0) both rewrite the last line of section 19's Settings view (C adds the
+  Teaching arrows row, P4 adds `.concat(padSetBlocks())`): whoever merges second resolves it by hand.
+Runs queued (queue 12, alone): cadet_test off, arrows_pointer_check, 6 mutants (MUT_CHECK=arrows_pointer_check.py),
+device_check, interactions_check, check_fast.
