@@ -1634,7 +1634,7 @@ def legacy_parts(GAME, ON, fails):
             p.ev("INTRO_UI.manifest.querySelector('button').focus()"); p.press('a'); p.step(3)
             check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
         p.close()
-    # ---- CP3 (claude/controller-p3 47d71ff): marks, touch (here touch3), drop ----
+    # ---- CP3 (claude/controller-p3 18e9032): marks, touch (here touch3), drop ----
     # ---- P3 (plan sections 5 and 6): button pictures, connecting and disconnecting ----
     # marks:   nothing before a press; after one, a mark on Device (Y), Pause (Menu), Tracked (View), inside its button, shown;
     #          the bottom line's mark in the pad's style; Xbox / PlayStation / Nintendo from the pad's name and from
@@ -1707,9 +1707,16 @@ def legacy_parts(GAME, ON, fails):
         check(p.ev("document.getElementById('tt').textContent") == '', 'marks: "Controller connected" said twice in a session')
         p.close()
     def part_touch3(pw):
-        a = Pad(pw, ON); a.plug(); a.step(30); a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); a.close()
+        # speech bubbles are kept out of the pictures (the browser sometimes draws their layer a shade differently with the
+        # same page, CTT's find) and compared as text and place instead
+        BUBS = "bubbles.list.map(b => [b.text, b.el.style.display, b.el.style.transform])"
+        a = Pad(pw, ON); a.plug(); a.step(31); a.g.page.add_style_tag(content='.bubw{opacity:0!important}')
+        a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); ba = a.ev(BUBS); a.close()
         b = Pad(pw, ON); b.plug(); b.press('x'); b.step(27)   # (a press is 3 frames)
-        b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.g.shot(str(WORK / 'test' / '_pad_touch.png')); b.close()
+        b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.step(1)   # (the deck drawn once after the touch)
+        b.g.page.add_style_tag(content='.bubw{opacity:0!important}')
+        b.g.shot(str(WORK / 'test' / '_pad_touch.png')); bb = b.ev(BUBS); b.close()
+        check(ba == bb, f'touch: the speech bubbles differ after a press then a touch: {ba} vs {bb}')
         x, y = (WORK / 'test' / '_pad_nopad.png').read_bytes(), (WORK / 'test' / '_pad_touch.png').read_bytes()
         check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
     def part_drop(pw):
@@ -1955,7 +1962,11 @@ MUTANTS = {
     },
 }
 def plant(src, code):
-    # a fault is JS added beside the game, or ('src', old, new): a change inside section 26 itself (a reviewer's fault)
+    # a fault is JS added beside the game, or ('src', old, new): a change inside section 26 itself (a reviewer's fault), or
+    # a list of those, all planted together
+    if isinstance(code, list):
+        for c in code: src = plant(src, c)
+        return src
     if isinstance(code, tuple):
         if src.count(code[1]) != 1: raise ValueError('cannot be planted in this build (its line is not there once)')
         return src.replace(code[1], code[2])
@@ -2012,10 +2023,13 @@ MUTANTS['games'] = {
     'B does not leave Lightdisc': WRAP("if (typeof DISC !== 'undefined' && DISC.view) buttons[1] = { pressed: false, touched: false, value: 0 };"),
 }
 # the builders' own planted faults for their old-shape parts (each line once in the builder's game at its tip)
-MUTANTS['marks'] = {   # CP3, claude/controller-p3 47d71ff
+MUTANTS['marks'] = {   # CP3, claude/controller-p3 18e9032
   'marks shown without the pad in use': ('src', "'body.pad .padk{display:inline-flex}", "'.padk{display:inline-flex}body.pad .padk{display:inline-flex}"),
   'Nintendo marks in Xbox places': ('src', "nin: { a: ['B', '#e6f0f1', 'B'], b: ['A', '#e6f0f1', 'A'],", "nin: { a: ['A', '#e6f0f1', 'A'], b: ['B', '#e6f0f1', 'B'],"),
   'Controller connected over another message': ('src', "if (PAD_MARK.say && PAD.used && !toastEl.classList.contains('show')) {", "if (PAD_MARK.say && PAD.used) {"),
+}
+MUTANTS['touch3'] = {
+  'the ring left up after a touch': [('src', "  if (!free) { if (P.ring) padPickShow(false); P.n = 0;", "  if (!free) { P.n = 0;"), ('src', "padOn('unuse', () => { if (PAD_PICK.ring) padPickShow(false); });", "")],
 }
 MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
