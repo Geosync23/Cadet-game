@@ -613,4 +613,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 | CP3 | session_01AkfeDe7MBN8RYd5n6obGRm | `claude/controller-p3` | button pictures, connect/disconnect | RV2 |
 | CP4 | session_01VTXDwLqWGJVRh95HozqhCu | `claude/controller-p4` | Controller settings page | RV2 |
 | CP5 | session_01VcdDgzyHa1dqdmcRLELbiS | `claude/controller-p5` | accessibility + docs | RV2 |
-**~10:15 UTC: LEAD HANDOVER** lead 26 at ~64% memory (past the 60% judging point; the controller team is many hours of work) → lead 27. Brief: plans/handover-lead26.md on claude/lead-26.
+**~10:15 UTC: LEAD HANDOVER** lead 26 at ~64% memory (past the 60% judging point; the controller team is many hours of work) → lead 27. Brief: plans/handover-lead26.md on claude/lead-26.  Lead 27 = session_017UHW78qnvRTQwYpDxpodHz (branch claude/lead-27).
