@@ -617,13 +617,17 @@ def part_unplug(pw, src, tag):
     st = r.ev("[PAUSE.on, (document.getElementById('pauseCard') || {}).textContent || '']")
     print(f'  unplugged mid-walk: moved {moved:.3f} m after; paused {st[0]}, the card: "{st[1][:80]}"')
     if moved > .01: fails.append(f'still walking after the pad was unplugged ({moved:.3f} m)')
+    if r.ev("!!player.steer && player.steer.k > 0"): fails.append('unplugged: the walk the stick asked for is still there (player.steer), it walks on when the game goes on')
     if not st[0]: fails.append('unplugged within half a minute of using it: the game should pause')
     elif 'Controller disconnected' not in st[1]: fails.append(f'the Pause card should say "Controller disconnected": "{st[1][:80]}"')
     t0 = r.ev("SHIP.time.min"); r.step(60); t1 = r.ev("SHIP.time.min")
     if t1 != t0: fails.append(f'the ship clock ran while paused after the unplug ({t0} -> {t1})')
     r.js('window.__pads.plug(0, {})'); r.step(5); r.press('MENU'); r.step(10)
     if r.ev("PAUSE.on"): fails.append('reconnected and pressed Start: the game should go on')
-    else: print('  plugged back in, Start: playing again')
+    else:
+        print('  plugged back in, Start: playing again')
+        a = r.ev(f"({SCREEN})()"); r.step(15); b = r.ev(f"({SCREEN})()"); mv = ((b[2] - a[2]) ** 2 + (b[3] - a[3]) ** 2) ** .5
+        if mv > .01 and not r.ev("(player.path || []).length"): fails.append(f'after the reconnect you walk by yourself ({mv:.2f} m with the stick untouched)')
     # not used for over half a minute: unplugging only stops (no pause)
     r.step(31 * 30); r.js('window.__pads.unplug(0)'); r.step(10)
     if r.ev("PAUSE.on"): fails.append('unplugged a pad not used for half a minute: the game should not pause')
@@ -662,10 +666,101 @@ def part_odd(pw, src, tag):
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 
+# ---- picking (pick): the ringed thing and A, against a tap on the same thing --------------------------------------------
+# Five kinds of thing, found from the deck itself: a crew member (DECK_CREW, awake if any), a seat (a place of a sitting
+# kind), an item (ITEMS), a sealed door (CLOSED_DOORS) and the lift door. Stand beside it facing it; step the D-pad right
+# until the bottom line (#padHint) names it; press A. A second run, frame for frame the same, taps the thing where it is
+# on screen instead. A must lead to what the tap led to.
+PICK_TARGETS = r"""(() => { const out = [], v = new THREE.Vector3();
+  const a = DECK_CREW.find(a => a.x !== undefined && a.pose !== 'lie') || DECK_CREW.find(a => a.x !== undefined);
+  if (a) out.push({ kind: 'crew', name: a.p.name, words: [a.p.name.toLowerCase()], x: a.x, y: (a.y || 0) + 1, z: a.z, crew: DECK_CREW.indexOf(a) });
+  // a seat with no other seat within reach, so "Sit" on the bottom line can only mean that one
+  const seats = [...PLACE_OF.values()].filter(pl => ['lounge-seat', 'mess-seat', 'bench', 'common-room'].includes(pl.type) && placeSpot(pl.id)).map(pl => [pl, placeSpot(pl.id)]);
+  const lone = seats.find(([pl, sp]) => seats.every(([q, sq]) => q === pl || Math.hypot(sq.x - sp.x, sq.z - sp.z) > 3.6));
+  const seat = lone ? lone[0] : null;
+  if (seat) { const sp = placeSpot(seat.id); out.push({ kind: 'seat', name: seat.id, words: ['sit'], x: sp.x, y: 0, z: sp.z, seat: 1 }); }
+  const it = ITEMS.find(i => i.hit && !i.wall && !i.see && !i.lift && /\w/.test(i.t) && (i.machine || i.mach || /panel|valve|pump|console|unit|rack|station/i.test(i.t))) || ITEMS.find(i => i.hit && !i.wall && !i.see && !i.lift);
+  if (it) { it.hit.getWorldPosition(v); out.push({ kind: 'item', name: it.t, words: [it.t.toLowerCase()], x: v.x, y: v.y, z: v.z, item: ITEMS.indexOf(it) }); }
+  const dk = Object.keys(typeof CLOSED_DOORS !== 'undefined' ? CLOSED_DOORS : {})[0];
+  if (dk) { const e = EDGES.get(dk), c = CLOSED_DOORS[dk]; out.push({ kind: 'sealed door', name: c.t, words: [(c.t || 'door').toLowerCase()], x: e.cx, y: 1, z: e.cz, door: dk }); }
+  const ld = DOOR_OBJS.find(d => d.e.type === 'lift'); if (ld) out.push({ kind: 'lift', name: 'the lift', words: ['lift'], x: ld.e.cx, y: 1, z: ld.e.cz, lift: 1 });
+  return out; })()"""
+STAND_BY = r"""((t) => { const c = nearestOpen(t.x, t.z, player); if (!c) return false; player.stop(); player.steer = null;
+  player.obj.position.copy(cellPos(...c)); target.copy(player.obj.position).setY(.7);
+  player.face = Math.atan2(t.x - player.obj.position.x, t.z - player.obj.position.z); return true; })"""
+TARGET_AT = r"""((t) => { let x = t.x, y = t.y, z = t.z; if (t.crew !== undefined) { const a = DECK_CREW[t.crew]; if (a) { x = a.x; z = a.z; y = (a.y || 0) + (a.pose === 'lie' ? .15 : a.pose === 'sit' ? .7 : 1); } }
+  const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+# a point a finger can tap to reach it, by the game's own hit tests (section 11's pick and crewAtScreen): the middle of
+# the thing on screen, else the nearest point around it (a spiral out to 60 px) that reaches it
+TAP_POINT = r"""((t) => { const [x0, y0] = (TARGET_AT_)(t), a = t.crew !== undefined ? DECK_CREW[t.crew] : null;
+  const ok = (x, y) => { const c = crewAtScreen(x, y); if (t.crew !== undefined) return c === a; if (c) return false;
+    const h = pick(x, y), u = h ? h.object.userData : null;
+    if (t.item !== undefined) return !!(u && u.item === ITEMS[t.item]);
+    if (t.door !== undefined) return !!(u && u.closedDoor === t.door);
+    if (t.lift) return !!(u && (u.liftDoor || (u.item && u.item.lift)));
+    if (t.seat) return !!h && !(u && (u.item || u.walker || u.closedDoor || u.liftDoor || u.youLock));
+    return false; };
+  for (let r = 0; r <= 60; r += 4) for (let k = 0; k < (r ? 16 : 1); k++) { const x = x0 + r * Math.cos(k * Math.PI / 8), y = y0 + r * Math.sin(k * Math.PI / 8); if (ok(x, y)) return [x, y]; }
+  return null; })"""
+OUTCOME = r"""(() => ({ at: [Math.round(player.obj.position.x * 100), Math.round(player.obj.position.z * 100)], path: (player.path || []).length,
+  act: typeof ACT !== 'undefined' && ACT ? String(ACT.kind) : null, toast: document.getElementById('tt').textContent + '|' + document.getElementById('tx').textContent,
+  dev: DEV.open, lift: !document.getElementById('lift').hidden, paused: PAUSE.on, deck: player.deck,
+  open: [...document.querySelectorAll('[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0).map(e => e.id || e.className).sort() }))()"""
+HINT = "(() => { const h = document.getElementById('padHint'); return h && !h.hidden && h.getBoundingClientRect().width > 0 ? h.textContent : null; })()"
+def pick_one(pw, src, tag, by_pad, n):
+    # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
+    # the same in the pad run and the tap run
+    r = Run(pw, src, f'{tag}_{n}', mode='pad' if by_pad else 'none', plug={} if by_pad else None, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
+    r.step(10)
+    if by_pad: r.press('B'); r.step(2)
+    else: r.step(5)
+    ts = r.ev(PICK_TARGETS)
+    if n >= len(ts): r.close(); return None, len(ts)
+    t = ts[n]; name = t['kind'] + ' (' + str(t.get('name')) + ')'
+    r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
+    if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
+    r.step(12); hints = []; found = not by_pad
+    for k in range(9):
+        if not by_pad: r.step(7); continue
+        h = r.ev(HINT); hints.append(h)
+        if h and any(w in h.lower() for w in t['words']): found = True; break
+        r.press('RIGHT'); r.step(4)
+    if by_pad: r.press('A')
+    else:
+        pt = r.ev(f"({TAP_POINT.replace('TARGET_AT_', TARGET_AT)})({json.dumps(t)})")
+        if pt: r.page.mouse.click(*pt)
+        else: print(f'  ({name}: no point on screen reaches it by a tap)')
+        r.step(3)
+    r.step(90); out = [name, hints[-1] if found and hints else hints, r.ev(OUTCOME), found]
+    r.close(); return out, len(ts)
+def pick_play(pw, src, tag, by_pad):
+    out, n = [], 0
+    while True:
+        o, total = pick_one(pw, src, tag + ('_pad' if by_pad else '_tap'), by_pad, n)
+        if o is None: break
+        out.append(o); n += 1
+    return out
+def part_pick(pw, src, tag):
+    fails = []
+    P = pick_play(pw, src, f'{tag}_pick', True)
+    T = pick_play(pw, src, f'{tag}_pick', False)
+    for (kind, hint, op, found), (_, _, ot, _) in zip(P, T):
+        if hint == 'nowhere to stand': print(f'  {kind}: nowhere to stand beside it'); continue
+        if not found: fails.append(f'{kind}: the bottom line never named it ({[h for h in hint if h][:4]})'); print(f'  {kind}: not reached by the D-pad'); continue
+        d = diff_state(ot, op)
+        print(f'  {kind}: the line says "{hint}"; A {"did what the tap did" if not d else "differs from the tap: " + "; ".join(d[:3])}')
+        if d: fails.append(f'{kind} ("{hint}"): A and a tap differ: ' + '; '.join(d[:3]))
+    kinds = {x[0].split(' (')[0] for x in P}
+    for k in ('crew', 'seat', 'item', 'sealed door', 'lift'):
+        if k not in kinds: print(f'  {k}: none on this deck to try' + (' (no seat without another seat in reach, so "Sit" would be ambiguous)' if k == 'seat' else ''))
+    if len(P) < 4: fails.append(f'only {len(P)} kinds of thing found on the deck to pick')
+    return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick}   # 'reach' joins when the pad half is written
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
@@ -713,6 +808,12 @@ MUTANTS['unplug'] = {
 MUTANTS['odd'] = {
     'a non-standard pad ignored': WRAP("if (p.mapping !== 'standard') return null;").replace("if (!p) return p;", "if (!p || p.mapping !== 'standard') return null;"),
     'only the first pad listened to': WRAP("").replace("if (!p) return p;", "if (!p || p.index > 0) return null;"),
+}
+
+MUTANTS['pick'] = {
+    'A and B swapped': WRAP("const t = buttons[0]; buttons[0] = buttons[1]; buttons[1] = t;"),
+    'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
+    'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
 }
 
 # ---- the stand-in (--selftest) ----------------------------------------------------------------------------------------
