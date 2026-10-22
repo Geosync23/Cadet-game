@@ -173,3 +173,8 @@ pauseSet's own early return (on === PAUSE.on) means it runs once per change. For
 changes nothing (why false, no saved line). OK. Only caveat: padPauseLine reaches the card's line by position
 (`firstElementChild.children[1]`), so a change to the card's markup in section 15 silently drops the line; P3's drop
 part would catch that (it reads the same line). Suggest an id on that line (`pauseLine`) in the same one-line spirit.
+
+### P3 mutants on efbe62a (CP3's check): 8/8 CAUGHT
+markload (marks before a press), alwaysshow (touch picture), nopause, pausealways (30 s rule), norestore (the card's
+line comes back), saidalways (connected twice), ninA (Nintendo's bottom is B), nounuse (marks stay with no pad). To be
+re-run on 958421a (queued).
