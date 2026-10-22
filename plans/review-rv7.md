@@ -126,3 +126,26 @@ D. Still stuck once: "Linen to the laundry, Deck 4" (a haul drop; with FX3). The
 Day 4 (the arrows plan's Day 4 warning).
 E. A real rewire job has a machine, so it gets a Take it through the old machine rule (as before 6610dc7; tier 2). The
 interactions line tests `{ kind: 'rewire' }` without a machine, so it doesn't prove "never a rewire". Lead 29's call.
+
+## 4. claude/arrows-c 86faa86 + 5160b81: the game change PASS; the follower change FIXES NEEDED
+
+86faa86 (game): 15b `ixJobStep` returns null once you've clocked out today, so there's no job arrow (steps, Turn it in,
+Take a job) after clock-out; a job you hold stays in Tracked; a put-back part keeps its arrow.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 78fef90 -> 86faa86, alone | ALL IDENTICAL |
+| arrows_d_check on 86faa86 | OK; my planted fault (clocked out "tomorrow" instead of today) caught ("after clock-out: no job arrow") |
+| Week with 78fef90's follower on 86faa86's game, off / on | the same as 78fef90 (m1, m3d, m4, m5 learned; m2 off) |
+
+86faa86 + 5160b81 (follower): a real floor tap at the pin whenever the arrow is your job's own step (5160b81: not
+when the goal names an item, i.e. the board). With it the week collapses:
+
+| Follower | Arrows off | Arrows on |
+| --- | --- | --- |
+| 86faa86 | stuck at "Clock in at the time clock" every workday from Day 2 08:04: never clocks in; only m3d learned | stuck at "Turn it in at the job board" every day; only m3d |
+| 5160b81 | the same: stuck at Clock in (the clock's goal has a place, no item) | stuck at "Turn it in at the job board" from Day 2 10:50; nothing learned |
+
+A floor tap at the clock's or the board's pin opens neither. Fix: keep the real tap for a job's own stop (a chore's
+stop, a machine's spot) and tap the clock and the board by name, or tap the thing first and the floor only when nothing
+started (78fef90's order already does that).
