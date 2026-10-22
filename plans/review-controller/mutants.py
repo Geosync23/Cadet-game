@@ -34,6 +34,11 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p4_oddsave': ("if (new Set(all).size !== all.length) S.map = {};", "", 'settings'),
  'p4_nogentle': ("if (PAD_SET.walk === 'gentle' && PAD_DECK.walking", "if (false && PAD_DECK.walking", 'settings'),
  'p4_noeat': ("  for (const n of PAD_BTN) for (const e of [n, n + ':up']) (PAD.on[e] = PAD.on[e] || []).unshift(() => PAD_SET_UI.listen || PAD_SET_UI.eat ? true : undefined);", "", 'settings'),
+ # P3 47d71ff (CP3's five fixes)
+ 'p3b_saidalways': ("  if (!PAD_MARK.said) PAD_MARK.say = true;", "  PAD_MARK.say = true;", 'marks'),
+ 'p3b_overtoast': ("  if (PAD_MARK.say && PAD.used && !toastEl.classList.contains('show')) {", "  if (PAD_MARK.say && PAD.used) {", 'marks'),
+ 'p3b_nounuse': ("  if (!padList().filter(g => g.index !== PAD.goneIdx).length) padUnuse();", "", 'drop'),
+ 'p3b_saynow': ("  if (!PAD_MARK.said) PAD_MARK.say = true;", "  if (!PAD_MARK.said) { PAD_MARK.said = true; toast('Controller connected', 'x'); }", 'marks drop'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}

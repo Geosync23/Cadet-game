@@ -267,3 +267,10 @@ The pauseSet hook (section 15): fine (above). Fixes for CP3:
 (5aaa680 vs the turn-3 mutants included; my run of it stopped before it ran), CP1's facing/lift fixes, and the combined
 claude/controller checks. Handed to RV5: these notes, mutants.py, the probes, the gotchas. I re-check CP3's and CP5's
 five fixes each when they land; otherwise standing by.
+
+## P3 47d71ff (CP3's five fixes): code read OK, runs going
+'use' sets PAD_MARK.say; the frame handler says "Controller connected" once PAD.used and no toast is showing (1, 2);
+padBye records PAD.goneIdx and 'gone' leaves it out (3, in CT1's base: one field); pauseSet's line has id="pauseLine"
+(4: an invisible id in section 15's card markup for everyone, my suggestion); new marks/drop cases (5). Mutants updated
+(p3b_*). CP3 also saw a_start differ by 14812 px (max 153) once with the switch on, alone-rerun identical: the same
+count CP5 reported earlier - a start-up difference under load, to look at after this round.
