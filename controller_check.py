@@ -678,6 +678,11 @@ def part_lists(pw):
 
 # ---- P2: the mini-games (controller package 2) ----
 TL_FOCUS = "(() => { const a = document.activeElement, R = TL_UI.root; if (!a || !R || !R.contains(a)) return null; const d = a.dataset; return d.c !== undefined ? 'c' + d.c : d.h !== undefined ? 'h' + d.h : d.end ? 'e' + d.end : '?'; })()"
+def tl_settled(p, limit=10.0):                      # the board's own real-time redraw (it clears TL_GAME.fx) has happened; up to limit s
+    for _ in range(int(limit * 10)):
+        if p.ev('!TL_GAME || !TL_GAME.fx'): return True
+        p.g.page.wait_for_timeout(100)
+    return check(False, 'tiles: the board never redrew after its move (TL_GAME.fx still set after %g s)' % limit)
 def tl_nav(p, cell):                                   # D-pad to a square, one square a press
     for _ in range(14):
         f = p.ev(TL_FOCUS)
@@ -710,6 +715,7 @@ def part_tiles(pw):
         if tl_nav(p, mv[1]):
             p.press('a'); check(p.ev('TL_GAME.s.plies') == plies + 1, f'tiles: A on square {mv[1]} should put the tile down (a move made)')
     p.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
+    tl_settled(p); p.step(3)   # (the move's animations end and the board redraws on its own real-time timer, which clears fx: wait for it, so it can't land mid-check)
     # the hold: A picks a tile in your hold, and the highlight keeps its place when the board redraws
     p.ev("TL_GAME.s.p = 0; TL_GAME.sel = null; TL_GAME.s.hold[0] = [1]; tilesDraw(); padFocusTo(TL_UI.root.querySelector('[data-h=\"1\"]'))"); p.step(2)
     p.press('a'); p.step(2)
@@ -717,7 +723,7 @@ def part_tiles(pw):
     p.press('up'); f = p.ev(TL_FOCUS); check(f and f[0] in 'ce', f'tiles: D-pad up from your hold should go back toward the board, not {f}')
     # the end: Again highlighted; along to Done, A
     p.ev("""(() => { const G = TL_GAME; G.sel = null; G.s.sc = [6, 0]; G.s.p = 0; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()"""); p.step(3)
-    p.g.page.wait_for_timeout(1500); p.step(3)              # (the board redraws on its own timer once its moves' animations end; the highlight follows a frame later)
+    tl_settled(p); p.step(3)   # (the board redraws on its own timer once its moves' animations end, clearing fx; the highlight follows a frame later)
     if check(p.ev('TL_GAME.s.over'), 'tiles: the game did not end'):
         check(p.ev(TL_FOCUS) == 'efull', f'tiles: at the end the highlight should be on Again, not {p.ev(TL_FOCUS)}')
         p.press('right'); check(p.ev(TL_FOCUS) == 'equick', f'tiles: D-pad right from Again should reach Quick game ({p.ev(TL_FOCUS)})')
@@ -742,7 +748,9 @@ def part_disc(pw):
     p.ev('DISC.g.p[0].x = 0'); kf, df = run(-1)
     check(-1 < kl < 0 and kf == -1, f'disc: the stick should set the move by how far it is pushed ({kl}, {kf})')
     check(dl < 0 and df < 0 and abs(df) > abs(dl) * 1.5, f'disc: a full push should go further than a light one ({dl:.2f}, {df:.2f})')
-    check(p.ev(LD_FOCUS) == 'next', f'disc: the stick moved the highlight ({p.ev(LD_FOCUS)})')
+    for ax in ([1, 0, 0, 0], [0, 1, 0, 0], [0, -1, 0, 0], [-1, 0, 0, 0]):   # a full push every way: Skip is to the right of Next, Leave below
+        p.ev('DISC.g.p[0].x = 0'); p.axes(ax); p.step(12); p.axes([0, 0, 0, 0]); p.step(2)
+        check(p.ev(LD_FOCUS) == 'next', f'disc: the stick pushed {ax[:2]} moved the highlight ({p.ev(LD_FOCUS)})')
     p.axes([0, 0, 0, 0]); p.step(2); check(p.ev('DISC.inp.kx') == 0 and p.ev('DISC.inp.kz') == 0, 'disc: letting go of the stick should stop you')
     for _ in range(4):
         if p.ev('DISC.how') < 0: break
