@@ -14,7 +14,7 @@ Lead 25 = session_01J2aTyEohBf8KFHCsTqt3LW, branch `claude/lead-25`. Took over 2
 - Never change the look of the game (pixel-identical regressions); a missing menu word is a bug fix, not a look change.
 - main and the published links change only for a passed build. PRs/merges to main only on the user's go.
 - Up to **14 active seats**; any number on standby.
-- Handover at 500k (warn) / 600k (hand over), every seat.
+- Handover at about 65% memory (~650k), every seat; before that, hand over early if the next task would carry you past 65% (the user, 2026-10-22; replaces 500k/600k).
 - Full test round: before every release, whenever the coverage map is remade, and at least once a day. Between those, the test picker on option (a) "Careful".
 - Standing crowd limits are set by performance tests, not fixed guesses (the user, 2026-10-21).
 - Camera: 1.62 / 1.22 (0.64.12, the user asked 10-15% back from 1.85 / 1.40).
