@@ -134,3 +134,8 @@ the lift is offered, A = tap for crew, item, sealed door, lift, seat; facing rea
   #needPop (z-index 3) also on top of the open device at 900x760 (on b9f053ba and d5ee190); 6261ecc moves it to 2.
   cadet_test vs b9f053ba alone ALL IDENTICAL; bubble_check OK on 6261ecc, its item 5 FAILS on b9f053ba (#seek at
   390x844, #needPop at 900x760).
+
+## 10. controller_check closed: PASS (CTT2 09cac1b on 0.90.8)
+pick OK end to end (facing Desk and Wardrobe, crowded seat, crowded talk opens Olu's chat, lift and lone seat A = tap);
+day OK (lift to breakfast, servery, tray, sit, hunger 60 -> 100; talk; Take it at the job board; lift home; bunk; Set
+alarm; wakes day 2 06:00); idle (1fa67e9) OK twice. Still not run by anyone: the reach faults and the full reach sweep.

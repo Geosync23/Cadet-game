@@ -11,15 +11,13 @@ session_01E1TTHbhLzy2U6pAoGh7E9a (keeps CP3's and CP5's fix re-checks); PR9 sess
 
 ## Done (verdicts sent)
 - CTT2's controller_check: PASS WITH FIXES, all fixes in (cc72b15 verified on 0.90.5); idle's toast-timer fix verified
-  (1fa67e9: idle OK twice on 0.90.8).
+  (1fa67e9: idle OK twice on 0.90.8); 09cac1b's pick and day OK on 0.90.8: closed as PASS.
 - CP1 pick fix 8d68ad5: PASS. CP4 first use (3a086c2 + a505b42 + 3f6bb66): PASS (merged as 0.90.8). padBuzz beside a
   visible sign: PASS.
 - claude/controller 0.90.4, 0.90.5, 0.90.7, 0.90.8 (fda82c1): PASS. 0.90.8 is the five packages + pick fix + first use.
 - Batch 1: CP4 New game in Settings 63710eb2 PASS; CP4 bubbles-device 6261ecc0 PASS.
 
 ## Open
-- CTT2's newest pick and day on 0.90.8 (facing pressing B past P3's "Controller connected"; the day part's fixes): re-run
-  and confirm (pick should be fully OK on 0.90.8; day: each scene by pad).
 - Not yet run by anyone (as of 17:10): the reach faults and the full reach sweep (~2 h alone).
 - Each later merge into claude/controller: the suite below.
 
