@@ -1,4 +1,4 @@
-# Review: FX2's Pillar 5 fixes (claude/p5-fix2)
+# Review: the Pillar 5 fixes FX1-FX3 (AR2; FX2 from the start, FX1 and FX3 from PR9 at lead 28's call)
 
 Reviewer AR2 (session_015pnwa5oK7TDF5gZXNFLLvx), for lead 27, taking over FX2 from PR9. Base: claude/integration 2b4a05db (0.64.15). Builder FX2: session_01JRCSTi6r1qQ51mTgwgJ7es.
 
@@ -22,3 +22,18 @@ How each part is judged (lead 27's brief): its new check part FAILs on 2b4a05db 
 ## B. The scanner: not received yet
 
 ## C. Wording, the galley plant's calibrate, a dropped part left in hand: not received yet
+
+## FX3's delta e6bcf827 (on b063f86, which PR9 passed with fixes): PASS
+
+In it: hauling's lesson on any day from Day 3 (the week's `manifestFor` crates kept back for it) and asked again at its own time (`againAsk`), not at 06:00; each manifest stop's own words on the arrow (a kind's `goal(j, k)`, read by 15b's `ixJobStep`; `haulName` knows "linen"); the promotion talk where Calder finds you (`where: { any: true }`); 24f clears only its own arrow (`incGoalSet`/`incGoalClear`, PR9's request); Tomas's inspection ask in person in Bunk 1 18:00-21:30 the evening before, else Mail at 21:30.
+
+| Test | Result |
+| --- | --- |
+| mech_check fx3 on 2b4a05db | FAIL (promo talk; m4 off a delivery day, its run, per-stop words, the retry time; m6's Mail, warning, follow, crew and retry), as it should |
+| mech_check fx3, and m4 m6 m3i, on e6bcf827 | MECH CHECK OK, both |
+| cadet_test 2b4a05db -> e6bcf827 | first run: only `a_start` 14812 px (the known first-frame bubble flake, backlog #16); rerun ALL IDENTICAL (renderer noise only) |
+| Honest play, Thursday case (Rounds trained Day 3, hauling not; manifest empty) | base: Yara's talk at 11:40, then `again`, nothing (the old stall). tip: talk at 11:40, watch, the run "Manifest run: 1 crate" held for you, trained at 11:57 |
+| Honest play, Days 2-5 | per-stop words seen: "Take a hover cart from the Cart bay", "Load the medical supplies (1 of 2)", "Load the crew store stock (2 of 2)", "Medical supplies to the infirmary, Deck 3", "Crew store stock to the crew store, Deck 3", "Cart back to its dock" |
+| arrows_check week on e6bcf827 | the same 17 FAILs as PR9's b063f86 run (main lift lines stay green; Day 2 "Repair the light relays" stale arrow still red, FX1's); nothing new red |
+
+Seen, not FX3's: in both runs the follower took Yara's own "load only" watch run from the board ("[train] [held]") and was trained after one load, without delivering anything. That is the teacher's-job item in FX2's B (sent to FX2: cover hauling, not only the scanner). Yara's Mail still says "Meet me at the hold" (FX2's C).
