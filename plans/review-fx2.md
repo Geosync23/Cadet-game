@@ -66,3 +66,17 @@ In it: (8) calibrating the galley plant: a tap whose line passes over your job's
 | arrows_check week on a merge FX2 cc2bb2be + FX3 360801c0 (AC1's resolution of the one-line conflict) | the drill lines go; left: the same m1 chain (FX1) and one line "Turn it in at the job board stayed up from Day 4 05:50" on that path only. My own play of the merge (Days 2-4) doesn't show it: there the round is learned on Day 2, Yara's lesson lapses on Day 3 and FX3's re-ask comes on Day 4 with FX2's words ("Meet me in Main storage on Deck 5, 11:40"). To look at again once FX1 is in |
 
 Merge: FX2 and FX3 conflict in one line of 15b's ixJobStep (the machine arrow's label: FX2's scan-first and "Tune the", FX3's chore title) and in mech_check.py; AC1's claude/arrows-c 1f2ce27d resolves the line as both (checked).
+
+## FX2's eating fix 191d1853 (on a merge of integration b9f053ba): PASS
+
+With a tray, only a `mess-seat` ate it; now any sit place does (`SIT_TYPES` with pose `sit`: lounge seats, benches, the common room, the garden, the music room's seats, event seats such as Sunday's long table, the observatory). Only when you hold a tray.
+
+| Test | Result |
+| --- | --- |
+| player_check on b9f053ba | FAIL "with a tray, a tap on any seat eats it" (long table, lounge, mess seat all 'sit'), as it should |
+| player_check on 191d1853 | PLAYER CHECK OK |
+| cadet_test b9f053ba -> 191d1853 | ALL IDENTICAL |
+| By hand (Deck 3, 18:30) | no tray: lounge seat, mess seat, bench all "Sitting" on both builds (unchanged); with a tray: base eats only at the mess seat, the tip eats at all three |
+| Other sit-downs and the crew | the change is inside the player's `actStart` tray branch only: meetings, traditions and the lounge without a tray are unchanged (above), and the crew's seating (sections 10 and 14) isn't touched |
+
+Note for the user, not blocking: "any seat" includes the music room's seats (the piano stool) and meeting seats (`event`), so a tray carried into a meeting room is eaten there.
