@@ -315,7 +315,10 @@ FOLLOW = r"""(() => {
   its.sort((a, b) => a[2] - b[2]);
   const named = its.find(x => x[2] < 3.5 && x[0].t && (g.label || '').toLowerCase().includes(x[0].t.toLowerCase().replace(/\s+\d+$/, '')));   // what the label names, as a player would read it
   const it = sh && its.find(x => x[0].t === sh[1]) || named || its[0];   // a shelf by its name, else the thing named, else the nearest
-  const pin = () => { const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
+  const pin = () => {                                     // a tap on the pin as the game draws it (on the thing since FX3's fix 15), else the floor under the arrow's spot
+    const pe = document.getElementById('ixGoal'), pd = pe && !pe.hidden && pe.children[1];
+    if (pd && getComputedStyle(pd).display !== 'none') { const r = pd.getBoundingClientRect(); if (r.width > 1 && r.bottom > 0 && r.top < innerHeight) return { click: [r.left + r.width / 2, r.top + r.height / 2], label: g.label }; }
+    const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
   if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
   { let js = null; try { js = typeof ixJobStep === 'function' ? ixJobStep() : null; } catch (e) { js = null; } let mj = null; try { mj = myJob(); } catch (e) { mj = null; } if (mj && !mj.workDone && js && js.label === g.label && !sh && !g.item && g.place !== '5-timeclock-1') return pin(); }   // your job's own step (a chore's stop, a machine; not the board, the time clock or another named thing, tapped by name: RV7): a real tap at its pin, as a player would (lead 29, RV7's arrows_check_rt; a shelf still by its name)
   if (it && it[2] < 2.5) { try { const v = it[1].clone().project(camera); ray.setFromCamera({ x: v.x, y: v.y }, camera); } catch (e) { /* no ray */ }   // the tap's ray through the thing, as a real tap would set it (a stale one from the last real tap made the board's tap restart a done job: AC2)
