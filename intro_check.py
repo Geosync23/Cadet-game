@@ -621,9 +621,9 @@ with sync_playwright() as pw:
             if g.ev("shipNow() >= introAbs(1, INTRO_WEEK.find(b => b.id === 'd1-shadow').at + 1)"): break
         took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
         # the first week's work day is the ship's day shift (TS3, a planted fault: DAY_SHIFT an hour late went unnoticed):
-        # when Torres starts the shadow job you're inside your shift, and it began no more than 15 minutes before
-        sh = g.ev("({ t: clockText(), m: SHIP.time.min, from: DAY_SHIFT[0], to: dayShiftEnd(SHIP.time.day), on: playerShiftOn(SHIP.time.day) })")
-        if not (sh['on'] and sh['from'] <= sh['m'] < sh['to'] and sh['m'] - sh['from'] <= 15): fail(f"the shadow shift starts at {sh['t']}, outside the day shift's start ({mins(sh['from'])}-{mins(sh['to'])}): {sh}")
+        # the shadow beat starts within 15 minutes of the shift's start, and you're on your shift when you take its job
+        sh = g.ev("({ t: clockText(), m: SHIP.time.min, beat: INTRO_WEEK.find(b => b.id === 'd1-shadow').at, from: DAY_SHIFT[0], to: dayShiftEnd(SHIP.time.day), on: playerShiftOn(SHIP.time.day) })")
+        if not (sh['on'] and sh['from'] <= sh['m'] < sh['to'] and 0 <= sh['beat'] - sh['from'] <= 15): fail(f"the shadow shift is not the day shift's start: the beat at {sh['beat'] // 60:02d}:{sh['beat'] % 60:02d}, the job taken {sh['t']}, the shift {sh['from'] // 60:02d}:{sh['from'] % 60:02d}-{sh['to'] // 60:02d}:{sh['to'] % 60:02d}: {sh}")
         g.step(60)
         esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
         fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
