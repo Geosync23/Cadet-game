@@ -538,3 +538,4 @@ Every game change runs the full round on six runners at once (~30 min). Split an
 | CR5 | session_01CHoEsvv7zMPZDr1ir7uAiz | `claude/checks-cr5` |
 | CR6 | session_01B1FwE5sMmHnMPWsGn23nrk | `claude/checks-cr6` |
 Build master: BM13 session_01ExFoVfhiFG3wYTFv2QrojC. Lead: lead 25 session_01J2aTyEohBf8KFHCsTqt3LW.
+**~01:46 UTC:** Last plan page up: comet + visit https://claude.ai/artifact/Gg2QgQPhmGpzkdhui13K72 (EP2; comet Day 16 21:30, visit Days 26-29, crowds measured under 80, ~14-16 build turns + ~125 lines; coordinate with P5P on Day 16/26/29 and CS1). All four pages are now with the user. 0.64.14 full round: CR2, CR3 done OK (known-old only); CR1 finishing (CR3 took day 5/7).
