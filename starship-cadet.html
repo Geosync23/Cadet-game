@@ -53261,10 +53261,10 @@ const padTrig = v => v < PAD_DEAD.trig ? 0 : Math.min(1, (v - PAD_DEAD.trig) / (
 function padList() { try { return navigator.getGamepads ? Array.from(navigator.getGamepads() || []).filter(g => g && g.connected !== false) : []; } catch (e) { return []; } }
 function padUse() {                                        // the controller is in use: its marks and highlight show (later turns)
   PAD.lastUse = performance.now(); if (PAD.used) return;
-  PAD.used = true; document.body.classList.add('pad'); padFire('use');
+  PAD.used = true; padListen(); document.body.classList.add('pad'); padFire('use');   // the touch hand-back listens from the first use, not from hello
 }
 function padUnuse() { if (!PAD.used) return; PAD.used = false; document.body.classList.remove('pad'); padFire('unuse'); }
-function padListen() {                                    // once a pad has said hello: a touch, the mouse or the wheel hands back to them
+function padListen() {                                    // once the pad is first used: a touch, the mouse or the wheel hands back to them
   if (PAD.listening) return; PAD.listening = true;
   const back = () => padUnuse();
   addEventListener('pointerdown', back, true); addEventListener('wheel', back, { capture: true, passive: true });
@@ -53299,7 +53299,7 @@ function padTick(dt) {                                    // every frame while a
   padFire('frame');                                       // the turns' per-frame work (walking, the ring) hangs here
 }
 function padHello(e) {                                    // a pad said hello (its first button press)
-  PAD.live = true; padListen();
+  PAD.live = true;
   if (e && e.gamepad && PAD.idx < 0) PAD.idx = e.gamepad.index;
 }
 function padBye(e) {                                      // a pad went (battery, Bluetooth, unclipped)
