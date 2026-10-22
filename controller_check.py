@@ -380,8 +380,11 @@ class Sweep:
     def inner(sc):
         # with a panel open, its own things; the screen's edge buttons are pressed from the deck only
         return [i for i in sc['items'] if i['dlg']] if sc['dialogs'] else sc['items']
+    # a panel's own fixed keys (the device's Back, Home and Close) are pressed like the rest but don't make a screen new:
+    # Back comes and goes with the app, so home after an app would look like another screen
+    FIXED = {'#devBack', '#devHome', '#devClose'}
     @classmethod
-    def sig(cls, sc): return (sc.get('deck'), tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc))))
+    def sig(cls, sc): return (sc.get('deck'), tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc) if i['k'] not in cls.FIXED)))
     def deck_tap(self, key):
         name = key[len('@tap:'):]
         t = next((t for t in self.r.ev(DECK_TARGETS) if t['name'] == name), None)
