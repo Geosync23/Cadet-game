@@ -53235,10 +53235,11 @@ const PAD_ON = false;                                     // the switch (control
 const PAD_BTN = ['a', 'b', 'x', 'y', 'lb', 'rb', 'lt', 'rt', 'view', 'menu', 'ls', 'rs', 'up', 'down', 'left', 'right'];   // the standard layout's order
 const PAD_DEAD = { stick: .22, trig: .12 };               // how far a stick or trigger moves before it counts
 const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeats: after half a second, then four steps a second
+const PAD_FIRST_USE = { push: .5, hold: .15 };            // until the pad is in use, a stick or trigger must pass push (after the dead zone) for hold s; any button press counts at once
 // live: a pad is connected; idx: the pad in charge (the last to press anything); used: the controller is the input in
 // use (its marks and highlight show); lastUse: when (performance.now) it was last used; down / held: buttons this frame,
 // and how long each has been held (s); ls, rs: the sticks after the dead zone, [x, y] in -1..1 (y down); lt, rt: 0..1
-const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, dt: 0, log: null };
+const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, firm: 0, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, dt: 0, log: null };
 function padOn(name, fn) { (PAD.on[name] = PAD.on[name] || []).push(fn); }
 function padFire(name, rep) {
   if (PAD.log) PAD.log.push(name + (rep ? '+' : ''));     // controller_check reads what fired
@@ -53284,6 +53285,7 @@ function padTick(dt) {                                    // every frame while a
   PAD.ls = padStick(+ax[0] || 0, +ax[1] || 0); PAD.rs = padStick(+ax[2] || 0, +ax[3] || 0);
   PAD.lt = padTrig(bt[6] ? +bt[6].value || (bt[6].pressed ? 1 : 0) : 0); PAD.rt = padTrig(bt[7] ? +bt[7].value || (bt[7].pressed ? 1 : 0) : 0);
   let any = PAD.ls[0] || PAD.ls[1] || PAD.rs[0] || PAD.rs[1] || PAD.lt || PAD.rt;
+  PAD.firm = Math.max(Math.hypot(PAD.ls[0], PAD.ls[1]), Math.hypot(PAD.rs[0], PAD.rs[1]), PAD.lt, PAD.rt) > PAD_FIRST_USE.push ? PAD.firm + dt : 0;   // how long a stick or trigger has been pushed firmly
   for (let k = 0; k < PAD_BTN.length; k++) {
     const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || k === 6 && PAD.lt > .5 || k === 7 && PAD.rt > .5;   // a trigger counts as pressed past half way
     if (on) any = true;
@@ -53293,7 +53295,7 @@ function padTick(dt) {                                    // every frame while a
       if (k >= 12 && (PAD.rep[n] -= dt) <= 0) { PAD.rep[n] += PAD_REP.every; padFire(n, true); }   // the D-pad repeats while held
     } else if (PAD.down[n]) { PAD.down[n] = false; PAD.held[n] = 0; padFire(n + ':up'); }
   }
-  if (any) padUse();
+  if (any && (PAD.used || PAD.firm >= PAD_FIRST_USE.hold)) padUse();   // not in use yet (or handed back to touch): a stick or trigger alone counts only pushed firmly for a moment, so a drifting stick is not a use
   padFire('frame');                                       // the turns' per-frame work (walking, the ring) hangs here
 }
 function padHello(e) {                                    // a pad said hello (its first button press)

@@ -5,6 +5,8 @@
 # The game file's switch PAD_ON is flipped on in a copy (the "on" build); the file as given is the "off" build.
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
+#   firstuse: (lead 27) a drifting stick or a light trigger at connect is not a use (no body.pad, nothing new); a
+#           firm push held 0.15 s is, a press at once; after a touch a drift doesn't take the screen back
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
 #   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   lists:  (P1) the right stick scrolls a long list, the triggers page; the D-pad follows into it; a text box: A keeps
@@ -572,7 +574,28 @@ def part_screens(pw):
         check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('tiles', part_tiles), ('disc', part_disc), ('screens', part_screens)]
+# the first use (lead 27, PR9's note): a stick that drifts at connect is not a use; a firm push held a moment is, a press at once
+def part_firstuse(pw):
+    p = Pad(pw, ON)
+    shape = "[PAD.used, PAD.lastUse > -1e9, document.body.classList.contains('pad'), document.querySelectorAll('style').length, document.body.children.length]"
+    p.plug(); p.step(2); s0 = p.ev(shape)
+    p.axes([.35, .12, -.3, .2]); p.step(45)                # past the dead zone, a gentle drift on both sticks for 1.5 s
+    check(p.ev(shape) == s0 and s0[0] is False and s0[1] is False, f'firstuse: a drifting stick at connect counted as a use: {s0} -> {p.ev(shape)}')
+    p.btn('lt', .4); p.step(30); p.btn('lt', 0); p.step(1)  # a light, steady trigger
+    check(p.ev('PAD.used') is False, 'firstuse: a light trigger counted as a use')
+    p.axes([1, 0, 0, 0]); p.step(3); u = p.ev('PAD.used')   # a firm push, 0.1 s: not yet
+    p.step(3); v = p.ev('PAD.used'); p.axes([0, 0, 0, 0]); p.step(1)   # 0.2 s: a use
+    check(u is False and v is True and 'pad' in p.ev('document.body.className'), f'firstuse: a firm push should count after about 0.15 s: {u} {v}')
+    # handed back to touch: the drift doesn't take it back; a press does, at once
+    p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))")
+    p.axes([.35, .12, 0, 0]); p.step(30); check(p.ev('PAD.used') is False, 'firstuse: a drifting stick took the screen back from touch')
+    p.axes([0, 0, 0, 0]); p.btn('b'); p.step(1); check(p.ev('PAD.used') is True, 'firstuse: a press should count at once'); p.btn('b', 0); p.step(1)
+    # in use: a gentle stick keeps it in use (lastUse moves on)
+    t0 = p.ev('PAD.lastUse'); p.axes([.35, 0, 0, 0]); p.step(5); p.axes([0, 0, 0, 0]); p.step(1)
+    check(p.ev('PAD.lastUse') > t0, 'firstuse: in use, a gentle stick should still count')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('tiles', part_tiles), ('disc', part_disc), ('screens', part_screens), ('firstuse', part_firstuse)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
