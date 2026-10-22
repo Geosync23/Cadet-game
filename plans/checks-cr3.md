@@ -124,3 +124,16 @@ sha256 **0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e** (the
 | day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 244 s |
 
 No FAIL. (The same numbers as on c5c43293.)
+
+# Round on 0.64.16 (claude/integration-next b9f053ba), BM13's start (lead 27's go; reported to lead 28), CR3's share
+
+sha256 **70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7** (BM13's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 252; worst stuck 0.0; 283 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 250; worst stuck 0.0; 264 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 267; worst stuck 0.0; 268 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 270 s |
+
+No FAIL.
