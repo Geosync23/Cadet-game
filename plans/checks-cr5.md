@@ -4,6 +4,24 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.64.16 full round (2026-10-22, started 14:06 UTC, for lead 27 / lead 28 and BM13)
+
+- Candidate: `claude/integration-next` b9f053ba ("0.64.16: the Zeke patch (ON1's claude/patch-zeke ce2f77bc)").
+  Checks run from a worktree of this commit (its own check scripts).
+- `starship-cadet.html` sha256 `70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7`: matches BM13's.
+- OLD: `claude/integration` 2b4a05db (0.64.15), sha256 `0c1f6fb4...8259d2e` (the 0.64.15 re-run's file). Not
+  needed: nothing failed.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `day_check.py BUILD 21` | OK | 0 | 284 s | `DAY CHECK OK`; draw calls peak 220 / 207 / 258 / 233 on Decks 1-4 (budget 450) |
+| `day_check.py BUILD 27` | OK | 0 | 277 s | `DAY CHECK OK` |
+| `interactions_check.py BUILD` | OK | 0 | 449 s | `INTERACTIONS CHECK OK` |
+| `events_check.py BUILD` | OK | 0 | 258 s | `EVENTS CHECK OK` |
+| `career_check.py BUILD` | OK | 0 | 47 s | `CAREER CHECK OK` |
+
+No FAIL lines in any log. **CR5: OK** (5 of 5).
+
 ## 0.64.15 full re-run (2026-10-22, started 08:46 UTC, for lead 26 and BM13)
 
 - Candidate: `claude/integration-next` 31c44cb9 ("Merge claude/patch-play1-d 836db6c7 (CJ1: part 14 takes fetch or
