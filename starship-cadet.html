@@ -13462,6 +13462,7 @@ function playerTap(it, at, point) {
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
   if (choreRayTap(it, at)) return true;                  // the tap passed over your chore's next stop and a machine caught it (FX3, below)
+  if (choreThingTap(it, at)) return true;                // a machine in reach of a haul's (a round's) next stop; anything, carrying for a haul or a delivery: the stop (FB1, below)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
@@ -13538,6 +13539,7 @@ function playerFloorTap(point) {
   if (typeof beamFloorTap === 'function' && beamFloorTap(point)) return true;   // section 18: by the beam at Name on the beam, paint your name (0.71.3)
   if (typeof crateTap === 'function' && crateTap(point)) return true;   // the crate you set down (Put down, 0.28.60)
   if (typeof clothesFloorTap === 'function' && clothesFloorTap(point)) return true;   // section 21b: your wardrobe, or the hamper you set down (0.42.40)
+  if (typeof ixPinTap === 'function' && ixPinTap(point)) return true;   // section 15b: a tap at the arrow's pin is the thing it points at (FX3)
   if (typeof PLACE_OF === 'undefined' || typeof ray === 'undefined') return false;
   const o = ray.ray.origin, d = ray.ray.direction, hits = [];
   for (const pl of PLACE_OF.values()) {
@@ -14331,7 +14333,8 @@ function jobTap(it, at) {
       const sh = typeof shelfTapped === 'function' ? shelfTapped(it) : null;   // no job at all: a shelf says what's on it (0.33.41)
       if (sh && !myJob() && !P.carry.some(p => p !== KIT_BAG)) { toast(it.t + ' shelf', shelfLine(sh)); return true; }   // not with a chore: its stop may be here (a delivery's pickup)
       if (!P.carry.some(p => p !== KIT_BAG) || typeof returnPart !== 'function') return false;
-      approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
+      const pl = jobPlaceNear('storage', 'r', at);       // to the shelf's spot nearest the tap, as a fetch does (FB1: its front was round the far side, away from the put-back arrow's pin)
+      if (pl) actStart('stow', pl.id, { title: it.t, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
       return true;
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
@@ -14423,7 +14426,19 @@ function jobDoorOpen(deck, room) {
 function choreRayTap(it, at) {
   const j = typeof ixChore === 'function' ? ixChore() : null; if (!j || j.workDone || typeof ray === 'undefined' || !(ixMachine(at) || stubTap(it, at))) return false;
   const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
-  if (!s || jobRayDist(s) >= JOB_RAY) return false;
+  const dock = /^Cart dock/.test(it.t) && nx && /^(cart|return)$/.test(nx.s.step) && s && Math.hypot(s.x - at.x, s.z - at.z) < JOB_REACH;   // a run's cart stop: the dock itself is where you take the cart (lead 29's Cart dock 1 pin)
+  if (!s || !dock && jobRayDist(s) >= JOB_RAY) return false;
+  return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
+}
+// a machine, real or stand-in, within reach of the next stop of a registered kind's job (a haul, a round: FB1, lead 29): the
+// stop, whatever the tap's line. Hauling's cart and return stops stand by Cart dock 1, and the dock said "in good order":
+// players tap the thing under the arrow. Carrying for a haul or a delivery, anything in reach of its next pick-up or drop does
+// it (lead 29, RV7: the Folding table by the laundry drop was your laundry; the store's baskets, the infirmary's supplies).
+// Other chores keep 0.28.55's rule (Washer 1 by a laundry lamp: your load)
+function choreThingTap(it, at) {
+  const j = typeof ixChore === 'function' ? ixChore() : null, carry = !!j && (j.kind === 'haul' || j.chore === 'delivery'); if (!j || j.workDone || !(carry || jobKindOf(j)) || !it.hit) return false;
+  const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
+  if (!s || ixDist(it, s) >= JOB_REACH || !(carry || ixMachine(at) || stubTap(it, at))) return false;
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
@@ -15930,9 +15945,10 @@ function ixJobStep() {
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
   if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: with the scanner, a faulty machine is read before its part is named)
-    if (w.make && w.make.part) return { deck: 5, room: 'f', label: 'Make ' + partList([w.make.part]) + ' in the machine shop' };
+    const lathe = typeof MAKE_AT !== 'undefined' ? MAKE_AT.find(id => typeof placeById === 'function' && placeById(id)) || null : null;   // the machine you need (FX3, the user's "arrow to the needed machine"): the lathe, not the room
+    if (w.make && w.make.part) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([w.make.part]) + (lathe ? ' at the lathe' : ' in the machine shop') };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
-    if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
+    if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', place: lathe, label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + (lathe ? ' at the lathe' : ' in the machine shop') };
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
   return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (j.kind === 'chore' && !need.length && j.title) || (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a chore on a machine says what it is ("Calibrate the galley plant": FX3); a tune job (24e) is tuned, scan first (p5-fix2)
@@ -15955,6 +15971,18 @@ function ixWorkStep() {
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
   const open = typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow; the queue on: only a job with a Take it counts (piece D's S6)
   return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
+}
+// a tap at the arrow's pin (the floor under it: the thing itself may be on a wall the camera has cut away, or off to one side
+// of the pin, FE1's items 33 and 38: the lathe, the job board) is a tap on the thing the goal points at: the goal's item, else the
+// thing nearest its place. Only when the tap's line passes over the goal's point (JOB_RAY)
+function ixPinTap(point) {
+  const g = goalNow(); if (!g || typeof deckDef === 'undefined' || g.deck !== deckDef.num || g.crew || g.xz || typeof jobRayDist !== 'function') return false;
+  const w = ixGoalWorld(g); if (!w || jobRayDist(w) >= JOB_RAY) return false;
+  const pos = i => { i.hit.getWorldPosition(ixP); return ixP.clone(); };
+  let it = g.item ? ITEMS.find(i => g.item instanceof RegExp ? g.item.test(i.t) : i.t === g.item) : null;
+  if (!it && g.place) { let bd = 1.6; for (const i of ITEMS) { if (!i.hit || i.lift) continue; const q = pos(i), d = Math.hypot(q.x - w.x, q.z - w.z); if (d < bd) { bd = d; it = i; } } }
+  if (!it) return false;
+  const q = pos(it); return !!playerTap(it, q.clone(), q.clone());
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
