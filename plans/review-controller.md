@@ -281,3 +281,9 @@ role/aria-live recorded and removed on 'unuse'; a11y's name test reads the brows
 shadows required; DEV_NOTES: three tap-again asks; left hand: no zoom, said in the comment and DEV_NOTES (judgement
 call, accepted: zoom's analog reading makes a button remap P4's business). New mutants p5b_keepattr, p5b_glyphname,
 p5b_nomaps.
+
+## P3 47d71ff verdict: PASS (all five fixes in, nothing open)
+Alone: cadet_test 93093a8 -> 47d71ff off ALL IDENTICAL, on ALL IDENTICAL (plain; CP3's 14812 px a_start didn't show);
+CP3's controller_check OK; mutants 10/10 CAUGHT (the six old ones still standing, plus p3b_saidalways, p3b_overtoast
+"replaced the message showing", p3b_nounuse, p3b_saynow "a first press of B lost Controller connected"); check_fast
+QUICK CHECK OK (389 s).
