@@ -58,11 +58,12 @@ it to the runner with the lightest share and update this table and the picker's 
 ### What counts as a known old failure
 
 A FAIL is **known old** only if all three hold: it has a row in `plans/backlog.md`; the same check on the last release
-(`OLD`) fails **the same way**; and its message matches the row. Today (2026-10-22) the lead's list is **backlog 12**
-(career_check `busy: "Relied on" before Day 5`). Others seen failing the same way on the release, for the lead to add
-to the list or not: backlog 14 (perf_check +2 geometries across deck round trips), 18 (day_check Day 12 "the rec deck
-is on but nobody came"), 24 (tiles_check "opening the board adds nothing", CR3's row 26), and food_check `11 4`
-"harvest salad" (no row yet: CR2's find). Until the lead adds one, treat it as a FAIL to report.
+(`OLD`) fails **the same way**; and its message matches the row. **The list (lead 25, 2026-10-22): backlog 12**
+(career_check `busy: "Relied on" before Day 5`) **and backlog 14** (perf_check "memory grows across deck round trips",
++2 geometries a lap). Nothing else. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
+backlog 18 (day_check Day 12 "the rec deck is on but nobody came", PB2's fix), backlog 24 / CR3's row 26 (tiles_check
+"opening the board adds nothing to the 3D scene") and food_check `11 4` "harvest salad" (PB2's fix). On 0.64.14 and
+later they must pass: if one fails again, it's a real FAIL.
 
 Contents
 1. Why we test this way (the user's rules)
@@ -169,19 +170,19 @@ or item you can't reach.
 
 ### 2.3 Known FAILs and what they mean
 
-A FAIL listed here is **known**: it doesn't block a release on its own, but it must look exactly like this. A new
+Only backlog 12 and 14 are **known old** failures that don't block a merge (THE RULE, at the top); the others below are flakes or fixed, listed so you can recognise them. A known one must look exactly like this. A new
 FAIL, or one of these with a different message, is new (see 8.3).
 
 | Check | FAIL | What it means |
 |---|---|---|
 | career_check | `busy: "Relied on" before Day 5` | Known and accepted (backlog 12 and 17): waits for the user's balancing pass. Never "fix" it by changing the check. |
 | perf_check | `memory grows across deck round trips` (+2 geometries: 548 → 548 → 550 in backlog 14; 520 → 520 → 522 on the storm + Fridays candidate) | Known (backlog 14). perf_check exits 1 on this alone. A single frame-time spike can also show; measure again. |
-| tiles_check | `phone 390 (or 320): opening the board adds nothing to the 3D scene` | Known since 0.64.11 (backlog 24, CR3's row 26): the check's own timing. It counts while the device's framing still eases on real time and something comes into view. Not a game bug. |
+| tiles_check | `phone 390 (or 320): opening the board adds nothing to the 3D scene` | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Known since 0.64.11 (backlog 24, CR3's row 26): the check's own timing. It counts while the device's framing still eases on real time and something comes into view. Not a game bug. |
 | devmode_check | the clock part: `clocked in, the jump didn't keep you clocked in` | A flake (backlog 21): real-time waits plus, before DB2's fix, a random seed giving an early sick day about 1 run in 28. Run it alone; open until full runs stay green. |
-| day_check Day 12 | `the rec deck is on but nobody came to it in the evening` | Backlog 18: on Day 12 (a Friday) the plans' rec-deck evening is empty **with the storm off too** (0.64.6; claude/fridays with SHORT_FRIDAY off); Day 5 passes. Open. |
+| day_check Day 12 | `the rec deck is on but nobody came to it in the evening` | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Backlog 18: on Day 12 (a Friday) the plans' rec-deck evening is empty **with the storm off too** (0.64.6; claude/fridays with SHORT_FRIDAY off); Day 5 passes. Open. |
 | day_check Day 13 (storm on) | the same message, on the storm's Saturday | A separate case: the storm shuts the rec deck that day; EV4's 4fa198f skips the comparison only on days the storm shuts the deck. Check it on the combined storm build. |
 | day_check Day 3 | two crew in one breakfast seat (e.g. 3-mess-42) | Backlog 11. |
-| food_check `11 4` | `harvest salad` (part 4g) | Since 0.64.11's crew patch Day 20 is the farewell supper (CR2's find; no backlog row yet). `1 7` passes. |
+| food_check `11 4` | `harvest salad` (part 4g) | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Since 0.64.11's crew patch Day 20 is the farewell supper (CR2's find; no backlog row yet). `1 7` passes. |
 | food_check from Day 7 | `garden, good` (4j) | Backlog 23. |
 | join_check | `first-light: not on in 400 days` | Backlog 19, when `FLC_ON` is off. |
 | lines_check | warnings | Never a FAIL. Integration has 6 known warnings; the storm build 49 (43 storm meeting repeats). |
