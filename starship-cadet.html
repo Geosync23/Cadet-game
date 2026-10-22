@@ -14827,7 +14827,7 @@ function ladderPanel() {
     const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
     const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
     b.append(mk('i', '', deckLabel(n)), sp);
-    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Goal')); }
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Tracked')); }   // the deck of what you're tracking (playtest 1, the user's word)
     if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
     return b;
   };
@@ -52316,8 +52316,8 @@ function openLiftPanel() {
     i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
-    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Goal'; b.appendChild(g); }
-    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. Your goal is here' + (gl.label ? ': ' + gl.label : '') : ''));
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Tracked'; b.appendChild(g); }   // playtest 1: the user's word
+    b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. What you\'re tracking is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
   }
