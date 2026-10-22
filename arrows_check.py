@@ -140,20 +140,61 @@ def part_queue(pg):
     check(s == 'b5', f'body: a level 5 did not show without a job ({s})')
     pg.ev("GUIDE.list.length = 0; GUIDE.rev++")
     print('  body: levels 5-6 after the job')
-    # the training arrows T1-T3 (read from SHIP.works.cur): meet from 15 minutes before, watch at the teacher, your turn at the board
-    t = pg.ev("""(() => { if (typeof guideTrain !== 'function' || !SHIP.works) return null; const W = SHIP.works, now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, out = [];
-      const keep = W.cur; GUIDE.list.length = 0; GUIDE.rev++; clearGoal(); SHIP.player.track = undefined;
+    # the training arrows T1-T3 (read from SHIP.works.cur): meet from 15 minutes before at the room (the teacher only once
+    # they're in it), watch at the teacher, your turn at the board unless you hold another job (RV6's review of E)
+    t = pg.ev("""(() => { if (typeof guideTrain !== 'function' || !SHIP.works) return null; const W = SHIP.works, now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, out = {};
+      const keep = W.cur, lab = () => { GUIDE.key = ''; const g = goalNow(); return g ? g.label || null : null; }, ent = p => GUIDE.list.find(e => e.id.startsWith(p)) || null;
+      const fit = t => { const c = document.createElement('canvas').getContext('2d'); c.font = '12.5px ' + getComputedStyle(document.body).fontFamily; return Math.ceil(c.measureText(t || '').width) + 20; };
+      GUIDE.list.length = 0; GUIDE.rev++; clearGoal(); SHIP.player.track = undefined; if (myJob()) dropJob(myJob().id);
       const occ = { key: 'arrows-occ', id: 'works.m4', deck: 5, room: 'r', at: now + 30, len: 15, status: 'asked' }; SHIP.occasions.push(occ);
       W.cur = { id: 'm4', st: 'meet', d, by: 'esposito-yara', occ: 'arrows-occ' };
-      guideTrain(); GUIDE.key = ''; out.push((goalNow() || {}).label || null);
-      occ.at = now + 10; GUIDE.list.length = 0; guideTrain(); GUIDE.key = ''; out.push((goalNow() || {}).label || null);
-      W.cur.st = 'watch'; GUIDE.key = ''; out.push((goalNow() || {}).label || null);   // the meet entry goes when the stage moves on
-      SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); W.cur = keep; GUIDE.list.length = 0; GUIDE.rev++; return out; })()""")
+      guideTrain(); out.early = lab();
+      occ.at = now + 10; GUIDE.list.length = 0; guideTrain(); out.meet = lab(); const m = ent('train:m4:meet');
+      if (m) { const g = m.goal(); out.meetLevel = m.level; out.meetRoom = [g.deck, g.room]; out.meetCrew = !!g.crew; out.inRoom = guideTeacherIn('esposito-yara', 5, 'r'); out.meetFit = fit(g.label); }
+      W.cur.st = 'watch'; out.after = lab();
+      const mc = machineList().find(x => !x.stub) || machineList()[0];
+      SHIP.jobs.push({ id: 'arrows-tj', machine: mc.id, deck: mc.deck, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: null, parts: [], status: 'open' });
+      W.cur.j = 'arrows-tj'; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.watch = lab(); const w = ent('train:m4:watch');
+      if (w) { const g = w.goal(); out.watchLevel = w.level; out.watchCrew = g.crew; out.watchId = w.id; }
+      W.cur.st = 'do'; out.watchAfter = lab();
+      GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.doo = lab(); const o = ent('train:m4:do');
+      if (o) { const g = o.goal(); out.doLevel = o.level; out.doBoard = !!g && String(g.item) === String(/job board/i); out.doFit = fit(g && g.label); }
+      SHIP.jobs.push({ id: 'arrows-mine', machine: mc.id, deck: mc.deck, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: 'you', parts: [], status: 'claimed' });
+      out.otherJob = lab(); out.otherShown = guideNow() ? guideNow().id : null;
+      SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-mine'); out.back = lab();
+      Object.assign(SHIP.jobs.find(j => j.id === 'arrows-tj'), { claimedBy: 'you', status: 'claimed' }); out.taken = lab(); out.takenLive = !!ent('train:m4:do');
+      const off = Object.keys(WORK_MECH).find(k => WORK_MECH[k].offer && ladderRow(k));
+      if (off) { W.cur = { id: off, st: 'do', d, by: 'calder', j: 'arrows-tj' }; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.offer = [off, !!ent('train:' + off + ':do')]; }
+      out.calder = guideWho('calder');
+      SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-tj'); SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); W.cur = keep; GUIDE.list.length = 0; GUIDE.rev++; return out; })()""")
     if t is not None:
-        check(t[0] is None or not str(t[0]).startswith('Meet'), f'train: the meet arrow showed 30 minutes before ({t[0]})')
-        check(t[1] and t[1].startswith('Meet Yara'), f'train: no meet arrow 10 minutes before ({t[1]})')
-        check(t[2] is None or not str(t[2]).startswith('Meet'), f'train: the meet arrow outlived the meeting ({t[2]})')
-        print(f'  train: T1 at 30 min {t[0]!r}, at 10 min {t[1]!r}, after {t[2]!r}')
+        print('  train:', t)
+        check(t['early'] is None or 'meet' not in str(t['early']), f'train: the meet arrow showed 30 minutes before ({t["early"]})')
+        check(t['meet'] and 'meet Yara' in t['meet'] and t['meet'][:5].count(':') == 1, f'train: T1 10 minutes before should say the time first and "meet Yara" ({t["meet"]})')
+        check(t.get('meetLevel') == 2 and t.get('meetRoom') == [5, 'r'], f'train: T1 should be level 2 at the meeting room ({t.get("meetLevel")}, {t.get("meetRoom")})')
+        check(t.get('meetCrew') == t.get('inRoom'), f'train: T1 should lead to the teacher only once they are in the room (crew {t.get("meetCrew")}, in the room {t.get("inRoom")})')
+        check(t['after'] is None or 'meet' not in str(t['after']), f'train: the meet arrow outlived the meeting ({t["after"]})')
+        check(t['watch'] and t['watch'].startswith('Stay close and watch Yara') and t.get('watchLevel') == 3 and t.get('watchCrew') == 'esposito-yara', f'train: T2 should follow the teacher at level 3 ({t["watch"]}, {t.get("watchLevel")}, {t.get("watchCrew")})')
+        check(str(t.get('watchId', '')).endswith(':' + str(pg.ev('SHIP.time.day'))), f'train: T2\'s once should be per training, its day in the id ({t.get("watchId")})')
+        check(t['watchAfter'] is None or not str(t['watchAfter']).startswith('Stay close'), f'train: T2 outlived the watching ({t["watchAfter"]})')
+        check(t['doo'] and t['doo'].startswith('Your turn') and t.get('doLevel') == 3 and t.get('doBoard'), f'train: T3 should point at the board at level 3 ({t["doo"]}, {t.get("doLevel")}, {t.get("doBoard")})')
+        check(t['otherShown'] != 'train:m4:do' and not str(t['otherJob'] or '').startswith('Your turn'), f'train: T3 should leave the arrow to another job you hold ({t["otherJob"]}, {t["otherShown"]})')
+        check(str(t['back'] or '').startswith('Your turn'), f'train: T3 should come back when that job is gone ({t["back"]})')
+        check(not str(t['taken'] or '').startswith('Your turn') and not t['takenLive'], f'train: T3 outlived taking the job ({t["taken"]})')
+        if 'offer' in t: check(not t['offer'][1], f'train: T3 for a row with its own offer ({t["offer"]})')
+        check(t['calder'] == 'Calder', f'train: Calder should be "Calder" ({t["calder"]})')
+        check(t.get('meetFit', 0) <= 258 and t.get('doFit', 0) <= 258, f'train: a label too wide for 390 px (T1 {t.get("meetFit")} px, T3 {t.get("doFit")} px; 258 fit)')
+    # the minute tick: guideTick asks the training arrows itself, once a ship minute (no direct call)
+    tk = pg.ev("""(() => { if (typeof guideTrain !== 'function' || !SHIP.works) return null; const W = SHIP.works, now = Math.floor(shipNow());
+      window.__tk = { keep: W.cur, occ: { key: 'arrows-occ2', id: 'works.m4', deck: 5, room: 'r', at: now + 10, len: 15, status: 'asked' } };
+      SHIP.occasions.push(__tk.occ); W.cur = { id: 'm4', st: 'meet', d: Math.floor(now / 1440) + 1, by: 'esposito-yara', occ: 'arrows-occ2' };
+      GUIDE.list.length = 0; GUIDE.rev++; guideStart(); return now; })()""")
+    if tk is not None:
+        for _ in range(40):
+            pg.step(15)
+            if pg.ev('Math.floor(shipNow())') > tk + 1: break
+        got = pg.ev("""(() => { const has = GUIDE.list.some(e => e.id.startsWith('train:m4:meet')); SHIP.works.cur = __tk.keep; SHIP.occasions.splice(SHIP.occasions.indexOf(__tk.occ), 1); GUIDE.list.length = 0; GUIDE.rev++; return has; })()""")
+        check(got, 'train: the minute tick did not ask the training arrows')
 
 def part_once(ctx, path):
     pg = Page(ctx, path); pg.day2()

@@ -16167,7 +16167,7 @@ function guideGoal(jobGoal) {                            // goalNow's: the queue
   if (IX_GOAL && e.level > 1) { GUIDE.shown = null; GUIDE.covered = e.id; return null; }   // a direct goal (not yet in the queue, or your own choice) stays in charge
   if (e.level >= 5 && jobGoal) { GUIDE.shown = null; return null; }   // your body and your own choices after your job's next step
   let g = null; try { g = e.goal(); } catch (err) { g = null; }
-  if (!g || !g.deck) return null;
+  if (!g || !g.deck) { GUIDE.shown = null; return null; }   // nothing to show now (e.g. T3 while you hold another job): not shown
   GUIDE.shown = e.id;
   if (!GUIDE.counted.has(e.id)) {                        // shown for the first time while asked: count it, and its tip
     GUIDE.counted.add(e.id);
@@ -16203,7 +16203,7 @@ function guideToast(t, x, o) {
 function guideTick() {
   if (!GUIDE_ON) { GUIDE.loop = false; GUIDE.tq.length = 0; return; }
   requestAnimationFrame(guideTick);
-  { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { /* 24 core not ready */ } } }   // once a ship minute
+  { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned) { GUIDE.trainWarned = true; console.warn('guideTrain:', e); } } } }   // once a ship minute; a break is said once (RV6)
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
 }
 function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
@@ -16212,24 +16212,36 @@ function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; reques
 // teacher (else the room), gone when the meeting starts or is missed. T2 watch: level 3, the arrow follows the teacher
 // to their job, once per training, with a tip the first time. T3 your turn: level 3, the job board until you take
 // your training job (then the job's own arrow), once per training. Labels are stand-ins until the writer's keys.
+// RV6's review (AC1): T1 leads to the meeting room, and to the teacher only once they're in it; T2's once is per
+// training (its day in the id); T3 is not for a row with its own offer (m6's call at the pipe, the tier test), and while
+// you hold another job it leaves the arrow to that job. A ranked name is said by its surname (Calder, not Ines).
+function guideWho(id) {
+  let n = id; try { n = typeof worksName === 'function' ? worksName(id) : id; } catch (e) { n = id; }
+  const w = String(n).split(' '); return /^(Chief|Chef|Commander|Captain)$/.test(w[0]) && w.length > 1 ? w[w.length - 1] : w[0];
+}
+function guideTeacherIn(by, deck, room) {                // the teacher on this deck, standing in that room
+  if (typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num !== deck) return false;
+  const a = DECK_CREW.find(x => x.p && x.p.id === by); if (!a) return false;
+  try { return roomAt(...a.here()) === room; } catch (e) { return false; }
+}
 function guideTrain() {
   const W = SHIP.works, c = W && W.cur; if (!c || typeof ladderRow !== 'function') return;
   const row = ladderRow(c.id); if (!row) return;
-  const now = Math.floor(shipNow()), who = typeof worksFirst === 'function' ? worksFirst(c.by) : 'your teacher', what = typeof mechName === 'function' ? mechName(c.id) : row.name;
+  const now = Math.floor(shipNow()), who = guideWho(c.by), what = typeof mechName === 'function' ? mechName(c.id) : row.name;
   if (c.st === 'meet') {
     const r = (SHIP.occasions || []).find(x => x.key === c.occ); if (!r) return;
     const room = ((DECKS[r.deck] || {}).rooms || {})[r.room], where = room && room.name ? room.name : 'the meeting';
     guideAsk({ id: 'train:' + c.id + ':meet:' + c.d, level: 2, owner: '24 core (read)', from: r.at - 15, until: r.at + r.len,
-      goal: () => ({ deck: r.deck, room: r.room, crew: c.by, label: 'Meet ' + who + ': ' + where + ', ' + hhmm(r.at % 1440) }),
+      goal: () => ({ deck: r.deck, room: r.room, ...(guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: hhmm(r.at % 1440) + ' meet ' + who + ': ' + where }),
       done: () => guideStage(c.id, 'meet') });
   } else if (c.st === 'watch') {
     const j = (SHIP.jobs || []).find(x => x.id === c.j), s = j && typeof trainSpot === 'function' ? trainSpot(j) : null; if (!s) return;
-    guideAsk({ id: 'train:' + c.id + ':watch', level: 3, once: true, owner: '24 core (read)', until: now + 180,
+    guideAsk({ id: 'train:' + c.id + ':watch:' + c.d, level: 3, once: true, owner: '24 core (read)', until: now + 180,
       goal: () => ({ deck: s.deck, crew: c.by, at: s.tile, room: s.room, label: 'Stay close and watch ' + who }),
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
-  } else if (c.st === 'do' && c.j) {
+  } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
     guideAsk({ id: 'train:' + c.id + ':do', level: 3, once: true, owner: '24 core (read)', until: now + 480,
-      goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() + ', on the board' }),
+      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() }; },
       done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
   }
 }
