@@ -4,7 +4,8 @@
 #   seats, benches, the garden, the music room, the laundry, basins, the kettle, the telescope, the observatory),
 #   with a pose, and the main need rises; places crew hold are "In use"; private cabins, beds, notices and
 #   section 15's own taps (treadmill, shower) are left alone; walking away stops it; draw calls stay under BUDGET
-#   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back
+#   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back;
+#   a round or a haul has a Take it, a side job (the drill) not
 #   the goal pointer: hidden with no goal; your job's next step shows by itself; on another deck it says "Take the
 #   lift to Deck N"; setGoal / clearGoal; an arrow at the screen edge when the place is off screen, a marker when on
 # Setup and environment as for cadet_test.py.
@@ -114,6 +115,15 @@ with sync_playwright() as pw:
     g.ev("goToDeck(5)"); g.step(3)
     r = tap('Job board'); g.step(150); s = st()
     check(r is True and s['board'], 'tapping the job board opens the list')
+    # a round and a haul (registered job kinds, run by their stops) have a Take it on the board; a side kind (the drill)
+    # does not (AC2, FX2's find: they said "not yet: coming soon", so Rounds and Hauling could never be taken)
+    rk = g.ev(r"""(() => { let j = null; try { j = roundJob(SHIP.time.day, Math.floor(SHIP.time.min), { train: 'm1', yours: true }); } catch (e) { return 'roundJob: ' + e.message; }
+      if (!j) return 'no round'; if (!SHIP.jobs.includes(j)) SHIP.jobs.push(j); j.claimedBy = null; j.status = 'open'; MACH_REV++; ixBoard.draw();
+      const row = [...document.querySelectorAll('#ixBoardL [data-job]')].find(r => r.dataset.job === j.id), b = row && row.querySelector('button');
+      const out = { offered: openJobs('you').some(o => o.id === j.id), row: !!row, btn: b ? b.textContent : null, haul: !JOB_KINDS.haul || ixBoard.doable({ kind: 'haul' }), drill: ixBoard.doable({ kind: 'drill' }) };
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
+    print('   a round on the board:', rk)
+    check(isinstance(rk, dict) and rk['row'] and rk['btn'] == 'Take it' and rk['haul'] and not rk['drill'], f'a round (and a haul) can be taken at the board, a drill (a side job) not ({rk})')
     # a job you can take, on Deck 3 (a tier 1 machine there), in case the crew have left none
     job = g.ev(r"""(() => { const t = shipNow(); const m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && PLACE_OF && panelPlace(m.id));
       if (!m) return null; const part = MACHINE_KINDS[m.kind].part || 'gasket'; SHIP.stores[part] = Math.max(SHIP.stores[part] || 0, 2);
@@ -152,7 +162,7 @@ with sync_playwright() as pw:
     check(s['goal'] and s['goal'].startswith('Repair the'), 'clearGoal: back to the job')
     g.ev("goToDeck(5)"); g.step(3); tap('Job board'); g.step(150)
     g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-    check(not g.ev("myJob()") and s['goal'] in NO_JOB_GOALS, f'Drop it: no job and the pointer hides (or shows the clock or the board) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
+    check(not g.ev("myJob()") and (s['goal'] in NO_JOB_GOALS or (s['goal'] or '').endswith('back: main storage')), f'Drop it: no job and the pointer hides (or shows the clock or the board, or, with its part still in your hands, where to put it back: FX3) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
     g.ev("ixBoard.close(); SHIP.player.carry = []")
     # a cart run (section 15's cartTap): the pointer starts at the Cart bay's docks
     if g.ev("typeof jobStops === 'function'"):
@@ -345,6 +355,41 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FX3 (lead 28, from AR1's play of 0.64.15): (1) a calibrate chore on the galley plant: its arrow says "Calibrate", and a real
+# tap at the arrow's pin starts it (the cold store's chiller in front used to take the tap: "in good order"); (2) a dropped
+# job's part left in your hands: the arrow says to put it back (a cart won't take full hands), a shelf tap does, then the cart
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof jobsOn === 'function' && jobsOn() && !!machineById('3-galleyplant-1') && !!panelPlace('3-galleyplant-1')"):
+        print('== FX3: calibrating the galley plant, a part left in your hands')
+        lab = g.ev(r"""(() => { setShipNow(1440 * 2 + 9 * 60); machinesNow(); const t = shipNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const m = machineById('3-galleyplant-1');
+          SHIP.jobs.push({ id: 'fx3-cal', machine: m.id, deck: 3, room: m.room, kind: 'chore', chore: 'calibrate', title: 'Calibrate the galley plant', tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', stops: [panelStop(m, 15, 'calibrate')] }); MACH_REV++;
+          claimJob('fx3-cal'); goToDeck(3); const s = placeSpot(panelPlace(m.id)); player.obj.position.set(s.x - .5, 0, s.z + 1.2); player.stop(); return (ixJobStep() || {}).label; })()""")
+        g.step(120)
+        xy = g.ev("(() => { const s = placeSpot(panelPlace('3-galleyplant-1')), v = new THREE.Vector3(s.x, 0.05, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+        g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+        cal = g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, document.getElementById('tx').textContent])")
+        print('   calibrate:', lab, cal[:160])
+        check(lab == 'Calibrate the galley plant', f'the calibrate chore\'s arrow says Calibrate ({lab})')
+        check('"job","3-galleyplant-1-panel"' in cal, f'a tap at the arrow\'s pin starts the calibration, not the chiller in front ({cal})')
+        pb = g.ev(r"""(() => { actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-cal'); SHIP.player.work = null; SHIP.player.carry = ['relay']; const a = ixJobStep() || {};
+          const t = shipNow(); SHIP.jobs.push({ id: 'fx3-cart', machine: null, deck: 3, kind: 'restock', cargo: 'stores', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); MACH_REV++;
+          const ok = claimJob('fx3-cart'), b = ixJobStep() || {}; goToDeck(5); return [a.label, a.place, ok, b.label]; })()""")
+        g.step(5)
+        g.ev(TAP + "({ title: 'Lights' })")
+        for k in range(80):
+            g.step(30)
+            if k > 1 and not g.ev("!!ACT || player.path.length > 0"): break
+        after = g.ev("[SHIP.player.carry.slice(), (ixJobStep() || {}).label]")
+        print('   a part in your hands:', pb, after)
+        check(pb[0] == 'Put the relay back: main storage' and pb[1] == '5-parts-1', f'no job and a relay in hand: put it back ({pb})')
+        check(pb[2] and pb[3] == 'Put the relay back: main storage', f'a cart run taken with the relay in hand: put it back first ({pb})')
+        check(after[0] == [] and after[1] and 'back: main storage' not in after[1], f'a shelf tap puts it back, then the cart run\'s own arrow ({after})')
+        g.ev("SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-cart'); SHIP.player.carry = []")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:
@@ -393,10 +438,11 @@ with sync_playwright() as pw:
         rows = json.loads(g.ev(ROWS)); on = [r[0] for r in rows if r[1]]
         check(len(on) == 1 and 'Your bunk' in on[0], f'only your bunk shows as Tracking now ({on})')
         tap('Your bunk'); g.step(3)
-        check(g.ev("IX_GOAL") is None and g.ev("SHIP.player.track") is None and g.ev("DEV.open"), 'a second tap stops it (no arrow), the device stays open')
+        check(g.ev("IX_GOAL") is None and g.ev("SHIP.player.track") == job and g.ev("DEV.open"), 'a second tap stops it (no arrow of its own; your job, still tracked, has the arrow back), the device stays open')   # FX1: tracking a place no longer switches job tracking off
         if job:
-            tap(g.ev("myJob().title")); g.step(3)
-            check(g.ev("SHIP.player.track") == job and g.ev("IX_GOAL") is None, 'a tap on your job tracks it again')
+            tap(g.ev("myJob().title")); g.step(3); off = g.ev("SHIP.player.track")
+            tap(g.ev("myJob().title")); g.step(3)   # (a stop leaves the device open)
+            check(off is None and g.ev("SHIP.player.track") == job and g.ev("IX_GOAL") is None, 'a tap on your job switches its arrow off, another tracks it again')
         g.page.click('#devBtn'); g.step(2); g.ev(OPEN); g.step(2)
         hadDinner = tap('Dinner'); g.step(3)
         check(not hadDinner or (g.ev("IX_GOAL && IX_GOAL.deck") == 3 and 'Deck 3' in (st()['goal'] or '')), f'a meal tracks the mess ({st()["goal"]})')
@@ -440,14 +486,15 @@ with sync_playwright() as pw:
             r = g.ev("""(() => { if (myJob()) dropJob && dropJob(myJob().id); const o = openJobs('you'); if (!o.length || !claimJob(o[0].id)) return null; const j = myJob(); j.workDone = true;
               j.gains = { rep: [{ dept: 'works', add: 3 }], meters: [{ sys: 'power', add: 4 }, { sys: 'air', add: 2.4 }, { sys: 'heat', add: 0 }] };
               const ok = ixBoard.turnIn(j.id); return [ok, [...document.querySelectorAll('#tx .tgain b')].map(b => [b.textContent, b.className])]; })()""")
-            check(r is None or (r[0] and len(r[1]) == 3 and r[1][0][1] == 'rep' and 'reputation up' in r[1][0][0] and not any(ch.isdigit() for ch in r[1][0][0]) and any('4' in t and t.startswith('+') for t, c in r[1][1:]) and not any('Heat' in t for t, c in r[1])), f'the turn-in shows rep first (words only, the user\'s 0.61.15 rule), then +N for each meter the job raised (none for 0) ({r})')
+            nrep = 0 if r is None else len([1 for t, c in r[1] if c == 'rep'])   # FX3: your own reputation's chip may come first, then the Works team's standing
+            check(r is None or (r[0] and len(r[1]) == 2 + nrep and nrep in (1, 2) and all(c == 'rep' for t, c in r[1][:nrep]) and ('reputation up' in r[1][0][0] or 'standing up' in r[1][0][0]) and not any(ch.isdigit() for t, c in r[1][:nrep] for ch in t) and any('4' in t and t.startswith('+') for t, c in r[1][nrep:]) and not any('Heat' in t for t, c in r[1])), f'the turn-in shows rep first (words only, the user\'s 0.61.15 rule), then +N for each meter the job raised (none for 0) ({r})')
             r = g.ev("""(() => { const o = openJobs('you'); if (!o.length || !claimJob(o[0].id)) return null; const j = myJob(); j.workDone = true;
               const a = turnInSnap(); a.sys.power -= 3; a.rep.works -= 2; return turnInGains(j, a).map(c => c.text); })()""")
             r2 = g.ev("""(() => turnInGains({ meters: [{ key: 'water', name: 'Water', gain: 3.4 }, { key: 'heat', name: 'Heat', gain: .2 }] }, null).map(c => c.text))()""")
             check(len(r2) == 1 and r2[0].startswith('+3') and 'Water' in r2[0], f"S2's j.meters (0.33.57) show as +N, under half a point left out ({r2})")
             d = g.ev("""(() => turnInGains({ gains: { rep: [{ dept: 'works' }, { dept: 'works', name: 'Works' }], meters: [{ sys: 'power', add: 4 }, { sys: 'power', add: 4 }] } }, null).map(c => c.text))()""")
             check(len(d) == 2, f'the same gain recorded twice (C2 and another section) shows once ({d})')
-            check(r is None or (any('reputation up' in t for t in r) and any('3' in t and t.startswith('+') for t in r)), f'with no j.gains, a before/after look fills it in ({r})')
+            check(r is None or (any('standing up' in t or 'reputation up' in t for t in r) and any('3' in t and t.startswith('+') for t in r)), f'with no j.gains, a before/after look fills it in ({r})')
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
@@ -503,14 +550,14 @@ with sync_playwright() as pw:
             check(len(r['out']) == 4 and all(x[4] for x in r['out']) and r['off'] == 0, f'the briefing, the Chief\'s office, the booths and the store on the Schedule with a goal, only during the intro ({r})')
             check(r['hu'] == ['Calling home soon+goal'], f'a beat gets its 15-minute heads-up with the arrow, even with heads-ups off ({r["hu"]})')
         if g.ev("typeof roundGuide === 'function'"):   # 0.73.0 (U2, item 1): the first round's arrow and tips, on E1's roundTrainStep (a stand-in when it's missing)
-            r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
+            r = g.ev("""(() => { const D = SHIP.device, real = typeof roundTrainStep === 'function' ? roundTrainStep : null; D.settings.tips = true; careerInit(); const ci0 = SHIP.career.ci; SHIP.career.ci = Math.max(1, Math.floor(shipNow()));   /* clocked in (FX1: a round's arrow waits for that) */ TIP_Q.length = 0; DEVICE_SKIN.tip(null); clearGoal(); RG_LAST = ''; RG_N = 0;
               for (const k in D.tipsSeen) if (/^rg:/.test(k)) delete D.tipsSeen[k];
               const seq = [{ step: 'take' }, { step: 'take' }, { step: 'go', machine: 'Washer 2' }, { step: 'look', machine: 'Washer 2' }, { step: 'mark', machine: 'Washer 2' }, { step: 'next', machine: 'Light relays 1' }, { step: 'look', machine: 'Light relays 1' }, { step: 'done' }, null];
               const out = []; let k = 0; roundTrainStep = () => seq[k];   // the binding itself: with 24a's own function in the build, a window property doesn't replace it
               for (; k < seq.length; k++) { roundGuide(); out.push([IX_GOAL && IX_GOAL.label, TIP_Q.map(t => t.id).join(','), (TIP_Q[0] || {}).text || '']); }
               setGoal({ deck: 3, room: 'M', label: 'Someone else' }); RG_LAST = 'take|'; k = 0; roundGuide(); roundGuide(); const other = IX_GOAL && IX_GOAL.label; clearGoal();
               k = 2; RG_LAST = ''; RG_N = 0; roundGuide(); const again = TIP_Q.length; TIP_Q.length = 0; DEVICE_SKIN.tip(null);
-              if (real) roundTrainStep = real; else delete window.roundTrainStep; return { out, other, again }; })()""")
+              SHIP.career.ci = ci0; if (real) roundTrainStep = real; else delete window.roundTrainStep; return { out, other, again }; })()""")
             o = r['out']; print('  the first round, step by step [arrow, tips queued, tip]:'); [print('   ', x) for x in o]
             check(o[0][0] == 'Take your first round at the job board' and o[0][1] == 'rg:take:0' and o[1][1] == 'rg:take:0', f'take: the arrow to the job board and its tip, once ({o[:2]})')
             check(o[2][0] is None and o[2][1] == 'rg:go:0' and 'Washer 2' in o[2][2], f'go: the board arrow gives way to the job\'s, the tip names the machine and replaces the last ({o[2]})')
@@ -564,7 +611,7 @@ with sync_playwright() as pw:
           const ip = it && it.hit.getWorldPosition(new THREE.Vector3());
           o.table = !!(w && ip && Math.hypot(w.x - ip.x, w.z - ip.z) < .05); o.notMid = !!(w && mid && Math.hypot(w.x - mid.x, w.z - mid.z) > .3);
           const x = trkItems().find(q => !q.job && q.goal); P.track = undefined;
-          if (x) { trkTap(x.key); o.tapped = [P.track === null, !!(IX_GOAL && IX_GOAL.back)]; trkDone(IX_GOAL); o.back = [P.track === undefined, IX_GOAL === null]; }
+          if (x) { trkTap(x.key); o.tapped = [P.track === undefined, !!IX_GOAL];   /* FX1: tracking stays on under it */ trkDone(IX_GOAL); o.back = [P.track === undefined, IX_GOAL === null]; }
           P.track = null; setGoal({ ...tg, trk: 'tea' }); trkDone(IX_GOAL); o.off = P.track === null;   // tracking was off before: it stays off
           P.track = undefined; clearGoal();
           return o; })()""")

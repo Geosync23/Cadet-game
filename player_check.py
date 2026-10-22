@@ -1065,6 +1065,29 @@ with sync_playwright() as pw:
                 rd = g.ev(f"(() => {{ const j = SHIP.jobs.find(j => j.id === {json.dumps(rj[0])}); return [j.status, !!myJob()]; }})()")
                 print('  repaired:', rd, '|', r3[3][:80])
                 check(rd == ['done', False], f'reserved job: done after fitting both parts and the repair ({rd})')
+        # the main lift's job (FX3, AR1's play of 0.64.15): the lift is a stand-in machine with no room, so it had no place to
+        # do its job: the arrow pointed at the landing and no tap there (the lift brake, the spot) started it. Now its
+        # service spot is at the brake release in the utility closet: a tap on the brake looks it over, then the relay, then the repair
+        lj = g.ev(r"""(() => { actEnd(true); SHIP.player.carry = []; SHIP.player.work = null; machinesNow(); const t = shipNow();
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          SHIP.jobs = SHIP.jobs.filter(j => j.machine !== '5-mainlift-1'); SHIP.stores.relay = Math.max(SHIP.stores.relay || 0, 2);   /* in stock (test only) */
+          SHIP.jobs.push({ id: 'fx3-lift', machine: '5-mainlift-1', deck: 5, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['relay'], status: 'open' }); MACH_REV++;
+          const ok = claimJob('fx3-lift'); SHIP.player.carry = ['relay']; const arrow = (ixJobStep() || {}).place || null; SHIP.player.carry = [];   /* the arrow once the relay's in hand */
+          return [ok, panelPlace('5-mainlift-1'), arrow]; })()""")
+        print('  the main lift:', lj)
+        if check(lj[0] and lj[1] and lj[2] == lj[1], f'main lift: its job needs a service place, and the arrow should point at it ({lj})'):
+            g.ev("goToDeck(5)"); g.step(5)
+            near = g.ev("(() => { const s = placeSpot(panelPlace('5-mainlift-1')), it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i.t, Math.hypot(_wp.x - s.x, _wp.z - s.z)]; }).sort((a, b) => a[1] - b[1])[0]; return it[0]; })()")
+            check(near == 'Lift brake' and g.ev(TAPI) is True, f'main lift: a tap on the lift brake should be the job (nearest: {near})'); l1 = jrun()
+            print('  looked over:', l1[3][:100]); check(l1[2] and l1[2]['seen'], f'main lift: looking it over ({l1})')
+            check(g.ev("(() => { const c = cellPos(19, 10); return !!jobHere(new THREE.Vector3(c.x, 0, c.z), false); })()"), 'main lift: the spot itself (a floor tap, the Repair button) should be the job too')
+            g.ev("SHIP.player.carry = ['relay']; goToDeck(5)"); g.step(5)
+            check(g.ev(TAPI) is True, 'main lift: back at the brake with the relay'); l2 = jrun(200)
+            g.ev("(() => { const j = myJob(); if (j && j.workDone) turnInJob(j.id); })()")
+            ld = g.ev("(() => { const j = SHIP.jobs.find(j => j.id === 'fx3-lift'); return [j.status, !!myJob(), Math.round(SHIP.machines['5-mainlift-1'].cond)]; })()")
+            print('  repaired:', ld, '|', l2[3][:80])
+            check(ld[0] == 'done' and not ld[1] and ld[2] >= 99, f'main lift: the job done and the lift as new ({ld})')
+        g.ev("SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-lift'); SHIP.player.carry = []; SHIP.player.work = null; actEnd(true); MACH_REV++")
         # the wrist comm: a job you could take, posted while you're free
         nt = g.ev(r"""(() => { const t0 = document.getElementById('tx').textContent; JOB_SEEN = new Set(); machinesNow(); actEnd(true);
           const held = SHIP.jobs.filter(j => j.claimedBy === 'you' && j.status === 'claimed'); for (const j of held) { j.claimedBy = null; j.status = 'open'; }   // free hands (test only: Step 2 posts the drill already yours)
@@ -1284,7 +1307,7 @@ with sync_playwright() as pw:
             print('The inspection\'s berth (0.28.73, m3): Make the bed, Tidy your locker')
             g.ev("goToDeck(4)"); g.step(3)
             BED = "JSON.stringify({ card: !!DEV.choose, btn: [...document.querySelectorAll('#devDlg button')].filter(b => b.offsetParent).map(b => b.textContent.trim()), act: ACT && [ACT.kind, ACT.phase], made: SHIP.player.bedMade, untidy: !!SHIP.player.untidy, tidy: lockerTidy(), day: SHIP.time.day })"
-            g.ev("(() => { const d0 = SHIP.time.day + 1; let d = d0; while (weekday(d) !== 3) d++; setShipNow((d - 1) * 1440 + 6 * 60); needsT = null; actEnd(true); SHIP.player.bedMade = null; SHIP.player.untidy = false; const s = placeSpot(playerBed()), c = cellPos(...s.walk); player.obj.position.copy(c); player.stop(); })()"); g.step(3)
+            g.ev("(() => { const d0 = SHIP.time.day + 1; let d = d0; while (weekday(d) !== 3) d++; setShipNow((d - 1) * 1440 + 6 * 60); needsT = null; actEnd(true); SHIP.player.bedMade = null; SHIP.player.untidy = false; const s = placeSpot(playerBed()), c = cellPos(...s.walk); player.obj.position.copy(c); player.stop(); if (typeof flagSet === 'function') flagSet('works.brief.m3i'); if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(true); })()"); g.step(3)   # (FX3: Tomas's first-inspection talk comes in the bunk room at 06:00; this part is the bunk's card)
             g.ev("bunkPick(playerBed())"); g.step(2); b1 = json.loads(g.ev(BED))
             g.ev("devDialogueDo('choose', 0)")
             for k in range(120):

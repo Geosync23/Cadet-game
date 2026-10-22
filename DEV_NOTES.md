@@ -881,6 +881,30 @@ The case engine (plans/mechanics/case-engine.html on `claude/p5-design`). A real
 
 All behind `SHORT_FRIDAY` (section 13), **on since turn 10** (2026-10-21, the user's yes passed on by lead 23; `false` gives the game without it, and fridays_check still makes both copies). All 10 turns built (FR1 1-5: the crew's and your 15:30 Friday, the skeleton, your clock, the Works holds, the device and Dev rows, the address as a tradition in the auditorium; FR2 6-8: the speech, the missed-it dip and dinner spread, the explaining lines; FR3 9-10: the perf scenes, switching on). Plan: `plans/fridays-build-brief.md`; state, gotchas and how to test: `plans/handover-fridays-builder-1.md` and `-2.md`. Check: `fridays_check.py`; perf_check's three Friday scenes.
 
+## The arrow queue (section 15b's slot, piece B of the arrows plan, AR1, 2026-10-22; switched off: `GUIDE_ON`)
+One place that decides what the world arrow shows. Callers `guideAsk({ id, level, goal: () => setGoal-shaped goal,
+from, until, done: () => bool, once, tip, owner })`; `goalNow()` (and so `ixFrame`, the lift panel, Tracked's button)
+shows the queue's pick first when `GUIDE_ON`. Levels: 1 right now, 2 next 15 minutes, 3 learning, 4 your shift, 5 your
+body, 6 you chose. Every entry needs an `until`; `done` helpers `guideAt/Near/Met/Taken/Clocked/Trained/Stage`. A goal
+still set directly with `setGoal` keeps working and stays over levels 2-6 (only a level 1 borrows it), so callers can
+move to the queue one at a time (pieces D-F, each in its owner's section; the list of all 31 setGoal calls and what each
+becomes is in plans/arrows-briefs.md). Also on the switch: a pop-up queue (`guideToast`, asked by section 11's `toast`)
+and the teaching-arrows setting, read through `guideMode()` from section 19's `teachMode()` (AC1's Settings row,
+`SHIP.device.settings.teach`), 'first' without it.
+Saved under the save's top-level `guide` key, only while on. Test: `python3 arrows_check.py BUILD.html` (about 1 minute).
+The training arrows (T1 meet from 15 minutes before, T2 follow the teacher while they work, T3 your turn at the board) are
+asked by `guideTrain()` from the queue's own frame loop, read-only from `SHIP.works.cur`. `arrows_check.py BUILD.html week guide`
+plays the week with the queue on.
+The shift chain (piece D, AC2: the plan's S1-S9) is asked by `guideShift()` from the same minute tick: level-4 entries
+`shift:in:<day>` (08:00 until clocked in), `shift:job:<day>` (clocked in, no job, a job with a Take it on the board:
+`guideTakeable()`), `shift:out:<day>` (from the shift's end, `dayShiftEnd`, for an hour, over a job still in hand); your
+job's steps and "Turn it in" stay the job's own arrow; an empty board gets no arrow (FX1's `boardEmptySay` says so).
+S1 is FX1's On shift row in Tracked (it turns the job arrow on); FX1's `trainArrow` stays down while the queue is on (T1 leads). With `POINT_ON`
+too: panel pointers on Clock in, Take it, Turn it in, Clock out (three times each), the Works app's Work log after a
+turn-in and its Training tab when your reputation reaches a new word (once each, with a toast for the word).
+`guideGoal` passes over an entry with nothing to show now (T3 while you hold another job) to the next live one; T3
+gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUILD.html` (about 1 minute).
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.
@@ -1023,6 +1047,10 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 20c `homeCallable` (events base F8, EV2) | `if (typeof eventCommsDown === 'function' && eventCommsDown(t)) return [];` (18; false while off): no calls home while the event's comms are down | EV2 (PR3 for 20c) | events base F8 |
 | section 17 `eventJob` (events base F5, EV2) | `return typeof eventJobRank === 'function' ? Object.assign(j, eventJobRank(spec)) : j;` (18; {} while off): an event job's `rank` -> `junior` / `only` | EV2 (OR1 for the systems seat) | events base F5 |
 | section 20 `SOC_CUE_OF`, `socNote` (events base F0b, EV2) | `calledIn: [d => 'calledIn', 1]`; `who` from the note (cue:calledIn@me) | EV2 (OR1 reviews) | events base F0b |
+| section 24k `p3Tick` (FX3, AR1's small lessons) | `if (c.train && typeof worksBrief === 'function' && worksBrief('p3', c.by)) return;` (24 core): the writer's first head-scratcher talk, readable, when the case shows | FX3 (H reviews) | patch-p5-fix3 |
+| section 24 core `trainDo`, `trainOffer` (FX3, Making it safe) | `WORK_MECH[id].doSay(c, id)` (a sub-block's own "your turn" word) and `WORK_MECH[id].againAsk` (asked again through its own `offer`, not restarted by `trainWatch` at 06:00); 24f's m6 sets both | FX3 (C reviews) | patch-p5-fix3 |
+| section 15b `ixJobStep` (FX3, hauling's arrows) | a registered job kind's own `goal(j, k)` (k: its stop's index in `kindStops`) names the arrow for that stop; 24d's haul has one ("Load the linen (1 of 3)"); kinds without it keep the job's title | FX3 (I reviews) | patch-p5-fix3 |
+| section 15b `turnInGains` (FX3, your reputation) | `j.gains.rep` entries with `dept: 'you'` (24 core's turn-in handler, when it raised your reputation) show as "Your reputation up"; the department's as "{dept} team's standing up" | FX3 (U reviews) | patch-p5-fix3 |
 
 ## Patch batch E, first half (patch builder PE, claude/patch-e; `plans/patch-plan.html`)
 
@@ -1175,6 +1203,10 @@ Section `// 19. DEVICE` sits **before** section 15 (after 14), so sections 15 an
 - **The skin (0.35.1), the old-school screen.** CSS tokens on `.device` (`--crt-ink`, `--crt-dim`, `--crt-bg`, `--crt-hot`, `--crt-glow`, `--crt-scan`, `--crt-radius`, `--crt-font`, `--crt-size`, `--bezel`), with `data-ph="amber" | "green" | "cyan"` choosing the phosphor. The dim colours are the plan's, brightened just enough for 7 : 1 (amber `#d09142`, green `#42b567`, cyan `#4ab1a3`). The scan lines and vignette are one `.crt::after` overlay; the roll is `.crt::before` moved with a transform; both animations only with `.fx` and never under `prefers-reduced-motion`. `.wide` (wider than 720px and landscape) docks it on the left; otherwise it's a bottom sheet and `body.devsheet` lifts the toast above it. A capture listener closes the sheet on a tap on the ship (the tap doesn't walk you) and opens it on a swipe up from the bottom 28px.
 - **Saved:** `SHIP.device = { settings: { phosphor, fx, tips } }` in `save.device` (SAVE_EXTRA), read defensively. `SAVE_V` stays 2 until memos and appointments arrive.
 - **device_check.py (0.35.0):** `CADET_CHROME=/opt/pw-browsers/chromium python3 device_check.py BUILD.html` (about a minute) at phone (390 × 844) and wide (1280 × 800) sizes: every app opens from its tile and draws without errors and keeps the look rules (15px+, 44px buttons, no blur, 7 : 1), Back and Close, mail and notify badges, the shim, the panel on screen, nothing added to the 3D scene, `deviceOn` once per open and close.
+
+### The panel pointer (the arrows plan, piece C, AC1; switched off: `POINT_ON = false`)
+
+In section 19's slot. `pointAsk({ id, path: [{ open, el, label }], done, until, once })` puts a gold ring with a label on one button inside an open panel; the first step whose `open()` isn't true is shown on its `el()` (what opens the next step), a step with no `open` is the button to press (tapping it ends the pointer), and an `el` of null waits (the board and the clock are opened in the world). Helpers: `pointToApp(app, label)` (Device button, then the tile or Back), `pointBoard(jobId, label)`, `pointClock('in'|'out', label)`, `pointCard(k, label, title)`; targets `tileFor`, `buttonFor(action)` (via `DEVICE_SKIN.actOf`), `chooseButton`, `boardButton` (15b's `data-job` on each board row), `boardTurnIn`, `clockButton` (section 20's words). One at a time; teaching only: `once` times (default 1) in `SHIP.device.pointsSeen` (cap 200), and Settings' Teaching arrows (`teachMode()`: all, first, off; default first) rules over that. Hidden under a meeting (a card's own buttons excepted), the address, a tip on the same spot, or when the button is covered or off screen. No draw calls. Check: `python3 arrows_pointer_check.py BUILD.html` (about 4 minutes; off and on, four screen sizes, screenshots `pointer-<size>-<target>.png` in CADET_WORK/test).
 
 ## Deck 2 (builds 0.9.x, the Deck 2 architect)
 

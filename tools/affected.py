@@ -44,6 +44,7 @@ CHECKS = {
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
     'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5),
+    'arrows_pointer': ('python3 arrows_pointer_check.py {g}', 4),   # the panel pointer (arrows plan, piece C)
     'disc': ('python3 disc_check.py {g}', 3), 'tiles': ('python3 tiles_check.py {g}', 3),
     'join': ('python3 join_check.py {g}', 3), 'clothes': ('python3 clothes_check.py {g}', 2),
     'path': ('python3 path_check.py {g}', 2), 'puzzle': ('python3 puzzle_check.py {g}', 2),
@@ -67,7 +68,7 @@ RULES = {
     'page': ['cadet', 'interactions', 'bubble'], '1': ['*'], '2': ['cadet', 'deck'], '3': ['cadet', 'deck'], '4': ['*'], '4a': ['*'],
     '4b': ['cadet', 'deck', 'perf'], '4c': ['*'], '4d': ['cadet', 'deck', 'day1', 'events', 'path'], '4e': ['cadet', 'deck', 'disc', 'day1'],
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
-    '19': ['device', 'puzzle', 'player'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join'],
+    '19': ['device', 'puzzle', 'player', 'arrows_pointer'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
     '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
     '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
@@ -194,7 +195,7 @@ def pick(a, b, mp, middle=False):
             continue
         if f == 'cadet_test.py':
             add(['*'], 'cadet_test.py (every check runs on it)')
-        elif re.fullmatch(r'[a-z0-9]+_check\.py', f) or f == 'day_check.py':
+        elif re.fullmatch(r'[a-z0-9_]+_check\.py', f) or f == 'day_check.py':
             add(['day1'] + EVENT_DAYS if f == 'day_check.py' else [f[:-9]], f)
         elif f.startswith('content/'):
             add(RULES['22'], f + ' (the words; content_gen --check is in check_fast)')

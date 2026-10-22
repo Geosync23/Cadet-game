@@ -39,7 +39,7 @@ step lines in `content/lines/<teacher>.lines` (kind `work`).
 | `works.skill.row` | "Ovens: you know these well." | `{machine}` (plural, capitalised by the game), `{skill}` |
 | `works.band.new` ... `works.band.relied`, `works.band.newofficer` | the reputation words | |
 | `works.title.t1` ... `works.title.t4`, `works.rank.junior` ... `works.rank.specialist` | rank and tier titles | |
-| `works.record` | the Record's line | `{title}` `{rank}` `{band}` `{next}` |
+| `works.record` | the Record's line | `{title}` (FX3: the title and rank together, "Junior Technician" for a junior, "Technician · Officer" after), `{rank}`, `{band}`, `{next}` |
 
 **What's next** (`content/works/next.lines`, 24.4 worksNext): `next.<id>` (the next unopened row: what's coming, and who
 teaches it), `next.wait.<id>` (opened but not trained yet: go and meet them), `next.band.<band>` (no row ahead: keep at it),
@@ -236,3 +236,4 @@ and people's own lines; meetings `train.<id>.<teacher>`.
 | E1 stages | `round.title.first` ({deck}; playtest item 1's training round), `round.last` ({n}), `round.last.never`, `round.doorway` ({machine} {word}), Torres `work` flag `round.two`; `haul.tidy`; stocktake `stock.count`, `stock.short` ({shelf} {part}), `stock.job`, `stock.fine` ({shelf}) |
 | E4 (was E3) cabin, stars (matched to 24t's code) | `cabin.spot.rug/desk/shelf/ledge` (the sentence when you put a thing there); crew kind `cabin.remark` (not read yet); `star.title`, `star.pick` ({a} {b}), `star.right` ({star}), `star.wrong` (retry at once), `star.name` ({n}), `star.done` (ten logged), `works.ms.stars`; sato and mori kind `cue` flag `stars.talk` (every third log; `stars.paid` not read yet) |
 | E3 M17 lift roof | meeting `train.m17.halloran-emeka`; Halloran `work` flags `roof.climb`, `roof.grease`, `roof.view`, `roof.done`; `roof.held`, `roof.result`, `roof.resume`; crew kind `roof.wait` |
+| FX3 (AR1's findings, 2026-10-22) | `next.t2.rep` ({band}), `next.t2.soon`, `next.t2.set` ({day}: today, tomorrow or a weekday); `works.rep.title`, `works.rep.up` / `works.rep.down` ({band}), `works.rep.missed` (Mail, "Subject \| body", {band}); `works.turnin.you`, `works.turnin.dept` ({dept}), `works.turnin.rep` now the Works team's standing; `inc.warn` (Mail, {time}), `inc.warn.soon`, `inc.goal.follow` ({name} {deck}), `inc.do.yours`, `inc.again` (Mail, {day} {time} {place}); the small rows' asks `works.ask.m3d`, `works.ask.m3i`, `works.ask.p3` are now sent |
