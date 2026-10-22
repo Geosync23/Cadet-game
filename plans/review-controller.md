@@ -274,3 +274,10 @@ padBye records PAD.goneIdx and 'gone' leaves it out (3, in CT1's base: one field
 (4: an invisible id in section 15's card markup for everyone, my suggestion); new marks/drop cases (5). Mutants updated
 (p3b_*). CP3 also saw a_start differ by 14812 px (max 153) once with the switch on, alone-rerun identical: the same
 count CP5 reported earlier - a start-up difference under load, to look at after this round.
+
+## P5 4892a0b (CP5's five fixes): code read OK, runs queued (queue 10, after P3's)
+padSaid needs a letter (`\p{L}`); PAD_NAMES names Maps' bare-number deck buttons "Deck N" (only in Maps); the toast's
+role/aria-live recorded and removed on 'unuse'; a11y's name test reads the browser's accessible name (CDP), both dark
+shadows required; DEV_NOTES: three tap-again asks; left hand: no zoom, said in the comment and DEV_NOTES (judgement
+call, accepted: zoom's analog reading makes a button remap P4's business). New mutants p5b_keepattr, p5b_glyphname,
+p5b_nomaps.

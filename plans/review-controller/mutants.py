@@ -39,6 +39,10 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p3b_overtoast': ("  if (PAD_MARK.say && PAD.used && !toastEl.classList.contains('show')) {", "  if (PAD_MARK.say && PAD.used) {", 'marks'),
  'p3b_nounuse': ("  if (!padList().filter(g => g.index !== PAD.goneIdx).length) padUnuse();", "", 'drop'),
  'p3b_saynow': ("  if (!PAD_MARK.said) PAD_MARK.say = true;", "  if (!PAD_MARK.said) { PAD_MARK.said = true; toast('Controller connected', 'x'); }", 'marks drop'),
+ # P5 4892a0b (CP5's five fixes)
+ 'p5b_keepattr': ("  if (!PAD_A11Y.toast) return; for (const a of PAD_A11Y.toast) toastEl.removeAttribute(a); PAD_A11Y.toast = false;", "", 'a11y'),
+ 'p5b_glyphname': ("if (/\\p{L}/u.test(t)) return t;   // a mark alone", "if (t) return t;   // a mark alone", 'a11y'),
+ 'p5b_nomaps': ("  ['#device button', el => DEV.app === 'maps'", "  ['#nothing', el => DEV.app === 'maps'", 'a11y'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
