@@ -3,7 +3,7 @@
 
 == greet
 ? tier=stranger
-- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till nine.
+- {hi}. You'll be new. Have you eaten? Breakfast's in the mess till eight.
 - {hi}. Emeka Halloran, systems. Tea corner's behind the parts racks, if you need me.
 ? tier>=acquaintance time:morning
 - {hi}. Why did the scrubber go to the infirmary? It had a filter cough.   #funny

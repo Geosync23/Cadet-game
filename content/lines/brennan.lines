@@ -6,7 +6,7 @@
 ? tier=stranger
 - {hi}. You're new. Have you eaten? Mess is through there. Trays on the left.
 ? tier>=acquaintance time:morning
-- Morning, {nick}. Breakfast's on till nine, and I'm counting heads.
+- Morning, {nick}. Breakfast's on till eight, and I'm counting heads.
 ? tier>=acquaintance
 - {hi}. Have you eaten? Don't answer. I can see you haven't. Sit.   #funny
 ? tier>=colleague

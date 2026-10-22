@@ -744,7 +744,6 @@ PARTS['m11'] = part_m11
 # quicker for whoever takes them); stage 2's flag looked at by the night crew at 22:00; logLast; saved; the same twice
 M12 = r"""(() => {
   SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;   // the machines replayed from the start, whatever the part before left (BM8, 0.63.5)
-  SHIP.jobs = SHIP.jobs.filter(j => !/^4-washer-[123]$/.test(j.machine || ''));   // the shift below is the only work on Washers 1-3 (patch 1 F: the replay can post a real Washer 3 job by Day 12, which the logbook and the night crew rightly take first)
   const W = worksInit(), out = {}, t = shipNow(); W.tier = 2; W.rank = 'officer'; W.op[12] = ['m12'];
   SHIP.jobs.push({ id: '4-washer-2@x', machine: '4-washer-2', deck: 4, kind: 'repair', parts: ['pump'], status: 'done', doneBy: 'you', posted: t - 300, found: t - 300 });
   W.log.push(['4-washer-2@x', 12, 0, 'repair']);

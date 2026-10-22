@@ -125,7 +125,7 @@
 
 == week1
 ? week1:true weekday:mon time:morning
-- Morning! Washroom, then breakfast. Breakfast's till nine. Left at the end. Probably.
+- Morning! Washroom, then breakfast. Breakfast's till eight. Left at the end. Probably.
 ? week1:true weekday:thu
 - Inspection today. I've folded everything. I've folded my socks. Is that normal?   #funny
 ? week1:true weekday:fri tier>=acquaintance
@@ -571,7 +571,7 @@
 ? flag:beat.d1-wash.1
 - Morning! Washroom first, before the queue. Hot's best early.
 ? flag:beat.d1-wash.2
-- Breakfast's till nine. Then Works. Then everything.
+- Breakfast's till eight. Then Works. Then everything.
 ? flag:beat.d1-wash.3
 - Towel's in your locker. Top shelf. I think.
 ? flag:beat.d1-wash.4
