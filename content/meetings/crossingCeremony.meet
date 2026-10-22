@@ -1,0 +1,35 @@
+@meeting crossingCeremony
+// EW1 (events writer), Crossing the Line (event-line plan v2, story A "The one on watch", the user's choice), Sunday
+// Day 7, 14:40-14:55, the bow lounge (moved from the plaza by the user; about 50-60). Cast: marrow, brennan, and two first-timers (the cast slot first:2;
+// first1 and first2 here). The Captain reads the old oath, then asks who answers for the first-timers: your answer goes
+// on the plaque (flag:line.answer.proud | .watch | .punch; the plaque texts are event.crossingLine.plaque.<answer>).
+// It replaces events plan v3.2's "one reply (proud, nervous, joking)" (question line-q9). If you're not there, a
+// first-timer gives the plain line and the plaque has event.crossingLine.plaque.missed. Three replies at most. Tomas
+// is on watch on Deck 2 (his crossing comes on the Lap at 20:30).
+title: The Line oath
+from: Captain Odile Marrow
+gist: You crossed the Line into the Veyli reach. The Captain read the old oath, you answered for the first-timers, and you drank Brennan's Line punch. Your certificate is on your shelf.
+== lines
+marrow: Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.   [gesture]
+marrow: First-timers, step forward. Don't be shy. Everyone here stood where you're standing once.
+first1: Do we have to say anything?
+marrow: One of you does, at the end. I do the hard part. Listen.   [laugh]
+marrow: Past this point the stars have other names, and help is a long way off. We go as guests.
+marrow: So we make each other a promise. Here it is.   [gesture]
+marrow: "We have crossed the Line. We left the near stars behind us, and we did not go alone."
+marrow: "Whatever is out here, we meet it as one crew, and we bring each other home."   [gesture]
+marrow: "From today, this reach knows our names." There. That's the oath. It's older than the ship.
+marrow: Now. Who answers for the first-timers?   [listen]
+first2: Not me. Don't look at me.
+first1 > you: {me}'ll do it. Won't you?   [laugh]
+? choice
+* We came a long way. We're glad we did.   rel:marrow+1 flavour:share flag:line.answer.proud
+  marrow: So are we. Write that down, somebody. It's going on the plaque.   [nod]
+* We crossed together, all of us. Even the ones on watch.   rel:marrow+1 flavour:warm flag:line.answer.watch
+  marrow: Even the ones on watch. Yes. That's going on the plaque.   [nod]
+* Is this the part with the punch?   rel:marrow+1,brennan+1 flavour:funny flag:line.answer.punch
+  marrow: It is. I'm so sorry. And yes, that's going on the plaque too.   [laugh]
+brennan: Line punch. One mug each. You drink it all. That's the dunking. No complaints.   [gesture]
+first2: It's... green. Why is it green?
+brennan: Tradition. Drink.   [nod]
+marrow: There. You're Line-crossers now. Supper's at six. Something to take the taste away.   [laugh]
