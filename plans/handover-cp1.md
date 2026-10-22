@@ -72,3 +72,15 @@ once gave screenshot noise once), check_fast. Setup: pip install playwright; thr
    spot), not the ring's; if a tap can, padWhat/padFind must find that point.
 3. CTT3's full reach sweep on 0.91.0: anything it finds.
 4. When 0.64.17's ladder change returns: padWhat learns its ladder hatch taps (A on "Lift" reached a hatch there).
+
+## State at ~60% memory (2026-10-22 ~22:15 UTC; report to lead 30, session_016evGvfNY88TNKgaHErG9Q8)
+- claude/controller = 9a8eac0b (0.90.9 on 0.64.16; controller_check.py there is CTT2's 09cac1b).
+- Follow-up 1 pushed: claude/controller-follow1 3f17ac95 (game sha256 a82cfb82...a9b), with RV9 (session_01E31oZQU7DFbZnh2BesWsnM):
+  (1) padFind tries rings of screen points 10-40 px around a seat when its own spot's points miss (3-mess-1 now offered; A sits there);
+  (2) padWhat mirrors tap()'s ladderAimed step (A on "Lift" never walks you to the Spine ladder; real on 0.64.16 at az 0.785).
+  Checks: cadet_test ALL IDENTICAL off/on vs 9a8eac0b; check_fast OK; controller_check with CTT3's 2bead1b5: 26/27, pick's
+  "crowded seat: not proven" also on 9a8eac0b (check-side, CTT3 on it).
+- Next: after RV9's PASS, merge claude/controller-follow1 into claude/controller (no build-number change unless the build
+  master asks; the controller line's numbers are mine on claude/controller), and swap controller_check.py to CTT3's final file
+  (claude/controller-tests-3; CTT3 sends the commit after its pick fix and the 3-mess-1 case). Usual set before the push.
+- Items 2 and 4 on the follow-up list above are done by follow-up 1 (item 4: the ladder, real on 0.64.16 too).
