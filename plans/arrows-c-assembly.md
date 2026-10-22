@@ -36,10 +36,20 @@ resolutions). History is merge commits and `cherry-pick -x` only, never rewritte
 Cherry-pick notes: d59e8e9's intro_check change taken as its own lines only (`clock_tracked` and its call); 493b84e's
 player_check change taken as the tea part only (its context carried a fix-eat part not on this branch).
 
+## Merged ahead of their PASS (lead 30, 22:05: "merge now, fix on top; no BM14 until every piece has a PASS")
+| What | Branch / commits | Review |
+|---|---|---|
+| FB1 haul and delivery stops (Cart dock 1, the Folding table), the shelf put-back, a chore's pin whatever is under it | claude/fe-cartdock 228de58 (merge ee420f4), ebf456b (merge 4cdd817) | RV8 checking |
+| FX3 fix 15 (the pin on the thing you need) | 3b7b13d, inside fe-cartdock | RV8 PASS WITH FIXES (one check line) |
+| CP4 #38 (the pin on the item; a tap on the pin over the board opens it, read on release) | claude/fe2-tracked f59b471, 016fc65, 1da26e6 (merge f71ab28) | RV8 checking |
+| AC2's follower fixes since 483c3da (real taps only at your held job's step, leisure ended, Fault notes, device closed, the tap's ray) | bf27739, afa5900, ac6f66e | RV7 |
+| AC2's pop-up queue keeps a training's word | 483c3da | RV7 |
+
+Clash notes: ixJobStep's make line keeps FX2's scan-first rule with FX3's lathe pin.
+
 ## Waiting (merge when it passes)
-- FB1 claude/fe-cartdock (5df8492: haul stops under a machine or by the drop; RV8).
-- FX3 p5-fix3 fixes 15, 16; the inspection arrows; the climbing wall (RV7).
-- CP4 #38 (f59b471: the pin on the item; a tap on the pin over the job board opens it; RV8's 1-in-3 pin miss).
+- FX3 p5-fix3 fix 16 onwards; the inspection arrows (FX3 agreed with AC2: a direct arrow in 24c that steps aside with
+  the queue on; AC2 adds the queue entry after); the climbing wall (RV7).
 
 ## Checks to run on the tip
 check_fast, cadet_test (alone), arrows_check queue / shift guide / week guide, arrows_d_check, arrows_f_check,
