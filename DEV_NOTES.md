@@ -898,7 +898,8 @@ plays the week with the queue on.
 The shift chain (piece D, AC2: the plan's S1-S9) is asked by `guideShift()` from the same minute tick: level-4 entries
 `shift:in:<day>` (08:00 until clocked in), `shift:job:<day>` (clocked in, no job, a job with a Take it on the board:
 `guideTakeable()`), `shift:out:<day>` (from the shift's end, `dayShiftEnd`, for an hour, over a job still in hand); your
-job's steps and "Turn it in" stay the job's own arrow; an empty board is said once an hour, no arrow. With `POINT_ON`
+job's steps and "Turn it in" stay the job's own arrow; an empty board gets no arrow (FX1's `boardEmptySay` says so).
+S1 is FX1's On shift row in Tracked (it turns the job arrow on); FX1's `trainArrow` stays down while the queue is on (T1 leads). With `POINT_ON`
 too: panel pointers on Clock in, Take it, Turn it in, Clock out (three times each), the Works app's Work log after a
 turn-in and its Training tab when your reputation reaches a new word (once each, with a toast for the word).
 `guideGoal` passes over an entry with nothing to show now (T3 while you hold another job) to the next live one; T3

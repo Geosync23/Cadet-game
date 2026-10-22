@@ -7,7 +7,9 @@
 #                   first row's Take it (a held one first); taken: the job's own arrow, no pointer
 #   turn it in (S5): the work done: the pointer on Turn it in; turned in: S8, the device pointer to the Works app's Work
 #                   log, gone once the tab shows
-#   empty (S6):     nothing to take (a row without a Take it counts as nothing): no arrow, "Board's empty for now" once an hour; tracking off: nothing said
+#   empty (S6):     nothing to take (a row without a Take it counts as nothing): no arrow; FX1's "Nothing on the board" said
+#   S1 (FX1's row): tracking today's On shift row leaves no direct arrow, so the queue's Clock in leads
+#   the meeting (RV6's E item 5): FX1's trainArrow puts no arrow up while the queue is on; T1 leads
 #   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
@@ -76,6 +78,9 @@ def part_on(pg):
     at(pg, 470); shift(pg)
     early = pg.ev(LAB); ids = pg.ev("guideList().map(e => e.id)")
     check(not any(i.startswith('shift:') for i in ids) and not str(early or '').startswith('Clock in'), f'S2: nothing before 08:00 ({early}, {ids})')
+    r = pg.ev("""(() => { setGoal({ deck: 3, room: 'w', label: 'old arrow' }); const it = trkItems().find(x => x.work); if (!it) return null; const t = trkTap(it.key); return { t, sub: it.sub, direct: IX_GOAL && IX_GOAL.label, track: SHIP.player.track === null ? 'off' : 'on' }; })()""")
+    print('  S1:', r)
+    check(r and r['t'] and r['direct'] is None and r['track'] == 'on' and '08:00' in r['sub'], f'S1: tracking On shift: no direct arrow, tracking on, "the clock opens at 08:00" ({r})')
     at(pg, 480); shift(pg)
     e = pg.ev("guideList().find(e => e.id === 'shift:in:9') || null"); lab = pg.ev(LAB)
     print('  S2:', lab, e and e['level'])
@@ -145,14 +150,12 @@ def part_on2(pg):
     check(p['up'] and p['now'] == 'p:works:log' and p['text'] and p['text'].startswith('Work log'), f'S8: in the Works app, the pointer on the Work log tab ({p})')
     pg.ev("POINT.aim.click()"); p = ptr(pg); pg.ev("deviceClose()")
     check(not p['up'] and pg.ev("!POINT_Q.some(x => x.id === 'p:works:log')"), f'S8: the tab shown: gone ({p})')
-    # S6
-    pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0"); at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB)
-    at(pg, 630); shift(pg); n1 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length")
-    at(pg, 661); shift(pg); n2 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length")
-    pg.ev("SHIP.player.track = null"); at(pg, 721); shift(pg); n3 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length"); pg.ev("SHIP.player.track = undefined")
+    # S6: nothing with a Take it (a row without one counts as nothing): no arrow; FX1's word said (boardEmptySay)
+    pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0; if (boardEmptySay.s) boardEmptySay.s.dry = false, boardEmptySay.s.at = -1e9")
+    at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB); n1 = pg.ev("__toasts.filter(t => /Nothing on the board/.test(t)).length")
     pg.ev("openJobs = __oj")
-    print('  S6:', lab, n1, n2, n3)
-    check(not (lab or '').startswith('Take a job') and n1 == 1 and n2 == 2 and n3 == 2, f'S6: an empty board: no arrow, said once an hour, not with tracking off ({lab}; said {n1}, {n2}, {n3})')
+    print('  S6:', lab, n1)
+    check(not (lab or '').startswith('Take a job') and n1 == 1, f'S6: an empty board: no arrow, and the board\'s word said ({lab}; said {n1})')
     # S9
     r = pg.ev("""(() => { const W = SHIP.works, keep = W.xp; __toasts.length = 0; guideShift(); const B = WORK_BANDS[W.tier] || WORK_BANDS[1], b0 = worksBand();
       W.xp = 0; guideShift(); const nx = B[1]; W.xp = nx[0]; guideShift(); const t1 = __toasts.slice(); const q = POINT_Q.some(x => x.id === 'p:works:training');
@@ -167,6 +170,14 @@ def part_on2(pg):
       guideDrop('shift:out:' + d); guideDrop('shift:job:' + d); SHIP.career.ci = ci; SHIP.career.co = co; setShipNow(now); return { d, from: e && e.from - b, until: e && e.until - b }; })()""")
     print('  short Friday:', r)
     if check(r is not None, 'Friday: (no short Friday found)'): check(r['from'] == 930 and r['until'] == 960, f'S7: on a short Friday from 15:30 until 16:00 ({r})')
+    # the meeting: trainArrow puts nothing up while the queue is on; T1 leads (RV6's E item 5)
+    r = pg.ev("""(() => { const W = SHIP.works, keep = W.cur, now = Math.floor(shipNow()), occ = { key: 'arrows-occ3', id: 'works.m4', deck: 5, room: 'r', at: now + 10, len: 15, status: 'asked' };
+      SHIP.occasions.push(occ); W.cur = { id: 'm4', st: 'meet', d: 9, by: 'esposito-yara', occ: 'arrows-occ3', told: true }; clearGoal();
+      trainArrow(W.cur, now); const direct = IX_GOAL && IX_GOAL.label; guideTrain(); GUIDE.key = ''; const g = goalNow();
+      W.cur = keep; SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); GUIDE.list = GUIDE.list.filter(e => !e.id.startsWith('train:')); GUIDE.rev++; clearGoal();
+      return { direct, lab: g && g.label }; })()""")
+    print('  meeting:', r)
+    check(r['direct'] is None and 'meet Yara' in str(r['lab']), f'meeting: no direct arrow from trainArrow with the queue on; T1 leads ({r})')
     # three times at most
     r = pg.ev("""(() => { SHIP.device.pointsSeen['p:clock:out'] = 3; pointDrop('p:clock:out'); const now = Math.floor(shipNow());
       setShipNow(8 * 1440 + 1030); SHIP.career.co = 0; guideShift(); const q = POINT_Q.some(x => x.id === 'p:clock:out'); setShipNow(now); return q; })()""")
