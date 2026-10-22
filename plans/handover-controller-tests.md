@@ -37,8 +37,15 @@ RV2 session_01E1TTHbhLzy2U6pAoGh7E9a (p3-p5 and this check; notes in plans/revie
 | unplug | deck, marks | stand-in only (marks not built) | 3/3 |
 | odd | deck | OK on 0.90.2 and the stand-in | 2/2 |
 | pick | pick | crew, machine, sealed door OK on 0.90.2; lift not offered by the D-pad from 2 m (CT1 told); no lone seat on Deck 4 | 3/3 on 0.90.2 |
-| reach | panels | touch half working (deck taps open Tiles, ladder, lift panel, other decks); pad half written, untested | none yet |
+| reach | panels | touch half working (deck taps open Tiles, ladder, lift panel, other decks; a full sweep takes over an hour and never finished yet); pad half written and run on the stand-in (it lists what the D-pad never reaches); its 2 planted faults not yet run | none yet |
 | day, games | | not written | |
+
+## Paused 2026-10-22 06:02 (lead 26's pare-down), where I stopped
+- Last push: see `git log origin/claude/controller-tests`. Nothing running.
+- Next: (1) a full `reach --inventory` on CT1's latest build (CTL_PRESSES=900, about 1-2 h) to fill NOT_FROM_NEW_GAME and see
+  which panels hidden at load never open; (2) `reach --selftest --mutants` with CTL_PRESSES=40 to prove the pad half's two
+  planted faults; (3) parts day and games; (4) fold in CT1's off/quiet/base once CT1 agrees.
+- Reported to CT1 (copy lead 26): the 0.90.2 results, mode b's three listeners, the lift not offered by the D-pad from 2 m.
 
 ## Loose ends
 - One file or two: CT1 also has a controller_check.py (white-box: PAD.log, padLayer). Proposed: mine is the file, CT1's
