@@ -45,6 +45,12 @@ Notes (no change needed):
 - The first morning a day there can be one more toast than the reminders (section 20's own in-bay toast and tips), as CK1 says; they're spaced 5.6 s apart at least.
 - Owner review: section 15 is the player engineer's; J sits in that seat's slot. The lead may want PB2 (or whoever holds that seat) to glance at it.
 
+### J, second fix: claude/patch-play1-j 4bc3e39c (07:57 UTC, CR6's clothes_check find in the full round)
+
+**Verdict: PASS at 4bc3e39c.** The 10:00 reminder, held while other toasts were up, fired 2.1 s after the washer's answer toast hid, and clothes_check read the reminder instead of the answer. The fix is only in clockRmHeld: held while `#toast` has `show`, and for CLOCK_RM.gap (10 s) after the 5.6 s stamp; design-doc's rule updated; career_check (l) gains a proof ("an answer toast up, then gone": held, held, then said).
+My runs on 4bc3e39c: clothes_check **ALL OK**; career_check (l) OK, including the new line (only the known backlog-12 FAIL); check_fast **QUICK CHECK OK** (341 s); cadet_test against ec06f68e **ALL IDENTICAL**.
+Note (no change needed): at SHIP_RATE .6 a ship minute is about 1.7 s, so the 09:00 "start" window (10 ship minutes, about 17 s) is barely longer than the new hold (5.6 + 10 s); a toast just before 09:00 can drop that one reminder. The "you forgot" ones (09:15 and later) still come, so it's fine; worth knowing if the user says a reminder didn't show.
+
 ## E. Ladder taps and the rower (notes 14, 16), LD1: claude/patch-play1-e 7e26050e
 
 **Verdict: PASS** (two notes for the lead, one owner look).
@@ -81,7 +87,7 @@ Not reviewed. SC1 would not push without the user's own go; the lead moved it to
 | Part | Tip | Verdict |
 | --- | --- | --- |
 | B, notes 9-12 (FR4) | claude/patch-play1-b 4d062c45 | PASS |
-| J, note 20 (CK1) | claude/patch-play1-j ec06f68e | PASS (after one fix asked at 1188cbdf) |
+| J, note 20 (CK1) | claude/patch-play1-j ec06f68e, then 4bc3e39c | PASS (after one fix asked at 1188cbdf); the toast-gap fix 4bc3e39c PASS |
 | E, notes 14, 16 (LD1) | claude/patch-play1-e 7e26050e | PASS (e36549af had no game change) |
 | F, note 18 | none | on hold (the user's decision) |
 
