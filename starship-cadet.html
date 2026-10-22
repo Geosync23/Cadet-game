@@ -53731,7 +53731,7 @@ const PAD_NAMES = [
 ];
 function padNameIt(el) {                                   // give el a readable name before it takes the focus, if it has none
   if (!PAD.used || padSaid(el)) return;
-  for (const [sel, nm] of PAD_NAMES) if (el.matches(sel)) { const t = typeof nm === 'function' ? nm(el) : nm; if (t) el.setAttribute('aria-label', t); return; }
+  for (const [sel, nm] of PAD_NAMES) if (el.matches(sel)) { const t = typeof nm === 'function' ? nm(el) : nm; if (t) { el.setAttribute('aria-label', t); return; } }   // (no name from this one: try the next)
 }
 // One-handed play: two presets for the Controller settings page (P4's "One hand: left / right", beside "Buttons back to
 // normal"), in its PAD_SET.map shape { action: the pad button that does it }, every action on its own button (a whole
