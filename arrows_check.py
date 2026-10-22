@@ -303,7 +303,8 @@ FOLLOW = r"""(() => {
   const it = sh && its.find(x => x[0].t === sh[1]) || named || its[0];   // a shelf by its name, else the thing named, else the nearest
   const pin = () => { const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
   if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
-  if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (!r || !ACT && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)
+  if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (r && ACT && IX_ACTS[ACT.kind] && !/tea|biscuits|drink|water/i.test(g.label || '')) { const k = ACT.kind; actEnd(true); window.__tapKey2 = key; return 'tap ' + it[0].t + ': started ' + k + ', not the job: up again'; }   // a sit-down or laundry instead of the job's stop (a pin by the folding table): the floor at the pin next (AC2)
+    if (!r || !ACT && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)
   return pin();
 })()"""
 STATE = r"""(() => { const W = SHIP.works, d = SHIP.time.day, g = goalNow();
