@@ -1,0 +1,7 @@
+part off
+part quiet
+part base
+part deck
+part pick
+  pick: 25 things pressed, kinds ['crew', 'item', 'lift', 'place']
+CONTROLLER CHECK OK

@@ -272,3 +272,31 @@ Nits for later turns (not blocking):
 2. controller_check has no "pad already there at load" case and no screenshot-after-touch case yet (none needed while
    nothing is drawn; both are due with turn 3's ring and RV2's check review).
 3. Walking's "moved in >= 2 of 4 directions" is loose; the steer direction test (> .999 in all four) is the strict one.
+
+## Controller turn 3 (CT1: 1ec16129 0.90.2, picking): PASS for the game, WITH FIXES for the check
+
+Code read: the ring (one RingGeometry mesh, colour through `col()`, y .035, clear of rugs at ~.012 and under the touch
+marker at .06) and the bottom line `#padHint` are made at the first use only (`padPickShow`, when the pad is in use and
+nothing is open), hidden with a touch, a panel or a toast. A presses section 11's own `tap()` at a screen point where a
+finger would hit the thing (`padFind` asks `padWhat`, a read-only copy of tap()'s order: crew, walker, item / lift,
+lift door, lock, shut door, then the floor's job / crate / hamper / wardrobe / place). The search is spread over frames
+(6 screen points a frame). Reduced motion keeps the ring still. Small label nit: a `youLock` door is always named a door,
+but tap() only treats it as one when `youLockTap` answers (else the tap walks you there); A still does what the tap does.
+
+Runs (each alone):
+- cadet_test turn 2 → turn 3 (switch off): ALL IDENTICAL (renderer noise only). Switch on, turn 2 → 3: ALL IDENTICAL.
+  integration 0.64.14 → turn 3 on: ALL IDENTICAL.
+- controller_check: OK; pick: 25 things pressed, kinds crew, item, lift, place (A and a finger's tap in lockstep give the
+  same outcome every time).
+- Mutants: **c5** A does nothing: CAUGHT. **c6** a hidden ring mesh made at load (inside `if (PAD_ON)`): **MISSED**.
+  **c7** a seat ringed where the tap actually reaches a person (padWhat skips the crew when looking for a place):
+  **MISSED**.
+
+Fixes for the check (CTT / CT1; not the game):
+1. c6: the `quiet` part (switch on, no pad) should also compare the 3D scene with the no-pad page: `scene.children.length`
+   and `renderer.info.memory` (geometries, textures), and after a press-then-touch, `renderer.info.render.calls`.
+2. c7: the lockstep compares A with a tap at the same point, so a wrong point passes. Also check that the outcome fits
+   the ringed thing's kind: crew → the chat opens with that person; lift → the lift panel; place → you go to that place
+   (ACT / goal at its spot); item → its toast or activity; door → you walk to that door.
+3. My bar 6: the kinds pressed should include a shut door and a machine (a job stop or a FLOOR_ACTS machine), not only
+   "lift or crew" plus an item.
