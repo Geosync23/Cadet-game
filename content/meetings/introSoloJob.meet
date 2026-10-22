@@ -1,13 +1,14 @@
 @meeting introSoloJob
 // Day 2, Tuesday 08:45, the Chief's glass office: Calder alone gives you your first solo job (the job is on your
-// device). The Works writer. Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
+// device). The Works writer. The playtest patch 1, #7: the job is yours and tracked when she's done, and her closing
+// words open rounds (Torres's Rounds ask waits for her talk); Torres no longer "on Deck 6" (he shows you rounds at 10:45). Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
 title: Your first solo job
 from: Chief Ines Calder
-gist: Calder gave you your first solo job: it's on your device. Every job goes in your Record. Book a progress talk any time.
+gist: Calder gave you your first solo job: it's yours and tracked on your device. Every job goes in your Record. From today rounds are on the board too: Torres will show you. Book a progress talk any time.
 == lines
 calder: Come in. Don't sit. This won't take long.   [gesture]
 calder > you: Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.
-calder: You'll do it alone. Torres is on Deck 6. He'll look in at tea. Once.
+calder: You'll do it alone. Torres has his own work. He'll look in at tea. Once.
 calder: Every job you finish goes in your Record. So does every job you leave half done. I read the Record.
 calder: Progress talks: any time. Book one on your device. I'll keep it.
 ? choice
@@ -17,4 +18,5 @@ calder: Progress talks: any time. Book one on your device. I'll keep it.
   calder: Don't let the machine down. I'll be fine.
 * (Take the job and go)
   calder: Good. That's an answer too.
+calder: And from today there's a new kind of work on the board: rounds. Torres walks you through your first one this morning.
 calder: One more thing. Finish what you start. Off you go.
