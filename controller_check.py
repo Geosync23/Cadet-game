@@ -1734,7 +1734,7 @@ def legacy_parts(GAME, ON, fails):
         p.press('x', 0); p.step(3)
         check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'xbox:y', 'drop: the Xbox pad pressed last, marks not back to Xbox')
         p.close()
-    # ---- CP4 (claude/controller-p4 db80eb0): settings ----
+    # ---- CP4 (claude/controller-p4 7631ab6): settings ----
     # P4, the Controller page in Settings (plan section 7)
     SV = "(() => { const s = {}; for (const f of SAVE_EXTRA) try { f(s); } catch (e) { } return s; })()"
     SAVE_NOW = """(() => { const decks = {}; for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
@@ -1798,6 +1798,10 @@ def legacy_parts(GAME, ON, fails):
         check(p.ev('camera.zoom') < z0, 'settings: flipped, up on the right stick should zoom out')
         p.axes([0, 0, 1, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
         check(k is not None and k <= .6, f'settings: gentle walking at full push: {k}')
+        # vibration: on (it held), a buzz of a known kind reaches the pad; an unknown kind, or vibration off, doesn't
+        p.js("window.__bz = 0; window.__pads[0].vibrationActuator = { playEffect: () => { window.__bz++; return Promise.resolve(); } }")
+        r = [p.ev("padBuzz('done')"), p.ev("padBuzz('nope')")]; p.ev("PAD_SET.buzz = false"); r.append(p.ev("padBuzz('pick')")); p.ev("PAD_SET.buzz = true")
+        check(r == [True, False, False] and p.js('window.__bz') == 1, f'settings: vibration: {r}, {p.js("window.__bz")} buzzes')
         # P5's one-hand layouts (a stand-in PAD_LAYOUTS): the buttons show, right turns the sticks over, back to normal clears both
         p.ev("window.PAD_LAYOUTS = { left: Object.fromEntries(PAD_BTN.map((n, i) => [n, PAD_BTN[(i + 1) % 16]])), right: Object.fromEntries(PAD_BTN.map(n => [n, n === 'a' ? 'rs' : n === 'rs' ? 'a' : n])) }")
         labels = p.ev("padSetView().blocks.flatMap(b => (b.items || []).map(i => i.label))")
@@ -2008,7 +2012,7 @@ MUTANTS['lists'] = {
   'B in a text box leaves the panel too': ('src', "if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { PAD_FOCUS.last = null; a.blur(); return; }", "if (false) { }"),
   'RT does not page': ('src', "padOn('rt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('rt', L, e)) padScroll(innerHeight * .6); return true; });", "padOn('rt', e => { const L = padLayer(); if (!L) return; return true; });"),
 }
-MUTANTS['settings'] = {   # CP4, claude/controller-p4 db80eb0
+MUTANTS['settings'] = {   # CP4, claude/controller-p4 7631ab6
   'an unchanged save writes s.pad': ('src', "SAVE_EXTRA.push(s => { const d = padSetDiff(); if (d) s.pad = d; });   // nothing changed: nothing written", "SAVE_EXTRA.push(s => { s.pad = padSetDiff() || {}; });"),
   'the stick swap not loading': ('src', "    if (d.sticks === true) S.sticks = true;", "    if (d.sticks === true) S.sticks = false;"),
   'the button map not saving': ('src', "  if (Object.keys(S.map).length) d.map = Object.assign({}, S.map);", "  if (false) d.map = Object.assign({}, S.map);"),
