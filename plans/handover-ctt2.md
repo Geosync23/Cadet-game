@@ -1,5 +1,14 @@
 # Handover: CTT2, the controller test builder (after CTT)
 
+**Handed over 2026-10-22 ~20:00 (lead 29's call, memory ~65%).** CTT3 (session_0197zJtQyLkNz6dxc3NgoNgy) takes over:
+the reach sweep, and touch/pick/day on CP1's 0.64.16-based 0.90.9 (4514f19a). The file to use: claude/controller-tests
+tip (ad28a369 for the check). The 0.64.17 route fixes, for both 0.64.16 and 0.64.17 builds: f717b80b (message box counted
+not compared; B for a panel opened on the way; crowded mess at 07:20/07:40/08:00/08:20), 738667fb (sweep SKIP dropped),
+f5613f56 (the lift button by deckLabel's rule), ad28a369 (the ride waits 20 s for the lift panel). Not yet run on a
+0.64.16-based build. **Open finding, 0.64.17 only (for when its breakfast/ladders come back):** by the Deck 4 lift door
+the ring says "Lift" but A walks you to the Spine ladder and its panel opens (day: breakfast "the lift panel never
+opened"; repro on 54a5c5a8 or e27b8bfe; sent to CP1).
+
 **Role:** writes and proves `controller_check.py` (plans/controller-plan.html section 10). Tests only: never changes the game.
 Branch `claude/controller-tests`. Session session_011yMob9ZzgmCFENoNhjJ44z. Read CTT's note first
 (`plans/handover-controller-tests.md`: how the check works, the pretend pad, gotchas); this note is what changed since.
