@@ -20,7 +20,7 @@ ALL IDENTICAL; check_fast OK.
 - arrows-c now also carries FX2 (p5-fix2 cc2bb2b) and FX3 (p5-fix3 e6bcf82, then 360801c) as merge commits (lead 28's
   option (a)); merge their new tips in again if they push more, never rewrite. One FX2/FX3 clash resolved: ixJobStep's
   machine label (FX3's chore title first, then FX2's scan first / Tune).
-- F3 and F4 (my commits 9524671, bd18997; diff `git diff 0ec58bc bd18997`): with RV6 for review. Off: ALL IDENTICAL.
+- F3 and F4 (my commits 9524671, bd18997, then RV6's fixes to 5557122e): RV6 PASS. Off: ALL IDENTICAL.
   Check: `arrows_f_check.py` (about 3 min). On 1f2ce27d: check_fast, arrows_f, arrows_pointer, arrows_check queue,
   mech_check all OK.
 - Next: D (shift chain, trainTell into the queue, T3's empty-goal pick) once FX1's tip comes; F1/F2 per lead 28.
@@ -32,6 +32,12 @@ ALL IDENTICAL; check_fast OK.
 - arrows_check's follower calls `pointNow().el()`, but pointNow() returns an id: it never presses a pointer. One-line
   fix offered to the lead (use `POINT.aim`).
 - Memory ~49%: suggested a fresh session takes D.
+
+## State at 5557122e (~16:35) — for AC2 (piece D)
+- F4's follow points where the teacher is going (the valve panel / the lift), never at her (RV6 played it: an arrow
+  on a walking teacher stalls; taps at the pin land on her). Keep that in mind for D and any "follow" arrow.
+- arrows_check's follower presses pointers now (POINT.aim). The climbing holds / climbing wall tap clash is FX3's.
+- D is AC2's (lead 28). Start: merge FX1's tip into claude/arrows-c (merge commit), then read "Loose ends" below.
 
 ## Checks
 - `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.

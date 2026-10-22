@@ -50,7 +50,7 @@ def run(path):
           P.x = a.x + 9; P.z = a.z; const far = incGoalNow(q); P.x = a.x + 1; P.z = a.z; const near = incGoalNow(q); P.x = keep[0]; P.z = keep[1];
           return { far: far.crew || null, farDeck: far.deck, near: near.crew || null, nearDeck: near.deck, who: a.p.id, here: deckDef.num }; })()""")
         print('  F4 follow target:', far)
-        if far: check(far['far'] == far['who'] and far['farDeck'] == far['here'] and far['near'] is None and far['nearDeck'] != far['here'], f'F4: the follow: on the teacher while far, onward to the pipe once beside her ({far})')
+        if far: check(far['far'] is None and far['near'] is None and far['farDeck'] != far['here'] and far['nearDeck'] != far['here'], f'F4: the follow points where the teacher is going (the pipe), never at her (RV6: that stalls the lesson) ({far})')
         check(g.ev("incWho('calder')") == 'Calder', 'F4: the call and the follow say "Calder", as the training arrows do')
         r = g.ev("""(() => { const j = { kind: 'incident', inc: 'burst', deck: 4, id: 'x' }; return [0, 1, 2].map(k => incStopWord(j, k)); })()""")
         print('  F4 stops:', r)
