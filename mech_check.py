@@ -1475,8 +1475,14 @@ FX3M6 = r"""(() => {
   out.next = [worksDay(shipNow()), c.st, r2 ? r2.at % 1440 : null, said.filter(x => /try that again/i.test(x)).length];
   run(U(401), U(640), t => { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at && !r.met) { r.met = true; worksCareerTick(t + .5); } return c.st === 'watch'; });
   setGoal({ deck: 3, place: '3-grab-1', label: 'Food, Deck 3' });   // another section's arrow (a need's) put up meanwhile: never cleared by this one (PR9)
+  const tv = shipNow(), vp = (DECKS[3].places || []).find(p => p.type === 'lift-wait');   // a job you hold when your turn comes (RV6/lead 28: the burst leads, it waits)
+  SHIP.jobs.push({ id: 'fx3-held', machine: null, deck: 3, room: vp.room, kind: 'chore', chore: 'vent', title: 'Clean a vent: test', tier: 1, urgency: 1, posted: tv, found: tv, claimedBy: null, parts: [], status: 'open', stops: [{ deck: 3, placeId: vp.id, mins: 20, tag: 'vent' }] }); MACH_REV++;
+  out.heldTaken = claimJob('fx3-held');
   c.w = 1; const t2 = Math.floor(shipNow()) + 1; run(t2, t2 + 1);
   const mj = myJob(); out.yours = [c.st, mj && mj.id === c.j, mj && (ixJobStep() || {}).deck, IX_GOAL ? IX_GOAL.label : null];
+  out.parked = (SHIP.jobs.find(x => x.id === 'fx3-held') || {}).claimedBy;
+  if (mj && mj.id === c.j) { jobFinish(mj, shipNow(), 'you'); const t3 = Math.floor(shipNow()) + 1; run(t3, t3 + 1); }
+  out.back = (myJob() || {}).id || null;
   toast = kt; SHIP.works = null; SHIP.jobs = []; clearGoal(); return out;
 })()"""
 FX3SMALL = r"""(() => {
@@ -1543,6 +1549,8 @@ def part_fx3(g):
     check(a['st0'] == 'meet' and a['warnMail'], f"m6: a Mail when the training's set, naming 10:30 ({a['warnMail']})")
     check(a['soon'] == 1, f"m6: a word ten minutes before the call ({a['soon']})")
     check(a['watch'] == 'watch' and a['goal'] and a['goal'][0] == 4 and a['goal'][1] == '4-valve-panel' and 'Follow' in a['goal'][2], f"m6: after the talk the arrow follows the teacher to the pipe ({a['goal']})")
+    check('Calder' in a['goal'][2] and 'Ines' not in a['goal'][2], f"m6: the label calls her Calder, as everywhere else (RV6) ({a['goal'][2]})")
+    check(a.get('heldTaken') and a.get('parked') == 'you-parked' and a.get('back') == 'fx3-held', f"m6: a job you hold waits while the burst pipe leads, and comes back after it ({a.get('heldTaken')}, {a.get('parked')}, {a.get('back')})")
     check(a['after'] == 'ask' and not a['goalAfter'] and a['open'] is None and a['again'] and '10:30' in a['again'][0], f"m6: not followed: the crew make it safe, the next try with its day, time and place ({a['after']}, {a['again']})")
     check(a['next'][1] == 'meet' and a['next'][2] == 630 and a['next'][3] == 0, f"m6: the next try is the 10:30 call again, not a 06:00 restart ({a['next']})")
     check(a['yours'][0] == 'do' and a['yours'][1] and a['yours'][2] == 4 and a['yours'][3] == 'Food, Deck 3', f"m6: followed, your turn is yours at once and points at the pipe; another section's arrow left alone ({a['yours']})")

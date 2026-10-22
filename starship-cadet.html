@@ -15709,7 +15709,7 @@ function ixJobStep() {
 // shelf in main storage puts them back (section 15's stow). A repair needing other parts keeps its own words ("fit those first")
 function ixLoose(j) {
   const P = SHIP.player, held = (P.carry || []).filter(p => p !== KIT_BAG && typeof STOCK !== 'undefined' && p in STOCK); if (!held.length) return null;
-  if (j && (j.machine || (j.parts || []).length && !j.workDone)) return null;
+  if (j && (j.machine || (j.parts || []).length && !j.workDone) || SHIP.jobs.some(x => x.claimedBy === 'you-parked')) return null;   // (a parked job's parts wait with it: 24f)
   const sh = typeof shelfOf === 'function' ? shelfOf(held[0]) : null;
   return { deck: 5, room: 'r', place: sh || null, label: typeof worksText === 'function' ? worksText('job.putback', 'Put the {part} back: main storage', { part: held[0] }) : 'Put the ' + held[0] + ' back: main storage' };
 }
@@ -31105,6 +31105,8 @@ const LINES = JSON.parse([
   '{"text":"{trad} at {time}","id":"1rf1eo"}]',
   ',"inc.again":[',
   '{"text":"Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.","id":"1qux7e9"}]',
+  ',"inc.back":[',
+  '{"text":"Back to it. Your job waited for you.","id":"y46bn9"}]',
   ',"inc.card.alarm":[',
   '{"text":"! Galley alarm","id":"1iy9g2w"}]',
   ',"inc.card.burst":[',
@@ -48430,7 +48432,7 @@ function incDone(j, t, by) {
 // an incident's job, ready to push: { kind: 'incident', inc, deck, first?, walk? } (o.slot: held in the training's slot)
 function incJob(kind, deck, t, o = {}) {
   const j = jobMake('incident', { id: 'incident' + (o.slot || '') + ':' + kind + deck + (o.walk ? 'w' : '') + '@' + Math.floor(t / 60), inc: kind, deck, room: null, h: Math.floor(t / 60), urgency: 2,
-    title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: worksFirst(o.by || 'calder') }) : ''),
+    title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: incWho(o.by || 'calder') }) : ''),
     ...(o.walk ? { walk: true } : {}), ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) } : { leave: o.held ? INC_HELD : 1 }), ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
   const P = placeById(jobStops(j).map(s => s.places && s.places[0]).find(Boolean)); if (P) j.room = P.room;
@@ -48482,6 +48484,24 @@ const INC_FOLLOW = 30, INC_WARN = 10;
 const INC_GOAL = { g: null };                            // the arrow this block set (PR9: clear only that one, never another section's)
 function incGoalSet(g) { if (typeof setGoal !== 'function') return; setGoal(g); INC_GOAL.g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; }
 function incGoalClear() { if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null; }
+const incWho = id => id === 'calder' ? 'Calder' : worksFirst(id);   // RV6 (lead 28): players know her as Calder, the name every other label uses
+// your turn at the pipe while you hold another job (RV6's F4 review, lead 28: the burst pipe is urgent, over everything): that
+// job waits, parked (claimedBy 'you-parked', its progress kept on it), and comes back as yours once the burst job is done
+function incPark() {
+  const h = typeof myJob === 'function' && myJob(); if (!h || h.kind === 'incident') return;
+  const P = SHIP.player; h.parkWork = P.work && P.work.job === h.id ? { ...P.work, fitted: P.work.fitted.slice() } : null;
+  h.claimedBy = 'you-parked'; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+const incParked = () => SHIP.jobs.some(x => x.claimedBy === 'you-parked');
+WORK_TICKS.push(now => {
+  if (!incParked()) return; const mj = myJob(); if (mj && mj.kind === 'incident') return;
+  for (const x of SHIP.jobs) if (x.claimedBy === 'you-parked') {
+    if (x.status !== 'claimed') { x.claimedBy = null; delete x.parkWork; continue; }
+    if (myJob()) break;
+    x.claimedBy = 'you'; x.touched = now; if (x.parkWork) SHIP.player.work = x.parkWork; delete x.parkWork; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    try { const [title] = jobCard(x); toast(title, worksText('inc.back', 'Back to it. Your job waited for you.')); } catch (e) { /* no UI */ }
+  }
+});
 const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
 function incWarn(c, at, now) {
   const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
@@ -48513,8 +48533,8 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
-    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
-    if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
+    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: incWho(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
+    if (o.yours) { incPark(); if (!myJob()) claimJob(j.id); incGoalClear(); }   // a job you hold waits (incPark)   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
   doSay: c => { const j = c && SHIP.jobs.find(x => x.id === c.j); return j && j.claimedBy === 'you' ? worksText('inc.do.yours', 'Your turn. Make it safe. I\'m right behind you.') : null; },
@@ -48538,7 +48558,7 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
+    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: incWho(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
   }
   if (O) {
