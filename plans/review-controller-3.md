@@ -86,4 +86,11 @@ The fifth call, padBuzz('test'), only when vibration is turned on in the Control
 - 0.90.3 (5ae7656) = P1 cff5bab + the build lines; 0.90.4 (95b6129) = P2 67df90a merged. cadet_test 0.64.14 (f6b9176,
   the controller's base) -> 0.90.4, alone: ALL IDENTICAL off and on.
 - 0.90.5 (8715b23 + 5010eaf): 8715b23 equals git's own merge of 0.90.4 and P3 47d71ff apart from the build lines and the
-  PAD_BUILT line (games, marks). Suite running.
+  PAD_BUILT line (games, marks). **PASS.** cadet_test vs 0.64.14, alone: ALL IDENTICAL off and on. check_fast QUICK CHECK
+  OK (device_check OK). player_check OK. The branch's controller_check: 14 parts OK. CTT2's save: byte-identical in all 9
+  pad modes; calls unchanged (phone 172 calls, wide 183). Old saves: a 0.64.14 save loads in 0.90.5 (off and on) with no
+  errors and re-saves byte-identical apart from the build stamp (scratchpad oldsave.py). idle: a pad present at load and
+  never pressed added the touch hand-back listeners (mousemove, pointerdown, wheel); lead 27: not accepted, CP4 moves
+  them to the first use (3f6bb66).
+- CP4 firstuse a505b42 (the view gated too): PASS; my probe: drift, light LT, a short right-stick push leave zoom and
+  view unchanged. 3f6bb66 (listeners at first use): code read OK; runs below.
