@@ -13240,7 +13240,12 @@ function gardenGift() {
 // note if one was left (the oldest unread; marked read), else does what a bunk tap always did (offerSleep, section 13)
 function bunkTap(it, at) {
   if (typeof playerBed !== 'function' || typeof PLACE_OF === 'undefined') return false;   // section 20's bunkNote optional (0.28.29)
-  const id = playerBed(), bed = PLACE_OF.get(id); if (!bed || at.distanceTo(cellPos(...bed.at)) > 1.2) return false;
+  const id = playerBed(), bed = PLACE_OF.get(id); if (!bed) return false;
+  if (at.distanceTo(cellPos(...bed.at)) > 1.2) {         // another bunk in the room you sleep in: its words, and which is yours (the fresh-eyes playtest; the user's yes, 2026-10-22)
+    if (!/^bunk$/i.test(it.t || '') || deckDef.num !== deckOf(id) || roomAt(...cellAt(at.x, at.z)) !== roomAt(...bed.at)) return false;
+    approach(at.clone(), it.front, it.depth, () => toast(it.t, (it.x ? it.x + ' ' : '') + 'Yours is the next one.'));
+    return true;
+  }
   const p = at.clone();
   approach(p, it.front, it.depth, () => { let n = null; try { n = typeof bunkNote === 'function' ? bunkNote() : null; } catch (e) { n = null; }
     if (n) toast('A note on your bunk', 'From ' + n.from + ': "' + n.text + '"'); else bunkPick(id); });
