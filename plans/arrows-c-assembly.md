@@ -44,12 +44,14 @@ player_check change taken as the tea part only (its context carried a fix-eat pa
 | CP4 #38 (the pin on the item; a tap on the pin over the board opens it, read on release) | claude/fe2-tracked f59b471, 016fc65, 1da26e6 (merge f71ab28) | RV8 PASS (016fc65, with fix 15 and FB1) |
 | AC2's follower fixes since 483c3da (real taps only at your held job's step, leisure ended, Fault notes, device closed, the tap's ray) | bf27739, afa5900, ac6f66e | RV7 |
 | AC2's pop-up queue keeps a training's word | 483c3da | RV7 |
+| FX3 fixes 16-18 (with the inspection morning's arrows, direct, off with the queue on) | claude/p5-fix3 a9cabf75 | RV7 PASS |
 
 Clash notes: ixJobStep's make line keeps FX2's scan-first rule with FX3's lathe pin.
 
 ## Waiting (merge when it passes)
-- FX3 p5-fix3 fix 16 onwards; the inspection arrows (FX3 agreed with AC2: a direct arrow in 24c that steps aside with
-  the queue on; AC2 adds the queue entry after); the climbing wall (RV7).
+- The inspection arrows' queue entry (AC2, with the queue on; FX3's direct arrow steps aside then).
+- FB1: the galley dry-goods drop (a tap on its pin walks and never drops; lead 30 routed it, RV8).
+- The climbing wall (FX3, RV7).
 
 ## Checks to run on the tip
 check_fast, cadet_test (alone), arrows_check queue / shift guide / week guide, arrows_d_check, arrows_f_check,
