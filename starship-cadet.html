@@ -42625,7 +42625,7 @@ const INTRO_WITH = 10;                                   // tiles: he's with you
 const INTRO_ESCORT_UNTIL = 18 * 60;                       // (playtest patch 1: an hour earlier with the 16:30 arrival; was 19:00) his own steps don't time out while he's with you, until then
 // (the Zeke patch, after 0.64.15) a step where he waits for you at a spot (the ramp, the bunk room, the table) holds that way
 // at most this many minutes: near him but never at the spot, the step's own fallback runs after that (he moves on)
-const INTRO_HOLD_MAX = 15;
+const INTRO_HOLD_MAX = 8;
 function introWithEscort(here, tiles = INTRO_WITH) {     // the real game only: the escort on your deck, near you
   const a = typeof introWalker === 'function' ? introWalker() : null;
   return !!(a && here && typeof deckDef !== 'undefined' && here.deck === deckDef.num && Math.max(Math.abs(cellAt(a.x, a.z)[0] - here.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - here.tile[1])) <= tiles);

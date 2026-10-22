@@ -360,6 +360,32 @@ def bunk_leave(g):
         if how in ('out', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
 
+# 15. The talk steps with you near but not there (OR2, after 0.64.15): during 'bunk' you stand in the corridor just
+# outside Bunk 1, during 'table' in the mess away from your table, both within his 10 tiles. On 2b4a05db he waited until
+# 18:00; now the step moves on (missed, its gist by Mail) INTRO_HOLD_MAX + 5 minutes after it became yours
+def talk_away(g):
+    print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
+    for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
+        g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(20)
+        for k in range(600):
+            g.step(20)
+            if g.ev(f"SHIP.intro.step === '{step}' && deckDef.num === {deck} && !DIALOGUE"): break
+            g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        if g.ev(f"SHIP.intro.step !== '{step}'"): fail(f'never reached {step}'); continue
+        t0 = g.ev('Math.floor(shipNow())'); g.ev(f"(() => {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }})()")
+        r = None
+        for k in range(200):
+            g.step(30)
+            if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
+            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
+            if r['step'] != step: break
+        took = r['m'] - t0
+        print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, Zeke at {r['z']}")
+        if r['step'] == step or took > 20: fail(f"standing near him but not at the spot during '{step}', the evening never moved on ({r})")
+    g.page.evaluate('localStorage.clear()')
+
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
     if not g.ev("typeof introArrowTick === 'function'"):
@@ -420,6 +446,7 @@ with sync_playwright() as pw:
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
     if LEAVE_ONLY:
+        talk_away(g)
         bunk_leave(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
@@ -801,6 +828,7 @@ with sync_playwright() as pw:
             if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
+    talk_away(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
