@@ -53289,7 +53289,7 @@ function padTick(dt) {                                    // every frame while a
   PAD.lt = padTrig(tl ? +tl.value || (tl.pressed ? 1 : 0) : 0); PAD.rt = padTrig(tr ? +tr.value || (tr.pressed ? 1 : 0) : 0);
   let any = PAD.ls[0] || PAD.ls[1] || PAD.rs[0] || PAD.rs[1] || PAD.lt || PAD.rt;
   for (let k = 0; k < PAD_BTN.length; k++) {
-    const n = PAD_MAPK[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;   // a trigger counts as pressed past half way (n: the action on button k, P4's Settings)
+    const n = PAD_MAPK[k], b = bt[k], trig = k === 6 || k === 7, on = trig ? padTrig(b ? +b.value || (b.pressed ? 1 : 0) : 0) > .5 : !!(b && b.pressed);   // a trigger counts as pressed past half way, whatever action it's on (n: the action on button k, P4's Settings)
     if (on) any = true;
     if (on && !PAD.down[n]) { PAD.down[n] = true; PAD.held[n] = 0; PAD.rep[n] = PAD_REP.first; padUse(); padFire(n); }
     else if (on) {
@@ -53772,7 +53772,7 @@ function padBuzz(kind) {                                   // a light buzz, only
   try { const g = padList().find(p => p.index === PAD.idx), v = g && g.vibrationActuator; if (!v || !v.playEffect) return false;
     v.playEffect('dual-rumble', { duration: z[0], weakMagnitude: z[1], strongMagnitude: z[1] / 2 }); return true; } catch (e) { return false; }
 }
-const padSetSeen = () => PAD_ON && (PAD.live || !!PAD.id || !!padSetDiff());
+const padSetSeen = () => PAD_ON && (PAD.lastUse > -1e9 || !!padSetDiff());   // a pad pressed this session (not just connected), or a change kept
 // section 19's Settings shows this at its end (a one-line hook there): nothing at all until a pad has been seen
 const padSetBlocks = () => padSetSeen() ? [{ kind: 'text', text: 'Controller' }, { kind: 'buttons', items: [{ label: 'Controller settings', action: { app: 'settings', do: 'open', arg: 'padsettings' } }] }] : [];
 function padSetBind(n, b) {                                // put action n on pad button b; the action that was there takes n's old button
