@@ -25,8 +25,10 @@ logs in `plans/review-9/logs/`, shots in `plans/review-9/shots/`, tools in `plan
 | Controller foundation (turns 1+2), turn 3 (game) | PASS |
 | Controller P1 (cff5bab7), P2 (5b4d9f0 incl. "George"), P4 (f904532) | PASS |
 | FX1 1433e5f | FIXES NEEDED (sent): TRAIN_LEAD 15; meeting arrow back after a borrowed arrow clears; a new stuck "Take your first round at the job board" arrow blocks Clock in Days 3 and 8 |
-| FX3 b063f86 | in review; early fix sent: clear only its own arrow (no unconditional clearGoal at the pipe / incRetry). Runs queued (q_fx3.sh): mech fx3, career, player base vs tip; cadet_test; arrows shift/week |
-| FX2 | not received yet |
+| FX3 b063f86 | PASS WITH FIXES: own parts fail on base / pass on tip, cadet_test identical, the main lift green in arrows_check. Fix (clear only its own arrow, INC_GOAL) done by FX3 in its next push: re-check that delta + hauling on any day + the promotion talk |
+| FX2 | moved to AR2 (lead 27) |
+
+New red for AR1/FX1 (exposed by FX3): "Repair the light relays" arrow up over 3 ship hours from Day 2 09:49 (logs/fx3_ar_week.log).
 
 ## How to test (Pillar 5)
 
