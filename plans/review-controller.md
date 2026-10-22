@@ -151,3 +151,18 @@ Probe `review-controller/p_marks.py` (positions, families, touch, unplug) to run
 - Turn 3 mutants vs CTT's check: t3_noop_crew CAUGHT (luck: a sleeping person), t3_offset CAUGHT, t3_ringload CAUGHT
   (idle, scene count), t3_nounuse MISSED but equivalent (turn 3's frame handler hides the ring whenever PAD.used is
   false, so the 'unuse' handler only matters when frames stop).
+
+### Turn 3 (1ec16129) verdict: PASS WITH FIXES (not blocking; fixes for P1 / CTT)
+Mutants in section 26 against CTT's check (049aff56), each with its own parts; caught = a FAIL the clean run lacked:
+| mutant | parts | result |
+|---|---|---|
+| t3_noop_crew (A ignores crew) | pick | CAUGHT, by luck: the person tried (Pell) was asleep, so the tap gave a toast; an awake person opens #chat, which OUTCOME doesn't read |
+| t3_offset (A taps 40 px off) | pick | CAUGHT |
+| t3_ringload (the ring made at load, switch on) | idle calls | CAUGHT (scene count, mode a and b) |
+| t3_nounuse ('unuse' handler gone) | touch | MISSED, equivalent (the frame handler hides the ring whenever PAD.used is false) |
+| t3_rand (R() in each search) | touch | CAUGHT (seed, pictures) |
+| t3_noface (facing ignored) | pick | MISSED in effect: its only new line is the clean run's lift failure with other hints listed |
+| PR9's c6, c7 | idle calls / pick | queued |
+Fixes: (1) CTT's OUTCOME should read the chat card (`#chat` visible, its person) and the crew's state (who's talking); (2) a
+facing test (two things in reach, ahead vs behind: the ring on the one ahead); (3) the lift not offered from 2 m (CTT
+told CT1); (4) the hint's floor order (above). cadet_test identical off and on; code clean.
