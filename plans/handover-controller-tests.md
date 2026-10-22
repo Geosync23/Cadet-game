@@ -3,8 +3,11 @@
 **Role:** writes and proves `controller_check.py` for the controller support work (plans/controller-plan.html section 10).
 Never changes the game. Branch `claude/controller-tests` (from claude/controller at 7dcfab0). Session
 session_01SgEbMMMNPRP2E7DbiDyiw4.
-**People:** lead 26 session_015mHBLCf5jpnzBkFY1iBTqv (took over from lead 25); CT1 (team leader, section 26's builder)
-session_019sqDowb6QNf3KZAYMSx1jM on claude/controller; reviewers PR9 session_01B1FUTc4sJR4Q5FFnx7L6Db (foundation, p1-p2) and
+**People:** lead 27 session_017UHW78qnvRTQwYpDxpodHz (report to it); CT1 (turns 1-3, now idle) session_019sqDowb6QNf3KZAYMSx1jM
+on claude/controller; package builders (plans/controller-team.md on claude/lead-26): CP1 panels + merges into claude/controller
+session_015ZhJRKCEditHrVhwdhszYq (claude/controller-p1), CP2 mini-games session_016zb2DTsTLqNNNeuegePDgE, CP3 marks + connect
+session_01AkfeDe7MBN8RYd5n6obGRm (claude/controller-p3), CP4 settings session_01VTXDwLqWGJVRh95HozqhCu, CP5 accessibility + docs
+session_01VcdDgzyHa1dqdmcRLELbiS (claude/controller-p5); reviewers PR9 session_01B1FUTc4sJR4Q5FFnx7L6Db (foundation, p1-p2) and
 RV2 session_01E1TTHbhLzy2U6pAoGh7E9a (p3-p5 and this check; notes in plans/review-controller.md on claude/review-controller).
 **Memory rule (lead 26, the user's):** from about 60% judge case by case; hand over before a big task; never above 80%.
 
@@ -26,34 +29,36 @@ RV2 session_01E1TTHbhLzy2U6pAoGh7E9a (p3-p5 and this check; notes in plans/revie
   proved before CT1's code exists.
 - `reach --inventory`: the touch half of the sweep alone (slow: about an hour; CTL_PRESSES caps presses).
 
-## Status (keep current)
+## Status (keep current; 2026-10-22 ~10:40)
+The single controller_check.py is THIS file (agreed with CP1, who merges claude/controller). This seat keeps: the sweep
+(reach), the whole day by pad (day), games, perf; package builders send their own parts.
 | Part | Package | State | Proof |
 |---|---|---|---|
-| idle | (none) | OK on 0.64.14; on CT1 0.90.2: mode b adds 3 hand-back listeners before a press (CT1 told, RV2 note 11) | 6/6 faults caught |
-| save | (none) | OK, all of storage compared | 2/2 |
+| idle | (none) | OK on 0.64.14; on CT1 0.90.2 mode b adds 3 hand-back listeners before a press (CT1 told) | 6 own faults + PR9 c6 |
+| save | (none) | OK, all of storage | 2/2 |
 | calls | (none) | OK | 1/1 |
-| walk | deck | OK on CT1 0.90.2 and the stand-in | 6/6 (stand-in) |
-| touch | base | OK on 0.90.2 (ring and #padHint kept hidden: info) | 2/2 (stand-in) |
-| unplug | deck, marks | stand-in only (marks not built) | 3/3 |
-| odd | deck | OK on 0.90.2 and the stand-in | 2/2 |
-| pick | pick | crew, machine, sealed door OK on 0.90.2; lift not offered by the D-pad from 2 m (CT1 told); no lone seat on Deck 4 | 3/3 on 0.90.2 |
-| reach | panels | touch half working (deck taps open Tiles, ladder, lift panel, other decks; a full sweep takes over an hour and never finished yet); pad half written and run on the stand-in (it lists what the D-pad never reaches); its 2 planted faults not yet run | none yet |
-| day, games | | not written | |
+| walk | deck | OK on 0.90.2 and the stand-in | 6/6 stand-in; PR9 c1-c3 running |
+| touch | base | OK on 0.90.2 (visible page compared; ring and #padHint kept hidden: info) | 2/2 stand-in; PR9 c4 running |
+| unplug | deck, marks | stand-in only | 3/3 |
+| odd | deck | OK on 0.90.2 | 2/2 |
+| pick | pick | crew, machine, sealed door, lift (the D-pad didn't offer the lift from 2 m on 0.90.2: CT1 told) + a crowded seat in the Deck 3 mess at breakfast (new, untested) | 3/3 own on 0.90.2; PR9 c5, c7 running |
+| reach | panels | touch half: works, a full run on turn 4 (a2c80df) in progress (scratchpad logs/reach10.txt); pad half: works on the stand-in, + readable names (CP5) | 2 faults written, not run |
+| games | games | OK on the stand-in (Tiles 9 moves to the end, Done; Lightdisc how-to, stick, B leaves) | 3 faults: the run was cut off by a time limit, rerun into a log file |
+| day | all | written (lift to breakfast, eat, talk, Take it at the job board, lift home, Set alarm), never run | none |
 
-## Paused 2026-10-22 06:02 (lead 26's pare-down), where I stopped
-- Last push: see `git log origin/claude/controller-tests`. Nothing running.
-- Next: (1) a full `reach --inventory` on CT1's latest build (CTL_PRESSES=900, about 1-2 h) to fill NOT_FROM_NEW_GAME and see
-  which panels hidden at load never open; (2) `reach --selftest --mutants` with CTL_PRESSES=40 to prove the pad half's two
-  planted faults; (3) parts day and games; (4) fold in CT1's off/quiet/base once CT1 agrees.
-- Reported to CT1 (copy lead 26): the 0.90.2 results, mode b's three listeners, the lift not offered by the D-pad from 2 m.
+Results of PR9's faults c1-c7 on 1ec1612: see the end of this note (or rerun: `CTL_MUT=PR9 python3 controller_check.py
+g.html idle walk touch pick --mutants`, g.html = `git show 1ec1612:starship-cadet.html`).
 
-## Loose ends
-- One file or two: CT1 also has a controller_check.py (white-box: PAD.log, padLayer). Proposed: mine is the file, CT1's
-  off/quiet/base folded in. Waiting for CT1's answer.
-- PAD_BUILT line asked of CT1.
-- NOT_FROM_NEW_GAME (panels that can't open from a new game at a test URL) to fill from the first full sweep, each with
-  its reason.
-- The sweep is slow (reloads ~15 s each); it is not for check_fast.
+## To fold in (the next big job)
+Old-shape parts (def part_X(pw), a Pad class, check()/fail() globals, GAME/ON paths) from other branches, to bring in
+unchanged through an adapter (a function that sets GAME/ON to the part's src files, runs part_X(pw) and collects check()
+failures as the part's list):
+- CT1, claude/controller 1ec1612+: off, quiet, base, deck, pick (white-box: PAD.log, padLayer, padZoom0).
+- CP1, claude/controller-p1 93093a8: api, panels. Take the game from claude/controller-p1 for runs.
+- CP3, claude/controller-p3 efbe62a: marks, touch (register as 'touch3'), drop. NEEDS ['marks'].
+- CP5, claude/controller-p5 fc8ccd5: part_a11y + NAMELESS, as 'a11y', NEEDS ['panels', 'pick']; its faults (outline 3px,
+  padStill false, no toast role) as MUTANTS.
+Then ask CP1 for the PAD_BUILT line (and each CP to add its package name when done).
 
 ## Gotchas
 - `pkill -f PATTERN` kills your own shell when the pattern is also in the command line: run pkill in its own call.
