@@ -211,8 +211,52 @@ def m3d_jump(g):
       return [before, j && j.status, SHIP.jobs.filter(x => x.kind === 'drill' && x.status !== 'done').length]; }})()""")
     print('  24c drill, missed then a jump to Day 11:', r)
     check(r[0] == 'claimed' and r[1] == 'done' and r[2] == 0, f"m3d: a missed drill is closed after a jump {r}")
+# the fire drill played by taps (p5-fix2: a side job, so myJob() left it out and the taps did nothing; Calder always said
+# "Four and a half minutes", it never counted, the arrow stayed up and the Calendar named the crew's lift lobbies): Day 3
+# at 14:52 on Deck 5, tap the extinguisher, stand at the hatch (a tap on the floor there), tap it again to put it back;
+# each a stop done, the extinguisher in your hand between, the arrow on to each next stop and off after; the all-clear
+# by you, trained; the Calendar's Wednesday names the Works bay
+M3D_TAPS = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  const run = (from, to) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
+  setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.tr.m1 = 2; W.use.m1 = 1; W.use.m4 = 1; W.op[1] = ['m1'];
+  run(2 * 1440 + 360, 2 * 1440 + 892); if (deckDef.num !== 5) goToDeck(5);
+  const e = DEV_WEEK[2].find(x => x.at === 900);
+  return [!!drillJobOf(3), IX_GOAL && IX_GOAL.label, e && e.where];
+})()"""
+M3D_TAP = r"""(({ title, place }) => {
+  if (place) { const s = placeSpot(place), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return [jobSpotTap(new THREE.Vector3(s.x, 0, s.z)), ACT && ACT.kind]; }
+  const it = ITEMS.filter(i => i.t === title).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })[0]; if (!it) return ['no item'];
+  const gl = nearestOpen(it[1].x, it[1].z, player); player.obj.position.copy(cellPos(...gl)); player.stop();
+  return [playerTap(it[0], it[1].clone(), it[1].clone()), ACT && ACT.kind];
+})"""
+M3D_SEE = "(() => { const j = drillJobOf(3); return [(j.stepsDone || []).slice(), typeof ixHold === 'function' ? ixHold() : null, IX_GOAL ? IX_GOAL.label : null]; })()"
+def m3d_taps(g):
+    if not g.ev("!!(DECKS[5].drill && placeById(DECKS[5].drill.ext))"): return
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
+    a = g.ev(M3D_TAPS); seen = [a]
+    def wait():
+        for k in range(300):
+            g.step(10)
+            if not g.ev("ACT && ACT.kind"): break
+    for t in ({'title': 'Fire extinguisher'}, {'place': '5-drill-hatch'}, {'title': 'Fire extinguisher'}):
+        r = g.ev(f"({M3D_TAP})({json.dumps(t)})"); wait(); seen.append([r, g.ev(M3D_SEE)])
+    for k in range(80):
+        g.step(30)
+        if g.ev("drillJobOf(3).status") == 'done': break
+    g.step(5)
+    end = g.ev("(() => { const j = drillJobOf(3); return [j.status, j.doneBy, SHIP.works.tr.m3d !== undefined, IX_GOAL ? IX_GOAL.label : null, simNotes('drill', 2880).map(n => n.you)]; })()")
+    print('  24c drill by taps:', json.dumps(seen), json.dumps(end))
+    check(a[0] and a[2] and 'Works bay' in a[2], f"m3d taps: the Calendar's drill place is the Works bay ({a[2]})")
+    check([x[0][0] for x in seen[1:]] == [True, True, True], f"m3d taps: each tap starts the stop ({[x[0] for x in seen[1:]]})")
+    check([x[1][0] for x in seen[1:]] == [[0], [0, 1], [0, 1, 2]], f"m3d taps: each stop done in turn ({[x[1][0] for x in seen[1:]]})")
+    check([x[1][1] for x in seen[1:]] == ['extinguisher', 'extinguisher', None], f"m3d taps: the extinguisher in your hand till it's back ({[x[1][1] for x in seen[1:]]})")
+    check(seen[1][1][2] and seen[2][1][2] and seen[3][1][2] is None, f"m3d taps: the arrow on to each stop, off after the last ({[x[1][2] for x in seen[1:]]})")
+    check(end[:4] == ['done', 'you', True, None] and end[4] == [True], f"m3d taps: done by you, trained, no arrow left ({end})")
+    g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
 def m3d_both(g):
-    m3d_part(g); m3d_jump(g)
+    m3d_part(g); m3d_jump(g); m3d_taps(g)
 PARTS['m3d'] = m3d_both
 
 # 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk

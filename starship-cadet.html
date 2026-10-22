@@ -14215,10 +14215,10 @@ function jobHere(p, viaRay) {
   let by = Infinity;                                     // how near the tap passes the spot (the floor tap's tie-break, 0.28.55)
   const near = pid => { const s = pid && PLACE_OF.has(pid) ? placeSpot(pid) : null; if (!s) return null; const d = Math.hypot(s.x - p.x, s.z - p.z), r = viaRay ? jobRayDist(s) : Infinity; by = Math.min(d, r);
     return d < JOB_REACH || r < JOB_RAY ? s : null; };
-  const P = SHIP.player, j = typeof ixChore === 'function' ? ixChore() : null;
-  if (j && !j.workDone) {
+  const P = SHIP.player;
+  for (const j of typeof ixChores === 'function' ? ixChores() : []) if (!j.workDone) {   // your chore, and a side job's stop (the drill) first
     const nx = ixNextStop(j), s = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? near(nx.s.places[0]) : null;
-    if (s) return { by, parts: !!j.parts.length && !jobNeeds(j, { fitted: [] }, P.carry).length, go: () => ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) };
+    if (s) return { by, parts: !!j.parts.length && !jobNeeds(j, { fitted: [] }, P.carry).length, go: () => ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z), j) };
   }
   const mj = myJob(), m = mj && mj.machine && !mj.workDone ? machineById(mj.machine) : null, s = m && m.deck === deckDef.num ? near(panelPlace(m.id)) : null;
   const w = P.work && P.work.job === (mj && mj.id) ? P.work : { fitted: [] };   // not myWork(): it makes P.work, and this runs every few frames
@@ -15290,6 +15290,10 @@ const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the ven
   inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'] };
 Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
 const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
+// a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
+// board job's (it's only on for a few minutes); none once its work is done (p5-fix2: myJob leaves side jobs out, so the drill's taps did nothing)
+const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone) : [];
+const ixChores = () => [...ixSides(), ixChore()].filter(Boolean);
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there
 function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id, text); } catch (e) { /* the tips aren't ours */ } } }
@@ -15297,11 +15301,12 @@ function ixTip(id, text) { if (typeof tipShow === 'function') { try { tipShow(id
 // last of all (scenery with nothing of its own to do), and with own = true just before machineTap, for a stop that is that
 // machine's own panel (section 18's stormBallasts at the lights). The floor at the stop and the Repair button: jobHere
 function ixChoreLast(it, at, own) {
+  for (const s of ixSides()) if (!own && ixChoreTap(it, at, s)) return true;   // the drill's stop first (its stops are never a machine's panel)
   const j = ixChore(), nx = j && !j.workDone ? ixNextStop(j) : null, pl = nx && nx.s.places[0] && PLACE_OF.get(nx.s.places[0]);
   return own && !(pl && pl.machine) ? false : ixChoreTap(it, at);
 }
-function ixChoreTap(it, at) {
-  const j = ixChore(); if (!j || j.workDone) return false;
+function ixChoreTap(it, at, side) {
+  const j = side || ixChore(); if (!j || j.workDone) return false;
   const nx = ixNextStop(j); if (!nx) return false;
   const { k, s: st } = nx, room = roomAt(...cellAt(at.x, at.z)), P = SHIP.player, o = { title: it.t, flavour: it.x, job: j.id, ixStep: k };
   if (st.step === 'fetch') {                             // parts off the shelves in main storage, Deck 5
@@ -15330,6 +15335,10 @@ function ixChoreTap(it, at) {
 // cases (a cart, parts in hand, a tray): a delivery's crate from the pickup to the drop; a toolbox for any other job you're
 // on until its work is done (repairs, lamps, vents, rounds). Nothing for cart runs (the cart) or with no job.
 function ixHold() {
+  for (const s of typeof mySideJobs === 'function' ? mySideJobs() : []) {   // a side job's own thing in your hand first (the drill's extinguisher)
+    const kd = typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[s.kind]; let h = null; try { h = kd && typeof kd.hold === 'function' ? kd.hold(s) : null; } catch (e) { h = null; }
+    if (typeof h === 'string' && typeof HOLDS !== 'undefined' && HOLDS[h]) return h;
+  }
   const j = typeof myJob === 'function' ? myJob() : null;
   if (!j || j.workDone || j.kind === 'restock') return null;
   if (j.kind === 'chore' && j.chore === 'delivery' && typeof jobStops === 'function') {
@@ -15342,7 +15351,7 @@ function ixHold() {
 }
 // a stop's minutes are done (ixFrame sees the activity step out): mark it with section 17, and say what's next
 function ixStopDone(A) {
-  const j = ixChore(), P = SHIP.player; if (!j || j.id !== A.o.job) return;
+  const j = ixChores().find(x => x.id === A.o.job) || ixChore(), P = SHIP.player; if (!j || j.id !== A.o.job) return;
   if (A.o.ixFetch) {
     const got = [], none = [];
     for (const p of jobNeeds(j, { fitted: [] }, P.carry)) { if (P.carry.length >= CARRY_MAX) break; if (takePart(p)) { P.carry.push(p); got.push(p); } else none.push(p); }
@@ -15355,7 +15364,8 @@ function ixStopDone(A) {
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
   if (r.retry) { toast(A.def.title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto)
   const say = typeof r.say === 'string' && r.say ? r.say + ' ' : '';   // the kind's own words (its stepDone, through 17)
-  if (r.done) {
+  if (r.done && typeof jobSide === 'function' && jobSide(j)) toast(A.def.title, say + j.title + ': done.');   // a side job (the drill): nothing to turn in
+  else if (r.done) {
     for (const p of j.parts) { const i = P.carry.indexOf(p); if (i >= 0) P.carry.splice(i, 1); }   // the lamp went in: it's used
     toast('Work done', say + j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.');
     ixTip('turnin', 'Head back to the board to turn it in.');
@@ -45890,9 +45900,20 @@ if (typeof jobKindAdd === 'function') jobKindAdd('drill', { tier: 1, work: 0, si
     const tag = (jobStops(j)[k] || {}).step;
     if (tag === 'take' && typeof drillExtShow === 'function') drillExtShow(false);
     if (tag === 'putback' && typeof drillExtShow === 'function') drillExtShow(true);
+    drillGoal(j, k);                                     // the arrow on to the next stop (none after the last)
   },
   done(j, t, by) { if (by === 'you') j.drilled = true; },
   crew: { can: () => false, mins: 0 } });
+// the drill's arrow (set at 14:50, tagged with the job): after stop k, on to the next stop's place; cleared after the last
+// one, or at the all-clear (p5-fix2: it stayed up after the drill). Another section's goal is left alone
+function drillGoal(j, k) {
+  if (typeof IX_GOAL === 'undefined' || !IX_GOAL || IX_GOAL.drill !== j.id || typeof setGoal !== 'function') return;
+  const nx = k === null ? null : jobStops(j).find((x, i) => i > k && !x.done);
+  if (!nx) { clearGoal(); return; }
+  const by = { fire: 'the hatch', pressure: 'the door', power: 'the breaker cabinet' }[j.drill] || 'your station', key = nx.step === 'stand' ? 'stand.' + j.drill : nx.step;
+  const say = { take: 'Take the extinguisher', stand: 'Stand by ' + by, putback: 'The extinguisher back on its bracket', dog: 'Dog the bulkhead door', reserve: 'The breaker cabinet' }[nx.step];
+  setGoal({ deck: nx.deck, place: nx.places[0] || null, room: (placeById(nx.places[0]) || { room: 'w' }).room, label: worksText('drill.goal.' + key, say || 'The drill'), drill: j.id });
+}
 // Calder's word on the time (her lines drill.time.fast | ok | slow): words, never the number unless she says it
 function drillTimeWord(mins) { return mins === undefined || mins === null ? 'slow' : mins <= 3 ? 'fast' : mins <= 6 ? 'ok' : 'slow'; }
 function drillSay(key, fb) { try { const l = typeof lineFor === 'function' ? lineFor('calder', key) : null; worksSay('calder', l && l.text || fb); } catch (e) { worksSay('calder', fb); } }
@@ -45903,7 +45924,7 @@ WORK_TICKS.push((now, skip) => {
   if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
     j.told = true;
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
-    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', place: (jobStops(j)[0] || { places: [] }).places[0] || null, label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00', drill: j.id });
   }
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
 });
@@ -45913,6 +45934,7 @@ function drillClose(j, now, quiet) {
     const did = !!j.workDone, mins = j.reached;
     j.status = 'done'; j.doneAt = now; j.doneBy = did ? 'you' : null; if (typeof MACH_REV !== 'undefined') MACH_REV++;
     if (typeof drillExtShow === 'function') drillExtShow(true);
+    drillGoal(j, null);                                  // the arrow off at the all-clear
     simNote('drill', { kind: j.drill, mins: mins === undefined ? null : mins, you: did });
     if (did || mins !== undefined) worksUse('m3d');      // you turned up: the row's reputation (and the first is the training)
     if (!quiet) { try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ } const w = drillTimeWord(mins);
@@ -45927,6 +45949,10 @@ function drillCalendar() {
   Object.defineProperty(e, 'title', { configurable: true, enumerable: true, get() {
     const d0 = SHIP.time.day, d = d0 + ((2 - weekday(d0)) + 7) % 7;   // this week's Wednesday, today or next
     return drillDue(d) ? worksText('drill.cal', 'Drill at 15:00: {drill}').replace('{drill}', worksText('drill.kind.' + drillKind(d), drillKind(d).replace(/^./, x => x.toUpperCase()) + ' drill')) + '. Muster at the Works bay' : plain; } });
+  const where = e.where;                                 // and its place: yours is the Works bay, not the crew's lift lobbies (p5-fix2)
+  Object.defineProperty(e, 'where', { configurable: true, enumerable: true, get() {
+    const d0 = SHIP.time.day, d = d0 + ((2 - weekday(d0)) + 7) % 7;
+    return drillDue(d) ? worksText('drill.where', 'the Works bay, Deck 5') : where; } });
 }
 const DRILL_TEA = /^(works-tea|new-hands-tea)$/;
 WORK_TICKS.push((now, skip) => {
