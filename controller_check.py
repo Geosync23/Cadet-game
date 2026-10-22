@@ -6,6 +6,7 @@
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
+#   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   base:   hello; a press fires once and marks the controller in use (body.pad); its release; the dead zones (sticks,
 #           triggers); a held D-pad repeats (after 0.5 s, then every 0.25 s); a touch, the mouse or the wheel hands
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
@@ -378,9 +379,10 @@ def part_settings(pw):
     check(p.ev("padButtonFor('a')") == 'rs' and p.ev("padButtonFor('rs')") == 'b' and p.ev('PAD_SET.swap') is True, f'settings: confirm onto RS with the swap on: a {p.ev("padButtonFor(\'a\')")}, rs {p.ev("padButtonFor(\'rs\')")}')
     p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'view' })"); p.step(2); p.press('view'); p.step(2)
     check(p.ev("padButtonFor('view')") == 'view', 'settings: pressing an action\'s own button should keep it')
-    for verb, val in [('dead', .32), ('walk', 'gentle'), ('zoom', 1.6), ('flip', True), ('turn', 'hold'), ('marks', 'off'), ('first', .8), ('every', .125), ('buzz', True)]:
+    for verb, val in [('dead', .32), ('walk', 'gentle'), ('zoom', 1.6), ('flip', True), ('turn', 'hold'), ('marks', 'off'), ('first', .8), ('every', 0), ('buzz', True), ('sticks', True)]:
         p.ev(f"deviceDo({{ app: 'padsettings', do: {json.dumps(verb)}, arg: {json.dumps(val)} }})")
-    check(p.ev('PAD_DEAD.stick') == .32 and p.ev('PAD_REP.first') == .8 and p.ev('PAD_REP.every') == .125, 'settings: the dead zone and the menu repeat should take effect')
+    check(p.ev('PAD_DEAD.stick') == .32 and p.ev('PAD_REP.first === Infinity') and p.ev('PAD_REP.every') == .25, 'settings: the dead zone and the menu repeat (no repeat) should take effect')
+    p.axes([0, 0, 1, 0]); p.step(1); check(p.ev('PAD.ls[0]') == 1 and p.ev('PAD.rs[0]') == 0, 'settings: with the sticks swapped the right stick should walk'); p.axes([0, 0, 0, 0]); p.step(1)
     check(p.ev('padMarkFamily()') is None, 'settings: button pictures off should give no family')
     sv = p.ev(SV)['pad']; n = len(json.dumps(sv, separators=(',', ':')))
     check(n < 250, f'settings: the saved changes should be small: {n} bytes {sv}')
@@ -392,12 +394,22 @@ def part_settings(pw):
     check(p.ev("deviceView('settings').blocks.slice(-1)[0].items[0].label") == 'Controller settings', 'settings: changed settings should keep the page shown after a reload with no pad')
     p.plug(); p.press('a'); p.log()
     # turning by holding: 1.3 s of the right stick turns three times (flick: once); the right stick flipped zooms out
-    p.ev('azT = az = Math.PI / 4'); p.axes([0, 0, 1, 0]); p.step(39); p.axes([0, 0, 0, 0]); p.step(2)
+    p.ev('azT = az = Math.PI / 4'); p.axes([1, 0, 0, 0]); p.step(39); p.axes([0, 0, 0, 0]); p.step(2)
     turns = round(p.ev('(azT - Math.PI / 4) / (Math.PI / 2)')); check(turns == 3, f'settings: holding to turn for 1.3 s should give 3 quarter turns: {turns}')
-    p.ev('setZoom(padZoom0())'); z0 = p.ev('camera.zoom'); p.axes([0, 0, 0, -1]); p.step(6); p.axes([0, 0, 0, 0]); p.step(1)
+    p.ev('setZoom(padZoom0())'); z0 = p.ev('camera.zoom'); p.axes([0, -1, 0, 0]); p.step(6); p.axes([0, 0, 0, 0]); p.step(1)
     check(p.ev('camera.zoom') < z0, 'settings: flipped, up on the right stick should zoom out')
-    p.axes([1, 0, 0, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
+    p.axes([0, 0, 1, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
     check(k is not None and k <= .6, f'settings: gentle walking at full push: {k}')
+    # P5's one-hand layouts (a stand-in PAD_LAYOUTS): the buttons show, right turns the sticks over, back to normal clears both
+    p.ev("window.PAD_LAYOUTS = { left: Object.fromEntries(PAD_BTN.map((n, i) => [n, PAD_BTN[(i + 1) % 16]])), right: Object.fromEntries(PAD_BTN.map(n => [n, n === 'a' ? 'rs' : n === 'rs' ? 'a' : n])) }")
+    labels = p.ev("padSetView().blocks.flatMap(b => (b.items || []).map(i => i.label))")
+    check('One hand: left' in labels and 'One hand: right' in labels, 'settings: the one-hand buttons should show with PAD_LAYOUTS')
+    p.ev("deviceDo({ app: 'padsettings', do: 'hand', arg: 'right' })")
+    check(p.ev("padButtonFor('a')") == 'rs' and p.ev('PAD_SET.sticks') is True and p.ev('PAD_SET.swap') is False, 'settings: One hand: right should set its map and swap the sticks')
+    p.ev("deviceDo({ app: 'padsettings', do: 'hand', arg: 'left' })")
+    check(p.ev("padButtonFor('a')") == 'b' and p.ev('PAD_SET.sticks') is False, 'settings: One hand: left should set its map, sticks normal')
+    p.ev("deviceDo({ app: 'padsettings', do: 'normalbtn' })")
+    check(p.ev('Object.keys(PAD_SET.map).length') == 0 and p.ev('PAD_SET.sticks') is False, 'settings: Buttons back to normal should clear the map and the sticks')
     # an odd save stays normal: two actions on one button, a value not offered
     p.ev("padSetLoad({ map: { a: 'b' }, dead: .5, marks: 'sega', swap: 'yes' })")
     check(p.ev('padSetDiff()') is None and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()'), 'settings: an odd save should load as normal')
@@ -405,11 +417,34 @@ def part_settings(pw):
     # everything back to normal (two presses): nothing saved, the save's extras as before any change
     p.ev("deviceShow('padsettings'); deviceDo({ app: 'padsettings', do: 'normal' })"); check(p.ev('padSetDiff() !== null'), 'settings: one press of Everything back to normal should only ask')
     p.ev("deviceDo({ app: 'padsettings', do: 'normal' })")
-    check(p.ev('padSetDiff()') is None and 'pad' not in p.ev(SV) and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()') and p.ev('PAD_DEAD.stick') == .22 and p.ev('PAD_REP.first') == .5 and p.ev('PAD_REP.every') == .25,
+    check(p.ev('padSetDiff()') is None and 'pad' not in p.ev(SV) and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()') and p.ev('PAD_DEAD.stick') == .22 and p.ev('PAD_REP.first') == .5 and p.ev('PAD_SET.sticks') is False and p.ev('PAD_REP.every') == .25,
           f'settings: Everything back to normal should leave nothing changed and nothing saved: {p.ev("[padSetDiff(), PAD_MAPK.join(), PAD_DEAD.stick, PAD_REP.first, PAD_REP.every]")} {list(p.ev(SV).keys())[:3]}')
     p.ev('localStorage.clear()'); p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('settings', part_settings)]
+def part_api(pw):
+    # the panel helper's API (P1) for the other packages: padPanelAdd (order, first, back), padOwn (move, a, b, frame)
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstPanel'; d.style.cssText = 'position:fixed;left:20px;top:200px;z-index:99;display:grid;grid-template-columns:90px 90px;gap:8px';
+      d.innerHTML = '<button id="t1">one</button><button id="t2">two</button><button id="t3">three</button>'; document.body.appendChild(d);
+      window.__tst = { back: 0, a: 0, moves: [], frames: 0 };
+      padPanelAdd('tstPanel', { before: 'lift', first: '#t2', back: () => { __tst.back++; d.hidden = true; } }); })()""")
+    p.step(3)
+    check(p.ev("(padLayer() || {}).id") == 'tstPanel', 'api: an added panel should be on top')
+    check(p.ev("PAD_PANELS.findIndex(r => r[0] === 'tstPanel') + 1 === PAD_PANELS.findIndex(r => r[0] === 'lift')"), 'api: before: should put it just above the lift')
+    check(p.ev("document.activeElement && document.activeElement.id") == 't2', 'api: first: should land the highlight on #t2')
+    p.press('left'); check(p.ev("document.activeElement.id") == 't1', 'api: D-pad left should move to #t1')
+    p.press('down'); check(p.ev("document.activeElement.id") == 't3', 'api: D-pad down should move to #t3')
+    # a screen of its own takes the D-pad and A, not B
+    p.ev("padOwn(L => L && L.id === 'tstPanel', { move: d => { __tst.moves.push(d); return true; }, a: () => { __tst.a++; return true; }, frame: () => { __tst.frames++; } })")
+    p.press('right'); p.press('a'); p.step(2)
+    check(p.ev("__tst.moves.join()") == 'right' and p.ev("__tst.a") == 1 and p.ev("document.activeElement.id") == 't3', f'api: padOwn should take the D-pad and A: {p.ev("JSON.stringify(__tst)")}')
+    check(p.ev("__tst.frames") > 0, 'api: padOwn frame should run while its panel is on top')
+    p.press('b'); p.step(2)
+    check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('settings', part_settings)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue

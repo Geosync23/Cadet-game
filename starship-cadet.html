@@ -53281,7 +53281,8 @@ function padTick(dt) {                                    // every frame while a
   if (g.index !== PAD.idx) { padRelease(); PAD.idx = g.index; }
   if (g.id !== PAD.id) { PAD.id = g.id; PAD.std = g.mapping === 'standard'; PAD.fam = padFamily(g.id); }   // not standard: the same order is the best guess (Settings remaps it, turn 7)
   const ax = g.axes || [], bt = g.buttons || [];
-  PAD.ls = padStick(+ax[0] || 0, +ax[1] || 0); PAD.rs = padStick(+ax[2] || 0, +ax[3] || 0);
+  const sw = PAD_SET.sticks ? 2 : 0;                      // P4's Settings: the sticks swapped (for one hand)
+  PAD.ls = padStick(+ax[sw] || 0, +ax[sw + 1] || 0); PAD.rs = padStick(+ax[2 - sw] || 0, +ax[3 - sw] || 0);
   const tl = bt[PAD_PHY.lt], tr = bt[PAD_PHY.rt];          // the triggers' actions, wherever Settings put them (P4)
   PAD.lt = padTrig(tl ? +tl.value || (tl.pressed ? 1 : 0) : 0); PAD.rt = padTrig(tr ? +tr.value || (tr.pressed ? 1 : 0) : 0);
   let any = PAD.ls[0] || PAD.ls[1] || PAD.rs[0] || PAD.rs[1] || PAD.lt || PAD.rt;
@@ -53532,13 +53533,44 @@ padOn('a', () => {                                         // A: the tap, where 
   if (!s) return true;
   P.chosen = false; tap(s[0], s[1]); P.n = 0; P.job = null; return true;
 });
-// ---- turn 4 (0.90.3): panels and menus without touching the screen. While a panel is open (padLayer) the highlight is
-// the page's real focus, on one of its buttons: the D-pad (or the left stick, pushed past half way) moves it to the
-// nearest button that way, as on a TV menu; A presses it (click(), exactly a tap; a text box gets the system keyboard);
-// B does what the panel's own way out does (PAD_BACK; nothing on a card you must answer); the right stick scrolls a long
-// list, the triggers a page; LB and RB are the device's Back and Home. D-pad up on the deck reaches the buttons on the
-// screen's edge (a pretend panel, PAD_HUD; B goes back to walking). X presses the action button that's showing (Repair,
-// Hobby, Put down). The outline is drawn only while the controller is in use (body.pad).
+// ---- turn 4 (0.90.3, package P1): panels and menus without touching the screen. While a panel is open (padLayer) the
+// highlight is the page's real focus, on one of its buttons: the D-pad (or the left stick, pushed past half way) moves it
+// to the nearest button that way, as on a TV menu; A presses it (click(), exactly a tap; a text box gets the system
+// keyboard); B does what the panel's own way out does (PAD_BACK; nothing on a card you must answer); the right stick
+// scrolls a long list, the triggers a page; LB and RB are the device's Back and Home. D-pad up on the deck reaches the
+// buttons on the screen's edge (a pretend panel, PAD_HUD; B goes back to walking). X presses the action button that's
+// showing (Repair, Hobby, Put down). The outline (PAD_FOCUS_CSS) is drawn only while the controller is in use (body.pad).
+// THE PANEL HELPER, for the other controller packages (P2-P5) and any later panel:
+//   padPanelAdd(sel, { on, before, first, back })  a panel the helper knows. sel: its element id, or '.class'. on():
+//       open only while this says so (else: while it shows on the page). before: the id of a listed panel it sits on top
+//       of (else it goes at the bottom of the list). first: a selector inside it where the highlight lands first (else
+//       its first button; a focus the panel set itself, like the lift's goal deck, is kept). back: what B does there
+//       (else Escape); PAD_MUST for a card you must answer (B does nothing).
+//   padOwn(when, { move(dir, e), a(e), b(e), x(e), lt(e), rt(e), frame(dt) })  a screen with its own controls (Tiles'
+//       squares, Lightdisc's stick, the lift, work steps): when(L) gets the layer on top (or null for the deck) and says
+//       whether these apply; each handler returns true when it took the press, else the helper does its usual thing.
+//       frame returning true also stops the left stick acting as a D-pad that frame. Later padOwn calls are asked first.
+//   padLayer()  the layer on top: a panel element, PAD_HUD, or null (the deck). padPanel(): the panel only.
+//   padItems(L)  the buttons the highlight can land on in L, as shown. padFocusTo(el): put the highlight on el.
+//   padStep(dir)  one D-pad step ('up', 'down', 'left', 'right'): the screen's own move first, else padMove(dir), the
+//       nearest button that way. padPress(): what A does. padBack(L): what B does. padScroll(dy): scroll the list.
+//   PAD_REP (section 26's base) is the menu repeat's pace; PAD_FOCUS_CSS the outline's look (P5 may make them settable).
+const PAD_MUST = () => {};                                 // B on a card you must answer: nothing (its buttons take the highlight)
+const PAD_OWN = [];
+function padOwn(when, h) { PAD_OWN.unshift([when, h]); }
+function padOwnDo(name, L, ...args) {                      // the first screen of its own that takes it: true, else false
+  for (const [when, h] of PAD_OWN) { let w = false; try { w = when(L); } catch (e) { /* not this one */ } if (w && h[name] && h[name](...args) === true) return true; }
+  return false;
+}
+function padPanelAdd(sel, o = {}) {
+  const at = o.before ? PAD_PANELS.findIndex(r => r[0] === o.before) : -1, row = [sel, o.on];
+  if (at < 0) PAD_PANELS.push(row); else PAD_PANELS.splice(at, 0, row);
+  const k = sel[0] === '.' ? sel.slice(1) : sel;
+  if (o.first) PAD_FIRST[k] = o.first;
+  if (o.back) PAD_BACK[k] = o.back;
+}
+const PAD_FOCUS_CSS = 'body.pad :focus{outline:3px solid #4cc3b5!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(76,195,181,.28)!important}';
+const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
 const PAD_HUD = { id: 'hud', hud: true };
 const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard';
 const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0 };
@@ -53551,9 +53583,8 @@ function padFocusTo(el) {
   if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
   try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
 }
-const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
 function padFocusIn(L) {                                   // land in a layer: keep a focus already in it (the lift's goal deck), else the first button
-  const a = document.activeElement, items = padItems(L), first = PAD_FIRST[L.id] && document.querySelector(PAD_FIRST[L.id]);
+  const a = document.activeElement, items = padItems(L), k = padKey(L), first = PAD_FIRST[k] && document.querySelector(PAD_FIRST[k]);
   if (a && items.includes(a) && (!first || first.contains(a))) return;   // (the device puts its own focus on Close)
   padFocusTo(first && items.find(e => first.contains(e)) || items[0]);
 }
@@ -53597,7 +53628,7 @@ const padEsc = () => dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape',
 const PAD_BACK = {
   pauseCard: () => pauseSet(false),
   ld: () => { const v = DISC.view; if (v && v.leave && !v.leave.classList.contains('hide')) v.leave.click(); },
-  careerEnd: () => {}, sickCard: () => {}, devDlg: () => {},   // a card you must answer: B does nothing (its buttons take the highlight)
+  careerEnd: PAD_MUST, sickCard: PAD_MUST, devDlg: PAD_MUST,
   qAsk: () => { const b = document.getElementById('qStay'); if (b) b.click(); },
   trkPanel: () => trkClose(),
   dmSheet: () => devmodeOpen(false),
@@ -53605,49 +53636,55 @@ const PAD_BACK = {
   chat: () => chatClose(),
   hud: () => { PAD_FOCUS.hud = false; const a = document.activeElement; if (a && a.blur) a.blur(); },
 };
+function padKey(L) {                                       // a layer's name in PAD_BACK and PAD_FIRST: its id, or its listed class
+  if (!L) return null; if (L.id) return L.id;
+  const r = L.classList && PAD_PANELS.find(r => r[0][0] === '.' && L.classList.contains(r[0].slice(1))); return r ? r[0].slice(1) : null;
+}
 function padBack(L) {
   const a = document.activeElement;
   if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { a.blur(); return; }   // first out of a text box
-  (PAD_BACK[L.id] || padEsc)();                          // (the job board and Ship health take Escape)
+  (PAD_BACK[padKey(L)] || padEsc)();                     // (the job board and Ship health take Escape)
 }
-padOn('frame', () => {
-  const F = PAD_FOCUS;
-  if (F.hud && (ride || !PAD.used || padPanel())) F.hud = false;   // a real panel opening (or a touch) ends the screen-edge visit
-  const L = PAD.used ? padLayer() : null;
-  if (L && !F.css) {
-    F.css = true; const st = document.createElement('style');
-    st.textContent = 'body.pad :focus{outline:3px solid #4cc3b5!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(76,195,181,.28)!important}';
-    document.head.appendChild(st);
-  }
-  if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { F.layer = L; if (L) padFocusIn(L); }   // (and when it redraws: a new app)
-  if (!L) { F.stick = ''; return; }
-  // the left stick as a D-pad: pushed past half way, one step, then repeats like a held D-pad
-  const [x, y] = PAD.ls, m = Math.max(Math.abs(x), Math.abs(y)), dir = m < .6 ? '' : Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
-  if (dir !== F.stick) { F.stick = dir; F.rep = PAD_REP.first; if (dir) padMove(dir); }
-  else if (dir && (F.rep -= PAD.dt) <= 0) { F.rep += PAD_REP.every; padMove(dir); }
-  const sy = PAD.rs[1]; if (sy) padScroll(sy * 900 * PAD.dt);
-});
-for (const d of ['up', 'down', 'left', 'right']) padOn(d, () => {
-  if (!PAD.used) return;
-  if (d === 'up' && !padLayer() && !ride && !FREEZE.frozen) { PAD_FOCUS.hud = true; return true; }   // the deck: reach the screen's edge
-  return padLayer() ? padMove(d) : undefined;
-});
-padOn('a', () => {
-  const L = padLayer(); if (!L || !PAD.used) return;
+function padStep(dir, e) { const L = padLayer(); return padOwnDo('move', L, dir, e) || padMove(dir); }
+function padPress(e) {                                     // A in a panel: press the highlighted button
+  const L = padLayer(); if (!L) return false;
+  if (padOwnDo('a', L, e)) return true;
   const a = document.activeElement, items = padItems(L);
   if (!a || !items.includes(a)) { padFocusTo(items[0]); return true; }
   if (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { a.focus(); if (a.type === 'checkbox' || a.type === 'radio') a.click(); return true; }
   a.click();
   if (L === PAD_HUD) PAD_FOCUS.hud = false;              // a screen-edge button pressed: back to walking (its panel takes the highlight)
   return true;
+}
+padOn('frame', () => {
+  const F = PAD_FOCUS;
+  if (F.hud && (ride || !PAD.used || padPanel())) F.hud = false;   // a real panel opening (or a touch) ends the screen-edge visit
+  const L = PAD.used ? padLayer() : null;
+  if (L && !F.css) { F.css = true; const st = document.createElement('style'); st.id = 'padCss'; st.textContent = PAD_FOCUS_CSS; document.head.appendChild(st); }
+  if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { F.layer = L; if (L) padFocusIn(L); }   // (and when it redraws: a new app)
+  if (!L) { F.stick = ''; return; }
+  if (padOwnDo('frame', L, PAD.dt)) { F.stick = ''; return; }
+  // the left stick as a D-pad: pushed past half way, one step, then repeats at the D-pad's pace
+  const [x, y] = PAD.ls, m = Math.max(Math.abs(x), Math.abs(y)), dir = m < .6 ? '' : Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
+  if (dir !== F.stick) { F.stick = dir; F.rep = PAD_REP.first; if (dir) padStep(dir, { name: dir, pad: PAD, repeat: false, stick: true }); }
+  else if (dir && (F.rep -= PAD.dt) <= 0) { F.rep += PAD_REP.every; padStep(dir, { name: dir, pad: PAD, repeat: true, stick: true }); }
+  const sy = PAD.rs[1]; if (sy) padScroll(sy * 900 * PAD.dt);
 });
-padOn('b', () => { const L = padLayer(); if (!L || !PAD.used) return; padBack(L); return true; });
-padOn('lb', () => { if (!DEV.open || padLayer() !== document.getElementById('device')) return; deviceShow('home'); return true; });
-padOn('rb', () => { if (!DEV.open || padLayer() !== document.getElementById('device')) return; deviceShow('home'); return true; });
-padOn('lt', () => { if (!padLayer()) return; padScroll(-innerHeight * .6); return true; });
-padOn('rt', () => { if (!padLayer()) return; padScroll(innerHeight * .6); return true; });
-padOn('x', () => {                                         // the action button that's showing, bottom right
-  if (padLayer() || ride || FREEZE.frozen) return;
+for (const d of ['up', 'down', 'left', 'right']) padOn(d, e => {
+  if (!PAD.used) return;
+  if (d === 'up' && !padLayer() && !ride && !FREEZE.frozen && !padOwnDo('move', null, d, e)) { PAD_FOCUS.hud = true; return true; }   // the deck: reach the screen's edge
+  return padLayer() ? padStep(d, e) : undefined;
+});
+padOn('a', e => { if (!PAD.used || !padLayer()) return; return padPress(e); });
+padOn('b', e => { const L = padLayer(); if (!L || !PAD.used) return; if (!padOwnDo('b', L, e)) padBack(L); return true; });
+const padInDevice = () => DEV.open && padLayer() === document.getElementById('device');
+padOn('lb', () => { if (!padInDevice()) return; return padClick('devBack') || true; });   // the device's Back
+padOn('rb', () => { if (!padInDevice()) return; return padClick('devHome') || true; });   // and Home
+padOn('lt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('lt', L, e)) padScroll(-innerHeight * .6); return true; });
+padOn('rt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('rt', L, e)) padScroll(innerHeight * .6); return true; });
+padOn('x', e => {                                          // the action button that's showing, bottom right
+  const L = padLayer(); if (L) return padOwnDo('x', L, e) || undefined;
+  if (ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
 // ---- package P4 (controller plan section 7): the Controller page in your device's Settings. Shown only once a pad has
@@ -53658,11 +53695,11 @@ padOn('x', () => {                                         // the action button 
 // PAD_SET holds them; saved with the game (s.pad) only when something differs from normal, so a save without a change
 // stays byte for byte the same. Read by others: padButtonFor(action) (the button an action is on, for P3's marks),
 // padMarkFamily() (whose marks: 'xbox' | 'ps' | 'nin', or null for none, P3), PAD_REP (the menu repeat, P5), padBuzz().
-const PAD_SET0 = { map: {}, swap: false, dead: .22, walk: 'full', zoom: 1, flip: false, turn: 'flick', marks: 'auto', first: .5, every: .25, buzz: false };
+const PAD_SET0 = { map: {}, swap: false, sticks: false, dead: .22, walk: 'full', zoom: 1, flip: false, turn: 'flick', marks: 'auto', first: .5, every: .25, buzz: false };
 const PAD_SET = JSON.parse(JSON.stringify(PAD_SET0));
 const PAD_MAPK = PAD_BTN.slice();                         // pad button k (the standard order) -> the action it does (section 26's names)
 const PAD_PHY = {};                                       // the action -> its pad button's index
-const PAD_SET_CH = { dead: [.12, .22, .32], zoom: [.6, 1, 1.6], first: [.3, .5, .8], every: [.5, .25, .125], marks: ['auto', 'xbox', 'ps', 'nin', 'off'] };
+const PAD_SET_CH = { dead: [.12, .22, .32], zoom: [.6, 1, 1.6], first: [.5, .8, 1.2], every: [.25, .5, 0], marks: ['auto', 'xbox', 'ps', 'nin', 'off'] };
 const PAD_SET_ACTS = [['a', 'Use, press'], ['b', 'Back'], ['x', 'Action button (Repair, Hobby, Put down)'], ['y', 'Your device'], ['view', 'Tracked'], ['menu', 'Pause'],
   ['lb', 'Turn left'], ['rb', 'Turn right'], ['lt', 'Zoom out, page up'], ['rt', 'Zoom in, page down'], ['rs', 'The usual zoom'],
   ['up', 'Up (the screen\'s edge buttons)'], ['down', 'Down'], ['left', 'Previous thing nearby'], ['right', 'Next thing nearby'], ['ls', 'Spare (does nothing)']];
@@ -53676,7 +53713,7 @@ function padSetMap() {                                    // PAD_SET.map (action
   if (PAD_SET.swap) [phy.a, phy.b] = [phy.b, phy.a];
   for (const n of PAD_BTN) { PAD_PHY[n] = phy[n]; PAD_MAPK[phy[n]] = n; }
 }
-function padSetApply() { PAD_DEAD.stick = PAD_SET.dead; PAD_REP.first = PAD_SET.first; PAD_REP.every = PAD_SET.every; padSetMap(); }
+function padSetApply() { PAD_DEAD.stick = PAD_SET.dead; PAD_REP.first = PAD_SET.every ? PAD_SET.first : Infinity; PAD_REP.every = PAD_SET.every || .25; padSetMap(); }   // every 0: no repeat
 function padSetLoad(d) {                                   // a save's s.pad (only what differs from normal), checked; anything odd stays normal
   const S = PAD_SET; Object.assign(S, JSON.parse(JSON.stringify(PAD_SET0)));
   if (d && typeof d === 'object') {
@@ -53684,6 +53721,7 @@ function padSetLoad(d) {                                   // a save's s.pad (on
     for (const n of PAD_BTN) if (PAD_BTN.includes(m[n]) && m[n] !== n && !used.has(m[n])) { S.map[n] = m[n]; used.add(m[n]); }
     const all = PAD_BTN.map(n => S.map[n] || n); if (new Set(all).size !== all.length) S.map = {};   // not one button each: back to normal
     if (d.swap === true) S.swap = true;
+    if (d.sticks === true) S.sticks = true;
     if (d.flip === true) S.flip = true;
     if (d.buzz === true) S.buzz = true;
     if (d.walk === 'gentle') S.walk = 'gentle';
@@ -53706,10 +53744,11 @@ function padButtonName(b) {                                // a pad button's nam
   const k = PAD_BTN.indexOf(b); if (k >= 12) return 'D-pad ' + b;
   return (PAD_SET_NAMES[padMarkFamily() || PAD.fam] || PAD_SET_NAMES.xbox)[k] || b;
 }
-function padBuzz(ms, k) {                                  // a light buzz, only when it's turned on (never the only sign of anything)
-  if (!PAD_SET.buzz || !PAD.live) return false;
+const PAD_BUZZ = { pick: [90, .3], done: [180, .5], test: [150, .5] };   // kind -> [ms, strength]
+function padBuzz(kind) {                                   // a light buzz, only when it's turned on; call it only beside a sign on screen (P5)
+  const z = PAD_BUZZ[kind]; if (!z || !PAD_SET.buzz || !PAD.live) return false;
   try { const g = padList().find(p => p.index === PAD.idx), v = g && g.vibrationActuator; if (!v || !v.playEffect) return false;
-    v.playEffect('dual-rumble', { duration: ms || 120, weakMagnitude: k || .4, strongMagnitude: (k || .4) / 2 }); return true; } catch (e) { return false; }
+    v.playEffect('dual-rumble', { duration: z[0], weakMagnitude: z[1], strongMagnitude: z[1] / 2 }); return true; } catch (e) { return false; }
 }
 const padSetSeen = () => PAD_ON && (PAD.live || !!PAD.id || !!padSetDiff());
 // section 19's Settings shows this at its end (a one-line hook there): nothing at all until a pad has been seen
@@ -53730,8 +53769,7 @@ function padSetRaw() {                                     // the pad in charge'
   return PAD_BTN.map((n, k) => { const b = g.buttons[k]; return !!(b && (b.pressed || +b.value > .5)); });
 }
 if (PAD_ON) {
-  PAD.on.b = PAD.on.b || [];                               // B on the Controller page: back to Settings (before turn 4's B, which goes Home)
-  PAD.on.b.unshift(() => { if (!PAD.used || !DEV.open || DEV.app !== 'padsettings' || padLayer() !== document.getElementById('device')) return; deviceShow('settings'); return true; });
+  padOwn(L => L && L.id === 'device' && DEV.open && DEV.app === 'padsettings', { b: () => { deviceShow('settings'); return true; } });   // B on the page: back to Settings (not Home)
   for (const n of PAD_BTN) for (const e of [n, n + ':up']) (PAD.on[e] = PAD.on[e] || []).unshift(() => PAD_SET_UI.listen || PAD_SET_UI.eat ? true : undefined);   // waiting for a button: it does nothing else
   padOn('frame', () => {
     const U = PAD_SET_UI;
@@ -53754,13 +53792,19 @@ if (PAD_ON) {
   padOn('gone', () => { if (PAD_SET_UI.listen) { padSetListen(null); if (DEV.open) deviceRefresh(); } });
   deviceApp({ id: 'padsettings', title: 'Controller', icon: 'gear', order: 99.5, hidden: () => true, act: padSetAct, view: padSetView });
 }
+function padSetLayout(k) {                                 // P5's one-hand layout k ('left' | 'right'), { action: button } for all 16, or null
+  let L = null; try { L = typeof PAD_LAYOUTS === 'object' && PAD_LAYOUTS ? PAD_LAYOUTS[k] : null; } catch (e) { return null; }
+  return L && PAD_BTN.every(n => PAD_BTN.includes(L[n])) && new Set(PAD_BTN.map(n => L[n])).size === PAD_BTN.length ? L : null;
+}
 function padSetAct(verb, arg) {
   const S = PAD_SET, U = PAD_SET_UI;
   if (verb === 'bind') { U.sure = false; padSetListen(U.listen === arg ? null : arg); return; }
   if (verb === 'cancel') { U.sure = false; padSetListen(null); return; }
   padSetListen(null);
-  if (verb === 'normalbtn') { S.map = {}; S.swap = false; }
-  else if (verb === 'swap' || verb === 'flip' || verb === 'buzz') { S[verb] = !!arg; if (verb === 'buzz' && arg) padBuzz(150, .5); }
+  if (verb === 'normalbtn') { S.map = {}; S.swap = false; S.sticks = false; }
+  else if (verb === 'hand' && padSetLayout(arg)) { S.map = {}; for (const n of PAD_BTN) if (padSetLayout(arg)[n] !== n) S.map[n] = padSetLayout(arg)[n]; S.swap = false; S.sticks = arg === 'right'; }
+  else if (verb === 'sticks') S.sticks = !!arg;
+  else if (verb === 'swap' || verb === 'flip' || verb === 'buzz') { S[verb] = !!arg; if (verb === 'buzz' && arg) padBuzz('test'); }
   else if (verb === 'walk' && ['full', 'gentle'].includes(arg)) S.walk = arg;
   else if (verb === 'turn' && ['flick', 'hold'].includes(arg)) S.turn = arg;
   else if (PAD_SET_CH[verb] && PAD_SET_CH[verb].includes(arg)) S[verb] = arg;
@@ -53776,16 +53820,18 @@ function padSetView() {
   B.push({ kind: 'text', text: 'Buttons: pick an action, then press the button you want for it. A button already in use swaps places.' });
   B.push({ kind: 'list', rows: PAD_SET_ACTS.map(([n, label]) => ({ text: label, sub: U.listen === n ? 'Press a button on your controller (its own keeps it)' : padButtonName(padButtonFor(n)),
     mark: U.listen === n ? 'hot' : undefined, action: { app: A, do: 'bind', arg: n } })) });
-  B.push({ kind: 'buttons', items: [U.listen ? { label: 'Cancel', action: { app: A, do: 'cancel' } } : null, { label: 'Buttons back to normal', action: { app: A, do: 'normalbtn' } }].filter(Boolean) });
+  B.push({ kind: 'buttons', items: [U.listen ? { label: 'Cancel', action: { app: A, do: 'cancel' } } : null, { label: 'Buttons back to normal', action: { app: A, do: 'normalbtn' } },
+    padSetLayout('left') ? { label: 'One hand: left', action: { app: A, do: 'hand', arg: 'left' } } : null, padSetLayout('right') ? { label: 'One hand: right', action: { app: A, do: 'hand', arg: 'right' } } : null].filter(Boolean) });
   B.push({ kind: 'text', text: 'Swap confirm and back (Nintendo style: the right button confirms)' }, on('swap'));
+  B.push({ kind: 'text', text: 'Swap the sticks (walk with the right stick)' }, on('sticks'));
   B.push({ kind: 'text', text: 'How far a stick moves before it counts' }, pick('dead', [[.12, 'A little'], [.22, 'Normal'], [.32, 'A lot']]));
   B.push({ kind: 'text', text: 'Walking' }, pick('walk', [['full', 'Full speed'], ['gentle', 'Gentle']]));
   B.push({ kind: 'text', text: 'Zoom speed' }, pick('zoom', [[.6, 'Slow'], [1, 'Normal'], [1.6, 'Fast']]));
   B.push({ kind: 'text', text: 'Flip zoom on the right stick (down zooms in)' }, on('flip'));
   B.push({ kind: 'text', text: 'Turning the view' }, pick('turn', [['flick', 'A quarter turn a push'], ['hold', 'Keeps turning while held']]));
   B.push({ kind: 'text', text: 'Button pictures' }, pick('marks', [['auto', 'Automatic'], ['xbox', 'Xbox'], ['ps', 'PlayStation'], ['nin', 'Nintendo'], ['off', 'Off']]));
-  B.push({ kind: 'text', text: 'Holding a direction in a menu: wait before it repeats' }, pick('first', [[.3, 'Short'], [.5, 'Normal'], [.8, 'Long']]));
-  B.push({ kind: 'text', text: 'Then how fast it repeats' }, pick('every', [[.5, 'Slow'], [.25, 'Normal'], [.125, 'Fast']]));
+  B.push({ kind: 'text', text: 'Holding a direction in a menu: wait before it repeats' }, pick('first', [[.5, 'Normal'], [.8, 'Longer'], [1.2, 'Longest']]));
+  B.push({ kind: 'text', text: 'Then how fast it repeats' }, pick('every', [[.25, '4 a second'], [.5, '2 a second'], [0, 'No repeat']]));
   B.push({ kind: 'text', text: 'Vibration (a light buzz; never the only sign of anything)' }, on('buzz'));
   B.push({ kind: 'buttons', items: [{ label: U.sure ? 'Sure? Press again to put everything back' : 'Everything back to normal', action: { app: A, do: 'normal' } }, { label: 'Done', action: { app: A, do: 'done' } }] });
   return { title: 'Controller', blocks: B };
