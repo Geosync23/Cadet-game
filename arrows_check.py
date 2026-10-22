@@ -280,6 +280,20 @@ FOLLOW = r"""(() => {
     const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
   }
   if (typeof pointNow === 'function') { try { const el = pointNow() && POINT.aim; if (el && el.isConnected && !document.getElementById('ptr').hidden) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }   // pointNow() is the shown pointer's id; POINT.aim its button
+  // a head-scratcher (24k's case) waiting for your call while the arrow is your job's own step: Fault notes, as a player
+  // reads the toast "Fault notes has the suspects": Where next? while clues are left, Call it once one is left, then Yes (AC2, FX3's gap 1)
+  { let j = null, c = null, js = null; try { j = myJob(); c = j && typeof caseOf === 'function' ? caseOf(j) : null; js = ixJobStep(); } catch (e) { c = null; }
+    const gl = (goalNow() || {}).label;
+    if (c && !c.calls.length && j.scan && js && gl === js.label && !ACT) {
+      if (!(DEV.open && DEV.app === 'works' && WORKS_TAB === 'faults')) { worksTabShow('faults'); window.__devN = 0; return 'open Fault notes'; }
+      const bs = [...document.querySelectorAll('#devBody button')], by = re => bs.find(b => re.test(b.textContent));
+      const yes = by(/^Yes$/), calls = bs.filter(b => /^Call it/.test(b.textContent)), nx = by(/^Where next\?/);
+      const b = yes || (calls.length === 1 || !nx) && calls[0] || nx;
+      if (b) { const t = b.textContent; b.click(); if (t.startsWith('Where next')) deviceClose(); return 'Fault notes: ' + t; }
+    }
+  }
+  // the phone left open (the Scanner opens it by itself): closed after a moment, as a player would (FX3's gap 2)
+  if (DEV.open && !DEV.choose && !ACT) { window.__devN = (window.__devN || 0) + 1; if (window.__devN >= 3) { window.__devN = 0; deviceClose(); return 'close the device'; } } else window.__devN = 0;
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
   const cs = document.getElementById('clockScreen');
   if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
