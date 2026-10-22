@@ -156,3 +156,16 @@ sha256 **225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5** (BM1
 | day_check 7 | **OK** | DAY CHECK OK; peak 269 (260); worst stuck 0.0; 268 s |
 
 No FAIL. (The draw-call peaks moved a few calls with the breakfast change; all far under 450.)
+
+# Round on 0.64.17 (claude/integration-next 1498dbf4), lead 29's start; reported to BM14 and lead 29
+
+sha256 **ff45b427d65d543ab8dfe10f289b49653f0102af8ef513b960dd2e2ecbfac306** (lead 29's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 255; worst stuck 0.0; 224 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 202 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 200 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 211 s |
+
+No FAIL. (The same numbers as on 8193458e.)
