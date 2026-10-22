@@ -69,3 +69,17 @@ Then ask CP1 for the PAD_BUILT line (and each CP to add its package name when do
 ## How to test
 `CADET_CHROME=/opt/pw-browsers/chromium python3 controller_check.py GAME.html [parts] [--mutants] [--selftest]`.
 CT1's build: `git show origin/claude/controller:starship-cadet.html > g.html`.
+
+### CP3's update (10:32): tip claude/controller-p3 958421a (merges P1's helper)
+Register 'marks', 'touch3', 'drop' all with NEEDS ['marks']. CP3's planted faults (each line once in the game at 958421a):
+```
+MUTANTS['marks'] = {
+  'marks shown without the pad in use': ('src', "'body.pad .padk{display:inline-flex}", "'.padk{display:inline-flex}body.pad .padk{display:inline-flex}"),
+  'Nintendo marks in Xbox places': ('src', "nin: { a: ['B', '#e6f0f1', 'B'], b: ['A', '#e6f0f1', 'A'],", "nin: { a: ['A', '#e6f0f1', 'A'], b: ['B', '#e6f0f1', 'B'],"),
+  'Controller connected said at every press': ('src', "if (!PAD_MARK.said) { PAD_MARK.said = true;", "if (true) { PAD_MARK.said = true;"),
+}
+MUTANTS['drop'] = {
+  'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
+  'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
+}
+```
