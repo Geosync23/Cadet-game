@@ -92,3 +92,16 @@ What the failures are (all but 8.4 the check's, not the game's):
 
 ## Paused (2026-10-22 06:02, lead 26: the 06:00 pare-down)
 Where it stands: early notes 1-11 on CTT's controller_check sent to CTT, CT1, lead 26; no P3-P5 branch had landed. On waking: fetch claude/controller-p3..p5 and claude/controller-tests, re-run CTT's parts on the switch-on copy, then the per-package round above.
+
+## Unpaused 2026-10-22 09:43 (lead 26). Turn 3 (CT1 1ec16129, 0.90.2: the ring, picking, A through tap()): in progress
+- cadet_test 0.90.1 -> 0.90.2, switch off: ALL IDENTICAL; -> a PAD_ON = true copy: ALL IDENTICAL.
+- Code read: A calls section 11's own `tap()` at a screen point where `padWhat` (pick / crewAtScreen, read only) says a
+  finger reaches the thing; the touch path is the same `tap()` (pointerup). No R(), no save, nothing at load; the ring
+  (y .035, col(), depthWrite off, one mesh) and #padHint are made at the first use and hidden on unuse / gone.
+- Nit: padWhat's floor order isn't playerFloorTap's (bagLockerTap and beamFloorTap missing; job before crate/hamper),
+  so the line can say "A Sit" where A puts the kit bag away. A still does what the tap does.
+- Cost (probe `review-controller/p_cost.py`, 390x844, Deck 4): picks per frame up to 6 at the start spot, up to 16 for
+  8 frames in 16 at the densest (13 things in reach). For turn 8's frame-time check.
+- CTT's pick part compares A with a real mouse click by OUTCOME; OUTCOME doesn't see #chat (no role=dialog) - mutant
+  t3_noop_crew tests it.
+- Mutants in section 26 itself: `review-controller/mutants.py` (runs pending).
