@@ -138,3 +138,16 @@ toast once, 'gone' -> padUnuse when no pad is left and pauseSet(true) if used in
 - padPauseLine finds the card's line by position (`firstElementChild.children[1]`): fragile against section 15's card.
 - The marks stay inside the buttons after a touch (hidden): textContent of #devBtn / #pauseBtn / #trkBtn gains a letter.
 Probe `review-controller/p_marks.py` (positions, families, touch, unplug) to run.
+
+### Runs so far (10:40)
+- P5: cadet_test a2c80df6 -> adffcbe5 switch off: ALL IDENTICAL; -> a PAD_ON copy: ALL IDENTICAL (1-level renderer noise).
+- P3 probe p_marks (390x844, 320x640, 1280x800; Xbox, PlayStation, Nintendo by name): every mark on its button's
+  top-right corner, on screen, in the family's style (Y / triangle / X; the bottom line's A / Cross / B; the toast says
+  "Press Cross" / "Press B"); a click hides them all and drops body.pad; unplugged in use -> paused, the card reads
+  "Controller disconnected", a tap on the card resumes and the line is back. Shots look tidy at phone size.
+- **P3 find: a first press of B loses "Controller connected".** padTick fires 'use' then the button: 'use' shows the
+  toast, then B's handler (`toastEl.classList.remove('show')`) puts it away the same frame. Also P3's touch part can't
+  see toasts (the quiet style hides #toast), so the welcome toast being replaced isn't visible to it.
+- Turn 3 mutants vs CTT's check: t3_noop_crew CAUGHT (luck: a sleeping person), t3_offset CAUGHT, t3_ringload CAUGHT
+  (idle, scene count), t3_nounuse MISSED but equivalent (turn 3's frame handler hides the ring whenever PAD.used is
+  false, so the 'unuse' handler only matters when frames stop).

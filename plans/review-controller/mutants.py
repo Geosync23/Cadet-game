@@ -17,6 +17,15 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p5_notoast': ("  if (!toastEl.hasAttribute('aria-live')) toastEl.setAttribute('aria-live', 'polite');", "", 'a11y'),
  'p5_thin': ("body.pad :focus{outline:4px solid #4cc3b5!important", "body.pad :focus{outline:2px solid #4cc3b5!important", 'a11y'),
  'p5_noedge': (",0 0 0 9px #0d1521!important}'", ",0 0 0 9px rgba(13,21,33,0)!important}'", 'a11y'),
+ # P3 (CP3 efbe62a): run with CP3's controller_check (its marks, touch, drop parts)
+ 'p3_markload': ("const padFam = () =>", "if (PAD_ON) setTimeout(() => padMarksSync(), 0);\nconst padFam = () =>", 'marks'),
+ 'p3_alwaysshow': ("'body.pad .padk{display:inline-flex}", "'.padk{display:inline-flex}", 'touch'),
+ 'p3_nopause': ("  if (PAD.goneUsed && !PAUSE.on) { PAD_MARK.why = true; pauseSet(true); }", "", 'drop'),
+ 'p3_pausealways': ("  if (PAD.goneUsed && !PAUSE.on) {", "  if (!PAUSE.on) {", 'drop'),
+ 'p3_norestore': ("  else if (!on && PAD_MARK.line) { ln.textContent = PAD_MARK.line; PAD_MARK.line = ''; }", "", 'drop'),
+ 'p3_saidalways': ("  if (!PAD_MARK.said) { PAD_MARK.said = true;", "  if (true) { PAD_MARK.said = true;", 'marks'),
+ 'p3_ninA': ("nin: { a: ['B', '#e6f0f1', 'B']", "nin: { a: ['A', '#e6f0f1', 'A']", 'marks'),
+ 'p3_nounuse': ("  if (!padList().length) padUnuse();", "", 'drop'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
