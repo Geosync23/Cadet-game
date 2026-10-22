@@ -86,3 +86,20 @@ build table.
   board 3 of 4).
 - interactions_check OK on the tip; check_fast QUICK CHECK OK (151 s); cadet_test strictly alone vs 2cdc1dfc ALL
   IDENTICAL.
+
+## Second round
+
+- **FX2 ffdbb8c (trkDoneCheck leaves a 'clock:' goal alone): PASS.** p_clock4.py: the tracked Clock in arrow stays
+  on the clock from Deck 4, across the Works bay and through Calder's briefing to 09:16. 13b FAILS on 421838e (Zeke's
+  arrow from the bay) and passes on ffdbb8c. check_fast OK. cadet_test alone 421838e vs ffdbb8c ALL IDENTICAL.
+- **DS1 1dd4f560 (check only):** player_check also measures the card at 390x844. Fine.
+- **CP4 f59b471e (item 38: the pin at the item's middle, a tap on the pin is the item's tap): PASS, one note.**
+  Its check part FAILS on 251d9788 and passes on f59b471e. check_fast OK. cadet_test alone 251d9788 vs f59b471e
+  ALL IDENTICAL. Tested with FX3 3b7b13d as lead 29 asked (scratch build: FX3's file plus CP4's 38 change; applies
+  cleanly, names_check OK). p_board.py: a real click on the pin opens the board from every turn where it's on screen
+  (900x760 crew hidden: 4 of 4, icon and anchor; 390x844 crew on: 2 of 2 on screen, the other two turns show only the
+  edge arrow). FX3's interactions_check on the combined build: OK in 2 of 3 full runs. In the first run, turn 1's click
+  on the pin neither opened the board nor fell through (the pin still under the point afterwards). It didn't happen
+  again in eight more runs (2 full, 6 of FX3's part alone), so it's 1 in 9 and I couldn't reproduce it. Note for CP4: if it shows up again, the
+  pin acts on 'click' after stopping 'pointerdown'; if the pin moves between press and release no click comes, and
+  the press was already swallowed.
