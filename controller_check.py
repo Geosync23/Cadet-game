@@ -659,7 +659,11 @@ OUTLINES = r"""(() => { const out = []; for (const e of document.querySelectorAl
 # objects drawn. Things made on the pad's first use and hidden again after a touch (the ring, the bottom line) are listed
 # apart, as information: the rule is that touch looks and behaves as without a pad, not that nothing is ever made.
 SEEN_STATE = r"""(() => { let h = 0, n = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
+  // (P3's one-time "Controller connected" message after the first pad press is by design, and it goes on a real-time
+  // timer: the message box is left out while it says that, and only then)
+  const hello = (document.getElementById('tt') || {}).textContent === 'Controller connected', box = document.getElementById('toast');
   for (const e of document.body.querySelectorAll('*')) { if (e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
+    if (hello && box && (e === box || box.contains(e))) continue;
     if (e.checkVisibility && !e.checkVisibility({ visibilityProperty: true })) continue;   // not opacity: the bubbles are hidden from pictures that way
     const b = e.getBoundingClientRect(); if (b.width <= 0 || b.height <= 0) continue;
     n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '')); for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
