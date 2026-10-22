@@ -88,3 +88,12 @@ MUTANTS['drop'] = {
 Old-shape parts 'tiles', 'disc', 'screens' (plus CP1's 'api', 'lists'), to fold in the same way. NEEDS ['games'] for tiles and
 disc, ['panels'] for screens. tiles waits 1.5 s real time after a game ends (Tiles redraws on its own timer). disc uses a real
 DECK_CREW member. screens stubs pressPanel for the lift ride. Ask CP2 for planted faults if it hasn't listed them.
+
+### CP1 (10:53): claude/controller-p1 825378d2
+PAD_BUILT = ['base', 'deck', 'pick', 'panels'] is in. The highlight is always the real focus (document.activeElement); on the
+screen-edge layer it can land on plain divs (seek chip, heads-up, address card, tip), which get tabIndex -1 at that moment.
+CP1's old-shape parts in that commit's controller_check.py: api, lists, panels (30 panels). CP1 asks this seat to own the
+conversion and to tell it the commit so it runs its parts from this file. A suggested way to fold (CT1's, CP1's, CP2's,
+CP3's, CP5's old-shape parts): copy each part function in under its name, with one shared adapter giving them what CT1's
+file gave (GAME/ON paths set per call, a Pad class over cadet_test's Game with plug/btn/axes/press/log, check()/fail()
+appending to a list the adapter returns), then register NEEDS and MUTANTS as in this note.
