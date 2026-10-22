@@ -83,3 +83,8 @@ MUTANTS['drop'] = {
   'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
 }
 ```
+
+### CP2's parts (10:42): claude/controller-p2 e62efcc (built on CP1's file at 86d45aba)
+Old-shape parts 'tiles', 'disc', 'screens' (plus CP1's 'api', 'lists'), to fold in the same way. NEEDS ['games'] for tiles and
+disc, ['panels'] for screens. tiles waits 1.5 s real time after a game ends (Tiles redraws on its own timer). disc uses a real
+DECK_CREW member. screens stubs pressPanel for the lift ride. Ask CP2 for planted faults if it hasn't listed them.
