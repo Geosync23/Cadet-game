@@ -1,0 +1,68 @@
+1. The last 20 game commits on origin/claude/integration (full round: 33 checks, 176 min; check_fast on top of each)
+  9654f37b rules 33 (176 min)  (a) 33 (176 min)  (b) 33 (176 min)  0.64.12: the opening camera 12.5% back out (1.62 / 1.22
+  d66f568a rules 13 ( 64 min)  (a) 29 (170 min)  (b) 29 (170 min)  Patch crew T3b: the ramp left alone on ordinary days (m
+      the map adds: clothes day0 day13 day16 day19 day27 day5 day7 devmode disc interactions mech path perf player tiles
+  a5e78d39 rules 10 ( 57 min)  (a) 32 (175 min)  (b) 33 (176 min) FULL  Patch crew T3: leavers board the Tern up its ramp; the 
+      the map adds: arc bubble career clothes day0 day13 day16 day19 day27 day5 day7 devmode disc interactions mech path perf player puzzle social talk tiles
+  d686b868 rules  1 (  5 min)  (a)  2 (  7 min)  (b)  2 (  7 min)  Dev mode D7 fix: Rank Junior removes exactly the promot
+      the map adds: cadet
+  7698c813 rules 10 ( 69 min)  (a) 12 ( 76 min)  (b) 12 ( 76 min)  Patch crew: the rec deck's loader comment back on its o
+      the map adds: cadet devmode
+  261f7ad9 rules  1 (  5 min)  (a)  2 (  7 min)  (b)  2 (  7 min)  Dev mode D7 (Stop 2): the Career tab, behind the Dev li
+      the map adds: cadet
+  4dbdca88 rules 20 (115 min)  (a) 33 (176 min)  (b) 33 (176 min) FULL  Patch crew T2: Off the Tern, the new hand's tea on Thur
+      the map adds: arc career clothes day0 day19 day5 devmode interactions mech path player puzzle tiles
+  39b2acd8 rules  1 (  5 min)  (a)  2 (  7 min)  (b)  2 (  7 min)  Dev mode D6b (Stop 2): Set career's friendships, story 
+      the map adds: cadet
+  b97b5565 rules  1 (  5 min)  (a)  2 (  7 min)  (b)  2 (  7 min)  Dev mode D6a (Stop 2): Set career to a day, behind the 
+      the map adds: cadet
+  d2612749 rules 11 ( 74 min)  (a) 32 (175 min)  (b) 33 (176 min) FULL  Dev mode D5 (Stop 1b): the Traditions tab, behind the D
+      the map adds: arc bubble cadet career clothes day0 day1 day19 day21 day5 disc food interactions mech path perf player puzzle social talk tiles
+  1badd511 rules  7 ( 31 min)  (a) 33 (176 min)  (b) 33 (176 min)  Patch crew T1: first crew rotation to Sunday Day 21; op
+      the map adds: arc bigevents career clothes day0 day12 day13 day16 day19 day27 day5 day7 devmode disc food fridays interactions intro join mech path perf player puzzle social tiles
+  12def3a7 rules 19 (103 min)  (a) 33 (176 min)  (b) 33 (176 min)  Short Fridays turn 8 (E): explaining it. EW1's part E m
+      the map adds: cadet career day12 day13 day16 day21 day27 day7 devmode disc mech path puzzle tiles
+  86d0c80d rules 13 ( 88 min)  (a) 31 (172 min)  (b) 33 (176 min) FULL  Short Fridays turn 7 (C3 + D): missing the address on a
+      the map adds: arc bubble career clothes day0 day13 day16 day27 day7 devmode disc interactions mech path player puzzle social talk
+  8415d1ef rules 17 (120 min)  (a) 31 (172 min)  (b) 33 (176 min) FULL  Short Fridays: PR3's turn-5 fix, the crew seated by the
+      the map adds: arc bubble career clothes day0 devmode disc interactions mech path player puzzle social talk
+  a22d6514 rules 18 (117 min)  (a) 33 (176 min)  (b) 33 (176 min) FULL  Short Fridays turn 6 (C2): the Captain's speech. conten
+      the map adds: arc cadet career clothes day0 day21 devmode disc interactions mech path player puzzle social tiles
+  ca2f9d63 rules 14 ( 77 min)  (a) 33 (176 min)  (b) 33 (176 min) FULL  Events base F0b, PR3's fixes (checks running): 'calledI
+      the map adds: cadet career clothes day0 day1 day19 day21 day5 devmode disc food interactions mech path perf player puzzle talk tiles
+  bc8bb31d rules 16 ( 91 min)  (a) 31 (172 min)  (b) 33 (176 min) FULL  Events base F8 (checks running): comms down, behind EV_
+      the map adds: bubble career clothes day0 day19 day5 devmode disc interactions mech path perf player puzzle talk
+  c8c11b65 rules 13 ( 79 min)  (a) 32 (175 min)  (b) 33 (176 min) FULL  Events base F5 (checks running): small parts by rank, b
+      the map adds: arc bubble cadet clothes day0 day1 day19 day21 day5 devmode disc food interactions path perf player social talk tiles
+  7d933581 rules 12 ( 77 min)  (a) 16 ( 95 min)  (b) 16 ( 95 min)  Events base: PR2's nits (comments, 'Day N' for a one-da
+      the map adds: cadet devmode interactions tiles
+  955b16e2 rules 18 ( 97 min)  (a) 33 (176 min)  (b) 33 (176 min) FULL  Events base F0b (checks running): called in on a day of
+      the map adds: career clothes day0 day19 day5 devmode disc interactions mech path perf player puzzle talk tiles
+  average: rules 12.4 checks (73 min); (a) 24.2 checks (132 min); (b) 24.7 checks (133 min)
+2. Known failures (plans/opt-cover/failures.md): each must be picked
+  955b16e bigevents     (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  955b16e social        (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  1c4bc67 mech          (a) picked by map  (29 checks, 171 min)  (b) picked by safeguard (33 checks, 176 min)
+  1c4bc67 events        (a) picked by rules  (29 checks, 171 min)  (b) picked by rules (33 checks, 176 min)
+  1c4bc67 join          (a) picked by rules  (29 checks, 171 min)  (b) picked by rules (33 checks, 176 min)
+  155f0d4 intro         (a) picked by map  (7 checks, 41 min)  (b) picked by map (7 checks, 41 min)
+  ee48072: its failure was inherited from 155f0d4 (failures.md): checked against 155f0d4
+  155f0d4 intro         (a) picked by map  (7 checks, 41 min)  (b) picked by map (7 checks, 41 min)
+  1f91e90 interactions  (a) picked by rules  (30 checks, 172 min)  (b) picked by rules (33 checks, 176 min)
+  2e46584 career        (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  32f7710 career        (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  22ff1bb machine       (a) picked by check_fast  (33 checks, 176 min)  (b) picked by check_fast (33 checks, 176 min)
+  22ff1bb disc          (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  3a1cc57 machine       (a) picked by check_fast  (33 checks, 176 min)  (b) picked by check_fast (33 checks, 176 min)
+  9abd51f day1          (a) picked by rules  (32 checks, 175 min)  (b) picked by rules (33 checks, 176 min)
+  9abd51f events        (a) picked by rules  (32 checks, 175 min)  (b) picked by rules (33 checks, 176 min)
+  693e4f4 leave         (a) picked by check_fast  (33 checks, 176 min)  (b) picked by check_fast (33 checks, 176 min)
+  693e4f4 mech          (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  693e4f4 interactions  (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  693e4f4 machine       (a) picked by check_fast  (33 checks, 176 min)  (b) picked by check_fast (33 checks, 176 min)
+  ec0cbc3 player        (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  ec0cbc3 machine       (a) picked by check_fast  (33 checks, 176 min)  (b) picked by check_fast (33 checks, 176 min)
+  0f34cfb interactions  (a) picked by rules  (33 checks, 176 min)  (b) picked by rules (33 checks, 176 min)
+  1d602ff leave         (a) picked by check_fast  (32 checks, 175 min)  (b) picked by check_fast (31 checks, 174 min)
+(a): 23 of 23 known failures picked
+(b): 23 of 23 known failures picked

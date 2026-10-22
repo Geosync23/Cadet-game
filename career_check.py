@@ -197,6 +197,18 @@ with sync_playwright() as pw:
     check(e['give'] and not e['again'] and e['has'] and e.get('useWear') == 0 and abs(e['wear'] - .2) < 1e-9, 'tools: given once, worn by its scans (toolWear), not again by worksUse')
     check(e['missed'] == 7 and e['aband'] == 5 and e['floor'] == 0, 'a missed shift -3, an abandoned job -2, never below 0')
     check(e['before'] is None, 'SHIP.works made before Day 1\'s shift ended')
+    # the first promotion's gatherings (section 14's crewGather, TS3: a planted fault left them standing nobody anywhere):
+    # your box on Day 10 at 17:05, Tomas and Pell each on their own open tile by Cabin 4-23's door; and the career-beat
+    # guard: with the events base off, no day is an event day
+    pg = ev("""(() => { const t0 = shipNow(); setShipNow(9 * 1440 + 17 * 60 + 5);
+      const ids = typeof boxCarry === 'function' ? boxCarry(shipNow() + 40) : null, sc = (ids || []).map(id => CREW_SCENE.get(id)), tiles = sc.map(s => s && s.to && s.to.tile ? s.to.tile.join(',') : null);
+      (ids || []).forEach(id => crewSceneEnd(id)); setShipNow(t0);
+      const ev = typeof eventDay !== 'function' || typeof EV_GUARD_ON === 'undefined' || EV_GUARD_ON ? null : Array.from({ length: 60 }, (_, i) => i + 1).filter(d => eventDay(d));
+      return { ids, tiles, ev }; })()""")
+    print('  the promotion\'s box carriers:', pg['ids'], pg['tiles'], '| event days with the events base off:', pg['ev'])
+    if pg['ids'] is not None:
+        check(sorted(pg['ids']) == ['pell', 'tomas'] and all(pg['tiles']) and len(set(pg['tiles'])) == 2, f"the box on Day 10: Tomas and Pell each wait on their own tile by your door ({pg})")
+    check(pg['ev'] in (None, []), f"with the events base off the career-beat guard sees no event day (Days 1-60: {pg['ev']})")
 
     tb = ev("""(() => { const r = worksTabAdd({ id: 'test', title: 'Test', order: 40, view: () => [{ kind: 'text', text: 'hello' }], act: (v, a) => { window.__tabAct = v + ':' + a; } });
       WORKS_TAB = 'test'; const v = worksView(); deviceDo({ app: 'works', do: 'poke', arg: 7 }); const got = window.__tabAct;
@@ -341,6 +353,56 @@ with sync_playwright() as pw:
       SHIP.jobs.push(j); careerJobIn({ id: j.id, step: 'turnin', machine: null }); careerJobIn({ id: j.id, step: 'turnin', machine: null }); const g = j.gains; SHIP.jobs = SHIP.jobs.filter(x => x !== j); return g || null; })()""")
     print('  ', tg)
     check(tg and tg['rep'] and len(tg['rep']) == 1 and tg['rep'][0]['dept'] == 'works' and 'add' not in tg['rep'][0] and tg['meters'] == [{'sys': 'air', 'name': 'Air', 'add': 2.5}], f"turn-in gains: rep in words (no number), the ship meters it raised: {tg}")
+
+    print('(l) Clock-in and clock-out reminders (playtest patch 1, note 20, section 15\'s clockRemindTick):')
+    if not ev("typeof clockRemindTick === 'function'"): print('  not in this build')
+    else:
+        # on paper, minute by minute from 06:00 to 19:00 on workdays after the first week: the player on Deck 4 (so off
+        # Deck 5 after the shift), nothing on screen; toasts and Mail caught as they come
+        ck = ev("""(() => {
+          const was = toast, seen = []; toast = (t, x) => { seen.push([SHIP.time.day, hhmm(Math.floor(SHIP.time.min)), t, x]); };
+          SHIP.career = null; SHIP.rep = null; SHIP.mail = []; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; CLOCK_RM_LOG.length = 0;
+          const at = (d, m) => { setShipNow((d - 1) * 1440 + m); return shipNow(); }, out = { days: [] };
+          const day = (d, act) => { const s0 = seen.length, l0 = CLOCK_RM_LOG.length, m0 = SHIP.mail.length; let trk = {};
+            for (let m = 360; m <= 1140; m++) { const t = at(d, m); TOAST_AT = -1e9; POP.busy = false; document.getElementById('toast').classList.remove('show'); careerTick(t); if (act) act(m, t); clockRemindTick(t);
+              if (m === 560 || m === 1015 || m === 1030) { const it = clockTrkItem(); trk[hhmm(m)] = it ? it.title + ' @' + it.tag : null; } }
+            const r = { d, shift: playerShiftOn(d), stages: CLOCK_RM_LOG.slice(l0).map(x => hhmm(x[1]) + ' ' + x[2]), toasts: seen.slice(s0).filter(x => x[2] === 'Time clock').map(x => x[1] + ' ' + x[3]),
+              mail: SHIP.mail.filter(x => Math.floor(x.at / 1440) + 1 === d).map(x => x.from + ': ' + x.subject), run: SHIP.player.clockRm.n, trk }; out.days.push(r); return r; };
+          let d = 9; const work = () => { while (!careerRota(d) || careerOff(d) || friShort(d)) d++; return d++; };
+          out.late = day(work(), (m, t) => { if (m === 605) careerClock(t); if (m === 1015) goToDeck(5); if (m === 1022) goToDeck(4); });   // late in, at the bay at five, off Deck 5 at 17:02 without clocking out
+          for (let k = 0; k < 3; k++) day(work(), (m, t) => { if (m === 535 || m === 1025) careerClock(t); });   // three good days
+          out.easy = day(work(), (m, t) => { if (m === 535 || m === 1025) careerClock(t); });  // eased off
+          out.slip = day(work(), (m, t) => { if (m === 1025) careerClock(t); });               // forgot to clock in: back to full
+          out.after = day(work(), (m, t) => { if (m === 535 || m === 1025) careerClock(t); });
+          const C = SHIP.player.clockRm, sv = {}; SAVE_EXTRA.forEach(f => { try { f(sv.ship ? sv : Object.assign(sv, { ship: {}, player: {} })); } catch (e) {} });
+          out.saved = sv.player && sv.player.clockRm; out.size = JSON.stringify(out.saved || {}).length;
+          // held: a dialogue on screen keeps the late reminder back until it's over, and nothing on a day off or on leave
+          SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; const dh = work(); careerTick(at(dh, 360));
+          POP.busy = true; TOAST_AT = -1e9; const heldSt = clockRemindTick(at(dh, 556)); POP.busy = false; const freeSt = clockRemindTick(at(dh, 557));
+          let off = d; while (careerRota(off)) off++; careerTick(at(off, 360)); const offSt = [540, 556, 1030].map(m => { TOAST_AT = -1e9; return clockRemindTick(at(off, m)); });
+          // never over an answer toast (CR6's find on 0.64.15: a busy washer's "Washer 2 is free" replaced by "Still not clocked in"):
+          // held while it's on screen and for the gap after it, then said
+          const te = document.getElementById('toast'); SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; const da = work(); careerTick(at(da, 360));
+          was('Washer 3', 'Washer 3 is busy. Washer 2 is free.'); const ans = [];
+          ans.push(clockRemindTick(at(da, 600)), document.getElementById('tx').textContent);
+          TOAST_AT = performance.now() - 20000; ans.push(clockRemindTick(at(da, 601)), document.getElementById('tx').textContent);   // its stamp is old but it's still showing
+          te.classList.remove('show'); TOAST_AT = performance.now() - 12000; ans.push(clockRemindTick(at(da, 602)));   // gone, inside the gap
+          TOAST_AT = performance.now() - 16000; ans.push(clockRemindTick(at(da, 603)));   // gone, gap over
+          out.held = [heldSt, freeSt]; out.off = offSt; out.answer = ans;
+          toast = was; SHIP.career = null; SHIP.mail = []; SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; return out; })()""")
+        for r in ck['days']: print(f"   Day {r['d']}: {r['stages']} Mail {r['mail']} run {r['run']} Tracked {r['trk']}")
+        print('   held by a dialogue, then free:', ck['held'], '| a day off:', ck['off'], '| saved:', ck['saved'], ck['size'], 'bytes')
+        L, E, S, A = ck['late'], ck['easy'], ck['slip'], ck['after']
+        check(L['stages'][:4] == ['08:30 pre', '09:00 start', '09:15 late', '10:00 later'] and any('clocked in' in t.lower() for t in L['toasts'] if t.startswith('09:15')), f"late to clock in: reminders before, at the start, 15 minutes and an hour in ({L['stages']}, {L['toasts'][:4]})")
+        check('16:50 end0' in L['stages'] and '17:00 end' in L['stages'] and '17:02 left' in L['stages'] and any(t.startswith('17:02') and 'without clocking out' in t for t in L['toasts']), f"leaving without clocking out: told as you leave Deck 5 ({L['stages']}, {L['toasts']})")
+        check(any('clock out' in m.lower() for m in L['mail']) and L['trk'].get('09:20') == 'Clock in @Now' and L['trk'].get('16:55') == 'Clock out @17:00', f"the auto clock-out Mails you; Tracked shows Clock out from 16:50 ({L['mail']}, {L['trk']})")
+        check(E['run'] >= 3 and E['stages'] == [] and E['trk'] == {'09:20': None, '16:55': None, '17:10': None}, f"eased off after three good days: no reminders, no Tracked row on a good day ({E})")
+        check(S['stages'][:2] == ['09:15 late', '10:00 later'] and '12:00 last' in S['stages'] and '12:30 mailIn' in S['stages'] and S['run'] == 0 and any('clock-in' in m.lower() for m in S['mail']), f"eased off, forgetting still reminds (late, later, last call, Mail) and ends the run ({S})")
+        check(A['stages'][:1] == ['08:30 pre'] and '16:50 end0' in A['stages'] and '17:00 end' in A['stages'] and A['run'] == 1, f"after a slip, the full reminders come back ({A})")
+        check(ck['held'] == [None, 'late'] and ck['off'] == [None, None, None], f"held by something on screen, then said; nothing on a day off ({ck['held']}, {ck['off']})")
+        print('   an answer toast up, then gone:', ck['answer'])
+        check(ck['answer'] == [None, 'Washer 3 is busy. Washer 2 is free.', None, 'Washer 3 is busy. Washer 2 is free.', None, 'later'], f"a reminder never covers a toast on screen, nor in the gap after it ({ck['answer']})")
+        check(ck['saved'] is not None and ck['size'] < 60, f"the save: player.clockRm under 60 bytes ({ck['saved']})")
 
     print('(h) The bridge, by invitation (Step 3):')
     br = ev("""(() => {

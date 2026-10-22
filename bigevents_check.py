@@ -42,7 +42,13 @@ if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2
     SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
     (WORK / 'test').mkdir(parents=True, exist_ok=True)
     OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
-CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above; lead 24: unseated crowds only
+CROWD = 80                     # a standing crowd's limit on meaning to go, set by performance tests, not a fixed 60 (the user, 2026-10-21: "60 was just a guess
+                               # on performance. We can go higher. Just need to test for performance."; was the events plan v3.2 answer 4's 60; lead 24: unseated only).
+                               # LB3's measure (perf_check's Line ceremony scene with 0-90 extra people stood in the bow lounge, the phone and trifold sizes): draw
+                               # calls barely move (the crowd packs 12 to a call: 391 -> 397 at the widest view from 59 to 149 on Deck 3, budget 450); triangles grow
+                               # about 4k a person (516k -> 598k at 79, 794k at 149); game code 1.5-3.5 ms a frame throughout. About 3 in 4 of those meaning to go
+                               # get there (the ceremony: 61 -> 45), so 80 is about 60 in the room and 75-80 on the deck: about 600k triangles, the busiest scene
+                               # already shipped (Sunday dinner, 69 on Deck 3, 565k) plus a little. Raise it only after measuring again (plans/build-table.md, line L5j)
 MESS_SEATS = 44                # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
 LINE_SUPPER_MIN = 40           # the Line supper: at least about 40 should come (ER3's review)
 
@@ -148,7 +154,9 @@ PAPER = r"""(() => {
     // the most crew there at once (lead 23: never over its places at any one time), minute by minute through the gathering
     const B = (g.day - 1) * 1440, segs = people.flatMap(p => planDay(p, g.day).filter(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-'))));
     let peak = 0, peakAt = null; for (let m = B + e.from - 30; m < B + e.to + 30; m++) { const n = segs.filter(s => s.from <= m && m < s.to).length; if (n > peak) { peak = n; peakAt = m - B; } }
-    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
+    // a seated one (the user: nobody eats standing): each who means to go, a meal with no place (not the servery queue) in its window = eaten standing (PR10's gap)
+    const standing = e.ev.seated ? people.filter(p => eventPlan(p, g.day).some(x => x.id === g.id) && planDay(p, g.day).some(s => (s.act === 'dinner' || s.act === 'breakfast') && !s.placeId && s.tag !== 'queue' && s.from < B + e.to + 30 && B + e.from - 30 < s.to)).map(p => p.id) : [];
+    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, standing, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
   const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
@@ -369,7 +377,8 @@ LINE = r"""(() => {
       let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
       const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
       const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
-      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated };
+      const standing = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table') && planDay(p, d).some(s => s.act === 'dinner' && !s.placeId && s.tag !== 'queue' && s.from < B + sup.to + 30 && B + sup.from - 30 < s.to)).map(p => p.id);   // eaten standing (PR10's gap)
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated, standing };
     }
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
@@ -402,6 +411,7 @@ def check_line(g, tag):
         if not sp['seated']: fail(f"{tag}: the Line supper isn't seated (the user's call: no standing at meals): {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
         else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
             if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
+            if sp['standing']: fail(f"{tag}: the Line supper (seated): {len(sp['standing'])} eat standing, no seat for their sitting: {sp['standing'][:8]}")
             if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
     # the watch keeps the ship through the crossing's afternoon: Tomas and Ueda at their posts every 5 minutes from 14:30
     # to 15:15 (a short toilet or hand-wash on Deck 2 is fine), never at an event
@@ -544,6 +554,7 @@ def judge(a, tag):
         if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
         if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
             if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
+            if c.get('standing'): fail(f"{tag}: {c['id']} (seated): {len(c['standing'])} eat standing, no seat for their sitting: {c['standing'][:8]}")
             if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
         # (the old rule, a mess gathering over 44 needing standing places, is dropped: the user removed standing at meals)
         if c['went'] < c['want']: note(f"{c['id']}: {c['want'] - c['went']} meant to go but aren't planned there")
@@ -594,6 +605,15 @@ with sync_playwright() as pw:
           return { d, menu: /Line/.test(JSON.stringify(galleyMenu(d))), cer: eventsOn(d).some(e => e.id === 'lineCeremony'),
             keys: [...S.shared.keys()].filter(k => /bow-lounge-line/.test(k)), places: [...S.byId.keys()].filter(k => /bow-lounge-line/.test(k)).length }; })()""")
         if lo['menu']: fail(f"off: the galley's menu for Day {lo['d']} mentions the Line")
+        # the menu around the Line's day as it is, then with the Line's menu hook (linePudding) taken out, as a build with no
+        # Line code: off, the two must match, pudding and note too (ER3's plant P4: a pudding set on Day 7 before the switch's test)
+        mn = g.ev(r"""(() => { const d = (EV_CALENDAR.find(x => x.id === 'crossingLine') || { day: 6 }).day + 1, ds = [d - 1, d, d + 1];
+          const read = () => { GALLEY_MENU.clear(); return ds.map(x => JSON.stringify(galleyMenu(x))); };
+          const was = read(), keep = typeof linePudding === 'function' ? linePudding : null;
+          if (keep) window.__sc('linePudding = () => {}'); const bare = read(); if (keep) { window.__keepLP = keep; window.__sc('linePudding = window.__keepLP'); } GALLEY_MENU.clear();
+          return ds.map((x, i) => { if (was[i] === bare[i]) return null; const A = JSON.parse(was[i]), Z = JSON.parse(bare[i]);
+            return 'Day ' + x + ': ' + [...new Set(Object.keys(A).concat(Object.keys(Z)))].filter(k => JSON.stringify(A[k]) !== JSON.stringify(Z[k])).map(k => k + ' ' + JSON.stringify(A[k]) + ', without the Line ' + JSON.stringify(Z[k])).join('; '); }).filter(Boolean); })()""")
+        for m in mn: fail(f"off: the galley's menu differs from a build without the Line: {m[:300]}")
         if lo['cer']: fail(f"off: the Line's ceremony (lineCeremony) is on Day {lo['d']}")
         if lo['keys'] or lo['places']: fail(f"off: the Line's venue ('bow-lounge-line') is there: {lo['keys'][:4]}, {lo['places']} places")
     for e in g.errors[:3]: fail(f'off: page error: {e}')

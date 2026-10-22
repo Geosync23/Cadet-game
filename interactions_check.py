@@ -15,6 +15,9 @@ from playwright.sync_api import sync_playwright
 
 BUDGET = 450
 ok = True
+# with no job on a shift, the arrow shows the time clock till you've clocked in, then the job board (playtest 1, note 9)
+NO_JOB_GOALS = (None, 'Clock in at the time clock', 'Take a job at the job board')
+
 def check(cond, msg):
     global ok
     if not cond: ok = False; print('FAIL', msg)
@@ -149,7 +152,7 @@ with sync_playwright() as pw:
     check(s['goal'] and s['goal'].startswith('Repair the'), 'clearGoal: back to the job')
     g.ev("goToDeck(5)"); g.step(3); tap('Job board'); g.step(150)
     g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-    check(not g.ev("myJob()") and s['goal'] is None, f'Drop it: no job and the pointer hides ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
+    check(not g.ev("myJob()") and s['goal'] in NO_JOB_GOALS, f'Drop it: no job and the pointer hides (or shows the clock or the board) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
     g.ev("ixBoard.close(); SHIP.player.carry = []")
     # a cart run (section 15's cartTap): the pointer starts at the Cart bay's docks
     if g.ev("typeof jobStops === 'function'"):
@@ -213,7 +216,7 @@ with sync_playwright() as pw:
             btn = g.ev("(document.querySelector('#ixBoardL .ixjob button') || {}).textContent")
             check(btn == 'Turn it in', f'{kind}: the board offers Turn it in ({btn})')
             g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-            check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] is None, f'{kind}: turned in, complete, no pointer ({s["toast"][:80]})')
+            check(not g.ev("myJob()") and g.ev(f"SHIP.jobs.find(j => j.id === '{job[0]}').status") == 'done' and s['goal'] in NO_JOB_GOALS, f'{kind}: turned in, complete, no pointer (or the clock or the board) ({s["toast"][:80]})')
             check(g.ev("SHIP.player.credits || 0") > cr or not g.ev("typeof JOB_PAY !== 'undefined'"), f'{kind}: paid at turn-in')
             g.ev("ixBoard.close()")
     # a tap at your job's stop starts the work (0.28.52, the user's lamp report from 0.60.5b): a real screen tap at the spot the
@@ -545,6 +548,96 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     else:
         print('== the climbing wall: the rec deck is off in this build, skipped')
+    # playtest 1, notes 9-11, on paper: no job on a shift day, the arrow shows the time clock, then (clocked in) the job
+    # board, and nothing after the shift; a tracked tea points at the tea table, not the room's middle; tracking
+    # something else over your job, then done with it, tracking goes back to your job
+    if g.ev("typeof ixWorkStep === 'function'"):
+        print('== the arrow with no job, tea, back to the job (playtest 1, notes 9-11)')
+        g.ev("goToDeck(5)"); g.step(3)
+        r = g.ev("""(() => { const o = {}, P = SHIP.player; careerInit(); const C = SHIP.career, ci0 = C.ci;
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+          let d = 2; while (!playerShiftOn(d)) d++; setShipNow((d - 1) * 1440 + 600); P.track = undefined; clearGoal();
+          C.ci = 0; o.clock = (ixWorkStep() || {}).label;
+          C.ci = (d - 1) * 1440 + 560; o.open = openJobs('you').length; o.board = (ixWorkStep() || {}).label;
+          setShipNow((d - 1) * 1440 + dayShiftEnd(d) + 30); o.after = ixWorkStep(); C.ci = ci0;
+          const tg = devItemGoal({ kind: 'tea' }), w = ixGoalWorld(tg), mid = ixGoalWorld({ deck: 5, room: 't' }), it = ITEMS.find(i => i.t === 'Tea table');
+          const ip = it && it.hit.getWorldPosition(new THREE.Vector3());
+          o.table = !!(w && ip && Math.hypot(w.x - ip.x, w.z - ip.z) < .05); o.notMid = !!(w && mid && Math.hypot(w.x - mid.x, w.z - mid.z) > .3);
+          const x = trkItems().find(q => !q.job && q.goal); P.track = undefined;
+          if (x) { trkTap(x.key); o.tapped = [P.track === null, !!(IX_GOAL && IX_GOAL.back)]; trkDone(IX_GOAL); o.back = [P.track === undefined, IX_GOAL === null]; }
+          P.track = null; setGoal({ ...tg, trk: 'tea' }); trkDone(IX_GOAL); o.off = P.track === null;   // tracking was off before: it stays off
+          P.track = undefined; clearGoal();
+          return o; })()""")
+        print('  ', r)
+        check(r['clock'] == 'Clock in at the time clock' and r['board'] == ('Take a job at the job board' if r['open'] else None) and r['after'] is None, f'no job: the clock, then the board (while it has a job for you), nothing once the shift is over ({r})')
+        check(r['table'] and r['notMid'], f'a tracked tea points at the tea table ({r})')
+        check(r.get('tapped') == [True, True] and r.get('back') == [True, True] and r['off'], f'tracking goes back to your job when the other thing is done ({r})')
+    g.close()
+
+# the toilets (TQ1, the user's playtest note 19): you can use a toilet unless its red light is on (someone's in it), never
+# blocked by crew only heading for it; with every light on you join the washroom's line and go in when one comes free.
+# The crew: a wait for a toilet is spent in the washroom's line (tag 'toiletq'), they go in in turn, nobody shares a
+# place or gets stuck; and when you take the toilet someone is about to use, they take another or wait, never in yours
+TQ_SIM = r"""(({ day, deck, m0, m1, who, you }) => {
+  const B = (day - 1) * 1440, step = .05, out = { line: false, went: false, inYours: false, shared: 0, stuck: 0, alt: null, left: 0 };
+  setShipNow(B + m0); goToDeck(deck); if (typeof ACT !== 'undefined' && ACT) actEnd(true);
+  for (let k = 0; B + m0 + k * step * SHIP_RATE < B + m1; k++) {
+    const now = B + m0 + k * step * SHIP_RATE; setShipNow(now);
+    if (you && !you.on && now >= B + you.at) { you.on = true; actStart('toilet', you.id, { pose: 'sit', title: 'Toilet' }); }
+    if (you && you.on && !you.off && now >= B + you.end) { you.off = true; actEnd(true); }
+    updateDeckCrew(step);
+    const held = new Map();
+    for (const a of DECK_CREW) { if (a.settled && a.spot) { if (held.has(a.spot.id)) out.shared++; held.set(a.spot.id, a.p.id); } out.stuck = Math.max(out.stuck, a.stuckMax); }
+    const a = DECK_CREW.find(x => x.p.id === who.id); if (!a) continue;
+    if (QUEUE_SPOT.get(who.id)) out.line = true;
+    if (a.settled && a.spot && PLACE_OF.get(a.spot.id) && PLACE_OF.get(a.spot.id).type === 'toilet') { out.went = true; if (a.spot.id !== who.toilet) out.alt = a.spot.id; }
+    if (a.settled && a.spot && you && you.on && !you.off && a.spot.id === you.id) out.inYours = true;
+  }
+  out.left = [...QUEUE_NOW.values()].reduce((n, L) => n + L.length, 0); return out; })"""
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    if g.ev("typeof QUEUE_TAGS !== 'undefined' && !!QUEUE_TAGS.toiletq"):
+        print('== the toilets: the red light and the line (note 19)')
+        tap = lambda title, near=None, place=True: g.ev(f"({TAP})({json.dumps({'title': title, 'near': near, 'place': place})})")
+        g.ev("skipTo(600)"); g.step(3); g.ev("goToDeck(3)"); g.step(3); g.ev("actEnd(true)")
+        r = g.ev("""(() => { const T = [...PLACE_OF.values()].filter(q => q.type === 'toilet' && !privatePlace(q)), far = T.map(q => ({ goalId: q.id, p: { id: 'far-' + q.id, name: 'Someone' } }));
+          DECK_CREW.push(...far); let r; try { r = (%s)({ title: 'Toilet' }); } finally { for (const f of far) DECK_CREW.splice(DECK_CREW.indexOf(f), 1); }
+          return [r, ACT && ACT.kind, ACT && ACT.placeId, T.length, document.getElementById('tx').textContent]; })()""" % TAP)
+        print('   every toilet only heading-for by crew far off, tap:', r)
+        check(r[0] is True and r[1] == 'toilet' and r[2] and r[2].startswith('3-toilet'), f'a toilet crew are only heading for (light off) is yours: no "Occupied" ({r})')
+        g.ev("actEnd(true)"); g.step(2)
+        r = g.ev("""(() => { const T = [...PLACE_OF.values()].filter(q => q.type === 'toilet' && !privatePlace(q)); for (const q of T) BUSY.add(q.id);
+          const r = (%s)({ title: 'Toilet' }); const lit = (stallCapsTick(), STALL_CAP.list.filter(c => c.id && placeBusy(c.id)).length);
+          return [r, ACT && ACT.kind, QUEUE_YOU && QUEUE_YOU.type, document.getElementById('tx').textContent, lit]; })()""" % TAP)
+        print('   every red light on, tap:', r)
+        check(r[0] is True and r[1] != 'toilet' and r[2] == 'toilet' and 'line' in r[3], f'every red light on: no toilet, you join the washroom\'s line ({r})')
+        check(r[4] > 0, f'the stalls of the toilets in use have their red light on ({r[4]})')
+        for k in range(40):
+            g.step(5)
+            if g.ev("!!ACT && ACT.kind === 'toilet'"): break
+        r = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, QUEUE_YOU && QUEUE_YOU.type]")
+        print('   the lights off again:', r)
+        check(r[0] == 'toilet' and r[2] is None, f'a light goes off: out of the line and into that toilet ({r})')
+        g.ev("actEnd(true)"); g.step(2)
+        # the crew's line, from the plans: the first planned wait for a toilet on Deck 3 or 4 in the first week, not straight off the lift (a walk from the lift can take longer than the visit)
+        q = g.ev("""(() => { for (let d = 1; d <= 7; d++) for (const p of schedPeople()) { const S = planDay(p, d);
+            for (let i = 1; i + 1 < S.length; i++) if (S[i].tag === 'toiletq' && [3, 4].includes(S[i].deck) && S[i + 1].placeId && S[i - 1].act !== 'commute' && S[i - 1].deck === S[i].deck) return { day: d, deck: S[i].deck, id: p.id, from: S[i].from - (d - 1) * 1440, at: S[i + 1].from - (d - 1) * 1440, to: S[i + 1].to - (d - 1) * 1440, toilet: S[i + 1].placeId }; }
+          return null; })()""")
+        n = g.ev("(() => { let n = 0; for (let d = 1; d <= 7; d++) for (const p of schedPeople()) n += planDay(p, d).filter(s => s.tag === 'toiletq').length; return n; })()")
+        print('   planned waits for a toilet in week 1:', n, '| first on Deck 3 or 4:', q)
+        check(n > 0 and q, f'the crew plan waits for a toilet in the washroom\'s line ({n}, {q})')
+        if q:
+            w = {'id': q['id'], 'toilet': q['toilet']}
+            r = g.ev(f"({TQ_SIM})({json.dumps({'day': q['day'], 'deck': q['deck'], 'm0': q['from'] - 15, 'm1': q['to'] + 3, 'who': w})})")
+            print(f"   {q['id']}, the line from {q['from'] // 60:02d}:{q['from'] % 60:02d}:", r)
+            check(r['line'] and r['went'] and r['shared'] == 0 and r['stuck'] < 1 and r['left'] == 0, f'the line forms, they go in in turn, nobody shares a place or gets stuck, and it clears ({r})')
+            r = g.ev(f"({TQ_SIM})({json.dumps({'day': q['day'], 'deck': q['deck'], 'm0': q['from'] - 15, 'm1': q['to'] + 3, 'who': w, 'you': {'id': q['toilet'], 'at': q['at'] - 1, 'end': q['at'] + 3}})})")
+            print(f"   you take {q['toilet']} first:", r)
+            check(not r['inYours'] and r['shared'] == 0 and r['stuck'] < 1 and (r['alt'] or r['line']), f'you took theirs first: they take another or wait in the line, never in yours ({r})')
+        g.ev("actEnd(true)")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    else:
+        print('== the toilets: no toilet line in this build, skipped')
     g.close()
 
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')

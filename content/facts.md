@@ -31,7 +31,16 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **Out of the windows** (the Wren's route; the user's pick, 2026-10-20, via EW1): **the Pale Shoals**, a pale smudge of
   dust behind us ("we left them six weeks ago" on Day 1), and **Tavessa**, a star cluster the Veyli named, dead ahead past
   the Line (crossed into the Veyli reach on Day 7). Raman names both at First Light Cocoa. Ask before adding more.
-- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+- **The Veyli reach:** the Wren was last in the reach two years ago, on a quiet charting run (nothing happened; never
+  tie an incident to it). So crew aboard under two years are first-timers at the Line (Day 7), and older hands crossed
+  then (Pell, for one). Checked by EW1 against Holt's and Saruth's arcs: no clash (Holt's bad day is "years ago, on a
+  border patrol", no ship or date; never link the two).
+- **What the Line means** (the user, 2026-10-21, line-q10 A: "guests in someone else's sky"): the Line is where the
+  Veyli reach begins. Past it the Concord's charts are thin (a few runs, never a full survey; they grow thin, they
+  don't end), every star already has a Veyli name, and the nearest Concord port is a long way behind. The Wren travels
+  there as a guest (only "as guests": never by anyone's leave, permission or agreement). Help is a long way off (about
+  distance, never danger), so the old oath is a promise to each other. Survey's real work of the tour starts there.
+- **Time:** a ship day is 18 waking hours of play; breakfast 07:00-09:00 (the user's playtest notes, patch 1; it was 06:00-09:00 from seat X, playtest 1: the night shift now unwinds for an hour, eats at 07:00, then showers), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
   09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
@@ -486,7 +495,7 @@ introduces them), unless noted.
 | "Calder is the clock" (Works joke); in Teague's comic she's a very tidy cloud who says "Fair." | Works | writer-works, batch 2 |
 | The Veyli like their cabins warm | the delegation | writer-commons, reactions |
 | Captain Varga started the portrait gallery | Marrow | writer-command, batch 3 |
-| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 06:05 | Vance | writer-command, batch 3 and arcs |
+| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 07:05 (06:05 until patch 1) | Vance | writer-command, batch 3 and arcs |
 | Tomas is fourth on Vance's treadmill board | Vance, Tomas | writer-command, batch 3 |
 | The blue crate in the Works bay is Calder's (don't sit on it) | Works | the voice bible; Moleth asks about it |
 | Saruth: "Do not bow. Most of you do it wrong."; humans knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |

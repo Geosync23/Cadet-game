@@ -26,6 +26,7 @@
 #   the shelves and the Wednesday delivery (0.33.41-0.33.42): the right shelf, the machine shop, crates, two trips, 14:00 (5m)
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
+#   the board keeps up (playtest patch 1 note 13, JB1): a quick player always finds a job on the shift, Day 1 included (5z)
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
 #   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
@@ -830,7 +831,7 @@ with sync_playwright() as pw:
     # the same twice, never a load, a setting only from Day 4, and over many hours every allowed cause comes up, the
     # commonest most. Then the real crew with a scripted steady player (from Day 2, on each shift hour with nothing in
     # hand, takes the top job on the board and finishes it in its minutes): of the machine jobs you do, 40-60% are
-    # repairs, 3-7 jobs a shift day (3-6 before the patch's #16), ship health 85+, nothing broken, every repair from Day 2 has a cause, and Days 0-1
+    # repairs, 7-12 jobs a shift day (3-6 before the patch's #16, 3-7 before playtest patch 1's note 13), ship health 85+, nothing broken, every repair from Day 2 has a cause, and Days 0-1
     # have none
     if g.ev("typeof FAULT_CAUSES === 'object'"):
         fc = g.ev("""(() => {
@@ -897,7 +898,7 @@ with sync_playwright() as pw:
         print(f"    lowest ship health {st['minHealth']:.1f}, worst state {MSTATES[st['worst']] if 'MSTATES' in dir() else st['worst']}, repairs from Day 2 without a cause {st['noCause'][:4]}, causes on Days 0-1 {st['early'][:4]}, the same twice {st['sig'] == st2['sig']}")
         print('    causes seen: ' + ' '.join(f"{k}:{v}" for k, v in sorted(st['causes'].items())))
         if not (40 <= share <= 60): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does (want 40-60%)")
-        if not (3 <= per <= 7): fail(f"a steady player does {per:.1f} jobs a shift day (want 3-7)")   # 3-6 until the patch's #16: 6.0 before JOB_PACE .72, 6.2 after (the board's work is the limit, not the job's length)
+        if not (7 <= per <= 12): fail(f"a steady player does {per:.1f} jobs a shift day (want 7-12)")   # 3-6 until the patch's #16: 6.0 before JOB_PACE .72, 6.2 after; 3-7 until playtest patch 1's note 13 (6.8 then, 9.0 after: the board keeps up, so the job's length is the limit now, not the board's work; JB1)
         if st['minHealth'] < 85 or st['worst'] >= 4: fail('ship health or a broken machine with the steady player')
         if st['sig'] != st2['sig']: print('    first run only', sorted(set(json.loads(st['sig'])) - set(json.loads(st2['sig'])))[:6], 'second only', sorted(set(json.loads(st2['sig'])) - set(json.loads(st['sig'])))[:6])
         if st['noCause'] or st['early'] or st['sig'] != st2['sig']: fail('causes missing, early or not the same twice')
@@ -1154,14 +1155,15 @@ with sync_playwright() as pw:
     # 5v. the ship meters and the bridge room (Step 3, 0.33.57; the user's "starts a little lower, so you can see your impact"):
     # a fresh ship's board reads about 75 (72-79), none failing, one or more fine, while the machines' own health (what the
     # effects read) is 90+; untended, every meter only falls a little each day; a steady player (5o's) gets j.meters on every
-    # job they finish, biggest first, the biggest a visible step (1+), and the board rises well above its start (85+ by the
+    # job they finish, biggest first, the biggest a visible step (1+), while the board reads under 97 (from patch 1's note 13 the
+    # board keeps up, and a steady player tops the ship's upkeep out around Day 11: JB1), and the board rises well above its start (85+ by the
     # end); the same twice. A job in the bridge room (Deck 1, B) isn't offered to you or yours to take till SHIP.bridgeInvited,
     # then it is; the crew can take it; the Wednesday manifest has no bridge crate till then. The save keeps the upkeep, and a
     # save without it loads with none
     if g.ev("typeof shipMeters === 'function'"):
         MV = r"""(() => {
           window.__sc("window.__evMv = [typeof eventNow === 'function' ? eventNow : undefined, typeof eventMod === 'function' ? eventMod : undefined]; if (window.__evMv[0]) eventNow = () => null; if (window.__evMv[1]) eventMod = () => null");
-          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + DAYS * 1440, out = { jobs: 0, noMeters: [], small: [], notMain: [], byDay: [] };
+          const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, end = t0 + DAYS * 1440, out = { jobs: 0, noMeters: [], small: [], notMain: [], byDay: [], topped: 0 };
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; setShipNow(t0); machinesNow();
           const rows = shipHealthRows(); out.start = rows[0].value; out.startRows = rows.slice(1).map(r => r.name + ' ' + r.value + ' ' + r.state); out.machine0 = shipHealth();
           out.failing = rows.filter(r => r.state === 'failing').length; out.fine = rows.slice(1).filter(r => r.state === 'fine').length;
@@ -1172,9 +1174,9 @@ with sync_playwright() as pw:
           let mine = null, until = 0;
           for (let t = t0; t <= end; t += 30) {
             setShipNow(t); machinesNow();
-            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
-                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0];
-                if (!ms.length) out.noMeters.push(j.id); else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
+            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { const bf = shipHealthRows()[0].value; jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id);
+                out.jobs++; const ms = j.meters || [], main = jobMeterSys(j)[0]; if (bf >= 97) out.topped++;
+                if (!ms.length) { if (bf < 97) out.noMeters.push(j.id); } else { if (!SYSTEMS.includes(main)) out.notMain.push(j.id + ' ' + main); if (ms[0].gain < 1 && bf < 97) out.small.push(j.id + ' ' + ms[0].gain); } } mine = null; }
             const d = SHIP.time.day, md = t % 1440;
             if (md === 1080) out.byDay.push(Math.round(shipHealthRows()[0].value));
             if (!mine && d >= 2 && playerShiftOn(d) && md >= DAY_SHIFT[0] && md < DAY_SHIFT[1]) { const o = openJobs('you')[0]; if (o && claimJob(o.id)) { mine = o.id; until = t + Math.max(30, o.mins + 20); } }
@@ -1186,7 +1188,7 @@ with sync_playwright() as pw:
         })()""".replace('DAYS', str(DAYS))
         mv = g.ev(MV); mv2 = g.ev(MV)
         print(f"Ship meters (0.33.57): a fresh ship reads {mv['start']} (machines {mv['machine0']}), failing {mv['failing']}, fine {mv['fine']}: {mv['startRows']}")
-        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}")
+        print(f"  untended a day: upkeep out of step {mv['creep']}, the board down {mv['creepDrop']}; a steady player: {mv['jobs']} jobs, without meters {mv['noMeters'][:4]}, main system unknown {mv['notMain'][:4]}, a step under 1 {mv['small'][:4]}, done with the board at 97 or more (nothing much left to show: not counted) {mv['topped']}")
         print(f"  the board by day {mv['byDay']}, at the end {mv['end']}; the same twice {mv['sig'] == mv2['sig']}")
         if not (72 <= mv['start'] <= 79) or mv['failing'] or not mv['fine'] or mv['machine0'] < 90 or mv['creep'] or not (0 < mv['creepDrop'] < 4):
             fail('the ship meters at the start')
@@ -1422,6 +1424,43 @@ with sync_playwright() as pw:
     })()""")
     print(f"Save round trip: {rt['n']} machines and {rt['jobs']} jobs at hour {rt['hour']}, read back {rt['ok']}, the same {rt['same']}, junk refused {not any(rt['junk'])}")
     if not (rt['ok'] and rt['same']) or any(rt['junk']): fail('the save round trip')
+
+    # 5z. the board keeps up (playtest patch 1, note 13: the user cleared the board on Day 1; JB1). A quick player (from Day 1,
+    # on the shift, takes the board's top job whenever free and is done in its minutes + 20, lunch 12:00-12:45) finds
+    # something to take all through the shift: at most 30 minutes a shift day with nothing on the board, Day 1 included (330
+    # before); the board never piles up (8 at most for you at once); the crew never take a top-up (j.extra) and an untaken
+    # one is gone after the shift; with BOARD_ON false Day 1 is as thin as before (so this part sees it); the same twice
+    if g.ev("typeof boardTopUp === 'function'"):
+        BK = r"""((on) => {
+          window.__sc("window.__evBk = [typeof eventNow === 'function' ? eventNow : undefined]; if (window.__evBk[0]) eventNow = () => null");
+          BOARD_ON = on; const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { days: {}, maxBoard: 0, crewExtra: [], late: [], extras: 0 };
+          JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; SHIP.jobs = []; setShipNow(t0); machinesNow();
+          let mine = null, until = 0; const seen = new Map();
+          for (let t = t0; t <= t0 + 7 * 1440; t += 15) {
+            setShipNow(t); machinesNow();
+            for (const j of SHIP.jobs) if (j.extra) { seen.set(j.id, j); if (j.claimedBy && j.claimedBy !== 'you') out.crewExtra.push(j.id);
+              const d = Math.floor(j.found / 1440) + 1; if (j.status === 'open' && !j.claimedBy && t > (d - 1) * 1440 + dayShiftEnd(d) + 60) out.late.push(j.id); }
+            if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id); } mine = null; }
+            const d = SHIP.time.day, md = t % 1440;
+            if (!(playerShiftOn(d) && md >= DAY_SHIFT[0] && md < dayShiftEnd(d))) continue;
+            const list = openJobs('you'), D = out.days[d] || (out.days[d] = { jobs: 0, empty: 0 }); out.maxBoard = Math.max(out.maxBoard, list.length);
+            if (mine || (md >= 720 && md < 765)) continue;
+            if (!list.length) { D.empty += 15; continue; }
+            if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; }
+          }
+          out.extras = seen.size;
+          for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          BOARD_ON = true; window.__sc("if (window.__evBk[0]) eventNow = window.__evBk[0]");
+          setShipNow(t0); out.sig = JSON.stringify(out.days);
+          return out;
+        })"""
+        bk = g.ev(BK + "(true)"); bk2 = g.ev(BK + "(true)"); off = g.ev(BK + "(false)")
+        print(f"The board keeps up (patch 1, note 13): a quick player, Days 1-7 (jobs/minutes with nothing to take): " + ' '.join(f"{k}:{v['jobs']}/{v['empty']}" for k, v in sorted(bk['days'].items(), key=lambda kv: int(kv[0]))))
+        print(f"  top-ups posted {bk['extras']}, most on the board for you at once {bk['maxBoard']}, taken by the crew {bk['crewExtra'][:4]}, still up after the shift {bk['late'][:4]}, the same twice {bk['sig'] == bk2['sig']}")
+        print(f"  with BOARD_ON false: " + ' '.join(f"{k}:{v['jobs']}/{v['empty']}" for k, v in sorted(off['days'].items(), key=lambda kv: int(kv[0]))))
+        if any(v['empty'] > 30 for v in bk['days'].values()) or bk['maxBoard'] > 8 or bk['crewExtra'] or bk['late'] or bk['sig'] != bk2['sig'] or not bk['extras']:
+            fail('the board keeping up')
+        if off['days'].get('1', {}).get('empty', 0) < 120: fail('with BOARD_ON false, Day 1 should be as thin as before (this part would not see a regression)')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False
