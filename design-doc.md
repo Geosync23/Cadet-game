@@ -441,6 +441,7 @@ What higher tiers unlock:
 - **Repeats:** the same stories every game; which you meet depends on who you befriend and the calendar.
 - **The existing stories** (Pell, Zeke, Calder, Kovac) keep their words and gain a crescendo; their old last step becomes the afterglow. Tomas, Rina, Brennan, Vance, Marrow and Holt stay as they are for now.
 - **Pace:** at most one crescendo a day (and one heavy moment a day, as now).
+- **Follow-ups** (the user, 2026-10-22, all as recommended): Zeke's dad is well and retiring after forty years on the engines, and Zeke's letter is for his last day (his steps already in the game, where his dad is losing his memory, get rewritten when the writing starts); Halloran's terrible jokes were his late dad's, who died some years ago, and the crew's jokes go to his mum; Pell's mum's stiff hands stay (getting older, not illness); Leila Eklund stays parked.
 
 **Guests** (agreed 2026-10-16). Guests live like crew, but for a while: they eat, sleep, use rooms, turn up in chatter and can be befriended. Between events, an everyday guest (a specialist for a week, a transfer waiting for their ship) arrives about once a ship week, so Deck 4's corridor always has a new face. Events bring their own guests; a delegation leader or dignitary gets one of Deck 2's visitor rooms.
 
@@ -845,7 +846,6 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
-- Crew stories, from the user's answers (2026-10-22, `plans/crew-stories-pitch.html`): park Leila Eklund or make her the eleventh (recommended: park)? Zeke's dad losing his memory is illness in the present, which the lighter tone rules out: make his dad well and retiring (recommended) or keep it as written? Halloran's mum in hospital: make the jokes his late dad's instead (recommended)? Pell's mum's stiff hands: keep (recommended)?
 - Crossing the Line's supper (Day 7, the mess) is built (on claude/line-update, behind its switch) with those who don't get a seat eating standing with a tray at the mess's standing spots (`lineStandTray`). Should it sit down in sittings too, like the storm's lantern supper since 2026-10-21?
 
 **The decks:**
@@ -854,6 +854,7 @@ Done so far:
 
 **Answered:**
 
+- Crew stories, the follow-ups (the user, 2026-10-22, all as recommended): Leila Eklund parked, not cut; Zeke's dad is well and retiring after forty years on the engines, and the letter is for his last day; Halloran's terrible jokes were his late dad's (past grief), and the crew's jokes go to his mum; Pell's mum's stiff hands stay. See "Social life".
 - Crew stories (the user, 2026-10-22, plans/crew-stories-pitch.html): ten stories, Pell, Zeke and Theo first; a lighter tone with some grief and past pain; two kind endings; the same stories every game; Zeke's crescendo on Day 23; the existing stories keep their words and gain a crescendo; one crescendo a day. See "Social life".
 
 - Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
