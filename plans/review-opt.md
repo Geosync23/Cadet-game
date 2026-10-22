@@ -225,3 +225,11 @@ For lead 26 (session_015mHBLCf5jpnzBkFY1iBTqv). Run by me on integration f6b9176
 - The new lines restore what they change (the clock, scenes, ACT, wsteps); none changes the game.
 - Note: on 0.64.14 EVENTS_ON is on, so EV_GUARD_ON is on and the two "no event day with the events base off" lines (mech ff, career) skip themselves (they return null). The fault they catch lives only on the switched-off path, so they guard the base game for whenever the events are off; proven above on EVENTS_ON-false copies. Worth one sentence in planted.md.
 - The docs (B) and the 0.64.14 merge (C): read; the merge takes integration's perf_check and backlog as I advised. The known-old list (backlog 12 and 14) is the lead's call.
+
+### Playtest patch 1, branch C (PB2, claude/patch-play1-c, tip 0ecf99fa): note 17, crew drawn through walls: PASS
+For lead 26 and BM13. From integration 32b699a6.
+- The cause, confirmed: section 10's CrewAgent lane `WALK_LANE * ((idHash(id) >> 3) % 21 - 10) / 10`. idHash returns an unsigned 32-bit number; `>> 3` reads it as signed, so for hashes >= 2^31 `% 21` is negative and the lane reaches -0.54 tiles instead of +-0.18. The fix `>>> 3` leaves every hash < 2^31 unchanged. No other idHash use shifts it. (From #10, a67ea08e, in builds since 0.64.6: older than the 0.64.11-0.64.14 range the plan named; the closer camera likely made it noticeable.)
+- lanes.py (every walker on every deck, 09:00): old 31 of 73 lanes outside +-0.18 (min -0.54); new 0 (min -0.18, max 0.18).
+- day_check 1 with the branch's new lines: old build FAILs both new lines on the decks (lane 0.54; Deck 3 16,128 of 354,562 walking frames drawn into a wall by the lane); new build DAY CHECK OK (widest lane 0.18; 1-99 frames a deck, under the 0.1% allowance). So the check catches this bug.
+- cadet_test old -> new: DIFFERENCES in the 12 shots with walking crew. g_nocrew: only Oona Zielinski's speech bubble moved (it follows her drawn position; her body is hidden in that shot), the rest of the picture identical. f_noshadow: Oona drawn at her new lane, her bubble with her; the other walkers and all the scenery the same (play1c/cmp_*.png, old left, new right).
+- check_fast on the branch (0ecf99fa): QUICK CHECK OK in 228 s.
