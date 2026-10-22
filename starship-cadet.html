@@ -10603,9 +10603,11 @@ function shipDay(d) {
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
   occ.who = new Map();                                   // who -> the places they hold (seating by friendship)
+  const introAt = new Set(), skip = new Set();          // backlog 25: a spare station one of today's intro beats puts someone at has no stand-in today (a stand-in's shift is laid on it untested)
+  if (typeof introPlan === 'function') for (const p of S.people) { let add = null; try { add = introPlan(p, d); } catch (e) { add = null; } for (const e of Array.isArray(add) ? add : []) if (e && e.placeId && e.to > e.from) introAt.add(e.placeId); }
   S.spare.forEach((pl, i) => {
-    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !shiftBlocks(p, d) && aboardAllDay(p, d));
-    if (c.length) occ.rot.set(c[Math.floor(schedU(strSeed(pl.id), d, 7) * c.length)].id, { deck: pl.deck, id: pl.id, type: pl.type });   // by the station's id, so a new station never reshuffles the others
+    const dept = pl.type.slice(5), c = S.people.filter(p => p.dept === dept && p.shift !== 'night' && isWorkDay(p, d) && !occ.rot.has(p.id) && !skip.has(p.id) && !shiftBlocks(p, d) && aboardAllDay(p, d));
+    if (c.length) { const q = c[Math.floor(schedU(strSeed(pl.id), d, 7) * c.length)]; if (introAt.has(pl.id)) skip.add(q.id); else occ.rot.set(q.id, { deck: pl.deck, id: pl.id, type: pl.type }); }   // by the station's id, so a new station never reshuffles the others (a skipped one's pick stays at their own desk)
   });
   occ.rotIds = new Set([...occ.rot.values()].map(r => r.id));   // today's stand-in stations (a guest never takes one)
   const wakeAt = p => { const F = schedFrame(p, d); return F.night ? (schedFrame(p, d - 1).works ? 360 : F.wake) : F.wake; };
@@ -10634,12 +10636,10 @@ function shipDay(d) {
   }
   // section 21's named seats (Calder's across from yours) are held for whoever has them before anyone is planned, so an
   // earlier riser never takes one (introLay books it; no 'ev-' tag matches 'intro:<id>', so nobody else may) (0.26.32)
+  const introAdd = new Map();                            // each person's intro beats today, for the alts pass below
   if (typeof introPlan === 'function') for (const p of S.people) {
     let add = null; try { add = introPlan(p, d); } catch (e) { add = null; }
-    for (const e of Array.isArray(add) ? add : []) if (e && !e.placeId && e.alts && e.alts.length && e.to > e.from) {   // a beat with only alts (the room's places) holds its first, so a rota plans round it (backlog #20, PB's design: Halloran's d5-mug seat, the 13:00 tea turns)
-      if (!occ.res.has(e.alts[0])) occ.res.set(e.alts[0], []);
-      occ.res.get(e.alts[0]).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
-    }
+    introAdd.set(p.id, add);
     for (const e of Array.isArray(add) ? add : []) if (e && e.placeId && !e.alts && e.to > e.from) {
       if (!occ.res.has(e.placeId)) occ.res.set(e.placeId, []);
       occ.res.get(e.placeId).push([(d - 1) * 1440 + Math.max(0, e.from), (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + p.id]);
@@ -10654,6 +10654,19 @@ function shipDay(d) {
         occ.res.get(id).push([(d - 1) * 1440 + a, (d - 1) * 1440 + Math.min(1440, e.to), 'intro:' + owner]);
       }
     }
+  }
+  // then a beat with alts (the room's places; introPlan names the first as placeId too) holds a seat of them, so a rota
+  // plans round it (backlog #20, PB's design: Halloran's d5-mug seat, the 13:00 tea turns): after every named seat is
+  // held, in planning order, only for a beat that sits you (its first place a seat, not a queue, a shelf or a station)
+  // and only when no seat is held for you then (the escort's at the arrival dinner sits him); the first seat not held for
+  // another beat. Marked 'alts' (introLay)
+  for (const p of order) for (const e of Array.isArray(introAdd.get(p.id)) ? introAdd.get(p.id) : []) if (e && e.alts && e.alts.length && e.to > e.from && SEAT_SOCIAL.has((S.byId.get(e.alts[0]) || {}).type)) {
+    const a = (d - 1) * 1440 + Math.max(0, e.from), b = (d - 1) * 1440 + Math.min(1440, e.to), me = 'intro:' + p.id;
+    if ([...occ.res.values()].some(rs => rs.some(([u, v, w]) => w === me && u < b && a < v))) continue;
+    const id = e.alts.find(x => SEAT_SOCIAL.has((S.byId.get(x) || {}).type) && !(occ.res.get(x) || []).some(([u, v, w]) => u < b && a < v && /^intro:/.test(w)));
+    if (!id) continue;
+    if (!occ.res.has(id)) occ.res.set(id, []);
+    occ.res.get(id).push([a, b, me, 'alts']);
   }
   // crew leaving today wait in the shuttle bay 14:30-15:00 (guestTrim): each one's spot is held for them before anyone is
   // planned ('leave:<id>', which no tag matches), so their farewell friends stand round them, never in it (0.26.38)
@@ -10717,9 +10730,9 @@ function introLay(p, d, occ, segs) {
   // a seat shipDay held for you that none of your beats sits you in (the escort's at the arrival dinner): sit there for
   // the whole hold, and a beat of yours that overlaps it takes that seat, not a stand-in (0.26.39)
   const mine = [];
-  if (occ.res) for (const [id, rs] of occ.res) for (const [x, y, ev] of rs) if (ev === 'intro:' + p.id && y > B && x < B + 1440) mine.push([id, x, y]);
+  if (occ.res) for (const [id, rs] of occ.res) for (const [x, y, ev, k] of rs) if (ev === 'intro:' + p.id && y > B && x < B + 1440) mine.push([id, x, y, k]);
   const named = Array.isArray(add) ? add : (add = []);
-  for (const [id, x, y] of mine) if (!named.some(e => e && (e.placeId === id && !e.alts || !e.placeId && e.alts && e.alts[0] === id))) { const pl = byId.get(id); if (pl) named.unshift({ from: x - B, to: y - B, deck: pl.deck, placeId: id, alts: null, tag: 'intro-seat' }); }
+  for (const [id, x, y, k] of mine) if (k !== 'alts' && !named.some(e => e && (e.placeId === id && !e.alts || !e.placeId && e.alts && e.alts[0] === id))) { const pl = byId.get(id); if (pl) named.unshift({ from: x - B, to: y - B, deck: pl.deck, placeId: id, alts: null, tag: 'intro-seat' }); }
   if (!add.length) return segs;
   let out = segs.slice();
   for (const e of add.filter(e => e && e.to > e.from).sort((a, b) => a.from - b.from)) {
