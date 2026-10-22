@@ -227,3 +227,18 @@ action name, the stick swap), turn 2's zoom line (flip, speed), section 19's Set
 quiet machine. Where it showed: adffcbe on (with a second browser running), P3 958421a on (likely with my old P3
 mutant job still running beside it). fc8ccd5 off/on came out plain. Next: P3 958421a on again, strictly alone (queue 7).
 If it's clean alone, the noise is load (the HUD's blurred glass under a busy renderer); if not, it's the build.
+
+## P5 verdict (CP5 8216ad4 on 825378d): PASS WITH FIXES (none blocking)
+Runs, each alone: cadet_test 825378d -> 8216ad4 off ALL IDENTICAL, on (PAD_ON copy) ALL IDENTICAL (plain, no noise);
+CP5's controller_check CONTROLLER CHECK OK (30 panels swept; a11y 25 panels, 0 nameless); check_fast QUICK CHECK OK
+(380 s); mutants p5_rmonce, p5_notoast, p5_thin CAUGHT, p5_noedge MISSED. (Earlier tips adffcbe and fc8ccd5: the same.)
+Fixes for CP5 (small):
+1. a11y's highlight test: require both dark shadows (the inner 3px and the outer 9px), so p5_noedge fails it.
+2. a11y's name test asks the game's own padSaid (any textContent counts): a button whose only text is a glyph ("✕",
+   "‹", "+") passes as named. Read the browser's accessible name (CDP Accessibility.getPartialAXTree) and treat a name
+   with no letters as nameless.
+3. The toast's role=status / aria-live stay after a touch hands back: say so in DEV_NOTES as the one deliberate
+   leftover (or drop them on 'unuse'); CP5-1 in the backlog is the fix for everyone.
+4. DEV_NOTES says "the two tap-again asks": there's a third, the welcome's "Tap again to end the welcome" (no time limit).
+5. PAD_LAYOUTS.left leaves no zoom within reach (RT and the right stick on the far side, LT becomes A): fine as a
+   preset if the page or DEV_NOTES says so, or put zoom on the D-pad's spare direction.
