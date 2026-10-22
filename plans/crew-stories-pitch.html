@@ -1,0 +1,638 @@
+<title>Crew Stories Pitch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a crew logbook. One reading column; story cards in a two-up grid; a day strip from the arrival to the finale. */
+:root {
+  --paper: #f1f3f5;
+  --card: #ffffff;
+  --ink: #18212b;
+  --muted: #5b6672;
+  --line: #d5dbe1;
+  --works: #c25a14;
+  --works-soft: #f6e3d4;
+  --teal: #1f7a70;
+  --teal-soft: #d8ece9;
+  --night: #3b4a8a;
+  --night-soft: #e0e4f3;
+  --gold: #9a7417;
+  --gold-soft: #f3ead2;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #11161d; --card: #19202a; --ink: #e7ebef; --muted: #9aa6b2; --line: #2c3642;
+    --works: #f08a46; --works-soft: #3a2618; --teal: #5cc3b6; --teal-soft: #173430;
+    --night: #9aa8ea; --night-soft: #222a4a; --gold: #e0b955; --gold-soft: #352c14;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #11161d; --card: #19202a; --ink: #e7ebef; --muted: #9aa6b2; --line: #2c3642;
+  --works: #f08a46; --works-soft: #3a2618; --teal: #5cc3b6; --teal-soft: #173430;
+  --night: #9aa8ea; --night-soft: #222a4a; --gold: #e0b955; --gold-soft: #352c14;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--paper); color: var(--ink);
+  font-family: var(--body); font-size: 17px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 64px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+.read { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--display); line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 46px); font-weight: 700; letter-spacing: -0.01em; }
+h2 { font-size: 26px; font-weight: 700; }
+h3 { font-size: 19px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--works); }
+section { display: flex; flex-direction: column; gap: 16px; }
+.stack { display: flex; flex-direction: column; gap: 12px; }
+.lede { font-size: 19px; }
+.muted { color: var(--muted); }
+.small { font-size: 15px; }
+strong { font-weight: 600; }
+a { color: var(--teal); }
+ul, ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 6px; }
+
+.short { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 20px; }
+.short ul { gap: 8px; }
+
+/* the shape of a story */
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.step { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+.step .tag { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.step.peak { border-color: var(--works); background: var(--works-soft); }
+.step p { font-size: 15px; }
+
+/* candidate cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 470px), 1fr)); gap: 14px; }
+.cand { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.cand header { display: flex; flex-direction: column; gap: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-family: var(--mono); font-size: 11.5px; border-radius: 999px; padding: 2px 9px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.works { background: var(--works-soft); color: var(--works); border-color: transparent; }
+.chip.other { background: var(--teal-soft); color: var(--teal); border-color: transparent; }
+.chip.leaves { background: var(--gold-soft); color: var(--gold); border-color: transparent; }
+.chip.night { background: var(--night-soft); color: var(--night); border-color: transparent; }
+.cand p { font-size: 15.5px; }
+.cand .k { font-family: var(--display); font-weight: 700; font-size: 13px; letter-spacing: 0.03em; text-transform: uppercase; color: var(--muted); display: block; margin-bottom: 2px; }
+.cand .peak { background: var(--works-soft); border-radius: 8px; padding: 10px 12px; }
+.cand .peak .k { color: var(--works); }
+.pick { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 500; font-size: 15px; border-top: 1px dashed var(--line); padding-top: 10px; margin-top: auto; cursor: pointer; }
+.pick input { width: 18px; height: 18px; accent-color: var(--works); }
+
+/* the day strip */
+.strip-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--card); }
+.strip { display: grid; grid-template-columns: 150px repeat(31, minmax(22px, 1fr)); min-width: 860px; font-family: var(--mono); font-size: 11px; }
+.strip > div { border-bottom: 1px solid var(--line); min-height: 28px; display: flex; align-items: center; justify-content: center; }
+.strip .name { justify-content: flex-start; padding-left: 10px; font-family: var(--display); font-size: 13px; font-weight: 500; position: sticky; left: 0; background: var(--card); z-index: 1; }
+.strip .hd { color: var(--muted); font-variant-numeric: tabular-nums; }
+.strip .ev { color: var(--ink); font-size: 10px; }
+.strip .on { background: var(--teal-soft); }
+.strip .storm { background: var(--night-soft); }
+.strip .dot::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--works); display: block; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 14px; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.sw { width: 14px; height: 14px; border-radius: 3px; display: inline-block; }
+
+/* tables */
+.tbl-wrap { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; min-width: 640px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-top: 1px solid var(--line); }
+th { font-family: var(--display); font-weight: 700; font-size: 13px; color: var(--muted); letter-spacing: 0.02em; }
+td.mono { font-family: var(--mono); font-size: 13px; white-space: nowrap; }
+
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); gap: 14px; }
+.box { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.box h3 { font-size: 17px; }
+.box ul { font-size: 15.5px; }
+
+/* answers form */
+form#answers { display: flex; flex-direction: column; gap: 14px; }
+.q { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 18px; display: flex; flex-direction: column; gap: 10px; }
+.q h3 { font-size: 18px; }
+.q .why { font-size: 15px; color: var(--muted); }
+.q label.opt { display: flex; gap: 10px; align-items: flex-start; font-size: 15.5px; cursor: pointer; }
+.q label.opt input { margin-top: 5px; accent-color: var(--works); flex: none; }
+.rec { font-family: var(--mono); font-size: 11px; color: var(--works); border: 1px solid var(--works); border-radius: 999px; padding: 0 7px; margin-left: 4px; white-space: nowrap; }
+textarea { width: 100%; min-height: 70px; font: inherit; font-size: 15px; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+.picksum { font-size: 15px; }
+.savebar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+#savebtn { font-family: var(--display); font-weight: 700; font-size: 16px; color: #fff; background: var(--works); border: 0; border-radius: 999px; padding: 11px 24px; cursor: pointer; }
+#savebtn:disabled { opacity: 0.6; cursor: default; }
+#savestate { font-size: 15px; color: var(--muted); }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header class="stack read">
+  <span class="eyebrow">Starship Cadet · story pitch · CS1 for lead 25 · 22 Oct 2026</span>
+  <h1>Crew stories: who gets one, how they're told, and where they land</h1>
+  <p class="lede">Your brief: narrative arcs for some of the crew, mostly dialogue, tender and building to an emotional high point, simple to make, and more of them than one playthrough can hold. A lot of Works folks, Pell and Zeke for sure. This page is a pitch to talk over. Nothing here is built or written yet, and the answers form at the bottom keeps whatever you tick and type.</p>
+</header>
+
+<section class="short read" aria-labelledby="short-h">
+  <h2 id="short-h">The short version</h2>
+  <ul>
+    <li><strong>We aren't starting from nothing.</strong> Ten crew already have a story in the game, told as sit-down chats one step at a time (Pell, Zeke, Calder, Kovac, Tomas, Rina, Brennan, Vance, Captain Marrow, Holt). They're gentle, but they end quietly in a chat card. None of them has the big moment you're asking for.</li>
+    <li><strong>The new idea is the crescendo.</strong> Every crew story ends in one staged scene with other people there, at a real place and time, that hits harder than a chat. To keep it simple, each crescendo <em>rides on a gathering that already happens</em>: a Friday tea, the send-off in the shuttle bay, Knit and natter, the storm, Postcard night, your night shift. Nobody's day has to be re-planned.</li>
+    <li><strong>11 candidates:</strong> 9 from Works (Pell, Zeke, Calder, Kovac, Halloran, Theo Teague, Basil Bramwell, Leila Eklund, Saad Salo) and 2 new ones from elsewhere (Dev Raman on the helm, Anja Kowalczyk on the night bridge). The six non-Works stories already in the game (Tomas, Rina, Brennan, Vance, Marrow, Holt) can stay as they are or be upgraded later.</li>
+    <li><strong>You can't see them all.</strong> A crescendo needs a close friend, and in the first month you'll make maybe four to six. Several stories also have a window: Theo leaves on Day 21, Basil only arrives that day, Leila's day is fixed, Kowalczyk's only happens on your night shift.</li>
+    <li><strong>My recommendation:</strong> build 8, write Pell, Zeke and Theo first, and keep it tender but never bleak: grief and illness happen to people off the ship, told gently, and nobody dies on screen.</li>
+  </ul>
+</section>
+
+<section class="read" aria-labelledby="have-h">
+  <span class="eyebrow">Where we start</span>
+  <h2 id="have-h">What the game already has</h2>
+  <p>The pieces a crew story needs are already built and working in the game. This is what I'd use, unchanged:</p>
+  <ul>
+    <li><strong>Story moments.</strong> A crew member walks up when you're both off duty and asks you to sit with them. Their lines play one by one, you pick one reply out of three (listen, cheer up, practical, share), and there's never a wrong answer. Each step opens with friendship and time known, at most one heavy moment a day.</li>
+    <li><strong>Meetings.</strong> Scenes with several speakers, faces and names, one or two choices (the training scenes, First Light Cocoa, the storm briefing). This is what a crescendo is made of.</li>
+    <li><strong>Favours that matter.</strong> A practical reply can put a personal job in your Jobs app (fetch blue sage from the garden, help Pell practise in the machine shop, service the lift's brakes).</li>
+    <li><strong>Mail, keepsakes and memory.</strong> A Mail can follow a moment; a resolution leaves a keepsake on your shelf; every reply is remembered, so later lines can call back to it.</li>
+    <li><strong>Traditions and gatherings</strong> with times, places, Calendar entries and Mail the evening before. The rotation on Day 21 (Theo out at 15:00, Basil in at 17:40), the farewell supper, the shuttle bay send-off and the new hand's tea are all on the calendar already.</li>
+    <li><strong>Goodbyes.</strong> A leaver's friends get a goodbye conversation, and can say they miss them afterwards.</li>
+  </ul>
+  <p class="muted small">Also there: twelve shared "struggle themes" (homesick, exams, loss, burnout and so on) that give the other sixty-odd crew a short three-step thread made from fill-in templates. Those stay as the background hum. Crew stories are the hand-written, foreground ones.</p>
+</section>
+
+<section aria-labelledby="how-h">
+  <div class="read stack">
+    <span class="eyebrow">1 · How a crew story is told</span>
+    <h2 id="how-h">Four quiet steps, then one big one</h2>
+    <p>Every crew story has the same simple shape, so the writers have a pattern and the engine has nothing new to learn. Steps 1 to 4 are ordinary story moments (a chat card that opens into a short scene). Step 5 is the crescendo.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><span class="tag">Step 1 · colleague</span><h3>The spark</h3><p>Something small and funny you notice: a comic pinned in the common room, a scarf that's far too long, a joke nobody laughs at. Often it's their card line or a bit of chatter first.</p></div>
+    <div class="step"><span class="tag">Step 2 · colleague</span><h3>The thread</h3><p>They let you in a little. A light moment, and usually a <strong>favour</strong> you can choose to do: the player's part in the story.</p></div>
+    <div class="step"><span class="tag">Step 3 · friend</span><h3>The weight</h3><p>The heart of it, told plainly at a quiet hour: the dad who's forgetting, the shop at home, the day each year. One choice. You can't fix it; you can be there.</p></div>
+    <div class="step"><span class="tag">Step 4 · friend</span><h3>The turn</h3><p>They decide something, or ask you something. What you did in steps 2 and 3 shows here.</p></div>
+    <div class="step peak"><span class="tag">Step 5 · close friend, or its day</span><h3>The crescendo</h3><p>A short scene with other crew there, at a gathering that happens anyway. It's on your Calendar like any appointment. A keepsake, a Mail after, and the crew talk about it for a day or two.</p></div>
+  </div>
+  <div class="two">
+    <div class="box">
+      <h3>How a story starts</h3>
+      <ul>
+        <li>With a moment, not a menu: the person comes over when you're off duty, or the hint shows on their card ("Got a minute?").</li>
+        <li>Only after week 1 (your training week stays clear), and only once you've met them a few days.</li>
+        <li>A story that has a window (Theo, Basil) starts earlier and asks less friendship, so it can still land in time.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>How it moves on</h3>
+      <ul>
+        <li>By friendship and time: each step needs a tier, some days known, and two days' gap after a heavy one.</li>
+        <li>By what you did: a favour taken or not changes their next lines, and which version of the ending plays.</li>
+        <li>At most one heavy moment a day for you, and at most one crescendo a day.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>How it lands</h3>
+      <ul>
+        <li>The crescendo is put on your Calendar when the story is ready for it, with a Mail the evening before ("Pell's practical is tomorrow at the open-door tea. He says don't come. Come.").</li>
+        <li>Be there and it plays. Miss it and it still happens: a Mail tells you how it went, the crew talk, and the story ends with a smaller, kind moment later.</li>
+        <li>There's no bad ending. A full ending if you were part of it, a quiet one if you weren't.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Why you only see some</h3>
+      <ul>
+        <li><strong>Friendship:</strong> a workmate you eat and work with reaches friend in one to two weeks and close in about three; people outside Works take longer. So a month gives you four to six close friends, and that many crescendos.</li>
+        <li><strong>The calendar:</strong> leavers, arrivals, fixed days and the night shift open and shut windows.</li>
+        <li><strong>Your department:</strong> the Works stories come to you easily; the bridge and helm ones you have to go looking for.</li>
+        <li><strong>Your choices:</strong> who you sit with, which favours you take.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="who-h">
+  <div class="read stack">
+    <span class="eyebrow">2 · Who gets one</span>
+    <h2 id="who-h">Eleven candidates, and the six already written</h2>
+    <p>Every name is checked against the roster. "Stays" means they're aboard all year; the rotation dates are the crew designer's. For the four who already have a story, I keep their written steps and add the crescendo; their current last step becomes the afterglow. Tick the ones you want: the ticks are saved with your answers at the bottom.</p>
+  </div>
+  <div class="cards">
+
+    <article class="cand">
+      <header>
+        <h3>Pell Okafor: "Eat, sleep, call"</h3>
+        <div class="chips"><span class="chip works">Works technician</span><span class="chip">stays</span><span class="chip">has a story (8 steps)</span></div>
+      </header>
+      <p><span class="k">Situation</span>Two years ahead of you in Works and your neighbour in the bunk room. Calder has put him down for the certification practical, which he wants more than anything and is terrified of. His mum's three unread messages hide a fourth: her hands are stiffening, and she wants him home to run the family mending shop.</p>
+      <p><span class="k">The tender heart</span>Whatever he chooses, he thinks he's letting someone down. He nearly left the Wren in his first month, and is glad every day he didn't.</p>
+      <div class="peak"><span class="k">Crescendo · Wednesday open-door tea, Works tea corner, Day 17 or 24</span><p>The practical, in front of Works and the Chief. He strips the pump against the clock with everyone pretending not to watch. Calder says "Good. Clean work." and he can't speak. Then he tells the whole tea corner he's staying, and that he'll teach his mum's neighbour the radios by message, one step a week. If you timed his practice runs, he says so to everyone.</p></div>
+      <p><span class="k">What you do</span>Time his practice in the machine shop (a favour), sit with him while he opens the messages, and be there on the day.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="pell" id="pick-pell" checked> I want Pell's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Zeke Torres: "Ready"</h3>
+        <div class="chips"><span class="chip works">Engine officer, your trainer</span><span class="chip">stays</span><span class="chip">has a story (6 steps)</span></div>
+      </header>
+      <p><span class="k">Situation</span>The man who trains you, confident in week one, has been passed over twice for Engine Specialist. Calder once called him "restless". He's knitting you a scarf, badly. His father, an engine man for forty years, is losing his memory back home.</p>
+      <p><span class="k">The tender heart</span>On the last call his dad called him by his uncle's name. Zeke talks about the coils to get through it. He's decided to finish things: the scarf, the application, a letter about the Wren's coils.</p>
+      <div class="peak"><span class="k">Crescendo · Knit and natter, junior common room, Tuesday Day 23</span><p>The evening you're made Engine Specialist, the job he wanted. He gives you the scarf anyway, finished and far too long, in front of the circle. He's put his name forward again. And his dad had a good day: knew him, asked about the coils, said "she's sulking, give her a minute". Zeke reads you the line he wrote back.</p></div>
+      <p><span class="k">What you do</span>Answer his question about what you'd want in a letter if you'd forgotten nearly everything else, and maybe nudge him to ask Calder what "restless" meant.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="zeke" id="pick-zeke" checked> I want Zeke's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Chief Ines Calder: "Well done"</h3>
+        <div class="chips"><span class="chip works">Head of Works</span><span class="chip">stays</span><span class="chip">has a story (5 steps)</span></div>
+      </header>
+      <p><span class="k">Situation</span>The battered toolbox on her shelf was her first chief's, Rhoda Fenn, who taught her everything and never once said "well done". Fenn is retiring and has written. Calder hasn't answered. She's become hard in the same way, and isn't sure it was right.</p>
+      <p><span class="k">The tender heart</span>Nobody hears Calder say "well done" anywhere in the game until this story's end. She says "Good. Clean work." instead.</p>
+      <div class="peak"><span class="k">Crescendo · Calder's question, Works Friday tea, Day 26</span><p>Your four weeks are up and she asks her question in front of Works, as built. If her story is ready, she adds one thing first: Fenn wrote back two words, "Well done". "Took her thirty years. I won't take that long." Then, to you, in front of everyone: "Well done." The toolbox is on your bench the next morning: "Borrowed. Return it when you're done."</p></div>
+      <p><span class="k">What you do</span>Show her the work (her story is gated by your Works record), and give her an honest answer when she asks if she's too hard on you.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="calder" id="pick-calder" checked> I want Calder's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Zainab Kovac: "Four, please"</h3>
+        <div class="chips"><span class="chip works">Works technician</span><span class="chip">stays</span><span class="chip">has a story (4 steps)</span></div>
+      </header>
+      <p><span class="k">Situation</span>Can strip a scrubber in ten minutes flat and is secretly afraid of the lift. Both hands on the rail: "Lovely lift." So are Tove Cruz and Davi Keane, it turns out. "We're a club. Oh no. We're a club."</p>
+      <p><span class="k">The tender heart</span>As a child she was stuck all night in a lift on Marra Station, alone. She counted the bolts in the ceiling. There were 112.</p>
+      <div class="peak"><span class="k">Crescendo · the lift to the Captain's address, Friday Day 19 or 26</span><p>Half the ship rides up to the rec deck before four. You serviced the brakes with her, so she knows every bolt now. She steps in, says "Four, please" (your first words on the Wren), and the lift club rides up together with nobody holding the rail. Very brave, all three. The lighter one of the set, on purpose.</p></div>
+      <p><span class="k">What you do</span>Offer to service the lift's brakes with her (a favour), and ride with them.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="kovac" id="pick-kovac" checked> I want Kovac's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Theo Teague: "The last page"</h3>
+        <div class="chips"><span class="chip works">Works technician</span><span class="chip leaves">leaves Day 21 (to the Heron)</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Three months aboard, blunt, restless, draws comics about life on the Wren and pins them in the common room. A new one appears in your first week, starring "the new one". He reads the transfer lists every week and has put in for the Heron.</p>
+      <p><span class="k">The tender heart</span>His aunt, a pilot, taught him to leave before a place can leave you. He's leaving because he's started to like it here, and that frightens him more than staying.</p>
+      <div class="peak"><span class="k">Crescendo · the send-off, shuttle bay, Sunday Day 21, 14:30</span><p>His friends stand with him by the Tern. He gives you the comic's last page: the Works bay, everyone in it, and you at the beam with your name. "Finished it. Don't frame it. Frame it." Then he walks up the ramp, one of the last, and the ramp shuts.</p></div>
+      <p><span class="k">What you do</span>Sit for a panel, carry a page to someone he's too shy to give it to, and say what you think about him going. Whatever you say, he goes: the rotation is fixed. The only story you can't keep.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="teague" id="pick-teague" checked> I want Theo's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Basil Bramwell: "Your turn"</h3>
+        <div class="chips"><span class="chip works">Works cadet</span><span class="chip leaves">arrives Day 21 (Theo's place)</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Brand new, trying very hard not to look it, and he asks a lot of questions. He brought a cutting from his parents' repair-shop window, and it isn't doing well. He writes letters home every week.</p>
+      <p><span class="k">The tender heart</span>You were him four weeks ago. The story is about seeing how far you've come, and handing it on.</p>
+      <div class="peak"><span class="k">Crescendo · his new hand's tea, Works tea corner, Thursday Day 25</span><p>You bring the plant back to him, green again (Tove Cruz showed you how). The Works table makes a fuss. He reads a line from his letter home aloud by mistake, and it's about you. If you're close to Zeke, Zeke lets <em>you</em> hand Basil the pen at the beam on Day 22.</p></div>
+      <p><span class="k">What you do</span>Watch him come off the Tern, answer his questions, and take the plant to the garden (a favour). A short, late story for the last week.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="bramwell" id="pick-bramwell" checked> I want Basil's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Emeka Halloran: "Groaning means breathing"</h3>
+        <div class="chips"><span class="chip works">Works systems officer</span><span class="chip">stays</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Kind, loyal, tells terrible jokes at breakfast, and runs your training sessions. He learnt the jokes from his mum, who's in hospital back home on Coriel, and the news comes slowly.</p>
+      <p><span class="k">The tender heart</span>She always said "If they're groaning, they're breathing." He keeps telling the jokes every morning because it's the only way he knows to keep her in the room.</p>
+      <div class="peak"><span class="k">Crescendo · Works Friday tea, Deck 5, Friday Day 19</span><p>For once the whole tea corner tells <em>him</em> terrible jokes, one after another, and records them for his mum. You gathered them. He groans at every one, and then can't stop laughing. Her reply comes by Mail a few days later: she laughed so hard the nurse came in.</p></div>
+      <p><span class="k">What you do</span>Collect a terrible joke from five crew (a favour that sends you round the ship), and laugh at his.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="halloran" id="pick-halloran" checked> I want Halloran's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Leila Eklund: "The quiet day"</h3>
+        <div class="chips"><span class="chip works">Works technician</span><span class="chip">stays</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Dry, meticulous, collects old maps, records voice messages for home, and runs Postcard night. She goes quiet on one day each year and doesn't say why.</p>
+      <p><span class="k">The tender heart</span>The day is her grandad's. He died a few years ago. She still has his last voice message and has never played it to anyone, and she has never talked about him with her younger brother.</p>
+      <div class="peak"><span class="k">Crescendo · Postcard night, the call-home booths, Thursday Day 18, 18:45</span><p>Her quiet day. She plays you his message: thirty seconds about nothing, the weather and a map he found. Then, with you beside her, she records her first message to her brother about him. The others writing their cards go quiet, and someone leaves a biscuit by her elbow.</p></div>
+      <p><span class="k">What you do</span>Notice the quiet. Sit. This one has a fixed day: miss it and she tells you about it later, gently, as a quieter ending. The saddest of the set.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="eklund" id="pick-eklund"> I want Leila's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Saad Salo: "Twice"</h3>
+        <div class="chips"><span class="chip works">Engine technician</span><span class="chip">stays</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Cheerful, patient, grows cuttings, and checks his own work twice. Years ago, on an old ship, he didn't, and a valve he'd signed off let a whole deck go cold for a night. Nobody was hurt; nobody else remembers. His little sister wants to join up.</p>
+      <p><span class="k">The tender heart</span>He's afraid she'll be like him: good, and one tired night away from the same mistake. He hasn't written back to her.</p>
+      <div class="peak"><span class="k">Crescendo · the ion storm, Saturday Day 13</span><p>The storm throws up a fault just like his old one. He freezes. You work it with him, step by step, and he signs it off, once. At the all-clear the next morning Calder names him. That night he writes to his sister: "Check it twice. Then trust yourself."</p></div>
+      <p><span class="k">What you do</span>Be his friend before the storm (friend by Day 12). If you aren't, it lands later on an ordinary fault, smaller. The story that ties into the big event.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="salo" id="pick-salo" checked> I want Saad's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Dev Raman: "The same comet"</h3>
+        <div class="chips"><span class="chip other">Senior helm officer</span><span class="chip">stays</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Twenty years flying survey ships and he still gets nervous docking. He flew you in on Day 0, and he's building a model of the Wren on the shelf by his door. He's been offered a desk job near home on Lisk and hasn't answered.</p>
+      <p><span class="k">The tender heart</span>He's missed his daughters growing up, one call at a time. The elder is now old enough to be cross with him about it.</p>
+      <div class="peak"><span class="k">Crescendo · comet viewing, the observatory, Tuesday Day 16, 21:30</span><p>His daughters are watching the same comet from Lisk, at the same minute, because he asked them to. He tells you what he's decided: one more tour, and then home, and he's told them. He gives you the tiny carved shuttle from his model. "You were my last good landing. Don't tell anyone it was bumpy."</p></div>
+      <p><span class="k">What you do</span>Find him at the window seats in the mornings, and help with the model (a favour: a part from the machine shop). Helm is far from Works, so this one has to be sought out.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="raman" id="pick-raman" checked> I want Dev's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>Anja Kowalczyk: "The beacon"</h3>
+        <div class="chips"><span class="chip other">Second officer</span><span class="chip night">night shift</span><span class="chip">stays</span><span class="chip">new</span></div>
+      </header>
+      <p><span class="k">Situation</span>Runs the bridge at night, when the ship is hers. Reads old paper novels on quiet watches and sometimes goes a whole week without a real conversation. Her father kept a lighthouse beacon on Marra Station for thirty years.</p>
+      <p><span class="k">The tender heart</span>The beacon is being switched off for good this month, replaced by a buoy. She can't be there to see it go dark, and he won't say how much he minds.</p>
+      <div class="peak"><span class="k">Crescendo · your first night shift, the bridge, dawn of Day 20 (05:50)</span><p>At the hour the beacon goes dark, she lets you key the Wren's running lights in its old pattern, three long and one short, out into nothing. The night watch stands with you without being asked. A week later her father writes: someone on Marra saw a ship's lights do it and sent him the picture.</p></div>
+      <p><span class="k">What you do</span>You only meet her properly on your night shifts (Days 19 and 20). Talk to her in the quiet hours. The rarest one, and the most beautiful if you find it.</p>
+      <label class="pick"><input type="checkbox" name="pick" value="kowalczyk" id="pick-kowalczyk" checked> I want Anja's story</label>
+    </article>
+
+    <article class="cand">
+      <header>
+        <h3>The six other stories already in the game</h3>
+        <div class="chips"><span class="chip other">Watch, Infirmary, Galley, Command</span><span class="chip">all stay</span><span class="chip">have stories</span></div>
+      </header>
+      <p>Tomas (Watch, your bunkmate: the failed exam, home and the star map), Rina (Infirmary: sitting the doctor's exam, gran who cheats at Tiles), Chef Brennan (the soup that needs blue sage, the restaurant fire, "seventy-five covers"), Commander Vance (the poet "Gull", two unopened messages from his father), Captain Marrow (lonely in the chair, letters to her daughter), Chief Holt (one bad day on a border patrol, tea with the Envoy).</p>
+      <p><span class="k">My suggestion</span>Keep them as they are for now. Later, any of them can get a crescendo the same way; Brennan's would ride on the Sunday table, Vance's on the Friday address, Holt's on the Veyli visit. Tick the ones you'd like upgraded in the first batch.</p>
+      <div class="chips" role="group" aria-label="Upgrade an existing story">
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="tomas" id="pick-tomas"> Tomas</label>
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="rina" id="pick-rina"> Rina</label>
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="brennan" id="pick-brennan"> Brennan</label>
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="vance" id="pick-vance"> Vance</label>
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="marrow" id="pick-marrow"> Marrow</label>
+        <label class="pick" style="border:0;padding:0;margin:0"><input type="checkbox" name="pick" value="holt" id="pick-holt"> Holt</label>
+      </div>
+    </article>
+
+  </div>
+  <p class="muted small read">Also considered and left out for now: Bea Silva (a shy painter), Mateo Navarro and Davi Keane (both burning out on the night shift), Matthias Oduya (the counsellor, who lost his wife: lovely, but heavier than this set should be), Lukas Dlamini (the storm supper is already his story). Any of them can come back in a second batch.</p>
+</section>
+
+<section aria-labelledby="where-h">
+  <div class="read stack">
+    <span class="eyebrow">3 · Where each one goes</span>
+    <h2 id="where-h">On the ship's calendar</h2>
+    <p>From your arrival (Day 0) to the end of the Veyli visit (Day 30). The shaded part is when a story can be under way; the dot is its crescendo. The first week is kept clear for training; the storm (Days 11-15) has one story in it on purpose; the last week is the Works week, with a crescendo nearly every evening for a player who's close to the Works crew.</p>
+  </div>
+  <div class="strip-wrap" role="region" aria-label="Story calendar, Days 0 to 30" tabindex="0">
+    <div class="strip" id="strip"></div>
+  </div>
+  <div class="legend">
+    <span><i class="sw" style="background:var(--teal-soft)"></i> story can be under way</span>
+    <span><i class="sw" style="background:var(--works);border-radius:50%"></i> crescendo</span>
+    <span><i class="sw" style="background:var(--night-soft)"></i> the ion storm</span>
+  </div>
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Story</th><th>Crescendo: where and when</th><th>Rides on</th><th>How it fits</th></tr></thead>
+      <tbody>
+        <tr><td>Raman</td><td class="mono">Day 16 · 21:30</td><td>Comet viewing, the observatory (Deck 2)</td><td>The gentle evening after the storm. If you missed it, a quieter ending at his window seat later.</td></tr>
+        <tr><td>Salo</td><td class="mono">Day 13 · storm</td><td>A storm fault job, then the all-clear on Day 14</td><td>Inside the storm; counts as one of your storm jobs for the commendation.</td></tr>
+        <tr><td>Eklund</td><td class="mono">Day 18 · 18:45</td><td>Postcard night, the call-home booths (Deck 3)</td><td>A fixed day. Day 18 already has a training and a summons, both earlier.</td></tr>
+        <tr><td>Halloran</td><td class="mono">Day 19 · tea</td><td>Works Friday tea (Deck 5), after the address</td><td>Before your first night shift at 21:00. Or any later Friday.</td></tr>
+        <tr><td>Kovac</td><td class="mono">Day 19 or 26 · 15:40</td><td>The lift up to the Captain's address</td><td>Fridays from Day 12. Uses the queue for the lift that already happens.</td></tr>
+        <tr><td>Kowalczyk</td><td class="mono">Day 20 · 05:50</td><td>Your first night shift on the bridge</td><td>Only on night shift (from Day 19 at 21:00). The dawn of Day 21 would clash with Theo's send-off, so it's the first night.</td></tr>
+        <tr><td>Teague</td><td class="mono">Day 21 · 14:30</td><td>His send-off in the shuttle bay</td><td>The rotation: he's gone on the 15:00 Tern. The farewell supper on Day 20 is step 4.</td></tr>
+        <tr><td>Zeke</td><td class="mono">Day 23 · 20:00</td><td>Knit and natter, junior common room (Deck 4)</td><td>The evening you're made Engine Specialist.</td></tr>
+        <tr><td>Pell</td><td class="mono">Day 24 · 16:40</td><td>Open-door tea, Works tea corner (Deck 5)</td><td>Or Day 17. Calder's there anyway.</td></tr>
+        <tr><td>Bramwell</td><td class="mono">Day 25 · tea</td><td>His new hand's tea, Works tea corner</td><td>Starts the day he walks off the Tern (Day 21).</td></tr>
+        <tr><td>Calder</td><td class="mono">Day 26 · tea</td><td>Calder's question, Works Friday tea</td><td>The end of your career steps. Only adds lines to a scene that's already built.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="two">
+    <div class="box">
+      <h3>Around the big days</h3>
+      <ul>
+        <li><strong>Week one</strong> stays training: no story steps until it's done.</li>
+        <li><strong>Crossing the Line (Day 7)</strong> is a spark day: two or three stories open there with a light step (Theo sketches the ceremony; Raman flew the crossing).</li>
+        <li><strong>The storm (Days 11-15)</strong> holds back every heavy step except Salo's, which is about the storm.</li>
+        <li><strong>Fridays</strong> are good crescendo days: everyone's off from 15:30 and gathered at four.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Rotation and career</h3>
+      <ul>
+        <li><strong>Day 21:</strong> Theo leaves, Basil arrives. Leavers' stories must finish by their last day; arrivals' stories start late and move faster. Later rotations work the same way.</li>
+        <li><strong>Your promotions</strong> are never in the same hour as a crescendo (the same guard that spaces the Captain's scenes).</li>
+        <li><strong>Calder's and Zeke's</strong> crescendos sit on career days on purpose, so your promotions feel like they mean something to someone.</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<section aria-labelledby="easy-h">
+  <div class="read stack">
+    <span class="eyebrow">4 · How simple it is to make</span>
+    <h2 id="easy-h">Mostly writing, with four small pieces of code</h2>
+  </div>
+  <div class="two">
+    <div class="box">
+      <h3>Already there, used as is</h3>
+      <ul>
+        <li>The story-moment engine: steps, gates by friendship and time, places, choices, flags, keepsakes, Mail after.</li>
+        <li>Meeting scenes with several speakers and choices.</li>
+        <li>Favours that put a personal job in your Jobs app.</li>
+        <li>The traditions, the rotation, the send-off, the storm and the career days, all with times and places.</li>
+        <li>The writers' story file format (one plain-text file per story) and the checker for it.</li>
+        <li>The four existing Works stories, already written.</li>
+      </ul>
+    </div>
+    <div class="box">
+      <h3>Small new pieces</h3>
+      <ul>
+        <li><strong>A "day" condition</strong> for a step: from Day N, until Day N (for Theo, Basil, Eklund). One small addition to the condition list.</li>
+        <li><strong>A crescendo hook:</strong> when you're at a named gathering and a story is ready, its scene plays there. It uses people who are there already, so no one's day is re-planned.</li>
+        <li><strong>A Calendar entry and Mail</strong> the evening before a crescendo, and a Mail after if you missed it.</li>
+        <li><strong>A pace rule:</strong> at most one crescendo a day, and the quieter ending when a window closes.</li>
+        <li>The rest is writing: 7 new story files and 11 crescendo scenes, plus a line each for the people who are there.</li>
+      </ul>
+    </div>
+  </div>
+  <p class="read muted small">Rough size: the four code pieces are one engineer's turn or two in the social stories section, switched off until you've played them. The writing is a writer's job of about two to three days of sessions per batch of four stories. Kovac's lift ride, Salo's storm fault and Kowalczyk's lights are the three that touch another owner (the lift, the storm, the bridge), so they'd go to those owners first.</p>
+</section>
+
+<section aria-labelledby="ans-h">
+  <div class="read stack">
+    <span class="eyebrow">5 · Open questions, with my recommendations</span>
+    <h2 id="ans-h">Your answers</h2>
+    <p>Each question has my recommendation ticked to start with. Change anything, add a comment anywhere, then press Save. You can come back and change your answers; the latest save is the one we use.</p>
+  </div>
+
+  <form id="answers" data-collection="answers" data-doc="crew-stories" onsubmit="return false">
+
+    <div class="q" data-qid="cs-q1">
+      <h3>1. How many crew stories should we build?</h3>
+      <p class="why">A player sees four to six in a month. Building more than they can see is what makes a second playthrough feel different.</p>
+      <label class="opt"><input type="radio" name="cs-q1" value="8" checked> About 8 (the ones you ticked, trimmed to 8): enough that nobody sees them all. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q1" value="11"> All 11 pitched here.</label>
+      <label class="opt"><input type="radio" name="cs-q1" value="5"> Just 5, made really well, then more later.</label>
+      <textarea id="cs-q1-comment" name="cs-q1-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q2">
+      <h3>2. Which should be written first?</h3>
+      <p class="why">Pell and Zeke are your must-haves and already half written. Theo is the one that proves the "window" idea, and the rotation is already built.</p>
+      <label class="opt"><input type="radio" name="cs-q2" value="pell-zeke-theo" checked> Pell, Zeke and Theo, then Calder and Halloran. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q2" value="pell-zeke-calder"> Pell, Zeke and Calder (all Works, all on career days).</label>
+      <label class="opt"><input type="radio" name="cs-q2" value="mine"> A different order (say which in the comment).</label>
+      <textarea id="cs-q2-comment" name="cs-q2-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q3">
+      <h3>3. How dark or sad may they get?</h3>
+      <p class="why">You asked for tender and touching. The game's current rule is: grief is for people off the ship, told gently, and nobody dies on screen.</p>
+      <label class="opt"><input type="radio" name="cs-q3" value="gentle" checked> Keep the current rule. Illness, memory loss and old grief are fine if they're off the ship and long ago or far away, and every story ends warm. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q3" value="lighter"> Lighter: no illness or grief at all; keep it to worries, exams and homesickness.</label>
+      <label class="opt"><input type="radio" name="cs-q3" value="deeper"> Deeper: allow one story with a real loss during the playthrough (a call that brings bad news), handled gently.</label>
+      <textarea id="cs-q3-comment" name="cs-q3-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q4">
+      <h3>4. Endings: can a story go wrong?</h3>
+      <p class="why">The game never fails you anywhere else. A story with a window can close before you get there.</p>
+      <label class="opt"><input type="radio" name="cs-q4" value="full-quiet" checked> Two endings, both kind: a full one if you were part of it, a quiet one (a Mail, a smaller moment later) if you weren't. Never a bad ending. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q4" value="choices"> Let your choices change the ending itself (Pell could go home; Raman could take the desk job).</label>
+      <label class="opt"><input type="radio" name="cs-q4" value="one"> One ending each; if you miss it, you simply hear about it.</label>
+      <textarea id="cs-q4-comment" name="cs-q4-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q5">
+      <h3>5. Repeats: what about a second playthrough?</h3>
+      <p class="why">Stories are told once per save. The question is whether a new game should feel different.</p>
+      <label class="opt"><input type="radio" name="cs-q5" value="same" checked> Same stories every game; which ones you meet depends on who you befriend, and the quiet endings differ. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q5" value="shuffle"> Each new game picks a different 5 or 6 to be "in play".</label>
+      <textarea id="cs-q5-comment" name="cs-q5-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q6">
+      <h3>6. Zeke's crescendo on the evening you take the job he wanted?</h3>
+      <p class="why">It's the most bittersweet beat in the set: you become Engine Specialist on Day 23, the job he's been passed over for twice, and that evening he gives you the scarf.</p>
+      <label class="opt"><input type="radio" name="cs-q6" value="day23" checked> Yes, Day 23. He's proud of you, and he's put his name forward again. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q6" value="apart"> Keep them apart: any Tuesday that isn't your promotion day.</label>
+      <textarea id="cs-q6-comment" name="cs-q6-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q7">
+      <h3>7. The existing stories: rework or leave?</h3>
+      <p class="why">Pell, Zeke, Calder and Kovac already have written steps. The pitch keeps their words and adds a crescendo scene to each.</p>
+      <label class="opt"><input type="radio" name="cs-q7" value="add" checked> Keep their words; add the crescendo; their old last step becomes the afterglow. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q7" value="rewrite"> Rewrite them in the new five-step shape from scratch.</label>
+      <textarea id="cs-q7-comment" name="cs-q7-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-q8">
+      <h3>8. How busy may the last week get?</h3>
+      <p class="why">A player close to Works could have a crescendo on Days 23, 24, 25 and 26 in a row, in the same week as the Veyli visit.</p>
+      <label class="opt"><input type="radio" name="cs-q8" value="one-a-day" checked> At most one a day is enough; a run of them makes a fine last week. <span class="rec">recommended</span></label>
+      <label class="opt"><input type="radio" name="cs-q8" value="spread"> Spread them out: at most two a week, the rest move later.</label>
+      <textarea id="cs-q8-comment" name="cs-q8-comment" placeholder="Comment (optional)"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-picks">
+      <h3>Your picks</h3>
+      <p class="picksum" id="picksum">Ticked above: …</p>
+      <p class="why">The candidate ticks in section 2 are saved with this form. Anyone missing that you'd like (Bea, Navarro, Keane, Oduya, Lukas, or someone else)?</p>
+      <textarea id="cs-picks-comment" name="cs-picks-comment" placeholder="Anyone else, or notes on a story"></textarea>
+    </div>
+
+    <div class="q" data-qid="cs-general">
+      <h3>Anything else</h3>
+      <textarea id="cs-general-comment" name="cs-general-comment" placeholder="Thoughts on the whole idea, the tone, a story you'd love"></textarea>
+    </div>
+
+    <div class="savebar">
+      <button type="button" id="savebtn">Save my answers</button>
+      <p id="savestate"></p>
+    </div>
+  </form>
+</section>
+
+</div>
+
+<script>
+// the day strip: rows of [name, from, to, crescendo day]
+(function () {
+  const rows = [
+    ['Raman', 8, 16, 16], ['Salo', 4, 14, 13], ['Eklund', 8, 18, 18], ['Halloran', 6, 19, 19],
+    ['Kovac', 8, 26, 19], ['Kowalczyk', 19, 20, 20], ['Teague', 3, 21, 21], ['Zeke', 8, 23, 23],
+    ['Pell', 8, 24, 24], ['Bramwell', 21, 25, 25], ['Calder', 8, 26, 26]
+  ];
+  const marks = { 0: 'in', 5: 'Fri', 7: 'Line', 11: 'storm', 16: 'comet', 19: 'nights', 21: 'rota', 23: 'Eng', 26: 'Q', 27: 'visit' };
+  const s = document.getElementById('strip'), add = (cls, txt) => { const d = document.createElement('div'); d.className = cls; if (txt != null) d.textContent = txt; s.appendChild(d); };
+  add('name hd', 'Day');
+  for (let d = 0; d <= 30; d++) add('hd', String(d));
+  add('name hd', 'On the ship');
+  for (let d = 0; d <= 30; d++) add('ev' + (d >= 11 && d <= 15 ? ' storm' : ''), marks[d] || '');
+  rows.forEach(([n, a, b, c]) => {
+    add('name', n);
+    for (let d = 0; d <= 30; d++) add((d >= a && d <= b ? 'on' : '') + (d === c ? ' dot' : ''), null);
+  });
+})();
+</script>
+
+<script>
+// the answers form: saved to the page's shared database (collection "answers", doc "crew-stories")
+(function () {
+  const form = document.getElementById('answers'), btn = document.getElementById('savebtn'), state = document.getElementById('savestate');
+  const coll = form.dataset.collection, docId = form.dataset.doc;
+  const picks = () => Array.from(document.querySelectorAll('input[name="pick"]')).filter(x => x.checked).map(x => x.value);
+  const label = v => { const el = document.querySelector('input[name="pick"][value="' + v + '"]'); return el ? el.parentElement.textContent.replace(/^\s*I want\s*/, '').replace(/'s story\s*$/, '').trim() : v; };
+  const showPicks = () => { const p = picks(); document.getElementById('picksum').textContent = p.length ? 'Ticked above (' + p.length + '): ' + p.map(label).join(', ') + '.' : 'Nothing ticked yet.'; };
+  document.querySelectorAll('input[name="pick"]').forEach(x => x.addEventListener('change', showPicks));
+  showPicks();
+
+  const collect = () => {
+    const out = { answers: {}, comments: {}, picks: picks() };
+    form.querySelectorAll('.q[data-qid]').forEach(q => {
+      const id = q.dataset.qid, r = q.querySelector('input[type="radio"]:checked'), c = q.querySelector('textarea');
+      if (r) out.answers[id] = r.value;
+      if (c && c.value.trim()) out.comments[id] = c.value.trim();
+    });
+    return out;
+  };
+  const fill = data => {
+    if (!data) return;
+    Object.entries(data.answers || {}).forEach(([id, v]) => { const r = form.querySelector('input[name="' + id + '"][value="' + v + '"]'); if (r) r.checked = true; });
+    Object.entries(data.comments || {}).forEach(([id, v]) => { const c = document.getElementById(id + '-comment'); if (c) c.value = v; });
+    if (Array.isArray(data.picks)) { document.querySelectorAll('input[name="pick"]').forEach(x => { x.checked = data.picks.includes(x.value); }); showPicks(); }
+  };
+
+  let db = null, user = null;
+  state.textContent = 'Connecting so your answers can be saved…';
+  (async () => {
+    try { db = window.claude && await window.claude.use('db'); } catch (e) { db = null; }
+    try { user = window.claude && await window.claude.use('user'); } catch (e) { user = null; }
+    if (!db) { state.textContent = 'Saving isn\'t available in this view. Open the page on claude.ai while signed in to save your answers.'; btn.disabled = true; return; }
+    try {
+      const snap = await db.doc(coll + '/' + docId).get();
+      if (snap.exists) { fill(snap.data()); const at = snap.data().at; state.textContent = 'Your last saved answers are loaded' + (at ? ' (' + new Date(at).toLocaleString() + ')' : '') + '.'; }
+      else state.textContent = 'Not saved yet.';
+    } catch (e) { state.textContent = 'Couldn\'t load earlier answers. You can still save new ones.'; }
+  })();
+
+  btn.addEventListener('click', async () => {
+    if (!db) return;
+    btn.disabled = true; state.textContent = 'Saving…';
+    try {
+      const data = collect();
+      data.at = Date.now();
+      try { data.by = user ? await user.id() : null; } catch (e) { data.by = null; }
+      await db.doc(coll + '/' + docId).set(data);
+      state.textContent = 'Saved at ' + new Date(data.at).toLocaleTimeString() + '. Thank you. You can change anything and save again.';
+    } catch (e) {
+      state.textContent = 'That didn\'t save (' + ((e && (e.code || e.message)) || 'unknown error') + '). Check you\'re signed in, then try again.';
+    } finally { btn.disabled = false; }
+  });
+})();
+</script>
