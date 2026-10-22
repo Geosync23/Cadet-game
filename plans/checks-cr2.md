@@ -134,3 +134,18 @@ Order this time: cadet_test first (alone), path, arc, lines, intro, perf, lines 
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | OK (accepted baseline + backlog 32) | `the Line ceremony, bow lounge Sun 14:45 portrait: draw calls 301 -> 335` (49 people, was 59; every view up ~20-34), repeats exactly on the re-run. **Lead 29 accepts it as 0.64.17's new baseline**: perf_check stands you on the free tile nearest the room's middle, which with breakfast's crowd is (44,10) not (46,9), so the camera sits ~2 m aft and the mess, galley and spine come into view (SC1's finding; under 450; backlog LEAD29-1: a fixed tile per scene). One-off js spikes, a different scene each run (backlog 32): all-clear party portrait 1.55 → 3.16 ms (run 1, gone in run 2), quiz night portrait-wide 1.79 → 2.85 ms (run 2 only). Backlog 14's +2 geometries didn't show this time (521/521/521 both runs). |
 | lines_check --day | OK | PASS (0 errors) |
+
+# Round 7: 0.64.17 (claude/integration-next 1498dbf4: + SC1's Line supper fix, CP4's bubble slides), CR2's share — **OK**
+
+NEW 1498dbf4, sha256 `ff45b427d65d543ab8dfe10f289b49653f0102af8ef513b960dd2e2ecbfac306` (matches lead 29's).
+OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check handed to CR3 (agreed, copied to BM14 and lead 29).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW | DIFFERENCES, expected | Every DIFF line and pixel count identical to round 6 (8193458e, breakfast); BM14: 8193458e vs 1498dbf4 ALL IDENTICAL. No page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check | CR3 | handed over |
+| lines_check --day | OK | PASS (0 errors) |
