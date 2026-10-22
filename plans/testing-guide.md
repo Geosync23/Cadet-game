@@ -130,6 +130,9 @@ cd /tmp/cadet-work/acorn && npm pack acorn@8.12.1 && tar xzf acorn-8.12.1.tgz
 export CADET_CHROME=/opt/pw-browsers/chromium
 ```
 
+**check_fast in a fresh container:** names_check needs acorn (`npm pack acorn@8.12.1` into `$CADET_WORK/acorn`, as
+above); without it the quick check stops at its second step (lead 27).
+
 Every check **exits 1 when it fails** and prints an OK line when it passes; a step counts as passed only with both
 (exit 0 and the OK line). "Minutes" are minutes alone on 4 cores (`CHECKS` in tools/affected.py; measured in
 plans/opt-measure.md on claude/opt-render, section 4, and since). `BUILD.html` means the game file you're testing.
@@ -505,6 +508,9 @@ Results: plans/opt-cover/planted.md.
   crew change in a test copy and expect ALL IDENTICAL. Explain every difference in the build-table row.
 - cadet_test hides toasts, the `+N` need notes and the device button's glow, and turns off CSS transitions, because
   they run on real time.
+- **Run cadet_test strictly alone**, with no other browser check in the container. With a second browser running beside
+  it, the HUD's blurred glass can come out 1 level off in 6-46 pixels (seen twice on 2026-10-22, RV2); alone, the same
+  builds are plain ALL IDENTICAL, and a build compared with itself gives zero pixels (lead 27).
 
 ### 8.2 Browser quirks
 

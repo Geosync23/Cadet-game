@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.64.15
+   STARSHIP CADET: CSV Wren                           build 0.64.16
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9071,7 +9071,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.64.15';                           // keep in step with the header's build line
+const GAME_BUILD = '0.64.16';                           // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -14097,13 +14097,13 @@ function bagTick() {
   if (!on) bagStow(true);
   else if ((I.done || {}).bunk !== undefined && I.step !== 'stow' && !(I.missed || []).includes('bunk')) bagStow((I.missed || []).includes('stow') ? 'Zeke puts your bag in your wardrobe for you.' : false);   // (playtest patch 1, #2) you put it in yourself in the 'stow' step
 }
-function bagLockerTap(point) {                           // a tap by your wardrobe in Bunk 1 with the bag in your hands: walk there, stow it
+function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk to your wardrobe, stow it
   if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
   const ch = roomAt(...cellAt(point.x, point.z)), rm = ch && deckDef.rooms && deckDef.rooms[ch];
   if (!rm || rm.name !== 'Bunk 1') return false;
-  const w = typeof clothesWardrobe === 'function' ? clothesWardrobe() : null;   // (playtest patch 1, #2) only at your wardrobe: elsewhere in the room a tap just walks
-  if (w && Math.hypot(point.x - w.x, point.z - w.z) > 1.2) return false;
-  approach(new THREE.Vector3(point.x, 0, point.z), 0, 0, () => bagStow(false));
+  const w = typeof clothesWardrobe === 'function' ? clothesWardrobe() : null;   // (the Zeke patch, after 0.64.15) anywhere in the room: walk to your wardrobe and put it in there
+  const to = w && w.tile ? cellPos(...w.tile) : new THREE.Vector3(point.x, 0, point.z);
+  approach(new THREE.Vector3(to.x, 0, to.z), 0, 0, () => bagStow(false));
   return true;
 }
 // the arrival dinner (0.28.28, the lead's polish row): you sit at the table instead of standing. playerSitNear(deck,
@@ -42373,13 +42373,16 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
   { id: 'bunk', day: 0, at: 16 * 60 + 43, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 },
-    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your locker when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
+    fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
-  { id: 'stow', day: 0, at: 16 * 60 + 44, who: INTRO_ESCORT, mode: 'wait', where: 'your wardrobe', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9,
+  // (0.64.15's playtest: "Zeke just stands in the bunk room") neither waits on you being in Bunk 1 for good: noHold, their
+  // fallbacks run even with him near you (introAdvance's "he's with you" hold), and for the device he comes to you
+  // anywhere on the deck (near: within that many tiles of him, any room; escortPlan 'follow'), and hands it over there
+  { id: 'stow', day: 0, at: 16 * 60 + 44, who: INTRO_ESCORT, mode: 'wait', where: 'your wardrobe', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, noHold: true,
     ready: () => !(typeof bagHeld === 'function' && bagHeld()), fallback: { wait: 5, later: 'device' } },   // not by then: section 15's bagTick puts it away for you
-  { id: 'device', day: 0, at: 16 * 60 + 45, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introDevice', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9,
-    ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess' } },   // after his wardrobe lines (21b); missed: the Monday briefing hands it over, as before
+  { id: 'device', day: 0, at: 16 * 60 + 45, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introDevice', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, near: 3, noHold: true,
+    ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess' } },   // after his wardrobe lines (21b); you never came near him in 10 minutes (another deck): Monday's briefing hands it over, as for a missed bunk
   { id: 'toMess', day: 0, at: 16 * 60 + 55, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
   { id: 'servery', day: 0, at: 17 * 60 + 2, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
@@ -42611,6 +42614,7 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && /^intro-/.test(DIALOGUE.m.id || '') && typeof dialogueEnd === 'function') dialogueEnd(true);   // (the Zeke patch) a New game never keeps the last arrival's scene open (it covered the manifest)
   const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres' || INTRO_ARROW_LABELS.has(IX_GOAL.label));
   if (own && typeof clearGoal === 'function') clearGoal();
@@ -42636,9 +42640,12 @@ function introDone(id, at = Math.floor(shipNow())) {
 // On paper the tests pass `here` themselves; wave 2's frame tick passes the player's.
 const INTRO_WITH = 10;                                   // tiles: he's with you
 const INTRO_ESCORT_UNTIL = 18 * 60;                       // (playtest patch 1: an hour earlier with the 16:30 arrival; was 19:00) his own steps don't time out while he's with you, until then
-function introWithEscort(here) {                         // the real game only: the escort on your deck, near you
+// (the Zeke patch, after 0.64.15) a step where he waits for you at a spot (the ramp, the bunk room, the table) holds that way
+// at most this many minutes: near him but never at the spot, the step's own fallback runs after that (he moves on)
+const INTRO_HOLD_MAX = 8;
+function introWithEscort(here, tiles = INTRO_WITH) {     // the real game only: the escort on your deck, near you
   const a = typeof introWalker === 'function' ? introWalker() : null;
-  return !!(a && here && typeof deckDef !== 'undefined' && here.deck === deckDef.num && Math.max(Math.abs(cellAt(a.x, a.z)[0] - here.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - here.tile[1])) <= INTRO_WITH);
+  return !!(a && here && typeof deckDef !== 'undefined' && here.deck === deckDef.num && Math.max(Math.abs(cellAt(a.x, a.z)[0] - here.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - here.tile[1])) <= tiles);
 }
 function introAdvance(t, here) {
   const I = SHIP.intro; if (!introOn()) return;
@@ -42647,13 +42654,14 @@ function introAdvance(t, here) {
     if (t < at) break;
     const cp = st.checkpoint, f = st.fallback || {};
     const nx = INTRO_STEPS[INTRO_STEPS.indexOf(st) + 1];   // (0.42.31) a lead step on a deck you've ridden on from, to the next step's deck: done (the lift's, passed between two of its minutes)
-    const there = (!cp || here && here.deck === cp.deck && introRoomAt(here.deck, here.tile) === cp.room
-      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH)
+    const there = (!cp || here && here.deck === cp.deck && (st.near && introWithEscort(here, st.near) || introRoomAt(here.deck, here.tile) === cp.room
+      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH))
       || !!(cp && here && st.mode === 'lead' && here.deck !== cp.deck && nx && nx.checkpoint && nx.checkpoint.deck === here.deck)) && (!st.ready || !!st.ready(t));
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
     // (0.42.31, the user on 0.60.6: Zeke already in the mess, not with you off the lift) his own steps never time out while
     // he's with you (on your deck, within INTRO_WITH tiles): you're lingering together; until INTRO_ESCORT_UNTIL (18:00), then as before
-    if (st.who === I.escort && f.until === undefined && t < introAbs(0, INTRO_ESCORT_UNTIL) && introWithEscort(here)) { I.near = [I.near ? I.near[0] : 99, Math.floor(t)]; break; }
+    if (st.who === I.escort && !st.noHold && f.until === undefined && t < introAbs(0, INTRO_ESCORT_UNTIL) && introWithEscort(here)
+      && !(st.mode !== 'lead' && I.since !== null && t >= I.since + INTRO_HOLD_MAX)) { I.near = [I.near ? I.near[0] : 99, Math.floor(t)]; break; }
     // the wait counts from when the step became yours, or from the last minute you got nearer to it than the minute
     // before, on its deck (so nobody on their way loses a step); once you've missed one, he waits only 5 minutes at
     // each until you catch up (so the evening still ends by 20:00 if you never come)
@@ -42661,14 +42669,15 @@ function introAdvance(t, here) {
       const dist = Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1]));
       I.near = [dist, I.near && dist < I.near[0] ? Math.floor(t) : I.near ? I.near[1] : at];   // [tiles away now, the last minute you got nearer]
     }
-    const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = prev && I.missed.includes(prev.id) ? Math.min(5, f.wait || 20) : (f.wait || 20);
+    const capped = st.who === I.escort && st.mode !== 'lead' && I.since !== null && t >= I.since + INTRO_HOLD_MAX && introWithEscort(here);   // (only when the hold was his: with you near him)   // (the Zeke patch) held as long as it may be: five minutes more
+    const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = capped || prev && I.missed.includes(prev.id) && !st.noHold ? Math.min(5, f.wait || 20) : (f.wait || 20);   // (a missed 'stow' leaves the device scene its own ten minutes)
     const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since, I.near ? I.near[1] : at) + wait;
     if (t < late) break;
     introMail(f.mail, late);                              // you weren't there: the gist by Mail, and on to the next one
     I.done[st.id] = late; I.missed.push(st.id); introNote('introStep', { step: st.id, who: st.who, missed: true });
     for (const fl of f.flags || []) introFlagSet(fl);
-    const j = INTRO_STEPS.findIndex(x => x.id === f.later);
-    I.step = j >= 0 ? f.later : null; I.since = late; I.near = null;
+    const later = f.laterNear && introWithEscort(here) ? f.laterNear : f.later, j = INTRO_STEPS.findIndex(x => x.id === later);   // (the Zeke patch) laterNear: where a step missed with him near you goes on to
+    I.step = j >= 0 ? later : null; I.since = late; I.near = null;
     for (const s of INTRO_STEPS.slice(INTRO_STEPS.indexOf(st) + 1, j)) if (I.done[s.id] === undefined) { I.done[s.id] = late; I.missed.push(s.id); }   // skipped over
   }
   for (const b of INTRO_WEEK) {                           // the week, by the clock
@@ -42735,6 +42744,7 @@ function escortPlan(p, t) {
   // he's yours until he lets you go (the 'free' step): he waits where he's to meet you or show you something, and leads
   // you everywhere else, including to the table where the Chief stops by (her step, not his)
   if (introEscorting(st) && introSeat(p.id)) return { mode: 'wait', to: introSeat(p.id) };   // at dinner: he walks to his seat and sits (section 10, sim 0.26.26)
+  if (introEscorting(st) && st.near && t >= introAbs(st.day, st.at) && typeof deckDef !== 'undefined' && deckDef.num === st.checkpoint.deck) return { mode: 'follow', to: st.checkpoint };   // (0.64.15's playtest) the device: he comes to you, wherever you are
   if (introEscorting(st) && st.mode === 'lead' && INTRO_UI.pause) return { mode: 'wait', to: INTRO_UI.pause };   // pausing for the tour's core lines (introTourTick)
   if (introEscorting(st)) return { mode: st.who === p.id && st.mode !== 'lead' ? 'wait' : 'lead', to: { deck: st.checkpoint.deck, tile: st.checkpoint.tile },
     pace: st.mode === 'lead' && st.checkpoint.deck === 5 && I.done['tour:lift'] === undefined ? INTRO_STROLL : 1 };   // strolling to the lift (section 10 reads pace)
@@ -43272,7 +43282,7 @@ function introTick() {
     // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
-      const cp = st.checkpoint, room = new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
+      const cp = st.checkpoint, room = st.near ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; if (st.id === 'table' && I.done['table:end'] === undefined) I.done['table:end'] = now; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
       if (st.id === 'chief' && !introCalderIn() && now < (I.done.chief !== undefined ? I.done.chief : now) + 10) break;   // she's still on her way over
@@ -43282,6 +43292,8 @@ function introTick() {
       if (st.id === 'chief') { I.done['chief:met'] = now; INTRO_UI.chiefD = DIALOGUE; }   // the Chief's welcome: the goodnight waits for it (0.42.27)
     }
   }
+  // (the Zeke patch) the device step reached but its scene lost (a reload in between): he hands it over anyway
+  if (I.done.device !== undefined && !I.missed.includes('device') && !introFlag('intro.device') && !INTRO_UI.meet.some(x => x.id === 'device') && !(DIALOGUE && DIALOGUE.m && DIALOGUE.m.id === 'intro-device')) introDeviceGive();
   if (INTRO_UI.chiefD && DIALOGUE !== INTRO_UI.chiefD) { const D = INTRO_UI.chiefD; INTRO_UI.chiefD = null; I.done['chief:end'] = D.i >= D.queue.length ? Math.floor(shipNow()) : null; }   // all her lines, or walked away (null: day 0's minutes are negative)
   if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); introSowTick(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
