@@ -2211,7 +2211,7 @@ MUTANTS['settings'] = {   # CP4, claude/controller-p4 7631ab6
   'gentle walking lost': ('src', "    if (PAD_SET.walk === 'gentle' && PAD_DECK.walking && player.steer && !steering) player.steer.k = Math.min(player.steer.k, .6);", "    // gentle walking lost (planted)"),
   'an odd save loading as it is': ('src', "    const all = PAD_BTN.map(n => S.map[n] || n); if (new Set(all).size !== all.length) S.map = {};   // not one button each: back to normal", "    // odd maps kept (planted)"),
   'a clash not swapping': ('src', "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n) return;", "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n || true) return;"),
-  'padTick ignoring the map': ('src', "    const n = PAD_MAPK[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;   // a trigger counts as pressed past half way (n: the action on button k, P4's Settings)", "    const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;"),
+  'padTick ignoring the map': ('src', "    const n = PAD_MAPK[k], b = bt[k], trig = k === 6 || k === 7,", "    const n = PAD_BTN[k], b = bt[k], trig = k === 6 || k === 7,"),   # (the line as in 0.90.8)
 }
 # CP2, claude/controller-p2 7b11451 (the game as 5b4d9f0)
 MUTANTS['disc'] = {
