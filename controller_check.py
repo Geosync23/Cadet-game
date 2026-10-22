@@ -1092,6 +1092,10 @@ MUTANTS['odd'] = {
 
 # PR9's faults in section 26 itself (plans/review-9/ct_mutants.py on claude/review-8), for builds that have those lines
 MUTANTS['idle']['PR9 c6: a hidden ring mesh made at load'] = ('src', "if (PAD_ON) { addEventListener('gamepadconnected', padHello);", "if (PAD_ON) { const _pr = new THREE.Mesh(new THREE.RingGeometry(.4, .5, 40), new THREE.MeshBasicMaterial({ color: col('#4cc3b5') })); _pr.visible = false; scene.add(_pr); addEventListener('gamepadconnected', padHello);")
+MUTANTS['walk']['PR9 c1: the stick walks the wrong way'] = ('src', "const wx = rx * x - fx * y, wz = rz * x - fz * y", "const wx = rx * x + fx * y, wz = rz * x + fz * y")
+MUTANTS['walk']['PR9 c2: letting go keeps walking'] = ('src', "function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; if (!steering) player.steer = null; } }", "function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; } }")
+MUTANTS['walk']['PR9 c3: the device missing from the panel list'] = ('src', "['dmSheet', () => DM_UI.open], ['device', () => DEV.open], ", "['dmSheet', () => DM_UI.open], ")
+MUTANTS['touch']['PR9 c4: a touch does not hand back'] = ('src', "addEventListener('pointerdown', back, true); ", "")
 MUTANTS['pick'] = {
     'PR9 c7: a seat ringed where the tap reaches a person': ('src', "if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),
     'PR9 c5: A does nothing': ('src', "P.chosen = false; tap(s[0], s[1]); P.n = 0;", "P.chosen = false; P.n = 0;"),
