@@ -1,6 +1,6 @@
 # Fresh-eyes diary: Days 0-2 as a new player
 
-FE1, the fresh-eyes player. Build: claude/integration, 0.64.15 (2b4a05d). Phone size 390 x 844, touch, Chromium. I play only from what is on screen; no code reading, no dev shortcuts.
+FE1, the fresh-eyes player. Build: claude/integration, 0.64.15 (2b4a05d), for both Day 0 and Day 1 (0.64.16 landed during Day 0, but I only saw the note after Day 1). Phone size 390 x 844, touch, Chromium. I play only from what is on screen; no code reading, no dev shortcuts.
 
 **How bad:** *blocks me* (I could not go on, or lost something I was meant to do), *confusing* (I worked it out, or guessed, but a new player might not), *small* (looks or wording).
 
@@ -73,6 +73,8 @@ What worked well on Day 0: signing the manifest; Zeke's chat on the walk (warm a
 25. **21:02, the Alarm card is good.** "Wake at 06:00", minus/plus, "You'll wake with about 100% energy." Clear.
 
 (Note for the lead, not a game problem: my test browser was restarted at 20:40 and the game reloaded from its own hourly save at 20:26, Main lift Deck 4. "Welcome back" said so. Tracked was cleared by the reload, which is fine.)
+
+**Dinner miss, in detail (asked by the lead).** About 48 ship minutes lost at the Deck 5 lift (16:51-17:39, with the ladder detour to Deck 2). Zeke spoke of dinner twice: 16:36 "Tell me all about it at dinner" and 18:39 at the device hand-over "Dinner. Always dinner first." After that he stood still in the bunk room; the arrow "Take the lift to Deck 3: zeke Torres" pointed at a wall, and he never led me to the mess. 19:00: "Missed you at dinner". So partly my lift delay, partly the tour stalling after the device.
 
 **Day 0 summary:** the tour is warm but I lost most of the evening to the lift (no idea how to call it), and the tour itself ran past dinner, so the first thing my boss said to me was "Missed you at dinner". Then I took a tray twice and never managed to eat. Went to bed hungry (Food 46).
 
