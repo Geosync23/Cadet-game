@@ -207,3 +207,40 @@ all). Run alone (`--week --beats=none`): on 951c0cd's game **FAILED**, "10 share
 misleading there (the beats are only filtered out), harmless.
 
 8d88993 (the nit): with `--beats` filtering every beat out it now says "no beats walked: none match --beats"; otherwise unchanged. One line, check only: OK.
+
+# Controller support (CT1, claude/controller): reviewer PR9 (lead 25's ask, 2026-10-22 ~01:56)
+
+Plan: `plans/controller-plan.html` (7dcfab05). The user's answers (the page's db `answers/controller-plan`, saved
+2026-10-22 01:46): Q1 confirm by position (bottom button) with a swap in Settings; Q2 pause on disconnect if used in
+the last 30 s; Q3 walk with the stick (no walk-to-goal button); Q4 vibration built, off; Q5 keyboard later; Q6 the
+system keyboard, else a suggested name; **Q7 no tester page** ("I export and play outside of claude"); Q8 a
+reviewer every two turns; and "Make this a separate branch". Review every two turns, adversarially. The hard rule: no
+pad, the game is pixel-identical (cadet_test ALL IDENTICAL), no save or R() change.
+
+## What I'll hold the turns to (sent to CT1 before turn 1)
+
+1. **No pad = nothing.** With PAD_ON on and no pad: cadet_test ALL IDENTICAL; no new DOM node, style or listener that
+   changes behaviour (a `gamepadconnected` listener only); no mesh made at load (the ring and any material are made on
+   the first pad press, not made-and-hidden: scene children and draw calls unchanged); no `R()` call ever (the pad's
+   repeat timers use real time, never the game's random numbers); the save byte-identical (no `pad` key unless a
+   setting differs from normal).
+2. **A pad seen but never pressed** behaves like none (the fake pad must mimic browsers: `getGamepads()` empty until
+   the first press, then the connect event).
+3. **Touch after pad = exactly as before**: the screenshot after a pad press then a tap must match the no-pad one,
+   including no leftover `:focus` / `:focus-visible` outline on the last highlighted button (blur on touch), no
+   button marks, no ring.
+4. **The ring on the floor is not coplanar** (the phones rule: lift it off the floor), its colour through `col()`,
+   one draw call, and it never shows in a no-pad screenshot.
+5. **The reachability proof must not be circular.** For each panel, the check must list the clickable things from
+   the page itself (visible buttons, inputs, `[onclick]`, `role=button`, and elements with click listeners or
+   `cursor: pointer`), not from the controller's own panel list, and show each one can be highlighted, pressed with A
+   (the same result as a click) and the panel closed with B. Any visible clickable the highlight can't reach fails. I'll
+   plant mutants: a panel dropped from the helper's list, a div-with-a-click-handler button, a B that doesn't close.
+6. **A on the deck = the tap.** The check compares A's result with the regression test's own tap on the same thing (a
+   crew member, a seat, a machine, a sealed door, the lift) by the game's state after, not by the ring's label.
+7. **Stick walking in all four view turns** (up the screen is up every time), and a let-go stops at once, through
+   `player.steer` only (no second walking path).
+8. **Keyboard unchanged** (Q5 later): arrow keys, Enter, Escape and Lightdisc's arrows do exactly what they do now.
+9. **Disconnect**: stops walking; pauses only if the pad was used in the last 30 s; touch keeps working; no pause
+   from a pad that was never pressed.
+10. The usual: off-switch identical, check_fast before every push, names_check, phones-first draw calls.
