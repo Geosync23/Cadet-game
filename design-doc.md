@@ -579,7 +579,7 @@ How you earn a tier:
 What each tier gives you:
 
 - **Access.** Work on new systems. You can already walk into every utility room (2026-10-17); each tier makes the jobs in them yours, and at tier 2 your key opens a cabin of your own.
-- **Tools.** A diagnostic scanner, a pipe kit, a conduit tester, a calibration rig. Each one makes new kinds of faults readable.
+- **Tools.** A diagnostic scanner, a pipe kit, a conduit tester, a calibration rig. Each one makes new kinds of faults readable. **Scan first** (the user, 2026-10-22, through lead 27): once you have the scanner, every faulty-machine job of yours starts with "Look it over" at the machine, and the part is named only after you've read it (before the scanner, the job still names the part). Following the arrow therefore always uses the scanner, and each reading of the right part counts as a use.
 - **Responsibility.** Night on-call duty, where emergencies can wake you. Later, a junior tech to mentor.
 - **Skill.** Repairs get faster and cleaner in tiers you have mastered, so old jobs become quick wins while new ones stay challenging.
 

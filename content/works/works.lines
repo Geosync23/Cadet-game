@@ -170,11 +170,11 @@
 == works.ask.m1
 - Fancy a walk? | Fancy a walk? I'll show you my round. Tea corner, or the bay till half eleven.
 == works.ask.m4
-- The rest of the delivery | Shelves done? Meet me at the hold. There's a manifest with your name on it.
+- The rest of the delivery | Shelves done? Meet me in {place}, {time}. There's a manifest with your name on it.
 == works.ask.m3d
 - Drill at three | Drill at three. Works bay, ten to. Fire, this week.
 == works.ask.m5
-- Galley, 10:15 | Galley, 10:15. Bring nothing.
+- Galley, {time} | {place}, {time}. Bring nothing.
 == works.ask.m3i
 - Inspection tomorrow | Inspection is Thursday at 06:30. Clean uniform, bed made, locker tidy.
 == works.ask.m6
