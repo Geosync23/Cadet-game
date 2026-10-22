@@ -7,8 +7,8 @@
 #                   first row's Take it (a held one first); taken: the job's own arrow, no pointer
 #   turn it in (S5): the work done: the pointer on Turn it in; turned in: S8, the device pointer to the Works app's Work
 #                   log, gone once the tab shows
-#   empty (S6):     nothing to take: no arrow, "Board's empty for now" once an hour; tracking off: nothing said
-#   clock out (S7): from 17:00 "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
+#   empty (S6):     nothing to take (a row without a Take it counts as nothing): no arrow, "Board's empty for now" once an hour; tracking off: nothing said
+#   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
 #   reputation (S9): a new word: a toast once and the pointer to the Works app's Training tab; never again for that word
@@ -146,7 +146,7 @@ def part_on2(pg):
     pg.ev("POINT.aim.click()"); p = ptr(pg); pg.ev("deviceClose()")
     check(not p['up'] and pg.ev("!POINT_Q.some(x => x.id === 'p:works:log')"), f'S8: the tab shown: gone ({p})')
     # S6
-    pg.ev("window.__oj = openJobs; openJobs = () => []; __toasts.length = 0"); at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB)
+    pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0"); at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB)
     at(pg, 630); shift(pg); n1 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length")
     at(pg, 661); shift(pg); n2 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length")
     pg.ev("SHIP.player.track = null"); at(pg, 721); shift(pg); n3 = pg.ev("__toasts.filter(t => /Board.s empty/.test(t)).length"); pg.ev("SHIP.player.track = undefined")
@@ -161,6 +161,12 @@ def part_on2(pg):
     if check(r is not None, 'S9: (no higher reputation word to reach)'):
         check(len(r['t1']) == 1 and r['t1'][0].startswith('Works reputation: ') and r['q'], f'S9: a new word: a toast and the Training tab pointer ({r})')
         check(r['t2'] == 1, f'S9: the same word again: said once only ({r})')
+    # a short Friday: clock out from 15:30, until the clock signs you out at 16:00
+    r = pg.ev("""(() => { const now = Math.floor(shipNow()), ci = SHIP.career.ci, co = SHIP.career.co; let d = 9; while (!friShort(d) && d < 16) d++; if (!friShort(d)) return null;
+      const b = (d - 1) * 1440; setShipNow(b + 935); SHIP.career.ci = b + 540; SHIP.career.co = 0; guideShift(); const e = guideList().find(x => x.id === 'shift:out:' + d) || null;
+      guideDrop('shift:out:' + d); guideDrop('shift:job:' + d); SHIP.career.ci = ci; SHIP.career.co = co; setShipNow(now); return { d, from: e && e.from - b, until: e && e.until - b }; })()""")
+    print('  short Friday:', r)
+    if check(r is not None, 'Friday: (no short Friday found)'): check(r['from'] == 930 and r['until'] == 960, f'S7: on a short Friday from 15:30 until 16:00 ({r})')
     # three times at most
     r = pg.ev("""(() => { SHIP.device.pointsSeen['p:clock:out'] = 3; pointDrop('p:clock:out'); const now = Math.floor(shipNow());
       setShipNow(8 * 1440 + 1030); SHIP.career.co = 0; guideShift(); const q = POINT_Q.some(x => x.id === 'p:clock:out'); setShipNow(now); return q; })()""")
