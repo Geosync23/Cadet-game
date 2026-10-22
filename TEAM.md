@@ -517,3 +517,4 @@ PR9 keeps its probes, day 5/19/21 and the mutants, then collates the final verdi
 | P5P Pillar 5 planner | session_01DCUnQMyViDh8LQSWf2fkXe | `claude/plan-p5-steps56` | steps 5-6 plan |
 | CT1 controller | session_019sqDowb6QNf3KZAYMSx1jM | `claude/controller` | plan now; build 0.90.x after approval |
 | CS1 crew stories | session_01QcPAXHjQZ2HfZKMCTbaW9v | `claude/crew-stories-pitch` | pitch page |
+**~01:40 UTC, the user:** "We just need to keep testing fully." → **every game change runs the full round** before merge/publish (split across check runners). The test picker stays only as a quick aid while working. TS3 updates DEV_NOTES/testing guide; TS3 still closes the six check gaps (they make the full round stronger). In CLAUDE.md.
