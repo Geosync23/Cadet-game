@@ -526,3 +526,15 @@ PR9 keeps its probes, day 5/19/21 and the mutants, then collates the final verdi
 | CR6 | session_01B1FwE5sMmHnMPWsGn23nrk | `claude/checks-cr6` | check runner (standby) |
 **~01:42 UTC:** Plan pages up: controller https://claude.ai/artifact/Uhdf3u4fhbXrhb4G7hcQvE (CT1; 9 turns ~31 h; turn 1 = a pad tester page for the user's phone); crew stories pitch https://claude.ai/artifact/K1HWeDUuMnQcyj7JJYoBCd (CS1; 10 quiet arcs already exist; pitch = 4 moments + 1 crescendo riding existing gatherings; 11 candidates, 9 Works incl. Pell, Zeke). Answers in each page's db collection "answers". TS3: six-runner split + runner steps in plans/testing-guide.md (claude/opt-tests ff25e06e); known-old FAILs = backlog 12 and 14 only.
 **~01:43 UTC:** Pillar 5 steps 5-6 plan up: https://claude.ai/artifact/CANy8UxGYxMmNiEThY7GSv (P5P; Step 5 Senior Officer Days 15-21, Step 6 Engine Specialist + Calder's question Days 22-26; 5 calendar clashes, 11 questions; ~62 helper turns; Deck 6 needs reactor/coil machines). Runners briefed to message each other (sha mismatch, shared failures, setup fixes, sharing load, new FAILs at once).
+
+## Check runners (the user's rules, 2026-10-22)
+Every game change runs the full round on six runners at once (~30 min). Split and steps: plans/testing-guide.md. The runners talk to each other (rules in CLAUDE.md "How we work").
+| Runner | Session | Branch |
+|---|---|---|
+| CR1 | session_01CsWNjCsy8u5mrHJgTVgCst | `claude/checks-cr1` |
+| CR2 | session_01BgMQaB1LQmhfU1rSJ2ATvv | `claude/checks-cr2` |
+| CR3 | session_016oCbvvzgcqzzCTsBFCkYRB | `claude/checks-cr3` |
+| CR4 | session_01636CfY2MhB3DzrzZ59dhXz | `claude/checks-cr4` |
+| CR5 | session_01CHoEsvv7zMPZDr1ir7uAiz | `claude/checks-cr5` |
+| CR6 | session_01B1FwE5sMmHnMPWsGn23nrk | `claude/checks-cr6` |
+Build master: BM13 session_01ExFoVfhiFG3wYTFv2QrojC. Lead: lead 25 session_01J2aTyEohBf8KFHCsTqt3LW.
