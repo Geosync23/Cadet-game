@@ -793,6 +793,8 @@ TAP_POINT = r"""((t) => { const [x0, y0] = (TARGET_AT_)(t), a = t.crew !== undef
 OUTCOME = r"""(() => ({ at: [Math.round(player.obj.position.x * 100), Math.round(player.obj.position.z * 100)], path: (player.path || []).length,
   act: typeof ACT !== 'undefined' && ACT ? String(ACT.kind) : null, toast: document.getElementById('tt').textContent + '|' + document.getElementById('tx').textContent,
   dev: DEV.open, lift: !document.getElementById('lift').hidden, paused: PAUSE.on, deck: player.deck,
+  chat: (() => { const c = document.getElementById('chat'); return c && !c.hidden && c.getBoundingClientRect().width > 0 ? c.textContent.replace(/\s+/g, ' ').slice(0, 60) : null; })(),
+  talking: DECK_CREW.filter(a => a.talking > 0).map(a => a.p.id).sort(),
   open: [...document.querySelectorAll('[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0).map(e => e.id || e.className).sort() }))()"""
 HINT = "(() => { const h = document.getElementById('padHint'); return h && !h.hidden && h.getBoundingClientRect().width > 0 ? h.textContent : null; })()"
 def pick_one(pw, src, tag, by_pad, n):
@@ -835,16 +837,38 @@ def pick_play(pw, src, tag, by_pad):
         if o is None: break
         out.append(o); n += 1
     return out
-def part_pick(pw, src, tag):
+# facing (RV2's fix): a spot with two things in reach on opposite sides; face one, and the ring starts on it (before any
+# D-pad); turn round, and it starts on the other
+FACING_SPOT = r"""(() => { const v = new THREE.Vector3(), its = ITEMS.filter(i => i.hit && !i.wall && !i.see && /\w/.test(i.t)).map(i => { i.hit.getWorldPosition(v); return [i, v.x, v.z]; });
+  for (let j = 1; j < D - 1; j++) for (let i = 1; i < W - 1; i++) { if (!free(i, j)) continue; const c = cellPos(i, j);
+    if (DECK_CREW.some(a => a.x !== undefined && Math.hypot(a.x - c.x, a.z - c.z) < 3.5)) continue;
+    const near = its.filter(([it, x, z]) => { const d = Math.hypot(x - c.x, z - c.z); return d > .8 && d < 2.2; });
+    for (const A of near) for (const B of near) { if (A[0].t === B[0].t) continue;
+      const a = Math.atan2(A[1] - c.x, A[2] - c.z), b = Math.atan2(B[1] - c.x, B[2] - c.z), d = Math.abs(((a - b + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+      if (d > 2.6 && near.every(([it, x, z]) => it === A[0] || it === B[0] || Math.abs(((Math.atan2(x - c.x, z - c.z) - a + 3 * Math.PI) % (2 * Math.PI)) - Math.PI) > .9 && Math.abs(((Math.atan2(x - c.x, z - c.z) - b + 3 * Math.PI) % (2 * Math.PI)) - Math.PI) > .9))
+        return { cell: [i, j], a: [A[0].t, a], b: [B[0].t, b] }; } }
+  return null; })()"""
+def part_facing(pw, src, tag):
     fails = []
+    r = Run(pw, src, f'{tag}_facing', mode='pad', plug={}, w=390, h=844); r.step(10); r.press('B'); r.step(2)
+    sp = r.ev(FACING_SPOT)
+    if not sp: print('  facing: no spot on Deck 4 with two things on opposite sides and nothing else beside them'); r.close(); return fails
+    for name, ang in (sp['a'], sp['b']):
+        r.ev(f"player.stop(); player.obj.position.copy(cellPos({sp['cell'][0]}, {sp['cell'][1]})); target.copy(player.obj.position).setY(.7); player.face = {ang}")
+        r.step(20); h = r.ev(HINT)
+        print(f'  facing {name}: the ring starts on "{h}"')
+        if not h or name.lower() not in h.lower(): fails.append(f'facing {name} (another thing behind you): the ring should start on it, the line says "{h}"')
+    r.close(); return fails
+def part_pick(pw, src, tag):
+    fails = part_facing(pw, src, tag)
     P = pick_play(pw, src, f'{tag}_pick', True)
     T = pick_play(pw, src, f'{tag}_pick', False)
     for (kind, hint, op, found), (_, _, ot, _) in zip(P, T):
         if hint == 'nowhere to stand': print(f'  {kind}: nowhere to stand beside it'); continue
         if not found: fails.append(f'{kind}: the bottom line never named it ({[h for h in hint if h][:4]})'); print(f'  {kind}: not reached by the D-pad'); continue
         if 'seat' in kind:
-            ot = {k: ot[k] for k in ('act', 'open', 'dev', 'lift', 'deck')} | {'toast': ot['toast'].split('|')[0]}
-            op = {k: op[k] for k in ('act', 'open', 'dev', 'lift', 'deck')} | {'toast': op['toast'].split('|')[0]}
+            ot = {k: ot[k] for k in ('act', 'open', 'dev', 'lift', 'deck', 'chat')} | {'toast': ot['toast'].split('|')[0]}
+            op = {k: op[k] for k in ('act', 'open', 'dev', 'lift', 'deck', 'chat')} | {'toast': op['toast'].split('|')[0]}
         d = diff_state(ot, op)
         print(f'  {kind}: the line says "{hint}"; A {"did what the tap did" if not d else "differs from the tap: " + "; ".join(d[:3])}')
         if d: fails.append(f'{kind} ("{hint}"): A and a tap differ: ' + '; '.join(d[:3]))
@@ -1103,6 +1127,8 @@ MUTANTS['walk']['PR9 c3: the device missing from the panel list'] = ('src', "['d
 MUTANTS['touch']['PR9 c4: a touch does not hand back'] = ('src', "addEventListener('pointerdown', back, true); ", "")
 MUTANTS['pick'] = {
     'PR9 c7: a seat ringed where the tap reaches a person': ('src', "if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),
+    'RV2 t3_noop_crew: A ignores crew': ('src', "  if (!s) return true;\n  P.chosen = false; tap(s[0], s[1]);", "  if (!s || t.key.startsWith('crew:')) return true;\n  P.chosen = false; tap(s[0], s[1]);"),
+    'RV2 t3_noface: facing ignored': ('src', "const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;"),
     'PR9 c5: A does nothing': ('src', "P.chosen = false; tap(s[0], s[1]); P.n = 0;", "P.chosen = false; P.n = 0;"),
     'A and B swapped': WRAP("const t = buttons[0]; buttons[0] = buttons[1]; buttons[1] = t;"),
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
@@ -1217,7 +1243,7 @@ with sync_playwright() as pw:
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
         if '--mutants' in FLAGS:
             for name, code in MUTANTS.get(part, {}).items():
-                if os.environ.get('CTL_MUT') and os.environ['CTL_MUT'] not in name: continue   # only the planted faults named
+                if os.environ.get('CTL_MUT') and not re.search(os.environ['CTL_MUT'], name): continue   # only the planted faults named (a regex)
                 # caught only by a failure the clean run didn't have (a part already failing proves nothing)
                 norm = lambda f: re.sub(r'-?[\d.]+', 'N', f)   # the same failure with other numbers is the same failure
                 try: msrc = plant(psrc if part not in SELF_BOTH else SRC, code)
