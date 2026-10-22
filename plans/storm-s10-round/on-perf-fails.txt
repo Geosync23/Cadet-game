@@ -1,0 +1,1 @@
+17:PROBLEM memory grows across deck round trips: [{'geo': 548, 'tex': 43, 'heap': 228}, {'geo': 548, 'tex': 43, 'heap': 228}, {'geo': 550, 'tex': 43, 'heap': 228}]

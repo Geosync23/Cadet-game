@@ -1,0 +1,2 @@
+5:FAIL clock: the excused days (only past the first week, a jump past 12:30): {'ms': 0, 'l': 3, 'st': 0, 'ca': 0, 'ex': [], 'off8': True, 'on8': False, 'crew': 48, 'day': 'Day 9, Tuesday 06:01'}
+9:DEVMODE CHECK FAILED

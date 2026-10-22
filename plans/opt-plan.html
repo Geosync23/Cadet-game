@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Optimization Pass Plan</title>
+<style>
+:root{--ink:#e8eef0;--muted:#93a6ae;--teal:#4cc3b5;--amber:#e9c46a;--rose:#e58f8f;--glass:rgba(13,21,33,.78);--line:rgba(150,200,196,.22);--bg:#121a27;--bar:#4cc3b5;--bar2:#e9c46a}
+:root[data-theme="light"]{--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--bar:#167e72;--bar2:#b08a20}
+@media (prefers-color-scheme: light){:root:not([data-theme="dark"]){--ink:#18232b;--muted:#4f6168;--teal:#167e72;--amber:#8a6510;--rose:#a33b3b;--glass:rgba(255,255,255,.86);--line:rgba(30,80,76,.22);--bg:#eef2f3;--bar:#167e72;--bar2:#b08a20}}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"Avenir Next","Segoe UI",system-ui,sans-serif}
+body{line-height:1.5}
+main{max-width:860px;margin:0 auto;padding:16px 16px 60px}
+h1{font-size:21px;font-weight:600;margin:4px 0 0}
+h2{font-size:17px;font-weight:600;margin:30px 0 8px;color:var(--teal)}
+h3{font-size:15px;font-weight:600;margin:0}
+p,li{font-size:14px}
+.sub{font-size:13px;color:var(--muted);margin-top:4px}
+.card{background:var(--glass);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin:10px 0}
+details.item{background:var(--glass);border:1px solid var(--line);border-radius:12px;margin:8px 0;padding:0}
+details.item>summary{cursor:pointer;padding:10px 12px;list-style:none;display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+details.item>summary::-webkit-details-marker{display:none}
+details.item>summary .n{font-weight:700;color:var(--teal);min-width:30px}
+details.item>summary .t{flex:1;font-size:14.5px;min-width:200px}
+details.item>summary .s{font-size:11.5px;color:var(--muted)}
+details.item[open]>summary{border-bottom:1px solid var(--line)}
+.body{padding:8px 12px 12px}
+.body p{margin:6px 0}
+.k{font-weight:600;color:var(--teal)}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;background:rgba(127,160,170,.14);padding:0 4px;border-radius:4px;word-break:break-word}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.chip{font-size:12px;border:1px solid var(--line);border-radius:999px;padding:2px 9px;color:var(--muted)}
+.chip.gain{border-color:var(--teal);color:var(--teal)}
+.chip.risk{border-color:var(--amber);color:var(--amber)}
+.chip.q{border-color:var(--rose);color:var(--rose)}
+table{border-collapse:collapse;width:100%;font-size:13px;margin:6px 0}
+th,td{border-bottom:1px solid var(--line);padding:4px 6px;text-align:left;vertical-align:top}
+th{color:var(--muted);font-weight:600}
+td.num,th.num{text-align:right;white-space:nowrap}
+.tw{overflow-x:auto}
+.hb{display:flex;align-items:center;gap:8px;font-size:12.5px;margin:3px 0}
+.hb .l{flex:0 0 150px;color:var(--muted)}
+.hb .b{height:12px;border-radius:3px;background:var(--bar)}
+.hb .b.alt{background:var(--bar2)}
+.hb .v{white-space:nowrap}
+.q{background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:12px 0}
+.q .qh{font-size:12px;color:var(--rose);font-weight:600;letter-spacing:.03em}
+.q .qt{font-size:14.5px;font-weight:600;margin:3px 0 8px}
+.q label{display:flex;gap:8px;align-items:flex-start;font-size:13.5px;padding:5px 0;cursor:pointer}
+.q input[type=radio]{margin-top:4px;accent-color:var(--teal)}
+.rec{font-size:11px;color:var(--bg);background:var(--teal);border-radius:999px;padding:0 7px;margin-left:4px;white-space:nowrap}
+textarea{width:100%;min-height:58px;background:transparent;color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:6px 8px;font:inherit;font-size:13.5px;margin-top:6px}
+.why{font-size:12.5px;color:var(--muted);margin:2px 0 0 24px}
+#savebtn{appearance:none;border:1px solid var(--teal);background:var(--teal);color:var(--bg);font:inherit;font-size:14px;font-weight:600;padding:9px 18px;border-radius:999px;cursor:pointer;margin-top:6px}
+#savebtn:focus-visible{outline:2px solid var(--ink);outline-offset:2px}
+a{color:var(--teal)}
+.legend{font-size:12.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+<h1>Optimization Pass Plan</h1>
+<div class="sub">The pass you asked for right after the ship-wide events: a faster page load, a lighter game for phones, and checks that finish sooner. Measured on build 0.64.7 (claude/integration 6ea5acf) before anything is changed. Nothing here has been built yet; your answers at the bottom decide the details.</div>
+
+<div class="card">
+<h3>The goal, in plain words</h3>
+<ul>
+<li><b>The game should open faster and run smoother on your phone</b>, and the checks we run before every change should take less time, so the team gets more done each night.</li>
+<li><b>Nothing you see or play changes.</b> Every change has to leave the game exactly as it is: the same pictures to the pixel, the same crew going to the same places at the same minutes, the same saves. If a change can't prove that, it doesn't go in. (The game picks its "random" choices from a fixed list of numbers. If code that runs while the game opens used up one of those numbers, every later choice would shift, so these changes never touch that list.)</li>
+<li><b>The checks still play the real game, with drawing on.</b> No "skip the drawing" shortcuts (your rule). We only stop them doing work twice or doing work they don't need.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>At a glance</h3>
+<ul>
+<li><b>Opening the page takes about 7 seconds in our test machine</b> on 0.64.4, 0.64.5 and 0.64.7 alike. The jump to 16-18 seconds seen last night happened because several checks were running on the same machine at once. The game itself didn't get slower.</li>
+<li><b>Three things cost the most when the game opens:</b> painting the "grain" noise into every texture (1.0 s here, roughly 4 s on a mid-range phone), building the first deck (1.3 s), and preparing the 3D shaders for the first picture (about 3.5 s here, but much less on a real phone's graphics chip).</li>
+<li><b>One hidden cost stands out:</b> when the crowd changes (someone sits, stands or picks up a tray), the game re-sends a big block of crowd shape data to the graphics chip, sometimes 4 MB in one frame. On a phone that's a small hitch. In the checks it's 74% of day_check's time on a busy deck.</li>
+<li><b>The busiest frame (Sunday dinner in the mess, 69 people) spends 2-3 ms</b> of game code before drawing here, so about 8-14 ms on a mid phone, out of the 16.7 ms a smooth frame allows. Half of it is posing the crowd.</li>
+<li><b>Running every check once takes about 2 hours</b> (nearly 3 at a release), and player_check alone is a third of that. Most turns change one area but run far more checks than that area needs.</li>
+<li><b>14 changes are proposed</b> (items 0-13), ranked by how much they help against how risky they are, built over a setup turn and 3 turns by 3 builders and a reviewer, merged by the build master.</li>
+</ul>
+</div>
+
+<h2>What's slow, and why</h2>
+
+<div class="card">
+<h3>Opening the page (0.64.7, phone size 390×844, test machine)</h3>
+<div class="hb"><span class="l">HTML and reading the code</span><span class="b" style="width:9px"></span><span class="v">0.3 s</span></div>
+<div class="hb"><span class="l">Painting texture grain</span><span class="b alt" style="width:30px"></span><span class="v">1.0 s (section 2)</span></div>
+<div class="hb"><span class="l">Building Deck 4</span><span class="b alt" style="width:40px"></span><span class="v">1.3 s (sections 4a-4c)</span></div>
+<div class="hb"><span class="l">Today's crew plans</span><span class="b alt" style="width:13px"></span><span class="v">0.4 s (section 14)</span></div>
+<div class="hb"><span class="l">Other set-up, tidying memory</span><span class="b alt" style="width:13px"></span><span class="v">0.4 s</span></div>
+<div class="hb"><span class="l">First picture (shaders)</span><span class="b" style="width:105px"></span><span class="v">3.5 s (graphics set-up)</span></div>
+<p class="legend">Gold bars are the game's own code (a phone runs it roughly 4-5 times slower). Teal bars depend on the machine: the test machine draws in software, so its shader time is far longer than a phone's. The dialogue (2 MB of the 5.5 MB file) is already stored in the fast form; reading it takes under 0.1 s.</p>
+</div>
+
+<div class="card">
+<h3>A busy frame (Sunday dinner, standing in the mess hall, 69 people, drawing aside)</h3>
+<div class="hb"><span class="l">Crowd: posing everyone</span><span class="b alt" style="width:170px"></span><span class="v">1.13 ms (sections 8b, 8)</span></div>
+<div class="hb"><span class="l">Crew on this deck</span><span class="b alt" style="width:71px"></span><span class="v">0.47 ms (10, 8c)</span></div>
+<div class="hb"><span class="l">Walkers</span><span class="b alt" style="width:41px"></span><span class="v">0.27 ms (10)</span></div>
+<div class="hb"><span class="l">You (needs, walking)</span><span class="b alt" style="width:26px"></span><span class="v">0.17 ms (15)</span></div>
+<div class="hb"><span class="l">Walls, doors, screens, clock</span><span class="b alt" style="width:44px"></span><span class="v">0.29 ms (4a, 4b, 8b, 8c, 2, 13)</span></div>
+<div class="hb"><span class="l">Reading the screen layout</span><span class="b alt" style="width:15px"></span><span class="v">0.10 ms (11, 15, 19)</span></div>
+<p class="legend">With the profiler on, 2.6 ms a frame; perf_check (fixed) measures 2.0-3.0 ms, so roughly 8-14 ms on a mid phone. Galley, events, social, lines and the day's plan each cost 0.02 ms or less. The HUD measures its own buttons on screen every frame; on a phone that can make the browser lay the page out again each frame.</p>
+</div>
+
+<div class="card">
+<h3>Pictures and memory</h3>
+<ul>
+<li><b>Our speed check was measuring the wrong rooms.</b> perf_check stands you in the room for each busy moment, but a mix-up between tile numbers and positions put you in the next room over in 6 of its 8 scenes (Sunday dinner was measured in the bow lounge). Found by EV4, confirmed here. Fixing it is item 0.</li>
+<li><b>Draw calls</b> (the 450 budget), in the right rooms: the busiest is <b>the mess hall at Sunday dinner zoomed out, 418</b>, then breakfast in the mess 409 and quiz night 396. (The old "433 in the junior common room" was really a cabin next door; the common room itself is 305.)</li>
+<li><b>Memory is steady</b>: it comes back to the same numbers after visiting every deck and after a week of play.</li>
+<li><b>Memory grows from 95 MB to 229 MB as you visit the decks</b>, then stays there. Opening the game takes the same as in the last pass (about 100 MB); the extra 134 MB is kept for decks you've already left. It isn't a leak (it stops after one visit to each deck), but on a phone it's a lot to hold. Finding out exactly what holds it is the first job of item 3.</li>
+</ul>
+</div>
+
+<div class="card">
+<h3>The checks</h3>
+<p>Every check once on 0.64.7, two at a time as the build master runs them (intro_check and the quick check alone). All pass, apart from the known ones (career_check's backlog row 12, perf_check's known +2 geometries, cadet_test's explained differences from 0.64.6).</p>
+<div class="hb"><span class="l">player</span><span class="b alt" style="width:260px"></span><span class="v">36 min 39 s</span></div>
+<div class="hb"><span class="l">intro</span><span class="b alt" style="width:79px"></span><span class="v">11 min 09 s</span></div>
+<div class="hb"><span class="l">day1</span><span class="b" style="width:55px"></span><span class="v">7 min 46 s</span></div>
+<div class="hb"><span class="l">interactions</span><span class="b" style="width:54px"></span><span class="v">7 min 35 s</span></div>
+<div class="hb"><span class="l">perf</span><span class="b" style="width:53px"></span><span class="v">7 min 26 s</span></div>
+<div class="hb"><span class="l">mech</span><span class="b" style="width:37px"></span><span class="v">5 min 10 s</span></div>
+<div class="hb"><span class="l">events</span><span class="b" style="width:36px"></span><span class="v">5 min 02 s</span></div>
+<div class="hb"><span class="l">bubble</span><span class="b" style="width:34px"></span><span class="v">4 min 49 s</span></div>
+<div class="hb"><span class="l">devmode</span><span class="b" style="width:30px"></span><span class="v">4 min 13 s</span></div>
+<div class="hb"><span class="l">device</span><span class="b" style="width:28px"></span><span class="v">4 min 01 s</span></div>
+<div class="hb"><span class="l">deck</span><span class="b" style="width:22px"></span><span class="v">3 min 09 s</span></div>
+<div class="hb"><span class="l">disc</span><span class="b" style="width:18px"></span><span class="v">2 min 34 s</span></div>
+<div class="hb"><span class="l">tiles</span><span class="b" style="width:17px"></span><span class="v">2 min 25 s</span></div>
+<div class="hb"><span class="l">join</span><span class="b" style="width:17px"></span><span class="v">2 min 21 s</span></div>
+<div class="hb"><span class="l">cadet</span><span class="b" style="width:11px"></span><span class="v">1 min 34 s</span></div>
+<div class="hb"><span class="l">clothes</span><span class="b" style="width:10px"></span><span class="v">1 min 25 s</span></div>
+<div class="hb"><span class="l">path</span><span class="b" style="width:10px"></span><span class="v">1 min 24 s</span></div>
+<div class="hb"><span class="l">puzzle</span><span class="b" style="width:8px"></span><span class="v">1 min 11 s</span></div>
+<div class="hb"><span class="l">food</span><span class="b" style="width:8px"></span><span class="v">1 min 06 s</span></div>
+<div class="hb"><span class="l">career</span><span class="b" style="width:7px"></span><span class="v">1 min 03 s</span></div>
+<div class="hb"><span class="l">machine</span><span class="b" style="width:6px"></span><span class="v">0 min 52 s</span></div>
+<div class="hb"><span class="l">social</span><span class="b" style="width:4px"></span><span class="v">0 min 30 s</span></div>
+<div class="hb"><span class="l">talk</span><span class="b" style="width:3px"></span><span class="v">0 min 28 s</span></div>
+<div class="hb"><span class="l">leave</span><span class="b" style="width:3px"></span><span class="v">0 min 26 s</span></div>
+<div class="hb"><span class="l">arc</span><span class="b" style="width:3px"></span><span class="v">0 min 22 s</span></div>
+<div class="hb"><span class="l">lines</span><span class="b" style="width:2px"></span><span class="v">0 min 04 s</span></div>
+<p class="legend">One after another that's <b>1 h 54 min</b> (nearly 3 hours with the release's Days 0-8 of day_check). The quick check before every push takes 4.5 min. player_check alone is a third of it; where its time goes is item 2, in turn 0.</p>
+</div>
+
+<h2>The changes, ranked by gain against risk</h2>
+<p class="legend">Gain: <span class="chip gain">big</span> <span class="chip gain">medium</span> <span class="chip gain">small</span> &nbsp; Risk: <span class="chip risk">none</span> <span class="chip risk">low</span> <span class="chip risk">medium</span>. Each item says how it is proven to change nothing you see or play. "Section" names the part of the game file it touches; its owner reviews it (plans/owners.md). Gains marked "estimate" are worked out from the measurements, not yet tried.</p>
+
+<details class="item" open><summary><span class="n">0</span><span class="t">Make the speed check measure the right rooms</span><span class="s">perf_check.py · test-speed seat, first</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: true numbers for everything below</span><span class="chip risk">risk: none to the game</span></div>
+<p><b>What:</b> one line in perf_check: turn the room's middle tile into a position before asking for the nearest free spot (<code>cellPos</code> first). Then a new baseline on 0.64.7, so the before/after numbers of this pass are in the right rooms.</p>
+<p><b>Why it's safe:</b> it's a check, not the game. Its own proof: every scene prints the room you actually stand in, and it must match the scene's room.</p>
+</div></details>
+
+<details class="item" open><summary><span class="n">1</span><span class="t">Run only the checks a change affects</span><span class="s">checks · test-speed seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: big (about 106 min → 28 min a turn, a lower bound)</span><span class="chip risk">risk: none to the game</span><span class="chip q">question 3</span></div>
+<p><b>What:</b> a small tool, <code>tools/affected.py</code>, reads which parts of the game a change touches and prints the checks to run. It takes the union of two lists. The first is the "run it whenever..." rules already written in DEV_NOTES. The second is a map made from <b>real runs</b>: each check is run once with the browser recording which of the game's functions it used (tried on 0.64.6 by TS1: it works). Parts that are only data, like the baked dialogue (section 22) or the tradition tables, have no functions of their own; they map through the sections that read them (<code>tools/shared.js</code>), so a change to the lines runs the lines, talk and bubble checks and the checks of the sections that read them (events, social). A change to something everything reads (the ship's clock and save, the deck builder, the main loop) runs every check.</p>
+<p><b>Measured so far:</b> replaying the last 20 turns that changed the game (<code>plans/opt-probes/affected_estimate.py</code>), the written rules alone pick <b>4.2 checks on average, about 28 minutes</b>, against 22 checks and 106 minutes for all of them (the quick check runs on top either way). The map from real runs can only add checks, so this is the least it would pick. One turn in 20 touched the clock and save and ran everything. A change to section 15 always costs 45 minutes, because player_check runs (item 2).</p>
+<p><b>Why it's safe:</b> it changes no game code and no check; it only chooses. Before anyone relies on it, turn 1 replays the last 20 merges and the failures the build table records for them: every check that really failed on one must have been picked. That number goes on the results page next to the average. The full round still runs at every release (and daily, if you choose so in question 3).</p>
+</div></details>
+
+<details class="item" open><summary><span class="n">2</span><span class="t">Find where player_check's 37 minutes go</span><span class="s">player_check.py · test-speed seat, turn 0</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: probably the biggest single check saving</span><span class="chip risk">risk: none to the game</span></div>
+<p><b>What:</b> player_check is a third of the whole round (36 min 39 s) and runs for every change to sections 15 and 15b. It takes 128 steps, reloads the page twice, and goes through your needs, activities and saving. Turn 0 times each of its parts and profiles the slowest, the same way this plan's probes did. Then the seat proposes fixes: for example, not waiting longer than a step needs, or opening a page once where it opens several.</p>
+<p><b>Why it's safe:</b> the same rules as every check change. The check prints exactly the same lines before and after, on the same build, and its owner (the player engineer's seat) reviews it.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">3</span><span class="t">The crowd sends less to the graphics chip: <b>parked</b> (measured, not worth it)</span><span class="s">section 8b · render seat · parked 2026-10-21 by lead 23 on RN1's numbers</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: none for the checks, under ~1 ms on phones</span><span class="chip risk">risk: low</span></div>
+<p><b>Parked, not built (2026-10-21).</b> RN1 measured it again in turn 1 and the gain wasn't there:</p>
+<ul>
+<li><b>Nothing is sent twice.</b> The "15.6 MB a frame, more than the whole crowd" came from the probe counting each call's whole source array; three r128 on WebGL2 sends only the changed stretch. The true numbers for day_check, Deck 3, Day 1: 115 MB over the day, at most 8.4 MB in one drawn frame (after an hour of skipped frames nearly everyone has changed, so most of the group really is new).</li>
+<li><b>day_check's time isn't uploads.</b> In this test browser <code>gl.finish()</code> returns at once, so the software renderer's queued drawing (600-900 ms a frame) is billed to the next call that has to wait, usually the crowd's upload. With a real wait after each frame (reading back one pixel), the whole day's uploads take 30 ms and the new buffers 0.3 s, against 15.6 s and 11 s without it. day_check's time is drawing its ~50 frames.</li>
+<li><b>In play it's small.</b> Sunday dinner, standing in the mess hall (70 people, 600 drawn frames, phone portrait): 31 KB a frame typically (p95 31 KB), at most 1.69 MB (the 4.4 MB was the same miscount). On a phone that's around a millisecond.</li>
+</ul>
+<p>Fixed places would have changed the crowd's buffer layout (a new proof, risk in section 8b) to save about a millisecond in a rare frame. Kept on record here; probes: <code>plans/opt-probes/buf_true.py</code>, <code>buf_play_true.py</code>. The original proposal follows.</p>
+<details><summary>The original proposal (revision 2)</summary>
+
+<div class="chips"><span class="chip gain">gain: medium on phones; checks: measured in turn 1</span><span class="chip risk">risk: low</span></div>
+<p><b>What happens now:</b> the crowd is drawn in groups of 12 people. When one person in a group changes (sits, stands, picks up a tray), the game rewrites everything from that person to the end of the group and re-sends it. In three.js r128 each piece of shape data can send only <b>one</b> stretch a frame, from the first change to the last. In play that's 31 KB a typical frame, with spikes up to 4.4 MB. In day_check, up to 15.6 MB goes out in one drawn frame after an hour of skipped frames. That's more than the whole crowd's data (about 6 MB in the mess), so some of it is sent more than once.</p>
+<p><b>How it's built (the chosen way):</b> first, turn 1 finds out why some data goes twice; if that's a plain waste, fixing it alone may give most of the check gain. Then <b>fixed places</b>: each person gets a fixed stretch of the group's data, big enough for their largest shape, and the unused end of each stretch holds empty triangles that draw nothing. One person changing rewrites only their stretch, and the single upload runs from the first changed stretch to the last. Sending several separate stretches would need a hook into three's internals (<code>renderer.attributes</code>), so it's left out unless turn 1's numbers say it's worth it. Smaller groups are ruled out: they cost draw calls, and the mess hall is at 418 of 450.</p>
+<p><b>Gain (estimate):</b> in play, one person changing sends about a twelfth of a group instead of up to all of it, so the 4.4 MB spikes become a few hundred KB at most. After a long skip most people have changed, so the checks gain mainly from the "sent twice" fix; turn 1 measures that before anything else is built.</p>
+<p><b>Why it's safe:</b> the same triangles in the same order, with empty ones in between, so the same picture. The layout changes, so the proof doesn't compare what's sent. After every drawn frame of a ship day on every deck, it compares the <b>triangles the group draws</b> (read back from the buffers, empty ones skipped) with the old build's, then the picture: cadet_test ALL IDENTICAL, and 32 crowd shots after skipped frames (the test that caught the last bug of this kind, in 0.27.28).</p>
+</details>
+</div></details>
+
+<details class="item" open><summary><span class="n">4</span><span class="t">Keep compiled shaders across deck changes</span><span class="s">sections 4c, 12 · render seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium (deck changes; measured)</span><span class="chip risk">risk: low</span></div>
+<p><b>Built (RN1, 2026-10-21, claude/opt-render):</b> <code>keepShaders()</code> in section 1, called once after each render. Measured again with a real wait after each frame: laps 2-3 of all seven decks, first frames 10.6-10.9 s kept against 11.1-12.4 s plain; programs stop at 22 after one lap at both phone sizes; cadet_test and every deck's shot at 390×844 and 844×390 identical. The 9.2 → 6.3 s below was partly drawing time billed to later frames (see item 3).</p>
+<p><b>What:</b> three.js throws a shader away when the last thing using it is unloaded, so every deck change compiles shaders again, even on a deck you've just left. Keeping each compiled shader once it exists costs a little memory (the game uses about 22) and nothing else. Measured with a probe (<code>plans/opt-probes/keep_probe.py</code>): over a second lap of all seven decks, the first frames after the changes took <b>6.3 s instead of 9.2 s</b>. Decks 5, 1, 6 and the rec deck dropped from 0.5-2 s to 10-30 ms. On a phone each saved compile is tens to hundreds of milliseconds of hitch when you arrive.</p>
+<p><b>Also measured, and not worth it alone:</b> warming the shaders with <code>renderer.compile(scene, camera)</code> right after a deck is built doesn't save time. The first frame falls from 1-2 s to about 40 ms, but the compile itself takes 0.7-2.4 s (<code>compile_probe.py</code>). It only moves the wait inside the deck change's fade, which may still be nicer on a phone; the seat tries it with the keeping above and keeps it only if your phone's numbers (item 8) say so.</p>
+<p><b>Why it's safe:</b> the shaders are the same ones, so the pictures are too. cadet_test ALL IDENTICAL, deck_check OK, and memory over deck round trips still flat. The hook into three's internals (holding one extra use of each compiled shader) is named in one place with a comment, and the probe checks that the shader count stops growing after one lap. Decks with their own lights or fog can need their own shader versions, so the build review counts the shaders after every deck at both phone sizes, and the memory over deck round trips must stay flat (ER2's note).</p>
+</div></details>
+
+<details class="item"><summary><span class="n">5</span><span class="t">Find what fills the extra 134 MB of memory</span><span class="s">measure first · game-code seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: up to ~130 MB less on a phone</span><span class="chip risk">risk: none to measure; each fix low</span></div>
+<p><b>What we know:</b> 95 MB right after opening; 229 MB once you've been to every deck, then flat. The growth is 81 MB of raw number arrays (the shape data of furniture and walls, kept on the game's side after it was sent to the graphics chip) and 40 MB of lists. <b>What:</b> follow who holds those arrays (a "retainers" walk of the memory snapshot), then a short list of the big ones that are waste (copies of decks you've left, shape data nobody reads again), each with its own small fix as a later turn.</p>
+<p><b>Why it's safe:</b> measuring changes nothing. Each fix that follows is proven like item 7: the same results after a played day, and the pictures identical.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">6</span><span class="t">Paint texture grain faster, same pixels</span><span class="s">section 2 · game-code seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium (at most about half of the 1.0 s here, ~2 s on a phone)</span><span class="chip risk">risk: low</span></div>
+<p><b>Built in part (RN1, 2026-10-21, claude/opt-render):</b> the grain loop, with the same pixels and the same random numbers, saves about 25 ms here: the loop was 26 ms of the "1.0 s". The rest (735 ms) is the browser reading each texture back from the graphics chip. The only way round that, drawing the textures on the CPU, would open the page 1.8 s sooner here but changes the pixels of 101 of 106 textures. <b>Parked: the user said don't change the look of the game.</b> Numbers: plans/opt-measure.md "Faster texture painting".</p>
+<p><b>What:</b> the grain painter adds a random speck to every pixel of every texture, one by one (8 textures, all while the game opens). The same specks, in the same order, can be made with a much tighter loop, with no change to the numbers drawn. "Half" is the most we expect, not a promise: each speck still needs its own random number.</p>
+<p><b>Why it's safe:</b> a probe fingerprints every painted texture and the game's random-number position after opening; both must match the old build exactly. Then cadet_test ALL IDENTICAL.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">7</span><span class="t">Lighter busy frames</span><span class="s">sections 8b, 10, 14, 11, 15, 19 · game-code seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium (aim: a quarter off the 2-3 ms)</span><span class="chip risk">risk: medium (many owners)</span></div>
+<p><b>Parked: measured, small (RN1, 2026-10-21; lead 24 agreed).</b> At Sunday dinner in the mess the frame's game code is 2.4 ms here; half is the crowd's posing, which the skinning really needs (everyone is on screen). The three pieces below would save at most about 0.15-0.2 ms, across four or five owners' sections. A phone already runs this frame in about 10-12 ms of the 16.7 ms a smooth frame allows. Numbers: plans/opt-measure.md "Lighter busy frames".</p>
+<p><b>What:</b> small, separate savings, one area at a time:</p>
+<ul>
+<li><b>The screen-size answers and the HUD's button positions</b> (<code>matchMedia</code>, <code>getBoundingClientRect</code>) are remembered instead of measured every frame. They're forgotten whenever the screen changes size or turns, and whenever the HUD itself changes: the needs strip, the device opening or closing, a button appearing.</li>
+<li><b>"Where should this person be now?"</b> (<code>whereIs</code>, <code>planWhere</code>, <code>walkGap</code>) is asked once per person per ship moment instead of several times a frame.</li>
+<li><b>The crowd's posing work</b> is trimmed.</li>
+</ul>
+<p><b>The rule these answers follow</b> (the crew's planner never reads records built while the game runs): the remembered answers are used only by the frame code, never by the planner. Each is labelled with everything it was worked out from, and all are forgotten on anything that can change a plan or a place within the same ship moment: a time skip or sleep, a reload, joining a tradition, a meeting, an event's phase changing, a Dev mode jump.</p>
+<p><b>Why it's safe:</b></p>
+<ul>
+<li><b>The crew:</b> after 900 frames of Sunday dinner with zoom changes, every crew member's position, pose and goal, the save and the random-number position must match the old build exactly (the method used for 0.27.27). A new probe does the same through each "forget" case (a Dev jump, a time skip, joining a tradition), person by person. day_check's output is identical line for line.</li>
+<li><b>The HUD:</b> interactions_check and bubble_check pass at 390 and 360 wide. They test where taps land and where bubbles sit, which pictures can't.</li>
+</ul>
+<p>Each owner reviews their area.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">8</span><span class="t">Speed readout on your own phone</span><span class="s">section 25 (Dev mode) · game-code seat with the Dev mode owner</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: real phone numbers</span><span class="chip risk">risk: none (hidden)</span><span class="chip q">question 4</span></div>
+<p><b>What:</b> our measurements come from a desktop drawing in software, so we guess at phone numbers. A small "Speed" card in Dev mode (only with the Dev link) would show, on your phone: how long opening took (each step), game code and drawing per frame, draw calls, and memory. You'd read it out (or screenshot it) once before and once after the pass.</p>
+<p><b>Why it's safe:</b> without the Dev link nothing of it exists, like the rest of Dev mode; devmode_check checks that.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">9</span><span class="t">Remember painted textures between visits</span><span class="s">sections 2, 4b · game-code seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium (every open after the first)</span><span class="chip risk">risk: medium</span><span class="chip q">question 2</span></div>
+<p><b>What:</b> after the first open, keep the finished textures in the browser's storage (IndexedDB, which holds several MB; the 5 MB save storage is too small). Each is labelled with the build number and a fingerprint of the painting code. Later opens load them instead of painting (about 1 s here, several on a phone). It also stores where the random-number list stood after painting, so everything after it carries on exactly the same.</p>
+<p><b>Never inside the checks:</b> with <code>?nosave</code> (every check) the game never reads or writes the cache, so every check still paints. A wrongly labelled cache is ignored and repainted. If the storage is full, blocked or slow, the game simply paints, as now.</p>
+<p><b>Why it's safe:</b> one probe opens the game on purpose with the cache, and once without it. Both must give the same pixels, and the same random-number position after opening and after visiting every deck. So both ways are tested, not just the painting one.</p>
+<p><b>Risk:</b> a wrongly labelled cache would show old textures; that's what the fingerprint guards against. Planned after the safer items.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">10</span><span class="t">Faster deck changes</span><span class="s">sections 4b, 4c · render seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium (Deck 3 builds in 1.1 s here, about 4-5 s on a phone)</span><span class="chip risk">risk: low</span></div>
+<p><b>Built (RN1, 2026-10-21, claude/opt-render):</b> all seven decks build in 1.33 s instead of 2.27 s here (Deck 3 599 → 346 ms, Deck 2 486 → 264, Deck 4 451 → 270), with every merged shape, standing tile, wall and the random seed identical to the bit; cadet_test ALL IDENTICAL. Numbers: plans/opt-measure.md "Faster deck builds".</p>
+<p><b>What:</b> building a deck merges thousands of furniture pieces into a few shapes; the merge first copies every piece into a slower form (<code>toNonIndexed</code>, 0.3 s of Deck 4's build) and measures the hull edge by edge. Both can make exactly the same result with less copying. Measured already: building takes 0.1-0.4 s on Decks 1, 5, 6 and the rec deck, 0.7-0.9 s on Decks 2 and 4, 1.1 s on Deck 3 (plans/opt-measure.md). Turn 2 profiles Decks 3, 2 and 4 and works on their slowest parts.</p>
+<p><b>Why it's safe:</b> every merged shape is compared byte for byte with the old build's on all seven decks (the method used for the shadow stand-ins in 0.27.33); cadet_test ALL IDENTICAL; deck_check OK.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">11</span><span class="t">Long checks that pick up where they stopped, and the full round shared out</span><span class="s">checks · test-speed seat</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: medium</span><span class="chip risk">risk: none to the game</span></div>
+<p><b>What:</b> each long check writes a line per part as it goes (part, build fingerprint, OK or FAIL, seconds); a rerun on the same build skips the parts already passed. The full round is listed in one file, and several runner sessions each take a slice and report back, so one stuck runner never holds up the others.</p>
+<p><b>Why it's safe:</b> only parts that don't depend on what the part before left behind are skipped (DEV_NOTES lists the ones that do); results are compared with a whole run before it's relied on.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">12</span><span class="t">Saved starting points for the longest checks</span><span class="s">checks · test-speed seat, last</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: depends</span><span class="chip risk">risk: medium</span><span class="chip q">question 5</span></div>
+<p><b>What:</b> start a long check from a saved game (say the start of Day 5) instead of playing from Day 1, as you allowed "with caution" on 2026-10-20. Only if items 1, 2, 3 and 11 still leave the checks too slow. Each saved start carries the build and a fingerprint of the planning code, fails loudly if they don't match, and a full from-Day-1 run still happens before every release.</p>
+</div></details>
+
+<details class="item"><summary><span class="n">13</span><span class="t">Draw-call headroom in the mess hall</span><span class="s">section 4d · watch only</span></summary><div class="body">
+<div class="chips"><span class="chip gain">gain: safety margin</span><span class="chip risk">risk: low</span><span class="chip q">question 7</span></div>
+<p>At Sunday dinner, zoomed out, the mess hall is at 418 of 450 (breakfast 409). A new tradition's decor there could break the budget. The proposal is to watch it (perf_check, once item 0 is in) and not touch it in this pass, unless you'd rather we free up room now by merging more of its still furniture (same picture, checked shot for shot).</p>
+</div></details>
+
+<div class="card">
+<h3>Not proposed</h3>
+<ul>
+<li><b>Checks without drawing</b>: your rule. Our test browser has no window on screen (that's what "headless" means), but it still draws the game exactly as the checks always have, and that stays.</li>
+<li><b>Visible trade-offs</b> (softer or blockier shadows on small screens, people far away moving less often, fewer decorations): each would change what you see. Only if you ask for it (question 6).</li>
+<li><b>Test browsers keeping compiled shaders between runs</b>: tried (a kept browser profile and Chrome's shader store): no measurable gain, the software renderer compiles them again anyway. (Keeping them within one run is item 4, and that does help.)</li>
+<li><b>Fewer kinds of materials</b> to compile fewer shaders: it would change colours and shine.</li>
+<li><b>Cutting the dialogue file down</b>: it's already stored in the fast form and takes under 0.1 s to read. Most hosts send the page compressed (1.6 MB instead of 5.5 MB); the lead checks that the playable link does.</li>
+</ul>
+</div>
+
+<h2>How each change is proven to change nothing</h2>
+<div class="card">
+<ul>
+<li><b>Pictures:</b> cadet_test against the build before, ALL IDENTICAL (the known one-level renderer noise excepted), plus the item's own extra shots.</li>
+<li><b>The crew and the ship:</b> day_check's output line for line, events_check, food_check and machine_check OK, and for frame changes a played Sunday dinner compared person by person.</li>
+<li><b>The random numbers:</b> the "random" list's position after opening and after a played hour is compared with the old build. Shared kit made at load still never draws from it.</li>
+<li><b>The planner rule:</b> nothing remembered while the game runs is read by the crew's planner (item 7 says how).</li>
+<li><b>Before and after numbers:</b> one bench tool (<code>tools/opt_bench.py</code>, turn 0) measures opening, deck changes, busy frames, memory, uploads and each check's time; every turn adds its before/after row to <code>plans/opt-measure.md</code>.</li>
+<li><b>Review:</b> an adversarial reviewer re-runs the proof for every item before the build master merges it. The quick check passes before every push, as always.</li>
+</ul>
+</div>
+
+<h2>Turns</h2>
+<div class="tw"><table>
+<tr><th>Turn</th><th>Test-speed seat</th><th>Render seat</th><th>Game-code seat</th></tr>
+<tr><td>0</td><td>#0 perf_check's rooms and the new baseline; #2 player_check timed part by part</td><td colspan="2">The bench tool (the planner's probes in <code>plans/opt-probes/</code> become one tool); each seat reads its sections and owners.</td></tr>
+<tr><td>1</td><td>#1 affected checks: the map from real runs, <code>tools/affected.py</code>, the replay of the last 20 merges (picks and caught failures)</td><td>#3: why some crowd data goes twice, then fixed places; #4 shaders kept</td><td>#5 memory: who holds the 134 MB; #6 faster grain</td></tr>
+<tr><td>2</td><td>#2's fixes; #11 resumable long checks</td><td>#10 deck builds</td><td>#7 lighter frames (HUD answers first, then "where should this person be"); #8 the speed card (with the Dev mode owner)</td></tr>
+<tr><td>3</td><td>#11 the full round shared out; the cadence written into DEV_NOTES</td><td colspan="2">The memory fixes from turn 1's list; #9 texture cache (if you say yes). Then the final bench against the baseline, the full round on the combined build, review, and the results page for you, with your phone's before/after if #8 is in.</td></tr>
+</table></div>
+
+<h2>The team</h2>
+<div class="tw"><table>
+<tr><th>Seat</th><th>Does</th><th>Touches</th></tr>
+<tr><td><b>Test-speed</b> (TS1 back, or a fresh session from its handover)</td><td>#0, #1, #2, #11, #12</td><td>tools/, the check files (each with its owner; cadet_test.py with the build master), DEV_NOTES "Testing"</td></tr>
+<tr><td><b>Render</b></td><td>#3, #4, #10, #13</td><td>sections 8b (the crowd's chunks and uploads), 4b, 4c, 12</td></tr>
+<tr><td><b>Game code</b></td><td>#5, #6, #7, #8, #9, the memory fixes</td><td>sections 2, 4b, 8b (posing), 10, 14, 11, 15, 19, 25, and whoever owns what the memory walk finds; each owner reviews</td></tr>
+<tr><td><b>Reviewer</b> (adversarial)</td><td>Re-runs every item's proof before merge; looks for a way it could differ</td><td>reads only</td></tr>
+</table></div>
+<p class="legend">Four sessions: three builders and a reviewer, within your "3-4 helpers" rule. The build master already on duty merges into claude/integration as usual and isn't counted here. Render and game code both touch section 8b, so their work there is split by function (render: the chunks and uploads; game code: posing), and they merge early and often.</p>
+
+<h2>Questions for you</h2>
+<form id="answers">
+
+<div class="q" data-qid="opt-q1"><div class="qh">QUESTION 1 · ORDER</div><div class="qt">The three goals (opening, smooth play, check speed): work on them side by side, or one first?</div>
+<label><input type="radio" name="opt-q1" value="side-by-side"><span>Side by side, one seat each <span class="rec">recommended</span></span></label><div class="why">They touch different code, so they don't wait on each other.</div>
+<label><input type="radio" name="opt-q1" value="checks-first"><span>Check speed first, then the phone</span></label><div class="why">Faster checks make every later turn quicker, but phone gains come later.</div>
+<label><input type="radio" name="opt-q1" value="phone-first"><span>The phone first, then the checks</span></label>
+<textarea name="opt-q1-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q2"><div class="qh">QUESTION 2 · TEXTURE CACHE (#9)</div><div class="qt">Should the game keep its painted textures in your phone's browser storage, so opening it a second time is quicker?</div>
+<label><input type="radio" name="opt-q2" value="yes"><span>Yes, after the safer items are in <span class="rec">recommended</span></span></label><div class="why">A few MB of storage; saves about a second here, several on a phone, every open after the first.</div>
+<label><input type="radio" name="opt-q2" value="no"><span>No, only make the painting faster (#6)</span></label>
+<textarea name="opt-q2-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q3"><div class="qh">QUESTION 3 · WHICH CHECKS RUN WHEN (#1)</div><div class="qt">Once the "affected checks" tool works, how often should the full round run? (So far it picks 4.2 checks, about 28 min, per turn instead of 22 checks and 106 min. Your answer applies only once turn 1 shows it would have caught every real failure of the last 20 merges.)</div>
+<label><input type="radio" name="opt-q3" value="affected-daily"><span>Each turn: the quick check plus the affected checks. The full round at every release and at least once a day <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="opt-q3" value="affected-release"><span>Each turn: quick plus affected. The full round only at releases</span></label><div class="why">Fastest, but a problem in an unexpected place could sit for a few days.</div>
+<label><input type="radio" name="opt-q3" value="as-now"><span>Keep it as now: each turn runs its area's checks by hand</span></label>
+<textarea name="opt-q3-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q4"><div class="qh">QUESTION 4 · YOUR PHONE'S NUMBERS (#8)</div><div class="qt">Add a "Speed" card to Dev mode so you can read real phone numbers before and after the pass?</div>
+<label><input type="radio" name="opt-q4" value="devmode"><span>Yes, in Dev mode (only with the Dev link) <span class="rec">recommended</span></span></label><div class="why">You'd open it twice, screenshot it, and send the pictures.</div>
+<label><input type="radio" name="opt-q4" value="no"><span>No, the test machine's numbers are enough</span></label>
+<textarea name="opt-q4-comment" placeholder="What phone do you play on? (it helps us read the numbers)"></textarea></div>
+
+<div class="q" data-qid="opt-q5"><div class="qh">QUESTION 5 · SAVED STARTING POINTS (#12)</div><div class="qt">Start long checks from a saved game instead of Day 1?</div>
+<label><input type="radio" name="opt-q5" value="later"><span>Not in this pass; only if the checks are still too slow after it <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="opt-q5" value="now"><span>Yes, for the longest checks now, with a full from-Day-1 run before every release</span></label>
+<textarea name="opt-q5-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q6"><div class="qh">QUESTION 6 · VISIBLE TRADE-OFFS</div><div class="qt">Everything in this plan keeps the game looking exactly the same. Would you also like to see an option that looks slightly different but runs faster on small phones (for example softer shadows)?</div>
+<label><input type="radio" name="opt-q6" value="none"><span>No, keep everything looking exactly the same <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="opt-q6" value="show-me"><span>Make one and show me side-by-side pictures before deciding</span></label>
+<textarea name="opt-q6-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q7"><div class="qh">QUESTION 7 · THE BUSIEST ROOM (#13)</div><div class="qt">The mess hall at Sunday dinner is at 418 of its 450 draw-call budget when zoomed out. Free up room now?</div>
+<label><input type="radio" name="opt-q7" value="watch"><span>Watch it; only act when something new goes in there <span class="rec">recommended</span></span></label>
+<label><input type="radio" name="opt-q7" value="now"><span>Free up room now (same picture, merged furniture)</span></label>
+<textarea name="opt-q7-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-q8"><div class="qh">QUESTION 8 · TEAM</div><div class="qt">Four sessions overnight (three builders and a reviewer), with the build master already on duty merging?</div>
+<label><input type="radio" name="opt-q8" value="four"><span>Yes, four <span class="rec">recommended</span></span></label><div class="why">Within your "3-4 helpers" rule; the build master isn't counted.</div>
+<label><input type="radio" name="opt-q8" value="five"><span>Five: split the game-code seat into a load seat and a frame seat</span></label><div class="why">Faster on the phone items, one more session to run.</div>
+<label><input type="radio" name="opt-q8" value="three"><span>Three: one builder for all the game work, test-speed, and the reviewer</span></label><div class="why">Uses the least; the phone work takes about twice as long.</div>
+<textarea name="opt-q8-comment" placeholder="Anything to add"></textarea></div>
+
+<div class="q" data-qid="opt-general"><div class="qh">ANYTHING ELSE</div><div class="qt">Anything that feels slow to you when you play, that we should look at first?</div>
+<textarea name="opt-general" placeholder="Your thoughts"></textarea></div>
+
+<button type="button" id="savebtn">Save my answers</button>
+</form>
+<p class="legend">Revision 2 folds in reviewer ER2's round 1 (plans/opt-plan-review.md on claude/event-plan-review-2): the crowd item rebuilt for three.js r128 with its proof on what is drawn; the texture cache kept out of the checks; the remembered answers kept from the planner; measured numbers for the affected checks; player_check as its own item; shaders kept across deck changes (measured); four sessions. Planned on claude/opt-plan from claude/integration 6ea5acf (0.64.7). All numbers and how they were measured: plans/opt-measure.md; the probe scripts: plans/opt-probes/. Earlier passes: plans/perf-p4-plan.md (0.27.25-0.27.33), the lines pass (0.43.26), TS1's test-speed handover (claude/test-speed bd7d61f).</p>
+</main>
+</body>
+</html>

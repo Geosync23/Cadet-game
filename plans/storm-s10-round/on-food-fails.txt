@@ -1,0 +1,16 @@
+24:  FAIL carts: the cold store ran out, or a wait over the limit, in the week with carts
+28:  FAIL spoilage: the cold store ran out, or a wait over the limit, in the week with a broken chiller
+45:  FAIL busy: day 12 waits {'breakfast': 0, 'dinner': 43} with [{'kind': 'slow', 'meal': 'dinner', 'from': 990, 'to': 1080}]
+46:  FAIL busy: day 14 waits {'breakfast': 0, 'dinner': 26} with []
+47:  FAIL busy: day 15 waits {'breakfast': 0, 'dinner': 8} with []
+48:  FAIL busy: day 17 waits {'breakfast': 0, 'dinner': 43} with [{'kind': 'slow', 'meal': 'dinner', 'from': 990, 'to': 1080}]
+49:  FAIL busy: day 20 waits {'breakfast': 0, 'dinner': 10} with []
+50:  FAIL busy: day 21 waits {'breakfast': 0, 'dinner': 26} with []
+51:  FAIL busy: day 24 waits {'breakfast': 0, 'dinner': 46} with [{'kind': 'slow', 'meal': 'dinner', 'from': 990, 'to': 1080}]
+52:  FAIL busy: day 25 waits {'breakfast': 0, 'dinner': 10} with []
+53:  FAIL busy: day 27 waits {'breakfast': 0, 'dinner': 6} with []
+54:  FAIL busy: day 28 waits {'breakfast': 0, 'dinner': 30} with []
+55:  FAIL busy: day 31 waits {'breakfast': 0, 'dinner': 51} with [{'kind': 'rush', 'meal': 'dinner', 'from': 1020, 'to': 1065}, {'kind': 'slow', 'meal': 'dinner', 'from': 990, 'to': 1080}]
+56:  FAIL busy: day 32 waits {'breakfast': 0, 'dinner': 45} with [{'kind': 'rush', 'meal': 'dinner', 'from': 1020, 'to': 1065}, {'kind': 'slow', 'meal': 'dinner', 'from': 990, 'to': 1080}]
+57:  FAIL busy: day 35 waits {'breakfast': 0, 'dinner': 20} with []
+100:FOOD CHECK FAILED

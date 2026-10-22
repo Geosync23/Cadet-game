@@ -1,0 +1,4 @@
+24:  FAIL off: a beat put in the hold should wait to 17:00 (calendar off): [[5, 945, 1020], [12, 930, 1020], [12, 1019, 1020], [12, 1020, 1020], [12, 925, 925], [11, 945, 945], [4, 960, 960]] (want [[5, 945, 945], [12, 930, 930], [12, 1019, 1019], [12, 1020, 1020], [12, 925, 925], [11, 945, 945], [4, 960, 960]])
+58:  FAIL calendar: the device part acts while EV_DEVICE_ON is off: {'items': [1, 0, 0, 1], 'lounge': True}
+60:  FAIL calendar: phase notes while EV_NOTES_ON is off: ['ionStorm:warning@14760', 'ionStorm:onset@16680']
+136:BIGEVENTS CHECK FAILED

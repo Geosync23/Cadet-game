@@ -176,17 +176,27 @@ def mins(t):
 
 # part 12, also on its own: python3 intro_check.py BUILD.html --week (a fast-forwarded week is slow; the lead's quick checks)
 def week(g):
-    print('12. The week in the real game: each beat\'s teacher says their lines in its room in its window (the writers\' beat.<id>.<n>); Tomas comes to Sowing')
+    print('12. The week in the real game: on paper, no intro beat\'s place shared with someone else\'s plan (Days 0-8); each beat\'s teacher says their lines in its room in its window (the writers\' beat.<id>.<n>); Tomas comes to Sowing')
     if not g.ev("typeof introBeatTick === 'function' && typeof skipTo === 'function'"):
         print('  not yet: no introBeatTick')
     else:
         g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        # on paper first (backlogs #20 and #25, PR9's rule): Days 0-8, nobody planned in a place someone on an intro beat
+        # has at the same minutes (seated places, not an event's standing spots): a teacher's seat stays theirs
+        cl = g.ev("""(() => { const out = [], byId = schedData().byId;
+          for (let d = 0; d <= 8; d++) { const segs = []; for (const [id, plan] of shipDay(d).plans) for (const s of plan) if (s.placeId) segs.push([id, s]);
+            for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) { const [a, s] = segs[i], [b, u] = segs[j];
+              if (a !== b && s.placeId === u.placeId && s.from < u.to && u.from < s.to && (byId.get(s.placeId) || {}).type !== 'event' && (/^intro/.test(s.tag || '') || /^intro/.test(u.tag || '')))
+                out.push(`Day ${d} ${s.placeId} ${hhmm(Math.max(s.from, u.from) % 1440)}: ${a} (${s.tag || s.act}) and ${b} (${u.tag || u.act})`); } }
+          return out; })()""")
+        print(f"  intro beats' places, Days 0-8: {len(cl)} shared with someone else's plan")
+        for c in cl[:8]: fail('a place shared with an intro beat: ' + c)
         g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), text]); return old.apply(this, arguments); }; return true; })()")
         beats = g.ev("INTRO_WEEK.filter(b => b.who && introBeatLines(b).length).map(b => b.id)")
         only = [x.split('=', 1)[1].split(',') for x in sys.argv if x.startswith('--beats=')]   # e.g. --week --beats=d4-quiz,d5-invite
         if only: beats = [b for b in beats if b in only[0]]
-        if not beats: print('  not yet: the writers\' beat lines are not in this build')
+        if not beats: print('  no beats walked: none match --beats' if only else '  not yet: the writers\' beat lines are not in this build')
         for bid in beats:
             go = g.ev("""((id) => { const b = INTRO_WEEK.find(x => x.id === id), from = introAbs(b.day, b.at);
               if (shipNow() < from + 1) skipTo(from + 1);
@@ -620,6 +630,10 @@ with sync_playwright() as pw:
             g.step(30)
             if g.ev("shipNow() >= introAbs(1, INTRO_WEEK.find(b => b.id === 'd1-shadow').at + 1)"): break
         took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
+        # the first week's work day is the ship's day shift (TS3, a planted fault: DAY_SHIFT an hour late went unnoticed):
+        # the shadow beat starts within 15 minutes of the shift's start, and you're on your shift when you take its job
+        sh = g.ev("({ t: clockText(), m: SHIP.time.min, beat: INTRO_WEEK.find(b => b.id === 'd1-shadow').at, from: DAY_SHIFT[0], to: dayShiftEnd(SHIP.time.day), on: playerShiftOn(SHIP.time.day) })")
+        if not (sh['on'] and sh['from'] <= sh['m'] < sh['to'] and 0 <= sh['beat'] - sh['from'] <= 15): fail(f"the shadow shift is not the day shift's start: the beat at {sh['beat'] // 60:02d}:{sh['beat'] % 60:02d}, the job taken {sh['t']}, the shift {sh['from'] // 60:02d}:{sh['from'] % 60:02d}-{sh['to'] // 60:02d}:{sh['to'] % 60:02d}: {sh}")
         g.step(60)
         esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
         fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
@@ -636,9 +650,10 @@ with sync_playwright() as pw:
             print(f"  the health check missed on Tuesday: {h}")
             if not h['again'] or len([x for x in h['appts'] if x[2] == 'yes']) != 1 or any(x[3] != 'checkup' for x in h['appts']) or not h['mail']: fail(f'a missed health check is not booked again once: {h}')
             g.ev('skipTo(introAbs(3, 20 * 60 + 5))'); g.step(60)
-            pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
+            pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { asked: !!ask, done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
             print(f"  Pell's Wednesday ask (you were away): {pm}")
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
+            if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))

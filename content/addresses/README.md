@@ -18,7 +18,8 @@ The weekly file's lines without a speaker (`- text`) are Marrow's.
   - Still to agree: `myrank:junior|officer|senior|specialist` (your rank, SHIP.works.rank; `rank:` is the speaker's, so
     it needs a small condition in section 22's engine, the dialogue engineer's, or FR1's player reading it) and
     `myshift:night` (your night shifts: Pillar 5, not built yet); `{leavers}` (this week's leavers' first names,
-    from ROSTER_ROTATIONS); the `.address` file itself and its bake (the Fridays builder, the dialogue engineer and the
+    from ROSTER_ROTATIONS; `{sunleavers}`: this weekend's, the Saturday or Sunday after the Friday; `arriving`, alone like `commended`: new crew
+    come aboard on this weekend's rotation); the `.address` file itself and its bake (the Fridays builder, the dialogue engineer and the
     lead); `week1:true` in the .trad Mail is existing.
   - The event drafts' calledin is now EV1's `cue:calledIn@me` / `cue:calledIn` (plans/events-ready); the drafts'
     other headers (@gathering, @tradition-day, == reactions.*) are superseded there by EV1's bank keys.

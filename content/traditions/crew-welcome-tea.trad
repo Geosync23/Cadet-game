@@ -1,10 +1,11 @@
 @tradition crew-welcome-tea
-// New hand's tea for new crew (seasons designer, k 484; baked since 0.34.43): the first Friday after a crew rotation
-// (when: rotation friday); its honorees are that shuttle's arrivals ({names}, {first}), with dept-of-honoree and
+// New hand's tea for new crew (seasons designer, k 484; baked since 0.34.43): the first Thursday after a crew rotation
+// (when: rotation thursday; the first Friday until the user moved it, 2026-10-21: the first rotation's Friday, Day 26,
+// is the Veyli visit's first day, so Day 25 for that one and Thursday for every rotation); its honorees are that shuttle's arrivals ({names}, {first}), with dept-of-honoree and
 // bunk-of-honoree. Design note: plans/trad-notes-seasons.md.
 k: 484
 title: New hand's tea
-when: rotation friday
+when: rotation thursday
 at: 18:40-19:30
 min: 20
 prio: 2

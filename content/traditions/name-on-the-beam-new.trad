@@ -1,7 +1,7 @@
 @tradition name-on-the-beam-new
 // Name on the beam for a new Works hand (0.70.0, playtest 1: the user, "you on arrival, and each new Works member
 // later"; the traditions engineer). The Monday after a crew rotation brings someone new to Works (when: rotation monday
-// dept works; ROSTER_ROTATIONS: days 35, 77, 161 so far), straight from shift: the Works crew gather under the bay's cross
+// dept works; ROSTER_ROTATIONS: days 21, 77, 161 so far), straight from shift: the Works crew gather under the bay's cross
 // beam and the newcomer paints their first name beside everyone else's. Same places as yours (the deck architect's
 // 5-beam-1..8, pool @name-beam). You just turn up (no tap): their name goes on the beam (section 18's beamNames).
 // Placeholder words by the traditions engineer until the head writer's.
