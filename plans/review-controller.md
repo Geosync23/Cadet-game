@@ -26,4 +26,42 @@ The fake pad runs two ways, and both must keep the no-change rule until the firs
 "plugged in, never pressed = identical"; (b) present at load (a reconnect after a reload, which some browsers allow).
 PR9 sends its foundation verdict first; p3-p5 build on it.
 
-(No package has landed yet.)
+PR9's foundation verdict (CT1 turns 1 + 2, c99acf4f + ef59c61a): PASS (02:47). PR9's mutants: `plans/review-9/ct_mutants.py`.
+
+## CTT's controller_check, first look (claude/controller-tests 115ee00d, work in progress)
+
+Read in full, then run against CT1's 0.90.1 (ef59c61a) in a copy with `const PAD_BUILT = ['base', 'deck'];` added
+(CT1's build has no PAD_BUILT, see 1). Early notes, not a verdict:
+
+1. **Two controller_check.py files.** CT1's (claude/controller, 220 lines: off / quiet / base) and CTT's (671 lines)
+   share a name on two branches: a merge clash, and two checks of one thing. CT1 and CTT to agree whose file it is
+   (CTT's parts plus CT1's base cases folded in, I'd suggest).
+2. **"not yet" passes on the real build.** CTT reads the packages from `PAD_BUILT` in section 26, which CT1's build
+   doesn't have, so on the real 0.90.1 every controller part says "not yet" and the check says OK. Either CT1 adds
+   `PAD_BUILT` (and keeps it current each turn), or the check finds the packages from the code (`padOn('frame'`,
+   etc.). And a package named in PAD_BUILT whose part is missing from PART_FN should FAIL, not "not yet".
+3. **No hidden-until-first-press mode (PR9's bar 2, agreed with PR9).** Every pad mode plugs at load (`plug` at
+   DOMContentLoaded: `getGamepads()` returns it and `gamepadconnected` fires before any press): that is mode (b),
+   present at load. Mode (a) is missing: slots hidden (`getGamepads()` nulls) and no event until the first non-zero
+   button, then the pad appears and the event fires in that same read, as Chrome does. The idle, save and calls parts
+   should run both (a) with drift (a pad in a bag) and (b).
+4. **reach's touch half never leaves the DOM.** The canvas is excluded, so panels opened from the deck (the lift, a
+   conversation, the job board, the crew store, the ladder, the sleep alarm, the question card, work steps, Lightdisc's
+   start) are never opened, and their buttons never listed. Non-circular, but not complete. Wanted: (i) deck openers
+   from cadet_test's own tap targets (a crew member, the lift door, a bunk, the job board, the store), and (ii) a
+   completeness rule from the page: every element that is a panel candidate in the page as loaded (hidden and
+   position fixed/absolute, or a direct child of body that is hidden at load) must be seen open in the sweep, or be in
+   a short named list of "not reachable from a new game" with a reason; any other one FAILs. So a panel added later by
+   another seat fails the sweep until someone opens it.
+5. **The sweep's caps are silent.** MAX_DEPTH 4 and MAX_PRESSES 700 end the crawl without a word; reaching either
+   should print and count as incomplete (FAIL in the pad half). And the state key includes the first 40 characters of
+   each button's text, so a button showing the clock (or any live count) can make every scan a "new" state: watch
+   the inventory's state count, and key on ids or the text with digits removed.
+6. **touch compares the game and the pictures, not the page.** After a press and a tap it should also compare the
+   PAGE_STATE (minus listener counts): `body.pad` left on, or a mark element made hidden but kept, would pass today.
+   And one of the taps should be a real touch (a context with hasTouch, `page.touchscreen.tap`), the phone path.
+7. The planted faults are added beside the game (their own listeners and getGamepads wrappers), not in section 26, so
+   they prove each part can fail but not that it fails on section 26's own mistakes. I'll add mutants in section 26
+   itself (`plans/review-controller/mutants.py`) for P3-P5.
+
+Run of CTT's parts on 0.90.1 (+PAD_BUILT): see below.
