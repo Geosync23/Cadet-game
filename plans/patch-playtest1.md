@@ -13,7 +13,7 @@ The rules as always: small exact-string edits, new code in your slot, no build n
 4. **Zeke's device message goes** (it repeats what he now says in person). Judgement call by the lead; the user asked "Get rid of Zeke's message?": flag it in the summary.
 5. **The Chief, sitting at a nearby table, comes over physically** to talk to you.
 6. **Zeke and the Chief don't stand up and walk away straight after speaking**: they stay a little, then go naturally.
-### D. The Chief's first solo job and hygiene (notes 7-8): CJ1 (new), branch `claude/patch-play1-d` (sections 24/24p, 21b, 15)
+### D. The Chief's first solo job (note 7; note 8 hygiene moved back to ON1, who had coded it): CJ1 (new), branch `claude/patch-play1-d` (sections 24/24p, 21b, 15)
 7. **The Chief's first SOLO job is still broken** (the user's correction): the cut scene starts, then nothing happens. The Chief says what they say now, then explains the new job type is on the board, which unlocks the new mechanic. Find the root cause and fix it; add a check that would have caught it (intro_check or career_check).
 8. **Hygiene and clothes**: hygiene goes down while wearing dirty clothes, and ticks up when you change into clean ones (21b with section 15's needs; the player engineer's numbers through PB2/owners if shared).
 
