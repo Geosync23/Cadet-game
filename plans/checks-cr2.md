@@ -91,3 +91,18 @@ Share (plans/testing-guide.md): intro (whole), perf NEW OLD, cadet_test OLD NEW,
   at 10:41 (after the check's walk to 10:40, crew running): 1 before A, **0 after A**, so the arrow rightly falls
   back to "Make a relay in the machine shop" (section 15b's goal: stores empty → make).
 - Not fixed. CJ1 is on it (lead 26). Owners' call: keep a relay for the solo job, or the check takes make as step 1.
+
+# Round 4: 0.64.15 re-run (claude/integration-next 31c44cb9, 2026-10-22), CR2's share — **OK**
+
+NEW 31c44cb9, sha256 `0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e` (matches lead 26's).
+OLD claude/integration 32b699a6 (0.64.14), sha256 `94f32868...881e9` (matches).
+
+| Check | Result | Key lines |
+|---|---|---|
+| intro_check (whole) | OK | `OK` (part 14: "step by step (0 on the shelf): Make a relay ...", accepted) |
+| perf_check NEW OLD | known old only (backlog 14) | `memory grows across deck round trips` 521 → 521 → 523. First run also `lantern supper, the mess Sat 18:30 trifold-folded-turned: js 1.77 -> 2.91 ms`; **re-measured: doesn't repeat** (OLD 2.14, NEW 1.78 ms; `PERF CHECK: 1 problem(s)`, backlog 14 only). Two rounds, two one-off spikes in different scenes: renderer timing noise. |
+| cadet_test OLD NEW | DIFFERENCES, all explained | Pixel counts identical to round 3 (patch C's crew lanes); state/collide = patch H's ladder rooms. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings) |
+| lines_check --day | OK | PASS (0 errors) |
