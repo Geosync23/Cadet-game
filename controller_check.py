@@ -1128,8 +1128,10 @@ def ride(r, deck, fails, scene):
     for k in range(20):
         if r.ev("!document.getElementById('lift').hidden"): break
         r.step(10)
-    # the deck's button by its place in the game's own deck order (its words changed in 0.64.17: deckLabel)
-    res = press_in_panel(r, f"document.querySelectorAll('#liftList button')[DECK_ORDER.indexOf({deck})]")
+    # the deck's button by its label (deckLabel since 0.64.17: 'R' for the rec deck, 7; else the number; DECK_ORDER and
+    # deckLabel are in a script the check can't see)
+    lab = 'R' if deck == 7 else str(deck)
+    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{lab}')")
     if res != 'ok': fails.append(f'{scene}: the lift\'s Deck {deck} button: {res}'); return False
     for k in range(60):
         r.step(10)
