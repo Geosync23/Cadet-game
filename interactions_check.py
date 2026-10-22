@@ -5,7 +5,7 @@
 #   with a pose, and the main need rises; places crew hold are "In use"; private cabins, beds, notices and
 #   section 15's own taps (treadmill, shower) are left alone; walking away stops it; draw calls stay under BUDGET
 #   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back;
-#   a round or a haul has a Take it, a side job (the drill) not
+#   a round or a haul has a Take it; a side job (the drill) and the other registered kinds (an incident, a leak...) not
 #   the goal pointer: hidden with no goal; your job's next step shows by itself; on another deck it says "Take the
 #   lift to Deck N"; setGoal / clearGoal; an arrow at the screen edge when the place is off screen, a marker when on
 # Setup and environment as for cadet_test.py.
@@ -117,13 +117,13 @@ with sync_playwright() as pw:
     check(r is True and s['board'], 'tapping the job board opens the list')
     # a round and a haul (registered job kinds, run by their stops) have a Take it on the board; a side kind (the drill)
     # does not (AC2, FX2's find: they said "not yet: coming soon", so Rounds and Hauling could never be taken)
-    rk = g.ev(r"""(() => { let j = null; try { j = roundJob(SHIP.time.day, Math.floor(SHIP.time.min), { train: 'm1', yours: true }); } catch (e) { return 'roundJob: ' + e.message; }
+    rk = g.ev(r"""(() => { if (typeof ixBoard === 'undefined' || typeof ixBoard.doable !== 'function') return 'no ixBoard.doable in this build'; let j = null; try { j = roundJob(SHIP.time.day, Math.floor(SHIP.time.min), { train: 'm1', yours: true }); } catch (e) { return 'roundJob: ' + e.message; }
       if (!j) return 'no round'; if (!SHIP.jobs.includes(j)) SHIP.jobs.push(j); j.claimedBy = null; j.status = 'open'; MACH_REV++; ixBoard.draw();
       const row = [...document.querySelectorAll('#ixBoardL [data-job]')].find(r => r.dataset.job === j.id), b = row && row.querySelector('button');
-      const out = { offered: openJobs('you').some(o => o.id === j.id), row: !!row, btn: b ? b.textContent : null, haul: !JOB_KINDS.haul || ixBoard.doable({ kind: 'haul' }), drill: ixBoard.doable({ kind: 'drill' }) };
+      const out = { offered: openJobs('you').some(o => o.id === j.id), row: !!row, btn: b ? b.textContent : null, haul: !JOB_KINDS.haul || ixBoard.doable({ kind: 'haul' }), drill: ixBoard.doable({ kind: 'drill' }), others: ['incident', 'leak', 'nozzle', 'tracedemo', 'rewire', 'tune'].filter(k => ixBoard.doable({ kind: k })) };
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   a round on the board:', rk)
-    check(isinstance(rk, dict) and rk['row'] and rk['btn'] == 'Take it' and rk['haul'] and not rk['drill'], f'a round (and a haul) can be taken at the board, a drill (a side job) not ({rk})')
+    check(isinstance(rk, dict) and rk['row'] and rk['btn'] == 'Take it' and rk['haul'] and not rk['drill'] and not rk['others'], f'a round (and a haul) can be taken at the board; a drill, an incident, a leak, nozzles, a rewire, the trace demo or a machine-less tune not (lead 29) ({rk})')
     # a job you can take, on Deck 3 (a tier 1 machine there), in case the crew have left none
     job = g.ev(r"""(() => { const t = shipNow(); const m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && PLACE_OF && panelPlace(m.id));
       if (!m) return null; const part = MACHINE_KINDS[m.kind].part || 'gasket'; SHIP.stores[part] = Math.max(SHIP.stores[part] || 0, 2);

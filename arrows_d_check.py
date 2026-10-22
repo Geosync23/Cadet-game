@@ -13,9 +13,10 @@
 #   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
-#   reputation (S9): a new word reached: a toast once; a drop: "Works reputation down" and the pointer to the Works app's Training tab; never again for that word
+#   reputation (S9): a new word reached: a toast once; never again for that word (a word first met on a drop still is, when reached going up); a drop: the toast "Works reputation down: <word>" only
 #   pointers:       each panel pointer three times at most, then not asked
 #   tick:           guideTick asks the shift chain itself once a ship minute
+#   the drill:      (the build as it is) the 14:50 drill arrow has no trk tag and stays up once you reach the Works bay
 # And in the build as it is (both off): no entries, no pointer, section 15's clock-out arrow as before.
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three).  Run:  python3 arrows_d_check.py BUILD.html
 import sys, json, re, os, pathlib
@@ -106,6 +107,13 @@ def part_on(pg):
     pg.ev("POINT.aim.click()"); pg.step(2); shift(pg); lab = pg.ev(LAB); p = ptr(pg)
     mine = pg.ev("myJob() && myJob().id")
     check(mine and lab and lab != 'Take a job at the board' and not p['up'], f'S3: taken: the job\'s own arrow, no pointer ({mine}, {lab}, {p})')
+    # only a round on the board (a registered kind, not a machine job): S3 still says take a job (RV7)
+    r = pg.ev("""(() => { const keep = openJobs, t = shipNow(); const mj = myJob(); if (mj) mj.claimedBy = 'arrows-away';
+      SHIP.jobs.push({ id: 'arrows-round', kind: 'rounds', deck: 4, room: 'l', route: [], marks: {}, title: 'Your first round', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' });
+      openJobs = () => [{ id: 'arrows-round', asked: true }]; guideShift(); GUIDE.key = ''; const g = goalNow(), L = guideTakeable().map(o => o.id);
+      openJobs = keep; SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-round'); if (mj) mj.claimedBy = 'you'; return { lab: g && g.label, L }; })()""")
+    print('  S3, only a round:', r)
+    check(r['L'] == ['arrows-round'] and r['lab'] == 'Take a job at the board', f'S3: a round on the board counts as a job to take (the board\'s own rule) ({r})')
     # a job held for you comes first on the pointer's list (RV6's note)
     r = pg.ev("""(() => { const keep = openJobs; openJobs = () => [{ id: 'arrows-a', asked: false }, { id: 'arrows-h', asked: true }];
       const t = shipNow(), m = machineList().find(m => !m.stub); for (const id of ['arrows-a', 'arrows-h']) SHIP.jobs.push({ id, machine: m.id, deck: m.deck, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' });
@@ -160,18 +168,25 @@ def part_on2(pg):
     at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB); n1 = pg.ev("__toasts.filter(t => /Nothing on the board/.test(t)).length")
     hold = pg.ev("""(() => { boardEmptySay.s.dry = false; boardEmptySay.s.at = -1e9; __toasts.length = 0; const now = Math.floor(shipNow()), occ = { key: 'arrows-occ4', deck: 5, room: 'r', at: now - 2, len: 15, status: 'asked' };
       SHIP.occasions.push(occ); boardEmptySay(true, now); const inMeet = __toasts.length; SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); boardEmptySay(true, now + 1); return [inMeet, __toasts.length]; })()""")
+    hold2 = pg.ev("""(() => { const say = () => { boardEmptySay.s.dry = false; boardEmptySay.s.at = -1e9; __toasts.length = 0; boardEmptySay(true, Math.floor(shipNow())); return __toasts.length; };
+      const W = SHIP.works, keep = W.cur, dk = DIALOGUE, out = {};
+      DIALOGUE = { arrows: true }; out.dialogue = say(); DIALOGUE = dk;
+      W.cur = { id: 'm4', st: 'watch', d: 9, by: 'esposito-yara' }; out.watch = say(); W.cur.st = 'do'; out.doo = say(); W.cur = keep; out.free = say(); return out; })()""")
     pg.ev("openJobs = __oj")
-    print('  S6:', lab, n1, 'in a meeting, then after:', hold)
+    print('  S6:', lab, n1, 'in a meeting, then after:', hold, '| in a dialogue, a watch, a turn, then free:', hold2)
+    check(hold2 == {'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 1}, f'S6: the board\'s word waits through a dialogue and a training\'s watch and turn (RV7) ({hold2})')
     check(hold == [0, 1], f'S6: the board\'s word waits through a meeting, then is said (lead 29) ({hold})')
     check(not (lab or '').startswith('Take a job') and n1 == 1, f'S6: an empty board: no arrow, and the board\'s word said ({lab}; said {n1})')
     # S9: up to a new word: said with the pointer; up to it again: not said; a drop: "Works reputation down: <word>"
     r = pg.ev("""(() => { const W = SHIP.works, keep = W.xp, B = WORK_BANDS[W.tier] || WORK_BANDS[1], b0 = worksBand(); guideShift();
       W.xp = 0; guideShift(); __toasts.length = 0; W.xp = B[1][0]; guideShift(); const t1 = __toasts.slice(), q = POINT_Q.some(x => x.id === 'p:works:training');
       __toasts.length = 0; W.xp = 0; guideShift(); const down = __toasts.slice(); __toasts.length = 0; W.xp = B[1][0]; guideShift(); const t2 = __toasts.slice();
-      W.xp = keep; guideShift(); __toasts.length = 0; W.xp = B[3][0]; guideShift(); const down2 = __toasts.slice(); W.xp = keep; guideShift(); return { b0, t1, q, down, t2, down2 }; })()""")
+      W.xp = keep; guideShift(); __toasts.length = 0; W.xp = B[3][0]; guideShift(); const down2 = __toasts.slice(); W.xp = keep; guideShift();
+      __toasts.length = 0; W.xp = B[2][0]; guideShift(); W.xp = B[1][0]; guideShift(); W.xp = B[2][0]; guideShift(); const back = __toasts.slice(); W.xp = keep; guideShift(); return { b0, t1, q, down, t2, down2, back }; })()""")
     print('  S9:', r)
     check(r['t1'] == ['Works reputation: Steady'] and r['q'], f'S9: a new word: a toast and the Training tab pointer ({r})')
     check(r['t2'] == [], f'S9: the same word reached again: not said again ({r})')
+    check(r['back'][-1:] == ['Works reputation: Reliable'], f'S9: a word first met by a drop is said when later reached going up (RV7) ({r})')
     check(r['down'] == ['Works reputation down: New'] and r['down2'] == ['Works reputation down: Trusted'], f'S9: a drop says it went down, even to a word not yet reached (lead 29, RV6) ({r})')
     # a short Friday: clock out from 15:30, until the clock signs you out at 16:00
     r = pg.ev("""(() => { const now = Math.floor(shipNow()), ci = SHIP.career.ci, co = SHIP.career.co; let d = 9; while (!friShort(d) && d < 16) d++; if (!friShort(d)) return null;
@@ -191,6 +206,21 @@ def part_on2(pg):
     r = pg.ev("""(() => { SHIP.device.pointsSeen['p:clock:out'] = 3; pointDrop('p:clock:out'); const now = Math.floor(shipNow());
       setShipNow(8 * 1440 + 1030); SHIP.career.co = 0; guideShift(); const q = POINT_Q.some(x => x.id === 'p:clock:out'); setShipNow(now); return q; })()""")
     check(not r, f'pointers: a fourth time is not asked ({r})')
+
+def part_drill(pg):                                  # the 14:50 drill arrow stays up once you're in the Works bay (FX2's own line; RV7)
+    pg.ev("devmodeRun('Set career', () => devmodeSetCareerTo(2))"); pg.step(20); d = 3   # Day 3, a Wednesday: your first drill (a junior's)
+    pg.ev(f"devmodeSkipTo({(d - 1) * 1440 + 14 * 60 + 40}); clearGoal(); SHIP.player.track = undefined; while (typeof TIP_Q !== 'undefined' && TIP_Q.length) tipDone()"); pg.step(10)
+    for _ in range(200):
+        pg.step(10, 50)
+        if pg.ev(f"shipNow() >= {(d - 1) * 1440 + 14 * 60 + 51}"): break
+    r = pg.ev("(() => { const g = IX_GOAL; return g && { label: g.label, drill: !!g.drill, trk: g.trk || null }; })()")
+    if not check(r and r['drill'], f'drill: the 14:50 arrow is up ({r}; {pg.ev("[clockText(), !!drillJobOf(SHIP.time.day), (drillJobOf(SHIP.time.day) || {}).told]")})'): return
+    pg.ev("goToDeck(5)"); pg.step(5)
+    pg.ev("(() => { const P = player.obj.position; P.x += 30; })()"); pg.step(3)   # away first (trkDoneCheck's rule)
+    pg.ev("(() => { const w = ixGoalWorld(IX_GOAL), c = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...c)); player.stop(); })()"); pg.step(5)
+    r2 = pg.ev("(() => { const g = IX_GOAL; return g ? g.label : null; })()")
+    print('  drill:', r, '-> in the Works bay:', r2)
+    check(r2 is not None and not r['trk'], f'drill: the arrow stays up once you reach the Works bay (no trk tag; FX2\'s stop arrows follow) ({r}, {r2})')
 
 def part_tick(pg):
     at(pg, 478); pg.ev("GUIDE.list.length = 0; GUIDE.rev++; guideStart()")
@@ -214,7 +244,7 @@ with sync_playwright() as pw:
         on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
-        for name, fn, p, guide in (('off', part_off, path, False), ('on: S2, S3, pass-over, S7', part_on, str(on), True), ('on: S5, S8, S6, S9', part_on2, str(on), True), ('tick', part_tick, str(on), True)):
+        for name, fn, p, guide in (('off', part_off, path, False), ('on: S2, S3, pass-over, S7', part_on, str(on), True), ('on: S5, S8, S6, S9', part_on2, str(on), True), ('tick', part_tick, str(on), True), ('the drill arrow', part_drill, path, False)):
             print('==', name)
             try:
                 pg = Page(ctx, p, 'on' if guide else 'off'); pg.day9(guide); fn(pg)

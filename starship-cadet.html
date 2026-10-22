@@ -15808,7 +15808,8 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind] && !JOB_KINDS[j.kind].side) && typeof jobStepDone === 'function'));   // a registered kind too (a round, a haul: run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
+  const BOARD_KINDS = new Set(['rounds', 'haul']);     // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo)
+  const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
