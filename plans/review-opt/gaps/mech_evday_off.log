@@ -1,0 +1,91 @@
+m1 (Rounds, big): opened Day 2, trained Day 2, steps ['meet', 'do'], teacher's job by None, yours by you, stage 0
+  24a training (0.45.9): {"steps": ["take", "go:Washer 2", "next:Light relays 1", "next:Washer 4", "next:Light relays 2", "done"], "st": "do", "job": ["rounds", "m1", 4, "washer", "Your first round, Deck 4", null, true], "teacherJobs": 0, "board": true, "claimed": true, "escort": null, "turnin": true, "trained": 2, "after": null}
+  24a: Day 2's meeting with Torres at 645
+  24a rounds: {"posted": true, "route": ["4-junction-1", "4-washer-1", "4-washer-4", "4-junction-2"], "leaveEnd": 660, "stops": [["look", "4-junction-1-svc", 3], ["look", "4-washer-1-svc", 3], ["look", "4-washer-4-svc", 3], ["look", "4-junction-2-svc", 3]], "found": [["service", "you", true], ["service", "you", true]], "healthyJobs": 0, "xp": 3, "use": 2, "crew": ["done", "kovac-zainab", true], "crewFound": "5/5", "stage4": 0, "stage5": 1, "off": [false, false]}
+  signs: ['A click now and then in the box.', 'Drum turns clean and quiet.', 'Drum turns clean and quiet.', 'Steady light.']
+m4 (Hauling and stores, big): opened Day 3, trained Day 3, steps ['meet', 'do'], teacher's job by esposito-yara, yours by you, stage 0
+  24d training runs: {"runs": [["load", 1, "esposito-yara"], ["yours", 3, "you"]], "all": ["linen", "medical", "store"], "delivered": ["linen", "medical", "store"], "left": 0}
+  24d hauling: {"manifest": [["bridge", "1-bridge-drop", 1], ["medical", "3-infirmary-drop", 1]], "crates": 2, "posted": true, "held": true, "junior": true, "claimed": true, "stops": [["cart", "5-cart-1"], ["load", "5-hold-1"], ["load", "5-hold-1"], ["deliver", "3-infirmary-drop"], ["deliver", "1-bridge-drop"], ["return", "5-cart-1"]], "holds": ["cart", "cart", "cartfull", "cartfull", "cartfull", "cart"], "workDone": true, "turnin": true, "left": 0, "got": ["medical", "bridge"], "use": 2, "notes": ["medical", "bridge"], "five": 5, "runs": [4, 1], "leftFive": 0, "hauls": [["haul@227", 2, "done", "you", "you"], ["haul@228", 4, "done", "you", "you"], ["haul@229", 1, "done", "you", "you"]], "d2": 19, "d17": [true, [["restock-stores@442", "done"]], [{"id": "linen", "dest": "4-laundry-drop", "n": 0}, {"id": "bridge", "dest": "1-bridge-drop", "n": 0}]], "crew": [2, [["done", "quist-ilse"]], 0]}
+m3d (The drill, small): opened Day 3, trained Day 3, steps [], teacher's job by None, yours by None, stage 0
+  24c drill Day 3: {"kind": "fire", "opened": true, "posted": true, "stops": [["take", "hold", "5-drill-ext"], ["stand", "hold", "5-drill-hatch"], ["putback", "hold", "5-drill-ext"]], "mine": "you", "reached": 2, "workDone": true, "status": ["done", "you"], "note": [["drill", 2, true]], "tr": 3, "use": 1, "xp": 1}
+  24c drill Day 10: {"kind": "pressure", "opened": true, "posted": true, "stops": [["dog", "turn", "5-drill-door"], ["stand", "hold", "5-drill-door"]], "mine": "you", "reached": 2, "workDone": true, "status": ["done", "you"], "note": [["drill", 2, true]], "tr": 10, "use": 1, "xp": 1}
+  24c drill Day 17: {"kind": "power", "opened": true, "posted": true, "stops": [["reserve", "hold", "5-drill-breaker"], ["stand", "hold", "5-drill-breaker"]], "mine": "you", "reached": 2, "workDone": true, "status": ["done", "you"], "note": [["drill", 2, true]], "tr": 17, "use": 1, "xp": 1}
+  24c drill, missed then a jump to Day 11: ['claimed', 'done', 0]
+m5 (Tuning, big): opened Day 4, trained Day 4, steps ['meet', 'do'], teacher's job by calder, yours by you, stage 0
+  m5: {"opened": [2, 2], "start": 2, "uses": 1, "after": 0, "crew": 0} ['running hot', 'a little hot', 'steady', 'a little cool', 'cold', 'flickering fast', 'charging slow']
+m3i (The inspection, small): opened Day 4, trained Day 4, steps [], teacher's job by None, yours by None, stage 0
+  24c inspection {'uniform': 1, 'bed': 1} here {"res": "nod", "mail": 0, "use": 1, "off": false}
+  24c inspection {'uniform': 0, 'bed': 1} here {"res": "uniform", "mail": 0, "use": 1, "off": false}
+  24c inspection {'uniform': 1, 'bed': 0} away {"res": "bed", "mail": 1, "use": 0, "off": false}
+  24c inspection {'uniform': 0, 'bed': 0} away {"res": "two", "mail": 1, "use": 0, "off": false}
+  24c inspection {'uniform': 1, 'bed': 1} away {"res": "nod", "mail": 1, "use": 1, "off": false}
+m7 (The scanner, big): opened Day 5, trained Day 5, steps ['meet', 'held'], teacher's job by halloran-emeka, yours by you, stage 0
+p3 (What's been tried?, small): opened Day 5, trained Day 5, steps [], teacher's job by None, yours by None, stage 0
+m6 (Making it safe, big): opened Day 8, trained Day 8, steps ['meet', 'do'], teacher's job by calder, yours by you, stage 0
+  m6 plan: [['alarm', 16, 680, 3, 0], ['burst', 22, 720, 5, 0], ['burst', 33, 580, 5, 0], ['burst', 38, 630, 5, 0]] ['true,true,true,true,true,2', 'true,true,true,true,true,3', 'true,true,true,true,true,4', 'true,true,true,true,true,5']
+  m6 burst4: held 30, steps ['safe:choose@4-valve-panel', 'clean:hold@4-wet-1', 'clean:hold@4-wet-2'], safe True, fix ['joint:4-wet-1::420']
+  m6 burst3: held 30, steps ['safe:choose@3-valve-panel', 'clean:hold@3-wet-1', 'clean:hold@3-wet-2'], safe True, fix ['joint:3-wet-1::420']
+  m6 burst5: held 30, steps ['safe:choose@5-valve-panel', 'clean:hold@5-wet-1', 'clean:hold@5-wet-2'], safe True, fix ['joint:5-wet-1::420']
+  m6 lift5: held 30, steps ['safe:turn@5-lift-brake', 'clean:hold@4-lift-1'], safe True, fix ['repair:5-mainlift-1:you:420']
+  m6 alarm3: held 30, steps ['safe:hold@3-extractor-alarm', 'clean:wait@3-vent-1', 'clean:look@3-vent-1'], safe True, fix ['repair:3-galleyplant-1:you:420']
+  m6 crew: {'by': 'crew', 'status': 'done', 'open': None, 'fix': 1} skip: {'done': 1, 'open': None, 'jobs': ['done:crew']}
+m2 (Your work uniform, small): opened Day 8, trained Day 8, steps [], teacher's job by None, yours by None, stage 0
+  24b uniform: {"before": [0, false], "steps": [0.05, 0.4, 0.6], "state1": "grubby", "flag": 8, "grubby": [0.95, "grubby"], "tint": 16, "untint": 0}
+t2 (Your Tier 2 test job): 24p's test job, not a training (career_check (i) and (j))
+m8 (Team jobs, big): opened Day 11, trained Day 11, steps ['meet'], teacher's job by None, yours by you, stage 0
+  m8 plan: [[[11, 3, 570, 'recycler']], [[17, 2, 570, 'scrubber'], [18, 3, 570, 'washer']], [[23, 1, 570, 'scrubber'], [25, 3, 570, 'washer'], [26, 4, 810, 'recycler']], [[30, 1, 570, 'scrubber'], [32, 3, 570, 'washer']]]
+  m8 crew: {'team': 2, 'you': False, 'status': 'done', 'by': 'halloran-emeka', 'late': False, 'mins': 32, 'posted': -1050} late: {'team': 3, 'you': False, 'status': 'done', 'by': 'halloran-emeka', 'late': True, 'mins': 40, 'posted': -1050} you: {'team': 3, 'you': True, 'status': 'done', 'by': 'you', 'late': False, 'mins': 29, 'posted': -1050} [True, True, True] early refused True
+m9 (Tracing, big): opened Day 12, trained Day 12, steps ['meet'], teacher's job by calder, yours by you, stage 0
+  m9 training jobs: [['repair', '5-valve-2', 'water:4', 'you'], ['tracedemo', None, None, 'calder']]
+  m9 path: [['3-recycler-1'], ['3-filter-1'], ['3-uv-1'], ['3-pump-1'], ['5-pump-1', '5-pump-2'], ['5-valve-2']] symptom: {'line': 'water', 'decks': [4, 5, 6], 'deck': 4}
+  m9 card: ['Showers weak on Deck 4', 'Deck 4 · the water line', 'repair', 'soon'] board: [['Repair: Showers weak on Deck 4', None, None]] goal: [3, '3-pump-1-panel']
+  m9 reads: [['5-pump-1', 'full', 'full', False], ['5-valve-2', 'full', 'low', True]] | upstream: ['full', 'full', 'low', 'low', 'low', 'low'] [['5-valve-1', 'low', 'low', False], ['3-pump-1', 'low', 'low', False], ['3-filter-1', 'full', 'full', False], ['3-uv-1', 'full', 'low', True]]
+  m9 after: [False, 'Pipe valves 2', ['fetch', 'job']] fixed: [True, 'healthy', True] crew: ['done', 'crew', 'healthy'] share: [540, 247, {'water': 82, 'air': 108, 'heat': 40, 'pool': 17}, 0]
+  m9 air: [['5-fan-1', 'full', 'full', False], ['5-damper-2', 'full', 'low', True]]
+p1 (When does it happen?, small): opened Day 12, trained Day 12, steps [], teacher's job by None, yours by None, stage 0
+p2 (Who saw what?, small): opened Day 15, trained Day 15, steps [], teacher's job by None, yours by None, stage 0
+m10 (The workshop, small): opened Day 12, trained Day 12, steps [], teacher's job by None, yours by None, stage 0
+  m10 posted: [['abara-rosa', 'lamp-arm', 12, 'posted']] job: ['shop', 'you', 'claimed', True, True] stops: [['make', 'wait', '5-shop-lathe', 0], ['finish', 'hold', '5-shop-lathe', 2]]
+  m10 hand over: {'id': 'shop-give', 'label': 'Give the lamp arm'} The lamp arm works. I can see my page. Thank you. ['given', 1, True, 1, 1] | Monday: [['achebe-lumi', 'guitar-hook'], ['abara-rosa', 'drawer-pull']] ['lapsed', 'lapsed'] mails 2
+  m10 stage 2: [2, ['fetch', 'make', 'finish'], 'cable'] tinker: 6 [True, True, True, True, True, True] clean: [0, 0, True] 0
+m11 (Tool upkeep, small): opened Day 12, trained Day 12, steps [], teacher's job by None, yours by None, stage 0
+  24m: {"due": ["due", "due", 1.25], "tap": ["scanner", "pipekit"], "kit": [true, [2, "5-bench-you"], "charged", 12], "charge": [true, 5], "mid": "due", "end": ["charged", false], "xp": 1, "xp2": 1, "rack0": false, "stage": 2, "rack": [true, [3, "5-tool-rack"], 1, false], "saved": true, "notes": ["pipekit", "scanner", "pipekit", "rack"]}
+m12 (The logbook, small): opened Day 12, trained Day 12, steps [], teacher's job by None, yours by None, stage 0
+  24n: {"choices": ["Washer 2: pump replaced; Washer 3 is acting up, left for tomorrow", "Washer 2: pump replaced; Washer 1 still open", "Washer 3 is acting up, left for tomorrow; Washer 1 still open"], "entry": {"day": 12, "pick": "Washer 2: pump replaced; Washer 3 is acting up, left for tomorrow", "jobs": ["4-washer-3@x"], "flag": "4-washer-2", "looked": true}, "again": null, "logged": [12, 0.9], "xp": 1, "trained": 12, "last": ["Washer 2: pump replaced; Washer 3 is acting up, left for tomorrow"], "stage": 1, "night": ["done", "navarro-mateo", ["4-washer-3"]], "night2": ["open", "open"], "saved": true}
+m13 (Leak hunting, small): opened Day 12, trained Day 12, steps [], teacher's job by None, yours by None, stage 0
+  m13 days: [[12, 4, True, True], [18, 3, True, True], [25, 3, True, True], [30, 1, True, True], [40, 4, True, True]] posted ['A pipe drips somewhere on Deck 4', 4, 480] board [None, None, 4] stops ['puddle:look@4-leakp-4', 'damp:look@-', 'joint:look@-'] then ['4-leakp-4', '4-leak-4', '4-leak-4']
+  m13 worn: ['joint', True, 'seal', 0, True] held 2040 crew ['done', True, True, None] galleries 0 -> 5 stage 1
+m14 (Garden irrigation, small): opened Day 15, trained Day 15, steps [], teacher's job by None, yours by None, stage 0
+  m14 harvests [20, 34, 5] posted [570, 'Clear the nozzles', 4, ['rack0:hold:3-rack-1', 'rack1:hold:3-rack-2', 'rack2:hold:3-rack-3']] after [4, 4, 1, True, 1] bonus [0.1, 0, True] lapsed ['done', None] none 0 stages ['rack0', 'flush'] ['rack0', 'flush', 'plant'] clogged [2, 4, 4, 4, 2, 2]
+m15 (Rewiring, big): opened Day 17, trained Day 17, steps ['meet', 'do'], teacher's job by calder, yours by you, stage 0
+  m15 weeks: [[24, 2, 480, '4-junction-2', 2, 6, 'done'], [29, 0, 480, '1-junction-1', 2, 4, 'done'], [39, 3, 480, '2-junction-1', 2, 4, 'done']]
+  m15 stops ['open:look', 'wire:choose', 'wire:choose', 'wire:choose', 'wire:choose', 'wire:choose', 'wire:choose', 'test:hold'] right [True, 0, True, 1] pop False [1, 1, 0, 1, 1, 1, 1, 0] wrongs 1 after [False, 1] faded [1, 'check', False, True, True] held 2040 crew ['done', True]
+m17 (The lift roof, big): opened Day 18, trained Day 18, steps ['meet'], teacher's job by None, yours by None, stage 0
+  m17 open: False [False, True, True, False, False, True, False] False | hold: {'movers': 12, 'waiting': 62, 'bad': [], 'held': [True, True, False, False]} | saves: {"rides":0,"last":0} {"rides":0,"last":0} {"rides":2,"last":11}
+  m17 ride Day 18: [True, 'roofRide'] | mid ['light', 0, True, 1, '@', True, 18] | end [6, None, False, '{"rides":1,"last":18}', 1, 97, True, 960, '{"cond":91,"stops":[0,1,2,3,4,5,6],"calls":73}', [1, 2, 3, 4, 7, 5, 6]] [True, False, False]
+  m17 ride Day 25: [True, 'roofRide'] | mid ['light', 0, True, 1, '@', True, 25] | end [3, None, False, '{"rides":1,"last":18}', 1, 81, True, 947, '{"cond":81,"stops":[0,1,2],"calls":73}', [1, 2, 3, 4, 7, 5, 6]] [True, False, False]
+side (Step 4's core: tool wear, the side-job cap, the texts):
+  side tools: ['charged', 100, 1, 'Charged'] ['low', 56, 1] ['due', 28, 1.25, 1.25, 'Due'] none: [None, 1, 0] uses: [100, 28] look: [True, True, 1.25]
+  side rep: [1, 1, 0, 0] 2 2 ['a1', 'b1', 'e2', 'probe1', 'probe1'] | save: True True True | bunk: ["Your bunk's in Bunk 1 on Deck 4.", True, '4-23', "Your bunk's in Cabin 4-23 on Deck 4.", False, True]
+  manifestRun: {"job": ["haul", "stores", 30, true, 2, ["cart:5-cart-1", "load:5-parts-2", "load:5-parts-3", "deliver:5-scrubber-1-svc", "deliver:5-scrubber-1-svc", "return:5-cart-1"]], "claimed": true, "took": [1, 1], "delivered": [true, ["team-x:5-scrubber-1-svc:filter+pump"]], "turnin": true, "withdrawn": ["done", null, false], "bad": [null, null], "empty": [["filter", "pump"], ["No pump on the shelf."], ["filter"]]}
+  hauling stage 2: {"free": [true, false], "before": ["4-laundry-drop", "3-store-drop", "3-galley-drop"], "after": ["3-store-drop", "4-laundry-drop", "3-galley-drop"], "tidy": [true, 1], "untidy": [false, 1], "order": [true, true, ["store", "linen", "galley"], true], "junior": [true, 0], "posts": ["held", "crew"]}
+  stocktake: {"none": [false, false, false], "job": [810, 960, 31, true, ["5-stock-1", "5-stock-2", "5-stock-3", "5-stock-4"], "coil winding"], "says": ["Lights is short of coil winding.", "Filters: all present. A relay on the Filters shelf? That's not where it lives. Back on its own shelf. A job won't go looking for it now.", "Plumbing: all present.", "Galley parts: all present."], "moved": [2, 2, null], "xp": 1, "restock": true, "turnin": [true, 0, "{\"week\":2,\"found\":true}"], "withdrawn": ["open", "done", null], "saved": true}
+  rounds stages 2-3: {"before": ["4-junction-1", "4-washer-1", "4-washer-2", "4-washer-4", "4-junction-2"], "asked": [6, 5, 4, 3, 3], "first": ["Light relays 2 \u00b7 not looked at yet", "Light relays 1 \u00b7 last looked 2 days ago"], "route": [4, true, true, 4, true, true], "two": [true, ["round1"], 4], "door": [true, 4, "From the doorway: Washer 2, worn. Found by you: Washer 2. From the doorway: Washer 3, fine. From the doorway: Washer 4, worn. Found by you: Washer 4.", [0, 1, 2], 4, "you", "you"], "train": [0], "saved": true}
+fcase:
+  fcase scripts [['lamp', 4, True, 'choose', True], ['cold', 4, True, 'choose', True], ['squeak', 4, True, 'choose', True], ['shower', 4, True, 'choose', True], ['clock', 4, True, 'choose', True], ['speaker', 4, True, 'choose', True]]
+  fcase plan [21, 1120] asked ['cold', 'asked', 21, True] offered ['offered', None] side ['you', 'claimed', ['clue:look:P', 'clue:look:P', 'clue:look:P', 'call:choose:P']] early False wrong False right True [1, True] fix 4-19 True True done lapse ['lapsed', 'done']
+ff:
+  ff kinds ['p1', 'p3'] mail [1, 1] posted [15, 480, 23, 2, 'Ticket case: Water filter bank low flow'] solved ['T2', 'p1', True, True] grade [1, ['ff1', 15]] after 0 wrong ['T2', 'p1', True, False] [0, 1, 22, None] notYet 0
+FAIL ff: with the events base off no day is an event day, so cases are offered (Days 1-60: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60])
+  ff pin: rig before [16, 42648] graded [1, 1, True, [16, 42816]] after a reload [1, [16, 42816]] cleared [16, 42648]
+tparts:
+  tparts bring {'run': ['haul', 30, True, 'pump+bearing', True], 'delivered': True, 'first': 6, 'job': {'day': 18, 'status': 'done', 'by': 'you', 'late': False, 'partsLate': False, 'mins': 34, 'run': True}, 'left': ['done', True], 'parts': 1, 'mail': ['Bring the parts']}
+  tparts not {'run': ['haul', 30, True, 'pump+bearing', True], 'first': 16, 'job': {'day': 18, 'status': 'done', 'by': 'you', 'late': False, 'partsLate': True, 'mins': 44, 'run': True}, 'left': ['done', False], 'parts': 0, 'mail': ['Bring the parts']}
+  tparts stage0 {'first': 6, 'job': {'day': 18, 'status': 'done', 'by': 'you', 'late': False, 'partsLate': None, 'mins': 34, 'run': False}, 'left': None, 'parts': 0, 'mail': ['Washer overhaul']}
+  tparts early {'first': 6, 'job': {'day': 17, 'status': 'done', 'by': 'you', 'late': False, 'partsLate': None, 'mins': 34, 'run': False}, 'left': None, 'parts': 0, 'mail': ['Washer overhaul']}
+24t cabin: [True, 2, True, True, 0, 2, 1, True] 3 [['little lamp'], 2] {"desk":"little lamp"} [False, 0] | stars: ['{"pts":["just below the middle","just above the middle","right at the top"],"fresh":1}', '{"pts":["just below the middle","just above the middle","high on the right"],"fresh":0}', '{"pts":["just below the middle","high on the right","low on the right"],"fresh":0}'] [True, True]
+24t stars driven: {'found': True, 'hours': [False, False], 'tap': True, 'wrong': [True, 0], 'right': [True, 1, 12], 'again': False, 'next': True, 'third': [3, True], 'ten': [10, True], 'trip': ['{"rug":"woven rug","shelf":"metal puzzle"}', '{"n":10,"last":12}'], 'looks': [True, True, True, True], 'clash': [], 'oldRack': 'mug tree', 'tidy': [False, True, False], 'remark': ['Nice lamp.']}
+side (E2's saved parts):
+  side save: before [[{"id":"leak:4-leak-1@300","joint":"4-leak-1","room":"k","deck":4,"day":12,"worn":1,"found":"you"}],{"day":20,"clogged":["0.1","2.3"],"cleared":["0.1"],"flushe ... after [[{"id":"leak:4-leak-1@300","joint":"4-leak-1","room":"k","deck":4,"day":12,"worn":1,"found":"you"}],{"day":20,"clogged":["0.1","2.3"],"cleared":["0.1"],"flushe
+MECH CHECK FAILED
+EXIT 1

@@ -209,3 +209,19 @@ Run on integration a4a5735 + 38424f0 + 5b4eb4f's lines (b2_new), against a4a5735
 - `--run`, rerun by me on two behaviour faults: "your tasting vote is not kept" (18 -> food): exit 1 against 0 on the game as it is, 2 new FAILs (the tally, your tastes). "a due tool no longer slows a look step" (15 -> mech): exit 1 against 0, 1 new FAIL ("a look step with a due tool takes a quarter longer"). Both as TS3 reported. The throwaway worktrees were cleaned up (no stray branch or worktree).
 - The counting rule (`fails()`): a FAIL or error line that the game as it is doesn't print, numbers set to '#' first, or exit 1 where the base exits 0. Numbers to '#' means a known FAIL whose numbers move doesn't count as new: it under-claims, the safe side.
 - Crash typos as faults (3 of 6): fair. They are the commonest real break, and a check catches one only if it runs that line, which is what the map claims. But they prove coverage, not that a check notices wrong behaviour. The 3 behaviour faults (escort, tool slow-down, tasting vote) are the stronger evidence, and the six that left their checks green (listed in planted.md) are real check gaps for their owners.
+
+### TS3: the six check gaps closed (claude/opt-tests 06dc8577 + cf8c359f + 121f1de5 + e7062dc4; passed at tip 7063b375): PASS
+For lead 26 (session_015mHBLCf5jpnzBkFY1iBTqv). Run by me on integration f6b91764 (0.64.14, EVENTS_ON on), the check files at e7062dc4 (mech_check rerun at 7063b375), each fault planted by its exact string (from b5ad0eed / 02f9efdb). Logs in plans/review-opt/gaps/.
+
+| Fault | Check | Clean | With the fault |
+|---|---|---|---|
+| Pell's seek ask never recorded (20) | intro | OK | FAILED: "Pell was never asked to come and find you on Wednesday" |
+| DAY_SHIFT 09:00 -> 10:00 (17) | intro | OK | FAILED: "the shadow shift is not the day shift's start ... the shift 10:00-17:00" |
+| wsOf starts a work step afresh (15) | mech | OK at 7063b375 (e7062dc4's copy fails m17 on 0.64.14: the storm-on fix 0b77dfcb comes with the 7063b375 merge) | FAILED: "side: a wait step keeps its start ... [True, False]" |
+| eventDay true every day, guard off (18) | mech, on a copy with EVENTS_ON false | MECH CHECK OK | FAILED: "ff: with the events base off no day is an event day ... [1, 2, 3, ...]" |
+| crewGather finds no tiles (14) | career | only backlog 12 ("Relied on" before Day 5) | + "the box on Day 10: Tomas and Pell each wait on their own tile ... ids []" |
+| eventDay true every day (18) | career, EVENTS_ON false | only backlog 12 | + "with the events base off the career-beat guard sees no event day" |
+
+- The new lines restore what they change (the clock, scenes, ACT, wsteps); none changes the game.
+- Note: on 0.64.14 EVENTS_ON is on, so EV_GUARD_ON is on and the two "no event day with the events base off" lines (mech ff, career) skip themselves (they return null). The fault they catch lives only on the switched-off path, so they guard the base game for whenever the events are off; proven above on EVENTS_ON-false copies. Worth one sentence in planted.md.
+- The docs (B) and the 0.64.14 merge (C): read; the merge takes integration's perf_check and backlog as I advised. The known-old list (backlog 12 and 14) is the lead's call.

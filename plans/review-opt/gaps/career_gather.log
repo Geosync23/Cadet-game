@@ -1,0 +1,57 @@
+(a) Step 1 as built: no sub-blocks, nothing opens:
+  the Works app on Day 1 morning: hidden; opened [], trained {}, head: Junior Technician · Junior Officer. Works reputation: New. What's next: Keep at it: the board will teach you plenty.
+(b) A steady player, every row with a stand-in sub-block, Days 1-9:
+    Day 1 (M): jobs 3, opened [], xp 0 (new), training None, used []
+    Day 2 (T): jobs 8, opened ['m1'], xp 10 (steady), training None, used ['m1']
+    Day 3 (W): jobs 7, opened ['m4', 'm3d'], xp 22 (reliable), training None, used ['m1', 'm4', 'm3d']
+    Day 4 (T): jobs 7, opened ['m5', 'm3i'], xp 33 (trusted), training None, used ['m3i', 'm1', 'm4', 'm5']
+    Day 5 (F): jobs 9, opened ['m7', 'p3'], xp 48 (relied), training None, used ['m1', 'm4', 'm5', 'm7']
+    Day 6 (S, off): jobs 0, opened [], xp 48 (relied), training None, used []
+    Day 7 (S, off): jobs 0, opened [], xp 48 (relied), training None, used []
+    Day 8 (M): jobs 7, opened ['m6', 'm2'], xp 56 (relied), training None, used ['m1', 'm4', 'm5', 'm7', 'm6', 'm2']
+    Day 9 (T): jobs 8, opened ['t2'], xp 68 (relied), training None, used ['m1', 'm4', 'm5', 'm7', 'm6']
+  opened: {'m1': 2, 'm4': 3, 'm3d': 3, 'm5': 4, 'm3i': 4, 'm7': 5, 'p3': 5, 'm6': 8, 'm2': 8, 't2': 9}
+  trained: {'m1': 2, 'm4': 3, 'm3d': 3, 'm3i': 4, 'm5': 4, 'm7': 5, 'p3': 5, 'm6': 8, 'm2': 8, 't2': 9}
+  asked on: {'m1': [2], 'm4': [3], 'm5': [4], 'm7': [5], 'm6': [8], 't2': [9]}
+  teacher's job and yours: {'m1': {'by': 'torres-zeke', 'you': 'you'}, 'm4': {'by': 'esposito-yara', 'you': 'you'}, 'm5': {'by': 'calder', 'you': 'you'}, 'm7': {'by': 'halloran-emeka', 'you': 'you'}, 'm6': {'by': 'calder', 'you': 'you'}}
+  meetings: [{'id': 'works.m1', 'day': 2, 'at': '08:50', 'by': 'torres-zeke', 'status': 'kept'}, {'id': 'works.m4', 'day': 3, 'at': '09:30', 'by': 'esposito-yara', 'status': 'kept'}, {'id': 'works.m5', 'day': 4, 'at': '08:40', 'by': 'calder', 'status': 'kept'}, {'id': 'works.m7', 'day': 5, 'at': '09:00', 'by': 'halloran-emeka', 'status': 'kept'}, {'id': 'works.m6', 'day': 8, 'at': '09:30', 'by': 'calder', 'status': 'kept'}, {'id': 'works.t2', 'day': 9, 'at': '09:30', 'by': 'calder', 'status': 'kept'}]
+  Mail: ['torres-zeke: Fancy a walk?', 'esposito-yara: The rest of the delivery', 'calder: Galley, 10:15', "halloran-emeka: Board, when you're in", 'calder: Burst pipe', 'calder: Training: the Tier 2 test job']
+  Record: Junior Technician · Junior Officer. Works reputation: Relied on. What's next: Calder has a test job for you: Tier 2.
+  locker: Your locker. Clean clothes, and your tools: Round clipboard, Torres's old scanner.
+  Works app: ["Junior Officer. Works reputation: Relied on. | What's next Calder has a test job for you: Tier 2. | Trained | the job loop (with Zeke Torres, Day 1); rounds (Day 2); hauling and stores (Day 3); the drill (Day 3); tuning (Day 4); the inspection (Day 4); the scanner (Day 5); head-scratchers (Day 5); making it safe (Day 8); your work uniform (Day 8); the Tier 2 test job (Day 9) | What you know | Light relays: getting the hang of these. (undefined); Washers: getting the hang of these. (undefined)", "Tune (Day 9); Replace a lamp (Day 9); Take medical supplies to the infirmary, Deck 3 (Day 9); Tune (Day 9); Repair: Cart dock 1 (charges slow) (Day 9); Repair: Stage lights (a stage light is out) (Day 9); Repair: Cart dock 2 (won't charge) (Day 9); Repair: Seat hinges (a seat won't fold) (Day 9); Service: Light relays (Day 8); Replace a burst joint (Day 8); Service: Oven 1 (Day 8); Repair: Washer 1 (Day 8); Service: Light relays 1 (Day 8); Morning round, Deck 4 (Day 8); Service: Washer 2 (Day 8); Service: Washer (Day 5); Delivery (Day 5); Repair: Seat hinges (Day 5); Lamp (Day 5); Repair: Washer (Day 5 · right part first time · a clever fix); Rounds (Day 5); Repair: Washer (Day 5); Service: Pool filter (Day 5); Repair: Climbing holds (Day 5); Service: Oven (Day 4); Round (Day 4); Service: Cart dock (Day 4); Service: Grow lights (Day 4); Repair: Washer (Day 4); Repair: Light relays (Day 4)", "Round clipboard (In your locker · like new · since Day 2); Torres's old scanner (In your locker · Charged · since Day 5)"]
+(c) A very busy player:
+    Day 1: 6 jobs, xp 3 new, Day 2: 10 jobs, xp 16 steady, Day 3: 12 jobs, xp 34 trusted, Day 4: 5 jobs, xp 41 relied, Day 5: 10 jobs, xp 58 relied, Day 6: 3 jobs, xp 61 relied, Day 7: 2 jobs, xp 63 relied, Day 8: 16 jobs, xp 85 relied
+FAIL busy: "Relied on" before Day 5
+(d) A lazy player, Days 1-28:
+  opened: {'m1': 2, 'm4': 3, 'm3d': 3, 'm3i': 4, 'm5': 5, 'm7': 9, 'p3': 9, 'm2': 10, 'm6': 11, 't2': 23}
+  trained: {'m1': 2, 'm3i': 4, 'm4': 4, 'm5': 8, 'm7': 9, 'p3': 9, 'm3d': 10, 'm2': 10, 'm6': 11, 't2': 23}
+  asked on: {'m1': [2], 'm4': [3, 4], 'm5': [5, 8], 'm7': [9], 'm6': [11], 't2': [23]}
+(e) Bands, skill words, tools, penalties:
+   {'bands': ['new', 'new', 'steady', 'steady', 'reliable', 'reliable', 'trusted', 'trusted', 'relied', 'relied'], 'officer': 'New officer', 'words': ['new to you', 'new to you', 'getting the hang of these', 'getting the hang of these', 'you know these well'], 'give': True, 'again': False, 'has': True, 'useWear': 0, 'wear': 0.19999999999999998, 'missed': 7, 'aband': 5, 'floor': 0, 'before': None}
+  the promotion's box carriers: [] [] | event days with the events base off: None
+FAIL the box on Day 10: Tomas and Pell each wait on their own tile by your door ({'ids': [], 'tiles': [], 'ev': None})
+  worksTabAdd: {'r': True, 'tabs': ['Training', 'Work log', 'Tools', 'Fault notes', 'Test'], 'body': 'hello', 'got': 'poke:7'}
+  the escort hold (Day 5): {'hold': True, 'st': 'held', 'trainedEarly': False, 'esc': 'follow', 'clean': True, 'after': 5, 'cur': None}
+  asked while asleep, told when up; a stale hold; open on a tab: {'st': 'meet', 'toldAsleep': False, 'toldUp': True, 'goal': True, 'heldTrained': 2, 'tab': 'tools'}
+(f) The save:
+  round trip: True (818 bytes); junk: {'v': 1, 'tier': 1, 'rank': 'junior', 'xp': 0, 'tr': {}, 'use': {}, 'op': {'2': ['m1']}, 'tools': {'scanner': [3, 1]}, 'sk': {}, 'log': [], 'test': None, 'home': 'bunk', 'done': [], 'said': {}, 'ms': [], 'cur': None, 'side': {}}
+  reload mid-training (meet, 1 appointment): same True, its occasion made
+  an old save on Day 10: {'works': {'v': 1, 'tier': 1, 'rank': 'junior', 'xp': 0, 'tr': {}, 'use': {}, 'op': {'10': ['m1', 'm3d']}, 'tools': {}, 'sk': {}, 'log': [], 'test': None, 'home': 'bunk', 'done': [], 'said': {}, 'ms': [], 'cur': {'id': 'm1', 'st': 'meet', 'd': 10, 'by': 'torres-zeke', 'occ': 'works.m1@10', 'j': None, 'w': 0, 'told': True, 'mail': 'Fancy a walk?'}, 'side': {'upkeep': {'done': 0}, 'log': [], 'cabin': {}, 'favours': [], 'leaks': [], 'nozzles': {'day': 0, 'clogged': [], 'cleared': [], 'flushed': 0, 'harvests': 0, 'stage': 0, 'told': 0, 'bonus': 0}}, 'inc': {'plan': {'1': [], '2': ['alarm', 16, 680, 3, 0]}, 'open': None}, 'team': {'plan': {'1': [[11, 570, None, 'recycler']], '2': [[17, 570, None, 'scrubber'], [18, 570, None, 'washer']]}}, 'cases': {'open': [{'id': 'creserve20:4-washer-2@12600', 'job': 'reserve20:4-washer-2@12600', 'kind': 'p3', 'k': 0, 'band': 'T1', 'cause': 'pump', 'sus': ['pump', 'seal', 'valve'], 'fewest': 2, 'clues': [{'id': 'n0', 'type': 'note', 'src': {'by': 'volkov-maeve', 't': 13395, 'tried': 'seal', 'done': False}, 'at': 'board', 'kills': ['seal']}, {'id': 'n1', 'type': 'note', 'src': {'by': 'rahman-farah', 't': 13410, 'tried': 'valve', 'done': False}, 'at': '4-washer-2-svc', 'kills': ['valve']}], 'got': [], 'crossed': [], 'known': [], 'calls': [], 'posted': 12600, 'until': 0, 'wait': True, 'taken': False, 'talk': False, 'long': False, 'train': True, 'told': False, 'title': ''}], 'done': [], 'n': 1, 'first': 'creserve20:4-washer-2@12600'}}, 'tier': 1, 'tr': {}, 'op': {'10': ['m1', 'm3d']}}
+  ship.works after 30 busy days: 2871 bytes, log 30
+(g) The steady run twice:
+  identical: True
+(i) The Tier 2 test job (24p, Step 3):
+   steady: [['set', 8, 9], ['start', 9, 9], ['passed', 9, 9]] {'tier': 2, 'day': 9, 'tries': 1, 'passed': True} [['4-scrubber-2', 'done', 'you', '09:00', '15:00']] Mail []
+   late: [['set', 8, 9], ['start', 9, 9], ['delayed', 9, 11], ['start', 11, 11], ['passed', 11, 11]] {'tier': 2, 'day': 11, 'tries': 2, 'passed': True}
+(j) The summons and the promotion (24p):
+   there: [[10, '11:00', 'kept', True, None]] [[10, '11:00', 'met']] [2, 'officer', 33, 'Reliable', 2, 'officer'] reply 3 {'summons': {'day': 10, 'at': 660}, 'gather': {'day': 10, 'from': 670, 'to': 685}, 'move': {'day': 10, 'at': 1020}, 'ceremony': {'day': 11, 'at': 1035}, 'done': ['summons2', 'cake2', 'move2', 'ceremony2']}
+   the move: [[10, '17:30', 'late']] ['4-23', ['summons2', 'cake2', 'move2', 'ceremony2'], True, True, False]
+   the ceremony: [[11, '17:15', '1/O', None]] [[11, 'met']] pip [1, 1] ['your framed commission'] ['marrow', 'vance', 'calder', 'torres-zeke'] ['Your commission, 17:15', 'Congratulations']
+   away: [[10, '11:00', 'kept', True, '11:15']] [[10, '12:00', 'mail']] ['The pipe kit', 'Your commission, 17:15', 'Your cabin', 'Congratulations', 'Your promotion', 'Your test job', 'Burst pipe', 'Galley, 10:15']
+   away, the ceremony: [[11, '17:15', '1/O', '17:30']] [[11, 'mail']]
+(k) The turn-in card's gains (Step 3, for the HUD engineer):
+   {'rep': [{'dept': 'works', 'name': 'Works reputation up'}], 'meters': [{'sys': 'air', 'name': 'Air', 'add': 2.5}]}
+(h) The bridge, by invitation (Step 3):
+   {'youShut': True, 'crewOpen': True, 'obsOpen': True, 'washOpen': True, 'tap': {'t': 'Bridge', 'x': "The bridge. You need the Captain's permission to go in."}, 'tapLobby': None, 'readyNoEvent': False, 'readyAfter': [False, True], 'invited': True, 'youOpen': True, 'saved': True, 'insideOut': True}
+CAREER CHECK FAILED
+EXIT 1
