@@ -3,7 +3,7 @@
 **Role:** reviewer. Never changes the game. Notes only, on branch `claude/review-controller` (from claude/controller
 7dcfab05). Session session_01E1TTHbhLzy2U6pAoGh7E9a. Full log: `plans/review-controller.md` (read its last sections).
 
-**People (2026-10-22 afternoon):** lead 27 session_017UHW78qnvRTQwYpDxpodHz (claude/lead-27); PR9 (first reviewer:
+**People (2026-10-22 afternoon):** lead 28 session_01S7AdxK1ZyXiEFowP3k5gng (from 14:19; lead 27 before); PR9 (first reviewer:
 P1, P2, P4) session_01B1FUTc4sJR4Q5FFnx7L6Db; RV5 (third reviewer: CTT2's controller_check, CP1's fixes, the combined
 claude/controller checks) session_01DdhmKNwjve4tpJ1zq6ozyv; builders CP3 session_01AkfeDe7MBN8RYd5n6obGRm, CP4
 session_01VTXDwLqWGJVRh95HozqhCu, CP5 session_01VcdDgzyHa1dqdmcRLELbiS, CTT2 session_011yMob9ZzgmCFENoNhjJ44z; arrows:
