@@ -463,7 +463,11 @@ class Sweep:
             grp = re.sub(r'\[.*\](#\d+)?$', '', it['k'])
             big = sum(1 for i in todo if re.sub(r'\[.*\](#\d+)?$', '', i['k']) == grp) >= 20   # a board or a long list, not the device's apps
             if not it['k'].startswith('@') and grp != it['k'] and big and self.groups.get(grp, 0) >= 2: continue
-            self.groups[grp] = self.groups.get(grp, 0) + 1
+            # alike things with the same label (the key's #2, #3...: a map's pins, each "N" once digits are hidden): two
+            # pressed in the whole sweep; each one pressed went a level deeper into the same screens (0.90.5's run)
+            same = re.sub(r'#\d+$', '', it['k'])
+            if not it['k'].startswith('@') and self.groups.get('=' + same, 0) >= 2: continue
+            self.groups[grp] = self.groups.get(grp, 0) + 1; self.groups['=' + same] = self.groups.get('=' + same, 0) + 1
             self.pressed.add(it['k'])
             cur = self.scan(); need = [it['k']] if not it['k'].startswith('@') else []
             if need and it['k'] not in {i['k'] for i in self.inner(cur)}: self.back_to(list(path), sg, need)
