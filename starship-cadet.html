@@ -26,7 +26,6 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
   .controls{display:grid;grid-template-columns:repeat(3,44px);gap:8px;top:10px;max-width:none}
   .controls button{width:44px;height:44px;padding:0;justify-content:center;font-size:0;gap:0}
   .controls button svg{width:19px;height:19px}
-  .controls #newgame.ask{background:var(--teal);color:#08201d}
   .hud{max-width:calc(100vw - 14px - 148px - 12px - 12px)}
   .controls #pauseBtn{position:fixed;top:86px;height:31px}   /* 0.28.50: beside the Device button (section 15's pausePlace), not a third row */
   .controls #pauseBtn::after{content:"";position:absolute;inset:-7px -4px}   /* a 44px tap target, clear of the clock above and the needs strip below */
@@ -257,7 +256,6 @@ body.dlgon .devhu{display:none}
   <button id="walls" aria-label="Walls: auto. Tap for all walls down"><svg viewBox="0 0 24 24"><path d="M3 20h18"/><path d="M5 20v-6h5v6"/><path d="M14 20V8h5v12"/></svg><span>Walls</span></button>
   <button id="crew" aria-pressed="true" aria-label="Show or hide visiting crew"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c.8-3.6 3.2-5.5 6-5.5s5.2 1.9 6 5.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16.5 14.6c2.4.2 4 1.9 4.5 4.6"/></svg><span>Crew</span></button>
   <button id="light" aria-label="Switch to night lighting"><svg viewBox="0 0 24 24"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg><span>Night</span></button>
-  <button id="newgame" aria-label="New game: tap twice to start again"><svg viewBox="0 0 24 24"><path d="M12 5v14"/><path d="M5 12h14"/></svg><span>New game</span></button>
 </div>
 <div class="toast" id="toast"><b id="tt"></b><span id="tx"></span></div>
 <div class="lift" id="lift" role="dialog" aria-modal="true" aria-labelledby="liftT" hidden>
@@ -9246,14 +9244,10 @@ document.addEventListener('visibilitychange', () => { if (document.hidden) saveG
 addEventListener('pagehide', saveGame);
 const welcomeBack = () => 'Welcome back. ' + clockText() + '.';
 
-// New game: the first tap asks, a second within 4 seconds clears the save and starts again in Bunk 1 at 06:00
-const newBtn = document.getElementById('newgame'); let newAsk = 0;
-newBtn.onclick = () => {
-  const span = newBtn.querySelector('span');
-  if (!newAsk) { span.textContent = 'Tap again'; newBtn.classList.add('ask'); newAsk = setTimeout(() => { newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask'); }, 4000);
-    if (matchMedia('(max-width:720px),(max-height:500px)').matches) toast('New game', 'Tap again to start over.');   // 0.35.34: the label is hidden on narrow phones
-    return; }
-  clearTimeout(newAsk); newAsk = 0; span.textContent = 'New game'; newBtn.classList.remove('ask');
+// New game (2026-10-22, the user's go: it moved from the HUD's round "+", which a fresh player read as "add" and where a
+// stray double tap wiped the game, into the device's Settings, which asks on its own page; section 19): newGameGo()
+// starts one, the same way the HUD's button did
+function newGameGo() {
   if (ride) return;                                      // not mid-ride
   // how to start (agreed with section 21 and the device): the tests and anyone without section 21 wake on Monday; a
   // device that has never arrived arrives by shuttle; one that has gets the choice (arrive, or skip to Monday)
@@ -9261,7 +9255,7 @@ newBtn.onclick = () => {
   if (!introArrived() || typeof deviceChoose !== 'function') return newGameStart(true);
   deviceChoose({ title: 'New game', text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] },
     i => { if (i === 0) newGameStart(true); else { newGameStart(false); if (typeof introSkip === 'function') introSkip(); } });
-};
+}
 // a new game (Pillar 4): by shuttle on day 0 at 16:30 (arrival true: section 21 then calls introBegin), or in Bunk 1
 // on Monday at 06:00 (false; section 21 calls introSkip when you skipped the arrival). Clears the save, the decks'
 // state, the habit changes, the flag store and the notes, then sections 15, 20 start again
@@ -11242,6 +11236,7 @@ function rotTernTick(now, N) {
 // =====================================================================
 const DEVICE_APPS = new Map();                 // id -> { id, title, icon, order, badge, view, act }
 const DEV = { open: false, app: 'home', notes: {}, on: { open: [], close: [], phosphor: [] }, errors: [] };
+let devNewSure = false;                       // Settings is asking "Start a new game?" (never outlives the Settings page)
 // what the device keeps (saved, SAVE_EXTRA): settings now; memos, appointments, pins and tips as their apps arrive
 const PHOSPHORS = { amber: 'Amber', green: 'Green', cyan: 'Wren cyan' };
 function deviceLoad(s) {
@@ -11507,7 +11502,7 @@ function deviceShow(id) {
   if (!DEV.open && devLocked()) { try { if (typeof deviceLockedTap === 'function') deviceLockedTap(); } catch (e) { /* section 15's */ } return; }
   if (!DEV.open && !SHIP.device.booted && devTry(() => SHIP.intro && SHIP.intro.on && !SHIP.intro.skipped)) { SHIP.device.booted = true; id = 'boot'; }
   if (!DEVICE_APPS.has(id)) id = 'home';
-  if (id !== 'settle') settleSure = false;               // 0.35.24 (reviewer 2): the end-the-welcome confirm never outlives the screen
+  if (id !== 'settle') settleSure = false; if (id !== 'settings') devNewSure = false;               // 0.35.24 (reviewer 2): the end-the-welcome confirm never outlives the screen
   DEV.app = id; delete DEV.notes[id];
   if (!DEV.open) { DEV.open = true; DEVICE_SKIN.open(); deviceFrame(!DEVICE_SKIN.wide()); deviceFire('open');
     tipShow('device', 'Your device: Schedule and Calendar for your day, Maps to find your way, Jobs to track your work, Mail and Memos, Needs for how you feel.'); }
@@ -12534,9 +12529,17 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
   } });
 
 // Settings: the screen's colour (the three phosphors), screen effects (the flicker and roll; always off when the
-// phone asks for reduced motion), tips on or off
+// phone asks for reduced motion), tips on or off; New game (2026-10-22, from the HUD), which asks on this page first:
+// "Start a new game? Your current game will be lost." Start over (section 13's newGameGo) or Keep playing
+function devNewAct(verb) {
+  if (verb === 'newgame') { devNewSure = true; return true; }
+  if (verb === 'newkeep') { devNewSure = false; return true; }
+  if (verb === 'newgo') { devNewSure = false; deviceClose(); newGameGo(); return true; }
+  devNewSure = false; return false;
+}
+deviceOn('close', () => { devNewSure = false; });
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
+  act(verb, arg) { if (devNewAct(verb)) return; const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
     else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg; },
   view: () => {
@@ -12547,6 +12550,8 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
+      ...(devNewSure ? [{ kind: 'text', text: 'Start a new game? Your current game will be lost.', mark: 'urgent' }, { kind: 'buttons', items: [{ label: 'Start over', action: { app: 'settings', do: 'newgo' } }, { label: 'Keep playing', action: { app: 'settings', do: 'newkeep' } }] }]
+        : [{ kind: 'text', text: 'Start the game again from the beginning' }, { kind: 'buttons', items: [{ label: 'New game', action: { app: 'settings', do: 'newgame' } }] }]),
       { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
       { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
       { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }].concat(typeof padSetBlocks === 'function' ? padSetBlocks() : []) };   // the Controller page's button, once a pad is seen (section 26, P4)
