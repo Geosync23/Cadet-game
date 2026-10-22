@@ -212,3 +212,11 @@ action name, the stick swap), turn 2's zoom line (flip, speed), section 19's Set
   half way as before (the `> .5` rule now follows the action name, not the physical trigger). A light squeeze could press.
 - Note 3: P5's left-hand preset leaves no zoom (above); the page offers it as is.
 Runs queued (queue 5): cadet_test off/on, its check, device_check off/on, 7 mutants, check_fast.
+
+### P3 958421a: runs
+- cadet_test off ALL IDENTICAL; on ALL IDENTICAL apart from 1-level noise (located above; control pending).
+- CP3's controller_check: CONTROLLER CHECK OK. Mutants 8/8 CAUGHT again (same list as on efbe62a).
+- check_fast: my first run failed before any game check (acorn wasn't installed in my container: names_check's
+  parser); installed, re-run queued (queue 6) with P5's.
+- CTT 442f339 (CTT's fixes for turn 3: OUTCOME reads #chat and who's talking; a facing test): t3_noop_crew, t3_noface
+  and PR9's c7 to re-run on 0.90.2 (queue 6). CTT has handed over to a fresh session.
