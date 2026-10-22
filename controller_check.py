@@ -268,7 +268,69 @@ def part_pick(pw):
     check(a.ev('PAD_PICK.ring.visible') is False and a.ev('document.getElementById("padHint").hidden') is True, 'pick: the ring or line stayed after a touch')
     a.close(); b.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick)]
+# every button of the panel on top, reached from its first by D-pad moves alone: { layer, items, reached, missing }
+REACH = """(() => {
+  const L = padLayer(); if (!L) return null;
+  const items = padItems(L), seen = new Set([items[0]]), todo = [items[0]];
+  while (todo.length) { const e = todo.pop(); for (const d of ['up', 'down', 'left', 'right']) { padFocusTo(e); padMove(d); const n = document.activeElement; if (items.includes(n) && !seen.has(n)) { seen.add(n); todo.push(n); } } }
+  padFocusTo(items[0]);
+  const name = e => (e.id ? '#' + e.id : '') + ' ' + (e.getAttribute('aria-label') || e.textContent || '').trim().slice(0, 30);
+  return { layer: L.id || L.className, items: items.length, reached: seen.size, missing: items.filter(e => !seen.has(e)).map(name) };
+})()"""
+def sweep(p, what, back=True, must=False):
+    p.step(3)
+    r = p.ev(REACH)
+    if not check(r is not None, f'panels: {what}: no panel on top'): return None
+    check(r['items'] > 0 and not r['missing'], f'panels: {what} ({r["layer"]}): {r["reached"]} of {r["items"]} buttons reached by the D-pad; missing {r["missing"][:6]}')
+    check(p.ev('document.activeElement && padItems(padLayer()).includes(document.activeElement)'), f'panels: {what}: the highlight is not on one of its buttons')
+    if back:
+        L0 = p.ev('(padLayer() || {}).id || null'); p.press('b'); p.step(3); L1 = p.ev('(padLayer() || {}).id || null')
+        if must: check(L1 == L0, f'panels: {what}: B closed a card you must answer')
+        else: check(L1 != L0, f'panels: {what}: B did not close it (still {L1})')
+    return r
+
+def part_panels(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    n = 0
+    # the screen's edge, from the deck
+    p.press('up'); check(p.ev('padLayer() === PAD_HUD'), 'panels: D-pad up on the deck should reach the screen-edge buttons'); sweep(p, 'screen edge'); n += 1
+    check(p.ev('padLayer()') is None, 'panels: B from the screen edge should go back to walking')
+    p.press('up'); p.ev("padFocusTo(document.getElementById('pauseBtn'))"); p.press('a'); p.step(2)
+    check(p.ev('PAUSE.on') is True and p.ev("(padLayer() || {}).id") == 'pauseCard', 'panels: A on the Pause button should pause, with the card on top')
+    sweep(p, 'pause card'); n += 1; check(p.ev('PAUSE.on') is False, 'panels: B on the Pause card should resume')
+    p.press('menu'); sweep(p, 'pause card by Menu', back=False); p.press('a'); check(p.ev('PAUSE.on') is False, 'panels: A on Resume should resume'); n += 1
+    # the lift's deck list: its goal deck (or first deck) highlighted; B is Stay here
+    p.ev('openLiftPanel()'); sweep(p, 'lift'); n += 1
+    p.ev('alarmOpen()'); sweep(p, 'alarm'); n += 1
+    p.press('view'); sweep(p, 'Tracked'); n += 1
+    p.ev('ixBoard.open()'); sweep(p, 'job board'); n += 1
+    # a conversation: the first person on the deck whose card opens (someone asleep only gets a toast)
+    if check(p.ev("DECK_CREW.some(a => { chatOpen(a.p); const c = document.getElementById('chat'); return c && !c.hidden; })"), 'panels: no conversation card would open'):
+        sweep(p, 'chat'); n += 1
+    # the device: home, then every app on it, each by A from its tile; B back home, B again closes
+    p.press('y'); sweep(p, 'device home', back=False); n += 1
+    apps = p.ev("[...DEVICE_APPS.values()].filter(a => !(a.hidden && a.hidden()) && a.id !== 'home' && a.id !== 'boot').map(a => a.id)")
+    for app in apps:
+        p.ev(f'deviceShow({json.dumps(app)})'); p.step(3)
+        r = sweep(p, 'device app ' + app, back=False)
+        p.press('b'); p.step(2)
+        check(p.ev('DEV.open && DEV.app') == 'home', f'panels: B in the {app} app should go back home, not {p.ev("DEV.open && DEV.app")}')
+        n += 1
+    p.press('b'); p.step(2); check(p.ev('DEV.open') is False, 'panels: B on the home screen should close the device')
+    # A on a home tile opens that app
+    p.press('y'); p.step(3); first = p.ev('document.activeElement && document.activeElement.textContent.trim().slice(0, 20)')
+    p.press('a'); p.step(3); check(p.ev('DEV.open && DEV.app') != 'home', f'panels: A on the home tile {first!r} should open its app')
+    p.press('y'); p.step(2)
+    # X presses the action button that shows (none now: nothing happens, nothing opens)
+    lay = p.ev("(() => { const L = padLayer(); return L ? L.id || L.className : null; })()")
+    check(lay is None, f'panels: something still open before X: {lay}')
+    p.press('x'); lay = p.ev("(() => { const L = padLayer(); return L ? L.id || L.className : null; })()")
+    check(lay is None, f'panels: X with no action button opened {lay}')
+    print(f'  panels: {n} panels swept, device apps {len(apps)}')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue

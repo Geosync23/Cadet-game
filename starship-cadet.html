@@ -53315,7 +53315,7 @@ if (PAD_ON) { addEventListener('gamepadconnected', padHello); addEventListener('
 const PAD_PANELS = [['pauseCard', () => PAUSE.on], ['ld', () => !!DISC.view], ['careerEnd'], ['sickCard'], ['qAsk'], ['lift'], ['sleepAsk'], ['ladderPanel'],
   ['shopMenu'], ['clockScreen'], ['trkPanel'], ['dmSheet', () => DM_UI.open], ['device', () => DEV.open], ['devDlg'], ['chat'], ['.ixpanel']];
 const padShown = el => !!(el && !el.hidden && el.getClientRects().length);
-function padLayer() {                                     // the open panel on top, or null: the deck is yours
+function padPanel() {                                     // the open panel on top, or null
   for (const [sel, on] of PAD_PANELS) {
     if (on && !on()) continue;
     if (sel[0] === '.') { for (const el of document.querySelectorAll(sel)) if (padShown(el)) return el; continue; }
@@ -53323,6 +53323,8 @@ function padLayer() {                                     // the open panel on t
   }
   return null;
 }
+// the open panel on top, or the screen's edge buttons while you're among them (turn 4's PAD_HUD), or null: the deck is yours
+const padLayer = () => padPanel() || (PAD_FOCUS.hud ? PAD_HUD : null);
 const PAD_DECK = { walking: false, flick: 0 };
 const padClick = id => { const b = document.getElementById(id); if (b && padShown(b) && !b.disabled) { b.click(); return true; } return false; };
 const padZoom0 = () => innerWidth / innerHeight < .8 ? 1.62 : 1.22;   // section 6's opening zoom (the same rule)
@@ -53528,6 +53530,124 @@ padOn('a', () => {                                         // A: the tap, where 
   if (!s) { P.list = padTargets(); const n = P.list.find(x => x.key === t.key); s = n ? n.s : null; }   // it moved: find it again
   if (!s) return true;
   P.chosen = false; tap(s[0], s[1]); P.n = 0; P.job = null; return true;
+});
+// ---- turn 4 (0.90.3): panels and menus without touching the screen. While a panel is open (padLayer) the highlight is
+// the page's real focus, on one of its buttons: the D-pad (or the left stick, pushed past half way) moves it to the
+// nearest button that way, as on a TV menu; A presses it (click(), exactly a tap; a text box gets the system keyboard);
+// B does what the panel's own way out does (PAD_BACK; nothing on a card you must answer); the right stick scrolls a long
+// list, the triggers a page; LB and RB are the device's Back and Home. D-pad up on the deck reaches the buttons on the
+// screen's edge (a pretend panel, PAD_HUD; B goes back to walking). X presses the action button that's showing (Repair,
+// Hobby, Put down). The outline is drawn only while the controller is in use (body.pad).
+const PAD_HUD = { id: 'hud', hud: true };
+const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard';
+const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0 };
+const PAD_FOCUSABLE = 'button, [role=button], a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
+function padItems(L) {                                     // the buttons the highlight can land on in layer L, as shown
+  const els = L === PAD_HUD ? document.querySelectorAll(PAD_HUD_SEL) : L.querySelectorAll(PAD_FOCUSABLE);
+  return [...els].filter(e => !e.disabled && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true' && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
+}
+function padFocusTo(el) {
+  if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+  try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
+}
+const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
+function padFocusIn(L) {                                   // land in a layer: keep a focus already in it (the lift's goal deck), else the first button
+  const a = document.activeElement, items = padItems(L), first = PAD_FIRST[L.id] && document.querySelector(PAD_FIRST[L.id]);
+  if (a && items.includes(a) && (!first || first.contains(a))) return;   // (the device puts its own focus on Close)
+  padFocusTo(first && items.find(e => first.contains(e)) || items[0]);
+}
+function padMove(dir) {                                    // the nearest button that way (straight on first, then a little to the side)
+  const L = padLayer(); if (!L) return false;
+  const items = padItems(L); if (!items.length) return true;
+  const a = document.activeElement; if (!items.includes(a)) { padFocusTo(items[0]); return true; }
+  const r = a.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2;
+  const [dx, dy] = { up: [0, -1], down: [0, 1], left: [-1, 0], right: [1, 0] }[dir];
+  // first the buttons in the same scrolling list (the next row may be scrolled out of sight, past the device's own keys)
+  const sc = padScroller(a), pool = items.filter(e => padScroller(e) === sc);
+  let best = padNearest(a, r, cx, cy, dx, dy, pool); if (!best && pool.length < items.length) best = padNearest(a, r, cx, cy, dx, dy, items);
+  if (best) padFocusTo(best);
+  return true;
+}
+function padScroller(e) {                                  // the nearest ancestor that scrolls, or null
+  for (let p = e && e.parentElement; p && p !== document.body; p = p.parentElement) { const o = getComputedStyle(p).overflowY; if ((o === 'auto' || o === 'scroll') && p.scrollHeight > p.clientHeight + 1) return p; }
+  return null;
+}
+function padNearest(a, r, cx, cy, dx, dy, items) {
+  let best = null, bs = Infinity;
+  for (const e of items) {
+    if (e === a) continue;
+    const q = e.getBoundingClientRect(), ex = q.left + q.width / 2, ey = q.top + q.height / 2;
+    // how far along the way, measured from the nearer edges, so a wide button next to a narrow one counts as beside it
+    const along = dx ? (dx > 0 ? q.left - r.right : r.left - q.right) : (dy > 0 ? q.top - r.bottom : r.top - q.bottom);
+    const mid = dx ? (ex - cx) * dx : (ey - cy) * dy; if (mid <= 1) continue;
+    const side = dx ? Math.max(0, Math.abs(ey - cy) - (q.height + r.height) / 4) : Math.max(0, Math.abs(ex - cx) - (q.width + r.width) / 4);
+    const s = Math.max(0, along) + side * 2.5;
+    if (s < bs) { bs = s; best = e; }
+  }
+  return best;
+}
+function padScroll(dy) {                                   // the long list the highlight is in (or the panel) scrolls by dy pixels
+  const L = padLayer(); if (!L || L === PAD_HUD) return;
+  let e = document.activeElement && L.contains(document.activeElement) ? document.activeElement : L;
+  while (e && e !== document.body) { const cs = getComputedStyle(e); if (/(auto|scroll)/.test(cs.overflowY) && e.scrollHeight > e.clientHeight + 1) { e.scrollTop += dy; return; } e = e.parentElement; }
+}
+const padEsc = () => dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+// B, panel by panel (the id of the layer, or 'ixpanel'); a panel not here gets Escape, which most already take
+const PAD_BACK = {
+  pauseCard: () => pauseSet(false),
+  ld: () => { const v = DISC.view; if (v && v.leave && !v.leave.classList.contains('hide')) v.leave.click(); },
+  careerEnd: () => {}, sickCard: () => {}, devDlg: () => {},   // a card you must answer: B does nothing (its buttons take the highlight)
+  qAsk: () => { const b = document.getElementById('qStay'); if (b) b.click(); },
+  trkPanel: () => trkClose(),
+  dmSheet: () => devmodeOpen(false),
+  device: () => { if (DEV.app && DEV.app !== 'home') deviceShow('home'); else deviceClose(); },
+  chat: () => chatClose(),
+  hud: () => { PAD_FOCUS.hud = false; const a = document.activeElement; if (a && a.blur) a.blur(); },
+};
+function padBack(L) {
+  const a = document.activeElement;
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { a.blur(); return; }   // first out of a text box
+  (PAD_BACK[L.id] || padEsc)();                          // (the job board and Ship health take Escape)
+}
+padOn('frame', () => {
+  const F = PAD_FOCUS;
+  if (F.hud && (ride || !PAD.used || padPanel())) F.hud = false;   // a real panel opening (or a touch) ends the screen-edge visit
+  const L = PAD.used ? padLayer() : null;
+  if (L && !F.css) {
+    F.css = true; const st = document.createElement('style');
+    st.textContent = 'body.pad :focus{outline:3px solid #4cc3b5!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(76,195,181,.28)!important}';
+    document.head.appendChild(st);
+  }
+  if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { F.layer = L; if (L) padFocusIn(L); }   // (and when it redraws: a new app)
+  if (!L) { F.stick = ''; return; }
+  // the left stick as a D-pad: pushed past half way, one step, then repeats like a held D-pad
+  const [x, y] = PAD.ls, m = Math.max(Math.abs(x), Math.abs(y)), dir = m < .6 ? '' : Math.abs(x) > Math.abs(y) ? (x > 0 ? 'right' : 'left') : (y > 0 ? 'down' : 'up');
+  if (dir !== F.stick) { F.stick = dir; F.rep = PAD_REP.first; if (dir) padMove(dir); }
+  else if (dir && (F.rep -= PAD.dt) <= 0) { F.rep += PAD_REP.every; padMove(dir); }
+  const sy = PAD.rs[1]; if (sy) padScroll(sy * 900 * PAD.dt);
+});
+for (const d of ['up', 'down', 'left', 'right']) padOn(d, () => {
+  if (!PAD.used) return;
+  if (d === 'up' && !padLayer() && !ride && !FREEZE.frozen) { PAD_FOCUS.hud = true; return true; }   // the deck: reach the screen's edge
+  return padLayer() ? padMove(d) : undefined;
+});
+padOn('a', () => {
+  const L = padLayer(); if (!L || !PAD.used) return;
+  const a = document.activeElement, items = padItems(L);
+  if (!a || !items.includes(a)) { padFocusTo(items[0]); return true; }
+  if (/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName)) { a.focus(); if (a.type === 'checkbox' || a.type === 'radio') a.click(); return true; }
+  a.click();
+  if (L === PAD_HUD) PAD_FOCUS.hud = false;              // a screen-edge button pressed: back to walking (its panel takes the highlight)
+  return true;
+});
+padOn('b', () => { const L = padLayer(); if (!L || !PAD.used) return; padBack(L); return true; });
+padOn('lb', () => { if (!DEV.open || padLayer() !== document.getElementById('device')) return; deviceShow('home'); return true; });
+padOn('rb', () => { if (!DEV.open || padLayer() !== document.getElementById('device')) return; deviceShow('home'); return true; });
+padOn('lt', () => { if (!padLayer()) return; padScroll(-innerHeight * .6); return true; });
+padOn('rt', () => { if (!padLayer()) return; padScroll(innerHeight * .6); return true; });
+padOn('x', () => {                                         // the action button that's showing, bottom right
+  if (padLayer() || ride || FREEZE.frozen) return;
+  for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
 // ---- end of slot: Controller engineer ----
 
