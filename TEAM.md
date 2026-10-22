@@ -576,3 +576,4 @@ Seat limit lifted for the patch, so the controller team keeps all five package b
 | TQ1 (new) | session_01EkwwgFpDwsdmD6EYHZ4yJT | `claude/patch-play1-i` | 19 toilet queue |
 | RV4 (new) reviewer | session_01GpAWYxQbS4y8rcB5LWDVE7 | `claude/review-play1b` | reviews G, H, I |
 FR4 keeps 9-12, LD1 keeps 14 + 16, SC1 keeps 18. Merge order C, F, I, A, D, B, G, E, H.
+**~03:25 UTC:** player_check on ed57dd78 OK (check-only merge fully passed). **PB2: wall clipping culprit found** = patch #10 "crew walking apart" a67ea08e (0.64.6): `idHash(id) >> 3` signed shift makes half the crew's drawn lanes lean up to half a tile into walls; fix `>>> 3` + a new body-vs-walls check. BM13: patch branches merge into a candidate `claude/integration-next`; integration is fast-forwarded only after the six-runner round passes (lead OK). OR2 reviews A, C, D.
