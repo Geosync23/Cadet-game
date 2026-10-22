@@ -139,6 +139,9 @@ class Run:
         try: self.page.wait_for_function("window.__sc('typeof MACH_NORM === \\'undefined\\' || MACH_NORM !== null')", timeout=30000)
         except Exception: pass
         self.page.wait_for_timeout(300)
+        # (RV5) the welcome message hides itself on a real-time timer (5.6 s), so whether it still shows at the first
+        # snapshot depended on the machine's speed: put it away now, the same in every run (its text stays in the page)
+        self.ev("typeof toastTimer !== 'undefined' && clearTimeout(toastTimer); typeof toastEl !== 'undefined' && toastEl.classList.remove('show')")
     def reload(self):
         self.page.reload(timeout=90000)
         self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
