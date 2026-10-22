@@ -408,18 +408,19 @@ class Sweep:
         for k in path:
             if not self.press(self.scan(), k): return False
         return True
-    def back_to(self, path, sig):
+    def back_to(self, path, sig, need=()):
         # Escape, else load again and replay the presses; a screen that comes back a little different (the device
         # reopens on the app last used) is taken as it is, and the presses left are made from there
+        here = lambda sc: self.sig(sc) == sig or (need and tuple(sorted(sc['dialogs'])) == sig[1] and sc.get('deck') == sig[0] and set(need) <= {i['k'] for i in self.inner(sc)})
         self.r.page.keyboard.press('Escape'); self.r.step(4)
         for _ in range(3):
             sc = self.scan()
-            if self.sig(sc) == sig: return True
+            if here(sc): return True
             b = next((i for i in self.inner(sc) if self.BACK.match(i['label'])), None)
             if not b: break
             self.press(sc, b['k'])
-        if self.sig(self.scan()) == sig: return True
-        if self.replay(path) and self.sig(self.scan()) == sig: return True
+        if here(self.scan()): return True
+        if self.replay(path) and here(self.scan()): return True
         self.lost.append(' > '.join(path) or '(the deck)'); return True
     def crawl(self, path=(), depth=0):
         # coverage, not screens: a screen is explored only if it shows something pressable not seen before, and each
@@ -445,14 +446,16 @@ class Sweep:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
             self.pressed.add(it['k'])
-            cur = self.scan()
-            if self.sig(cur) != sg: self.back_to(list(path), sg)
+            cur = self.scan(); need = [it['k']] if not it['k'].startswith('@') else []
+            if need and it['k'] not in {i['k'] for i in self.inner(cur)}: self.back_to(list(path), sg, need)
+            elif not need and (cur['dialogs'] or cur.get('deck') != sg[0]): self.back_to(list(path), sg)   # deck taps from the bare deck
             if not self.press(self.scan(), it['k']): continue
             after = self.scan()
             if after['url'] != sc['url']: self.lost.append('left the page: ' + it['k']); self.replay(list(path)); continue
             if self.sig(after) != sg or it['k'].startswith('@deck:'):
                 self.crawl(tuple(path) + (it['k'],), depth + 1)
-                self.back_to(list(path), sg)
+                left = [i['k'] for i in todo if i['k'] not in self.pressed and not i['k'].startswith('@')]
+                self.back_to(list(path), sg, left[:1])
     def run(self):
         self.load(); self.crawl()
         if self.r: self.r.close()
