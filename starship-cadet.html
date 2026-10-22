@@ -12715,8 +12715,7 @@ function liftButton(n) {
   return null;
 }
 const pointLiftOpen = () => { const l = document.getElementById('lift'); return !!l && !l.hidden; };
-function pointLiftStep() {                               // each frame while POINT_ON: ask when the picker opens with the arrow on another deck
-  requestAnimationFrame(pointLiftStep);
+function pointLiftStep() {                               // a watcher: ask when the picker opens with the arrow on another deck
   const open = pointLiftOpen(); if (open === POINT.lift) return; POINT.lift = open;
   if (!open) return;
   let g = null; try { g = typeof goalNow === 'function' ? goalNow() : null; } catch (e) { g = null; }
@@ -12724,7 +12723,14 @@ function pointLiftStep() {                               // each frame while POI
   const n = g.deck;
   pointAsk({ id: 'p:lift', once: 3, path: [{ el: () => liftButton(n), label: 'Your arrow\'s deck' }], done: () => !pointLiftOpen() });
 }
-if (POINT_ON) requestAnimationFrame(pointLiftStep);
+// watchers (pieces F3, F4): small functions run each frame while POINT_ON, each asking its pointer when its panel shows
+// (the Scanner, Fault notes, the valve card). POINT_WATCH.push(fn) from any section; a watcher that throws is dropped
+const POINT_WATCH = [pointLiftStep];
+function pointWatchStep() {
+  requestAnimationFrame(pointWatchStep);
+  for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); POINT_WATCH.splice(i--, 1); }
+}
+if (POINT_ON) requestAnimationFrame(pointWatchStep);
 // a tap on the pointer's own button (a step with no open: the one to press) ends it; the tap itself goes on as normal
 if (POINT_ON) document.addEventListener('click', e => {
   const c = POINT.cur; if (!c || !POINT.aim || !e.target || !POINT.aim.contains(e.target)) return;
@@ -48087,6 +48093,7 @@ function caseAct(verb, arg) {
   else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
+    const setGoal = caseNextGoal(c, k);                  // F3: the queue's while it's on (24k slot), else section 15b's own
     if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckIn(p.deck) : '') }); }
     else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
       const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
@@ -48579,6 +48586,45 @@ function p2ShowFirst(C, c, j, now) {                     // its witnesses over [
 }
 
 // ---- slot: Puzzles seat (section 24k). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// F3 (the arrows plan, M7a-d and the first head-scratcher; AC1). Everything here waits on the arrows' switches:
+// GUIDE_ON (the queue, 15b) and POINT_ON (the pointer, 19). Off, the game is as it was.
+// caseNextGoal(c, k): "Where next?"'s arrow. With the queue on it's a level-2 entry (it shows with tracking off, as you
+// asked for it) that goes when that clue is found, the case is called or 3 ship hours pass, and nothing switches your
+// job's arrow off, so after the call the job's own arrow is back (the plan: "today it doesn't"). Off: setGoal, as before.
+function caseNextGoal(c, k) {
+  if (!(typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function')) return setGoal;
+  const calls = c.calls.length, tk = SHIP.player.track;
+  return g => { SHIP.player.track = tk;                  // the old path switched tracking off just before this: put it back as it was
+    guideAsk({ id: 'case:' + c.id + ':next', level: 2, owner: '24k', until: shipNow() + 180, goal: () => g,
+      done: () => { const x = caseById(c.id); return !x || !k || x.got.includes(k.id) || x.calls.length > calls; } }); };
+}
+// the pointers (piece C), the first time each: the Scanner (read the bars, then fetch the low one: not on a
+// head-scratcher, where every suspect reads worn), then Fault notes for the first case (the Works app, its tab, Where
+// next?, a suspect the crew tried, and Call it once only one is left)
+const F3P = { scanT: 0, scanJob: null };
+function f3ScanWatch() {
+  const id = DEV.open && DEV.app === 'scanner' && typeof SCAN_UI !== 'undefined' ? SCAN_UI.job : null, j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j || !j.scan || j.picked || caseOf(j)) { F3P.scanJob = null; return; }
+  if (F3P.scanJob !== id) { F3P.scanJob = id; F3P.scanT = performance.now(); }
+  const low = j.scan.slice().sort((a, b) => a[1] - b[1])[0][0];
+  pointAsk({ id: 'p:scan', once: 1, done: () => !!j.picked || !(DEV.open && DEV.app === 'scanner'), path: [
+    { open: () => performance.now() - F3P.scanT > 3000, el: () => document.querySelector('#devBody .bars'), label: worksText('scan.point.bars', 'Read the bars: the low one\'s the fault') },
+    { el: () => buttonFor({ app: 'scanner', do: 'pick', arg: j.id + '|' + low }), label: worksText('scan.point.fetch', 'The low one: fetch it') }] });
+}
+function f3CaseWatch() {
+  const C = SHIP.works && SHIP.works.cases && caseState(), c = C && C.open.find(x => !x.wait); if (!c) return;
+  const app = caseApp(), tab = app === 'works' ? [{ open: () => WORKS_TAB === 'faults', el: () => buttonFor({ app: 'works', do: 'tab', arg: 'faults' }), label: worksText('case.point.tab', 'Fault notes: your first head-scratcher') }] : [];
+  const onNotes = () => DEV.open && DEV.app === app && (app !== 'works' || WORKS_TAB === 'faults') && !CASE_UI.chief;
+  if (!onNotes()) { pointAsk({ id: 'p:case:open', once: 1, path: [...pointToApp(app, worksText('case.point.app', 'Works: a head-scratcher')), ...tab], done: () => onNotes() }); return; }
+  const A = (v, arg) => ({ app, do: 'case:' + v, arg: c.id + '|' + arg }), left = c.clues.length - c.got.length;
+  if (CASE_UI.at && CASE_UI.at !== c.id) return;
+  const tried = c.clues.filter(k => c.got.includes(k.id)).flatMap(k => k.kills || []).find(s => c.sus.includes(s) && !c.crossed.includes(s) && !c.known.includes(s));   // a found note rules it out
+  const can = c.sus.filter(s => !c.crossed.includes(s) && !c.known.includes(s));
+  if (tried) pointAsk({ id: 'p:case:cross', once: 1, path: [{ el: () => buttonFor(A('cross', tried)), label: worksText('case.point.cross', 'Cross out what was tried') }], done: () => !onNotes() || c.crossed.includes(tried) });
+  else if (left && !CASE_UI.ask) pointAsk({ id: 'p:case:next', once: 1, path: [{ el: () => buttonFor(A('next', 0)), label: worksText('case.point.next', 'Where next? The next clue') }], done: () => !onNotes() });
+  else if (can.length === 1 && !c.long && !CASE_UI.ask && !c.calls.length) pointAsk({ id: 'p:case:call', once: 1, path: [{ el: () => buttonFor(A('call', can[0])), label: worksText('case.point.call', 'Only one left: call it') }], done: () => !onNotes() || c.calls.length > 0 });
+}
+if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(f3ScanWatch, f3CaseWatch);
 // ---- end of slot: Puzzles seat ----
 
 // ---------------------------------------------------------------------
@@ -48791,7 +48837,7 @@ function incPost(t, by) {                                // the open incident's 
   return j.id;
 }
 if (typeof jobKindAdd === 'function') jobKindAdd('incident', { tier: 1, work: 0, text: 'Incident',
-  stops: incStops, stepDone: incStepDone, done: incDone, veto: true,
+  stops: incStops, stepDone: incStepDone, done: incDone, veto: true, goal: incStopWord,
   crew: { can: incWorks, mins: j => j.walk ? 5 : 25 + Math.floor(schedU(machSeed(j.id), worksDay(j.posted), 873) * 16) } });
 // the ladder row (m6): the training is an urgent call, not an appointment by Mail: offer (24 core's hook) makes the
 // meeting at the incident's minute with no Mail; then reserve gives the teacher's walk to the pipe (watch 1 minute
@@ -48814,8 +48860,36 @@ function incOffer(row, c, d, t) {
 // it safe with the crew and tells you the next try's day, 10:30 and the office (the same call again, not a 06:00 restart)
 const INC_FOLLOW = 30, INC_WARN = 10;
 const INC_GOAL = { g: null };                            // the arrow this block set (PR9: clear only that one, never another section's)
-function incGoalSet(g) { if (typeof setGoal !== 'function') return; setGoal(g); INC_GOAL.g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; }
-function incGoalClear() { if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null; }
+function incGoalSet(g, by) {
+  if (incGuide()) { const q = INC_GOAL.q = { g, by }; guideAsk({ id: 'inc:m6', level: 1, owner: '24f', until: shipNow() + 90, goal: () => incGoalNow(q), done: () => INC_GOAL.q !== q }); return; }   // F4: the queue, level 1 (over everything)
+  if (typeof setGoal !== 'function') return; setGoal(g); INC_GOAL.g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null;
+}
+function incGoalClear() {
+  if (INC_GOAL.q) { INC_GOAL.q = null; if (typeof guideDrop === 'function') guideDrop('inc:m6'); }
+  if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null;
+}
+// F4 (the arrows plan, M6a-d; AC1), only while the arrow queue is on (GUIDE_ON): the call and the follow are level-1
+// queue entries (so they clear themselves and give the job's arrow back); while you follow, the arrow is on the teacher
+// herself when she's on your deck and not yet at the pipe's deck, else the valve panel; each stop of the burst says
+// what it is ("Close the valve upstream of the wet", "Mop up (1 of 2)"); on the valve card, the first time, a pointer on
+// the valve nearest the wet (piece C, POINT_ON)
+const incGuide = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
+function incGoalNow(q) {
+  const g = q.g; if (!q.by || typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num === g.deck) return g;
+  const a = DECK_CREW.find(x => x.p && x.p.id === q.by); return a ? { ...g, deck: deckDef.num, crew: q.by } : g;
+}
+function incStopWord(j, k) {
+  if (!incGuide() || j.inc !== 'burst' || j.walk) return null;
+  const st = incStops(j), s = st[k]; if (!s) return null;
+  if (s.tag === 'safe') return worksText('inc.goal.safe', 'Close the valve upstream of the wet');
+  const cl = st.filter(x => x.tag === 'clean'); return s.tag === 'clean' ? worksText('inc.goal.mop', 'Mop up ({i} of {n})', { i: cl.indexOf(s) + 1, n: cl.length }) : null;
+}
+function incValveWatch() {                                 // the valve card up, on your burst job: the valve nearest the wet
+  const j = typeof myJob === 'function' && myJob(); if (!j || j.kind !== 'incident' || j.inc !== 'burst' || !DEV.choose) return;
+  const line = (DECKS[j.deck] && DECKS[j.deck].valveLine) || [1, 2, 3].map(k => j.deck + '-valve-' + k), title = worksText('inc.burst.safe.title', 'Which valve?');
+  if (chooseButton(line.length - 1, title)) pointAsk({ id: 'p:inc:valve', once: 1, path: pointCard(line.length - 1, worksText('inc.point.valve', 'The one nearest the wet'), title), done: () => !DEV.choose });
+}
+if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(incValveWatch);
 const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
 function incWarn(c, at, now) {
   const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
@@ -48847,7 +48921,7 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
-    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
+    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) }, c && c.by);   // FX3: with her, not the office
     if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
