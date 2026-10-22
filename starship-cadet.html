@@ -54289,6 +54289,7 @@ function padWhat(cx, cy, want) {                           // what a tap at (cx,
   const h = pick(cx, cy); if (!h) return null;
   const ud = h.object.userData;
   if (ud.walker && ud.walker.active) return 'walker:' + ud.walker.spec.name;
+  if (typeof ladderAimed === 'function' && ladderAimed(h)) return 'ladder';   // tap()'s next step (follow-up 1, CTT3's find): a point in line with the Spine ladder goes to the ladder, not the lift behind it
   if (ud.item) return ud.item.lift ? 'lift' : 'item:' + ITEMS.indexOf(ud.item);
   if (ud.liftDoor) return 'lift';
   if (ud.youLock) return 'lock:' + ud.youLock;
