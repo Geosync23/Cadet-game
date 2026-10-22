@@ -37,4 +37,16 @@ Tried first and replaced, because their check passed (or showed only its known F
 | `crewGather` finds no tiles | 14 | career | the promotion's gatherings standing nobody anywhere (only career's known FAIL showed) |
 | `DAY_SHIFT` 09:00 → 10:00 (a table) | 17 | intro | the day shift starting an hour late in the first week |
 
-These are gaps worth a look by each check's owner (the picker did pick each of them; it's the checks that stayed green).
+These were gaps in the checks (the picker did pick each of them; it's the checks that stayed green). **Closed** (TS3,
+2026-10-22, lead 25's ask), each proven: the clean game passes (career: only its known backlog 12), the fault FAILs:
+
+| Fault | Closed in | The new assertion | On the fault |
+|---|---|---|---|
+| `DAY_SHIFT` an hour late | intro_check part 10 | the shadow beat starts within 15 min of the shift's start, and you're on shift when you take its job | FAIL: the beat at 09:05, the shift 10:00-17:00 |
+| `socialSeekAsk` never records the ask | intro_check part 10 | Pell's Wednesday ask was made | FAIL: asked False |
+| `wsOf` starts afresh | mech_check side | a wait step keeps its start when you come back before it's ready | FAIL: [True, False] |
+| `eventDay` true every day | mech_check ff, career_check (e) | with the events base off, no day 1-60 is an event day (so cases are offered) | FAIL: Days 1-60 all event days |
+| `crewGather` finds no tiles | career_check (e) | the Day 10 box: Tomas and Pell each on their own tile by your door | FAIL: ids [] |
+
+Not closed: `seekArrive` never showing the chip (20 → intro): the lead's list didn't name it. puzzle_check already
+catches `eventDay` true every day ("cases were posted over Days 5-26 on paper: 0").
