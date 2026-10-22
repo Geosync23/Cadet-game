@@ -4,7 +4,14 @@ RV2 (session_01E1TTHbhLzy2U6pAoGh7E9a), branch `claude/review-controller` (notes
 Lead 26 (session_015mHBLCf5jpnzBkFY1iBTqv, claude/lead-26; took over from lead 25 at 02:09); team leader CT1 (session_019sqDowb6QNf3KZAYMSx1jM, claude/controller);
 first reviewer PR9 (session_01B1FUTc4sJR4Q5FFnx7L6Db, notes on claude/review-8, `plans/review-9.md`).
 
-## Split (agreed with PR9, 2026-10-22 02:00)
+## Split (lead 26's plans/controller-team.md, claude/lead-26 31151143; replaces the 02:00 split)
+- RV2: **P3** button pictures + connect/disconnect (CP3 session_01AkfeDe7MBN8RYd5n6obGRm, claude/controller-p3),
+  **P4** the Controller settings page (CP4 session_01VTXDwLqWGJVRh95HozqhCu, claude/controller-p4), **P5** accessibility
+  + docs (CP5 session_01VcdDgzyHa1dqdmcRLELbiS, claude/controller-p5), and CTT's checks.
+- PR9: P1 panels, P2 mini-games. Base for all: claude/controller a2c80df6. Turn 3 (the ring) had no named reviewer; my
+  review of it below is extra, sent to PR9 and the lead.
+
+### Old split (agreed with PR9, 2026-10-22 02:00)
 - PR9: the foundation (section 26, the switch, polling, connect/disconnect) and packages p1-p2.
 - RV2: packages p3-p5 and CTT's `controller_check.py` (the fake pad, the reachability sweep, its mutants).
 
