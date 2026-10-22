@@ -1,5 +1,21 @@
 # Check runner CR4: results
 
+## 0.64.16 full round (2026-10-22)
+
+- **Candidate:** `claude/integration-next` b9f053ba ("0.64.16: the Zeke patch (ON1's claude/patch-zeke ce2f77bc)")
+- **starship-cadet.html sha256:** `70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7` (matches BM13's)
+- **OLD:** `claude/integration` 2b4a05db (0.64.15), sha256 `0c1f6fb4...8259d2e`; not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, one at a time, alone, checked out at b9f053ba (day_check.py unchanged since 31c44cb9), `CADET_WORK=/tmp/work-cr4`
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 261 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped, as designed); draw calls peak 250 / 450 |
+| day_check 13 | OK (exit 0, 254 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped); draw calls peak 253 / 450 |
+| day_check 16 | OK (exit 0, 263 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 246 / 450 |
+| day_check 19 | OK (exit 0, 252 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 265 / 450 |
+
+**CR4: OK.** No FAILs. Same peaks as 0.64.15.
+
 ## 0.64.15 full re-run (2026-10-22)
 
 - **Candidate:** `claude/integration-next` 31c44cb9 ("Merge claude/patch-play1-d 836db6c7 ... into claude/integration-next")
