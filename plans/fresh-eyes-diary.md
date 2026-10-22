@@ -55,3 +55,23 @@ Screenshots: `plans/fresh-eyes/`.
 18. **19:52, bubbles cover the clock.** Bo Mbeki's and Mateo Navarro's bubbles sat over the top-left clock and the Device and Needs buttons. *Small.* (`d0-17-bubble-covers-clock.png`)
 
 What worked well on Day 0: signing the manifest; Zeke's chat on the walk (warm and funny); the people cards; the device's home screen ("Settling in: 0 of 17 done", Dinner: the mess, Deck 3); the Mail; the ladder's deck list; the lift's deck list once found.
+
+**Day 0 bedtime (20:00-21:02).**
+
+19. **20:00, the Settling in list.** Clear: "0 of 17 done. Nothing here is required: people will show you as the week goes on." with "Go there" buttons. Good.
+
+20. **20:02, the arrow's label sits under the Needs bar.** Tracking "Your bunk" from the mess: the label "Take the lift to Deck 4: your bunk" and the arrow ring sat right on top of the Needs bar. Later on Deck 4 the ring was hidden under the Needs bar entirely. *Small.* (`d0-21-arrow-label-over-needs.png`, `d0-24-arrow-under-needs-bar.png`)
+
+21. **20:14-20:26, the lift again (Deck 3).** Following the arrow to the lift on Deck 3, I walked onto the lift floor and tapped around it; nothing. I tapped the small keypad by the door and got nothing either (I may have been too far away, or tapped the person in front of it: Vera Ueda's card opened). I gave up and took the spine ladder down to Deck 4 (its list is in a good order: up first, then down). Same problem as item 7: it is not clear how to call the lift. *Confusing.* (`d0-22-ladder-list-order.png`)
+
+22. **20:26-20:47, finding Bunk 1 from the lift alone was hard.** The arrow points in a straight line at the bed, through walls, and the camera turned so that "toward the arrow" led me into walls, then into Bunk 2. I tapped the bed under the pin from inside Bunk 2: nothing happened (no "can't get there from here"). I got there by walking out to the junior corridor and in again. About 20 ship minutes. *Confusing.*
+
+23. **20:41, a crew member lying flat on the corridor floor** (near Esme Walsh's bubble, outside the bunk rooms). Looked like someone had collapsed. Later I saw people lying on top of their bunks, which looks right; this one was on the floor. *Small.* (`d0-23-crew-lying-on-floor.png`)
+
+24. **20:48-20:59, the bunk would not let me sleep.** Tapping my bunk only showed "Bunk: Tomas has taped a star map to the underside of the top bunk." Three times, two different spots. Nothing said it was too early. The Schedule doesn't show a bedtime. At 21:01 the same tap gave "You climb into your bunk" and the Alarm card. If there's a rule (no sleep before 21:00), I'd like to be told. *Confusing.* (`d0-26-bunk-only-description.png`, `d0-25-alarm.png`)
+
+25. **21:02, the Alarm card is good.** "Wake at 06:00", minus/plus, "You'll wake with about 100% energy." Clear.
+
+(Note for the lead, not a game problem: my test browser was restarted at 20:40 and the game reloaded from its own hourly save at 20:26, Main lift Deck 4. "Welcome back" said so. Tracked was cleared by the reload, which is fine.)
+
+**Day 0 summary:** the tour is warm but I lost most of the evening to the lift (no idea how to call it), and the tour itself ran past dinner, so the first thing my boss said to me was "Missed you at dinner". Then I took a tray twice and never managed to eat. Went to bed hungry (Food 46).
