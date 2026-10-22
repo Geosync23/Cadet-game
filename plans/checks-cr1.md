@@ -66,3 +66,20 @@ Checked out as is. **sha256 of starship-cadet.html: `e955d667fe946b3e1e0a21c0b1f
 | talk_check | **OK** | 28 s | TALK CHECK OK |
 
 No FAILs, so no OLD (0.64.14, 32b699a6) runs were needed.
+
+# Round 4: 0.64.15 re-run (claude/integration-next 31c44cb9, 2026-10-22)
+
+Checked out as is. **sha256 of starship-cadet.html: `0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e`**
+(matches the lead's). Share as before plus fridays_check (moved from CR6). One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 337 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 245 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 265 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 63 s | PUZZLE CHECK OK |
+| social_check | **OK** | 25 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 29 s | TALK CHECK OK |
+| fridays_check | **OK** | 1179 s | FRIDAYS CHECK OK |
+
+No FAILs, so no OLD (0.64.14, 32b699a6) runs were needed.
