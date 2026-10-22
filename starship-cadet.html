@@ -53577,14 +53577,20 @@ const PAD_FIRST = { device: '#devBody' };                 // where to land first
 const PAD_HUD = { id: 'hud', hud: true };
 // (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
 const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';
-const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0, last: null };   // last: where the highlight was, for a redraw
+const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0, last: null, el: null, tabs: new Set() };   // last: where the highlight was, for a redraw; el: the button the pad put the highlight on; tabs: the boxes it made focusable
+// a touch or the mouse takes over: the pad's own highlight goes (a focus the game set itself stays), and so do the tabIndex it added
+padOn('unuse', () => {
+  const F = PAD_FOCUS, a = document.activeElement; if (F.el && a === F.el && a.blur) a.blur();
+  for (const e of F.tabs) e.removeAttribute('tabindex'); F.tabs.clear(); F.el = null; F.hud = false;
+});
 const PAD_FOCUSABLE = 'button, [role=button], a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 function padItems(L) {                                     // the buttons the highlight can land on in layer L, as shown
   const els = L === PAD_HUD ? document.querySelectorAll(PAD_HUD_SEL) : L.querySelectorAll(PAD_FOCUSABLE);
   return [...els].filter(e => !e.disabled && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true' && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
 }
 function padFocusTo(el) {
-  if (!el) return; if (el.tabIndex < 0 && !el.hasAttribute('tabindex')) el.tabIndex = -1;   // a card you tap (a div) takes the focus too
+  if (!el) return; if (el.tabIndex < 0 && !el.hasAttribute('tabindex')) { el.tabIndex = -1; PAD_FOCUS.tabs.add(el); }   // a card you tap (a div) takes the focus too
+  PAD_FOCUS.el = el;
   try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
   try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
 }
