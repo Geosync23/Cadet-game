@@ -176,12 +176,22 @@ def mins(t):
 
 # part 12, also on its own: python3 intro_check.py BUILD.html --week (a fast-forwarded week is slow; the lead's quick checks)
 def week(g):
-    print('12. The week in the real game: each beat\'s teacher says their lines in its room in its window (the writers\' beat.<id>.<n>); Tomas comes to Sowing')
+    print('12. The week in the real game: on paper, no intro beat\'s place shared with someone else\'s plan (Days 0-8); each beat\'s teacher says their lines in its room in its window (the writers\' beat.<id>.<n>); Tomas comes to Sowing')
     if not g.ev("typeof introBeatTick === 'function' && typeof skipTo === 'function'"):
         print('  not yet: no introBeatTick')
     else:
         g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        # on paper first (backlogs #20 and #25, PR9's rule): Days 0-8, nobody planned in a place someone on an intro beat
+        # has at the same minutes (seated places, not an event's standing spots): a teacher's seat stays theirs
+        cl = g.ev("""(() => { const out = [], byId = schedData().byId;
+          for (let d = 0; d <= 8; d++) { const segs = []; for (const [id, plan] of shipDay(d).plans) for (const s of plan) if (s.placeId) segs.push([id, s]);
+            for (let i = 0; i < segs.length; i++) for (let j = i + 1; j < segs.length; j++) { const [a, s] = segs[i], [b, u] = segs[j];
+              if (a !== b && s.placeId === u.placeId && s.from < u.to && u.from < s.to && (byId.get(s.placeId) || {}).type !== 'event' && (/^intro/.test(s.tag || '') || /^intro/.test(u.tag || '')))
+                out.push(`Day ${d} ${s.placeId} ${hhmm(Math.max(s.from, u.from) % 1440)}: ${a} (${s.tag || s.act}) and ${b} (${u.tag || u.act})`); } }
+          return out; })()""")
+        print(f"  intro beats' places, Days 0-8: {len(cl)} shared with someone else's plan")
+        for c in cl[:8]: fail('a place shared with an intro beat: ' + c)
         g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), text]); return old.apply(this, arguments); }; return true; })()")
         beats = g.ev("INTRO_WEEK.filter(b => b.who && introBeatLines(b).length).map(b => b.id)")
         only = [x.split('=', 1)[1].split(',') for x in sys.argv if x.startswith('--beats=')]   # e.g. --week --beats=d4-quiz,d5-invite
