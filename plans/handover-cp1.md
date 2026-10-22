@@ -40,3 +40,17 @@ once gave screenshot noise once), check_fast. Setup: pip install playwright; thr
 - Check changes now go to CTT2 (claude/controller-tests), not straight into claude/controller's copy.
 - Merges of packages clash at the end of section 26's slot; when git keeps one shared closing `}` outside, add one
   between the two blocks.
+
+## Update 2026-10-22 ~19:35 UTC
+- 0.90.9 = claude/integration 0.64.17 merged into the controller (f929c0b0; on claude/controller-p1 54a5c5a8; claude/controller
+  itself is still 0.90.8 until CTT2's check fixes pass). BM14 builds fresh-eyes batch 1 (0.91.0) on f929c0b0
+  (claude/integration-next-fe1). A stray copy branch claude/controller-p1-0909 exists (the remote refused deletes; lead 29: leave it).
+- On 0.90.9 CTT2's touch / pick / day parts failed: the check's routes meeting 0.64.17's playtest changes, fixed by CTT2
+  ("for 0.64.17 in the controller" on claude/controller-tests); send BM14 that commit when it's confirmed, with SKIP {'#newgame'} dropped.
+- Follow-up before any switch-on (lead 29): CTT2's reach sweep said the D-pad never reached the device home's Roster tile,
+  Tracked's "Dawn swim" and "The job board" rows, Calendar's second "Don't", and the appointment map's svg "Deck plan".
+  My check on 0.90.9: the four buttons are in padItems and padMove reaches them (the second "Don't" in one press; P1's own
+  panels walk reaches every button there); the sweep's pad half stops at 6 presses deep. The svg's taps are Maps' room
+  picks, all in the Rooms list (PR9's ruling). To do on top of 0.91.0: walk straight to each with padMove on 0.91.0's game
+  and fix padNearest if one is truly unreachable; the new tester raises the sweep's depth or walks to targets directly
+  and allows the Deck plan as covered.
