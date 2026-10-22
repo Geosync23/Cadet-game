@@ -581,3 +581,9 @@ FR4 keeps 9-12, LD1 keeps 14 + 16, SC1 keeps 18. Merge order C, F, I, A, D, B, G
 **~03:35 UTC:** the user: pare-down mark = 20% of the weekly allowance used; the user may give a time instead (lead sets a scheduled task for it). Overlap fixed: ON1 had already coded note 8 (hygiene) → ON1 keeps 8; CJ1 keeps note 7 only, combining ON1's Day 2 findings (solo job claimed silently, arrow stays on Rounds, Torres's Deck 6 clash).
 **~03:38 UTC, the user (goodnight):** at **2am Eastern (06:00 UTC)** go down to **8 workers total**, divided so the patch has priority. Scheduled (send_later at 06:00 UTC). Lead's reading: at most 8 seats working at once (idle standby seats don't use the allowance; the lead isn't counted). Then: BM13, unfinished patch builders and their reviewers, then the six runners for 0.64.15's round as builders finish; the controller team and the Line seats finish their current step, push, and pause.
 **~03:40 UTC:** LB3: integration 0.64.14 merged into claude/line-update (tip 67b2c38c; Line OFF = ALL IDENTICAL to 0.64.14; check_fast OK). PR10 re-reviews; the Line's six-runner round comes after 0.64.15's (patch first). L6 switch-on waits for the user. Question for PR10: food_check 7 1 "garden, good" (backlog 23) on integration too?
+**~03:45 UTC, the user (last notes before sleep):** note 7: no new job type; the solo job must track like other jobs and be clear (CJ1 told). New notes: 20 many clock in/out reminders, 21 "a lot of repeating lines in the talk with pack" (unclear: Noor Park, Zeke, or crew chat; DL1 measures). Plan e29851e0.
+| Seat | Session | Branch | Notes |
+|---|---|---|---|
+| CK1 (new) | session_019aKGycYTir7m7CosDxnixN | `claude/patch-play1-j` | 20 clock in/out reminders (RV3) |
+| DL1 (new) | session_01UzTkeUaWVVFkSWa4f1dVYk | `claude/patch-play1-k` | 21 repeating lines (RV4) |
+Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC (send_later trig_01BXxoLKo6FYJZGm7ZasvycW).
