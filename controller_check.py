@@ -889,7 +889,9 @@ with sync_playwright() as pw:
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
         if '--mutants' in FLAGS:
             for name, code in MUTANTS.get(part, {}).items():
-                mf = PART_FN[part](br, plant(psrc, code), 'm')
+                # caught only by a failure the clean run didn't have (a part already failing proves nothing)
+                norm = lambda f: re.sub(r'-?[\d.]+', 'N', f)   # the same failure with other numbers is the same failure
+                mf = [f for f in PART_FN[part](br, plant(psrc, code), 'm') if norm(f) not in {norm(x) for x in fails}]
                 caught = bool(mf)
                 print(f'  planted fault "{name}": {"caught (" + mf[0][:110] + ")" if caught else "NOT CAUGHT"}')
                 check(caught, f'{part}: the planted fault "{name}" was not caught')
