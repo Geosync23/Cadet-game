@@ -1,0 +1,11 @@
+af_follownow ['-'] MISSED []
+af_valve0 ['-'] CAUGHT ["FAIL F#: the valve card: on the valve nearest the wet (Valve #) ({'up': True, 'now': 'p:inc:valve', 'label': 'The one nearest the wet', 'text': 'Valve #'})"]
+af_track ['-'] CAUGHT ["FAIL F#: Where next?'s arrow is a level# queue entry and tracking is left alone ({'e': #, 'lab': 'laundry', 'track': None, 'direct': False}, track was f#case)", "FAIL F#: after the call the job's own arrow is back ({'next': False, 'lab': None, 'job': 'Look over the washer', 'calls': #, 'up': False})"]
+af_scanhs ['-'] MISSED []
+af_call2 ['-'] MISSED []
+af_nextdone ['-'] MISSED []
+af_stopoff ['-'] CAUGHT ["FAIL off: as before ({'a': 'Follow test', 'after': None, 'w': 'Mop up (# of #)', 'n': True, 'list': #})"]
+af_nowait ['-'] CAUGHT ["FAIL F#: the Scanner: first on the bars ({'ok': True, 'low': 'relay', 'cause': 'relay'}, {'up': True, 'now': 'p:scan', 'label': 'The low one: fetch it', 'text': 'Fetch: relay'})"]
+af_inclevel ['-'] CAUGHT ["FAIL F#: the follow is a level# queue entry, not a direct arrow ({'level': #, 'a': 'Follow Calder to the burst pipe, Deck #', 'direct': False, 'after': None, 'live': False})"]
+af_incclear ['-'] CAUGHT ["FAIL F#: after the call the job's own arrow is back ({'next': False, 'lab': 'Follow Calder to the burst pipe, Deck #', 'job': 'Look over the washer', 'calls': #, 'up': False})", "FAIL F#: cleared, gone ({'level': #, 'a': 'Follow Calder to the burst pipe, Deck #', 'direct': False, 'after': 'Follow Calder to the burst pipe, Deck #', 'live': True})"]
+mut exit 0

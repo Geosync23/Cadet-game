@@ -1,0 +1,22 @@
+Day 8, Monday 05:52 | None | None | None | None | None |  | arrows-check-yesterday | 4 | 7,1 | -
+Day 8, Monday 06:00 | None | None | None | m6:meet | None | train:m6:meet:8/L2 | arrows-check-yesterday | 4 | 7,1 | -
+Day 8, Monday 08:01 | Fetch a fan belt: the Galley parts shelf | None | None | m6:meet | None | train:m6:meet:8/L2 | 3-galleyplant-1@163 | 5 | 32,3 | -
+Day 8, Monday 08:08 | Repair the galley plant | None | None | m6:meet | None | train:m6:meet:8/L2 | 3-galleyplant-1@163 | 3 | 39,1 | -
+Day 8, Monday 08:21 | Fetch an element: the Galley parts shelf | None | None | m6:meet | None | train:m6:meet:8/L2 | 3-oven-2@162 | 5 | 32,3 | -
+Day 8, Monday 08:25 | Repair the oven | None | None | m6:meet | None | train:m6:meet:8/L2 | 3-oven-2@162 | 3 | 38,4 | -
+Day 8, Monday 08:38 | Take a job at the job board | None | None | m6:meet | None | train:m6:meet:8/L2 | 3-oven-2@162 | 5 | 15,0 | -
+Day 8, Monday 09:02 | Take a hover cart from the Cart bay | None | None | m6:meet | None | train:m6:meet:8/L2 | restock-meals@177 | 5 | 19,13 | -
+Day 8, Monday 09:04 | Load the cart in the cargo hold | None | None | m6:meet | None | train:m6:meet:8/L2 | restock-meals@177 | 5 | 16,11 | -
+Day 8, Monday 09:12 | Unload at the cold store | None | None | m6:meet | None | train:m6:meet:8/L2 | restock-meals@177 | 3 | 36,1 | -
+Day 8, Monday 09:27 | Dock the cart in the Cart bay | None | None | m6:meet | None | train:m6:meet:8/L2 | restock-meals@177 | 5 | 19,13 | -
+Day 8, Monday 09:30 | Clean a vent: laundry | None | None | m6:meet | None | train:m6:meet:8/L2 | extra-vent:4-laundry-1@177 | 4 | 14,18 | -
+Day 8, Monday 10:15 | 10:30 meet Calder: Works Chief's office | train:m6:meet:8 | None | m6:meet | None | train:m6:meet:8/L2* | extra-vent:4-laundry-1@177 | 5 | 10,1 | -
+Day 8, Monday 10:30 | Meet Ines | inc:m6 | None | m6:meet | None | train:m6:meet:8/L2 inc:m6/L1* | extra-vent:4-laundry-1@177 | 5 | 10,1 | -
+Day 8, Monday 10:32 | Follow Ines to the burst pipe, Deck 4 | inc:m6 | None | m6:watch | None | inc:m6/L1* train:m6:watch:8/L3 | extra-vent:4-laundry-1@177 | 5 | 13,0 | -
+Day 8, Monday 11:04 | Clean a vent: laundry | None | None | m6:ask | None |  | extra-vent:4-laundry-1@177 | 4 | 14,18 | -
+labels seen: ["10:30 meet Calder: Works Chief's office", 'Clean a vent: laundry', 'Dock the cart in the Cart bay', 'Fetch a fan belt: the Galley parts shelf', 'Fetch an element: the Galley parts shelf', 'Follow Ines to the burst pipe, Deck 4', 'Load the cart in the cargo hold', 'Meet Ines', 'Repair the galley plant', 'Repair the oven', 'Take a hover cart from the Cart bay', 'Take a job at the job board', 'Unload at the cold store']
+trained: {"m1":2,"m4":3,"m3d":3,"m5":4,"m3i":4,"m7":5,"p3":5,"m2":8}
+errors: []
+dev errors: []
+acts: []
+exit 0
