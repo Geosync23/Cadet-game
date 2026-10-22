@@ -749,6 +749,11 @@ def part_odd(pw, src, tag):
 # kind), an item (ITEMS), a sealed door (CLOSED_DOORS) and the lift door. Stand beside it facing it; step the D-pad right
 # until the bottom line (#padHint) names it; press A. A second run, frame for frame the same, taps the thing where it is
 # on screen instead. A must lead to what the tap led to.
+CROWDED_SEAT = r"""(() => { const held = id => typeof heldBy === 'function' ? !!heldBy(id) : false;
+  for (const pl of PLACE_OF.values()) { if (pl.type !== 'mess-seat' || held(pl.id)) continue; const sp = placeSpot(pl.id); if (!sp) continue;
+    const a = DECK_CREW.find(a => a.x !== undefined && a.settled && Math.hypot(a.x - sp.x, a.z - sp.z) < 1.3);
+    if (a) return { kind: 'crowded seat', name: pl.id + ' beside ' + a.p.name, words: ['sit'], x: sp.x, y: 0, z: sp.z, seat: 1 }; }
+  return null; })()"""
 PICK_TARGETS = r"""(() => { const out = [], v = new THREE.Vector3();
   const a = DECK_CREW.find(a => a.x !== undefined && a.pose !== 'lie') || DECK_CREW.find(a => a.x !== undefined);
   if (a) out.push({ kind: 'crew', name: a.p.name, words: [a.p.name.toLowerCase()], x: a.x, y: (a.y || 0) + 1, z: a.z, crew: DECK_CREW.indexOf(a) });
@@ -794,8 +799,14 @@ def pick_one(pw, src, tag, by_pad, n):
     if by_pad: r.press('B'); r.step(2)
     else: r.step(5)
     ts = r.ev(PICK_TARGETS)
-    if n >= len(ts): r.close(); return None, len(ts)
-    t = ts[n]; name = t['kind'] + ' (' + str(t.get('name')) + ')'
+    if n > len(ts): r.close(); return None, len(ts)
+    if n == len(ts):
+        # the crowded mess at breakfast (the plan's risk: "picking the wrong thing in a crowded mess hall"): a free seat
+        # with someone seated right beside it; "Sit" must sit you there, not talk to them
+        r.ev("skipTo((SHIP.time.day - 1) * 1440 + 7 * 60 + 40); goToDeck(3, null)"); r.step(240)
+        t = r.ev(CROWDED_SEAT)
+        if not t: r.close(); return ['crowded seat (none free beside someone)', 'nowhere to stand', None, None], len(ts)
+    else: t = ts[n]; name = t['kind'] + ' (' + str(t.get('name')) + ')'
     r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
     r.step(12); hints = []; found = not by_pad
@@ -826,6 +837,9 @@ def part_pick(pw, src, tag):
     for (kind, hint, op, found), (_, _, ot, _) in zip(P, T):
         if hint == 'nowhere to stand': print(f'  {kind}: nowhere to stand beside it'); continue
         if not found: fails.append(f'{kind}: the bottom line never named it ({[h for h in hint if h][:4]})'); print(f'  {kind}: not reached by the D-pad'); continue
+        if 'seat' in kind:
+            ot = {k: ot[k] for k in ('act', 'open', 'dev', 'lift', 'deck')} | {'toast': ot['toast'].split('|')[0]}
+            op = {k: op[k] for k in ('act', 'open', 'dev', 'lift', 'deck')} | {'toast': op['toast'].split('|')[0]}
         d = diff_state(ot, op)
         print(f'  {kind}: the line says "{hint}"; A {"did what the tap did" if not d else "differs from the tap: " + "; ".join(d[:3])}')
         if d: fails.append(f'{kind} ("{hint}"): A and a tap differ: ' + '; '.join(d[:3]))
@@ -1046,6 +1060,10 @@ MUTANTS = {
     },
 }
 def plant(src, code):
+    # a fault is JS added beside the game, or ('src', old, new): a change inside section 26 itself (a reviewer's fault)
+    if isinstance(code, tuple):
+        if src.count(code[1]) != 1: raise ValueError('cannot be planted in this build (its line is not there once)')
+        return src.replace(code[1], code[2])
     i = src.rfind('})();')
     return src[:i] + '\n// planted by controller_check --mutants\n' + code + src[i:]
 
@@ -1072,7 +1090,11 @@ MUTANTS['odd'] = {
     'only the first pad listened to': WRAP("").replace("if (!p) return p;", "if (!p || p.index > 0) return null;"),
 }
 
+# PR9's faults in section 26 itself (plans/review-9/ct_mutants.py on claude/review-8), for builds that have those lines
+MUTANTS['idle']['PR9 c6: a hidden ring mesh made at load'] = ('src', "if (PAD_ON) { addEventListener('gamepadconnected', padHello);", "if (PAD_ON) { const _pr = new THREE.Mesh(new THREE.RingGeometry(.4, .5, 40), new THREE.MeshBasicMaterial({ color: col('#4cc3b5') })); _pr.visible = false; scene.add(_pr); addEventListener('gamepadconnected', padHello);")
 MUTANTS['pick'] = {
+    'PR9 c7: a seat ringed where the tap reaches a person': ('src', "if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),
+    'PR9 c5: A does nothing': ('src', "P.chosen = false; tap(s[0], s[1]); P.n = 0;", "P.chosen = false; P.n = 0;"),
     'A and B swapped': WRAP("const t = buttons[0]; buttons[0] = buttons[1]; buttons[1] = t;"),
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
     'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
@@ -1188,7 +1210,9 @@ with sync_playwright() as pw:
             for name, code in MUTANTS.get(part, {}).items():
                 # caught only by a failure the clean run didn't have (a part already failing proves nothing)
                 norm = lambda f: re.sub(r'-?[\d.]+', 'N', f)   # the same failure with other numbers is the same failure
-                mf = [f for f in PART_FN[part](br, plant(psrc, code), 'm') if norm(f) not in {norm(x) for x in fails}]
+                try: msrc = plant(psrc if part not in SELF_BOTH else SRC, code)
+                except ValueError as e: print(f'  planted fault "{name}": {e}'); RESULTS.append((part + ' mutant', 'n/a', name)); continue
+                mf = [f for f in PART_FN[part](br, msrc, 'm') if norm(f) not in {norm(x) for x in fails}]
                 caught = bool(mf)
                 print(f'  planted fault "{name}": {"caught (" + mf[0][:110] + ")" if caught else "NOT CAUGHT"}')
                 check(caught, f'{part}: the planted fault "{name}" was not caught')
