@@ -33,6 +33,12 @@ ALL IDENTICAL; check_fast OK.
   fix offered to the lead (use `POINT.aim`).
 - Memory ~49%: suggested a fresh session takes D.
 
+## State at 5557122e (~16:35) — for AC2 (piece D)
+- F4's follow points where the teacher is going (the valve panel / the lift), never at her (RV6 played it: an arrow
+  on a walking teacher stalls; taps at the pin land on her). Keep that in mind for D and any "follow" arrow.
+- arrows_check's follower presses pointers now (POINT.aim). The climbing holds / climbing wall tap clash is FX3's.
+- D is AC2's (lead 28). Start: merge FX1's tip into claude/arrows-c (merge commit), then read "Loose ends" below.
+
 ## Checks
 - `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.
 - `arrows_check.py BUILD.html queue` (about 4 min): B and E. Parts `shift` and `week` fail by design until FX1-FX3.
