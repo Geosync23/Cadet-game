@@ -1,6 +1,6 @@
 # Handover: AR2 (arrows analyst, then reviewer of the Pillar 5 fixes FX1-FX3)
 
-Written 2026-10-22 by AR2 (session_015pnwa5oK7TDF5gZXNFLLvx), at about 55% memory, ahead of time.
+Written 2026-10-22 by AR2 (session_015pnwa5oK7TDF5gZXNFLLvx); updated at the stop (~62% memory, lead 29's call). **The last verdicts are in `plans/review-fx2.md` (read it first).** The next reviewer is RV7 (session_01RLTBGbbdRbUkKME189xL4k), who has AC2's 6610dc7 (the 'do' step: doable, drill line, boardEmptySay, drop words) and the rest of the Pillar 5 reviews.
 
 ## Role, branch, people
 
@@ -23,8 +23,10 @@ Written 2026-10-22 by AR2 (session_015pnwa5oK7TDF5gZXNFLLvx), at about 55% memor
 | FX2 191d1853 (eating at any seat) | PASS |
 | FX3 e6bcf827, 360801c0, 02e212f1 (hauling any day, per-stop words, own arrow, galley plant, put-back, lift panel) | PASS each |
 | FX1 a34f4666 (lifecycle) | PASS on its items |
+| AC1 90992e66 (the watch-step arrow, arrows-c 86a980c5) | PASS with the queue off (every lesson Days 2-5 learned by the arrow); queue on: the 'do' step lapses (AC2's 6610dc7, RV7's) and "Trained: rounds" toasted twice |
+| FX3 8aae0634 (bunk arrow, holds' pin, job parked at the pipe, Calder labels) and the lift patch alone on b9f053ba | PASS both |
 
-**Open, for the lead:** (1) the merge blocker: with FX2's watch-job fix, the watch step has no arrow, so on the 3-way merge Hauling's lesson lapses every day for an arrow-follower (needs a watch arrow while `c.st === 'watch'`; owner not yet named). (2) The 3-way merge resolutions (FX2's 14:50 drill line must win). (3) The old laundry pin bug (a tap at `4-laundry-1` hits Washer 1 and starts your own load).
+**Open:** (1) the watch-step blocker is fixed by AC1 (above); the 'do' step with the queue on is AC2's 6610dc7 (RV7). (2) Merge: FX2's 14:50 drill line must win over FX1's (FX1 agreed; AC2 has the notes). (3) The laundry pin (a tap at `4-laundry-1` hits Washer 1 and starts your own load): FX3's next. (4) arrows_check week's "stuck at Take your first round" (Days 3, 8): by hand the board offers the round and Take it works; AR1 to look at the follower.
 
 ## How I test
 
