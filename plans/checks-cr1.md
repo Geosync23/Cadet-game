@@ -146,3 +146,19 @@ Checked out as is. **sha256 of starship-cadet.html: `ff45b427d65d543ab8dfe10f289
 | talk_check | **OK** | 30 s | TALK CHECK OK |
 
 No FAILs. Round 6's bubble FAIL is gone with CP4's fix (36f8abf7).
+
+# Round 8: 0.91.0 (claude/integration-next 989fd566, 2026-10-22)
+
+Checked out as is. **sha256 of starship-cadet.html: `da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee`**
+(matches BM14's). OLD = 0.64.16 b9f053ba. One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 314 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 221 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 257 s | BUBBLE CHECK OK; largest move beyond the speaker 30.0 px (at most 45) |
+| puzzle_check | **OK** | 54 s | PUZZLE CHECK OK |
+| social_check | **OK** | 19 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 24 s | TALK CHECK OK |
+
+No FAILs, so no OLD runs were needed.
