@@ -280,7 +280,7 @@ FOLLOW = r"""(() => {
     const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
   }
   if (typeof pointNow === 'function') { try { const el = pointNow() && POINT.aim; if (el && el.isConnected && !document.getElementById('ptr').hidden) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }   // pointNow() is the shown pointer's id; POINT.aim its button
-  if (ACT) return null;
+  if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
   const cs = document.getElementById('clockScreen');
   if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
     const gl = (goalNow() || {}).label || '', want = /clock out|shift over/i.test(gl) ? /clock out/i : /clock in/i;
