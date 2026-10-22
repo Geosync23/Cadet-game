@@ -27,7 +27,7 @@ Merge notes:
 
 ## J. Clock-in and clock-out reminders (note 20), CK1: claude/patch-play1-j 1188cbdf
 
-**Verdict: PASS WITH ONE FIX** (one guarded line in J's clockRemindTick; then no re-review needed beyond a look at the line and check_fast).
+**Verdict: PASS at ec06f68e** (05:05 UTC). First reviewed at 1188cbdf: PASS WITH ONE FIX (below). CK1's ec06f68e changes only that line (`if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal();`) and its build-table row; CK1's check_fast OK (241 s), career_check (l) OK. My re-probe on B 4d062c45 + J ec06f68e merged: tracking "Clock in" from beside the clock, then clocking in, now gives "Take a job at the job board" with tracking back on (was: no arrow, tracking off).
 
 Sections touched: 15 (+108 in its slot, one call in playerUpdate's once-a-minute block), 15b (one line in trkItems, FR4 agreed), 22 (the baked words only, through content/). No build-number lines. No R(); nothing the crew's planner reads; SHIP.player.clockRm saved (about 35 bytes).
 
