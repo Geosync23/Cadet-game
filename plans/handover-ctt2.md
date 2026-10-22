@@ -48,12 +48,22 @@ CTT (idle) session_01SgEbMMMNPRP2E7DbiDyiw4.
 - CT1's parts on cff5bab: off quiet base deck pick1 OK; 9/9 new faults caught.
 - day on claude/controller 0.90.5 (after three check fixes: steering by the view's axes, your own bunk via MY_BUNK, wait for
   the alarm card): talk OK, bedtime + Set alarm OK; breakfast and the job board blocked by the lift not being offered.
-- CP1 copies still to take from claude/controller: (a) pick: PAD_MARK.say off in both copies after the setup press;
-  (b) settings: PAD_LAYOUTS stand-in only when undefined. CP1 will send the commit.
+- CP1's 3dfe6579 (pick1 PAD_MARK, settings PAD_LAYOUTS): copied in.
+
+## The full file on claude/controller 0.90.8 (fda82c1a), 16:00-17:30
+CP1 replaces claude/controller's merged copy with this file (lead 28's call; RV5 checks it). Added for it: CP4's
+part_firstuse and the newer part_settings word for word from fda82c1a; CP4's 'padTick ignoring the map' fault on 0.90.8's
+line. Results: idle OK 3 runs alone (+7/7 faults; the welcome-message fix in Run holds), save OK, calls OK, pick OK, unplug
+OK, games OK, day OK (a whole day by pad), walk OK + odd OK (11/11 faults) after in_use() (B before a measured walk: CP4's
+first use counts a push on an unused pad after 0.15 s, by design); all 17 builders' parts OK. touch: fixed to leave out P3's
+one-time "Controller connected" message (by design, real-time timer); rerun alone pending. reach: running.
+Leads since: lead 28 (session_01S7AdxK1ZyXiEFowP3k5gng), now lead 29 (session_01A9rNreAGVbsY1HgPucDMA7): report to lead 29.
 
 ## Loose ends
 - CP3 says the Pause card's line now has id="pauseLine": the unplug part could read it instead of the card's whole text.
-- CTT's list still stands: the games faults, the reach faults, the day part never run, the full reach sweep (~2 h alone).
+- The day part now runs (STEER by the view's axes, next cell, through people if no way round; MY_BUNK; FREE_SEAT).
+- The sweep: alike things with the same label pressed twice only (the map's pins made it dive); it still gets lost in
+  Tracked (replays); reach faults never run yet.
 - PAD_BUILT on claude/controller (0.90.3): ['base','deck','pick','panels']; CP1 will add 'games' (P2), 'marks' (P3),
   'settings' (P4); P5 gets no name.
 
