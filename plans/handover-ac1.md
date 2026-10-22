@@ -39,6 +39,19 @@ ALL IDENTICAL; check_fast OK.
 - arrows_check's follower presses pointers now (POINT.aim). The climbing holds / climbing wall tap clash is FX3's.
 - D is AC2's (lead 28). Start: merge FX1's tip into claude/arrows-c (merge commit), then read "Loose ends" below.
 
+## State at the watch arrow (~17:50) — AC1 stopping here (lead 29)
+- New (lead 29, AR2's find with FX1-FX3 together): `trainWatchArrow` in the 24p slot (Works career engineer's, beside
+  FX1's trainArrow), a WORK_TICKS tick: with the queue off, while W.cur.st === 'watch', a direct arrow on the training
+  job's spot ("Watch Yara: Cargo hold"; what trainNear counts), over the board/job fallback arrows; another direct arrow
+  is left alone and ours comes back; down at 'do'; none with GUIDE_ON (E's T2). arrows_check part queue checks it on paper.
+  Played Day 3 (follower, arrows off, on AC2's 82b92a9 + this): watch done 12:29-12:44, 'do' reached. AR2 reviews.
+- Not proven yet (lead 29 asked): Days 4-5 (tuning, scanner) reach 'do' with arrows off and on. Probe:
+  scratchpad-style `p_day.py BUILD DAY [guide]` = arrows_check's Page/real_game/Follower over one day, logging arrow,
+  stage, job, activity (copy in this note's commit message history; easy to rewrite from arrows_check.py).
+- Open, handed to FX2 (lead 29): Day 3 'do': after the watch, the arrow says "Take a job at the job board" from 13:38
+  and the follower finds nothing to take until the drill; m4 goes to 'again' at 17:01 (trained m1, m3d only).
+- D is AC2's (session_015uhdrDuE49CJ8iWWX2SEeP).
+
 ## Checks
 - `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.
 - `arrows_check.py BUILD.html queue` (about 4 min): B and E. Parts `shift` and `week` fail by design until FX1-FX3.
