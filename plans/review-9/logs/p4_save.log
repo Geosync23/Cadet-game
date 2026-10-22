@@ -1,0 +1,14 @@
+no pad: Settings shows Controller settings? False | save: {"keys":["build","clothes","crew","device","disc","flags","fri","galley","habitLog","intro","lines","mail","news","newsAt","newsRows","newsUsed","notes","player","rec","ship","social","tiles","time","
+pad used: Settings shows it? True
+pad used, settings opened, nothing changed: save == no-pad save? True | pad: None
+after swap + dead .32 + Y on X: s.pad = {"map": {"x": "y", "y": "x"}, "swap": true, "dead": 0.32}
+loads back: {"map":{"x":"y","y":"x"},"swap":true,"dead":0.32}
+after Everything back to normal (twice): pad key? False | == base True
+load null -> null 0.22 a,b,x,y
+load 5 -> null 0.22 a,b,x,y
+load "x" -> null 0.22 a,b,x,y
+load {"map":{"a":"b"}} -> null 0.22 a,b,x,y
+load {"map":{"a":"zz","b":"a"},"dead":5,"zoom":"fast","swap":"yes","every":0} -> {"every":0} 0.22 a,b,x,y
+load {"map":{"a":"b","b":"a"}} -> {"map":{"a":"b","b":"a"}} 0.22 b,a,x,y
+load [1,2] -> null 0.22 a,b,x,y
+page errors []

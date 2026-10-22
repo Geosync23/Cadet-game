@@ -1,0 +1,7 @@
+p4_savealways ['settings'] CAUGHT ["FAIL settings: Everything back to normal should leave nothing changed and nothing saved: [None, 'a,b,x,y,lb,rb,lt,rt,view,menu,ls,rs,up,down,left,right', #, #, #] ['habitLog', 'device', 'player']", 'FAIL settings: a pad used but nothing changed wrote s#pad']
+p4_showalways ['settings'] CAUGHT ['FAIL settings: the Settings app differs with the switch on and no pad']
+p4_noclash ['settings'] CAUGHT ['FAIL settings: Pause onto X should swap them', 'FAIL settings: Y and LB should swap: y on lb, lb on lb', 'FAIL settings: confirm onto RS with the swap on: a rs, rs rs']
+p4_noflip ['settings'] CAUGHT ['FAIL settings: flipped, up on the right stick should zoom out']
+p4_oddsave ['settings'] CAUGHT ['FAIL settings: an odd save should load as normal']
+p4_nogentle ['settings'] CAUGHT ['FAIL settings: gentle walking at full push: #']
+p4_noeat ['settings'] CAUGHT ['FAIL settings: A on an action should wait for a button', 'FAIL settings: B on the Controller page should go back to Settings, not home', 'FAIL settings: Y and LB should swap: y on y, lb on lb']

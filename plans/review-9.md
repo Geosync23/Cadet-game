@@ -380,3 +380,30 @@ page (the harness fixes the clock): the per-frame `padItems` over a 152-row Rost
 Merges P1 cff5bab7 (drops CP2's alarm padOwn: P1's same-row move does it), and the user's answer: PAD_NAME 'George', no
 rename promised. One word: the cabin plate shows the whole name, the beam `firstName` ('George'). cadet_test cff5bab7 →
 67df90a (switch off): ALL IDENTICAL. CP2's own: controller_check OK, tiles/disc/names/check_fast OK.
+
+## Controller P4, the Controller settings page (CP4: claude/controller-p4 7631ab6 = P1 cff5bab7 + e73b7b0, db80eb0, 7631ab6): PASS WITH FIXES
+
+(Taken over from RV2, whose code read is in plans/review-controller.md "P4"; RV2 passed the section 19 hook.) Code read:
+a hidden device app 'padsettings', reached from a button that ends Settings; PAD_SET saved as `s.pad` only when it
+differs from normal (`padSetDiff`); `padSetLoad` keeps only valid values and drops a button map that isn't one action per
+button; rebinding swaps clashes and the pressed button is "eaten" until let go; 10 s or Cancel stops waiting. Edits
+outside the slot: padTick's PAD_MAPK / PAD_PHY / stick swap (CP1 agreed), turn 2's zoom line (flip, speed), section 19's
+one hook, and four typeof-guarded `padBuzz` hooks in sections 15/15b beside their messages (no-ops unless vibration was
+turned on and a pad is live).
+
+Runs on 7631ab6 (each alone): cadet_test integration 0.64.14 → 7631ab6 off ALL IDENTICAL, on ALL IDENTICAL.
+controller_check: OK, all 9 parts (settings included). RV2's P4 mutants (`plans/review-9/rv2_mutants.py`), all
+**CAUGHT**: p4_savealways, p4_showalways, p4_noclash, p4_noflip, p4_oddsave, p4_nogentle, p4_noeat.
+My save probe (`p9_padsave.py`, saveGame's own build-up): no pad, Settings has no Controller button; the pad used and the
+page opened with nothing changed: the save equals the no-pad save, no `pad`; a swap + dead .32 + Y on X saves exactly
+`{"map":{"x":"y","y":"x"},"swap":true,"dead":0.32}` and loads back; Everything back to normal (twice) leaves no `pad` and
+the save equals the no-pad one; odd saves (null, 5, "x", [1,2], a non-permutation map, out-of-list values, "yes" for true)
+load as normal, keeping only valid parts.
+
+**Fix 1 (the hard rule, mode b; RV2's find, confirmed by `p9_modeb.py`): a pad connected but never pressed shows the
+"Controller settings" button in Settings** (`padSetSeen = PAD.live || PAD.id || diff`; PAD.live is true at a hello).
+Gate it on the pad having been used this session (`PAD.lastUse > -1e9`) or a saved change; add a check case (plug + hello,
+no press: Settings unchanged).
+**Fix 2 (small; RV2's find): a trigger moved to another action presses at the browser's own `pressed` threshold** (a light
+squeeze can press A); treat the physical triggers by their half-way rule whatever action they carry.
+For P5 (RV2's note): the left-hand preset leaves no way to zoom.
