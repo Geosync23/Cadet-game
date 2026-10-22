@@ -111,3 +111,16 @@ sha256 of starship-cadet.html **e955d667fe946b3e1e0a21c0b1f3049694460096f675dad5
 | day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 257 s |
 
 No FAIL.
+
+# Re-run on 0.64.15 (claude/integration-next 31c44cb9), lead 26's full re-run, CR3's share
+
+sha256 **0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e** (the lead's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 252; worst stuck 0.0; 251 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 250; worst stuck 0.0; 235 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 267; worst stuck 0.0; 237 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 244 s |
+
+No FAIL. (The same numbers as on c5c43293.)
