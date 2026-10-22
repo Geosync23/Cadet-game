@@ -1994,6 +1994,20 @@ MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
   'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
 }
+# CP1, claude/controller-p1 cff5bab (and claude/controller 5ae76569, 0.90.3)
+MUTANTS['api'] = {
+  'panel order lost': ('src', "  if (at < 0) PAD_PANELS.push(row); else PAD_PANELS.splice(at, 0, row);", "  PAD_PANELS.push(row);"),
+  'a touch after the pad keeps the focus': ('src', "  const F = PAD_FOCUS, a = document.activeElement; if (F.el && a === F.el && a.blur) a.blur();", "  const F = PAD_FOCUS, a = document.activeElement;"),
+  'same row not first': ('src', "  return row || best;", "  return best;"),
+}
+MUTANTS['panels'] = {
+  'B in the device does nothing': ('src', "  device: () => { if (DEV.app && DEV.app !== 'home') deviceShow('home'); else deviceClose(); },", "  device: () => {},"),
+  'the address card unreachable': ('src', "#ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';", "#ixBoard, #seek, #devHu, #devHu button, #devTip';"),
+}
+MUTANTS['lists'] = {
+  'B in a text box leaves the panel too': ('src', "if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { PAD_FOCUS.last = null; a.blur(); return; }", "if (false) { }"),
+  'RT does not page': ('src', "padOn('rt', e => { const L = padLayer(); if (!L) return; if (!padOwnDo('rt', L, e)) padScroll(innerHeight * .6); return true; });", "padOn('rt', e => { const L = padLayer(); if (!L) return; return true; });"),
+}
 MUTANTS['settings'] = {   # CP4, claude/controller-p4 db80eb0
   'an unchanged save writes s.pad': ('src', "SAVE_EXTRA.push(s => { const d = padSetDiff(); if (d) s.pad = d; });   // nothing changed: nothing written", "SAVE_EXTRA.push(s => { s.pad = padSetDiff() || {}; });"),
   'the stick swap not loading': ('src', "    if (d.sticks === true) S.sticks = true;", "    if (d.sticks === true) S.sticks = false;"),
