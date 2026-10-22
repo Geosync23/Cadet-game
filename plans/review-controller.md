@@ -125,3 +125,16 @@ first use. Nothing before a press, no R(), no save. Notes so far (none blocking)
 - DEV_NOTES: "the two tap-again asks" - there's a third (the welcome's "Tap again to end the welcome", no time limit).
 Turn 3 mutants so far: t3_noop_crew CAUGHT (but only because Pell is asleep: the tap gave a toast; an awake person opens
 #chat, which OUTCOME doesn't see), t3_offset CAUGHT.
+
+## P3 (CP3 efbe62a on a2c80df6): in progress
+Code read: PAD_GLYPH / padMark / padMarksSync (marks as `<i class="padk" aria-hidden>` inside Device, Pause, Tracked,
+the X action and Lightdisc's Leave; display only under body.pad; made at the first press), the "Controller connected"
+toast once, 'gone' -> padUnuse when no pad is left and pauseSet(true) if used in the last 30 s, padPauseLine (section
+15's one guarded line). Notes so far (none blocking yet):
+- The connected toast replaces whatever toast is showing: a press in the first 5.6 s loses the opening "You wake in
+  Bunk 1... Tap to walk" toast (and it moves TOAST_AT, section 15's quiet-moment clock). Wait for the toast to clear?
+- 'gone' asks `padList().length` without leaving out the pad that's going (padBye filters `g.index !== gone`): a
+  browser that still lists it during the event would leave body.pad and the marks up with no pad.
+- padPauseLine finds the card's line by position (`firstElementChild.children[1]`): fragile against section 15's card.
+- The marks stay inside the buttons after a touch (hidden): textContent of #devBtn / #pauseBtn / #trkBtn gains a letter.
+Probe `review-controller/p_marks.py` (positions, families, touch, unplug) to run.
