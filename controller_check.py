@@ -1143,7 +1143,9 @@ def part_day(pw, src, tag):
                 r.press('RIGHT'); r.step(4)
             if got: r.press('A')
             else: fails.append(f'bedtime: the ring never offered your own bunk ({mine})')
-            r.step(30)
+            for k in range(40):   # you walk over and lie down; at night, lying in it brings the alarm card (bunkSleep)
+                r.step(15)
+                if r.ev("!document.getElementById('sleepAsk').hidden"): break
             asked = r.ev("!document.getElementById('sleepAsk').hidden")
             res = press_in_panel(r, "document.getElementById('sleepYes')") if asked else 'no alarm card'
             r.step(60); t = r.ev("[SHIP.time.day, SHIP.time.min]")
