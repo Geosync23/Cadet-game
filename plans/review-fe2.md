@@ -122,3 +122,12 @@ build table.
   did nothing); on a52aad0 only the put-back part FAILS (4 turns). check_fast OK; cadet_test alone 3b7b13d vs 228de58
   ALL IDENTICAL. Note: "anything in reach" would also take a lift panel or a door within 1.5 m of a stop; FB1 measured
   none today (the docks, Folding table, Laundry drop sign, the Till). 776c4ff not pushed yet when this was written.
+- **FB1 ebf456b6 (any chore: a tap whose line passes over the next stop does it): PASS.** FB1's new vents-and-lamps part:
+  OK on ebf456b; on 228de58 it FAILS (the hydroponics vent, turn 1: the Orange tree started gardening). Full
+  interactions_check OK. check_fast OK. cadet_test alone 228de58 vs ebf456b ALL IDENTICAL. FB1's first three parts
+  at 390x844 with the crew on (p_fb1phone.py): one camera turn misses the Folding table, with a haul and without
+  one, because a crew member stands at the table and takes the tap; with the crew hidden (p_fold2.py) all four turns
+  deliver the linen and the no-haul tap folds laundry. Note: choreThingTap's onPin reads the last canvas tap's ray.
+  When playerTap is called without a fresh ray (CP4's ixGoalTap, a check's direct playerTap), a stale ray that
+  passed over the current stop would do the stop instead of the tapped thing. That can only happen if the last canvas
+  tap was over the stop and didn't do it. Not seen; an edge case for FB1/CP4 to keep in mind.
