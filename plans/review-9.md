@@ -306,7 +306,7 @@ Fixes for the check (CTT / CT1; not the game):
 RV2 (claude/review-controller) gave turn 3 PASS WITH FIXES against CTT's newer check (claude/controller-tests 049aff56):
 a ring made at load (my c6) is CAUGHT there (its idle/calls compare the scene count); A 40 px off and R() in the search
 CAUGHT; "A ignores crew" caught only via a sleeping person's toast (CTT's OUTCOME doesn't read #chat); "facing ignored"
-MISSED (CTT to add one thing ahead, one behind). My c7 against CTT's check: pending from RV2.
+MISSED (CTT to add one thing ahead, one behind). My c6/c7 against CTT's check (RV2): **c6 CAUGHT** (idle's scene count, pad modes a and b); **c7 MISSED**: CTT's pick finds no lone seat on Deck 4, so a seat ringed where the tap reaches a person is never tried. Open for CTT: a seat case, with a person in front of a seat, on a deck that has one.
 
 ## Controller P1, panels (CP1: claude/controller-p1 86d45aba, on CT1's turn-4 WIP a2c80df6): PASS WITH FIXES
 
