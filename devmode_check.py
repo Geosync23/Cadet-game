@@ -26,6 +26,11 @@
 #          people going and at the room; whose for a birthday; a clash with a Dev start, too late, a usual time gone
 #          refused; a calendar tradition in the same room gives way; its Mail now; the starts ride in the Dev save and
 #          through Undo; Stop it puts the day back to its calendar; the list, the search, 44px buttons
+#   days:  Start at a day, as played (D8, DS1): every recorded day starts from the Set career tab's row (two taps) or
+#          devmodeStartDay, reloads into Day N 06:00 beside your bed, with its recorded summary (trained, uses, band,
+#          tier, rank, work log; job tracking on), the lasting notice saying how it was recorded, an Undo; the real save
+#          byte for byte unchanged; Undo goes back; no DecompressionStream, or a damaged record, is refused with a
+#          message and the Dev game untouched
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 devmode_check.py BUILD.html [part ...]   (parts: only those)   Good is DEVMODE CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -547,6 +552,52 @@ def part_career(b):
     pg.close(); ctx.close()
     print(f'  career: xp, next band, next training (Rounds + clipboard), a tool, Undo; rank Officer and Junior by hand; Day 8 test opened (only the day missing), passed, Next step through {seen} to the ceremony; the tab')
 
+DAY_SUM = ('tr', 'use', 'band', 'tier', 'rank', 'jobs')
+def part_days(b):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
+    pg = Page(ctx, ''); pg.sign(); pg.step(30); pg.ev('saveGame()'); real0 = store(pg).get('starship-cadet-save'); pg.close()
+    pg = Page(ctx, '#dev'); pg.sign(); pg.step(20)
+    days = pg.ev("Object.keys(DM_DAYS.days).map(Number).sort((a, b) => a - b)")
+    if not check(days, 'days: no days recorded in DM_DAYS (python3 tools/day_saves.py BUILD.html --write)'): pg.close(); ctx.close(); return
+    check(days == list(range(1, len(days) + 1)), f'days: the recorded days are not Day 1 on, in a row: {days}')
+    played = pg.ev("Object.keys(DM_DAYS.days).filter(d => DM_DAYS.days[d].played !== false).length")
+    # refused, the Dev game untouched: no DecompressionStream, then a damaged record (not base64; not a save)
+    pg.ev('saveGame()'); s0 = store(pg)['starship-cadet-save-dev']
+    pg.ev("window.__DS = window.DecompressionStream; window.DecompressionStream = undefined; DM_HOLD = false; devmodeStartDay(1)"); pg.page.wait_for_timeout(300); pg.step(2)
+    check("can't unpack" in pg.ev('DM_UI.msg') and store(pg)['starship-cadet-save-dev'] == s0 and pg.ev('!devmodeRead(DM_KEY.undo) || devmodeRead(DM_KEY.undo).label !== "Start at Day 1"'),
+          f'days: without DecompressionStream: {pg.ev("DM_UI.msg")!r}, or the Dev game changed')
+    pg.ev("window.DecompressionStream = window.__DS")
+    for bad in ('not base64!', 'eJzLSM3JyQcABiwCFQ=='):
+        pg.ev(f"window.__z = DM_DAYS.days[1].z; DM_DAYS.days[1].z = {json.dumps(bad)}; devmodeStartDay(1)"); pg.page.wait_for_timeout(500); pg.step(2)
+        check("couldn't be read" in pg.ev('DM_UI.msg') and not pg.ev('DM_DAYBUSY') and store(pg)['starship-cadet-save-dev'] == s0, f'days: a damaged Day 1 ({bad}): {pg.ev("DM_UI.msg")!r}, or the Dev game changed')
+        pg.ev("DM_DAYS.days[1].z = window.__z")
+    # every day, from the tab's row for the first, then devmodeStartDay
+    for n in days:
+        pg.ev('saveGame()'); before = store(pg)['starship-cadet-save-dev']
+        if n == days[0]:
+            pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.msg = ""; devmodeDraw()')
+            btn = pg.page.locator('#dmSheet button[aria-label="Start at Day %d"]' % n)
+            check(btn.count() == 1, f'days: the Set career tab has no Day {n} button'); btn.click(); pg.step(1)
+            with pg.page.expect_navigation(timeout=90000): btn.click()
+            pg.page.wait_for_function('window.__sc !== undefined', timeout=90000); first = pg.page.evaluate('() => localStorage.getItem("starship-cadet-save-dev")'); pg.ready()
+        else:
+            first = pg.ev_reload(f'devmodeStartDay({n})')
+        rec = pg.ev(f'DM_DAYS.days[{n}]'); now = pg.ev('devmodeDaySum()'); sv = json.loads(first or '{}')
+        check(sv.get('time', {}).get('day') == n and 360 <= now['min'] <= 366 and now['day'] == n, f'days: Day {n} started at Day {now["day"]} {now["min"]} min')
+        diff = [k for k in DAY_SUM if now[k] != rec['sum'][k]]
+        check(not diff, f'days: Day {n} does not match its recording in {diff}: now {[now[k] for k in diff]}, recorded {[rec["sum"][k] for k in diff]} (re-record: tools/day_saves.py)')
+        check(now['track'] == 'on', f'days: Day {n} started with job tracking off')
+        check(pg.ev("(() => { const id = playerBed(), n = deckOf(id), bed = DECKS[n].places.find(p => p.id === id); return deckDef.num === n && roomAt(...player.here()) === roomAt(...bed.at); })()"), f'days: Day {n} did not start beside your bed')
+        check(pg.ev('devmodeState().note').startswith(f'Started at Day {n}'), f'days: Day {n}: the notice says {pg.ev("devmodeState().note")!r}')
+        check(pg.ev('devmodeRead(DM_KEY.undo) && devmodeRead(DM_KEY.undo).label') == f'Start at Day {n}' and (lambda u, v: u == v if n != days[0] else u['time']['day'] == v['time']['day'] and abs(u['time']['min'] - v['time']['min']) < 5)(json.loads(pg.ev('devmodeRead(DM_KEY.undo).save')), json.loads(before)), f'days: Day {n} kept no Undo of the game before')   # (the tab's two taps let a frame or two pass)
+        check(store(pg).get('starship-cadet-save') == real0, f'days: Day {n} changed the real save')
+        dev_keys_ok(store(pg), 'days')
+    back = pg.ev_reload('devmodeUndo()')
+    check(back == pg.ev('localStorage.getItem("starship-cadet-save-dev")') and json.loads(back)['time']['day'] == days[-2 if len(days) > 1 else 0], 'days: Undo after a start did not go back to the day before')
+    check(not pg.errors, f'days: errors {pg.errors[:3]}')
+    pg.close(); ctx.close()
+    print(f'  days: {len(days)} days start from the Set career tab (as played: {played}), each matches its recording, tracking on, beside your bed, an Undo; refused without DecompressionStream and when damaged; the real save untouched')
+
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
@@ -554,7 +605,7 @@ with sync_playwright() as pw:
         if ONLY and name not in ONLY: continue
         try: part(ctx)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
-    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career)):
+    for name, part in (('clock', part_clock), ('move', part_move), ('slow', part_slow), ('trad', part_trad), ('set', part_set), ('career', part_career), ('days', part_days)):
         if ONLY and name not in ONLY: continue
         try: part(b)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
