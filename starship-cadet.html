@@ -16043,7 +16043,7 @@ function trkItems() {
     for (const x of list) {
       if (x.kind === 'off' || x.from >= upto || (day === d && x.to <= m)) continue;
       const work = x.kind === 'shift' && day === d;       // FX1: tracking your shift today is your job's arrow: the clock from when it opens, the board, your job (not the bay's middle)
-      out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where + (work && typeof CAREER !== 'undefined' && m < CAREER.clockIn ? ' · the clock opens at ' + hhmm(CAREER.clockIn) : ''),
+      out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, later: day > d, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where + (work && typeof CAREER !== 'undefined' && m < CAREER.clockIn ? ' · the clock opens at ' + hhmm(CAREER.clockIn) : ''),
         tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), ...(work ? { work: true } : { goal: trkGoalOf(x), span: [(day - 1) * 1440 + x.from, (day - 1) * 1440 + x.to] }) });   // span: when it's on (trkDoneCheck)
     }
   }
@@ -16051,8 +16051,13 @@ function trkItems() {
   return out;
 }
 const trkOn = it => { if (it.work) return !IX_GOAL && SHIP.player.track !== null && !(typeof myJob === 'function' && myJob()); if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
+// a row for a later day (tomorrow morning) can't be followed yet: its tap says so on the row (TRK_SAID, for a few ship
+// minutes) instead of setting an arrow for now (fresh-eyes 2026-10-22: "The Chief's office: your first solo job" said Tomorrow)
+const TRK_SAID = { key: '', at: -1e9 };
+const trkSaid = it => TRK_SAID.key === it.key && shipNow() - TRK_SAID.at < 20 ? ' · That\'s tomorrow: track it on the day' : '';
 function trkTap(key) {                                  // the app's tap: track it, or stop if it's the one tracked
   const it = trkItems().find(x => x.key === key); if (!it) return false;
+  if (it.later && !trkOn(it)) { TRK_SAID.key = it.key; TRK_SAID.at = shipNow(); return false; }
   if (trkOn(it)) { if (it.job || it.work) SHIP.player.track = null; else clearGoal(); return false; }
   if (it.work) { SHIP.player.track = undefined; clearGoal(); return true; }   // FX1: your shift: the job arrow on
   if (it.job) { SHIP.player.track = it.job; clearGoal(); }
@@ -16073,7 +16078,7 @@ function trkDraw() {
       const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
       b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal && !it.work; b.setAttribute('aria-pressed', String(on));
       if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
-      t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : ''); sp.append(t, sm); b.appendChild(sp);
+      t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : '') + trkSaid(it); sp.append(t, sm); b.appendChild(sp);
       if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
       b.onclick = e => { e.stopPropagation(); if (trkTap(it.key)) trkClose(); else trkDraw(); };   // on its way: the arrow shows; a stop stays open
       box.appendChild(b);
@@ -16116,7 +16121,7 @@ deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
       const rows = items.filter(x => x.sec === sec); if (!rows.length) continue;
       B.push({ kind: 'text', text: head, mark: 'head' });
       B.push({ kind: 'list', rows: rows.map(it => { const on = trkOn(it), can = on || it.job || it.goal;
-        return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : can ? '' : ' · no arrow for this one'), mark: on ? 'hot' : null,
+        return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : can ? '' : ' · no arrow for this one') + trkSaid(it), mark: on ? 'hot' : null,
           action: can ? { app: 'tracked', do: 'track', arg: it.key } : null }; }) });
     }
     return { title: 'Tracked', blocks: B };
