@@ -46,3 +46,22 @@ Note: claude/fridays' tip is now cc68abd (newer than 3bd9b2c); this round used 3
 ## Not run
 
 Nothing else from the brief was skipped.
+
+# Round 2: 0.64.14 (claude/integration 8e239328, 2026-10-22)
+
+Checked out as is (no merging). sha256 of starship-cadet.html `94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86563d8ca4652881e9`
+(matches lead 25's); `SHORT_FRIDAY = true`, `EVENTS_ON = true`. Each check run from that commit's own check files, one at a time.
+
+| Check | Result |
+|---|---|
+| talk_check | OK |
+| social_check | OK |
+| join_check | OK |
+| lines_check | OK: PASS (0 errors, 49 warnings, the same as round 1); `--day` PASS (0 errors) |
+| food_check 11 4 | OK (round 1's harvest-salad FAIL is gone) |
+| food_check 1 7 | OK |
+| mech_check | OK |
+| machine_check | OK |
+| career_check | FAIL (known): only `FAIL busy: "Relied on" before Day 5`, backlog 12. The same on 0.64.13 a7477a9. |
+| bigevents_check | OK |
+| day_check Days 1, 12, 13, 16 | OK, OK, OK, OK |
