@@ -405,9 +405,16 @@ def part_marks(pw):
     p.close()
 
 def part_touch(pw):
-    a = Pad(pw, ON); a.plug(); a.step(30); a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); a.close()
+    # speech bubbles are kept out of the pictures (the browser sometimes draws their layer a shade differently with the
+    # same page, CTT's find) and compared as text and place instead
+    BUBS = "bubbles.list.map(b => [b.text, b.el.style.display, b.el.style.transform])"
+    a = Pad(pw, ON); a.plug(); a.step(31); a.g.page.add_style_tag(content='.bubw{opacity:0!important}')
+    a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); ba = a.ev(BUBS); a.close()
     b = Pad(pw, ON); b.plug(); b.press('x'); b.step(27)   # (a press is 3 frames)
-    b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.g.shot(str(WORK / 'test' / '_pad_touch.png')); b.close()
+    b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.step(1)   # (the deck drawn once after the touch)
+    b.g.page.add_style_tag(content='.bubw{opacity:0!important}')
+    b.g.shot(str(WORK / 'test' / '_pad_touch.png')); bb = b.ev(BUBS); b.close()
+    check(ba == bb, f'touch: the speech bubbles differ after a press then a touch: {ba} vs {bb}')
     x, y = (WORK / 'test' / '_pad_nopad.png').read_bytes(), (WORK / 'test' / '_pad_touch.png').read_bytes()
     check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
 
