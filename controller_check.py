@@ -366,7 +366,7 @@ class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
-    MAX_DEPTH, MAX_PRESSES = 6, int(os.environ.get('CTL_PRESSES', 700))
+    MAX_DEPTH, MAX_PRESSES = int(os.environ.get('CTL_DEPTH', 6)), int(os.environ.get('CTL_PRESSES', 700))
     SKIP = set()   # (was {'#newgame'}: the HUD's New game button, gone from 0.91.0, now in Settings)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
