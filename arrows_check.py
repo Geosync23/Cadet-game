@@ -14,7 +14,18 @@
 #             urgent one ({ now: true }) at once
 #   mode:     the teaching-arrows setting is read from section 19's teachMode() (AC1's Settings row), 'first' without it
 #   size:     SHIP.guide in the save stays small with 400 seen ids (300 kept)
-# Later parts (pieces C-F) add the pointer and the played shift and lessons, following only the arrow.
+# Parts "shift" and "week" (AR1, for FX1-FX3): play as a player who ONLY follows the arrow (and the pointer, once piece C
+# is in) from a real game's state (tracking as after taking a job yesterday): go where the arrow points (a teleport stands
+# in for the walk), tap the thing it points at, press the button a panel offers (the clock screen's, the board's Take it /
+# Turn it in, a meeting's Go on, a card's choices in turn), read meetings through, sleep at night.
+#   shift: one ordinary workday (Day 9, nothing new taught): clocked in by 09:05, at least three jobs turned in, never
+#          stuck (the arrow on the same spot for 45 ship minutes with the player there), clocked out by the player
+#   week:  Days 2-8 in a row: clocked in every workday; each lesson learned on its day by following the arrow (Rounds
+#          Day 2, Hauling and the drill Day 3, the inspection and Tuning Day 4, the scanner and the first head-scratcher
+#          Day 5); the scanner counted as used; Making it safe opened on Day 8 and learned; no arrow left up after its
+#          moment (the same label for over 3 ship hours)
+# On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, shift, week; default all, about 15 minutes)
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three). Run:  python3 arrows_check.py BUILD.html
 import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
@@ -162,20 +173,146 @@ def part_toasts(pg):
     check(pg.ev('GUIDE.tq.length') == 0 and not pg.ev('GUIDE.loop'), 'toasts: switching off left the queue running')
     print(f'  toasts: {names}, gaps {gaps} ms; urgent at once')
 
+
+# the arrow follower: one action per call; returns what it did (or null)
+FOLLOW = r"""(() => {
+  const dlg = document.getElementById('devDlg');
+  if (dlg && !dlg.hidden) {
+    const next = dlg.querySelector('button.next'); if (next) { next.click(); return 'read on'; }
+    const bs = [...dlg.querySelectorAll('button.act')]; if (!bs.length) return null;
+    // a card: keep pressing the same choice while the card's words change (it's working), try the next when they don't
+    const card = !!DEV.choose, txt = dlg.textContent, n = Math.max(1, bs.length - 1);
+    if (card && window.__cardTxt === txt) window.__pick = ((window.__pick || 0) + 1) % n;
+    window.__cardTxt = txt; let k = card ? (window.__pick || 0) % n : 0;
+    const want = /cold|cool|dim|slow/i.test(txt) ? '+' : /hot|flicker|blink|fast/i.test(txt) ? '\u2212' : null;   // a tuning card: read the machine's word, as a player would
+    if (card && want) { const i = bs.findIndex(b => b.textContent.trim() === want); if (i >= 0) k = i; }
+    const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
+  }
+  if (typeof pointNow === 'function') { try { const p = pointNow(); const el = p && p.el && p.el(); if (el && el.offsetParent !== null) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }
+  if (ACT) return null;
+  const cs = document.getElementById('clockScreen');
+  if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
+    const gl = (goalNow() || {}).label || '', want = /clock out|shift over/i.test(gl) ? /clock out/i : /clock in/i;
+    const b = [...cs.querySelectorAll('button')].find(b => want.test(b.textContent)) || [...cs.querySelectorAll('button')].find(b => /close/i.test(b.textContent));
+    if (b) { const t = b.textContent; b.click(); return 'clock screen: ' + t; }
+  }
+  const bd = document.getElementById('ixBoard');
+  if (bd && !bd.hidden) { const b = [...bd.querySelectorAll('#ixBoardL button')].find(b => /turn it in/i.test(b.textContent)) || [...bd.querySelectorAll('#ixBoardL button')].find(b => /take/i.test(b.textContent));
+    const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }
+  const g = goalNow(); if (!g) return null;
+  if (deckDef.num !== g.deck) { goToDeck(g.deck); return 'lift to Deck ' + g.deck; }
+  const w = ixGoalWorld(g); if (!w) return 'arrow with no spot: ' + g.label;
+  const p = player.obj.position;
+  if (Math.hypot(w.x - p.x, w.z - p.z) > 2.2) { const gl = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return 'walk to: ' + g.label; }
+  const key = g.label + '|' + Math.floor(shipNow() / 3); if (window.__tapKey === key && window.__tapKey2 !== key) return null;   // a tap every 3 ship minutes at most
+  if (window.__tapKey2 === key && window.__tapDone === key) return null; if (window.__tapKey2 === key) window.__tapDone = key; window.__tapKey = key;
+  const sh = /the (.+) shelf/.exec(g.label || ''), its = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone(), Math.hypot(_wp.x - w.x, _wp.z - w.z)]; });
+  its.sort((a, b) => a[2] - b[2]);
+  const named = its.find(x => x[2] < 3.5 && x[0].t && (g.label || '').toLowerCase().includes(x[0].t.toLowerCase().replace(/\s+\d+$/, '')));   // what the label names, as a player would read it
+  const it = sh && its.find(x => x[0].t === sh[1]) || named || its[0];   // a shelf by its name, else the thing named, else the nearest
+  const pin = () => { const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
+  if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
+  if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (!r) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }
+  return pin();
+})()"""
+STATE = r"""(() => { const W = SHIP.works, d = SHIP.time.day, g = goalNow();
+  return { clock: clockText(), day: d, min: Math.floor(SHIP.time.min), arrow: g ? g.label : null, deck: deckDef.num, at: player.here().join(','),
+    tr: W ? Object.assign({}, W.tr) : {}, use: W ? Object.assign({}, W.use) : {}, op: W ? W.op : {}, cur: W && W.cur ? W.cur.id + ':' + W.cur.st : null,
+    inn: typeof careerClockedIn === 'function' ? !!careerClockedIn(d) : null, log: (SHIP.player.clockLog || {})[d] || 0,
+    done: (SHIP.jobs || []).filter(j => j.doneBy === 'you' && Math.floor((j.doneAt || 0) / 1440) + 1 === d).length }; })()"""
+FIX = { 'clock in': 'FX1', 'stuck': 'FX1 (arrows and tracking) or FX3 (the lift)', 'clock out': 'FX1', 'm1': 'FX1 (meeting arrows)', 'm4': 'FX3 (Hauling) and FX1',
+        'm3d': 'FX2 (the drill)', 'm3i': 'the arrows plan (Day 4 warning) and FX1', 'm5': 'FX1 (meeting arrows) and FX2 (Tuning)', 'm7': 'FX2 (the scanner job)',
+        'p3': 'FX2 (the scanner job) and piece C (Fault notes pointers)', 'm6': 'FX3 (the burst pipe) and FX2 (the scanner count)', 'scan': 'FX2', 'stale': 'FX1 (arrows that never clear)', 'need': 'section 15 (the needs arrow): nobody yet' }
+
+def stuck_fix(lab):                                  # who should turn a "stuck at" line green
+    if lab.startswith(('A shower', 'A toilet', 'Food', 'Your bunk')): return FIX['need']
+    if 'main lift' in lab: return 'FX3 (the lift service)'
+    if 'galley plant' in lab: return 'nobody yet (the calibrate chore: its pin sits where the chiller takes the tap; the label says Repair)'
+    return FIX['stuck']
+
+class Follower:
+    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []
+    def run(self, until_min_abs, every=6):
+        pg = self.pg
+        while pg.ev('shipNow()') < until_min_abs:
+            pg.step(every, 50)
+            r = pg.ev(FOLLOW)
+            if isinstance(r, dict) and r.get('click'):
+                pg.page.mouse.click(*r['click']); pg.step(2, 50); r = 'tap the floor at the pin: ' + r['label'] + (' (working)' if pg.ev('!!ACT') else '')
+            if r: self.acts.append((pg.ev('clockText()'), r))
+            s = pg.ev("(() => { const g = goalNow(); return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE)]; })()")
+            if s[4] and self.same: self.same = (s[0], self.same[1], self.same[2], self.same[3]); continue   # busy (working, a meeting): not stuck
+            if s[1]:
+                if self.same and self.same[1] == s[1]:
+                    if s[2] == self.same[2] and s[0] - self.same[0] >= 45 and not any(x[1] == s[1] and x[0] == self.same[0] for x in self.stuck): self.stuck.append((self.same[0], s[1], s[3]))
+                    if s[0] - self.same[3] >= 180 and not any(x[1] == s[1] for x in self.long): self.long.append((self.same[3], s[1]))
+                    if s[2] != self.same[2]: self.same = (s[0], s[1], s[2], self.same[3])
+                else: self.same = (s[0], s[1], s[2], s[0])
+            else: self.same = None
+    def night(self, day):                               # to bed: the next morning, rested
+        self.pg.ev(f"devmodeSkipTo({day * 1440 + 5 * 60 + 50}); for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); self.pg.step(10)
+
+def real_game(pg, day):                               # the career set to the end of day-1, tracking as in a real game
+    pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day - 1}))"); pg.step(20)
+    pg.ev(f"devmodeSkipTo({(day - 1) * 1440 + 5 * 60 + 50}); clearGoal(); SHIP.player.track = 'arrows-check-yesterday'; for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); pg.step(10)   # a normal evening before: washed, fed, rested
+
+def hhmm(m): m = int(m) % 1440; return f'{m // 60:02d}:{m % 60:02d}'
+
+def part_shift(ctx, path):
+    pg = Page(ctx, path); real_game(pg, 9); f = Follower(pg)
+    f.run(8 * 1440 + 9 * 60 + 5); s = json.loads(json.dumps(pg.ev(STATE)))
+    check(s['inn'], f'shift: not clocked in by 09:05 following the arrow (fix: {FIX["clock in"]}); arrow now "{s["arrow"]}"')
+    f.run(8 * 1440 + 17 * 60 + 40); s = pg.ev(STATE)
+    check(s['done'] >= 3, f'shift: {s["done"]} jobs turned in on Day 9 following the arrow (want 3 or more)')
+    out = pg.ev("(() => { const L = SHIP.mail.filter(m => /didn.t clock out/i.test(m.subject || '')); return L.length; })()")
+    check(not s['inn'] and not out, f'shift: not clocked out by the player at the end (still in: {s["inn"]}, the clock signed you out: {bool(out)}) (fix: {FIX["clock out"]})')
+    for t, lab, dk in f.stuck: fail(f'shift: stuck from {hhmm(t)} at "{lab}" (Deck {dk}): the arrow points where nothing can be done (fix: {stuck_fix(lab)})')
+    print(f'  shift: Day 9, {s["done"]} jobs, stuck {len(f.stuck)}; last actions: {[a[1] for a in f.acts[-4:]]}')
+    check(not pg.errors, f'shift: page errors {pg.errors[:3]}')
+    pg.page.close()
+
+WEEK = [(2, ['m1']), (3, ['m4', 'm3d']), (4, ['m3i', 'm5']), (5, ['m7', 'p3']), (8, ['m6'])]
+def part_week(ctx, path):
+    pg = Page(ctx, path); real_game(pg, 2); f = Follower(pg)
+    want = dict(WEEK); fails = []
+    for d in range(2, 9):
+        f.run((d - 1) * 1440 + 21 * 60 + 30)
+        s = pg.ev(STATE)
+        work = pg.ev(f"playerShiftOn({d})")
+        log = pg.ev(f"(SHIP.player.clockLog || {{}})[{d}] || 0")
+        if work: check(log > 0, f'week: Day {d}: never clocked in following the arrow (fix: {FIX["clock in"]})')
+        for m in want.get(d, []):
+            check(s['tr'].get(m) is not None, f'week: Day {d}: "{m}" not learned by following the arrow (fix: {FIX.get(m, "?")}); training {s["cur"]}, opened {s["op"].get(str(d))}')
+        if d == 5: check((s['use'].get('m7') or 0) >= 1, f'week: Day 5: the scanner never counted as used (fix: {FIX["scan"]})')
+        if d == 8: check('m6' in (s['op'].get('8') or []), f'week: Day 8: Making it safe did not open (fix: {FIX["m6"]})')
+        print(f'  week: Day {d}: learned {sorted(k for k in s["tr"])}, training {s["cur"]}, clocked {log} min, stuck so far {len(f.stuck)}')
+        f.night(d)
+    for t, lab, dk in f.stuck: fail(f'week: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}) (fix: {stuck_fix(lab)})')
+    for t, lab in f.long: fail(f'week: the arrow "{lab}" stayed up over 3 ship hours from Day {t // 1440 + 1} {hhmm(t)} (fix: {FIX["stale"]})')
+    check(not pg.errors, f'week: page errors {pg.errors[:3]}')
+    pg.page.close()
+
+PARTS = set(sys.argv[2:]) or {'queue', 'shift', 'week'}
 with sync_playwright() as pw:
     path = sys.argv[1]
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
-    print('== queue (piece B)')
-    try:
-        pg = Page(ctx, path); pg.day2()
-        if not check(pg.ev("typeof guideAsk === 'function' && typeof GUIDE_ON !== 'undefined'"), 'no arrow queue in this build'): raise SystemExit
-        part_off(pg); part_queue(pg); part_toasts(pg)
-        check(not pg.errors, f'queue: page errors {pg.errors[:3]}')
-        pg.page.close()
-        part_once(ctx, path)
-    except SystemExit: pass
-    except Exception as e: fail(f'stopped: {str(e)[:300]}')
+    if 'queue' in PARTS:
+        print('== queue (piece B)')
+        try:
+            pg = Page(ctx, path); pg.day2()
+            if not check(pg.ev("typeof guideAsk === 'function' && typeof GUIDE_ON !== 'undefined'"), 'no arrow queue in this build'): raise SystemExit
+            part_off(pg); part_queue(pg); part_toasts(pg)
+            check(not pg.errors, f'queue: page errors {pg.errors[:3]}')
+            pg.page.close()
+            part_once(ctx, path)
+        except SystemExit: pass
+        except Exception as e: fail(f'queue: stopped: {str(e)[:300]}')
+    for name, part in (('shift', part_shift), ('week', part_week)):
+        if name not in PARTS: continue
+        print(f'== {name} (following only the arrow)')
+        try: part(ctx, path)
+        except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 
 print('ARROWS CHECK OK' if ok else 'ARROWS CHECK FAILED')
