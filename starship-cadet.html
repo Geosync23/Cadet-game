@@ -14097,13 +14097,13 @@ function bagTick() {
   if (!on) bagStow(true);
   else if ((I.done || {}).bunk !== undefined && I.step !== 'stow' && !(I.missed || []).includes('bunk')) bagStow((I.missed || []).includes('stow') ? 'Zeke puts your bag in your wardrobe for you.' : false);   // (playtest patch 1, #2) you put it in yourself in the 'stow' step
 }
-function bagLockerTap(point) {                           // a tap by your wardrobe in Bunk 1 with the bag in your hands: walk there, stow it
+function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk to your wardrobe, stow it
   if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
   const ch = roomAt(...cellAt(point.x, point.z)), rm = ch && deckDef.rooms && deckDef.rooms[ch];
   if (!rm || rm.name !== 'Bunk 1') return false;
-  const w = typeof clothesWardrobe === 'function' ? clothesWardrobe() : null;   // (playtest patch 1, #2) only at your wardrobe: elsewhere in the room a tap just walks
-  if (w && Math.hypot(point.x - w.x, point.z - w.z) > 1.2) return false;
-  approach(new THREE.Vector3(point.x, 0, point.z), 0, 0, () => bagStow(false));
+  const w = typeof clothesWardrobe === 'function' ? clothesWardrobe() : null;   // (the Zeke patch, after 0.64.15) anywhere in the room: walk to your wardrobe and put it in there
+  const to = w && w.tile ? cellPos(...w.tile) : new THREE.Vector3(point.x, 0, point.z);
+  approach(new THREE.Vector3(to.x, 0, to.z), 0, 0, () => bagStow(false));
   return true;
 }
 // the arrival dinner (0.28.28, the lead's polish row): you sit at the table instead of standing. playerSitNear(deck,

@@ -324,9 +324,9 @@ def bunk_leave(g):
     if not g.ev("typeof INTRO_STEPS !== 'undefined' && INTRO_STEPS.some(s => s.id === 'device')"):
         print('  not yet: no device step'); return
     url = g.page.url.split('?')[0]
-    # how: 'out' the corridor after the bag, 'nobag' the corridor without it, 'deck' the lift to Deck 3 after the bag,
+    # how: 'stay' never puts the bag away and stays in Bunk 1, 'out' the corridor after the bag, 'nobag' the corridor without it, 'deck' the lift to Deck 3 after the bag,
     # 'reload' a save and reload in the device step, then the corridor (the lead 27's cases)
-    for how in ('out', 'nobag', 'deck', 'reload'):
+    for how in ('stay', 'out', 'nobag', 'deck', 'reload'):
         if how == 'reload':
             g.page.evaluate('localStorage.clear()')
             g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
@@ -338,7 +338,7 @@ def bunk_leave(g):
             if g.ev("SHIP.intro.step === 'stow' && !DIALOGUE"): break
             g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
         t0 = g.ev('Math.floor(shipNow())')
-        if how != 'nobag': g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()"); g.step(10)
+        if how not in ('nobag', 'stay'): g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()"); g.step(10)
         if how == 'reload':
             for k in range(60):
                 g.step(10)
@@ -346,7 +346,7 @@ def bunk_leave(g):
             g.ev('saveGame()')
             g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
         if how == 'deck': g.ev('goToDeck(3)'); g.step(10)
-        else: g.ev("(() => { player.path.length = 0; playerGo([11, 4]); })()")   # out into the junior corridor
+        elif how != 'stay': g.ev("(() => { player.path.length = 0; playerGo([11, 4]); })()")   # out into the junior corridor
         r = None
         for k in range(200):
             g.step(30)
@@ -355,7 +355,7 @@ def bunk_leave(g):
             if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and r['dev']: break
         took = r['m'] - t0
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
-        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] or r['bag'] or took > 20:
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] or r['bag'] or took > (20 if how == 'deck' else 12):
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
         if how in ('out', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
