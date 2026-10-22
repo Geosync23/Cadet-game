@@ -1,5 +1,21 @@
 # Check runner CR4: results
 
+## 0.91.0 full round (2026-10-22)
+
+- **Candidate:** `claude/integration-next` 989fd566 ("0.91.0: the controller (0.90.9 on 0.64.16, switched off) + fresh-eyes batch 1")
+- **starship-cadet.html sha256:** `da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee` (matches BM14's)
+- **OLD:** b9f053ba (0.64.16); not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, one at a time, alone, checked out at 989fd566 (day_check.py unchanged since 1498dbf4), `CADET_WORK=/tmp/work-cr4`. Reported to BM14 and lead 30 (took over from lead 29).
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 206 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped, as designed); draw calls peak 250 / 450 |
+| day_check 13 | OK (exit 0, 200 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped); draw calls peak 253 / 450 |
+| day_check 16 | OK (exit 0, 204 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 246 / 450 |
+| day_check 19 | OK (exit 0, 194 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 265 / 450 |
+
+**CR4: OK.** No FAILs. Peaks identical to 0.64.16 (b9f053ba), as expected with breakfast rolled back.
+
 ## 0.64.17 full round, second candidate (2026-10-22)
 
 - **Candidate:** `claude/integration-next` 1498dbf4 ("Merge claude/bubble-jump 36f8abf7 ... into the 0.64.17 candidate")
