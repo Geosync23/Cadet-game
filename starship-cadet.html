@@ -12963,6 +12963,7 @@ function pauseSet(on) {
     el.querySelector('button').onclick = e => { e.stopPropagation(); pauseSet(false); };   // Enter or Space on the focused Resume (0.28.54, reviewer 1f)
     document.body.appendChild(el);
   }
+  if (typeof padPauseLine === 'function') padPauseLine(el, on);   // section 26: "Controller disconnected" after a pad drops out (controller P3)
   if (on) {
     PAUSE.on = true; PAUSE.since = now; try { saveGame(); } catch (e) { /* the save's own problem */ }
   } else PAUSE.on = false;
@@ -53491,9 +53492,9 @@ function padPickShow(on) {                                 // the ring and the l
   const t = on && P.sel;
   P.ring.visible = !!t;
   const text = t ? padLabel(t.key) : '', more = t && P.list.length > 1;
-  if (P.hint.dataset.t !== text + more) {
-    P.hint.dataset.t = text + more; P.hint.textContent = '';
-    if (t) { const k = document.createElement('span'); k.className = 'k'; k.textContent = 'A'; const m = document.createElement('span'); m.className = 'm'; m.textContent = more ? '◀ ▶' : '';
+  if (P.hint.dataset.t !== text + more + padFam()) {
+    P.hint.dataset.t = text + more + padFam(); P.hint.textContent = '';
+    if (t) { const k = padMark('a'); const m = document.createElement('span'); m.className = 'm'; m.textContent = more ? '◀ ▶' : '';
       P.hint.append(k, document.createTextNode(text), m); }
   }
   P.hint.hidden = !t || toastEl.classList.contains('show');
@@ -53649,6 +53650,74 @@ padOn('x', () => {                                         // the action button 
   if (padLayer() || ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
+// ---- P3 (controller package 3; plan sections 5 and 6): button pictures, connecting and disconnecting. Small button
+// marks in the pad's own style (Xbox letters, PlayStation shapes, Nintendo's letters in Nintendo's places: the bottom
+// button is B there), from the name the pad gives the browser (PAD.fam) or a choice in Settings (PAD_MARK.pick, the
+// controller settings page's: 'xbox', 'ps', 'nin', or null for the pad's own). A mark sits on the corner of the button
+// it presses (Device: Y, Pause: Menu, Tracked: View, the bottom-right action: X, Lightdisc's Leave: B) and on the
+// bottom line naming the ringed thing; made at the first press, shown only while the controller is in use (body.pad:
+// a touch or the mouse hides them at once), in the HUD's own text sizes (px, which the phone's text size scales; the
+// mark's shape in em, so it grows with its letter), and inside their own buttons, so
+// a speech bubble (drawn above the buttons) is never covered. Marks are aria-hidden: each button keeps its own name.
+// Connecting: the first press of a session says so once. A pad in use in the last half minute going away (battery,
+// Bluetooth, unclipping) pauses the game, the Pause card reading "Controller disconnected" (section 15's pauseSet asks
+// padPauseLine); Start or A on the card resumes once it's back.
+const PAD_MARK = { pick: null, css: false, fam: '', n: 0, said: false, why: false, line: '' };
+const PAD_SVG = s => '<svg viewBox="0 0 16 16" aria-hidden="true">' + s + '</svg>';
+const PAD_GLYPH = {                                       // [what the mark shows, its colour, its name in words]
+  xbox: { a: ['A', '#7bc75a', 'A'], b: ['B', '#ec6a62', 'B'], x: ['X', '#5f9ee8', 'X'], y: ['Y', '#ecc94e', 'Y'],
+    view: [PAD_SVG('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="6" y="6" width="7" height="7" rx="1"/>'), '#e6f0f1', 'View'],
+    menu: [PAD_SVG('<path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h9"/>'), '#e6f0f1', 'Menu'] },
+  ps: { a: [PAD_SVG('<path d="M4 4l8 8M12 4l-8 8"/>'), '#93b6f0', 'Cross'], b: [PAD_SVG('<circle cx="8" cy="8" r="4.6"/>'), '#ef8a8a', 'Circle'],
+    x: [PAD_SVG('<rect x="3.8" y="3.8" width="8.4" height="8.4"/>'), '#e3a1d6', 'Square'], y: [PAD_SVG('<path d="M8 3.2l5 8.6H3z"/>'), '#6fd6b8', 'Triangle'],
+    view: [PAD_SVG('<path d="M5 4v8M8 3v10M11 4v8"/>'), '#e6f0f1', 'Create'], menu: [PAD_SVG('<path d="M3.5 4.5h9M3.5 8h9M3.5 11.5h9"/>'), '#e6f0f1', 'Options'] },
+  nin: { a: ['B', '#e6f0f1', 'B'], b: ['A', '#e6f0f1', 'A'], x: ['Y', '#e6f0f1', 'Y'], y: ['X', '#e6f0f1', 'X'],   // Nintendo's places: bottom B, right A, left Y, top X
+    view: ['−', '#e6f0f1', 'Minus'], menu: ['+', '#e6f0f1', 'Plus'] },
+};
+const padFam = () => PAD_MARK.pick && PAD_GLYPH[PAD_MARK.pick] ? PAD_MARK.pick : PAD_GLYPH[PAD.fam] ? PAD.fam : 'xbox';
+const padWord = name => (PAD_GLYPH[padFam()][name] || [, , name.toUpperCase()])[2];   // a button's name in words, in the pad's style
+function padMark(name, cls) {                              // a mark for button name: <i class="padk ..."> in the pad's style
+  padMarkCss(); const g = PAD_GLYPH[padFam()][name], i = document.createElement('i');
+  i.className = 'padk' + (cls ? ' ' + cls : ''); i.dataset.k = name; i.dataset.f = padFam(); i.setAttribute('aria-hidden', 'true');
+  if (g) { i.innerHTML = g[0]; i.style.color = g[1]; } else i.textContent = name.toUpperCase();
+  return i;
+}
+function padMarkCss() {
+  if (PAD_MARK.css) return; PAD_MARK.css = true;
+  const st = document.createElement('style');
+  st.textContent = '.padk{display:none;position:absolute;top:-.55em;right:-.55em;z-index:1;min-width:1.7em;height:1.7em;padding:0 .3em;box-sizing:border-box;border-radius:.85em;'
+    + 'align-items:center;justify-content:center;font-size:11px;font-weight:700;font-style:normal;line-height:1;background:#0d1521;border:1px solid rgba(230,240,241,.45);pointer-events:none}'
+    + 'i.padk>svg{width:1.15em!important;height:1.15em!important;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}'
+    + 'body.pad .padk{display:inline-flex}body.pad #handBtns button{position:relative}'
+    + '#padHint .padk{display:inline-flex;position:static;flex:none;font-size:12px}';
+  document.head.appendChild(st);
+}
+// the buttons that get a mark: [the button, or a function giving it; the pad button that presses it]
+const PAD_MARKS = [['devBtn', 'y'], ['pauseBtn', 'menu'], ['trkBtn', 'view'], [() => ['repairBtn', 'hobbyBtn', 'putDown'].map(id => document.getElementById(id)).find(padShown), 'x'],
+  [() => DISC.view && DISC.view.leave, 'b']];
+function padMarksSync() {                                  // each mark on its button, in the pad's style (a redrawn button loses its mark: put back)
+  const fam = padFam(), on = new Set();
+  for (const [t, k] of PAD_MARKS) { const b = typeof t === 'function' ? t() : document.getElementById(t); if (b) on.add(b);
+    if (!b) continue; const m = b.querySelector(':scope > .padk');
+    if (m && m.dataset.f === fam) continue; if (m) m.remove(); b.appendChild(padMark(k)); }
+  for (const m of document.querySelectorAll('.padk')) if (!m.closest('#padHint') && !on.has(m.parentElement)) m.remove();   // X's mark moves to the action showing now
+  PAD_MARK.fam = fam;
+}
+padOn('use', () => {
+  padMarksSync(); PAD_MARK.n = 0;
+  if (!PAD_MARK.said) { PAD_MARK.said = true; toast('Controller connected', 'Press ' + padWord('a') + ' to use the highlighted thing.'); }   // once a session
+});
+padOn('frame', () => { if (PAD.used && (PAD_MARK.fam !== padFam() || --PAD_MARK.n <= 0)) { PAD_MARK.n = 10; padMarksSync(); } });   // a few times a second
+padOn('gone', () => {                                      // the pad in charge went: stop walking (padRelease did), pause if it was in use lately
+  if (!padList().length) padUnuse();                     // no pad left: its marks and highlight go
+  if (PAD.goneUsed && !PAUSE.on) { PAD_MARK.why = true; pauseSet(true); }
+});
+function padPauseLine(el, on) {                            // section 15's Pause card asks for its line (pauseSet): "Controller disconnected" after a drop-out
+  const ln = el && el.firstElementChild && el.firstElementChild.children[1]; if (!ln) return;
+  if (on && PAD_MARK.why) { PAD_MARK.line = PAD_MARK.line || ln.textContent; ln.textContent = 'Controller disconnected'; }
+  else if (!on && PAD_MARK.line) { ln.textContent = PAD_MARK.line; PAD_MARK.line = ''; }
+  if (!on) PAD_MARK.why = false;
+}
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================

@@ -330,7 +330,108 @@ def part_panels(pw):
     print(f'  panels: {n} panels swept, device apps {len(apps)}')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels)]
+# ---- P3 (plan sections 5 and 6): button pictures, connecting and disconnecting ----
+# marks:   nothing before a press; after one, a mark on Device (Y), Pause (Menu), Tracked (View), inside its button, shown;
+#          the bottom line's mark in the pad's style; Xbox / PlayStation / Nintendo from the pad's name and from
+#          PAD_MARK.pick; X's mark moves to the action button showing; Lightdisc's Leave gets B; a touch hides them all;
+#          "Controller connected" once a session; the marks follow the text size (em); a speech bubble is drawn above them
+# touch:   press, then touch: the screenshot is the no-pad one, pixel for pixel
+# drop:    a disconnect mid-walk stops you and pauses ("Controller disconnected" on the card); A on the card resumes once
+#          the pad is back; the card's usual line comes back; a pad not used for 30 s stops you but doesn't pause;
+#          two pads: the last to press decides the marks' style
+SHOTS = os.environ.get('PAD_SHOTS')
+MARKS = "(() => [...document.querySelectorAll('.padk')].map(m => [m.parentElement.id || m.parentElement.className, m.dataset.k, m.dataset.f, getComputedStyle(m).display !== 'none']))()"
+def marks(p): return {(a, k): (f, shown) for a, k, f, shown in p.ev(MARKS)}
+
+def part_marks(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.step(3)
+    check(p.ev("document.querySelectorAll('.padk').length") == 0, 'marks: marks on the page before any press')
+    p.ev("document.getElementById('tt').textContent = ''")
+    p.press('x'); p.step(12)
+    m = marks(p)
+    for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
+        check(m.get((b, k)) == ('xbox', True), f'marks: no shown Xbox {k} mark on {b}: {m}')
+    check(p.ev("document.getElementById('tt').textContent") == 'Controller connected', 'marks: no "Controller connected" at the first press')
+    check(p.ev("document.querySelector('#devBtn > .padk').textContent") == 'Y', 'marks: the Device mark should read Y')
+    hint = p.ev("(() => { const h = document.getElementById('padHint'); const k = h && h.querySelector('.padk'); return h && !h.hidden && k ? [k.dataset.k, k.dataset.f, k.textContent] : null; })()")
+    check(hint is None or hint == ['a', 'xbox', 'A'], f'marks: the bottom line\'s mark: {hint}')
+    # text size: the phone's text size scales the HUD's px text; the mark's shape is in em, so it grows with its letter
+    w0 = p.ev("document.querySelector('#pauseBtn > .padk').getBoundingClientRect().height")
+    p.ev("document.querySelector('#pauseBtn > .padk').style.fontSize = '22px'"); w1 = p.ev("document.querySelector('#pauseBtn > .padk').getBoundingClientRect().height")
+    p.ev("document.querySelector('#pauseBtn > .padk').style.fontSize = ''")
+    check(w0 > 14, f'marks: the Pause mark is too small to see: {w0}px')
+    check(w1 > w0 * 1.6, f'marks: the mark did not grow with the text size: {w0} -> {w1}')
+    # speech bubbles are drawn above the buttons (and so above their marks)
+    zb = p.ev("(() => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;inset:0;z-index:2'; document.body.appendChild(d); const r = document.querySelector('#devBtn > .padk').getBoundingClientRect(); const top = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2); d.remove(); return top === d; })()")
+    check(zb, 'marks: a layer like the speech bubbles\' (z-index 2, later on the page) does not cover the marks')
+    if SHOTS: p.g.shot(SHOTS + '/marks-xbox.png')
+    # X: the action button showing
+    # (section 15's handTick hides the Hobby button again on its own timer: shown and marked at once, without a step)
+    m = p.ev("(() => { handEl(); const b = document.getElementById('hobbyBtn'); b.hidden = false; padMarksSync(); const m = b.querySelector(':scope > .padk'); return m ? [m.dataset.k, getComputedStyle(m).display !== 'none'] : null; })()")
+    check(m == ['x', True], f'marks: no X mark on the Hobby button showing: {m}')
+    if SHOTS: p.g.shot(SHOTS + '/marks-x.png')
+    p.ev("document.getElementById('hobbyBtn').hidden = true; padMarksSync()")
+    check(not any(k == 'x' for _, k in marks(p)), 'marks: the X mark stayed with no action button showing')
+    # the families: a Settings choice, and the pad's own name
+    for fam, y in [('ps', None), ('nin', 'X')]:
+        p.ev(f"PAD_MARK.pick = {json.dumps(fam)}"); p.step(2)
+        m = marks(p); check(m.get(('devBtn', 'y')) == (fam, True), f'marks: the pick {fam} did not restyle the marks: {m}')
+        if y: check(p.ev("document.querySelector('#devBtn > .padk').textContent") == y, f'marks: Nintendo\'s top button should read {y}')
+        if SHOTS: p.g.shot(SHOTS + f'/marks-{fam}.png')
+    check(p.ev("padWord('a')") == 'B', 'marks: on a Nintendo pad the bottom button is B')
+    p.ev("PAD_MARK.pick = null"); p.step(2)
+    # Lightdisc's Leave: B
+    if p.ev("(() => { const a = DECK_CREW[0]; if (!a) return false; discBegin(a); return !!(DISC.view && DISC.view.leave); })()"):
+        p.press('x'); p.step(12)
+        check(p.ev("(() => { const m = DISC.view.leave.querySelector('.padk'); return m && m.dataset.k === 'b' && getComputedStyle(m).display !== 'none'; })()"), 'marks: no B mark on Lightdisc\'s Leave')
+        if SHOTS: p.g.shot(SHOTS + '/marks-lightdisc.png')
+        p.press('b'); p.step(10)
+        check(not p.ev('DISC.view'), 'marks: B did not leave Lightdisc')
+    # a touch hides them all; the connected message only once a session
+    p.ev("document.getElementById('tt').textContent = ''")
+    p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)
+    check(not any(s for _, s in marks(p).values()), f'marks: a mark still shows after a touch: {marks(p)}')
+    p.press('x'); p.step(3)
+    check(p.ev("document.getElementById('tt').textContent") == '', 'marks: "Controller connected" said twice in a session')
+    p.close()
+
+def part_touch(pw):
+    a = Pad(pw, ON); a.plug(); a.step(30); a.g.shot(str(WORK / 'test' / '_pad_nopad.png')); a.close()
+    b = Pad(pw, ON); b.plug(); b.press('x'); b.step(27)   # (a press is 3 frames)
+    b.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); b.g.shot(str(WORK / 'test' / '_pad_touch.png')); b.close()
+    x, y = (WORK / 'test' / '_pad_nopad.png').read_bytes(), (WORK / 'test' / '_pad_touch.png').read_bytes()
+    check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
+
+def part_drop(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.step(2)
+    p.axes([0, -1, 0, 0]); p.step(6)
+    check(p.ev('!!player.steer'), 'drop: the stick did not walk')
+    p.js('window.__padUnplug(0)'); p.step(1)
+    check(p.ev('player.steer') is None, 'drop: still walking after the pad went')
+    check(p.ev('PAUSE.on') is True, 'drop: a pad in use going away did not pause')
+    line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+    check(line == 'Controller disconnected', f'drop: the Pause card reads {line!r}')
+    check('pad' not in p.ev('document.body.className'), 'drop: the marks stayed with no pad')
+    if SHOTS: p.g.shot(SHOTS + '/drop-pause.png')
+    p.plug(); p.step(2); p.press('a'); p.step(2)
+    check(p.ev('PAUSE.on') is False, 'drop: A on the Pause card did not resume once the pad was back')
+    p.press('menu'); p.step(2)
+    line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+    check(p.ev('PAUSE.on') is True and line == 'The ship waits for you.', f'drop: an ordinary pause afterwards reads {line!r}')
+    p.press('menu'); p.step(2)
+    # not used for half a minute: stop, no pause
+    p.ev('PAD.lastUse -= 31000'); p.js('window.__padUnplug(0)'); p.step(1)
+    check(p.ev('PAUSE.on') is False, 'drop: a pad unused for 30 s going away paused the game')
+    # two pads: the last to press decides the style
+    p.plug(0); p.press('x'); p.plug(1, 'DualSense Wireless Controller'); p.press('x', 1); p.step(3)
+    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'ps', f'drop: the PlayStation pad pressed last, marks still {marks(p)}')
+    p.press('x', 0); p.step(3)
+    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'xbox', 'drop: the Xbox pad pressed last, marks not back to Xbox')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('marks', part_marks), ('touch', part_touch), ('drop', part_drop)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
