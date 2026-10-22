@@ -5,6 +5,12 @@ against claude/integration 2b4a05db (0.64.15). Line numbers are from that build;
 Read first: CLAUDE.md, DEV_NOTES "Rules that keep it working", `plans/owners.md`, the plan page, and
 `plans/arrows-pillar5-notes.md` ("How the game guides the player today" and "Step 1: the tracked shift").
 
+**Decisions (the plan's five questions, answered "go with the recommendations", 2026-10-22, as passed on by lead 27):**
+fixes first; the shift's arrows every shift while the shift is tracked, panel pointers the first three times
+(`once: 3`); a training meeting may take the arrow from 15 minutes before, the job's arrow back straight after (level 2
+over level 4); a Settings switch for teaching arrows, all / first time only / off, default first time only (B builds
+it, see "The Settings switch"); the burst pipe's job taken at the pipe (F4).
+
 **Both pieces start switched off** (`GUIDE_ON = false`, `POINT_ON = false`): with the switch off the game is identical
 (cadet_test ALL IDENTICAL, no new save keys written). Nothing here calls `R()`. Neither adds anything to the 3D scene:
 both are page elements (no draw calls).
@@ -110,6 +116,15 @@ Day 2 at 10:00 Torres's invitation was replaced within the same ship minute by t
   queue can live in the 15b slot with `toast` wrapped there.
 Tests (arrows_check part "queue"): five toasts in one frame show in order, none for under 2.5 s, at most 3 waiting;
 an urgent one shows at once; GUIDE_ON false is identical.
+
+### The Settings switch (decision 4; B builds it)
+`SHIP.device.settings.arrows`: 'all' | 'first' (default) | 'off', saved with the other settings, read back defensively
+(anything else is 'first'). Shown in the Settings app next to the tips switch (section 19; agree the exact spot and
+words with the device builder / builder C, who also reads it). Its meaning:
+- 'first': `once` entries and pointers show their set number of times, as planned.
+- 'all': `once` is ignored for teaching entries (level 3 and pointers): they show every time they apply.
+- 'off': no level-3 entries and no pointers. Levels 1, 2, 4, 5 and 6 are unchanged: the shift's arrows, meetings and
+  emergencies are not teaching.
 
 ### Tests for B (a new check, `arrows_check.py`, part "queue"; it can be built with B and grown by D-F)
 - Off: `GUIDE_ON = false` gives cadet_test ALL IDENTICAL and no `guide` key in the save.
