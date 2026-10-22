@@ -97,3 +97,8 @@ conversion and to tell it the commit so it runs its parts from this file. A sugg
 CP3's, CP5's old-shape parts): copy each part function in under its name, with one shared adapter giving them what CT1's
 file gave (GAME/ON paths set per call, a Pad class over cadet_test's Game with plug/btn/axes/press/log, check()/fail()
 appending to a list the adapter returns), then register NEEDS and MUTANTS as in this note.
+
+### CP4 (11:23): claude/controller-p4 db80eb0
+Old-shape part 'settings' (part_settings with helpers SV and SAVE_NOW above it; uses Pad and sweep()). A real reload with
+saving on (writes a save in the game's shape, page.goto without ?nosave, clears localStorage at the end); defines
+window.PAD_LAYOUTS as a stand-in for P5's. About 2 minutes. NEEDS ['settings'].
