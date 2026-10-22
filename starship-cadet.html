@@ -12458,7 +12458,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
       { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
       { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
-      { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }] };
+      { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }].concat(typeof padSetBlocks === 'function' ? padSetBlocks() : []) };   // the Controller page's button, once a pad is seen (section 26, P4)
   } });
 
 // Wallet: credits and your locker (0.28.10)
@@ -53282,15 +53282,16 @@ function padTick(dt) {                                    // every frame while a
   if (g.id !== PAD.id) { PAD.id = g.id; PAD.std = g.mapping === 'standard'; PAD.fam = padFamily(g.id); }   // not standard: the same order is the best guess (Settings remaps it, turn 7)
   const ax = g.axes || [], bt = g.buttons || [];
   PAD.ls = padStick(+ax[0] || 0, +ax[1] || 0); PAD.rs = padStick(+ax[2] || 0, +ax[3] || 0);
-  PAD.lt = padTrig(bt[6] ? +bt[6].value || (bt[6].pressed ? 1 : 0) : 0); PAD.rt = padTrig(bt[7] ? +bt[7].value || (bt[7].pressed ? 1 : 0) : 0);
+  const tl = bt[PAD_PHY.lt], tr = bt[PAD_PHY.rt];          // the triggers' actions, wherever Settings put them (P4)
+  PAD.lt = padTrig(tl ? +tl.value || (tl.pressed ? 1 : 0) : 0); PAD.rt = padTrig(tr ? +tr.value || (tr.pressed ? 1 : 0) : 0);
   let any = PAD.ls[0] || PAD.ls[1] || PAD.rs[0] || PAD.rs[1] || PAD.lt || PAD.rt;
   for (let k = 0; k < PAD_BTN.length; k++) {
-    const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || k === 6 && PAD.lt > .5 || k === 7 && PAD.rt > .5;   // a trigger counts as pressed past half way
+    const n = PAD_MAPK[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;   // a trigger counts as pressed past half way (n: the action on button k, P4's Settings)
     if (on) any = true;
     if (on && !PAD.down[n]) { PAD.down[n] = true; PAD.held[n] = 0; PAD.rep[n] = PAD_REP.first; padUse(); padFire(n); }
     else if (on) {
       PAD.held[n] += dt;
-      if (k >= 12 && (PAD.rep[n] -= dt) <= 0) { PAD.rep[n] += PAD_REP.every; padFire(n, true); }   // the D-pad repeats while held
+      if (PAD_BTN.indexOf(n) >= 12 && (PAD.rep[n] -= dt) <= 0) { PAD.rep[n] += PAD_REP.every; padFire(n, true); }   // the D-pad repeats while held
     } else if (PAD.down[n]) { PAD.down[n] = false; PAD.held[n] = 0; padFire(n + ':up'); }
   }
   if (any) padUse();
@@ -53343,8 +53344,8 @@ padOn('frame', () => {
   const sx = PAD.rs[0];
   if (Math.abs(sx) > .6 && !PAD_DECK.flick) { PAD_DECK.flick = Math.sign(sx); azT += PAD_DECK.flick * Math.PI / 2; }
   else if (Math.abs(sx) < .3) PAD_DECK.flick = 0;
-  const zr = PAD.rt - PAD.lt - PAD.rs[1], dt = PAD.dt;   // up on the stick and the right trigger zoom in
-  if (zr && dt) setZoom(camera.zoom * Math.exp(zr * 1.4 * dt));
+  const zr = PAD.rt - PAD.lt - PAD.rs[1] * (PAD_SET.flip ? -1 : 1), dt = PAD.dt;   // up on the stick and the right trigger zoom in (P4's Settings: flip, speed)
+  if (zr && dt) setZoom(camera.zoom * Math.exp(zr * 1.4 * PAD_SET.zoom * dt));
 });
 padOn('release', () => padWalkEnd());
 padOn('lb', () => { if (padLayer() || ride || FREEZE.frozen) return; azT -= Math.PI / 2; return true; });
@@ -53649,6 +53650,146 @@ padOn('x', () => {                                         // the action button 
   if (padLayer() || ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
+// ---- package P4 (controller plan section 7): the Controller page in your device's Settings. Shown only once a pad has
+// been seen this session (or something on it was changed before), so Settings is unchanged for everyone else. Change a
+// button (highlight an action, press A, press the button you want; one already used swaps places; "Back to normal"),
+// swap confirm and back (Nintendo style), the sticks' dead zone, walking full speed or gentle, the camera's zoom speed,
+// flip zoom, turning by flick or by holding, the button pictures, the menu repeat, vibration (off unless turned on).
+// PAD_SET holds them; saved with the game (s.pad) only when something differs from normal, so a save without a change
+// stays byte for byte the same. Read by others: padButtonFor(action) (the button an action is on, for P3's marks),
+// padMarkFamily() (whose marks: 'xbox' | 'ps' | 'nin', or null for none, P3), PAD_REP (the menu repeat, P5), padBuzz().
+const PAD_SET0 = { map: {}, swap: false, dead: .22, walk: 'full', zoom: 1, flip: false, turn: 'flick', marks: 'auto', first: .5, every: .25, buzz: false };
+const PAD_SET = JSON.parse(JSON.stringify(PAD_SET0));
+const PAD_MAPK = PAD_BTN.slice();                         // pad button k (the standard order) -> the action it does (section 26's names)
+const PAD_PHY = {};                                       // the action -> its pad button's index
+const PAD_SET_CH = { dead: [.12, .22, .32], zoom: [.6, 1, 1.6], first: [.3, .5, .8], every: [.5, .25, .125], marks: ['auto', 'xbox', 'ps', 'nin', 'off'] };
+const PAD_SET_ACTS = [['a', 'Use, press'], ['b', 'Back'], ['x', 'Action button (Repair, Hobby, Put down)'], ['y', 'Your device'], ['view', 'Tracked'], ['menu', 'Pause'],
+  ['lb', 'Turn left'], ['rb', 'Turn right'], ['lt', 'Zoom out, page up'], ['rt', 'Zoom in, page down'], ['rs', 'The usual zoom'],
+  ['up', 'Up (the screen\'s edge buttons)'], ['down', 'Down'], ['left', 'Previous thing nearby'], ['right', 'Next thing nearby'], ['ls', 'Spare (does nothing)']];
+const PAD_SET_NAMES = {                                   // each pad button's name, in the pad's own style (the standard order)
+  xbox: ['A', 'B', 'X', 'Y', 'LB', 'RB', 'LT', 'RT', 'View', 'Menu', 'Left stick click', 'Right stick click'],
+  ps: ['Cross', 'Circle', 'Square', 'Triangle', 'L1', 'R1', 'L2', 'R2', 'Create', 'Options', 'L3', 'R3'],
+  nin: ['B', 'A', 'Y', 'X', 'L', 'R', 'ZL', 'ZR', 'Minus', 'Plus', 'Left stick click', 'Right stick click'] };
+const PAD_SET_UI = { listen: null, t0: 0, prev: null, eat: false, sure: false, turnT: 0, holdT: {} };
+function padSetMap() {                                    // PAD_SET.map (action -> pad button, the changed ones) and the swap -> PAD_MAPK, PAD_PHY
+  const phy = {}; for (const n of PAD_BTN) phy[n] = PAD_BTN.indexOf(PAD_SET.map[n] || n);
+  if (PAD_SET.swap) [phy.a, phy.b] = [phy.b, phy.a];
+  for (const n of PAD_BTN) { PAD_PHY[n] = phy[n]; PAD_MAPK[phy[n]] = n; }
+}
+function padSetApply() { PAD_DEAD.stick = PAD_SET.dead; PAD_REP.first = PAD_SET.first; PAD_REP.every = PAD_SET.every; padSetMap(); }
+function padSetLoad(d) {                                   // a save's s.pad (only what differs from normal), checked; anything odd stays normal
+  const S = PAD_SET; Object.assign(S, JSON.parse(JSON.stringify(PAD_SET0)));
+  if (d && typeof d === 'object') {
+    const m = d.map && typeof d.map === 'object' ? d.map : {}, used = new Set();
+    for (const n of PAD_BTN) if (PAD_BTN.includes(m[n]) && m[n] !== n && !used.has(m[n])) { S.map[n] = m[n]; used.add(m[n]); }
+    const all = PAD_BTN.map(n => S.map[n] || n); if (new Set(all).size !== all.length) S.map = {};   // not one button each: back to normal
+    if (d.swap === true) S.swap = true;
+    if (d.flip === true) S.flip = true;
+    if (d.buzz === true) S.buzz = true;
+    if (d.walk === 'gentle') S.walk = 'gentle';
+    if (d.turn === 'hold') S.turn = 'hold';
+    for (const k of ['dead', 'zoom', 'first', 'every', 'marks']) if (PAD_SET_CH[k].includes(d[k])) S[k] = d[k];
+  }
+  padSetApply();
+}
+function padSetDiff() {                                    // what differs from normal, or null
+  const S = PAD_SET, d = {};
+  if (Object.keys(S.map).length) d.map = Object.assign({}, S.map);
+  for (const k in PAD_SET0) if (k !== 'map' && S[k] !== PAD_SET0[k]) d[k] = S[k];
+  return Object.keys(d).length ? d : null;
+}
+padSetLoad(SAVED && SAVED.pad);
+SAVE_EXTRA.push(s => { const d = padSetDiff(); if (d) s.pad = d; });   // nothing changed: nothing written
+const padButtonFor = n => PAD_BTN[PAD_PHY[n]] || n;      // the pad button (by position) an action is on
+const padMarkFamily = () => PAD_SET.marks === 'off' ? null : PAD_SET.marks === 'auto' ? PAD.fam : PAD_SET.marks;
+function padButtonName(b) {                                // a pad button's name in words, in the pad's style
+  const k = PAD_BTN.indexOf(b); if (k >= 12) return 'D-pad ' + b;
+  return (PAD_SET_NAMES[padMarkFamily() || PAD.fam] || PAD_SET_NAMES.xbox)[k] || b;
+}
+function padBuzz(ms, k) {                                  // a light buzz, only when it's turned on (never the only sign of anything)
+  if (!PAD_SET.buzz || !PAD.live) return false;
+  try { const g = padList().find(p => p.index === PAD.idx), v = g && g.vibrationActuator; if (!v || !v.playEffect) return false;
+    v.playEffect('dual-rumble', { duration: ms || 120, weakMagnitude: k || .4, strongMagnitude: (k || .4) / 2 }); return true; } catch (e) { return false; }
+}
+const padSetSeen = () => PAD_ON && (PAD.live || !!PAD.id || !!padSetDiff());
+// section 19's Settings shows this at its end (a one-line hook there): nothing at all until a pad has been seen
+const padSetBlocks = () => padSetSeen() ? [{ kind: 'text', text: 'Controller' }, { kind: 'buttons', items: [{ label: 'Controller settings', action: { app: 'settings', do: 'open', arg: 'padsettings' } }] }] : [];
+function padSetBind(n, b) {                                // put action n on pad button b; the action that was there takes n's old button
+  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n) return;
+  [phy[n], phy[other]] = [k, phy[n]];
+  if (PAD_SET.swap) [phy.a, phy.b] = [phy.b, phy.a];      // back to the map before the swap
+  PAD_SET.map = {}; for (const m of PAD_BTN) if (phy[m] !== PAD_BTN.indexOf(m)) PAD_SET.map[m] = PAD_BTN[phy[m]];
+  padSetMap();
+}
+function padSetListen(n) {                                 // wait for the next pad button press, for action n (null: stop waiting)
+  const U = PAD_SET_UI; U.listen = n || null; U.t0 = performance.now(); U.prev = null;
+  if (n) padRelease();
+}
+function padSetRaw() {                                     // the pad in charge's buttons, pressed or not, by pad button index
+  const g = padList().find(p => p.index === PAD.idx) || padList()[0]; if (!g) return null;
+  return PAD_BTN.map((n, k) => { const b = g.buttons[k]; return !!(b && (b.pressed || +b.value > .5)); });
+}
+if (PAD_ON) {
+  PAD.on.b = PAD.on.b || [];                               // B on the Controller page: back to Settings (before turn 4's B, which goes Home)
+  PAD.on.b.unshift(() => { if (!PAD.used || !DEV.open || DEV.app !== 'padsettings' || padLayer() !== document.getElementById('device')) return; deviceShow('settings'); return true; });
+  for (const n of PAD_BTN) for (const e of [n, n + ':up']) (PAD.on[e] = PAD.on[e] || []).unshift(() => PAD_SET_UI.listen || PAD_SET_UI.eat ? true : undefined);   // waiting for a button: it does nothing else
+  padOn('frame', () => {
+    const U = PAD_SET_UI;
+    if (U.listen) {
+      if (!DEV.open || DEV.app !== 'padsettings' || performance.now() - U.t0 > 10000) { padSetListen(null); if (DEV.open) deviceRefresh(); }
+      else {
+        const raw = padSetRaw();
+        if (raw) { const k = U.prev ? raw.findIndex((on, i) => on && !U.prev[i]) : -1; U.prev = raw;   // a new press (not one held when it began)
+          if (k >= 0) { padSetBind(U.listen, PAD_BTN[k]); padSetListen(null); U.eat = true; padRelease(); deviceRefresh(); } }
+      }
+    }
+    if (U.eat) { const raw = padSetRaw(); if (!raw || !raw.some(Boolean)) U.eat = false; }   // the chosen button does nothing until let go
+    const free = !ride && !padLayer() && !FREEZE.frozen, dt = PAD.dt;
+    if (PAD_SET.walk === 'gentle' && PAD_DECK.walking && player.steer && !steering) player.steer.k = Math.min(player.steer.k, .6);
+    if (PAD_SET.turn !== 'hold' || !free) { U.turnT = 0; U.holdT = {}; return; }
+    // turning by holding: a held push (the stick, LB, RB) turns again every half second
+    if (PAD_DECK.flick && Math.abs(PAD.rs[0]) > .6) { if ((U.turnT += dt) >= .6) { U.turnT -= .5; azT += PAD_DECK.flick * Math.PI / 2; } } else U.turnT = 0;
+    for (const [n, s] of [['lb', -1], ['rb', 1]]) if (PAD.down[n]) { if ((U.holdT[n] = (U.holdT[n] || 0) + dt) >= .6) { U.holdT[n] -= .5; azT += s * Math.PI / 2; } } else U.holdT[n] = 0;
+  });
+  padOn('gone', () => { if (PAD_SET_UI.listen) { padSetListen(null); if (DEV.open) deviceRefresh(); } });
+  deviceApp({ id: 'padsettings', title: 'Controller', icon: 'gear', order: 99.5, hidden: () => true, act: padSetAct, view: padSetView });
+}
+function padSetAct(verb, arg) {
+  const S = PAD_SET, U = PAD_SET_UI;
+  if (verb === 'bind') { U.sure = false; padSetListen(U.listen === arg ? null : arg); return; }
+  if (verb === 'cancel') { U.sure = false; padSetListen(null); return; }
+  padSetListen(null);
+  if (verb === 'normalbtn') { S.map = {}; S.swap = false; }
+  else if (verb === 'swap' || verb === 'flip' || verb === 'buzz') { S[verb] = !!arg; if (verb === 'buzz' && arg) padBuzz(150, .5); }
+  else if (verb === 'walk' && ['full', 'gentle'].includes(arg)) S.walk = arg;
+  else if (verb === 'turn' && ['flick', 'hold'].includes(arg)) S.turn = arg;
+  else if (PAD_SET_CH[verb] && PAD_SET_CH[verb].includes(arg)) S[verb] = arg;
+  else if (verb === 'normal') { if (!U.sure) { U.sure = true; return; } padSetLoad(null); }
+  else if (verb === 'done') { deviceShow('settings'); return; }
+  if (verb !== 'normal') U.sure = false;
+  padSetApply();
+}
+function padSetView() {
+  const S = PAD_SET, U = PAD_SET_UI, A = 'padsettings', B = [];
+  const pick = (verb, list) => ({ kind: 'buttons', items: list.map(([v, label]) => ({ label, action: { app: A, do: verb, arg: v }, on: S[verb] === v })) });
+  const on = verb => pick(verb, [[true, 'On'], [false, 'Off']]);
+  B.push({ kind: 'text', text: 'Buttons: pick an action, then press the button you want for it. A button already in use swaps places.' });
+  B.push({ kind: 'list', rows: PAD_SET_ACTS.map(([n, label]) => ({ text: label, sub: U.listen === n ? 'Press a button on your controller (its own keeps it)' : padButtonName(padButtonFor(n)),
+    mark: U.listen === n ? 'hot' : undefined, action: { app: A, do: 'bind', arg: n } })) });
+  B.push({ kind: 'buttons', items: [U.listen ? { label: 'Cancel', action: { app: A, do: 'cancel' } } : null, { label: 'Buttons back to normal', action: { app: A, do: 'normalbtn' } }].filter(Boolean) });
+  B.push({ kind: 'text', text: 'Swap confirm and back (Nintendo style: the right button confirms)' }, on('swap'));
+  B.push({ kind: 'text', text: 'How far a stick moves before it counts' }, pick('dead', [[.12, 'A little'], [.22, 'Normal'], [.32, 'A lot']]));
+  B.push({ kind: 'text', text: 'Walking' }, pick('walk', [['full', 'Full speed'], ['gentle', 'Gentle']]));
+  B.push({ kind: 'text', text: 'Zoom speed' }, pick('zoom', [[.6, 'Slow'], [1, 'Normal'], [1.6, 'Fast']]));
+  B.push({ kind: 'text', text: 'Flip zoom on the right stick (down zooms in)' }, on('flip'));
+  B.push({ kind: 'text', text: 'Turning the view' }, pick('turn', [['flick', 'A quarter turn a push'], ['hold', 'Keeps turning while held']]));
+  B.push({ kind: 'text', text: 'Button pictures' }, pick('marks', [['auto', 'Automatic'], ['xbox', 'Xbox'], ['ps', 'PlayStation'], ['nin', 'Nintendo'], ['off', 'Off']]));
+  B.push({ kind: 'text', text: 'Holding a direction in a menu: wait before it repeats' }, pick('first', [[.3, 'Short'], [.5, 'Normal'], [.8, 'Long']]));
+  B.push({ kind: 'text', text: 'Then how fast it repeats' }, pick('every', [[.5, 'Slow'], [.25, 'Normal'], [.125, 'Fast']]));
+  B.push({ kind: 'text', text: 'Vibration (a light buzz; never the only sign of anything)' }, on('buzz'));
+  B.push({ kind: 'buttons', items: [{ label: U.sure ? 'Sure? Press again to put everything back' : 'Everything back to normal', action: { app: A, do: 'normal' } }, { label: 'Done', action: { app: A, do: 'done' } }] });
+  return { title: 'Controller', blocks: B };
+}
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================

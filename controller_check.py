@@ -11,6 +11,12 @@
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
 #           is in charge); a disconnect lets go of everything and says whether the pad was in use; the last pad going
 #           leaves PAD.live false
+#   settings (P4, plan section 7): with no pad, Settings and the save are unchanged (switch off vs on); once a pad is seen
+#           Settings ends with the Controller page's button; change a button by pad (the A that began it is not taken,
+#           the chosen button does nothing, the two swap), B back to Settings, the swap of confirm and back, an action's
+#           own button keeps it; every setting takes effect; the changes are small in the save and hold through a real
+#           reload; turning by holding, flipped zoom, gentle walking; an odd save loads as normal; Everything back to
+#           normal leaves nothing saved
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 controller_check.py BUILD.html [part ...]    Good is CONTROLLER CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -330,7 +336,80 @@ def part_panels(pw):
     print(f'  panels: {n} panels swept, device apps {len(apps)}')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels)]
+# P4, the Controller page in Settings (plan section 7)
+SV = "(() => { const s = {}; for (const f of SAVE_EXTRA) try { f(s); } catch (e) { } return s; })()"
+SAVE_NOW = """(() => { const decks = {}; for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
+  const save = { v: SAVE_V, build: GAME_BUILD, time: { day: SHIP.time.day, min: SHIP.time.min }, player: { deck: player.deck, tile: player.here(), facing: player.face }, ship: { decks }, crew: {}, flags: SHIP.flags || {}, notes: SHIP.notes || [] };
+  if (typeof crewState === 'function') save.crew = crewState(SHIP.time.day); for (const f of SAVE_EXTRA) f(save); localStorage.setItem(SAVE_KEY, JSON.stringify(save)); return true; })()"""
+def part_settings(pw):
+    # with no pad: Settings unchanged, nothing saved; the save's extras byte-identical with the switch off and on
+    a = Pad(pw, GAME); va = a.ev("JSON.stringify(deviceView('settings'))"); sa = a.ev(f'JSON.stringify({SV})'); a.close()
+    p = Pad(pw, ON)
+    check(p.ev("JSON.stringify(deviceView('settings'))") == va, 'settings: the Settings app differs with the switch on and no pad')
+    check(p.ev(f'JSON.stringify({SV})') == sa, 'settings: the save differs with the switch on and no pad')
+    p.plug(); p.press('x'); p.log()
+    v = p.ev("deviceView('settings').blocks.map(b => b.text || (b.items || []).map(i => i.label).join('|'))")
+    check(v[-1] == 'Controller settings', f'settings: with a pad seen, Settings should end with the Controller button: {v[-2:]}')
+    check('pad' not in p.ev(SV), 'settings: a pad used but nothing changed wrote s.pad')
+    p.ev("deviceShow('settings')"); p.step(3)
+    p.ev("padFocusTo([...document.querySelectorAll('#devBody button')].find(b => b.textContent === 'Controller settings'))"); p.press('a'); p.step(3)
+    check(p.ev('DEV.app') == 'padsettings', f'settings: A on Controller settings should open the page, not {p.ev("DEV.app")}')
+    sweep(p, 'Controller page', back=False)
+    # change a button by pad: highlight "Your device", A, then LB. The A that began it is not taken; Y and LB swap
+    p.ev("padFocusTo([...document.querySelectorAll('#devBody button')].find(b => b.textContent.startsWith('Your device')))"); p.log()
+    p.btn('a'); p.step(2)
+    check(p.ev('PAD_SET_UI.listen') == 'y', 'settings: A on an action should wait for a button')
+    p.step(3); p.btn('a', 0); p.step(2); check(p.ev('PAD_SET_UI.listen') == 'y', 'settings: letting go of A stopped the wait')
+    p.btn('lb'); p.step(2)
+    check(p.ev("padButtonFor('y')") == 'lb' and p.ev("padButtonFor('lb')") == 'y', f'settings: Y and LB should swap: y on {p.ev("padButtonFor(\'y\')")}, lb on {p.ev("padButtonFor(\'lb\')")}')
+    check(p.ev('DEV.open && DEV.app') == 'padsettings', 'settings: the chosen button did something (the device moved on)')
+    p.step(5); p.btn('lb', 0); p.step(2)
+    check(p.ev('DEV.open && DEV.app') == 'padsettings' and p.ev('azT === az && !PAD_SET_UI.eat'), 'settings: the chosen button did something when let go')
+    # B on the page goes back to Settings; Y (now on LB) closes the device
+    p.press('b'); p.step(2); check(p.ev('DEV.open && DEV.app') == 'settings', f'settings: B on the Controller page should go back to Settings, not {p.ev("DEV.app")}')
+    p.press('lb'); p.step(2); check(p.ev('DEV.open') is False, 'settings: the device action, moved to LB, should close the device')
+    p.log(); p.press('y'); p.step(2); l = p.log(); check('lb' in l and 'y' not in l, f'settings: the Y button should now turn left (lb): {l}')
+    # by deviceDo: Pause onto X, then the swap of confirm and back
+    p.ev("deviceShow('padsettings'); deviceDo({ app: 'padsettings', do: 'bind', arg: 'menu' })"); p.step(2); p.press('x'); p.step(2)
+    check(p.ev("padButtonFor('menu')") == 'x' and p.ev("padButtonFor('x')") == 'menu', 'settings: Pause onto X should swap them')
+    p.ev("deviceDo({ app: 'padsettings', do: 'swap', arg: true })")
+    check(p.ev("padButtonFor('a')") == 'b' and p.ev("padButtonFor('b')") == 'a', 'settings: the swap should put confirm on B')
+    p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'a' })"); p.step(2); p.press('rs'); p.step(2)
+    check(p.ev("padButtonFor('a')") == 'rs' and p.ev("padButtonFor('rs')") == 'b' and p.ev('PAD_SET.swap') is True, f'settings: confirm onto RS with the swap on: a {p.ev("padButtonFor(\'a\')")}, rs {p.ev("padButtonFor(\'rs\')")}')
+    p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'view' })"); p.step(2); p.press('view'); p.step(2)
+    check(p.ev("padButtonFor('view')") == 'view', 'settings: pressing an action\'s own button should keep it')
+    for verb, val in [('dead', .32), ('walk', 'gentle'), ('zoom', 1.6), ('flip', True), ('turn', 'hold'), ('marks', 'off'), ('first', .8), ('every', .125), ('buzz', True)]:
+        p.ev(f"deviceDo({{ app: 'padsettings', do: {json.dumps(verb)}, arg: {json.dumps(val)} }})")
+    check(p.ev('PAD_DEAD.stick') == .32 and p.ev('PAD_REP.first') == .8 and p.ev('PAD_REP.every') == .125, 'settings: the dead zone and the menu repeat should take effect')
+    check(p.ev('padMarkFamily()') is None, 'settings: button pictures off should give no family')
+    sv = p.ev(SV)['pad']; n = len(json.dumps(sv, separators=(',', ':')))
+    check(n < 250, f'settings: the saved changes should be small: {n} bytes {sv}')
+    want = p.ev('JSON.stringify(PAD_SET)'); mk = p.ev('PAD_MAPK.join()')
+    # reload: the save written, the page opened again with saving on; it all holds
+    p.ev(SAVE_NOW); url = p.g.page.url.replace('?nosave&debug', '?debug')
+    p.g.page.goto(url); p.g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); p.step(5)
+    check(p.ev('JSON.stringify(PAD_SET)') == want and p.ev('PAD_MAPK.join()') == mk and p.ev('PAD_DEAD.stick') == .32, 'settings: the changes did not hold through a reload')
+    check(p.ev("deviceView('settings').blocks.slice(-1)[0].items[0].label") == 'Controller settings', 'settings: changed settings should keep the page shown after a reload with no pad')
+    p.plug(); p.press('a'); p.log()
+    # turning by holding: 1.3 s of the right stick turns three times (flick: once); the right stick flipped zooms out
+    p.ev('azT = az = Math.PI / 4'); p.axes([0, 0, 1, 0]); p.step(39); p.axes([0, 0, 0, 0]); p.step(2)
+    turns = round(p.ev('(azT - Math.PI / 4) / (Math.PI / 2)')); check(turns == 3, f'settings: holding to turn for 1.3 s should give 3 quarter turns: {turns}')
+    p.ev('setZoom(padZoom0())'); z0 = p.ev('camera.zoom'); p.axes([0, 0, 0, -1]); p.step(6); p.axes([0, 0, 0, 0]); p.step(1)
+    check(p.ev('camera.zoom') < z0, 'settings: flipped, up on the right stick should zoom out')
+    p.axes([1, 0, 0, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
+    check(k is not None and k <= .6, f'settings: gentle walking at full push: {k}')
+    # an odd save stays normal: two actions on one button, a value not offered
+    p.ev("padSetLoad({ map: { a: 'b' }, dead: .5, marks: 'sega', swap: 'yes' })")
+    check(p.ev('padSetDiff()') is None and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()'), 'settings: an odd save should load as normal')
+    p.ev(f"padSetLoad({json.dumps(sv)})"); check(p.ev('padSetDiff() !== null'), 'settings: loading the changes back')
+    # everything back to normal (two presses): nothing saved, the save's extras as before any change
+    p.ev("deviceShow('padsettings'); deviceDo({ app: 'padsettings', do: 'normal' })"); check(p.ev('padSetDiff() !== null'), 'settings: one press of Everything back to normal should only ask')
+    p.ev("deviceDo({ app: 'padsettings', do: 'normal' })")
+    check(p.ev('padSetDiff()') is None and 'pad' not in p.ev(SV) and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()') and p.ev('PAD_DEAD.stick') == .22 and p.ev('PAD_REP.first') == .5 and p.ev('PAD_REP.every') == .25,
+          f'settings: Everything back to normal should leave nothing changed and nothing saved: {p.ev("[padSetDiff(), PAD_MAPK.join(), PAD_DEAD.stick, PAD_REP.first, PAD_REP.every]")} {list(p.ev(SV).keys())[:3]}')
+    p.ev('localStorage.clear()'); p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('settings', part_settings)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
