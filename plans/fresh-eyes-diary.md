@@ -129,3 +129,21 @@ What worked well on Day 0: signing the manifest; Zeke's chat on the walk (warm a
 
 43. **11:45-12:12, finding the utility closet.** The arrow pointed through walls; pressing toward it walked me into a wall by the lift lobby for 4 ship minutes. Rotate helped. On arrival I tapped the cabinet under the pin and got "Circulation pump 1: Heating pumps 1: showing its age, due a service." (the heating plant next door) and then a tap walked me back out to the lift lobby. Then, standing in the utility closet, a **"Repair" button** appeared at the bottom right: tapping it worked at once. "You fit a relay and a bracket. You set to work on the light relays: about 32 minutes." I didn't know that button existed; I only saw it because I happened to stand in the right spot. *Confusing.* (`d1-20-repair-button.png`)
     - People asleep on Deck 4 at noon (night shift, I suppose) lie on top of the bunks in a row, and two of them on the floor between the bunks.
+
+44. **12:46, job done.** "Job done: The light relays is running sweetly again. That's one off the board. +15 credits." ("relays is", *small*.) Arrow: "Take the lift to Deck 5: turn it in at the job board".
+
+45. **12:52-13:06, the spine ladder took me to the Bridge (Deck 1).** On Deck 4 I tapped the ladder twice (no menu), then a third time, and I was on Deck 1 by the Captain's table, with "Captain Odile Marrow: The air plant's humming right." Then the ladder list opened and I went down 5 decks to Deck 5 (Energy -10). I think one of my taps on the ladder was taken as "go up", without the list. *Confusing.* (`d1-21-ladder-took-me-to-bridge.png`)
+
+46. **13:06-13:26, finding the job board to turn in.** The pin for "Turn it in at the job board" sat on open floor between two desks (`d1-22-board-pin-on-floor.png`). Tapping there did nothing. After Rotate twice I could see the board on the wall. My first two taps hit the notice board next to it ("Shift swaps, a lost-and-found glove..."). The third opened the board: my job at the top with **"Turn it in"**, then four more jobs. (`d1-23-board-turn-in.png`) *Confusing.*
+
+47. **13:27, the turn-in card.** "Job complete. Light relays 1: signed off on the board. That's one more on your record." with chips "Works reputation up", "+17 Power", "+2 Lift & doors". I don't know what +17 Power or +2 Lift & doors means (ship health? my skill?). *Confusing.*
+
+48. **13:27-13:57, tea and biscuits with Zeke: couldn't sit.** Zeke: "Tea time. This way. The tea corner, behind the racks." The arrow "Tea and biscuits with Zeke" led me to the tea corner. "Tea table: In use: Chief Ines Calder is there." "Armchair: In use: Zainab Kovac is there." No other seat. Zeke wasn't at the table. I gave up. *Confusing.* (`d1-24-tea-table-in-use.png`)
+
+49. **13:45-13:58, the tea arrow wouldn't let go (known: "career arrows never clear").** I took a second job ("Replace a lamp: lift lobby") but the arrow stayed on "Tea and biscuits with Zeke". In Tracked, tapping my job ("YOUR JOB: Replace a lamp... Fetch a lamp: the Lights shelf") did nothing; tapping "Tea and biscuits" twice didn't stop it either. Nothing in Tracked shows which row the arrow is following. At 13:58 (tea over) it cleared and tapping my job worked. *Known; the "no highlight on the followed row" part may be new.* (`d1-25-tracked-no-highlight.png`)
+
+50. **14:00-14:33, the Lights shelf again: 30 minutes.** Same as item 40: the shelf is in the middle of a block of shelves, people stand in front of it, and my taps went to them. Rotate was the only thing that helped.
+
+51. **14:33-14:53, fitting the lamp in the lift lobby.** Following the arrow I walked through the lift lobby into the haulway and the shuttle bay (the arrow ring was at the screen edge, and holding toward it kept me walking). The pin for the lamp was on the floor of the lift lobby. *Confusing.*
+
+(Note for the lead: at 14:53 my test browser hit its 2-hour limit and restarted; the game reloaded its 14:00 save. "Welcome back. Day 1, Monday 14:00." I'm back to "Fetch a lamp". Saving only on the hour lost 53 ship minutes of play, including a lamp I had picked up. A real phone that closes the tab would lose the same.)
