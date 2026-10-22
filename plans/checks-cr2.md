@@ -147,5 +147,5 @@ OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check handed to CR3 (ag
 | arc_check | OK | `ARC CHECK OK` |
 | lines_check | OK | PASS (0 errors, 50 warnings) |
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
-| perf_check | CR3 | handed over |
+| perf_check NEW OLD | OK (CR3, accepted baseline) | Only `the Line ceremony ... portrait: draw calls 301 -> 335` (the accepted baseline); no backlog-14 memory flag, no js spike (claude/checks-cr3 4a681ec1) |
 | lines_check --day | OK | PASS (0 errors) |
