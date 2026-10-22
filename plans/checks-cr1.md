@@ -162,3 +162,15 @@ Checked out as is. **sha256 of starship-cadet.html: `da9f1d0851efa06a307e2fafe9e
 | talk_check | **OK** | 24 s | TALK CHECK OK |
 
 No FAILs, so no OLD runs were needed.
+
+## Round 8 extra: controller_check on 0.91.0 (taken from CR3, agreed with CR3, lead 30's ask)
+
+`python3 controller_check.py starship-cadet.html idle save calls touch walk pick day games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks touch3 drop settings a11y firstuse`
+on 989fd566 (sha256 da9f1d08…4aee), 1709 s. Exit 1, CONTROLLER CHECK FAILED, **only on the two known items** (BM14's
+known list: touch and day, RV9/CP1). The other 25 parts OK: idle, save, calls, walk, pick, games, unplug, odd, off,
+quiet, base, deck, pick1, panels, api, lists, tiles, disc, screens, marks, touch3, drop, settings, a11y, firstuse.
+
+The known FAIL lines, for matching against RV9/CP1's:
+- touch (6): after B / after UP+DOWN / after UP: `tap0.seen.seen: 54 -> 51` and `tap0.seen.seenHash: -1403106251 -> -1508090985`
+- day (4): `breakfast: the lift's Deck 3 button: not there`; `talk: no crew member to walk to`;
+  `the job board: could not walk to the lift by the stick`; `bedtime: could not walk to your bunk by the stick (bed [-15.5, -8.5]; you at [4, -4.5, 1.5, 'null', False, 'ladderPanel'] ...)`
