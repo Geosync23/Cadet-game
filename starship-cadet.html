@@ -42598,6 +42598,7 @@ function introNewGame(arriving) { try { introUiReset(); } catch (e) {} if (arriv
 // the Chief never came to your table); an arrow of its own (Torres's, your bunk's) goes too
 const INTRO_BED_GOAL = 'Head to your bunk when you\'re done looking around';   // a suggestion, not an order (the user, 0.60.5a)
 function introUiReset() {
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && /^intro-/.test(DIALOGUE.m.id || '') && typeof dialogueEnd === 'function') dialogueEnd(true);   // (the Zeke patch) a New game never keeps the last arrival's scene open (it covered the manifest)
   const U = INTRO_UI; (U.said || []).forEach(simClear); U.night = null; U.chiefD = null;
   const own = typeof IX_GOAL !== 'undefined' && IX_GOAL && (IX_GOAL.label === INTRO_BED_GOAL || IX_GOAL.label === 'Zeke Torres' || INTRO_ARROW_LABELS.has(IX_GOAL.label));
   if (own && typeof clearGoal === 'function') clearGoal();
