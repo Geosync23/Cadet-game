@@ -54,3 +54,11 @@ want it re-sent.
 - A missed meeting's notes Mail ("Your first round is on the board") is still wrong when it isn't (AR2's item; not on
   lead 27's second list).
 - The galley plant calibrate chore's pin (arrows_check shift: "nobody yet").
+
+## Handed on
+- The Day 8 "Your bunk, Deck 4" arrow up over 3 hours (AR1's arrows_check week) goes to FX3 (lead 28). What I know:
+  two things set that label, neither cleared by my work: section 15's needs arrow (`needGoal('energy')`, NEED_FIX_SAY
+  "Your bunk"; it clears only when energy is back above WARN_REARM or you start fixing it, so a tired player who works
+  on keeps it all day) and section 20's sick arrow (around `setGoal({ deck: deckOf(bed.id), room: bed.room, label:
+  'Your bunk' })`, with the infirmary's). I haven't traced which one fires on Day 8. Tracked's own "Your bunk" place
+  clears on arrival (trk 'place:bed').
