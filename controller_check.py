@@ -664,11 +664,11 @@ OUTLINES = r"""(() => { const out = []; for (const e of document.querySelectorAl
 # objects drawn. Things made on the pad's first use and hidden again after a touch (the ring, the bottom line) are listed
 # apart, as information: the rule is that touch looks and behaves as without a pad, not that nothing is ever made.
 SEEN_STATE = r"""(() => { let h = 0, n = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
-  // (P3's one-time "Controller connected" message after the first pad press is by design, and it goes on a real-time
-  // timer: the message box is left out while it says that, and only then)
-  const hello = (document.getElementById('tt') || {}).textContent === 'Controller connected', box = document.getElementById('toast');
+  // (the message box shows and hides on real-time timers, and P3's one-time "Controller connected" after the first pad
+  // press is by design: the box and its lines are counted, but their text and classes are not compared)
+  const box = document.getElementById('toast');
   for (const e of document.body.querySelectorAll('*')) { if (e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
-    if (hello && box && (e === box || box.contains(e))) continue;
+    if (box && (e === box || box.contains(e))) { n++; mix('toast-box'); continue; }
     if (e.checkVisibility && !e.checkVisibility({ visibilityProperty: true })) continue;   // not opacity: the bubbles are hidden from pictures that way
     const b = e.getBoundingClientRect(); if (b.width <= 0 || b.height <= 0) continue;
     n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '')); for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
@@ -914,8 +914,12 @@ CREW_NAME = "(k => { const a = DECK_CREW.find(a => 'crew:' + a.p.id === k); retu
 def crowded_setup(pw, src, tag):
     r = Run(pw, src, tag, mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
-    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 7 * 60 + 40); goToDeck(3, null)"); r.step(240)
-    t = r.ev(CROWDED_SEAT)
+    # breakfast's busiest minutes moved with the playtests (07:00 from 0.64.17): the first of these with a free seat beside
+    # someone seated
+    t = None; r.ev("goToDeck(3, null)")
+    for hm in (7 * 60 + 20, 7 * 60 + 40, 8 * 60, 8 * 60 + 20):
+        r.ev(f"SHIP.time.min < {hm} && skipTo((SHIP.time.day - 1) * 1440 + {hm})"); r.step(240); t = r.ev(CROWDED_SEAT)
+        if t: break
     if not t or not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return None, None
     r.ev("toastEl.classList.remove('show')"); r.step(72); return r, t
 # (RV5's C7) in the same crowd: "Talk to X" whose point on screen is on someone else, Y, at the moment A is pressed. A must
@@ -1085,7 +1089,10 @@ STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, play
   const dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
   const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
 def walk_to(r, x, z, frames=900):
+    shut = 0
     for k in range(frames // 6):
+        # a panel that opened on the way (a ladder hatch underfoot, 0.64.17): B puts it away, as a player would, then on
+        if shut < 4 and r.ev("!!padLayer()"): r.js('window.__pads.clear(0)'); r.press('B'); r.step(3); shut += 1; continue
         st = r.ev(f"({STEER})({x}, {z})")
         if not st or st.get('there'): r.js('window.__pads.clear(0)'); r.step(2); return bool(st)
         if st.get('nopath'): r.js('window.__pads.clear(0)'); return False
@@ -1112,7 +1119,8 @@ def ride(r, deck, fails, scene):
     for k in range(20):
         if r.ev("!document.getElementById('lift').hidden"): break
         r.step(10)
-    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{deck}')")
+    # the deck's button by its place in the game's own deck order (its words changed in 0.64.17: deckLabel)
+    res = press_in_panel(r, f"document.querySelectorAll('#liftList button')[DECK_ORDER.indexOf({deck})]")
     if res != 'ok': fails.append(f'{scene}: the lift\'s Deck {deck} button: {res}'); return False
     for k in range(60):
         r.step(10)
