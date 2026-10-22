@@ -1376,6 +1376,13 @@ with sync_playwright() as pw:
             again = g.ev("teaOffer()")
             print('  tea [out at 13:05, out at 10:30, offered, arrow, card, after Keep working, after Off to tea, at the tea table]:', te, '| saved', sv, '| offered again the same day', again)
             check(te[0] is True and te[1] is False and te[2] is True and te[3] == 'Tea and biscuits, in the Tea corner' and te[4] and te[5] is None and te[6] == te[3], f'playtest: tea is out at 13:00, the arrow after a job, Keep working dismisses it ({te})')
+            # tea not taken: its arrow goes when tea's over, never left up overnight over Clock in (AC2, arrows_check week)
+            st = json.loads(g.ev("""(() => { actEnd(true); clearGoal(); let d = SHIP.time.day + 1; while (!(typeof playerShiftOn === 'function' ? playerShiftOn(d) : weekday(d) < 5)) d++;
+              setShipNow((d - 1) * 1440 + 13 * 60 + 5); SHIP.player.teaDay = null; const off = teaOffer(); if (DEV.choose) devDialogueDo('choose', 0); return JSON.stringify([off, d]); })()"""))
+            g.step(3); up = g.ev("IX_GOAL && IX_GOAL.label")
+            g.ev(f"setShipNow({(st[1] - 1) * 1440} + (typeof WORKS_TEA !== 'undefined' ? WORKS_TEA.until : TEA_TO) + 1)"); g.step(3); gone = g.ev("IX_GOAL && IX_GOAL.label")
+            print('  tea not taken [offered, arrow during tea, arrow after tea]:', st[0], up, gone)
+            check(st[0] is True and up == 'Tea and biscuits, in the Tea corner' and gone != up, f'tea not taken: the arrow goes when tea is over ({st[0]}, {up}, {gone})')
             tt = json.loads(te[7]) if isinstance(te[7], str) else te[7]
             check(tt[0] in ('ixTea', 'ixLounge') and tt[1] == 'Tea and biscuits' and tt[2] and tt[3] is None and isinstance(sv, int) and again is False, f'playtest: tea and biscuits at the tea table, the arrow goes, the day saved, not offered twice ({tt}, {sv}, {again})')
             ew = json.loads(g.ev("""(() => { const was = [ACT, CHAT]; ACT = { kind: 'eat', phase: 'do', body: {}, def: { mins: 20, title: 'Eating' }, done: 5, o: {} };
