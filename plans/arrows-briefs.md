@@ -95,6 +95,22 @@ The 31 `setGoal` calls at 2b4a05db, by section, with what each becomes:
 - 19 (device "go" buttons, Maps, Roster, Settling in): these are the player's own choice, so they become the sticky
   level 6 (rule 4). Fix their `track = null` (FX1 is on it): choosing a place must not switch the job arrow off for good.
 
+### Pop-ups: a short queue (added to B, 2026-10-22, the lead's placement)
+Today `toast(t, x)` (section 11, line 52957, the HUD seat's) has one slot: each call replaces the text at once, so on
+Day 2 at 10:00 Torres's invitation was replaced within the same ship minute by three other pop-ups. Add, behind
+`GUIDE_ON`:
+- `toast` keeps its signature. While a toast has been up for less than about 2.5 real seconds, a new one waits in a
+  queue of at most 3 (older ones beyond that drop, never the one on screen); each queued one then shows for at least
+  2.5 seconds, the last for the usual 5.6.
+- Same title and text as the one on screen or queued: merged, not repeated.
+- A toast marked urgent (an optional third argument `{ now: true }`, for the burst pipe call, the summons, the drill,
+  "Bursting") jumps the queue.
+- Real-time timers as today (toasts already run on real time, not the ship clock); the queue empties on a deck change.
+- Section 11 is the HUD seat's: the edit is small but goes to that owner for sign-off. If the HUD seat prefers, the
+  queue can live in the 15b slot with `toast` wrapped there.
+Tests (arrows_check part "queue"): five toasts in one frame show in order, none for under 2.5 s, at most 3 waiting;
+an urgent one shows at once; GUIDE_ON false is identical.
+
 ### Tests for B (a new check, `arrows_check.py`, part "queue"; it can be built with B and grown by D-F)
 - Off: `GUIDE_ON = false` gives cadet_test ALL IDENTICAL and no `guide` key in the save.
 - Order: ask a level-4, a level-2 and a level-1 at once: the 1 shows, then the 2, then the 4 as each is done.
