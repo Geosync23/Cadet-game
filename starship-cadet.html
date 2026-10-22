@@ -16055,9 +16055,36 @@ function guideToast(t, x, o) {
 function guideTick() {
   if (!GUIDE_ON) { GUIDE.loop = false; GUIDE.tq.length = 0; return; }
   requestAnimationFrame(guideTick);
+  { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { /* 24 core not ready */ } } }   // once a ship minute
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
 }
 function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
+// the training arrows (the plan's T1-T3; AR1): read from 24 core's training under way (SHIP.works.cur) once a ship
+// minute, asked of the queue, nothing written back. T1 meet: level 2, from 15 minutes before the meeting, at the
+// teacher (else the room), gone when the meeting starts or is missed. T2 watch: level 3, the arrow follows the teacher
+// to their job, once per training, with a tip the first time. T3 your turn: level 3, the job board until you take
+// your training job (then the job's own arrow), once per training. Labels are stand-ins until the writer's keys.
+function guideTrain() {
+  const W = SHIP.works, c = W && W.cur; if (!c || typeof ladderRow !== 'function') return;
+  const row = ladderRow(c.id); if (!row) return;
+  const now = Math.floor(shipNow()), who = typeof worksFirst === 'function' ? worksFirst(c.by) : 'your teacher', what = typeof mechName === 'function' ? mechName(c.id) : row.name;
+  if (c.st === 'meet') {
+    const r = (SHIP.occasions || []).find(x => x.key === c.occ); if (!r) return;
+    const room = ((DECKS[r.deck] || {}).rooms || {})[r.room], where = room && room.name ? room.name : 'the meeting';
+    guideAsk({ id: 'train:' + c.id + ':meet:' + c.d, level: 2, owner: '24 core (read)', from: r.at - 15, until: r.at + r.len,
+      goal: () => ({ deck: r.deck, room: r.room, crew: c.by, label: 'Meet ' + who + ': ' + where + ', ' + hhmm(r.at % 1440) }),
+      done: () => guideStage(c.id, 'meet') });
+  } else if (c.st === 'watch') {
+    const j = (SHIP.jobs || []).find(x => x.id === c.j), s = j && typeof trainSpot === 'function' ? trainSpot(j) : null; if (!s) return;
+    guideAsk({ id: 'train:' + c.id + ':watch', level: 3, once: true, owner: '24 core (read)', until: now + 180,
+      goal: () => ({ deck: s.deck, crew: c.by, at: s.tile, room: s.room, label: 'Stay close and watch ' + who }),
+      done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
+  } else if (c.st === 'do' && c.j) {
+    guideAsk({ id: 'train:' + c.id + ':do', level: 3, once: true, owner: '24 core (read)', until: now + 480,
+      goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() + ', on the board' }),
+      done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
+  }
+}
 if (GUIDE_ON) guideStart();
 // ---- end of slot: Interactions engineer ----
 

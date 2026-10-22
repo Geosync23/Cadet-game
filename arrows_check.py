@@ -26,6 +26,7 @@
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
 # Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, shift, week; default all, about 15 minutes)
+# Add 'guide' to play shift and week with the arrow queue switched on (GUIDE_ON), e.g. ... BUILD.html week guide
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three). Run:  python3 arrows_check.py BUILD.html
 import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
@@ -134,6 +135,20 @@ def part_queue(pg):
     check(s == 'b5', f'body: a level 5 did not show without a job ({s})')
     pg.ev("GUIDE.list.length = 0; GUIDE.rev++")
     print('  body: levels 5-6 after the job')
+    # the training arrows T1-T3 (read from SHIP.works.cur): meet from 15 minutes before, watch at the teacher, your turn at the board
+    t = pg.ev("""(() => { if (typeof guideTrain !== 'function' || !SHIP.works) return null; const W = SHIP.works, now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, out = [];
+      const keep = W.cur; GUIDE.list.length = 0; GUIDE.rev++; clearGoal(); SHIP.player.track = undefined;
+      const occ = { key: 'arrows-occ', id: 'works.m4', deck: 5, room: 'r', at: now + 30, len: 15, status: 'asked' }; SHIP.occasions.push(occ);
+      W.cur = { id: 'm4', st: 'meet', d, by: 'esposito-yara', occ: 'arrows-occ' };
+      guideTrain(); GUIDE.key = ''; out.push((goalNow() || {}).label || null);
+      occ.at = now + 10; GUIDE.list.length = 0; guideTrain(); GUIDE.key = ''; out.push((goalNow() || {}).label || null);
+      W.cur.st = 'watch'; GUIDE.key = ''; out.push((goalNow() || {}).label || null);   // the meet entry goes when the stage moves on
+      SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); W.cur = keep; GUIDE.list.length = 0; GUIDE.rev++; return out; })()""")
+    if t is not None:
+        check(t[0] is None or not str(t[0]).startswith('Meet'), f'train: the meet arrow showed 30 minutes before ({t[0]})')
+        check(t[1] and t[1].startswith('Meet Yara'), f'train: no meet arrow 10 minutes before ({t[1]})')
+        check(t[2] is None or not str(t[2]).startswith('Meet'), f'train: the meet arrow outlived the meeting ({t[2]})')
+        print(f'  train: T1 at 30 min {t[0]!r}, at 10 min {t[1]!r}, after {t[2]!r}')
 
 def part_once(ctx, path):
     pg = Page(ctx, path); pg.day2()
@@ -261,6 +276,7 @@ class Follower:
 
 def real_game(pg, day):                               # the career set to the end of day-1, tracking as in a real game
     pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day - 1}))"); pg.step(20)
+    if GUIDE: pg.ev("GUIDE_ON = true; guideStart()")   # the arrow queue on (its training arrows T1-T3; pieces D-F as they land)
     pg.ev(f"devmodeSkipTo({(day - 1) * 1440 + 5 * 60 + 50}); clearGoal(); SHIP.player.track = 'arrows-check-yesterday'; for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); pg.step(10)   # a normal evening before: washed, fed, rested
 
 def hhmm(m): m = int(m) % 1440; return f'{m // 60:02d}:{m % 60:02d}'
@@ -299,7 +315,8 @@ def part_week(ctx, path):
     check(not pg.errors, f'week: page errors {pg.errors[:3]}')
     pg.page.close()
 
-PARTS = set(sys.argv[2:]) or {'queue', 'shift', 'week'}
+GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
+PARTS = set(a for a in sys.argv[2:] if a != 'guide') or {'queue', 'shift', 'week'}
 with sync_playwright() as pw:
     path = sys.argv[1]
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])

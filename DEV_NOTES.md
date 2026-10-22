@@ -892,6 +892,9 @@ becomes is in plans/arrows-briefs.md). Also on the switch: a pop-up queue (`guid
 and the teaching-arrows setting, read through `guideMode()` from section 19's `teachMode()` (AC1's Settings row,
 `SHIP.device.settings.teach`), 'first' without it.
 Saved under the save's top-level `guide` key, only while on. Test: `python3 arrows_check.py BUILD.html` (about 1 minute).
+The training arrows (T1 meet from 15 minutes before, T2 follow the teacher while they work, T3 your turn at the board) are
+asked by `guideTrain()` from the queue's own frame loop, read-only from `SHIP.works.cur`. `arrows_check.py BUILD.html week guide`
+plays the week with the queue on.
 
 ## Hook register
 
