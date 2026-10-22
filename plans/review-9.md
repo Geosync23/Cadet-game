@@ -205,3 +205,5 @@ all). Run alone (`--week --beats=none`): on 951c0cd's game **FAILED**, "10 share
 (Day 1 Torres/Halloran 5-stool-1 x6, Day 2 Rina/Oduya 3-infirmary-6, Day 3 Salo/Torres 5-stool-1); on fridays-20 0,
 **OK**. Nit: with `--beats=none` it also prints "not yet: the writers' beat lines are not in this build", which is
 misleading there (the beats are only filtered out), harmless.
+
+8d88993 (the nit): with `--beats` filtering every beat out it now says "no beats walked: none match --beats"; otherwise unchanged. One line, check only: OK.
