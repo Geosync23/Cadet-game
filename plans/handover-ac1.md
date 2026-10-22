@@ -20,7 +20,7 @@ ALL IDENTICAL; check_fast OK.
 - arrows-c now also carries FX2 (p5-fix2 cc2bb2b) and FX3 (p5-fix3 e6bcf82, then 360801c) as merge commits (lead 28's
   option (a)); merge their new tips in again if they push more, never rewrite. One FX2/FX3 clash resolved: ixJobStep's
   machine label (FX3's chore title first, then FX2's scan first / Tune).
-- F3 and F4 (my commits 9524671, bd18997; diff `git diff 0ec58bc bd18997`): with RV6 for review. Off: ALL IDENTICAL.
+- F3 and F4 (my commits 9524671, bd18997, then RV6's fixes to 5557122e): RV6 PASS. Off: ALL IDENTICAL.
   Check: `arrows_f_check.py` (about 3 min). On 1f2ce27d: check_fast, arrows_f, arrows_pointer, arrows_check queue,
   mech_check all OK.
 - Next: D (shift chain, trainTell into the queue, T3's empty-goal pick) once FX1's tip comes; F1/F2 per lead 28.
