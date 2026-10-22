@@ -48,5 +48,7 @@ These were gaps in the checks (the picker did pick each of them; it's the checks
 | `eventDay` true every day | mech_check ff, career_check (e) | with the events base off, no day 1-60 is an event day (so cases are offered) | FAIL: Days 1-60 all event days |
 | `crewGather` finds no tiles | career_check (e) | the Day 10 box: Tomas and Pell each on their own tile by your door | FAIL: ids [] |
 
+**On a build with the events base on** (EVENTS_ON true, as on 0.64.14), the two "events base off" `eventDay` lines (mech_check ff, career_check (e)) skip themselves: they guard only the switched-off game. OR2 proved them on EVENTS_ON-false copies of 0.64.14.
+
 Not closed: `seekArrive` never showing the chip (20 → intro): the lead's list didn't name it. puzzle_check already
 catches `eventDay` true every day ("cases were posted over Days 5-26 on paper: 0").
