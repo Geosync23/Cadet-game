@@ -37,11 +37,19 @@ The rules as always: small exact-string edits, new code in your slot, no build n
 ### I. Toilet queue (note 19): TQ1 (new), branch `claude/patch-play1-i` (sections 15b, 10, 14)
 19. **Toilets: the crew wait in a queue**. Today you can't use a toilet an NPC has "targeted", even from across the ship. You can always use it unless its red light is on (someone inside); the crew queue for it.
 
+### J. Clocking in and out reminders (note 20, the user 03:45): CK1 (new), branch `claude/patch-play1-j` (sections 15, 24, 19)
+20. **A lot of reminders about clocking in and out**: before and at the start of your shift (clock in), at the end of your shift (clock out), and if you forget either; through toasts, the Tracked line, Mail and crew lines where natural. Coordinate with FR4 (note 9's clock-in arrow).
+
+### K. Repeating lines (note 21, the user 03:45: "a lot of repeating lines in the talk with pack"): DL1 (new), branch `claude/patch-play1-k` (section 22 engine; words through content/ only)
+21. **Too many repeated lines in conversation.** The user's words are unclear about whose talk ("pack": maybe Noor Park, Zeke's walk-and-talk, or crew chat in general). Measure repetition across all crew chat, Zeke's arrival and training talk and Noor Park's lines over the first days, fix the worst first (better rotation and memory of what was said; new lines only where a pool is too small), and report which talk it was most likely.
+
+Note 7 update (the user, 03:45): no new job type. The problem is the solo job doesn't track like other jobs; it must be clear how to do it.
+
 ## Review and release
-- Reviewers: **OR2** reviews A, C, D; **RV3** reviews B, E, F; **RV4** (new) reviews G, H, I. Each names the exact tip.
+- Reviewers: **OR2** reviews A, C, D; **RV3** reviews B, E, F; **RV4** (new) reviews G, H, I, K; RV3 also reviews J. Each names the exact tip.
 - BM13 merges all nine into integration as 0.64.15, check_fast + cadet_test (each difference explained by a note).
 - The full round on all six runners, then PUB1 publishes both pages, and the user gets a notification with a plain summary.
-- Order of merging: C first (clipping), then F, I, A, D, B, G, E, H (H, the map change, last).
+- Order of merging: C first (clipping), then F, I, A, D, B, J, G, K, E, H (H, the map change, last).
 
 ## Lead's judgement calls (tell the user)
 - Note 4 (Zeke's message) read as "yes, remove it", since Zeke now hands over the device in person.
