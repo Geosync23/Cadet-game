@@ -1,0 +1,26 @@
+Day 5, Friday 09:21 | Stay close and watch Emeka | 4:13,17 | ixFold/Doing your laundry/do | shut | 7-wall-holds@93 | - | watch
+Day 5, Friday 09:24 | Look over the climbing holds | 4:13,17 | ixFold/Doing your laundry/do | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 09:26 | Look over the climbing holds | 7:2,4 | recClimb/Climbing/walk | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 09:27 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/do | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 09:34 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/out | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 09:35 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/do | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:05 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/in | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:06 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/do | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:13 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/out | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:14 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/do | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:20 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/out | shut | 7-wall-holds@93 | - | do
+Day 5, Friday 10:21 | Look over the climbing holds | 7:2,3 | recClimb/Climbing/do | shut | 7-wall-holds@93 | - | do
+acts:
+   ('Day 5, Friday 09:25', 'lift to Deck 7')
+   ('Day 5, Friday 09:25', 'walk to: Look over the climbing holds')
+   ('Day 5, Friday 09:26', 'tap Climbing wall: true')
+   ('Day 5, Friday 09:34', 'tap Climbing wall: true')
+   ('Day 5, Friday 09:42', 'tap Climbing wall: true')
+   ('Day 5, Friday 09:50', 'tap Climbing wall: true')
+   ('Day 5, Friday 09:57', 'tap Climbing wall: true')
+   ('Day 5, Friday 10:05', 'tap Climbing wall: true')
+   ('Day 5, Friday 10:13', 'tap Climbing wall: true')
+   ('Day 5, Friday 10:20', 'tap Climbing wall: true')
+   ('Day 5, Friday 10:28', 'tap Climbing wall: true')
+errors []
+exit 0

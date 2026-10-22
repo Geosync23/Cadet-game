@@ -63,3 +63,22 @@ The play builds are 1f2ce27d with `POINT_ON = true` in a copy and GUIDE_ON switc
 - Where next? restores tracking exactly as it was before the old path cleared it, and its entry has a 3-hour limit.
 - The merge on 1f2ce27d: ixJobStep's label line keeps FX3's chore title first, then scan first / Tune; check_fast and
   arrows_f_check pass there.
+
+## Re-check of items 1 and 2 (lead 28 / AC1 could not reproduce item 2), 2026-10-22 ~16:20
+
+**Item 2 is withdrawn: my probe's mistake.** The follower tapped the item nearest the pin, the "Climbing wall", which
+started a climb (recClimb) each time instead of the job; the look-over never ran. With one real screen tap at the pin
+(`p_scan.py tap`): 09:25 "Inspecting" -> 09:28 the Scanner opens by itself -> F3's pointer `p:scan` is up (my first log
+read `pointNow().id`, but pointNow() returns the id string, so it showed '-'). AC1's path works.
+
+(Side note, not F3's: on the rec deck the climbing holds' pin sits on the Climbing wall, so tapping the thing under the
+arrow starts a climb. A real tap on the floor at the pin works. Worth a look by whoever owns the rec deck's machines;
+not filed.)
+
+**Item 1 stands, checked two more ways (`p_inc2.py`, `p_inc_off.py`):**
+- Real screen taps at the pin while the arrow says "Follow ..." (no follower walk): the taps land on Calder and don't move
+  you; Calder walked from the office to the Works bay (14,4) by 10:35 and stood there until 11:03, 4 tiles from you; the
+  follow timed out, m6 back to "ask". So it isn't only the follower standing in her way.
+- The same day with the switches off (FX3's arrow on the valve panel, Deck 4): at 10:32 the follower took the lift to
+  Deck 4, Calder came down after, and at 10:33 the training moved on to your turn ('do'). The lesson goes on with the
+  panel arrow and stalls with the arrow on Calder.
