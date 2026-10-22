@@ -412,13 +412,13 @@ class Sweep:
         # Escape, else load again and replay the presses; a screen that comes back a little different (the device
         # reopens on the app last used) is taken as it is, and the presses left are made from there
         here = lambda sc: self.sig(sc) == sig or (need and tuple(sorted(sc['dialogs'])) == sig[1] and sc.get('deck') == sig[0] and set(need) <= {i['k'] for i in self.inner(sc)})
-        self.r.page.keyboard.press('Escape'); self.r.step(4)
-        for _ in range(3):
+        # the panel's own Back first (Escape closes the whole device), then Escape
+        for _ in range(4):
             sc = self.scan()
             if here(sc): return True
             b = next((i for i in self.inner(sc) if self.BACK.match(i['label'])), None)
-            if not b: break
-            self.press(sc, b['k'])
+            if b and b['k'] != '#devClose': self.press(sc, b['k'])
+            else: self.r.page.keyboard.press('Escape'); self.r.step(4)
         if here(self.scan()): return True
         if self.replay(path) and here(self.scan()): return True
         self.lost.append(' > '.join(path) or '(the deck)'); return True
