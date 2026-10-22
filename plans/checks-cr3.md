@@ -169,3 +169,11 @@ sha256 **ff45b427d65d543ab8dfe10f289b49653f0102af8ef513b960dd2e2ecbfac306** (lea
 | day_check 7 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 211 s |
 
 No FAIL. (The same numbers as on 8193458e.)
+
+## perf_check for CR2 on 0.64.17 (agreed with CR2; copied to BM14 and lead 29)
+
+`perf_check.py NEW OLD`: NEW = 1498dbf4 (ff45b427…c306), OLD = b9f053ba (0.64.16, 70f94273…a6c7), 1498dbf4's perf_check.
+Exit 1, **1 flag, the one CR2 named as the accepted baseline**: `the Line ceremony, bow lounge Sun 14:45 portrait: draw calls 301 -> 335`
+(59 → 49 people in the scene; portrait-wide 391 → 411, landscape 282 → 299, not flagged). Everything under 450 on every view
+(busiest 418, portrait-wide). No memory flag this time (round trips 521 → 521 → 521; 0.64.16 was 521 → 523, backlog #14).
+No js spike (backlog #32). File 5.80 MB.
