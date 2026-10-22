@@ -70,17 +70,28 @@ For the lead:
 2. LD1 offered a standing ladder-tap part for interactions_check; nothing checks note 14 today. Worth a backlog row (or a small follow-up), not a blocker.
 3. Owner: the rower's mover is in 4b (the deck architect's); it reads section 15's ACT.body and section 10's DECK_CREW at run time, typeof-guarded, falling back to the old swing.
 
-## F. Breakfast at 07:00 (note 18): on hold
+## F. Breakfast at 07:00 (note 18), SC1: claude/patch-play1-f dd83d896
 
-Not reviewed. SC1 would not push without the user's own go; the lead moved it to SC2 (claude/patch-play1-f2), then put breakfast on hold until the user decides (lead 26, 06:14 UTC). Whoever reviews it later also does the section 14 owner check (PB2 was released). What depends on breakfast opening at 06:00 in 32b699a6 (line numbers there), to tick off:
+**Verdict: PASS at dd83d896** (14:10 UTC; lead 27's review, with the section 14 owner check, PB2 being released). Game code reviewed at 8d65f86f; dd83d896 only changes words (content/ rebaked: Vance's breakfast at 07:05 everywhere and facts.md; "till nine" for four pre-existing "till eight" breakfast lines). Base: claude/integration 2b4a05db (0.64.15), merged into the branch at 85cef096. Still to do on the merged build once BM13 publishes 0.64.16 (Zeke): machine_check's repair share and a cadet_test against 0.64.16 (below).
 
-- MEALS.breakfast[0] 360 (9311); FOOD.open.breakfast 360 (16036); galley early plan [330,360 bake][360,540 line] (15949) and galleyShift head (16108); chef cooks 290-510
-- texts: servery 5427, menu board 5432, canvas menu 2538 + 16916 'Breakfast 06:00', hunger tips 12609 12649, servery closed 13132, pans 16786
-- night shift ends 06:00 then breakfast: 1h wait? (10470-10475); garden hart-ravi hours 360-840 breakfast?
-- morning(): want = max(MEALS.breakfast[0], ...): crew wake (F.wake) vs 07:00; Works crew clock 08:00-09:00
-- traditions with meal 'breakfast' (pick-your-own at 06:15 = 375; long breakfast); intro week beats; devDay Schedule
-- player's alarm 06:00 (WAKE_AT): ok to keep?
-- checks: day_check several days (1, 3 backlog11, 5 Fri, 6 Sat, 12), food_check 1 7 and 11 4, events_check, intro --week?, cadet_test (Deck 4: crew positions at 06:00 start may change -> explained), check_fast, design-doc
+What changed (sections 4b, 4d, 15, 22: words and signs; 14 and 16: the schedules and the galley): `MEALS.breakfast` [420, 540], `FOOD.open.breakfast` 420; the crew's wake unchanged (05:30-07:15); "straight to breakfast" crew up before 07:00 wait in their bunk till 07:00-07:40; the spread of breakfast times starts at 07:00; the night shift comes off at 06:00, unwinds in the Deck 3 lounge, eats 07:00-07:40, then showers and sleeps; the chef rises 05:30 and cooks from 05:50; the early hands prep 05:30, cook with the chef 06:00-06:30, bake 06:30-07:00, line from 07:00. design-doc.md (the galley's day, a day through three decks, meals) and the build-table row describe this final version (wake unchanged, Deck 3 unwinding), not the earlier later-wake one.
+
+Every item on the 06:00 list above is handled: MEALS, FOOD.open, the galley plans and galleyShift's head, the servery, menu board and both canvas signs, the hunger tips, the closed servery and pans texts, the night shift, the morning spread. Pick-your-own (06:15-06:55, picking in the garden) stays before breakfast, which suits it. The player's alarm stays 06:00. Tomas's Day 1 06:00 wash scene: unchanged and still right (the wake didn't move); its "Breakfast's till eight" line is now "till nine".
+
+**Section 14 owner check** (crew plans read from `planDay`, Days 1, 3, 6 and 9, against 0.64.15):
+- 06:00-07:00 is spent in the Deck 3 lounge (about 10-12 people: the night shift and early risers), in bunks (5-12 people, "off"), the washroom and toilets, the gym and the morning traditions (sunrise stretch, pick-your-own, dawn swim). Before, 13-18 people ate between 06:00 and 06:30.
+- Breakfasts by half hour (Day 3): 07:00 31, 07:30 19, 08:00 9, 08:30 11, 09:00 2; a short queue forms from 06:47-06:57.
+- The night shift eats 07:00-08:00 (was 06:02).
+- Nobody uses the early grab shelf before 07:00; not needed.
+- day_check Day 1 and Day 3 **OK** (worst stuck 0.0 ship min on every deck; draw calls well under 450); food_check 1 7 **OK** (Day 1: 151 came to eat, longest wait 2 min at dinner, breakfast 0).
+
+Checks I ran on 8d65f86f: check_fast **QUICK CHECK OK** (347 s); food_check 1 7 **OK**; day_check 1 and 3 **OK**; on dd83d896: content_gen --check up to date, names_check OK. machine_check (in check_fast) OK with the steady player's repair share **40%** (17 of 42; 0.64.15: 20 of 40, 50%): deterministic, so no flake between runners; the size of the sampling noise (about 8 points at 40 jobs), not a change in how the crew claim repairs; accepted by lead 27, backlog LEAD27-1 (measure over 28 days).
+
+**cadet_test against 2b4a05db: DIFFERENCES FOUND, all explained.** State: `tris`, the five taps and their walks, state_end; every shot but g_nocrew differs widely (g_nocrew 149 px, max 58). The cause is the crew's moved mornings (the test starts Day 1 06:00 on Deck 4: who is in bunks, the corridor and the washroom at 06:00 changes, and with it doors, what a tap hits and where you walk). Proof: a copy of 8d65f86f with only the section 14 and 16 code hunks put back (all the words kept) is **ALL IDENTICAL** to 2b4a05db.
+
+Notes (no change needed):
+- brennan.lines:124 "Dinner's till eight" (dinner runs to 20:30): pre-existing, left; a backlog row if wanted.
+- The build-table row says the branch is from 32b699a6 and has no cadet_test line: BM13 may want to add "cadet_test: crew mornings moved; schedule code reverted = ALL IDENTICAL" and the 40% when merging.
 
 ## Summary (06:15 UTC)
 
@@ -89,5 +100,5 @@ Not reviewed. SC1 would not push without the user's own go; the lead moved it to
 | B, notes 9-12 (FR4) | claude/patch-play1-b 4d062c45 | PASS |
 | J, note 20 (CK1) | claude/patch-play1-j ec06f68e, then 4bc3e39c | PASS (after one fix asked at 1188cbdf); the toast-gap fix 4bc3e39c PASS |
 | E, notes 14, 16 (LD1) | claude/patch-play1-e 7e26050e | PASS (e36549af had no game change) |
-| F, note 18 | none | on hold (the user's decision) |
+| F, note 18 (SC1) | claude/patch-play1-f dd83d896 | PASS (re-check the repair share and cadet_test on 0.64.16 once published) |
 
