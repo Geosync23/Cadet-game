@@ -51112,7 +51112,8 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
       this.pair = { l: a, r: c, stack };
     } else this.pair = null;
     for (const b of on) {                                // a change of layout (side by side, stacked) slides in over a few frames; the speaker is followed exactly
-      const ox = b.x - b.ax, oy = b.y - b.ay, step = d => Math.max(-lim, Math.min(lim, d * ease)); b.ox = b.ox === undefined ? ox : b.ox + step(ox - b.ox); b.oy = b.oy === undefined ? oy : b.oy + step(oy - b.oy);
+      const ox = b.x - b.ax, oy = b.y - b.ay;           // (2026-10-22: lim caps the slide's whole distance, not each way on its own, which let a diagonal slide go 1.4 times as fast)
+      if (b.ox === undefined) { b.ox = ox; b.oy = oy; } else { const dx = (ox - b.ox) * ease, dy = (oy - b.oy) * ease, m = Math.hypot(dx, dy), k = m > lim ? lim / m : 1; b.ox += dx * k; b.oy += dy * k; }
       const hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax + b.ox)); b.y = b.ay + b.oy;
     }
     for (const b of on) {
