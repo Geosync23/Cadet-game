@@ -1510,6 +1510,8 @@ FX3SMALL = r"""(() => {
   if (C) C.changed = wed + 1; tick(++t9); out.arrows.push(lab()); P.bedMade = wed + 1; tick(++t9); out.arrows.push(lab()); P.untidy = false; tick(++t9); out.arrows.push(lab());
   goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at)); tick(++t9); out.arrows.push(lab());
   goToDeck(5); tick(++t9); out.arrows.push(lab()); setGoal({ deck: 3, place: '3-galley-1', label: 'someone else' }); P.bedMade = null; tick(++t9); out.arrows.push(lab()); clearGoal();
+  const gq = typeof GUIDE_ON === 'undefined' ? null : GUIDE_ON, setQ = v => { if (gq === null) window.GUIDE_ON = v; else GUIDE_ON = v; };   // the arrow queue on: the arrows step aside (AC2's piece F2 asks the queue)
+  setQ(true); tick(++t9); out.queued = lab(); if (gq === null) delete window.GUIDE_ON; else GUIDE_ON = gq;
   tick(++t9); for (let t = t9; t <= th(INSPECT_AT); t++) tick(t); out.arrows.push(lab());
   if (C) C.changed = keep[0]; P.bedMade = keep[1]; P.untidy = keep[2]; goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
   const n0 = SHIP.mail.length; worksTrained('m3i'); out.again = open('m3i'); if (DIALOGUE) dialogueEnd(true);
@@ -1566,8 +1568,8 @@ def part_fx3(g):
     b = g.ev(FX3SMALL); print('  small lessons:', b)
     A = b.get('arrows') or []
     check(A[:4] == ['Fresh uniform for inspection: your wardrobe', 'Make your bed: your bunk', 'Tidy your locker: your bunk', 'Inspection at 06:30: your berth'] and A[4] is None
-          and A[5] == 'Inspection at 06:30: your berth' and A[6] == 'someone else' and A[7] is None,
-          f'fx3: the inspection morning\'s arrows lead through wardrobe, bed and locker to your berth, never over another arrow, gone at 06:30 ({A})')
+          and A[5] == 'Inspection at 06:30: your berth' and A[6] == 'someone else' and A[7] is None and b.get('queued') is None,
+          f'fx3: the inspection morning\'s arrows lead through wardrobe, bed and locker to your berth, never over another arrow, none with the arrow queue on, gone at 06:30 ({A}, queue on: {b.get("queued")})')
     check(b['m3dOpen'] and b['drillAsk'] == 1, f"m3d: Calder's ask the morning of your first drill ({b})")
     check(b['brief'] and b['briefStays'], f"m3d: her briefing before the drill, and it stays to be read ({b})")
     check(b['inspectEarly'] == 0 and b['inspectAsk'] == 1, f"m3i: Tomas's ask the evening before your first inspection (in person in your bunk room, else Mail at 21:30) ({b})")
