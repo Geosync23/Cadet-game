@@ -379,3 +379,14 @@ T1 and T2 dropped by TQ_MAX 3 (the burst point, left to the migration pieces' `n
   queue names, not on "chromium".
 Runs (queue 15, alone): cadet_test 2b4a05db -> d99a9e50 (off), arrows_pointer_check, arrows_check queue, 4 mutants
 (ac_nocover, ac_liftsame, ac_liftmany, ac_showrow), check_fast.
+
+## Arrows C verdict (AC1, game d99a9e50 = 5a783387; check 5a783387): PASS
+Alone: cadet_test 2b4a05db -> d99a9e50 (off, with B, C and E all switched off) ALL IDENTICAL (plain: the earlier noisy run
+was run conditions); arrows_pointer_check OK; arrows_check queue OK; check_fast QUICK CHECK OK (391 s). Mutants
+(47e55bb4 and d99a9e50): ac_showrow, ac_nocount, ac_offlets, ac_tapkeeps, ac_firststep, ac_liftmany CAUGHT;
+ac_liftsame equivalent (the picker's own-deck button is disabled, so liftButton finds nothing); **ac_nocover now CAUGHT**
+by 5a783387's covered cases (8 FAILs). Outside-slot hooks fine: 15b's row() data-job (interactions seat), section 19's
+act() WeakMap, deviceLoad's teach/pointsSeen, the Settings row. To keep in mind: the merge clash with P4 on Settings'
+last line; `data-job` on board rows is on for everyone (invisible).
+
+## RV2 done (15:35): handed over (plans/handover-review-controller.md). E is RV6's.

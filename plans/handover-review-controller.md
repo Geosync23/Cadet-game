@@ -14,10 +14,11 @@ AR1 (piece B) session_01XcfcbFvi4nMVUPZgT2BcmE, AC1 (piece C) session_01LDmfZ93t
 |---|---|---|
 | Turn 3 (CT1, the ring) | 1ec16129 | PASS WITH FIXES (fixes for CTT's check: chat, facing; done by CTT in 442f339) |
 | P3 marks + connect/disconnect | 958421a | PASS WITH FIXES; **47d71ff: PASS** (all five fixes, 10/10 mutants) |
-| P5 accessibility + docs | 8216ad4 | PASS WITH FIXES; 4892a0b (the fixes): round running, see the log |
+| P5 accessibility + docs | 8216ad4 | PASS WITH FIXES; **4892a0b / 9325b3f: PASS** |
 | P4 settings | db80eb0 | moved to PR9 (notes and p4_* mutants handed over) |
-| Arrows piece B | c0ab64c | code read done, runs queued (see the log) |
-| Arrows piece C | 47e55bb4 | next (lead 27's ask, 13:21) |
+| Arrows piece B | 5dd6b6f | PASS WITH FIXES (check fixes; done by AC1 in 1422e0c1) |
+| Arrows piece C | d99a9e50 / 5a783387 | **PASS** |
+| Arrows piece E | 14cffba | not mine: RV6 (session_018Jzc4LeoHvuahsS7VHAzn3) |
 
 ## Tools (plans/review-controller/)
 - `mutants.py GAME.html CHECKDIR CLEAN.log name[:parts] ...`: plants each mutant (old -> new string, must occur once)
@@ -39,9 +40,9 @@ AR1 (piece B) session_01XcfcbFvi4nMVUPZgT2BcmE, AC1 (piece C) session_01LDmfZ93t
   starts with none.
 
 ## Loose ends
-- P5 4892a0b: verdict after its round (cadet_test off/on were ALL IDENTICAL; its check, 6 mutants, check_fast). RV5's two
-  notes go in it: padNameIt returns at the first matching PAD_NAMES selector even when its name is '' ('#device button'
-  is broad); the aria-label it sets stays after a touch (harmless; device views redraw).
-- Arrows B: AR1's three questions answered (13:03 message); verdict after queue 11's runs.
-- Arrows C: not started.
-- The a_start 14812 px under load: not investigated beyond "alone it's identical".
+- Nothing open of mine. All my verdicts are sent (P3, P5 to their builders and the lead; B and C to lead 28 and AC1).
+- Merge clash ahead: arrows C and controller P4 both rewrite the last line of section 19's Settings view.
+- The noise under load: two noisy runs (P3 958421a-on, arrows C 47e55bb4-off) had the *same* pixels and boxes with
+  different builds; CP3 and CP5 each saw a_start 14812 px once. All were plain identical alone.
+- A queue that waits for "no chromium" never starts here (pid 85, the container's CA setup, mentions the browser path):
+  wait on your own queue names.
