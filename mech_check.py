@@ -297,6 +297,29 @@ def m7_taps(g):
     g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
 PARTS['m7'] = m7_taps
 
+# p5-fix2 C: what the career's notes say. The Tuning ask names one time, the meeting's real one (the writer's line had
+# 10:15 fixed and the code added the real time after it); the Hauling ask names where the meeting is (Main storage, not
+# "the hold"); a Tune job's arrow says Tune, not Repair; the Calendar's Thursday inspection is at 06:30, the walk's time
+C_ASK = TRAIN.replace("if (c && c.st === 'meet') {", "if (c && c.st === 'meet') break; if (false) {").replace("const st0 = worksStage(id);", """const st0 = 0; const c = SHIP.works.cur, r = c && SHIP.occasions.find(x => x.key === c.occ);
+  const m = c && ((SHIP.mail || []).find(x => x.subject === c.mail) || TRAIN_HELD.mail);
+  return { st: c && c.st, at: r ? hhmm(r.at % 1440) : null, room: r ? DECKS[r.deck].rooms[r.room].name : null, subject: m && m.subject, body: m && m.body };""")
+def part_fix2_c(g):
+    import re
+    for rid in ('m5', 'm4'):
+        a = g.ev(f"({C_ASK})('{rid}')")
+        print(f'  the {rid} ask:', a)
+        times = re.findall(r'\b\d\d:\d\d\b', (a.get('subject') or '') + ' | ' + (a.get('body') or ''))
+        check(a['st'] == 'meet' and a['body'] and set(times) == {a['at']}, f"{rid}: the ask names the meeting's time, and only that ({times} vs {a['at']})")
+        check(a['room'] and a['room'].lower() in a['body'].lower() and 'the hold' not in a['body'], f"{rid}: the ask names where the meeting is ({a['room']}: {a['body']})")
+    t = g.ev("""(() => { SHIP.works = null; SHIP.jobs = []; setShipNow(4 * 1440 + 600); machinesNow(); const W = worksInit(); W.tr.m5 = 4;
+      const m = machineList().find(x => x.kind === 'oven'); const j = tuneJob(m.id, shipNow()); if (!j) return null; SHIP.jobs.push(j); claimJob(j.id);
+      const g = ixJobStep(); dropJob(j.id); SHIP.jobs = []; SHIP.works = null; return g && g.label; })()""")
+    print('  a tune job\'s arrow:', t)
+    check(t and t.startswith('Tune the'), f"m5: a tune job's arrow says Tune ({t})")
+    cal = g.ev("(() => { const e = DEV_WEEK[3][0]; return [e.at, e.title]; })()")
+    print('  the Calendar\'s Thursday:', cal)
+    check(cal[0] == 390, f"m3i: the Calendar's inspection is at 06:30, the walk ({cal})")
+
 # 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk
 # room it's said, away it's Mail at 07:00; turning up (or a nod while out) is the row's use; none on a day off
 M3I_RUN = r"""((items, here) => {
@@ -1565,6 +1588,7 @@ with sync_playwright() as pw:
         part_round23(g)
     for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
         if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff') || (typeof teamParts === 'function' && '{k}' === 'tparts')"): print(k + ':'); f(g)
+    if not only or 'fix2' in only: print('fix2 (the notes\' words):'); part_fix2_c(g)
     if not only or 't24' in only: part_t24(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))

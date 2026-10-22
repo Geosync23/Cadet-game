@@ -14,7 +14,7 @@ step lines in `content/lines/<teacher>.lines` (kind `work`).
 | What | Key | Notes |
 | --- | --- | --- |
 | The meeting at the place | meeting `train.<id>.<teacherId>` | e.g. `train.m7.halloran-emeka` (Day 5: m7 and p3's teachers are torres-zeke, halloran-emeka, calder; first on shift). Pick by the teacher who actually teaches (the `by` list's first on shift). Small openings use the same id (one or two lines) |
-| The ask (toast + Mail) | `works.ask.<id>` | text, "Subject \| body"; Mail unsigned (the game adds the sender) |
+| The ask (toast + Mail) | `works.ask.<id>` | text, "Subject \| body"; Mail unsigned (the game adds the sender). `{time}` and `{place}` are the meeting's real time and room ("Galley on Deck 3"); without `{time}` in the body the game adds "(time, place.)" after it, so never write a time by hand (p5-fix2) |
 | Teacher's words while they lead (you watch) | kind `work` in the teacher's own lines, `? flag:train.<id>.lead.<step>` | every line under a flag plays in order. Seat C (0.44.1) plays `lead.take` when they lead you to it and `lead.done` when they hand over; job steps: `take`, `fetch`, `make`, `hold` (= the panel), `carry` (cart, pickup, drop), `done` (turn-in is followed by `works.trained`). The mechanics' own steps (`look` on rounds, `turn` in tuning, `choose`, `wait`) are named for seats M1/M2 |
 | Teacher's words while you lead | `? flag:train.<id>.follow.<step>` | same steps |
 | Trained | `works.trained` | text: "Trained: {mech}, with {name}." `{mech}` from `works.mech.<id>`, `{name}` the teacher's name |

@@ -15710,7 +15710,7 @@ function ixJobStep() {
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
-  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length ? 'Look over the ' : 'Repair the ') + name };
+  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a tune job (24e) is tuned, not repaired (p5-fix2)
 }
 // no job yet on a shift day (playtest 1, note 9): the time clock till you've clocked in, then the job board while it
 // has a job for you; then your job's steps as above. From the clock's opening to the shift's end; Day 1 has section 21's own
@@ -33822,9 +33822,9 @@ const LINES = JSON.parse([
   ',"works.ask.m3i":[',
   '{"text":"Inspection tomorrow | Inspection is Thursday at 06:30. Clean uniform, bed made, locker tidy.","id":"5hgh07"}]',
   ',"works.ask.m4":[',
-  '{"text":"The rest of the delivery | Shelves done? Meet me at the hold. There\'s a manifest with your name on it.","id":"1bbk6qt"}]',
+  '{"text":"The rest of the delivery | Shelves done? Meet me in {place}, {time}. There\'s a manifest with your name on it.","id":"h1s4hl"}]',
   ',"works.ask.m5":[',
-  '{"text":"Galley, 10:15 | Galley, 10:15. Bring nothing.","id":"19ro3hn"}]',
+  '{"text":"Galley, {time} | {place}, {time}. Bring nothing.","id":"icqkda"}]',
   ',"works.ask.m6":[',
   '{"text":"Burst pipe | Burst pipe, junior wing. With me.","id":"qractp"}]',
   ',"works.ask.m7":[',
@@ -45963,6 +45963,12 @@ function drillCalendar() {
     const d0 = SHIP.time.day, d = d0 + ((2 - weekday(d0)) + 7) % 7;
     return drillDue(d) ? worksText('drill.where', 'the Works bay, Deck 5') : where; } });
 }
+// the Thursday line's time: the walk is at 06:30 (INSPECT_AT), not the crew's 06:40 tidy (p5-fix2), once the row's in the build
+function inspectCalendar() {
+  const e = typeof DEV_WEEK !== 'undefined' && DEV_WEEK[3] && DEV_WEEK[3][0]; if (!e || Object.getOwnPropertyDescriptor(e, 'at').get) return;
+  const plain = e.at; Object.defineProperty(e, 'at', { configurable: true, enumerable: true, get() { return WORK_MECH.m3i ? INSPECT_AT : plain; } });
+}
+inspectCalendar();
 const DRILL_TEA = /^(works-tea|new-hands-tea)$/;
 WORK_TICKS.push((now, skip) => {
   const d = worksDay(now), m = now - (d - 1) * 1440; if (skip || weekday(d) !== 4 || m < 1125 || m > 1170 || !WORK_MECH.m3d) return;
