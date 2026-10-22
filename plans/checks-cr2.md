@@ -106,3 +106,15 @@ OLD claude/integration 32b699a6 (0.64.14), sha256 `94f32868...881e9` (matches).
 | arc_check | OK | `ARC CHECK OK` |
 | lines_check | OK | PASS (0 errors, 50 warnings) |
 | lines_check --day | OK | PASS (0 errors) |
+
+# Round 5: 0.64.16 (claude/integration-next b9f053ba, 2026-10-22), CR2's share — **OK**
+
+NEW b9f053ba, sha256 `70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7` (matches BM13's).
+OLD claude/integration 2b4a05db (0.64.15), sha256 `0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e`.
+Split by agreement (copied to lead 28 and BM13): path, arc, lines, lines --day → CR4 (all OK, plans/checks-cr4.md
+725c250f); cadet_test → CR3 (ALL IDENTICAL, claude/checks-cr3 890ef899). CR2 ran intro and perf.
+
+| Check | Result | Key lines |
+|---|---|---|
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check NEW OLD | known old only (backlog 14) | `memory grows across deck round trips` 521 → 521 → 523. First run also `the Line supper, the mess Sun 18:30 trifold-open-turned: js 2.05 -> 3.08 ms`; **re-measured: doesn't repeat** (OLD 2.27, NEW 2.04 ms; `PERF CHECK: 1 problem(s)`). Third round running with a one-off spike in a different scene. |
