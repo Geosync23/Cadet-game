@@ -1,5 +1,23 @@
 # CR6 check results
 
+## 0.64.17 round 2 (2026-10-22): OK
+
+- **Build:** `claude/integration-next` 1498dbf4 (with SC1's m12 and Line supper fixes, CP4's bubble fix),
+  `starship-cadet.html` sha256 `ff45b427d65d543ab8dfe10f289b49653f0102af8ef513b960dd2e2ecbfac306` (matches lead 29's).
+- **OLD:** 0.64.16 b9f053ba. Not needed: no FAIL.
+- Share (lead 29): check_fast, mech, bigevents, fridays (BM14 stopped its copy; this is the one), disc, tiles (alone), join.
+  food 1 7, food 11 4 and clothes moved to CR4 before they started (CR4: all OK). One check at a time.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 251 s) | `QUICK CHECK OK in 251 s`; machine repair share `repairs 17 (40%)` of 42 = 40.5%, inside 40-60 at the edge (same as round 1) |
+| mech_check | OK (exit 0, 196 s) | `MECH CHECK OK`; m12 fixed: `"night": ["done", "navarro-mateo", ["4-washer-3"]]`, `"logged": [12, 0.9]` |
+| bigevents_check | OK (exit 0, 166 s) | `BIGEVENTS CHECK OK`; Line supper: 83 mean to go, 71 came, at most 44 at once, 48 seats, nobody standing |
+| fridays_check | OK (exit 0, 1135 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 86 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 103 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 131 s) | `JOIN CHECK OK` |
+
 ## 0.64.17 full round (2026-10-22): FAIL (2 new)
 
 - **Build:** `claude/integration-next` 8193458e (breakfast at 07:00, SC1's claude/patch-play1-f), `starship-cadet.html`
