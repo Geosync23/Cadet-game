@@ -835,10 +835,87 @@ def part_pick(pw, src, tag):
     if len(P) < 4: fails.append(f'only {len(P)} kinds of thing found on the deck to pick')
     return fails
 
+# ---- the games (games): Tiles to the end, and Lightdisc, by pad ---------------------------------------------------------
+# Tiles: opened as tiles_check does (tilesPlay), then played only by pad: each move is the game's own choice (tilesAI,
+# medium), and each square or hold button it needs is reached with the D-pad (the highlight is the page's focus) and
+# pressed with A. The crew's answer is made at once (its real-time timer cleared, as tiles_check does). At the end the
+# D-pad and A reach Done and the board closes.
+FOCUS_ON = r"""((sel) => { const t = document.querySelector(sel), f = document.activeElement; if (!t) return { gone: true };
+  if (f === t || t.contains(f)) return { on: true };
+  const a = t.getBoundingClientRect(), b = f && f !== document.body ? f.getBoundingClientRect() : null;
+  if (!b) return { none: true };
+  const dx = (a.left + a.width / 2) - (b.left + b.width / 2), dy = (a.top + a.height / 2) - (b.top + b.height / 2);
+  return { dx, dy }; })"""
+def pad_to(r, sel, tries=40):
+    """move the highlight onto sel with the D-pad (the bigger gap first); True once it's there"""
+    for k in range(tries):
+        f = r.ev(f"({FOCUS_ON})({json.dumps(sel)})")
+        if f.get('on'): return True
+        if f.get('gone'): return False
+        if f.get('none'): r.press('DOWN'); r.step(1); continue
+        dx, dy = f['dx'], f['dy']
+        r.press(('RIGHT' if dx > 0 else 'LEFT') if abs(dx) >= abs(dy) else ('DOWN' if dy > 0 else 'UP')); r.step(1)
+    return r.ev(f"({FOCUS_ON})({json.dumps(sel)})").get('on', False)
+def part_games(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_tiles', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false); SHIP.device.tipsSeen && (SHIP.device.tipsSeen.device = true)"); r.step(10)
+    r.press('B'); r.step(2)
+    r.ev("tilesPlay('tomas', null, 'quick')"); r.step(4)
+    played0 = r.ev("SHIP.tiles.played"); moves = 0; stuck = None
+    for n in range(120):
+        st = r.ev("(() => { const G = TL_GAME; if (!G) return null; if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (!G.s.over && G.s.p === 1) tilesCrewMove(); return { over: G.s.over, p: G.s.p }; })()")
+        if not st or st['over']: break
+        mv = r.ev(f"(() => {{ const m = tilesAI(TL_GAME.s, 'medium', tilesRng({n})); return m; }})()")
+        first = f'#devBody .tl-hd button[data-h="{mv["m"]}"]' if mv.get('k') == 'l' else f'#devBody .tl-c[data-c="{mv["from"]}"]'
+        for sel in (first, f'#devBody .tl-c[data-c="{mv["to"]}"]'):
+            if not pad_to(r, sel): stuck = sel; break
+            r.press('A'); r.step(2)
+        if stuck: break
+        moves += 1
+    over = r.ev("!!TL_GAME && TL_GAME.s.over")
+    print(f'  Tiles: {moves} moves made by pad; game over {over}' + (f'; the highlight never reached {stuck}' if stuck else ''))
+    if stuck: fails.append(f'Tiles: the D-pad never reached {stuck}')
+    elif not over: fails.append(f'Tiles: not over after {moves} moves by pad')
+    else:
+        done = pad_to(r, '#devBody .tl-end button[data-end="done"]')
+        if done: r.press('A'); r.step(6)
+        closed = r.ev("!TL_GAME || !DEV.open || DEV.app !== 'tiles'"); played = r.ev("SHIP.tiles.played")
+        print(f'  Tiles: Done reached and pressed by pad: {done}; the board closed: {closed}; games played {played0} -> {played}')
+        if not (done and closed): fails.append(f'Tiles: Done by pad should end it (reached {done}, closed {closed})')
+        if played != played0 + 1: fails.append(f'Tiles: a game played to the end should count once ({played0} -> {played})')
+    if r.errors: fails.append('Tiles: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close()
+    # Lightdisc: on the rec deck in the evening (as disc_check), asked for, then by pad only: A through the how-to-play,
+    # the stick moves you, B leaves
+    r = Run(pw, src, f'{tag}_disc', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(5)
+    r.ev("(() => { skipTo((SHIP.time.day - 1) * 1440 + 19 * 60); goToDeck(7, null); })()"); r.step(30)
+    r.press('B'); r.step(2); r.ev("discAsk()")
+    for k in range(90):
+        r.step(30)
+        if r.ev("!!(DISC.g && DISC.view)"): break
+    if not r.ev("!!(DISC.g && DISC.view)"): fails.append('Lightdisc: no game started (nobody came?)'); r.close(); return fails
+    for k in range(6):
+        if r.ev("DISC.how") < 0: break
+        x0 = r.ev("DISC.g.p[0].x"); r.pad(20, a={0: 1}); r.pad(20, a={0: -1}); r.press('A'); r.step(4)
+    x0 = r.ev("DISC.g.p[0].x"); r.pad(15, a={0: 1}); x1 = r.ev("DISC.g.p[0].x"); r.pad(15, a={0: -1}); x2 = r.ev("DISC.g.p[0].x")
+    print(f'  Lightdisc: the how-to-play passed ({r.ev("DISC.how")}); the stick moved you {x1 - x0:+.2f} then {x2 - x1:+.2f}')
+    if not (x1 > x0 and x2 < x1): fails.append(f'Lightdisc: the stick should move you right then left ({x0:.2f} -> {x1:.2f} -> {x2:.2f})')
+    r.press('B'); r.step(10)
+    for k in range(3):   # Leave may ask once more: the highlight lands on its button, A confirms
+        if not r.ev("!!DISC.g"): break
+        r.press('A'); r.step(10)
+    left = not r.ev("!!(DISC.g && DISC.view)")
+    print(f'  Lightdisc: B left the game: {left}')
+    if not left: fails.append('Lightdisc: B should leave the game')
+    if r.errors: fails.append('Lightdisc: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach, 'games': part_games}   # 'reach' joins when the pad half is written
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
@@ -899,13 +976,19 @@ MUTANTS['reach'] = {
     'A clicks the panel, not the highlighted thing': WRAP("if (buttons[0].pressed && document.activeElement && document.activeElement !== document.body) { buttons[0] = { pressed: false, touched: false, value: 0 }; const d = document.activeElement.closest('[role=dialog],.lift,.device'); if (d) d.click(); }"),
 }
 
+MUTANTS['games'] = {
+    'A does nothing on the Tiles board': WRAP("if (document.activeElement && document.activeElement.closest && document.activeElement.closest('.tl-bd')) buttons[0] = { pressed: false, touched: false, value: 0 };"),
+    'the stick does not move you in Lightdisc': EACH_FRAME.replace('__BODY__', "if (typeof DISC !== 'undefined' && DISC.view) DISC.inp.kx = 0;"),
+    'B does not leave Lightdisc': WRAP("if (typeof DISC !== 'undefined' && DISC.view) buttons[1] = { pressed: false, touched: false, value: 0 };"),
+}
+
 # ---- the stand-in (--selftest) ----------------------------------------------------------------------------------------
 # A tiny controller driver written for this check alone, planted in a copy of the game, so each part can be shown to
 # PASS on something that works and FAIL on its planted faults before section 26 exists. It is not the design: section 26
 # is CT1's. It covers what's built in the parts here so far (the deck package).
 STANDIN = r"""
 const PAD_ON = true;
-const PAD_BUILT = ['base', 'deck', 'marks', 'panels'];
+const PAD_BUILT = ['base', 'deck', 'marks', 'panels', 'games'];
 (() => {
   if (!PAD_ON) return;
   const prev = {}; let steering = false, flick = 0, charge = null, used = -1e9;
@@ -927,6 +1010,13 @@ const PAD_BUILT = ['base', 'deck', 'marks', 'panels'];
     // panels (a simple stand-in): the top open panel's buttons; the D-pad to the nearest one that way, A clicks, B backs
     const top = [...document.querySelectorAll('#pauseCard,[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0 && getComputedStyle(e).display !== 'none').pop();
     const hitp = k => !!(p.buttons[k] && p.buttons[k].pressed) && !pv[k];
+    if (typeof DISC !== 'undefined' && DISC.view && DISC.g) {   // Lightdisc (a stand-in): the stick moves you, A is Next, B leaves
+      const sx = p.axes[0] || 0; DISC.inp.kx = Math.abs(sx) > .2 ? sx : 0;
+      if (hitp(0)) { const n = DISC.view.howNext; if (n && n.offsetParent) n.click(); }
+      if (hitp(1) && DISC.view.leave) DISC.view.leave.click();
+      for (const q of pads) prev[q.index] = q.buttons.map(b => b.pressed);
+      return;
+    }
     if (top && !hitp(3) && !hitp(8) && !hitp(9)) {   // Y, View and Menu keep their own jobs
       const btns = [...top.querySelectorAll('button,[role=button],a[href],input,select,textarea,[tabindex]')].filter(e => !e.disabled && e.getBoundingClientRect().width > 0 && (!e.checkVisibility || e.checkVisibility()));
       const cur = top.contains(document.activeElement) ? document.activeElement : null;
