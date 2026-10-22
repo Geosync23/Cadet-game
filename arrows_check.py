@@ -115,8 +115,13 @@ def part_queue(pg):
     pg.ev("SHIP.player.track = undefined")
     # a direct goal stays over 2-6; a level 1 borrows it
     pg.ev("GUIDE.list.length = 0; GUIDE.rev++; setGoal({ deck: 4, room: 'w', label: 'mine', trk: 'place:bed' })")
-    ask(pg, id='d2', level=2); a = shown(pg); ask(pg, id='d1', level=1); b = shown(pg); done(pg, 'd1'); c = shown(pg)
-    check(a == 'mine' and b == 'd1' and c == 'mine', f'direct: {a}, {b}, {c}')
+    ask(pg, id='d2', level=2); a = shown(pg); cov = pg.ev("guideList().filter(e => e.covered).map(e => e.id)")
+    ask(pg, id='d1', level=1); b = shown(pg); done(pg, 'd1'); c = shown(pg)
+    check(a == 'mine' and b == 'd1' and c == 'mine' and cov == ['d2'], f'direct: {a}, {b}, {c}, covered {cov}')
+    # done between two picks in the same minute: gone at once (RV2)
+    pg.ev("clearGoal(); GUIDE.list.length = 0; GUIDE.rev++; window.__d = {}"); ask(pg, id='quick', level=2); s1 = shown(pg)
+    done(pg, 'quick'); s2 = pg.ev("(() => { const g = goalNow(); return g ? g.label : null; })()")   # no cache reset: the same minute
+    check(s1 == 'quick' and s2 != 'quick', f'direct: a done entry stayed up within its minute ({s1}, {s2})')
     pg.ev("clearGoal(); GUIDE.list.length = 0; GUIDE.rev++")
     print('  track and direct: tracking off shows levels 1-2 only; your goal stays, a level 1 borrows it')
     # body after the job's step
@@ -167,6 +172,8 @@ def part_toasts(pg):
     gaps = [round(seen[i + 1][1] - seen[i][1]) for i in range(len(seen) - 1)]
     check(names == ['T1', 'T3', 'T4', 'T5'] and waiting == 3, f'toasts: shown {names}, waiting {waiting} (T2 drops: four waited, three kept)')
     check(all(g >= 2500 for g in gaps), f'toasts: one shown under 2.5 s: {gaps}')
+    pg.ev("TOAST_AT = -1e9; toast('R1', 'same')"); t0 = pg.ev('TOAST_AT'); pg.step(10, 50); pg.ev("toast('R1', 'same')")
+    check(pg.ev('TOAST_AT') > t0 and pg.ev('GUIDE.tq.length') == 0, 'toasts: the one on screen, again, should show again (its time restarting), not wait')
     pg.ev("toast('U1', 'x'); toast('U2', 'urgent', { now: true })")
     check(pg.ev("document.getElementById('tt').textContent") == 'U2', 'toasts: an urgent one waited')
     pg.ev("GUIDE_ON = false; PAUSE.on = false"); pg.step(3)

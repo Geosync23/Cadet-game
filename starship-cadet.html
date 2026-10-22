@@ -15971,7 +15971,7 @@ function trkDoneCheck() {
 // 'first' | 'off') ignores `once` on 'all' and drops level-3 entries on 'off'. Also here, on the same switch: a short queue for pop-ups
 // (section 11's toast asks guideToast first), so a new one waits a moment instead of wiping the one on screen.
 var GUIDE_ON = false;                                    // var: goalNow and toast (above and below) may ask before this line has run
-const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, warn: [], loop: false, tq: [], pass: false, mode: null };
+const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, covered: null, counted: new Set(), warn: [], loop: false, tq: [], pass: false, mode: null };
 SHIP.guide = (() => {
   const g = SAVED && SAVED.guide, seen = {};
   if (g && g.seen && typeof g.seen === 'object') for (const k in g.seen) if (typeof k === 'string' && k.length < 60 && Number.isInteger(g.seen[k]) && g.seen[k] > 0) seen[k] = Math.min(99, g.seen[k]);
@@ -15986,18 +15986,18 @@ function guideAsk(e) {
   if (!GUIDE_ON || !e || typeof e.id !== 'string' || !e.id || e.id.length >= 60 || typeof e.goal !== 'function' || !(e.level >= 1 && e.level <= 6)) return false;
   if (guideTeach(e) && guideMode() === 'off') return false;
   const i = GUIDE.list.findIndex(x => x.id === e.id);
-  if (guideOverSeen(e) && !(i >= 0 && GUIDE.shown === e.id)) return false;
+  if (guideOverSeen(e) && !(i >= 0 && GUIDE.counted.has(e.id))) return false;
   if (!Number.isFinite(e.until) && !GUIDE.warn.includes(e.id)) GUIDE.warn.push(e.id);   // every entry should have a time limit (guideList shows these)
   const x = { ...e, at: i >= 0 ? GUIDE.list[i].at : ++GUIDE.n, t: i >= 0 ? GUIDE.list[i].t : Math.floor(shipNow()) };   // t: when asked (a missing `from` counts from then)
   if (i >= 0) GUIDE.list[i] = x; else GUIDE.list.push(x);
   GUIDE.rev++; guideStart(); return true;
 }
-function guideDrop(id) { const i = GUIDE.list.findIndex(x => x.id === id); if (i < 0) return false; GUIDE.list.splice(i, 1); if (GUIDE.shown === id) GUIDE.shown = null; GUIDE.rev++; return true; }
+function guideDrop(id) { const i = GUIDE.list.findIndex(x => x.id === id); if (i < 0) return false; GUIDE.list.splice(i, 1); GUIDE.counted.delete(id); if (GUIDE.shown === id) GUIDE.shown = null; if (GUIDE.covered === id) GUIDE.covered = null; GUIDE.rev++; return true; }
 function guideLive(now) {                                // drop what's done or past; the rest, in order
   const out = [];
   for (const e of GUIDE.list.slice()) {
     let done = false; try { done = typeof e.done === 'function' && !!e.done(); } catch (err) { done = true; }
-    if (done || Number.isFinite(e.until) && now >= e.until || guideOverSeen(e) && GUIDE.shown !== e.id) { guideDrop(e.id); continue; }
+    if (done || Number.isFinite(e.until) && now >= e.until || guideOverSeen(e) && !GUIDE.counted.has(e.id)) { guideDrop(e.id); continue; }
     if (!(Number.isFinite(e.from) && now < e.from)) out.push(e);
   }
   const from = e => Number.isFinite(e.from) ? e.from : e.t;
@@ -16011,21 +16011,25 @@ function guidePick() {                                   // the entry that may s
   return GUIDE.pick;
 }
 function guideGoal(jobGoal) {                            // goalNow's: the queue's goal, or null to leave it to IX_GOAL and the job
+  GUIDE.covered = null;
   if (!GUIDE_ON || !GUIDE.list.length) { GUIDE.shown = null; return null; }
-  const e = guidePick(); if (!e) { GUIDE.shown = null; return null; }
-  if (IX_GOAL && e.level > 1) return null;               // a direct goal (not yet in the queue, or your own choice) stays in charge
-  if (e.level >= 5 && jobGoal) return null;              // your body and your own choices after your job's next step
+  let e = guidePick(); if (!e) { GUIDE.shown = null; return null; }
+  let fin = false; try { fin = typeof e.done === 'function' && !!e.done(); } catch (err) { fin = true; }   // done since this minute's pick (RV2): gone at once
+  if (fin) { guideDrop(e.id); e = guidePick(); if (!e) { GUIDE.shown = null; return null; } }
+  if (IX_GOAL && e.level > 1) { GUIDE.shown = null; GUIDE.covered = e.id; return null; }   // a direct goal (not yet in the queue, or your own choice) stays in charge
+  if (e.level >= 5 && jobGoal) { GUIDE.shown = null; return null; }   // your body and your own choices after your job's next step
   let g = null; try { g = e.goal(); } catch (err) { g = null; }
   if (!g || !g.deck) return null;
-  if (GUIDE.shown !== e.id) {                            // shown for the first time: count it, and its tip
-    GUIDE.shown = e.id;
+  GUIDE.shown = e.id;
+  if (!GUIDE.counted.has(e.id)) {                        // shown for the first time while asked: count it, and its tip
+    GUIDE.counted.add(e.id);
     if (guideLimit(e)) SHIP.guide.seen[e.id] = (SHIP.guide.seen[e.id] || 0) + 1;
     if (e.tip && e.tip.id && e.tip.text && !(guideTeach(e) && guideMode() === 'off')) ixTip(e.tip.id, e.tip.text);
   }
   return { ...g, guide: e.id };
 }
 function guideNow() { return GUIDE_ON && GUIDE.shown ? GUIDE.list.find(x => x.id === GUIDE.shown) || null : null; }
-function guideList() { return GUIDE.list.map(e => ({ id: e.id, level: e.level, from: e.from || null, until: Number.isFinite(e.until) ? e.until : null, owner: e.owner || '', shown: e.id === GUIDE.shown, noLimit: GUIDE.warn.includes(e.id) })); }
+function guideList() { return GUIDE.list.map(e => ({ id: e.id, level: e.level, from: e.from || null, until: Number.isFinite(e.until) ? e.until : null, owner: e.owner || '', shown: e.id === GUIDE.shown, covered: e.id === GUIDE.covered, noLimit: GUIDE.warn.includes(e.id) })); }   // covered: the queue's pick, hidden by a direct goal (RV2)
 // "done when" helpers, so askers don't each write their own (each safe to call any time)
 const guideHere = () => { try { return deckDef && player ? { deck: deckDef.num, room: roomAt(...player.here()) } : null; } catch (e) { return null; } };
 function guideAt(deck, room) { const h = guideHere(); return !!h && h.deck === deck && (room == null || h.room === room); }
@@ -16043,7 +16047,8 @@ function guideToast(t, x, o) {
   if (!GUIDE_ON || GUIDE.pass || o && o.now) return false;
   const shown = (document.getElementById('tt').textContent || '') + '|' + (document.getElementById('tx').textContent || '');
   if (performance.now() - TOAST_AT >= TQ_MIN && !GUIDE.tq.length) return false;   // nothing fresh on screen: show it now
-  if (shown === t + '|' + x || GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
+  if (shown === t + '|' + x && !GUIDE.tq.length) return false;   // the one on screen again: shown again (its time starts over), as before (RV2)
+  if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
   GUIDE.tq.push([t, x]); if (GUIDE.tq.length > TQ_MAX) GUIDE.tq.shift();
   guideStart(); return true;
 }
