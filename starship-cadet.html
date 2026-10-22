@@ -342,6 +342,16 @@ document.body.appendChild(renderer.domElement);
 const scene = new THREE.Scene();
 scene.background = new THREE.Color('#151d2c');
 const maxAniso = renderer.capabilities.getMaxAnisotropy();
+// Optimization pass #4 (the render seat): three r128 deletes a compiled shader program when the last material using it is
+// disposed, so each deck change compiled again the ones its unload threw away. keepShaders() (called by the main loop right
+// after each render) holds one extra use (usedTimes) of every program once it exists, so it's never deleted and a later
+// material with the same key reuses it: the same shader, the same pixels. About 22 programs in all; three internals named
+// here only. Nothing new: one length check a frame.
+const KEPT_PROGRAMS = new Set();
+function keepShaders() {
+  const ps = renderer.info.programs; if (!ps || ps.length === KEPT_PROGRAMS.size) return;
+  for (const p of ps) if (!KEPT_PROGRAMS.has(p)) { KEPT_PROGRAMS.add(p); p.usedTimes++; }
+}
 
 let seed = 11;
 const R = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
@@ -359,9 +369,19 @@ function tex(w, h, draw, rx = 1, ry = 1, srgb = true) {
   t.userData = { g, c };
   return t;
 }
+// Optimization pass #6 (the render seat): the same specks from the same random numbers, faster. R() is inlined on a
+// local copy of seed (written back once at the end), and its % 2147483647 is done exactly without a division: for
+// m = 2^31 - 1, x mod m = (x mod 2^31) + floor(x / 2^31), less m if that reaches m (x = s * 16807 < 2^46, so every step
+// is exact in a double). The same pixels and the same seed after (opt-probes/grain_bench.py, grain_load.py).
 function grain(g, w, h, amt) {
-  const d = g.getImageData(0, 0, w, h), p = d.data;
-  for (let i = 0; i < p.length; i += 4) { const n = (R() - .5) * amt; p[i] += n; p[i + 1] += n; p[i + 2] += n; }
+  const d = g.getImageData(0, 0, w, h), p = d.data, L = p.length;
+  let s = seed;
+  for (let i = 0; i < L; i += 4) {
+    const x = s * 16807, hi = Math.floor(x / 2147483648);
+    s = x - hi * 2147483648 + hi; if (s >= 2147483647) s -= 2147483647;   // = (s * 16807) % 2147483647
+    const n = (s / 2147483647 - .5) * amt; p[i] += n; p[i + 1] += n; p[i + 2] += n;
+  }
+  seed = s;
   g.putImageData(d, 0, 0);
 }
 
@@ -654,6 +674,24 @@ function hullDist(x, z) {
     best = Math.min(best, Math.hypot(x - s.ax - s.dx * t, z - s.az - s.dz * t));
   }
   return inHull(x, z) ? best : -best;
+}
+// opt #10 (the render seat): hullDist(x, z) > d, for d >= 0, the same answer without measuring to every segment: a
+// segment whose box (widened by d + .01) doesn't hold the point is farther than d, so only the near ones are measured,
+// the same way. buildDeck asks it for every tile and every wall end. The boxes are made once per HULL_SEGS.
+let HULL_BOX = null, HULL_BOX_OF = null;
+function hullBeyond(x, z, d) {
+  if (!inHull(x, z)) return false;                       // outside, hullDist is -best <= 0 <= d
+  if (HULL_BOX_OF !== HULL_SEGS) {
+    HULL_BOX_OF = HULL_SEGS; HULL_BOX = new Float64Array(HULL_SEGS.length * 4);
+    HULL_SEGS.forEach((s, k) => { HULL_BOX[k * 4] = Math.min(s.ax, s.bx); HULL_BOX[k * 4 + 1] = Math.max(s.ax, s.bx); HULL_BOX[k * 4 + 2] = Math.min(s.az, s.bz); HULL_BOX[k * 4 + 3] = Math.max(s.az, s.bz); });
+  }
+  const m = d + .01, B = HULL_BOX;
+  for (let k = 0; k < HULL_SEGS.length; k++) {
+    if (x < B[k * 4] - m || x > B[k * 4 + 1] + m || z < B[k * 4 + 2] - m || z > B[k * 4 + 3] + m) continue;
+    const s = HULL_SEGS[k], t = Math.max(0, Math.min(1, ((x - s.ax) * s.dx + (z - s.az) * s.dz) / s.l2));
+    if (!(Math.hypot(x - s.ax - s.dx * t, z - s.az - s.dz * t) > d)) return false;
+  }
+  return true;
 }
 const tileInHull = (i, j) => [[.15, .15], [.85, .15], [.15, .85], [.85, .85]].some(([a, b]) => inHull(i + a, j + b));
 const roomAt = (i, j) => (i < 0 || j < 0 || i >= W || j >= D || MAP[j][i] === '.') ? null : MAP[j][i];
@@ -2937,16 +2975,18 @@ function tallCombine() {
       const base = o.isMesh && !o.userData.noMerge && !Array.isArray(o.material) && t.src.get(o.material);
       if (!base || base.transparent || base.opacity < 1) continue;
       const key = base.uuid + (o.castShadow ? '' : '-ns');
-      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, P: [], N: [], U: [], ranges: [] });
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat: base.clone(), shadow: o.castShadow, parts: [], nP: 0, nN: 0, nU: 0, ranges: [] });
       const a = o.geometry.attributes, n = a.position.count;
-      b.ranges.push([ti, b.P.length / 3, n]); for (const [d, s] of [[b.P, a.position], [b.N, a.normal], [b.U, a.uv]]) for (const v of s.array) d.push(v);
+      // opt #10: the arrays are kept and copied whole at the end (they were pushed one number at a time; the same numbers)
+      b.ranges.push([ti, b.nP / 3, n]); b.parts.push([a.position.array, a.normal.array, a.uv.array]); b.nP += a.position.array.length; b.nN += a.normal.array.length; b.nU += a.uv.array.length;
       o.visible = false; t.own.push(o);
     }
   });
   for (const b of buckets.values()) {
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.Float32BufferAttribute(b.P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(b.N, 3));
-    geo.setAttribute('uv', new THREE.Float32BufferAttribute(b.U, 2)); geo.computeBoundingSphere();
+    const geo = new THREE.BufferGeometry(), P = new Float32Array(b.nP), N = new Float32Array(b.nN), U = new Float32Array(b.nU);
+    let p = 0, q = 0, u = 0; for (const [a, n, w] of b.parts) { P.set(a, p); N.set(n, q); U.set(w, u); p += a.length; q += n.length; u += w.length; }
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3)); geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+    geo.setAttribute('uv', new THREE.Float32BufferAttribute(U, 2)); geo.computeBoundingSphere();
     const mesh = new THREE.Mesh(geo, [b.mat]); mesh.castShadow = b.shadow; mesh.receiveShadow = true; mesh.raycast = () => {}; deckRoot.add(mesh);
     TALL_ALL.push({ mesh, ranges: b.ranges });
   }
@@ -3073,28 +3113,60 @@ function tallSync() {
     b.mesh.geometry.groups = gr; b.mesh.visible = gr.length > 0;
   }
 }
+// Optimization pass #10 (the render seat): each piece is read once, straight from its own (indexed or not) arrays, with
+// three r128's own sums in the same order (Vector3.applyMatrix4 for positions; the normal matrix, applyMatrix3 and
+// normalize for normals), into typed arrays sized by a first pass that only counts. Before, each piece was copied
+// (toNonIndexed or clone), transformed through BufferAttribute's getX/setXYZ and copied again into plain arrays. A value
+// is rounded to 32 bits once either way, so the merged shapes are the same to the bit, in the same order
+// (opt-probes/merge_bytes.py). A piece in a form this doesn't read (interleaved, not 3 + 3 + 2 numbers a corner) is
+// copied and transformed the old way first (g below), then read the same way.
+const MERGE_N3 = new THREE.Matrix3();
 function mergeMeshes(root) {
   root.updateMatrixWorld(true);
   const inv = new THREE.Matrix4().copy(root.matrixWorld).invert(), m4 = new THREE.Matrix4();
-  const buckets = new Map(), done = [];
-  root.traverse(o => {
+  const buckets = new Map(), done = [], jobs = [];
+  root.traverse(o => {                                   // 1: the buckets (in the order they were always made) and their sizes
     if (!o.isMesh || o.userData.noMerge) return;
-    const mats = Array.isArray(o.material) ? o.material : [o.material];
-    const g = o.geometry.index ? o.geometry.toNonIndexed() : o.geometry.clone();
-    g.applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld));
-    const groups = Array.isArray(o.material) ? g.groups : [{ start: 0, count: g.attributes.position.count, materialIndex: 0 }];
-    const P = g.attributes.position.array, Nn = g.attributes.normal.array, U = g.attributes.uv ? g.attributes.uv.array : null;
+    const mats = Array.isArray(o.material) ? o.material : [o.material], src = o.geometry, A = src.attributes;
+    const direct = A.position && A.normal && !A.position.isInterleavedBufferAttribute && !A.normal.isInterleavedBufferAttribute && A.position.itemSize === 3 && A.normal.itemSize === 3
+      && (!A.uv || !A.uv.isInterleavedBufferAttribute && A.uv.itemSize === 2) && (!src.index || !src.index.isInterleavedBufferAttribute);
+    let g = null, groups;
+    if (direct) groups = Array.isArray(o.material) ? src.groups : [{ start: 0, count: src.index ? src.index.array.length : A.position.count, materialIndex: 0 }];
+    else { g = src.index ? src.toNonIndexed() : src.clone(); g.applyMatrix4(m4.multiplyMatrices(inv, o.matrixWorld)); groups = Array.isArray(o.material) ? g.groups : [{ start: 0, count: g.attributes.position.count, materialIndex: 0 }]; }
+    const parts = [];
     for (const gr of groups) {
       const mat = mats[gr.materialIndex]; if (!mat) continue;
       const key = mat.uuid + (o.userData.noShadow ? '-ns' : '');
-      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat, P: [], N: [], U: [], shadow: !o.userData.noShadow });
-      for (let v = gr.start; v < gr.start + gr.count; v++) {
-        b.P.push(P[v * 3], P[v * 3 + 1], P[v * 3 + 2]); b.N.push(Nn[v * 3], Nn[v * 3 + 1], Nn[v * 3 + 2]);
-        if (U) b.U.push(U[v * 2], U[v * 2 + 1]); else b.U.push(0, 0);
+      let b = buckets.get(key); if (!b) buckets.set(key, b = { mat, need: 0, n: 0, shadow: !o.userData.noShadow });
+      b.need += Math.max(0, gr.count); parts.push([gr, b]);
+    }
+    jobs.push({ o, g, parts }); done.push(o);
+  });
+  for (const b of buckets.values()) { b.P = new Float32Array(b.need * 3); b.N = new Float32Array(b.need * 3); b.U = new Float32Array(b.need * 2); }
+  for (const { o, g, parts } of jobs) {                  // 2: the corners, in the same order
+    const A = (g || o.geometry).attributes, ix = !g && o.geometry.index ? o.geometry.index.array : null;
+    const P = A.position.array, Nn = A.normal.array, U = A.uv ? A.uv.array : null;
+    if (!g) m4.multiplyMatrices(inv, o.matrixWorld);
+    const e = m4.elements, n3 = MERGE_N3.getNormalMatrix(m4).elements;
+    for (const [gr, b] of parts) {
+      const BP = b.P, BN = b.N, BU = b.U, end = gr.start + gr.count;
+      for (let v = gr.start; v < end; v++, b.n++) {
+        const s = ix ? ix[v] : v, k = b.n * 3;
+        if (g) { BP[k] = P[s * 3]; BP[k + 1] = P[s * 3 + 1]; BP[k + 2] = P[s * 3 + 2]; BN[k] = Nn[s * 3]; BN[k + 1] = Nn[s * 3 + 1]; BN[k + 2] = Nn[s * 3 + 2]; }   // already moved
+        else {
+          let x = P[s * 3], y = P[s * 3 + 1], z = P[s * 3 + 2];
+          const w = 1 / (e[3] * x + e[7] * y + e[11] * z + e[15]);   // Vector3.applyMatrix4
+          BP[k] = (e[0] * x + e[4] * y + e[8] * z + e[12]) * w; BP[k + 1] = (e[1] * x + e[5] * y + e[9] * z + e[13]) * w; BP[k + 2] = (e[2] * x + e[6] * y + e[10] * z + e[14]) * w;
+          x = Nn[s * 3]; y = Nn[s * 3 + 1]; z = Nn[s * 3 + 2];
+          const nx = n3[0] * x + n3[3] * y + n3[6] * z, ny = n3[1] * x + n3[4] * y + n3[7] * z, nz = n3[2] * x + n3[5] * y + n3[8] * z;   // applyMatrix3
+          const r = 1 / (Math.sqrt(nx * nx + ny * ny + nz * nz) || 1);   // normalize: divideScalar(length() || 1)
+          BN[k] = nx * r; BN[k + 1] = ny * r; BN[k + 2] = nz * r;
+        }
+        if (U) { BU[b.n * 2] = U[s * 2]; BU[b.n * 2 + 1] = U[s * 2 + 1]; }   // else 0, 0 (a new Float32Array is zeros)
       }
     }
-    g.dispose(); done.push(o);
-  });
+    if (g) g.dispose();
+  }
   for (const o of done) o.parent.remove(o);
   for (const b of buckets.values()) {
     const geo = new THREE.BufferGeometry();
@@ -3145,7 +3217,7 @@ function buildDeck(def) {
   });
   MAP = def.map.map((row, j) => [...row].map((c, i) => tileInHull(i, j) ? c : '.').join(''));
   STAND = new Set();         // tiles whose centre sits well inside the hull, where people can stand
-  for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (hullDist(i + .5, j + .5) > .45) STAND.add(i + ',' + j);
+  for (let j = 0; j < D; j++) for (let i = 0; i < W; i++) if (hullBeyond(i + .5, j + .5, .45)) STAND.add(i + ',' + j);
   for (const [key, type] of Object.entries(DOORS)) {          // locked rooms say what they are
     if ((type !== 'closed' && type !== 'hatch') || CLOSED_DOORS[key] || !def.lockedRoom || (def.service || []).some(sv => (sv.key || sv) === key)) continue;
     const [k, a, b] = key.split(','), i = +a, j = +b, r = (k === 'h' ? [roomAt(i, j - 1), roomAt(i, j)] : [roomAt(i - 1, j), roomAt(i, j)]).find(r => r && !ROOMS[r].hall);
@@ -3321,12 +3393,12 @@ function buildDeck(def) {
   // inner walls that run into a curved stretch of hull are cut short, running just into the hull wall
   for (const e of edgeList) {
     const ax = e.i, az = e.j, bx = e.horiz ? e.i + 1 : e.i, bz = e.horiz ? e.j : e.j + 1;
-    const ina = hullDist(ax, az) > 0, inb = hullDist(bx, bz) > 0;
+    const ina = hullBeyond(ax, az, 0), inb = hullBeyond(bx, bz, 0);   // hullDist(...) > 0 (opt #10)
     e.wx = e.cx; e.wz = e.cz; e.sx = 1;
     if (ina === inb) continue;
     const [x0, z0, x1, z1] = ina ? [ax, az, bx, bz] : [bx, bz, ax, az];
     let lo = 0, hi = 1;
-    for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; if (hullDist(x0 + (x1 - x0) * m, z0 + (z1 - z0) * m) > 0) lo = m; else hi = m; }
+    for (let k = 0; k < 20; k++) { const m = (lo + hi) / 2; if (hullBeyond(x0 + (x1 - x0) * m, z0 + (z1 - z0) * m, 0)) lo = m; else hi = m; }
     const len = Math.min(1, lo + .3);
     e.sx = len / SEG > 1 ? 1 : len; e.wx = x0 + (x1 - x0) * len / 2 - OX; e.wz = z0 + (z1 - z0) * len / 2 - OZ;
   }
@@ -3606,6 +3678,11 @@ function unloadDeck() {
   geos.forEach(g => g.dispose()); mats.forEach(m => m.dispose());
   for (const t of texs) { t.dispose(); const c = t.userData && t.userData.c; if (c && c === t.image) c.width = c.height = 0; }
   scene.remove(deckRoot);
+  // optimization pass #5 (the render seat): the old deck's tree taken apart. Small handles to one object on a deck (a
+  // bench's bar, the day's decor, the Tern's hinge, deckRoot itself) are kept by other sections until that deck is built
+  // again, and through .parent they held the whole unloaded deck, shapes and all (~78 MB after visiting every deck).
+  // Now a stale handle holds only itself. Nothing of an unloaded deck is ever shown again (opt-probes/detach_test.py).
+  { const all = []; deckRoot.traverse(o => all.push(o)); for (const o of all) { o.parent = null; o.children = []; } }
   deckRoot = staticRoot = floor = wallIM = hdrIM = postIM = hpostIM = sillIM = paneIM = null; glassEdges = [];
   LAMPS = []; STEAM = []; DUST = []; SPINS = []; PULSES = []; MOVERS = []; TALL = []; ITEMS = []; WALL_DECOR = []; DOOR_OBJS = []; HULL_RUNS = []; HULL_MESHES = []; VOID_BLOCKS = []; DOOR_LEAVES = []; SHADOW_PROXY = []; SHADOW_JOB = null;
   if (typeof deckUnloaded === 'function') deckUnloaded();   // 0.27.43: section 8b's per-deck caches let go of the old deck
@@ -52281,10 +52358,10 @@ function liftHeld(t) { if (!LIFT_HOLD) return false; if (!Number.isFinite(t)) t 
 // hashchange line, which only offers a reload when #dev is added or taken away). In Dev mode the game keeps its own
 // save (section 13's SAVE_KEY and section 21's INTRO_KEY get "-dev"), so the real game is never written. The place-and-
 // clock card gets a gold outline and the word DEV, and tapping it opens the sheet ("Dev mode: not your real game"):
-// six tabs, two rows of three, 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
+// seven tabs (the render seat's Speed card, opt #8, on a third row), 44px buttons. Stop 1a (D1-D4): Quick and Clock. Dev state rides in the Dev save
 // (save.dev, through SAVE_EXTRA), so Mark and Undo bring it back too. Nothing here calls R().
 // =====================================================================
-const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events']];
+const DM_TABS = [['quick', 'Quick'], ['clock', 'Clock'], ['trad', 'Traditions'], ['career', 'Career'], ['set', 'Set career'], ['events', 'Big events'], ['speed', 'Speed']];   // Speed: the render seat's (opt #8)
 const DM_LATER = { events: 'Big events: start, phases, threads, End and undo. Coming in Stop 3.' };
 var DM_ST = null;                                         // the Dev state (save.dev): { ex: [excused days], note, last, tr: [traditions started] }; var: sections 18 and 20 may ask before this line runs
 const DM_UI = { el: null, tab: 'quick', open: false, msg: '' };
@@ -52379,6 +52456,7 @@ function devmodeDraw() {
   else if (DM_UI.tab === 'trad') devmodeTrad(body);
   else if (DM_UI.tab === 'set') devmodeSet(body);
   else if (DM_UI.tab === 'career') devmodeCareer(body);
+  else if (DM_UI.tab === 'speed') devmodeSpeed(body);
   DM_UI.el.querySelector('.dmFoot').textContent = devmodeFoot();
   const to = DM_UI.scroll && body.querySelector(DM_UI.scroll); DM_UI.scroll = null;   // a list just opened: into view
   if (to) body.scrollTop = to.offsetTop - body.offsetTop - 8;
@@ -53059,6 +53137,70 @@ function devmodeCareer(body) {
   const give = Object.keys(WORK_TOOLS).filter(k => !W.tools[k]);
   for (let i = 0; i < give.length; i += 3) devmodeRow(body, give.slice(i, i + 3).map(k => ['Give ' + toolName(k), () => devmodeDo('Career: give ' + toolName(k), () => (toolGive(k), 'You have ' + toolName(k) + ' now.'))]));
 }
+// ---- the Speed card (optimization pass #8, the render seat RN1; plans/opt-plan.html) ----
+// The Speed tab shows how the game runs on this phone, to read out or screenshot: the screen's size in CSS pixels and
+// its pixel ratio (and every size seen since the page opened, so folding or turning the phone shows both), how long
+// opening took, frames a second, a frame's game code and the time handing the picture to the graphics chip, draw calls,
+// shaders, memory, and the last deck change. Measuring only, and only with the Dev link: three wrappers (around the main
+// loop's frames, renderer.render and goToDeck), installed only in Dev mode, call the same functions with the same
+// arguments and change nothing they do. The graphics chip's own drawing time can't be read from a web page: a low
+// rate with little game code means the chip is the limit. Nothing here calls R().
+const DM_SPEED = { fr: [], k: 0, render: 0, calls: 0, tris: 0, first: 0, ready: performance.now(), deck: null, sizes: [], drawn: 0 };
+function devmodeSpeedSize() {                            // a new screen size or ratio joins the list (folding, unfolding, turning)
+  const k = innerWidth + ' x ' + innerHeight + ' at ' + (Math.round(devicePixelRatio * 1000) / 1000);
+  if (!DM_SPEED.sizes.includes(k)) { DM_SPEED.sizes.push(k); if (DM_SPEED.sizes.length > 8) DM_SPEED.sizes.shift(); }
+}
+if (DEVMODE) {
+  const now = () => performance.now(), rr = renderer.render.bind(renderer), raf = window.requestAnimationFrame.bind(window), go = goToDeck;
+  renderer.render = (sc, cam) => {
+    const a = now(); rr(sc, cam); const b = now(); DM_SPEED.render += b - a;
+    DM_SPEED.calls = renderer.info.render.calls; DM_SPEED.tris = renderer.info.render.triangles;
+    if (!DM_SPEED.first) DM_SPEED.first = b;
+    const d = DM_SPEED.deck; if (d && !d.first) d.first = b - d.at;
+  };
+  window.requestAnimationFrame = cb => cb !== loop ? raf(cb) : raf(t => {   // the main loop's frames only
+    const a = now(); DM_SPEED.render = 0; cb(t); const b = now();
+    const F = DM_SPEED.fr, row = [t, b - a, DM_SPEED.render]; if (F.length < 240) F.push(row); else F[DM_SPEED.k] = row; DM_SPEED.k = (DM_SPEED.k + 1) % 240;
+    if (DM_UI.open && DM_UI.tab === 'speed' && b - DM_SPEED.drawn > 1000) devmodeSpeedText();
+  });
+  goToDeck = function (...args) { const a = now(), r = go.apply(this, args); DM_SPEED.deck = { n: deckDef && deckDef.num, ms: now() - a, at: now(), first: 0 }; return r; };
+  devmodeSpeedSize(); addEventListener('resize', devmodeSpeedSize);
+}
+function devmodeSpeedLines() {
+  const S = DM_SPEED, f1 = v => (Math.round(v * 10) / 10).toFixed(1), s2 = v => (v / 1000).toFixed(2) + ' s';
+  const F = S.fr.slice().sort((x, y) => x[0] - y[0]), L = [];
+  const o = innerWidth > innerHeight ? 'held sideways' : 'held upright';
+  L.push('Screen: ' + innerWidth + ' x ' + innerHeight + ' CSS px, pixel ratio ' + devicePixelRatio + ' (the game draws at ' + renderer.getPixelRatio() + '), ' + o);
+  L.push('Seen since opening: ' + S.sizes.join('; '));
+  const nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+  L.push('Opening: the page read ' + (nav ? s2(nav.responseEnd) : '?') + ', the game set up ' + s2(S.ready) + ', the first picture ' + (S.first ? s2(S.first) : '?') + ' after you opened the link');
+  if (F.length > 10) {
+    const gaps = []; for (let i = 1; i < F.length; i++) if (F[i][0] - F[i - 1][0] < 1000) gaps.push(F[i][0] - F[i - 1][0]);
+    const q = (a, p) => { const b = a.slice().sort((x, y) => x - y); return b[Math.min(b.length - 1, Math.floor(b.length * p))] || 0; };
+    const code = F.map(r => r[1] - r[2]), hand = F.map(r => r[2]), med = q(gaps, .5);
+    L.push('Frames: ' + (med ? Math.round(1000 / med) : '?') + ' a second (' + f1(med) + ' ms apart; the slowest 1 in 20: ' + f1(q(gaps, .95)) + ' ms; worst ' + f1(q(gaps, 1)) + ' ms), over the last ' + F.length + ' frames');
+    L.push('Game code a frame: ' + f1(q(code, .5)) + ' ms (1 in 20 over ' + f1(q(code, .95)) + ', worst ' + f1(q(code, 1)) + ')');
+    L.push('Handing the picture to the graphics chip: ' + f1(q(hand, .5)) + ' ms (worst ' + f1(q(hand, 1)) + ')');
+  } else L.push('Frames: keep the panel open a few seconds');
+  L.push('Draw calls: ' + S.calls + ' (the budget is 450), triangles ' + Math.round(S.tris / 1000) + ' thousand');
+  const m = renderer.info.memory, hp = performance.memory ? Math.round(performance.memory.usedJSHeapSize / 1048576) + ' MB' : 'not shown by this browser';
+  L.push('Memory: ' + m.geometries + ' shapes, ' + m.textures + ' textures, ' + renderer.info.programs.length + ' shaders, game memory ' + hp);
+  const d = S.deck; L.push(d ? 'Last deck change: ' + deckWord(d.n) + ' built in ' + Math.round(d.ms) + ' ms, the first picture ' + (d.first ? Math.round(d.first) + ' ms' : '…') + ' after it' : 'Last deck change: none yet (take the lift to time one)');
+  L.push('Build ' + GAME_BUILD + ', ' + (deckDef ? deckWord(deckDef.num) : '') + ', ' + clockText());
+  return L;
+}
+function devmodeSpeedText() {                            // the card's lines, refreshed in place once a second while it's open
+  DM_SPEED.drawn = performance.now();
+  const el = DM_UI.el && DM_UI.el.querySelector('#dmSpeed'); if (!el) return;
+  el.textContent = devmodeSpeedLines().join('\n');
+}
+function devmodeSpeed(body) {
+  devmodeText(body, 'How the game runs on this phone. Screenshot it, or Copy and paste it to us. Fold, unfold or turn the phone and it adds the new size.');
+  const pre = document.createElement('p'); pre.id = 'dmSpeed'; pre.style.whiteSpace = 'pre-wrap'; pre.style.fontVariantNumeric = 'tabular-nums'; body.appendChild(pre);
+  devmodeRow(body, [['Copy', b => { const t = devmodeSpeedLines().join('\n'); try { navigator.clipboard.writeText(t).then(() => { b.textContent = 'Copied'; }, () => { b.textContent = 'Copy failed'; }); } catch (e) { b.textContent = 'Copy failed'; } }],
+    ['Start again', () => { DM_SPEED.fr = []; DM_SPEED.k = 0; devmodeSpeedText(); }, { aria: 'Forget the frames so far and measure from now' }]]);
+  devmodeSpeedText();
+}
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----
 
@@ -53179,6 +53321,7 @@ function loop() {
   discFrame();                                           // section 23b: a game of Lightdisc on the court (0.82.0), frozen or not
   camera.updateMatrixWorld(); bubbles.place();           // 0.47.9: the speech bubbles, with this frame's camera (they shook on phones)
   renderer.render(scene, DISC.cam || camera);
+  keepShaders();                                         // section 1: compiled shaders kept across deck changes (opt #4)
   requestAnimationFrame(loop);
 }
 drawScreen(0); applyLight(0); loop();

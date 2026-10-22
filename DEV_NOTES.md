@@ -1528,6 +1528,32 @@ with
 - Lamps (0.27.10): `lamps(t)` runs in the main loop right after `applyLight` (which resets the lamps every frame); while any of the deck's `lights` machines flickers, lamps 0, 3, 6, ... (and 1, 4, 7, ... at full flicker) drop to 15% at moments picked by a hash of the time.
 - Shower spray (0.27.10): the deck's `shower` places; for each one `placeBusy`, 12 streaks (3-sided, r .012, .28 long, see-through) fall from 1.9 m round the spot. Weak water: `shipSystems()` water or heat under 50 gives 7 streaks and cuts out 45% of the time; under 25, 4 streaks and 60%. Cabin wash pods are closed boxes, so the spray mostly shows in the open stalls of the washrooms.
 
+## Shaders kept across deck changes (section 1, the render seat RN1, optimization pass #4)
+
+- `keepShaders()` (section 1), called by the main loop right after `renderer.render`, adds one use (`usedTimes`, a three r128 internal) to every shader program the first time it exists, so disposing a deck's materials never deletes a program and the next deck's materials with the same key reuse it. 22 programs in all, reached after one lap of the decks at phone portrait and landscape. If three.js is ever upgraded, check `renderer.info.programs` and `usedTimes` still exist.
+- **Timing a frame in our test browser needs a real wait.** `gl.finish()` returns at once in this Chromium with SwiftShader, so a frame's drawing is billed to whichever later call syncs (a buffer upload, a shader compile). Probes that time one frame wait with `gl.readPixels` of one pixel after it (`plans/opt-probes/keep_true.py`, `buf_true.py`). Without it, day_check's drawing looked like crowd uploads (plans/opt-measure.md section 5).
+
+## The Dev mode Speed card (section 25, the render seat RN1, optimization pass #8)
+
+- **What it is:** a seventh Dev mode tab, Speed, there only with the Dev link (#dev). It shows how the game runs on the phone in hand:
+  - the screen in CSS pixels and its pixel ratio, and every size seen since the page opened, so folding, unfolding or turning the phone lists each one;
+  - how long opening took: the page read, the game set up, the first picture;
+  - frames a second (median, the slowest 1 in 20, the worst);
+  - a frame's game code, and the time handing the picture to the graphics chip. The chip's own drawing time can't be read from a web page, so a low frame rate with little game code means the chip is the limit;
+  - draw calls (the 450 budget) and triangles;
+  - shapes, textures, shaders and JS memory;
+  - the last deck change (its build, and the first picture after it);
+  - the build and the ship time.
+  It has two buttons: Copy (the lines, as text) and Start again (forget the frames so far).
+- **How the user reads it on the TriFold:**
+  1. Open the Dev link.
+  2. Tap the gold card at the top, then Speed.
+  3. Wait a few seconds and screenshot it, folded.
+  4. Unfold, wait, screenshot again.
+  5. Take the lift once to time a deck change.
+  The screen sizes it shows replace perf_check's derived `TRIFOLD` table (`perf_check.py`) and plans/opt-measure.md "The trifold's sizes".
+- **How it measures:** only in Dev mode, by wrapping three things: the main loop's frames (`requestAnimationFrame` callbacks that are `loop`), `renderer.render` and `goToDeck`. Each wrapper calls the same function with the same arguments and only reads the clock. Without #dev nothing is wrapped or stored; devmode_check's off part checks that. Its card part checks the seven tabs and the card's first line. In the test browsers the clock is virtual, so the card's times read 0 there.
+
 ## Rules that keep it working
 
 Phones:
@@ -1640,7 +1666,7 @@ They checked:
 
 **mech_check.py** (0.44.0, frame by the Works career engineer; one part per mechanic by the mechanic engineers): `CADET_CHROME=/opt/pw-browsers/chromium python3 mech_check.py BUILD.html [ID ...]`. For each ladder row whose sub-block is in the build: its training end to end, stage 0 once trained, the same twice; then the mechanic's own part (`PARTS[id]`). Rows not in the build are listed, not failed.
 
-**perf_check.py** (the performance engineer, Pillar 4's phone-speed watchdog): `CADET_CHROME=/opt/pw-browsers/chromium python3 perf_check.py NEW.html [OLD.html]` (about 5 minutes per build) measures the busy moments on phone views (portrait 390×844 at zoom 1.5 and 0.7, landscape 844×390 at 1.15): draw calls (budget 450), triangles, milliseconds of game code a frame (rendering skipped: SwiftShader can't say how fast a phone draws) and crew on the deck, then memory over three deck round trips. With OLD it marks regressions (calls up over 10% and 25, game code up over 30%, memory growing). Scenes are a list at the top (`SCENES`); add one when a tradition or moment lands. Baseline at 0.41.10: everything under 450; the busiest is the junior common room zoomed out on a portrait phone (428), then the bow lounge at quiz night (378); game code at most about 3 ms a frame (the mess at Sunday dinner, 68 people).
+**perf_check.py** (the performance engineer, Pillar 4's phone-speed watchdog): `CADET_CHROME=/opt/pw-browsers/chromium python3 perf_check.py NEW.html [OLD.html]` (about 11 minutes per build alone on 0.64.8; more with the event scenes switched on, since each busy one adds four TriFold views) measures the busy moments on phone views (portrait 390×844 at zoom 1.5 and 0.7, landscape 844×390 at 1.15): draw calls (budget 450), triangles, milliseconds of game code a frame (rendering skipped: SwiftShader can't say how fast a phone draws) and crew on the deck, then memory over three deck round trips. With OLD it marks regressions (calls up over 10% and 25, game code up over 30%, memory growing). Scenes are a list at the top (`SCENES`); add one when a tradition or moment lands. Each view records the room you really stand in and fails if it isn't the scene's room (TS2, opt item 0: until then `nearestOpen` was given a tile instead of a position, and 6 of 8 scenes measured the next room over, so baselines before it compare only with each other). Baseline at 0.64.8 in the right rooms: everything under 450; the busiest is the mess hall at Sunday dinner zoomed out on a portrait phone (418, 69 people), then breakfast in the mess (409) and quiz night in the bow lounge (396); game code at most about 2.2 ms a frame. **The busy event scenes (RN1, optimization pass):** a scene can carry `on: [switches]` (measured on a copy with each `const NAME = false;` made true by text; a switch the build doesn't have prints SKIP), `busy: True` (also the user's Galaxy Z TriFold, folded and open, both ways up: the `TRIFOLD` table, sizes derived from the panels until the Dev Speed card reads the real ones), `cells: True` (FR3: the room's own open tile nearest its middle) and `needs` (JS; false prints WAITING, for a moment not built yet). The Captain's address, the lift lobby after it and the Friday dinner (SHORT_FRIDAY), the lantern supper and the all-clear party (EVENTS_ON), the Line ceremony and supper (EVENTS_ON, EV_LINE_ON) and the Day 21 Tern arrival are in; switched on, all under 450, the busiest the two suppers in the mess zoomed out (419, 417: plans/opt-measure.md). `PERF_SCENES=regexp` runs only those scenes (case matters) and no memory runs, for a quick look while building an event; the check itself is the full run. The storm's two scenes also need `EV_STORM_ON` (they print WAITING without the storm update). The last line counts the scenes skipped and waiting.
 
 **path_check.py** (the performance engineer, 0.27.29): `CADET_CHROME=/opt/pw-browsers/chromium python3 path_check.py GAME.html [PAIRS]` (about 5 minutes) checks that `findPath` (the heap search) finds exactly the same paths as `findPathScan` (the old scan), tile for tile, including every failure. It runs PAIRS (default 3000) random searches on every deck, then compares every real call of a played Monday as it happens. Run it whenever section 7, `free`, `edgeOpen` or `edgeBlocks` change. Good is PATH CHECK OK.
 
