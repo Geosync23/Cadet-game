@@ -265,7 +265,7 @@
 
 == note
 ? tier>=friend
-- Called by. You were out. Correctly: it's your evening. See you at 06:05.
+- Called by. You were out. Correctly: it's your evening. See you at 07:05.
 - The waiting list moved. You're eighth. Don't let it go to your head.   #funny
 
 == smalltalk
@@ -276,7 +276,7 @@
 - For your information only.
 
 // Writer 4, batch 14: Vance's ordinary weeks, after week one. Mostly not work: the treadmill and rowing boards, the
-// good records and their waiting list, books, sweets, tea at 06:05, Gull (only as a reader with opinions), juniors.
+// good records and their waiting list, books, sweets, tea at 07:05, Gull (only as a reader with opinions), juniors.
 // Gates kept: no father or messages before beat:vance.3; never admits Gull before beat:vance.5; never late; no swearing.
 
 == greet
@@ -298,7 +298,7 @@
 ? tier>=acquaintance !week1:true
 - Did you read Gull this week? "Oh corridor, thou long and grey." Two errors of metre.   #funny
 - The good records. A waiting list exists for a reason. The reason is me.   #funny
-- Breakfast at 06:05. Porridge, toast, a small biscuit. The biscuit is not regulation.   #funny
+- Breakfast at 07:05. Porridge, toast, a small biscuit. The biscuit is not regulation.   #funny
 - I read on my rest days. Old naval histories. And, once, a mystery. Don't tell Achterberg.   #funny
 - Lindqvist set a treadmill time yesterday. I've studied it. Respectfully. Closely.   #funny
 - Rest day tomorrow. I've planned it to the minute. Most minutes say "nothing".   #funny
@@ -320,7 +320,7 @@
 
 == near
 ? act:breakfast !week1:true
-- 06:05. Porridge. The biscuit. Don't look at the biscuit.   #funny
+- 07:05. Porridge. The biscuit. Don't look at the biscuit.   #funny
 ? act:gym !week1:true
 - Treadmill. Five kilometres. Then I'll pretend not to look at the board.   #funny
 ? act:dinner !week1:true

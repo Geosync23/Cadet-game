@@ -495,7 +495,7 @@ introduces them), unless noted.
 | "Calder is the clock" (Works joke); in Teague's comic she's a very tidy cloud who says "Fair." | Works | writer-works, batch 2 |
 | The Veyli like their cabins warm | the delegation | writer-commons, reactions |
 | Captain Varga started the portrait gallery | Marrow | writer-command, batch 3 |
-| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 06:05 | Vance | writer-command, batch 3 and arcs |
+| Vance's regulations: six (shoes off in cabins), nine (rest), eleven section two (leave at port on request); he breakfasts at 07:05 (06:05 until patch 1) | Vance | writer-command, batch 3 and arcs |
 | Tomas is fourth on Vance's treadmill board | Vance, Tomas | writer-command, batch 3 |
 | The blue crate in the Works bay is Calder's (don't sit on it) | Works | the voice bible; Moleth asks about it |
 | Saruth: "Do not bow. Most of you do it wrong."; humans knock twice; the cord tied loose means "you are expected"; Saruth respects Holt's plain distrust as "a kind of honesty" | Saruth | writer-command, batch 3 |
