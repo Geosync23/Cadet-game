@@ -102,7 +102,7 @@ Layout principles:
 
 The daily loop spans three decks: sleep on Deck 4, eat on Deck 3, work from Deck 5. The lift is part of the core from the first playable build.
 
-**The spine.** A vertical core runs through all six decks with the main lift, a maintenance ladder and the main power and air trunks. The trunks and ladder can be seen behind glass beside the lift. Service crawlways branch off it on every deck. Crawlways have low ceilings, so you crouch-walk through them.
+**The spine.** A vertical core runs through all six decks with the main lift, a maintenance ladder and the main power and air trunks. The trunks and ladder can be seen behind glass beside the lift. Every deck's ladder room can be walked into (the user, playtest patch 1, note 15, 2026-10-22): a sliding door where the hatch was, and room to stand beside the ladder; you tap the ladder there to climb, and a climb lands you in the ladder room. Service crawlways branch off it on every deck. Crawlways have low ceilings, so you crouch-walk through them.
 
 **The lift.** The lift car is a walkable room on every deck: 2 × 3 tiles, big enough for a hover cart, with one wide door on each side. You step in, press the deck panel on its back wall, and ride. **Two panels** (the user, 0.60.7): a second panel on the opposite wall, so one is always in view whichever way you're looking; you walk to the nearer one. When the goal arrow is showing you somewhere, the panel marks that deck's button with an arrow and what it's for ("Your goal: fetch a relay"), and says so if the goal is on the deck you're on (0.60.6a). Every deck is placed so the lift sits at the same spot, so the spine lines up from deck to deck.
 

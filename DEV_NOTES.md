@@ -1399,6 +1399,7 @@ The trunks run up behind the car's back wall. A deck with room above the car (De
 - **`spineTrunks` and `spineLadder`** each fill exactly one row beside the car (on Deck 4 the trunks sit in row 7, just above it), placed with their back to the car (`'n'` for both). That's why they line up. Decks with more spine room add their own fittings around them, as Deck 4 does with `trunkJunction` and `harnessRack`.
 - **Tap text** is shared from `SPINE_IT`.
 - **`#` rooms are still solid spine** wherever a deck has spine beyond those rows.
+- **The ladder rooms are open** (note 15, playtest patch 1, LR1): each deck's ladder hatch is a sliding `door` (Deck 5's set by section 15's `LADDER.d5`), the ladder kit's well is narrow and its cage starts at 2.1, and the tile on the far side of the well is blocked by the ladder placement's `block`. `LADDER_ROOMS` (4d's slot) names each deck's door and the stand tile beside the ladder; `ladderStand()` returns it (null on a deck without one). Section 15's ladder walks you there and lands you there. No crew places in Z, so crew paths don't change.
 
 
 ## Kit added in 0.5.x (4b)
