@@ -322,6 +322,19 @@ with sync_playwright() as pw:
     check(nt[0] == 'sit' and nt[1] is False and nt[2] is False and nt[4] <= 0 and nt[5] is False, f'sitting at a mess table without a meal: just sitting, no tray, no food: {nt}')
     check(wt[0] == 'eat' and wt[1] is True and wt[2] is True and wt[3] is None and wt[4] > 1, f'with a tray from the servery: it goes on the table and food rises as you eat: {wt}')
 
+    print('A tray at any seat (fix-eat: the fresh-eyes player, Day 0, sat at the long table and in the lounge and never ate):')
+    anyseat = []
+    for sid in ('3-longtable-1', '3-lounge-1', '3-mess-1'):
+        g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 3) goToDeck(3); needsT = null; SHIP.player.tray = 'Test soup'; SHIP.player.needs.hunger = 40;
+          const s = placeSpot('{sid}'); if (!s) return null; const at = new THREE.Vector3(s.x, 0, s.z); return sitTap({{ t: 'Seat', x: '' }}, at, at); }})()""")
+        for k in range(200):
+            g.step(10)
+            if g.ev("!ACT || ACT.phase === 'do'"): break
+        h0 = g.ev("SHIP.player.needs.hunger"); r0 = g.ev("[ACT && ACT.kind, ACT && !!ACT.o.fed, SHIP.player.tray]"); g.step(150)
+        anyseat.append([sid] + r0 + [round(g.ev("SHIP.player.needs.hunger") - h0, 1)]); g.ev("actEnd(true); SHIP.player.tray = null")
+    print('  [seat, activity, fed, tray in hand, food change]:', anyseat)
+    check(all(r[1] == 'eat' and r[2] is True and r[3] is None and r[4] > 1 for r in anyseat if g.ev(f"!!placeSpot('{r[0]}')")), f'with a tray, a tap on any seat eats it (the long table, the lounge, a mess seat): {anyseat}')
+
     print('Need warnings (0.28.41):')
     wn = json.loads(g.ev(r"""(() => { const n = SHIP.player.needs, out = [], te = document.getElementById('toast');
       let t = performance.now() + 1e6;
