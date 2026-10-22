@@ -64,7 +64,14 @@ CP1 found 3 FAILs on 0.90.9 (touch, pick's crowded seat, day): all the check's r
 counts the message box but doesn't compare its text/classes (hidden welcome text vs "Controller connected"); the day's
 lift picks the deck button by DECK_ORDER (labels are deckLabel now); walk_to presses B when a panel opens on the way
 (ladder hatches); the crowded mess tried at 07:20/07:40/08:00/08:20. The sweep's SKIP {'#newgame'} dropped (gone in 0.91.0).
-Runs on 0.90.9 then 0.91.0 (touch alone, day, pick) were in progress at this writing: logs in the scratchpad logs/g9, logs/g10.
+Results on the 0.64.17-based 0.90.9 (54a5c5a8) and 0.91.0 candidate (e27b8bfe): touch OK (+3/3 faults), pick OK; day: talk,
+the job board, bedtime OK; breakfast FAILS: "the lift panel never opened": by the lift door the ring says "Lift" but A
+walks you south and the ladderPanel opens (A's point reaches a ladder hatch on 0.64.17's ladders): a controller finding,
+sent to CP1. Then the user rolled back 0.64.17's breakfast: the controller is redone on 0.64.16 (CP1's 4514f19a, not
+pushed at this writing). Next: run touch (alone), pick, day on it; fixes must pass on both (breakfast comes back).
+Also since: the day's lift button found by its label (deckLabel's rule, 'R' for deck 7: DECK_ORDER/deckLabel live in a
+script the check can't reach); the ride waits up to 20 s for the lift panel and says so if it never opens.
+CTT3 (session_0197zJtQyLkNz6dxc3NgoNgy) has taken over the reach sweep (lead 29).
 Send the results and the commit to CP1 and BM14 (session_016mhGtsCxEgPCFn9C767yjq); BM14 builds 0.91.0 on CP1's 0.90.9.
 The reach sweep on 0.90.8 (stopped partway): its pad half missed Roster, two Tracked rows, Calendar's 2nd "Don't" and
 the Maps plan svg. CP1 showed all four buttons are reachable (the zigzag covers a dozen rows only): now a second chance
