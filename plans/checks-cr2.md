@@ -118,3 +118,19 @@ Split by agreement (copied to lead 28 and BM13): path, arc, lines, lines --day �
 |---|---|---|
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | known old only (backlog 14) | `memory grows across deck round trips` 521 → 521 → 523. First run also `the Line supper, the mess Sun 18:30 trifold-open-turned: js 2.05 -> 3.08 ms`; **re-measured: doesn't repeat** (OLD 2.27, NEW 2.04 ms; `PERF CHECK: 1 problem(s)`). Third round running with a one-off spike in a different scene. |
+
+# Round 6: 0.64.17 (claude/integration-next 8193458e, breakfast at 07:00, 2026-10-22), CR2's share — **OK**
+
+NEW 8193458e, sha256 `225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5` (matches BM13's).
+OLD claude/integration b9f053ba (0.64.16), sha256 `70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7`.
+Order this time: cadet_test first (alone), path, arc, lines, intro, perf, lines --day. Results to BM14 and lead 29.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW | DIFFERENCES, expected | Breakfast's moved mornings: needs and taps differ from tap1 on ("Very hungry" / "Bursting" vs the old), walks, state tris, state_end; g_nocrew only 149 px; no page errors (A [] B []). RV3 proved ALL IDENTICAL with patch F's section 14/16 code reverted. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check NEW OLD | OK (accepted baseline + backlog 32) | `the Line ceremony, bow lounge Sun 14:45 portrait: draw calls 301 -> 335` (49 people, was 59; every view up ~20-34), repeats exactly on the re-run. **Lead 29 accepts it as 0.64.17's new baseline**: perf_check stands you on the free tile nearest the room's middle, which with breakfast's crowd is (44,10) not (46,9), so the camera sits ~2 m aft and the mess, galley and spine come into view (SC1's finding; under 450; backlog LEAD29-1: a fixed tile per scene). One-off js spikes, a different scene each run (backlog 32): all-clear party portrait 1.55 → 3.16 ms (run 1, gone in run 2), quiz night portrait-wide 1.79 → 2.85 ms (run 2 only). Backlog 14's +2 geometries didn't show this time (521/521/521 both runs). |
+| lines_check --day | OK | PASS (0 errors) |
