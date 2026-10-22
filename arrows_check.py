@@ -261,7 +261,7 @@ FOLLOW = r"""(() => {
     if (card && want) { const i = bs.findIndex(b => b.textContent.trim() === want); if (i >= 0) k = i; }
     const t = bs[k].textContent; bs[k].click(); return (card ? 'card: ' : 'reply: ') + t;
   }
-  if (typeof pointNow === 'function') { try { const p = pointNow(); const el = p && p.el && p.el(); if (el && el.offsetParent !== null) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }
+  if (typeof pointNow === 'function') { try { const el = pointNow() && POINT.aim; if (el && el.isConnected && !document.getElementById('ptr').hidden) { el.click(); return 'pointer: ' + (el.textContent || '').slice(0, 30); } } catch (e) { /* piece C */ } }   // pointNow() is the shown pointer's id; POINT.aim its button
   if (ACT) return null;
   const cs = document.getElementById('clockScreen');
   if (cs && !cs.hidden && getComputedStyle(cs).display !== 'none') {
