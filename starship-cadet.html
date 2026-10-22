@@ -13253,7 +13253,7 @@ function bunkTap(it, at) {
 const LIE_GAIN = .05;                                    // energy a ship minute lying down: 3 an hour
 function bunkLie(id) {
   const sick = typeof sickNow === 'function' && sickNow(), night = typeof bedtime === 'function' && bedtime() || sick;   // unwell: you sleep it off, by day too (0.61.5)
-  actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'You lie down for a rest. Tap anywhere to get up.' });
+  actStart('lie', id, { title: 'Your bunk', sleep: night, after: sick ? 'You crawl into your bunk and close your eyes.' : night ? 'You climb into your bunk and pull the blanket up.' : 'Too early to sleep: you can turn in from 20:00. You lie down for a rest; tap anywhere to get up.' });   // the fresh-eyes playtest (lead 28): say why it's not sleep
 }
 // the Thursday inspection's berth (Pillar 5, m3): on an inspection morning (Thursday 05:30-08:00, not unwell) a tap on
 // your bunk asks: Make the bed (SHIP.player.bedMade = the day; saved; cleared when you next sleep in it), Tidy your locker
