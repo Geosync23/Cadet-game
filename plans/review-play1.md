@@ -45,9 +45,24 @@ Notes (no change needed):
 - The first morning a day there can be one more toast than the reminders (section 20's own in-bay toast and tips), as CK1 says; they're spaced 5.6 s apart at least.
 - Owner review: section 15 is the player engineer's; J sits in that seat's slot. The lead may want PB2 (or whoever holds that seat) to glance at it.
 
-## E. Ladder taps and the rower (notes 14, 16), LD1: claude/patch-play1-e
+## E. Ladder taps and the rower (notes 14, 16), LD1: claude/patch-play1-e 7e26050e
 
-(waiting for the tip)
+**Verdict: PASS** (two notes for the lead, one owner look).
+
+The first tip sent, e36549af, had no game change (only the build-table row and two PNGs); LD1 re-pushed 7e26050e, whose game file is sha256 3b33cb34...9d85a9c as reported. Sections: 4b (+14, the rower's mover), 15 (+29, the ladder block: ladderAimed, ladderAt, ladderRoom; ladderTap and ladderStep), 11 (one line in tap()). No map, path or deck data. No design-doc change (behaviour fixes, no new decision). No build-number lines.
+
+Driven in the browser (390 x 844), real screen taps through section 11's tap() at the ladder's rungs, 0.6, 1.5, 2.0 and 2.5 m up, from a few tiles away, on Decks 1-6:
+- Note 14: the ladder panel opened **17 of 24** (old build 32b699a6: 1 of the first 14, the rest walked you to the floor). Misses: the 0.6 m taps on Decks 1, 2, 4, 5 and 6 (they land on the lobby's low wall in front, which is a walk as before), and Deck 5 at 1.5 and 2.0 m (the lift brake stands in front and gets the tap: "Lift brake"). LD1's judgement call 2 says so.
+- Note 16: rowing on Deck 3's gym rower (you, `sit:row`): the hands move about 0.7 m along the rower over a stroke; LD1's six-frame strip (plans/patch-play1-e/rower-after.png) shows the handle in the hands in every frame (before: drifting out of them). LD1 measured within 0.01 m for you and crowd rowers.
+- With H merged (LR1's d0f96def; a test merge, only plans/build-table.md clashes): taps 17 of 24 again; a rung tap on Deck 4 walks you into the ladder room (ladderStand's tile) and opens the panel; climbs 4->2, 2->6, 6->5, 5->1 land on each deck's ladderStand tile, in the ladder room.
+- No console errors.
+
+Checks I ran on 7e26050e: cadet_test against 32b699a6 **ALL IDENTICAL**; check_fast **QUICK CHECK OK** (463 s); interactions_check **OK**; player_check **OK**.
+
+For the lead:
+1. Deck 5: the lift brake in front of the ladder takes taps at 1.5-2.0 m; only the top of the ladder opens the panel there. Fine by the rule "what's in front wins", but it's the deck the user works on. Possibly revisit after H (LR1) opens the room.
+2. LD1 offered a standing ladder-tap part for interactions_check; nothing checks note 14 today. Worth a backlog row (or a small follow-up), not a blocker.
+3. Owner: the rower's mover is in 4b (the deck architect's); it reads section 15's ACT.body and section 10's DECK_CREW at run time, typeof-guarded, falling back to the old swing.
 
 ## F. Breakfast at 07:00 (note 18), SC1: claude/patch-play1-f
 
