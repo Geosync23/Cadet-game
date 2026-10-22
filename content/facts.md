@@ -31,7 +31,7 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
 - **Out of the windows** (the Wren's route; the user's pick, 2026-10-20, via EW1): **the Pale Shoals**, a pale smudge of
   dust behind us ("we left them six weeks ago" on Day 1), and **Tavessa**, a star cluster the Veyli named, dead ahead past
   the Line (crossed into the Veyli reach on Day 7). Raman names both at First Light Cocoa. Ask before adding more.
-- **Time:** a ship day is 18 waking hours of play; breakfast 06:00-09:00 (seat X, playtest 1: the night shift eats at 06:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
+- **Time:** a ship day is 18 waking hours of play; breakfast 07:00-09:00 (the user's playtest notes, patch 1; it was 06:00-09:00 from seat X, playtest 1: the night shift now showers, then eats at 07:00), 09:00 shift, dinner 17:00-20:30 (design-doc). The day shift runs
   09:00-17:00 (the user, playtest 1); Calder's briefing at ten to nine; the night shift is its own world (Bunk 8, the inner cabins). Tea and biscuits at 13:00 in the Works tea corner (replaced the half-ten tea, playtest 1).
 - **The ship's year:** 364 days, 52 weeks, Day 1 a Monday. Four seasons named for the garden: **Sowing** (days 1-91),
   **Greening** (92-182), **Harvest** (183-273), **Lanterns** (274-364). You arrive on **Day 0**, a Sunday, the last evening
