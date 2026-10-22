@@ -12728,7 +12728,7 @@ function pointLiftStep() {                               // a watcher: ask when 
 const POINT_WATCH = [pointLiftStep];
 function pointWatchStep() {
   requestAnimationFrame(pointWatchStep);
-  for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); POINT_WATCH.splice(i--, 1); }
+  for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); console.warn('pointer watcher dropped:', e); POINT_WATCH.splice(i--, 1); }
 }
 if (POINT_ON) requestAnimationFrame(pointWatchStep);
 // a tap on the pointer's own button (a step with no open: the one to press) ends it; the tap itself goes on as normal
@@ -48636,8 +48636,8 @@ function f3CaseWatch() {
   const tried = c.clues.filter(k => c.got.includes(k.id)).flatMap(k => k.kills || []).find(s => c.sus.includes(s) && !c.crossed.includes(s) && !c.known.includes(s));   // a found note rules it out
   const can = c.sus.filter(s => !c.crossed.includes(s) && !c.known.includes(s));
   if (tried) pointAsk({ id: 'p:case:cross', once: 1, path: [{ el: () => buttonFor(A('cross', tried)), label: worksText('case.point.cross', 'Cross out what was tried') }], done: () => !onNotes() || c.crossed.includes(tried) });
-  else if (left && !CASE_UI.ask) pointAsk({ id: 'p:case:next', once: 1, path: [{ el: () => buttonFor(A('next', 0)), label: worksText('case.point.next', 'Where next? The next clue') }], done: () => !onNotes() });
   else if (can.length === 1 && !c.long && !CASE_UI.ask && !c.calls.length) pointAsk({ id: 'p:case:call', once: 1, path: [{ el: () => buttonFor(A('call', can[0])), label: worksText('case.point.call', 'Only one left: call it') }], done: () => !onNotes() || c.calls.length > 0 });
+  else if (left && !CASE_UI.ask) pointAsk({ id: 'p:case:next', once: 1, path: [{ el: () => buttonFor(A('next', 0)), label: worksText('case.point.next', 'Where next? The next clue') }], done: () => !onNotes() });
 }
 if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(f3ScanWatch, f3CaseWatch);
 // ---- end of slot: Puzzles seat ----
@@ -48889,9 +48889,12 @@ function incGoalClear() {
 // what it is ("Close the valve upstream of the wet", "Mop up (1 of 2)"); on the valve card, the first time, a pointer on
 // the valve nearest the wet (piece C, POINT_ON)
 const incGuide = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
+const INC_NEAR = 4;                                      // tiles: closer than this to the teacher, the arrow goes on to the pipe
+const incWho = id => incGuide() && typeof guideWho === 'function' ? guideWho(id) : worksFirst(id);   // RV6: one name with the queue on ("Calder"); off, as before
 function incGoalNow(q) {
   const g = q.g; if (!q.by || typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num === g.deck) return g;
-  const a = DECK_CREW.find(x => x.p && x.p.id === q.by); return a ? { ...g, deck: deckDef.num, crew: q.by } : g;
+  const a = DECK_CREW.find(x => x.p && x.p.id === q.by), p = player.obj.position;   // RV6: beside her, onward (she may wait at the lift)
+  return a && Math.hypot(a.x - p.x, a.z - p.z) > INC_NEAR ? { ...g, deck: deckDef.num, crew: q.by } : g;
 }
 function incStopWord(j, k) {
   if (!incGuide() || j.inc !== 'burst' || j.walk) return null;
@@ -48936,7 +48939,7 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
-    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) }, c && c.by);   // FX3: with her, not the office
+    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: incWho(c && c.by || 'calder'), deck: O.deck }) }, c && c.by);   // FX3: with her, not the office
     if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
@@ -48961,7 +48964,7 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
+    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: incWho(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
   }
   if (O) {
