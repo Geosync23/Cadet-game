@@ -28,7 +28,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - **Each turn:** small exact-string edits to the build (never rewrite the whole file), bump the build number in the HUD, add a row to the build table in DEV_NOTES, run the tests, commit and push.
 - **Determinism and regressions** (details in DEV_NOTES "Rules that keep it working"): shared kit made at load never calls `R()`; regressions on unchanged decks must be pixel-identical, and when they aren't, find out why before moving on.
 - **Phones first:** no coplanar surfaces, every colour through `col()`, watch draw calls.
-- **Full tests on every change (the user, 2026-10-22).** Every game change runs the full round of checks (split across check runners to save time) before it is merged or published. The test picker in tools/ stays for quick feedback while working, but never replaces the full round.
+- **Full tests on every change (the user, 2026-10-22).** Every game change runs the full round of checks before it is merged or published, always split across six check runners at once (about 30 minutes; the split and the steps are in plans/testing-guide.md). The test picker in tools/ stays for quick feedback while working, but never replaces the full round.
 - Keep `DEV_NOTES.md` current so a fresh session can pick up from it.
 - **Update `design-doc.md` when a design decision is made,** in the same commit as the work that depends on it: edit the section it belongs to, and move answered questions out of its Open questions.
 - The user is new to Claude Code and git: explain in plain language, no jargon. No emojis in anything for the user (the user, 2026-10-21).

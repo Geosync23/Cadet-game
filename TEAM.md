@@ -518,3 +518,4 @@ PR9 keeps its probes, day 5/19/21 and the mutants, then collates the final verdi
 | CT1 controller | session_019sqDowb6QNf3KZAYMSx1jM | `claude/controller` | plan now; build 0.90.x after approval |
 | CS1 crew stories | session_01QcPAXHjQZ2HfZKMCTbaW9v | `claude/crew-stories-pitch` | pitch page |
 **~01:40 UTC, the user:** "We just need to keep testing fully." → **every game change runs the full round** before merge/publish (split across check runners). The test picker stays only as a quick aid while working. TS3 updates DEV_NOTES/testing guide; TS3 still closes the six check gaps (they make the full round stronger). In CLAUDE.md.
+**~01:50 UTC, the user:** full round on every game change, **always six check runners at once** (~30 min). TS3 writes the six-way split and the runner steps into plans/testing-guide.md + DEV_NOTES + CLAUDE.md (integration). CR4-CR6 started on standby.

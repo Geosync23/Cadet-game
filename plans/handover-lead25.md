@@ -15,7 +15,7 @@ Lead 25 = session_01J2aTyEohBf8KFHCsTqt3LW, branch `claude/lead-25`. Took over 2
 - main and the published links change only for a passed build. PRs/merges to main only on the user's go.
 - Up to **14 active seats**; any number on standby.
 - Handover at about 65% memory (~650k), every seat; before that, hand over early if the next task would carry you past 65% (the user, 2026-10-22; replaces 500k/600k).
-- Full test round: before every release, whenever the coverage map is remade, and at least once a day. Between those, the test picker on option (a) "Careful".
+- **Full test round on EVERY game change, always split across SIX check runners (CR1-CR6) at once, about 30 min** (the user, 2026-10-22). Split table and runner steps: plans/testing-guide.md (TS3). The test picker is only a quick aid while working, never the gate.
 - Standing crowd limits are set by performance tests, not fixed guesses (the user, 2026-10-21).
 - Camera: 1.62 / 1.22 (0.64.12, the user asked 10-15% back from 1.85 / 1.40).
 
