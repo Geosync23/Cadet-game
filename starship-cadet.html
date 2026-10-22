@@ -51174,7 +51174,7 @@ class CrewAgent {
     this.face = idHash(p.id) % 628 / 100; this.pose = 'stand';
     this.path = []; this.spot = null; this.goalId = undefined; this.settled = false; this.talking = 0;
     this.stuck = 0; this.stuckMax = 0; this.lastX = this.x; this.lastZ = this.z; this.noPath = 0;
-    this.lx = 0; this.lz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace
+    this.lx = 0; this.lz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >>> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace (>>> since playtest 1, #17: >> made half the crew's hashes negative, lanes to -0.54 tiles, drawn through walls they walked beside)
     const bed = PLACE_OF.get(p.bed); this.bedRooms = bed ? [bed.room] : []; this.rooms = new Set(this.bedRooms);
     this.liftCell = (() => { const l = liftTiles(); return l.length ? l[idHash(p.id) % l.length] : cell; })();
   }
