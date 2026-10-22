@@ -150,12 +150,21 @@ def settle(p, n=40):
 def part_deck(pw):
     p = Pad(pw, ON)
     p.plug(); p.press('a'); p.log()
-    # walking: in each of the four view directions, each stick direction that moves you moves you that way on screen
+    # walking: in each of the four view directions, each stick direction that moves you moves you that way on screen.
+    # From the most open floor on the deck (a free tile with the most free tiles within two), so furniture rarely slides you
+    p.ev("""(() => { let best = null, bn = -1; for (let i = 2; i < W - 2; i++) for (let j = 2; j < D - 2; j++) { if (!free(i, j)) continue;
+      let n = 0; for (let a = -2; a <= 2; a++) for (let b = -2; b <= 2; b++) if (free(i + a, j + b)) n++; if (n > bn) { bn = n; best = [i, j]; } }
+      player.stop(); player.obj.position.copy(cellPos(best[0], best[1])); target.copy(player.obj.position).setY(.7); return best; })()""")
     for turn in range(4):
         p.ev(f'azT = az = Math.PI / 4 + {turn} * Math.PI / 2'); settle(p, 10)
         moved = 0
         for name, (sx, sy) in [('up', (0, -1)), ('right', (1, 0)), ('down', (0, 1)), ('left', (-1, 0))]:
-            a = p.ev(SCREEN); p.axes([sx, sy, 0, 0]); p.step(20); b = p.ev(SCREEN); p.axes([0, 0, 0, 0]); p.step(2)
+            a = p.ev(SCREEN); p.axes([sx, sy, 0, 0]); p.step(2)
+            # the way the stick asks you to walk, on screen: exactly the stick's way
+            ex, ey = p.ev("(() => { const s = player.steer, A = new THREE.Vector3(0, 0, 0).project(camera), B = new THREE.Vector3(s.x, 0, s.z).project(camera); return [(B.x - A.x) * innerWidth / 2, -(B.y - A.y) * innerHeight / 2]; })()")
+            en = (ex * ex + ey * ey) ** .5 or 1
+            check((ex * sx + ey * sy) / en > .999, f'deck: view {turn}, stick {name}: asks to walk the wrong way on screen ({ex:.1f}, {ey:.1f})')
+            p.step(18); b = p.ev(SCREEN); p.axes([0, 0, 0, 0]); p.step(2)
             dist = ((b[2] - a[2]) ** 2 + (b[3] - a[3]) ** 2) ** .5
             if dist < .3: continue
             moved += 1
@@ -164,7 +173,7 @@ def part_deck(pw):
             dx, dy = p.ev(f"(() => {{ const A = new THREE.Vector3({a[2]}, 0, {a[3]}).project(camera), B = new THREE.Vector3({b[2]}, 0, {b[3]}).project(camera); return [(B.x - A.x) * innerWidth / 2, -(B.y - A.y) * innerHeight / 2]; }})()")
             n = (dx * dx + dy * dy) ** .5 or 1
             dot = (dx * sx + dy * sy) / n
-            check(dot > .85, f'deck: view {turn}, stick {name}: walked the wrong way on screen ({dx:.1f}, {dy:.1f})')
+            check(dot > .5, f'deck: view {turn}, stick {name}: walked the wrong way on screen ({dx:.1f}, {dy:.1f})')   # loose: furniture slides you along
             # walking back where we came from keeps the test in the same room
             p.axes([-sx, -sy, 0, 0]); p.step(20); p.axes([0, 0, 0, 0]); p.step(2)
         check(moved >= 2, f'deck: view {turn}: the stick moved you in only {moved} of 4 directions')
@@ -200,7 +209,7 @@ def part_deck(pw):
     check(p.ev('padLayer()') is None, 'deck: nothing should be open at the end')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base)]
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue

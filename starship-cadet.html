@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.90.0
+   STARSHIP CADET: CSV Wren                           build 0.90.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8994,7 +8994,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.90.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.90.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -53238,7 +53238,7 @@ const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeat
 // live: a pad is connected; idx: the pad in charge (the last to press anything); used: the controller is the input in
 // use (its marks and highlight show); lastUse: when (performance.now) it was last used; down / held: buttons this frame,
 // and how long each has been held (s); ls, rs: the sticks after the dead zone, [x, y] in -1..1 (y down); lt, rt: 0..1
-const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, log: null };
+const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, dt: 0, log: null };
 function padOn(name, fn) { (PAD.on[name] = PAD.on[name] || []).push(fn); }
 function padFire(name, rep) {
   if (PAD.log) PAD.log.push(name + (rep ? '+' : ''));     // controller_check reads what fired
@@ -53274,7 +53274,7 @@ function padRelease() {                                   // let go of everythin
   PAD.down = {}; PAD.held = {}; PAD.rep = {}; PAD.ls = [0, 0]; PAD.rs = [0, 0]; PAD.lt = PAD.rt = 0; padFire('release');
 }
 function padTick(dt) {                                    // every frame while a pad is connected (section 12)
-  const pads = padList();
+  PAD.dt = dt; const pads = padList();
   if (!pads.length) { PAD.live = false; padRelease(); return; }
   for (const g of pads) if (g.index !== PAD.idx && g.buttons.some(b => b && b.pressed)) { padRelease(); PAD.idx = g.index; }   // two pads: the last to press anything is in charge
   const g = pads.find(p => p.index === PAD.idx) || pads[0];
@@ -53307,6 +53307,51 @@ function padBye(e) {                                      // a pad went (battery
 }
 if (PAD_ON) { addEventListener('gamepadconnected', padHello); addEventListener('gamepaddisconnected', padBye); }
 // ---- slot: Controller engineer (section 26). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- turn 2 (0.90.1): on the deck. The left stick walks (the same walk as press-and-hold), the right stick, LB and RB
+// turn the view a quarter turn, the right stick and the triggers zoom (the same limits as pinch), the right stick's
+// click goes back to the opening zoom; Menu pauses, Y opens or closes the device, View opens Tracked, B puts a toast
+// away. Buttons on the screen are pressed with click(), so each goes through its own code (the device's lock too).
+// The panels, top first (turn 4 moves a highlight in them): while one is open the deck takes no stick or press.
+const PAD_PANELS = [['pauseCard', () => PAUSE.on], ['ld', () => !!DISC.view], ['careerEnd'], ['sickCard'], ['qAsk'], ['lift'], ['sleepAsk'], ['ladderPanel'],
+  ['shopMenu'], ['clockScreen'], ['trkPanel'], ['dmSheet', () => DM_UI.open], ['device', () => DEV.open], ['devDlg'], ['chat'], ['.ixpanel']];
+const padShown = el => !!(el && !el.hidden && el.getClientRects().length);
+function padLayer() {                                     // the open panel on top, or null: the deck is yours
+  for (const [sel, on] of PAD_PANELS) {
+    if (on && !on()) continue;
+    if (sel[0] === '.') { for (const el of document.querySelectorAll(sel)) if (padShown(el)) return el; continue; }
+    const el = document.getElementById(sel); if (padShown(el)) return el;
+  }
+  return null;
+}
+const PAD_DECK = { walking: false, flick: 0 };
+const padClick = id => { const b = document.getElementById(id); if (b && padShown(b) && !b.disabled) { b.click(); return true; } return false; };
+const padZoom0 = () => innerWidth / innerHeight < .8 ? 1.62 : 1.22;   // section 6's opening zoom (the same rule)
+function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; if (!steering) player.steer = null; } }
+padOn('frame', () => {
+  const free = !ride && !padLayer() && !FREEZE.frozen, [x, y] = PAD.ls, m = Math.hypot(x, y);
+  // walking: up on the stick is up the screen, whichever way the view faces (section 12's camera: right is (cos az, -sin az))
+  if (free && m && !steering) {
+    const rx = Math.cos(az), rz = -Math.sin(az), fx = -Math.sin(az), fz = -Math.cos(az);
+    const wx = rx * x - fx * y, wz = rz * x - fz * y, d = Math.hypot(wx, wz) || 1;
+    if (!PAD_DECK.walking) { PAD_DECK.walking = true; player.stop(); }
+    player.steer = { x: wx / d, z: wz / d, k: Math.min(1, .45 + .55 * m) };
+  } else padWalkEnd();
+  if (!free) { PAD_DECK.flick = 0; return; }
+  // the view: a push of the right stick sideways is one quarter turn (let it come back before the next)
+  const sx = PAD.rs[0];
+  if (Math.abs(sx) > .6 && !PAD_DECK.flick) { PAD_DECK.flick = Math.sign(sx); azT += PAD_DECK.flick * Math.PI / 2; }
+  else if (Math.abs(sx) < .3) PAD_DECK.flick = 0;
+  const zr = PAD.rt - PAD.lt - PAD.rs[1], dt = PAD.dt;   // up on the stick and the right trigger zoom in
+  if (zr && dt) setZoom(camera.zoom * Math.exp(zr * 1.4 * dt));
+});
+padOn('release', () => padWalkEnd());
+padOn('lb', () => { if (padLayer() || ride || FREEZE.frozen) return; azT -= Math.PI / 2; return true; });
+padOn('rb', () => { if (padLayer() || ride || FREEZE.frozen) return; azT += Math.PI / 2; return true; });
+padOn('rs', () => { if (padLayer() || ride || FREEZE.frozen) return; setZoom(padZoom0()); return true; });
+padOn('menu', () => { pauseSet(!PAUSE.on); return true; });   // what the Pause button does
+padOn('y', () => { if (DEV.open) { deviceClose(); return true; } if (padLayer()) return; return padClick('devBtn'); });
+padOn('view', () => { if (!trkEl.hidden) { trkClose(); return true; } if (padLayer()) return; return padClick('trkBtn'); });
+padOn('b', () => { if (padLayer()) return; toastEl.classList.remove('show'); return true; });
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================
