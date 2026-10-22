@@ -451,6 +451,11 @@ def part_lists(pw):
 
 # ---- P2: the mini-games (controller package 2) ----
 TL_FOCUS = "(() => { const a = document.activeElement, R = TL_UI.root; if (!a || !R || !R.contains(a)) return null; const d = a.dataset; return d.c !== undefined ? 'c' + d.c : d.h !== undefined ? 'h' + d.h : d.end ? 'e' + d.end : '?'; })()"
+def tl_settled(p, limit=10.0):                      # the board's own real-time redraw (it clears TL_GAME.fx) has happened; up to limit s
+    for _ in range(int(limit * 10)):
+        if p.ev('!TL_GAME || !TL_GAME.fx'): return True
+        p.g.page.wait_for_timeout(100)
+    return check(False, 'tiles: the board never redrew after its move (TL_GAME.fx still set after %g s)' % limit)
 def tl_nav(p, cell):                                   # D-pad to a square, one square a press
     for _ in range(14):
         f = p.ev(TL_FOCUS)
@@ -483,7 +488,7 @@ def part_tiles(pw):
         if tl_nav(p, mv[1]):
             p.press('a'); check(p.ev('TL_GAME.s.plies') == plies + 1, f'tiles: A on square {mv[1]} should put the tile down (a move made)')
     p.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
-    p.g.page.wait_for_timeout(1500); p.step(3)              # (the move's animations end and the board redraws on its own timer; let it, so it can't land mid-check)
+    tl_settled(p); p.step(3)   # (the move's animations end and the board redraws on its own real-time timer, which clears fx: wait for it, so it can't land mid-check)
     # the hold: A picks a tile in your hold, and the highlight keeps its place when the board redraws
     p.ev("TL_GAME.s.p = 0; TL_GAME.sel = null; TL_GAME.s.hold[0] = [1]; tilesDraw(); padFocusTo(TL_UI.root.querySelector('[data-h=\"1\"]'))"); p.step(2)
     p.press('a'); p.step(2)
@@ -491,7 +496,7 @@ def part_tiles(pw):
     p.press('up'); f = p.ev(TL_FOCUS); check(f and f[0] in 'ce', f'tiles: D-pad up from your hold should go back toward the board, not {f}')
     # the end: Again highlighted; along to Done, A
     p.ev("""(() => { const G = TL_GAME; G.sel = null; G.s.sc = [6, 0]; G.s.p = 0; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()"""); p.step(3)
-    p.g.page.wait_for_timeout(1500); p.step(3)              # (the board redraws on its own timer once its moves' animations end; the highlight follows a frame later)
+    tl_settled(p); p.step(3)   # (the board redraws on its own timer once its moves' animations end, clearing fx; the highlight follows a frame later)
     if check(p.ev('TL_GAME.s.over'), 'tiles: the game did not end'):
         check(p.ev(TL_FOCUS) == 'efull', f'tiles: at the end the highlight should be on Again, not {p.ev(TL_FOCUS)}')
         p.press('right'); check(p.ev(TL_FOCUS) == 'equick', f'tiles: D-pad right from Again should reach Quick game ({p.ev(TL_FOCUS)})')
