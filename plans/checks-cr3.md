@@ -143,3 +143,16 @@ No FAIL.
 `cadet_test.py OLD NEW`: OLD = claude/integration 2b4a05db (0.64.15, sha256 0c1f6fb4…), NEW = b9f053ba (0.64.16, 70f94273…),
 run with b9f053ba's cadet_test.py from a scratch folder, strictly alone (no other browser in the container). Exit 0:
 **ALL IDENTICAL**: every shot a_start … j_steer2 0 px different; errors A [] B []; taps the same.
+
+# Round on 0.64.17 (claude/integration-next 8193458e, breakfast at 07:00), BM13's start; reported to BM14 and lead 28
+
+sha256 **225836918e5a70cad2a9809b2aea8febc21837617f3dee907b49a07655a4c4b5** (BM13's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 255 (0.64.16: 252); worst stuck 0.0; 280 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247 (250); worst stuck 0.0; 272 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254 (267); worst stuck 0.0; 266 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 269 (260); worst stuck 0.0; 268 s |
+
+No FAIL. (The draw-call peaks moved a few calls with the breakfast change; all far under 450.)
