@@ -14595,6 +14595,7 @@ const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower',
 let NEED_GOAL = null;                                     // { need, label } while the marker is ours
 function needGoal(k) {
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
+  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
   const ok = pl => k === 'energy' ? pl.id === bed : NEED_FIX[k].includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl));
   const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
@@ -14604,7 +14605,7 @@ function needGoal(k) {
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
-function needGoalTick() { if (NEED_GOAL && SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM) needGoalClear(); }
+function needGoalTick() { if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) needGoalClear(); }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
 // pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
 // after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
 const PUSH_MS = 2000, PASS_MS = 1500; let PUSH = null;   // { who, t0, last, until }
