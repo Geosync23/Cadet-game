@@ -2222,6 +2222,12 @@ MUTANTS['pick'] = {
     'CP1: a seat never ringed (the mess seat)': ('src', "  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
 }
 
+MUTANTS['day'] = {
+    # CP1, claude/controller-follow1 3f17ac95: the ring takes the lift where a tap reaches the Spine ladder (CTT3's find at
+    # the Deck 4 lift door: A climbed the ladder, the lift panel never opened)
+    'CP1: the ring ignores the ladder in front of the lift': ('src', "  if (typeof ladderAimed === 'function' && ladderAimed(h)) return 'ladder';", ""),
+}
+
 MUTANTS['reach'] = {
     'the D-pad skips the device\'s Home key': EACH_FRAME.replace('__BODY__', "if (document.activeElement && document.activeElement.id === 'devHome') document.getElementById('devBack').focus();"),
     'A clicks the panel, not the highlighted thing': WRAP("if (buttons[0].pressed && document.activeElement && document.activeElement !== document.body) { buttons[0] = { pressed: false, touched: false, value: 0 }; const d = document.activeElement.closest('[role=dialog],.lift,.device'); if (d) d.click(); }"),
