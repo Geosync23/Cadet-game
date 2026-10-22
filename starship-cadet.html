@@ -53353,7 +53353,11 @@ padOn('rs', () => { if (padLayer() || ride || FREEZE.frozen) return; setZoom(pad
 padOn('menu', () => { pauseSet(!PAUSE.on); return true; });   // what the Pause button does
 padOn('y', () => { if (DEV.open) { deviceClose(); return true; } if (padLayer()) return; return padClick('devBtn'); });
 padOn('view', () => { if (!trkEl.hidden) { trkClose(); return true; } if (padLayer()) return; return padClick('trkBtn'); });
-padOn('b', () => { if (padLayer()) return; toastEl.classList.remove('show'); return true; });
+padOn('b', () => {                                         // B on the deck: a tip card, then the Captain's address, then a toast (P1)
+  if (padLayer()) return;
+  for (const id of ['devTip', 'devAddr']) { const c = document.getElementById(id); if (padShown(c)) { c.click(); return true; } }
+  toastEl.classList.remove('show'); return true;
+});
 // ---- turn 3 (0.90.2): picking things on the deck. The nearest thing you can use within PAD_PICK.reach m (the way you
 // face first) gets a soft ring at its feet and a line at the bottom naming it; D-pad left and right step through the
 // others nearby, nearest first; A taps it through section 11's own tap(), at a point on screen where a finger would hit
@@ -53570,7 +53574,8 @@ function padPanelAdd(sel, o = {}) {
 const PAD_FOCUS_CSS = 'body.pad :focus{outline:3px solid #4cc3b5!important;outline-offset:2px!important;box-shadow:0 0 0 6px rgba(76,195,181,.28)!important}';
 const PAD_FIRST = { device: '#devBody' };                 // where to land first in a panel, when not on its first button
 const PAD_HUD = { id: 'hud', hud: true };
-const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard';
+// (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
+const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';
 const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0 };
 const PAD_FOCUSABLE = 'button, [role=button], a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 function padItems(L) {                                     // the buttons the highlight can land on in layer L, as shown
@@ -53578,7 +53583,8 @@ function padItems(L) {                                     // the buttons the hi
   return [...els].filter(e => !e.disabled && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true' && e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden');
 }
 function padFocusTo(el) {
-  if (!el) return; try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
+  if (!el) return; if (el.tabIndex < 0 && !el.hasAttribute('tabindex')) el.tabIndex = -1;   // a card you tap (a div) takes the focus too
+  try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
   try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
 }
 function padFocusIn(L) {                                   // land in a layer: keep a focus already in it (the lift's goal deck), else the first button
