@@ -2019,7 +2019,9 @@ MUTANTS['reach'] = {
 
 MUTANTS['games'] = {
     'A does nothing on the Tiles board': WRAP("if (document.activeElement && document.activeElement.closest && document.activeElement.closest('.tl-bd')) buttons[0] = { pressed: false, touched: false, value: 0 };"),
-    'the stick does not move you in Lightdisc': EACH_FRAME.replace('__BODY__', "if (typeof DISC !== 'undefined' && DISC.view) DISC.inp.kx = 0;"),
+    # (the pad's left stick reads still while Lightdisc is open: a fault in the input, whoever reads it; zeroing DISC.inp
+    # once a frame missed a driver that sets it later in the same frame)
+    'the stick does not move you in Lightdisc': WRAP("if (typeof DISC !== 'undefined' && DISC.view) { axes[0] = 0; axes[1] = 0; }"),
     'B does not leave Lightdisc': WRAP("if (typeof DISC !== 'undefined' && DISC.view) buttons[1] = { pressed: false, touched: false, value: 0 };"),
 }
 # the builders' own planted faults for their old-shape parts (each line once in the builder's game at its tip)
