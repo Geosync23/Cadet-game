@@ -11255,7 +11255,10 @@ function deviceLoad(s) {
     .slice(-60).map(a => ({ ...a, id: a.id, with: a.with.filter(x => typeof x === 'string').slice(0, 8), at: +a.at, len: isFinite(a.len) ? +a.len : 30, where: a.where,
       kind: typeof a.kind === 'string' ? a.kind : 'social', status: ['asked', 'yes', 'no', 'kept', 'missed'].includes(a.status) ? a.status : 'no', by: typeof a.by === 'string' ? a.by : null,
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}), ...(a.places && typeof a.places === 'object' ? { places: Object.fromEntries(Object.entries(a.places).filter(([k, v]) => typeof v === 'string').slice(0, 8)) } : { places: undefined }) }));   // places: each person's seat (0.71.2)
-  return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true },
+  const pointsSeen = {}; if (d.pointsSeen && typeof d.pointsSeen === 'object') for (const k in d.pointsSeen) if (Number.isInteger(d.pointsSeen[k]) && d.pointsSeen[k] > 0 && k.length < 60) pointsSeen[k] = Math.min(99, d.pointsSeen[k]);
+  return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true,
+      ...(['all', 'first', 'off'].includes(st.teach) ? { teach: st.teach } : {}) },   // the arrows plan: Teaching arrows, kept only once chosen
+    ...(Object.keys(pointsSeen).length ? { pointsSeen } : {}),   // the panel pointer's counts (piece C), only once one has shown
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
       heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
 }
@@ -11603,7 +11606,8 @@ const DEVICE_SKIN = (() => {
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
   const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•', track: '◎' };
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
-  const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; return b; };
+  const acts = new WeakMap();                  // each button's action, for the panel pointer's buttonFor (the arrows plan, piece C)
+  const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; acts.set(b, action); return b; };
   let back = null, drawn = null, drawnKey = null, mapCache = null;
   const layout = () => {                       // phone: a sheet over the bottom two thirds; wide (an unfolded TriFold, a desktop): a side panel
     const st = SHIP.device.settings, w = skin.wide();
@@ -11734,6 +11738,7 @@ const DEVICE_SKIN = (() => {
     get ink() { return INK[SHIP.device.settings.phosphor] || INK.cyan; },
     wide: () => innerWidth > innerHeight * 1.15 && innerWidth >= 720,
     has: kind => !!blocks[kind],               // 0.55.0: which VIEW blocks this skin draws (devChips asks)
+    actOf: b => acts.get(b) || null,           // the action a drawn button runs (the panel pointer finds buttons by it)
     open() { back = document.activeElement; el.hidden = false; layout(); $('devClose').focus(); },
     close() { el.hidden = true; drawn = null; drawnKey = null; layout(); if (back && back.focus) back.focus(); },
     button() {
@@ -12538,7 +12543,8 @@ deviceApp({ id: 'mail', title: 'Mail', icon: 'mail', order: 40, badge: () => mai
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
   act(verb, arg) { const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
     else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
-    else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg; },
+    else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg;
+    else if (verb === 'teach' && TEACH_MODES[arg]) st.teach = arg; },
   view: () => {
     const st = SHIP.device.settings, R = SHIP.device.calendarRemind, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
@@ -12549,7 +12555,9 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
       { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
       { kind: 'text', text: 'How early' }, { kind: 'buttons', items: [15, 30, 60].map(m => ({ label: m + ' min', action: { app: 'settings', do: 'ahead', arg: m }, on: R.ahead === m })) },
-      { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') }] };
+      { kind: 'text', text: 'Meals and your shift too' }, { kind: 'buttons', items: on(R.everyday, 'everyday') },
+      ...(teachShown() ? [{ kind: 'text', text: 'Teaching arrows (pointers that show you something new)' },
+        { kind: 'buttons', items: Object.entries(TEACH_MODES).map(([k, label]) => ({ label, action: { app: 'settings', do: 'teach', arg: k }, on: teachMode() === k })) }] : [])] };
   } });
 
 // Wallet: credits and your locker (0.28.10)
@@ -12564,6 +12572,146 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 } });
 
 // ---- slot: Device engineer (section 19). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the panel pointer (the arrows plan, piece C, AC1; plans/arrows-briefs.md): a gold ring on one button inside an
+// open panel (a device tile or button, a choice card, a job board row, the time clock), with a short label above or
+// below it. pointAsk({ id, path, done, until, once }): path = [{ open: () => bool, el: () => element | null, label }],
+// outermost first; the first step whose open() isn't true is shown, on its el (what opens the next step), so with the
+// device shut it sits on the Device button, then the app's tile, then the tab. A step with no open is the button to
+// press: a tap on it works as normal and ends the pointer; every step open ends it too. An el of null waits (the board
+// and the clock are opened in the world, where the world arrow points). One pointer at a time (POINT_Q, first asked
+// first, the first with something on screen). Teaching only: each id shows at most `once` times (true = 1), counted when first shown
+// in SHIP.device.pointsSeen (saved, cap 200), and Settings' Teaching arrows (teachMode: all | first | off) rules over
+// that. done() and until (absolute ship minutes) end it. A page element over the 3D view: no draw calls, placed each
+// frame from the button's getBoundingClientRect while a pointer is asked, nothing at all when none is.
+// Off (POINT_ON false): pointAsk refuses, nothing draws, nothing is saved.
+const POINT_ON = false;
+const TEACH_MODES = { all: 'Always', first: 'First times', off: 'Off' };
+const teachMode = () => { const m = SHIP.device && SHIP.device.settings.teach; return TEACH_MODES[m] ? m : 'first'; };   // AR1's queue reads it too
+const teachShown = () => { let g = false; try { g = typeof GUIDE_ON !== 'undefined' && !!GUIDE_ON; } catch (e) { g = false; } return POINT_ON || g; };
+const POINT_Q = [], POINT = { el: null, cur: null, key: '', aim: null, raf: 0, tapped: false };
+const POINT_CAP = 200;
+// the targets: each returns the element or null
+const tileFor = app => document.querySelector('#devBody .apps button.app[data-app="' + app + '"]');
+function buttonFor(a) {                                  // a device button by its action { app, do, arg } (the skin's actOf)
+  if (!a || !DEV.open) return null; const want = JSON.stringify(a.arg === undefined ? null : a.arg);
+  for (const b of document.querySelectorAll('#devBody button')) { const x = DEVICE_SKIN.actOf ? DEVICE_SKIN.actOf(b) : null;
+    if (x && x.app === a.app && x.do === a.do && JSON.stringify(x.arg === undefined ? null : x.arg) === want) return b; }
+  return null;
+}
+function chooseButton(k, title) {                        // the k-th choice of the open deviceChoose card (title: only that card)
+  const c = document.getElementById('devDlg'); if (!DEV.choose || !c || c.hidden) return null;
+  const h = c.querySelector('small'); if (title && !(h && h.textContent.startsWith(String(title).toUpperCase()))) return null;
+  return c.querySelectorAll('.btns button')[k] || null;
+}
+function boardButton(id) {                               // a job board row's button (Take it, Turn it in, Drop it), by job id (15b's data-job)
+  const b = document.getElementById('ixBoard'); if (!b || b.hidden || !id) return null;
+  for (const r of b.querySelectorAll('[data-job]')) if (r.dataset.job === String(id)) return r.querySelector('button');
+  return null;
+}
+function boardTurnIn() { let j = null; try { j = myJob(); } catch (e) { j = null; } return j && j.workDone ? boardButton(j.id) : null; }
+function clockButton(want) {                             // the time clock screen's Clock in or Clock out (section 20's words)
+  const c = document.getElementById('clockScreen'); if (!c || c.hidden) return null;
+  let t = want === 'in' ? 'Clock in' : 'Clock out'; try { t = csText(want === 'in' ? 'in' : 'out', t); } catch (e) { /* section 20's words */ }
+  for (const b of c.querySelectorAll('.btns button')) if (!b.disabled && b.textContent === t) return b;
+  return null;
+}
+// path steps, for the askers: the Device button, an app (its tile on the home grid, else Back to it), a button in it
+const pointDevice = () => ({ open: () => DEV.open, el: () => document.getElementById('devBtn'), label: 'Open your device' });
+const pointApp = (app, label) => ({ open: () => DEV.open && DEV.app === app, el: () => DEV.app === 'home' ? tileFor(app) : document.getElementById('devBack'),
+  label: () => DEV.app === 'home' ? label : 'Back to your apps' });
+const pointToApp = (app, label) => [pointDevice(), pointApp(app, label)];
+const pointBoard = (id, label) => [{ open: () => typeof ixBoard !== 'undefined' && ixBoard.isOpen, el: () => null }, { el: () => boardButton(id), label }];
+const pointClock = (want, label) => [{ open: () => { const c = document.getElementById('clockScreen'); return !!c && !c.hidden; }, el: () => null }, { el: () => clockButton(want), label }];
+const pointCard = (k, label, title) => [{ open: () => !!DEV.choose, el: () => null }, { el: () => chooseButton(k, title), label }];
+function pointLimit(p) { const m = teachMode(); return m === 'off' ? 0 : m === 'all' ? Infinity : p.once === true || p.once == null ? 1 : Math.max(0, p.once | 0); }
+const pointSeenN = id => (SHIP.device.pointsSeen && SHIP.device.pointsSeen[id]) || 0;
+function pointAsk(p) {
+  if (!POINT_ON || !p || typeof p.id !== 'string' || p.id.length >= 60 || !Array.isArray(p.path) || !p.path.length) return false;
+  if (pointSeenN(p.id) >= pointLimit(p)) return false;
+  const e = { id: p.id, path: p.path, done: typeof p.done === 'function' ? p.done : null, until: Number.isFinite(p.until) ? p.until : null, once: p.once, shown: false };
+  const i = POINT_Q.findIndex(x => x.id === p.id); if (i >= 0) { e.shown = POINT_Q[i].shown; POINT_Q[i] = e; } else POINT_Q.push(e);
+  if (!POINT.raf) POINT.raf = requestAnimationFrame(pointFrame);
+  return true;
+}
+function pointDrop(id) { const i = POINT_Q.findIndex(x => x.id === id); if (i < 0) return false; POINT_Q.splice(i, 1); if (POINT.cur && POINT.cur.id === id) POINT.cur = null; return true; }
+const pointNow = () => POINT.cur ? POINT.cur.id : null;
+const pointList = () => POINT_Q.map(x => ({ id: x.id, shown: x.shown, seen: pointSeenN(x.id) }));
+function pointCount(id) {                                // a first show: counted and saved (oldest dropped past the cap)
+  const S = SHIP.device.pointsSeen || (SHIP.device.pointsSeen = {});
+  S[id] = Math.min(99, (S[id] || 0) + 1);
+  const ks = Object.keys(S); for (let i = 0; i < ks.length - POINT_CAP; i++) delete S[ks[i]];
+}
+function pointStep(e) {                                  // -> { el, label, press } for this pointer now, null (nothing to show) or 'open' (all open: done)
+  for (let i = 0; i < e.path.length; i++) {
+    const s = e.path[i]; if (s.open && s.open()) continue;
+    const el = s.el ? s.el() : null; if (!el) return null;
+    return { el, label: String((typeof s.label === 'function' ? s.label() : s.label) || ''), press: !s.open };
+  }
+  return 'open';
+}
+function pointSees(el) {                                 // the button's box if it's on screen and nothing covers it, else null
+  if (!el.isConnected) return null;
+  const B = document.body.classList, dlg = document.getElementById('devDlg'), ad = document.getElementById('devAddr');
+  if (B.contains('dlgon') && !(dlg && dlg.contains(el)) || ad && !ad.hidden) return null;   // a meeting or the address: none (a choice card's own buttons yes)
+  if (POINT.aim !== el) { POINT.aim = el; try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (x) { /* old browsers */ } }   // a new button in a scrolled list: into view, once
+  const r = el.getBoundingClientRect(); if (r.width < 2 || r.height < 2 || r.bottom < 2 || r.right < 2 || r.top > innerHeight - 2 || r.left > innerWidth - 2) return null;
+  const x = Math.min(innerWidth - 1, Math.max(0, (Math.max(0, r.left) + Math.min(innerWidth, r.right)) / 2)), y = Math.min(innerHeight - 1, Math.max(0, (Math.max(0, r.top) + Math.min(innerHeight, r.bottom)) / 2));
+  const hit = document.elementFromPoint(x, y); if (!hit || hit !== el && !el.contains(hit)) return null;   // covered (a panel over it, scrolled out of its box)
+  const q = pointTip(); if (q && q.left < r.right + 6 && q.right > r.left - 6 && q.top < r.bottom + 6 && q.bottom > r.top - 6) return null;   // a tip on the same spot
+  return r;
+}
+const pointTip = () => { const c = document.getElementById('devTip'); return c && !c.hidden ? c.getBoundingClientRect() : null; };
+function pointFrame() {
+  POINT.raf = 0;
+  const t = typeof shipNow === 'function' ? shipNow() : 0; let show = null;
+  for (let i = 0; i < POINT_Q.length; i++) {
+    const e = POINT_Q[i]; let st = null;
+    try {
+      if (e.until != null && t > e.until || e.done && e.done() || !e.shown && pointSeenN(e.id) >= pointLimit(e)) { POINT_Q.splice(i--, 1); continue; }
+      if (show) continue;
+      st = pointStep(e); if (st === 'open') { POINT_Q.splice(i--, 1); continue; }
+    } catch (x) { DEV.errors.push('pointer ' + e.id + ': ' + (x && x.message || x)); POINT_Q.splice(i--, 1); continue; }   // a step that throws ends it
+    const r = st && pointSees(st.el); if (r) show = { e, st, r };
+  }
+  POINT.cur = show ? show.e : null;
+  if (show && !show.e.shown) { show.e.shown = true; pointCount(show.e.id); }
+  pointDraw(show);
+  if (POINT_Q.length) POINT.raf = requestAnimationFrame(pointFrame); else POINT.aim = null;
+}
+function pointDraw(v) {
+  let g = POINT.el;
+  if (!v) { if (g && !g.hidden) { g.hidden = true; POINT.key = ''; } return; }
+  if (!g) {
+    const css = document.createElement('style');
+    css.textContent = '#ptr{position:fixed;left:0;top:0;width:0;height:0;z-index:5;pointer-events:none;--ptr-gold:#e8c06a}#ptr[hidden]{display:none}'
+      + '#ptr .ptring{position:fixed;border:2px solid var(--ptr-gold);border-radius:12px;box-shadow:0 0 0 2px rgba(13,21,33,.75),0 0 12px rgba(232,192,106,.55)}'
+      + '#ptr .ptlab{position:fixed;white-space:nowrap;max-width:min(260px,calc(100vw - 16px));overflow:hidden;text-overflow:ellipsis;font:12.5px/1.35 system-ui,-apple-system,sans-serif;padding:3px 9px;border-radius:999px;background:rgba(13,21,33,.9);border:1px solid rgba(232,192,106,.6);color:#f2e3bf}'
+      + '#ptr .ptarr{position:fixed;width:0;height:0;border-style:solid;filter:drop-shadow(0 1px 2px rgba(0,0,0,.6));animation:ptbob 1.4s ease-in-out infinite}'
+      + '#ptr .ptarr.dn{border-width:9px 7px 0 7px;border-color:var(--ptr-gold) transparent transparent transparent}#ptr .ptarr.up{border-width:0 7px 9px 7px;border-color:transparent transparent var(--ptr-gold) transparent;animation-name:ptbobu}'
+      + '@keyframes ptbob{50%{transform:translateY(3px)}}@keyframes ptbobu{50%{transform:translateY(-3px)}}@media (prefers-reduced-motion:reduce){#ptr .ptarr{animation:none}}';
+    document.head.appendChild(css);
+    g = POINT.el = document.createElement('div'); g.id = 'ptr'; g.hidden = true; g.setAttribute('aria-live', 'polite');
+    g.innerHTML = '<div class="ptring"></div><div class="ptarr"></div><div class="ptlab"></div>'; document.body.appendChild(g);
+  }
+  const r = v.r, W = innerWidth, H = innerHeight, L = Math.max(2, Math.round(r.left) - 4), T = Math.max(2, Math.round(r.top) - 4);
+  const R = Math.min(W - 2, Math.round(r.right) + 4), Bt = Math.min(H - 2, Math.round(r.bottom) + 4), q = pointTip(), key = [L, T, R, Bt, W, H, v.st.label, q ? Math.round(q.top) : -1].join();
+  g.hidden = false; if (key === POINT.key) return; POINT.key = key;
+  const [ring, arr, lab] = g.children;
+  Object.assign(ring.style, { left: L + 'px', top: T + 'px', width: (R - L) + 'px', height: (Bt - T) + 'px' });
+  lab.textContent = v.st.label; lab.hidden = arr.hidden = !v.st.label; if (!v.st.label) return;
+  const lw = lab.offsetWidth, lh = lab.offsetHeight || 24, cx = Math.round((L + R) / 2), fitUp = T - lh - 14 >= 4, fitDn = Bt + lh + 14 <= H - 4;
+  const onTip = up => !!q && q.top < (up ? T - 2 : Bt + lh + 14) && q.bottom > (up ? T - lh - 14 : Bt + 2);   // the label never on a tip
+  const above = fitUp && !(onTip(true) && fitDn && !onTip(false)) || !fitDn && !fitUp;
+  const lx = Math.max(6, Math.min(W - 6 - lw, cx - Math.round(lw / 2))), ly = above ? Math.max(4, T - lh - 12) : Bt + 12;
+  Object.assign(lab.style, { left: lx + 'px', top: ly + 'px' });
+  arr.className = 'ptarr ' + (above ? 'dn' : 'up'); Object.assign(arr.style, { left: (Math.max(L + 4, Math.min(R - 18, cx - 7))) + 'px', top: (above ? T - 11 : Bt + 2) + 'px' });
+}
+// a tap on the pointer's own button (a step with no open: the one to press) ends it; the tap itself goes on as normal
+if (POINT_ON) document.addEventListener('click', e => {
+  const c = POINT.cur; if (!c || !POINT.aim || !e.target || !POINT.aim.contains(e.target)) return;
+  let st = null; try { st = pointStep(c); } catch (x) { st = null; }
+  if (st && st.press && st.el === POINT.aim) pointDrop(c.id);
+}, true);
 // ---- end of slot: Device engineer ----
 
 // =====================================================================
@@ -15587,9 +15735,9 @@ const ixBoard = (() => {
   let back = null;
   const canTake = (j, mine) => !mine && !j.claimedBy && (typeof jobTier !== 'function' || jobTier(j) <= playerTier())
     && !(j.machine && typeof ENGINE_KINDS !== 'undefined' && ENGINE_KINDS.has((machineById(j.machine) || {}).kind));
-  function row(title, line, pri, btn) {
+  function row(title, line, pri, btn, job) {           // job: the job's id, on the row (data-job), for section 19's panel pointer
     const r = document.createElement('div'), d = document.createElement('div'), h = document.createElement('b'), s = document.createElement('small');
-    r.className = 'ixjob ' + (pri || ''); h.textContent = title; s.textContent = line; d.append(h, s); r.append(document.createElement('i'), d);
+    r.className = 'ixjob ' + (pri || ''); if (job) r.dataset.job = job; h.textContent = title; s.textContent = line; d.append(h, s); r.append(document.createElement('i'), d);
     if (btn) r.appendChild(btn); list.appendChild(r);
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
@@ -15613,11 +15761,11 @@ const ixBoard = (() => {
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
         row(mine.title || title, where + ' · ' + (done ? 'done: turn it in' : state), pri, done ? button('Turn it in', () => api.turnIn(mine.id))
-          : button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }));
+          : button('Drop it', () => { dropJob(mine.id); api.draw(); device.refresh(); toast('Job board', 'You put the job back on the board.'); }), mine.id);
       }
       for (const o of yours) {
         const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
-        row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null);
+        row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null, o.id);
       }
       for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
         const [title, where, state, pri] = jobCard(j), why = jobTier(j) > playerTier() ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
