@@ -364,7 +364,7 @@ with sync_playwright() as pw:
           SHIP.career = null; SHIP.rep = null; SHIP.mail = []; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; CLOCK_RM_LOG.length = 0;
           const at = (d, m) => { setShipNow((d - 1) * 1440 + m); return shipNow(); }, out = { days: [] };
           const day = (d, act) => { const s0 = seen.length, l0 = CLOCK_RM_LOG.length, m0 = SHIP.mail.length; let trk = {};
-            for (let m = 360; m <= 1140; m++) { const t = at(d, m); TOAST_AT = -1e9; POP.busy = false; careerTick(t); if (act) act(m, t); clockRemindTick(t);
+            for (let m = 360; m <= 1140; m++) { const t = at(d, m); TOAST_AT = -1e9; POP.busy = false; document.getElementById('toast').classList.remove('show'); careerTick(t); if (act) act(m, t); clockRemindTick(t);
               if (m === 560 || m === 1015 || m === 1030) { const it = clockTrkItem(); trk[hhmm(m)] = it ? it.title + ' @' + it.tag : null; } }
             const r = { d, shift: playerShiftOn(d), stages: CLOCK_RM_LOG.slice(l0).map(x => hhmm(x[1]) + ' ' + x[2]), toasts: seen.slice(s0).filter(x => x[2] === 'Time clock').map(x => x[1] + ' ' + x[3]),
               mail: SHIP.mail.filter(x => Math.floor(x.at / 1440) + 1 === d).map(x => x.from + ': ' + x.subject), run: SHIP.player.clockRm.n, trk }; out.days.push(r); return r; };
@@ -380,7 +380,15 @@ with sync_playwright() as pw:
           SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; const dh = work(); careerTick(at(dh, 360));
           POP.busy = true; TOAST_AT = -1e9; const heldSt = clockRemindTick(at(dh, 556)); POP.busy = false; const freeSt = clockRemindTick(at(dh, 557));
           let off = d; while (careerRota(off)) off++; careerTick(at(off, 360)); const offSt = [540, 556, 1030].map(m => { TOAST_AT = -1e9; return clockRemindTick(at(off, m)); });
-          out.held = [heldSt, freeSt]; out.off = offSt;
+          // never over an answer toast (CR6's find on 0.64.15: a busy washer's "Washer 2 is free" replaced by "Still not clocked in"):
+          // held while it's on screen and for the gap after it, then said
+          const te = document.getElementById('toast'); SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; const da = work(); careerTick(at(da, 360));
+          was('Washer 3', 'Washer 3 is busy. Washer 2 is free.'); const ans = [];
+          ans.push(clockRemindTick(at(da, 600)), document.getElementById('tx').textContent);
+          TOAST_AT = performance.now() - 20000; ans.push(clockRemindTick(at(da, 601)), document.getElementById('tx').textContent);   // its stamp is old but it's still showing
+          te.classList.remove('show'); TOAST_AT = performance.now() - 12000; ans.push(clockRemindTick(at(da, 602)));   // gone, inside the gap
+          TOAST_AT = performance.now() - 16000; ans.push(clockRemindTick(at(da, 603)));   // gone, gap over
+          out.held = [heldSt, freeSt]; out.off = offSt; out.answer = ans;
           toast = was; SHIP.career = null; SHIP.mail = []; SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; return out; })()""")
         for r in ck['days']: print(f"   Day {r['d']}: {r['stages']} Mail {r['mail']} run {r['run']} Tracked {r['trk']}")
         print('   held by a dialogue, then free:', ck['held'], '| a day off:', ck['off'], '| saved:', ck['saved'], ck['size'], 'bytes')
@@ -392,6 +400,8 @@ with sync_playwright() as pw:
         check(S['stages'][:2] == ['09:15 late', '10:00 later'] and '12:00 last' in S['stages'] and '12:30 mailIn' in S['stages'] and S['run'] == 0 and any('clock-in' in m.lower() for m in S['mail']), f"eased off, forgetting still reminds (late, later, last call, Mail) and ends the run ({S})")
         check(A['stages'][:1] == ['08:30 pre'] and '16:50 end0' in A['stages'] and '17:00 end' in A['stages'] and A['run'] == 1, f"after a slip, the full reminders come back ({A})")
         check(ck['held'] == [None, 'late'] and ck['off'] == [None, None, None], f"held by something on screen, then said; nothing on a day off ({ck['held']}, {ck['off']})")
+        print('   an answer toast up, then gone:', ck['answer'])
+        check(ck['answer'] == [None, 'Washer 3 is busy. Washer 2 is free.', None, 'Washer 3 is busy. Washer 2 is free.', None, 'later'], f"a reminder never covers a toast on screen, nor in the gap after it ({ck['answer']})")
         check(ck['saved'] is not None and ck['size'] < 60, f"the save: player.clockRm under 60 bytes ({ck['saved']})")
 
     print('(h) The bridge, by invitation (Step 3):')
