@@ -13406,7 +13406,8 @@ function stubTap(it, at) {
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
-  if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && (PLACE_OF.get(placeId) || {}).type === 'mess-seat') {   // your tray: eat it at the seat you chose (0.28.31)
+  const trayAt = pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
+  if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && trayAt(PLACE_OF.get(placeId))) {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
   }
   if (kind === 'eat' && !o.fed) {                        // no tray, no meal (0.28.45, the user's: "no auto tray: you must get it from the line"): you just sit
