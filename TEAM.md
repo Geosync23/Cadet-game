@@ -510,3 +510,10 @@ PR9 keeps its probes, day 5/19/21 and the mutants, then collates the final verdi
 **~00:54 UTC:** FR4: intro_check seat-clash guard (claude/fridays-20 169f0b3, check only) → PR9 reviews; it joins the later check-only merge with opt-tests (not in 0.64.14).
 **~01:10 UTC: lead 25 at ~475k memory** → handover note plans/handover-lead25.md written; the user warned. Lead 25 keeps going until 0.64.14 is published or ~600k, then hands over to lead 26.
 **~01:15 UTC, the user:** memory rule is now **hand over at ~65% (~650k)** for every seat (replaces warn 500k / hand over 600k); before that, decide case by case from the work ahead (hand over first if the next task would carry you past 65%). In CLAUDE.md.
+**~01:33 UTC, the user (before bed):** don't stack new features before playtesting. Tonight: PLAN the last two ship-wide events (comet, visit), PLAN Pillar 5 steps 5-6, PLAN controller support (published page; build TONIGHT after the user approves), PITCH crew stories (who: many Works crew, Pell and Zeke for sure; tender, building to an emotional crescendo; simple, mostly dialogue; where they go; not all in one playthrough). Writing and building the events/P5 come after the user's playtest. New seats (all publish plan pages with answer forms):
+| Seat | Session | Branch | Job |
+|---|---|---|---|
+| EP2 events planner | session_012zwwPk24gA3K5Rz23Fu2Fv | `claude/plan-events-final` | comet + visit plan |
+| P5P Pillar 5 planner | session_01DCUnQMyViDh8LQSWf2fkXe | `claude/plan-p5-steps56` | steps 5-6 plan |
+| CT1 controller | session_019sqDowb6QNf3KZAYMSx1jM | `claude/controller` | plan now; build 0.90.x after approval |
+| CS1 crew stories | session_01QcPAXHjQZ2HfZKMCTbaW9v | `claude/crew-stories-pitch` | pitch page |
