@@ -46,3 +46,13 @@ Lead 27 = session_017UHW78qnvRTQwYpDxpodHz, branch `claude/lead-27`. Took over 2
 - AR1 can only push to claude/arrows-plan (builds B there as game commits on top of docs).
 - Some seats can't create new branches (FX1 only pushes claude/p5-fix1).
 - Check every fix: its new check part must FAIL on the old build.
+
+## Latest state at handover (~14:18 UTC)
+- **0.64.16 (Zeke) six-runner round RUNNING** on claude/integration-next b9f053ba (sha 70f94273...a6c7). OR2 PASS (ce2f77bc). When all six report OK: BM13 fast-forwards claude/integration, PUB1 republishes both pages from it (name the build 0.64.16 and the sha), push-notify the user.
+- **0.64.17 (breakfast) built and PASSED by RV3**: claude/integration-next-0.64.17 1d2f3269 (sha 22583691...c4b5). After 0.64.16 is fast-forwarded, BM13 moves it onto integration-next and the six runners do its round; then publish. SC1's own full round on 8d65f86f reports to you (interactions, ten day_checks, events, fridays still running). Repair share 40% accepted (backlog LEAD27-1: measure over 28 days).
+- **The user's helper limit: 12 normally, up to 20 while a six-runner round runs.**
+- **BM13 hands over after 0.64.17** (start BM14 to read plans/handover-build-master.md).
+- **Fixes:** FX1 reworking after PR9's FIXES NEEDED (the "Take your first round" arrow hides Clock in from 06:00 on Days 3/8; TRAIN_LEAD 15; meeting arrow returns after borrowing) plus its lifecycle list (full set running); FX2 A drill e10d81a FIXES NEEDED by AR2 (drill starts silently from 14:00 on an extinguisher tap), B scanner (incl. scan-first and jobEnd → caseFitted) coming; FX3 b063f86 with PR9, next push adds hauling any day + per-stop words + promo talk + "clear only own arrow". Reviewers: PR9 (FX1, FX3; near its limit, handover written: plans/handover-reviewer-9.md on claude/review-8), AR2 (FX2). When PR9 stops, AR2 or a new reviewer takes FX1/FX3.
+- **Arrows:** B with RV2 (5dd6b6f), C with RV2 after B (AC1 claude/arrows-c d7a55699); AR1 next builds D (shift chain) once FX1 lands; AC1 idle for D-F pointer callers; AR2 for F lessons later. Merge clash C vs controller P4 (section 19 Settings last line).
+- **Controller:** claude/controller 0251af41 = 0.90.6 (P1-P4). CP1 merging P5 9325b3f + CP2 7b11451 + pickfix 8d68ad5 → 0.90.7 in one round. CP4 adding the touch hand-back listeners at first use on claude/controller-firstuse (a505b42 passed by RV5; one more commit for RV5), then CP1 merges it. RV5 running the 0.90.5 suite. CTT2: reach sweep running; day-by-pad needs the pickfix. Then a six-runner round on claude/controller and merge into integration switched off; switch-on is the user's go.
+- Plan page: https://claude.ai/artifact/7rKvXwbZLRsJj8k7yrXXkK (v5).
