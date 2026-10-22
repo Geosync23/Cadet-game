@@ -449,7 +449,19 @@ Fix requests (sent): (1) TRAIN_LEAD 15 (the user's word); (2) the meeting arrow 
 arrow owns the screen when the board can't give the round (from 06:00, before Clock in): show it only when the board offers
 the round job, and never over Clock in before you're clocked in; find out why m1 lapses to `again` on Day 2 for a follower.
 
-## FX3 (claude/p5-fix3 b063f86): in review
+## FX3 (claude/p5-fix3 b063f86): PASS WITH FIXES
 
-Merges with FX1 with only a build-table conflict. Early fix request (sent): `clearGoal()` unconditionally at your turn at the
-pipe and in incRetry wipes whatever arrow is up (FX1's meeting arrow, a needs arrow, a Tracked pick): clear only its own.
+Five fixes: the main lift's job place (its brake, Deck 5's utility closet); the Record's What's next and the junior title;
+your reputation shown changing, apart from the team's; Making it safe (warned, followable, your turn at the pipe, a retry
+with day/time/place); small lessons readable and timed, the writer's asks sent. Merges with FX1 with only a build-table
+conflict.
+Runs (each alone): its own parts FAIL on 2b4a05db and pass on the tip: mech_check fx3 (base: m3d briefing, m3i ask and
+talk, m2's word not readable; tip OK), career_check (base: 4 FAILs on the rep words, the Record; tip OK), player_check
+(base: "main lift: its job needs a service place"; tip OK). cadet_test 2b4a05db → b063f86: ALL IDENTICAL.
+arrows_check: green now: both "stuck at Repair the main lift" lines and its 3-hour arrow. Still red as on the base: Days
+4-5 clock in, the lessons (FX1/FX2), Making it safe on Day 8 (needs FX2's scanner count), the galley plant, the fire drill.
+**New red** (not on the base): the arrow "Repair the light relays" up over 3 ship hours from Day 2 09:49, most likely
+exposed (the follower now gets past the lift to the next job), for AR1 / FX1 to look at.
+Fix request (sent, FX3 has it done, not yet pushed): `clearGoal()` unconditionally at your turn at the pipe and in
+incRetry wiped whatever arrow was up; now INC_GOAL keeps its own and clears only that, with a mech_check case (a need's
+"Food" arrow left alone). Re-check that delta when pushed.

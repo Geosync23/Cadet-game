@@ -1,0 +1,4 @@
+fx3 (Making it safe's flow, the small lessons):
+  m6 flow: {'day': 8, 'st0': 'meet', 'warnMail': ["This morning: At 10:30 I'll show you how to make an incident safe. Stay on Deck 5."], 'soon': 1, 'watch': 'watch', 'goal': [4, '4-valve-panel', 'Follow Ines to the burst pipe, Deck 4'], 'after': 'ask', 'goalAfter': False, 'open': None, 'again': ["The crew made it safe. We'll try again on Tuesday: 10:30, my office."], 'next': [9, 'meet', 630, 0], 'yours': ['do', True, 4, None]}
+  small lessons: {'drillAsk': 1, 'm3dOpen': True, 'brief': True, 'briefStays': True, 'inspectAsk': 1, 'm3iOpen': True, 'tomas': True, 'tomasStays': True, 'again': False, 'm2': True, 'm2Stays': True}
+MECH CHECK OK

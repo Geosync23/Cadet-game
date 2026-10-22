@@ -1,0 +1,15 @@
+fx3 (Making it safe's flow, the small lessons):
+  m6 flow: {'day': 8, 'st0': 'meet', 'warnMail': [], 'soon': 0, 'watch': 'watch', 'goal': [5, None, 'Meet Ines'], 'after': 'watch', 'goalAfter': True, 'open': {'kind': 'burst', 'deck': 4, 'at': 10710, 'train': True, 'safe': False, 'j': 'incident14:burst4@198'}, 'again': [], 'next': [9, 'watch', 630, 1], 'yours': ['do', None, None, 'Meet Ines']}
+FAIL m6: a Mail when the training's set, naming 10:30 ([])
+FAIL m6: a word ten minutes before the call (0)
+FAIL m6: after the talk the arrow follows the teacher to the pipe ([5, None, 'Meet Ines'])
+FAIL m6: not followed: the crew make it safe, the next try with its day, time and place (watch, [])
+FAIL m6: the next try is the 10:30 call again, not a 06:00 restart ([9, 'watch', 630, 1])
+FAIL m6: followed, your turn is yours at once and points at the pipe (['do', None, None, 'Meet Ines'])
+  small lessons: {'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False}
+FAIL m3d: Calder's ask the morning of your first drill ({'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False})
+FAIL m3d: her briefing before the drill, and it stays to be read ({'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False})
+FAIL m3i: Tomas's ask the day before your first inspection ({'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False})
+FAIL m3i: his talk before the walk, readable, and not again after it ({'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False})
+FAIL m2: Torres's word stays to be read ({'drillAsk': 0, 'm3dOpen': True, 'brief': False, 'briefStays': False, 'inspectAsk': 0, 'm3iOpen': True, 'tomas': False, 'tomasStays': False, 'again': True, 'm2': True, 'm2Stays': False})
+MECH CHECK FAILED
