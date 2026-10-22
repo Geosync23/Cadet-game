@@ -12815,10 +12815,10 @@ function needPop(k) {
   let el = NEED_POP.el;
   if (!el) {
     el = NEED_POP.el = document.createElement('div'); el.id = 'needPop'; el.setAttribute('role', 'status'); el.setAttribute('aria-live', 'polite');
-    el.style.cssText = 'position:fixed;z-index:3;max-width:min(260px,calc(100vw - 28px));padding:8px 12px;border-radius:12px;background:rgba(13,21,33,.92);border:1px solid var(--line);font-size:14px;line-height:1.3;color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:auto;cursor:pointer';
+    el.style.cssText = 'position:fixed;z-index:2;max-width:min(260px,calc(100vw - 28px));padding:8px 12px;border-radius:12px;background:rgba(13,21,33,.92);border:1px solid var(--line);font-size:14px;line-height:1.3;color:var(--ink);box-shadow:0 6px 18px rgba(0,0,0,.4);pointer-events:auto;cursor:pointer';
     el.onclick = e => { e.stopPropagation(); el.hidden = true; };
     el.addEventListener('pointerdown', e => e.stopPropagation());
-    document.body.appendChild(el);
+    document.body.appendChild(el);   // (z-index 2, with the HUD: under the device and every panel, 2026-10-22; at 3 it sat over the open device on a wide screen)
   }
   const strip = needStrip(), icon = strip.querySelector('.ns[data-k="' + k + '"]'), fold = strip.classList.contains('fold'), r = (fold || !icon ? strip : icon).getBoundingClientRect(), sr = strip.getBoundingClientRect();
   el.textContent = txt; el.style.borderColor = NEED_COL[k]; el.hidden = false;
@@ -40840,10 +40840,10 @@ function seekCome(p, a, m, why) {                         // a: their agent on t
   SEEK_COME = { p, m, why: why || null, until: simNow() + SEEK_COME_SECS * 1000 };
 }
 function seekArrive(a) { const c = SEEK_COME; SEEK_COME = null; if (c && !CHAT && !SEEK) seekShow(c.p, c.m, c.why, a); }
-function seekEl() {
+function seekEl() {                                       // (z-index 2, with the HUD and the bubbles: under the device and every panel or card, 2026-10-22; at 3 it sat over the open device)
   let el = document.getElementById('seek'); if (el) return el;
   const st = document.createElement('style');
-  st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:3;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
+  st.textContent = '#seek{position:fixed;right:12px;top:50%;transform:translateY(-50%);z-index:2;max-width:min(220px,60vw);background:var(--glass);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:13px;color:#e6f0f1;line-height:1.35;cursor:pointer;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px)}#seek b{color:#bdeee6;font-weight:600}';
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'seek'; el.hidden = true; document.body.appendChild(el);
   el.onclick = () => { if (SEEK && SEEK.visit) { visitIn(); return; } const s = SEEK; seekEnd(); if (s) { const a = DECK_CREW.find(x => x.p === s.p); if (a) { a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z); } chatOpen(s.p, !s.line, s.line || undefined); } };
