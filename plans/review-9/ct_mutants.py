@@ -15,6 +15,7 @@ M = {
  'p2_ldleave': ("if (a && V.root.contains(a) && padShown(a) && (a !== V.leave || PAD_LD.chose)) { a.click(); return true; }", "if (a && V.root.contains(a) && padShown(a)) { a.click(); return true; }"),   # A can press Leave by accident
  'p2_noname': ("box.value = PAD_NAME; return true;", "return;"),   # A on Sign with an empty box: no suggested name
  'p2_tilesnoland': ("if (to && to !== a) padFocusTo(to);\n  const f = to || a;", "const f = a;"),   # Tiles: the highlight never lands on the board
+ 'p1_noblur': ("if (F.el && a === F.el && a.blur) a.blur();", ""),   # a touch leaves the pad's focus (the outline)
  'c4_noback': ("addEventListener('pointerdown', back, true); ", ""),   # a touch doesn't hand back
 }
 for n in sys.argv[2:] or list(M):
