@@ -803,7 +803,12 @@ OUTCOME = r"""(() => ({ at: [Math.round(player.obj.position.x * 100), Math.round
   talking: DECK_CREW.filter(a => a.talking > 0).map(a => a.p.id).sort(),
   open: [...document.querySelectorAll('[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0).map(e => e.id || e.className).sort() }))()"""
 HINT = "(() => { const h = document.getElementById('padHint'); return h && !h.hidden && h.getBoundingClientRect().width > 0 ? h.textContent : null; })()"
-def pick_one(pw, src, tag, by_pad, n, presses=0):
+# a seat with no other seat within reach, on the deck you're on (so "Sit" can only mean that one)
+LONE_SEAT = r"""(() => { const seats = [...PLACE_OF.values()].filter(pl => ['lounge-seat', 'mess-seat', 'bench', 'common-room'].includes(pl.type) && placeSpot(pl.id)).map(pl => [pl, placeSpot(pl.id)]);
+  const lone = seats.find(([pl, sp]) => seats.every(([q, sq]) => q === pl || Math.hypot(sq.x - sp.x, sq.z - sp.z) > 3.6));
+  return lone ? { kind: 'seat', name: deckDef.num + ':' + lone[0].id, words: ['sit'], x: lone[1].x, y: 0, z: lone[1].z, seat: 1 } : null; })()"""
+DECKS_JS = "(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))"
+def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
     # the same in the pad run and the tap run: the pad run goes first, and the tap run waits 7 frames for each D-pad
     # press the pad run made (presses) before it taps
@@ -813,8 +818,14 @@ def pick_one(pw, src, tag, by_pad, n, presses=0):
     if by_pad: r.press('B'); r.step(2)
     else: r.step(5)
     ts = r.ev(PICK_TARGETS)
-    if n >= len(ts): r.close(); return None, len(ts)
-    t = ts[n]
+    if seat_search:   # (RV5) no lone seat on Deck 4: the first deck that has one
+        t = None
+        for d in r.ev(DECKS_JS):
+            r.ev(f"goToDeck({d}, null)"); r.step(60); t = r.ev(LONE_SEAT)
+            if t: break
+        if not t: r.close(); return ['seat (none on any deck)', 'nowhere to stand', None, None, 0], len(ts)
+    elif n >= len(ts): r.close(); return None, len(ts)
+    else: t = ts[n]
     name = t['kind'] + ' (' + str(t.get('name')) + ')'
     r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
@@ -839,6 +850,9 @@ def pick_play(pw, src, tag, by_pad, pad=None):
         o, total = pick_one(pw, src, tag + ('_pad' if by_pad else '_tap'), by_pad, n, pad[n][4] if pad and n < len(pad) else 0)
         if o is None: break
         out.append(o); n += 1
+    if not any(x[0].startswith('seat') for x in out):
+        o, _ = pick_one(pw, src, tag + ('_pad' if by_pad else '_tap'), by_pad, n, pad[n][4] if pad and n < len(pad) else 0, seat_search=True)
+        out.append(o)
     return out
 # facing (RV2's fix): a spot with two things in reach on opposite sides; face one, and the ring starts on it (before any
 # D-pad); turn round, and it starts on the other
@@ -941,6 +955,7 @@ def part_pick(pw, src, tag):
     P = pick_play(pw, src, f'{tag}_pick', True)
     T = pick_play(pw, src, f'{tag}_pick', False, P)
     for (kind, hint, op, found, _), (_, _, ot, _, _) in zip(P, T):
+        if kind.startswith('seat (none'): fails.append('seat: not proven (no seat without another seat in reach on any deck)'); continue
         if hint == 'nowhere to stand': print(f'  {kind}: nowhere to stand beside it'); continue
         if not found: fails.append(f'{kind}: the bottom line never named it ({[h for h in hint if h][:4]})'); print(f'  {kind}: not reached by the D-pad'); continue
         if 'seat' in kind:
