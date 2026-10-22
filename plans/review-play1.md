@@ -64,6 +64,24 @@ For the lead:
 2. LD1 offered a standing ladder-tap part for interactions_check; nothing checks note 14 today. Worth a backlog row (or a small follow-up), not a blocker.
 3. Owner: the rower's mover is in 4b (the deck architect's); it reads section 15's ACT.body and section 10's DECK_CREW at run time, typeof-guarded, falling back to the old swing.
 
-## F. Breakfast at 07:00 (note 18), SC1: claude/patch-play1-f
+## F. Breakfast at 07:00 (note 18): on hold
 
-(waiting for the tip)
+Not reviewed. SC1 would not push without the user's own go; the lead moved it to SC2 (claude/patch-play1-f2), then put breakfast on hold until the user decides (lead 26, 06:14 UTC). Whoever reviews it later also does the section 14 owner check (PB2 was released). What depends on breakfast opening at 06:00 in 32b699a6 (line numbers there), to tick off:
+
+- MEALS.breakfast[0] 360 (9311); FOOD.open.breakfast 360 (16036); galley early plan [330,360 bake][360,540 line] (15949) and galleyShift head (16108); chef cooks 290-510
+- texts: servery 5427, menu board 5432, canvas menu 2538 + 16916 'Breakfast 06:00', hunger tips 12609 12649, servery closed 13132, pans 16786
+- night shift ends 06:00 then breakfast: 1h wait? (10470-10475); garden hart-ravi hours 360-840 breakfast?
+- morning(): want = max(MEALS.breakfast[0], ...): crew wake (F.wake) vs 07:00; Works crew clock 08:00-09:00
+- traditions with meal 'breakfast' (pick-your-own at 06:15 = 375; long breakfast); intro week beats; devDay Schedule
+- player's alarm 06:00 (WAKE_AT): ok to keep?
+- checks: day_check several days (1, 3 backlog11, 5 Fri, 6 Sat, 12), food_check 1 7 and 11 4, events_check, intro --week?, cadet_test (Deck 4: crew positions at 06:00 start may change -> explained), check_fast, design-doc
+
+## Summary (06:15 UTC)
+
+| Part | Tip | Verdict |
+| --- | --- | --- |
+| B, notes 9-12 (FR4) | claude/patch-play1-b 4d062c45 | PASS |
+| J, note 20 (CK1) | claude/patch-play1-j ec06f68e | PASS (after one fix asked at 1188cbdf) |
+| E, notes 14, 16 (LD1) | claude/patch-play1-e 7e26050e | PASS (e36549af had no game change) |
+| F, note 18 | none | on hold (the user's decision) |
+
