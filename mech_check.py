@@ -808,6 +808,10 @@ SIDE = r"""(() => {
     const took = workStep(j, st, 63, null); const m = ACT && ACT.def ? ACT.def.mins : null; ACT = null; SHIP.player.wsteps = []; return [took, m]; };
   for (let i = 0; i < 18; i++) toolWear('pipekit', 5);
   const a = look(null), b = look('pipekit'); out.look = [a[0], b[0], a[1] && b[1] ? Math.round(b[1] / a[1] * 100) / 100 : null];
+  // a wait step keeps its start when you come back before it's ready (wsOf: the step under way, not a fresh one; TS3, a planted fault)
+  { SHIP.player.wsteps = []; ACT = null; const j = { id: 'probe@w', title: 'Probe' }, st = { step: 'wait', places: [], how: 'wait', opts: { mins: 30 } }, t0 = shipNow();
+    workStep(j, st, 5, null); const at1 = (wsFind(j.id, 5) || {}).at; setShipNow(t0 + 10); workStep(j, st, 5, null); const at2 = (wsFind(j.id, 5) || {}).at;
+    out.wait = [at1 === t0, at2 === at1]; SHIP.player.wsteps = []; ACT = null; setShipNow(t0); }
   // the cap
   const x0 = W.xp; out.xp = [worksSideXp(1, 'a'), worksSideXp(3, 'b'), worksSideXp(1, 'c'), worksSideXp(-1, 'd')]; out.gain = W.xp - x0;
   setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e');
@@ -841,6 +845,7 @@ def part_side(g):
     check(a['none'] == [None, 1, 0], 'side: a tool you don\'t have has no state and doesn\'t slow you')
     check(a['uses'] == [100, 28], f"side: worksUse doesn't wear the scanner or the pipe kit again ({a['uses']})")
     check(a['look'][0] and a['look'][1] and a['look'][2] == 1.25, f"side: a look step with a due tool takes a quarter longer and still starts ({a['look']})")
+    check(a.get('wait') == [True, True], f"side: a wait step keeps its start when you come back before it's ready ({a.get('wait')})")
     check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
     check(a['notes'] == ['a1', 'b1', 'e2', 'probe1', 'probe1'], f"side: the sideXp notes ({a['notes']})")
     check(a['turnin'] == 3, f"side: side-job kinds turned in at the board are capped too (+2), an ordinary job isn't (+1) ({a['turnin']})")
@@ -1092,6 +1097,8 @@ FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  const rigN = () => { let m = 0, v = 0; player.rig.root.traverse(o => { if (o.isMesh) { m++; v += o.geometry.attributes.position.count; } }); return [m, v]; };
  delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig0 = rigN();
  let W = reset(12 * 1440 + 300); out.kinds = caseKindsOpen();
+ // head-scratchers are offered on ordinary workdays: with the events base off, the career-beat guard sees no event day (caseOffer asks eventDay; TS3)
+ out.evDays = typeof eventDay !== 'function' || typeof EV_GUARD_ON === 'undefined' || EV_GUARD_ON ? null : Array.from({ length: 60 }, (_, i) => i + 1).filter(d => eventDay(d));
  tick(12 * 1440 + 480, 12 * 1440 + 500); out.mail = [SHIP.mail.filter(x => /Calder/.test(x.from || '')).length, worksSide().ff.mail];
  tick(14 * 1440 + 470, 14 * 1440 + 490); let j = SHIP.jobs.find(x => x.ticket);
  out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
@@ -1110,6 +1117,7 @@ def extra_ff(g):
     a, b = g.ev(FF), g.ev(FF)
     print('  ff kinds', a['kinds'], 'mail', a['mail'], 'posted', a.get('posted'), 'solved', a.get('solved'), 'grade', a.get('grade'), 'after', a.get('after'), 'wrong', a.get('wrong'), a.get('wrongAfter'), 'notYet', a.get('notYet'))
     check(a['mail'] == [1, 1], "ff: Calder's Mail on Day 13")
+    check(a.get('evDays') in (None, []), f"ff: with the events base off no day is an event day, so cases are offered (Days 1-60: {a.get('evDays')})")
     if not check(a.get('posted') and a['posted'][0] == 15 and a['posted'][1] == 480 and a['posted'][2] == 23 and a['posted'][3] == 2, 'ff: a ticket at 08:00 on the next workday, Tier 2, held in slot 23'): return
     check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
     check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
