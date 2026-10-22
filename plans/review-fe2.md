@@ -34,3 +34,30 @@ player_check's new lines, a build-table row. Nothing else.
 - Note (not blocking): player_check runs at 900x760, so its "card fits the screen" line is not the phone size the user
   asked about; my phone-size tap above covers it for this review. The card fitted on the base too (bottom 826 of 844);
   the change makes it 22 px shorter. #25 (showering outside the cubicle) was not changed (DS1: not a bug, lead 29's call).
+
+## FX2: claude/p5-fix2 421838e4 (commits d59e8e9f, 493b84ea, 421838e4; items 29 and 40): FIXES NEEDED (item 29)
+
+Reviewed against 31477c3c (FX2's merge of arrows-c 6610dc7, whose other parent already holds integration 0.64.16 and
+FX2's earlier Day 0 tray fix 191d1853). So the branch brings 0.64.16 and 191d1853 along as well as batch 2: the build
+master should know. What batch 2 changed: section 15b's ixTap / ixTeaAnywhere / BUSY_TILE (tea), the intro's arrow
+lines (introArrowClear, introArrowTick, introTick), intro_check part 13b, player_check's tea part, the build table.
+
+- **40, tea (PASS).** Day 1 tea with Zeke, 390x844, real screen taps (p_tea.py). With every Tea corner place taken: a tap
+  on the Armchair or the Tea table gives "Tea and biscuits" standing in the corner (tea day set); on 31477c3c the
+  Armchair said "In use" and the table did nothing. With a seat free: the same on both (you sit in it).
+  player_check: OK on the tip; on 31477c3c with the tip's check, exactly the tea line FAILS (the three-taken case; with
+  two taken the base already gave tea at the standing spot).
+- **29, the Clock in arrow (FIXES NEEDED).** The fix holds while you stand at the Deck 5 lift (intro_check 13b: OK on
+  the tip, FAILS on 31477c3c), but a real walk does not: Day 1 08:30, Tracked "Clock in" tapped on Deck 4, ride to Deck
+  5, walk from the lift towards the clock (p_clock4.py). As you step from the lift lobby (room '@') into the Works bay,
+  15b's trkDoneCheck counts you as arrived (any tile in the clock's room) and takes the arrow down, 5.6 m from the clock
+  and not clocked in; Zeke's arrow takes over at once (08:35 "clear clock:in <- trkDone < trkDoneCheck"). It came back
+  only at 08:50 as the intro's own first-time "Clock in" arrow. So from the player's side it still switches itself off
+  on Deck 5. Suggested: trkDoneCheck leaves a 'clock:' goal alone (15's clock reminder already takes it down once you
+  punch), and 13b walks into the bay (not just goToDeck) and then punches with a tap on the clock.
+- check_fast on the tip: QUICK CHECK OK (149 s).
+- cadet_test strictly alone, 31477c3c vs tip: run 1 and 2 "ALL IDENTICAL apart from renderer noise" (6-46 px, max 1 level,
+  every shot), run 3 ALL IDENTICAL (0 px). Base vs a padded copy of base: 0. Tea hunks alone: 0. Intro hunks alone: one
+  run with a_start's speech bubble a few px to the side (14812 px), two reruns 0. So: noise, nothing from the change.
+- Side note (both builds, not FX2's): my skip to Day 1 08:30 leaves the intro on step 'bunk', and at 08:55 a "Put your
+  bag in your wardrobe" arrow shows though the bag is stowed. Likely my probe's skip; not filed.
