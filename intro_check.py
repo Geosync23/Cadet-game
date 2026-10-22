@@ -102,7 +102,7 @@ WALK_TICK = r"""((mode) => {
     }
   }
   return { t: clockText(), step: I.step, deck: deckDef.num, me: cellAt(player.obj.position.x, player.obj.position.z),
-           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, dlg: DIALOGUE && DIALOGUE.id,
+           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, shown: (el => el && !el.hidden ? el.children[2].textContent : null)(document.getElementById('ixGoal')), dlg: DIALOGUE && DIALOGUE.id,
            ex: a ? [+a.x.toFixed(2), +a.z.toFixed(2)] : null, pause: !!(typeof INTRO_UI !== 'undefined' && INTRO_UI.pause), pre: I.done['tour:up'] !== undefined && I.done['tour:lift'] === undefined, sm: shipNow() };
 })"""
 
@@ -525,7 +525,7 @@ with sync_playwright() as pw:
         print('  tour lines with the week under way (place, played, written):', tl2)
         if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
         order, peak, led = [], {}, 0
-        rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
+        rides, rideFrom, liftArrow = [], None, []   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
         lingered = []
         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
         dinner, bunkAt, seats, chat, chiefAt = None, None, None, None, None
@@ -537,6 +537,7 @@ with sync_playwright() as pw:
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
             if r['esc'] and r['esc'][2] == 'escort': led += 1
+            if r['step'] == 'wing' and r['deck'] == 5 and r.get('shown'): liftArrow.append(r['shown'])   # FX3: at the Deck 5 lift with Deck 4 to go, the arrow at the lift panel
             spot = ('lift' if r['step'] in ('lift', 'wing') and r['deck'] == 5 and r['me'][0] >= 14 else 'bunk' if r['step'] == 'toMess' and r['deck'] == 4 and not r['dlg'] else None)
             if DAWDLE and spot and spot not in lingered:   # stand still for ~40 real s (more than the steps' old 20 ship minutes)
                 lingered.append(spot)
@@ -623,6 +624,8 @@ with sync_playwright() as pw:
         for x in rides[:2]:
             if x[5] is None or x[5] > 3: fail(f'after the lift ride Deck {x[0]} -> {x[1]} Torres is not beside you: {x}')
         if len(rides) < 2: fail(f'expected two lift rides on the evening (Deck 5 -> 4 -> 3): {rides}')
+        print('  the arrow at the Deck 5 lift, Deck 4 to go:', sorted(set(liftArrow))[:3])
+        if not any(x.startswith('Tap the lift: Deck 4') for x in liftArrow): fail(f'at the Deck 5 lift with Torres, the arrow should point at the lift panel for Deck 4 (the user\'s: "an arrow pointing to the control panel"): {sorted(set(liftArrow))[:3]}')
         print(f"  the walk to the lift: {pre['n'] * ps:.0f} s with him on Deck 5 ({pre['n']} looks), paused {pre['pause'] * ps:.1f} s, longest standing still {pre['still'] * ps:.1f} s")
         if pre['pause']: fail('Torres paused for his lines before the lift (the user on 0.60.5: walk-and-talk until the lift)')
         wl = [i for i, x in enumerate(said) if any(x in L['core'] + L['extra'] for p, L in sp if p in walkp)]
