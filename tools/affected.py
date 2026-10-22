@@ -48,7 +48,7 @@ CHECKS = {
     'join': ('python3 join_check.py {g}', 3), 'clothes': ('python3 clothes_check.py {g}', 2),
     'path': ('python3 path_check.py {g}', 2), 'puzzle': ('python3 puzzle_check.py {g}', 2),
     'food': ('python3 food_check.py {g}', 2), 'career': ('python3 career_check.py {g}', 2),
-    'social': ('python3 social_check.py {g}', 1), 'talk': ('python3 talk_check.py {g}', 1),
+    'social': ('python3 social_check.py {g}', 1), 'talk': ('python3 talk_check.py {g}', 2),
     'arc': ('python3 arc_check.py {g}', 1), 'lines': ('python3 lines_check.py {g}', 1),
     'bigevents': ('python3 bigevents_check.py {g}', 5), 'fridays': ('python3 fridays_check.py {g}', 4),
     # in check_fast already (listed only so a check file of theirs is known)

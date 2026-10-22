@@ -176,7 +176,7 @@ or item you can't reach.
 | **food_check.py** | The galley over whole days: food ready on time, waits, portions, the dish pit, cold store, the rota, carts, spoilage, menu, harvest, garden. | 2 | `python3 food_check.py BUILD.html [DAY N]` (default 1 7; releases also run `11 4`) | `FOOD CHECK OK` |
 | **career_check.py** | The Works career on paper: a steady, a very busy and a lazy player; each row on its day; bands, tools, penalties, the save. | 2 | `python3 career_check.py BUILD.html` | `CAREER CHECK OK` |
 | **social_check.py** | The crew's social life on paper: 14 days twice the same, a big jump = hour by hour, the save, Say hello / Talk a while, affinities and news. | 1 | `python3 social_check.py BUILD.html [DAYS]` / `--long` | `SOCIAL CHECK OK` |
-| **talk_check.py** | Talk a while's picker on paper: baked, no repeats, gates, determinism, the save. | 1 | `python3 talk_check.py BUILD.html` | `TALK CHECK OK` |
+| **talk_check.py** | Talk a while's picker on paper: baked, no repeats, gates, determinism, the save; part (i), repeated lines over Days 1-3 with a chatty player (DL1). | 2 | `python3 talk_check.py BUILD.html` | `TALK CHECK OK` |
 | **arc_check.py** | Can every story arc reach its last beat? A diligent player over 70 days; a stalled arc is listed with its next beat. | 1 | `python3 arc_check.py BUILD.html [DAYS] [arcs\|themes\|calls\|booth]` | `ARC CHECK OK` |
 | **lines_check.py** | The writers' `content/` files: parseable, tokens, conditions, length, crew ids, banned words, baked blocks up to date (warnings don't fail); `--day` the voice budget in the browser. | 1 | `python3 lines_check.py [GAME.html]` / `--day` | `lines_check: PASS (0 errors, N warnings)` |
 
