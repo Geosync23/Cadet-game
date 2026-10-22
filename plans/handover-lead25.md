@@ -20,8 +20,8 @@ Lead 25 = session_01J2aTyEohBf8KFHCsTqt3LW, branch `claude/lead-25`. Took over 2
 - Camera: 1.62 / 1.22 (0.64.12, the user asked 10-15% back from 1.85 / 1.40).
 
 ## Game pages (this account)
-- Playtest: https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs (v2 = 0.64.13)
-- Dev: https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (v2 = 0.64.13)
+- Playtest: https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs (v3 = 0.64.14)
+- Dev: https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (v3 = 0.64.14)
 - Publisher PUB1 (session_01GnpjFR6oumvuvTrmcXSqeg) republishes both to the same URLs from a named commit (it made them, so no read is needed). Recipe: plans/handover-lead23.md on claude/lead-24.
 
 ## Builds
