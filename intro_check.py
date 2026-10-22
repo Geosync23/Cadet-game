@@ -14,6 +14,7 @@
 #   8. the evening in the real game (once section 13 has the Day 0 start): New game arriving, the manifest, a player
 #      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
 #      draw calls under 450, no page errors
+#   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -237,6 +238,71 @@ def week(g):
 # part 13, also on its own: python3 intro_check.py BUILD.html --firsts (onboarding 5, 0.42.60-0.42.62, the 0.63.2 playtest):
 # the first-time arrows (the servery after the Chief's "Eat something", the time clock after Day 1's opener, the job
 # board once clocked in, gone once a job's taken), the first night's call-home card and its Track it arrow, and Zeke's
+# the playtest patch 1, #7 (the user: "the Chief's first solo job: the cut scene starts, then nothing happens"): Tuesday
+# 08:45 in the real game, you walk into her office and read her meeting through. Once it closes the solo job must be yours
+# AND tracked like a job taken at the board, its own marker on screen and a toast naming it, and nothing else may take the
+# arrow while you're on it (sampled to 10:40: Zeke's Rounds ask, told at 06:00 before, took it); the Rounds ask (his
+# Mail) not before her meeting is over; her words say how (the board, turn it in) and never put Torres on Deck 6. Then
+# each step moves the arrow like a board job: the shelf, the shop, the machine, back to the board; turned in, it's done
+def solo(g):
+    print('14. Tuesday\'s first solo job in the real game: after the Chief\'s meeting it\'s yours and tracked, and keeps the arrow')
+    if not g.ev("typeof jobReserved === 'function' && typeof myJob === 'function'"):
+        print('  not yet: no jobReserved'); return
+    SEEN = "(() => { const el = document.getElementById('ixGoal'), id = SHIP.jobs.find(x => x.reserved === 3 && x.status !== 'done'); return { t: clockText().slice(-5), dlg: DIALOGUE ? DIALOGUE.id : null, shown: !!el && !el.hidden, label: el && !el.hidden ? el.children[2].textContent : '', goal: IX_GOAL ? IX_GOAL.label : null, track: SHIP.player.track === undefined ? 'unset' : SHIP.player.track, job: id ? id.id : null, mine: myJob() ? myJob().id : null }; })()"
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("window.__solo = []; { const t0 = toast; toast = (a, b) => { window.__solo.push([Math.floor(shipNow()), String(a), String(b)]); return t0(a, b); }; }")
+    g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(60)   # Monday in the bay
+    g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")   # and Monday's shadow job done, as in play: Tuesday's Rounds ask then comes at 06:00
+    g.ev('skipTo(introAbs(2, 8 * 60 + 35))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)
+    g.ev("SHIP.player.track = null")                    # as after Day 1's Tracked items (a real Tuesday has it off)
+    g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")   # had breakfast and a wash (the skip from Sunday leaves you starving: the need marker would rightly lead)
+    g.ev("playerGo(DECKS[5].places.find(q => q.id === '5-office-visit-1').at)")
+    met = None
+    for i in range(80):
+        g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
+        if met: break
+    if not met or not met.startswith('introSoloJob'): fail(f'Tuesday\'s solo job meeting did not play: {met}'); return
+    said = g.ev("DIALOGUE.queue.filter(l => l.who === 'calder').map(l => l.text).join(' ')")
+    n = 0
+    while g.ev('!!DIALOGUE') and n < 40:
+        g.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(2); else dialogueNext(); })()"); g.step(60); n += 1
+    end = g.ev("typeof SHIP.intro.done['d2-solo:end'] === 'number' ? SHIP.intro.done['d2-solo:end'] : Math.floor(shipNow())")   # when her panel closed
+    g.step(30); after = g.ev(SEEN)
+    print(f'  after her meeting: {after}')
+    toasts = g.ev('window.__solo')
+    named = [x for x in toasts if x[0] >= end - 6 and after['job'] and g.ev(f"(j => !!j && {json.dumps(' '.join(x[1:]))}.includes(j.title || jobCard(j)[0]))(SHIP.jobs.find(x => x.id === {json.dumps(after['job'])}))")]
+    print(f'  toasts from her meeting\'s end: {[x[1] + ": " + x[2][:60] for x in toasts if x[0] >= end - 6][:3]}')
+    if 'board' not in said.lower() or 'turn it in' not in said.lower(): fail('her words don\'t say how to do it (turn it in at the board)')
+    if 'deck 6' in said.lower(): fail('her words still put Torres on Deck 6 (he shows you rounds this morning)')
+    if not (after['job'] and after['mine'] == after['job'] and after['track'] == after['job']): fail(f'after her meeting the solo job is not yours and tracked: {after}')
+    if not after['shown'] or after['goal'] is not None: fail(f'after her meeting the solo job\'s own marker is not up: {after}')
+    if not named: fail('no toast naming the solo job when her meeting ended')
+    bad = []
+    while g.ev('shipNow() < introAbs(2, 10 * 60 + 40)'):
+        g.step(150); w = g.ev(SEEN)
+        if not (w['mine'] == after['job'] and w['track'] == after['job'] and w['goal'] is None and w['shown']): bad.append(w)
+    print('  the arrow to 10:40:', 'the solo job\'s throughout' if not bad else bad[:2])
+    if bad: fail(f'something else took the arrow from the solo job before 10:40: {bad[:2]}')
+    ask = g.ev("(() => { const c = SHIP.works && SHIP.works.cur, m = c && c.mail && SHIP.mail.find(x => x.subject === c.mail); return { cur: c ? c.id : null, at: m ? m.at : null }; })()")
+    print(f'  the Rounds ask: {ask} (her meeting ended {end})')
+    if ask['cur'] == 'm1' and ask['at'] is not None and ask['at'] < end: fail(f'the Rounds ask came before her meeting was over: {ask}, end {end}')
+    # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
+    jid = json.dumps(after['job'])
+    lab = lambda: g.ev(SEEN)['label']
+    steps = [lab()]
+    g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ SHIP.player.carry.push(j.parts[1]); if (SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make = null; }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); SHIP.player.carry.length = 0; if (!j.workDone) finishJob(j.id); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    app = g.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {jid}); return typeof jobCard === 'function' && !!j && myJob() === j; }})()")
+    t_in = g.ev(f"turnInJob({jid})"); g.step(30); fin = g.ev(SEEN)
+    print('  the arrow, step by step:', ' > '.join(steps), '| turned in:', t_in, '| after:', fin['mine'], fin['track'])
+    want = [r'fetch ', r'(make |look over )', r'repair ', r'turn it in at the job board']   # (off its deck: 'Take the lift to Deck 4: ...'; the machine shows what else it needs, as for any job)
+    import re as _re
+    if len(steps) != 4 or not all(_re.search(w, (x or '').lower()) for w, x in zip(want, steps)): fail(f'the solo job\'s arrow does not walk its steps like a board job: {steps}')
+    if not app: fail('the solo job is not your job (myJob) through its steps')
+    if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
+
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
@@ -656,6 +722,7 @@ with sync_playwright() as pw:
             if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
+    solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 
