@@ -94,3 +94,23 @@ A goal on another deck now points at the nearest Lift panel you can see (`ixLift
 | By eye, phone 390 x 844 | Deck 5, goal on Deck 4: the pin sits on the lift's keypad beside the doors, "Tap the lift: Deck 4 · Your bunk" (base: the landing's middle). Deck 4 in Bunk 1, goal on Deck 3: off screen, an edge arrow toward the lift, "Tap the lift: Deck 3 · Food" |
 
 Shots: scratch only (lift_base_d5.png, lift_fx3d_d5.png).
+
+## FX1 a34f4666 (1433e5f + the lifecycle commit 00a3a1dd; re-check from PR9): PASS, with one merge blocker for the lead
+
+In it: tracking stays on (new game, Tracked items, every device "go" through `goTo`, which clears on arrival); a tracked job that's gone resets tracking (`trackFresh`); the training meeting's arrow from 15 minutes before (`trainArrow`, "Wait here: ..." in its room, back after a borrowed arrow), and while you hold a job a word 10 minutes before instead ("Rounds with Zeke, 10:45, Works bay. In ten minutes: Tracked shows the way."); the round's arrow only after clock-in, only while the board offers it, never while you hold another job; On shift in Tracked is your job's arrow; career arrows carry `trk` ends (Meet Ines, the Chief's office, the cabin, the test job, the commission, the 14:50 drill); "Shift over: clock out" from 17:00 over a job; an empty-board word; the shower arrow's own-deck rule; lessons not before 09:15; Tracked names the teacher; a tap on the light relays by name.
+
+| Test | Result |
+| --- | --- |
+| career_check --fx on 2b4a05db | FAIL, 15 lines (bug 1, bug 2, the borrowed arrow, new game, go, On shift, clock out, empty board, shower, 09:15, Tracked's names, the test job, the round's arrow, the light relays), as it should |
+| career_check --fx on a34f4666 | CAREER CHECK OK |
+| cadet_test 2b4a05db -> a34f4666 | first run: only `a_start` (the known first-frame flake); rerun ALL IDENTICAL |
+| arrows_check week on a34f4666 alone | PR9's regression is gone: no "never clocked in" on any day, no "Take your first round" over Clock in, no stale drill or light-relays arrow. Left: the lesson chain (m1 still `ask` for this follower, then everything after) and FX2's/FX3's own lines (main lift, galley plant, stage lights), fixed on their branches |
+| Honest play, merge FX3 02e212f1 + FX2 cc2bb2be + FX1 (my bot, Days 2-8) | Rounds learned on Day 2 (holding a job at 10:35: the word "In ten minutes: Tracked shows the way", then Tracked); "Wait here: hauling and stores with Yara, 12:00" in Main storage; "Shift over: clock out" at 17:00; "Nothing on the board for you just now" when dry; the drill learned. **Then Hauling's watch step lapses every day (Days 3, 4, 5) and nothing after it opens.** See below |
+| arrows_check week on the merge | no clock-in line red on any day; drill learned. Red: the lesson chain (m1 `again` for this follower), "Take your first round" stuck at the board Days 3 and 8, and "Clean a vent: laundry" stuck Days 2 and 4 |
+| arrows_check shift on the merge | "not clocked out" (the check reads careerClockedIn, which stays true after clocking out: FX1's note, for AR1) and "stuck at Take clean linen to the laundry, Deck 4" |
+
+**Merge blocker (not one fixer's bug):** with FX2's fix the teacher's job is off your board during the watch step, and nothing points at the watch step: after Yara's talk the job arrow says "Take a job at the job board", the follower goes off on other jobs and is never within 3 tiles of her run for 10 minutes, so the lesson lapses at 17:00 every day. Before FX2 a player could take the teacher's job (a skip); now there's no way through but luck. Same for Tuning and the scanner. Suggested: while `c.st === 'watch'`, an arrow to the training job's spot or the teacher ("Watch Yara: Main storage"), over board and job arrows, until your turn. Sent to lead 29 and FX1.
+
+**Merge resolutions (FX1 with FX2/FX3), four code conflicts:** 15's jobTap (FX1's `own` + FX3's room fallback and ray rescue: both); 15b's ixJobStep (FX1's "Shift over" first, then FX3's put-back); the 14:50 drill arrow: **FX2's must win**: FX1's `trk: 'career:drill'` (no trkFrom) makes trkDoneCheck clear it as soon as you reach the Works bay, before FX2's stop-by-stop drill arrows (drillGoal only moves an arrow tagged with the drill), and FX2 already clears it at 15:15; "Meet Ines": FX3's incGoalSet with FX1's trk fields (fine).
+
+**Found, old (on 2b4a05db too), not FX1's:** the laundry's chore pin (`4-laundry-1`, "Clean a vent: laundry" and "Take clean linen to the laundry") sits on Washer 1: a tap on the washer starts your own laundry load ("You start a load. It fills and begins to churn.") instead of the chore's stop; only a floor tap at the pin works. The same shape as the galley plant/chiller case FX3 fixed. That's both stuck lines above.
