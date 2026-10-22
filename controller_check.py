@@ -532,7 +532,7 @@ def part_reach_pad(pw, src, tag, states):
         seen, order = pad_moves(sw.r, min(12, len(want) + 2))
         now = {i['k'] for i in Sweep.inner(sw.scan())}
         missing = sorted((want & now) - seen)
-        print(f'  {where}: {len(seen & want)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
+        print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         # A clicks the highlighted thing
         sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
