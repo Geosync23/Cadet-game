@@ -46,7 +46,7 @@ The single controller_check.py is THIS file (agreed with CP1, who merges claude/
 | games | games | OK on the stand-in (Tiles 9 moves to the end, Done; Lightdisc how-to, stick, B leaves) | 3 faults: the run was cut off by a time limit, rerun into a log file |
 | day | all | written (lift to breakfast, eat, talk, Take it at the job board, lift home, Set alarm), never run | none |
 
-Results of PR9's faults c1-c7 on 1ec1612: see the end of this note (or rerun: `CTL_MUT=PR9 python3 controller_check.py
+Results of PR9's and RV2's faults on 1ec1612: see "Reviewers' faults" at the end of this note (or rerun: `CTL_MUT=PR9 python3 controller_check.py
 g.html idle walk touch pick --mutants`, g.html = `git show 1ec1612:starship-cadet.html`).
 
 ## To fold in (the next big job)
@@ -102,3 +102,17 @@ appending to a list the adapter returns), then register NEEDS and MUTANTS as in 
 Old-shape part 'settings' (part_settings with helpers SV and SAVE_NOW above it; uses Pad and sweep()). A real reload with
 saving on (writes a save in the game's shape, page.goto without ?nosave, clears localStorage at the end); defines
 window.PAD_LAYOUTS as a stand-in for P5's. About 2 minutes. NEEDS ['settings'].
+
+## Reviewers' faults on 1ec1612 (11:30, logs in the scratchpad: pr9.txt, pr9b.txt)
+Caught: PR9 c1 (walk), c2 (walk), c3 (walk: the deck takes nothing while the device is open, added for it), c4 (touch),
+c5 (pick), c6 (idle: scene 14 -> 15 with the switch on and no pad); RV2 t3_noop_crew (pick: the chat card / who's talking,
+added for it), t3_noface (pick: the facing test, added for it).
+NOT caught: PR9 c7 (a seat ringed where the tap reaches a person). Cause, the check's: the crowded-seat case (Deck 3 mess at
+07:40, a free mess seat beside someone seated) stood the player where the ring offered Lift / Dr. Imra Sato / Deck directory
+/ Spine ladder, never the seat: STAND_BY's nearestOpen near 3-mess-2 seems to land by the lift. Next: stand on the tile
+beside the seat spot (try the four neighbours of the seat's own tile, pick the one nearest the spot), then rerun
+`CTL_MUT='PR9 c7' python3 controller_check.py g.html pick --mutants`.
+Open in the clean run on 1ec1612 (for CP1 to judge, may be the check's): facing the Wardrobe (Deck 4, the spot FACING_SPOT
+chose), the ring starts on "Bed", not the Wardrobe; the lift still not offered from 2 m (CT1 told; CP1 now owns pick).
+Not yet run: the games faults (rerun into a log file; the earlier run was cut off by a time limit), the reach faults, the
+day part (never run), the full reach sweep on turn 4 (scratchpad logs/reach10.txt was in progress).
