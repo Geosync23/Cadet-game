@@ -1079,6 +1079,10 @@ def ride(r, deck, fails, scene):
         r.step(10)
         if r.ev("player.deck") == deck and not r.ev("!!ride"): return True
     fails.append(f'{scene}: the lift never reached Deck {deck}'); return False
+MY_BUNK = r"""(() => { const id = playerBed(), bed = (DECKS[deckOf(id)].places || []).find(p => p.id === id); if (!bed) return null;
+  const c = cellPos(...bed.at), v = new THREE.Vector3(); let best = null, bd = 1.2;
+  ITEMS.forEach((it, i) => { if (!it.hit) return; it.hit.getWorldPosition(v); const d = Math.hypot(v.x - c.x, v.z - c.z); if (d <= bd) { bd = d; best = 'item:' + i; } });
+  return best; })()"""
 def part_day(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_day', mode='pad', plug={}, w=390, h=844)
@@ -1131,7 +1135,15 @@ def part_day(pw, src, tag):
     if r.ev("player.deck") == 4 or ride(r, 4, fails, 'bedtime'):
         bp = r.ev("(() => { const s = placeSpot(playerBed()); return s ? [s.x, s.z] : null; })()")
         if bp and walk_to(r, bp[0], bp[1]):
-            got = ring_and_A(r, ['bunk', 'sleep', 'bed']); r.step(30)
+            # your own bunk, not a neighbour's (the game offers sleep only within 1.2 m of your bed): its ring key
+            mine = r.ev(MY_BUNK); got = None
+            for k in range(12):
+                sel = r.ev(RING_SEL)
+                if sel and mine and sel['key'] == mine: got = r.ev(HINT); break
+                r.press('RIGHT'); r.step(4)
+            if got: r.press('A')
+            else: fails.append(f'bedtime: the ring never offered your own bunk ({mine})')
+            r.step(30)
             asked = r.ev("!document.getElementById('sleepAsk').hidden")
             res = press_in_panel(r, "document.getElementById('sleepYes')") if asked else 'no alarm card'
             r.step(60); t = r.ev("[SHIP.time.day, SHIP.time.min]")
