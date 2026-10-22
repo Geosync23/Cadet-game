@@ -17,6 +17,9 @@
 #           up, A puts down); A on your hold keeps the highlight when the board redraws; Again at the end, Done by D-pad and A
 #   disc:   Lightdisc: Next highlighted, A is Next; the left stick's full range (a light push slower), never the highlight;
 #           letting go stops; A never presses Leave by itself, B leaves; the result card's Again, Quick game by D-pad and A
+#   screens: the lift (your goal deck highlighted, A rides, B stays); the alarm (Set alarm first, − and + in reach, B
+#           closes); a work step's turn card (its first answer, not the ×; the place kept as it asks again; B is the ×);
+#           the arrival's manifest (the name box first, B stays, A on Sign fills a suggested name, A again signs)
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 controller_check.py BUILD.html [part ...]    Good is CONTROLLER CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -443,7 +446,46 @@ def part_disc(pw):
     p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the quick game')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('tiles', part_tiles), ('disc', part_disc)]
+FOCUS_ID = "(() => { const a = document.activeElement; return a ? (a.id || a.textContent.trim().slice(0, 24)) : null; })()"
+def part_screens(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    # the lift: your goal's deck highlighted; A rides; B stays
+    goal = p.ev("(() => { const n = [4, 5, 6, 7, 3, 2, 1].find(n => DECKS[n] && n !== deckDef.num); setGoal({ deck: n, x: 0, z: 0, label: 'test' }); return n; })()")
+    p.ev('openLiftPanel()'); p.step(3)
+    check(p.ev("document.activeElement && document.activeElement.classList.contains('goal')"), f'screens: the lift should highlight your goal deck ({goal}), not {p.ev(FOCUS_ID)}')
+    p.press('b'); p.step(2); check(p.ev("document.getElementById('lift').hidden") and not p.ev('ride'), 'screens: B on the lift should stay')
+    p.ev('window.__pp = []; window.__ppWas = pressPanel; pressPanel = n => __pp.push(n); openLiftPanel()'); p.step(3); p.press('a'); p.step(2)   # (the ride itself needs you in the car)
+    check(p.ev('__pp.join()') == str(goal), f'screens: A on the goal deck should ride to it ({p.ev("__pp.join()")})')
+    p.ev('pressPanel = __ppWas; setGoal(null)')
+    # the alarm: Set alarm highlighted; − and + in reach; B is Not yet
+    p.ev('alarmOpen()'); p.step(3)
+    check(p.ev(FOCUS_ID) == 'sleepYes', f'screens: the alarm should land on Set alarm, not {p.ev(FOCUS_ID)}')
+    t0 = p.ev("document.getElementById('alarmT').textContent"); p.press('up'); f = p.ev(FOCUS_ID)
+    if check(f in ('alarmDn', 'alarmUp'), f'screens: D-pad up from Set alarm should reach − or +, not {f}'):
+        p.press('a'); check(p.ev("document.getElementById('alarmT').textContent") != t0, 'screens: A on − or + should move the alarm')
+        p.press('left' if f == 'alarmUp' else 'right'); check(p.ev(FOCUS_ID) in ('alarmDn', 'alarmUp') and p.ev(FOCUS_ID) != f, 'screens: the D-pad should reach the other of − and +')
+    p.press('b'); p.step(2); check(p.ev("document.getElementById('sleepAsk').hidden"), 'screens: B on the alarm should close it')
+    # a work step's turn card (deviceChoose): the first answer highlighted, not the ×; the place kept when it asks again; B is the ×
+    p.ev("window.__ws = { picks: [], v: 0 }; window.__ask = () => deviceChoose({ title: 'The setting', text: 'v ' + __ws.v, choices: ['−', '+'], cancel: 'Step back' }, i => { __ws.picks.push(i); if (i >= 0) { __ws.v += i ? 1 : -1; if (__ws.v < 3) __ask(); } }); __ask()"); p.step(3)
+    check(p.ev(FOCUS_ID) == '−', f'screens: a turn card should land on its first answer, not {p.ev(FOCUS_ID)}')
+    p.press('right'); check(p.ev(FOCUS_ID) == '+', f'screens: D-pad right should reach + ({p.ev(FOCUS_ID)})')
+    for _ in range(3): p.press('a'); p.step(2)
+    check(p.ev('__ws.v') == 3 and p.ev('__ws.picks.join()') == '1,1,1', f'screens: A three times on + should keep the place as the card asks again ({p.ev("__ws.picks.join()")})')
+    p.ev('__ws.v = 0; __ask()'); p.step(3); p.press('b'); p.step(2)
+    check(p.ev('__ws.picks.slice(-1)[0]') == -1 and p.ev('!DEV.choose'), 'screens: B on a question should be the × (Not now, Step back)')
+    # the arrival's manifest: the name box first; A on Sign with it empty fills a suggested name; A again signs
+    p.ev("if (typeof introManifest === 'function') introManifest()"); p.step(4)
+    if check(p.ev("(padLayer() || {}).id") == 'introManifest', f'screens: the manifest should be the panel on top ({p.ev("(padLayer() || {}).id")})'):
+        check(p.ev("document.activeElement && document.activeElement.tagName") == 'INPUT', 'screens: the manifest should land in the name box')
+        p.press('b'); p.step(2); check(p.ev("(padLayer() || {}).id") == 'introManifest', 'screens: B should not leave the manifest')
+        p.press('down'); check(p.ev("document.activeElement && document.activeElement.tagName") == 'BUTTON', 'screens: D-pad down should reach Sign and go aboard')
+        p.press('a'); check(p.ev("INTRO_UI.manifest && INTRO_UI.manifest.querySelector('input').value") == p.ev('PAD_NAME'), 'screens: A on Sign with no name should fill in the suggested one')
+        p.ev("INTRO_UI.manifest.querySelector('button').focus()"); p.press('a'); p.step(3)
+        check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('tiles', part_tiles), ('disc', part_disc), ('screens', part_screens)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue

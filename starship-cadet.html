@@ -53745,6 +53745,39 @@ padOn('frame', () => {                                     // off those screens 
   if (!padTlOn(L)) PAD_TL.shown = false;
   if (!padLdOn(L)) { if (PAD_LD.stick) { PAD_LD.stick = false; DISC.inp.kx = DISC.inp.kz = 0; } PAD_LD.res = false; }
 });
+// Work steps and the device's questions (deviceChoose: a choose or turn card, a look's marks, the arrival's "skip it?"):
+// the highlight lands on the first answer, not the × (Walk away), and keeps its place when a turn card asks again (− + −
+// without hunting); B is the ×, as tapping it is (Not now, Step back). A conversation's card is the helper's (B: nothing).
+PAD_FIRST.devDlg = '#devDlg .act';
+PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck
+padOwn(L => !!(L && L.id === 'sleepAsk'), { move: dir => {   // − and + sit far apart in their row: left and right go straight across (not down to Set alarm)
+  const a = document.activeElement, to = dir === 'left' && a && a.id === 'alarmUp' ? 'alarmDn' : dir === 'right' && a && a.id === 'alarmDn' ? 'alarmUp' : null;
+  if (to) { padFocusTo(document.getElementById(to)); return true; }
+} });
+const PAD_DLG = { el: null, i: -1 };
+const padDlgOn = L => !!(L && L.id === 'devDlg' && DEV.choose);
+padOwn(padDlgOn, {
+  frame: () => {
+    const D = PAD_DLG, a = document.activeElement, acts = [...document.querySelectorAll('#devDlg .act')];
+    if (D.el && !D.el.isConnected && D.i >= 0 && acts[D.i] && acts[D.i] !== a) padFocusTo(acts[D.i]);   // asked again: the same button
+    const f = document.activeElement, i = acts.indexOf(f); if (i >= 0) { D.el = f; D.i = i; }
+  },
+  b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },
+});
+padOn('frame', () => { if (!padDlgOn(PAD.used ? padLayer() : null)) { PAD_DLG.el = null; PAD_DLG.i = -1; } });
+// The arrival's manifest (section 21's introManifest, a full-screen form): a panel once the controller is in use (it
+// gets an id then, so the helper can find it). The highlight lands in the name box: A brings up the phone's keyboard,
+// D-pad down reaches Sign and go aboard. A on Sign with the box empty fills in a suggested name you can change, or sign
+// with (the user's answer to the plan's question 6: no keyboard, a suggested name; the name can be changed later).
+// It's a card you must answer: B only leaves the box.
+const PAD_NAME = 'Alex Morrow';
+padPanelAdd('introManifest', { on: () => !!INTRO_UI.manifest, before: 'careerEnd', first: '#introManifest input', back: PAD_MUST });
+padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });
+padOwn(L => !!(L && L.id === 'introManifest'), { a: () => {
+  const a = document.activeElement, m = INTRO_UI.manifest, box = m && m.querySelector('input');
+  if (!box || !a || a.tagName !== 'BUTTON' || !m.contains(a) || box.value.trim()) return;   // (the helper presses it)
+  box.value = PAD_NAME; return true;                       // shown in the box first; A again signs
+} });
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================
