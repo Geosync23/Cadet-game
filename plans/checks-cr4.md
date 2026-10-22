@@ -16,6 +16,16 @@
 
 **CR4: OK.** No FAILs. Same peaks as the first 0.64.17 candidate (8193458e).
 
+### Taken over from CR6 (0.64.17 1498dbf4, same sha256)
+
+Lead 29 assigned these at 18:13; CR6 confirmed them off its list and not started (it kept fridays, disc, tiles, join). Run one at a time, alone, at 1498dbf4.
+
+| Check | Result | Key lines |
+|---|---|---|
+| food_check 1 7 | OK (exit 0, 59 s) | `FOOD CHECK OK`; no FAIL lines (backlog 23's `garden, good` did not show: garden good 772 picked, 0 binned, 0 missed) |
+| food_check 11 4 | OK (exit 0, 65 s) | `FOOD CHECK OK`; no FAIL lines |
+| clothes_check | OK (exit 0, 80 s) | `ALL OK` |
+
 ## 0.64.17 full round (2026-10-22; breakfast at 07:00)
 
 - **Candidate:** `claude/integration-next` 8193458e
