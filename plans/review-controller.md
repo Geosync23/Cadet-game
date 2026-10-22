@@ -242,3 +242,23 @@ Fixes for CP5 (small):
 4. DEV_NOTES says "the two tap-again asks": there's a third, the welcome's "Tap again to end the welcome" (no time limit).
 5. PAD_LAYOUTS.left leaves no zoom within reach (RT and the right stick on the far side, LT becomes A): fine as a
    preset if the page or DEV_NOTES says so, or put zoom on the D-pad's spare direction.
+
+## The noise, settled
+P3 958421a on, re-run strictly alone: ALL IDENTICAL (plain). With the control (93093a8 against itself alone: zero
+pixels) and P5 alone (plain), the 1-level HUD noise came only from runs with a second browser beside them: load, not
+the builds. Rule of thumb for this container: cadet_test alone, nothing else running.
+
+## P3 verdict (CP3 958421a on 93093a8): PASS WITH FIXES (none blocking)
+Runs (alone): cadet_test off and on ALL IDENTICAL; CP3's controller_check OK; mutants 8/8 CAUGHT (markload, alwaysshow,
+nopause, pausealways, norestore, saidalways, ninA, nounuse); check_fast QUICK CHECK OK (376 s); probe p_marks: marks
+right at 390x844, 320x640, 1280x800 in all three families, gone at a touch, unplug pauses with the line, tap resumes.
+The pauseSet hook (section 15): fine (above). Fixes for CP3:
+1. A first press of B loses "Controller connected": 'use' shows it, then B's handler puts toasts away the same frame.
+   Show it after the press's own handlers (e.g. on the next frame), or skip B's put-away on the press that said hello.
+2. The connected toast replaces whatever toast is up (a press in the first seconds loses the opening "You wake in
+   Bunk 1... Tap to walk" toast) and moves TOAST_AT: wait until no toast is showing, then say it.
+3. 'gone' tests `padList().length` with the going pad possibly still listed; leave it out as padBye does
+   (`g.index !== gone`).
+4. padPauseLine finds the card's line by position: give the line an id in pauseSet's markup (same one-line hook).
+5. Check gap: CP3's touch part can't see toasts (the quiet style hides #toast), so 1 and 2 pass it; a marks case for
+   "first press B" would catch 1.
