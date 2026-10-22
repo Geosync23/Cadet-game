@@ -1,5 +1,26 @@
 # CR6 check results
 
+## 0.91.0 full round (2026-10-22): OK
+
+- **Build:** `claude/integration-next` 989fd566 (0.91.0: the controller on 0.64.16, switched off, + fresh-eyes batch 1;
+  no breakfast), `starship-cadet.html` sha256 `da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee`
+  (matches BM14's).
+- **OLD:** 0.64.16 b9f053ba. Not needed: no FAIL.
+- Share: all 10, one at a time, tiles alone. (CR1 offered to take fridays; it was already running here.)
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 254 s) | `QUICK CHECK OK in 254 s`; machine repair share `machine jobs 40, repairs 20 (50%)` |
+| mech_check | OK (exit 0, 197 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 160 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 1121 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 82 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 107 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 133 s) | `JOIN CHECK OK` |
+| food_check 1 7 | OK (exit 0, 62 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 62 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 83 s) | `ALL OK` |
+
 ## 0.64.17 round 2 (2026-10-22): OK
 
 - **Build:** `claude/integration-next` 1498dbf4 (with SC1's m12 and Line supper fixes, CP4's bubble fix),
