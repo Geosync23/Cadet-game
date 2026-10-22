@@ -1631,7 +1631,7 @@ def legacy_parts(GAME, ON, fails):
             p.ev("INTRO_UI.manifest.querySelector('button').focus()"); p.press('a'); p.step(3)
             check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
         p.close()
-    # ---- CP3 (claude/controller-p3 958421a): marks, touch (here touch3), drop ----
+    # ---- CP3 (claude/controller-p3 47d71ff): marks, touch (here touch3), drop ----
     # ---- P3 (plan sections 5 and 6): button pictures, connecting and disconnecting ----
     # marks:   nothing before a press; after one, a mark on Device (Y), Pause (Menu), Tracked (View), inside its button, shown;
     #          the bottom line's mark in the pad's style; Xbox / PlayStation / Nintendo from the pad's name and from
@@ -1648,8 +1648,10 @@ def legacy_parts(GAME, ON, fails):
         p = Pad(pw, ON)
         p.plug(); p.step(3)
         check(p.ev("document.querySelectorAll('.padk').length") == 0, 'marks: marks on the page before any press')
-        p.ev("document.getElementById('tt').textContent = ''")
-        p.press('x'); p.step(12)
+        # "Controller connected" waits for the message showing (the opening one) to go, then shows
+        p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
+        check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
+        p.ev("toastEl.classList.remove('show')"); p.step(2)
         m = marks(p)
         for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
             check(m.get((b, k)) == ('xbox:' + k, True), f'marks: no shown Xbox {k} mark on {b}: {m}')
@@ -1709,20 +1711,21 @@ def legacy_parts(GAME, ON, fails):
         check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
     def part_drop(pw):
         p = Pad(pw, ON)
-        p.plug(); p.press('x'); p.step(2)
+        p.plug(); p.ev("toastEl.classList.remove('show')"); p.press('b'); p.step(2)   # the first press is B, which puts messages away
+        check(p.ev("document.getElementById('tt').textContent") == 'Controller connected' and p.ev("toastEl.classList.contains('show')"), 'drop: a first press of B lost "Controller connected"')
         p.axes([0, -1, 0, 0]); p.step(6)
         check(p.ev('!!player.steer'), 'drop: the stick did not walk')
         p.js('window.__padUnplug(0)'); p.step(1)
         check(p.ev('player.steer') is None, 'drop: still walking after the pad went')
         check(p.ev('PAUSE.on') is True, 'drop: a pad in use going away did not pause')
-        line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+        line = p.ev("document.getElementById('pauseLine').textContent")
         check(line == 'Controller disconnected', f'drop: the Pause card reads {line!r}')
         check('pad' not in p.ev('document.body.className'), 'drop: the marks stayed with no pad')
         if SHOTS: p.g.shot(SHOTS + '/drop-pause.png')
         p.plug(); p.step(2); p.press('a'); p.step(2)
         check(p.ev('PAUSE.on') is False, 'drop: A on the Pause card did not resume once the pad was back')
         p.press('menu'); p.step(2)
-        line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+        line = p.ev("document.getElementById('pauseLine').textContent")
         check(p.ev('PAUSE.on') is True and line == 'The ship waits for you.', f'drop: an ordinary pause afterwards reads {line!r}')
         p.press('menu'); p.step(2)
         # not used for half a minute: stop, no pause
@@ -1989,10 +1992,10 @@ MUTANTS['games'] = {
     'B does not leave Lightdisc': WRAP("if (typeof DISC !== 'undefined' && DISC.view) buttons[1] = { pressed: false, touched: false, value: 0 };"),
 }
 # the builders' own planted faults for their old-shape parts (each line once in the builder's game at its tip)
-MUTANTS['marks'] = {   # CP3, claude/controller-p3 958421a
+MUTANTS['marks'] = {   # CP3, claude/controller-p3 47d71ff
   'marks shown without the pad in use': ('src', "'body.pad .padk{display:inline-flex}", "'.padk{display:inline-flex}body.pad .padk{display:inline-flex}"),
   'Nintendo marks in Xbox places': ('src', "nin: { a: ['B', '#e6f0f1', 'B'], b: ['A', '#e6f0f1', 'A'],", "nin: { a: ['A', '#e6f0f1', 'A'], b: ['B', '#e6f0f1', 'B'],"),
-  'Controller connected said at every press': ('src', "if (!PAD_MARK.said) { PAD_MARK.said = true;", "if (true) { PAD_MARK.said = true;"),
+  'Controller connected over another message': ('src', "if (PAD_MARK.say && PAD.used && !toastEl.classList.contains('show')) {", "if (PAD_MARK.say && PAD.used) {"),
 }
 MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
