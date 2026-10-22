@@ -560,21 +560,26 @@ You progress by earning clearance to work on deeper, more connected systems, and
 | --- | --- | --- | --- | --- | --- | --- |
 | 1 | Junior Technician | Junior Officer | Bunk, junior wing | Galley oven, lights, doors, washroom fixtures, laundry washers, cabin fixtures | One machine, one fault. Learn the loop: diagnose, fetch, repair, service | Works bay, storage, machine shop, utility closets |
 | 2 | Technician | Officer (first promotion) | Own cabin, officers' corridor | Air scrubbers, water recycler, heating, air plant, fan | Connected systems. Ducts and pipes run between rooms and decks, so a fault can start upstream. Trace it from the manifold room and junctions | Air plant, fan hall, manifold room, pipe galleries, Deck 4 scrubbers and heating, Deck 3 recycler |
-| 3 | Senior Technician | Officer | Own cabin | Power conduits, relays, batteries, sensor array | Planning around the crew. Some repairs need a shutdown. Pick a quiet hour, warn affected crew, and decide which systems get power during a fault | Battery room, power junctions, crawlspaces, bridge sub-floor |
-| 4 | Engine Specialist | Officer | Own cabin | Reactor, drive coils, engine controls | Team jobs. Big repairs need several techs. You plan the job, call in crew and coordinate, often timed with the bridge | Deck 6: engine room repairs and the reactor |
+| 3 | Senior Technician | Senior Officer (second promotion) | Deck 2's visitors' suite, refitted as yours | Power conduits, relays, batteries, sensor array | Planning around the crew. Some repairs need a shutdown. Pick a quiet hour, warn affected crew, and decide which systems get power during a fault | Battery room, power junctions, crawlspaces, bridge sub-floor |
+| 4 | Engine Specialist | Senior Officer (a badge, not a rank) | Your suite | Reactor, drive coils, engine controls | Team jobs. Big repairs need several techs. You plan the job, call in crew and coordinate, often timed with the bridge | Deck 6: engine room repairs and the reactor |
 
 How you earn a tier:
 
 - **Experience.** Jobs completed in your current tier, weighted by quality and how early you caught faults.
 - **Certification.** When you are ready, the Works Chief sets a supervised qualification job in the next tier. Pass it and your clearance goes up.
 - **The first promotion, as built (Pillar 5 Step 3, the approved page `plans/mechanics/promotion-officer.html`):** once you're "Relied on" and trained to make things safe, Calder tells you "Tomorrow, your test job" (Day 8 for a steady player). The test (never before Day 9) is a real Tier 2 job on one of Deck 4's air scrubbers, held for you 09:00-15:00 with Calder following; it can only be delayed, never failed (not done, and it's set again two workdays later). The next workday she summons you to her office at 11:00 (an urgent notice at 10:30; if you're not in the Works bay by 11:15 she comes to find you): you're promoted to Works Officer, Technician (Tier 2), your reputation starts again as "New officer", and junior jobs are no longer held for you. At 17:00 she walks you to cabin 4-23, which is yours from then (by 17:30 whatever happens). The next day at 17:15 the Captain commissions you in the observation room, with Vance, Calder, Torres and up to three of your closest friends: a second pip on your collar, the framed commission on your shelf, and "Commissioned Officer" on your Record. Every step has a fallback (someone comes to find you, or Mail), so none of it can be missed. Officer reputation bands are provisional until Step 4.
+- **Pillar 5 Steps 5 and 6, as agreed (the user, 2026-10-22; `plans/pillar5-steps56-plan.html` v2 on claude/plan-p5-steps56; not built yet).** Every recommended answer, and the night shift changed by the user:
+  - **Step 5, Senior Officer (Days 15-21):** the Tier 3 test on Monday Day 15 (a planned shutdown of a Deck 6 power junction, with Calder). Storm jobs, the weekend's included, count toward your Works reputation, and the Tier 2 bands are re-tuned so a steady player who helps in the storm is "Relied on" by Sunday Day 14. Day 16: Calder's office at 11:00, then the Captain's ready room; at 17:00 Commander Vance walks you to Deck 2's visitors' suite (your things moved for you; 4-23 back to spare). Day 17: the toast at a Captain's table, Vance called in on his day off. Power and relays (Day 17; this hands you the conduit tester if rewiring hasn't), shutdowns (Day 18: **booked for tomorrow**, so the crew's day really changes), the sensor array (Friday Day 19's morning, with a new carried calibration rig), P4, P5, P9, and the old-mysteries board in the Works bay from Day 21.
+  - **Step 6, Tier 4 and the end (Days 22-26):** the Monday briefing (Day 22, 08:30; a staff meeting, not one of the Captain's scenes, so the Tier 4 test can follow it the same day; it announces the Veyli visit instead of Vance's memo). The Tier 4 test (a drive coil, 09:30-12:30). Engine Specialist is shown as "Senior Officer, Engine Specialist". Mentoring Basil Bramwell (Day 26, 09:00-15:30), and **Calder's question at "Four weeks aboard"** (Day 26, 18:40, the Works tea corner), before the visit's warning.
+  - **The night shift (the user: "the next Monday", three nights, "comes no matter what"):** Monday to Wednesday nights, Days 22-24, 21:00-06:00, whatever your rank. After Monday's briefing Calder moves Mateo Navarro, the night shift's Works systems officer, onto days to ready the shuttle bay and Deck 1's dinner power for the Veyli, and puts you on his nights; you go home at 13:00 to sleep. Night 1: engine work with Alejandro Reyes; Day 23 at 06:00 both engine crews sign your Engine Specialist badge at the shift change; night 2: the reactor; night 3: leading your own team job with the night crew. Thursday Day 25 at 06:00 Calder comes down and takes you off nights (Navarro's done; you have a cadet tomorrow). A player not yet Senior Officer still works the nights, as a pair of hands on Reyes's crew. Days 19-20 are an ordinary Friday and weekend.
+  - Built as two steps, each behind its own switch (the night shift with its own), one spec page per step reviewed first; Step 5 starts once Crossing the Line and the comet are switched on, alongside the visit.
 - **Trust.** Reliability matters: turning up for shifts, not leaving jobs half-done, keeping your corner of the ship running.
 
 What each tier gives you:
 
 - **Access.** Work on new systems. You can already walk into every utility room (2026-10-17); each tier makes the jobs in them yours, and at tier 2 your key opens a cabin of your own.
 - **Tools.** A diagnostic scanner, a pipe kit, a conduit tester, a calibration rig. Each one makes new kinds of faults readable.
-- **Responsibility.** Night on-call duty, where emergencies can wake you. Later, a junior tech to mentor.
+- **Responsibility.** An assigned stretch on the night shift (three nights, Days 22-24; no on-call duty, the user), and a day mentoring a junior tech.
 - **Skill.** Repairs get faster and cleaner in tiers you have mastered, so old jobs become quick wins while new ones stay challenging.
 
 Why it stays interesting: each tier adds a new kind of thinking. Tier 1 is fixing things, tier 2 is tracing problems, tier 3 is planning around people, and tier 4 is leading a team.
@@ -619,7 +624,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 **Commendations and occasions (the events engineer, build 0.34.11, from the Pillar 3 plan's Part 4):**
 
-- **A commendation** comes at an event's all-clear if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. (Timing, the user 2026-10-20: at the all-clear, not when the event ends as it used to. The event's threads stop counting there too.) **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them, in hours as well as days: at most one Captain's scene a day, none on a test day, and never across a night shift. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 (at an hour clear of that day's training) and the table on Day 20 (ending by 20:30, before the night shift).
+- **A commendation** comes at an event's all-clear if you did two or more of its jobs, or one job and a meeting. It's a letter from the Captain, kept on your record. (Timing, the user 2026-10-20: at the all-clear, not when the event ends as it used to. The event's threads stop counting there too.) **The Captain's scenes stay separate** (the user, 2026-10-20): the commendation summons, the Senior Officer ready room, the toast, the Captain's table and the missed-shifts talks each keep their own scene. A career-beat guard spaces them, in hours as well as days: at most one Captain's scene a day, none on a test day, and never across a night shift. After the storm that gives the letter on Day 14, the Senior Officer scene on Day 16, the toast on Day 17, the summons on Day 18 (at an hour clear of that day's training) and the table on Day 20 (its usual 19:30 since the night shift moved to Days 22-24, the user 2026-10-22).
 - **The Captain's ready room:** your first commendation (or a close friendship with Commander Vance) gets you a summons on the first day the career-beat guard leaves free, at an hour it leaves free (after the storm: Day 18). She thanks you, asks for a junior's view, and introduces the Admiral.
 - **The Captain's table:** a dinner in her quarters every four weeks (days 20, 48, ...) at 19:30. You're invited the day before if you were commended in the last four weeks, or have three close friends. The galley cooks an extra batch, and you keep a framed menu if you go.
 - **The bridge invite** (built in 0.34.35; the head writer's lines): bridge hour waits for it. At breakfast in the mess the day before your first bridge hour after the first ship-wide event has ended (day 22, a Monday, in a new game), Commander Vance stops by your table and passes on the Captain's invitation. It's a chance meeting, so there's no appointment or notice first. Any reply counts as a yes; if you miss him, his note comes by Mail and you're invited anyway. Bridge hour is then on the calendar from day 23.
@@ -649,7 +654,7 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **The events base's three answers (the user, 2026-10-21, each the recommended option; `plans/events-base-brief.md`):**
 - **A save already past an event's day** when the events are switched on: that event is **skipped**, never run late. Dev mode can still start it. The skip is decided once, the first time a save loads with events on, and kept with the save.
-- **The Captain's table and your night shift:** on a night-shift week (Day 20) the table starts at **19:00 and ends by 20:15**, so you can go and still be at your 21:00 shift.
+- **The Captain's table and your night shift:** on a night-shift evening (it was Day 20; since 2026-10-22 the night shift is Days 22-24, so no table falls on one in a new game) the table starts at **19:00 and ends by 20:15**, so you can go and still be at your 21:00 shift.
 - **Day 12, the storm and the Friday address:** the rec deck stays closed from the front to the all-clear, but **the auditorium and the way to it open just for the address** (16:00-16:50). The Captain says she's borrowed the room for an hour.
 
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
@@ -830,9 +835,7 @@ Done so far:
 **The game:**
 
 - The Works Chief is Chief Ines Calder. Her personality and how she judges your work are still to be designed, before Pillar 2, because she runs the job board and certifies the player.
-- Should the player ever work the night shift, for example as part of on-call duty?
 - How does diagnosing a fault look on screen: a simple panel with labelled components, or something more hands-on? Prototype it in Pillar 2.
-- Can the player be passed over for certification, or only delayed?
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
@@ -843,6 +846,8 @@ Done so far:
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 
 **Answered:**
+
+- Pillar 5 Steps 5 and 6 (the user, 2026-10-22; plans/pillar5-steps56-plan.html v2): the player works the night shift, assigned, three nights (Days 22-24), with no on-call duty; certification is only ever delayed, never passed over. See "Works progression".
 
 - Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
   - The one extra short event is Crossing the Line, on Sunday Day 7, so Saturday stays free.
