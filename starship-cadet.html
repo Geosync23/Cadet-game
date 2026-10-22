@@ -15796,12 +15796,13 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const doable = j => !!(j && (j.machine || j.kind === 'restock' || j.kind === 'chore' && typeof jobStepDone === 'function'));
+  const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind] && !JOB_KINDS[j.kind].side) && typeof jobStepDone === 'function'));   // a registered kind too (a round, a haul: run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
     close() { el.hidden = true; if (back && back.focus) back.focus(); },
     get isOpen() { return !el.hidden; },
+    doable,                                              // the Take it rule (piece D's guideTakeable reads it)
     draw() {
       if (el.hidden) return;
       list.textContent = '';
@@ -16339,7 +16340,7 @@ function guideShiftOver() {                              // clocked in, not out,
 }
 function guideTakeable() {                               // the board's jobs with a Take it for you (ixBoard's rule), a held one first
   let L = []; try { L = typeof openJobs === 'function' ? openJobs('you') : []; } catch (e) { L = []; }
-  L = L.filter(o => { const j = (SHIP.jobs || []).find(x => x.id === o.id); return !!j && (!!j.machine || j.kind === 'restock' || j.kind === 'chore' && typeof jobStepDone === 'function'); });
+  L = L.filter(o => ixBoard.doable((SHIP.jobs || []).find(x => x.id === o.id)));
   return L.filter(o => o.asked).concat(L.filter(o => !o.asked));
 }
 const guideClock = label => ({ deck: 5, place: '5-timeclock-1', label });
@@ -16357,7 +16358,8 @@ function guideShiftWords(now, P) {                       // S8 and S9
     toast(worksText('works.app.title', 'Works'), 'Works reputation: ' + worksBandWord());
     if (P) pointAsk({ id: 'p:works:training', once: 1, path: guideWorksTab('training', 'Your reputation is here'), until: now + 120, done: tabDone('training') });
   }
-  if (b !== 'new') SHIP.guide.seen[k] = 1; GUIDE_SHIFT.band = b;
+  else if (GUIDE_SHIFT.band !== null && !up) toast(worksText('works.app.title', 'Works'), 'Works reputation down: ' + worksBandWord());   // a drop says so (lead 29)
+  if (b !== 'new' && (up || GUIDE_SHIFT.band === null)) SHIP.guide.seen[k] = 1; GUIDE_SHIFT.band = b;   // the word a game loads with counts as reached
 }
 function guideShift() {
   if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return;
@@ -16407,7 +16409,10 @@ onSim('newGame', () => { SHIP.player.track = undefined; clearGoal(); });
 function boardEmptySay(empty, now) {
   const B = boardEmptySay.s || (boardEmptySay.s = { dry: false, at: -1e9 });
   if (!empty) { B.dry = false; return; }
-  if (B.dry || now - B.at < 60) return; B.dry = true; B.at = now;
+  if (B.dry || now - B.at < 60) return;
+  const c = SHIP.works && SHIP.works.cur;                // not in a meeting or a training (lead 29): held until it ends, then said
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE || c && (c.st === 'watch' || c.st === 'do') || (SHIP.occasions || []).some(r => r.status === 'asked' && now >= r.at - 5 && now < r.at + r.len)) return;
+  B.dry = true; B.at = now;
   try { toast('Job board', 'Nothing on the board for you just now. New jobs come in through the shift: look again in an hour, or have a tea.'); } catch (e) { /* no UI */ }
 }
 // ---- end of slot: Interactions engineer ----
@@ -46451,7 +46456,7 @@ WORK_TICKS.push((now, skip) => {
   if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
     j.told = true;
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
-    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', place: (jobStops(j)[0] || { places: [] }).places[0] || null, label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00', drill: j.id, trk: 'career:drill', trkTo: j.until });   // FX1: gone at the all-clear (it stayed up for days)
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', place: (jobStops(j)[0] || { places: [] }).places[0] || null, label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00', drill: j.id });   // FX2's (lead 29: FX1's trk tag would let trkDoneCheck clear it at the Works bay before FX2's stop-by-stop arrows)
   }
   if (!skip && m >= DRILL_TOAST && m < DRILL_AT && SHIP.works && SHIP.works.tr.m3d === undefined) worksBrief('m3d', 'calder');   // your first: her briefing before it, not after (FX3)
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);

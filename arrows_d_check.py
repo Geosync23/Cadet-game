@@ -7,13 +7,13 @@
 #                   first row's Take it (a held one first); taken: the job's own arrow, no pointer
 #   turn it in (S5): the work done: the pointer on Turn it in; turned in: S8, the device pointer to the Works app's Work
 #                   log, gone once the tab shows
-#   empty (S6):     nothing to take (a row without a Take it counts as nothing): no arrow; FX1's "Nothing on the board" said
+#   empty (S6):     nothing to take (a row without a Take it counts as nothing): no arrow; FX1's "Nothing on the board" said, but not in a meeting (held till it ends)
 #   S1 (FX1's row): tracking today's On shift row leaves no direct arrow, so the queue's Clock in leads
 #   the meeting (RV6's E item 5): FX1's trainArrow puts no arrow up while the queue is on; T1 leads
 #   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
-#   reputation (S9): a new word reached (not by a drop): a toast once and the pointer to the Works app's Training tab; never again for that word
+#   reputation (S9): a new word reached: a toast once; a drop: "Works reputation down" and the pointer to the Works app's Training tab; never again for that word
 #   pointers:       each panel pointer three times at most, then not asked
 #   tick:           guideTick asks the shift chain itself once a ship minute
 # And in the build as it is (both off): no entries, no pointer, section 15's clock-out arrow as before.
@@ -158,19 +158,21 @@ def part_on2(pg):
     # S6: nothing with a Take it (a row without one counts as nothing): no arrow; FX1's word said (boardEmptySay)
     pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0; if (boardEmptySay.s) boardEmptySay.s.dry = false, boardEmptySay.s.at = -1e9")
     at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB); n1 = pg.ev("__toasts.filter(t => /Nothing on the board/.test(t)).length")
+    hold = pg.ev("""(() => { boardEmptySay.s.dry = false; boardEmptySay.s.at = -1e9; __toasts.length = 0; const now = Math.floor(shipNow()), occ = { key: 'arrows-occ4', deck: 5, room: 'r', at: now - 2, len: 15, status: 'asked' };
+      SHIP.occasions.push(occ); boardEmptySay(true, now); const inMeet = __toasts.length; SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); boardEmptySay(true, now + 1); return [inMeet, __toasts.length]; })()""")
     pg.ev("openJobs = __oj")
-    print('  S6:', lab, n1)
+    print('  S6:', lab, n1, 'in a meeting, then after:', hold)
+    check(hold == [0, 1], f'S6: the board\'s word waits through a meeting, then is said (lead 29) ({hold})')
     check(not (lab or '').startswith('Take a job') and n1 == 1, f'S6: an empty board: no arrow, and the board\'s word said ({lab}; said {n1})')
-    # S9
-    r = pg.ev("""(() => { const W = SHIP.works, keep = W.xp; __toasts.length = 0; guideShift(); const B = WORK_BANDS[W.tier] || WORK_BANDS[1], b0 = worksBand();
-      W.xp = 0; guideShift(); const nx = B[1]; W.xp = nx[0]; guideShift(); const t1 = __toasts.slice(); const q = POINT_Q.some(x => x.id === 'p:works:training');
-      W.xp = keep; guideShift(); W.xp = nx[0]; guideShift(); const t2 = __toasts.length; W.xp = keep; guideShift();
-      __toasts.length = 0; W.xp = B[3][0]; guideShift(); W.xp = B[2][0]; guideShift(); const drop = __toasts.slice(); W.xp = keep; guideShift(); return { b0, b1: nx[1], t1, q, t2, drop }; })()""")
+    # S9: up to a new word: said with the pointer; up to it again: not said; a drop: "Works reputation down: <word>"
+    r = pg.ev("""(() => { const W = SHIP.works, keep = W.xp, B = WORK_BANDS[W.tier] || WORK_BANDS[1], b0 = worksBand(); guideShift();
+      W.xp = 0; guideShift(); __toasts.length = 0; W.xp = B[1][0]; guideShift(); const t1 = __toasts.slice(), q = POINT_Q.some(x => x.id === 'p:works:training');
+      __toasts.length = 0; W.xp = 0; guideShift(); const down = __toasts.slice(); __toasts.length = 0; W.xp = B[1][0]; guideShift(); const t2 = __toasts.slice();
+      W.xp = keep; guideShift(); __toasts.length = 0; W.xp = B[3][0]; guideShift(); const down2 = __toasts.slice(); W.xp = keep; guideShift(); return { b0, t1, q, down, t2, down2 }; })()""")
     print('  S9:', r)
-    if check(r is not None, 'S9: (no higher reputation word to reach)'):
-        check(len(r['t1']) == 1 and r['t1'][0].startswith('Works reputation: ') and r['q'], f'S9: a new word: a toast and the Training tab pointer ({r})')
-        check(r['t2'] == 1, f'S9: the same word again: said once only ({r})')
-        check(not r['drop'], f'S9: a word reached by a drop is not said (RV6) ({r})')
+    check(r['t1'] == ['Works reputation: Steady'] and r['q'], f'S9: a new word: a toast and the Training tab pointer ({r})')
+    check(r['t2'] == [], f'S9: the same word reached again: not said again ({r})')
+    check(r['down'] == ['Works reputation down: New'] and r['down2'] == ['Works reputation down: Trusted'], f'S9: a drop says it went down, even to a word not yet reached (lead 29, RV6) ({r})')
     # a short Friday: clock out from 15:30, until the clock signs you out at 16:00
     r = pg.ev("""(() => { const now = Math.floor(shipNow()), ci = SHIP.career.ci, co = SHIP.career.co; let d = 9; while (!friShort(d) && d < 16) d++; if (!friShort(d)) return null;
       const b = (d - 1) * 1440; setShipNow(b + 935); SHIP.career.ci = b + 540; SHIP.career.co = 0; guideShift(); const e = guideList().find(x => x.id === 'shift:out:' + d) || null;
