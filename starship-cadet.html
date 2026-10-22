@@ -48884,18 +48884,15 @@ function incGoalClear() {
   if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null;
 }
 // F4 (the arrows plan, M6a-d; AC1), only while the arrow queue is on (GUIDE_ON): the call and the follow are level-1
-// queue entries (so they clear themselves and give the job's arrow back); while you follow, the arrow is on the teacher
-// herself when she's on your deck and not yet at the pipe's deck, else the valve panel; each stop of the burst says
+// queue entries (so they clear themselves and give the job's arrow back); while you follow, the arrow is on where the
+// teacher is going (the valve panel on the burst's deck); each stop of the burst says
 // what it is ("Close the valve upstream of the wet", "Mop up (1 of 2)"); on the valve card, the first time, a pointer on
 // the valve nearest the wet (piece C, POINT_ON)
 const incGuide = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
-const INC_NEAR = 4;                                      // tiles: closer than this to the teacher, the arrow goes on to the pipe
 const incWho = id => incGuide() && typeof guideWho === 'function' ? guideWho(id) : worksFirst(id);   // RV6: one name with the queue on ("Calder"); off, as before
-function incGoalNow(q) {
-  const g = q.g; if (!q.by || typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num === g.deck) return g;
-  const a = DECK_CREW.find(x => x.p && x.p.id === q.by), p = player.obj.position;   // RV6: beside her, onward (she may wait at the lift)
-  return a && Math.hypot(a.x - p.x, a.z - p.z) > INC_NEAR ? { ...g, deck: deckDef.num, crew: q.by } : g;
-}
+// RV6 (played): an arrow on Calder herself stalls the lesson (a tap at the pin lands on her and doesn't move you; she
+// stops and the follow times out), so the follow points where she's going, as FX3 built it: the lift, then the valve panel
+function incGoalNow(q) { return q.g; }
 function incStopWord(j, k) {
   if (!incGuide() || j.inc !== 'burst' || j.walk) return null;
   const st = incStops(j), s = st[k]; if (!s) return null;
