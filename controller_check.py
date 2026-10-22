@@ -623,6 +623,10 @@ def part_walk(pw, src, tag):
     # Pause (Menu), your device (Y), Tracked (View): each opens and the same button closes it
     for b, what, js in [('MENU', 'Pause', 'PAUSE.on'), ('Y', 'your device', 'DEV.open'), ('VIEW', 'Tracked', '!document.getElementById("trkPanel").hidden')]:
         r.press(b); r.step(10); on = r.ev(js)
+        if on and b != 'MENU':
+            # with a panel open the deck takes nothing: the stick doesn't walk you, RB doesn't turn the view
+            a = r.ev(f"({SCREEN})()"); a0 = r.ev("azT"); r.pad(20, a={0: 1}); r.press('RB'); r.step(5); c = r.ev(f"({SCREEN})()")
+            if abs(a[2] - c[2]) + abs(a[3] - c[3]) > 1e-3 or r.ev("azT") != a0: fails.append(f'with {what} open, the stick walked or RB turned the view')
         t0 = r.ev("SHIP.time.min"); r.step(60); t1 = r.ev("SHIP.time.min")
         r.press(b); r.step(10); off = r.ev(js)
         if not on or off: fails.append(f'{b} should open {what} and close it again (open {on}, after the second press {off})')
