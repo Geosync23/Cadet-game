@@ -51,3 +51,21 @@ Plant runner and logs: `plans/review-day-start/` (plant.py, p_load.py, the logs)
   refuses while busy, refuses a damaged record and a browser without DecompressionStream with a message and the Dev
   game unchanged; the planted faults above show the check notices each.
 - Each start lands at Day N 06:00 beside your bed with tracking on (the check's lines, all passing).
+
+## Re-check of DS1's fixes (claude/day-start 1d3f76c3): PASS
+
+| Check | Result |
+|---|---|
+| cadet_test 2b4a05db vs 1d3f76c3, alone | ALL IDENTICAL |
+| devmode_check days | DEVMODE CHECK OK (8 days, 1 as played) |
+| The recorded summaries (read from the block) | Day 2 trained none; Day 3 m1; Day 4 m1 m3d m4; Day 5 adds m3i m5; Days 6-8 add m7 p3; Day 8 without m6: no day starts with its own lessons |
+
+- Item 1 fixed: the recorder sets the career through the day before, then wakes at 06:00; the new check line
+  (DAY_LESSONS, arrows_check's WEEK) fails a day that starts with its own lessons.
+- Item 2: the lead's call: no copy; day-start merges after claude/arrows-c (arrows_check.py at the root) and FX1-3.
+- Item 3: the page and the notice say the * days have the career from its table and an empty work log; a day marked
+  played from Day 3 on must have jobs in its log (check line).
+- Item 4: the record is now a function body (`devmodeDaysData`), built only when Dev draws the row or a day is tapped;
+  check line: `DM_DAYS` is null without #dev. DS1's heap figures (after GC) put it within noise of 2b4a05db. Not re-measured.
+- Item 5: DEV_NOTES has the line for the build master.
+Not re-run: day_saves --twice after the stand-in change (DS1 ran it before; the played Day 1 path is unchanged).
