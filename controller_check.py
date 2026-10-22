@@ -364,7 +364,7 @@ class Sweep:
         self.pw, self.src, self.tag = pw, src, tag
         self.states = {}          # signature -> {'path': [...], 'items': [...], 'dialogs': [...]}
         self.pressed = set(); self.presses = 0; self.reloads = 0; self.lost = []; self.capped = set(); self.tapped = set()
-        self.cands = None; self.opened = set()
+        self.cands = None; self.opened = set(); self.seen_keys = set()
         self.r = None
     def load(self):
         if self.r: self.r.reload()
@@ -422,8 +422,12 @@ class Sweep:
         if self.replay(path) and self.sig(self.scan()) == sig: return True
         self.lost.append(' > '.join(path) or '(the deck)'); return True
     def crawl(self, path=(), depth=0):
+        # coverage, not screens: a screen is explored only if it shows something pressable not seen before, and each
+        # pressable thing is pressed once in the whole sweep (a game's screens change with what you did, endlessly)
         sc = self.scan(); sg = self.sig(sc)
-        if sg in self.states: return
+        fresh = [i['k'] for i in self.inner(sc) if i['k'] not in self.seen_keys]
+        if sg in self.states or (path and not fresh and not path[-1].startswith('@deck:')): return
+        self.seen_keys.update(i['k'] for i in self.inner(sc))
         self.states[sg] = {'path': list(path), 'items': self.inner(sc), 'dialogs': sc['dialogs']}
         print(f'    state {len(self.states)}: {" > ".join(path) or "(the deck)"}: {len(self.inner(sc))} things, {self.presses} presses, {self.reloads} loads', flush=True)
         if depth >= self.MAX_DEPTH:
@@ -439,8 +443,8 @@ class Sweep:
                     todo.append({'k': f'@deck:{n}'})
         for it in todo:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
-            if (sg, it['k']) in self.pressed or (it['k'] in self.SKIP and path): continue
-            self.pressed.add((sg, it['k']))
+            if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
+            self.pressed.add(it['k'])
             cur = self.scan()
             if self.sig(cur) != sg: self.back_to(list(path), sg)
             if not self.press(self.scan(), it['k']): continue
