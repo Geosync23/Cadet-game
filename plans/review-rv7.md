@@ -66,3 +66,24 @@ Fixes (checks only, no game change):
 
 For the lead (not AC2's): is it wanted that incidents, leaks, nozzles and the trace demo also get a Take it when one
 is on your board? The rule allows it; none showed up in the week.
+
+## 2. FX3 2cdc1df on claude/p5-fix3 (fix 14, on 8aae063 which AR2 passed): PASS
+
+What it does: `choreRayTap` in 15's `playerTap`, after `jobTap`: if you hold a chore (`ixChore`, which includes the
+registered kinds), the tap landed on a machine (real or stand-in) and the tap's line passes within `JOB_RAY` (0.6 m)
+of your chore's next stop, the stop starts there (`ixChoreTap` at the stop's spot). The linen drop and the laundry vent
+stop (4-laundry-1) stand by Washer 1, which took the tap before. `stubTap` only looks a stand-in up (no side effect).
+
+| Test | Result |
+| --- | --- |
+| interactions_check on 8aae063 | FAILED on the new line only: the camera turn with Washer 2 under the pin starts nothing (linen and vent) |
+| interactions_check on 2cdc1df | INTERACTIONS CHECK OK: all 8 taps (2 chores x 4 camera turns) start the stop |
+| cadet_test 8aae063 -> 2cdc1df, alone | ALL IDENTICAL (renderer noise only: up to 46 px one level off) |
+| clothes_check, player_check on 2cdc1df | ALL OK, PLAYER CHECK OK |
+| Planted: no ray test (any machine tap does the stop) | caught ("a lamp chore in the laundry: Washer 1 does its own thing") |
+| Planted: no machine test (any tap on the line to the pin) | not caught (small: worth one line, e.g. the hamper or a seat on the line still does its own thing) |
+
+Notes: (1) the arrows_check follower calls `playerTap` directly with no screen tap, so this fix can't help its week
+(it stays stuck at the laundry); a real tap does work (my follower variant). (2) The same trap is now on the haul's cart
+stop (pin beside Cart dock 1: a tap on the dock says "in good order"), see item 1. `choreRayTap` helps only when the
+tap's line passes within 0.6 m of the pin.
