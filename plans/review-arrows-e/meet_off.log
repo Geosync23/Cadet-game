@@ -1,0 +1,22 @@
+Day 2, Tuesday 10:16 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 4,-3 room r | False |  | 
+Day 2, Tuesday 10:38 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 5,-1 room r | False |  | 
+Day 2, Tuesday 10:39 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 3,0 room = | False |  | 
+Day 2, Tuesday 10:40 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 1,0 room = | False |  | 
+Day 2, Tuesday 10:41 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -1,0 room = | False |  | 
+Day 2, Tuesday 10:42 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -2,-1 room + | False |  | 
+Day 2, Tuesday 10:43 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -3,-2 room w | False |  | 
+Day 2, Tuesday 10:44 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -5,-3 room w | False |  | 
+Day 2, Tuesday 10:46 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -7,-4 room w | False |  | 
+Day 2, Tuesday 11:01 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -5,-4 room w | False |  | 
+Day 2, Tuesday 11:02 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -3,-3 room w | False |  | 
+Day 2, Tuesday 11:03 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -2,-1 room + | False |  | 
+Day 2, Tuesday 11:04 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke -1,0 room = | False |  | 
+Day 2, Tuesday 11:05 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 1,0 room = | False |  | 
+Day 2, Tuesday 11:06 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 3,0 room = | False |  | 
+Day 2, Tuesday 11:08 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 5,-1 room r | False |  | 
+Day 2, Tuesday 11:09 | Repair the main lift | meet | asked at 5w 10:45 | 5:18,8 room @ | zeke 4,-3 room r | False |  | 
+Day 2, Tuesday 11:15 | Repair the main lift | ask | missed at 5w 10:45 | 5:18,8 room @ | zeke 4,-3 room r | False |  | 
+acts [('Day 2, Tuesday 10:42', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 10:45', 'tap Lift panel: false'), ('Day 2, Tuesday 10:45', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 10:48', 'tap Lift panel: false'), ('Day 2, Tuesday 10:48', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 10:51', 'tap Lift panel: false'), ('Day 2, Tuesday 10:51', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 10:54', 'tap Lift panel: false'), ('Day 2, Tuesday 10:54', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 10:57', 'tap Lift panel: false'), ('Day 2, Tuesday 10:57', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:00', 'tap Lift panel: false'), ('Day 2, Tuesday 11:00', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:03', 'tap Lift panel: false'), ('Day 2, Tuesday 11:03', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:06', 'tap Lift panel: false'), ('Day 2, Tuesday 11:06', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:09', 'tap Lift panel: false'), ('Day 2, Tuesday 11:09', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:12', 'tap Lift panel: false'), ('Day 2, Tuesday 11:12', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:15', 'tap Lift panel: false'), ('Day 2, Tuesday 11:15', 'tap the floor at the pin: Repair the main lift'), ('Day 2, Tuesday 11:18', 'tap Lift panel: false'), ('Day 2, Tuesday 11:18', 'tap the floor at the pin: Repair the main lift')]
+trained {}
+errors []
+exit 0

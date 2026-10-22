@@ -1,0 +1,15 @@
+Day 2, Tuesday 05:52 | None | None | None | None | None |  | arrows-check-yesterday | 4 | 7,1
+Day 2, Tuesday 08:01 | Fetch a relay: the Lights shelf | None | None | None | None |  | 1-lights-1@9 | 5 | 26,2
+Day 2, Tuesday 08:06 | Repair the light relays | None | None | None | None |  | 1-lights-1@9 | 1 | 7,1
+Day 2, Tuesday 08:17 | Turn it in at the job board | None | None | None | None |  | 1-lights-1@9 | 5 | 17,7
+Day 2, Tuesday 08:19 | Fetch a cartridge: the Filters shelf | None | None | None | None |  | 7-pool-filter-1@12 | 5 | 28,5
+Day 2, Tuesday 08:21 | Repair the pool filter | None | None | None | None |  | 7-pool-filter-1@12 | 7 | 19,8
+Day 2, Tuesday 08:34 | Fetch a relay: the Lights shelf | None | None | None | None |  | 5-mainlift-1@9 | 5 | 26,2
+Day 2, Tuesday 08:38 | Repair the main lift | None | None | None | None |  | 5-mainlift-1@9 | 5 | 18,8
+Day 2, Tuesday 09:01 | Repair the main lift | None | None | m1:meet | None | train:m1:meet:2/L2 | 5-mainlift-1@9 | 5 | 18,8
+Day 2, Tuesday 10:31 | Meet Zeke: Works bay, 10:45 | train:m1:meet:2 | None | m1:meet | None | train:m1:meet:2/L2* | 5-mainlift-1@9 | 5 | 25,3
+Day 2, Tuesday 11:15 | Repair the main lift | None | None | m1:ask | None |  | 5-mainlift-1@9 | 5 | 18,8
+labels seen: ['Fetch a cartridge: the Filters shelf', 'Fetch a relay: the Lights shelf', 'Meet Zeke: Works bay, 10:45', 'Repair the light relays', 'Repair the main lift', 'Repair the pool filter', 'Turn it in at the job board']
+trained: {}
+errors: []
+exit 0
