@@ -889,13 +889,18 @@ MUTANTS['pick'] = {
     'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
 }
 
+MUTANTS['reach'] = {
+    'the D-pad skips the device\'s Home key': EACH_FRAME.replace('__BODY__', "if (document.activeElement && document.activeElement.id === 'devHome') document.getElementById('devBack').focus();"),
+    'A clicks the panel, not the highlighted thing': WRAP("if (buttons[0].pressed && document.activeElement && document.activeElement !== document.body) { buttons[0] = { pressed: false, touched: false, value: 0 }; const d = document.activeElement.closest('[role=dialog],.lift,.device'); if (d) d.click(); }"),
+}
+
 # ---- the stand-in (--selftest) ----------------------------------------------------------------------------------------
 # A tiny controller driver written for this check alone, planted in a copy of the game, so each part can be shown to
 # PASS on something that works and FAIL on its planted faults before section 26 exists. It is not the design: section 26
 # is CT1's. It covers what's built in the parts here so far (the deck package).
 STANDIN = r"""
 const PAD_ON = true;
-const PAD_BUILT = ['base', 'deck', 'marks'];
+const PAD_BUILT = ['base', 'deck', 'marks', 'panels'];
 (() => {
   if (!PAD_ON) return;
   const prev = {}; let steering = false, flick = 0, charge = null, used = -1e9;
@@ -914,6 +919,23 @@ const PAD_BUILT = ['base', 'deck', 'marks'];
     for (const q of pads) if (q.buttons.some((b, k) => b.pressed && !(prev[q.index] || [])[k])) charge = q.index;
     const p = pads.find(q => q.index === charge) || pads.find(q => Math.hypot(q.axes[0] || 0, q.axes[1] || 0) > .2) || pads[0];
     const pv = prev[p.index] || [];
+    // panels (a simple stand-in): the top open panel's buttons; the D-pad to the nearest one that way, A clicks, B backs
+    const top = [...document.querySelectorAll('#pauseCard,[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0 && getComputedStyle(e).display !== 'none').pop();
+    const hitp = k => !!(p.buttons[k] && p.buttons[k].pressed) && !pv[k];
+    if (top && !hitp(3) && !hitp(8) && !hitp(9)) {   // Y, View and Menu keep their own jobs
+      const btns = [...top.querySelectorAll('button,[role=button],a[href],input,select,textarea,[tabindex]')].filter(e => !e.disabled && e.getBoundingClientRect().width > 0 && (!e.checkVisibility || e.checkVisibility()));
+      const cur = top.contains(document.activeElement) ? document.activeElement : null;
+      const go = (dx, dy) => { const c = cur ? cur.getBoundingClientRect() : { left: 0, top: 0, width: 0, height: 0 }, cx = c.left + c.width / 2, cy = c.top + c.height / 2;
+        let best = null, bd = 1e9; for (const e of btns) { if (e === cur) continue; const b = e.getBoundingClientRect(), x = b.left + b.width / 2 - cx, y = b.top + b.height / 2 - cy;
+          const along = x * dx + y * dy, side = Math.abs(x * dy - y * dx); if (cur && along <= 1) continue; const d = along + 2 * side; if (d < bd) { bd = d; best = e; } }
+        if (best) best.focus(); };
+      if (!cur && btns[0] && [12, 13, 14, 15].some(hitp)) btns[0].focus();
+      else { if (hitp(12)) go(0, -1); if (hitp(13)) go(0, 1); if (hitp(14)) go(-1, 0); if (hitp(15)) go(1, 0); }
+      if (hitp(0) && cur) cur.click();
+      if (hitp(1)) { const bk = document.getElementById('devBack'); if (top.id === 'device' && bk && bk.getBoundingClientRect().width > 0 && DEV.app !== 'home') bk.click(); else document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true })); }
+      for (const q of pads) prev[q.index] = q.buttons.map(b => b.pressed);
+      return;
+    }
     const B = k => !!(p.buttons[k] && p.buttons[k].pressed), V = k => p.buttons[k] ? p.buttons[k].value : 0, hit = k => B(k) && !pv[k];
     const sx = p.axes[0] || 0, sy = p.axes[1] || 0, m = Math.hypot(sx, sy);
     if (m > .2 || p.buttons.some(b => b.pressed)) used = performance.now();
