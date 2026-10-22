@@ -465,7 +465,7 @@ with sync_playwright() as pw:
         linger = {}
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
         BED_GOAL = g.ev("typeof INTRO_BED_GOAL !== 'undefined' ? INTRO_BED_GOAL : 'Your bunk'")
-        for k in range(420):
+        for k in range(600):   # (playtest patch 1: the evening's last step is 19:30)
             g.step(20)
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
