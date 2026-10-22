@@ -332,7 +332,7 @@ def bunk_leave(g):
             g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
         else:
             g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
-        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(20)
+        g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)   # (a panel left from the last run may cover the button)
         for k in range(500):
             g.step(20)
             if g.ev("SHIP.intro.step === 'stow' && !DIALOGUE"): break
@@ -367,7 +367,7 @@ def talk_away(g):
     print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
     for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
         g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
-        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(20)
+        g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)   # (a panel left from the last run may cover the button)
         for k in range(600):
             g.step(20)
             if g.ev(f"SHIP.intro.step === '{step}' && deckDef.num === {deck} && !DIALOGUE"): break
