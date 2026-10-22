@@ -101,3 +101,11 @@ AC1's own extra: Call it now comes before Where next? once one suspect is left.
 Note, not F4's: after the follow, the burst job is your turn while you still hold the vent job, so the job's arrow
 stays on the vent (the same "another job in hand" pattern as Rounds' board arrow on Day 2); the follower didn't reach
 the pipe job by 10:41. For FX3 / the lead.
+
+## Follow-up (claude/arrows-c 5557122e): PASS
+
+AC1 then made the follow never point at Calder (`incGoalNow(q)` returns FX3's goal: the lift, then the valve panel;
+INC_NEAR gone), and arrows_check's follower now presses the shown pointer's button (`POINT.aim`). Re-run here: Day 8
+with the follower (queue and pointer on): lift 10:32, your turn at 10:33, as before; arrows_f_check OK; arrows_check
+queue OK. AC1 reports cadet_test alone ALL IDENTICAL and check_fast OK on it (not re-run by me: the change is inside
+code that runs only with GUIDE_ON).
