@@ -14245,8 +14245,7 @@ function jobDoorOpen(deck, room) {
 function choreRayTap(it, at) {
   const j = typeof ixChore === 'function' ? ixChore() : null; if (!j || j.workDone || typeof ray === 'undefined' || !(ixMachine(at) || stubTap(it, at))) return false;
   const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
-  const dock = /^Cart dock/.test(it.t) && nx && /^(cart|return)$/.test(nx.s.step) && s && Math.hypot(s.x - at.x, s.z - at.z) < JOB_REACH;   // a run's cart stop: the dock itself is where you take the cart (lead 29's Cart dock 1 pin)
-  if (!s || !dock && jobRayDist(s) >= JOB_RAY) return false;
+  if (!s || jobRayDist(s) >= JOB_RAY) return false;     // (a tap on a haul stop's machine or thing in reach: FB1's choreThingTap, claude/fe-cartdock)
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
