@@ -364,14 +364,19 @@ Six one-line faults, each in **one** section, each breaking a check that section
 map can pick it. `python3 tools/affected_planted.py` checks the picks on paper (under a minute);
 `--run` also runs each fault's check on its faulty copy (about 40 minutes, one at a time) and requires it to FAIL (a fault its check doesn't notice proves nothing).
 
-| Fault | Section | Must pick | Rules alone |
-|---|---|---|---|
-| an escort to a tile goes nowhere (`escortGoal`) | 10 | intro | miss |
-| a crew member seeking you never shows (`seekArrive`) | 20 | intro | miss |
-| a work step starts afresh every time (`wsOf`) | 15 | mech | miss |
-| a gathering finds no tiles (`crewGather`) | 14 | career | miss |
-| every day an event day (`eventDay`) | 18 | mech | miss |
-| your tasting vote isn't kept (`tallyVote`) | 18 | food | miss |
+| Fault | Section | Must pick | Rules alone | The check on the faulty copy |
+|---|---|---|---|---|
+| an escort to a tile goes nowhere (`escortGoal`) | 10 | intro | miss | 12 new FAILs |
+| a typo in the seek chip (`seekEl`) | 20 | intro | miss | TypeError |
+| a due tool no longer slows a look step (`workStep`) | 15 | mech | miss | 1 new FAIL |
+| a typo in `eventDay` (`fals`) | 18 | career | miss | ReferenceError (on top of its known FAIL) |
+| a typo in the health booking (`pls.id`) | 21 | player | miss | ReferenceError |
+| your tasting vote isn't kept (`tallyVote`) | 18 | food | miss | 2 new FAILs |
+
+All 6 are picked by (a) and (b), by the map alone. A fault counts only if its check prints a FAIL or error the game as
+it is doesn't, or exits 1 where the game as it is exits 0. Six other faults were tried first and their checks stayed
+green (e.g. intro_check doesn't notice the day shift starting an hour late): listed in planted.md as gaps for the
+checks' owners.
 
 Results: plans/opt-cover/planted.md.
 
