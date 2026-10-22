@@ -12,6 +12,11 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  't3_rand':      ("  const J = P.job; P.cs = J.cs;", "  R(); const J = P.job; P.cs = J.cs;", 'touch'),
  'pr9_c6_eagerring': ("if (PAD_ON) { addEventListener('gamepadconnected', padHello);", "if (PAD_ON) { const _pr = new THREE.Mesh(new THREE.RingGeometry(.4, .5, 40), new THREE.MeshBasicMaterial({ color: col('#4cc3b5') })); _pr.visible = false; scene.add(_pr); addEventListener('gamepadconnected', padHello);", 'idle calls'),   # PR9's c6_eagerring
  'pr9_c7_mislabel': ("if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;", 'pick'),   # PR9's c7_mislabel
+ # P5 (CP5 adffcbe5): run with CP5's controller_check (its a11y part)
+ 'p5_rmonce': ("  return !!(A.rmq && A.rmq.matches);\n}", "  if (A.v === undefined) A.v = !!(A.rmq && A.rmq.matches); return A.v;\n}", 'a11y'),
+ 'p5_notoast': ("  if (!toastEl.hasAttribute('aria-live')) toastEl.setAttribute('aria-live', 'polite');", "", 'a11y'),
+ 'p5_thin': ("body.pad :focus{outline:4px solid #4cc3b5!important", "body.pad :focus{outline:2px solid #4cc3b5!important", 'a11y'),
+ 'p5_noedge': (",0 0 0 9px #0d1521!important}'", ",0 0 0 9px rgba(13,21,33,0)!important}'", 'a11y'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}

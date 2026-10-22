@@ -112,3 +112,16 @@ Where it stands: early notes 1-11 on CTT's controller_check sent to CTT, CT1, le
 - CTT's pick part compares A with a real mouse click by OUTCOME; OUTCOME doesn't see #chat (no role=dialog) - mutant
   t3_noop_crew tests it.
 - Mutants in section 26 itself: `review-controller/mutants.py` (runs pending).
+
+## P5 first part (CP5 adffcbe5 on a2c80df6): in progress
+Code read (section 26's slot + `padNameIt(el)` in padFocusTo): PAD_FOCUS_CSS (4px teal, dark #0d1521 both sides,
+forced-colors Highlight), padStill() live, padName/padNameIt/PAD_NAMES (empty), the toast a polite live region at the
+first use. Nothing before a press, no R(), no save. Notes so far (none blocking):
+- The toast's role=status / aria-live stay after a touch hands back (an attribute only, nothing seen): a deliberate
+  exception to "touch after pad = as before"? Backlog #28 (the same fix for everyone) is the clean way.
+- The a11y name test asks the game's own padName (textContent counts), so a glyph-only button ("✕", "‹") counts as named.
+  Ask the browser's accessible name (CDP Accessibility) and treat a name with no letters as nameless.
+- The highlight test needs only one dark shadow (mutant p5_noedge removes the outer edge).
+- DEV_NOTES: "the two tap-again asks" - there's a third (the welcome's "Tap again to end the welcome", no time limit).
+Turn 3 mutants so far: t3_noop_crew CAUGHT (but only because Pell is asleep: the tap gave a toast; an awake person opens
+#chat, which OUTCOME doesn't see), t3_offset CAUGHT.
