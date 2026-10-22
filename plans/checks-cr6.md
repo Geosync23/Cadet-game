@@ -37,7 +37,9 @@ FAIL a busy washer sends you to a free one
   laundry part) or a real clash (a nag toast hiding the answer to the player's tap) is for the owner of the time-clock
   nag / clothes to judge.
 
-### Note: fridays_check took 1197 s
+### Note: fridays_check took 1197 s: not the patch
 
-It passed, but took about 20 minutes alone (the guide's table says ~4). Not a FAIL; the machine wasn't shared
-(load ~4, only this check's browser). Worth timing on OLD if the slowdown matters.
+Timed alone, back to back, with the same fridays_check.py (unchanged between the two builds): **OLD 0.64.14: 1212 s,
+NEW 0.64.15: 1275 s**, both `FRIDAYS CHECK OK`, load ~4.5 (the check's own browser). So the ~20 minutes is the
+check on this machine, not the patch (within ~5%). The guide's "~4 min" for fridays_check is out of date for a
+4-core cloud session; the six-way split's minutes for CR6 are about 16 too low.
