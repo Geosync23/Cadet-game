@@ -25,7 +25,7 @@
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   the kit bag and the device lock (0.28.26): held from the ramp, into the locker in Bunk 1
-#   lying down in your bunk (0.28.29): by day to rest, at night to sleep, and getting up
+#   lying down in your bunk (0.28.29): by day to rest (saying it's too early to sleep, lead 28), at night to sleep, and getting up
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -506,6 +506,10 @@ with sync_playwright() as pw:
     if stubn: g.ev("delete window.bunkNote")
     print('  your bunk with a note, then again:', notes)
     if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'lie down' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    # the fresh-eyes playtest (lead 28, 2026-10-22): by day the bunk says why it isn't sleep; bedtime itself unchanged (20:00 to 05:30)
+    check('Too early to sleep: you can turn in from 20:00.' in notes[-1][1], f'the bunk by day should say it is too early to sleep: {notes[-1][1]!r}')
+    bt = g.ev("(() => { const m = SHIP.time.min, r = [1199, 1200, 329, 330].map(x => (SHIP.time.min = x, bedtime())); SHIP.time.min = m; return r; })()")
+    check(bt == [False, True, True, False], f'bedtime should still be 20:00 to 05:30: 19:59, 20:00, 05:29, 05:30 gave {bt}')
     # lying down (0.28.29, the user's "I can't lay down in bed"): a tap on your bunk by day lies you down in it to rest;
     # walking off gets you up; at night you lie down, sleep to 06:00 and wake still lying there
     for j in range(40):
@@ -522,6 +526,22 @@ with sync_playwright() as pw:
         if g.ev("!ACT && player.obj.visible"): break
     up = g.ev("[!!ACT, player.obj.visible]"); print('  walking off:', up)
     check(up == [False, True], f'walking off should get you up: {up}')
+    # (b), the user's yes: another bunk in the room you sleep in says which is yours; one in another room doesn't
+    OTAP = """((same) => { const id = playerBed(), bed = PLACE_OF.get(id), b = cellPos(...bed.at), r = roomAt(...bed.at);
+      const L = ITEMS.filter(i => /^bunk$/i.test(i.t)).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })
+        .filter(([i, w]) => w.distanceTo(b) > 1.2 && (roomAt(...cellAt(w.x, w.z)) === r) === same).sort((m, n) => m[1].distanceTo(b) - n[1].distanceTo(b));
+      if (!L.length) return null; window.__ot = L[0][0].x; return playerTap(L[0][0], L[0][1].clone(), L[0][1].clone()); })"""
+    others = []
+    for same in ('true', 'false'):
+        g.ev("document.getElementById('tx').textContent = ''")
+        tp = g.ev(f'({OTAP})({same})')
+        for j in range(60):
+            g.step(10)
+            if not g.ev("player.path.length > 0"): break
+        g.step(5); others.append([tp, g.ev("window.__ot"), g.ev("document.getElementById('tx').textContent")])
+    print('  another bunk, your room then the next room:', others)
+    check(others[0][0] is True and others[0][2] == others[0][1] + ' Yours is the next one.', f'a bunk in your room should say which is yours: {others[0]}')
+    check(others[1][0] is not True and 'Yours is the next one' not in (others[1][2] or ''), f'a bunk in another room should not: {others[1]}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
     day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
     # the alarm clock (0.73.0, playtest 2): at night lying down opens it; the saved time (06:00 by default), the energy
