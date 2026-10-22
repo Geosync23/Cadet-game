@@ -42652,7 +42652,7 @@ function introAdvance(t, here) {
       const dist = Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1]));
       I.near = [dist, I.near && dist < I.near[0] ? Math.floor(t) : I.near ? I.near[1] : at];   // [tiles away now, the last minute you got nearer]
     }
-    const capped = st.who === I.escort && st.mode !== 'lead' && I.since !== null && t >= I.since + INTRO_HOLD_MAX;   // (the Zeke patch) held as long as it may be: five minutes more
+    const capped = st.who === I.escort && st.mode !== 'lead' && I.since !== null && t >= I.since + INTRO_HOLD_MAX && introWithEscort(here);   // (only when the hold was his: with you near him)   // (the Zeke patch) held as long as it may be: five minutes more
     const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = capped || prev && I.missed.includes(prev.id) && !st.noHold ? Math.min(5, f.wait || 20) : (f.wait || 20);   // (a missed 'stow' leaves the device scene its own ten minutes)
     const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since, I.near ? I.near[1] : at) + wait;
     if (t < late) break;

@@ -330,6 +330,7 @@ def bunk_leave(g):
         if how == 'reload':
             g.page.evaluate('localStorage.clear()')
             g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+            if not g.ev("!!document.querySelector('form input[maxlength=\"24\"]')"): g.ev('localStorage.clear(); newGameStart(true)'); g.step(5)   # (an earlier part's save on this page: arrive anew)
         else:
             g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
         g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)   # (a panel left from the last run may cover the button)
