@@ -60,3 +60,20 @@ An earlier pair (f929c0b0 = controller + 0.64.17, e27b8bfe = 0.91.0 on it) was d
 - Two browser checks at once at most; a third makes screenshots time out (seen once on the wide seek shot; a rerun
   alone passed).
 - controller_check's parts run on a copy with PAD_ON true (ON_SRC); a probe must do the same.
+
+## Verdict: CP1's claude/controller-follow1 3f17ac95: PASS (2026-10-22, about 23:10), to CP1 and lead 30
+
+Two commits on 9a8eac0b, section 26 only (8 game lines): (1) padFind, for a place key, tries 4 rings of 8 screen points
+(10-40 px) around the spot when the usual points miss; (2) padWhat returns 'ladder' where ladderAimed(h) (tap()'s next
+step after a walker).
+- cadet_test alone vs 9a8eac0b: ALL IDENTICAL, switch off and PAD_ON true. check_fast OK (224 s).
+- controller_check (CTT3's claude/controller-tests-3 2bead1b5 file), all but reach: 26 OK; pick FAIL "crowded seat: not
+  proven", the same on 9a8eac0b with that file (CTT3's check-side item). touch and day OK.
+- Mess seats by pad (review-rv9/dbg_mess2.py: stand at each of the 44 mess seat spots, 72 frames, Monday 06:00):
+  offered 7/44 before, 23/44 after, none lost. Still missed: 3-mess-2..6, 12, 14, 18-22, 24, 25, 27-32, 39 (not
+  proven why: the 8-item cap in a crowded mess, or a person on the point). rv9mess.py: 3-mess-1 offered, A with a tray
+  eats there (ACT.placeId 3-mess-1).
+- Ladder (review-rv9/dbg_ladder.py): by the Spine ladder's hatch on Decks 4 and 3, five spots each, the ring's targets
+  are the same on both builds (Spine ladder still offered as item:N), plus place:3-bench-2 from (1). padWhat says
+  'ladder' whatever ladderTap would do; tap() takes that step only if ladderTap(null) succeeds, which fails only with
+  the ladder off, mid-ride, or with no way to the ladder room and no hatch.
