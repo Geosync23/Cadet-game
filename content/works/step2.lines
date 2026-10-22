@@ -180,6 +180,8 @@
 - Follow {name} to the burst pipe, Deck {deck}
 == inc.do.yours
 - Your turn. Make it safe. I'm right behind you.
+== inc.back
+- Back to it. Your job waited for you.
 == inc.again
 - Next time | The crew made it safe. We'll try again on {day}: {time}, {place}.
 

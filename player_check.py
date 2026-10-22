@@ -1332,6 +1332,15 @@ with sync_playwright() as pw:
               setGoal({ deck: 5, room: 'w', label: 'Someone else' }); const b = needGoal('energy'), c = IX_GOAL.label; clearGoal(); needGoal('hunger'); P.needs.hunger = 60; needGoalTick(); const d = IX_GOAL; P.needs.hunger = h; return JSON.stringify([r, a, b, c, d]); })()"""))
             print('  a very low need\'s marker [set, goal, over another arrow, still theirs, after eating]:', ng)
             check(ng[0] and ng[1] and ng[1][0].startswith('Food') and ng[2] is False and ng[3] == 'Someone else' and ng[4] is None, f'playtest: a very low need points to the nearest fix, never over another arrow, and goes once it is back up ({ng})')
+            # FX3 (AR1's arrows_check, Day 8): low energy by day put up "Your bunk" for hours (you can't sleep before 20:00, and lying
+            # down didn't clear it). Now the bunk's arrow comes at bedtime, and lying in your bunk clears it
+            en = json.loads(g.ev("""(() => { clearGoal(); NEED_GOAL = null; const P = SHIP.player, e = P.needs.energy, t0 = shipNow(), day = Math.floor(t0 / 1440) * 1440; P.needs.energy = 5;
+              setShipNow(day + 14 * 60); const a = needGoal('energy'), ga = IX_GOAL && IX_GOAL.label;
+              setShipNow(day + 21 * 60); const b = needGoal('energy'), gb = IX_GOAL && IX_GOAL.label;
+              const was = ACT; ACT = { kind: 'lie', phase: 'do', o: {}, def: PLAYER_ACTS.lie }; needGoalTick(); const gc = IX_GOAL && IX_GOAL.label; ACT = was;
+              clearGoal(); NEED_GOAL = null; P.needs.energy = e; setShipNow(t0); return JSON.stringify([a, ga, b, gb, gc]); })()"""))
+            print('  low energy [14:00 set, goal, 21:00 set, goal, lying down]:', en)
+            check(en[0] is False and en[1] is None and en[2] is True and en[3] and en[3].startswith('Your bunk') and en[4] is None, f'low energy: the bunk\'s arrow only at bedtime, cleared once you lie down ({en})')
             pt = []
             g.ev("window.__who = {}; player.steer = { x: 1, z: 0, k: 1 }; PUSH = null")
             pt.append(g.ev("pushThrough(window.__who, player.obj.position.x + .4, player.obj.position.z, player.obj.position)"))

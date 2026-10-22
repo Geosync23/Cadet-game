@@ -1,0 +1,188 @@
+From 6207c3b1d788cd5c6fe9fef981fb529401c29b0e Mon Sep 17 00:00:00 2001
+From: Claude <noreply@anthropic.com>
+Date: Thu, 22 Oct 2026 17:25:05 +0000
+Subject: [PATCH] FX3 fix 10 alone: a goal on another deck points at the lift
+ panel you can see (02e212f on b9f053ba)
+
+Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
+Claude-Session: https://claude.ai/code/session_01UZWrZRivwQJPKL3x7c8Ft9
+---
+ design-doc.md         |  1 +
+ interactions_check.py | 41 +++++++++++++++++++++++++++++++++++++++--
+ intro_check.py        |  7 +++++--
+ plans/build-table.md  |  6 ++++++
+ starship-cadet.html   | 18 +++++++++++++++---
+ 5 files changed, 66 insertions(+), 7 deletions(-)
+
+diff --git a/design-doc.md b/design-doc.md
+index 2ddf21c..a14a32a 100644
+--- a/design-doc.md
++++ b/design-doc.md
+@@ -572,6 +572,7 @@ How you earn a tier:
+ - **Experience.** Jobs completed in your current tier, weighted by quality and how early you caught faults.
+ - **Certification.** When you are ready, the Works Chief sets a supervised qualification job in the next tier. Pass it and your clearance goes up.
+ - **The first promotion, as built (Pillar 5 Step 3, the approved page `plans/mechanics/promotion-officer.html`):** once you're "Relied on" and trained to make things safe, Calder tells you "Tomorrow, your test job" (Day 8 for a steady player). The test (never before Day 9) is a real Tier 2 job on one of Deck 4's air scrubbers, held for you 09:00-15:00 with Calder following; it can only be delayed, never failed (not done, and it's set again two workdays later). The next workday she summons you to her office at 11:00 (an urgent notice at 10:30; if you're not in the Works bay by 11:15 she comes to find you): you're promoted to Works Officer, Technician (Tier 2), your reputation starts again as "New officer", and junior jobs are no longer held for you. At 17:00 she walks you to cabin 4-23, which is yours from then (by 17:30 whatever happens). The next day at 17:15 the Captain commissions you in the observation room, with Vance, Calder, Torres and up to three of your closest friends: a second pip on your collar, the framed commission on your shelf, and "Commissioned Officer" on your Record. Every step has a fallback (someone comes to find you, or Mail), so none of it can be missed. Officer reputation bands are provisional until Step 4.
++- **The arrow to the lift panel** (the user, 2026-10-22, after a new player climbed the spine ladder instead of riding the lift): when what you're heading for is on another deck, the arrow points at the lift's control panel, the thing you tap to choose a deck, on every deck, and says "Tap the lift: Deck 4" with the goal's own words after it. Inside the deck picker the right deck's button is marked (arrows piece C).
+ - **Trust.** Reliability matters: turning up for shifts, not leaving jobs half-done, keeping your corner of the ship running.
+ 
+ What each tier gives you:
+diff --git a/interactions_check.py b/interactions_check.py
+index daf2aa7..e1b3660 100644
+--- a/interactions_check.py
++++ b/interactions_check.py
+@@ -135,9 +135,9 @@ with sync_playwright() as pw:
+     check(sv is None and g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return 'track' in s.player; })()"), 'the save keeps tracking off')
+     g.ev("SHIP.player.track = myJob().id"); g.step(3); s = st()
+     g.ev("goToDeck(4)"); g.step(3); s = st()
+-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 5'), f'another deck: take the lift ({s["goal"]})')
++    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 5'), f'another deck: the lift panel ({s["goal"]})')   # (FX3: was "Take the lift to Deck 5")
+     g.ev("SHIP.player.carry = [" + json.dumps(job[1]) + "]"); g.step(40); s = st()
+-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
++    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
+     g.ev("goToDeck(3)"); g.step(3); s = st()
+     check(s['goal'] and s['goal'].startswith('Repair the'), f'on its deck: repair it ({s["goal"]})')
+     g.ev("(() => { const m = machineById(myJob().machine), sp = placeSpot(panelPlace(m.id)); player.obj.position.copy(cellPos(...sp.walk)); player.stop(); })()"); g.step(45)
+@@ -345,6 +345,43 @@ with sync_playwright() as pw:
+     check(not g.errors, f'no console errors ({g.errors[:3]})')
+     g.close()
+ 
++# FX3 (the user's, lead 28): a goal on another deck points at the lift's control panel (the thing you tap to choose a deck),
++# not the middle of the landing; following it and tapping there opens the deck picker, and the goal's deck takes you there
++with sync_playwright() as pw:
++    g = Game(pw, sys.argv[1]); g.step(5)
++    print('== FX3: the arrow to the lift panel')
++    LP = r"""(() => { const el = document.getElementById('ixGoal'), m = (el.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/) || []).slice(1).map(Number);
++      const its = ITEMS.filter(i => i.lift && isShown(i.hit)).map(i => { i.hit.getWorldPosition(_wp); const v = _wp.clone().project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; });
++      return { hidden: el.hidden, label: el.children[2].textContent, at: m, panels: its }; })()"""
++    # on Decks 5, 3 and 4, inside the car and at the landing: the arrow on a lift panel you can see, and a real tap there opens the deck picker (FE1, lead 28)
++    for deck, goal in ((5, 4), (3, 5), (4, 5)):
++        for spot in ('inside', 'landing'):
++            g.ev(f"goToDeck({deck})"); g.step(3)
++            g.ev("(w => { const t = w === 'inside' ? ROOM_TILES['@'][Math.floor(ROOM_TILES['@'].length / 2)] : null; if (t) player.obj.position.copy(cellPos(...t)); else player.obj.position.set(LIFT_AT[0] + 3, 0, LIFT_AT[1]); player.stop(); SHIP.player.track = null; })('" + spot + "')")
++            g.ev(f"setGoal({{ deck: {goal}, item: /job board/i, room: 'w', label: 'The job board' }})"); g.step(90)
++            lp = g.ev(LP)
++            near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
++            opened = False
++            if lp['at'] and near < 3:
++                g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
++                for k in range(120):
++                    g.step(10)
++                    if g.ev("!document.getElementById('lift').hidden"): opened = True; break
++            print(f"   Deck {deck}, {spot}: {lp['label']} | {round(near, 1)} px from a panel you can see | picker {opened}")
++            check(not lp['hidden'] and lp['label'].startswith(f'Tap the lift: Deck {goal}') and 'job board' in lp['label'], f"Deck {deck} {spot}: the label names the lift, the deck and the goal ({lp['label']})")
++            check(near < 3, f"Deck {deck} {spot}: the arrow points at a lift panel you can see, not the landing ({near:.1f} px)")
++            check(opened, f'Deck {deck} {spot}: tapping where the arrow points opens the deck picker')
++            if opened and (deck, spot) == (4, 'landing'):
++                g.ev("document.querySelector('#liftList button.goal').click()")
++                for k in range(200):
++                    g.step(10)
++                    if g.ev("deckDef.num") == 5 and not g.ev("ride"): break
++                check(g.ev("deckDef.num") == 5, f'the goal\'s deck button takes you there (Deck {g.ev("deckDef.num")})')
++            elif opened: g.ev("closeLiftPanel()"); g.step(2)
++    g.ev("clearGoal()")
++    check(not g.errors, f'no console errors ({g.errors[:3]})')
++    g.close()
++
+ # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
+ # could take on the board (section 17's openJobs), the way a new player finds it
+ if '--quick' not in sys.argv:
+diff --git a/intro_check.py b/intro_check.py
+index d814878..e11deb8 100644
+--- a/intro_check.py
++++ b/intro_check.py
+@@ -102,7 +102,7 @@ WALK_TICK = r"""((mode) => {
+     }
+   }
+   return { t: clockText(), step: I.step, deck: deckDef.num, me: cellAt(player.obj.position.x, player.obj.position.z),
+-           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, dlg: DIALOGUE && DIALOGUE.id,
++           esc: a ? [cellAt(a.x, a.z), a.pose, a.tag] : null, seat: typeof introSeat === 'function' ? introSeat(INTRO_ESCORT) : null, calls: renderer.info.render.calls, act, goal: IX_GOAL && IX_GOAL.label, shown: (el => el && !el.hidden ? el.children[2].textContent : null)(document.getElementById('ixGoal')), dlg: DIALOGUE && DIALOGUE.id,
+            ex: a ? [+a.x.toFixed(2), +a.z.toFixed(2)] : null, pause: !!(typeof INTRO_UI !== 'undefined' && INTRO_UI.pause), pre: I.done['tour:up'] !== undefined && I.done['tour:lift'] === undefined, sm: shipNow() };
+ })"""
+ 
+@@ -603,7 +603,7 @@ with sync_playwright() as pw:
+         print('  tour lines with the week under way (place, played, written):', tl2)
+         if wrong: fail('a tour place plays other lines than its own: ' + ', '.join(wrong))
+         order, peak, led = [], {}, 0
+-        rides, rideFrom = [], None   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
++        rides, rideFrom, liftArrow = [], None, []   # (the lead, the user on 0.60.5a): after each lift ride Torres steps out with you, not at the room he's heading for
+         lingered = []
+         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
+         dinner, bunkAt, seats, chat, chiefAt = None, None, None, None, None
+@@ -615,6 +615,7 @@ with sync_playwright() as pw:
+             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
+             if r['esc'] and r['esc'][2] == 'escort': led += 1
++            if r['step'] == 'wing' and r['deck'] == 5 and r.get('shown'): liftArrow.append(r['shown'])   # FX3: at the Deck 5 lift with Deck 4 to go, the arrow at the lift panel
+             spot = ('lift' if r['step'] in ('lift', 'wing') and r['deck'] == 5 and r['me'][0] >= 14 else 'bunk' if r['step'] == 'toMess' and r['deck'] == 4 and not r['dlg'] else None)
+             if DAWDLE and spot and spot not in lingered:   # stand still for ~40 real s (more than the steps' old 20 ship minutes)
+                 lingered.append(spot)
+@@ -701,6 +702,8 @@ with sync_playwright() as pw:
+         for x in rides[:2]:
+             if x[5] is None or x[5] > 3: fail(f'after the lift ride Deck {x[0]} -> {x[1]} Torres is not beside you: {x}')
+         if len(rides) < 2: fail(f'expected two lift rides on the evening (Deck 5 -> 4 -> 3): {rides}')
++        print('  the arrow at the Deck 5 lift, Deck 4 to go:', sorted(set(liftArrow))[:3])
++        if not any(x.startswith('Tap the lift: Deck 4') for x in liftArrow): fail(f'at the Deck 5 lift with Torres, the arrow should point at the lift panel for Deck 4 (the user\'s: "an arrow pointing to the control panel"): {sorted(set(liftArrow))[:3]}')
+         print(f"  the walk to the lift: {pre['n'] * ps:.0f} s with him on Deck 5 ({pre['n']} looks), paused {pre['pause'] * ps:.1f} s, longest standing still {pre['still'] * ps:.1f} s")
+         if pre['pause']: fail('Torres paused for his lines before the lift (the user on 0.60.5: walk-and-talk until the lift)')
+         wl = [i for i, x in enumerate(said) if any(x in L['core'] + L['extra'] for p, L in sp if p in walkp)]
+diff --git a/plans/build-table.md b/plans/build-table.md
+index fd55c13..4dfecdf 100644
+--- a/plans/build-table.md
++++ b/plans/build-table.md
+@@ -1347,3 +1347,9 @@ Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The on
+ | patch-a (ON1): playtest patch 1, notes 1-6 and 8 (the arrival, the Chief at dinner, clothes and hygiene) | **Sections 21 and 21b, with one line in 13 and small edits in 15** (ON1; plans/patch-playtest1.md on claude/lead-26, section A). (1) The arrival at **16:30** (`INTRO_START`, 13's `SHIP_START_ARRIVAL`; every Day 0 step an hour earlier, the Chief's step and Zeke's latest goodnight 19:00 (half an hour, for a slow player), the night step 19:30, `INTRO_ESCORT_UNTIL` 18:00): you reach the table at about 17:30 instead of 18:28. (2) New steps 'stow' (your bag into your wardrobe by your own tap, its arrow, Zeke waits; his wardrobe lines as a 21b beat once it's in) and 'device'; Zeke says "First, we drop your bag" on the wing, and the bunk meeting ends "Now, your bag. In your wardrobe". The bag goes in only at your wardrobe (15's `bagLockerTap`, `bagStow` text; `wardrobeUse` stows it first). (3) The device in person: meeting `introDevice` (new content/meetings/introDevice.meet, the old second half of introBunk), `introDeviceGive` as it opens. (4) Zeke's cabin Mail parked (`ZEKE_CABIN_MAIL = false`; "I've sent you a Mail" line gone). (5) **Root cause of "the Chief doesn't come over":** her walk to your table ended at a fixed 19:00 (`crewComeTo` until), so anyone reaching the table late saw her welcome start from the next table (probe on 32b699a6: 4.2 m away; now 0.2 m); it now lasts to her step's own end. (6) Both linger `INTRO_LINGER` 10 ship minutes after their last word (Zeke `introLingers` in escortPlan; Calder a second `crewComeTo`). (8) `CLOTHES_FRESH` +8 hygiene on a change; `clothesDirtyTick` shows the dirty clothes' extra drain as "−2 Hygiene". Also: Zeke's goodnight says breakfast from seven (SC1's 07:00), the Day 1 tea arrow points at the tea table (FR4's note 10). **Checks:** intro_check full OK and --evening OK (part 8 now with clothes on: the bag by your tap with its arrow, his wardrobe lines, then the device, no cabin Mail, Zeke and Calder still at the table 5 minutes after their last word), clothes_check ALL OK (+8, the −2 note), player_check OK (its bag test now taps the wardrobe), device_check OK, lines_check PASS (0 errors), career_check FAILED only on the known `busy: "Relied on" before Day 5` (backlog 12), check_fast OK (228 s). |
+ | patch-play1-h (LR1): note 15, every ladder room can be walked into | **The seven ladder rooms open** (LR1; sections 4b, 4d, 4e, and two lines of 15; branch claude/patch-play1-h from integration 32b699a6). Each deck's ladder room (room Z beside the car) keeps its size; its hatch is a sliding `door` in the same spot (Deck 1 h,7,8; 2 h,19,13; 3 h,20,13; 4 h,20,14; 5 v,19,9 through section 15's LADDER.d5; 6 h,18,8; rec deck h,20,11) and its 'Spine ladder' closedDoors text goes. The ladder kit (`spineLadder`, 4b) has a narrow well (0.5 wide, was 1.0) so the tile beside the ladder is floor, and the safety cage starts at 2.1 (was 1.0) so you can stand under it; the tile on the far side of the well is blocked (`block`). Deck 4's harness rack moves to the east glass, out of the doorway. 4d's slot: `LADDER_ROOMS` (door and stand tile per deck) and `ladderStand()`; section 15's `ladderHatch()` falls back to the ladder room's door, so tapping the ladder still walks you in and opens the panel, and a climb lands you in the ladder room (LD1's note 14 builds on `ladderStand()`). Crew have no places in the rooms (each is a dead end with one door), so their paths are unchanged. Look: only the ladder rooms (door, well, cage) and Deck 4's rack; +1 draw call and +1 geometry a deck (the door's threshold). Checks: check_fast OK, path_check OK, tiles_check OK, day_check Days 1, 5 (Friday), 11 (storm) OK, devmode_check OK, interactions_check OK; cadet_test against 32b699a6: all 15 shots and 300 paths identical, state differs in edges/doors/closed/blocked/roomTiles (the doors and blocked tiles), 9 of 3000 collide probes differ, all in Deck 4's ladder room and doorway. Shots: plans/patch-play1-h-shots/. |
+ | zeke (ON1): Zeke stuck in the bunk room after the bag (the user's playtest of 0.64.15) | **Section 21, one function in 15** (ON1, lead 27; branch claude/patch-zeke from 2b4a05db). **Cause:** introAdvance's "his own steps never time out while he's within 10 tiles of you" (until 18:00) also held patch A's 'stow' and 'device' steps, which needed you inside Bunk 1: step into the corridor after the bag, or miss the bag tap (only within 1.2 m of the wardrobe since patch A), and he waited there till 18:00 (the user's report). The talk steps 'bunk' and 'table' had the same hold (older, OR2's find). **Fix:** `noHold` on 'stow' and 'device' (their fallbacks run: the bag goes in by itself after 5 minutes); `near: 3`: the device scene wherever you are within 3 tiles of him on the deck (escortPlan 'follow' brings him to you; its meeting's room any; a reload that lost the scene still hands it over; a 'bunk' missed with you near him goes on to 'stow' (`laterNear`), so he still hands it over; on another deck it waits for Monday, as before); a wait/meet step holds near you at most `INTRO_HOLD_MAX` 8 minutes, then 5 more (only while he's near you: a slow player keeps the full wait, intro_check part 2); a tap anywhere in Bunk 1 with the bag walks you to your wardrobe and stows it (15's `bagLockerTap`, as before patch A). **Checks:** intro_check parts 14-15 (`--leave`): on 2b4a05db FAILED (bunk talk 82 min, table 40, never stowed 52, the corridor after/without the bag and the lift to Deck 3 stuck all evening); on the fix OK, every case moves on in 6-13 ship minutes with the device in person when you're on the deck. intro_check full, --evening OK; player_check OK (its bag test back to "anywhere in Bunk 1"); check_fast OK. |
++
++### patch-p5-fix3 (FX3), the lift panel arrow alone (claude/p5-fix3 02e212f cherry-picked for fresh-eyes batch 1; the build master sets the number)
++
++| Build | What changed |
++|---|---|
++| patch-p5-fix3 (FX3): 10, the arrow to the lift panel (the user's, lead 28) | **A goal on another deck points at the lift's control panel** (15b's `ixFrame`, new `ixLiftPanel`). It pointed at `LIFT_AT`, the middle of the landing, and a new player (FE1) couldn't see how to ride the lift and climbed the spine ladder. Now the arrow points at the nearest Lift panel (the car's panel items, the thing you tap to choose a deck) on every deck, labelled "Tap the lift: Deck 4 · " and the goal's own words (its deck said once: "Food, Deck 3" reads "Tap the lift: Deck 3 · Food"; the label keeps to its 260 px) (was "Take the lift to Deck 4: ..."); only a panel you can see (the car's wall nearest the camera is cut away with its panel; FE1 tapped where that one was and nothing came: lead 28), checked inside the car and at the landing on Decks 5, 3 and 4; the deck picker's own pointer is AC1's (piece C). The arrival tour gets it with no change of its own: at the Deck 5 lift Torres's goal is already on Deck 4 ("Tap the lift: Deck 4 · Zeke Torres"). Checks: interactions_check "FX3: the arrow to the lift panel" (the arrow on a panel, a real tap there opens the picker, the goal's deck takes you there; fails on 2b4a05db), intro_check part 8 (the evening: the arrow at the Deck 5 lift; fails on 2b4a05db); interactions_check's two old "Take the lift to" lines take the new words. |
+diff --git a/starship-cadet.html b/starship-cadet.html
+index 0adc8a8..dfe7b24 100644
+--- a/starship-cadet.html
++++ b/starship-cadet.html
+@@ -15200,7 +15200,7 @@ function clockRemindTick(now = shipNow()) {
+ // The job board: tap it for the open jobs; take one (section 17's claimJob, as the device's Jobs section does).
+ // The goal pointer: setGoal({ deck, at: [i, j] | place: id | room: key or name, label }) and clearGoal(). While
+ // you hold a job the pointer follows it by itself (storage, the machine shop, the machine). On screen: a marker
+-// over the place; off screen: an arrow at the edge; on another deck: "Take the lift to Deck N". DOM only, so
++// over the place; off screen: an arrow at the edge; on another deck: the lift panel, "Tap the lift: Deck N" (FX3). DOM only, so
+ // no draw calls. Hidden with no goal.
+ // Hooks: one line in section 15's playerTap (PLAYER_TAPS). Nothing here calls R() or makes geometry.
+ // =====================================================================
+@@ -15767,6 +15767,17 @@ function roundGuide() {
+ }
+ const ixV = new THREE.Vector3();
+ let ixLast = '';
++// the lift's control panel nearest you on this deck (a Lift panel item, section 11's lift: true; the deck picker opens on a
++// tap): where the arrow points for a goal on another deck (FX3; it was LIFT_AT, the middle of the landing). One you can see:
++// the car's wall nearest the camera is cut away, and its panel with it (FE1 tapped where it was, and nothing came). Cached per deck
++const IX_LIFT = { deck: null, its: [] };
++function ixLiftPanel() {
++  const key = deckDef.num + ':' + ITEMS.length;
++  if (IX_LIFT.deck !== key || !IX_LIFT.its.length) { IX_LIFT.deck = key; IX_LIFT.its = ITEMS.filter(i => i.lift && i.hit).map(i => { i.hit.getWorldPosition(ixP); return { x: ixP.x, y: ixP.y, z: ixP.z, hit: i.hit }; }); }
++  const p = player.obj.position; let best = null, bd = Infinity;
++  for (const q of IX_LIFT.its) { const d = Math.hypot(q.x - p.x, q.z - p.z) + (typeof isShown === 'function' && !isShown(q.hit) ? 100 : 0); if (d < bd) { bd = d; best = q; } }   // a hidden one only if none shows
++  return best;
++}
+ function ixFrame() {
+   requestAnimationFrame(ixFrame);
+   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
+@@ -15781,9 +15792,10 @@ function ixFrame() {
+   const g = IX_GOAL || (SHIP.player.track === null ? null : ixJobGoal);   // the job's step only while it's tracked
+   if (!g) { if (!el.hidden) el.hidden = true; return; }
+   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
+-  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
++  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
+   if (!w) { el.hidden = true; return; }
+-  const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
++  const gw = g.label ? g.label.replace(new RegExp(',? (on )?Deck ' + g.deck + '$'), '') : '';   // "Food, Deck 3": the deck said once
++  const label = here ? g.label : 'Tap the lift: ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (gw ? ' · ' + gw : '');   // the panel you tap to choose a deck (FX3, the user's: "an arrow pointing to the control panel")
+   ixV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);   // a goal with a height (the beam's name spot, the patch #19)
+   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
+   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
+-- 
+2.43.0
+

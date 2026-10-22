@@ -13461,6 +13461,7 @@ function playerTap(it, at, point) {
   if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
+  if (choreRayTap(it, at)) return true;                  // the tap passed over your chore's next stop and a machine caught it (FX3, below)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
@@ -14415,6 +14416,15 @@ function jobDoorOpen(deck, room) {
   const j = typeof myJob === 'function' ? myJob() : null; if (!j || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
   return j.stops.some(x => { const pl = x.placeId && placeById(x.placeId); return !!pl && pl.deck === deck && pl.room === room; });   // any stop of the job you hold, until it's turned in
 }
+// a tap whose line passes over your chore's next stop (the arrow's pin) where a machine caught it first (FX3, AC2 and AR2: the
+// linen's drop and the laundry's vent stop stand by Washer 1, and the washer took the tap: your own load, never the stop). Only
+// on the line to the pin: a washer tapped elsewhere still does its own thing (0.28.55, the lead's rule for chores)
+function choreRayTap(it, at) {
+  const j = typeof ixChore === 'function' ? ixChore() : null; if (!j || j.workDone || typeof ray === 'undefined' || !(ixMachine(at) || stubTap(it, at))) return false;
+  const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
+  if (!s || jobRayDist(s) >= JOB_RAY) return false;
+  return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
+}
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
 // the Repair button (0.28.52, the user's design, "Repair" step): small and thumb-sized at the bottom right, in the slot
 // above Put down's (player engineer 8's #putDown), shown only when it applies: you stand at your job's stop (jobHere at
@@ -14779,6 +14789,7 @@ const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower',
 let NEED_GOAL = null;                                     // { need, label } while the marker is ours
 function needGoal(k) {
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
+  if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
@@ -14791,7 +14802,7 @@ function needGoal(k) {
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
-function needGoalTick() { if (NEED_GOAL && SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM) needGoalClear(); }
+function needGoalTick() { if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) needGoalClear(); }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
 // pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
 // after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
 const PUSH_MS = 2000, PASS_MS = 1500; let PUSH = null;   // { who, t0, last, until }
@@ -15392,7 +15403,7 @@ function clockRemindTick(now = shipNow()) {
 // The job board: tap it for the open jobs; take one (section 17's claimJob, as the device's Jobs section does).
 // The goal pointer: setGoal({ deck, at: [i, j] | place: id | room: key or name, label }) and clearGoal(). While
 // you hold a job the pointer follows it by itself (storage, the machine shop, the machine). On screen: a marker
-// over the place; off screen: an arrow at the edge; on another deck: "Take the lift to Deck N". DOM only, so
+// over the place; off screen: an arrow at the edge; on another deck: the lift panel, "Tap the lift: Deck N" (FX3). DOM only, so
 // no draw calls. Hidden with no goal.
 // Hooks: one line in section 15's playerTap (PLAYER_TAPS). Nothing here calls R() or makes geometry.
 // =====================================================================
@@ -15908,7 +15919,7 @@ function ixJobStep() {
 // shelf in main storage puts them back (section 15's stow). A repair needing other parts keeps its own words ("fit those first")
 function ixLoose(j) {
   const P = SHIP.player, held = (P.carry || []).filter(p => p !== KIT_BAG && typeof STOCK !== 'undefined' && p in STOCK); if (!held.length) return null;
-  if (j && (j.machine || (j.parts || []).length && !j.workDone)) return null;
+  if (j && (j.machine || (j.parts || []).length && !j.workDone) || SHIP.jobs.some(x => x.claimedBy === 'you-parked')) return null;   // (a parked job's parts wait with it: 24f)
   const sh = typeof shelfOf === 'function' ? shelfOf(held[0]) : null;
   return { deck: 5, room: 'r', place: sh || null, label: typeof worksText === 'function' ? worksText('job.putback', 'Put the {part} back: main storage', { part: held[0] }) : 'Put the ' + held[0] + ' back: main storage' };
 }
@@ -15986,6 +15997,17 @@ function roundGuide() {
 }
 const ixV = new THREE.Vector3();
 let ixLast = '';
+// the lift's control panel nearest you on this deck (a Lift panel item, section 11's lift: true; the deck picker opens on a
+// tap): where the arrow points for a goal on another deck (FX3; it was LIFT_AT, the middle of the landing). One you can see:
+// the car's wall nearest the camera is cut away, and its panel with it (FE1 tapped where it was, and nothing came). Cached per deck
+const IX_LIFT = { deck: null, its: [] };
+function ixLiftPanel() {
+  const key = deckDef.num + ':' + ITEMS.length;
+  if (IX_LIFT.deck !== key || !IX_LIFT.its.length) { IX_LIFT.deck = key; IX_LIFT.its = ITEMS.filter(i => i.lift && i.hit).map(i => { i.hit.getWorldPosition(ixP); return { x: ixP.x, y: ixP.y, z: ixP.z, hit: i.hit }; }); }
+  const p = player.obj.position; let best = null, bd = Infinity;
+  for (const q of IX_LIFT.its) { const d = Math.hypot(q.x - p.x, q.z - p.z) + (typeof isShown === 'function' && !isShown(q.hit) ? 100 : 0); if (d < bd) { bd = d; best = q; } }   // a hidden one only if none shows
+  return best;
+}
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
@@ -16000,9 +16022,10 @@ function ixFrame() {
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
-  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : { x: LIFT_AT[0], z: LIFT_AT[1] };
+  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
   if (!w) { el.hidden = true; return; }
-  const label = here ? g.label : 'Take the lift to ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (g.label ? ': ' + g.label.charAt(0).toLowerCase() + g.label.slice(1) : '');
+  const gw = g.label ? g.label.replace(new RegExp(',? (on )?Deck ' + g.deck + '$'), '') : '';   // "Food, Deck 3": the deck said once
+  const label = here ? g.label : 'Tap the lift: ' + (g.deck === 7 ? 'the rec deck' : 'Deck ' + g.deck) + (gw ? ' · ' + gw : '');   // the panel you tap to choose a deck (FX3, the user's: "an arrow pointing to the control panel")
   ixV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);   // a goal with a height (the beam's name spot, the patch #19)
   // the arrow keeps inside a frame clear of the HUD at the top and the toast at the bottom
   const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (ixV.x + 1) * W2, sy = (1 - ixV.y) * H2, L0 = 30, R0 = innerWidth - 30, T0 = 130, B0 = innerHeight - 110;
@@ -31533,6 +31556,8 @@ const LINES = JSON.parse([
   '{"text":"{trad} at {time}","id":"1rf1eo"}]',
   ',"inc.again":[',
   '{"text":"Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.","id":"1qux7e9"}]',
+  ',"inc.back":[',
+  '{"text":"Back to it. Your job waited for you.","id":"y46bn9"}]',
   ',"inc.card.alarm":[',
   '{"text":"! Galley alarm","id":"1iy9g2w"}]',
   ',"inc.card.burst":[',
@@ -48939,7 +48964,7 @@ function incDone(j, t, by) {
 // an incident's job, ready to push: { kind: 'incident', inc, deck, first?, walk? } (o.slot: held in the training's slot)
 function incJob(kind, deck, t, o = {}) {
   const j = jobMake('incident', { id: 'incident' + (o.slot || '') + ':' + kind + deck + (o.walk ? 'w' : '') + '@' + Math.floor(t / 60), inc: kind, deck, room: null, h: Math.floor(t / 60), urgency: 2,
-    title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: worksFirst(o.by || 'calder') }) : ''),
+    title: '! ' + worksText('inc.title.' + kind, INC_TITLE[kind], { deck }) + (o.walk ? ': ' + worksText('inc.with', 'with {name}', { name: incWho(o.by || 'calder') }) : ''),
     ...(o.walk ? { walk: true } : {}), ...(o.slot ? { reserved: o.slot, until: (worksDay(t) - 1) * 1440 + dayShiftEnd(worksDay(t)) } : { leave: o.held ? INC_HELD : 1 }), ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
   const P = placeById(jobStops(j).map(s => s.places && s.places[0]).find(Boolean)); if (P) j.room = P.room;
@@ -49003,7 +49028,7 @@ function incGoalClear() {
 // what it is ("Close the valve upstream of the wet", "Mop up (1 of 2)"); on the valve card, the first time, a pointer on
 // the valve nearest the wet (piece C, POINT_ON)
 const incGuide = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
-const incWho = id => incGuide() && typeof guideWho === 'function' ? guideWho(id) : worksFirst(id);   // RV6: one name with the queue on ("Calder"); off, as before
+const incWho = id => incGuide() && typeof guideWho === 'function' ? guideWho(id) : id === 'calder' ? 'Calder' : worksFirst(id);   // RV6: one name, "Calder" (the queue on: guideWho; off: FX3's, lead 28)
 // RV6 (played): an arrow on Calder herself stalls the lesson (a tap at the pin lands on her and doesn't move you; she
 // stops and the follow times out), so the follow points where she's going, as FX3 built it: the lift, then the valve panel
 function incGoalNow(q) { return q.g; }
@@ -49019,6 +49044,23 @@ function incValveWatch() {                                 // the valve card up,
   if (chooseButton(line.length - 1, title)) pointAsk({ id: 'p:inc:valve', once: 1, path: pointCard(line.length - 1, worksText('inc.point.valve', 'The one nearest the wet'), title), done: () => !DEV.choose });
 }
 if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(incValveWatch);
+// your turn at the pipe while you hold another job (RV6's F4 review, lead 28: the burst pipe is urgent, over everything): that
+// job waits, parked (claimedBy 'you-parked', its progress kept on it), and comes back as yours once the burst job is done
+function incPark() {
+  const h = typeof myJob === 'function' && myJob(); if (!h || h.kind === 'incident') return;
+  const P = SHIP.player; h.parkWork = P.work && P.work.job === h.id ? { ...P.work, fitted: P.work.fitted.slice() } : null;
+  h.claimedBy = 'you-parked'; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+const incParked = () => SHIP.jobs.some(x => x.claimedBy === 'you-parked');
+WORK_TICKS.push(now => {
+  if (!incParked()) return; const mj = myJob(); if (mj && mj.kind === 'incident') return;
+  for (const x of SHIP.jobs) if (x.claimedBy === 'you-parked') {
+    if (x.status !== 'claimed') { x.claimedBy = null; delete x.parkWork; continue; }
+    if (myJob()) break;
+    x.claimedBy = 'you'; x.touched = now; if (x.parkWork) SHIP.player.work = x.parkWork; delete x.parkWork; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    try { const [title] = jobCard(x); toast(title, worksText('inc.back', 'Back to it. Your job waited for you.')); } catch (e) { /* no UI */ }
+  }
+});
 const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
 function incWarn(c, at, now) {
   const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
@@ -49051,7 +49093,7 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
     if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: incWho(c && c.by || 'calder'), deck: O.deck }) }, c && c.by);   // FX3: with her, not the office
-    if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
+    if (o.yours) { incPark(); if (!myJob()) claimJob(j.id); incGoalClear(); }   // a job you hold waits (incPark)   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
   doSay: c => { const j = c && SHIP.jobs.find(x => x.id === c.j); return j && j.claimedBy === 'you' ? worksText('inc.do.yours', 'Your turn. Make it safe. I\'m right behind you.') : null; },

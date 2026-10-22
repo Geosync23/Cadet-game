@@ -145,9 +145,9 @@ with sync_playwright() as pw:
     check(sv is None and g.ev("(() => { const s = { player: {} }; for (const f of SAVE_EXTRA) try { f(s); } catch (e) {} return 'track' in s.player; })()"), 'the save keeps tracking off')
     g.ev("SHIP.player.track = myJob().id"); g.step(3); s = st()
     g.ev("goToDeck(4)"); g.step(3); s = st()
-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 5'), f'another deck: take the lift ({s["goal"]})')
+    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 5'), f'another deck: the lift panel ({s["goal"]})')   # (FX3: was "Take the lift to Deck 5")
     g.ev("SHIP.player.carry = [" + json.dumps(job[1]) + "]"); g.step(40); s = st()
-    check(s['goal'] and s['goal'].startswith('Take the lift to Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
+    check(s['goal'] and s['goal'].startswith('Tap the lift: Deck 3') and 'epair' in s['goal'], f'parts in hand: to the machine ({s["goal"]})')
     g.ev("goToDeck(3)"); g.step(3); s = st()
     check(s['goal'] and s['goal'].startswith('Repair the'), f'on its deck: repair it ({s["goal"]})')
     g.ev("(() => { const m = machineById(myJob().machine), sp = placeSpot(panelPlace(m.id)); player.obj.position.copy(cellPos(...sp.walk)); player.stop(); })()"); g.step(45)
@@ -387,6 +387,94 @@ with sync_playwright() as pw:
         check(pb[2] and pb[3] == 'Put the relay back: main storage', f'a cart run taken with the relay in hand: put it back first ({pb})')
         check(after[0] == [] and after[1] and 'back: main storage' not in after[1], f'a shelf tap puts it back, then the cart run\'s own arrow ({after})')
         g.ev("SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-cart'); SHIP.player.carry = []")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FX3 (the user's, lead 28): a goal on another deck points at the lift's control panel (the thing you tap to choose a deck),
+# not the middle of the landing; following it and tapping there opens the deck picker, and the goal's deck takes you there
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    print('== FX3: the arrow to the lift panel')
+    LP = r"""(() => { const el = document.getElementById('ixGoal'), m = (el.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/) || []).slice(1).map(Number);
+      const its = ITEMS.filter(i => i.lift && isShown(i.hit)).map(i => { i.hit.getWorldPosition(_wp); const v = _wp.clone().project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; });
+      return { hidden: el.hidden, label: el.children[2].textContent, at: m, panels: its }; })()"""
+    # on Decks 5, 3 and 4, inside the car and at the landing: the arrow on a lift panel you can see, and a real tap there opens the deck picker (FE1, lead 28)
+    for deck, goal in ((5, 4), (3, 5), (4, 5)):
+        for spot in ('inside', 'landing'):
+            g.ev(f"goToDeck({deck})"); g.step(3)
+            g.ev("(w => { const t = w === 'inside' ? ROOM_TILES['@'][Math.floor(ROOM_TILES['@'].length / 2)] : null; if (t) player.obj.position.copy(cellPos(...t)); else player.obj.position.set(LIFT_AT[0] + 3, 0, LIFT_AT[1]); player.stop(); SHIP.player.track = null; })('" + spot + "')")
+            g.ev(f"setGoal({{ deck: {goal}, item: /job board/i, room: 'w', label: 'The job board' }})"); g.step(90)
+            lp = g.ev(LP)
+            near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
+            opened = False
+            if lp['at'] and near < 3:
+                g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
+                for k in range(120):
+                    g.step(10)
+                    if g.ev("!document.getElementById('lift').hidden"): opened = True; break
+            print(f"   Deck {deck}, {spot}: {lp['label']} | {round(near, 1)} px from a panel you can see | picker {opened}")
+            check(not lp['hidden'] and lp['label'].startswith(f'Tap the lift: Deck {goal}') and 'job board' in lp['label'], f"Deck {deck} {spot}: the label names the lift, the deck and the goal ({lp['label']})")
+            check(near < 3, f"Deck {deck} {spot}: the arrow points at a lift panel you can see, not the landing ({near:.1f} px)")
+            check(opened, f'Deck {deck} {spot}: tapping where the arrow points opens the deck picker')
+            if opened and (deck, spot) == (4, 'landing'):
+                g.ev("document.querySelector('#liftList button.goal').click()")
+                for k in range(200):
+                    g.step(10)
+                    if g.ev("deckDef.num") == 5 and not g.ev("ride"): break
+                check(g.ev("deckDef.num") == 5, f'the goal\'s deck button takes you there (Deck {g.ev("deckDef.num")})')
+            elif opened: g.ev("closeLiftPanel()"); g.step(2)
+    g.ev("clearGoal()")
+    check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FX3 (RV6, lead 29): the climbing holds' job (rec deck, 7-wall-holds): its arrow's pin stands over the Climbing wall, and a tap
+# there started a climb instead of the job's look-over (the same as the galley plant's chiller: jobTap now takes a tap over its spot)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof REC_DECK !== 'undefined' && REC_DECK && !!machineById('7-wall-holds') && !!panelPlace('7-wall-holds')"):
+        print('== FX3: the climbing holds\' pin')
+        g.ev(r"""(() => { setShipNow(1440 * 2 + 10 * 60); machinesNow(); const t = shipNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const m = machineById('7-wall-holds'); SHIP.jobs = SHIP.jobs.filter(j => j.machine !== m.id);
+          SHIP.jobs.push({ id: 'fx3-holds', machine: m.id, deck: 7, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: ['seal'], status: 'open' }); MACH_REV++;
+          claimJob('fx3-holds'); goToDeck(7); const s = placeSpot(panelPlace(m.id)); player.obj.position.set(s.x + 1.2, 0, s.z + 1.2); player.stop(); })()""")
+        g.page.click('#rot'); g.step(80)
+        xy = g.ev("(() => { const s = placeSpot(panelPlace('7-wall-holds')), v = new THREE.Vector3(s.x, 1.2, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+        under = g.ev(f"(() => {{ const h = pick({xy[0]}, {xy[1]}); return h && h.object.userData.item ? h.object.userData.item.t : 'floor'; }})()")
+        g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+        r = g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, document.getElementById('tt').textContent])")
+        print('   under the pin:', under, '| tapped:', r)
+        check('"job","7-wall-holds-svc"' in r, f'a tap at the holds job\'s pin (over the {under}) starts the job, not a climb ({r})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-holds')")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FX3 (AC2's arrows_check shift guide, AR2; lead 29): the linen delivery's drop (4-laundry-1) and the laundry's vent stop stand by
+# Washer 1; a tap at the arrow's pin hit the washer and did the washer's thing (your own load), never the stop. Now a tap on
+# the line to your chore's next stop does the stop; a washer tapped elsewhere still does its own (0.28.55, tested above)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof DELIVERIES !== 'undefined' && !!placeById('4-laundry-1')"):
+        print('== FX3: the laundry stops by Washer 1')
+        SET = r"""(kind => { actEnd(true); setShipNow(1440 * 2 + 13 * 60 + 40); machinesNow(); const t = shipNow(); SHIP.jobs = SHIP.jobs.filter(j => !/^fx3-/.test(j.id)); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const d = DELIVERIES.find(x => x.key === 'linen'), to = placeById(d.to);
+          SHIP.jobs.push(kind === 'linen' ? { id: 'fx3-linen', machine: null, deck: 4, room: to.room, kind: 'chore', chore: 'delivery', title: d.title, bring: d.bring, tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
+              stops: [{ deck: 5, placeId: d.from, mins: 3, tag: 'pickup' }, { deck: 4, placeId: d.to, mins: 3, tag: 'drop' }], stepsDone: [0] }
+            : { id: 'fx3-vent', machine: null, deck: 4, room: to.room, kind: 'chore', chore: 'vent', title: 'Clean a vent: laundry', tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', stops: [{ deck: 4, placeId: d.to, mins: 20, tag: 'vent' }] });
+          MACH_REV++; claimJob(kind === 'linen' ? 'fx3-linen' : 'fx3-vent'); if (deckDef.num !== 4) goToDeck(4); const s = placeSpot(d.to); player.obj.position.set(s.x + 1.2, 0, s.z + 1.2); player.stop(); })"""
+        res = []
+        for kind in ('linen', 'vent'):
+            for rot in range(4):
+                g.ev(f"({SET})('{kind}')"); g.step(80)
+                xy = g.ev("(() => { const s = placeSpot('4-laundry-1'), v = new THREE.Vector3(s.x, 1.2, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+                under = g.ev(f"(() => {{ const h = pick({xy[0]}, {xy[1]}); return h && h.object.userData.item ? h.object.userData.item.t : 'floor'; }})()")
+                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+                res.append([kind, rot, under, g.ev("ACT && ACT.kind")])
+                g.page.click('#rot'); g.step(30)
+        print('   at the pin [chore, camera turn, under the pin, what started]:', res)
+        washer = [r for r in res if r[2].startswith('Washer')]
+        check(washer, f'(the pin stands over a washer in some camera turn: {res})')
+        check(all(r[3] == 'ixStop' for r in res), f'a tap at the laundry stop\'s pin does the chore\'s stop, over a washer too ({res})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fx3-/.test(j.id))")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
