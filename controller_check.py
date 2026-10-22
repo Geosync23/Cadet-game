@@ -573,6 +573,11 @@ SCREEN = r"""(() => { const v = player.obj.position.clone().project(camera); ret
 def screen_delta(r, w0, w1):
     # both world points through today's camera: the screen move, whatever the camera did meanwhile
     return r.ev(f"(() => {{ const a = new THREE.Vector3({w0[0]}, 0, {w0[1]}).project(camera), b = new THREE.Vector3({w1[0]}, 0, {w1[1]}).project(camera); return [(b.x - a.x) * innerWidth / 2, -(b.y - a.y) * innerHeight / 2]; }})()")
+def in_use(r, i=0):
+    # the pad in use before a walk is measured: since CP4's first use (0.90.8), a stick push on a pad not in use (none
+    # yet, or touch took over: the check's own click on the turn button) counts only after 0.15 s held, by design; a
+    # press of B counts at once (on the deck it only puts a message away)
+    if not r.ev("typeof PAD === 'object' && PAD.used && PAD.idx === " + str(i)): r.press('B', i=i); r.step(2)
 def part_walk(pw, src, tag):
     import math
     fails = []
@@ -582,7 +587,7 @@ def part_walk(pw, src, tag):
     for rot in range(4):
         az0 = r.ev("azT")
         for name, (sx, sy) in [('up', (0, -1)), ('right', (1, 0)), ('down', (0, 1)), ('left', (-1, 0))]:
-            r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3)
+            r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3); in_use(r)
             p0 = r.ev(f"({SCREEN})()")
             r.pad(12, a={0: sx, 1: sy}, release=False)
             p1 = r.ev(f"({SCREEN})()")
@@ -597,7 +602,7 @@ def part_walk(pw, src, tag):
     # faster the further you push
     sp = []
     for k in (.5, 1):
-        r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3); p0 = r.ev(f"({SCREEN})()")
+        r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3); in_use(r); p0 = r.ev(f"({SCREEN})()")
         r.pad(10, a={0: k}); p1 = r.ev(f"({SCREEN})()"); sp.append(math.hypot(p1[2] - p0[2], p1[3] - p0[3]))
     print(f'  half a push walks {sp[0]:.2f} m, a full push {sp[1]:.2f} m')
     if not (sp[1] > sp[0] * 1.2 and sp[0] > 0): fails.append(f'a full push should walk faster than half a push ({sp[0]:.2f} vs {sp[1]:.2f} m)')
@@ -740,7 +745,7 @@ def part_unplug(pw, src, tag):
 
 # ---- odd pads (deck): one that doesn't report the standard layout, and two at once ----------------------------------
 def walk_with(r, cell, i):
-    r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3); p0 = r.ev(f"({SCREEN})()")
+    r.ev(f"({PUT})({json.dumps(cell[:2])})"); r.step(3); in_use(r, i); p0 = r.ev(f"({SCREEN})()")
     r.pad(10, a={0: 1}, i=i); p1 = r.ev(f"({SCREEN})()")
     return ((p1[2] - p0[2]) ** 2 + (p1[3] - p0[3]) ** 2) ** .5
 def part_odd(pw, src, tag):
