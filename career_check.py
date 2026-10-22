@@ -20,7 +20,8 @@
 # Not yet (waiting for section 17's 17.2, seat S): reserved-rank jobs never taken below their rank, crew or you.
 # Setup and environment as for cadet_test.py.
 #   (p) FX1's fixes in the real game: the guidance (tracking after a job, the meeting arrow's window)
-# Run:  python3 career_check.py BUILD.html     (--fx: only part (p))
+#   (q) FX1's arrow and tracking lifecycle (new game, Tracked, device go, On shift, clock out, empty board, shower, asks)
+# Run:  python3 career_check.py BUILD.html     (--fx: only parts (p) and (q))
 import sys, json, os, re, pathlib
 exec(open(__file__.replace('career_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
@@ -129,8 +130,8 @@ def pacing(r, name):
 
 # (p) FX1 (patch-p5-fix1): the guidance in the real game, a fresh page with the real sub-blocks. Bug 1: a job taken and
 # turned in leaves tracking on with nothing tracked (it kept the old job's id, so the training ask never put its arrow
-# up). Bug 2: the meeting's arrow is up only from 30 ship minutes before the meeting until you're in its room, it has
-# started or it's over (it was up from the ask all day); out of the room before it starts, it comes back.
+# up). Bug 2: the meeting's arrow is up only from 15 ship minutes before the meeting until it has started or it's over
+# (it was up from the ask all day); in its room before it starts it says wait here, out of it it leads back.
 FX_LOOK = "(() => { const c = SHIP.works && SHIP.works.cur, r = c && c.occ && SHIP.occasions.find(x => x.key === c.occ); return [c ? c.id + ':' + c.st : null, r ? r.at : null, r ? r.len : null, r ? r.deck : null, r ? r.room : null, IX_GOAL ? IX_GOAL.label : null, typeof DIALOGUE !== 'undefined' && DIALOGUE ? DIALOGUE.id : null]; })()"
 def fx_guidance(pw):
     print('(p) FX1, the guidance in the real game (bugs 1-2: tracking after a job, the meeting arrow\'s window):')
@@ -155,20 +156,81 @@ def fx_guidance(pw):
         if where == 'in': ev(f"(() => {{ if (deckDef.num !== {dk}) goToDeck({dk}); const t = ROOM_TILES['{rm}'][0]; player.obj.position.copy(cellPos(...t)); }})()")
         if where == 'out': ev(f"(() => {{ const k = Object.keys(ROOM_TILES).find(k => k !== '{rm}' && ROOM_TILES[k].length > 4); player.obj.position.copy(cellPos(...ROOM_TILES[k][0])); }})()")
         ev(f"setShipNow({1440 + mm})"); g.step(1); g.step(1); look[mm] = ev(FX_LOOK); return look[mm]
-    early = go(min(ask[0] + 5, at - 31)); lead = go(at - 29); inr = go(at - 10, 'in'); outr = go(at - 5, 'out'); back = go(at - 2, 'in'); start = go(at + 1)
+    early = go(min(ask[0] + 5, at - 16)); lead = go(at - 14); inr = go(at - 10, 'in'); ev("setGoal({ deck: 3, room: 'M', label: 'Food' })"); lent = go(at - 8); ev('clearGoal()'); gave = go(at - 7); outr = go(at - 5, 'out'); back = go(at - 2, 'in'); start = go(at + 1)
     if start[6]: ev("dialogueEnd(true)")
     after = [go(at + 3)[5], go(at + 20)[5], go(at + ln + 5)[5]]
-    print('   before the lead:', early[5], '| 29 before:', lead[5], '| in the room:', inr[5], '| out again:', outr[5], '| back in:', back[5], '| started:', start[0], start[6], '| after:', after)
+    print('   before the lead:', early[5], '| 14 before:', lead[5], '| in the room:', inr[5], '| out again:', outr[5], '| back in:', back[5], '| started:', start[0], start[6], '| after:', after)
     check(ask[1][5] is None and early[5] is None, f"bug 2: no meeting arrow at the ask nor before the lead time ({ask[1][5]}, {early[5]})")
-    check(lead[5] and ' with ' in lead[5] and lead[5][0].isupper(), f"bug 2: the meeting arrow is up 29 minutes before ({lead[5]})")
-    check(inr[5] is None and outr[5] == lead[5] and back[5] is None, f"bug 2: down in the room, back up out of it, down again ({inr[5]}, {outr[5]}, {back[5]})")
+    check(lead[5] and ' with ' in lead[5] and lead[5][0].isupper(), f"bug 2: the meeting arrow is up 14 minutes before ({lead[5]})")
+    check((inr[5] or '').startswith('Wait here') and outr[5] == lead[5] and (back[5] or '').startswith('Wait here'), f"bug 2: in the room it says wait here (your job's arrow doesn't lead you off), out of it it leads back ({inr[5]}, {outr[5]}, {back[5]})")
+    check(lent[5] == 'Food' and (gave[5] or '').startswith('Wait here'), f"bug 2 (PR9): another arrow borrows it, and once that's gone the meeting's is back ({lent[5]}, {gave[5]})")
     check(start[6] and not any(x and ' with ' in x for x in after), f"bug 2: the meeting plays with you there; its arrow never comes back after it ({start[6]}, {after})")
     if g.errors: fail('(p) page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
 
+# (q) FX1 (patch-p5-fix1): the arrow and tracking lifecycle, a fresh page, on paper. A new game starts with job tracking
+# on; tracking your bunk, or a device "go" (the Jobs app's board), no longer switches it off (and a "go" clears itself on
+# arrival); tracking "On shift" is your job's arrow (the clock, not the bay's middle); at 17:00 with a job in hand the
+# arrow says clock out; an empty board says so, once; the shower arrow from Deck 5 goes to the junior washroom, not a
+# cabin's; a lesson asked at 06:00 is never before 09:15; a training on Tracked names its teacher, time and place; the
+# test job's arrow goes when its time is up; a tap on Deck 5's light relays (your job) starts the work.
+FX_LIFE = r"""(() => {
+  const out = {}, P = SHIP.player, said = [], kt = toast; toast = (a, b) => said.push(a + ': ' + b);
+  try {
+  P.track = null; newGameStart(false); simFlush && simFlush(); out.fresh = P.track === undefined ? 'on' : P.track;
+  P.track = undefined; clearGoal(); trkTap('place:bed'); out.bed = [P.track === null ? 'off' : 'on', IX_GOAL && IX_GOAL.label]; clearGoal();
+  P.track = undefined; DEVICE_APPS.get('jobs').act('board'); out.go = [P.track === null ? 'off' : 'on', IX_GOAL && IX_GOAL.trk]; clearGoal();
+  careerInit(); let d = 2; while (!playerShiftOn(d)) d++; out.d = d;
+  setShipNow((d - 1) * 1440 + 450); P.track = undefined;
+  const sh = trkItems().find(x => /^shift:/.test(x.key)); out.shiftRow = sh ? [sh.title, !!sh.work, sh.sub] : null;
+  out.shiftOn = sh ? trkOn(sh) : null; setGoal({ deck: 3, room: 'M', label: 'x', trk: 'meal:x' }); if (sh) trkTap(sh.key); out.shiftTap = [P.track === null ? 'off' : 'on', IX_GOAL && IX_GOAL.label];
+  setShipNow((d - 1) * 1440 + 490); out.at0810 = (goalNow() && goalNow().label) || ((ixJobStep() || {}).label); clearGoal();
+  careerClock(shipNow()); const o = openJobs('you')[0]; if (o) ixBoard.take(o.id);
+  setShipNow((d - 1) * 1440 + 1025); out.out1705 = (ixJobStep() || {}).label;
+  const mj = myJob(); if (mj) dropJob(mj.id);
+  { setShipNow((d - 1) * 1440 + 600); const ci0 = SHIP.career.ci; SHIP.career.ci = Math.max(1, Math.floor(shipNow())); const rts = roundTrainStep, js = openJobs('you');   // the round's arrow: free hands only (RV6)
+    roundTrainStep = () => ({ step: 'take', job: js[0] && js[0].id }); clearGoal(); RG_LAST = ''; roundGuide(); const free = IX_GOAL && IX_GOAL.label;
+    clearGoal(); RG_LAST = ''; if (js[1]) ixBoard.take(js[1].id); roundGuide(); out.round = [free, IX_GOAL ? IX_GOAL.label : null, !!myJob()];
+    const mj2 = myJob(); if (mj2) dropJob(mj2.id); roundTrainStep = rts; RG_LAST = ''; clearGoal(); SHIP.career.ci = ci0; }
+  setShipNow((d - 1) * 1440 + 600); const keep = SHIP.jobs; const oj = openJobs; openJobs = () => []; said.length = 0; out.emptyStep = (ixWorkStep() || {}).label || null; out.emptyOpen = openJobs('you').length; out.empty = said.slice(); ixWorkStep(); out.emptyTwice = said.length; openJobs = oj; SHIP.jobs = keep;
+  goToDeck(5); clearGoal(); NEED_GOAL = null; needGoal('hygiene'); out.shower = IX_GOAL && [IX_GOAL.deck, IX_GOAL.place, IX_GOAL.label]; needGoalClear(); clearGoal();
+  { SHIP.works = null; SHIP.occasions.length = 0; setShipNow((d - 1) * 1440 + 360); const W = worksInit(); W.log.push(['x', d, 0, 'service']); const c = { id: 'm5', st: 'ask' }; W.cur = c;
+    trainOffer(ladderRow('m5'), c, d, (d - 1) * 1440 + 360); const r = SHIP.occasions.find(x => x.key === c.occ); out.ask0600 = r ? hhmm(r.at % 1440) : null;
+    const it = r && trkItems().find(x => x.sec === 'on' && x.goal && /Training/.test(x.title)); out.occ = it && [it.title, it.sub, it.goal.label];
+    const items = trkItems().filter(x => x.sec === 'on').map(x => x.title); out.order = items;
+    SHIP.works = null; SHIP.occasions.length = 0; }
+  { const m = machineList().find(x => x.deck === 4) || machineList()[0], t = shipNow(); const j = { id: 'fx-test', machine: m.id, deck: m.deck, room: m.room, kind: 'service', status: 'open', posted: t, found: t, until: t + 30, parts: [], title: 'Test' }; SHIP.jobs.push(j);
+    clearGoal(); promoTestTell({ j: 'fx-test', by: 'calder' }); out.test = IX_GOAL && [IX_GOAL.label, IX_GOAL.trk, IX_GOAL.trkTo === j.until];
+    setShipNow(t + 31); trkDoneCheck(); out.testAfter = IX_GOAL && IX_GOAL.label; SHIP.jobs = SHIP.jobs.filter(x => x !== j); clearGoal(); }
+  { goToDeck(5); clearGoal(); const t = shipNow(), m = machineById('5-junction-1');   // the light relays' own tap starts the work (arrows_check: "Repair the light relays" up all day)
+    const j = { id: 'fx-relays', machine: m.id, deck: m.deck, room: m.room, kind: 'chore', chore: 'fault', target: m.id, title: 'Reset a tripped breaker: light relays', parts: [], stops: [{ tag: 'fault', placeId: '5-junction-1-svc', mins: 10 }], status: 'claimed', claimedBy: 'you', posted: t, found: t, start: t };
+    SHIP.jobs = SHIP.jobs.filter(x => !(x.claimedBy === 'you' && x.status === 'claimed')); SHIP.jobs.push(j); MACH_REV++; actEnd(true);
+    const it = ITEMS.find(i => i.t === 'Light relays'), p = it && it.hit.getWorldPosition(new THREE.Vector3()), s = placeSpot(panelPlace(m.id)); player.obj.position.set(s.x, 0, s.z);
+    out.relays = [!!it && !!playerTap(it, p.clone(), p.clone()), ACT ? ACT.kind : null]; actEnd(true); SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  toast = kt; return out;
+})()"""
+def fx_lifecycle(pw):
+    print('(q) FX1, the arrow and tracking lifecycle (a fresh page):')
+    g = Game(pw, sys.argv[1]); r = g.ev(FX_LIFE); print('  ', json.dumps(r))
+    check(not r.get('err'), f"(q) stopped: {r.get('err')}")
+    check(r.get('fresh') == 'on', f"a new game starts with job tracking on ({r.get('fresh')})")
+    check(r.get('bed') == ['on', 'Your bunk'] and r.get('go') == ['on', 'go:The job board, in the Works bay'], f"tracking your bunk or a device go keeps job tracking on; a go clears on arrival ({r.get('bed')}, {r.get('go')})")
+    check(r.get('shiftRow') and r['shiftRow'][1] and r.get('shiftOn') and r.get('shiftTap') == ['on', None] and r.get('at0810') == 'Clock in at the time clock', f"On shift is your job's arrow: the clock at 08:10 ({r.get('shiftRow')}, {r.get('shiftTap')}, {r.get('at0810')})")
+    check(r.get('out1705') == 'Shift over: clock out at the time clock', f"17:05 with a job in hand: clock out ({r.get('out1705')})")
+    check(r.get('emptyStep') is None and len(r.get('empty') or []) == 1 and 'board' in r['empty'][0].lower() and r.get('emptyTwice') == 1, f"an empty board says so, once ({r.get('empty')}, {r.get('emptyTwice')})")
+    check(r.get('shower') and r['shower'][1].startswith('4-shower-'), f"the shower arrow from Deck 5: the junior washroom ({r.get('shower')})")
+    check(r.get('ask0600') and r['ask0600'] >= '09:15', f"a lesson asked at 06:00 is after the shift starts ({r.get('ask0600')})")
+    check(r.get('occ') and ' with ' in r['occ'][0] and ' with ' in r['occ'][2] and ':' in r['occ'][2], f"a training on Tracked names its teacher, time and place ({r.get('occ')})")
+    check(r.get('test') == ['Your test job', 'career:test', True] and r.get('testAfter') is None, f"the test job's arrow goes when its time is up ({r.get('test')}, {r.get('testAfter')})")
+    check(r.get('round') and r['round'][0] == 'Take your first round at the job board' and r['round'][1] is None and r['round'][2], f"the round's arrow with free hands; holding another job, that job leads ({r.get('round')})")
+    check(r.get('relays') == [True, 'job'], f"a tap on the light relays starts your job there ({r.get('relays')})")
+    if g.errors: fail('(q) page errors: ' + ' | '.join(g.errors[:5]))
+    g.close()
+
 with sync_playwright() as pw:
     if '--fx' in sys.argv:                                # only part (p): python3 career_check.py BUILD.html --fx
-        fx_guidance(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
+        fx_guidance(pw); fx_lifecycle(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
     g = Game(pw, sys.argv[1])
     errors = g.errors
     ev = g.ev
@@ -271,12 +333,12 @@ with sync_playwright() as pw:
       setShipNow(1440 + 300); const W = worksInit(); W.log.push(['x', 1, 0, 'service']); const out = {}; clearGoal();
       skipTo(1440 + 460); WORKS_TICK.m = -1; out.st = W.cur && W.cur.st; out.toldAsleep = W.cur && W.cur.told;
       worksCareerTick(shipNow() + 1); out.toldUp = W.cur && W.cur.told; out.goalAtAsk = !!(IX_GOAL && / with /.test(IX_GOAL.label));
-      { const r = SHIP.occasions.find(x => x.key === W.cur.occ); if (r) worksCareerTick(r.at - 20); out.goal = !!(IX_GOAL && / with /.test(IX_GOAL.label)); clearGoal(); }   // FX1: its arrow from 30 minutes before the meeting
+      { const r = SHIP.occasions.find(x => x.key === W.cur.occ); if (r) worksCareerTick(r.at - 10); out.goal = !!(IX_GOAL && / with /.test(IX_GOAL.label)); clearGoal(); }   // FX1: its arrow from 15 minutes before the meeting
       W.cur = { id: 'm7', st: 'held', d: 2, by: 'calder', occ: null, j: null, w: 0, hold: true }; ladderTick(Math.floor((2 * 1440 + 400) / 60)); out.heldTrained = W.tr.m7;
       deviceDo({ app: 'works', tab: 'tools' }); out.tab = WORKS_TAB; WORKS_TAB = 'training';
       for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null; return out; })()""")
     print('  asked while asleep, told when up; a stale hold; open on a tab:', rv)
-    check(rv['st'] == 'meet' and rv['toldAsleep'] is False and rv['toldUp'] is True and rv['goal'] and not rv['goalAtAsk'], f"an ask made during a sleep is told (toast) when you are up; its arrow comes 30 minutes before the meeting ({rv})")
+    check(rv['st'] == 'meet' and rv['toldAsleep'] is False and rv['toldUp'] is True and rv['goal'] and not rv['goalAtAsk'], f"an ask made during a sleep is told (toast) when you are up; its arrow comes 15 minutes before the meeting ({rv})")
     check(rv['heldTrained'] is not None, 'a hold left from an earlier day trains you on the next workday')
     check(rv['tab'] == 'tools', 'the Works app opens on a given tab')
 
@@ -477,6 +539,7 @@ with sync_playwright() as pw:
     if errors: fail('page errors: ' + ' | '.join(errors[:5]))
     g.close()
     fx_guidance(pw)
+    fx_lifecycle(pw)
 
 print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED')
 sys.exit(0 if ok else 1)

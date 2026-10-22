@@ -11390,7 +11390,11 @@ function devPlaceGoal(id) {                              // a place id (an appoi
   return null;
 }
 function devItemGoal(x) {
-  if (x.kind === 'appt' && x.place) return devPlaceGoal(x.place);
+  if (x.kind === 'appt' && x.place) {                    // FX1: an occasion's 'deck|room' too (a training: it had no arrow), and who, when and where
+    const k = /^(\d+)\|(.+)$/.exec(String(x.place)), g = devPlaceGoal(x.place) || (k && DECKS[k[1]] && (DECKS[k[1]].rooms || {})[k[2]] ? { deck: +k[1], room: k[2], label: apptWhereName(x.place) } : null);
+    if (g && x.title) g.label = x.title + ', ' + hhmm(x.from) + ': ' + g.label;
+    return g;
+  }
   if (x.kind === 'meal') return { deck: 3, room: 'M', label: 'The mess hall, Deck 3' };
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
   if (x.kind === 'tea') return { deck: 5, item: /^tea table$/i, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5; the arrow at the table (playtest 1, note 10)
@@ -11453,7 +11457,7 @@ function devHeadsBack() { if (DEV.hu) { DEV.hu = null; DEVICE_SKIN.heads(null); 
 function devHeadsDo(verb) {                              // the strip's taps: 'open' (the Schedule), 'go' (the goal arrow), 'done'
   const h = DEV.hu; if (!h) return; DEV.hu = null; HU_Q.shift(); DEVICE_SKIN.heads(null);
   if (verb === 'open') deviceShow('schedule');
-  else if (verb === 'go' && h && h.goal && typeof setGoal === 'function') { SHIP.player.track = null; setGoal(h.goal); }
+  else if (verb === 'go' && h && h.goal && typeof setGoal === 'function') goTo(h.goal);   // (FX1: tracking stays on)
   if (verb === 'done') devHeadsShow();
 }
 
@@ -11908,7 +11912,7 @@ deviceApp({ id: 'settle', title: 'Settling in', short: 'Settling', icon: 'record
   act(verb, arg) {
     if (verb === 'go' && typeof setGoal === 'function') {
       const it = (settleList() || []).find(x => x.id === arg), g = it && settleGoal(it); if (!g) return;
-      SHIP.player.track = null; setGoal(g); deviceNotify({ app: 'settle', text: 'Follow the marker: ' + g.label + '.', urgent: true }); delete DEV.notes.settle;
+      goTo(g); deviceNotify({ app: 'settle', text: 'Follow the marker: ' + g.label + '.', urgent: true }); delete DEV.notes.settle;
     }
     else if (verb === 'end') { if (!settleSure) settleSure = true; else { settleSure = false; if (typeof introEnd === 'function') introEnd(false); } }
   },
@@ -12016,7 +12020,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
 deviceApp({ id: 'jobs', title: 'Jobs', icon: 'wrench', order: 30,
   act(verb, id) {
     if (verb === 'track') { SHIP.player.track = SHIP.player.track === null ? id : null; if (SHIP.player.track && typeof clearGoal === 'function') clearGoal(); }
-    else if (verb === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
+    else if (verb === 'board' && typeof setGoal === 'function') goTo({ deck: 5, room: 'w', label: 'The job board, in the Works bay' });
   },
   view: () => {
     const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
@@ -12067,7 +12071,7 @@ deviceApp({ id: 'maps', title: 'Maps', icon: 'map', order: 25,
     else if (verb === 'pick') mapPick = mapPick === arg ? null : arg;
     else if (verb === 'go' && mapPick && typeof setGoal === 'function') {
       const n = mapDeck || deckDef.num, r = DECKS[n].rooms[mapPick];
-      SHIP.player.track = null; setGoal({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckIn(n) : '') });
+      goTo({ deck: n, room: mapPick, label: r.name + (n !== deckDef.num ? ', ' + deckIn(n) : '') });
       deviceNotify({ app: 'maps', text: 'Follow the marker to the ' + r.name.toLowerCase() + '.', urgent: true }); delete DEV.notes.maps;
     }
     else if (verb === 'clear' && typeof clearGoal === 'function') clearGoal();
@@ -12145,7 +12149,7 @@ deviceApp({ id: 'roster', title: 'Roster', icon: 'crew', order: 52,
     else if (verb === 'tab') { rosterTab = arg === 'known' ? 'known' : 'all'; rosterPick = null; }
     else if (verb === 'go' && rosterPick && typeof setGoal === 'function') {
       const p = apptPerson(rosterPick), w = p && rosterWhere(p); if (!w || !w.room) return;
-      SHIP.player.track = null; setGoal({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') });
+      goTo({ deck: w.deck, room: w.room, label: p.name.split(' ')[0] + ', ' + rosterRoomName(w.roomName) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') });
       deviceNotify({ app: 'roster', text: 'Follow the marker to ' + rosterRoomName(w.roomName) + '.', urgent: true }); delete DEV.notes.roster;
     }
   },
@@ -12320,6 +12324,7 @@ function apptRoomPlace(n, key) {
 const apptPerson = id => typeof schedPeople === 'function' ? schedPeople().find(p => p.id === id) : (typeof ROSTER !== 'undefined' ? ROSTER.find(p => p.id === id) : null);
 const apptName = id => { const p = apptPerson(id); return p ? p.name : String(id); };
 const apptWhereName = id => {                          // the room's name, for any place in it
+  { const k = /^(\d+)\|(.+)$/.exec(String(id)), r = k && DECKS[k[1]] && (DECKS[k[1]].rooms || {})[k[2]]; if (r) return r.name + ', ' + deckIn(+k[1]); }   // FX1: an occasion's 'deck|room' (24's trainings)
   for (const n of Object.keys(DECKS)) { const q = (DECKS[n].places || []).find(x => x.id === id); if (q) { const r = (DECKS[n].rooms || {})[q.room]; return (r ? r.name : 'there') + ', ' + deckIn(n); } }
   return 'there';
 };
@@ -14194,7 +14199,8 @@ function jobTap(it, at) {
   // (Deck 4's light relays), and no other machine in the room is nearer. The floor at its panel and glass-backed things
   // past it still start the work (jobSpotTap), as does Repair
   const dm = Math.hypot(mc.x - at.x, mc.z - at.z), dp = Math.hypot(spot.x - at.x, spot.z - at.z), mine = Math.min(dm, dp);
-  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== m.room
+  const own = !!(it && it.t && typeof machineName === 'function' && String(it.t).toLowerCase() === String(machineName(m)).toLowerCase() && dm <= MACHINE_NEAR + 1);   // FX1: the machine itself, by its name (Deck 5's light relays sit 1.25 m from their middle: a tap on them did nothing, and the job's arrow stayed up all day)
+  if (!(dm <= MACHINE_NEAR || dp <= .8 || own) || roomAt(...c) !== m.room
     || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) return false;
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
@@ -14592,7 +14598,10 @@ let NEED_GOAL = null;                                     // { need, label } whi
 function needGoal(k) {
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
-  const ok = pl => k === 'energy' ? pl.id === bed : NEED_FIX[k].includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl));
+  // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
+  // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
+  const theirs = pl => (DECKS[pl.deck].places || []).some(q => q.type === 'bed' && q.id !== bed && (q.room === pl.room || pl.id.startsWith(q.id + '-')));
+  const ok = pl => k === 'energy' ? pl.id === bed : NEED_FIX[k].includes(pl.type) && !(PRIVATE_TYPES.has(pl.type) && theirs(pl));
   const near = pl => pl.deck === here ? Math.hypot(cellPos(...pl.at).x - pos.x, cellPos(...pl.at).z - pos.z) : 1000 * (1 + Math.abs(pl.deck - here));
   const all = Object.keys(DECKS).flatMap(n => (DECKS[n].places || []).map(pl => ({ ...pl, deck: +n }))).filter(ok);
   const pl = all.sort((a, b) => near(a) - near(b) || (a.id < b.id ? -1 : 1))[0]; if (!pl) return false;
@@ -15163,7 +15172,7 @@ function clockRemindTick(now = shipNow()) {
   if (!off && due.want === 'out') CLOCK_RM_ON5 = now;
   const st = due.want === 'in'
     ? (m >= CAREER.missBy ? 'mailIn' : m >= CAREER.missBy - CLOCK_RM.last ? 'last' : m >= S + CLOCK_RM.later ? 'later' : m >= S + CLOCK_RM.late ? 'late' : easy ? null : m >= S + CLOCK_RM.start ? null : m >= S ? 'start' : m >= S - CLOCK_RM.pre ? 'pre' : null)
-    : (m >= E && left ? 'left' : m >= E + CLOCK_RM.stillin ? 'stillin' : easy ? null : m >= E + CLOCK_RM.end ? null : m >= E ? 'end' : 'end0');
+    : (m >= E && left ? 'left' : m >= E + CLOCK_RM.stillin ? 'stillin' : easy && !(typeof myJob === 'function' && myJob()) ? null : m >= E + CLOCK_RM.end ? null : m >= E ? 'end' : 'end0');
   if (!st || C.s & CLOCK_RM.bit[st] || st === 'stillin' && C.s & CLOCK_RM.bit.left) { if (!clockRmHeld(now) && (!easy || due.late) && (due.want === 'in' ? m >= S : m >= E)) clockRmSay(due.want, now); return null; }
   if (clockRmHeld(now)) return null;
   C.s |= CLOCK_RM.bit[st]; if (st === 'left') C.s |= CLOCK_RM.bit.end | CLOCK_RM.bit.stillin;
@@ -15667,6 +15676,7 @@ const ixShelf = need => { const id = typeof shelfOf === 'function' && need.lengt
 // your job's next step: parts from main storage, a part from the machine shop, or the machine's panel
 function ixJobStep() {
   if (typeof myJob !== 'function') return null;
+  { const co = typeof clockRmDue === 'function' ? clockRmDue() : null; if (co && co.want === 'out' && co.late && !(typeof introOn === 'function' && introOn() && SHIP.time.day === 1)) return { deck: 5, place: '5-timeclock-1', label: 'Shift over: clock out at the time clock' }; }   // FX1: at the shift's end, over your job (it waits for tomorrow)
   const j = myJob(); if (!j) return ixWorkStep();
   if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
@@ -15703,7 +15713,8 @@ function ixWorkStep() {
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
-  return typeof openJobs === 'function' && openJobs('you').length ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
+  const open = typeof openJobs === 'function' && openJobs('you').length; if (typeof boardEmptySay === 'function') boardEmptySay(!open, now);   // FX1: the empty board says so, not just no arrow
+  return open ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
@@ -15754,6 +15765,8 @@ function roundGuide() {
   let r = null; try { r = typeof roundTrainStep === 'function' ? roundTrainStep() : null; } catch (e) { r = null; }
   const ours = IX_GOAL && IX_GOAL.label === RG_GOAL, rgTips = () => { if (TIP_Q.length && /^rg:/.test(TIP_Q[0].id)) tipDone(); for (let i = TIP_Q.length - 1; i > 0; i--) if (/^rg:/.test(TIP_Q[i].id)) TIP_Q.splice(i, 1); };
   if (!r || r.step !== 'take') { if (ours) clearGoal(); }
+  else if (typeof careerClockedIn === 'function' && typeof playerShiftOn === 'function' && playerShiftOn(SHIP.time.day) && !careerClockedIn(SHIP.time.day)) { if (ours) clearGoal(); }   // FX1: a round offered again waits for you to clock in (from 06:00 it hid Clock in all morning)
+  else if (typeof myJob === 'function' && myJob() || r.job && typeof openJobs === 'function' && !openJobs('you').some(o => o.id === r.job)) { if (ours) clearGoal(); }   // FX1: holding another job, its arrow leads (the round's comes back when your hands are free); and only while the board offers it
   else if (!IX_GOAL || !RG_LAST) setGoal({ deck: 5, item: /job board/i, room: 'w', label: RG_GOAL });   // straight after Torres's talk it takes over (his meeting's arrow is done); later, never over another
   if (!r) { if (RG_LAST) rgTips(); RG_LAST = ''; return; }   // turned in: the last tip goes too
   const key = r.step + '|' + (r.machine || ''); if (key === RG_LAST) return;
@@ -15820,22 +15833,24 @@ function trkItems() {
     out.push({ sec: 'job', key: 'job:' + j.id, job: j.id, title: j.title || 'Your job', sub: st ? st.label : 'Your job', tag: 'Job' }); }
   if (typeof clockTrkItem === 'function') { const ci = clockTrkItem(); if (ci) out.push(ci); }   // clock in / clock out while it's due (section 15's reminders, note 20)
   for (const [day, upto] of [[d, 1440], [d + 1, 720]]) {   // the rest of today, and tomorrow until noon
-    let list = []; try { list = devDay(day); } catch (e) { /* none */ }
+    let list = []; try { list = devDay(day).slice().sort((a, b) => a.from - b.from || (a.kind === 'shift') - (b.kind === 'shift')); } catch (e) { /* none */ }   // FX1: at the same time, what's on before your shift's own row
     for (const x of list) {
       if (x.kind === 'off' || x.from >= upto || (day === d && x.to <= m)) continue;
-      out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where,
-        tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), goal: trkGoalOf(x), span: [(day - 1) * 1440 + x.from, (day - 1) * 1440 + x.to] });   // span: when it's on (trkDoneCheck)
+      const work = x.kind === 'shift' && day === d;       // FX1: tracking your shift today is your job's arrow: the clock from when it opens, the board, your job (not the bay's middle)
+      out.push({ sec: 'on', key: x.kind + ':' + day + ':' + x.from + ':' + x.title, title: x.title, sub: (day === d ? '' : 'Tomorrow · ') + x.where + (work && typeof CAREER !== 'undefined' && m < CAREER.clockIn ? ' · the clock opens at ' + hhmm(CAREER.clockIn) : ''),
+        tag: day === d && x.from <= m ? 'Now' : hhmm(x.from), ...(work ? { work: true } : { goal: trkGoalOf(x), span: [(day - 1) * 1440 + x.from, (day - 1) * 1440 + x.to] }) });   // span: when it's on (trkDoneCheck)
     }
   }
   for (const q of TRK_PLACES) { const g = q.goal(); let shut = false; try { shut = typeof eventClosed === 'function' && eventClosed(g); } catch (e) { /* not yet */ } if (shut) continue; out.push({ sec: 'place', key: q.key, title: q.title, sub: q.sub, tag: '', goal: g }); }   // a place a ship-wide event has closed isn't offered (section 18, the events base F3a)
   return out;
 }
-const trkOn = it => { if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
+const trkOn = it => { if (it.work) return !IX_GOAL && SHIP.player.track !== null && !(typeof myJob === 'function' && myJob()); if (!it.job) return !!(IX_GOAL && IX_GOAL.trk === it.key); const j = typeof myJob === 'function' ? myJob() : null; return !IX_GOAL && SHIP.player.track !== null && !!j && j.id === it.job; };
 function trkTap(key) {                                  // the app's tap: track it, or stop if it's the one tracked
   const it = trkItems().find(x => x.key === key); if (!it) return false;
-  if (trkOn(it)) { if (it.job) SHIP.player.track = null; else clearGoal(); return false; }
+  if (trkOn(it)) { if (it.job || it.work) SHIP.player.track = null; else clearGoal(); return false; }
+  if (it.work) { SHIP.player.track = undefined; clearGoal(); return true; }   // FX1: your shift: the job arrow on
   if (it.job) { SHIP.player.track = it.job; clearGoal(); }
-  else if (it.goal) { const back = SHIP.player.track !== null; SHIP.player.track = null; setGoal({ ...it.goal, trk: it.key, ...(back ? { back } : {}), ...(it.span ? { trkFrom: it.span[0], trkTo: it.span[1] } : {}) }); }   // back: your job was tracked (playtest 1, note 11)
+  else if (it.goal) setGoal({ ...it.goal, trk: it.key, ...(it.span ? { trkFrom: it.span[0], trkTo: it.span[1] } : {}) });   // over your job's arrow, which comes back when it's done (playtest 1, note 11; FX1: tracking is no longer switched off for it)
   else return false;
   return true;
 }
@@ -15850,7 +15865,7 @@ function trkDraw() {
     const h = document.createElement('h3'), box = document.createElement('div'); h.textContent = head; box.className = 'decks'; trkList.append(h, box);
     for (const it of rows) {
       const on = trkOn(it), b = document.createElement('button'), sp = document.createElement('span'), t = document.createElement('b'), sm = document.createElement('small');
-      b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal; b.setAttribute('aria-pressed', String(on));
+      b.type = 'button'; b.className = 'deckbtn' + (on ? ' goal' : ''); b.disabled = !on && !it.job && !it.goal && !it.work; b.setAttribute('aria-pressed', String(on));
       if (it.tag) { const i = document.createElement('i'); i.textContent = it.tag; b.appendChild(i); }
       t.textContent = it.title; sm.textContent = it.sub + (b.disabled ? ' · no arrow for this one' : ''); sp.append(t, sm); b.appendChild(sp);
       if (on) { const e = document.createElement('em'); e.textContent = 'Tracking'; b.appendChild(e); }
@@ -15965,6 +15980,22 @@ function trackFresh() {
   const t = SHIP.player.track; if (t === null || t === undefined) return t;
   const j = typeof myJob === 'function' ? myJob() : null; if (!j || j.id !== t) SHIP.player.track = undefined;
   return SHIP.player.track;
+}
+// FX1: a "go" from the device (a heads-up, Settling in, the Jobs app's board, Maps, People, 24k's Where next): the arrow
+// there, over your job's arrow, and gone once you arrive (trkDoneCheck's place rule). These switched job tracking off
+// for good (track = null; so did tracking a Tracked item), so after Dev mode's Set career, or any "go", there was no
+// Clock in or job arrow until you took a job by hand. Tracking now stays on: your job's arrow comes back after.
+function goTo(g, key) { if (g && g.deck) setGoal({ ...g, trk: g.trk || 'go:' + (key || g.label || '') }); }
+// FX1: a new game (and Dev mode's Set career, which starts one) starts with job tracking on and no arrow left over: the
+// old game's track (null if you, or a "go", had switched it off) used to carry over
+onSim('newGame', () => { SHIP.player.track = undefined; clearGoal(); });
+// FX1: on shift with no job and nothing on the board for you, the arrow just vanished. Now a word, once each time the
+// board runs dry (and not again within the hour): ixWorkStep asks, once a ship minute
+function boardEmptySay(empty, now) {
+  const B = boardEmptySay.s || (boardEmptySay.s = { dry: false, at: -1e9 });
+  if (!empty) { B.dry = false; return; }
+  if (B.dry || now - B.at < 60) return; B.dry = true; B.at = now;
+  try { toast('Job board', 'Nothing on the board for you just now. New jobs come in through the shift: look again in an hour, or have a tea.'); } catch (e) { /* no UI */ }
 }
 // ---- end of slot: Interactions engineer ----
 
@@ -45252,8 +45283,9 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   if (c.st === 'again') return trainWatch(row, c, t, true);
   const M = WORK_MECH[row.id] || {}; if (M.offer) { try { return !!M.offer(row, c, d, t); } catch (e) { console.error(e); return false; } }   // the sub-block's own ask (24f: m6's urgent call); it sets c.st = 'meet', c.occ, c.by
   let early = 0; try { early = M.at ? +M.at(d) || 0 : 0; } catch (e) { early = 0; }   // a sub-block's earliest meeting (24d: m4 after the delivery's unload)
-  const at = Math.min(Math.max(900, early), Math.max(m + 60, 510, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);
-  o.by = by; o.script = trainScript(row, by); const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
+  const at = Math.min(Math.max(900, early), Math.max(m + 60, DAY_SHIFT[0] + 15, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);   // FX1: never before 09:15 (it was 08:30: an ask at 06:00 pulled you off before your shift)
+  o.by = by; o.script = trainScript(row, by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + worksFirst(by);   // FX1: the Calendar, Schedule and Tracked name the teacher
+  const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
   if (!r) return false;
   c.st = 'meet'; c.occ = r.key; c.told = false;
   const place = DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name : 'the Works bay', when = hhmm(at);
@@ -45911,7 +45943,7 @@ WORK_TICKS.push((now, skip) => {
   if (!skip && m >= DRILL_TOAST && m < DRILL_END && !j.told) {   // 14:50: the toast, the job yours, the arrow
     j.told = true;
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
-    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00', trk: 'career:drill', trkTo: j.until });   // FX1: gone at the all-clear (it stayed up for days)
   }
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
 });
@@ -47640,13 +47672,13 @@ function caseAct(verb, arg) {
   else if (v === 'yes') { CASE_UI.ask = null; if (caseCall(c.id, s)) { const p = caseSus(c, s).part; if (p && typeof toast === 'function') toast('Called it', 'A ' + p + ' from main storage, Deck 5. Follow the marker.'); } }
   else if (v === 'next') {
     const k = c.clues.find(x => !c.got.includes(x.id)), p = k && k.at && k.at !== 'board' && placeById(k.at);
-    if (p && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckIn(p.deck) : '') }); }
+    if (p && typeof setGoal === 'function') { goTo({ deck: p.deck, place: p.id, label: (roomName(p.deck, p.room) || 'The clue') + (p.deck !== deckDef.num ? ', ' + deckIn(p.deck) : '') }); }
     else if (k && k.src && k.src.ask && typeof setGoal === 'function') {   // a person: where they are now
       const p = schedPeople().find(x => x.id === k.src.ask), w = p && whereIs(p, shipNow());
-      if (w && w.placeId && placeById(w.placeId)) { SHIP.player.track = null; setGoal({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') }); }
+      if (w && w.placeId && placeById(w.placeId)) { goTo({ deck: w.deck, place: w.placeId, label: shortName(p) + (w.deck !== deckDef.num ? ', ' + deckIn(w.deck) : '') }); }
       else if (typeof toast === 'function') toast('Fault notes', caseHint(c.id));
     }
-    else if (k && k.at === 'board' && typeof setGoal === 'function') { SHIP.player.track = null; setGoal({ deck: 5, room: 'w', label: 'The job board, in the Works bay' }); }
+    else if (k && k.at === 'board' && typeof setGoal === 'function') goTo({ deck: 5, room: 'w', label: 'The job board, in the Works bay' });
     else if (k && typeof toast === 'function') toast('Fault notes', caseHint(c.id));
   }
   else if (v === 'doubt') { c.doubt = c.doubt || []; const i = c.doubt.indexOf(s); if (i < 0) c.doubt.push(s); else c.doubt.splice(i, 1); }   // P2: a witness marked "doesn't fit" (yours, kept)
@@ -48381,7 +48413,7 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    if (typeof setGoal === 'function') { const o = OCCASIONS['works.m6']; if (o) setGoal({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }
+    if (typeof setGoal === 'function') { const o = OCCASIONS['works.m6']; if (o) setGoal({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }), trk: 'career:inc', trkFrom: R0.at, trkTo: R0.at + 60 }); }   // FX1: gone once you're there, or after an hour (15b's trkDoneCheck)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
   }
   if (O) {
@@ -49311,7 +49343,7 @@ WORK_MECH.t2 = {
 function promoTestTell(c) {                              // the start in play: Calder's word (or a toast), the goal to the job
   promoSay(c.by, 'test.start', 'Your test job\'s on the board: one of Four\'s scrubbers. Take it when you\'re ready. I\'ll be with you.');
   const j = SHIP.jobs.find(x => x.id === c.j), m = j && typeof machineById === 'function' ? machineById(j.machine) : null;
-  if (m && typeof setGoal === 'function' && !(SHIP.player && (typeof trackFresh === 'function' ? trackFresh() : SHIP.player.track))) setGoal({ deck: m.deck, room: m.room, label: 'Your test job' });
+  if (m && typeof setGoal === 'function' && !(SHIP.player && (typeof trackFresh === 'function' ? trackFresh() : SHIP.player.track))) setGoal({ deck: m.deck, room: m.room, label: 'Your test job', trk: 'career:test', ...(j.until ? { trkTo: j.until } : {}) });   // FX1: gone once you're there, you take it, or its time is up
 }
 function promoPassed(t) {                                // the test job turned in: passed, whatever it took
   const W = SHIP.works, c = W && W.cur; if (!W || !W.test || W.test.passed) return false;
@@ -49414,7 +49446,7 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
     const text = worksText('promo.summons', 'Chief Calder: My office, 11:00. — C.');
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); } catch (e) { /* no device */ }
     try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
-    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00' });
+    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00', trk: 'career:summons', trkFrom: r.at, trkTo: r.at + (r.len || 30) });   // FX1: gone once it's begun with you there, or it's over
     if (promoInBay()) promoSay('torres-zeke', 'summons.torres', 'Go on. She doesn\'t bite. Usually.'); }
   if (m >= PROMO.seekAt && !f.seek && !r.met && !promoInBay() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) f.seek = now;   // 11:15: she comes to you
 }
@@ -49473,7 +49505,7 @@ function promoMoveTick(now) {
     if (!promoInBay()) promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.');
     promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
     simNote('moveStart', { by: W.mv.by });   // the sim engineer's box carry (Tomas and Pell at 4-23's door)
-    if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home });
+    if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: Math.floor(now / 1440) * 1440 + 1440 });   // FX1: gone once you're there (or at midnight)
   }
   try { const rm = roomAt(...player.here()), n = deckDef.num, M = PROMO.homeRoom, bed = typeof PLACE_OF !== 'undefined' && PLACE_OF.get(PROMO.home), [c, r] = player.here();   // her lines along the way (W2's promo.walk.*)
     if (rm === '@') promoWalkSay('promo.walk.lift', 'Officers\' corridor\'s on Four, the far side from the bunks.');
@@ -49574,7 +49606,7 @@ function promoCerTick(now) {
     f.gr = 1; worksSayAll('calder', worksVoice('calder', 'promo.grubby') || ['(Calder looks at your uniform, then at you, and says nothing.)']); } } catch (e) { /* not in play */ }   // a clean uniform matters (M2): her look, nothing else
   if (m >= PROMO.cerSeek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = PROMO.cerLate - PROMO.cerAt + 20;   // 17:30: Calder walks you up; the room waits for you
     worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']);
-    if (typeof setGoal === 'function') setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room' }); }
+    if (typeof setGoal === 'function') setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room', trk: 'career:ceremony', trkFrom: r.at, trkTo: r.at + r.len }); }   // FX1: gone once you're there, or it's over
 }
 function promoCerEscort(p, t) {                          // worksEscort's 24p part: Calder walking you up to the ceremony
   const r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');
@@ -49585,24 +49617,27 @@ WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('cere
 // ---- slot: Works career engineer (section 24p). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // FX1 (patch-p5-fix1, bug 2): the training meeting's arrow. trainTell put it up at the ask (06:00 for a 09:00 meeting)
 // with nothing to take it down, so it stayed all day over Clock in and the training job's own arrow. Now trainTick
-// calls trainArrow once a ship minute: while the meeting is asked and told, the arrow is up from TRAIN_LEAD ship
-// minutes before it (over your job's arrow, which comes back after) and down once you're in its room, it has started
-// or it's over. Leave the room before it starts and it comes back; another arrow put up meanwhile (a Tracked item,
-// a beat's) is left alone. Not saved: after a reload it comes back in the window.
-const TRAIN_LEAD = 30;
-const TRAIN_ARROW = { key: null, up: false, lost: false, mine: null };
-function trainArrow(c, now) {
-  const A = TRAIN_ARROW, r = c && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;
+// calls trainArrow once a ship minute: while the meeting is asked and told, the arrow is up from 15 ship minutes
+// before it (the arrows plan, as approved by the user and passed on by lead 27), over Clock in and the board; holding a job, your job keeps the arrow (the playtest patch 1, #7,
+// intro_check part 14) and a word comes 10 minutes before instead (Tracked has the meeting, with its arrow); in its room before it starts it stays on you as "wait
+// here" (so your job's arrow doesn't lead you off again); down once it has started or it's over. Another arrow put
+// up meanwhile (a Tracked item, a beat's, a need's) is left alone, and once it's gone ours comes back. Not saved: after a reload it comes back in the window.
+function trainArrow(c, now) {                           // (its state on the function: trainTick may run before this line at load)
+  const A = trainArrow.s || (trainArrow.s = { key: null, up: false, lost: false, mine: null, lead: 15, said: null }), r = c && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;
   if (typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined') return;
   const ours = !!A.mine && IX_GOAL === A.mine;
   if (A.up && !ours) { A.up = false; A.lost = true; }    // something else has the arrow now
+  if (A.lost && !IX_GOAL) A.lost = false;                 // and gave it back: ours again, while the window holds (PR9)
   if (!r) { if (ours) clearGoal(); A.up = false; A.mine = null; return; }
   if (A.key !== r.key) { if (ours) clearGoal(); A.key = r.key; A.up = A.lost = false; A.mine = null; }
   let here = false; try { here = deckDef.num === r.deck && roomAt(...player.here()) === r.room; } catch (e) { here = false; }
-  const want = c.told && !r.met && r.status === 'asked' && now >= r.at - TRAIN_LEAD && now < r.at + r.len && !here && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
-  if (want && !A.up && !A.lost) {
-    const row = ladderRow(c.id); if (!row) return;
-    setGoal({ deck: r.deck, room: r.room, label: mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) });
+  const want = c.told && !r.met && r.status === 'asked' && now >= r.at - A.lead && now < r.at + r.len && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
+  const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) : null;
+  const label = here ? 'Wait here: ' + base.charAt(0).toLowerCase() + base.slice(1) : base;
+  const busy = !A.up && typeof myJob === 'function' && !!myJob();   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead
+  if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: Tracked shows the way.'); } catch (e) { /* no UI */ } } return; }
+  if (want && base && !A.lost && (!A.up || A.mine.label !== label)) {
+    setGoal({ deck: r.deck, room: r.room, label });
     A.mine = IX_GOAL; A.up = true;
   } else if (!want && A.up) { if (ours) clearGoal(); A.up = false; }
 }
