@@ -863,10 +863,13 @@ def part_facing(pw, src, tag):
 # the crowded mess at breakfast (the plan's risk: "picking the wrong thing in a crowded mess hall"): stand among the
 # tables beside a free seat with someone seated next to it, let the ring settle (its search runs a little each frame and
 # a D-pad press starts it again, so after the check moves you it waits about 2 s), then step through what's offered. A
-# "Sit" whose point on screen has a person on it at that moment is the hard case (PR9's c7): A must not talk to them
-# (the game finds another point, or does nothing). Without such a one, the first "Sit". Either way A must not open a chat.
+# "Sit" whose point on screen has a person on it at the moment A is pressed is the hard case (PR9's c7): A must not talk
+# to them (the game finds another point, or does nothing). Without such a one, the first "Sit". Either way A must not
+# open a chat. (Making it the ring's choice is done as the D-pad does it, in the same moment, so the crowd can't move.)
 RING_SEL = r"""(() => { const s = typeof PAD_PICK !== 'undefined' ? PAD_PICK.sel : null; if (!s || !s.s) return null;
   const a = crewAtScreen(s.s[0], s.s[1]); return { key: s.key, on: a ? a.p.name : null }; })()"""
+RING_PICK_CROWDED = r"""(() => { const P = PAD_PICK; for (const t of P.list) { if (!t.key.startsWith('place:') || !t.s) continue; const a = crewAtScreen(t.s[0], t.s[1]);
+  if (a) { P.sel = t; P.chosen = true; P.n = P.every; P.job = null; return [t.key, a.p.name]; } } return null; })()"""
 def part_crowded(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_crowd', mode='pad', plug={}, w=390, h=844)
@@ -884,15 +887,18 @@ def part_crowded(pw, src, tag):
     sits = [(h, sel) for h, sel in seen if h and 'sit' in h.lower()]
     print(f'  crowded seat (beside {t["name"]}): the ring offers ' + '; '.join(f'"{h}"' + (f' (its point on {sel["on"]})' if sel['on'] else '') for h, sel in seen))
     if not sits: r.close(); return fails + ['crowded seat: the ring never offered a seat in the crowded mess']
-    h, want = next(((h, sel) for h, sel in sits if sel['on'] and 'talk' not in h.lower()), sits[0])
-    for k in range(12):
-        sel = r.ev(RING_SEL)
-        if sel and sel['key'] == want['key']: break
-        r.press('RIGHT'); r.step(4)
-    on = (r.ev(RING_SEL) or {}).get('on')
+    # the hard case at the moment of pressing: a seat in the ring with a person on its point now (the crowd moves, so
+    # look for one for up to about 4 s); it becomes the ring's choice, as the D-pad makes it, and A is pressed at once
+    on = None
+    for k in range(30):
+        got = r.ev(RING_PICK_CROWDED)
+        if got: want, on = got; break
+        r.step(4)
+    if not on: want = sits[0][1]['key']; r.ev(f"(() => {{ const P = PAD_PICK, t = P.list.find(t => t.key === {json.dumps(want)}); if (t) {{ P.sel = t; P.chosen = true; P.n = P.every; P.job = null; }} }})()")
+    h = r.ev(HINT)
     r.press('A'); r.step(90); o = r.ev(OUTCOME)
-    print(f'  crowded seat: A on "{h}" ({want["key"]}' + (f', a person on its point: {on}' if on else '') + f'): chat {o["chat"]}, act {o["act"]}')
-    if o['chat']: fails.append(f'crowded seat: A on "{h}" ({want["key"]}) talked to someone instead ({o["chat"]})')
+    print(f'  crowded seat: A on "{h}" ({want}' + (f', a person on its point: {on}' if on else ', no seat with a person on its point came up') + f'): chat {o["chat"]}, act {o["act"]}')
+    if o['chat']: fails.append(f'crowded seat: A on "{h}" ({want}) talked to someone instead ({o["chat"]})')
     if r.errors: fails.append('crowded seat: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_pick(pw, src, tag):
