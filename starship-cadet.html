@@ -53340,7 +53340,7 @@ padOn('frame', () => {
     if (!PAD_DECK.walking) { PAD_DECK.walking = true; player.stop(); }
     player.steer = { x: wx / d, z: wz / d, k: Math.min(1, .45 + .55 * m) };
   } else padWalkEnd();
-  if (!free) { PAD_DECK.flick = 0; return; }
+  if (!free || !PAD.used) { PAD_DECK.flick = 0; return; }   // (the view too, only once the pad is in use: a drift never turns or zooms it)
   // the view: a push of the right stick sideways is one quarter turn (let it come back before the next)
   const sx = PAD.rs[0];
   if (Math.abs(sx) > .6 && !PAD_DECK.flick) { PAD_DECK.flick = Math.sign(sx); azT += PAD_DECK.flick * Math.PI / 2; }

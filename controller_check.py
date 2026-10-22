@@ -6,7 +6,7 @@
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   firstuse: (lead 27) a drifting stick or a light trigger at connect is not a use (no body.pad, nothing new); a
-#           firm push held 0.15 s is, a press at once; after a touch a drift doesn't take the screen back; a drift never walks you
+#           firm push held 0.15 s is, a press at once; after a touch a drift doesn't take the screen back; a drift never walks you, zooms or turns the view
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
 #   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   lists:  (P1) the right stick scrolls a long list, the triggers page; the D-pad follows into it; a text box: A keeps
@@ -584,8 +584,15 @@ def part_firstuse(pw):
     pos1 = p.ev('[player.obj.position.x, player.obj.position.z]')
     check(pos0 == pos1 and p.ev('player.steer') is None, f'firstuse: a drifting stick at connect walked the player: {pos0} -> {pos1}')
     check(p.ev(shape) == s0 and s0[0] is False and s0[1] is False, f'firstuse: a drifting stick at connect counted as a use: {s0} -> {p.ev(shape)}')
-    p.btn('lt', .4); p.step(30); p.btn('lt', 0); p.step(1)  # a light, steady trigger
+    view = "[camera.zoom, azT]"
+    p.ev('setZoom(padZoom0())'); v0 = p.ev(view)
+    p.btn('lt', .4); p.step(45); p.btn('lt', 0); p.step(1)  # a light, steady trigger for 1.5 s
     check(p.ev('PAD.used') is False, 'firstuse: a light trigger counted as a use')
+    check(p.ev(view) == v0, f'firstuse: a light trigger before the first use moved the view: {v0} -> {p.ev(view)}')
+    p.axes([0, 0, 0, .37]); p.step(45); p.axes([0, 0, 0, 0]); p.step(1)   # the right stick drifting down for 1.5 s
+    check(p.ev(view) == v0, f'firstuse: a right-stick drift before the first use zoomed: {v0} -> {p.ev(view)}')
+    p.axes([0, 0, 1, 0]); p.step(3); p.axes([0, 0, 0, 0]); p.step(1)    # a 0.1 s push sideways: not a use, so no turn
+    check(p.ev(view) == v0 and p.ev('PAD.used') is False, f'firstuse: a short push before the first use turned the view: {v0} -> {p.ev(view)}')
     p.axes([1, 0, 0, 0]); p.step(3); u = p.ev('PAD.used')   # a firm push, 0.1 s: not yet
     p.step(3); v = p.ev('PAD.used'); p.axes([0, 0, 0, 0]); p.step(1)   # 0.2 s: a use
     check(u is False and v is True and 'pad' in p.ev('document.body.className'), f'firstuse: a firm push should count after about 0.15 s: {u} {v}')
