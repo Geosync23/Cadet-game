@@ -353,3 +353,17 @@ inside padNameIt (runs only with a pad in use). The PASS carries over to 9325b3f
   AR2's played-shift parts that record known broken items on purpose. Piece B's own part, queue: no FAIL. Mutants re-run
   on part queue only (the first whole-check run was stopped).
 - E (training arrows, 14cffba): asked lead 28 to pass it to a new reviewer (my handover point).
+
+## Arrows B 5dd6b6f verdict: PASS WITH FIXES (check fixes only; the game code is right)
+Alone: cadet_test off ALL IDENTICAL; arrows_check part queue OK; check_fast QUICK CHECK OK (384 s). (Parts shift and
+week fail on purpose: AR2's record of known broken items, each naming its fix.)
+Mutants on part queue, 9/11 CAUGHT: ar_levels, ar_track, ar_nocount, ar_tqmin, ar_saveoff, ar2_direct, ar2_body,
+ar2_norecheck ("a done entry stayed up within its minute"), ar2_retime. MISSED:
+- ar2_nomerge (a pop-up already waiting queued again): the toasts part doesn't send the same words twice while they wait.
+- ar_throwkeeps (a done() that throws kept): mostly equivalent now, since guideGoal's new re-check treats a throw as done
+  for the picked entry; an entry that isn't picked keeps its throwing done() until it would be picked. A case with a
+  throwing done() on an entry behind a lower level would cover it.
+Play probe (GUIDE_ON on, 390x844, p_arrows.py): a level 4 asked with tracking off stays hidden (by design); a direct
+goal shows; a level 1 over it borrows the arrow ("RV2 emergency") and gives it back to the direct goal within a ship
+minute of done; clearing the direct goal leaves nothing; five pop-ups in one frame plus a repeat show T0, T3, T4, T1:
+T1 and T2 dropped by TQ_MAX 3 (the burst point, left to the migration pieces' `now` marks by AR1's call).
