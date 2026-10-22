@@ -42,6 +42,8 @@ Lead 25 = session_01J2aTyEohBf8KFHCsTqt3LW, branch `claude/lead-25`. Took over 2
 | BM13 build master | session_01ExFoVfhiFG3wYTFv2QrojC | claude/integration | idle, waiting on the full round |
 | PUB1 publisher | session_01GnpjFR6oumvuvTrmcXSqeg | claude/publish-25 | standby |
 | CR1 / CR2 / CR3 check runners | session_01CsWNjCsy8u5mrHJgTVgCst / session_01BgMQaB1LQmhfU1rSJ2ATvv / session_016oCbvvzgcqzzCTsBFCkYRB | claude/checks-cr1/2/3 | running 0.64.14's full round |
+| CR4 / CR5 / CR6 check runners | session_01636CfY2MhB3DzrzZ59dhXz / session_01CHoEsvv7zMPZDr1ir7uAiz / session_01B1FwE5sMmHnMPWsGn23nrk | claude/checks-cr4/5/6 | standby; with CR1-3 they run every full round |
+| EP2 / P5P / CT1 / CS1 planners | session_012zwwPk24gA3K5Rz23Fu2Fv / session_01DCUnQMyViDh8LQSWf2fkXe / session_019sqDowb6QNf3KZAYMSx1jM / session_01QcPAXHjQZ2HfZKMCTbaW9v | claude/plan-events-final, claude/plan-p5-steps56, claude/controller, claude/crew-stories-pitch | plan pages; CT1 builds controller support after the user approves |
 | PR9 Fridays reviewer | session_01B1FUTc4sJR4Q5FFnx7L6Db | claude/review-8 | idle |
 | PR10 storm + Line reviewer | session_01KG4WKkSL57buDyiygrA5tF | claude/review-6 | idle |
 | OR2 opt reviewer | session_01AnRKXUUGi8mwREwvt4WbaV | claude/review-opt | reviewing TS3's latest |
