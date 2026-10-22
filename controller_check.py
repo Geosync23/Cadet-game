@@ -6,6 +6,7 @@
 # Parts (turn 1, the base):
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
+#   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
 #   base:   hello; a press fires once and marks the controller in use (body.pad); its release; the dead zones (sticks,
 #           triggers); a held D-pad repeats (after 0.5 s, then every 0.25 s); a touch, the mouse or the wheel hands
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
@@ -333,7 +334,7 @@ def part_panels(pw):
 # ---- P3 (plan sections 5 and 6): button pictures, connecting and disconnecting ----
 # marks:   nothing before a press; after one, a mark on Device (Y), Pause (Menu), Tracked (View), inside its button, shown;
 #          the bottom line's mark in the pad's style; Xbox / PlayStation / Nintendo from the pad's name and from
-#          PAD_MARK.pick; X's mark moves to the action button showing; Lightdisc's Leave gets B; a touch hides them all;
+#          P4's padMarkFamily (Off too) and padButtonFor (a rebound button); X's mark moves to the action button showing; Lightdisc's Leave gets B; a touch hides them all;
 #          "Controller connected" once a session; the marks follow the text size (em); a speech bubble is drawn above them
 # touch:   press, then touch: the screenshot is the no-pad one, pixel for pixel
 # drop:    a disconnect mid-walk stops you and pauses ("Controller disconnected" on the card); A on the card resumes once
@@ -351,11 +352,11 @@ def part_marks(pw):
     p.press('x'); p.step(12)
     m = marks(p)
     for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
-        check(m.get((b, k)) == ('xbox', True), f'marks: no shown Xbox {k} mark on {b}: {m}')
+        check(m.get((b, k)) == ('xbox:' + k, True), f'marks: no shown Xbox {k} mark on {b}: {m}')
     check(p.ev("document.getElementById('tt').textContent") == 'Controller connected', 'marks: no "Controller connected" at the first press')
     check(p.ev("document.querySelector('#devBtn > .padk').textContent") == 'Y', 'marks: the Device mark should read Y')
     hint = p.ev("(() => { const h = document.getElementById('padHint'); const k = h && h.querySelector('.padk'); return h && !h.hidden && k ? [k.dataset.k, k.dataset.f, k.textContent] : null; })()")
-    check(hint is None or hint == ['a', 'xbox', 'A'], f'marks: the bottom line\'s mark: {hint}')
+    check(hint is None or hint == ['a', 'xbox:a', 'A'], f'marks: the bottom line\'s mark: {hint}')
     # text size: the phone's text size scales the HUD's px text; the mark's shape is in em, so it grows with its letter
     w0 = p.ev("document.querySelector('#pauseBtn > .padk').getBoundingClientRect().height")
     p.ev("document.querySelector('#pauseBtn > .padk').style.fontSize = '22px'"); w1 = p.ev("document.querySelector('#pauseBtn > .padk').getBoundingClientRect().height")
@@ -373,14 +374,19 @@ def part_marks(pw):
     if SHOTS: p.g.shot(SHOTS + '/marks-x.png')
     p.ev("document.getElementById('hobbyBtn').hidden = true; padMarksSync()")
     check(not any(k == 'x' for _, k in marks(p)), 'marks: the X mark stayed with no action button showing')
-    # the families: a Settings choice, and the pad's own name
+    # the families (PAD.fam, from the pad's name; P4's padMarkFamily() when it's there)
     for fam, y in [('ps', None), ('nin', 'X')]:
-        p.ev(f"PAD_MARK.pick = {json.dumps(fam)}"); p.step(2)
-        m = marks(p); check(m.get(('devBtn', 'y')) == (fam, True), f'marks: the pick {fam} did not restyle the marks: {m}')
+        p.ev(f"PAD.fam = {json.dumps(fam)}"); p.step(2)
+        m = marks(p); check(m.get(('devBtn', 'y')) == (fam + ':y', True), f'marks: the family {fam} did not restyle the marks: {m}')
         if y: check(p.ev("document.querySelector('#devBtn > .padk').textContent") == y, f'marks: Nintendo\'s top button should read {y}')
         if SHOTS: p.g.shot(SHOTS + f'/marks-{fam}.png')
     check(p.ev("padWord('a')") == 'B', 'marks: on a Nintendo pad the bottom button is B')
-    p.ev("PAD_MARK.pick = null"); p.step(2)
+    # P4's Settings: Off (no marks on the buttons, a plain one on the bottom line), and Y's action moved to LB
+    p.ev("window.padMarkFamily = () => null"); p.step(12)
+    check(not any(a != 'padHint' for a, _ in marks(p)), f'marks: marks on the buttons with Off: {marks(p)}')
+    p.ev("window.padMarkFamily = () => PAD.fam; window.padButtonFor = a => a === 'y' ? 'lb' : a; PAD.fam = 'xbox'"); p.step(2)
+    check(marks(p).get(('devBtn', 'y')) == ('xbox:lb', True) and p.ev("document.querySelector('#devBtn > .padk').textContent") == 'LB', f'marks: Device should show LB after rebinding: {marks(p)}')
+    p.ev("delete window.padMarkFamily; delete window.padButtonFor"); p.step(12)
     # Lightdisc's Leave: B
     if p.ev("(() => { const a = DECK_CREW[0]; if (!a) return false; discBegin(a); return !!(DISC.view && DISC.view.leave); })()"):
         p.press('x'); p.step(12)
@@ -426,12 +432,35 @@ def part_drop(pw):
     check(p.ev('PAUSE.on') is False, 'drop: a pad unused for 30 s going away paused the game')
     # two pads: the last to press decides the style
     p.plug(0); p.press('x'); p.plug(1, 'DualSense Wireless Controller'); p.press('x', 1); p.step(3)
-    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'ps', f'drop: the PlayStation pad pressed last, marks still {marks(p)}')
+    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'ps:y', f'drop: the PlayStation pad pressed last, marks still {marks(p)}')
     p.press('x', 0); p.step(3)
-    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'xbox', 'drop: the Xbox pad pressed last, marks not back to Xbox')
+    check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'xbox:y', 'drop: the Xbox pad pressed last, marks not back to Xbox')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('marks', part_marks), ('touch', part_touch), ('drop', part_drop)]
+def part_api(pw):
+    # the panel helper's API (P1) for the other packages: padPanelAdd (order, first, back), padOwn (move, a, b, frame)
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstPanel'; d.style.cssText = 'position:fixed;left:20px;top:200px;z-index:99;display:grid;grid-template-columns:90px 90px;gap:8px';
+      d.innerHTML = '<button id="t1">one</button><button id="t2">two</button><button id="t3">three</button>'; document.body.appendChild(d);
+      window.__tst = { back: 0, a: 0, moves: [], frames: 0 };
+      padPanelAdd('tstPanel', { before: 'lift', first: '#t2', back: () => { __tst.back++; d.hidden = true; } }); })()""")
+    p.step(3)
+    check(p.ev("(padLayer() || {}).id") == 'tstPanel', 'api: an added panel should be on top')
+    check(p.ev("PAD_PANELS.findIndex(r => r[0] === 'tstPanel') + 1 === PAD_PANELS.findIndex(r => r[0] === 'lift')"), 'api: before: should put it just above the lift')
+    check(p.ev("document.activeElement && document.activeElement.id") == 't2', 'api: first: should land the highlight on #t2')
+    p.press('left'); check(p.ev("document.activeElement.id") == 't1', 'api: D-pad left should move to #t1')
+    p.press('down'); check(p.ev("document.activeElement.id") == 't3', 'api: D-pad down should move to #t3')
+    # a screen of its own takes the D-pad and A, not B
+    p.ev("padOwn(L => L && L.id === 'tstPanel', { move: d => { __tst.moves.push(d); return true; }, a: () => { __tst.a++; return true; }, frame: () => { __tst.frames++; } })")
+    p.press('right'); p.press('a'); p.step(2)
+    check(p.ev("__tst.moves.join()") == 'right' and p.ev("__tst.a") == 1 and p.ev("document.activeElement.id") == 't3', f'api: padOwn should take the D-pad and A: {p.ev("JSON.stringify(__tst)")}')
+    check(p.ev("__tst.frames") > 0, 'api: padOwn frame should run while its panel is on top')
+    p.press('b'); p.step(2)
+    check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('marks', part_marks), ('touch', part_touch), ('drop', part_drop)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
