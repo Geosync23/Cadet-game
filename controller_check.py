@@ -1994,6 +1994,12 @@ MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
   'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
 }
+MUTANTS['a11y'] = {   # CP5, claude/controller-p5 8216ad4
+  'outline 3px': ('src', "outline:4px solid #4cc3b5!important;outline-offset:3px", "outline:3px solid #4cc3b5!important;outline-offset:3px"),
+  'padStill false': ('src', "  return !!(A.rmq && A.rmq.matches);", "  return false;"),
+  'no toast role': ('src', "  if (!toastEl.hasAttribute('role')) toastEl.setAttribute('role', 'status');", "  if (0) toastEl.setAttribute('role', 'status');"),
+  'one-handed layout broken': ('src', "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'a' },", "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'lt' },"),
+}
 
 # ---- the stand-in (--selftest) ----------------------------------------------------------------------------------------
 # A tiny controller driver written for this check alone, planted in a copy of the game, so each part can be shown to
