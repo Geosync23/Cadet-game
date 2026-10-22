@@ -72,7 +72,7 @@ when:
 A FAIL is **known old** only if all three hold: it has a row in `plans/backlog.md`; the same check on the last release
 (`OLD`) fails **the same way**; and its message matches the row. **The list (lead 25, 2026-10-22): backlog 12**
 (career_check `busy: "Relied on" before Day 5`) **and backlog 14** (perf_check "memory grows across deck round trips",
-+2 geometries a lap). Nothing else. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
++2 geometries a lap). Nothing else. **Updated for 0.64.15 on (lead 26/27): the list is backlog 14 and backlog 23** (food_check `7 1` "garden, good", fails the same on 0.64.14); backlog 12 no longer shows since playtest patch 1's part G, and its return would be the old failure, not a new one. **perf_check frame-time spikes:** a spike in one scene that doesn't repeat on a second measure is noise (three rounds, three different one-off spikes, none repeated: backlog 32); re-measure before calling it. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
 backlog 18 (day_check Day 12 "the rec deck is on but nobody came", PB2's fix), backlog 26 (tiles_check
 "opening the board adds nothing to the 3D scene") and food_check `11 4` "harvest salad" (PB2's fix). On 0.64.14 and
 later they must pass: if one fails again, it's a real FAIL.
