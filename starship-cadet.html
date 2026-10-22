@@ -10559,13 +10559,13 @@ function schedBuild(p, d, occ, S) {
       evening(sp, F.bed, false);
     }
   } else {
-    // night shift: the shift that began last night runs to 06:00, then an hour to unwind, breakfast from 07:00 (patch 1:
-    // it was at 06:00), a shower and sleep through the day (a shower at 06:00 would meet the day crew's washroom rush)
+    // night shift: the shift that began last night runs to 06:00, then an hour to unwind in the Deck 3 lounge, breakfast
+    // from 07:00 (patch 1: it was at 06:00), a shower and sleep through the day (a shower at 06:00 would meet the day crew's washroom rush)
     if (P.works) {
       deck = wd;
       if (wd === 1 && P.workEnd >= 60) { work(P.workEnd - 15); take('work', [[1, '@handover']], 15, { by: P.workEnd, min: 5, tag: 'handover' }); }   // the night watch hands over at the ring
       work(P.workEnd);
-      if (t + C < MEALS.breakfast[0]) leisureUntil(MEALS.breakfast[0] - C + Math.round(40 * U(29)), 23);   // an hour to unwind before the servery opens (07:00, patch 1)
+      if (t + C < MEALS.breakfast[0]) { const to = MEALS.breakfast[0] + Math.round(40 * U(29)); if (!take('leisure', [[3, 'lounge-seat'], [3, 'bench']], to - t - (deck !== 3 ? C : 0), { wait: 5, min: 15, by: to })) leisureUntil(to - C, 23); }   // an hour to unwind on Deck 3 till the servery opens (07:00, patch 1)
       meal('breakfast', 20, MEALS.breakfast[1]);
       wash(25, true); go(bedDeck);                       // a shower after the night's work, then bed
       seg('sleep', t + 420 + Math.round(30 * U(26)), 'bed', p.bed);
@@ -16158,7 +16158,7 @@ let trkAt = 0;
 //  - The rota. galleyDay(person, day) gives a galley worker's day: when they rise, how late they may go to bed
 //    before an early start, their work blocks at the galley's stations, and when they eat. Chef Brennan rises
 //    about 05:30 and cooks breakfast before 07:00, and dinner from 14:30; her deputy cooks on her days off. The
-//    hands work an early shift (05:30-13:30: cooking with the chef, the bake, then the line) or a late one (13:00-21:15). (Patch 1:
+//    hands work an early shift (05:30-13:30: prep, cooking with the chef from 06:00, the bake, then the line) or a late one (13:00-21:15). (Patch 1:
 //    breakfast from 07:00, so the chef's morning is an hour later and the early hands cook with her first.) The schedules (section 14) ask for it;
 //    it never asks them, so there's no loop.
 //  - The food. SHIP.galley, stepped a ship minute at a time (galleyAdvance) whatever deck you're on: meals in the
@@ -16193,7 +16193,7 @@ const GALLEY_NEXT = { cook: 'prep', bake: 'prep', serve: 'wash', wash: 'clean', 
 // 'breakfast' and 'dinner' are the staff's own meals
 const GALLEY_SHIFTS = {
   chef: { wake: 330, plan: [[350, 540, 'cook'], [540, 560, 'breakfast'], [560, 630, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
-  early: { wake: 305, plan: [[330, 390, 'cook'], [390, 420, 'bake'], [420, 540, 'line'], [540, 560, 'breakfast'], [560, 630, 'wash'], [630, 690, 'bake'], [690, 780, 'prep'], [780, 810, 'clean']] },   // breakfast served to 09:00 (0.71.1) and from 07:00 (patch 1: still in at 05:30, helping the chef fill the servery before the bake: breakfast is busier in two hours than in three)
+  early: { wake: 305, plan: [[330, 360, 'prep'], [360, 390, 'cook'], [390, 420, 'bake'], [420, 540, 'line'], [540, 560, 'breakfast'], [560, 630, 'wash'], [630, 690, 'bake'], [690, 780, 'prep'], [780, 810, 'clean']] },   // breakfast served to 09:00 (0.71.1) and from 07:00 (patch 1: still in at 05:30, prep, then helping the chef fill the servery from 06:00 before the bake: breakfast is busier in two hours than in three; no more range time than before, so no more wear)
   late: { wake: null, plan: [[780, 870, 'prep'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'line'], [1230, 1275, 'wash']] },
   bar: { wake: null, plan: [[900, 1020, 'prep'], [1020, 1045, 'dinner'], [1050, 1380, 'bar']] },   // bar duty 17:30-23:00 (plan-0607), ended in time for an early start
 };
@@ -16352,7 +16352,7 @@ const galleyClose = (d, meal) => FOOD.close[meal] + galleyServeEnd(d, meal) - FO
 function galleyPlan(role, d) {
   const P = GALLEY_SHIFTS[role].plan, x = galleyServeEnd(d, 'breakfast') - FOOD.serveTo.breakfast;
   if (!x || (role !== 'chef' && role !== 'early')) return P;
-  const head = role === 'chef' ? [[350, 510 + x, 'cook'], [510 + x, 530 + x, 'breakfast'], [530 + x, 600 + x, 'clean']] : [[330, 390, 'cook'], [390, 420, 'bake'], [420, 540 + x, 'line'], [540 + x, 560 + x, 'breakfast'], [560 + x, 630 + x, 'wash']];
+  const head = role === 'chef' ? [[350, 510 + x, 'cook'], [510 + x, 530 + x, 'breakfast'], [530 + x, 600 + x, 'clean']] : [[330, 360, 'prep'], [360, 390, 'cook'], [390, 420, 'bake'], [420, 540 + x, 'line'], [540 + x, 560 + x, 'breakfast'], [560 + x, 630 + x, 'wash']];
   const end = head[head.length - 1][1];
   return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 660 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
 }
