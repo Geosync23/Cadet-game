@@ -1511,7 +1511,7 @@ def legacy_parts(GAME, ON, fails):
         p.ev("deviceShow('mail')"); p.step(3); p.press('rb'); p.step(2)
         check(p.ev("DEV.open && DEV.app") == 'home', f'lists: RB in an app should go home ({p.ev("DEV.app")})')
         p.close()
-    # ---- CP2 (claude/controller-p2 e62efcc): tiles, disc, screens ----
+    # ---- CP2 (claude/controller-p2 5b4d9f0): tiles, disc, screens ----
     # ---- P2: the mini-games (controller package 2) ----
     TL_FOCUS = "(() => { const a = document.activeElement, R = TL_UI.root; if (!a || !R || !R.contains(a)) return null; const d = a.dataset; return d.c !== undefined ? 'c' + d.c : d.h !== undefined ? 'h' + d.h : d.end ? 'e' + d.end : '?'; })()"
     def tl_nav(p, cell):                                   # D-pad to a square, one square a press
@@ -1545,6 +1545,7 @@ def legacy_parts(GAME, ON, fails):
             if tl_nav(p, mv[1]):
                 p.press('a'); check(p.ev('TL_GAME.s.plies') == plies + 1, f'tiles: A on square {mv[1]} should put the tile down (a move made)')
         p.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
+        p.g.page.wait_for_timeout(1500); p.step(3)              # (the move's animations end and the board redraws on its own timer; let it, so it can't land mid-check)
         # the hold: A picks a tile in your hold, and the highlight keeps its place when the board redraws
         p.ev("TL_GAME.s.p = 0; TL_GAME.sel = null; TL_GAME.s.hold[0] = [1]; tilesDraw(); padFocusTo(TL_UI.root.querySelector('[data-h=\"1\"]'))"); p.step(2)
         p.press('a'); p.step(2)
@@ -1576,7 +1577,9 @@ def legacy_parts(GAME, ON, fails):
         p.ev('DISC.g.p[0].x = 0'); kf, df = run(-1)
         check(-1 < kl < 0 and kf == -1, f'disc: the stick should set the move by how far it is pushed ({kl}, {kf})')
         check(dl < 0 and df < 0 and abs(df) > abs(dl) * 1.5, f'disc: a full push should go further than a light one ({dl:.2f}, {df:.2f})')
-        check(p.ev(LD_FOCUS) == 'next', f'disc: the stick moved the highlight ({p.ev(LD_FOCUS)})')
+        for ax in ([1, 0, 0, 0], [0, 1, 0, 0], [0, -1, 0, 0], [-1, 0, 0, 0]):   # a full push every way: Skip is to the right of Next, Leave below
+            p.ev('DISC.g.p[0].x = 0'); p.axes(ax); p.step(12); p.axes([0, 0, 0, 0]); p.step(2)
+            check(p.ev(LD_FOCUS) == 'next', f'disc: the stick pushed {ax[:2]} moved the highlight ({p.ev(LD_FOCUS)})')
         p.axes([0, 0, 0, 0]); p.step(2); check(p.ev('DISC.inp.kx') == 0 and p.ev('DISC.inp.kz') == 0, 'disc: letting go of the stick should stop you')
         for _ in range(4):
             if p.ev('DISC.how') < 0: break
@@ -2041,7 +2044,7 @@ MUTANTS['settings'] = {   # CP4, claude/controller-p4 7631ab6
   'a clash not swapping': ('src', "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n) return;", "  const phy = Object.assign({}, PAD_PHY), k = PAD_BTN.indexOf(b), other = PAD_MAPK[k]; if (k < 0 || other === n || true) return;"),
   'padTick ignoring the map': ('src', "    const n = PAD_MAPK[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;   // a trigger counts as pressed past half way (n: the action on button k, P4's Settings)", "    const n = PAD_BTN[k], b = bt[k], on = !!(b && b.pressed) || n === 'lt' && PAD.lt > .5 || n === 'rt' && PAD.rt > .5;"),
 }
-# CP2, claude/controller-p2 67df90a (its parts as at e62efcc)
+# CP2, claude/controller-p2 5b4d9f0
 MUTANTS['disc'] = {
   'no full range: a light push is a full one': ('src', "    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = x; inp.kz = y; PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once", "    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = Math.sign(x); inp.kz = Math.sign(y); PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once"),
   'the stick also moves the highlight': ('src', "    return play;                                           // (while you play the stick is yours, not the highlight's)", "    return false;                                          // (while you play the stick is yours, not the highlight's)"),
@@ -2054,7 +2057,7 @@ MUTANTS['tiles'] = {
 MUTANTS['screens'] = {
   'a question card lands on the x': ('src', "PAD_FIRST.devDlg = '#devDlg .act';", "PAD_FIRST.devDlg = '#devDlg';"),
   'B on a question does nothing': ('src', "  b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },", "  b: () => true,"),
-  'a turn card asking again jumps back': ('src', "    if (D.el && !D.el.isConnected && D.i >= 0 && acts[D.i] && acts[D.i] !== a) padFocusTo(acts[D.i]);   // asked again: the same button", "    if (false) padFocusTo(acts[D.i]);"),
+  'a turn card asking again loses the place': ('src', "  const was = PAD_FOCUS.last;", "  const was = null;"),   # (replaces P2's dead-code fault; the line is P1's)
   'the alarm lands on minus': ('src', "PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck", "PAD_FIRST.sleepAsk = '#alarmDn';"),
   'no suggested name': ('src', "  box.value = PAD_NAME; return true;                       // shown in the box first; A again signs", "  return;"),
   'the manifest is never a panel': ('src', "padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });", "padOn('frame', () => {});"),
