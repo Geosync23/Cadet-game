@@ -165,3 +165,34 @@ the game copes live); backlog 25 (intro beats sharing a stand-in station on Days
 welcome said with nobody arriving; the old fails career #12 and food 11 4 (the harvest salad, from 0.64.11).
 For BM13: plans/backlog.md conflicts on both merges (keep both sides' rows); take fridays' build-table block (it
 already carries integration's rows); day_check.py must be storm-update's.
+
+## claude/fridays-20 db001aa + 378e82b (FR4 with PB2: backlog #20 and #25): PASS
+
+Code (section 14, not behind a switch; only with the intro on, so test URLs and every other check are unchanged):
+- **#20:** a second pass in shipDay, in planning order, after every named seat is held: a beat with `alts` whose first
+  place is a seat (SEAT_SOCIAL) holds the first seat of its alts not held for another intro beat then, unless a seat is
+  already held for that person then (the escort's arrival dinner). The hold is marked `'alts'`, so introLay doesn't
+  turn it into an `intro-seat` sitting (2078010's Day 0 break).
+- **#25:** a spare station that one of the day's intro beats uses gets no stand-in that day; the person the draw picks
+  stays at their own desk and leaves the draw for later stations (deterministic; it reshuffles later stations' picks).
+
+My runs against the release's fridays (951c0cd), new game with the intro on, Days 0-8 on paper (`p9_plans.py`):
+- Intro seat clashes (`p9_seats` rule): **10 → 0**. Three new holds (Day 2 5-tea-1 Torres, Day 2 3-bench-17 Eklund,
+  Day 5 5-tea-1 Halloran), **all used** by their beats.
+- Whole plans: **Day 0 identical** (the arrival dinner), Days 4, 6, 7, 8 identical. Changed: Day 1 (Halloran off
+  5-stool-1, Volkov), Day 2 (Oduya 3-infirmary-6 → 3-infirmary-2), Day 3 (10 people: the stand-in reshuffle), Day 5
+  (Calder, Kovac, Soto off Halloran's seat). Two people in one place at once (any place, standing spots included), per
+  day: never more than before (Day 1 51 → 45, Day 2 46 → 45, Day 3 65 → 64, Day 5 42 → 40, the rest equal). Work
+  minutes on Day 3 move by 1-3 at most.
+- Live Day 5 (`p9_tea_live.py`): Halloran at 5-tea-1 through the beat; Soto sits at 5-tea-2 as planned; **Calder now
+  gets a seat** (5-tea-2) instead of standing for his tea. No page errors.
+- intro_check (full, the arrival evening in the real game included): OK. cadet_test 951c0cd → fridays-20: ALL IDENTICAL.
+- FR4's own: intro --week (d5-mug 3/3), day_check 0/1/2/3/5, fridays_check, check_fast OK; PB2 PASS (section 14).
+
+Nits, not blocking (PB2's two in backlog 26, plus one):
+1. The alts hold ignores an event's holds (only intro holds are tested); none clash in Days 0-8.
+2. introLay's `held` lookup wants the held seat within 2.5 of `alts[0]`; a hold on a later alt further away would be
+   left unused (none is today: all three are used).
+3. No check in the repo guards #20 or #25: day_check runs with the intro off, and intro --week passes with and without
+   the fix. A small intro_check case (no two people on one place at once Days 0-8 with the intro on, my p9_seats rule)
+   would.
