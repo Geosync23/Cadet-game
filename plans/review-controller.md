@@ -336,3 +336,13 @@ migration pieces; o.now exists). Mutants refreshed (ar2_*). Runs queued (queue 1
 
 ## P5 9325b3f (CP5): RV5 nit 1 fixed (padNameIt goes on to the next PAD_NAMES entry when one gives no name); one line
 inside padNameIt (runs only with a pad in use). The PASS carries over to 9325b3f. Nit 2 kept and written down by CP5.
+
+## Arrows C 47e55bb4: runs
+- arrows_pointer_check OK; device_check OK; interactions_check OK; check_fast QUICK CHECK OK (399 s).
+- Mutants 5/6 CAUGHT: ac_showrow (off: the row shows), ac_nocount, ac_offlets (Off still lets one show), ac_tapkeeps,
+  ac_firststep. **ac_nocover MISSED**: pointSees without its elementFromPoint test (a pointer drawn on a button another
+  panel covers) passes the check: no case with the target button covered.
+- cadet_test 2b4a05db -> 47e55bb4 (off): "ALL IDENTICAL apart from renderer noise". The diff is **the same pattern,
+  pixel for pixel, as P3 958421a-on's noisy run** (a_start 11 px, b_wander 22, c_rotated 27, d_wallslow 46 ... same
+  boxes), with different builds and bases: a property of the run conditions, not of either build. This run likely
+  overlapped P5's check_fast (my queue's wait missed it). Re-running strictly alone (queue 14, waits for no chromium).
