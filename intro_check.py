@@ -240,9 +240,10 @@ def week(g):
 # board once clocked in, gone once a job's taken), the first night's call-home card and its Track it arrow, and Zeke's
 # the playtest patch 1, #7 (the user: "the Chief's first solo job: the cut scene starts, then nothing happens"): Tuesday
 # 08:45 in the real game, you walk into her office and read her meeting through. Once it closes the solo job must be yours
-# AND tracked, its own marker on screen and a toast naming it, and nothing else may take the arrow while you're on it
-# (sampled to 10:40: Zeke's Rounds ask, told at 06:00 before, took it at 09:00); the Rounds ask (his Mail) not before her
-# meeting is over; her words name the new work on the board (rounds) and never put Torres on Deck 6 (he shows you rounds)
+# AND tracked like a job taken at the board, its own marker on screen and a toast naming it, and nothing else may take the
+# arrow while you're on it (sampled to 10:40: Zeke's Rounds ask, told at 06:00 before, took it); the Rounds ask (his
+# Mail) not before her meeting is over; her words say how (the board, turn it in) and never put Torres on Deck 6. Then
+# each step moves the arrow like a board job: the shelf, the shop, the machine, back to the board; turned in, it's done
 def solo(g):
     print('14. Tuesday\'s first solo job in the real game: after the Chief\'s meeting it\'s yours and tracked, and keeps the arrow')
     if not g.ev("typeof jobReserved === 'function' && typeof myJob === 'function'"):
@@ -272,7 +273,7 @@ def solo(g):
     toasts = g.ev('window.__solo')
     named = [x for x in toasts if x[0] >= end - 6 and after['job'] and g.ev(f"(j => !!j && {json.dumps(' '.join(x[1:]))}.includes(j.title || jobCard(j)[0]))(SHIP.jobs.find(x => x.id === {json.dumps(after['job'])}))")]
     print(f'  toasts from her meeting\'s end: {[x[1] + ": " + x[2][:60] for x in toasts if x[0] >= end - 6][:3]}')
-    if 'rounds' not in said.lower() or 'board' not in said.lower(): fail('her words don\'t say the new work (rounds) is on the board')
+    if 'board' not in said.lower() or 'turn it in' not in said.lower(): fail('her words don\'t say how to do it (turn it in at the board)')
     if 'deck 6' in said.lower(): fail('her words still put Torres on Deck 6 (he shows you rounds this morning)')
     if not (after['job'] and after['mine'] == after['job'] and after['track'] == after['job']): fail(f'after her meeting the solo job is not yours and tracked: {after}')
     if not after['shown'] or after['goal'] is not None: fail(f'after her meeting the solo job\'s own marker is not up: {after}')
@@ -286,6 +287,21 @@ def solo(g):
     ask = g.ev("(() => { const c = SHIP.works && SHIP.works.cur, m = c && c.mail && SHIP.mail.find(x => x.subject === c.mail); return { cur: c ? c.id : null, at: m ? m.at : null }; })()")
     print(f'  the Rounds ask: {ask} (her meeting ended {end})')
     if ask['cur'] == 'm1' and ask['at'] is not None and ask['at'] < end: fail(f'the Rounds ask came before her meeting was over: {ask}, end {end}')
+    # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
+    jid = json.dumps(after['job'])
+    lab = lambda: g.ev(SEEN)['label']
+    steps = [lab()]
+    g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ SHIP.player.carry.push(j.parts[1]); if (SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make = null; }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); SHIP.player.carry.length = 0; if (!j.workDone) finishJob(j.id); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    app = g.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {jid}); return typeof jobCard === 'function' && !!j && myJob() === j; }})()")
+    t_in = g.ev(f"turnInJob({jid})"); g.step(30); fin = g.ev(SEEN)
+    print('  the arrow, step by step:', ' > '.join(steps), '| turned in:', t_in, '| after:', fin['mine'], fin['track'])
+    want = [r'fetch ', r'(make |look over )', r'repair ', r'turn it in at the job board']   # (off its deck: 'Take the lift to Deck 4: ...'; the machine shows what else it needs, as for any job)
+    import re as _re
+    if len(steps) != 4 or not all(_re.search(w, (x or '').lower()) for w, x in zip(want, steps)): fail(f'the solo job\'s arrow does not walk its steps like a board job: {steps}')
+    if not app: fail('the solo job is not your job (myJob) through its steps')
+    if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
 def firsts(g):

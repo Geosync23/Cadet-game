@@ -1,10 +1,11 @@
 @meeting introSoloJob
 // Day 2, Tuesday 08:45, the Chief's glass office: Calder alone gives you your first solo job (the job is on your
 // device). The Works writer. The playtest patch 1, #7: the job is yours and tracked when she's done, and her closing
-// words open rounds (Torres's Rounds ask waits for her talk); Torres no longer "on Deck 6" (he shows you rounds at 10:45). Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
+// words say how to do it (where, the parts, the arrow, turn it in at the board); Torres no longer "on Deck 6" (he shows
+// you rounds at 10:45, and his Rounds ask waits for her talk). Teaches the Record and progress talks. One choice, no wrong answer; no "well done".
 title: Your first solo job
 from: Chief Ines Calder
-gist: Calder gave you your first solo job: it's yours and tracked on your device. Every job goes in your Record. From today rounds are on the board too: Torres will show you. Book a progress talk any time.
+gist: Calder gave you your first solo job, the other light relay on Deck 4: it's yours and tracked on your device. A relay from storage, a bracket from the shop, follow the arrow, then turn it in at the job board. Every job goes in your Record. Book a progress talk any time.
 == lines
 calder: Come in. Don't sit. This won't take long.   [gesture]
 calder > you: Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.
@@ -18,5 +19,6 @@ calder: Progress talks: any time. Book one on your device. I'll keep it.
   calder: Don't let the machine down. I'll be fine.
 * (Take the job and go)
   calder: Good. That's an answer too.
-calder: And from today there's a new kind of work on the board: rounds. Torres walks you through your first one this morning.
+calder: The other light relay on Four. A relay off the Lights shelf in storage, a bracket you make in the shop. Your device's arrow takes you step by step.
+calder: Lit and tested, you come back and turn it in at the board. Not before.
 calder: One more thing. Finish what you start. Off you go.
