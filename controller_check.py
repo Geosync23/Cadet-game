@@ -503,8 +503,11 @@ REACH_INVENTORY = {}
 def pad_moves(r, n):
     seen, order = set(), []
     def look():
-        sc = r.ev(SCAN); f = next((i['k'] for i in Sweep.inner(sc) if i['foc']), None)
-        if f and f not in seen: seen.add(f); order.append(f)
+        sc = r.ev(SCAN); it = next((i for i in Sweep.inner(sc) if i['foc']), None); f = it and it['k']
+        if f and f not in seen:
+            seen.add(f); order.append(f)
+            # CP5's rule: what the highlight lands on has a name a screen reader reads (text, aria-label or title)
+            if not r.js("(() => { const e = document.activeElement; return !!((e.getAttribute('aria-label') || e.textContent || e.title || (e.labels && e.labels[0] && e.labels[0].textContent) || '').trim()); })()"): pad_moves.nameless.add(f)
         return f
     r.press('DOWN'); r.step(1); look()
     for d1, d2 in (('RIGHT', 'LEFT'), ('LEFT', 'RIGHT')):
@@ -520,8 +523,9 @@ def pad_moves(r, n):
     for k in range(4 * n):
         x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
     return seen, order
+pad_moves.nameless = set()
 def part_reach_pad(pw, src, tag, states):
-    fails = []
+    fails = []; pad_moves.nameless = set()
     for st in states.values():
         if not st['dialogs'] or any(k.startswith('@deck:') for k in st['path']): continue
         sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
@@ -534,6 +538,7 @@ def part_reach_pad(pw, src, tag, states):
         missing = sorted((want & now) - seen)
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
+        if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
         # A clicks the highlighted thing
         sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
         if f and not Sweep.BACK.match(f['label']):
