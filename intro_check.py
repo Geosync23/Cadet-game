@@ -3,7 +3,7 @@
 #   0. test URLs (?nosave&debug) start with the intro off: Day 1 06:00, no escort, no beats (so every other check is unchanged)
 #   1. the data: steps and beats in time order, everyone named is on the roster, every checkpoint tile is in its room on
 #      its deck's map, every fallback leads to a real step, every meeting and Settling-in item is known
-#   2. the happy path on paper: a player always at the checkpoint, Day 0 17:30 to Day 8; every step in order, the
+#   2. the happy path on paper: a player always at the checkpoint, Day 0 16:30 (INTRO_START) to Day 8; every step in order, the
 #      week's flags at their times, the arrival evening's points (Torres 10, Tomas 10, Pell 5, Calder 3, Brennan 3)
 #   3. the wanderer (misses every other step) and the idler (never there): the fallbacks' Mail, the evening still ends
 #      by 20:00, the week still ends on Day 8
@@ -14,6 +14,7 @@
 #   8. the evening in the real game (once section 13 has the Day 0 start): New game arriving, the manifest, a player
 #      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
 #      draw calls under 450, no page errors
+#   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -21,7 +22,7 @@ import sys, json
 exec(open(__file__.replace('intro_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
-# run the intro on paper, minute by minute from Day 0 17:30 to `to` (absolute ship minutes); `who`: 'happy' (always at
+# run the intro on paper, minute by minute from Day 0 16:30 (INTRO_START) to `to` (absolute ship minutes); `who`: 'happy' (always at
 # the checkpoint), 'wander' (misses every other step of the evening), 'idle' (never anywhere). reload: save and load
 # section 21's state at every step change. Returns the intro, the points, the flags, the Mail it sent and the order.
 RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
@@ -61,11 +62,22 @@ RUN = r"""(({ who, reload, to, skip, endAt, pace }) => {
 CALDER_D = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = placeSpot(introSeat('calder') || '3-mess-9'); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
 # the patch (#3): during the dinner chat she eats at the next table (the chief step's `away` seat), then walks over
 CALDER_AWAY = """(() => { const a = DECK_CREW.find(x => x.p && x.p.id === 'calder'), st = introStepById('chief'), sp = st.away && placeSpot(st.away.calder); return a && sp ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null; })()"""
+# playtest patch 1, #6: someone `after` (5) ship minutes past `key` (a SHIP.intro.done minute): how far from their seat at your table
+LINGER = r"""(([who, key]) => {
+  const I = SHIP.intro, at = I.done[key], seat = (introStepById('chief').seats || {})[who];
+  if (typeof at !== 'number' || !seat || shipNow() < at + 5) return null;
+  const a = DECK_CREW.find(x => x.p && x.p.id === who), sp = placeSpot(seat);
+  return { t: clockText(), after: Math.floor(shipNow()) - at, d: a && sp && deckDef.num === 3 ? Math.round(Math.hypot(a.x - sp.x, a.z - sp.z) * 10) / 10 : null };
+})"""
 WALK_TICK = r"""((mode) => {
   const I = SHIP.intro, st = introStepById(I.step), pp = player.obj.position, here = cellAt(pp.x, pp.z);
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
   let act = '';
   if (DIALOGUE) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); act = 'talk'; }
+  else if (I.step === 'stow' && typeof bagHeld === 'function' && bagHeld() && typeof wardrobeUse === 'function') {   // playtest patch 1: your bag into your wardrobe (a tap on it)
+    const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile));
+    window.__stow = { t: clockText(), goal: typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null }; wardrobeUse(); act = 'stow';
+  }
   else if (mode === 'follow' && st && st.checkpoint && typeof INTRO_UI !== 'undefined' && INTRO_UI.pause && a) act = 'listen';   // he's stopped to tell you about a place: stay with him
   else if (mode === 'follow' && st && st.checkpoint) {
     const cp = st.checkpoint;
@@ -237,6 +249,72 @@ def week(g):
 # part 13, also on its own: python3 intro_check.py BUILD.html --firsts (onboarding 5, 0.42.60-0.42.62, the 0.63.2 playtest):
 # the first-time arrows (the servery after the Chief's "Eat something", the time clock after Day 1's opener, the job
 # board once clocked in, gone once a job's taken), the first night's call-home card and its Track it arrow, and Zeke's
+# the playtest patch 1, #7 (the user: "the Chief's first solo job: the cut scene starts, then nothing happens"): Tuesday
+# 08:45 in the real game, you walk into her office and read her meeting through. Once it closes the solo job must be yours
+# AND tracked like a job taken at the board, its own marker on screen and a toast naming it, and nothing else may take the
+# arrow while you're on it (sampled to 10:40: Zeke's Rounds ask, told at 06:00 before, took it); the Rounds ask (his
+# Mail) not before her meeting is over; her words say how (the board, turn it in) and never put Torres on Deck 6. Then
+# each step moves the arrow like a board job: the shelf, the shop, the machine, back to the board; turned in, it's done
+def solo(g):
+    print('14. Tuesday\'s first solo job in the real game: after the Chief\'s meeting it\'s yours and tracked, and keeps the arrow')
+    if not g.ev("typeof jobReserved === 'function' && typeof myJob === 'function'"):
+        print('  not yet: no jobReserved'); return
+    SEEN = "(() => { const el = document.getElementById('ixGoal'), id = SHIP.jobs.find(x => x.reserved === 3 && x.status !== 'done'); return { t: clockText().slice(-5), dlg: DIALOGUE ? DIALOGUE.id : null, shown: !!el && !el.hidden, label: el && !el.hidden ? el.children[2].textContent : '', goal: IX_GOAL ? IX_GOAL.label : null, track: SHIP.player.track === undefined ? 'unset' : SHIP.player.track, job: id ? id.id : null, mine: myJob() ? myJob().id : null }; })()"
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("window.__solo = []; { const t0 = toast; toast = (a, b) => { window.__solo.push([Math.floor(shipNow()), String(a), String(b)]); return t0(a, b); }; }")
+    g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(60)   # Monday in the bay
+    g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")   # and Monday's shadow job done, as in play: Tuesday's Rounds ask then comes at 06:00
+    g.ev('skipTo(introAbs(2, 8 * 60 + 35))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)
+    g.ev("SHIP.player.track = null")                    # as after Day 1's Tracked items (a real Tuesday has it off)
+    g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")   # had breakfast and a wash (the skip from Sunday leaves you starving: the need marker would rightly lead)
+    g.ev("playerGo(DECKS[5].places.find(q => q.id === '5-office-visit-1').at)")
+    met = None
+    for i in range(80):
+        g.step(30); met = g.ev('DIALOGUE && DIALOGUE.id')
+        if met: break
+    if not met or not met.startswith('introSoloJob'): fail(f'Tuesday\'s solo job meeting did not play: {met}'); return
+    said = g.ev("DIALOGUE.queue.filter(l => l.who === 'calder').map(l => l.text).join(' ')")
+    n = 0
+    while g.ev('!!DIALOGUE') and n < 40:
+        g.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(2); else dialogueNext(); })()"); g.step(60); n += 1
+    end = g.ev("typeof SHIP.intro.done['d2-solo:end'] === 'number' ? SHIP.intro.done['d2-solo:end'] : Math.floor(shipNow())")   # when her panel closed
+    g.step(30); after = g.ev(SEEN)
+    print(f'  after her meeting: {after}')
+    toasts = g.ev('window.__solo')
+    named = [x for x in toasts if x[0] >= end - 6 and after['job'] and g.ev(f"(j => !!j && {json.dumps(' '.join(x[1:]))}.includes(j.title || jobCard(j)[0]))(SHIP.jobs.find(x => x.id === {json.dumps(after['job'])}))")]
+    print(f'  toasts from her meeting\'s end: {[x[1] + ": " + x[2][:60] for x in toasts if x[0] >= end - 6][:3]}')
+    if 'board' not in said.lower() or 'turn it in' not in said.lower(): fail('her words don\'t say how to do it (turn it in at the board)')
+    if 'deck 6' in said.lower(): fail('her words still put Torres on Deck 6 (he shows you rounds this morning)')
+    if not (after['job'] and after['mine'] == after['job'] and after['track'] == after['job']): fail(f'after her meeting the solo job is not yours and tracked: {after}')
+    if not after['shown'] or after['goal'] is not None: fail(f'after her meeting the solo job\'s own marker is not up: {after}')
+    if not named: fail('no toast naming the solo job when her meeting ended')
+    bad = []
+    while g.ev('shipNow() < introAbs(2, 10 * 60 + 40)'):
+        g.step(150); w = g.ev(SEEN)
+        if not (w['mine'] == after['job'] and w['track'] == after['job'] and w['goal'] is None and w['shown']): bad.append(w)
+    print('  the arrow to 10:40:', 'the solo job\'s throughout' if not bad else bad[:2])
+    if bad: fail(f'something else took the arrow from the solo job before 10:40: {bad[:2]}')
+    ask = g.ev("(() => { const c = SHIP.works && SHIP.works.cur, m = c && c.mail && SHIP.mail.find(x => x.subject === c.mail); return { cur: c ? c.id : null, at: m ? m.at : null }; })()")
+    print(f'  the Rounds ask: {ask} (her meeting ended {end})')
+    if ask['cur'] == 'm1' and ask['at'] is not None and ask['at'] < end: fail(f'the Rounds ask came before her meeting was over: {ask}, end {end}')
+    # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
+    jid = json.dumps(after['job'])
+    lab = lambda: g.ev(SEEN)['label']
+    shelf = g.ev(f"(j => SHIP.stores[j.parts[0]] || 0)(SHIP.jobs.find(x => x.id === {jid}))")   # the crew may have used the shelf's last one by now (then you make it in the shop, as for any job)
+    steps = [lab()]
+    g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ SHIP.player.carry.push(j.parts[1]); if (SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make = null; }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    g.ev(f"(j => {{ jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); SHIP.player.carry.length = 0; if (!j.workDone) finishJob(j.id); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
+    app = g.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {jid}); return typeof jobCard === 'function' && !!j && myJob() === j; }})()")
+    t_in = g.ev(f"turnInJob({jid})"); g.step(30); fin = g.ev(SEEN)
+    print('  the arrow, step by step (' + str(shelf) + ' on the shelf):', ' > '.join(steps), '| turned in:', t_in, '| after:', fin['mine'], fin['track'])
+    want = [r'fetch ' if shelf > 0 else r'make ', r'(make |look over )', r'repair ', r'turn it in at the job board']   # (off its deck: 'Take the lift to Deck 4: ...'; the machine shows what else it needs, as for any job)
+    import re as _re
+    if len(steps) != 4 or not all(_re.search(w, (x or '').lower()) for w, x in zip(want, steps)): fail(f'the solo job\'s arrow does not walk its steps like a board job: {steps}')
+    if not app: fail('the solo job is not your job (myJob) through its steps')
+    if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
+
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
@@ -245,7 +323,7 @@ def firsts(g):
     G = "(typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null)"
     g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
     g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
-    g.ev("skipTo(introAbs(0, 18 * 60 + 40))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
+    g.ev("skipTo(introAbs(0, INTRO_START.min + 70))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
     g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
     eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
     g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
@@ -306,6 +384,7 @@ with sync_playwright() as pw:
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
 
     steps = g.ev("INTRO_STEPS.map(s => s.id)")   # (part 8 needs it with --evening too)
+    START_MIN = g.ev('INTRO_START.min'); START_HM = f'{START_MIN // 60:02d}:{START_MIN % 60:02d}'   # 16:30 since playtest patch 1 (was 17:30)
     if not EVENING_ONLY:   # --evening: part 8 alone (the tour's quick check)
         print('0. Test URLs start with the intro off')
         st = g.ev("({ on: introOn(), s: SHIP.intro.on, day: SHIP.time.day, min: Math.floor(SHIP.time.min), esc: escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), beats: introBeats(INTRO_ESCORT, 1).length })")
@@ -326,7 +405,7 @@ with sync_playwright() as pw:
         EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
         WANT = {'torres-zeke': 10, 'tomas': 10, 'pell': 5, 'calder': 3, 'brennan': 3}
 
-        print('2. The happy path, on paper (Day 0 17:30 to Day 8 00:00)')
+        print('2. The happy path, on paper (Day 0 from INTRO_START to Day 8 00:00)')
         a = run()
         steps = g.ev("INTRO_STEPS.map(s => s.id)")
         order = [k for k in a['I']['done'] if k in steps]
@@ -415,7 +494,7 @@ with sync_playwright() as pw:
         fail('no newGameStart or escort walker (sections 13 and 10, the sim engineer): the arrival cannot start')
     else:
         g.ev("(() => { window.__said = []; const old = bubbleSay; bubbleSay = function (h, text, s) { window.__said.push([clockText(), SHIP.intro.step, text]); return old.apply(this, arguments); }; return true; })()")   # reviewer 1c's probe: what's actually said
-        g.ev('newGameStart(true)'); g.step(5)
+        g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)   # playtest patch 1: clothes on, as in a real game (the wardrobe, his wardrobe lines before the device)
         tern = g.ev("typeof ternRamp === 'function' && !!DECKS[5].tern")
         if tern:   # the walk-in Tern (deck architect 0.38.18): you start in its aisle with the ramp shut
             t0 = g.ev("({ me: player.here(), start: SHIP_START_ARRIVAL.tile, open: ternRampOpen() })")
@@ -450,9 +529,10 @@ with sync_playwright() as pw:
         lingered = []
         pre = { 'n': 0, 'pause': 0, 'still': 0, 'run': 0, 'last': None, 'sm': [] }   # 0.42.29 (the user on 0.60.5): from the ramp's welcome to the lift, walk-and-talk, no pauses
         dinner, bunkAt, seats, chat, chiefAt = None, None, None, None, None
+        linger = {}
         INTRO_ESC_ID = g.ev('INTRO_ESCORT')
         BED_GOAL = g.ev("typeof INTRO_BED_GOAL !== 'undefined' ? INTRO_BED_GOAL : 'Your bunk'")
-        for k in range(420):
+        for k in range(600):   # (playtest patch 1: the evening's last step is 19:30)
             g.step(20)
             r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
             peak[r['deck']] = max(peak.get(r['deck'], 0), r['calls'])
@@ -477,7 +557,7 @@ with sync_playwright() as pw:
                 dinner = g.ev("(() => { const G = SHIP.galley || {}, sv = G.servery || {}, mess = DECK_CREW.filter(a => deckDef.num === 3 && /Mess hall/.test((ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name || '')).length; return { t: clockText(), portions: sv.portions, dish: sv.dish, meal: sv.meal, mess, you: introSeat('you'), him: introSeat(INTRO_ESCORT) }; })()")
                 print(f"  at the table {dinner['t']}: servery {dinner['portions']} portions of {dinner['dish']} ({dinner['meal']}), {dinner['mess']} crew in the mess, seats you {dinner['you']}, Torres {dinner['him']}")
                 hm = dinner['t'].split()[-1]; tmin = int(hm[:2]) * 60 + int(hm[3:])
-                if tmin > 19 * 60 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, too late for the dinner chat and the Chief before 19:30 (reviewer 1c: 19:00, the scenes wait till 19:30)')   # 0.42.27
+                if tmin > START_MIN + 90 and not DAWDLE: fail(f'the walk is too long: you reach the table at {hm}, more than 90 minutes after the arrival (reviewer 1c; the scenes wait till the Chief\'s step ends)')   # 0.42.27; playtest patch 1: from INTRO_START
             if chat is None and g.ev("!!DIALOGUE && /^introDinner/.test(DIALOGUE.id || '')"):   # the dinner chat at your table (0.42.63, the user: the game sits you down for it)
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 chat = { 't': g.ev('clockText()'), 'seat': g.ev("introSeat('you')"), 'sat': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null"), 'calder': g.ev(CALDER_D), 'away': g.ev(CALDER_AWAY) }
@@ -487,14 +567,18 @@ with sync_playwright() as pw:
             if chiefAt is None and g.ev("!!DIALOGUE && /^introChief/.test(DIALOGUE.id || '')"):   # her welcome: she's walked over and sat first, after you and the chat
                 chiefAt = { 't': g.ev('clockText()'), 'calder': g.ev(CALDER_D), 'in': g.ev('introCalderIn()'), 'chat': chat is not None, 'you': g.ev("typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null") }
                 print(f"  the Chief's welcome at {chiefAt['t']}: she's {chiefAt['calder']} m from her seat (at it: {chiefAt['in']}), after the chat {chiefAt['chat']}, you in {chiefAt['you']}")
-                if not chiefAt['in'] and not DAWDLE: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")
+                if not chiefAt['in']: fail(f"the Chief's welcome began before she'd walked over to your table: {chiefAt}")   # (playtest patch 1, #5: --dawdle too, the user's late arrival)
                 if not chiefAt['chat'] and not DAWDLE: fail(f"the Chief's welcome came before the dinner chat with Torres: {chiefAt}")
             if r['step'] == 'free' and seats is None:   # reviewer 1: who sits in the three dinner seats once the Chief has come over
                 for _ in range(4): g.step(20); g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'stand'])   # stop steering: let the game sit you
                 seats = g.ev("(() => { const S = introStepById('chief').seats || {}, h = id => { const a = id && heldBy(id); return a ? a.p.id : null; }; return { you: [S.you, h(S.you), typeof ACT !== 'undefined' && ACT ? ACT.placeId || null : null], torres: [S[INTRO_ESCORT], h(S[INTRO_ESCORT])], calder: [S.calder, h(S.calder)], t: clockText() }; })()")
                 print(f"  the dinner seats at {seats['t']}: yours {seats['you']}, Torres {seats['torres']}, Calder {seats['calder']}")
             if r['goal'] in ('Your bunk', BED_GOAL) and bunkAt is None: bunkAt = r['t']; print(f"  {r['t']}  the arrow points to your bunk")
-            if r['step'] is None: break
+            for who, key in (('torres-zeke', 'free'), ('calder', 'chief:end')):   # playtest patch 1, #6: they stay sat a little after their last word, then go
+                if who in linger: continue
+                lg = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [LINGER, [who, key]])
+                if lg: linger[who] = lg; print(f"  {lg['t']}: {who} {lg['after']} ship minutes after {key}: {lg['d']} m from the seat at your table")
+            if r['step'] is None and (bunkAt or g.ev('shipNow() >= introAbs(0, 20 * 60)')): break   # (playtest patch 1: the evening's last step can end before the bunk arrow, which waits for his goodnight and the servery arrow)
         simnow = g.ev("typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")   # the sim's dinner seating and evening cooking (0.26.26-0.26.31)
         if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
         elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
@@ -516,6 +600,18 @@ with sync_playwright() as pw:
         if [s for s in steps if s not in w['done']]: fail('the real walk never reached ' + ', '.join(s for s in steps if s not in w['done']))
         if order[-1] is not None: fail('the evening did not end in the real walk')
         if not (w['device'] and w['calder']): fail('no device or no Calder after the real walk')
+        # playtest patch 1 (#2-#4, #6): the bag into the wardrobe by you, the device from Zeke in person, no cabin Mail, the linger
+        hand = g.ev("({ cabin: SHIP.clothes.said['d0-wardrobe'], stow: window.__stow || null, given: SHIP.intro.done['device:given'], stowAt: SHIP.intro.done.stow, devMet: SHIP.intro.done.device, bag: typeof bagHeld === 'function' && bagHeld(), mail: SHIP.mail.filter(m => m.from === 'Zeke Torres').map(m => m.subject) })")
+        print(f"  the bag and the device: stowed by you {hand['stow']}, device handed over at {hand['given']} (stow step {hand['stowAt']}, device step {hand['devMet']}); Zeke's Mail {hand['mail']}")
+        if 'stow' in steps:
+            if not hand['stow'] or hand['stow']['goal'] != 'Put your bag in your wardrobe' or hand['bag']: fail(f"the bag did not go into the wardrobe by your tap, with its arrow: {hand}")
+            if hand['given'] is None or hand['stowAt'] is None or hand['given'] < hand['stowAt']: fail(f"the device was not handed over in person after the bag: {hand}")
+            if hand['cabin'] is None or hand['given'] < hand['cabin']: fail(f"his wardrobe lines did not come between the bag and the device: {hand}")
+            if any(x in ('Everything I didn\'t say', 'Settling in') for x in hand['mail']): fail('Zeke\'s cabin Mail is back (parked, playtest patch 1 #4)')
+        if True:   # (playtest patch 1, #6: on any build, so an old one fails it)
+            for who in ('torres-zeke', 'calder'):
+                if who not in linger: fail(f'{who}: never sampled after their last word (the linger check)')
+                elif linger[who]['d'] is None or linger[who]['d'] > 1.2: fail(f'{who} left the table straight after speaking: {linger[who]}')
         if max(peak.values()) >= 450: fail(f'draw calls {max(peak.values())} at the arrival (budget 450)')
         if led < 20: fail('Torres hardly led you')
         # the tour as heard by a follower (pacing A): every place's core lines, in place order; extras only if you linger
@@ -563,7 +659,7 @@ with sync_playwright() as pw:
         g.step(5)
         f = g.ev("({ t: clockText(), deck: deckDef.num, on: introOn(), step: SHIP.intro.step, form: !!document.querySelector('form input[maxlength=\"24\"]') })")
         print(f"  {f['t']}, Deck {f['deck']}, intro {'on' if f['on'] else 'off'} at {f['step']}, manifest {'up' if f['form'] else 'not up'}")
-        if not (f['t'].startswith('Day 0, Sunday 17:30') and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
+        if not (f['t'].startswith('Day 0, Sunday ' + START_HM) and f['deck'] == 5 and f['on'] and f['form']): fail('a first launch did not arrive by shuttle')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(30)
         g.ev('saveGame()'); before = g.ev('({ step: SHIP.intro.step, day: SHIP.time.day })')
         g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
@@ -656,6 +752,7 @@ with sync_playwright() as pw:
             if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
+    solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 
