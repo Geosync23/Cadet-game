@@ -357,7 +357,7 @@ def bunk_leave(g):
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
         if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] or r['bag'] or took > (20 if how == 'deck' else 12):
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
-        if how in ('out', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
+        if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
 
 # 15. The talk steps with you near but not there (OR2, after 0.64.15): during 'bunk' you stand in the corridor just
