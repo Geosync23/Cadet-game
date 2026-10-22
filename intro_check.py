@@ -196,7 +196,7 @@ def week(g):
         beats = g.ev("INTRO_WEEK.filter(b => b.who && introBeatLines(b).length).map(b => b.id)")
         only = [x.split('=', 1)[1].split(',') for x in sys.argv if x.startswith('--beats=')]   # e.g. --week --beats=d4-quiz,d5-invite
         if only: beats = [b for b in beats if b in only[0]]
-        if not beats: print('  not yet: the writers\' beat lines are not in this build')
+        if not beats: print('  no beats walked: none match --beats' if only else '  not yet: the writers\' beat lines are not in this build')
         for bid in beats:
             go = g.ev("""((id) => { const b = INTRO_WEEK.find(x => x.id === id), from = introAbs(b.day, b.at);
               if (shipNow() < from + 1) skipTo(from + 1);
