@@ -366,8 +366,8 @@ class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
-    MAX_DEPTH, MAX_PRESSES = 6, int(os.environ.get('CTL_PRESSES', 700))
-    SKIP = {'#newgame'}   # pressed once at the top only (twice starts a new game; nothing new to find behind it)
+    MAX_DEPTH, MAX_PRESSES = int(os.environ.get('CTL_DEPTH', 6)), int(os.environ.get('CTL_PRESSES', 700))
+    SKIP = set()   # (was {'#newgame'}: the HUD's New game button, gone from 0.91.0, now in Settings)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
         self.states = {}          # signature -> {'path': [...], 'items': [...], 'dialogs': [...]}
@@ -533,6 +533,8 @@ def pad_moves(r, n):
         x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
     return seen, order
 pad_moves.nameless = set()
+# things the D-pad needn't reach, each with its reason (and who ruled)
+PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
     fails = []; pad_moves.nameless = set()
     for st in states.values():
@@ -544,7 +546,14 @@ def part_reach_pad(pw, src, tag, states):
         want = {i['k'] for i in st['items']}
         seen, order = pad_moves(sw.r, min(12, len(want) + 2))
         now = {i['k'] for i in Sweep.inner(sw.scan())}
-        missing = sorted((want & now) - seen)
+        missing = sorted((want & now) - seen - set(PAD_COVERED))
+        for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
+        # (CP1) the zigzag above covers a dozen rows; anything it missed: steer the highlight straight at it, up to 40
+        # presses (pad_to: the bigger gap first), as a player aiming for it would
+        for k in list(missing):
+            it = next((i for i in Sweep.inner(sw.scan()) if i['k'] == k), None)
+            if it and sw.r.ev(f"(() => {{ const e = document.elementFromPoint({it['x']}, {it['y']}); for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt'); if (!e) return false; (e.closest('button,a,input,select,textarea,[tabindex],[role]') || e).setAttribute('data-ctt', '1'); return true; }})()") and pad_to(sw.r, '[data-ctt]', 40):
+                missing.remove(k); seen.add(k)
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
@@ -664,11 +673,11 @@ OUTLINES = r"""(() => { const out = []; for (const e of document.querySelectorAl
 # objects drawn. Things made on the pad's first use and hidden again after a touch (the ring, the bottom line) are listed
 # apart, as information: the rule is that touch looks and behaves as without a pad, not that nothing is ever made.
 SEEN_STATE = r"""(() => { let h = 0, n = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
-  // (P3's one-time "Controller connected" message after the first pad press is by design, and it goes on a real-time
-  // timer: the message box is left out while it says that, and only then)
-  const hello = (document.getElementById('tt') || {}).textContent === 'Controller connected', box = document.getElementById('toast');
+  // (the message box shows and hides on real-time timers, and P3's one-time "Controller connected" after the first pad
+  // press is by design: the box and its lines are counted, but their text and classes are not compared)
+  const box = document.getElementById('toast');
   for (const e of document.body.querySelectorAll('*')) { if (e.tagName === 'SCRIPT' || e.tagName === 'STYLE') continue;
-    if (hello && box && (e === box || box.contains(e))) continue;
+    if (box && (e === box || box.contains(e))) { n++; mix('toast-box'); continue; }
     if (e.checkVisibility && !e.checkVisibility({ visibilityProperty: true })) continue;   // not opacity: the bubbles are hidden from pictures that way
     const b = e.getBoundingClientRect(); if (b.width <= 0 || b.height <= 0) continue;
     n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '')); for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
@@ -911,13 +920,18 @@ RING_PICK_CROWDED = r"""(() => { const P = PAD_PICK; for (const t of P.list) { i
 RING_PICK_NAMED = r"""(() => { const P = PAD_PICK; for (const t of P.list) { if (!t.key.startsWith('crew:') || !t.s) continue; const a = crewAtScreen(t.s[0], t.s[1]);
   if (a && 'crew:' + a.p.id !== t.key) { P.sel = t; P.chosen = true; P.n = P.every; P.job = null; return [t.key, a.p.name]; } } return null; })()"""
 CREW_NAME = "(k => { const a = DECK_CREW.find(a => 'crew:' + a.p.id === k); return a ? a.p.name : null; })"
-def crowded_setup(pw, src, tag):
+CROWD_TIMES = (7 * 60 + 20, 7 * 60 + 40, 8 * 60, 8 * 60 + 20)
+def crowded_setup(pw, src, tag, times=CROWD_TIMES):
     r = Run(pw, src, tag, mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
-    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 7 * 60 + 40); goToDeck(3, null)"); r.step(240)
-    t = r.ev(CROWDED_SEAT)
+    # breakfast's busiest minutes moved with the playtests (07:00 from 0.64.17): the first of these with a free seat beside
+    # someone seated
+    t = None; r.ev("goToDeck(3, null)")
+    for hm in times:
+        r.ev(f"SHIP.time.min < {hm} && skipTo((SHIP.time.day - 1) * 1440 + {hm})"); r.step(240); t = r.ev(CROWDED_SEAT)
+        if t: break
     if not t or not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return None, None
-    r.ev("toastEl.classList.remove('show')"); r.step(72); return r, t
+    r.ev("toastEl.classList.remove('show')"); r.step(72); r.hm = r.ev("SHIP.time.min"); return r, t
 # (RV5's C7) in the same crowd: "Talk to X" whose point on screen is on someone else, Y, at the moment A is pressed. A must
 # talk to X (the game finds X again), never Y. Without such a one: said, not a failure (the seat case above is the proof
 # that the crowd is there).
@@ -940,9 +954,22 @@ def part_crowded_named(pw, src, tag):
     if r.errors: fails.append('crowded talk: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_crowded(pw, src, tag):
+    # (CTT3) the case needs a seat whose point on screen has a person on it: on 0.64.16 it didn't come up at the first
+    # breakfast time in the first view. So each view (LB, a quarter turn, then the ring's search again) at each breakfast
+    # time, until it does
+    times = list(CROWD_TIMES); last = None
+    while times:
+        r, t = crowded_setup(pw, src, f'{tag}_crowd', times)
+        if not r: break
+        hm = r.hm; times = [x for x in times if x > hm]
+        for rot in range(4):
+            if rot: r.press('LB'); r.step(72)
+            last = part_crowded_try(r, t, f' (ship minute {hm}, view {rot})')
+            if last is not None: return last
+        r.close()
+    return ['crowded seat: not proven (no seat in the ring with a person on its point came up in about 4 s, in any view at any breakfast time)'] if last is None else last
+def part_crowded_try(r, t, where):
     fails = []
-    r, t = crowded_setup(pw, src, f'{tag}_crowd')
-    if not r: return ['crowded seat: not proven (no free seat beside someone seated in the Deck 3 mess at 07:40)']
     seen = []
     for k in range(10):
         h, sel = r.ev(HINT), r.ev(RING_SEL)
@@ -951,7 +978,7 @@ def part_crowded(pw, src, tag):
         r.press('RIGHT'); r.step(4)
     sits = [(h, sel) for h, sel in seen if h and 'sit' in h.lower()]
     print(f'  crowded seat (beside {t["name"]}): the ring offers ' + '; '.join(f'"{h}"' + (f' (its point on {sel["on"]})' if sel['on'] else '') for h, sel in seen))
-    if not sits: r.close(); return fails + ['crowded seat: the ring never offered a seat in the crowded mess']
+    if not sits: return None
     # the hard case at the moment of pressing: a seat in the ring with a person on its point now (the crowd moves, so
     # look for one for up to about 4 s); it becomes the ring's choice, as the D-pad makes it, and A is pressed at once
     # (one frame after choosing, so the line has been redrawn for the choice; then the person must still be on its point)
@@ -962,15 +989,41 @@ def part_crowded(pw, src, tag):
             r.step(1); sel = r.ev(RING_SEL)
             if sel and sel['key'] == got[0] and sel['on']: want, on = got[0], sel['on']; break
         r.step(4)
-    if not on: r.close(); return fails + ['crowded seat: not proven (no seat in the ring with a person on its point came up in about 4 s)']
+    if not on: return None
     h = r.ev(HINT)
     r.press('A'); r.step(90); o = r.ev(OUTCOME)
-    print(f'  crowded seat: A on "{h}" ({want}, a person on its point: {on}): chat {o["chat"]}, act {o["act"]}')
+    print(f'  crowded seat{where}: A on "{h}" ({want}, a person on its point: {on}): chat {o["chat"]}, act {o["act"]}')
     if o['chat']: fails.append(f'crowded seat: A on "{h}" ({want}) talked to someone instead ({o["chat"]})')
     if r.errors: fails.append('crowded seat: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
+# (CP1, lead 29's find; fixed on claude/controller-follow1 0028869c) the seat at the mess's first place: standing by it,
+# facing it, the ring must offer it, the D-pad (right) must make it the choice, and A must sit you there. On 9a8eac0b the
+# ring offered the long tables, items and Raman, never 3-mess-1
+def part_mess_seat(pw, src, tag):
+    r = Run(pw, src, f'{tag}_mess1', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    r.ev("goToDeck(3, null)"); r.step(30)
+    sp = r.ev("(() => { const s = placeSpot('3-mess-1'); return s ? { x: s.x, z: s.z } : null; })()")
+    if not sp or not r.ev(f"({STAND_BY})({json.dumps(sp)})"): r.close(); return ['mess seat: nowhere to stand by 3-mess-1']
+    r.ev("toastEl.classList.remove('show')"); r.step(72)
+    lst = r.ev("PAD_PICK.list ? PAD_PICK.list.map(x => x.key) : []")
+    fails = []
+    if 'place:3-mess-1' not in lst: fails.append(f'mess seat: standing by 3-mess-1 and facing it, the ring never offers it ({lst[:6]})')
+    else:
+        for k in range(len(lst) + 2):
+            if r.ev("PAD_PICK.sel && PAD_PICK.sel.key") == 'place:3-mess-1': break
+            r.press('RIGHT'); r.step(4)
+        sel = r.ev("PAD_PICK.sel && PAD_PICK.sel.key")
+        if sel != 'place:3-mess-1': fails.append(f'mess seat: the D-pad never made 3-mess-1 the choice (on {sel})')
+        else:
+            r.press('A'); r.step(240); act = r.ev("ACT ? [ACT.kind, ACT.placeId || null] : null")
+            print(f'  mess seat: the ring offers {lst}; A on 3-mess-1: {act}')
+            if not act or act[1] != '3-mess-1': fails.append(f'mess seat: A on 3-mess-1 should sit you there: {act}')
+    if r.errors: fails.append('mess seat: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
+    fails += part_mess_seat(pw, src, tag)
     fails += part_crowded(pw, src, tag)
     fails += part_crowded_named(pw, src, tag)
     P = pick_play(pw, src, f'{tag}_pick', True)
@@ -1085,7 +1138,10 @@ STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, play
   const dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
   const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
 def walk_to(r, x, z, frames=900):
+    shut = 0
     for k in range(frames // 6):
+        # a panel that opened on the way (a ladder hatch underfoot, 0.64.17): B puts it away, as a player would, then on
+        if shut < 4 and r.ev("!!padLayer()"): r.js('window.__pads.clear(0)'); r.press('B'); r.step(3); shut += 1; continue
         st = r.ev(f"({STEER})({x}, {z})")
         if not st or st.get('there'): r.js('window.__pads.clear(0)'); r.step(2); return bool(st)
         if st.get('nopath'): r.js('window.__pads.clear(0)'); return False
@@ -1109,10 +1165,14 @@ def ride(r, deck, fails, scene):
     lp = r.ev("(() => { const d = DOOR_OBJS.find(d => d.e.type === 'lift'); return d ? [d.e.cx, d.e.cz] : null; })()")
     if not lp or not walk_to(r, *lp): fails.append(f'{scene}: could not walk to the lift by the stick'); return False
     if not ring_and_A(r, ['lift']): fails.append(f'{scene}: the ring never named the lift'); return False
-    for k in range(20):
+    for k in range(60):   # (you walk in first; at breakfast the lift can be busy: up to 20 s)
         if r.ev("!document.getElementById('lift').hidden"): break
         r.step(10)
-    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{deck}')")
+    if r.ev("document.getElementById('lift').hidden"): fails.append(f'{scene}: the lift panel never opened'); return False
+    # the deck's button by its label (deckLabel since 0.64.17: 'R' for the rec deck, 7; else the number; DECK_ORDER and
+    # deckLabel are in a script the check can't see)
+    lab = 'R' if deck == 7 else str(deck)
+    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{lab}')")
     if res != 'ok': fails.append(f'{scene}: the lift\'s Deck {deck} button: {res}'); return False
     for k in range(60):
         r.step(10)
@@ -2158,6 +2218,14 @@ MUTANTS['pick'] = {
     'A and B swapped': WRAP("const t = buttons[0]; buttons[0] = buttons[1]; buttons[1] = t;"),
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
     'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
+    # CP1, claude/controller-follow1 0028869c: the ring finds no point for a seat
+    'CP1: a seat never ringed (the mess seat)': ('src', "  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
+}
+
+MUTANTS['day'] = {
+    # CP1, claude/controller-follow1 3f17ac95: the ring takes the lift where a tap reaches the Spine ladder (CTT3's find at
+    # the Deck 4 lift door: A climbed the ladder, the lift panel never opened)
+    'CP1: the ring ignores the ladder in front of the lift': ('src', "  if (typeof ladderAimed === 'function' && ladderAimed(h)) return 'ladder';", ""),
 }
 
 MUTANTS['reach'] = {
