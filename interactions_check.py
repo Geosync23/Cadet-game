@@ -654,6 +654,41 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FB1 (lead 29, arrows_check week Day 6): "Put the seal back: main storage" (FX3's fix 9) stuck over 3 hours: a tap on the shelf
+# nearest the arrow's pin walked you round to the shelf's front, 7 tiles away, and the follower's next step pulled you back.
+# Now a part goes back from the shelf's spot nearest the tap, as a fetch does (a step or two from the pin, under 2.2 m): real taps
+# on the shelf nearest the pin, four camera turns
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof ixLoose === 'function' && typeof shelfOf === 'function' && !!shelfOf('seal')"):
+        print('== FB1: put a part back from the arrow\'s pin')
+        g.ev("goToDeck(5)"); g.step(5); g.page.click('#crew'); g.step(5)
+        PB = r"""(() => { actEnd(true); for (const k of NEED_KEYS) SHIP.player.needs[k] = 100; needsT = null; NEED_GOAL = null; clearGoal(); if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const t = document.getElementById('devTip'); if (t) t.hidden = true;
+          setShipNow(1440 * 5 + 7 * 60 + 30); machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; } MACH_REV++; SHIP.player.carry = ['seal']; SHIP.player.work = null; SHIP.player.track = undefined;
+          const w = placeSpot(shelfOf('seal')); player.obj.position.copy(cellPos(...nearestOpen(w.x, w.z, player))); player.stop(); return [w.x, w.z]; })()"""
+        ONS = r"""(w => { const its = ITEMS.filter(i => i.hit && isShown(i.hit) && /^(Lights|Filters|Plumbing|Galley parts)$/.test(i.t)).map(i => { i.hit.getWorldPosition(_wp); return [i, Math.hypot(_wp.x - w[0], _wp.z - w[1])]; }).sort((a, b) => a[1] - b[1]);
+          for (const [i] of its.slice(0, 2)) { const b = new THREE.Box3().setFromObject(i.hit);
+            for (const fy of [.5, .7, .3]) for (const fx of [.5, .35, .65, .2, .8]) for (const fz of [.5, .35, .65, .2, .8]) {
+              const v = new THREE.Vector3(b.min.x + (b.max.x - b.min.x) * fx, b.min.y + (b.max.y - b.min.y) * fy, b.min.z + (b.max.z - b.min.z) * fz).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight, h = pick(x, y);
+              if (x > 0 && y > 0 && x < innerWidth && y < innerHeight && h && h.object.userData.item === i) return [x, y, i.t]; } }
+          return null; })"""
+        res = []
+        for rot in range(4):
+            w = g.ev(PB); g.step(30)
+            for _ in range(rot): g.page.click('#rot'); g.step(30)
+            lab = g.ev("(goalNow() || {}).label"); p = g.ev(f"({ONS})({json.dumps(w)})")
+            if not p: res.append([rot, lab, 'no shelf under the finger']); continue
+            g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(3)
+            a = g.ev(f"(w => ACT && ACT.kind === 'stow' && ACT.spot ? ['stow', Math.round(Math.hypot(ACT.spot.x - w[0], ACT.spot.z - w[1]) * 10) / 10] : [ACT && ACT.kind, null])({json.dumps(w)})")
+            g.step(600); res.append([rot, lab, p[2], a, g.ev("JSON.stringify(SHIP.player.carry)")])
+        print('   [camera turn, the arrow, shelf tapped, (started, its spot from the pin in m), in hand after]:', res)
+        check(len([r for r in res if len(r) > 3]) >= 3, f'a shelf by the pin under the finger in at least three camera turns ({res})')
+        for r in res:
+            if len(r) > 3: check(r[1] == 'Put the seal back: main storage' and r[3][0] == 'stow' and r[3][1] is not None and r[3][1] < 2.2 and r[4] == '[]',
+                                 f'a tap on the shelf by the put-back pin puts the seal back from the spot by the pin (camera turn {r[0]}: {r})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:

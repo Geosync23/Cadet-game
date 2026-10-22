@@ -14155,7 +14155,8 @@ function jobTap(it, at) {
       const sh = typeof shelfTapped === 'function' ? shelfTapped(it) : null;   // no job at all: a shelf says what's on it (0.33.41)
       if (sh && !myJob() && !P.carry.some(p => p !== KIT_BAG)) { toast(it.t + ' shelf', shelfLine(sh)); return true; }   // not with a chore: its stop may be here (a delivery's pickup)
       if (!P.carry.some(p => p !== KIT_BAG) || typeof returnPart !== 'function') return false;
-      approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
+      const pl = jobPlaceNear('storage', 'r', at);       // to the shelf's spot nearest the tap, as a fetch does (FB1: its front was round the far side, away from the put-back arrow's pin)
+      if (pl) actStart('stow', pl.id, { title: it.t, pose: 'browse' }); else approach(at.clone(), it.front, it.depth, () => actStart('stow', null, { title: it.t }));
       return true;
     }
     const need = shelfNeeds(mw.j, mw.w, P.carry);
