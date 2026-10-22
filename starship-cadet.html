@@ -8129,6 +8129,60 @@ const DECK_DRESS = {
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.2, .26), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.47, .031); s.add(p);   // .006 in front of the frame (PR4: no shimmer at phone distance)
     return { t: 'Framed menu', x: 'The menu from the Captain\'s table, signed by everyone who sat at it.', wall: [room, 'n', along], y: 2.47, w: .26, h: .32 };
   } },
+  // Crossing the Line (EV5, L3, the deck architect's stand-in; PR4 reviews; all behind EV_LINE_ON by `on`, so a game with it
+  // off never shows them). lineRibbons, the ceremony (Sunday 14:30-15:15, section 18's dressing; gone before the reading
+  // corner at 16:00): three gold ribbon swags across the bow lounge's window end with a bow at each drop (one merged
+  // gold, 1 draw call), and Brennan's punch bowl on a small stand beside her spot at the glass (51, 9; blocked while
+  // out): the stand merged, the green punch unlit, 2 draw calls
+  lineRibbons: { deck: 3, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'gold ribbons at the bow glass and the Line punch bowl', make(g) {
+    const r = ROOM_BOX.L, s = dressAt(g, 'L', 'floor', 0, 0), gold = '#e8b83a';
+    for (const x of [46.5, 48.6, 50.8]) {                  // a swag across the room, rows 5.4 to 15.6, dipping in the middle
+      const z0 = 5.4, z1 = 15.6, n = 12;
+      for (let k = 0; k < n; k++) { const za = z0 + (z1 - z0) * k / n, zb = z0 + (z1 - z0) * (k + 1) / n, y = z => 2.32 - .32 * Math.sin(Math.PI * (z - z0) / (z1 - z0)), ya = y(za), yb = y(zb);
+        const m = dressBox(s, .02, .12, Math.hypot(zb - za, yb - ya) + .01, gold, x - r.i0, (ya + yb) / 2, (za + zb) / 2 - r.j0); m.rotation.x = Math.atan2(ya - yb, zb - za); }   // a ribbon, on edge
+      for (const z of [z0, (z0 + z1) / 2, z1]) { const y = z === z0 || z === z1 ? 2.28 : 1.96; dressBox(s, .05, .16, .24, gold, x - r.i0, y, z - r.j0); dressBox(s, .03, .42, .06, gold, x - r.i0, y - .28, z - r.j0 - .05); dressBox(s, .03, .36, .06, gold, x - r.i0, y - .25, z - r.j0 + .06); }   // a bow, its two tails
+    }
+    const b = dressAt(g, 'L', 'floor', 51.45 - r.i0, 9.45 - r.j0);   // the stand and the bowl
+    dressBox(b, .44, .04, .44, '#5a4632', 0, .78, 0); dressBox(b, .08, .76, .08, '#5a4632', 0, .38, 0); dressBox(b, .3, .03, .3, '#5a4632', 0, .02, 0);
+    const bowl = new THREE.Mesh(new THREE.SphereGeometry(.2, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), dressMat('#d9e4e6')); bowl.position.set(0, 1.0, 0); bowl.rotation.x = Math.PI; b.add(bowl);
+    const punch = new THREE.Mesh(new THREE.CircleGeometry(.185, 16), new THREE.MeshBasicMaterial({ color: col('#7bc44a'), toneMapped: false })); punch.rotation.x = -Math.PI / 2; punch.position.set(0, .985, 0); punch.userData.noMerge = true; b.add(punch);
+    return { t: 'Line punch', x: (typeof evWord === 'function' && evWord('event.crossingLine.tap.punch')) || 'Chef Brennan\'s Line punch, in the big bowl. It is green. Nobody asks why.', floor: ['L', 51.45 - r.i0, 9.45 - r.j0], y: .9, w: .5, h: .4, d: .5, block: [[51, 9]] };
+  } },
+  // linePlaque: the plaque by the bow lounge's doorway, on the promenade's north wall at its bow end (40, 9: the Lap of
+  // the Wren turns there, and everyone passing sees it): from the afterglow (Sunday 19:15) on, a trace for good after the event. Your answer
+  // from the oath under the date (flag line.answer.<proud|watch|punch>), else a first-timer's (missed). 2 draw calls
+  linePlaque: { deck: 3, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'the plaque for Crossing the Line, by the bow lounge door', make(g) {
+    const ans = ['proud', 'watch', 'punch'].find(a => typeof flag === 'function' && flag('line.answer.' + a)) || 'missed';
+    const text = (typeof evWord === 'function' && evWord('event.crossingLine.plaque.' + ans)) || 'The CSV Wren crossed the Line into the Veyli reach, Day 7.';
+    const q = /"(.*)"/.exec(text), quote = q ? q[1] : '', s = dressAt(g, '=', 'n', 28.5);
+    dressBox(s, .52, .34, .03, '#8a6a2a', 0, 1.55, .015);            // the brass plate's backing, flat on the wall
+    const t = tex(260, 170, (c, w, h) => {
+      c.fillStyle = '#c99b3e'; c.fillRect(0, 0, w, h); c.strokeStyle = '#7a5a1e'; c.lineWidth = 4; c.strokeRect(6, 6, w - 12, h - 12);
+      c.fillStyle = '#3a2a0c'; c.textAlign = 'center'; c.font = '700 17px Georgia,serif'; c.fillText('CROSSING THE LINE', w / 2, 36);
+      c.font = 'italic 500 13px Georgia,serif'; c.fillText('CSV Wren, into the Veyli reach, Day 7', w / 2, 58);
+      c.font = '500 14px Georgia,serif'; const words = ('\u201c' + quote + '\u201d').split(' '), lines = []; let l = '';
+      for (const wd of words) { const tryL = l ? l + ' ' + wd : wd; if (c.measureText(tryL).width > w - 40 && l) { lines.push(l); l = wd; } else l = tryL; } if (l) lines.push(l);
+      lines.slice(0, 3).forEach((x, k) => c.fillText(x, w / 2, 92 + k * 20));
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.48, .3), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.55, .033); s.add(p);   // .003 in front of the plate
+    return { t: 'The Line plaque', x: text, wall: ['=', 'n', 28.5], y: 1.55, w: .52, h: .34 };
+  } },
+  // lineCertificate: your Line certificate (section 18's settleTraces, from the oath's end), framed beside the
+  // Captain's table menu above your keepsake shelf: the bunk's, or your officer cabin's once SHIP.works.home is '4-23'
+  // (moved with the next deck build, as framedMenu is). 2 draw calls
+  lineCertificate: { deck: 4, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
+    const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .9 : 2.05;
+    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet';
+    dressBox(s, .22, .28, .025, '#3a3024', 0, 2.45, .0125);
+    const t = tex(176, 224, (c, w, h) => {
+      c.fillStyle = '#f6efd8'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c9a23e'; c.lineWidth = 5; c.strokeRect(8, 8, w - 16, h - 16);
+      c.fillStyle = '#7a5a1e'; c.textAlign = 'center'; c.font = '700 14px Georgia,serif'; c.fillText('THE LINE', w / 2, 40);
+      c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));
+      c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(52, 192); for (let i = 1; i <= 16; i++) c.lineTo(52 + i * 4.5, 192 - 5 * Math.sin(i * 1.4)); c.stroke();   // the Captain's signature
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.45, .028); s.add(p);
+    return { t: 'Line certificate', x: (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
+  } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
   spiceJars: { deck: 3, what: 'spice jars from home on the mess hall\'s spice shelf', make(g, o) {
@@ -9836,7 +9890,7 @@ function gatherings(p, d, F) {
   if (typeof eventPlan === 'function') for (const e of eventPlan(p, d) || []) {   // a host (host: true) is there 5 minutes early
     const early = e.host ? 5 : 0;
     const q = e.meal ? TRAD_LINE[0] + Math.round((TRAD_LINE[1] - TRAD_LINE[0]) * U(530)) : 0;   // a meal tradition: through the line first, set off q minutes early (0.26.41)
-    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2): a break in a double shift
+    out.push({ at: e.from - early - q, dur: e.to - e.from + early + q, where: e.opts, tag: e.tag, anim: e.anim, min: e.min || 20, host: !!e.host, meal: e.meal || null, act: e.meal || undefined, q: e.meal ? q : 0, ...(e.meet ? { meet: true, act: 'work' } : {}), ...(e.seated ? { seated: true } : {}) });   // a meal tradition (meal: 'dinner' | 'breakfast') is that meal; meet (the storm update's S2: a break in a double shift; Crossing the Line's standing easy: a break in the shift)
   }
   if (typeof rotTernGreet === 'function') { const g = rotTernGreet(p, d); if (g) { for (let i = out.length - 1; i >= 0; i--) if (out[i].tag && out[i].tag.startsWith('ev-off-the-tern')) out.splice(i, 1); out.push(g); } }   // the Tern's greeter (PT1): at the ramp's foot, not in its crowd
   if (typeof eventMeetPlan === 'function') out.push(...eventMeetPlan(p, d, F));   // a ship-wide event's meeting that names p (section 18, F0b; [] while the events are off): meet: true is a break in the shift
@@ -9894,8 +9948,15 @@ const evAt = abs => { const d = Math.floor(abs / 1440) + 1, sl = evDay(d); retur
 const evWho = (who, p) => !who || who === 'all' || who === 'dept:' + p.dept;
 const evRule = (abs, rule, p) => { const e = evAt(abs); return e && e.rules.find(r => r.rule === rule && (!p || evWho(r.who, p))) || null; };
 // a place closed at ship minute abs: where 'type:<type>' or '<deck>|<room key>'
-const evClosed = (pl, abs) => { const e = evAt(abs); return !!e && e.rules.some(r => r.rule === 'closed' && (r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room
-  || (r.where === 'deck:' + pl.deck && !(typeof evOpenFor === 'function' && evOpenFor(pl.deck, pl.room, abs))))); };   // a whole deck (the storm update: the rec deck), but a room opened for a held beat (the auditorium for the Friday address)
+const evShut = (pl, abs, r) => r.where === 'type:' + pl.type || r.where === pl.deck + '|' + pl.room
+  || (r.where === 'deck:' + pl.deck && !(typeof evOpenFor === 'function' && evOpenFor(pl.deck, pl.room, abs)));   // a whole deck (the storm update: the rec deck), but a room opened for a held beat (the auditorium for the Friday address)
+// ev: the take is for a gathering (o.event), which a rule with `gather: true` lets in (Crossing the Line: the bow lounge
+// is the ceremony's alone); to: the stay's end: such a rule is checked in every 10-minute slot of the stay (evAt's), so
+// nobody sits on into it nor through it (a lounge seat 14:00-15:30 spans the whole 14:30-15:15: PB's fix)
+const evClosed = (pl, abs, ev, to) => { const e = evAt(abs);
+  if (!!e && e.rules.some(r => r.rule === 'closed' && !(ev && r.gather) && evShut(pl, abs, r))) return true;
+  if (ev || !(to > abs)) return false;
+  for (let m = abs; ; m = Math.min(m + 10, to - 1)) { const f = evAt(m); if (f && f.rules.some(r => r.rule === 'closed' && r.gather && evShut(pl, m, r))) return true; if (m >= to - 1) return false; } };
 // owed a call when comms come back: section 18's callOwed (the calls-home crew and about a third of the rest)
 const evOwed = (p, e, d) => p.rank !== 'guest' && (typeof callOwed === 'function' ? callOwed(p, e.startDay) : habitsOn(p, d).includes('calls-home') || schedU(p.seed, e.startDay, 601) < .33);
 function schedFrame(p, d) {
@@ -10101,7 +10162,7 @@ function schedBuild(p, d, occ, S) {
           const pl = pool[(fav + i) % pool.length], mine = ownL.length > 0 && S.owner.get(pl.id).length === 1;
           if (pref && (pass === 0 ? !pref.has(pl.id) || avoid.has(pl.id) : pass === 1 ? pref.has(pl.id) || avoid.has(pl.id) : !avoid.has(pl.id))) continue;
           if (!mine && !isFree(pl.id, s, end, o.tag)) continue;
-          if (shut && evClosed(pl, B + s)) continue;          // closed for the event
+          if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
             const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
@@ -10323,7 +10384,9 @@ function schedBuild(p, d, occ, S) {
     const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);
     go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
     take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
-    if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })) seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
+      && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
+      seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
     e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
   };
   const leisureUntil = (end, k) => {
@@ -10468,6 +10531,11 @@ function schedBuild(p, d, occ, S) {
       if (!given.breakfast && !given.dinner) for (const m of ['breakfast', 'dinner']) {   // no time given and none free: eat at the station
         const [, w1] = MEALS[m];
         if (!ate[m] && Math.max(a, t) <= w1 - 30 && b >= w1 - 10 && !GB.some(x => x[0] > b && x[0] < w1)) { workAt(pid, task, w1 - 30); seg(m, w1 - 10, pid && S.byId.get(pid) ? S.byId.get(pid).type : wtype, pid, { tag: 'staff' }); ate[m] = true; }
+      }
+      for (const e of meet.filter(x => x.meet && !x.done && x.at >= Math.max(t, a) && x.at < b)) {   // an event meeting during a stint (F0b; Crossing the Line's oath: Brennan with the punch): there and back on the stint's time
+        workAt(pid, task, e.at); const n0 = segs.length;
+        if (take(e.act || 'work', e.where, e.dur, { tag: e.tag, min: e.min, by: b, event: true, anim: e.anim })) { go(wd); for (let i = n0; i < segs.length; i++) if (segs[i].act === 'commute' || segs[i].tag === 'lift') segs[i].tag = e.tag; }
+        e.done = true;
       }
       workAt(pid, task, Math.min(b, 1440));
     });
@@ -16345,6 +16413,7 @@ function galleyMenu(d) {
     out.dinner = out.votes.length ? out.votes[0][0] : 'Sunday roast';
     out.note = out.votes.length ? `voted for by the crew, ${out.votes[0][1]} votes` : '';
   } else out.dinner = regular([0, 1, , 2, , 3][wd]);
+  if (typeof linePudding === 'function') linePudding(d, out);   // Crossing the Line: the Line supper's pudding (section 18's slot 'Line builder'; nothing while it's off)
   // a harvest morning in the garden (section 18's eventsOn, id 'harvest'): fresh salad with dinner
   if (typeof eventsOn === 'function' && eventsOn(d).some(e => e.id === 'harvest')) { out.salad = true; out.note = (out.note ? out.note + ', ' : '') + 'with fresh garden salad'; }
   // the traditions' dishes (galleyTies): a long breakfast's pancakes; the suppers' dinners; a leaver's favourite
@@ -18729,7 +18798,7 @@ function eventJob(spec, ev, t, key) {
   }
   const j = { id: key, machine, deck: where.deck, room: where.room, kind: 'chore', chore: spec.kind, target: spec.id || spec.kind, event: ev, eventJob: spec.id || null, title,
            bring: spec.bring || null, tier: spec.tier || 1, stops, urgency: spec.urgency ?? 1, leave: spec.leave ?? 60, posted: t, found: t,
-           claimedBy: null, parts: (spec.parts || []).slice(), status: 'open' };
+           claimedBy: null, parts: (spec.parts || []).slice(), status: 'open', ...(Number.isFinite(spec.hold) ? { reserved: 'event', until: Math.floor(t / 1440) * 1440 + spec.hold, shareSeen: true } : {}) };   // hold: kept for you to that minute of its day (Crossing the Line's volunteer jobs), then the crew's
   return typeof eventJobRank === 'function' ? Object.assign(j, eventJobRank(spec)) : j;   // section 18's F5: a job for a rank ({} while off)
 }
 function eventJobsHour(h, jobs) {
@@ -18742,6 +18811,7 @@ function eventJobsHour(h, jobs) {
   const start = Math.floor(t / 1440) - (ev.day || 0);
   list.forEach((spec, k) => {
     if (Number.isFinite(spec.at) && Math.floor((t % 1440) / 60) !== Math.floor(spec.at / 60)) return;   // only in the hour of its minute (afterglow's 08:00 is the next morning)
+    if (spec.day != null && (ev.day || 0) !== spec.day) return;   // only on that day of the event (Crossing the Line: Sunday's jobs in a warning that began on Saturday)
     const key = 'event:' + ev.id + ':' + (spec.id || ev.phase + k) + '@' + start;
     if (jobs.some(j => j.id === key)) return;
     const j = eventJob(spec, ev.id, Number.isFinite(spec.at) ? Math.max(t, Math.floor(t / 1440) * 1440 + spec.at) : t, key); if (!j) return;
@@ -29340,6 +29410,47 @@ const LINES = JSON.parse([
   '{"text":"Commissioned, then. Congratulations, Officer.","id":"cdtlyy","cue":["ceremony","ceremony.you"],"tier":[1,4]},',
   '{"text":"Did the Captain ask you her question? She always does.","id":"1hdrngm","cue":["ceremony","ceremony.you"],"tier":[1,4]},',
   '{"text":"There was a ceremony up top. A new officer.","id":"1gs1469","cue":"ceremony"},',
+  '{"text":"Did you see the first-timers\' faces at the punch? I\'ll remember that for years.","id":"vvwnoh","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
+  '{"text":"Zeke says his face at his first Line was worse. I don\'t believe him.","id":"m0wb1a","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
+  '{"text":"There\'s a plaque up now. With the date. We were there.","id":"yx2j91","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
+  '{"text":"First morning in the Veyli reach. The stars look different from the mess.","id":"1epn92","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
+  '{"text":"Your first Line, {nick}. Keep the certificate. Everyone does.","id":"1i05x76","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"tier":[1,4]},',
+  '{"text":"I read the plaque. \\"Is this the part with the punch?\\" Classic.","id":"vzdimz","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"flag":"line.answer.punch"},',
+  '{"text":"\\"Even the ones on watch.\\" The whole Watch has read that plaque.","id":"8xab1z","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"flag":"line.answer.watch"},',
+  '{"text":"\\"We came a long way. We\'re glad we did.\\" I read it twice.","id":"jxy6hw","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"flag":"line.answer.proud"},',
+  '{"text":"New reach. Survey\'s had their noses to the windows since yesterday.","id":"ujqpl4","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"dept":"survey"},',
+  '{"text":"A Veyli does not watch another people\'s rite. I hope it was a good one.","id":"1jfwehl","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"tier":[0,0],"who":"saruth"},',
+  '{"text":"You crossed. You are further from home now than your grandparents were. We know it.","id":"bd11qx","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"],"tier":[1,4],"who":"saruth"},',
+  '{"text":"Did you feel that? The whole deck went gold.","id":"fi0bjc","cue":["event.crossingLine.onset","event.crossingLine.onset"]},',
+  '{"text":"Look at the windows. Everything\'s gold. Even the stars.","id":"5effd0","tone":"warm","cue":["event.crossingLine.onset","event.crossingLine.onset"]},',
+  '{"text":"That\'s it, then. We\'re over the Line. To the ceremony!","id":"6tuq2g","cue":["event.crossingLine.onset","event.crossingLine.onset"]},',
+  '{"text":"First-timers to the front. Go on. We\'ll be at the back.","id":"1ur5g9l","tone":"funny","cue":["event.crossingLine.onset","event.crossingLine.onset"]},',
+  '{"text":"Your first Line, {nick}! Go on, to the front.","id":"ulusc6","tone":"warm","cue":["event.crossingLine.onset","event.crossingLine.onset"],"tier":[1,4]},',
+  '{"text":"It\'s filling up in there. Mind the punch bowl. It\'s heavier than it looks.","id":"vf49y7","cue":["event.crossingLine.onset","event.crossingLine.onset"],"dept":"watch"},',
+  '{"text":"How was the punch? Be honest. I won\'t tell Brennan.","id":"862ei4","tone":"funny","cue":["event.crossingLine.resolution","event.crossingLine.resolution"]},',
+  '{"text":"You answered the oath! In front of everyone. Brave.","id":"1cd6f14","tone":"warm","cue":["event.crossingLine.resolution","event.crossingLine.resolution"]},',
+  '{"text":"\\"Is this the part with the punch?\\" Best answer in years.","id":"7tltfr","tone":"funny","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"flag":"line.answer.punch"},',
+  '{"text":"\\"Even the ones on watch.\\" Tomas will love that.","id":"qz3d6r","tone":"warm","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"flag":"line.answer.watch"},',
+  '{"text":"\\"We\'re glad we did.\\" That\'s going to look good on a plaque.","id":"1ghyj4v","tone":"warm","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"flag":"line.answer.proud"},',
+  '{"text":"A week aboard and a Line crossed. Not a bad first week.","id":"ri158s","tone":"warm","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"who":"torres-zeke"},',
+  '{"text":"Your first week, and you\'re already in someone else\'s sky. Not bad.","id":"c59num","tone":"warm","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"who":"torres-zeke"},',
+  '{"text":"My first Line, I pulled the worst face in the whole crowd. There\'s a sketch. It\'s gone.","id":"cwqygf","tone":"funny","cue":["event.crossingLine.resolution","event.crossingLine.resolution"],"who":"torres-zeke"},',
+  '{"text":"We cross the Line tomorrow. First time? You\'ll love it. Mostly.","id":"n0bskj","tone":"funny","cue":["event.crossingLine.warning","event.crossingLine.warning"]},',
+  '{"text":"First crossing? Lucky you. Don\'t drink the punch. You\'ll drink the punch.","id":"1dgb64o","tone":"funny","cue":["event.crossingLine.warning","event.crossingLine.warning"]},',
+  '{"text":"The Line\'s tomorrow. The horn goes on every deck. Don\'t jump.","id":"144x08v","cue":["event.crossingLine.warning","event.crossingLine.warning"]},',
+  '{"text":"Tomorrow we cross into the Veyli reach. New stars out of the windows.","id":"1afd4fc","cue":["event.crossingLine.warning","event.crossingLine.warning"]},',
+  '{"text":"First crossing, {nick}? Stand at the front tomorrow. That\'s the rule.","id":"1228a2e","cue":["event.crossingLine.warning","event.crossingLine.warning"],"tier":[1,4]},',
+  '{"text":"Line punch tomorrow. Brennan\'s recipe. We don\'t ask what\'s in it.","id":"se31n0","tone":"funny","cue":["event.crossingLine.warning","event.crossingLine.warning"],"dept":"galley"},',
+  '{"text":"Tomorrow at half two we cross the Line. Helm\'s flying it. Gently.","id":"1qa6z67","cue":["event.crossingLine.warning","event.crossingLine.warning"],"dept":"helm"},',
+  '{"text":"New reach, new charts. Survey\'s been waiting months for this.","id":"7cztyp","cue":["event.crossingLine.warning","event.crossingLine.warning"],"dept":"survey"},',
+  '{"text":"I\'ll stand with you tomorrow. Everyone needs someone at their first Line.","id":"1uaq2br","tone":"warm","cue":["event.crossingLine.warning","event.crossingLine.warning"],"tier":[3,4]},',
+  '{"text":"My first Line was two years ago. I still dream about that punch.","id":"139co0u","tone":"funny","cue":["event.crossingLine.warning","event.crossingLine.warning"],"who":"pell"},',
+  '{"text":"Crossing or no crossing, this ship stays tidy. No punch on my decks.","id":"v7vaxw","cue":["event.crossingLine.warning","event.crossingLine.warning"],"who":"holt"},',
+  '{"text":"Past the Line every star\'s got a Veyli name. They got there first.","id":"1kfb9t","cue":["event.crossingLine.warning","event.crossingLine.warning"],"not":{"who":"saruth|holt"}},',
+  '{"text":"Six hundred years the Veyli have been out there. We\'re the new ones.","id":"1wnkone","cue":["event.crossingLine.warning","event.crossingLine.warning"],"not":{"who":"saruth|holt"}},',
+  '{"text":"Past the Line we\'re guests in someone else\'s sky. Best manners, all of us.","id":"1h87gcv","tone":"warm","cue":["event.crossingLine.warning","event.crossingLine.warning"],"not":{"who":"saruth|holt"}},',
+  '{"text":"Help\'s a long way off out there. That\'s what the oath\'s about. Each other.","id":"b9v016","cue":["event.crossingLine.warning","event.crossingLine.warning"],"not":{"who":"saruth|holt"}},',
+  '{"text":"Our charts go thin past the Line. A few runs, never a full survey. Until now.","id":"197pj42","cue":["event.crossingLine.warning","event.crossingLine.warning"],"dept":"survey","not":{"who":"saruth"}},',
   '{"text":"Lantern supper tonight. I\'ve saved you a spot on the bench.","id":"aev9ce","tone":"warm","cue":["event.ionStorm.escalation","event.ionStorm.escalation"],"time":"evening"},',
   '{"text":"Called in on a Saturday. The board doesn\'t know what a weekend is.","id":"169e4ql","cue":["event.ionStorm.escalation","event.ionStorm.escalation"],"dept":"works","weekday":"sat"},',
   '{"text":"My day off, they said. Then the surge, they said.","id":"142sy7l","tone":"funny","cue":["event.ionStorm.escalation","event.ionStorm.escalation"],"dept":"works","weekday":"sat"},',
@@ -29746,6 +29857,92 @@ const LINES = JSON.parse([
   '{"text":"Day off: muster by the lift with the off-duty crew.","id":"1b4xffh"}]',
   ',"drill.toast":[',
   '{"text":"Drill in ten minutes. Muster at the Works bay.","id":"facp99"}]',
+  ',"event.crossingLine.address.onset.1":[',
+  '{"text":"This is the Captain. I\'m off today, so I\'ll be brief. We\'ve crossed the Line.","id":"134e870"}]',
+  ',"event.crossingLine.address.onset.2":[',
+  '{"text":"Welcome to the Veyli reach. Look out of a window. Everything out there is new to us.","id":"1lp7mv5"}]',
+  ',"event.crossingLine.address.onset.3":[',
+  '{"text":"First-timers, to the bow lounge. The rest of you, be kind. Marrow out.","id":"pp8v7w"}]',
+  ',"event.crossingLine.answer.missed":[',
+  '{"text":"We\'re new, and we\'re nervous, and we came anyway.","id":"zmbzi1"}]',
+  ',"event.crossingLine.gather.ceremony.ask":[',
+  '{"text":"Bow lounge at half two. First-timers stand at the front. That\'s you.","id":"146f80v","tone":"funny"},',
+  '{"text":"Coming to the Line? Half two, the bow lounge. Bring a brave face.","id":"gfr69z"},',
+  '{"text":"The Captain\'s reading the oath at half two. Come and hear it.","id":"rxdj23","tone":"warm"}]',
+  ',"event.crossingLine.gather.ceremony.here":[',
+  '{"text":"Front row\'s for first-timers. We old hands stand at the back and laugh.","id":"dup5gn","tone":"funny"},',
+  '{"text":"Watch their faces when the punch goes round. Best bit.","id":"10z73b3","tone":"funny"},',
+  '{"text":"I cried at my first Line. Don\'t tell anyone.","id":"x1fiz0","tone":"warm"}]',
+  ',"event.crossingLine.gather.ceremony.thanks":[',
+  '{"text":"You stand with the crowd in the bow lounge while the Captain reads the old oath, the stars at her back. Then a mug of Line punch, all of it. You\'re a Line-crosser now.","id":"6oreif","tone":"warm"}]',
+  ',"event.crossingLine.gather.lineSupper.ask":[',
+  '{"text":"Line supper at six. Proper food, to make up for the punch.","id":"1e9lmha","tone":"funny"},',
+  '{"text":"Everyone\'s at the Line supper tonight. Come and squeeze onto a bench.","id":"51n6rl"}]',
+  ',"event.crossingLine.gather.lineSupper.chatter":[',
+  '{"text":"Best Sunday table we\'ve had. And it wasn\'t even the Sunday table.","id":"1u39wao","tone":"funny"},',
+  '{"text":"The Line supper ran out of seconds in ten minutes. Brennan was thrilled.","id":"1ezqofv"}]',
+  ',"event.crossingLine.gather.lineSupper.here":[',
+  '{"text":"To the Line, and everyone who crossed it today.","id":"9e3td8","tone":"warm"},',
+  '{"text":"Supper\'s to get rid of the taste. It\'s working.","id":"1nder5b","tone":"funny"},',
+  '{"text":"First-timers eat first. That\'s the rule tonight.","id":"1htsskx"}]',
+  ',"event.crossingLine.gather.lineSupper.mail":[',
+  '{"text":"The Line supper | The Line supper tonight at six, in the mess, in place of the Sunday table. Whatever the crew voted for, and a pudding. No punch. I promise.","id":"1wz8ezd"}]',
+  ',"event.crossingLine.gather.lineSupper.name":[',
+  '{"text":"The Line supper","id":"188acw2"}]',
+  ',"event.crossingLine.gather.lineSupper.thanks":[',
+  '{"text":"The mess is full, every bench taken. Someone hands you a plate, and someone else budges up to make you room.","id":"1pnx7cu","tone":"warm"}]',
+  ',"event.crossingLine.job.punch":[',
+  '{"text":"Crossing the Line: carry the punch up from the galley","id":"c0a0sz"}]',
+  ',"event.crossingLine.job.ribbons":[',
+  '{"text":"Crossing the Line: hang the gold ribbons for the ceremony","id":"1peuuee"}]',
+  ',"event.crossingLine.keepsake":[',
+  '{"text":"Your Line certificate, signed by the Captain: \\"Crossed into the Veyli reach, Day 7, where the Wren travels as a guest. This reach knows your name.\\"","id":"6ohvw6"}]',
+  ',"event.crossingLine.lap.tomas.mug":[',
+  '{"text":"I\'ve still got the mug. I\'m keeping it. Is that allowed? I\'m keeping it.","id":"11cp4xu","tone":"warm"}]',
+  ',"event.crossingLine.lap.tomas.none":[',
+  '{"text":"Next Line, you\'re on watch and I\'m drinking the punch. Deal?","id":"145nlfc","tone":"funny"}]',
+  ',"event.crossingLine.lap.tomas.watch":[',
+  '{"text":"You said \\"even the ones on watch\\". Deck 2 heard about it in five minutes.","id":"1afqp8","tone":"warm"}]',
+  ',"event.crossingLine.mail.tomas":[',
+  '{"text":"On watch tomorrow | On watch tomorrow, all day. You\'ll have to cross for both of us. Tell me everything after.","id":"akbozj"}]',
+  ',"event.crossingLine.mail.warning":[',
+  '{"text":"Tomorrow we cross the Line | Tomorrow at 14:30 the Wren crosses into the Veyli reach. Beyond it, the Wren travels as a guest. The horn will sound on every deck. First crossing? The ceremony is in the bow lounge, 14:30. Then the Line supper in the mess at 18:00, in place of the Sunday table. Attendance is not required. It is, however, expected.","id":"1ciz85k"}]',
+  ',"event.crossingLine.notice.ceremony":[',
+  '{"text":"Crossing the Line: the ceremony in the bow lounge at 14:30. First-timers to the front.","id":"ji8jrg"}]',
+  ',"event.crossingLine.notice.horn":[',
+  '{"text":"The ship\'s horn: the Wren has crossed the Line.","id":"skmjcn"}]',
+  ',"event.crossingLine.notice.mug":[',
+  '{"text":"A mug of Line punch for Tomas: he\'s at his post by the Deck 2 lift until five.","id":"px9kha"}]',
+  ',"event.crossingLine.notice.offer":[',
+  '{"text":"Brennan\'s Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.","id":"13sv5js"}]',
+  ',"event.crossingLine.plaque.missed":[',
+  '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We\'re new, and we\'re nervous, and we came anyway.\\"","id":"1i583ko"}]',
+  ',"event.crossingLine.plaque.proud":[',
+  '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We came a long way. We\'re glad we did.\\"","id":"zcplyx"}]',
+  ',"event.crossingLine.plaque.punch":[',
+  '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"Is this the part with the punch?\\"","id":"hfeac2"}]',
+  ',"event.crossingLine.plaque.watch":[',
+  '{"text":"The CSV Wren crossed the Line into the Veyli reach, Day 7. \\"We crossed together, all of us. Even the ones on watch.\\"","id":"1ekgd6y"}]',
+  ',"event.crossingLine.punch.offer":[',
+  '{"text":"Two Line jobs, love: punch and ribbons. Mess sheet, 12:45.","id":"1kbehpm"}]',
+  ',"event.crossingLine.punch.saved":[',
+  '{"text":"Tomas is on watch, so I\'ve saved him a mug. Don\'t look at me like that. I\'m not soft.","id":"kv5rwo"}]',
+  ',"event.crossingLine.punch.savedYou":[',
+  '{"text":"Missed the Line, love? Saved you a mug. All of it, mind.","id":"1ja7udv","tone":"warm"}]',
+  ',"event.crossingLine.punch.secret":[',
+  '{"text":"What\'s in it? Pickle brine. One spoon. Every Line since I joined. Tell no one.","id":"1u7618m"}]',
+  ',"event.crossingLine.record":[',
+  '{"text":"Crossed the Line into the Veyli reach, Day 7.","id":"18zdulk"}]',
+  ',"event.crossingLine.status.afterglow":[',
+  '{"text":"First day in the Veyli reach.","id":"1ou5ip6"}]',
+  ',"event.crossingLine.status.onset":[',
+  '{"text":"Crossed the Line. Ceremony, bow lounge. Supper 18:00.","id":"pcrcpu"}]',
+  ',"event.crossingLine.status.resolution":[',
+  '{"text":"Crossed the Line. The Line supper\'s in the mess at 18:00.","id":"2ludkb"}]',
+  ',"event.crossingLine.status.warning":[',
+  '{"text":"Tomorrow at 14:30 we cross the Line into the Veyli reach.","id":"mnvjhf"}]',
+  ',"event.crossingLine.tap.punch":[',
+  '{"text":"Brennan\'s Line punch. Green, faintly fizzy. Nobody will tell you what\'s in it.","id":"3da9n7","tone":"funny"}]',
   ',"event.ionStorm.address.onset.1":[',
   '{"text":"This is the Captain. We\'re in it.","id":"7u0nc0"}]',
   ',"event.ionStorm.address.onset.2":[',
@@ -34408,6 +34605,7 @@ const MEETINGS_BAKED = {
   "careerChief": {"title": "A word with the Chief", "from": "Chief Ines Calder", "gist": "You didn't come to my office. Missed shifts. Be in the bay at ten to nine, every workday. Need a day? Book leave.", "lines": [{"who": "calder", "text": "Door. Thank you. Sit.", "pose": "gesture"}, {"who": "calder", "text": "I'll be plain. You've missed shifts. Not one. Several.", "to": "you"}, {"who": "calder", "text": "The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs."}, {"who": "calder", "text": "I'm not angry. I'm worried. Those are different, and I'd like you to know which."}, {"who": "calder", "text": "So. What's going on, {me}? Take your time.", "pose": "listen", "to": "you"}, {"choice": [{"text": "It's been hard. I've been tired.", "rel": {"calder": 1}, "flavour": "share", "mem": "career.chief.tired", "reply": {"who": "calder", "text": "Tired I can work with. If you're ill, the infirmary. Time there never counts against you."}}, {"text": "I don't have a good reason.", "rel": {"calder": 1}, "mem": "career.chief.honest", "reply": {"who": "calder", "text": "Honest. Good. I can work with honest.", "pose": "nod"}}, {"text": "It won't happen again.", "mem": "career.chief.promise", "reply": {"who": "calder", "text": "Don't promise me. Show the board."}}]}, {"who": "calder", "text": "Here's what changes. You're in the bay at ten to nine. Every workday."}, {"who": "calder", "text": "You take a job. You finish it. You turn it in at the board. Do that, and this goes away."}, {"who": "calder", "text": "Need a day? Book leave on your device. An empty slot on paper beats a surprise."}, {"who": "calder", "text": "If nothing changes, the Captain will want to see you. Neither of us wants that."}, {"who": "calder", "text": "Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.", "to": "you"}, {"who": "calder", "text": "That's all. I won't say it twice. Board's there.", "pose": "nod"}]},
   "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
   "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
+  "crossingCeremony": {"title": "The Line oath", "from": "Captain Odile Marrow", "gist": "You crossed the Line into the Veyli reach. The Captain read the old oath, you answered for the first-timers, and you drank Brennan's Line punch. Your certificate is on your shelf.", "lines": [{"who": "marrow", "text": "Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.", "pose": "gesture"}, {"who": "marrow", "text": "First-timers, step forward. Don't be shy. Everyone here stood where you're standing once."}, {"who": "first1", "text": "Do we have to say anything?"}, {"who": "marrow", "text": "One of you does, at the end. I do the hard part. Listen.", "pose": "laugh"}, {"who": "marrow", "text": "Past this point the stars have other names, and help is a long way off. We go as guests."}, {"who": "marrow", "text": "So we make each other a promise. Here it is.", "pose": "gesture"}, {"who": "marrow", "text": "\"We have crossed the Line. We left the near stars behind us, and we did not go alone.\""}, {"who": "marrow", "text": "\"Whatever is out here, we meet it as one crew, and we bring each other home.\"", "pose": "gesture"}, {"who": "marrow", "text": "\"From today, this reach knows our names.\" There. That's the oath. It's older than the ship."}, {"who": "marrow", "text": "Now. Who answers for the first-timers?", "pose": "listen"}, {"who": "first2", "text": "Not me. Don't look at me."}, {"who": "first1", "text": "{me}'ll do it. Won't you?", "pose": "laugh", "to": "you"}, {"choice": [{"text": "We came a long way. We're glad we did.", "rel": {"marrow": 1}, "flavour": "share", "flag": "line.answer.proud", "reply": {"who": "marrow", "text": "So are we. Write that down, somebody. It's going on the plaque.", "pose": "nod"}}, {"text": "We crossed together, all of us. Even the ones on watch.", "rel": {"marrow": 1}, "flavour": "warm", "flag": "line.answer.watch", "reply": {"who": "marrow", "text": "Even the ones on watch. Yes. That's going on the plaque.", "pose": "nod"}}, {"text": "Is this the part with the punch?", "rel": {"marrow": 1, "brennan": 1}, "flavour": "funny", "flag": "line.answer.punch", "reply": {"who": "marrow", "text": "It is. I'm so sorry. And yes, that's going on the plaque too.", "pose": "laugh"}}]}, {"who": "brennan", "text": "Line punch. One mug each. You drink it all. That's the dunking. No complaints.", "pose": "gesture"}, {"who": "first2", "text": "It's... green. Why is it green?"}, {"who": "brennan", "text": "Tradition. Drink.", "pose": "nod"}, {"who": "marrow", "text": "There. You're Line-crossers now. Supper's at six. Something to take the taste away.", "pose": "laugh"}]},
   "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is six till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.", "lines": [{"who": "calder", "text": "Ten to nine. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea and biscuits at one. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"who": "calder", "text": "Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.", "to": "you"}, {"who": "torres-zeke", "text": "I do talk a lot. It's mostly useful.", "pose": "laugh"}, {"who": "calder", "text": "Three things. Gloves on before the panel comes off. Not after.", "to": "you"}, {"who": "calder", "text": "If you don't know, ask. Asking takes a minute. Guessing takes a shift.", "to": "you"}, {"who": "calder", "text": "And put tools back where you found them. The wall has outlines. Use them.", "to": "you"}, {"who": "tech2", "text": "She means it about the wall.", "pose": "gesture"}, {"who": "calder", "text": "Last thing. Work ends at five. The ship doesn't.", "to": "you"}, {"who": "calder", "text": "Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.", "to": "you"}, {"who": "calder", "text": "The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.", "to": "you"}, {"who": "calder", "text": "People who join in settle in. I've watched it for years. Go to things.", "to": "you"}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
@@ -34417,6 +34615,10 @@ const MEETINGS_BAKED = {
   "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, coil three, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
   "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your six needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Food, energy, hygiene, social, fitness, bathroom. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must. You know where the toilets are."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
   "introSoloJob": {"title": "Your first solo job", "from": "Chief Ines Calder", "gist": "Calder gave you your first solo job, the other light relay on Deck 4: it's yours and tracked on your device. A relay from storage, a bracket from the shop, follow the arrow, then turn it in at the job board. Every job goes in your Record. Book a progress talk any time.", "lines": [{"who": "calder", "text": "Come in. Don't sit. This won't take long.", "pose": "gesture"}, {"who": "calder", "text": "Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.", "to": "you"}, {"who": "calder", "text": "You'll do it alone. Torres has his own work. He'll look in at tea. Once."}, {"who": "calder", "text": "Every job you finish goes in your Record. So does every job you leave half done. I read the Record."}, {"who": "calder", "text": "Progress talks: any time. Book one on your device. I'll keep it."}, {"choice": [{"text": "What if I need help?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Ask. Asking isn't failing. Hiding it is.", "pose": "nod"}}, {"text": "I won't let you down, Chief.", "rel": {"calder": 1}, "flavour": "cheer", "reply": {"who": "calder", "text": "Don't let the machine down. I'll be fine."}}, {"text": "(Take the job and go)", "reply": {"who": "calder", "text": "Good. That's an answer too."}}]}, {"who": "calder", "text": "The other light relay on Four. A relay off the Lights shelf, a bracket you make in the shop."}, {"who": "calder", "text": "Your device's arrow takes you there. Step by step."}, {"who": "calder", "text": "Lit and tested, you come back and turn it in at the board. Not before."}, {"who": "calder", "text": "One more thing. Finish what you start. Off you go."}]},
+  "lineLap": {"title": "Lap of the Wren", "from": "Zeke Torres", "gist": "On the Lap of the Wren, the old hands gave Tomas his crossing at the bow lounge door.", "lines": [{"who": "torres-zeke", "text": "Hold up. Stop here, everyone. This is where it happened today.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Tomas Lind. You missed your Line watching the ship. So here it is."}, {"who": "torres-zeke", "text": "From today, this reach knows your name, Lind.", "pose": "nod"}, {"who": "pell", "text": "And the last of the punch. I saved it. It's not got better.", "pose": "laugh"}, {"who": "tomas", "text": "That's... thank you. That's the nicest thing. It's horrible. Thank you.", "pose": "laugh"}]},
+  "lineSupperGuess": {"title": "What's in the punch?", "from": "Pell Okafor", "gist": "At the Line supper, Pell tried to guess what's in Brennan's punch.", "lines": [{"who": "pell", "text": "You carried it up. You know. What's in the punch? It's ginger. It's definitely ginger.", "pose": "listen", "to": "you"}, {"choice": [{"text": "No idea. Ask Brennan.", "rel": {"brennan": 1}, "flavour": "practical", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "She'd tell me. She wouldn't. You're both the same. Unbearable.", "pose": "laugh"}}, {"text": "It's pickle brine.", "rel": {"pell": 1}, "flavour": "share", "mem": "line.secret.told", "reply": {"who": "pell", "text": "Pickle... no. No. I've had three mugs. Why would you tell me that?", "pose": "laugh"}}, {"text": "Ginger. Definitely ginger.", "rel": {"brennan": 1}, "flavour": "funny", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "I knew it! Ha. Ginger. I'm never wrong about these things.", "pose": "laugh"}}]}]},
+  "lineTomasMug": {"title": "A mug for the watch", "from": "Tomas Lind", "gist": "You took Tomas a mug of Line punch at his watch post.", "lines": [{"who": "tomas", "text": "You brought it up. Nobody brings things to the watch.", "pose": "laugh"}, {"who": "tomas", "text": "It's green. Why is it green? Don't tell me. I'm drinking it anyway."}, {"who": "tomas", "text": "Tell me one thing. Just one. Then I have to look at the screen again.", "pose": "listen"}]},
+  "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
   "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Well done.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "rec.talent.you": {"title": "Talent night: your act", "from": "Lucia Ferreira", "gist": "You did an act at talent night, and the crowd cheered.", "lines": [{"who": "ferreira", "text": "And now, a first-timer. Be kind, everyone. Here's {me}!", "pose": "gesture"}, {"choice": [{"text": "(Play a tune on the piano)", "flavour": "share", "mem": "talent.tune", "reply": {"who": "ferreira", "text": "Lovely! Not a single wrong note. Well, one. It was the best one.", "pose": "laugh"}}, {"text": "(Tell a ship joke)", "flavour": "cheer", "mem": "talent.joke", "reply": {"who": "ferreira", "text": "Oh, that's terrible. They're all laughing. That's a win, {me}.", "pose": "laugh"}}, {"text": "(Do a Works trick with a spanner)", "flavour": "practical", "mem": "talent.trick", "reply": {"who": "ferreira", "text": "Spinning a spanner on one finger! Chief Calder's clapping. Mark the day.", "pose": "laugh"}}]}, {"who": "ferreira", "text": "Give it up for {me}, everybody!", "pose": "gesture"}]},
@@ -36291,6 +36493,8 @@ function evArrive(p, d, e) {
   const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
+  if (ev.easy && lineEasy(p, d, e)) return e.from;        // Crossing the Line: the day shift stands easy for the ceremony (slot 'Line builder')
+  if (ev.ownFor && ev.ownFor(p, d) && lineOwnUp(p, d, e)) return e.from;   // Crossing the Line: a first-timer up from a night shift's day sleep comes to their own (ER3 fix 9)
   if (!ev.afterShift) return null;
   const F = schedFrame(p, d), gp = shiftBlocks(p, d);
   const host = p.id === ev.host, need = host ? 5 : ev.min || 20, at = Math.max(e.from, F.workEnd + (host ? 15 : 2));   // a host comes even for the last few minutes (Calder works late some days), after the whole end of shift
@@ -36326,9 +36530,10 @@ function eventPlan(p, d) {
     let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
     if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
     if (ev.lead) from = ev.lead(p, d, from, e);            // set off ahead, so they're seated by the start (the Captain's Friday address, 18f)
-    const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null, meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
+    const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p), meal: ev.meal || null, ...(meet ? { meet: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    if (!meet && ev.easy && lineEasy(p, d, e)) meet = true;   // Crossing the Line's standing easy: a break in the shift (section 14's 'meet')
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}), ...(ev.seated ? { seated: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];
@@ -36472,6 +36677,7 @@ function eventsPlayer(now) {
   if (key !== EV_IN.key) EV_IN = { key, since: now };
   if (key && e.id === 'quiz' && QUIZ_PLAYED !== d && SHIP.events.joined.includes(key) && !DIALOGUE) quizStart(d, now);   // joined while another card was open: the game when it's free
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key) || TJ_WALK) return;   // not on the way past, in a walk's line (0.70.0)
+  if (e.ev.joinAt != null && m < e.ev.joinAt) return;    // joined (its thanks) no sooner than that minute (Crossing the Line: after the punch, ER3 fix 4)
   if (tradJoinable(e) && !tradDoingIt(e)) return;        // 0.70.0: one with something to do together is joined by a tap (tradJoinTap), or by doing it at one of its places
   eventJoin(e, d, now);
 }
@@ -36924,6 +37130,7 @@ function eventsTick() {
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
+  if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -37002,6 +37209,7 @@ const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as e
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
 const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 const EV_STORM_ON = EVENTS_ON;                           // the ion storm update (EV3, S1-S9; plans/event-storm-plan.md v1.2), laid over SHIP_EVENTS.ionStorm
+const EV_LINE_ON = false;                                 // Crossing the Line (EV5, L1-L5; plans/event-line-plan.md v2.2): SHIP_EVENTS.crossingLine only while on (L6 makes it EVENTS_ON)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -37219,6 +37427,88 @@ if (EV_STORM_ON) {
   S.dayDress = [{ trad: 'lap-of-the-wren', day: 3, drop: true }, { trad: 'lap-of-the-wren', day: 4, add: { at: [1230, 1275], who: [['tomas', 1]], words: 'event.ionStorm.trad.lap-of-the-wren' } },
     { trad: 'rec-talent-night', day: 3, drop: true }, { trad: 'rec-talent-night', day: 10, add: {} }];
 }
+// ---- Crossing the Line (a short event; plans/event-line-plan.md v2.2 on claude/event-plan-line, the user's answers of
+// 2026-10-21: story A "The one on watch", the ceremony in the bow lounge). Only while EV_LINE_ON (off: no such event,
+// the calendar passes over its row). Sunday Day 7, your second day off: the Wren crosses into the Veyli reach. Day 0
+// is Saturday Day 6: the crew talk about it from 08:00 (the user's line-q1 b), Vance's Mail at 18:00; Sunday 14:30 the
+// horn (the onset) and the Captain's banner, called in on her day off; 14:40-14:55 the oath in the bow lounge (the
+// meeting crossingCeremony: your answer for the first-timers, flag line.answer.<proud|watch|punch>, goes on the
+// plaque); 15:15 the resolution (Brennan's supper Mail); 19:15 the afterglow, to Monday midnight. No score: no threads,
+// no debrief, `commend: false` (eventFinish). The words are the writers' (content/banks/event-crossingLine.lines, the
+// meetings, the reactions event.crossingLine.<phase>); the functions are in the slot 'Line builder' (end of section 18)
+if (EV_LINE_ON) {
+  const w = k => evWord('event.crossingLine.' + k);
+  SHIP_EVENTS.crossingLine = {
+    title: 'Crossing the Line', days: 3, commend: false, threads: [], pause: [], keep: [],
+    phases: [{ id: 'warning', at: [0, 480] }, { id: 'onset', at: [1, 870] }, { id: 'resolution', at: [1, 915], clears: true }, { id: 'afterglow', at: [1, 1155], clears: true }],
+    address: { onset: [1, 2, 3].map(i => w('address.onset.' + i)).filter(Boolean) },
+    mail: {
+      vanceLine: { ...evBankMail('event.crossingLine.mail.warning', { subject: 'Tomorrow we cross the Line', body: 'Tomorrow at 14:30 the Wren crosses into the Veyli reach. The ceremony is in the bow lounge.' }), at: [0, 1080], from: 'Commander Teo Vance' },
+      lineSupper: { ...evBankMail('event.crossingLine.gather.lineSupper.mail', { subject: 'The Line supper', body: 'The Line supper tonight at six, in the mess.' }), at: [1, 915], from: 'Chef Auda Brennan' },
+    },
+    status: { resolution: 'Crossed the Line. The Line supper at 18:00.' },   // the writers' event.crossingLine.status.<phase> first (eventStatus): they have warning, onset and afterglow
+    // the oath (EW1's crossingCeremony): the Captain, Brennan with the punch, and two first-timers off shift that day
+    // (the cast slot 'first:2': lineFirst, evSlotCrew). The Captain's one scene that day (EV_BEATS' lineCeremony row)
+    meetings: [{ id: 'crossingCeremony', phase: 'onset', at: [1, 880], len: 15, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, script: 'crossingCeremony',
+      who: ['marrow', 'brennan', 'first:2'], notify: w('notice.ceremony') || 'Crossing the Line: the ceremony in the bow lounge at 14:30.' }],
+  };
+  EV_BEATS.push({ id: 'lineCeremony', kind: 'captain', day: 7, at: [870, 915] });   // the calendar's Day 6 + 1: 14:30-15:15, the horn to the punch
+  // L2, the crowds. The ceremony in the bow lounge (the user, 01:42), 14:30-15:15 (k 353): its own venue
+  // 'bow-lounge-line' (lineVenue: the lounge's standing tiles west of column 49, so nobody stands between the Captain
+  // and the bow glass, and four lead spots at the windows: the Captain, Brennan with the punch, the two first-timers;
+  // the cast takes them in its order, evLeadWhere), then the lounge seats, then the plaza. Everyone free comes (about 45),
+  // never Saruth (a Veyli doesn't watch another people's rite) and never the cast (they come with the meeting). The day
+  // shift stands easy for it (the user's line-q7 a): `standEasy`, everyone at a post that can wait except the bridge, the
+  // watch and the galley line (lineEasy; section 14 makes it a break in the shift, like a meeting)
+  const L = SHIP_EVENTS.crossingLine, cer = L.meetings[0];
+  cer.where.venue = 'bow-lounge-line'; cer.len = 35;   // the oath, then the punch: the Captain and Brennan stay to 15:15
+  cer.early = 25;   // the cast at the glass by the horn (PR6: 5 minutes early, the Captain set off from Deck 2 at 14:35 and reached her spot at 14:52)
+  L.moments = [{ id: 'lineCeremony', phase: 'onset', at: [1, 870], len: 45, k: 353, where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, gathering: true, easy: true,
+    who: (p, d) => p.id === 'saruth' || cer.who.includes(p.id) || lineFirstCrew(2, d, cer.who).some(q => q.id === p.id) ? 0 : 1, anim: 'talk', from: 'Captain Odile Marrow',
+    places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
+    whereFor: (p, d, opts) => lineFirst().has(p.id) ? [[3, '@bow-lounge-line-front']].concat(opts) : opts,   // the first-timers at the front (the ten spots nearest the Captain are theirs)
+    lead: lineLead,   // the crowd sets off ahead of the horn, so most are in by the oath (PR6)
+    ownFor: p => lineFirst().has(p.id), joinAt: 900,   // its thanks (the oath read, a mug of punch) at 15:00, after the punch (ER3 fix 4: it came at 14:36)   // the first-timers' own, as a birthday is its honorees': it comes before a game or a tradition at the same time (ER3 fix 3: Bakshi and Hart were at Winner Stays On)
+    name: 'Crossing the Line', ask: (c, p) => evWordAt('event.crossingLine.gather.ceremony.ask', p ? p.seed + c.day : 0) || 'The ceremony\'s at half two, in the bow lounge. Coming?', here: (c, p) => evWordAt('event.crossingLine.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
+    thanks: c => evWordAt('event.crossingLine.gather.ceremony.thanks', 0, c) || 'You squeeze into the bow lounge with the crew. Gold light comes through the bow glass.' }];   // EW2's ask and thanks (af19fbe)
+  // L3, the look: the horn at 14:30 (a felt moment, 'horn': a gold pulse, section 8b) with its one-line notice
+  // (lineStoryTick), the gold hull lights to 19:15 (8b's FEEL_MOODS.crossingLine), the ribbons and the punch bowl in the
+  // lounge for the ceremony only, the plaque by the lounge door from the afterglow (then a trace), your certificate on
+  // your shelf from 15:15 (settle: the resolution; it has no score to settle)
+  L.moments.push({ id: 'horn', phase: 'onset', at: [1, 870], where: 'shipwide', feel: ['horn'], len: 3 });
+  L.dressing = { onset: [{ id: 'lineRibbons', title: 'Crossing the Line', at: [1, 870, 915] }], afterglow: [{ id: 'linePlaque' }] };
+  L.settle = 'resolution'; L.settleTraces = ['lineCertificate']; L.traces = { smooth: ['linePlaque'], bumpy: ['linePlaque'], rough: ['linePlaque'] };
+  // L4, story A "The one on watch" (the user's line-q9; the moments are lineStoryTick's, in play): Tomas's Mail at
+  // 22:50 on Saturday unless you met him that evening (`unless`: the moment's key in e.mine)
+  { const m = evBankMail('event.crossingLine.mail.tomas', null); if (m) L.mail.tomas = { ...m, at: [0, 1370], from: 'Tomas Lind', unless: 'story:sat' }; }
+  // L5, your part (the user's line-q8 a): two small volunteer jobs on Sunday from 12:45 (`day: 1`), never scored (the
+  // event has no score and no commendation): carry the punch up from the galley (Brennan tells you one of its secrets;
+  // done, a mug of it is yours for Tomas after the oath) and hang the gold ribbons from storage. On the board and on the
+  // mess's sign-up sheet (DECK_DRESS.signupMess) 12:45-14:30, held for you to 13:45 (`hold`; 14:15 in the plan: jobsHour gives a job to the crew on the hour, so a 14:15 hold reached them at 15:00, mid-ceremony; at 13:45 the crew have it at 14:00, done before the horn: section 17's reserved
+  // and until; then the crew's, so the punch still gets there)
+  L.jobs = { warning: [
+    { id: 'linePunch', day: 1, at: 765, hold: 825, tier: 1, title: evWord('event.crossingLine.job.punch') || 'Crossing the Line: carry the punch up from the galley', bring: 'the punch bowl',
+      stops: [{ deck: 3, room: /^Galley$/, mins: 5, tag: 'pickup' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 5, tag: 'drop' }] },
+    { id: 'lineRibbons', day: 1, at: 765, hold: 825, tier: 1, title: evWord('event.crossingLine.job.ribbons') || 'Crossing the Line: hang the gold ribbons for the ceremony', bring: 'a box of gold ribbons',
+      stops: [{ deck: 5, room: /^Main storage$/, mins: 5, tag: 'pickup' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'], mins: 20, tag: 'drop' }] }] };
+  L.dressing.warning = [{ id: 'signupMess', title: 'Crossing the Line: volunteers', at: [1, 765, 870], lines: c => ['A. Brennan: the punch'].concat((SHIP.jobs || []).some(j => j.event === 'crossingLine' && j.claimedBy === 'you') ? [c.you] : []) }];
+  L.routines = { onset: [{ who: 'all', rule: 'standEasy', at: [870, 915], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] },
+    { where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true }] };   // the lounge is the ceremony's alone for its 45 minutes (section 14's evClosed lets its own crowd in); Saruth stays away
+  // the Line supper (the user's line-q4 a): the Sunday table re-dressed on Day 7 (EV_DAY_DRESS, the storm's shape), the
+  // crew's voted dish and Brennan's pudding (linePudding, section 16's menu), 18:00-19:45 (the gold ends at 19:15 all
+  // the same), in seated sittings like the storm's lantern supper (the user, 2026-10-21: no standing at meals): its own
+  // seats only, each diner through the line and sat for 30-45 minutes of it (`stay`, evStay; `seated`), everyone
+  // pulled to 1 and so Pell (his guess at the punch, ER3 fix 2; lead 24: a seated gathering is capped by its seats at
+  // once, not by the 60 meaning to go): about 83 mean to go, 59 come, at most 40 at once in a new game; its Saturday
+  // Mail left out
+  // (Vance's covers it; Brennan's comes at 15:15). The galley cooks 12 more portions. Lap of the Wren the same night:
+  // Tomas (off shift), Zeke and Pell come (pull 1)
+  L.galley = { resolution: { extra: 12 } };
+  L.dayDress = [{ trad: 'sunday-table', day: 1, set: { name: evWord('event.crossingLine.gather.lineSupper.name') || 'The Line supper', at: [1080, 1185], jitter: 0, who: [['everyone', 1], ['pell', 1]],
+    words: 'event.crossingLine.gather.lineSupper', mail: false, stay: [30, 45], min: 20, seated: true, pudding: true } },
+    { trad: 'lap-of-the-wren', day: 1, set: { who: [['tomas', 1], ['torres-zeke', 1], ['pell', 1]] } }];
+  lineVenue();
+}
 // ---- the diplomatic visit (event 2; plans/pillar3-plan.md, "The main events"): a Veyli delegation of four (GUESTS with
 // event 'diplomatic', section 9) aboard for five days. Day 0 Vance's warning; day 2 10:00 the greeting in the shuttle
 // bay; formal dinners on days 3 and 5 in the Captain's quarters; day 7 the gift exchange at 09:00 and the farewell at
@@ -37310,7 +37600,7 @@ const VEYLI_RETELL = {
 for (const [id, def] of Object.entries(SHIP_EVENTS)) for (const m of def.moments || []) if (m.gathering) EV_SHIPWIDE.push({
   id: m.id, name: m.name || 'All-clear party', k: m.k != null ? m.k : EV_SHIPWIDE.length ? 350 + EV_SHIPWIDE.length : 340, when: { ship: id, day: m.at[0] }, at: [m.at[1], m.at[1] + m.len], min: 25, hold: [], venue: m.where.venue,
   where: m.places || [{ deck: m.where.deck, room: m.where.room, types: ['lounge-seat'] }, { deck: m.where.deck, room: m.where.room, types: ['bench', 'common-room'] }],
-  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.seated ? { seated: true } : {}),   // a pull by person, a meal, ties, seats only (the storm update's lantern supper)
+  who: typeof m.who === 'function' ? m.who : () => m.who, ...(m.meal ? { meal: m.meal } : {}), ...(m.ties ? { ties: m.ties } : {}), ...(m.stay ? { stay: m.stay } : {}), ...(m.seated ? { seated: true } : {}), ...(m.easy ? { easy: true } : {}), ...(m.whereFor ? { whereFor: m.whereFor } : {}), ...(m.lead ? { lead: m.lead } : {}), ...(m.ownFor ? { ownFor: m.ownFor } : {}), ...(m.joinAt != null ? { joinAt: m.joinAt } : {}),   // a pull by person, a meal, ties, seats only (the storm update's lantern supper); standing easy and a place by person (Crossing the Line)
   anim: () => m.anim || null, ask: m.ask || 'Party in the bow lounge at seven. We earned it.', here: m.here || 'To the Wren, and to clear skies!',
   thanks: m.thanks || 'You squeeze into the bow lounge for the all-clear party. Someone hands you a cup.', from: m.from || 'Commander Teo Vance' });
 // the saved state (section 13's SAVE_EXTRA): ship.event, ship.eventLog, ship.traces
@@ -37330,6 +37620,7 @@ function eventNow(t = shipNow()) {
   if (e && SHIP_EVENTS[e.id]) spans.push({ id: e.id, startDay: e.startDay });
   if (typeof SHIP !== 'undefined' && SHIP.eventLog) for (const l of SHIP.eventLog) spans.push(l);
   if (!e) { const due = eventDueDay(); if (due) spans.push({ id: due.id, startDay: due.day }); }
+  if (EV_CAL_ON) evLaterSpans(e, spans);                 // the calendar's later events too (the Line, then the storm: a day planned ahead sees both; slot 'Line builder')
   for (const sp of spans) {
     const def = SHIP_EVENTS[sp.id]; if (!def) continue;
     const rel = t - (sp.startDay - 1) * 1440; if (rel < 0 || rel >= def.days * 1440) continue;
@@ -37442,7 +37733,7 @@ function eventDueDay() {
 }
 // move the event on to minute t: start one when due, run each phase's actions as it begins (the address, a notice),
 // and at the end score it, lay down its traces, log it and send the debrief. Returns what happened, for the checks.
-function eventAdvance(t = shipNow(), quiet) {
+function eventAdvance(t = shipNow(), quiet, depth) {
   const out = [];
   if (EV_STORM_ON) stormAllHandsTick(t);                 // the rec deck's first all-hands: the first Friday address (the storm update, S3)
   if (!SHIP.event) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) { eventStart(due.id, due.day); out.push('start ' + due.id); } }
@@ -37479,6 +37770,7 @@ function eventAdvance(t = shipNow(), quiet) {
   }
   if (def.commendAt && !e.mine['commend:at'] && t >= evBeatAt(e.startDay, def.commendAt)) eventCommend(e, def, t, quiet, out);   // the storm update: at the all-clear's end
   if (t >= end) eventFinish(e, def, t, quiet, out);
+  if (EV_CAL_ON && !SHIP.event && t >= end && (depth | 0) < 4) { const due = eventDueDay(); if (due && t >= (due.day - 1) * 1440) return out.concat(eventAdvance(t, quiet, (depth | 0) + 1)); }   // a late load or a long sleep: the next one too, if it's already due (two events in the calendar)
   return out;
 }
 // the end of a run (split out of eventAdvance, the events base F4a; Dev mode's End and keep uses it too): its band
@@ -37491,7 +37783,7 @@ function eventFinish(e, def, t, quiet, out = []) {
   SHIP.eventLog.push({ id: e.id, startDay: e.startDay, endDay: e.startDay + def.days, band, threads: { ...e.threads }, mine: { ...e.mine } });
   if (typeof mailSend === 'function' && def.debrief && def.debrief[band] && !timedDebrief) mailSend({ at: t, from: def.debrief.from || 'Commander Teo Vance', subject: def.title + ': how it went', body: def.debrief[band] + evText(def.debrief.mine || '', evCtx(e)), quiet: !!quiet });
   const mine = e.mine || {};
-  if (!def.commendAt && evCommended(mine)) {   // your part: commended (Part 2, "How outcomes are scored"); the storm update's comes at the all-clear
+  if (!def.commendAt && def.commend !== false && evCommended(mine)) {   // commend: false (Crossing the Line): never a commendation   // your part: commended (Part 2, "How outcomes are scored"); the storm update's comes at the all-clear
     SHIP.commendations.push({ event: e.id, day: Math.floor(t / 1440) + 1 }); out.push('commended');
     if (typeof mailSend === 'function') mailSend({ at: t, from: 'Captain Odile Marrow', subject: 'Commendation: ' + def.title, body: 'For your work during the ' + def.title.toLowerCase() + ', noted on your record with thanks. Chief Calder spoke well of you.', quiet: !!quiet });
   }
@@ -37535,7 +37827,7 @@ function meetingCast(m) {
   for (const w of m.who || []) {
     const mm = /^(\w+):(\d+)$/.exec(w);
     if (!mm) { const p = evPerson(w); if (p) cast[w] = p; continue; }
-    evSlotCrew(mm[1], +mm[2], d, m.who || []).forEach((p, i) => { cast['tech' + (i + 1)] = p; });
+    evSlotCrew(mm[1], +mm[2], d, m.who || []).forEach((p, i) => { cast[(mm[1] === 'first' ? 'first' : 'tech') + (i + 1)] = p; });   // the Line's first-timers are first1, first2
   }
   return cast;
 }
@@ -38059,7 +38351,7 @@ function eventRecord() {
   if (!EV_DEVICE_ON || !SHIP.eventLog.length) return [];
   const rows = SHIP.eventLog.map(l => { const def = SHIP_EVENTS[l.id] || { title: l.id }, c = SHIP.commendations.find(x => x.event === l.id);
     return { text: quizText('event.' + l.id + '.record', l.startDay, {}) || def.title + (l.endDay - 1 > l.startDay ? ', Days ' + l.startDay + '-' + (l.endDay - 1) : ', Day ' + l.startDay) + '.',
-      sub: (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });
+      sub: def.commend === false ? '' : (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });   // no score, no "came through it" (Crossing the Line)
   return [{ kind: 'text', text: 'Ship-wide events', mark: 'head' }, { kind: 'list', rows: rows.reverse() }];
 }
 // ---- end of slot: Traditions engineer ----
@@ -38076,7 +38368,7 @@ function evMeetsOn(d) {
     for (const m of def.meetings || []) {
       if (!m.where || !m.where.venue) continue;
       const at = evBeatAt(r.day, m.at) - (d - 1) * 1440; if (at < 0 || at >= 1440) continue;
-      out.push({ id: m.id, event: r.id, venue: m.where.venue, at, len: m.len || 15, who: m.who || [], anim: m.anim || null });
+      out.push({ id: m.id, event: r.id, venue: m.where.venue, at, len: m.len || 15, who: m.who || [], anim: m.anim || null, ...(m.early ? { early: m.early } : {}) });   // early: the named cast's lead (Crossing the Line's oath)
     }
   }
   return out;
@@ -38085,6 +38377,7 @@ function evMeetsOn(d) {
 // order (hash 337), never one already named, and (with the events base on) aboard that day. meetingCast fills tech1..techN from this same list, so the plan and the
 // scene agree. Pure (the roster and the rota)
 function evSlotCrew(dept, n, d, named) {
+  if (dept === 'first') return lineFirstCrew(n, d, named);   // Crossing the Line: first-timers off shift that day (slot 'Line builder')
   return schedPeople().filter(p => p.dept === dept && p.rank === 'junior' && p.shift !== 'night' && isWorkDay(p, d) && !named.includes(p.id) && (!EV_CALLIN_ON || aboard(p, d)))
     .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337)).slice(0, n);
 }
@@ -38109,8 +38402,8 @@ function eventMeetPlan(p, d, F) {
   const out = []; if (!EV_CALLIN_ON || !p) return out;
   for (const g of evMeetsOn(d)) {
     const c = evMeetCast(g, d).find(x => x.p.id === p.id), v = c && gatherVenue(g.venue); if (!v) continue;
-    const early = c.named ? 5 : 0, shift = !!(F && F.works && !F.night);
-    out.push({ at: g.at - early, dur: g.len + early, where: [[v.deck, '@gather-' + g.venue]], tag: 'ev-' + g.event + '-' + g.id, anim: g.anim,
+    const early = c.named ? g.early || 5 : EV_LINE_ON && g.early || 0, shift = !!(F && F.works && !F.night);   // a named cast member comes 5 minutes early, or the meeting's own `early`; a slot's crew the meeting's own `early` too (Crossing the Line: the two first-timer speakers reached the glass at 14:43, after the oath; lead 25)
+    out.push({ at: g.at - early, dur: g.len + early, where: (EV_LINE_ON && evLeadWhere(g, d, p, v)) || [[v.deck, '@gather-' + g.venue]], tag: 'ev-' + g.event + '-' + g.id, anim: g.anim,
       min: Math.min(g.len, 10), host: c.named, meet: shift, act: shift ? 'work' : undefined });
   }
   return out;
@@ -38266,9 +38559,12 @@ function evIsTrad(ev) { return !!ev && SHIP_TRADITIONS.includes(ev.base || ev); 
 function evDressed(ev, o) {
   const x = { ...ev, base: ev.base || ev };   // base: the tradition it's a copy of (evIsTrad; PR4's S6 fix 1)
   if (o.name) x.name = o.name; if (o.at) x.at = o.at.slice(); if (o.jitter != null) x.jitter = o.jitter;
-  if (o.who) { const pull = new Map(o.who), own = ev.who; x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : own(p, d, e); }
+  if (o.who) { const pull = new Map(o.who), own = ev.who, all = pull.get('everyone'); x.who = (p, d, e) => pull.has(p.id) ? pull.get(p.id) : all != null ? Math.max(all, own(p, d, e)) : own(p, d, e); }   // 'everyone': at least that pull (the Line supper's .85; ER3: it was read as an id and did nothing)
   if (o.words) for (const k of ['mail', 'ask', 'here', 'thanks']) if (typeof LINES !== 'undefined' && LINES[o.words + '.' + k]) x[k] = (c, p) => evWordAt(o.words + '.' + k, (p ? p.seed : 0) + (c && c.day || 0));
   if (o.mail === false) x.mail = null;
+  if (o.where) x.where = o.where;
+  if (o.stay) x.stay = o.stay.slice(); if (o.seated) x.seated = true;   // Crossing the Line: the Line supper in seated sittings (evStay), as the lantern supper
+  if (o.min != null) x.min = o.min;                     // Crossing the Line: the least time seated (the Line supper's 20: a long servery line ate into a 30-45 minute sitting, and under the tradition's 30 left, they ate standing)
   return x;
 }
 evDressMake();
@@ -38336,6 +38632,166 @@ function evDoubleExcept(p, d) {
   return x ? x.at : null;
 }
 // ---- end of slot: Storm builder ----
+// ---- slot: Line builder (section 18; EV5, Crossing the Line L1-L6, plans/event-line-plan.md v2.2). New code of this seat's goes here ----
+// the first-timers (the user's line-q5 a): everyone aboard under two years by the roster's `since` (the Wren was last in
+// the reach two years ago, on a quiet charting run: content/facts.md), never a guest. Made once, when first asked (the
+// roster's words are read with section 20's socDays), from the roster only: never R(), never saved
+let LINE_FIRST = null;
+function lineFirst() {
+  if (!LINE_FIRST) LINE_FIRST = new Set(schedPeople().filter(p => p.rank !== 'guest' && typeof p.since === 'string' && (socDays(p.since) ?? 1e9) < 730).map(p => p.id));
+  return LINE_FIRST;
+}
+// the cast slot 'first:N' on day d: N first-timers aboard and off shift that day (not a rota work day), never one
+// already named, in a fixed order (the slots' hash 337). Pure
+function lineFirstCrew(n, d, named) {
+  const F = lineFirst();
+  return schedPeople().filter(p => F.has(p.id) && !named.includes(p.id) && !isWorkDay(p, d) && aboard(p, d))
+    .sort((a, b) => schedU(a.seed, d, 337) - schedU(b.seed, d, 337)).slice(0, n);
+}
+// the calendar's events after the next due one (eventNow's spans: a day planned ahead, before the event in front of it
+// has run, sees it). From the calendar's plan only, never the running one or one already logged. With one event in
+// the calendar it adds nothing (today's storm)
+function evLaterSpans(e, spans) {
+  for (const r of evCalPlan()) if (!(e && e.id === r.id) && !spans.some(s => s.id === r.id) && !SHIP.eventLog.some(l => l.id === r.id)) spans.push({ id: r.id, startDay: r.day });
+}
+// L2: the ceremony's venue (built only while on, at load: Deck 3's places stay as they are with it off). The bow
+// lounge's standing tiles west of column 49 (the 'bow-lounge' venue's, the 9 at the windows dropped), its focus and four
+// lead spots at the bow glass facing into the room. A lead spot is also a pool of one ('@bow-lounge-line-lead-N', its
+// `event`), so a meeting's cast can be sent to it (evLeadWhere). Checked open in a new game (plans/event-line-plan.md)
+function lineVenue() {                                   // (called from the data block at load: its tables are inside it)
+  const LINE_LEADS = [[50.5, 10.5, -90], [50.5, 9.5, -90], [50.5, 11.5, -90], [50.5, 12.5, -90]];
+  const LINE_DROP = ['49,6', '49,7', '49,8', '49,13', '49,14', '50,9', '50,10', '50,11', '50,12'];
+  const v = 'bow-lounge-line', d = DECKS[3], P = d.places || (d.places = []), src = d.gathers['bow-lounge'];
+  const g = d.gathers[v] = { name: 'the bow lounge', focus: [50.5, 10.5], rooms: src.rooms, seats: src.seats.slice(), also: ['plaza'], lead: LINE_LEADS.map(l => l.slice()),
+    at: src.at.split(' ').filter(x => !LINE_DROP.includes(x)).map(x => [x, x.split(',').map(Number)]).sort((p, q) => Math.hypot(p[1][0] + .5 - 50.5, p[1][1] + .5 - 10.5) - Math.hypot(q[1][0] + .5 - 50.5, q[1][1] + .5 - 10.5) || (p[0] < q[0] ? -1 : 1)).map(x => x[0]).join(' ') };   // nearest the Captain first (the crowd fills the spots in this order: the first-timers at the front)
+  const face = (x, z) => Math.round(Math.atan2(g.focus[0] - x, g.focus[1] - z) * 180 / Math.PI);
+  g.lead.forEach(([x, z, f], i) => P.push({ id: `3-${v}-lead-${i + 1}`, type: 'event', gather: v, lead: i + 1, event: `${v}-lead-${i + 1}`, at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', room: d.map[Math.floor(z)][Math.floor(x)] }));
+  g.at.split(' ').forEach((t, i) => {
+    const [c, r] = t.split(',').map(Number), x = c + .5 + ((c * 37 + r * 11) % 7 - 3) * .04, z = r + .5 + ((c * 13 + r * 29) % 7 - 3) * .04;   // as section 4d's venues
+    P.push({ id: `3-${v}-crowd-${i + 1}`, type: 'event', ...(i < 10 ? { event: v + '-front' } : { gather: v }), at: [c, r], xy: [+x.toFixed(2), +z.toFixed(2)], face: face(x, z), pose: 'stand', room: d.map[r][c] });   // the first ten: the first-timers' own ('@bow-lounge-line-front')
+  });
+  PLACE_IDX = null; GATHER_SPOTS.delete(v);
+}
+// a meeting's cast at its venue's lead spots, in the cast's order (the Captain first), when the venue has them as pools
+// (only the Line's lounge): [[deck, '@<venue>-lead-N'], then the crowd spots], else null. Pure (the plan and the places)
+function evLeadWhere(g, d, p, v) {
+  const i = evMeetCast(g, d).findIndex(x => x.p.id === p.id), key = '@' + g.venue + '-lead-' + (i + 1);
+  return i >= 0 && (schedData().shared.get(v.deck + '|' + key) || []).length ? [[v.deck, key], [v.deck, '@gather-' + g.venue]] : null;
+}
+// standing easy (the user's line-q7 a): p, a day worker on shift through the gathering e (not the galley's rota'd
+// line, not the night shift), may leave the post for it when the event's `standEasy` rule is in force at its start and
+// doesn't leave p's department out (the bridge, the watch, the galley). Pure (the rota and the event's data)
+function lineEasy(p, d, e) {
+  if (!EV_LINE_ON || !p || p.rank === 'guest' || !p.work) return false;
+  const F = schedFrame(p, d), gp = shiftBlocks(p, d), gb = gp && gp.blocks; if (F.night || !F.works) return false;
+  if (gb ? !gb.some(([a, b]) => a < e.to && e.from < b) : F.workStart > e.from || F.workEnd < e.to) return false;   // on shift through it (a rota'd stint: one that overlaps it)
+  if (gb && p.dept === 'galley') return false;                  // the galley line stays (the supper's prep); a garden or stores stint can wait
+  const r = evRule((d - 1) * 1440 + e.from, 'standEasy', p);
+  return !!r && !(r.not || []).includes('dept:' + p.dept);
+}
+// ER3 fix 9: a first-timer on the night shift who slept through the day after last night's shift (eventFree keeps
+// them out until 15:00) is free for their own ceremony from its start, when off duty through it and not in bed by then:
+// up before the horn, the planner holds their errands and leisure for it (section 14's clear and leisureUntil; Reyes
+// woke 14:29, Yoon 14:22, Lemaire 14:00). One still asleep at the horn misses it, as before. Pure (the plan's frames)
+function lineOwnUp(p, d, e) {
+  if (!EV_LINE_ON || p.rank === 'guest' || e.from < 840) return false;
+  const F = schedFrame(p, d), P = schedFrame(p, d - 1);
+  if (!F.night || !P.works || e.from < P.workEnd || e.to > F.bed - 20) return false;
+  return !(F.works && e.to > F.workStart - 10);
+}
+// the ceremony's crowd sets off ahead of the horn (PR6: setting off at 14:30, most came in 14:43-14:52, after the oath's
+// start at 14:40), as the Fridays' friLead: the gathering's `lead`, read by eventPlan. Someone standing easy leaves the
+// post 10 minutes before the horn; anyone else plans to be there 10-20 minutes before it (k 1190) when they're free
+// then, else at the horn. Pure (the plan's frame and the event's data)
+function lineLead(p, d, at, e) {
+  if (lineEasy(p, d, e)) return at - 10;
+  const L = 10 + Math.round(10 * schedU(p.seed, d, 1190));
+  return eventFree(p, d, at - L, e.to, e.ev.wake) ? at - L : at;
+}
+// the Line supper's pudding (section 16's galleyMenu asks, for any day): on the day the Sunday table is the Line supper,
+// the next week's pudding with the voted dish. Pure (the calendar's plan); nothing while it's off, or before section 18 ran
+function linePudding(d, out) {
+  try { if (!EV_LINE_ON) return; } catch (e) { return; }
+  const x = EV_DAY_DRESS.get('sunday-table@' + d); if (!x || !x.o || !x.o.pudding) return;
+  out.pudding = MENU.pudding[(Math.floor((d - 1) / 7) + 1) % MENU.pudding.length];
+  out.note = (out.note ? out.note + '; ' : '') + 'the Line supper, with ' + out.pudding;
+}
+// standing easy on shift counts as work, the walk there and back too, as a meeting's does (section 14's dayReport reads
+// eventMeetTag): the ceremony's tags join the meetings'
+if (EV_LINE_ON) for (const t of ['ev-lineCeremony', 'ev-lineCeremony-talk']) EV_MEET_TAGS.add(t);
+// Crossing the Line in play, once a minute from eventsTick (never the crew's planner): it reads and writes the running
+// event's e.mine ('story:*', 'notice:*', saved with it) and the flags the replies set (line.promised,
+// line.answer.<proud|watch|punch>, line.secret.<kept|told>). L3: the horn's one-line notice as it sounds (14:30, a few
+// minutes' grace; a sleep passes it). L4, story A "The one on watch" (EW1/EW2's meetings lineTomasSat, lineTomasMug,
+// lineLap, lineSupperGuess, and the bank's lap.tomas.*, punch.*): Saturday from 19:00 until he's asleep, near Tomas
+// wherever he is, his moment (else his Mail at 22:50); after the oath, if you were there, a spare mug for him (or the
+// punch job's, L5): near him at his post on Deck 2 until 17:00, his moment; the Line supper: Pell's guess at the punch
+// if Brennan told you its secret (L5's job), Brennan's saved mug if you promised him one and didn't go; the Lap at
+// 20:30-21:45, walking it in the line (TJ_WALK), as its leader reaches the bow turn by the lounge door (3-lap-6), the
+// old hands give him his crossing, and Tomas's line to you after Pell's: you named the watch, you brought the mug, or neither. The moments
+// are 'moment:' scripts: never a commendation (the event has none anyway)
+// done: [key, value] set in the running Line's e.mine when the panel ends, however it ends (PR6: set as it opened, a
+// reload mid-panel lost the moment, and Saturday's also cancelled Tomas's 22:50 Mail; the storm's stormMoment the same)
+function lineMoment(id, who, add, done) {
+  const sc = MEETING_SCRIPTS[id]; if (!sc || DIALOGUE) return false;
+  const key = 'moment:' + id, L = sc.lines.slice();
+  if (add) { let i = -1; L.forEach((l, k) => { if (l.who === add.after) i = k; }); L.splice(i >= 0 ? i + 1 : L.length, 0, add.line); }   // after that speaker's last line
+  MEETING_SCRIPTS[key] = { ...sc, lines: L, onEnd: () => { delete MEETING_SCRIPTS[key]; const e = SHIP.event; if (done && e && e.id === 'crossingLine') e.mine[done[0]] = done[1]; } };
+  return dialogueShow(key, { id: key, who, at: shipNow(), where: hereWhere() });
+}
+let LINE_GOAL = null;                                    // the pointer to Tomas lineStoryTick set (false: done this load); never saved
+function lineStoryTick(now) {
+  const e = SHIP.event; if (!e || e.id !== 'crossingLine' || typeof DECK_CREW === 'undefined' || !deckDef) return;
+  const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e), P = player.obj.position, dn = deckDef.num;
+  const note = t => { if (t && typeof toast === 'function') toast('Crossing the Line', t); };
+  if (!M['notice:horn'] && now >= at(1, 870) && now < at(1, 875)) { M['notice:horn'] = 1; note(evWord('event.crossingLine.notice.horn', c)); }
+  const near = (id, r) => DECK_CREW.find(a => a.p && a.p.id === id && a.h && Math.hypot(a.x - P.x, a.z - P.z) < r) || null;
+  const say = (id, key, r = 6) => { const a = near(id, r), text = evWord(key, c); return !!(a && text && typeof bubbleSay === 'function' && bubbleSay(a.h, text, 5)); };
+  const tomas = schedPeople().find(x => x.id === 'tomas'), tw = tomas && typeof whereIs === 'function' ? whereIs(tomas, now) : null;
+  // Saturday evening: until he's asleep (his plans don't move)
+  if (!M['story:sat'] && now >= at(0, 1140) && now < at(1, 0) && tw && tw.act !== 'sleep' && near('tomas', 4)) lineMoment('lineTomasSat', ['tomas'], null, ['story:sat', 1]);
+  // the mug for the watch: yours after the oath if you were at it (L5's punch job gives one too)
+  // L5: taking the punch from the galley (the job yours), Brennan tells you one of its secrets
+  const pj = (SHIP.jobs || []).find(j => j.event === 'crossingLine' && j.eventJob === 'linePunch' && j.claimedBy === 'you' && j.status !== 'done');
+  const inGalley = (() => { try { const r = DECKS[dn].rooms[roomAt(...player.here())]; return dn === 3 && !!r && r.name === 'Galley'; } catch (x) { return false; } })();
+  if (!M['story:secret'] && pj && inGalley && now < at(1, 900)) { M['story:secret'] = 1; const t = evWord('event.crossingLine.punch.secret', c); if (t && typeof toast === 'function') toast('Chef Brennan', t); }   // her note on the bowl if she's not there
+  if (!M['story:mug'] && (M['met:crossingCeremony'] || eventJobDone('linePunch', true) || (SHIP.jobs || []).some(j => j.event === 'crossingLine' && j.eventJob === 'linePunch' && j.claimedBy === 'you' && j.workDone)) && now >= at(1, 915) && now < at(1, 1020)) { M['story:mug'] = 1; note(flag('line.promised') && evWord('event.crossingLine.notice.mug', c) || 'Brennan hands you a spare mug of punch. "For Tomas. He\'s on watch: Deck 2, the lift lobby."'); }
+  if (M['story:mug'] === 1 && dn === 2 && now >= at(1, 915) && now < at(1, 1020) && tw && tw.act === 'work' && near('tomas', 3)) lineMoment('lineTomasMug', ['tomas'], null, ['story:mug', 2]);
+  // L5b: Brennan offers the two jobs in person (the plan: on the sheet, and Brennan offers them): Sunday 10:30-13:45
+  // wherever you find her (the lounge in the morning, Winner Stays On from 12:17: she's never in the mess before the
+  // horn), before they're up at 12:45 or while one's still open and neither is yours; once (a bubble, and a toast)
+  const lj = (SHIP.jobs || []).filter(j => j.event === 'crossingLine' && /^line(Punch|Ribbons)$/.test(j.eventJob || ''));
+  if (!M['story:offer'] && (now < at(1, 765) ? !lj.length : lj.some(j => j.status === 'open' && !j.claimedBy) && !lj.some(j => j.claimedBy === 'you')) && now >= at(1, 630) && now < at(1, 825) && say('brennan', 'event.crossingLine.punch.offer', 5)) {
+    M['story:offer'] = 1; note(evWord('event.crossingLine.notice.offer', c) || 'Brennan\'s Line jobs, the punch and the ribbons: job board and mess sheet from 12:45.'); }
+  // L5b: the punch "dunking" (the plan's 14:55-15:15, a mug each): the ceremony's crowd on this deck drink from a mug
+  // (the crowd's mug pose, patch #30's 'cocoa', with MUG_ON) from the oath's end; looks only (the planner's tag is unchanged)
+  if (dn === 3 && now >= at(1, 895) && now < at(1, 915) && typeof CROWD_ANIMS !== 'undefined' && CROWD_ANIMS.has('cocoa'))
+    for (const a of DECK_CREW) if (a.settled && a.tag === 'ev-lineCeremony-talk' && a.pose === 'talk') a.pose = 'cocoa';
+  // L5b: while the mug's yours to take (15:15-17:00), the goal pointer to Tomas at his post, once a load, if no other
+  // goal is set; cleared when he has it or the time's up
+  if (M['story:mug'] === 1 && now < at(1, 1020) && LINE_GOAL === null && typeof setGoal === 'function' && typeof goalNow === 'function' && !IX_GOAL && tw && tw.act === 'work' && tw.placeId) {
+    LINE_GOAL = { deck: tw.deck || 2, place: tw.placeId, label: 'Take Tomas his mug of punch' }; setGoal(LINE_GOAL); }
+  if (LINE_GOAL && (M['story:mug'] !== 1 || now >= at(1, 1020))) { if (IX_GOAL && IX_GOAL.label === LINE_GOAL.label) clearGoal(); LINE_GOAL = false; }
+  // the Line supper, in the mess
+  let room = ''; try { const r = DECKS[dn].rooms[roomAt(...player.here())]; room = dn + '|' + (r && r.name || ''); } catch (x) { /* between rooms */ }
+  if (room === '3|Mess hall' && now >= at(1, 1085) && now < at(1, 1185)) {
+    if (!M['story:guess'] && M['story:secret'] && near('pell', 4)) lineMoment('lineSupperGuess', ['pell'], null, ['story:guess', 1]);
+    if (!M['story:saved'] && flag('line.promised') && M['story:mug'] !== 2 && say('brennan', 'event.crossingLine.punch.saved', 8)) M['story:saved'] = now;   // the minute (truthy)
+    // L5b: you missed the ceremony (the user's line-q6 a): Brennan saved you a mug, 4 ship minutes after her Tomas line
+    // if that came too (ER3 fix 5: a minute apart, the second bubble cut the first short)
+    else if (!M['story:savedYou'] && !M['met:crossingCeremony'] && !(M['story:saved'] > now - 4) && say('brennan', 'event.crossingLine.punch.savedYou', 8)) M['story:savedYou'] = 1;
+  }
+  // the Lap, walked with Tomas leading (section 18's TJ_WALK, you in the line): as he reaches its bow turn by the lounge door
+  const lw = typeof TJ_WALK !== 'undefined' && TJ_WALK && TJ_WALK.e.id === 'lap-of-the-wren' ? TJ_WALK : null, ld = lw && near(lw.lead, 30);
+  if (!M['story:lap'] && lw && ld && dn === 3 && now >= at(1, 1230) && now < at(1, 1305) && near('tomas', 30)) {
+    const sp = typeof placeById === 'function' && placeById('3-lap-6'), w = sp && cellPos(sp.at[0], sp.at[1]);
+    if (w && Math.hypot(w.x - ld.x, w.z - ld.z) < 3 && Math.hypot(w.x - P.x, w.z - P.z) < 6) {
+      const v = flag('line.answer.watch') ? 'watch' : M['story:mug'] === 2 ? 'mug' : 'none';
+      lineMoment('lineLap', ['torres-zeke', 'pell', 'tomas'], { after: 'pell', line: { who: 'tomas', to: 'you', text: x => evWord('event.crossingLine.lap.tomas.' + v, x) || '' } }, ['story:lap', v]);
+    }
+  }
+}
+// ---- end of slot: Line builder ----
 
 // =====================================================================
 // 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
@@ -50400,7 +50856,8 @@ const FEEL_CALM = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const FEEL_MOODS = {                                     // by event id: its mood (0-1) in each phase, and its colours
   ionStorm: { phases: { warning: .15, onset: .75, escalation: 1 }, a: col('#7a3cff'), b: col('#19d6c8'), light: col('#a99cff'), bg: col('#4a2488') },
 };
-const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1);
+if (EV_LINE_ON) FEEL_MOODS.crossingLine = { phases: { onset: .5, resolution: .5 }, a: col('#ffd36a'), b: col('#ffae42'), light: col('#ffe2a8'), bg: col('#4a3512') };   // Crossing the Line (EV5, L3): the hull lights gold from the horn to the end of the Line supper (the afterglow fades it), a warm gold through the windows and a slightly warmer light indoors (the user's line-q2 a)
+const FEEL_EMERG = col('#ff7a3c'), FEEL_WHITE = new THREE.Color(1, 1, 1), FEEL_GOLD = col('#ffd36a');
 const FEEL_S = { t0: -1, until: -1, kinds: [], mood: 0, moodT: 0, def: null, flick: false, dark: false, darkT: -99, check: -1, deck: undefined, first: true, gather: false, lamp: 0, lampT: 0 };
 function shipFeel(kinds, len = 4) { const s = FEEL_S; s.t0 = simNow() / 1000; s.until = s.t0 + len; s.kinds = kinds.slice(); }
 // ---- the garden view (0.27.23, with the galley's working garden, section 16): the crops on Deck 3's raised beds and
@@ -50545,6 +51002,8 @@ function shipFeelFrame(t, dt) {
     camera.position.addScaledVector(_r, a * Math.sin(se * 58)).addScaledVector(_u, a * .7 * Math.sin(se * 43 + 1)); camera.updateMatrixWorld();
   }
   if (has('jolt') && se < .9) flash = 1 - se / .9;
+  const horn = has('horn') && se < 1.8 ? Math.sin(Math.PI * se / 1.8) : 0;   // Crossing the Line's horn (no sound): one soft gold pulse, no shake; reduced motion: a soft dip
+  if (horn && !FEEL_CALM) flash = Math.max(flash, .7 * horn);
   if (has('lightsDip')) k = se < .25 ? 1 - se / .25 * .65 : se < 1.4 ? .35 : Math.min(1, .35 + (se - 1.4) * .45);
   if (has('flicker') && se > 1.4) k *= FEEL_CALM ? .9 + .1 * Math.cos(se * 2) : feelHash(Math.floor(se * 8), 3) < .3 ? .55 : 1;
   // the odd flicker while the event's 'flicker' effect is on (about one in 30 tenths of a second)
@@ -50566,6 +51025,7 @@ function shipFeelFrame(t, dt) {
     const e = emerg; hemi.color.lerp(FEEL_EMERG, .62 * e); hemi.intensity *= 1 - .58 * e; sun.color.lerp(FEEL_EMERG, .6 * e); sun.intensity *= 1 - .85 * e;
     for (const L of LAMPS) L.l.intensity *= 1 - .75 * e;
   }
+  if (horn) { if (FEEL_CALM) k *= 1 - .15 * horn; else { hemi.color.lerp(FEEL_GOLD, .35 * horn); sun.color.lerp(FEEL_GOLD, .3 * horn); hemi.intensity *= 1 + .25 * horn; } }
   if (k < 1) { hemi.intensity *= k; sun.intensity *= k; for (const L of LAMPS) L.l.intensity *= k; }
 }
 

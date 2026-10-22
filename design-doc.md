@@ -632,11 +632,12 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
 
 **Scope and calendar (the user, 2026-10-20; plans/events-plan.html v3).** Only the events up to the end of the career (the promotions, ending with "Calder's question" on Day 26) are built. **Every later event is parked**, not deleted: it stays in the table below and in `plans/pillar3-plan.md`, in case the game grows. Events come by the calendar, not by your rank, with small parts that depend on rank. The fixed days for a new game:
 - **Sunday Day 7: Crossing the Line**, a new one-day short event and the first chronologically. It's the user's "one more short one". It's on Sunday so that the player keeps Saturday as a completely free day. The Wren crosses into the Veyli reach.
-  - 14:30: the horn and gold hull lights, then the Captain's short address.
-  - 14:30-15:15: the ceremony for first-timers on the plaza (you included).
-  - 18:00-19:15: the Line supper, which takes the Sunday table's place in the mess.
-  - Afterwards: a certificate and a plaque.
+  - 14:30: the horn (a gold pulse; the game has no sound) and gold hull lights, then the Captain's short address.
+  - 14:30-15:15: the ceremony for first-timers in the bow lounge (you included), the oath at 14:40, then Brennan's punch.
+  - 18:00-19:45: the Line supper, which takes the Sunday table's place in the mess (seated sittings, like the lantern supper; the gold fades at 19:15 all the same).
+  - Afterwards: your certificate on your shelf, and a plaque with your answer by the bow lounge door.
   - Saturday Day 6 at 17:00 is the fallback.
+  - The details are below ("Crossing the Line's answers").
 - **Days 11-15:** the ion storm, one day later than built, with a shorter afterglow.
   - Thursday 11: the warning, and Calder's briefing at 14:00, after the first team job and the tea break.
   - Friday 12, 14:00: the front.
@@ -658,9 +659,18 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
-**Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Other gatherings (the party) still use standing places. (Whether Crossing the Line's supper follows the same rule is an open question.)
+**Crowds:** a standing crowd's limit is set by performance tests, not a fixed 60 (the user, 2026-10-21: "60 was just a guess on performance. We can go higher. Just need to test for performance."). Measured at phone and TriFold sizes (the Line ceremony with up to 149 people on Deck 3): draw calls stay flat because the crowd is drawn 12 people to a call, and the cost that grows is triangles, about 4,000 a person. The limit is now 80 meaning to go (bigevents_check's `CROWD`), which is about 60 in the room and about as heavy as the busiest scene already in the game (Sunday dinner). It goes higher only after measuring again, and after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Crossing the Line's supper follows the same rule (the user, 2026-10-21, via lead 24): seated sittings with staggered arrival. A seated gathering's cap is its seats at once, not the 60 meaning to go (lead 24). Other gatherings (the party, the Line ceremony) still use standing places.
 
 **The storm, as decided (the user, 2026-10-20).** Your prep jobs and help move its threads: fitting the ballasts shortens the blackouts, taking the batteries up keeps the bridge fed, and a call-booth rota shortens the queue. Left alone, the storm comes out bumpy; with good help, smooth. The rec deck's first all-hands gets its own date, so it no longer rides on the storm. The rec deck closes from the front to the all-clear.
+
+**Crossing the Line's answers (the user, 2026-10-21, 01:30-02:52 UTC via lead 22; `plans/event-line-plan.md` v2.2 on claude/event-plan-line; built in the Line update, claude/line-update):**
+- **The story is A, "The one on watch".** Tomas, your bunkmate, is on watch on Deck 2 through the whole crossing and misses his own Line. On Saturday evening he tells you (or Mails you at 22:50 if you don't meet him). After the oath you can carry him a mug of punch at his post. On Lap of the Wren that night the old hands stop at the bow turn by the lounge door and give him his crossing ("From today, this reach knows your name, Lind"), and what he says to you depends on your day.
+- **Your answer goes on the plaque.** At the oath the Captain asks who answers for the first-timers: "We came a long way. We're glad we did.", "We crossed together, all of us. Even the ones on watch." or "Is this the part with the punch?". If you miss it, a first-timer's plain line goes up instead.
+- **The ceremony is in the bow lounge** (01:42), the Captain at the bow glass with the stars behind her, Brennan with the punch bowl, the two first-timer speakers beside them and the first-timers at the front of the crowd. About 45 come (everyone free, and the day shift standing easy), setting off ahead of the horn so most are in by the oath at 14:40. The ceremony is the first-timers' own, as a birthday is its honourees': an off-duty first-timer comes to it before a game or another tradition at the same time. A first-timer on the night shift who is up from their day's sleep by the horn comes too, their errands and free time waiting for it (ER3's fix 9, 2026-10-21: 17 of the 22 first-timers are there; the rest are on duty or still asleep). Envoy Saruth stays away by courtesy, and the lounge is the ceremony's alone for its 45 minutes.
+- **q1 (b):** the crew talk about the Line from Saturday 08:00; Vance's Mail still comes at 18:00.
+- **q2-q8 (all a):** a warm gold in the windows and slightly warmer light indoors until the supper ends; the horn as a gold pulse with a one-line notice; the Sunday table re-dressed as the Line supper (the crew's voted dish and Brennan's pudding; seated sittings with staggered arrival like the lantern supper, nobody standing with a tray: the user, 2026-10-21; whoever the servery line keeps waiting still gets a seat, for at least 20 minutes; 18:00-19:45 with 30-45 minute sittings, everyone pulled to it: about 59 come, at most 40 at once, Pell among them. Lead 24, 2026-10-21: a seated gathering is capped by its seats at once (and draw calls), not by the 60 meaning to go, which was for standing crowds; about 83 mean to go); first-timers are everyone aboard under two years (the Wren was last in the reach two years ago, on a quiet charting run); if you miss the ceremony you still crossed (the gist by Mail, the certificate anyway); the day shift stands easy 14:30-15:15 except the bridge, the watch and the galley line; two small volunteer jobs on Sunday from 12:45 (carry the punch, hang the ribbons), held for you until 13:45 (the plan said 14:15; moved by lead 24, 2026-10-21, because the crew take jobs on the hour, so a 14:15 hold reached them at 15:00, mid-ceremony; at 13:45 the crew have them at 14:00 and finish before the horn).
+- **q10 (A), why it matters: "guests in someone else's sky".** Past the Line the Concord's charts are thin, every star has a Veyli name, and help is a long way off, so the old oath is a promise to each other. About 14 lines carry it through the week (content/facts.md, "What the Line means").
+- **No score:** a short event can say `commend: false`. The Line has no threads, no debrief and never a commendation, and its Record line is plain ("Crossed the Line into the Veyli reach, Day 7.").
 
 **The storm update's eight answers (the user, 2026-10-21 02:29 UTC, each the recommended option; `plans/event-storm-plan.md` v1.2 on claude/event-plan-storm):**
 - **The story is A, "Sixty by lamplight".** Brennan is off on Friday and Saturday, so Lukas Dlamini runs her galley through the storm and the lantern supper is his. The surge kills four of his six rings. Your one choice: fix the range yourself, carry his question to Brennan, or tell him two rings is plenty. Brennan eats at the supper, and what she says depends on your choice.
@@ -686,7 +696,7 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 
 | Order | Event | Kind | In short |
 | --- | --- | --- | --- |
-| — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A plaza ceremony for first-timers and a supper in the mess. |
+| — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A ceremony for first-timers in the bow lounge and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
 | — | Comet viewing | Short, Day 16 | One gentle evening at the observatory and the bow lounge windows. |
 | 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
@@ -841,7 +851,6 @@ Done so far:
 - Should the player customise or shape their character at the start?
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
-- Crossing the Line's supper (Day 7, the mess) is built (on claude/line-update, behind its switch) with those who don't get a seat eating standing with a tray at the mess's standing spots (`lineStandTray`). Should it sit down in sittings too, like the storm's lantern supper since 2026-10-21?
 
 **The decks:**
 
@@ -849,10 +858,12 @@ Done so far:
 
 **Answered:**
 
+- Crossing the Line's supper (the user, 2026-10-21, via lead 24): seated sittings with staggered arrival, like the storm's lantern supper; no standing places and no trays held standing (`lineStandTray` taken out).
+
 - Ship-wide events, v3.1 (the user, 2026-10-20 12:25):
   - The one extra short event is Crossing the Line, on Sunday Day 7, so Saturday stays free.
   - The cast is called in on their day off, with lines about it.
-  - Crowds up to about 60.
+  - Crowds up to about 60 (since 2026-10-21: set by performance tests, now 80 meaning to go; see "Ship-wide events").
   - Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15.
   - The commendation comes at the all-clear.
   - See "Ship-wide events".
