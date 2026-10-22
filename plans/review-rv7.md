@@ -149,3 +149,25 @@ when the goal names an item, i.e. the board). With it the week collapses:
 A floor tap at the clock's or the board's pin opens neither. Fix: keep the real tap for a job's own stop (a chore's
 stop, a machine's spot) and tap the clock and the board by name, or tap the thing first and the floor only when nothing
 started (78fef90's order already does that).
+
+## 5. FX3 claude/p5-fix3 410954b, c3d246f, cc61962 (fixes 16-18): PASS
+
+16 (410954b): `choreRayTap` back to fix 14's ray test (FB1's choreThingTap on claude/fe-cartdock handles haul stops).
+17 (c3d246f): on an inspection morning, 06:00-06:30, a direct arrow through your berth: wardrobe (fresh uniform), bunk
+(make the bed), locker, then "Inspection at 06:30: your berth" if you've left it; never over another arrow; off with
+GUIDE_ON (the queue's F2 is AC2's). 18 (cc61962): with your job on the climbing holds, a tap on the Climbing wall in
+its room starts the job (`JOB_THING`), not a climb; it ends in the same `actStart('job', ...)` as the machine path.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 3b7b13db -> 410954b, alone | ALL IDENTICAL |
+| cadet_test 440730f -> cc61962, alone | ALL IDENTICAL |
+| mech_check fx3 on 440730f | FAILED on the new inspection-arrows line only |
+| mech_check fx3 on cc61962 | MECH CHECK OK |
+| interactions_check on c3d246f | FAILED on the new climbing-wall line only (a climb started) |
+| interactions_check on cc61962 | OK |
+| Planted: over another arrow; steps out of order | both caught |
+| Planted: the arrow also with GUIDE_ON (no stepping aside) | not caught (one line worth adding) |
+
+Note: with the arrows queue on, nobody shows the inspection arrows until AC2 wires `inspectGoal` into the queue (F2).
+The earlier optional line (a non-machine thing on the pin's line keeps its own tap) is still optional.
