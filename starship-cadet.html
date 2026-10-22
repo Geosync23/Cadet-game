@@ -15318,6 +15318,7 @@ function clockTrkItem() {                                // section 15b's Tracke
 function clockRmPoint(want) {                            // the clock-out arrow, never over someone else's (clocking in: section 15b's own
   // job-arrow fallback, FR4's ixWorkStep for note 9, points to the time clock by itself until you've clocked in, so nothing here)
   if (want !== 'out' || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || typeof introOn === 'function' && introOn() && SHIP.time.day === 1) return;   // training day: the intro's own arrows
+  if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) return;   // the arrow queue on: its clock-out entry (15b, piece D's S7) points, under the rules
   if (!IX_GOAL || /^clock:/.test(IX_GOAL.trk || '')) setGoal(clockRmGoal(want));
 }
 function clockRmSay(want, now) {                         // a Works crew member near you says so (once a day each way)
@@ -15907,7 +15908,7 @@ function ixWorkStep() {
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || m < CAREER.clockIn || m >= dayShiftEnd(d)) return null;
   if (!careerClockedIn(d)) return { deck: 5, place: '5-timeclock-1', label: 'Clock in at the time clock' };
-  return typeof openJobs === 'function' && openJobs('you').length ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;
+  return typeof openJobs === 'function' && (GUIDE_ON ? guideTakeable() : openJobs('you')).length ? { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the job board' } : null;   // the queue on: only a job with a Take it (piece D's S6: an empty board gets no arrow)
 }
 // where a goal is on this deck, in the world: a place, a tile, or the middle of a room (by key or name)
 function ixGoalWorld(g) {
@@ -16211,7 +16212,7 @@ function guidePick() {                                   // the entry that may s
   const now = Math.floor(shipNow()), key = now + '|' + GUIDE.rev + '|' + (SHIP.player.track === null ? 0 : 1);
   if (key === GUIDE.key) return GUIDE.pick;
   const live = guideLive(now).filter(e => SHIP.player.track !== null || e.level <= 2);
-  GUIDE.key = key; GUIDE.pick = live[0] || null;
+  GUIDE.key = key; GUIDE.live = live; GUIDE.pick = live[0] || null;
   return GUIDE.pick;
 }
 function guideGoal(jobGoal) {                            // goalNow's: the queue's goal, or null to leave it to IX_GOAL and the job
@@ -16221,9 +16222,15 @@ function guideGoal(jobGoal) {                            // goalNow's: the queue
   let fin = false; try { fin = typeof e.done === 'function' && !!e.done(); } catch (err) { fin = true; }   // done since this minute's pick (RV2): gone at once
   if (fin) { guideDrop(e.id); e = guidePick(); if (!e) { GUIDE.shown = null; return null; } }
   if (IX_GOAL && e.level > 1) { GUIDE.shown = null; GUIDE.covered = e.id; return null; }   // a direct goal (not yet in the queue, or your own choice) stays in charge
-  if (e.level >= 5 && jobGoal) { GUIDE.shown = null; return null; }   // your body and your own choices after your job's next step
-  let g = null; try { g = e.goal(); } catch (err) { g = null; }
-  if (!g || !g.deck) { GUIDE.shown = null; return null; }   // nothing to show now (e.g. T3 while you hold another job): not shown
+  let g = null;
+  for (const x of GUIDE.live.slice(GUIDE.live.indexOf(e) < 0 ? 0 : GUIDE.live.indexOf(e))) {   // piece D (AC2, RV6's T3 note): an entry with nothing to show now (T3 while you hold another job) gives way to the next live one
+    if (x !== e && (IX_GOAL && x.level > 1 || !GUIDE.list.includes(x))) break;
+    if (x.level >= 5 && jobGoal) break;                  // your body and your own choices after your job's next step
+    if (x !== e) { let f = false; try { f = typeof x.done === 'function' && !!x.done(); } catch (err) { f = true; } if (f) continue; }
+    try { g = x.goal(); } catch (err) { g = null; }
+    if (g && g.deck) { e = x; break; } g = null;
+  }
+  if (!g) { GUIDE.shown = null; return null; }           // nothing to show now: not shown
   GUIDE.shown = e.id;
   if (!GUIDE.counted.has(e.id)) {                        // shown for the first time while asked: count it, and its tip
     GUIDE.counted.add(e.id);
@@ -16259,7 +16266,8 @@ function guideToast(t, x, o) {
 function guideTick() {
   if (!GUIDE_ON) { GUIDE.loop = false; GUIDE.tq.length = 0; return; }
   requestAnimationFrame(guideTick);
-  { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned) { GUIDE.trainWarned = true; console.warn('guideTrain:', e); } } } }   // once a ship minute; a break is said once (RV6)
+  { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned) { GUIDE.trainWarned = true; console.warn('guideTrain:', e); } }
+    try { guideShift(); } catch (e) { if (!GUIDE.shiftWarned) { GUIDE.shiftWarned = true; console.warn('guideShift:', e); } } } }   // once a ship minute; a break is said once (RV6)
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
 }
 function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
@@ -16297,8 +16305,70 @@ function guideTrain() {
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
   } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
     guideAsk({ id: 'train:' + c.id + ':do', level: 3, once: true, owner: '24 core (read)', until: now + 480,
-      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() }; },
+      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() }; },   // at the shift's end it gives way to clock out (piece D)
       done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
+  }
+}
+// the shift chain (the plan's S1-S9, piece D; AC2), asked once a ship minute from guideTick, level 4 (always while
+// tracking is on, no `once`): S2 clock in from 08:00 until you have; S3 take a job while you're clocked in with none and
+// the board has one you can take (a held training job first); S4-S5 are your job's own arrow (ixJobGoal); S6 an empty
+// board is said once an hour, no arrow; S7 clock out from the shift's end (17:00, 15:30 on a short Friday) until you
+// have or an hour later, over a job still in hand (T3 gives way then). Each ends when it's done or its time has passed.
+// With the panel pointer on (POINT_ON): Clock in / Take it / Turn it in / Clock out the first three times; S8 the Works
+// app's Work log after a turn-in, once; S9 a short toast the first time each reputation word is reached, and the Works
+// app's Training tab, once. Labels are stand-ins until the writer's keys.
+const GUIDE_SHIFT = { empty: -1, logN: -1, band: null };
+function guideShiftOver() {                              // clocked in, not out, past the end of today's shift
+  try { const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+    return playerShiftOn(d) && m >= dayShiftEnd(d) && careerClockedIn(d) && !careerClockedOut(d); } catch (e) { return false; }
+}
+function guideTakeable() {                               // the board's jobs with a Take it for you (ixBoard's rule), a held one first
+  let L = []; try { L = typeof openJobs === 'function' ? openJobs('you') : []; } catch (e) { L = []; }
+  L = L.filter(o => { const j = (SHIP.jobs || []).find(x => x.id === o.id); return !!j && (!!j.machine || j.kind === 'restock' || j.kind === 'chore' && typeof jobStepDone === 'function'); });
+  return L.filter(o => o.asked).concat(L.filter(o => !o.asked));
+}
+const guideClock = label => ({ deck: 5, place: '5-timeclock-1', label });
+function guideWorksTab(tab, label) {                     // a device pointer: Device, the Works app, its tab
+  return [...pointToApp('works', 'Your Works app'), { el: () => DEV.open && DEV.app === 'works' && typeof buttonFor === 'function' ? buttonFor({ app: 'works', do: 'tab', arg: tab }) : null, label }];
+}
+function guideShiftWords(now, P) {                       // S8 and S9
+  const W = SHIP.works; if (!W) return;
+  const n = Array.isArray(W.log) ? W.log.length : 0, tabDone = tab => () => DEV.open && DEV.app === 'works' && WORKS_TAB === tab;
+  if (P && GUIDE_SHIFT.logN >= 0 && n > GUIDE_SHIFT.logN) pointAsk({ id: 'p:works:log', once: 1, path: guideWorksTab('log', 'Your work is logged here'), until: now + 120, done: tabDone('log') });
+  GUIDE_SHIFT.logN = n;
+  const b = typeof worksBand === 'function' ? worksBand() : null; if (!b || b === GUIDE_SHIFT.band) return;
+  const k = 'rep:' + b;
+  if (GUIDE_SHIFT.band !== null && b !== 'new' && !SHIP.guide.seen[k]) {   // a new word since we last looked (not the one a game loads with)
+    toast(worksText('works.app.title', 'Works'), 'Works reputation: ' + worksBandWord());
+    if (P) pointAsk({ id: 'p:works:training', once: 1, path: guideWorksTab('training', 'Your reputation is here'), until: now + 120, done: tabDone('training') });
+  }
+  if (b !== 'new') SHIP.guide.seen[k] = 1; GUIDE_SHIFT.band = b;
+}
+function guideShift() {
+  if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return;
+  const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, base = (d - 1) * 1440, P = POINT_ON && typeof pointAsk === 'function';
+  guideShiftWords(now, P);
+  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || SHIP.career && SHIP.career.end) return;   // training day: the intro's own arrows
+  const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
+  if (!inn && m >= CAREER.clockIn && m < E) {            // S2
+    guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
+    if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
+  }
+  if (!inn || out) return;
+  let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
+  if (m < E) {                                           // S3, S6
+    guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the board' }; } });
+    const L = mine ? [] : guideTakeable();
+    const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
+    if (P && L.length) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
+    if (!mine && !L.length && SHIP.player.track !== null && GUIDE_SHIFT.empty !== Math.floor(now / 60)) { GUIDE_SHIFT.empty = Math.floor(now / 60); toast('Job board', 'Board\'s empty for now. New jobs come on the hour.'); }
+  }
+  if (P && mine && mine.workDone) pointAsk({ id: 'p:board:turnin', once: 3, path: pointBoard(mine.id, 'Turn it in'), until: now + 240, done: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return !j || j.id !== mine.id; } });   // S5
+  const T = Math.min(E + 60, typeof friAutoOut === 'function' ? friAutoOut(d) : E + 60);
+  if (m < T) {                                           // S7
+    guideAsk({ id: 'shift:out:' + d, level: 4, owner, from: base + E, until: base + T, goal: () => guideClock('Shift over: clock out'), done: () => careerClockedOut(d) });
+    if (P && m >= E) pointAsk({ id: 'p:clock:out', once: 3, path: pointClock('out', 'Clock out'), until: base + T, done: () => careerClockedOut(d) });
   }
 }
 if (GUIDE_ON) guideStart();

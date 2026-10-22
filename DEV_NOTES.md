@@ -895,6 +895,14 @@ Saved under the save's top-level `guide` key, only while on. Test: `python3 arro
 The training arrows (T1 meet from 15 minutes before, T2 follow the teacher while they work, T3 your turn at the board) are
 asked by `guideTrain()` from the queue's own frame loop, read-only from `SHIP.works.cur`. `arrows_check.py BUILD.html week guide`
 plays the week with the queue on.
+The shift chain (piece D, AC2: the plan's S1-S9) is asked by `guideShift()` from the same minute tick: level-4 entries
+`shift:in:<day>` (08:00 until clocked in), `shift:job:<day>` (clocked in, no job, a job with a Take it on the board:
+`guideTakeable()`), `shift:out:<day>` (from the shift's end, `dayShiftEnd`, for an hour, over a job still in hand); your
+job's steps and "Turn it in" stay the job's own arrow; an empty board is said once an hour, no arrow. With `POINT_ON`
+too: panel pointers on Clock in, Take it, Turn it in, Clock out (three times each), the Works app's Work log after a
+turn-in and its Training tab when your reputation reaches a new word (once each, with a toast for the word).
+`guideGoal` passes over an entry with nothing to show now (T3 while you hold another job) to the next live one; T3
+gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUILD.html` (about 1 minute).
 
 ## Hook register
 
