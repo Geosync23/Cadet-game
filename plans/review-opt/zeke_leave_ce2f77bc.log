@@ -1,0 +1,11 @@
+15. Near him but not at the spot: the bunk talk and the dinner chat still move on
+  bunk, you at [12, 4]: 20 ship minutes later step toMess, missed ['bunk', 'stow'], device in person True, Zeke at [10, 4]
+  table, you at [33, 3]: 13 ship minutes later step chief, missed ['table'], device in person True, Zeke at [29, 1]
+14. Leaving Bunk 1 early: the device and the walk on still come
+  stay: 9 ship minutes later step toMess, device True (in person: True), bag in hands False, you on Deck 4, Zeke at [10, 5] (Junior corridor)
+  out: 8 ship minutes later step toMess, device True (in person: True), bag in hands False, you on Deck 4, Zeke at [10, 5] (Junior corridor)
+  nobag: 6 ship minutes later step toMess, device True (in person: True), bag in hands False, you on Deck 4, Zeke at [10, 5] (Junior corridor)
+  deck: 14 ship minutes later step toMess, device False (in person: False), bag in hands False, you on Deck 3, Zeke at [19, 10] (None)
+  reload: 1 ship minutes later step toMess, device True (in person: True), bag in hands False, you on Deck 4, Zeke at [20, 8] (Main lift)
+OK
+EXIT 0
