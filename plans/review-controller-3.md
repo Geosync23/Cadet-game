@@ -36,5 +36,26 @@ Findings (for CTT2; none makes a part pass something broken today, but each can 
 - C5 'calls', 'touch' and 'idle' compare pictures with a 1-level allowance; fine, but say in the note they must run
   with no other browser (as cadet_test).
 
-### Runs
-(in progress)
+- C6 part_crowded prints the bottom line read in the same moment the check sets PAD_PICK.sel, before a frame has
+  redrawn it, so its message can name the old choice ("A on 'Talk to Olu Farouk' (place:3-longtable-2...)"). The
+  test itself is right (it judges by the chat card); read the line after one frame for the message.
+- C7 Seen while running: the ring offered "Talk to Olu Farouk" with its screen point on Emeka Halloran (crowded mess).
+  A re-finds the person when pressed, so this is likely fine, but nothing tests it: a pick case "Talk to X" whose point
+  is on Y should check A talks to X. (Question for CP1, not a check bug.)
+
+### Runs (each controller_check in its own CADET_WORK, at most two at once; the pixel parts with a 1-level allowance)
+| Build | Parts | Clean | Planted faults |
+|---|---|---|---|
+| 0.90.2 (1ec1612) | walk | OK | 10/10 caught (CTT's 6 + PR9 c1, c2, c3) |
+| 0.90.2 | touch | OK | 3/3 (incl. PR9 c4) |
+| 0.90.2 | pick | FAIL only on the two known findings (Wardrobe starts on "Bed"; the lift never named) | 7/7 (PR9 c5, c7; RV2 t3_noop_crew, t3_noface; 3 of CTT's) |
+| 0.90.2 | odd | OK | 2/2 |
+| P2 67df90a (CTL_BUILT=games) | games | OK (Tiles 9 moves, Done; Lightdisc how-to, stick, B) | not run here (CP2 moved to 5b4d9f0; CTT2 reports 11/11 on it with 1855bae) |
+| 0.90.4 (95b6129) | pick | FAIL on the same two findings | - |
+| CP1 pickfix 8d68ad5 | pick | OK (Wardrobe right, the lift named, A = tap for crew, item, sealed door, lift) | 7/7 |
+RV2's t3_noface and PR9's c7, missed before, are now caught on both 0.90.2 and the fix.
+
+### Verdict on controller_check (109c0b9 parts run; 548ede7/3b1cade/1855bae read as diffs): PASS WITH FIXES
+None of C1-C7 lets a broken build through today. Fixes for CTT2: C1 (frame-for-frame pick), C2 (not-proven cases as
+failures), C3 (faults for CT1's old parts), C4 (CP2's real-time wait), C6 (message). Not yet run by anyone: day, the
+reach faults, the full reach sweep (about 2 h alone).
