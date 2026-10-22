@@ -262,3 +262,8 @@ The pauseSet hook (section 15): fine (above). Fixes for CP3:
 4. padPauseLine finds the card's line by position: give the line an id in pauseSet's markup (same one-line hook).
 5. Check gap: CP3's touch part can't see toasts (the quiet style hides #toast), so 1 and 2 pass it; a marks case for
    "first press B" would catch 1.
+
+## 12:16 lead 27: a third reviewer, RV5 (session_01DdhmKNwjve4tpJ1zq6ozyv), takes CTT2's controller_check reviews
+(5aaa680 vs the turn-3 mutants included; my run of it stopped before it ran), CP1's facing/lift fixes, and the combined
+claude/controller checks. Handed to RV5: these notes, mutants.py, the probes, the gotchas. I re-check CP3's and CP5's
+five fixes each when they land; otherwise standing by.
