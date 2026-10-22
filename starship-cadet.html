@@ -15298,7 +15298,7 @@ Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job'
 const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
 // a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
 // board job's (it's only on for a few minutes); none once its work is done (p5-fix2: myJob leaves side jobs out, so the drill's taps did nothing)
-const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone) : [];
+const ixSides = () => typeof mySideJobs === 'function' && typeof jobStops === 'function' ? mySideJobs().filter(j => typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind] && !j.machine && !j.workDone && !(j.found > shipNow())) : [];   // only once it's announced (the drill: 14:50, AR2's A1)
 const ixChores = () => [...ixSides(), ixChore()].filter(Boolean);
 function ixNextStop(j) { const st = jobStops(j), k = st.findIndex(x => !x.done); return k < 0 ? null : { k, s: st[k] }; }
 // first tips (Pillar 3, C13: 15b says when, the device draws them): tipShow(id, text) shows each once, when it's there

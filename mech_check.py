@@ -222,9 +222,12 @@ M3D_TAPS = r"""(() => {
   MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
   const run = (from, to) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
   setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.tr.m1 = 2; W.use.m1 = 1; W.use.m4 = 1; W.op[1] = ['m1'];
-  run(2 * 1440 + 360, 2 * 1440 + 892); if (deckDef.num !== 5) goToDeck(5);
+  run(2 * 1440 + 360, 2 * 1440 + 860); if (deckDef.num !== 5) goToDeck(5);
+  const it = ITEMS.filter(i => i.t === 'Fire extinguisher').map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })[0], gl = nearestOpen(it[1].x, it[1].z, player);   // 14:20, before Calder's call: a tap only reads it (AR2's A1)
+  player.obj.position.copy(cellPos(...gl)); player.stop(); playerTap(it[0], it[1].clone(), it[1].clone()); const early = [ACT && ACT.kind, (drillJobOf(3).stepsDone || []).length]; if (ACT) actEnd(true);
+  run(2 * 1440 + 861, 2 * 1440 + 892);
   const e = DEV_WEEK[2].find(x => x.at === 900);
-  return [!!drillJobOf(3), IX_GOAL && IX_GOAL.label, e && e.where];
+  return [!!drillJobOf(3), IX_GOAL && IX_GOAL.label, e && e.where, early];
 })()"""
 M3D_TAP = r"""(({ title, place }) => {
   if (place) { const s = placeSpot(place), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return [jobSpotTap(new THREE.Vector3(s.x, 0, s.z)), ACT && ACT.kind]; }
@@ -250,6 +253,7 @@ def m3d_taps(g):
     end = g.ev("(() => { const j = drillJobOf(3); return [j.status, j.doneBy, SHIP.works.tr.m3d !== undefined, IX_GOAL ? IX_GOAL.label : null, simNotes('drill', 2880).map(n => n.you)]; })()")
     print('  24c drill by taps:', json.dumps(seen), json.dumps(end))
     check(a[0] and a[2] and 'Works bay' in a[2], f"m3d taps: the Calendar's drill place is the Works bay ({a[2]})")
+    check(a[3] == [None, 0], f"m3d taps: a tap on the extinguisher at 14:20, before the call, starts nothing ({a[3]})")
     check([x[0][0] for x in seen[1:]] == [True, True, True], f"m3d taps: each tap starts the stop ({[x[0] for x in seen[1:]]})")
     check([x[1][0] for x in seen[1:]] == [[0], [0, 1], [0, 1, 2]], f"m3d taps: each stop done in turn ({[x[1][0] for x in seen[1:]]})")
     check([x[1][1] for x in seen[1:]] == ['extinguisher', 'extinguisher', None], f"m3d taps: the extinguisher in your hand till it's back ({[x[1][1] for x in seen[1:]]})")
