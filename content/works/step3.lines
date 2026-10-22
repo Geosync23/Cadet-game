@@ -89,7 +89,12 @@
 
 // ---- the turn-in (C2, U)
 == works.turnin.rep
-- Works reputation up
+- Works team's standing up
+// FX3: your own reputation's chip (the department's above has its own name, so the two never read the same)
+== works.turnin.you
+- Your reputation up
+== works.turnin.dept
+- {dept} team's standing up
 == works.turnin.meter
 - +{n} {system}
 == works.turnin.repN

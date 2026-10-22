@@ -431,6 +431,32 @@ with sync_playwright() as pw:
         check(br['invited'] and br['youOpen'] and br['saved'] is True, 'invited: SHIP.bridgeInvited follows bridge.invited, the bridge opens, the save keeps it')
         check(br['insideOut'], 'never shut in: already on the bridge, you can walk out')
 
+    # the Record's "What's next" before the test job (FX3, AR1's play of 0.64.15): with Making it safe done it said "Calder
+    # has a test job for you" though no test was set and you weren't "Relied on"; and a junior read "Junior Technician · Junior Officer"
+    rn = ev(r"""(() => { const was = SHIP.works; SHIP.works = null; setShipNow(9 * 1440 + 600); const W = worksInit(), out = {};
+      for (const r of CAREER_LADDER) if (r.id !== 't2' && r.tier === 1 && WORK_MECH[r.id]) { W.tr[r.id] = 1; (W.op[1] = W.op[1] || []).push(r.id); }
+      W.xp = 10; out.low = worksNext(); out.head = worksRecordHead().text;
+      W.xp = 999; out.ready = worksNext(); W.test = { tier: 2, day: SHIP.time.day + 1, tries: 0, passed: false }; out.set = worksNext();
+      W.rank = 'officer'; W.tier = 2; out.officer = worksRecordHead().text; SHIP.works = was; return out; })()""")
+    print('  what\'s next before the test:', rn)
+    check('test job for you' not in rn['low'] and 'rely' in rn['low'], f"not Relied on yet: say so, not \"a test job for you\" ({rn['low']})")
+    check('test job for you' not in rn['ready'] and 'tomorrow' in rn['set'], f"ready, then set for tomorrow: the real state ({rn['ready']} / {rn['set']})")
+    check('Junior Technician · Junior Officer' not in rn['head'] and rn['head'].startswith('Junior Technician.') and rn['officer'].startswith('Technician · Officer.'), f"the Record's title ({rn['head'][:40]} / {rn['officer'][:40]})")
+
+    # your reputation shown changing (FX3, AR1): its word changing is said; a missed shift says what it cost; the turn-in
+    # card's chips name yours and the Works team's differently; the Record says "Your reputation"
+    rp = ev(r"""(() => { const was = SHIP.works; SHIP.works = null; setShipNow(9 * 1440 + 600); const W = worksInit(), out = {}, tt = () => document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent;
+      W.xp = 7; document.getElementById('tt').textContent = ''; worksXp(1); out.up = tt();
+      W.xp = 8; document.getElementById('tt').textContent = ''; const m0 = SHIP.mail.length; simNote('shiftMissed', { day: 9 }); simFlush(); out.down = tt(); out.mail = SHIP.mail.slice(m0).map(x => x.subject + ': ' + x.body);
+      const j = { id: 'fx3-rep', kind: 'service', machine: null, status: 'done', parts: [] }; SHIP.jobs.push(j); simNote('job', { id: 'fx3-rep', step: 'turnin', job: 'service', machine: null, t: shipNow() }); simFlush();
+      out.chips = typeof turnInGains === 'function' ? turnInGains(j, null).map(c => c.text) : null; SHIP.jobs = SHIP.jobs.filter(x => x !== j);
+      out.head = worksRecordHead().text; SHIP.works = was; return out; })()""")
+    print('  your reputation:', rp)
+    check('Your reputation' in rp['up'] and 'Steady' in rp['up'], f"its word going up is said ({rp['up']})")
+    check('Your reputation' in rp['down'] and 'New' in rp['down'] and any('reputation' in m for m in rp['mail']), f"a missed shift: said and in Mail ({rp['down']} / {rp['mail']})")
+    check(rp['chips'] is None or (rp['chips'][:1] == ['Your reputation up'] and len(set(rp['chips'])) == len(rp['chips']) and not any(c == 'Works reputation up' for c in rp['chips'])), f"the turn-in's chips: yours first, the team's under its own name ({rp['chips']})")
+    check('Your reputation: ' in rp['head'], f"the Record names it as yours ({rp['head'][:60]})")
+
     ev("for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null")
     if errors: fail('page errors: ' + ' | '.join(errors[:5]))
     g.close()

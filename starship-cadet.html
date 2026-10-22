@@ -4684,6 +4684,7 @@ DECKS[5] = {
     { id: '5-battery-4-svc', machine: '5-battery-4', type: 'work:works', at: [33, 14], face: 'n', pose: 'work', room: 'y' },
     { id: '5-inverter-1-svc', machine: '5-inverter-1', type: 'work:works', at: [33, 10], face: 'n', pose: 'work', room: 'y' },
     { id: '5-junction-1-svc', machine: '5-junction-1', type: 'work:works', at: [19, 11], face: 'e', pose: 'work', room: 'u' },
+    { id: '5-mainlift-1-svc', machine: '5-mainlift-1', type: 'work:works', at: [19, 10], face: 'w', pose: 'work', room: 'u' },   // the main lift's service spot, at its brake release by the ladder (FX3: a stand-in machine with no room had no place to do its job)
     { id: '5-cartdock-1-svc', machine: '5-cartdock-1', type: 'work:works', at: [19, 12], face: 'e', pose: 'work', room: 'm' },
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
@@ -14360,7 +14361,7 @@ function jobTap(it, at) {
   // (Deck 4's light relays), and no other machine in the room is nearer. The floor at its panel and glass-backed things
   // past it still start the work (jobSpotTap), as does Repair
   const dm = Math.hypot(mc.x - at.x, mc.z - at.z), dp = Math.hypot(spot.x - at.x, spot.z - at.z), mine = Math.min(dm, dp);
-  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== m.room
+  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== (m.room || PLACE_OF.get(pid).room)   // a stand-in with no room (the main lift): its panel place's room
     || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) return false;
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
@@ -15864,7 +15865,9 @@ function ixJobStep() {
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
     const rm = j.kind === 'rounds' && nx && nx.s === st && typeof machineById === 'function' ? machineById((j.route || [])[nx.k]) : null;   // a round: the machine by name (0.73.0)
     if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + (typeof machineLabel === 'function' ? machineLabel(rm).split(',')[0] : machineName(rm)) };
-    return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
+    const K = typeof jobKindOf === 'function' && jobKindOf(j), kk = st && nx ? (st === nx.s ? nx.k : nx.k + 1) - (j.parts.length ? 1 : 0) : -1;   // a registered kind's own words for the stop (FX3: hauling's), else as before
+    let kl = null; if (K && typeof K.goal === 'function' && kk >= 0) try { kl = K.goal(j, kk); } catch (e) { kl = null; }
+    return st ? { deck: st.deck, place: st.places[0] || null, label: kl || (st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title) } : null;
   }
   if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
   const m = machineById(j.machine); if (!m) return null;
@@ -16109,7 +16112,7 @@ function turnInGains(j, a) {
   if (mets) { const best = {}; for (const m of mets) if (m && (!best[m.sys] || m.add > best[m.sys].add)) best[m.sys] = m; mets = mets.filter(m => m && best[m.sys] === m); }
   const out = [];
   for (const r of reps || []) { if (r && dup('rep:' + (r.dept || 'works'))) continue; if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);   // words only, never a number (the user's 0.61.15 rule)
-    out.push({ rep: true, text: (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works reputation up') : dn + ' reputation up' }); }
+    out.push({ rep: true, text: r.dept === 'you' ? T('works.turnin.you', 'Your reputation up') : (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works team\'s standing up') : T('works.turnin.dept', '{dept} team\'s standing up', { dept: tgDept(r.dept) }) }); }   // yours and the department's, never the same name (FX3)
   for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = T('meter.' + m.sys, m.name || m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));   // the head writer's short name first
     out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
   return out;
@@ -31188,6 +31191,14 @@ const LINES = JSON.parse([
   '{"text":"Manifest done. Every crate where it belongs.","id":"1b2d6j8"}]',
   ',"haul.drop":[',
   '{"text":"Drop it off","id":"15ue0m9"}]',
+  ',"haul.goal.cart":[',
+  '{"text":"Take a hover cart from the Cart bay","id":"1s8v3bv"}]',
+  ',"haul.goal.deliver":[',
+  '{"text":"{thing} to {where}","id":"1ew6erx"}]',
+  ',"haul.goal.load":[',
+  '{"text":"Load the {thing} ({a} of {b})","id":"93p9qu"}]',
+  ',"haul.goal.return":[',
+  '{"text":"Cart back to its dock","id":"f4bvp7"}]',
   ',"haul.goodroute.note":[',
   '{"text":"a good route","id":"1r9aufk"}]',
   ',"haul.load":[',
@@ -31388,6 +31399,8 @@ const LINES = JSON.parse([
   '{"text":"Ideas for tonight","id":"1d0308s"}]',
   ',"ideas.trad":[',
   '{"text":"{trad} at {time}","id":"1rf1eo"}]',
+  ',"inc.again":[',
+  '{"text":"Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.","id":"1qux7e9"}]',
   ',"inc.card.alarm":[',
   '{"text":"! Galley alarm","id":"1iy9g2w"}]',
   ',"inc.card.burst":[',
@@ -31400,8 +31413,12 @@ const LINES = JSON.parse([
   '{"text":"Mopped. Dry enough to walk on.","id":"7izt27"}]',
   ',"inc.clean.lift":[',
   '{"text":"Out safe. Nobody hurt.","id":"1atkvj4"}]',
+  ',"inc.do.yours":[',
+  '{"text":"Your turn. Make it safe. I\'m right behind you.","id":"ijzsfo"}]',
   ',"inc.done":[',
   '{"text":"Safe, clean, fixed.","id":"1j6a271"}]',
+  ',"inc.goal.follow":[',
+  '{"text":"Follow {name} to the burst pipe, Deck {deck}","id":"2e5p4f"}]',
   ',"inc.missed":[',
   '{"text":"The crew dealt with it. You\'ll hear about it at dinner.","id":"jglniw"}]',
   ',"inc.safe.alarm":[',
@@ -31426,6 +31443,10 @@ const LINES = JSON.parse([
   '{"text":"Burst pipe on Deck {deck}. Make it safe.","id":"1dyqkyz"}]',
   ',"inc.toast.lift":[',
   '{"text":"The lift\'s stuck between decks. Someone\'s inside.","id":"ib0hqb"}]',
+  ',"inc.warn":[',
+  '{"text":"This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.","id":"14p0cj0"}]',
+  ',"inc.warn.soon":[',
+  '{"text":"Ten minutes. Stay on Deck 5.","id":"neenny"}]',
   ',"inc.wrong.valve":[',
   '{"text":"Still running. That one\'s downstream.","id":"1437nn2"}]',
   ',"inspect.bed":[',
@@ -32259,6 +32280,12 @@ const LINES = JSON.parse([
   '{"text":"Calder wants you in her office. Don\'t keep her waiting.","id":"168ij95"}]',
   ',"next.t2":[',
   '{"text":"Calder has a test job for you: Tier 2.","id":"1nls7n8"}]',
+  ',"next.t2.rep":[',
+  '{"text":"Calder sets your Tier 2 test once people rely on you. You\'re at {band}.","id":"17sjiyu"}]',
+  ',"next.t2.set":[',
+  '{"text":"Your Tier 2 test job: {day}, nine o\'clock in the Works bay.","id":"1i92rmn"}]',
+  ',"next.t2.soon":[',
+  '{"text":"You\'re ready for your Tier 2 test. Calder will set the day.","id":"1frwk58"}]',
   ',"next.wait.m1":[',
   '{"text":"Torres is waiting to show you his round. Find him.","id":"15mbvgm"}]',
   ',"next.wait.m2":[',
@@ -34280,9 +34307,17 @@ const LINES = JSON.parse([
   ',"works.rank.specialist":[',
   '{"text":"Specialist","id":"1i4f8yp"}]',
   ',"works.record":[',
-  '{"text":"{title} · {rank}. Works reputation: {band}. What\'s next: {next}","id":"6pzbd1"}]',
+  '{"text":"{title}. Your reputation: {band}. What\'s next: {next}","id":"zz0hp5"}]',
   ',"works.record.commissioned":[',
   '{"text":"Commissioned Officer, Day {day}.","id":"cey8rd"}]',
+  ',"works.rep.down":[',
+  '{"text":"Down to {band}.","id":"897ti4"}]',
+  ',"works.rep.missed":[',
+  '{"text":"Missed shift | You missed your shift. That costs your reputation: {band} now.","id":"esuj79"}]',
+  ',"works.rep.title":[',
+  '{"text":"Your reputation","id":"19ityk4"}]',
+  ',"works.rep.up":[',
+  '{"text":"Up to {band}. People are noticing your work.","id":"z7vqf0"}]',
   ',"works.skill.hang":[',
   '{"text":"getting the hang of these","id":"piahj7"}]',
   ',"works.skill.know":[',
@@ -34351,12 +34386,16 @@ const LINES = JSON.parse([
   '{"text":"What\'s next","id":"83cf6l"}]',
   ',"works.training.none":[',
   '{"text":"Nothing yet. Your first lesson is coming.","id":"7mlbr0"}]',
+  ',"works.turnin.dept":[',
+  '{"text":"{dept} team\'s standing up","id":"pe6k2s"}]',
   ',"works.turnin.meter":[',
   '{"text":"+{n} {system}","id":"1cqchx1"}]',
   ',"works.turnin.rep":[',
-  '{"text":"Works reputation up","id":"1l37imz"}]',
+  '{"text":"Works team\'s standing up","id":"1m336ij"}]',
   ',"works.turnin.repN":[',
   '{"text":"+{n} {dept} reputation","id":"1t16n10"}]',
+  ',"works.turnin.you":[',
+  '{"text":"Your reputation up","id":"1ug4yik"}]',
   ',"worried.captain":[',
   '{"text":"Up to the ready room? {sigh}. The Captain\'s kind. Still, go to your shift.","id":"12wxjes","tone":"warm","tier":[2,4]}]',
   ',"worried.chief":[',
@@ -40605,7 +40644,7 @@ function careerJobIn(n) {
     if (!g.meters && Array.isArray(j.meters)) g.meters = j.meters.filter(m => m && m.gain > 0).map(m => ({ sys: m.key, name: m.name, add: m.gain })); }   // the systems engineer's points per ship meter (0.33.57)
   if (typeof turnInShow === 'function') { if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1; return; }   // the card says it: no chip as well
   const now = performance.now(); if (now - REP_CHIP_AT < REP_CHIP_GAP * 1000 || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || CHAT || typeof needFloat !== 'function') return;
-  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' reputation');
+  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' team\'s standing');   // the department's (yours is "Your reputation": FX3)
   const f = typeof FLOATS !== 'undefined' && FLOATS[FLOATS.length - 1]; if (f && f[0]) { f[0].style.color = REP_DEPT_COL[dept] || ''; f[0].style.borderColor = REP_DEPT_COL[dept] || ''; }
   if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
 }
@@ -45563,7 +45602,7 @@ for (const r of SHIP.occasions) if (/^works\./.test(r.id) && ladderRow(r.id.slic
 function trainOffer(row, c, d, t) {                      // the ask, or the ask again: an appointment today at a time in both shifts
   const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
   c.by = by; c.d = d; c.w = 0;
-  if (c.st === 'again') return trainWatch(row, c, t, true);
+  if (c.st === 'again' && !(WORK_MECH[row.id] || {}).againAsk) return trainWatch(row, c, t, true);   // againAsk (24f's m6): asked again with its own offer, not restarted at 06:00
   const M = WORK_MECH[row.id] || {}; if (M.offer) { try { return !!M.offer(row, c, d, t); } catch (e) { console.error(e); return false; } }   // the sub-block's own ask (24f: m6's urgent call); it sets c.st = 'meet', c.occ, c.by
   let early = 0; try { early = M.at ? +M.at(d) || 0 : 0; } catch (e) { early = 0; }   // a sub-block's earliest meeting (24d: m4 after the delivery's unload)
   const at = Math.min(Math.max(900, early), Math.max(m + 60, 510, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);
@@ -45614,7 +45653,7 @@ function trainDo(row, c, t) {                            // your turn: the same 
   if (!id) { c.st = 'again'; return false; }
   c.st = 'do'; c.j = id; const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = row.id;
   if (M.hold) c.hold = true;                             // the teacher stays with you until worksEscortEnd (24g's m7: until P3's case is called)
-  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || ['Your turn. It\'s on the board for you; I\'ll be right behind you.']);
+  if (!M.self) worksSayAll(c.by, worksVoice(c.by, 'train.' + row.id + '.lead.done') || [(M.doSay && M.doSay(c, id)) || 'Your turn. It\'s on the board for you; I\'ll be right behind you.']);   // M.doSay: a sub-block's own word (24f: the job's already yours, at the pipe)
   return true;
 }
 function trainNear(spot) {                               // you're watching: on its deck, in its room or within a few tiles of it
@@ -45660,10 +45699,25 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
   if (row.tool) toolGive(row.tool, t);
   const by = W.cur && W.cur.id === id && W.cur.by || ladderTeacher(row, worksDay(t)) || row.by[0];
   const sc = MEETING_SCRIPTS['train.' + id + '.' + by] ? 'train.' + id + '.' + by : 'train.' + id;   // (small rows: never a stand-in)
-  if (row.size === 'small' && MEETING_SCRIPTS[sc] && !MEETING_SCRIPTS[sc].stub && typeof dialogueShow === 'function' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) dialogueShow(sc);   // a word on the job itself
+  if (row.size === 'small' && !flag('works.brief.' + id)) worksBrief(id, by);   // a word on the job itself, unless you had it before (the drill, the inspection, the first head-scratcher: FX3)
   try { toast(worksName(by), worksText('works.trained', 'Trained: {mech}, with {name}.', { mech: mechName(id).replace(/^./, x => x.toLowerCase()), name: worksName(by) }) + (row.tool ? ' ' + toolName(row.tool).replace(/^./, x => x.toUpperCase()) + ' is yours now.' : '')); } catch (e) { /* no UI */ }
   if (W.cur && W.cur.id === id) W.cur = null;
   simNote('trained', { mech: id });
+  return true;
+}
+// a small row's talk (train.<id>.<teacher>, the writer's), shown now and readable wherever you are (FX3, AR1: shown with no
+// meeting place, section 18's meetings tick closed it within a ship minute and left only its "(notes)" Mail); once (flag
+// works.brief.<id>). The drill's and the inspection's come before them (24c), the first head-scratcher's when its case shows (24k)
+function worksBrief(id, by) {
+  if (flag('works.brief.' + id) || typeof dialogueShow !== 'function' || typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  const sc = MEETING_SCRIPTS['train.' + id + '.' + by] ? 'train.' + id + '.' + by : 'train.' + id; if (!MEETING_SCRIPTS[sc] || MEETING_SCRIPTS[sc].stub) return false;
+  flagSet('works.brief.' + id); return dialogueShow(sc, { id: sc, who: [by], at: shipNow(), where: { any: true } });
+}
+// a small row's ask (works.ask.<id>, "Subject | body"): Mail from the teacher, and a toast in play (FX3: the writer's asks were never sent)
+function worksAskSend(id, by, now) {
+  const ask = worksText('works.ask.' + id, ''), cut = ask.indexOf(' | '); if (!ask || flag('works.ask.' + id) || typeof mailSend !== 'function') return false;
+  flagSet('works.ask.' + id); mailSend({ at: now, from: worksName(by), subject: cut > 0 ? ask.slice(0, cut) : mechName(id), body: cut > 0 ? ask.slice(cut + 3) : ask, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(by), cut > 0 ? ask.slice(cut + 3) : ask); } catch (e) { /* no UI */ }
   return true;
 }
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
@@ -45752,7 +45806,13 @@ if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
 // ---- skill in words (section 15's careerSpeed reads SHIP.works.sk; this counts and words it) ----
 function skillWord(kind) { const n = SHIP.works && SHIP.works.sk[kind] || 0; return n >= 15 ? worksText('works.skill.know', 'you know these well') : n >= 5 ? worksText('works.skill.hang', 'getting the hang of these') : worksText('works.skill.new', 'new to you'); }
 // ---- your Works reputation in your rank ----
-function worksXp(n) { const W = worksInit(); if (!W || !n) return; W.xp = Math.max(0, W.xp + n); }
+function worksXp(n) { const W = worksInit(); if (!W || !n) return; const b0 = worksBand(); W.xp = Math.max(0, W.xp + n); const b1 = worksBand(); if (b1 !== b0) worksRepTell(b0, b1); }
+// your reputation said when its word changes (FX3, AR1: it moved and nobody told you; "Relied on" is what the test job waits for)
+function worksRepTell(b0, b1) {
+  const B = WORK_BANDS[SHIP.works.tier] || WORK_BANDS[1], up = B.findIndex(x => x[1] === b1) > B.findIndex(x => x[1] === b0), band = worksBandWord();
+  try { toast(worksText('works.rep.title', 'Your reputation'), up ? worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
+  if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
+}
 function worksBand() {                                   // 'new' ... 'relied', or null before SHIP.works (section 17 keeps today's order)
   const W = SHIP.works; if (!W) return null;
   const B = WORK_BANDS[W.tier] || WORK_BANDS[1]; let b = B[0][1]; for (const [x, k] of B) if (W.xp >= x) b = k; return b;
@@ -45768,7 +45828,9 @@ onSim('job', n => {
   const found = !!(j && (j.foundBy === 'you' || (n.machine && simNotes('found', (j.posted || 0) - 1).some(x => x.machine === n.machine && x.by === 'you'))));
   const right = !!(j && j.rightFirst && d >= WORKS_RIGHT_FROM), clever = !!(j && j.clever);
   const side = WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind), xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0);
-  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
+  const xp0 = W.xp;
+  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);
+  if (j && W.xp > xp0) { const g = j.gains || (j.gains = {}), R = g.rep || (g.rep = []); if (!R.some(x => x.dept === 'you')) R.unshift({ dept: 'you' }); }   // the turn-in card's first chip: your own reputation (FX3)   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
   const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);
@@ -45779,7 +45841,9 @@ onSim('job', n => {                                      // the teacher's word a
   const say = worksVoice(c.by, 'train.' + c.id + '.follow.' + key) || [{ take: 'Good. Take your time.', done: 'Done. Turn it in at the board.' }[key] || (n.step === 'stop' ? 'That\'s it. Next.' : null)].filter(Boolean);
   worksSayAll(c.by, say);
 });
-onSim('shiftMissed', n => worksXp(WORK_XP.missed));
+onSim('shiftMissed', n => { worksXp(WORK_XP.missed); if (!SHIP.works || typeof mailSend !== 'function') return;   // said, not quiet (FX3, AR1): a missed shift costs your reputation
+  const t = worksText('works.rep.missed', 'Missed shift | You missed your shift. That costs your reputation: {band} now.', { band: worksBandWord() }), i = t.indexOf(' | ');
+  mailSend({ at: shipNow(), from: worksName('calder'), subject: i > 0 ? t.slice(0, i) : 'Missed shift', body: i > 0 ? t.slice(i + 3) : t }); });
 onSim('jobAbandoned', n => worksXp(WORK_XP.abandoned));
 function worksNoticed(jobId, who) {                      // someone noticed a job of yours (section 20 may call it): the log shows who
   const e = SHIP.works && SHIP.works.log.find(x => x[0] === jobId); if (!e || typeof who !== 'string') return false; e[4] = who.slice(0, 40); return true;
@@ -45804,15 +45868,20 @@ function worksNext() {
     if (!promoDone('move2')) return nx('move', 'Your own cabin, 4-23, after the shift.');
     if (!promoDone('ceremony2')) return nx('ceremony', 'Your commission: the observation room, 17:15 tomorrow.'); }
   const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
+  if (next && next.id === 't2' && !(W.test && W.test.passed)) {   // the test job not open yet (FX3, AR1): what it waits for, not "Calder has a test job"
+    if (W.test) return worksText('next.t2.set', 'Your Tier 2 test job: {day}, nine o\'clock in the Works bay.', { day: (dd => dd === 0 ? 'today' : dd === 1 ? 'tomorrow' : dayName(W.test.day))(W.test.day - SHIP.time.day) }, k);
+    if (!ladderNeeds({ rep: 'relied' }, W)) return worksText('next.t2.rep', 'Calder sets your Tier 2 test once people rely on you. You\'re at {band}.', { band: worksBandWord() }, k);
+    return worksText('next.t2.soon', 'You\'re ready for your Tier 2 test. Calder will set the day.', null, k); }
   if (next) return worksText('next.' + next.id, worksFirst(next.by[0]) + ' will show you ' + mechName(next.id).replace(/^./, x => x.toLowerCase()) + ' when you\'re ready.', { name: worksName(next.by[0]), mech: mechName(next.id) }, k);
   return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
 }
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
+  if (W.rank !== 'junior') v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1)
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1];   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the
@@ -45837,7 +45906,7 @@ function worksLogTitle(e) {                              // a log row's title, f
 }
 worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training'), order: 10, view() {
   const W = SHIP.works, B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
-  say(worksRankTitle(W) + '. Works reputation: ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
+  say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
@@ -46192,6 +46261,16 @@ WORK_TICKS.push((now, skip) => {
   else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
 });
 WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
+const INSPECT_ASK = [1080, 1290];                        // the evening before your first: 18:00-21:30 Tomas says it in your bunk room if you're both there, else his Mail at 21:30
+WORK_TICKS.push((now, skip) => {                         // FX3: the evening before your first, Tomas's ask ("Inspection tomorrow"); that morning from 06:00 in your bunk room, his talk
+  const W = SHIP.works, d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('m3i'); if (!W || !row || W.rank !== 'junior' || W.tr.m3i !== undefined) return;
+  if (weekday(d + 1) === 3 && m >= INSPECT_ASK[0] && d + 1 >= row.day && playerShiftOn(d + 1) && !worksOpened(W).has('m3i') && !flag('works.ask.m3i')) {
+    const by = row.by[0], a = !skip && inspectHere() && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === by), here = a && (() => { try { return roomAt(...cellAt(a.x, a.z)) === roomAt(...player.here()); } catch (e) { return false; } })();
+    if (here) { const t = worksText('works.ask.m3i', ''), i = t.indexOf(' | '); flagSet('works.ask.m3i'); worksSay(by, i > 0 ? t.slice(i + 3) : t); }   // in person (AR1, the lead's decision)
+    else if (skip || m >= INSPECT_ASK[1]) worksAskSend('m3i', by, now);
+  }
+  if (!skip && m >= 360 && m < INSPECT_AT && inspectDue(d) && inspectHere()) worksBrief('m3i', row.by[0]);
+});
 // the drill job: a side job (beside any board job you hold, never the crew's), posted for you at 14:50 on Wednesdays
 // you're on shift as a junior, from the day the row (m3d) opens; yours at once (claimed for you), over at 15:15 whatever
 // the state (the all-clear). Places: DECKS[5].drill (the Pillar 5 deck architect's); a kind's stops left out till they're in
@@ -46244,6 +46323,7 @@ WORK_TICKS.push((now, skip) => {
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', place: (jobStops(j)[0] || { places: [] }).places[0] || null, label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00', drill: j.id });
   }
+  if (!skip && m >= DRILL_TOAST && m < DRILL_AT && SHIP.works && SHIP.works.tr.m3d === undefined) worksBrief('m3d', 'calder');   // your first: her briefing before it, not after (FX3)
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
 });
 // the all-clear: the drill is over whatever the state (no lapse, no abandoned job); quiet when skipped past or from an earlier day
@@ -46286,7 +46366,7 @@ WORK_TICKS.push((now, skip) => {
   const dr = simNotes('drill', now - 3 * 1440).filter(n => n.you).pop(); if (!dr || drillTimeWord(dr.mins) !== 'fast') return;
   simNote('drillTea', { day: d }); drillSay('drill.tea', 'Wednesday\'s drill was quick. Well done, all of you.');
 });
-if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = {}; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
+if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = { open(row, d) { worksAskSend('m3d', 'calder', shipNow()); } }; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
 
 // ---------------------------------------------------------------------
 // 24d HAULING (M4, seat M1, 0.45.x; plans/mechanics/m4-hauling.html). The Wednesday delivery has a few crates for the
@@ -46302,7 +46382,7 @@ const HAUL_FROM = 780, HAUL_UNTIL = 960, HAUL_TRAIN = 660;   // posted by 13:00 
 const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'function' ? deliveryLate(d) : 0);
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
-const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
+const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ linen: 'Linen', laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
 const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckIn(p.deck) : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
@@ -46351,6 +46431,16 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
     jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' && !haulFree(d) }));   // an officer at stage 2 keeps it to 16:00 (D3)
   },
   stops: haulStops,
+  goal(j, k) {                                           // FX3 (AR2): each stop's own words on the arrow, not the run's title
+    const st = haulStops(j), s = st[k]; if (!s) return null;
+    const c = (j.crates || []).find(x => (x.key || x.id) === s.crate), thing = c ? haulName(c) : '', low = thing.replace(/^./, x => x.toLowerCase());
+    const loads = st.filter(x => x.tag === 'load'), a = loads.indexOf(s) + 1, stop = c && { linen: 'laundry', laundry: 'laundry', medical: 'infirmary', infirmary: 'infirmary', store: 'store', galley: 'galley', bridge: 'bridge' }[c.id];
+    if (s.tag === 'cart') return worksText('haul.goal.cart', 'Take a hover cart from the Cart bay');
+    if (s.tag === 'load') return worksText('haul.goal.load', 'Load the {thing} ({a} of {b})', { thing: low, a, b: loads.length });
+    if (s.tag === 'deliver' && c) return worksText('haul.goal.deliver', '{thing} to {where}', { thing, where: !c.part && stop ? worksText('haul.stop.' + stop, haulWhere(c)) : haulWhere(c) });
+    if (s.tag === 'return') return worksText('haul.goal.return', 'Cart back to its dock');
+    return null;
+  },
   stepDone(j, k, res, t) {
     const st = haulStops(j), s = st[k]; if (!s) return null;
     const c = (j.crates || []).find(x => (x.key || x.id) === s.crate);
@@ -46480,7 +46570,9 @@ function stockWithdraw(now) {                            // 16:00 and not taken:
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul) WORK_MECH.m4 = {
   at: d => HAUL_TRAIN,                                   // after the 10:00 delivery's unload
   reserve(d, at, slot, o = {}) {
-    const t = (d - 1) * 1440 + at, crates = haulCrates(o.yours ? CART_CRATES : 1); if (!crates.length || !haulDock() || !haulLoadAt()) return null;
+    const t = (d - 1) * 1440 + at;
+    if (!manifestCrates() && !SHIP.jobs.some(x => x.kind === 'haul' && !x.src && x.train === 'm4' && x.status !== 'done')) SHIP.manifest = manifestFor(d);   // FX3 (AR2's B2): no crates in the hold (not a delivery day, or the crew's run took them): the week's, kept back for your lesson, so it works any day
+    const crates = haulCrates(o.yours ? CART_CRATES : 1); if (!crates.length || !haulDock() || !haulLoadAt()) return null;
     SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
     for (const x of SHIP.jobs) if (x.kind === 'haul' && x.status === 'open' && !x.claimedBy && !x.reserved) { x.status = 'done'; x.doneAt = t; x.doneBy = null; }   // an ordinary run waiting: this one stands for it
     const j = haulJob(t, crates, { slot, yours: !!o.yours }); if (!o.yours) j.only = 'load';
@@ -46488,6 +46580,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KIND
     return j.id;
   },
   watch: 10,
+  againAsk: true,                                        // FX3: a lesson that didn't happen is asked again at its own time after the delivery (Yara's ask and meeting), not restarted at 06:00
 };
 
 // =====================================================================
@@ -48072,6 +48165,7 @@ function p3Tick(c, j) {
   if (!here && (!playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900 || (c.train && !caseOpened('p3')))) return;
   if (c.train) { const W = SHIP.works, row = typeof ladderRow === 'function' && ladderRow('p3'); c.by = (here && W && W.cur && W.cur.by) || (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder'; }
   caseShow(c, j);
+  if (c.train && typeof worksBrief === 'function' && worksBrief('p3', c.by)) return;   // the writer's talk, readable (FX3)
   if (c.train && typeof worksSay === 'function') worksSay(c.by, (typeof worksText === 'function' && worksText('works.train.p3.start', null)) || 'Here\'s a funny one. ' + c.title + '. Open Fault notes: the first note\'s taped to the job.');
 }
 CASE_KINDS.p3 = { name: 'What\'s been tried?', ladder: 'p3',
@@ -48085,7 +48179,7 @@ CHIEF_NOTES.p3 = { title: 'What\'s been tried', key: 'chief.p3', lines: [
   'If someone fitted it and it\'s still wrong, it isn\'t that.',
   'Read every note. One\'s on the job; the others are on the machine.',
   'What nobody has tried yet is your best bet.'] };
-if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open() { /* the training case is already staged (p3Stage); it shows at the next tick */ } };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open(row, d) { if (typeof worksAskSend === 'function') worksAskSend('p3', ladderTeacher(row, d) || 'calder', shipNow()); } };   // the training case is already staged (p3Stage); it shows at the next tick. The ask (FX3)
 // Day 5's training case, staged at 18:00 on Day 4 (or the first 18:00 from Day 4 the ship gets to without it): held
 // for you (24 core's slot 20) till the row opens, so it's never on the crew's board
 function p3Stage(C) {
@@ -48704,14 +48798,47 @@ if (typeof jobKindAdd === 'function') jobKindAdd('incident', { tier: 1, work: 0,
 // there), then the incident's job, yours
 function incOffer(row, c, d, t) {
   const m = t - (d - 1) * 1440, by = ladderTeacher(row, d); if (!by) return false;
+  if (c.st === 'again') incTrainClear(t);                // FX3: a lapsed try's leftovers first, so today's call can come
   const at = m <= INC_FIRST.at - 10 ? INC_FIRST.at : Math.min(INC_WIN[1], m + 10), o = trainSetup(row);
   o.by = by; o.script = trainScript(row, by);
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, true, 15); if (!r) return false;
   c.by = by; c.d = d; c.w = 0; c.st = 'meet'; c.occ = r.key;
+  incWarn(c, (d - 1) * 1440 + at, t);
   return true;
 }
+// FX3 (AR1's play of 0.64.15): the training's call came with no warning, its arrow stayed on the office while the teacher
+// walked to the pipe, a training you didn't follow sat to the end of the shift and came back at 06:00 with no place or time,
+// and your job waited on the board on Deck 5. Now: a word when it's set (Mail, and a toast in play) and ten minutes before;
+// the arrow follows the teacher to the pipe (setGoal: the step's own target; 15b's rules say when arrows show and clear);
+// your turn is yours at once, at the pipe; not there in INC_FOLLOW minutes, or the day's training lapsed, the teacher makes
+// it safe with the crew and tells you the next try's day, 10:30 and the office (the same call again, not a 06:00 restart)
+const INC_FOLLOW = 30, INC_WARN = 10;
+const INC_GOAL = { g: null };                            // the arrow this block set (PR9: clear only that one, never another section's)
+function incGoalSet(g) { if (typeof setGoal !== 'function') return; setGoal(g); INC_GOAL.g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; }
+function incGoalClear() { if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null; }
+const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
+function incWarn(c, at, now) {
+  const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'This morning', body: i > 0 ? t.slice(i + 3) : t, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(by), i > 0 ? t.slice(i + 3) : t); } catch (e) { /* no UI */ }
+}
+function incTrainClear(now) {                            // the open training incident cleared by the crew; the training's walk or turn gone
+  const I = incState(), O = I && I.open;
+  if (O && O.train) { if (!O.j) incPost(now); const j = O.j && SHIP.jobs.find(x => x.id === O.j); if (j && j.status !== 'done') jobFinish(j, now, 'crew'); I.open = null; incFx(); }
+  for (const x of SHIP.jobs) if (x.train === 'm6' && x.status !== 'done' && x.claimedBy !== 'you') { x.status = 'done'; x.doneAt = now; x.doneBy = null; }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function incRetry(c, now) {                              // the training's next try, said with its day, time and place
+  const row = ladderRow('m6'), d = worksDay(now); incTrainClear(now);
+  let d2 = d; for (let k = 0; k < 14; k++) { d2 = promoWorkday(d2); if (ladderTeacher(row, d2)) break; }
+  c.st = 'ask'; c.d = d; c.j = null; c.occ = null; c.rt = d;
+  incGoalClear();
+  const t = worksText('inc.again', 'Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.', { day: dayName(d2), time: hhmm(INC_FIRST.at), place: incWhere() }), i = t.indexOf(' | ');
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(c.by), subject: i > 0 ? t.slice(0, i) : 'Next time', body: i > 0 ? t.slice(i + 3) : t, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(c.by), i > 0 ? t.slice(i + 3) : t); } catch (e) { /* no UI */ }
+}
 if (JOB_KINDS.incident) WORK_MECH.m6 = {
-  offer: incOffer,
+  offer: incOffer, againAsk: true,
   reserve(d, at, slot, o = {}) {
     const t = (d - 1) * 1440 + at, I = incState(); if (!I) return null;
     if (!I.open) incStart(INC_FIRST.kind, INC_FIRST.deck, t, true);
@@ -48720,8 +48847,11 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
+    if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
+  doSay: c => { const j = c && SHIP.jobs.find(x => x.id === c.j); return j && j.claimedBy === 'you' ? worksText('inc.do.yours', 'Your turn. Make it safe. I\'m right behind you.') : null; },
   watch: 1,                                              // a minute at the pipe with Calder, then it's yours
 };
 // the clock: the training's call at its minute; the week's incident at its minute; the stuck lift lets go after 20
@@ -48731,11 +48861,18 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   const I = incState(); if (!I) return;
   const d = worksDay(now), m = now - (d - 1) * 1440, c = SHIP.works.cur, O = I.open;
   if (I.fix) { const F = SHIP.jobs.find(x => x.id === I.fix.id); if (!F || F.status === 'done') { simNote('incident', { id: I.fix.kind, step: 'fixed', by: F ? F.doneBy : null }); I.fix = null; } }
+  if (c && c.id === 'm6') {                              // FX3: not following, a lapsed or missed day: the next try said, with its day, time and place
+    const wj = !skip && c.st === 'watch' && SHIP.jobs.find(x => x.id === c.j);
+    if (c.st === 'again' || wj && !c.w && now >= wj.posted + INC_FOLLOW) incRetry(c, now);
+    else if (c.st === 'ask' && c.d === d && c.rt !== d && O && O.train) incRetry(c, now);
+  }
+  const Rw = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;
+  if (Rw && !skip && !c.wn && now >= Rw.at - INC_WARN && now < Rw.at) { c.wn = 1; try { toast(worksName(c.by), worksText('inc.warn.soon', 'Ten minutes. Stay on Deck 5.')); } catch (e) { /* no UI */ } }
   const R0 = c && c.id === 'm6' && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;   // the call at the meeting's minute
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    if (typeof setGoal === 'function') { const o = OCCASIONS['works.m6']; if (o) setGoal({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }
+    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
   }
   if (O) {
@@ -49776,7 +49913,7 @@ function promoSeekTick(now) {                            // she's found you: the
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (!r || !r.f || !r.f.seek || r.met || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
   try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), p = player.obj.position;
     if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { worksSayAll(r.by, worksVoice(r.by, 'promo.fetch.summons') || ['There you are. My office was the idea, but this will do.']);   // her word as she reaches you, then the scene
-      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now }); } } catch (e) { /* not in play */ }
+      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now, where: { any: true } }); } } catch (e) { /* not in play */ }   // where you are: readable, not closed by section 18's meetings tick (FX3)
 }
 function promoEscort(p, t) {                             // worksEscort's 24p part: Calder walking over to find you
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');
