@@ -31938,6 +31938,12 @@ const LINES = JSON.parse([
   '{"text":"Calder wants you in her office. Don\'t keep her waiting.","id":"168ij95"}]',
   ',"next.t2":[',
   '{"text":"Calder has a test job for you: Tier 2.","id":"1nls7n8"}]',
+  ',"next.t2.rep":[',
+  '{"text":"Calder sets your Tier 2 test once people rely on you. You\'re at {band}.","id":"17sjiyu"}]',
+  ',"next.t2.set":[',
+  '{"text":"Your Tier 2 test job: {day}, nine o\'clock in the Works bay.","id":"1i92rmn"}]',
+  ',"next.t2.soon":[',
+  '{"text":"You\'re ready for your Tier 2 test. Calder will set the day.","id":"1frwk58"}]',
   ',"next.wait.m1":[',
   '{"text":"Torres is waiting to show you his round. Find him.","id":"15mbvgm"}]',
   ',"next.wait.m2":[',
@@ -33959,7 +33965,7 @@ const LINES = JSON.parse([
   ',"works.rank.specialist":[',
   '{"text":"Specialist","id":"1i4f8yp"}]',
   ',"works.record":[',
-  '{"text":"{title} · {rank}. Works reputation: {band}. What\'s next: {next}","id":"6pzbd1"}]',
+  '{"text":"{title}. Your reputation: {band}. What\'s next: {next}","id":"zz0hp5"}]',
   ',"works.record.commissioned":[',
   '{"text":"Commissioned Officer, Day {day}.","id":"cey8rd"}]',
   ',"works.skill.hang":[',
@@ -45477,15 +45483,20 @@ function worksNext() {
     if (!promoDone('move2')) return nx('move', 'Your own cabin, 4-23, after the shift.');
     if (!promoDone('ceremony2')) return nx('ceremony', 'Your commission: the observation room, 17:15 tomorrow.'); }
   const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
+  if (next && next.id === 't2' && !(W.test && W.test.passed)) {   // the test job not open yet (FX3, AR1): what it waits for, not "Calder has a test job"
+    if (W.test) return worksText('next.t2.set', 'Your Tier 2 test job: {day}, nine o\'clock in the Works bay.', { day: (dd => dd === 0 ? 'today' : dd === 1 ? 'tomorrow' : dayName(W.test.day))(W.test.day - SHIP.time.day) }, k);
+    if (!ladderNeeds({ rep: 'relied' }, W)) return worksText('next.t2.rep', 'Calder sets your Tier 2 test once people rely on you. You\'re at {band}.', { band: worksBandWord() }, k);
+    return worksText('next.t2.soon', 'You\'re ready for your Tier 2 test. Calder will set the day.', null, k); }
   if (next) return worksText('next.' + next.id, worksFirst(next.by[0]) + ' will show you ' + mechName(next.id).replace(/^./, x => x.toLowerCase()) + ' when you\'re ready.', { name: worksName(next.by[0]), mech: mechName(next.id) }, k);
   return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
 }
 // the Record's first lines (section 19 asks): your rank, your Works reputation and "What's next"
 function worksRecordHead() {                             // null before SHIP.works (Days 0-1 keep the Record's old line)
   const W = SHIP.works; if (!W) return null; const tier = W.tier, v = { title: worksText('works.title.t' + tier, 'tier ' + tier), rank: worksRankTitle(W), band: worksBandWord(), next: worksNext() };
+  if (W.rank !== 'junior') v.title += ' · ' + v.rank;   // the title and rank together, never "Junior Technician · Junior Officer" (FX3, AR1)
   const com = (W.ms.find(x => x[0] === 'commissioned') || [])[1], st = (W.ms.find(x => x[0] === 'stars') || [])[1];   // 24p: the ceremony; 24t: star logger (E3, 0.45.11)
   const ff = W.ms.filter(x => /^ff[1-3]$/.test(x[0])).sort((a, b) => a[0] < b[0] ? 1 : -1)[0], gr = ff ? +ff[0][2] : 0;   // E2's fault-finder grade (the highest)
-  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{rank}, {title}. Works reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
+  return { kind: 'text', mark: 'hot', text: worksText('works.record', '{title}. Your reputation: {band}. What\'s next: {next}', v) + (com ? ' ' + worksText('works.ms.commissioned', worksText('works.record.commissioned', 'Commissioned Officer, Day {n}.', { day: com, n: com }), { n: com }) : '') + (st ? ' ' + worksText('works.ms.stars', 'Star logger, Day {n}.', { n: st }) : '') + (gr ? ' ' + worksText('works.ms.grade', 'Fault-finder grade: {grade}.', { grade: worksText('works.grade.' + gr, ['', 'Fault-finder', 'Senior fault-finder', 'Master fault-finder'][gr]), n: ff[1] }) : '') };
 }
 // ---- the device's Works app: Training, Work log, Tools; other sections add tabs with worksTabAdd (24k: Fault notes and
 // the Chief's notes): worksTabAdd({ id, title, order, view() -> [blocks], act?(verb, arg), badge?() -> number }); the

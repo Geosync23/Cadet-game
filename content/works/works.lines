@@ -136,9 +136,9 @@
 == works.rank.specialist
 - Specialist
 
-// the Record's line
+// the Record's line ({title}: the title and rank together, the rank left out where it would only repeat "Junior": FX3)
 == works.record
-- {title} · {rank}. Works reputation: {band}. What's next: {next}
+- {title}. Your reputation: {band}. What's next: {next}
 
 // the asks (toast and Mail when a row opens; the teacher sends it)
 == works.ask.m7
