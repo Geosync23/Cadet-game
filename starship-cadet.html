@@ -53653,7 +53653,7 @@ function padKey(L) {                                       // a layer's name in 
 }
 function padBack(L) {
   const a = document.activeElement;
-  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { a.blur(); return; }   // first out of a text box
+  if (a && /^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName) && L.contains && L.contains(a)) { PAD_FOCUS.last = null; a.blur(); return; }   // first out of a text box (to the panel's first button)
   (PAD_BACK[padKey(L)] || padEsc)();                     // (the job board and Ship health take Escape)
 }
 function padStep(dir, e) { const L = padLayer(); return padOwnDo('move', L, dir, e) || padMove(dir); }
