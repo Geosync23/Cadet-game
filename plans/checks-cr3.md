@@ -137,3 +137,9 @@ sha256 **70f9427354a398ef25e355e7428f10ba6f0800b4c83a83945c8c950a42e6a5c7** (BM1
 | day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0; 270 s |
 
 No FAIL.
+
+## cadet_test for CR2 (agreed with CR2, copied to lead 28 and BM13)
+
+`cadet_test.py OLD NEW`: OLD = claude/integration 2b4a05db (0.64.15, sha256 0c1f6fb4…), NEW = b9f053ba (0.64.16, 70f94273…),
+run with b9f053ba's cadet_test.py from a scratch folder, strictly alone (no other browser in the container). Exit 0:
+**ALL IDENTICAL**: every shot a_start … j_steer2 0 px different; errors A [] B []; taps the same.
