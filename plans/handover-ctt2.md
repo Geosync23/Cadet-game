@@ -36,10 +36,10 @@ CTT (idle) session_01SgEbMMMNPRP2E7DbiDyiw4.
 | Builder (tip) | Parts clean | Planted faults |
 |---|---|---|
 | CP1 (claude/controller-p1 cff5bab) | off quiet base deck pick1 panels api lists: all OK | 7/7 caught |
-| CP2 (claude/controller-p2 67df90a, parts as e62efcc) | disc OK, screens OK, **tiles FAIL** ("A on your hold should pick its tile and keep the highlight there (None)") | 8/11: NOT caught 'the stick also moves the highlight' (disc), 'a turn card asking again jumps back' (screens); 'a redraw loses your place' only differs from the clean failure by its message. Told CP2. |
-| CP3 (958421a) | marks touch3 drop OK | 5/5 caught; parts updated to 47d71ff (new fault 'Controller connected over another message'), rerun pending |
+| CP2 (claude/controller-p2 67df90a, parts as e62efcc) | disc OK, screens OK, tiles unsteady (failed once: "A on your hold should pick its tile and keep the highlight there (None)"; passed alone on rerun; Tiles redraws on a real-time timer) | 8/11: NOT caught 'the stick also moves the highlight' (disc), 'a turn card asking again jumps back' (screens); 'a redraw loses your place' only differs from the clean failure by its message. Told CP2. |
+| CP3 (47d71ff) | marks, drop OK; touch3 unsteady (2 of 3 runs fail on a speech bubble's pixels; fix proposed to CP3: hide .bubw in its shots) | 5/5 caught (incl. the new 'Controller connected over another message') |
 | CP4 (7631ab6) | settings OK | 7/7 caught |
-| CP5 (8216ad4) | a11y OK | 4/4 caught; part updated to 4892a0b (AX_ITEMS, nameless; 7 faults), rerun pending |
+| CP5 (4892a0b) | a11y OK | 7/7 caught |
 | this check's pick on 1ec1612 | FAIL only on the two real findings above | PR9 c7 caught |
 
 ## Loose ends
