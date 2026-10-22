@@ -42357,7 +42357,7 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
   { id: 'bunk', day: 0, at: 16 * 60 + 43, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 },
-    fallback: { wait: 30, later: 'toMess', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your locker when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },
+    fallback: { wait: 30, later: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4, and your wardrobe\'s by the door. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) on to 'stow': the bag goes in, and he still brings you your device
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
   // (0.64.15's playtest: "Zeke just stands in the bunk room") neither waits on you being in Bunk 1 for good: noHold, their
@@ -42366,7 +42366,7 @@ const INTRO_STEPS = [
   { id: 'stow', day: 0, at: 16 * 60 + 44, who: INTRO_ESCORT, mode: 'wait', where: 'your wardrobe', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, noHold: true,
     ready: () => !(typeof bagHeld === 'function' && bagHeld()), fallback: { wait: 5, later: 'device' } },   // not by then: section 15's bagTick puts it away for you
   { id: 'device', day: 0, at: 16 * 60 + 45, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introDevice', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, near: 3, noHold: true,
-    ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess', flags: ['intro.device'] } },   // after his wardrobe lines (21b); never handed over in 10 minutes: it's yours anyway
+    ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess' } },   // after his wardrobe lines (21b); you never came near him in 10 minutes (another deck): Monday's briefing hands it over, as for a missed bunk
   { id: 'toMess', day: 0, at: 16 * 60 + 55, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3',
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
   { id: 'servery', day: 0, at: 17 * 60 + 2, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',

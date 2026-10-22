@@ -353,10 +353,10 @@ def bunk_leave(g):
             g.step(30)
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, dev: introFlag('intro.device'), given: SHIP.intro.done['device:given'], bag: bagHeld(), deck: deckDef.num, z: (a => a && cellAt(a.x, a.z))(introWalker()), zr: (a => a && deckDef.num === 4 ? introRoomAt(4, cellAt(a.x, a.z)) : null)(introWalker()) })")
-            if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and r['dev']: break
+            if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and (r['dev'] or how == 'deck'): break
         took = r['m'] - t0
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
-        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] or r['bag'] or took > (20 if how == 'deck' else 12):
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else 12):   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
         if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
@@ -380,11 +380,12 @@ def talk_away(g):
             g.step(30)
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
             g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
-            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
-            if r['step'] != step: break
+            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), given: SHIP.intro.done['device:given'], z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
+            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)): break   # (bunk: on through the bag and the device)
         took = r['m'] - t0
-        print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, Zeke at {r['z']}")
-        if r['step'] == step or took > 20: fail(f"standing near him but not at the spot during '{step}', the evening never moved on ({r})")
+        print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, device in person {r['given'] is not None}, Zeke at {r['z']}")
+        if step == 'bunk' and r['given'] is None: fail(f'standing outside Bunk 1 through his bunk talk, the device never came from him in person ({r})')   # (OR2)
+        if r['step'] == step or took > (25 if step == 'bunk' else 20): fail(f"standing near him but not at the spot during '{step}', the evening never moved on ({r})")
     g.page.evaluate('localStorage.clear()')
 
 def firsts(g):
