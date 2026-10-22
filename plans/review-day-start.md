@@ -5,16 +5,16 @@ What: section 25 only (Dev link only): `DM_DAYS` (8 recorded saves, 170,459 char
 `devmodeDayUnpack`, `devmodeStartDay`, `devmodeDaysRow`, and one call line in `devmodeSet`; `tools/day_saves.py` (the
 recorder); `devmode_check.py` part "days".
 
-## Verdict: FIXES NEEDED (draft: two runs still going)
+## Verdict: FIXES NEEDED (item 1 in the recordings, item 2 in the recorder's setup)
 
 ## What was run
 | Check | Result |
 |---|---|
 | cadet_test 2b4a05db vs 64583ba1, alone (no #dev) | ALL IDENTICAL |
-| check_fast on 64583ba1 | (running) |
+| check_fast on 64583ba1 | QUICK CHECK OK in 252 s |
 | devmode_check days (clean) | DEVMODE CHECK OK |
 | Planted faults, devmode_check days (6) | 6 of 6 caught: a wrong day, no Undo, the real save written, the DecompressionStream test removed, tracking off, the busy flag left on after a damaged record |
-| day_saves.py --twice | (running) |
+| day_saves.py --twice (with ARROWS_CHECK from claude/arrows-plan 14cffba, item 2) | DAY SAVES TWICE OK; both recordings match the build's Days 1-2 sizes exactly (11,660 and 13,624 packed). Day 1 is played; the follower fell behind on Day 1 (never clocked in), so Days 2-8 are Set career, as the brief expected |
 | Load outside Dev, 5 loads each, with and without the block | heap +0.6 MB (89.2 vs 88.6 MB median); load median 6.41 s vs 6.01 s (noisy: one load of five was faster with the block); file +167 KB (5,826 vs 5,659 KB) |
 
 Plant runner and logs: `plans/review-day-start/` (plant.py, p_load.py, the logs).

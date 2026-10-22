@@ -1,0 +1,13 @@
+ds.html dcl/load ms [7188, 7189] heap MB 89.19 devmode n/a
+ds_noblock.html dcl/load ms [5995, 5995] heap MB 88.55 devmode n/a
+ds.html dcl/load ms [6406, 6407] heap MB 89.21 devmode n/a
+ds_noblock.html dcl/load ms [5687, 5688] heap MB 88.55 devmode n/a
+ds.html dcl/load ms [6019, 6020] heap MB 89.36 devmode n/a
+ds_noblock.html dcl/load ms [6113, 6114] heap MB 88.47 devmode n/a
+ds.html dcl/load ms [6430, 6431] heap MB 89.08 devmode n/a
+ds_noblock.html dcl/load ms [6476, 6476] heap MB 88.8 devmode n/a
+ds.html dcl/load ms [6206, 6206] heap MB 85.72 devmode n/a
+ds_noblock.html dcl/load ms [6005, 6006] heap MB 88.64 devmode n/a
+ds.html median load ms 6407 median heap MB 89.19 file KB 5826
+ds_noblock.html median load ms 6006 median heap MB 88.55 file KB 5659
+exit 0

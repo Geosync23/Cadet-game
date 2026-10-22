@@ -1,0 +1,8 @@
+clean OK []
+wrongday CAUGHT ["FAIL days: Day # does not match its recording in ['tr', 'use', 'band']: now [['m#', 'm#d', 'm#'], {'m#': #, 'm#': #, 'm#d': #}, 'reliable'], recorded [['m#', 'm#d', 'm#i', 'm#', 'm#'], {'m#': #, 'm#': #, 'm#d': #, 'm#': #, 'm#i': #}, 'trusted'] (re#record: tools/day_saves#py)", "FAIL days: Day # does not match its recording in ['tr', 'use', 'band']: now [['m#', 'm#d', 'm#i', 'm#', 'm#', 'm#', 'p#'], {'m#': #, 'm#': #, 'm#d': #, 'm#': #, 'm#i': #, 'm#': #, 'p#': #}, 'trusted'], recorded [['m#', 'm#', 'm#d', 'm#i', 'm#', 'm#', 'm#', 'm#', 'p#'], {'m#': #, 'm#': #, 'm#d': #, 'm#': #, 'm#i': #, 'm#': #, 'p#': #, 'm#': #, 'm#': #}, 'relied'] (re#record: tools/day_saves#py)"]
+noundo CAUGHT ['FAIL days: Day # kept no Undo of the game before', 'FAIL days: stopped: Timeout #ms exceeded#']
+realsave CAUGHT ['FAIL days: Day # changed the real save']
+nodecomp CAUGHT ['FAIL days: without DecompressionStream: "The recorded Day # couldn\'t be read# Your Dev game is unchanged#", or the Dev game changed']
+trackoff CAUGHT ['FAIL days: Day # started with job tracking off']
+nobusy CAUGHT ["FAIL days: a damaged Day # (eJzLSM#JyQcABiwCFQ==): 'Still starting the last day you picked#', or the Dev game changed", 'FAIL days: a damaged Day # (not base#!): "The recorded Day # couldn\'t be read# Your Dev game is unchanged#", or the Dev game changed']
+exit 0
