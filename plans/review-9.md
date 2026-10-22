@@ -146,8 +146,11 @@ Lead 25's check runners on it (their notes on claude/checks-cr1 90bc8b3, checks-
 - CR3: arc, path, disc, puzzle, deck OK; perf under 450 everywhere (flags: the Friday scenes, Fridays off on plain;
   memory #14); tiles_check's old FAIL was the check's timing (fixed in the check, after the release).
 
-Mine on it: check_fast QUICK CHECK OK (353 s); fridays_check FRIDAYS CHECK OK (1542 s). (events_check with 3bd9b2c
-and the Day 12 shot follow below when done; not needed for the verdict.)
+Mine on it: check_fast QUICK CHECK OK (353 s); fridays_check FRIDAYS CHECK OK (1542 s). events_check (with 3bd9b2c)
+EVENTS CHECK OK, quiet-watch Day 300 Deck 3 8/8. Live Day 12 (`p9_fri.py rc d12`): lectern Marrow + Vance from 16:04,
+54 seated, the storm's 17-line speech, line 10 ("What I need from you. Stay in when you can...") at 16:30 in Marrow's
+named bubble; shot `shots/rc_d12_1630.png`. (The probe's `eventOn('ionStorm')` reads null: eventOn takes a day, the
+probe's slip; the storm lines prove the storm is on.)
 
 ## FINAL VERDICT: the release (Short Fridays on, with the storm update and EVENTS_ON): PASS
 

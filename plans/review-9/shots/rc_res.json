@@ -1,0 +1,132 @@
+{
+ "sc": "d12",
+ "build": "starship-cadet.html",
+ "fill": [
+  [
+   "Day 12, Friday 15:56",
+   49,
+   [
+    "marrow"
+   ],
+   null
+  ],
+  [
+   "Day 12, Friday 16:00",
+   51,
+   [
+    "marrow"
+   ],
+   null
+  ],
+  [
+   "Day 12, Friday 16:04",
+   52,
+   [
+    "marrow",
+    "vance"
+   ],
+   0
+  ],
+  [
+   "Day 12, Friday 16:08",
+   53,
+   [
+    "marrow",
+    "vance"
+   ],
+   1
+  ],
+  [
+   "Day 12, Friday 16:12",
+   53,
+   [
+    "marrow",
+    "vance"
+   ],
+   3
+  ],
+  [
+   "Day 12, Friday 16:16",
+   54,
+   [
+    "marrow",
+    "vance"
+   ],
+   5
+  ],
+  [
+   "Day 12, Friday 16:20",
+   54,
+   [
+    "marrow",
+    "vance"
+   ],
+   6
+  ],
+  [
+   "Day 12, Friday 16:24",
+   54,
+   [
+    "marrow",
+    "vance"
+   ],
+   8
+  ],
+  [
+   "Day 12, Friday 16:28",
+   54,
+   [
+    "marrow",
+    "vance"
+   ],
+   9
+  ]
+ ],
+ "speech": [
+  "vance: Settle, please. The Captain. Quickly; I'm due back on the bridge.",
+  "marrow: Afternoon, everyone. If the lights dip while I talk, that's the storm. Not my speech.",
+  "marrow: The rec deck is shut for the storm. I've borrowed this room for an hour, then it shuts.",
+  "marrow: At two we flew into an ion storm. Dr. Sato says it's bigger than a moon. She's thrilled.",
+  "marrow: It can't hurt us. It can make the lights flicker, the comms go quiet, and Works very busy.",
+  "marrow: We expect it to blow through by Sunday morning. Two nights, perhaps a little less.",
+  "marrow: What's down: calls home and outside Mail. The booths and the bow lounge are shut for now.",
+  "marrow: I know that's hard. Your people will be there on Sunday. So, I'm afraid, will the queue.",
+  "marrow: Not every lamp got its new ballast in time. Expect a dark corridor. Walk, don't run.",
+  "marrow: Chief Calder's crew have been on the board since the jolt. They'll be on it all weekend.",
+  "marrow: What I need from you. Stay in when you can. Check on your neighbours. Eat the stew.",
+  "marrow: Some of you will be called in on your days off. I'm sorry. And thank you, in advance.",
+  "marrow: Tomorrow at six, supper in the mess by lantern light. If you're staying in, come and sit.",
+  "marrow: Happier news: cadet is learning fast. The Chief has noticed.",
+  "marrow: She says you ask good questions. Keep asking them. A storm is full of answers.",
+  "marrow: The all-clear, I hope, on Sunday morning. I'll tell you myself. Until then: steady.",
+  "marrow: Dinner's at five. Enjoy your weekend, those of you who have one."
+ ],
+ "said": [
+  12,
+  10
+ ],
+ "bub": [
+  {
+   "who": "marrow",
+   "stand": true,
+   "shown": true,
+   "top": 354,
+   "bot": 439,
+   "left": 142,
+   "right": 382,
+   "t": "What I need from you. Stay in when you can. Check on your ne"
+  }
+ ],
+ "storm": [
+  true,
+  null,
+  [
+   "works-tea 18:45-19:30",
+   "jam 19:45-21:15",
+   "sunrise-stretch 06:30-07:00",
+   "tap-night 20:00-22:00",
+   "captains-address 16:00-16:50"
+  ]
+ ],
+ "errors": []
+}
