@@ -80,3 +80,17 @@ With a tray, only a `mess-seat` ate it; now any sit place does (`SIT_TYPES` with
 | Other sit-downs and the crew | the change is inside the player's `actStart` tray branch only: meetings, traditions and the lounge without a tray are unchanged (above), and the crew's seating (sections 10 and 14) isn't touched |
 
 Note for the user, not blocking: "any seat" includes the music room's seats (the piano stool) and meeting seats (`event`), so a tray carried into a meeting room is eaten there.
+
+## FX3's delta 02e212f1 (fix 10, the lift-panel arrow; the user's go): PASS
+
+A goal on another deck now points at the nearest Lift panel you can see (`ixLiftPanel`: section 11's `lift` items, a hidden one only if none shows), not the middle of the landing, labelled "Tap the lift: Deck N · <goal>" (a trailing ", Deck N" said once).
+
+| Test | Result |
+| --- | --- |
+| interactions_check on 2b4a05db | FAIL: "another deck: the lift panel", "parts in hand: to the machine", the Deck 5 inside label and "the arrow points at a lift panel you can see, not the landing (166.8 px)" (and fixes 8-9's lines), as they should |
+| interactions_check on 02e212f1 | INTERACTIONS CHECK OK |
+| intro_check --evening on 2b4a05db / 02e212f1 | FAIL "at the Deck 5 lift with Torres, the arrow should point at the lift panel" (label was "Take the lift to Deck 4: zeke Torres", lower-case z) / OK |
+| cadet_test 2b4a05db -> 02e212f1 | e_night to i_tap3 differ (about 12,000 px each), all else identical. Looked at e_night: the only change is the off-screen arrow's label ("Take the lift to Deck 3: food, Deck 3" -> "Tap the lift: Deck 3 · Food") and its angle. Intended |
+| By eye, phone 390 x 844 | Deck 5, goal on Deck 4: the pin sits on the lift's keypad beside the doors, "Tap the lift: Deck 4 · Your bunk" (base: the landing's middle). Deck 4 in Bunk 1, goal on Deck 3: off screen, an edge arrow toward the lift, "Tap the lift: Deck 3 · Food" |
+
+Shots: scratch only (lift_base_d5.png, lift_fx3d_d5.png).
