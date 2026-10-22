@@ -14434,6 +14434,11 @@ function hobbyPick() {
 function jobBegin(A) {
   const mw = myWork(); if (!mw || A.placeId !== panelPlace(mw.j.machine)) { ACT = null; toast(A.o.title, 'You don\'t have a job here any more.'); return false; }
   const P = SHIP.player, { j, w } = mw, fit = [];
+  if (typeof scanFirst === 'function' && scanFirst(j)) {   // your scanner training (24g): look it over and read it first, nothing fitted yet (p5-fix2)
+    w.seen = true; A.def = { mins: INSPECT_MINS * (typeof toolSlow === 'function' ? toolSlow('scanner') : 1), pose: 'work', title: 'Inspecting' };
+    A.o.after = 'You open the panel on the ' + machineName(machineById(j.machine)) + ' and look it over with the scanner.'; A.o.need = jobNeeds(j, w);
+    return true;
+  }
   for (const p of P.carry.slice()) if (jobNeeds(j, w).includes(p)) { w.fitted.push(p); fit.push(p); P.carry.splice(P.carry.indexOf(p), 1); }
   if (fit.length) jobTouch(true);
   const need = jobNeeds(j, w), name = machineName(machineById(j.machine)), fitted = fit.length ? 'You fit ' + partList(fit) + '. ' : '';
@@ -14478,7 +14483,8 @@ function jobEnd(A) {
   } else if (A.kind === 'job' && mw) {
     const name = machineName(machineById(mw.j.machine));
     if (A.o.repair) {
-      if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
+      if (!mw.j.workDone && typeof caseFitted === 'function' && caseFitted(mw.j)) { P.work = null; MACH_REV++; }   // 24k / 24g: no call yet, or the wrong part: still faulty (caseFitted says so and puts the part back), as jobStepDone asks (p5-fix2)
+      else if (finishJob(mw.j.id)) { P.work = null; P.credits += JOB_PAY; toast('Job done', 'The ' + name + ' is running sweetly again. That\'s one off the board. +' + JOB_PAY + ' credits.'); }
       else toast('Your job', 'The job isn\'t yours any more.');
     } else if (!(typeof scanOpen === 'function' && scanOpen(mw.j.id))) toast('Inspecting', 'The ' + name + ' needs ' + partList(A.o.need) + '. ' + (P.carry.length && !A.o.need.includes(madeHere(mw.j)) ? '' : whereFrom(mw.j, A.o.need)));
   }
@@ -15698,7 +15704,7 @@ function ixJobStep() {
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
-  if (need.length && P.carry.length < CARRY_MAX) {
+  if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: your scanner training, not read yet: look it over first)
     if (w.make && w.make.part) return { deck: 5, room: 'f', label: 'Make ' + partList([w.make.part]) + ' in the machine shop' };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
@@ -45357,7 +45363,10 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
 const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
+// a row's own say on whether your finished training job counts (WORK_MECH[id].counts(job); 24g's m7: only once you've
+// scanned it, p5-fix2). Not counted: no training now; trainTick sees the job done and offers the training again
+function worksCounts(id, c) { const M = WORK_MECH[id] || {}, j = c && c.id === id && SHIP.jobs.find(x => x.id === c.j); try { return !M.counts || !j || !!M.counts(j); } catch (e) { return true; } }
 function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
 function worksEscortEnd(id) {
   const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id) return false;
@@ -46452,6 +46461,10 @@ function scanTrainMachine(d, not) {
   const all = machineList().filter(ok); if (!all.length) return null;
   return all[Math.floor(schedU(machSeed('m7'), d, 875) * all.length)];
 }
+// your scanner training job, not read yet (p5-fix2: it listed the washer's pump, so the arrow said "Fetch a pump", the
+// pump went in as a plain repair, the head-scratcher closed unseen and you were trained without a scan): the arrow sends
+// you to look it over (section 15's ixJobStep) and the look-over is the scan (jobBegin), which shows Day 5's case
+const scanFirst = j => !!j && !j.scan && j.train === 'm7' && j.claimedBy === 'you' && j.status === 'claimed' && !!j.cause && !j.workDone && scanHave();
 const SCAN_TRAINED = new Set();                          // machines used for today's training (the teacher's first)
 function scanTrainReserve(d, at, slot, o) {
     if (o && o.yours && typeof toolGive === 'function') toolGive('scanner');   // handed over at the board: yours to read with
@@ -46469,7 +46482,7 @@ function scanTrainReserve(d, at, slot, o) {
     delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; SCAN_TRAINED.add(m.id);
     return id;
 }
-if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.m7 = { reserve: scanTrainReserve, counts: j => !!j.scan };   // trained only once you've read it (24 core's trainTick asks)
 
 // =====================================================================
 // 24i. TRACING (M9, seat M3, 0.53.x; plans/mechanics/m9-tracing.html on claude/p5-design)

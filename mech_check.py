@@ -43,6 +43,7 @@ TRAIN = r"""((id) => {
     return j.status === 'done';
   };
   const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+    if (j.train === 'm7' && typeof scanRead === 'function') { scanRead(jid); if (typeof caseTick === 'function') caseTick(); }   // the scanner's training: you read it first (it shows Day 5's case; p5-fix2)
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
     jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
@@ -258,6 +259,43 @@ def m3d_taps(g):
 def m3d_both(g):
     m3d_part(g); m3d_jump(g); m3d_taps(g)
 PARTS['m3d'] = m3d_both
+
+# 24g the scanner's training played by taps (p5-fix2: the Day 5 job listed the washer's pump, so after Take it the arrow
+# said "Fetch a pump", the pump went in as a plain repair, the head-scratcher closed unseen, and you were trained without
+# a scan; and a repair at the panel never asked the case, so an uncalled head-scratcher was "fixed"): to the training
+# job's "do", take it; the arrow says look it over; the look-over is the scan and shows the case; a repair before a call
+# leaves it faulty; the right call, the fetch, the fit, the turn-in: trained. Then on paper, the job finished without a
+# scan: not trained
+M7_SETUP = TRAIN.replace("if (c && c.st === 'do' && (!myJob()", "if (c && c.st === 'do') break; if (false && (!myJob()").replace("const st0 = worksStage(id);", "const st0 = 0; const c = SHIP.works.cur; window.__m7j = c && c.j; return { st: c && c.st };")
+M7_SEE = "(() => { const j = SHIP.jobs.find(x => x.id === window.__m7j) || {}, cs = ((SHIP.works.cases || {}).open || []).find(c => c.job === j.id), g = ixJobStep(); return { goal: g && g.label, scan: !!j.scan, shown: cs ? !cs.wait : null, work: !!j.workDone, st: j.status, tr: SHIP.works.tr.m7 !== undefined }; })()"
+M7_PANEL = r"""(() => { const j = myJob(), m = machineById(j.machine); if (deckDef.num !== m.deck) goToDeck(m.deck); const s = placeSpot(panelPlace(m.id)), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return jobSpotTap(new THREE.Vector3(s.x, 0, s.z)); })()"""
+M7_FETCH = r"""(() => { if (deckDef.num !== 5) goToDeck(5); const need = jobNeeds(myJob(), myWork().w, SHIP.player.carry), it = ITEMS.find(i => i.t === shelfName(shelfOf(need[0]))); if (!it) return false; it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
+def m7_taps(g):
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
+    def wait():
+        for k in range(300):
+            g.step(10)
+            if not g.ev("ACT && ACT.kind"): break
+    st = g.ev(f"({M7_SETUP})('m7')"); took = g.ev("claimJob(window.__m7j)"); seen = [g.ev(M7_SEE)]
+    for f in (M7_PANEL, M7_PANEL):
+        r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
+    call = g.ev("(() => { const c = SHIP.works.cases.open.find(x => x.job === window.__m7j); return !!c && caseCall(c.id, c.cause); })()")
+    for f in (M7_FETCH, M7_PANEL):
+        r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
+    g.ev("turnInJob(window.__m7j)"); g.step(60); end = g.ev(M7_SEE)
+    print('  24g scanner training by taps:', st, took, json.dumps(seen), call, json.dumps(end))
+    check(st['st'] == 'do' and took and seen[0]['goal'].startswith('Look over') and not seen[0]['scan'], f"m7 taps: after Take it the arrow says look it over ({seen[0]['goal']})")
+    check(seen[1][0] and seen[1][1]['scan'] and seen[1][1]['shown'], f"m7 taps: the look-over is the scan, and the head-scratcher shows ({seen[1]})")
+    check(seen[2][0] and not seen[2][1]['work'], f"m7 taps: a repair before the call leaves it faulty ({seen[2]})")
+    check(call and seen[3][0] and seen[4][0] and seen[4][1]['work'], f"m7 taps: called, fetched and fitted: the work's done ({seen[3:]})")
+    check(end['st'] == 'done' and end['tr'], f"m7 taps: turned in, trained ({end})")
+    paper = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const id = window.__m7j; claimJob(id); const j = SHIP.jobs.find(x => x.id === id);
+      jobStops(j).forEach((x, k) => jobStepDone(id, k)); const t = turnInJob(id); for (let m = 1; m <= 30; m++) worksCareerTick(shipNow() + m);
+      return [t, !!j.scan, SHIP.works.tr.m7 !== undefined]; }})()""")
+    print('  24g scanner training finished without a scan:', paper)
+    check(paper[0] and not paper[1] and not paper[2], f"m7: a training job finished without a scan doesn't train you ({paper})")
+    g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
+PARTS['m7'] = m7_taps
 
 # 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk
 # room it's said, away it's Mail at 07:00; turning up (or a nod while out) is the row's use; none on a day off
