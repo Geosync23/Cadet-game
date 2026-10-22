@@ -91,6 +91,13 @@ with sync_playwright() as pw:
     if TWICE:
         a = record(ctx, 2); ctx2 = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1); c = record(ctx2, 2)
         same = all(a[d]['save'] == c[d]['save'] for d in a)
+        def where(x, y, path=''):                       # the paths that differ (the first 12)
+            if type(x) != type(y): return [path or '/']
+            if isinstance(x, dict): return [p for k in sorted(set(x) | set(y)) for p in where(x.get(k), y.get(k), path + '/' + k)]
+            if isinstance(x, list): return [p for i in range(max(len(x), len(y))) for p in where(x[i] if i < len(x) else None, y[i] if i < len(y) else None, f'{path}[{i}]')]
+            return [] if x == y else [f'{path}: {str(x)[:60]} / {str(y)[:60]}']
+        for d in a:
+            if a[d]['save'] != c[d]['save']: print(f'  Day {d} differs at:', where(json.loads(a[d]['save']), json.loads(c[d]['save']))[:12])
         print('DAY SAVES TWICE OK' if same else 'DAY SAVES TWICE FAILED: the two recordings differ'); b.close(); sys.exit(0 if same else 1)
     days = record(ctx, LAST)
     b.close()
