@@ -438,6 +438,36 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FX3 (AC2's arrows_check shift guide, AR2; lead 29): the linen delivery's drop (4-laundry-1) and the laundry's vent stop stand by
+# Washer 1; a tap at the arrow's pin hit the washer and did the washer's thing (your own load), never the stop. Now a tap on
+# the line to your chore's next stop does the stop; a washer tapped elsewhere still does its own (0.28.55, tested above)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof DELIVERIES !== 'undefined' && !!placeById('4-laundry-1')"):
+        print('== FX3: the laundry stops by Washer 1')
+        SET = r"""(kind => { actEnd(true); setShipNow(1440 * 2 + 13 * 60 + 40); machinesNow(); const t = shipNow(); SHIP.jobs = SHIP.jobs.filter(j => !/^fx3-/.test(j.id)); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const d = DELIVERIES.find(x => x.key === 'linen'), to = placeById(d.to);
+          SHIP.jobs.push(kind === 'linen' ? { id: 'fx3-linen', machine: null, deck: 4, room: to.room, kind: 'chore', chore: 'delivery', title: d.title, bring: d.bring, tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
+              stops: [{ deck: 5, placeId: d.from, mins: 3, tag: 'pickup' }, { deck: 4, placeId: d.to, mins: 3, tag: 'drop' }], stepsDone: [0] }
+            : { id: 'fx3-vent', machine: null, deck: 4, room: to.room, kind: 'chore', chore: 'vent', title: 'Clean a vent: laundry', tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', stops: [{ deck: 4, placeId: d.to, mins: 20, tag: 'vent' }] });
+          MACH_REV++; claimJob(kind === 'linen' ? 'fx3-linen' : 'fx3-vent'); if (deckDef.num !== 4) goToDeck(4); const s = placeSpot(d.to); player.obj.position.set(s.x + 1.2, 0, s.z + 1.2); player.stop(); })"""
+        res = []
+        for kind in ('linen', 'vent'):
+            for rot in range(4):
+                g.ev(f"({SET})('{kind}')"); g.step(80)
+                xy = g.ev("(() => { const s = placeSpot('4-laundry-1'), v = new THREE.Vector3(s.x, 1.2, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+                under = g.ev(f"(() => {{ const h = pick({xy[0]}, {xy[1]}); return h && h.object.userData.item ? h.object.userData.item.t : 'floor'; }})()")
+                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+                res.append([kind, rot, under, g.ev("ACT && ACT.kind")])
+                g.page.click('#rot'); g.step(30)
+        print('   at the pin [chore, camera turn, under the pin, what started]:', res)
+        washer = [r for r in res if r[2].startswith('Washer')]
+        check(washer, f'(the pin stands over a washer in some camera turn: {res})')
+        check(all(r[3] == 'ixStop' for r in res), f'a tap at the laundry stop\'s pin does the chore\'s stop, over a washer too ({res})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fx3-/.test(j.id))")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
 # could take on the board (section 17's openJobs), the way a new player finds it
 if '--quick' not in sys.argv:

@@ -13284,6 +13284,7 @@ function playerTap(it, at, point) {
   if (bunkTap(it, at)) return true;                      // a friend's note on your bunk (0.28.25)
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
+  if (choreRayTap(it, at)) return true;                  // the tap passed over your chore's next stop and a machine caught it (FX3, below)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
@@ -14236,6 +14237,15 @@ function jobDoorOpen(deck, room) {
   if (typeof deckDef !== 'undefined' && deckDef.num === deck && roomAt(...player.here()) === room) return true;   // never shut on you inside (0.28.55, reviewer 1f's softlock)
   const j = typeof myJob === 'function' ? myJob() : null; if (!j || !Array.isArray(j.stops) || typeof placeById !== 'function') return false;
   return j.stops.some(x => { const pl = x.placeId && placeById(x.placeId); return !!pl && pl.deck === deck && pl.room === room; });   // any stop of the job you hold, until it's turned in
+}
+// a tap whose line passes over your chore's next stop (the arrow's pin) where a machine caught it first (FX3, AC2 and AR2: the
+// linen's drop and the laundry's vent stop stand by Washer 1, and the washer took the tap: your own load, never the stop). Only
+// on the line to the pin: a washer tapped elsewhere still does its own thing (0.28.55, the lead's rule for chores)
+function choreRayTap(it, at) {
+  const j = typeof ixChore === 'function' ? ixChore() : null; if (!j || j.workDone || typeof ray === 'undefined' || !(ixMachine(at) || stubTap(it, at))) return false;
+  const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
+  if (!s || jobRayDist(s) >= JOB_RAY) return false;
+  return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
 // the Repair button (0.28.52, the user's design, "Repair" step): small and thumb-sized at the bottom right, in the slot
