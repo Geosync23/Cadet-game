@@ -1,6 +1,6 @@
-(() => { const RG = {x0:-1.15,x1:2.32,z0:-8.75,z1:-4.68};
+(() => { const RG = window.__RG || {x0:-1.15,x1:2.32,z0:-8.75,z1:-4.68};
  const inR = (x,z) => x>=RG.x0 && x<=RG.x1 && z>=RG.z0 && z<=RG.z1;
- player.obj.visible = false; scene.updateMatrixWorld(true);
+ if (!window.__KEEP_PLAYER) player.obj.visible = false; scene.updateMatrixWorld(true);
  const q = (a, d=1000) => Array.from(a, x => Math.round(x*d)/d);
  const texs = {}, mats = {}, meshes = [], sprites = [], lights = [];
  const tex = t => { if(!t) return null; if(!texs[t.uuid]) { const im = t.image; let url=null, w=0, h=0;
@@ -53,6 +53,7 @@
    meshes.push({ mat: mat(gm), p:outP, n: outN.length? outN:null, c: outC.length? outC:null, u: outU.length? outU:null, cast:o.castShadow, recv:o.receiveShadow, ro:o.renderOrder, inst:o.isInstancedMesh?o.count:0, src: o.uuid });
    }
  });
+ if (window.__LIGHTS_ONLY) return JSON.stringify({ lights, sprites: sprites.map(x => ({ ...x, m: mats[x.mat] })), exp: renderer.toneMappingExposure, bg: scene.background.getHex() });
  // crop big clamped textures to the part this room uses, and remap its uvs
  for (const [id, T] of Object.entries(texs)) { if (T.w * T.h < 300000) continue;
    const users = meshes.filter(m => mats[m.mat].map === id && m.u); if (!users.length) continue;

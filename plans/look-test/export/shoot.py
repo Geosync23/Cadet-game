@@ -1,7 +1,8 @@
 import sys, re, pathlib, json
 from playwright.sync_api import sync_playwright
 EX = pathlib.Path('/tmp/cadet-work/three/package')
-PAGE = (pathlib.Path(__file__).parent / '../tea-corner-look-test.html').read_text()
+import os
+PAGE = (pathlib.Path(__file__).parent / ('../' + os.environ.get('LT_PAGE', 'bunk-room-look-test.html'))).read_text()
 SKEL = '<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"></head><body>' + PAGE + '</body></html>'
 pathlib.Path('/tmp/cadet-work/lt.html').write_text(SKEL)
 def route(r):
@@ -14,6 +15,8 @@ def route(r):
 sizes = [tuple(map(int, s.split('x'))) for s in (sys.argv[1] if len(sys.argv) > 1 else '412x960').split(',')]
 levels = [int(c) for c in (sys.argv[2] if len(sys.argv) > 2 else '012')]
 cam = sys.argv[3] if len(sys.argv) > 3 else 'close'
+tod = sys.argv[4] if len(sys.argv) > 4 else 'day'
+OUT = os.environ.get('LT_OUT', '.')
 with sync_playwright() as pw:
     b = pw.chromium.launch(executable_path='/opt/pw-browsers/chromium', args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     for (w, h) in sizes:
@@ -25,9 +28,10 @@ with sync_playwright() as pw:
         p.goto('file:///tmp/cadet-work/lt.html')
         p.wait_for_function('window.__look', timeout=60000)
         p.evaluate(f"__look.setCam('{cam}')")
+        p.evaluate(f"__look.setTime && __look.setTime('{tod}')")
         for lv in levels:
             p.evaluate(f'__look.setLevel({lv})'); p.wait_for_timeout(2500)
-            p.screenshot(path=f'L{lv}_{w}x{h}_{cam}.png')
+            p.screenshot(path=f'{OUT}/L{lv}_{w}x{h}_{cam}_{tod}.png')
             print(w, h, lv, json.dumps(p.evaluate('__look.stats()')))
         print('errors', errs[:6])
         p.close()
