@@ -1202,7 +1202,7 @@ def legacy_parts(GAME, ON, fails):
     def check(cond, msg):
         if not cond: fail(msg)
         return cond
-    # ---- CT1 and CP1 (claude/controller-p1 cff5bab): off, quiet, base, deck, pick, panels, api, lists ----
+    # ---- CT1 and CP1 (claude/controller-p1 cff5bab, + CP1's claude/controller c11ed33c in pick): off, quiet, base, deck, pick, panels, api, lists ----
     class Pad:
         """The game with a pretend controller: plug, hello, press, sticks, step."""
         def __init__(self, pw, path, w=390, h=844):
@@ -1394,6 +1394,7 @@ def legacy_parts(GAME, ON, fails):
                     check(got == want, f'pick: D-pad right should ring the next thing, {want}, not {got}')
                 key = a.ev('PAD_PICK.sel && PAD_PICK.sel.key')
                 s = a.ev('PAD_PICK.sel.s')
+                for q in (a, b): q.ev("document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")   # (an old message: the controller's own may differ in time)
                 b.ev(f'tap({s[0]}, {s[1]})')                 # b: a finger, at the same moment
                 a.btn('a'); a.step(1); b.step(1); a.btn('a', 0)
                 a.step(40); b.step(40)
@@ -1704,7 +1705,7 @@ def legacy_parts(GAME, ON, fails):
             p.ev("INTRO_UI.manifest.querySelector('button').focus()"); p.press('a'); p.step(3)
             check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
         p.close()
-    # ---- CP3 (claude/controller-p3 18e9032): marks, touch (here touch3), drop ----
+    # ---- CP3 (claude/controller-p3 18e9032, + CP1's claude/controller 0251af41 in marks): marks, touch (here touch3), drop ----
     # ---- P3 (plan sections 5 and 6): button pictures, connecting and disconnecting ----
     # marks:   nothing before a press; after one, a mark on Device (Y), Pause (Menu), Tracked (View), inside its button, shown;
     #          the bottom line's mark in the pad's style; Xbox / PlayStation / Nintendo from the pad's name and from
@@ -1757,11 +1758,12 @@ def legacy_parts(GAME, ON, fails):
             if SHOTS: p.g.shot(SHOTS + f'/marks-{fam}.png')
         check(p.ev("padWord('a')") == 'B', 'marks: on a Nintendo pad the bottom button is B')
         # P4's Settings: Off (no marks on the buttons, a plain one on the bottom line), and Y's action moved to LB
-        p.ev("window.padMarkFamily = () => null"); p.step(12)
+        p4 = p.ev("typeof PAD_SET === 'object' && typeof padSetBind === 'function'")   # (with P4 built, its own settings; else stand-ins)
+        p.ev("PAD_SET.marks = 'off'" if p4 else "window.padMarkFamily = () => null"); p.step(12)
         check(not any(a != 'padHint' for a, _ in marks(p)), f'marks: marks on the buttons with Off: {marks(p)}')
-        p.ev("window.padMarkFamily = () => PAD.fam; window.padButtonFor = a => a === 'y' ? 'lb' : a; PAD.fam = 'xbox'"); p.step(2)
+        p.ev("PAD_SET.marks = 'auto'; padSetBind('y', 'lb'); PAD.fam = 'xbox'" if p4 else "window.padMarkFamily = () => PAD.fam; window.padButtonFor = a => a === 'y' ? 'lb' : a; PAD.fam = 'xbox'"); p.step(2)
         check(marks(p).get(('devBtn', 'y')) == ('xbox:lb', True) and p.ev("document.querySelector('#devBtn > .padk').textContent") == 'LB', f'marks: Device should show LB after rebinding: {marks(p)}')
-        p.ev("delete window.padMarkFamily; delete window.padButtonFor"); p.step(12)
+        p.ev("padSetBind('y', 'y')" if p4 else "delete window.padMarkFamily; delete window.padButtonFor"); p.step(12)
         # Lightdisc's Leave: B
         if p.ev("(() => { const a = DECK_CREW[0]; if (!a) return false; discBegin(a); return !!(DISC.view && DISC.view.leave); })()"):
             p.press('x'); p.step(12)
