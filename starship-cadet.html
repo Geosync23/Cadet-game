@@ -15928,7 +15928,7 @@ function turnInGains(j, a) {
   if (mets) { const best = {}; for (const m of mets) if (m && (!best[m.sys] || m.add > best[m.sys].add)) best[m.sys] = m; mets = mets.filter(m => m && best[m.sys] === m); }
   const out = [];
   for (const r of reps || []) { if (r && dup('rep:' + (r.dept || 'works'))) continue; if (!r || !(r.add > 0) && r.add !== undefined) continue; const dn = r.name || tgDept(r.dept);   // words only, never a number (the user's 0.61.15 rule)
-    out.push({ rep: true, text: (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works reputation up') : dn + ' reputation up' }); }
+    out.push({ rep: true, text: r.dept === 'you' ? T('works.turnin.you', 'Your reputation up') : (r.dept || 'works') === 'works' ? T('works.turnin.rep', 'Works team\'s standing up') : T('works.turnin.dept', '{dept} team\'s standing up', { dept: tgDept(r.dept) }) }); }   // yours and the department's, never the same name (FX3)
   for (const m of mets || []) { if (!m || !(m.add >= .5)) continue; const nm = T('meter.' + m.sys, m.name || m.fb || (typeof SYSTEM_NAME !== 'undefined' && SYSTEM_NAME[m.sys]) || String(m.sys));   // the head writer's short name first
     out.push({ rep: false, text: T('works.turnin.meter', '+{n} {system}', { n: Math.round(m.add), system: nm }) }); }
   return out;
@@ -33968,6 +33968,14 @@ const LINES = JSON.parse([
   '{"text":"{title}. Your reputation: {band}. What\'s next: {next}","id":"zz0hp5"}]',
   ',"works.record.commissioned":[',
   '{"text":"Commissioned Officer, Day {day}.","id":"cey8rd"}]',
+  ',"works.rep.down":[',
+  '{"text":"Down to {band}.","id":"897ti4"}]',
+  ',"works.rep.missed":[',
+  '{"text":"Missed shift | You missed your shift. That costs your reputation: {band} now.","id":"esuj79"}]',
+  ',"works.rep.title":[',
+  '{"text":"Your reputation","id":"19ityk4"}]',
+  ',"works.rep.up":[',
+  '{"text":"Up to {band}. People are noticing your work.","id":"z7vqf0"}]',
   ',"works.skill.hang":[',
   '{"text":"getting the hang of these","id":"piahj7"}]',
   ',"works.skill.know":[',
@@ -34036,12 +34044,16 @@ const LINES = JSON.parse([
   '{"text":"What\'s next","id":"83cf6l"}]',
   ',"works.training.none":[',
   '{"text":"Nothing yet. Your first lesson is coming.","id":"7mlbr0"}]',
+  ',"works.turnin.dept":[',
+  '{"text":"{dept} team\'s standing up","id":"pe6k2s"}]',
   ',"works.turnin.meter":[',
   '{"text":"+{n} {system}","id":"1cqchx1"}]',
   ',"works.turnin.rep":[',
-  '{"text":"Works reputation up","id":"1l37imz"}]',
+  '{"text":"Works team\'s standing up","id":"1m336ij"}]',
   ',"works.turnin.repN":[',
   '{"text":"+{n} {dept} reputation","id":"1t16n10"}]',
+  ',"works.turnin.you":[',
+  '{"text":"Your reputation up","id":"1ug4yik"}]',
   ',"worried.captain":[',
   '{"text":"Up to the ready room? {sigh}. The Captain\'s kind. Still, go to your shift.","id":"12wxjes","tone":"warm","tier":[2,4]}]',
   ',"worried.chief":[',
@@ -40290,7 +40302,7 @@ function careerJobIn(n) {
     if (!g.meters && Array.isArray(j.meters)) g.meters = j.meters.filter(m => m && m.gain > 0).map(m => ({ sys: m.key, name: m.name, add: m.gain })); }   // the systems engineer's points per ship meter (0.33.57)
   if (typeof turnInShow === 'function') { if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1; return; }   // the card says it: no chip as well
   const now = performance.now(); if (now - REP_CHIP_AT < REP_CHIP_GAP * 1000 || (typeof DIALOGUE !== 'undefined' && DIALOGUE) || CHAT || typeof needFloat !== 'function') return;
-  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' reputation');
+  REP_CHIP_AT = now; needFloat('+ ' + dept[0].toUpperCase() + dept.slice(1) + ' team\'s standing');   // the department's (yours is "Your reputation": FX3)
   const f = typeof FLOATS !== 'undefined' && FLOATS[FLOATS.length - 1]; if (f && f[0]) { f[0].style.color = REP_DEPT_COL[dept] || ''; f[0].style.borderColor = REP_DEPT_COL[dept] || ''; }
   if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
 }
@@ -45431,7 +45443,13 @@ if (typeof PLAYER_TAPS !== 'undefined') PLAYER_TAPS.unshift((it, at) => {
 // ---- skill in words (section 15's careerSpeed reads SHIP.works.sk; this counts and words it) ----
 function skillWord(kind) { const n = SHIP.works && SHIP.works.sk[kind] || 0; return n >= 15 ? worksText('works.skill.know', 'you know these well') : n >= 5 ? worksText('works.skill.hang', 'getting the hang of these') : worksText('works.skill.new', 'new to you'); }
 // ---- your Works reputation in your rank ----
-function worksXp(n) { const W = worksInit(); if (!W || !n) return; W.xp = Math.max(0, W.xp + n); }
+function worksXp(n) { const W = worksInit(); if (!W || !n) return; const b0 = worksBand(); W.xp = Math.max(0, W.xp + n); const b1 = worksBand(); if (b1 !== b0) worksRepTell(b0, b1); }
+// your reputation said when its word changes (FX3, AR1: it moved and nobody told you; "Relied on" is what the test job waits for)
+function worksRepTell(b0, b1) {
+  const B = WORK_BANDS[SHIP.works.tier] || WORK_BANDS[1], up = B.findIndex(x => x[1] === b1) > B.findIndex(x => x[1] === b0), band = worksBandWord();
+  try { toast(worksText('works.rep.title', 'Your reputation'), up ? worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
+  if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
+}
 function worksBand() {                                   // 'new' ... 'relied', or null before SHIP.works (section 17 keeps today's order)
   const W = SHIP.works; if (!W) return null;
   const B = WORK_BANDS[W.tier] || WORK_BANDS[1]; let b = B[0][1]; for (const [x, k] of B) if (W.xp >= x) b = k; return b;
@@ -45447,7 +45465,9 @@ onSim('job', n => {
   const found = !!(j && (j.foundBy === 'you' || (n.machine && simNotes('found', (j.posted || 0) - 1).some(x => x.machine === n.machine && x.by === 'you'))));
   const right = !!(j && j.rightFirst && d >= WORKS_RIGHT_FROM), clever = !!(j && j.clever);
   const side = WORKS_SIDE_KINDS.has(kind) || j && WORKS_SIDE_KINDS.has(j.kind), xp = side ? (WORK_XP[kind] ?? 1) + (right ? 1 : 0) : (WORK_XP[kind] || 1) + (found ? 1 : 0) + (right ? 1 : 0) + (clever ? 1 : 0);
-  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
+  const xp0 = W.xp;
+  if (j && j.xp === 0) { /* paid elsewhere (E2's leak joint: the leak's +1) */ } else if (side) worksSideXp(xp, j && j.kind || kind); else worksXp(xp);
+  if (j && W.xp > xp0) { const g = j.gains || (j.gains = {}), R = g.rep || (g.rep = []); if (!R.some(x => x.dept === 'you')) R.unshift({ dept: 'you' }); }   // the turn-in card's first chip: your own reputation (FX3)   // a side job's: flat (+1 more right first time: rewiring, 0.45.14), capped, +2 a day in all (0.45.7; flat 0.45.11, E2/R4)
   if (m) W.sk[m.kind] = (W.sk[m.kind] || 0) + 1;
   W.log.push([String(n.id).slice(0, 80), d, (found ? 1 : 0) | (right ? 2 : 0) | (clever ? 4 : 0), String(kind).slice(0, 24)]); if (W.log.length > WORKS_LOG) W.log.splice(0, W.log.length - WORKS_LOG);
   const c = W.cur; if (c && c.st === 'do' && c.j === n.id) worksDone(c.id, n.t);
@@ -45458,7 +45478,9 @@ onSim('job', n => {                                      // the teacher's word a
   const say = worksVoice(c.by, 'train.' + c.id + '.follow.' + key) || [{ take: 'Good. Take your time.', done: 'Done. Turn it in at the board.' }[key] || (n.step === 'stop' ? 'That\'s it. Next.' : null)].filter(Boolean);
   worksSayAll(c.by, say);
 });
-onSim('shiftMissed', n => worksXp(WORK_XP.missed));
+onSim('shiftMissed', n => { worksXp(WORK_XP.missed); if (!SHIP.works || typeof mailSend !== 'function') return;   // said, not quiet (FX3, AR1): a missed shift costs your reputation
+  const t = worksText('works.rep.missed', 'Missed shift | You missed your shift. That costs your reputation: {band} now.', { band: worksBandWord() }), i = t.indexOf(' | ');
+  mailSend({ at: shipNow(), from: worksName('calder'), subject: i > 0 ? t.slice(0, i) : 'Missed shift', body: i > 0 ? t.slice(i + 3) : t }); });
 onSim('jobAbandoned', n => worksXp(WORK_XP.abandoned));
 function worksNoticed(jobId, who) {                      // someone noticed a job of yours (section 20 may call it): the log shows who
   const e = SHIP.works && SHIP.works.log.find(x => x[0] === jobId); if (!e || typeof who !== 'string') return false; e[4] = who.slice(0, 40); return true;
@@ -45521,7 +45543,7 @@ function worksLogTitle(e) {                              // a log row's title, f
 }
 worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training'), order: 10, view() {
   const W = SHIP.works, B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
-  say(worksRankTitle(W) + '. Works reputation: ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
+  say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });

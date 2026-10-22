@@ -140,6 +140,16 @@
 == works.record
 - {title}. Your reputation: {band}. What's next: {next}
 
+// FX3: your reputation said when its word changes, and a missed shift's Mail ("Subject | body", from Calder)
+== works.rep.title
+- Your reputation
+== works.rep.up
+- Up to {band}. People are noticing your work.
+== works.rep.down
+- Down to {band}.
+== works.rep.missed
+- Missed shift | You missed your shift. That costs your reputation: {band} now.
+
 // the asks (toast and Mail when a row opens; the teacher sends it)
 == works.ask.m7
 - Board, when you're in | Board, when you're in. Torres left you something.
