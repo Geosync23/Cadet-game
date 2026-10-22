@@ -30441,6 +30441,10 @@ const LINES = JSON.parse([
   '{"text":"{hi}. Don\'t worry, nobody knows where anything is for a week.","id":"1wsosu4","tone":"funny","tier":[0,0]},',
   '{"text":"Hello, new face. You\'ll be fine. Everyone\'s friendly here.","id":"1hxnlcc","tier":[0,0]},',
   '{"text":"{hi}. If you get lost, follow the smell of toast to the mess.","id":"1y9nu6u","tone":"funny","tier":[0,0]},',
+  '{"text":"{hi}. Found your way about yet? Deck signs help. Mostly.","id":"1lxn3qj","tier":[0,0]},',
+  '{"text":"Oh, {hi}. Still learning names? Me too, some days.","id":"13p6ocy","tone":"funny","tier":[0,0]},',
+  '{"text":"{hi}. Good to see a new face about the place.","id":"1omen9t","tier":[0,0]},',
+  '{"text":"{hi}. Ask anyone anything. We all had a first week.","id":"2o8kql","tier":[0,0]},',
   '{"text":"{hi}, {nick}. Getting the hang of the place?","id":"10692mb","tier":[1,1]},',
   '{"text":"Oh, {hi}. Good to see you again.","id":"pzcmie","tier":[1,1]},',
   '{"text":"{hi}. Still finding your way? You\'re doing well.","id":"tcmr0v","tier":[1,1]},',
@@ -32741,6 +32745,16 @@ const LINES = JSON.parse([
   '{"text":"Good chat. I feel better for that.","id":"fvciw3","tone":"warm"},',
   '{"text":"Same time tomorrow? Only half joking.","id":"1997g1","tone":"funny"},',
   '{"text":"That\'s the best part of my day sorted. Off you go.","id":"22mvyu","tone":"warm"},',
+  '{"text":"Right. Back to it. That did me good, that.","id":"1fn2sgk"},',
+  '{"text":"Lovely. Let\'s not leave it so long next time.","id":"1otaiiy"},',
+  '{"text":"Well, that went quickly. Good chats always do.","id":"1jdogni"},',
+  '{"text":"Thanks for stopping. Most people just wave.","id":"uox6na"},',
+  '{"text":"I\'ll let you go. Same again some time?","id":"1p11nxf"},',
+  '{"text":"That was a proper talk. I\'d forgotten how nice they are.","id":"mc590r","tone":"warm"},',
+  '{"text":"Off you pop. I\'ll save my next story for you.","id":"mvqp0z","tone":"funny"},',
+  '{"text":"Good. That\'s put me in a better mood. Mind how you go.","id":"1lnbnlw"},',
+  '{"text":"Right, enough of me. Go and do something fun.","id":"9sjil3"},',
+  '{"text":"{thanks}. That was the nicest fifteen minutes I\'ve had today.","id":"133z01m"},',
   '{"text":"Thanks, {nick}. I needed that.","id":"16y7fzq"},',
   '{"text":"You\'re good company, you know that? Go on, scoot.","id":"fb7hvr","tone":"warm","tier":[3,4]}]',
   ',"talk.filler":[',
@@ -32753,7 +32767,17 @@ const LINES = JSON.parse([
   '{"text":"I could do this all evening. Shame about bedtime.","id":"1upqp3v","tone":"funny"},',
   '{"text":"You\'ve got a good laugh. Use it more.","id":"4hwhjj","tone":"warm"},',
   '{"text":"Sorry, I\'m rambling. Stop me if I ramble.","id":"w1u1f","tone":"funny"},',
-  '{"text":"Tea would make this perfect. Next time, tea.","id":"1eyau6s"}]',
+  '{"text":"Tea would make this perfect. Next time, tea.","id":"1eyau6s"},',
+  '{"text":"Hark at us. Two people having a proper chat. Rare, that.","id":"1g37ncp","tone":"funny"},',
+  '{"text":"It\'s nice, isn\'t it? Just talking. Nobody needing anything.","id":"1pmtods","tone":"warm"},',
+  '{"text":"Hm. I\'ve lost my thread. Never mind, it\'ll turn up.","id":"1gwkbkg"},',
+  '{"text":"Listen to the vents. You stop hearing them after a month.","id":"k6yme1"},',
+  '{"text":"I keep thinking I should be doing something. Then I don\'t.","id":"xxoo5m","tone":"funny"},',
+  '{"text":"Nobody\'s called me on the comm in an hour. That\'s a record.","id":"99won5","tone":"funny"},',
+  '{"text":"Funny, the things you end up talking about out here.","id":"16yei6o"},',
+  '{"text":"I\'ll remember this bit. The quiet bit. It\'s my favourite.","id":"d1of74"},',
+  '{"text":"Where does the time go on a ship? Into the walls, I reckon.","id":"1gw254s","tone":"funny"},',
+  '{"text":"Mm. That\'s a good question. I\'ll think about it later.","id":"ro1oq7"}]',
   ',"talk.food.ans.cheer":[',
   '{"text":"Toast is life. Finally, someone gets it.","id":"eqtguj","tone":"funny"},',
   '{"text":"Bold. Correct, but bold.","id":"13nbf0i","tone":"funny"}]',
@@ -32955,7 +32979,9 @@ const LINES = JSON.parse([
   '{"text":"Sit down, sit down. There\'s room.","id":"g5kgqz"},',
   '{"text":"Grab a seat. This one\'s comfy, I checked.","id":"fa1zk0","tone":"funny"},',
   '{"text":"Oh, have a seat. I was getting bored of me.","id":"jjv6le","tone":"funny"},',
-  '{"text":"Sit. Get comfy. I\'m not going anywhere.","id":"1f64a33"}]',
+  '{"text":"Sit. Get comfy. I\'m not going anywhere.","id":"1f64a33"},',
+  '{"text":"Have a seat. The good one\'s taken, but this one\'s fine.","id":"rukdhu","tone":"funny"},',
+  '{"text":"Sit down. Feet up, if nobody\'s looking.","id":"sxxza4"}]',
   ',"talk.start":[',
   '{"text":"Got a few minutes? Go on, then.","id":"fq2t61"},',
   '{"text":"Oh, a proper chat. Lovely. I\'ve got time.","id":"1qxfwg5"},',
@@ -32963,6 +32989,12 @@ const LINES = JSON.parse([
   '{"text":"I\'d like that. Go on, what\'s new?","id":"1yy0jqe"},',
   '{"text":"Talk? Always. Tell me everything.","id":"1ydh7ra"},',
   '{"text":"Course. I was hoping someone would stop.","id":"t3xdyh","tone":"warm"},',
+  '{"text":"Go on, then. I could do with a sit and a natter.","id":"mnnzt8"},',
+  '{"text":"Oh, yes please. My head\'s full of nothing much.","id":"bs0oj0","tone":"funny"},',
+  '{"text":"Mm, go on. Five minutes, then I\'m all yours. Well, fifteen.","id":"r3v2ek","tone":"funny"},',
+  '{"text":"Nice. I was just thinking it\'s been a quiet one.","id":"5s7bmv"},',
+  '{"text":"Yes. Let\'s. What\'s the news with you?","id":"qbjsju"},',
+  '{"text":"Always time for a chat. That\'s a ship rule. I just made it up.","id":"heltsm","tone":"funny"},',
   '{"text":"For you? I\'ve always got time.","id":"si0uba","tone":"warm","tier":[3,4]},',
   '{"text":"Oh good. I\'ve been saving things up to tell you.","id":"1x3n8qy","tier":[3,4]}]',
   ',"talk.stop":[',
@@ -32970,7 +33002,10 @@ const LINES = JSON.parse([
   '{"text":"Another time, then. No rush.","id":"1b1aty8"},',
   '{"text":"Right you are. Finish this another day.","id":"1d8v3al"},',
   '{"text":"Go on, I\'ll keep the rest for next time.","id":"r4f7hu"},',
-  '{"text":"No worries. I\'ll be here. Probably.","id":"q72q6g","tone":"funny"}]',
+  '{"text":"No worries. I\'ll be here. Probably.","id":"q72q6g","tone":"funny"},',
+  '{"text":"Off you go, then. We\'ll pick it up later.","id":"1h2qc2p"},',
+  '{"text":"Fair enough. Remind me where we were, next time.","id":"1fcutqh"},',
+  '{"text":"Course. Go on, I\'ll hold the thought.","id":"1fksuun"}]',
   ',"talk.tradition.ans.cheer":[',
   '{"text":"That\'s the spirit. Then the tiredness. Then the spirit again.","id":"1ctb7wu","tone":"funny"},',
   '{"text":"Good plan. Bad plan. Do it anyway.","id":"ga83ck","tone":"funny"}]',
@@ -34533,7 +34568,7 @@ const TALKS = JSON.parse([
   '{"id":"work.works.light-on","topic":"work","when":{"tier":[3,4]},"lines":[{"text":"There\'s a lamp on Deck 4 I fixed in my first month. Every time I pass it, I check."},{"text":"Still on. Every time. Silly, isn\'t it? It feels like a friend.","tone":"warm"}],"ask":{"text":"Is there something you check on, just because it\'s yours?"},"replies":{"listen":{"text":"Has it ever gone out?","ans":{"text":"Once. I fixed it again before breakfast. Nobody knew. That was the best bit.","tone":"warm"}},"share":{"text":"Something I fixed in my first week.","ans":{"text":"Then you\'ll check it for years. Welcome to the club.","tone":"warm"}},"cheer":{"text":"My mug. And my hook on the rack.","ans":{"text":"Fair. Both fiercely defended territory.","tone":"funny"}}}},',
   '{"id":"work.works.coils-proud","topic":"work","when":{"tier":[3,4],"who":"reyes-alejandro|keane-davi|jovanovic-petra|amadi-asha|salo-saad|kowal-priya"},"lines":[{"text":"When all three coils run sweet, you feel it through the floor. Like a kettle settling."},{"text":"I sit in the watch room and just listen. That\'s what I\'d tell someone the job is.","tone":"warm"}],"ask":{"text":"What would you tell someone your job is, if you only had one line?"},"replies":{"listen":{"text":"How often do all three run sweet?","ans":{"text":"A few times a week. Coil three makes us wait for it. Every time.","tone":"funny"}},"share":{"text":"Keeping things running so others can sleep.","ans":{"text":"That\'s it. That\'s exactly it. Say it like that to anyone who asks.","tone":"warm"}},"cheer":{"text":"Professional lamp-befriender.","ans":{"text":"Ha. Put it on your door. Calder won\'t notice. She will.","tone":"funny"}}}},',
   '{"id":"work.works.new-hand-memory","topic":"work","when":{"tier":[3,4],"not":{"newhere":"true","who":"bramwell-basil"}},"lines":[{"text":"I remember being the newest in Works. Every name a blur. The board a wall of words."},{"text":"Someone handed me a mug and said \\"You\'ll be fine.\\" I was. They were right.","tone":"warm"}],"ask":{"text":"What would you tell the next new hand in Works?"},"replies":{"listen":{"text":"Who said you\'d be fine?","ans":{"text":"Not saying. They\'d be embarrassed. They\'re still here, though. Still saying it.","tone":"warm"}},"share":{"text":"Ask everything. Nobody minds.","ans":{"text":"That\'s the one. Tell them that, and give them a mug. Done.","tone":"warm"}},"cheer":{"text":"Second drawer. For the tape.","ans":{"text":"The most important lesson in Works. In order.","tone":"funny"}}}}]',
-  '},"small":{"done":[{"text":"We\'ve talked about everything, haven\'t we? I don\'t mind. It\'s nice just sitting.","tone":"warm"},{"text":"I think we\'ve run out of things to say. Good. Means we\'ve said them.","tone":"warm"},{"text":"We\'ve covered the lot, you and me. Now we just get to sit.","tone":"warm"},{"text":"I\'ve told you all my stories. You\'ll have to make me some new ones.","tone":"funny"},{"text":"Nothing left to tell you. Funny. It still feels like a good chat.","tone":"warm"},{"text":"Talked ourselves out, haven\'t we? Best kind of quiet, this.","tone":"warm"}],"done.saruth":[{"text":"We have said everything, I think. Then we may sit. That is also a conversation.","tone":"warm"},{"text":"Nothing is left to tell. I find I do not mind.","tone":"warm"}],"small":[{"text":"Nice to just sit a minute, isn\'t it?"},{"text":"The ship\'s quiet just now. I like her quiet."},{"text":"I think the mess is doing something with onions later. I can smell hope.","tone":"funny"},{"text":"Busy day? You don\'t have to tell me. I can see it."},{"text":"Funny how fast a week goes out here."},{"text":"I keep meaning to go to the observatory more. Next week. I say that every week.","tone":"funny"},{"text":"Have you eaten? Good. Just checking."},{"text":"That lamp\'s been flickering. Someone\'s on it, I expect. Someone always is."},{"text":"I like this spot. You can see who\'s coming and going."},{"text":"Do you hear that? The hum\'s changed. Probably nothing. Works will know."},{"text":"I\'m not even tired. I\'m just sitting. Sitting\'s lovely.","tone":"funny"},{"text":"It\'s good, this. Not talking about anything. Just talking.","tone":"warm"},{"text":"Someone\'s whistling down the corridor. Badly. Wonderfully.","tone":"funny"},{"text":"The tea\'s better than usual today. Don\'t tell anyone, they\'ll all want some.","tone":"funny"},{"text":"I lost track of the day again. Is it nearly the weekend? It\'s always nearly something.","tone":"funny"},{"text":"You seem settled these days. Good. That\'s good to see.","tone":"warm"},{"text":"I could sit here for hours. Shame about the clock.","tone":"funny"},{"text":"Quiet company\'s the best kind, I reckon.","tone":"warm"},{"text":"The garden smells of rain again. I went in just to breathe."},{"text":"I keep saying I\'ll learn Tiles properly. Then I watch a real game.","tone":"funny"},{"text":"Mm. Where was I? Doesn\'t matter."},{"text":"Good to see you. That\'s all. No news. Just good.","tone":"warm"}],"small.saruth":[{"text":"It is pleasant, to sit a while."},{"text":"The ship is quiet. I like her quiet."},{"text":"Your people knocked twice again today. Very consistent."},{"text":"The seedlings lean towards the lamps. So do I, some evenings."},{"text":"I have nothing to report. That is a good report."},{"text":"You are here. That is enough news."}]}}',
+  '},"small":{"done":[{"text":"We\'ve talked about everything, haven\'t we? I don\'t mind. It\'s nice just sitting.","tone":"warm"},{"text":"I think we\'ve run out of things to say. Good. Means we\'ve said them.","tone":"warm"},{"text":"We\'ve covered the lot, you and me. Now we just get to sit.","tone":"warm"},{"text":"I\'ve told you all my stories. You\'ll have to make me some new ones.","tone":"funny"},{"text":"Nothing left to tell you. Funny. It still feels like a good chat.","tone":"warm"},{"text":"Talked ourselves out, haven\'t we? Best kind of quiet, this.","tone":"warm"}],"done.saruth":[{"text":"We have said everything, I think. Then we may sit. That is also a conversation.","tone":"warm"},{"text":"Nothing is left to tell. I find I do not mind.","tone":"warm"}],"small":[{"text":"Nice to just sit a minute, isn\'t it?"},{"text":"The ship\'s quiet just now. I like her quiet."},{"text":"I think the mess is doing something with onions later. I can smell hope.","tone":"funny"},{"text":"Busy day? You don\'t have to tell me. I can see it."},{"text":"Funny how fast a week goes out here."},{"text":"I keep meaning to go to the observatory more. Next week. I say that every week.","tone":"funny"},{"text":"Have you eaten? Good. Just checking."},{"text":"That lamp\'s been flickering. Someone\'s on it, I expect. Someone always is."},{"text":"I like this spot. You can see who\'s coming and going."},{"text":"Do you hear that? The hum\'s changed. Probably nothing. Works will know."},{"text":"I\'m not even tired. I\'m just sitting. Sitting\'s lovely.","tone":"funny"},{"text":"It\'s good, this. Not talking about anything. Just talking.","tone":"warm"},{"text":"Someone\'s whistling down the corridor. Badly. Wonderfully.","tone":"funny"},{"text":"The tea\'s better than usual today. Don\'t tell anyone, they\'ll all want some.","tone":"funny"},{"text":"I lost track of the day again. Is it nearly the weekend? It\'s always nearly something.","tone":"funny"},{"text":"You seem settled these days. Good. That\'s good to see.","tone":"warm"},{"text":"I could sit here for hours. Shame about the clock.","tone":"funny"},{"text":"Quiet company\'s the best kind, I reckon.","tone":"warm"},{"text":"The garden smells of rain again. I went in just to breathe."},{"text":"I keep saying I\'ll learn Tiles properly. Then I watch a real game.","tone":"funny"},{"text":"Mm. Where was I? Doesn\'t matter."},{"text":"Good to see you. That\'s all. No news. Just good.","tone":"warm"},{"text":"The corridor lights have gone softer. Must be evening already."},{"text":"I saw someone carrying three cakes earlier. I didn\'t ask. I should have asked.","tone":"funny"},{"text":"Everyone\'s in a good mood today. Must be something in the soup.","tone":"funny"},{"text":"Funny, how the ship sounds different on every deck."},{"text":"I could do with a nap. Not now. Later. A proper one.","tone":"funny"},{"text":"The stars don\'t move much, do they? I keep checking anyway."},{"text":"It\'s nice when the mess is half empty. You can hear yourself."},{"text":"Somebody\'s left a jumper on the bench again. It\'s been there days.","tone":"funny"},{"text":"I like it here. Did I say that already? Still true.","tone":"warm"},{"text":"There\'s a smell of fresh bread on the stairs. Follow it, I would."},{"text":"It\'s been one of those days where nothing happens. Lovely."},{"text":"Look at us, sitting about. Very grown up.","tone":"funny"},{"text":"Have you seen the garden lately? It\'s growing faster than I am.","tone":"funny"},{"text":"Mm. Comfortable, this. Not a bad way to spend a bit of time."}],"small.saruth":[{"text":"It is pleasant, to sit a while."},{"text":"The ship is quiet. I like her quiet."},{"text":"Your people knocked twice again today. Very consistent."},{"text":"The seedlings lean towards the lamps. So do I, some evenings."},{"text":"I have nothing to report. That is a good report."},{"text":"You are here. That is enough news."}]}}',
 ].join(''));
 // ---- END TALKS ----
 // ---- BEGIN ADDRESSES (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
@@ -34929,6 +34964,8 @@ function lineFor(who, kind, ctx = {}) {
     if (mine.some(r => r.id === x.e.id && r.h !== h)) x.sc -= 15;
     if (all.some(r => r.id === x.e.id && r.who !== p.id)) x.sc -= 8;
   }
+  const heard = talkHeardKind(kind) ? talksHeard() : null;   // the talk card's everyday lines (hello, start, filler, end; DL1, playtest 1 note 21): one you've
+  if (heard) for (const x of pool) { const at = heard[x.e.id]; if (at != null) x.sc -= 40 - Math.min(19, Math.floor(Math.max(0, t - at) / 240)); }   // heard loses 21-40, the latest the most (4 ship hours a point)
   pool.sort((x, y) => y.sc - x.sc);                       // stable: the pool's order within a score
   let best = [];
   for (let i = 0; i < pool.length && !best.length;) {     // fill only the top-scoring lines, the next score down if none of them fill (0.43.26)
@@ -34947,6 +34984,7 @@ function lineFor(who, kind, ctx = {}) {
   if (!ctx.peek) {
     if (!LINE_RECENT.some(x => x.id === e.id && x.who === p.id && x.h === h)) { LINE_RECENT.push({ id: e.id, who: p.id, h }); if (LINE_RECENT.length > 40) LINE_RECENT.shift(); }
     for (const k of [].concat(e.told || [])) lineQ('memTold', p.id, k);
+    if (heard) heard[e.id] = Math.floor(t);
   }
   const out = { text: pick.text, id: e.id, kind, tone: e.tone || 'light' }; if (e.cue) out.cue = e.cue;   // a reaction's cue: [its kind, ...]
   return out;
@@ -35176,6 +35214,8 @@ function talksClean(s) {                                  // save.talks read bac
   const f = s && s.fired && typeof s.fired === 'object' ? s.fired : {}, m = s && s.small && typeof s.small === 'object' ? s.small : {};
   for (const id in f) if (Array.isArray(f[id]) && Number.isInteger(f[id][0]) && typeof f[id][1] === 'string') T.fired[id] = [f[id][0], f[id][1]];
   for (const id in m) if (Array.isArray(m[id]) && Number.isInteger(m[id][0])) T.small[id] = [m[id][0], m[id][1] ? 1 : 0];
+  const h = s && s.heard && typeof s.heard === 'object' ? s.heard : {};
+  for (const id in h) if (Number.isInteger(h[id]) && h[id] >= 0) (T.heard = T.heard || {})[id] = h[id];   // what you've heard (DL1), only when there's any
   return T;
 }
 function talksState() {
@@ -35184,9 +35224,20 @@ function talksState() {
   return SHIP.talks;
 }
 if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
-  const T = SHIP.talks; if (!T || (!Object.keys(T.fired).length && !Object.keys(T.small).length)) return;
-  s.talks = { fired: { ...T.fired }, small: { ...T.small } };
+  const T = SHIP.talks; if (!T || (!Object.keys(T.fired).length && !Object.keys(T.small).length && !Object.keys(T.heard || {}).length)) return;
+  s.talks = { fired: { ...T.fired }, small: { ...T.small } }; if (T.heard && Object.keys(T.heard).length) s.talks.heard = { ...T.heard };
 });
+// ---- what you've heard (DL1, playtest 1 note 21: "a lot of repeating lines in the talk"). The talk card's everyday
+// lines come from small shared pools, so the player's ears keep a record: SHIP.talks.heard = { lineId: ship minute last
+// heard } (saved in save.talks.heard; about 60 bank lines and the small talk, at most about 2 KB). lineFor makes a
+// hello, talk.start/sit/filler/end/stop line you've heard lose out, the latest the most, so the least lately heard comes
+// next; small talk goes least lately heard first; a talk says at most TALK_FILLER_MAX filler lines, none you heard in
+// the last TALK_HEARD_DAYS ship days, and then goes quiet (talkPackQuiet: section 20's talkNext asks it before its
+// filler). TALK_HEARD_ON is the switch (committed ON for playtest patch 1; off, every pick is as before).
+const TALK_HEARD_ON = true, TALK_FILLER_MAX = 2, TALK_HEARD_DAYS = 2;
+function talkHeardKind(kind) { return TALK_HEARD_ON && (kind === 'hello' || /^talk\.(start|sit|filler|end|stop)$/.test(kind)); }
+function talksHeard() { const T = TALK_HEARD_ON && talksState(); return T ? T.heard || (T.heard = {}) : null; }
+const talkSmallKey = e => 's' + lineHash(e.text);
 const talkPackSeed = p => p.seed || lineHash(p.id);
 const talkPackVeyli = p => p.rank === 'guest' && /Veyli/.test(p.role || '');   // the Envoy, and any Veyli guest: no contractions
 function talkPackTrad(t) {                                // {trad}: the next tradition on the calendar (today's if it's still to come), not someone's own day
@@ -35235,16 +35286,18 @@ function talkPackPick(who, t = shipNow()) {
   const small = pickFrom('small'), dones = pickFrom('done'), last = T.small[p.id];
   const waiting = TALK_SOURCES.some(s => s.talks(p).some(tk => !T.fired[tk.id] && talkPackFits(tk, p, ctx)));   // talks still to come with them (a tier, a beat, a day away): not "talked about everything" yet (TR1's W1)
   const done = !waiting && dones.length > 0 && schedU(seed, d, 757) < TALK_DONE_ODDS && !(last && last[1] && last[0] < d);   // never twice running with one person
-  const order = small.map((e, i) => [schedU(seed, d * 64 + i, 756), e]).sort((a, b) => a[0] - b[0]).map(x => x[1]);
+  const heard = (TALK_HEARD_ON && T.heard) || {}, ago = e => { const at = heard[talkSmallKey(e)]; return at == null ? -1 : at; };   // least lately heard first (DL1), then seeded
+  const order = small.map((e, i) => [ago(e), schedU(seed, d * 64 + i, 756), e]).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(x => x[2]);
   const n = 3 + (schedU(seed, d, 758) < .5 ? 1 : 0), out = [];
-  if (done) { const e = dones[Math.floor(schedU(seed, d, 759) * dones.length)], x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light' }); }
-  for (const e of order) { if (out.length >= n) break; const x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light' }); }
+  if (done) { const e = dones[Math.floor(schedU(seed, d, 759) * dones.length)], x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light', key: talkSmallKey(e) }); }
+  for (const e of order) { if (out.length >= n) break; const x = linesFill(e.text, p, ctx); if (x) out.push({ text: x, tone: e.tone || 'light', key: talkSmallKey(e) }); }
   return { small: out, done: done && out.length > 0 };
 }
 function talkPackFire(who, pick, t = shipNow()) {         // a talk started: it's used up for this save; small talk notes its day (and its "done")
   const p = linesWho(who), T = talksState(); if (!p || !T || !pick) return;
   const d = Math.floor(t / 1440) + 1;
   if (pick.talk) T.fired[pick.talk.id] = [d, p.id]; else T.small[p.id] = [d, pick.done ? 1 : 0];
+  if (pick.small && TALK_HEARD_ON) { const h = T.heard || (T.heard = {}); for (const x of pick.small) if (x.key) h[x.key] = Math.floor(t); }   // the small talk you'll hear (DL1)
 }
 // ---- the pack in Talk a while (T3): section 20's talkStart asks talkPackStart(C) for the talk (fired as it starts:
 // the user's no-repeats rule, so walking off or "got to go" still uses it up), then talkNext / the ask / talkReply /
@@ -35261,8 +35314,17 @@ function talkPackStart(C) {
     : { small: true, lines: pk.small.map(x => x.text), done: pk.done, i: 1 };
   if (T.pack.small) T.asked = true;                       // small talk: no question
   const own = new Set(T.pack.lines); for (const e of (typeof LINES !== 'undefined' && LINES['talk.filler']) || []) if (own.has(e.text)) T.said.push(e.id);   // a filler line that's also one of these isn't said again
+  const heard = talksHeard() || {}, now = shipNow();      // nor one you've heard in the last TALK_HEARD_DAYS ship days (DL1)
+  for (const e of (typeof LINES !== 'undefined' && LINES['talk.filler']) || []) if (heard[e.id] != null && now - heard[e.id] < TALK_HEARD_DAYS * 1440 && !T.said.includes(e.id)) T.said.push(e.id);
+  T.pack.fill0 = talkFillerSaid(T);
   return T.pack.lines[0];
 }
+const talkFillerSaid = T => { const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || []; return T.said.filter(id => F.some(e => e.id === id)).length; };
+// the talk has gone quiet (DL1): its own lines are said, and it's had TALK_FILLER_MAX filler lines, or every filler
+// line is said or heard lately. Section 20's talkNext then says nothing more: the meter runs on to the end
+const talkPackQuiet = C => { const P = talkPackOf(C); if (!P || !TALK_PACK_ON || !TALK_HEARD_ON) return false;
+  const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || [], n = talkFillerSaid(C.talk);
+  return n - (P.fill0 || 0) >= TALK_FILLER_MAX || n >= F.length; };
 const talkPackOf = C => C && C.talk && C.talk.pack;
 const talkPackNext = C => { const P = talkPackOf(C); return P && P.i < P.lines.length && !(C.talk.asked && !P.small) ? P.lines[P.i++] : null; };   // the "more" lines before the question (all of small talk)
 const talkPackAsk = C => { const P = talkPackOf(C); return P && !P.small ? P.ask : null; };
@@ -40599,7 +40661,9 @@ function talkStart(C) {
 }
 function talkNext(C) {                                    // their next line while you talk: the topic's, a filler, else their usual chat
   const T = C.talk, p = C.p;
-  const l = (typeof talkPackNext === 'function' && talkPackNext(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');   // section 22: the pack's next line first
+  const pk = typeof talkPackNext === 'function' && talkPackNext(C); if (pk) return pk;   // section 22: the pack's next line first
+  if (typeof talkPackQuiet === 'function' && talkPackQuiet(C)) return null;   // section 22: the pack's talk has gone quiet (no filler over and over; DL1, playtest 1)
+  const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
   if (l) return l;
   for (let k = 1; k <= 8; k++) { const c = chatLine(p, shipNow() + 60 * k, true); if (c && c.say !== false && !TALK_KEEP.has(c.kind) && c.kind !== 'greet' && c.kind !== 'go' && !T.said.includes(c.text)) { T.said.push(c.text); return c.text; } }
   return null;
