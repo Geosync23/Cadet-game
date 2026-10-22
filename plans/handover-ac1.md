@@ -15,6 +15,16 @@ ALL IDENTICAL; check_fast OK.
   RV2 reviewing (asked for the covered-target case: added, 5a783387).
 - **E, the training arrows T1-T3** (AR1's, fixed by me for RV6, 15b slot): RV6 PASS on d99a9e50.
 
+## State at 1f2ce27d (2026-10-22 ~15:45)
+- C: RV2 PASS (game d99a9e50, check 5a783387). B's follow-ups: RV2 fine. E: RV6 PASS (d99a9e50).
+- arrows-c now also carries FX2 (p5-fix2 cc2bb2b) and FX3 (p5-fix3 e6bcf82, then 360801c) as merge commits (lead 28's
+  option (a)); merge their new tips in again if they push more, never rewrite. One FX2/FX3 clash resolved: ixJobStep's
+  machine label (FX3's chore title first, then FX2's scan first / Tune).
+- F3 and F4 (my commits 9524671, bd18997; diff `git diff 0ec58bc bd18997`): with RV6 for review. Off: ALL IDENTICAL.
+  Check: `arrows_f_check.py` (about 3 min). On 1f2ce27d: check_fast, arrows_f, arrows_pointer, arrows_check queue,
+  mech_check all OK.
+- Next: D (shift chain, trainTell into the queue, T3's empty-goal pick) once FX1's tip comes; F1/F2 per lead 28.
+
 ## Checks
 - `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.
 - `arrows_check.py BUILD.html queue` (about 4 min): B and E. Parts `shift` and `week` fail by design until FX1-FX3.
