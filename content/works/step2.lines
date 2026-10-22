@@ -56,6 +56,15 @@
 - Which stop next?
 == haul.goodroute.note
 - a good route
+// FX3 (AR2): each stop's words on the arrow ({thing}: the crate, {a} of {b}: which load; {where}: the stop)
+== haul.goal.cart
+- Take a hover cart from the Cart bay
+== haul.goal.load
+- Load the {thing} ({a} of {b})
+== haul.goal.deliver
+- {thing} to {where}
+== haul.goal.return
+- Cart back to its dock
 == stock.title
 - Stocktake
 == stock.look

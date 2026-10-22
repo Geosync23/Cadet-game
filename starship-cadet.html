@@ -15683,7 +15683,9 @@ function ixJobStep() {
     const st = nx && nx.s.step === 'fetch' ? jobStops(j)[nx.k + 1] : nx && nx.s;
     const rm = j.kind === 'rounds' && nx && nx.s === st && typeof machineById === 'function' ? machineById((j.route || [])[nx.k]) : null;   // a round: the machine by name (0.73.0)
     if (st && rm) return { deck: st.deck, place: st.places[0] || null, label: 'Look at ' + (typeof machineLabel === 'function' ? machineLabel(rm).split(',')[0] : machineName(rm)) };
-    return st ? { deck: st.deck, place: st.places[0] || null, label: st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title } : null;
+    const K = typeof jobKindOf === 'function' && jobKindOf(j), kk = st && nx ? (st === nx.s ? nx.k : nx.k + 1) - (j.parts.length ? 1 : 0) : -1;   // a registered kind's own words for the stop (FX3: hauling's), else as before
+    let kl = null; if (K && typeof K.goal === 'function' && kk >= 0) try { kl = K.goal(j, kk); } catch (e) { kl = null; }
+    return st ? { deck: st.deck, place: st.places[0] || null, label: kl || (st.step === 'pickup' ? 'Pick up ' + (j.bring || 'the delivery') : st.step === 'inspect' ? j.title + ': the next stop' : j.title) } : null;
   }
   if (typeof traceHidden === 'function' && traceHidden(j)) return typeof traceGoal === 'function' ? traceGoal(j) : null;   // a traced fault not yet found: the line, never the machine (24i)
   const m = machineById(j.machine); if (!m) return null;
@@ -30867,6 +30869,14 @@ const LINES = JSON.parse([
   '{"text":"Manifest done. Every crate where it belongs.","id":"1b2d6j8"}]',
   ',"haul.drop":[',
   '{"text":"Drop it off","id":"15ue0m9"}]',
+  ',"haul.goal.cart":[',
+  '{"text":"Take a hover cart from the Cart bay","id":"1s8v3bv"}]',
+  ',"haul.goal.deliver":[',
+  '{"text":"{thing} to {where}","id":"1ew6erx"}]',
+  ',"haul.goal.load":[',
+  '{"text":"Load the {thing} ({a} of {b})","id":"93p9qu"}]',
+  ',"haul.goal.return":[',
+  '{"text":"Cart back to its dock","id":"f4bvp7"}]',
   ',"haul.goodroute.note":[',
   '{"text":"a good route","id":"1r9aufk"}]',
   ',"haul.load":[',
@@ -45923,9 +45933,14 @@ WORK_TICKS.push((now, skip) => {
   else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
 });
 WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
-WORK_TICKS.push((now, skip) => {                         // FX3: the day before your first, Tomas's ask ("Inspection tomorrow"); that morning from 06:00 in your bunk room, his talk
+const INSPECT_ASK = [1080, 1290];                        // the evening before your first: 18:00-21:30 Tomas says it in your bunk room if you're both there, else his Mail at 21:30
+WORK_TICKS.push((now, skip) => {                         // FX3: the evening before your first, Tomas's ask ("Inspection tomorrow"); that morning from 06:00 in your bunk room, his talk
   const W = SHIP.works, d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('m3i'); if (!W || !row || W.rank !== 'junior' || W.tr.m3i !== undefined) return;
-  if (weekday(d + 1) === 3 && m >= 960 && d + 1 >= row.day && playerShiftOn(d + 1) && !worksOpened(W).has('m3i')) worksAskSend('m3i', row.by[0], now);
+  if (weekday(d + 1) === 3 && m >= INSPECT_ASK[0] && d + 1 >= row.day && playerShiftOn(d + 1) && !worksOpened(W).has('m3i') && !flag('works.ask.m3i')) {
+    const by = row.by[0], a = !skip && inspectHere() && typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === by), here = a && (() => { try { return roomAt(...cellAt(a.x, a.z)) === roomAt(...player.here()); } catch (e) { return false; } })();
+    if (here) { const t = worksText('works.ask.m3i', ''), i = t.indexOf(' | '); flagSet('works.ask.m3i'); worksSay(by, i > 0 ? t.slice(i + 3) : t); }   // in person (AR1, the lead's decision)
+    else if (skip || m >= INSPECT_ASK[1]) worksAskSend('m3i', by, now);
+  }
   if (!skip && m >= 360 && m < INSPECT_AT && inspectDue(d) && inspectHere()) worksBrief('m3i', row.by[0]);
 });
 // the drill job: a side job (beside any board job you hold, never the crew's), posted for you at 14:50 on Wednesdays
@@ -45969,7 +45984,7 @@ WORK_TICKS.push((now, skip) => {
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
   }
-  if (!skip && m >= DRILL_TOAST && m < DRILL_AT && SHIP.works.tr.m3d === undefined) worksBrief('m3d', 'calder');   // your first: her briefing before it, not after (FX3)
+  if (!skip && m >= DRILL_TOAST && m < DRILL_AT && SHIP.works && SHIP.works.tr.m3d === undefined) worksBrief('m3d', 'calder');   // your first: her briefing before it, not after (FX3)
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
 });
 // the all-clear: the drill is over whatever the state (no lapse, no abandoned job); quiet when skipped past or from an earlier day
@@ -46017,7 +46032,7 @@ const HAUL_FROM = 780, HAUL_UNTIL = 960, HAUL_TRAIN = 660;   // posted by 13:00 
 const haulDay = d => weekday(d) === DELIVERY.day + (typeof deliveryLate === 'function' ? deliveryLate(d) : 0);
 const haulDock = () => CART_AT.find(id => placeById(id)) || null;
 const haulLoadAt = () => HOLD_AT.find(id => placeById(id)) || null;
-const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
+const haulName = c => c.part ? String(c.id).replace(/^./, x => x.toUpperCase()) : worksText('haul.crate.' + c.id, ({ linen: 'Linen', laundry: 'Linen', medical: 'Medical supplies', infirmary: 'Medical supplies', store: 'Crew store stock', galley: 'Dry goods', bridge: 'Bridge spares' })[c.id] || 'A crate');
 const haulWhere = c => { const p = placeById(c.dest); return p ? (roomName(p.deck, p.room) || 'the room') + ', ' + deckIn(p.deck) : 'its stop'; };
 // a run's crates from what's left of the manifest: up to CART_CRATES, by deck from the hold upward (4, 3, 2, 1): fewest rides
 function haulCrates(max = CART_CRATES) {
@@ -46066,6 +46081,16 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function') jobKindAdd
     jobs.push(haulJob(h * 60, crates, { crew: !(W && W.tr.m4 !== undefined) || playerRank() !== 'junior' && !haulFree(d) }));   // an officer at stage 2 keeps it to 16:00 (D3)
   },
   stops: haulStops,
+  goal(j, k) {                                           // FX3 (AR2): each stop's own words on the arrow, not the run's title
+    const st = haulStops(j), s = st[k]; if (!s) return null;
+    const c = (j.crates || []).find(x => (x.key || x.id) === s.crate), thing = c ? haulName(c) : '', low = thing.replace(/^./, x => x.toLowerCase());
+    const loads = st.filter(x => x.tag === 'load'), a = loads.indexOf(s) + 1, stop = c && { linen: 'laundry', laundry: 'laundry', medical: 'infirmary', infirmary: 'infirmary', store: 'store', galley: 'galley', bridge: 'bridge' }[c.id];
+    if (s.tag === 'cart') return worksText('haul.goal.cart', 'Take a hover cart from the Cart bay');
+    if (s.tag === 'load') return worksText('haul.goal.load', 'Load the {thing} ({a} of {b})', { thing: low, a, b: loads.length });
+    if (s.tag === 'deliver' && c) return worksText('haul.goal.deliver', '{thing} to {where}', { thing, where: !c.part && stop ? worksText('haul.stop.' + stop, haulWhere(c)) : haulWhere(c) });
+    if (s.tag === 'return') return worksText('haul.goal.return', 'Cart back to its dock');
+    return null;
+  },
   stepDone(j, k, res, t) {
     const st = haulStops(j), s = st[k]; if (!s) return null;
     const c = (j.crates || []).find(x => (x.key || x.id) === s.crate);
@@ -46195,7 +46220,9 @@ function stockWithdraw(now) {                            // 16:00 and not taken:
 if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KINDS.haul) WORK_MECH.m4 = {
   at: d => HAUL_TRAIN,                                   // after the 10:00 delivery's unload
   reserve(d, at, slot, o = {}) {
-    const t = (d - 1) * 1440 + at, crates = haulCrates(o.yours ? CART_CRATES : 1); if (!crates.length || !haulDock() || !haulLoadAt()) return null;
+    const t = (d - 1) * 1440 + at;
+    if (!manifestCrates() && !SHIP.jobs.some(x => x.kind === 'haul' && !x.src && x.train === 'm4' && x.status !== 'done')) SHIP.manifest = manifestFor(d);   // FX3 (AR2's B2): no crates in the hold (not a delivery day, or the crew's run took them): the week's, kept back for your lesson, so it works any day
+    const crates = haulCrates(o.yours ? CART_CRATES : 1); if (!crates.length || !haulDock() || !haulLoadAt()) return null;
     SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === slot && heldForYou(x) && !x.claimedBy));
     for (const x of SHIP.jobs) if (x.kind === 'haul' && x.status === 'open' && !x.claimedBy && !x.reserved) { x.status = 'done'; x.doneAt = t; x.doneBy = null; }   // an ordinary run waiting: this one stands for it
     const j = haulJob(t, crates, { slot, yours: !!o.yours }); if (!o.yours) j.only = 'load';
@@ -46203,6 +46230,7 @@ if (typeof jobKindAdd === 'function' && typeof haulOn === 'function' && JOB_KIND
     return j.id;
   },
   watch: 10,
+  againAsk: true,                                        // FX3: a lesson that didn't happen is asked again at its own time after the delivery (Yara's ask and meeting), not restarted at 06:00
 };
 
 // =====================================================================
@@ -48423,6 +48451,9 @@ function incOffer(row, c, d, t) {
 // your turn is yours at once, at the pipe; not there in INC_FOLLOW minutes, or the day's training lapsed, the teacher makes
 // it safe with the crew and tells you the next try's day, 10:30 and the office (the same call again, not a 06:00 restart)
 const INC_FOLLOW = 30, INC_WARN = 10;
+const INC_GOAL = { g: null };                            // the arrow this block set (PR9: clear only that one, never another section's)
+function incGoalSet(g) { if (typeof setGoal !== 'function') return; setGoal(g); INC_GOAL.g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; }
+function incGoalClear() { if (INC_GOAL.g && typeof IX_GOAL !== 'undefined' && IX_GOAL === INC_GOAL.g && typeof clearGoal === 'function') clearGoal(); INC_GOAL.g = null; }
 const incWhere = () => { const o = OCCASIONS['works.m6']; return o && DECKS[o.deck] && DECKS[o.deck].rooms[o.room] ? DECKS[o.deck].rooms[o.room].name.replace(/^Works Chief's office$/, 'my office') : 'the Works bay'; };
 function incWarn(c, at, now) {
   const by = c.by, t = worksText('inc.warn', 'This morning | At {time} I\'ll show you how to make an incident safe. Stay on Deck 5.', { time: hhmm(at % 1440), name: worksFirst(by) }), i = t.indexOf(' | ');
@@ -48439,7 +48470,7 @@ function incRetry(c, now) {                              // the training's next 
   const row = ladderRow('m6'), d = worksDay(now); incTrainClear(now);
   let d2 = d; for (let k = 0; k < 14; k++) { d2 = promoWorkday(d2); if (ladderTeacher(row, d2)) break; }
   c.st = 'ask'; c.d = d; c.j = null; c.occ = null; c.rt = d;
-  if (typeof clearGoal === 'function') clearGoal();
+  incGoalClear();
   const t = worksText('inc.again', 'Next time | The crew made it safe. We\'ll try again on {day}: {time}, {place}.', { day: dayName(d2), time: hhmm(INC_FIRST.at), place: incWhere() }), i = t.indexOf(' | ');
   if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(c.by), subject: i > 0 ? t.slice(0, i) : 'Next time', body: i > 0 ? t.slice(i + 3) : t, quiet: true });
   if (now >= shipNow() - 1) try { toast(worksName(c.by), i > 0 ? t.slice(i + 3) : t); } catch (e) { /* no UI */ }
@@ -48454,8 +48485,8 @@ if (JOB_KINDS.incident) WORK_MECH.m6 = {
     const c = SHIP.works.cur, j = incJob(O.kind, O.deck, t, { slot, train: o.train || 'm6', walk: !o.yours, by: c && c.by });
     if (o.yours) O.j = j.id;
     SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
-    if (!o.yours && t >= shipNow() - 1 && typeof setGoal === 'function') setGoal({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
-    if (o.yours) { if (!myJob()) claimJob(j.id); if (typeof clearGoal === 'function') clearGoal(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
+    if (!o.yours && t >= shipNow() - 1) incGoalSet({ deck: O.deck, place: incPlace(O.deck + '-valve-panel'), label: worksText('inc.goal.follow', 'Follow {name} to the burst pipe, Deck {deck}', { name: worksFirst(c && c.by || 'calder'), deck: O.deck }) });   // FX3: with her, not the office
+    if (o.yours) { if (!myJob()) claimJob(j.id); incGoalClear(); }   // FX3: yours at once, at the pipe (the job's own arrow); hands full: it waits on the board as before
     return j.id;
   },
   doSay: c => { const j = c && SHIP.jobs.find(x => x.id === c.j); return j && j.claimedBy === 'you' ? worksText('inc.do.yours', 'Your turn. Make it safe. I\'m right behind you.') : null; },
@@ -48479,7 +48510,7 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    if (typeof setGoal === 'function') { const o = OCCASIONS['works.m6']; if (o) setGoal({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }
+    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: worksFirst(c.by) }) }); }   // (FX3: kept, so only this one is cleared)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
   }
   if (O) {
@@ -49520,7 +49551,7 @@ function promoSeekTick(now) {                            // she's found you: the
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked'); if (!r || !r.f || !r.f.seek || r.met || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
   try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), p = player.obj.position;
     if (a && Math.hypot(a.x - p.x, a.z - p.z) < 2.2) { worksSayAll(r.by, worksVoice(r.by, 'promo.fetch.summons') || ['There you are. My office was the idea, but this will do.']);   // her word as she reaches you, then the scene
-      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now }); } } catch (e) { /* not in play */ }
+      promoScript(); r.met = true; dialogueShow('promo.officer', { id: r.key, who: [r.by], at: now, where: { any: true } }); } } catch (e) { /* not in play */ }   // where you are: readable, not closed by section 18's meetings tick (FX3)
 }
 function promoEscort(p, t) {                             // worksEscort's 24p part: Calder walking over to find you
   const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');

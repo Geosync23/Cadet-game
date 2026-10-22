@@ -1025,6 +1025,7 @@ One-line, `typeof`-guarded calls from one section into another (plans/pillar4-pl
 | section 20 `SOC_CUE_OF`, `socNote` (events base F0b, EV2) | `calledIn: [d => 'calledIn', 1]`; `who` from the note (cue:calledIn@me) | EV2 (OR1 reviews) | events base F0b |
 | section 24k `p3Tick` (FX3, AR1's small lessons) | `if (c.train && typeof worksBrief === 'function' && worksBrief('p3', c.by)) return;` (24 core): the writer's first head-scratcher talk, readable, when the case shows | FX3 (H reviews) | patch-p5-fix3 |
 | section 24 core `trainDo`, `trainOffer` (FX3, Making it safe) | `WORK_MECH[id].doSay(c, id)` (a sub-block's own "your turn" word) and `WORK_MECH[id].againAsk` (asked again through its own `offer`, not restarted by `trainWatch` at 06:00); 24f's m6 sets both | FX3 (C reviews) | patch-p5-fix3 |
+| section 15b `ixJobStep` (FX3, hauling's arrows) | a registered job kind's own `goal(j, k)` (k: its stop's index in `kindStops`) names the arrow for that stop; 24d's haul has one ("Load the linen (1 of 3)"); kinds without it keep the job's title | FX3 (I reviews) | patch-p5-fix3 |
 | section 15b `turnInGains` (FX3, your reputation) | `j.gains.rep` entries with `dept: 'you'` (24 core's turn-in handler, when it raised your reputation) show as "Your reputation up"; the department's as "{dept} team's standing up" | FX3 (U reviews) | patch-p5-fix3 |
 
 ## Patch batch E, first half (patch builder PE, claude/patch-e; `plans/patch-plan.html`)
