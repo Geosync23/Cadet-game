@@ -188,6 +188,6 @@ sha256 **da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee** (BM1
 | day_check 1 | **OK** | DAY CHECK OK; peak 250; worst stuck 0.0; 251 s |
 | day_check 5 | **OK** | DAY CHECK OK; peak 267; worst stuck 0.0; 249 s |
 | day_check 7 | **OK** | DAY CHECK OK; peak 260; worst stuck 0.0 |
-| controller_check (all parts but reach) | **handed to CR1** (CR1's offer, agreed before it started; my queued copy cancelled, never ran) | see CR1's notes |
+| controller_check (all parts but reach) | **run by CR1** (CR1's offer, agreed before it started; my queued copy cancelled, never ran) | CR1: only touch and day FAIL (the known items: touch check-only, day a controller lift/ladder item); the other 25 parts OK. plans/checks-cr1.md on claude/checks-cr1 c7a59cae |
 
 No FAIL in my part. (Day numbers the same as 0.64.16's: breakfast isn't in 0.91.0.)
