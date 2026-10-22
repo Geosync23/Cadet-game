@@ -367,7 +367,7 @@ class Sweep:
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
     MAX_DEPTH, MAX_PRESSES = 6, int(os.environ.get('CTL_PRESSES', 700))
-    SKIP = {'#newgame'}   # pressed once at the top only (twice starts a new game; nothing new to find behind it)
+    SKIP = set()   # (was {'#newgame'}: the HUD's New game button, gone from 0.91.0, now in Settings)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
         self.states = {}          # signature -> {'path': [...], 'items': [...], 'dialogs': [...]}
