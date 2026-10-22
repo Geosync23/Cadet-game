@@ -162,4 +162,5 @@ OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check and lines_check -
 | arc_check | OK | `ARC CHECK OK` |
 | lines_check | OK | PASS (0 errors, 50 warnings) |
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
-| perf_check, lines_check --day | CR4 | handed over |
+| perf_check NEW OLD | known old only (CR4) | backlog 14 (521/521/523, the same on OLD); all scenes identical to OLD; the Line ceremony back to 301 calls (no breakfast) |
+| lines_check --day | OK (CR4) | PASS |
