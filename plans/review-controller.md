@@ -190,3 +190,25 @@ re-run on 958421a (queued).
 - One-handed presets PAD_LAYOUTS: both are whole permutations of the 16 buttons. Left hand: zoom in (RT) and the
   right stick are out of reach and LT is now A, so a left-hand player can't zoom (turning is via D-pad up -> Rotate).
   Right hand needs the sticks swapped (said in the comment). Notes for P4's page, not blocking.
+
+## P5 8216ad4 (on P1 part 3, 825378d): same code as fc8ccd5, padName renamed padSaid (P1 took padName); padNameIt
+after P1's tabIndex line. Runs queued (queue 4). P5's check_fast runs on 8216ad4 (queue 2).
+
+## P3 958421a: cadet_test 93093a8 -> 958421a off: ALL IDENTICAL; on: ALL IDENTICAL apart from renderer noise. The noise:
+6-46 pixels a picture, max 1 level, mostly in the top HUD strip (y 5-60) and the left panel: glass/blur antialiasing. The
+control (93093a8 against itself, alone) is queued to tell whether the same noise shows with identical files.
+
+## P4 (CP4 db80eb0 on 93093a8): code read
+Slot code + three edits outside it (CP1 agreed): padTick (PAD_MAPK[k], triggers via PAD_PHY, the D-pad repeat by
+action name, the stick swap), turn 2's zoom line (flip, speed), section 19's Settings hook (`.concat(padSetBlocks())`).
+- Settings' 'open' with arg goes through the device's own dispatcher (`action.do === 'open'` -> arg) - fine.
+- padSetLoad runs at load whatever PAD_ON (inert data); SAVE_EXTRA writes s.pad only when padSetDiff() - fine; an odd
+  save is cleaned (one button each, known values only).
+- padSetBind: checked by hand with the A/B swap on (a to X): a on X, x on a's old button, b unchanged. Right.
+- **Note 1 (the hard rule, mode b):** padSetSeen() is `PAD.live || PAD.id || diff`: a pad present at load (connect
+  event before any press) makes PAD.live true, so Settings shows "Controller settings" without a press. Same class as
+  the hand-back listeners (note 11). Gate on "used once" (PAD.lastUse > -1e9) instead.
+- Note 2: a trigger bound to a face action (e.g. 'a' on RT) fires at the browser's own `pressed` threshold, not past
+  half way as before (the `> .5` rule now follows the action name, not the physical trigger). A light squeeze could press.
+- Note 3: P5's left-hand preset leaves no zoom (above); the page offers it as is.
+Runs queued (queue 5): cadet_test off/on, its check, device_check off/on, 7 mutants, check_fast.

@@ -26,6 +26,14 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p3_saidalways': ("  if (!PAD_MARK.said) { PAD_MARK.said = true;", "  if (true) { PAD_MARK.said = true;", 'marks'),
  'p3_ninA': ("nin: { a: ['B', '#e6f0f1', 'B']", "nin: { a: ['A', '#e6f0f1', 'A']", 'marks'),
  'p3_nounuse': ("  if (!padList().length) padUnuse();", "", 'drop'),
+ # P4 (CP4 db80eb0): run with CP4's controller_check (its settings part)
+ 'p4_savealways': ("SAVE_EXTRA.push(s => { const d = padSetDiff(); if (d) s.pad = d; });", "SAVE_EXTRA.push(s => { s.pad = padSetDiff() || {}; });", 'settings'),
+ 'p4_showalways': ("const padSetSeen = () => PAD_ON && (PAD.live || !!PAD.id || !!padSetDiff());", "const padSetSeen = () => PAD_ON;", 'settings'),
+ 'p4_noclash': ("  [phy[n], phy[other]] = [k, phy[n]];", "  phy[n] = k;", 'settings'),
+ 'p4_noflip': ("PAD.rs[1] * (PAD_SET.flip ? -1 : 1)", "PAD.rs[1]", 'settings'),
+ 'p4_oddsave': ("if (new Set(all).size !== all.length) S.map = {};", "", 'settings'),
+ 'p4_nogentle': ("if (PAD_SET.walk === 'gentle' && PAD_DECK.walking", "if (false && PAD_DECK.walking", 'settings'),
+ 'p4_noeat': ("  for (const n of PAD_BTN) for (const e of [n, n + ':up']) (PAD.on[e] = PAD.on[e] || []).unshift(() => PAD_SET_UI.listen || PAD_SET_UI.eat ? true : undefined);", "", 'settings'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
