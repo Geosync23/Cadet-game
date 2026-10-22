@@ -41595,10 +41595,10 @@ const INTRO_STEPS = [
     // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she's at the dinner from its start; (the patch, #3: "she should
     // walk up to you") she eats at the next table, facing yours, and walks over on Zeke's "Look who's coming over" (introTick's calderGo)
     away: { calder: '3-mess-26' },
-    fallback: { until: 18 * 60 + 30, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
-  { id: 'free', day: 0, at: 18 * 60 + 30, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 18:30 at the latest (reviewer 1c: no fixed time; 19:30 before the 16:30 arrival)
-  { id: 'tomas', day: 0, at: 18 * 60 + 30, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
-  { id: 'night', day: 0, at: 19 * 60, who: null, mode: 'free', where: 'your bunk', teaches: 'sleep' },
+    fallback: { until: 19 * 60, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
+  { id: 'free', day: 0, at: 19 * 60, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:00 at the latest (reviewer 1c: no fixed time; 19:30 before the 16:30 arrival; half an hour, not an hour, earlier: OR2's slow player reaches the table about 18:20)
+  { id: 'tomas', day: 0, at: 19 * 60, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
+  { id: 'night', day: 0, at: 19 * 60 + 30, who: null, mode: 'free', where: 'your bunk', teaches: 'sleep' },
 ];
 // the meetings the writers fill (content/meetings, merged into MEETING_SCRIPTS): their gist is what Mail says if you miss them
 const INTRO_MEETINGS = {
@@ -41915,7 +41915,7 @@ function introSkip() {
 // the escort's walker mode at minute t (section 10 drives him with it): lead to the checkpoint, wait there, follow
 // you (Monday afternoon), or null (his own plan)
 // the dinner table (0.42.15, the lead: Calder comes visibly to your table and you all sit): who sits where from the
-// Chief's step until Torres lets you go (after his goodnight, 18:30 at the latest). Section 10 seats Torres and Calder, section 15 the player.
+// Chief's step until Torres lets you go (after his goodnight, 19:00 at the latest). Section 10 seats Torres and Calder, section 15 the player.
 function introSeat(who) {
   if (!introOn()) return null;
   const I = SHIP.intro; if (I.step !== 'table' && I.step !== 'chief' && I.step !== 'free') return null;
@@ -42096,13 +42096,13 @@ function introTourTick() {
 // goal arrow points to your own bunk until you reach it (or sleep)
 // the goodnight (the user, after 0.60.3): once the Chief's welcome is over and his last tour lines are said, Torres says
 // goodnight (the writers' walk.goodnight.<n> in order, else the stand-in), and that lets you go: the 'free' step (else
-// at 18:30 (19:30 before the 16:30 arrival), reviewer 1c: the evening isn't held to a fixed 19:00). The first night's bunk arrow waits for it
+// at 19:00 (19:30 before the 16:30 arrival), reviewer 1c: the evening isn't held to a fixed 19:00). The first night's bunk arrow waits for it
 // (introBedTick). Not with you then (another deck, or more than 6 tiles off), or gone before he's finished: no line, the
 // arrow anyway. SHIP.intro.done.goodnight: when (null: not said; day 0's minutes are negative)
 const INTRO_GOODNIGHT = ['Explore as long as you like tonight. Early start, mind: get some sleep.'];
 function introNightTick() {
   const I = SHIP.intro; if (!introOn() || I.done.goodnight !== undefined || typeof player === 'undefined') return;
-  // after the Chief's welcome (her step done and her meeting over, or missed), or once 'free' came by the clock (18:30)
+  // after the Chief's welcome (her step done and her meeting over, or missed), or once 'free' came by the clock (19:00)
   const said = I.done['chief:end'] !== undefined || I.missed.includes('chief');
   if (I.done.free === undefined && (I.done.chief === undefined || !said || DIALOGUE || INTRO_UI.meet.length)) return;
   const p = player.obj.position, U = INTRO_UI, now = simNow(), a = introWalker(), near = !!a && Math.hypot(a.x - p.x, a.z - p.z) <= 6;
@@ -42457,7 +42457,7 @@ function introTeaTick(now) {
 }
 // the Chief at your table: her agent within a tile of her seat (section 10's crewComeTo brings her)
 function introCalderIn() {
-  const id = introSeat('calder'), a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = id && typeof placeSpot === 'function' ? placeSpot(id) : null;
+  const id = introStepById('chief').seats.calder, a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === 'calder'), sp = id && typeof placeSpot === 'function' ? placeSpot(id) : null;
   return !!(a && sp && Math.hypot(a.x - sp.x, a.z - sp.z) <= 1.2);
 }
 function introTick() {

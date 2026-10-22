@@ -511,7 +511,7 @@ with sync_playwright() as pw:
                 if who in linger: continue
                 lg = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [LINGER, [who, key]])
                 if lg: linger[who] = lg; print(f"  {lg['t']}: {who} {lg['after']} ship minutes after {key}: {lg['d']} m from the seat at your table")
-            if r['step'] is None: break
+            if r['step'] is None and (bunkAt or g.ev('shipNow() >= introAbs(0, 20 * 60)')): break   # (playtest patch 1: the evening's last step can end before the bunk arrow, which waits for his goodnight and the servery arrow)
         simnow = g.ev("typeof tapCrew === 'function' && /introTap/.test(tapCrew.toString())")   # the sim's dinner seating and evening cooking (0.26.26-0.26.31)
         if not simnow: print('  not yet: the dinner and seat checks (they need the sim engineer\'s current build, 0.26.31+)')
         elif dinner is None or not dinner['portions'] or dinner['portions'] < 2 or dinner['mess'] < 3 or not dinner['you'] or not dinner['him']: fail(f'no proper dinner when you reach the table: {dinner}')
