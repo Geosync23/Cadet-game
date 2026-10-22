@@ -42357,7 +42357,7 @@ const INTRO_STEPS = [
     checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
   { id: 'bunk', day: 0, at: 16 * 60 + 43, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
     checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 },
-    fallback: { wait: 30, later: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4, and your wardrobe\'s by the door. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) on to 'stow': the bag goes in, and he still brings you your device
+    fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
   // (0.64.15's playtest: "Zeke just stands in the bunk room") neither waits on you being in Bunk 1 for good: noHold, their
@@ -42660,8 +42660,8 @@ function introAdvance(t, here) {
     introMail(f.mail, late);                              // you weren't there: the gist by Mail, and on to the next one
     I.done[st.id] = late; I.missed.push(st.id); introNote('introStep', { step: st.id, who: st.who, missed: true });
     for (const fl of f.flags || []) introFlagSet(fl);
-    const j = INTRO_STEPS.findIndex(x => x.id === f.later);
-    I.step = j >= 0 ? f.later : null; I.since = late; I.near = null;
+    const later = f.laterNear && introWithEscort(here) ? f.laterNear : f.later, j = INTRO_STEPS.findIndex(x => x.id === later);   // (the Zeke patch) laterNear: where a step missed with him near you goes on to
+    I.step = j >= 0 ? later : null; I.since = late; I.near = null;
     for (const s of INTRO_STEPS.slice(INTRO_STEPS.indexOf(st) + 1, j)) if (I.done[s.id] === undefined) { I.done[s.id] = late; I.missed.push(s.id); }   // skipped over
   }
   for (const b of INTRO_WEEK) {                           // the week, by the clock
