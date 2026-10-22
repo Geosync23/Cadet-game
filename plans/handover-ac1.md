@@ -25,6 +25,14 @@ ALL IDENTICAL; check_fast OK.
   mech_check all OK.
 - Next: D (shift chain, trainTell into the queue, T3's empty-goal pick) once FX1's tip comes; F1/F2 per lead 28.
 
+## State at 3519abab (~16:20)
+- RV6's F3/F4 review (plans/review-arrows-f.md on claude/review-arrows) answered: 1, 3, 4, 6 fixed; 2 found to be the
+  rec deck's climbing wall taking the tap for the climbing holds' job (7-wall-holds) with the arrows on or off: routed
+  to lead 28 (rec deck / systems), not ours. 5 (owners' reviews) with the lead.
+- arrows_check's follower calls `pointNow().el()`, but pointNow() returns an id: it never presses a pointer. One-line
+  fix offered to the lead (use `POINT.aim`).
+- Memory ~49%: suggested a fresh session takes D.
+
 ## Checks
 - `arrows_pointer_check.py BUILD.html` (about 5 min): C, off and on, four sizes, screenshots in CADET_WORK/test.
 - `arrows_check.py BUILD.html queue` (about 4 min): B and E. Parts `shift` and `week` fail by design until FX1-FX3.
