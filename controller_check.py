@@ -1059,7 +1059,7 @@ def part_games(pw, src, tag):
 # D-pad can be steered to it. Scenes: the lift down to breakfast, eat, talk to someone, take a job at the board, the
 # lift home, set the alarm and sleep.
 STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, player); if (!s || !g) return null;
-  const pp = player.obj.position, gp = cellPos(...g); if (Math.hypot(gp.x - pp.x, gp.z - pp.z) < .45) return { there: true };
+  const pp = player.obj.position, gp = cellPos(...g); if (Math.hypot(gp.x - pp.x, gp.z - pp.z) < .45 || (s[0] === g[0] && s[1] === g[1])) return { there: true };   // (on its cell: there, though people may keep you off its middle)
   // (around people if it can; else through them: the game lets you push past someone after 2 s)
   let path = findPath(s, g, null, player); if (!path || !path.length) path = findPath(s, g); if (!path || !path.length) return { nopath: true };
   // the stick for that way, by the view's own axes (up on the stick is away from the camera: right (cos az, -sin az),
