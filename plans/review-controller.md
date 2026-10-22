@@ -162,7 +162,8 @@ Mutants in section 26 against CTT's check (049aff56), each with its own parts; c
 | t3_nounuse ('unuse' handler gone) | touch | MISSED, equivalent (the frame handler hides the ring whenever PAD.used is false) |
 | t3_rand (R() in each search) | touch | CAUGHT (seed, pictures) |
 | t3_noface (facing ignored) | pick | MISSED in effect: its only new line is the clean run's lift failure with other hints listed |
-| PR9's c6, c7 | idle calls / pick | queued |
+| PR9's c6 (a hidden mesh at load) | idle calls | CAUGHT (scene count, modes a and b) |
+| PR9's c7 (a seat ringed where the tap reaches a person) | pick | MISSED: CTT's pick finds no lone seat on Deck 4, so no seat is ever tried |
 Fixes: (1) CTT's OUTCOME should read the chat card (`#chat` visible, its person) and the crew's state (who's talking); (2) a
 facing test (two things in reach, ahead vs behind: the ring on the one ahead); (3) the lift not offered from 2 m (CTT
 told CT1); (4) the hint's floor order (above). cadet_test identical off and on; code clean.
@@ -178,3 +179,14 @@ part would catch that (it reads the same line). Suggest an id on that line (`pau
 markload (marks before a press), alwaysshow (touch picture), nopause, pausealways (30 s rule), norestore (the card's
 line comes back), saidalways (connected twice), ninA (Nintendo's bottom is B), nounuse (marks stay with no pad). To be
 re-run on 958421a (queued).
+
+### P5 fc8ccd5 (on P1's 93093a8): runs
+- cadet_test 93093a8 -> fc8ccd5, switch off: ALL IDENTICAL; -> PAD_ON copy: ALL IDENTICAL (plain, no renderer-noise
+  note). Run with only my old P3 mutant job beside it (a second browser), so CP5's one a_start difference under load
+  did not come back here; the control (93093a8 against itself, alone) is queued.
+- CP5's controller_check: CONTROLLER CHECK OK (a11y: 25 panels, 0 nameless).
+- Mutants (a11y part): p5_rmonce CAUGHT, p5_notoast CAUGHT, p5_thin CAUGHT, **p5_noedge MISSED** (the outer dark edge
+  gone: the test only needs one dark shadow).
+- One-handed presets PAD_LAYOUTS: both are whole permutations of the 16 buttons. Left hand: zoom in (RT) and the
+  right stick are out of reach and LT is now A, so a left-hand player can't zoom (turning is via D-pad up -> Rotate).
+  Right hand needs the sticks swapped (said in the comment). Notes for P4's page, not blocking.
