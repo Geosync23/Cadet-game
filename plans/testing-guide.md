@@ -5,6 +5,65 @@ this is the long one. Written by TS3 (the test-speed engineer) on 2026-10-21 at 
 `claude/opt-tests`; checked for accuracy by OR2. Numbers are from 0.64.12 (claude/integration a4a5735) unless
 another build is named. When a number here and a check's own output disagree, the check is right: fix this page.
 
+## THE RULE: every game change runs the full round, split across six check runners
+
+**The user, 2026-10-22: "We just need to keep testing fully."** Every change to the game runs the **full round** of
+checks (all 33, the event days included) **before it is merged or published**, always **split across six check
+runners (CR1-CR6) at once**, about 30-35 minutes. The test picker (`tools/affected.py`, section 4) is only a quick aid
+while you work; it is **never the gate**. check_fast still runs before every push.
+
+### The six-way split (fixed; balanced on the measured minutes alone, about 200 in all)
+
+| Runner | Its share | Minutes alone |
+|---|---|---|
+| **CR1** | `player_check` (the long one, ~20 min on a release run: a light share), devmode, bubble, puzzle, social, talk | ~34 |
+| **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day` | ~35 |
+| **CR3** | `day_check` Days **0, 1, 5, 7** | ~32 |
+| **CR4** | `day_check` Days **12, 13, 16, 19** | ~32 |
+| **CR5** | `day_check` Days **21, 27**, interactions, events, career | ~32 |
+| **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes | ~35 |
+
+`OLD` = the last release's game (`git show <release commit>:starship-cadet.html > old.html`). Every check runs with
+its default arguments unless the table says otherwise (`intro_check` whole, not in pieces). If a check is added, give
+it to the runner with the lightest share and update this table and the picker's `CHECKS` (section 4).
+
+### How a runner runs its share (step by step)
+
+1. **Check out the named commit** the build master sends: `git fetch origin <branch> && git checkout --detach <commit>`.
+2. **Confirm the game file**: `sha256sum starship-cadet.html` must equal the sha256 the build master sent. If it
+   doesn't, stop and tell the build master: you'd be testing a different file.
+3. Set up once (section 2's setup: playwright, three.js r128 and acorn in `CADET_WORK`, `CADET_CHROME`), and use your
+   own `CADET_WORK` (`export CADET_WORK=/tmp/work-crN`).
+4. **Run your share one check at a time**, in the table's order, each with its exit code and last line kept
+   (`python3 X_check.py starship-cadet.html > logs/X.txt 2>&1; echo "X exit $?"`). Long shares: split into background
+   scripts under 90 minutes.
+5. **For any FAIL**: run the same check on the last release's game (`OLD`). If it fails there **the same way** and has
+   a backlog row in the list of known old failures below, it's a known old failure. Anything else is **new**: say so
+   plainly, with the FAIL lines.
+6. **Write `plans/checks-crN.md`** on your own branch (`claude/checks-crN`): the commit, the sha256, then a table
+   `Check | Result | Key lines`, then each FAIL with "known old (backlog N)" or "NEW", and the proof (the OLD run).
+7. **Report to the build master and the lead**: "CRn: OK" or "CRn: FAIL: <check>: <one line>, known old (backlog N) /
+   NEW", with the link to your notes.
+
+### The build master's part
+
+1. Build the candidate (section 7): merges, switches, `content_gen.py --check`, `node names_check.js`, check_fast.
+2. **Send all six runners the commit and the game's sha256** (`sha256sum starship-cadet.html`), and the last
+   release's commit for `OLD`.
+3. **Wait for all six reports.**
+4. **Merge and publish only when every runner says OK, or every FAIL is a known old one** (below, with its backlog row
+   and the OLD run showing the same FAIL). Any NEW FAIL: back to the change's owner; nothing is merged or published.
+5. Record the round: the build-table row names the six runners' notes and the sha256.
+
+### What counts as a known old failure
+
+A FAIL is **known old** only if all three hold: it has a row in `plans/backlog.md`; the same check on the last release
+(`OLD`) fails **the same way**; and its message matches the row. Today (2026-10-22) the lead's list is **backlog 12**
+(career_check `busy: "Relied on" before Day 5`). Others seen failing the same way on the release, for the lead to add
+to the list or not: backlog 14 (perf_check +2 geometries across deck round trips), 18 (day_check Day 12 "the rec deck
+is on but nobody came"), 24 (tiles_check "opening the board adds nothing", CR3's row 26), and food_check `11 4`
+"harvest salad" (no row yet: CR2's find). Until the lead adds one, treat it as a FAIL to report.
+
 Contents
 1. Why we test this way (the user's rules)
 2. Every check: what it covers, how long, how to run it, what its FAILs mean
@@ -28,8 +87,9 @@ quietly breaking another's. The user's rules, in their words where we have them:
   as it is: any check that runs a changed line is picked". A faster setting ("Middle") was tried and only to be adopted
   "if its replay picks ALL 23 known failures ... If it misses even one, we stay on (a)" (21:45). It saved nothing, so
   we stay on Careful.
-- **The full round still runs**: before every release, whenever the coverage map is remade, and at least once a day
-  even on a day without a release (the user, 2026-10-21).
+- **The full round runs on every game change** before it's merged or published, split across six check runners (the
+  user, 2026-10-22: "We just need to keep testing fully"; see THE RULE at the top). Earlier (2026-10-21) it was: before
+  every release, when the map is remade, and at least once a day.
 - **A shortcut has to prove itself first.** From the optimization plan: the picker "applies only once turn 1 shows it
   would have caught every real failure of the last 20 merges".
 - **Never push when check_fast says FAILED** (CLAUDE.md, "How we work").
@@ -131,12 +191,9 @@ FAIL, or one of these with a different message, is new (see 8.3).
 
 ### 3.1 When it's required
 
-The full round (every check, alone, from Day 1) runs:
-1. **before every release** (a new playtest or Dev page, a merge to main);
-2. **whenever the coverage map is remade** (the map run itself doesn't count: run the round normally as well);
-3. **at least once a day**, even on a day without a release.
-
-Between those, each turn runs check_fast plus what the picker lists (section 4).
+The full round runs on **every game change, before it is merged or published**, split across the six runners (THE
+RULE, at the top). It also runs whenever the coverage map is remade (the map run itself doesn't count). While you're
+working, check_fast before every push, and the picker (section 4) as a quick aid.
 
 ### 3.2 What's in it, and in what order
 
@@ -199,6 +256,9 @@ With the event days the full round is 33 checks, about 176 minutes alone, plus c
 
 ## 4. The test picker (`tools/affected.py`)
 
+**The picker is a quick aid while you work, never the gate** (the user, 2026-10-22): the full round decides (THE
+RULE, at the top).
+
 ### 4.1 Using it
 
 ```
@@ -208,7 +268,8 @@ python3 tools/affected.py --why         # what picked each check
 python3 tools/affected.py --cmd         # the commands, shortest first
 ```
 
-Each turn: `bash check_fast.sh`, then every command `--cmd` prints, one at a time. It changes nothing.
+While working: `bash check_fast.sh`, then the commands `--cmd` prints, one at a time, to find a problem early. It
+changes nothing.
 
 ### 4.2 How it decides
 
@@ -263,7 +324,7 @@ The rules, as of 0.64.12 (`RULES` in tools/affected.py is the master; `python3 t
 
 ### 4.4 The settings: (a) Careful and (b) Middle
 
-- **(a) Careful, in use** (the user, 2026-10-21): the rules plus the whole map, as above. Over the last 20 game
+- **(a) Careful, the picker's setting** (the user, 2026-10-21; since 2026-10-22 an aid only): the rules plus the whole map, as above. Over the last 20 game
   commits it picks on average 24 of 33 checks, about 132 minutes (the full round with the event days: 176 minutes;
   the rules alone: 12 checks, 73 minutes). Before the event days were added it was 17 of 24 checks, 77 of 104 minutes.
   The event days come together: every day_check day runs nearly the same planner code, so a change one day runs,
