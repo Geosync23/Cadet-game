@@ -73,3 +73,24 @@ draws one more frame, and only then takes the "before" count. If the slide never
 (A first try of the group plant put the mesh 5 m in front of the camera, nearer than the camera's near plane (about 15 m),
 and on a phone the slid view's centre line falls just above the screen; the plant, not the check, was wrong. Placed at the
 view's middle (`unproject` of (0, 0, 0)) it fails on every view.) Backlog #26 moved to Fixed.
+
+# Round on 0.64.14 (claude/integration 8e239328), lead 25's full round, CR3's share
+
+Checked out 8e239328 as it is (no merging); its own checks run (tiles_check has the #26 fix).
+sha256 of starship-cadet.html **94f32868dbe7f27fc744eb834bb6b5f7c335bc15ac1bca86563d8ca4652881e9**, the lead's. Build line 0.64.14;
+`SHORT_FRIDAY = true`, `EVENTS_ON = true`. One check at a time, CADET_CHROME=/opt/pw-browsers/chromium.
+
+| Check | Result | Key lines |
+|---|---|---|
+| perf_check vs 0.64.13 (a7477a9) | exit 1, **1 problem: old** | Only "memory grows across deck round trips" 520→520→522, the same on 0.64.13 (backlog #14). Draw calls identical to 0.64.13 in every scene and view (trifold views included); busiest Sunday dinner portrait-wide 418, lantern supper 417, quiz night 396, storm all-clear party 363 (portrait 271): all under 450. Game code at most 2.12 ms. JS heap 228 → 87 MB (both a week of play and round trips). The Line ceremony and supper skip (EV_LINE_ON not in this build). 1824 s (the machine was slow; load 9.8/7.6/7.5 s). |
+| arc_check | **OK** | every arc finished (pell 8/8, rina 7/7, tomas 7/7 ...); errors [] |
+| path_check | **OK** | 7 decks x 3000 the same; a played day 3102/3102 |
+| tiles_check | **OK** | ALL OK (with the #26 fix) |
+| disc_check | **OK** | ALL OK; game view 129 calls |
+| puzzle_check | **OK** | PUZZLE CHECK OK |
+| deck_check | **OK** | lift draw calls D1 156, D2 146, D3 209, D4 176, D5 168, D6 122, D7 169 |
+| day_check 19 | **OK** | DAY CHECK OK; draw calls peak 265; worst stuck 3.7 ship min |
+| day_check 21 | **OK** | DAY CHECK OK; peak 258; worst stuck 5.2 |
+| day_check 27 | **OK** | DAY CHECK OK; peak 258; worst stuck 3.6 |
+
+No FAIL outside the known-old list.
