@@ -301,14 +301,15 @@ def solo(g):
     # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
     jid = json.dumps(after['job'])
     lab = lambda: g.ev(SEEN)['label']
+    shelf = g.ev(f"(j => SHIP.stores[j.parts[0]] || 0)(SHIP.jobs.find(x => x.id === {jid}))")   # the crew may have used the shelf's last one by now (then you make it in the shop, as for any job)
     steps = [lab()]
     g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
     g.ev(f"(j => {{ SHIP.player.carry.push(j.parts[1]); if (SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make = null; }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
     g.ev(f"(j => {{ jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); SHIP.player.carry.length = 0; if (!j.workDone) finishJob(j.id); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
     app = g.ev(f"(() => {{ const j = SHIP.jobs.find(x => x.id === {jid}); return typeof jobCard === 'function' && !!j && myJob() === j; }})()")
     t_in = g.ev(f"turnInJob({jid})"); g.step(30); fin = g.ev(SEEN)
-    print('  the arrow, step by step:', ' > '.join(steps), '| turned in:', t_in, '| after:', fin['mine'], fin['track'])
-    want = [r'fetch ', r'(make |look over )', r'repair ', r'turn it in at the job board']   # (off its deck: 'Take the lift to Deck 4: ...'; the machine shows what else it needs, as for any job)
+    print('  the arrow, step by step (' + str(shelf) + ' on the shelf):', ' > '.join(steps), '| turned in:', t_in, '| after:', fin['mine'], fin['track'])
+    want = [r'fetch ' if shelf > 0 else r'make ', r'(make |look over )', r'repair ', r'turn it in at the job board']   # (off its deck: 'Take the lift to Deck 4: ...'; the machine shows what else it needs, as for any job)
     import re as _re
     if len(steps) != 4 or not all(_re.search(w, (x or '').lower()) for w, x in zip(want, steps)): fail(f'the solo job\'s arrow does not walk its steps like a board job: {steps}')
     if not app: fail('the solo job is not your job (myJob) through its steps')
