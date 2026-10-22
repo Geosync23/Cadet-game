@@ -244,3 +244,31 @@ pad, the game is pixel-identical (cadet_test ALL IDENTICAL), no save or R() chan
 9. **Disconnect**: stops walking; pauses only if the pad was used in the last 30 s; touch keeps working; no pause
    from a pad that was never pressed.
 10. The usual: off-switch identical, check_fast before every push, names_check, phones-first draw calls.
+
+## Controller turns 1 + 2 (CT1: c99acf4f 0.90.0 the base, ef59c61a 0.90.1 the deck): PASS
+
+Code read (section 26 + one line in section 12's loop, `if (PAD.live) padTick(dt)` with the real clamped frame time):
+- With PAD_ON off: only consts, the PAD object and padOn registrations (inert). With it on and no pad: two window
+  listeners (`gamepadconnected`/`disconnected`) and nothing else; the hand-back listeners (pointerdown, wheel,
+  mousemove, capture, passive, no preventDefault) are added only at a hello. No `R()`, no save, no DOM, no mesh in
+  section 26 (grep).
+- Walking sets `player.steer` (the touch walk's own shape), never while a touch is steering (`steering`); a let-go or a
+  panel ends it. Turns are `azT ± π/2` (what the Rotate button does), zoom goes through `setZoom` (pinch's clamp).
+  Menu = pauseSet (a hidden tab pauses at any time too, so pausing over anything is the game's own behaviour); Y and
+  View press their own buttons (`click()`), so the device's lock etc. apply.
+- All 15 ids in PAD_PANELS exist in the game. A queue (ACT kind queue) shows qAsk, which is in the list, so the stick
+  walk ends the next frame and qAsk is asked once (Stay by pad needs turn 4's highlight).
+
+Runs (each alone):
+- cadet_test integration 0.64.14 → 0.90.1 (switch off): ALL IDENTICAL. → a copy with `PAD_ON = true`: ALL IDENTICAL.
+- controller_check: CONTROLLER CHECK OK (161 s).
+- Mutants (`plans/review-9/ct_mutants.py`), all **CAUGHT**: c1 walking flipped (view 0 "asks to walk the wrong way");
+  c2 a let-go that doesn't stop (views 0-3); c3 the device dropped from PAD_PANELS ("with the device open the stick
+  walked or RB turned"); c4 no pointerdown hand-back ("a touch did not hand back").
+
+Nits for later turns (not blocking):
+1. A worn stick drifting past the dead zone (.22) keeps the controller "in use" and walking; turn 7's dead-zone setting
+   covers it, but a stick that never returns to centre could also be ignored until it does once.
+2. controller_check has no "pad already there at load" case and no screenshot-after-touch case yet (none needed while
+   nothing is drawn; both are due with turn 3's ring and RV2's check review).
+3. Walking's "moved in >= 2 of 4 directions" is loose; the steer direction test (> .999 in all four) is the strict one.
