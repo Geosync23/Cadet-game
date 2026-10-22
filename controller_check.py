@@ -14,7 +14,7 @@
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
 #           is in charge); a disconnect lets go of everything and says whether the pad was in use; the last pad going
 #           leaves PAD.live false
-#   a11y:   (CP5) walking stops the frame the stick is let go; the menu repeat's pace and "no repeat"; toasts read out;
+#   a11y:   (CP5) walking stops the frame the stick is let go; the one-handed presets (whole shuffles, the main actions on one side); the menu repeat's pace and "no repeat"; toasts read out;
 #           the highlight's look; the ring pulses, and stays still with reduced motion; every button the highlight can
 #           land on, panel by panel, has a name a screen reader can say
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -422,7 +422,7 @@ def part_lists(pw):
 # P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
 NAMELESS = """(() => {
   const L = padLayer(); if (!L) return null;
-  return padItems(L).filter(e => { padNameIt(e); return !padName(e); }).map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
+  return padItems(L).filter(e => { padNameIt(e); return !padSaid(e); }).map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
 })()"""
 
 def part_a11y(pw):
@@ -438,6 +438,13 @@ def part_a11y(pw):
     fired = [x for x in p.log() if x.startswith('down')]
     check(fired == ['down', 'down:up'], f'a11y: with no repeat, holding down three seconds should be one step: {fired}')
     p.ev('PAD_REP.first = .5')
+    # the one-handed presets: each a whole shuffle of the buttons (every action on its own button), as P4's PAD_SET.map takes
+    for side, m in p.ev('PAD_LAYOUTS').items():
+        check(sorted(m) == sorted(BTN) and sorted(m.values()) == sorted(BTN), f'a11y: the one-handed {side} layout should give every action its own button: {m}')
+    left = p.ev('PAD_LAYOUTS.left'); hand = {'up', 'down', 'left', 'right', 'lb', 'lt', 'view', 'ls'}
+    check(all(left[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the left-hand layout should put use, back, device, action, Pause and the D-pad on the left side: {left}')
+    right = p.ev('PAD_LAYOUTS.right'); hand = {'a', 'b', 'x', 'y', 'rb', 'rt', 'menu', 'rs'}
+    check(all(right[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the right-hand layout should put use, back, device, action, Pause and the screen edge on the right side: {right}')
     # toasts are read out once the controller is in use
     check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
     # the highlight: thick, teal, with a dark edge

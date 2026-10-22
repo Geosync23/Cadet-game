@@ -53715,7 +53715,7 @@ function padStill() {                                      // the phone asks for
   const A = PAD_A11Y; if (!A.rmq && typeof matchMedia === 'function') A.rmq = matchMedia('(prefers-reduced-motion: reduce)');
   return !!(A.rmq && A.rmq.matches);
 }
-function padName(el) {                                     // what a screen reader says for el: '' when nothing
+function padSaid(el) {                                     // what a screen reader says for el: '' when nothing
   if (!el || !el.getAttribute) return '';
   const tidy = t => String(t || '').replace(/\s+/g, ' ').trim();
   const l = tidy(el.getAttribute('aria-label')); if (l) return l;
@@ -53728,9 +53728,23 @@ function padName(el) {                                     // what a screen read
 // [selector, name or (el) => name]: for a button that shows only a picture (the check's 'a11y' part lists any it finds)
 const PAD_NAMES = [];
 function padNameIt(el) {                                   // give el a readable name before it takes the focus, if it has none
-  if (!PAD.used || padName(el)) return;
+  if (!PAD.used || padSaid(el)) return;
   for (const [sel, nm] of PAD_NAMES) if (el.matches(sel)) { const t = typeof nm === 'function' ? nm(el) : nm; if (t) el.setAttribute('aria-label', t); return; }
 }
+// One-handed play: two presets for the Controller settings page (P4's "One hand: left / right", beside "Buttons back to
+// normal"), in its PAD_SET.map shape { action: the pad button that does it }, every action on its own button (a whole
+// shuffle of PAD_BTN; padSetLoad takes nothing else). Everything stays reachable: D-pad up on the deck reaches the
+// screen's edge buttons (Pause, Rotate, the device, Tracked), and in a panel the stick moves the highlight.
+// Left hand: the thumb on the stick and the D-pad, the fingers on LB (back) and LT (use); D-pad down is the device,
+// View the action button, the stick's click Pause. Right hand: A, B, X, Y as normal; the bumper and trigger step
+// through things nearby (RB left, RT right), Menu reaches the screen's edge, the stick's click is Pause. Walking with the
+// right hand needs the sticks swapped (P4's choice): with them swapped the right stick walks and moves the highlight.
+const PAD_LAYOUTS = {
+  left: { a: 'lt', b: 'lb', y: 'down', x: 'view', menu: 'ls', up: 'up', left: 'left', right: 'right', rb: 'rb', rt: 'rt', rs: 'rs',
+    lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'a' },
+  right: { a: 'a', b: 'b', x: 'x', y: 'y', up: 'menu', left: 'rb', right: 'rt', menu: 'rs', lb: 'lb', lt: 'lt', view: 'view', ls: 'ls', down: 'down',
+    rb: 'up', rt: 'right', rs: 'left' },
+};
 padOn('use', () => {                                       // toasts are read out once the controller is in use
   if (PAD_A11Y.toast) return; PAD_A11Y.toast = true;
   if (!toastEl.hasAttribute('role')) toastEl.setAttribute('role', 'status');
