@@ -614,3 +614,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 | CP4 | session_01VTXDwLqWGJVRh95HozqhCu | `claude/controller-p4` | Controller settings page | RV2 |
 | CP5 | session_01VcdDgzyHa1dqdmcRLELbiS | `claude/controller-p5` | accessibility + docs | RV2 |
 **~10:15 UTC: LEAD HANDOVER** lead 26 at ~64% memory (past the 60% judging point; the controller team is many hours of work) → lead 27. Brief: plans/handover-lead26.md on claude/lead-26.
+**~10:12 UTC: LEAD 27 took over** (session_017UHW78qnvRTQwYpDxpodHz, branch `claude/lead-27` from claude/lead-26 350a36de). Hourly check-in trig_011FyDwZoLc4NAv5VhKyHV52 (minute 11); lead 26's trig_012kj7K8rQoenVdySbkUcoKa disabled. Messaged to report to lead 27: BM13, CR1-CR6, PUB1, CP1-CP5, CTT, PR9, RV2. Waiting on: CR2's final report for 0.64.15 (31c44cb9), then BM13 fast-forward + PUB1 republish. Breakfast (F) still waits for the user.
