@@ -1533,7 +1533,7 @@ with sync_playwright() as pw:
     check(kb[1] == [True, True, 'No device yet', False, 'Put your bag in your locker first'], f'before the bunk: the bag held, the device locked and shut: {kb[1]}')
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
     check(kb[3] == [True, []], f'a missed bunk step leaves the bag in your hands: {kb[3]}')
-    check(kb[4] == [True, 'walks', False, True] and walked and kb2[0] == ['kitbag'], f'a tap at your wardrobe in Bunk 1 walks you there and stows the bag; elsewhere in the room a tap just walks (playtest patch 1): {kb[4]} {walked} {kb2[0]}')
+    check(kb[4] == [True, 'stowed', False, True] and walked and kb2[0] == ['kitbag'], f'a tap anywhere in Bunk 1 (or at your wardrobe) walks you to your wardrobe and stows the bag (the Zeke patch, after 0.64.15): {kb[4]} {walked} {kb2[0]}')
     check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'the bunk step done: the bag in your locker, the device opens: {kb2[1]}')
     check(kb2[2] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb2[2]}')
     ev("localStorage.removeItem(SAVE_KEY)")

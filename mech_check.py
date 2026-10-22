@@ -1632,6 +1632,17 @@ FX3SMALL = r"""(() => {
   const bed = placeById(playerBed()); goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
   const th = m => wed * 1440 + m; for (let t = th(300); t <= th(375); t += 5) tick(t);
   out.m3iOpen = worksOpened(W).has('m3i'); out.tomas = open('m3i'); meetingsTick(shipNow()); out.tomasStays = open('m3i'); if (DIALOGUE) dialogueEnd(true);
+  // the inspection morning's arrows (the week guide's Day 4, lead 29): wardrobe, bed, locker, then your berth if you've left it
+  const C = SHIP.clothes, P = SHIP.player, lab = () => { const g = goalNow(); return g ? g.label : null; }; clearGoal(); out.arrows = [];
+  goToDeck(5); const keep = [C && C.changed, P.bedMade, P.untidy]; if (C) C.changed = null; P.bedMade = null; P.untidy = true;
+  let t9 = th(376); tick(t9); out.arrows.push(lab());
+  if (C) C.changed = wed + 1; tick(++t9); out.arrows.push(lab()); P.bedMade = wed + 1; tick(++t9); out.arrows.push(lab()); P.untidy = false; tick(++t9); out.arrows.push(lab());
+  goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at)); tick(++t9); out.arrows.push(lab());
+  goToDeck(5); tick(++t9); out.arrows.push(lab()); setGoal({ deck: 3, place: '3-galley-1', label: 'someone else' }); P.bedMade = null; tick(++t9); out.arrows.push(lab()); clearGoal();
+  const gq = typeof GUIDE_ON === 'undefined' ? null : GUIDE_ON, setQ = v => { if (gq === null) window.GUIDE_ON = v; else GUIDE_ON = v; };   // the arrow queue on: the arrows step aside (AC2's piece F2 asks the queue)
+  setQ(true); tick(++t9); out.queued = lab(); if (gq === null) delete window.GUIDE_ON; else GUIDE_ON = gq;
+  tick(++t9); for (let t = t9; t <= th(INSPECT_AT); t++) tick(t); out.arrows.push(lab());
+  if (C) C.changed = keep[0]; P.bedMade = keep[1]; P.untidy = keep[2]; goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
   const n0 = SHIP.mail.length; worksTrained('m3i'); out.again = open('m3i'); if (DIALOGUE) dialogueEnd(true);
   W.tr.m2 = undefined; delete W.tr.m2; worksTrained('m2'); out.m2 = open('m2'); meetingsTick(shipNow()); out.m2Stays = open('m2'); if (DIALOGUE) dialogueEnd(true);
   goToDeck(4); SHIP.works = null; SHIP.jobs = []; return out;
@@ -1684,6 +1695,10 @@ def part_fx3(g):
     check(a['next'][1] == 'meet' and a['next'][2] == 630 and a['next'][3] == 0, f"m6: the next try is the 10:30 call again, not a 06:00 restart ({a['next']})")
     check(a['yours'][0] == 'do' and a['yours'][1] and a['yours'][2] == 4 and a['yours'][3] == 'Food, Deck 3', f"m6: followed, your turn is yours at once and points at the pipe; another section's arrow left alone ({a['yours']})")
     b = g.ev(FX3SMALL); print('  small lessons:', b)
+    A = b.get('arrows') or []
+    check(A[:4] == ['Fresh uniform for inspection: your wardrobe', 'Make your bed: your bunk', 'Tidy your locker: your bunk', 'Inspection at 06:30: your berth'] and A[4] is None
+          and A[5] == 'Inspection at 06:30: your berth' and A[6] == 'someone else' and A[7] is None and b.get('queued') is None,
+          f'fx3: the inspection morning\'s arrows lead through wardrobe, bed and locker to your berth, never over another arrow, none with the arrow queue on, gone at 06:30 ({A}, queue on: {b.get("queued")})')
     check(b['m3dOpen'] and b['drillAsk'] == 1, f"m3d: Calder's ask the morning of your first drill ({b})")
     check(b['brief'] and b['briefStays'], f"m3d: her briefing before the drill, and it stays to be read ({b})")
     check(b['inspectEarly'] == 0 and b['inspectAsk'] == 1, f"m3i: Tomas's ask the evening before your first inspection (in person in your bunk room, else Mail at 21:30) ({b})")

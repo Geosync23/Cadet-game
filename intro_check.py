@@ -341,6 +341,78 @@ def clock_tracked(g):
     print('  punched in:', punched)
     if not punched[0] or punched[1] == 'clock:in': fail(f'after clocking in the clock arrow should go: {punched}')
 
+# 14. Leaving the bunk room early (0.64.15's playtest: "after the bag, Zeke just stands in the bunk room"): a player who
+# walks out into the corridor right after putting the bag away (or without putting it away) must still get the device from
+# Zeke and be led on to the mess; on 0.64.15 he waited in Bunk 1 for good (the 'device' step wanted you in there)
+def bunk_leave(g):
+    print('14. Leaving Bunk 1 early: the device and the walk on still come')
+    if not g.ev("typeof INTRO_STEPS !== 'undefined' && INTRO_STEPS.some(s => s.id === 'device')"):
+        print('  not yet: no device step'); return
+    url = g.page.url.split('?')[0]
+    # how: 'stay' never puts the bag away and stays in Bunk 1, 'out' the corridor after the bag, 'nobag' the corridor without it, 'deck' the lift to Deck 3 after the bag,
+    # 'reload' a save and reload in the device step, then the corridor (the lead 27's cases)
+    for how in ('stay', 'out', 'nobag', 'deck', 'reload'):
+        if how == 'reload':
+            g.page.evaluate('localStorage.clear()')
+            g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+            if not g.ev("!!document.querySelector('form input[maxlength=\"24\"]')"): g.ev('localStorage.clear(); newGameStart(true)'); g.step(5)   # (an earlier part's save on this page: arrive anew)
+        else:
+            g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+        g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)   # (a panel left from the last run may cover the button)
+        for k in range(500):
+            g.step(20)
+            if g.ev("SHIP.intro.step === 'stow' && !DIALOGUE"): break
+            g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        t0 = g.ev('Math.floor(shipNow())')
+        if how not in ('nobag', 'stay'): g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()"); g.step(10)
+        if how == 'reload':
+            for k in range(60):
+                g.step(10)
+                if g.ev("SHIP.intro.step === 'device'"): break
+            g.ev('saveGame()')
+            g.page.goto(url + '?debug', timeout=RELOAD_MS); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(10)
+        if how == 'deck': g.ev('goToDeck(3)'); g.step(10)
+        elif how != 'stay': g.ev("(() => { player.path.length = 0; playerGo([11, 4]); })()")   # out into the junior corridor
+        r = None
+        for k in range(200):
+            g.step(30)
+            if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, dev: introFlag('intro.device'), given: SHIP.intro.done['device:given'], bag: bagHeld(), deck: deckDef.num, z: (a => a && cellAt(a.x, a.z))(introWalker()), zr: (a => a && deckDef.num === 4 ? introRoomAt(4, cellAt(a.x, a.z)) : null)(introWalker()) })")
+            if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and (r['dev'] or how == 'deck'): break
+        took = r['m'] - t0
+        print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else 12):   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
+            fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
+        if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
+    g.page.evaluate('localStorage.clear()')
+
+# 15. The talk steps with you near but not there (OR2, after 0.64.15): during 'bunk' you stand in the corridor just
+# outside Bunk 1, during 'table' in the mess away from your table, both within his 10 tiles. On 2b4a05db he waited until
+# 18:00; now the step moves on (missed, its gist by Mail) INTRO_HOLD_MAX + 5 minutes after it became yours
+def talk_away(g):
+    print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
+    for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
+        g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+        g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)   # (a panel left from the last run may cover the button)
+        for k in range(600):
+            g.step(20)
+            if g.ev(f"SHIP.intro.step === '{step}' && deckDef.num === {deck} && !DIALOGUE"): break
+            g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        if g.ev(f"SHIP.intro.step !== '{step}'"): fail(f'never reached {step}'); continue
+        t0 = g.ev('Math.floor(shipNow())'); g.ev(f"(() => {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }})()")
+        r = None
+        for k in range(200):
+            g.step(30)
+            if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
+            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), given: SHIP.intro.done['device:given'], z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
+            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)): break   # (bunk: on through the bag and the device)
+        took = r['m'] - t0
+        print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, device in person {r['given'] is not None}, Zeke at {r['z']}")
+        if step == 'bunk' and r['given'] is None: fail(f'standing outside Bunk 1 through his bunk talk, the device never came from him in person ({r})')   # (OR2)
+        if r['step'] == step or took > (25 if step == 'bunk' else 20): fail(f"standing near him but not at the spot during '{step}', the evening never moved on ({r})")
+    g.page.evaluate('localStorage.clear()')
+
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
     if not g.ev("typeof introArrowTick === 'function'"):
@@ -392,6 +464,7 @@ def firsts(g):
 
 RELOAD_MS = 120000   # parts 9 and 11 reload the page right after part 8's long evening: in a cloud container that load took 31-32 s, past Playwright's 30 s default (BM11, 0.64.7)
 FIRSTS_ONLY = '--firsts' in sys.argv
+LEAVE_ONLY = '--leave' in sys.argv   # part 14 alone (0.64.15's "Zeke stands in the bunk room")
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
@@ -399,6 +472,11 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
+    if LEAVE_ONLY:
+        talk_away(g)
+        bunk_leave(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
         firsts(g); clock_tracked(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
@@ -724,7 +802,7 @@ with sync_playwright() as pw:
         fresh = g.ev("({ calder: !!INTRO_UI.calder, tour: INTRO_UI.tour.length, step: INTRO_UI.step === undefined, meet: INTRO_UI.meet.length })")
         print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
         if fresh['calder'] or fresh['tour'] or not fresh['step'] or fresh['meet']: fail(f'New game kept the last evening\'s state: {fresh}')
-        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+        g.ev("(() => { const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(5)   # (the click timed out once under load; nothing covered the button)
         g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev('(() => { goToDeck(5); player.obj.position.copy(cellPos(15, 3)); })()'); g.step(5)   # the next frames run 05:00's beat, which holds the jobs
         res = g.ev("[1, 2, 3].map(k => SHIP.jobs.find(x => x.reserved === k)).map(j => j && j.machine)")
         print('  held for you:', res)
@@ -780,6 +858,8 @@ with sync_playwright() as pw:
             if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
+    talk_away(g)
+    bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()

@@ -110,6 +110,14 @@
 - Locker tidy. Nothing loose.
 == inspect.reminder
 - Inspection at 06:30: clean uniform, bed made, locker tidy.
+== inspect.goal.uniform
+- Fresh uniform for inspection: your wardrobe
+== inspect.goal.bed
+- Make your bed: your bunk
+== inspect.goal.locker
+- Tidy your locker: your bunk
+== inspect.goal.here
+- Inspection at 06:30: your berth
 == inspect.mail.subject
 - This morning's inspection
 

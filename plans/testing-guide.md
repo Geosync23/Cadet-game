@@ -72,7 +72,7 @@ when:
 A FAIL is **known old** only if all three hold: it has a row in `plans/backlog.md`; the same check on the last release
 (`OLD`) fails **the same way**; and its message matches the row. **The list (lead 25, 2026-10-22): backlog 12**
 (career_check `busy: "Relied on" before Day 5`) **and backlog 14** (perf_check "memory grows across deck round trips",
-+2 geometries a lap). Nothing else. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
++2 geometries a lap). Nothing else. **Updated for 0.64.15 on (lead 26/27): the list is backlog 14 and backlog 23** (food_check `7 1` "garden, good", fails the same on 0.64.14); backlog 12 no longer shows since playtest patch 1's part G, and its return would be the old failure, not a new one. **perf_check frame-time spikes:** a spike in one scene that doesn't repeat on a second measure is noise (three rounds, three different one-off spikes, none repeated: backlog 32); re-measure before calling it. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
 backlog 18 (day_check Day 12 "the rec deck is on but nobody came", PB2's fix), backlog 26 (tiles_check
 "opening the board adds nothing to the 3D scene") and food_check `11 4` "harvest salad" (PB2's fix). On 0.64.14 and
 later they must pass: if one fails again, it's a real FAIL.
@@ -129,6 +129,9 @@ cd /tmp/cadet-work/three && npm pack three@0.128.0 && tar xzf three-0.128.0.tgz
 cd /tmp/cadet-work/acorn && npm pack acorn@8.12.1 && tar xzf acorn-8.12.1.tgz
 export CADET_CHROME=/opt/pw-browsers/chromium
 ```
+
+**check_fast in a fresh container:** names_check needs acorn (`npm pack acorn@8.12.1` into `$CADET_WORK/acorn`, as
+above); without it the quick check stops at its second step (lead 27).
 
 Every check **exits 1 when it fails** and prints an OK line when it passes; a step counts as passed only with both
 (exit 0 and the OK line). "Minutes" are minutes alone on 4 cores (`CHECKS` in tools/affected.py; measured in
@@ -505,6 +508,9 @@ Results: plans/opt-cover/planted.md.
   crew change in a test copy and expect ALL IDENTICAL. Explain every difference in the build-table row.
 - cadet_test hides toasts, the `+N` need notes and the device button's glow, and turns off CSS transitions, because
   they run on real time.
+- **Run cadet_test strictly alone**, with no other browser check in the container. With a second browser running beside
+  it, the HUD's blurred glass can come out 1 level off in 6-46 pixels (seen twice on 2026-10-22, RV2); alone, the same
+  builds are plain ALL IDENTICAL, and a build compared with itself gives zero pixels (lead 27).
 
 ### 8.2 Browser quirks
 
