@@ -16192,6 +16192,7 @@ const trkDone = g => { clearGoal(); if (g.back && SHIP.player.track === null) SH
 function trkDoneCheck() {
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
   const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { trkDone(g); return; }
+  if (/^clock:/.test(g.trk)) return;                     // the time clock's: up till you punch (15's clock reminder takes it down), not on reaching the Works bay (RV8 on FE1 item 36)
   if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
   const w = ixGoalWorld(g); if (!w) return;
   const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));

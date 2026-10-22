@@ -402,7 +402,11 @@ def clock_tracked(g):
     seen = []
     for k in range(4): g.step(30); seen.append(g.ev(G))
     g.ev("goToDeck(5)"); g.step(5)
-    for k in range(12): g.step(30); seen.append(g.ev(G))
+    for k in range(4): g.step(30); seen.append(g.ev(G))
+    walk = g.ev("""(() => { const s = placeSpot('5-timeclock-1'), t = (ROOM_TILES.w || []).filter(c => free(...c)).map(c => [c, cellPos(...c)]).filter(([, w]) => Math.hypot(w.x - s.x, w.z - s.z) > 4).sort((a, b) => Math.hypot(a[1].x - s.x, a[1].z - s.z) - Math.hypot(b[1].x - s.x, b[1].z - s.z))[0];
+      if (!t) return null; player.obj.position.copy(t[1]); player.stop(); return [roomAt(...player.here()), Math.round(Math.hypot(t[1].x - s.x, t[1].z - s.z) * 10) / 10]; })()""")   # into the Works bay, a few metres from the clock (RV8: arriving in the bay took it down)
+    for k in range(8): g.step(30); seen.append(g.ev(G))
+    print('  in the Works bay, away from the clock:', walk)
     print('  tracked', tap, '| the arrow after, on Deck 4 then Deck 5:', sorted(set(map(str, seen))))
     if tap != 'clock:in' or any(x != 'clock:in' for x in seen): fail(f'Tracked "Clock in" did not stay up till you punched: {seen}')
     punched = g.ev("(() => { careerClock(shipNow()); for (let i = 0; i < 3; i++) clockRemindTick(shipNow()); return [careerClockedIn(SHIP.time.day), IX_GOAL && IX_GOAL.trk || null]; })()")
