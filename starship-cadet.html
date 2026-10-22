@@ -13285,6 +13285,7 @@ function playerTap(it, at, point) {
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
   if (choreRayTap(it, at)) return true;                  // the tap passed over your chore's next stop and a machine caught it (FX3, below)
+  if (choreThingTap(it, at)) return true;                // a machine in reach of a haul's (a round's) next stop; anything, carrying for a haul or a delivery: the stop (FB1, below)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
@@ -14247,6 +14248,17 @@ function choreRayTap(it, at) {
   const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
   const dock = /^Cart dock/.test(it.t) && nx && /^(cart|return)$/.test(nx.s.step) && s && Math.hypot(s.x - at.x, s.z - at.z) < JOB_REACH;   // a run's cart stop: the dock itself is where you take the cart (lead 29's Cart dock 1 pin)
   if (!s || !dock && jobRayDist(s) >= JOB_RAY) return false;
+  return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
+}
+// a machine, real or stand-in, within reach of the next stop of a registered kind's job (a haul, a round: FB1, lead 29): the
+// stop, whatever the tap's line. Hauling's cart and return stops stand by Cart dock 1, and the dock said "in good order":
+// players tap the thing under the arrow. Carrying for a haul or a delivery, anything in reach of its next pick-up or drop does
+// it (lead 29, RV7: the Folding table by the laundry drop was your laundry; the store's baskets, the infirmary's supplies).
+// Other chores keep 0.28.55's rule (Washer 1 by a laundry lamp: your load)
+function choreThingTap(it, at) {
+  const j = typeof ixChore === 'function' ? ixChore() : null, carry = !!j && (j.kind === 'haul' || j.chore === 'delivery'); if (!j || j.workDone || !(carry || jobKindOf(j)) || !it.hit) return false;
+  const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
+  if (!s || ixDist(it, s) >= JOB_REACH || !(carry || ixMachine(at) || stubTap(it, at))) return false;
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
 const jobSpotTap = p => { const h = jobHere(p, typeof ray !== 'undefined'); return !!(h && h.go()); };   // a tap on the floor or on anything near your job's stop
