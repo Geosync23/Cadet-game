@@ -130,3 +130,19 @@ aim 0.00 px, no shakes, no hide-and-show, no side swaps). Different speakers sta
 breakfast change (07:00) moves who is chatting there at the check's moment, and the 45 px limit is crossed with the new pair.
 Whether that is a game bug (a bubble really jumping) or the check's limit meeting a new scene isn't settled here: for the
 bubble owner. Not fixed (check runner).
+
+# Round 7: 0.64.17 candidate with the bubble fix (claude/integration-next 1498dbf4, 2026-10-22)
+
+Checked out as is. **sha256 of starship-cadet.html: `ff45b427d65d543ab8dfe10f289b49653f0102af8ef513b960dd2e2ecbfac306`**
+(matches lead 29's). Share per lead 29: player, devmode, bubble, puzzle, social, talk (fridays not in it). One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 374 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 271 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 283 s | BUBBLE CHECK OK; same speakers as round 6 (kim-yusuf, kovac-zainab); largest move beyond the speaker 41.1 px (at most 45; was 49.8 on 8193458e) |
+| puzzle_check | **OK** | 68 s | PUZZLE CHECK OK |
+| social_check | **OK** | 26 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 30 s | TALK CHECK OK |
+
+No FAILs. Round 6's bubble FAIL is gone with CP4's fix (36f8abf7).
