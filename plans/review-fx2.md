@@ -114,3 +114,13 @@ In it: tracking stays on (new game, Tracked items, every device "go" through `go
 **Merge resolutions (FX1 with FX2/FX3), four code conflicts:** 15's jobTap (FX1's `own` + FX3's room fallback and ray rescue: both); 15b's ixJobStep (FX1's "Shift over" first, then FX3's put-back); the 14:50 drill arrow: **FX2's must win**: FX1's `trk: 'career:drill'` (no trkFrom) makes trkDoneCheck clear it as soon as you reach the Works bay, before FX2's stop-by-stop drill arrows (drillGoal only moves an arrow tagged with the drill), and FX2 already clears it at 15:15; "Meet Ines": FX3's incGoalSet with FX1's trk fields (fine).
 
 **Found, old (on 2b4a05db too), not FX1's:** the laundry's chore pin (`4-laundry-1`, "Clean a vent: laundry" and "Take clean linen to the laundry") sits on Washer 1: a tap on the washer starts your own laundry load ("You start a load. It fills and begins to churn.") instead of the chore's stop; only a floor tap at the pin works. The same shape as the galley plant/chiller case FX3 fixed. That's both stuck lines above.
+
+## AC1's watch-step arrow 90992e66 (claude/arrows-c 86a980c5, on FX1 + FX2 + FX3 360801c0): PASS with the queue off; queue on has the next gap
+
+While a lesson is at 'watch', a direct arrow on the training job's spot ("Watch Yara: Cargo hold"), over the board and job arrows, another section's arrow left alone, down at your turn; nothing with the queue on (E's T2 instead).
+
+| Test | Result |
+| --- | --- |
+| Honest play Days 2-5, queue off (my bot) | every lesson learned by following the arrow: Rounds (Day 2), Hauling ("Watch Yara: Cargo hold" 12:05, your turn 12:15, trained 12:36), the drill, Tuning ("Watch Calder: Galley" 09:32, trained 09:50), the scanner ("Watch Emeka: Laundry" 09:51, your turn on Washer 2, trained 10:43). Before it (my FX1+FX2+FX3 merge): Hauling lapsed every day |
+| Honest play Days 2-5, queue on (GUIDE_ON true) | the watch steps complete (T2), but each lesson's turn then lapses at 17:00 (Hauling `do` on Days 3, 4 and 5): the 'do' gap FX2 is fixing. Also "Trained: rounds" toasted twice (11:09 and 11:12) |
+| arrows_check week on 86a980c5 | as on my 3-way merge: AR1's follower (no Tracked) lets Rounds lapse on Day 2 (holding a job, FX1 gives a word, not an arrow), then "stuck at Take your first round" Days 3 and 8, and the laundry pin (FX3's next). By hand in that state (m1 `again`, Day 3, clocked in) the board offers "Your first round, Deck 4" and Take it works: the stuck line looks like the follower's, for AR1 |
