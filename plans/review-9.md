@@ -407,3 +407,13 @@ no press: Settings unchanged).
 **Fix 2 (small; RV2's find): a trigger moved to another action presses at the browser's own `pressed` threshold** (a light
 squeeze can press A); treat the physical triggers by their half-way rule whatever action they carry.
 For P5 (RV2's note): the left-hand preset leaves no way to zoom.
+
+## Controller P4 re-check (CP4: f904532): PASS
+
+Fix 1: `padSetSeen = PAD_ON && (PAD.lastUse > -1e9 || !!padSetDiff())`; my `p9_modeb.py` (plug + hello, no press): Settings
+has no Controller button (it did on 7631ab6). Fix 2: physical buttons 6/7 count as pressed only past half way
+(`padTrig(value) > .5`), whatever action they carry. (Note: `lastUse` is also set by a stick past its dead zone, so a stick
+drifting at connect counts as a use; that is turn 2's drift nit, for turn 7's dead zone.) Runs (each alone): cadet_test
+integration 0.64.14 → f904532 off ALL IDENTICAL, on ALL IDENTICAL; controller_check settings OK. Mutants undoing each fix,
+both **CAUGHT** by CP4's new cases: `pr9_p4_seenlive` ("a pad connected but never pressed changed Settings"),
+`pr9_p4_trigpressed` ("a light squeeze of LT (bound to confirm) pressed it").

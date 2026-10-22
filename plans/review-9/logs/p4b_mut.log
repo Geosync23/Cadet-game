@@ -1,0 +1,2 @@
+pr9_p4_seenlive ['settings'] CAUGHT ['FAIL settings: a pad connected but never pressed changed Settings']
+pr9_p4_trigpressed ['settings'] CAUGHT ["FAIL settings: a light squeeze of LT (bound to confirm) pressed it: ['a', 'a:up', 'release', 'frame', 'a', 'frame', 'frame']"]
