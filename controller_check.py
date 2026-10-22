@@ -483,6 +483,7 @@ def part_tiles(pw):
         if tl_nav(p, mv[1]):
             p.press('a'); check(p.ev('TL_GAME.s.plies') == plies + 1, f'tiles: A on square {mv[1]} should put the tile down (a move made)')
     p.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
+    p.g.page.wait_for_timeout(1500); p.step(3)              # (the move's animations end and the board redraws on its own timer; let it, so it can't land mid-check)
     # the hold: A picks a tile in your hold, and the highlight keeps its place when the board redraws
     p.ev("TL_GAME.s.p = 0; TL_GAME.sel = null; TL_GAME.s.hold[0] = [1]; tilesDraw(); padFocusTo(TL_UI.root.querySelector('[data-h=\"1\"]'))"); p.step(2)
     p.press('a'); p.step(2)
@@ -515,7 +516,9 @@ def part_disc(pw):
     p.ev('DISC.g.p[0].x = 0'); kf, df = run(-1)
     check(-1 < kl < 0 and kf == -1, f'disc: the stick should set the move by how far it is pushed ({kl}, {kf})')
     check(dl < 0 and df < 0 and abs(df) > abs(dl) * 1.5, f'disc: a full push should go further than a light one ({dl:.2f}, {df:.2f})')
-    check(p.ev(LD_FOCUS) == 'next', f'disc: the stick moved the highlight ({p.ev(LD_FOCUS)})')
+    for ax in ([1, 0, 0, 0], [0, 1, 0, 0], [0, -1, 0, 0], [-1, 0, 0, 0]):   # a full push every way: Skip is to the right of Next, Leave below
+        p.ev('DISC.g.p[0].x = 0'); p.axes(ax); p.step(12); p.axes([0, 0, 0, 0]); p.step(2)
+        check(p.ev(LD_FOCUS) == 'next', f'disc: the stick pushed {ax[:2]} moved the highlight ({p.ev(LD_FOCUS)})')
     p.axes([0, 0, 0, 0]); p.step(2); check(p.ev('DISC.inp.kx') == 0 and p.ev('DISC.inp.kz') == 0, 'disc: letting go of the stick should stop you')
     for _ in range(4):
         if p.ev('DISC.how') < 0: break

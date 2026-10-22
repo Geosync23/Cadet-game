@@ -53766,21 +53766,14 @@ padOn('frame', () => {                                     // off those screens 
   if (!padLdOn(L)) { if (PAD_LD.stick) { PAD_LD.stick = false; DISC.inp.kx = DISC.inp.kz = 0; } PAD_LD.res = false; }
 });
 // Work steps and the device's questions (deviceChoose: a choose or turn card, a look's marks, the arrival's "skip it?"):
-// the highlight lands on the first answer, not the × (Walk away), and keeps its place when a turn card asks again (− + −
-// without hunting); B is the ×, as tapping it is (Not now, Step back). A conversation's card is the helper's (B: nothing).
+// the highlight lands on the first answer, not the × (Walk away); B is the ×, as tapping it is (Not now, Step back). The
+// place is kept when a turn card asks again (− + −) by the helper's own keeping after a redraw (P1 part 3). A
+// conversation's card is the helper's (B: nothing).
 PAD_FIRST.devDlg = '#devDlg .act';
 PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck
-const PAD_DLG = { el: null, i: -1 };
-const padDlgOn = L => !!(L && L.id === 'devDlg' && DEV.choose);
-padOwn(padDlgOn, {
-  frame: () => {
-    const D = PAD_DLG, a = document.activeElement, acts = [...document.querySelectorAll('#devDlg .act')];
-    if (D.el && !D.el.isConnected && D.i >= 0 && acts[D.i] && acts[D.i] !== a) padFocusTo(acts[D.i]);   // asked again: the same button
-    const f = document.activeElement, i = acts.indexOf(f); if (i >= 0) { D.el = f; D.i = i; }
-  },
+padOwn(L => !!(L && L.id === 'devDlg' && DEV.choose), {
   b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },
 });
-padOn('frame', () => { if (!padDlgOn(PAD.used ? padLayer() : null)) { PAD_DLG.el = null; PAD_DLG.i = -1; } });
 // The arrival's manifest (section 21's introManifest, a full-screen form): a panel once the controller is in use (it
 // gets an id then, so the helper can find it). The highlight lands in the name box: A brings up the phone's keyboard,
 // D-pad down reaches Sign and go aboard. A on Sign with the box empty fills in the suggested name, shown in the box
