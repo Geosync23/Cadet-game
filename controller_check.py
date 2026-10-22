@@ -808,6 +808,11 @@ LONE_SEAT = r"""(() => { const seats = [...PLACE_OF.values()].filter(pl => ['lou
   const lone = seats.find(([pl, sp]) => seats.every(([q, sq]) => q === pl || Math.hypot(sq.x - sp.x, sq.z - sp.z) > 3.6));
   return lone ? { kind: 'seat', name: deckDef.num + ':' + lone[0].id, words: ['sit'], x: lone[1].x, y: 0, z: lone[1].z, seat: 1 } : null; })()"""
 DECKS_JS = "(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))"
+def hint_now(r):
+    """the bottom line; a message showing hides it, so B first puts the message away, as a player would"""
+    h = r.ev(HINT)
+    if h is None and r.ev("toastEl.classList.contains('show')"): r.press('B'); r.step(2); h = r.ev(HINT)
+    return h
 def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
     # the same in the pad run and the tap run: the pad run goes first, and the tap run waits 7 frames for each D-pad
@@ -872,7 +877,7 @@ def part_facing(pw, src, tag):
     if not sp: r.close(); return ['facing: not proven (no spot on Deck 4 with two things on opposite sides and nothing else beside them)']
     for name, ang in (sp['a'], sp['b']):
         r.ev(f"player.stop(); player.obj.position.copy(cellPos({sp['cell'][0]}, {sp['cell'][1]})); target.copy(player.obj.position).setY(.7); player.face = {ang}")
-        r.step(72); h = r.ev(HINT)
+        r.step(72); h = hint_now(r)
         print(f'  facing {name}: the ring starts on "{h}"')
         if not h or name.lower() not in h.lower(): fails.append(f'facing {name} (another thing behind you): the ring should start on it, the line says "{h}"')
     r.close(); return fails
@@ -1069,7 +1074,7 @@ def walk_to(r, x, z, frames=900):
     r.js('window.__pads.clear(0)'); r.step(2); return False
 def ring_and_A(r, words, tries=10):
     for k in range(tries):
-        h = r.ev(HINT)
+        h = hint_now(r)
         if h and any(w in h.lower() for w in words): r.press('A'); r.step(4); return h
         r.press('RIGHT'); r.step(4)
     return None
@@ -1166,7 +1171,7 @@ def part_day(pw, src, tag):
             r.step(60); t = r.ev("[SHIP.time.day, SHIP.time.min]")
             print(f'  bedtime: "{got}", the alarm card {asked}, Set alarm by pad: {res}; now day {t[0]} {int(t[1]) // 60:02d}:{int(t[1]) % 60:02d}')
             if res != 'ok': fails.append(f'bedtime: Set alarm by pad ({got}, {res})')
-        else: fails.append('bedtime: could not walk to your bunk by the stick')
+        else: fails.append(f'bedtime: could not walk to your bunk by the stick (bed {bp}; you at ' + str(r.ev("[player.deck, Math.round(player.obj.position.x * 10) / 10, Math.round(player.obj.position.z * 10) / 10, String(ACT && ACT.kind), !!ride, String(padLayer() && (padLayer().id || padLayer().className))]")) + '; the way: ' + str(r.ev(f"({STEER})({bp[0]}, {bp[1]})") if bp else None) + ')')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 
