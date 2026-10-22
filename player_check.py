@@ -963,15 +963,24 @@ with sync_playwright() as pw:
         TAPS = "(() => { const it = ITEMS.find(i => i.t === %s); it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"
         g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 1440 * 2 + 9 * 60); needsT = null; SHIP.player.carry = []; SHIP.player.work = null"); g.step(3)
         # a tier-1 service job on a machine with a panel place, handed to you (the crew may have claimed it: test only)
-        jid = g.ev(r"""(() => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
+        # (FR3, PR5's find with Fridays on: the first one can be the auditorium seats, whose nearest tap is the Lectern; the
+        # game's Repair button does that job, but this loop taps, so a job whose nearest item fails section 15's own
+        # machine test is handed back and the next one taken)
+        TOK = "(() => { const m = machineById(myJob().machine), pid = panelPlace(m.id), s = placeSpot(pid), mc = cellPos(...(m.at || PLACE_OF.get(pid).at)), it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return _wp.clone(); }).sort((a, b) => Math.hypot(a.x - s.x, a.z - s.z) - Math.hypot(b.x - s.x, b.z - s.z))[0]; return !!it && roomAt(...cellAt(it.x, it.z)) === m.room && (Math.hypot(mc.x - it.x, mc.z - it.z) <= MACHINE_NEAR || Math.hypot(s.x - it.x, s.z - it.z) <= .8); })()"
+        skip = []
+        for tries in range(8):
+          jid = g.ev(r"""(skip => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && !skip.includes(j.id) && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
           if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
           for (const p of j.parts) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   // the shelf has some (test only: since Pillar 5's faults and hauling the part may be out until the delivery)
-          return claimJob(j.id) ? j.id : null; })()""")
+          return claimJob(j.id) ? j.id : null; })""" + f"({json.dumps(skip)})")
+          if not jid: break
+          mj = json.loads(g.ev("JSON.stringify([myJob().parts, machineById(myJob().machine).deck, myJob().machine, SHIP.stores[myJob().parts[0]]])"))
+          g.ev(f"goToDeck({mj[1]})"); g.step(5)
+          if g.ev(TOK): break
+          print('  skipped (its nearest tap is not the machine):', jid); g.ev(f"dropJob('{jid}')"); skip.append(jid); jid = None
         check(jid is not None, 'job loop: a tier-1 service job to take')
         if jid:
-            mj = json.loads(g.ev("JSON.stringify([myJob().parts, machineById(myJob().machine).deck, myJob().machine, SHIP.stores[myJob().parts[0]]])"))
             print('  your job:', jid, mj)
-            g.ev(f"goToDeck({mj[1]})"); g.step(5)
             check(g.ev(TAPI) is True, 'job loop: a tap on the machine should be the job'); s1 = jrun()
             print('  inspected:', s1[3][:110]); check(s1[2]['seen'] and 'needs' in s1[3], f'job loop: inspecting should say what it needs ({s1[3]})')
             g.ev("goToDeck(5)"); g.step(5)

@@ -1,0 +1,27 @@
+@meeting captainAllClear.smooth
+// EW1 (events writer), the storm update: the all-clear, Sunday Day 14 at 10:00, the observation room, when the storm
+// went smoothly (one file per band: captainAllClear.smooth, .bumpy, .rough; replaces MEETING_SCRIPTS.captainAllClear).
+// Four of the five are called in on their day off (the Captain, Calder, Sato, Holt; Vance is on duty), and they say
+// so (the user's answer). FOR EV1: after Calder's "Mine too" line the game inserts the Captain's line to you from
+// the bank keys event.ionStorm.allclear.you.commended | .jobs | .none (content/banks/event-ionStorm.lines), as the
+// game's script does today with c.mine.jobs: the commendation letter comes now (the user's answer 8).
+title: The all-clear
+from: Commander Teo Vance
+gist: Notes from the observation room: the storm passed at 09:40, short blackouts, nothing lost from the cold store, and a bridge crew that ate on time. Comms are back; expect a queue at the booths. Party in the bow lounge at 19:00.
+== lines
+vance: The Captain. Who is, for the record, off duty today.   [nod]
+marrow: So is most of this room. Thank you for coming in. Dr. Sato?   [gesture]
+sato: The front passed us at 09:40. Readings are back to background. It's over.
+sato: I'd have come in anyway. You don't sleep through the end of a storm.
+marrow: Then let's say so. That went about as well as a storm can.   [nod]
+calder: The lights only went a few times. The prep paid off.
+holt: Watch reports no injuries. Some short tempers. Mine included. It's my day off.   [sigh]
+calder: Mine too. Nobody tell my rota.   [laugh]
+? choice
+* It was good to be useful.   rel:marrow+1,calder+1
+  marrow: It always is. Remember that on the dull days.   [nod]
+* Is there a party?   rel:vance+1
+  vance: Bow lounge, 19:00. The Captain insists.   [gesture]
+* (Just nod)
+  marrow: Good.   [nod]
+marrow: Right. I'll tell the ship. Then I'm going back to my Sunday.   [laugh]

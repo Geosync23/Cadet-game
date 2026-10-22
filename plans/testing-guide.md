@@ -73,7 +73,7 @@ A FAIL is **known old** only if all three hold: it has a row in `plans/backlog.m
 (`OLD`) fails **the same way**; and its message matches the row. **The list (lead 25, 2026-10-22): backlog 12**
 (career_check `busy: "Relied on" before Day 5`) **and backlog 14** (perf_check "memory grows across deck round trips",
 +2 geometries a lap). Nothing else. Three that used to fail are **fixed in 0.64.14** (claude/integration 8e239328):
-backlog 18 (day_check Day 12 "the rec deck is on but nobody came", PB2's fix), backlog 24 / CR3's row 26 (tiles_check
+backlog 18 (day_check Day 12 "the rec deck is on but nobody came", PB2's fix), backlog 26 (tiles_check
 "opening the board adds nothing to the 3D scene") and food_check `11 4` "harvest salad" (PB2's fix). On 0.64.14 and
 later they must pass: if one fails again, it's a real FAIL.
 
@@ -189,7 +189,7 @@ FAIL, or one of these with a different message, is new (see 8.3).
 |---|---|---|
 | career_check | `busy: "Relied on" before Day 5` | Known and accepted (backlog 12 and 17): waits for the user's balancing pass. Never "fix" it by changing the check. |
 | perf_check | `memory grows across deck round trips` (+2 geometries: 548 → 548 → 550 in backlog 14; 520 → 520 → 522 on the storm + Fridays candidate) | Known (backlog 14). perf_check exits 1 on this alone. A single frame-time spike can also show; measure again. |
-| tiles_check | `phone 390 (or 320): opening the board adds nothing to the 3D scene` | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Known since 0.64.11 (backlog 24, CR3's row 26): the check's own timing. It counts while the device's framing still eases on real time and something comes into view. Not a game bug. |
+| tiles_check | `phone 390 (or 320): opening the board adds nothing to the 3D scene` | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Known since 0.64.11 (backlog 26): the check's own timing. It counts while the device's framing still eases on real time and something comes into view. Not a game bug. |
 | devmode_check | the clock part: `clocked in, the jump didn't keep you clocked in` | A flake (backlog 21): real-time waits plus, before DB2's fix, a random seed giving an early sick day about 1 run in 28. Run it alone; open until full runs stay green. |
 | day_check Day 12 | `the rec deck is on but nobody came to it in the evening` | **Fixed in 0.64.14 (claude/integration 8e239328): must pass from then on; a FAIL is real.** Before: Backlog 18: on Day 12 (a Friday) the plans' rec-deck evening is empty **with the storm off too** (0.64.6; claude/fridays with SHORT_FRIDAY off); Day 5 passes. Open. |
 | day_check Day 13 (storm on) | the same message, on the storm's Saturday | A separate case: the storm shuts the rec deck that day; EV4's 4fa198f skips the comparison only on days the storm shuts the deck. Check it on the combined storm build. |
@@ -520,7 +520,7 @@ Results: plans/opt-cover/planted.md.
   `gl.readPixels` after it.
 - **Real time**: toasts hide on a 5.6 s `setTimeout`, the tip card and heads-ups on timers, the device's framing eases
   by requestAnimationFrame. A check that reads them must clear or wait for them itself (player_check's phone block;
-  tiles_check's backlog 24 is this).
+  tiles_check's backlog 26 was this).
 - intro_check's reloads take up to 120 s (`RELOAD_MS`). Background jobs stop at 2 hours. Never `pkill -f` a pattern
   (it matches the shell running it). `*.png` is gitignored: add shots with `git add -f`. perf_check writes
   `perf_check.json` where it runs.
@@ -574,7 +574,7 @@ tiles_check exited 1: `FAIL phone 390: opening the board adds nothing to the 3D 
    the crew patch T1-T3b, Dev mode D5, Short Fridays 1-8. The section rules alone (23 → tiles) would have named none of
    them, which is exactly what the map is for. CR3, the same evening, bisected it to the crew patch T2 (4dbdca8, the
    opening camera) and found the cause: the check counts while the device's framing still eases on real time.
-5. Backlog row 24 (and CR3's row 26): the check's timing, not a game bug; nobody fixed it on the side.
+5. Backlog row 26 (CR3's; TS3 had written the same as a row 24 on its branch, dropped at the merge): the check's timing, not a game bug; nobody fixed it on the side.
 
 **Case 2: a known failure that wasn't what it seemed.** The known-failure list said ee48072 broke intro_check
 --evening, and the picker (rules and map) didn't pick intro for it. Before changing the rules to force intro on every

@@ -13,12 +13,12 @@
 #   by the saved or live state; the career-beat guard (EV_BEATS, guardFree): every meeting and gathering clear of the
 #   beats' hours (its own beat aside), one Captain's scene a day, none on a test day or across a night shift; the
 #   summons on Day 18 at 16:00 and the Captain's table on Day 20 19:00-20:15 (a night-shift week); the meetings' casts on
-#   shift or called in (eventCalledIn), and planned in the meeting's room; gatherings fit their places (crowds about
-#   60, the mess's 44 seats plus standing); no tradition in a gathering's or meeting's room while it's on, and the
+#   shift or called in (eventCalledIn), and planned in the meeting's room; gatherings fit their places (unseated crowds
+#   at most 60, never more there at once than its places; a seated one (no standing, the user's) never more at once than its seats, any number meaning to go: lead 24); no tradition in a gathering's or meeting's room while it's on, and the
 #   plan's clashes (talent night and Lap of the Wren off the party night, the lap on Day 15 at 20:30); the run twice
 #   is identical;
 #   4. a self-test: clashes planted in a copy (a meeting in the Friday hold, one over the officer's ceremony, a
-#   gathering in the hold) must each be caught;
+#   gathering in the hold, a dressed copy of a tradition in the party's room) must each be caught;
 #   5. late saves (F0c): evSkippedFor for any day, evCalPlan; real saves: SHIP.evFrom (the day events first came on,
 #   saved) decides what's passed over (evFrom 0 on Day 20: the storm it missed is run at load and logged), kept through a save and a reload, null and unsaved while off;
 #   and in parts 1-3, the phase notes (F2): the clock run through the storm's warning and front, each phase's note once at
@@ -36,8 +36,15 @@ exec(open(__file__.replace('bigevents_check.py', 'cadet_test.py')).read().split(
 from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
-CROWD = 66                     # crowds up to about 60 (the user, events plan v3.2 answer 4): a tenth over is a FAIL
-MESS_SEATS = 44
+OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
+ON_ALREADY = 'const EVENTS_ON = true;' in SRC
+if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
+    SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
+    (WORK / 'test').mkdir(parents=True, exist_ok=True)
+    OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
+CROWD = 60                     # crowds up to about 60 (the user, events plan v3.2 answer 4); lead 23: the supper at most 60, a FAIL above; lead 24: unseated crowds only
+MESS_SEATS = 44                # the mess hall's seats (kept for reference; the standing-places rule it served is dropped)
+LINE_SUPPER_MIN = 40           # the Line supper: at least about 40 should come (ER3's review)
 
 ok = True
 SINK = None                    # the self-test collects the FAILs here instead of printing them
@@ -137,15 +144,19 @@ PAPER = r"""(() => {
     const want = people.filter(p => eventPlan(p, g.day).some(x => x.id === g.id)).length;
     const went = people.filter(p => planDay(p, g.day).some(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-')))).length;
     const pls = e.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + e.id + ':' + i : w.pool)) || []);
-    const cap = new Set(pls.map(pl => pl.id)).size, seats = new Set(pls.filter(pl => /seat|chair|bench|stool|sofa/.test(pl.type)).map(pl => pl.id)).size;
-    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
+    const cap = new Set(pls.map(pl => pl.id)).size, seats = new Set(pls.filter(pl => pl.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(pl.type)).map(pl => pl.id)).size, crowd = new Set(pls.filter(pl => pl.gather).map(pl => pl.id)).size;   // a seat: any place sat at (the long tables' chairs are type 'event'); a crowd spot: a gather place
+    // the most crew there at once (lead 23: never over its places at any one time), minute by minute through the gathering
+    const B = (g.day - 1) * 1440, segs = people.flatMap(p => planDay(p, g.day).filter(s => s.tag && (s.tag === 'ev-' + g.id || s.tag.startsWith('ev-' + g.id + '-'))));
+    let peak = 0, peakAt = null; for (let m = B + e.from - 30; m < B + e.to + 30; m++) { const n = segs.filter(s => s.from <= m && m < s.to).length; if (n > peak) { peak = n; peakAt = m - B; } }
+    out.caps.push({ id: g.id, day: g.day, at: hhmm(e.from) + '-' + hhmm(e.to), want, went, cap, seats, peak, peakAt: peakAt == null ? null : hhmm(peakAt), stay: e.ev.stay || null, seated: !!e.ev.seated, crowd, rooms: g.rooms, mess: g.rooms.some(r => /mess/.test(r)) });
   }
   // traditions in a gathering's or meeting's room while it's on; and the traditions on the events' days, for the plan's list
+  const isTrad = e => SHIP_TRADITIONS.some(t => t.id === e.ev.id);   // by id: a ship-wide event's day dress (S6, EV_DAY_DRESS) lists a dressed copy, a new object (PR4)
   const span = []; for (const r of CAL.filter(built)) for (let d = r.day; d <= r.day + SHIP_EVENTS[r.id].days; d++) span.push(d);
-  for (const d of [...new Set(span)]) out.named[d] = eventsOn(d).filter(e => SHIP_TRADITIONS.includes(e.ev)).map(e => [e.id, e.from, e.to]);
+  for (const d of [...new Set(span)]) out.named[d] = eventsOn(d).filter(isTrad).map(e => [e.id, e.from, e.to]);
   const things = out.gath.filter(g => !g.draft && g.day).map(g => ({ id: g.id, day: g.day, from: g.at[0], to: g.at[1], rooms: g.rooms }))
     .concat(out.beats.filter(b => b.what === 'meeting' && !b.draft && b.room).map(b => ({ id: b.id, day: b.day, from: b.t - ab(b.day, 0), to: b.t - ab(b.day, 0) + b.len, rooms: [b.deck + '|' + b.room] })));
-  for (const x of things) for (const e of eventsOn(x.day).filter(e => SHIP_TRADITIONS.includes(e.ev))) {
+  for (const x of things) for (const e of eventsOn(x.day).filter(isTrad)) {
     const rooms = evRooms(e.ev); if (e.from < x.to && x.from < e.to && rooms.some(r => x.rooms.includes(r))) out.clash.push('D' + x.day + ' ' + e.id + ' ' + hhmm(e.from) + '-' + hhmm(e.to) + ' in ' + rooms.join(',') + ' during ' + x.id + ' ' + hhmm(x.from) + '-' + hhmm(x.to));
   }
   // the Captain's scenes in the events' meetings, a day at a time
@@ -158,7 +169,10 @@ PAPER = r"""(() => {
       const from = b.t - ab(b.day, 0), own = evBeatsOn(b.day).filter(x => from < x.to && from + b.len > x.from && x.id !== b.beat);
       G.items.push({ what: b.ev + ' meeting ' + b.id, when: b.at, ok: guardFree(b.day, from, from + b.len, 'beat') || own.every(x => x.kind === 'captain' && Math.abs(x.from - from) <= 15), beats: own.map(x => x.id) });
     }
-    for (const g of out.gath.filter(g => !g.draft && g.day)) G.items.push({ what: 'gathering ' + g.id, when: dm(ab(g.day, g.at[0])), ok: guardFree(g.day, g.at[0], g.at[1], 'beat'), beats: evBeatsOn(g.day).filter(x => g.at[0] < x.to && g.at[1] > x.from).map(x => x.id) });
+    for (const g of out.gath.filter(g => !g.draft && g.day)) {   // its own beat aside, as a meeting's: one with its id, or a Captain's beat that day within 15 minutes (EV5: the Line's ceremony)
+      const own = evBeatsOn(g.day).filter(x => g.at[0] < x.to && g.at[1] > x.from && x.id !== g.id);
+      G.items.push({ what: 'gathering ' + g.id, when: dm(ab(g.day, g.at[0])), ok: guardFree(g.day, g.at[0], g.at[1], 'beat') || own.every(x => x.kind === 'captain' && Math.abs(x.from - g.at[0]) <= 15), beats: own.map(x => x.id) });
+    }
     for (const b of EV_BEATS) if (b.kind === 'captain') G.captainDays[b.day] = (G.captainDays[b.day] || 0) + 1;
     // test day; Day 18 16:00 free; the table at 19:30 on Day 20 crosses the night shift, at 19:00 it doesn't; Day 21 05:00 is the night shift; Friday 16:00
     G.samples = [guardFree(15, 600, 625, 'captain'), guardFree(18, 960, 985, 'captain'), guardFree(20, 1170, 1260, 'captain'), guardFree(20, 1140, 1215, 'captain'), guardFree(21, 300, 330, 'beat'), guardFree(12, 960, 990, 'beat')];
@@ -182,7 +196,11 @@ PLANT = r"""(() => {
   M.push({ id: 'plantHold', at: [1, 945], len: 10, where: { venue: 'bow-lounge', deck: 3, room: /^Bow lounge$/ }, who: [] });
   M.push({ id: 'plantGuard', at: [0, 1040], len: 20, where: { venue: 'works-bay', deck: 5, room: /^Works bay$/ }, who: [] });
   const p = EV_SHIPWIDE.find(g => g.id === 'party'); EV_SHIPWIDE.push({ ...p, id: 'plantGath', k: 9999, when: { ship: 'ionStorm', day: 1 }, at: [960, 1000] });
-  return true;
+  // a dressed tradition (a copy, as S6's EV_DAY_DRESS makes) put in the party's room during the party
+  const t = SHIP_TRADITIONS.find(e => e.id === 'book-circle') || SHIP_TRADITIONS[0], pd = EV_CALENDAR.find(r => r.id === 'ionStorm').day + p.when.day;
+  const copy = { ...t, where: p.where.map(w => ({ ...w })) }, on0 = eventsOn;
+  eventsOn = d => { const l = on0(d); return d === pd ? l.concat([{ id: t.id, name: t.name, ev: copy, day: d, from: p.at[0] + 10, to: p.at[0] + 50, honorees: [], names: '', first: '' }]) : l; };
+  return t.id;
 })()"""
 PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 
@@ -194,7 +212,7 @@ PLANTED = ['plantHold', 'plantGuard', 'plantGath']
 NOTES = r"""((a, b) => {
   const out = { notes: [], cues: [], lines: 0, want: [], err: null, on: typeof EV_NOTES_ON !== 'undefined' ? EV_NOTES_ON : null };
   try {
-    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? (EV_CALENDAR.find(x => x.id === 'ionStorm' && SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) || EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft)) : null;   // the storm's own row (EV5: the Line comes first)
     if (r) out.want = SHIP_EVENTS[r.id].phases.map(p => [r.id, p.id, evBeatAt(r.day, p.at)]).filter(x => x[2] >= a && x[2] <= b).map(x => x[0] + ':' + x[1] + '@' + x[2]);
     for (let t = a; t <= b; t += 5) { setShipNow(t); eventAdvance(t, true); if (typeof socialTick === 'function') socialTick();
       if (t === a + 420 || t === b) out.cues.push(...((SHIP.social && SHIP.social.cues) || []).map(c => c.key).filter(k => /^event\./.test(k))); }
@@ -217,7 +235,7 @@ DEVICE = r"""(() => {
   const keep = { ...SHIP.time }, out = { on: typeof EV_DEVICE_ON !== 'undefined' ? EV_DEVICE_ON : null, days: [], trk: [], closed: [], open7: null, off: null, err: null };
   const ab = (d, m) => (d - 1) * 1440 + m;
   try {
-    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) : null;
+    const r = typeof EV_CALENDAR !== 'undefined' && EV_CAL_ON ? (EV_CALENDAR.find(x => x.id === 'ionStorm' && SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft) || EV_CALENDAR.find(x => SHIP_EVENTS[x.id] && !SHIP_EVENTS[x.id].draft)) : null;   // the storm's own row (EV5: the Line comes first)
     const sd = r ? r.day : (eventDueDay() || {}).day;
     out.off = { items: [sd, sd + 1, sd + 2, sd + 3].map(d => eventItems(ab(d, 0), ab(d, 1439)).length), lounge: eventClosed({ deck: 3, room: 'L' }, ab(sd + 1, 900)) };
     if (!out.on) return out;
@@ -282,15 +300,21 @@ def check_device(g, tag, want_on):
 # simNote('calledIn') for each named person off that day (eventCalledIn), at a minute in; one 'calledIn' cue each in
 # section 20's cues (read at the hour after: notes are applied when their social hour runs); nobody else. Off (EV_CALLIN_ON): no calledIn note at all
 CALLIN = r"""(() => {
-  const out = { on: typeof EV_CALLIN_ON !== 'undefined' ? EV_CALLIN_ON : null, meet: null, want: [], notes: [], cues: [], err: null };
+  const out = { on: typeof EV_CALLIN_ON !== 'undefined' ? EV_CALLIN_ON : null, meets: [], notes: [], err: null };
   try {
-    let m = null, d = 0;
-    if (out.on && typeof evMeetsOn === 'function') for (d = 1; d <= 40 && !m; d++) { const dd = d; m = evMeetsOn(dd).find(g => g.who.some(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, dd); })); if (m) break; }
-    const day = m ? d : 14, at = m ? m.at : 600, ab = (day - 1) * 1440 + at;
-    if (m) { out.meet = m.id + ' D' + day + ' ' + hhmm(at); out.want = m.who.filter(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, day); }).sort(); }
-    for (const t of [ab - 10, ab + 5, ab + 65]) { skipTo(t); if (t === ab + 65) out.cues = ((SHIP.social && SHIP.social.cues) || []).filter(c => c.key === 'calledIn').map(c => c.who).sort(); }
+    const ab = (d, m) => (d - 1) * 1440 + m, list = [];
+    if (out.on && typeof evMeetsOn === 'function') for (let d = 1; d <= 40; d++) for (const m of evMeetsOn(d)) {
+      const want = m.who.filter(w => { const p = schedPeople().find(x => x.id === w); return p && eventCalledIn(p, d); }).sort();
+      if (want.length) list.push({ id: m.id, day: d, at: m.at, t: ab(d, m.at), want });
+    }
+    if (!list.length) skipTo(ab(14, 590)), skipTo(ab(14, 665));   // off: the all-clear's hour, where it would be
+    for (const m of list.sort((a, b) => a.t - b.t)) {   // each meeting that calls someone in, in turn: 10 minutes before, 5 after, an hour after (its cues: the hour after)
+      for (const t of [m.t - 10, m.t + 5, m.t + 65]) if (t > shipNow()) skipTo(t);
+      const cues = ((SHIP.social && SHIP.social.cues) || []).filter(c => c.key === 'calledIn' && c.at >= m.t - 1).map(c => c.who).sort();
+      const notes = simNotes('calledIn').filter(n => n.meeting === m.id && n.day === m.day).map(n => [n.who, n.t]).sort();
+      out.meets.push({ meet: m.id + ' D' + m.day + ' ' + hhmm(m.at), id: m.id, want: m.want, at: m.t, notes, cues });
+    }
     out.notes = simNotes('calledIn').map(n => [n.who, n.meeting, n.day, n.t]).sort();
-    out.at = ab;
   } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
   return out;
 })()"""
@@ -298,19 +322,92 @@ CALLIN = r"""(() => {
 def check_callin(pw, path, tag, want_on):
     if 'EV_CALLIN_ON' not in SRC: waiting('called in (F0b, EV_CALLIN_ON)'); return
     g = Game(pw, path); C = g.ev(CALLIN); errs = g.errors[:3]; g.close()
-    say(f"  called in: {C['meet']}: notes {C['notes']}; cues {C['cues']}")
     if C['err']: fail(f"{tag}: called in: {C['err']}"); return
     for e in errs: fail(f"{tag}: called in: page error: {e}")
     if not want_on:
+        say(f"  called in (off): notes {C['notes']}")
         if C['notes']: fail(f"{tag}: calledIn notes while EV_CALLIN_ON is off: {C['notes']}")
         return
-    if not C['meet']: fail(f"{tag}: no event meeting calls anyone in"); return
-    got = sorted(n[0] for n in C['notes'])
-    if got != C['want']: fail(f"{tag}: calledIn notes for {got}, want one each for {C['want']}")
-    for n in C['notes']:
-        if n[3] != C['at'] + 1: fail(f"{tag}: {n[0]}'s calledIn note at minute {n[3]}, want {C['at'] + 1} (a minute into the meeting)")
-    if C['cues'] != C['want']: fail(f"{tag}: calledIn cues for {C['cues']}, want one each for {C['want']}")
-    if 'ionStorm' in SRC and C['meet'].startswith('allClear') and C['want'] != ['calder', 'holt', 'marrow', 'sato']: fail(f"{tag}: the all-clear's called in are {C['want']}, the plan says Marrow, Sato, Holt and Calder")
+    if not C['meets']: fail(f"{tag}: no event meeting calls anyone in"); return
+    for M in C['meets']:
+        say(f"  called in: {M['meet']}: notes {M['notes']}; cues {M['cues']}")
+        got = sorted(n[0] for n in M['notes'])
+        if got != M['want']: fail(f"{tag}: {M['meet']}: calledIn notes for {got}, want one each for {M['want']}")
+        for w, t in M['notes']:
+            if t != M['at'] + 1: fail(f"{tag}: {M['meet']}: {w}'s calledIn note at minute {t}, want {M['at'] + 1} (a minute into the meeting)")
+        if M['cues'] != M['want']: fail(f"{tag}: {M['meet']}: calledIn cues for {M['cues']}, want one each for {M['want']}")
+        if M['id'] == 'allClear' and M['want'] != ['calder', 'holt', 'marrow', 'sato']: fail(f"{tag}: the all-clear's called in are {M['want']}, the plan says Marrow, Sato, Holt and Calder")
+    stray = [n for n in C['notes'] if not any(n[1] == M['id'] and n[0] in M['want'] for M in C['meets'])]
+    if stray: fail(f"{tag}: calledIn notes for nobody's meeting: {stray}")
+
+# Crossing the Line (EV5, claude/line-update; plans/event-line-plan.md), in a copy with EV_LINE_ON switched on too:
+# the oath ceremony's cast at the glass (Marrow and Brennan on the lead spots, Brennan on her galley stint), the front
+# spots for first-timers only (lineFirst), Saruth never at the ceremony (a Veyli does not watch another people's rite),
+# Tomas at his post through the day and on the Lap at 20:30 with Torres-Zeke and Pell, the Line supper (the Sunday table
+# dressed) at most 60 and never more there at once than its places, and no commendation (commend: false)
+LINE = r"""(() => {
+  const out = { err: null }, ab = (d, m) => (d - 1) * 1440 + m, P = id => schedPeople().find(p => p.id === id), S = schedData();
+  try {
+    const r = EV_CALENDAR.find(x => x.id === 'crossingLine'), def = SHIP_EVENTS.crossingLine, d = r.day + 1;   // the crossing: its day 1 (Sunday Day 7)
+    out.day = d; out.commend = def.commend;
+    const at = (p, m) => { const q = P(p); const s = q && planDay(q, d).find(s => s.from <= ab(d, m) && ab(d, m) < s.to); return s ? { place: s.placeId || null, tag: s.tag || null, act: s.act, from: s.from - ab(d, 0), to: s.to - ab(d, 0) } : null; };
+    const cer = def.meetings.find(m => m.id === 'crossingCeremony'), cm = cer.at[1];
+    out.cast = ['marrow', 'brennan'].map(id => [id, at(id, cm + 5)]);
+    const g = EV_SHIPWIDE.find(x => x.id === 'lineCeremony'), gFrom = g.at[0], gTo = g.at[1];
+    out.saruth = (P('saruth') ? planDay(P('saruth'), d) : []).filter(s => s.from < ab(d, gTo) && ab(d, gFrom) < s.to && /^ev-(lineCeremony|crossingLine)/.test(s.tag || '')).map(s => s.tag + '@' + (s.placeId || ''));
+    const front = new Set((S.shared.get('3|@bow-lounge-line-front') || []).map(q => q.id)), first = typeof lineFirst === 'function' ? lineFirst() : new Set();
+    out.front = { spots: front.size, inFront: [], notFirst: [] };
+    for (const p of schedPeople()) for (const s of planDay(p, d)) if (s.placeId && front.has(s.placeId) && s.from < ab(d, gTo) && ab(d, gFrom) < s.to) { out.front.inFront.push(p.id); if (!first.has(p.id)) out.front.notFirst.push(p.id); }
+    out.tomas = { post: at('tomas', 600), lap: at('tomas', 1240) };
+    out.lapWith = ['torres-zeke', 'pell'].map(id => [id, at(id, 1240)]);
+    out.watch = ['tomas', 'ueda-vera'].map(id => { const l = []; for (let m = 870; m <= 915; m += 5) l.push([hhmm(m), at(id, m)]); return [id, l]; });   // 14:30-15:15: the crossing's afternoon
+    const sup = eventsOn(d).find(e => e.id === 'sunday-table'), people = schedPeople();
+    if (sup) {
+      const want = people.filter(p => eventPlan(p, d).some(x => x.id === 'sunday-table')).length, B = ab(d, 0);
+      const isSup = s => s.tag && (s.tag === 'ev-sunday-table' || s.tag.startsWith('ev-sunday-table-')), segs = people.flatMap(p => planDay(p, d).filter(isSup));
+      const came = people.filter(p => planDay(p, d).some(isSup)).length;
+      let peak = 0; for (let m = B + sup.from; m < B + sup.to; m++) peak = Math.max(peak, segs.filter(s => s.from <= m && m < s.to).length);
+      const pls = sup.ev.where.flatMap((w, i) => S.shared.get(w.deck + '|' + (w.room ? 'ev:' + sup.id + ':' + i : w.pool)) || []), cap = new Set(pls.map(q => q.id)).size;
+      const seats = new Set(pls.filter(q => q.pose === 'sit' || /seat|chair|bench|stool|sofa/.test(q.type)).map(q => q.id)).size, crowd = new Set(pls.filter(q => q.gather).map(q => q.id)).size;
+      out.supper = { at: hhmm(sup.from) + '-' + hhmm(sup.to), want, came, peak, cap, seats, crowd, seated: !!sup.ev.seated };
+    }
+  } catch (e) { out.err = String(e && e.stack || e).slice(0, 300); }
+  return out;
+})()"""
+
+def check_line(g, tag):
+    L = g.ev(LINE)
+    if L['err']: fail(f"{tag}: the Line: {L['err']}"); return
+    say(f"  the Line D{L['day']}: cast {L['cast']}; front spots {L['front']['spots']}, in them {len(L['front']['inFront'])}; Tomas {L['tomas']}; at the Lap {L['lapWith']}; supper {L.get('supper')}")
+    if L['commend'] is not False: fail(f"{tag}: the Line should never commend (commend: false): {L['commend']}")
+    for i, a in L['cast']:
+        if not a or not str(a['place'] or '').startswith('3-bow-lounge-line-lead'): fail(f"{tag}: {i} isn't on a lead spot at the oath: {a}")
+    b = dict(L['cast']).get('brennan')
+    if b and b['place'] != '3-bow-lounge-line-lead-2': fail(f"{tag}: Brennan should be at 3-bow-lounge-line-lead-2 for the oath: {b}")
+    if L['saruth']: fail(f"{tag}: Saruth is at the Line's ceremony: {L['saruth']}")
+    if not L['front']['spots']: fail(f"{tag}: no front spots ('@bow-lounge-line-front')")
+    if L['front']['notFirst']: fail(f"{tag}: not first-timers in the front spots: {L['front']['notFirst']}")
+    t = L['tomas']
+    if not t['post'] or t['post']['place'] != '2-watch-6': fail(f"{tag}: Tomas isn't at his post (2-watch-6) at 10:00 on the Line's day: {t['post']}")
+    if not t['lap'] or not str(t['lap']['tag'] or '').startswith('ev-lap-of-the-wren'): fail(f"{tag}: Tomas isn't on the Lap at 20:40: {t['lap']}")
+    for i, a in L['lapWith']:
+        if not a or not str(a['tag'] or '').startswith('ev-lap-of-the-wren'): fail(f"{tag}: {i} isn't on the Lap at 20:40: {a}")
+    sp = L.get('supper')
+    if not sp: fail(f"{tag}: no Line supper (the Sunday table) on Day {L['day']}")
+    else:
+        if sp['want'] > CROWD and not sp['seated']: fail(f"{tag}: the Line supper: a crowd of {sp['want']}, over {CROWD}")   # seated: no cap on meaning to go (lead 24), only at once <= seats
+        if sp['peak'] > sp['cap']: fail(f"{tag}: the Line supper: {sp['peak']} at once for {sp['cap']} places")
+        say(f"  the Line supper {sp['at']}: {sp['want']} mean to go, {sp['came']} came, at most {sp['peak']} at once, {sp['seats']} seats")
+        if sp['came'] < LINE_SUPPER_MIN: fail(f"{tag}: the Line supper: only {sp['came']} came (want {sp['want']}), fewer than {LINE_SUPPER_MIN}: the ship's supper of the year is empty")
+        if not sp['seated']: fail(f"{tag}: the Line supper isn't seated (the user's call: no standing at meals): {sp['seats']} seats, {sp['crowd']} standing spots, {sp['peak']} at once")
+        else:   # seated, as the lantern supper: never more at once than its seats, no standing spot
+            if sp['peak'] > sp['seats']: fail(f"{tag}: the Line supper (seated): {sp['peak']} at once for {sp['seats']} seats")
+            if sp['crowd']: fail(f"{tag}: the Line supper (seated) has {sp['crowd']} standing crowd spots")
+    # the watch keeps the ship through the crossing's afternoon: Tomas and Ueda at their posts every 5 minutes from 14:30
+    # to 15:15 (a short toilet or hand-wash on Deck 2 is fine), never at an event
+    for i, l in L['watch']:
+        off = [f"{m} {a['place'] if a else None}/{a['tag'] if a else None}" for m, a in l if not a or str(a['tag'] or '').startswith('ev-') or not (str(a['place'] or '').startswith('2-watch-') or str(a['place'] or '').startswith('2-wc'))]
+        if off: fail(f"{tag}: {i} is off watch in the crossing's afternoon (14:30-15:15): {off}")
 
 def paper(g, tag):
     a = g.ev(PAPER); b = g.ev(PAPER)
@@ -392,7 +489,7 @@ def judge(a, tag):
     # eventDay, and nothing reads the saved or live state
     if guard_on and a['eventDay'] is not None:
         if a['eventDay'] != a['bigDays']: fail(f"{tag}: eventDay is true on {a['eventDay']}, the big phases fall on {a['bigDays']}")
-        if 'ionStorm' in days and a['eventDay'][:3] != [12, 13, 14]: fail(f"{tag}: the storm's eventDays are {a['eventDay']}, not 12-14")
+        if 'ionStorm' in days and not {12, 13, 14} <= set(a['eventDay']): fail(f"{tag}: the storm's eventDays {sorted({12, 13, 14} - set(a['eventDay']))} are missing from {a['eventDay']}")
     elif a['eventDay'] is None: waiting('eventDay (F1a)')
     if a['eventDayLive'] != a['eventDay']: fail(f"{tag}: eventDay changed with the saved/live state: {a['eventDay']} -> {a['eventDayLive']}")
     if a['skippedLive'] != a['skipped']: fail(f"{tag}: the passed-over events changed after load: {a['skipped']} -> {a['skippedLive']}")
@@ -440,10 +537,15 @@ def judge(a, tag):
     # the gatherings fit their places
     for c in a['caps']:
         if c.get('missing'): fail(f"{tag}: gathering {c['id']} isn't on Day {c['day']}"); continue
-        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, {c['cap']} places ({c['seats']} seats) in {c['rooms']}")
-        if c['want'] > c['cap'] or c['went'] > c['cap']: fail(f"{tag}: {c['id']}: {max(c['want'], c['went'])} people for {c['cap']} places")
-        if c['want'] > CROWD: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over about 60")
-        if c['mess'] and c['want'] > MESS_SEATS and c['cap'] - c['seats'] < c['want'] - MESS_SEATS: fail(f"{tag}: {c['id']} in the mess: {c['want']} people, {c['seats']} seats and too few standing places")
+        say(f"  gathering {c['id']} D{c['day']} {c['at']}: {c['want']} mean to go, {c['went']} planned there, at most {c['peak']} at once ({c['peakAt']}){', dropping in for ' + str(c['stay'][0]) + '-' + str(c['stay'][1]) + ' min' if c['stay'] else ''}, {c['cap']} places ({c['seats']} seats{', seated only' if c['seated'] else ''}) in {c['rooms']}")
+        if c['peak'] > c['cap']: fail(f"{tag}: {c['id']}: {c['peak']} there at once ({c['peakAt']}) for {c['cap']} places")
+        if c['want'] > c['cap'] and not c['stay']: fail(f"{tag}: {c['id']}: {c['want']} mean to go for {c['cap']} places")   # one that drops in and out (stay) is judged by the most there at once
+        if c['want'] > CROWD and not c['seated']: fail(f"{tag}: {c['id']}: a crowd of {c['want']}, over {CROWD}")   # seated sittings (staggered): no cap on meaning to go (lead 24); at once <= seats below
+        if c['id'] == 'lanternSupper' and not c['seated']: fail(f"{tag}: the lantern supper isn't seated (the user's call: no standing at meals)")
+        if c['seated']:   # seated sittings only (the user, the storm's lantern supper): never more at once than its seats, and no crowd spot
+            if c['peak'] > c['seats']: fail(f"{tag}: {c['id']} (seated): {c['peak']} at once for {c['seats']} seats")
+            if c['crowd']: fail(f"{tag}: {c['id']} (seated) has {c['crowd']} standing crowd spots among its places")
+        # (the old rule, a mess gathering over 44 needing standing places, is dropped: the user removed standing at meals)
         if c['went'] < c['want']: note(f"{c['id']}: {c['want'] - c['went']} meant to go but aren't planned there")
     # no tradition in a gathering's or meeting's room while it's on; the plan's clashes (with the storm's new hours)
     for x in a['clash']: fail(f"{tag}: {x}")
@@ -460,14 +562,15 @@ with sync_playwright() as pw:
     # 0. the switches
     base = 'const EVENTS_ON = false;' in SRC
     cal_alone = bool(re.search(r'const EV_CAL_ON = EVENTS_ON;', SRC))
-    print('Switches:', 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
+    print('Switches:', 'EVENTS_ON (on in the build; a switched-off copy for parts 1-2)' if ON_ALREADY else 'EVENTS_ON (off)' if base else 'EVENTS_ON on already' if 'const EVENTS_ON = true;' in SRC else 'no EVENTS_ON', '|', ', '.join(s for s in ['EV_CAL_ON', 'EV_GUARD_ON', 'EV_NOTES_ON', 'EV_DEVICE_ON', 'EV_REPLAY_ON', 'EV_RANK_ON', 'EV_COMMS_ON'] if re.search(r'const ' + s + r' = ', SRC)) or 'no pieces')
     if not base and 'const EVENTS_ON = true;' not in SRC:
         print('  SKIP: no events base in this build (EVENTS_ON): nothing to check')
         print('BIGEVENTS CHECK OK (nothing built yet)'); sys.exit(0)
 
     # 1. off: today's game
     print('\n1. Switched off (the build as it is):')
-    g = Game(pw, sys.argv[1]); a = paper(g, 'off'); show(a)
+    if ON_ALREADY: note('EVENTS_ON is on in this build: parts 1-2 run on a switched-off copy of it (EVENTS_ON = false), part 3 on the build as switched on')
+    g = Game(pw, OFF_BUILD); a = paper(g, 'off'); show(a)
     if a['sw']['EVENTS_ON']: note('EVENTS_ON is already on in this build: part 1 checks the build as it is')
     else:
         if a['eventDay']: fail(f"off: eventDay is true on {a['eventDay']}")
@@ -486,26 +589,46 @@ with sync_playwright() as pw:
     if set(ks) & set(trk): fail(f'a ship-wide gathering shares a hash key with a tradition: {sorted(set(ks) & set(trk))}')
     check_hold(a, 'off', False)
     if not a['sw']['EVENTS_ON']: check_device(g, 'off', False)
+    if not a['sw']['EVENTS_ON'] and 'EV_LINE_ON' in SRC:   # the Line off: no Line in the menu, no ceremony, no venue
+        lo = g.ev(r"""(() => { const S = schedData(), d = (EV_CALENDAR.find(x => x.id === 'crossingLine') || { day: 6 }).day + 1;
+          return { d, menu: /Line/.test(JSON.stringify(galleyMenu(d))), cer: eventsOn(d).some(e => e.id === 'lineCeremony'),
+            keys: [...S.shared.keys()].filter(k => /bow-lounge-line/.test(k)), places: [...S.byId.keys()].filter(k => /bow-lounge-line/.test(k)).length }; })()""")
+        if lo['menu']: fail(f"off: the galley's menu for Day {lo['d']} mentions the Line")
+        if lo['cer']: fail(f"off: the Line's ceremony (lineCeremony) is on Day {lo['d']}")
+        if lo['keys'] or lo['places']: fail(f"off: the Line's venue ('bow-lounge-line') is there: {lo['keys'][:4]}, {lo['places']} places")
     for e in g.errors[:3]: fail(f'off: page error: {e}')
     g.close()
-    if not a['sw']['EVENTS_ON']: check_callin(pw, sys.argv[1], 'off', False)
-    if not a['sw']['EVENTS_ON']: check_notes(pw, sys.argv[1], 'off', False)
+    if not a['sw']['EVENTS_ON']: check_callin(pw, OFF_BUILD, 'off', False)
+    if not a['sw']['EVENTS_ON']: check_notes(pw, OFF_BUILD, 'off', False)
 
     # 2. the calendar alone (EV_CAL_ON), then 3. everything on (EVENTS_ON)
     for n, tag, on, title in ([(2, 'calendar', ['EV_CAL_ON'], 'The calendar alone (EV_CAL_ON)')] if cal_alone else []) + [(3, 'on', 'all', 'Everything on (EVENTS_ON)')]:
         print(f'\n{n}. {title}:')
         g = Game(pw, variant(tag, on)); a = paper(g, tag); show(a); judge(a, tag); check_device(g, tag, on == 'all')
+        if on == 'all' and g.ev("typeof SHIP_EVENTS.crossingLine !== 'undefined' && !SHIP_EVENTS.crossingLine.draft"): check_line(g, tag)
         for e in g.errors[:3]: fail(f'{tag}: page error: {e}')
         g.close()
         check_notes(pw, variant(tag, on), tag, on == 'all')
         if on == 'all': check_callin(pw, variant(tag, on), tag, True)
 
+    # 3b. with Crossing the Line on (EV_LINE_ON; it follows EVENTS_ON from L6): everything again, and the Line's own cases
+    if 'const EV_LINE_ON = false;' in SRC:
+        print('\n3b. With Crossing the Line (EV_LINE_ON):')
+        lsrc = SRC.replace('const EVENTS_ON = false;', 'const EVENTS_ON = true;', 1).replace('const EV_LINE_ON = false;', 'const EV_LINE_ON = EVENTS_ON;', 1)
+        lp = WORK / 'test' / 'bigev_line.html'; lp.write_text(lsrc)
+        g = Game(pw, str(lp)); a = paper(g, 'line'); show(a); judge(a, 'line'); check_device(g, 'line', True); check_line(g, 'line')
+        for e in g.errors[:3]: fail(f'line: page error: {e}')
+        g.close()
+        check_callin(pw, str(lp), 'line', True)
+    elif "SHIP_EVENTS.crossingLine" in SRC and 'EV_LINE_ON' in SRC:
+        note('EV_LINE_ON already follows EVENTS_ON: the Line is checked in part 3')
+
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
-    g = Game(pw, variant('on', 'all')); g.ev(PLANT); a = g.ev(PAPER); g.close()
+    g = Game(pw, variant('on', 'all')); dressed = g.ev(PLANT); a = g.ev(PAPER); g.close()
     SINK = []; judge(a, 'planted'); caught, SINK = SINK, None
-    for p in PLANTED:
-        hit = [c for c in caught if p in c]
+    for p in PLANTED + [dressed + ' ']:
+        hit = [c for c in caught if p in c and (p != dressed + ' ' or 'during party' in c)]
         print(f"  {p}: " + ('caught: ' + hit[0] if hit else 'NOT caught'))
         if not hit: fail(f'the self-test: the planted {p} was not caught')
 
@@ -524,7 +647,7 @@ with sync_playwright() as pw:
           const cases = [[20, [], null], [9, [], null], [20, [{ id: 'ionStorm' }], null], [20, [], { id: 'ionStorm' }], [0, [], null], [1, [], null], [null, [], null], [40, [], null]];
           const plan = evCalPlan();
           return { evFrom: SHIP.evFrom, late: EV_LATE, cases: cases.map(([f, l, c]) => ({ f, l: l.map(x => x.id), c: c && c.id, got: evSkippedFor(f, l, c), want: want(f, l, c) })),
-            plan, due: evCalDue(), days: plan.map(r => SHIP_EVENTS[r.id].days),
+            plan, due: evCalDue(), days: plan.map(r => SHIP_EVENTS[r.id].days), bigs: plan.map(r => SHIP_EVENTS[r.id].phases.filter(p => ['onset', 'escalation', 'resolution'].includes(p.id)).map(p => r.day + p.at[0])),
             cal: EV_CALENDAR.filter(r => SHIP_EVENTS[r.id] && !SHIP_EVENTS[r.id].draft && !EV_SKIPPED.has(r.id)).map(r => r.id) };
         })()""")
         g.close()
@@ -567,14 +690,16 @@ with sync_playwright() as pw:
         errs = []
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
-        big = [12, 13, 14] if storm else []
-        sday = next((r['day'] for r in P5['plan'] if r['id'] == 'ionStorm'), 11)
-        slog = [f"ionStorm:{sday}-{sday + n}" for r, n in zip(P5['plan'], P5['days']) if r['id'] == 'ionStorm']   # the log's span from the game's own data (SHIP_EVENTS.ionStorm.days)
+        # from the game's own data, every planned event (EV5: the Line comes before the storm): its big days, and its span
+        # in the log once a late load has caught it up (each one ended by Day 20)
+        bigs = {r['id']: b for r, b in zip(P5['plan'], P5['bigs'])}
+        big_but = lambda *skip: sorted({d for i, b in bigs.items() if i not in skip for d in b})
+        slog = [f"{r['id']}:{r['day']}-{r['day'] + n}" for r, n in zip(P5['plan'], P5['days']) if r['day'] + n <= 20]
         for title, save, want in [
-            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': [], 'due': None, 'log': []}),
-            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big, 'due': None, 'log': slog}),   # the storm it missed is run on load, as an unbroken game ran it
-            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big, 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
-            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big, 'due': None})]:
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'ed': big_but('crossingLine', 'ionStorm', 'comet'), 'due': None, 'log': []}),
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
+            ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': ['comet', 'crossingLine'], 'ed': big_but('crossingLine', 'comet'), 'due': None})]:
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
             print(f"  {title}: evFrom {r['evFrom']}, passes over {r['sk']}, eventDay {r['ed']}, due {r['due']}, log {r['log']}, running {r['ev']}")
             for k in ('evFrom', 'sk', 'ed', 'due', 'log'):

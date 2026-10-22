@@ -1,0 +1,21 @@
+@meeting stormLukasSat
+// EW2 (events writer 2), the ion storm story A. Saturday Day 13 (your day off), a moment in the galley from 14:30 to
+// 17:00, when Lukas comes on. The 11:20 surge left his range with two rings of six. Three replies, each sets one flag
+// (storm.lukas.fixed|asked|own) that the supper's Brennan moment reads. FOR THE BUILDER: "job:stormRange" on the first
+// reply holds the range job for you (the brief's key); the errand reply sends you to Brennan (stormBrennanErrand).
+// GUARD RAILS as stormLukasFri: tonight, the range, the storm and Brennan's galley only.
+title: Two rings
+from: Lukas Dlamini
+gist: The surge took four of the galley range's six rings, and Lukas has sixty bowls to cook tonight.
+== lines
+dlamini-lukas: Hm. Hello. Don't touch the range. It's sulking.
+dlamini-lukas: Surge took four rings. Works has a list. I'm near the bottom.
+dlamini-lukas > you: Sixty bowls on two rings. Or I knock on Brennan's door. On her day off. Typical.   [sigh]
+? choice
+* I'm Works. Let me look at it.   rel:dlamini-lukas+1 flavour:practical flag:storm.lukas.fixed job:stormRange
+  dlamini-lukas: Go on then. Panel's behind the pass. Mind the big pan. It bites.   [nod]
+* Ask her. I'll go.   rel:dlamini-lukas+1 flavour:share flag:storm.lukas.asked
+  dlamini-lukas: ... Suppose so. Don't say I sent you. She'll know anyway.   [sigh]
+* Two rings is plenty. Stew's one pot.   rel:dlamini-lukas+1 flavour:cheer flag:storm.lukas.own
+  dlamini-lukas: Huh. My aunt cooked on two rings in a cockpit for twenty years. I'll make hers.   [laugh]
+dlamini-lukas: Right. Onions. Tariq's ahead, forty-one to thirty-eight. Not after today.

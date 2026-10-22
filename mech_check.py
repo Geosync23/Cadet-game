@@ -1369,9 +1369,11 @@ M17P = r"""(() => {
   r.last = 18; out.twice = roofOpen(B + 935); r.last = 0;
   const ppl = schedPeople(), ts = []; for (let m = 935; m <= 1010; m += 5) ts.push(B + m);
   const base = ppl.map(p => ts.map(t => { const w = whereIs(p, t); return w ? w.deck : null; }));
+  const onJob = ppl.map(p => ts.some(t => { const w = whereIs(p, t); return !!w && w.tag === 'job'; }));   // crew out on a repair job (EV6, storm S10): left out, since the jobs come from the machines' state at the time (the storm's wear leaves more by Day 18, done by the second pass)
   setShipNow(B + 935); liftHold(true, B + 990);
   let movers = 0, bad = [], waiting = 0, after = 0;
   ppl.forEach((p, i) => {
+    if (onJob[i]) return;
     const d0 = base[i][0]; let moved = false;
     ts.forEach((t, k) => { const w = whereIs(p, t), dk = w ? w.deck : null;
       if (t < B + 990) { if (base[i][k] !== d0) { moved = true; if (dk !== d0 || w.type !== 'lift-wait') bad.push(p.id + '@' + hhmm(t % 1440)); else waiting++; } else if (dk !== base[i][k]) bad.push(p.id + '~' + hhmm(t % 1440)); }

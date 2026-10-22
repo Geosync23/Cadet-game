@@ -66,13 +66,16 @@ PAPER = r"""(() => {
 
 # the speech on paper (turn 6): every line, every rank, the events base's readers there (stubbed) and missing
 SPEECH = r"""(() => {
-  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON };
+  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, rot21: typeof ROSTER_ROTATIONS !== 'undefined' && ROSTER_ROTATIONS.some(r => r.day > 19 && r.day <= 21 && (r.out || []).length), storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON };
   const ranks = ['junior', 'officer', 'senior', 'specialist'], A = FRI_ADDRESSES, filled = new Set();
   // the events base's readers (stubbed: which storm jobs were done, and by you), the ship health boards, your repair
   // cue, a job of yours on the board, the Tiles ladder joined: each way, so every line gets its chance
   const DONE = [[], ['stormBallasts', 'stormBatteries'], ['stormBallasts', 'stormBallasts.you'], ['stormBatteries', 'stormBatteries.you']];
-  const stub = (on, k) => { if (on) { window.eventBandOf = () => window.__band; window.eventJobDone = (j, you) => DONE[k % 4].includes(j + (you ? '.you' : '')); window.eventJobsCount = () => 12; }
-    else for (const x of ['eventBandOf', 'eventJobDone', 'eventJobsCount']) delete window[x]; };
+  // (since 0.64.8 the game has its own readers, which a window stub can't shadow: they're swapped for the stubs here,
+  // missing = undefined, and put back after; a build without them gets globals, as before)
+  const R0 = [typeof eventBandOf === 'function' ? eventBandOf : undefined, typeof eventJobDone === 'function' ? eventJobDone : undefined, typeof eventJobsCount === 'function' ? eventJobsCount : undefined];
+  const set = (b, j, c) => { eventBandOf = b; eventJobDone = j; eventJobsCount = c; };
+  const stub = (on, k) => on ? set(() => window.__band, (j, you) => DONE[k % 4].includes(j + (you ? '.you' : '')), () => 12) : set(undefined, undefined, undefined);
   const rows0 = shipHealthRows, health = ['fine', 'worn', 'poor'];
   if (!SHIP.works) SHIP.works = { rank: 'junior' };
   const rank0 = SHIP.works.rank, com0 = SHIP.commendations, jobs0 = SHIP.jobs, cues0 = SHIP.social && SHIP.social.cues, joined0 = SHIP.events.joined;
@@ -105,7 +108,7 @@ SPEECH = r"""(() => {
     for (const r of FRI.ring) for (const id of r.slice(1)) { const b = W.beats.find(b => b.lines.some(l => l.id === id)); if (seen[id] != null && r[0] - seen[id] < 7 && b && b.lines.length >= 7 * b.pick && b.lines.every(l => !l.if)) out.repeats.push([rank, r[0], b.id, id]); seen[id] = r[0]; }
   }
   out.full = JSON.stringify(FRI).length;                  // the save's fri part after 13 weeks
-  stub(false); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
+  set(...R0); shipHealthRows = rows0; SHIP.works.rank = rank0; SHIP.commendations = com0; SHIP.jobs = jobs0; SHIP.social.cues = cues0; SHIP.events.joined = joined0; FRI.ring = []; FRI.today = null; FRI_SPEECH = null;
   const sv = { ship: { decks: {} }, player: {}, crew: {}, flags: SHIP.flags, notes: [] }; for (const f of SAVE_EXTRA) try { f(sv); } catch (e) {} out.save = 'fri' in sv ? JSON.stringify(sv.fri).length : null;
   // turn 8: Zeke's goodnight keys and lines, Halloran's after the mug, the breakfast flag (set, never saved), the clock
   const b5 = INTRO_WEEK.find(b => b.id === 'd5-mug'), SD = SHIP.time.day; SHIP.time.day = 5;
@@ -119,6 +122,24 @@ def aud(g):   # you in the middle of the auditorium (Deck 7's room A)
     g.ev("goToDeck(7)"); g.step(5)
     g.ev("(() => { const M = DECKS[7].map, c = []; for (let j = 0; j < M.length; j++) for (let i = 0; i < M[j].length; i++) if (M[j][i] === 'A') c.push([i, j]); const t = cellPos(...c[Math.floor(c.length / 2)]); player.obj.position.set(t.x, 0, t.z); })()")
     g.step(10)
+
+# PR8's find 3: a save without the fri part (every save from the published game) loaded on a Friday (Day 5, its
+# localStorage as a player's), then played on (Deck 4, never in the auditorium): [mailed, heard, work, address count,
+# address Mails] at the load and at the end
+def old_save(pw, path, day, mn, frames):
+    sv = {'v': 2, 'build': 'x', 'time': {'day': day, 'min': mn}, 'player': {'deck': 4, 'tile': [20, 4], 'facing': 0}, 'ship': {'decks': {}, 'eventLog': []}, 'crew': {}}
+    b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+    pg = b.new_page(viewport={'width': 390, 'height': 844}); errs = []
+    pg.on('pageerror', lambda e: errs.append(str(e)))
+    pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    pg.add_init_script(INIT + "try { if (!sessionStorage.getItem('seeded')) { sessionStorage.setItem('seeded', '1'); localStorage.clear(); localStorage.setItem('starship-cadet-save', " + json.dumps(json.dumps(sv)) + "); localStorage.setItem('starship-cadet-arrived', '1'); } } catch (e) {}")
+    tmp = work / '_fri_oldsave.html'; tmp.write_text(instrument(pathlib.Path(path).read_text()))
+    pg.goto('file://' + str(tmp) + '?debug', timeout=240000); pg.wait_for_function('window.__sc !== undefined || window.__err', timeout=240000)
+    ev = lambda x: pg.evaluate('s => window.__sc(s)', x)
+    got = "[FRI.mailed, FRI.heard, repInit().ship.work, repInit().cnt.address || 0, (SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d5'].mail[0]).length, clockText()]"
+    pg.evaluate('window.__step(2, 1000/30)'); r0 = ev(got)
+    for k in range(frames): pg.evaluate('window.__step(20, 1000/30)')
+    r = [r0, ev(got), errs[:3]]; b.close(); return r
 
 LIVE = "[shipNow() % 1440, bubbles.list.map(b => [(bubblePerson(b.who) || {}).id, b.text]), FRI_SAID && FRI_SAID[1], simNow() - CHATTER_AT]"
 
@@ -157,6 +178,10 @@ with sync_playwright() as pw:
     if g.errors: check(False, 'on: page errors in the fill run ' + str(g.errors[:3]))
     g.b.close()
         # turn 7, dinner after the address (on paper): each goer's dinner start, and who washes first
+    # PR5's 3b: on paper on Day 5, section 14's late joiners (in after 16:00) leave with the rest, by 16:52 (16:50 and the
+    # planner's 2 minutes before the walk out); anyone else may sit on until their later plans (a dinner), but not past 17:20
+    late = g2.ev("schedPeople().flatMap(p => planDay(p, 5).filter(s => /captains/.test(s.tag || '') && s.to > 4 * 1440 + (s.from > 4 * 1440 + 960 ? 1012 : 1040)).map(s => [p.id, s.from - 4 * 1440, s.to - 4 * 1440]))")
+    sit_on = g2.ev("(() => { const t = schedPeople().flatMap(p => planDay(p, 5).filter(s => /captains/.test(s.tag || '')).map(s => s.to - 4 * 1440)); return [t.filter(x => x <= 1012).length, t.filter(x => x > 1012).length, Math.max(...t)]; })()")
     dinner = g2.ev("""(() => { const b = 4 * 1440, st = [], wash = [];
       for (const p of schedPeople()) { const P = planDay(p, 5); if (!P.some(s => /captains/.test(s.tag || ''))) continue;
         const dn = P.find(s => s.act === 'dinner' && s.from >= b + 1000); if (dn) st.push(dn.from - b);
@@ -199,8 +224,19 @@ with sync_playwright() as pw:
     for k in range(40): g.step(20)
     live['leave'] = [w33, g.ev("[repInit().ship.work, repInit().cnt.address || 0, FRI.mailed]")]
     live['mails'] = g.ev("(SHIP.mail || []).filter(m => m.subject === FRI_ADDRESSES['friday-d26'].mail[0] && m.at >= 25 * 1440 + 1000 && m.at < 26 * 1440).length")
+    # PR5's turn-6 fix 2: a jump across Friday's 16:50 (Day 40, 15:00 to Saturday 07:00, as a sleep would): the banner,
+    # the Mail (stamped 16:50) and the dip all the same, once
+    g.ev("goToDeck(4)"); g.ev("skipTo((40 - 1) * 1440 + 900)"); g.step(5)
+    w40 = g.ev("window.__toasts = []; [repInit().ship.work, repInit().cnt.address || 0, playerShiftOn(40)]")
+    g.ev("skipTo((41 - 1) * 1440 + 420)"); g.step(5)
+    live['skip'] = [w40, g.ev("[repInit().ship.work, repInit().cnt.address || 0, FRI.mailed, window.__toasts.filter(x => /missed/.test(x[1])).length, (SHIP.mail || []).filter(m => m.at === 39 * 1440 + 1010).length]")]
+    # PR5's 3a: a weekly speech (Day 47) reloaded with the cache cleared and a condition changed (your rank) keeps its
+    # lines (the save's FRI.today), not a fresh pick: only lines of the day's list, in its order (a rank line may drop)
+    live['weekly'] = g.ev("(() => { SHIP.works.rank = 'junior'; FRI_SPEECH = null; const a = friSpeech(47).map(l => l.id); FRI_SPEECH = null; SHIP.works.rank = 'senior'; const b = friSpeech(47).map(l => l.id); return [a.length, b.length, b.every((id, i) => a.includes(id) && (i === 0 || a.indexOf(id) > a.indexOf(b[i - 1])))]; })()")
     live['errors'] = g.errors[:3]
     g.b.close()
+    live['old'] = old_save(pw, copies[True], 5, 18 * 60, 30)      # after the address: nothing missed
+    live['oldBefore'] = old_save(pw, copies[True], 5, 16 * 60 + 47, 40)   # before its end: missed at 16:50 as usual
 
 off, on = res[False], res[True]
 print('off:', json.dumps({k: off[k] for k in ('inTable', 'ends', 'on')}))
@@ -245,10 +281,11 @@ print('  lines that never fill (want only myshift:night\'s, and the storm\'s whi
 print('  the save\'s fri part: %s bytes fresh, %s with a full ring (7 weeks)' % (sp['save'], sp['full']))
 check(sp['full'] < 1200, 'on: the save\'s fri part is %s bytes' % sp['full'])
 check(not sp['bad'], 'on: lines showing a slot or a ?, too long, or not Marrow\'s or Vance\'s %s' % sp['bad'][:4])
-# never: your night shifts (Pillar 5's); the Day 19 leavers (nobody's rota leaves before Day 35); with the storm update
+# never: your night shifts (Pillar 5's); the Day 19 leavers ({sunleavers}: none before the first rotation, Day 35 until
+# claude/patch-crew brings it to Day 21); with the storm update
 # off (EV_STORM_ON, or none in the build), its own lines: done:storm*, band: and {stormjobs} (the game's readers say nothing)
 stormy = lambda x: not sp['storm'] and (any(re.search(r'(^|[ !|])(done:storm|band:)', c) for c in x[2]) or '{stormjobs}' in x[1])
-never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and '{leavers}' in x[1]) and not stormy(x)]
+never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and ('{sunleavers}' in x[1] or 'arriving' in x[2]) and not sp['rot21']) and not stormy(x)]
 check(not never, 'on: lines that never fill %s' % never)
 check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
 check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])
@@ -276,6 +313,19 @@ print('  dinner after the address, Day 5 (planned; spread: first and 80th percen
 check(dinner['n'] >= 30 and dinner['spread'][0] >= 1020 and dinner['spread'][1] <= 1080 and dinner['by10'] <= .45 * dinner['n'], 'on: Day 5 dinner after the address not spread over 17:00-17:50 %s' % dinner)
 print('  the rec deck lift after the address, Day 5 in play [queued at the lift, still walking out]: at 16:52 %s, at 17:10 %s' % (lift.get(1012), lift.get(1030)))
 check(lift.get(1030, [99])[0] <= 3, 'on: Day 5, %s queued at the rec deck lift at 17:10' % lift.get(1030))
+print('  a jump across 16:50 on Day 40 (work, count, shift day | work, count, mailed, banners, Mails at 16:50):', live['skip'])
+sk0, sk1 = live['skip']
+check(sk1[2] == 40 and sk1[3] == 1 and sk1[4] == 1 and (sk1[1] == sk0[1] + 1 if sk0[2] else sk1[1] == sk0[1]), 'on: a jump across Friday 16:50 without the banner, Mail or dip %s' % live['skip'])
+print('  the weekly speech on Day 47 reloaded with your rank changed (lines before, after, only the day\'s in order):', live['weekly'])
+check(live['weekly'][0] >= 9 and live['weekly'][2], 'on: a reload of the weekly speech picked again %s' % live['weekly'])
+print('  the address on Day 5, planned stays (gone by 16:52, sitting on until later plans, the last minute):', sit_on, 'too late:', late)
+check(not late, 'on: people planned in the address too long on Day 5 (a late joiner past 16:52, anyone past 17:20) %s' % late[:6])
+print('  an old save (no fri) loaded on Day 5 at 18:00, then played [mailed, heard, work, count, Mails, clock] at load / later:', live['old'][:2])
+o0, o1, oe = live['old']
+check(o0[0] == 5 and o1[:5] == o0[:5] and o0[3] == 0 and o0[4] == 0 and not oe, 'on: an old save loaded on a Friday evening got the missed address %s' % live['old'])
+print('  the same loaded at 16:47 and played past 16:50:', live['oldBefore'][:2])
+b0, b1, be = live['oldBefore']
+check(b0[0] == 0 and b1[0] == 5 and b1[4] == 1 and not be, 'on: an old save loaded before 16:50 not missed at 16:50 %s' % live['oldBefore'])
 check(not live['errors'], 'on: page errors in the live run %s' % live['errors'])
 print('FRIDAYS CHECK OK' if not fails else 'FRIDAYS CHECK FAILED (%d)' % len(fails))
 sys.exit(1 if fails else 0)

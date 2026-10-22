@@ -58,8 +58,9 @@ with sync_playwright() as pw:
     if not b['joined'] or b['tj']: fail(f"the birthday should join by being there: {b}")
     # Lap of the Wren: Sundays, Tomas, a line that goes round and finishes
     lap = g.ev("""(() => { const days = [...Array(29).keys()].filter(x => eventsOn(x).some(e => e.id === 'lap-of-the-wren'));   // from day 0: not the Sunday you arrive
-      return { days, wd: [...new Set(days.map(d => weekday(d)))] }; })()""")
-    print('Lap of the Wren on days', lap['days'], 'weekdays', lap['wd'])
+      const moved = d => typeof EV_DAY_DRESS !== 'undefined' && EV_DAY_DRESS.has('lap-of-the-wren@' + d);   // the storm update moves it (S6: EV_DAY_DRESS, Monday Day 15 with Tomas): not a Sunday by design
+      return { days, wd: [...new Set(days.filter(d => !moved(d)).map(d => weekday(d)))], moved: days.filter(moved) }; })()""")
+    print('Lap of the Wren on days', lap['days'], 'weekdays', lap['wd'], 'moved by an event', lap['moved'])
     if lap['wd'] != [6] or lap['days'][:1] != [7]: fail(f"Lap of the Wren should be on Sundays only: {lap}")
     g.ev("""(() => { const d = 7, e = eventsOn(d).find(x => x.id === 'lap-of-the-wren'); goToDeck(3); actEnd(true); clearGoal();
       setShipNow((d - 1) * 1440 + e.from + 8); deckCrewFill(); const sp = placeSpot('3-lap-3'); player.obj.position.set(sp.x, 0, sp.z + 1); player.stop();
