@@ -16,6 +16,17 @@
 
 **CR4: OK.** No FAILs. Peaks identical to 0.64.16 (b9f053ba), as expected with breakfast rolled back.
 
+### Taken over from CR2 (0.91.0 989fd566, same sha256)
+
+Lead 30's idea at 21:42; CR2 handed these over at 21:43 (off its list; it kept intro). Run one at a time, alone on this machine.
+
+| Check | Result | Key lines |
+|---|---|---|
+| perf_check vs OLD b9f053ba | exit 1, **known old only** (2066 s) | `PROBLEM memory grows across deck round trips` 521 -> 521 -> 523 geometries (textures 40, heap 87 MB): **backlog 14**, and OLD shows exactly the same 521/521/523 in the same run. No other problem: no draw-call or frame-time regression, no backlog 32 spike. Every scene's draw calls identical to OLD (e.g. the Line ceremony portrait 301c, as CR2 expected without breakfast). Week of play 521 -> 523 in both. File 5.87 MB (OLD 5.79), load ~6.2 s in both. |
+| lines_check --day | PASS (exit 0, 281 s) | `lines_check --day: PASS (0 errors)` |
+
+**perf_check counts as OK for the round:** its only FAIL is backlog 14, the same way on OLD.
+
 ## 0.64.17 full round, second candidate (2026-10-22)
 
 - **Candidate:** `claude/integration-next` 1498dbf4 ("Merge claude/bubble-jump 36f8abf7 ... into the 0.64.17 candidate")
