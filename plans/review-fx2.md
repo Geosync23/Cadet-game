@@ -51,3 +51,18 @@ In it: hauling's lesson on any day from Day 3 (the week's `manifestFor` crates k
 | arrows_check week on e6bcf827 | the same 17 FAILs as PR9's b063f86 run (main lift lines stay green; Day 2 "Repair the light relays" stale arrow still red, FX1's); nothing new red |
 
 Seen, not FX3's: in both runs the follower took Yara's own "load only" watch run from the board ("[train] [held]") and was trained after one load, without delivering anything. That is the teacher's-job item in FX2's B (sent to FX2: cover hauling, not only the scanner). Yara's Mail still says "Meet me at the hold" (FX2's C).
+
+## FX3's delta 360801c0 (fixes 8 and 9, from FX2's list by lead 28): PASS
+
+In it: (8) calibrating the galley plant: a tap whose line passes over your job's pin starts your machine's work even if the chiller in front caught the tap (15's jobTap), and a machine chore's arrow shows its own title ("Calibrate the galley plant"); (9) a part in your hands that nothing you hold needs gets "Put the relay back: main storage" (15b's `ixLoose`), a shelf tap puts it back.
+
+| Test | Result |
+| --- | --- |
+| interactions_check on 2b4a05db | FAIL: "Repair the galley plant", "Cold store chiller: in good order.", no put-back arrow (twice), as it should |
+| interactions_check, player_check on 360801c0 | OK, both |
+| cadet_test 2b4a05db -> 360801c0 | ALL IDENTICAL |
+| By hand | a relay in hand, no job: after "Clock in", the arrow is "Put the relay back: main storage" at the Lights shelf; a tap on the shelf: "You put back a relay.", then "Take a job at the job board" |
+| arrows_check week on 360801c0 | green now: every "stuck at Repair the galley plant", "Look over the stage lights" and "Repair the light relays" line. New red: Days 3/4/5/8 "never clocked in" and the arrow "Take your first round at the job board" up from Day 2 11:08, and "Fire drill, 15:00" up for days. With the galley plant fixed the follower now reaches Torres's talk, lapses the round (m1 `again`) and meets FX1's known "Take your first round" arrow over Clock in, and FX2's not-yet-merged drill arrow |
+| arrows_check week on a merge FX2 cc2bb2be + FX3 360801c0 (AC1's resolution of the one-line conflict) | the drill lines go; left: the same m1 chain (FX1) and one line "Turn it in at the job board stayed up from Day 4 05:50" on that path only. My own play of the merge (Days 2-4) doesn't show it: there the round is learned on Day 2, Yara's lesson lapses on Day 3 and FX3's re-ask comes on Day 4 with FX2's words ("Meet me in Main storage on Deck 5, 11:40"). To look at again once FX1 is in |
+
+Merge: FX2 and FX3 conflict in one line of 15b's ixJobStep (the machine arrow's label: FX2's scan-first and "Tune the", FX3's chore title) and in mech_check.py; AC1's claude/arrows-c 1f2ce27d resolves the line as both (checked).
