@@ -42739,7 +42739,8 @@ function clothesGoal(to) {
 const CLOTHES_BEATS = [
   // the cabin (the user on 0.63.1, 0.42.48): after the bunk meeting Zeke shows you your wardrobe ("this is where you get clean
   // clothes"); (playtest patch 1, #2/#4) once your bag's in it (section 21's 'stow' step), and his Mail is gone (ZEKE_CABIN_MAIL)
-  { id: 'd0-wardrobe', day: 0, at: 16 * 60 + 40, till: 18 * 60, who: INTRO_ESCORT, where: { deck: 4, room: 'Bunk 1' }, when: () => SHIP.intro.done.stow !== undefined,
+  // (he may wait in the doorway while you're on his spot: so he's near, and you're in Bunk 1)
+  { id: 'd0-wardrobe', day: 0, at: 16 * 60 + 40, till: 18 * 60, who: INTRO_ESCORT, where: 'seek', when: () => SHIP.intro.done.stow !== undefined && deckDef.num === 4 && introRoomAt(4, player.here()) === 'Bunk 1',
     keys: () => ['walk.cabin.wardrobe'], lines: () => ['That\'s your wardrobe, by the door. It\'s where you get clean clothes.'], first: () => { if (ZEKE_CABIN_MAIL) clothesCabinMail(); } },
   { id: 'd1-dinner-zeke', day: 1, at: 18 * 60, till: 20 * 60, who: INTRO_ESCORT, where: { deck: 3, room: 'Mess hall' }, when: () => true, settle: 'clothes',   // settle: the Settling-in item it teaches (as INTRO_WEEK's; intro_check reads both)
     keys: C => ['walk.dinner.eve', 'walk.eve.choose', ...(C.kit ? [] : [['beat.d1-clothes', 'walk.dinner.laundry']])],   // walk.eve.choose (0.42.48): you can't do every tradition, you choose
