@@ -45,6 +45,18 @@ it to the runner with the lightest share and update this table and the picker's 
 7. **Report to the build master and the lead**: "CRn: OK" or "CRn: FAIL: <check>: <one line>, known old (backlog N) /
    NEW", with the link to your notes.
 
+### Runners talk to each other
+
+The six runners, the build master and the lead message each other directly (session ids are in `TEAM.md`, not here)
+when:
+1. **a sha256 doesn't match**: tell everyone and stop; nobody tests until the build master sends the right one;
+2. **a failure could affect other shares** (a broken build, the game crashing on load, a shared setup problem): tell
+   everyone at once, so nobody spends half an hour on a broken file;
+3. **someone fixes a setup problem** (a missing package, a CADET_WORK mix-up): share the fix;
+4. **someone finishes early**: offer to take a check from the slowest runner; agree it between the two of you, copy
+   the lead, and never run a check twice by accident (the one who hands it over says so before the other starts);
+5. **any FAIL not on the known-old list**: tell the build master and the lead at once, not only in your notes.
+
 ### The build master's part
 
 1. Build the candidate (section 7): merges, switches, `content_gen.py --check`, `node names_check.js`, check_fast.
