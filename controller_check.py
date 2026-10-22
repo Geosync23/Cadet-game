@@ -1109,6 +1109,9 @@ MY_BUNK = r"""(() => { const id = playerBed(), bed = (DECKS[deckOf(id)].places |
   const c = cellPos(...bed.at), v = new THREE.Vector3(); let best = null, bd = 1.2;
   ITEMS.forEach((it, i) => { if (!it.hit) return; it.hit.getWorldPosition(v); const d = Math.hypot(v.x - c.x, v.z - c.z); if (d <= bd) { bd = d; best = 'item:' + i; } });
   return best; })()"""
+FREE_SEAT = r"""(() => { const held = id => typeof heldBy === 'function' ? !!heldBy(id) : false, pp = player.obj.position; let best = null, bd = 1e9;
+  for (const [pl, sp] of padPlaces()) { if (pl.pose !== 'sit' || held(pl.id)) continue; const w = sp.walk ? cellPos(...sp.walk) : sp, d = Math.hypot(w.x - pp.x, w.z - pp.z); if (d < bd) { bd = d; best = [w.x, w.z, pl.id]; } }
+  return best; })()"""
 def part_day(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_day', mode='pad', plug={}, w=390, h=844)
@@ -1126,7 +1129,10 @@ def part_day(pw, src, tag):
                 r.step(15)
                 if r.ev("!!SHIP.player.tray"): break
             tray = r.ev("SHIP.player.tray || null")
-            if tray: sat = ring_and_A(r, ['sit', 'eat']); print(f'  a tray ({tray}); then "{sat}"')
+            if tray:   # carry it to the nearest free seat (by the stick), then "Sit" by the ring
+                seat = r.ev(FREE_SEAT); sat = None
+                if seat and walk_to(r, seat[0], seat[1]): sat = ring_and_A(r, ['sit', 'eat'])
+                print(f'  a tray ({tray}); the nearest free seat {seat}; then "{sat}"')
             for k in range(60): r.step(15)
             h1 = r.ev("SHIP.player.needs.hunger")
             print(f'  breakfast on Deck {deck}: the line said "{got}"; hunger {h0:.0f} -> {h1:.0f}')
