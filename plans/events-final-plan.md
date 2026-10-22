@@ -1,4 +1,6 @@
-# The comet and the Veyli visit: plan summary (version 1)
+# The comet and the Veyli visit: plan summary (version 1.1: answered)
+
+**The user's answers (2026-10-22 01:55 UTC):** the recommended answer on q1-q7, q9, q10; **q8 = b: you always get a seat at the dinner** (so no "carry the dinner up" job; you are at the gift exchange too). No comments. Recorded in design-doc.md "Ship-wide events".
 
 Events planner EP2, 2026-10-22. Branch `claude/plan-events-final`, from claude/integration f6b9176 (0.64.14). Planning only.
 - **Page:** `plans/events-final-plan.html`, published at https://claude.ai/artifact/Gg2QgQPhmGpzkdhui13K72

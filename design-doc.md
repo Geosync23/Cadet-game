@@ -652,6 +652,13 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 - **The Captain's table and your night shift:** on a night-shift week (Day 20) the table starts at **19:00 and ends by 20:15**, so you can go and still be at your 21:00 shift.
 - **Day 12, the storm and the Friday address:** the rec deck stays closed from the front to the all-clear, but **the auditorium and the way to it open just for the address** (16:00-16:50). The Captain says she's borrowed the room for an hour.
 
+**The comet and the visit (the user, 2026-10-22 01:55 UTC; `plans/events-final-plan.html` v1.1 on claude/plan-events-final; recommended on all but question 8).** Planned, not built: building starts after the user's playtest.
+- **Comet viewing, Tuesday Day 16** (one day, no score, no jobs): Sato's Mail at 08:00; from 21:30 to 22:40 the comet in every outside window (felt everywhere), with a 22:05 brightest moment; the Captain's two-line banner at 21:28 ("Find a window"); three viewing places: the bow lounge windows, the observatory (Sato at the scope) and the observation room, about 55 in all. Afterglow on Day 17: chatter and a sketch pinned in the bow lounge for a week.
+- **The comet's story is "The comet knot":** on the Veyli long ship the youngest aboard tied a knot for a comet. Saruth asks the newest hand (you) to tie it: you tie it, tie it with a bunkmate, or watch her tie it. The knot goes on her door cord. At the visit's greeting, Speaker Teshavi notices it ("A comet knot. Who tied it?").
+- **The Veyli visit, the finale:** Vance's memo on Monday Day 22; the Friday Day 26 address adds "Our guests come aboard tomorrow at ten"; the warning (Mail, four prep jobs, sign-up sheet) at 19:40 after Calder's question; **Saturday 27, 10:00, the greeting:** the Tern fetches the delegation and they walk down its ramp; crew whose posts can be spared step out for half an hour, so about 50-55 line the bay. **Sunday 28, 19:00-20:30:** one formal dinner in the Captain's quarters, a meeting with choices; **you always have a seat, whatever your rank** (the user's choice over the recommended "Senior Officer and up"); a galley hand carries the dinner up. **Monday 29:** the gift exchange at 09:00 (you're there), then **the farewell at 17:30** after shifts (about 60-65; moved from 10:00, when only 21 crew are free). **Tuesday 30:** afterglow and Vance's debrief at 18:00. The guests are aboard two nights.
+- **The visit's story is "Forty questions":** Moleth's forty questions for Works come with the Day 22 memo; on Saturday at 11:00 you and Torres show Moleth the Works bay and the engine room (an Engine Specialist leads the engine room part); the fortieth question ("You still say 'cheers'. Why did you keep it?") is your choice (home, the ship, or "what did you keep?"); at the farewell Moleth hands you question 41, "For next time."
+- **Help and result:** four prep jobs, each moving its own part: warm cabins (make up the cabins, heaters up), herbs (pick them Sunday morning), the dinner on time (fix the dining-room lamp), courtesy (the gift crates up from the hold). Left alone bumpy; with all four, smooth. A commendation at the farewell, by the storm's rule.
+
 **Called in on a day off (the user, 2026-10-20).** When an event needs someone who isn't working (the Captain on Days 7 and 27, four of the five in the storm's Sunday all-clear), they are called in. Their own lines and the crew's chatter mention it.
 
 **Crowds:** up to about 60 per gathering for now (the user). This goes up after a test on the user's phone. The storm's lantern supper has no standing places (the user, 2026-10-21): it comes and goes in sittings like a regular dinner, so the mess never holds more than its 48 seats at once (its 44 and the long tables' extra chairs). Other gatherings (the party) still use standing places. (Whether Crossing the Line's supper follows the same rule is an open question.)
@@ -684,8 +691,8 @@ Build order: the ion storm first, then Crossing the Line, the comet and the visi
 | --- | --- | --- | --- |
 | — | Crossing the Line (new) | Short, Sunday Day 7 | One day: the Wren crosses into the Veyli reach. A plaza ceremony for first-timers and a supper in the mess. |
 | 1 | Ion storm | Main, built first; Days 11-15 | Touches every system: power flickers and comms go down. Calder's storm briefing in the Works bay, the Captain's address, emergency lighting deck by deck, storm stew, the Captain's all-clear, a rush on the call-home booths and a party in the bow lounge. |
-| — | Comet viewing | Short, Day 16 | One gentle evening at the observatory and the bow lounge windows. |
-| 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation fills Deck 2's visitor rooms (the second visitors' cabin is kept for this). A greeting in the shuttle bay, formal dinners in the Captain's quarters, a gift exchange. |
+| — | Comet viewing | Short, Day 16 | One gentle evening: the comet in every window, the bow lounge, the observatory and the observation room. Saruth's comet knot. Planned (2026-10-22). |
+| 2 | Diplomatic visit | Main, Days 26-30 (the finale) | A Veyli delegation of four, two nights aboard (the visitors' cabin on Deck 2 and three guest cabins on Deck 4). The greeting down the Tern's ramp, one formal dinner in the Captain's quarters, a gift exchange, the farewell at 17:30. Moleth's forty questions. Planned (2026-10-22). |
 | — | Crew rotation day | Short, **parked** | Five crew leave on a transport and five new faces arrive. |
 | 3 | Something in the garden | Main, **parked** | A creature eats the crops; traps from the machine shop and a volunteer garden watch. It becomes the ship's pet. |
 | — | Power surge | Short, **parked** | A junction on Deck 6 trips and two decks lose power for a while. |
@@ -850,6 +857,12 @@ Done so far:
   - Crowds up to about 60.
   - Rec talent night moves a week, and Lap of the Wren moves to Monday Day 15.
   - The commendation comes at the all-clear.
+  - See "Ship-wide events".
+- The comet and the visit (the user, 2026-10-22; plans/events-final-plan.html):
+  - The comet's story is "The comet knot"; three viewing places; the Captain's two-line banner.
+  - The visit's story is "Forty questions"; the Tern brings the delegation; spare posts step out for the greeting.
+  - The farewell is Monday 17:30; you always have a seat at the formal dinner.
+  - Each prep job moves its own part; a commendation at the farewell.
   - See "Ship-wide events".
 - Ship-wide events (the user, 2026-10-20; plans/events-plan.html v2):
   - Scope: only the events before the career's end; the rest are parked.
