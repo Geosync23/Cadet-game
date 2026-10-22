@@ -94,3 +94,23 @@ The fifth call, padBuzz('test'), only when vibration is turned on in the Control
   them to the first use (3f6bb66).
 - CP4 firstuse a505b42 (the view gated too): PASS; my probe: drift, light LT, a short right-stick push leave zoom and
   view unchanged. 3f6bb66 (listeners at first use): code read OK; runs below.
+- CP4 3f6bb66 (the touch hand-back listeners added at the first use, not at hello): **PASS.** Alone: cadet_test vs 0.90.4
+  ALL IDENTICAL off and on (one earlier "on" run showed 1-level noise that didn't repeat; control 0.90.4-on vs itself
+  identical); idle: no hand-back listeners in mode b any more. firstuse (3a086c2 + a505b42 + 3f6bb66) can merge.
+
+## 6. CTT2's fixes to the check (cc72b15), re-run on 0.90.5: PASS
+C3's 9 new faults all caught (off; quiet; base x3; deck PR9 c1, c2; pick1 PR9 c5, t3_noop_crew); C7 crowded talk opens
+Olu's chat; the lone seat found on Deck 3 (3-visit-1), A = tap; c7 caught. New items sent to CTT2:
+- idle is unsteady: the base no-pad run's first snapshot (a_start) domHash flips between two values whatever the build
+  or switch (alone, on 0.90.4+3f6bb66 and 0.90.5). Likely the welcome toast's real-time 5.6 s timer removing .show
+  around a_start. Clear it at load in every run.
+- On 0.90.5 pick's facing case reads no bottom line ("None"): P3's one-time "Controller connected"; CP1 fixed the same
+  in claude/controller's copy (3dfe657).
+- day on 0.90.5: talk and bedtime OK by pad; breakfast and the job board fail only on "the ring never named the lift"
+  (the turn-3 finding, fixed by the pick fix in 0.90.7: to re-run there).
+
+## 7. 0.90.6 / 0.90.7 merges (claude/controller 3dfe657)
+Each merge equals git's own merge with its conflicts resolved by keeping both sides: P4 a7b2a8e (P2/P3's slot code,
+then P4's; the extra "}" closes padPauseLine), P5 d029ad1 (P1's newer padFocusTo line plus P5's padNameIt), CP2
+7b11451 93d9779 (no game conflict), the pick fix 51530b3 (PAD_BUILT kept whole: base deck pick panels games marks
+settings); plus the build lines. Suite running.
