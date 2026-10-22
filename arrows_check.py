@@ -288,7 +288,7 @@ FOLLOW = r"""(() => {
     if (b) { const t = b.textContent; b.click(); return 'clock screen: ' + t; }
   }
   const bd = document.getElementById('ixBoard');
-  if (bd && !bd.hidden) { const b = [...bd.querySelectorAll('#ixBoardL button')].find(b => /turn it in/i.test(b.textContent)) || [...bd.querySelectorAll('#ixBoardL button')].find(b => /take/i.test(b.textContent));
+  if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], b = bs.find(b => /turn it in/i.test(b.textContent)) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2)
     const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }
   const g = goalNow(); if (!g) return null;
   if (deckDef.num !== g.deck) { goToDeck(g.deck); return 'lift to Deck ' + g.deck; }
@@ -303,7 +303,7 @@ FOLLOW = r"""(() => {
   const it = sh && its.find(x => x[0].t === sh[1]) || named || its[0];   // a shelf by its name, else the thing named, else the nearest
   const pin = () => { const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
   if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
-  if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (!r) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }
+  if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (!r || !ACT && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)
   return pin();
 })()"""
 STATE = r"""(() => { const W = SHIP.works, d = SHIP.time.day, g = goalNow();
