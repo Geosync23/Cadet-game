@@ -13632,7 +13632,8 @@ function actBegin() {
   const what = A.kind === 'queue' ? 'You join the queue.' :   // no count (0.28.30, the user's: you see the people ahead of you)
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
-  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' ? A.o.flavour : '', what, A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+  toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
+    A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
