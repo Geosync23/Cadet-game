@@ -53685,6 +53685,63 @@ padOn('x', e => {                                          // the action button 
   if (ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
+// ---- P2 (controller package 2): the mini-games and special screens (plans/controller-plan.html section 4), on the
+// panel helper (padOwn). Tiles: the D-pad moves square by square (the helper's nearest-button move on the board's own
+// buttons, then onto your hold and the buttons below), A picks up and puts down through the board's own click, as a tap
+// does. Here the highlight lands on a sensible square (How to play's Next, else the square you were on, else a tile you
+// can move; Again once a game is over) and keeps its place when the board redraws (your hold and the buttons are made
+// anew at each move). Lightdisc: the left stick moves you with its full range (the arrow keys' inp.kx and inp.kz, so a
+// light push is a slow step) and doesn't move the highlight while you play; A is Next in How to play and presses the
+// result card's buttons; B is Leave (PAD_BACK); A presses Leave only when you moved the highlight onto it yourself.
+const PAD_TL = { g: null, key: '', el: null, cell: -1, over: false, shown: false };
+const padTlKey = e => !e || !e.dataset ? '' : e.dataset.c !== undefined ? 'c' + e.dataset.c : e.dataset.h !== undefined ? 'h' + e.dataset.h : e.dataset.end ? 'e' + e.dataset.end : '';
+function padTlFind(key) {                                  // the button with that key on the board as drawn now, if shown
+  if (!key || !TL_UI.root) return null;
+  const e = TL_UI.root.querySelector('[data-' + { c: 'c', h: 'h', e: 'end' }[key[0]] + '="' + key.slice(1) + '"]'); return e && padShown(e) ? e : null;
+}
+function padTlLand() {                                     // where the highlight lands in a game
+  const s = TL_GAME.s; if (s.over) return padTlFind('efull') || padTlFind('edone');
+  const mv = s.p === 0 ? tilesMoves(s, 0).find(m => m.from !== undefined) : null;
+  return padTlFind('etnext') || padTlFind('c' + PAD_TL.cell) || mv && padTlFind('c' + mv.from) || padTlFind('c2');
+}
+const padTlOn = L => !!(L && L.id === 'device' && DEV.app === 'tiles' && TL_GAME && TL_UI.root && TL_UI.root.isConnected && padShown(TL_UI.root));
+padOwn(padTlOn, { frame: () => {
+  const T = PAD_TL, R = TL_UI.root, G = TL_GAME, a = document.activeElement, over = !!G.s.over;
+  if (G !== T.g) { T.g = G; T.key = ''; T.el = null; T.cell = -1; T.over = false; T.shown = false; }
+  // lost: the button you were on was redrawn (made anew) or hidden; a highlight you moved off the board is left alone
+  const lost = T.el && (!T.el.isConnected || !padShown(T.el)) || !a || a === document.body;
+  const to = !T.shown || over && !T.over ? padTlLand() : lost ? padTlFind(T.key) || padTlLand() : null;   // arriving, the game ending, a redraw
+  if (to && to !== a) padFocusTo(to);
+  const f = to || a; T.el = f && R.contains(f) ? f : null; if (T.el) { T.key = padTlKey(f); if (f.dataset.c !== undefined) T.cell = +f.dataset.c; }
+  T.shown = true; T.over = over;
+} });
+const PAD_LD = { stick: false, chose: false, res: false };
+const padLdOn = L => !!(L && L.id === 'ld' && DISC.view);
+padOwn(padLdOn, {
+  frame: () => {
+    const V = DISC.view, inp = DISC.inp, play = DISC.g && DISC.g.phase !== 'over';
+    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = x; inp.kz = y; PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once
+    const res = !V.res.classList.contains('hide'), how = !V.how.classList.contains('hide'), a = document.activeElement;
+    if (res && !PAD_LD.res || !a || !V.root.contains(a) || !padShown(a) || a === V.leave && how && !PAD_LD.chose) {   // the result card's Again, How to play's Next, else Leave
+      const to = res ? V.res.querySelector('button.go') || V.res.querySelector('button') : how ? V.howNext : V.leave;
+      if (to && padShown(to) && to !== a) padFocusTo(to); PAD_LD.chose = false;
+    }
+    PAD_LD.res = res;
+    return play;                                           // (while you play the stick is yours, not the highlight's)
+  },
+  move: () => { PAD_LD.chose = true; },                    // (then the helper moves the highlight)
+  a: () => {
+    const V = DISC.view, a = document.activeElement;
+    if (a && V.root.contains(a) && padShown(a) && (a !== V.leave || PAD_LD.chose)) { a.click(); return true; }
+    if (!V.how.classList.contains('hide')) V.howNext.click();
+    return true;                                           // (never Leave by accident: B leaves)
+  },
+});
+padOn('frame', () => {                                     // off those screens (or under the Pause card): Tiles lands afresh, Lightdisc's stick lets go
+  const L = PAD.used ? padLayer() : null;
+  if (!padTlOn(L)) PAD_TL.shown = false;
+  if (!padLdOn(L)) { if (PAD_LD.stick) { PAD_LD.stick = false; DISC.inp.kx = DISC.inp.kz = 0; } PAD_LD.res = false; }
+});
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================

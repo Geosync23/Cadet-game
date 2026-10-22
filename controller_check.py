@@ -12,6 +12,11 @@
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
 #           is in charge); a disconnect lets go of everything and says whether the pad was in use; the last pad going
 #           leaves PAD.live false
+# Parts (P2, the mini-games):
+#   tiles:  How to play's Next highlighted and pressed with A; the D-pad square by square; a move by the pad alone (A picks
+#           up, A puts down); A on your hold keeps the highlight when the board redraws; Again at the end, Done by D-pad and A
+#   disc:   Lightdisc: Next highlighted, A is Next; the left stick's full range (a light push slower), never the highlight;
+#           letting go stops; A never presses Leave by itself, B leaves; the result card's Again, Quick game by D-pad and A
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 controller_check.py BUILD.html [part ...]    Good is CONTROLLER CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -354,7 +359,90 @@ def part_api(pw):
     check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api)]
+# ---- P2: the mini-games (controller package 2) ----
+TL_FOCUS = "(() => { const a = document.activeElement, R = TL_UI.root; if (!a || !R || !R.contains(a)) return null; const d = a.dataset; return d.c !== undefined ? 'c' + d.c : d.h !== undefined ? 'h' + d.h : d.end ? 'e' + d.end : '?'; })()"
+def tl_nav(p, cell):                                   # D-pad to a square, one square a press
+    for _ in range(14):
+        f = p.ev(TL_FOCUS)
+        if not f or f[0] != 'c': return False
+        c = int(f[1:])
+        if c == cell: return True
+        dx, dy = cell % 6 - c % 6, cell // 6 - c // 6
+        p.press('right' if dx > 0 else 'left' if dx < 0 else 'up' if dy > 0 else 'down'); p.step(1)
+        n = p.ev(TL_FOCUS)
+        want = c + (1 if dx > 0 else -1 if dx < 0 else 6 if dy > 0 else -6)
+        if not check(n == 'c%d' % want, f'tiles: a D-pad press from square {c} should land on square {want}, not {n}'): return False
+    return False
+
+def part_tiles(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    p.ev("SHIP.device.tipsSeen.device = true; tilesPlay('tomas', null, 'full'); if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }"); p.step(3)
+    check(p.ev(TL_FOCUS) == 'etnext', f'tiles: your first game should land on How to play\'s Next, not {p.ev(TL_FOCUS)}')
+    for _ in range(12):
+        if p.ev('TL_GAME.tut') < 0: break
+        p.press('a'); p.step(1)
+    check(p.ev('TL_GAME.tut') < 0, 'tiles: A on Next should go through How to play')
+    f = p.ev(TL_FOCUS); check(f and f[0] == 'c', f'tiles: after How to play the highlight should be on a square, not {f}')
+    # one move by the pad alone: to the tile, A, to the square, A
+    mv = p.ev("(() => { const m = tilesMoves(TL_GAME.s, 0).find(m => m.k === 's') || tilesMoves(TL_GAME.s, 0).find(m => m.from !== undefined); return m ? [m.from, m.to] : null; })()")
+    plies = p.ev('TL_GAME.s.plies')
+    if check(mv, 'tiles: no move to make') and tl_nav(p, mv[0]):
+        p.press('a'); check(p.ev('TL_GAME.sel && TL_GAME.sel.c') == mv[0], f'tiles: A on square {mv[0]} should pick up its tile')
+        check(p.ev(TL_FOCUS) == 'c%d' % mv[0], 'tiles: the highlight should stay on the square after A')
+        if tl_nav(p, mv[1]):
+            p.press('a'); check(p.ev('TL_GAME.s.plies') == plies + 1, f'tiles: A on square {mv[1]} should put the tile down (a move made)')
+    p.ev("if (TL_GAME.timer) { clearTimeout(TL_GAME.timer); TL_GAME.timer = 0; }")
+    # the hold: A picks a tile in your hold, and the highlight keeps its place when the board redraws
+    p.ev("TL_GAME.s.p = 0; TL_GAME.sel = null; TL_GAME.s.hold[0] = [1]; tilesDraw(); padFocusTo(TL_UI.root.querySelector('[data-h=\"1\"]'))"); p.step(2)
+    p.press('a'); p.step(2)
+    check(p.ev('TL_GAME.sel && TL_GAME.sel.h') == 1 and p.ev(TL_FOCUS) == 'h1', f'tiles: A on your hold should pick its tile and keep the highlight there ({p.ev(TL_FOCUS)})')
+    p.press('up'); f = p.ev(TL_FOCUS); check(f and f[0] in 'ce', f'tiles: D-pad up from your hold should go back toward the board, not {f}')
+    # the end: Again highlighted; along to Done, A
+    p.ev("""(() => { const G = TL_GAME; G.sel = null; G.s.sc = [6, 0]; G.s.p = 0; let n = 0; while (!G.s.over && n++ < 80) { if (G.timer) { clearTimeout(G.timer); G.timer = 0; } if (G.s.p === 0) tilesDo(tilesAI(G.s, 'hard', G.rng)); else { const mv = tilesMoves(G.s, 1).find(m => !tilesApply(G.s, m).pts) || tilesMoves(G.s, 1)[0]; tilesDo(mv); } } if (G.timer) clearTimeout(G.timer); })()"""); p.step(3)
+    if check(p.ev('TL_GAME.s.over'), 'tiles: the game did not end'):
+        check(p.ev(TL_FOCUS) == 'efull', f'tiles: at the end the highlight should be on Again, not {p.ev(TL_FOCUS)}')
+        p.press('right'); check(p.ev(TL_FOCUS) == 'equick', f'tiles: D-pad right from Again should reach Quick game ({p.ev(TL_FOCUS)})')
+        p.press('left'); p.press('down')                     # (on a phone Done wraps to a row of its own, under Again)
+        check(p.ev(TL_FOCUS) == 'edone', f'tiles: the D-pad should reach Done ({p.ev(TL_FOCUS)})')
+        p.press('a'); p.step(2); check(p.ev('TL_GAME') is None, 'tiles: A on Done should end the game')
+    p.close()
+
+LD_FOCUS = "(() => { const a = document.activeElement, V = DISC.view; if (!V || !a || !V.root.contains(a)) return null; return a === V.leave ? 'leave' : a === V.howNext ? 'next' : a.textContent; })()"
+def part_disc(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    begin = "discBegin(DECK_CREW.find(a => !a.asleep) || DECK_CREW[0], %s)"   # (Again needs your opponent on the deck)
+    p.ev(begin % 'false'); p.step(3)
+    check(p.ev("(padLayer() || {}).id") == 'ld', 'disc: Lightdisc\'s view should be the panel on top')
+    check(p.ev(LD_FOCUS) == 'next', f'disc: How to play\'s Next should have the highlight, not {p.ev(LD_FOCUS)}')
+    p.press('a'); check(p.ev('DISC.how') == 1, 'disc: A should be Next in How to play')
+    # the stick: a light push is a slow step, a full one the arrow keys' speed; it never moves the highlight; let go stops
+    def run(x, n=10):
+        x0 = p.ev('DISC.g.p[0].x'); p.axes([x, 0, 0, 0]); p.step(n); k = p.ev('DISC.inp.kx'); x1 = p.ev('DISC.g.p[0].x'); return k, x1 - x0
+    p.ev('DISC.g.p[0].x = 0'); kl, dl = run(-.45)
+    p.ev('DISC.g.p[0].x = 0'); kf, df = run(-1)
+    check(-1 < kl < 0 and kf == -1, f'disc: the stick should set the move by how far it is pushed ({kl}, {kf})')
+    check(dl < 0 and df < 0 and abs(df) > abs(dl) * 1.5, f'disc: a full push should go further than a light one ({dl:.2f}, {df:.2f})')
+    check(p.ev(LD_FOCUS) == 'next', f'disc: the stick moved the highlight ({p.ev(LD_FOCUS)})')
+    p.axes([0, 0, 0, 0]); p.step(2); check(p.ev('DISC.inp.kx') == 0 and p.ev('DISC.inp.kz') == 0, 'disc: letting go of the stick should stop you')
+    for _ in range(4):
+        if p.ev('DISC.how') < 0: break
+        p.press('a')
+    check(p.ev('DISC.how') == -1, 'disc: A should go through How to play')
+    p.step(2); check(p.ev(LD_FOCUS) == 'leave', f'disc: with How to play done the highlight goes to Leave ({p.ev(LD_FOCUS)})')
+    p.press('a'); p.step(2); check(p.ev('!!DISC.g && !!DISC.view'), 'disc: A should never press Leave by itself')
+    p.press('b'); p.step(3); check(p.ev('!DISC.g && !document.getElementById("ld")'), 'disc: B should be Leave')
+    # the result card: Again highlighted, the D-pad along it, A presses
+    p.ev(begin % 'false'); p.step(3)
+    p.ev("(() => { const G = DISC.g; G.over = true; G.winner = 0; G.score = [7, 3]; G.phase = 'over'; discOver(); discResult(); })()"); p.step(3)
+    check(p.ev(LD_FOCUS) == 'Again', f'disc: the result card should land on Again ({p.ev(LD_FOCUS)})')
+    p.press('right'); check(p.ev(LD_FOCUS) == 'Quick game', f'disc: D-pad right on the result card should reach Quick game ({p.ev(LD_FOCUS)})')
+    p.press('a'); p.step(3); check(p.ev('!!DISC.g && DISC.g.target') == 5, 'disc: A on Quick game should start a game to 5')
+    p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the quick game')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('tiles', part_tiles), ('disc', part_disc)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
