@@ -1825,12 +1825,27 @@ def legacy_parts(GAME, ON, fails):
         check(p.ev('padSetDiff()') is None and 'pad' not in p.ev(SV) and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()') and p.ev('PAD_DEAD.stick') == .22 and p.ev('PAD_REP.first') == .5 and p.ev('PAD_SET.sticks') is False and p.ev('PAD_REP.every') == .25,
               f'settings: Everything back to normal should leave nothing changed and nothing saved: {p.ev("[padSetDiff(), PAD_MAPK.join(), PAD_DEAD.stick, PAD_REP.first, PAD_REP.every]")} {list(p.ev(SV).keys())[:3]}')
         p.ev('localStorage.clear()'); p.close()
-    # ---- CP5 (claude/controller-p5 8216ad4): a11y ----
+    # ---- CP5 (claude/controller-p5 4892a0b): a11y ----
     # P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
-    NAMELESS = """(() => {
+    # The names are the browser's own accessible names (CDP Accessibility.getPartialAXTree), not padSaid's guess; a name
+    # with no letters in it (a mark alone: "✕", "+") counts as none.
+    AX_ITEMS = """(() => {
       const L = padLayer(); if (!L) return null;
-      return padItems(L).filter(e => { padNameIt(e); return !padSaid(e); }).map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
+      window.__ax = padItems(L); window.__ax.forEach(e => padNameIt(e));
+      return window.__ax.map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
     })()"""
+    def nameless(p):
+        """the buttons of the layer on top with no accessible name a screen reader can say, or None with no layer"""
+        descr = p.ev(AX_ITEMS)
+        if descr is None: return None
+        if not hasattr(p, 'cdp'): p.cdp = p.g.page.context.new_cdp_session(p.g.page); p.cdp.send('Accessibility.enable')
+        out = []
+        for i, d in enumerate(descr):
+            oid = p.cdp.send('Runtime.evaluate', {'expression': f'window.__ax[{i}]'})['result'].get('objectId')
+            nodes = p.cdp.send('Accessibility.getPartialAXTree', {'objectId': oid, 'fetchRelatives': False})['nodes'] if oid else []
+            name = str(((nodes[0].get('name') or {}).get('value')) if nodes else '' or '')
+            if not re.search(r'[^\W\d_]', name or ''): out.append(f'{d} (heard: {name!r})')
+        return out
     def part_a11y(pw):
         p = Pad(pw, ON)
         p.plug(); p.press('x'); p.log(); p.step(3)
@@ -1853,10 +1868,13 @@ def legacy_parts(GAME, ON, fails):
         check(all(right[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the right-hand layout should put use, back, device, action, Pause and the screen edge on the right side: {right}')
         # toasts are read out once the controller is in use
         check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
+        p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)
+        check(p.ev("!toastEl.hasAttribute('role') && !toastEl.hasAttribute('aria-live')"), 'a11y: a touch taking back should leave the toast as it was')
+        p.press('x'); p.step(2)
         # the highlight: thick, teal, with a dark edge
         p.press('up'); p.step(2)
         st = p.ev("(() => { const c = getComputedStyle(document.activeElement); return [c.outlineWidth, c.outlineColor, c.outlineStyle, c.boxShadow]; })()")
-        check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and 'rgb(13, 21, 33)' in st[3], f'a11y: the highlight should be a 4px teal outline with a dark edge: {st}')
+        check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and st[3].count('rgb(13, 21, 33)') == 2, f'a11y: the highlight should be a 4px teal outline with a dark edge on both sides (two dark shadows): {st}')
         p.press('b'); p.step(2)
         # the deck ring: pulses, and stays still when the phone asks for reduced motion (asked live)
         ring = p.ev('!!(PAD_PICK.ring && PAD_PICK.ring.visible)')
@@ -1872,7 +1890,7 @@ def legacy_parts(GAME, ON, fails):
         gaps, n = {}, 0
         def look(what):
             nonlocal n
-            p.step(3); r = p.ev(NAMELESS)
+            p.step(3); r = nameless(p)
             if check(r is not None, f'a11y: {what}: no panel on top'): n += 1
             if r: gaps[what] = r
         p.press('up'); look('screen edge'); p.press('b')
@@ -1889,7 +1907,6 @@ def legacy_parts(GAME, ON, fails):
         for what, r in gaps.items(): fail(f'a11y: {what}: buttons with no name a screen reader can say: {r[:4]}')
         print(f'  a11y: {n} panels looked at for names, {sum(len(r) for r in gaps.values())} nameless')
         p.close()
-
     return locals()
 def legacy(name):
     """an old-shape part as a part of this check: GAME and ON are written from the build given (the switch-on copy, or
@@ -2042,10 +2059,13 @@ MUTANTS['screens'] = {
   'no suggested name': ('src', "  box.value = PAD_NAME; return true;                       // shown in the box first; A again signs", "  return;"),
   'the manifest is never a panel': ('src', "padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });", "padOn('frame', () => {});"),
 }
-MUTANTS['a11y'] = {   # CP5, claude/controller-p5 8216ad4
+MUTANTS['a11y'] = {   # CP5, claude/controller-p5 4892a0b
   'outline 3px': ('src', "outline:4px solid #4cc3b5!important;outline-offset:3px", "outline:3px solid #4cc3b5!important;outline-offset:3px"),
+  'one dark shadow, not two': ('src', "box-shadow:0 0 0 3px #0d1521,0 0 0 9px #0d1521!important", "box-shadow:0 0 0 3px #0d1521!important"),
   'padStill false': ('src', "  return !!(A.rmq && A.rmq.matches);", "  return false;"),
-  'no toast role': ('src', "  if (!toastEl.hasAttribute('role')) toastEl.setAttribute('role', 'status');", "  if (0) toastEl.setAttribute('role', 'status');"),
+  'no toast role': ('src', "  if (!toastEl.hasAttribute('role')) { toastEl.setAttribute('role', 'status'); PAD_A11Y.toast.push('role'); }", "  if (0) { }"),
+  'the toast role kept after a touch': ('src', "toastEl.removeAttribute(a);", "void a;"),
+  "Maps' deck buttons nameless": ('src', "'Deck ' + el.textContent.trim() : ''", "''"),
   'one-handed layout broken': ('src', "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'a' },", "lb: 'x', lt: 'y', down: 'b', view: 'menu', ls: 'lt' },"),
 }
 
