@@ -1,0 +1,2 @@
+p1_devbackno CAUGHT ['FAIL panels: B in the schedule app should go back home, not schedule', 'FAIL panels: B in the calendar app should go back home, not calendar', 'FAIL panels: B in the jobs app should go back home, not jobs']
+p1_nolanding CAUGHT ['FAIL panels: something still open before X: device', 'FAIL panels: X with no action button opened device', 'FAIL api: first: should land the highlight on #t2']

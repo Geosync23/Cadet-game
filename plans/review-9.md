@@ -300,3 +300,39 @@ Fixes for the check (CTT / CT1; not the game):
    (ACT / goal at its spot); item → its toast or activity; door → you walk to that door.
 3. My bar 6: the kinds pressed should include a shut door and a machine (a job stop or a FLOOR_ACTS machine), not only
    "lift or crew" plus an item.
+
+## RV2 on turn 3 (for the record)
+
+RV2 (claude/review-controller) gave turn 3 PASS WITH FIXES against CTT's newer check (claude/controller-tests 049aff56):
+a ring made at load (my c6) is CAUGHT there (its idle/calls compare the scene count); A 40 px off and R() in the search
+CAUGHT; "A ignores crew" caught only via a sleeping person's toast (CTT's OUTCOME doesn't read #chat); "facing ignored"
+MISSED (CTT to add one thing ahead, one behind). My c7 against CTT's check: pending from RV2.
+
+## Controller P1, panels (CP1: claude/controller-p1 86d45aba, on CT1's turn-4 WIP a2c80df6): PASS WITH FIXES
+
+Code read: while a panel is open the highlight is the page's real focus; the D-pad (or the left stick past half way)
+moves to the nearest button that way, the same scrolling list first; A = `click()` (a text box only takes the focus);
+B = the panel's own way out (PAD_BACK, else Escape; PAD_MUST on a card you must answer); the right stick scrolls, the
+triggers page; LB/RB are the device's Back/Home; D-pad up on the deck reaches the screen's edge (PAD_HUD); X presses the
+showing action button. The outline CSS (`padCss`) is added only once the pad is used and a panel opens, and only applies
+under `body.pad`. The API for P2-P5: padPanelAdd, padOwn, padStep/padPress/padBack, PAD_FIRST, PAD_BACK.
+
+Runs (each alone):
+- cadet_test integration 0.64.14 → 86d45aba: switch off ALL IDENTICAL; switch on ALL IDENTICAL.
+- controller_check: OK (panels: 30 swept, 17 device apps; api; lists).
+- Mutants: `p1_devbackno` (B does nothing in the device) CAUGHT; `p1_nolanding` (opening a panel puts the highlight
+  nowhere) CAUGHT.
+- My page-derived sweep (`p9_reach.py`: every visible element with cursor:pointer, an onclick, role=button or a form
+  control, not in padItems): only disabled buttons (the lift's and ladder's "You are here", the alarm's "−" at its limit,
+  the device's Back on its home screen: a tap does nothing there either) and the Maps app's SVG map, whose room taps
+  run the same `maps pick` as its Rooms list rows (only service rooms are on the map but not in the list; the map's
+  person dots have no action in Maps). Nothing a tap can use is out of the pad's reach today.
+
+**Fix (game, small): a touch after the pad leaves an outline** (`p9_focus.py`). The pad focuses the device's Calendar
+tile; after a pointerdown hands back (body.pad off, PAD_FOCUS_CSS off) the tile keeps the focus and still matches
+`:focus-visible`, so the game's own `.device button:focus-visible{outline:2px solid var(--crt-hot)}` (and
+`button:focus-visible` at line 23) draws a 2px outline a touch-only player never sees. Fix: remember what the pad focused
+and on 'unuse' blur it if it still has the focus (never a focus the game set itself); add a check case.
+
+**Fix (check): the panels sweep is circular.** REACH starts from `padItems(L)`, the controller's own list, so a clickable
+`div` with an onclick (not focusable) would never be found missing. Add the page-derived cross-check (as `p9_reach.py`).

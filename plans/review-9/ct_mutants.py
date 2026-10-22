@@ -11,6 +11,10 @@ M = {
  'c7_mislabel': ("if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),   # a seat ringed where the tap reaches a person
  'p1_devbackno': ("device: () => { if (DEV.app && DEV.app !== 'home') deviceShow('home'); else deviceClose(); },", "device: () => {},"),   # B does nothing in the device
  'p1_nolanding': ("if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { F.layer = L; if (L) padFocusIn(L); }", "if (L !== F.layer) { F.layer = L; }"),   # opening a panel puts the highlight nowhere
+ 'p2_ldnostick': ("if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = x; inp.kz = y; PAD_LD.stick = !!(x || y); } }", ""),   # Lightdisc ignores the stick
+ 'p2_ldleave': ("if (a && V.root.contains(a) && padShown(a) && (a !== V.leave || PAD_LD.chose)) { a.click(); return true; }", "if (a && V.root.contains(a) && padShown(a)) { a.click(); return true; }"),   # A can press Leave by accident
+ 'p2_noname': ("box.value = PAD_NAME; return true;", "return;"),   # A on Sign with an empty box: no suggested name
+ 'p2_tilesnoland': ("if (to && to !== a) padFocusTo(to);\n  const f = to || a;", "const f = a;"),   # Tiles: the highlight never lands on the board
  'c4_noback': ("addEventListener('pointerdown', back, true); ", ""),   # a touch doesn't hand back
 }
 for n in sys.argv[2:] or list(M):

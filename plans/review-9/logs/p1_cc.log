@@ -1,0 +1,11 @@
+part off
+part quiet
+part base
+part deck
+part pick
+  pick: 25 things pressed, kinds ['crew', 'item', 'lift', 'place']
+part panels
+  panels: 30 panels swept, device apps 17
+part api
+part lists
+CONTROLLER CHECK OK
