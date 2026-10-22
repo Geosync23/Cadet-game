@@ -16,6 +16,17 @@
 
 **CR4: OK.** No FAILs. Same peaks as 0.64.15.
 
+### Taken over from CR2 (0.64.16, same commit and sha256)
+
+Agreed with CR2 at 14:23 (lead 28's idea, copied to lead 28 and BM13): CR2 removed these from its run; it kept intro, perf, cadet_test. Run one at a time, alone, at b9f053ba, default arguments.
+
+| Check | Result | Key lines |
+|---|---|---|
+| path_check | OK (exit 0, 74 s) | `PATH CHECK OK`; every deck 3000/3000 the same; a played day 3165/3165 real calls the same; 4.4x faster |
+| arc_check | OK (exit 0, 17 s) | `ARC CHECK OK`; errors []; no theme beat unreachable |
+| lines_check | PASS (exit 0, 4 s) | `lines_check: PASS (0 errors, 50 warnings)` (same as 0.64.15 per CR2; warnings never fail) |
+| lines_check --day | PASS (exit 0, 365 s) | `lines_check --day: PASS (0 errors)` |
+
 ## 0.64.15 full re-run (2026-10-22)
 
 - **Candidate:** `claude/integration-next` 31c44cb9 ("Merge claude/patch-play1-d 836db6c7 ... into claude/integration-next")
