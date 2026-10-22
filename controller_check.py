@@ -251,6 +251,7 @@ def part_pick(pw):
     a = Pad(pw, ON); b = Pad(pw, ON)                 # a presses A; b taps the same spot by hand: the same game, in lockstep
     kids0 = a.ev('scene.children.length')
     for q in (a, b): q.plug(); q.press('x'); q.log()
+    for q in (a, b): q.ev("typeof PAD_MARK === 'object' && (PAD_MARK.say = false, PAD_MARK.said = true)")   # (P3's one-time "Controller connected" comes at its own moment in each copy)
     check(a.ev('PAD_PICK.ring !== null') and a.ev('scene.children.length') == kids0 + 1, 'pick: the ring should be made at the first use, one object')
     spots = a.ev(SPOTS); check(len(spots) >= 5, f'pick: too few places to stand: {spots}')
     kinds, tried = set(), 0
@@ -585,13 +586,13 @@ def part_settings(pw):
     r = [p.ev("padBuzz('done')"), p.ev("padBuzz('nope')")]; p.ev("PAD_SET.buzz = false"); r.append(p.ev("padBuzz('pick')")); p.ev("PAD_SET.buzz = true")
     check(r == [True, False, False] and p.js('window.__bz') == 1, f'settings: vibration: {r}, {p.js("window.__bz")} buzzes')
     # P5's one-hand layouts (a stand-in PAD_LAYOUTS): the buttons show, right turns the sticks over, back to normal clears both
-    p.ev("window.PAD_LAYOUTS = { left: Object.fromEntries(PAD_BTN.map((n, i) => [n, PAD_BTN[(i + 1) % 16]])), right: Object.fromEntries(PAD_BTN.map(n => [n, n === 'a' ? 'rs' : n === 'rs' ? 'a' : n])) }")
+    if p.ev("typeof PAD_LAYOUTS === 'undefined'"): p.ev("window.PAD_LAYOUTS = { left: Object.fromEntries(PAD_BTN.map((n, i) => [n, PAD_BTN[(i + 1) % 16]])), right: Object.fromEntries(PAD_BTN.map(n => [n, n === 'a' ? 'rs' : n === 'rs' ? 'a' : n])) }")
     labels = p.ev("padSetView().blocks.flatMap(b => (b.items || []).map(i => i.label))")
     check('One hand: left' in labels and 'One hand: right' in labels, 'settings: the one-hand buttons should show with PAD_LAYOUTS')
     p.ev("deviceDo({ app: 'padsettings', do: 'hand', arg: 'right' })")
-    check(p.ev("padButtonFor('a')") == 'rs' and p.ev('PAD_SET.sticks') is True and p.ev('PAD_SET.swap') is False, 'settings: One hand: right should set its map and swap the sticks')
+    check(p.ev("padButtonFor('a')") == p.ev("PAD_LAYOUTS.right.a") and p.ev('PAD_SET.sticks') is True and p.ev('PAD_SET.swap') is False, 'settings: One hand: right should set its map and swap the sticks')
     p.ev("deviceDo({ app: 'padsettings', do: 'hand', arg: 'left' })")
-    check(p.ev("padButtonFor('a')") == 'b' and p.ev('PAD_SET.sticks') is False, 'settings: One hand: left should set its map, sticks normal')
+    check(p.ev("padButtonFor('a')") == p.ev("PAD_LAYOUTS.left.a") and p.ev('PAD_SET.sticks') is False, 'settings: One hand: left should set its map, sticks normal')
     p.ev("deviceDo({ app: 'padsettings', do: 'normalbtn' })")
     check(p.ev('Object.keys(PAD_SET.map).length') == 0 and p.ev('PAD_SET.sticks') is False, 'settings: Buttons back to normal should clear the map and the sticks')
     # an odd save stays normal: two actions on one button, a value not offered
