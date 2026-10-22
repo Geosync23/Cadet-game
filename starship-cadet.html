@@ -53714,6 +53714,9 @@ padOwn(padTlOn, { frame: () => {
   if (to && to !== a) padFocusTo(to);
   const f = to || a; T.el = f && R.contains(f) ? f : null; if (T.el) { T.key = padTlKey(f); if (f.dataset.c !== undefined) T.cell = +f.dataset.c; }
   T.shown = true; T.over = over;
+}, move: () => {                                           // a press in the frame after a redraw: back on your square first, then the move
+  const T = PAD_TL, a = document.activeElement;
+  if (T.el && !T.el.isConnected && (!a || a === document.body)) { const e = padTlFind(T.key); if (e) { padFocusTo(e); T.el = e; } }
 } });
 const PAD_LD = { stick: false, chose: false, res: false };
 const padLdOn = L => !!(L && L.id === 'ld' && DISC.view);
