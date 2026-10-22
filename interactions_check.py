@@ -719,7 +719,8 @@ with sync_playwright() as pw:
     check(len(r['lit']) == 1 and 'The job board' in r['lit'][0] and r['lit'][0].endswith('Arrow') and r['app'], f'Tracked: the job board row is highlighted for an arrow set elsewhere ({r})')
     check(len(r['tracked']) == 1 and r['tracked'][0].endswith('Tracking'), f'Tracked: a tracked row still says Tracking ({r})')
     # (38) "Turn it in at the job board": the pin sits on the board (its middle, not 1.2 m up, on the floor when the board's
-    # wall is cut away) and a real tap on it walks you up and opens the board; a goal on a place gives no tappable pin
+    # wall is cut away) and a real tap on it walks you up and opens the board, 10 taps in every camera turn where it shows;
+    # a goal on a place gives no tappable pin
     print('== the pin on the job board (fresh-eyes 38)')
     g.ev("goToDeck(5)"); g.step(3)
     g.ev("(() => { const it = ITEMS.find(i => /job board/i.test(i.t)), p = it.hit.getWorldPosition(new THREE.Vector3()); player.stop(); player.obj.position.set(p.x + 1.5, 0, p.z + 4); target.copy(player.obj.position).setY(.7); clearGoal(); setGoal({ deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' }); azT = az = Math.PI / 4 + Math.PI; })()")
@@ -729,12 +730,26 @@ with sync_playwright() as pw:
     print('  ', pin)
     if check(pin['shown'], f'the pin shows over the job board ({pin})'):
         check(abs(pin['x'] - pin['bx']) < 3 and abs(pin['by'] - pin['y'] - 19) < 4, f'the pin points at the board\'s middle ({pin})')
-        g.page.mouse.click(pin['x'], pin['y']); opened = False
-        for _ in range(40):
-            g.step(15)
-            if g.ev("!document.getElementById('ixBoard').hidden"): opened = True; break
-        check(opened, 'a tap on the pin walks you to the job board and opens it')
-        g.ev("ixBoard.close ? ixBoard.close() : (document.getElementById('ixBoard').hidden = true)"); g.step(2)
+    # every camera turn where the pin is on screen, 10 taps each: pressed, a few frames of the pin bobbing, released (RV8:
+    # a tap acting on 'click' was lost 1 in 9 when the pin moved between press and release); each opens the board
+    PUT = "(() => { const it = ITEMS.find(i => /job board/i.test(i.t)), p = it.hit.getWorldPosition(new THREE.Vector3()); document.getElementById('ixBoard').hidden = true; player.stop(); player.obj.position.set(p.x + .5, 0, p.z + 1.6); target.copy(player.obj.position).setY(.7); })()"
+    PIN = "(() => { const el = document.getElementById('ixGoal'), p = el.children[1], r = p.getBoundingClientRect(); return { tap: !el.hidden && el.classList.contains('tap') && p.style.display !== 'none', x: r.left + r.width / 2, y: r.top + r.height / 2 }; })()"
+    turns, taps, missed = 0, 0, []
+    for t in range(4):
+        g.ev(f"azT = az = Math.PI / 4 + {t} * Math.PI / 2"); g.ev(PUT); g.step(20)
+        if not g.ev(PIN)['tap']: continue
+        turns += 1
+        for n in range(10):
+            g.ev(PUT); g.step(4); q = g.ev(PIN)
+            if not q['tap']: missed.append((t, n, 'no pin')); continue
+            g.page.mouse.move(q['x'], q['y']); g.page.mouse.down(); g.step(3); g.page.mouse.up(); taps += 1; opened = False
+            for _ in range(30):
+                g.step(6)
+                if g.ev("!document.getElementById('ixBoard').hidden"): opened = True; break
+            if not opened: missed.append((t, n))
+    print(f'   the pin: {turns} camera turns with it on screen, {taps} taps, missed {missed}')
+    check(turns >= 1 and taps >= 10 and not missed, f'every tap on the pin opens the job board ({turns} turns, {taps} taps, missed {missed})')
+    g.ev("document.getElementById('ixBoard').hidden = true"); g.step(2)
     g.ev("clearGoal(); setGoal({ deck: 5, place: playerBed(), room: 'w', label: 'Somewhere' })"); g.step(3)
     check(not g.ev("document.getElementById('ixGoal').classList.contains('tap')"), 'a goal on a place gives no tappable pin')
     g.ev("clearGoal()")

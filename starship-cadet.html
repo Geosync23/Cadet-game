@@ -15734,7 +15734,13 @@ function putFrame() {
   document.head.appendChild(st);
   const g = document.createElement('div'); g.id = 'ixGoal'; g.hidden = true; g.setAttribute('aria-live', 'polite');
   g.innerHTML = '<div class="ixarr"></div><div class="ixpin"></div><div class="ixlab"></div>';
-  for (const e of [g.children[1], g.children[2]]) { e.addEventListener('pointerdown', ev => { if (g.classList.contains('tap')) ev.stopPropagation(); }); e.onclick = ev => { if (!g.classList.contains('tap')) return; ev.stopPropagation(); ixGoalTap(); }; }
+  // a tap on the pin is read as the deck reads one (section 11): pressed on the pin, released near the same spot soon after,
+  // wherever the pin has bobbed to by then (RV8: acting on 'click' lost a tap when the bobbing pin moved between press and release)
+  let pinDown = null;
+  for (const e of [g.children[1], g.children[2]]) e.addEventListener('pointerdown', ev => { if (!g.classList.contains('tap')) return; ev.stopPropagation(); pinDown = { id: ev.pointerId, x: ev.clientX, y: ev.clientY, t: performance.now() }; });
+  addEventListener('pointerup', ev => { const d = pinDown; if (!d || ev.pointerId !== d.id) return; pinDown = null;
+    if (Math.hypot(ev.clientX - d.x, ev.clientY - d.y) < HOLD_PX && performance.now() - d.t <= HOLD_MS) { tapUpAt = ev.timeStamp; ixGoalTap(); } }, true);   // tapUpAt: the browser's own click after it is swallowed, as after a deck tap
+  addEventListener('pointercancel', ev => { if (pinDown && ev.pointerId === pinDown.id) pinDown = null; }, true);
   document.body.appendChild(g);
   const b = document.createElement('div'); b.className = 'lift ixboard ixpanel';   // not .device: that's the device's own sheet (section 19)
   b.id = 'ixBoard'; b.hidden = true;
