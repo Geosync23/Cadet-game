@@ -41,6 +41,13 @@
 - Torres has something for you to wear. Find him.
 == next.t2
 - Calder has a test job for you: Tier 2.
+// FX3: before the test job is set, the real condition (next.t2 only once it's open). {band}: your reputation now
+== next.t2.rep
+- Calder sets your Tier 2 test once people rely on you. You're at {band}.
+== next.t2.soon
+- You're ready for your Tier 2 test. Calder will set the day.
+== next.t2.set
+- Your Tier 2 test job: {day}, nine o'clock in the Works bay.
 == next.band.new
 - Keep at it: the board will teach you plenty.
 == next.band.steady
