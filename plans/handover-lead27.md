@@ -12,7 +12,7 @@ Lead 27 = session_017UHW78qnvRTQwYpDxpodHz, branch `claude/lead-27`. Took over 2
 - Plain language, no jargon, no emojis. Safety of the code first. Phone notification for every new build, milestone or question.
 - Memory: from ~60% judge case by case (hand over before a big task); 80% hard cap.
 - Full round on every game change, six runners at once (plans/testing-guide.md).
-- **At most 12 helpers working at once (daytime).** Idle seats don't count. Pause controller seats that are only waiting while the six runners work.
+- **At most 12 helpers working at once (daytime); up to 20 while a six-runner round runs (the user, ~14:05).** Idle seats don't count.
 - main and published links change only for a passed build; PRs/merges to main only on the user's go.
 - **Run cadet_test strictly alone** (a second browser alongside gives 1-level HUD noise; BM13 is adding this to testing-guide.md).
 
