@@ -1,7 +1,8 @@
 # RV2: plant mutants in section 26 itself (CT1's code, not beside it) and run CTT's controller_check parts on each copy.
 # Caught = a FAIL line the clean run of the same parts didn't have. Usage:
 #   python3 mutants.py GAME.html CHECKDIR CLEAN.log name[:parts] ...    (CHECKDIR holds controller_check.py + cadet_test.py)
-import sys, subprocess, pathlib, re
+import sys, subprocess, pathlib, re, os
+CHECK = os.environ.get('MUT_CHECK', 'controller_check.py')   # another check: MUT_CHECK=arrows_check.py (parts '' runs it whole)
 GAME, CK, CLEAN = pathlib.Path(sys.argv[1]), pathlib.Path(sys.argv[2]), pathlib.Path(sys.argv[3])
 src = GAME.read_text()
 M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
@@ -43,6 +44,16 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'p5b_keepattr': ("  if (!PAD_A11Y.toast) return; for (const a of PAD_A11Y.toast) toastEl.removeAttribute(a); PAD_A11Y.toast = false;", "", 'a11y'),
  'p5b_glyphname': ("if (/\\p{L}/u.test(t)) return t;   // a mark alone", "if (t) return t;   // a mark alone", 'a11y'),
  'p5b_nomaps': ("  ['#device button', el => DEV.app === 'maps'", "  ['#nothing', el => DEV.app === 'maps'", 'a11y'),
+ # arrows piece B (AR1 c0ab64c): MUT_CHECK=arrows_check.py, parts '-' (the whole check)
+ 'ar_levels': ("return out.sort((a, b) => a.level - b.level ||", "return out.sort((a, b) => b.level - a.level ||", '-'),
+ 'ar_track': (".filter(e => SHIP.player.track !== null || e.level <= 2);", ";", '-'),
+ 'ar_direct': ("  if (IX_GOAL && e.level > 1) return null;", "", '-'),
+ 'ar_body': ("  if (e.level >= 5 && jobGoal) return null;", "", '-'),
+ 'ar_nocount': ("    if (guideLimit(e)) SHIP.guide.seen[e.id] = (SHIP.guide.seen[e.id] || 0) + 1;", "", '-'),
+ 'ar_tqmin': ("const TQ_MIN = 2500, TQ_MAX = 3;", "const TQ_MIN = 500, TQ_MAX = 3;", '-'),
+ 'ar_nomerge': ("  if (shown === t + '|' + x || GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;", "", '-'),
+ 'ar_saveoff': ("SAVE_EXTRA.push(s => { if (!GUIDE_ON) return;", "SAVE_EXTRA.push(s => {", '-'),
+ 'ar_throwkeeps': ("catch (err) { done = true; }", "catch (err) { done = false; }", '-'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
@@ -51,9 +62,9 @@ for arg in sys.argv[4:]:
     name, _, parts = arg.partition(':'); a, b, dp = M[name]; parts = (parts or dp).split()
     assert src.count(a) == 1, (name, src.count(a))
     d = CK / ('mut_' + name); d.mkdir(exist_ok=True)
-    for f in ('controller_check.py', 'cadet_test.py'): (d / f).write_text((CK / f).read_text())
+    for f in (CHECK, 'cadet_test.py'): (d / f).write_text((CK / f).read_text())
     (d / 'game.html').write_text(src.replace(a, b))
-    r = subprocess.run(['python3', 'controller_check.py', 'game.html'] + parts, cwd=d, capture_output=True, text=True)
+    r = subprocess.run(['python3', CHECK, 'game.html'] + [x for x in parts if x != '-'], cwd=d, capture_output=True, text=True)
     (d / 'out.log').write_text(r.stdout + r.stderr)
     new = sorted(fails(r.stdout) - base)
     print(name, parts, 'CAUGHT' if new else 'MISSED', new[:3], flush=True)

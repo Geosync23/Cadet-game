@@ -287,3 +287,17 @@ Alone: cadet_test 93093a8 -> 47d71ff off ALL IDENTICAL, on ALL IDENTICAL (plain;
 CP3's controller_check OK; mutants 10/10 CAUGHT (the six old ones still standing, plus p3b_saidalways, p3b_overtoast
 "replaced the message showing", p3b_nounuse, p3b_saynow "a first press of B lost Controller connected"); check_fast
 QUICK CHECK OK (389 s).
+
+# Arrows piece B (AR1, claude/arrows-plan c0ab64c on integration 2b4a05db; lead 27's ask, 13:01)
+Code read (section 15b's slot + goalNow/ixFrame in 15b + one line in section 11's toast, which I review as the HUD seat):
+- Off: goalNow = `(GUIDE_ON && guideGoal(j)) || IX_GOAL || j`, the old rule exactly; ixFrame now calls goalNow() (the
+  same expression). toast(t, x, o): `typeof guideToast === 'function' && guideToast(...)`, false when off. No caller
+  passes a third argument today (only the definitions). `var GUIDE_ON` hoists for both.
+- SHIP.guide is built at load (seen from SAVED.guide, cleaned) but the save is field by field (saveGame + SAVE_EXTRA)
+  and s.guide is written only when on: nothing new in an off save. An on-save's `guide` is lost at the next off save
+  (fine while it's off). No R(), no DOM, no scene.
+- Small notes (on): GUIDE.shown keeps an entry while a direct goal (or a goal() with no deck) hides it, so guideNow()
+  names an entry that isn't the arrow; a repeat of the toast on screen is merged rather than re-timed (today a repeat
+  restarts its 5.6 s); a queued toast can be stale by the time it shows (a need toast after the need is met).
+Runs queued (queue 11, alone): cadet_test off, arrows_check, 9 mutants (MUT_CHECK=arrows_check.py), a play probe with
+GUIDE_ON true (p_arrows.py), check_fast.
