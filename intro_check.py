@@ -316,6 +316,35 @@ def solo(g):
     if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
+# 14. Leaving the bunk room early (0.64.15's playtest: "after the bag, Zeke just stands in the bunk room"): a player who
+# walks out into the corridor right after putting the bag away (or without putting it away) must still get the device from
+# Zeke and be led on to the mess; on 0.64.15 he waited in Bunk 1 for good (the 'device' step wanted you in there)
+def bunk_leave(g):
+    print('14. Leaving Bunk 1 early: the device and the walk on still come')
+    if not g.ev("typeof INTRO_STEPS !== 'undefined' && INTRO_STEPS.some(s => s.id === 'device')"):
+        print('  not yet: no device step'); return
+    for stow in (True, False):
+        g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+        g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(20)
+        for k in range(500):
+            g.step(20)
+            if g.ev("SHIP.intro.step === 'stow' && !DIALOGUE"): break
+            g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        t0 = g.ev('Math.floor(shipNow())')
+        if stow: g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()"); g.step(10)
+        g.ev("(() => { player.path.length = 0; playerGo([11, 4]); })()")   # out into the junior corridor
+        r = None
+        for k in range(160):
+            g.step(30)
+            if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, dev: introFlag('intro.device'), given: SHIP.intro.done['device:given'], bag: bagHeld(), me: player.here(), z: (a => a && cellAt(a.x, a.z))(introWalker()), zr: (a => a && introRoomAt(4, cellAt(a.x, a.z)))(introWalker()) })")
+            if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1': break
+        took = r['m'] - t0
+        print(f"  {'bag put away' if stow else 'bag left in your hands'}, then out to the corridor: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, Zeke at {r['z']} ({r['zr']})")
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] or r['bag'] or took > 15:
+            fail(f"leaving Bunk 1 {'after' if stow else 'without'} putting the bag away: Zeke never moved on ({r})")
+        if stow and r['given'] is None: fail(f'the device was not handed over in person when you left the room: {r}')
+
 def firsts(g):
     print('13. First-time arrows, calling home, Zeke\'s Day 1 tea')
     if not g.ev("typeof introArrowTick === 'function'"):
@@ -367,6 +396,7 @@ def firsts(g):
 
 RELOAD_MS = 120000   # parts 9 and 11 reload the page right after part 8's long evening: in a cloud container that load took 31-32 s, past Playwright's 30 s default (BM11, 0.64.7)
 FIRSTS_ONLY = '--firsts' in sys.argv
+LEAVE_ONLY = '--leave' in sys.argv   # part 14 alone (0.64.15's "Zeke stands in the bunk room")
 WEEK_ONLY = '--week' in sys.argv
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
@@ -374,6 +404,10 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     if not g.ev("typeof INTRO_STEPS !== 'undefined'"):
         print('No section 21 in this build.'); sys.exit(1)
+    if LEAVE_ONLY:
+        bunk_leave(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
         firsts(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
@@ -751,6 +785,7 @@ with sync_playwright() as pw:
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
             if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
+    bunk_leave(g)
     week(g)
     solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
