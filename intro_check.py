@@ -620,6 +620,10 @@ with sync_playwright() as pw:
             g.step(30)
             if g.ev("shipNow() >= introAbs(1, INTRO_WEEK.find(b => b.id === 'd1-shadow').at + 1)"): break
         took = g.ev("claimJob(SHIP.jobs.find(x => x.reserved === 1).id)")
+        # the first week's work day is the ship's day shift (TS3, a planted fault: DAY_SHIFT an hour late went unnoticed):
+        # the shadow beat starts within 15 minutes of the shift's start, and you're on your shift when you take its job
+        sh = g.ev("({ t: clockText(), m: SHIP.time.min, beat: INTRO_WEEK.find(b => b.id === 'd1-shadow').at, from: DAY_SHIFT[0], to: dayShiftEnd(SHIP.time.day), on: playerShiftOn(SHIP.time.day) })")
+        if not (sh['on'] and sh['from'] <= sh['m'] < sh['to'] and 0 <= sh['beat'] - sh['from'] <= 15): fail(f"the shadow shift is not the day shift's start: the beat at {sh['beat'] // 60:02d}:{sh['beat'] % 60:02d}, the job taken {sh['t']}, the shift {sh['from'] // 60:02d}:{sh['from'] % 60:02d}-{sh['to'] // 60:02d}:{sh['to'] % 60:02d}: {sh}")
         g.step(60)
         esc = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), e = escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()), pp = player.obj.position; return { mode: e && e.mode, d: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null }; })()")
         fin = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; return { t: turnInJob(j.id), shadow: !!SHIP.intro.settle.shadow, mem: (SHIP.notes || []).some(n => n.kind === 'introStep' && n.step === 'd1-shadow') }; })()")
@@ -636,9 +640,10 @@ with sync_playwright() as pw:
             print(f"  the health check missed on Tuesday: {h}")
             if not h['again'] or len([x for x in h['appts'] if x[2] == 'yes']) != 1 or any(x[3] != 'checkup' for x in h['appts']) or not h['mail']: fail(f'a missed health check is not booked again once: {h}')
             g.ev('skipTo(introAbs(3, 20 * 60 + 5))'); g.step(60)
-            pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
+            pm = g.ev("(() => { const ask = ((SHIP.social && SHIP.social.seekAsks) || []).find(a => a.id === 'pell'); return { asked: !!ask, done: ask ? ask.done : null, mail: (SHIP.mail.find(m => m.from === 'Mira Pell' || /Pell/.test(m.from)) || {}).subject || null, seek: SHIP.intro.done['d3-pell:seek'] }; })()")
             print(f"  Pell's Wednesday ask (you were away): {pm}")
             if pm['seek'] is None or (not pm['done'] and not pm['mail']): fail(f'no Mail when Pell never found you: {pm}')
+            if not pm['asked']: fail(f'Pell was never asked to come and find you on Wednesday (socialSeekAsk): {pm}')   # TS3, a planted fault
     firsts(g)
     week(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))

@@ -197,6 +197,18 @@ with sync_playwright() as pw:
     check(e['give'] and not e['again'] and e['has'] and e.get('useWear') == 0 and abs(e['wear'] - .2) < 1e-9, 'tools: given once, worn by its scans (toolWear), not again by worksUse')
     check(e['missed'] == 7 and e['aband'] == 5 and e['floor'] == 0, 'a missed shift -3, an abandoned job -2, never below 0')
     check(e['before'] is None, 'SHIP.works made before Day 1\'s shift ended')
+    # the first promotion's gatherings (section 14's crewGather, TS3: a planted fault left them standing nobody anywhere):
+    # your box on Day 10 at 17:05, Tomas and Pell each on their own open tile by Cabin 4-23's door; and the career-beat
+    # guard: with the events base off, no day is an event day
+    pg = ev("""(() => { const t0 = shipNow(); setShipNow(9 * 1440 + 17 * 60 + 5);
+      const ids = typeof boxCarry === 'function' ? boxCarry(shipNow() + 40) : null, sc = (ids || []).map(id => CREW_SCENE.get(id)), tiles = sc.map(s => s && s.to && s.to.tile ? s.to.tile.join(',') : null);
+      (ids || []).forEach(id => crewSceneEnd(id)); setShipNow(t0);
+      const ev = typeof eventDay !== 'function' || typeof EV_GUARD_ON === 'undefined' || EV_GUARD_ON ? null : Array.from({ length: 60 }, (_, i) => i + 1).filter(d => eventDay(d));
+      return { ids, tiles, ev }; })()""")
+    print('  the promotion\'s box carriers:', pg['ids'], pg['tiles'], '| event days with the events base off:', pg['ev'])
+    if pg['ids'] is not None:
+        check(sorted(pg['ids']) == ['pell', 'tomas'] and all(pg['tiles']) and len(set(pg['tiles'])) == 2, f"the box on Day 10: Tomas and Pell each wait on their own tile by your door ({pg})")
+    check(pg['ev'] in (None, []), f"with the events base off the career-beat guard sees no event day (Days 1-60: {pg['ev']})")
 
     tb = ev("""(() => { const r = worksTabAdd({ id: 'test', title: 'Test', order: 40, view: () => [{ kind: 'text', text: 'hello' }], act: (v, a) => { window.__tabAct = v + ':' + a; } });
       WORKS_TAB = 'test'; const v = worksView(); deviceDo({ app: 'works', do: 'poke', arg: 7 }); const got = window.__tabAct;

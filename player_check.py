@@ -46,6 +46,20 @@ import sys, json, pathlib
 exec(open(__file__.replace('player_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
+# Drawing (the user's exception, 2026-10-21, opt item 2 fix B): a step here draws its last frame only where the picture is
+# read: inside an activity (run_activity, servery_seat: their draw calls are the 450 budget) and the phone-layout block.
+# Elsewhere (walking until you arrive, set-up steps) every frame is simulated as usual but none is drawn. 1083 s -> ~5.5 min.
+DRAWN = [0]                                               # > 0: steps draw their last frame, as Game.step always does
+_game_step = Game.step
+def _step(self, n, dt=1000/30):
+    if DRAWN[0]: return _game_step(self, n, dt)
+    self.page.evaluate('s => { if (window.__skip === undefined && window.__sc) window.__sc(s); }', SKIP_SWITCH)
+    self.page.evaluate(f'window.__skip = true; window.__step({n}, {dt}); window.__skip = false')
+Game.step = _step
+class drawn:                                              # with drawn(): ...  (nests)
+    def __enter__(self): DRAWN[0] += 1
+    def __exit__(self, *a): DRAWN[0] -= 1
+
 BUDGET = 450
 ok = True
 def fail(msg):
@@ -109,7 +123,13 @@ STATE = r"""JSON.stringify({ act: ACT && [ACT.kind, ACT.placeId, ACT.phase, ACT.
 def state(g): return json.loads(g.ev(STATE))
 UI = {}                                                   # per activity: progress-bar texts and floating notes seen (0.28.20, 0.28.21)
 
+FRAME = 'renderer.info.render.frame'                       # counts drawn frames: a drawn part proves it drew (OR1's F1)
 def servery_seat(g, label):
+    f0 = g.ev(FRAME)
+    with drawn(): r = _servery_seat(g, label)
+    check(g.ev(FRAME) > f0, f'{label}: drawn (its draw calls are the budget), frame {f0} -> {g.ev(FRAME)}')
+    return r
+def _servery_seat(g, label):
     """the servery's line (0.28.31): served, you hold your tray and get control back; then you tap a mess table yourself"""
     tp, b, seen, e, pk = run_activity(g, 'Servery', label=label)
     tray = g.ev("[SHIP.player.tray, player.holding, !!ACT]")
@@ -134,6 +154,11 @@ def servery_seat(g, label):
     return tp, b, seen, e, pk
 
 def run_activity(g, title, near=None, limit=4000, label=None):
+    f0 = g.ev(FRAME)
+    with drawn(): r = _run_activity(g, title, near, limit, label)
+    check(g.ev(FRAME) > f0, f'{label or title}: drawn (its draw calls are the budget), frame {f0} -> {g.ev(FRAME)}')
+    return r
+def _run_activity(g, title, near=None, limit=4000, label=None):
     """tap, then step until the activity is over (or the limit); returns (tapped, states seen, end state)"""
     before = state(g)
     for tries in range(6):                                # busy (crew on it, a queue): wait five ship minutes and try again
@@ -152,7 +177,7 @@ def run_activity(g, title, near=None, limit=4000, label=None):
     end = state(g); UI.setdefault(label or title, {'bar': [], 'nf': set()})['nf'].update(end['nf'])
     if not any(x[2] == 'do' for x in seen) and re.match(r"In use|There's a queue", end['toast'].split(': ', 1)[1]) and limit > 0:
         print('   ', title, 'taken on arrival:', end['toast'][:80]); g.step(190)
-        return run_activity(g, title, near, limit - 1000, label)
+        return _run_activity(g, title, near, limit - 1000, label)
     if os.environ.get('PC_DEBUG'): print(seen[:3], seen[-3:], end)
     print(f"  {label or title:22s} tapped={tapped!s:5s} poses={sorted(set(a[3] for a in seen if a[2] == 'do'))} "
           f"{end['time']} needs {end['needs']} calls<={peak}")
@@ -254,7 +279,8 @@ with sync_playwright() as pw:
     check(rs == [False, True, 0] and json.loads(a2)[1] != json.loads(a1)[1], f'resumed: the overlay goes, time runs again, the pacing stamps moved on by the pause: {rs} {a2}')
     g.ev("player.stop(); actEnd(true)"); g.step(30)
     # the frozen clock (0.28.50): a simTimeout (the tip card's, the heads-up's) waits out a pause; simNow doesn't jump
-    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); return [held, out.length, Math.round(s1 - s0)]; })()")
+    # (its 80 frames are stepped inside one ev: __skip keeps them undrawn, as Game.step does; the next step draws. TS2, opt item 2)
+    tq = g.ev("(() => { const out = [], s0 = simNow(); simTimeout(() => out.push('fired'), 500); window.__skip = true; pauseSet(true); window.__step(60, 1000 / 30); const held = out.length, s1 = simNow(); pauseSet(false); window.__step(20, 1000 / 30); window.__skip = false; return [held, out.length, Math.round(s1 - s0)]; })()")
     print('  a simTimeout across a 2 s pause [fired while paused, fired after, simNow moved while paused (ms)]:', tq)
     check(tq[0] == 0 and tq[1] == 1 and tq[2] < 100, f'a simTimeout waits out a pause, then fires once; the sim clock stands still while paused: {tq}')
     # the pause card and the keyboard (0.28.54, reviewer 1f): Resume is focused, Tab stays on it, Enter resumes, Escape resumes; dust stands still
@@ -1117,14 +1143,18 @@ with sync_playwright() as pw:
             RECTS = r"""(() => { const r = id => { const e = document.getElementById(id); if (!e || e.hidden) return null; const b = e.getBoundingClientRect(); return [b.left, b.top, b.right, b.bottom].map(Math.round); };
               return { repair: r('repairBtn'), put: r('putDown'), toast: document.getElementById('toast').classList.contains('show') ? r('toast') : null }; })()"""
             over = lambda a, b: bool(a and b and a[0] < b[2] and b[0] < a[2] and a[1] < b[3] and b[1] < a[3])
+            DRAWN[0] += 1                                  # drawn, as before fix B (Put down's lift waits on real time)
             vp = g.page.viewport_size; g.page.set_viewport_size({'width': 390, 'height': 844})
             g.ev("goToDeck(4)"); g.step(3); pid = g.ev(f"({HJ})('lamp')"); g.ev(f"({PUTAT})('{pid}', 0)"); g.step(5)
-            for label, js in [('at rest', ''), ('with a toast', "toast('Main storage', 'You take a lamp. Now replace a lamp: lift lobby. A long line, so it wraps on a phone, and wraps again.')")]:
-                if js: g.ev(js)
+            # the toast is on or off by the check's say, not by a toast's real-time 5.6 s (setTimeout, off the virtual clock): at rest,
+            # an earlier toast went or not depending on the machine's speed (TS2, opt item 2); with a toast, it stays up for the reading
+            for label, js in [('at rest', "clearTimeout(toastTimer); toastEl.classList.remove('show')"), ('with a toast', "toast('Main storage', 'You take a lamp. Now replace a lamp: lift lobby. A long line, so it wraps on a phone, and wraps again.'); clearTimeout(toastTimer)")]:
+                g.ev(js)
                 for k in range(8): g.step(8); g.page.wait_for_timeout(120)   # real time: the toast's transition, Put down's lift
                 rc = g.ev(RECTS); print(f'  phone, {label}:', rc)
                 check(rc['repair'] and not over(rc['repair'], rc['put']) and not over(rc['repair'], rc['toast']) and rc['repair'][3] <= 844, f'phone, {label}: Repair shown, clear of Put down and the toast ({rc})')
-            g.page.set_viewport_size(vp); g.step(3)
+            g.page.set_viewport_size(vp); g.step(3); DRAWN[0] -= 1
+            g.ev("toastTimer = setTimeout(() => toastEl.classList.remove('show'), 5600)")   # the toast goes as it would have
             g.ev("for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('pcrb-')); SHIP.player.carry = []; SHIP.player.work = null; MACH_REV++; handTick(true)")
         if g.ev("typeof workStep === 'function'"):
             print('The work steps (Pillar 5, foundation 15: look, choose, turn, wait; careerSpeed):')
@@ -1340,7 +1370,10 @@ with sync_playwright() as pw:
     url = 'file://' + str(tmp)
     def load(q=''):
         page.goto(url + q); page.wait_for_function('window.__sc !== undefined', timeout=60000)
+        page.evaluate('s => window.__sc(s)', SKIP_SWITCH)   # draw only the last frame of each page_step, as Game.step does (TS2)
         return lambda s: page.evaluate('s => window.__sc(s)', s)
+    def page_step(n):
+        page.evaluate(f'window.__skip = true; window.__step({n - 1}, 1000 / 30); window.__skip = false; window.__step(1, 1000 / 30)')
     ev = load()
     ev("localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, build: '0.25.2', time: { day: 2, min: 600 }, player: { deck: 4, tile: [7, 3], facing: 0 }, ship: { decks: {} }, crew: {} })); Storage.prototype.setItem = () => {}")
     ev = load()
@@ -1396,8 +1429,8 @@ with sync_playwright() as pw:
       out.push([!!pt, pt ? bagLockerTap(new THREE.Vector3(pt.x, 0, pt.z)) : null, bagLockerTap(new THREE.Vector3(999, 0, 999))]);
       return JSON.stringify(out);
     })()"""))
-    for _ in range(60):                                  # frames are stepped by hand here (window.__step)
-        page.evaluate('window.__step(30, 1000 / 30)')
+    for _ in range(60):                                  # frames are stepped by hand here (window.__step), the last of each 30 drawn
+        page_step(30)
         if ev('!bagHeld()'): break
     walked = ev('!bagHeld()')
     kb2 = json.loads(ev("""(() => {
@@ -1420,7 +1453,7 @@ with sync_playwright() as pw:
       const w = cellPos(28, 2), c = nearestOpen(w.x, w.z, player); player.obj.position.copy(cellPos(...c)); player.path.length = 0;
       const mine = typeof introSeat === 'function' ? introSeat('you') : null, h = mine && heldBy(mine);   // crew already heading for your seat?
       return JSON.stringify([real, c, h ? h.p.id : null]); })()"""))
-    for _ in range(10): page.evaluate('window.__step(15, 1000 / 30)')
+    for _ in range(10): page_step(15)
     dn = json.loads(ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.phase, ACT && ACT.placeId, DINNER_SAT, typeof introSeat === 'function' ? introSeat('you') : null])"))
     print('  the arrival dinner (0.28.28):', dn0, dn)
     check(dn[0] == 'sit' and dn[1] == 'do' and str(dn[2]).startswith('3-mess') and dn[3] is True and (dn[4] is None or dn[2] == dn[4] or dn0[2]), f'at your table for the dinner you sit down (in your own seat when section 21 names one and nobody is heading for it): {dn}')
