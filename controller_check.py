@@ -912,10 +912,117 @@ def part_games(pw, src, tag):
     if r.errors: fails.append('Lightdisc: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 
+# ---- a whole day by pad (all packages) ---------------------------------------------------------------------------------
+# You move only by the pretend controller: the stick steers along the game's own path (findPath) to where you're going,
+# the D-pad steps the ring until the bottom line names the thing, A uses it, and in panels the D-pad and A press the
+# button wanted. The check only fast-forwards the clock between scenes and marks the button it wants (data-ctt) so the
+# D-pad can be steered to it. Scenes: the lift down to breakfast, eat, talk to someone, take a job at the board, the
+# lift home, set the alarm and sleep.
+STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, player); if (!s || !g) return null;
+  const pp = player.obj.position, gp = cellPos(...g); if (Math.hypot(gp.x - pp.x, gp.z - pp.z) < .45) return { there: true };
+  const path = findPath(s, g, null, player); if (!path || !path.length) return { nopath: true };
+  const w = cellPos(...path[Math.min(1, path.length - 1)]), a = pp.clone().project(camera), b = w.clone().project(camera);
+  const dx = (b.x - a.x) * innerWidth, dy = -(b.y - a.y) * innerHeight, d = Math.hypot(dx, dy) || 1; return { x: dx / d, y: dy / d }; })"""
+def walk_to(r, x, z, frames=900):
+    for k in range(frames // 6):
+        st = r.ev(f"({STEER})({x}, {z})")
+        if not st or st.get('there'): r.js('window.__pads.clear(0)'); r.step(2); return bool(st)
+        if st.get('nopath'): r.js('window.__pads.clear(0)'); return False
+        r.pad(6, a={0: st['x'], 1: st['y']}, release=False)
+    r.js('window.__pads.clear(0)'); r.step(2); return False
+def ring_and_A(r, words, tries=10):
+    for k in range(tries):
+        h = r.ev(HINT)
+        if h and any(w in h.lower() for w in words): r.press('A'); r.step(4); return h
+        r.press('RIGHT'); r.step(4)
+    return None
+# which deck has a thing, from its deck definition (without going there)
+DECK_HAS = "Object.values(DECKS[D_]).some(v => (typeof v === 'function' ? v.toString() : (() => { try { return JSON.stringify(v) || ''; } catch (e) { return ''; } })()).includes('RX'))"
+MARK = r"""((js) => { for (const e of document.querySelectorAll('[data-ctt]')) e.removeAttribute('data-ctt'); const e = (new Function('return ' + js))(); if (!e) return false; e.setAttribute('data-ctt', '1'); return true; })"""
+def press_in_panel(r, js):
+    if not r.ev(f"({MARK})({json.dumps(js)})"): return 'not there'
+    if not pad_to(r, '[data-ctt]'): return 'never highlighted'
+    r.press('A'); r.step(6); return 'ok'
+WHERE_IS = r"""((re) => { const rx = new RegExp(re, 'i'), v = new THREE.Vector3(); const it = ITEMS.find(i => i.hit && rx.test(i.t)); if (!it) return null; it.hit.getWorldPosition(v); return [v.x, v.z, it.t]; })"""
+def ride(r, deck, fails, scene):
+    lp = r.ev("(() => { const d = DOOR_OBJS.find(d => d.e.type === 'lift'); return d ? [d.e.cx, d.e.cz] : null; })()")
+    if not lp or not walk_to(r, *lp): fails.append(f'{scene}: could not walk to the lift by the stick'); return False
+    if not ring_and_A(r, ['lift']): fails.append(f'{scene}: the ring never named the lift'); return False
+    for k in range(20):
+        if r.ev("!document.getElementById('lift').hidden"): break
+        r.step(10)
+    res = press_in_panel(r, f"[...document.querySelectorAll('#liftList button')].find(b => (b.querySelector('i') || b).textContent.trim() === '{deck}')")
+    if res != 'ok': fails.append(f'{scene}: the lift\'s Deck {deck} button: {res}'); return False
+    for k in range(60):
+        r.step(10)
+        if r.ev("player.deck") == deck and not r.ev("!!ride"): return True
+    fails.append(f'{scene}: the lift never reached Deck {deck}'); return False
+def part_day(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_day', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    # breakfast: the servery is on another deck
+    sv = None; deck = None
+    for d in r.ev("(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))"):
+        if r.ev(DECK_HAS.replace('RX', 'Servery').replace('D_', str(d))): deck = d; break
+    h0 = r.ev("SHIP.player.needs.hunger")
+    if deck and ride(r, deck, fails, 'breakfast'):
+        sv = r.ev(f"({WHERE_IS})('servery')")
+        if sv and walk_to(r, sv[0], sv[1]):
+            got = ring_and_A(r, ['servery', 'eat', 'breakfast', 'food'])
+            for k in range(60):   # the queue, then a tray
+                r.step(15)
+                if r.ev("!!SHIP.player.tray"): break
+            tray = r.ev("SHIP.player.tray || null")
+            if tray: sat = ring_and_A(r, ['sit', 'eat']); print(f'  a tray ({tray}); then "{sat}"')
+            for k in range(60): r.step(15)
+            h1 = r.ev("SHIP.player.needs.hunger")
+            print(f'  breakfast on Deck {deck}: the line said "{got}"; hunger {h0:.0f} -> {h1:.0f}')
+            if not got or h1 <= h0: fails.append(f'breakfast: by pad at the servery hunger should rise ({got}, {h0:.0f} -> {h1:.0f})')
+        else: fails.append(f'breakfast: could not walk to the servery ({sv})')
+    elif not deck: fails.append('breakfast: no servery found on any deck')
+    # talk: the nearest crew member the ring offers; a conversation opens; B puts it away
+    r.ev("actEnd && ACT && actEnd(true)"); r.step(10)
+    a = r.ev("(() => { const a = DECK_CREW.find(a => a.x !== undefined && a.pose !== 'lie'); return a ? [a.x, a.z, a.p.name] : null; })()")
+    if a and walk_to(r, a[0], a[1]):
+        got = ring_and_A(r, ['talk']); r.step(30)
+        opened = r.ev("[...document.querySelectorAll('[role=dialog],#chat')].some(e => !e.hidden && e.getBoundingClientRect().width > 0)") or r.ev("document.getElementById('tt').textContent.length > 0")
+        r.press('B'); r.step(10)
+        print(f'  talk: "{got}", something opened {opened}')
+        if not got or not opened: fails.append(f'talk: by pad ({got}, opened {opened})')
+    else: fails.append('talk: no crew member to walk to')
+    # a job: the board (the job board item), Take it by pad
+    jb = None
+    for d in r.ev("(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS).map(Number))"):
+        if r.ev(DECK_HAS.replace('RX', 'Job board').replace('D_', str(d))): jb = d; break
+    if jb and (r.ev("player.deck") == jb or ride(r, jb, fails, 'the job board')):
+        b = r.ev(f"({WHERE_IS})('job board')")
+        if b and walk_to(r, b[0], b[1]) and ring_and_A(r, ['job board', 'board']):
+            r.step(30); res = press_in_panel(r, "[...document.querySelectorAll('#ixBoardL button')].find(b => /take it/i.test(b.textContent))")
+            mine = r.ev("typeof myJob === 'function' && !!myJob()")
+            print(f'  the job board: Take it by pad: {res}; a job of yours: {mine}')
+            if res != 'ok' or not mine: fails.append(f'the job board: Take it by pad ({res}, a job: {mine})')
+            r.press('B'); r.step(10)
+        else: fails.append('the job board: could not reach it by pad')
+    # bed: the evening, the lift home, your bunk, Set alarm
+    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 22 * 60)"); r.step(20)
+    if r.ev("player.deck") == 4 or ride(r, 4, fails, 'bedtime'):
+        bp = r.ev("(() => { const s = placeSpot(playerBed()); return s ? [s.x, s.z] : null; })()")
+        if bp and walk_to(r, bp[0], bp[1]):
+            got = ring_and_A(r, ['bunk', 'sleep', 'bed']); r.step(30)
+            asked = r.ev("!document.getElementById('sleepAsk').hidden")
+            res = press_in_panel(r, "document.getElementById('sleepYes')") if asked else 'no alarm card'
+            r.step(60); t = r.ev("[SHIP.time.day, SHIP.time.min]")
+            print(f'  bedtime: "{got}", the alarm card {asked}, Set alarm by pad: {res}; now day {t[0]} {t[1] // 60:02d}:{t[1] % 60:02d}')
+            if res != 'ok': fails.append(f'bedtime: Set alarm by pad ({got}, {res})')
+        else: fails.append('bedtime: could not walk to your bunk by the stick')
+    if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach, 'games': part_games}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
