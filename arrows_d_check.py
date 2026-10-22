@@ -13,7 +13,7 @@
 #   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
-#   reputation (S9): a new word: a toast once and the pointer to the Works app's Training tab; never again for that word
+#   reputation (S9): a new word reached (not by a drop): a toast once and the pointer to the Works app's Training tab; never again for that word
 #   pointers:       each panel pointer three times at most, then not asked
 #   tick:           guideTick asks the shift chain itself once a ship minute
 # And in the build as it is (both off): no entries, no pointer, section 15's clock-out arrow as before.
@@ -106,6 +106,11 @@ def part_on(pg):
     pg.ev("POINT.aim.click()"); pg.step(2); shift(pg); lab = pg.ev(LAB); p = ptr(pg)
     mine = pg.ev("myJob() && myJob().id")
     check(mine and lab and lab != 'Take a job at the board' and not p['up'], f'S3: taken: the job\'s own arrow, no pointer ({mine}, {lab}, {p})')
+    # a job held for you comes first on the pointer's list (RV6's note)
+    r = pg.ev("""(() => { const keep = openJobs; openJobs = () => [{ id: 'arrows-a', asked: false }, { id: 'arrows-h', asked: true }];
+      const t = shipNow(), m = machineList().find(m => !m.stub); for (const id of ['arrows-a', 'arrows-h']) SHIP.jobs.push({ id, machine: m.id, deck: m.deck, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' });
+      const L = guideTakeable().map(o => o.id); openJobs = keep; SHIP.jobs = SHIP.jobs.filter(j => !j.id.startsWith('arrows-a') && j.id !== 'arrows-h'); return L; })()""")
+    check(r == ['arrows-h', 'arrows-a'], f'S3: a job held for you first ({r})')
     # pass-over (RV6's T3 note): T3 empty while you hold another job; the next live entry shows
     r = pg.ev("""(() => { const W = SHIP.works, keep = W.cur, now = Math.floor(shipNow());
       SHIP.jobs.push({ id: 'arrows-tj', machine: myJob().machine, deck: 5, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: null, parts: [], status: 'open' });
@@ -159,11 +164,13 @@ def part_on2(pg):
     # S9
     r = pg.ev("""(() => { const W = SHIP.works, keep = W.xp; __toasts.length = 0; guideShift(); const B = WORK_BANDS[W.tier] || WORK_BANDS[1], b0 = worksBand();
       W.xp = 0; guideShift(); const nx = B[1]; W.xp = nx[0]; guideShift(); const t1 = __toasts.slice(); const q = POINT_Q.some(x => x.id === 'p:works:training');
-      W.xp = keep; guideShift(); W.xp = nx[0]; guideShift(); const t2 = __toasts.length; W.xp = keep; guideShift(); return { b0, b1: nx[1], t1, q, t2 }; })()""")
+      W.xp = keep; guideShift(); W.xp = nx[0]; guideShift(); const t2 = __toasts.length; W.xp = keep; guideShift();
+      __toasts.length = 0; W.xp = B[3][0]; guideShift(); W.xp = B[2][0]; guideShift(); const drop = __toasts.slice(); W.xp = keep; guideShift(); return { b0, b1: nx[1], t1, q, t2, drop }; })()""")
     print('  S9:', r)
     if check(r is not None, 'S9: (no higher reputation word to reach)'):
         check(len(r['t1']) == 1 and r['t1'][0].startswith('Works reputation: ') and r['q'], f'S9: a new word: a toast and the Training tab pointer ({r})')
         check(r['t2'] == 1, f'S9: the same word again: said once only ({r})')
+        check(not r['drop'], f'S9: a word reached by a drop is not said (RV6) ({r})')
     # a short Friday: clock out from 15:30, until the clock signs you out at 16:00
     r = pg.ev("""(() => { const now = Math.floor(shipNow()), ci = SHIP.career.ci, co = SHIP.career.co; let d = 9; while (!friShort(d) && d < 16) d++; if (!friShort(d)) return null;
       const b = (d - 1) * 1440; setShipNow(b + 935); SHIP.career.ci = b + 540; SHIP.career.co = 0; guideShift(); const e = guideList().find(x => x.id === 'shift:out:' + d) || null;

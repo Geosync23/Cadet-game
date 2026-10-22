@@ -16352,8 +16352,8 @@ function guideShiftWords(now, P) {                       // S8 and S9
   if (P && GUIDE_SHIFT.logN >= 0 && n > GUIDE_SHIFT.logN) pointAsk({ id: 'p:works:log', once: 1, path: guideWorksTab('log', 'Your work is logged here'), until: now + 120, done: tabDone('log') });
   GUIDE_SHIFT.logN = n;
   const b = typeof worksBand === 'function' ? worksBand() : null; if (!b || b === GUIDE_SHIFT.band) return;
-  const k = 'rep:' + b;
-  if (GUIDE_SHIFT.band !== null && b !== 'new' && !SHIP.guide.seen[k]) {   // a new word since we last looked (not the one a game loads with)
+  const k = 'rep:' + b, up = GUIDE_SHIFT.band !== null && Object.keys(BAND_WORD).indexOf(b) > Object.keys(BAND_WORD).indexOf(GUIDE_SHIFT.band);
+  if (up && !SHIP.guide.seen[k]) {                       // a new word reached since we last looked (up, never on a drop; not the one a game loads with: RV6)
     toast(worksText('works.app.title', 'Works'), 'Works reputation: ' + worksBandWord());
     if (P) pointAsk({ id: 'p:works:training', once: 1, path: guideWorksTab('training', 'Your reputation is here'), until: now + 120, done: tabDone('training') });
   }
