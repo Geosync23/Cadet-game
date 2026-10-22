@@ -42,6 +42,15 @@ CTT (idle) session_01SgEbMMMNPRP2E7DbiDyiw4.
 | CP5 (4892a0b) | a11y OK | 7/7 caught |
 | this check's pick on 1ec1612 | FAIL only on the two real findings above | PR9 c7 caught |
 
+## Results after RV5's fixes (14:30)
+- pick on 1ec1612: c7 caught; crowded talk OK (A talks to the one named, Olu Farouk, with Emeka on its point); lone seat on
+  Deck 3: A = tap. Fails only on the two real turn-3 findings.
+- CT1's parts on cff5bab: off quiet base deck pick1 OK; 9/9 new faults caught.
+- day on claude/controller 0.90.5 (after three check fixes: steering by the view's axes, your own bunk via MY_BUNK, wait for
+  the alarm card): talk OK, bedtime + Set alarm OK; breakfast and the job board blocked by the lift not being offered.
+- CP1 copies still to take from claude/controller: (a) pick: PAD_MARK.say off in both copies after the setup press;
+  (b) settings: PAD_LAYOUTS stand-in only when undefined. CP1 will send the commit.
+
 ## Loose ends
 - CP3 says the Pause card's line now has id="pauseLine": the unplug part could read it instead of the card's whole text.
 - CTT's list still stands: the games faults, the reach faults, the day part never run, the full reach sweep (~2 h alone).
@@ -50,7 +59,7 @@ CTT (idle) session_01SgEbMMMNPRP2E7DbiDyiw4.
 
 ## RV5's review (PASS WITH FIXES, 13:34) and what was done
 C1 the tap run waits as long as the pad run read the line (pick_one's presses); C2 facing and the crowded seat FAIL as
-"not proven" when their case doesn't come up (the lone 'seat' on Deck 4 still only says none: open); C3 faults for CT1's
+"not proven" when their case doesn't come up; the lone seat is searched on every deck (found on Deck 3, 3-visit-1); C3 faults for CT1's
 off, quiet, base, deck, pick1; C4 is CP2's (tiles' real-time wait: told CP2); C5 below; C6 one frame between choosing
 and reading the line in the crowded seat; C7 part_crowded_named: "Talk to X" with Y on its point, A must talk to X.
 
