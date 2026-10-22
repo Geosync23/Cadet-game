@@ -53783,10 +53783,10 @@ padOwn(padDlgOn, {
 padOn('frame', () => { if (!padDlgOn(PAD.used ? padLayer() : null)) { PAD_DLG.el = null; PAD_DLG.i = -1; } });
 // The arrival's manifest (section 21's introManifest, a full-screen form): a panel once the controller is in use (it
 // gets an id then, so the helper can find it). The highlight lands in the name box: A brings up the phone's keyboard,
-// D-pad down reaches Sign and go aboard. A on Sign with the box empty fills in a suggested name you can change, or sign
-// with (the user's answer to the plan's question 6: no keyboard, a suggested name; the name can be changed later).
+// D-pad down reaches Sign and go aboard. A on Sign with the box empty fills in the suggested name, shown in the box
+// first; A again signs with it (the user's answer to the plan's question 6: with no keyboard, the suggested name is used).
 // It's a card you must answer: B only leaves the box.
-const PAD_NAME = 'Alex Morrow';
+const PAD_NAME = 'George';                                  // the user's choice (2026-10-22): one name, as the plate and the beam can show
 padPanelAdd('introManifest', { on: () => !!INTRO_UI.manifest, before: 'careerEnd', first: '#introManifest input', back: PAD_MUST });
 padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });
 padOwn(L => !!(L && L.id === 'introManifest'), { a: () => {
