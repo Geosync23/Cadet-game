@@ -262,6 +262,7 @@ def part_pick(pw):
                 check(got == want, f'pick: D-pad right should ring the next thing, {want}, not {got}')
             key = a.ev('PAD_PICK.sel && PAD_PICK.sel.key')
             s = a.ev('PAD_PICK.sel.s')
+            for q in (a, b): q.ev("document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")   # (an old message: the controller's own may differ in time)
             b.ev(f'tap({s[0]}, {s[1]})')                 # b: a finger, at the same moment
             a.btn('a'); a.step(1); b.step(1); a.btn('a', 0)
             a.step(40); b.step(40)
