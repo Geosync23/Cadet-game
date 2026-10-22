@@ -146,6 +146,14 @@ def board(g, path):
         gg = Game(g, path, w, h); gg.step(3)
         MEM = "[scene.children.length, renderer.info.memory.geometries, renderer.info.memory.textures]"
         gg.ev("SHIP.device.tipsSeen.device = true; deviceShow('home')"); gg.step(2)   # the device's own first open uploads its prop once
+        # on a phone the device's framing (section 19, deviceFrameStep) eases the view down on real time, about a second:
+        # count only once it has settled and been drawn, or whatever slides into view counts as the board's (backlog #26)
+        for _ in range(100):
+            if gg.ev("DEV.fr === (DEV.frOn ? 1 : 0)"): break
+            gg.page.wait_for_timeout(100); gg.step(1)
+        settled = gg.ev("DEV.fr === (DEV.frOn ? 1 : 0)")
+        check(settled, f'{name}: the device\'s framing settles within 10 s (DEV.fr {gg.ev("DEV.fr")}, frOn {gg.ev("DEV.frOn")})')
+        gg.step(1)
         m0 = gg.ev(MEM)
         gg.ev("tilesPlay('tomas', null, 'full')"); gg.step(2)
         lk = gg.ev(LOOKS)
