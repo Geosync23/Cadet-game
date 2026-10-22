@@ -6,6 +6,9 @@ M = {
  'c1_walkflip': ("const wx = rx * x - fx * y, wz = rz * x - fz * y", "const wx = rx * x + fx * y, wz = rz * x + fz * y"),   # up on the stick walks down the screen
  'c2_nostop': ("function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; if (!steering) player.steer = null; } }", "function padWalkEnd() { if (PAD_DECK.walking) { PAD_DECK.walking = false; } }"),   # letting go keeps walking
  'c3_nodevice': ("['dmSheet', () => DM_UI.open], ['device', () => DEV.open], ", "['dmSheet', () => DM_UI.open], "),   # the device missing from the panel list
+ 'c5_anoop': ("P.chosen = false; tap(s[0], s[1]); P.n = 0;", "P.chosen = false; P.n = 0;"),   # A does nothing
+ 'c6_eagerring': ("if (PAD_ON) { addEventListener('gamepadconnected', padHello);", "if (PAD_ON) { const _pr = new THREE.Mesh(new THREE.RingGeometry(.4, .5, 40), new THREE.MeshBasicMaterial({ color: col('#4cc3b5') })); _pr.visible = false; scene.add(_pr); addEventListener('gamepadconnected', padHello);"),   # a hidden mesh made at load
+ 'c7_mislabel': ("if (a) return 'crew:' + a.p.id;", "if (a && !(want && want.startsWith('place:'))) return 'crew:' + a.p.id;"),   # a seat ringed where the tap reaches a person
  'c4_noback': ("addEventListener('pointerdown', back, true); ", ""),   # a touch doesn't hand back
 }
 for n in sys.argv[2:] or list(M):
