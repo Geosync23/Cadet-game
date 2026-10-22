@@ -53,7 +53,7 @@ Notes for the build master and owners:
 
 ## G: more jobs on the board (note 13; JB1, claude/patch-play1-g)
 
-**Tip reviewed: 3ffb604f** (game sha256 0ef144c3...e159). **Verdict: see the verdict line below.**
+**Tip reviewed: 3ffb604f** (game sha256 0ef144c3...e159). **Verdict: PASS.**
 
 What it does: each hour of your shift (45 minutes or more left), if fewer than 2 jobs you may take are on the board,
 small no-part chores at your tier are posted (vent, calibrate, delivery, small fault; seals first for an officer),
@@ -74,10 +74,11 @@ the machines already use; the crew's planner never reads it). Extras keep their 
 is saved whole) and lapse before the crew's claim step in the same hour, so the crew never take one (machine_check 5z
 confirms). `j.xp === 0` is honoured by 24 core's turn-in.
 
-Checks (first tip, then the new tip, below): check_fast OK (239 s; machine_check: steady player 9.0 a day, range now
+Checks, on the first tip 1b3e18f1 and again on 3ffb604f (all the same results): check_fast OK (239 s; machine_check: steady player 9.0 a day, range now
 7-12; 5z: Days 1-5 10/0 10/0 10/0 10/0 8/0 jobs/empty minutes, off 3/300; ship health lowest 93.5), intro_check OK,
 career_check OK (steady player Relied on by Day 5 at 45 xp, base 48: pace about the same), interactions_check OK,
-player_check OK, cadet_test vs base ALL IDENTICAL.
+player_check OK (first tip), cadet_test vs base ALL IDENTICAL. On 3ffb604f: check_fast OK (243 s, 5z the same),
+cadet_test ALL IDENTICAL, intro_check --week OK, career_check OK, and the Day 1 drive the same (13 jobs, never empty).
 
 machine_check's expectations moved (each explained in the file): the steady player's range 3-7 to 7-12, and the ship
 meters part no longer counts a job without meter gain once the board reads 97 or more (13 such jobs: the ship's
