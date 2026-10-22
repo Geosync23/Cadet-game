@@ -64,4 +64,28 @@ Read in full, then run against CT1's 0.90.1 (ef59c61a) in a copy with `const PAD
    they prove each part can fail but not that it fails on section 26's own mistakes. I'll add mutants in section 26
    itself (`plans/review-controller/mutants.py`) for P3-P5.
 
-Run of CTT's parts on 0.90.1 (+PAD_BUILT): see below.
+### Runs of CTT's parts on 0.90.1 (+PAD_BUILT), each alone (scratchpad logs run1.log, run2.log)
+
+As given (`PAD_ON = false`): idle FAIL 24, touch FAIL 12, walk FAIL 29, odd FAIL 3, unplug "not yet" (marks).
+On a copy with `PAD_ON = true`: **walk OK, odd OK** (four views, half push 0.22 m / full 0.35 m, zoom to 2.4 and 0.55,
+Menu / Y / View; the non-standard pad and two pads walk); touch FAIL 13.
+
+What the failures are (all but 8.4 the check's, not the game's):
+
+8. **The controller parts run on the file as given.** walk / odd / touch / unplug should run on the switch-on copy
+   (as idle's second half and CT1's check do); on the off build they fail (walk) or pass for nothing (touch, idle).
+9. **idle, "PAD_ON on, no pad": the DOM hash differs because the hash reads `<script>` text** (PAGE_STATE mixes every
+   text node, the game's own source with `PAD_ON = true` in it). Skip SCRIPT and STYLE text. And the two waiting
+   listeners (`gamepadconnected`, `gamepaddisconnected`) are the ones PR9's bar 1 allows at load: allow exactly
+   those two, nothing else.
+10. **touch's frame count isn't matched.** The no-pad run steps 20 + 20 frames before its taps; a run with presses
+    steps 20 + 3 per press + 4 per press + (20 - 6 per press): one or two frames more, so the clock is 0.02-0.04 min
+    on, the crew have moved, and every picture differs, switch off or on. Step the same total in every run (or step
+    the no-pad run through the same frame count with no presses). LB then RB also turns the view twice (geometries
+    339 -> 357, textures 32 -> 34: the game builds a turned view's walls), so it can't equal a run that never turned:
+    compare it with a no-pad run that presses Rotate the same way, or drop it.
+11. **Mode (b) and the hand-back listeners (CT1's, small).** With a pad present at load, `gamepadconnected` fires
+    before any press and `padHello` adds the hand-back listeners (pointerdown, wheel, mousemove +1 each). They do
+    nothing until the pad is used (`padUnuse` returns when not used), so nothing changes for the player; but the hard
+    rule is "nothing until a press". Suggest `padListen()` on the first `padUse()` instead of at the hello; then
+    mode (b) is fully identical and the check can keep counting listeners.
