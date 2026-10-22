@@ -14434,7 +14434,7 @@ function hobbyPick() {
 function jobBegin(A) {
   const mw = myWork(); if (!mw || A.placeId !== panelPlace(mw.j.machine)) { ACT = null; toast(A.o.title, 'You don\'t have a job here any more.'); return false; }
   const P = SHIP.player, { j, w } = mw, fit = [];
-  if (typeof scanFirst === 'function' && scanFirst(j)) {   // your scanner training (24g): look it over and read it first, nothing fitted yet (p5-fix2)
+  if (typeof scanFirst === 'function' && scanFirst(j)) {   // scan first (24g's scanFirst, the user's rule): look it over and read it, nothing fitted yet (p5-fix2)
     w.seen = true; A.def = { mins: INSPECT_MINS * (typeof toolSlow === 'function' ? toolSlow('scanner') : 1), pose: 'work', title: 'Inspecting' };
     A.o.after = 'You open the panel on the ' + machineName(machineById(j.machine)) + ' and look it over with the scanner.'; A.o.need = jobNeeds(j, w);
     return true;
@@ -15704,13 +15704,13 @@ function ixJobStep() {
   const m = machineById(j.machine); if (!m) return null;
   const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null };
   const need = jobNeeds(j, w, P.carry), name = machineName(m);
-  if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: your scanner training, not read yet: look it over first)
+  if (need.length && P.carry.length < CARRY_MAX && !(typeof scanFirst === 'function' && scanFirst(j))) {   // (24g's scanFirst: with the scanner, a faulty machine is read before its part is named)
     if (w.make && w.make.part) return { deck: 5, room: 'f', label: 'Make ' + partList([w.make.part]) + ' in the machine shop' };
     if (need.some(p => SHIP.stores[p] > 0)) { const on = need.filter(p => SHIP.stores[p] > 0), sh = ixShelf(on); return { deck: 5, room: 'r', place: sh.place, label: 'Fetch ' + partList(on) + sh.say }; }
     if (need.some(p => !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)))) return { deck: 5, room: 'f', label: 'Make ' + partList([need.find(p => !NO_MAKE.has(p))]) + ' in the machine shop' };
   }
   const pid = typeof panelPlace === 'function' ? panelPlace(m.id) : null;
-  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a tune job (24e) is tuned, not repaired (p5-fix2)
+  return { deck: m.deck, place: pid, at: m.at, room: m.room, label: (need.length || typeof scanFirst === 'function' && scanFirst(j) ? 'Look over the ' : j.kind === 'tune' ? 'Tune the ' : 'Repair the ') + name };   // a tune job (24e) is tuned, not repaired (p5-fix2)
 }
 // no job yet on a shift day (playtest 1, note 9): the time clock till you've clocked in, then the job board while it
 // has a job for you; then your job's steps as above. From the clock's opening to the shift's end; Day 1 has section 21's own
@@ -18690,7 +18690,7 @@ function jobWhere(person, t) {
 }
 // ---- your side of the job list (the device and the board come later, with the player engineer) ----
 // the board: jobs found and not done, the most urgent first
-function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j))).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
+function jobsBoard() { machinesNow(); const t = shipNow(); return SHIP.jobs.filter(j => j.status !== 'done' && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && !(typeof worksWatching === 'function' && worksWatching(j))).sort((a, b) => b.urgency - a.urgency || a.found - b.found); }
 // your jobs on the ship notes bus (Pillar 4, for onboarding's Settling-in and the social side): simNote('job', { id,
 // step, reserved, ... }) when you take one ('take'), tick off a stop ('stop', with k and its tag), finish its work ('done'),
 // turn it in ('turnin'), give it up ('drop') or leave it till it lapses ('lapse', sent once the hour has run). reserved:
@@ -19555,7 +19555,7 @@ jobWhere.on = true;                                      // crew go to their job
 // hour (schedU), so the same ship posts the same ones however time moves. BOARD_ON false: as before.
 let BOARD_ON = true;
 const BOARD_MIN = 2, BOARD_FROM = 45, BOARD_KINDS = ['vent', 'calibrate', 'delivery', 'fault', 'seal'];
-const boardForYou = (j, t) => j.status === 'open' && !j.claimedBy && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)));
+const boardForYou = (j, t) => j.status === 'open' && !j.claimedBy && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && !(typeof worksWatching === 'function' && worksWatching(j)) && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)));
 function boardTopUp(h, jobs) {
   const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, end = dayShiftEnd(d);
   for (const j of jobs) if (j.extra && j.status === 'open' && !j.claimedBy && t >= leaveEnd(j)) j.status = 'gone';   // untaken by the shift's end: lapsed
@@ -45366,6 +45366,9 @@ const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; retur
 function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
 // a row's own say on whether your finished training job counts (WORK_MECH[id].counts(job); 24g's m7: only once you've
 // scanned it, p5-fix2). Not counted: no training now; trainTick sees the job done and offers the training again
+// the teacher's own job while you watch it (24 core's 'watch'): theirs, never on your board (AR2's B4, p5-fix2: taking it
+// skipped the lesson and trained you; on Day 5 you'd never read the scanner)
+function worksWatching(j) { const c = SHIP.works && SHIP.works.cur; return !!(c && c.st === 'watch' && j && c.j === j.id); }
 function worksCounts(id, c) { const M = WORK_MECH[id] || {}, j = c && c.id === id && SHIP.jobs.find(x => x.id === c.j); try { return !M.counts || !j || !!M.counts(j); } catch (e) { return true; } }
 function worksEscortHold(id) { const c = SHIP.works && SHIP.works.cur; if (!c || c.id !== id || !/^(watch|do|meet|ask|again)$/.test(c.st)) return false; c.hold = true; return true; }
 function worksEscortEnd(id) {
@@ -46432,15 +46435,17 @@ function scanPick(jobId, part) {
 }
 // at the last stop (24k's caseFitted asks for jobs that aren't cases): a wrong pick keeps the machine as it was -> true
 function scanFitted(j) {
-  if (!j.scan || !j.picked) return false;
+  if (!j.scan) return false;
   const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause); if (!f || !f.part) return false;
-  if (j.picked === f.part) {
+  const pick = j.picked || ((j.parts || []).includes(f.part) ? f.part : null);   // no Fetch pressed: the part the job names after the reading counts as yours (p5-fix2: else the use never counted)
+  if (!pick) return false;
+  if (pick === f.part) {
     j.rightFirst = !j.scanWrong;
     if (typeof simNote === 'function') simNote('scanned', { machine: j.machine, right: !j.scanWrong });
     if (typeof worksUse === 'function') worksUse('m7');
     return false;
   }
-  const wrong = j.picked, shows = f.shows || 'acts up';
+  const wrong = pick, shows = f.shows || 'acts up';
   if (!(CASE_SPENT.has(wrong) && jobTier(j) >= 2)) returnPart(wrong);   // Tier 1: back on its shelf unused
   const key = 'fault.still.' + m.kind + '.' + (caseCauses(m).find(x => x.part === wrong) || {}).id;
   const line = (typeof worksText === 'function' ? worksText(key, null) : null) || 'Fitted a new ' + wrong + '. Still ' + shows + ': it\'s the ' + f.part + '.';
@@ -46467,10 +46472,16 @@ function scanTrainMachine(d, not) {
   const all = machineList().filter(ok); if (!all.length) return null;
   return all[Math.floor(schedU(machSeed('m7'), d, 875) * all.length)];
 }
-// your scanner training job, not read yet (p5-fix2: it listed the washer's pump, so the arrow said "Fetch a pump", the
-// pump went in as a plain repair, the head-scratcher closed unseen and you were trained without a scan): the arrow sends
-// you to look it over (section 15's ixJobStep) and the look-over is the scan (jobBegin), which shows Day 5's case
-const scanFirst = j => !!j && !j.scan && j.train === 'm7' && j.claimedBy === 'you' && j.status === 'claimed' && !!j.cause && !j.workDone && scanHave();
+// scan first (the user, 2026-10-22, through lead 27): once you have the scanner, every faulty-machine job of yours with a
+// part cause starts with a look at the machine, and its part is named only after the reading. Till then section 15's arrow
+// says "Look over the <machine>" (ixJobStep) and the look-over fits nothing and opens the scanner (jobBegin). On Day 5's
+// lesson the reading shows P3's case (p5-fix2: the job listed the washer's pump, so the arrow said "Fetch a pump", the
+// pump went in as a plain repair, the head-scratcher closed unseen and you were trained without a scan)
+function scanFirst(j) {
+  if (!j || j.scan || j.claimedBy !== 'you' || j.status !== 'claimed' || j.workDone || !j.machine || !j.cause || !scanHave()) return false;
+  const cz = typeof caseOf === 'function' && caseOf(j); if (cz && CASE_KINDS[cz.kind] && CASE_KINDS[cz.kind].noScan) return false;   // P1: the scanner won't settle a line (as scanRead)
+  const m = machineById(j.machine), f = m && caseCauses(m).find(x => x.id === j.cause); return !!(f && f.part);
+}
 const SCAN_TRAINED = new Set();                          // machines used for today's training (the teacher's first)
 function scanTrainReserve(d, at, slot, o) {
     if (o && o.yours && typeof toolGive === 'function') toolGive('scanner');   // handed over at the board: yours to read with
@@ -47502,7 +47513,7 @@ function caseClue(caseId, clueId) {
   c.got.push(clueId);
   const who = k.src && (k.src.by || k.src.ask), p = who && schedPeople().find(x => x.id === who);
   const name = p ? p.name.split(' ').slice(-1)[0] : k.type === 'log' ? 'the log' : k.type;
-  if (typeof toast === 'function') toast('+ clue: ' + name);
+  if (typeof toast === 'function') toast('Fault notes', '+ clue: ' + name);   // (one argument showed '+ clue: Eklund | undefined': AR2, p5-fix2)
   if (typeof deviceNotify === 'function') deviceNotify({ app: caseApp(), text: '+ clue: ' + name });
   MACH_REV++;
   return true;

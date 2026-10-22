@@ -271,6 +271,14 @@ PARTS['m3d'] = m3d_both
 # leaves it faulty; the right call, the fetch, the fit, the turn-in: trained. Then on paper, the job finished without a
 # scan: not trained
 M7_SETUP = TRAIN.replace("if (c && c.st === 'do' && (!myJob()", "if (c && c.st === 'do') break; if (false && (!myJob()").replace("const st0 = worksStage(id);", "const st0 = 0; const c = SHIP.works.cur; window.__m7j = c && c.j; return { st: c && c.st };")
+M7_WATCH = TRAIN.replace("if (c && c.st === 'watch') {", "if (c && c.st === 'watch') break; if (false) {").replace("const st0 = worksStage(id);", "const st0 = 0; const c = SHIP.works.cur; return { st: c && c.st, board: !!c && jobsBoard().some(x => x.id === c.j), took: !!c && claimJob(c.j) };")
+M7_LATER = r"""(() => { const W = SHIP.works; if (!W.tr.m7) W.tr.m7 = 5; toolGive('scanner'); const use0 = W.use.m7 || 0;
+  const m = machineList().find(x => !x.stub && (x.deck === 3 || x.deck === 4) && panelPlace(x.id) && caseCauses(x).some(f => f.part) && !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done'));
+  const f = caseCauses(m).find(x => x.part), id = jobReserve(m.id, worksDay(shipNow()), shipNow() % 1440, 21, { tier: 1, cause: f.id }), j = SHIP.jobs.find(x => x.id === id);
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; delete j.case; claimJob(id);
+  const before = ixJobStep().label; scanRead(id); SHIP.player.carry = []; const after = ixJobStep().label;
+  jobStops(j).forEach((x, k) => jobStepDone(id, k)); turnInJob(id);
+  return { before, scan: !!j.scan, after, use0, use: W.use.m7 || 0 }; })()"""
 M7_SEE = "(() => { const j = SHIP.jobs.find(x => x.id === window.__m7j) || {}, cs = ((SHIP.works.cases || {}).open || []).find(c => c.job === j.id), g = ixJobStep(); return { goal: g && g.label, scan: !!j.scan, shown: cs ? !cs.wait : null, work: !!j.workDone, st: j.status, tr: SHIP.works.tr.m7 !== undefined }; })()"
 M7_PANEL = r"""(() => { const j = myJob(), m = machineById(j.machine); if (deckDef.num !== m.deck) goToDeck(m.deck); const s = placeSpot(panelPlace(m.id)), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return jobSpotTap(new THREE.Vector3(s.x, 0, s.z)); })()"""
 M7_FETCH = r"""(() => { if (deckDef.num !== 5) goToDeck(5); const need = jobNeeds(myJob(), myWork().w, SHIP.player.carry), it = ITEMS.find(i => i.t === shelfName(shelfOf(need[0]))); if (!it) return false; it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
@@ -280,6 +288,10 @@ def m7_taps(g):
         for k in range(300):
             g.step(10)
             if not g.ev("ACT && ACT.kind"): break
+    watch = g.ev(f"({M7_WATCH})('m7')")
+    print('  24g the teacher\'s job while you watch:', watch)
+    check(watch['st'] == 'watch' and not watch['board'] and not watch['took'], f"m7: the teacher's job isn't on your board and can't be taken ({watch})")
+    g.ev("window.__kt = toast; window.__said = []; toast = (a, b) => { window.__said.push(a + ' | ' + b); return window.__kt(a, b); }")
     st = g.ev(f"({M7_SETUP})('m7')"); took = g.ev("claimJob(window.__m7j)"); seen = [g.ev(M7_SEE)]
     for f in (M7_PANEL, M7_PANEL):
         r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
@@ -287,6 +299,13 @@ def m7_taps(g):
     for f in (M7_FETCH, M7_PANEL):
         r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
     g.ev("turnInJob(window.__m7j)"); g.step(60); end = g.ev(M7_SEE)
+    said = g.ev("(() => { toast = window.__kt; return window.__said.filter(x => /clue|undefined/.test(x)); })()")
+    print('  24g the clue toasts:', said)
+    check(said and not any('undefined' in x for x in said), f"m7: the clue toasts have a title and a line, no 'undefined' ({said})")
+    after = g.ev(M7_LATER)
+    print('  24g an ordinary job once you have the scanner:', after)
+    check(after['before'] and after['before'].startswith('Look over') and after['scan'] and after['after'] and after['after'].startswith('Fetch') and after['use'] == after['use0'] + 1,
+          f"m7: scan first on any faulty job (look it over, then the part), and the use counts with no Fetch pressed ({after})")
     print('  24g scanner training by taps:', st, took, json.dumps(seen), call, json.dumps(end))
     check(st['st'] == 'do' and took and seen[0]['goal'].startswith('Look over') and not seen[0]['scan'], f"m7 taps: after Take it the arrow says look it over ({seen[0]['goal']})")
     check(seen[1][0] and seen[1][1]['scan'] and seen[1][1]['shown'], f"m7 taps: the look-over is the scan, and the head-scratcher shows ({seen[1]})")
