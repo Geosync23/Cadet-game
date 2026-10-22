@@ -114,3 +114,12 @@ Each merge equals git's own merge with its conflicts resolved by keeping both si
 then P4's; the extra "}" closes padPauseLine), P5 d029ad1 (P1's newer padFocusTo line plus P5's padNameIt), CP2
 7b11451 93d9779 (no game conflict), the pick fix 51530b3 (PAD_BUILT kept whole: base deck pick panels games marks
 settings); plus the build lines. Suite running.
+
+## 8. claude/controller 0.90.7 (3dfe657) and 0.90.8 (fda82c1): PASS (one alone re-run pending)
+0.90.8 = 0.90.7 + CP4's first use (3f6bb66): merge equals git's own merge apart from the build lines and the PAD record
+line (firm and goneIdx both kept). Runs on 0.90.8: cadet_test vs 0.64.14 alone off ALL IDENTICAL, on ALL IDENTICAL apart
+from 1-level noise in 5 shots (6-30 px) with nothing else running: repeating. CTT2's idle (1fa67e9, toast timer cleared
+at load) OK twice in a row, no listeners before a press; save byte-identical in 9 pad modes; calls unchanged; check_fast
+OK; player_check OK; the branch's controller_check 17 parts OK; a 0.64.14 save loads and re-saves byte-identical (build
+stamp aside). 0.90.7: the same, apart from the listener item (fixed in 0.90.8). CTT2's older pick (cc72b15) on 0.90.7:
+the lift is offered, A = tap for crew, item, sealed door, lift, seat; facing read no line (check, fixed by CTT2 since).
