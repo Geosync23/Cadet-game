@@ -170,7 +170,8 @@ CENSUS = r"""
     if (TYPES.has(type) && this instanceof Element) { if (!tagged.has(this)) tagged.set(this, new Set()); tagged.get(this).add(type); }
     return add.call(this, type, fn, opt);
   };
-  window.__census = { tagged, counts };
+  window.__census = { tagged, counts, lastClick: null };
+  add.call(document, 'click', e => { window.__census.lastClick = e.target; }, true);   // which element the last click reached
 })();
 """
 # listeners: every kind asked for, less the two waiting ones (gamepadconnected, gamepaddisconnected) allowed at load
@@ -326,7 +327,9 @@ SCAN = r"""(() => {
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
     const d = e.closest('[role=dialog],[aria-modal=true],.lift,.device,dialog');
-    out.push({ k: key, x: at[0], y: at[1], why: ['', 'tag', 'click', 'listener', 'cursor'][k], dlg: d ? (d.id || d.className) : null, label: own });
+    const f = document.activeElement, lc = window.__census.lastClick;
+    out.push({ k: key, x: at[0], y: at[1], why: ['', 'tag', 'click', 'listener', 'cursor'][k], dlg: d ? (d.id || d.className) : null, label: own,
+      foc: !!f && f !== document.body && (f === e || e.contains(f)), clicked: !!lc && (lc === e || e.contains(lc)) });
   }
   const dlg = [...document.querySelectorAll('[role=dialog],[aria-modal=true],.lift,.device,dialog')].filter(e => !e.closest('[hidden]') && e.getBoundingClientRect().width > 0 && (!e.checkVisibility || e.checkVisibility({ opacityProperty: true, visibilityProperty: true }))).map(e => e.id || e.className);
   return { items: out, dialogs: dlg, url: location.href, deck: typeof player !== 'undefined' ? player.deck : null };
@@ -482,8 +485,62 @@ def part_reach(pw, src, tag):
     for c in sorted(NOT_FROM_NEW_GAME): print(f'  not from a new game: #{c} ({NOT_FROM_NEW_GAME[c]})')
     fails += [f'the panel #{c} (hidden at load) was never seen open in the sweep' for c in never]
     fails += [f'the sweep stopped early: {c}' for c in sorted(sw.capped)]
+    if 'panels' in built and '--inventory' not in FLAGS: fails += part_reach_pad(pw, src, tag, sw.states)
     return fails
 REACH_INVENTORY = {}
+
+# ---- the pad half (panels): every thing on every screen the touch half found, reached and pressed by pad --------------
+# For each screen with a panel open: get there by the touch half's own presses, then move the highlight (the page's real
+# focus, plan section 3) with the D-pad only: back and forth along rows, down and up, and a seeded wander, until nothing
+# new is reached. Every thing the page lists on that screen must have had the highlight. Then A on the highlighted thing
+# must click that very thing, and B must leave the panel (or go back a step).
+def pad_moves(r, n):
+    seen, order = set(), []
+    def look():
+        sc = r.ev(SCAN); f = next((i['k'] for i in Sweep.inner(sc) if i['foc']), None)
+        if f and f not in seen: seen.add(f); order.append(f)
+        return f
+    r.press('DOWN'); r.step(1); look()
+    for d1, d2 in (('RIGHT', 'LEFT'), ('LEFT', 'RIGHT')):
+        for row in range(n):
+            for d in (d1, d2):
+                last = None
+                for k in range(n):
+                    r.press(d); r.step(1); f = look()
+                    if f == last: break
+                    last = f
+            r.press('DOWN' if d1 == 'RIGHT' else 'UP'); r.step(1); look()
+    x = 7
+    for k in range(4 * n):
+        x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
+    return seen, order
+def part_reach_pad(pw, src, tag, states):
+    fails = []
+    for st in states.values():
+        if not st['dialogs'] or any(k.startswith('@deck:') for k in st['path']): continue
+        sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
+        okp = all(sw.press(sw.scan(), k) for k in st['path'])
+        where = ' > '.join(st['path'])
+        if not okp: print(f'  {where}: could not get there again'); sw.r.close(); continue
+        want = {i['k'] for i in st['items']}
+        seen, order = pad_moves(sw.r, min(12, len(want) + 2))
+        now = {i['k'] for i in Sweep.inner(sw.scan())}
+        missing = sorted((want & now) - seen)
+        print(f'  {where}: {len(seen & want)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
+        if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
+        # A clicks the highlighted thing
+        sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
+        if f and not Sweep.BACK.match(f['label']):
+            sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
+            sw.r.press('A'); sw.r.step(4)
+            hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
+            if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
+        # B leaves the panel or goes back
+        sig0 = Sweep.sig(sw.scan())
+        sw.r.press('B'); sw.r.step(6); sc3 = sw.scan()
+        if Sweep.sig(sc3) == sig0: fails.append(f'{where}: B changed nothing (the panel stays as it was)')
+        sw.r.close()
+    return fails
 
 # ---- on the deck: walking, turning, zooming, Pause, Device, Tracked (the deck package) --------------------------------
 OPEN_CELL = r"""(() => { let best = null;
@@ -775,7 +832,7 @@ def part_pick(pw, src, tag):
 # parts that need a package: 'not yet' until PAD_BUILT names it
 NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach}   # 'reach' joins when the pad half is written
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
 # Each is put into a copy of the game just before the test hook (inside the game's scope). A part must FAIL on each of
