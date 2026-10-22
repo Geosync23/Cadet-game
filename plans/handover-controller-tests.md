@@ -116,3 +116,7 @@ Open in the clean run on 1ec1612 (for CP1 to judge, may be the check's): facing 
 chose), the ring starts on "Bed", not the Wardrobe; the lift still not offered from 2 m (CT1 told; CP1 now owns pick).
 Not yet run: the games faults (rerun into a log file; the earlier run was cut off by a time limit), the reach faults, the
 day part (never run), the full reach sweep on turn 4 (scratchpad logs/reach10.txt was in progress).
+The turn-4 sweep (a2c80df, CTL_PRESSES=900) was stopped at the handover after 611 presses and 81 loads in about 95 min:
+39 screens, reaching Decks 1, 2, 3 and 7 and, by deck taps, Booth 1, the lift panel, the servery, the Spine ladder, the Tiles
+table and the toilet. It never finished, so the completeness list (panels hidden at load never seen open) is still to come;
+expect to run it in a slot of its own for about 2 hours.
