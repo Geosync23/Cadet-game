@@ -367,3 +367,15 @@ Play probe (GUIDE_ON on, 390x844, p_arrows.py): a level 4 asked with tracking of
 goal shows; a level 1 over it borrows the arrow ("RV2 emergency") and gives it back to the direct goal within a ship
 minute of done; clearing the direct goal leaves nothing; five pop-ups in one frame plus a repeat show T0, T3, T4, T1:
 T1 and T2 dropped by TQ_MAX 3 (the burst point, left to the migration pieces' `now` marks by AR1's call).
+
+## Arrows C on AC1's tip d99a9e50 (AC1 now owns B, C, E; claude/arrows-plan merged in)
+- B's change since 5dd6b6f: guideGoal clears GUIDE.shown when the picked entry's goal is empty; arrows_check queue gained
+  my two cases (a waiting pop-up queued once; a throwing done() behind a lower level dropped). E is RV6's.
+- C's new lift case (lead 28's ask): pointLiftStep, a per-frame watch (only with POINT_ON) for the deck picker opening
+  while the arrow wants another deck; pointAsk 'p:lift' once: 3 on that deck's button (found by its deck letter in
+  #liftList), done when the picker shuts. Reads fine; it doubles section 11's "-> Goal" tag on the picker, on purpose.
+- My first queue for C's alone re-run never started: its "no chromium running" wait matched a system process (pid 85,
+  the container's CA setup, whose arguments mention the browser path). Lesson for the handover: wait on your own
+  queue names, not on "chromium".
+Runs (queue 15, alone): cadet_test 2b4a05db -> d99a9e50 (off), arrows_pointer_check, arrows_check queue, 4 mutants
+(ac_nocover, ac_liftsame, ac_liftmany, ac_showrow), check_fast.

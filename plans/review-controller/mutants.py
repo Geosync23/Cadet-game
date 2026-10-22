@@ -67,6 +67,9 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'ar2_nomerge': ("  if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;", "", '-'),
  'ar2_norecheck': ("  if (fin) { guideDrop(e.id); e = guidePick(); if (!e) { GUIDE.shown = null; return null; } }", "", '-'),
  'ar2_retime': ("  if (shown === t + '|' + x && !GUIDE.tq.length) return false;", "", '-'),
+ # arrows C d99a9e50 (AC1): the lift case
+ 'ac_liftsame': ("if (!g || !g.deck || typeof deckDef === 'undefined' || g.deck === deckDef.num) return;", "if (!g || !g.deck || typeof deckDef === 'undefined') return;", '-'),
+ 'ac_liftmany': ("pointAsk({ id: 'p:lift', once: 3,", "pointAsk({ id: 'p:lift', once: 99,", '-'),
  't3_noface':    ("const fx = Math.sin(player.face || 0), fz = Math.cos(player.face || 0);", "const fx = 0, fz = 0;", 'pick'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
