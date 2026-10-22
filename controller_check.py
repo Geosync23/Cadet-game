@@ -35,7 +35,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'reach', 'day', 'games', 'unplug', 'odd',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -1841,7 +1841,7 @@ def legacy_parts(GAME, ON, fails):
         p.press('x', 0); p.step(3)
         check(marks(p).get(('devBtn', 'y'), ('',))[0] == 'xbox:y', 'drop: the Xbox pad pressed last, marks not back to Xbox')
         p.close()
-    # ---- CP4 (claude/controller-p4 7631ab6, + CP1's claude/controller 3dfe6579): settings ----
+    # ---- CP4 (part_settings as merged in claude/controller fda82c1a, 0.90.8): settings ----
     # P4, the Controller page in Settings (plan section 7)
     SV = "(() => { const s = {}; for (const f of SAVE_EXTRA) try { f(s); } catch (e) { } return s; })()"
     SAVE_NOW = """(() => { const decks = {}; for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
@@ -1853,7 +1853,9 @@ def legacy_parts(GAME, ON, fails):
         p = Pad(pw, ON)
         check(p.ev("JSON.stringify(deviceView('settings'))") == va, 'settings: the Settings app differs with the switch on and no pad')
         check(p.ev(f'JSON.stringify({SV})') == sa, 'settings: the save differs with the switch on and no pad')
-        p.plug(); p.press('x'); p.log()
+        p.plug(); p.step(3)
+        check(p.ev("JSON.stringify(deviceView('settings'))") == va, 'settings: a pad connected but never pressed changed Settings')
+        p.press('x'); p.log()
         v = p.ev("deviceView('settings').blocks.map(b => b.text || (b.items || []).map(i => i.label).join('|'))")
         check(v[-1] == 'Controller settings', f'settings: with a pad seen, Settings should end with the Controller button: {v[-2:]}')
         check('pad' not in p.ev(SV), 'settings: a pad used but nothing changed wrote s.pad')
@@ -1882,6 +1884,15 @@ def legacy_parts(GAME, ON, fails):
         check(p.ev("padButtonFor('a')") == 'b' and p.ev("padButtonFor('b')") == 'a', 'settings: the swap should put confirm on B')
         p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'a' })"); p.step(2); p.press('rs'); p.step(2)
         check(p.ev("padButtonFor('a')") == 'rs' and p.ev("padButtonFor('rs')") == 'b' and p.ev('PAD_SET.swap') is True, f'settings: confirm onto RS with the swap on: a {p.ev("padButtonFor(\'a\')")}, rs {p.ev("padButtonFor(\'rs\')")}')
+        # a light squeeze of a trigger is not a press, whatever action it's on (confirm onto LT for this)
+        p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'a' })"); p.step(2); p.press('lt'); p.step(2)
+        check(p.ev("padButtonFor('a')") == 'lt', 'settings: confirm onto LT'); p.log()
+        p.js("Object.assign(window.__pads[0].buttons[6], { pressed: true, value: .3, touched: true })"); p.step(3); l = p.log()
+        p.js("Object.assign(window.__pads[0].buttons[6], { pressed: false, value: 0, touched: false })"); p.step(2)
+        check('a' not in l, f'settings: a light squeeze of LT (bound to confirm) pressed it: {l}')
+        p.btn('lt', .9); p.step(2); l = p.log(); p.btn('lt', 0); p.step(2)
+        check('a' in l, f'settings: LT squeezed past half way should confirm: {l}')
+        p.ev("deviceShow('padsettings'); deviceDo({ app: 'padsettings', do: 'bind', arg: 'a' })"); p.step(2); p.press('rs'); p.step(2)
         p.ev("deviceDo({ app: 'padsettings', do: 'bind', arg: 'view' })"); p.step(2); p.press('view'); p.step(2)
         check(p.ev("padButtonFor('view')") == 'view', 'settings: pressing an action\'s own button should keep it')
         for verb, val in [('dead', .32), ('walk', 'gentle'), ('zoom', 1.6), ('flip', True), ('turn', 'hold'), ('marks', 'off'), ('first', .8), ('every', 0), ('buzz', True), ('sticks', True)]:
@@ -1929,6 +1940,7 @@ def legacy_parts(GAME, ON, fails):
         check(p.ev('padSetDiff()') is None and 'pad' not in p.ev(SV) and p.ev('PAD_MAPK.join()') == p.ev('PAD_BTN.join()') and p.ev('PAD_DEAD.stick') == .22 and p.ev('PAD_REP.first') == .5 and p.ev('PAD_SET.sticks') is False and p.ev('PAD_REP.every') == .25,
               f'settings: Everything back to normal should leave nothing changed and nothing saved: {p.ev("[padSetDiff(), PAD_MAPK.join(), PAD_DEAD.stick, PAD_REP.first, PAD_REP.every]")} {list(p.ev(SV).keys())[:3]}')
         p.ev('localStorage.clear()'); p.close()
+
     # ---- CP5 (claude/controller-p5 4892a0b): a11y ----
     # P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
     # The names are the browser's own accessible names (CDP Accessibility.getPartialAXTree), not padSaid's guess; a name
@@ -2011,6 +2023,39 @@ def legacy_parts(GAME, ON, fails):
         for what, r in gaps.items(): fail(f'a11y: {what}: buttons with no name a screen reader can say: {r[:4]}')
         print(f'  a11y: {n} panels looked at for names, {sum(len(r) for r in gaps.values())} nameless')
         p.close()
+    # ---- CP4 (claude/controller-firstuse 3f6bb66, as merged in claude/controller fda82c1a): firstuse ----
+    # the first use (lead 27, PR9's note): a stick that drifts at connect is not a use; a firm push held a moment is, a press at once
+    def part_firstuse(pw):
+        p = Pad(pw, ON)
+        shape = "[PAD.used, PAD.lastUse > -1e9, document.body.classList.contains('pad'), document.querySelectorAll('style').length, document.body.children.length]"
+        p.plug(); p.step(2); s0 = p.ev(shape)
+        check(p.ev('PAD.listening') is False, 'firstuse: the touch hand-back listeners were added at hello, before any use')
+        pos0 = p.ev('[player.obj.position.x, player.obj.position.z]')
+        p.axes([.35, .12, -.3, .2]); p.step(45)                # past the dead zone, a gentle drift on both sticks for 1.5 s
+        pos1 = p.ev('[player.obj.position.x, player.obj.position.z]')
+        check(pos0 == pos1 and p.ev('player.steer') is None, f'firstuse: a drifting stick at connect walked the player: {pos0} -> {pos1}')
+        check(p.ev(shape) == s0 and s0[0] is False and s0[1] is False, f'firstuse: a drifting stick at connect counted as a use: {s0} -> {p.ev(shape)}')
+        view = "[camera.zoom, azT]"
+        p.ev('setZoom(padZoom0())'); v0 = p.ev(view)
+        p.btn('lt', .4); p.step(45); p.btn('lt', 0); p.step(1)  # a light, steady trigger for 1.5 s
+        check(p.ev('PAD.used') is False, 'firstuse: a light trigger counted as a use')
+        check(p.ev(view) == v0, f'firstuse: a light trigger before the first use moved the view: {v0} -> {p.ev(view)}')
+        p.axes([0, 0, 0, .37]); p.step(45); p.axes([0, 0, 0, 0]); p.step(1)   # the right stick drifting down for 1.5 s
+        check(p.ev(view) == v0, f'firstuse: a right-stick drift before the first use zoomed: {v0} -> {p.ev(view)}')
+        p.axes([0, 0, 1, 0]); p.step(3); p.axes([0, 0, 0, 0]); p.step(1)    # a 0.1 s push sideways: not a use, so no turn
+        check(p.ev(view) == v0 and p.ev('PAD.used') is False, f'firstuse: a short push before the first use turned the view: {v0} -> {p.ev(view)}')
+        p.axes([1, 0, 0, 0]); p.step(3); u = p.ev('PAD.used')   # a firm push, 0.1 s: not yet
+        p.step(3); v = p.ev('PAD.used'); p.axes([0, 0, 0, 0]); p.step(1)   # 0.2 s: a use
+        check(u is False and v is True and 'pad' in p.ev('document.body.className'), f'firstuse: a firm push should count after about 0.15 s: {u} {v}')
+        check(p.ev('PAD.listening') is True, 'firstuse: the first use should add the touch hand-back listeners')
+        # handed back to touch: the drift doesn't take it back; a press does, at once
+        p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))")
+        p.axes([.35, .12, 0, 0]); p.step(30); check(p.ev('PAD.used') is False, 'firstuse: a drifting stick took the screen back from touch')
+        p.axes([0, 0, 0, 0]); p.btn('b'); p.step(1); check(p.ev('PAD.used') is True, 'firstuse: a press should count at once'); p.btn('b', 0); p.step(1)
+        # in use: a gentle stick keeps it in use (lastUse moves on)
+        t0 = p.ev('PAD.lastUse'); p.axes([.35, 0, 0, 0]); p.step(5); p.axes([0, 0, 0, 0]); p.step(1)
+        check(p.ev('PAD.lastUse') > t0, 'firstuse: in use, a gentle stick should still count')
+        p.close()
     return locals()
 def legacy(name):
     """an old-shape part as a part of this check: GAME and ON are written from the build given (the switch-on copy, or
@@ -2025,7 +2070,7 @@ def legacy(name):
     return run
 OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['deck'], 'pick': ['pick'], 'panels': ['panels'], 'api': ['panels'],
              'lists': ['panels'], 'tiles': ['games'], 'disc': ['games'], 'screens': ['panels'], 'marks': ['marks'], 'touch3': ['marks'],
-             'drop': ['marks'], 'settings': ['settings'], 'a11y': ['panels', 'pick']}
+             'drop': ['marks'], 'settings': ['settings'], 'a11y': ['panels', 'pick'], 'firstuse': ['base']}
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
