@@ -1041,8 +1041,10 @@ def part_games(pw, src, tag):
 STEER = r"""((gx, gz) => { const s = player.here(), g = nearestOpen(gx, gz, player); if (!s || !g) return null;
   const pp = player.obj.position, gp = cellPos(...g); if (Math.hypot(gp.x - pp.x, gp.z - pp.z) < .45) return { there: true };
   const path = findPath(s, g, null, player); if (!path || !path.length) return { nopath: true };
-  const w = cellPos(...path[Math.min(1, path.length - 1)]), a = pp.clone().project(camera), b = w.clone().project(camera);
-  const dx = (b.x - a.x) * innerWidth, dy = -(b.y - a.y) * innerHeight, d = Math.hypot(dx, dy) || 1; return { x: dx / d, y: dy / d }; })"""
+  // the stick for that way, by the view's own axes (up on the stick is away from the camera: right (cos az, -sin az),
+  // forward (-sin az, -cos az)); the way it looks on screen is squashed by the camera's tilt, so it isn't used
+  const w = cellPos(...path[Math.min(1, path.length - 1)]), dx = w.x - pp.x, dz = w.z - pp.z, d = Math.hypot(dx, dz) || 1;
+  const x = (dx * Math.cos(az) - dz * Math.sin(az)) / d, y = (dx * Math.sin(az) + dz * Math.cos(az)) / d; return { x, y }; })"""
 def walk_to(r, x, z, frames=900):
     for k in range(frames // 6):
         st = r.ev(f"({STEER})({x}, {z})")
