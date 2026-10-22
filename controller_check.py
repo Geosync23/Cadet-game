@@ -364,7 +364,7 @@ class Sweep:
         self.pw, self.src, self.tag = pw, src, tag
         self.states = {}          # signature -> {'path': [...], 'items': [...], 'dialogs': [...]}
         self.pressed = set(); self.presses = 0; self.reloads = 0; self.lost = []; self.capped = set(); self.tapped = set()
-        self.cands = None; self.opened = set(); self.seen_keys = set()
+        self.cands = None; self.opened = set(); self.seen_keys = set(); self.groups = {}
         self.r = None
     def load(self):
         if self.r: self.r.reload()
@@ -445,6 +445,11 @@ class Sweep:
         for it in todo:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
+            # at most two of each kind of thing are pressed (the same container and class: Tiles' 36 squares, a list's
+            # rows); every one of them is still listed, and the pad half must reach every one
+            grp = re.sub(r'\[.*\](#\d+)?$', '', it['k'])
+            if not it['k'].startswith('@') and grp != it['k'] and self.groups.get(grp, 0) >= 2: continue
+            self.groups[grp] = self.groups.get(grp, 0) + 1
             self.pressed.add(it['k'])
             cur = self.scan(); need = [it['k']] if not it['k'].startswith('@') else []
             if need and it['k'] not in {i['k'] for i in self.inner(cur)}: self.back_to(list(path), sg, need)
