@@ -65,6 +65,9 @@
 - {thing} to {where}
 == haul.goal.return
 - Cart back to its dock
+// FX3: a dropped job's part still in your hands (15b's arrow; a cart won't take full hands)
+== job.putback
+- Put the {part} back: main storage
 == stock.title
 - Stocktake
 == stock.look

@@ -152,7 +152,7 @@ with sync_playwright() as pw:
     check(s['goal'] and s['goal'].startswith('Repair the'), 'clearGoal: back to the job')
     g.ev("goToDeck(5)"); g.step(3); tap('Job board'); g.step(150)
     g.ev("document.querySelector('#ixBoardL .ixjob button').click()"); g.step(3); s = st()
-    check(not g.ev("myJob()") and s['goal'] in NO_JOB_GOALS, f'Drop it: no job and the pointer hides (or shows the clock or the board) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
+    check(not g.ev("myJob()") and (s['goal'] in NO_JOB_GOALS or (s['goal'] or '').endswith('back: main storage')), f'Drop it: no job and the pointer hides (or shows the clock or the board, or, with its part still in your hands, where to put it back: FX3) ({g.ev("JSON.stringify(myJob())")}, {s["goal"]}, board {s["board"]}, {s["toast"][:80]})')
     g.ev("ixBoard.close(); SHIP.player.carry = []")
     # a cart run (section 15's cartTap): the pointer starts at the Cart bay's docks
     if g.ev("typeof jobStops === 'function'"):
@@ -343,6 +343,41 @@ with sync_playwright() as pw:
     print('   draw-call peak while doing things:', peak)
     check(peak < BUDGET, f'draw calls under {BUDGET} ({peak})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FX3 (lead 28, from AR1's play of 0.64.15): (1) a calibrate chore on the galley plant: its arrow says "Calibrate", and a real
+# tap at the arrow's pin starts it (the cold store's chiller in front used to take the tap: "in good order"); (2) a dropped
+# job's part left in your hands: the arrow says to put it back (a cart won't take full hands), a shelf tap does, then the cart
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof jobsOn === 'function' && jobsOn() && !!machineById('3-galleyplant-1') && !!panelPlace('3-galleyplant-1')"):
+        print('== FX3: calibrating the galley plant, a part left in your hands')
+        lab = g.ev(r"""(() => { setShipNow(1440 * 2 + 9 * 60); machinesNow(); const t = shipNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          const m = machineById('3-galleyplant-1');
+          SHIP.jobs.push({ id: 'fx3-cal', machine: m.id, deck: 3, room: m.room, kind: 'chore', chore: 'calibrate', title: 'Calibrate the galley plant', tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open', stops: [panelStop(m, 15, 'calibrate')] }); MACH_REV++;
+          claimJob('fx3-cal'); goToDeck(3); const s = placeSpot(panelPlace(m.id)); player.obj.position.set(s.x - .5, 0, s.z + 1.2); player.stop(); return (ixJobStep() || {}).label; })()""")
+        g.step(120)
+        xy = g.ev("(() => { const s = placeSpot(panelPlace('3-galleyplant-1')), v = new THREE.Vector3(s.x, 0.05, s.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })()")
+        g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(150)
+        cal = g.ev("JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId, document.getElementById('tx').textContent])")
+        print('   calibrate:', lab, cal[:160])
+        check(lab == 'Calibrate the galley plant', f'the calibrate chore\'s arrow says Calibrate ({lab})')
+        check('"job","3-galleyplant-1-panel"' in cal, f'a tap at the arrow\'s pin starts the calibration, not the chiller in front ({cal})')
+        pb = g.ev(r"""(() => { actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-cal'); SHIP.player.work = null; SHIP.player.carry = ['relay']; const a = ixJobStep() || {};
+          const t = shipNow(); SHIP.jobs.push({ id: 'fx3-cart', machine: null, deck: 3, kind: 'restock', cargo: 'stores', urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open' }); MACH_REV++;
+          const ok = claimJob('fx3-cart'), b = ixJobStep() || {}; goToDeck(5); return [a.label, a.place, ok, b.label]; })()""")
+        g.step(5)
+        g.ev(TAP + "({ title: 'Lights' })")
+        for k in range(80):
+            g.step(30)
+            if k > 1 and not g.ev("!!ACT || player.path.length > 0"): break
+        after = g.ev("[SHIP.player.carry.slice(), (ixJobStep() || {}).label]")
+        print('   a part in your hands:', pb, after)
+        check(pb[0] == 'Put the relay back: main storage' and pb[1] == '5-parts-1', f'no job and a relay in hand: put it back ({pb})')
+        check(pb[2] and pb[3] == 'Put the relay back: main storage', f'a cart run taken with the relay in hand: put it back first ({pb})')
+        check(after[0] == [] and after[1] and 'back: main storage' not in after[1], f'a shelf tap puts it back, then the cart run\'s own arrow ({after})')
+        g.ev("SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'fx3-cart'); SHIP.player.carry = []")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
 # a fresh game (0.37.6; strict from 0.37.7, with section 17's 0.33.32; the user's "the job board never has any jobs"): every hour of Day 1's day shift has a job you
