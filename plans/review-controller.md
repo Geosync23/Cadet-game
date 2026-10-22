@@ -333,3 +333,6 @@ guideGoal re-checks the pick's done() and picks again at once; a direct goal cov
 guideList) and clears GUIDE.shown; counting per ask (GUIDE.counted, cleared on drop) so covered-then-uncovered counts
 once; a repeat of the toast on screen shows again (re-timed) when nothing is waiting. Toast overflow kept (left to the
 migration pieces; o.now exists). Mutants refreshed (ar2_*). Runs queued (queue 13, after C's).
+
+## P5 9325b3f (CP5): RV5 nit 1 fixed (padNameIt goes on to the next PAD_NAMES entry when one gives no name); one line
+inside padNameIt (runs only with a pad in use). The PASS carries over to 9325b3f. Nit 2 kept and written down by CP5.
