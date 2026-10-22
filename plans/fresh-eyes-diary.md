@@ -149,3 +149,31 @@ What worked well on Day 0: signing the manifest; Zeke's chat on the walk (warm a
 51. **14:33-14:53, fitting the lamp in the lift lobby.** Following the arrow I walked through the lift lobby into the haulway and the shuttle bay (the arrow ring was at the screen edge, and holding toward it kept me walking). The pin for the lamp was on the floor of the lift lobby. *Confusing.*
 
 (Note for the lead: at 14:53 my test browser hit its 2-hour limit and restarted; the game reloaded its 14:00 save. "Welcome back. Day 1, Monday 14:00." I'm back to "Fetch a lamp". Saving only on the hour lost 53 ship minutes of play, including a lamp I had picked up. A real phone that closes the tab would lose the same.)
+
+52. **14:00-16:35, the second lamp: the shelf search started without telling me.** After the reload I went back to the Lights shelf. Again people in front of it took my taps (Signe Moreau, Marta Soto, others). I thought nothing had worked and waited for the end of the shift (real time, no skipping). At 16:35 the screen said "You take a lamp." So one of my taps had started the search, but the only sign was the small progress line under Tracked, which I'd missed under the bubbles. *Confusing.*
+
+53. **16:35-16:51, couldn't fit the lamp.** The pin "Replace a lamp: lift lobby" sits on the floor of the lift lobby. Tapping it walked me through the lobby into the haulway; no "Replace" button showed (on Day 1 the relay job gave me a "Repair" button when I stood in the right spot). I ran out of shift. The job is still in my hands. *Blocks me* (for this job).
+
+54. **16:51, the clock-out arrow came on with my job unfinished.** Arrow: "Clock out at the time clock"; Zeke: "Clock out first, then come to the beam. They're waiting for you." Clear, and it came before 17:00. Good. (`d1-26-clock-out-arrow.png`)
+    - My tap on the arrow ring hit Pell Okafor and opened his card; my next tap landed on "Talk a while", which started a 14-minute talk by accident. The arrow ring and people's cards overlap at the bottom of the screen. *Confusing.*
+
+55. **17:00-17:16, couldn't clock out: the whole crew was standing on the clock for "Name on the beam".** The pin was on a person each time; three taps opened Works technicians' cards. At 17:11 a banner "Name on the beam is starting, Works bay, Deck 5 · GO THERE" (six minutes after its 17:05 start) appeared over the crowd; by the time I tapped "Go there" it had gone and my tap opened Maeve Volkov's card. I never clocked out and never saw the beam. *Blocks me.* (`d1-27-beam-crowd-on-clock.png`)
+
+**Stopped here (memory), Day 1 Monday 17:16, still clocked in, holding a lamp.** Day 2 not played.
+
+---
+
+## Top 10, in plain words, for the user
+
+1. **I couldn't work out how to call the lift.** Tapping the lift does nothing; only a tiny keypad beside the door works, and people or speech bubbles often cover it. It cost me 20+ minutes four times, and once I climbed the ladder to the wrong deck by mistake. A "Lift" button when you're in the lift lobby, or making the whole lift door tappable, would fix most of my lost time.
+2. **People standing in front of things take your taps.** At the shelves, the workbench, the time clock, the seats and the job board, whoever is in front gets the tap and their card opens. Fetching one relay took 45 minutes. Taps near the pinned thing should go to the thing.
+3. **The arrow's pin often sits on the floor near a thing, not on it.** The job board's pin was on empty floor between desks; the lamp's on the lobby floor; the clock's on whoever stood there. When I tapped the pin, I just walked there.
+4. **The first evening goes wrong.** The tour stalls after Zeke hands you the device, so you miss the welcome dinner and Calder's first Mail is "Missed you at dinner".
+5. **Eating on Day 0 didn't work.** I took a tray twice, sat down twice and never ate; the tray vanished. (On Day 1 a bench worked, and I can't tell what was different.) Went to bed hungry.
+6. **I was late on my first morning.** The clock is hard to find and Calder stands on it; 18 minutes to clock in, marked late. The Monday briefing also started while I was walking, so I came in at line 5 of 17.
+7. **The camera turns as you walk.** "Walk toward the arrow" keeps changing direction, and I walked into walls. Rotate was the most useful button in the game, but nothing tells you to use it.
+8. **Some messages never tell you what to do next.** The bunk wouldn't let me sleep before 21:00 and didn't say why; the job's "Repair" button only appears if you stand in exactly the right spot; "+17 Power" and "+2 Lift & doors" on the turn-in card aren't explained.
+9. **Small words a player sees at once:** the briefing speaker shows as "tech2"; "zeke Torres" and "works Chief's office" with small letters; "The light relays is running"; item descriptions printed twice ("Seats eight... Seats eight..."); the first message says I'm waking in Bunk 1 while I'm on the shuttle.
+10. **The "+" button top right is New game.** It looks like "add" or "more", and one more tap would have wiped my game.
+
+What worked well: Zeke's company and lines, the people cards, the device's home screen and Mail, Zeke's "How a day runs" Mail (I'd show it on Day 0), the Settling in "Go there" buttons, the shower and toilet, the lift's deck list with the gold "TRACKED" badge, the job board, the "Job taken / Follow the marker" cards, the progress line under Tracked.

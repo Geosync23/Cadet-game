@@ -6,7 +6,9 @@
 
 **Scope given.** First: Pillar 5 Steps 1-2, Days 0-8. Then the lead narrowed it (2026-10-22): Day 0 to the end of Day 2 only, then push the diary, send the top points and stop. The full Days 0-8 run comes later on the build with the Pillar 5 fixes (FX1-FX3) and the new arrows switched on; the lead will wake a session for it.
 
-**Where I got to.** See the diary. Day 0 complete; Day 1 played from 06:00 to about 14:30 in real time, then waited (in real time) for the end of the shift. Day 2 not played (memory).
+**Where I got to.** See the diary. Day 0 complete; Day 1 played 06:00-17:16 (0.64.15), all in real time, no clock skips. Stopped at 17:16 still clocked in, holding a lamp (the lamp job unfinished), the crew gathered for Name on the beam. Day 2 not played (memory). The top 10 is at the end of the diary.
+
+**Screenshots:** the repo's .gitignore drops *.png; add them with `git add -f` (I shrank them to 256-colour PNGs first).
 
 ## How I ran the game (so the next player can repeat it)
 
