@@ -61,14 +61,22 @@ FAKEPAD = r"""
   const fire = (type, p) => { const e = new Event(type); Object.defineProperty(e, 'gamepad', { value: copy(p) }); window.dispatchEvent(e); };
   window.__pads = {
     reads: 0,
-    plug(i, o) { slots[i] = mk(i, o || {}); fire('gamepadconnected', slots[i]); },
+    // o.hidden: the browser keeps the pad to itself (getGamepads gives null, no event) until a button is first pressed,
+    // then shows it and says hello in that same moment, as Chrome does (mode a); otherwise it's there at once (mode b)
+    plug(i, o) { slots[i] = mk(i, o || {}); slots[i].hidden = !!(o && o.hidden); if (!slots[i].hidden) fire('gamepadconnected', slots[i]); },
     unplug(i) { const p = slots[i]; if (!p) return; p.connected = false; slots[i] = null; fire('gamepaddisconnected', p); },
     // b: { index: value 0..1 } (pressed above .5 for the face buttons, any value for the triggers), a: { index: value }
     set(i, b, a) { const p = slots[i]; if (!p) return; for (const k in (b || {})) { const v = +b[k]; p.buttons[k] = { pressed: v > .1, touched: v > 0, value: v }; }
+      if (p.hidden && p.buttons.some(x => x.value > 0)) { p.hidden = false; fire('gamepadconnected', p); }
       for (const k in (a || {})) p.axes[k] = +a[k]; p.timestamp = performance.now(); },
     clear(i) { const p = slots[i]; if (!p) return; p.axes.fill(0); p.buttons.forEach((b, k) => p.buttons[k] = { pressed: false, touched: false, value: 0 }); p.timestamp = performance.now(); },
   };
-  Object.defineProperty(Navigator.prototype, 'getGamepads', { configurable: true, value: function () { window.__pads.reads++; return slots.map(p => p && copy(p)); } });
+  Object.defineProperty(Navigator.prototype, 'getGamepads', { configurable: true, value: function () { window.__pads.reads++; return slots.map(p => p && !p.hidden ? copy(p) : null); } });
+  window.__padPlug = (i, id, mapping) => { slots[i] = mk(i, { id, mapping }); return true; };
+  window.__padHello = i => { fire('gamepadconnected', slots[i]); return true; };
+  window.__padUnplug = i => { window.__pads.unplug(i); return true; };
+  window.__padBtn = (i, k, v) => { window.__pads.set(i, { [k]: v }); return true; };
+  window.__padAxes = (i, a) => { window.__pads.set(i, null, Object.fromEntries(a.map((v, k) => [k, v]))); return true; };
   if (CFG.plug) { const go = () => window.__pads.plug(0, CFG.plug); document.readyState === 'loading' ? addEventListener('DOMContentLoaded', go) : go(); }
 })();
 """
@@ -82,9 +90,12 @@ def pad_switch(src):
     return None if not m else m.group(1) == 'true'
 def with_switch(src, on):
     return re.sub(r'(\bconst PAD_ON\s*=\s*)(true|false)\b', r'\g<1>' + ('true' if on else 'false'), src, count=1)
+# the packages, from section 26's PAD_BUILT line; until it has one, found from section 26's own tables (and said so)
+FOUND_BY = [('base', r'\bconst PAD_ON\s*='), ('deck', r'\bconst PAD_DECK\s*='), ('pick', r'\bconst PAD_PICK\s*=')]
 def pad_built(src):
     m = re.search(r'\bconst PAD_BUILT\s*=\s*\[([^\]]*)\]', src)
-    return set() if not m else set(re.findall(r"['\"](\w+)['\"]", m.group(1)))
+    if m: return set(re.findall(r"['\"](\w+)['\"]", m.group(1))), 'PAD_BUILT'
+    return {k for k, rx in FOUND_BY if re.search(rx, src)}, 'found from the code (no PAD_BUILT line)'
 
 ok = True
 RESULTS = []   # (part, 'OK' | 'FAIL' | 'not yet', note)
@@ -96,12 +107,12 @@ def check(cond, msg):
 QUIET = '#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important}'
 class Run:
     """One page of the game with the pretend controller in a given mode. extra: JS put into the game's scope at load."""
-    def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None):
+    def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None, touch=False):
         self.errors = []
         # a browser of its own for every run, as cadet_test does: a second page in one browser sometimes drew a speech
         # bubble's layer differently (the same styles and DOM, different pixels), a browser quirk, not the game
         self.br = br.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=ARGS_GL)
-        self.ctx = self.br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1)
+        self.ctx = self.br.new_context(viewport={'width': w, 'height': h}, device_scale_factor=1, has_touch=touch)
         self.page = self.ctx.new_page()
         self.page.on('console', lambda m: m.type in ('error', 'warning') and self.errors.append(f'{m.type}: {m.text}'))
         self.page.on('pageerror', lambda e: self.errors.append(f'pageerror: {e}'))
@@ -162,10 +173,10 @@ CENSUS = r"""
 """
 PAGE_STATE = r"""(() => {
   let h = 0; const mix = s => { for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; };
-  let n = 0; for (const e of document.querySelectorAll('*')) { n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '') + '|' + (e.hidden ? 'h' : '') + (e === document.activeElement ? 'F' : '')); for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
+  let n = 0; for (const e of document.querySelectorAll('*')) { n++; mix(e.tagName + '|' + e.id + '|' + e.className + '|' + (e.getAttribute('style') || '') + '|' + (e.hidden ? 'h' : '') + (e === document.activeElement ? 'F' : '')); if (e.tagName !== 'SCRIPT' && e.tagName !== 'STYLE') for (const c of e.childNodes) if (c.nodeType === 3) mix(c.textContent); }
   let rules = 0; for (const s of document.styleSheets) { try { rules += s.cssRules.length; } catch (e) {} }
   const ls = []; try { for (let i = 0; i < localStorage.length; i++) { const k = localStorage.key(i); ls.push(k + '=' + localStorage.getItem(k).length); } } catch (e) {}
-  return { elements: n, domHash: h, sheets: document.styleSheets.length, rules, storage: ls.sort(), listeners: window.__census.counts, focus: document.activeElement && (document.activeElement.id || document.activeElement.tagName) };
+  return { elements: n, domHash: h, sheets: document.styleSheets.length, rules, storage: ls.sort(), listeners: Object.fromEntries(Object.entries(window.__census.counts).filter(([k]) => k !== 'gamepadconnected' && k !== 'gamepaddisconnected')),   // the two waiting listeners are allowed at load focus: document.activeElement && (document.activeElement.id || document.activeElement.tagName) };
 })()"""
 GAME_STATE = r"""(() => ({ seed, walkers: walkers.map(w => [w.spec.name, Math.round(w.obj.position.x * 1e4), Math.round(w.obj.position.z * 1e4), Math.round(w.obj.rotation.y * 1e3), w.goal]),
   player: [Math.round(player.obj.position.x * 1e4), Math.round(player.obj.position.z * 1e4), player.deck], time: [SHIP.time.day, SHIP.time.min],
@@ -210,13 +221,11 @@ def diff_state(a, b, path=''):
         return out
     return [f'{path}: {str(a)[:90]} -> {str(b)[:90]}']
 
-IDLE_MODES = [('none', 'no pad again (the check is steady)', None), ('api', 'the pad API with no pad', None), ('idle', 'a pad plugged in, never pressed', {}), ('drift', 'a drifting pad, never pressed', {'drift': True})]
+IDLE_MODES = [('none', 'no pad again (the check is steady)', None), ('api', 'the pad API with no pad', None), ('hidden', 'a drifting pad the browser keeps hidden until a press (mode a), never pressed', {'hidden': True, 'drift': True}), ('idle', 'a pad there at load (mode b), never pressed', {}), ('drift', 'a drifting pad there at load (mode b), never pressed', {'drift': True})]
 def part_idle(br, src, tag):
     """FAIL lines for: every idle mode (and PAD_ON on, if there is a switch) against the game with no pad."""
     fails = []
-    builds = [('off', src)]
-    sw = pad_switch(src)
-    if sw is not None: builds = [('off', with_switch(src, False)), ('on', with_switch(src, True))]
+    builds = both_builds(src); sw = pad_switch(src)
     print(f'  PAD_ON: {"no switch in this build" if sw is None else ("on" if sw else "off")}')
     r = Run(br, builds[0][1], f'{tag}_base'); base, bshots = scenario(r, f'{tag}_base'); r.close()
     for bname, bsrc in builds:
@@ -236,30 +245,37 @@ def save_text(br, src, tag, mode, plug, frames=200):
     # the whole of storage, not only the save: a controller's own key would be a change to what's kept too
     r.step(frames); txt = r.ev("saveGame(), JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(k => [k, k === SAVE_KEY ? JSON.parse(localStorage.getItem(k)) : localStorage.getItem(k)])))"); r.close()
     return txt
+def both_builds(src):
+    # the file as given with its switch off, and a copy with it on; a build with no switch is tested as it is
+    if pad_switch(src) is None: return [('as given', src)]
+    return [('off', with_switch(src, False)), ('on', with_switch(src, True))]
 def part_save(br, src, tag):
     fails = []
-    base = save_text(br, src, f'{tag}_save_none', 'none', None)
+    builds = both_builds(src)
+    base = save_text(br, builds[0][1], f'{tag}_save_none', 'none', None)
     print(f'  storage with no pad (the save and everything else kept): {len(base or "")} bytes')
     if not base: return ['no save was written with no pad']
-    for mode, what, plug in IDLE_MODES[1:]:
-        t = save_text(br, src, f'{tag}_save_{mode}', mode, plug)
-        same = t == base
-        print(f'  {what}: {"byte-identical" if same else "DIFFERENT"} ({len(t or "")} bytes)')
-        if not same:
-            a, b = json.loads(base), json.loads(t or '{}')
-            fails.append(f'save with {what} differs: ' + '; '.join(diff_state(a, b)[:4]))
+    for bname, bsrc in builds:
+        for mode, what, plug in ([] if bname != 'on' else [('none', 'no pad', None)]) + IDLE_MODES[1:]:
+            t = save_text(br, bsrc, f'{tag}_save_{bname}_{mode}', mode, plug)
+            same = t == base
+            print(f'  PAD_ON {bname}, {what}: {"byte-identical" if same else "DIFFERENT"} ({len(t or "")} bytes)')
+            if not same:
+                a, b = json.loads(base), json.loads(t or '{}')
+                fails.append(f'PAD_ON {bname}, {what}: storage differs: ' + '; '.join(diff_state(a, b)[:4]))
     return fails
 
 def part_calls(br, src, tag):
     fails = []
     for (name, w, h) in [('phone', 390, 844), ('wide', 1280, 800)]:
         got = {}
-        for mode, plug in [('none', None), ('idle', {}), ('drift', {'drift': True})]:
-            r = Run(br, src, f'{tag}_calls_{name}_{mode}', mode=mode, plug=plug, w=w, h=h)
+        on = both_builds(src)[-1][1]   # the switch on (the off build is idle's)
+        for mode, plug in [('none', None), ('hidden', {'hidden': True, 'drift': True}), ('idle', {}), ('drift', {'drift': True})]:
+            r = Run(br, on, f'{tag}_calls_{name}_{mode}', mode=mode, plug=plug, w=w, h=h)
             r.step(60); g = r.ev(GAME_STATE); r.close()
             got[mode] = [g['calls'], g['tris'], g['mem']['geometries'], g['mem']['textures'], g['scene']]
         print(f'  {name} {w}x{h}: draw calls, triangles, geometries, textures, scene objects: ' + ', '.join(f'{m} {v}' for m, v in got.items()))
-        for m in ('idle', 'drift'):
+        for m in ('hidden', 'idle', 'drift'):
             if got[m] != got['none']: fails.append(f'{name}: {m} pad {got[m]} vs no pad {got["none"]}')
         if got['none'][0] >= 450: fails.append(f'{name}: {got["none"][0]} draw calls, the budget is 450')
     return fails
@@ -303,15 +319,37 @@ SCAN = r"""(() => {
     if (k === 4 && [...cand.keys()].some(o => o !== e && o.contains(e))) continue;
     const at = vis(e); if (!at) continue;
     let a = e, path = ''; while (a && a !== document.body && !a.id) { a = a.parentElement; }
-    const own = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40);
-    let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + own + ']';
+    const own = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40), lab = own.replace(/\d+/g, 'N');   // no digits in keys: a clock or a count isn't a new thing
+    let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
     const d = e.closest('[role=dialog],[aria-modal=true],.lift,.device,dialog');
     out.push({ k: key, x: at[0], y: at[1], why: ['', 'tag', 'click', 'listener', 'cursor'][k], dlg: d ? (d.id || d.className) : null, label: own });
   }
   const dlg = [...document.querySelectorAll('[role=dialog],[aria-modal=true],.lift,.device,dialog')].filter(e => !e.closest('[hidden]') && e.getBoundingClientRect().width > 0 && (!e.checkVisibility || e.checkVisibility({ opacityProperty: true, visibilityProperty: true }))).map(e => e.id || e.className);
-  return { items: out, dialogs: dlg, url: location.href };
+  return { items: out, dialogs: dlg, url: location.href, deck: typeof player !== 'undefined' ? player.deck : null };
 })()"""
+
+# The deck's own tappable things, read from what section 11's tap() reads: the items (ITEMS, each with its hit mesh), the
+# crew (DECK_CREW, tapCrew), the lift doors and the closed doors. One of each name (the same kind of thing opens the same
+# kind of panel). Then a tap on one: stand beside it, tap where it is on screen, and let the game run until it settles.
+# Panel candidates in the page as loaded: hidden children of body (hidden, or display none) that are dialogs or hold
+# something pressable or a heading. Each must be seen open in the sweep, or be on NOT_FROM_NEW_GAME with a reason.
+CANDS = r"""(() => [...document.body.children].filter(e => (e.hidden || getComputedStyle(e).display === 'none') && e.id &&
+  (e.matches('[role=dialog],[aria-modal=true],dialog') || e.querySelector('button,input,select,textarea,a[href],[role=button],h1,h2,h3'))).map(e => e.id))()"""
+OPEN_NOW = r"""((ids) => ids.filter(id => { const e = document.getElementById(id); if (!e || e.hidden) return false; const b = e.getBoundingClientRect();
+  return b.width > 0 && b.height > 0 && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden'; }))"""
+NOT_FROM_NEW_GAME = {}   # id: the reason it can't open in a new game at a test URL (filled as the sweep finds them, each with a reason)
+DECK_TARGETS = r"""(() => { const out = [], seen = new Set(), v = new THREE.Vector3();
+  const add = (name, x, y, z) => { if (seen.has(name)) return; seen.add(name); out.push({ name, x, y, z }); };
+  for (const it of ITEMS) { if (!it.hit) continue; it.hit.getWorldPosition(v); add('item:' + it.t, v.x, v.y, v.z); }
+  if (typeof DECK_CREW !== 'undefined') for (const a of DECK_CREW) { if (a.x !== undefined) { add('crew', a.x, 1.1, a.z); break; } }
+  for (const d of DOOR_OBJS) if (d.e.type === 'lift') { add('lift door', d.e.cx, 1, d.e.cz); break; }
+  for (const k in (typeof CLOSED_DOORS !== 'undefined' ? CLOSED_DOORS : {})) { const e = EDGES.get(k); if (e) add('closed door:' + (CLOSED_DOORS[k].t || k), e.cx, 1, e.cz); }
+  return out; })()"""
+TAP_TARGET = r"""((t) => { const c = nearestOpen(t.x, t.z, player); if (!c) return null; player.stop(); player.steer = null;
+  player.obj.position.copy(cellPos(...c)); target.copy(player.obj.position).setY(.7); return true; })"""
+WHERE = r"""((t) => { let x = t.x, z = t.z; if (t.name === 'crew' && typeof DECK_CREW !== 'undefined') { const a = DECK_CREW.find(a => a.x !== undefined); if (a) { x = a.x; z = a.z; } }
+  const v = new THREE.Vector3(x, t.y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight, Math.abs(v.x) < .95 && Math.abs(v.y) < .95]; })"""
 
 class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
@@ -322,21 +360,39 @@ class Sweep:
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
         self.states = {}          # signature -> {'path': [...], 'items': [...], 'dialogs': [...]}
-        self.pressed = set(); self.presses = 0; self.reloads = 0; self.lost = []
+        self.pressed = set(); self.presses = 0; self.reloads = 0; self.lost = []; self.capped = set(); self.tapped = set()
+        self.cands = None; self.opened = set()
         self.r = None
     def load(self):
         if self.r: self.r.reload()
         else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
         self.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); self.r.step(20); self.reloads += 1
-    def scan(self): return self.r.ev(SCAN)
+    def scan(self):
+        sc = self.r.ev(SCAN)
+        if self.cands is None: self.cands = self.r.ev(CANDS)
+        self.opened |= set(self.r.ev(f"({OPEN_NOW})({json.dumps(self.cands)})"))
+        return sc
     BACK = re.compile(r'^(back|close|stay here|not yet|cancel|done|leave|no|×|✕|x)$', re.I)
     @staticmethod
     def inner(sc):
         # with a panel open, its own things; the screen's edge buttons are pressed from the deck only
         return [i for i in sc['items'] if i['dlg']] if sc['dialogs'] else sc['items']
     @classmethod
-    def sig(cls, sc): return (tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc))))
+    def sig(cls, sc): return (sc.get('deck'), tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc))))
+    def deck_tap(self, key):
+        name = key[len('@tap:'):]
+        t = next((t for t in self.r.ev(DECK_TARGETS) if t['name'] == name), None)
+        if not t or not self.r.ev(f"({TAP_TARGET})({json.dumps(t)})"): return False
+        self.r.step(6); x, y, on = self.r.ev(f"({WHERE})({json.dumps(t)})")
+        if not on: return False
+        self.r.page.mouse.click(x, y); self.presses += 1
+        for _ in range(15):   # up to 5 s of game: a walk to it, then whatever it opens
+            self.r.step(10)
+            if self.r.ev(SCAN)['dialogs']: break
+        return True
     def press(self, sc, key):
+        if key.startswith('@deck:'): self.r.ev(f"goToDeck({int(key[6:])})"); self.r.step(40); return True
+        if key.startswith('@tap:'): return self.deck_tap(key)
         it = next((i for i in sc['items'] if i['k'] == key), None)
         if not it: return False
         self.r.page.mouse.click(it['x'], it['y']); self.r.step(8); self.presses += 1
@@ -364,9 +420,19 @@ class Sweep:
         if sg in self.states: return
         self.states[sg] = {'path': list(path), 'items': self.inner(sc), 'dialogs': sc['dialogs']}
         print(f'    state {len(self.states)}: {" > ".join(path) or "(the deck)"}: {len(self.inner(sc))} things, {self.presses} presses, {self.reloads} loads', flush=True)
-        if depth >= self.MAX_DEPTH: return
-        for it in self.inner(sc):
-            if self.presses >= self.MAX_PRESSES: return
+        if depth >= self.MAX_DEPTH:
+            if self.inner(sc): self.capped.add(f'depth {self.MAX_DEPTH} reached at {" > ".join(path)}')
+            return
+        todo = list(self.inner(sc))
+        if not sc['dialogs'] and all(not k.startswith('@tap:') for k in path):
+            # on a deck: its tappable things too (each name once in the whole sweep), then the other decks
+            for t in self.r.ev(DECK_TARGETS):
+                if t['name'] not in self.tapped: self.tapped.add(t['name']); todo.append({'k': '@tap:' + t['name']})
+            if not path:
+                for n in self.r.ev("(typeof DECK_ORDER !== \"undefined\" ? DECK_ORDER : Object.keys(DECKS).map(Number)).filter(n => n !== player.deck)"):
+                    todo.append({'k': f'@deck:{n}'})
+        for it in todo:
+            if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if (sg, it['k']) in self.pressed or (it['k'] in self.SKIP and path): continue
             self.pressed.add((sg, it['k']))
             cur = self.scan()
@@ -374,7 +440,7 @@ class Sweep:
             if not self.press(self.scan(), it['k']): continue
             after = self.scan()
             if after['url'] != sc['url']: self.lost.append('left the page: ' + it['k']); self.replay(list(path)); continue
-            if self.sig(after) != sg:
+            if self.sig(after) != sg or it['k'].startswith('@deck:'):
                 self.crawl(tuple(path) + (it['k'],), depth + 1)
                 self.back_to(list(path), sg)
     def run(self):
@@ -387,11 +453,18 @@ def part_reach(pw, src, tag):
     keys = sorted({i['k'] for st in sw.states.values() for i in st['items']})
     dl = sorted({d for st in sw.states.values() for d in st['dialogs']})
     print(f'  by touch: {len(sw.states)} screen states, {len(keys)} different pressable things, {sw.presses} presses, {sw.reloads} loads; panels seen: {", ".join(dl)}')
+    if sw.capped: print(f'  INCOMPLETE: {"; ".join(sorted(sw.capped))}')
     if sw.lost: print(f'  could not get back from: {"; ".join(sw.lost[:6])}')
     for st in list(sw.states.values())[:200]:
         print(f'    {" > ".join(st["path"]) or "(the deck)"}: {len(st["items"])} things' + (f' in {", ".join(st["dialogs"])}' if st['dialogs'] else ''))
     REACH_INVENTORY.update(states=sw.states, keys=keys)
-    return []
+    fails = []
+    never = [c for c in (sw.cands or []) if c not in sw.opened and c not in NOT_FROM_NEW_GAME]
+    print(f'  panels in the page as loaded: {len(sw.cands or [])}; seen open: {", ".join(sorted(sw.opened)) or "none"}')
+    for c in sorted(NOT_FROM_NEW_GAME): print(f'  not from a new game: #{c} ({NOT_FROM_NEW_GAME[c]})')
+    fails += [f'the panel #{c} (hidden at load) was never seen open in the sweep' for c in never]
+    fails += [f'the sweep stopped early: {c}' for c in sorted(sw.capped)]
+    return fails
 REACH_INVENTORY = {}
 
 # ---- on the deck: walking, turning, zooming, Pause, Device, Tracked (the deck package) --------------------------------
@@ -483,27 +556,35 @@ def WRAP(body):
 OUTLINES = r"""(() => { const out = []; for (const e of document.querySelectorAll('*')) { const cs = getComputedStyle(e);
   if (cs.outlineStyle !== 'none' && parseFloat(cs.outlineWidth) > 0 && e.getBoundingClientRect().width > 0) out.push((e.id || e.tagName) + ' ' + cs.outlineWidth); }
   const a = document.activeElement; return { outlines: out.slice(0, 5), focus: a && a !== document.body ? (a.id || a.tagName) : null }; })()"""
+PRE = 40   # frames before the first tap, the same in every run (each press is 3 frames and 4 after it)
 def touch_play(pw, src, tag, mode, presses):
-    r = Run(pw, src, tag, mode=mode, plug={} if mode != 'none' else None)
+    r = Run(pw, src, tag, mode=mode, plug={} if mode != 'none' else None, touch=True)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
-    r.step(20)
+    r.step(10)
     for b in presses: r.press(b); r.step(4)
-    r.step(20 - 6 * len(presses) if len(presses) < 3 else 1)
+    r.step(PRE - 10 - 7 * len(presses))
     shots, st = [], []
+    # the first tap by the mouse, the second a real touch (the phone's way)
     for k, (x, y) in enumerate([(450, 380), (700, 300)]):
-        r.page.mouse.click(x, y); r.step(90)
-        shots.append((f'tap{k}', r.shot(f'{tag}_tap{k}'))); g = r.ev(GAME_STATE); g.pop('calls', None); st.append([g, r.js(OUTLINES)])
+        if k == 0: r.page.mouse.click(x, y)
+        else: r.page.touchscreen.tap(x, y)
+        r.step(90)
+        shots.append((f'tap{k}', r.shot(f'{tag}_tap{k}'))); g = r.ev(GAME_STATE); g.pop('calls', None)
+        pg = r.js(PAGE_STATE); pg.pop('listeners', None)
+        st.append([g, r.js(OUTLINES), pg])
     r.close(); return shots, st
 def part_touch(pw, src, tag):
     fails = []
     a, sa = touch_play(pw, src, f'{tag}_touch_none', 'none', [])
-    for presses in (['B'], ['LB', 'RB'], ['UP', 'DOWN']):
+    # B (put away a message: none on screen) and D-pad up then down (to the screen's edge buttons and back); not LB/RB,
+    # which really turn the view (a different picture by design)
+    for presses in (['B'], ['UP', 'DOWN'], ['UP']):
         b, sb = touch_play(pw, src, f'{tag}_touch_{"".join(presses)}', 'pad', presses)
-        d = same_pics(a, b) + [x for k in range(2) for x in diff_state(sa[k][0], sb[k][0], f'tap{k}')]
+        d = same_pics(a, b) + [x for k in range(2) for x in diff_state(sa[k][0], sb[k][0], f'tap{k}') + diff_state(sa[k][2], sb[k][2], f'tap{k}.page')]
         for k in range(2):
             if sb[k][1]['outlines']: d.append(f'tap{k}: a focus outline is left: {sb[k][1]["outlines"]}')
             if sb[k][1]['focus'] != sa[k][1]['focus']: d.append(f'tap{k}: focus on {sb[k][1]["focus"]}, without a pad {sa[k][1]["focus"]}')
-        print(f'  pressed {" then ".join(presses)}, then tapped twice: {"the no-pad game" if not d else str(len(d)) + " differences"}')
+        print(f'  pressed {" then ".join(presses)}, then a click and a touch: {"the no-pad game" if not d else str(len(d)) + " differences"}')
         fails += [f'after {"+".join(presses)}: {x}' for x in d[:5]]
     return fails
 
@@ -621,7 +702,8 @@ MUTANTS['odd'] = {
 # PASS on something that works and FAIL on its planted faults before section 26 exists. It is not the design: section 26
 # is CT1's. It covers what's built in the parts here so far (the deck package).
 STANDIN = r"""
-const PAD_ON = true, PAD_BUILT = ['base', 'deck', 'marks'];
+const PAD_ON = true;
+const PAD_BUILT = ['base', 'deck', 'marks'];
 (() => {
   if (!PAD_ON) return;
   const prev = {}; let steering = false, flick = 0, charge = null, used = -1e9;
@@ -661,25 +743,34 @@ const PAD_ON = true, PAD_BUILT = ['base', 'deck', 'marks'];
 
 # ---- run ----------------------------------------------------------------------------------------------------------
 if '--selftest' in FLAGS:
+    if pad_switch(SRC) is not None: print('--selftest is for a build without section 26 (it plants its own PAD_ON)'); sys.exit(1)
     SRC = plant(SRC, STANDIN); print('--selftest: the parts run on a copy with the check\'s own stand-in driver (not section 26)')
-built = pad_built(SRC)
-print(f'controller_check on {GAME}: PAD_ON {pad_switch(SRC)}, packages built: {sorted(built) or "none"}')
+built, built_how = pad_built(SRC)
+print(f'controller_check on {GAME}: PAD_ON {pad_switch(SRC)}, packages built: {sorted(built) or "none"} ({built_how})')
+# the parts that play with the pad run on the switch-on copy (idle, save and calls test both themselves)
+ON_SRC = both_builds(SRC)[-1][1]
+SELF_BOTH = {'idle', 'save', 'calls'}
 with sync_playwright() as pw:
     br = pw   # each Run launches its own browser
     for part in PARTS:
         print(f'[{part}]')
+        if part not in PART_FN and NEEDS.get(part) and all(p in built for p in NEEDS[part]):
+            # the package is there, the part isn't: never a pass
+            check(False, f'{part}: its package is built ({", ".join(NEEDS[part])}) but this check has no part for it yet')
+            RESULTS.append((part, 'FAIL', 'package built, part not written yet')); continue
         if part not in PART_FN or any(p not in built for p in NEEDS.get(part, [])):
             missing = [p for p in NEEDS.get(part, []) if p not in built]
             if part == 'reach' and '--inventory' in FLAGS:   # the touch half alone: what there is to reach, read from the page
-                part_reach(br, SRC, 'g')
+                for f in part_reach(br, ON_SRC, 'g'): check(False, f'reach (touch half): {f}')
             note = f'waits for package{"s" if len(missing) > 1 else ""} {", ".join(missing)}' if missing else 'built in this check later'
             print(f'  not yet ({note})'); RESULTS.append((part, 'not yet', note)); continue
-        fails = PART_FN[part](br, SRC, 'g')
+        psrc = SRC if part in SELF_BOTH else ON_SRC
+        fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')
         RESULTS.append((part, 'FAIL' if fails else 'OK', f'{len(fails)} problems' if fails else ''))
         if '--mutants' in FLAGS:
             for name, code in MUTANTS.get(part, {}).items():
-                mf = PART_FN[part](br, plant(SRC, code), 'm')
+                mf = PART_FN[part](br, plant(psrc, code), 'm')
                 caught = bool(mf)
                 print(f'  planted fault "{name}": {"caught (" + mf[0][:110] + ")" if caught else "NOT CAUGHT"}')
                 check(caught, f'{part}: the planted fault "{name}" was not caught')
