@@ -288,7 +288,7 @@ with sync_playwright() as pw:
     # line comes more than FILLER_MOST times, and no everyday line (hello, start, filler, end, small talk) more than
     # LINE_MOST times; the pack's own talk lines never twice
     print('(i) repeats over Days 1-3, talking with everyone every day:')
-    FILLER_MOST, LINE_MOST = 3, 25
+    FILLER_MOST, LINE_MOST, HOLD_MOST = 3, 25, 5   # HOLD_MOST: ship minutes one line stays (5: before the question at TALK_ASK)
     errors3 = []
     g = Game(pw, sys.argv[1], w=390, h=844, errors=errors3)
     g.ev("(() => { SHIP.time.day = 1; SHIP.time.min = 8 * 60; })()"); g.step(3)
@@ -302,11 +302,11 @@ with sync_playwright() as pw:
         chatDo('talk'); const T = CHAT.talk; if (!T) return;
         const P = T.pack, kind = x => !P ? 'old' : P.small && P.lines.includes(x) ? 'small' : P.lines.includes(x) ? 'pack' : x === P.ask ? 'ask'
           : P.replies && Object.values(P.replies).some(r => r.ans === x) ? 'answer' : fill.has(x) ? 'filler' : 'other';
-        let last = CHAT.line.text, n = 0; log.push({ p: p.id, kind: 'start', text: last });
-        for (let k = 1; k <= 60 && !T.end; k++) { setShipNow(t0 + 1 + k * .5); CHAT.checked = Math.floor(shipNow()) + 999; talkStep(CHAT);
+        let last = CHAT.line.text, n = 0, at = 0, hold = 0, took = 0; log.push({ p: p.id, kind: 'start', text: last });
+        for (let k = 1; k <= 60 && !T.end; k++) { setShipNow(t0 + 1 + k * .5); CHAT.checked = Math.floor(shipNow()) + 999; talkStep(CHAT); took = k * .5;
           if (T.ask) chatDo('reply:' + talkSuits(p));
-          const l = CHAT.line.text; if (l !== last) { last = l; const kd = kind(l); if (kd === 'filler') n++; log.push({ p: p.id, kind: kd, text: l }); } }
-        log.push({ p: p.id, kind: 'talk', n });
+          const l = CHAT.line.text; if (l !== last) { hold = Math.max(hold, k * .5 - at); at = k * .5; last = l; const kd = kind(l); if (kd === 'filler') n++; log.push({ p: p.id, kind: kd, text: l }); } }
+        log.push({ p: p.id, kind: 'talk', n, hold, mins: took, small: !!(P && P.small), id: P && P.id, end: T.end, pts: T.pts, gained: Math.round(T.gained) });
       });
       chatClose(); return { log, max: typeof TALK_FILLER_MAX !== 'undefined' ? TALK_FILLER_MAX : 2, saved: JSON.stringify(SHIP.talks.heard || {}).length }; })"""
     r = g.ev(f"({REP})({{ days: 3 }})")
@@ -320,6 +320,10 @@ with sync_playwright() as pw:
     print(f"  {len(talks)} talks, {len(said)} lines; filler a talk at most {max(e['n'] for e in talks)}; the heard record {r['saved']} bytes")
     check(len(talks) > 100, f"only {len(talks)} talks: the replay didn't run")
     check(all(e['n'] <= r['max'] for e in talks), f"a talk said more than {r['max']} filler lines")
+    held = max(e['hold'] for e in talks); hw = max(talks, key=lambda e: e['hold']); print(f"  the longest hold: {hw['p']} {hw.get('id')} small {hw.get('small')}")
+    print(f"  the longest one line stayed on the card: {held} ship minutes; ended full {sum(e['end'] == 'full' for e in talks)}/{len(talks)}, after {min(e['mins'] for e in talks)}-{max(e['mins'] for e in talks)} ship minutes; social a talk {min(e['gained'] for e in talks)}-{max(e['gained'] for e in talks)}")
+    check(held <= HOLD_MOST, f"a line stayed on the card {held} ship minutes (at most {HOLD_MOST}: a talk with nothing new to say wraps up)")
+    check(all(e['end'] == 'full' for e in talks), 'a talk did not finish (the meter and the goodbye)')
     worst = by['filler'].most_common(1)
     check(not worst or worst[0][1] <= FILLER_MOST, f"a filler line {worst and worst[0]} more than {FILLER_MOST} times")
     every = collections.Counter(e['text'] for e in said if e['kind'] in ('hello', 'start', 'filler', 'small', 'other'))

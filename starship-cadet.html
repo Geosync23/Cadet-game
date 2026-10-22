@@ -35232,8 +35232,8 @@ if (typeof SAVE_EXTRA !== 'undefined') SAVE_EXTRA.push(s => {
 // heard } (saved in save.talks.heard; about 60 bank lines and the small talk, at most about 2 KB). lineFor makes a
 // hello, talk.start/sit/filler/end/stop line you've heard lose out, the latest the most, so the least lately heard comes
 // next; small talk goes least lately heard first; a talk says at most TALK_FILLER_MAX filler lines, none you heard in
-// the last TALK_HEARD_DAYS ship days, and then goes quiet (talkPackQuiet: section 20's talkNext asks it before its
-// filler). TALK_HEARD_ON is the switch (committed ON for playtest patch 1; off, every pick is as before).
+// the last TALK_HEARD_DAYS ship days, and then wraps up (talkPackQuiet: section 20's talkNext asks it before its
+// filler and sets T.wrap; talkStep then finishes the meter with a full talk's gains and the usual goodbye). TALK_HEARD_ON is the switch (committed ON for playtest patch 1; off, every pick is as before).
 const TALK_HEARD_ON = true, TALK_FILLER_MAX = 2, TALK_HEARD_DAYS = 2;
 function talkHeardKind(kind) { return TALK_HEARD_ON && (kind === 'hello' || /^talk\.(start|sit|filler|end|stop)$/.test(kind)); }
 function talksHeard() { const T = TALK_HEARD_ON && talksState(); return T ? T.heard || (T.heard = {}) : null; }
@@ -35320,9 +35320,9 @@ function talkPackStart(C) {
   return T.pack.lines[0];
 }
 const talkFillerSaid = T => { const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || []; return T.said.filter(id => F.some(e => e.id === id)).length; };
-// the talk has gone quiet (DL1): its own lines are said, and it's had TALK_FILLER_MAX filler lines, or every filler
-// line is said or heard lately. Section 20's talkNext then says nothing more: the meter runs on to the end
-const talkPackQuiet = C => { const P = talkPackOf(C); if (!P || !TALK_PACK_ON || !TALK_HEARD_ON) return false;
+// nothing new left to say (DL1): its own lines are said, and it's had TALK_FILLER_MAX filler lines, or every filler
+// line is said or heard lately. Section 20's talkNext then wraps the talk up (RV4: a line held for 15 s read as stuck)
+const talkPackQuiet = C => { const P = talkPackOf(C); if (!P || !TALK_PACK_ON || !TALK_HEARD_ON || (!P.small && !C.talk.reply)) return false;   // a talk with a question: only once you've answered
   const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || [], n = talkFillerSaid(C.talk);
   return n - (P.fill0 || 0) >= TALK_FILLER_MAX || n >= F.length; };
 const talkPackOf = C => C && C.talk && C.talk.pack;
@@ -40662,7 +40662,7 @@ function talkStart(C) {
 function talkNext(C) {                                    // their next line while you talk: the topic's, a filler, else their usual chat
   const T = C.talk, p = C.p;
   const pk = typeof talkPackNext === 'function' && talkPackNext(C); if (pk) return pk;   // section 22: the pack's next line first
-  if (typeof talkPackQuiet === 'function' && talkPackQuiet(C)) return null;   // section 22: the pack's talk has gone quiet (no filler over and over; DL1, playtest 1)
+  if (typeof talkPackQuiet === 'function' && talkPackQuiet(C)) { T.wrap = true; return null; }   // section 22: nothing new left to say (no filler over and over; DL1, playtest 1): the talk wraps up
   const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
   if (l) return l;
   for (let k = 1; k <= 8; k++) { const c = chatLine(p, shipNow() + 60 * k, true); if (c && c.say !== false && !TALK_KEEP.has(c.kind) && c.kind !== 'greet' && c.kind !== 'go' && !T.said.includes(c.text)) { T.said.push(c.text); return c.text; } }
@@ -40697,7 +40697,7 @@ function talkEnd(C, why, quiet) {                         // why: 'full' | 'stop
 function talkStep(C) {                                    // every frame while you talk
   const T = C.talk, t = shipNow(), dm = Math.max(0, Math.min(1, t - T.last)); T.last = t;
   if (T.ask || T.end || !dm) return;
-  const was = T.mins; T.mins = Math.min(TALK_MINS, T.mins + dm);
+  const was = T.mins; T.mins = T.wrap ? TALK_MINS : Math.min(TALK_MINS, T.mins + dm);   // wrapping up (talkNext): the meter finishes now, with a full talk's social and friendship
   const P = SHIP.player, fx = typeof needEffects === 'function' ? needEffects() : { socialGain: 1 }, g = (T.mins - was) / TALK_MINS * TALK_SOCIAL * (fx.socialGain || 1);
   if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
   for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
