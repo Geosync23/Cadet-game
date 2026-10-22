@@ -4684,6 +4684,7 @@ DECKS[5] = {
     { id: '5-battery-4-svc', machine: '5-battery-4', type: 'work:works', at: [33, 14], face: 'n', pose: 'work', room: 'y' },
     { id: '5-inverter-1-svc', machine: '5-inverter-1', type: 'work:works', at: [33, 10], face: 'n', pose: 'work', room: 'y' },
     { id: '5-junction-1-svc', machine: '5-junction-1', type: 'work:works', at: [19, 11], face: 'e', pose: 'work', room: 'u' },
+    { id: '5-mainlift-1-svc', machine: '5-mainlift-1', type: 'work:works', at: [19, 10], face: 'w', pose: 'work', room: 'u' },   // the main lift's service spot, at its brake release by the ladder (FX3: a stand-in machine with no room had no place to do its job)
     { id: '5-cartdock-1-svc', machine: '5-cartdock-1', type: 'work:works', at: [19, 12], face: 'e', pose: 'work', room: 'm' },
     { id: '5-cartdock-2-svc', machine: '5-cartdock-2', type: 'work:works', at: [19, 15], face: 'e', pose: 'work', room: 'm' },
     { id: '5-valve-1-svc', machine: '5-valve-1', type: 'work:works', at: [28, 0], face: 'n', pose: 'work', room: 'g' },
@@ -14194,7 +14195,7 @@ function jobTap(it, at) {
   // (Deck 4's light relays), and no other machine in the room is nearer. The floor at its panel and glass-backed things
   // past it still start the work (jobSpotTap), as does Repair
   const dm = Math.hypot(mc.x - at.x, mc.z - at.z), dp = Math.hypot(spot.x - at.x, spot.z - at.z), mine = Math.min(dm, dp);
-  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== m.room
+  if (!(dm <= MACHINE_NEAR || dp <= .8) || roomAt(...c) !== (m.room || PLACE_OF.get(pid).room)   // a stand-in with no room (the main lift): its panel place's room
     || machineList().some(o => o.id !== m.id && !o.stub && o.deck === m.deck && o.room === m.room && o.at && (q => Math.hypot(q.x - at.x, q.z - at.z))(cellPos(...o.at)) < mine)) return false;
   actStart('job', pid, { title: it.t, pose: (typeof poseOf === 'function' ? poseOf(PLACE_OF.get(pid)) : null) || 'work' });
   return true;
