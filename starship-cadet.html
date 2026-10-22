@@ -12957,7 +12957,7 @@ function pauseSet(on) {
     el = document.createElement('div'); el.id = 'pauseCard'; el.hidden = true; el.setAttribute('role', 'dialog'); el.setAttribute('aria-label', 'Paused');
     el.style.cssText = 'position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(6,14,18,.55)';
     el.innerHTML = '<div style="padding:20px 26px;border-radius:14px;background:rgba(8,20,26,.94);border:1px solid #6fa8b0;color:#e6f0f1;text-align:center;font:inherit">'
-      + '<div style="font-size:20px;font-weight:600;margin-bottom:6px">Paused</div><div style="opacity:.8;margin-bottom:14px">The ship waits for you.</div>'
+      + '<div style="font-size:20px;font-weight:600;margin-bottom:6px">Paused</div><div id="pauseLine" style="opacity:.8;margin-bottom:14px">The ship waits for you.</div>'
       + '<button type="button" style="font:inherit;min-height:44px;padding:8px 22px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1">Resume</button></div>';
     el.addEventListener('pointerdown', e => { e.stopPropagation(); e.preventDefault(); pauseSet(false); });
     el.querySelector('button').onclick = e => { e.stopPropagation(); pauseSet(false); };   // Enter or Space on the focused Resume (0.28.54, reviewer 1f)
@@ -53239,7 +53239,7 @@ const PAD_REP = { first: .5, every: .25 };                // a held D-pad repeat
 // live: a pad is connected; idx: the pad in charge (the last to press anything); used: the controller is the input in
 // use (its marks and highlight show); lastUse: when (performance.now) it was last used; down / held: buttons this frame,
 // and how long each has been held (s); ls, rs: the sticks after the dead zone, [x, y] in -1..1 (y down); lt, rt: 0..1
-const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, dt: 0, log: null };
+const PAD = { live: false, idx: -1, id: '', std: true, used: false, lastUse: -1e9, down: {}, held: {}, rep: {}, ls: [0, 0], rs: [0, 0], lt: 0, rt: 0, on: {}, fam: 'xbox', listening: false, goneUsed: false, goneIdx: -1, dt: 0, log: null };
 function padOn(name, fn) { (PAD.on[name] = PAD.on[name] || []).push(fn); }
 function padFire(name, rep) {
   if (PAD.log) PAD.log.push(name + (rep ? '+' : ''));     // controller_check reads what fired
@@ -53303,7 +53303,7 @@ function padHello(e) {                                    // a pad said hello (i
 }
 function padBye(e) {                                      // a pad went (battery, Bluetooth, unclipped)
   const gone = e && e.gamepad ? e.gamepad.index : -1, wasUsed = PAD.used && performance.now() - PAD.lastUse < 30000;
-  if (gone === PAD.idx || gone < 0) { padRelease(); PAD.idx = -1; PAD.goneUsed = wasUsed; padFire('gone'); }   // goneUsed: it was in use in the last half minute (the pause, turn 6)
+  if (gone === PAD.idx || gone < 0) { padRelease(); PAD.idx = -1; PAD.goneUsed = wasUsed; PAD.goneIdx = gone; padFire('gone'); }   // goneUsed: it was in use in the last half minute (the pause, turn 6)
   if (!padList().filter(g => g.index !== gone).length) PAD.live = false;
 }
 if (PAD_ON) { addEventListener('gamepadconnected', padHello); addEventListener('gamepaddisconnected', padBye); }
@@ -53699,7 +53699,7 @@ padOn('x', e => {                                          // the action button 
 // Connecting: the first press of a session says so once. A pad in use in the last half minute going away (battery,
 // Bluetooth, unclipping) pauses the game, the Pause card reading "Controller disconnected" (section 15's pauseSet asks
 // padPauseLine); Start or A on the card resumes once it's back.
-const PAD_MARK = { css: false, fam: '', n: 0, said: false, why: false, line: '' };
+const PAD_MARK = { say: false, css: false, fam: '', n: 0, said: false, why: false, line: '' };
 const PAD_SVG = s => '<svg viewBox="0 0 16 16" aria-hidden="true">' + s + '</svg>';
 const PAD_GLYPH = {                                       // [what the mark shows, its colour, its name in words]
   xbox: { a: ['A', '#7bc75a', 'A'], b: ['B', '#ec6a62', 'B'], x: ['X', '#5f9ee8', 'X'], y: ['Y', '#ecc94e', 'Y'],
@@ -53746,15 +53746,20 @@ function padMarksSync() {                                  // each mark on its b
 }
 padOn('use', () => {
   padMarksSync(); PAD_MARK.n = 0;
-  if (!PAD_MARK.said) { PAD_MARK.said = true; toast('Controller connected', 'Press ' + padWord('a') + ' to use the highlighted thing.'); }   // once a session
+  if (!PAD_MARK.said) PAD_MARK.say = true;               // once a session, when no other message is showing (below)
 });
-padOn('frame', () => { if (PAD.used && (PAD_MARK.fam !== padFam() || --PAD_MARK.n <= 0)) { PAD_MARK.n = 10; padMarksSync(); } });   // a few times a second
+padOn('frame', () => {
+  if (PAD.used && (PAD_MARK.fam !== padFam() || --PAD_MARK.n <= 0)) { PAD_MARK.n = 10; padMarksSync(); }   // a few times a second
+  if (PAD_MARK.say && PAD.used && !toastEl.classList.contains('show')) {   // "Controller connected": never over another message (the opening one)
+    PAD_MARK.say = false; PAD_MARK.said = true; toast('Controller connected', 'Press ' + padWord('a') + ' to use the highlighted thing.');
+  }
+});
 padOn('gone', () => {                                      // the pad in charge went: stop walking (padRelease did), pause if it was in use lately
-  if (!padList().length) padUnuse();                     // no pad left: its marks and highlight go
+  if (!padList().filter(g => g.index !== PAD.goneIdx).length) padUnuse();   // no pad left (the one going may still be listed): its marks and highlight go
   if (PAD.goneUsed && !PAUSE.on) { PAD_MARK.why = true; pauseSet(true); }
 });
 function padPauseLine(el, on) {                            // section 15's Pause card asks for its line (pauseSet): "Controller disconnected" after a drop-out
-  const ln = el && el.firstElementChild && el.firstElementChild.children[1]; if (!ln) return;
+  const ln = el && el.querySelector('#pauseLine'); if (!ln) return;
   if (on && PAD_MARK.why) { PAD_MARK.line = PAD_MARK.line || ln.textContent; ln.textContent = 'Controller disconnected'; }
   else if (!on && PAD_MARK.line) { ln.textContent = PAD_MARK.line; PAD_MARK.line = ''; }
   if (!on) PAD_MARK.why = false;

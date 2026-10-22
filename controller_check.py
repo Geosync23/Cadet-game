@@ -348,8 +348,10 @@ def part_marks(pw):
     p = Pad(pw, ON)
     p.plug(); p.step(3)
     check(p.ev("document.querySelectorAll('.padk').length") == 0, 'marks: marks on the page before any press')
-    p.ev("document.getElementById('tt').textContent = ''")
-    p.press('x'); p.step(12)
+    # "Controller connected" waits for the message showing (the opening one) to go, then shows
+    p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
+    check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
+    p.ev("toastEl.classList.remove('show')"); p.step(2)
     m = marks(p)
     for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
         check(m.get((b, k)) == ('xbox:' + k, True), f'marks: no shown Xbox {k} mark on {b}: {m}')
@@ -411,20 +413,21 @@ def part_touch(pw):
 
 def part_drop(pw):
     p = Pad(pw, ON)
-    p.plug(); p.press('x'); p.step(2)
+    p.plug(); p.ev("toastEl.classList.remove('show')"); p.press('b'); p.step(2)   # the first press is B, which puts messages away
+    check(p.ev("document.getElementById('tt').textContent") == 'Controller connected' and p.ev("toastEl.classList.contains('show')"), 'drop: a first press of B lost "Controller connected"')
     p.axes([0, -1, 0, 0]); p.step(6)
     check(p.ev('!!player.steer'), 'drop: the stick did not walk')
     p.js('window.__padUnplug(0)'); p.step(1)
     check(p.ev('player.steer') is None, 'drop: still walking after the pad went')
     check(p.ev('PAUSE.on') is True, 'drop: a pad in use going away did not pause')
-    line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+    line = p.ev("document.getElementById('pauseLine').textContent")
     check(line == 'Controller disconnected', f'drop: the Pause card reads {line!r}')
     check('pad' not in p.ev('document.body.className'), 'drop: the marks stayed with no pad')
     if SHOTS: p.g.shot(SHOTS + '/drop-pause.png')
     p.plug(); p.step(2); p.press('a'); p.step(2)
     check(p.ev('PAUSE.on') is False, 'drop: A on the Pause card did not resume once the pad was back')
     p.press('menu'); p.step(2)
-    line = p.ev("document.querySelector('#pauseCard > div').children[1].textContent")
+    line = p.ev("document.getElementById('pauseLine').textContent")
     check(p.ev('PAUSE.on') is True and line == 'The ship waits for you.', f'drop: an ordinary pause afterwards reads {line!r}')
     p.press('menu'); p.step(2)
     # not used for half a minute: stop, no pause
