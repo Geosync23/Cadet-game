@@ -290,7 +290,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.90.3
+   STARSHIP CADET: CSV Wren                           build 0.90.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -8994,7 +8994,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.90.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.90.4';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -53705,6 +53705,95 @@ padOn('x', e => {                                          // the action button 
   if (ride || FREEZE.frozen) return;
   for (const id of ['repairBtn', 'hobbyBtn', 'putDown']) if (padClick(id)) return true;
 });
+// ---- P2 (controller package 2): the mini-games and special screens (plans/controller-plan.html section 4), on the
+// panel helper (padOwn). Tiles: the D-pad moves square by square (the helper's nearest-button move on the board's own
+// buttons, then onto your hold and the buttons below), A picks up and puts down through the board's own click, as a tap
+// does. Here the highlight lands on a sensible square (How to play's Next, else the square you were on, else a tile you
+// can move; Again once a game is over) and keeps its place when the board redraws (your hold and the buttons are made
+// anew at each move). Lightdisc: the left stick moves you with its full range (the arrow keys' inp.kx and inp.kz, so a
+// light push is a slow step) and doesn't move the highlight while you play; A is Next in How to play and presses the
+// result card's buttons; B is Leave (PAD_BACK); A presses Leave only when you moved the highlight onto it yourself.
+const PAD_TL = { g: null, key: '', el: null, cell: -1, over: false, shown: false };
+const padTlKey = e => !e || !e.dataset ? '' : e.dataset.c !== undefined ? 'c' + e.dataset.c : e.dataset.h !== undefined ? 'h' + e.dataset.h : e.dataset.end ? 'e' + e.dataset.end : '';
+function padTlFind(key) {                                  // the button with that key on the board as drawn now, if shown
+  if (!key || !TL_UI.root) return null;
+  const e = TL_UI.root.querySelector('[data-' + { c: 'c', h: 'h', e: 'end' }[key[0]] + '="' + key.slice(1) + '"]'); return e && padShown(e) ? e : null;
+}
+function padTlLand() {                                     // where the highlight lands in a game
+  const s = TL_GAME.s; if (s.over) return padTlFind('efull') || padTlFind('edone');
+  const mv = s.p === 0 ? tilesMoves(s, 0).find(m => m.from !== undefined) : null;
+  return padTlFind('etnext') || padTlFind('c' + PAD_TL.cell) || mv && padTlFind('c' + mv.from) || padTlFind('c2');
+}
+const padTlOn = L => !!(L && L.id === 'device' && DEV.app === 'tiles' && TL_GAME && TL_UI.root && TL_UI.root.isConnected && padShown(TL_UI.root));
+padOwn(padTlOn, { frame: () => {
+  const T = PAD_TL, R = TL_UI.root, G = TL_GAME, a = document.activeElement, over = !!G.s.over;
+  if (G !== T.g) { T.g = G; T.key = ''; T.el = null; T.cell = -1; T.over = false; T.shown = false; }
+  // lost: the button you were on was redrawn (made anew) or hidden; a highlight you moved off the board is left alone
+  const lost = T.el && (!T.el.isConnected || !padShown(T.el)) || !a || a === document.body;
+  const to = !T.shown || over && !T.over ? padTlLand() : lost ? padTlFind(T.key) || padTlLand() : null;   // arriving, the game ending, a redraw
+  if (to && to !== a) padFocusTo(to);
+  const f = to || a; T.el = f && R.contains(f) ? f : null; if (T.el) { T.key = padTlKey(f); if (f.dataset.c !== undefined) T.cell = +f.dataset.c; }
+  T.shown = true; T.over = over;
+}, move: () => {                                           // a press in the frame after a redraw: back on your square first, then the move
+  const T = PAD_TL, a = document.activeElement;
+  if (T.el && !T.el.isConnected && (!a || a === document.body)) { const e = padTlFind(T.key); if (e) { padFocusTo(e); T.el = e; } }
+} });
+const PAD_LD = { stick: false, chose: false, res: false };
+const padLdOn = L => !!(L && L.id === 'ld' && DISC.view);
+padOwn(padLdOn, {
+  frame: () => {
+    const V = DISC.view, inp = DISC.inp, play = DISC.g && DISC.g.phase !== 'over';
+    if (play) { const [x, y] = PAD.ls; if (x || y || PAD_LD.stick) { inp.kx = x; inp.kz = y; PAD_LD.stick = !!(x || y); } }   // a let-go stops you, once
+    const res = !V.res.classList.contains('hide'), how = !V.how.classList.contains('hide'), a = document.activeElement;
+    if (res && !PAD_LD.res || !a || !V.root.contains(a) || !padShown(a) || a === V.leave && how && !PAD_LD.chose) {   // the result card's Again, How to play's Next, else Leave
+      const to = res ? V.res.querySelector('button.go') || V.res.querySelector('button') : how ? V.howNext : V.leave;
+      if (to && padShown(to) && to !== a) padFocusTo(to); PAD_LD.chose = false;
+    }
+    PAD_LD.res = res;
+    return play;                                           // (while you play the stick is yours, not the highlight's)
+  },
+  move: () => { PAD_LD.chose = true; },                    // (then the helper moves the highlight)
+  a: () => {
+    const V = DISC.view, a = document.activeElement;
+    if (a && V.root.contains(a) && padShown(a) && (a !== V.leave || PAD_LD.chose)) { a.click(); return true; }
+    if (!V.how.classList.contains('hide')) V.howNext.click();
+    return true;                                           // (never Leave by accident: B leaves)
+  },
+});
+padOn('frame', () => {                                     // off those screens (or under the Pause card): Tiles lands afresh, Lightdisc's stick lets go
+  const L = PAD.used ? padLayer() : null;
+  if (!padTlOn(L)) PAD_TL.shown = false;
+  if (!padLdOn(L)) { if (PAD_LD.stick) { PAD_LD.stick = false; DISC.inp.kx = DISC.inp.kz = 0; } PAD_LD.res = false; }
+});
+// Work steps and the device's questions (deviceChoose: a choose or turn card, a look's marks, the arrival's "skip it?"):
+// the highlight lands on the first answer, not the × (Walk away), and keeps its place when a turn card asks again (− + −
+// without hunting); B is the ×, as tapping it is (Not now, Step back). A conversation's card is the helper's (B: nothing).
+PAD_FIRST.devDlg = '#devDlg .act';
+PAD_FIRST.sleepAsk = '#sleepYes';                         // the alarm: Set alarm first (− and + a press away), as the lift lands on your goal deck
+const PAD_DLG = { el: null, i: -1 };
+const padDlgOn = L => !!(L && L.id === 'devDlg' && DEV.choose);
+padOwn(padDlgOn, {
+  frame: () => {
+    const D = PAD_DLG, a = document.activeElement, acts = [...document.querySelectorAll('#devDlg .act')];
+    if (D.el && !D.el.isConnected && D.i >= 0 && acts[D.i] && acts[D.i] !== a) padFocusTo(acts[D.i]);   // asked again: the same button
+    const f = document.activeElement, i = acts.indexOf(f); if (i >= 0) { D.el = f; D.i = i; }
+  },
+  b: () => { const x = document.querySelector('#devDlg button.x'); if (x) x.click(); return true; },
+});
+padOn('frame', () => { if (!padDlgOn(PAD.used ? padLayer() : null)) { PAD_DLG.el = null; PAD_DLG.i = -1; } });
+// The arrival's manifest (section 21's introManifest, a full-screen form): a panel once the controller is in use (it
+// gets an id then, so the helper can find it). The highlight lands in the name box: A brings up the phone's keyboard,
+// D-pad down reaches Sign and go aboard. A on Sign with the box empty fills in the suggested name, shown in the box
+// first; A again signs with it (the user's answer to the plan's question 6: with no keyboard, the suggested name is used).
+// It's a card you must answer: B only leaves the box.
+const PAD_NAME = 'George';                                  // the user's choice (2026-10-22): one name, as the plate and the beam can show
+padPanelAdd('introManifest', { on: () => !!INTRO_UI.manifest, before: 'careerEnd', first: '#introManifest input', back: PAD_MUST });
+padOn('frame', () => { const m = PAD.used && INTRO_UI.manifest; if (m && !m.id) m.id = 'introManifest'; });
+padOwn(L => !!(L && L.id === 'introManifest'), { a: () => {
+  const a = document.activeElement, m = INTRO_UI.manifest, box = m && m.querySelector('input');
+  if (!box || !a || a.tagName !== 'BUTTON' || !m.contains(a) || box.value.trim()) return;   // (the helper presses it)
+  box.value = PAD_NAME; return true;                       // shown in the box first; A again signs
+} });
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================
