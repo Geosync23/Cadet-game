@@ -10559,15 +10559,15 @@ function schedBuild(p, d, occ, S) {
       evening(sp, F.bed, false);
     }
   } else {
-    // night shift: the shift that began last night runs to 06:00, then a shower, breakfast from 07:00 (patch 1: it was
-    // breakfast at 06:00, then the shower) and sleep through the day
+    // night shift: the shift that began last night runs to 06:00, then an hour to unwind, breakfast from 07:00 (patch 1:
+    // it was at 06:00), a shower and sleep through the day (a shower at 06:00 would meet the day crew's washroom rush)
     if (P.works) {
       deck = wd;
       if (wd === 1 && P.workEnd >= 60) { work(P.workEnd - 15); take('work', [[1, '@handover']], 15, { by: P.workEnd, min: 5, tag: 'handover' }); }   // the night watch hands over at the ring
       work(P.workEnd);
-      wash(25, true);                                    // a shower after the night's work, then breakfast, then bed
-      if (t + C < MEALS.breakfast[0]) leisureUntil(MEALS.breakfast[0] - C + Math.round(40 * U(29)), 23);
-      meal('breakfast', 20, MEALS.breakfast[1]); go(bedDeck);
+      if (t + C < MEALS.breakfast[0]) leisureUntil(MEALS.breakfast[0] - C + Math.round(40 * U(29)), 23);   // an hour to unwind before the servery opens (07:00, patch 1)
+      meal('breakfast', 20, MEALS.breakfast[1]);
+      wash(25, true); go(bedDeck);                       // a shower after the night's work, then bed
       seg('sleep', t + 420 + Math.round(30 * U(26)), 'bed', p.bed);
       const sp = specials(50, !F.works);
       evening(sp, F.works ? F.workStart : F.bed, F.works);
