@@ -29,6 +29,9 @@
 #           own button keeps it; every setting takes effect; the changes are small in the save and hold through a real
 #           reload; turning by holding, flipped zoom, gentle walking; an odd save loads as normal; Everything back to
 #           normal leaves nothing saved
+#   a11y:   (CP5) walking stops the frame the stick is let go; the one-handed presets (whole shuffles, the main actions on one side); the menu repeat's pace and "no repeat"; toasts read out;
+#           the highlight's look; the ring pulses, and stays still with reduced motion; every button the highlight can
+#           land on, panel by panel, has a name a screen reader can say
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 controller_check.py BUILD.html [part ...]    Good is CONTROLLER CHECK OK (exit 0); a failure exits 1.
 import sys, os, re, json, pathlib
@@ -796,7 +799,91 @@ def part_screens(pw):
         check(p.ev('!INTRO_UI.manifest') and p.ev('SHIP.player.name') == p.ev('PAD_NAME'), f'screens: A on Sign again should sign ({p.ev("SHIP.player.name")})')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('tiles', part_tiles), ('disc', part_disc), ('screens', part_screens), ('marks', part_marks), ('touch', part_touch), ('drop', part_drop), ('settings', part_settings)]
+
+# P5 (accessibility, CP5): every button the highlight lands on has a name a screen reader can say: [] or the nameless
+# The names are the browser's own accessible names (CDP Accessibility.getPartialAXTree), not padSaid's guess; a name
+# with no letters in it (a mark alone: "✕", "+") counts as none.
+AX_ITEMS = """(() => {
+  const L = padLayer(); if (!L) return null;
+  window.__ax = padItems(L); window.__ax.forEach(e => padNameIt(e));
+  return window.__ax.map(e => (e.id ? '#' + e.id : e.className ? '.' + String(e.className).split(' ')[0] : e.tagName) + ' ' + e.outerHTML.slice(0, 70));
+})()"""
+def nameless(p):
+    """the buttons of the layer on top with no accessible name a screen reader can say, or None with no layer"""
+    descr = p.ev(AX_ITEMS)
+    if descr is None: return None
+    if not hasattr(p, 'cdp'): p.cdp = p.g.page.context.new_cdp_session(p.g.page); p.cdp.send('Accessibility.enable')
+    out = []
+    for i, d in enumerate(descr):
+        oid = p.cdp.send('Runtime.evaluate', {'expression': f'window.__ax[{i}]'})['result'].get('objectId')
+        nodes = p.cdp.send('Accessibility.getPartialAXTree', {'objectId': oid, 'fetchRelatives': False})['nodes'] if oid else []
+        name = str(((nodes[0].get('name') or {}).get('value')) if nodes else '' or '')
+        if not re.search(r'[^\W\d_]', name or ''): out.append(f'{d} (heard: {name!r})')
+    return out
+
+def part_a11y(pw):
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log(); p.step(3)
+    # no holds: the stick walks only while pushed, and stops the frame it's let go
+    p.axes([0, -1, 0, 0]); p.step(6); walking = p.ev('!!player.steer')
+    p.axes([0, 0, 0, 0]); p.step(1)
+    check(walking and p.ev('!player.steer && !PAD_DECK.walking'), f'a11y: walking should stop the frame the stick is let go (was walking: {walking})')
+    # the menu repeat is calm (0.5 s, then 4 a second) and follows PAD_REP when Settings changes it: "no repeat" is one step
+    check(p.ev('PAD_REP.first') == .5 and p.ev('PAD_REP.every') == .25, 'a11y: the menu repeat should start at 0.5 s, then 4 steps a second')
+    p.ev('PAD_REP.first = Infinity'); p.log(); p.btn('down'); p.step(90); p.btn('down', 0); p.step(1)
+    fired = [x for x in p.log() if x.startswith('down')]
+    check(fired == ['down', 'down:up'], f'a11y: with no repeat, holding down three seconds should be one step: {fired}')
+    p.ev('PAD_REP.first = .5')
+    # the one-handed presets: each a whole shuffle of the buttons (every action on its own button), as P4's PAD_SET.map takes
+    for side, m in p.ev('PAD_LAYOUTS').items():
+        check(sorted(m) == sorted(BTN) and sorted(m.values()) == sorted(BTN), f'a11y: the one-handed {side} layout should give every action its own button: {m}')
+    left = p.ev('PAD_LAYOUTS.left'); hand = {'up', 'down', 'left', 'right', 'lb', 'lt', 'view', 'ls'}
+    check(all(left[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the left-hand layout should put use, back, device, action, Pause and the D-pad on the left side: {left}')
+    right = p.ev('PAD_LAYOUTS.right'); hand = {'a', 'b', 'x', 'y', 'rb', 'rt', 'menu', 'rs'}
+    check(all(right[k] in hand for k in ('a', 'b', 'x', 'y', 'menu', 'up', 'left', 'right')), f'a11y: the right-hand layout should put use, back, device, action, Pause and the screen edge on the right side: {right}')
+    # toasts are read out once the controller is in use
+    check(p.ev("toastEl.getAttribute('role') === 'status' && toastEl.getAttribute('aria-live') === 'polite'"), 'a11y: the toast should be a polite live region once the pad is used')
+    p.js("document.body.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)
+    check(p.ev("!toastEl.hasAttribute('role') && !toastEl.hasAttribute('aria-live')"), 'a11y: a touch taking back should leave the toast as it was')
+    p.press('x'); p.step(2)
+    # the highlight: thick, teal, with a dark edge
+    p.press('up'); p.step(2)
+    st = p.ev("(() => { const c = getComputedStyle(document.activeElement); return [c.outlineWidth, c.outlineColor, c.outlineStyle, c.boxShadow]; })()")
+    check(st[0] == '4px' and st[1] == 'rgb(76, 195, 181)' and st[2] == 'solid' and st[3].count('rgb(13, 21, 33)') == 2, f'a11y: the highlight should be a 4px teal outline with a dark edge on both sides (two dark shadows): {st}')
+    p.press('b'); p.step(2)
+    # the deck ring: pulses, and stays still when the phone asks for reduced motion (asked live)
+    ring = p.ev('!!(PAD_PICK.ring && PAD_PICK.ring.visible)')
+    if check(ring, 'a11y: no ring on the deck where the game starts (needed for the pulse test)'):
+        sc = []
+        for _ in range(8): p.step(2); sc.append(p.ev('PAD_PICK.ring.scale.x'))
+        check(len(set(sc)) > 1, f'a11y: the ring should pulse gently: {sc}')
+        p.g.page.emulate_media(reduced_motion='reduce'); sc = []
+        for _ in range(8): p.step(2); sc.append(p.ev('PAD_PICK.ring.scale.x'))
+        check(set(sc) == {1}, f'a11y: with reduced motion the ring should stay still: {sc}')
+        p.g.page.emulate_media(reduced_motion='no-preference')
+    # every button the highlight can land on has a name, panel by panel
+    gaps, n = {}, 0
+    def look(what):
+        nonlocal n
+        p.step(3); r = nameless(p)
+        if check(r is not None, f'a11y: {what}: no panel on top'): n += 1
+        if r: gaps[what] = r
+    p.press('up'); look('screen edge'); p.press('b')
+    p.press('menu'); look('pause card'); p.press('b')
+    p.ev('openLiftPanel()'); look('lift'); p.press('b')
+    p.ev('alarmOpen()'); look('alarm'); p.press('b')
+    p.press('view'); look('Tracked'); p.press('b')
+    p.ev('ixBoard.open()'); look('job board'); p.press('b')
+    if p.ev("DECK_CREW.some(a => { chatOpen(a.p); const c = document.getElementById('chat'); return c && !c.hidden; })"): look('chat'); p.press('b')
+    p.press('y'); look('device home')
+    for app in p.ev("[...DEVICE_APPS.values()].filter(a => !(a.hidden && a.hidden()) && a.id !== 'home' && a.id !== 'boot').map(a => a.id)"):
+        p.ev(f'deviceShow({json.dumps(app)})'); look('device app ' + app); p.press('b'); p.step(2)
+    p.press('b'); p.step(2)
+    for what, r in gaps.items(): fail(f'a11y: {what}: buttons with no name a screen reader can say: {r[:4]}')
+    print(f'  a11y: {n} panels looked at for names, {sum(len(r) for r in gaps.values())} nameless')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('tiles', part_tiles), ('disc', part_disc), ('screens', part_screens), ('marks', part_marks), ('touch', part_touch), ('drop', part_drop), ('settings', part_settings), ('a11y', part_a11y)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
