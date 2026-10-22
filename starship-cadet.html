@@ -15773,7 +15773,7 @@ function ixFrame() {
   // a chore's stop is done once its minutes are in: seen as it steps out, or (if it ended between our frames) once it's gone
   const L = ixStopLast; ixStopLast = ACT && ACT.kind === 'ixStop' ? ACT : null;
   for (const A of [ACT, L]) if (A && A.kind === 'ixStop' && !A.o.ixDone && (A.phase === 'out' || A !== ACT && A.done >= A.def.mins)) { A.o.ixDone = true; ixStopDone(A); }
-  ixTips(); ixHealth.tick(); trkDoneCheck();
+  ixTips(); ixHealth.tick(); trkDoneCheck(); trackFresh();
   const el = document.getElementById('ixGoal');
   if (typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined') { el.hidden = true; return; }
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
@@ -15957,6 +15957,14 @@ function trkDoneCheck() {
   if (g.trkFrom != null) { if (inRoom) trkDone(g); return; }
   const there = inRoom || Math.hypot(w.x - p.x, w.z - p.z) < 1.5;
   if (!there) g.trkAway = true; else if (g.trkAway) trkDone(g);
+}
+// FX1 (patch-p5-fix1, bug 1): SHIP.player.track kept the id of a job after it was turned in or dropped, so section 24's
+// "only while no job is tracked" (the training ask, the test job) never held again once you had taken any job. A
+// tracked job that is no longer yours goes back to "on, nothing tracked" (undefined), as at the start. Returns it.
+function trackFresh() {
+  const t = SHIP.player.track; if (t === null || t === undefined) return t;
+  const j = typeof myJob === 'function' ? myJob() : null; if (!j || j.id !== t) SHIP.player.track = undefined;
+  return SHIP.player.track;
 }
 // ---- end of slot: Interactions engineer ----
 
@@ -45265,7 +45273,7 @@ function trainTell(row, c) {                             // the ask in play: a t
   const o = OCCASIONS['works.' + row.id], place = (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name, when = hhmm(r.at % 1440);
   const m = (SHIP.mail || []).find(x => x.from === worksName(c.by) && x.subject === c.mail);
   try { toast(worksName(c.by), m ? m.body : 'Meet me in the ' + place + ' at ' + when + '.'); } catch (e) { /* no UI */ }
-  if (typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: r.deck, room: r.room, label: mechName(row.id) + ' with ' + worksFirst(c.by) + ', ' + when });
+  // the arrow to the meeting: trainArrow (24p's slot, FX1), from a little before it, not from the ask
 }
 function trainSpot(j) {                                  // where a training job is done: { deck, tile, room }
   if (!j) return null;
@@ -45302,7 +45310,7 @@ function trainNear(spot) {                               // you're watching: on 
   } catch (e) { return false; }
 }
 function trainTick(now) {                                // once a ship minute in play
-  const W = SHIP.works, c = W && W.cur; if (!c) return;
+  const W = SHIP.works, c = W && W.cur; if (typeof trainArrow === 'function') trainArrow(c, now); if (!c) return;
   const row = ladderRow(c.id); if (!row) { W.cur = null; return; }
   if (c.st === 'meet') {
     const r = SHIP.occasions.find(x => x.key === c.occ);
@@ -49303,7 +49311,7 @@ WORK_MECH.t2 = {
 function promoTestTell(c) {                              // the start in play: Calder's word (or a toast), the goal to the job
   promoSay(c.by, 'test.start', 'Your test job\'s on the board: one of Four\'s scrubbers. Take it when you\'re ready. I\'ll be with you.');
   const j = SHIP.jobs.find(x => x.id === c.j), m = j && typeof machineById === 'function' ? machineById(j.machine) : null;
-  if (m && typeof setGoal === 'function' && !(SHIP.player && SHIP.player.track)) setGoal({ deck: m.deck, room: m.room, label: 'Your test job' });
+  if (m && typeof setGoal === 'function' && !(SHIP.player && (typeof trackFresh === 'function' ? trackFresh() : SHIP.player.track))) setGoal({ deck: m.deck, room: m.room, label: 'Your test job' });
 }
 function promoPassed(t) {                                // the test job turned in: passed, whatever it took
   const W = SHIP.works, c = W && W.cur; if (!W || !W.test || W.test.passed) return false;
@@ -49575,6 +49583,29 @@ function promoCerEscort(p, t) {                          // worksEscort's 24p pa
 WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('ceremony2')) promoPip(); });
 
 // ---- slot: Works career engineer (section 24p). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// FX1 (patch-p5-fix1, bug 2): the training meeting's arrow. trainTell put it up at the ask (06:00 for a 09:00 meeting)
+// with nothing to take it down, so it stayed all day over Clock in and the training job's own arrow. Now trainTick
+// calls trainArrow once a ship minute: while the meeting is asked and told, the arrow is up from TRAIN_LEAD ship
+// minutes before it (over your job's arrow, which comes back after) and down once you're in its room, it has started
+// or it's over. Leave the room before it starts and it comes back; another arrow put up meanwhile (a Tracked item,
+// a beat's) is left alone. Not saved: after a reload it comes back in the window.
+const TRAIN_LEAD = 30;
+const TRAIN_ARROW = { key: null, up: false, lost: false, mine: null };
+function trainArrow(c, now) {
+  const A = TRAIN_ARROW, r = c && c.st === 'meet' ? SHIP.occasions.find(x => x.key === c.occ) : null;
+  if (typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined') return;
+  const ours = !!A.mine && IX_GOAL === A.mine;
+  if (A.up && !ours) { A.up = false; A.lost = true; }    // something else has the arrow now
+  if (!r) { if (ours) clearGoal(); A.up = false; A.mine = null; return; }
+  if (A.key !== r.key) { if (ours) clearGoal(); A.key = r.key; A.up = A.lost = false; A.mine = null; }
+  let here = false; try { here = deckDef.num === r.deck && roomAt(...player.here()) === r.room; } catch (e) { here = false; }
+  const want = c.told && !r.met && r.status === 'asked' && now >= r.at - TRAIN_LEAD && now < r.at + r.len && !here && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
+  if (want && !A.up && !A.lost) {
+    const row = ladderRow(c.id); if (!row) return;
+    setGoal({ deck: r.deck, room: r.room, label: mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) });
+    A.mine = IX_GOAL; A.up = true;
+  } else if (!want && A.up) { if (ours) clearGoal(); A.up = false; }
+}
 // ---- end of slot: Works career engineer ----
 
 
