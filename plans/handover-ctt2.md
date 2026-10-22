@@ -48,7 +48,15 @@ CTT (idle) session_01SgEbMMMNPRP2E7DbiDyiw4.
 - PAD_BUILT on claude/controller (0.90.3): ['base','deck','pick','panels']; CP1 will add 'games' (P2), 'marks' (P3),
   'settings' (P4); P5 gets no name.
 
+## RV5's review (PASS WITH FIXES, 13:34) and what was done
+C1 the tap run waits as long as the pad run read the line (pick_one's presses); C2 facing and the crowded seat FAIL as
+"not proven" when their case doesn't come up (the lone 'seat' on Deck 4 still only says none: open); C3 faults for CT1's
+off, quiet, base, deck, pick1; C4 is CP2's (tiles' real-time wait: told CP2); C5 below; C6 one frame between choosing
+and reading the line in the crowded seat; C7 part_crowded_named: "Talk to X" with Y on its point, A must talk to X.
+
 ## How to run (as CTT's note), plus
+**idle, calls and touch compare pictures: run them with no other browser check running** (RV5's C5; two at once is
+fine for the rest).
 `CTL_BUILT=games CADET_CHROME=/opt/pw-browsers/chromium python3 controller_check.py g2.html tiles disc screens --mutants`.
 Two checks at once at most, each with its own CADET_WORK (copy `three/` into it). Builders' games:
 `git show origin/claude/controller-pN:starship-cadet.html > gN.html`.

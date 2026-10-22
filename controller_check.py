@@ -803,9 +803,10 @@ OUTCOME = r"""(() => ({ at: [Math.round(player.obj.position.x * 100), Math.round
   talking: DECK_CREW.filter(a => a.talking > 0).map(a => a.p.id).sort(),
   open: [...document.querySelectorAll('[role=dialog],.lift,.device')].filter(e => !e.hidden && e.getBoundingClientRect().width > 0).map(e => e.id || e.className).sort() }))()"""
 HINT = "(() => { const h = document.getElementById('padHint'); return h && !h.hidden && h.getBoundingClientRect().width > 0 ? h.textContent : null; })()"
-def pick_one(pw, src, tag, by_pad, n):
+def pick_one(pw, src, tag, by_pad, n, presses=0):
     # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
-    # the same in the pad run and the tap run
+    # the same in the pad run and the tap run: the pad run goes first, and the tap run waits 7 frames for each D-pad
+    # press the pad run made (presses) before it taps
     r = Run(pw, src, f'{tag}_{n}', mode='pad' if by_pad else 'none', plug={} if by_pad else None, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)")
     r.step(10)
@@ -818,23 +819,24 @@ def pick_one(pw, src, tag, by_pad, n):
     r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
     r.step(72); hints = []; found = not by_pad   # (the ring's search needs about 2 s after the check moves you)
-    for k in range(9):
-        if not by_pad: r.step(7); continue
+    if not by_pad and presses: r.step(7 * presses)
+    for k in range(9 if by_pad else 0):
         h = r.ev(HINT); hints.append(h)
         if h and any(w in h.lower() for w in t['words']): found = True; break
-        r.press('RIGHT'); r.step(4)
+        r.press('RIGHT'); r.step(4); presses += 1   # (a press is 3 frames)
     if by_pad: r.press('A')
     else:
         pt = r.ev(f"({TAP_POINT.replace('TARGET_AT_', TARGET_AT)})({json.dumps(t)})")
         if pt: r.page.mouse.click(*pt)
         else: print(f'  ({name}: no point on screen reaches it by a tap)')
         r.step(3)
-    r.step(90); out = [name, hints[-1] if found and hints else hints, r.ev(OUTCOME), found]
+    r.step(90); out = [name, hints[-1] if found and hints else hints, r.ev(OUTCOME), found, presses]
     r.close(); return out, len(ts)
-def pick_play(pw, src, tag, by_pad):
+def pick_play(pw, src, tag, by_pad, pad=None):
+    # pad: the pad run's results, for the tap run to wait as long as each pad run read the line
     out, n = [], 0
     while True:
-        o, total = pick_one(pw, src, tag + ('_pad' if by_pad else '_tap'), by_pad, n)
+        o, total = pick_one(pw, src, tag + ('_pad' if by_pad else '_tap'), by_pad, n, pad[n][4] if pad and n < len(pad) else 0)
         if o is None: break
         out.append(o); n += 1
     return out
@@ -853,7 +855,7 @@ def part_facing(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_facing', mode='pad', plug={}, w=390, h=844); r.step(10); r.press('B'); r.step(2)
     sp = r.ev(FACING_SPOT)
-    if not sp: print('  facing: no spot on Deck 4 with two things on opposite sides and nothing else beside them'); r.close(); return fails
+    if not sp: r.close(); return ['facing: not proven (no spot on Deck 4 with two things on opposite sides and nothing else beside them)']
     for name, ang in (sp['a'], sp['b']):
         r.ev(f"player.stop(); player.obj.position.copy(cellPos({sp['cell'][0]}, {sp['cell'][1]})); target.copy(player.obj.position).setY(.7); player.face = {ang}")
         r.step(72); h = r.ev(HINT)
@@ -864,20 +866,48 @@ def part_facing(pw, src, tag):
 # tables beside a free seat with someone seated next to it, let the ring settle (its search runs a little each frame and
 # a D-pad press starts it again, so after the check moves you it waits about 2 s), then step through what's offered. A
 # "Sit" whose point on screen has a person on it at the moment A is pressed is the hard case (PR9's c7): A must not talk
-# to them (the game finds another point, or does nothing). Without such a one, the first "Sit". Either way A must not
-# open a chat. (Making it the ring's choice is done as the D-pad does it, in the same moment, so the crowd can't move.)
+# to them (the game finds another point, or does nothing). Without such a one the case is not proven: a failure, so a
+# change to the deck can't quietly switch it off. (It is made the ring's choice as the D-pad does it, one frame before A,
+# so the crowd can't move away in between.)
 RING_SEL = r"""(() => { const s = typeof PAD_PICK !== 'undefined' ? PAD_PICK.sel : null; if (!s || !s.s) return null;
   const a = crewAtScreen(s.s[0], s.s[1]); return { key: s.key, on: a ? a.p.name : null }; })()"""
 RING_PICK_CROWDED = r"""(() => { const P = PAD_PICK; for (const t of P.list) { if (!t.key.startsWith('place:') || !t.s) continue; const a = crewAtScreen(t.s[0], t.s[1]);
   if (a) { P.sel = t; P.chosen = true; P.n = P.every; P.job = null; return [t.key, a.p.name]; } } return null; })()"""
-def part_crowded(pw, src, tag):
-    fails = []
-    r = Run(pw, src, f'{tag}_crowd', mode='pad', plug={}, w=390, h=844)
+RING_PICK_NAMED = r"""(() => { const P = PAD_PICK; for (const t of P.list) { if (!t.key.startsWith('crew:') || !t.s) continue; const a = crewAtScreen(t.s[0], t.s[1]);
+  if (a && 'crew:' + a.p.id !== t.key) { P.sel = t; P.chosen = true; P.n = P.every; P.job = null; return [t.key, a.p.name]; } } return null; })()"""
+CREW_NAME = "(k => { const a = DECK_CREW.find(a => 'crew:' + a.p.id === k); return a ? a.p.name : null; })"
+def crowded_setup(pw, src, tag):
+    r = Run(pw, src, tag, mode='pad', plug={}, w=390, h=844)
     r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
     r.ev("skipTo((SHIP.time.day - 1) * 1440 + 7 * 60 + 40); goToDeck(3, null)"); r.step(240)
     t = r.ev(CROWDED_SEAT)
-    if not t or not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return ['crowded seat: no free seat beside someone seated in the Deck 3 mess at 07:40']
-    r.ev("toastEl.classList.remove('show')"); r.step(72)
+    if not t or not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return None, None
+    r.ev("toastEl.classList.remove('show')"); r.step(72); return r, t
+# (RV5's C7) in the same crowd: "Talk to X" whose point on screen is on someone else, Y, at the moment A is pressed. A must
+# talk to X (the game finds X again), never Y. Without such a one: said, not a failure (the seat case above is the proof
+# that the crowd is there).
+def part_crowded_named(pw, src, tag):
+    r, t = crowded_setup(pw, src, f'{tag}_crowd2')
+    if not r: return []
+    want = other = None
+    for k in range(30):
+        got = r.ev(RING_PICK_NAMED)
+        if got:
+            r.step(1); sel = r.ev(RING_SEL)
+            if sel and sel['key'] == got[0] and sel['on'] and sel['on'] == got[1]: want, other = got; break
+        r.step(4)
+    if not want: print('  crowded talk: no "Talk to" in the ring with someone else on its point came up (not tried)'); r.close(); return []
+    name = r.ev(f"({CREW_NAME})({json.dumps(want)})"); h = r.ev(HINT)
+    r.press('A'); r.step(90); o = r.ev(OUTCOME)
+    print(f'  crowded talk: A on "{h}" with {other} on its point: chat {o["chat"]}')
+    fails = []
+    if not o['chat'] or name not in o['chat']: fails.append(f'crowded talk: A on "{h}" ({other} on its point) should talk to {name}: chat {o["chat"]}')
+    if r.errors: fails.append('crowded talk: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+def part_crowded(pw, src, tag):
+    fails = []
+    r, t = crowded_setup(pw, src, f'{tag}_crowd')
+    if not r: return ['crowded seat: not proven (no free seat beside someone seated in the Deck 3 mess at 07:40)']
     seen = []
     for k in range(10):
         h, sel = r.ev(HINT), r.ev(RING_SEL)
@@ -889,24 +919,28 @@ def part_crowded(pw, src, tag):
     if not sits: r.close(); return fails + ['crowded seat: the ring never offered a seat in the crowded mess']
     # the hard case at the moment of pressing: a seat in the ring with a person on its point now (the crowd moves, so
     # look for one for up to about 4 s); it becomes the ring's choice, as the D-pad makes it, and A is pressed at once
+    # (one frame after choosing, so the line has been redrawn for the choice; then the person must still be on its point)
     on = None
     for k in range(30):
         got = r.ev(RING_PICK_CROWDED)
-        if got: want, on = got; break
+        if got:
+            r.step(1); sel = r.ev(RING_SEL)
+            if sel and sel['key'] == got[0] and sel['on']: want, on = got[0], sel['on']; break
         r.step(4)
-    if not on: want = sits[0][1]['key']; r.ev(f"(() => {{ const P = PAD_PICK, t = P.list.find(t => t.key === {json.dumps(want)}); if (t) {{ P.sel = t; P.chosen = true; P.n = P.every; P.job = null; }} }})()")
+    if not on: r.close(); return fails + ['crowded seat: not proven (no seat in the ring with a person on its point came up in about 4 s)']
     h = r.ev(HINT)
     r.press('A'); r.step(90); o = r.ev(OUTCOME)
-    print(f'  crowded seat: A on "{h}" ({want}' + (f', a person on its point: {on}' if on else ', no seat with a person on its point came up') + f'): chat {o["chat"]}, act {o["act"]}')
+    print(f'  crowded seat: A on "{h}" ({want}, a person on its point: {on}): chat {o["chat"]}, act {o["act"]}')
     if o['chat']: fails.append(f'crowded seat: A on "{h}" ({want}) talked to someone instead ({o["chat"]})')
     if r.errors: fails.append('crowded seat: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
     fails += part_crowded(pw, src, tag)
+    fails += part_crowded_named(pw, src, tag)
     P = pick_play(pw, src, f'{tag}_pick', True)
-    T = pick_play(pw, src, f'{tag}_pick', False)
-    for (kind, hint, op, found), (_, _, ot, _) in zip(P, T):
+    T = pick_play(pw, src, f'{tag}_pick', False, P)
+    for (kind, hint, op, found, _), (_, _, ot, _, _) in zip(P, T):
         if hint == 'nowhere to stand': print(f'  {kind}: nowhere to stand beside it'); continue
         if not found: fails.append(f'{kind}: the bottom line never named it ({[h for h in hint if h][:4]})'); print(f'  {kind}: not reached by the D-pad'); continue
         if 'seat' in kind:
@@ -2037,6 +2071,20 @@ MUTANTS['drop'] = {
   'no pause after a drop-out': ('src', "if (PAD.goneUsed && !PAUSE.on) {", "if (false) {"),
   'the card keeps saying disconnected': ('src', "else if (!on && PAD_MARK.line) {", "else if (false) {"),
 }
+# CT1's old parts (off quiet base deck pick1), RV5's C3: faults written by CTT2 from section 26's own lines
+MUTANTS['off'] = {
+  'the switch ignored: a hello with PAD_ON off': ('src', "if (PAD_ON) { addEventListener('gamepadconnected', padHello);", "if (true) { addEventListener('gamepadconnected', padHello);"),
+}
+MUTANTS['quiet'] = {
+  'an element made at load with the switch on': "if (PAD_ON) document.body.appendChild(document.createElement('i'));\n",
+}
+MUTANTS['base'] = {
+  'the D-pad repeats too soon': ('src', "const PAD_REP = { first: .5, every: .25 };", "const PAD_REP = { first: .25, every: .25 };"),
+  'a touch does not hand back': ('src', "addEventListener('pointerdown', back, true); ", ""),
+  'two pads: the last to press is not in charge': ('src', "  for (const g of pads) if (g.index !== PAD.idx && g.buttons.some(b => b && b.pressed)) { padRelease(); PAD.idx = g.index; }", ""),
+}
+MUTANTS['deck'] = {k: MUTANTS['walk'][k] for k in ('PR9 c1: the stick walks the wrong way', 'PR9 c2: letting go keeps walking')}
+MUTANTS['pick1'] = {k: MUTANTS['pick'][k] for k in ('PR9 c5: A does nothing', 'RV2 t3_noop_crew: A ignores crew')}
 # CP1, claude/controller-p1 cff5bab (and claude/controller 5ae76569, 0.90.3)
 MUTANTS['api'] = {
   'panel order lost': ('src', "  if (at < 0) PAD_PANELS.push(row); else PAD_PANELS.splice(at, 0, row);", "  PAD_PANELS.push(row);"),
