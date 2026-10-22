@@ -61,3 +61,28 @@ lines (introArrowClear, introArrowTick, introTick), intro_check part 13b, player
   run with a_start's speech bubble a few px to the side (14812 px), two reruns 0. So: noise, nothing from the change.
 - Side note (both builds, not FX2's): my skip to Day 1 08:30 leaves the intro on step 'bunk', and at 08:55 a "Put your
   bag in your wardrobe" arrow shows though the bag is stowed. Likely my probe's skip; not filed.
+
+## FX3: claude/p5-fix3 3b7b13db (fix 15; items 33, 38 and the Cart dock 1 stop): PASS WITH FIXES (the check only)
+
+Reviewed against its parent 2cdc1dfc. Not on arrows-c 6610dc7: the branch is integration b9f053ba + FX3's fixes 10-14
++ fix 15, so it brings fixes 10-14 along (the build master should know). What fix 15 changed: 15b's ixJobStep (the lathe),
+new ixPinTap, one line in 15's playerFloorTap, the dock clause in 15's choreRayTap, an interactions_check part, the
+build table.
+
+- **33, the pin on the machine you need.** "Make a bracket at the lathe" with the pin on the lathe (was "... in the
+  machine shop", the room's middle). At 390x844 with the crew on, a real tap at the pin made the part from three of four
+  camera turns; on the fourth, Chief Calder and two crew stood in front of the lathe and the tap opened her card (a person
+  in front takes the tap, as FX3 says; the same on 2cdc1dfc). Note: MAKE_AT's first place (5-make-1) is always the one
+  pointed at, even when someone is using it and 5-make-2 is free.
+- **38, the job board pin.** "Turn it in at the job board": at 900x760 (FX3's check) a tap at the pin opens the board
+  from all four turns (on 2cdc1dfc only one of four). At 390x844 from where the check stands you, two turns have the
+  board off screen (only the edge arrow), so there's no pin to tap; the two on screen open it. Not a regression.
+- **Cart dock 1.** Standing in the Cart bay (room 'm'), a real click on Cart dock 1 does the cart stop from every turn
+  ("Done here. 7 stops to go"); on 2cdc1dfc three of four turns gave the dock's machine card instead (p_dock2.py).
+- **Check (the fix needed):** the new part's Cart dock line passes on 2cdc1dfc too, so it doesn't prove the dock
+  change: it stands you 1.5 m from the dock's spot, which is in the machine shop on the other side of the wall, and calls
+  playerTap with the last click's ray instead of clicking the dock. Suggested: stand in the Cart bay and click the dock
+  on screen (as p_dock2.py does); that fails on 2cdc1dfc. The lathe and board lines do fail on 2cdc1dfc (lathe 3 of 4,
+  board 3 of 4).
+- interactions_check OK on the tip; check_fast QUICK CHECK OK (151 s); cadet_test strictly alone vs 2cdc1dfc ALL
+  IDENTICAL.
