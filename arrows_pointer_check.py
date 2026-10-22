@@ -98,7 +98,21 @@ def run(path):
             p = where(); check(not p['up'] and p['now'] is None, f'a meeting on screen hides it ({p})')
             g.ev("deviceDialogue(null)"); g.step(2); p = where('#devBody button.app[data-app="mail"]')
             check(p['up'] and p['target'], f'and it comes back after ({p})')
-            g.ev("pointDrop('x:meet'); deviceClose()"); g.step(2)
+            # covered (RV2): the pause card over the Device button, and a panel laid over a tile: no ring while covered
+            g.ev("pointDrop('x:meet'); deviceClose(); pointAsk({ id: 'x:cover', path: pointToApp('mail', 'Mail') })"); g.step(2)
+            check(where('#devBtn')['up'], 'covered: the pointer is up before the cover')
+            g.ev("pauseSet(true)"); g.step(2); p = where(); shot('paused')
+            check(not p['up'], f'covered: the pause card over the Device button should hide it ({p})')
+            g.ev("pauseSet(false)"); g.step(2)
+            check(where('#devBtn')['up'], 'covered: it should come back after the pause')
+            g.page.click('#devBtn'); g.ev("while (TIP_Q.length) tipDone()"); g.step(2)
+            g.ev("""(() => { const r = tileFor('mail').getBoundingClientRect(), c = document.createElement('div'); c.id = '__cover';
+              Object.assign(c.style, { position: 'fixed', left: (r.left - 10) + 'px', top: (r.top - 10) + 'px', width: (r.width + 20) + 'px', height: (r.height + 20) + 'px', zIndex: 4, background: '#123' });
+              document.body.appendChild(c); })()"""); g.step(2); p = where()
+            check(not p['up'], f'covered: a panel over the tile should hide it ({p})')
+            g.ev("document.getElementById('__cover').remove()"); g.step(2)
+            check(where('#devBody button.app[data-app="mail"]')['up'], 'covered: back once the panel goes')
+            g.ev("pointDrop('x:cover'); deviceClose()"); g.step(2)
             check(not where()['up'], 'pointDrop ends it')
             # (b) a choice card's k-th button
             g.ev("window.__pick = null; deviceChoose({ title: 'Test card', text: 'Which?', choices: ['First', 'Second', 'Third'] }, k => { __pick = k; }); pointAsk({ id: 'x:card', path: pointCard(1, 'This one', 'Test card'), once: 2 })")
