@@ -7,6 +7,8 @@
 #   off:    with the switch off, a pad saying hello and pressing buttons changes nothing (no PAD.live, no body.pad)
 #   quiet:  with the switch on and no pad: nothing new on the page (elements, styles, body classes), PAD.live false
 #   api:    (P1) the panel helper's API: padPanelAdd's order, first button and B; padOwn taking the D-pad, A and frames
+#   lists:  (P1) the right stick scrolls a long list, the triggers page; the D-pad follows into it; a text box: A keeps
+#           it, B leaves it first; LB and RB are the device's Back and Home
 #   base:   hello; a press fires once and marks the controller in use (body.pad); its release; the dead zones (sticks,
 #           triggers); a held D-pad repeats (after 0.5 s, then every 0.25 s); a touch, the mouse or the wheel hands
 #           back (body.pad goes); the pad families from their names; a non-standard pad; two pads (the last to press
@@ -284,8 +286,24 @@ REACH = """(() => {
   const name = e => (e.id ? '#' + e.id : '') + ' ' + (e.getAttribute('aria-label') || e.textContent || '').trim().slice(0, 30);
   return { layer: L.id || L.className, items: items.length, reached: seen.size, missing: items.filter(e => !seen.has(e)).map(name) };
 })()"""
+# (P1, PR9's cross-check) the same panel read from the page, not from padItems: every visible thing a finger could press
+# (a button or form box, role=button, an onclick, a pointer cursor) that the highlight can't land on (not in padItems, not
+# inside one). Allowed: disabled buttons; the Maps app's drawing (its room taps are the Rooms list's buttons).
+CLICKY = """(() => { const L = padLayer(); if (!L || L === PAD_HUD) return []; const items = padItems(L);
+  const vis = e => e.getClientRects().length && getComputedStyle(e).visibility !== 'hidden' && !e.closest('[hidden]') && e.getAttribute('aria-hidden') !== 'true';
+  const out = [];
+  for (const e of L.querySelectorAll('*')) {
+    if (!vis(e) || e.disabled || e.closest('button:disabled') || items.includes(e) || items.some(i => i.contains(e) || e.contains(i))) continue;
+    if (DEV.app === 'maps' && e.closest('svg')) continue;
+    const cs = getComputedStyle(e), clicky = e.onclick || cs.cursor === 'pointer' || e.getAttribute('role') === 'button' || /^(BUTTON|INPUT|SELECT|TEXTAREA|A)$/.test(e.tagName);
+    if (!clicky || cs.pointerEvents === 'none' || e.parentElement && out.some(o => o.el === e.parentElement)) continue;
+    out.push({ el: e, d: e.tagName.toLowerCase() + (e.id ? '#' + e.id : '') + ' ' + (e.textContent || '').trim().slice(0, 24) + (e.onclick ? ' [onclick]' : '') });
+  }
+  return out.map(o => o.d); })()"""
 def sweep(p, what, back=True, must=False):
     p.step(3)
+    miss = p.ev(CLICKY)
+    check(not miss, f'panels: {what}: things a finger can press that the highlight cannot reach: {miss[:6]}')
     r = p.ev(REACH)
     if not check(r is not None, f'panels: {what}: no panel on top'): return None
     check(r['items'] > 0 and not r['missing'], f'panels: {what} ({r["layer"]}): {r["reached"]} of {r["items"]} buttons reached by the D-pad; missing {r["missing"][:6]}')
@@ -315,6 +333,27 @@ def part_panels(pw):
     # a conversation: the first person on the deck whose card opens (someone asleep only gets a toast)
     if check(p.ev("DECK_CREW.some(a => { chatOpen(a.p); const c = document.getElementById('chat'); return c && !c.hidden; })"), 'panels: no conversation card would open'):
         sweep(p, 'chat'); n += 1
+    # (P1) more panels: the ladder (B = Escape), the queue's question (B = Stay), the waking card and a clock screen
+    p.ev('ladderPanel()'); sweep(p, 'ladder'); n += 1
+    p.ev('queueAsk()'); r = p.ev("(padLayer() || {}).id")
+    if check(r == 'qAsk', f'panels: the queue question is not on top ({r})'): sweep(p, 'queue question'); n += 1
+    p.ev("sickNote('Test', 'A card you must answer.', [['One', () => {}], ['Two', () => {}]])"); sweep(p, 'waking card', must=True); p.press('a'); p.step(2)
+    check(p.ev("(padLayer() || {}).id") != 'sickCard', 'panels: A on the waking card should answer it'); n += 1
+    p.ev("clockScreen('Test')"); r = p.ev("(padLayer() || {}).id")
+    if r == 'clockScreen':
+        sweep(p, 'clock screen'); n += 1
+    else: p.ev("(() => { const e = document.getElementById('clockScreen'); if (e) e.hidden = true; })()")
+    # a tip card on the deck: B puts it away; the heads-up cards are among the screen-edge buttons (D-pad up, A)
+    p.ev("SHIP.device.settings.tips = true; tipShow('padTest', 'A test tip.')"); p.step(2)
+    if check(p.ev("!document.getElementById('devTip').hidden"), 'panels: the test tip did not show'):
+        p.press('b'); p.step(2); check(p.ev("document.getElementById('devTip').hidden"), 'panels: B on the deck should put a tip card away')
+    p.ev("SHIP.device.settings.tips = false; tipShow('padTest2', 'Another.')")
+    p.ev("DEVICE_SKIN.address({ text: 'Test address.' })"); p.step(2)
+    p.press('up'); p.step(2)
+    check(p.ev("padItems(PAD_HUD).includes(document.getElementById('devAddr'))"), 'panels: the address card should be among the screen-edge buttons')
+    p.ev("padFocusTo(document.getElementById('devAddr'))"); check(p.ev("document.activeElement.id") == 'devAddr', 'panels: the highlight should land on the address card')
+    p.press('a'); p.step(2); check(p.ev("document.getElementById('devAddr').hidden"), 'panels: A on the address card should put it away')
+    p.press('b'); p.step(2)
     # the device: home, then every app on it, each by A from its tile; B back home, B again closes
     p.press('y'); sweep(p, 'device home', back=False); n += 1
     apps = p.ev("[...DEVICE_APPS.values()].filter(a => !(a.hidden && a.hidden()) && a.id !== 'home' && a.id !== 'boot').map(a => a.id)")
@@ -400,6 +439,10 @@ def part_settings(pw):
     check(p.ev('camera.zoom') < z0, 'settings: flipped, up on the right stick should zoom out')
     p.axes([0, 0, 1, 0]); p.step(2); k = p.ev('player.steer && player.steer.k'); p.axes([0, 0, 0, 0]); p.step(2)
     check(k is not None and k <= .6, f'settings: gentle walking at full push: {k}')
+    # vibration: on (it held), a buzz of a known kind reaches the pad; an unknown kind, or vibration off, doesn't
+    p.js("window.__bz = 0; window.__pads[0].vibrationActuator = { playEffect: () => { window.__bz++; return Promise.resolve(); } }")
+    r = [p.ev("padBuzz('done')"), p.ev("padBuzz('nope')")]; p.ev("PAD_SET.buzz = false"); r.append(p.ev("padBuzz('pick')")); p.ev("PAD_SET.buzz = true")
+    check(r == [True, False, False] and p.js('window.__bz') == 1, f'settings: vibration: {r}, {p.js("window.__bz")} buzzes')
     # P5's one-hand layouts (a stand-in PAD_LAYOUTS): the buttons show, right turns the sticks over, back to normal clears both
     p.ev("window.PAD_LAYOUTS = { left: Object.fromEntries(PAD_BTN.map((n, i) => [n, PAD_BTN[(i + 1) % 16]])), right: Object.fromEntries(PAD_BTN.map(n => [n, n === 'a' ? 'rs' : n === 'rs' ? 'a' : n])) }")
     labels = p.ev("padSetView().blocks.flatMap(b => (b.items || []).map(i => i.label))")
@@ -431,6 +474,9 @@ def part_api(pw):
       padPanelAdd('tstPanel', { before: 'lift', first: '#t2', back: () => { __tst.back++; d.hidden = true; } }); })()""")
     p.step(3)
     check(p.ev("(padLayer() || {}).id") == 'tstPanel', 'api: an added panel should be on top')
+    p.ev("(() => { const c = document.createElement('div'); c.id = 'tClk'; c.textContent = 'tap me'; c.onclick = () => {}; document.getElementById('tstPanel').appendChild(c); })()")
+    check(any('tClk' in m for m in p.ev(CLICKY)), 'api: the page cross-check should find a box with an onclick the highlight cannot reach')
+    p.ev("document.getElementById('tClk').remove()")
     check(p.ev("PAD_PANELS.findIndex(r => r[0] === 'tstPanel') + 1 === PAD_PANELS.findIndex(r => r[0] === 'lift')"), 'api: before: should put it just above the lift')
     check(p.ev("document.activeElement && document.activeElement.id") == 't2', 'api: first: should land the highlight on #t2')
     p.press('left'); check(p.ev("document.activeElement.id") == 't1', 'api: D-pad left should move to #t1')
@@ -440,11 +486,56 @@ def part_api(pw):
     p.press('right'); p.press('a'); p.step(2)
     check(p.ev("__tst.moves.join()") == 'right' and p.ev("__tst.a") == 1 and p.ev("document.activeElement.id") == 't3', f'api: padOwn should take the D-pad and A: {p.ev("JSON.stringify(__tst)")}')
     check(p.ev("__tst.frames") > 0, 'api: padOwn frame should run while its panel is on top')
+    # (P1, CP2's alarm case) a far button in the same row beats a wide one just below; (CP4's) a redraw keeps the place
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstRow'; d.style.cssText = 'position:fixed;left:20px;top:420px;width:340px;z-index:99';
+      const draw = () => { d.innerHTML = '<div style="display:flex;justify-content:space-between"><button id="rm" style="width:40px">-</button><button id="rp" style="width:40px">+</button></div><button id="rw" style="width:100%;margin-top:6px">Set</button><button id="rx">Again</button>';
+        d.querySelector('#rx').onclick = draw; d.querySelector('#rw').onclick = draw; };
+      draw(); document.body.appendChild(d); padPanelAdd('tstRow', { before: 'pauseCard', first: '#rp', back: () => { d.hidden = true; } }); })()""")
+    p.step(3); check(p.ev("document.activeElement.id") == 'rp', 'api: the row panel should start on +')
+    p.press('left'); check(p.ev("document.activeElement.id") == 'rm', f'api: D-pad left from + should go across to -, not {p.ev("document.activeElement.id")}')
+    p.press('down'); p.press('down'); check(p.ev("document.activeElement.id") == 'rx', f'api: two downs should reach Again ({p.ev("document.activeElement.id")})')
+    p.press('a'); p.step(3); check(p.ev("document.activeElement.id") == 'rx', f'api: after a redraw the highlight should stay on Again, not {p.ev("document.activeElement.id")}')
+    p.press('b'); p.step(2)
+    # (PR9) a touch after the pad: the button the pad highlighted loses its focus (no outline for a touch player)
+    p.ev("padFocusTo(document.getElementById('t1'))"); p.step(1)
+    p.ev("document.querySelector('canvas').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true }))"); p.step(2)   # a touch that moves no focus itself
+    check(p.ev("document.activeElement && document.activeElement.id") != 't1', 'api: a touch should take the focus off the pad\'s highlighted button')
+    check(p.ev("getComputedStyle(document.getElementById('t1')).outlineStyle") == 'none', 'api: no outline left on it after a touch')
+    p.press('x'); p.step(2); p.ev("padFocusTo(document.getElementById('t3'))")
     p.press('b'); p.step(2)
     check(p.ev("__tst.back") == 1 and p.ev("padLayer()") is None, 'api: B should run the panel\'s back and close it')
     p.close()
 
-PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('settings', part_settings)]
+def part_lists(pw):
+    # (P1) long lists and text boxes: the right stick scrolls, the triggers page, the D-pad follows into the scrolled-away
+    # part; A in a text box keeps it (the system keyboard), B leaves the box first, then closes; LB and RB in the device
+    p = Pad(pw, ON)
+    p.plug(); p.press('x'); p.log()
+    p.ev("""(() => { const d = document.createElement('div'); d.id = 'tstList'; d.style.cssText = 'position:fixed;left:20px;top:100px;width:200px;height:300px;z-index:99;display:flex;flex-direction:column';
+      d.innerHTML = '<input id="tIn" aria-label="Name"><div id="tSc" style="overflow-y:auto;flex:1">' + Array.from({ length: 30 }, (_, i) => '<button style="display:block;width:180px;height:40px" id="b' + i + '">' + i + '</button>').join('') + '</div>';
+      document.body.appendChild(d); padPanelAdd('tstList', { first: '#b0', back: () => { d.hidden = true; } }); })()""")
+    p.step(3)
+    check(p.ev("document.activeElement.id") == 'b0', 'lists: the highlight should start on #b0')
+    p.axes([0, 0, 0, 1]); p.step(10); p.axes([0, 0, 0, 0]); p.step(1)
+    s1 = p.ev("document.getElementById('tSc').scrollTop"); check(s1 > 50, f'lists: the right stick should scroll the list ({s1})')
+    p.press('rt'); s2 = p.ev("document.getElementById('tSc').scrollTop"); check(s2 > s1, f'lists: RT should page down ({s1} -> {s2})')
+    p.press('lt'); s3 = p.ev("document.getElementById('tSc').scrollTop"); check(s3 < s2, f'lists: LT should page up ({s2} -> {s3})')
+    for _ in range(12): p.press('down')
+    check(p.ev("document.activeElement.id") == 'b12', f'lists: twelve D-pad downs should reach #b12, not {p.ev("document.activeElement.id")}')
+    r = p.ev("(() => { const a = document.activeElement.getBoundingClientRect(), b = document.getElementById('tSc').getBoundingClientRect(); return a.top >= b.top - 1 && a.bottom <= b.bottom + 1; })()")
+    check(r, 'lists: the highlighted button should be scrolled into sight')
+    p.ev("padFocusTo(document.getElementById('b0'))"); p.press('up'); check(p.ev("document.activeElement.id") == 'tIn', 'lists: D-pad up from the first button should reach the text box')
+    p.press('a'); check(p.ev("document.activeElement.id") == 'tIn', 'lists: A in a text box should keep it')
+    p.press('b'); check(p.ev("document.activeElement.id") != 'tIn' and p.ev("(padLayer() || {}).id") == 'tstList', 'lists: B in a text box should leave the box, not the panel')
+    p.press('b'); check(p.ev("padLayer()") is None, 'lists: B again should close the panel')
+    # the device: LB is its Back, RB its Home
+    p.press('y'); p.step(3); p.ev("deviceShow('mail')"); p.step(3); check(p.ev("DEV.app") == 'mail', 'lists: the Mail app did not open'); p.press('lb'); p.step(2)
+    check(p.ev("DEV.open && DEV.app") == 'home', f'lists: LB in an app should go back ({p.ev("DEV.app")})')
+    p.ev("deviceShow('mail')"); p.step(3); p.press('rb'); p.step(2)
+    check(p.ev("DEV.open && DEV.app") == 'home', f'lists: RB in an app should go home ({p.ev("DEV.app")})')
+    p.close()
+
+PARTS = [('off', part_off), ('quiet', part_quiet), ('base', part_base), ('deck', part_deck), ('pick', part_pick), ('panels', part_panels), ('api', part_api), ('lists', part_lists), ('settings', part_settings)]
 with sync_playwright() as pw:
     for name, fn in PARTS:
         if ONLY and name not in ONLY: continue
