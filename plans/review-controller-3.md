@@ -59,3 +59,31 @@ RV2's t3_noface and PR9's c7, missed before, are now caught on both 0.90.2 and t
 None of C1-C7 lets a broken build through today. Fixes for CTT2: C1 (frame-for-frame pick), C2 (not-proven cases as
 failures), C3 (faults for CT1's old parts), C4 (CP2's real-time wait), C6 (message). Not yet run by anyone: day, the
 reach faults, the full reach sweep (about 2 h alone).
+
+## 2. CP1's pick fix (claude/controller-pickfix 8d68ad5, on 0.90.4): PASS
+Code: padRaw ranks a thing within about 45 degrees of your facing by its distance, beside 2.6x, behind 3x; a thing found
+from two places (the lift's car and door) keeps both entries (key@position), and padSearch offers the first a finger can
+reach and skips the rest. Runs: CTT2's pick on 0.90.4 FAILs (facing the Wardrobe the ring starts on "Bed"; the lift never
+named); on the fix OK, and 7/7 pick planted faults caught. cadet_test vs 0.90.4, alone: ALL IDENTICAL off and on.
+Question left with CP1: the ring offered "Talk to Olu Farouk" with its point on Emeka Halloran (A re-finds the person?).
+
+## 3. CP4's first use (claude/controller-firstuse, game = 3a086c2; tips 54d2ff9/316ae59/82d2838 only add backlog rows): PASS WITH FIXES
+Code: `PAD_FIRST_USE = { push: .5, hold: .15 }`, `PAD.firm`; until the pad is in use a stick or trigger alone counts only
+past .5 for 0.15 s; button presses (and a trigger past half way) count at once; 3a086c2 gates the left-stick walk on
+PAD.used. Runs: CP4's part firstuse FAILs on 0.90.4 (4 lines), OK on 04a93a2 and 3a086c2; my probes on the fix: two 0.1 s
+firm pushes don't add up (OK), a held drift doesn't count (OK). cadet_test vs 0.90.4, alone: ALL IDENTICAL off and on.
+**The fix:** the view half of the same frame handler isn't gated. On 3a086c2, pad plugged and never pressed: a
+right-stick drift (.37) for 1.5 s zooms 1.62 -> 1.08; a light LT (.4) zooms on to the 0.70 limit; a 0.1 s right-stick
+push turns the view a quarter (azT .785 -> 2.356) without the pad becoming in use. Gate flick and zoom on PAD.used too, and
+add the three cases to firstuse.
+
+## 4. padBuzz beside a visible sign (P4 7631ab6; lead 27's ask from CP5's loose end): PASS
+Four hooks: section 15b's fetch from main storage (buzz, then toast "Main storage: You take ..."), job done at a machine
+and at the cart run (toast "Job done", then buzz), ixStopDone's fetch (buzz, then toast). toast() never drops a message.
+The fifth call, padBuzz('test'), only when vibration is turned on in the Controller settings page.
+
+## 5. Merges into claude/controller
+- 0.90.3 (5ae7656) = P1 cff5bab + the build lines; 0.90.4 (95b6129) = P2 67df90a merged. cadet_test 0.64.14 (f6b9176,
+  the controller's base) -> 0.90.4, alone: ALL IDENTICAL off and on.
+- 0.90.5 (8715b23 + 5010eaf): 8715b23 equals git's own merge of 0.90.4 and P3 47d71ff apart from the build lines and the
+  PAD_BUILT line (games, marks). Suite running.
