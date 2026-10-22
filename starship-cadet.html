@@ -15967,18 +15967,18 @@ function trkDoneCheck() {
 // guideDrop(id). Tracking off (SHIP.player.track === null): only levels 1-2. A goal set directly with setGoal (not yet
 // moved to the queue, or the player's own Tracked choice) stays in charge, and only a level-1 entry shows over it, giving
 // it back when done. Levels 5-6 only show when your job has no step to point at. `once: n` shows an entry at most n times
-// ever (SHIP.guide.seen, saved); the teaching-arrows setting (SHIP.guide.arrows: 'all' | 'first' | 'off', in Settings)
-// ignores `once` on 'all' and drops level-3 entries on 'off'. Also here, on the same switch: a short queue for pop-ups
+// ever (SHIP.guide.seen, saved); the teaching-arrows setting (section 19's Settings row, AC1's teachMode(): 'all' |
+// 'first' | 'off') ignores `once` on 'all' and drops level-3 entries on 'off'. Also here, on the same switch: a short queue for pop-ups
 // (section 11's toast asks guideToast first), so a new one waits a moment instead of wiping the one on screen.
 var GUIDE_ON = false;                                    // var: goalNow and toast (above and below) may ask before this line has run
-const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, warn: [], loop: false, tq: [], pass: false };
+const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, warn: [], loop: false, tq: [], pass: false, mode: null };
 SHIP.guide = (() => {
   const g = SAVED && SAVED.guide, seen = {};
   if (g && g.seen && typeof g.seen === 'object') for (const k in g.seen) if (typeof k === 'string' && k.length < 60 && Number.isInteger(g.seen[k]) && g.seen[k] > 0) seen[k] = Math.min(99, g.seen[k]);
-  return { seen, arrows: g && ['all', 'first', 'off'].includes(g.arrows) ? g.arrows : 'first' };
+  return { seen };
 })();
-SAVE_EXTRA.push(s => { if (!GUIDE_ON) return; const S = SHIP.guide.seen, ks = Object.keys(S); if (ks.length > 300) for (const k of ks.slice(0, ks.length - 300)) delete S[k]; s.guide = { seen: { ...S }, arrows: SHIP.guide.arrows }; });
-const guideMode = () => SHIP.guide.arrows;
+SAVE_EXTRA.push(s => { if (!GUIDE_ON) return; const S = SHIP.guide.seen, ks = Object.keys(S); if (ks.length > 300) for (const k of ks.slice(0, ks.length - 300)) delete S[k]; s.guide = { seen: { ...S } }; });
+const guideMode = () => { if (GUIDE.mode) return GUIDE.mode; let m = 'first'; try { m = typeof teachMode === 'function' ? teachMode() : 'first'; } catch (e) { m = 'first'; } return ['all', 'first', 'off'].includes(m) ? m : 'first'; };   // section 19's Settings row (AC1's teachMode); GUIDE.mode: a test's override
 const guideLimit = e => e.once === true ? 1 : Number.isInteger(e.once) && e.once > 0 ? e.once : 0;   // 0: no limit
 const guideTeach = e => e.level === 3;
 function guideOverSeen(e) { const L = guideLimit(e); return !!L && !(guideMode() === 'all' && guideTeach(e)) && (SHIP.guide.seen[e.id] || 0) >= L; }
@@ -16053,19 +16053,6 @@ function guideTick() {
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
 }
 function guideStart() { if (GUIDE_ON && !GUIDE.loop) { GUIDE.loop = true; requestAnimationFrame(guideTick); } }
-// the teaching-arrows switch in Settings (section 19's app, wrapped here while the queue is on; the user's answer 4)
-{
-  const A = DEVICE_APPS.get('settings');
-  if (A) {
-    const view = A.view, act = A.act, MODE = [['all', 'All'], ['first', 'First time only'], ['off', 'Off']];
-    A.view = (...a) => { const v = view(...a); if (!GUIDE_ON || !v || !Array.isArray(v.blocks)) return v;
-      const i = v.blocks.findIndex(b => b && b.kind === 'text' && b.text === 'Tips'), at = i >= 0 ? i + 2 : v.blocks.length;
-      v.blocks.splice(at, 0, { kind: 'text', text: 'Teaching arrows (the arrow and pointers that show you something new)' },
-        { kind: 'buttons', items: MODE.map(([k, label]) => ({ label, action: { app: 'settings', do: 'arrows', arg: k }, on: guideMode() === k })) });
-      return v; };
-    A.act = (verb, arg) => { if (GUIDE_ON && verb === 'arrows' && MODE.some(m => m[0] === arg)) { SHIP.guide.arrows = arg; GUIDE.rev++; return; } return act ? act(verb, arg) : undefined; };
-  }
-}
 if (GUIDE_ON) guideStart();
 // ---- end of slot: Interactions engineer ----
 

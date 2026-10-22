@@ -8,8 +8,8 @@ Read first: CLAUDE.md, DEV_NOTES "Rules that keep it working", `plans/owners.md`
 **Decisions (the plan's five questions, answered "go with the recommendations", 2026-10-22, as passed on by lead 27):**
 fixes first; the shift's arrows every shift while the shift is tracked, panel pointers the first three times
 (`once: 3`); a training meeting may take the arrow from 15 minutes before, the job's arrow back straight after (level 2
-over level 4); a Settings switch for teaching arrows, all / first time only / off, default first time only (B builds
-it, see "The Settings switch"); the burst pipe's job taken at the pipe (F4).
+over level 4); a Settings switch for teaching arrows, all / first time only / off, default first time only (C builds
+it, B reads it: see "The Settings switch"); the burst pipe's job taken at the pipe (F4).
 
 **Both pieces start switched off** (`GUIDE_ON = false`, `POINT_ON = false`): with the switch off the game is identical
 (cadet_test ALL IDENTICAL, no new save keys written). Nothing here calls `R()`. Neither adds anything to the 3D scene:
@@ -117,10 +117,11 @@ Day 2 at 10:00 Torres's invitation was replaced within the same ship minute by t
 Tests (arrows_check part "queue"): five toasts in one frame show in order, none for under 2.5 s, at most 3 waiting;
 an urgent one shows at once; GUIDE_ON false is identical.
 
-### The Settings switch (decision 4; B builds it)
-`SHIP.device.settings.arrows`: 'all' | 'first' (default) | 'off', saved with the other settings, read back defensively
-(anything else is 'first'). Shown in the Settings app next to the tips switch (section 19; agree the exact spot and
-words with the device builder / builder C, who also reads it). Its meaning:
+### The Settings switch (decision 4; agreed 2026-10-22 between AR1 and AC1, the lead's call: AC1 owns it)
+Builder C (AC1, the device seat) adds the row to section 19's Settings app: `SHIP.device.settings.teach`, 'all' | 'first'
+(default) | 'off', kept by 19's settings reader, read through `teachMode()` in 19's slot, shown only while
+`GUIDE_ON || POINT_ON`. B reads it through `guideMode()` (teachMode() if present, else 'first'), so neither branch
+needs the other. Meaning, for B's entries and C's pointers alike:
 - 'first': `once` entries and pointers show their set number of times, as planned.
 - 'all': `once` is ignored for teaching entries (level 3 and pointers): they show every time they apply.
 - 'off': no level-3 entries and no pointers. Levels 1, 2, 4, 5 and 6 are unchanged: the shift's arrows, meetings and

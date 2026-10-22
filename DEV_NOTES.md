@@ -889,7 +889,8 @@ body, 6 you chose. Every entry needs an `until`; `done` helpers `guideAt/Near/Me
 still set directly with `setGoal` keeps working and stays over levels 2-6 (only a level 1 borrows it), so callers can
 move to the queue one at a time (pieces D-F, each in its owner's section; the list of all 31 setGoal calls and what each
 becomes is in plans/arrows-briefs.md). Also on the switch: a pop-up queue (`guideToast`, asked by section 11's `toast`)
-and the teaching-arrows setting (`SHIP.guide.arrows`: 'all' | 'first' | 'off'; a Settings row wrapped in from 15b).
+and the teaching-arrows setting, read through `guideMode()` from section 19's `teachMode()` (AC1's Settings row,
+`SHIP.device.settings.teach`), 'first' without it.
 Saved under the save's top-level `guide` key, only while on. Test: `python3 arrows_check.py BUILD.html` (about 1 minute).
 
 ## Hook register

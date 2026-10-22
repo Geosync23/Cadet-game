@@ -9,10 +9,10 @@
 #   direct:   a goal set with setGoal stays over levels 2-6; a level 1 borrows the arrow and gives it back
 #   body:     levels 5-6 wait while your job has a step to point at
 #   once:     a `once: 2` entry shows twice, survives a reload, and is refused a third time; 'all' ignores it for
-#             teaching entries, 'off' refuses teaching entries
+#             teaching entries, 'off' refuses teaching entries (set through GUIDE.mode, a test override)
 #   toasts:   five pop-ups in one frame show in order, each for at least 2.5 s, at most 3 waiting, repeats merged; an
 #             urgent one ({ now: true }) at once
-#   settings: the Teaching arrows row (All / First time only / Off) under Tips, saved
+#   mode:     the teaching-arrows setting is read from section 19's teachMode() (AC1's Settings row), 'first' without it
 #   size:     SHIP.guide in the save stays small with 400 seen ids (300 kept)
 # Later parts (pieces C-F) add the pointer and the played shift and lessons, following only the arrow.
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three). Run:  python3 arrows_check.py BUILD.html
@@ -73,13 +73,9 @@ def part_off(pg):
     check(st['on'] is False and st['ask'] is False and st['same'] and st['list'] == 0 and not st['loop'], f'off: the queue is not inert: {st}')
     pg.ev("toast('A', 'one'); toast('B', 'two')"); t = pg.ev("document.getElementById('tt').textContent")
     check(t == 'B', f'off: toast no longer shows at once ({t})')
-    pg.ev("deviceShow('settings')"); pg.step(2)
-    txt = pg.ev("document.getElementById('devBody').textContent")
-    check('Teaching arrows' not in txt, 'off: the Settings row shows with the queue off')
-    pg.ev("deviceClose()")
     pg.ev('saveGame()'); sv = pg.ev("JSON.parse(localStorage.getItem(SAVE_KEY))")
     check(sv is not None and 'guide' not in sv, f'off: the save has a guide key ({sorted(sv)[:8] if sv else sv})')
-    print('  off: inert, toast at once, no Settings row, no save key')
+    print('  off: inert, toast at once, no save key')
 
 def part_queue(pg):
     pg.ev("GUIDE_ON = true; GUIDE.list.length = 0; GUIDE.rev++; SHIP.player.track = undefined; clearGoal(); window.__d = {}")
@@ -125,7 +121,7 @@ def part_queue(pg):
 
 def part_once(ctx, path):
     pg = Page(ctx, path); pg.day2()
-    pg.ev("GUIDE_ON = true; SHIP.guide.seen = {}; SHIP.guide.arrows = 'first'; window.__d = {}")
+    pg.ev("GUIDE_ON = true; SHIP.guide.seen = {}; GUIDE.mode = 'first'; window.__d = {}")
     counts = []
     for k in range(3):
         r = ask(pg, id='twice', level=3, once=2); s = shown(pg); counts.append((r, s))
@@ -134,26 +130,17 @@ def part_once(ctx, path):
             pg.ev('saveGame()'); pg.reload(); pg.ev("GUIDE_ON = true; window.__d = {}; clearGoal()")
     check(counts[0] == (True, 'twice') and counts[1] == (True, 'twice') and counts[2][0] is False, f'once: {counts}')
     check(pg.ev("SHIP.guide.seen.twice") == 2, f'once: seen {pg.ev("SHIP.guide.seen.twice")}')
-    pg.ev("SHIP.guide.arrows = 'all'"); r = ask(pg, id='twice', level=3, once=2); check(r, "once: 'all' should ignore once for teaching")
-    pg.ev("guideDrop('twice'); SHIP.guide.arrows = 'off'"); r3 = ask(pg, id='t3', level=3); r2 = ask(pg, id='t2', level=2)
+    pg.ev("GUIDE.mode = 'all'"); r = ask(pg, id='twice', level=3, once=2); check(r, "once: 'all' should ignore once for teaching")
+    pg.ev("guideDrop('twice'); GUIDE.mode = 'off'"); r3 = ask(pg, id='t3', level=3); r2 = ask(pg, id='t2', level=2)
     check(r3 is False and r2 is True, f"once: 'off' should refuse level 3 only ({r3}, {r2})")
-    pg.ev("SHIP.guide.arrows = 'first'")
-    # settings row
-    pg.ev("deviceShow('settings')"); pg.step(2)
-    txt = pg.ev("document.getElementById('devBody').textContent")
-    check('Teaching arrows' in txt and 'First time only' in txt, f'settings: no Teaching arrows row: {txt[:200]}')
-    order = pg.ev("(() => { const t = document.getElementById('devBody').textContent; return [t.indexOf('Tips'), t.indexOf('Teaching arrows'), t.indexOf('Quiet off shift')]; })()")
-    check(order[0] < order[1] < order[2], f'settings: the row should sit under Tips: {order}')
-    pg.ev("deviceDo({ app: 'settings', do: 'arrows', arg: 'off' })"); check(pg.ev("SHIP.guide.arrows") == 'off', 'settings: the Off button did not set it')
-    pg.ev("deviceDo({ app: 'settings', do: 'tips', arg: true })"); check(pg.ev("SHIP.guide.arrows") == 'off', 'settings: another setting changed it')
-    pg.ev('saveGame()'); pg.reload()
-    check(pg.ev("SHIP.guide.arrows") == 'off', 'settings: not kept by the save')
+    pg.ev("GUIDE.mode = null")
+    check(pg.ev("guideMode()") in ('first', 'all', 'off'), 'settings: guideMode without an override')   # section 19's teachMode (AC1) when it's in, else 'first'
     pg.ev("GUIDE_ON = true; SHIP.guide.seen = {}; for (let i = 0; i < 400; i++) SHIP.guide.seen['id' + i] = 1; saveGame()")
     sv = pg.ev("JSON.parse(localStorage.getItem(SAVE_KEY)).guide")
     check(sv and len(sv['seen']) == 300 and len(json.dumps(sv)) < 4000, f'size: {len(sv["seen"]) if sv else None} ids, {len(json.dumps(sv)) if sv else 0} bytes')
     check(not pg.errors, f'once: page errors {pg.errors[:3]}')
     pg.page.close()
-    print('  once, settings, size: twice then refused across a reload; all / off; the Settings row under Tips, saved; 300 ids kept, under 4 KB')
+    print('  once, mode, size: twice then refused across a reload; all / off (the Settings row is section 19\'s, AC1); 300 ids kept, under 4 KB')
 
 def part_toasts(pg):
     pg.ev("GUIDE_ON = true; GUIDE.tq.length = 0; TOAST_AT = -1e9; PAUSE.on = true")   # the clock held: no game pop-ups in between
