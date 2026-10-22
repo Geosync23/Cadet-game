@@ -31186,6 +31186,14 @@ const LINES = JSON.parse([
   '{"text":"Make the bed","id":"zb6ymi"}]',
   ',"inspect.bed.done":[',
   '{"text":"Bed made. Corners and all.","id":"eevnzg"}]',
+  ',"inspect.goal.bed":[',
+  '{"text":"Make your bed: your bunk","id":"1fk12n8"}]',
+  ',"inspect.goal.here":[',
+  '{"text":"Inspection at 06:30: your berth","id":"t2frk"}]',
+  ',"inspect.goal.locker":[',
+  '{"text":"Tidy your locker: your bunk","id":"1xm01jk"}]',
+  ',"inspect.goal.uniform":[',
+  '{"text":"Fresh uniform for inspection: your wardrobe","id":"1gxw46k"}]',
   ',"inspect.locker":[',
   '{"text":"Locker. Things go in it, not on it.","id":"takbwn"},',
   '{"text":"Tidy the locker, please. You\'ll thank yourself.","id":"hlw3t3"}]',
@@ -46008,6 +46016,28 @@ WORK_TICKS.push((now, skip) => {                         // FX3: the evening bef
     else if (skip || m >= INSPECT_ASK[1]) worksAskSend('m3i', by, now);
   }
   if (!skip && m >= 360 && m < INSPECT_AT && inspectDue(d) && inspectHere()) worksBrief('m3i', row.by[0]);
+});
+// FX3 (the week guide's Day 4; the arrows plan's Thursday 06:00 arrows): on an inspection morning from 06:00 the arrow
+// takes you through your berth in order: a fresh uniform at your wardrobe (not changed today), your bunk to make the bed,
+// your locker (the bunk's card), then your bunk room if you've left it, till the walk at 06:30. Clears only its own (PR9);
+// a direct arrow, for the arrow queue off (with it on, AC2's piece F2 asks the queue for inspectGoal)
+const INSPECT_GOAL = { g: null };
+function inspectGoal(d) {
+  const bed = typeof playerBed === 'function' ? playerBed() : null, bp = bed && placeById(bed); if (!bp) return null;
+  const it = inspectItems(d), W = DECKS[bp.deck].wardrobes && DECKS[bp.deck].wardrobes[bed], wp = W && placeById(W.place) ? W.place : null;
+  const g = (place, key, plain) => ({ deck: bp.deck, place, label: worksText(key, plain) });
+  if (!it.uniform && wp) return g(wp, 'inspect.goal.uniform', 'Fresh uniform for inspection: your wardrobe');
+  if (!it.bed) return g(bed, 'inspect.goal.bed', 'Make your bed: your bunk');
+  if (!it.locker) return g(bed, 'inspect.goal.locker', 'Tidy your locker: your bunk');
+  return inspectHere() ? null : g(bed, 'inspect.goal.here', 'Inspection at 06:30: your berth');
+}
+WORK_TICKS.push((now, skip) => {
+  const d = worksDay(now), m = now - (d - 1) * 1440, cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = !!cur && cur === INSPECT_GOAL.g;
+  const q = typeof GUIDE_ON !== 'undefined' && GUIDE_ON;   // the arrow queue on: it steps aside (AC2 wires inspectGoal into the queue, piece F2)
+  const g = !q && !skip && !SIM_AT && m >= 360 && m < INSPECT_AT && inspectDue(d) ? inspectGoal(d) : null;
+  if (!g) { if (ours) clearGoal(); INSPECT_GOAL.g = null; return; }
+  if (cur && !ours || ours && cur.label === g.label && cur.place === g.place) return;   // never over another section's arrow
+  setGoal(g); INSPECT_GOAL.g = IX_GOAL;
 });
 // the drill job: a side job (beside any board job you hold, never the crew's), posted for you at 14:50 on Wednesdays
 // you're on shift as a junior, from the day the row (m3d) opens; yours at once (claimed for you), over at 15:15 whatever
