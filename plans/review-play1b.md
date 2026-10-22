@@ -123,6 +123,55 @@ else is heading for, as you can. Suggest a backlog row; section 14/10's owner (P
 Owners: TQ1 touches sections 10 and 14 (PB2, who agreed the lines), 15 (the player's tap, 5 lines) and 22 (baked
 words).
 
+## K: repeating lines in conversation (note 21; DL1, claude/patch-play1-k)
+
+**Tip reviewed: d38d4cdc** (game sha256 fb0bd3f9...a84f). **Verdict: PASS** (one balance note for the user, below).
+
+Which talk the user meant: DL1 measured all the readings the lead's plan names. Zeke's Day 0 walk-and-talk, 43 lines,
+none twice; the first week's teaching beats (Zeke's training among them), 52, none twice; Noor Park ("Park"), 19 lines
+in three chatty days, one twice; the card's opening lines, at most 3 times each. Talk a while, before the fix: 1,157 of
+2,325 lines were the same 10 filler lines (one 124 times). So Talk a while is by far the likeliest.
+
+What it does (section 22, words through content/ only): the player's ears keep a record of the talk card's everyday
+lines they've heard (hello, start, sit, filler, end, stop, small talk; saved, about 1.7 KB after three days, bounded by
+the size of those pools); a line heard lately loses out to one not heard lately. A talk says at most 2 filler lines,
+none heard in the last 2 ship days. New lines in content/ (filler 10 to 20, end 6 to 16, start 6 to 12, and more),
+plain and in the bank's voice. Section 20 (talkNext, talkStep; the social engineer's) gets two small changes.
+
+The first tip (2aaa40bc) fixed the repeats but, once a talk ran out of lines, kept the last line on the card while the
+meter ran: about 15 real seconds of a 25-second talk with nothing new (9 of 15 ship minutes; base 2). I flagged it;
+d38d4cdc wraps the talk up instead: once you've answered its question and it has said its 2 filler lines, the meter
+finishes, the usual goodbye plays, and you get a full talk's social and friendship.
+
+Measured in the browser's game (my own probe, every crew member, Days 1-3, 222 talks):
+- base: 9-10 lines a talk, 15 ship minutes, longest pause 2 ship minutes.
+- d38d4cdc: 4.5-6 lines a talk, 6-10 ship minutes (mean 8), longest pause 2.5 on average, 5 at most (once, before
+  the question). talk_check part (i): filler 40 lines in 222 talks (at most twice each, was 1,157 with one 124 times),
+  every talk ends "full" with social 30.
+
+**For the user (a balance change, not a fault):** a talk now gives its full social (30) and friendship in about 8
+ship minutes instead of 15, so talking fills your social need about twice as fast per minute. DL1's call, sensible
+(the talk ran out of things to say, not you); the player engineer's and social engineer's numbers, worth a look in the
+balancing pass.
+
+Checks on d38d4cdc: check_fast OK (249 s), cadet_test vs base ALL IDENTICAL, talk_check OK (and the old build fails its
+new part (i) on all three counts), social_check OK, player_check OK (the save budget, with the heard record),
+arc_check OK, lines_check PASS (0 errors, 49 warnings, as before), content_gen --check up to date, names_check OK.
+The new words read well; one small nit for the writers: "a smell of fresh bread on the stairs" (the Wren has a lift
+and a ladder, no stairs). Owners: section 20's two lines (talkNext, talkStep) go to the social engineer.
+
+## Summary
+
+| Branch | Note | Builder | Tip | Verdict |
+| --- | --- | --- | --- | --- |
+| G claude/patch-play1-g | 13, more jobs | JB1 | 3ffb604f (511101405 after it is docs only: backlog row JB1-1, handover) | PASS |
+| H claude/patch-play1-h | 15, open ladder rooms | LR1 | d0f96def | PASS |
+| I claude/patch-play1-i | 19, toilet queue | TQ1 | 0c05e856 (1d2344eb after it is docs only: backlog row TQ1-1) | PASS, follow-up TQ1-1 |
+| K claude/patch-play1-k | 21, repeating lines | DL1 | d38d4cdc | PASS, balance note |
+
+A test merge of integration + E + H + G + I merged the game file with no conflict (only plans/build-table.md, where
+every branch appends a row); names_check OK and the ladder drive passed on it.
+
 ## Answers from the user
 
 (space for the user's comments)
