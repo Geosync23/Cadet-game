@@ -1,5 +1,24 @@
 # CR6 check results
 
+## 0.64.15 re-run (2026-10-22): OK
+
+- **Build:** `claude/integration-next` 31c44cb9 (merge of claude/patch-play1-d 836db6c7), `starship-cadet.html` sha256
+  `0c1f6fb487d6f7f7a47ab3f4f20a475f0ded2b53107030bdd4dbfb6ef8259d2e` (matches the lead's).
+- **OLD:** `claude/integration` 32b699a6 (0.64.14). Not needed: no FAIL.
+- Share as before minus fridays_check (moved to CR1). One check at a time; tiles alone; CADET_WORK=/tmp/work-cr6.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 280 s) | `QUICK CHECK OK in 280 s` |
+| mech_check | OK (exit 0, 228 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 193 s) | `BIGEVENTS CHECK OK` |
+| disc_check | OK (exit 0, 102 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 129 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 154 s) | `JOIN CHECK OK` |
+| food_check 1 7 | OK (exit 0, 73 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 82 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 102 s) | `ALL OK`; `ok a busy washer sends you to a free one` (the first run's NEW FAIL is fixed) |
+
 ## 0.64.15 full round (2026-10-22): FAIL (1 new)
 
 - **Build:** `claude/integration-next` c5c43293 ("0.64.15: playtest patch 1 ..."), `starship-cadet.html` sha256
