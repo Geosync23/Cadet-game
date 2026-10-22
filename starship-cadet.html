@@ -53557,6 +53557,7 @@ padOn('a', () => {                                         // A: the tap, where 
 //   padStep(dir)  one D-pad step ('up', 'down', 'left', 'right'): the screen's own move first, else padMove(dir), the
 //       nearest button that way. padPress(): what A does. padBack(L): what B does. padScroll(dy): scroll the list.
 //   PAD_REP (section 26's base) is the menu repeat's pace; PAD_FOCUS_CSS the outline's look (P5 may make them settable).
+const PAD_BUILT = ['base', 'deck', 'pick', 'panels'];   // the parts built so far (controller_check's black-box parts read it)
 const PAD_MUST = () => {};                                 // B on a card you must answer: nothing (its buttons take the highlight)
 const PAD_OWN = [];
 function padOwn(when, h) { PAD_OWN.unshift([when, h]); }
@@ -53576,7 +53577,7 @@ const PAD_FIRST = { device: '#devBody' };                 // where to land first
 const PAD_HUD = { id: 'hud', hud: true };
 // (and the cards a tap puts away or opens: someone who'd like a word, the heads-up and its Go there, the address, a tip)
 const PAD_HUD_SEL = '#pauseBtn, .controls button, #devBtn, #trkBtn, #needStrip, #handBtns button, #putDown, #ixBoard, #seek, #devHu, #devHu button, #devAddr, #devTip';
-const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0 };
+const PAD_FOCUS = { hud: false, layer: null, css: false, stick: '', held: 0, rep: 0, last: null };   // last: where the highlight was, for a redraw
 const PAD_FOCUSABLE = 'button, [role=button], a[href], input, select, textarea, summary, [tabindex]:not([tabindex="-1"])';
 function padItems(L) {                                     // the buttons the highlight can land on in layer L, as shown
   const els = L === PAD_HUD ? document.querySelectorAll(PAD_HUD_SEL) : L.querySelectorAll(PAD_FOCUSABLE);
@@ -53587,9 +53588,13 @@ function padFocusTo(el) {
   try { el.focus({ preventScroll: true }); } catch (e) { el.focus(); }
   try { el.scrollIntoView({ block: 'nearest', inline: 'nearest' }); } catch (e) { /* fine */ }
 }
+const padCtx = L => L && L.id === 'device' ? 'device:' + DEV.app : padKey(L);   // the same screen (a device app counts as its own)
+const padName = e => (e.getAttribute('aria-label') || '') + '|' + e.textContent.trim();
 function padFocusIn(L) {                                   // land in a layer: keep a focus already in it (the lift's goal deck), else the first button
   const a = document.activeElement, items = padItems(L), k = padKey(L), first = PAD_FIRST[k] && document.querySelector(PAD_FIRST[k]);
   if (a && items.includes(a) && (!first || first.contains(a))) return;   // (the device puts its own focus on Close)
+  const was = PAD_FOCUS.last;                              // the same screen drawn again (a choice pressed): the same button, by name, else by place
+  if (was && was.L === L && was.ctx === padCtx(L) && items.length) { padFocusTo(items.find(e => padName(e) === was.name) || items[Math.min(was.i, items.length - 1)]); return; }
   padFocusTo(first && items.find(e => first.contains(e)) || items[0]);
 }
 function padMove(dir) {                                    // the nearest button that way (straight on first, then a little to the side)
@@ -53608,8 +53613,8 @@ function padScroller(e) {                                  // the nearest ancest
   for (let p = e && e.parentElement; p && p !== document.body; p = p.parentElement) { const o = getComputedStyle(p).overflowY; if ((o === 'auto' || o === 'scroll') && p.scrollHeight > p.clientHeight + 1) return p; }
   return null;
 }
-function padNearest(a, r, cx, cy, dx, dy, items) {
-  let best = null, bs = Infinity;
+function padNearest(a, r, cx, cy, dx, dy, items) {      // a button in the same row (or column) first, as on a TV menu; else the best on the slant
+  let best = null, bs = Infinity, row = null, rs = Infinity;
   for (const e of items) {
     if (e === a) continue;
     const q = e.getBoundingClientRect(), ex = q.left + q.width / 2, ey = q.top + q.height / 2;
@@ -53619,8 +53624,10 @@ function padNearest(a, r, cx, cy, dx, dy, items) {
     const side = dx ? Math.max(0, Math.abs(ey - cy) - (q.height + r.height) / 4) : Math.max(0, Math.abs(ex - cx) - (q.width + r.width) / 4);
     const s = Math.max(0, along) + side * 2.5;
     if (s < bs) { bs = s; best = e; }
+    const ov = dx ? q.top < r.bottom - 1 && q.bottom > r.top + 1 : q.left < r.right - 1 && q.right > r.left + 1;   // overlapping across the way
+    if (ov && along > -1 && Math.max(0, along) < rs) { rs = Math.max(0, along); row = e; }
   }
-  return best;
+  return row || best;
 }
 function padScroll(dy) {                                   // the long list the highlight is in (or the panel) scrolls by dy pixels
   const L = padLayer(); if (!L || L === PAD_HUD) return;
@@ -53665,7 +53672,8 @@ padOn('frame', () => {
   if (F.hud && (ride || !PAD.used || padPanel())) F.hud = false;   // a real panel opening (or a touch) ends the screen-edge visit
   const L = PAD.used ? padLayer() : null;
   if (L && !F.css) { F.css = true; const st = document.createElement('style'); st.id = 'padCss'; st.textContent = PAD_FOCUS_CSS; document.head.appendChild(st); }
-  if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { F.layer = L; if (L) padFocusIn(L); }   // (and when it redraws: a new app)
+  if (L !== F.layer || L && L !== PAD_HUD && !L.contains(document.activeElement)) { if (L !== F.layer) F.last = null; F.layer = L; if (L) padFocusIn(L); }   // (and when it redraws: a new app)
+  if (L && L !== PAD_HUD) { const a = document.activeElement, it = L.contains(a) ? padItems(L) : null, i = it ? it.indexOf(a) : -1; F.last = i < 0 ? F.last : { L, ctx: padCtx(L), name: padName(a), i }; }
   if (!L) { F.stick = ''; return; }
   if (padOwnDo('frame', L, PAD.dt)) { F.stick = ''; return; }
   // the left stick as a D-pad: pushed past half way, one step, then repeats at the D-pad's pace
