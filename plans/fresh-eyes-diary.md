@@ -75,3 +75,29 @@ What worked well on Day 0: signing the manifest; Zeke's chat on the walk (warm a
 (Note for the lead, not a game problem: my test browser was restarted at 20:40 and the game reloaded from its own hourly save at 20:26, Main lift Deck 4. "Welcome back" said so. Tracked was cleared by the reload, which is fine.)
 
 **Day 0 summary:** the tour is warm but I lost most of the evening to the lift (no idea how to call it), and the tour itself ran past dinner, so the first thing my boss said to me was "Missed you at dinner". Then I took a tray twice and never managed to eat. Went to bed hungry (Food 46).
+
+---
+
+## Day 1, Monday (first work day)
+
+**06:00, Bunk 1.** "Good morning. Morning. Your alarm's going. Day 1, Monday 06:00." Then a TIP about Mail. Needs at wake-up: Food 24, Energy 100, Hygiene 39, Bathroom 19. (Food 24 because I never managed to eat on Day 0.)
+
+26. **06:05, Zeke's Mail "How a day runs" is very good.** "Breakfast from seven, shift at nine, tea at one. Off at five. Dinner till half eight. Weekends off..." This is exactly what I needed on Day 0. It arrived at 21:02 on Day 0 while I was asleep. *Small* (I'd show it earlier, or have Zeke say it on the tour). (`d1-01-zeke-day-mail.png`)
+    - The Mail says "Breakfast from seven" but Tracked and the device say "Breakfast: the mess, Deck 3" from 06:00 ("Now"). Which is it? *Small.*
+
+27. **06:10, people asleep in their bunks are drawn floating above the bed**, and the arrow label at the bottom was cut off ("Take the lift to Deck 5: works Chief's office, Deck 5" ran off the screen at the right). Also "works" with a small w again. *Small.* (`d1-02-sleepers-floating-label-cut.png`)
+
+28. **06:11, I tracked "The Chief's office: your first solo job" by mistake.** On the Tracked list it says "Tomorrow" (Day 2), but tapping it set an arrow for now ("Take the lift to Deck 5: works Chief's office"). Following that today would take me to the wrong meeting. I switched to Breakfast. *Confusing.*
+
+29. **06:14, Settling in "Go there" works well.** "Washed and fed: Ask Tomas Lind, Port washroom, Deck 4". The arrow pointed at the washroom. Clear.
+
+30. **06:23-06:40, the shower.** "Both showers are busy, so you join the line." then "Your turn. About 11 minutes; walk away to stop." Clear and fun. My character stood outside the cubicle in the corridor while "showering". *Small.* (`d1-03-shower-standing-outside.png`)
+
+31. **06:41, toilet.** First tap on a bunk opened "Chloe Tran, Comms rating. Fast asleep. Better not wake them." (they were in the bunk next to the washroom). Second tap found the toilet. "Now wash your hands at the basins." Nice touch. Basins worked.
+
+32. **06:59-07:25, the lift again, 25 ship minutes to leave Deck 4. (The worst thing so far.)** The lift lobby is full at breakfast time. Every tap I made near the lift or the ladder opened a person's card (Karin Yilmaz, Lars Achterberg, Imani O'Neill, Bea Silva's group...) or a thing's description (Bench, Trunk junction). Speech bubbles sat on top of the lift door and keypad. When I finally saw the keypad clearly it is very small (a few pixels on a phone) and it took four taps to hit it. Then it worked well: no deck list this time, because I was tracking the mess hall it took me straight to Deck 3. *Blocks me* (for a new player this is where they'd give up). (`d1-04-bubbles-cover-lift.png`, `d1-05-crowd-steals-taps.png`, `d1-06-lift-keypad-tiny.png`)
+    - What I'd expect: tapping the lift door or the lift floor calls the lift, or a "Lift" button shows when I'm standing in the lift lobby.
+
+33. **07:35, item descriptions say their sentence twice.** "Long table: Seats eight. The engineers take this one every morning and argue about pumps. Seats eight. The engineers take this one every morning and argue about pumps. You sit down. To eat, queue at the servery for a tray, then bring it to a seat." (Same on Day 0 with "Officers tend to sit here.") The card is cut off at the bottom of the screen. *Small.* (`d1-07-card-text-twice.png`)
+
+34. **07:35-07:50, getting breakfast.** Tracking Breakfast in the mess hall gives no arrow once you're in the room, so I didn't know where the servery was until I saw the counter with food on it. Then: queue (07:43), "Your turn. You take a tray: porridge and eggs. Find a seat and tap it to eat." Three of my taps on seats opened people's cards instead (Signe Moreau, Quinn Zamora) because people walk between me and the seats. The fourth (a bench) worked: **"You sit down to porridge and eggs. About 19 minutes."** So eating does work; on Day 0 the two chairs I chose must have been wrong somehow (I got "Seat. You sit down." with no food). I still can't tell what was different. *Confusing.* (`d1-08-eating-works.png`)
