@@ -14966,7 +14966,7 @@ function flcTick() {                                     // each frame (section 
 //        job on another deck at five isn't leaving), 'stillin' half an hour after the end, and a Mail once the clock has signed
 //        you out for you (section 20's auto clock-out).
 // Each one is a toast (the head writer's career.clock.<stage>, career.mail.clock.in/out; clock.remind.in/out for the
-// crew), the arrow to the time clock when no other arrow is up (CLOCK_RM_POINT), and a "Clock in" / "Clock out" row in
+// crew), the clock-out arrow when no other arrow is up (clocking in: section 15b's own arrow), and a "Clock in" / "Clock out" row in
 // Tracked while it's due (clockTrkItem, section 15b's trkItems). Never during a dialogue, a panel, a tip card, sleep,
 // the lift, a meeting you've been called to, nor the arrival and the end of training day (teachHeld); nor within a
 // toast's 5.6 s: a held reminder waits for its window to pass, then is dropped. Training day (Day 1, the intro on):
@@ -15009,9 +15009,9 @@ function clockTrkItem() {                                // section 15b's Tracke
   return { sec: 'job', key: 'clock:' + due.want, title: clockRmText('career.clock.trk.' + due.want, inn ? 'Clock in' : 'Clock out'),
     sub: clockRmText('career.clock.trk.where', 'The time clock, Works bay, Deck 5'), tag: (inn ? m >= S : m >= E) ? 'Now' : hhmm(inn ? S : E), goal: clockRmGoal(due.want) };
 }
-function clockRmPoint(want) {                            // the arrow to the time clock, never over someone else's
-  if (typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || typeof introOn === 'function' && introOn() && SHIP.time.day === 1) return;   // training day: the intro's own arrows
-  if (typeof CLOCK_RM_POINT === 'function') { CLOCK_RM_POINT(want); return; }   // section 15b's clock pointer (FR4, note 9), when it's in
+function clockRmPoint(want) {                            // the clock-out arrow, never over someone else's (clocking in: section 15b's own
+  // job-arrow fallback, FR4's ixWorkStep for note 9, points to the time clock by itself until you've clocked in, so nothing here)
+  if (want !== 'out' || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || typeof introOn === 'function' && introOn() && SHIP.time.day === 1) return;   // training day: the intro's own arrows
   if (!IX_GOAL || /^clock:/.test(IX_GOAL.trk || '')) setGoal(clockRmGoal(want));
 }
 function clockRmSay(want, now) {                         // a Works crew member near you says so (once a day each way)
