@@ -77,3 +77,26 @@ Probes and mutant set: scratchpad `p_train.py` (a day, logging arrow / queue / s
   8 hours) would beat it at the end of a shift: D should keep that in mind.
 - T2 follows the teacher on her deck (the crew position), and the job's spot when you're on another deck.
 - Piece B as E uses it: `guideAsk` re-asked each minute keeps the first-ask time; `guideStage`/`guideTaken` behave.
+
+## Re-check of AC1's fixes (claude/arrows-c d99a9e50, the E fixes in 77548cf): PASS
+
+AC1 took E over from AR1. Read the diff (15b's slot only, plus one line in B's guideGoal: an empty goal clears `shown`).
+| Check | Result |
+|---|---|
+| cadet_test 2b4a05db vs d99a9e50, alone | ALL IDENTICAL |
+| arrows_check queue (AC1's new T1-T3 and tick lines) | ARROWS CHECK OK |
+| Mutants on the new lines (ae2_*, 10) | 10 of 10 caught (level, crew always, no T2, T2 without the teacher, T2 id without the day, T3 not done when taken, T3 over another job, T3 on an offer row, no tick, B's empty-goal line) |
+| Day 2 probe, queue on | T1 "10:45 meet Zeke: Works bay" led to the Works bay: the meeting was **met** (was missed) |
+| Day 3 probe, queue on | T1, T2 as before; at 12:21 T3 gave the arrow back to the held galley-plant job (was 2.5 h at the board) |
+
+Items 1-4 and 6-9 are fixed as asked (item 4: no T3 for rows with their own offer, m6 and t2; item 8: time first, "Your turn:
+<lesson>", "Calder"). Item 5 (trainTell) moves with piece D (lead 28's call).
+
+Notes for later, not blocking:
+- While T3 gives way to another job it is still the queue's pick, so a lower entry (piece D's level-4 shift entries,
+  level 5-6) can't show in that time either; the job's own arrow does. Piece D should keep it in mind.
+- Day 2 (same probe): after the meeting, Rounds' own direct arrow "Take your first round at the job board" (section 24a's
+  setGoal, not E) has the same problem T3 had: it sat at the board from 10:47 to 17:01 while the player held the
+  main-lift job, and Rounds went back to "again". For F1 (or FX1).
+- Day 3: the training still lapsed, because the follower never finished the galley-plant job (the known calibrate chore,
+  "nobody yet" in arrows_check), so T3 never came back. Not E's.

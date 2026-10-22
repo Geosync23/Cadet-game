@@ -80,6 +80,17 @@ M = {   # name: (old, new, parts)   turn 3 (0.90.2) first
  'ae_nodo': ("  } else if (c.st === 'do' && c.j) {", "  } else if (c.st === 'dox' && c.j) {", 'queue'),
  'ae_notick': ("try { guideTrain(); } catch (e) { /* 24 core not ready */ }", "", 'queue'),
  'ae_throw': ("const row = ladderRow(c.id); if (!row) return;\n  const now", "const row = ladderRow(c.id); if (!row) return; null.x;\n  const now", 'queue'),
+ # arrows E fixes (AC1 d99a9e50)
+ 'ae2_level': ("guideAsk({ id: 'train:' + c.id + ':meet:' + c.d, level: 2,", "guideAsk({ id: 'train:' + c.id + ':meet:' + c.d, level: 4,", 'queue'),
+ 'ae2_crewalways': ("...(guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}),", "crew: c.by,", 'queue'),
+ 'ae2_nowatch': ("  } else if (c.st === 'watch') {", "  } else if (c.st === 'watchx') {", 'queue'),
+ 'ae2_watchcrew': ("goal: () => ({ deck: s.deck, crew: c.by, at: s.tile,", "goal: () => ({ deck: s.deck, at: s.tile,", 'queue'),
+ 'ae2_watchday': ("id: 'train:' + c.id + ':watch:' + c.d,", "id: 'train:' + c.id + ':watch',", 'queue'),
+ 'ae2_dodone': ("      done: () => guideTaken(c.j) || guideStage(c.id, 'do') });", "      done: () => guideStage(c.id, 'do') });", 'queue'),
+ 'ae2_overjob': ("return m && m.id !== c.j ? null :", "return false ? null :", 'queue'),
+ 'ae2_offer': ("} else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {", "} else if (c.st === 'do' && c.j) {", 'queue'),
+ 'ae2_notick': ("try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned)", "try { 0; } catch (e) { if (!GUIDE.trainWarned)", 'queue'),
+ 'ae2_emptyshown': ("  if (!g || !g.deck) { GUIDE.shown = null; return null; }", "  if (!g || !g.deck) return null;", 'queue'),
 }
 fails = lambda t: {re.sub(r'[-\d.]+', '#', l) for l in t.splitlines() if l.startswith('FAIL')}
 base = fails(CLEAN.read_text())

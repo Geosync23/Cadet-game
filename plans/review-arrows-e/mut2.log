@@ -1,0 +1,11 @@
+ae2_level ['queue'] CAUGHT ["FAIL train: T# should be level # at the meeting room (#, [#, 'r'])"]
+ae2_crewalways ['queue'] CAUGHT ['FAIL train: T# should lead to the teacher only once they are in the room (crew True, in the room False)']
+ae2_nowatch ['queue'] CAUGHT ['FAIL train: T# should follow the teacher at level # (None, None, None)', "FAIL train: T#'s once should be per training, its day in the id (None)"]
+ae2_watchcrew ['queue'] CAUGHT ['FAIL train: T# should follow the teacher at level # (Stay close and watch Yara, #, None)']
+ae2_watchday ['queue'] CAUGHT ["FAIL train: T#'s once should be per training, its day in the id (train:m#:watch)"]
+ae2_dodone ['queue'] CAUGHT ['FAIL train: T# outlived taking the job (Your turn: hauling and stores)']
+ae2_overjob ['queue'] CAUGHT ['FAIL train: T# should leave the arrow to another job you hold (Your turn: hauling and stores, train:m#:do)']
+ae2_offer ['queue'] CAUGHT ["FAIL train: T# for a row with its own offer (['m#', True])"]
+ae2_notick ['queue'] CAUGHT ['FAIL train: the minute tick did not ask the training arrows']
+ae2_emptyshown ['queue'] CAUGHT ['FAIL train: T# should leave the arrow to another job you hold (None, train:m#:do)']
+mut exit 0
