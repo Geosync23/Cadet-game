@@ -45367,10 +45367,25 @@ function worksTrained(id, t = shipNow()) {               // trained: the Trainin
   if (row.tool) toolGive(row.tool, t);
   const by = W.cur && W.cur.id === id && W.cur.by || ladderTeacher(row, worksDay(t)) || row.by[0];
   const sc = MEETING_SCRIPTS['train.' + id + '.' + by] ? 'train.' + id + '.' + by : 'train.' + id;   // (small rows: never a stand-in)
-  if (row.size === 'small' && MEETING_SCRIPTS[sc] && !MEETING_SCRIPTS[sc].stub && typeof dialogueShow === 'function' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) dialogueShow(sc);   // a word on the job itself
+  if (row.size === 'small' && !flag('works.brief.' + id)) worksBrief(id, by);   // a word on the job itself, unless you had it before (the drill, the inspection, the first head-scratcher: FX3)
   try { toast(worksName(by), worksText('works.trained', 'Trained: {mech}, with {name}.', { mech: mechName(id).replace(/^./, x => x.toLowerCase()), name: worksName(by) }) + (row.tool ? ' ' + toolName(row.tool).replace(/^./, x => x.toUpperCase()) + ' is yours now.' : '')); } catch (e) { /* no UI */ }
   if (W.cur && W.cur.id === id) W.cur = null;
   simNote('trained', { mech: id });
+  return true;
+}
+// a small row's talk (train.<id>.<teacher>, the writer's), shown now and readable wherever you are (FX3, AR1: shown with no
+// meeting place, section 18's meetings tick closed it within a ship minute and left only its "(notes)" Mail); once (flag
+// works.brief.<id>). The drill's and the inspection's come before them (24c), the first head-scratcher's when its case shows (24k)
+function worksBrief(id, by) {
+  if (flag('works.brief.' + id) || typeof dialogueShow !== 'function' || typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  const sc = MEETING_SCRIPTS['train.' + id + '.' + by] ? 'train.' + id + '.' + by : 'train.' + id; if (!MEETING_SCRIPTS[sc] || MEETING_SCRIPTS[sc].stub) return false;
+  flagSet('works.brief.' + id); return dialogueShow(sc, { id: sc, who: [by], at: shipNow(), where: { any: true } });
+}
+// a small row's ask (works.ask.<id>, "Subject | body"): Mail from the teacher, and a toast in play (FX3: the writer's asks were never sent)
+function worksAskSend(id, by, now) {
+  const ask = worksText('works.ask.' + id, ''), cut = ask.indexOf(' | '); if (!ask || flag('works.ask.' + id) || typeof mailSend !== 'function') return false;
+  flagSet('works.ask.' + id); mailSend({ at: now, from: worksName(by), subject: cut > 0 ? ask.slice(0, cut) : mechName(id), body: cut > 0 ? ask.slice(cut + 3) : ask, quiet: true });
+  if (now >= shipNow() - 1) try { toast(worksName(by), cut > 0 ? ask.slice(cut + 3) : ask); } catch (e) { /* no UI */ }
   return true;
 }
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
@@ -45908,6 +45923,11 @@ WORK_TICKS.push((now, skip) => {
   else if (skip || m >= INSPECT_MAIL - 1) inspectRun(d, false);
 });
 WORK_MECH.m3i = {};                                      // a small row: opens on Thursday, trained by the first inspection
+WORK_TICKS.push((now, skip) => {                         // FX3: the day before your first, Tomas's ask ("Inspection tomorrow"); that morning from 06:00 in your bunk room, his talk
+  const W = SHIP.works, d = worksDay(now), m = now - (d - 1) * 1440, row = ladderRow('m3i'); if (!W || !row || W.rank !== 'junior' || W.tr.m3i !== undefined) return;
+  if (weekday(d + 1) === 3 && m >= 960 && d + 1 >= row.day && playerShiftOn(d + 1) && !worksOpened(W).has('m3i')) worksAskSend('m3i', row.by[0], now);
+  if (!skip && m >= 360 && m < INSPECT_AT && inspectDue(d) && inspectHere()) worksBrief('m3i', row.by[0]);
+});
 // the drill job: a side job (beside any board job you hold, never the crew's), posted for you at 14:50 on Wednesdays
 // you're on shift as a junior, from the day the row (m3d) opens; yours at once (claimed for you), over at 15:15 whatever
 // the state (the all-clear). Places: DECKS[5].drill (the Pillar 5 deck architect's); a kind's stops left out till they're in
@@ -45949,6 +45969,7 @@ WORK_TICKS.push((now, skip) => {
     try { toast(worksName('calder'), worksText('drill.toast', 'Drill in ten minutes. Muster at the Works bay.') + ' ' + worksText('drill.job.' + j.drill, '')); } catch (e) { /* no UI */ }
     if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'w', label: worksText('drill.kind.' + j.drill, 'Drill') + ', 15:00' });
   }
+  if (!skip && m >= DRILL_TOAST && m < DRILL_AT && SHIP.works.tr.m3d === undefined) worksBrief('m3d', 'calder');   // your first: her briefing before it, not after (FX3)
   if (m >= DRILL_END && j.status !== 'done') drillClose(j, now, skip);
 });
 // the all-clear: the drill is over whatever the state (no lapse, no abandoned job); quiet when skipped past or from an earlier day
@@ -45980,7 +46001,7 @@ WORK_TICKS.push((now, skip) => {
   const dr = simNotes('drill', now - 3 * 1440).filter(n => n.you).pop(); if (!dr || drillTimeWord(dr.mins) !== 'fast') return;
   simNote('drillTea', { day: d }); drillSay('drill.tea', 'Wednesday\'s drill was quick. Well done, all of you.');
 });
-if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = {}; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
+if (typeof jobKindAdd === 'function' && drillPlace('ext') && drillPlace('hatch') && drillPlace('door') && drillPlace('breaker')) { WORK_MECH.m3d = { open(row, d) { worksAskSend('m3d', 'calder', shipNow()); } }; drillCalendar(); }   // a small row: opens on Wednesday, trained by the first drill; only with the drill's places in the build
 
 // ---------------------------------------------------------------------
 // 24d HAULING (M4, seat M1, 0.45.x; plans/mechanics/m4-hauling.html). The Wednesday delivery has a few crates for the
@@ -47754,6 +47775,7 @@ function p3Tick(c, j) {
   if (!here && (!playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900 || (c.train && !caseOpened('p3')))) return;
   if (c.train) { const W = SHIP.works, row = typeof ladderRow === 'function' && ladderRow('p3'); c.by = (here && W && W.cur && W.cur.by) || (row && typeof ladderTeacher === 'function' && ladderTeacher(row, d)) || 'calder'; }
   caseShow(c, j);
+  if (c.train && typeof worksBrief === 'function' && worksBrief('p3', c.by)) return;   // the writer's talk, readable (FX3)
   if (c.train && typeof worksSay === 'function') worksSay(c.by, (typeof worksText === 'function' && worksText('works.train.p3.start', null)) || 'Here\'s a funny one. ' + c.title + '. Open Fault notes: the first note\'s taped to the job.');
 }
 CASE_KINDS.p3 = { name: 'What\'s been tried?', ladder: 'p3',
@@ -47767,7 +47789,7 @@ CHIEF_NOTES.p3 = { title: 'What\'s been tried', key: 'chief.p3', lines: [
   'If someone fitted it and it\'s still wrong, it isn\'t that.',
   'Read every note. One\'s on the job; the others are on the machine.',
   'What nobody has tried yet is your best bet.'] };
-if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open() { /* the training case is already staged (p3Stage); it shows at the next tick */ } };
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open(row, d) { if (typeof worksAskSend === 'function') worksAskSend('p3', ladderTeacher(row, d) || 'calder', shipNow()); } };   // the training case is already staged (p3Stage); it shows at the next tick. The ask (FX3)
 // Day 5's training case, staged at 18:00 on Day 4 (or the first 18:00 from Day 4 the ship gets to without it): held
 // for you (24 core's slot 20) till the row opens, so it's never on the crew's board
 function p3Stage(C) {
