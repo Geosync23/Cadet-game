@@ -18193,6 +18193,7 @@ function jobsHour(h) {
   // left for you stay 3-6 a day with the mechanics in); at least one ordinary job is still held
   const mech = jobs.filter(j => (jobKindOf(j) || j.chore === 'joint') && j.status === 'open' && !j.claimedBy && j.found <= t && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)))).length;   // rounds, tuning, hauling, the drill, an incident's joint (the lead)
   for (const j of held.slice(Math.max(1, HOLD_MAX - mech))) j.released = true;
+  if (typeof boardTopUp === 'function') boardTopUp(h, jobs);   // the board keeps up on your shift (JB1, the slot below)
   const todo = jobs.filter(j => (j.status === 'open' || j.status === 'waiting') && !j.claimedBy && j.found <= t && t >= leaveEnd(j) && !heldForYou(j))
     .sort((a, b) => b.urgency - a.urgency || a.found - b.found || (a.id < b.id ? -1 : 1));
   for (const j of todo) if (j.machine && !j.unclaimed && !j.released && forYou(j) && leaveEnd(j) > j.found) { j.unclaimed = true; simLater('jobUnclaimed', { machine: j.machine, dept: null, id: j.id }); }
@@ -19283,6 +19284,39 @@ machinesLoad(SAVED);
 jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // ---- slot: Systems engineer (section 17). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the board keeps up (JB1, playtest patch 1 note 13: the user cleared the board on Day 1) ----
+// Each hour of your shift (BOARD_FROM minutes or more of it left), if fewer than BOARD_MIN jobs you may take are on the
+// board, boardTopUp posts small chores at your tier (the highest your tier allows first: an officer gets the seals),
+// from CHORES' types that need no parts (BOARD_KINDS), never one already open or on a machine with a job. They're held
+// for you to the end of the shift (j.leave) and never counted against HOLD_MAX; one you haven't taken by then lapses
+// (gone from the list), so the crew's work is as before. They give skill, the log and the ship's health but no Works
+// reputation (j.xp = 0: the pace of the career waits for the user's balancing pass, backlog 12 and 17). Seeded by the
+// hour (schedU), so the same ship posts the same ones however time moves. BOARD_ON false: as before.
+let BOARD_ON = true;
+const BOARD_MIN = 2, BOARD_FROM = 45, BOARD_KINDS = ['vent', 'calibrate', 'delivery', 'fault', 'seal'];
+const boardForYou = (j, t) => j.status === 'open' && !j.claimedBy && j.kind !== 'favour' && j.found <= t && !(typeof caseHidden === 'function' && caseHidden(j)) && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)));
+function boardTopUp(h, jobs) {
+  const d = Math.floor(h / 24) + 1, t = h * 60, m = t - (d - 1) * 1440, end = dayShiftEnd(d);
+  for (const j of jobs) if (j.extra && j.status === 'open' && !j.claimedBy && t >= leaveEnd(j)) j.status = 'gone';   // untaken by the shift's end: lapsed
+  for (let k = jobs.length - 1; k >= 0; k--) if (jobs[k].status === 'gone') jobs.splice(k, 1);
+  if (!BOARD_ON || h < 0 || !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM) return;
+  let n = jobs.filter(j => boardForYou(j, t)).length; if (n >= BOARD_MIN) return;
+  const busy = new Set(jobs.filter(j => j.status !== 'done').map(j => j.machine ? 'm:' + j.machine : j.chore + ':' + j.target)), tier = playerTier(), seed = machSeed('board:extra');
+  const cands = [];
+  for (const kind of BOARD_KINDS) for (const c of choreWhere(kind) || []) {
+    const C = CHORES[kind], ct = Math.max(C.tier, c.tier || 0);
+    if (busy.has(kind + ':' + c.key) || (c.machine && busy.has('m:' + c.machine)) || (c.machine && SHIP.machines[c.machine] && JOB_FOR[SHIP.machines[c.machine].state])) continue;   // not a machine that needs a real job
+    const j = { id: 'extra-' + kind + ':' + c.key + '@' + h, machine: c.machine || null, deck: c.deck, room: c.room, kind: 'chore', chore: kind, target: c.key, title: c.title, bring: c.bring || null, tier: ct,
+                stops: c.stops.map(st => ({ ...st })), urgency: 0, leave: end - m, posted: t, found: t, claimedBy: null, parts: [], status: 'open', extra: true, xp: 0 };
+    const jt = jobTier(j); if (jt <= tier && forYou(j)) cands.push([jt, j]);
+  }
+  for (let k = 0; n < BOARD_MIN && cands.length; k++) {
+    const top = Math.max(...cands.map(c => c[0])), pool = cands.filter(c => c[0] === top), pick = pool[Math.floor(pool.length * schedU(seed, h, 10 + k))];
+    cands.splice(cands.indexOf(pick), 1);
+    const j = pick[1], key = j.machine ? 'm:' + j.machine : j.chore + ':' + j.target; if (busy.has(key)) continue;
+    busy.add(key); jobs.push(j); n++;
+  }
+}
 // ---- end of slot: Systems engineer ----
 
 // =====================================================================
