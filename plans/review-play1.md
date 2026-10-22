@@ -89,6 +89,8 @@ Checks I ran on 8d65f86f: check_fast **QUICK CHECK OK** (347 s); food_check 1 7 
 
 **cadet_test against 2b4a05db: DIFFERENCES FOUND, all explained.** State: `tris`, the five taps and their walks, state_end; every shot but g_nocrew differs widely (g_nocrew 149 px, max 58). The cause is the crew's moved mornings (the test starts Day 1 06:00 on Deck 4: who is in bunks, the corridor and the washroom at 06:00 changes, and with it doors, what a tap hits and where you walk). Proof: a copy of 8d65f86f with only the section 14 and 16 code hunks put back (all the words kept) is **ALL IDENTICAL** to 2b4a05db.
 
+**Re-check on 0.64.17** (claude/integration-next-0.64.17 1d2f3269 = 0.64.16 b9f053ba + dd83d896, game sha256 22583691...a4c4b5; 14:20 UTC): the merged change is exactly F's own plus the two build-number lines. machine_check **OK**, repair share 40% (17 of 42, the same as on 0.64.15 + F: Zeke's patch doesn't move it). cadet_test against 0.64.16: DIFFERENCES FOUND, the same as on 0.64.15; with the section 14/16 code (and build lines) put back: **ALL IDENTICAL** to 0.64.16. **F stays PASS on 0.64.17.**
+
 Notes (no change needed):
 - brennan.lines:124 "Dinner's till eight" (dinner runs to 20:30): pre-existing, left; a backlog row if wanted.
 - The build-table row says the branch is from 32b699a6 and has no cadet_test line: BM13 may want to add "cadet_test: crew mornings moved; schedule code reverted = ALL IDENTICAL" and the 40% when merging.
@@ -100,5 +102,5 @@ Notes (no change needed):
 | B, notes 9-12 (FR4) | claude/patch-play1-b 4d062c45 | PASS |
 | J, note 20 (CK1) | claude/patch-play1-j ec06f68e, then 4bc3e39c | PASS (after one fix asked at 1188cbdf); the toast-gap fix 4bc3e39c PASS |
 | E, notes 14, 16 (LD1) | claude/patch-play1-e 7e26050e | PASS (e36549af had no game change) |
-| F, note 18 (SC1) | claude/patch-play1-f dd83d896 | PASS (re-check the repair share and cadet_test on 0.64.16 once published) |
+| F, note 18 (SC1) | claude/patch-play1-f dd83d896 | PASS; re-checked merged as 0.64.17 1d2f3269: PASS |
 
