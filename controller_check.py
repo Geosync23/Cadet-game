@@ -1135,7 +1135,7 @@ def part_day(pw, src, tag):
             asked = r.ev("!document.getElementById('sleepAsk').hidden")
             res = press_in_panel(r, "document.getElementById('sleepYes')") if asked else 'no alarm card'
             r.step(60); t = r.ev("[SHIP.time.day, SHIP.time.min]")
-            print(f'  bedtime: "{got}", the alarm card {asked}, Set alarm by pad: {res}; now day {t[0]} {t[1] // 60:02d}:{t[1] % 60:02d}')
+            print(f'  bedtime: "{got}", the alarm card {asked}, Set alarm by pad: {res}; now day {t[0]} {int(t[1]) // 60:02d}:{int(t[1]) % 60:02d}')
             if res != 'ok': fails.append(f'bedtime: Set alarm by pad ({got}, {res})')
         else: fails.append('bedtime: could not walk to your bunk by the stick')
     if r.errors: fails.append('page errors: ' + ' | '.join(r.errors[:3]))
