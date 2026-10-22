@@ -166,3 +166,10 @@ Mutants in section 26 against CTT's check (049aff56), each with its own parts; c
 Fixes: (1) CTT's OUTCOME should read the chat card (`#chat` visible, its person) and the crew's state (who's talking); (2) a
 facing test (two things in reach, ahead vs behind: the ring on the one ahead); (3) the lift not offered from 2 m (CTT
 told CT1); (4) the hint's floor order (above). cadet_test identical off and on; code clean.
+
+### P3's hook in section 15's pauseSet (lead 27: reviewed as part of P3; no HUD seat)
+`if (typeof padPauseLine === 'function') padPauseLine(el, on);` after the card is made, before PAUSE.on changes. Guarded;
+pauseSet's own early return (on === PAUSE.on) means it runs once per change. For an ordinary pause (no drop-out) it
+changes nothing (why false, no saved line). OK. Only caveat: padPauseLine reaches the card's line by position
+(`firstElementChild.children[1]`), so a change to the card's markup in section 15 silently drops the line; P3's drop
+part would catch that (it reads the same line). Suggest an id on that line (`pauseLine`) in the same one-line spirit.
