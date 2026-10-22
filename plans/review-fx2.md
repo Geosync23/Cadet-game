@@ -124,3 +124,17 @@ While a lesson is at 'watch', a direct arrow on the training job's spot ("Watch 
 | Honest play Days 2-5, queue off (my bot) | every lesson learned by following the arrow: Rounds (Day 2), Hauling ("Watch Yara: Cargo hold" 12:05, your turn 12:15, trained 12:36), the drill, Tuning ("Watch Calder: Galley" 09:32, trained 09:50), the scanner ("Watch Emeka: Laundry" 09:51, your turn on Washer 2, trained 10:43). Before it (my FX1+FX2+FX3 merge): Hauling lapsed every day |
 | Honest play Days 2-5, queue on (GUIDE_ON true) | the watch steps complete (T2), but each lesson's turn then lapses at 17:00 (Hauling `do` on Days 3, 4 and 5): the 'do' gap FX2 is fixing. Also "Trained: rounds" toasted twice (11:09 and 11:12) |
 | arrows_check week on 86a980c5 | as on my 3-way merge: AR1's follower (no Tracked) lets Rounds lapse on Day 2 (holding a job, FX1 gives a word, not an arrow), then "stuck at Take your first round" Days 3 and 8, and the laundry pin (FX3's next). By hand in that state (m1 `again`, Day 3, clocked in) the board offers "Your first round, Deck 4" and Take it works: the stuck line looks like the follower's, for AR1 |
+
+## FX3 8aae0634 (fixes 11-13 on 02e212f1) and plans/fx3-lift-alone.patch on b9f053ba (for BM14): PASS, both
+
+In it: (11) low energy's "Your bunk" arrow only at bedtime or unwell, cleared once you lie down; (12) a check for the climbing holds' pin (fixed by fix 8); (13) your turn at the burst pipe parks a job you hold (`claimedBy: 'you-parked'`, its progress kept) and gives it back after; 24f's labels say Calder.
+
+| Test | Result |
+| --- | --- |
+| player_check, interactions_check, mech_check fx3 on 2b4a05db | FAIL (2, 25 and 18 lines, among them the low-energy bunk arrow, the holds' pin starting a climb, the held job waiting at the pipe, "Meet Ines" for Calder), as they should |
+| the same on 8aae0634 | OK, all three |
+| cadet_test 2b4a05db -> 8aae0634 | only e_night to i_tap3, with exactly 02e212f1's counts (the lift-panel arrow, checked by eye before) |
+| Parking by hand | a repair with a part fitted, parked: `you-parked`; two ship hours on, the crew's finish rule (claimed, not 'you', `done` passed) leaves it alone (`done` unset); through JSON and jobsTidy it stays; given back as yours with its fitted part |
+| The lift patch alone on b9f053ba (f93bde5a when applied) | interactions_check FAILs on b9f053ba (4 lift lines) and is OK patched; intro_check --evening OK patched; cadet_test b9f053ba -> patched: the same shots and counts as on 2b4a05db (the arrow only) |
+
+Cosmetic, not blocking: the job board's crew list shows a parked job as taken (its "taken" rows are any claimedBy but 'you').
