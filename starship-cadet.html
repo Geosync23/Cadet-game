@@ -13806,7 +13806,7 @@ function playerUpdate(dt, t) {
   needsSeen(); floatsTick();                             // a need that rose shows it (0.28.20; faded by frames, 0.28.23)
   actBar();                                              // and how long the activity has left (0.28.21)
   const m = Math.floor(now);
-  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); gardenGift(); newsTick(now); device.refresh(); }
+  if (m !== devMin) { devMin = m; jobNotice(); jobTouch(); cartAuto(); gardenGift(); newsTick(now); clockRemindTick(now); device.refresh(); }   // clock reminders (note 20, this section's slot)
 }
 // squeezing past (0.28.12): crew settled at their places hold their tile (section 10's occupiedBy), which can close
 // the only way through (Chef Brennan at the galley's middle station, the plant panel behind her). When the player's
@@ -14955,6 +14955,113 @@ function flcTick() {                                     // each frame (section 
   FLC_DIM = Math.abs(want - FLC_DIM) < .01 ? want : FLC_DIM + (want - FLC_DIM) * .05;
   if (FLC_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
 }
+// ---- clock-in and clock-out reminders (playtest patch 1, note 20, CK1; the user's "we need a lot of reminders about
+// clocking in and out"; design-doc "Clocking in and out: the reminders"). Once a ship minute (playerUpdate) on a day
+// you're on shift (playerShiftOn: not leave, sick or a day off), from Day 1, each stage at most once a day, in its window:
+//   in:  'pre' 30 minutes before the shift, 'start' as it starts (a Works crew member near you may say so too), then if
+//        you still haven't clocked in, 'late' 15 minutes in, 'later' an hour in, 'last' half an hour before it counts as
+//        missed (CAREER.missBy), and a Mail at missBy;
+//   out: 'end0' ten minutes before the shift ends, 'end' as it ends (a crew line too), 'left' when you leave Deck 5
+//        after the end still clocked in (you were on Deck 5 from ten minutes before the end: CLOCK_RM_ON5, not saved; a
+//        job on another deck at five isn't leaving), 'stillin' half an hour after the end, and a Mail once the clock has signed
+//        you out for you (section 20's auto clock-out).
+// Each one is a toast (the head writer's career.clock.<stage>, career.mail.clock.in/out; clock.remind.in/out for the
+// crew), the clock-out arrow when no other arrow is up (clocking in: section 15b's own arrow), and a "Clock in" / "Clock out" row in
+// Tracked while it's due (clockTrkItem, section 15b's trkItems). Never during a dialogue, a panel, a tip card, sleep,
+// the lift, a meeting you've been called to, nor the arrival and the end of training day (teachHeld); nor within a
+// toast's 5.6 s: a held reminder waits for its window to pass, then is dropped. Training day (Day 1, the intro on):
+// Zeke and the first-time arrows teach the clock, so only the "you forgot" ones.
+// Easing off: a workday you clock in by 5 minutes past the start and clock out yourself adds one to a run; late past
+// 15 minutes, no clock-in, or the clock signing you out ends it. With a run of CLOCK_RM.ease (3) days the reminders
+// before you're due ('pre', 'start', 'end0', 'end') and the early Tracked rows stop; the "you forgot" ones always stay.
+// SHIP.player.clockRm = { d, s: stages said that day (bits), n: the run, o: the last day you clocked out yourself,
+// a: the last day the auto clock-out was mailed } (saved; under 60 bytes). No R(); nothing the crew's planner reads.
+const CLOCK_RM = { ease: 3, pre: 30, start: 10, late: 15, later: 60, last: 30, end0: 10, end: 15, stillin: 30, onTime: 5, near: 5,
+  bit: { pre: 1, start: 2, late: 4, later: 8, last: 16, mailIn: 32, end0: 64, end: 128, left: 256, stillin: 512, sayIn: 1024, sayOut: 2048 } };
+SHIP.player.clockRm = (() => { const s = SAVED && SAVED.player && SAVED.player.clockRm, i = (v, x) => Number.isInteger(v) ? v : x;
+  return s && typeof s === 'object' ? { d: i(s.d, 0), s: i(s.s, 0), n: Math.max(0, i(s.n, 0)), o: i(s.o, 0), a: i(s.a, 0) } : { d: 0, s: 0, n: 0, o: 0, a: 0 }; })();
+SAVE_EXTRA.push(s => { (s.player || (s.player = {})).clockRm = { ...SHIP.player.clockRm }; });
+onSim('newGame', () => { SHIP.player.clockRm = { d: 0, s: 0, n: 0, o: 0, a: 0 }; });
+onSim('clock', n => { const C = SHIP.player.clockRm, d = Math.floor(n.t / 1440) + 1; if (n.what !== 'out' || !SHIP.career) return;   // clocked out yourself: the day counts for the run if you were in on time
+  C.o = d; C.n = SHIP.career.ci % 1440 <= DAY_SHIFT[0] + CLOCK_RM.onTime ? C.n + 1 : 0; });
+let CLOCK_RM_ON5 = -1e9;                                 // the last ship minute you were on Deck 5 while clocked in (for 'left')
+const CLOCK_RM_LOG = [];                                 // [day, minute, stage, text] said this session (the checks read it; not saved)
+const clockRmText = (k, fb, ctx, v = 0) => { let t = null; try { t = careerText(k, v); } catch (e) { t = null; } t = t || fb; for (const x in ctx || {}) t = t.split('{' + x + '}').join(ctx[x]); return t; };
+const clockRmEasy = () => SHIP.player.clockRm.n >= CLOCK_RM.ease;
+function clockRmHeld(now) {                              // not now: something's up, or a toast is still showing
+  if (typeof POP !== 'undefined' && POP.busy || typeof DIALOGUE !== 'undefined' && DIALOGUE || sleeping || typeof ride !== 'undefined' && ride) return true;
+  if (typeof teachHeld === 'function' && teachHeld() || performance.now() - TOAST_AT < 5600) return true;
+  return (SHIP.occasions || []).some(r => r.status === 'asked' && now >= r.at - 5 && now < r.at + r.len);   // a meeting you've been called to
+}
+function clockRmDue(now = shipNow()) {                   // -> 'in' | 'out' | null: what the clock wants of you now, and from when
+  if (typeof CAREER === 'undefined' || typeof careerClockedIn !== 'function' || !SHIP.career || SHIP.career.end) return null;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, S = DAY_SHIFT[0], E = dayShiftEnd(d);
+  if (d < 1 || !playerShiftOn(d)) return null;
+  if (!careerClockedIn(d)) return m >= CAREER.clockIn && m < E ? { want: 'in', from: S - CLOCK_RM.pre, late: m >= S + CLOCK_RM.late } : null;
+  if (!careerClockedOut(d)) return m >= E - CLOCK_RM.end0 && m < friAutoOut(d) ? { want: 'out', from: E - CLOCK_RM.end0, late: m >= E } : null;
+  return null;
+}
+const CLOCK_RM_GOAL = { in: 'Clock in at the time clock', out: 'Clock out at the time clock' };
+function clockRmGoal(want) { return { deck: 5, place: '5-timeclock-1', label: clockRmText('career.clock.goal.' + want, CLOCK_RM_GOAL[want]), trk: 'clock:' + want }; }
+function clockTrkItem() {                                // section 15b's Tracked: a "Clock in" / "Clock out" row while it's due (easing off: only once you're late)
+  const due = clockRmDue(); if (!due || clockRmEasy() && !due.late) return null;
+  const m = SHIP.time.min, S = DAY_SHIFT[0], E = dayShiftEnd(SHIP.time.day), inn = due.want === 'in';
+  return { sec: 'job', key: 'clock:' + due.want, title: clockRmText('career.clock.trk.' + due.want, inn ? 'Clock in' : 'Clock out'),
+    sub: clockRmText('career.clock.trk.where', 'The time clock, Works bay, Deck 5'), tag: (inn ? m >= S : m >= E) ? 'Now' : hhmm(inn ? S : E), goal: clockRmGoal(due.want) };
+}
+function clockRmPoint(want) {                            // the clock-out arrow, never over someone else's (clocking in: section 15b's own
+  // job-arrow fallback, FR4's ixWorkStep for note 9, points to the time clock by itself until you've clocked in, so nothing here)
+  if (want !== 'out' || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || typeof introOn === 'function' && introOn() && SHIP.time.day === 1) return;   // training day: the intro's own arrows
+  if (!IX_GOAL || /^clock:/.test(IX_GOAL.trk || '')) setGoal(clockRmGoal(want));
+}
+function clockRmSay(want, now) {                         // a Works crew member near you says so (once a day each way)
+  const C = SHIP.player.clockRm, b = CLOCK_RM.bit[want === 'in' ? 'sayIn' : 'sayOut'];
+  if (C.s & b || typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function' || typeof socLine !== 'function' || deckDef.num !== 5) return null;
+  const P = player.obj.position, dist = x => Math.hypot(x.x - P.x, x.z - P.z);
+  const a = DECK_CREW.filter(x => x.p && x.p.dept === 'works' && x.h && dist(x) < CLOCK_RM.near && !(typeof introQuiet === 'function' && introQuiet(x.p.id))).sort((x, y) => dist(x) - dist(y))[0]; if (!a) return null;
+  let l = null; try { l = socLine(a.p, 'clock.remind.' + want, { t: now, tier: relTier(a.p.id) }); } catch (e) { l = null; }
+  if (!l) return null; C.s |= b; bubbleSay(a.h, l.text); return l.text;
+}
+function clockRemindTick(now = shipNow()) {
+  const C = SHIP.player.clockRm, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; if (C.d !== d) { C.d = d; C.s = 0; }
+  if (typeof CAREER === 'undefined' || !SHIP.career) return null;
+  const k = SHIP.career, cd = k.ci > 0 ? Math.floor(k.ci / 1440) + 1 : 0;
+  if (cd && cd <= d && k.co > k.ci && k.co === (cd - 1) * 1440 + dayShiftEnd(cd) && C.o !== cd && C.a !== cd && (cd < d || m >= friAutoOut(cd))) {   // the clock signed you out: Mail, and the run ends
+    C.a = cd; C.n = 0;
+    const t = clockRmText('career.mail.clock.out', 'You didn\'t clock out | The clock signed you out at {time}. Next time, tap it on your way out: Works bay, by the tea corner.', { time: hhmm(dayShiftEnd(cd)) }, cd), i = t.indexOf(' | ');
+    if (typeof mailSend === 'function' && i > 0) mailSend({ at: now, from: 'Works time clock', subject: t.slice(0, i), body: t.slice(i + 3) });
+  }
+  if (typeof IX_GOAL !== 'undefined' && IX_GOAL && /^clock:/.test(IX_GOAL.trk || '')) { const due = clockRmDue(now); if (!due || 'clock:' + due.want !== IX_GOAL.trk) { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); } }   // punched (or past): the clock's arrow goes (15b's trkDone, FR4's: your job's tracking comes back if the Tracked tap paused it; RV3)
+  const due = clockRmDue(now); if (!due) return null;
+  if (due.want === 'in' && due.late) C.n = 0;
+  const train = typeof introOn === 'function' && introOn() && d === 1, easy = clockRmEasy() || train, S = DAY_SHIFT[0], E = dayShiftEnd(d), A = friAutoOut(d);
+  const off = (() => { try { return deckDef.num !== 5; } catch (e) { return false; } })(), left = off && due.want === 'out' && CLOCK_RM_ON5 >= now - (m - E) - CLOCK_RM.end0;   // here at the end, then gone
+  if (!off && due.want === 'out') CLOCK_RM_ON5 = now;
+  const st = due.want === 'in'
+    ? (m >= CAREER.missBy ? 'mailIn' : m >= CAREER.missBy - CLOCK_RM.last ? 'last' : m >= S + CLOCK_RM.later ? 'later' : m >= S + CLOCK_RM.late ? 'late' : easy ? null : m >= S + CLOCK_RM.start ? null : m >= S ? 'start' : m >= S - CLOCK_RM.pre ? 'pre' : null)
+    : (m >= E && left ? 'left' : m >= E + CLOCK_RM.stillin ? 'stillin' : easy ? null : m >= E + CLOCK_RM.end ? null : m >= E ? 'end' : 'end0');
+  if (!st || C.s & CLOCK_RM.bit[st] || st === 'stillin' && C.s & CLOCK_RM.bit.left) { if (!clockRmHeld(now) && (!easy || due.late) && (due.want === 'in' ? m >= S : m >= E)) clockRmSay(due.want, now); return null; }
+  if (clockRmHeld(now)) return null;
+  C.s |= CLOCK_RM.bit[st]; if (st === 'left') C.s |= CLOCK_RM.bit.end | CLOCK_RM.bit.stillin;
+  const ctx = { time: hhmm(st === 'last' || st === 'mailIn' ? CAREER.missBy : st === 'left' ? A : due.want === 'in' ? S : E) };
+  let text;
+  if (st === 'mailIn') {
+    const t = clockRmText('career.mail.clock.in', 'No clock-in today | The time clock has no card from you today. If you\'re working, clock in at the Works bay, by the tea corner.', ctx, d), i = t.indexOf(' | ');
+    if (typeof mailSend !== 'function' || i < 0) return null; mailSend({ at: now, from: 'Works time clock', subject: t.slice(0, i), body: t.slice(i + 3) }); text = t;
+  } else {
+    const FB = { pre: 'Your shift starts at {time}. Clock in at the time clock in the Works bay, by the tea corner.', start: '{time}: your shift\'s started. Clock in at the time clock, by the tea corner.',
+      late: 'You haven\'t clocked in yet. Your shift started at {time}. The time clock\'s by the tea corner.', later: 'Still not clocked in. The time clock\'s in the Works bay, Deck 5. Late is better than missed.',
+      last: 'Clock in by {time}, or today counts as a missed shift.', end0: 'Ten minutes left on your shift. Clock out at the time clock before you go.',
+      end: '{time}: shift\'s done. Clock out at the time clock before you go.', left: 'You left without clocking out. Pop back to the time clock, or it signs you out for you at {time}.',
+      stillin: 'You\'re still clocked in. Clock out at the time clock in the Works bay, Deck 5.' };
+    const key = st === 'last' && d <= CAREER.grace ? 'last.week1' : st;
+    text = clockRmText('career.clock.' + key, key === 'last.week1' ? 'Clock in soon. From next week, no clock-in by {time} counts as a missed shift.' : FB[st], ctx, d);
+    toast(clockRmText('career.clock.title', 'Time clock'), text); clockRmPoint(due.want);
+    if (st === 'start' || st === 'late' || st === 'end') clockRmSay(due.want, now);
+  }
+  CLOCK_RM_LOG.push([d, m, st, text]); if (CLOCK_RM_LOG.length > 60) CLOCK_RM_LOG.shift();
+  return st;
+}
 // ---- end of slot: Player engineer ----
 
 // =====================================================================
@@ -15587,6 +15694,7 @@ function trkItems() {
   const d = SHIP.time.day, m = SHIP.time.min, out = [], j = typeof myJob === 'function' ? myJob() : null;
   if (j) { let st = null; try { st = ixJobStep(); } catch (e) { /* no step */ }
     out.push({ sec: 'job', key: 'job:' + j.id, job: j.id, title: j.title || 'Your job', sub: st ? st.label : 'Your job', tag: 'Job' }); }
+  if (typeof clockTrkItem === 'function') { const ci = clockTrkItem(); if (ci) out.push(ci); }   // clock in / clock out while it's due (section 15's reminders, note 20)
   for (const [day, upto] of [[d, 1440], [d + 1, 720]]) {   // the rest of today, and tomorrow until noon
     let list = []; try { list = devDay(day); } catch (e) { /* none */ }
     for (const x of list) {
@@ -28698,6 +28806,42 @@ const LINES = JSON.parse([
   ',"career.card":[',
   '{"text":"The Wren sails on | Your time on the Wren is over, {me}. Thank you for it.","id":"x4clql"},',
   '{"text":"The Wren sails on | A scrubber hums. Nobody thanks the air. Thank you, {me}.","id":"jetko4"}]',
+  ',"career.clock.end":[',
+  '{"text":"{time}: shift\'s done. Clock out at the time clock before you go.","id":"fbe9il"},',
+  '{"text":"That\'s your shift. Clock out at the time clock, by the tea corner.","id":"1b1yri3"}]',
+  ',"career.clock.end0":[',
+  '{"text":"Ten minutes left on your shift. Clock out at the time clock before you go.","id":"c8ny53"}]',
+  ',"career.clock.goal.in":[',
+  '{"text":"Clock in at the time clock","id":"cpa9bu"}]',
+  ',"career.clock.goal.out":[',
+  '{"text":"Clock out at the time clock","id":"1ji461c"}]',
+  ',"career.clock.last":[',
+  '{"text":"Clock in by {time}, or today counts as a missed shift.","id":"14j6g5l"}]',
+  ',"career.clock.last.week1":[',
+  '{"text":"Clock in soon. From next week, no clock-in by {time} counts as a missed shift.","id":"ocqsgr"}]',
+  ',"career.clock.late":[',
+  '{"text":"You haven\'t clocked in yet. Your shift started at {time}. The time clock\'s by the tea corner.","id":"1y6zm5p"},',
+  '{"text":"Not clocked in. Your shift began at {time}: the time clock\'s past the tool wall, Works bay.","id":"1hljh6m"}]',
+  ',"career.clock.later":[',
+  '{"text":"Still not clocked in. The time clock\'s in the Works bay, Deck 5. Late is better than missed.","id":"ey4cdz"}]',
+  ',"career.clock.left":[',
+  '{"text":"You left without clocking out. Pop back to the time clock, or it signs you out for you at {time}.","id":"u5obr7"}]',
+  ',"career.clock.pre":[',
+  '{"text":"Your shift starts at {time}. Clock in at the time clock in the Works bay, by the tea corner.","id":"1if0t24"},',
+  '{"text":"Shift at {time}. Head down to the Works bay, Deck 5, and clock in at the time clock.","id":"jfnv84"}]',
+  ',"career.clock.start":[',
+  '{"text":"{time}: your shift\'s started. Clock in at the time clock, by the tea corner.","id":"10dc58o"},',
+  '{"text":"Shift\'s on. Tap the time clock in the Works bay to clock in, then take a job.","id":"lu6y9q"}]',
+  ',"career.clock.stillin":[',
+  '{"text":"You\'re still clocked in. Clock out at the time clock in the Works bay, Deck 5.","id":"1eflkov"}]',
+  ',"career.clock.title":[',
+  '{"text":"Time clock","id":"kbmhp3"}]',
+  ',"career.clock.trk.in":[',
+  '{"text":"Clock in","id":"1fa8yy7"}]',
+  ',"career.clock.trk.out":[',
+  '{"text":"Clock out","id":"1c1lyud"}]',
+  ',"career.clock.trk.where":[',
+  '{"text":"The time clock, Works bay, Deck 5","id":"1doyrq2"}]',
   ',"career.leave.booked":[',
   '{"text":"Day off tomorrow? Good for you. Sleep in.","id":"bgeio7","tier":[1,4]},',
   '{"text":"Leave tomorrow! Anything planned, or just nothing at all?","id":"lzokjj","tier":[1,4]}]',
@@ -28705,6 +28849,10 @@ const LINES = JSON.parse([
   '{"text":"Ready room | The Captain will see you in her ready room, Deck 1. Please be prompt.","id":"14396qx"}]',
   ',"career.mail.chief":[',
   '{"text":"My office | Come to my office, Deck 5, today. Missed shifts. We\'ll talk it through.","id":"rlvtkz"}]',
+  ',"career.mail.clock.in":[',
+  '{"text":"No clock-in today | The time clock has no card from you today. Working? Clock in in the Works bay, by the tea corner.","id":"oyslcf"}]',
+  ',"career.mail.clock.out":[',
+  '{"text":"You didn\'t clock out | The clock signed you out at {time}. Next time, tap it on your way out, by the tea corner.","id":"1jseoxo"}]',
   ',"career.mail.notice":[',
   '{"text":"Your last day | The Wren is letting you go. The Tern leaves tomorrow. I\'m sorry.","id":"vigj7s"}]',
   ',"career.missed":[',
@@ -28977,6 +29125,17 @@ const LINES = JSON.parse([
   '{"text":"Save me a seat at dinner if you get there first.","id":"u89fbu","dept":"works","tier":[3,4]},',
   '{"text":"Rough one. Tomorrow\'s a fresh board.","id":"s6rni1","dept":"works","mood":"low"},',
   '{"text":"You fixed it today. I heard it start up. Lovely sound.","id":"1qd6a1y","tone":"warm","cue":"repair.you@dept","dept":"works"}]',
+  ',"clock.remind.in":[',
+  '{"text":"Clocked in yet? The clock\'s past the tool wall, by the tea corner.","id":"1oj21pc","dept":"works"},',
+  '{"text":"Don\'t forget the clock, {nick}. Your card\'s the one in pencil.","id":"1wapvf3","dept":"works"},',
+  '{"text":"Clock first, then the board. The Chief reads the cards.","id":"uleqtb","dept":"works"},',
+  '{"text":"You\'ll want to clock in. Tea corner end of the bay.","id":"ttheam","dept":"works"},',
+  '{"text":"Card in the clock, {nick}. Then we\'ll find you a job.","id":"zx52t1","dept":"works"}]',
+  ',"clock.remind.out":[',
+  '{"text":"Clock out before you go, {nick}. The clock\'s by the tea corner.","id":"jn0lno","dept":"works"},',
+  '{"text":"Shift\'s done. Clock out, or your card says you\'re still here.","id":"1jdnd94","tone":"funny","dept":"works"},',
+  '{"text":"Don\'t walk off without clocking out. I did once. Once.","id":"umj3z5","tone":"funny","dept":"works"},',
+  '{"text":"Card, then dinner. Clock out on your way past.","id":"bxifh5","dept":"works"}]',
   ',"clock.screen.cancel":[',
   '{"text":"Cancel","id":"163j2u6"}]',
   ',"clock.screen.close":[',
