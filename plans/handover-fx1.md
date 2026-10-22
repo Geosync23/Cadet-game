@@ -62,3 +62,8 @@ want it re-sent.
   on keeps it all day) and section 20's sick arrow (around `setGoal({ deck: deckOf(bed.id), room: bed.room, label:
   'Your bunk' })`, with the infirmary's). I haven't traced which one fires on Day 8. Tracked's own "Your bunk" place
   clears on arrival (trk 'place:bed').
+- Merge notes from AR2 (reviewing a34f466): at the merge with FX2, FX2's 14:50 drill arrow line wins over mine (my
+  `trk: 'career:drill'` with no trkFrom lets trkDoneCheck clear it on reaching the Works bay, which would stop FX2's
+  stop-by-stop drill arrows; FX2 clears it at the all-clear already). AR2 also found that nothing points at a
+  training's watch step (c.st 'watch') once FX2 takes the teacher's job off your board: proposed to lead 29 as a watch
+  arrow from trainArrow or 24 core ("Watch Yara: Main storage", cleared when your turn starts); not built by FX1.
