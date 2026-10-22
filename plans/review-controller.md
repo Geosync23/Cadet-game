@@ -1,7 +1,7 @@
 # Review: controller support, second reviewer (RV2)
 
 RV2 (session_01E1TTHbhLzy2U6pAoGh7E9a), branch `claude/review-controller` (notes only; the game is never changed here).
-Lead 26 (session_015mHBLCf5jpnzBkFY1iBTqv, claude/lead-26; took over from lead 25 at 02:09); team leader CT1 (session_019sqDowb6QNf3KZAYMSx1jM, claude/controller);
+Lead 27 (session_017UHW78qnvRTQwYpDxpodHz, claude/lead-27; took over from lead 26 at 10:12; lead 26 was session_015mHBLCf5jpnzBkFY1iBTqv); team leader CT1 (session_019sqDowb6QNf3KZAYMSx1jM, claude/controller);
 first reviewer PR9 (session_01B1FUTc4sJR4Q5FFnx7L6Db, notes on claude/review-8, `plans/review-9.md`).
 
 ## Split (lead 26's plans/controller-team.md, claude/lead-26 31151143; replaces the 02:00 split)
