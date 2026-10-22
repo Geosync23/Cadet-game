@@ -18,6 +18,8 @@ entries, the event days included).
 | 5 | a typo in the health check booking (`pls.id`) | 21 | player | miss (3) | picks (4, 27 min) | picks | exit 1 (as is: 0); `ReferenceError: pls is not defined` |
 | 6 | your tasting vote isn't kept (`tallyVote`) | 18 | food | miss (10) | picks (11, 71 min) | picks | exit 1 (as is: 0); 2 new FAILs: "tasting with the tally", "your tastes" |
 
+**What they prove** (OR2): the three crash typos (2, 4, 5) prove coverage (a check catches a typo only by running its line, which is what the map claims), not that a check notices wrong behaviour; the three behaviour faults (1, 3, 6) are the stronger evidence.
+
 Run: `CADET_CHROME=/opt/pw-browsers/chromium python3 tools/affected_planted.py --run --out DIR` (about an hour, one
 browser check at a time; the base run of each check once, then each fault); 2026-10-22 00:45-01:30 UTC, fault 4
 again with the error rule at 01:31. On paper only: `python3 tools/affected_planted.py` (under a minute).

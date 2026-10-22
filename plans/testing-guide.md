@@ -447,7 +447,7 @@ map can pick it. `python3 tools/affected_planted.py` checks the picks on paper (
 | a typo in the health booking (`pls.id`) | 21 | player | miss | ReferenceError |
 | your tasting vote isn't kept (`tallyVote`) | 18 | food | miss | 2 new FAILs |
 
-All 6 are picked by (a) and (b), by the map alone. A fault counts only if its check prints a FAIL or error the game as
+All 6 are picked by (a) and (b), by the map alone. The three crash typos prove coverage (a check catches one only by running its line); the three behaviour faults (escort, tool slow-down, tasting vote) are the stronger evidence that a check notices wrong behaviour (OR2). A fault counts only if its check prints a FAIL or error the game as
 it is doesn't, or exits 1 where the game as it is exits 0. Six other faults were tried first and their checks stayed
 green (e.g. intro_check doesn't notice the day shift starting an hour late): listed in planted.md as gaps for the
 checks' owners.
