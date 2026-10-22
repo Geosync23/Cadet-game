@@ -221,3 +221,9 @@ action name, the stick swap), turn 2's zoom line (flip, speed), section 19's Set
   parser); installed, re-run queued (queue 6) with P5's.
 - CTT 442f339 (CTT's fixes for turn 3: OUTCOME reads #chat and who's talking; a facing test): t3_noop_crew, t3_noface
   and PR9's c7 to re-run on 0.90.2 (queue 6). CTT has handed over to a fresh session.
+
+### The noise control (lead 27's ask)
+93093a8 against itself, alone: ALL IDENTICAL, zero pixels differ. So the 1-level noise isn't cadet_test's floor on a
+quiet machine. Where it showed: adffcbe on (with a second browser running), P3 958421a on (likely with my old P3
+mutant job still running beside it). fc8ccd5 off/on came out plain. Next: P3 958421a on again, strictly alone (queue 7).
+If it's clean alone, the noise is load (the HUD's blurred glass under a busy renderer); if not, it's the build.
