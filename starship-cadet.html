@@ -54337,6 +54337,13 @@ function padFind(key, x, z, ys, r) {                       // a point on screen 
   for (const y of ys) for (const [ox, oz] of r ? [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]] : [[0, 0]]) {
     const s = padScreen(x + ox, y, z + oz); PAD_PICK.used++; if (s && padWhat(s[0], s[1], key) === key) return s;
   }
+  // a seat whose own spot's points fall nearer another seat (a mess seat beside a long table's, follow-up 1): a little
+  // further out on screen around it, four rings of eight points (10 to 40 px), the first point a tap really reaches
+  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;
+  for (let k = 1; k <= 4; k++) for (let a = 0; a < 8; a++) {
+    const cx = c[0] + 10 * k * Math.cos(a * Math.PI / 4 + k), cy = c[1] + 10 * k * Math.sin(a * Math.PI / 4 + k); PAD_PICK.used++;
+    if (padWhat(cx, cy, key) === key) return [cx, cy];
+  }
   return null;
 }
 function padCrewSeen() {                                   // section 10's crewAtScreen, its screen points worked out once for a whole search
