@@ -448,10 +448,11 @@ class Sweep:
         for it in todo:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
-            # at most two of each kind of thing are pressed (the same container and class: Tiles' 36 squares, a list's
-            # rows); every one of them is still listed, and the pad half must reach every one
+            # of a big set of alike things (20 or more on one screen with the same container and class: Tiles' 36
+            # squares) two are pressed; every one of them is still listed, and the pad half must reach every one
             grp = re.sub(r'\[.*\](#\d+)?$', '', it['k'])
-            if not it['k'].startswith('@') and grp != it['k'] and self.groups.get(grp, 0) >= 2: continue
+            big = sum(1 for i in todo if re.sub(r'\[.*\](#\d+)?$', '', i['k']) == grp) >= 20   # a board or a long list, not the device's apps
+            if not it['k'].startswith('@') and grp != it['k'] and big and self.groups.get(grp, 0) >= 2: continue
             self.groups[grp] = self.groups.get(grp, 0) + 1
             self.pressed.add(it['k'])
             cur = self.scan(); need = [it['k']] if not it['k'].startswith('@') else []
