@@ -16,6 +16,7 @@ M = {
  'p2_noname': ("box.value = PAD_NAME; return true;", "return;"),   # A on Sign with an empty box: no suggested name
  'p2_tilesnoland': ("if (to && to !== a) padFocusTo(to);\n  const f = to || a;", "const f = a;"),   # Tiles: the highlight never lands on the board
  'p1_noblur': ("if (F.el && a === F.el && a.blur) a.blur();", ""),   # a touch leaves the pad's focus (the outline)
+ 'p1b_nolanding': ("if (L !== F.layer) F.last = null; F.layer = L; if (L) padFocusIn(L); }", "if (L !== F.layer) F.last = null; F.layer = L; }"),   # cff5bab7: opening a panel puts the highlight nowhere
  'c4_noback': ("addEventListener('pointerdown', back, true); ", ""),   # a touch doesn't hand back
 }
 for n in sys.argv[2:] or list(M):
