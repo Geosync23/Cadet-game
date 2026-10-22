@@ -124,6 +124,10 @@ class Run:
         try: self.page.wait_for_function("window.__sc('typeof MACH_NORM === \\'undefined\\' || MACH_NORM !== null')", timeout=30000)
         except Exception: pass
         self.page.wait_for_timeout(300)
+    def reload(self):
+        self.page.reload()
+        self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
+        self.ev(SKIP_SWITCH); self.page.wait_for_timeout(300)
     def ev(self, s): return self.page.evaluate('s => window.__sc(s)', s)
     def js(self, s): return self.page.evaluate(s)
     def step(self, n, dt=1000/30):
@@ -229,12 +233,13 @@ def part_idle(br, src, tag):
 def save_text(br, src, tag, mode, plug, frames=200):
     # a real save (no ?nosave), the arrival marked done so the intro doesn't start
     r = Run(br, src, tag, mode=mode, plug=plug, query='?debug', storage={'starship-cadet-arrived': '1'})
-    r.step(frames); txt = r.ev("saveGame(), localStorage.getItem(SAVE_KEY)"); r.close()
+    # the whole of storage, not only the save: a controller's own key would be a change to what's kept too
+    r.step(frames); txt = r.ev("saveGame(), JSON.stringify(Object.fromEntries(Object.keys(localStorage).sort().map(k => [k, k === SAVE_KEY ? JSON.parse(localStorage.getItem(k)) : localStorage.getItem(k)])))"); r.close()
     return txt
 def part_save(br, src, tag):
     fails = []
     base = save_text(br, src, f'{tag}_save_none', 'none', None)
-    print(f'  the save with no pad: {len(base or "")} bytes')
+    print(f'  storage with no pad (the save and everything else kept): {len(base or "")} bytes')
     if not base: return ['no save was written with no pad']
     for mode, what, plug in IDLE_MODES[1:]:
         t = save_text(br, src, f'{tag}_save_{mode}', mode, plug)
@@ -301,7 +306,8 @@ SCAN = r"""(() => {
     const own = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40);
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + own + ']';
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
-    out.push({ k: key, x: at[0], y: at[1], why: ['', 'tag', 'click', 'listener', 'cursor'][k] });
+    const d = e.closest('[role=dialog],[aria-modal=true],.lift,.device,dialog');
+    out.push({ k: key, x: at[0], y: at[1], why: ['', 'tag', 'click', 'listener', 'cursor'][k], dlg: d ? (d.id || d.className) : null, label: own });
   }
   const dlg = [...document.querySelectorAll('[role=dialog],[aria-modal=true],.lift,.device,dialog')].filter(e => !e.closest('[hidden]') && e.getBoundingClientRect().width > 0 && (!e.checkVisibility || e.checkVisibility({ opacityProperty: true, visibilityProperty: true }))).map(e => e.id || e.className);
   return { items: out, dialogs: dlg, url: location.href };
@@ -311,7 +317,7 @@ class Sweep:
     """The touch half of the reachability sweep: from the deck and from every panel it can open, press every clickable
     by mouse (a real click at its middle, as a finger would) and record each screen state reached: the pressable things
     in it, read from the page. Back to the state before with Escape, else by reloading and replaying the presses."""
-    MAX_DEPTH, MAX_PRESSES = 4, 700
+    MAX_DEPTH, MAX_PRESSES = 4, int(os.environ.get('CTL_PRESSES', 700))
     SKIP = {'#newgame'}   # pressed once at the top only (twice starts a new game; nothing new to find behind it)
     def __init__(self, pw, src, tag):
         self.pw, self.src, self.tag = pw, src, tag
@@ -319,11 +325,17 @@ class Sweep:
         self.pressed = set(); self.presses = 0; self.reloads = 0; self.lost = []
         self.r = None
     def load(self):
-        if self.r: self.r.close()
-        self.r = Run(self.pw, self.src, f'{self.tag}_sweep'); self.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); self.r.step(20); self.reloads += 1
+        if self.r: self.r.reload()
+        else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
+        self.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); self.r.step(20); self.reloads += 1
     def scan(self): return self.r.ev(SCAN)
+    BACK = re.compile(r'^(back|close|stay here|not yet|cancel|done|leave|no|×|✕|x)$', re.I)
     @staticmethod
-    def sig(sc): return tuple(sorted(i['k'] for i in sc['items']))
+    def inner(sc):
+        # with a panel open, its own things; the screen's edge buttons are pressed from the deck only
+        return [i for i in sc['items'] if i['dlg']] if sc['dialogs'] else sc['items']
+    @classmethod
+    def sig(cls, sc): return (tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc))))
     def press(self, sc, key):
         it = next((i for i in sc['items'] if i['k'] == key), None)
         if not it: return False
@@ -335,27 +347,36 @@ class Sweep:
             if not self.press(self.scan(), k): return False
         return True
     def back_to(self, path, sig):
+        # Escape, else load again and replay the presses; a screen that comes back a little different (the device
+        # reopens on the app last used) is taken as it is, and the presses left are made from there
         self.r.page.keyboard.press('Escape'); self.r.step(4)
+        for _ in range(3):
+            sc = self.scan()
+            if self.sig(sc) == sig: return True
+            b = next((i for i in self.inner(sc) if self.BACK.match(i['label'])), None)
+            if not b: break
+            self.press(sc, b['k'])
         if self.sig(self.scan()) == sig: return True
         if self.replay(path) and self.sig(self.scan()) == sig: return True
-        self.lost.append(' > '.join(path) or '(the deck)'); return False
+        self.lost.append(' > '.join(path) or '(the deck)'); return True
     def crawl(self, path=(), depth=0):
         sc = self.scan(); sg = self.sig(sc)
         if sg in self.states: return
-        self.states[sg] = {'path': list(path), 'items': sc['items'], 'dialogs': sc['dialogs']}
+        self.states[sg] = {'path': list(path), 'items': self.inner(sc), 'dialogs': sc['dialogs']}
+        print(f'    state {len(self.states)}: {" > ".join(path) or "(the deck)"}: {len(self.inner(sc))} things, {self.presses} presses, {self.reloads} loads', flush=True)
         if depth >= self.MAX_DEPTH: return
-        for it in sc['items']:
+        for it in self.inner(sc):
             if self.presses >= self.MAX_PRESSES: return
             if (sg, it['k']) in self.pressed or (it['k'] in self.SKIP and path): continue
             self.pressed.add((sg, it['k']))
             cur = self.scan()
-            if self.sig(cur) != sg and not self.back_to(list(path), sg): return
+            if self.sig(cur) != sg: self.back_to(list(path), sg)
             if not self.press(self.scan(), it['k']): continue
             after = self.scan()
             if after['url'] != sc['url']: self.lost.append('left the page: ' + it['k']); self.replay(list(path)); continue
             if self.sig(after) != sg:
                 self.crawl(tuple(path) + (it['k'],), depth + 1)
-                if not self.back_to(list(path), sg): return
+                self.back_to(list(path), sg)
     def run(self):
         self.load(); self.crawl()
         if self.r: self.r.close()
