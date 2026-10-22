@@ -12,6 +12,7 @@
 #   the meeting (RV6's E item 5): FX1's trainArrow puts no arrow up while the queue is on; T1 leads
 #   clock out (S7): from 17:00 (15:30 on a short Friday, until 16:00) "Shift over: clock out" over a job still in hand and over T3 (your training turn), for an
 #                   hour; the pointer on Clock out; pressed: gone. Section 15's direct clock-out arrow stays off
+#   after clock-out: a job you hold has no arrow (nor Turn it in), and stays in Tracked
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
 #   reputation (S9): a new word reached: a toast once; never again for that word (a word first met on a drop still is, when reached going up); a drop: the toast "Works reputation down: <word>" only
 #   pointers:       each panel pointer three times at most, then not asked
@@ -146,6 +147,13 @@ def part_on(pg):
     pg.ev("POINT.aim.click()"); pg.step(2); pg.ev("document.getElementById('clockScreen').hidden = true"); shift(pg)
     r = pg.ev("({ out: careerClockedOut(9), live: guideList().some(e => e.id === 'shift:out:9'), lab: (GUIDE.key = '', (goalNow() || {}).label || null) })")
     check(r['out'] and not r['live'] and r['lab'] != 'Shift over: clock out', f'S7: pressed: clocked out, gone ({r})')
+    # clocked out: the job arrow rests (lead 29: off shift you're free); a job you hold stays in Tracked
+    pg.ev(f"({JOB})('arrows-late', true); SHIP.player.track = 'arrows-late'; ixGoalAt = -1"); pg.step(3)
+    r = pg.ev("(() => { GUIDE.key = ''; const g = goalNow(); return { lab: g && g.label, step: (ixJobStep() || {}).label || null, row: trkItems().some(x => x.job === 'arrows-late') }; })()")
+    Object_done = pg.ev("Object.assign(myJob(), { workDone: true }); ixGoalAt = -1; (ixJobStep() || {}).label || null")
+    pg.ev("SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-late'); MACH_REV++; ixGoalAt = -1")
+    print('  after clock-out, a held job:', r, Object_done)
+    check(r['lab'] is None and r['step'] is None and Object_done is None and r['row'], f'after clock-out: no job arrow (its steps or Turn it in), the job still in Tracked (lead 29) ({r}, {Object_done})')
 
 def part_on2(pg):
     # S5 and S8: turn it in, then the Work log; S6: the empty board; S9: the reputation word; three times at most

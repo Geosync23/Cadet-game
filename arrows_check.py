@@ -16,7 +16,7 @@
 #   size:     SHIP.guide in the save stays small with 400 seen ids (300 kept)
 # Parts "shift" and "week" (AR1, for FX1-FX3): play as a player who ONLY follows the arrow (and the pointer, once piece C
 # is in) from a real game's state (tracking as after taking a job yesterday): go where the arrow points (a teleport stands
-# in for the walk), tap the thing it points at, press the button a panel offers (the clock screen's, the board's Take it /
+# in for the walk), tap the thing it points at (your job's own steps: a real screen tap at the pin), press the button a panel offers (the clock screen's, the board's Take it /
 # Turn it in, a meeting's Go on, a card's choices in turn), read meetings through, sleep at night.
 #   shift: one ordinary workday (Day 9, nothing new taught): clocked in by 09:05, at least three jobs turned in, never
 #          stuck (the arrow on the same spot for 45 ship minutes with the player there), clocked out by the player
@@ -303,6 +303,7 @@ FOLLOW = r"""(() => {
   const it = sh && its.find(x => x[0].t === sh[1]) || named || its[0];   // a shelf by its name, else the thing named, else the nearest
   const pin = () => { const v = new THREE.Vector3(w.x, .05, w.z).project(camera); return { click: [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight], label: g.label }; };
   if (window.__tapKey2 === key) return pin();             // the thing didn't answer: a real tap on the floor at the pin, as a player would
+  { let js = null; try { js = typeof ixJobStep === 'function' ? ixJobStep() : null; } catch (e) { js = null; } if (js && js.label === g.label && !sh) return pin(); }   // your job's own step (a chore's stop, a machine, the board): a real tap at its pin, as a player would (lead 29, RV7's arrows_check_rt; a shelf still by its name)
   if (it && it[2] < 2.5) { const r = playerTap(it[0], it[1].clone(), it[1].clone()); if (r && ACT && IX_ACTS[ACT.kind] && !/tea|biscuits|drink|water/i.test(g.label || '')) { const k = ACT.kind; actEnd(true); window.__tapKey2 = key; return 'tap ' + it[0].t + ': started ' + k + ', not the job: up again'; }   // a sit-down or laundry instead of the job's stop (a pin by the folding table): the floor at the pin next (AC2)
     if (!r || !ACT && !document.querySelector('#ixBoard:not([hidden]), #clockScreen:not([hidden]), #devDlg:not([hidden])')) window.__tapKey2 = key; return 'tap ' + it[0].t + ': ' + r; }   // answered but nothing started (a machine's "in good order" over the stop's spot): the floor at the pin next (AC2)
   return pin();

@@ -15885,6 +15885,7 @@ function ixJobStep() {
   if (typeof myJob !== 'function') return null;
   { const co = typeof clockRmDue === 'function' ? clockRmDue() : null; if (co && co.want === 'out' && co.late && !(typeof introOn === 'function' && introOn() && SHIP.time.day === 1)) return { deck: 5, place: '5-timeclock-1', label: 'Shift over: clock out at the time clock' }; }   // FX1: at the shift's end, over your job (it waits for tomorrow)
   const j = myJob(), lo = ixLoose(j); if (lo) return lo;
+  if (typeof careerClockedOut === 'function' && careerClockedOut(SHIP.time.day)) return null;   // clocked out: off shift you're free, no arrow to turn in or take more (lead 29; a job you hold stays in Tracked)
   if (!j) return ixWorkStep();
   if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: 'Turn it in at the job board' };   // Pillar 3: back to the board
   if (j.kind === 'restock') {                            // a cart run (section 15's cartTap): the dock, the hold, where it's going, the dock
