@@ -10382,6 +10382,8 @@ function schedBuild(p, d, occ, S) {
   const tradMeal = (e, end) => {
     const l = segs[segs.length - 1], from = deck === 3 && l && l.placeId && S.byId.get(l.placeId), at = from ? from.at : DECKS[3].lift;
     const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);
+    const short = t + (deck !== 3 ? C : 0) + walk + 3 + (e.min || 15) - (e.at + e.dur);   // a long walk to the line (the garden's far beds) would leave under the least time seated: set off that much earlier, out of what they were doing (at most half of it), so nobody eats standing (patch 1 F, bigevents_check's Line supper)
+    if (short > 0 && l && l.to === t && l.act !== 'commute' && !STOPS.has(l.tag) && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag))) { const cut = Math.min(short, Math.floor((l.to - l.from) / 2)); l.to -= cut; t -= cut; }
     go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
     take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
     if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
