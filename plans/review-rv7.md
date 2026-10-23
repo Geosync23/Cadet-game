@@ -277,3 +277,29 @@ expects the mop. OK on 518ee9ef; it catches the 40 px fault (19 px from Oona: no
 - interactions_check fdd15400: test setup only (a fresh game has no career yet).
 - controller_check (controller-tests-3): with arrows on, B puts away one waiting pop-up per press (up to four in a
   burst), where one press used to clear the one on screen. A small UX change, not a fault.
+
+## 12. 0.92.0, claude/integration-next-fe1 4147f03d (BM14's merge, arrows-c last): PASS WITH FIXES (one check)
+
+Game sha256 c2180854...4f1286, matches lead 31's. Only the arrows-c merge (b657a4e) had game clashes, four, each
+resolved keeping both sides: Settings (the Teaching arrows row, then the controller's padSetBlocks), section 19's slot
+(the panel pointer, then tip-clear's tipClear), jobEnd's repair finish (caseFitted first, then finishJob with padBuzz),
+ixPinBooth/IX_PIN (arrows-c's, new). The other eight merges had none in the game. FX7's floor-tap fix and FX3's fix 19
+auto-merged in separate code. controller_check taken whole from CTT3: the base's copy equals 2a76b818, which CTT3's
+branch contains, so nothing is lost.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 362d0ff (just before arrows-c) -> 4147f03d, alone | ALL IDENTICAL: arrows-c adds nothing to its shots |
+| cadet_test arrows-c 7d97d538 -> 4147f03d, alone | differs from a_start on, whole screen from i_tap1: the other pieces' changes (meals and hygiene); the player heads for "A toilet" where arrows-c's went for food. arrows-c itself adds nothing (the line above) |
+| arrows_d, arrows_f, arrows_pointer on 4147f03d | OK, all three |
+| Week, the build as shipped, First times | all nine learned: m1 Day 2; m4, m3d Day 3; m3i, m5 Day 4; m7, p3 Day 5; m6, m2 Day 8. Nothing stuck, no arrow over 3 hours, 9 "Trained" pop-ups, no page errors |
+| Week, Teaching arrows Off | the same, lesson for lesson |
+| Panel pointer | First times: p:clock:in asked; Off: none |
+| mech_check (all) on 4147f03d | **FAIL** in part fx3, then a crash: "m6: after the talk the arrow follows the teacher to the pipe (None)", then `a['goal'][2]` on None |
+| mech_check fx3 on arrows-c 7d97d538 | the same FAIL and crash: not from the merge, from the switch (arrows on by default) |
+
+The fix needed (AC3 / FX3): mech_check's fx3 part was written for the arrows off; with the queue on, the burst pipe's
+follow arrow is a queue entry (F4, level 1), not a direct goal, and in the check's Day 8 scenario m6 goes back to "ask"
+after the talk. Play shows m6 learned on Day 8 with the arrows on and with Off, so it is most likely the check (it
+reads IX_GOAL; and its scenario may lean on the direct arrow). That has to be shown, and the part made to pass
+with the shipped switches, before the round can be green.
