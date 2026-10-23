@@ -485,7 +485,18 @@ class Sweep:
         return self
 
 def part_reach(pw, src, tag):
-    sw = Sweep(pw, src, tag).run()
+    # (CTT3) CTL_STATES=file: the touch half's findings saved there, and read back instead of sweeping again when the file
+    # is there (the pad half alone, after a stop; the touch half took 1.5 h on 0.91.0)
+    keep = os.environ.get('CTL_STATES')
+    if keep and os.path.exists(keep):
+        from types import SimpleNamespace
+        d = json.load(open(keep)); print(f'  the touch half read back from {keep}')
+        sw = SimpleNamespace(**{k: d[k] for k in ('presses', 'reloads', 'lost', 'cands')}, capped=set(d['capped']), opened=set(d['opened']),
+                             states={str(i): v for i, v in enumerate(d['states'])})
+    else:
+        sw = Sweep(pw, src, tag).run()
+        if keep: json.dump({'presses': sw.presses, 'reloads': sw.reloads, 'lost': sw.lost, 'cands': sw.cands, 'capped': sorted(sw.capped),
+                            'opened': sorted(sw.opened), 'states': list(sw.states.values())}, open(keep, 'w'))
     keys = sorted({i['k'] for st in sw.states.values() for i in st['items']})
     dl = sorted({d for st in sw.states.values() for d in st['dialogs']})
     print(f'  by touch: {len(sw.states)} screen states, {len(keys)} different pressable things, {sw.presses} presses, {sw.reloads} loads; panels seen: {", ".join(dl)}')
@@ -509,14 +520,22 @@ REACH_INVENTORY = {}
 # focus, plan section 3) with the D-pad only: back and forth along rows, down and up, and a seeded wander, until nothing
 # new is reached. Every thing the page lists on that screen must have had the highlight. Then A on the highlighted thing
 # must click that very thing, and B must leave the panel (or go back a step).
-def pad_moves(r, n):
+class _AllSeen(Exception): pass
+def pad_moves(r, n, want=None):
+    # (CTT3) want: once every one of these has had the highlight, stop (all the screen needs; the zigzag was ~600 presses a
+    # screen, each with a scan of the page)
     seen, order = set(), []
+    try: _pad_moves(r, n, want, seen, order)
+    except _AllSeen: pass
+    return seen, order
+def _pad_moves(r, n, want, seen, order):
     def look():
         sc = r.ev(SCAN); it = next((i for i in Sweep.inner(sc) if i['foc']), None); f = it and it['k']
         if f and f not in seen:
             seen.add(f); order.append(f)
             # CP5's rule: what the highlight lands on has a name a screen reader reads (text, aria-label or title)
             if not r.js("(() => { const e = document.activeElement; return !!((e.getAttribute('aria-label') || e.textContent || e.title || (e.labels && e.labels[0] && e.labels[0].textContent) || '').trim()); })()"): pad_moves.nameless.add(f)
+            if want and want <= seen: raise _AllSeen()
         return f
     r.press('DOWN'); r.step(1); look()
     for d1, d2 in (('RIGHT', 'LEFT'), ('LEFT', 'RIGHT')):
@@ -557,7 +576,7 @@ def part_reach_pad(pw, src, tag, states):
         where = ' > '.join(st['path'])
         if not okp: print(f'  {where}: could not get there again'); sw.r.close(); continue
         want = {i['k'] for i in st['items']}
-        seen, order = pad_moves(sw.r, min(12, len(want) + 2))
+        seen, order = pad_moves(sw.r, min(12, len(want) + 2), want & {i['k'] for i in Sweep.inner(sw.scan())} - set(PAD_COVERED))
         now = {i['k'] for i in Sweep.inner(sw.scan())}
         missing = sorted((want & now) - seen - set(PAD_COVERED))
         for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
