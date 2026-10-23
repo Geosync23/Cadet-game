@@ -1602,9 +1602,10 @@ FX3M6 = r"""(() => {
   run(T(359), T(600)); out.st0 = W.cur && W.cur.st; out.warnMail = SHIP.mail.map(x => x.subject + ': ' + x.body).filter(x => /10:30/.test(x));
   run(T(601), T(625)); out.soon = said.filter(x => /Ten minutes/.test(x)).length;
   const c = W.cur; run(T(626), T(640), t => { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at && !r.met) { r.met = true; worksCareerTick(t + .5); } return c.st === 'watch'; });
-  out.watch = c.st; out.goal = IX_GOAL ? [IX_GOAL.deck, IX_GOAL.place, IX_GOAL.label] : null;
+  const seen = () => { if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof goalNow === 'function') { GUIDE.key = ''; return goalNow(); } return IX_GOAL; };   // the arrow you see: with the teaching arrows on (0.92.0) the burst's follow is the queue's inc:m6 entry
+  const sg = seen(); out.watch = c.st; out.goal = sg ? [sg.deck, sg.place, sg.label] : null;
   const t1 = shipNow(); run(t1 + 1, t1 + 40, () => c.st !== 'watch');
-  out.after = c.st; out.goalAfter = !!IX_GOAL; out.open = W.inc.open; out.again = SHIP.mail.filter(x => /Next time/.test(x.subject)).map(x => x.body);
+  out.after = c.st; out.goalAfter = !!seen(); out.open = W.inc.open; out.again = SHIP.mail.filter(x => /Next time/.test(x.subject)).map(x => x.body);
   let d2 = d + 1; while (!playerShiftOn(d2)) d2++;
   const U = m => (d2 - 1) * 1440 + m; run(U(300), U(400)); const r2 = SHIP.occasions.find(x => x.key === c.occ);
   out.next = [worksDay(shipNow()), c.st, r2 ? r2.at % 1440 : null, said.filter(x => /try that again/i.test(x)).length];
@@ -1639,6 +1640,7 @@ FX3SMALL = r"""(() => {
   const th = m => wed * 1440 + m; for (let t = th(300); t <= th(375); t += 5) tick(t);
   out.m3iOpen = worksOpened(W).has('m3i'); out.tomas = open('m3i'); meetingsTick(shipNow()); out.tomasStays = open('m3i'); if (DIALOGUE) dialogueEnd(true);
   // the inspection morning's arrows (the week guide's Day 4, lead 29): wardrobe, bed, locker, then your berth if you've left it
+  const gq0 = typeof GUIDE_ON !== 'undefined' && GUIDE_ON; if (gq0) GUIDE_ON = false;   // FX3's direct arrows: the queue off (on from 0.92.0, the queue's own path is the week guide's Day 4, AC2's F2)
   const C = SHIP.clothes, P = SHIP.player, lab = () => { const g = goalNow(); return g ? g.label : null; }; clearGoal(); out.arrows = [];
   goToDeck(5); const keep = [C && C.changed, P.bedMade, P.untidy]; if (C) C.changed = null; P.bedMade = null; P.untidy = true;
   let t9 = th(376); tick(t9); out.arrows.push(lab());
@@ -1648,6 +1650,7 @@ FX3SMALL = r"""(() => {
   const gq = typeof GUIDE_ON === 'undefined' ? null : GUIDE_ON, setQ = v => { if (gq === null) window.GUIDE_ON = v; else GUIDE_ON = v; };   // the arrow queue on: the arrows step aside (AC2's piece F2 asks the queue)
   setQ(true); tick(++t9); out.queued = lab(); if (gq === null) delete window.GUIDE_ON; else GUIDE_ON = gq;
   tick(++t9); for (let t = t9; t <= th(INSPECT_AT); t++) tick(t); out.arrows.push(lab());
+  if (gq0) { GUIDE_ON = true; guideStart(); }
   if (C) C.changed = keep[0]; P.bedMade = keep[1]; P.untidy = keep[2]; goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
   const n0 = SHIP.mail.length; worksTrained('m3i'); out.again = open('m3i'); if (DIALOGUE) dialogueEnd(true);
   W.tr.m2 = undefined; delete W.tr.m2; worksTrained('m2'); out.m2 = open('m2'); meetingsTick(shipNow()); out.m2Stays = open('m2'); if (DIALOGUE) dialogueEnd(true);
