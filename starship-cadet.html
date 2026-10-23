@@ -14112,7 +14112,9 @@ function bagTick() {
   const on = typeof introOn === 'function' && introOn(), I = SHIP.intro || {};
   if (!bagHeld()) { if (on && I.step === 'ramp') bagGive(); return; }
   if (!on) bagStow(true);
-  // (DS1, the user 2026-10-23) during the arrival evening and the week nobody puts it away for you: you do (the wardrobe arrow stays; bagLockerTap, wardrobeUse)
+  // (DS1, the user 2026-10-23) on the arrival evening nobody puts it away for you: you do (the wardrobe arrow stays; bagLockerTap, wardrobeUse).
+  // Still in your hands on Monday (a time jump, or past 19:45): you put it away before bed
+  else if (SHIP.time.day >= 1) bagStow('Your bag\'s in your wardrobe: you put it away before bed.');
 }
 function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk to your wardrobe, stow it
   if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
@@ -43278,7 +43280,7 @@ function introArrowClear() {
 function introArrowWant(now) {
   const I = SHIP.intro, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, fin = id => { if (I.done['arrow:' + id] === undefined) I.done['arrow:' + id] = Math.floor(now); };
   const P = SHIP.player, late = m >= 20 * 60 + 30;        // dinner's till half eight
-  if (typeof bagHeld === 'function' && bagHeld() && (I.step === 'stow' || I.done.stow !== undefined)) return 'stow';   // your bag into your wardrobe (playtest patch 1, #2), till you do (DS1)
+  if (typeof bagHeld === 'function' && bagHeld() && I.step === 'stow') return 'stow';   // your bag into your wardrobe (playtest patch 1, #2)
   if (introTeaPhase(now) === 'go') return 'tea';
   if (I.done['call:track'] !== undefined && I.done['call:end'] === undefined) return 'call';
   if (P.tray || ACT && (ACT.kind === 'queue' || ACT.kind === 'eat')) I.done['ate:last'] = Math.floor(now);   // the last minute you had food in hand (or were queueing, eating)
@@ -43288,7 +43290,7 @@ function introArrowWant(now) {
     else if (d > 1 || d === 1 && late) fin('eat');
   }
   if (d > 1 || typeof careerClockedIn !== 'function') { fin('clock'); fin('board'); return null; }
-  if (d < 1) return null;
+  if (d < 1) return typeof bagHeld === 'function' && bagHeld() && I.done.stow !== undefined ? 'stow' : null;   // (DS1) past its step (19:45), the bag's arrow still, after the others
   const out = m >= (typeof CAREER !== 'undefined' ? CAREER.clockOut : 1020);
   if (I.done['arrow:clock'] === undefined) {
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }

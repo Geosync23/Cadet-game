@@ -400,6 +400,7 @@ def talk_away(g):
             g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), given: SHIP.intro.done['device:given'], z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
             if g.ev("typeof DEV !== 'undefined' && DEV.open"): g.ev('deviceClose()')   # DS1: his Mail after the hand-over, read and closed
+            if step == 'bunk' and g.ev("SHIP.intro.step === 'stow' && bagHeld()"): g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()")   # DS1 (the user): nobody stows it for you, so you do, then back to your spot
             if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)) and (step != 'bunk' or g.ev("SHIP.intro.done['hand:end'] !== undefined || !introHandDue()")): break   # (bunk: on through the bag, the device and his hand-over)
         took = r['m'] - t0
         print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, device in person {r['given'] is not None}, Zeke at {r['z']}")
