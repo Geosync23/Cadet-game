@@ -22,7 +22,8 @@
 #          stuck (the arrow on the same spot for 45 ship minutes with the player there), clocked out by the player
 #   week:  Days 2-8 in a row: clocked in every workday; each lesson learned on its day by following the arrow (Rounds
 #          Day 2, Hauling and the drill Day 3, the inspection and Tuning Day 4, the scanner and the first head-scratcher
-#          Day 5); the scanner counted as used; Making it safe opened on Day 8 and learned; no arrow left up after its
+#          Day 5); the scanner counted as used by the next workday; Making it safe opened and learned on Day 8, or on the
+#          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
 # Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, shift, week; default all, about 15 minutes)
@@ -403,22 +404,36 @@ def part_shift(ctx, path):
     check(not pg.errors, f'shift: page errors {pg.errors[:3]}')
     pg.page.close()
 
-WEEK = [(2, ['m1']), (3, ['m4', 'm3d']), (4, ['m3i', 'm5']), (5, ['m7', 'p3']), (8, ['m6'])]
+WEEK = [(2, ['m1']), (3, ['m4', 'm3d']), (4, ['m3i', 'm5']), (5, ['m7', 'p3'])]
+# The scanner's first counted use is your first faulty-machine job after the Day 5 lesson (the lesson's own reading doesn't
+# count), so it comes when the board has one: Day 5's afternoon, else the next workday. Making it safe (m6) needs that use
+# and opens at a day's start from Day 8: on Day 8, or on the first workday after the use (FX6 for lead 31, 0.92.1: with
+# the Line on, Friday Day 5's board was all chores, the first use came on Day 8 and m6 on Day 9; backlog LEAD31-11)
 def part_week(ctx, path):
     pg = Page(ctx, path); real_game(pg, 2); f = Follower(pg)
     want = dict(WEEK); fails = []
-    for d in range(2, 9):
-        f.run((d - 1) * 1440 + 21 * 60 + 30)
+    workday = lambda d: bool(pg.ev(f"playerShiftOn({d})"))
+    use_by = next(x for x in range(6, 20) if workday(x))   # the scanner used by the next workday after Day 5
+    used, m6_by, last, d = None, None, 8, 1
+    while d < last:
+        d += 1
+        f.run((d - 1) * 1440 + (21 * 60 + 30 if d <= 8 else 17 * 60 + 30))   # a day after Day 8 only for Making it safe: its workday (the evening's needs arrow is another check's)
         s = pg.ev(STATE)
         work = pg.ev(f"playerShiftOn({d})")
         log = pg.ev(f"(SHIP.player.clockLog || {{}})[{d}] || 0")
-        if work: check(log > 0, f'week: Day {d}: never clocked in following the arrow (fix: {FIX["clock in"]})')
+        if work: check(log > 0 or d > 8 and bool(pg.ev(f"careerClockedIn({d})")), f'week: Day {d}: never clocked in following the arrow (fix: {FIX["clock in"]})')
         for m in want.get(d, []):
             check(s['tr'].get(m) is not None, f'week: Day {d}: "{m}" not learned by following the arrow (fix: {FIX.get(m, "?")}); training {s["cur"]}, opened {s["op"].get(str(d))}')
-        if d == 5: check((s['use'].get('m7') or 0) >= 1, f'week: Day 5: the scanner never counted as used (fix: {FIX["scan"]})')
-        if d == 8: check('m6' in (s['op'].get('8') or []), f'week: Day 8: Making it safe did not open (fix: {FIX["m6"]})')
-        print(f'  week: Day {d}: learned {sorted(k for k in s["tr"])}, training {s["cur"]}, clocked {log} min, stuck so far {len(f.stuck)}')
+        if used is None and d >= 5 and (s['use'].get('m7') or 0) >= 1:
+            used = d; m6_by = next(x for x in range(max(8, d + 1), 30) if workday(x)); last = max(last, m6_by)
+        if used is None and d == use_by: check(False, f'week: the scanner never counted as used by Day {use_by}, the next workday after its lesson (fix: {FIX["scan"]})')
+        if m6_by is not None and d == m6_by:
+            opened = sorted(int(k) for k, v in s['op'].items() if 'm6' in v)
+            check(bool(opened) and opened[0] <= m6_by, f'week: Making it safe did not open by Day {m6_by} (the scanner first used on Day {used}) (fix: {FIX["m6"]})')
+            check(s['tr'].get('m6') is not None, f'week: Day {d}: "m6" not learned by following the arrow (fix: {FIX["m6"]}); training {s["cur"]}, opened {s["op"].get(str(d))}')
+        print(f'  week: Day {d}: learned {sorted(k for k in s["tr"])}, training {s["cur"]}, clocked {log} min, stuck so far {len(f.stuck)}' + (f'; the scanner first used Day {used}, Making it safe due by Day {m6_by}' if used == d else ''))
         f.night(d)
+    if used is None and last < use_by: check(False, f'week: the scanner never counted as used (fix: {FIX["scan"]})')
     for t, lab, dk in f.stuck: fail(f'week: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}) (fix: {stuck_fix(lab)})')
     for t, lab in f.long: fail(f'week: the arrow "{lab}" stayed up over 3 ship hours from Day {t // 1440 + 1} {hhmm(t)} (fix: {FIX["stale"]})')
     check(not pg.errors, f'week: page errors {pg.errors[:3]}')
