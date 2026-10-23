@@ -686,6 +686,11 @@ with sync_playwright() as pw:
         # playtest patch 1 (#2-#4, #6): the bag into the wardrobe by you, the device from Zeke in person, no cabin Mail, the linger
         hand = g.ev("({ cabin: SHIP.clothes.said['d0-wardrobe'], stow: window.__stow || null, given: SHIP.intro.done['device:given'], stowAt: SHIP.intro.done.stow, devMet: SHIP.intro.done.device, bag: typeof bagHeld === 'function' && bagHeld(), mail: SHIP.mail.filter(m => m.from === 'Zeke Torres').map(m => m.subject) })")
         print(f"  the bag and the device: stowed by you {hand['stow']}, device handed over at {hand['given']} (stow step {hand['stowAt']}, device step {hand['devMet']}); Zeke's Mail {hand['mail']}")
+        hv = g.ev("({ s: SHIP.intro.done['hand:start'], e: SHIP.intro.done['hand:end'], mail: window.__handMail || null })")
+        if hv['s'] is not None:   # DS1 (lead 30's (e)): his hand-over in bubbles, his Mail opened on your device, the clock held through it
+            print(f"  the hand-over: from ship minute {hv['s']} to {hv['e']}; the device opened on {hv['mail']}")
+            if hv['e'] is None or hv['e'] - hv['s'] > 1: fail(f"the ship clock should hold through Zeke's hand-over: {hv}")
+            if not hv['mail'] or hv['mail'].get('app') != 'mail' or not hv['mail'].get('subject'): fail(f"the device should open on his Mail at the hand-over: {hv}")
         if 'stow' in steps:
             if not hand['stow'] or hand['stow']['goal'] != 'Put your bag in your wardrobe' or hand['bag']: fail(f"the bag did not go into the wardrobe by your tap, with its arrow: {hand}")
             if hand['given'] is None or hand['stowAt'] is None or hand['given'] < hand['stowAt']: fail(f"the device was not handed over in person after the bag: {hand}")

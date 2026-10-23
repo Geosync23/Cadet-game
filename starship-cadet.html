@@ -42642,7 +42642,8 @@ function introDeviceGive() {
 // facing you), he hands it over in his speech bubbles, a line every INTRO_TOUR_GAP (the device is yours at line
 // INTRO_HAND.give: introDeviceGive). Then your device opens on his Mail, written before you landed
 // (mail.zeke.land), past its first switch-on screen this once, so your next open shows that screen as before. When
-// you close it: his last lines ("Right, onward") and the step is done (its ready). Away from him on another deck it ends
+// you close it: his last lines ("Right, onward") and the step is done (its ready). The ship clock holds from his first line
+// to his last (lead 30's (e), the user's: so dinner comes when it did; crew keep walking, nothing scheduled fires). Away from him on another deck it ends
 // at once (the device is yours, the Mail sent). The question it used to ask is parked with introDevice.meet.
 // The words are the writers' (ZW1; the user picks): walk.hand.<n> before the Mail opens, in order, the device handed over on
 // line INTRO_HAND.give; walk.hand.after.<n> once you've closed it; mail.zeke.land ("Subject | body", {me} your name). Until
@@ -42670,7 +42671,8 @@ function introHandTick() {
   const I = SHIP.intro, D = I.done, now = simNow(), t = Math.floor(shipNow());
   if (D['hand:end'] !== undefined) return;
   if (introFlag('intro.device') && D['hand:start'] === undefined && I.step !== 'device') { introHandMail(); D['hand:end'] = t; return; }   // given another way (Monday's briefing): his Mail all the same
-  const H = INTRO_UI.hand || (INTRO_UI.hand = { n: 0, next: 0, opened: 0, a: 0 });
+  const H = INTRO_UI.hand || (INTRO_UI.hand = { n: 0, next: 0, opened: 0, a: 0, hold: null });
+  if (H.hold && D['hand:start'] !== undefined) { SHIP.time.day = H.hold[0]; SHIP.time.min = H.hold[1]; }   // (lead 30's (e)) the clock holds through it, as the manifest's does
   const a = introWalker();
   if (D['hand:start'] !== undefined && (H.n === 0 && !H.opened || !a || deckDef.num !== 4)) {   // a reload mid-scene, or you left the deck: it's yours, the Mail's there
     introDeviceGive(); introHandMail(); D['hand:end'] = t; return;
@@ -42682,7 +42684,7 @@ function introHandTick() {
     if (!H.quiet) H.quiet = now + INTRO_TOUR_GAP;          // his last wardrobe line read first
     if (now < H.quiet || now < INTRO_UI.next) return;
     if (Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > INTRO_HAND_NEAR) return;
-    D['hand:start'] = t; H.n = 0; H.a = 0; H.next = now;
+    D['hand:start'] = t; H.n = 0; H.a = 0; H.next = now; H.hold = [SHIP.time.day, Math.floor(SHIP.time.min) + .001];   // held just past the minute: a frame's step never crosses it
   }
   if (now < H.next || DIALOGUE) return;
   const say = text => { if (typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); H.next = INTRO_UI.next = now + introHandGap(text); };
