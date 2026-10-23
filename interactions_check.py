@@ -361,6 +361,8 @@ with sync_playwright() as pw:
             g.ev(f"setGoal({{ deck: {goal}, item: /job board/i, room: 'w', label: 'The job board' }})"); g.step(90)
             lp = g.ev(LP)
             near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
+            tip = g.ev("(() => { const c = document.getElementById('devTip'); if (!c || c.hidden) return null; const r = c.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, c.style.pointerEvents === 'none']; })()")
+            if tip and lp['at']: check(tip[4] or not (tip[0] <= lp['at'][0] <= tip[2] and tip[1] <= lp['at'][1] <= tip[3]), f"Deck {deck} {spot}: the tip card isn't over the arrow's target, or lets the tap through (tip {[round(v) for v in tip[:4]]}, target {lp['at']}) (FX5)")
             opened = False
             if lp['at'] and near < 3:
                 g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
