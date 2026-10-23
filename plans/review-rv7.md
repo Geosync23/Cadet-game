@@ -223,3 +223,23 @@ p3 are lost. That fails lead 30's rule (Off removes only what exists to teach, n
 Under Off these stay, which is right by that rule: the job arrows, the shift chain (Take a job, Shift over), the meeting
 arrows (L2), the inspection (L2) and the drill. The panel pointer is off under Off: at 08:01 on Day 2 "First times"
 asks p:clock:in, and Off asks nothing.
+
+## 9. claude/arrows-c e3c7c183 + 764438d4 + f8ed8521 (AC3: the teaching arrows switched on; Off keeps the watch arrow): PASS
+
+e3c7c183: `POINT_ON = true`, `GUIDE_ON = true`, Settings shows Teaching arrows (default First times), design-doc;
+the arrow checks make their own switched-off copy for their "off" parts. 764438d4: device_check empties the pop-up
+queue before reading a toast. f8ed8521: `guideTeach` skips an entry marked `everyday` (T2's watch arrow), so Off
+keeps it; T2's first-time tip stays hidden under Off.
+
+| Test | Result |
+| --- | --- |
+| cadet_test c14a799d (before the switch) -> f8ed8521, alone | ALL IDENTICAL (its shots are Day 1, where the intro's own arrows run and the queue adds nothing) |
+| arrows_d, arrows_f, arrows_pointer on f8ed8521 | OK, all three |
+| Week, the build as shipped (no run-time overrides), First times | m1 Day 2, m4 and m3d Day 3, m3i and m5 Day 4, m7 and p3 Day 5, m2; 8 "Trained" pop-ups shown. Not m6 |
+| Week, Teaching arrows Off | the same lessons on the same days; the watch arrows ("Stay close and watch ...") show |
+| Panel pointer, 08:01 Day 2 | First times: p:clock:in asked; Off: none |
+
+Under Off, what still shows (all things the game had before, or not teaching): job arrows, the shift chain, meeting
+arrows, the watch arrows, the inspection, the drill, Calder's call. What goes: the panel pointers and the first-time
+tips. Still stuck in both: "Mop up (2 of 2)" (Day 8, m6) and the hydroponics vent (Day 4), FX3's fix 19.
+Note: urgent device notifications now wait their turn in the pop-up queue (a second or two), like every other pop-up.
