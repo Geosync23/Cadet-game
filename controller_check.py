@@ -588,8 +588,11 @@ def part_reach_pad(pw, src, tag, states):
         where = ' > '.join(st['path'])
         if not okp: print(f'  {where}: could not get there again'); sw.r.close(); continue
         want = {i['k'] for i in st['items']}
-        seen, order = pad_moves(sw.r, min(12, len(want) + 2), want & {i['k'] for i in Sweep.inner(sw.scan())} - set(PAD_COVERED))
+        # what's on the screen as you arrive (CTT3: read after the zigzag, a list it had scrolled lost its first rows from
+        # both the count and the misses: New appointment's 8 people counted as "3 of 3"); a thing the touch half listed
+        # that isn't here now is a screen that changed with the clock (Tracked's rows), said below
         now = {i['k'] for i in Sweep.inner(sw.scan())}
+        seen, order = pad_moves(sw.r, min(12, len(want) + 2), want & now - set(PAD_COVERED))
         missing = sorted((want & now) - seen - set(PAD_COVERED))
         for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
         # (CP1) the zigzag above covers a dozen rows; anything it missed: steer the highlight straight at it, up to 40
@@ -603,7 +606,8 @@ def part_reach_pad(pw, src, tag, states):
                 for _ in range(15): sw.r.press('UP'); sw.r.step(1)
                 ok = pad_to_key(sw.r, k, 40)
             if ok: missing.remove(k); seen.add(k)
-        print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
+        gone = sorted(want - now)
+        print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else '') + (f'; not on the screen this time: {len(gone)} ({gone[:3]})' if gone else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
         # A clicks the highlighted thing
