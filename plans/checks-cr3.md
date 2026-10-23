@@ -207,3 +207,11 @@ Share: day_check 0, 1, 5, 7 + the new arrows_d_check and arrows_f_check (BM14's 
 | arrows_f_check | **OK** | `arrows_f_check: OK` (off; F4 follow, stops "Close the valve upstream of the wet", "Mop up (1 of 2)/(2 of 2)"; F3 case); 27 s |
 
 No FAIL. (Day peaks as in 0.64.17: breakfast at 07:00 is back.)
+
+## controller_check on 0.92.0, taken from CR6 (BM14's ask; CR6 "handed over" before I started)
+
+a9823284's controller_check.py (the game file there is the same, sha c2180854…1286), every part but reach. 1894 s. Exit 1:
+**26 parts OK, only `day` FAILs, with exactly the two known items** (BM14's list, controller-path only):
+`FAIL day: the job board: the ring never named the lift` (KC1) and `FAIL day: bedtime: the lift panel never opened` (KC2).
+OK: idle save calls touch walk pick games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks
+touch3 drop settings a11y firstuse. (touch passes this round.)
