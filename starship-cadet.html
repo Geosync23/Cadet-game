@@ -48478,7 +48478,10 @@ CHIEF_NOTES.p3 = { title: 'What\'s been tried', key: 'chief.p3', lines: [
   'If someone fitted it and it\'s still wrong, it isn\'t that.',
   'Read every note. One\'s on the job; the others are on the machine.',
   'What nobody has tried yet is your best bet.'] };
-if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open(row, d) { if (typeof worksAskSend === 'function') worksAskSend('p3', ladderTeacher(row, d) || 'calder', shipNow()); } };   // the training case is already staged (p3Stage); it shows at the next tick. The ask (FX3)
+// FX5: on Day 5 the training case is Washer 2, your scanner job; m7 is trained at its turn-in, so this row opens an hour
+// later and the case's one use (caseDone's worksUse, counted while the row wasn't open) trained nothing: trained here
+// then, and no ask (it would send you to the board for a case already solved)
+if (typeof WORK_MECH !== 'undefined') WORK_MECH.p3 = { open(row, d) { const W = SHIP.works; if (W && W.use && W.use.p3 > 0 && typeof worksTrained === 'function') { worksTrained('p3'); return; } if (typeof worksAskSend === 'function') worksAskSend('p3', ladderTeacher(row, d) || 'calder', shipNow()); } };   // the training case is already staged (p3Stage); it shows at the next tick. The ask (FX3)
 // Day 5's training case, staged at 18:00 on Day 4 (or the first 18:00 from Day 4 the ship gets to without it): held
 // for you (24 core's slot 20) till the row opens, so it's never on the crew's board
 function p3Stage(C) {
