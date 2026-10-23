@@ -531,6 +531,23 @@ with sync_playwright() as pw:
                 chat = [tgt[0], g.ev("ACT && ACT.kind"), g.ev(f"(DECK_CREW.find(x => x && x.p && x.p.name === {json.dumps(tgt[0])}) || {{}}).talking > 0")]
                 g.ev("actEnd(true)"); break
             g.page.click('#rot'); g.step(30)
+        # beside them, not on them (RV7's optional line): someone half a metre from the puddle, a tap on the floor at the
+        # puddle 12-26 px from their body and away from the pin: the job (a wider "on the person" would make it a chat)
+        side = None
+        for rot in range(4):
+            g.ev(SET); g.step(60); p = g.ev(PIN)
+            for dx in (.35, .45, .55, .65, -.35, -.45, -.55, -.65):
+                q = p and g.ev(f"""(() => {{ const a = DECK_CREW.find(x => x && x.p); if (!a) return null; const w = placeSpot('4-wet-2'); a.x = w.x + {dx}; a.z = w.z; a.y = 0; a.path = []; a.settled = false; a.spot = null;
+                  const v = new THREE.Vector3(w.x, .02, w.z).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+                  const body = Math.min(...[.5, 1, 1.4].map(hy => {{ _cp.set(a.x, hy, a.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - x, (1 - _cp.y) / 2 * innerHeight - y); }}));
+                  return crewAtScreen(x, y) === a && body > 12 && body < 26 && Math.hypot(x - {p[0]}, y - {p[1]}) > 26 ? [a.p.name, x, y, Math.round(body)] : null; }})()""")
+                if q:
+                    g.page.mouse.move(q[1], q[2]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
+                    side = [rot, dx, q[0], q[3], g.ev("ACT && ACT.kind")]; g.ev("actEnd(true)"); break
+            if side: break
+            g.page.click('#rot'); g.step(30)
+        print('   beside someone [turn, offset, who, px from them, started]:', side)
+        check(side and side[4] == 'ixStop', f'a tap on the floor at the puddle just beside someone (not on them) mops it ({side})')
         print('   at the pin [turn, standing on it, under the tap, started]:', res, '| a tap on someone away from it:', chat)
         check(any(r[2] for r in res), f'(someone under the pin in some camera turn: {res})')
         check(len(res) == 4 and all(r[3] == 'ixStop' for r in res), f'a tap at the pin mops the puddle, with someone standing on it ({res})')
