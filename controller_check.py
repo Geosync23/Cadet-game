@@ -1972,7 +1972,10 @@ def legacy_parts(GAME, ON, fails):
         p.plug(); p.step(3)
         check(p.ev("document.querySelectorAll('.padk').length") == 0, 'marks: marks on the page before any press')
         # "Controller connected" waits for the message showing (the opening one) to go, then shows
-        p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
+        # (CP5) frames alone decide: every pop-up shows at once (the game's test hook, LEAD31-2: no arrows' queue on real
+        # time), and the message stays until the check puts it away (no 5.6 s real-time hide): it flaked about half the runs
+        p.js("window.cadetPopupsNow = true")
+        p.ev("toast('Deck 4, CSV Wren', 'opening'); clearTimeout(toastTimer)"); p.press('x'); p.step(12)
         check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
         # (CTT3) put away as its 5.6 s would: with the arrows on, a message within 2.5 s (real time) of the last one waits in
         # their queue, and the check's frames take far less real time than a player's
