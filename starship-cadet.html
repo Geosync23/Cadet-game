@@ -54577,6 +54577,7 @@ function devmodeQuick(body) {
     ['Copy my real game', b => devmodeTwice(b, 'Tap again to copy', devmodeCopyReal)],
     ['Clear Dev save', b => devmodeTwice(b, 'Tap again to clear', devmodeClear)]]);
   if (u) devmodeText(body, 'Undo goes back to before: ' + u.label + ' (' + u.at + ').');
+  devmodeArrowRow(body);                                 // DV1's career arrow switch (below)
 }
 // ---- D5 (Stop 1b): Traditions: start any ship tradition, in 20 minutes, at its usual time or tomorrow ----
 // A Dev start is a row in the Dev state (DM_ST.tr: { id, day, from, who? }, kept in the Dev save), which section 18's
@@ -55052,6 +55053,197 @@ function devmodeSpeed(body) {
     ['Start again', () => { DM_SPEED.fr = []; DM_SPEED.k = 0; devmodeSpeedText(); }, { aria: 'Forget the frames so far and measure from now' }]]);
   devmodeSpeedText();
 }
+// ---- DV1: the Dev career arrow (the user, 2026-10-23; design-doc "Dev mode") ----
+// A testing cheat, in Dev mode only: an arrow of its own (magenta, a DEV tag) that always points at whatever the player
+// must do next for their career, whatever the Teaching arrows setting, a tracked goal or the hour: Day 1's first-week
+// beats, the training under way (its meeting, watching the teacher, your turn), the next ladder row's ask (or what it
+// still needs: a round done, a reputation word), the drill and the inspection, the test job and the promotion's beats.
+// Something that waits for its time points where it will happen, the label saying when ("Torres's meeting, 09:20").
+// dvCareerNext() -> null | { deck, place?, room?, crew?, item?, xz?, at?, label, when (absolute minutes), key }: read only,
+// nothing written to the game. The arrow is a separate element (#dmArrow) beside the game's #ixGoal, which it never
+// reads to draw or changes: its pin sits higher and its edge arrow inside the game's frame, so the two never cover each
+// other, nor fight when they point at the same thing. Shown or hidden from the Quick tab (on by default; the choice in
+// this browser's storage, DV_KEY). Without #dev none of it runs. Nothing here calls R().
+const DV_KEY = 'starship-cadet-dev-arrow';
+const DV = { el: null, last: '', key: '', at: -1, g: null, on: true };
+if (DEVMODE) try { DV.on = localStorage.getItem(DV_KEY) !== 'off'; } catch (e) { DV.on = true; }
+function dvShow(on) { DV.on = !!on; try { localStorage.setItem(DV_KEY, on ? 'on' : 'off'); } catch (e) { /* kept for this page */ } if (DV.el && !on) DV.el.hidden = true; }
+function dvWhen(at) {                                    // "09:20", "tomorrow 06:00", "Thursday (Day 4) 06:30"
+  const d = worksDay(at), today = SHIP.time.day, t = hhmm(at % 1440);
+  return d === today ? t : d === today + 1 ? 'tomorrow ' + t : WEEKDAYS[weekday(d)] + ' (Day ' + d + ') ' + t;
+}
+const dvAbs = (d, m) => (d - 1) * 1440 + m;
+const dvName = id => mechName(id).replace(/^./, x => x.toUpperCase());   // the writer's names start small ("rounds")
+const dvWho = id => { const w = guideWho(id); return w + (/s$/.test(w) ? '\'' : '\'s'); };
+const dvClock = label => ({ deck: 5, place: '5-timeclock-1', label });
+const dvBoard = label => ({ deck: 5, item: /job board/i, room: 'w', label });
+function dvWork(label, from = 1) {                       // the next step is work itself: clock in, take a job, do it
+  const now = Math.floor(shipNow()), d = worksDay(now), m = now - (d - 1) * 1440;
+  if (d >= from && playerShiftOn(d) && m < dayShiftEnd(d) && !careerClockedOut(d)) {
+    if (!careerClockedIn(d)) return { when: Math.max(now, dvAbs(d, CAREER.clockIn)), g: dvClock('Clock in, then: ' + label) };
+    let j = null; try { j = myJob(); } catch (e) { j = null; }
+    if (j && ixJobGoal) return { when: now, g: { ...ixJobGoal, label: label + ' · ' + ixJobGoal.label } };
+    return { when: now, g: dvBoard(label + ': take a job at the board') };
+  }
+  let k = Math.max(d + 1, from); for (let i = 0; i < 28 && !playerShiftOn(k); i++) k++;
+  return { when: dvAbs(k, CAREER.clockIn), g: dvClock('Clock in, then: ' + label) };
+}
+function dvNeed(row, W) {                                // a ladder row whose needs aren't met yet: the first missing one
+  const L = Array.isArray(row.needs) ? row.needs : row.needs ? [row.needs] : [], n = L.find(x => !ladderNeeds(x, W)); if (!n) return null;
+  const what = dvName(row.id);
+  if (n.trained) return null;                            // that row comes first, on its own
+  if (n.intro) return dvWork('Day 1\'s shadow shift (for ' + what + ')');
+  if (n.mech) { const k = (n.uses || 1) - (W.use[n.mech] || 0); return dvWork(dvName(n.mech) + ': ' + k + ' more (for ' + what + ')'); }
+  if (n.rep) return dvWork('Works reputation to ' + BAND_WORD[n.rep] + ', now ' + BAND_WORD[worksBand()] + ' (for ' + what + ')');
+  if (n.flag === 'works.oily') return dvWork('Get oily on a job (for ' + what + ')', row.day);
+  return dvWork('Keep working (for ' + what + ')', row.day);
+}
+function dvAsk(row, W) {                                 // a big row's ask: its first workday from its day with its teacher on shift, 06:00-10:30
+  const now = Math.floor(shipNow()), d0 = worksDay(now), m0 = now - (d0 - 1) * 1440;
+  for (let d = Math.max(d0, row.day), i = 0; i < 42; d++, i++) {
+    if (!playerShiftOn(d) || !ladderTeacher(row, d) || row.fixed && weekday(d) + 1 !== row.fixed.wd || d === d0 && m0 > WORKS_ASK[1]) continue;
+    const at = d === d0 ? Math.max(dvAbs(d, WORKS_ASK[0]), Math.ceil((now + 1) / 60) * 60) : dvAbs(d, WORKS_ASK[0]), by = ladderTeacher(row, d), wh = row.where || { deck: 5, room: 'w' };
+    return { when: at, g: { deck: wh.deck, room: wh.room, label: dvName(row.id) + ' training: ' + guideWho(by) + ' asks you' } };
+  }
+  return null;
+}
+function dvTrain(W) {                                    // the training under way (24 core's W.cur)
+  const c = W.cur, row = c && ladderRow(c.id); if (!row) return null;
+  const now = Math.floor(shipNow()), what = mechName(c.id).replace(/^./, x => x.toLowerCase()), who = guideWho(c.by);
+  if (c.st === 'meet') {
+    const r = (SHIP.occasions || []).find(x => x.key === c.occ); if (!r) return null;
+    return { when: r.at, soon: 15, g: { deck: r.deck, room: r.room, ...(guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: dvWho(c.by) + ' meeting: ' + what } };
+  }
+  if (c.st === 'watch') {
+    const j = (SHIP.jobs || []).find(x => x.id === c.j), s = j && trainSpot(j);
+    return { when: now, g: s ? { deck: s.deck, crew: c.by, at: s.tile, room: s.room, label: 'Watch ' + who + ': ' + what } : { deck: 5, room: 'w', crew: c.by, label: 'Watch ' + who + ': ' + what } };
+  }
+  if (c.st === 'do' || c.st === 'held') {
+    let j = null; try { j = myJob(); } catch (e) { j = null; }
+    if (j && j.id === c.j && ixJobGoal) return { when: now, g: { ...ixJobGoal, label: 'Your turn (' + what + ') · ' + ixJobGoal.label } };
+    if (c.st === 'held') return { when: now, g: { deck: 5, room: 'w', crew: c.by, label: 'With ' + who + ': ' + what } };
+    return dvWork(c.id === 't2' ? 'Your Tier 2 test job' : 'Your turn: ' + what);
+  }
+  if (c.st === 'ask' || c.st === 'again') {              // offered again on a later workday
+    const d0 = worksDay(now); for (let d = Math.max(d0, c.d + 1), i = 0; i < 42; d++, i++) {
+      if (!playerShiftOn(d) || !ladderTeacher(row, d) || d === d0 && now - (d - 1) * 1440 > WORKS_ASK[1]) continue;
+      const wh = row.where || { deck: 5, room: 'w' };
+      return { when: d === d0 ? Math.max(dvAbs(d, WORKS_ASK[0]), Math.ceil((now + 1) / 60) * 60) : dvAbs(d, WORKS_ASK[0]), g: { deck: wh.deck, room: wh.room, label: dvName(c.id) + ', asked again' } };
+    }
+  }
+  return null;
+}
+function dvFixed(W, id) {                                // the drill (m3d) and the inspection (m3i): a junior's, on their weekday
+  const row = ladderRow(id); if (!row || !WORK_MECH[id] || W.tr[id] !== undefined || W.rank !== 'junior') return null;
+  const now = Math.floor(shipNow()), d0 = worksDay(now), at = row.fixed.at, end = id === 'm3d' ? DRILL_END : INSPECT_AT + 5;
+  for (let d = Math.max(d0, row.day), i = 0; i < 42; d++, i++) {
+    if (weekday(d) + 1 !== row.fixed.wd || !playerShiftOn(d) || d === d0 && now >= dvAbs(d, end)) continue;
+    if (id === 'm3d') {
+      const j = d === d0 && typeof drillJobOf === 'function' ? drillJobOf(d) : null, nx = j && j.status !== 'done' ? jobStops(j).find(x => !x.done) : null;
+      const ext = drillPlace('ext') || drillPlace('door') || drillPlace('breaker'), p = nx && nx.places[0] || ext;
+      return { when: dvAbs(d, at), soon: 15, g: { deck: 5, place: p, room: (placeById(p) || { room: 'w' }).room, label: 'The drill, with Calder' } };
+    }
+    const g = d === d0 && now >= dvAbs(d, 360) && typeof inspectGoal === 'function' ? inspectGoal(d) : null, bed = playerBed();
+    return { when: dvAbs(d, at), soon: 30, g: g ? { ...g, label: 'The inspection · ' + g.label } : { deck: 4, place: bed, label: 'The inspection: your berth' } };
+  }
+  return null;
+}
+const DV_PROMO = { 'Your test job': null, 'The summons': { deck: 5, place: '5-office-1', room: 'o' }, 'Cake in the tea corner': { deck: 5, place: '5-tea-3' }, 'Your cabin': { deck: 4, room: 'W' }, 'The ceremony': { deck: 1, place: '1-ceremony-you', room: 'O' } };
+function dvIntro() {                                     // the first week's career beats (section 21), while the intro runs
+  if (typeof introOn !== 'function' || !introOn() || typeof INTRO_WEEK === 'undefined') return null;
+  const I = SHIP.intro, now = Math.floor(shipNow()), say = { 'd1-briefing': 'Calder\'s Monday briefing', 'd1-shadow': 'Shadow shift with Torres', 'd1-lead': 'Lead a job, Torres watching', 'd2-solo': 'Calder: your first solo job' };
+  for (const b of INTRO_WEEK) {
+    if (!say[b.id]) continue;
+    const from = dvAbs(b.day, b.at), to = dvAbs(b.day, b.until), started = I.done[b.id] !== undefined, over = I.done[b.id + ':job'] !== undefined || now >= to;
+    if (over) continue;
+    const w = b.where || { deck: 5, room: 'w' };
+    let j = null; try { j = started && b.job ? myJob() : null; } catch (e) { j = null; }
+    if (j && ixJobGoal) return { when: now, g: { ...ixJobGoal, label: say[b.id] + ' · ' + ixJobGoal.label } };   // the shadow shift's or your led job's own step
+    return { when: started ? now : from, soon: 15, g: { deck: w.deck, room: w.room, ...(w.placeId ? { place: w.placeId } : {}), label: say[b.id] } };
+  }
+  return null;
+}
+function dvCareerNext() {                                // the next career step: the soonest of what's open (rules above)
+  if (!DEVMODE || typeof CAREER_LADDER === 'undefined') return null;
+  const now = Math.floor(shipNow()), C = [], add = (x, k) => { if (x && x.g && x.g.deck) C.push({ ...x, k }); };
+  try { add(dvIntro(), 'intro'); } catch (e) { /* none */ }
+  const W = SHIP.works || { tier: 1, rank: 'junior', xp: 0, tr: {}, use: {}, op: {}, log: [], test: null, cur: null };
+  const opened = worksOpened(SHIP.works ? W : null), I = SHIP.intro;
+  if (!C.length || !(I && I.on && !I.ended && SHIP.time.day < 2)) {
+    try { if (W.cur) add(dvTrain(W), 'train:' + W.cur.id + ':' + W.cur.st); } catch (e) { /* none */ }
+    if (!W.cur) {
+      const row = CAREER_LADDER.find(r => r.size === 'big' && !opened.has(r.id) && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier);
+      try {
+        if (row && row.id === 't2' && ladderNeeds(row.needs, W)) {
+          if (W.test && !W.test.passed) add({ when: dvAbs(W.test.day, PROMO.jobAt), soon: 15, g: dvBoard('Your Tier 2 test job, at the board') }, 'test');
+          else if (!W.test) add(dvWork('Calder sets your test job (from Day ' + PROMO.from + ', ' + hhmm(PROMO.at) + ')', PROMO.from), 'test:set');
+        } else if (row) add(ladderNeeds(row.needs, W) ? dvAsk(row, W) : dvNeed(row, W), 'row:' + row.id);
+      } catch (e) { /* none */ }
+    }
+    for (const id of ['m3d', 'm3i']) try { add(dvFixed(W, id), id); } catch (e) { /* none */ }
+    const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));
+    try { if (small) add(ladderNeeds(small.needs, W) ? dvWork(dvName(small.id) + ': it comes with a job', small.day) : dvNeed(small, W), 'small:' + small.id); } catch (e) { /* none */ }
+    try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
+  }
+  if (!C.length) return null;
+  const score = x => x.when <= now || x.soon && x.when - x.soon <= now ? now - 1 + C.indexOf(x) / 100 : x.when + C.indexOf(x) / 100;   // started or close: now, in the order above; else by its time
+  const best = C.slice().sort((a, b) => score(a) - score(b))[0];
+  return { ...best.g, when: best.when, key: best.k, label: best.g.label + (best.when > now ? ', ' + dvWhen(best.when) : '') };
+}
+function dvBuild() {
+  const st = document.createElement('style');
+  st.textContent = '#dmArrow{position:fixed;left:0;top:0;z-index:2;pointer-events:none;width:0;height:0}#dmArrow[hidden]{display:none}'
+    + '#dmArrow .dvarr{position:absolute;left:-15px;top:-15px;width:30px;height:30px;border-radius:6px;background:rgba(40,8,36,.86);border:2px solid #ff5ad2;box-shadow:0 2px 10px rgba(0,0,0,.45)}'
+    + '#dmArrow .dvarr::after{content:"";position:absolute;left:9px;top:7px;border-style:solid;border-width:6px 0 6px 11px;border-color:transparent transparent transparent #ff5ad2}'
+    + '#dmArrow .dvpin{position:absolute;left:-9px;top:-74px;width:18px;height:18px;border-radius:3px;background:#ff5ad2;transform:rotate(45deg);box-shadow:0 1px 4px rgba(0,0,0,.6)}'
+    + '#dmArrow .dvstem{position:absolute;left:-1px;top:-58px;width:2px;height:22px;background:#ff5ad2;opacity:.8}'
+    + '#dmArrow .dvlab{position:absolute;left:0;top:-104px;transform:translateX(-50%);white-space:nowrap;max-width:min(280px,74vw);overflow:hidden;text-overflow:ellipsis;font-size:12px;padding:3px 8px 3px 4px;border-radius:6px;background:rgba(40,8,36,.88);border:1px solid #ff5ad2;color:#ffd6f3}'
+    + '#dmArrow .dvlab b{font:700 9.5px/1 system-ui,sans-serif;letter-spacing:.08em;padding:2px 4px;margin-right:5px;border-radius:3px;background:#ff5ad2;color:#28081f;vertical-align:1px}';
+  document.head.appendChild(st);
+  const el = DV.el = document.createElement('div'); el.id = 'dmArrow'; el.hidden = true; el.setAttribute('aria-hidden', 'true');
+  el.innerHTML = '<div class="dvarr"></div><div class="dvstem"></div><div class="dvpin"></div><div class="dvlab"><b>DEV</b><span></span></div>';
+  document.body.appendChild(el);
+}
+const dvV = new THREE.Vector3();
+function dvFrame() {
+  requestAnimationFrame(dvFrame);
+  const el = DV.el; if (!el) return;
+  if (!DV.on || typeof deckDef === 'undefined' || !deckDef || typeof player === 'undefined' || !player) { if (!el.hidden) el.hidden = true; return; }
+  const m = Math.floor(shipNow()), j = typeof myJob === 'function' ? myJob() : null, W = SHIP.works, c = W && W.cur;
+  const key = m + '|' + deckDef.num + '|' + (j ? j.id + (j.workDone ? '+' : '') : '') + '|' + (ixJobGoal ? ixJobGoal.label : '') + '|' + (c ? c.id + c.st : '') + '|' + (W ? W.log.length + '/' + Object.keys(W.tr).length + '/' + (W.test ? W.test.day + W.test.passed : '') : '') + '|' + (typeof careerClockedIn === 'function' && careerClockedIn(SHIP.time.day) ? 1 : 0);   // what changes the next step
+  if (key !== DV.key) { DV.key = key; try { DV.g = dvCareerNext(); } catch (e) { DV.g = null; if (!DV.warned) { DV.warned = true; console.warn('dvCareerNext:', e); } } }
+  const g = DV.g; if (!g) { if (!el.hidden) el.hidden = true; return; }
+  const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
+  if (!w) { if (!el.hidden) el.hidden = true; return; }
+  const label = here ? g.label : deckWord(g.deck) + ' · ' + g.label;
+  dvV.set(w.x, w.y != null ? w.y : 1.2, w.z).project(camera);
+  // the game's arrow keeps to a frame 30 px in from the sides, 130 from the top, 110 from the bottom (ixFrame, drawn just
+  // before this frame's): ours keeps 60 px inside it. Where the game's arrow is at the same spot on screen (both pointing at
+  // the same thing; DV.same, with a margin either way so it never flickers), ours leaves the pointing to the game's: off
+  // screen no arrow of its own, its label on the other side of the game's; on screen its pin above the game's pin
+  const W2 = innerWidth / 2, H2 = innerHeight / 2, sx = (dvV.x + 1) * W2, sy = (1 - dvV.y) * H2, dx = sx - W2, dy = sy - H2;
+  const edge = (l, r, t, b) => { const k = Math.min(dx > 0 ? (r - W2) / dx : dx < 0 ? (l - W2) / dx : Infinity, dy > 0 ? (b - H2) / dy : dy < 0 ? (t - H2) / dy : Infinity); return [W2 + dx * k, H2 + dy * k]; };
+  const on = dvV.z < 1 && sx >= 30 && sx <= innerWidth - 30 && sy >= 130 && sy <= innerHeight - 110, [arr, stem, pin, lab] = el.children;
+  const [gx, gy] = on ? [sx, sy] : edge(30, innerWidth - 30, 130, innerHeight - 110);
+  const ge = document.getElementById('ixGoal'), gm = ge && !ge.hidden && /translate\(([-\d.]+)px, ?([-\d.]+)px/.exec(ge.style.transform);
+  const gd = gm && (ge.children[0].style.display === 'none') === on ? Math.hypot(+gm[1] - gx, +gm[2] - gy) : Infinity;
+  DV.same = DV.same ? gd < 40 : gd < 16;
+  const [x, y] = on || DV.same ? [gx, gy] : edge(90, innerWidth - 90, 190, innerHeight - 170);
+  el.hidden = false; el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+  arr.style.display = on || DV.same ? 'none' : ''; pin.style.display = stem.style.display = on ? '' : 'none';
+  if (!on) arr.style.transform = 'rotate(' + Math.atan2(dy, dx).toFixed(3) + 'rad)';
+  lab.style.top = on ? '-104px' : y > H2 ? '24px' : '-50px';   // the game's label: below on screen; off it, above in the lower half, else below
+  lab.style.transform = 'translateX(' + (x > innerWidth - 140 ? '-100%' : x < 140 ? '0' : '-50%') + ')';
+  lab.style.left = x > innerWidth - 140 ? '18px' : x < 140 ? '-18px' : '0';
+  if (label !== DV.last) { lab.lastChild.textContent = DV.last = label; }
+}
+function devmodeArrowRow(body) {                         // the Quick tab's switch
+  devmodeHead(body, 'Career arrow (Dev only)');
+  devmodeRow(body, [['Show it', () => { dvShow(true); devmodeDraw(); }, { ask: DV.on, off: DV.on }], ['Hide it', () => { dvShow(false); devmodeDraw(); }, { ask: !DV.on, off: !DV.on }]]);
+  let g = null; try { g = dvCareerNext(); } catch (e) { g = null; }
+  devmodeText(body, 'The magenta DEV arrow: ' + (g ? g.label + (g.deck !== (deckDef && deckDef.num) ? ' (' + deckWord(g.deck) + ')' : '') : 'no career step ahead') + '.');
+}
+if (DEVMODE) { dvBuild(); requestAnimationFrame(dvFrame); }
 if (DEVMODE) { devmodeCss(); devmodeBuild(); devmodeState(); }   // last, once every Dev mode name above exists
 // ---- end of slot: Dev mode engineer ----
 
