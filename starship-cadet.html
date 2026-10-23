@@ -55714,9 +55714,10 @@ function padFind(key, x, z, ys, r) {                       // a point on screen 
   for (const y of ys) for (const [ox, oz] of r ? [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]] : [[0, 0]]) {
     const s = padScreen(x + ox, y, z + oz); PAD_PICK.used++; if (s && padWhat(s[0], s[1], key) === key) return s;
   }
-  // a seat whose own spot's points fall nearer another seat (a mess seat beside a long table's, follow-up 1): a little
-  // further out on screen around it, four rings of eight points (10 to 40 px), the first point a tap really reaches
-  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;
+  // a seat whose own spot's points fall nearer another seat (a mess seat beside a long table's, follow-up 1), or the lift
+  // with someone walking past in front of it (CP5, KC2): a little further out on screen around it, four rings of eight
+  // points (10 to 40 px), the first point a tap really reaches
+  const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z); if (!c) return null;
   for (let k = 1; k <= 4; k++) for (let a = 0; a < 8; a++) {
     const cx = c[0] + 10 * k * Math.cos(a * Math.PI / 4 + k), cy = c[1] + 10 * k * Math.sin(a * Math.PI / 4 + k); PAD_PICK.used++;
     if (padWhat(cx, cy, key) === key) return [cx, cy];
@@ -55773,11 +55774,14 @@ function padSearch(budget) {
   if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
   const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
   try {
-    while (J.i < J.raw.length && J.out.length < P.max && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key)) continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && t.key !== 'lift') continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
   } finally { P.cs = null; P.wr = null; }
-  if (J.i < J.raw.length && J.out.length < P.max) return null;
+  if (padMore(J)) return null;
   P.job = null; return J.out;
 }
+// (CP5, KC1) the lift is the way off the deck: when the list is full of people, benches and things before the search
+// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first)
+const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));
 const padTargets = () => { PAD_PICK.job = null; return padSearch(Infinity); };   // all at once: [{ key, x, z, d, s: [cx, cy] }], best first
 function padPickShow(on) {                                 // the ring and the line, made at the first use
   const P = PAD_PICK;
