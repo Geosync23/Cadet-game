@@ -62,6 +62,7 @@ CP5 session_01Un47TDkZfRL6cvcLwE3Zcy (claude/controller-follow2 from 685af944): 
 - LEAD31-8 team job restores machines only to 90 (TEAM_RESTORE); washers drop under 90 within the hour: ask the user whether team jobs should leave machines nearer new.
 - LEAD31-9 meal stops silently at the long table (findings 70; FX7 finding the cause).
 - LEAD31-10 taps on empty seats in a crowd open passers-by cards (findings 71).
+- LEAD31-11 reserve a scannable faulty job after the Day 5 scanner lesson so the first use and Making it safe always land on time (user to decide; AC3).
 - FE2 batch 1 smaller items: "You wake in Bunk 1" card behind the manifest (FE1 item 7 again); single floor taps beyond the shuttle-bay rail don't move you (press-and-hold does).
 
 ## Gotchas learned this session
