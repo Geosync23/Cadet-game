@@ -20,6 +20,8 @@ def check(ok, what):
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(30); E = g.ev
+    # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's)
+    E("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
     toast = lambda: E("document.getElementById('toast').innerText")
     E("window.__toasts = []; { const t0 = toast; toast = (a, b) => { window.__toasts.push(a + ': ' + b); return t0(a, b); }; }")
     said = lambda: ' || '.join(E('window.__toasts.slice(-4)'))
