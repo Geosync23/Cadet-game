@@ -12589,8 +12589,8 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 // in SHIP.device.pointsSeen (saved, cap 200), and Settings' Teaching arrows (teachMode: all | first | off) rules over
 // that. done() and until (absolute ship minutes) end it. A page element over the 3D view: no draw calls, placed each
 // frame from the button's getBoundingClientRect while a pointer is asked, nothing at all when none is.
-// Off (POINT_ON false): pointAsk refuses, nothing draws, nothing is saved.
-const POINT_ON = false;
+// Off (POINT_ON false): pointAsk refuses, nothing draws, nothing is saved. On since 0.92.0 (the user, 2026-10-23: the teaching arrows on).
+const POINT_ON = true;
 const TEACH_MODES = { all: 'Always', first: 'First times', off: 'Off' };
 const teachMode = () => { const m = SHIP.device && SHIP.device.settings.teach; return TEACH_MODES[m] ? m : 'first'; };   // AR1's queue reads it too
 const teachShown = () => { let g = false; try { g = typeof GUIDE_ON !== 'undefined' && !!GUIDE_ON; } catch (e) { g = false; } return POINT_ON || g; };
@@ -16306,7 +16306,7 @@ function trkDoneCheck() {
 // ever (SHIP.guide.seen, saved); the teaching-arrows setting (section 19's Settings row, AC1's teachMode(): 'all' |
 // 'first' | 'off') ignores `once` on 'all' and drops level-3 entries on 'off'. Also here, on the same switch: a short queue for pop-ups
 // (section 11's toast asks guideToast first), so a new one waits a moment instead of wiping the one on screen.
-var GUIDE_ON = false;                                    // var: goalNow and toast (above and below) may ask before this line has run
+var GUIDE_ON = true;                                     // var: goalNow and toast (above and below) may ask before this line has run. On since 0.92.0 (the user, 2026-10-23)
 const GUIDE = { list: [], n: 0, rev: 0, key: '', pick: null, shown: null, covered: null, counted: new Set(), warn: [], loop: false, tq: [], pass: false, mode: null };
 SHIP.guide = (() => {
   const g = SAVED && SAVED.guide, seen = {};

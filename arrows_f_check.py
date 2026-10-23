@@ -21,13 +21,17 @@ def check(cond, msg):
 WHERE = r"""(() => { const g = document.getElementById('ptr'); if (!g || g.hidden) return { up: false, now: pointNow() };
   const a = POINT.aim; return { up: true, now: pointNow(), label: g.children[2].textContent, text: a ? a.textContent.slice(0, 40) : null }; })()"""
 
+def arrows_off(src):                                 # the build with the teaching arrows switched off (as before 0.92.0), for the parts that test "off"
+    return src.replace('const POINT_ON = true;', 'const POINT_ON = false;', 1).replace('var GUIDE_ON = true;', 'var GUIDE_ON = false;', 1)
+
 def run(path):
-    src = pathlib.Path(path).read_text()
+    src = arrows_off(pathlib.Path(path).read_text())
     if not check('const POINT_ON = false;' in src and 'function incStopWord' in src and 'function caseNextGoal' in src, 'the build has F3 and F4'): return
     on = WORK / 'test' / ('_f34_on_' + pathlib.Path(path).name)
     on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
+    off = WORK / 'test' / ('_f34_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
     with sync_playwright() as pw:
-        print('off (the build as it is):')
+        print('off (the build switched off):')
         g = Game(pw, path, 390, 844); g.step(3)
         r = g.ev("""(() => { clearGoal(); incGoalSet({ deck: 4, room: 'w', label: 'Follow test' }, 'calder'); const a = IX_GOAL && IX_GOAL.label; incGoalClear();
           const w = incStopWord({ kind: 'incident', inc: 'burst', deck: 4, id: 'x' }, 1), n = caseNextGoal({ calls: [] }, null) === setGoal;

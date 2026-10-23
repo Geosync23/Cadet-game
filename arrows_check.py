@@ -369,8 +369,11 @@ class Follower:
 
 def real_game(pg, day):                               # the career set to the end of day-1, tracking as in a real game
     pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day - 1}))"); pg.step(20)
-    if GUIDE: pg.ev("GUIDE_ON = true; guideStart()")   # the arrow queue on (its training arrows T1-T3; pieces D-F as they land)
+    if GUIDE: pg.ev("if (!GUIDE_ON) { GUIDE_ON = true; guideStart(); }")   # the arrow queue on (a build from 0.92.0 has it on already: no override) (its training arrows T1-T3; pieces D-F as they land)
     pg.ev(f"devmodeSkipTo({(day - 1) * 1440 + 5 * 60 + 50}); clearGoal(); SHIP.player.track = 'arrows-check-yesterday'; for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); pg.step(10)   # a normal evening before: washed, fed, rested
+
+def arrows_off(src):                                 # the build with the teaching arrows switched off (as before 0.92.0), for the parts that test "off"
+    return src.replace('const POINT_ON = true;', 'const POINT_ON = false;', 1).replace('var GUIDE_ON = true;', 'var GUIDE_ON = false;', 1)
 
 def hhmm(m): m = int(m) % 1440; return f'{m // 60:02d}:{m % 60:02d}'
 
@@ -411,24 +414,26 @@ def part_week(ctx, path):
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 PARTS = set(a for a in sys.argv[2:] if a != 'guide') or {'queue', 'shift', 'week'}
 with sync_playwright() as pw:
-    path = sys.argv[1]
+    path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
+    if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)
+    off_path = str(WORK / 'test' / ('_off_' + pathlib.Path(path).name)) if off != src else path   # queue's 'off' part, and shift / week without 'guide': the arrows switched off
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     if 'queue' in PARTS:
         print('== queue (piece B)')
         try:
-            pg = Page(ctx, path); pg.day2()
+            pg = Page(ctx, off_path); pg.day2()
             if not check(pg.ev("typeof guideAsk === 'function' && typeof GUIDE_ON !== 'undefined'"), 'no arrow queue in this build'): raise SystemExit
             part_off(pg); part_queue(pg); part_toasts(pg)
             check(not pg.errors, f'queue: page errors {pg.errors[:3]}')
             pg.page.close()
-            part_once(ctx, path)
+            part_once(ctx, off_path)
         except SystemExit: pass
         except Exception as e: fail(f'queue: stopped: {str(e)[:300]}')
     for name, part in (('shift', part_shift), ('week', part_week)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
-        try: part(ctx, path)
+        try: part(ctx, path if GUIDE else off_path)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 
