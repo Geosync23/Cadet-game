@@ -133,6 +133,7 @@ with sync_playwright() as pw:
     g.ev("ixBoard.draw()")
     rows = g.ev("document.querySelectorAll('#ixBoardL .ixjob').length")
     check(rows >= 1, f'the board lists jobs ({rows})')
+    g.ev("if (typeof careerClockedIn === 'function' && typeof GUIDE_ON !== 'undefined' && GUIDE_ON && !careerClockedIn()) { SHIP.career.ci = Math.floor(shipNow()); SHIP.career.co = 0; }")   # clocked in, as when you hold a job on shift: with the teaching arrows on (0.92.0) the arrow points at the time clock first otherwise
     took = g.ev("ixBoard.take('ixtest@1')"); g.step(3); s = st()
     check(took and g.ev("(myJob() || {}).id") == 'ixtest@1' and not s['board'], 'Take it: the job is yours and the board closes')
     g.step(2); check(g.ev("player.holding") == 'toolbox', f'a repair job: a toolbox in hand ({g.ev("player.holding")!r})')
