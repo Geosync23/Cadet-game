@@ -16,7 +16,7 @@ Lead 31 = session_0118SXBCdg87nDiXdtrGNVSR, branch `claude/lead-31`, a fresh top
 - Whenever next steps are discussed, remind the user of everything still built but switched off (now: the controller, Crossing the Line).
 - **Deadlines are goals, not deadlines: quality first; nothing gets dropped or rushed for a time** (the user, 2026-10-22 night).
 - **Overnight mode** when the user goes to bed: no messages or phone pings; decisions wait for the morning; one morning summary.
-- Hire whatever is needed, don't waste. Full round on six runners for every game change. Memory: judge from ~60%, never above 80%.
+- Hire whatever is needed, don't waste. **The lead may start new workers AND its own successor lead itself (create_session), following these rules (the user, 2026-10-23 20:31 UTC).** New sessions may start without the repo: tell them to add_repo (Geosync23/Cadet-game, push), clone, register_repo_root. Full round on six runners for every game change. Memory: judge from ~60%, never above 80%.
 
 ## Pages for the user
 - **NOW Version 10 = 0.92.1** (claude/integration e03505fd, sha256 2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c; Line ON, PAD off), published 20:30 UTC. Before that:
