@@ -1004,15 +1004,28 @@ with sync_playwright() as pw:
         g.ev("(() => { player.obj.position.copy(cellPos(37, 15)); player.stop(); })()"); g.step(30)
         inroom = g.ev("({ trk: IX_GOAL && IX_GOAL.trk, place: IX_GOAL && IX_GOAL.place, room: roomAt(...player.here()) })")
         moved = g.ev("(() => { if (!IX_GOAL) return null; const was = IX_GOAL.place, x = { goalId: was }; DECK_CREW.push(x); trkDoneCheck(); const now = IX_GOAL.place; DECK_CREW.splice(DECK_CREW.indexOf(x), 1); IX_GOAL.place = was; return [was, now]; })()")
-        g.ev("(() => { const it = ITEMS.find(i => i.t === 'Booth ' + ((IX_GOAL && IX_GOAL.place) || '1').slice(-1)); it.hit.getWorldPosition(_wp); playerTap(it, _wp.clone(), _wp.clone()); })()")
+        # (RV10, 320 wide: someone at the booth under the pin took the tap as a chat) someone stands on the booth: a real tap at the pin is the booth
+        g.ev("(() => { for (let k = 0; k < 9 && TIP_Q.length; k++) tipDone(); })()"); g.step(2)
+        g.ev("(() => { player.obj.position.copy(cellPos(38, 19)); player.stop(); })()"); g.step(20)
+        for rot in range(4):                               # a camera turn with them under the pin
+            who = g.ev("(() => { const a = DECK_CREW.find(x => x && x.p), s = placeSpot(IX_GOAL.place); a.x = s.x; a.z = s.z; a.y = 0; a.path = []; a.settled = false; a.spot = null; return a.p.id; })()"); g.step(2)
+            pin = g.ev("(() => { const el = document.getElementById('ixGoal'), m = el.style.transform.match(/translate\\(([-\\d.]+)px, ?([-\\d.]+)px\\)/); return !el.hidden && m && el.children[1].style.display !== 'none' ? [+m[1], +m[2]] : null; })()")
+            over = pin and g.ev(f"(a => a && a.p && a.p.id)(crewAtScreen({pin[0]}, {pin[1]}))")
+            if pin and over == who: break
+            g.page.click('#rot'); g.step(30)
+        if pin: g.page.mouse.click(*pin)
         for i in range(40):
             g.step(10)
             if g.ev("!!ACT && ACT.kind === 'call' && ACT.phase !== 'walk'"): break
+        chat = g.ev("!!document.getElementById('chat') && !document.getElementById('chat').hidden"); g.ev("typeof chatClose === 'function' && chatClose()")
+        check(pin and over == who and not chat and g.ev("!!ACT && ACT.kind === 'call'"), f"the call booths' row: with {who} on the booth under the pin, a real tap at the pin starts the call, not a chat (FX5) (pin {pin}, under it {over}, chat {chat}, act {g.ev('ACT && ACT.kind')})")
         g.step(5); after = g.ev("({ act: ACT && ACT.kind, trk: IX_GOAL && IX_GOAL.trk })")
         print('   the call booths\' row: in the room', inroom, '| booth taken, moved', moved, '| the call begun', after)
         check(inroom['trk'] == 'place:calls' and (inroom['place'] or '').startswith('3-callhome-') and inroom['room'] == 'B', f"the call booths' row: in the room its arrow stays up, on a booth (FX5) ({inroom})")
         check(moved and moved[0] != moved[1], f"the call booths' row: someone takes its booth, the arrow moves to a free one (FX5) ({moved})")
         check(after['act'] == 'call' and after['trk'] != 'place:calls', f"the call booths' row: once the call begins the arrow goes (FX5) ({after})")
+        for k in range((4 - rot - (0 if pin and over == who else 1)) % 4): g.page.click('#rot'); g.step(5)   # the camera as it was
+        g.ev("(() => { if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true); if (DEV.choose) devChosen(-1); })()"); g.step(2)   # the first call's own talk
         g.ev(f"(() => {{ actEnd(true); clearGoal(); const k = {keep}; if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; player.stop(); }})()"); g.step(3)
         if g.ev("!!document.getElementById('trkBtn')"):   # the main-screen button and panel, kept beside the app (the user, ~04:00)
             g.page.add_style_tag(content='#needStrip{display:flex!important} #devTip{display:none!important}')   # a tip card over it would take the tap

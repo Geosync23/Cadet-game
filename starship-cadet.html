@@ -16085,6 +16085,13 @@ function ixLiftPanel() {
   return best;
 }
 const IX_PIN = { x: 0, y: 0, t: -1e9 };                   // the pin on screen this frame (FX3: a tap there is your job's, over someone standing on the stop)
+// FX5 (RV10, 320 wide: Calder in Booth 1, the pin on Booth 2 over her, so the tap opened her card): a tap at the pin of an
+// arrow on a call booth (Day 0's call-home arrow, the Tracked row) is a tap on that booth, as fix 19's is your job's stop
+function ixPinBooth() {
+  const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, m = g && deckDef && deckDef.num === g.deck && /^3-callhome-(\d)$/.exec(g.place || '');
+  const it = m && ITEMS.find(i => i.t === 'Booth ' + m[1]); if (!it) return false;
+  it.hit.getWorldPosition(_wp); return !!playerTap(it, _wp.clone(), _wp.clone());
+}
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
@@ -53952,6 +53959,7 @@ function tap(cx, cy) {
   if (near && (atPin || ![.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; }))) {
     const h0 = pick(cx, cy); if (h0 && !h0.object.userData.walker && jobSpotTap(h0.point)) return;
   }
+  if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
