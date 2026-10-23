@@ -239,3 +239,9 @@ sha256 **2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c** (BM1
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 27 s |
 
 No FAIL. (Day 0's peak is 14 calls higher than on 0.92.0, likely FX5's dinner trickle; far under 450.)
+
+## controller_check on 0.92.1, taken from CR6 (BM15's ask; CR6 "hand over" before I started)
+
+51a1bb34's own controller_check.py, every part but reach (lift included). 1977 s. Exit 0: **CONTROLLER CHECK OK**, all 28 parts OK:
+idle save calls touch walk pick day games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks
+touch3 drop settings a11y firstuse lift. **day now passes: KC1 and KC2 fixed** (CP5), as BM15 expected.
