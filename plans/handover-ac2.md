@@ -28,15 +28,19 @@ Keep `plans/arrows-c-assembly.md` current with each merge.
 - **Checks:** `arrows_d_check.py` (about 2 minutes; every line has a planted fault it catches; mutant list lives in my
   scratchpad, the names are in the build-table rows). interactions_check (board kinds), player_check (tea not taken).
 
-## Where the week stands (arrows_check week guide)
-On the tip before FX3 16-18 and before the pin-tap follower: m1 Day 2, m3d + m4 Day 3, m5 Day 5, m7 Day 6; m3i, p3, m6
-not learned; stucks at machine pins (the floor-tap follower's miss, fixed by 3430ea1). Rerun on 3c42632 under way when
-this was written (see the latest message to lead 30).
+## Where the week stands (final rerun, tip 1d12e33: F2 + everything above)
+- shift guide: OK (19 jobs, clocked out).
+- week guide (queue on): m1 Day 2, m3d + m4 Day 3, m3i + m5 Day 4, m7 Day 5, m2 by Day 8, all on time. Not learned:
+  p3 (FX5 fixing: the case is solved before p3's row opens), m6 (stuck at "Mop up (2 of 2)", FX3). Also stuck: "Clean a
+  vent: hydroponics garden" Day 4 (FX3).
+- week (queue off): m1, m3d, m4, m3i, m5 on their days; m7 stays at 'ask' from Day 5 (FX4 fixing); p3, m6 follow from it;
+  stuck at the hydroponics vent and "Clean a vent: lift plaza" (FX3).
 
 ## Loose ends
-- The inspection morning's queue entry (FX3's direct arrow in 24c steps aside with the queue on: `inspectGoal(d)`,
-  `inspectDue(d)`; add a level-4 entry in 15b, 06:00-06:30).
-- FB1: the galley dry-goods drop (a tap on its pin walks, never drops; lead 30 routed it). Merge when RV8 passes.
+- F2 (5f7e91c: the inspection through the queue) and the follower commits since 483c3da need RV7's review.
+- AC3 (session_01DiLRzrXgkeoAZCoX1mVJn9) owns claude/arrows-c from 2026-10-23 ~02:05 UTC (lead 30).
+- Routed by lead 30: the vent pins and "Mop up (2 of 2)" to FX3; p3 to FX5 (session_01LGRr55ZQCd11PuqhJEn9Jj, claude/p5-fix5);
+  m7 with the queue off to FX4 (session_01BueJ4UzQkn8HcC1TXd1KrW). Merge each into arrows-c when its review passes.
 - FX3: the climbing wall. Merge when RV7 passes.
 - Game note (raised, not owned): with the queue off nothing points a player at Fault notes after "it still leaks".
 
@@ -44,7 +48,9 @@ this was written (see the latest message to lead 30).
 - `careerClockedIn(d)` stays true after clocking out: use `careerClockedOut(d)`.
 - A follower that mixes real clicks and `playerTap` must set `ray` first (FX3's `jobRayDist` reads the last tap's ray).
 - A `//` comment inside a one-line JS block in arrows_check's FOLLOW swallows the rest of the line: comments last.
-- Background `until` watchers time out at 30 minutes; write runs to a log with `nohup` and poll the log.
+- Background `until` watchers time out at 30 minutes, and the container can restart (losing background runs): run the
+  week as a tracked background task (`runweek.sh` pattern: the three runs in one script, tee to a log).
+- `pkill -f PATTERN` kills your own shell if the pattern is in your command line: use `pgrep -f "python3 arrows_chec[k]"`.
 - Run cadet_test alone; use a second CADET_WORK (/tmp/cadet-work2) for check_fast while another browser check runs.
 
 ## How to test a merge here
