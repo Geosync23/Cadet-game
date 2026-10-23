@@ -893,7 +893,10 @@ DECKS_JS = "(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS)
 def hint_now(r):
     """the bottom line; a message showing hides it, so B first puts the message away, as a player would"""
     h = r.ev(HINT)
-    if h is None and r.ev("toastEl.classList.contains('show')"): r.press('B'); r.step(2); h = r.ev(HINT)
+    # (CTT3) with the arrows on, messages wait in a queue and come one after another: B for each, up to four, as a player would
+    for k in range(4):
+        if h is not None or not r.ev("toastEl.classList.contains('show')"): break
+        r.press('B'); r.step(2); h = r.ev(HINT)
     return h
 def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
@@ -914,7 +917,9 @@ def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     elif n >= len(ts): r.close(); return None, len(ts)
     else: t = ts[n]
     name = t['kind'] + ' (' + str(t.get('name')) + ')'
-    r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
+    # (CTT3) the message box put away by hand, and the arrows' pop-up queue with it (else the next waiting one shows at
+    # once and hides the bottom line the whole time: round 10, arrows on)
+    r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''; typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
     r.step(72); hints = []; found = not by_pad   # (the ring's search needs about 2 s after the check moves you)
     if not by_pad and presses: r.step(7 * presses)
