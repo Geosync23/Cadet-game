@@ -43109,6 +43109,17 @@ const introMail = (m, at) => { if (m && typeof mailSend === 'function') mailSend
 // any), set its own flags (not the step's: a missed bunk is no device yet) and move on to `later`.
 // rel: points to people when the step is done (the social plan's end state: Torres 10, Tomas 10, Pell 5, Calder 3, Brennan 3).
 // Checkpoint tiles are provisional until wave 2 walks them (intro_check: in the room, on the deck's map).
+// (DS1, FE2 on 0.92.0: "Zeke stands by the lift for 35 minutes") a lead step whose spot is where he stops (the Works bay door,
+// the lift, the junior wing) also counts you there when you're beside him (within 2 tiles, on his deck), once his lines for
+// that place are said: a player who stops beside him, not on the spot, isn't left waiting (he stands on it himself). Only
+// once he's there himself (within a tile of the spot). Bunk 1 too: its talk then plays with you at the door (as the device's)
+const INTRO_BESIDE = id => ({ beside: 2, besideReady: () => !id || introTourSaid(id) });   // (its own key: `near` has him come to you)
+function introTourSaid(id) { return SHIP.intro.done['tour:' + id] !== undefined && !INTRO_UI.tour.some(q => q.t.id === id && q.core.length); }
+function introBeside(st, here, t) {
+  const a = introWalker(), cp = st.checkpoint; if (!st.beside || !a || !cp || !introWithEscort(here, st.beside)) return false;
+  const c = cellAt(a.x, a.z); if (Math.max(Math.abs(c[0] - cp.tile[0]), Math.abs(c[1] - cp.tile[1])) > 1 || !st.besideReady(t)) return false;
+  SHIP.intro.done['beside:' + st.id] = Math.floor(t); return true;   // (introTick: its meeting then plays wherever you are beside him)
+}
 const INTRO_STEPS = [
   { id: 'manifest', day: 0, at: 17 * 60 + 15, who: null, mode: 'free', where: 'the shuttle manifest',
     teaches: 'your name' },
@@ -43119,13 +43130,13 @@ const INTRO_STEPS = [
   { id: 'haulway', day: 0, at: 17 * 60 + 19, who: INTRO_ESCORT, mode: 'lead', where: 'the haulway',
     checkpoint: { deck: 5, tile: [12, 8], room: 'Haulway' }, fallback: { wait: 20, later: 'works' } },
   { id: 'works', day: 0, at: 17 * 60 + 21, who: INTRO_ESCORT, mode: 'lead', where: 'the Works bay door',
-    checkpoint: { deck: 5, tile: [16, 6], room: 'Lift lobby' }, fallback: { wait: 20, later: 'lift' } },
+    checkpoint: { deck: 5, tile: [16, 6], room: 'Lift lobby' }, fallback: { wait: 20, later: 'lift' }, ...INTRO_BESIDE('works') },
   { id: 'lift', day: 0, at: 17 * 60 + 23, who: INTRO_ESCORT, mode: 'lead', where: 'the lift, Deck 5',
-    checkpoint: { deck: 5, tile: [15, 9], room: 'Lift lobby' }, fallback: { wait: 20, later: 'wing' } },
+    checkpoint: { deck: 5, tile: [15, 9], room: 'Lift lobby' }, fallback: { wait: 20, later: 'wing' }, ...INTRO_BESIDE('lift') },
   { id: 'wing', day: 0, at: 17 * 60 + 25, who: INTRO_ESCORT, mode: 'lead', where: 'the junior wing, Deck 4',
-    checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
+    checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' }, ...INTRO_BESIDE('wing') },
   { id: 'bunk', day: 0, at: 17 * 60 + 28, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
-    checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 },
+    checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, ...INTRO_BESIDE(),
     fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
@@ -43481,7 +43492,7 @@ function introAdvance(t, here) {
     const cp = st.checkpoint, f = st.fallback || {};
     const nx = INTRO_STEPS[INTRO_STEPS.indexOf(st) + 1];   // (0.42.31) a lead step on a deck you've ridden on from, to the next step's deck: done (the lift's, passed between two of its minutes)
     const there = (!cp || here && here.deck === cp.deck && (st.near && introWithEscort(here, st.near) || introRoomAt(here.deck, here.tile) === cp.room
-      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH))
+      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH) || introBeside(st, here, t))
       || !!(cp && here && st.mode === 'lead' && here.deck !== cp.deck && nx && nx.checkpoint && nx.checkpoint.deck === here.deck)) && (!st.ready || !!st.ready(t));
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
     // (DS1, the user on 0.91.0 and 2026-10-23) holdBag: while your bag's in your hands it waits for you, wherever you are, with the
@@ -44120,7 +44131,7 @@ function introTick() {
     // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
-      const cp = st.checkpoint, room = st.near ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
+      const cp = st.checkpoint, room = st.near || st.beside && I.done['beside:' + st.id] ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; if (st.id === 'table' && I.done['table:end'] === undefined) I.done['table:end'] = now; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
       if (st.id === 'chief' && !introCalderIn() && now < (I.done.chief !== undefined ? I.done.chief : now) + 10) break;   // she's still on her way over
