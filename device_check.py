@@ -31,7 +31,7 @@
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   New game in Settings (2026-10-22): no New game on the HUD; Settings asks on its page; Keep playing changes nothing;
-#   the question goes with the page; Start over (saving on) starts Day 0 16:30 on Deck 5
+#   the question goes with the page; Start over (saving on) starts Day 0 at the arrival (INTRO_START, 17:15) on Deck 5
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
 # Setup and environment as for cadet_test.py.
 # Run:  python3 device_check.py BUILD.html
@@ -63,7 +63,7 @@ LOOK = r"""(() => {
 
 # New game in Settings (2026-10-22, from the HUD's "+"): no "+" on the HUD; Settings > New game asks on the page;
 # Keep playing changes nothing; leaving Settings forgets the question; Start over (real saving, no ?nosave) starts a
-# fresh game on Day 0 at 16:30 by the shuttle
+# fresh game on Day 0 at the arrival (INTRO_START) by the shuttle
 NEWQ = "(() => { const b = [...document.querySelectorAll('#devBody button')].map(x => x.textContent); const t = document.getElementById('devBody').textContent; return { b, ask: t.includes('Start a new game? Your current game will be lost.') }; })()"
 def newgame(pw, path):
     print('new game in Settings:')
@@ -89,7 +89,8 @@ def newgame(pw, path):
     g.ev("deviceShow('settings'); deviceShow('settings'); deviceDo({ app: 'settings', do: 'newgame' })"); g.step(2)
     g.ev("[...document.querySelectorAll('#devBody button')].find(b => b.textContent === 'Start over').click()"); g.step(5)   # (the arrival's own panels may sit over the sheet)
     s1 = g.ev("({ day: SHIP.time.day, min: SHIP.time.min, deck: deckDef.num, probe: !!SHIP.flags.__probe, open: DEV.open, intro: typeof introOn === 'function' ? introOn() : null })")
-    check(s1['day'] == 0 and s1['min'] == 16 * 60 + 30 and s1['deck'] == 5 and not s1['probe'] and not s1['open'], f'new game: Start over should start a fresh game on Day 0 at 16:30 on Deck 5, the device shut: {s1}')
+    arr = g.ev('INTRO_START.min')   # (DS1: the arrival moved to 17:15; the check reads it)
+    check(s1['day'] == 0 and s1['min'] == arr and s1['deck'] == 5 and not s1['probe'] and not s1['open'], f'new game: Start over should start a fresh game on Day 0 at the arrival time ({arr}) on Deck 5, the device shut: {s1}')
     check(not [e for e in g.errors if 'favicon' not in e], f'new game: page errors: {g.errors[:4]}')
     g.ev('localStorage.clear()'); g.close()
 

@@ -929,3 +929,32 @@
 - Fridays we knock off at half three.
 ? flag:walk.goodnight.friday.2
 - Captain talks to all of us at four, then dinner.
+
+// ---- ZW1 (writer), the Day 0 device hand-over in bubbles (the user, 2026-10-23: no green box, no question; the mix
+// in plans/zeke-words.md). DS1's claude/zeke-tour plays walk.hand IN FILE ORDER, a bubble every 3.6 s; the device
+// is handed over on the 3rd line (INTRO_HAND.give = 3) and opens on mail.zeke.land after the last; walk.hand.after
+// plays once you close the Mail. walk.hand lines 3 and 7 and both walk.hand.after lines are his old introDevice.meet
+// lines, kept word for word (the last one split in two at its comma, for the bubble).
+== week1
+? flag:walk.hand
+- Oh, hold on. Nearly forgot the important bit.
+- Hands out. Careful, it's still warm from my pocket.   #funny
+- And this is yours. Your device.
+- There. Officially handed over. I'm a witness.   #funny
+- Most important thing you'll own aboard.
+- More than your boots. Slightly less than your mug.   #funny
+- Mail, Schedule, the Map, your Needs. The lot. Don't lose it.
+- It knows where you're meant to be before you do.
+- Annoying, but useful.
+- Needs tells you you're hungry. Before your tummy does.   #funny
+- Lose it and you'll spend a week asking strangers what day it is.   #funny
+- There. Officially crew.   #warm
+- I left you a note in there. Have a look.
+? flag:walk.hand.after
+- Right, onward. The mess is on Deck 3.
+- And Brennan doesn't hold plates for anyone.
+
+// Zeke's Mail, written that Sunday morning before you landed (DS1's words, the user's pick): the device opens on it
+// after the last walk.hand line. "Subject | body", like mail.zeke.cabin (one line: Mail bodies are plain text).
+== mail.zeke.land
+- Before you land | New hand, I'm writing this before the Tern docks, so by the time you read it I'll have handed you this in person and said most of it already. Here's the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it's just home with a lift in it. And if you're the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I'll be the one with the tea. Zeke
