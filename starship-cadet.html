@@ -14410,9 +14410,9 @@ function jobTap(it, at) {
 // the tap's line of sight as it passes over the spot (a thing in front, like Deck 1's trunk head, catches the tap first).
 // Null: no work here. parts: what it fits is in hand (or fitted), so the work itself starts (the Repair button's test)
 const JOB_REACH = 1.5, JOB_RAY = .6;
-function jobRayDist(s) {                                 // the tap's ray from the floor to 1.2 m up: how close it passes to spot s
-  const o = ray.ray.origin, d = ray.ray.direction; let best = Infinity;
-  for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (k > 0) best = Math.min(best, Math.hypot(o.x + d.x * k - s.x, o.z + d.z * k - s.z)); }
+function jobRayDist(s) {                                 // the tap's ray from the floor to 1.7 m up: how close it passes to spot s
+  const o = ray.ray.origin, d = ray.ray.direction; let best = Infinity;   // (FB1, FX3 agreed: to 1.7 m, not 1.2: the arrow's dot is drawn above 1.2 m, and a tap on it crosses the spot at up to 1.65 m, 0.57-0.6 m off at 1.2 as it bobs; no higher, or a tap on a thing far behind the spot would count)
+  for (let y = 0; y <= 1.7; y += .1) { const k = (y - o.y) / d.y; if (k > 0) best = Math.min(best, Math.hypot(o.x + d.x * k - s.x, o.z + d.z * k - s.z)); }
   return best;
 }
 function jobHere(p, viaRay) {
@@ -53947,6 +53947,7 @@ function tap(cx, cy) {
     return;
   }
   if (typeof ladderAimed === 'function' && ladderAimed(h) && ladderTap(null)) return;   // patch #5, playtest patch 1 #14: the ladder (all of it, through glass) or its hatch: into the ladder room and climb (LADDER_ON)
+  if ((ud.liftDoor || ud.item && ud.item.lift) && typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return;   // your job's stop under the arrow's pin, in front of the lift (FB1: a lift lobby's vent; the lift took the tap)
   if (ud.item && ud.item.lift) { enterLift(); return; }
   if (ud.item && ud.item.see && ud.item.t === 'Spine ladder' && typeof ladderTap === 'function' && ladderTap(null)) return;   // patch #5: the ladder behind its glass takes you to its hatch (LADDER_ON)
   if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
