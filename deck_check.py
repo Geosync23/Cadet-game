@@ -104,7 +104,8 @@ PLACES = r"""(() => {
     else if (mine[0].type !== 'work:works' || !mine[0].at || mine[0].at[0] !== pc || mine[0].at[1] !== pr) why.push('its place ' + mine[0].id + ' is not a work:works place on the panel');
     if (why.length) mbad.push(m.id + ': ' + why.join(', '));
   }
-  for (const p of ps) if (p.machine && !ms.some(m => m.id === p.machine)) mbad.push(p.id + ': names machine ' + p.machine + ', not on this deck');
+  const stub = id => typeof machineList === 'function' && machineList().some(m => m.stub && m.id === id && m.deck === deckDef.num);   // a stand-in machine's service place (FX3: the main lift's, at its brake)
+  for (const p of ps) if (p.machine && !ms.some(m => m.id === p.machine) && !stub(p.machine)) mbad.push(p.id + ': names machine ' + p.machine + ', not on this deck');
   return { ids: ps.map(p => p.id), bad, counts, n: ps.length, mids: ms.map(m => m.id), mbad };
 })()"""
 

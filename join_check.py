@@ -37,6 +37,10 @@ EACH = r"""(id => {
 
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
+    # the teaching arrows are on from 0.92.0, and their pop-up queue makes a toast wait its turn (2.5 s of real time)
+    # behind one just shown; each part here runs in one frozen moment of the test's clock, so the join notice would
+    # still be waiting. Every pop-up shows at once, as in interactions_check (AC3's line; the queue is arrows_check's)
+    g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
     ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam')")
     print(f"{len(ids)} joinable traditions (plus the beam): {', '.join(ids)}")
     for i in ids:
