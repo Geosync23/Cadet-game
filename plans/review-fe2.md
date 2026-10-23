@@ -174,3 +174,23 @@ build table.
   9 s (simTimeout in DEVICE_SKIN.tip), so it's a short wait at worst. Fine.
 - Merge with SC1's 0cd37b1b check: `git merge-file` joins them with no conflict, FX5's line before SC1's tip-closing,
   as FX5 asked. Once tip-clear is in, SC1's tip-closing could go, so the real tap tests the tip case again.
+
+## dinner-spread: SC1 claude/dinner-spread ed6bcbf3 (on breakfast-back 0cd37b1b): PASS WITH FIXES (a check)
+
+- Section 14 only (tradLeave / tradStay / tradGood in schedBuild, evening()'s mt line): each diner at a meal tradition
+  gets up after their own meal and linger (35-75 min from sitting, schedU keys 531-533, unused elsewhere), never past
+  the tradition's end (overrunners leave in its last 12 min); Day 0's Sunday table holds to INTRO_STEPS 'free' (a const
+  table, so the planner reads no live record) then thins over 25 min, the part past 19:00 split off untagged.
+- On paper, days 0-21 (p_leave.py), most diners leaving in one minute, 0cd37b1b -> ed6bcbf3: spice-shelf supper 22 ->
+  5, 17 -> 5, 16 -> 5; tasting table 22 -> 3, 26 -> 4, 27 -> 4; Sunday table 7-9 -> 6; lantern supper and long breakfast
+  about the same (already spread). Day 0's table (p_day0table.py), seated every 5 min: before 44 at 18:50, 24 at 18:55,
+  0 at 19:00; after 48 to 18:55, then 44, 36, 28, 18, 8, 1 to 19:25. Matches SC1's numbers.
+- check_fast OK; events_check OK; bigevents_check OK; food_check 11 4 and 1 7 OK; day_check 0 and 7 OK. cadet_test alone
+  0cd37b1b vs ed6bcbf3 ALL IDENTICAL (no meal tradition in its shots).
+- **Fix needed: no check part covers the change**, so nothing would fail if the old lump came back. Suggested: an
+  events_check (or day_check) line on paper: for each meal tradition in days 0-21, the most diners leaving in any one
+  minute is at most 6, and Day 0's table is still full 5 minutes before Zeke's 'free' minute (p_leave.py and
+  p_day0table.py do both); it should FAIL on 0cd37b1b.
+- Judgement call (SC1's, for the lead and the user): the plan can only use the fixed 'free' minute, so with DS1's tour
+  (free 19:45) the Day 0 table stays full about an hour after a player who's let go at about 18:20. I'd keep it (the
+  user asked for "full while you're there"), and say so to the user.
