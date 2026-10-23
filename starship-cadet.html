@@ -42416,7 +42416,7 @@ const INTRO_STEPS = [
     ready: () => !(typeof bagHeld === 'function' && bagHeld()), fallback: { wait: 5, later: 'device' } },   // not by then: section 15's bagTick puts it away for you
   { id: 'device', day: 0, at: 17 * 60 + 30, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, near: 3, noHold: true,
     ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess' } },   // (DS1, the user on 0.91.0) its meeting introDevice is parked: once it's done his hand-over plays in bubbles (introHandTick), toMess waiting for it   // after his wardrobe lines (21b); you never came near him in 10 minutes (another deck): Monday's briefing hands it over, as for a missed bunk
-  { id: 'toMess', day: 0, at: 17 * 60 + 40, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3', hold: () => introHandDue(),
+  { id: 'toMess', day: 0, at: 17 * 60 + 40, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3', hold: t => introHandBusy() || introHandDue(t),
     checkpoint: { deck: 3, tile: [22, 7], room: 'Lift plaza' }, fallback: { wait: 20, later: 'servery' } },
   { id: 'servery', day: 0, at: 17 * 60 + 47, who: INTRO_ESCORT, mode: 'lead', where: 'the mess servery',
     checkpoint: { deck: 3, tile: [33, 3], room: 'Mess hall' }, rel: { pell: 5, brennan: 3 }, fallback: { wait: 25, later: 'table' } },
@@ -42660,7 +42660,8 @@ const INTRO_HAND_READ = 45000;                             // real ms: reading h
 const introHandLines = after => introWriterLines(after ? 'walk.hand.after' : 'walk.hand') || (after ? INTRO_HAND.after : INTRO_HAND.lines);   // one flag key each, in the file's order
 const introHandBusy = () => { const D = SHIP.intro.done; return D['hand:start'] !== undefined && D['hand:end'] === undefined; };
 // due: the device step done with you there (not missed) and the scene not over: toMess holds and he stays with you (escortPlan)
-const introHandDue = () => { const I = SHIP.intro, D = I.done; return !!I && D.device !== undefined && !I.missed.includes('device') && D['hand:end'] === undefined && I.step === 'toMess'; };
+const INTRO_HAND_WAIT = 10;                                 // ship minutes the scene may take to start (he walks over, his wardrobe lines end); then it's skipped (a time jump)
+const introHandDue = (t = shipNow()) => { const I = SHIP.intro, D = I.done; return !!I && D.device !== undefined && !I.missed.includes('device') && D['hand:end'] === undefined && I.step === 'toMess' && (D['hand:start'] !== undefined || t < D.device + INTRO_HAND_WAIT); };
 function introHandMail() {                                 // his Mail, once (dated that morning, before you landed); its id
   const D = SHIP.intro.done; if (D['hand:mail'] !== undefined || typeof mailSend !== 'function') return D['hand:mail'];
   let t = INTRO_HAND_MAIL; try { if (typeof clothesText === 'function') t = clothesText('mail.zeke.land', {}, INTRO_HAND_MAIL); } catch (e) { t = INTRO_HAND_MAIL; }
@@ -42671,7 +42672,7 @@ function introHandMail() {                                 // his Mail, once (da
 function introHandTick() {
   const I = SHIP.intro, D = I.done, now = simNow(), t = Math.floor(shipNow());
   if (D['hand:end'] !== undefined) return;
-  if (D['hand:start'] === undefined && !introHandDue() && (introFlag('intro.device') || I.missed.includes('device'))) { if (introFlag('intro.device')) { introHandMail(); D['hand:end'] = t; } return; }   // given another way (Monday's briefing): his Mail all the same
+  if (D['hand:start'] === undefined && !introHandDue() && (introFlag('intro.device') || I.missed.includes('device') || D.device !== undefined && I.step !== 'device')) { if (!I.missed.includes('device')) introDeviceGive(); if (introFlag('intro.device')) { introHandMail(); D['hand:end'] = t; } return; }   // given another way (Monday's briefing), or the scene's moment passed (a time jump): yours, his Mail all the same   // given another way (Monday's briefing): his Mail all the same
   const H = INTRO_UI.hand || (INTRO_UI.hand = { n: 0, next: 0, opened: 0, a: 0, hold: null });
   if (H.hold && D['hand:start'] !== undefined) { SHIP.time.day = H.hold[0]; SHIP.time.min = H.hold[1]; }   // (lead 30's (e)) the clock holds through it, as the manifest's does
   const a = introWalker();
@@ -43404,7 +43405,7 @@ function introTick() {
   }
   // (the Zeke patch) the device step reached but its scene lost (a reload in between): he hands it over anyway
   introHandTick();                                       // (DS1) the device hand-over in his bubbles, then his Mail
-  if (I.done.device !== undefined && !I.missed.includes('device') && !introFlag('intro.device') && !INTRO_UI.meet.some(x => x.id === 'device') && !(DIALOGUE && DIALOGUE.m && DIALOGUE.m.id === 'intro-device')) introDeviceGive();
+  if (I.done.device !== undefined && !I.missed.includes('device') && !introFlag('intro.device') && !introHandDue() && !INTRO_UI.meet.some(x => x.id === 'device') && !(DIALOGUE && DIALOGUE.m && DIALOGUE.m.id === 'intro-device')) introDeviceGive();
   if (INTRO_UI.chiefD && DIALOGUE !== INTRO_UI.chiefD) { const D = INTRO_UI.chiefD; INTRO_UI.chiefD = null; I.done['chief:end'] = D.i >= D.queue.length ? Math.floor(shipNow()) : null; }   // all her lines, or walked away (null: day 0's minutes are negative)
   if (now === INTRO_UI.min) { introWeekMeetings(now); introMoments(now); introSeekMail(now); introSowTick(now); }
   // the Chief comes over to your table for her step (section 10's crewComeTo, live only, so again after a reload)
