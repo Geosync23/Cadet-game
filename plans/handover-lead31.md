@@ -27,6 +27,7 @@ Teaching arrows ON (Settings: Always / First times / Off); breakfast back; Zeke'
 
 ## User decisions this session (all in TEAM.md)
 - (SUPERSEDED 13:30 UTC: the user is fine with the automatic put-away; bag-no-net dropped) No bag safety net: player must always stow the bag (Monday put-away removed; exception agreed by lead: skipping the intro/"I know my way around"/week's end stows it quietly; user not yet asked about the week's-end case, mention it).
+- 19:06 UTC: Day 0 after-dinner = full simulation once diners leave (staggered, slow); day0-stay dropped. Team repairs to near new (FX6). Lessons: designed order, slip OK until playtest. Tap accuracy / way-finding themes: leave alone (LEAD31-10 closed).
 - (SUPERSEDED 13:30 UTC: the table now trickles out from the live end of the Chief's talk / Zeke's goodnight, FX5 claude/day0-trickle, RV10) Day 0 table: keep as is (full ~1 h after the goodnight, thins by ~20:05); lead read "Yes" as keep: confirm if the user brings it up.
 - Zeke tour notes (washroom line only if you linger; slow player misses the arrival Sunday table; "Ship traditions tomorrow" Mail in the bunk room): no change for now.
 - Hygiene rule approved; late tweaks (booth arrow, hygiene, tiles, dev arrow) shipped.
