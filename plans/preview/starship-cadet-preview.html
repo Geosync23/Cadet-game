@@ -72,7 +72,7 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
 .verdict h2 { font-size: 22pt; }
 .phone { border: 2.2mm solid #11161c; border-radius: 6mm; overflow: hidden; background: #000; }
 .phone img { border-radius: 0; }
-.gallery figure img { height: 54mm; object-fit: cover; }
+.gallery { grid-template-columns: 1fr; } .gallery figure img { height: 68mm; object-fit: cover; }
 </style>
 </head>
 <body>
@@ -130,9 +130,8 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
   <p class="kicker">The first evening</p>
   <h2>Zeke Torres will see you now</h2>
   <p class="standfirst">A new game opens on a Sunday afternoon, Day 0, 16:30. You sign the shuttle's manifest, the ramp opens, and an engine officer with a box under his arm walks you home.</p>
-  <div class="grid2">
-    <figure><img src="img/arr_ramp.jpg" alt=""><div class="caption"><b>The welcome.</b> Zeke Torres meets you at the foot of the ramp. "I'm from the Works Department. So are you, now."</div></figure>
-    <figure><img src="img/arr_haul.jpg" alt=""><div class="caption"><b>Walk and talk.</b> From the ramp to the lift he never stops: "Don't learn it all tonight. Nobody does. I didn't."</div></figure>
+  <div>
+    <figure><img src="img/arr_ramp.jpg" alt="" style="height:78mm;object-fit:cover;object-position:50% 45%"><div class="caption"><b>The welcome.</b> Zeke Torres meets you at the foot of the ramp. "I'm from the Works Department. So are you, now."</div></figure>
   </div>
   <div class="cols">
     <p>The arrival is the best introduction to how the game thinks. There is no tutorial screen. Zeke, a Works engine officer one rank above you, simply walks ahead and talks, and you follow him. On Deck 5 it's welcome chatter as you pass the Works bay; after the lift, he stops at each place and says its two to four key lines. Linger and he tells you more. Wander off and he waits, then moves on, and anything you missed arrives later by Mail.</p>
@@ -140,7 +139,6 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
     <div class="pull">"The scrubber manual. Chapter three. Nobody reads chapter three."<cite>Chief Ines Calder, at your first dinner</cite></div>
     <p>It's a very well-judged hour. By the time Zeke says goodnight and the arrow points you to your bunk, you have ridden the lift, seen three decks, met your boss, eaten in a crowded mess and been told, in passing, that Fridays finish early. Nobody stopped the clock to do it: the other 74 crew went about their Sunday the whole time.</p>
     <figure><img src="img/arr_bunk.jpg" alt=""><div class="caption"><b>Bunk 1, 17:14.</b> "Now, your bag. In your wardrobe, by the door." Six berths, three bunk beds, and a washroom down the corridor: "Hot water till ten, then it's character-building."</div></figure>
-    <figure><img src="img/arr_device.jpg" alt=""><div class="caption"><b>The device, handed over.</b> Zeke's short scene in Bunk 1 offers three replies. None of them is wrong; they just suit people differently.</div></figure>
   </div>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>3</span></div>
 </section>
@@ -155,7 +153,6 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
     <p>Dinner runs from 17:00 to 20:30, breakfast from 06:00 to 09:00, and the galley also keeps a grab-and-go shelf for anyone running late. Menus run on a weekly cycle, with a Friday treat and a Sunday dinner the crew voted for. When the ovens wear or the cold store runs warm, it shows: late batches, queues, an empty shelf.</p>
     <div class="pull">"Have you eaten? Don't answer. I can see you haven't. Sit."<cite>Chef Auda Brennan</cite></div>
     <p>It's also where the social side quietly starts. At a meal, the people at your table count toward your social need, more so the better you know them, and eating at the same table is one of the ways a stranger becomes an acquaintance.</p>
-    <figure><img src="img/arr_servery.jpg" alt=""><div class="caption"><b>The servery.</b> Zeke heads for the line: "Tray first, then the servery. Take what smells best."</div></figure>
   </div>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>4</span></div>
 </section>
@@ -172,13 +169,8 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
     <p>Everything you need to know lives on your handheld, which never pauses time: you can walk while you read it. It's styled like an old-school screen with a cyan phosphor glow, and holds Schedule, Calendar, Needs, Maps, Jobs, Mail, Memos, Hobbies, People, the full crew Roster, a News feed, your Record, a Wallet, Tiles and Settings, with a Tracked list at the top.</p>
     <p>The home screen sums up your day in plain sentences. On our first Monday it read: "Today aboard, 4 traditions: Sunrise stretch at 06:30, Name on the beam at 17:05, Gym club at 19:15, First Light Cocoa at 20:00." A single goal arrow, never more than one, points wherever you've chosen to go.</p>
   </div>
-  <div class="grid3" style="margin-top:2mm">
-    <figure><img src="img/dev_home.jpg" alt=""><div class="caption"><b>Home.</b> The day in a few lines, and the apps.</div></figure>
-    <figure><img src="img/dev_schedule.jpg" alt=""><div class="caption"><b>Schedule.</b> Breakfast, Sunrise stretch, your shift 09:00-17:00, tea at 13:00, dinner.</div></figure>
-    <figure><img src="img/dev_needs.jpg" alt=""><div class="caption"><b>Needs.</b> Seven bars. "Well rested: tasks +15%."</div></figure>
-    <figure><img src="img/dev_calendar.jpg" alt=""><div class="caption"><b>Calendar.</b> Each tradition with a reminder you can turn off ("Don't").</div></figure>
-    <figure><img src="img/dev_maps.jpg" alt=""><div class="caption"><b>Maps.</b> A clean plan of every deck, with its rooms.</div></figure>
-    <figure><img src="img/dev_record.jpg" alt=""><div class="caption"><b>Record.</b> "Works technician, tier 1." Every department starts you as a new face.</div></figure>
+  <div style="margin-top:2mm;width:62%">
+    <figure><img src="img/dev_home.jpg" alt=""><div class="caption"><b>Your device, Day 1, 06:00.</b> The home screen: the day in a few lines, the season, today's traditions and the apps.</div></figure>
   </div>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>5</span></div>
 </section>
@@ -187,7 +179,7 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
 <section class="page">
   <p class="kicker">Work and the Works career</p>
   <h2>Look, fetch, carry, fix, turn in</h2>
-  <figure><img src="img/works_board.jpg" alt="" style="height:64mm;object-fit:cover;object-position:50% 25%"><div class="caption"><b>The job board, Tuesday 09:06.</b> One list for the whole ship. Jobs marked "Take it" are yours for the asking; the rest already have someone on them: "Emeka on it", "Leila on it", "Chief on it".</div></figure>
+  <figure><img src="img/works_board.jpg" alt="" style="height:58mm;object-fit:cover;object-position:50% 25%"><div class="caption"><b>The job board, Tuesday 09:06.</b> One list for the whole ship. Jobs marked "Take it" are yours for the asking; the rest already have someone on them: "Emeka on it", "Leila on it", "Chief on it".</div></figure>
   <div class="cols">
     <p>The heart of Starship Cadet is the job loop, and it is refreshingly physical. Every machine aboard is a real object in a room with a condition from 100% down to broken, and wear turns into work on one shared job list. The crew draw from it as you do. You take a job at the big board in the Works bay, and the arrow walks you through it: inspect the machine, fetch the right part from the right shelf in main storage, carry it back (you can hold two things), hold to repair, then turn the job in at the board.</p>
     <p>Our first real job on Tuesday was a service on Washer 2 in the Deck 4 laundry. Its panel told us what it needed: a pump. On our first try the Plumbing shelf was out of pumps, and the game said so plainly: "The machine shop next door can make one (about an hour at the lathe)." Stock runs down through the week, and the supply shuttle comes on Wednesdays.</p>
@@ -196,9 +188,7 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
     <h3>Climbing, never commanding</h3>
     <p>You start at Tier 1 on galley ovens, lights, doors, washers and cabin fixtures. In the live build the Works career runs through your first promotion: real faults with causes, tracing a fault along the water, heat and air lines, "head-scratcher" deduction puzzles where the clues are in the world, team jobs, a weekly drill and inspection, and side jobs. Once you're "Relied on", Chief Calder sets a supervised test job on a Deck 4 air scrubber. Pass it and you become a Works Officer, move into your own cabin, 4-23, and the Captain commissions you the next day. There are no timers and no scores; the test can be delayed, never failed.</p>
   </div>
-  <div class="grid3">
-    <figure><img src="img/job_fetch.jpg" alt=""><div class="caption"><b>Fetch.</b> Main storage, Deck 5: "You take a pump. Now to the washer on Deck 4."</div></figure>
-    <figure><img src="img/job_repair.jpg" alt=""><div class="caption"><b>Repair.</b> Back in the Deck 4 laundry, part fitted, holding to work.</div></figure>
+  <div style="width:42%">
     <figure><img src="img/job_done.jpg" alt=""><div class="caption"><b>Done.</b> "The washer is running sweetly again. That's one off the board." Turned in: Works reputation up, +6 Waste and laundry, +2 Water.</div></figure>
   </div>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>6</span></div>
@@ -242,9 +232,8 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
     <h3>When things go wrong</h3>
     <p>The ion storm is in the build. About a week and a half into a new game (Days 11 to 15), Calder briefs the Works crew, storm jobs go up on the board, the rec deck closes, and on the Saturday the mess eats by lantern light. Your prep work changes how smoothly it goes, the Captain gives the all-clear, and a commendation can follow. Rough is never failure: the ship gets shabbier for a while, then recovers.</p>
   </div>
-  <div class="grid2">
+  <div style="width:70%">
     <figure><img src="img/works_beam.jpg" alt=""><div class="caption"><b>The beam, Works bay.</b> First names of everyone who's served there, painted on the cross beam, with room left for yours.</div></figure>
-    <figure><img src="img/works_health.jpg" alt=""><div class="caption"><b>Ship health.</b> Every system's meter, and where the worst wear is. Ours read 74 on Day 2.</div></figure>
   </div>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>8</span></div>
 </section>
@@ -254,15 +243,9 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
   <p class="kicker">The tour</p>
   <h2 style="color:#fff">A ship you get to know like a home</h2>
   <div class="grid3 gallery">
-<figure><img src="img/deck3_lounge.jpg" alt=""><div class="caption"><b>Deck 3, the bow lounge.</b> It fills the whole bow on one floor, with curved windows and a bar: a lively bar end and a quiet window end.</div></figure>
 <figure><img src="img/deck3_garden.jpg" alt=""><div class="caption"><b>Deck 3, the hydroponics garden.</b> Grow racks, raised beds, fruit trees and a pond at the stern. The herb wall feeds the galley.</div></figure>
-<figure><img src="img/deck3_mess_dinner.jpg" alt=""><div class="caption"><b>Deck 3, the mess hall at 18:00.</b> Tuesday dinner, with the evening's traditions coming up on the Calendar.</div></figure>
-<figure><img src="img/deck4_common.jpg" alt=""><div class="caption"><b>Deck 4, the junior common room.</b> Stern windows, a Tiles table that plays any time, and Knit and natter on Tuesdays.</div></figure>
 <figure><img src="img/deck6_engine.jpg" alt=""><div class="caption"><b>Deck 6, the engine room.</b> Three drive coils, each taller than a person, glowing as they cycle. Walkable from day one.</div></figure>
 <figure><img src="img/deck1_bridge.jpg" alt=""><div class="caption"><b>Deck 1, the bridge.</b> The command ring and curved viewscreen. Its doors stay shut to you until the Captain invites you.</div></figure>
-<figure><img src="img/deck2_observatory.jpg" alt=""><div class="caption"><b>Deck 2, the observatory.</b> Bow windows at the end of the science corridor, for observatory night.</div></figure>
-<figure><img src="img/deckR_pool.jpg" alt=""><div class="caption"><b>The rec deck, the pool.</b> One floor of a double-height deck with kayak rivers, a climbing wall, a float room and a Lightdisc court.</div></figure>
-<figure><img src="img/deckR_auditorium.jpg" alt=""><div class="caption"><b>The rec deck, the auditorium.</b> 76 seats and a stage against the bow windows: the Captain speaks here every Friday at 16:00.</div></figure>
   </div>
   <p style="margin-top:2mm;color:#9fb0bf;font:400 7.6pt Inter,sans-serif">To save ship time, we reached some of these rooms with the game's own testing tools rather than on foot, so some sit outside your normal day (the bridge, for one, needs an invitation).</p>
   <div class="folio"><span>Starship Cadet · Hands-on preview</span><span>9</span></div>
@@ -272,8 +255,7 @@ figure img { width: 100%; display: block; border-radius: 1.5mm; }
 <section class="page">
   <p class="kicker">Look and feel</p>
   <h2>Built for the phone in your hand</h2>
-  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:5mm">
-    <figure><div class="phone"><img src="img/phone_bunk.jpg" alt=""></div><div class="caption"><b>Morning in Bunk 1</b>, held upright.</div></figure>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:8mm;width:66%;margin:0 auto">
     <figure><div class="phone"><img src="img/phone_device.jpg" alt=""></div><div class="caption"><b>The device</b> slides up over part of the screen; the ship stays visible.</div></figure>
     <figure><div class="phone"><img src="img/phone_mess.jpg" alt=""></div><div class="caption"><b>The mess at dinner</b>, Tuesday 18:10.</div></figure>
   </div>
