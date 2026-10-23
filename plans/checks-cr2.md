@@ -210,4 +210,5 @@ perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 31).
 | arc_check | OK | `ARC CHECK OK` |
 | lines_check | OK | PASS (0 errors, 50 warnings; the same count as 0.92.0) |
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
-| perf_check, lines_check --day | CR4 | handed over |
+| perf_check NEW OLD | OK (CR4) | exit 0; the Line ceremony 335 calls (KP1); vs OLD only Sunday dinner 66 people vs 69, junior wing +5k triangles, storm all-clear +2 calls |
+| lines_check --day | OK (CR4) | PASS |
