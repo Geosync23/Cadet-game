@@ -243,3 +243,23 @@ Under Off, what still shows (all things the game had before, or not teaching): j
 arrows, the watch arrows, the inspection, the drill, Calder's call. What goes: the panel pointers and the first-time
 tips. Still stuck in both: "Mop up (2 of 2)" (Day 8, m6) and the hydroponics vent (Day 4), FX3's fix 19.
 Note: urgent device notifications now wait their turn in the pop-up queue (a second or two), like every other pop-up.
+
+## 10. FX3 fix 19, claude/p5-fix3 518ee9ef (on arrows-c 14249d84): PASS
+
+Section 11's tap: when someone is near the tap on screen and the tap is on the arrow's pin (`IX_PIN`, within 22 px) or
+beside them (more than 10 px from their body points), and the floor under it is your job's stop (`jobSpotTap`), the
+job; else `tapCrew` as before. Calder by the second puddle (Day 8) and a crew member at the garden vent took every pin
+tap as a chat.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 14249d84 -> 518ee9ef, alone | ALL IDENTICAL |
+| interactions_check --quick on 14249d84 | FAILED on the new line only (0 of 4 taps at the pin mop the puddle) |
+| interactions_check --quick on 518ee9ef | OK (4 of 4; a tap on someone away from it is still a chat) |
+| Planted: pin taps ignored | caught |
+| Planted: "on the person" widened to 40 px | not caught (minor: only matters for a tap near your stop, off the pin) |
+| Week on 518ee9ef, arrows off | nothing stuck, no arrow over 3 hours (m7 on Day 8: FX4's fix isn't in this base) |
+| Week on 518ee9ef, arrows on | nothing stuck; m6 learned on Day 8 11:08 (p3: FX5's fix isn't in this base) |
+
+Trade-off to know: with a job in hand, a tap near someone standing close to your stop (but not right on their body)
+now goes to the job, not a chat.
