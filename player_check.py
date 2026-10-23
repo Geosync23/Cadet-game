@@ -25,7 +25,7 @@
 #   the bathroom need (0.28.19): toilets in the public washrooms (Decks 4 and 3) sit you down and fill it; cabins' are private
 #   seeing it work (0.28.20, 0.28.21): each tapped activity shows the progress bar and a +N note for its need
 #   the kit bag and the device lock (0.28.26): held from the ramp, into the locker in Bunk 1
-#   lying down in your bunk (0.28.29): by day to rest, at night to sleep, and getting up
+#   lying down in your bunk (0.28.29): by day to rest (saying it's too early to sleep, lead 28), at night to sleep, and getting up
 #   gifts (0.28.25): store gifts and machine-shop gifts into your hands (giftAdd); a friend's note on your bunk
 #   a reserved training job (0.28.24): the shelf part, the bracket made in the machine shop with the bar, the stops marked, the repair
 #   the note bus (0.28.22): simNote('act', ...) for wash, eat (with), call, buy; your name saved and cleaned
@@ -338,6 +338,18 @@ with sync_playwright() as pw:
     check(nt[0] == 'sit' and nt[1] is False and nt[2] is False and nt[4] <= 0 and nt[5] is False, f'sitting at a mess table without a meal: just sitting, no tray, no food: {nt}')
     check(wt[0] == 'eat' and wt[1] is True and wt[2] is True and wt[3] is None and wt[4] > 1, f'with a tray from the servery: it goes on the table and food rises as you eat: {wt}')
 
+    print('A tray at any seat (fix-eat: the fresh-eyes player, Day 0, sat at the long table and in the lounge and never ate):')
+    anyseat = []
+    for sid in ('3-longtable-1', '3-lounge-1', '3-mess-1'):
+        g.ev(f"""(() => {{ actEnd(true); if (deckDef.num !== 3) goToDeck(3); needsT = null; SHIP.player.tray = 'Test soup'; SHIP.player.needs.hunger = 40;
+          const s = placeSpot('{sid}'); if (!s) return null; const at = new THREE.Vector3(s.x, 0, s.z); return sitTap({{ t: 'Seat', x: '' }}, at, at); }})()""")
+        for k in range(200):
+            g.step(10)
+            if g.ev("!ACT || ACT.phase === 'do'"): break
+        h0 = g.ev("SHIP.player.needs.hunger"); r0 = g.ev("[ACT && ACT.kind, ACT && !!ACT.o.fed, SHIP.player.tray]"); g.step(150)
+        anyseat.append([sid] + r0 + [round(g.ev("SHIP.player.needs.hunger") - h0, 1)]); g.ev("actEnd(true); SHIP.player.tray = null")
+    print('  [seat, activity, fed, tray in hand, food change]:', anyseat)
+    check(all(r[1] == 'eat' and r[2] is True and r[3] is None and r[4] > 1 for r in anyseat if g.ev(f"!!placeSpot('{r[0]}')")), f'with a tray, a tap on any seat eats it (the long table, the lounge, a mess seat): {anyseat}')
     print('Tea in the Tea corner, every seat taken (fresh-eyes, FE1 item 48: "any chair in the tea corner should sit you down for tea"):')
     teas = []; keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], tea: SHIP.player.teaDay })")
     for taken in (['5-tea-1', '5-tea-2'], ['5-tea-1', '5-tea-2', '5-tea-3']):
@@ -526,6 +538,10 @@ with sync_playwright() as pw:
     if stubn: g.ev("delete window.bunkNote")
     print('  your bunk with a note, then again:', notes)
     if stubn: check(notes[0][0] is True and notes[0][1].startswith('A note on your bunk') and 'lie down' in notes[1][1], f"the bunk: a friend's note first, then the bunk as before ({notes})")
+    # the fresh-eyes playtest (lead 28, 2026-10-22): by day the bunk says why it isn't sleep; bedtime itself unchanged (20:00 to 05:30)
+    check('Too early to sleep: you can turn in from 20:00.' in notes[-1][1], f'the bunk by day should say it is too early to sleep: {notes[-1][1]!r}')
+    bt = g.ev("(() => { const m = SHIP.time.min, r = [1199, 1200, 329, 330].map(x => (SHIP.time.min = x, bedtime())); SHIP.time.min = m; return r; })()")
+    check(bt == [False, True, True, False], f'bedtime should still be 20:00 to 05:30: 19:59, 20:00, 05:29, 05:30 gave {bt}')
     # lying down (0.28.29, the user's "I can't lay down in bed"): a tap on your bunk by day lies you down in it to rest;
     # walking off gets you up; at night you lie down, sleep to 06:00 and wake still lying there
     for j in range(40):
@@ -542,6 +558,22 @@ with sync_playwright() as pw:
         if g.ev("!ACT && player.obj.visible"): break
     up = g.ev("[!!ACT, player.obj.visible]"); print('  walking off:', up)
     check(up == [False, True], f'walking off should get you up: {up}')
+    # (b), the user's yes: another bunk in the room you sleep in says which is yours; one in another room doesn't
+    OTAP = """((same) => { const id = playerBed(), bed = PLACE_OF.get(id), b = cellPos(...bed.at), r = roomAt(...bed.at);
+      const L = ITEMS.filter(i => /^bunk$/i.test(i.t)).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })
+        .filter(([i, w]) => w.distanceTo(b) > 1.2 && (roomAt(...cellAt(w.x, w.z)) === r) === same).sort((m, n) => m[1].distanceTo(b) - n[1].distanceTo(b));
+      if (!L.length) return null; window.__ot = L[0][0].x; return playerTap(L[0][0], L[0][1].clone(), L[0][1].clone()); })"""
+    others = []
+    for same in ('true', 'false'):
+        g.ev("document.getElementById('tx').textContent = ''")
+        tp = g.ev(f'({OTAP})({same})')
+        for j in range(60):
+            g.step(10)
+            if not g.ev("player.path.length > 0"): break
+        g.step(5); others.append([tp, g.ev("window.__ot"), g.ev("document.getElementById('tx').textContent")])
+    print('  another bunk, your room then the next room:', others)
+    check(others[0][0] is True and others[0][2] == others[0][1] + ' Yours is the next one.', f'a bunk in your room should say which is yours: {others[0]}')
+    check(others[1][0] is not True and 'Yours is the next one' not in (others[1][2] or ''), f'a bunk in another room should not: {others[1]}')
     g.ev("setShipNow(Math.floor(shipNow() / 1440) * 1440 + 21 * 60); needsT = null; SHIP.player.needs.energy = 30"); g.step(3)
     day0 = g.ev("SHIP.time.day"); tp = g.ev(BTAP)
     # the alarm clock (0.73.0, playtest 2): at night lying down opens it; the saved time (06:00 by default), the energy
@@ -1002,8 +1034,16 @@ with sync_playwright() as pw:
         TOK = "(() => { const m = machineById(myJob().machine), pid = panelPlace(m.id), s = placeSpot(pid), mc = cellPos(...(m.at || PLACE_OF.get(pid).at)), it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return _wp.clone(); }).sort((a, b) => Math.hypot(a.x - s.x, a.z - s.z) - Math.hypot(b.x - s.x, b.z - s.z))[0]; return !!it && roomAt(...cellAt(it.x, it.z)) === m.room && (Math.hypot(mc.x - it.x, mc.z - it.z) <= MACHINE_NEAR || Math.hypot(s.x - it.x, s.z - it.z) <= .8); })()"
         skip = []
         for tries in range(8):
-          jid = g.ev(r"""(skip => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && !skip.includes(j.id) && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
-          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
+          jid = g.ev(r"""(skip => { machinesNow(); let j = SHIP.jobs.find(j => j.machine && !skip.includes(j.id) && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) {   // none on the board (since dinner-spread the crew's day shifts which faults come as service jobs by Day 11): post one as section 17 does (test only)
+            const t = shipNow(), m = machineList().filter(m => !m.stub && !ENGINE_KINDS.has(m.kind) && panelPlace(m.id) && !skip.includes(m.id + '@pc') && !SHIP.jobs.some(x => x.machine === m.id && x.status !== 'done'))
+              .sort((a, b) => (a.id === '7-aud-lights' ? -1 : 0) - (b.id === '7-aud-lights' ? -1 : 0) || (a.id < b.id ? -1 : 1))
+              .find(m => jobTier({ machine: m.id, kind: 'service' }) <= PLAYER_TIER);
+            if (!m) return null;
+            SHIP.jobs.push({ id: m.id + '@pc', machine: m.id, deck: m.deck, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: faultParts(m, 'service', null), status: 'open' });
+            j = SHIP.jobs[SHIP.jobs.length - 1];
+          }
+          j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
           for (const p of j.parts) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   // the shelf has some (test only: since Pillar 5's faults and hauling the part may be out until the delivery)
           return claimJob(j.id) ? j.id : null; })""" + f"({json.dumps(skip)})")
           if not jid: break
@@ -1351,7 +1391,7 @@ with sync_playwright() as pw:
         if g.ev("typeof teaOffer === 'function'"):
             print('Playtest 1 (0.28.74): wash hands, a low need\'s marker, push through, taking a job tracks it, tea and biscuits, talk while eating, sitting near people')
             g.ev("actEnd(true); goToDeck(4)"); g.step(5)
-            wh = json.loads(g.ev("""(() => { const P = SHIP.player; P.needs.hygiene = 50; const it = ITEMS.find(i => i.t === 'Basins'); if (!it) return JSON.stringify(['no basins']); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone()); return JSON.stringify([r, PLAYER_ACTS.toilet.cost.hygiene]); })()"""))
+            wh = json.loads(g.ev("""(() => { const P = SHIP.player; P.needs.hygiene = 50; if (typeof washLoad === 'function') P.wash = { shower: null, owed: 3, pre: 53 }; const it = ITEMS.find(i => i.t === 'Basins'); if (!it) return JSON.stringify(['no basins']); it.hit.getWorldPosition(_wp); const r = playerTap(it, _wp.clone(), _wp.clone()); return JSON.stringify([r, PLAYER_ACTS.toilet.cost.hygiene]); })()"""))
             for k in range(60):
                 g.step(10)
                 if g.ev("!ACT || ACT.phase === 'out'"): break
@@ -1361,6 +1401,48 @@ with sync_playwright() as pw:
             wh2 = g.ev("[Math.round(SHIP.player.needs.hygiene * 10) / 10, document.getElementById('tx').textContent]")
             print('  basins [tapped, the toilet\'s hygiene cost]:', wh, '| hygiene 50 ->', wh2)
             check(wh[0] is True and wh[1] == 3 and wh2[0] > 52, f'playtest: washing at the basins (15b\'s ixBasin) puts hygiene back ({wh}, {wh2})')
+            # no hygiene farming (FX6, the user's, 2026-10-23): a shower once every 6 ship hours; a basin only gives back a toilet's take
+            print('No hygiene farming (FX6): showers 6 hours apart, the basin only after a toilet, the marker, the crew untouched')
+            check(g.ev("typeof washBegin === 'function'"), 'no hygiene farming: the shower cooldown and the basin rule are in the build')
+            if g.ev("typeof washBegin === 'function'"):
+                hf = json.loads(g.ev(r"""(() => { const P = SHIP.player, n = P.needs, out = {}, h0 = { ...n };
+                  const fx = () => { FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: { hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 }, drain: { hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 }, walk: 1, notes: [] }; };
+                  const run = (kind, mins) => { const A = { kind, def: { ...PLAYER_ACTS[kind] }, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
+                    Object.assign(n, { hunger: 50, energy: 50, fitness: 50, social: 50, bathroom: 50, leisure: 50 }); ACT = A; washBegin(A); needsT = shipNow() - (mins || A.def.mins);   // other needs in the middle: no task-speed bonus or penalty
+                    fx(); playerUpdate(0, 0); ACT = A; actEnd(true); return [Math.round(n.hygiene * 10) / 10, A.o.after || '', A.def.done || '']; };
+                  actEnd(true); P.wash = washLoad(null);
+                  n.hygiene = 20; out.first = run('shower');
+                  n.hygiene = 40; out.again = run('shower');
+                  clearGoal(); NEED_GOAL = null; n.hygiene = 5; out.markCool = needGoal('hygiene'); clearGoal(); NEED_GOAL = null;
+                  P.wash.shower = shipNow() - 361; out.markLater = needGoal('hygiene'); clearGoal(); NEED_GOAL = null;
+                  n.hygiene = 40; out.later = run('shower');
+                  P.wash.shower = shipNow() - 300; n.hygiene = 40; out.rec = run('recShower');
+                  P.wash = washLoad(null); P.wash.shower = shipNow() - 400; n.hygiene = 50; out.basinNone = run('ixBasin');
+                  n.hygiene = 50; out.toilet = run('toilet'); out.basin = run('ixBasin'); out.basin2 = run('ixBasin');
+                  n.hygiene = 50; run('toilet'); run('toilet'); out.twoToilets = run('ixBasin', 1); out.twoToilets2 = run('ixBasin');
+                  P.wash = washLoad(null); n.hygiene = 30; out.rinse = run('recShower'); out.rinseCool = washCooling(); n.hygiene = 40; out.afterRinse = run('shower');   // RV10: the swim's rinse never locks out the evening shower
+                  P.wash = washLoad(null); n.hygiene = 30; out.minute = run('shower', 1); out.minuteCool = washCooling(); out.thenFull = run('shower'); out.fullCool = washCooling();
+                  P.wash = washLoad(null); n.hygiene = 20; out.short = [run('shower', 2)[0], washCooling(), run('shower', 2)[0], washCooling(), run('shower', 2)[0], washCooling(), run('shower', 2)[0]];
+                  P.wash = washLoad(null); n.hygiene = 100; out.full100 = run('shower');
+                  out.crew = PLAYER_ACTS.shower.gain === 80 && PLAYER_ACTS.ixBasin.gain === 6;
+                  FX_MIN = -1; Object.assign(n, h0); P.wash = washLoad(null); return JSON.stringify(out); })()"""))
+                print('  [hygiene, what it said]:', hf)
+                check(hf['first'][0] == 100 and hf['first'][1] == '', f'no hygiene farming: a first shower fills hygiene as before (20 -> {hf["first"]})')
+                check(hf['again'][0] == 40 and 'still fresh' in hf['again'][1], f'no hygiene farming: a shower inside 6 ship hours gives nothing and says so (40 -> {hf["again"]})')
+                check(hf['markCool'] is False and hf['markLater'] is True, f'no hygiene farming: the low-need marker never points to a shower that would give nothing ({hf["markCool"]}, then {hf["markLater"]} after 6 hours)')
+                check(hf['later'][0] == 100, f'no hygiene farming: after 6 ship hours a shower gives again (40 -> {hf["later"]})')
+                check(hf['rec'][0] == 40 and 'still fresh' in hf['rec'][1], f'no hygiene farming: the rec deck\'s shower keeps the same cooldown (40 -> {hf["rec"]})')
+                check(hf['basinNone'][0] == 50 and 'already clean' in hf['basinNone'][1], f'no hygiene farming: a hand-wash with no toilet visit since gives nothing and says so (50 -> {hf["basinNone"]})')
+                check(hf['toilet'][0] < 47.5 and 49.8 <= hf['basin'][0] <= 50 and hf['basin2'][0] == hf['basin'][0] and 'already clean' in hf['basin2'][1],
+                      f'no hygiene farming: a hand-wash puts back only what the toilet took, never above where it was, and only once (50 -> toilet {hf["toilet"]} -> basin {hf["basin"]} -> again {hf["basin2"]})')
+                check(hf['twoToilets'][0] < hf['twoToilets2'][0] <= 50, f'no hygiene farming: two toilet visits, a hand-wash walked away from part way, then finished: back to at most 50 ({hf["twoToilets"]}, {hf["twoToilets2"]})')
+                check(hf['rinse'][0] == 50 and hf['rinseCool'] is False and hf['afterRinse'][0] == 100, f'no hygiene farming: the rec deck\'s rinse after a swim gives its own +20 and never starts the cooldown, so a shower still gives (RV10: {hf["rinse"]}, {hf["rinseCool"]}, {hf["afterRinse"]})')
+                check(hf['minute'][0] == 38 and hf['minuteCool'] is False and hf['thenFull'][0] == 100 and hf['fullCool'] is True, f'no hygiene farming: walking out after a minute doesn\'t start the cooldown; a shower that runs half its time does (RV10: {hf["minute"]}, {hf["minuteCool"]}, {hf["thenFull"]}, {hf["fullCool"]})')
+                sh = hf['short']
+                check(sh[0] == 36 and sh[1] is False and sh[2] == 52 and sh[3] is False and sh[4] == 68 and sh[5] is True and sh[6] == 68, f'no hygiene farming: short showers walked away from add up, and once they have given 40 the cooldown starts ({sh})')
+                check(hf['again'][2] == 'A warm rinse. You were still fresh anyway.' and hf['first'][2].startswith('Clean,') and hf['basinNone'][2] == 'Hands and face rinsed.', f'no hygiene farming: a wash that gives nothing ends with its own plain line ({hf["again"][2]}, {hf["basinNone"][2]})')
+                check(hf['full100'][1] == '', f'no hygiene farming: at 100 with no shower yet, no "still fresh" ({hf["full100"]})')
+                check(hf['crew'], 'no hygiene farming: the activities\' own gains are unchanged (the crew\'s washing is section 14\'s and untouched)')
             ng = json.loads(g.ev("""(() => { clearGoal(); NEED_GOAL = null; const P = SHIP.player, h = P.needs.hunger; P.needs.hunger = 5; const r = needGoal('hunger'), a = IX_GOAL && [IX_GOAL.label, IX_GOAL.deck, IX_GOAL.place];
               setGoal({ deck: 5, room: 'w', label: 'Someone else' }); const b = needGoal('energy'), c = IX_GOAL.label; clearGoal(); needGoal('hunger'); P.needs.hunger = 60; needGoalTick(); const d = IX_GOAL; P.needs.hunger = h; return JSON.stringify([r, a, b, c, d]); })()"""))
             print('  a very low need\'s marker [set, goal, over another arrow, still theirs, after eating]:', ng)
@@ -1458,8 +1540,10 @@ with sync_playwright() as pw:
     check(raw['v'] == 2 and {k: v for k, v in raw['player']['needs'].items() if k != 'leisure'} == {'hunger': 11, 'energy': 22, 'hygiene': 33, 'fitness': 44, 'social': 55, 'bathroom': 66}, f"v 2 save should hold the needs: {raw['player']['needs']}")
     ev = load()
     v2 = json.loads(ev("JSON.stringify(SHIP.player.needs)")); print('  v 2 save:', v2)
-    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); SHIP.player.alarm = 450; saveGame()")
+    ev("mailSend({ from: 'Test', subject: 'Kept', body: 'b', play: 'home:gran' }); SHIP.player.credits = 77; SHIP.player.locker = ['a deck of cards']; SHIP.player.chats = { x: SHIP.time.day }; playerNameSet('Ada'); stripFold(true); SHIP.player.alarm = 450; SHIP.player.wash = { shower: shipNow() - 100, owed: 2.5, pre: 47 }; saveGame()")
     ev = load()
+    wk = json.loads(ev("JSON.stringify([SHIP.player.wash, typeof washCooling === 'function' && washCooling(), shipNow()])")); print('  the shower cooldown and the toilet\'s take, kept (FX6):', wk)
+    check(bool(wk[0]) and wk[0].get('owed') == 2.5 and wk[0].get('pre') == 47 and abs(wk[2] - 100 - wk[0].get('shower', -1e9)) < 5 and wk[1] is True, f'the save keeps the shower cooldown and the toilet\'s take: {wk}')
     kept = json.loads(ev("JSON.stringify([SHIP.mail.map(m => m.subject + (m.play ? '|' + m.play : '')), SHIP.player.credits, SHIP.player.locker, Object.keys(SHIP.player.chats), SHIP.player.name, SHIP.player.alarm])")); print('  mail, credits, locker, chats, name, alarm kept:', kept)
     fold = json.loads(ev("(() => { const el = needStrip(), r = [SHIP.player.stripFold, el.classList.contains('fold')]; el.click(); r.push(SHIP.player.stripFold, el.classList.contains('fold')); el.querySelector('.nsFold').click(); r.push(SHIP.player.stripFold); stripFold(false); return JSON.stringify(r); })()"))
     print('  the needs strip folded, kept, tapped open, folded again (0.28.33):', fold)
@@ -1508,7 +1592,7 @@ with sync_playwright() as pw:
     walked = ev('!bagHeld()')
     kb2 = json.loads(ev("""(() => {
       const P = SHIP.player, b = document.getElementById('devBtn'), out = [P.locker.slice()];
-      P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // the bunk step done: it goes in by itself
+      P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // (DS1, the user 2026-10-23: nobody stows it on the arrival evening) here it's Monday, the evening over: it's in your wardrobe (you put it away before bed)
       __devSet(); floatsTick(); b.click();
       out.push([bagHeld(), P.locker.slice(), deviceLocked(), b.querySelector('span').textContent, typeof DEV === 'undefined' || !!DEV.open]);
       if (typeof deviceClose === 'function') deviceClose();
@@ -1538,7 +1622,7 @@ with sync_playwright() as pw:
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
     check(kb[3] == [True, []], f'a missed bunk step leaves the bag in your hands: {kb[3]}')
     check(kb[4] == [True, 'stowed', False, True] and walked and kb2[0] == ['kitbag'], f'a tap anywhere in Bunk 1 (or at your wardrobe) walks you to your wardrobe and stows the bag (the Zeke patch, after 0.64.15): {kb[4]} {walked} {kb2[0]}')
-    check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'the bunk step done: the bag in your locker, the device opens: {kb2[1]}')
+    check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'Monday, the evening over: the bag in your wardrobe, the device opens: {kb2[1]}')
     check(kb2[2] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb2[2]}')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()

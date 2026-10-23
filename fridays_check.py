@@ -211,6 +211,7 @@ with sync_playwright() as pw:
     live['reloadKeep'] = keep == live['reload'][2]
     # missed (Day 26 on Deck 4 all afternoon): the banner and the Mail at 16:50, once
     g.ev("goToDeck(4)"); g.ev("skipTo((26 - 1) * 1440 + 1005)"); g.step(5)
+    g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")   # every pop-up shows at once (the queue is arrows_check's): with it, a queued banner was shown later by a second toast() call and counted twice (FX4, 0.92.0's round)
     g.ev("window.__toasts = []; { const t0 = toast; toast = (t, x) => { window.__toasts.push([t, x]); t0(t, x); }; }")
     live['w26'] = g.ev("[repInit().ship.work, repInit().cnt.address || 0, playerShiftOn(26)]")
     for k in range(40): g.step(20)

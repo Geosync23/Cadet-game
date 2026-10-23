@@ -66,6 +66,7 @@ with sync_playwright() as pw:
     for deck, title, kind, need in PARITY:
         g.ev(f"goToDeck({deck})"); g.step(3)
         g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 50")
+        if kind == 'ixBasin': g.ev("if (typeof washLoad === 'function') SHIP.player.wash = { shower: null, owed: 3, pre: 53 }")   # a hand-wash puts back only a toilet's take (FX6): as after a visit
         if title == 'The bar':                         # a stool is a drink only with one from the bar (section 15's barTap, 0.28.62); by day the bar is shut
             g.ev("SHIP.player.drink = null"); shut = tap(title); g.step(1)
             check(shut is True and 'Back at 17:30' in st()['toast'] and not g.ev("SHIP.player.drink"), f'the bar by day: "Back at 17:30" ({st()["toast"][:60]})')
@@ -413,8 +414,11 @@ with sync_playwright() as pw:
             g.ev(f"setGoal({{ deck: {goal}, item: /job board/i, room: 'w', label: 'The job board' }})"); g.step(90)
             lp = g.ev(LP)
             near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
+            tip = g.ev("(() => { const c = document.getElementById('devTip'); if (!c || c.hidden) return null; const r = c.getBoundingClientRect(); return [r.left, r.top, r.right, r.bottom, c.style.pointerEvents === 'none']; })()")
+            if tip and lp['at']: check(tip[4] or not (tip[0] <= lp['at'][0] <= tip[2] and tip[1] <= lp['at'][1] <= tip[3]), f"Deck {deck} {spot}: the tip card isn't over the arrow's target, or lets the tap through (tip {[round(v) for v in tip[:4]]}, target {lp['at']}) (FX5)")
             opened = False
             if lp['at'] and near < 3:
+                g.ev("while (TIP_Q.length) tipDone()"); g.step(2)   # a device tip card can sit over the panel (t:lift on Deck 3 at 06:07 with breakfast from 07:00): this part tests the arrow, so close tips first (the card's own fix: FX5)
                 g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
                 for k in range(120):
                     g.step(10)
@@ -821,8 +825,29 @@ with sync_playwright() as pw:
                 g.page.click('#rot'); g.step(30)
             print(f'   {cs[0]} {cs[1]}:', ' '.join(row))
         print(f'   {n} taps at the pin; things under it: {sorted(things)}')
-        check(n >= 3 * len(stops) and ('Orange tree' in things or 'Salad bed' in things), f'the pin under the finger in most turns, over the garden in some ({n} taps, {sorted(things)})')
+        check(n >= 3 * len(stops), f'the pin under the finger in most turns ({n} taps, {sorted(things)})')
         for b in bad: check(False, f'a real tap at a chore\'s pin does the stop: {b}')
+        # the garden over the hydroponics vent's pin, whatever the camera does (whether a pin lands on the tree depends on the
+        # turn and the pin's drawing): a real tap on the Orange tree or the Salad bed whose line passes over the stop
+        GARDEN = r"""(() => { const s = placeSpot('3-tend-1');
+          for (const i of ITEMS.filter(i => i.hit && isShown(i.hit) && /^(Orange tree|Salad bed)$/.test(i.t))) { const b = new THREE.Box3().setFromObject(i.hit);
+            for (let fy = .1; fy <= .95; fy += .1) for (let fx = .1; fx <= .95; fx += .2) for (let fz = .1; fz <= .95; fz += .2) {
+              const v = new THREE.Vector3(b.min.x + (b.max.x - b.min.x) * fx, b.min.y + (b.max.y - b.min.y) * fy, b.min.z + (b.max.z - b.min.z) * fz).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+              if (!(x > 0 && y > 0 && x < innerWidth && y < innerHeight)) continue; const h = pick(x, y); if (!h || h.object.userData.item !== i) continue;
+              ndc.set(v.x, v.y); ray.setFromCamera(ndc, camera); if (jobRayDist(s) < JOB_RAY) return [x, y, i.t]; } }
+          return null; })()"""
+        gres = []
+        for rot in range(4):
+            k = g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
+            for _ in range(rot): g.page.click('#rot'); g.step(30)
+            g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); q = g.ev(GARDEN)
+            if q:
+                g.page.mouse.move(q[0], q[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20)
+                gres.append([rot, q[2], g.ev("JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep])"), k])
+            g.page.click('#rot'); g.step(30)
+        print('   the garden on the line over the hydroponics vent [camera turn, thing, what started]:', gres)
+        check(gres, 'a point on the Orange tree or the Salad bed whose tap line passes over the vent stop, in some camera turn')
+        for r in gres: check(r[2] == json.dumps(['ixStop', r[3]]).replace(' ', ''), f'a tap on the garden, on the line over the vent\'s stop, cleans the vent ({r})')
         # off the pin, the Orange tree is the garden still (0.28.55: a thing you can use does its own thing)
         g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
         off = g.ev(r"""(() => { const s = placeSpot('3-tend-1'), i = ITEMS.filter(i => i.t === 'Orange tree' && isShown(i.hit)).sort((a, b) => ixDist(a, s) - ixDist(b, s))[0]; if (!i) return null; const b = new THREE.Box3().setFromObject(i.hit);
@@ -1349,6 +1374,27 @@ with sync_playwright() as pw:
     check(not g.ev("document.getElementById('ixGoal').classList.contains('tap')"), 'a goal on a place gives no tappable pin')
     g.ev("clearGoal()")
     check(not g.errors, f'no console errors ({g.errors[:3]})')
+# a tap on the floor by a place (section 15's playerFloorTap: gym kit, booths, shelves, toilets) hands the taps a stand-in
+# with no hit box; ixTap measured from that box and threw at the Deck 3 exercise bikes ("reading 'updateWorldMatrix'",
+# 0.92.0's trial, FX7): on every deck no floor tap throws, and the one by a bike starts the gym on that bike
+FLOOR_TAPS = r"""(() => { const out = { n: 0, bad: [], bike: null };
+  for (const pl of PLACE_OF.values()) { if (!FLOOR_ACTS[pl.type]) continue; const sp = placeSpot(pl.id); if (!sp) continue;
+    const it = { t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at = new THREE.Vector3(sp.x, 0, sp.z); out.n++;
+    try { actEnd(true); playerTap(it, at, at); if (/bike/i.test(it.t) && !out.bike) out.bike = [pl.id, ACT && ACT.kind, ACT && ACT.placeId]; } catch (e) { out.bad.push(pl.id + ': ' + e.message); }
+    actEnd(true); }
+  return out; })()"""
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    print('== a floor tap by every place, every deck')
+    if g.ev("typeof FLOOR_ACTS !== 'undefined' && typeof playerTap === 'function'"):
+        bikes = None
+        for d in (1, 2, 3, 4, 5, 7):
+            g.ev(f"goToDeck({d})"); g.step(3)
+            r = g.ev(FLOOR_TAPS)
+            check(not r['bad'], f'Deck {d}: no floor tap by a place throws ({r["n"]} places: {r["bad"][:3]})')
+            if r['bike']: bikes = r['bike']
+        check(bikes and bikes[1] == 'gym' and bikes[2] == bikes[0], f'a floor tap by an exercise bike starts the gym on that bike ({bikes})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')

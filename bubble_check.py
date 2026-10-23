@@ -10,6 +10,8 @@
 #      30 px on a 33 ms frame)
 #   3. no bubble is hidden and shown again within 30 frames (a re-show replays its pop-in)
 #   4. two bubbles that overlap never swap sides or stacking from one frame to the next more than once a second
+#   5. (2026-10-22) at phone and wide sizes, with the device open no bubble, no "would like a word" chip and no low-need pop
+#      is drawn over it; shut, the chip is on top
 # Setup and environment as for cadet_test.py.  Run:  python3 bubble_check.py BUILD.html
 import sys
 exec(open(__file__.replace('bubble_check.py', 'cadet_test.py')).read().split('import sys, json, hashlib\nimport numpy')[0].replace('device_scale_factor=1', 'device_scale_factor=3'))   # a phone's pixel density
@@ -71,8 +73,42 @@ def run(path):
         g.close()
     return errs
 
+# 5. (2026-10-22, the fresh-eyes playtest: someone's "would like a word" chip sat on top of the open device, over the Mail
+# being read) with the device open, neither a speech bubble nor the chip (#seek) is the top thing anywhere they overlap
+# it; closed, the chip is on top again. (The bubble layer has pointer-events none, so it's switched on to be found.)
+TOPS = r"""(() => { const dev = document.getElementById('device'), d = dev && !dev.hidden ? dev.getBoundingClientRect() : null, out = [];
+  if (bubbles.el) bubbles.el.style.pointerEvents = 'auto';
+  const els = [document.getElementById('seek'), document.getElementById('needPop'), ...bubbles.list.filter(b => b.el.style.display !== 'none').map(b => b.card)].filter(e => e && !e.hidden);
+  for (const e of els) { const r = e.getBoundingClientRect(); let x = r.left + r.width / 2, y = r.top + r.height / 2, over = false;
+    if (d) { const L = Math.max(r.left, d.left), R = Math.min(r.right, d.right), T = Math.max(r.top, d.top), B = Math.min(r.bottom, d.bottom); over = R > L + 2 && B > T + 2; if (over) { x = (L + R) / 2; y = (T + B) / 2; } }
+    const t = document.elementFromPoint(x, y); out.push({ id: e.id || 'bubble', over, top: !!(t && (t === e || e.contains(t))), dev: !!(t && dev && dev.contains(t)) }); }
+  if (bubbles.el) bubbles.el.style.pointerEvents = 'none'; return out; })()"""
+def cover(path):
+    errs = []
+    for w, h in [(390, 844), (900, 760)]:
+      with sync_playwright() as pw:
+        g = Game(pw, path, w=w, h=h)
+        g.ev("skipTo((2 - 1) * 1440 + 720)"); g.ev("goToDeck(3)"); g.step(5)
+        g.ev("player.obj.position.set(21.5 - OX, 0, 10.5 - OZ)"); g.step(40)
+        ok = g.ev("(() => { const P = player.obj.position, a = DECK_CREW.filter(a => a.h).sort((x, y) => Math.hypot(x.x - P.x, x.z - P.z) - Math.hypot(y.x - P.x, y.z - P.z))[0]; if (!a) return false;"
+                  " seekShow(a.p, 0, null, a); bubbleSay({ x: P.x, y: 0, z: P.z }, 'A line said low on the screen, under where the device opens.', 60); return true; })()")
+        if not ok: errs.append(f'5. {w} x {h}: nobody on the deck to ask for a word'); g.close(); continue
+        g.step(3); shut = g.ev(TOPS)
+        g.ev("deviceShow('mail')"); g.step(12); g.ev("needPop('hunger')"); g.step(2); open_ = g.ev(TOPS)   # the low-need pop too (RV5's find)
+        g.ev("deviceClose()"); g.step(12); again = g.ev(TOPS)
+        print(f'  5. {w} x {h}: device shut {shut}; open {open_}; shut again {again}')
+        chip = lambda L: next((x for x in L if x['id'] == 'seek'), None)
+        if not (chip(shut) and chip(shut)['top']): errs.append(f'5. {w} x {h}: the chip should be on top with the device shut: {shut}')
+        if not any(x['over'] for x in open_): errs.append(f'5. {w} x {h}: nothing overlapped the open device, so nothing was tested: {open_}')
+        bad = [x for x in open_ if x['over'] and x['top']]   # over the device and the top thing there
+        if bad: errs.append(f'5. {w} x {h}: drawn over the open device: {bad}')
+        if not (chip(again) and chip(again)['top']): errs.append(f'5. {w} x {h}: the chip should be back on top once the device is shut: {again}')
+        if g.errors: errs.append(f'5. {w} x {h}: page errors: ' + ' | '.join(g.errors[:3]))
+        g.close()
+    return errs
+
 if __name__ == '__main__':
     print('Speech bubbles at phone size, uneven frames, you walking and the camera turning')
-    e = run(sys.argv[1])
+    e = run(sys.argv[1]) + cover(sys.argv[1])
     for x in e: print('  FAIL', x)
     print('BUBBLE CHECK ' + ('FAILED' if e else 'OK')); sys.exit(1 if e else 0)
