@@ -26908,6 +26908,8 @@ const VOICE = JSON.parse([
   '{"text":"Kovac taught me to cast on. Dahl taught me to fix it. Nobody can teach me to stop.","id":"1dde28j","tone":"funny","tier":[3,4],"not":{"week1":"true"}}]',
   ',"mail.zeke.cabin":[',
   '{"text":"Everything I didn\'t say | Your device has the lot: Mail, Schedule, Calendar, the Map and your Needs. Breakfast\'s from seven till nine. Shift starts at nine in the Works bay; Calder\'s briefing is at ten to nine. Clean clothes live in your wardrobe: change each morning, and do your laundry on Deck 4 when they run out. Tea and biscuits at one. Ask me anything, any time.","id":"6dj9r3"}]',
+  ',"mail.zeke.land":[',
+  '{"text":"Before you land | New hand, I\'m writing this before the Tern docks, so by the time you read it I\'ll have handed you this in person and said most of it already. Here\'s the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it\'s just home with a lift in it. And if you\'re the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I\'ll be the one with the tea. Zeke","id":"x4idcz"}]',
   ',"missed":[',
   '{"text":"Missed you earlier. No harm done. The coils kept me company. Next time?","id":"1rjmonq"},',
   '{"text":"I waited a bit. Then I knitted a bit. Then I gave up. Are you all right?","id":"bd5wk5"},',
@@ -27172,7 +27174,22 @@ const VOICE = JSON.parse([
   '{"text":"Tap the beam where you want it. Next to mine, if you like.","id":"gveb6y","tone":"warm","flag":"trad.beam.3"},',
   '{"text":"There. You\'re part of the bay now. Properly.","id":"yx7heb","tone":"warm","flag":"trad.beam.4"},',
   '{"text":"Fridays we knock off at half three.","id":"w90aeb","flag":"walk.goodnight.friday.1"},',
-  '{"text":"Captain talks to all of us at four, then dinner.","id":"4yezt6","flag":"walk.goodnight.friday.2"}]',
+  '{"text":"Captain talks to all of us at four, then dinner.","id":"4yezt6","flag":"walk.goodnight.friday.2"},',
+  '{"text":"Oh, hold on. Nearly forgot the important bit.","id":"875z71","flag":"walk.hand"},',
+  '{"text":"Hands out. Careful, it\'s still warm from my pocket.","id":"r38qeo","tone":"funny","flag":"walk.hand"},',
+  '{"text":"And this is yours. Your device.","id":"1o330ig","flag":"walk.hand"},',
+  '{"text":"There. Officially handed over. I\'m a witness.","id":"lewsvh","tone":"funny","flag":"walk.hand"},',
+  '{"text":"Most important thing you\'ll own aboard.","id":"1uww8pu","flag":"walk.hand"},',
+  '{"text":"More than your boots. Slightly less than your mug.","id":"10cisze","tone":"funny","flag":"walk.hand"},',
+  '{"text":"Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.","id":"a6q0f5","flag":"walk.hand"},',
+  '{"text":"It knows where you\'re meant to be before you do.","id":"7803nn","flag":"walk.hand"},',
+  '{"text":"Annoying, but useful.","id":"vb7o6k","flag":"walk.hand"},',
+  '{"text":"Needs tells you you\'re hungry. Before your tummy does.","id":"ll8ou5","tone":"funny","flag":"walk.hand"},',
+  '{"text":"Lose it and you\'ll spend a week asking strangers what day it is.","id":"q50za5","tone":"funny","flag":"walk.hand"},',
+  '{"text":"There. Officially crew.","id":"1mwmfbf","tone":"warm","flag":"walk.hand"},',
+  '{"text":"I left you a note in there. Have a look.","id":"1t4airl","flag":"walk.hand"},',
+  '{"text":"Right, onward. The mess is on Deck 3.","id":"19moh55","flag":"walk.hand.after"},',
+  '{"text":"And Brennan doesn\'t hold plates for anyone.","id":"x5g8e2","flag":"walk.hand.after"}]',
   ',"work":[',
   '{"text":"Watch. Panel, scanner, and a little patience.","id":"vj83c4","flag":"train.m7.lead.hold"},',
   '{"text":"That one\'s at twenty. Sulking badly. There\'s our part.","id":"1otmtk7","flag":"train.m7.lead.hold"},',
@@ -42629,11 +42646,13 @@ function introDeviceGive() {
 // at once (the device is yours, the Mail sent). The question it used to ask is parked with introDevice.meet.
 // The words are the writers' (ZW1; the user picks): walk.hand.<n> before the Mail opens, in order, the device handed over on
 // line INTRO_HAND.give; walk.hand.after.<n> once you've closed it; mail.zeke.land ("Subject | body", {me} your name). Until
-// they're baked, the stand-ins below (DS1's version).
-const INTRO_HAND = { give: 1, lines: ['And this is yours. Your device.', 'Hands out. Careful, it\'s still warm from my pocket.',
-  'Most important thing you\'ll own aboard. More than your boots. Slightly less than your mug.', 'Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.',
-  'It knows where you\'re meant to be before you do. Annoying, but useful.', 'Lose it and you\'ll spend a week asking strangers what day it is.',
-  'There. Officially crew. I left you a note in there. Have a look.'], after: ['Right, onward. The mess is on Deck 3, and Brennan doesn\'t hold plates for anyone.'] };
+// they're baked, the stand-ins below (the same words).
+const INTRO_HAND = { give: 3, lines: ['Oh, hold on. Nearly forgot the important bit.', 'Hands out. Careful, it\'s still warm from my pocket.',
+  'And this is yours. Your device.', 'There. Officially handed over. I\'m a witness.', 'Most important thing you\'ll own aboard.',
+  'More than your boots. Slightly less than your mug.', 'Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.',
+  'It knows where you\'re meant to be before you do.', 'Annoying, but useful.', 'Needs tells you you\'re hungry. Before your tummy does.',
+  'Lose it and you\'ll spend a week asking strangers what day it is.', 'There. Officially crew.', 'I left you a note in there. Have a look.'],
+  after: ['Right, onward. The mess is on Deck 3.', 'And Brennan doesn\'t hold plates for anyone.'] };   // the user's mix (ZW1's plans/zeke-words.md), stand-ins for walk.hand / walk.hand.after
 const INTRO_HAND_MAIL = 'Before you land | New hand, I\'m writing this before the Tern docks, so by the time you read it I\'ll have handed you this in person and said most of it already. Here\'s the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it\'s just home with a lift in it. And if you\'re the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I\'ll be the one with the tea. Zeke';
 const INTRO_HAND_NEAR = 2.2;                               // m: he's come up to you
 const INTRO_HAND_READ = 45000;                             // real ms: reading his Mail with the device open that long, he goes on anyway
