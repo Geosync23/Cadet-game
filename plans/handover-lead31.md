@@ -30,7 +30,7 @@ Teaching arrows ON (Settings: Always / First times / Off); breakfast back; Zeke'
 - Day 0 table: keep as is (full ~1 h after the goodnight, thins by ~20:05); lead read "Yes" as keep: confirm if the user brings it up.
 - Zeke tour notes (washroom line only if you linger; slow player misses the arrival Sunday table; "Ship traditions tomorrow" Mail in the bunk room): no change for now.
 - Hygiene rule approved; late tweaks (booth arrow, hygiene, tiles, dev arrow) shipped.
-- **Open question to the user: switch Crossing the Line on in 0.92.1?** (FX6's check passed; see below). Not answered yet.
+- **Crossing the Line: the user said YES (13:25 UTC): ON in 0.92.1** (FX6 claude/line-on → RV9 → BM15).
 
 ## 0.92.1 (in progress; build master BM15 session_01EH5qkoYriK2Gsrp7hHRoso, staging claude/staging-0.92.1)
 - AC3 54169e4c: join notices never dropped (TQ_KEEP) + check test hook (LEAD31-3, LEAD31-2): **RV10 PASS, merged on staging (c6601dce)**; lead signed off section 18 on RV10's review.
