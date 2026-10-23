@@ -452,7 +452,8 @@ def beside_walk(g):
     if 'table' not in at or at['table'] > 18 * 60 + 45: fail(f"walking beside him, dinner's table only at {at.get('table')}")
 
 # part 17 (DS1, FE2 on 0.92.0: Calder's "Missed you at dinner" came while Zeke was still taking them to dinner): late on the
-# way (the clock on to 19:40 at the servery step), with him all the way past her step's 19:45: no Mail from her
+# way (the clock on to 19:32 at the servery step), with him all the way past her step's 19:45: no Mail from her (on 685af944 it
+# came at 19:45, the table and her steps missed)
 def late_dinner(g):
     print('17. Late to dinner, with him: Calder\'s "Missed you at dinner" Mail never comes while he\'s still taking you')
     g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
@@ -462,14 +463,14 @@ def late_dinner(g):
         r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
         if r['step'] == 'servery' and r['deck'] == 3: break
     if g.ev("SHIP.intro.step !== 'servery'"): fail('part 17: never reached the servery step'); return
-    g.ev('skipTo(introAbs(0, 19 * 60 + 40))'); g.step(10)
+    g.ev('skipTo(introAbs(0, 19 * 60 + 32))'); g.step(10)
     near = []
     for k in range(400):
         g.step(20)
         r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'beside'])
         near.append(g.ev("introWithEscort({ deck: deckDef.num, tile: player.here() })"))
-        if g.ev('shipNow() >= introAbs(0, 19 * 60 + 50)'): break
-    m = g.ev("(SHIP.mail || []).filter(x => x.from === 'I. Calder' && /Missed you at dinner/.test(x.body || '')).map(x => hhmm(x.at % 1440))")
+        if g.ev('shipNow() >= introAbs(0, 19 * 60 + 58)'): break
+    m = g.ev("(SHIP.mail || []).filter(x => x.from === 'I. Calder' && /Missed you at dinner/.test(x.body || '')).map(x => hhmm(((x.at % 1440) + 1440) % 1440))")
     st = g.ev("({ t: clockText(), step: SHIP.intro.step, chief: SHIP.intro.done.chief, missed: SHIP.intro.missed.slice() })")
     print(f"  with him {sum(near)}/{len(near)} frames to {st['t']}; step {st['step']}; missed {st['missed']}; Calder's Mail: {m}")
     if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
