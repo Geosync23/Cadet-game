@@ -369,6 +369,7 @@ class Follower:
 
 def real_game(pg, day):                               # the career set to the end of day-1, tracking as in a real game
     pg.ev(f"devmodeRun('Set career', () => devmodeSetCareerTo({day - 1}))"); pg.step(20)
+    if TEACHOFF: pg.ev("SHIP.device.settings.teach = 'off'")   # Settings' Teaching arrows: Off (the everyday arrows stay)
     if GUIDE: pg.ev("if (!GUIDE_ON) { GUIDE_ON = true; guideStart(); }")   # the arrow queue on (a build from 0.92.0 has it on already: no override) (its training arrows T1-T3; pieces D-F as they land)
     pg.ev(f"devmodeSkipTo({(day - 1) * 1440 + 5 * 60 + 50}); clearGoal(); SHIP.player.track = 'arrows-check-yesterday'; for (const k of NEED_KEYS) SHIP.player.needs[k] = Math.max(SHIP.player.needs[k], 85)"); pg.step(10)   # a normal evening before: washed, fed, rested
 
@@ -412,7 +413,8 @@ def part_week(ctx, path):
     pg.page.close()
 
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
-PARTS = set(a for a in sys.argv[2:] if a != 'guide') or {'queue', 'shift', 'week'}
+TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'shift', 'week'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)

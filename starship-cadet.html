@@ -16316,7 +16316,7 @@ SHIP.guide = (() => {
 SAVE_EXTRA.push(s => { if (!GUIDE_ON) return; const S = SHIP.guide.seen, ks = Object.keys(S); if (ks.length > 300) for (const k of ks.slice(0, ks.length - 300)) delete S[k]; s.guide = { seen: { ...S } }; });
 const guideMode = () => { if (GUIDE.mode) return GUIDE.mode; let m = 'first'; try { m = typeof teachMode === 'function' ? teachMode() : 'first'; } catch (e) { m = 'first'; } return ['all', 'first', 'off'].includes(m) ? m : 'first'; };   // section 19's Settings row (AC1's teachMode); GUIDE.mode: a test's override
 const guideLimit = e => e.once === true ? 1 : Number.isInteger(e.once) && e.once > 0 ? e.once : 0;   // 0: no limit
-const guideTeach = e => e.level === 3;
+const guideTeach = e => e.level === 3 && !e.everyday;   // `everyday`: a level-3 entry the old game always had (a lesson's watch arrow): kept under Off (lead 31, RV7)
 function guideOverSeen(e) { const L = guideLimit(e); return !!L && !(guideMode() === 'all' && guideTeach(e)) && (SHIP.guide.seen[e.id] || 0) >= L; }
 function guideAsk(e) {
   if (!GUIDE_ON || !e || typeof e.id !== 'string' || !e.id || e.id.length >= 60 || typeof e.goal !== 'function' || !(e.level >= 1 && e.level <= 6)) return false;
@@ -16366,7 +16366,7 @@ function guideGoal(jobGoal) {                            // goalNow's: the queue
   if (!GUIDE.counted.has(e.id)) {                        // shown for the first time while asked: count it, and its tip
     GUIDE.counted.add(e.id);
     if (guideLimit(e)) SHIP.guide.seen[e.id] = (SHIP.guide.seen[e.id] || 0) + 1;
-    if (e.tip && e.tip.id && e.tip.text && !(guideTeach(e) && guideMode() === 'off')) ixTip(e.tip.id, e.tip.text);
+    if (e.tip && e.tip.id && e.tip.text && !(e.level === 3 && guideMode() === 'off')) ixTip(e.tip.id, e.tip.text);
   }
   return { ...g, guide: e.id };
 }
@@ -16432,7 +16432,7 @@ function guideTrain() {
       done: () => guideStage(c.id, 'meet') });
   } else if (c.st === 'watch') {
     const j = (SHIP.jobs || []).find(x => x.id === c.j), s = j && typeof trainSpot === 'function' ? trainSpot(j) : null; if (!s) return;
-    guideAsk({ id: 'train:' + c.id + ':watch:' + c.d, level: 3, once: true, owner: '24 core (read)', until: now + 180,
+    guideAsk({ id: 'train:' + c.id + ':watch:' + c.d, level: 3, everyday: true, once: true, owner: '24 core (read)', until: now + 180,
       goal: () => ({ deck: s.deck, crew: c.by, at: s.tile, room: s.room, label: 'Stay close and watch ' + who }),
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
   } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
