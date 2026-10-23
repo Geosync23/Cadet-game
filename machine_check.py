@@ -1250,7 +1250,9 @@ with sync_playwright() as pw:
             if (mode === 'you' && t >= start && j()) j().youIn = true;   // at your spot from the start
             if (mode === 'you' && t >= start + 30 && j() && j().claimedBy === 'you' && !j().workDone) { jobStops(j()).forEach((x, k) => jobStepDone(id, k)); jobFinish(j(), shipNow(), 'you'); }
             if (mode === 'in' && t >= start && j() && !j().youIn) { j().youIn = true; teamYouOut(id); }
+            if (j() && j().status === 'done' && out.condDone === undefined) out.condDone = SHIP.machines['3-recycler-1'].cond;   // as it's done (the user's close to new, 0.92.2; a lead's finish lands inside machinesNow's hour, so up to an hour's wear after it)
           }
+          out.restore = typeof TEAM_RESTORE !== 'undefined' ? TEAM_RESTORE : 90;
           const J = j(); out.status = J && J.status; out.doneBy = J && J.doneBy; out.youOut = !!(J && J.youOut); out.long = J ? J.done - J.start : 0; out.cond = SHIP.machines['3-recycler-1'].cond;
           out.meters = J && J.meters ? J.meters.length : 0;
           // nobody in it on another job that overlaps it
@@ -1262,11 +1264,12 @@ with sync_playwright() as pw:
         tc = g.ev(TM + "('crew')"); tc2 = g.ev(TM + "('crew')"); ty = g.ev(TM + "('you')"); ti = g.ev(TM + "('in')"); tn = g.ev(TM + "('out')")
         for r in (tc, ty, ti, tn):
             print(f"Team job ({r['mode']}): {r['id']}, team {r['team']}, lead {r['lead']}, claimed by {r['claimed']}, your stops {r['stops']}; at their spots {r['atSpot']}, back after {r['after']}, kept in the save {r['saved']}; "
-                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f}, meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
+                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f} ({r.get('condDone')} as it was done, team repairs to {r.get('restore')}), meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
         print(f"  the same twice {tc['sig'] == tc2['sig']}")
         bad = []
         for r in (tc, ty, ti, tn):
-            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or r['cond'] < 90 or r['overlap']: bad.append(r['mode'])
+            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or (r.get('condDone') if r.get('condDone') is not None else r['cond']) < r.get('restore', 90) - 1 or r['overlap']: bad.append(r['mode'])
+            if r.get('restore', 90) < 98: bad.append('team repairs leave machines at ' + str(r.get('restore')) + ', not close to new (98 or more; the user, 2026-10-23)')
         if tc['claimed'] == 'you' or tc['doneBy'] != tc['lead'] or tc['meters'] or tc['long'] != 40: bad.append('crew only')
         if ty['claimed'] != 'you' or ty['doneBy'] != 'you' or not ty['meters'] or ty['youOut']: bad.append('with you')
         if ti['doneBy'] != ti['lead'] or not ti['meters'] or ti['long'] != 48: bad.append('you at your spot, the lead finishing')
