@@ -10805,12 +10805,17 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // Chief's talk are over, "that's the moment people should start trickling out ... slowly and naturally"). The day's plans
 // keep the table to the goodnight's latest minute (tradGood); once it has happened (SHIP.intro.done.free, saved), only its
 // diners' plans change: each gets up 2-50 minutes after it (key 534, one at a time) and goes back to their bunk till the
-// evening they had planned (or, with no time for the lift both ways, stands about near the mess). Nobody else's plan
-// changes, so nobody else moves (RV10: planning the whole day again re-seated people mid-workout). -> the minute used
+// evening they had planned (or, with no time for the lift both ways, stands about near the mess); with an hour or more
+// till then they stay on Deck 3 instead, in a lounge seat or on a bench nobody's plan has then, else about the deck (key 535; the user,
+// 2026-10-23, through lead 31). Nobody else's plan changes, so nobody else moves (RV10: planning the whole day again
+// re-seated people mid-workout). -> the minute used
 const day0Free = () => { const f = typeof introOn === 'function' && introOn() && SHIP.intro && SHIP.intro.done && SHIP.intro.done.free; return typeof f === 'number' ? f : null; };
 function day0Trickle(day, S) {
   const f = day0Free(), st = typeof introStepById === 'function' && introStepById('free'), B = -1440, C = SCHED_COMMUTE;
   if (f == null || !st || f - B < 0 || f - B >= st.at) return f;
+  const busy = new Map(), seats = (S.shared.get('3|lounge-seat') || []).concat(S.shared.get('3|bench') || []);   // who has each Deck 3 seat when, from everyone's plans
+  for (const [, segs] of day.plans) for (const s of segs) if (s.placeId) { if (!busy.has(s.placeId)) busy.set(s.placeId, []); busy.get(s.placeId).push([s.from, s.to]); }
+  const freeSeat = (p, a, b) => { const n = seats.length, k0 = Math.floor(schedU(p.seed, 0, 535) * n); for (let q = 0; q < n; q++) { const pl = seats[(k0 + q) % n]; if (!(busy.get(pl.id) || []).some(([x, y]) => x < b && a < y)) return pl; } return null; };
   for (const p of S.people) {
     const segs = day.plans.get(p.id), i = segs ? segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) : -1; if (i < 0) continue;
     let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
@@ -10819,7 +10824,10 @@ function day0Trickle(day, S) {
     let j = k; while (j > i && segs[j].from >= L) j--;
     segs.splice(j + 1, k - j); segs[j].to = L;
     const bed = S.byId.get(p.bed), bd = bed ? bed.deck : 0, fill = [];
+    const sit = !(bed && bd === 3) && end - L >= 60 && freeSeat(p, L, end);
     if (bed && bd === 3) fill.push({ from: L, to: end, act: 'off', deck: 3, type: 'bed', placeId: p.bed });
+    else if (sit) { const an = placeAnim(sit); fill.push({ from: L, to: end, act: 'leisure', deck: 3, type: sit.type, placeId: sit.id, ...(an ? { anim: an } : {}) }); busy.get(sit.id) ? busy.get(sit.id).push([L, end]) : busy.set(sit.id, [[L, end]]); }
+    else if (end - L >= 60) fill.push({ from: L, to: end, act: 'off', deck: 3, type: null, placeId: null });   // no seat free all that time: about the deck all the same
     else if (bed && end - L >= 2 * C + 15) fill.push({ from: L, to: L + C, act: 'commute', deck: bd, fromDeck: 3, type: 'lift', placeId: null },
       { from: L + C, to: end - C, act: 'off', deck: bd, type: 'bed', placeId: p.bed }, { from: end - C, to: end, act: 'commute', deck: 3, fromDeck: bd, type: 'lift', placeId: null });
     else fill.push({ from: L, to: end, act: 'off', deck: 3, type: null, placeId: null });

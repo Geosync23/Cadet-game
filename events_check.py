@@ -412,17 +412,20 @@ with sync_playwright() as pw:
         const others = [...day.plans].filter(([id, x]) => !diners.has(id) && base.get(id) !== JSON.stringify(x)).map(([id]) => id);   // RV10: nobody off the table may change
         for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
         const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
-        const ups = new Map(); let early = 0;
+        const ups = new Map(); let early = 0, bunk = 0;
         for (const [, segs] of day.plans) { const i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId); if (i < 0) continue;   // the tradition's diners: when they get up from its seat (kept on in the same seat)
           let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
-          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1); }
-        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, after10: at(B + fr + 10), after60: at(B + fr + 60) });
+          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1);
+          const nx = segs[k + 1], bd = segs[k + 2]; if (nx && nx.act === 'commute' && bd && bd.act === 'off' && bd.type === 'bed' && bd.to - bd.from >= 56) bunk++; }   // the user (lead 31): an hour or more, they stay on Deck 3
+        const dbl = []; { const o = new Map(); for (const [, x] of day.plans) for (const q of x) if (q.placeId && /^(lounge-seat|bench)$/.test(q.type || '')) { const L = o.get(q.placeId) || []; if (L.some(([a, b]) => a < q.to && q.from < b)) dbl.push(q.placeId); L.push([q.from, q.to]); o.set(q.placeId, L); } }
+        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, bunk, dbl, after10: at(B + fr + 10), after60: at(B + fr + 60) });
       }
       I.on = keep[0]; I.ended = keep[1]; if (keep[2] === undefined) delete I.done.free; else I.done.free = keep[2]; return out; })()""")
     print('Day 0 table from the live goodnight (free, seats, before, most, up before it, most up in a minute, others changed, 10 and 60 min after):', LV)
     for r in LV:
         if r['before'] < r['most'] or r['early'] or r['top'] > 4 or not (r['after10'] < r['before']) or r['after60'] > r['before'] // 5:
             fail(f"Day 0's table after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} doesn't trickle out from it (full till then, nobody up before, at most 4 a minute, nearly empty an hour later): {r}")
+        if r['bunk'] or r['dbl']: fail(f"after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d}, diners with an hour or more till their evening go back to their bunk ({r['bunk']}) or share a Deck 3 seat ({r['dbl'][:4]}); they should stay on Deck 3 in a free seat (the user, through lead 31)")
         if r['others']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed the plans of people not at the table (they'd move mid-activity): {r['others'][:6]}")
 
     # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
