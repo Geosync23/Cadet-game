@@ -11,6 +11,7 @@
 #   the player joining by being in the room (a little social, once); the tap line before it;
 #   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
 #   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
+#   meal traditions thin out: at most 6 diners get up in any one minute (Days 0-21), Day 0's table full till Zeke's goodnight;
 #   a ship-wide event on paper: the ion storm's skeleton from day 10, its phases in order, eventMod in each, the same twice.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 events_check.py BUILD.html [DAYS]     (DAYS defaults to 28, from Day 1, plus days 100 and 300)
@@ -375,6 +376,29 @@ with sync_playwright() as pw:
     same = g.ev(f"({SAME})(4)")
     print('Plans the same twice (day 4):', same)
     if not same: fail('day 4 planned differently the second time')
+
+    # 1a. meal traditions thin out (the user, 2026-10-23: "the room must not all empty at once"; SC1's dinner-spread, RV8's
+    # condition): on paper, Days 0-21, at most 6 diners get up from a meal tradition in any one minute (a diner's leaving is
+    # the end of their seat, kept on past the tradition's end in the same seat: Day 0's linger), and Day 0's Sunday table is
+    # still full 5 minutes before Zeke's goodnight to you (section 21's INTRO_STEPS 'free')
+    SP = g.ev(r"""(() => { const worst = [];
+      for (let d = 0; d <= 21; d++) { const day = shipDay(d), by = new Map();
+        for (const [id, segs] of day.plans) segs.forEach((s, i) => {
+          if (!(s.tag && /^ev-/.test(s.tag) && s.placeId && /dinner|breakfast|supper|lunch|meal|eat|sit/i.test(String(s.act)))) return;
+          let k = i; while (segs[k + 1] && segs[k + 1].placeId === s.placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+          if (!by.has(s.tag)) by.set(s.tag, new Map()); const L = by.get(s.tag); if (!L.has(id)) L.set(id, Math.round(segs[k].to)); });
+        for (const [tag, L] of by) { const c = new Map(); for (const m of L.values()) c.set(m, (c.get(m) || 0) + 1);
+          let w = 0, wm = 0; for (const [m, n] of c) if (n > w) { w = n; wm = m; } worst.push([d, tag, L.size, w, ((wm % 1440) + 1440) % 1440]); } }
+      const f = typeof introStepById === 'function' && introStepById('free'), day = shipDay(0), B = -1440, pl = new Set();
+      for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
+      const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
+      let most = 0; if (f) for (let m = B + 17 * 60; m < B + f.at; m += 5) most = Math.max(most, at(m));
+      return { worst: worst.sort((a, b) => b[3] - a[3]), day0: f ? { seats: pl.size, free: f.at, most, before: at(B + f.at - 5) } : null }; })()""")
+    print('Meal traditions, most getting up in one minute (day, tag, diners, most, at):', SP['worst'][:3], '| Day 0 table:', SP['day0'])
+    for w in SP['worst']:
+        if w[3] > 6: fail(f"Day {w[0]} {w[1]}: {w[3]} of {w[2]} diners get up in the same minute ({w[4] // 60:02d}:{w[4] % 60:02d}); at most 6 (the room must not empty at once)")
+    D0 = SP['day0']
+    if not D0 or not D0['most'] or D0['before'] < D0['most']: fail(f"Day 0's Sunday table not full 5 minutes before Zeke's goodnight: {D0}")
 
     # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
     # arrival) to day 364; the four seasons; the baked traditions (content/traditions, the TRADITIONS block) loaded
