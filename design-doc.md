@@ -662,7 +662,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - Sunday 28: one dinner.
   - Monday 29: the farewell.
 
-Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. Pillar 5 steps 5-6 come later and fit around these days.
+Build order: the ion storm first, then Crossing the Line, the comet and the visit. Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
 
 **The events base's three answers (the user, 2026-10-21, each the recommended option; `plans/events-base-brief.md`):**
 - **A save already past an event's day** when the events are switched on: that event is **skipped**, never run late. Dev mode can still start it. The skip is decided once, the first time a save loads with events on, and kept with the save.
