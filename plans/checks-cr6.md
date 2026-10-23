@@ -1,5 +1,23 @@
 # CR6 check results
 
+## 0.92.1 full round (2026-10-23): OK (mech after FX6's test-only m8 fix)
+
+- **Build:** `claude/integration-next` 51a1bb34 (0.92.1, Crossing the Line ON), `starship-cadet.html` sha256
+  `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c` (matches BM15's; unchanged at 54efee21).
+- **OLD:** 0.92.0 685af944 (f2329b62...1ebd).
+- Share: check_fast, mech, bigevents, fridays, disc, tiles (alone), join (alone). Handed over before they started:
+  controller_check (all but reach) to CR3; food 1 7, food 11 4, clothes to CR4 (all OK: 56 s, 69 s, 89 s).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 274 s) | `QUICK CHECK OK in 274 s`; machine repair share `machine jobs 39, repairs 19 (49%)` |
+| mech_check | first run FAIL (exit 1, 604 s) -> **OK** on 54efee21's check (exit 0, 601 s) | first: `FAIL m8: a crew-only team job runs and puts the machines right` (OLD passes m8; BM15: the Line makes m8's team job the washers, two end at 88.6/89.3). Re-run with 54efee21's mech_check.py (sha f4a11f79), alone: `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 164 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 1208 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 91 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 118 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 148 s, alone) | `JOIN CHECK OK` |
+
 ## 0.92.0 re-run on FX5's Day 0 table fix (2026-10-23): OK
 
 - **Build:** `claude/integration-next` 4e324417, `starship-cadet.html` sha256
