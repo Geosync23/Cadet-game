@@ -1469,7 +1469,7 @@ with sync_playwright() as pw:
     walked = ev('!bagHeld()')
     kb2 = json.loads(ev("""(() => {
       const P = SHIP.player, b = document.getElementById('devBtn'), out = [P.locker.slice()];
-      P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // the bunk step done: (DS1, the user 2026-10-23) it stays in your hands till you put it away
+      P.carry = ['kitbag']; P.locker = []; SHIP.intro.missed = []; bagTick();   // (DS1, the user 2026-10-23: nobody stows it on the arrival evening) here it's Monday, the evening over: it's in your wardrobe (you put it away before bed)
       __devSet(); floatsTick(); b.click();
       out.push([bagHeld(), P.locker.slice(), deviceLocked(), b.querySelector('span').textContent, typeof DEV === 'undefined' || !!DEV.open]);
       if (typeof deviceClose === 'function') deviceClose();
@@ -1499,7 +1499,7 @@ with sync_playwright() as pw:
     check(kb[2] == ['kitbag'], f'main storage takes back parts, never the kit bag: {kb[2]}')
     check(kb[3] == [True, []], f'a missed bunk step leaves the bag in your hands: {kb[3]}')
     check(kb[4] == [True, 'stowed', False, True] and walked and kb2[0] == ['kitbag'], f'a tap anywhere in Bunk 1 (or at your wardrobe) walks you to your wardrobe and stows the bag (the Zeke patch, after 0.64.15): {kb[4]} {walked} {kb2[0]}')
-    check(kb2[1] == [True, [], False, 'Device', True], f'the bunk step done: the bag still in your hands (nobody stows it for you), the device opens: {kb2[1]}')
+    check(kb2[1] == [False, ['kitbag'], False, 'Device', True], f'Monday, the evening over: the bag in your wardrobe, the device opens: {kb2[1]}')
     check(kb2[2] == [False, 1, 'Fit those first'], f'the intro off: the bag goes to the locker once: {kb2[2]}')
     ev("localStorage.removeItem(SAVE_KEY)")
     b.close()

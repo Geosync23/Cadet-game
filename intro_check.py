@@ -415,7 +415,8 @@ def firsts(g):
     G = "(typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null)"
     g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
     g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
-    g.ev("skipTo(introAbs(0, INTRO_START.min + 70))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); if (typeof bagHeld === 'function' && bagHeld()) bagStow(true); })()"); g.step(5)   # (DS1: nobody stows your bag for you; a player who skipped here would have)
+    g.ev("skipTo(introAbs(0, INTRO_START.min + 70))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
+    g.ev("if (typeof bagHeld === 'function' && bagHeld()) bagStow(true)"); g.step(2)   # (DS1: nobody stows your bag for you; a player who skipped here would have; after a frame, past the ramp step that hands it over)
     g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
     eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
     g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
@@ -804,6 +805,9 @@ with sync_playwright() as pw:
         print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
     else:
         stale = g.ev("({ calder: INTRO_UI.calder, tour: INTRO_UI.tour.length })")   # after part 8's evening
+        for i in range(120):   # (DS1) a lift ride left from part 11's follower (on its way to the mess) lands first
+            if not g.ev("typeof ride !== 'undefined' && !!ride"): break
+            g.step(10)
         g.ev('localStorage.clear()'); g.ev('if (typeof DEV !== "undefined" && DEV.open) deviceClose(); newGameStart(true)'); g.step(5)
         fresh = g.ev("({ calder: !!INTRO_UI.calder, tour: INTRO_UI.tour.length, step: INTRO_UI.step === undefined, meet: INTRO_UI.meet.length })")
         print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
