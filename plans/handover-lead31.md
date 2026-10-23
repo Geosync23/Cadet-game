@@ -64,6 +64,7 @@ CP5 session_01Un47TDkZfRL6cvcLwE3Zcy (claude/controller-follow2 from 685af944): 
 - LEAD31-10 taps on empty seats in a crowd open passers-by cards (findings 71).
 - LEAD31-11 reserve a scannable faulty job after the Day 5 scanner lesson so the first use and Making it safe always land on time (user to decide; AC3).
 - FE2 finished (top 10 in plans/fresh-eyes-2-diary.md on claude/fresh-eyes-2 5f6a4c9). FE3 for Days 3-8 once 0.92.2 is out (starts from Day 0; sample).
+- LEAD31-12 eating sometimes does not start after sitting with a tray (findings 73; FX7 could not reproduce).
 - FE2 batch 1 smaller items: "You wake in Bunk 1" card behind the manifest (FE1 item 7 again); single floor taps beyond the shuttle-bay rail don't move you (press-and-hold does).
 
 ## Gotchas learned this session
