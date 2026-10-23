@@ -581,8 +581,17 @@ def pad_to_key(r, key, tries=40):
 PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
     fails = []; pad_moves.nameless = set()
+    # (CTT3) CTL_PADDONE=file: each screen's result kept there as it's done, and screens already in it not walked again
+    # (a long run that a restart stopped picks up where it was; the pad half is ~5 min a screen)
+    pdf = os.environ.get('CTL_PADDONE'); done = {}
+    if pdf and os.path.exists(pdf):
+        for ln in open(pdf): d = json.loads(ln); done[d['where']] = d['fails']
     for st in states.values():
         if not st['dialogs'] or any(k.startswith('@deck:') for k in st['path']): continue
+        where = ' > '.join(st['path'])
+        if where in done:
+            print(f'  {where}: done before (read back): ' + ('; '.join(done[where]) or 'all reached')); fails += done[where]; continue
+        n0 = len(fails)
         sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
         okp = all(sw.press(sw.scan(), k) for k in st['path'])
         where = ' > '.join(st['path'])
