@@ -435,9 +435,21 @@ def firsts(g):
     else:
         g.ev("devChosen(0)"); g.step(20); tr = g.ev(G)
         g.ev("(() => { player.obj.position.copy(cellPos(37, 19)); })()"); g.step(20)
-        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined })")
-        print(f"  Track it: arrow '{tr}'; in the booths: arrow {end['g']}, done {end['end']}")
-        if not tr or 'booth' not in tr.lower() or end['g'] or not end['end']: fail(f'the call-home arrow went wrong: {tr}, {end}')
+        mid = g.ev("({ g: " + G + ", place: IX_GOAL && IX_GOAL.place, end: SHIP.intro.done['call:end'] !== undefined })")
+        moved = g.ev("(() => { const was = INTRO_ARROWS.call.place, x = { goalId: was }; DECK_CREW.push(x); introCallTick(Math.floor(shipNow())); const now = INTRO_ARROWS.call.place; DECK_CREW.splice(DECK_CREW.indexOf(x), 1); INTRO_ARROWS.call.place = was; return [was, now]; })()")
+        if moved[0] == moved[1]: fail(f"someone took the booth the call arrow was on, and it stayed there (FX5): {moved}")
+        # FX5 (the user, 2026-10-23): in the room it still points at a booth, a free one, until the call begins (it went on walking
+        # in); once the call's begun the call arrow is gone (the bunk arrow may come back)
+        g.ev("(() => { const it = ITEMS.find(i => i.t === 'Booth ' + ((IX_GOAL && IX_GOAL.place) || '1').slice(-1)); it.hit.getWorldPosition(_wp); playerTap(it, _wp.clone(), _wp.clone()); })()")
+        for i in range(40):
+            g.step(10)
+            if g.ev("!!ACT && ACT.kind === 'call' && ACT.phase !== 'walk'"): break
+        g.step(20)
+        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined, act: ACT && ACT.kind })")
+        g.ev("actEnd(true)")
+        print(f"  Track it: arrow '{tr}'; in the booths: arrow {mid['g']} on {mid['place']}, done {mid['end']}; the call begun ({end['act']}): arrow {end['g']}, done {end['end']}")
+        if not tr or 'booth' not in tr.lower() or end['g'] == tr or not end['end'] or end['act'] != 'call': fail(f'the call-home arrow went wrong: {tr}, {end}')
+        if mid['g'] != tr or not (mid['place'] or '').startswith('3-callhome-') or mid['end'] or g.ev(f"!!heldBy('{mid['place']}')"): fail(f"in the booths' room the arrow went before the call began, or isn't on a free booth (FX5): {mid}")
     g.ev("(() => { const b = INTRO_WEEK.find(x => x.id === 'd1-briefing'); SHIP.intro.done['d1-briefing:met'] = introAbs(1, b.at); skipTo(introAbs(1, b.until + 6)); goToDeck(5); player.obj.position.copy(cellPos(15, 3)); clearGoal(); })()"); g.step(20)
     c1 = g.ev(G); g.ev('careerClock()'); g.step(20); c2 = g.ev(G)
     took = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1) || SHIP.jobs.find(x => !x.by); return !!j && claimJob(j.id); })()"); g.step(20); c3 = g.ev(G)
