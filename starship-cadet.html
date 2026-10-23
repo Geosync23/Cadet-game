@@ -16510,16 +16510,18 @@ function guideTrained(id) { return !!(SHIP.works && SHIP.works.tr && SHIP.works.
 function guideStage(id, st) { const c = SHIP.works && SHIP.works.cur; return !c || c.id !== id || c.st !== st; }
 // pop-ups: section 11's toast(t, x, o) asks guideToast first. While one has been up under TQ_MIN (real) ms, a new one
 // waits (at most TQ_MAX; the oldest waiting drops first, never the one on screen); the same words aren't queued twice;
-// o.now shows at once. Each waiting one is shown in turn from the frame loop below.
+// o.now shows at once. Each waiting one is shown in turn from the frame loop below. o.keep (a tradition's join notice,
+// LEAD31-3) is a keeper too, as TQ_KEEP's words are. window.cadetPopupsNow (LEAD31-2): a test hook a check harness sets
+// so every pop-up shows at once; nothing in the game sets it, so play is unchanged.
 const TQ_MIN = 2500, TQ_MAX = 3, TQ_KEEP = /^(Trained: |Works reputation)/;   // a training's or your reputation's word is never dropped
 function guideToast(t, x, o) {
-  if (!GUIDE_ON || GUIDE.pass || o && o.now) return false;
+  if (!GUIDE_ON || GUIDE.pass || o && o.now || window.cadetPopupsNow) return false;
   const shown = (document.getElementById('tt').textContent || '') + '|' + (document.getElementById('tx').textContent || '');
   if (performance.now() - TOAST_AT >= TQ_MIN && !GUIDE.tq.length) return false;   // nothing fresh on screen: show it now
   if (shown === t + '|' + x && !GUIDE.tq.length) return false;   // the one on screen again: shown again (its time starts over), as before (RV2)
   if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
-  GUIDE.tq.push([t, x]);
-  if (GUIDE.tq.length > TQ_MAX) { const i = GUIDE.tq.findIndex(q => !TQ_KEEP.test(String(q[1]))); if (i >= 0) GUIDE.tq.splice(i, 1); }   // the oldest that isn't a keeper goes (lead 29, RV7: "Trained: rounds" was dropped when six came at once)
+  GUIDE.tq.push([t, x, !!(o && o.keep)]);
+  if (GUIDE.tq.length > TQ_MAX) { const i = GUIDE.tq.findIndex(q => !q[2] && !TQ_KEEP.test(String(q[1]))); if (i >= 0) GUIDE.tq.splice(i, 1); }   // the oldest that isn't a keeper goes (lead 29, RV7: "Trained: rounds" was dropped when six came at once)
   guideStart(); return true;
 }
 function guideTick() {
@@ -37463,7 +37465,7 @@ function eventJoin(e, d, now, notice) {
   const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
   if (typeof leisureAdd === 'function') leisureAdd(15, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan)
-  toast(e.name, notice || evText(e.ev.thanks, e));
+  toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
@@ -37651,7 +37653,7 @@ function tradJoin(e, a) {
   const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: (d - 1) * 1440 + e.to, tj: e.id + '@' + d };
   if (!sp) {                                             // every spot taken (a full music room): you stand beside the leader and join in there
     const w = nearestOpen(near.x + .9, near.z + .9, player), c = w && cellPos(...w);
-    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.'); return true; }
+    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
     actStart('tj:' + e.id, null, { ...o, pose: tradPose(s, {}, { pose: 'stand' }), company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(near.x - c.x, near.z - c.z), pose: 'stand' } });
     return true;
   }
