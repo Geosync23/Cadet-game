@@ -10382,7 +10382,7 @@ function schedBuild(p, d, occ, S) {
   const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };
   const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger, never past its end (a seated sitting's seats are the next sitting's): who'd run over leaves in its last 12 minutes
     const g = tradGood(e), end = e.at + e.dur, own = e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), to = own < end - 12 ? own : end - Math.round(12 * U(533));
-    return g != null ? g + 2 + Math.round(48 * U(532)) : to;   // Day 0: from the goodnight, one at a time over about 50 minutes, whoever finished first (FX5: their own times all fell in the tradition's last quarter hour)
+    return g != null ? (DAY0_LEAVE.has(p.id) ? DAY0_LEAVE.get(p.id) - B : g + 2 + Math.round(48 * U(532))) : to;   // (day0Trickle's re-plan: up at the minute they really stand)   // Day 0: from the goodnight, one at a time over about 50 minutes, whoever finished first (FX5: their own times all fell in the tradition's last quarter hour)
   };
   const tradStay = e => Math.max(e.min || 15, tradLeave(e) - t - 3);
   const tradMeal = (e, end) => {
@@ -10396,6 +10396,7 @@ function schedBuild(p, d, occ, S) {
     if (!take(e.act, e.where, tradStay(e), { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
       && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
       seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    if (DAY0_LEAVE.has(p.id) && tradGood(e) != null) { const l = segs[segs.length - 1], up = DAY0_LEAVE.get(p.id) - B; if (l && l.tag === e.tag && l.placeId && l.from < up) { l.to = up; l.kept = 1; t = up; } }   // day0Trickle's re-plan (FX8): up from the table at the minute they really stand (kept: no walk after it starts out of it), and their evening planned from there
     { const l = segs[segs.length - 1], cut = e.at + e.dur;   // Day 0's table, kept past its end for Zeke's goodnight: after the tradition ends they're ordinary diners lingering in the same seat
       if (l && l.tag === e.tag && l.from < cut && l.to > cut) { const x = { ...l, from: cut, kept: 1 }; delete x.tag; l.to = cut; segs.push(x); } }   // kept: a walk after it never starts out of it (FX5: a toilet's walk lead got three up before the goodnight)
     e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
@@ -10795,7 +10796,7 @@ function shipDay(d) {
     for (const s of plan) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < Math.min(1440, s.to - (d - 1) * 1440); m++) (s.deck === 3 ? occ.heads : occ.rec)[m]++;
   }
   const day = { d, plans, occ };
-  if (d === 0) day.free = day0Trickle(day, S);
+  if (d === 0) day.free = day0Trickle(day, S, leave);
   SHIP_DAYS.set(d, day);
   for (const k of SHIP_DAYS.keys()) if (k < d - 9 || k > d + 2) SHIP_DAYS.delete(k);   // needs look back a week
   return day;
@@ -10804,26 +10805,38 @@ function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; 
 // Day 0's Sunday table from Zeke's goodnight as it really happens (FX5; the user, 2026-10-23: once his explanation and the
 // Chief's talk are over, "that's the moment people should start trickling out ... slowly and naturally"). The day's plans
 // keep the table to the goodnight's latest minute (tradGood); once it has happened (SHIP.intro.done.free, saved), only its
-// diners' plans change: each gets up 2-50 minutes after it (key 534, one at a time) and goes back to their bunk till the
-// evening they had planned (or, with no time for the lift both ways, stands about near the mess). Nobody else's plan
-// changes, so nobody else moves (RV10: planning the whole day again re-seated people mid-workout). -> the minute used
+// diners' plans change: each gets up 2-50 minutes after it (key 534, one at a time) and from that minute has their own
+// evening (FX8; the user, 2026-10-23: "return to full simulation ... let them do what they will do"): the planner runs
+// again for them alone, up from the table at that minute (DAY0_LEAVE, read by tradLeave), everyone else's bookings as
+// they are; their plan is kept up to it and the new one's steps follow. Nobody else's plan changes, so nobody else
+// moves (RV10: planning the whole day again re-seated people mid-workout). -> the minute used
+const DAY0_LEAVE = new Map();                            // person -> the ship minute they get up from Day 0's table (only while day0Trickle re-plans them)
 const day0Free = () => { const f = typeof introOn === 'function' && introOn() && SHIP.intro && SHIP.intro.done && SHIP.intro.done.free; return typeof f === 'number' ? f : null; };
-function day0Trickle(day, S) {
-  const f = day0Free(), st = typeof introStepById === 'function' && introStepById('free'), B = -1440, C = SCHED_COMMUTE;
+function day0Trickle(day, S, leave) {
+  const f = day0Free(), st = typeof introStepById === 'function' && introStepById('free'), B = -1440, occ = day.occ;
   if (f == null || !st || f - B < 0 || f - B >= st.at) return f;
+  const run = segs => { let i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId), k = i; if (i >= 0) while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++; return [i, k]; };
+  const heads = (segs, n) => { for (const s of segs) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - B); m < Math.min(1440, s.to - B); m++) (s.deck === 3 ? occ.heads : occ.rec)[m] += n; };
+  const unbook = (who, list) => { for (const [x, y, id] of list) { const rs = occ.get(id) || [], q = rs.findIndex(r => r[0] === x && r[1] === y && r[2] === who); if (q >= 0) rs.splice(q, 1); } };
   for (const p of S.people) {
-    const segs = day.plans.get(p.id), i = segs ? segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) : -1; if (i < 0) continue;
-    let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+    const segs = day.plans.get(p.id), [i, k] = segs ? run(segs) : [-1, -1]; if (i < 0) continue;
     const end = segs[k].to, L = f + 2 + Math.round(48 * schedU(p.seed, 0, 534));
     if (L >= end - 5 || L <= segs[i].from + 10) continue;   // leaving about then anyway, or only just sat down
-    let j = k; while (j > i && segs[j].from >= L) j--;
-    segs.splice(j + 1, k - j); segs[j].to = L;
-    const bed = S.byId.get(p.bed), bd = bed ? bed.deck : 0, fill = [];
-    if (bed && bd === 3) fill.push({ from: L, to: end, act: 'off', deck: 3, type: 'bed', placeId: p.bed });
-    else if (bed && end - L >= 2 * C + 15) fill.push({ from: L, to: L + C, act: 'commute', deck: bd, fromDeck: 3, type: 'lift', placeId: null },
-      { from: L + C, to: end - C, act: 'off', deck: bd, type: 'bed', placeId: p.bed }, { from: end - C, to: end, act: 'commute', deck: 3, fromDeck: bd, type: 'lift', placeId: null });
-    else fill.push({ from: L, to: end, act: 'off', deck: 3, type: null, placeId: null });
-    segs.splice(j + 1, 0, ...fill);
+    // their bookings and heads out of the day, then their day planned again with everyone else's as they are
+    const was = (occ.who.get(p.id) || []).slice(); unbook(p.id, was); occ.who.set(p.id, []); heads(segs, -1);
+    DAY0_LEAVE.set(p.id, L); let nw;
+    try { nw = introLay(p, 0, occ, guestTrim(p, 0, schedBuild(p, 0, occ, S), leave && leave.get(p.id))); } finally { DAY0_LEAVE.delete(p.id); }
+    const [i2, k2] = run(nw), got = occ.who.get(p.id) || []; unbook(p.id, got);
+    if (i2 < 0 || Math.abs(nw[k2].to - L) > 2) {           // not up from the table then in the new plan (no seat at it this time): their planned day stays as it was
+      occ.who.set(p.id, was); for (const [x, y, id] of was) (occ.get(id) || occ.set(id, []).get(id)).push([x, y, p.id]); heads(segs, 1); continue;
+    }
+    // kept: the plan up to when the new one gets up (U: L, or a minute or two before when the wait for the lift comes out
+    // of the seat), the table run cut there, then the new plan's steps from the table on, and the bookings that go with them
+    const U = nw[k2].to; let j = k; while (j > i && segs[j].from >= U) j--;
+    segs.splice(j + 1); segs[j].to = U; segs.push(...nw.slice(k2 + 1));
+    const keep = was.filter(([x]) => x < U).map(([x, y, id]) => [x, Math.min(y, U), id]).concat(got.filter(([x]) => x >= U - .5));
+    occ.who.set(p.id, keep); for (const [x, y, id] of keep) (occ.get(id) || occ.set(id, []).get(id)).push([x, y, p.id]);
+    heads(segs, 1);
   }
   return f;
 }

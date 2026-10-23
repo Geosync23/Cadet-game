@@ -412,11 +412,19 @@ with sync_playwright() as pw:
         const others = [...day.plans].filter(([id, x]) => !diners.has(id) && base.get(id) !== JSON.stringify(x)).map(([id]) => id);   // RV10: nobody off the table may change
         for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
         const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
-        const ups = new Map(); let early = 0;
+        const ups = new Map(), filler = [], pre = []; let early = 0;
         for (const [, segs] of day.plans) { const i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId); if (i < 0) continue;   // the tradition's diners: when they get up from its seat (kept on in the same seat)
           let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
-          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1); }
-        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, after10: at(B + fr + 10), after60: at(B + fr + 60) });
+          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1);
+          // FX8 (the user, 2026-10-23: "let them do what they will do"): once up, their own planned evening, no made-up wait
+          // (0.92.1's bunk trip or standing about until their old time: the first step after the lift is 'off' at their bed
+          // or nowhere); and nothing of theirs changes before the goodnight
+          let n = k + 1; while (segs[n] && (segs[n].act === 'commute' || segs[n].type === 'lift-wait')) n++;
+          const nx = segs[n], me = [...day.plans].find(([, x]) => x === segs)[0], bed = (schedData().people.find(q => q.id === me) || {}).bed;
+          if (nx && m > fr && nx.act === 'off' && (!nx.placeId || nx.placeId === bed)) filler.push(me + ' ' + nx.type + ' ' + Math.round(nx.from - B));
+          const cut = x => JSON.stringify(x.filter(q => q.from < B + fr).map(q => ({ ...q, to: Math.min(q.to, B + fr) })));
+          if (cut(segs) !== cut(JSON.parse(base.get(me)))) pre.push(me); }
+        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, after10: at(B + fr + 10), after60: at(B + fr + 60), filler, pre, span: [Math.min(...ups.keys()) - fr, Math.max(...ups.keys()) - fr] });
       }
       I.on = keep[0]; I.ended = keep[1]; if (keep[2] === undefined) delete I.done.free; else I.done.free = keep[2]; return out; })()""")
     print('Day 0 table from the live goodnight (free, seats, before, most, up before it, most up in a minute, others changed, 10 and 60 min after):', LV)
@@ -424,6 +432,8 @@ with sync_playwright() as pw:
         if r['before'] < r['most'] or r['early'] or r['top'] > 4 or not (r['after10'] < r['before']) or r['after60'] > r['before'] // 5:
             fail(f"Day 0's table after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} doesn't trickle out from it (full till then, nobody up before, at most 4 a minute, nearly empty an hour later): {r}")
         if r['others']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed the plans of people not at the table (they'd move mid-activity): {r['others'][:6]}")
+        if r['filler']: fail(f"after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d}, diners up from the table wait about instead of their own evening (bunk or standing till their old time): {r['filler'][:6]}")
+        if r['pre']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed diners' plans before it: {r['pre'][:6]}")
 
     # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
     # arrival) to day 364; the four seasons; the baked traditions (content/traditions, the TRADITIONS block) loaded
