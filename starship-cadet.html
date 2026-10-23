@@ -10377,13 +10377,9 @@ function schedBuild(p, d, occ, S) {
   // how long a diner keeps their seat at a meal tradition (the user, 2026-10-23: "the room must not all empty at once"):
   // their own meal and a linger, 35-75 minutes from sitting down, not to the tradition's end, so the table thins a few
   // at a time (at most 20 minutes past its end). Day 0's Sunday table stays seated through Zeke's goodnight to you
-  // (section 21's INTRO_STEPS 'free'), then trickles out over the next 50 minutes. The goodnight's minute is the live one
-  // once it has happened (SHIP.intro.done.free, saved; section 21's introSig plans the day again when it comes: the
-  // user, 2026-10-23, "that's the moment people should start trickling out"), else the step's latest (19:45)
-  const tradGood = e => {
-    const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); if (!(g && g.day === 0 && isFinite(g.at))) return null;
-    const f = typeof introOn === 'function' && introOn() && SHIP.intro.done.free; return typeof f === 'number' && f - B >= 0 && f - B < g.at ? f - B : g.at;
-  };
+  // (section 21's INTRO_STEPS 'free', its latest minute: a plan never reads what happens live), then trickles out over
+  // the next 50 minutes. When the goodnight really comes earlier, day0Trickle (below shipDay) has the diners get up from then
+  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };
   const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger, never past its end (a seated sitting's seats are the next sitting's): who'd run over leaves in its last 12 minutes
     const g = tradGood(e), end = e.at + e.dur, own = e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), to = own < end - 12 ? own : end - Math.round(12 * U(533));
     return g != null ? g + 2 + Math.round(48 * U(532)) : to;   // Day 0: from the goodnight, one at a time over about 50 minutes, whoever finished first (FX5: their own times all fell in the tradition's last quarter hour)
@@ -10707,7 +10703,7 @@ function jobVisits() {
 const SHIP_DAYS = new Map();
 function shipDay(d) {
   if (evChanged()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
-  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt))) return was;   // planned before its rec hour was settled: plan again (RC, 0.64.1)
+  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt)) && !(d === 0 && was.free !== day0Free())) return was;   // (Day 0: Zeke's goodnight came: day0Trickle)   // planned before its rec hour was settled: plan again (RC, 0.64.1)
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
@@ -10799,11 +10795,38 @@ function shipDay(d) {
     for (const s of plan) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < Math.min(1440, s.to - (d - 1) * 1440); m++) (s.deck === 3 ? occ.heads : occ.rec)[m]++;
   }
   const day = { d, plans, occ };
+  if (d === 0) day.free = day0Trickle(day, S);
   SHIP_DAYS.set(d, day);
   for (const k of SHIP_DAYS.keys()) if (k < d - 9 || k > d + 2) SHIP_DAYS.delete(k);   // needs look back a week
   return day;
 }
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
+// Day 0's Sunday table from Zeke's goodnight as it really happens (FX5; the user, 2026-10-23: once his explanation and the
+// Chief's talk are over, "that's the moment people should start trickling out ... slowly and naturally"). The day's plans
+// keep the table to the goodnight's latest minute (tradGood); once it has happened (SHIP.intro.done.free, saved), only its
+// diners' plans change: each gets up 2-50 minutes after it (key 534, one at a time) and goes back to their bunk till the
+// evening they had planned (or, with no time for the lift both ways, stands about near the mess). Nobody else's plan
+// changes, so nobody else moves (RV10: planning the whole day again re-seated people mid-workout). -> the minute used
+const day0Free = () => { const f = typeof introOn === 'function' && introOn() && SHIP.intro && SHIP.intro.done && SHIP.intro.done.free; return typeof f === 'number' ? f : null; };
+function day0Trickle(day, S) {
+  const f = day0Free(), st = typeof introStepById === 'function' && introStepById('free'), B = -1440, C = SCHED_COMMUTE;
+  if (f == null || !st || f - B < 0 || f - B >= st.at) return f;
+  for (const p of S.people) {
+    const segs = day.plans.get(p.id), i = segs ? segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) : -1; if (i < 0) continue;
+    let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+    const end = segs[k].to, L = f + 2 + Math.round(48 * schedU(p.seed, 0, 534));
+    if (L >= end - 5 || L <= segs[i].from + 10) continue;   // leaving about then anyway, or only just sat down
+    let j = k; while (j > i && segs[j].from >= L) j--;
+    segs.splice(j + 1, k - j); segs[j].to = L;
+    const bed = S.byId.get(p.bed), bd = bed ? bed.deck : 0, fill = [];
+    if (bed && bd === 3) fill.push({ from: L, to: end, act: 'off', deck: 3, type: 'bed', placeId: p.bed });
+    else if (bed && end - L >= 2 * C + 15) fill.push({ from: L, to: L + C, act: 'commute', deck: bd, fromDeck: 3, type: 'lift', placeId: null },
+      { from: L + C, to: end - C, act: 'off', deck: bd, type: 'bed', placeId: p.bed }, { from: end - C, to: end, act: 'commute', deck: 3, fromDeck: bd, type: 'lift', placeId: null });
+    else fill.push({ from: L, to: end, act: 'off', deck: 3, type: null, placeId: null });
+    segs.splice(j + 1, 0, ...fill);
+  }
+  return f;
+}
 // the arrival's beats (Pillar 4, section 21's introPlan(p, d) -> [{ from, to, deck, placeId?, act?, tag?, anim? }],
 // minutes from that day's midnight): laid over the person's planned day as fixed blocks, the way an accepted
 // appointment is, so the escort and the teachers are really busy then (whereIs, needs, dayReport all see it). The
@@ -43453,7 +43476,7 @@ function introUiReset() {
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
-const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased() + (introOn() && typeof SHIP.intro.done.free === 'number' ? '|free' + SHIP.intro.done.free : '');   // + a meeting done early frees its speaker (the patch, #1); + Zeke's goodnight, live: Day 0's table trickles out from it (section 14's tradGood, FX5)
+const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased();   // + a meeting done early frees its speaker (the patch, #1)
 
 // one step done: its points, its flags, its note; then the next step (the evening) or none (the week runs by the clock)
 function introDone(id, at = Math.floor(shipNow())) {
