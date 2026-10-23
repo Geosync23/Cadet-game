@@ -4,6 +4,57 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.92.0 full round (2026-10-23, started 08:38 UTC, for BM14 and lead 31)
+
+- Candidate: `claude/integration-next` 4147f03d (0.92.0: teaching arrows ON, Pillar 5 fixes, breakfast at 07:00,
+  Zeke's Day 0 tour, the dinner spread, ...; controller and Crossing the Line off). Checks run from a worktree of
+  4147f03d, except interactions_check.py, which is 3d729dd7's (FB1's test-only garden fix, BM14's instruction; file
+  sha256 cbf23b84...). The game at 3d729dd7 is the same file.
+- `starship-cadet.html` sha256 `c2180854a780936c21cbac0ba9e7932fb491759f740e1d5ac3b4d4494a4f1286`: matches BM14's.
+- OLD: 0.91.0 989fd566 (`da9f1d08...dc94aee`).
+- First start stopped after ~3 min of Day 21 (BM14's correction about which interactions_check to use); restarted
+  clean. Only the restarted run is reported.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `day_check.py BUILD 21` | OK | 0 | 283 s | `DAY CHECK OK`; draw calls peak 204 / 195 / 293 / 236 on Decks 1-4 (budget 450) |
+| `day_check.py BUILD 27` | OK | 0 | 279 s | `DAY CHECK OK` |
+| `interactions_check.py BUILD` (3d729dd7's) | OK | 0 | 1894 s | `INTERACTIONS CHECK OK`; neither known item (garden pin, Cart dock 1) failed. Slow: 0.91.0 took 486 s |
+| `events_check.py BUILD` | **FAIL (NEW)** | 1 | 287 s | `FAIL Day 0's Sunday table not full 5 minutes before Zeke's goodnight: {'seats': 48, 'free': 1185, 'most': 48, 'before': 45}` |
+| `career_check.py BUILD` | **FAIL (NEW)** | 1 | 128 s | 12 FAIL lines (below) |
+
+### The FAILs
+
+Both repeat exactly when run alone (events: the same line; career: the same 12 lines, `diff` empty). Neither is on
+the known list (backlog 14, 23, 32; controller_check day x2; interactions' two items).
+
+**events_check**: one line, quoted in the table: on Day 0, 45 of the Sunday table's 48 diners are still seated at
+19:40 (5 minutes before `free` = 1185 = 19:45, Zeke's goodnight); the check wants all of them. This part is new
+(ed7f5318, "Day 0's table full till Zeke's goodnight"), not in 0.91.0's events_check, so OLD can't show it. With
+the arrows switched off in a copy (`POINT_ON`, `GUIDE_ON` false, 4 lines changed) it fails the same way: not the
+arrows.
+
+**career_check**: 12 FAIL lines; 0.91.0's career_check passed (the arrows were off there).
+1. Toasts (3): the check reads the Day 0 wake toast ("You wake in Bunk 1, in the junior wing. Tap to walk
+   somewhere...") instead of the one it expects: `a reminder never covers a toast on screen, nor in the gap after
+   it`; `its word going up is said`; `a missed shift: said and in Mail` (the Mail is there, the toast read is the
+   wake one). Likely BM14's note: with the arrows on, toasts queue.
+2. Meeting and call arrows (8), each finding no arrow (None): `an ask made during a sleep is told (toast) when you
+   are up; its arrow comes 15 minutes before the meeting`; `bug 2: the meeting arrow is up 14 minutes before`;
+   `bug 2: in the room it says wait here ...`; `bug 2 (PR9): another arrow borrows it ...` (Food, None); `(p2) a job
+   taken inside the window should not keep the meeting's arrow away`; `(p3) the call's arrow is up at 10:30`; `(p3)
+   coming into her office before the meeting starts, the call's arrow should stay`; `(p3) the meeting plays, then
+   her walk to the pipe takes the arrow`.
+3. Save size (1): `ship.works over 3 KB by Day 30, or the log not cut to 30`: 3001 bytes after 30 busy days (limit
+   3000), log 30.
+
+With the arrows off in a copy: only line 3 fails (the 3001-byte save); the 11 others pass. So 1 and 2 come with the
+arrows on; 3 doesn't.
+
+Logs (this container): `/tmp/work-cr5/logs-new7/` (`events.txt`, `career.txt`, `*-rerun.txt`, `*-arrowsoff.txt`).
+
+**CR5: FAIL** (3 of 5 OK; events and career NEW).
+
 ## 0.91.0 full round (2026-10-22, started ~21:30 UTC, for BM14 and lead 29 / lead 30)
 
 - Candidate: `claude/integration-next` 989fd566 (0.91.0: CP1's controller 0.90.9 on 0.64.16, PAD_ON off, + fresh-eyes
