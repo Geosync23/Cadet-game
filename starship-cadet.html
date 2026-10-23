@@ -44358,9 +44358,10 @@ function tilesSeatTick(A) {   // the 'tiles' activity while you sit: find someon
   if (!o.st) {
     const sat = seats.map(id => heldBy(id)).find(here);   // someone already at the board
     if (sat) return tilesBegin(A, sat.p.id);
-    const seat = seats.filter(id => !heldBy(id)).map(id => [id, placeSpot(id)]).filter(x => x[1])
+    const coming = seats.map(id => heldBy(id)).find(a => a && a.p && a.p.id && ROSTER.some(x => x.id === a.p.id));   // on their way to a seat at the board: they play you once sat (0.92.0)
+    const seat = coming ? [coming.goalId, placeSpot(coming.goalId)] : seats.filter(id => !heldBy(id)).map(id => [id, placeSpot(id)]).filter(x => x[1])
       .sort((m, n) => Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z) - Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z))[0];   // the seat across from you: the farthest free one
-    const a = seat && tilesFind(seat[1]);
+    const a = coming || seat && tilesFind(seat[1]);
     if (!a) { tilesNobody(A); return false; }
     o.st = 'wait'; o.opp = a.p.id; o.seat = seat[0]; o.since = shipNow(); o.here = false;
     const go = crewComeTo(a.p, seat[0], () => { o.here = true; }, { until: shipNow() + TL_WAIT + 30 }), prev = A.release;
@@ -44413,14 +44414,27 @@ function tilesNightNow() {
   if (typeof eventsOn !== 'function') return false;
   const m = SHIP.time.min; try { return eventsOn(SHIP.time.day).some(e => /^tiles/i.test(e.id) && m >= e.from && m < e.to); } catch (e) { return false; }
 }
+// the seats of the board you tapped (0.92.0, the user's "nobody sits next to you"): the deck's own lists (DECKS[n].tiles:
+// the station's two stools, each Tiles night board's seats, the junior common room's four stools), the one closest round
+// the board; null on a deck with none. Every seat within TL_NEAR took in armchairs and the next booth, and the partner
+// went to the farthest of those
+function tilesBoardSeats(it) {
+  const T = deckDef && DECKS[deckDef.num] && DECKS[deckDef.num].tiles; if (!T) return null;
+  let best = null, bd = 1e9;
+  for (const l of [T.seats || T.station].concat((T.boards || []).map(b => b[5]))) {
+    const sp = (l || []).map(id => placeSpot(id)); if (!sp.length || sp.some(s => !s)) continue;
+    const d = sp.reduce((n, s) => n + ixDist(it, s), 0) / sp.length; if (d < bd) { bd = d; best = l; }
+  }
+  return bd < TL_NEAR ? best : null;
+}
 function tilesWorldTap(it, at, point) {
   if (!it || !TL_ITEM.test(it.t || '')) return false;
   const jcr = /^Tiles table\b/i.test(it.t) && roomAt(...cellAt(at.x, at.z)) === 'j' && deckDef.num === 4;   // the junior common room's table: any time (0.28.62, the 0.60.7 plan)
   if (!/^Tiles station\b/i.test(it.t) && !jcr && !tilesNightNow()) return false;
   if (TL_GAME && tilesSeated()) { deviceShow('tiles'); return true; }
-  const room = roomAt(...cellAt(at.x, at.z));
+  const room = roomAt(...cellAt(at.x, at.z)), own = tilesBoardSeats(it);
   const seats = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id)])
-    .filter(([pl, s]) => s && (!room || pl.room === room) && (s.pose || pl.pose) === 'sit' && !privatePlace(pl) && ixDist(it, s) < TL_NEAR);
+    .filter(([pl, s]) => s && (!own || own.includes(pl.id)) && (!room || pl.room === room) && (s.pose || pl.pose) === 'sit' && !privatePlace(pl) && ixDist(it, s) < TL_NEAR);
   if (!seats.length) return false;
   const free = seats.filter(([pl]) => !heldBy(pl.id)).sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z))[0];
   if (!free) { toast(it.t, 'Every seat at the board is taken.'); return true; }
