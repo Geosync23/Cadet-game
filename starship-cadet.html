@@ -10377,11 +10377,16 @@ function schedBuild(p, d, occ, S) {
   // how long a diner keeps their seat at a meal tradition (the user, 2026-10-23: "the room must not all empty at once"):
   // their own meal and a linger, 35-75 minutes from sitting down, not to the tradition's end, so the table thins a few
   // at a time (at most 20 minutes past its end). Day 0's Sunday table stays seated through Zeke's goodnight to you
-  // (section 21's INTRO_STEPS 'free'), then empties over the next 25 minutes
-  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };   // section 21's fixed minute (a plan never reads what happens live)
+  // (section 21's INTRO_STEPS 'free'), then trickles out over the next 50 minutes. The goodnight's minute is the live one
+  // once it has happened (SHIP.intro.done.free, saved; section 21's introSig plans the day again when it comes: the
+  // user, 2026-10-23, "that's the moment people should start trickling out"), else the step's latest (19:45)
+  const tradGood = e => {
+    const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); if (!(g && g.day === 0 && isFinite(g.at))) return null;
+    const f = typeof introOn === 'function' && introOn() && SHIP.intro.done.free; return typeof f === 'number' && f - B >= 0 && f - B < g.at ? f - B : g.at;
+  };
   const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger, never past its end (a seated sitting's seats are the next sitting's): who'd run over leaves in its last 12 minutes
     const g = tradGood(e), end = e.at + e.dur, own = e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), to = own < end - 12 ? own : end - Math.round(12 * U(533));
-    return g != null ? Math.max(to, g + Math.round(25 * U(532))) : to;
+    return g != null ? g + 2 + Math.round(48 * U(532)) : to;   // Day 0: from the goodnight, one at a time over about 50 minutes, whoever finished first (FX5: their own times all fell in the tradition's last quarter hour)
   };
   const tradStay = e => Math.max(e.min || 15, tradLeave(e) - t - 3);
   const tradMeal = (e, end) => {
@@ -43448,7 +43453,7 @@ function introUiReset() {
   if ('pilotAt' in U) Object.assign(U, { pilotAt: 0, ternOpened: false, ternShut: false });
 }
 // section 14 plans the crew again when this changes (introBeats depends on nothing else)
-const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased();   // + a meeting done early frees its speaker (the patch, #1)
+const introSig = () => (introOn() ? 'on' : 'off') + (SHIP.intro.skipped ? '|skipped' : '') + introReleased() + (introOn() && typeof SHIP.intro.done.free === 'number' ? '|free' + SHIP.intro.done.free : '');   // + a meeting done early frees its speaker (the patch, #1); + Zeke's goodnight, live: Day 0's table trickles out from it (section 14's tradGood, FX5)
 
 // one step done: its points, its flags, its note; then the next step (the evening) or none (the week runs by the clock)
 function introDone(id, at = Math.floor(shipNow())) {
