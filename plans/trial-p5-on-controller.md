@@ -18,7 +18,9 @@ branches: the controller off (`PAD_ON = false`), the arrows off (as arrows-c shi
 | round 3 | 9a8eac0b (CP1's controller 0.90.9 redone on 0.64.16 b9f053ba, after the user rolled back breakfast) | 69d1ed9b | 2 game conflicts (#3, #4) + backlog and build-table rows; same resolutions. This is claude/trial-p5-on-controller (c91e04a8 to 77256a82; replaced by round 4) |
 | round 4 | 989fd566 (BM14's new 0.91.0 candidate on claude/integration-next-fe1 = CP1's 9a8eac0b + fresh-eyes batch 1) | 69d1ed9b | as round 2: #3, #4, the FX3 fix 10 duplicate (#5) in design-doc, interactions_check and build-table; same resolutions. Commit 8bd5d1c4 (notes fce67dac, 9b7be696); replaced on the branch by round 5 |
 | round 5 | 01b237f4 (BM14's staging on claude/integration-next-fe1 = 0.91.0 + CP1's controller follow-up dcdfe944 + CTT3's controller_check) | 12b67c70 (includes 3c42632, FX3 16-18) | as round 4 (#3, #4, #5, docs) + one new: player_check.py (#6). Commit a4f7d4f0 |
-| round 5b | 01b237f4 | 9197ba11 (+ FB1's galley drop, 191bee5) | merged by itself into round 5, no conflict. Commit 45362bd6: this is claude/trial-p5-on-controller now |
+| round 5b | 01b237f4 | 9197ba11 (+ FB1's galley drop, 191bee5) | merged by itself into round 5, no conflict. Commit 45362bd6: replaced |
+| round 5c | 01b237f4 | 46e594cd (F2) | merged by itself; all checks green (arrows off). Commit 9b3e7c3f |
+| rounds 6-10: the 0.92.0 combined build (lead 30, then 31) | 01b237f4 | arrows-c up to 8eb57151 (arrows ON) | + breakfast-back 0cd37b1b, dinner-spread ed6bcbf3, tip-clear feb2e54a, zeke-tour 99687fc8. Clashes: build-table rows every time (kept, in merge order; one doubled row removed) and section 19's Device engineer slot (#7). Round 10 = e819950a: this is claude/trial-p5-on-controller now; see plans/handover-im1.md for its check status |
 
 ## Conflicts in the game (starship-cadet.html)
 
@@ -31,6 +33,7 @@ branches: the controller off (`PAD_ON = false`), the arrows off (as arrows-c shi
 
 | 5 | The lift-panel arrow (FX3's fix 10), round 2 only | 0.91.0 carries fix 10 alone (7886bfdf, cherry-picked): its design-doc line, its interactions_check part, its build-table row | arrows-c carries the same fix through the p5-fix3 merge, with fixes 11-14 beside it | arrows-c's side (it holds 0.91.0's lines word for word, in one block, plus fixes 11-14); the build-table row kept once | The same change twice: one copy, the version already on the line (BM14's rule). The game file's fix 10 lines merged by themselves; checked that none is in the file twice. |
 
+| 7 | Section 19, the Device engineer slot (round 8) | tip-clear adds FX5's `tipClear()` and its requestAnimationFrame | arrows-c adds the panel pointer block (POINT_ON, TEACH_MODES, pointAsk...) at the same spot | keep both, arrows-c's first | Independent code; tipClear reads #ixGoal's translate the way arrows-c's own check does. |
 | 6 | player_check.py (round 5) | 0.91.0 added "A tray at any seat" (the eating fix's test) | arrows-c added "Tea in the Tea corner, every seat taken" (FE1 item 48) at the same place | keep both, 0.91.0's first | Two different tests, not a duplicate. The game's eating-fix lines are each in the file once. |
 
 The eating fix (191d1853, cherry-picked onto 0.91.0 as fb29d37a from p5-fix2) is not on arrows-c yet, so it causes
