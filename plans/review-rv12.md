@@ -30,3 +30,28 @@ Game sha256 69d845c6...; base 54efee21 2dbb11b8.... Handed over from RV10 (its r
 - Notes (not blocking): the re-plan's steps before the table can differ from the old plan (others booked first); only
   the steps after are used, as designed. DAY0_LEAVE is a top-level const read inside schedBuild; no planner run comes
   before its line at load (all checks load clean).
+
+## FX6 tray-seat claude/tray-seat f90140bb (LEAD31-14) + FX7 mess-taps 9c4e02b5 (test only): PASS (~23:00 UTC)
+Game sha256 b7b7b6e4... (only b7a8a22e changes the game; ed1ee8d7 reverted by 1d4e0dac; 62deb7b3 merges mess-taps
+9c4e02b5; f90140bb test only). Base: mess-taps 980c2591 game 9d0119cd....
+- Diff: section 15 only. needGoal('hunger') with a tray on Deck 3 -> nearest mess-seat not heldBy (else nearest),
+  label "A seat for your tray", NEED_GOAL.tray; needGoalTick re-aims when the tray comes or goes; sitting to eat clears
+  it as before (actBegin). Trays are dropped every frame off Deck 3 (playerUpdate), so the re-aim can't churn. design-doc
+  Small comforts. Does what it says.
+- 9c4e02b5 / f90140bb (test only): the counter taps recheck "on the counter, someone near, not on them" before each
+  click; part (3)'s seat tap waits (up to 20x15 frames) for the seat to be on screen and clear; if it never is, no tap
+  and part (3)'s second line FAILs (never a silent pass).
+- interactions_check (full, game b7b7b6e4): OK. Mess part alone with f90140bb's code (plans copy of lines 1-56 + the
+  LEAD31-9 block): fix OK (counter 8/8); 980c2591 game FAILs both new lines (arrow stays "Food", here on 3-grab-1);
+  planted f1 (no re-aim in needGoalTick) FAILs both; f2 (right label, points at a servery-queue) FAILs both; f3
+  (counter fix in tap() removed) FAILs the counter line, 9 tried 0 joined; 54efee21 (before FX7's fix) FAILs all of
+  LEAD31-9's lines, counter 0/8. Same results earlier with b7a8a22e's and ed1ee8d7's test code.
+- arrows_check week: OK on the fix; FAILs on 980c2591's game with the same check ("stuck from Day 9 16:50 at Food").
+- cadet_test 980c2591 vs fix: ALL IDENTICAL (one run; FX6's one-off bubble offset not seen; FX6 reports the same wobble
+  comparing mess-taps with itself under load, so renderer timing, not this change).
+- check_fast: QUICK CHECK OK in 401 s.
+- Notes (not blocking): without the fix the tray arrow could even point at a grab shelf, and a tap there eats a snack
+  with the tray still in hand (seen on 980c2591); the fix removes that path. The seat pick reads live heldBy only, so
+  it can point at a seat kept for a tradition; tapping it moves you to a free one nearby (actBegin), so harmless.
+- Counter-tap fragility (lead's ask, with RV10): with the recheck the counter part was 8/8 or 9/9 in every run here
+  (8 runs), and the planted counter fault is still caught; the earlier 1-of-9 miss was the point going stale, not the fix.
