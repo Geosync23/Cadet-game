@@ -1,0 +1,37 @@
+solotap-base exit 1 65s | FAILED
+solotap-dv1 exit 0 45s | OK
+mach-base exit 1 72s | MACHINE CHECK FAILED
+mach-fx6 exit 0 73s | MACHINE CHECK OK
+pl-dv1-late exit 0 37s | OK
+pl-dv1-noplace exit 1 45s | FAILED
+pl-dv1-nowalk exit 1 60s | FAILED
+pl-fx6-97-mach exit 1 57s | MACHINE CHECK FAILED
+pl-fx6-noapply-mach exit 1 60s | MACHINE CHECK FAILED
+mech-base exit 1 981s | MECH CHECK FAILED
+cf-fx6 exit 0 346s | QUICK CHECK OK in 346 s
+ct-fx6 exit 0 104s | ALL IDENTICAL
+day16-fx6 exit 0 481s | DAY CHECK OK
+mech-fx6 exit 0 1064s | MECH CHECK OK
+day1-fx6 exit 0 478s | DAY CHECK OK
+ix-base exit 0 3179s | INTERACTIONS CHECK OK
+ix-fx3 exit 143 9s | Terminated
+fx3o-base exit 0 310s | FX3 BLOCK FAILED
+fx3o-fix exit 0 308s | FX3 BLOCK OK
+fx3o-85b6 exit 0 298s | FX3 BLOCK FAILED
+fx3o-wrong exit 0 303s | FX3 BLOCK FAILED
+fx3probe-fix exit 0 92s | crew over glow taps: 30 fetch: 0 talk/card: 30
+ct-fx3b exit 1 96s | DIFFERENCES FOUND
+mach-fx3b exit 0 62s | MACHINE CHECK OK
+cf-fx3b exit 0 368s | QUICK CHECK OK in 368 s
+intro-dv1 exit 0 3396s | OK
+ct-dv1 exit 0 99s | ALL IDENTICAL
+cf-dv1 exit 0 347s | QUICK CHECK OK in 347 s
+player-fx3b exit 0 679s | PLAYER CHECK OK
+ix-dv1 exit 0 3251s | INTERACTIONS CHECK OK
+e81-fix exit 1 0s | SyntaxError: unterminated string literal (detected at line 24)
+e81-early exit 1 0s | SyntaxError: unterminated string literal (detected at line 24)
+e81-base exit 1 0s | SyntaxError: unterminated string literal (detected at line 24)
+e81-fix exit 0 31s | OK
+e81-early exit 1 34s | FAILED
+e81-base exit 1 44s | FAILED
+ix-fx3b exit 0 1751s | INTERACTIONS CHECK OK
