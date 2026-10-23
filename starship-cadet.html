@@ -20068,6 +20068,19 @@ function shelfGlowTick() {
   m.material.opacity = fl ? .5 + .16 * Math.sin(now / 90) : .34 + .08 * Math.sin(now / 420);
   m.visible = true;
 }
+// a tap on the glow is a tap on the shelf it lights (FX3, fresh-eyes 2 item 64): the glow reaches down to the floor and out
+// past the shelves, so a thumb on its lower part met the floor in front, or at some camera turns the Filters shelf in front
+// ("No relays on the Filters shelf") and the first job's relay couldn't be had. Section 11's tap asks, after the crew; false: not on it
+const _sgb = new THREE.Box3(), _sgp = new THREE.Vector3();
+function shelfGlowTap(cx, cy) {
+  const G = SHELF_GLOW; if (!G || !G.mesh.visible || !G.id || typeof playerTap !== 'function') return false;
+  ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
+  if (!ray.ray.intersectBox(_sgb.setFromObject(G.mesh), _sgp)) return false;
+  let best = null, bd = Infinity;
+  for (const it of ITEMS) if (it.t === SHELF_NAME[G.id] && it.hit) { it.hit.getWorldPosition(_wp); const d = Math.hypot(_wp.x - _sgp.x, _wp.z - _sgp.z); if (d < bd) { bd = d; best = it; } }
+  if (!best) return false;
+  best.hit.getWorldPosition(_wp); return !!playerTap(best, _wp.clone(), _sgp.clone());
+}
 
 // ---- the Wednesday delivery as crates (0.33.42, the plan for 0.60.7, "Stores and the lift") ----
 // The delivery lands in the cargo hold at 10:00 on Wednesdays (jobsHour; never late in your first week, so your first is
@@ -54286,6 +54299,7 @@ function tap(cx, cy) {
   }
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
+  if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
   if (ud.walker && ud.walker.active) {
