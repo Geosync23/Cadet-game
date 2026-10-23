@@ -15,6 +15,8 @@
 #      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
 #      draw calls under 450, no page errors
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
+#   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
+#      starts; at 10:05 a tap on her doesn't (--solotap: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -336,6 +338,52 @@ def solo(g):
     if not app: fail('the solo job is not your job (myJob) through its steps')
     if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
+# item 81 (FE2 on 0.92.0, LEAD31-13): Tuesday 08:51, in the Works bay. The Tracked arrow for the solo job points at the spot
+# you stand at in the Chief's office, not her seat; a real tap on her (as FE2 tapped the pin over her desk) walks you in and
+# her meeting starts; once it has been (or outside its time), a tap on her is her card as before, no walk
+def solo_tap(g):
+    print('18. Tuesday 08:51: the solo job\'s arrow at your spot in her office, a tap on the Chief walks you in and it starts; later her card')
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")
+    g.ev('skipTo(introAbs(2, 8 * 60 + 51))'); g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")
+    HERE = "(() => { goToDeck(5); player.obj.position.copy(cellPos(12, 5)); player.path.length = 0; if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"   # a first-time tip card can sit over her (as interactions_check)
+    g.ev(HERE); g.step(60)
+    row = g.ev("(trkItems().find(x => x.title === DEV_BEATS['d2-solo']) || {})")
+    goal = row.get('goal') or {}
+    print(f"  Tracked: {row.get('title')} -> {goal}")
+    if goal.get('place') != '5-office-visit-1': fail(f'the solo job\'s Tracked arrow is not at your spot in her office: {goal}')
+    # a point on her the canvas takes (a speech bubble or a toast can cover part of her, as for a player, who'd tap the rest)
+    TAP = """(() => { const a = DECK_CREW.find(c => c.p.id === 'calder'); if (!a) return null; const room = ROOMS[roomAt(...cellAt(a.x, a.z))].name; let first = null;
+      for (const h of [.9, .5, 1.2, .7, 1.4]) for (const dx of [0, -8, 8]) { const v = new THREE.Vector3(a.x, (a.y || 0) + h, a.z).project(camera), x = (v.x + 1) * innerWidth / 2 + dx, y = (1 - v.y) * innerHeight / 2;
+        const e = document.elementFromPoint(x, y), c = crewAtScreen(x, y); if (!first) first = (e && e.closest('[id]') ? e.closest('[id]').id : e && e.tagName) || '?';
+        if (e && e.tagName === 'CANVAS' && c && c.p.id === 'calder') return [x, y, room, 'canvas']; }
+      return [0, 0, room, 'covered by ' + first]; })()"""
+    pt = g.ev(TAP)
+    if not pt or pt[2] != "Works Chief's office": fail(f'the Chief is not in her office at 08:51: {pt}'); return
+    print(f'  the tap on her: {pt}')
+    if pt[3] != 'canvas': fail(f'no point on the Chief to tap: {pt}'); return
+    g.page.mouse.click(pt[0], pt[1]); g.step(5)
+    walking = g.ev('player.path.length')
+    met = None
+    for i in range(40):
+        g.step(30); met = g.ev("DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null")
+        if met: break
+    print(f"  a tap on her from the bay at 08:51: walking {walking > 0}, then {met} at {g.ev('clockText()')[-5:]} in {g.ev('ROOMS[roomAt(...player.here())].name')}")
+    if not walking: fail('a tap on the Chief from the bay during her meeting\'s time did not walk you in')
+    if met != 'intro-d2-solo': fail(f'her solo job meeting did not start after the tap: {met}')
+    n = 0
+    while g.ev('!!DIALOGUE') and n < 40:
+        g.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(2); else dialogueNext(); })()"); g.step(60); n += 1
+    g.ev('skipTo(introAbs(2, 10 * 60 + 5))'); g.ev(HERE); g.step(60)
+    pt = g.ev(TAP)
+    if pt and pt[3] == 'canvas':
+        g.page.mouse.click(pt[0], pt[1]); g.step(5)
+        late = g.ev("({ path: player.path.length, dlg: !!DIALOGUE, card: !!(document.querySelector('.chat:not([hidden]), #chat:not([hidden])') || (document.getElementById('tt') || {}).textContent) })")
+        print(f'  10:05, the meeting over: a tap on her: {late}')
+        if late['path'] or late['dlg']: fail(f'at 10:05 a tap on the Chief still walked you in or started a meeting: {late}')
+    else: print('  10:05: the Chief is not on Deck 5 (her card not tapped)')
+
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
 def clock_tracked(g):
     # fresh-eyes (FE1 item 36): on Day 1 you tap Tracked's "Clock in" on Deck 4, Zeke walks you down, you step out on Deck 5:
@@ -581,6 +629,10 @@ with sync_playwright() as pw:
     if LEAVE_ONLY:
         talk_away(g)
         bunk_leave(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
+    if '--solotap' in sys.argv:   # part 18 alone (item 81)
+        solo_tap(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if BESIDE_ONLY:
@@ -991,6 +1043,7 @@ with sync_playwright() as pw:
     late_dinner(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
+    solo_tap(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 
