@@ -1,6 +1,6 @@
 # Handover: RV7 (reviewer: Pillar 5 fixes, the guiding arrows, the teaching-arrows switch)
 
-Written 2026-10-23 by RV7 (session_01RLTBGbbdRbUkKME189xL4k) at about 50% memory, kept up as work goes.
+Written 2026-10-23 by RV7 (session_01RLTBGbbdRbUkKME189xL4k); final at about 61% memory. RV7 has stopped.
 
 ## Role, branch, people
 - Reviewer. Never edits the game. Notes only, on `claude/review-rv7` (push only there).
@@ -21,11 +21,21 @@ Written 2026-10-23 by RV7 (session_01RLTBGbbdRbUkKME189xL4k) at about 50% memory
 8. The shipped default before the switch: Off lost the watch arrow (fixed in f8ed8521).
 9. arrows-c e3c7c183 + 764438d4 + f8ed8521 (teaching arrows ON in 0.92.0; Off keeps the watch arrow): PASS.
 
-## Still to do (lead 31's list)
-- FX3's fix 19 (the hydroponics vent and "Mop up (2 of 2)" stucks: the only things left in the week).
-- BM14's merge of arrows-c onto 0.91.0 (the combined 0.92.0 build). Check: the merge's conflict resolutions, cadet_test
-  alone vs 0.91.0 (explain every difference), the week on the merged build with the default setting and with Off
-  (p_audit.py, TEACH=off), the pointer under Off (p_ptr.py), arrows_d/f/pointer, check_fast.
+10. FX3 fix 19 (518ee9ef, tap at the pin over someone standing there) + adda4fe5 (extra line): PASS.
+11. The check-side fixes since the switch (intro_check pilot line, meeting arrow, interactions clock-in, controller
+    pop-up queue): none hides a game problem (p_ramp.py: the pilot's line shows its full time in real play).
+12. 0.92.0 (claude/integration-next-fe1 4147f03d, BM14's merge): PASS WITH FIXES. Clashes right; cadet_test explained;
+    week all nine lessons, default and Off; pointer right. FIX: mech_check part fx3 fails (m6 follow, then a crash)
+    on arrows-c 7d97d538 and on 4147f03d: written for arrows off. Sent to AC3, FX3, lead 31.
+
+## Stopped here (2026-10-23, about 61% memory)
+Open for whoever takes over:
+- When AC3/FX3 fix mech_check fx3: run `python3 mech_check.py BUILD fx3` on the fixed build (must pass with the
+  shipped switches) and plant a fault (e.g. drop the inc:m6 guideAsk) to see it caught. If the cause turns out to be
+  the game (m6 really lapsing to 'ask' after the talk with the queue on), the week runs say otherwise, so look at what
+  the check's scenario does differently (it sets things on paper, not by play).
+- Then the six-runner round on 0.92.0 (lead 31 runs it); known: controller_check's 2 FAILs (controller off), FB1's
+  garden coverage line may fail by chance (FX4 making it deterministic).
 
 ## How I test (scratchpad, not in the repo; copies of the probes in plans/review-rv7/)
 - Setup: `pip install playwright numpy pillow`; three r128 and acorn in /tmp/cadet-work (testing guide 2);

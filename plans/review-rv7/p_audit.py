@@ -4,7 +4,7 @@
 import sys, os, json
 BUILD = sys.argv[1]; G = "guide" in sys.argv; sys.argv = [sys.argv[0], BUILD]
 src = open(os.path.join(os.path.dirname(os.path.abspath(__file__)), os.environ.get('ACHK', 'arrows_check.py'))).read().split("GUIDE = 'guide' in")[0]
-exec(src); GUIDE = G
+exec(src); GUIDE = G; TEACHOFF = False
 HOOK = r"""(() => { window.__tl = []; const t0 = toast; toast = function (a, b, o) { const r = t0.apply(this, arguments); try { if ((document.getElementById('tx').textContent || '') === String(b)) window.__tl.push([clockText(), Math.floor(shipNow()), String(a), String(b)]); } catch (e) {} return r; };
   window.__jobs = []; window.__new = []; window.__lastJ = null; })()"""
 POLL = r"""(() => { const j = myJob(); const id = j ? j.id : null;
