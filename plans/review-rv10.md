@@ -59,7 +59,7 @@ a folder holding cadet_test.py, an output folder).
 | AC3 join notices kept + cadetPopupsNow hook | claude/arrows-c 54169e4c (integration 685af944) | PASS |
 | FX4 save trim | claude/fx4-save-trim 06a989e6 (integration 685af944) | PASS |
 | FX7 gym bike tap | claude/bike-tap 9328dc76 (integration 685af944) | PASS |
-| FX5 Day 0 trickle | claude/day0-trickle 0e392cf3 (integration 685af944) | FIXES NEEDED (side effect, see below) |
+| FX5 Day 0 trickle | claude/day0-trickle 0e392cf3, then de475883 (integration 685af944) | FIXES NEEDED, then PASS |
 | CP5 controller follow-up 2 | claude/controller-follow2 f293d672 (integration 685af944; off) | PASS |
 
 - AC3: arrows_check queue lines fail on 685af944, OK after; join_check OK (alone); check_fast OK; cadet_test identical.
@@ -75,6 +75,9 @@ a folder holding cadet_test.py, an output folder).
   gym-13 -> gym-14 mid-workout, Esme lounge-31 -> 33, Zofia garden-6 -> tend-12 (they walk). Options sent to FX5.
 - CP5: controller_check lift 4 FAILs on base, OK with both mutants caught; pick (CTL_MUT=CP1) and day OK; check_fast OK;
   cadet_test identical with PAD_ON off and on.
+- FX5 trickle de475883: no whole-day re-plan; day0Trickle patches only the diners. trickle_probe.py at 18:20/18:40/19:10:
+  no non-diner's plan changes; live at 18:40 Lukas, Esme, Zofia stay put. events_check, day_check 0, intro_check --evening,
+  check_fast OK; cadet_test identical. Diners with an hour or more go to their bunk and come back for their evening.
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
