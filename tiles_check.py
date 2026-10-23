@@ -13,7 +13,8 @@
 #   member answers; a whole game played by taps ends with the result, Again / Quick game / Done, and a 'tiles' note;
 #   the first game uses the teaching layout and points at a jump; opening it adds nothing to the 3D scene
 #   sitting down (0.46.2, 0.46.4, 0.28.51): the Tiles station always, tables and boards only on Tiles night (else a plain seat);
-#   you sit (the 'tiles' activity, sit:play) and a free crew member comes over (a visit) and sits opposite, and the game
+#   you sit (the 'tiles' activity, sit:play) and a free crew member comes over (a visit) and sits opposite (on one of the
+#   table's own stools, DECKS[4].tiles.seats, within reach of the board: 0.92.0), and the game
 #   opens; someone already at the table plays you at once; nobody free (quiet hours): a toast says so and you just sit;
 #   playing stops ship time and a deck tap brings the board back; time runs again once it's over; How to play on your
 #   first game (Next, by itself as you select and step, Skip, again from the board and the Tiles app; every step about
@@ -212,6 +213,10 @@ def seat(pw, path):
     ok_on = wait_for(gg, SEATED, 80)
     st = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), sp = placeSpot(ACT.o.seat); return [ACT.phase, ACT.pose, TL_GAME.opp, TL_GAME.where === ACT.placeId, DEV.open, DEV.app, !!a && Math.hypot(a.x - sp.x, a.z - sp.z) < .8, !!a && a.settled]; })()")
     check(ok_on and st[2] == w[0] and st[3] and st[4] and st[5] == 'tiles' and st[6] and st[7], f'they sit opposite and the game opens on the device: {st}')
+    # 0.92.0 (the user's "nobody sits next to you"): their seat is one of the table's own stools, they're in a sit pose
+    # and within reach of the board (before, the farthest seat within 2.4 m: an armchair across the room)
+    rs = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), it = ITEMS.find(i => /^Tiles table$/.test(i.t)); return [ACT.o.seat, DECKS[4].tiles.seats.includes(ACT.o.seat), (ACT.o.board || []).every(id => DECKS[4].tiles.seats.includes(id)), a && a.pose, a && +ixDist(it, a).toFixed(2)]; })()")
+    check(rs[1] and rs[2] and str(rs[3]).startswith('sit') and rs[4] is not None and rs[4] < .5, f'the partner sits at the Tiles table itself, sitting, within reach of the board: {rs}')
     # playing stops time (the user's "Playing tiles stops time"); a tap on the deck brings the board back
     t0 = gg.ev("[SHIP.time.min, FREEZE.frozen, SHIP.player.needs.social, (SHIP.rel[TL_GAME.opp] || {}).pts || 0]"); gg.ev("deviceClose()"); gg.step(150)
     gg.page.mouse.click(195, 300); gg.step(2)
