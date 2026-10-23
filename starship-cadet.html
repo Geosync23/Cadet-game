@@ -12587,6 +12587,27 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 } });
 
 // ---- slot: Device engineer (section 19). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// FX5 (lead 30; SC1's interactions_check "Deck 3 landing"): a tip card never sits over the goal arrow's target. The card's
+// place (128 px down) is where the arrow's pin is when its target is near the top (section 15b keeps the pin from 130 px),
+// so on Deck 3's landing "Seven decks, one lift" covered the lift panel and the tap closed the tip instead. While a tip is
+// up and the pin (with its label) would be under it, the card moves just below the pin, clear of the toast and buttons at
+// the bottom; with no room there (a long tip on the smallest phones; above it is the HUD) it stays and lets taps through
+// to the game. Back as it was once clear. Reads #ixGoal's position only; nothing changes when they don't overlap.
+function tipClear() {
+  requestAnimationFrame(tipClear);
+  const c = document.getElementById('devTip'), g = document.getElementById('ixGoal');
+  let top = '', through = '';
+  if (c && !c.hidden && g && !g.hidden) {
+    const m = g.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/), r = c.getBoundingClientRect(), h = r.height;
+    if (m && r.width) {
+      const x = +m[1], y = +m[2], T = 128;
+      if (x > r.left - 48 && x < r.right + 48 && y > T - 44 && y < T + h + 40) { if (y + 48 + h <= innerHeight - 110) top = Math.round(y + 48) + 'px'; else through = 'none'; }
+    }
+  }
+  if (c && c.style.top !== top) c.style.top = top;
+  if (c && c.style.pointerEvents !== through) c.style.pointerEvents = through;
+}
+requestAnimationFrame(tipClear);
 // ---- end of slot: Device engineer ----
 
 // =====================================================================
