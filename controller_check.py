@@ -1873,7 +1873,9 @@ def legacy_parts(GAME, ON, fails):
         # "Controller connected" waits for the message showing (the opening one) to go, then shows
         p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
         check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
-        p.ev("toastEl.classList.remove('show')"); p.step(2)
+        # (CTT3) put away as its 5.6 s would: with the arrows on, a message within 2.5 s (real time) of the last one waits in
+        # their queue, and the check's frames take far less real time than a player's
+        p.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9)"); p.step(2)
         m = marks(p)
         for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
             check(m.get((b, k)) == ('xbox:' + k, True), f'marks: no shown Xbox {k} mark on {b}: {m}')
@@ -1941,7 +1943,7 @@ def legacy_parts(GAME, ON, fails):
         check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
     def part_drop(pw):
         p = Pad(pw, ON)
-        p.plug(); p.ev("toastEl.classList.remove('show')"); p.press('b'); p.step(2)   # the first press is B, which puts messages away
+        p.plug(); p.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9)"); p.press('b'); p.step(2)   # the first press is B, which puts messages away (TOAST_AT: as above, for the arrows' queue)
         check(p.ev("document.getElementById('tt').textContent") == 'Controller connected' and p.ev("toastEl.classList.contains('show')"), 'drop: a first press of B lost "Controller connected"')
         p.axes([0, -1, 0, 0]); p.step(6)
         check(p.ev('!!player.steer'), 'drop: the stick did not walk')
