@@ -49258,8 +49258,13 @@ if (WORK_MECH.m6) WORK_TICKS.push((now, skip) => {
   if (R0 && now >= R0.at && now < R0.at + 60 && !O && !skip) {
     incStart(INC_FIRST.kind, INC_FIRST.deck, now, true);
     const line = worksTeach('m6', c.by, 'call', ['Burst pipe, junior wing. With me.']);
-    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: incWho(c.by) }), trk: 'career:inc', trkFrom: R0.at, trkTo: R0.at + 60 }); }   // (FX3: kept, so only this one is cleared); FX1: gone once you're there, or after an hour (15b's trkDoneCheck)
+    { const o = OCCASIONS['works.m6']; if (o) incGoalSet({ deck: o.deck, room: o.room, label: worksText('inc.goal', 'Meet {name}', { name: incWho(c.by) }), trk: 'career:inc', trkFrom: R0.at + R0.len, trkTo: R0.at + 60 }); }   // (FX3: kept, so only this one is cleared); FX1: gone once you're there, or after an hour (15b's trkDoneCheck). FX4: not on arrival while the meeting's on (it says "Wait here" then, below; its walk to the pipe takes the arrow over)
     if (!line) try { toast(worksName(c.by), 'Burst pipe, junior wing. With me.'); } catch (e) { /* no UI */ }
+  }
+  if (R0 && !skip && !incGuide() && INC_GOAL.g && IX_GOAL === INC_GOAL.g && !R0.met && now < R0.at + R0.len) {   // FX4: in her office before the meeting starts, "Wait here" (it cleared as you came in, and your job's arrow sent you out again before the meeting began); out of it, back to "Meet"
+    let here = false; try { here = deckDef.num === R0.deck && roomAt(...player.here()) === R0.room; } catch (e) { here = false; }
+    const label = here ? worksText('inc.goal.wait', 'Wait here for {name}', { name: incWho(c.by) }) : worksText('inc.goal', 'Meet {name}', { name: incWho(c.by) });
+    if (INC_GOAL.g.label !== label) incGoalSet({ deck: R0.deck, room: R0.room, label, trk: 'career:inc', trkFrom: R0.at + R0.len, trkTo: R0.at + 60 });
   }
   if (O) {
     if (O.kind === 'lift' && !O.safe && now >= O.at + INC_LIFT && typeof liftStuck === 'function') { O.safe = true; liftStuck(false); }
@@ -50480,7 +50485,7 @@ function trainArrow(c, now) {                           // (its state on the fun
   const want = c.told && !r.met && r.status === 'asked' && now >= r.at - A.lead && now < r.at + r.len && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) : null;
   const label = here ? 'Wait here: ' + base.charAt(0).toLowerCase() + base.slice(1) : base;
-  const busy = !A.up && typeof myJob === 'function' && !!myJob();   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead
+  const held = typeof myJob === 'function' ? myJob() : null, busy = !A.up && !!held && !((held.start || 0) >= r.at - A.lead);   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead. FX4: not a job taken once the window had opened (a steady player turns one in and takes the next at the board: Day 5's scanner was missed till Monday with the queue off)
   if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: Tracked shows the way.'); } catch (e) { /* no UI */ } } return; }
   if (want && base && !A.lost && (!A.up || A.mine.label !== label)) {
     setGoal({ deck: r.deck, room: r.room, label });
