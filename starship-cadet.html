@@ -13666,7 +13666,13 @@ function stubTap(it, at) {
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
-  const trayAt = pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
+  const sp0 = placeId && ACT && ACT.spot && placeSpot(placeId);
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed && (ACT.phase === 'in' || ACT.phase === 'do') && (kind === 'eat' || kind === 'sit')
+      && (placeId === ACT.placeId || sp0 && Math.hypot(sp0.x - ACT.spot.x, sp0.z - ACT.spot.z) < 1.6)) {   // a tap on your seat or table mid-meal keeps the meal (LEAD31-9: it ended it, the tray already eaten into, and sat you down with nothing)
+    toast(ACT.o.title || 'Mess hall', 'You\'re still eating: about ' + taskMins(Math.max(1, ACT.def.mins - ACT.done)) + ' minutes to go. Walk away to stop.'); return;
+  }
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed) actEnd(true);   // any other start mid-meal: the rest of it back on your tray first (actEnd), so another seat finishes it
+  const trayAt =pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
   if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && trayAt(PLACE_OF.get(placeId))) {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
   }
@@ -13676,6 +13682,7 @@ function actStart(kind, placeId, o = {}) {
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
+  if (kind === 'eat' && o.fed && SHIP.player.trayLeft > 0 && SHIP.player.trayLeft < ACT.def.mins) { ACT.def.gain *= SHIP.player.trayLeft / ACT.def.mins; ACT.def.mins = SHIP.player.trayLeft; }   // a tray part eaten: only what's left (LEAD31-9)
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
   if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
@@ -13702,7 +13709,7 @@ function actBegin() {
   }
   if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt;   // your place in line from when you reach it
     const ln = typeof lineSpot === 'function' && lineAt(lineSpot('player')); if (ln) A.spot = ln; }   // the back of the real line now (0.28.36; section 16 owns who's in it, 15 only reads the spot)
-  if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
+  if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null, SHIP.player.trayLeft = 0;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   if ((A.kind === 'ixTea' || A.kind === 'ixLounge') && teaHere(A)) teaBegin(A);   // 13:00 in the Tea corner: tea and biscuits (playtest 1)
   if (typeof washBegin === 'function') washBegin(A);     // no hygiene farming (FX6): a shower's cooldown, a basin's only what a toilet took
@@ -13722,6 +13729,10 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
+  if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5) {   // a meal cut short: never lost in silence (LEAD31-9)
+    SHIP.player.tray = A.o.dish; SHIP.player.trayLeft = A.def.mins - A.done;
+    toast(A.o.title || 'Mess hall', 'You get up with your tray: about ' + taskMins(SHIP.player.trayLeft) + ' minutes of ' + A.o.dish + ' left. Tap a seat to finish it.');
+  }
   if (A.release) try { A.release(); } catch (e) { /* theirs */ }   // whoever stepped aside for you goes back (crewMakeWay, 0.28.40)
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
@@ -13765,7 +13776,7 @@ function actEnd(abort) {
   }
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
-  if (A.kind === 'queue') { SHIP.player.tray = dishName(A.o.dish); toast('Servery', 'Your turn. You take a tray: ' + SHIP.player.tray + '. Find a seat and tap it to eat.'); return; }   // 0.28.31: control back, tray in hand
+  if (A.kind === 'queue') { SHIP.player.tray = dishName(A.o.dish); SHIP.player.trayLeft = 0; toast('Servery', 'Your turn. You take a tray: ' + SHIP.player.tray + '. Find a seat and tap it to eat.'); return; }   // 0.28.31: control back, tray in hand
   if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
     const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
       .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
@@ -13778,7 +13789,7 @@ function actEnd(abort) {
 // queue, a tap or a drag doesn't walk you off; it asks "Leave the queue?" (Leave / Stay). Served, you hold your tray
 // (SHIP.player.tray, the dish; not saved) and choose a mess seat yourself: tap it and you sit and eat.
 const queueHeld = () => !!(ACT && ACT.kind === 'queue' && ACT.phase !== 'walk' && ACT.phase !== 'out') && (queueAsk(), true);
-SHIP.player.tray = null;
+SHIP.player.tray = null; SHIP.player.trayLeft = 0;   // trayLeft: a tray part eaten, the minutes of it left (LEAD31-9)
 function queueAsk() {
   let el = document.getElementById('qAsk');
   if (!el) {
@@ -54227,13 +54238,19 @@ function tap(cx, cy) {
   if (ride) return;
   if (FREEZE.frozen) { if (!PAUSE.on && PAUSE.tilesTap) PAUSE.tilesTap(); return; }   // nothing on the deck moves while frozen (0.28.50): mid-Tiles, the board comes back
   if (!liftEl.hidden) { closeLiftPanel(); return; }       // a tap outside the panel puts it away
+  { const ns = document.getElementById('needStrip'); if (ns && ns.classList.contains('open')) { ns.classList.remove('open'); STRIP_SIG = ''; return; } }   // the needs list open: a tap on the deck closes it, nothing more (LEAD31-9: it sat you down and ended your meal)
   // FX3 (arrows_check's week, Day 8: Calder beside the second puddle, or someone crossing it, took every tap there as a chat):
   // someone near the tap on screen, and the tap is on the arrow's pin or beside them, not on them, with your job's stop
   // under it: the job. A tap on the person themselves, away from the pin, still talks to them
   const near = typeof jobSpotTap === 'function' && crewAtScreen(cx, cy);
   const atPin = typeof IX_PIN !== 'undefined' && performance.now() - IX_PIN.t < 500 && Math.hypot(IX_PIN.x - cx, IX_PIN.y - cy) < CREW_PIN_PX;
-  if (near && (atPin || ![.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; }))) {
+  const onThem = near && [.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; });
+  if (near && (atPin || !onThem)) {
     const h0 = pick(cx, cy); if (h0 && !h0.object.userData.walker && jobSpotTap(h0.point)) return;
+  }
+  if (near && !onThem) {                                 // the servery counter beside the galley staff or the line, not on them, is the counter (LEAD31-9: it opened their cards)
+    const h1 = pick(cx, cy), it1 = h1 && h1.object.userData.item;
+    if (it1 && /^servery$/i.test(it1.t) && it1.hit) { it1.hit.getWorldPosition(_wp); if (playerTap(it1, _wp.clone(), h1.point)) return; }
   }
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)

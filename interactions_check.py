@@ -1426,5 +1426,82 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# LEAD31-9 (0.92.2, FE2's items 35 and 38): real taps in the mess at Day 1's dinner. (1) A tray, a seat, then one more tap
+# on the same seat mid-meal: the meal goes on (it ended it, the tray already eaten into, and sat you down with nothing);
+# with the needs list open, a tap on the deck only closes it; walking away keeps the rest on your tray, and a seat
+# finishes it, about one meal's Food in all. (2) A tap on the servery counter beside the galley staff or the line, not on them, joins the queue
+# (it opened their card), in any camera turn; a tap on a person still talks to them
+MESS_SCR = r"""((x, y, z) => { const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+MESS_ST = "[ACT && ACT.kind, ACT && ACT.placeId, ACT && ACT.phase, SHIP.player.tray, SHIP.player.needs.hunger, document.getElementById('tx').textContent]"
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== the mess at dinner: a second tap mid-meal, the counter beside the staff (real taps)')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    g.ev("goToDeck(3); setShipNow(18 * 60 + 50); SHIP.player.needs.hunger = 5; for (const t of ITEMS) if (t.t === 'Servery') { window.__sv = t; break; }"); g.step(60)
+    sv = g.ev("(() => { __sv.hit.getWorldPosition(_wp); const c = nearestOpen(_wp.x - 3, _wp.z, player); player.obj.position.copy(cellPos(...c)); player.stop(); return [_wp.x, _wp.y + .3, _wp.z]; })()"); g.step(30)
+    x, y = g.ev(f"({MESS_SCR})({sv[0]}, {sv[1]}, {sv[2]})"); g.page.mouse.click(x, y)
+    tray = False
+    for k in range(80):
+        g.step(30)
+        if g.ev("!!SHIP.player.tray"): tray = True; break
+    seat = g.ev(f"""(() => {{ const pp = player.obj.position, scr = {MESS_SCR};
+      const c = [...PLACE_OF.values()].filter(p => p.room === 'M' && p.pose === 'sit' && SIT_TYPES.has(p.type) && !heldBy(p.id)).map(p => [p, placeSpot(p.id)]).filter(x => x[1])
+        .sort((a, b) => Math.hypot(a[1].x - pp.x, a[1].z - pp.z) - Math.hypot(b[1].x - pp.x, b[1].z - pp.z))
+        .find(([p, s]) => {{ const q = scr(s.x, s.y, s.z); const el = document.elementFromPoint(q[0], q[1]); return q[0] > 20 && q[0] < 370 && q[1] > 200 && q[1] < 800 && !crewAtScreen(q[0], q[1]) && el && el.tagName === 'CANVAS'; }});
+      return c && [c[0].id, c[1].x, c[1].y, c[1].z]; }})()""")
+    check(tray and seat, f'the servery hands you a tray and there is a free seat to tap ({tray}, {seat})')
+    if tray and seat:
+        x, y = g.ev(f"({MESS_SCR})({seat[1]}, {seat[2]}, {seat[3]})"); g.page.mouse.click(x, y)
+        for k in range(40):
+            g.step(30)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        g.step(60); f0 = g.ev("SHIP.player.needs.hunger")
+        x, y = g.ev(f"({MESS_SCR})({seat[1]}, {seat[2]}, {seat[3]})"); g.page.mouse.click(x, y); g.step(4)
+        s1 = g.ev(MESS_ST)
+        check(s1[0] == 'eat' and s1[1] == seat[0] and 'still eating' in s1[5], f'one more tap on your seat mid-meal: you keep eating ({s1[:3]}, {s1[5][:70]})')
+        # the needs list open (tap the strip for names and numbers): a tap on the deck closes it and nothing else
+        g.ev("document.getElementById('needStrip').classList.add('open')"); g.page.mouse.click(x, y); g.step(4)
+        sb = g.ev("[document.getElementById('needStrip').classList.contains('open'), ACT && ACT.kind, ACT && ACT.placeId]")
+        check(not sb[0] and sb[1] == 'eat' and sb[2] == seat[0], f'with the needs list open, a tap on the deck only closes it: the meal goes on ({sb})')
+        # walking away mid-meal: the rest stays on your tray, and you're told; a seat finishes it
+        g.step(150)
+        w = g.ev("(() => { const s = placeSpot(ACT.placeId), c = nearestOpen(s.x + 3, s.z + 2, player); playerGo(c); return c; })()"); g.step(20)
+        sw = g.ev(MESS_ST)
+        check(sw[0] != 'eat' and sw[3] and 'get up with your tray' in sw[5], f'walking away mid-meal: the rest stays on your tray, and you\'re told ({sw[0]}, {sw[3]}, {sw[5][:70]})')
+        x, y = g.ev(f"({MESS_SCR})({seat[1]}, {seat[2]}, {seat[3]})"); g.page.mouse.click(x, y)
+        for k in range(40):
+            g.step(30)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        left = g.ev("ACT && ACT.kind === 'eat' ? [ACT.def.mins, ACT.def.gain] : null")
+        check(left and left[0] < 20, f'back at a seat, only what was left on the tray ({left})')
+        for k in range(80):
+            g.step(30)
+            if not g.ev("!!(ACT && ACT.kind === 'eat')"): break
+        s2 = g.ev(MESS_ST)
+        check(f0 + 30 < s2[4] < f0 + 62 and not s2[3], f'and Food rises by about one meal in all, the tray done ({round(f0)} -> {round(s2[4])}, tray {s2[3]}: {s2[5][:50]})')
+    # (2) the counter, from 3 m, four camera turns: points on its tap box with someone near on screen but the tap not on them
+    g.ev("actEnd(true); SHIP.player.tray = null; setShipNow(18 * 60 + 40)"); g.step(30)
+    tried, bad = 0, []
+    for turn in range(4):
+        g.ev("(() => { actEnd(true); const b = new THREE.Box3().setFromObject(__sv.hit), c = nearestOpen(b.min.x - 3, (b.min.z + b.max.z) / 2 + 2, player); player.obj.position.copy(cellPos(...c)); player.stop(); })()"); g.step(40)
+        pts = g.ev(f"""(() => {{ const b = new THREE.Box3().setFromObject(__sv.hit), scr = {MESS_SCR}, out = [];
+          for (const fz of [.1, .3, .5, .7, .9]) for (const fy of [.6, 1]) for (const fx of [0, .5]) {{
+            const q = scr(b.min.x + (b.max.x - b.min.x) * fx, b.max.y * fy, b.min.z + (b.max.z - b.min.z) * fz); if (!(q[0] > 10 && q[0] < 380 && q[1] > 10 && q[1] < 834)) continue;
+            const h = pick(q[0], q[1]), near = crewAtScreen(q[0], q[1]), el = document.elementFromPoint(q[0], q[1]);
+            if (!h || h.object.userData.item !== __sv || !near || !el || el.tagName !== 'CANVAS') continue;
+            const on = [.5, 1, 1.4].some(hy => {{ _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - q[0], (1 - _cp.y) / 2 * innerHeight - q[1]) < CREW_ON_PX; }});
+            if (!on) out.push([Math.round(q[0]), Math.round(q[1]), near.p ? near.p.id : '?']); }}
+          return out.slice(0, 3); }})()""")
+        for px, py, who in pts:
+            g.ev("actEnd(true); player.stop()"); g.step(2)
+            g.page.mouse.click(px, py); g.step(6); tried += 1
+            a = g.ev("ACT && ACT.kind")
+            if a != 'queue': bad.append([turn, px, py, who, a])
+        g.ev("actEnd(true)"); g.page.click('#rot'); g.step(80)
+    print(f'   counter taps beside someone: {tried} tried, {tried - len(bad)} joined the queue')
+    check(tried > 0 and not bad, f'a tap on the servery counter beside the staff or the line, not on them, joins the queue ({tried} tried: {bad[:3]})')
+    check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
