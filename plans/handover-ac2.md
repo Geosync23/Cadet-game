@@ -28,20 +28,19 @@ Keep `plans/arrows-c-assembly.md` current with each merge.
 - **Checks:** `arrows_d_check.py` (about 2 minutes; every line has a planted fault it catches; mutant list lives in my
   scratchpad, the names are in the build-table rows). interactions_check (board kinds), player_check (tea not taken).
 
-## Where the week stands (arrows_check, on 64fe416e + F2 5f7e91c)
+## Where the week stands (final rerun, tip 1d12e33: F2 + everything above)
 - shift guide: OK (19 jobs, clocked out).
-- week guide (queue on): m1 Day 2, m3d + m4 Day 3, m5 Day 4, m7 Day 5 on time. m3i failed because the queue had no
-  inspection entry: F2 built since (5f7e91c), not yet rerun. p3 and m6 not learned; stuck at "Clean a vent: hydroponics
-  garden" (Day 4) and "Mop up (2 of 2)" (Day 8).
-- week (queue off): m1, m3d, m4, m3i, m5 on their days; m7 stays at 'ask' from Day 5; p3, m6 not learned; stuck at the
-  hydroponics vent and "Clean a vent: lift plaza".
-- A single Day 5 run (queue on): no head-scratcher job ever reached the player (the follower took other board jobs), so
-  p3 never started: whose arrow should lead to the first case job is open (FX2/FX3, sent to lead 30).
+- week guide (queue on): m1 Day 2, m3d + m4 Day 3, m3i + m5 Day 4, m7 Day 5, m2 by Day 8, all on time. Not learned:
+  p3 (FX5 fixing: the case is solved before p3's row opens), m6 (stuck at "Mop up (2 of 2)", FX3). Also stuck: "Clean a
+  vent: hydroponics garden" Day 4 (FX3).
+- week (queue off): m1, m3d, m4, m3i, m5 on their days; m7 stays at 'ask' from Day 5 (FX4 fixing); p3, m6 follow from it;
+  stuck at the hydroponics vent and "Clean a vent: lift plaza" (FX3).
 
 ## Loose ends
-- F2 (the inspection through the queue) and the follower commits since 483c3da need RV7's review.
-- Routed by lead 30 or waiting: the vent pins (hydroponics, lift plaza), "Mop up (2 of 2)", p3's first case job, m7
-  with the queue off.
+- F2 (5f7e91c: the inspection through the queue) and the follower commits since 483c3da need RV7's review.
+- AC3 (session_01DiLRzrXgkeoAZCoX1mVJn9) owns claude/arrows-c from 2026-10-23 ~02:05 UTC (lead 30).
+- Routed by lead 30: the vent pins and "Mop up (2 of 2)" to FX3; p3 to FX5 (session_01LGRr55ZQCd11PuqhJEn9Jj, claude/p5-fix5);
+  m7 with the queue off to FX4 (session_01BueJ4UzQkn8HcC1TXd1KrW). Merge each into arrows-c when its review passes.
 - FX3: the climbing wall. Merge when RV7 passes.
 - Game note (raised, not owned): with the queue off nothing points a player at Fault notes after "it still leaks".
 
