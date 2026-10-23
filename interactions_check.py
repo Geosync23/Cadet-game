@@ -58,6 +58,7 @@ with sync_playwright() as pw:
     for deck, title, kind, need in PARITY:
         g.ev(f"goToDeck({deck})"); g.step(3)
         g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 50")
+        if kind == 'ixBasin': g.ev("if (typeof washLoad === 'function') SHIP.player.wash = { shower: null, owed: 3, pre: 53 }")   # a hand-wash puts back only a toilet's take (FX6): as after a visit
         if title == 'The bar':                         # a stool is a drink only with one from the bar (section 15's barTap, 0.28.62); by day the bar is shut
             g.ev("SHIP.player.drink = null"); shut = tap(title); g.step(1)
             check(shut is True and 'Back at 17:30' in st()['toast'] and not g.ev("SHIP.player.drink"), f'the bar by day: "Back at 17:30" ({st()["toast"][:60]})')
