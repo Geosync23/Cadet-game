@@ -1,6 +1,24 @@
 # CR6 check results
 
-## 0.92.0 full round (2026-10-23): first pass done, check fixes pending
+## 0.92.0 full round (2026-10-23): OK (after test-only check fixes)
+
+**Final:** every check in my share passes on game sha256 c2180854...f1286. The five first-pass FAILs were all in the
+checks (written for arrows off, or reading a pop-up that the arrows-on queue holds back); each was fixed in the check
+only and re-run alone on the same game file:
+
+| Check | Re-run with | Result |
+|---|---|---|
+| mech_check | a9823284's mech_check.py (sha 6a067a85) | OK (exit 0, 582 s), `MECH CHECK OK`; fx3 m6 goal `[4, '4-valve-panel', 'Follow Calder to the burst pipe, Deck 4']`; the last part ran |
+| join_check | b842fa43's join_check.py (sha 6be4e077) | OK (exit 0, 143 s), `JOIN CHECK OK`, no FAIL lines |
+| clothes_check | 6cc38797's clothes_check.py (sha 48241023) | OK (exit 0, 88 s), `ALL OK` |
+| tiles_check | 567e39fc's tiles_check.py (sha 50f95a28), fully alone | OK (exit 0, 116 s), `ALL OK` |
+| fridays_check | 6c55b296's fridays_check.py (sha a4a1e69c) | OK (exit 0, 1142 s), `FRIDAYS CHECK OK`; missed on Day 26 `[26, 19, 1] mails 1` |
+
+controller_check (all parts but reach) went to CR3: 26 parts OK, day FAILs only with the known KC1/KC2.
+A slip on my side: the first tiles re-run waited on itself (my "nothing else running" guard matched its own
+command line), so cab36489's version never ran; only 567e39fc's (the one that ships) did, as BM14 asked.
+
+### First pass
 
 - **Build:** `claude/integration-next` 4147f03d (0.92.0: the teaching arrows ON, breakfast at 07:00, Zeke's tour, the
   dinner spread and more), `starship-cadet.html` sha256
