@@ -533,6 +533,19 @@ def pad_moves(r, n):
         x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
     return seen, order
 pad_moves.nameless = set()
+# the element a key from SCAN names (the same key rule, without its on-screen test), marked data-ctt
+KEY_MARK = r"""((want) => { for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt');
+  const seen = new Map();
+  for (const e of document.body.querySelectorAll('*')) {
+    if (e.closest('[hidden]') || !e.getClientRects().length) continue;
+    let a = e; while (a && a !== document.body && !a.id) a = a.parentElement;
+    const lab = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
+    let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
+    if (!want.startsWith(key)) continue;
+    const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
+    if (key === want) { e.setAttribute('data-ctt', '1'); return true; }
+  }
+  return false; })"""
 # things the D-pad needn't reach, each with its reason (and who ruled)
 PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
@@ -550,10 +563,15 @@ def part_reach_pad(pw, src, tag, states):
         for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
         # (CP1) the zigzag above covers a dozen rows; anything it missed: steer the highlight straight at it, up to 40
         # presses (pad_to: the bigger gap first), as a player aiming for it would
+        # (CTT3) found by its key, not by its point on screen: after the zigzag a long panel may have scrolled it out of
+        # sight (0.91.0's device home: Roster, its last tile), and the highlight scrolls it back in as it gets there
         for k in list(missing):
-            it = next((i for i in Sweep.inner(sw.scan()) if i['k'] == k), None)
-            if it and sw.r.ev(f"(() => {{ const e = document.elementFromPoint({it['x']}, {it['y']}); for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt'); if (!e) return false; (e.closest('button,a,input,select,textarea,[tabindex],[role]') || e).setAttribute('data-ctt', '1'); return true; }})()") and pad_to(sw.r, '[data-ctt]', 40):
-                missing.remove(k); seen.add(k)
+            if not sw.r.ev(f"({KEY_MARK})({json.dumps(k)})"): continue
+            ok = pad_to(sw.r, '[data-ctt]', 40)
+            if not ok:   # steering from where the wander ended can bounce between two; from the top again, as a player would
+                for _ in range(15): sw.r.press('UP'); sw.r.step(1)
+                ok = pad_to(sw.r, '[data-ctt]', 40)
+            if ok: missing.remove(k); seen.add(k)
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
