@@ -14,7 +14,7 @@ Memory about 60% at writing: stopping here; a fresh fixer takes any new job.
 | claude/day0-trickle 0e392cf3 + de475883 | Day 0's table trickles out from Zeke's LIVE goodnight (the user, 2026-10-23): section 14 day0Free/day0Trickle patch only the diners after Day 0 is planned (2-50 min after the goodnight, then bunk till their planned evening); plans never read the live minute | RV10 | to BM15 for 0.92.1 |
 
 ## Loose ends / for the next session
-- Done (day0-stay): the user said yes to diners with an hour or more staying on Deck 3. Waits of 19-59 minutes still take the bunk trip (left as it was; the user asked only about an hour or more).
+- Done (day0-stay): after the Day 0 dinner no diner takes the lift to their bunk; all stay on Deck 3 (the user's yes, then lead 31: whatever the wait).
 - tip-clear (feb2e54a) was not in arrows-c when booth-arrow was reviewed: a tip card over a pin still took taps there; check it's in the merged line.
 - Backlog idea (not filed): day0Trickle leaves the table seats "held" in occ until the old end (harmless today: nobody else's plan is made after it).
 
