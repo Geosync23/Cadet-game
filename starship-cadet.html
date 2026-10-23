@@ -13676,6 +13676,7 @@ function actBegin() {
   if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   if ((A.kind === 'ixTea' || A.kind === 'ixLounge') && teaHere(A)) teaBegin(A);   // 13:00 in the Tea corner: tea and biscuits (playtest 1)
+  if (typeof washBegin === 'function') washBegin(A);     // no hygiene farming (FX6): a shower's cooldown, a basin's only what a toilet took
   if (A.def.need && NEED_GOAL && NEED_GOAL.need === A.def.need) needGoalClear();   // on your way to fixing it: the marker's done its job
   if (A.kind === 'sit' || A.kind === 'eat') sitBump(A);   // sitting down near people: a little social (playtest 1)
   const p = player.obj.position, s = A.spot || { x: p.x, z: p.z, y: 0, face: player.face };
@@ -13695,6 +13696,7 @@ function actEnd(abort) {
   if (A.release) try { A.release(); } catch (e) { /* theirs */ }   // whoever stepped aside for you goes back (crewMakeWay, 0.28.40)
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
+  if (A.kind === 'toilet' && typeof washToilet === 'function') washToilet(A);   // what the toilet took, for the basin to put back (FX6)
   if (A.o.cost) for (const k in A.o.cost) if (A.o.cost[k] >= .5) needFloat('\u2212' + Math.round(A.o.cost[k]) + ' ' + NEED_LABEL[k], k, -A.o.cost[k]);   // what it cost, like a gain's note: the toilet's "−3 Hygiene" (playtest 2, 0.73.0)
   if ((A.phase === 'do' || A.phase === 'out') && A.done > 0) {   // the note bus (0.28.22): done, or walked away part way
     const act = { shower: 'wash', eat: 'eat', grab: 'eat', call: 'call' }[A.kind];
@@ -14099,7 +14101,9 @@ function playerUpdate(dt, t) {
       if (A.kind === 'job' && A.o.repair && SHIP.player.work) SHIP.player.work.done += m;   // repair time is kept if you walk away
       if (A.kind === 'make' && SHIP.player.work && SHIP.player.work.make) SHIP.player.work.make.done += m;   // and making a part
       const bm = A.def.need === 'social' && A.o.opp ? bondMult(A.o.opp) : 1;   // a game of Tiles: by your bond with them (0.28.43)
+      const v0 = A.def.need && n[A.def.need];
       if (A.def.need) n[A.def.need] = needClamp(n[A.def.need] + A.def.gain / A.def.mins * fxR(fx, A.def.need) * bm * m);
+      if (A.o.wash && m > 0) washGain(A, v0);            // a shower or basin: its cap, the cooldown's start (FX6)
       if (A.def.cost) for (const k in A.def.cost) { const was = n[k]; n[k] = needClamp(n[k] - A.def.cost[k] / A.def.mins * m); (A.o.cost || (A.o.cost = {}))[k] = (A.o.cost[k] || 0) + was - n[k]; }   // a workout tires you (0.28.17); A.o.cost: what it took, shown at the end (0.73.0)
       if (A.kind === 'eat' && m > 0) {                   // company at your table (0.28.10, 0.28.43): by the bond, up to COMPANY_CAP
         const c = company(A); A.o.company = Math.max(A.o.company || 0, c);   // bond-weighted, capped (0.28.43)
@@ -14231,7 +14235,7 @@ SIM_ADVANCE.push((from, to) => {
 });
 // New game (section 13): fresh needs, nothing in hand
 function playerNew() {
-  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.teaDay = null; NEED_GOAL = null; PUSH = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
+  actEnd(true); basket = null; SHIP.player.needs = needsLoad(null); NEED_SEEN = null; SHIP.player.carry = []; SHIP.player.work = null; SHIP.player.wsteps = []; SHIP.player.wash = washLoad(null); SHIP.player.bedMade = null; SHIP.player.untidy = false; SHIP.player.teaDay = null; NEED_GOAL = null; PUSH = null; SHIP.player.tray = null; SHIP.player.crate = null; needsT = null; slowWas = {}; WARN_SAID = {}; TEACH_ST = null; POP.tip = -1e9; Object.assign(SHIP, { news: [], newsUsed: [], newsAt: null, newsRows: {} });
   Object.assign(SHIP.player, walletLoad(null)); SHIP.player.bought = 0; SHIP.player.cart = null; SHIP.player.name = null; SHIP.mail = []; mailWelcome(); device.refresh();
   DINNER_SAT = false; DINNER_TRY = -1;                   // a new arrival dinner seats you again (reviewer 1, 0.28.37)
   SHIP.player.alarm = WAKE_AT;                           // the alarm clock back at 06:00 (0.73.0)
@@ -14865,6 +14869,7 @@ const NEED_FIX = { hunger: ['servery-queue', 'grab-shelf'], energy: ['bed'], hyg
 const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower', bathroom: 'A toilet', fitness: 'The gym', social: 'The call booths', leisure: 'Somewhere to sit and unwind' };
 let NEED_GOAL = null;                                     // { need, label } while the marker is ours
 function needGoal(k) {
+  if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
@@ -15026,6 +15031,35 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 // ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // ---- slot: Player engineer (section 15). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// no hygiene farming (FX6, the user's, 2026-10-23; lead 31's rule): a shower (Deck 4's, a cabin's, the rec deck's) gives
+// hygiene at most once every WASH_COOL ship minutes; one sooner still runs, gives none and says so. A basin only puts back
+// what toilet visits took since the last wash (owed), never above where hygiene was before the first of them (pre). The
+// player only: the crew's washing is section 14's. SHIP.player.wash = { shower: ship minute | null, owed, pre | null }, saved
+const WASH_COOL = 360, WASH_SHOWERS = new Set(['shower', 'recShower']);
+const WASH_SAY = { shower: 'You\'re still fresh from your last shower, so this one is just for comfort.', basin: 'Your hands are already clean, so this is just a quick rinse.' };
+function washLoad(s) {
+  const w = s && s.player && s.player.wash, num = v => typeof v === 'number' && Number.isFinite(v);
+  return { shower: w && num(w.shower) ? w.shower : null, owed: w && num(w.owed) ? Math.max(0, Math.min(100, w.owed)) : 0, pre: w && num(w.pre) ? Math.max(0, Math.min(100, w.pre)) : null };
+}
+SHIP.player.wash = washLoad(SAVED);
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wash = { ...SHIP.player.wash }; });
+function washCooling(t = shipNow()) { const at = SHIP.player.wash.shower; return at !== null && at <= t && t - at < WASH_COOL; }
+function washBegin(A) {                                  // from actBegin: set the cap this wash may raise hygiene to
+  const W = SHIP.player.wash, h = SHIP.player.needs.hygiene;
+  if (A.kind === 'toilet') { if (W.pre === null) W.pre = h; return; }   // where you were before the first visit since a wash
+  const shower = WASH_SHOWERS.has(A.kind);
+  if (!shower && A.kind !== 'ixBasin' || A.def.need !== 'hygiene') return;
+  const cap = shower ? (washCooling() ? h : 100) : Math.min(W.pre === null ? h : W.pre, h + W.owed);
+  A.o.wash = { cap: Math.max(h, cap), stamp: shower && cap > h };
+  if (cap <= h) A.o.after = [A.o.after, WASH_SAY[shower ? 'shower' : 'basin']].filter(Boolean).join(' ');
+}
+function washGain(A, v0) {                               // each minute it runs: hold hygiene to the cap; a shower starts its cooldown
+  const W = SHIP.player.wash, n = SHIP.player.needs, c = A.o.wash;
+  if (n.hygiene > c.cap) n.hygiene = Math.max(c.cap, v0);
+  if (c.stamp) { W.shower = shipNow(); c.stamp = false; W.owed = 0; W.pre = null; }   // a real shower washes the toilet off too
+  if (A.kind === 'ixBasin') { W.owed = Math.max(0, W.owed - Math.max(0, n.hygiene - v0)); if (W.owed < .01 || n.hygiene >= c.cap) { W.owed = 0; W.pre = null; } }
+}
+function washToilet(A) { const t = A.o.cost && A.o.cost.hygiene; if (t > 0) SHIP.player.wash.owed = Math.min(100, SHIP.player.wash.owed + t); }
 // patch #21 (plans/patch-plan.html, the user's "Junior Officer"): the rank before the title on a crew card and in the device's
 // crew lists ("Junior Officer · Storekeeper · stranger"). Left out where the title already says it (Captain, Executive Officer,
 // Head of …) and for guests. The words live in content/banks/talk.lines (card.rank.*). Off = identical; ?rankcard turns it on.
