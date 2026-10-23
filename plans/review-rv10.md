@@ -7,8 +7,8 @@ a folder holding cadet_test.py, an output folder).
 |---|---|---|
 | DV1 Dev career arrow | claude/dev-career-arrow 9f51257a (arrows-c f8ed8521), sha 5be2df87 | PASS |
 | FX7 Tiles partner sits | claude/tiles-sit 0a58748e (breakfast-back 0cd37b1b) | PASS |
-| FX6 hygiene cooldown | claude/hygiene-cool cbd41548 (breakfast-back 0cd37b1b) | FIXES NEEDED (see below) |
-| FX5 call-home booth arrow | on claude/arrows-c via AC3 | waiting |
+| FX6 hygiene cooldown | claude/hygiene-cool cbd41548, then 50fd3f2a (breakfast-back 0cd37b1b) | FIXES NEEDED, then PASS |
+| FX5 call-home booth arrow | claude/booth-arrow 771c9ff2 (3 commits + arrows-c 8ab6089f), sha b8d67573 | PASS |
 
 ## DV1, 9f51257a: PASS
 - Diff only adds lines (section 25's slot + one line in devmodeQuick); nothing runs without #dev.
@@ -31,6 +31,19 @@ a folder holding cadet_test.py, an output folder).
   full 6-hour cooldown: hygiene 30 -> rinse 49.9 -> Deck 4 shower stays 50. A shower walked away from after a minute
   also locks showers for 6 hours. During a cooldown the end toast still says "Clean, and smelling of the ship's one
   soap" with no gain (the "still fresh" words are in the start toast only).
+
+## FX6 fix, 50fd3f2a: PASS
+- Only a full shower starts the cooldown (at half its time, or 40 from short ones, lapsing after 6 h); the rinse never does;
+  its own end lines. player_check + interactions_check OK, check_fast OK, cadet_test ALL IDENTICAL (noise).
+- Real play: rinse 30 -> 49.9 with no cooldown, then a Deck 4 shower -> 100; a cooling shower ends "A warm rinse...".
+
+## FX5, 771c9ff2: PASS
+- Day 0 call arrow and the Tracked "The call booths" row keep to a free booth until the call begins; a tap at the booth's
+  pin with someone under it is the booth (ixPinBooth). intro_check --firsts: FX5 lines fail on 8ab6089f, OK after;
+  interactions_check OK (alone); check_fast OK; cadet_test vs 8ab6089f ALL IDENTICAL.
+- Real taps at both sizes, incl. Calder in Booth 1 with the arrow on Booth 2 at 320 wide: on 6caeb176 the pin tap opened
+  her card 3/3; on 771c9ff2 the first tap starts the call.
+- Two interactions_check runs at once (base + FX5) both stalled at "near your job, but not it"; alone it passes.
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
