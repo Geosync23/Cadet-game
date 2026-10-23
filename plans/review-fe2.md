@@ -194,3 +194,8 @@ build table.
 - Judgement call (SC1's, for the lead and the user): the plan can only use the fixed 'free' minute, so with DS1's tour
   (free 19:45) the Day 0 table stays full about an hour after a player who's let go at about 18:20. I'd keep it (the
   user asked for "full while you're there"), and say so to the user.
+- **dinner-spread's check (FX4 ed7f5318, events_check part 1a, test only; game unchanged since ed6bcbf3): PASS, so
+  dinner-spread is now PASS.** Whole events_check OK on ed7f5318; on 0cd37b1b part 1a FAILS on every meal tradition
+  (22-27 of a table up in one minute; Sunday tables 8-9) and on Day 0's table (24 of 48 five minutes before 'free').
+  Note: the limit of 6 is exactly the tip's worst (the Sunday tables on Days 7, 14 and 21), so a small schedule change
+  elsewhere could tip it to 7; if that happens, the number may need a look rather than the game.

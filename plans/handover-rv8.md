@@ -20,10 +20,10 @@ wants AC2 (session_015uhdrDuE49CJ8iWWX2SEeP) copied on anything going into claud
 | FB1 fe-cartdock | a52aad05, 228de584, ebf456b6, 191bee5d | PASS each |
 | SC1 breakfast-back | claude/breakfast-back 0cd37b1b | PASS |
 | FX5 tip-clear | claude/tip-clear feb2e54a | PASS |
-| SC1 dinner-spread | claude/dinner-spread ed6bcbf3 | PASS WITH FIXES (needs a check part that fails without it; probes p_leave.py, p_day0table.py) |
+| SC1 dinner-spread | claude/dinner-spread ed6bcbf3, check ed7f5318 (FX4) | PASS WITH FIXES, then PASS with events_check 1a |
 
 ## Loose ends
-- dinner-spread: re-check SC1's new check line when it comes (should FAIL on 0cd37b1b, pass on the tip).
+- dinner-spread's events_check 1a limit (6 a minute) equals the tip's worst (Sunday tables): a later schedule change may need the number looked at.
 - Day 0's Sunday table stays full about an hour after you're let go with DS1's tour (plans use the fixed 'free' minute): the user should hear it.
 - Stale-ray edge (FB1's choreThingTap onPin reads the last canvas ray; CP4's ixGoalTap calls playerTap without one):
   lead 30 put it on the backlog.
