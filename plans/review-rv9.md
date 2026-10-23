@@ -77,3 +77,22 @@ step after a walker).
   are the same on both builds (Spine ladder still offered as item:N), plus place:3-bench-2 from (1). padWhat says
   'ladder' whatever ladderTap would do; tap() takes that step only if ladderTap(null) succeeds, which fails only with
   the ladder off, mid-ride, or with no way to the ladder room and no hatch.
+
+## Verdicts, 2026-10-23 (lead 30, then lead 31 session_0118SXBCdg87nDiXdtrGNVSR)
+- **FX5 claude/p5-fix5 c5eb7119: PASS** (to FX5 session_01LGRr55ZQCd11PuqhJEn9Jj, AC3 session_01DiLRzrXgkeoAZCoX1mVJn9,
+  the lead). WORK_MECH.p3.open trains when W.use.p3 > 0 (worksUse's small-row rule: a use trains only once the row is
+  open); worksTrained can't train twice. mech_check: OK on the fix; on 46e594cd only the new 24k line fails. cadet_test
+  ALL IDENTICAL; check_fast OK.
+- **FX4 claude/p5-fix4 tip fc2e1c6d: PASS** (to FX4 session_01BueJ4UzQkn8HcC1TXd1KrW, AC3, the lead).
+  e38eba4d: trainArrow's busy needs the held job taken before the window (j.start, set at every claim). career_check
+  (p2) fails on 5f7e91cd, all OK after; intro_check all OK (part 14: the solo job keeps the arrow to 10:40); cadet_test
+  ALL IDENTICAL; check_fast OK. FX4 + FX5: the game merges cleanly; mech_check on the merge OK.
+  fc2e1c6d: Calder's call arrow trkFrom = the meeting's end, and "Wait here" in her office. IX_GOAL === INC_GOAL.g holds
+  (incGoalSet stores IX_GOAL); the follow arrow (m6.reserve) is set after the meeting starts, so the new block never
+  relabels it. career_check (p3) fails on its parent, all OK after; cadet_test ALL IDENTICAL; check_fast OK.
+- **DS1 claude/zeke-tour:** not pushed yet. Ready: review-rv9/zeke/addlog.py (adds a timed log of bubbles, the box,
+  panels, Mail, goals and both positions to intro_check part 8: `python3 addlog.py intro_check.py`, then
+  `RV9_LOG=out.json python3 intro_check.py GAME.html --evening`) and compare.py (`python3 compare.py before.json
+  after.json`: lines lost, how each is given, the dinner part from toMess identical, Zeke's still spans). The before
+  run on 989fd566, twice: the same 91 lines, the dinner part identical in ship time. Zeke stands still on Deck 4 at
+  (19,9) 16:59-17:03 and (14,5) 17:08-17:10; in the bunk room (8,4) 17:15-17:17 before the device.
