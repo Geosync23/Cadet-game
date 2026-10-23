@@ -17,7 +17,8 @@ branches: the controller off (`PAD_ON = false`), the arrows off (as arrows-c shi
 | round 2 | e27b8bfe (BM14's 0.91.0 candidate on claude/integration-next-fe1 = 0.90.9 + fresh-eyes batch 1) | 7ff2c27 | 2 game conflicts (#3, #4, same resolutions) + the FX3 fix 10 duplicate in design-doc.md, interactions_check.py and build-table (#5) + backlog rows. Commit 62347604, not pushed: overtaken by the breakfast rollback |
 | round 3 | 9a8eac0b (CP1's controller 0.90.9 redone on 0.64.16 b9f053ba, after the user rolled back breakfast) | 69d1ed9b | 2 game conflicts (#3, #4) + backlog and build-table rows; same resolutions. This is claude/trial-p5-on-controller (c91e04a8 to 77256a82; replaced by round 4) |
 | round 4 | 989fd566 (BM14's new 0.91.0 candidate on claude/integration-next-fe1 = CP1's 9a8eac0b + fresh-eyes batch 1) | 69d1ed9b | as round 2: #3, #4, the FX3 fix 10 duplicate (#5) in design-doc, interactions_check and build-table; same resolutions. Commit 8bd5d1c4 (notes fce67dac, 9b7be696); replaced on the branch by round 5 |
-| round 5 | 01b237f4 (BM14's staging on claude/integration-next-fe1 = 0.91.0 + CP1's controller follow-up dcdfe944 + CTT3's controller_check) | 12b67c70 (includes 3c42632, FX3 16-18) | as round 4 (#3, #4, #5, docs) + one new: player_check.py (#6). Commit a4f7d4f0: this is claude/trial-p5-on-controller now |
+| round 5 | 01b237f4 (BM14's staging on claude/integration-next-fe1 = 0.91.0 + CP1's controller follow-up dcdfe944 + CTT3's controller_check) | 12b67c70 (includes 3c42632, FX3 16-18) | as round 4 (#3, #4, #5, docs) + one new: player_check.py (#6). Commit a4f7d4f0 |
+| round 5b | 01b237f4 | 9197ba11 (+ FB1's galley drop, 191bee5) | merged by itself into round 5, no conflict. Commit 45362bd6: this is claude/trial-p5-on-controller now |
 
 ## Conflicts in the game (starship-cadet.html)
 
@@ -96,6 +97,9 @@ Round 5 (01b237f4 + arrows-c 12b67c70, commit a4f7d4f0):
 | interactions_check | OK |
 | controller_check, every part but reach (CTT3's corrected file) | CONTROLLER CHECK OK (touch and day pass now) |
 | controller_check reach | not run here (over 2 hours on this container; for the full round) |
+
+Round 5b (45362bd6 = round 5 + arrows-c 9197ba11): check_fast OK; arrows queue, d, f OK; player_check OK;
+interactions_check OK; controller_check every part but reach OK.
 
 cadet_test is not run on rounds 4 and 5: there is no "0.91.0 without the controller" to compare against; round 3's
 ALL IDENTICAL (same controller, same arrows-c) covers "the controller off changes nothing visible".
