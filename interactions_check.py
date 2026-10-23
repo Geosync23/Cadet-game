@@ -1397,5 +1397,34 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# LEAD31-1 (0.92.1): real taps at phone size by the Deck 3 gym's two exercise bikes, in all four camera turns: on the floor at
+# each bike and 0.3 m out on the three sides away from the other bike, each starts that bike (before: a floor tap took the
+# place the tap's line passed nearest at any height, and only bike 16 had a tap box, so taps by bike 17 started bike 16 or
+# nothing). At 03:00, with nobody in the gym (a tap by someone is a word with them, as designed)
+BIKE_AT = r"""((pid, dx, dz) => { const s = placeSpot(pid), v = new THREE.Vector3(s.x + dx, .02, s.z + dz).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== real taps by the exercise bikes, four camera turns')
+    home = g.ev("""(() => { goToDeck(3); setShipNow((SHIP.time.day - 1) * 1440 + 3 * 60); if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }
+      const s = placeSpot('3-gym-17'); if (!s || !placeSpot('3-gym-16')) return null; const c = nearestOpen(s.x + 1.5, s.z + 1.5, player); window.__home = cellPos(...c); player.obj.position.copy(__home); player.stop();
+      return Math.sign(placeSpot('3-gym-17').x - placeSpot('3-gym-16').x) || 1; })()""")
+    if home is None: print('   no exercise bikes in this build, skipped')
+    else:
+        g.step(60); res, bad = [], []
+        for turn in range(4):
+            for pid, away in (('3-gym-16', -home), ('3-gym-17', home)):
+                for dx, dz in ((0, 0), (.3 * away, 0), (0, .3), (0, -.3)):
+                    g.ev("actEnd(true); player.obj.position.copy(__home); player.stop()"); g.step(30)
+                    x, y = g.ev(f"({BIKE_AT})('{pid}', {dx}, {dz})")
+                    if 0 <= x <= 390 and 0 <= y <= 844: g.page.mouse.click(x, y); g.step(90)
+                    a = g.ev("ACT && [ACT.kind, ACT.placeId]")
+                    res.append(bool(a and a[1] == pid))
+                    if not (a and a[1] == pid): bad.append([turn, pid, (round(dx, 1), dz), a])
+            g.ev("actEnd(true)"); g.page.click('#rot'); g.step(80)
+        print(f'   {sum(res)} of {len(res)} taps started the bike tapped')
+        check(not bad, f'a real tap by an exercise bike, any camera turn, starts that bike ({bad[:4]})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

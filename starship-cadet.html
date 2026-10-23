@@ -5612,7 +5612,7 @@ DECKS[3] = {
     [1.0, 1.8].forEach((x, k) => place('F', 'rower', x, 4.6, 's', { place: '3-gym-' + (11 + k), it: k ? IT('Rowing machines', 'A matched pair, side by side, so two people can race. Somebody always says it isn\'t a race.') : undefined }));
     place('F', 'punchBag', 7.5, 4.5, 'e', { place: '3-gym-13', it: IT('Punch bag', 'Patched with tape in three places. The Watch crew say it helps them think. The Works crew say it helps them not think.') });
     place('F', 'gymMat', 4.9, 4.6, 's', { it: IT('Stretching mat', 'One more mat, rolled out in the middle of the room, for people who want to stretch where everyone can see them do it.') });
-    [5.5, 6.5].forEach((x, k) => place('F', 'exerciseBike', x, .95, 'n', { place: '3-gym-' + (16 + k), it: k ? undefined : IT('Exercise bikes', 'Two bikes facing the promenade, so everyone walking past can see how hard you aren\'t pedalling.') }));   // 0.38.28
+    [5.5, 6.5].forEach((x, k) => place('F', 'exerciseBike', x, .95, 'n', { place: '3-gym-' + (16 + k), hitH: .7, it: IT('Exercise bikes', 'Two bikes facing the promenade, so everyone walking past can see how hard you aren\'t pedalling.') }));   // 0.38.28; each bike its own tap, saddle-high (LEAD31-1: a tap on bike 17 went through it to bike 16's, or into the air above the other's bars)
     // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
     [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
@@ -13597,12 +13597,13 @@ function playerFloorTap(point) {
     const sp = placeSpot(pl.id); if (!sp) continue;
     let best = Infinity;
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
-    if (best < FLOOR_NEAR) hits.push([best, pl, sp, use]);
+    if (best < FLOOR_NEAR) hits.push([best, pl, sp, use, Math.hypot(point.x - sp.x, point.z - sp.z)]);
   }
   const job = jobHere(point, true);                      // the floor at your job's stop (0.28.52, the user's lamp), unless a usable place is nearer the tap
   if (job && (!hits.length || job.by <= hits.reduce((m, h) => Math.min(m, h[0]), Infinity))) return !!job.go();
   if (!hits.length) return false;
-  const [, pl, sp, use] = hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
+  const on = hits.filter(h => h[4] < FLOOR_NEAR).sort((a, b) => a[4] - b[4])[0];   // the place right where you tapped the floor first; else the nearest along the tap (LEAD31-1: past bike 16 to bike 17's floor)
+  const [, pl, sp, use] = on || hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
   if (use === 'sit') return sitTap({ t: 'Seat', x: '' }, at, at);
   return playerTap({ t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at, at);
 }
