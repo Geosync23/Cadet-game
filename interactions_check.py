@@ -408,6 +408,7 @@ with sync_playwright() as pw:
             near = min((((p[0] - lp['at'][0]) ** 2 + (p[1] - lp['at'][1]) ** 2) ** .5 for p in lp['panels']), default=999) if lp['at'] else 999
             opened = False
             if lp['at'] and near < 3:
+                g.ev("while (TIP_Q.length) tipDone()"); g.step(2)   # a device tip card can sit over the panel (t:lift on Deck 3 at 06:07 with breakfast from 07:00): this part tests the arrow, so close tips first (the card's own fix: FX5)
                 g.page.mouse.move(*lp['at']); g.page.mouse.down(); g.page.mouse.up()
                 for k in range(120):
                     g.step(10)
