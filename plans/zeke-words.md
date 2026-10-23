@@ -178,7 +178,7 @@ Your answer here:
 
 ---
 
-## Two words-only fixes (the user via lead 31, 2026-10-23): proposed, not yet in the content files
+## Two words-only fixes (the user via lead 31, 2026-10-23): agreed as proposed (lead 31: all three, the Roster option); DS1 wires them
 
 Only these lines change; timing, order and who speaks stay exactly as they are. At the arrival dinner you sit with
 Zeke first and only get food after Calder's "Eat something" (the servery arrow then), so no line before that may
