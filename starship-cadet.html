@@ -48254,7 +48254,7 @@ const CASE_BANDS = {                                    // suspects, clues (reac
 const CASE_RANK_BAND = { junior: 'T1', officer: 'T2', senior: 'T3', specialist: 'T4' };
 const CASE_RATE = { junior: .1, officer: .2, senior: .25, specialist: .33 }, CASE_MAX = { junior: 1, officer: 1, senior: 2, specialist: 2 };
 const CASE_WAIT_MAX = 3 * 1440;                         // a case still waiting (P3's tries) after three days is a plain repair
-const CASE_TRIES = 8, CASE_DONE_KEEP = 20, CASE_SPENT = new Set(['seal', 'cartridge', 'filter', 'membrane', 'oxygen cell', 'uv lamp']);   // from Tier 2 a wrong call's consumable is used up (the T2 band: the user's seal or cartridge, and the other NO_MAKE parts)
+const CASE_TRIES = 8, CASE_DONE_KEEP = 8, CASE_SPENT = new Set(['seal', 'cartridge', 'filter', 'membrane', 'oxygen cell', 'uv lamp']);   // from Tier 2 a wrong call's consumable is used up (the T2 band: the user's seal or cartridge, and the other NO_MAKE parts)
 const CASE_STATS = { offered: 0, rolled: 0, posted: 0, fallback: 0, ms: 0, why: {} };   // for puzzle_check
 const caseRank = () => (SHIP.works && SHIP.works.rank) || 'junior';
 const caseBand = rank => CASE_RANK_BAND[rank] || 'T1';
@@ -49287,6 +49287,7 @@ function incWeights() {                                  // by the machines' wea
 function incPlan(w) {
   const I = incState(); if (!I) return null;
   if (I.plan[w]) return I.plan[w];
+  for (const k in I.plan) if (+k < w - 1) delete I.plan[k];   // FX4 (LEAD31-4): only this week and the next are read; older weeks dropped as they are at load (incClean), so the save stays flat
   const W = SHIP.works, days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => incDayOk(d, W));
   if (w < 2 || !days.length) return I.plan[w] = [];
   const seed = machSeed('incident'), d = days[Math.floor(schedU(seed, w, 870) * days.length) % days.length];
@@ -49610,6 +49611,7 @@ function teamNeed(kind) { const ms = TEAM_JOBS[kind].machines.filter(id => SHIP.
 function teamPlan(w) {
   const T = teamState(), W = SHIP.works; if (!T) return [];
   if (T.plan[w]) return T.plan[w];
+  for (const k in T.plan) if (+k < w - 1) delete T.plan[k];   // FX4 (LEAD31-4): only this week and the next are read; older weeks dropped as they are at load (teamClean), so the save stays flat
   const slots = TEAM_ROTA.slice(); if ((w + 1) % 2 === 0) slots.push(friTeamSlot(w));
   const out = [], used = new Set(), taken = new Set();
   for (const [wd, at] of slots) {
