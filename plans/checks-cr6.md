@@ -1,5 +1,27 @@
 # CR6 check results
 
+## 0.92.0 full round (2026-10-23): first pass done, check fixes pending
+
+- **Build:** `claude/integration-next` 4147f03d (0.92.0: the teaching arrows ON, breakfast at 07:00, Zeke's tour, the
+  dinner spread and more), `starship-cadet.html` sha256
+  `c2180854a780936c21cbac0ba9e7932fb491759f740e1d5ac3b4d4494a4f1286` (matches BM14's; unchanged at 25a90ced/a9823284).
+- **OLD:** 0.91.0 989fd566 (da9f1d08...aee).
+- Share: check_fast, mech, bigevents, fridays, disc, tiles (alone), join, food 1 7, food 11 4, clothes, one at a time.
+  controller_check (all but reach) was handed to CR3 before it started.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 255 s) | `QUICK CHECK OK in 255 s`; machine repair share `machine jobs 41, repairs 17 (41%)` |
+| mech_check | FAIL (exit 1, 546 s) | new part fx3: `FAIL m6: after the talk the arrow follows the teacher to the pipe (None)`, then a crash at mech_check.py:1698 (TypeError on a None goal). The part was written for arrows off; fixed in the check (AC3 876711e7, FX3 f058b082); rerun pending |
+| bigevents_check | OK (exit 0, 174 s) | `BIGEVENTS CHECK OK`; Line supper at most 38 at once, 48 seats |
+| fridays_check | FAIL (exit 1, 1167 s) | `FAIL on: the missed banner and Mail [26, 19, 2] 1`: check artifact (BM14): a queued pop-up goes through toast() twice (guideToast queues, guideTick replays); the player sees it once. Check fix pending |
+| disc_check | OK (exit 0, 93 s) | `ALL OK` |
+| tiles_check | FAIL (exit 1, 117 s, alone) | new "partners sit" part: `once you sit, someone free comes over` (Zofia sits; the toast read is a "New job" one), `nobody free: a toast says so` (you stay sat; the toast read is the earlier "You leave the game"). Check reads a queued toast; fix pending |
+| join_check | FAIL (exit 1, 148 s) | all 21 traditions `no join notice: You wake in Bunk 1 ...` (the first-wake tip is read; the join notice is queued). The rest passes. Same queued-toast pattern; fix pending |
+| food_check 1 7 | OK (exit 0, 58 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 69 s) | `FOOD CHECK OK` |
+| clothes_check | FAIL (exit 1, 86 s) | `the toast: your one spare` (the first-wake tip is read), `the toast says the kit came up from stores` (the washing-done toast is read); state checks pass. Same pattern; fix pending |
+
 ## 0.91.0 full round (2026-10-22): OK
 
 - **Build:** `claude/integration-next` 989fd566 (0.91.0: the controller on 0.64.16, switched off, + fresh-eyes batch 1;
