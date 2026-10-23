@@ -565,6 +565,18 @@ KEY_MARK = r"""((want) => { for (const o of document.querySelectorAll('[data-ctt
     if (key === want) { e.setAttribute('data-ctt', '1'); return true; }
   }
   return false; })"""
+def pad_to_key(r, key, tries=40):
+    # pad_to, the thing found again by its key before every press: a panel that redraws itself (the device home, as the
+    # ship clock ticks) drops the mark, and pad_to then gave up one press short (0.91.0's Roster). None: not in the page
+    for k in range(tries + 1):
+        if not r.ev(f"({KEY_MARK})({json.dumps(key)})"): return None if k == 0 else False
+        f = r.ev(f"({FOCUS_ON})('[data-ctt]')")
+        if f.get('on'): return True
+        if k == tries: return False
+        if f.get('none'): r.press('DOWN'); r.step(1); continue
+        dx, dy = f['dx'], f['dy']
+        r.press(('RIGHT' if dx > 0 else 'LEFT') if abs(dx) >= abs(dy) else ('DOWN' if dy > 0 else 'UP')); r.step(1)
+    return False
 # things the D-pad needn't reach, each with its reason (and who ruled)
 PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
@@ -585,11 +597,11 @@ def part_reach_pad(pw, src, tag, states):
         # (CTT3) found by its key, not by its point on screen: after the zigzag a long panel may have scrolled it out of
         # sight (0.91.0's device home: Roster, its last tile), and the highlight scrolls it back in as it gets there
         for k in list(missing):
-            if not sw.r.ev(f"({KEY_MARK})({json.dumps(k)})"): continue
-            ok = pad_to(sw.r, '[data-ctt]', 40)
+            ok = pad_to_key(sw.r, k, 40)
+            if ok is None: continue
             if not ok:   # steering from where the wander ended can bounce between two; from the top again, as a player would
                 for _ in range(15): sw.r.press('UP'); sw.r.step(1)
-                ok = pad_to(sw.r, '[data-ctt]', 40)
+                ok = pad_to_key(sw.r, k, 40)
             if ok: missing.remove(k); seen.add(k)
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
