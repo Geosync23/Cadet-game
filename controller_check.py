@@ -592,6 +592,8 @@ def part_reach_pad(pw, src, tag, states):
         # both the count and the misses: New appointment's 8 people counted as "3 of 3"); a thing the touch half listed
         # that isn't here now is a screen that changed with the clock (Tracked's rows), said below
         now = {i['k'] for i in Sweep.inner(sw.scan())}
+        # (and what's in the panel but out of sight, below its edge: the device home's last tiles; the D-pad scrolls to them)
+        now |= {k for k in want - now if not k.startswith('@') and sw.r.ev(f"({KEY_MARK})({json.dumps(k)})")}
         seen, order = pad_moves(sw.r, min(12, len(want) + 2), want & now - set(PAD_COVERED))
         missing = sorted((want & now) - seen - set(PAD_COVERED))
         for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
