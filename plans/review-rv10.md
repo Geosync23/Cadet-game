@@ -78,6 +78,8 @@ a folder holding cadet_test.py, an output folder).
 - FX5 trickle de475883: no whole-day re-plan; day0Trickle patches only the diners. trickle_probe.py at 18:20/18:40/19:10:
   no non-diner's plan changes; live at 18:40 Lukas, Esme, Zofia stay put. events_check, day_check 0, intro_check --evening,
   check_fast OK; cadet_test identical. Diners with an hour or more go to their bunk and come back for their evening.
+- FX6 m8-fix 54efee21 (test only, on 0.92.1 candidate 51a1bb34): game identical; old mech_check m8 FAILs on 0.92.1;
+  new one OK with the Line on and on an EV_LINE_ON=false copy; a planted TEAM_RESTORE = 0 makes it FAIL. PASS.
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
