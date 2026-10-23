@@ -1346,7 +1346,7 @@ with sync_playwright() as pw:
                   const fx = () => { FX_MIN = Math.floor(shipNow()); FX_NOW = { deck: deckDef.num, restore: { hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 }, drain: { hunger: 1, energy: 1, hygiene: 1, fitness: 1, social: 1 }, walk: 1, notes: [] }; };
                   const run = (kind, mins) => { const A = { kind, def: { ...PLAYER_ACTS[kind] }, phase: 'do', done: 0, o: {}, deck: deckDef, x: 0, z: 0, y: 0, face: player.face, to: {}, body: { set() {}, update() {}, dispose() {} } };
                     Object.assign(n, { hunger: 50, energy: 50, fitness: 50, social: 50, bathroom: 50, leisure: 50 }); ACT = A; washBegin(A); needsT = shipNow() - (mins || A.def.mins);   // other needs in the middle: no task-speed bonus or penalty
-                    fx(); playerUpdate(0, 0); ACT = A; actEnd(true); return [Math.round(n.hygiene * 10) / 10, A.o.after || '']; };
+                    fx(); playerUpdate(0, 0); ACT = A; actEnd(true); return [Math.round(n.hygiene * 10) / 10, A.o.after || '', A.def.done || '']; };
                   actEnd(true); P.wash = washLoad(null);
                   n.hygiene = 20; out.first = run('shower');
                   n.hygiene = 40; out.again = run('shower');
@@ -1357,6 +1357,10 @@ with sync_playwright() as pw:
                   P.wash = washLoad(null); P.wash.shower = shipNow() - 400; n.hygiene = 50; out.basinNone = run('ixBasin');
                   n.hygiene = 50; out.toilet = run('toilet'); out.basin = run('ixBasin'); out.basin2 = run('ixBasin');
                   n.hygiene = 50; run('toilet'); run('toilet'); out.twoToilets = run('ixBasin', 1); out.twoToilets2 = run('ixBasin');
+                  P.wash = washLoad(null); n.hygiene = 30; out.rinse = run('recShower'); out.rinseCool = washCooling(); n.hygiene = 40; out.afterRinse = run('shower');   // RV10: the swim's rinse never locks out the evening shower
+                  P.wash = washLoad(null); n.hygiene = 30; out.minute = run('shower', 1); out.minuteCool = washCooling(); out.thenFull = run('shower'); out.fullCool = washCooling();
+                  P.wash = washLoad(null); n.hygiene = 20; out.short = [run('shower', 2)[0], washCooling(), run('shower', 2)[0], washCooling(), run('shower', 2)[0], washCooling(), run('shower', 2)[0]];
+                  P.wash = washLoad(null); n.hygiene = 100; out.full100 = run('shower');
                   out.crew = PLAYER_ACTS.shower.gain === 80 && PLAYER_ACTS.ixBasin.gain === 6;
                   FX_MIN = -1; Object.assign(n, h0); P.wash = washLoad(null); return JSON.stringify(out); })()"""))
                 print('  [hygiene, what it said]:', hf)
@@ -1369,6 +1373,12 @@ with sync_playwright() as pw:
                 check(hf['toilet'][0] < 47.5 and 49.8 <= hf['basin'][0] <= 50 and hf['basin2'][0] == hf['basin'][0] and 'already clean' in hf['basin2'][1],
                       f'no hygiene farming: a hand-wash puts back only what the toilet took, never above where it was, and only once (50 -> toilet {hf["toilet"]} -> basin {hf["basin"]} -> again {hf["basin2"]})')
                 check(hf['twoToilets'][0] < hf['twoToilets2'][0] <= 50, f'no hygiene farming: two toilet visits, a hand-wash walked away from part way, then finished: back to at most 50 ({hf["twoToilets"]}, {hf["twoToilets2"]})')
+                check(hf['rinse'][0] == 50 and hf['rinseCool'] is False and hf['afterRinse'][0] == 100, f'no hygiene farming: the rec deck\'s rinse after a swim gives its own +20 and never starts the cooldown, so a shower still gives (RV10: {hf["rinse"]}, {hf["rinseCool"]}, {hf["afterRinse"]})')
+                check(hf['minute'][0] == 38 and hf['minuteCool'] is False and hf['thenFull'][0] == 100 and hf['fullCool'] is True, f'no hygiene farming: walking out after a minute doesn\'t start the cooldown; a shower that runs half its time does (RV10: {hf["minute"]}, {hf["minuteCool"]}, {hf["thenFull"]}, {hf["fullCool"]})')
+                sh = hf['short']
+                check(sh[0] == 36 and sh[1] is False and sh[2] == 52 and sh[3] is False and sh[4] == 68 and sh[5] is True and sh[6] == 68, f'no hygiene farming: short showers walked away from add up, and once they have given 40 the cooldown starts ({sh})')
+                check(hf['again'][2] == 'A warm rinse. You were still fresh anyway.' and hf['first'][2].startswith('Clean,') and hf['basinNone'][2] == 'Hands and face rinsed.', f'no hygiene farming: a wash that gives nothing ends with its own plain line ({hf["again"][2]}, {hf["basinNone"][2]})')
+                check(hf['full100'][1] == '', f'no hygiene farming: at 100 with no shower yet, no "still fresh" ({hf["full100"]})')
                 check(hf['crew'], 'no hygiene farming: the activities\' own gains are unchanged (the crew\'s washing is section 14\'s and untouched)')
             ng = json.loads(g.ev("""(() => { clearGoal(); NEED_GOAL = null; const P = SHIP.player, h = P.needs.hunger; P.needs.hunger = 5; const r = needGoal('hunger'), a = IX_GOAL && [IX_GOAL.label, IX_GOAL.deck, IX_GOAL.place];
               setGoal({ deck: 5, room: 'w', label: 'Someone else' }); const b = needGoal('energy'), c = IX_GOAL.label; clearGoal(); needGoal('hunger'); P.needs.hunger = 60; needGoalTick(); const d = IX_GOAL; P.needs.hunger = h; return JSON.stringify([r, a, b, c, d]); })()"""))

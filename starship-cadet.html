@@ -14769,32 +14769,45 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.cart = SHIP.play
 // ---- the device: its screens (Home, Needs, Mail, Wallet and the rest) are section 19's apps (0.35.0) ----
 
 // ---- slot: Player engineer (section 15). New code of this seat's goes here, above the end line (plans/owners.md) ----
-// no hygiene farming (FX6, the user's, 2026-10-23; lead 31's rule): a shower (Deck 4's, a cabin's, the rec deck's) gives
-// hygiene at most once every WASH_COOL ship minutes; one sooner still runs, gives none and says so. A basin only puts back
-// what toilet visits took since the last wash (owed), never above where hygiene was before the first of them (pre). The
-// player only: the crew's washing is section 14's. SHIP.player.wash = { shower: ship minute | null, owed, pre | null }, saved
-const WASH_COOL = 360, WASH_SHOWERS = new Set(['shower', 'recShower']);
+// no hygiene farming (FX6, the user's, 2026-10-23; lead 31's rule): a full shower (the washrooms', a cabin's) gives
+// hygiene at most once every WASH_COOL ship minutes; one sooner still runs, gives none and says so. The cooldown starts once
+// a shower has run half its time, or showers walked away from early have given WASH_PART between them (W.part, which lapses
+// after WASH_COOL), so a minute's rinse doesn't lock you out and many short ones don't farm. The rec deck's changing-room
+// rinse after a swim (15r's recShower) gives nothing while the cooldown runs but never starts it (RV10). A basin only puts
+// back what toilet visits took since the last wash (owed), never above where hygiene was before the first of them (pre).
+// The player only: the crew's washing is section 14's. SHIP.player.wash = { shower: ship minute | null, owed, pre | null,
+// part: { at, got } | null }, saved
+const WASH_COOL = 360, WASH_PART = 40, WASH_SHOWERS = new Set(['shower', 'recShower']);
 const WASH_SAY = { shower: 'You\'re still fresh from your last shower, so this one is just for comfort.', basin: 'Your hands are already clean, so this is just a quick rinse.' };
+const WASH_DONE = { shower: 'A warm rinse. You were still fresh anyway.', basin: 'Hands and face rinsed.' };
 function washLoad(s) {
-  const w = s && s.player && s.player.wash, num = v => typeof v === 'number' && Number.isFinite(v);
-  return { shower: w && num(w.shower) ? w.shower : null, owed: w && num(w.owed) ? Math.max(0, Math.min(100, w.owed)) : 0, pre: w && num(w.pre) ? Math.max(0, Math.min(100, w.pre)) : null };
+  const w = s && s.player && s.player.wash, num = v => typeof v === 'number' && Number.isFinite(v), pc = v => Math.max(0, Math.min(100, v));
+  const pt = w && w.part && num(w.part.at) && num(w.part.got) ? { at: w.part.at, got: pc(w.part.got) } : null;
+  return { shower: w && num(w.shower) ? w.shower : null, owed: w && num(w.owed) ? pc(w.owed) : 0, pre: w && num(w.pre) ? pc(w.pre) : null, part: pt };
 }
 SHIP.player.wash = washLoad(SAVED);
-SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wash = { ...SHIP.player.wash }; });
+SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); const W = SHIP.player.wash; p.wash = { ...W, part: W.part && { ...W.part } }; });
 function washCooling(t = shipNow()) { const at = SHIP.player.wash.shower; return at !== null && at <= t && t - at < WASH_COOL; }
 function washBegin(A) {                                  // from actBegin: set the cap this wash may raise hygiene to
   const W = SHIP.player.wash, h = SHIP.player.needs.hygiene;
   if (A.kind === 'toilet') { if (W.pre === null) W.pre = h; return; }   // where you were before the first visit since a wash
   const shower = WASH_SHOWERS.has(A.kind);
   if (!shower && A.kind !== 'ixBasin' || A.def.need !== 'hygiene') return;
-  const cap = shower ? (washCooling() ? h : 100) : Math.min(W.pre === null ? h : W.pre, h + W.owed);
-  A.o.wash = { cap: Math.max(h, cap), stamp: shower && cap > h };
-  if (cap <= h) A.o.after = [A.o.after, WASH_SAY[shower ? 'shower' : 'basin']].filter(Boolean).join(' ');
+  const cool = shower && washCooling(), cap = shower ? (cool ? h : 100) : Math.min(W.pre === null ? h : W.pre, h + W.owed);
+  A.o.wash = { cap: Math.max(h, cap), full: A.kind === 'shower' && !cool };
+  if (shower ? cool : cap <= h) {                        // nothing to give: say so at the start, and a plain line at the end
+    A.o.after = [A.o.after, WASH_SAY[shower ? 'shower' : 'basin']].filter(Boolean).join(' ');
+    if (A.def.done) A.def.done = WASH_DONE[shower ? 'shower' : 'basin'];
+  }
 }
-function washGain(A, v0) {                               // each minute it runs: hold hygiene to the cap; a shower starts its cooldown
-  const W = SHIP.player.wash, n = SHIP.player.needs, c = A.o.wash;
+function washGain(A, v0) {                               // each minute it runs: hold hygiene to the cap; a full shower may start the cooldown
+  const W = SHIP.player.wash, n = SHIP.player.needs, c = A.o.wash, t = shipNow();
   if (n.hygiene > c.cap) n.hygiene = Math.max(c.cap, v0);
-  if (c.stamp) { W.shower = shipNow(); c.stamp = false; W.owed = 0; W.pre = null; }   // a real shower washes the toilet off too
+  if (c.full) {
+    if (W.part && !(W.part.at <= t && t - W.part.at < WASH_COOL)) W.part = null;
+    const P = W.part || (W.part = { at: t, got: 0 }); P.got += Math.max(0, n.hygiene - v0);
+    if (A.done >= A.def.mins / 2 || P.got >= WASH_PART) { W.shower = t; W.part = null; W.owed = 0; W.pre = null; c.full = false; }   // a real shower washes the toilet off too
+  }
   if (A.kind === 'ixBasin') { W.owed = Math.max(0, W.owed - Math.max(0, n.hygiene - v0)); if (W.owed < .01 || n.hygiene >= c.cap) { W.owed = 0; W.pre = null; } }
 }
 function washToilet(A) { const t = A.o.cost && A.o.cost.hygiene; if (t > 0) SHIP.player.wash.owed = Math.min(100, SHIP.player.wash.owed + t); }
