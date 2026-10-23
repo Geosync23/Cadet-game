@@ -245,3 +245,9 @@ The FAIL lines: `Day 5: the scanner never counted as used (fix: FX2)`; `Day 8: "
 | NEW with `EV_LINE_ON = false` (a one-line copy) | OK: Day 8 learned m6, clocked 548 min (as 0.92.0) |
 
 So the Line being on causes it. Sent to BM15 for FX6 (BM15 bisects if needed; CR1 not bisecting).
+
+## Round 10 rerun: arrows_check (whole) on claude/integration-next e1f1ec97 (FX6's test-only fix)
+
+Game sha256 unchanged: `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c`. e1f1ec97's arrows_check.py, all parts, alone:
+**ARROWS CHECK OK** (exit 0, 718 s, no FAIL lines). Week: the scanner first used Day 8, m2 learned Day 8, m6 (Making it
+safe) learned Day 9; nobody stuck.
