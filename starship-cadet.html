@@ -2549,7 +2549,7 @@ const WALL_KIT = {
     const t = tex(320, 200, (c, w, h) => {
       c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
       c.fillStyle = '#e8c06a'; c.font = '700 24px system-ui,sans-serif'; c.fillText('MESS', 18, 34);
-      c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText('Breakfast  06:00 - 09:00', 18, 66); c.fillText('Dinner  17:00 - 20:30', 18, 90);
+      c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText('Breakfast  07:00 - 09:00', 18, 66); c.fillText('Dinner  17:00 - 20:30', 18, 90);
       c.fillStyle = '#e8eef0'; c.font = '500 15px system-ui,sans-serif';
       ['Today: Brennan\'s spiced lentils', 'Fresh rolls, garden greens', 'Grab & go by the line'].forEach((l, k) => c.fillText(l, 18, 126 + k * 24));
       c.fillStyle = '#c86b4a'; c.fillRect(18, 186, 60, 3);
@@ -5436,12 +5436,12 @@ DECKS[3] = {
     place('M', 'drinksStation', 11.6, 1.0, 'e', { it: IT('Drinks station', 'Three juices, a tea urn that is never allowed to run dry, and a stack of mugs. Someone has labelled the orange one "probably orange".') });
     // 0.38.25 (the user's): no tray return; diners leave their trays on the table and the galley crew clear them (kit trayReturn kept, unused)
     place('M', 'trayStack', 11.65, 3.5, 'e', { it: IT('Trays and cutlery', 'The start of the line. Take a tray, take a fork, keep moving.') });
-    place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 06:00 to 09:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
+    place('M', 'servery', 11.45, 5.5, 'e', { it: IT('Servery', 'The hot line, under heat lamps. Breakfast from 07:00 to 09:00, dinner from 17:00 to 20:30. The galley hands it through the counter behind.') });
     place('M', 'grabShelf', 11.6, 7.5, 'e', { live: true, it: IT('Grab and go', 'Rolls, fruit and juice, chilled, for anyone running late. It empties fast at 07:55.') });
     wallFixed('=', 'valvePanel', 'n', VALVE_PANELS[3].along, { hitW: 1.5, it: { ...IT('Pipe valves', 'Three valves on the Commons\' water line, numbered from upstream. Close the one before a leak.'), valves: 3 } });   // 0.47.0: incidents (m6)
     wallFixed('K', 'alarmPanel', 'w', 4.5, { hitW: .7, it: { ...IT('Extractor alarm', 'The galley extractor\'s alarm and, beside it, the switch that opens the vents. Brennan has views on how often it goes off.'), alarm: true, vent: true } });
     placeWall('M', 'spiceShelf', 'e', SPICES.along, { hitW: 1.3, it: IT('Spice shelf', 'A shelf over the drinks for spices brought from home. Brennan says it will fill up. Brennan is patient.') });   // 0.38.31
-    placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 06:00 to 09:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
+    placeWall('M', 'menuBoard', 'e', 3.5, { hitW: 1.2, it: IT('Menu board', 'Two meals a day: breakfast 07:00 to 09:00, dinner 17:00 to 20:30. Today: Brennan\'s spiced lentils.') });
     placeWall('M', 'notices', 'w', 4.5, { hitW: 1.0, it: IT('Mess notices', 'This week\'s birthdays, the galley rota, and a polite note about taking mugs back to the mess.') });
     for (const x of [.45, 5.0]) place('M', 'plant', x, .45, 'n', { band: '#c86b4a' });   // under the windows, out of the aisles
 
@@ -9379,7 +9379,7 @@ if (!DEBUG) document.getElementById('light').style.display = 'none';
 // calls R() or draws anything.
 // =====================================================================
 const SCHED_COMMUTE = 2;                                 // a lift ride, ship minutes; you're on the new deck after it
-const MEALS = { breakfast: [360, 540], dinner: [1020, 1230] };   // breakfast to 09:00 since the day shift starts then (0.71.1; was to 08:00)
+const MEALS = { breakfast: [420, 540], dinner: [1020, 1230] };   // breakfast 07:00-09:00 (the user's playtest notes, patch 1: was from 06:00); to 09:00 since the day shift starts then (0.71.1; was to 08:00)
 const SHIFTS = { day: [540, 1020], night: [1260, 360] }; // 09:00-17:00 (the user's playtest answer, 0.71.1; was 08:00), 21:00-06:00 (into the next day)
 // the shape of each weekday (0 = Monday)
 const WEEK_SHAPE = [
@@ -10376,6 +10376,8 @@ function schedBuild(p, d, occ, S) {
   const tradMeal = (e, end) => {
     const l = segs[segs.length - 1], from = deck === 3 && l && l.placeId && S.byId.get(l.placeId), at = from ? from.at : DECKS[3].lift;
     const walk = Math.round(LINE_WALK[0] + (Math.abs(at[0] - LINE_WALK[2][0]) + Math.abs(at[1] - LINE_WALK[2][1])) * LINE_WALK[1]);
+    const short = t + (deck !== 3 ? C : 0) + walk + 3 + (e.min || 15) - (e.at + e.dur);   // a long walk to the line (the garden's far beds) would leave under the least time seated: set off that much earlier, out of what they were doing (at most half of it), so nobody eats standing (patch 1 F, bigevents_check's Line supper)
+    if (short > 0 && l && l.to === t && l.act !== 'commute' && !STOPS.has(l.tag) && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag))) { const cut = Math.min(short, Math.floor((l.to - l.from) / 2)); l.to -= cut; t -= cut; }
     go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
     take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
     if (!take(e.act, e.where, e.at + e.dur - t, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
@@ -10479,6 +10481,7 @@ function schedBuild(p, d, occ, S) {
     // wash after, 2 in 10 a short workout first, 2 in 10 a coffee or a read after the wash, the rest wash and go
     const sty = U(k + 13), quiet = !F.shape.inspect && !H.has('skips-breakfast') && !meet.some(e => !e.done && e.at < by + 150 && e.at + e.dur > t);
     if (quiet && sty < .3 && by - t >= 100) {
+      if (t + C + 5 < MEALS.breakfast[0]) linger(MEALS.breakfast[0] - C + Math.round(40 * U(k + 17)));   // up before the servery opens (07:00, patch 1): in their bunk till then
       meal('breakfast', k + 5, by - 45);
       if (by - t >= 45) wash(k); else if (by - t >= 15) take('wash', [[bedDeck, 'basin']], 5, { wait: 5 });
       return;
@@ -10492,7 +10495,7 @@ function schedBuild(p, d, occ, S) {
     const mb = meet.find(e => e.meal === 'breakfast' && !e.done && e.at + 10 > t && e.at < by + 150);   // a meal tradition (the long breakfast) is their breakfast
     if (mb) { leisureUntil(mb.at + mb.dur, k + 9); if (meet.some(e => e.meal === 'breakfast' && e.ate) || segs.some(s => s.act === 'breakfast' && s.tag === mb.tag)) return; if (t >= by - 5) { grab('breakfast', k + 3); return; } }
     if (H.has('skips-breakfast') && U(k + 1) < .7) { if (!pre) linger(Math.max(t, by - 8 - Math.round(10 * U(k + 2)))); grab('breakfast', k + 3); return; }
-    const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(100 * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));   // spread over the morning (playtest 2: not everyone at 08:00-08:30)
+    const want = Math.max(MEALS.breakfast[0], by - 30 - Math.round(Math.max(0, Math.min(100, by - 30 - MEALS.breakfast[0])) * U(k + 4)) - (H.has('lingers-at-meals') ? 15 : 0));   // spread over the morning (playtest 2: not everyone at 08:00-08:30), from the servery's opening on (patch 1: no crowd at 07:00)
     if (want > t + C + 5 && !pre) linger(want - (deck !== 3 ? C : 0));   // after a gathering: straight to breakfast (waiting would only stretch the gathering)
     meal('breakfast', k + 5, by);
   };
@@ -10552,11 +10555,13 @@ function schedBuild(p, d, occ, S) {
       evening(sp, F.bed, false);
     }
   } else {
-    // night shift: the shift that began last night runs to 06:00, then breakfast and sleep through the day
+    // night shift: the shift that began last night runs to 06:00, then an hour to unwind in the Deck 3 lounge, breakfast
+    // from 07:00 (patch 1: it was at 06:00), a shower and sleep through the day (a shower at 06:00 would meet the day crew's washroom rush)
     if (P.works) {
       deck = wd;
       if (wd === 1 && P.workEnd >= 60) { work(P.workEnd - 15); take('work', [[1, '@handover']], 15, { by: P.workEnd, min: 5, tag: 'handover' }); }   // the night watch hands over at the ring
       work(P.workEnd);
+      if (t + C < MEALS.breakfast[0]) { const to = MEALS.breakfast[0] + Math.round(40 * U(29)); if (!take('leisure', [[3, 'lounge-seat'], [3, 'bench']], to - t - (deck !== 3 ? C : 0), { wait: 5, min: 15, by: to })) leisureUntil(to - C, 23); }   // an hour to unwind on Deck 3 till the servery opens (07:00, patch 1)
       meal('breakfast', 20, MEALS.breakfast[1]);
       wash(25, true); go(bedDeck);                       // a shower after the night's work, then bed
       seg('sleep', t + 420 + Math.round(30 * U(26)), 'bed', p.bed);
@@ -12702,7 +12707,7 @@ const taskMins = mins => Math.max(1, Math.round(mins / needEffects().task));   /
 const NEED_SAY = {
   energy: ['You feel sluggish: get some sleep. Your bunk is in Bunk 1 on Deck 4.', 'You\'re getting tired.'],
   fitness: ['You\'re out of shape and slow on your feet: work out at the gym on Deck 3.', 'You could do with some exercise.'],
-  hunger: ['You\'re hungry. The mess serves breakfast 06:00-09:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
+  hunger: ['You\'re hungry. The mess serves breakfast 07:00-09:00 and dinner 17:00-20:30; the grab shelf is always open.', 'You\'re getting peckish.'],
   hygiene: ['You need a shower. The washrooms are at the ends of the junior wing on Deck 4.', 'A shower would be nice.'],
   social: ['You miss home. The call-home booths are on Deck 3.', 'You\'d like to hear from home.'],
   bathroom: ['You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4.', 'You could do with a trip to the toilet.'],
@@ -12742,7 +12747,7 @@ function popupWatch(now) {
 // Tips setting's (they're about you, not teaching). At 0 nothing more happens (no fail state) except bathroom's '+go'.
 const WARN_AT = [NEED_LOW, 10], WARN_REARM = 40, WARN_GAP = 8000;
 const NEED_WARN = {   // need: [[title, text] under 25, [title, text] under 10] (text: head writer 3)
-  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 06:00-09:00, dinner 17:00-20:30. The grab shelf never closes.'],
+  hunger: [['Hungry', 'Getting peckish. Mess on Deck 3: breakfast 07:00-09:00, dinner 17:00-20:30. The grab shelf never closes.'],
     ['Very hungry', 'Starving: tasks are 15% slower. Eat something. The grab shelf in the mess, Deck 3, is always open.']],
   energy: [['Tired', 'You\'re tired, so you\'re walking slower. Your bunk\'s in Bunk 1, Deck 4, from 20:00. By day, sit down a while.'],
     ['Exhausted', 'Exhausted. Get to your bunk, Bunk 1 on Deck 4, and sleep it off.']],
@@ -13226,7 +13231,7 @@ function foodFrom(where, peek) {
   const m = SHIP.time.min;
   if (m >= MEALS.breakfast[0] && m < MEALS.breakfast[1]) return { ok: true, dish: 'breakfast' };
   if (m >= 1020 && m < 1230) return { ok: true, dish: 'dinner' };
-  return { ok: false, why: 'The servery is closed. Breakfast is 06:00 to 09:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
+  return { ok: false, why: 'The servery is closed. Breakfast is 07:00 to 09:00, dinner 17:00 to 20:30. The grab-and-go shelf is always open.' };
 }
 // a gift from the garden (0.28.25, the galley engineer's notes): on a harvest day (section 16's gardenHarvestDay), once
 // your garden run (section 17's chore 'garden', id 'garden@<minute>') has its pickup ticked off, a sprig of herbs and/or
@@ -16180,8 +16185,9 @@ let trkAt = 0;
 // The galley really cooks (Pillar 2, workstream A4). Three parts, all worked out from ship time alone:
 //  - The rota. galleyDay(person, day) gives a galley worker's day: when they rise, how late they may go to bed
 //    before an early start, their work blocks at the galley's stations, and when they eat. Chef Brennan rises
-//    about 04:30 and cooks breakfast before 06:00, and dinner from 14:30; her deputy cooks on her days off. The
-//    hands work an early shift (05:30-13:30) or a late one (13:00-21:15). The schedules (section 14) ask for it;
+//    about 05:30 and cooks breakfast before 07:00, and dinner from 14:30; her deputy cooks on her days off. The
+//    hands work an early shift (05:30-13:30: prep, cooking with the chef from 06:00, the bake, then the line) or a late one (13:00-21:15). (Patch 1:
+//    breakfast from 07:00, so the chef's morning is an hour later and the early hands cook with her first.) The schedules (section 14) ask for it;
 //    it never asks them, so there's no loop.
 //  - The food. SHIP.galley, stepped a ship minute at a time (galleyAdvance) whatever deck you're on: meals in the
 //    cold store, pots cooking, portions in the servery, the grab-and-go shelf, plates dirty and in use, anyone
@@ -16214,8 +16220,8 @@ const GALLEY_NEXT = { cook: 'prep', bake: 'prep', serve: 'wash', wash: 'clean', 
 // each role's day, in minutes of the day: [from, to, task]. 'line' is serving and washing up by turns;
 // 'breakfast' and 'dinner' are the staff's own meals
 const GALLEY_SHIFTS = {
-  chef: { wake: 270, plan: [[290, 540, 'cook'], [540, 560, 'breakfast'], [560, 630, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
-  early: { wake: 305, plan: [[330, 360, 'bake'], [360, 540, 'line'], [540, 560, 'breakfast'], [560, 630, 'wash'], [630, 690, 'bake'], [690, 780, 'prep'], [780, 810, 'clean']] },   // breakfast served to 09:00 (0.71.1)
+  chef: { wake: 330, plan: [[350, 540, 'cook'], [540, 560, 'breakfast'], [560, 630, 'clean'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'cook'], [1230, 1245, 'tea']] },
+  early: { wake: 305, plan: [[330, 360, 'prep'], [360, 390, 'cook'], [390, 420, 'bake'], [420, 540, 'line'], [540, 560, 'breakfast'], [560, 630, 'wash'], [630, 690, 'bake'], [690, 780, 'prep'], [780, 810, 'clean']] },   // breakfast served to 09:00 (0.71.1) and from 07:00 (patch 1: still in at 05:30, prep, then helping the chef fill the servery from 06:00 before the bake: breakfast is busier in two hours than in three; no more range time than before, so no more wear)
   late: { wake: null, plan: [[780, 870, 'prep'], [870, 990, 'cook'], [990, 1010, 'dinner'], [1010, 1230, 'line'], [1230, 1275, 'wash']] },
   bar: { wake: null, plan: [[900, 1020, 'prep'], [1020, 1045, 'dinner'], [1050, 1380, 'bar']] },   // bar duty 17:30-23:00 (plan-0607), ended in time for an early start
 };
@@ -16302,7 +16308,7 @@ const FOOD = {
   restock: 'carts',                       // ...while this is 'rule'. 'carts': section 17's hover carts bring it (B3; the
                                           // top-up stays on until cartClaim exists, so a build without section 17 still eats)
   plates: 110, washRate: 3,               // plates aboard; plates a minute through the dish machine
-  open: { breakfast: 360, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
+  open: { breakfast: 420, dinner: 1020 }, // the serving windows open (section 14's MEALS)...
   serveTo: { breakfast: 540, dinner: 1230 }, // ...and end (a tradition's `until` can keep breakfast going: galleyServeEnd)
   lead: 70,                               // ...and hot pots start at most this long before
   close: { breakfast: 570, dinner: 1245 },// leftovers go to the grab shelf (the rest is wasted); later by as much as serving runs on
@@ -16374,7 +16380,7 @@ const galleyClose = (d, meal) => FOOD.close[meal] + galleyServeEnd(d, meal) - FO
 function galleyPlan(role, d) {
   const P = GALLEY_SHIFTS[role].plan, x = galleyServeEnd(d, 'breakfast') - FOOD.serveTo.breakfast;
   if (!x || (role !== 'chef' && role !== 'early')) return P;
-  const head = role === 'chef' ? [[290, 510 + x, 'cook'], [510 + x, 530 + x, 'breakfast'], [530 + x, 600 + x, 'clean']] : [[330, 360, 'bake'], [360, 540 + x, 'line'], [540 + x, 560 + x, 'breakfast'], [560 + x, 630 + x, 'wash']];
+  const head = role === 'chef' ? [[350, 510 + x, 'cook'], [510 + x, 530 + x, 'breakfast'], [530 + x, 600 + x, 'clean']] : [[330, 360, 'prep'], [360, 390, 'cook'], [390, 420, 'bake'], [420, 540 + x, 'line'], [540 + x, 560 + x, 'breakfast'], [560 + x, 630 + x, 'wash']];
   const end = head[head.length - 1][1];
   return head.concat(P.filter(b => b[1] > end && b[0] >= (role === 'chef' ? 660 : 0)).map(b => [Math.max(b[0], end), b[1], b[2]]));
 }
@@ -17053,7 +17059,7 @@ function galleyText(what = 'servery') {
   if (S.batch && S.batch.d === SHIP.time.day && md < 1260) extra += ` Brennan is also cooking for ${S.batch.label}` + (S.batch.late ? ', running late' : '') + (S.batch.herbs === false ? ', without the garden\'s herbs' : '') + '.';
   if (S.trays && S.trays.d === SHIP.time.day && md >= FOOD.trayAt && md < FOOD.trayAt + 60) extra += ` ${S.trays.n} trays have gone up to the bridge.`;
   if (S.servery.portions) return `${open ? 'Serving' : 'Ready'}: ${S.servery.dish}. ${S.servery.portions} portions in the pans.` + extra;
-  return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 06:00' : 'Dinner from 17:00'}.`) + extra;
+  return (open ? 'The pans are empty. The next pot is on its way.' : `Closed. ${meal === 'breakfast' ? 'Breakfast from 07:00' : 'Dinner from 17:00'}.`) + extra;
 }
 // the menu board: today's meals and the week's dinners
 function galleyBoard(d = SHIP.time.day) {
@@ -17183,7 +17189,7 @@ function galleyBoardDraw(t, d) {
   c.fillStyle = '#1d2a2a'; c.fillRect(0, 0, w, h);
   line('MESS', 34, '700 24px system-ui,sans-serif', '#e8c06a');
   c.fillStyle = '#9fd9cf'; c.font = '600 15px system-ui,sans-serif'; c.fillText(WEEKDAYS[weekday(d)], w - 18 - c.measureText(WEEKDAYS[weekday(d)]).width, 34);
-  line('Breakfast 06:00' + (M.bnote ? '-' + hhmm(galleyServeEnd(d, 'breakfast')) : '') + '  ' + cap(M.breakfast), 66, '600 15px system-ui,sans-serif', '#9fd9cf');
+  line('Breakfast 07:00' + (M.bnote ? '-' + hhmm(galleyServeEnd(d, 'breakfast')) : '') + '  ' + cap(M.breakfast), 66, '600 15px system-ui,sans-serif', '#9fd9cf');
   line('Dinner 17:00  ' + cap(M.dinner), 92, '600 15px system-ui,sans-serif', '#9fd9cf');
   if (M.note) line(cap(M.note), 118, '500 14px system-ui,sans-serif', '#e8eef0');
   const ck = galleyCake(d);
@@ -20640,7 +20646,7 @@ const VOICE = JSON.parse([
   '{"text":"Look after yourself, love. Eat properly. I\'ll know if you don\'t. I always know.","id":"te1mh2","tone":"warm","leaving":"you","tier":[3,4]}]',
   ',"greet":[',
   '{"text":"{hi}. You\'re new. Have you eaten? Mess is through there. Trays on the left.","id":"1d8v1kd","tier":[0,0]},',
-  '{"text":"Morning, {nick}. Breakfast\'s on till eight, and I\'m counting heads.","id":"k2mjm6","tier":[1,4],"time":"morning"},',
+  '{"text":"Morning, {nick}. Breakfast\'s on till nine, and I\'m counting heads.","id":"1ibun11","tier":[1,4],"time":"morning"},',
   '{"text":"{hi}. Have you eaten? Don\'t answer. I can see you haven\'t. Sit.","id":"17g07qz","tone":"funny","tier":[1,4]},',
   '{"text":"There you are, {nick}. Biscuits went down to the junior wing. Did you get one? Good.","id":"15judip","tier":[2,4]},',
   '{"text":"Oh, there\'s my favourite. Don\'t tell the others. I tell them all that, mind.","id":"1y59j2u","tone":"warm","tier":[3,4]},',
@@ -22196,7 +22202,7 @@ const VOICE = JSON.parse([
   '{"text":"I\'m off soon! Have you eaten? Go and eat. That\'s my goodbye.","id":"1o2p3ic","leaving":"you","tier":[1,4]},',
   '{"text":"Your first mug, Friday tea. I still think about that. Lovely day. Keep the hook.","id":"11m622a","tone":"warm","leaving":"you","tier":[3,4]}]',
   ',"greet":[',
-  '{"text":"{hi}. You\'ll be new. Have you eaten? Breakfast\'s in the mess till eight.","id":"b77ox4","tier":[0,0]},',
+  '{"text":"{hi}. You\'ll be new. Have you eaten? Breakfast\'s in the mess till nine.","id":"62uz7b","tier":[0,0]},',
   '{"text":"{hi}. Emeka Halloran, systems. Tea corner\'s behind the parts racks, if you need me.","id":"119ml7h","tier":[0,0]},',
   '{"text":"{hi}. Why did the scrubber go to the infirmary? It had a filter cough.","id":"5f9ph2","tone":"funny","tier":[1,4],"time":"morning"},',
   '{"text":"{hi}. I had a joke for you. I\'ve lost it. That\'s probably for the best.","id":"1kbvfw5","tone":"funny","tier":[1,4],"time":"morning"},',
@@ -26706,12 +26712,12 @@ const VOICE = JSON.parse([
   '{"text":"Sleep whenever you like. Lights out is ten, Chloe says. Chloe means it.","id":"nfcfwn","time":"evening","week1":"true","weekday":"sun","not":{"flag":"week1.d2"}},',
   '{"text":"I\'m really glad you\'re here. I was the newest for a whole week. It was a long week.","id":"1l92aff","tone":"warm","time":"evening","week1":"true","weekday":"sun","not":{"flag":"week1.d2"}},',
   '{"text":"Night, {me}. If you wake up and don\'t know where you are, that\'s normal. It\'s Deck 4.","id":"ohimlg","tone":"funny","time":"evening","week1":"true","weekday":"sun","not":{"flag":"week1.d2"}},',
-  '{"text":"Morning! Washroom, then breakfast. Breakfast\'s till eight. Left at the end. Probably.","id":"19qsag2","time":"morning","week1":"true","weekday":"mon"},',
+  '{"text":"Morning! Washroom, then breakfast. Breakfast\'s till nine. Left at the end. Probably.","id":"en7pwt","time":"morning","week1":"true","weekday":"mon"},',
   '{"text":"Inspection today. I\'ve folded everything. I\'ve folded my socks. Is that normal?","id":"u1foh","tone":"funny","week1":"true","weekday":"thu"},',
   '{"text":"Sowing morning\'s tomorrow! You plant your own seedling. Come with me? Film night after.","id":"ir7ptp","tier":[1,4],"week1":"true","weekday":"fri"},',
   '{"text":"Ready? Garden. Seedling. Bring your hands. That\'s all you need. And maybe a towel.","id":"10k39gg","time":"morning","week1":"true","weekday":"sat"},',
   '{"text":"Morning! Washroom first, before the queue. Hot\'s best early.","id":"1el5hch","flag":"beat.d1-wash.1"},',
-  '{"text":"Breakfast\'s till eight. Then Works. Then everything.","id":"4rjg09","flag":"beat.d1-wash.2"},',
+  '{"text":"Breakfast\'s till nine. Then Works. Then everything.","id":"1kfgbjo","flag":"beat.d1-wash.2"},',
   '{"text":"Towel\'s in your locker. Top shelf. I think.","id":"1p0422","flag":"beat.d1-wash.3"},',
   '{"text":"Out the door, then left. Probably left.","id":"179ofgq","tone":"funny","flag":"beat.d1-wash.4"},',
   '{"text":"Sowing morning\'s tomorrow! You plant your own seedling.","id":"1w3byfi","flag":"beat.d5-invite.1"},',
@@ -27300,7 +27306,7 @@ const VOICE = JSON.parse([
   '{"text":"I take my time over dinner. It\'s the only part of the day nobody can hurry.","id":"1yvj3b4","act":"meal"},',
   '{"text":"Bunk 1 tidy check. Yours is fine. Tomas has folded his socks again. Bless him.","id":"1yht2me","deck":"4","time":"evening"},',
   '{"text":"Lost-property box. One left glove, a scarf, and a very sad sock. I\'ll find their people.","id":"9i8cvk","act":"leisure"},',
-  '{"text":"Breakfast at six sharp. The porridge is best before half past. Trust me on this.","id":"xqrpm1","act":"breakfast"},',
+  '{"text":"Breakfast at seven sharp. The porridge is best before half past. Trust me on this.","id":"1uypsxw","act":"breakfast"},',
   '{"text":"I\'m reading. Not a mystery. Mysteries keep me up. I don\'t do up.","id":"z4ipd","tone":"funny","act":"leisure","deck":"3"}]',
   ',"rumour":[',
   '{"text":"I disapprove. Here\'s what I heard.","id":"1kcxnhg"},',
@@ -28022,7 +28028,7 @@ const VOICE = JSON.parse([
   '{"text":"You\'ve the makings of a good officer. Don\'t let it go to your head. Your boots, maybe.","id":"vjfcd0","tone":"funny","tier":[2,4]},',
   '{"text":"Did you read Gull this week? \\"Oh corridor, thou long and grey.\\" Two errors of metre.","id":"10iozmi","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"The good records. A waiting list exists for a reason. The reason is me.","id":"x73rua","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
-  '{"text":"Breakfast at 06:05. Porridge, toast, a small biscuit. The biscuit is not regulation.","id":"1pjxikt","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
+  '{"text":"Breakfast at 07:05. Porridge, toast, a small biscuit. The biscuit is not regulation.","id":"c37evc","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"I read on my rest days. Old naval histories. And, once, a mystery. Don\'t tell Achterberg.","id":"85g4bx","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Lindqvist set a treadmill time yesterday. I\'ve studied it. Respectfully. Closely.","id":"1jkoi1q","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
   '{"text":"Rest day tomorrow. I\'ve planned it to the minute. Most minutes say \\"nothing\\".","id":"tpfv6a","tone":"funny","tier":[1,4],"not":{"week1":"true"}},',
@@ -28158,13 +28164,13 @@ const VOICE = JSON.parse([
   '{"text":"The bridge runs on three things: procedure, coffee and the Captain. In that order.","id":"gi94p0","tone":"funny","deck":"1"},',
   '{"text":"The rowing machine still has my name on top. I check on the way past. Daily.","id":"1rpc919","tone":"funny","act":"gym","deck":"3"},',
   '{"text":"The good records. There\'s a list. You\'re on it. I\'m the list.","id":"bi1vvn","tone":"funny","deck":"4","time":"evening"},',
-  '{"text":"Breakfast at 06:05. Not 06:00, there\'s a queue. Not 06:10, that\'s late.","id":"fj4c1s","act":"meal"},',
+  '{"text":"Breakfast at 07:05. Not 07:00, there\'s a queue. Not 07:10, that\'s late.","id":"1xq1qsz","act":"meal"},',
   '{"text":"Sit. I\'m off duty. Officially. I\'ve told the bridge where I am anyway.","id":"1xi2m1u","place":"calm","tier":[2,4]},',
   '{"text":"Treadmill board\'s filling up. Tomas is fourth. Don\'t tell him he\'s fourth.","id":"bcotav","tone":"funny","act":"gym","deck":"3"},',
   '{"text":"The senior corridor. Shoes off in the cabins, on in the corridor. Regulation six.","id":"1dam560","deck":"2"},',
   '{"text":"The record cabinet. Waiting list, page one. You\'re still ninth. Patience.","id":"18vwv5e","tone":"funny","place":"musicroom"},',
   '{"text":"Ring corridor, eight laps. It\'s not on a leaderboard. I\'m considering it.","id":"15x20oq","tone":"funny","habit":"runner"},',
-  '{"text":"06:05. Porridge. The biscuit. Don\'t look at the biscuit.","id":"az8j1e","tone":"funny","act":"breakfast","not":{"week1":"true"}},',
+  '{"text":"07:05. Porridge. The biscuit. Don\'t look at the biscuit.","id":"1svcqip","tone":"funny","act":"breakfast","not":{"week1":"true"}},',
   '{"text":"Treadmill. Five kilometres. Then I\'ll pretend not to look at the board.","id":"5ry2i","tone":"funny","act":"gym","not":{"week1":"true"}},',
   '{"text":"Dinner at 18:00. On time. Pudding at 18:20. Also on time.","id":"170gv39","tone":"funny","act":"dinner","not":{"week1":"true"}},',
   '{"text":"Rest day. A book, a long walk, a record. A fourth thing: tea. Allow it.","id":"ted7t0","tone":"funny","act":"off"},',
@@ -28181,7 +28187,7 @@ const VOICE = JSON.parse([
   '{"text":"Founding Day. The Captain speaks first. Then cake. In that order. Always.","id":"afer3l","trad":"founding"},',
   '{"text":"The quiet watch. I will be at a window. Not on the bridge. On advice.","id":"f9deak","tier":[3,4],"trad":"quiet-watch"}]',
   ',"note":[',
-  '{"text":"Called by. You were out. Correctly: it\'s your evening. See you at 06:05.","id":"fzhjvy","tier":[3,4]},',
+  '{"text":"Called by. You were out. Correctly: it\'s your evening. See you at 07:05.","id":"1ipt4pt","tier":[3,4]},',
   '{"text":"The waiting list moved. You\'re eighth. Don\'t let it go to your head.","id":"1v0ytm0","tone":"funny","tier":[3,4]}]',
   ',"rumour":[',
   '{"text":"Not gossip. A briefing. Informal. Listen.","id":"11tgokf","tone":"funny"},',
@@ -31617,7 +31623,7 @@ const LINES = JSON.parse([
   '{"text":"The grab shelf was cleared by 21:00 again. Brennan is \\"not angry, just noting it\\".","id":"rzada6"},',
   '{"text":"Trays back on the rack, please. Brennan counts them. She knows.","id":"1g7uca1"},',
   '{"text":"The galley thanks whoever washed the big pot. You are a hero. Do it again.","id":"7ud6dc"},',
-  '{"text":"Breakfast runs 06:00 to 09:00. Dinner 17:00 to 20:30. The grab shelf never sleeps.","id":"vueu7y"},',
+  '{"text":"Breakfast runs 07:00 to 09:00. Dinner 17:00 to 20:30. The grab shelf never sleeps.","id":"1y6r31z"},',
   '{"text":"Brennan on pineapple in savoury food: \\"No.\\" Brennan on further questions: \\"No.\\"","id":"1ddtw7d"},',
   '{"text":"Ivo Madsen would like everyone to know he made the bread today. All of it. Personally.","id":"5ercbr"},',
   '{"text":"Tamsin Haddad tried a new pudding. It is, she says, \\"nearly a pudding\\". Brave of her.","id":"k1wxwi"},',
@@ -31656,7 +31662,7 @@ const LINES = JSON.parse([
   '{"text":"Esme Walsh caught a spelling mistake on the menu board. It said \\"chili con carnie\\". Fixed.","id":"3oi5d8"},',
   '{"text":"Brennan tasted the porridge and said \\"fine\\". From Brennan, that\'s a medal.","id":"arp1p7"},',
   '{"text":"Please tell the galley if you can\'t eat something. They\'ll make you something you can.","id":"s2vudg"},',
-  '{"text":"Breakfast runs 06:00 to 09:00 every day. Porridge, eggs, toast, tea. Don\'t skip it.","id":"1yqqg27","time":"morning"},',
+  '{"text":"Breakfast runs 07:00 to 09:00 every day. Porridge, eggs, toast, tea. Don\'t skip it.","id":"12oizys","time":"morning"},',
   '{"text":"Dinner\'s on till half eight. There\'s still pudding. There\'s always still pudding.","id":"6co9v3","time":"evening"}]',
   ',"news.garden":[',
   '{"text":"The big tree in the garden has a new leaf. Tove Cruz counted. It\'s the 412th.","id":"1t6h3cn"},',
@@ -34633,7 +34639,7 @@ const MEETINGS_BAKED = {
   "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
   "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
   "crossingCeremony": {"title": "The Line oath", "from": "Captain Odile Marrow", "gist": "You crossed the Line into the Veyli reach. The Captain read the old oath, you answered for the first-timers, and you drank Brennan's Line punch. Your certificate is on your shelf.", "lines": [{"who": "marrow", "text": "Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.", "pose": "gesture"}, {"who": "marrow", "text": "First-timers, step forward. Don't be shy. Everyone here stood where you're standing once."}, {"who": "first1", "text": "Do we have to say anything?"}, {"who": "marrow", "text": "One of you does, at the end. I do the hard part. Listen.", "pose": "laugh"}, {"who": "marrow", "text": "Past this point the stars have other names, and help is a long way off. We go as guests."}, {"who": "marrow", "text": "So we make each other a promise. Here it is.", "pose": "gesture"}, {"who": "marrow", "text": "\"We have crossed the Line. We left the near stars behind us, and we did not go alone.\""}, {"who": "marrow", "text": "\"Whatever is out here, we meet it as one crew, and we bring each other home.\"", "pose": "gesture"}, {"who": "marrow", "text": "\"From today, this reach knows our names.\" There. That's the oath. It's older than the ship."}, {"who": "marrow", "text": "Now. Who answers for the first-timers?", "pose": "listen"}, {"who": "first2", "text": "Not me. Don't look at me."}, {"who": "first1", "text": "{me}'ll do it. Won't you?", "pose": "laugh", "to": "you"}, {"choice": [{"text": "We came a long way. We're glad we did.", "rel": {"marrow": 1}, "flavour": "share", "flag": "line.answer.proud", "reply": {"who": "marrow", "text": "So are we. Write that down, somebody. It's going on the plaque.", "pose": "nod"}}, {"text": "We crossed together, all of us. Even the ones on watch.", "rel": {"marrow": 1}, "flavour": "warm", "flag": "line.answer.watch", "reply": {"who": "marrow", "text": "Even the ones on watch. Yes. That's going on the plaque.", "pose": "nod"}}, {"text": "Is this the part with the punch?", "rel": {"marrow": 1, "brennan": 1}, "flavour": "funny", "flag": "line.answer.punch", "reply": {"who": "marrow", "text": "It is. I'm so sorry. And yes, that's going on the plaque too.", "pose": "laugh"}}]}, {"who": "brennan", "text": "Line punch. One mug each. You drink it all. That's the dunking. No complaints.", "pose": "gesture"}, {"who": "first2", "text": "It's... green. Why is it green?"}, {"who": "brennan", "text": "Tradition. Drink.", "pose": "nod"}, {"who": "marrow", "text": "There. You're Line-crossers now. Supper's at six. Something to take the taste away.", "pose": "laugh"}]},
-  "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is six till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
+  "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is seven till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
   "introAsk": {"title": "Ask Zeke", "from": "Zeke Torres", "gist": "You asked Zeke Torres about himself, Works and where the Wren is going.", "lines": [{"who": "torres-zeke", "text": "Go on, ask. Questions are the best bit.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Who are you, then?", "flavour": "listen", "reply": {"who": "torres-zeke", "text": "Zeke. Engine officer, days. I mind the drive coils on Deck 6. And I'm your trainer this week. I talk a lot.", "pose": "laugh"}}, {"text": "What does Works do?", "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Keeps her running. Air, water, lights, the lift, the engines. Faults go on the board; we fix them properly.", "pose": "gesture"}}, {"text": "Where's the ship going?", "flavour": "share", "reply": {"who": "torres-zeke", "text": "Out along the frontier, mapping. Survey picks the stars; we get her there. The Veyli share it. Their Envoy's aboard.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Anything else, just tap me. Right, onward."}]},
   "introBriefing": {"title": "Monday briefing", "from": "Chief Ines Calder", "gist": "The Monday briefing: Calder put you with Torres for the day, gave three rules for the bay, and told you to join in aboard.", "lines": [{"who": "calder", "text": "Ten to nine. Good. Everyone's here.", "pose": "nod"}, {"who": "calder", "text": "Board's at twelve. Two scrubbers, a lamp on Deck 4, the dish pit. A usual Monday."}, {"who": "calder", "text": "{me}. Arrived last night. Works, from today.", "to": "you"}, {"who": "tech1", "text": "Morning, new hand.", "pose": "gesture", "to": "you"}, {"who": "tech2", "text": "Welcome to Works. Tea and biscuits at one. That's the important bit.", "to": "you"}, {"who": "calder", "text": "Torres. One job, end to end. Board to turn-in. Their hands, not yours."}, {"who": "torres-zeke", "text": "Their hands. Got it, Chief."}, {"who": "calder", "text": "Torres shadows you today. Every step. He'll talk you through it. He talks a lot. Listen anyway.", "to": "you"}, {"who": "torres-zeke", "text": "I do talk a lot. It's mostly useful.", "pose": "laugh"}, {"who": "calder", "text": "Three things. Gloves on before the panel comes off. Not after.", "to": "you"}, {"who": "calder", "text": "If you don't know, ask. Asking takes a minute. Guessing takes a shift.", "to": "you"}, {"who": "calder", "text": "And put tools back where you found them. The wall has outlines. Use them.", "to": "you"}, {"who": "tech2", "text": "She means it about the wall.", "pose": "gesture"}, {"who": "calder", "text": "Last thing. Work ends at five. The ship doesn't.", "to": "you"}, {"who": "calder", "text": "Sunday dinner at the long tables. Music on Fridays. Quiz nights. Observatory nights.", "to": "you"}, {"who": "calder", "text": "The garden, the lounge. Knitters, rowers, whoever's learning the guitar this month. Find your lot.", "to": "you"}, {"who": "calder", "text": "People who join in settle in. I've watched it for years. Go to things.", "to": "you"}, {"choice": [{"text": "Ready when you are.", "rel": {"torres-zeke": 1}, "flavour": "cheer", "reply": {"who": "torres-zeke", "text": "That's the spirit. Right, onward.", "pose": "laugh"}}, {"text": "What if I get something wrong?", "rel": {"calder": 1}, "flavour": "listen", "reply": {"who": "calder", "text": "Then you say so, and we fix it. That's the job."}}, {"text": "(Nod)", "reply": {"who": "calder", "text": "Good. Quiet's fine."}}]}, {"who": "calder", "text": "Right. Board's there. Back to it."}]},
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your wardrobe. Your bag goes in your wardrobe, by the door.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. This is you. This is where you sleep.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "The top bunk in the middle is yours."}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "Now, your bag. In your wardrobe, by the door. Go on, it's yours now.", "pose": "gesture", "to": "you"}]},
@@ -51132,7 +51138,8 @@ const bubbles = { list: [], hidden: false, el: null, v: new THREE.Vector3(), on:
       this.pair = { l: a, r: c, stack };
     } else this.pair = null;
     for (const b of on) {                                // a change of layout (side by side, stacked) slides in over a few frames; the speaker is followed exactly
-      const ox = b.x - b.ax, oy = b.y - b.ay, step = d => Math.max(-lim, Math.min(lim, d * ease)); b.ox = b.ox === undefined ? ox : b.ox + step(ox - b.ox); b.oy = b.oy === undefined ? oy : b.oy + step(oy - b.oy);
+      const ox = b.x - b.ax, oy = b.y - b.ay;           // (2026-10-22: lim caps the slide's whole distance, not each way on its own, which let a diagonal slide go 1.4 times as fast)
+      if (b.ox === undefined) { b.ox = ox; b.oy = oy; } else { const dx = (ox - b.ox) * ease, dy = (oy - b.oy) * ease, m = Math.hypot(dx, dy), k = m > lim ? lim / m : 1; b.ox += dx * k; b.oy += dy * k; }
       const hw = b.w / 2 + 8; b.x = Math.min(innerWidth - hw, Math.max(hw, b.ax + b.ox)); b.y = b.ay + b.oy;
     }
     for (const b of on) {
