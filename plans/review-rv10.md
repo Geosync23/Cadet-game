@@ -53,6 +53,19 @@ a folder holding cadet_test.py, an output folder).
 - intro_check booth line: a mutant without the move line FAILS it. Full intro_check base vs fix: identical output, 0 FAILs,
   up to a 50-minute limit (includes the Day 0 dinner). day_check 1 and 7 OK, check_fast OK, cadet_test ALL IDENTICAL.
 
+## 0.92.1
+| What | Commit (base) | Verdict |
+|---|---|---|
+| AC3 join notices kept + cadetPopupsNow hook | claude/arrows-c 54169e4c (integration 685af944) | PASS |
+| FX4 save trim | claude/fx4-save-trim 06a989e6 (integration 685af944) | PASS |
+| FX7 gym bike tap | not received yet | |
+
+- AC3: arrows_check queue lines fail on 685af944, OK after; join_check OK (alone); check_fast OK; cadet_test identical.
+  join_probe.py (real tap on Mira, Gym club, then four pop-ups): base drops the join notice, AC3 keeps it, both sizes.
+  Pop-up timing runs on the test's virtual clock (performance.now): step frames, don't wait real time.
+- FX4: career_check's three lines fail on base (Day 120 4673 bytes) and pass after (2816); callers only read this or
+  next week; puzzle_check, check_fast OK; cadet_test identical. Nothing on screen.
+
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
 - Teleporting the player (player.obj.position) doesn't move them for taps; use playerTap or real floor taps to walk.
