@@ -209,3 +209,9 @@ is new in 0.92.0 and not from the arrows (it fails with them off too, and passes
 The 13 lines on 4147f03d: the bunk before 20:00 too early; the bunk at 21:00 sleep to 06:00; not enough credits toast;
 crawlway; sit anywhere; the servery closed at 12:00; job loop tier-1 service job; reserved job bracket made not kept;
 job loop new job announced; work steps x4 (ok(v), "ready at", tapped too soon, r.say).
+
+## Round 9 rerun: player_check on the new 0.92.0 game (claude/integration-next 4e324417)
+
+**sha256 of starship-cadet.html: `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd`** (matches BM14's;
+FX5's Day 0 table fix). 4e324417's player_check.py (AC3's arrows-on fix + FX6's job-loop fix), alone: **PLAYER CHECK OK**
+(exit 0, 384 s, no FAIL lines). The tier-1 job line is gone.
