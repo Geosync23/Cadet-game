@@ -47,6 +47,7 @@ player_check change taken as the tea part only (its context carried a fix-eat pa
 | FX3 fixes 16-18 (with the inspection morning's arrows, direct, off with the queue on) | claude/p5-fix3 a9cabf75 | RV7 PASS |
 | AC2 F2: the inspection morning through the queue (level 2) | 5f7e91c | RV7 |
 | FX5: p3 trained when Day 5's case is solved before its row opens (24k WORK_MECH.p3.open) | claude/p5-fix5 c5eb7119 (cherry-picked by AC3, e3fb801) | RV9 PASS |
+| AC3 follower: an urgent career arrow ends your work; stay in a training meeting's room until it starts (FX4's diagnosis) | 8dd0304 | RV7 PASS |
 
 Clash notes: ixJobStep's make line keeps FX2's scan-first rule with FX3's lathe pin.
 
