@@ -68,7 +68,8 @@ Day 0's kept seat is never cut short by the next walk ..."), game sha256
 'free': 1185, 'most': 48, 'before': 48}` (all 48 still seated 5 minutes before Zeke's goodnight; was 45).
 
 **CR5 for 0.92.0 now:** day_check 21 OK, 27 OK, interactions OK (on c2180854), career known KS1 only (on c2180854),
-events OK (on f2329b62).
+events OK (on f2329b62). BM14 (11:37 UTC): no further re-runs; FX5's change only touches Day 0's kept seat (RV10 checked Days 0-28), so
+the c2180854 results stand. Stood down.
 
 ## 0.91.0 full round (2026-10-22, started ~21:30 UTC, for BM14 and lead 29 / lead 30)
 
