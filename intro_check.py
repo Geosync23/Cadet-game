@@ -436,7 +436,12 @@ def beside_walk(g):
         r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow' if st in ('servery', 'table', 'chief', 'free', 'tomas', 'night', None) else 'beside'])
         m = hm(r['t']); at.setdefault(r['step'], m)
         if r['dlg']: dlgs.add(r['dlg'])
-        if r['step'] == 'works' and r['esc'] and r['esc'][0] == [16, 6] and r['deck'] == 5: still.setdefault('works', m)   # he's at the Works bay door
+        if r['step'] == 'works' and r['esc'] and r['esc'][0] == [16, 6] and r['deck'] == 5:   # he's at the Works bay door
+            if 'works' not in still:   # (lead 31) a tap on him: his usual card, no chat, and the tour goes on
+                tap = g.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT), seen = []; const t0 = toast; toast = function (t, x, o) { seen.push(t + ': ' + x); return t0.apply(this, arguments); }; const r = introTap(a.p); toast = t0; return { r, seen, dlg: !!DIALOGUE, chat: typeof CHAT !== 'undefined' && !!CHAT }; })()")
+                print(f'  a tap on him at the Works door: {tap}')
+                if not (tap['r'] and any(x.startswith('Zeke Torres: ') for x in tap['seen']) and not tap['dlg'] and not tap['chat']): fail(f'a tap on him during the tour should show his card (no chat): {tap}')
+            still.setdefault('works', m)
         if r['step'] in ('table', 'chief', 'free', None): break
     missed = g.ev('SHIP.intro.missed.slice()'); done = g.ev("(() => { const D = SHIP.intro.done, out = {}; for (const k of ['works', 'lift', 'wing', 'bunk', 'beside:works', 'beside:bunk']) out[k] = D[k] === undefined ? null : hhmm(((D[k] % 1440) + 1440) % 1440); return out; })()")
     print(f"  steps began: {sorted(((v, k) for k, v in at.items()))}; done: {done}; missed: {missed}; talks: {sorted(dlgs)}")
