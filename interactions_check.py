@@ -566,21 +566,26 @@ with sync_playwright() as pw:
         # the Folding table nearest the pin started your own laundry (0.28.55's rule) and the arrows_check follower looped there
         if g.ev("!!placeById('4-laundry-drop')"):
             g.ev("goToDeck(4)"); g.step(5)
-            HSET = r'''(() => { actEnd(true); setShipNow(1440 * 2 + 12 * 60 + 20); machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+            HSET = r'''(() => { actEnd(true); setShipNow(1440 * 2 + 10 * 60);   // 10:00, clear of Yara's 12:00 hauling lesson (its own run and steps took the job, now and then, on a busy runner)
+              machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
               SHIP.jobs = SHIP.jobs.filter(j => !/^haul.*fb1|^haul@.*y$/.test(j.id)); SHIP.player.carry = []; for (const k of NEED_KEYS) SHIP.player.needs[k] = 80;
-              const j = haulJob(shipNow(), [{ id: 'linen', dest: '4-laundry-drop' }], { yours: true }); SHIP.jobs.push(j); MACH_REV++; claimJob(j.id);
+              const j = haulJob(shipNow(), [{ id: 'linen', dest: '4-laundry-drop' }], { yours: true }); SHIP.jobs.push(j); MACH_REV++; const cl = claimJob(j.id); window.__cl = [cl, (myJob() || {}).id, SHIP.jobs.filter(x => x.claimedBy).map(x => x.id + ':' + x.claimedBy + ':' + x.status)];
               const st = jobStops(myJob()), k = st.findIndex(x => x.step === 'deliver'); for (let i = 0; i < k; i++) jobStepDone(j.id, i);
               const s = placeSpot('4-laundry-drop'); player.obj.position.set(s.x + 1, 0, s.z + 1); player.stop(); return [k, j.id]; })()'''
             ONT = ON.replace("i.t === 'Cart dock 1'", "i.t === 'Folding table' && isShown(i.hit) && ixDist(i, placeSpot('4-laundry-drop')) < 1.5")
             fres = []
             for rot in range(4):
                 kp = g.ev(HSET); g.step(60)
+                check(g.ev("window.__cl[0] && (myJob() || {}).id === window.__cl[1]"), f'(the test holds its haul: {g.ev("JSON.stringify(window.__cl)")})')
                 for _ in range(rot): g.page.click('#rot'); g.step(30)
                 g.ev(TIPOFF); xy = g.ev(ONT)
                 if not xy: fres.append([rot, 'no point on the table', None]); continue
                 FT = f"(k => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(kp[1])}); return j && jobStops(j)[k].done ? JSON.stringify(['ixStop', k]) : JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep]); }})({kp[0]})"   # done already counts
                 g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT)
-                if a == 'null': g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT) + ' (tapped twice)'   # a tap lost on a busy runner: a player taps again
+                if a == 'null':
+                    print('      (claim)', g.ev('JSON.stringify(window.__cl)'), g.ev('JSON.stringify([(myJob() || {}).id, SHIP.jobs.filter(x => /haul/.test(x.id)).map(x => x.id + ":" + x.claimedBy + ":" + x.status)])'))
+                    print('      (diag)', g.ev(f"JSON.stringify([(e => e && (e.id || e.className || e.tagName))(document.elementFromPoint({xy[0]}, {xy[1]})), typeof ride !== 'undefined' && !!ride, typeof FREEZE !== 'undefined' && FREEZE.frozen, !document.getElementById('lift').hidden, typeof PAUSE !== 'undefined' && PAUSE.on, clockText(), deckDef.num, player.here().join(','), player.path.length, (goalNow() || {{}}).label, document.getElementById('tt').textContent])"))
+                    g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT) + ' (tapped twice)'   # a tap lost on a busy runner: a player taps again
                 fres.append([rot, kp, a])
             print('   the linen\'s drop, a tap on the Folding table [camera turn, (stop, job), what started]:', fres)
             check(sum(1 for r in fres if r[2]) >= 2, f'the Folding table under the finger in at least two camera turns ({fres})')
