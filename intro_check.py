@@ -356,11 +356,12 @@ def bunk_leave(g):
         for k in range(200):
             g.step(30)
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            if g.ev("typeof DEV !== 'undefined' && DEV.open"): g.ev('deviceClose()')   # DS1: his Mail on your device after the hand-over, read and closed
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, dev: introFlag('intro.device'), given: SHIP.intro.done['device:given'], bag: bagHeld(), deck: deckDef.num, z: (a => a && cellAt(a.x, a.z))(introWalker()), zr: (a => a && deckDef.num === 4 ? introRoomAt(4, cellAt(a.x, a.z)) : null)(introWalker()) })")
             if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and (r['dev'] or how == 'deck'): break
         took = r['m'] - t0
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
-        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else 12):   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else g.ev('INTRO_HOLD_ROOM') + 12 if how == 'stay' else 12):   # (DS1: staying in the room with the bag, the bag step waits INTRO_HOLD_ROOM for you)   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
         if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
@@ -484,7 +485,7 @@ with sync_playwright() as pw:
             if has != want and d['combined']: fail(f'{who} has days off {has}; the first week needs {want} (combined builds 0.60+)')
 
         run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
-        EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
+        EVENING = -1440 + g.ev("introStepById('night').at") + 31          # Day 0 20:01 with the night step at 19:30 (DS1: it moves with the arrival)
         WANT = {'torres-zeke': 10, 'tomas': 10, 'pell': 5, 'calder': 3, 'brennan': 3}
 
         print('2. The happy path, on paper (Day 0 from INTRO_START to Day 8 00:00)')
@@ -512,8 +513,8 @@ with sync_playwright() as pw:
             e = run(who=who, to=EVENING)
             late = [s for s in steps if s not in e['I']['done']]
             miss = e['I']['missed']
-            print(f"  {who}: by Day 0 20:01 step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
-            if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by 20:01 (left: {', '.join(late)})")
+            print(f"  {who}: by Day 0 {EVENING + 1440} min step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
+            if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by {EVENING + 1440} min (left: {', '.join(late)})")
             if who == 'idle' and not {'Your bunk', 'Tomorrow'} <= {m[2] for m in e['mail']}: fail('idle: the fallback Mail did not all arrive')
             if who == 'wander' and len(miss) < 5: fail(f'wander: only {len(miss)} steps missed; a step should not count from a nearby checkpoint')
             w = run(who=who)
