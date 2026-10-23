@@ -485,7 +485,18 @@ class Sweep:
         return self
 
 def part_reach(pw, src, tag):
-    sw = Sweep(pw, src, tag).run()
+    # (CTT3) CTL_STATES=file: the touch half's findings saved there, and read back instead of sweeping again when the file
+    # is there (the pad half alone, after a stop; the touch half took 1.5 h on 0.91.0)
+    keep = os.environ.get('CTL_STATES')
+    if keep and os.path.exists(keep):
+        from types import SimpleNamespace
+        d = json.load(open(keep)); print(f'  the touch half read back from {keep}')
+        sw = SimpleNamespace(**{k: d[k] for k in ('presses', 'reloads', 'lost', 'cands')}, capped=set(d['capped']), opened=set(d['opened']),
+                             states={str(i): v for i, v in enumerate(d['states'])})
+    else:
+        sw = Sweep(pw, src, tag).run()
+        if keep: json.dump({'presses': sw.presses, 'reloads': sw.reloads, 'lost': sw.lost, 'cands': sw.cands, 'capped': sorted(sw.capped),
+                            'opened': sorted(sw.opened), 'states': list(sw.states.values())}, open(keep, 'w'))
     keys = sorted({i['k'] for st in sw.states.values() for i in st['items']})
     dl = sorted({d for st in sw.states.values() for d in st['dialogs']})
     print(f'  by touch: {len(sw.states)} screen states, {len(keys)} different pressable things, {sw.presses} presses, {sw.reloads} loads; panels seen: {", ".join(dl)}')
@@ -509,14 +520,22 @@ REACH_INVENTORY = {}
 # focus, plan section 3) with the D-pad only: back and forth along rows, down and up, and a seeded wander, until nothing
 # new is reached. Every thing the page lists on that screen must have had the highlight. Then A on the highlighted thing
 # must click that very thing, and B must leave the panel (or go back a step).
-def pad_moves(r, n):
+class _AllSeen(Exception): pass
+def pad_moves(r, n, want=None):
+    # (CTT3) want: once every one of these has had the highlight, stop (all the screen needs; the zigzag was ~600 presses a
+    # screen, each with a scan of the page)
     seen, order = set(), []
+    try: _pad_moves(r, n, want, seen, order)
+    except _AllSeen: pass
+    return seen, order
+def _pad_moves(r, n, want, seen, order):
     def look():
         sc = r.ev(SCAN); it = next((i for i in Sweep.inner(sc) if i['foc']), None); f = it and it['k']
         if f and f not in seen:
             seen.add(f); order.append(f)
             # CP5's rule: what the highlight lands on has a name a screen reader reads (text, aria-label or title)
             if not r.js("(() => { const e = document.activeElement; return !!((e.getAttribute('aria-label') || e.textContent || e.title || (e.labels && e.labels[0] && e.labels[0].textContent) || '').trim()); })()"): pad_moves.nameless.add(f)
+            if want and want <= seen: raise _AllSeen()
         return f
     r.press('DOWN'); r.step(1); look()
     for d1, d2 in (('RIGHT', 'LEFT'), ('LEFT', 'RIGHT')):
@@ -533,28 +552,73 @@ def pad_moves(r, n):
         x = (x * 48271) % 2147483647; r.press(['UP', 'DOWN', 'LEFT', 'RIGHT'][x % 4]); r.step(1); look()
     return seen, order
 pad_moves.nameless = set()
+# the element a key from SCAN names (the same key rule, without its on-screen test), marked data-ctt
+KEY_MARK = r"""((want) => { for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt');
+  const seen = new Map();
+  for (const e of document.body.querySelectorAll('*')) {
+    if (e.closest('[hidden]') || !e.getClientRects().length) continue;
+    let a = e; while (a && a !== document.body && !a.id) a = a.parentElement;
+    const lab = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
+    let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
+    if (!want.startsWith(key)) continue;
+    const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
+    if (key === want) { e.setAttribute('data-ctt', '1'); return true; }
+  }
+  return false; })"""
+def pad_to_key(r, key, tries=40):
+    # pad_to, the thing found again by its key before every press: a panel that redraws itself (the device home, as the
+    # ship clock ticks) drops the mark, and pad_to then gave up one press short (0.91.0's Roster). None: not in the page
+    for k in range(tries + 1):
+        if not r.ev(f"({KEY_MARK})({json.dumps(key)})"): return None if k == 0 else False
+        f = r.ev(f"({FOCUS_ON})('[data-ctt]')")
+        if f.get('on'): return True
+        if k == tries: return False
+        if f.get('none'): r.press('DOWN'); r.step(1); continue
+        dx, dy = f['dx'], f['dy']
+        r.press(('RIGHT' if dx > 0 else 'LEFT') if abs(dx) >= abs(dy) else ('DOWN' if dy > 0 else 'UP')); r.step(1)
+    return False
 # things the D-pad needn't reach, each with its reason (and who ruled)
 PAD_COVERED = {'#devBody svg[Deck plan]': "its click only picks a room, and every room you can meet in is in the Rooms list below it with the same pick (PR9's ruling on the Maps plan; CP1)"}
 def part_reach_pad(pw, src, tag, states):
     fails = []; pad_moves.nameless = set()
+    # (CTT3) CTL_PADDONE=file: each screen's result kept there as it's done, and screens already in it not walked again
+    # (a long run that a restart stopped picks up where it was; the pad half is ~5 min a screen)
+    pdf = os.environ.get('CTL_PADDONE'); done = {}
+    if pdf and os.path.exists(pdf):
+        for ln in open(pdf): d = json.loads(ln); done[d['where']] = d['fails']
     for st in states.values():
         if not st['dialogs'] or any(k.startswith('@deck:') for k in st['path']): continue
+        where = ' > '.join(st['path'])
+        if where in done:
+            print(f'  {where}: done before (read back): ' + ('; '.join(done[where]) or 'all reached')); fails += done[where]; continue
+        n0 = len(fails)
         sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
         okp = all(sw.press(sw.scan(), k) for k in st['path'])
         where = ' > '.join(st['path'])
         if not okp: print(f'  {where}: could not get there again'); sw.r.close(); continue
         want = {i['k'] for i in st['items']}
-        seen, order = pad_moves(sw.r, min(12, len(want) + 2))
+        # what's on the screen as you arrive (CTT3: read after the zigzag, a list it had scrolled lost its first rows from
+        # both the count and the misses: New appointment's 8 people counted as "3 of 3"); a thing the touch half listed
+        # that isn't here now is a screen that changed with the clock (Tracked's rows), said below
         now = {i['k'] for i in Sweep.inner(sw.scan())}
+        # (and what's in the panel but out of sight, below its edge: the device home's last tiles; the D-pad scrolls to them)
+        now |= {k for k in want - now if not k.startswith('@') and sw.r.ev(f"({KEY_MARK})({json.dumps(k)})")}
+        seen, order = pad_moves(sw.r, min(12, len(want) + 2), want & now - set(PAD_COVERED))
         missing = sorted((want & now) - seen - set(PAD_COVERED))
         for k in sorted((want & now) & set(PAD_COVERED) - seen): print(f'  {where}: {k} not reached by the D-pad, allowed: {PAD_COVERED[k]}')
         # (CP1) the zigzag above covers a dozen rows; anything it missed: steer the highlight straight at it, up to 40
         # presses (pad_to: the bigger gap first), as a player aiming for it would
+        # (CTT3) found by its key, not by its point on screen: after the zigzag a long panel may have scrolled it out of
+        # sight (0.91.0's device home: Roster, its last tile), and the highlight scrolls it back in as it gets there
         for k in list(missing):
-            it = next((i for i in Sweep.inner(sw.scan()) if i['k'] == k), None)
-            if it and sw.r.ev(f"(() => {{ const e = document.elementFromPoint({it['x']}, {it['y']}); for (const o of document.querySelectorAll('[data-ctt]')) o.removeAttribute('data-ctt'); if (!e) return false; (e.closest('button,a,input,select,textarea,[tabindex],[role]') || e).setAttribute('data-ctt', '1'); return true; }})()") and pad_to(sw.r, '[data-ctt]', 40):
-                missing.remove(k); seen.add(k)
-        print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else ''))
+            ok = pad_to_key(sw.r, k, 40)
+            if ok is None: continue
+            if not ok:   # steering from where the wander ended can bounce between two; from the top again, as a player would
+                for _ in range(15): sw.r.press('UP'); sw.r.step(1)
+                ok = pad_to_key(sw.r, k, 40)
+            if ok: missing.remove(k); seen.add(k)
+        gone = sorted(want - now)
+        print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else '') + (f'; not on the screen this time: {len(gone)} ({gone[:3]})' if gone else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
         # A clicks the highlighted thing
@@ -569,6 +633,8 @@ def part_reach_pad(pw, src, tag, states):
         sw.r.press('B'); sw.r.step(6); sc3 = sw.scan()
         if Sweep.sig(sc3) == sig0: fails.append(f'{where}: B changed nothing (the panel stays as it was)')
         sw.r.close()
+        if pdf:
+            with open(pdf, 'a') as fh: fh.write(json.dumps({'where': where, 'fails': fails[n0:]}) + '\n')
     return fails
 
 # ---- on the deck: walking, turning, zooming, Pause, Device, Tracked (the deck package) --------------------------------
@@ -836,7 +902,10 @@ DECKS_JS = "(typeof DECK_ORDER !== 'undefined' ? DECK_ORDER : Object.keys(DECKS)
 def hint_now(r):
     """the bottom line; a message showing hides it, so B first puts the message away, as a player would"""
     h = r.ev(HINT)
-    if h is None and r.ev("toastEl.classList.contains('show')"): r.press('B'); r.step(2); h = r.ev(HINT)
+    # (CTT3) with the arrows on, messages wait in a queue and come one after another: B for each, up to four, as a player would
+    for k in range(4):
+        if h is not None or not r.ev("toastEl.classList.contains('show')"): break
+        r.press('B'); r.step(2); h = r.ev(HINT)
     return h
 def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     # target n of PICK_TARGETS, from a fresh load (a panel the last one opened can't get in the way), frame for frame
@@ -857,7 +926,9 @@ def pick_one(pw, src, tag, by_pad, n, presses=0, seat_search=False):
     elif n >= len(ts): r.close(); return None, len(ts)
     else: t = ts[n]
     name = t['kind'] + ' (' + str(t.get('name')) + ')'
-    r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''")
+    # (CTT3) the message box put away by hand, and the arrows' pop-up queue with it (else the next waiting one shows at
+    # once and hides the bottom line the whole time: round 10, arrows on)
+    r.ev("toastEl.classList.remove('show'); document.getElementById('tt').textContent = ''; document.getElementById('tx').textContent = ''; typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)")
     if not r.ev(f"({STAND_BY})({json.dumps(t)})"): r.close(); return [name, 'nowhere to stand', None, None], len(ts)
     r.step(72); hints = []; found = not by_pad   # (the ring's search needs about 2 s after the check moves you)
     if not by_pad and presses: r.step(7 * presses)
@@ -1816,7 +1887,9 @@ def legacy_parts(GAME, ON, fails):
         # "Controller connected" waits for the message showing (the opening one) to go, then shows
         p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
         check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
-        p.ev("toastEl.classList.remove('show')"); p.step(2)
+        # (CTT3) put away as its 5.6 s would: with the arrows on, a message within 2.5 s (real time) of the last one waits in
+        # their queue, and the check's frames take far less real time than a player's
+        p.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"); p.step(2)
         m = marks(p)
         for b, k in [('devBtn', 'y'), ('pauseBtn', 'menu'), ('trkBtn', 'view')]:
             check(m.get((b, k)) == ('xbox:' + k, True), f'marks: no shown Xbox {k} mark on {b}: {m}')
@@ -1884,7 +1957,7 @@ def legacy_parts(GAME, ON, fails):
         check(x == y, 'touch: the screenshot after a press then a touch differs from the no-pad one (' + str(WORK / 'test') + '/_pad_*.png)')
     def part_drop(pw):
         p = Pad(pw, ON)
-        p.plug(); p.ev("toastEl.classList.remove('show')"); p.press('b'); p.step(2)   # the first press is B, which puts messages away
+        p.plug(); p.ev("toastEl.classList.remove('show'); typeof TOAST_AT !== 'undefined' && (TOAST_AT = -1e9); typeof GUIDE !== 'undefined' && GUIDE.tq && (GUIDE.tq.length = 0)"); p.press('b'); p.step(2)   # the first press is B, which puts messages away (TOAST_AT: as above, for the arrows' queue)
         check(p.ev("document.getElementById('tt').textContent") == 'Controller connected' and p.ev("toastEl.classList.contains('show')"), 'drop: a first press of B lost "Controller connected"')
         p.axes([0, -1, 0, 0]); p.step(6)
         check(p.ev('!!player.steer'), 'drop: the stick did not walk')
