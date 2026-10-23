@@ -82,6 +82,10 @@ WALK_TICK = r"""((mode) => {
     const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile));
     window.__stow = { t: clockText(), goal: typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null }; wardrobeUse(); act = 'stow';
   }
+  else if (mode === 'follow' && typeof introHandDue === 'function' && introHandDue() && a) {   // DS1 (lead 31): his device hand-over: stay with him (the arrow says "Zeke Torres"), beside him
+    const c = cellAt(a.x, a.z); if (Math.max(Math.abs(c[0] - here[0]), Math.abs(c[1] - here[1])) > 1) { const n = nearestOpen(a.x, a.z, player); if (n) player.obj.position.copy(cellPos(...n)); }
+    act = 'hand-over';
+  }
   else if (mode === 'follow' && st && st.checkpoint && typeof INTRO_UI !== 'undefined' && INTRO_UI.pause && a) act = 'listen';   // he's stopped to tell you about a place: stay with him
   else if (mode === 'follow' && st && st.checkpoint) {
     const cp = st.checkpoint;
@@ -697,7 +701,13 @@ with sync_playwright() as pw:
         # playtest patch 1 (#2-#4, #6): the bag into the wardrobe by you, the device from Zeke in person, no cabin Mail, the linger
         hand = g.ev("({ cabin: SHIP.clothes.said['d0-wardrobe'], stow: window.__stow || null, given: SHIP.intro.done['device:given'], stowAt: SHIP.intro.done.stow, devMet: SHIP.intro.done.device, bag: typeof bagHeld === 'function' && bagHeld(), mail: SHIP.mail.filter(m => m.from === 'Zeke Torres').map(m => m.subject) })")
         print(f"  the bag and the device: stowed by you {hand['stow']}, device handed over at {hand['given']} (stow step {hand['stowAt']}, device step {hand['devMet']}); Zeke's Mail {hand['mail']}")
-        hv = g.ev("({ s: SHIP.intro.done['hand:start'], e: SHIP.intro.done['hand:end'], mail: window.__handMail || null })")
+        hv = g.ev("({ s: SHIP.intro.done['hand:start'], e: SHIP.intro.done['hand:end'], mail: window.__handMail || null, lines: introHandLines(false), after: introHandLines(true), toast: (document.getElementById('tx') || {}).textContent })")
+        if hv['s'] is None: fail('the device hand-over in his bubbles never played (lead 31: part 8 must play it)')
+        heard = [x for x in g.ev('window.__said') if x[2] in hv['lines'] + hv['after']]
+        order = [x[2] for x in heard]
+        print(f"  the hand-over's lines heard {len(order)}/{len(hv['lines']) + len(hv['after'])}, at {sorted(set(x[0] for x in heard))}")
+        if order != hv['lines'] + hv['after']: fail(f"the hand-over's lines out of order or missing: {order}")
+        if len(set(x[0] for x in heard)) > 1: fail(f"the ship clock moved during the hand-over: {sorted(set(x[0] for x in heard))}")
         if hv['s'] is not None:   # DS1 (lead 30's (e)): his hand-over in bubbles, his Mail opened on your device, the clock held through it
             print(f"  the hand-over: from ship minute {hv['s']} to {hv['e']}; the device opened on {hv['mail']}")
             if hv['e'] is None or hv['e'] - hv['s'] > 1: fail(f"the ship clock should hold through Zeke's hand-over: {hv}")

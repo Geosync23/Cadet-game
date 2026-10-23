@@ -36726,6 +36726,7 @@ function eventsPlayer(now) {
   const key = e ? e.id + '@' + d : null;
   if (key !== EV_IN.key) EV_IN = { key, since: now };
   if (key && e.id === 'quiz' && QUIZ_PLAYED !== d && SHIP.events.joined.includes(key) && !DIALOGUE) quizStart(d, now);   // joined while another card was open: the game when it's free
+  if (key && typeof introJoinWait === 'function' && introJoinWait(d)) return;   // (DS1, lead 31) the arrival dinner: a tradition there is joined after the Chief's welcome and his goodnight, as before the 17:15 arrival
   if (!key || now - EV_IN.since < 5 || SHIP.events.joined.includes(key) || TJ_WALK) return;   // not on the way past, in a walk's line (0.70.0)
   if (e.ev.joinAt != null && m < e.ev.joinAt) return;    // joined (its thanks) no sooner than that minute (Crossing the Line: after the punch, ER3 fix 4)
   if (tradJoinable(e) && !tradDoingIt(e)) return;        // 0.70.0: one with something to do together is joined by a tap (tradJoinTap), or by doing it at one of its places
@@ -42631,10 +42632,10 @@ function introBegin(name) {
 
 // (playtest patch 1, #3) Zeke hands you your device in person, as his device meeting opens; the flag unlocks section 19's
 // button (deviceLocked) and starts its first-time glow (introDevGlowTick). Missed (you never came back to Bunk 1): Monday's briefing
-function introDeviceGive() {
+function introDeviceGive(quiet) {                         // quiet: in his own bubbles (DS1, the user: no message box at the hand-over)
   if (introFlag('intro.device')) return;
   introFlagSet('intro.device'); SHIP.intro.done['device:given'] = Math.floor(shipNow());
-  toast('Zeke Torres', 'He hands you your device. It\'s yours now: tap it any time.');
+  if (!quiet) toast('Zeke Torres', 'He hands you your device. It\'s yours now: tap it any time.');
 }
 // (DS1, the user on 0.91.0, lead 30's brief B, C, E) the device hand-over without the meeting panel: once the device step
 // is yours, his wardrobe lines and the tour's core lines are done and he's come up to you (escortPlan's follow: he stands
@@ -42658,6 +42659,9 @@ const INTRO_HAND_NEAR = 2.2;                               // m: he's come up to
 const introHandGap = text => Math.min(INTRO_TOUR_GAP, Math.max(2200, 1200 + 40 * String(text).length));   // (lead 30's (c)) real ms to the next line, by its length: 60 characters 3.6 s (his tour pace), a short one 2.2 s
 const INTRO_HAND_READ = 45000;                             // real ms: reading his Mail with the device open that long, he goes on anyway
 const introHandLines = after => introWriterLines(after ? 'walk.hand.after' : 'walk.hand') || (after ? INTRO_HAND.after : INTRO_HAND.lines);   // one flag key each, in the file's order
+// (DS1, lead 31) the arrival dinner keeps its order with the later arrival: a tradition in the mess (the Sunday long table)
+// is joined once the Tomas step comes (after the Chief's welcome and his goodnight lines), not as you sit down
+const introJoinWait = d => d === 0 && introOn() && !!SHIP.intro.step && SHIP.intro.done.tomas === undefined;
 const introHandBusy = () => { const D = SHIP.intro.done; return D['hand:start'] !== undefined && D['hand:end'] === undefined; };
 // due: the device step done with you there (not missed) and the scene not over: toMess holds and he stays with you (escortPlan)
 const INTRO_HAND_WAIT = 10;                                 // ship minutes the scene may take to start (he walks over, his wardrobe lines end); then it's skipped (a time jump)
@@ -42698,9 +42702,9 @@ function introHandTick() {
   }
   const L = introHandLines(false);
   if (H.n < L.length) {                                    // his lines, a few seconds apart, facing you
-    say(L[H.n++]); if (H.n >= INTRO_HAND.give) introDeviceGive(); return;
+    say(L[H.n++]); if (H.n >= INTRO_HAND.give) introDeviceGive(true); return;
   }
-  introDeviceGive(); const id = introHandMail(); if (typeof deviceShow !== 'function') { H.opened = now; return; }
+  introDeviceGive(true); const id = introHandMail(); if (typeof deviceShow !== 'function') { H.opened = now; return; }
   if (typeof deviceClose === 'function' && typeof DEV !== 'undefined' && DEV.open) deviceClose();
   try { if (id != null) { mailOpen = id; const m = SHIP.mail.find(x => x.id === id); if (m) m.read = true; } } catch (e) { /* section 19's */ }
   const booted = SHIP.device.booted; SHIP.device.booted = true; deviceShow('mail'); SHIP.device.booted = booted;   // past the first switch-on, this once
@@ -42951,7 +42955,7 @@ const INTRO_TOUR = [
   { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift', step: 'lift', core: 3 },
   // (DS1, the user on 0.91.0: he stood ~7 s off the lift) the officers' corridor is walk-and-talk: he leads off at once (must: its
   // lines all heard, the wing's wait for them)
-  { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3, walk: true, must: true }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
+  { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3, walk: true, must: true, noHold: true }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
   { id: 'deck3', deck: 3, at: [22, 7], r: 3, stub: 'toMess', step: 'toMess', core: 2 }, { id: 'servery', deck: 3, at: [33, 3], r: 2, stub: 'servery', step: 'servery', core: 3 },
 ];
 // a place's lines split into { core, extra }: the writers' entries marked core if any are, else its first `core` lines
@@ -42991,12 +42995,14 @@ function introTourTick() {
   const head = Q[0], near = a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 5;
   // he pauses where he is while core lines are waiting and you're with him (at the ramp and from the lift on: never on the walk between, the `walk` places), never longer in all than a place's lines take
   // (only the time he's actually held counts: not meetings, not the lift)
-  const hold = head && head.core.length && Q.some(q => !q.t.walk) && near && !DIALOGUE && head.held < head.cap;
+  const hold = head && head.core.length && !head.t.noHold && Q.some(q => !q.t.walk) && near && !DIALOGUE && head.held < head.cap;   // (DS1) noHold: a place whose lines never stop him (Deck 4's officers' corridor)
   if (hold) head.held += Math.min(250, now - (INTRO_UI.tickAt || now));
   INTRO_UI.tickAt = now;
   if (hold && !INTRO_UI.pause) INTRO_UI.pause = cellAt(a.x, a.z); else if (!hold) INTRO_UI.pause = null;   // his tile on this deck (the queue holds only this deck's places)
   if (DIALOGUE || !a || typeof bubbleSay !== 'function') return;
+  const scene = typeof introHandDue === 'function' && introHandDue();   // (DS1, lead 31) his hand-over: no tour extras or lines about himself during it, his Mail open included
   if (head) {
+    if (scene && !head.core.length) return;
     if (now >= INTRO_UI.next && (head.t.id !== 'shuttle' || introClose(a))) {   // his first lines wait until you've reached him (the user on 0.63.1, 0.42.47)
       const text = head.core.length ? head.core.shift() : head.extra.shift();
       if (!head.at) head.at = now; bubbleSay(a.h, text, 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; INTRO_UI.still = now;
@@ -43005,7 +43011,7 @@ function introTourTick() {
   }
   // standing still near him with nothing else to say: a line about himself
   const key = here.join(','); if (key !== INTRO_UI.stillAt) { INTRO_UI.stillAt = key; INTRO_UI.still = now; return; }
-  if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
+  if (now - INTRO_UI.still > 8000 && now >= INTRO_UI.next && st.mode !== 'meet' && !scene && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 3) {
     const l = introWriterLine('walk.more.' + (INTRO_UI.more + 1)); INTRO_UI.still = now;
     if (l) { INTRO_UI.more++; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
   }
