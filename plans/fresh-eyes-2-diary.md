@@ -120,7 +120,13 @@ The manifest card ("Your name", "Sign and go aboard") is clear. The card behind 
 
 **43. Small.** On Day 2 Tracked is about three screens long (today and tomorrow), and the device home has grown, so the Settling / Maps / Mail tiles are now below the fold and need a scroll. Day 2 adds nice new rows: "Training: rounds with Zeke" 10:45, "New-crew health check" 14:00, "Calling home" 18:00, and "The Chief's office: your first solo job" 08:45.
 
-**I stopped here, at Day 2 Tuesday 07:20** (memory), in Bunk 6 on Deck 4, before the Chief's office. Days 2 (rest) to 8 are not played; see the handover note `plans/handover-fe2.md`.
+**44. 07:26-07:50, leaving the bunk wing. Confusing, then good.** Tracked "The Chief's office: your first solo job" gave "Tap the lift: Deck 5 · Works Chief's office". In the lift lobby, taps on the lift's button panel opened Hugo Janssen (twice), Bo Mbeki and Marta Soto. A tap at the foot of the spine ladder opened its deck list at once, with Deck 5 marked "TRACKED" (d2-57). Down 2 decks: "Energy −4, fitness +2." The way out of the bunk wing that worked: the spine ladder.
+
+**45. 07:55-08:45, Deck 5. Good warnings.** The arrow carried on to "Works Chief's office, Deck 5". Calder's card (she stood in my path): "Your first solo job's mine. Glass office, quarter to nine. I'll pick it. You'll do it." (d2-61). At 08:30: "The Chief's office: your first solo job starts in 15 min · Go there", and a time-clock reminder.
+
+**46. 08:45-09:05, the Chief's office: the solo job never starts. Blocks me.** Press-and-hold toward the arrow took me into the haulway, the wrong way. From the haulway, Rotate showed the pin on Calder's desk with Calder sitting at it (d2-69). Tapping the pin at 08:58 opened Calder's card, still saying "Glass office, quarter to nine" (d2-70). "Ask about..." offers only News / Their work / Home. Nothing else happened. At 09:05 the line was "09:00: your shift's started. Clock in at the time clock". The appointment "The Chief's office: your first solo job" still sat in Tracked. I couldn't find out how to start it, or whether I'd arrived too late (08:58 for 08:45).
+
+**I stopped here, at Day 2 Tuesday 09:05** (memory), by the Chief's office on Deck 5, not clocked in. Days 2 (rest) to 8 are not played; see the handover note `plans/handover-fe2.md`.
 
 ---
 

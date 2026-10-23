@@ -6,7 +6,7 @@
 
 **Build played.** 0.92.0, claude/integration 685af944, game file sha256 f2329b62...6ebd (checked). Teaching arrows on (Settings default "First times"); the controller and Crossing the Line off.
 
-**Where I got to.** Day 0 complete; Day 1 complete (06:00 to bed at 21:12); Day 2 from 06:00 to 07:20 only. Stopped in Bunk 6 on Deck 4 before "The Chief's office: your first solo job" (08:45), at about 50% memory. Days 2 (rest) to 8 are not played. Item numbers 1-43 in the diary match the five batches sent to the lead.
+**Where I got to.** Day 0 complete; Day 1 complete (06:00 to bed at 21:12); Day 2 from 06:00 to 09:05 only. Got out of the bunk wing by the spine ladder and reached Calder's desk at 08:58, but the 08:45 "first solo job" never started (diary item 46). Stopped there, at about 60% memory, by the Chief's office on Deck 5, not clocked in. Days 2 (rest) to 8 are not played. Item numbers 1-46 in the diary match the six batches sent to the lead.
 
 **The save does not carry over.** My game's save lives in this container's browser profile (/tmp/cadet-work/profile), which a new session can't reach. A fresh FE starts a new game from Day 0 (or the lead decides how to get to Day 2+).
 
