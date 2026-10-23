@@ -215,3 +215,12 @@ a9823284's controller_check.py (the game file there is the same, sha c2180854…
 `FAIL day: the job board: the ring never named the lift` (KC1) and `FAIL day: bedtime: the lift panel never opened` (KC2).
 OK: idle save calls touch walk pick games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks
 touch3 drop settings a11y firstuse. (touch passes this round.)
+
+## Re-run on the new 0.92.0 game (claude/integration-next 4e324417, FX5's Day 0 table fix), BM14's ask
+
+sha256 **f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd** (BM14's). Each alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 255; worst stuck 0.0; 298 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 291 s |
