@@ -624,6 +624,8 @@ def part_reach_pad(pw, src, tag, states):
         sw.r.press('B'); sw.r.step(6); sc3 = sw.scan()
         if Sweep.sig(sc3) == sig0: fails.append(f'{where}: B changed nothing (the panel stays as it was)')
         sw.r.close()
+        if pdf:
+            with open(pdf, 'a') as fh: fh.write(json.dumps({'where': where, 'fails': fails[n0:]}) + '\n')
     return fails
 
 # ---- on the deck: walking, turning, zooming, Pause, Device, Tracked (the deck package) --------------------------------
