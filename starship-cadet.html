@@ -10160,7 +10160,7 @@ function schedBuild(p, d, occ, S) {
           if (shut && evClosed(pl, B + s, o.event, B + end)) continue;   // closed for the event
           if (act === 'leisure' && type.startsWith('work:') && (S.deskOf(pl.id) || (occ.rotIds && occ.rotIds.has(pl.id)))) continue;   // a guest at a work type: never someone's desk, nor today's stand-in's
           const lead = () => { if (!fromXY || dk !== deck) return;   // the walk (#9): they set off earlier, out of the end of what they were doing (at most half of it; never an event meeting, F0b)
-            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
+            const l = segs[segs.length - 1], cut = l && l.to === t && l.deck === deck && l.act !== 'commute' && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag)) && !l.kept ? Math.min(walkLead(fromXY(dk), pl), Math.floor((l.to - l.from) / 2)) : 0;
             if (cut > 0) { l.to -= cut; t -= cut; }
           };
           if (o.queue && s - arrive >= (o.qMin || SHOWER_Q)) { lead(); go(dk); seg('off', s, 'booth-queue', null, { tag: o.queue }); }   // a wait worth queueing for: in the line by the place (0.71.4, the booths); o.qMin: the toilets' line from a minute's wait, and the walk comes before it (TQ1, note 19)
@@ -10396,7 +10396,7 @@ function schedBuild(p, d, occ, S) {
       && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
       seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
     { const l = segs[segs.length - 1], cut = e.at + e.dur;   // Day 0's table, kept past its end for Zeke's goodnight: after the tradition ends they're ordinary diners lingering in the same seat
-      if (l && l.tag === e.tag && l.from < cut && l.to > cut) { const x = { ...l, from: cut }; delete x.tag; l.to = cut; segs.push(x); } }
+      if (l && l.tag === e.tag && l.from < cut && l.to > cut) { const x = { ...l, from: cut, kept: 1 }; delete x.tag; l.to = cut; segs.push(x); } }   // kept: a walk after it never starts out of it (FX5: a toilet's walk lead got three up before the goodnight)
     e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
   };
   const leisureUntil = (end, k) => {

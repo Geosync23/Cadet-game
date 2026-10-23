@@ -460,8 +460,11 @@ def firsts(g):
         g.ev("devChosen(0)"); g.step(20); tr = g.ev(G)
         g.ev("(() => { player.obj.position.copy(cellPos(37, 19)); })()"); g.step(20)
         mid = g.ev("({ g: " + G + ", place: IX_GOAL && IX_GOAL.place, end: SHIP.intro.done['call:end'] !== undefined })")
-        moved = g.ev("(() => { const was = INTRO_ARROWS.call.place, x = { goalId: was }; DECK_CREW.push(x); introCallTick(Math.floor(shipNow())); const now = INTRO_ARROWS.call.place; DECK_CREW.splice(DECK_CREW.indexOf(x), 1); INTRO_ARROWS.call.place = was; return [was, now]; })()")
-        if moved[0] == moved[1]: fail(f"someone took the booth the call arrow was on, and it stayed there (FX5): {moved}")
+        # (0.92.0's evening: the crew may hold the other three booths; one is freed for the test, so a free one exists)
+        moved = g.ev("""(() => { const was = INTRO_ARROWS.call.place, B = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'], other = B.find(id => id !== was), h = DECK_CREW.filter(a => a.goalId === other), x = { goalId: was };
+          h.forEach(a => a.goalId = null); DECK_CREW.push(x); introCallTick(Math.floor(shipNow())); const now = INTRO_ARROWS.call.place;
+          DECK_CREW.splice(DECK_CREW.indexOf(x), 1); h.forEach(a => a.goalId = other); INTRO_ARROWS.call.place = was; return [was, now, other]; })()""")
+        if moved[1] != moved[2]: fail(f"someone took the booth the call arrow was on, and it didn't move to the free one (FX5): {moved}")
         # FX5 (the user, 2026-10-23): in the room it still points at a booth, a free one, until the call begins (it went on walking
         # in); once the call's begun the call arrow is gone (the bunk arrow may come back)
         g.ev("(() => { const it = ITEMS.find(i => i.t === 'Booth ' + ((IX_GOAL && IX_GOAL.place) || '1').slice(-1)); it.hit.getWorldPosition(_wp); playerTap(it, _wp.clone(), _wp.clone()); })()")
