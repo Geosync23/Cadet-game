@@ -386,7 +386,8 @@ def talk_away(g):
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
             g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), given: SHIP.intro.done['device:given'], z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
-            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)): break   # (bunk: on through the bag and the device)
+            if g.ev("typeof DEV !== 'undefined' && DEV.open"): g.ev('deviceClose()')   # DS1: his Mail after the hand-over, read and closed
+            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)) and (step != 'bunk' or g.ev("SHIP.intro.done['hand:end'] !== undefined || !introHandDue()")): break   # (bunk: on through the bag, the device and his hand-over)
         took = r['m'] - t0
         print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, device in person {r['given'] is not None}, Zeke at {r['z']}")
         if step == 'bunk' and r['given'] is None: fail(f'standing outside Bunk 1 through his bunk talk, the device never came from him in person ({r})')   # (OR2)
@@ -771,9 +772,9 @@ with sync_playwright() as pw:
         back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
         print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
         if not mid or back['step'] != mid['step'] or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
-        for k in range(200):
+        for k in range(400):
             g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
-            if r['step'] == 'toMess': break
+            if r['step'] == 'toMess' and g.ev("SHIP.intro.done['hand:end'] !== undefined || !introHandDue()"): break   # (DS1: after his hand-over)
         bunk = g.ev("({ done: SHIP.intro.done.bunk !== undefined, missed: SHIP.intro.missed.slice(), device: introFlag('intro.device') })")
         print(f"  on to the bunk after the reload: reached {bunk['done']}, missed {bunk['missed']}, device {bunk['device']}")
         if not bunk['done'] or bunk['missed'] or not bunk['device']: fail(f'after reloading mid-walk the evening went wrong: {bunk}')
@@ -783,7 +784,7 @@ with sync_playwright() as pw:
         print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
     else:
         stale = g.ev("({ calder: INTRO_UI.calder, tour: INTRO_UI.tour.length })")   # after part 8's evening
-        g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.ev('localStorage.clear()'); g.ev('if (typeof DEV !== "undefined" && DEV.open) deviceClose(); newGameStart(true)'); g.step(5)
         fresh = g.ev("({ calder: !!INTRO_UI.calder, tour: INTRO_UI.tour.length, step: INTRO_UI.step === undefined, meet: INTRO_UI.meet.length })")
         print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
         if fresh['calder'] or fresh['tour'] or not fresh['step'] or fresh['meet']: fail(f'New game kept the last evening\'s state: {fresh}')
