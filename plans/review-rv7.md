@@ -206,3 +206,20 @@ to start. The game file at 8dd03049 is 14249d8 plus FX5's p3 fix (RV9's). Week o
 
 Nothing got worse. What these lines are for (Day 8's m6 at "ask" with the arrows off) can't show yet: with the arrows
 off the scanner isn't learned on Day 5 (FX4's fix), so Making it safe doesn't open on Day 8.
+
+## 8. The shipped default (teaching arrows on in 0.92.0): a week before AC3's switch commit
+
+A copy of arrows-c 8dd03049 with `POINT_ON = true` and `GUIDE_ON = true` at load (no run-time overrides),
+`plans/review-rv7/p_audit.py` (the week, logging every arrow's source and level), `p_ptr.py` (the panel pointer).
+
+| Teaching arrows | Learned | Stuck |
+| --- | --- | --- |
+| First times (the default) | m1, m4, m3d, m3i, m5, m7, p3, m2 | "Mop up (2 of 2)" Day 8 (m6; FX3), the hydroponics vent Day 4 |
+| Off | m1, m3d, m3i, m2 only | the hydroponics vent |
+
+With Off, the queue drops T2 ("Stay close and watch <teacher>", level 3). `trainWatchArrow` (the old direct watch
+arrow) runs only with the queue off, so a lesson's watch step has no arrow at all, and Hauling, Tuning, the scanner and
+p3 are lost. That fails lead 30's rule (Off removes only what exists to teach, never the arrow the game had before).
+Under Off these stay, which is right by that rule: the job arrows, the shift chain (Take a job, Shift over), the meeting
+arrows (L2), the inspection (L2) and the drill. The panel pointer is off under Off: at 08:01 on Day 2 "First times"
+asks p:clock:in, and Off asks nothing.
