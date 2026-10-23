@@ -606,8 +606,9 @@ with sync_playwright() as pw:
             if t0['open'] != 0: fail('the Tern\'s ramp is open while you sign the manifest')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
         if tern:   # about 2 s after signing, the pilot's line and the ramp opens (2.5 s)
+            g.ev("window.__shown = []; { const el = document.getElementById('toast'); if (el) new MutationObserver(() => window.__shown.push(el.textContent)).observe(el, { subtree: true, childList: true, characterData: true }); }")   # every pop-up shown (with the teaching arrows on, 0.92.0, a later one waits its turn and then follows it)
             r0 = g.ev('ternRampOpen()'); g.step(150)   # 2 s to the pilot, 2.5 s of ramp (the frame clock)
-            r1 = g.ev("({ open: ternRampOpen(), toast: (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
+            r1 = g.ev("({ open: ternRampOpen(), toast: window.__shown.find(t => t.includes('Raman')) || (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
             src = "the writers' line" if r1['pilot'] else 'the stand-in'
             print(f"  the ramp right after signing {r0}, 5 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
             if r0 != 0: fail('the ramp opened before the pilot spoke')
