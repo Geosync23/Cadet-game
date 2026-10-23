@@ -18,9 +18,13 @@ wants AC2 (session_015uhdrDuE49CJ8iWWX2SEeP) copied on anything going into claud
 | FX2 fix | ffdbb8cd | PASS |
 | FX3 fix 15 (33, 38, dock) | claude/p5-fix3 3b7b13db | PASS WITH FIXES (dock check line); FX3 dropped the dock clause in fix 16 (RV7 passed 16-18) |
 | FB1 fe-cartdock | a52aad05, 228de584, ebf456b6, 191bee5d | PASS each |
-| SC1 breakfast-back | claude/breakfast-back 0cd37b1b | see plans/review-fe2.md, "breakfast-back" |
+| SC1 breakfast-back | claude/breakfast-back 0cd37b1b | PASS |
+| FX5 tip-clear | claude/tip-clear feb2e54a | PASS |
+| SC1 dinner-spread | claude/dinner-spread ed6bcbf3 | PASS WITH FIXES (needs a check part that fails without it; probes p_leave.py, p_day0table.py) |
 
 ## Loose ends
+- dinner-spread: re-check SC1's new check line when it comes (should FAIL on 0cd37b1b, pass on the tip).
+- Day 0's Sunday table stays full about an hour after you're let go with DS1's tour (plans use the fixed 'free' minute): the user should hear it.
 - Stale-ray edge (FB1's choreThingTap onPin reads the last canvas ray; CP4's ixGoalTap calls playerTap without one):
   lead 30 put it on the backlog.
 - Section 11's lift guard (FB1 191bee5) counts a stop within 1.5 m of the lift tap: nothing near a lift today
