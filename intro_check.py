@@ -15,7 +15,7 @@
 #      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
 #      draw calls under 450, no page errors
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
-#   17. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
+#   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
 #      starts; at 10:05 a tap on her doesn't (--solotap: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
@@ -342,7 +342,7 @@ def solo(g):
 # you stand at in the Chief's office, not her seat; a real tap on her (as FE2 tapped the pin over her desk) walks you in and
 # her meeting starts; once it has been (or outside its time), a tap on her is her card as before, no walk
 def solo_tap(g):
-    print('17. Tuesday 08:51: the solo job\'s arrow at your spot in her office, a tap on the Chief walks you in and it starts; later her card')
+    print('18. Tuesday 08:51: the solo job\'s arrow at your spot in her office, a tap on the Chief walks you in and it starts; later her card')
     g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
     g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
     g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")
@@ -353,12 +353,16 @@ def solo_tap(g):
     goal = row.get('goal') or {}
     print(f"  Tracked: {row.get('title')} -> {goal}")
     if goal.get('place') != '5-office-visit-1': fail(f'the solo job\'s Tracked arrow is not at your spot in her office: {goal}')
-    TAP = """(() => { const a = DECK_CREW.find(c => c.p.id === 'calder'); if (!a) return null; const v = new THREE.Vector3(a.x, 1.0, a.z).project(camera);
-      return [(v.x + 1) * innerWidth / 2, (1 - v.y) * innerHeight / 2, ROOMS[roomAt(...cellAt(a.x, a.z))].name]; })()"""
+    # a point on her the canvas takes (a speech bubble or a toast can cover part of her, as for a player, who'd tap the rest)
+    TAP = """(() => { const a = DECK_CREW.find(c => c.p.id === 'calder'); if (!a) return null; const room = ROOMS[roomAt(...cellAt(a.x, a.z))].name; let first = null;
+      for (const h of [.9, .5, 1.2, .7, 1.4]) for (const dx of [0, -8, 8]) { const v = new THREE.Vector3(a.x, (a.y || 0) + h, a.z).project(camera), x = (v.x + 1) * innerWidth / 2 + dx, y = (1 - v.y) * innerHeight / 2;
+        const e = document.elementFromPoint(x, y), c = crewAtScreen(x, y); if (!first) first = (e && e.closest('[id]') ? e.closest('[id]').id : e && e.tagName) || '?';
+        if (e && e.tagName === 'CANVAS' && c && c.p.id === 'calder') return [x, y, room, 'canvas']; }
+      return [0, 0, room, 'covered by ' + first]; })()"""
     pt = g.ev(TAP)
     if not pt or pt[2] != "Works Chief's office": fail(f'the Chief is not in her office at 08:51: {pt}'); return
-    who = g.ev(f"(() => {{ const a = crewAtScreen({pt[0]}, {pt[1]}), e = document.elementFromPoint({pt[0]}, {pt[1]}); return [a ? a.p.id : null, e ? e.id || e.className || e.tagName : null, DIALOGUE ? 'dlg' : '', typeof DEV !== 'undefined' && DEV.open]; }})()")
-    print(f'  at the tap: {who}')
+    print(f'  the tap on her: {pt}')
+    if pt[3] != 'canvas': fail(f'no point on the Chief to tap: {pt}'); return
     g.page.mouse.click(pt[0], pt[1]); g.step(5)
     walking = g.ev('player.path.length')
     met = None
@@ -373,7 +377,7 @@ def solo_tap(g):
         g.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(2); else dialogueNext(); })()"); g.step(60); n += 1
     g.ev('skipTo(introAbs(2, 10 * 60 + 5))'); g.ev(HERE); g.step(60)
     pt = g.ev(TAP)
-    if pt:
+    if pt and pt[3] == 'canvas':
         g.page.mouse.click(pt[0], pt[1]); g.step(5)
         late = g.ev("({ path: player.path.length, dlg: !!DIALOGUE, card: !!(document.querySelector('.chat:not([hidden]), #chat:not([hidden])') || (document.getElementById('tt') || {}).textContent) })")
         print(f'  10:05, the meeting over: a tap on her: {late}')
@@ -627,7 +631,7 @@ with sync_playwright() as pw:
         bunk_leave(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
-    if '--solotap' in sys.argv:   # part 17 alone (item 81)
+    if '--solotap' in sys.argv:   # part 18 alone (item 81)
         solo_tap(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
