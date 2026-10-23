@@ -131,3 +131,13 @@ build table.
   When playerTap is called without a fresh ray (CP4's ixGoalTap, a check's direct playerTap), a stale ray that
   passed over the current stop would do the stop instead of the tapped thing. That can only happen if the last canvas
   tap was over the stop and didn't do it. Not seen; an edge case for FB1/CP4 to keep in mind.
+- **FB1 191bee5d (jobRayDist looks to 1.7 m; section 11: a tap on a lift door or panel tries your job's stop first): PASS.**
+  FB1's new part (taps on the top of the drawn dot at the top of its bob) OK on 191bee5; on ebf456b it FAILS (40
+  lines: e.g. the linen and store drops did nothing, the galley drop sat you down). Full interactions_check OK.
+  check_fast OK. cadet_test alone ebf456b vs 191bee5 ALL IDENTICAL. Section 11's line (no active owner, so reviewed
+  here): jobSpotTap(h.point) uses jobHere, which takes a stop within 1.5 m of the tap's hit point as well as one under
+  the tap's line. So with a job in hand whose next stop (or the machine panel) is within 1.5 m of a lift door or panel,
+  a tap on the lift does the stop and not the lift. p_liftnear.py lists, for every deck, the places within 2 m of a
+  lift part: only event spots and lift-wait spots, no machine panel or chore stop (closest: 5-drill-door 0.8 m from
+  Deck 5's lift panel, a drill spot). So nothing is caught today. A stop placed by a lift later would block the lift
+  until it's done: worth a line in the deck-building notes.
