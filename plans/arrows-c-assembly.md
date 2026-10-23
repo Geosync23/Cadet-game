@@ -51,11 +51,22 @@ player_check change taken as the tea part only (its context carried a fix-eat pa
 
 Clash notes: ixJobStep's make line keeps FX2's scan-first rule with FX3's lathe pin.
 
-## Waiting (merge when it passes)
-- FX4 m7 at 'ask' with the queue off (claude/p5-fix4 e38eba4, 2e5581f; RV9).
-- FX3 the hydroponics and lift-plaza vents, "Mop up (2 of 2)" (RV7).
-- FB1 the stale-line guard (RV8), if ready in time.
-- RV7 still to review: F2 5f7e91c and AC2's follower commits since 483c3da.
+## The teaching arrows switched on, and the last pieces (AC3, 2026-10-23)
+| What | Branch / commits | Review |
+|---|---|---|
+| The teaching arrows ON for 0.92.0 (the user via lead 30): POINT_ON + GUIDE_ON true; the arrow checks make their own switched-off copy | e3c7c18, device_check 764438d | RV7 |
+| Teaching arrows Off keeps a lesson's watch arrow (T2 `everyday`); arrows_check `teachoff` | f8ed852 | RV7 (lead 31's call) |
+| FX4 m7 at 'ask' with the queue off + Calder's "Wait here" | claude/p5-fix4 fc2e1c6 (merge 3d6046a) | RV9 PASS |
+| Check-side fixes for the arrows being on: interactions_check Game wrapper (clock in on taking a test job, pop-ups at once), intro_check (pilot's line from the queue; the solo job under Zeke's meeting arrow) | 8eb5715, fcd3df0, fdd1540, 34da38f, 7989742, 7d97d53 | RV7 (whole merge) |
+| FX3 fix 19 (a tap at the pin over someone is your job) + its interactions line | claude/p5-fix3 518ee9e, adda4fe (merges 1569810, 8ab6089) | RV7 PASS |
+| DV1 Dev mode's career arrow | claude/dev-career-arrow 9f51257 (merge 5f6a19c) | RV10 PASS |
+| FB1 Folding-table test fix; the stale-line guard + its fix | 8438e7f (cc4a5c2), bd291e4 + e19625c (a6213a7, b26da80) | FX4 PASS |
+| FX5 the arrival-night call-home booth arrow (3 commits) | claude/booth-arrow 771c9ff (merge a2cd3cd) | RV10 PASS |
+
+**Final tip named to BM14: 7d97d538** (lead 31, 2026-10-23 ~08:40 UTC). On it: check_fast OK; arrows_check week guide OK and
+week guide teachoff OK (every lesson m1-m7, p3, m2, m6; stuck 0); intro_check OK; cadet_test vs pre-switch c14a799d ALL IDENTICAL;
+interactions_check one FAIL, FB1's coverage line "over the garden in some" (all 60 taps did their stop; lead 31: coverage, FX4
+makes it deterministic, test-only, BM14 takes it on top). Not in arrows-c: CTT3's controller_check fixes 7f5b13d1 (BM14), tip-clear.
 
 ## Checks to run on the tip
 check_fast, cadet_test (alone), arrows_check queue / shift guide / week guide, arrows_d_check, arrows_f_check,
