@@ -1518,11 +1518,16 @@ with sync_playwright() as pw:
       return [!!SHIP.player.tray, g && g.label, pl && pl.type, pl && pl.id, q]; }})()""")
     check(a0 == 'Food' and ts[0] and ts[1] == 'A seat for your tray' and ts[2] == 'mess-seat', f'very hungry with a tray in hand, the arrow points at a seat for it, not the servery (LEAD31-14: before {a0!r}, then {ts[:4]})')
     if ts[4]:
-        g.page.mouse.click(*ts[4])
+        for k in range(20):   # as (1)'s seat: tap it only while it's on screen, nobody stands on the point and nothing covers it
+            q = g.ev(f"""(() => {{ const s = placeSpot('{ts[3]}'), q = {MESS_SCR}(s.x, s.y, s.z), el = document.elementFromPoint(q[0], q[1]);
+              return q[0] > 20 && q[0] < 370 && q[1] > 200 && q[1] < 800 && !crewAtScreen(q[0], q[1]) && el && el.tagName === 'CANVAS' ? q : null; }})()""")
+            if q: break
+            g.step(15)
+        if q: g.page.mouse.click(*q)
         for k in range(40):
             g.step(30)
             if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
-        te = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, !!SHIP.player.tray, (goalNow() || {}).label || null]")
+        te = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, !!SHIP.player.tray, (goalNow() || {}).label || null, document.getElementById('tx').textContent.slice(0, 80)]")
         check(te[0] == 'eat' and not te[2] and te[3] != 'A seat for your tray', f'a tap on the seat the arrow shows eats your tray, and the arrow goes ({te})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
