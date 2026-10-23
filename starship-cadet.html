@@ -42941,8 +42941,9 @@ const INTRO_TOUR = [
   { id: 'shuttle', deck: 5, at: [5, 10], r: 2, stub: 'hello', step: 'hello', core: 3 }, { id: 'up', deck: 5, at: [5, 10], leave: 3, stub: 'haulway', step: 'haulway', core: 12, walk: true },
   { id: 'works', deck: 5, at: [16, 6], r: 2, stub: 'works', step: 'works', core: 2, walk: true, must: true },
   { id: 'lift', deck: 5, at: [15, 9], r: 2, stub: 'lift', step: 'lift', core: 3 },
-  // (DS1, the user on 0.91.0: he stood ~7 s off the lift) the officers' corridor is walk-and-talk: he leads off at once
-  { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3, walk: true }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
+  // (DS1, the user on 0.91.0: he stood ~7 s off the lift) the officers' corridor is walk-and-talk: he leads off at once (must: its
+  // lines all heard, the wing's wait for them)
+  { id: 'officers', deck: 4, at: [21, 5], r: 3, step: 'wing', core: 3, walk: true, must: true }, { id: 'wing', deck: 4, at: [12, 4], r: 3, stub: 'wing', step: 'wing', core: 2 },
   { id: 'deck3', deck: 3, at: [22, 7], r: 3, stub: 'toMess', step: 'toMess', core: 2 }, { id: 'servery', deck: 3, at: [33, 3], r: 2, stub: 'servery', step: 'servery', core: 3 },
 ];
 // a place's lines split into { core, extra }: the writers' entries marked core if any are, else its first `core` lines
