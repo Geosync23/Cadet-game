@@ -141,3 +141,22 @@ build table.
   lift part: only event spots and lift-wait spots, no machine panel or chore stop (closest: 5-drill-door 0.8 m from
   Deck 5's lift panel, a drill spot). So nothing is caught today. A stop placed by a lift later would block the lift
   until it's done: worth a line in the deck-building notes.
+
+## breakfast-back: SC1 claude/breakfast-back 0cd37b1b (on 0.91.0 989fd566): PASS
+
+- **Exactly breakfast + its passed fixes, nothing else.** My own expected build: 989fd566 + `git diff b9f053ba 1498dbf4
+  -- . ':!plans'` (1498dbf4 = breakfast 0.64.17 + m12 + Line supper + bubble-jump, as merged and round-passed),
+  applied with --3way; only clash the two build-number lines (kept at 0.91.0). Tip vs that: identical outside plans/
+  except SC1's one interactions_check line (0cd37b1b). Plans: one new build-table row only.
+- **The rollback undone cleanly:** 2b81d8a0's diff (outside plans) is exactly the inverse of 2cabe96b's, build lines aside.
+- check_fast OK. food_check 11 4 and 1 7 OK, day_check 1 OK, bubble_check OK, mech_check OK.
+- **cadet_test alone 989fd566 vs tip: DIFFERENCES FOUND, all the breakfast schedule.** Every shot differs (crew where
+  breakfast now puts them at 07:4x on Day 2; tap1-4 land differently: on 0.91.0 tap1 opens Pell's card in Bunk 1, on
+  the tip you walk into the Junior corridor; 'tris' state). With sections 14 (SCHEDULES) and 16 (GALLEY & FOOD) put back
+  to 989fd566's in a copy (names_check OK; the 07:00 texts and the bubble cap left in): renderer noise only (6-46 px,
+  max 1 level).
+- **Known items:** interactions "Deck 3 landing": with 2b81d8a0's check it FAILS ("tapping where the arrow points opens
+  the deck picker": the t:lift tip over the panel); with 0cd37b1b's check (tips closed first) OK; the player-facing fix
+  is FX5's claude/tip-clear. controller_check day: the same 4 problems on the tip and on plain 989fd566 (Deck 3 button,
+  no crew to walk to, the lift and the bunk by the stick), so not breakfast's. perf Line ceremony: not rerun by me;
+  SC1's 335 calls / 49 people against the accepted baseline.
