@@ -740,6 +740,21 @@ with sync_playwright() as pw:
         if off:
             g.page.mouse.move(*off); g.page.mouse.down(); g.page.mouse.up(); g.step(20); a = g.ev("ACT && ACT.kind")
             print('   the Orange tree off the pin:', a); check(a == 'ixGarden', f'the Orange tree tapped off the pin is the garden, not the vent ({a})')
+        # RV8: playerTap called some other way (a check, another section) after a real tap at the pin: the pin's line is that old
+        # tap's, not this one's, so a garden thing far from it is the garden, not the vent
+        g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
+        for _ in range(4):
+            g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); p = g.ev(PIN)
+            if p and g.ev(f"({UNDER})({json.dumps(p)})") == 'floor': break
+            g.page.click('#rot'); g.step(30)
+        if p:
+            g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
+            stale = g.ev(r"""(() => { actEnd(true); const s = placeSpot('3-tend-1'), o = ray.ray.origin, d = ray.ray.direction, f = -o.y / d.y, fx = o.x + d.x * f, fz = o.z + d.z * f;
+              const it = ITEMS.filter(i => i.hit && /bed|tree|planter|herb/i.test(i.t) && roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'G').map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })
+                .filter(([i, q]) => Math.hypot(q.x - fx, q.z - fz) > 2.5 && ixDist(i, s) > 2.5)[0];
+              if (!it) return null; playerTap(it[0], it[1].clone(), it[1].clone()); return [it[0].t, ACT && ACT.kind]; })()""")
+            print('   a garden thing tapped some other way after a pin tap:', stale)
+            if check(stale, 'a garden thing far from the pin to tap'): check(stale[1] != 'ixStop', f'a playerTap made some other way after a pin tap does its own thing, not the vent (the old line is not this tap\'s: {stale})')
         g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id))")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
