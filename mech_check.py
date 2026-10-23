@@ -300,6 +300,11 @@ def m7_taps(g):
     for f in (M7_FETCH, M7_PANEL):
         r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
     g.ev("turnInJob(window.__m7j)"); g.step(60); end = g.ev(M7_SEE)
+    # FX5: Day 5's case is the scanner job, so it's solved before the p3 row can open (it needs m7 trained); the row then
+    # opens within the next ship hours and that solve trains you (it was lost: p3 never learned on Day 5)
+    p3 = g.ev("(() => { const t0 = shipNow(), W = SHIP.works, use = W.use.p3 || 0; for (let m = 1; m <= 150 && W.tr.p3 === undefined; m++) { setShipNow(t0 + m); worksCareerTick(t0 + m); } const r = { use, open: worksIsOpen('p3'), tr: W.tr.p3, at: clockText(), ask: flag('works.ask.p3') }; setShipNow(t0); return r; })()")
+    print('  24k Day 5\'s case solved on the scanner job, then the p3 row:', p3)
+    check(p3['use'] == 1 and p3['open'] and p3['tr'] is not None and not p3['ask'], f"p3: the training case solved on Day 5's scanner job trains you once the p3 row opens, with no ask to go to the board (FX5) ({p3})")
     said = g.ev("(() => { toast = window.__kt; return window.__said.filter(x => /clue|undefined/.test(x)); })()")
     print('  24g the clue toasts:', said)
     check(said and not any('undefined' in x for x in said), f"m7: the clue toasts have a title and a line, no 'undefined' ({said})")

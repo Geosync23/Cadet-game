@@ -1,6 +1,6 @@
 # claude/arrows-c: what's in (for BM14)
 
-Kept by AC2 (session_015uhdrDuE49CJ8iWWX2SEeP), assembly branch for the Pillar 5 + arrows + fresh-eyes batch 2 build
+Kept by AC3 (session_01DiLRzrXgkeoAZCoX1mVJn9) since 2026-10-23 01:51 UTC, before that AC2 (session_015uhdrDuE49CJ8iWWX2SEeP), assembly branch for the Pillar 5 + arrows + fresh-eyes batch 2 build
 (lead 29, 2026-10-22). Base: claude/integration 2b4a05db (0.64.15). BM14 merges arrows-c onto 0.91.0 (IM1 has the
 resolutions). History is merge commits and `cherry-pick -x` only, never rewritten.
 
@@ -45,12 +45,17 @@ player_check change taken as the tea part only (its context carried a fix-eat pa
 | AC2's follower fixes since 483c3da (real taps only at your held job's step, leisure ended, Fault notes, device closed, the tap's ray) | bf27739, afa5900, ac6f66e | RV7 |
 | AC2's pop-up queue keeps a training's word | 483c3da | RV7 |
 | FX3 fixes 16-18 (with the inspection morning's arrows, direct, off with the queue on) | claude/p5-fix3 a9cabf75 | RV7 PASS |
-| AC2 F2: the inspection morning through the queue (level 2) | (this commit) | RV7 |
+| AC2 F2: the inspection morning through the queue (level 2) | 5f7e91c | RV7 |
+| FX5: p3 trained when Day 5's case is solved before its row opens (24k WORK_MECH.p3.open) | claude/p5-fix5 c5eb7119 (cherry-picked by AC3, e3fb801) | RV9 PASS |
+| AC3 follower: an urgent career arrow ends your work; stay in a training meeting's room until it starts (FX4's diagnosis) | 8dd0304 | RV7 PASS |
 
 Clash notes: ixJobStep's make line keeps FX2's scan-first rule with FX3's lathe pin.
 
 ## Waiting (merge when it passes)
-- The climbing wall (FX3, RV7).
+- FX4 m7 at 'ask' with the queue off (claude/p5-fix4 e38eba4, 2e5581f; RV9).
+- FX3 the hydroponics and lift-plaza vents, "Mop up (2 of 2)" (RV7).
+- FB1 the stale-line guard (RV8), if ready in time.
+- RV7 still to review: F2 5f7e91c and AC2's follower commits since 483c3da.
 
 ## Checks to run on the tip
 check_fast, cadet_test (alone), arrows_check queue / shift guide / week guide, arrows_d_check, arrows_f_check,

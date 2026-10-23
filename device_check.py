@@ -133,8 +133,8 @@ def run(path):
               deviceShow('mail'); document.querySelector('#devBody button.row').click();
               out.read = mailUnread(); out.body = document.getElementById('devBody').textContent.includes('Two left.'); deviceShow('home'); return out; })()""")
             check(ml == {'btn': '1', 'tile': '1', 'read': 0, 'body': True}, f'mail: badges, tap to read: {ml}')
-            # notify: a badge until the app is opened; urgent ones toast
-            nt = g.ev("""(() => { deviceNotify({ app: 'wallet', text: 'Paid', urgent: true }); const t = (document.querySelector('#devBody .app[data-app="wallet"] b') || {}).textContent;
+            # notify: a badge until the app is opened; urgent ones toast (the arrow queue's pop-up queue, on from 0.92.0, emptied first: a pop-up then shows at once)
+            nt = g.ev("""(() => { if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'wallet', text: 'Paid', urgent: true }); const t = (document.querySelector('#devBody .app[data-app="wallet"] b') || {}).textContent;
               const toast = document.getElementById('tx').textContent; deviceShow('wallet'); deviceShow('home');
               return [t, toast, !!document.querySelector('#devBody .app[data-app="wallet"] b')]; })()""")
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
@@ -438,9 +438,9 @@ def run(path):
             # Quiet off shift (0.35.11): off shift, a work notice is a badge, not a toast; on shift it still toasts.
             # Section 20's #seek chip in the screen's style (a stand-in chip when the build has none)
             qt = g.ev("""(() => { const st = SHIP.device.settings, save = SHIP.time.min, tx = () => document.getElementById('tx').textContent, out = [];
-              st.quiet = true; SHIP.time.min = 1200; document.getElementById('tx').textContent = ''; deviceNotify({ app: 'jobs', text: 'Quiet test', urgent: true }); out.push(DEV.notes.jobs, tx().includes('Quiet test'));
-              SHIP.time.min = 600; deviceNotify({ app: 'jobs', text: 'Shift test', urgent: true }); out.push(tx().includes('Shift test'));
-              st.quiet = false; SHIP.time.min = 1200; deviceNotify({ app: 'jobs', text: 'Loud test', urgent: true }); out.push(tx().includes('Loud test'));
+              st.quiet = true; SHIP.time.min = 1200; document.getElementById('tx').textContent = ''; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Quiet test', urgent: true }); out.push(DEV.notes.jobs, tx().includes('Quiet test'));
+              SHIP.time.min = 600; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Shift test', urgent: true }); out.push(tx().includes('Shift test'));
+              st.quiet = false; SHIP.time.min = 1200; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Loud test', urgent: true }); out.push(tx().includes('Loud test'));
               SHIP.time.min = save; delete DEV.notes.jobs; document.getElementById('tx').textContent = '';
               out.push(deviceLoad({ device: { settings: { quiet: true } } }).settings.quiet, deviceLoad({}).settings.quiet);
               let sk = document.getElementById('seek'), made = false; if (!sk) { sk = document.createElement('div'); sk.id = 'seek'; sk.innerHTML = '<b>Tomas</b> waves you over.'; document.body.appendChild(sk); made = true; }

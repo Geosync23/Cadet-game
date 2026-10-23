@@ -260,12 +260,16 @@ def part_off(pg):
     at(pg, 1020); pg.ev("SHIP.career.ci = 8 * 1440 + 540; SHIP.career.co = 0; clearGoal(); clockRmPoint('out')"); d = pg.ev("IX_GOAL && IX_GOAL.label")
     check(d and 'lock out' in d, f'off: section 15\'s clock-out arrow as before ({d})')
 
+def arrows_off(src):                                 # the build with the teaching arrows switched off (as before 0.92.0), for the parts that test "off"
+    return src.replace('const POINT_ON = true;', 'const POINT_ON = false;', 1).replace('var GUIDE_ON = true;', 'var GUIDE_ON = false;', 1)
+
 with sync_playwright() as pw:
     path = sys.argv[1] if len(sys.argv) > 1 else 'starship-cadet.html'
-    src = pathlib.Path(path).read_text()
+    src = arrows_off(pathlib.Path(path).read_text())
     if check('const POINT_ON = false;' in src and 'function guideShift' in src, 'the build has piece D (guideShift) and the pointer switch'):
         on = WORK / 'test' / ('_d_on_' + pathlib.Path(path).name)
         on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
+        off = WORK / 'test' / ('_d_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
         for name, fn, p, guide in (('off', part_off, path, False), ('on: S2, S3, pass-over, S7', part_on, str(on), True), ('on: S5, S8, S6, S9', part_on2, str(on), True), ('tick', part_tick, str(on), True), ('the drill arrow', part_drill, path, False)):

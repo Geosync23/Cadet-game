@@ -35,16 +35,20 @@ WHERE = r"""(sel => {
     target: t ? POINT.aim === t || (POINT.aim && t.contains(POINT.aim)) : null, n: document.querySelectorAll('#ptr').length };
 })"""
 
+def arrows_off(src):                                 # the build with the teaching arrows switched off (as before 0.92.0), for the parts that test "off"
+    return src.replace('const POINT_ON = true;', 'const POINT_ON = false;', 1).replace('var GUIDE_ON = true;', 'var GUIDE_ON = false;', 1)
+
 def run(path):
-    src = pathlib.Path(path).read_text()
+    src = arrows_off(pathlib.Path(path).read_text())
     has = 'const POINT_ON = false;' in src
-    check(has, 'the build has the panel pointer (const POINT_ON = false;)')
+    check(has, 'the build has the panel pointer (const POINT_ON)')
     if not has: return
+    off = WORK / 'test' / ('_pointer_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
     on = WORK / 'test' / ('_pointer_on_' + pathlib.Path(path).name)
     on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
     with sync_playwright() as pw:
         # ---- off: the build as it is
-        print('off (the build as it is):')
+        print('off (the build switched off):')
         g = Game(pw, path, 390, 844); g.step(3)
         r = g.ev("""(() => { const a = pointAsk({ id: 'x:off', path: [pointDevice()] }); deviceShow('settings'); const txt = document.getElementById('devBody').textContent; deviceClose();
           return { a, ptr: !!document.getElementById('ptr'), seen: 'pointsSeen' in SHIP.device, teach: 'teach' in SHIP.device.settings, row: /Teaching arrows/.test(txt),
