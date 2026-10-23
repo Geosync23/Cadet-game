@@ -74,6 +74,10 @@ WALK_TICK = r"""((mode) => {
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
   let act = '';
   if (DIALOGUE) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); act = 'talk'; }
+  else if (typeof DEV !== 'undefined' && DEV.open && I.done['hand:start'] !== undefined && I.done['hand:end'] === undefined) {   // DS1: his Mail on your device, read, then closed
+    window.__handMail = window.__handMail || { t: clockText(), app: DEV.app, mail: typeof mailOpen !== 'undefined' ? mailOpen : null, subject: ((SHIP.mail || []).find(m => m.id === mailOpen) || {}).subject || null };
+    if ((window.__handRead = (window.__handRead || 0) + 1) > 3) deviceClose(); act = 'read mail';
+  }
   else if (I.step === 'stow' && typeof bagHeld === 'function' && bagHeld() && typeof wardrobeUse === 'function') {   // playtest patch 1: your bag into your wardrobe (a tap on it)
     const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile));
     window.__stow = { t: clockText(), goal: typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null }; wardrobeUse(); act = 'stow';
@@ -377,11 +381,12 @@ def bunk_leave(g):
         for k in range(200):
             g.step(30)
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            if g.ev("typeof DEV !== 'undefined' && DEV.open"): g.ev('deviceClose()')   # DS1: his Mail on your device after the hand-over, read and closed
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, dev: introFlag('intro.device'), given: SHIP.intro.done['device:given'], bag: bagHeld(), deck: deckDef.num, z: (a => a && cellAt(a.x, a.z))(introWalker()), zr: (a => a && deckDef.num === 4 ? introRoomAt(4, cellAt(a.x, a.z)) : null)(introWalker()) })")
             if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and (r['dev'] or how == 'deck'): break
         took = r['m'] - t0
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
-        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else 12):   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else g.ev('INTRO_HOLD_ROOM') + 12 if how == 'stay' else 12):   # (DS1: staying in the room with the bag, the bag step waits INTRO_HOLD_ROOM for you)   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
         if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')
@@ -406,7 +411,8 @@ def talk_away(g):
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
             g.ev(f"(() => {{ if (deckDef.num === {deck} && (K(player.here()) !== K([{spot[0]}, {spot[1]}]) || ACT)) {{ actEnd(true); player.path.length = 0; player.obj.position.copy(cellPos({spot[0]}, {spot[1]})); }} }})()")   # stay put
             r = g.ev("({ t: clockText(), m: Math.floor(shipNow()), step: SHIP.intro.step, missed: SHIP.intro.missed.slice(), given: SHIP.intro.done['device:given'], z: (a => a && cellAt(a.x, a.z))(introWalker()), me: player.here() })")
-            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)): break   # (bunk: on through the bag and the device)
+            if g.ev("typeof DEV !== 'undefined' && DEV.open"): g.ev('deviceClose()')   # DS1: his Mail after the hand-over, read and closed
+            if r['step'] not in ((step, 'stow', 'device') if step == 'bunk' else (step,)) and (step != 'bunk' or g.ev("SHIP.intro.done['hand:end'] !== undefined || !introHandDue()")): break   # (bunk: on through the bag, the device and his hand-over)
         took = r['m'] - t0
         print(f"  {step}, you at {spot}: {took} ship minutes later step {r['step']}, missed {r['missed']}, device in person {r['given'] is not None}, Zeke at {r['z']}")
         if step == 'bunk' and r['given'] is None: fail(f'standing outside Bunk 1 through his bunk talk, the device never came from him in person ({r})')   # (OR2)
@@ -505,7 +511,7 @@ with sync_playwright() as pw:
             if has != want and d['combined']: fail(f'{who} has days off {has}; the first week needs {want} (combined builds 0.60+)')
 
         run = lambda **k: g.page.evaluate("([s, a]) => window.__sc(s)(a)", [RUN, {'who': 'happy', 'reload': False, 'to': 7 * 1440, 'skip': False, **k}])
-        EVENING = -1440 + 20 * 60 + 1          # Day 0 20:01
+        EVENING = -1440 + g.ev("introStepById('night').at") + 31          # Day 0 20:01 with the night step at 19:30 (DS1: it moves with the arrival)
         WANT = {'torres-zeke': 10, 'tomas': 10, 'pell': 5, 'calder': 3, 'brennan': 3}
 
         print('2. The happy path, on paper (Day 0 from INTRO_START to Day 8 00:00)')
@@ -533,8 +539,8 @@ with sync_playwright() as pw:
             e = run(who=who, to=EVENING)
             late = [s for s in steps if s not in e['I']['done']]
             miss = e['I']['missed']
-            print(f"  {who}: by Day 0 20:01 step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
-            if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by 20:01 (left: {', '.join(late)})")
+            print(f"  {who}: by Day 0 {EVENING + 1440} min step {e['I']['step']}, missed {len(miss)} ({', '.join(miss)}); mail: {', '.join(m[2] for m in e['mail'])}")
+            if e['I']['step'] is not None or late: fail(f"{who}: the evening hasn't ended by {EVENING + 1440} min (left: {', '.join(late)})")
             if who == 'idle' and not {'Your bunk', 'Tomorrow'} <= {m[2] for m in e['mail']}: fail('idle: the fallback Mail did not all arrive')
             if who == 'wander' and len(miss) < 5: fail(f'wander: only {len(miss)} steps missed; a step should not count from a nearby checkpoint')
             w = run(who=who)
@@ -707,6 +713,11 @@ with sync_playwright() as pw:
         # playtest patch 1 (#2-#4, #6): the bag into the wardrobe by you, the device from Zeke in person, no cabin Mail, the linger
         hand = g.ev("({ cabin: SHIP.clothes.said['d0-wardrobe'], stow: window.__stow || null, given: SHIP.intro.done['device:given'], stowAt: SHIP.intro.done.stow, devMet: SHIP.intro.done.device, bag: typeof bagHeld === 'function' && bagHeld(), mail: SHIP.mail.filter(m => m.from === 'Zeke Torres').map(m => m.subject) })")
         print(f"  the bag and the device: stowed by you {hand['stow']}, device handed over at {hand['given']} (stow step {hand['stowAt']}, device step {hand['devMet']}); Zeke's Mail {hand['mail']}")
+        hv = g.ev("({ s: SHIP.intro.done['hand:start'], e: SHIP.intro.done['hand:end'], mail: window.__handMail || null })")
+        if hv['s'] is not None:   # DS1 (lead 30's (e)): his hand-over in bubbles, his Mail opened on your device, the clock held through it
+            print(f"  the hand-over: from ship minute {hv['s']} to {hv['e']}; the device opened on {hv['mail']}")
+            if hv['e'] is None or hv['e'] - hv['s'] > 1: fail(f"the ship clock should hold through Zeke's hand-over: {hv}")
+            if not hv['mail'] or hv['mail'].get('app') != 'mail' or not hv['mail'].get('subject'): fail(f"the device should open on his Mail at the hand-over: {hv}")
         if 'stow' in steps:
             if not hand['stow'] or hand['stow']['goal'] != 'Put your bag in your wardrobe' or hand['bag']: fail(f"the bag did not go into the wardrobe by your tap, with its arrow: {hand}")
             if hand['given'] is None or hand['stowAt'] is None or hand['given'] < hand['stowAt']: fail(f"the device was not handed over in person after the bag: {hand}")
@@ -721,7 +732,7 @@ with sync_playwright() as pw:
         # the tour as heard by a follower (pacing A): every place's core lines, in place order; extras only if you linger
         said = [x[2] for x in g.ev('window.__said')]
         sp = g.ev("INTRO_TOUR.map(t => [t.id, introTourSplit(t)])")
-        walkp = set(g.ev("INTRO_TOUR.filter(t => t.walk && !t.must).map(t => t.id)"))   # before the lift: heard as you walk, the rest skipped at the lift (a must place is always heard)
+        walkp = set(g.ev("INTRO_TOUR.filter(t => t.walk && !t.must && t.deck === 5).map(t => t.id)"))   # (DS1: Deck 4's officers' corridor walks too, after the lift; its core lines must still be heard) before the lift: heard as you walk, the rest skipped at the lift (a must place is always heard)
         ps = (pre['sm'][-1] - pre['sm'][0]) / g.ev('SHIP_RATE') / max(1, pre['n'] - 1) if pre['n'] > 1 else 0   # real seconds a look
         print('  after each ride (from, to, time, you, Torres, tiles apart):', rides)
         for x in rides[:2]:
@@ -786,9 +797,9 @@ with sync_playwright() as pw:
         back = g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === INTRO_ESCORT), pp = player.obj.position; return { step: SHIP.intro.step, deck: deckDef.num, esc: a ? Math.round(Math.hypot(a.x - pp.x, a.z - pp.z)) : null, plan: (escortPlan(ROSTER.find(p => p.id === INTRO_ESCORT), shipNow()) || {}).mode }; })()")
         print(f"  saved at step {mid and mid['step']} ({mid and mid['t']}); after the reload: step {back['step']}, Deck {back['deck']}, Torres {back['esc']} tiles away ({back['plan']})")
         if not mid or back['step'] != mid['step'] or back['esc'] is None: fail(f'reloading mid-walk lost the step or Torres: {back}')
-        for k in range(200):
+        for k in range(400):
             g.step(20); r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
-            if r['step'] == 'toMess': break
+            if r['step'] == 'toMess' and g.ev("SHIP.intro.done['hand:end'] !== undefined || !introHandDue()"): break   # (DS1: after his hand-over)
         bunk = g.ev("({ done: SHIP.intro.done.bunk !== undefined, missed: SHIP.intro.missed.slice(), device: introFlag('intro.device') })")
         print(f"  on to the bunk after the reload: reached {bunk['done']}, missed {bunk['missed']}, device {bunk['device']}")
         if not bunk['done'] or bunk['missed'] or not bunk['device']: fail(f'after reloading mid-walk the evening went wrong: {bunk}')
@@ -798,7 +809,7 @@ with sync_playwright() as pw:
         print('  not yet: this build has no jobReserve (section 17, systems 0.33.36+)')
     else:
         stale = g.ev("({ calder: INTRO_UI.calder, tour: INTRO_UI.tour.length })")   # after part 8's evening
-        g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+        g.ev('localStorage.clear()'); g.ev('if (typeof DEV !== "undefined" && DEV.open) deviceClose(); newGameStart(true)'); g.step(5)
         fresh = g.ev("({ calder: !!INTRO_UI.calder, tour: INTRO_UI.tour.length, step: INTRO_UI.step === undefined, meet: INTRO_UI.meet.length })")
         print(f'  New game again: the evening\'s state before {stale}, after {fresh}')
         if fresh['calder'] or fresh['tour'] or not fresh['step'] or fresh['meet']: fail(f'New game kept the last evening\'s state: {fresh}')
