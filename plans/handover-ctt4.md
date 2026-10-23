@@ -27,14 +27,30 @@ Read CTT3's note first (`plans/handover-ctt3.md` on claude/controller-tests-3): 
 Scratchpad `run_reach.sh` (work dir `w_reach`, CTL_STATES=states.json, CTL_PADDONE=paddone.jsonl): rerun it detached after
 a restart and it resumes. Touch half: 43 screens, 185 pressable things, 751 presses (~2 h 40 min). The D-pad half ran with
 the fixed check from 14:55 UTC. Here a screen takes ~5 min alone, ~20 min with a second browser job beside it.
-Result: see the bottom of this note.
+Result: see "The sweep's end" below.
 
 ## Gotchas
 - `pkill -f` with a pattern that also appears literally in your own command kills your shell (exit 144): bracket a letter.
 - `timeout N` on a run of the pad half: a screen can take 20 min; my 1-hour cap cut a proof run short.
 - At most two browser checks at once (4 cores).
+- **The container is reclaimed while the session sits idle** (twice, ~17:00 and ~18:00 UTC: uptime 0, the sweep gone, no
+  progress in that hour). Keep a Monitor armed (re-arm at each 30-min expiry) for as long as a detached run must live; a
+  send_later check-in alone does not keep it up. The files in the scratchpad survive; rerun run_reach.sh and it resumes.
+- A on a text box only puts the cursor in it (padPress: a.focus()), so "A does nothing" there can't be told from right in
+  the test browser (the system keyboard is what differs). The check catches A pressing something else instead.
 
 ## Open
 - `#sleepAsk`, `#ixHealth`, `#needStrip`, `#devHu` never open from a new game (CTT3): NOT_FROM_NEW_GAME reasons or a
   situation to open them, for the controller owner.
 - Depth 8 is reached only in the appointment-making chain (deck buttons, then a room): the same 14 things each step.
+
+## The sweep's end (2026-10-23 20:17 UTC, 0.92.0 f2329b62, with the fixed check): 6 problems, none a D-pad fault
+- **Every screen with a panel: everything reached by D-pad, B and A right**: Pause 1/1, device home 16/16, Tracked app,
+  Appointments and all its chain (the map steps 13/14, the deck plan allowed), Calendar 7/7, 8/8, 8/8, Maps 14/15 (deck
+  plan allowed), Jobs 4/4, Mail 4/4, 5/5, Memos 4/4, New memo 7/7, Hobbies 7/7, Roster 11/11, 10/10, Tracked panel 11/11 and
+  11/11, Spine ladder 7/7, lift panel 7/7.
+- Not D-pad, known: #sleepAsk, #ixHealth, #needStrip never open from a new game (NOT_FROM_NEW_GAME reasons or a situation:
+  for the controller owner; #devHu, on CTT3's list, opened this time); depth 8 only in the appointment chain (x2).
+- Check-side, fixed (d5d34dd6): A on New memo's text box "clicked nothing" (see the gotcha above). Proven clean; planted
+  fault (A on a text box presses another button) caught.
+- Tiles' screens can't be replayed (real-time redraw): 0 of 0, "could not get there again" (known, CTT3).
