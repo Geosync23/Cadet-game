@@ -14918,12 +14918,19 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wsteps = SHIP.pl
 // one, else the nearest deck's. Cleared when you start fixing it, or the need is back up (WARN_REARM)
 const NEED_FIX = { hunger: ['servery-queue', 'grab-shelf'], energy: ['bed'], hygiene: ['shower'], bathroom: ['toilet'], fitness: ['gym'], social: ['callhome'], leisure: ['lounge-seat'] };
 const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower', bathroom: 'A toilet', fitness: 'The gym', social: 'The call booths', leisure: 'Somewhere to sit and unwind' };
-let NEED_GOAL = null;                                     // { need, label } while the marker is ours
+let NEED_GOAL = null;                                     // { need, label, tray? } while the marker is ours (tray: it points at a seat for your tray)
+const TRAY_SEAT_SAY = 'A seat for your tray';
 function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
+  if (k === 'hunger' && SHIP.player.tray && here === 3) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
+    const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
+    const seats = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat').sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+    const seat = seats.find(pl => !heldBy(pl.id)) || seats[0];   // all taken: the nearest (sitting there moves you to a free one nearby, actBegin)
+    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true }; setGoal({ deck: 3, place: seat.id, label: TRAY_SEAT_SAY }); return true; }
+  }
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
   const theirs = pl => (DECKS[pl.deck].places || []).some(q => q.type === 'bed' && q.id !== bed && (q.room === pl.room || pl.id.startsWith(q.id + '-')));
@@ -14935,7 +14942,10 @@ function needGoal(k) {
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
-function needGoalTick() { if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) needGoalClear(); }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
+function needGoalTick() {
+  if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) { needGoalClear(); return; }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
+  if (NEED_GOAL && NEED_GOAL.need === 'hunger' && !!SHIP.player.tray !== !!NEED_GOAL.tray) { needGoalClear(); needGoal('hunger'); }   // a tray taken (a seat next) or left behind (food again): LEAD31-14
+}
 // pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
 // after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
 const PUSH_MS = 2000, PASS_MS = 1500; let PUSH = null;   // { who, t0, last, until }

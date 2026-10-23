@@ -1500,6 +1500,26 @@ with sync_playwright() as pw:
         g.ev("actEnd(true)"); g.page.click('#rot'); g.step(80)
     print(f'   counter taps beside someone: {tried} tried, {tried - len(bad)} joined the queue')
     check(tried > 0 and not bad, f'a tap on the servery counter beside the staff or the line, not on them, joins the queue ({tried} tried: {bad[:3]})')
+    # (3) LEAD31-14 (FX6), after the counter's part (before it, it moved the crowd the counter's taps meet): very hungry, the arrow says Food; a tray from the servery (a real tap) turns it to a seat for your
+    # tray (it stayed on the servery: "You already have your tray" till Food 0); a real tap on that seat eats it
+    g.ev("actEnd(true); SHIP.player.tray = null; clearGoal(); NEED_GOAL = null; SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
+    a0 = g.ev("(goalNow() || {}).label")
+    g.ev("(() => { __sv.hit.getWorldPosition(_wp); const c = nearestOpen(_wp.x - 3, _wp.z, player); player.obj.position.copy(cellPos(...c)); player.stop(); })()"); g.step(30)
+    x, y = g.ev(f"({MESS_SCR})({sv[0]}, {sv[1]}, {sv[2]})"); g.page.mouse.click(x, y)
+    for k in range(80):
+        g.step(30)
+        if g.ev("!!SHIP.player.tray"): break
+    g.step(30)
+    ts = g.ev(f"""(() => {{ const g = goalNow(), pl = g && g.place && PLACE_OF.get(g.place), s = pl && placeSpot(pl.id), q = s && {MESS_SCR}(s.x, s.y, s.z);
+      return [!!SHIP.player.tray, g && g.label, pl && pl.type, pl && pl.id, q]; }})()""")
+    check(a0 == 'Food' and ts[0] and ts[1] == 'A seat for your tray' and ts[2] == 'mess-seat', f'very hungry with a tray in hand, the arrow points at a seat for it, not the servery (LEAD31-14: before {a0!r}, then {ts[:4]})')
+    if ts[4]:
+        g.page.mouse.click(*ts[4])
+        for k in range(40):
+            g.step(30)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        te = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, !!SHIP.player.tray, (goalNow() || {}).label || null]")
+        check(te[0] == 'eat' and not te[2] and te[3] != 'A seat for your tray', f'a tap on the seat the arrow shows eats your tray, and the arrow goes ({te})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
