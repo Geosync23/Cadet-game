@@ -12,7 +12,7 @@ Nothing here sets build numbers.
 | claude/floor-tap-fix | integration-next-fe1 01b237f4 | aaab3540 | A floor tap by an exercise bike threw `updateWorldMatrix` (ixTap measured a hit-less stand-in); ixTap now measures a stand-in from the spot tapped (section 15b) | FX4 PASS, in 0.92.0 |
 | claude/tiles-check-queue | integration-next 25a90ced | 664e0baa | tiles_check: SHOW_ALL once after load (the arrows' pop-up queue), test only | sent to BM14 |
 | claude/bike-tap | integration 685af944 | 9328dc76 | LEAD31-1: playerFloorTap takes the place right where the floor was tapped first; both bikes have a saddle-high tap box | RV10 PASS, for 0.92.1 |
-| claude/mess-taps | integration-next 54efee21 | 980c2591 | LEAD31-9: a second tap on your seat mid-meal keeps eating; a meal cut short keeps the rest on your tray (`SHIP.player.trayLeft`, not saved) and says so; the open needs strip closes on a deck tap, nothing more; a counter tap beside the staff, not on them, is the counter | with RV10, for 0.92.2 |
+| claude/mess-taps | integration-next 54efee21 | 9c4e02b5 | LEAD31-9: a second tap on your seat mid-meal keeps eating; a meal cut short keeps the rest on your tray (`SHIP.player.trayLeft`, not saved) and says so; the open needs strip closes on a deck tap, nothing more; a counter tap beside the staff, not on them, is the counter (9c4e02b5: the check rechecks its counter point just before each click, RV10's note) | RV10 PASS on 980c2591, for 0.92.2 (BM15) |
 
 ## Find-the-cause notes (for whoever picks these up)
 - 0.92.0 trial (IM1 round 10): the bar failures and the Clock-in pins were arrows-c's check (AC3 fixed them); the 3
