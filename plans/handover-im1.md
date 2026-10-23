@@ -65,6 +65,11 @@ Not yet on GitHub when I stopped: hygiene-cool, tiles-sit.
 
 ## Open for the next session
 
+Who gets what (lead 31): the controller_check walk '#rot' timeout, if it repeats, goes to AC3
+(session_01DiLRzrXgkeoAZCoX1mVJn9; likely an arrow or tip over the Rotate button, which matters for players even with the
+controller off), copy CTT3 (session_0197zJtQyLkNz6dxc3NgoNgy); CP1 has stopped. The bar failures go to lead 31 with
+their cause. zeke-tour will get a new commit from DS1 (the user rejected the bag auto-stow): merge it when it lands.
+
 1. Rerun round 10's area checks; chase the controller_check walk `#rot` crash and the two bar failures (are they on
    arrows-c alone? then AC3's; otherwise the merge's).
 2. Add hygiene-cool and tiles-sit when on GitHub; then AC3's remaining arrows-c fixes.
