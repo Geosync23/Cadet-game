@@ -10,3 +10,11 @@ Taken for the magazine-style preview. Phone shots are 390x844 at 3x (1170x2532);
 | 04-device-mail-phone.png | Day 7, Sunday 18:26, the crew device (CSV Wren crew PDA) open on Mail over the mess: the week's letters and the ship traditions notices. |
 | 05-works-bay-phone.png | Day 2, Tuesday 09:56, the Works bay on Deck 5 on a workday: the crew at the benches, the job board and the machines. |
 | 06-wide-deck3-phone.png | Day 2, Tuesday 12:36, Deck 3 zoomed out from the promenade at lunchtime: crew walking between the mess, the lounge and the garden. |
+| 07-tour-haulway-phone.png | Day 0, Sunday 16:38, the haulway on Deck 5: Zeke leading you on the arrival tour, "I'm from the Works Department. So are you, now." |
+| 08-lift-panel-phone.png | Day 2, Tuesday 08:41, the main lift's deck panel open in the Deck 4 lift lobby: all seven decks with what's on each. (Speech bubbles hidden for this one.) |
+| 09-device-map-phone.png | The device on Maps: the deck buttons and the Deck 3 plan with you on it. |
+| 10-device-needs-phone.png | The device on Needs: the seven needs and the well-rested bonus. |
+| 11-bar-evening-phone.png | Day 6, Saturday 19:41, the bow lounge bar on Deck 3 in the evening: the curved bar, the sofas, a crewmate talking. |
+| 12-bridge-phone.png | Day 2, Tuesday 10:31, the bridge on Deck 1 on watch: Captain Odile Marrow in her chair, crew at the consoles. |
+| 13-machine-shop-phone.png | Day 2, Tuesday 10:31, the machine shop on Deck 5 on a workday: crew at the benches and machines. |
+| 14-pool-phone.png, 14-pool-wide.png | The pool on the rec deck: Saturday afternoon (phone, a swimmer by the lanes) and a Tuesday morning (wide, quiet). |
