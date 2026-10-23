@@ -1459,6 +1459,8 @@ Deck 4's static screenshots are pixel-identical from 0.5.0 through 0.5.7. The on
 
 | arrows-d (AC2): RV7's notes on 69d1ed9/78fef90 and 86faa86 (lead 29) | **The pop-up queue keeps a training's word** (15b slot, piece B, on with GUIDE_ON only): when more than three wait, the oldest that isn't "Trained: ..." or "Works reputation ..." goes (`TQ_KEEP`); "Trained: rounds" was dropped when six came at Day 2 11:00. arrows_d_check: six at once, the training's word still waits (fails on its planted fault). **arrows_check's follower:** the real tap at the pin only for your held job's own step (not the board, the time clock or a named thing: with the arrows off it never clocked in, RV7); while you hold a job, a tap that starts anything that isn't a job act (the climbing wall all Day 5) is ended, then the floor at the pin. |
 
+| arrows-d (AC2): F2, the inspection morning through the queue | **15b slot, `guideShift`, GUIDE_ON only:** on an inspection morning (FX3's `inspectDue(d)`), 06:00-06:30, a level-2 entry `inspect:<day>` whose goal is FX3's `inspectGoal(d)` (a fresh uniform, the bed, the locker, then your berth; empty once you're ready and there). FX3's direct arrow steps aside with the queue on, so with the queue on m3i was never learned in the week guide. arrows_d_check: level 2, FX3's goal, gone at 06:30 (fails on its planted fault). |
+
 ### Pillar 5 fixes, part 2 (builder FX2, claude/p5-fix2 from claude/integration 2b4a05db, 0.64.15; AR1's findings; the build master sets the number)
 | Build | What changed |
 |---|---|
