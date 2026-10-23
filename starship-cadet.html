@@ -11386,7 +11386,7 @@ function devDay(d) {
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
-      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -11444,7 +11444,7 @@ function devItemGoal(x) {
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
   if (x.kind === 'tea') return { deck: 5, item: /^tea table$/i, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5; the arrow at the table (playtest 1, note 10)
   if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
-  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, ...(x.kind === 'beat' && x.place ? { place: x.place } : {}), label: x.where };   // a first-week beat's own standing spot (item 81)
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
@@ -43885,6 +43885,7 @@ function introTernTick() {
 // file, off behind INTRO_ASK_ON
 const INTRO_ASK_ON = false;
 function introTap(p) {
+  if (introMeetGo(p)) return true;                      // item 81: the speaker of a first-week meeting that's on takes you in
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
   const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
@@ -44615,6 +44616,24 @@ function introMeetStand(b) {
   const to = (DECKS[b.where.deck].places || []).find(q => q.id === (b.where.placeId || '')), face = () => {
     if (to) { const p = player.obj.position, c = cellPos(...to.at); player.face = Math.atan2(c.x - p.x, c.z - p.z); } };
   if (K(pl.at) === K(player.here()) && !player.path.length) face(); else playerGo(pl.at, face);
+}
+// item 81 (FE2 on 0.92.0, LEAD31-13: "the first solo job never starts"): the arrow's pin sat on the Chief's desk with her
+// at it, so the tap was hers (section 11's tapCrew asks introTap first) and opened her card; you never got into the office,
+// and the meeting starts only once you're in its room. Now a tap on the speaker of a first-week meeting that's on (its
+// start to its end, not met yet), from outside its room on its deck, walks you to its standing spot (b.stand), else into
+// the room; introWeekMeetings starts it as you enter. In the room, or outside its time, their card as before
+function introMeetGo(p) {
+  if (!introOn() || !p || typeof DIALOGUE !== 'undefined' && DIALOGUE || typeof playerGo !== 'function' || typeof inMeeting !== 'function') return false;
+  const I = SHIP.intro, now = Math.floor(shipNow());
+  const b = INTRO_WEEK.find(x => x.meeting && x.who === p.id && x.where && I.done[x.id + ':met'] === undefined && now >= introAbs(x.day, x.at) && now < introAbs(x.day, x.until) && deckDef.num === x.where.deck);
+  if (!b) return false;
+  const room = new RegExp('^' + b.where.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
+  if (inMeeting({ where: { deck: b.where.deck, room } })) return false;
+  const pl = b.stand && (DECKS[b.where.deck].places || []).find(q => q.id === b.stand);
+  let to = pl ? pl.at : null;
+  if (!to) { const key = Object.keys(ROOMS).find(k => room.test(ROOMS[k].name || '')); for (let j = 0; j < D && !to && key; j++) for (let i = 0; i < W && !to; i++) if (MAP[j][i] === key) to = [i, j]; }
+  if (!to) return false;
+  playerGo(to); return true;
 }
 function introMeetEnded(now) {                          // a released beat's meeting is over once its panel has closed
   const I = SHIP.intro, open = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null;
