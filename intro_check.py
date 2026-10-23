@@ -353,6 +353,15 @@ def bunk_leave(g):
         if how == 'deck': g.ev('goToDeck(3)'); g.step(10)
         elif how != 'stay': g.ev("(() => { player.path.length = 0; playerGo([11, 4]); })()")   # out into the junior corridor
         r = None
+        if how in ('stay', 'nobag'):   # DS1 (the user, 2026-10-23): with the bag still in your hands he waits, as long as it takes, the arrow on your wardrobe; nobody stows it for you
+            for k in range(60):
+                g.step(30)
+                if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
+            w = g.ev("({ m: Math.floor(shipNow()), step: SHIP.intro.step, bag: bagHeld(), goal: IX_GOAL && IX_GOAL.label, zr: (a => a && (DECKS[4].rooms[roomAt(...cellAt(a.x, a.z))] || {}).name)(introWalker()), missed: SHIP.intro.missed.slice() })")
+            print(f"  {how}: {w['m'] - t0} ship minutes on with the bag: step {w['step']}, bag {w['bag']}, arrow {w['goal']!r}, Zeke in {w['zr']}")
+            if w['step'] != 'stow' or not w['bag'] or w['goal'] != 'Put your bag in your wardrobe' or w['missed']: fail(f"{how}: with the bag in your hands he should wait at the bag step, the arrow on your wardrobe: {w}")
+            g.ev("(() => { const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile)); wardrobeUse(); })()"); g.step(10)   # now you put it in
+            t0 = g.ev('Math.floor(shipNow())')
         for k in range(200):
             g.step(30)
             if g.ev('!!DIALOGUE'): g.ev('(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); })()')
@@ -361,7 +370,7 @@ def bunk_leave(g):
             if r['step'] not in ('stow', 'device') and r['zr'] != 'Bunk 1' and (r['dev'] or how == 'deck'): break
         took = r['m'] - t0
         print(f"  {how}: {took} ship minutes later step {r['step']}, device {r['dev']} (in person: {r['given'] is not None}), bag in hands {r['bag']}, you on Deck {r['deck']}, Zeke at {r['z']} ({r['zr']})")
-        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else g.ev('INTRO_HOLD_ROOM') + 12 if how == 'stay' else 12):   # (DS1: staying in the room with the bag, the bag step waits INTRO_HOLD_ROOM for you)   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
+        if r['step'] in ('stow', 'device') or r['zr'] == 'Bunk 1' or not r['dev'] and how != 'deck' or r['bag'] or took > (20 if how == 'deck' else 12):   # (deck: you left him: the device waits for Monday's briefing, as for a missed bunk)
             fail(f"leaving Bunk 1 ({how}): the evening never moved on, or no device ({r})")
         if how in ('stay', 'out', 'nobag', 'reload') and r['given'] is None: fail(f'the device was not handed over in person when you left the room ({how}): {r}')
     g.page.evaluate('localStorage.clear()')

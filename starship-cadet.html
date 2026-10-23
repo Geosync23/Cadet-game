@@ -14112,7 +14112,7 @@ function bagTick() {
   const on = typeof introOn === 'function' && introOn(), I = SHIP.intro || {};
   if (!bagHeld()) { if (on && I.step === 'ramp') bagGive(); return; }
   if (!on) bagStow(true);
-  else if ((I.done || {}).bunk !== undefined && I.step !== 'stow' && !(I.missed || []).includes('bunk')) bagStow((I.missed || []).includes('stow') ? 'Zeke puts your bag in your wardrobe for you.' : false);   // (playtest patch 1, #2) you put it in yourself in the 'stow' step
+  // (DS1, the user 2026-10-23) during the arrival evening and the week nobody puts it away for you: you do (the wardrobe arrow stays; bagLockerTap, wardrobeUse)
 }
 function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk to your wardrobe, stow it
   if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
@@ -42412,8 +42412,8 @@ const INTRO_STEPS = [
   // (0.64.15's playtest: "Zeke just stands in the bunk room") neither waits on you being in Bunk 1 for good: noHold, their
   // fallbacks run even with him near you (introAdvance's "he's with you" hold), and for the device he comes to you
   // anywhere on the deck (near: within that many tiles of him, any room; escortPlan 'follow'), and hands it over there
-  { id: 'stow', day: 0, at: 17 * 60 + 29, who: INTRO_ESCORT, mode: 'wait', where: 'your wardrobe', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, noHold: true, holdRoom: true,
-    ready: () => !(typeof bagHeld === 'function' && bagHeld()), fallback: { wait: 5, later: 'device' } },   // not by then: section 15's bagTick puts it away for you
+  { id: 'stow', day: 0, at: 17 * 60 + 29, who: INTRO_ESCORT, mode: 'wait', where: 'your wardrobe', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, noHold: true, holdBag: true,
+    ready: () => !(typeof bagHeld === 'function' && bagHeld()), fallback: { wait: 5, later: 'device' } },   // (DS1) it holds while the bag's in your hands (holdBag), till his goodnight's latest time; nobody stows it for you
   { id: 'device', day: 0, at: 17 * 60 + 30, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, reach: 9, near: 3, noHold: true,
     ready: t => typeof clothesCabinQuiet !== 'function' || clothesCabinQuiet(t), fallback: { wait: 10, later: 'toMess' } },   // (DS1, the user on 0.91.0) its meeting introDevice is parked: once it's done his hand-over plays in bubbles (introHandTick), toMess waiting for it   // after his wardrobe lines (21b); you never came near him in 10 minutes (another deck): Monday's briefing hands it over, as for a missed bunk
   { id: 'toMess', day: 0, at: 17 * 60 + 40, who: INTRO_ESCORT, mode: 'lead', where: 'to the mess, Deck 3', hold: t => introHandBusy() || introHandDue(t),
@@ -42746,7 +42746,6 @@ const INTRO_ESCORT_UNTIL = 18 * 60 + 45;                  // (the user, 0.91.x: 
 // (the Zeke patch, after 0.64.15) a step where he waits for you at a spot (the ramp, the bunk room, the table) holds that way
 // at most this many minutes: near him but never at the spot, the step's own fallback runs after that (he moves on)
 const INTRO_HOLD_MAX = 8;
-const INTRO_HOLD_ROOM = 20;                                // (DS1) the bag step waits for you in the room this long at most (then he puts it away for you, as before)
 function introWithEscort(here, tiles = INTRO_WITH) {     // the real game only: the escort on your deck, near you
   const a = typeof introWalker === 'function' ? introWalker() : null;
   return !!(a && here && typeof deckDef !== 'undefined' && here.deck === deckDef.num && Math.max(Math.abs(cellAt(a.x, a.z)[0] - here.tile[0]), Math.abs(cellAt(a.x, a.z)[1] - here.tile[1])) <= tiles);
@@ -42762,10 +42761,11 @@ function introAdvance(t, here) {
       && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH))
       || !!(cp && here && st.mode === 'lead' && here.deck !== cp.deck && nx && nx.checkpoint && nx.checkpoint.deck === here.deck)) && (!st.ready || !!st.ready(t));
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
-    // (DS1, the user on 0.91.0) holdRoom: while you're in its checkpoint's room with your bag, it waits for you (the wardrobe
-    // arrow stays until you've put it in); out of the room its wait counts from when you left, as before (the Zeke patch)
+    // (DS1, the user on 0.91.0 and 2026-10-23) holdBag: while your bag's in your hands it waits for you, wherever you are, with the
+    // wardrobe arrow up: you put it in yourself (nobody does it for you). Only at his goodnight's latest time ('free') does the
+    // evening go on without it (the steps after it missed, as for a player who never came); the bag and the arrow stay till you do
     if (st.hold && st.hold(t)) { I.near = [0, Math.floor(t)]; break; }   // (DS1) a scene of his under way (the device hand-over): it waits for it
-    if (st.holdRoom && cp && here && here.deck === cp.deck && introRoomAt(here.deck, here.tile) === cp.room && typeof bagHeld === 'function' && bagHeld() && t < at + INTRO_HOLD_ROOM) { I.near = [0, Math.floor(t)]; break; }
+    if (st.holdBag && typeof bagHeld === 'function' && bagHeld() && t < introAbs(0, introStepById('free').at)) { I.near = [0, Math.floor(t)]; break; }
     // (0.42.31, the user on 0.60.6: Zeke already in the mess, not with you off the lift) his own steps never time out while
     // he's with you (on your deck, within INTRO_WITH tiles): you're lingering together; until INTRO_ESCORT_UNTIL (18:00), then as before
     if (st.who === I.escort && !st.noHold && f.until === undefined && t < introAbs(0, INTRO_ESCORT_UNTIL) && introWithEscort(here)
@@ -43272,7 +43272,7 @@ function introArrowClear() {
 function introArrowWant(now) {
   const I = SHIP.intro, d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, fin = id => { if (I.done['arrow:' + id] === undefined) I.done['arrow:' + id] = Math.floor(now); };
   const P = SHIP.player, late = m >= 20 * 60 + 30;        // dinner's till half eight
-  if (I.step === 'stow' && typeof bagHeld === 'function' && bagHeld()) return 'stow';   // your bag into your wardrobe (playtest patch 1, #2)
+  if (typeof bagHeld === 'function' && bagHeld() && (I.step === 'stow' || I.done.stow !== undefined)) return 'stow';   // your bag into your wardrobe (playtest patch 1, #2), till you do (DS1)
   if (introTeaPhase(now) === 'go') return 'tea';
   if (I.done['call:track'] !== undefined && I.done['call:end'] === undefined) return 'call';
   if (P.tray || ACT && (ACT.kind === 'queue' || ACT.kind === 'eat')) I.done['ate:last'] = Math.floor(now);   // the last minute you had food in hand (or were queueing, eating)
