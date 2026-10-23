@@ -175,3 +175,24 @@ Two options, both shorter. **Picked: option 1** (lead 31, 2026-10-23); DS1 wires
 2. Questions? Hold them for dinner. I think better fed.   #funny  (52 characters: drops the tap; dinner with him, introDinner, does have a choice for you)
 
 Your answer here:
+
+---
+
+## Two words-only fixes (the user via lead 31, 2026-10-23): proposed, not yet in the content files
+
+Only these lines change; timing, order and who speaks stay exactly as they are. At the arrival dinner you sit with
+Zeke first and only get food after Calder's "Eat something" (the servery arrow then), so no line before that may
+assume you have food.
+
+| Where (flag / meeting line) | Old line | New line |
+|---|---|---|
+| introDinner.meet, first line (Zeke, [gesture]) | Sit, sit. Eat while it's hot. Brennan notices. (47) | Sit, sit. Talk first. Then food. I'll be quick. (47)  #funny |
+| walk.servery.1 (the servery stop, before the table) | Tray first, then the servery. Take what smells best. (52) | The servery. Trays here. Food after a sit-down. (47) |
+| walk.hand, 10th line (the hand-over) | Needs tells you you're hungry. Before your tummy does. (54) | The Roster's in there. Every name aboard. Mine's best. (54)  #funny |
+
+Second option for the hand-over line only: "Calendar's in there too. Every tea, quiz and party." (51)
+
+Checked and kept: the rest of the servery stop (Brennan, the table, her book of favourite dishes, bread day, the
+grab shelf), walk.toMess and walk.deck3, the rest of introDinner, introChief (Calder's "Eat something" is what sends
+you for food), and his goodnight. Line ids are made from the text when the words are baked, so the two bubble
+lines get new ids; their flags stay the same.
