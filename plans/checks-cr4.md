@@ -15,7 +15,9 @@
 | day_check 19 | OK (exit 0, 575 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
 | controller_check reach | **NOT FINISHED** (stopped at the 2-hour limit for a background command, 08:32-10:31) | No verdict. It finished the touch sweep (41 states, e.g. the Tiles table) and had started the D-pad half: `#pauseBtn` 1 of 1, `#devBtn` 16 of 16 (`Works` app not on the screen that time), `Tracked` 9 of 9, `Appointments` 4 of 4 highlighted. No FAIL or error line printed before it stopped. Needs a longer-than-2-hour run (see the report to BM14). |
 
-**CR4: days OK; reach unfinished (no FAIL seen).**
+**Reach re-run (BM14's option a):** started detached 10:36 UTC (same file, same CADET_WORK, no CTL_STATES / CTL_PADDONE). By 12:34 it had redone the touch half (41 states) and 5 screens of the D-pad half, all fully highlighted (`#pauseBtn` 1/1, `#devBtn` 16/16, `Tracked` 9/9, `Appointments` 4/4, `Appointments > New appointment` 11/11); no FAIL or error. Too slow to finish soon, so **stopped at 12:35 on lead 31's and CTT4's word**: CTT4 owns the full sweep (on the published game with a fixed check that saves its progress); CTT4 says the 5 screens agree with its own. Reach does not block 0.92.0 (lead 31).
+
+**CR4: days OK; reach handed to CTT4 (no FAIL seen in what ran).**
 
 ## 0.91.0 full round (2026-10-22)
 
