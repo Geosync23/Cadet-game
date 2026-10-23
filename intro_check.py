@@ -415,7 +415,7 @@ def firsts(g):
     G = "(typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null)"
     g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
     g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
-    g.ev("skipTo(introAbs(0, INTRO_START.min + 70))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); })()"); g.step(5)
+    g.ev("skipTo(introAbs(0, INTRO_START.min + 70))"); g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(28, 2)); if (typeof bagHeld === 'function' && bagHeld()) bagStow(true); })()"); g.step(5)   # (DS1: nobody stows your bag for you; a player who skipped here would have)
     g.ev("(() => { if (DIALOGUE) dialogueEnd(); INTRO_UI.chiefD = null; SHIP.intro.done['chief:met'] = SHIP.intro.done['chief:end'] = Math.floor(shipNow()); SHIP.player.tray = null; delete SHIP.intro.done['ate:last']; clearGoal(); })()"); g.step(20)
     eat = g.ev(G); card0 = g.ev("SHIP.intro.done['call:tip'] !== undefined")
     g.ev("SHIP.player.tray = 'Stew'"); g.step(10); eat2 = g.ev(G); card = ''
@@ -820,7 +820,7 @@ with sync_playwright() as pw:
         print('  08:50 in the Works bay:', met)
         who = g.ev("DIALOGUE ? { lines: DIALOGUE.queue.filter(l => l.who).map(l => l.who), cal: (() => { const a = DECK_CREW.find(x => x.p.id === 'calder'); return a ? (ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name : null; })() } : null")
         print('  its speakers:', who)
-        if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play')
+        if not met or not met.startswith('introBriefing'): fail('the Monday briefing did not play: ' + str(g.ev("({ t: clockText(), dlg: DIALOGUE && DIALOGUE.id, dev: typeof DEV !== 'undefined' && DEV.open, step: SHIP.intro.step, missed: SHIP.intro.missed, bag: bagHeld(), brief: SHIP.intro.done['d1-briefing'], met: SHIP.intro.done['d1-briefing:met'], hand: [SHIP.intro.done['hand:start'], SHIP.intro.done['hand:end']], deck: deckDef.num, room: (ROOMS[roomAt(...player.here())] || {}).name, cal: (a => a && (ROOMS[roomAt(...cellAt(a.x, a.z))] || {}).name)(DECK_CREW.find(x => x.p.id === 'calder')), meet: INTRO_UI.meet.map(x => x.id) })")))
         elif who and 'calder' in who['lines'] and who['cal'] != 'Works bay' and g.ev('shipNow() < introAbs(1, 540)'): fail('Calder speaks the briefing from ' + str(who['cal']))
         # the lead (0.42.30): the briefing plays in full at a reader's pace (a tap every ~3 s) before the shadow shift starts
         bf = { 'start': g.ev('clockText()'), 'n': g.ev('DIALOGUE ? DIALOGUE.queue.length : 0'), 'taps': 0, 'cut': None, 'follow': None }

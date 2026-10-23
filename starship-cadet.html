@@ -14114,7 +14114,7 @@ function bagTick() {
   if (!on) bagStow(true);
   // (DS1, the user 2026-10-23) on the arrival evening nobody puts it away for you: you do (the wardrobe arrow stays; bagLockerTap, wardrobeUse).
   // Still in your hands on Monday (a time jump, or past 19:45): you put it away before bed
-  else if (SHIP.time.day >= 1) bagStow('Your bag\'s in your wardrobe: you put it away before bed.');
+  else if (SHIP.time.day >= 1 && I.done && I.done.night !== undefined) bagStow('Your bag\'s in your wardrobe: you put it away before bed.');   // (once the evening's over)
 }
 function bagLockerTap(point) {                           // a tap in Bunk 1 with the bag in your hands: walk to your wardrobe, stow it
   if (!bagHeld() || typeof deckDef === 'undefined' || deckDef.num !== 4) return false;
