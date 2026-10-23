@@ -199,10 +199,9 @@ lines get new ids; their flags stay the same.
 
 ---
 
-## Backlog LEAD31-6 (lead 32, 2026-10-23): agreed; DS1 wires it
+## Backlog LEAD31-6 (lead 32, 2026-10-23): closed, the line is correct as is
 
-| Flag | Old line | New line |
-|---|---|---|
-| walk.goodnight.1 | Right, that's me. Breakfast from seven, shift at nine, tea at one. | Right, that's me. Breakfast from six, shift at nine, tea at one. |
-
-The mess serves breakfast 06:00 to 09:00 (MEALS.breakfast = [360, 540]; the menu board and servery say the same).
+walk.goodnight.1 stays: "Right, that's me. Breakfast from seven, shift at nine, tea at one." The game's breakfast is
+07:00 to 09:00: `const MEALS = { breakfast: [420, 540], dinner: [1020, 1230] };   // breakfast 07:00-09:00 (the user's
+playtest notes, patch 1: was from 06:00)` (starship-cadet.html line 9383 on claude/integration). ZW1's proposed change
+to "from six" came from a stale read of the old 06:00 value and is cancelled; nothing was changed in the content files.
