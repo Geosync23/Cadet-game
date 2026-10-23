@@ -843,7 +843,7 @@ with sync_playwright() as pw:
             g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
             stale = g.ev(r"""(() => { actEnd(true); const s = placeSpot('3-tend-1'), o = ray.ray.origin, d = ray.ray.direction, f = -o.y / d.y, fx = o.x + d.x * f, fz = o.z + d.z * f;
               const it = ITEMS.filter(i => i.hit && /bed|tree|planter|herb/i.test(i.t) && roomAt(...cellAt(i.hit.getWorldPosition(_wp).x, _wp.z)) === 'G').map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })
-                .filter(([i, q]) => Math.hypot(q.x - fx, q.z - fz) > 2.5 && ixDist(i, s) > 2.5)[0];
+                .filter(([i, q]) => jobRayDist({ x: q.x, z: q.z }) > 2.5 && ixDist(i, s) > 2.5)[0];   // far from the old line's 0-1.7 m band (FX4)
               if (!it) return null; playerTap(it[0], it[1].clone(), it[1].clone()); return [it[0].t, ACT && ACT.kind]; })()""")
             print('   a garden thing tapped some other way after a pin tap:', stale)
             if check(stale, 'a garden thing far from the pin to tap'): check(stale[1] != 'ixStop', f'a playerTap made some other way after a pin tap does its own thing, not the vent (the old line is not this tap\'s: {stale})')

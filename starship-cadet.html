@@ -14435,13 +14435,14 @@ function choreRayTap(it, at) {
   if (!s || jobRayDist(s) >= JOB_RAY) return false;     // (a tap on a haul stop's machine or thing in reach: FB1's choreThingTap, claude/fe-cartdock)
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
-// the last screen tap's line is this tap's: its point (section 11's hit point) lies on the line, or by where the line meets
-// the floor (15b's ixPinTap passes the thing nearest the pin, within 1.6 m of it). Not so for playerTap called some other way
-// later on (RV8: a check, or another section, after a screen tap elsewhere)
+// the last screen tap's line is this tap's: its point (section 11's hit point) lies on the line, or is within 1.6 m + JOB_RAY
+// of the line's 0-1.7 m band (15b's ixPinTap passes the thing nearest the pin, within 1.6 m of it, and the line passes within
+// JOB_RAY of the pin there; FX4: measured from the floor point, a tap on the drawn dot lost it). Not so for playerTap called
+// some other way later on (RV8: a check, or another section, after a screen tap elsewhere)
 function rayIsThisTap(p) {
   const o = ray.ray.origin, d = ray.ray.direction, v = new THREE.Vector3().subVectors(p, o), k = v.dot(d);
   if (k > 0 && v.addScaledVector(d, -k).length() < .3) return true;
-  const f = d.y < 0 ? -o.y / d.y : -1; return f > 0 && Math.hypot(o.x + d.x * f - p.x, o.z + d.z * f - p.z) < 1.6 + JOB_RAY;
+  return jobRayDist({ x: p.x, z: p.z }) < 1.6 + JOB_RAY;
 }
 // a machine, real or stand-in, within reach of the next stop of a registered kind's job (a haul, a round: FB1, lead 29): the
 // stop, whatever the tap's line. Hauling's cart and return stops stand by Cart dock 1, and the dock said "in good order":
