@@ -300,7 +300,10 @@ def solo(g):
     if ask['cur'] == 'm1' and ask['at'] is not None and ask['at'] < end: fail(f'the Rounds ask came before her meeting was over: {ask}, end {end}')
     # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
     jid = json.dumps(after['job'])
-    lab = lambda: g.ev(SEEN)['label']
+    # with the teaching arrows on (0.92.0) a training meeting takes the arrow from 15 minutes before (the arrows plan): Zeke's
+    # 10:45 Rounds meeting has it from 10:30, so then the job's own step (ixJobStep, the arrow it gives back) is read
+    meet = "(() => { const n = typeof guideNow === 'function' ? guideNow() : null; return n && /^train:.*:meet:/.test(n.id) ? ((ixJobStep() || {}).label || null) : undefined; })()"
+    lab = lambda: (lambda m: g.ev(SEEN)['label'] if m is None else m)(g.ev(meet))
     shelf = g.ev(f"(j => SHIP.stores[j.parts[0]] || 0)(SHIP.jobs.find(x => x.id === {jid}))")   # the crew may have used the shelf's last one by now (then you make it in the shop, as for any job)
     steps = [lab()]
     g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
