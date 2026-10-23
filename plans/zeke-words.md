@@ -1,0 +1,96 @@
+# Zeke's Day 0 device hand-over: the words (ZW1, 2026-10-23)
+
+For DS1 to wire in on `claude/zeke-tour`. Words only. Source of the old words: `content/meetings/introDevice.meet`
+(the green text box, the dialogue strip) and its stand-in in section 21 (`INTRO_STUB_SCRIPTS.introDevice`).
+
+The user's brief: no green text box and no question to you. Zeke walks up, faces you and, in speech bubbles, hands
+you your device, very clearly, with a short overview in his voice. Then the device opens straight onto a Mail he
+wrote before you arrived, carrying everything worth keeping from the green text. Every existing Zeke line stays.
+
+Bubble limit: 60 characters or fewer (the limit on all his tour lines, `content/lines/torres-zeke.lines`).
+`{me}` is your name, as in his other lines. Tags in brackets are poses or tones, the same marks his lines already use.
+
+## (a) The bubble lines, in order
+
+| # | Line | Chars | Note |
+|---|------|-------|------|
+| 1 | Oh, hold on. Nearly forgot the important bit. | 45 | He walks up and faces you. |
+| 2 | Hands out, {me}. Both of them. Properly. | 40 | [gesture] |
+| 3 | And this is yours. Your device. | 31 | KEPT, the green text's first line. [gesture] The hand-over happens on this line (introDeviceGive). |
+| 4 | There. Officially handed over. I'm a witness. | 45 | #funny |
+| 5 | Honestly? Most important thing you'll own here. | 47 | |
+| 6 | More than your boots. Possibly more than me. | 44 | #funny |
+| 7 | Mail, Schedule, the Map, your Needs. The lot. Don't lose it. | 60 | KEPT, the green text's second line, word for word. |
+| 8 | Schedule says where you should be. Map says how. | 48 | |
+| 9 | Needs tells you you're hungry. Before your tummy does. | 54 | #funny |
+| 10 | Jobs, Calendar, people. It's all in there. | 42 | |
+| 11 | Tap it any time. It never sulks. Unlike coil three. | 51 | #funny (his running joke) |
+| 12 | Oh, and there's Mail waiting. From me. Wrote it last week. | 58 | Then the device opens on his Mail. |
+| 13 | Read it now. I'm better on paper. Fewer tangents. | 49 | #funny |
+
+After you close the Mail (or straight after line 13, if that's simpler to wire):
+
+| # | Line | Chars | Note |
+|---|------|-------|------|
+| 14 | Right, onward. The mess is on Deck 3. | 37 | KEPT, the green text's last line, first half. [gesture] |
+| 15 | And Brennan doesn't hold plates for anyone. | 43 | KEPT, its second half (the old line was 80 characters, too long for one bubble, so it's split, no words changed). |
+
+## (b) The Mail
+
+From: Zeke Torres
+
+Subject: **Before you get here**
+
+Body:
+
+> Hello, {me}. I'm writing this a week before you land, so if anything's changed, blame the future.
+>
+> By now I've handed you this device and probably talked too much. Sorry. That's me.
+>
+> The one thing to know about tonight: dinner. Always dinner first. Then everything else. The mess is on Deck 3, dinner's till half eight, and Brennan doesn't hold plates for anyone. Not even for new hands. I've asked.
+>
+> It'll feel like a lot tonight. First night, it is. By Thursday it's just home with a lift in it.
+>
+> If you're the quiet sort, good. The quiet ones last longest. If you're not, also good. I'm not.
+>
+> See you at dinner. I'll save you a seat. Brennan won't.
+>
+> Z.
+
+In the game's one-string form (as `clothesText` mails use, `Subject | body`; DS1 to say if another form is wanted):
+
+```
+Before you get here | Hello, {me}. I'm writing this a week before you land, so if anything's changed, blame the future. By now I've handed you this device and probably talked too much. Sorry. That's me. The one thing to know about tonight: dinner. Always dinner first. Then everything else. The mess is on Deck 3, dinner's till half eight, and Brennan doesn't hold plates for anyone. Not even for new hands. I've asked. It'll feel like a lot tonight. First night, it is. By Thursday it's just home with a lift in it. If you're the quiet sort, good. The quiet ones last longest. If you're not, also good. I'm not. See you at dinner. I'll save you a seat. Brennan won't. Z.
+```
+
+Facts checked against the game: the mess is on Deck 3; dinner runs till half eight (his goodnight line, walk.goodnight.2);
+"Brennan doesn't hold plates" is his own line. Nothing new is promised.
+
+## (c) Every green-text line, and where it lives now
+
+| Green-text line (introDevice.meet) | Where it lives now |
+|---|---|
+| Zeke: "And this is yours. Your device." | Bubble 3, word for word (the moment he hands it over). |
+| Zeke: "Mail, Schedule, the Map, your Needs. The lot. Don't lose it." | Bubble 7, word for word. |
+| Your choice: "What do I do first?" | Dropped: it was the question to you. |
+| Zeke's reply: "Dinner. Always dinner first. Then everything else." | The Mail, word for word ("Always dinner first. Then everything else."). |
+| Your choice: "Is it always this much?" | Dropped: it was the question to you. |
+| Zeke's reply: "First night, yes. By Thursday it's just home with a lift in it." | The Mail ("First night, it is. By Thursday it's just home with a lift in it."). |
+| Your choice: "(Just nod)" | Dropped: it was the question to you. |
+| Zeke's reply: "Good. The quiet ones last longest." | The Mail ("If you're the quiet sort, good. The quiet ones last longest."). |
+| Zeke: "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone." | Bubbles 14 and 15 (split in two, same words), and again in the Mail. |
+| Meeting gist: "Torres handed you your device: Mail, your Schedule, the Map and your Needs." | Unchanged if the record of the meeting stays (DS1's call); its content is bubble 7. |
+
+Not green text, but in the same moment: the toast "He hands you your device. It's yours now: tap it any time."
+Its content is bubbles 3, 4 and 11; DS1 decides whether the toast stays.
+
+The stand-in in section 21 (`INTRO_STUB_SCRIPTS.introDevice`: "And this is yours: your device. Schedule, the Map,
+Mail, the lot. Don't lose it." / "Right. Dinner. Come on.") is only used when the meeting file is missing; its
+content is covered by bubbles 3, 7 and 14.
+
+## Questions for the user
+
+1. Bubbles 14 and 15 (the walk to dinner): after you close the Mail, or straight away? (Suggested: after the Mail, so he sends you off.)
+2. Is the Mail's length right? It's six short paragraphs; it could lose the "quiet sort" paragraph if you'd like it shorter, but then that line would be lost.
+
+Your answers here:
