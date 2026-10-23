@@ -18,6 +18,18 @@
 
 **CR4: OK.** No FAILs.
 
+### Taken over (0.92.1 51a1bb34, same sha256)
+
+On BM15's suggestion (17:12). CR6 handed over food 1 7, food 11 4, clothes (none started; it kept fridays, disc, tiles, join). CR2 handed over lines_check --day and then perf_check (never started; it kept intro; path, arc, lines already OK there). Run one at a time, alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| food_check 1 7 | OK (exit 0, 56 s) | `FOOD CHECK OK`; no FAIL lines |
+| food_check 11 4 | OK (exit 0, 69 s) | `FOOD CHECK OK`; no FAIL lines |
+| clothes_check | OK (exit 0, 89 s) | `ALL OK` |
+| perf_check vs OLD 685af944 | **OK** (exit 0, 2195 s) | `PERF CHECK OK`; no problem at all this time: deck round trips 521 -> 521 -> 521 (backlog 14 didn't show), week of play 521 -> 523 in both. The Line ceremony portrait 335c (= KP1's accepted 335, same as OLD); the Line supper 261c. Differences from OLD, all small and explained: Sunday dinner 66 people vs 69 (FX5's Day 0 trickle), junior wing +5k triangles, storm all-clear +2 draw calls (289c vs 287c); every other scene identical. File 6.03 MB vs 6.02. |
+| lines_check --day | PASS (exit 0, 377 s) | `lines_check --day: PASS (0 errors)` |
+
 ## 0.92.0 full round (2026-10-23)
 
 - **Candidate:** `claude/integration-next` 4147f03d
