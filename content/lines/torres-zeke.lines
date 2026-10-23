@@ -337,7 +337,7 @@
 - Lounge at the bow. Big curved windows. Best seats aboard.
 // point: servery
 ? flag:walk.servery.1
-- Tray first, then the servery. Take what smells best.
+- The servery. Trays here. Food after a sit-down.
 ? flag:walk.servery.2
 - That's Chef Brennan. Thank her on the way past. It matters.
 ? flag:walk.servery.3
@@ -946,7 +946,7 @@
 - Mail, Schedule, the Map, your Needs. The lot. Don't lose it.
 - It knows where you're meant to be before you do.
 - Annoying, but useful.
-- Needs tells you you're hungry. Before your tummy does.   #funny
+- The Roster's in there. Every name aboard. Mine's best.   #funny
 - Lose it and you'll spend a week asking strangers what day it is.   #funny
 - There. Officially crew.   #warm
 - I left you a note in there. Have a look.

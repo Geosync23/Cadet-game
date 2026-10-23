@@ -451,6 +451,30 @@ def beside_walk(g):
     if not any(str(d).startswith('introBunk') for d in dlgs): fail(f'walking beside him, the bunk talk never played: {sorted(dlgs)}')
     if 'table' not in at or at['table'] > 18 * 60 + 45: fail(f"walking beside him, dinner's table only at {at.get('table')}")
 
+# part 17 (DS1, FE2 on 0.92.0: Calder's "Missed you at dinner" came while Zeke was still taking them to dinner): late on the
+# way (the clock on to 19:40 at the servery step), with him all the way past her step's 19:45: no Mail from her
+def late_dinner(g):
+    print('17. Late to dinner, with him: Calder\'s "Missed you at dinner" Mail never comes while he\'s still taking you')
+    g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(160)
+    for k in range(2000):
+        g.step(20)
+        r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        if r['step'] == 'servery' and r['deck'] == 3: break
+    if g.ev("SHIP.intro.step !== 'servery'"): fail('part 17: never reached the servery step'); return
+    g.ev('skipTo(introAbs(0, 19 * 60 + 40))'); g.step(10)
+    near = []
+    for k in range(400):
+        g.step(20)
+        r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'beside'])
+        near.append(g.ev("introWithEscort({ deck: deckDef.num, tile: player.here() })"))
+        if g.ev('shipNow() >= introAbs(0, 19 * 60 + 50)'): break
+    m = g.ev("(SHIP.mail || []).filter(x => x.from === 'I. Calder' && /Missed you at dinner/.test(x.body || '')).map(x => hhmm(x.at % 1440))")
+    st = g.ev("({ t: clockText(), step: SHIP.intro.step, chief: SHIP.intro.done.chief, missed: SHIP.intro.missed.slice() })")
+    print(f"  with him {sum(near)}/{len(near)} frames to {st['t']}; step {st['step']}; missed {st['missed']}; Calder's Mail: {m}")
+    if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
+    if m: fail(f'Calder\'s "Missed you at dinner" Mail came while he was still with you: {m}')
+
 def talk_away(g):
     print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
     for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
@@ -559,7 +583,7 @@ with sync_playwright() as pw:
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if BESIDE_ONLY:
-        beside_walk(g)
+        beside_walk(g); late_dinner(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
@@ -963,6 +987,7 @@ with sync_playwright() as pw:
     week(g)
     talk_away(g)
     beside_walk(g)
+    late_dinner(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
