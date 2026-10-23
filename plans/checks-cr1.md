@@ -215,3 +215,33 @@ job loop new job announced; work steps x4 (ok(v), "ready at", tapped too soon, r
 **sha256 of starship-cadet.html: `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd`** (matches BM14's;
 FX5's Day 0 table fix). 4e324417's player_check.py (AC3's arrows-on fix + FX6's job-loop fix), alone: **PLAYER CHECK OK**
 (exit 0, 384 s, no FAIL lines). The tier-1 job line is gone.
+
+# Round 10: 0.92.1 (claude/integration-next 51a1bb34, 2026-10-23)
+
+**sha256 of starship-cadet.html: `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c`** (matches BM15's).
+OLD = 0.92.0 685af944 (f2329b62…1ebd). One at a time, CADET_WORK=/tmp/work-cr1. Switches as BM15 named (POINT_ON, GUIDE_ON true; EV_LINE_ON = EVENTS_ON; PAD_ON false).
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 367 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 263 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 312 s | BUBBLE CHECK OK (41.1 px, at most 45) |
+| puzzle_check | **OK** | 69 s | PUZZLE CHECK OK |
+| social_check | **OK** | 24 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 31 s | TALK CHECK OK |
+| arrows_check (default) | **FAIL (NEW)** | 638 s | queue and shift OK (join notice kept, hook); week: 3 FAIL lines (below) |
+| arrows_pointer_check | **OK** | 136 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 36 s | DEV ARROW CHECK OK |
+
+## arrows_check week: NEW, from Crossing the Line being on
+
+The FAIL lines: `Day 5: the scanner never counted as used (fix: FX2)`; `Day 8: "m6" not learned by following the arrow
+(fix: FX3 (the burst pipe) and FX2 (the scanner count)); training None, opened ['m2']`; `Day 8: Making it safe did not open`.
+
+| Run (week part only, 51a1bb34's check) | Result |
+|---|---|
+| NEW 0.92.1 (twice) | FAIL, the same 3 lines |
+| OLD 0.92.0 (f2329b62…) | OK |
+| NEW with `EV_LINE_ON = false` (a one-line copy) | OK: Day 8 learned m6, clocked 548 min (as 0.92.0) |
+
+So the Line being on causes it. Sent to BM15 for FX6 (BM15 bisects if needed; CR1 not bisecting).
