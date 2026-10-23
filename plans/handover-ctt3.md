@@ -61,3 +61,13 @@ pattern as `'[w]_reach/controller_check.py'`. Two browser checks at once at most
 - Tracked's rows and the device's Works tile change with the clock: the pad half names what the touch half listed but
   isn't there this time (not a miss).
 - The sweep's "could not get back from Tracked" (replays) is old, harmless.
+
+## The sweep's end (2026-10-23 ~10:00, 3f17ac95): FAIL, 17 problems (sent to lead 31)
+- **Unreachable by D-pad (likely real; confirm by a straight walk first):** the map's deck buttons (6 of 7, keyed
+  `button.act[N]`) on Maps and every Appointments > Pick on the map screen; even pad_to_key from the top failed.
+- **"B changed nothing"** on Pause, Tracked (app and panel), Hobbies, the Lift panel. The pad half presses A on the
+  highlighted thing before B and compares with the screen after A: may be the check. Confirm by hand.
+- Not D-pad: #sleepAsk, #ixHealth, #needStrip, #devHu never opened from a new game (add to NOT_FROM_NEW_GAME with a
+  reason, or open them by a situation); Tiles' screens can't be replayed (real-time redraw); depth 8 only in the
+  appointment chain.
+- 27 screens checked; all else fully reached (Roster included).
