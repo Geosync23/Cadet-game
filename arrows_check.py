@@ -260,9 +260,21 @@ def part_toasts(pg):
     pg.ev("GUIDE.tq.length = 0")
     pg.ev("toast('U1', 'x'); toast('U2', 'urgent', { now: true })")
     check(pg.ev("document.getElementById('tt').textContent") == 'U2', 'toasts: an urgent one waited')
+    # a tradition's join notice is never the one dropped (LEAD31-3): a planted burst around the real eventJoin
+    kj = pg.ev("""(() => { if (typeof eventJoin !== 'function' || typeof eventsOn !== 'function') return null; let e = null, d = 1;
+      for (; d < 60 && !e; d++) e = eventsOn(d).find(x => !/^(quiz|first-light|rec-)/.test(x.id) && !SHIP.events.joined.includes(x.id + '@' + d)); if (!e) return null; d--;
+      GUIDE.tq.length = 0; TOAST_AT = -1e9; toast('K0', 'on screen'); toast('K1', 'b'); eventJoin(e, d, shipNow());
+      for (const k of ['K3', 'K4', 'K5', 'K6']) toast(k, 'x'); const q = GUIDE.tq.map(x => x[0]);
+      SHIP.events.joined = SHIP.events.joined.filter(k => k !== e.id + '@' + d); return { name: e.name, q }; })()""")
+    check(kj is None or (kj['name'] in kj['q'] and len(kj['q']) == 3), f'toasts: a join notice was dropped by a burst of pop-ups ({kj})')
+    # the test hook (LEAD31-2): window.cadetPopupsNow shows every pop-up at once; off, they wait again
+    pg.ev("GUIDE.tq.length = 0; TOAST_AT = -1e9; window.cadetPopupsNow = true; toast('H1', 'a'); toast('H2', 'b')")
+    hk = [pg.ev("document.getElementById('tt').textContent"), pg.ev('GUIDE.tq.length')]
+    pg.ev("window.cadetPopupsNow = false; toast('H3', 'c')"); hk.append(pg.ev('GUIDE.tq.length')); pg.ev("GUIDE.tq.length = 0")
+    check(hk == ['H2', 0, 1], f'toasts: the test hook cadetPopupsNow (shown, waiting; then off, waiting): {hk}')
     pg.ev("GUIDE_ON = false; PAUSE.on = false"); pg.step(3)
     check(pg.ev('GUIDE.tq.length') == 0 and not pg.ev('GUIDE.loop'), 'toasts: switching off left the queue running')
-    print(f'  toasts: {names}, gaps {gaps} ms; urgent at once')
+    print(f'  toasts: {names}, gaps {gaps} ms; urgent at once; join notice kept {kj}; hook {hk}')
 
 
 # the arrow follower: one action per call; returns what it did (or null)
