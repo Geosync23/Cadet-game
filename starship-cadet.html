@@ -42655,6 +42655,7 @@ const INTRO_HAND = { give: 3, lines: ['Oh, hold on. Nearly forgot the important 
   after: ['Right, onward. The mess is on Deck 3.', 'And Brennan doesn\'t hold plates for anyone.'] };   // the user's mix (ZW1's plans/zeke-words.md), stand-ins for walk.hand / walk.hand.after
 const INTRO_HAND_MAIL = 'Before you land | New hand, I\'m writing this before the Tern docks, so by the time you read it I\'ll have handed you this in person and said most of it already. Here\'s the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it\'s just home with a lift in it. And if you\'re the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I\'ll be the one with the tea. Zeke';
 const INTRO_HAND_NEAR = 2.2;                               // m: he's come up to you
+const introHandGap = text => Math.min(INTRO_TOUR_GAP, Math.max(2200, 1200 + 40 * String(text).length));   // (lead 30's (c)) real ms to the next line, by its length: 60 characters 3.6 s (his tour pace), a short one 2.2 s
 const INTRO_HAND_READ = 45000;                             // real ms: reading his Mail with the device open that long, he goes on anyway
 const introHandLines = after => introWriterLines(after ? 'walk.hand.after' : 'walk.hand') || (after ? INTRO_HAND.after : INTRO_HAND.lines);   // one flag key each, in the file's order
 const introHandBusy = () => { const D = SHIP.intro.done; return D['hand:start'] !== undefined && D['hand:end'] === undefined; };
@@ -42684,7 +42685,7 @@ function introHandTick() {
     D['hand:start'] = t; H.n = 0; H.a = 0; H.next = now;
   }
   if (now < H.next || DIALOGUE) return;
-  const say = text => { if (typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); H.next = INTRO_UI.next = now + INTRO_TOUR_GAP; };
+  const say = text => { if (typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); H.next = INTRO_UI.next = now + introHandGap(text); };
   if (H.opened) {                                          // reading his Mail: once it's closed, his last lines, then on we go
     if (typeof DEV !== 'undefined' && DEV.open && now < H.opened + INTRO_HAND_READ) return;   // still reading (at most INTRO_HAND_READ: then he goes on while you read)
     const L = introHandLines(true); if (H.a < L.length) { say(L[H.a++]); return; }
