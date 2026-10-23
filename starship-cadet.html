@@ -10377,7 +10377,7 @@ function schedBuild(p, d, occ, S) {
   // their own meal and a linger, 35-75 minutes from sitting down, not to the tradition's end, so the table thins a few
   // at a time (at most 20 minutes past its end). Day 0's Sunday table stays seated through Zeke's goodnight to you
   // (section 21's INTRO_STEPS 'free'), then empties over the next 25 minutes
-  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof INTRO_STEPS !== 'undefined' && INTRO_STEPS.find(x => x.id === 'free' && x.day === 0); return g ? g.at : null; };
+  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };   // section 21's fixed minute (a plan never reads what happens live)
   const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger
     const g = tradGood(e), to = Math.min(e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), e.at + e.dur + 20);
     return g != null ? Math.max(to, g + Math.round(25 * U(532))) : to;
