@@ -61,6 +61,15 @@ Exit 1 in 137 s, one FAIL line, as BM14 expected: `FAIL ship.works over 3 KB by 
 (`ship.works after 30 busy days: 3001 bytes, log 30`). Lead 31 made it known item **KS1** for this round (old slow
 growth; trimmed in the next build). So career: **known (KS1)**. events_check waits for FX5's game fix (new sha).
 
+**Re-run, events_check on FX5's Day 0 table fix** (BM14, 11:31 UTC): `claude/integration-next` 4e324417 ("day0-table:
+Day 0's kept seat is never cut short by the next walk ..."), game sha256
+`f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd` (matches BM14's), run alone from a worktree of
+4e324417 with its events_check.py: exit 0 in 275 s, `EVENTS CHECK OK`, no FAIL lines; `Day 0 table: {'seats': 48,
+'free': 1185, 'most': 48, 'before': 48}` (all 48 still seated 5 minutes before Zeke's goodnight; was 45).
+
+**CR5 for 0.92.0 now:** day_check 21 OK, 27 OK, interactions OK (on c2180854), career known KS1 only (on c2180854),
+events OK (on f2329b62).
+
 ## 0.91.0 full round (2026-10-22, started ~21:30 UTC, for BM14 and lead 29 / lead 30)
 
 - Candidate: `claude/integration-next` 989fd566 (0.91.0: CP1's controller 0.90.9 on 0.64.16, PAD_ON off, + fresh-eyes
