@@ -74,6 +74,10 @@ WALK_TICK = r"""((mode) => {
   const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT);
   let act = '';
   if (DIALOGUE) { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(1); else dialogueNext(); act = 'talk'; }
+  else if (typeof DEV !== 'undefined' && DEV.open && I.done['hand:start'] !== undefined && I.done['hand:end'] === undefined) {   // DS1: his Mail on your device, read, then closed
+    window.__handMail = window.__handMail || { t: clockText(), app: DEV.app, mail: typeof mailOpen !== 'undefined' ? mailOpen : null, subject: ((SHIP.mail || []).find(m => m.id === mailOpen) || {}).subject || null };
+    if ((window.__handRead = (window.__handRead || 0) + 1) > 3) deviceClose(); act = 'read mail';
+  }
   else if (I.step === 'stow' && typeof bagHeld === 'function' && bagHeld() && typeof wardrobeUse === 'function') {   // playtest patch 1: your bag into your wardrobe (a tap on it)
     const w = clothesWardrobe(); if (w && w.tile) player.obj.position.copy(cellPos(...w.tile));
     window.__stow = { t: clockText(), goal: typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.label : null }; wardrobeUse(); act = 'stow';
