@@ -42616,31 +42616,35 @@ function introDeviceGive() {
 }
 // (DS1, the user on 0.91.0, lead 30's brief B, C, E) the device hand-over without the meeting panel: once the device step
 // is yours, his wardrobe lines and the tour's core lines are done and he's come up to you (escortPlan's follow: he stands
-// facing you), he hands it over in his speech bubbles, a line every INTRO_TOUR_GAP (walk.hand.1-7, else the stand-ins;
-// the device is yours at the first: introDeviceGive). Then your device opens on his Mail, written before you landed
+// facing you), he hands it over in his speech bubbles, a line every INTRO_TOUR_GAP (the device is yours at line
+// INTRO_HAND.give: introDeviceGive). Then your device opens on his Mail, written before you landed
 // (mail.zeke.land), past its first switch-on screen this once, so your next open shows that screen as before. When
-// you close it: walk.hand.8 ("Right, onward") and the step is done (its ready). Away from him on another deck it ends
+// you close it: his last lines ("Right, onward") and the step is done (its ready). Away from him on another deck it ends
 // at once (the device is yours, the Mail sent). The question it used to ask is parked with introDevice.meet.
-const INTRO_HAND = ['And this is yours. Your device.', 'Hands out. Careful, it\'s still warm from my pocket.',
+// The words are the writers' (ZW1; the user picks): walk.hand.<n> before the Mail opens, in order, the device handed over on
+// line INTRO_HAND.give; walk.hand.after.<n> once you've closed it; mail.zeke.land ("Subject | body", {me} your name). Until
+// they're baked, the stand-ins below (DS1's version).
+const INTRO_HAND = { give: 1, lines: ['And this is yours. Your device.', 'Hands out. Careful, it\'s still warm from my pocket.',
   'Most important thing you\'ll own aboard. More than your boots. Slightly less than your mug.', 'Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.',
   'It knows where you\'re meant to be before you do. Annoying, but useful.', 'Lose it and you\'ll spend a week asking strangers what day it is.',
-  'There. Officially crew. I left you a note in there. Have a look.', 'Right, onward. The mess is on Deck 3, and Brennan doesn\'t hold plates for anyone.'];
+  'There. Officially crew. I left you a note in there. Have a look.'], after: ['Right, onward. The mess is on Deck 3, and Brennan doesn\'t hold plates for anyone.'] };
 const INTRO_HAND_MAIL = 'Before you land | New hand, I\'m writing this before the Tern docks, so by the time you read it I\'ll have handed you this in person and said most of it already. Here\'s the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it\'s just home with a lift in it. And if you\'re the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I\'ll be the one with the tea. Zeke';
 const INTRO_HAND_NEAR = 2.2;                               // m: he's come up to you
-const introHandLine = n => { const l = introWriterLine('walk.hand.' + n); return l ? l[0] : INTRO_HAND[n - 1]; };
+const introHandLines = after => introWriterLines(after ? 'walk.hand.after' : 'walk.hand') || (after ? INTRO_HAND.after : INTRO_HAND.lines);   // one flag key each, in the file's order
 const introHandBusy = () => { const D = SHIP.intro.done; return D['hand:start'] !== undefined && D['hand:end'] === undefined; };
 function introHandMail() {                                 // his Mail, once (dated that morning, before you landed); its id
   const D = SHIP.intro.done; if (D['hand:mail'] !== undefined || typeof mailSend !== 'function') return D['hand:mail'];
   let t = INTRO_HAND_MAIL; try { if (typeof clothesText === 'function') t = clothesText('mail.zeke.land', {}, INTRO_HAND_MAIL); } catch (e) { t = INTRO_HAND_MAIL; }
-  const i = t.indexOf(' | '); mailSend({ at: introAbs(0, 9 * 60), from: 'Zeke Torres', subject: i < 0 ? 'Before you land' : t.slice(0, i), body: i < 0 ? t : t.slice(i + 3), quiet: true });
-  const m = (SHIP.mail || []).find(x => x.from === 'Zeke Torres' && x.at === introAbs(0, 9 * 60)); return D['hand:mail'] = m ? m.id : null;
+  t = t.replace(/\{me\}/g, (SHIP.player && SHIP.player.name) || 'new hand');
+  const i = t.indexOf(' | '), at = introAbs(0, 9 * 60); mailSend({ at, from: 'Zeke Torres', subject: i < 0 ? 'Before you land' : t.slice(0, i), body: i < 0 ? t : t.slice(i + 3), quiet: true });
+  const m = (SHIP.mail || []).find(x => x.from === 'Zeke Torres' && x.at === at); return D['hand:mail'] = m ? m.id : null;
 }
 function introHandTick() {
   const I = SHIP.intro, D = I.done, now = simNow(), t = Math.floor(shipNow());
   if (D['hand:end'] !== undefined) return;
   if (introFlag('intro.device') && D['hand:start'] === undefined && I.step !== 'device') { introHandMail(); D['hand:end'] = t; return; }   // given another way (Monday's briefing): his Mail all the same
-  const H = INTRO_UI.hand || (INTRO_UI.hand = { n: 0, next: 0, opened: false });
-  const a = introWalker(), here = player.here();
+  const H = INTRO_UI.hand || (INTRO_UI.hand = { n: 0, next: 0, opened: false, a: 0 });
+  const a = introWalker();
   if (D['hand:start'] !== undefined && (H.n === 0 && !H.opened || !a || deckDef.num !== 4)) {   // a reload mid-scene, or you left the deck: it's yours, the Mail's there
     introDeviceGive(); introHandMail(); D['hand:end'] = t; return;
   }
@@ -42649,20 +42653,20 @@ function introHandTick() {
     if (!st || st.id !== 'device' || t < introAbs(st.day, st.at) || !a || deckDef.num !== 4 || DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) return;
     if (typeof clothesCabinQuiet === 'function' && !clothesCabinQuiet(t)) return;
     if (Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > INTRO_HAND_NEAR) return;
-    D['hand:start'] = t; H.n = 0; H.next = now;
-  }
-  if (H.opened) {                                          // reading his Mail: closed, so on we go
-    if (typeof DEV !== 'undefined' && DEV.open) return;
-    if (typeof bubbleSay === 'function') bubbleSay(a.h, introHandLine(INTRO_HAND.length), 4.5);
-    INTRO_UI.next = now + INTRO_TOUR_GAP; D['hand:end'] = t; return;
+    D['hand:start'] = t; H.n = 0; H.a = 0; H.next = now;
   }
   if (now < H.next || DIALOGUE) return;
-  if (H.n < INTRO_HAND.length - 1) {                       // his lines, a few seconds apart, facing you
-    H.n++; if (typeof bubbleSay === 'function') bubbleSay(a.h, introHandLine(H.n), 4.5);
-    if (H.n === 1) introDeviceGive();
-    H.next = now + INTRO_TOUR_GAP; INTRO_UI.next = H.next; return;
+  const say = text => { if (typeof bubbleSay === 'function') bubbleSay(a.h, text, 4.5); H.next = INTRO_UI.next = now + INTRO_TOUR_GAP; };
+  if (H.opened) {                                          // reading his Mail: once it's closed, his last lines, then on we go
+    if (typeof DEV !== 'undefined' && DEV.open) return;
+    const L = introHandLines(true); if (H.a < L.length) { say(L[H.a++]); return; }
+    D['hand:end'] = t; return;
   }
-  const id = introHandMail(); if (typeof deviceShow !== 'function') { H.opened = true; return; }
+  const L = introHandLines(false);
+  if (H.n < L.length) {                                    // his lines, a few seconds apart, facing you
+    say(L[H.n++]); if (H.n >= INTRO_HAND.give) introDeviceGive(); return;
+  }
+  introDeviceGive(); const id = introHandMail(); if (typeof deviceShow !== 'function') { H.opened = true; return; }
   if (typeof deviceClose === 'function' && typeof DEV !== 'undefined' && DEV.open) deviceClose();
   try { if (id != null) { mailOpen = id; const m = SHIP.mail.find(x => x.id === id); if (m) m.read = true; } } catch (e) { /* section 19's */ }
   const booted = SHIP.device.booted; SHIP.device.booted = true; deviceShow('mail'); SHIP.device.booted = booted;   // past the first switch-on, this once
