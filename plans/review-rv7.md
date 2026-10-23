@@ -171,3 +171,24 @@ its room starts the job (`JOB_THING`), not a climb; it ends in the same `actStar
 
 Note: with the arrows queue on, nobody shows the inspection arrows until AC2 wires `inspectGoal` into the queue (F2).
 The earlier optional line (a non-machine thing on the pin's line keeps its own tap) is still optional.
+
+## 6. claude/arrows-c 483c3da..14249d8 (AC2: the pop-up queue keeps a training's word; F2; the follower): PASS
+
+483c3da: when the pop-up queue (arrows on) is full, the oldest waiting pop-up that isn't a "Trained: ..." or "Works
+reputation" word is dropped (`TQ_KEEP`). If every waiting pop-up is one of these, none is dropped (a few, no harm).
+5f7e91c (F2): from 06:00 to 06:30 on an inspection morning, `guideShift` asks the queue for FX3's `inspectGoal` at level 2.
+This happens before the shift's clock-in returns, so it works before you clock in. The other commits in the range are
+the follower and docs, and merges RV8 passed. The game is the same at 5f7e91c and 14249d8.
+
+| Test | Result |
+| --- | --- |
+| cadet_test 483c3da^ -> 483c3da, and 5f7e91c^ -> 5f7e91c, alone | ALL IDENTICAL, both |
+| arrows_d_check on 14249d8 | OK |
+| Planted: the queue drops the oldest again; F2 at level 5; F2 off | all caught |
+| Planted: the queue drops the newest instead of the oldest non-keeper | not caught (minor) |
+| Week (14249d8's own follower), arrows off | learned m1 (Day 2), m4 and m3d (Day 3), m3i and m5 (Day 4), m2. Not: m7, p3, m6 |
+| Week, arrows on | learned m1, m4, m3d, m3i, m5, **m7 (Day 5)**, m2. Not: p3 (FX5's fix, RV9), m6 (stuck at "Mop up (2 of 2)", Day 8: FX3's mop fix) |
+| "Trained: ..." pop-ups | every training said once and reached the screen, arrows off and on (7 with the arrows on) |
+
+Still stuck: "Clean a vent: hydroponics garden" Day 4 (both runs; FX3's vent fix) and "Clean a vent: lift plaza" Day 8 (arrows off).
+With the arrows off, m7 isn't learned on Day 5 (FX4's m7 fix, RV9).
