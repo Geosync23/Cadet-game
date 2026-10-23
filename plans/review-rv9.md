@@ -96,3 +96,16 @@ step after a walker).
   after.json`: lines lost, how each is given, the dinner part from toMess identical, Zeke's still spans). The before
   run on 989fd566, twice: the same 91 lines, the dinner part identical in ship time. Zeke stands still on Deck 4 at
   (19,9) 16:59-17:03 and (14,5) 17:08-17:10; in the bunk room (8,4) 17:15-17:17 before the device.
+
+## zeke-tour 99687fc8 (DS1 session_01MZBSf7MZeb9C89wpoavLko): interim, FIXES NEEDED as it stands (to DS1, lead 31)
+Before = 2b81d8a0 (0.91.0 + breakfast back), after = 99687fc8 (arrival 17:15). Recorder: review-rv9/zeke/addlog.py on
+each build's own intro_check; after-run a2 also patches WALK_TICK so the follower stays while introHandDue()/introHandBusy()
+(part 8's own follower walks to toMess's checkpoint at once, so the bubble scene never plays there: F6).
+`python3 dinner.py before.json after.json`: scripted events from the lead-off (the hand-over's last line).
+- F1 dinner part: Sunday long table toast + Brennan's "Thanks for coming" Mail at 18:20 (table step, before you sit
+  with Zeke); before 18:06 (tomas step, after the Chief). introDinner/introChief identical; seats; steps within ~1.5 min.
+- F2 Deck 4: off the lift fixed (was ~8 s at (19,9)); the wing stop (16,5) now ~9 s (13 samples) vs ~4 s (6 at (14,5)).
+- F3 bunk room ~65 s real (scene lines 38.5 s + after 5.6 s + Mail; ~7 s at the device step; ~7 s before line 1).
+- F4 introDeviceGive's toast still mid-bubbles. F5 tour extras inside the scene. F6 part 8 never plays the scene.
+- Lines kept: the old introDevice panel's lines in the bubbles; its question and three answers in "Before you land".
+- Next: DS1's bag commit (the user rejected the auto-stow); then the full set, his facing, the recorder again.
