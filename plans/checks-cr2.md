@@ -164,3 +164,26 @@ OLD b9f053ba (0.64.16), sha256 `70f94273...e6a5c7`. perf_check and lines_check -
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | known old only (CR4) | backlog 14 (521/521/523, the same on OLD); all scenes identical to OLD; the Line ceremony back to 301 calls (no breakfast) |
 | lines_check --day | OK (CR4) | PASS |
+
+# Round 9: 0.92.0 (claude/integration-next 4147f03d: teaching arrows on, breakfast back, Zeke's tour, dinner spread), CR2's share — **FAIL (2 new)**
+
+NEW 4147f03d, sha256 `c2180854a780936c21cbac0ba9e7932fb491759f740e1d5ac3b4d4494a4f1286` (matches BM14's).
+OLD 989fd566 (0.91.0), sha256 `da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee`.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW | DIFFERENCES, expected | The same DIFF lines as round 6's breakfast build (needs/taps from tap1, walks, state tris, state_end), pixel counts within a few dozen of round 6; g_nocrew 149 px; no page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | **FAIL, NEW** | `ERROR lines/torres-zeke [mail.zeke.land] "Before you land \| New hand, I'm writing this befor": 475 characters (at most 400)` (Zeke's device hand-over Mail, cb57522d). 0.91.0: 0 errors. |
+| intro_check (whole) | **FAIL, NEW** | part 13 only: `FAIL someone took the booth the call arrow was on, and it stayed there (FX5): ['3-callhome-1', '3-callhome-1']`. Repeats with `--firsts` alone. |
+| perf_check NEW OLD | OK (accepted baseline) | Only `the Line ceremony ... portrait: draw calls 301 -> 335` (49 people), = lead 29's accepted breakfast baseline from 0.64.17 (breakfast is back). No memory growth (521/521/521), no js spike. |
+| lines_check --day | OK | PASS (0 errors) |
+
+## intro part 13 (FX5): why it fails
+
+A probe at the check's moment (Day 0 Sunday 18:26): crew already hold booths 3-callhome-2, -3 and -4 (`heldBy`); only -1
+is free. The check puts a stand-in on -1, so all four are taken, and `introCallTick` keeps the arrow as it was, by its
+own rule ("all taken: as it was, where the line forms"). So the check's assumption that a free booth exists doesn't hold
+at 18:26 in 0.92.0 (the later arrival / tour / dinner spread puts crew on the booths). Looks like a check-setup issue,
+not a game bug; the arrows/FX5 owner's call. Not fixed.
