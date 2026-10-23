@@ -187,3 +187,12 @@ is free. The check puts a stand-in on -1, so all four are taken, and `introCallT
 own rule ("all taken: as it was, where the line forms"). So the check's assumption that a free booth exists doesn't hold
 at 18:26 in 0.92.0 (the later arrival / tour / dinner spread puts crew on the booths). Looks like a check-setup issue,
 not a game bug; the arrows/FX5 owner's call. Not fixed.
+
+# Round 9b: 0.92.0 re-run (claude/integration-next 4e324417: FX5's Day 0 table fix), BM14's two checks — **OK**
+
+NEW 4e324417, sha256 `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd` (matches BM14's). OLD 989fd566 (0.91.0).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Every DIFF line and every shot's pixel count identical to round 9 (4147f03d): the breakfast pattern; no page errors. |
+| intro_check (whole, 4e324417's check) | OK | `OK`, 0 FAIL lines (part 13's FX5 booth FAIL gone) |
