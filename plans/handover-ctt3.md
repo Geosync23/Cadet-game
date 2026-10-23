@@ -43,8 +43,18 @@ must be redone (the files are in the old scratchpad).
 pattern as `'[w]_reach/controller_check.py'`. Two browser checks at once at most; idle/touch/calls alone.
 
 ## State at this writing
-- Sweep on 3f17ac95 (pad half): __SWEEP__
-- day on round 10: __DAY__
+- Sweep on 3f17ac95 (claude/controller-follow1), pad half, running in this session's scratchpad with CTL_PADDONE
+  (paddone_f1.jsonl). So far: Pause 1/1, device home 16/16 (Roster reached; Works tile not there that time), Tracked 9/9,
+  Appointments 4/4, New appointment 11/11, Alejandro's screen 14/14 (earlier partial runs). **New, to look at:**
+  "#pauseBtn: B changed nothing (the panel stays as it was)": B on the Pause card leaves it open. By design if the card
+  is one you must answer (PAD_MUST), else a finding for the controller owner. Ask lead 31.
+  If this session has gone: rerun reach on the game with CTL_DEPTH=8 CTL_PRESSES=2000 CTL_STATES=... CTL_PADDONE=...
+  (about 1.5 h touch half, then ~5 min a dialog screen; ~38 of the 42 screens have a panel).
+- Round 10 (claude/trial-p5-on-controller, arrows on), with this check: marks, drop, pick OK. day FAILS 2, game-side
+  on the controller path only (lead 31: known controller items, don't block 0.92.0): (1) Deck 3 lift lobby at 06:49,
+  standing 0.95 m from the lift door (-5.94,-1.39): the ring's 8-thing list is full of crew, benches, items and never
+  offers the lift; (2) same spot at 22:00: the ring says "Lift", then people move, the lift drops out of the list and A
+  does nothing (alone at that spot A opens it). Needs a controller owner (CP1 has stopped).
 
 ## Open
 - The full list of anything unreachable to lead 31 when the sweep ends (Deck plan counted as covered).
