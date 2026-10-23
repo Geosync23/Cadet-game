@@ -12753,7 +12753,7 @@ function pointLiftStep() {                               // a watcher: ask when 
 }
 // watchers (pieces F3, F4): small functions run each frame while POINT_ON, each asking its pointer when its panel shows
 // (the Scanner, Fault notes, the valve card). POINT_WATCH.push(fn) from any section; a watcher that throws is dropped
-const POINT_WATCH = [pointLiftStep];
+const POINT_WATCH = [];   // pointLiftStep (p:lift) parked, not watched: the deck row's own "→ Tracked" (openLiftPanel) is the one marker (the user, 2026-10-23, via lead 31); its id stays retired
 function pointWatchStep() {
   requestAnimationFrame(pointWatchStep);
   for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); console.warn('pointer watcher dropped:', e); POINT_WATCH.splice(i--, 1); }

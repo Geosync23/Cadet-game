@@ -151,15 +151,18 @@ def run(path):
                 g.page.click('#__in'); g.step(3); p = where()
                 check(not p['up'] and g.ev("careerClockedIn(SHIP.time.day)"), f'clocked in: gone ({p})')
             g.ev("document.getElementById('clockScreen').hidden = true; pointDrop('x:clock')")
-            # (d2) the lift's deck picker: on the arrow's deck button, the first three times; gone when the picker shuts
+            # (d2) the lift's deck picker: one marker for the arrow's deck, the row's own "→ Tracked", with Teaching arrows on
+            # First times, Always or Off; no teaching pointer on it (the user, 2026-10-23: two were shown)
             lf = []
-            for k in range(4):
-                n = g.ev("(() => { const n = deckDef.num === 5 ? 3 : 5; setGoal({ deck: n, room: 'w', label: 'Somewhere' }); openLiftPanel(); const b = liftButton(n); if (b) b.id = '__lift'; return n; })()")
-                g.step(2); p = where('#__lift'); lf.append(p['up'] and p['target'] and p['onScreen'])
-                if k == 0: shot('lift')
+            for mode in ('first', 'all', 'off'):
+                n = g.ev(f"(() => {{ deviceDo({{ app: 'settings', do: 'teach', arg: '{mode}' }}); deviceClose(); const n = deckDef.num === 5 ? 3 : 5; setGoal({{ deck: n, room: 'w', label: 'Somewhere' }}); openLiftPanel(); const b = liftButton(n); if (b) b.id = '__lift'; return n; }})()")
+                g.step(2); p = where('#__lift')
+                rows = g.ev("[...document.querySelectorAll('#liftList .goal')].map(b => b.id === '__lift')")
+                lf.append([mode, rows, bool(p['up'] and p['target'])])
+                if mode == 'first': shot('lift')
                 g.ev("closeLiftPanel(); clearGoal()"); g.step(2)
-                if k == 0: check(not where()['up'], 'the lift: gone when the picker shuts')
-            check(lf == [True, True, True, False], f'the lift: on the arrow\'s deck button the first three times ({lf})')
+            g.ev("deviceDo({ app: 'settings', do: 'teach', arg: 'first' }); deviceClose()")
+            check(all(r == [True] and not up for _, r, up in lf), f'the lift: one marker on the arrow\'s deck (the row\'s → Tracked), no pointer, in each teaching mode ({lf})')
             # (e) one at a time; the Teaching arrows switch; the cap
             r = g.ev("""(() => { deviceClose(); pointAsk({ id: 'x:one', path: [pointDevice()] }); pointAsk({ id: 'x:two', path: [pointDevice()] }); return 0; })()""")
             g.step(2); p = where()
