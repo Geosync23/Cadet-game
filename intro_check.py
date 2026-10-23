@@ -308,7 +308,10 @@ def solo(g):
     if ask['cur'] == 'm1' and ask['at'] is not None and ask['at'] < end: fail(f'the Rounds ask came before her meeting was over: {ask}, end {end}')
     # step by step, as a board job: each part in hand moves the arrow on; the work done sends you back to the board
     jid = json.dumps(after['job'])
-    lab = lambda: g.ev(SEEN)['label']
+    # with the teaching arrows on (0.92.0) a training meeting takes the arrow from 15 minutes before (the arrows plan): Zeke's
+    # 10:45 Rounds meeting has it from 10:30, so then the job's own step (ixJobStep, the arrow it gives back) is read
+    meet = "(() => { const n = typeof guideNow === 'function' ? guideNow() : null; return n && /^train:.*:meet:/.test(n.id) ? ((ixJobStep() || {}).label || null) : undefined; })()"
+    lab = lambda: (lambda m: g.ev(SEEN)['label'] if m is None else m)(g.ev(meet))
     shelf = g.ev(f"(j => SHIP.stores[j.parts[0]] || 0)(SHIP.jobs.find(x => x.id === {jid}))")   # the crew may have used the shelf's last one by now (then you make it in the shop, as for any job)
     steps = [lab()]
     g.ev(f"(j => {{ takePart(j.parts[0]); SHIP.player.carry.push(j.parts[0]); }})(SHIP.jobs.find(x => x.id === {jid}))"); g.step(30); steps.append(lab())
@@ -324,6 +327,31 @@ def solo(g):
     if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
+def clock_tracked(g):
+    # fresh-eyes (FE1 item 36): on Day 1 you tap Tracked's "Clock in" on Deck 4, Zeke walks you down, you step out on Deck 5:
+    # the arrow stays the clock's until you've clocked in (it was replaced by Zeke's and cleared when he let you go)
+    print('13b. Tracked "Clock in" stays up on the training day until you punch')
+    if not g.ev("typeof clockTrkItem === 'function'"):
+        print('  not yet: no clockTrkItem'); return
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev("skipTo(introAbs(1, 8 * 60 + 30))"); g.ev("(() => { if (typeof DIALOGUE !== 'undefined' && DIALOGUE) dialogueEnd(); goToDeck(4); })()"); g.step(10)
+    G = "(IX_GOAL ? IX_GOAL.trk || IX_GOAL.label : null)"
+    tap = g.ev("(() => { const it = clockTrkItem(); if (!it) return null; setGoal(it.goal); return it.goal.trk; })()")
+    seen = []
+    for k in range(4): g.step(30); seen.append(g.ev(G))
+    g.ev("goToDeck(5)"); g.step(5)
+    for k in range(4): g.step(30); seen.append(g.ev(G))
+    walk = g.ev("""(() => { const s = placeSpot('5-timeclock-1'), t = (ROOM_TILES.w || []).filter(c => free(...c)).map(c => [c, cellPos(...c)]).filter(([, w]) => Math.hypot(w.x - s.x, w.z - s.z) > 4).sort((a, b) => Math.hypot(a[1].x - s.x, a[1].z - s.z) - Math.hypot(b[1].x - s.x, b[1].z - s.z))[0];
+      if (!t) return null; player.obj.position.copy(t[1]); player.stop(); return [roomAt(...player.here()), Math.round(Math.hypot(t[1].x - s.x, t[1].z - s.z) * 10) / 10]; })()""")   # into the Works bay, a few metres from the clock (RV8: arriving in the bay took it down)
+    for k in range(8): g.step(30); seen.append(g.ev(G))
+    print('  in the Works bay, away from the clock:', walk)
+    print('  tracked', tap, '| the arrow after, on Deck 4 then Deck 5:', sorted(set(map(str, seen))))
+    if tap != 'clock:in' or any(x != 'clock:in' for x in seen): fail(f'Tracked "Clock in" did not stay up till you punched: {seen}')
+    punched = g.ev("(() => { careerClock(shipNow()); for (let i = 0; i < 3; i++) clockRemindTick(shipNow()); return [careerClockedIn(SHIP.time.day), IX_GOAL && IX_GOAL.trk || null]; })()")
+    print('  punched in:', punched)
+    if not punched[0] or punched[1] == 'clock:in': fail(f'after clocking in the clock arrow should go: {punched}')
+
 # 14. Leaving the bunk room early (0.64.15's playtest: "after the bag, Zeke just stands in the bunk room"): a player who
 # walks out into the corridor right after putting the bag away (or without putting it away) must still get the device from
 # Zeke and be led on to the mess; on 0.64.15 he waited in Bunk 1 for good (the 'device' step wanted you in there)
@@ -431,9 +459,21 @@ def firsts(g):
     else:
         g.ev("devChosen(0)"); g.step(20); tr = g.ev(G)
         g.ev("(() => { player.obj.position.copy(cellPos(37, 19)); })()"); g.step(20)
-        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined })")
-        print(f"  Track it: arrow '{tr}'; in the booths: arrow {end['g']}, done {end['end']}")
-        if not tr or 'booth' not in tr.lower() or end['g'] or not end['end']: fail(f'the call-home arrow went wrong: {tr}, {end}')
+        mid = g.ev("({ g: " + G + ", place: IX_GOAL && IX_GOAL.place, end: SHIP.intro.done['call:end'] !== undefined })")
+        moved = g.ev("(() => { const was = INTRO_ARROWS.call.place, x = { goalId: was }; DECK_CREW.push(x); introCallTick(Math.floor(shipNow())); const now = INTRO_ARROWS.call.place; DECK_CREW.splice(DECK_CREW.indexOf(x), 1); INTRO_ARROWS.call.place = was; return [was, now]; })()")
+        if moved[0] == moved[1]: fail(f"someone took the booth the call arrow was on, and it stayed there (FX5): {moved}")
+        # FX5 (the user, 2026-10-23): in the room it still points at a booth, a free one, until the call begins (it went on walking
+        # in); once the call's begun the call arrow is gone (the bunk arrow may come back)
+        g.ev("(() => { const it = ITEMS.find(i => i.t === 'Booth ' + ((IX_GOAL && IX_GOAL.place) || '1').slice(-1)); it.hit.getWorldPosition(_wp); playerTap(it, _wp.clone(), _wp.clone()); })()")
+        for i in range(40):
+            g.step(10)
+            if g.ev("!!ACT && ACT.kind === 'call' && ACT.phase !== 'walk'"): break
+        g.step(20)
+        end = g.ev("({ g: " + G + ", end: SHIP.intro.done['call:end'] !== undefined, act: ACT && ACT.kind })")
+        g.ev("actEnd(true)")
+        print(f"  Track it: arrow '{tr}'; in the booths: arrow {mid['g']} on {mid['place']}, done {mid['end']}; the call begun ({end['act']}): arrow {end['g']}, done {end['end']}")
+        if not tr or 'booth' not in tr.lower() or end['g'] == tr or not end['end'] or end['act'] != 'call': fail(f'the call-home arrow went wrong: {tr}, {end}')
+        if mid['g'] != tr or not (mid['place'] or '').startswith('3-callhome-') or mid['end'] or g.ev(f"!!heldBy('{mid['place']}')"): fail(f"in the booths' room the arrow went before the call began, or isn't on a free booth (FX5): {mid}")
     g.ev("(() => { const b = INTRO_WEEK.find(x => x.id === 'd1-briefing'); SHIP.intro.done['d1-briefing:met'] = introAbs(1, b.at); skipTo(introAbs(1, b.until + 6)); goToDeck(5); player.obj.position.copy(cellPos(15, 3)); clearGoal(); })()"); g.step(20)
     c1 = g.ev(G); g.ev('careerClock()'); g.step(20); c2 = g.ev(G)
     took = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1) || SHIP.jobs.find(x => !x.by); return !!j && claimJob(j.id); })()"); g.step(20); c3 = g.ev(G)
@@ -474,7 +514,7 @@ with sync_playwright() as pw:
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
-        firsts(g)
+        firsts(g); clock_tracked(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if WEEK_ONLY:
@@ -602,8 +642,12 @@ with sync_playwright() as pw:
             if t0['open'] != 0: fail('the Tern\'s ramp is open while you sign the manifest')
         g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
         if tern:   # about 2 s after signing, the pilot's line and the ramp opens (2.5 s)
+            g.ev("window.__shown = []; { const el = document.getElementById('toast'); if (el) new MutationObserver(() => window.__shown.push(el.textContent)).observe(el, { subtree: true, childList: true, characterData: true }); }")   # every pop-up shown (with the teaching arrows on, 0.92.0, a later one waits its turn and then follows it)
             r0 = g.ev('ternRampOpen()'); g.step(150)   # 2 s to the pilot, 2.5 s of ramp (the frame clock)
-            r1 = g.ev("({ open: ternRampOpen(), toast: (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
+            for _ in range(10):                         # a pop-up ahead of it in the queue: the pilot's line follows in its turn
+                if g.ev("window.__shown.some(t => t.includes('Raman'))"): break
+                g.step(30)
+            r1 = g.ev("({ open: ternRampOpen(), toast: window.__shown.find(t => t.includes('Raman')) || (document.getElementById('toast') || {}).textContent || '', pilot: !!introWriterLine('pilot.ramp', 'raman') })")
             src = "the writers' line" if r1['pilot'] else 'the stand-in'
             print(f"  the ramp right after signing {r0}, 5 s later {r1['open']}; the pilot ({src}): {r1['toast'][:90]}")
             if r0 != 0: fail('the ramp opened before the pilot spoke')

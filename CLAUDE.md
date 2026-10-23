@@ -24,6 +24,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
 - `bubble_check.py`: speech bubbles at phone size with uneven frames: they follow their speaker without shaking, jumping or swapping sides.
 - `devmode_check.py`: checks Dev mode (section 25, `#dev`): nothing without the Dev link, the real save untouched, Undo, Mark, the Dev clock, Take me to.
+- `dev_arrow_check.py`: Dev mode's career arrow: none without #dev, the right next step through the first career steps, drawn apart from the game's arrow, Show/Hide.
 - `names_check.js`: reads the game's script the way the browser does: it must parse; no top-level name, shared-table key or registration (`deviceApp({ id })` and the like) made twice; no "Deck 7" on screen. Names the section and line of each problem.
 - `check_fast.sh`: the quick check (about 5 minutes): words baked, names_check, then the deck, machine and leave checks side by side with the device check. Run it before every push. GitHub runs the same by itself on every push that touches the game, the checks or the words (`.github/workflows/quick-check.yml`): a tick or a cross on the commit, in about 5 minutes.
 - `plans/testing-guide.md`: the whole testing process, long form: why, every check, the full round and the event days, the test picker (`tools/affected.py`, its map and proofs), releases, regressions, troubleshooting, a glossary. DEV_NOTES "Testing" is the summary.

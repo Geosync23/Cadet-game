@@ -43,7 +43,8 @@ CHECKS = {
     **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 16, 19, 21, 27)},
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
-    'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5),
+    'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5), 'dev_arrow': ('python3 dev_arrow_check.py {g}', 2),   # Dev mode's career arrow (DV1)
+    'arrows_pointer': ('python3 arrows_pointer_check.py {g}', 4),   # the panel pointer (arrows plan, piece C)
     'disc': ('python3 disc_check.py {g}', 3), 'tiles': ('python3 tiles_check.py {g}', 3),
     'join': ('python3 join_check.py {g}', 3), 'clothes': ('python3 clothes_check.py {g}', 2),
     'path': ('python3 path_check.py {g}', 2), 'puzzle': ('python3 puzzle_check.py {g}', 2),
@@ -67,14 +68,14 @@ RULES = {
     'page': ['cadet', 'interactions', 'bubble'], '1': ['*'], '2': ['cadet', 'deck'], '3': ['cadet', 'deck'], '4': ['*'], '4a': ['*'],
     '4b': ['cadet', 'deck', 'perf'], '4c': ['*'], '4d': ['cadet', 'deck', 'day1', 'events', 'path'], '4e': ['cadet', 'deck', 'disc', 'day1'],
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
-    '19': ['device', 'puzzle', 'player'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join'],
+    '19': ['device', 'puzzle', 'player', 'arrows_pointer'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
     '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
     '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
     '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],
     '10': ['day1', 'cadet', 'deck', 'events'], '8c': ['disc', 'day1', 'perf'], '11': ['cadet', 'interactions', 'bubble'],
-    '25': ['devmode'], '12': ['*'],
+    '25': ['devmode', 'dev_arrow'], '12': ['*'],
 }
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']
@@ -194,7 +195,7 @@ def pick(a, b, mp, middle=False):
             continue
         if f == 'cadet_test.py':
             add(['*'], 'cadet_test.py (every check runs on it)')
-        elif re.fullmatch(r'[a-z0-9]+_check\.py', f) or f == 'day_check.py':
+        elif re.fullmatch(r'[a-z0-9_]+_check\.py', f) or f == 'day_check.py':
             add(['day1'] + EVENT_DAYS if f == 'day_check.py' else [f[:-9]], f)
         elif f.startswith('content/'):
             add(RULES['22'], f + ' (the words; content_gen --check is in check_fast)')
