@@ -43,7 +43,7 @@ CHECKS = {
     **{f'day{d}': (f'python3 day_check.py {{g}} {d}', 8) for d in (0, 5, 7, 12, 13, 16, 19, 21, 27)},
     'interactions': ('python3 interactions_check.py {g}', 8), 'perf': ('python3 perf_check.py {g} OLD.html', 15),
     'mech': ('python3 mech_check.py {g}', 6), 'events': ('python3 events_check.py {g}', 6),
-    'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5),
+    'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5), 'dev_arrow': ('python3 dev_arrow_check.py {g}', 2),   # Dev mode's career arrow (DV1)
     'arrows_pointer': ('python3 arrows_pointer_check.py {g}', 4),   # the panel pointer (arrows plan, piece C)
     'disc': ('python3 disc_check.py {g}', 3), 'tiles': ('python3 tiles_check.py {g}', 3),
     'join': ('python3 join_check.py {g}', 3), 'clothes': ('python3 clothes_check.py {g}', 2),
@@ -75,7 +75,7 @@ RULES = {
     '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],
     '10': ['day1', 'cadet', 'deck', 'events'], '8c': ['disc', 'day1', 'perf'], '11': ['cadet', 'interactions', 'bubble'],
-    '25': ['devmode'], '12': ['*'],
+    '25': ['devmode', 'dev_arrow'], '12': ['*'],
 }
 for k in ['24', '24a', '24b', '24c', '24d', '24m', '24n', '24g', '24i', '24j', '24t', '24s', '24e', '24f', '24h', '24l', '24o', '24q', '24r', '24p']:
     RULES[k] = ['career', 'mech', 'leave']

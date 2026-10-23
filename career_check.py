@@ -169,6 +169,57 @@ def fx_guidance(pw):
     if g.errors: fail('(p) page errors: ' + ' | '.join(g.errors[:5]))
     g.close()
 
+# (p2) FX4 (p5-fix4): with the arrow queue off, a job you hold keeps the arrow from a training meeting (the playtest patch
+# 1, #7) only if you took it before the meeting's arrow window opened (15 minutes before); one taken inside the window
+# (turned one in and took the next at the board) doesn't: the meeting's arrow comes up (Day 5's scanner was missed till Monday)
+def fx_window_job(pw):
+    print('(p2) FX4, a job taken inside the meeting arrow\'s window (queue off):')
+    g = Game(pw, sys.argv[1]); ev = g.ev
+    ev("setShipNow(1020)"); g.step(2); ev("setShipNow(1440 + 480)"); g.step(2)
+    ev("(() => { const o = openJobs('you')[0]; if (!o || !ixBoard.take(o.id)) return; const j = myJob(); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); ixBoard.turnIn(j.id); })()"); g.step(1)   # a job of yours done, as (p): the ladder's first row needs one
+    ask = None; m = 481
+    while m < 1020:
+        ev(f"setShipNow({1440 + m})"); g.step(1); s = ev(FX_LOOK)
+        if s[0] and s[0].endswith(':meet') and s[1]: ask = [m, s]; break
+        m += 5
+    if not check(ask, '(p2) no training ask on Day 2'): g.close(); return
+    at = ask[1][1] - 1440
+    TAKE = "(() => { const o = openJobs('you').find(x => !x.train); return o && ixBoard.take(o.id) ? myJob().id : null; })()"
+    DONE = "(() => { const j = myJob(); if (!j) return null; jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); ixBoard.turnIn(j.id); return j.id; })()"
+    def go(mm): ev(f"setShipNow({1440 + mm})"); g.step(1); g.step(1); return ev(FX_LOOK)[5]
+    ev(f"setShipNow({1440 + at - 20})"); g.step(1); a = ev(TAKE); before = go(at - 14)
+    ev(DONE); b = ev(TAKE); inside = go(at - 11)
+    print('   job taken before the window:', a, '-> arrow at 14 before:', before, '| turned in, next taken at 12 before:', b, '-> arrow:', inside)
+    check(a and not (before and ' with ' in before), f"(p2) a job taken before the window keeps the arrow (the playtest patch 1, #7) ({before})")
+    check(b and inside and ' with ' in inside, f"(p2) a job taken inside the window should not keep the meeting's arrow away ({inside})")
+    if g.errors: fail('(p2) page errors: ' + ' | '.join(g.errors[:5]))
+    g.close()
+
+# (p3) FX4 (p5-fix4): Calder's call (m6, Day 8, 10:30; queue off): its arrow cleared the moment you came into her office, so
+# your job's arrow came straight back and led you out before the meeting began (up to a ship minute later). Now in the
+# room it stays (as "Wait here for Calder" once a minute ticks) until the meeting starts; then her walk to the pipe takes it
+def fx_inc_wait(pw):
+    print('(p3) FX4, Calder\'s call: the arrow stays in her office until the meeting starts (queue off):')
+    g = Game(pw, sys.argv[1]); ev = g.ev
+    ev("setShipNow(1020)"); g.step(2); t0 = 7 * 1440 + 9 * 60; ev(f"setShipNow({t0})"); g.step(2)
+    ok0 = ev(f"""(() => {{ if (!WORK_MECH.m6) return null; const W = worksInit(), row = ladderRow('m6'); W.cur = {{ id: 'm6', st: 'ask', d: 8, by: 'calder', occ: null, j: null, w: 0 }}; return trainOffer(row, W.cur, 8, {t0}); }})()""")
+    if not check(ok0, f'(p3) no m6 call set for Day 8 ({ok0})'): g.close(); return
+    LOOK = "(() => { const c = SHIP.works.cur, r = c && c.occ && SHIP.occasions.find(x => x.key === c.occ); return [c ? c.st : null, r ? !!r.met : null, IX_GOAL ? IX_GOAL.label : null, typeof DIALOGUE !== 'undefined' && DIALOGUE ? DIALOGUE.id : null]; })()"
+    PUT = "(io => { const o = OCCASIONS['works.m6']; if (deckDef.num !== o.deck) goToDeck(o.deck); const k = io ? o.room : Object.keys(ROOM_TILES).find(k => k !== o.room && ROOM_TILES[k].length > 4); player.obj.position.copy(cellPos(...ROOM_TILES[k][0])); })"
+    def at(m): ev(f"setShipNow({7 * 1440 + m})"); g.step(1); g.step(1); return ev(LOOK)
+    ev(f"{PUT}(false)")
+    for m in range(620, 632): call = at(m)
+    ev(f"{PUT}(true)"); g.step(3); arrive = ev(LOOK)
+    met = at(632)
+    if met[3]: ev("dialogueEnd(true)")
+    after = [at(m)[2] for m in range(633, 636)]
+    print('   the call, out of the room:', call, '| into her office (same minute):', arrive, '| next minute:', met, '| after:', after)
+    check(call[2] and 'Calder' in call[2], f"(p3) the call's arrow is up at 10:30 ({call})")
+    check(arrive[2] and 'Calder' in arrive[2], f"(p3) coming into her office before the meeting starts, the call's arrow should stay (it cleared: {arrive})")
+    check(met[1] and any(a and a.startswith('Follow') for a in after), f"(p3) the meeting plays, then her walk to the pipe takes the arrow ({met}, {after})")
+    if g.errors: fail('(p3) page errors: ' + ' | '.join(g.errors[:5]))
+    g.close()
+
 # (q) FX1 (patch-p5-fix1): the arrow and tracking lifecycle, a fresh page, on paper. A new game starts with job tracking
 # on; tracking your bunk, or a device "go" (the Jobs app's board), no longer switches it off (and a "go" clears itself on
 # arrival); tracking "On shift" is your job's arrow (the clock, not the bay's middle); at 17:00 with a job in hand the
@@ -231,7 +282,7 @@ def fx_lifecycle(pw):
 
 with sync_playwright() as pw:
     if '--fx' in sys.argv:                                # only part (p): python3 career_check.py BUILD.html --fx
-        fx_guidance(pw); fx_lifecycle(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
+        fx_guidance(pw); fx_window_job(pw); fx_inc_wait(pw); fx_lifecycle(pw); print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED'); sys.exit(0 if ok else 1)
     g = Game(pw, sys.argv[1])
     errors = g.errors
     ev = g.ev
@@ -566,6 +617,8 @@ with sync_playwright() as pw:
     if errors: fail('page errors: ' + ' | '.join(errors[:5]))
     g.close()
     fx_guidance(pw)
+    fx_window_job(pw)
+    fx_inc_wait(pw)
     fx_lifecycle(pw)
 
 print('CAREER CHECK OK' if ok else 'CAREER CHECK FAILED')

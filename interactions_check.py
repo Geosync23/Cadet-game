@@ -13,11 +13,18 @@
 import sys, json
 exec(open(__file__.replace('interactions_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
+# The teaching arrows are on from 0.92.0. Here, as on a shift, you are clocked in when you take a test job (else the
+# arrow rightly points at the time clock first), and every pop-up shows at once (the pop-up queue is arrows_check's).
+ARROWS_ON = """if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { const cj = claimJob; GUIDE.tq.length = 0; guideToast = () => false;
+  claimJob = function (...a) { if (typeof careerClockedIn === 'function' && !careerClockedIn()) { if (!SHIP.career && typeof careerInit === 'function') careerInit(); if (SHIP.career) SHIP.career.ci = Math.max(1, Math.floor(shipNow())), SHIP.career.co = 0; } return cj.apply(this, a); }; }"""
+_Game = Game
+def Game(*a, **k):
+    g = _Game(*a, **k); g.ev(ARROWS_ON); return g
 
 BUDGET = 450
 ok = True
 # with no job on a shift, the arrow shows the time clock till you've clocked in, then the job board (playtest 1, note 9)
-NO_JOB_GOALS = (None, 'Clock in at the time clock', 'Take a job at the job board')
+NO_JOB_GOALS = (None, 'Clock in at the time clock', 'Take a job at the job board', 'Take a job at the board')   # the last: the shift chain's (teaching arrows, 0.92.0)
 
 def check(cond, msg):
     global ok
@@ -488,6 +495,67 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# FX3 (lead 30, from AC2's arrows_check week on arrows-c): the burst pipe's second puddle (4-wet-2) with someone standing on
+# it or beside it (Calder escorting you, a crewmate on the way to the lift): a real tap at the arrow's pin went to section 11's
+# tapCrew (it takes taps within 26 px of a person) as a chat, so "Mop up (2 of 2)" never started. Now the pin is your job's;
+# a tap on the person away from the pin still talks to them
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(5)
+    if g.ev("typeof incJob === 'function' && !!placeById('4-wet-2') && typeof crewAtScreen === 'function'"):
+        print('== FX3: the burst pipe\'s puddle with someone on it')
+        g.ev("(() => { if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const t = document.getElementById('devTip'); if (t) t.hidden = true; })()")
+        PIN = r"""(() => { const el = document.getElementById('ixGoal'), m = (el.style.transform.match(/translate\(([-\d.]+)px, ?([-\d.]+)px\)/) || []).slice(1).map(Number);
+          return el.hidden || !m.length ? null : [m[0], m[1], el.children[2].textContent]; })()"""
+        SET = r"""(() => { actEnd(true); for (const q of NEED_KEYS) SHIP.player.needs[q] = 100; needsT = null; NEED_GOAL = null; clearGoal();
+          setShipNow(1440 * 7 + 10 * 60 + 40); machinesNow(); const t = shipNow(); SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'incident'); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+          careerInit(); SHIP.career.ci = t - 90; SHIP.career.co = null; const j = incJob('burst', 4, t); SHIP.jobs.push(j); MACH_REV++; claimJob(j.id); SHIP.player.track = j.id; j.stepsDone = [0, 1]; SHIP.player.carry = [];
+          if (deckDef.num !== 4) goToDeck(4); player.obj.position.copy(cellPos(10, 5)); player.stop(); })()"""
+        ON = r"""(dx => { const a = DECK_CREW.find(x => x && x.p); if (!a) return null; const w = placeSpot('4-wet-2'); a.x = w.x + dx; a.z = w.z; a.y = 0; a.path = []; a.settled = false; a.spot = null; return a.p.name; })"""
+        res, chat = [], []
+        for rot in range(4):
+            g.ev(SET); g.step(60); p = g.ev(PIN); who = g.ev(ON + '(0)')   # (placed just before the tap: the crew move on in the next frame)
+            if p:
+                caught = g.ev(f"(() => {{ const a = crewAtScreen({p[0]}, {p[1]}); return a && a.p.id; }})()")
+                g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
+                res.append([rot, who, caught, g.ev("ACT && ACT.kind")])
+            g.ev("actEnd(true)"); g.page.click('#rot'); g.step(30)
+        # a person away from the pin: a tap on them is a chat (their name on the toast), not the job
+        # the same, with the tap on their legs, away from the pin: a chat with them, not the job
+        chat = [None, None, 'nobody under the pin']
+        for rot in range(4):
+            g.ev(SET); g.step(60); p = g.ev(PIN); g.ev(ON + '(0)')
+            tgt = p and g.ev(f"""(() => {{ const a = DECK_CREW.find(x => x && x.p); if (!a) return null; const v = new THREE.Vector3(a.x, a.y + .4, a.z).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+              return Math.hypot(x - {p[0]}, y - {p[1]}) > 26 && crewAtScreen(x, y) === a ? [a.p.name, x, y] : null; }})()""")
+            if tgt:
+                g.page.mouse.move(tgt[1], tgt[2]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
+                chat = [tgt[0], g.ev("ACT && ACT.kind"), g.ev(f"(DECK_CREW.find(x => x && x.p && x.p.name === {json.dumps(tgt[0])}) || {{}}).talking > 0")]
+                g.ev("actEnd(true)"); break
+            g.page.click('#rot'); g.step(30)
+        # beside them, not on them (RV7's optional line): someone half a metre from the puddle, a tap on the floor at the
+        # puddle 12-26 px from their body and away from the pin: the job (a wider "on the person" would make it a chat)
+        side = None
+        for rot in range(4):
+            g.ev(SET); g.step(60); p = g.ev(PIN)
+            for dx in (.35, .45, .55, .65, -.35, -.45, -.55, -.65):
+                q = p and g.ev(f"""(() => {{ const a = DECK_CREW.find(x => x && x.p); if (!a) return null; const w = placeSpot('4-wet-2'); a.x = w.x + {dx}; a.z = w.z; a.y = 0; a.path = []; a.settled = false; a.spot = null;
+                  const v = new THREE.Vector3(w.x, .02, w.z).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+                  const body = Math.min(...[.5, 1, 1.4].map(hy => {{ _cp.set(a.x, hy, a.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - x, (1 - _cp.y) / 2 * innerHeight - y); }}));
+                  return crewAtScreen(x, y) === a && body > 12 && body < 26 && Math.hypot(x - {p[0]}, y - {p[1]}) > 26 ? [a.p.name, x, y, Math.round(body)] : null; }})()""")
+                if q:
+                    g.page.mouse.move(q[1], q[2]); g.page.mouse.down(); g.page.mouse.up(); g.step(5)
+                    side = [rot, dx, q[0], q[3], g.ev("ACT && ACT.kind")]; g.ev("actEnd(true)"); break
+            if side: break
+            g.page.click('#rot'); g.step(30)
+        print('   beside someone [turn, offset, who, px from them, started]:', side)
+        check(side and side[4] == 'ixStop', f'a tap on the floor at the puddle just beside someone (not on them) mops it ({side})')
+        print('   at the pin [turn, standing on it, under the tap, started]:', res, '| a tap on someone away from it:', chat)
+        check(any(r[2] for r in res), f'(someone under the pin in some camera turn: {res})')
+        check(len(res) == 4 and all(r[3] == 'ixStop' for r in res), f'a tap at the pin mops the puddle, with someone standing on it ({res})')
+        check(bool(chat[0]) and chat[1] != 'ixStop' and chat[2] is True, f'a tap on someone away from the pin still talks to them ({chat})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'incident')")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 # FX3 (fresh-eyes batch 2, items 33 and 38; lead 29): the arrow's pin on the thing you need, and a tap at the pin is that thing:
 # a part you make points at the lathe (it pointed at the machine shop's middle), and "Turn it in at the job board" opens the
 # board from its pin (the pin sat on empty floor when the board's wall was cut away). Four camera turns, real taps at the pin
@@ -585,21 +653,26 @@ with sync_playwright() as pw:
         # the Folding table nearest the pin started your own laundry (0.28.55's rule) and the arrows_check follower looped there
         if g.ev("!!placeById('4-laundry-drop')"):
             g.ev("goToDeck(4)"); g.step(5)
-            HSET = r'''(() => { actEnd(true); setShipNow(1440 * 2 + 12 * 60 + 20); machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
+            HSET = r'''(() => { actEnd(true); setShipNow(1440 * 2 + 10 * 60);   // 10:00, clear of Yara's 12:00 hauling lesson (its own run and steps took the job, now and then, on a busy runner)
+              machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
               SHIP.jobs = SHIP.jobs.filter(j => !/^haul.*fb1|^haul@.*y$/.test(j.id)); SHIP.player.carry = []; for (const k of NEED_KEYS) SHIP.player.needs[k] = 80;
-              const j = haulJob(shipNow(), [{ id: 'linen', dest: '4-laundry-drop' }], { yours: true }); SHIP.jobs.push(j); MACH_REV++; claimJob(j.id);
+              const j = haulJob(shipNow(), [{ id: 'linen', dest: '4-laundry-drop' }], { yours: true }); SHIP.jobs.push(j); MACH_REV++; const cl = claimJob(j.id); window.__cl = [cl, (myJob() || {}).id, SHIP.jobs.filter(x => x.claimedBy).map(x => x.id + ':' + x.claimedBy + ':' + x.status)];
               const st = jobStops(myJob()), k = st.findIndex(x => x.step === 'deliver'); for (let i = 0; i < k; i++) jobStepDone(j.id, i);
               const s = placeSpot('4-laundry-drop'); player.obj.position.set(s.x + 1, 0, s.z + 1); player.stop(); return [k, j.id]; })()'''
             ONT = ON.replace("i.t === 'Cart dock 1'", "i.t === 'Folding table' && isShown(i.hit) && ixDist(i, placeSpot('4-laundry-drop')) < 1.5")
             fres = []
             for rot in range(4):
                 kp = g.ev(HSET); g.step(60)
+                check(g.ev("window.__cl[0] && (myJob() || {}).id === window.__cl[1]"), f'(the test holds its haul: {g.ev("JSON.stringify(window.__cl)")})')
                 for _ in range(rot): g.page.click('#rot'); g.step(30)
                 g.ev(TIPOFF); xy = g.ev(ONT)
                 if not xy: fres.append([rot, 'no point on the table', None]); continue
                 FT = f"(k => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(kp[1])}); return j && jobStops(j)[k].done ? JSON.stringify(['ixStop', k]) : JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep]); }})({kp[0]})"   # done already counts
                 g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT)
-                if a == 'null': g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT) + ' (tapped twice)'   # a tap lost on a busy runner: a player taps again
+                if a == 'null':
+                    print('      (claim)', g.ev('JSON.stringify(window.__cl)'), g.ev('JSON.stringify([(myJob() || {}).id, SHIP.jobs.filter(x => /haul/.test(x.id)).map(x => x.id + ":" + x.claimedBy + ":" + x.status)])'))
+                    print('      (diag)', g.ev(f"JSON.stringify([(e => e && (e.id || e.className || e.tagName))(document.elementFromPoint({xy[0]}, {xy[1]})), typeof ride !== 'undefined' && !!ride, typeof FREEZE !== 'undefined' && FREEZE.frozen, !document.getElementById('lift').hidden, typeof PAUSE !== 'undefined' && PAUSE.on, clockText(), deckDef.num, player.here().join(','), player.path.length, (goalNow() || {{}}).label, document.getElementById('tt').textContent])"))
+                    g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT) + ' (tapped twice)'   # a tap lost on a busy runner: a player taps again
                 fres.append([rot, kp, a])
             print('   the linen\'s drop, a tap on the Folding table [camera turn, (stop, job), what started]:', fres)
             check(sum(1 for r in fres if r[2]) >= 2, f'the Folding table under the finger in at least two camera turns ({fres})')
