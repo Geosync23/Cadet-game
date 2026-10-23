@@ -15,7 +15,8 @@
 #   touch     touch after pad: press, then tap: the picture is the no-pad one and no focus outline is left (base)
 #   walk      walking in all four view directions, letting go stops; turning and zooming (deck)
 #   pick      the ringed thing and A, against cadet_test's taps (pick)
-#   lift      by Deck 3's lift door with people about: the ring offers the lift (CP5: KC1) (pick)
+#   lift      by Deck 3's lift door with people about: the ring offers the lift, and A on it opens the panel after someone
+#             steps in front (CP5: KC1, KC2) (pick)
 #   reach     the non-circular sweep: the clickables are read from the page itself (every element that is a button,
 #             link or input, or has a click/pointer/touch listener, or shows a hand cursor), first by mouse through every
 #             panel and menu; then every one must be reached and pressed by pad (panels)
@@ -1095,11 +1096,18 @@ def part_mess_seat(pw, src, tag):
     r.close(); return fails
 # (CP5) the lift by Deck 3's lift lobby (CTT3's KC1 and KC2 in the day part, round 10 / 0.92.0): standing 0.95 m from the
 # lift door, the lift must be in the ring's list however many people are about (KC1: the 8-thing list filled with people
-# first). People are set down just ahead of you.
+# first), and A on "Lift" must open the lift panel when someone has since stepped in front of the point the ring chose
+# (KC2: A searched the full list again, found no lift, and did nothing). People are set down where the round saw them.
 LOBBY = (-5.938, -1.394, 1.8086)
 LOBBY_AT = "(() => { player.stop(); player.steer = null; player.obj.position.set(%s, 0, %s); player.face = %s; target.copy(player.obj.position).setY(.7); })()" % LOBBY
 PEOPLE_AT = r"""((spots, rel) => { const pp = player.obj.position, who = DECK_CREW.filter(a => a.pose !== 'lie').slice(0, spots.length);
   who.forEach((a, i) => { a.x = (rel ? pp.x : 0) + spots[i][0]; a.z = (rel ? pp.z : 0) + spots[i][1]; }); return who.length; })"""
+LIFT_A = r"""(() => { const P = PAD_PICK, L = padTargets(), t = L.find(o => o.key === 'lift'); if (!t) return 'no lift in the list';
+  P.list = L; P.sel = t; P.chosen = true; P.n = 99;
+  // someone steps in front of it: set down on the far door, then A in the same moment
+  const who = DECK_CREW.filter(a => a.pose !== 'lie')[1]; who.x = -3.3; who.z = -0.8;
+  if (padWhat(t.s[0], t.s[1], 'lift') === 'lift') return 'still clear';
+  padFire('a'); return 'pressed'; })()"""
 def part_lift(pw, src, tag):
     fails = []
     r = Run(pw, src, f'{tag}_lift', mode='pad', plug={}, w=390, h=844)
@@ -1112,6 +1120,20 @@ def part_lift(pw, src, tag):
         r.ev(LOBBY_AT); n = r.ev(f"({PEOPLE_AT})({json.dumps(spots)}, true)"); lst = r.ev("padTargets().map(o => o.key)")
         print(f'  lift lobby, breakfast, {name} ({n} people): the ring offers {lst}')
         if 'lift' not in lst: fails.append(f'lift lobby, breakfast, {name}: the ring never offers the lift 1 m away ({lst})')
+    # KC2, 22:00: the ring has the lift, someone steps in front, A
+    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 1320)"); r.step(20)
+    for name, spots in (('people at both doors', [[-5.0, -0.8], [-3.3, -0.8]]),):
+        r.ev(LOBBY_AT); r.ev(f"({PEOPLE_AT})({json.dumps(spots)}, false)"); lst = r.ev("padTargets().map(o => o.key)")
+        print(f'  lift lobby, 22:00, {name}: the ring offers {lst}')
+        if 'lift' not in lst: fails.append(f'lift lobby, 22:00, {name}: the ring never offers the lift (a finger can tap it) ({lst})')
+    r.ev(LOBBY_AT); r.ev(f"({PEOPLE_AT})({json.dumps([[-5.0, -0.8], [-6.5, -2.5]])}, false)")
+    res = r.ev(LIFT_A); opened = False
+    for k in range(60):
+        r.step(10)
+        if r.ev("!document.getElementById('lift').hidden"): opened = True; break
+    print(f'  lift lobby, 22:00: the ring on "Lift", someone steps in front, A ({res}): the lift panel opened {opened}')
+    if res != 'pressed': fails.append(f'lift lobby, 22:00: could not set it up ({res})')
+    elif not opened: fails.append('lift lobby, 22:00: A on "Lift" after someone stepped in front: the lift panel never opened')
     if r.errors: fails.append('lift lobby: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_pick(pw, src, tag):
@@ -2314,11 +2336,12 @@ MUTANTS['pick'] = {
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
     'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
     # CP1, claude/controller-follow1 0028869c: the ring finds no point for a seat
-    'CP1: a seat never ringed (the mess seat)': ('src', "  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
+    'CP1: a seat never ringed (the mess seat)': ('src', "  const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
 }
 
 MUTANTS['lift'] = {   # CP5, claude/controller-follow2
     'CP5 KC1: the list stops at 8 before the lift': ('src', "const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));", "const padMore = J => J.i < J.raw.length && J.out.length < PAD_PICK.max;"),
+    'CP5 KC2: the lift gets no wider search': ('src', "const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z);", "const c = key.startsWith('place:') && padScreen(x, ys[0], z);"),
 }
 MUTANTS['day'] = {
     # CP1, claude/controller-follow1 3f17ac95: the ring takes the lift where a tap reaches the Spine ladder (CTT3's find at
