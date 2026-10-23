@@ -13462,7 +13462,7 @@ function playerTap(it, at, point) {
   if (cartTap(it, at)) return true;                      // a restock job: the hover cart (below)
   if (jobTap(it, at)) return true;                       // the job loop (below): main storage, or the machine you're working on
   if (choreRayTap(it, at)) return true;                  // the tap passed over your chore's next stop and a machine caught it (FX3, below)
-  if (choreThingTap(it, at)) return true;                // a machine in reach of a haul's (a round's) next stop; anything, carrying, or on the line to the pin: the stop (FB1, below)
+  if (choreThingTap(it, at, point)) return true;         // a machine in reach of a haul's (a round's) next stop; anything, carrying, or on the line to the pin: the stop (FB1, below)
   if (PLAYER_TAPS.some(f => f(it, at, point))) return true;   // other sections' taps (15b)
   const chore = own => typeof ixChoreLast === 'function' && ixChoreLast(it, at, own);   // your chore's stop: only things with nothing of their own to do (0.28.55)
   const rule = ACT_TAP.find(r => r[0].test(it.t)); if (!rule) return sitTap(it, at, point) || chore(true) || machineTap(it, at) || chore(false);
@@ -14435,6 +14435,14 @@ function choreRayTap(it, at) {
   if (!s || jobRayDist(s) >= JOB_RAY) return false;     // (a tap on a haul stop's machine or thing in reach: FB1's choreThingTap, claude/fe-cartdock)
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
+// the last screen tap's line is this tap's: its point (section 11's hit point) lies on the line, or by where the line meets
+// the floor (15b's ixPinTap passes the thing nearest the pin, within 1.6 m of it). Not so for playerTap called some other way
+// later on (RV8: a check, or another section, after a screen tap elsewhere)
+function rayIsThisTap(p) {
+  const o = ray.ray.origin, d = ray.ray.direction, v = new THREE.Vector3().subVectors(p, o), k = v.dot(d);
+  if (k > 0 && v.addScaledVector(d, -k).length() < .3) return true;
+  const f = d.y < 0 ? -o.y / d.y : -1; return f > 0 && Math.hypot(o.x + d.x * f - p.x, o.z + d.z * f - p.z) < 1.6 + JOB_RAY;
+}
 // a machine, real or stand-in, within reach of the next stop of a registered kind's job (a haul, a round: FB1, lead 29): the
 // stop, whatever the tap's line. Hauling's cart and return stops stand by Cart dock 1, and the dock said "in good order":
 // players tap the thing under the arrow. Carrying for a haul or a delivery, anything in reach of its next pick-up or drop does
@@ -14442,11 +14450,11 @@ function choreRayTap(it, at) {
 // And any chore: a tap whose line passes over the next stop (the arrow's pin) does it, whatever thing caught it (fix 14's rule,
 // past machines: the hydroponics garden's vent stop stands by the Orange tree, which took the tap as "Tend a bed"). Tapped
 // elsewhere, other chores keep 0.28.55's rule (Washer 1 by a laundry lamp: your load)
-function choreThingTap(it, at) {
+function choreThingTap(it, at, point) {
   const j = typeof ixChore === 'function' ? ixChore() : null, carry = !!j && (j.kind === 'haul' || j.chore === 'delivery'); if (!j || j.workDone || !it.hit) return false;
   const nx = ixNextStop(j), id = nx && nx.s.step !== 'fetch' && nx.s.deck === deckDef.num ? nx.s.places[0] : null, s = id && PLACE_OF.has(id) ? placeSpot(id) : null;
   if (!s) return false;
-  const onPin = typeof ray !== 'undefined' && jobRayDist(s) < JOB_RAY;
+  const onPin = typeof ray !== 'undefined' && rayIsThisTap(point || at) && jobRayDist(s) < JOB_RAY;   // the line is this tap's (RV8: playerTap called some other way leaves the last screen tap's)
   if (!onPin && (ixDist(it, s) >= JOB_REACH || !(carry || jobKindOf(j) && (ixMachine(at) || stubTap(it, at))))) return false;
   return ixChoreTap({ t: j.title, x: '' }, new THREE.Vector3(s.x, 0, s.z)) !== false;
 }
@@ -53954,7 +53962,7 @@ function tap(cx, cy) {
     return;
   }
   if (typeof ladderAimed === 'function' && ladderAimed(h) && ladderTap(null)) return;   // patch #5, playtest patch 1 #14: the ladder (all of it, through glass) or its hatch: into the ladder room and climb (LADDER_ON)
-  if ((ud.liftDoor || ud.item && ud.item.lift) && typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return;   // your job's stop under the arrow's pin, in front of the lift (FB1: a lift lobby's vent; the lift took the tap)
+  if ((ud.liftDoor || ud.item && ud.item.lift) && typeof jobHere === 'function') { const jh = jobHere({ x: Infinity, z: Infinity }, true); if (jh && jh.go()) return; }   // your job's stop under the arrow's pin, in front of the lift (FB1: a lift lobby's vent; the lift took the tap). The tap's line only, not the floor near it (RV8)
   if (ud.item && ud.item.lift) { enterLift(); return; }
   if (ud.item && ud.item.see && ud.item.t === 'Spine ladder' && typeof ladderTap === 'function' && ladderTap(null)) return;   // patch #5: the ladder behind its glass takes you to its hatch (LADDER_ON)
   if (ud.item && ud.item.see) { if (typeof jobSpotTap === 'function' && jobSpotTap(h.point)) return; toast(ud.item.t, ud.item.x); return; }   // seen through glass: nothing to walk to (but your job's stop past it: section 15, 0.28.52)
