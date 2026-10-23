@@ -825,8 +825,29 @@ with sync_playwright() as pw:
                 g.page.click('#rot'); g.step(30)
             print(f'   {cs[0]} {cs[1]}:', ' '.join(row))
         print(f'   {n} taps at the pin; things under it: {sorted(things)}')
-        check(n >= 3 * len(stops) and ('Orange tree' in things or 'Salad bed' in things), f'the pin under the finger in most turns, over the garden in some ({n} taps, {sorted(things)})')
+        check(n >= 3 * len(stops), f'the pin under the finger in most turns ({n} taps, {sorted(things)})')
         for b in bad: check(False, f'a real tap at a chore\'s pin does the stop: {b}')
+        # the garden over the hydroponics vent's pin, whatever the camera does (whether a pin lands on the tree depends on the
+        # turn and the pin's drawing): a real tap on the Orange tree or the Salad bed whose line passes over the stop
+        GARDEN = r"""(() => { const s = placeSpot('3-tend-1');
+          for (const i of ITEMS.filter(i => i.hit && isShown(i.hit) && /^(Orange tree|Salad bed)$/.test(i.t))) { const b = new THREE.Box3().setFromObject(i.hit);
+            for (let fy = .1; fy <= .95; fy += .1) for (let fx = .1; fx <= .95; fx += .2) for (let fz = .1; fz <= .95; fz += .2) {
+              const v = new THREE.Vector3(b.min.x + (b.max.x - b.min.x) * fx, b.min.y + (b.max.y - b.min.y) * fy, b.min.z + (b.max.z - b.min.z) * fz).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight;
+              if (!(x > 0 && y > 0 && x < innerWidth && y < innerHeight)) continue; const h = pick(x, y); if (!h || h.object.userData.item !== i) continue;
+              ndc.set(v.x, v.y); ray.setFromCamera(ndc, camera); if (jobRayDist(s) < JOB_RAY) return [x, y, i.t]; } }
+          return null; })()"""
+        gres = []
+        for rot in range(4):
+            k = g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
+            for _ in range(rot): g.page.click('#rot'); g.step(30)
+            g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); q = g.ev(GARDEN)
+            if q:
+                g.page.mouse.move(q[0], q[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20)
+                gres.append([rot, q[2], g.ev("JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep])"), k])
+            g.page.click('#rot'); g.step(30)
+        print('   the garden on the line over the hydroponics vent [camera turn, thing, what started]:', gres)
+        check(gres, 'a point on the Orange tree or the Salad bed whose tap line passes over the vent stop, in some camera turn')
+        for r in gres: check(r[2] == json.dumps(['ixStop', r[3]]).replace(' ', ''), f'a tap on the garden, on the line over the vent\'s stop, cleans the vent ({r})')
         # off the pin, the Orange tree is the garden still (0.28.55: a thing you can use does its own thing)
         g.ev(f"({SET})({json.dumps(['vent', '3-tend-1'])})"); g.step(40)
         off = g.ev(r"""(() => { const s = placeSpot('3-tend-1'), i = ITEMS.filter(i => i.t === 'Orange tree' && isShown(i.hit)).sort((a, b) => ixDist(a, s) - ixDist(b, s))[0]; if (!i) return null; const b = new THREE.Box3().setFromObject(i.hit);
