@@ -16,7 +16,8 @@ arrow, likely the next build).
 `claude/trial-p5-on-controller` = round 10, e819950a (plus this note): 01b237f4 + arrows-c 8eb57151 (arrows ON) +
 breakfast-back 0cd37b1b + dinner-spread ed6bcbf3 + tip-clear feb2e54a + zeke-tour 99687fc8. (dinner-spread was merged
 before zeke-tour because zeke-tour landed later; the merge order made no difference: no clash.)
-Not yet on GitHub when I stopped: hygiene-cool, tiles-sit.
+Round 11 = 14d80a87: + hygiene-cool cbd41548 (FX6), only a build-table row clashed; check_fast OK; its area checks not run
+(player_check is the one it touches most). Not yet on GitHub when I stopped: tiles-sit.
 
 ## The resolutions (the full table is plans/trial-p5-on-controller.md)
 
@@ -72,5 +73,5 @@ their cause. zeke-tour will get a new commit from DS1 (the user rejected the bag
 
 1. Rerun round 10's area checks; chase the controller_check walk `#rot` crash and the two bar failures (are they on
    arrows-c alone? then AC3's; otherwise the merge's).
-2. Add hygiene-cool and tiles-sit when on GitHub; then AC3's remaining arrows-c fixes.
+2. Run the area checks on round 11 (hygiene-cool: player_check first); add tiles-sit when on GitHub; then AC3's remaining arrows-c fixes.
 3. Send BM14 the final sha and results.
