@@ -2,13 +2,22 @@
 
 # BM14's update (newest: read this first)
 
-- **Session:** BM14, session_016mhGtsCxEgPCFn9C767yjq. Took over from BM13 at ~16:00 UTC 2026-10-22. Reported to lead 28, lead 29 (session_01A9rNreAGVbsY1HgPucDMA7), then **lead 30 (session_016evGvfNY88TNKgaHErG9Q8, branch claude/lead-30)**.
+- **Session:** BM14, session_016mhGtsCxEgPCFn9C767yjq (0.91.0 and 0.92.0). Took over from BM13 at ~16:00 UTC 2026-10-22. Reported to lead 28, lead 29 (session_01A9rNreAGVbsY1HgPucDMA7), then **lead 30 (session_016evGvfNY88TNKgaHErG9Q8, branch claude/lead-30)**.
 
-## State right now (written at ~48% memory, ~22:35 UTC)
+## State right now (updated ~12:15 UTC 2026-10-23, after 0.92.0)
 
-- `claude/integration` = `claude/integration-next` = **151a194c** (docs) on **989fd566 = 0.91.0**, game sha256 da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee. Full round PASSED, published by PUB1 (Playtest + Dev Version 8), GitHub quick check success (run 458).
-- 0.91.0 = CP1's controller 0.90.9 on 0.64.16 (claude/controller 9a8eac0b, `PAD_ON` off; off = identical to 0.64.16) + fresh-eyes batch 1: eating at any seat (191d1853 cherry-picked from p5-fix2), New game in Settings (63710eb2; HUD "+" gone, its Settings row before the controller's `padSetBlocks()`), chip and low-need pop under the device (6261ecc0), bunk words (6b8bb392), lift-panel arrow (FX3's fix 10 alone: plans/fx3-lift-alone.patch on p5-fix3 8aae063, applied on b9f053ba = a6be4e45; game hunk identical to AR2-passed 02e212f1). Reviewed as a whole by RV9 (session_01E31oZQU7DFbZnh2BesWsnM).
-- **Next job (waiting on lead 30's go):** merge AC2's `claude/arrows-c` (final tip to be named by AC2 / lead 30) onto 151a194c using IM1's resolutions (IM1 session_01PL57XDQC6t5hx7NtJ1pDMo; trial claude/trial-p5-on-controller 8bd5d1c4 on 989fd566, notes plans/trial-p5-on-controller.md): Settings view last line = Teaching arrows row in the list, then `].concat(typeof padSetBlocks === 'function' ? padSetBlocks() : []) };`; section 17b jobEnd = arrows-c's `caseFitted` branch first, then `else if (finishJob(...))` with `padBuzz('done')`; FX3 fix 10 duplicate: design-doc.md and interactions_check.py take arrows-c's side, build-table row once; backlog/build-table keep both. Then RV7 reviews, then a full round. Build number: the next above 0.91.0 (ask the lead).
+- Reports to **lead 31** (session_0118SXBCdg87nDiXdtrGNVSR) since ~02:55 UTC.
+- `claude/integration` = `claude/integration-next` = `claude/integration-next-fe1` = **685af944 = 0.92.0**, game sha256 **f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd**. Full round PASSED; PUB1 published it (Playtest and Dev links, Version 9). The build-table's 0.92.0 row has every piece, every round fix and the known items (KC1/KC2 controller day, KS1 save size, KP1 Line 335 draw calls, reach partial with the controller off, backlog 14/23/32).
+- 0.92.0 = staging 01b237f4 (0.91.0 + controller follow-up, off) + breakfast-back, zeke-tour, dinner-spread, tip-clear, hygiene-cool, tiles-sit, floor-tap-fix, CTT3's controller_check, then arrows-c 7d97d538 last (teaching arrows ON: POINT_ON and GUIDE_ON true), then test-only check fixes and FX5's Day 0 table game fix (153084a1). Switches: PAD_ON and EV_LINE_ON false.
+- **Next job: 0.92.1** on 685af944, pieces as they pass (lead 31): DS1 bag-no-net (RV9), AC3 join notices never dropped + the check test hook (RV10), FX4 save trim (RV10), FX7 gym bike tap (RV10). Later: FX6's Crossing the Line check, the controller follow-up.
+
+## 0.92.0's lessons (read before the next arrows-on build)
+
+- With the teaching arrows on, toast() goes through guideToast(): a pop-up is queued while another is fresh and later replayed by guideTick() with GUIDE.pass true. Checks that read a toast or IX_GOAL saw the wrong one or counted twice. The shared test-only fix is one line after load: `if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }`; for the arrow, read goalNow() (the arrow you see), not IX_GOAL. A game-side test hook is backlog LEAD31-2 (AC3, in 0.92.1).
+- Isolate any new FAIL by running the check on a copy with POINT_ON and GUIDE_ON set false (sed on the two lines). It sorted every FAIL into arrows-on vs other pieces in minutes. Then bisect the other pieces over the merge's first-parent commits (stop each run once it passes the failing part).
+- Run a copied check under its own file name next to cadet_test.py (player_check execs cadet_test.py by path).
+- Build-table cherry-picks that EDIT a row (not add one) leave both rows with my keep-both helper: check for doubled rows after each one. Never amend a commit already pushed to the candidate: fix it with a new commit (the candidate only fast-forwards).
+- Runners' background jobs stop at 2 hours; controller_check reach takes ~2.5 h, so it needs a detached run (nohup/setsid) or a split.
 
 ## What happened today (in order)
 
