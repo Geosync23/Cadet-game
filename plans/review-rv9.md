@@ -109,3 +109,13 @@ each build's own intro_check; after-run a2 also patches WALK_TICK so the followe
 - F4 introDeviceGive's toast still mid-bubbles. F5 tour extras inside the scene. F6 part 8 never plays the scene.
 - Lines kept: the old introDevice panel's lines in the bubbles; its question and three answers in "Before you land".
 - Next: DS1's bag commit (the user rejected the auto-stow); then the full set, his facing, the recorder again.
+
+## Verdict: DS1 claude/zeke-tour de637c74: PASS (2026-10-23 ~06:50 UTC, to DS1 and lead 31)
+Before 2b81d8a0 (16:30) vs after de637c74 (17:15), recorder on each build's own intro_check part 8 (de637c74's follower
+stays with Zeke for the hand-over). Dinner part from the lead-off: scenes word for word, same seats, steps in order
+(tomas +38.0/+40.5, night +102.1/+101.8), the Sunday long table back after his goodnight. Deck 4: no stop of 3+ samples.
+Hand-over 15/15 lines, clock held, Mail opened, no toast, no extras; facing 0 rad on 70 samples (a copy c2 logs it).
+Slow bag (c2: the bag held 59 samples, 17:55-18:18): Zeke waits, arrow "Put your bag in your wardrobe" throughout.
+intro_check all OK; clothes, player, bubble OK; check_fast OK; cadet_test ALL IDENTICAL vs 2b81d8a0.
+Notes: "Washrooms" line not heard on a straight walk; slow player misses the arrival dinner's Sunday long table;
+"Ship traditions tomorrow" Mail now in the bunk room; DS1's Monday bag put-away is DS1's call (flagged to lead 31).
