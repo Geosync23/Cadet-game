@@ -196,3 +196,18 @@ NEW 4e324417, sha256 `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996
 |---|---|---|
 | cadet_test OLD NEW (alone) | DIFFERENCES, expected | Every DIFF line and every shot's pixel count identical to round 9 (4147f03d): the breakfast pattern; no page errors. |
 | intro_check (whole, 4e324417's check) | OK | `OK`, 0 FAIL lines (part 13's FX5 booth FAIL gone) |
+
+# Round 10: 0.92.1 (claude/integration-next 51a1bb34: the Line switched on, + fixes), CR2's share — **OK**
+
+NEW 51a1bb34, sha256 `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c` (matches BM15's).
+OLD 685af944 (0.92.0), sha256 `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd`.
+perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 31).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | OK | `ALL IDENTICAL` |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings; the same count as 0.92.0) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check, lines_check --day | CR4 | handed over |
