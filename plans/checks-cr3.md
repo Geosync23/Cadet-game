@@ -191,3 +191,19 @@ sha256 **da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee** (BM1
 | controller_check (all parts but reach) | **run by CR1** (CR1's offer, agreed before it started; my queued copy cancelled, never ran) | CR1: only touch and day FAIL (the known items: touch check-only, day a controller lift/ladder item); the other 25 parts OK. plans/checks-cr1.md on claude/checks-cr1 c7a59cae |
 
 No FAIL in my part. (Day numbers the same as 0.64.16's: breakfast isn't in 0.91.0.)
+
+# Round on 0.92.0 (claude/integration-next 4147f03d), BM14's start; reported to BM14 and lead 31
+
+sha256 **c2180854a780936c21cbac0ba9e7932fb491759f740e1d5ac3b4d4494a4f1286** (BM14's). Checked out as it is; own CADET_WORK.
+Share: day_check 0, 1, 5, 7 + the new arrows_d_check and arrows_f_check (BM14's split), each with its default arguments.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 255; worst stuck 0.0; 262 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 260 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 244 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 263 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK` (off; on: S1-S3, pass-over, S7; S5, S8, S6, S9: the pointer on Clock in, Take it, Turn it in, Clock out); 53 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK` (off; F4 follow, stops "Close the valve upstream of the wet", "Mop up (1 of 2)/(2 of 2)"; F3 case); 27 s |
+
+No FAIL. (Day peaks as in 0.64.17: breakfast at 07:00 is back.)
