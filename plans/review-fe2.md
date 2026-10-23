@@ -160,3 +160,17 @@ build table.
   is FX5's claude/tip-clear. controller_check day: the same 4 problems on the tip and on plain 989fd566 (Deck 3 button,
   no crew to walk to, the lift and the bunk by the stick), so not breakfast's. perf Line ceremony: not rerun by me;
   SC1's 335 calls / 49 people against the accepted baseline.
+
+## tip-clear: FX5 claude/tip-clear feb2e54a (on breakfast-back 2b81d8a0): PASS
+
+- Section 19's slot, tipClear (its own rAF step): while a tip card and the goal pin overlap, the card moves just below
+  the pin, or (no room) lets taps through. interactions_check: FX5's new line and the old "tapping where the arrow
+  points opens the deck picker" both FAIL on 2b81d8a0 at Deck 3's landing (tip [230,128,670,227], target [400,153]) and
+  pass on feb2e54a. check_fast OK. cadet_test alone 2b81d8a0 vs feb2e54a ALL IDENTICAL.
+- Phone sizes (p_tip.py, the lift-arrow part, real taps): 390x844, the panel sits lower (y 291/359) and the card never
+  covered it, before or after; 320x640, the card moves below the pin (top 316 inside, 261 landing) and the tap opens
+  the deck picker on every deck and spot.
+- The pass-through fallback (no room below): the card then can't be tapped to close, but every tip closes itself after
+  9 s (simTimeout in DEVICE_SKIN.tip), so it's a short wait at worst. Fine.
+- Merge with SC1's 0cd37b1b check: `git merge-file` joins them with no conflict, FX5's line before SC1's tip-closing,
+  as FX5 asked. Once tip-clear is in, SC1's tip-closing could go, so the real tap tests the tip case again.
