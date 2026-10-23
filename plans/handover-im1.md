@@ -48,7 +48,11 @@ Round 11 = 14d80a87: + hygiene-cool cbd41548 (FX6), only a build-table row clash
   isolating it on 168900ea and arrows-c 8eb57151 alone. controller_check: walk OK this time ('#rot' did not repeat);
   pick FAILED 4 ("the bottom line never named it": crew, item, sealed door, the lift) and day FAILED 2 ("the ring never
   named the lift", "bedtime: the lift panel never opened"); green on round 5c (arrows off), so likely the arrows on;
-  not isolated. intro, food, player and the arrows checks were still running when I wrote this.
+  not isolated. Later results: food_check OK, arrows_d OK, arrows_f OK; intro_check FAILED 2 ("no pilot's line when the
+  ramp opened"; the solo job's arrow stuck on "10:45 meet Zeke: Works bay": try it on 168900ea, without zeke-tour);
+  controller_check also marks and drop: the one-time "Controller connected" never shows (guess: the arrows' pop-up queue
+  holds the toast; AC3 and CTT3). player_check and arrows_check queue had not run when I stopped. All sent to BM14 and
+  lead 31; BM14 is isolating interactions_check.
 
 ## How to test (what I ran)
 
