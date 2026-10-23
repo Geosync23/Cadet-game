@@ -643,7 +643,9 @@ def part_reach_pad(pw, src, tag, states):
             if f and not Sweep.BACK.match(f['label']):
                 sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
                 sw.r.press('A'); sw.r.step(4)
-                hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
+                # (CTT4) a text box isn't clicked: A puts the typing cursor in it (the system keyboard, plan section 3), so A
+                # must leave the highlight on it; a tick box or a choice is clicked as any button
+                hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; if (/^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName) && !/^(checkbox|radio|button|submit)$/.test(f.type)) return c && c !== f && !f.contains(c) ? (c.id || c.tagName) : document.activeElement === f ? 'it' : 'the highlight left it'; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
                 if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
         else: print(f'  {where}: could not get there again for A')
         sw.r.close()
