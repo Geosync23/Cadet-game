@@ -18,6 +18,7 @@ Lead 31 = session_0118SXBCdg87nDiXdtrGNVSR, branch `claude/lead-31`, a fresh top
 - Hire whatever is needed, don't waste. Full round on six runners for every game change. Memory: judge from ~60%, never above 80%.
 
 ## Pages for the user
+- **NOW Version 10 = 0.92.1** (claude/integration e03505fd, sha256 2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c; Line ON, PAD off), published 20:30 UTC. Before that:
 - Playtest https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs and Dev https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq: **Version 9 = 0.92.0** (claude/integration 685af944, game sha256 f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd; POINT_ON + GUIDE_ON true, PAD_ON + EV_LINE_ON false). PUB1 republishes from a named commit + sha.
 - Fresh-eyes findings https://claude.ai/artifact/7GFQ8pZZxmZnTW3o6RHd6k: **v22** (batch 2 Done; 25 Not a problem; 14 note). Always read the live page first (Artifact read the url; then read with path "index.html" to get an editable local copy; edit the state JSON; publish with url). FE2's findings go here as they come.
 - Game preview PDF (PW1): claude/game-preview 513d9a4 (plans/starship-cadet-preview.pdf, updated for 0.92.0) sent to the user; also a text-only version (110 KB) sent, built from plans/preview/starship-cadet-preview.html with images/styles stripped and printed with Chromium (not committed).
