@@ -42662,8 +42662,8 @@ const introHandGap = text => Math.min(INTRO_TOUR_GAP, Math.max(2200, 1200 + 40 *
 const INTRO_HAND_READ = 45000;                             // real ms: reading his Mail with the device open that long, he goes on anyway
 const introHandLines = after => introWriterLines(after ? 'walk.hand.after' : 'walk.hand') || (after ? INTRO_HAND.after : INTRO_HAND.lines);   // one flag key each, in the file's order
 // (DS1, lead 31) the arrival dinner keeps its order with the later arrival: a tradition in the mess (the Sunday long table)
-// is joined once the Tomas step comes (after the Chief's welcome and his goodnight lines), not as you sit down
-const introJoinWait = d => d === 0 && introOn() && !!SHIP.intro.step && SHIP.intro.done.tomas === undefined;
+// is joined once his goodnight's done (the Tomas step on: after the Chief's welcome), not as you sit down
+const introJoinWait = d => d === 0 && introOn() && !!SHIP.intro.step && SHIP.intro.done.free === undefined;   // till his goodnight's done (the Tomas step on)
 const introHandBusy = () => { const D = SHIP.intro.done; return D['hand:start'] !== undefined && D['hand:end'] === undefined; };
 // due: the device step done with you there (not missed) and the scene not over: toMess holds and he stays with you (escortPlan)
 const INTRO_HAND_WAIT = 10;                                 // ship minutes the scene may take to start (he walks over, his wardrobe lines end); then it's skipped (a time jump)
