@@ -929,3 +929,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~20:30 UTC: LEAD 31: **0.92.1 PUBLISHED** (PUB1): Version 10 on Playtest and Dev, from claude/integration e03505fd, game sha256 2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c; POINT_ON/GUIDE_ON on, EV_LINE_ON on, PAD_ON off. User told (4:30 PM Eastern). BM15 now staging 0.92.2 from e03505fd.
 - ~20:30 UTC: LEAD 31: started LEAD 32 session_01GFHMDsQK3TfPfH7Paapyog at the user's request; it takes over from plans/handover-lead31.md. Lead 31 goes idle once lead 32 confirms.
 - ~20:31 UTC: USER: leads may start new workers and new leads themselves, following the rules. Sent to lead 32; added to plans/handover-lead31.md.
+- ~20:32 UTC: LEAD 32 (session_01GFHMDsQK3TfPfH7Paapyog) confirmed takeover; its check-in trig_01Ns6SpEXoSHpWyhwLyoJMBY; lead 31's trigger disabled; all seats told. LEAD 31 now idle.
