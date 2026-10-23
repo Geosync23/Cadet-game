@@ -38,7 +38,8 @@ FX6 arrows-week e1f1ec97 PASS; FX7 mess-taps 980c2591 PASS. Handed to RV11: FX3 
 ## Open items
 - FX8 day0-sim 87e3174a: paper probe done (18:20, 19:10): others changed none; no diner changed before standing; no
   gaps; same twice; first steps gym/lounge/call home/shop/garden/lift; only new overlaps are toilets (3 and 2 pairs; 54
-  toilet overlaps exist without the live minute). Checks running at handover time: see plans/review-rv10.md.
+  toilet overlaps exist without the live minute). Checks: events_check FAILs its new line on 54efee21 and is OK on 87e3174a; day_check 0, check_fast OK; cadet_test identical. Handed to RV12 (session_013JmdoWWEDQde8y1bwrMGnY) with these results; RV12 does the live look, intro --evening and timing.
+- FX7 mess-taps 9c4e02b5 (test only, after my PASS): not reviewed by me.
 - Backlog notes: FX6's Day 9 'Food' arrow stuck with the Line on (lead has it); FX7 counter check should re-test
   "not on them" right before each click.
 
