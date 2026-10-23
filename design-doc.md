@@ -583,6 +583,7 @@ How you earn a tier:
 - **The arrow to the lift panel** (the user, 2026-10-22, after a new player climbed the spine ladder instead of riding the lift): when what you're heading for is on another deck, the arrow points at the lift's control panel, the thing you tap to choose a deck, on every deck, and says "Tap the lift: Deck 4" with the goal's own words after it. Inside the deck picker the right deck's button is marked (arrows piece C).
 - **The inspection morning's arrows** (the arrows plan's Thursday 06:00 arrows, built by FX3, 2026-10-22): from 06:00 on an inspection morning the arrow takes you through your berth in order (a fresh uniform at your wardrobe, your bunk to make the bed, your locker from the bunk's card), then back to your bunk room if you've left it, till the walk at 06:30. It never takes over another arrow.
 - **A machine on a bigger thing** (FX3, 2026-10-22): with a job on a machine that sits on a thing with its own use, such as the climbing holds on the Climbing wall, a tap on that thing is the job, not its own use (no climb while the holds are yours to fix).
+- **The arrow's pin beats a person standing on it** (FX3, 2026-10-23): a tap on the arrow's pin, or on the floor just beside someone, does your job when your job's stop is under it, even with a crewmate standing there (Calder at the burst pipe, someone passing by); a tap on the person themselves still talks to them.
 - **Trust.** Reliability matters: turning up for shifts, not leaving jobs half-done, keeping your corner of the ship running.
 
 What each tier gives you:
