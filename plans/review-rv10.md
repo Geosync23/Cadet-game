@@ -58,13 +58,23 @@ a folder holding cadet_test.py, an output folder).
 |---|---|---|
 | AC3 join notices kept + cadetPopupsNow hook | claude/arrows-c 54169e4c (integration 685af944) | PASS |
 | FX4 save trim | claude/fx4-save-trim 06a989e6 (integration 685af944) | PASS |
-| FX7 gym bike tap | not received yet | |
+| FX7 gym bike tap | claude/bike-tap 9328dc76 (integration 685af944) | PASS |
+| FX5 Day 0 trickle | claude/day0-trickle 0e392cf3 (integration 685af944) | FIXES NEEDED (side effect, see below) |
+| CP5 controller follow-up 2 | claude/controller-follow2 f293d672 (integration 685af944; off) | PASS |
 
 - AC3: arrows_check queue lines fail on 685af944, OK after; join_check OK (alone); check_fast OK; cadet_test identical.
   join_probe.py (real tap on Mira, Gym club, then four pop-ups): base drops the join notice, AC3 keeps it, both sizes.
   Pop-up timing runs on the test's virtual clock (performance.now): step frames, don't wait real time.
 - FX4: career_check's three lines fail on base (Day 120 4673 bytes) and pass after (2816); callers only read this or
   next week; puzzle_check, check_fast OK; cadet_test identical. Nothing on screen.
+- FX7: bike_probe.py (touch, both sizes, four turns, floor/saddle/bars): 47-48 of 48 vs 42-43 on base; 28 other Deck 3
+  places identical on both builds; interactions_check 32/32 (alone), player_check, check_fast OK; cadet_test identical.
+- FX5 trickle: events_check new lines fail on base, OK after; day_check 0, check_fast OK; cadet_test identical. But the
+  live goodnight re-plans the day from its start: trickle_probe.py shows ~6 non-diners on Deck 3 get a different place for
+  the activity under way at that minute (goodnights 18:20, 18:40, 19:10; none at 19:45); trickle_live.py at 18:40: Lukas
+  gym-13 -> gym-14 mid-workout, Esme lounge-31 -> 33, Zofia garden-6 -> tend-12 (they walk). Options sent to FX5.
+- CP5: controller_check lift 4 FAILs on base, OK with both mutants caught; pick (CTL_MUT=CP1) and day OK; check_fast OK;
+  cadet_test identical with PAD_ON off and on.
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
