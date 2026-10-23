@@ -1494,10 +1494,6 @@ with sync_playwright() as pw:
           return out.slice(0, 3); }})()""")
         for px, py, who in pts:
             g.ev("actEnd(true); player.stop()"); g.step(2)
-            still = g.ev(f"""(() => {{ const h = pick({px}, {py}), near = crewAtScreen({px}, {py}), el = document.elementFromPoint({px}, {py});
-              if (!h || h.object.userData.item !== __sv || !el || el.tagName !== 'CANVAS') return false;
-              return !near || ![.5, 1, 1.4].some(hy => {{ _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - {px}, (1 - _cp.y) / 2 * innerHeight - {py}) < CREW_ON_PX; }}); }})()""")
-            if not still: continue   # the line moved onto it since the points were picked: a tap on them is theirs (lead 32: RV10 judged the 1-of-9 miss test timing)
             g.page.mouse.click(px, py); g.step(6); tried += 1
             a = g.ev("ACT && ACT.kind")
             if a != 'queue': bad.append([turn, px, py, who, a])
