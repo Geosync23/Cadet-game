@@ -929,3 +929,27 @@
 - Fridays we knock off at half three.
 ? flag:walk.goodnight.friday.2
 - Captain talks to all of us at four, then dinner.
+
+// ---- ZW1 (writer), the Day 0 device hand-over in bubbles (the user, 2026-10-23: no green box, no question; the mix
+// in plans/zeke-words.md). DS1's claude/zeke-tour plays walk.hand IN FILE ORDER, a bubble every 3.6 s; the device
+// is handed over on the 3rd line (INTRO_HAND.give = 3) and opens on mail.zeke.land after the last; walk.hand.after
+// plays once you close the Mail. walk.hand lines 3 and 7 and both walk.hand.after lines are his old introDevice.meet
+// lines, kept word for word (the last one split in two at its comma, for the bubble).
+== week1
+? flag:walk.hand
+- Oh, hold on. Nearly forgot the important bit.
+- Hands out. Careful, it's still warm from my pocket.   #funny
+- And this is yours. Your device.
+- There. Officially handed over. I'm a witness.   #funny
+- Most important thing you'll own aboard.
+- More than your boots. Slightly less than your mug.   #funny
+- Mail, Schedule, the Map, your Needs. The lot. Don't lose it.
+- It knows where you're meant to be before you do.
+- Annoying, but useful.
+- Needs tells you you're hungry. Before your tummy does.   #funny
+- Lose it and you'll spend a week asking strangers what day it is.   #funny
+- There. Officially crew.   #warm
+- I left you a note in there. Have a look.
+? flag:walk.hand.after
+- Right, onward. The mess is on Deck 3.
+- And Brennan doesn't hold plates for anyone.

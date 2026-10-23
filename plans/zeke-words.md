@@ -1,5 +1,42 @@
 # Zeke's Day 0 device hand-over: the words (ZW1, 2026-10-23)
 
+## FINAL (the user's pick, 2026-10-23, through lead 30): the mix
+
+The user chose a mix: the bubble order below (DS1's and ZW1's lines, words unchanged; any line over 60 characters
+split at a full stop) and DS1's Mail, word for word. The lines are in `content/lines/torres-zeke.lines` (the last
+block): `flag:walk.hand` in file order before the Mail, `flag:walk.hand.after` once you close it. The device is
+handed over on line 3 (`INTRO_HAND.give = 3`). The Mail goes in as `== mail.zeke.land`.
+
+Before the Mail (`walk.hand`):
+
+1. Oh, hold on. Nearly forgot the important bit.
+2. Hands out. Careful, it's still warm from my pocket.
+3. And this is yours. Your device. (kept from the green text; the hand-over)
+4. There. Officially handed over. I'm a witness.
+5. Most important thing you'll own aboard.
+6. More than your boots. Slightly less than your mug.
+7. Mail, Schedule, the Map, your Needs. The lot. Don't lose it. (kept)
+8. It knows where you're meant to be before you do.
+9. Annoying, but useful.
+10. Needs tells you you're hungry. Before your tummy does.
+11. Lose it and you'll spend a week asking strangers what day it is. (64 characters, one sentence with no full stop to split at: kept whole)
+12. There. Officially crew.
+13. I left you a note in there. Have a look.
+
+The device opens on the Mail. After you close it (`walk.hand.after`):
+
+14. Right, onward. The mess is on Deck 3. (kept)
+15. And Brennan doesn't hold plates for anyone. (kept)
+
+The Mail: DS1's "Before you land", word for word (PENDING: DS1 to send the exact text; it goes here and in the
+content file as `== mail.zeke.land`).
+
+Green text map: as in (c) below, except the Mail is DS1's; check against it once it's in.
+
+---
+
+## The first draft (ZW1, kept for the record)
+
 For DS1 to wire in on `claude/zeke-tour`. Words only. Source of the old words: `content/meetings/introDevice.meet`
 (the green text box, the dialogue strip) and its stand-in in section 21 (`INTRO_STUB_SCRIPTS.introDevice`).
 
