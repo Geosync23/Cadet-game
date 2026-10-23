@@ -39,7 +39,7 @@ player_check change taken as the tea part only (its context carried a fix-eat pa
 ## Merged ahead of their PASS (lead 30, 22:05: "merge now, fix on top; no BM14 until every piece has a PASS")
 | What | Branch / commits | Review |
 |---|---|---|
-| FB1 haul and delivery stops (Cart dock 1, the Folding table), the shelf put-back, a chore's pin whatever is under it | claude/fe-cartdock 228de58 (merge ee420f4), ebf456b (merge 4cdd817), 191bee5 (the galley drop: the tap's line to 1.7 m) | RV8 PASS (a52aad0, 228de58, ebf456b); 191bee5 RV8 |
+| FB1 haul and delivery stops (Cart dock 1, the Folding table), the shelf put-back, a chore's pin whatever is under it | claude/fe-cartdock 228de58 (merge ee420f4), ebf456b (merge 4cdd817), 191bee5 (the galley drop: the tap's line to 1.7 m) | RV8 PASS (a52aad0, 228de58, ebf456b); 191bee5 RV8 PASS |
 | FX3 fix 15 (the pin on the thing you need) | 3b7b13d, inside fe-cartdock | RV8 PASS WITH FIXES (one check line) |
 | CP4 #38 (the pin on the item; a tap on the pin over the board opens it, read on release) | claude/fe2-tracked f59b471, 016fc65, 1da26e6 (merge f71ab28) | RV8 PASS (016fc65, with fix 15 and FB1) |
 | AC2's follower fixes since 483c3da (real taps only at your held job's step, leisure ended, Fault notes, device closed, the tap's ray) | bf27739, afa5900, ac6f66e | RV7 |
