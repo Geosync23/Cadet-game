@@ -230,7 +230,7 @@ FIRST = r"""(() => {
   const r = scanRead(j.id); out.scan = r;
   // solve it: take it (the first note comes with it), Where next?, cross both, call the pump, fit it
   claimJob(j.id); caseTick(); out.got = c.got.slice();
-  caseAct('case:next', c.id + '|0'); out.goal = IX_GOAL ? IX_GOAL.place : null; out.panel = panelPlace(j.machine);
+  caseAct('case:next', c.id + '|0'); { const g = (typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof goalNow === 'function' ? (GUIDE.key = '', goalNow()) : IX_GOAL); out.goal = g ? g.place : null; } out.panel = panelPlace(j.machine);   // the arrow you see: with the teaching arrows on (0.92.0) Where next? asks the queue (caseNextGoal)
   for (const k of c.clues) if (k.at !== 'board') caseClue(c.id, k.id);
   for (const s of ['seal', 'valve']) caseAct('case:cross', c.id + '|' + s);
   caseAct('case:call', c.id + '|pump'); caseAct('case:yes', c.id + '|pump');
@@ -281,7 +281,7 @@ PLAY = r"""(() => {
   // take the job: the note taped to it comes with it
   claimJob(j.id); caseTick(); out.gotBoard = c.got.slice();
   // Where next? points at the other note (the machine's panel)
-  caseAct('case:next', c.id + '|0'); out.goal = typeof IX_GOAL !== 'undefined' && IX_GOAL ? IX_GOAL.place || IX_GOAL.room : null; out.panel = panelPlace(m.id);
+  caseAct('case:next', c.id + '|0'); { const g = typeof IX_GOAL === 'undefined' ? null : (typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof goalNow === 'function' ? (GUIDE.key = '', goalNow()) : IX_GOAL); out.goal = g ? g.place || g.room : null; } out.panel = panelPlace(m.id);   // the arrow you see (Where next? asks the queue with the teaching arrows on)
   // a wrong call: fetch, fit; the part goes back, the suspect is crossed by the evidence, the job's not done
   const wrongS = c.sus.find(s => s !== c.cause), wp = caseSus(c, wrongS).part;
   caseAct('case:call', c.id + '|' + wrongS); out.ask = document.getElementById('devBody').textContent.includes('Call it: the') || true;
