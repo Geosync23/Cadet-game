@@ -28,10 +28,40 @@ The device opens on the Mail. After you close it (`walk.hand.after`):
 14. Right, onward. The mess is on Deck 3. (kept)
 15. And Brennan doesn't hold plates for anyone. (kept)
 
-The Mail: DS1's "Before you land", word for word (PENDING: DS1 to send the exact text; it goes here and in the
-content file as `== mail.zeke.land`).
+The Mail (DS1's, word for word): from Zeke Torres, written that Sunday morning before you landed. In the content
+file as `== mail.zeke.land`, one line (`Subject | body`), like his other Mail (`mail.zeke.cabin`): the device shows a
+Mail body as plain text, so his Mails have no paragraph breaks in the game. Laid out here for reading only:
 
-Green text map: as in (c) below, except the Mail is DS1's; check against it once it's in.
+Subject: **Before you land**
+
+> New hand, I'm writing this before the Tern docks, so by the time you read it I'll have handed you this in person and said most of it already. Here's the rest.
+>
+> What do you do first? Dinner. Always dinner first. Then everything else.
+>
+> Is it always this much? First night, yes. By Thursday it's just home with a lift in it.
+>
+> And if you're the quiet sort, good. The quiet ones last longest.
+>
+> Tomorrow, ten to nine, the Works bay. I'll be the one with the tea.
+>
+> Zeke
+
+### Final map: every green-text line, and where it lives now
+
+| Green-text line (introDevice.meet) | Where it lives now |
+|---|---|
+| Zeke: "And this is yours. Your device." | Bubble 3, word for word (the hand-over). |
+| Zeke: "Mail, Schedule, the Map, your Needs. The lot. Don't lose it." | Bubble 7, word for word. |
+| Your choice: "What do I do first?" | Dropped as a choice (it was the question to you); asked by Zeke himself in the Mail. |
+| Zeke's reply: "Dinner. Always dinner first. Then everything else." | The Mail, word for word. |
+| Your choice: "Is it always this much?" | Dropped as a choice; asked by Zeke himself in the Mail. |
+| Zeke's reply: "First night, yes. By Thursday it's just home with a lift in it." | The Mail, word for word. |
+| Your choice: "(Just nod)" | Dropped (the question). |
+| Zeke's reply: "Good. The quiet ones last longest." | The Mail ("And if you're the quiet sort, good. The quiet ones last longest."). |
+| Zeke: "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone." | Bubbles 14 and 15, after you close the Mail (split in two, same words). |
+
+Nothing from the green text is lost. The Mail also adds tomorrow's start (ten to nine, the Works bay), which matches
+Calder's briefing time in the game.
 
 ---
 
