@@ -10378,8 +10378,8 @@ function schedBuild(p, d, occ, S) {
   // at a time (at most 20 minutes past its end). Day 0's Sunday table stays seated through Zeke's goodnight to you
   // (section 21's INTRO_STEPS 'free'), then empties over the next 25 minutes
   const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };   // section 21's fixed minute (a plan never reads what happens live)
-  const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger
-    const g = tradGood(e), to = Math.min(e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), e.at + e.dur + 20);
+  const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger, never past its end (a seated sitting's seats are the next sitting's): who'd run over leaves in its last 12 minutes
+    const g = tradGood(e), end = e.at + e.dur, own = e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), to = own < end - 12 ? own : end - Math.round(12 * U(533));
     return g != null ? Math.max(to, g + Math.round(25 * U(532))) : to;
   };
   const tradStay = e => Math.max(e.min || 15, tradLeave(e) - t - 3);
@@ -10390,9 +10390,12 @@ function schedBuild(p, d, occ, S) {
     if (short > 0 && l && l.to === t && l.act !== 'commute' && !STOPS.has(l.tag) && !(typeof eventMeetTag === 'function' && eventMeetTag(l.tag))) { const cut = Math.min(short, Math.floor((l.to - l.from) / 2)); l.to -= cut; t -= cut; }
     go(3); seg(e.meal, t + walk, null, null, { tag: 'queue' });
     take(e.meal, [[3, 'servery-queue']], 3, { wait: 0, tag: 'queue', min: 1 });
-    if (!take(e.act, e.where, tradStay(e), { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
-      && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by: end, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
+    const by = Math.max(end, e.at + e.dur);              // a late diner still gets their least time seated up to its end, whatever their own leaving time
+    if (!take(e.act, e.where, tradStay(e), { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
+      && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
       seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    { const l = segs[segs.length - 1], cut = e.at + e.dur;   // Day 0's table, kept past its end for Zeke's goodnight: after the tradition ends they're ordinary diners lingering in the same seat
+      if (l && l.tag === e.tag && l.from < cut && l.to > cut) { const x = { ...l, from: cut }; delete x.tag; l.to = cut; segs.push(x); } }
     e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
   };
   const leisureUntil = (end, k) => {
