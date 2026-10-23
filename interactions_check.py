@@ -1494,6 +1494,10 @@ with sync_playwright() as pw:
           return out.slice(0, 3); }})()""")
         for px, py, who in pts:
             g.ev("actEnd(true); player.stop()"); g.step(2)
+            # the line moves between picking the point and the tap (RV10): only a point still on the counter, beside someone and not on them
+            still = g.ev(f"""(() => {{ const h = pick({px}, {py}), near = crewAtScreen({px}, {py}); if (!h || h.object.userData.item !== __sv || !near) return false;
+              return ![.5, 1, 1.4].some(hy => {{ _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - {px}, (1 - _cp.y) / 2 * innerHeight - {py}) < CREW_ON_PX; }}); }})()""")
+            if not still: continue
             g.page.mouse.click(px, py); g.step(6); tried += 1
             a = g.ev("ACT && ACT.kind")
             if a != 'queue': bad.append([turn, px, py, who, a])
