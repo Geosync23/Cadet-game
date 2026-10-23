@@ -111,6 +111,10 @@ def check(cond, msg):
 QUIET = '#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important} .bubw{opacity:0!important}'
 # .bubw (speech bubbles) out of the pictures: mid-fade, one in three runs drew a bubble's layer a shade differently with
 # the same DOM and styles (a compositor quirk). Their text, place and fade are still compared through the page state.
+# (CTT4) padNameIt (P5) names a button with no readable name as the highlight lands on it (an aria-label); mark the ones it
+# named, so the sweep's keys (SCAN, KEY_MARK) stay the names the touch half saw. Only ever runs with the pad in use.
+NAMED_MARK = r"""(() => { if (typeof padNameIt !== 'function') return; const o = padNameIt;
+  padNameIt = el => { const had = el.getAttribute('aria-label'); o(el); if (el.getAttribute('aria-label') !== had && had === null) el.setAttribute('data-ctt-named', ''); }; })()"""
 class Run:
     """One page of the game with the pretend controller in a given mode. extra: JS put into the game's scope at load."""
     def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None, touch=False):
@@ -136,6 +140,7 @@ class Run:
         except Exception: pass
         if self.page.evaluate('window.__sc === undefined'): raise RuntimeError('game failed to start: ' + ' | '.join(self.errors[:6]))
         self.ev(SKIP_SWITCH)
+        self.ev(NAMED_MARK)
         # let the game's own real-time timers at load run first (section 19's DEV.live at 0 ms, section 17's machine
         # averages from 300 ms), so every run starts from the same place however fast the machine is
         try: self.page.wait_for_function("window.__sc('typeof MACH_NORM === \\'undefined\\' || MACH_NORM !== null')", timeout=30000)
@@ -147,7 +152,7 @@ class Run:
     def reload(self):
         self.page.reload(timeout=90000)
         self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
-        self.ev(SKIP_SWITCH); self.page.wait_for_timeout(300)
+        self.ev(SKIP_SWITCH); self.ev(NAMED_MARK); self.page.wait_for_timeout(300)
     def ev(self, s): return self.page.evaluate('s => window.__sc(s)', s)
     def js(self, s): return self.page.evaluate(s)
     def step(self, n, dt=1000/30):
@@ -330,7 +335,9 @@ SCAN = r"""(() => {
     if (k === 4 && [...cand.keys()].some(o => o !== e && o.contains(e))) continue;
     const at = vis(e); if (!at) continue;
     let a = e, path = ''; while (a && a !== document.body && !a.id) { a = a.parentElement; }
-    const own = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40), lab = own.replace(/\d+/g, 'N');   // no digits in keys: a clock or a count isn't a new thing
+    // (CTT4) an aria-label the controller's padNameIt added as the highlight landed (Maps' "1" became "Deck 1") is not in
+    // the key: the touch half never sees it, and the pad half lost the thing it had just reached (0.91.0-0.92.0's map deck row)
+    const own = ((e.hasAttribute('data-ctt-named') ? '' : e.getAttribute('aria-label')) || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40), lab = own.replace(/\d+/g, 'N');   // no digits in keys: a clock or a count isn't a new thing
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
     const d = e.closest('[role=dialog],[aria-modal=true],.lift,.device,dialog');
@@ -560,7 +567,7 @@ KEY_MARK = r"""((want) => { for (const o of document.querySelectorAll('[data-ctt
   for (const e of document.body.querySelectorAll('*')) {
     if (e.closest('[hidden]') || !e.getClientRects().length) continue;
     let a = e; while (a && a !== document.body && !a.id) a = a.parentElement;
-    const lab = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
+    const lab = ((e.hasAttribute('data-ctt-named') ? '' : e.getAttribute('aria-label')) || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     if (!want.startsWith(key)) continue;
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
@@ -623,17 +630,22 @@ def part_reach_pad(pw, src, tag, states):
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else '') + (f'; not on the screen this time: {len(gone)} ({gone[:3]})' if gone else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
-        # A clicks the highlighted thing
-        sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
-        if f and not Sweep.BACK.match(f['label']):
-            sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
-            sw.r.press('A'); sw.r.step(4)
-            hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
-            if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
-        # B leaves the panel or goes back
+        # B leaves the panel or goes back (CTT4: first, on the screen as the D-pad left it: after A, B was asked of whatever
+        # A had opened or closed, and "B changed nothing" on Pause, Tracked, Hobbies and the lift was the check's)
         sig0 = Sweep.sig(sw.scan())
         sw.r.press('B'); sw.r.step(6); sc3 = sw.scan()
         if Sweep.sig(sc3) == sig0: fails.append(f'{where}: B changed nothing (the panel stays as it was)')
+        # A clicks the highlighted thing: on the screen again (the same presses after a reload), the highlight put back by a
+        # D-pad press (the mouse presses handed the game back to touch)
+        if sw.replay(st['path']):
+            sw.r.press('DOWN'); sw.r.step(2)
+            sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
+            if f and not Sweep.BACK.match(f['label']):
+                sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
+                sw.r.press('A'); sw.r.step(4)
+                hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
+                if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
+        else: print(f'  {where}: could not get there again for A')
         sw.r.close()
         if pdf:
             with open(pdf, 'a') as fh: fh.write(json.dumps({'where': where, 'fails': fails[n0:]}) + '\n')
