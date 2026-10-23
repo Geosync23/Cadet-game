@@ -924,6 +924,23 @@ with sync_playwright() as pw:
         hadDinner = tap('Dinner'); g.step(3)
         check(not hadDinner or (g.ev("IX_GOAL && IX_GOAL.deck") == 3 and 'Deck 3' in (st()['goal'] or '')), f'a meal tracks the mess ({st()["goal"]})')
         g.ev("deviceClose(); clearGoal()"); g.step(2)
+        # FX5 (the user, 2026-10-23): the call booths' row points at a free booth and stays up in the room till the call begins (it went on walking in)
+        keep = g.ev("JSON.stringify({ deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z] })")
+        g.page.click('#devBtn'); g.step(2); g.ev(OPEN); g.step(2); tap('The call booths'); g.step(3)
+        g.ev("(() => { goToDeck(3); player.obj.position.copy(cellPos(37, 12)); player.stop(); })()"); g.step(20)
+        g.ev("(() => { player.obj.position.copy(cellPos(37, 15)); player.stop(); })()"); g.step(30)
+        inroom = g.ev("({ trk: IX_GOAL && IX_GOAL.trk, place: IX_GOAL && IX_GOAL.place, room: roomAt(...player.here()) })")
+        moved = g.ev("(() => { if (!IX_GOAL) return null; const was = IX_GOAL.place, x = { goalId: was }; DECK_CREW.push(x); trkDoneCheck(); const now = IX_GOAL.place; DECK_CREW.splice(DECK_CREW.indexOf(x), 1); IX_GOAL.place = was; return [was, now]; })()")
+        g.ev("(() => { const it = ITEMS.find(i => i.t === 'Booth ' + ((IX_GOAL && IX_GOAL.place) || '1').slice(-1)); it.hit.getWorldPosition(_wp); playerTap(it, _wp.clone(), _wp.clone()); })()")
+        for i in range(40):
+            g.step(10)
+            if g.ev("!!ACT && ACT.kind === 'call' && ACT.phase !== 'walk'"): break
+        g.step(5); after = g.ev("({ act: ACT && ACT.kind, trk: IX_GOAL && IX_GOAL.trk })")
+        print('   the call booths\' row: in the room', inroom, '| booth taken, moved', moved, '| the call begun', after)
+        check(inroom['trk'] == 'place:calls' and (inroom['place'] or '').startswith('3-callhome-') and inroom['room'] == 'B', f"the call booths' row: in the room its arrow stays up, on a booth (FX5) ({inroom})")
+        check(moved and moved[0] != moved[1], f"the call booths' row: someone takes its booth, the arrow moves to a free one (FX5) ({moved})")
+        check(after['act'] == 'call' and after['trk'] != 'place:calls', f"the call booths' row: once the call begins the arrow goes (FX5) ({after})")
+        g.ev(f"(() => {{ actEnd(true); clearGoal(); const k = {keep}; if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; player.stop(); }})()"); g.step(3)
         if g.ev("!!document.getElementById('trkBtn')"):   # the main-screen button and panel, kept beside the app (the user, ~04:00)
             g.page.add_style_tag(content='#needStrip{display:flex!important} #devTip{display:none!important}')   # a tip card over it would take the tap
             g.page.click('#trkBtn'); g.step(2)

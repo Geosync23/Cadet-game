@@ -16124,6 +16124,7 @@ requestAnimationFrame(ixFrame);
 // (setGoal, the goal carrying trk, its key, so the panel knows it's on; your job with SHIP.player.track, as the Jobs app
 // does); a tap on the one being tracked stops it. A tradition asks tradGoal(x) first when there is one (the traditions
 // seat: the arrow to the leader for tap-to-join), else the Schedule's devItemGoal (its room). Nothing here is saved. ----
+const TRK_BOOTHS = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];   // the call booths' row: its arrow keeps to a free one (trkDoneCheck)
 const TRK_PLACES = [
   { key: 'place:board', title: 'The job board', sub: 'The Works bay, Deck 5', goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'The job board' }) },
   { key: 'place:bed', title: 'Your bunk', sub: 'Your bed, Deck 4', goal: () => ({ deck: 4, place: playerBed(), label: 'Your bunk' }) },
@@ -16287,6 +16288,12 @@ function trkDoneCheck() {
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
   const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { trkDone(g); return; }
   if (/^clock:/.test(g.trk)) return;                     // the time clock's: up till you punch (15's clock reminder takes it down), not on reaching the Works bay (RV8 on FE1 item 36)
+  if (g.trk === 'place:calls') {                         // the call booths' (FX5, the user 2026-10-23): on a free booth, up till your call there begins, not on reaching the room
+    if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'call' && ACT.phase !== 'walk') { trkDone(g); return; }
+    const free = id => !(typeof heldBy === 'function' && heldBy(id));
+    if (deckDef.num === g.deck && !free(g.place)) g.place = TRK_BOOTHS.find(free) || g.place;   // taken: the first free one (all taken: as it was, where the line forms)
+    return;
+  }
   if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
   const w = ixGoalWorld(g); if (!w) return;
   const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));
