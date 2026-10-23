@@ -196,6 +196,14 @@ def wait_for(gg, cond, n=60, k=10):
         gg.step(k)
         if gg.ev(cond): return True
     return False
+# a toast as you'd see it (0.92.0): with the teaching arrows on, a new toast waits its turn in their pop-up queue
+# (guideToast, 15b) while a fresh one is on screen; step until the words are on screen (or give up), and return what's shown
+def shown(gg, words, n=40, k=10):
+    for _ in range(n):
+        t = gg.ev("document.getElementById('tx').textContent")
+        if words in t: return t
+        gg.step(k)
+    return gg.ev("document.getElementById('tx').textContent")
 
 def seat(pw, path):
     gg = Game(pw, path, 390, 844); gg.step(3)
@@ -209,6 +217,7 @@ def seat(pw, path):
     check(r['act'] and r['act'][0] == 'tiles' and not r['act'][2], f'nobody at the table: you go to sit, with nobody named yet: {r}')
     came = wait_for(gg, "!!(ACT && ACT.o.st === 'wait')", 40)
     w = gg.ev("[ACT && ACT.o.opp, ACT && ACT.o.seat, ACT && ACT.placeId, document.getElementById('tx').textContent, (() => { const p = ROSTER.find(x => x.id === (ACT && ACT.o.opp)); const w = p && whereIs(p, shipNow()); return w && w.act; })()]")
+    w[3] = shown(gg, 'comes over to play')
     check(came and w[0] and w[1] != w[2] and 'comes over to play' in w[3] and w[4] == 'visit', f'once you sit, someone free comes over to the other seat: {w}')
     ok_on = wait_for(gg, SEATED, 80)
     st = gg.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === TL_GAME.opp), sp = placeSpot(ACT.o.seat); return [ACT.phase, ACT.pose, TL_GAME.opp, TL_GAME.where === ACT.placeId, DEV.open, DEV.app, !!a && Math.hypot(a.x - sp.x, a.z - sp.z) < .8, !!a && a.settled]; })()")
@@ -284,7 +293,7 @@ def seat(pw, path):
     gg.ev("SHIP.time.min = 22 * 60 + 30; for (const a of DECK_CREW) a.settled = false"); gg.step(2)
     r = gg.ev(SEAT + "(null)")
     sat = wait_for(gg, "!!(ACT && ACT.phase === 'do' && ACT.o.st === 'none')", 40)
-    st = gg.ev("[ACT && ACT.kind, !!TL_GAME, document.getElementById('tx').textContent]")
+    st = gg.ev("[ACT && ACT.kind, !!TL_GAME, document.getElementById('tx').textContent]"); st[2] = shown(gg, 'Nobody’s around to play right now')
     check(sat and st[0] == 'sit' and not st[1] and 'Nobody’s around to play right now' in st[2], f'nobody free: a toast says so and you stay sat: {st}')
     gg.ev("actEnd(true)")
     # beating Rina: news once, her memory, the day kept
