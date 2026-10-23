@@ -232,6 +232,10 @@ if '--long' in sys.argv:
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     errors = g.errors
+    # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's), and
+    # a job taken clocks you in first, as on a shift (else the arrow rightly points at the time clock first)
+    g.ev("""if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { const cj = claimJob; GUIDE.tq.length = 0; guideToast = () => false;
+      claimJob = function (...a) { if (typeof careerClockedIn === 'function' && !careerClockedIn()) { if (!SHIP.career && typeof careerInit === 'function') careerInit(); if (SHIP.career) SHIP.career.ci = Math.max(1, Math.floor(shipNow())), SHIP.career.co = 0; } return cj.apply(this, a); }; }""")
 
     print('On paper, a week of normal days:')
     p = g.ev(f"({PAPER})({{ normal: true }})"); print('  lowest', p['lo'], 'slow minutes', p['slowMins'], 'energy at bedtime', p['ends'])
