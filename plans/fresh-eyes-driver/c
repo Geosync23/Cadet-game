@@ -1,0 +1,4 @@
+#!/bin/bash
+# usage: c cmd k=v ...
+cmd=$1; shift; args="c=$cmd"; for a in "$@"; do args="$args&$(python3 -c 'import sys,urllib.parse;k,v=sys.argv[1].split("=",1);print(k+"="+urllib.parse.quote(v))' "$a")"; done
+curl -s "http://127.0.0.1:8765/cmd?$args"; echo
