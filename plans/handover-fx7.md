@@ -34,7 +34,14 @@ Nothing here sets build numbers.
   shelf just used; and the arrow never offers the servery while it serves (+55 against a grab's +25), nor skips a held
   shelf. Proposed (not built): needGoal prefers the servery while it serves and skips a held place. arrows_check's shift
   part on 54efee21 (Day 9 to 17:40) had no Food arrow and nothing stuck; the bot's 3 hours come from the week run (needs
-  carried over), still to see in FX6's log.
+  carried over).
+  **Cause (FX6's rerun, week part with Day 9 run to 21:30):** at 16:48 the follower queued, at 16:49 it got a tray; from
+  then to 20:00 the hunger arrow stayed on the servery (needGoal never looks at SHIP.player.tray, and clears only at Food
+  40), so every tap said "You already have your tray" and Food fell to 0. A person can read the toast and sit, but the
+  arrow points the wrong way. **Proposed fix (to build, section 15):** while you hold a tray the hunger arrow points at
+  the nearest free mess seat ("A seat for your tray") and re-aims when the tray is taken or set down (needGoalTick
+  re-runs needGoal when SHIP.player.tray changes); optional polish above. Check: arrows_check week with FX6's Day 9 edit
+  has no stuck "Food"; a real-tap interactions_check line (tray in hand: the arrow on a seat, tapping it eats).
 
 ## How to test (what I ran)
 - Setup in a fresh container: `pip install playwright numpy pillow`; three r128 and acorn in /tmp/cadet-work (testing
