@@ -677,5 +677,28 @@ with sync_playwright() as pw:
         print('== the toilets: no toilet line in this build, skipped')
     g.close()
 
+# a tap on the floor by a place (section 15's playerFloorTap: gym kit, booths, shelves, toilets) hands the taps a stand-in
+# with no hit box; ixTap measured from that box and threw at the Deck 3 exercise bikes ("reading 'updateWorldMatrix'",
+# 0.92.0's trial, FX7): on every deck no floor tap throws, and the one by a bike starts the gym on that bike
+FLOOR_TAPS = r"""(() => { const out = { n: 0, bad: [], bike: null };
+  for (const pl of PLACE_OF.values()) { if (!FLOOR_ACTS[pl.type]) continue; const sp = placeSpot(pl.id); if (!sp) continue;
+    const it = { t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at = new THREE.Vector3(sp.x, 0, sp.z); out.n++;
+    try { actEnd(true); playerTap(it, at, at); if (/bike/i.test(it.t) && !out.bike) out.bike = [pl.id, ACT && ACT.kind, ACT && ACT.placeId]; } catch (e) { out.bad.push(pl.id + ': ' + e.message); }
+    actEnd(true); }
+  return out; })()"""
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    print('== a floor tap by every place, every deck')
+    if g.ev("typeof FLOOR_ACTS !== 'undefined' && typeof playerTap === 'function'"):
+        bikes = None
+        for d in (1, 2, 3, 4, 5, 7):
+            g.ev(f"goToDeck({d})"); g.step(3)
+            r = g.ev(FLOOR_TAPS)
+            check(not r['bad'], f'Deck {d}: no floor tap by a place throws ({r["n"]} places: {r["bad"][:3]})')
+            if r['bike']: bikes = r['bike']
+        check(bikes and bikes[1] == 'gym' and bikes[2] == bikes[0], f'a floor tap by an exercise bike starts the gym on that bike ({bikes})')
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)

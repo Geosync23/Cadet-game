@@ -15382,8 +15382,8 @@ function ixTap(it, at, point) {
   if (/^ship health$/i.test(it.t) && typeof shipHealthRows === 'function') { approach(at.clone(), it.front, it.depth, () => ixHealth.open()); return true; }
   if (IX_SKIP.test(it.t) && !IX_BEDS.test(it.t) || it.lift || ixTheirs(it, at) || ixMachine(at)) return false;
   const room = roomAt(...cellAt(at.x, at.z));             // the thing's own room: never a place through a wall
-  const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])
-    .filter(([pl, s, k]) => k && s && (!room || pl.room === room) && !privatePlace(pl) && ixDist(it, s) < IX_NEAR)
+  const near = [...PLACE_OF.values()].map(pl => [pl, placeSpot(pl.id), ixKind(pl, it)])   // a floor tap's stand-in (section 15's playerFloorTap: the exercise bikes) has no hit box: from the spot tapped (0.92.0)
+    .filter(([pl, s, k]) => k && s && (!room || pl.room === room) && !privatePlace(pl) && (it.hit ? ixDist(it, s) : Math.hypot(s.x - at.x, s.z - at.z)) < IX_NEAR)
     .sort((m, n) => Math.hypot(m[1].x - point.x, m[1].z - point.z) - Math.hypot(n[1].x - point.x, n[1].z - point.z));
   if (!near.length) return false;
   const busy = id => heldBy(id) || (typeof placeBusy === 'function' && placeBusy(id) && playerHolds() !== id);
