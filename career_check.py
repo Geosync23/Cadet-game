@@ -136,7 +136,7 @@ def pacing(r, name):
 FX_LOOK = "(() => { const c = SHIP.works && SHIP.works.cur, r = c && c.occ && SHIP.occasions.find(x => x.key === c.occ); return [c ? c.id + ':' + c.st : null, r ? r.at : null, r ? r.len : null, r ? r.deck : null, r ? r.room : null, IX_GOAL ? IX_GOAL.label : null, typeof DIALOGUE !== 'undefined' && DIALOGUE ? DIALOGUE.id : null]; })()"
 def fx_guidance(pw):
     print('(p) FX1, the guidance in the real game (bugs 1-2: tracking after a job, the meeting arrow\'s window):')
-    g = Game(pw, sys.argv[1]); ev = g.ev
+    g = Game(pw, sys.argv[1]); ev = g.ev; ev("if (typeof GUIDE_ON !== 'undefined') GUIDE_ON = false")   # FX1/FX4's direct arrows: the queue off (on from 0.92.0, the queue's meeting arrows are arrows_check's and the week guide's)
     ev("setShipNow(1020)"); g.step(2)
     ev("setShipNow(1440 + 480)"); g.step(2)
     tk = ev("(() => { const o = openJobs('you')[0]; if (!o || !ixBoard.take(o.id)) return null; const j = myJob(); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); ixBoard.turnIn(j.id); return j.id; })()")
@@ -174,7 +174,7 @@ def fx_guidance(pw):
 # (turned one in and took the next at the board) doesn't: the meeting's arrow comes up (Day 5's scanner was missed till Monday)
 def fx_window_job(pw):
     print('(p2) FX4, a job taken inside the meeting arrow\'s window (queue off):')
-    g = Game(pw, sys.argv[1]); ev = g.ev
+    g = Game(pw, sys.argv[1]); ev = g.ev; ev("if (typeof GUIDE_ON !== 'undefined') GUIDE_ON = false")   # FX1/FX4's direct arrows: the queue off (on from 0.92.0, the queue's meeting arrows are arrows_check's and the week guide's)
     ev("setShipNow(1020)"); g.step(2); ev("setShipNow(1440 + 480)"); g.step(2)
     ev("(() => { const o = openJobs('you')[0]; if (!o || !ixBoard.take(o.id)) return; const j = myJob(); jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); ixBoard.turnIn(j.id); })()"); g.step(1)   # a job of yours done, as (p): the ladder's first row needs one
     ask = None; m = 481
@@ -200,7 +200,7 @@ def fx_window_job(pw):
 # room it stays (as "Wait here for Calder" once a minute ticks) until the meeting starts; then her walk to the pipe takes it
 def fx_inc_wait(pw):
     print('(p3) FX4, Calder\'s call: the arrow stays in her office until the meeting starts (queue off):')
-    g = Game(pw, sys.argv[1]); ev = g.ev
+    g = Game(pw, sys.argv[1]); ev = g.ev; ev("if (typeof GUIDE_ON !== 'undefined') GUIDE_ON = false")   # FX1/FX4's direct arrows: the queue off (on from 0.92.0, the queue's meeting arrows are arrows_check's and the week guide's)
     ev("setShipNow(1020)"); g.step(2); t0 = 7 * 1440 + 9 * 60; ev(f"setShipNow({t0})"); g.step(2)
     ok0 = ev(f"""(() => {{ if (!WORK_MECH.m6) return null; const W = worksInit(), row = ladderRow('m6'); W.cur = {{ id: 'm6', st: 'ask', d: 8, by: 'calder', occ: null, j: null, w: 0 }}; return trainOffer(row, W.cur, 8, {t0}); }})()""")
     if not check(ok0, f'(p3) no m6 call set for Day 8 ({ok0})'): g.close(); return
@@ -286,6 +286,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     errors = g.errors
     ev = g.ev
+    ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")   # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's)
 
     print('(a) Step 1 as built: no sub-blocks, nothing opens:')
     hidden = ev("deviceApps().some(a => a.id === 'works')")
@@ -381,14 +382,14 @@ with sync_playwright() as pw:
     print('  the escort hold (Day 5):', eh)
     check(eh['hold'] and eh['st'] == 'held' and not eh['trainedEarly'] and eh['esc'] == 'follow' and eh['clean'] and eh['after'] == 5 and eh['cur'] is None, 'worksEscortHold / caseCalled')
 
-    rv = ev("""(() => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.mail = []; for (const r of CAREER_LADDER) WORK_MECH[r.id] = { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) };
+    rv = ev("""(() => { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON; if (gq) GUIDE_ON = false; try { return (() => { SHIP.works = null; SHIP.occasions.length = 0; SHIP.mail = []; for (const r of CAREER_LADDER) WORK_MECH[r.id] = { reserve: (d, at, slot, o) => jobReserve('washer', d, at, slot, o) };
       setShipNow(1440 + 300); const W = worksInit(); W.log.push(['x', 1, 0, 'service']); const out = {}; clearGoal();
       skipTo(1440 + 460); WORKS_TICK.m = -1; out.st = W.cur && W.cur.st; out.toldAsleep = W.cur && W.cur.told;
       worksCareerTick(shipNow() + 1); out.toldUp = W.cur && W.cur.told; out.goalAtAsk = !!(IX_GOAL && / with /.test(IX_GOAL.label));
       { const r = SHIP.occasions.find(x => x.key === W.cur.occ); if (r) worksCareerTick(r.at - 10); out.goal = !!(IX_GOAL && / with /.test(IX_GOAL.label)); clearGoal(); }   // FX1: its arrow from 15 minutes before the meeting
       W.cur = { id: 'm7', st: 'held', d: 2, by: 'calder', occ: null, j: null, w: 0, hold: true }; ladderTick(Math.floor((2 * 1440 + 400) / 60)); out.heldTrained = W.tr.m7;
       deviceDo({ app: 'works', tab: 'tools' }); out.tab = WORKS_TAB; WORKS_TAB = 'training';
-      for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null; return out; })()""")
+      for (const k in WORK_MECH) delete WORK_MECH[k]; SHIP.works = null; return out; })(); } finally { if (gq) { GUIDE_ON = true; guideStart(); } } })()""")   # FX1's direct arrow: the queue off for this one (on from 0.92.0)
     print('  asked while asleep, told when up; a stale hold; open on a tab:', rv)
     check(rv['st'] == 'meet' and rv['toldAsleep'] is False and rv['toldUp'] is True and rv['goal'] and not rv['goalAtAsk'], f"an ask made during a sleep is told (toast) when you are up; its arrow comes 15 minutes before the meeting ({rv})")
     check(rv['heldTrained'] is not None, 'a hold left from an earlier day trains you on the next workday')
