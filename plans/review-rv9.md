@@ -126,3 +126,7 @@ Days 1-5 has a job for you on both 685af944 and 5201ae05; only kinds shift. mach
 two planted faults (openJobs without lamp/delivery/vent/round; jobStepDone a no-op). machine_check off vs on: small
 wear-scaling ripple only. cadet_test ALL IDENTICAL; check_fast, events_check, day_check 7 OK. bag-no-net dropped by
 the user. Next: DS1's claude/zeke-lift-fix (not pushed yet at 14:40).
+
+## Verdict: AC3 claude/arrows-c 9142ac5e: PASS (~15:05 UTC, to AC3, BM15, lead 31)
+One line (POINT_WATCH = [], pointLiftStep parked; POINT_ON true). arrows_pointer_check OK; on 54169e4c its (d2) fails
+(the pointer and the row both on with teaching first/all). cadet_test ALL IDENTICAL; check_fast OK.
