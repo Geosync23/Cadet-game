@@ -1034,8 +1034,16 @@ with sync_playwright() as pw:
         TOK = "(() => { const m = machineById(myJob().machine), pid = panelPlace(m.id), s = placeSpot(pid), mc = cellPos(...(m.at || PLACE_OF.get(pid).at)), it = ITEMS.map(i => { i.hit.getWorldPosition(_wp); return _wp.clone(); }).sort((a, b) => Math.hypot(a.x - s.x, a.z - s.z) - Math.hypot(b.x - s.x, b.z - s.z))[0]; return !!it && roomAt(...cellAt(it.x, it.z)) === m.room && (Math.hypot(mc.x - it.x, mc.z - it.z) <= MACHINE_NEAR || Math.hypot(s.x - it.x, s.z - it.z) <= .8); })()"
         skip = []
         for tries in range(8):
-          jid = g.ev(r"""(skip => { machinesNow(); const j = SHIP.jobs.find(j => j.machine && !skip.includes(j.id) && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
-          if (!j) return null; j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
+          jid = g.ev(r"""(skip => { machinesNow(); let j = SHIP.jobs.find(j => j.machine && !skip.includes(j.id) && j.kind === 'service' && j.status !== 'done' && jobTier(j) <= PLAYER_TIER && panelPlace(j.machine) && !ENGINE_KINDS.has(machineById(j.machine).kind));
+          if (!j) {   // none on the board (since dinner-spread the crew's day shifts which faults come as service jobs by Day 11): post one as section 17 does (test only)
+            const t = shipNow(), m = machineList().filter(m => !m.stub && !ENGINE_KINDS.has(m.kind) && panelPlace(m.id) && !skip.includes(m.id + '@pc') && !SHIP.jobs.some(x => x.machine === m.id && x.status !== 'done'))
+              .sort((a, b) => (a.id === '7-aud-lights' ? -1 : 0) - (b.id === '7-aud-lights' ? -1 : 0) || (a.id < b.id ? -1 : 1))
+              .find(m => jobTier({ machine: m.id, kind: 'service' }) <= PLAYER_TIER);
+            if (!m) return null;
+            SHIP.jobs.push({ id: m.id + '@pc', machine: m.id, deck: m.deck, kind: 'service', urgency: 1, posted: t, found: t, claimedBy: null, parts: faultParts(m, 'service', null), status: 'open' });
+            j = SHIP.jobs[SHIP.jobs.length - 1];
+          }
+          j.claimedBy = null; j.status = 'open'; delete j.start; j.found = Math.min(j.found, shipNow()); MACH_REV++;
           for (const p of j.parts) SHIP.stores[p] = Math.max(SHIP.stores[p] || 0, 2);   // the shelf has some (test only: since Pillar 5's faults and hauling the part may be out until the delivery)
           return claimJob(j.id) ? j.id : null; })""" + f"({json.dumps(skip)})")
           if not jid: break
