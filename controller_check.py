@@ -15,6 +15,7 @@
 #   touch     touch after pad: press, then tap: the picture is the no-pad one and no focus outline is left (base)
 #   walk      walking in all four view directions, letting go stops; turning and zooming (deck)
 #   pick      the ringed thing and A, against cadet_test's taps (pick)
+#   lift      by Deck 3's lift door with people about: the ring offers the lift (CP5: KC1) (pick)
 #   reach     the non-circular sweep: the clickables are read from the page itself (every element that is a button,
 #             link or input, or has a click/pointer/touch listener, or shows a hand cursor), first by mouse through every
 #             panel and menu; then every one must be reached and pressed by pad (panels)
@@ -34,7 +35,7 @@ exec(open(__file__.replace('controller_check.py', 'cadet_test.py')).read().split
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
-ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'reach', 'day', 'games', 'unplug', 'odd',
+ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'reach', 'day', 'games', 'unplug', 'odd',
              'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
@@ -1091,6 +1092,27 @@ def part_mess_seat(pw, src, tag):
             print(f'  mess seat: the ring offers {lst}; A on 3-mess-1: {act}')
             if not act or act[1] != '3-mess-1': fails.append(f'mess seat: A on 3-mess-1 should sit you there: {act}')
     if r.errors: fails.append('mess seat: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+# (CP5) the lift by Deck 3's lift lobby (CTT3's KC1 and KC2 in the day part, round 10 / 0.92.0): standing 0.95 m from the
+# lift door, the lift must be in the ring's list however many people are about (KC1: the 8-thing list filled with people
+# first). People are set down just ahead of you.
+LOBBY = (-5.938, -1.394, 1.8086)
+LOBBY_AT = "(() => { player.stop(); player.steer = null; player.obj.position.set(%s, 0, %s); player.face = %s; target.copy(player.obj.position).setY(.7); })()" % LOBBY
+PEOPLE_AT = r"""((spots, rel) => { const pp = player.obj.position, who = DECK_CREW.filter(a => a.pose !== 'lie').slice(0, spots.length);
+  who.forEach((a, i) => { a.x = (rel ? pp.x : 0) + spots[i][0]; a.z = (rel ? pp.z : 0) + spots[i][1]; }); return who.length; })"""
+def part_lift(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_lift', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    r.ev("goToDeck(3, null)"); r.step(30)
+    # KC1, breakfast: nine people just ahead of you (they come before the lift, nearest first)
+    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 420)"); r.step(20); r.ev(LOBBY_AT); r.step(4)
+    for name, spots in (('a crowd ahead', [[0.7 + 0.5 * i, -1.0 + 0.5 * j] for i in range(3) for j in range(3)]),
+                        ('two rows ahead', [[0.6 + 0.45 * i, -0.6] for i in range(5)] + [[0.8 + 0.45 * i, -1.1] for i in range(4)])):
+        r.ev(LOBBY_AT); n = r.ev(f"({PEOPLE_AT})({json.dumps(spots)}, true)"); lst = r.ev("padTargets().map(o => o.key)")
+        print(f'  lift lobby, breakfast, {name} ({n} people): the ring offers {lst}')
+        if 'lift' not in lst: fails.append(f'lift lobby, breakfast, {name}: the ring never offers the lift 1 m away ({lst})')
+    if r.errors: fails.append('lift lobby: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
@@ -2216,9 +2238,9 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
@@ -2295,6 +2317,9 @@ MUTANTS['pick'] = {
     'CP1: a seat never ringed (the mess seat)': ('src', "  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
 }
 
+MUTANTS['lift'] = {   # CP5, claude/controller-follow2
+    'CP5 KC1: the list stops at 8 before the lift': ('src', "const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));", "const padMore = J => J.i < J.raw.length && J.out.length < PAD_PICK.max;"),
+}
 MUTANTS['day'] = {
     # CP1, claude/controller-follow1 3f17ac95: the ring takes the lift where a tap reaches the Spine ladder (CTT3's find at
     # the Deck 4 lift door: A climbed the ladder, the lift panel never opened)
