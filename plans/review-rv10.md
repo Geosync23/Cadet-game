@@ -9,6 +9,7 @@ a folder holding cadet_test.py, an output folder).
 | FX7 Tiles partner sits | claude/tiles-sit 0a58748e (breakfast-back 0cd37b1b) | PASS |
 | FX6 hygiene cooldown | claude/hygiene-cool cbd41548, then 50fd3f2a (breakfast-back 0cd37b1b) | FIXES NEEDED, then PASS |
 | FX5 call-home booth arrow | claude/booth-arrow 771c9ff2 (3 commits + arrows-c 8ab6089f), sha b8d67573 | PASS |
+| FX5 Day 0 table to the goodnight | claude/day0-table 153084a1 (integration-next b842fa43), sha f2329b62 | PASS |
 
 ## DV1, 9f51257a: PASS
 - Diff only adds lines (section 25's slot + one line in devmodeQuick); nothing runs without #dev.
@@ -44,6 +45,13 @@ a folder holding cadet_test.py, an output folder).
 - Real taps at both sizes, incl. Calder in Booth 1 with the arrow on Booth 2 at 320 wide: on 6caeb176 the pin tap opened
   her card 3/3; on 771c9ff2 the first tap starts the call.
 - Two interactions_check runs at once (base + FX5) both stalled at "near your job, but not it"; alone it passes.
+
+## FX5 day0-table, 153084a1: PASS
+- The Day 0 seat split past 19:00 gets kept: 1; lead() no longer cuts it for the next walk. kept_probe.py: kept seats only
+  on Day 0 (48) over Days 0-28; each still ends at its planned minute.
+- events_check: Day 0 table before the goodnight 45 on b842fa43 (FAIL), 48 after; other Sundays identical.
+- intro_check booth line: a mutant without the move line FAILS it. Full intro_check base vs fix: identical output, 0 FAILs,
+  up to a 50-minute limit (includes the Day 0 dinner). day_check 1 and 7 OK, check_fast OK, cadet_test ALL IDENTICAL.
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
