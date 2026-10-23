@@ -263,3 +263,17 @@ tap as a chat.
 
 Trade-off to know: with a job in hand, a tap near someone standing close to your stop (but not right on their body)
 now goes to the job, not a chat.
+
+FX3 adda4fe5 (test only): interactions_check also taps the floor beside someone at the puddle, off the pin, and
+expects the mop. OK on 518ee9ef; it catches the 40 px fault (19 px from Oona: nothing started). Both planted faults caught.
+
+## 11. The check-side fixes since the switch (lead 31's question): none hides a game problem
+
+- intro_check 34da38fc (the pilot's ramp line): `p_ramp.py` plays the arrival in real time (sign, then 35 s) on
+  arrows-c 8ab6089 with the arrows on and on a copy with them off. The pilot's line is the only pop-up both ways, and
+  it stays its full time. The 2.5 s happens only inside intro_check: 150 frames in well under a second of real time,
+  while the queue counts real time.
+- intro_check 7989742a: a training meeting has the arrow from 15 minutes before (the queue's T1, level 2, by design).
+- interactions_check fdd15400: test setup only (a fresh game has no career yet).
+- controller_check (controller-tests-3): with arrows on, B puts away one waiting pop-up per press (up to four in a
+  burst), where one press used to clear the one on screen. A small UX change, not a fault.
