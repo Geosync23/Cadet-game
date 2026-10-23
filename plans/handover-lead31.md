@@ -60,6 +60,7 @@ CP5 session_01Un47TDkZfRL6cvcLwE3Zcy (claude/controller-follow2 from 685af944): 
 - LEAD31-5 Line supper over-cooks (+20 cooked / +21 wasted with the Line on; section 16).
 - LEAD31-7 relay shelf glow answers as Filters (findings 64; FX3 claude/relay-shelf-fix, RV10).
 - LEAD31-8 team job restores machines only to 90 (TEAM_RESTORE); washers drop under 90 within the hour: ask the user whether team jobs should leave machines nearer new.
+- LEAD31-9 meal stops silently at the long table (findings 70; FX7 finding the cause).
 - FE2 batch 1 smaller items: "You wake in Bunk 1" card behind the manifest (FE1 item 7 again); single floor taps beyond the shuttle-bay rail don't move you (press-and-hold does).
 
 ## Gotchas learned this session
