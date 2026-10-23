@@ -192,3 +192,17 @@ the follower and docs, and merges RV8 passed. The game is the same at 5f7e91c an
 
 Still stuck: "Clean a vent: hydroponics garden" Day 4 (both runs; FX3's vent fix) and "Clean a vent: lift plaza" Day 8 (arrows off).
 With the arrows off, m7 isn't learned on Day 5 (FX4's m7 fix, RV9).
+
+## 7. claude/arrows-c 8dd03049 (AC3; arrows_check follower only): PASS
+
+Two follower lines: (1) while a `career:` arrow is up (Calder's call, a summons, the test, a move, a ceremony) the
+follower ends what it's working on and goes; (2) in a training meeting's room while the meeting is on, it waits for it
+to start. The game file at 8dd03049 is 14249d8 plus FX5's p3 fix (RV9's). Week on 8dd03049:
+
+| Arrows | Learned | Stuck |
+| --- | --- | --- |
+| off | m1, m4, m3d, m3i, m5, m2 (6 "Trained" pop-ups) | the hydroponics vent (Day 4), the lift plaza vent (Day 8) |
+| on | m1, m4, m3d, m3i, m5, m7, p3 (Day 5 11:02, FX5), m2 (8 "Trained" pop-ups) | the hydroponics vent, "Mop up (2 of 2)" (Day 8) |
+
+Nothing got worse. What these lines are for (Day 8's m6 at "ask" with the arrows off) can't show yet: with the arrows
+off the scanner isn't learned on Day 5 (FX4's fix), so Making it safe doesn't open on Day 8.
