@@ -224,3 +224,18 @@ sha256 **f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd** (BM1
 |---|---|---|
 | day_check 0 | **OK** | DAY CHECK OK; peak 255; worst stuck 0.0; 298 s |
 | day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 291 s |
+
+# Round on 0.92.1 (claude/integration-next 51a1bb34, Crossing the Line on), BM15's start; reported to BM15 and lead 31
+
+sha256 **2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c** (BM15's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269 (0.92.0: 255); worst stuck 0.0; 297 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 283 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 263 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 270 (269); worst stuck 0.0; 270 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 60 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 27 s |
+
+No FAIL. (Day 0's peak is 14 calls higher than on 0.92.0, likely FX5's dinner trickle; far under 450.)
