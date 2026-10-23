@@ -84,6 +84,9 @@ a folder holding cadet_test.py, an output folder).
   stay_probe.py: no one else changes, no seat double-booked, no gaps; 18:20 bunk trips 40 -> 5. Live 18:40: diners walk
   to lounge seats and a bench. events_check new line fails on base, OK; day_check 0, check_fast OK; cadet_test identical.
   PASS. Open question to lead: at a 19:10 goodnight 28 still take the bunk trip (waits under an hour).
+- FX5 day0-stay 583af9ed (replaces 3df51ee9, lead 31: no bunk trip whatever the wait): bunk trips 0 at 18:20 and 19:10,
+  no one else changes, no double-booked seats, no gaps; live fine; events_check, day_check 0, check_fast OK; cadet_test
+  identical. PASS (for 0.92.2).
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
