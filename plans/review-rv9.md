@@ -130,3 +130,9 @@ the user. Next: DS1's claude/zeke-lift-fix (not pushed yet at 14:40).
 ## Verdict: AC3 claude/arrows-c 9142ac5e: PASS (~15:05 UTC, to AC3, BM15, lead 31)
 One line (POINT_WATCH = [], pointLiftStep parked; POINT_ON true). arrows_pointer_check OK; on 54169e4c its (d2) fails
 (the pointer and the row both on with teaching first/all). cadet_test ALL IDENTICAL; check_fast OK.
+
+## Verdict: DS1 claude/zeke-lift-fix c5d92879: PASS (~15:40 UTC, to DS1, BM15, lead 31)
+introBeside (works, lift, wing, bunk), Calder's Mail not while with him (mailAway), a tap shows his card, three lines
+reworded. Recorder 685af944 vs c5d92879: dinner part identical to the ship minute apart from the reworded lines.
+intro_check all OK on c5d92879; its --beside (parts 16, 17) FAILS on 685af944 (89 min at the Works door, works and
+bunk missed, Calder's Mail 19:45). check_fast OK; cadet_test identical (1-level noise).
