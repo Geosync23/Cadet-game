@@ -1,5 +1,15 @@
 # CR6 check results
 
+## 0.92.0 re-run on FX5's Day 0 table fix (2026-10-23): OK
+
+- **Build:** `claude/integration-next` 4e324417, `starship-cadet.html` sha256
+  `f2329b620c113b0a585d6129ef70a3cbb8f8112c6ef9d19a13587fb996271ebd` (matches BM14's). My part: food x2, each alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| food_check 1 7 | OK (exit 0, 74 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 69 s) | `FOOD CHECK OK` |
+
 ## 0.92.0 full round (2026-10-23): OK (after test-only check fixes)
 
 **Final:** every check in my share passes on game sha256 c2180854...f1286. The five first-pass FAILs were all in the
