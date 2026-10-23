@@ -196,3 +196,13 @@ Checked and kept: the rest of the servery stop (Brennan, the table, her book of 
 grab shelf), walk.toMess and walk.deck3, the rest of introDinner, introChief (Calder's "Eat something" is what sends
 you for food), and his goodnight. Line ids are made from the text when the words are baked, so the two bubble
 lines get new ids; their flags stay the same.
+
+---
+
+## Backlog LEAD31-6 (lead 32, 2026-10-23): agreed; DS1 wires it
+
+| Flag | Old line | New line |
+|---|---|---|
+| walk.goodnight.1 | Right, that's me. Breakfast from seven, shift at nine, tea at one. | Right, that's me. Breakfast from six, shift at nine, tea at one. |
+
+The mess serves breakfast 06:00 to 09:00 (MEALS.breakfast = [360, 540]; the menu board and servery say the same).
