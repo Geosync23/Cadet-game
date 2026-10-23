@@ -50477,7 +50477,7 @@ function trainArrow(c, now) {                           // (its state on the fun
   const want = c.told && !r.met && r.status === 'asked' && now >= r.at - A.lead && now < r.at + r.len && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
   const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) : null;
   const label = here ? 'Wait here: ' + base.charAt(0).toLowerCase() + base.slice(1) : base;
-  const busy = !A.up && typeof myJob === 'function' && !!myJob();   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead
+  const held = typeof myJob === 'function' ? myJob() : null, busy = !A.up && !!held && !((held.start || 0) >= r.at - A.lead);   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead. FX4: not a job taken once the window had opened (a steady player turns one in and takes the next at the board: Day 5's scanner was missed till Monday with the queue off)
   if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: Tracked shows the way.'); } catch (e) { /* no UI */ } } return; }
   if (want && base && !A.lost && (!A.up || A.mine.label !== label)) {
     setGoal({ deck: r.deck, room: r.room, label });
