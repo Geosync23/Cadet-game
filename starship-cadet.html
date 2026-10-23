@@ -16084,6 +16084,7 @@ function ixLiftPanel() {
   for (const q of IX_LIFT.its) { const d = Math.hypot(q.x - p.x, q.z - p.z) + (typeof isShown === 'function' && !isShown(q.hit) ? 100 : 0); if (d < bd) { bd = d; best = q; } }   // a hidden one only if none shows
   return best;
 }
+const IX_PIN = { x: 0, y: 0, t: -1e9 };                   // the pin on screen this frame (FX3: a tap there is your job's, over someone standing on the stop)
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
@@ -16109,6 +16110,7 @@ function ixFrame() {
   const on = sx >= L0 && sx <= R0 && sy >= T0 && sy <= B0, arr = el.children[0], pin = el.children[1], lab = el.children[2];
   const x = on ? sx : W2 + dx * k, y = on ? sy : H2 + dy * k;
   el.hidden = false; el.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px)';
+  if (on && here) { IX_PIN.x = x; IX_PIN.y = y; IX_PIN.t = performance.now(); }   // where the pin is drawn, for section 11's tap (FX3)
   arr.style.display = on ? 'none' : ''; pin.style.display = on ? '' : 'none';
   const tp = on && here && !!w.it; if (el.classList.contains('tap') !== tp) el.classList.toggle('tap', tp);   // the pin over an item takes a tap (fresh-eyes 38)
   if (!on) arr.style.transform = 'rotate(' + Math.atan2(dy, dx).toFixed(3) + 'rad)';
@@ -53920,10 +53922,19 @@ function reachableSide(e) {
   const sides = doorSides(e), here = player.here();
   return sides.find(([i, j]) => free(i, j) && (K([i, j]) === K(here) || !!findPath(here, [i, j], null, player))) || sides[0];
 }
+const CREW_ON_PX = 10, CREW_PIN_PX = 22;                 // a tap this close to someone's body is on them (crewAtScreen takes 26 px and more), unless it's on the arrow's pin
 function tap(cx, cy) {
   if (ride) return;
   if (FREEZE.frozen) { if (!PAUSE.on && PAUSE.tilesTap) PAUSE.tilesTap(); return; }   // nothing on the deck moves while frozen (0.28.50): mid-Tiles, the board comes back
   if (!liftEl.hidden) { closeLiftPanel(); return; }       // a tap outside the panel puts it away
+  // FX3 (arrows_check's week, Day 8: Calder beside the second puddle, or someone crossing it, took every tap there as a chat):
+  // someone near the tap on screen, and the tap is on the arrow's pin or beside them, not on them, with your job's stop
+  // under it: the job. A tap on the person themselves, away from the pin, still talks to them
+  const near = typeof jobSpotTap === 'function' && crewAtScreen(cx, cy);
+  const atPin = typeof IX_PIN !== 'undefined' && performance.now() - IX_PIN.t < 500 && Math.hypot(IX_PIN.x - cx, IX_PIN.y - cy) < CREW_PIN_PX;
+  if (near && (atPin || ![.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; }))) {
+    const h0 = pick(cx, cy); if (h0 && !h0.object.userData.walker && jobSpotTap(h0.point)) return;
+  }
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
