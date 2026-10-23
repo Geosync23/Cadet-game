@@ -100,4 +100,43 @@ The manifest card ("Your name", "Sign and go aboard") is clear. The card behind 
 
 **37. Small.** Zeke's card says "Engine officer · stranger" after a whole day together, and Pell, Signe and Marta are still "stranger" after we've talked.
 
-(Day 1 continues: First Light Cocoa, bed.)
+**38. 19:58-20:09, the dinner bug found. Blocks me.** Third try: I got a tray and sat at a round table: "You sit down to Brennan's spiced lentils. About 26 minutes." There was no "Eating · N min" line this time, and Food stayed at 0 after 10 minutes. At 20:09 my tap to close the Needs panel fell through onto a seat ("Seat. You sit down. Tap anywhere to get up."), and the meal ended without a word. The tray was gone and there was no "you stop eating" message (d1-305). This probably explains item 35 too: any stray tap during a meal, even closing a panel, cancels dinner and throws the tray away.
+
+**39. 20:21-20:25, Grab and go again. Good.** "You take a hot plate of Brennan's spiced lentils. About 4 minutes", then "Something to eat on the way. Food 25." (d1-306). Grab and go is the only way I reliably ate all day.
+
+**40. 20:26-21:12, to bed. Better than Day 0.** The Tracked arrow "Your bunk" took me to the lift. On Deck 4 my hold-walks stuck on the lobby bench corner for 15 minutes. The arrow cleared on arrival in Bunk 1, so I re-tracked "Your bunk": the pin sat on the right bed, one tap, and "You climb into your bunk" came about 30 s later. Alarm card, 06:00. I skipped First Light Cocoa (20:00): too hungry and too late.
+
+**Day 1 summary.** Late to clock in (the briefing runs past 09:00 and the clock tells you where it is instead of opening), and the first job never started, because the glowing Lights shelf answers as "Filters". Tea missed. Name on the beam was lovely. At dinner my tray was lost twice to a silent cancel. I ate only two Grab and go plates.
+
+---
+
+## Day 2, Tuesday (first solo job day): morning only
+
+06:00. Food 4, Energy 100, Hygiene 36, Bathroom 0. The device says "You really need the toilet. The washrooms are at the ends of the junior wing on Deck 4."
+
+**41. 06:06-07:20, Deck 4: an hour lost looking for a toilet, then the lift. Blocks me.** Settling in's "Washed and fed" is done, so it no longer has a "Go there", and Tracked has no washroom row. The device's **Maps** (deck tabs, a floor plan with my dot, a Rooms list) lists "Port washroom", but tapping it does nothing: no arrow, no route (d2-03-maps). I'd expect "Go there" there. In the junior wing, floor taps kept seating me (armchair, then the swap shelf: "Take a book, leave a book... About 23 minutes"; d2-34) or opening cards (Imani O'Neill, Zainab Kovac, Mira Dahl, Leila Eklund, Yara asleep). Press-and-hold toward the arrow walked me into Bunk 6 (d2-39). At 07:20 I was still on Deck 4: unwashed, Bathroom 0 ("Bursting"), Food 4.
+
+**42. 06:33, Tracked list. Confusing.** It reopens where it was last scrolled (the bottom), so my "Breakfast" taps followed tomorrow's breakfast and "Wall night" (Rec deck) instead (d2-20). Good wording on tomorrow's rows, though: "That's tomorrow: track it on the day".
+
+**43. Small.** On Day 2 Tracked is about three screens long (today and tomorrow), and the device home has grown, so the Settling / Maps / Mail tiles are now below the fold and need a scroll. Day 2 adds nice new rows: "Training: rounds with Zeke" 10:45, "New-crew health check" 14:00, "Calling home" 18:00, and "The Chief's office: your first solo job" 08:45.
+
+**I stopped here, at Day 2 Tuesday 07:20** (memory), in Bunk 6 on Deck 4, before the Chief's office. Days 2 (rest) to 8 are not played; see the handover note `plans/handover-fe2.md`.
+
+---
+
+## Top 10, in plain words, for the user
+
+1. **Tapping the thing you want often gets something else.** People standing near things take the tap and open their card. A tap near a table sits you down. The × on a card has to be hit a little below and right of where it's drawn, and a missed × walks you away. At the relay shelf, the servery, the chairs, the time clock and the lift keypad, this cost me between 10 minutes and 2 hours each time. This is still the biggest problem (FE1's too).
+2. **The relay shelf seems broken.** The shelf that glows for "Fetch a relay" answers "Filters: No relays on the Filters shelf. Relays are on the Lights shelf: it's lit up for you." even when I stand right against it and tap the glow. I never got a relay, so my first job never started.
+3. **Dinner can vanish.** If anything taps the screen while you eat (I was closing the Needs panel), the meal stops silently and the tray is gone. Twice on Day 1. Grab and go always worked.
+4. **The first evening's tour stalls.** Zeke stops at the Deck 5 lift and stands silent for about 35 minutes, and he can't be tapped. It happens again on Deck 4. Then Calder's Mail "Missed you at dinner" arrives while dinner is still on and the tour is still taking you there.
+5. **Day 1 makes you late twice.** The Monday briefing runs until 09:09 and waits for your answer, so you can't clock in by 09:00. Then the time clock, when tapped, tells you where the time clock is instead of opening. I clocked in at 09:35, "A little late".
+6. **The camera turns every time you move.** What you want to tap moves away from your finger, and Rotate is needed after almost every step. Press-and-hold toward the arrow walks you in a straight line into bunk rooms and walls.
+7. **When there's no arrow, you're lost.** A finished Settling in item loses its "Go there", and Maps lists rooms you can't tap, so finding the washroom again on Day 2 took an hour. A "Go there" on Maps rooms would fix it.
+8. **Name on the beam is wonderful, but the crowd for it stands on the time clock.** It took 25 minutes to clock out because the whole bay gathered there.
+9. **Small words a player sees at once:** "tech1" and "tech2" as briefing speakers; the briefing count going 16/17 then 17/18; "Missed you at dinner" during dinner; "name on the beam" with a small n; Zeke still "stranger" on his card after a whole day; the relay job shown as "Your job / Your job"; "Name on the beam: Now" still listed after you've done it.
+10. **The Tracked list fights you.** Its Close button covers the last rows and slips off the bottom of the screen. It reopens at its old scroll position, so you tap tomorrow's rows by mistake. And it covers Rotate.
+
+**What was fixed since FE1, and works:** eating on Day 0 (queue, tray, seat, "Food 100"); the arrow carrying on after the lift; the TRACKING badge on the followed row; the job board's pin on the board; the lift list's "-> Tracked, Your arrow's deck"; the 15-minute "Go there" warnings for the briefing, shift and tea; the new "Get your dinner at the servery" arrow; putting the bag in the wardrobe yourself.
+
+**What I loved:** Name on the beam ("Zeke hands you the pen..."; "Lovely letters. That's there for good."); Zeke's "Before you land" letter; the crew's chatter; Grab and go; the shower and washroom routine; the off-shift tip listing what to do with your evening; the "No relays on the Filters shelf" style of message that tells you why.
