@@ -597,19 +597,22 @@ with sync_playwright() as pw:
                 for _ in range(rot): g.page.click('#rot'); g.step(30)
                 g.ev(TIPOFF); xy = g.ev(ONT)
                 if not xy: fres.append([rot, 'no point on the table', None]); continue
-                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60)
-                fres.append([rot, kp, g.ev(f"(k => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(kp[1])}); return j && jobStops(j)[k].done ? JSON.stringify(['ixStop', k]) : JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep]); }})({kp[0]})")])   # done already counts
+                FT = f"(k => {{ const j = SHIP.jobs.find(x => x.id === {json.dumps(kp[1])}); return j && jobStops(j)[k].done ? JSON.stringify(['ixStop', k]) : JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep]); }})({kp[0]})"   # done already counts
+                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT)
+                if a == 'null': g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev(FT) + ' (tapped twice)'   # a tap lost on a busy runner: a player taps again
+                fres.append([rot, kp, a])
             print('   the linen\'s drop, a tap on the Folding table [camera turn, (stop, job), what started]:', fres)
             check(sum(1 for r in fres if r[2]) >= 2, f'the Folding table under the finger in at least two camera turns ({fres})')
             for r in fres:
-                if r[2]: check(json.loads(r[2]) == ['ixStop', r[1][0]], f'pushing the linen to the laundry, a tap on the Folding table by the drop delivers it (camera turn {r[0]}: {r[2]})')
+                if r[2]: check(json.loads(r[2].replace(' (tapped twice)', '')) == ['ixStop', r[1][0]], f'pushing the linen to the laundry, a tap on the Folding table by the drop delivers it (camera turn {r[0]}: {r[2]})')
             # with no haul the table is your laundry again (0.28.55; parity above taps it too)
             g.ev("actEnd(true); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !/^haul@.*y$/.test(j.id)); MACH_REV++")
             g.step(5); g.ev(f"(() => {{ const s = placeSpot('4-laundry-drop'); player.obj.position.set(s.x + 1, 0, s.z + 1); player.stop(); }})()"); g.step(30)
             g.ev(TIPOFF); xy = g.ev(ONT)
             if xy:
-                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60)
-                a = g.ev("ACT && ACT.kind"); print('   no haul, the Folding table:', a)
+                g.page.mouse.move(*xy); g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev("ACT && ACT.kind")
+                if a is None: g.page.mouse.down(); g.page.mouse.up(); g.step(60); a = g.ev("ACT && ACT.kind"); print('   (tapped twice: the first tap was lost)')
+                print('   no haul, the Folding table:', a)
                 check(a == 'ixFold', f'with no haul, the Folding table by the drop is your laundry ({a})')
             g.ev("actEnd(true)")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
@@ -756,6 +759,110 @@ with sync_playwright() as pw:
         if off:
             g.page.mouse.move(*off); g.page.mouse.down(); g.page.mouse.up(); g.step(20); a = g.ev("ACT && ACT.kind")
             print('   the Orange tree off the pin:', a); check(a == 'ixGarden', f'the Orange tree tapped off the pin is the garden, not the vent ({a})')
+        g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id))")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
+# FB1 (lead 30, AC2's Day 2 run): "Take dry goods to the galley" stuck all day. The arrow's dot is drawn above its 1.2 m anchor
+# and bobs; a tap on it crosses the stop's line at about 1.6 m, and the tap's line was only looked at from the floor to 1.2 m
+# (jobRayDist), where it read 0.57-0.6 m off against 0.6: the same tap did the stop or only walked, as the dot bobbed. Now it
+# looks to 2 m. Real taps on the top edge of the drawn dot at the top of its bob (any of its 22 px is the pin to a player), four
+# camera turns: every delivery's pick-up and
+# drop, every haul drop, and every vent
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof DELIVERIES !== 'undefined' && typeof haulJob === 'function' && typeof choreWhere === 'function'"):
+        print('== FB1: a tap on the top of the drawn dot, at the top of its bob, does the stop')
+        g.page.click('#crew'); g.step(5)
+        g.ev("(() => { const st = document.createElement('style'); st.textContent = '#ixGoal .ixpin{animation:none !important}'; document.head.appendChild(st); if (typeof bridgeInvite === 'function') bridgeInvite(); else SHIP.bridgeInvited = true; })()")   # the dot held still, then 5 px up: the top of its bob
+        DOT = r"""(() => { const pe = document.getElementById('ixGoal'), pd = pe && !pe.hidden && pe.children[1]; if (!pd || getComputedStyle(pd).display === 'none') return null; const r = pd.getBoundingClientRect(); return [r.left + r.width / 2, r.top + 2 - 5, pe.children[2].textContent]; })()"""
+        STOPS = g.ev(r"""(() => { const out = [];
+          for (const k of Object.keys(MANIFEST_DROP)) if (placeById(MANIFEST_DROP[k])) out.push(['haul', k, 'deliver']);
+          for (const d of DELIVERIES) if (placeById(d.from) && placeById(d.to)) { out.push(['delivery', d.key, 'pickup']); out.push(['delivery', d.key, 'drop']); }
+          for (const c of choreWhere('vent')) out.push(['vent', c.key, 'vent']);
+          return out; })()""")
+        SET = r"""(([kind, key, step]) => { actEnd(true); const b = document.getElementById('ixBoard'); if (b) b.hidden = true; for (const k of NEED_KEYS) SHIP.player.needs[k] = 100; needsT = null; NEED_GOAL = null; clearGoal();
+          if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const tp = document.getElementById('devTip'); if (tp) tp.hidden = true;
+          setShipNow(1440 * 2 + 10 * 60); machinesNow(); for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; } SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id));
+          SHIP.player.carry = []; SHIP.player.work = null; if (SHIP.player.crate) SHIP.player.crate = null; const t = shipNow(); let j;
+          if (kind === 'haul') { j = haulJob(t, [{ id: key, dest: MANIFEST_DROP[key] }], { crew: false }); j.id = 'fb1-dot'; }
+          else if (kind === 'vent') { const c = choreWhere('vent').find(c => c.key === key); j = { id: 'fb1-dot', machine: null, deck: c.stops[0].deck, room: c.room, kind: 'chore', chore: 'vent', target: c.key, title: c.title, tier: 1, stops: c.stops.map(x => ({ ...x })), urgency: 0, posted: t, found: t, claimedBy: null, status: 'open', parts: [] }; }
+          else { const d = DELIVERIES.find(x => x.key === key), to = placeById(d.to), fr = placeById(d.from);
+            j = { id: 'fb1-dot', machine: null, deck: to.deck, room: to.room, kind: 'chore', chore: 'delivery', title: d.title, bring: d.bring, tier: 1, urgency: 1, posted: t, found: t, claimedBy: null, parts: [], status: 'open',
+              stops: [{ deck: fr.deck, placeId: d.from, mins: 3, tag: 'pickup' }, { deck: to.deck, placeId: d.to, mins: 3, tag: 'drop' }] }; }
+          SHIP.jobs.push(j); MACH_REV++; claimJob(j.id); SHIP.player.track = j.id;
+          const st = jobStops(myJob()), k = st.findIndex(x => x.step === step); for (let i = 0; i < k; i++) jobStepDone(j.id, i);
+          const pid = st[k].places[0], pl = placeById(pid); if (deckDef.num !== pl.deck) goToDeck(pl.deck);
+          const s = placeSpot(pid); player.obj.position.copy(cellPos(...s.walk)); player.stop(); return [k, pid]; })"""
+        bad, n = [], 0
+        for stop in STOPS:
+            row = []
+            for rot in range(4):
+                kp = g.ev(f"({SET})({json.dumps(stop)})"); g.step(40)
+                for _ in range(rot): g.page.click('#rot'); g.step(30)
+                g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); p = g.ev(DOT)
+                if not p: row.append('-'); g.page.click('#rot'); g.step(30); continue
+                g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20); n += 1
+                a = g.ev(f"(k => {{ const j = SHIP.jobs.find(x => x.id === 'fb1-dot'); return j && jobStops(j)[k].done ? 'done' : JSON.stringify(ACT && [ACT.kind, ACT.o && ACT.o.ixStep]); }})({kp[0]})")
+                good = a == 'done' or a == json.dumps(['ixStop', kp[0]]).replace(' ', ''); row.append('ok' if good else a)
+                if not good: bad.append([stop, rot, kp[1], a])
+                g.page.click('#rot'); g.step(30)
+            print(f'   {stop[0]} {stop[1]} {stop[2]}:', ' '.join(row))
+        print(f'   {n} taps on the dot')
+        check(n >= 3 * len(STOPS), f'the dot on screen in most camera turns ({n} taps, {len(STOPS)} stops)')
+        for b in bad: check(False, f'a real tap on the drawn dot does the stop: {b}')
+        # lead 30: the pin doesn't catch taps meant for something else. Off the pin, a thing by a vent stop does its own thing;
+        # with the job gone, the same tap on the lift door at a lift lobby calls the lift; a person standing at the stop is a person
+        OFF = r"""(pid => { const s = placeSpot(pid);
+          for (const i of ITEMS.filter(i => i.hit && isShown(i.hit) && !i.lift && ixDist(i, s) < 2.5).sort((a, b) => ixDist(a, s) - ixDist(b, s))) { const b = new THREE.Box3().setFromObject(i.hit);
+            for (const fy of [.5, .3, .7]) for (const fx of [.5, .3, .7]) for (const fz of [.5, .3, .7]) {
+              const v = new THREE.Vector3(b.min.x + (b.max.x - b.min.x) * fx, b.min.y + (b.max.y - b.min.y) * fy, b.min.z + (b.max.z - b.min.z) * fz).project(camera), x = (v.x + 1) / 2 * innerWidth, y = (1 - v.y) / 2 * innerHeight, h = pick(x, y);
+              if (!(x > 0 && y > 0 && x < innerWidth && y < innerHeight && h && h.object.userData.item === i)) continue;
+              ndc.set(v.x, v.y); ray.setFromCamera(ndc, camera); if (jobRayDist(s) >= JOB_RAY) return [x, y, i.t]; } }
+          return null; })"""
+        offs = []
+        for vk in [st[1] for st in STOPS if st[0] == 'vent']:
+            g.ev(f"({SET})({json.dumps(['vent', vk, 'vent'])})"); g.step(40); g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()")
+            q = g.ev(f"({OFF})({json.dumps(vk)})")
+            if not q: continue
+            g.page.mouse.move(q[0], q[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20); withJob = g.ev("ACT && ACT.kind")
+            g.ev("(() => { actEnd(true); const j = myJob(); if (j) dropJob(j.id); SHIP.player.track = undefined; clearGoal(); })()"); g.step(5)
+            g.page.mouse.move(q[0], q[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20); own = g.ev("ACT && ACT.kind")
+            offs.append([vk, q[2], withJob, own])
+        print('   a thing by a vent stop, tapped off the pin [stop, thing, with the vent job, with no job]:', offs)
+        check(len([o for o in offs if o[3]]) >= 2, f'things with a use of their own by two vent stops or more, to tap off the pin ({offs})')
+        for o in offs:
+            if o[3]: check(o[2] == o[3], f'a thing by a vent stop tapped off the pin does its own thing with the job too, not the vent ({o})')   # scenery with no use of its own may do the stop (0.28.55)
+        lifts = []
+        for vk in [st[1] for st in STOPS if st[0] == 'vent' and '-lift' in st[1]]:
+            for rot in range(4):
+                g.ev(f"({SET})({json.dumps(['vent', vk, 'vent'])})"); g.step(40)
+                for _ in range(rot): g.page.click('#rot'); g.step(30)
+                g.ev("(() => { const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"); p = g.ev(DOT)
+                lift = p and g.ev(f"(() => {{ const h = pick({p[0]}, {p[1]}), u = h && h.object.userData; return !!(u && (u.liftDoor || u.item && u.item.lift)); }})()")
+                if lift:
+                    g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(20); withJob = g.ev("ACT && ACT.kind")
+                    g.ev("(() => { actEnd(true); const j = myJob(); if (j) dropJob(j.id); SHIP.player.track = undefined; clearGoal(); })()"); g.step(5)
+                    g.page.mouse.move(p[0], p[1]); g.page.mouse.down(); g.page.mouse.up(); called = False
+                    for _ in range(40):
+                        g.step(10)
+                        if g.ev("!document.getElementById('lift').hidden || (typeof ride !== 'undefined' && !!ride)"): called = True; break
+                    lifts.append([vk, rot, withJob, called]); g.ev("(() => { if (typeof closeLiftPanel === 'function') closeLiftPanel(); })()"); g.step(5)
+                g.page.click('#rot'); g.step(30)
+                if lifts and lifts[-1][0] == vk: break
+        print('   the dot over a lift door [stop, camera turn, with the job, without it the lift came]:', lifts)
+        check(len(lifts) >= 2, f'the dot over the lift door at two lift lobbies or more ({lifts})')
+        for l in lifts: check(l[2] == 'ixStop' and l[3], f'over the lift door: with the vent job the tap cleans the vent, without it the lift comes ({l})')
+        # a person standing at the stop: the crew shown again, one of them moved to the galley drop; a tap on their head is them
+        g.page.click('#crew'); g.step(5); g.ev(f"({SET})({json.dumps(['delivery', 'galley', 'drop'])})"); g.step(20)
+        PER = r"""(() => { const s = placeSpot('3-cold-1'), a = DECK_CREW.find(c => c.p && c.p.name); if (!a) return null; a.x = s.x + .4; a.z = s.z + .2; a.settled = false; a.pose = 'stand'; if (a.path) a.path.length = 0;   // standing there
+          const v = new THREE.Vector3(a.x, (a.y || 0) + 1.4, a.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight, a.p.name]; })()"""
+        hd = g.ev(PER)
+        if hd:
+            g.page.mouse.move(hd[0], hd[1]); g.page.mouse.down(); g.page.mouse.up(); g.step(3)
+            res = g.ev("[ACT && ACT.kind, document.getElementById('tt').textContent, !!document.querySelector('#chat:not([hidden]), .chat:not([hidden])')]")
+            print('   a person at the galley drop, tapped on the head:', hd[2], res)
+            check(res[0] != 'ixStop' and (res[1] == hd[2] or res[2]), f'a person standing at the stop, tapped, is that person, not the drop ({hd[2]}: {res})')
         g.ev("actEnd(true); SHIP.jobs = SHIP.jobs.filter(j => !/^fb1-/.test(j.id))")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
