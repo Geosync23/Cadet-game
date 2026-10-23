@@ -169,7 +169,7 @@ Your answers here:
 The line `walk.more.3` in `content/lines/torres-zeke.lines` (one of his Day 0 linger extras) says "Ask me anything,
 by the way. Tap me. Questions are the best bit." (64 characters). His question menu is parked for now: tapping him
 on the tour shows only his card (name, role, a line about him), so the line promises something the game doesn't do.
-Two options, both shorter; not yet in the content file (the user picks, then it replaces the line, flag kept):
+Two options, both shorter. **Picked: option 1** (lead 31, 2026-10-23); DS1 wires it under the same flag walk.more.3.
 
 1. **(ZW1's pick)** Forget my name? Tap me. I won't be offended. Much.   #funny  (50 characters: invites a tap to see his card, promises nothing more)
 2. Questions? Hold them for dinner. I think better fed.   #funny  (52 characters: drops the tap; dinner with him, introDinner, does have a choice for you)
