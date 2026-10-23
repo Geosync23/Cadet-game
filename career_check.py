@@ -436,6 +436,15 @@ with sync_playwright() as pw:
     lg = ev(f"(() => {{ const r = ({PAPER})({{ plan: 'busy', days: 30 }}); return {{ size: r.size, log: r.works.log.length }}; }})()")
     print(f"  ship.works after 30 busy days: {lg['size']} bytes, log {lg['log']}")
     check(lg['size'] < 3000 and lg['log'] == 30, 'ship.works over 3 KB by Day 30, or the log not cut to 30')
+    # LEAD31-4 (FX4): ship.works stays flat: by Day 120 still under 3 KB, the team and incident plans only last week on
+    # (as their load-time cleaners keep), the solved cases' rows capped (CASE_DONE_KEEP); an old save's long lists trimmed on load
+    lg2 = ev(f"""(() => {{ const r = ({PAPER})({{ plan: 'busy', days: 120 }}), W = r.works, wk = o => o && o.plan ? Object.keys(o.plan).length : 0;
+      const old = {{ done: [...Array(20).keys()].map(i => ['c' + i, i + 1, 2]) }}, plan = {{}}; for (let w = 0; w < 18; w++) plan[w] = [[w * 7 + 3, 570, null, 'washer']];
+      return {{ size: r.size, team: wk(W.team), inc: wk(W.inc), done: W.cases && W.cases.done ? W.cases.done.length : 0,
+        oldDone: typeof caseClean === 'function' ? caseClean(old).done.length : null, oldTeam: typeof teamClean === 'function' ? Object.keys(teamClean({{ plan }}, 120).plan).length : null }}; }})()""")
+    print(f"  ship.works after 120 busy days: {lg2['size']} bytes; plan weeks kept: team {lg2['team']}, incidents {lg2['inc']}; solved cases kept {lg2['done']}; an old save's 20 cases -> {lg2['oldDone']}, 18 weeks of team plans -> {lg2['oldTeam']}")
+    check(lg2['size'] < 3000 and lg2['team'] <= 3 and lg2['inc'] <= 3 and lg2['done'] <= 8, f"ship.works grows: by Day 120 over 3 KB or old weeks / cases kept ({lg2})")
+    check(lg2['oldDone'] == 8 and lg2['oldTeam'] is not None and lg2['oldTeam'] <= 2, f"an old save's long lists not trimmed on load ({lg2})")
 
     print('(g) The steady run twice:')
     again = ev(f"({PAPER})({{ plan: 'steady', days: 9 }})")
