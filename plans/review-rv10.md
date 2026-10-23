@@ -80,6 +80,10 @@ a folder holding cadet_test.py, an output folder).
   check_fast OK; cadet_test identical. Diners with an hour or more go to their bunk and come back for their evening.
 - FX6 m8-fix 54efee21 (test only, on 0.92.1 candidate 51a1bb34): game identical; old mech_check m8 FAILs on 0.92.1;
   new one OK with the Line on and on an EV_LINE_ON=false copy; a planted TEAM_RESTORE = 0 makes it FAIL. PASS.
+- FX5 day0-stay 3df51ee9 (on 51a1bb34): diners with an hour or more sit in free Deck 3 lounge seats / benches.
+  stay_probe.py: no one else changes, no seat double-booked, no gaps; 18:20 bunk trips 40 -> 5. Live 18:40: diners walk
+  to lounge seats and a bench. events_check new line fails on base, OK; day_check 0, check_fast OK; cadet_test identical.
+  PASS. Open question to lead: at a 19:10 goodnight 28 still take the bunk trip (waits under an hour).
 
 ## Gotchas
 - Four browsers at once on 4 cores makes devmode_check and tiles_check flaky (timing); run two at a time.
