@@ -16,6 +16,7 @@
 #   pass-over:      an entry with nothing to show (T3 while you hold another job) gives way to the next live one
 #   reputation (S9): a new word reached: a toast once; never again for that word (a word first met on a drop still is, when reached going up); a drop: the toast "Works reputation down: <word>" only
 #   pointers:       each panel pointer three times at most, then not asked
+#   inspection:     on an inspection morning, 06:00-06:30, FX3's inspectGoal through the queue at level 2
 #   pop-ups:        six at once: a training's word ("Trained: ...") still waits its turn, another is dropped
 #   tick:           guideTick asks the shift chain itself once a ship minute
 #   the drill:      (the build as it is) the 14:50 drill arrow has no trk tag and stays up once you reach the Works bay
@@ -217,6 +218,14 @@ def part_on2(pg):
       const q = GUIDE.tq.map(x => x[1]); GUIDE.tq.length = 0; return q; })()""")
     print('  pop-ups waiting after six at once:', r)
     check('Trained: rounds, with Zeke Torres.' in r and len(r) <= 3, f'pop-ups: a training\'s word is kept when the queue is full, something else goes ({r})')
+    # the inspection morning (F2): FX3's arrows through the queue, level 2, 06:00-06:30
+    r = pg.ev("""(() => { if (typeof inspectGoal !== 'function') return null; const keep = inspectDue, now = Math.floor(shipNow()); inspectDue = () => true; clearGoal();
+      setShipNow(8 * 1440 + 361); GUIDE.key = ''; guideShift(); const e = guideList().find(x => x.id === 'inspect:9') || null; GUIDE.key = ''; const g = goalNow(), want = inspectGoal(9);
+      setShipNow(8 * 1440 + 391); GUIDE.key = ''; const after = (goalNow() || {}).label || null, live = guideList().some(x => x.id === 'inspect:9');
+      inspectDue = keep; setShipNow(now); GUIDE.key = ''; return { level: e && e.level, lab: g && g.label, want: want && want.label, after, live }; })()""")
+    print('  inspection morning:', r)
+    if check(r is not None, 'inspection: (no inspectGoal in this build)'):
+        check(r['level'] == 2 and r['want'] and r['lab'] == r['want'] and not r['live'] and r['after'] != r['want'], f'inspection: from 06:00 the queue shows FX3\'s arrow at level 2, gone at 06:30 ({r})')
     # three times at most
     r = pg.ev("""(() => { SHIP.device.pointsSeen['p:clock:out'] = 3; pointDrop('p:clock:out'); const now = Math.floor(shipNow());
       setShipNow(8 * 1440 + 1030); SHIP.career.co = 0; guideShift(); const q = POINT_Q.some(x => x.id === 'p:clock:out'); setShipNow(now); return q; })()""")

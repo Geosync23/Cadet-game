@@ -16481,6 +16481,8 @@ function guideShift() {
   if (typeof careerClockedIn !== 'function' || typeof playerShiftOn !== 'function' || typeof CAREER === 'undefined') return;
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440, base = (d - 1) * 1440, P = POINT_ON && typeof pointAsk === 'function';
   guideShiftWords(now, P);
+  if (typeof inspectDue === 'function' && typeof inspectGoal === 'function' && typeof INSPECT_AT !== 'undefined' && m >= 360 && m < INSPECT_AT && !(typeof SIM_AT !== 'undefined' && SIM_AT) && inspectDue(d))   // the inspection morning (F2, FX3's arrows in 24c): level 2, an event you're expected at; its goal empty once you're ready and there
+    guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
   if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || SHIP.career && SHIP.career.end) return;   // training day: the intro's own arrows
   const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
   if (!inn && m >= CAREER.clockIn && m < E) {            // S2
