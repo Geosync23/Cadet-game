@@ -55,6 +55,12 @@ Logs (this container): `/tmp/work-cr5/logs-new7/` (`events.txt`, `career.txt`, `
 
 **CR5: FAIL** (3 of 5 OK; events and career NEW).
 
+**Re-run, career_check with AC3's test-only fix** (BM14, 09:45 UTC): `claude/integration-next` 7ac605e4's
+career_check.py (file sha256 9d38bdd2...), the same game (7ac605e4's starship-cadet.html is still c2180854...).
+Exit 1 in 137 s, one FAIL line, as BM14 expected: `FAIL ship.works over 3 KB by Day 30, or the log not cut to 30`
+(`ship.works after 30 busy days: 3001 bytes, log 30`). Lead 31 made it known item **KS1** for this round (old slow
+growth; trimmed in the next build). So career: **known (KS1)**. events_check waits for FX5's game fix (new sha).
+
 ## 0.91.0 full round (2026-10-22, started ~21:30 UTC, for BM14 and lead 29 / lead 30)
 
 - Candidate: `claude/integration-next` 989fd566 (0.91.0: CP1's controller 0.90.9 on 0.64.16, PAD_ON off, + fresh-eyes
