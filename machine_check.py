@@ -419,7 +419,8 @@ with sync_playwright() as pw:
         if (tier < Math.max(...c.cand.stops.map(st => placeTier(st.placeId)))) badTier.push(c.kind + ' ' + c.cand.key);
       }
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; let o = [], seen = new Set();
-      for (let t = t0 + 1440 + 180; t < t0 + 4 * 1440; t += 60) { setShipNow(t); machinesNow(); for (const x of openJobs()) { if (!seen.has(x.id)) { seen.add(x.id); o.push(x); } } }
+      for (let t = t0 + 1440 + 180; t < t0 + 5 * 1440; t += 60) { setShipNow(t); machinesNow(); for (const x of openJobs())   // days 2-5 (FX6, 0.92.1: with the Line on, Days 6-7 are in machNorm's week, the wear shifts a little and the crew take Day 4's round at once; the first open lamp and delivery come on Day 5)
+        { if (!seen.has(x.id)) { seen.add(x.id); o.push(x); } } }
       const keys = ['id', 'title', 'kind', 'deck', 'at', 'room', 'place', 'tier', 'mins', 'parts', 'bring', 'urgency', 'state'];
       const shapeBad = o.filter(x => !keys.every(k => k in x) || !(x.tier <= PLAYER_TIER) || !(x.mins > 0) || !Array.isArray(x.at) || !(x.deck >= 1)).map(x => x.id);
       const openKinds = [...new Set(o.map(x => x.kind))];
@@ -435,7 +436,7 @@ with sync_playwright() as pw:
                sample: o.slice(0, 4).map(x => x.title + ' (Deck ' + x.deck + ', ' + x.mins + ' min' + (x.parts.length ? ', bring ' + x.parts.join(' ') : x.bring ? ', ' + x.bring : '') + ')') };
     })()""")
     print(f"Chores over 14 days: {ch['kinds']}; stops not real places {ch['badStop']}, tiers below their rooms {ch['badTier']}")
-    print(f"openJobs (days 2-4): {ch['seen']} jobs you could take, kinds {ch['openKinds']}, bad shape {ch['shapeBad']}; e.g. {ch['sample']}")
+    print(f"openJobs (days 2-5): {ch['seen']} jobs you could take, kinds {ch['openKinds']}, bad shape {ch['shapeBad']}; e.g. {ch['sample']}")
     print(f"  took '{ch['c']}': {ch['took']}, stops {ch['stops']}, finished {ch['fin']}, did its work {ch['helped']}")
     if len(ch['kinds']) < 7 or ch['badStop'] or ch['badTier'] or ch['shapeBad'] or len(ch['openKinds']) < 5: fail('chores and openJobs')
     if not (ch['took'] and ch['fin'] and ch['helped']): fail('taking and finishing a chore')
@@ -446,7 +447,7 @@ with sync_playwright() as pw:
     ti = g.ev("""(() => {
       const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 1440 + 180); machinesNow(); TURN_IN = true;
-      let c = null; for (let n = 0; n < 72 && !(c = openJobs().find(x => x.kind === 'delivery' || x.kind === 'lamp' || x.kind === 'vent' || x.kind === 'round')); n++) { setShipNow(shipNow() + 60); machinesNow(); }
+      let c = null; for (let n = 0; n < 96 && !(c = openJobs().find(x => x.kind === 'delivery' || x.kind === 'lamp' || x.kind === 'vent' || x.kind === 'round')); n++) { setShipNow(shipNow() + 60); machinesNow(); }
       if (!c) { TURN_IN = false; return { none: true }; }
       claimJob(c.id); const j = SHIP.jobs.find(x => x.id === c.id), n = jobStops(j).length, steps = [];
       for (let k = 0; k < n; k++) steps.push(jobStepDone(c.id, k));
