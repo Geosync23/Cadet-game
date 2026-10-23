@@ -19797,9 +19797,9 @@ function traceMark(jobId, id) {
 // calls it 15 minutes after the start; jobsHour does it by the next hour, TEAM_WAIT): your steps go to the lead and it
 // takes TEAM_SLOW longer. The crew in a team job take no other job that would overlap it (teamClash), and jobWhere puts
 // each at their spot. Finishing it (the lead's, at j.done; yours, when your stops are done) puts the machine right
-// (TEAM_RESTORE, an overhaul's); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
+// (TEAM_RESTORE: close to new, the user's 2026-10-23; was an overhaul's 90); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
 // even when the lead finishes it. simNote('team', ...) is 24h's. Nothing here posts a team job by itself
-const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 90;
+const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 98;   // 98: above a repair's 95, a little short of a service's 100 (JOB_TYPES)
 function teamSpots(id) {
   const m = machineById(id), pre = id.replace(/-\d+$/, '') + '-team-'; if (!m) return [];
   return (DECKS[m.deck].places || []).filter(p => p.id.startsWith(pre)).map(p => p.id).sort((a, b) => parseInt(a.slice(pre.length), 10) - parseInt(b.slice(pre.length), 10));

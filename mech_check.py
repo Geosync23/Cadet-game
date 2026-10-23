@@ -560,10 +560,10 @@ M8 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.plans = [1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]]));
  SHIP.works.team.plan = {}; out.again = JSON.stringify([1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]])));
  const run = (rank, act) => { reset(15 * 1440 + 900); SHIP.works.rank = rank; const r = {};
-   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); if (j && j.status === 'done' && r.right === undefined) r.right = j.machines.every(id => SHIP.machines[id].cond >= 90); }   // right when it's done (FX6, 0.92.1: with the Line on the plan picks the washers, which wear under 90 again within the hour)
+   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); if (j && j.status === 'done' && r.right === undefined) r.right = j.machines.every(id => SHIP.machines[id].cond >= TEAM_RESTORE); }   // right when it's done (FX6, 0.92.1: with the Line on the plan picks the washers, which wear under 90 again within the hour)
    const j = SHIP.jobs.find(x => x.kind === 'team');
    r.job = j && { team: j.team.length + (j.you ? 1 : 0), you: !!j.you && !j.youOut, status: j.status, by: j.doneBy, late: j.late, mins: j.doneAt - j.start, posted: j.posted - j.start };
-   if (r.right === undefined) r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= 90) : null; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
+   if (r.right === undefined) r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= TEAM_RESTORE) : null; r.restore = TEAM_RESTORE; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
  out.crew = run('junior');
  out.late = run('officer');
  out.you = run('officer', (j, t, r) => { if (j.status === 'done') return; if (t >= j.start - 5) j.youIn = true; const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
@@ -584,6 +584,7 @@ def part_m8(g):
     check(P == json.loads(a['again']), 'm8: the plan the same when made again')
     c, l, y = a['crew'], a['late'], a['you']
     check(c['job'] and c['job']['status'] == 'done' and not c['job']['you'] and c['right'], 'm8: a crew-only team job runs and puts the machines right')
+    check((c.get('restore') or 0) >= 98, f"m8: a team job leaves its machines close to new (TEAM_RESTORE {c.get('restore')}, want 98 or more; the user, 2026-10-23)")
     check(l['job'] and l['job']['status'] == 'done' and l['job']['late'] and l['job']['mins'] > c['job']['mins'], 'm8: without you it starts after 15 minutes and runs slower')
     check(y['job'] and y['job']['by'] == 'you' and y.get('turns') == [True, True, True] and y['uses'] == 1 and y['rep'] >= 2, 'm8: your three turns in order, finished by you, +2')
     if not y.get('early'): print('  m8: (a turn out of order is not refused: section 17\'s stepDone hook not in this build)')

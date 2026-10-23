@@ -267,6 +267,8 @@ A machine's life runs through five states:
 
 **Tapping a machine** gives a line about it and its condition. Where the machine has a use (a washer, an oven, a lift call panel, the lights, a fan), tapping it also starts it: it runs, the use counts toward its wear, and its system responds. Faulty machines slow the crew who use them, never the player.
 
+**How right a job puts a machine.** A service brings a worn machine back to 100%, a repair to 95% and an overhaul of a broken one to 90%. A crew team job (several techs on one big repair, Works progression's "Team jobs") leaves its machines close to new, at 98% (the user, 2026-10-23, via lead 31: it was an overhaul's 90%, and washers fixed by a team were worn again within the hour; built in 0.92.2).
+
 ### Food and cooking
 
 Food is simulated from store to plate (agreed 2026-10-15):
