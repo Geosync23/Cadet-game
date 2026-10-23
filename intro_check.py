@@ -16,7 +16,7 @@
 #      draw calls under 450, no page errors
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
 #   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
-#      starts; at 10:05 a tap on her doesn't (--solotap: this part alone)
+#      starts; at 08:35 (before it) and 10:05 a tap on her doesn't (--solotap: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -346,7 +346,7 @@ def solo_tap(g):
     g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
     g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
     g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")
-    g.ev('skipTo(introAbs(2, 8 * 60 + 51))'); g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")
+    g.ev('skipTo(introAbs(2, 8 * 60 + 35))'); g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")
     HERE = "(() => { goToDeck(5); player.obj.position.copy(cellPos(12, 5)); player.path.length = 0; if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"   # a first-time tip card can sit over her (as interactions_check)
     g.ev(HERE); g.step(60)
     row = g.ev("(trkItems().find(x => x.title === DEV_BEATS['d2-solo']) || {})")
@@ -359,6 +359,15 @@ def solo_tap(g):
         const e = document.elementFromPoint(x, y), c = crewAtScreen(x, y); if (!first) first = (e && e.closest('[id]') ? e.closest('[id]').id : e && e.tagName) || '?';
         if (e && e.tagName === 'CANVAS' && c && c.p.id === 'calder') return [x, y, room, 'canvas']; }
       return [0, 0, room, 'covered by ' + first]; })()"""
+    # 08:35 (RV11): she's at her desk from 08:25 (early: 20), but her meeting isn't on yet: a tap on her is her card, no walk
+    pt = g.ev(TAP)
+    if pt and pt[3] == 'canvas':
+        g.page.mouse.click(pt[0], pt[1]); g.step(5)
+        early = g.ev("({ path: player.path.length, dlg: !!DIALOGUE, room: ROOMS[roomAt(...player.here())].name })")
+        print(f'  08:35, before her meeting: a tap on her: {early}')
+        if early['path'] or early['dlg']: fail(f'at 08:35, before her meeting, a tap on the Chief walked you in or started it: {early}')
+    else: fail(f'08:35: no point on the Chief in her office to tap: {pt}')
+    g.ev('(() => { if (typeof chatClose === "function") chatClose(); })()'); g.ev('skipTo(introAbs(2, 8 * 60 + 51))'); g.ev(HERE); g.step(60)
     pt = g.ev(TAP)
     if not pt or pt[2] != "Works Chief's office": fail(f'the Chief is not in her office at 08:51: {pt}'); return
     print(f'  the tap on her: {pt}')
