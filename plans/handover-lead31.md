@@ -7,6 +7,7 @@
 4. Message every working seat below with your session id so they report to you (priority "now"; ask for a one-line acknowledgement). Tell lead 31 (session_0118SXBCdg87nDiXdtrGNVSR) you've taken over.
 5. Tell the user in one short message that you've taken over.
 
+Lead 32 = session_01GFHMDsQK3TfPfH7Paapyog (started by lead 31 at 20:30 UTC at the user's request).
 Lead 31 = session_0118SXBCdg87nDiXdtrGNVSR, branch `claude/lead-31`, a fresh top-level session (chain depth 0). Took over 2026-10-23 ~03:00 UTC; handed over ~13:00 UTC (9 AM Eastern) at ~67% memory.
 
 ## The user's standing rules (new in bold)
