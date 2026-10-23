@@ -791,6 +791,8 @@ Rules that keep it working on phones:
 **Working method.** This design doc, the latest build, the deck plans, the tests and the dev notes live in the git repo. Several sessions work in parallel under a lead session (see `TEAM.md`). Builds are edited in place, never rewritten whole. Turns stay short, each ending with a tested build. When a session gets long, the dev notes are updated as a handoff for a fresh one.
 
 
+**Dev mode** (testing only: the Dev link, `#dev` on the game's link; plan `plans/devmode-plan.html` v3.1). A hidden panel for testing, behind the gold DEV card: move the clock, take me to, mark and undo, start traditions, set the career, the Speed card. It keeps its own save, so the real game is never touched, and without the Dev link nothing of it exists. **The career arrow** (the user, 2026-10-23, DV1): in Dev mode a second arrow, magenta with a DEV tag so it can't be taken for the game's gold one, always points at whatever the player must do next for their career, whatever the Teaching arrows setting, whether a goal is tracked, and the hour: the first week's beats (Calder's Monday briefing, the shadow shift, the led job, Tuesday's solo job talk), the training under way (the meeting, watching the teacher, your turn), the next training's ask, or what it still needs (a round done, a reputation word, a job to get oily), the drill and the inspection, the test job and the promotion's beats. When the step waits for its time it points where it will happen and its label says when ("Zeke's meeting: rounds, 10:45", "Hauling and stores training: Yara asks you, tomorrow 06:00"); on another deck it points at the lift with the deck named. It never changes the game's arrow: where both point at the same thing, the game's arrow does the pointing and the Dev label sits on the other side of it (on screen, its pin above the game's). The Quick tab shows or hides it (on by default; the choice is kept in that browser). It reads only, and with Dev mode off the game is exactly as before.
+
 ## Milestones
 
 The current build and its history are in `DEV_NOTES.md`.
@@ -870,6 +872,7 @@ Done so far:
 **Answered:**
 
 - Scan first and the inspection's warning (2026-10-22, AR2's questions 3 and 4, as passed on by lead 27): every faulty-machine job starts with "Look it over" once you have the scanner; Tomas warns you on the first Wednesday evening, then the Thursday 06:00 arrows. See "Teaching arrows".
+- Dev mode's career arrow (2026-10-23, the user, via lead 31): a magenta DEV arrow in Dev mode only, always at the next career step, with a time when it waits; see "Dev mode" under the technical plan.
 - Teaching arrows on (2026-10-23, the user, as passed on by lead 30): switched on in 0.92.0, the queue and the panel pointers, with the Settings choice (default First times). See "Teaching arrows".
 - Teaching arrows (2026-10-22, the arrows plan's five questions, "go with the recommendations", as passed on by lead 27): fixes first; the shift's arrows always while the shift is tracked, panel pointers the first three times; a training meeting may take the arrow from 15 minutes before; a Settings switch for teaching arrows (default first time only); the burst pipe's job taken at the pipe. See "Teaching arrows" under the player.
 
