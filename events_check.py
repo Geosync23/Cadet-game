@@ -399,6 +399,31 @@ with sync_playwright() as pw:
         if w[3] > 6: fail(f"Day {w[0]} {w[1]}: {w[3]} of {w[2]} diners get up in the same minute ({w[4] // 60:02d}:{w[4] % 60:02d}); at most 6 (the room must not empty at once)")
     D0 = SP['day0']
     if not D0 or not D0['most'] or D0['before'] < D0['most']: fail(f"Day 0's Sunday table not full 5 minutes before Zeke's goodnight: {D0}")
+    # the user, 2026-10-23 (FX5): once Zeke's goodnight has really happened (the Chief's talk and his explanation over;
+    # SHIP.intro.done.free, live), the table trickles out from that minute: full till then, nobody up before it, a few
+    # at a time after (at most 4 in a minute), nearly empty an hour later, and nobody else's plan changes (RV10: no one
+    # off the table moves at that minute). On paper with the arrival on, at 18:20 and 19:10
+    LV = g.ev(r"""(() => { const I = SHIP.intro, keep = [I.on, I.ended, I.done.free], out = [], B = -1440;
+      I.on = true; I.ended = false;
+      delete I.done.free; const base = new Map([...shipDay(0).plans].map(([id, x]) => [id, JSON.stringify(x)]));   // without a live goodnight
+      for (const fr of [18 * 60 + 20, 19 * 60 + 10]) {
+        I.done.free = B + fr; const day = shipDay(0), pl = new Set();
+        const diners = new Set([...day.plans].filter(([, x]) => x.some(q => q.tag && /^ev-sunday-table/.test(q.tag))).map(([id]) => id));
+        const others = [...day.plans].filter(([id, x]) => !diners.has(id) && base.get(id) !== JSON.stringify(x)).map(([id]) => id);   // RV10: nobody off the table may change
+        for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
+        const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
+        const ups = new Map(); let early = 0;
+        for (const [, segs] of day.plans) { const i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId); if (i < 0) continue;   // the tradition's diners: when they get up from its seat (kept on in the same seat)
+          let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1); }
+        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, after10: at(B + fr + 10), after60: at(B + fr + 60) });
+      }
+      I.on = keep[0]; I.ended = keep[1]; if (keep[2] === undefined) delete I.done.free; else I.done.free = keep[2]; return out; })()""")
+    print('Day 0 table from the live goodnight (free, seats, before, most, up before it, most up in a minute, others changed, 10 and 60 min after):', LV)
+    for r in LV:
+        if r['before'] < r['most'] or r['early'] or r['top'] > 4 or not (r['after10'] < r['before']) or r['after60'] > r['before'] // 5:
+            fail(f"Day 0's table after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} doesn't trickle out from it (full till then, nobody up before, at most 4 a minute, nearly empty an hour later): {r}")
+        if r['others']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed the plans of people not at the table (they'd move mid-activity): {r['others'][:6]}")
 
     # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
     # arrival) to day 364; the four seasons; the baked traditions (content/traditions, the TRADITIONS block) loaded
