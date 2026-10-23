@@ -417,11 +417,11 @@ def part_week(ctx, path):
     used, m6_by, last, d = None, None, 8, 1
     while d < last:
         d += 1
-        f.run((d - 1) * 1440 + (21 * 60 + 30 if d <= 8 else 17 * 60 + 30))   # a day after Day 8 only for Making it safe: its workday (the evening's needs arrow is another check's)
+        f.run((d - 1) * 1440 + 21 * 60 + 30)   # a day after Day 8 (Making it safe) runs whole too: LEAD31-14 (FX6) fixed its evening's "Food" arrow with a tray in hand
         s = pg.ev(STATE)
         work = pg.ev(f"playerShiftOn({d})")
         log = pg.ev(f"(SHIP.player.clockLog || {{}})[{d}] || 0")
-        if work: check(log > 0 or d > 8 and bool(pg.ev(f"careerClockedIn({d})")), f'week: Day {d}: never clocked in following the arrow (fix: {FIX["clock in"]})')
+        if work: check(log > 0, f'week: Day {d}: never clocked in following the arrow (fix: {FIX["clock in"]})')
         for m in want.get(d, []):
             check(s['tr'].get(m) is not None, f'week: Day {d}: "{m}" not learned by following the arrow (fix: {FIX.get(m, "?")}); training {s["cur"]}, opened {s["op"].get(str(d))}')
         if used is None and d >= 5 and (s['use'].get('m7') or 0) >= 1:
