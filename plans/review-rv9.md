@@ -119,3 +119,10 @@ Slow bag (c2: the bag held 59 samples, 17:55-18:18): Zeke waits, arrow "Put your
 intro_check all OK; clothes, player, bubble OK; check_fast OK; cadet_test ALL IDENTICAL vs 2b81d8a0.
 Notes: "Washrooms" line not heard on a straight walk; slow player misses the arrival dinner's Sunday long table;
 "Ship traditions tomorrow" Mail now in the bunk room; DS1's Monday bag put-away is DS1's call (flagged to lead 31).
+
+## Verdict: FX6 claude/line-on 5201ae05: PASS (2026-10-23 ~14:40 UTC, to FX6 session_01VVgFPg2QfrvjGSfxf7QsQw, BM15 session_01EH5qkoYriK2Gsrp7hHRoso, lead 31)
+One game line (EV_LINE_ON = EVENTS_ON). review-rv9/line_board.py (openJobs hour by hour, Days 1-7): every shift hour of
+Days 1-5 has a job for you on both 685af944 and 5201ae05; only kinds shift. machine_check's widened 5e/5g windows catch
+two planted faults (openJobs without lamp/delivery/vent/round; jobStepDone a no-op). machine_check off vs on: small
+wear-scaling ripple only. cadet_test ALL IDENTICAL; check_fast, events_check, day_check 7 OK. bag-no-net dropped by
+the user. Next: DS1's claude/zeke-lift-fix (not pushed yet at 14:40).
