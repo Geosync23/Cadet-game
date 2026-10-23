@@ -700,7 +700,7 @@ with sync_playwright() as pw:
         # the tour as heard by a follower (pacing A): every place's core lines, in place order; extras only if you linger
         said = [x[2] for x in g.ev('window.__said')]
         sp = g.ev("INTRO_TOUR.map(t => [t.id, introTourSplit(t)])")
-        walkp = set(g.ev("INTRO_TOUR.filter(t => t.walk && !t.must).map(t => t.id)"))   # before the lift: heard as you walk, the rest skipped at the lift (a must place is always heard)
+        walkp = set(g.ev("INTRO_TOUR.filter(t => t.walk && !t.must && t.deck === 5).map(t => t.id)"))   # (DS1: Deck 4's officers' corridor walks too, after the lift; its core lines must still be heard) before the lift: heard as you walk, the rest skipped at the lift (a must place is always heard)
         ps = (pre['sm'][-1] - pre['sm'][0]) / g.ev('SHIP_RATE') / max(1, pre['n'] - 1) if pre['n'] > 1 else 0   # real seconds a look
         print('  after each ride (from, to, time, you, Torres, tiles apart):', rides)
         for x in rides[:2]:
