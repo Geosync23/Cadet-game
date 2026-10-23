@@ -58,6 +58,7 @@ CP5 session_01Un47TDkZfRL6cvcLwE3Zcy (claude/controller-follow2 from 685af944): 
 - LEAD31-3 join notices never dropped (AC3, done).
 - LEAD31-4 save trim (FX4, in review).
 - LEAD31-5 Line supper over-cooks (+20 cooked / +21 wasted with the Line on; section 16).
+- LEAD31-7 relay shelf glow answers as Filters (findings 64; FX3 claude/relay-shelf-fix, RV10).
 - FE2 batch 1 smaller items: "You wake in Bunk 1" card behind the manifest (FE1 item 7 again); single floor taps beyond the shuttle-bay rail don't move you (press-and-hold does).
 
 ## Gotchas learned this session
