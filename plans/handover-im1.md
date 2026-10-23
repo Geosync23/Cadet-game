@@ -42,8 +42,13 @@ Round 11 = 14d80a87: + hygiene-cool cbd41548 (FX6), only a build-table row clash
   (fixed in the check by AC3, 8eb57151) plus two bar ones to recheck ("the bar by day: Back at 17:30", "every bar stool
   held: In use"). controller_check walk CRASHED: `page.click('#rot')` timed out (Rotate view not clickable with the
   arrows on?). Not yet confirmed or reported to CP1/AC3.
-- Round 10: check_fast OK. Area checks were running when I stopped (results in the scratchpad, lost with the session).
-  The next session must run them again (below).
+- Round 10 (e819950a, game = e1007025): check_fast OK; day_check OK; events_check OK. interactions_check FAILED (87
+  lines: pins still "Clock in: shift at 09:00" at turn-in and job stops even after AC3's 8eb57151; "the bar by day";
+  3 pageerrors "reading 'updateWorldMatrix'" in the haul tests); BM14 saw the same (184 lines on e1007025) and is
+  isolating it on 168900ea and arrows-c 8eb57151 alone. controller_check: walk OK this time ('#rot' did not repeat);
+  pick FAILED 4 ("the bottom line never named it": crew, item, sealed door, the lift) and day FAILED 2 ("the ring never
+  named the lift", "bedtime: the lift panel never opened"); green on round 5c (arrows off), so likely the arrows on;
+  not isolated. intro, food, player and the arrows checks were still running when I wrote this.
 
 ## How to test (what I ran)
 
