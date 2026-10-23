@@ -67,7 +67,7 @@ CP5 session_01Un47TDkZfRL6cvcLwE3Zcy (claude/controller-follow2 from 685af944): 
 - LEAD31-11 reserve a scannable faulty job after the Day 5 scanner lesson so the first use and Making it safe always land on time (user to decide; AC3).
 - FE2 finished (top 10 in plans/fresh-eyes-2-diary.md on claude/fresh-eyes-2 5f6a4c9). FE3 for Days 3-8 once 0.92.2 is out (starts from Day 0; sample).
 - LEAD31-12 eating sometimes does not start after sitting with a tray (findings 73; FX7 could not reproduce).
-- LEAD31-13 first solo job (Day 2 08:45, Chief's office) never started for FE2 (findings 81; DV1 finding the cause).
+- LEAD31-13 first solo job never started (findings 81): FIXED by DV1 claude/d2-solo-tap 292f4f77 (speaker tap walks you in; arrow at the visitor spot), with RV10, for 0.92.2.
 - LEAD31-14 hunger arrow polish (not a blocker; real players fine): arrow returns after one grab, never offers the servery, held shelf "In use". Follower-bot stall unexplained (FX6 logs). See plans/handover-fx7.md on claude/fx7-handover.
 - FE2 batch 1 smaller items: "You wake in Bunk 1" card behind the manifest (FE1 item 7 again); single floor taps beyond the shuttle-bay rail don't move you (press-and-hold does).
 
