@@ -174,3 +174,38 @@ The known FAIL lines, for matching against RV9/CP1's:
 - touch (6): after B / after UP+DOWN / after UP: `tap0.seen.seen: 54 -> 51` and `tap0.seen.seenHash: -1403106251 -> -1508090985`
 - day (4): `breakfast: the lift's Deck 3 button: not there`; `talk: no crew member to walk to`;
   `the job board: could not walk to the lift by the stick`; `bedtime: could not walk to your bunk by the stick (bed [-15.5, -8.5]; you at [4, -4.5, 1.5, 'null', False, 'ladderPanel'] ...)`
+
+# Round 9: 0.92.0 (claude/integration-next 4147f03d, then 33c8639e's checks, 2026-10-23)
+
+**sha256 of starship-cadet.html: `c2180854a780936c21cbac0ba9e7932fb491759f740e1d5ac3b4d4494a4f1286`** (matches BM14's;
+the same game file at 4147f03d, 25a90ced and 33c8639e). OLD = 0.91.0 989fd566 (da9f1d08…4aee). One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check (4147f03d's) | **FAIL** | 383 s | 13 FAIL lines (below) |
+| player_check (33c8639e's, AC3's test fixes) | **FAIL, 1 line** | ~6 min | `job loop: a tier-1 service job to take` (BM14 bisecting) |
+| devmode_check | **OK** | 263 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 314 s | BUBBLE CHECK OK |
+| puzzle_check (4147f03d's) | **FAIL** | 66 s | `the first note with the job, Where next? to the panel: ['n0'] None`; `Where next? points at the panel: None vs 4-washer-1-svc` |
+| puzzle_check (33c8639e's) | **OK** | ~1 min | PUZZLE CHECK OK |
+| social_check | **OK** | 25 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 31 s | TALK CHECK OK |
+| arrows_check (default parts) | **OK** | 588 s | ARROWS CHECK OK |
+| arrows_pointer_check | **OK** | 133 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 36 s | DEV ARROW CHECK OK |
+
+## The player and puzzle FAILs, compared (4147f03d's checks)
+
+| Game | player FAIL lines | puzzle |
+|---|---|---|
+| NEW 0.92.0 | 13 (twice, the same) | 2 FAIL (twice) |
+| NEW with `POINT_ON` and `GUIDE_ON` false (a copy) | 1: `job loop: a tier-1 service job to take` | OK |
+| OLD 0.91.0 | 7, all lines for features 0.91.0 lacks (hygiene cooldown, tea armchair, table words once, main-lift service arrow, bunk and tea arrows, the save's shower cooldown); **not** the tier-1 job line | OK |
+
+So 12 of the 13 player lines and both puzzle lines were the checks meeting the teaching arrows (pop-ups queued, the goal
+taken by the arrow); AC3's test-only fixes (33c8639e) clear them. The one left, `job loop: a tier-1 service job to take`,
+is new in 0.92.0 and not from the arrows (it fails with them off too, and passes on 0.91.0). NEW, not known old.
+
+The 13 lines on 4147f03d: the bunk before 20:00 too early; the bunk at 21:00 sleep to 06:00; not enough credits toast;
+crawlway; sit anywhere; the servery closed at 12:00; job loop tier-1 service job; reserved job bracket made not kept;
+job loop new job announced; work steps x4 (ok(v), "ready at", tapped too soon, r.say).
