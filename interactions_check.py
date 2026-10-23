@@ -16,7 +16,7 @@ from playwright.sync_api import sync_playwright
 # The teaching arrows are on from 0.92.0. Here, as on a shift, you are clocked in when you take a test job (else the
 # arrow rightly points at the time clock first), and every pop-up shows at once (the pop-up queue is arrows_check's).
 ARROWS_ON = """if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { const cj = claimJob; GUIDE.tq.length = 0; guideToast = () => false;
-  claimJob = function (...a) { if (typeof careerClockedIn === 'function' && !careerClockedIn()) { SHIP.career.ci = Math.max(1, Math.floor(shipNow())); SHIP.career.co = 0; } return cj.apply(this, a); }; }"""
+  claimJob = function (...a) { if (typeof careerClockedIn === 'function' && !careerClockedIn()) { if (!SHIP.career && typeof careerInit === 'function') careerInit(); if (SHIP.career) SHIP.career.ci = Math.max(1, Math.floor(shipNow())), SHIP.career.co = 0; } return cj.apply(this, a); }; }"""
 _Game = Game
 def Game(*a, **k):
     g = _Game(*a, **k); g.ev(ARROWS_ON); return g
