@@ -30,6 +30,11 @@ Nothing here sets build numbers.
   so from near 0 it takes two grabs, and after the first the arrow still points at the shelf you just ate from. On paper
   only Brennan holds 3-grab-1 (5 min at 16:30 on Day 9); real taps from 16:50 to 20:00 all gave a hot plate. Asked FX6
   (session_01VVgFPg2QfrvjGSfxf7QsQw) for the follower's actions and toasts on Day 9 16:40-20:00 to see what it got.
+  Told lead 31: a real player is not stuck. Two rough edges: one grab leaves Food under 40, so the arrow comes back on the
+  shelf just used; and the arrow never offers the servery while it serves (+55 against a grab's +25), nor skips a held
+  shelf. Proposed (not built): needGoal prefers the servery while it serves and skips a held place. arrows_check's shift
+  part on 54efee21 (Day 9 to 17:40) had no Food arrow and nothing stuck; the bot's 3 hours come from the week run (needs
+  carried over), still to see in FX6's log.
 
 ## How to test (what I ran)
 - Setup in a fresh container: `pip install playwright numpy pillow`; three r128 and acorn in /tmp/cadet-work (testing
