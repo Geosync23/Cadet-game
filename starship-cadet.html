@@ -16094,6 +16094,13 @@ function ixLiftPanel() {
   return best;
 }
 const IX_PIN = { x: 0, y: 0, t: -1e9 };                   // the pin on screen this frame (FX3: a tap there is your job's, over someone standing on the stop)
+// FX5 (RV10, 320 wide: Calder in Booth 1, the pin on Booth 2 over her, so the tap opened her card): a tap at the pin of an
+// arrow on a call booth (Day 0's call-home arrow, the Tracked row) is a tap on that booth, as fix 19's is your job's stop
+function ixPinBooth() {
+  const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, m = g && deckDef && deckDef.num === g.deck && /^3-callhome-(\d)$/.exec(g.place || '');
+  const it = m && ITEMS.find(i => i.t === 'Booth ' + m[1]); if (!it) return false;
+  it.hit.getWorldPosition(_wp); return !!playerTap(it, _wp.clone(), _wp.clone());
+}
 function ixFrame() {
   requestAnimationFrame(ixFrame);
   if (ACT && IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && ACT.body) ixSide(ACT);   // one of ours under way: its side gains
@@ -16135,6 +16142,7 @@ requestAnimationFrame(ixFrame);
 // (setGoal, the goal carrying trk, its key, so the panel knows it's on; your job with SHIP.player.track, as the Jobs app
 // does); a tap on the one being tracked stops it. A tradition asks tradGoal(x) first when there is one (the traditions
 // seat: the arrow to the leader for tap-to-join), else the Schedule's devItemGoal (its room). Nothing here is saved. ----
+const TRK_BOOTHS = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'];   // the call booths' row: its arrow keeps to a free one (trkDoneCheck)
 const TRK_PLACES = [
   { key: 'place:board', title: 'The job board', sub: 'The Works bay, Deck 5', goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'The job board' }) },
   { key: 'place:bed', title: 'Your bunk', sub: 'Your bed, Deck 4', goal: () => ({ deck: 4, place: playerBed(), label: 'Your bunk' }) },
@@ -16298,6 +16306,12 @@ function trkDoneCheck() {
   const g = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null; if (!g || !g.trk || typeof deckDef === 'undefined' || !deckDef) return;
   const now = shipNow(); if (g.trkTo != null && now >= g.trkTo) { trkDone(g); return; }
   if (/^clock:/.test(g.trk)) return;                     // the time clock's: up till you punch (15's clock reminder takes it down), not on reaching the Works bay (RV8 on FE1 item 36)
+  if (g.trk === 'place:calls') {                         // the call booths' (FX5, the user 2026-10-23): on a free booth, up till your call there begins, not on reaching the room
+    if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'call' && ACT.phase !== 'walk') { trkDone(g); return; }
+    const free = id => !(typeof heldBy === 'function' && heldBy(id));
+    if (deckDef.num === g.deck && !free(g.place)) g.place = TRK_BOOTHS.find(free) || g.place;   // taken: the first free one (all taken: as it was, where the line forms)
+    return;
+  }
   if (deckDef.num !== g.deck || g.trkFrom != null && now < g.trkFrom) return;
   const w = ixGoalWorld(g); if (!w) return;
   const p = player.obj.position, mine = roomAt(...player.here()), inRoom = mine != null && mine === roomAt(...cellAt(w.x, w.z));
@@ -43764,7 +43778,7 @@ const INTRO_ARROWS = {
   eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
   stow: { deck: 4, place: '4-B1-4-wardrobe', label: 'Put your bag in your wardrobe' },   // the arrival's 'stow' step (playtest patch 1, #2)
   tea: { deck: 5, room: 't', item: /^tea table$/i, label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below); at the tea table, like FR4's quest arrow (playtest patch 1, #10)
-  call: { deck: 3, room: 'B', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick)
+  call: { deck: 3, room: 'B', place: '3-callhome-1', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick); on a free booth (FX5: introCallTick picks it)
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
 const INTRO_CLOCK_AUTO = 8 * 60 + 50;                     // 0.72.5 (playtest 2, item 6): on your first shift, the time clock's arrow from 08:50 if you're in the Works bay (then the job board's, item 7)
@@ -43813,13 +43827,14 @@ function introArrowTick() {
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) && !cur.trk || cur.label === INTRO_BED_GOAL && id === 'call' || cur.label === 'Zeke Torres');   // (playtest patch 1: a first-time arrow over his own, the wardrobe's while he waits)   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
   if (cur && !ours && !((id === 'clockout' || id === 'beam') && introHoldNudges())) return;   // someone else's arrow is up: ours waits for it (not the end of training day's: the beam wins, the patch #19)
-  if (!cur || cur.label !== g.label) setGoal(g);
+  if (!cur || cur.label !== g.label || g.place && cur.place !== g.place) setGoal(g);   // (FX5: the call's booth, if another's taken it)
   INTRO_UI.arrow = id;
 }
 // ---- call home on the first night (onboarding 5, 0.42.62; the user via lead 13): once the Chief's table visit is over
 // (and you've food, if she told you to eat), a card says to call home, with Track it (the head writer's tip.callhome,
-// .button, .goal; section 19's deviceChoose). Tracked, the arrow points to the Call-home booths on Deck 3 until you're
-// in there (or 22:00); then the default arrow, your bunk, comes back. Saved in SHIP.intro.done: 'call:tip', 'call:track', 'call:end'.
+// .button, .goal; section 19's deviceChoose). Tracked, the arrow points at a free booth in the Call-home booths on Deck 3
+// until your call there begins (or 22:00); then the default arrow, your bunk, comes back. (FX5, the user 2026-10-23: it
+// pointed at the room and went the moment you walked in, before you'd found a booth.) Saved in SHIP.intro.done: 'call:tip', 'call:track', 'call:end'.
 const introText = (k, or) => { const L = typeof LINES !== 'undefined' && LINES[k], e = Array.isArray(L) && L[0]; return e && typeof e.text === 'string' ? e.text : or; };
 function introCallTick(now) {
   const I = SHIP.intro, D = I.done; if (D['call:end'] !== undefined) return;
@@ -43833,8 +43848,9 @@ function introCallTick(now) {
     return;
   }
   if (D['call:track'] === undefined) return;
-  let there = false; try { there = deckDef.num === 3 && roomAt(...player.here()) === 'B'; } catch (e) { there = false; }
-  if (there) { D['call:end'] = now; INTRO_UI.bed = false; }   // reached: the bunk arrow (introBedTick) may come back
+  if (typeof ACT !== 'undefined' && ACT && ACT.kind === 'call' && ACT.phase !== 'walk') { D['call:end'] = now; INTRO_UI.bed = false; return; }   // the call's begun: the bunk arrow (introBedTick) may come back
+  const B = ['3-callhome-1', '3-callhome-2', '3-callhome-3', '3-callhome-4'], free = id => !(typeof heldBy === 'function' && heldBy(id)), A = INTRO_ARROWS.call;
+  if (!free(A.place)) A.place = B.find(free) || A.place;   // the booth it's on, while nobody's taken it; else the first free one (all taken: as it was, where the line forms)
 }
 // ---- Zeke's Day 1 tea (onboarding 5, 0.42.61; the user: "Zeke explains it; once your job is finished he leads you there
 // (tracked, with an arrow), then work carries on with Zeke following and chatting"). The 13:00 tea and biscuits in the
@@ -53952,6 +53968,7 @@ function tap(cx, cy) {
   if (near && (atPin || ![.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; }))) {
     const h0 = pick(cx, cy); if (h0 && !h0.object.userData.walker && jobSpotTap(h0.point)) return;
   }
+  if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
