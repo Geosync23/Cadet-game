@@ -1,4 +1,36 @@
-# Handover: build master (BM11, BM12, BM13; newest first)
+# Handover: build master (BM11, BM12, BM13, BM14; newest first)
+
+# BM14's update (newest: read this first)
+
+- **Session:** BM14, session_016mhGtsCxEgPCFn9C767yjq. Took over from BM13 at ~16:00 UTC 2026-10-22. Reported to lead 28, lead 29 (session_01A9rNreAGVbsY1HgPucDMA7), then **lead 30 (session_016evGvfNY88TNKgaHErG9Q8, branch claude/lead-30)**.
+
+## State right now (written at ~48% memory, ~22:35 UTC)
+
+- `claude/integration` = `claude/integration-next` = **151a194c** (docs) on **989fd566 = 0.91.0**, game sha256 da9f1d0851efa06a307e2fafe9eef9ff4d867d625c2f5c2d3e584aa79dc94aee. Full round PASSED, published by PUB1 (Playtest + Dev Version 8), GitHub quick check success (run 458).
+- 0.91.0 = CP1's controller 0.90.9 on 0.64.16 (claude/controller 9a8eac0b, `PAD_ON` off; off = identical to 0.64.16) + fresh-eyes batch 1: eating at any seat (191d1853 cherry-picked from p5-fix2), New game in Settings (63710eb2; HUD "+" gone, its Settings row before the controller's `padSetBlocks()`), chip and low-need pop under the device (6261ecc0), bunk words (6b8bb392), lift-panel arrow (FX3's fix 10 alone: plans/fx3-lift-alone.patch on p5-fix3 8aae063, applied on b9f053ba = a6be4e45; game hunk identical to AR2-passed 02e212f1). Reviewed as a whole by RV9 (session_01E31oZQU7DFbZnh2BesWsnM).
+- **Next job (waiting on lead 30's go):** merge AC2's `claude/arrows-c` (final tip to be named by AC2 / lead 30) onto 151a194c using IM1's resolutions (IM1 session_01PL57XDQC6t5hx7NtJ1pDMo; trial claude/trial-p5-on-controller 8bd5d1c4 on 989fd566, notes plans/trial-p5-on-controller.md): Settings view last line = Teaching arrows row in the list, then `].concat(typeof padSetBlocks === 'function' ? padSetBlocks() : []) };`; section 17b jobEnd = arrows-c's `caseFitted` branch first, then `else if (finishJob(...))` with `padBuzz('done')`; FX3 fix 10 duplicate: design-doc.md and interactions_check.py take arrows-c's side, build-table row once; backlog/build-table keep both. Then RV7 reviews, then a full round. Build number: the next above 0.91.0 (ask the lead).
+
+## What happened today (in order)
+
+1. **0.64.17 (breakfast)**: first round on 8193458e found three new FAILs and a rise: mech m12 (test fixture; SC1 5640cf5a), bigevents Line supper (silva-bea ate standing; SC1's tradMeal 599de448), bubble_check 49.8 px (CP4's bubble-jump 36f8abf7), perf Line ceremony 301->335 (camera tile moves with the crowd; accepted, backlog LEAD29-1). Re-round on 1498dbf4 passed; published; then **the user rolled breakfast back** (problems found in play). Rollback = 2cabe96b: game, content/, design-doc, food_check, mech_check exactly as 0.64.16 b9f053ba, history kept. Breakfast work kept on claude/patch-play1-f 7f07d035 and claude/bubble-jump 36f8abf7, and in history (1498dbf4), for later.
+2. **0.91.0** built twice: first on the 0.64.17 controller base (e27b8bfe, dropped with the rollback), then on 9a8eac0b (989fd566). Staging branch `claude/integration-next-fe1` is mine and spent (I overwrote it once).
+
+## Round notes
+
+- controller_check: run every part but reach (`python3 controller_check.py starship-cadet.html idle save calls touch walk pick day games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks touch3 drop settings a11y firstuse`); touch and day are known items (check-only / controller-only; CTT2/CTT3 fixing the check), tiles flaked once on IM1's trial (backlog CP4-1).
+- Known-old: backlog 14 (perf +2 geometries, same on OLD), 23, 32; machine_check repair share edge 40% (on 0.64.16-based builds it's ~50%).
+- fridays_check is CR6's (I once started a second copy by mistake; stopped it). Before running any check yourself during a round, confirm it isn't in a runner's share.
+- When a cadet_test difference shows, isolate it: apply only one part's game hunk to the base and compare again (did this for the lift arrow).
+- Build-table "both" resolutions: the eating cherry-pick drags FX2's Pillar 5 rows as context; keep only its `| fix-eat` row under its own heading.
+
+## Gotchas
+
+- My merge-conflict helper is in BM13's section below (resolve.py ours|theirs|both); a version that also skips diff3 base sections is fine.
+- Type full commit numbers when pushing (`git push origin <full sha>:claude/integration`); a typo makes the push fail quietly in a chain.
+- Run browser checks from a worktree that isn't being changed underneath them; I once switched branches in the folder a check was reading (harmless only because the files it read didn't change).
+- three/acorn under /tmp/cadet-work must be untarred WITH their `package/` folder (`tar xzf three-0.128.0.tgz -C three`), not stripped.
+
+---
 
 # BM13's update (newest: read this first)
 
