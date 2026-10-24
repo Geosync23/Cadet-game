@@ -1499,6 +1499,24 @@ with sync_playwright() as pw:
         if again * 100 > 14 * n: fail(f"the quick player did the same job again {again} times in {n} (want 14% at most: note 24, \"the same things over and over\")")
         if sci * 100 < 12 * n: fail(f"the quick player's jobs on Deck 2: {sci} of {n} (want 12% or more: note 21, \"work needs to take you to the science area more\")")
         if off['days'].get('1', {}).get('empty', 0) < 120: fail('with BOARD_ON false, Day 1 should be as thin as before (this part would not see a regression)')
+        # the scanner's first use held for you (FX10, RV13's find): from the first workday after the scanner lesson, while it's unused
+        # and no real fault with a part is open for you, a washer's leaking pump is held for you, once a day; never before the
+        # lesson, after a use, on the lesson's own day or on a day off (forced states; each FAILs with its gate removed)
+        if g.ev("typeof fixScanTick === 'function'"):
+            sc = g.ev(r"""(() => {
+              const keepW = SHIP.works, keepJ = SHIP.jobs, out = {};
+              let d = 6; while (!playerShiftOn(d)) d++; let off = 6; while (playerShiftOn(off)) off++;
+              const at = dd => { setShipNow((dd - 1) * 1440 + 600); machinesNow(); SHIP.jobs = SHIP.jobs.filter(j => j.kind !== 'repair' && j.reserved !== FIX_SCAN_SLOT); };
+              const tryIt = (W, dd) => { SHIP.works = { v: 1, tier: 1, rank: 'junior', xp: 0, op: {}, tools: {}, sk: {}, log: [], test: null, home: 'bunk', done: [], said: {}, ms: [], cur: null, side: {}, ...W }; at(dd); return !!fixScanTick(shipNow()); };   // the game's fresh record's shape (worksInit's)
+              if (off < d) out.off = tryIt({ tr: { m7: 5 }, use: {} }, off);
+              out.before = tryIt({ tr: {}, use: {} }, d); out.used = tryIt({ tr: { m7: 5 }, use: { m7: 1 } }, d); out.lessonDay = tryIt({ tr: { m7: d }, use: {} }, d);
+              out.due = tryIt({ tr: { m7: 5 }, use: {} }, d); out.again = !!fixScanTick(shipNow() + 30);
+              const j = SHIP.jobs.find(x => x.reserved === FIX_SCAN_SLOT); out.job = j ? [j.machine, j.cause, j.until - (d - 1) * 1440, heldForYou(j)] : null;
+              if (off > d) out.off = tryIt({ tr: { m7: 5 }, use: {} }, off);
+              SHIP.jobs = keepJ.filter(x => x.reserved !== FIX_SCAN_SLOT); SHIP.works = keepW; return out; })()""")
+            print(f"  the scanner's first use held for you (FX10): {sc}")
+            if not (sc['due'] and sc['job'] and sc['job'][1] == 'pump' and sc['job'][3]) or sc['before'] or sc['used'] or sc['lessonDay'] or sc.get('off') or sc['again']:
+                fail('the scanner\'s first use: a leak held for you on a workday after the lesson, once, and never before it, after a use, on its own day or a day off')
 
     print('errors', g.errors[:5])
     if g.errors: ok = False

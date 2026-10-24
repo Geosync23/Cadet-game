@@ -52257,13 +52257,14 @@ WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('cere
 // while the scanner's unused and no real fault with a part is open for you, one is held for you from FIX_SCAN_AT: a washer's
 // leaking pump (section 17's jobReserve, slot FIX_SCAN_SLOT), till the end of that shift. Once a day at most. FIX_ON false: nothing.
 const FIX_SCAN_SLOT = 24, FIX_SCAN_AT = 570;
-if (typeof FIX_ON !== 'undefined' && typeof jobReserve === 'function') WORK_TICKS.push(now => {
-  const W = SHIP.works; if (!FIX_ON || !W || W.tr.m7 === undefined || (W.use.m7 || 0) >= 1) return;
-  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440; if (d <= W.tr.m7 || !playerShiftOn(d) || m < FIX_SCAN_AT || m >= dayShiftEnd(d) - 60) return;
-  if (SHIP.jobs.some(j => j.reserved === FIX_SCAN_SLOT && j.found >= B)) return;   // today's, held or done
-  if (SHIP.jobs.some(j => j.kind === 'repair' && j.status !== 'done' && (faultCause(j) || {}).part && (j.claimedBy === 'you' || !j.claimedBy && forYou(j)))) return;   // one's already there for you
-  jobReserve('washer', d, FIX_SCAN_AT, FIX_SCAN_SLOT, { cause: 'pump', until: B + dayShiftEnd(d) });
-});
+function fixScanTick(now) {                              // -> the held job's id when it holds one now, else null
+  const W = SHIP.works; if (!FIX_ON || !W || !W.tr || W.tr.m7 === undefined || ((W.use || {}).m7 || 0) >= 1) return null;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440; if (d <= W.tr.m7 || !playerShiftOn(d) || m < FIX_SCAN_AT || m >= dayShiftEnd(d) - 60) return null;
+  if (SHIP.jobs.some(j => j.reserved === FIX_SCAN_SLOT && j.found >= B)) return null;   // today's, held or done
+  if (SHIP.jobs.some(j => j.kind === 'repair' && j.status !== 'done' && (faultCause(j) || {}).part && (j.claimedBy === 'you' || !j.claimedBy && forYou(j)))) return null;   // one's already there for you
+  return jobReserve('washer', d, FIX_SCAN_AT, FIX_SCAN_SLOT, { cause: 'pump', until: B + dayShiftEnd(d) });
+}
+if (typeof FIX_ON !== 'undefined' && typeof jobReserve === 'function') WORK_TICKS.push(now => { fixScanTick(now); });
 // FX1 (patch-p5-fix1, bug 2): the training meeting's arrow. trainTell put it up at the ask (06:00 for a 09:00 meeting)
 // with nothing to take it down, so it stayed all day over Clock in and the training job's own arrow. Now trainTick
 // calls trainArrow once a ship minute: while the meeting is asked and told, the arrow is up from 15 ship minutes
