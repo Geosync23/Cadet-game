@@ -170,3 +170,7 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
   join deleted (it only walks TRAD_JOIN). events_check on OK; off: cadet_test vs 0.92.4 ALL IDENTICAL, check_fast OK.
   Day 6 leaders not the hosts (every-song: haddad-tamsin vs torres-zeke; picnic: soto-marta vs cruz-tove "always") -> asked.
   FX14 handed over; FX11 fixes with T3/T4 (tjActs() rerun). Review T1-T4 together.
+- FX9 took over (session_01WeXGZBS3DyyLqHGpRjWZzA); T1-T4 at 357ff7ac (game d2ca64c2...): T3 Bread day, T4 big jigsaw,
+  tjActs() fix (rerun after the weekend block), weekend_check.py, SW1's words. Not final (attendance gap for Night owls'
+  cocoa / Sunday story, switch-on runs, host question open). Running weekend_check on the tip and with the second tjActs()
+  removed. Full verdict on FX9's next sha.
