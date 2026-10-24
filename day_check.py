@@ -37,10 +37,15 @@ SIM = r"""(async ({ n, day, step, draw }) => {
     if (wallE(`v,${i},${j}`) || !free(i - 1, j)) d = Math.min(d, fx); if (wallE(`v,${i + 1},${j}`) || !free(i + 1, j)) d = Math.min(d, 1 - fx);
     if (wallE(`h,${i},${j}`) || !free(i, j - 1)) d = Math.min(d, fz); if (wallE(`h,${i},${j + 1}`) || !free(i, j + 1)) d = Math.min(d, 1 - fz); return d; };
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
+  // arriving (0.92.5, the user's item 21: crew flashed across the screen by the lift): a newcomer's body is drawn where it is from its
+  // first frame (it was drawn once at the deck's origin): its drawn spot (Human.set's pos) within .1 of where it is, the step it appears
+  out.born = 0; out.bornFar = 0; out.bornWho = []; const seen = new Set(DECK_CREW);
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
     setShipNow(B + k * step * SHIP_RATE);
     updateDeckCrew(step);
     const now = shipNow(), held = new Map();
+    for (const a of DECK_CREW) if (!seen.has(a)) { seen.add(a); out.born++; const hp = a.h && a.h.pos;
+      if (!hp || Math.hypot(hp.x - (a.x + a.lx + a.hx), hp.z - (a.z + a.lz + a.hz)) > .1) { out.bornFar++; if (out.bornWho.length < 6) out.bornWho.push(a.p.id + ' ' + hhmm(now - B) + (hp ? ' drawn at ' + hp.x.toFixed(1) + ',' + hp.z.toFixed(1) : '')); } }
     for (const a of DECK_CREW) {
       { const hp = a.h && a.h.pos, dx = hp ? hp.x : a.x + a.lx, dz = hp ? hp.z : a.z + a.lz, u = upAt.get(a);   // where the body is drawn (Human.set's pos: RV11, so a drawing that ignores the glide is caught)
         if (u && u[2] && !a.settled) { const j = Math.hypot(dx - u[0], dz - u[1]), hop = Math.hypot(a.x - u[0], a.z - u[1]);   // hop: from the place to where they now are (a long one, over CREW_UP_MAX, still moves at once: lead 34)
@@ -222,6 +227,8 @@ with sync_playwright() as pw:
             if o['laneWall'] > LANE_WALL * o['walkF']: fail(f"deck {n}: drawn into a wall by the walking lane {o['laneWall']} frames: {o['laneWho']}")
         print(f"  getting up from a place: {o['ups']} times, the drawn body's biggest move in that step {o['upMax']:.2f} tiles ({o['upWho']}; limit {UP_JUMP}); {o['upLong']} longer moves (over CREW_UP_MAX), at once as before; {o['upMoving']} off a place drawn moving (8c), not counted")
         if o['upMax'] > UP_JUMP: fail(f"deck {n}: someone hops {o['upMax']:.2f} tiles in one step getting up from a place ({o['upWho']}); at most {UP_JUMP}")
+        print(f"  arriving: {o['born']} came onto the deck, {o['bornFar']} drawn somewhere else on their first frame {o['bornWho']}")
+        if o['bornFar']: fail(f"deck {n}: {o['bornFar']} arrivals drawn away from where they are on their first frame (a flash across the screen): {o['bornWho']}")
         if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times: {o['sharedWho']}")
         if o['notOwnBed']: fail(f"deck {n}: in someone else's bed: {sorted(set(o['notOwnBed']))[:6]}")
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")

@@ -56786,6 +56786,7 @@ function updateDeckCrew(dt) {
   crewDetail();
   const here = new Set(DECK_CREW.map(a => a.p.id));
   for (const p of schedPeople()) if (!here.has(p.id)) { const w = whereIs(p, now); if (w.deck === N) crewArrive(p, w, now, false); }
+  for (let i = 0; i < DECK_CREW.length; i++) { const a = DECK_CREW[i]; if (!here.has(a.p.id)) a.h.set({ x: a.x + a.lx + a.hx, y: a.y, z: a.z + a.lz + a.hz }, a.face, heldPose(a)); }   // 0.92.5 (the user's item 21): a newcomer is drawn where it is from its first frame (it was drawn once at the deck's origin, then jumped to the lift)
 }
 // doors open for crew walking through them; a 'closed' one only for those whose rooms are behind it
 function crewNearDoor(d) {
