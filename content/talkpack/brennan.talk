@@ -238,7 +238,7 @@ when: tier>=colleague
 them: When a junior tastes for me, they can't say "nice". "Nice" isn't a taste, love.
 them: "Too sharp." "Needs salt." "Tastes like Sunday." That's what I want. Tell me something.   #warm
 ask: Go on, then. Describe your favourite food. No "nice" allowed.
-listen: What's the best answer you've had?
+listen: Who's given you the best answer?
   them: Tomas, about a stew. "It tastes like being picked up from school." I nearly cried.   #warm
 share: Warm and salty. Like a kitchen at home.
   them: Oh, love. That's a real answer. That's the best kind. I'll cook to that.   #warm
