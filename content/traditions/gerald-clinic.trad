@@ -1,0 +1,32 @@
+@tradition gerald-clinic
+// Gerald clinic (FX14, 0.92.5 item 16; SW1's pitch): every cactus on the Wren is called Gerald, and they all came from Tove
+// Cruz's cuttings. Every other Sunday she holds a clinic at the garden's potting bench end. Behind WEEKEND_ON.
+k: 465
+title: Gerald clinic
+when: every 2 weeks sunday week 2 from day 1
+at: 14:30-15:15
+min: 20
+jitter: 10
+where: 3 pool garden
+hold: 1
+who: cruz-tove always, janssen-hugo always, esposito-yara always, alvarez-luca always, walsh-esme always, gardener 50%, garden-lover 30%, everyone 5%
+anim: water
+host: cruz-tove
+from: cruz-tove
+
+== mail
+- Gerald clinic tomorrow at half two. Bring your Gerald. Mm. Or come and get one. They're very easy. Mostly.
+
+== ask
+- Gerald clinic later. Mine needs a repot. Don't tell him.   #funny
+- Bring your Gerald to the garden this afternoon? Cruz is looking them over.
+
+== here
+- Mm. A little water. Not too much. Gerald doesn't like a fuss.
+- That one's a cutting of a cutting of the first Gerald.
+
+== thanks
+- You line up with the Gerald keepers at the potting bench while Tove Cruz murmurs to each little cactus in turn.
+
+== chatter
+- Gerald clinic tomorrow. My Gerald's leaning. Cruz says he's just thinking.   #funny

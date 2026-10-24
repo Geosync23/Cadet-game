@@ -1,0 +1,32 @@
+@tradition every-song
+// Every song (FX14, 0.92.5 item 16; SW1's pitch): Saturdays before dinner, the five who know every song in the record
+// cabinet sing through it in the music room, one record at a time, arguing about the second verse. Behind WEEKEND_ON.
+k: 459
+title: Every song
+when: weekly saturday
+at: 17:00-17:50
+min: 20
+jitter: 10
+where: 4 pool music
+hold: 1
+who: torres-zeke always, takahashi-wen always, farouk-olu always, achterberg-lars always, haddad-tamsin always, musician 50%, music 50%, everyone 6%
+anim: musician play, everyone talk
+host: torres-zeke
+from: torres-zeke
+
+== mail
+- Every song, tomorrow at five, the music room. This week: the lighthouse one. I'm right about the second verse. Come and tell Takahashi.
+
+== ask
+- Every song at five? We're on the lighthouse one.
+- Come and settle the second verse for us. Pick my side.   #funny
+
+== here
+- No, no, it's "the light comes round", not "the night comes down".   #funny
+- Next record! Don't touch the scratched one.
+
+== thanks
+- You sing along in the music room. Five people sing slightly different words at once, and the whole room takes sides.
+
+== chatter
+- Every song tonight. Zeke's been practising the wrong words all week.   #funny

@@ -1,0 +1,32 @@
+@tradition night-owls-cocoa
+// Night owls' cocoa (FX14, 0.92.5 item 16; SW1's pitch): Saturday late, after film night and the observatory, Davi Keane
+// makes a big pot of cocoa in the bow lounge with the lights down low. Behind WEEKEND_ON.
+k: 463
+title: Night owls' cocoa
+when: weekly saturday
+at: 22:30-23:30
+min: 20
+jitter: 15
+where: 3 room Bow lounge: lounge-seat, bench
+hold: 1
+who: keane-davi always, night-owl 80%, late-sleeper 50%, stargazer 30%, everyone 8%
+anim: drink
+host: keane-davi
+from: keane-davi
+
+== mail
+- Night owls' cocoa tomorrow from half ten, bow lounge. Lights low, cocoa high. Pyjamas welcome.
+
+== ask
+- Cocoa in the bow lounge later? For those of us who don't sleep.
+- Night owls' cocoa tonight. Keane's making the big pot.
+
+== here
+- Mind the pot, it's hot. Like the conversation.   #funny
+- Look at those stars. Nobody sees them this late but us.
+
+== thanks
+- You sit with a mug of Keane's cocoa in the low light of the bow lounge, the curved windows full of stars.
+
+== chatter
+- Night owls' cocoa tonight. The best hour of the week, if you can stay up.

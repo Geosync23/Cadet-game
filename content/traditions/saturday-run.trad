@@ -1,0 +1,33 @@
+@tradition saturday-run
+// Saturday run (FX14, 0.92.5 item 16; SW1's weekend pitch, the user's yes 2026-10-24): every other Saturday before the
+// long breakfast, Dr. Nandakumar leads three easy laps of the promenade, the Lap of the Wren's loop. Behind WEEKEND_ON.
+k: 458
+title: Saturday run
+when: every 2 weeks saturday week 1
+at: 07:00-07:40
+min: 20
+wake: 15
+where: 3 pool @lap-of-the-wren
+where: 3 room Promenade: bench
+hold: none
+who: nandakumar always, vance 70%, runner 50%, gym-regular 50%, early-riser 20%, everyone 5%
+anim: talk
+host: nandakumar
+from: nandakumar
+
+== mail
+- Saturday run tomorrow at seven. Three laps of the promenade, any speed. Then breakfast. Then water.
+
+== ask
+- Saturday run in the morning? Three laps. Walking counts.
+- Run with us before breakfast? Nobody's timed. Except by Vance.   #funny
+
+== here
+- Breathe. In through the nose. Out through the complaining.   #funny
+- One more lap, then the long breakfast.
+
+== thanks
+- You run three easy laps of the promenade with Dr. Nandakumar. Commander Vance times everyone anyway.
+
+== chatter
+- Saturday run tomorrow. Nandakumar says it's good for the heart. My legs disagree.   #funny
