@@ -17,6 +17,7 @@ from playwright.sync_api import sync_playwright
 DAY = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 BUDGET = 450
 LANE_WALL = .001               # the share of walking frames a lane may bring a body within .1 tile of a wall its tile isn't near (playtest 1, #17: a body leaving a seat, its tile still off the middle, while the lane eases in; 0.03% on Day 1's busiest deck)
+UP_JUMP = 0.35                 # tiles: the most the drawn body may move in the step someone gets up from a seat or station (0.92.4 C: it hopped about 0.7 at once)
 STEP = 0.05                    # real seconds a step (the main loop's longest frame): 0.03 ship minutes at SHIP_RATE 0.6
 
 # run one deck through the day: the crew logic only, a step at a time; every ship hour, draw a frame or two
@@ -29,6 +30,8 @@ SIM = r"""(async ({ n, day, step, draw }) => {
   // the drawn lane (#10; playtest 1, #17): every walker's lane within WALK_LANE, and never drawn into a wall it isn't at: a
   // walking frame where the lane alone brings the body within .1 tile of a wall or a blocked tile (its tile position not)
   out.laneMax = 0; out.laneWall = 0; out.laneWho = []; out.walkF = 0;
+  // getting up from a place (0.92.4 C, FX8): the drawn body's move in the step someone gets up (0.92.3: about 0.7 tiles at once)
+  out.upMax = 0; out.upWho = ''; out.ups = 0; const upAt = new Map();
   const wallE = k => { const e = EDGES.get(k); return !!e && (e.type === 'wall' || e.type === 'hull'); };
   const wallD = (X, Z) => { const gx = X + OX, gz = Z + OZ, i = Math.floor(gx), j = Math.floor(gz), fx = gx - i, fz = gz - j; let d = 9;
     if (wallE(`v,${i},${j}`) || !free(i - 1, j)) d = Math.min(d, fx); if (wallE(`v,${i + 1},${j}`) || !free(i + 1, j)) d = Math.min(d, 1 - fx);
@@ -39,6 +42,9 @@ SIM = r"""(async ({ n, day, step, draw }) => {
     updateDeckCrew(step);
     const now = shipNow(), held = new Map();
     for (const a of DECK_CREW) {
+      { const dx = a.x + a.lx + (a.hx || 0), dz = a.z + a.lz + (a.hz || 0), u = upAt.get(a);
+        if (u && u[2] && !a.settled) { const j = Math.hypot(dx - u[0], dz - u[1]); out.ups++; if (j > out.upMax) { out.upMax = j; out.upWho = a.p.id + ' ' + hhmm(now - B) + ' ' + (u[3] || ''); } }
+        upAt.set(a, [dx, dz, a.settled, a.spot && a.spot.id]); }
       if (typeof a.lane === 'number') out.laneMax = Math.max(out.laneMax, Math.abs(a.lane));
       if (a.pose === 'walk') out.walkF++;
       if (a.pose === 'walk' && (a.lx || a.lz) && wallD(a.x + a.lx, a.z + a.lz) < .1 && wallD(a.x, a.z) >= .1) { out.laneWall++; if (out.laneWho.length < 6 && !out.laneWho.some(w => w.startsWith(a.p.id + ' '))) out.laneWho.push(a.p.id + ' ' + hhmm(now - B)); }
@@ -212,6 +218,8 @@ with sync_playwright() as pw:
             print(f"  walking lanes: widest {o['laneMax']:.2f} tiles (limit {wl}), drawn into a wall by the lane {o['laneWall']} of {o['walkF']} walking frames {o['laneWho']}")
             if o['laneMax'] > wl + 1e-9: fail(f"deck {n}: a walking lane {o['laneMax']:.2f} tiles wide, over WALK_LANE {wl}")
             if o['laneWall'] > LANE_WALL * o['walkF']: fail(f"deck {n}: drawn into a wall by the walking lane {o['laneWall']} frames: {o['laneWho']}")
+        print(f"  getting up from a place: {o['ups']} times, the drawn body's biggest move in that step {o['upMax']:.2f} tiles ({o['upWho']}; limit {UP_JUMP})")
+        if o['upMax'] > UP_JUMP: fail(f"deck {n}: someone hops {o['upMax']:.2f} tiles in one step getting up from a place ({o['upWho']}); at most {UP_JUMP}")
         if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times: {o['sharedWho']}")
         if o['notOwnBed']: fail(f"deck {n}: in someone else's bed: {sorted(set(o['notOwnBed']))[:6]}")
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")
