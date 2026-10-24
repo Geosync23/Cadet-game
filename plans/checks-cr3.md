@@ -245,3 +245,18 @@ No FAIL. (Day 0's peak is 14 calls higher than on 0.92.0, likely FX5's dinner tr
 51a1bb34's own controller_check.py, every part but reach (lift included). 1977 s. Exit 0: **CONTROLLER CHECK OK**, all 28 parts OK:
 idle save calls touch walk pick day games unplug odd off quiet base deck pick1 panels api lists tiles disc screens marks
 touch3 drop settings a11y firstuse lift. **day now passes: KC1 and KC2 fixed** (CP5), as BM15 expected.
+
+# Round on 0.92.2 (claude/integration-next ee974894), BM15's start; reported to BM15 and lead 32
+
+sha256 **ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4** (BM15's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 257 s (FX8's Day 0 evening: no rule broken) |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 246 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 249 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 248 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 54 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 25 s |
+
+No FAIL. (Peaks the same as 0.92.1.)
