@@ -19,7 +19,7 @@ Every item below is the user's own words, summarised; nothing dropped. Each buil
 | 13 | Name on the beam: you can't sign until people arrive and a few speech bubbles explain the event | DV1 | RV13 |
 | 14 | Rename "task tracker" (Tracked) to "Schedule tracker" | FX4 | RV11 |
 | 15 | Talk a while: the Captain and the main characters get their own large pool of original lines, never the general pool; the Captain introduces herself properly and welcomes you aboard the first time you talk | CS1 + SW1-3 (words), FX13 (wiring) | CS1 (words), RV13 (code) |
-| 16 | First time using the pool or the river: green tip about changing in the lockers | AC3 | RV12 |
+| 16 | First time using the pool or the river: green tip about changing in the lockers | FX11 | RV13 |
 | 17 | Camera doesn't track the player swimming in the pool | FX11 | RV13 |
 | 18 | Hunger needs to drop a lot more overnight | FX9 | RV12 |
 | 19 | Get up while eating, even if not done: the tray goes away (still happens on 0.92.2) | FX12 | RV12 |
@@ -29,7 +29,7 @@ Every item below is the user's own words, summarised; nothing dropped. Each buil
 | 23 | Your name on the beam goes next to the other names (now way off to the side) | DV1 | RV13 |
 | 24 | First days repeat the exact same repairs; add a ton of plausible repairs and rotate them on the board | FX10 (+ writers for job words) | RV13 |
 | 25 | You should be able to see people playing light disc | FX11 | RV13 |
-| 26 | Dirty clothes: people comment and a green tip appears | AC3 (tip) + ZW1 (comment lines) | RV12 |
+| 26 | Dirty clothes: people comment and a green tip appears | FX4 (tip + hook) + ZW1 (comment lines) | RV11 |
 | 27 | Pick-your-own breakfast tradition: a tray of the food you picked in your hands when you finish, then an arrow to the mess hall; the tray behaves like the mess-hall one | FX12 | RV12 |
 | 28 | Kitchen workers appear in the kitchen at 07:00 by magic? Not allowed: they wake and leave early; all crew must path everywhere (check first) | FX8 | RV11 |
 | 29 | Your turn hauling / stores: when selected, show which job to take on the board | FX10 | RV13 |
