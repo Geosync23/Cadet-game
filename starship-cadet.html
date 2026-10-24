@@ -9021,9 +9021,9 @@ function recMats() {
 // The rec utility room (room 'b', columns 28-33, rows 11-17) splits: the sim bay 'S' (columns 28-31), its door the old
 // hatch h,31,11, and the stage booth (columns 32-33), which keeps the key 'b' so Maeve's 7-booth-1 and talent night are
 // as they were; a Works hatch h,32,11 into it from the foyer. The booth's three machines keep their ids and jobs; only
-// their tiles move, onto the auditorium wall. SIM_BAY off (the build's default till the switch-on step): nothing here
-// runs and the deck is as before; #simbay on the link (or ?simbay) previews it
-const SIM_BAY = location.hash.slice(1).split('.').some(t => t.split('-')[0] === 'simbay') || new URLSearchParams(location.search).has('simbay');
+// their tiles move, onto the auditorium wall. SIM_BAY was off till the switch-on step (#simbay
+// previewed it); it is on for good from 0.92.5
+const SIM_BAY = true;   // switched on for good in 0.92.5 (the user, 2026-10-24: "Put the Sim bay in."); #simbay / ?simbay on a link are now harmless
 const SIM_MOVE = { '7-aud-lights': [33, 14], '7-aud-sound': [33, 15], '7-grav-plates': [33, 16] };   // at; face 'w', the panel the tile west
 if (SIM_BAY) {
   const D = DECKS[7];
