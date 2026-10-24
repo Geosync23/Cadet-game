@@ -1288,6 +1288,45 @@ with sync_playwright() as pw:
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     else:
         print('== the climbing wall: the rec deck is off in this build, skipped')
+    # the sim bay (FX14, rec-simbay S3; behind SIM_BAY, so only on a build or copy with it on): a pod tap walks you in and
+    # sits you down for a 15-minute run with its screen playing, leisure up about 20 and no score; both pods taken, you
+    # wait on the bench and get in when one frees up
+    if g.ev("typeof SIM_BAY !== 'undefined' && SIM_BAY"):
+        print('== the sim bay: a run in a pod, and waiting for one')
+        tap = lambda title, near=None, place=True: g.ev(f"({TAP})({json.dumps({'title': title, 'near': near, 'place': place})})")
+        g.ev("skipTo(19 * 60)"); g.step(3); g.ev("goToDeck(7); actEnd(true); REC.q = null"); g.step(3)
+        l0 = g.ev("SHIP.player.needs.leisure"); tap('Sim pod'); g.step(240)
+        s = json.loads(g.ev(STATE)); run = g.ev("Math.max(simRunAt(0), simRunAt(1))")
+        print('   in the pod:', s['act'], round(run, 2))
+        check(s['act'] and s['act'][0] == 'recSim' and s['act'][1] in ('7-sim-1', '7-sim-2') and s['act'][2] == 'do' and s['act'][3] == 'sit', f"a pod tap: you sit in a pod ({s['act']})")
+        check(0 < run < 1, f'its screen plays the run ({run})')
+        for _ in range(12):
+            if not g.ev("ACT && ACT.kind === 'recSim'"): break
+            g.step(150)
+        l1 = g.ev("SHIP.player.needs.leisure"); s = json.loads(g.ev(STATE))
+        print('   after:', s['act'], round(l0, 1), '->', round(l1, 1), s['toast'][:90])
+        check(not (s['act'] and s['act'][0] == 'recSim'), f"the run ends by itself ({s['act']})")
+        check(14 <= l1 - l0 <= 24 or l1 >= 99, f'leisure up about 20 ({l0:.1f} -> {l1:.1f})')
+        check(g.ev("Math.max(simRunAt(0), simRunAt(1))") == -1, 'the screens go back to drifting stars')
+        w = g.ev("(() => { const fakes = SIM_POD_IDS.map(id => ({ goalId: id, x: -999, z: -999, path: [] })); DECK_CREW.push(...fakes); actEnd(true); REC.q = null; const r = recQueue('sim', 'Sim pod', null); const a = [r, ACT && ACT.kind, ACT && ACT.placeId, REC.q && REC.q.kind]; for (const f of fakes) DECK_CREW.splice(DECK_CREW.indexOf(f), 1); return a; })()")
+        check(w[0] is True and w[1] == 'recWait' and (w[2] or '').startswith('7-simq-') and w[3] == 'sim', f'both pods taken: you wait on the bench ({w})')
+        g.step(60); s = json.loads(g.ev(STATE))   # (the stand-ins leave in the same breath: they aren't real crew to step)
+        print('   the pods free up:', s['act'])
+        check(s['act'] and s['act'][0] == 'recSim', f"a pod frees up: you're up, in it ({s['act']})")
+        g.ev("actEnd(true); REC.q = null")
+        # the pods are machines (S4): one tagged out, a tap takes the other; both, a tap is refused and says why
+        g.ev("window.__simShut = simPodsShut; simPodsShut = () => [true, false]"); tap('Sim pod', [29, 13]); g.step(30)
+        s = json.loads(g.ev(STATE)); print('   pod 1 tagged out:', s['act'])
+        check(s['act'] and s['act'][0] == 'recSim' and s['act'][1] == '7-sim-2', f"one pod tagged out: you get the other ({s['act']})")
+        g.ev("actEnd(true); REC.q = null; simPodsShut = () => [true, true]"); tap('Sim pod'); g.step(5)
+        s = json.loads(g.ev(STATE)); print('   both tagged out:', s['act'], s['toast'][:90])
+        check(not (s['act'] and s['act'][0] in ('recSim', 'recWait')) and 'tagged out' in s['toast'], f"both tagged out: refused, and says why ({s['act']}, {s['toast'][:90]})")
+        g.ev("simPodsShut = window.__simShut")
+        m = g.ev("JSON.stringify(machineList().filter(m => m.kind === 'simpod').map(m => [m.id, m.at, m.panel, !!panelPlace(m.id)]))")
+        print('   the pods as machines:', m)
+        check(len(json.loads(m)) == 2 and all(x[3] for x in json.loads(m)), f'two pod machines, each with its panel place ({m})')
+        g.ev("actEnd(true); REC.q = null")
+        check(not g.errors, f'no console errors ({g.errors[:3]})')
     # playtest 1, notes 9-11, on paper: no job on a shift day, the arrow shows the time clock, then (clocked in) the job
     # board, and nothing after the shift; a tracked tea points at the tea table, not the room's middle; tracking
     # something else over your job, then done with it, tracking goes back to your job

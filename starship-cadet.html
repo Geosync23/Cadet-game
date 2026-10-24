@@ -9036,6 +9036,13 @@ if (SIM_BAY) {
     m.at = SIM_MOVE[m.id].slice(); m.face = 'w'; m.panel = [m.at[0] - 1, m.at[1]];
     const p = D.places.find(q => q.id === m.id + '-svc'); p.at = m.panel.slice(); p.face = 'e';
   }
+  // the pods' seats (S3; xy on the seat, the pods' centres at SIM_PODS' z) and the bench's two waiting spots, all from the aisle
+  D.places.push(...[13, 16].map((r, k) => ({ id: '7-sim-' + (k + 1), type: 'rec:sim', at: [29, r], walk: [30, r], xy: [29.45, r], y: .56, face: 'w', pose: 'sit', room: 'S' })),
+    ...[29.25, 28.55].map((x, k) => ({ id: '7-simq-' + (k + 1), type: 'rec:simq', at: [Math.floor(x), 11], walk: [30, 11], xy: [x, 11.32], y: .45, face: 's', pose: 'sit', room: 'S' })));
+  // the pods as machines (S4; the user's "now"): kind simpod (section 17's slot adds it), their panels on the aisle by each pod's nose end
+  const pods = [12, 15].map((r, k) => ({ id: '7-sim-pod-' + (k + 1), kind: 'simpod', at: [29, r], room: 'S', face: 'e', panel: [30, r], look: { lamp: [.2, .95, .45], drip: [.2, .35, .5], light: [.2, 1.5, .45] } }));
+  REC_MACHINES.push(...pods);
+  D.places.push(...pods.map(m => ({ id: m.id + '-svc', machine: m.id, type: 'work:works', at: m.panel.slice(), face: 'w', pose: 'work', room: 'S' })));
 }
 // the stage booth's kit (room-local: x 0-2 across, z 0-7 from the foyer end): the desk, chair and window as before, the
 // projector beside them, the dimmers, the sound rack and the gravity plates' board along the auditorium wall, each over
@@ -9146,6 +9153,27 @@ function simBayKit() {
   placeWall('S', 'simPoster', 'w', 3.5, { it: IT('Tern poster', 'The Tern in cutaway, and the sim bay\'s rules. Someone has added a fourth in pencil: no loops before breakfast.') });
   place('S', 'bench', 1.0, .3, 'n', { w: 1.6, it: IT('Bench', 'A bench by the door, for waiting your turn in a pod.') });
   place('S', 'utilShelf', 3.4, 6.7, 's', { it: IT('Headsets', 'A shelf of flight headsets on hooks, each with a name tape. One says DEV, in capitals.') });
+}
+// your run (S3; section 15r's recStart 'sim', PLAYER_ACTS.recSim): a free pod, else the bench (REC_QUEUE.sim); 15
+// minutes in the pod while its screen plays the run. No score (the user's "just fly"), nothing saved
+const SIM_POD_IDS = SIM_PODS.map((q, k) => '7-sim-' + (k + 1));
+// a pod is tagged out while its machine is faulty or worse (under 50), from the hour-by-hour record like section 17's
+// recShutAt (pure, so the crew's plans may ask: simPlanShut reads the record at 22:00 the evening before, as recPlanShut)
+const SIM_POD_MACH = SIM_PODS.map((q, k) => '7-sim-pod-' + (k + 1));
+function simPodsShutAt(t) { const c = MACH_HIST.get(histHour(t)); return SIM_POD_MACH.map(id => !!c && Number.isFinite(c[id]) && c[id] < 50); }
+function simPodsShut() { machinesNow(); return simPodsShutAt(shipNow()); }
+function simPlanShut(d) { const h = (d - 1) * 24 - 2; return recSettled(h) ? simPodsShutAt(h * 60) : SIM_POD_MACH.map(() => false); }
+const simPodsUsable = () => simPodsShut().filter(b => !b).length;
+const simPodsFree = () => { const sh = simPodsShut(); return SIM_POD_IDS.filter((id, k) => !heldBy(id) && !sh[k]); };
+function simStart(title, flavour, p) {                   // p: the tap in deck coordinates (or null): the nearest free pod to it
+  const free = simPodsFree(), z = id => PLACE_OF.get(id).xy[1];
+  const id = free.reduce((m, q) => p && Math.abs(z(q) - p[1]) < Math.abs(z(m) - p[1]) ? q : m, free[0]);
+  actStart('recSim', id, { pose: 'sit', title, flavour, after: 'You climb into the pod and strap in. On the screen, the bay doors begin to open.' });
+}
+// a pod's screen: your run's progress (0-1) while you're flying in it, else -1 (the stars drift)
+function simRunAt(k) {
+  const A = typeof ACT !== 'undefined' ? ACT : null;
+  return A && A.kind === 'recSim' && A.phase === 'do' && A.placeId === SIM_POD_IDS[k] ? Math.min(1, A.done / A.def.mins) : -1;
 }
 // ---- end of slot: Rec engineer ----
 
@@ -16964,6 +16992,7 @@ Object.assign(PLAYER_ACTS, {
   recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
   recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
+  recSim:    { need: 'leisure', gain: 20, mins: 15, pose: 'sit', title: 'Sim pod', done: 'Down and parked in the bay. You climb out, legs a little wobbly from the motion base.' },   // the sim bay (rec-simbay S3, SIM_BAY)
   recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
   recWait:   { need: 'leisure', gain: 4, mins: 40, pose: 'sit', title: 'Waiting your turn', done: 'You give up waiting.' },   // RA, 0.83.0: the queue (recQueue)
 });
@@ -16987,7 +17016,7 @@ function recTap(it, at, point) {
   if (t === 'Lightdisc court' || t === 'Ask someone to play') { if (!recQueue('disc', t, null)) discAsk(recCourtWaiting()); return true; }   // section 23b (0.82.0); two crew already on the court: wait your turn (RA, 0.83.0)
   if (t === 'Scoreboard') { toast(t, it.x); return true; }
   const kind = t === 'Pool' ? 'swim' : /^(Kayak dock|River|White water|Kayak rack|Wave gate)$/.test(t) ? 'kayak' : t === 'Climbing wall' ? 'climb'
-    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
+    : t === 'Float room' ? 'float' : t === 'Seats' ? 'seat' : t === 'Stands' ? 'watch' : t === 'Beanbag' ? 'bean' : t === 'Sim pod' ? 'sim' : t === 'Lockers' && recKitOn() ? 'unchange' : null;
   if (!kind) return false;
   if (!recOpen() && kind !== 'unchange') { toast(t, 'The rec deck\'s closed till six.'); return true; }
   recGo(kind, point, t, it.x); return true;
@@ -17028,8 +17057,8 @@ const recBelaysFree = () => { const sh = typeof recShut === 'function' ? recShut
 const recBelaysUsable = () => { const sh = REC_DECK && typeof recShut === 'function' ? recShut() : null; return REC_BELAYS.filter(([, r], b) => !(sh && ((sh.belayOff || [])[b] || sh.route === r))).length; };   // free or busy, not tagged out or roped off: none means no turn will come (R7's note; RE20, 0.64.1)
 const recCourtFree = () => !heldBy('7-disc-1');           // your baseline: crew there means a game of theirs is on (0.83.2)
 const REC_QUEUE = { swim: ['rec:poolq', 'Every lane\'s taken. You wait on a lounger for one to come free.'], climb: ['rec:climbq', 'Both belays are in use. You wait on the pebble beach for your turn.'],
-  disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'] };
-const recFreeFor = kind => kind === 'swim' ? recLanesFree().length > 0 : kind === 'climb' ? recBelaysFree().length > 0 : kind === 'disc' ? recCourtFree() : true;
+  disc: ['rec:seat', 'Two are playing. You wait on the bench by the gate: you\'re next.'], sim: ['rec:simq', 'Both pods are in use. You wait on the bench by the door for one to come free.'] };
+const recFreeFor = kind => kind === 'swim' ? recLanesFree().length > 0 : kind === 'climb' ? recBelaysFree().length > 0 : kind === 'disc' ? recCourtFree() : kind === 'sim' ? simPodsFree().length > 0 : true;
 // Winner Stays On (0.83.1): tap the court or its gate while it's on and you play the one who's on next ("Go on, you're
 // up"); win three in a row and your name goes on the foyer's board with the rest (REC.wso counts your run that day)
 // the Lightdisc Cup (0.83.2): you enter at the gate on Cup day and play your matches live, a round at a time against
@@ -17064,6 +17093,7 @@ function recQueue(kind, title, p) {                      // true when you're now
 }
 function recStart(kind, title, flavour, p) {             // p: the tap in deck coordinates (or null)
   if (kind === 'float' && recShut().float) { toast('Float room', worksText('rec.shut.float', 'The float room\'s shut: the gravity plates are down. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
+  if (kind === 'sim' && !simPodsUsable()) { toast('Sim pod', worksText('rec.shut.sim', 'Both pods are tagged out: their motion bases need Works. No flying till they\'re fixed.')); return; }   // rec-simbay S4
   if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (kind === 'climb' && REC_DECK && !recBelaysUsable()) { toast('Climbing wall', worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.')); return; }   // one tagged out, the other's route taped: no waiting for a turn that won't come (R7's note; RE20, 0.64.1)
   const water = { pool: .35, river: .36 };
@@ -17088,7 +17118,7 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
   } else if (kind === 'float') {
     actStart('recFloat', null, { title, flavour, spot: recSpot([18, 12], 20.5, 14.5, 0, 'stand'),
       move: { kind: 'float', at: [21, 14.8], r: 1.2, top: Math.min(2.2, H - 1.4), bounces: 4 }, follow: true, after: 'You pull on grip socks from the shelf and step into a fifth of a g.' });
-  }
+  } else if (kind === 'sim') simStart(title, flavour, p);   // the sim bay (rec-simbay S3)
 }
 // after each one ends: the next step of the wet way (change, the activity, a shower, change back)
 function recAfter(A) {
@@ -17119,6 +17149,8 @@ function recFrame() {
     if (q.kind === 'disc') { actEnd(true); discAsk(recCourtWaiting()); } else recStart(q.kind, q.title, null, q.p);
   } else if (A && A.kind === 'recWait' && REC.q && REC.q.kind === 'climb' && REC_DECK && !recBelaysUsable()) {   // waiting, and now no belay can free up: stop waiting (RE20, 0.64.1)
     REC.q = null; actEnd(true); toast('Climbing wall', recShut().belays ? worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.') : worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.'));
+  } else if (A && A.kind === 'recWait' && REC.q && REC.q.kind === 'sim' && !simPodsUsable()) {   // waiting, and now both pods are tagged out (rec-simbay S4)
+    REC.q = null; actEnd(true); toast('Sim pod', worksText('rec.shut.sim', 'Both pods are tagged out: their motion bases need Works. No flying till they\'re fixed.'));
   } else if (REC.q && (!A || A.kind !== 'recWait')) REC.q = null;   // gave up waiting, or went off to do something else
   if (A !== REC.last) { const was = REC.last; REC.last = A; if (was && was.kind.startsWith('rec') && !A) recAfter(was); }
   if (A && A.kind.startsWith('rec') && A.phase === 'do' && A.def.also) {   // the second gains (a swim washes you, all of them keep you fit), as the minutes go by
@@ -20532,6 +20564,16 @@ machinesLoad(SAVED);
 jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // ---- slot: Systems engineer (section 17). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the sim bay's pods (FX14, rec-simbay S4; behind SIM_BAY, section 4e's slot): a motion base under each, Tier 1, parts from
+// the existing shelves (a base bearing, a screen lamp). A pod
+// that's faulty or worse is tagged out (section 4e's simPodsShutAt)
+if (SIM_BAY) {
+  MACHINE_KINDS.simpod = { name: 'Sim pod', sys: 'rec', life: 22, time: .5, use: 'heads', scope: 'deck', w: 1, tier: 1, part: 'bearing' };
+  FAULT_CAUSES.simpod = [
+    { id: 'base', part: 'bearing', w: 3, shows: 'the pod lurches', sign: 'the motion base clunks on every turn, one corner dropping', when: 'always', still: 'New bearing. The screen still stutters.' },
+    { id: 'screen', part: 'lamp', w: 2, shows: 'the screen stutters', sign: 'the stars freeze for a moment, then jump', when: 'warm', still: 'New lamp. The base still lurches.' } ];
+  LOOK_LIT.simpod = .5;
+}
 // ---- small repairs (FX10, patch 0.92.3 items 21 and 24: "the first days you repair the exact same things over and over";
 // "work needs to take you to the science area more") ----
 // FIX_ROWS: real fittings all over the ship, none of them a machine: no condition, no wear, never in shipSystems,
