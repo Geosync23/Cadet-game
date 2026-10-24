@@ -16596,6 +16596,7 @@ function guideToast(t, x, o) {
 function guideTick() {
   if (!GUIDE_ON) { GUIDE.loop = false; GUIDE.tq.length = 0; return; }
   requestAnimationFrame(guideTick);
+  try { clockFirstTick(); } catch (e) { if (!GUIDE.clockWarned) { GUIDE.clockWarned = true; console.warn('clockFirstTick:', e); } }   // patch 0.92.3 item 6 (AC3)
   { const m = Math.floor(shipNow()); if (m !== GUIDE.tm) { GUIDE.tm = m; try { guideTrain(); } catch (e) { if (!GUIDE.trainWarned) { GUIDE.trainWarned = true; console.warn('guideTrain:', e); } }
     try { guideShift(); } catch (e) { if (!GUIDE.shiftWarned) { GUIDE.shiftWarned = true; console.warn('guideShift:', e); } } } }   // once a ship minute; a break is said once (RV6)
   if (GUIDE.tq.length && performance.now() - TOAST_AT >= TQ_MIN) { const [t, x] = GUIDE.tq.shift(); GUIDE.pass = true; try { toast(t, x); } finally { GUIDE.pass = false; } }
@@ -16730,6 +16731,40 @@ function boardEmptySay(empty, now) {
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE || c && (c.st === 'watch' || c.st === 'do') || (SHIP.occasions || []).some(r => r.status === 'asked' && now >= r.at - 5 && now < r.at + r.len)) return;
   B.dry = true; B.at = now;
   try { toast('Job board', 'Nothing on the board for you just now. New jobs come in through the shift: look again in an hour, or have a tea.'); } catch (e) { /* no UI */ }
+}
+// patch 0.92.3, item 6 (the user: "glaringly obvious"; AC3): Days 1-3, the first moment you're in the Works bay from
+// 08:00 until you've clocked in, Clock in is tracked (the time clock's arrow, as a tap on Tracked's "Clock in" row;
+// clockRemindTick clears it once you've punched) and the clock-in tip comes to the front of the tips and shows at once.
+// Day 1 (DS1, item 7): the tip waits for Zeke's "First, clock in" (his opener, SHIP.intro.done['d1-opener']), or 09:15
+// if he never reaches you, and only if you still haven't clocked in; the career's one-off bay tip is held back so the
+// two never double. Once a day each; nothing while a dialogue plays. Teaching arrows Off: the tip only (the shift's own
+// arrow points at the clock anyway). Its words match Zeke's: the time clock is by the tea corner.
+const CLOCK_FIRST = { days: 3, d: 0, tip: 0, d1late: 9 * 60 + 15 };
+function tipFront(id, text) {                            // tipShow, then that tip in front of any waiting and on screen now
+  tipShow(id, text); const i = TIP_Q.findIndex(x => x.id === id); if (i <= 0) return i === 0;
+  TIP_Q.unshift(TIP_Q.splice(i, 1)[0]); DEVICE_SKIN.tip(TIP_Q[0]); return true;
+}
+function clockFirstDrop(keep) {                         // a clock-in tip still waiting once it's stale (clocked in, or another day): gone
+  for (let i = TIP_Q.length - 1; i >= 0; i--) if (/^career\.clock\.\d$/.test(TIP_Q[i].id) && TIP_Q[i].id !== keep) { if (i === 0) tipDone(); else TIP_Q.splice(i, 1); }
+}
+function clockFirstTick() {
+  if (typeof CAREER === 'undefined' || typeof clockRmDue !== 'function') return;
+  const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  if (d < 1 || d > CLOCK_FIRST.days + 1 || DIALOGUE) return;
+  const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && d <= CLOCK_FIRST.days;
+  if (CLOCK_FIRST.tip) clockFirstDrop(want && CLOCK_FIRST.tip === d ? 'career.clock.' + d : null);
+  if (!(due && due.want === 'in') && CLOCK_FIRST.d === d && IX_GOAL && IX_GOAL.trk === 'clock:in') { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); }   // punched in: its arrow goes at once (not at the next minute's clockRemindTick)
+  if (!want) return;
+  let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
+  if (inBay && CLOCK_FIRST.d !== d) {
+    CLOCK_FIRST.d = d;
+    if (typeof tipSeen === 'function') tipSeen('career.clock');   // the career's own one-off bay tip: this one instead (on Day 1 after Zeke's line; any day, so a Day 1 missed never doubles it, RV12)
+    if (guideMode() !== 'off' && !(IX_GOAL && IX_GOAL.trk === 'clock:in')) setGoal(clockRmGoal('in'));
+  }
+  if (CLOCK_FIRST.d !== d || CLOCK_FIRST.tip === d) return;
+  if (d === 1 && !(SHIP.intro && SHIP.intro.done && SHIP.intro.done['d1-opener'] !== undefined) && m < CLOCK_FIRST.d1late) return;
+  CLOCK_FIRST.tip = d;
+  tipFront('career.clock.' + d, careerText('career.tip.clock.first') || 'Clock in first: the time clock\'s in the Works bay, by the tea corner. Your shift starts at 09:00; Tracked shows you the way.');
 }
 // ---- end of slot: Interactions engineer ----
 

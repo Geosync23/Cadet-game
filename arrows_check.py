@@ -26,7 +26,9 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, shift, week; default all, about 15 minutes)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week; default all, about 15 minutes)
+# Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
+# Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
 # Add 'guide' to play shift and week with the arrow queue switched on (GUIDE_ON), e.g. ... BUILD.html week guide
 # Setup as cadet_test.py (playwright, three r128 in $CADET_WORK/three). Run:  python3 arrows_check.py BUILD.html
 import sys, json, re, os, pathlib
@@ -439,9 +441,30 @@ def part_week(ctx, path):
     check(not pg.errors, f'week: page errors {pg.errors[:3]}')
     pg.page.close()
 
+def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
+    pg = Page(ctx, path)
+    pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
+    pg.page.fill('form input[maxlength="24"]', 'Sam'); pg.page.click('form button'); pg.step(5)
+    IN_BAY = """(() => { if (DIALOGUE) dialogueEnd(); goToDeck(5); SHIP.device.settings.tips = true; const s = placeSpot('5-timeclock-1'),
+      t = (ROOM_TILES.w || []).map(c => cellPos(...c)).filter(w => Math.hypot(w.x - s.x, w.z - s.z) > 5)[0]; player.obj.position.copy(t); player.stop(); })()"""
+    LOOK = "(() => ({ tip: TIP_Q[0] ? TIP_Q[0].id : null, clockTips: TIP_Q.filter(t => /^career\\.clock/.test(t.id)).map(t => t.id), trk: IX_GOAL ? IX_GOAL.trk || null : null }))()"
+    pg.ev("skipTo(introAbs(1, 8 * 60 + 30))"); pg.ev(IN_BAY); pg.step(10); a = pg.ev(LOOK)
+    check(a['trk'] == 'clock:in' and not a['clockTips'], f'clockin: Day 1 into the Works bay: Clock in tracked, and no clock-in tip before Zeke says it ({a})')
+    pg.ev("SHIP.intro.done['d1-opener'] = Math.floor(shipNow())"); pg.step(5); b = pg.ev(LOOK)
+    check(b['tip'] == 'career.clock.1', f'clockin: Day 1 after Zeke\'s line: the clock-in tip on screen at once ({b})')
+    pg.ev("careerClock(shipNow())"); pg.step(3); c = pg.ev(LOOK)
+    check(c['trk'] != 'clock:in' and not c['clockTips'], f'clockin: clocked in: its arrow and its tip gone at once ({c})')
+    pg.ev("skipTo(introAbs(2, 8 * 60 + 20))"); pg.ev(IN_BAY); pg.step(10); d = pg.ev(LOOK)
+    check(d['tip'] == 'career.clock.2' and d['trk'] == 'clock:in', f'clockin: Day 2 at 08:20 into the Works bay: the tip on screen and Clock in tracked ({d})')
+    pg.ev("clearGoal(); skipTo(introAbs(3, 8 * 60 + 20)); SHIP.device.settings.teach = 'off'"); pg.ev(IN_BAY); pg.step(10); e = pg.ev(LOOK)   # (Day 2's arrow, still due, would carry over)
+    check(e['tip'] == 'career.clock.3' and e['trk'] != 'clock:in', f'clockin: Day 3 with Teaching arrows Off: the tip, no tracked arrow ({e})')
+    check(not pg.errors, f'clockin: page errors {pg.errors[:3]}')
+    print(f'  clockin: Day 1 {a} -> {b} -> {c}; Day 2 {d}; Day 3 (Off) {e}')
+    pg.page.close()
+
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'shift', 'week'}
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)
@@ -459,6 +482,10 @@ with sync_playwright() as pw:
             part_once(ctx, off_path)
         except SystemExit: pass
         except Exception as e: fail(f'queue: stopped: {str(e)[:300]}')
+    if 'clockin' in PARTS:
+        print('== clockin (patch 0.92.3 item 6)')
+        try: part_clockin(ctx, path)
+        except Exception as e: fail(f'clockin: stopped: {str(e)[:300]}')
     for name, part in (('shift', part_shift), ('week', part_week)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
