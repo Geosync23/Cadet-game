@@ -149,3 +149,7 @@ the newcomer guide (incl. existing officer saves). Plants q1 (no parts aside), q
   from Day 8, Raman hosts) in SHIP_TRADITIONS when on; S7 loosens the pod test for crew pilots. "rec dec" is the crew's name
   for the deck (not a typo; my nit withdrawn). Still asked: a check line that crew pilots fly. Running: events_check on
   (+ who=0 plant), cadet_test off vs 0.92.3, check_fast.
+- **PASS promo-arrows 81e9065c (~19:45 UTC).** Plants: q1 parts aside off FAIL; q2b both flag setters off FAIL (q2, one
+  setter, passes: the skip path sets it too: redundant by design); q3 queue asks off FAIL (all four beats, move late, ceremony
+  by mail). social_check OK (the flag's features). cadet_test 0.92.3 vs fix identical (j_steer1 6 px 1 level, noise).
+  check_fast OK. DV1's own: career, mech, intro, day 1, devmode, dev_arrow OK. Sign-off: 24p, 25 (small edit).
