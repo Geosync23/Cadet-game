@@ -137,10 +137,10 @@ with sync_playwright() as pw:
     # puts its job first on the board, outlined, "Your lesson: take this one"; nothing marked once it isn't your turn
     ls = g.ev(r"""(() => { if (typeof boardLesson !== 'function') return 'no boardLesson in this build'; let j = null; try { j = roundJob(SHIP.time.day, Math.floor(SHIP.time.min), { train: 'm1', yours: true }); } catch (e) { return 'roundJob: ' + e.message; }
       if (!j) return 'no round'; if (!SHIP.jobs.includes(j)) SHIP.jobs.push(j); j.claimedBy = null; j.status = 'open'; j.found = Math.min(j.found, shipNow() - 1); MACH_REV++;
-      const W = typeof worksInit === 'function' ? worksInit() : SHIP.works, keep = W.cur, rowOf = () => document.querySelector('#ixBoardL [data-job]');
+      const had = SHIP.works, W = (typeof worksInit === 'function' && worksInit()) || SHIP.works || (SHIP.works = {}), keep = W.cur, rowOf = () => document.querySelector('#ixBoardL [data-job]');
       W.cur = { id: 'm1', st: 'do', d: SHIP.time.day, by: ['torres-zeke'], occ: null, j: j.id, w: 0 }; ixBoard.draw();
       const r = rowOf(), out = { first: !!r && r.dataset.job === j.id, lesson: !!r && r.classList.contains('lesson'), text: r ? r.textContent : null, sub: document.getElementById('ixBoardX').textContent };
-      W.cur = keep; ixBoard.draw(); out.after = [...document.querySelectorAll('#ixBoardL .lesson')].length;
+      W.cur = keep; if (!had) SHIP.works = had; ixBoard.draw(); out.after = [...document.querySelectorAll('#ixBoardL .lesson')].length;
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   your lesson on the board:', ls)
     check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and 'Your lesson' in (ls['text'] or '') and not ls['after'], f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
