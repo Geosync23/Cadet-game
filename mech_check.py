@@ -282,6 +282,64 @@ M7_LATER = r"""(() => { const W = SHIP.works; if (!W.tr.m7) W.tr.m7 = 5; toolGiv
 M7_SEE = "(() => { const j = SHIP.jobs.find(x => x.id === window.__m7j) || {}, cs = ((SHIP.works.cases || {}).open || []).find(c => c.job === j.id), g = ixJobStep(); return { goal: g && g.label, scan: !!j.scan, shown: cs ? !cs.wait : null, work: !!j.workDone, st: j.status, tr: SHIP.works.tr.m7 !== undefined }; })()"
 M7_PANEL = r"""(() => { const j = myJob(), m = machineById(j.machine); if (deckDef.num !== m.deck) goToDeck(m.deck); const s = placeSpot(panelPlace(m.id)), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return jobSpotTap(new THREE.Vector3(s.x, 0, s.z)); })()"""
 M7_FETCH = r"""(() => { if (deckDef.num !== 5) goToDeck(5); const need = jobNeeds(myJob(), myWork().w, SHIP.player.carry), it = ITEMS.find(i => i.t === shelfName(shelfOf(need[0]))); if (!it) return false; it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
+# patch 0.92.5 (DS1; the user's playtest notes 11 and 15): from Day 4 a lesson meets at 09:00 or 09:15 (the first few
+# days as before: 09:15 plus a wait); a lesson not finished by the shift's end ends there, the teacher stops following
+# (worksEscort), a training job in your hands goes back to the board, and it's offered again on the next workday
+P925_OPEN = r"""((id) => {
+  const row = ladderRow(id);
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  let d = Math.max(row.day, 2); while (!playerShiftOn(d) || (row.fixed && weekday(d) + 1 !== row.fixed.wd)) d++;
+  setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit();
+  W.log.push(['earlier', 1, 0, 'service']);
+  for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+  if (row.needs) for (const n of [].concat(row.needs)) { if (n.flag) flagSet(n.flag, 1); if (n.rep) W.xp = 999; }
+  W.tier = Math.max(W.tier, row.tier || 1); if (row.rank) W.rank = row.rank;
+  if (row.needs) for (const n of [].concat(row.needs)) if (n.trained && !ladderRow(n.trained)) W.tr[n.trained] = 1;
+  const opened = ladderTick(Math.floor(((d - 1) * 1440 + WORKS_ASK[0]) / 60)), c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ);
+  return { d, opened, st: c && c.st, at: r ? r.at - (d - 1) * 1440 : null };
+})"""
+P925_LAPSE = r"""((took) => {
+  const W = SHIP.works, c = W.cur; if (!c) return null; const j = SHIP.jobs.find(x => x.id === c.j), st0 = c.st, by = c.by;
+  if (took && j && !j.claimedBy) claimJob(j.id);
+  const p = ROSTER.find(x => x.id === by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1, before = worksEscort(p, t - 30);
+  setShipNow(t); trainTick(t);
+  const j2 = SHIP.jobs.find(x => x.id === c.j), st = W.cur && W.cur.st, after = (e => e && e.mode)(worksEscort(p, t + 1)), lapse = simNotes('trainLapse').length;
+  let d2 = c.d + 1; while (!playerShiftOn(d2)) d2++;
+  setShipNow((d2 - 1) * 1440 + WORKS_ASK[0]); machinesNow(); ladderTick(Math.floor(((d2 - 1) * 1440 + WORKS_ASK[0]) / 60));   // the next workday's ask
+  return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null };
+})"""
+def part_p925(g):
+    print('p925 (patch 0.92.5: lessons at 09:00/09:15 from Day 4; the lesson\'s job named on the board; an unfinished lesson ends with the shift):')
+    early = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m1', 'm4')]
+    late = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m5', 'm7')]   # (m6's is its own urgent call at the pipe, 24f: not a booked meeting)
+    print(f'  meets, the first days: {[(e["d"], e["at"]) for e in early]}; from Day 4: {[(e["d"], e["at"]) for e in late]}')
+    check(all(e['st'] == 'meet' and e['at'] is not None and e['at'] >= 9 * 60 + 25 for e in early), f'#11: the first few days\' lessons meet as before (09:15 and a wait): {early}')
+    check(all(e['st'] == 'meet' and e['at'] in (9 * 60, 9 * 60 + 15) for e in late), f'#11: from Day 4 a lesson meets at 09:00 or 09:15: {late}')
+    bd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const c = SHIP.works.cur, d = SHIP.time.day;
+      if (SHIP.career) SHIP.career.ci = 0;   // not clocked in yet: you're at the board first
+      ixBoard.open(); const row = [...document.querySelectorAll('#ixBoardL .ixjob')].find(r => r.dataset.job === c.j), sub = document.getElementById('ixBoardX').textContent;
+      SHIP.device.pointsSeen = SHIP.device.pointsSeen || {{}}; SHIP.device.pointsSeen['p:board:lesson:m7'] = 1;   // rung once before: rung again
+      POINT_Q.length = 0; guideShift(); const q = POINT_Q.find(x => x.id === 'p:board:lesson:m7'), lab = q ? q.path.map(s => s.label || '').join('|') : null; ixBoard.close();
+      return {{ st: c.st, clocked: careerClockedIn(d), row: row ? row.textContent.slice(0, 120) : null, lesson: !!row && /lesson/.test(row.className), sub, pointer: lab }}; }})()""")
+    print(f'  the scanner lesson at the board: {bd}')
+    check(bd['st'] == 'do' and bd['row'] and 'Your scanner lesson: take this one' in bd['row'] and bd['lesson'] and 'scanner lesson' in bd['sub'],
+          f'#12: the board names the lesson\'s job: "Your scanner lesson: take this one", and its line says so ({bd})')
+    check(bool(bd['pointer']) and 'scanner lesson' in bd['pointer'] and not bd['clocked'], f'#12: the pointer rings the lesson\'s Take it again, before you\'ve clocked in, naming the lesson ({bd})')
+    do = g.ev(f"(() => {{ ({M7_SETUP})('m7'); return ({P925_LAPSE})(true); }})()")
+    print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
+    check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),
+          f'#15: an unfinished lesson ends at the shift\'s end: offered again, the teacher stops following, the job back on the board ({do})')
+    hd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const W = SHIP.works, c = W.cur, j = SHIP.jobs.find(x => x.id === c.j); if (!c || !j) return null;
+      j.status = 'done'; j.doneBy = 'you'; c.st = 'held'; c.hold = true; const open = worksCaseOpen(c.j), p = ROSTER.find(x => x.id === c.by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1;
+      const before = (e => e && e.mode)(worksEscort(p, t - 30)); setShipNow(t); trainTick(t);
+      return {{ open, before, cur: W.cur && W.cur.st, trained: W.tr.m7 !== undefined, after: (e => e && e.mode)(worksEscort(p, t + 1)) }}; }})()""")
+    print(f'  held (its job turned in, its case open) at 17:01: {hd}')
+    check(bool(hd) and hd['before'] == 'follow' and hd['trained'] and not hd['cur'] and not hd['after'], f'#15: a lesson held at the shift\'s end (job done, case open) is trained and the teacher goes ({hd})')
+    wa = g.ev(f"(() => {{ ({M7_WATCH})('m7'); const c = SHIP.works.cur; if (c && c.st !== 'watch') {{ c.st = 'watch'; }} return ({P925_LAPSE})(false); }})()")
+    print(f'  watching at 17:01: {wa}')
+    check(bool(wa) and wa['st0'] == 'watch' and wa['st'] == 'again' and not wa['after'], f'#15: a lesson still at its watching ends at the shift\'s end, the teacher off ({wa})')
+
 def m7_taps(g):
     keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
     def wait():
@@ -1754,6 +1812,7 @@ with sync_playwright() as pw:
     if not only or 'fix2' in only: print('fix2 (the notes\' words):'); part_fix2_c(g)
     if not only or 't24' in only: part_t24(g)
     if not only or 'fx3' in only: print('fx3 (Making it safe\'s flow, the small lessons):'); part_fx3(g)
+    if not only or 'p925' in only: part_p925(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

@@ -161,14 +161,14 @@ def part_queue(pg):
       W.cur.j = 'arrows-tj'; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.watch = lab(); const w = ent('train:m4:watch');
       if (w) { const g = w.goal(); out.watchLevel = w.level; out.watchCrew = g.crew; out.watchId = w.id; }
       W.cur.st = 'do'; out.watchAfter = lab();
-      GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.doo = lab(); const o = ent('train:m4:do');
+      GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.doo = lab(); const o = ent('train:m4:do:' + W.cur.d);   /* (DS1, patch 0.92.5 #12: T3 per day, named) */
       if (o) { const g = o.goal(); out.doLevel = o.level; out.doBoard = !!g && String(g.item) === String(/job board/i); out.doFit = fit(g && g.label); }
       SHIP.jobs.push({ id: 'arrows-mine', machine: mc.id, deck: mc.deck, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: 'you', parts: [], status: 'claimed' });
       out.otherJob = lab(); out.otherShown = guideNow() ? guideNow().id : null;
       SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-mine'); out.back = lab();
-      Object.assign(SHIP.jobs.find(j => j.id === 'arrows-tj'), { claimedBy: 'you', status: 'claimed' }); out.taken = lab(); out.takenLive = !!ent('train:m4:do');
+      Object.assign(SHIP.jobs.find(j => j.id === 'arrows-tj'), { claimedBy: 'you', status: 'claimed' }); out.taken = lab(); out.takenLive = !!ent('train:m4:do:' + W.cur.d);
       const off = Object.keys(WORK_MECH).find(k => WORK_MECH[k].offer && ladderRow(k));
-      if (off) { W.cur = { id: off, st: 'do', d, by: 'calder', j: 'arrows-tj' }; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.offer = [off, !!ent('train:' + off + ':do')]; }
+      if (off) { W.cur = { id: off, st: 'do', d, by: 'calder', j: 'arrows-tj' }; GUIDE.list.length = 0; GUIDE.rev++; guideTrain(); out.offer = [off, !!ent('train:' + off + ':do:' + d)]; }
       out.calder = guideWho('calder');
       SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'arrows-tj'); SHIP.occasions.splice(SHIP.occasions.indexOf(occ), 1); W.cur = keep; GUIDE.list.length = 0; GUIDE.rev++; return out; })()""")
     if t is not None:
@@ -181,10 +181,10 @@ def part_queue(pg):
         check(t['watch'] and t['watch'].startswith('Stay close and watch Yara') and t.get('watchLevel') == 3 and t.get('watchCrew') == 'esposito-yara', f'train: T2 should follow the teacher at level 3 ({t["watch"]}, {t.get("watchLevel")}, {t.get("watchCrew")})')
         check(str(t.get('watchId', '')).endswith(':' + str(pg.ev('SHIP.time.day'))), f'train: T2\'s once should be per training, its day in the id ({t.get("watchId")})')
         check(t['watchAfter'] is None or not str(t['watchAfter']).startswith('Stay close'), f'train: T2 outlived the watching ({t["watchAfter"]})')
-        check(t['doo'] and t['doo'].startswith('Your turn') and t.get('doLevel') == 3 and t.get('doBoard'), f'train: T3 should point at the board at level 3 ({t["doo"]}, {t.get("doLevel")}, {t.get("doBoard")})')
-        check(t['otherShown'] != 'train:m4:do' and not str(t['otherJob'] or '').startswith('Your turn'), f'train: T3 should leave the arrow to another job you hold ({t["otherJob"]}, {t["otherShown"]})')
-        check(str(t['back'] or '').startswith('Your turn'), f'train: T3 should come back when that job is gone ({t["back"]})')
-        check(not str(t['taken'] or '').startswith('Your turn') and not t['takenLive'], f'train: T3 outlived taking the job ({t["taken"]})')
+        check(t['doo'] and t['doo'].startswith('Your ') and 'lesson' in t['doo'] and t.get('doLevel') == 3 and t.get('doBoard'), f'train: T3 should point at the board at level 3 ({t["doo"]}, {t.get("doLevel")}, {t.get("doBoard")})')
+        check(not str(t['otherShown'] or '').startswith('train:m4:do') and 'lesson' not in str(t['otherJob'] or ''), f'train: T3 should leave the arrow to another job you hold ({t["otherJob"]}, {t["otherShown"]})')
+        check('lesson' in str(t['back'] or ''), f'train: T3 should come back when that job is gone ({t["back"]})')
+        check('lesson' not in str(t['taken'] or '') and not t['takenLive'], f'train: T3 outlived taking the job ({t["taken"]})')
         if 'offer' in t: check(not t['offer'][1], f'train: T3 for a row with its own offer ({t["offer"]})')
         check(t['calder'] == 'Calder', f'train: Calder should be "Calder" ({t["calder"]})')
         check(t.get('meetFit', 0) <= 258 and t.get('doFit', 0) <= 258, f'train: a label too wide for 390 px (T1 {t.get("meetFit")} px, T3 {t.get("doFit")} px; 258 fit)')
