@@ -78,6 +78,36 @@ cheer: Sleep. I'm very good at sleep.
   **If any placeholder in a talk can't be filled, skip the whole talk** (not just the line: a talk with a hole in it
   makes no sense). Voice tokens (`{hi}` etc.) work but the pool hardly uses them: these are said in full sentences.
 
+### Own pools only, and the first-talk scene (patch 0.92.3 item 15, FX13 with CS1)
+
+The user's playtest note (2026-10-24): the Captain and the main characters have their own large pool and never pull
+from the general one; the Captain introduces herself and welcomes you aboard the first time you talk.
+
+```
+@talks marrow
+only: own                         <- file level, before the first "==" (in any one of the person's files)
+
+== welcome
+first: yes                        <- straight under the "==": the first-talk scene (one a person)
+topic: crew
+them: ...                         <- a first-talk scene may have 1-4 them: lines (others 1-3; 4 fit before the ask)
+ask: ...
+listen: ...  (and share:, cheer:, each with its indented answer, as for every talk)
+```
+
+- **Several files a person:** `marrow.talk`, `marrow-2.talk`, `marrow-bridge.talk`... all `@talks marrow`; `<id>.talk`
+  first, then the rest by file name; slugs unique across them (ids are still `<crewId>.<slug>`).
+- **`only: own`** (baked `TALKS.only`, a sorted list of ids): Talk a while gives them only their own talks: never the
+  shared pool, a work pool or the shared small talk. Their card's `talk.start/sit/filler/end/stop/go.*` lines are only
+  their own (`== talk.start` etc. in `content/lines/<id>.lines`); with none written there's no hello in front of the
+  opener and no filler (the talk wraps up after the answer), and the goodbye is the card's built-in sentence.
+  When all their own ready talks have been had they come round again, the least lately had first (a repeat moves its
+  day in `save.talks.fired`): none repeats while another ready one hasn't been had since, so a pool of n ready talks
+  repeats every n talks at the soonest. Write plenty with no `tier` gate: a stranger only gets those.
+- **`first: yes`** (baked `first: 1` on the talk): picked before every other talk with them, whatever the file order,
+  with no hello in front; it counts as had only once you've answered its question (walk off or "got to go" first and
+  it comes again next time). Works for anyone, listed or not.
+
 ### Talk ids (what "fired" saves)
 
 - Pool: `pool.<topic>.<slug>` (`pool.hobby.one-hour`). Own: `<crewId>.<slug>` (`calder.serials`).

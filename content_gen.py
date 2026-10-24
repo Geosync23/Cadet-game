@@ -290,8 +290,9 @@ def parse_talk_file(path, rel, out):
         t, where = cur['t'], cur['where']
         if not t['topic']:
             raise GenError(f'{where}: talk "{cur["slug"]}" has no topic: (a "topic:" line under its "==")')
-        if not 1 <= len(t['lines']) <= 3:
-            raise GenError(f'{where}: talk "{cur["slug"]}" has {len(t["lines"])} them: lines before its ask: (1-3)')
+        most = 4 if t['first'] else 3                    # a first-talk scene may say a little more (4 fit before the ask at TALK_ASK)
+        if not 1 <= len(t['lines']) <= most:
+            raise GenError(f'{where}: talk "{cur["slug"]}" has {len(t["lines"])} them: lines before its ask: (1-{most})')
         if not t['ask']:
             raise GenError(f'{where}: talk "{cur["slug"]}" has no ask:')
         for k in TALK_REPLY_KEYS:
@@ -300,7 +301,7 @@ def parse_talk_file(path, rel, out):
             if 'ans' not in t['replies'][k]:
                 raise GenError(f'{where}: talk "{cur["slug"]}": its {k}: reply has no answer (an indented "  them:" under it)')
         t['id'] = f'pool.{t["topic"]}.{cur["slug"]}' if pool else f'work.{work}.{cur["slug"]}' if work else f'{whose}.{cur["slug"]}'
-        talks.append({k: t[k] for k in ('id', 'topic', 'when', 'lines', 'ask', 'replies') if t.get(k)})
+        talks.append({k: t[k] for k in ('id', 'topic', 'first', 'when', 'lines', 'ask', 'replies') if t.get(k)})
 
     for i, l in lines:
         where, s = f'{path}:{i}', l.strip()
@@ -312,12 +313,24 @@ def parse_talk_file(path, rel, out):
             if not re.fullmatch(r'[a-z0-9][a-z0-9-]*', slug):
                 raise GenError(f'{where}: "{slug}" is not a talk slug (lower case, digits and -)')
             cur = {'slug': slug, 'where': where, 'last': None,
-                   't': {'topic': ftopic, 'when': None, 'lines': [], 'ask': None, 'replies': {}}}
+                   't': {'topic': ftopic, 'when': None, 'first': None, 'lines': [], 'ask': None, 'replies': {}}}
             continue
         m = re.fullmatch(r'([a-z]+):\s*(.*)', s)
         if not m:
             raise GenError(f'{where}: not understood (topic:, when:, them:, ask:, listen:, share:, cheer:, or "== slug")')
         key, val = m.groups()
+        if key == 'only':                                  # item 15: "only: own" (file level) = Talk a while uses only this person's own talks
+            if cur is not None or pool or work is not None or val != 'own':
+                raise GenError(f'{where}: "only: own" goes in a person\'s own .talk file, before the first "=="')
+            T.setdefault('only', set()).add(whose)
+            continue
+        if key == 'first':                                 # item 15: "first: yes" = the first-talk scene (straight under its "==")
+            if cur is None or pool or work is not None or val != 'yes':
+                raise GenError(f'{where}: "first: yes" goes straight under an own talk\'s "=="')
+            if cur['t']['first'] or cur['t']['lines'] or cur['t']['when']:
+                raise GenError(f'{where}: first: goes once, before when: and the them: lines')
+            cur['t']['first'] = 1
+            continue
         if key == 'topic':
             if not re.fullmatch(r'[a-z]+', val):
                 raise GenError(f'{where}: topic: takes one word')
@@ -384,10 +397,11 @@ def parse_talk_file(path, rel, out):
         if work in T['work']:
             raise GenError(f'{path}: a second file for the work pool {work}')
         T['work'][work] = talks
-    else:
-        if whose in T['own']:
-            raise GenError(f'{path}: a second file of talks for {whose}')
-        T['own'][whose] = talks
+    else:                                          # a person may have several files (item 15): <id>.talk first, then the rest by name
+        main = os.path.basename(path) == whose + '.talk'
+        T['own'][whose] = talks + T['own'].get(whose, []) if main else T['own'].get(whose, []) + talks
+        if sum(1 for x in T['own'][whose] if x.get('first')) > 1:
+            raise GenError(f'{path}: {whose} has two "first: yes" talks (one first-talk scene a person)')
 
 
 def parse_overheard(lines, path, rel, topic, out):
@@ -1053,7 +1067,7 @@ def talks_parsed(name, T):
         ts = T['work'][w]
         p.append(('' if n == 0 else ',') + cj(w) + ':[')
         p += [cj(t) + (',' if i < len(ts) - 1 else ']') for i, t in enumerate(ts)]
-    p.append('},"small":' + cj({k: T['small'][k] for k in sorted(T['small'])}) + '}')
+    p.append('},"small":' + cj({k: T['small'][k] for k in sorted(T['small'])}) + (',"only":' + cj(sorted(T['only'])) if T.get('only') else '') + '}')
     return js_parsed(name, p)
 
 
