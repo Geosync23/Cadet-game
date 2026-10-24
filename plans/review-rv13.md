@@ -65,3 +65,18 @@ Game sha256 b3caed3f... (with SW2's words baked in a scratch copy: ba3c31d0...).
   Notes: the dialogue guard isn't exercised by a check (small, reads right); arriving 17:38+ leaves ~2 ship min to paint,
   as on 0.92.2 at 17:38.
   Words: BM15 takes join.lines from SW2 4533c325 (line 1 softened to "Right. This is the beam..." after RV13's note; CS1 passed); bakes clean, lines_check PASS; PASS covers it.
+
+## FX11 pool-disc claude/p923-fx11 789f1ff0 (items 16, 17, 25): PASS (~05:15 UTC)
+Game sha256 6e445254...75b1 (b2c73694 = game; 838bf732/42bf2eaa/789f1ff0 = disc_check + backlog only).
+- Diff: 15r recChangeTip (tipShow 'rec.change', once per save, respects the tips setting; old ixTip 'recChange' retired)
+  in recGo's change-first path and recStart; swim gets follow: true (same camera path as kayak/float); 23b slot
+  ldCrewRally/ldCrewAt/ldCrewDisc/LD_CV (frame clock, no R(), nothing saved, 1 disc + halo made on first show);
+  8c REC_CREW.disc; places 7-disc-1/2 get move {kind:'disc'} (read only by the crew's spot.mv, not the player's act);
+  one main-loop line. Does what it says.
+- disc_check (new 0.92.3 block): fix ALL OK; 0.92.2 FAILs 7 (#16 x2, #17 7.00 m, #25 x4). Planted: f1 no follow ->
+  #17 FAIL; f3 ldCrewAt null -> 3 #25 FAIL; f5 no solo -> lone line FAIL; f6 both DISC.g guards off -> hidden line
+  FAIL; f2 (recStart's tip call removed) ALL OK: expected, recGo's call shows it first; recStart's is a backstop for a
+  save already in kit (harmless, the tip is once).
+- cadet_test 0.92.2 vs fix ALL IDENTICAL; check_fast OK (198 s). FX11's own: day_check 2, perf (court +2 calls).
+- Owner sign-off for 15r and 8c (Rec engineer seat not live, LEAD 33): given.
+- FX11-1 backlog row: withdrawn by FX11 (probe error), fine.
