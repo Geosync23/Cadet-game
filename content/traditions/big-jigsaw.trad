@@ -1,0 +1,39 @@
+@tradition big-jigsaw
+// The big jigsaw (FX11, 0.92.5 item 16 T4; SW1's weekend pitch, the user's yes 2026-10-24): all Sunday afternoon a huge
+// jigsaw of the Wren sits on the observation room's conference table on Deck 1; people drift in and out and add a few
+// pieces, Commander Vance always on the edges. The puzzle is decor (DECK_DRESS bigJigsaw) on the table, the seats are
+// the table's own (common-room), so Deck 1 is as before other days. A turn is 20 minutes and counts as your puzzles
+// hobby (the weekend slot in section 18). Still picture: the week-by-week fill is the large version, not built (ask first).
+// Behind WEEKEND_ON.
+k: 468
+title: The big jigsaw
+when: weekly sunday from day 1
+at: 13:00-15:30
+min: 25
+where: 1 room Observation room: common-room
+hold: none
+who: vance always, quiet-corner 60%, common-room 50%, window-seat 30%, officers 25%, juniors 20%, everyone 12%
+anim: read
+host: vance
+from: vance
+ties: decor bigJigsaw
+
+== mail
+- The jigsaw is out tomorrow from one, Observation room. Edges are done. Edges are always done first. That is not negotiable.
+
+== ask
+- The jigsaw's out on Deck 1. Come and find a piece or two.
+- Sky pieces need patient people. Are you patient?
+
+== here
+- That one's an edge. Give it here.   #funny
+- Sky. All of it is sky. Every piece is sky.   #funny
+- There. The hull's nearly joined up.   #warm
+
+== thanks
+- You sit at the long table with {host} and find a few pieces of the Wren's hull. The stars can wait for next week.   #warm
+
+== chatter
+- The jigsaw's out again on Sunday. Vance has already done the edges in her head.   #funny
+- I found the bridge window piece last week. I'm still proud.
+- Nobody touches the edges but the Commander.   #funny
