@@ -180,3 +180,8 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
 - FX9 on hosts: Lukas/Brennan lead from the galley by design; Zeke on Saturday shift to 17:01 (every-song 17:00); Vance works
   Sundays (jigsaw); Keane/Holt bedtime (attendance gap); Tove refused by the picnic's place take() (FX9 digging). Zeke/Vance
   decisions with the lead. Handover note written pre-emptively (plans/handover-rv13.md, cf2f59c6).
+- **Weekend review handed to RV14** (session_01RwUYVcYt2PP7B7g3ogduFZ, Lead 34 ~22:50 UTC); findings sent to RV14.
+
+## Lead 34's remaining asks: sim bay switch-on look (staging-0.92.5 e9ce3351, game b805ded3...) + DS1 items 11/12/15
+- e9ce3351 vs 543ef305: SIM_BAY = true (one line + docs). Running: cadet_test 543ef305 vs e9ce3351 (crew diffs expected:
+  sim pilots' plans change), interactions (sim part on), day_check 2, events_check, check_fast.
