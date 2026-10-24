@@ -29,3 +29,8 @@ Game sha256 aac49362...c40b (1aabb091 = talk_check only). Base 364c80cb.
   p5 (talkStart hook off) and p6 (talkNext hook off): TALK CHECK OK = not caught -> asked FX13 for test lines.
 - Notes: only-own with no own talk.filler holds the last pack line ~2-7 ship min; tier-0 stand-in repeats daily
   (gap 1) because only one ungated stand-in talk: writers need many ungated talks.
+- 7047bf90 (game 2fb90049...687b): talkPackHold (sec 22) + talkStep ask hook (sec 20, third hook): holds the ask while
+  first-scene lines remain, then 1 ship min (TALK_ASK - 3*TALK_LINE); talkNext calls talkPackNext first, so no endless
+  hold. talk_check OK (6 lines, last at 10, ask at 11). Planted p8 (hold off): FAIL both new lines; p9 (no 1-min tail):
+  FAIL (ask at 10.5). cadet_test 0.92.2 vs 7047bf90: ALL IDENTICAL apart from j_steer1 6 px max 1 level (renderer
+  noise; nothing in the change touches drawing). p5/p6 test gaps still open on this sha.
