@@ -37,6 +37,31 @@ with sync_playwright() as pw:
     for i, d in TRADS.items(): check(i in evs[d], 'switch on: %s on Day %d' % (i, d))
     acts = json.loads(g.ev("JSON.stringify(Object.keys(TRAD_JOIN).filter(id => WEEKEND_TRADS.has(id) && !TRAD_JOIN[id].act).map(id => [id, !!PLAYER_ACTS['tj:' + id] && typeof PLAYER_ACTS['tj:' + id].until === 'function']))"))
     check(len(acts) >= 7 and all(a for _, a in acts), 'every weekend join has its activity, with an end (%s)' % acts)
+    miss = json.loads(g.ev("JSON.stringify([...WEEKEND_TRADS].filter(id => !TRAD_JOIN[id] || (!TRAD_JOIN[id].act && !PLAYER_ACTS['tj:' + id])))"))
+    check(not miss, 'every weekend tradition has a join, and each tap-join its activity (missing: %s)' % miss)
+    g.close()
+    # each tap-join on its day: starts, ends by itself in its tradition's time, and gives its own gain (RV13's ask)
+    for jid, d in [(i, d) for i, d in TRADS.items() if i not in ('saturday-run',)]:
+        g = Game(pw, won, 900, 760)
+        r = json.loads(g.ev("""(() => { const d = %d, e = eventsOn(d).find(x => x.id === '%s'); if (!e) return JSON.stringify({ err: 'not on' });
+          skipTo((d - 1) * 1440 + e.from + 6); goToDeck(e.where[0].deck, null); SHIP.device.settings.tips = false; return JSON.stringify({ to: e.to, deck: e.where[0].deck }); })()""" % (d, jid)))
+        if 'err' in r: check(False, '%s: on Day %d' % (jid, d)); g.close(); continue
+        g.step(200)
+        st = json.loads(g.ev("""(() => { const e = eventsOn(%d).find(x => x.id === '%s'), s = TRAD_JOIN[e.id], need = s.need || 'social';
+          const a = DECK_CREW.find(x => x.settled && x.spot && x.goalId && (evTagId(x.tag || '') === e.id || tradSpotIds({ ...e, day: %d }).has(x.spot.id))) || DECK_CREW.find(x => x.p.id === s.host);
+          if (!a) return JSON.stringify({ err: 'nobody at it' }); SHIP.player.needs[need] = Math.min(SHIP.player.needs[need], 40);
+          const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); return JSON.stringify({ need, n0, act: ACT && ACT.kind }); })()""" % (d, jid, d, d)))
+        if 'err' in st: check(False, '%s: someone at it to join (%s)' % (jid, st['err'])); g.close(); continue
+        best = st['n0']; ended = None
+        for k in range(200):
+            g.step(60); x = json.loads(g.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind : null, SHIP.player.needs['%s']])" % st['need']))
+            best = max(best, x[2])
+            if x[1] != 'tj:' + jid: ended = x[0]; break
+            if x[0] > r['to'] + 5: break
+        check(st['act'] == 'tj:' + jid and ended is not None and ended <= r['to'] + 3 and best > st['n0'] + 5,
+              '%s: a tap-join starts, ends by itself (%s, its end %d) and gives its %s (%.0f -> %.0f)' % (jid, round(ended) if ended else None, r['to'], st['need'], st['n0'], best))
+        g.close()
+    g = Game(pw, won, 900, 760)
     # ---- Bread day (Day 7, Sunday) ----
     g.ev("(() => { skipTo(6 * 1440 + 428); goToDeck(3, null); player.obj.position.set(37 - OX, 0, 8.5 - OZ); SHIP.device.settings.tips = false; })()")
     g.step(240)
