@@ -16871,6 +16871,7 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
   if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (kind === 'climb' && REC_DECK && !recBelaysUsable()) { toast('Climbing wall', worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.')); return; }   // one tagged out, the other's route taped: no waiting for a turn that won't come (R7's note; RE20, 0.64.1)
   const water = { pool: .35, river: .36 };
+  if ((kind === 'swim' || kind === 'kayak') && typeof tipShow === 'function') tipShow('rec.change', worksText('rec.tip.change', 'The changing rooms are by the pool: grab a free locker (the keys are on wristbands), change into rec kit, and shower after.'));   // patch 0.92.3 item 16 (AC3): the first swim or paddle
   if (recQueue(kind, title, p)) return;
   if (kind === 'swim') {
     const free = recLanesFree(), lane = free.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, free.includes(REC_LANES[1]) ? REC_LANES[1] : free[0]);
