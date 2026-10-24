@@ -228,3 +228,18 @@ perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 32).
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | known old only (CR4) | backlog 32: Sunday dinner landscape js 1.66 -> 3.28 ms, gone on 2 re-measures; everything else identical to OLD; the Line ceremony 335 calls (KP1) |
 | lines_check --day | OK (CR4) | PASS |
+
+# Round 12: 0.92.3 candidate 1 (claude/staging-0.92.3 0dd4e2e2), CR2's share — **OK**
+
+NEW 0dd4e2e2, sha256 `4e6538447d13e4c5398fc74844748e1e9d41776afa7bcc83bc99d5eff87cd0a2` (matches BM16's).
+OLD 364c80cb (0.92.2), sha256 `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4`.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Only `DIFF tap1`/`tap2` ("Bursting" → "Missing people", FX9's social warning) and every shot a little (1448-14597 px: the wider "Schedule tracker" button, the tap text); no state/path/collide/crew diffs; no page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 49 warnings; 0.92.2 had 50: the "Tracked isn't a crew member" warning in tip.device is gone) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (part 12 did not time out) |
+| perf_check NEW OLD | known old (backlog 32) | Only `Tiles night, bow lounge Tue 20:30 portrait-wide: js 1.38 -> 2.61 ms` (one-off; re-measured in candidate 2's run); no memory growth (521/521/521); the Line ceremony equal on both (both have breakfast). |
+| lines_check --day | OK | PASS (0 errors) |
