@@ -54,7 +54,7 @@ button svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8
 .lift .deckbtn:disabled{opacity:.42;cursor:default}
 .lift .deckbtn.here{opacity:1;border-color:var(--teal)}
 .lift .deckbtn.goal{border-color:#e8c06a;box-shadow:0 0 0 1px #e8c06a,0 0 14px rgba(232,192,106,.35)}   /* 0.28.58: your goal's deck */
-.lift .deckbtn em{flex:none;margin-left:auto;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:999px;background:#e8c06a;color:#1a1408}
+.lift .deckbtn em{flex:0 1 auto;min-width:0;max-width:46%;margin-left:auto;font-style:normal;font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:3px 8px;border-radius:12px;background:#e8c06a;color:#1a1408;text-align:center;line-height:1.2}   /* 0.92.3 #14: "→ Schedule tracker" wraps inside its deck button on a narrow phone (RV11) */
 .lift .deckbtn.here i{background:#2a9d8f;color:#08201d;border-color:#2a9d8f}
 .lift .stay{margin:10px auto 0;padding:7px 16px}
 #sleepAsk .alarm{display:flex;align-items:center;gap:8px;margin:0 0 8px}#sleepAsk .alarm b{flex:1;text-align:center;font-size:17px;font-weight:600;color:var(--ink);font-variant-numeric:tabular-nums}   /* the alarm clock (0.73.0) */
@@ -271,7 +271,7 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
-<button class="trkbtn" id="trkBtn" aria-label="Schedule tracker: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
+<button class="trkbtn" id="trkBtn" aria-label="Schedule tracker: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Schedule tracker</span></button>
 <div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
   <h2 id="trkT">Schedule tracker</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
   <div id="trkList"></div>
