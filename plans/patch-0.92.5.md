@@ -16,7 +16,7 @@ Base: the published 0.92.4 (claude/integration once 0.92.4 is in), or 3866c8f3 +
 | 10 | Redo birthdays: the birthday person sits at a table with a cake; a group circles round with bubbles (happy birthday and other nice things, a good number of lines); tap the cake for a slice and you see the slice in your hands. | New birthday staging + lines + cake slice held item. | events builder + ZW1 (lines) | RV12 |
 | 11 | Trainings after the first few days start at 09:00 or 09:15, so you don't wait around. | From Day 4 (after the first few days) lessons start 09:00/09:15. | DS1 | RV13 |
 | 12 | Scanner training: not clear which job to take on the board. | Mark the scanner lesson's job on the board (and the arrow points at it). | DS1 | RV13 |
-| 13 | First shipwide event Day 4, or even Day 3 evening (sooner than now). | Move the first shipwide event earlier (Day 3 evening if it fits, else Day 4). | events builder | RV12 |
+| 13 (DROPPED by the user 20:17 UTC: "leave things alone") | First shipwide event Day 4, or even Day 3 evening (sooner than now). | Move the first shipwide event earlier (Day 3 evening if it fits, else Day 4). | events builder | RV12 |
 | 14 | Sitting in the auditorium: the camera should center so you see the stage. | Auditorium seats face the camera at the stage. | FX11 | RV13 |
 | 15 | An unfinished training ends at the end of the shift and the trainer stops following. | Lesson auto-ends at shift end; trainer leaves. | DS1 | RV13 |
 | 16 | Pitch new traditions to fill the weekend: Saturday and Sunday should have them all day. | A pitch page for the user (no building until answered). | SW1 | CS1 |
