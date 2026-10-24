@@ -56,4 +56,4 @@ Game sha256 b3caed3f... (with SW2's words baked in a scratch copy: ba3c31d0...).
 - **FINDING (game, item 13): late arrival can't sign.** 4 lines x 4.2 s real = ~10 ship min (SHIP_RATE 0.6), started
   only once you're in the bay. plans/review-rv13/late_probe.py (BEAM_OPEN reset each run): arrive 17:06 -> open 17:19;
   17:25 -> 17:35; 17:31/17:34/17:37 -> event ends 17:40 still locked. 0.92.2: sign any time to 17:40. -> DV1.
-- 54853c2b (test only): item 23 line (east/top slot, gap to the first name <= 0.25 m, arrow <= 0.7 m): rerunning.
+- 54853c2b (test only): item 23 line confirmed: fix OK (gap 0.164 m, arrow 0.431); old order (d3) FAIL (east false, gap 1.424). Item 23 done; item 13 late-arrival finding open.
