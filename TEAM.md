@@ -1082,3 +1082,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:25 UTC: **USER** on the sim flight prototype: keep it out of the game; "make it a lot prettier"; left/right controls are backwards, invert. → FX13 (prettier pass + invert, <~25 draw calls, new shots), RV12 light look, PUB1 updates RMgibsuh2KdxcF3kd8vuJr.
 - ~21:30 UTC: RV11 PASS FX11 23432122 (0.92.5 items 2, 3, 14, 17) → BM16. RV11 (~50%) writes plans/handover-rv11.md and idles. Remaining reviewers: RV12 (FX12 events, sim flight proto), RV13 (DS1, weekend, sim bay switch-on).
 - ~21:31 UTC: FX11 (~40%) joins the weekend traditions: T3 Bread day + T4 big jigsaw on its own branch on FX14's WEEKEND_ON scaffold (after T1), agreed with FX14; SW1 words; RV13.
+- ~21:32 UTC: Sim flight prototype v2 (FX13 7bf86392: steering inverted, prettier, 17 draw calls) published as Version 2 of RMgibsuh2KdxcF3kd8vuJr (1792877525-2be7); shots sent to the user; RV12 light look.
