@@ -55,3 +55,19 @@ Game sha256 b7b7b6e4... (only b7a8a22e changes the game; ed1ee8d7 reverted by 1d
   it can point at a seat kept for a tradition; tapping it moves you to a free one nearby (actBegin), so harmless.
 - Counter-tap fragility (lead's ask, with RV10): with the recheck the counter part was 8/8 or 9/9 in every run here
   (8 runs), and the planted counter fault is still caught; the earlier 1-of-9 miss was the point going stale, not the fix.
+
+## FX9 needs-pace claude/p923-fx9 fb3a5d1a (0.92.3 items 3, 4, 5, 18): PASS (~05:35 UTC 2026-10-24)
+Game commit 0e9243f9, sha256 fd28b42c...d5a4 (fb3a5d1a and de1e97e9 test/docs only); base 0.92.2 364c80cb ca2f908d....
+- Diff: section 15 constants only: NEED_DRAIN fitness [1.4,.35], social [4.5,.5], leisure [2.4,0], hunger asleep 6;
+  WORK_LEISURE 3; t:gym words "most days"; design-doc and tips-plan. Crew needs untouched. The design-doc sums check
+  (fitness 25.2 a day, social 76, leisure 38.4 a day off / 62 a shift day, hunger 48 a night).
+- Finding (fixed in fb3a5d1a): no check failed on the old rates (the normal paper week was re-planned to pass, the
+  neglect week passes on both). FX9 added four paper lines: on 364c80cb all four FAIL (fitness 12, social 50, leisure
+  12.8, hunger 16), on fb3a5d1a PLAYER CHECK OK (25.2, 76, 38.4, 48). The base run doubles as the planted fault.
+- player_check OK; arrows_check (all parts) OK; devmode_check OK; intro_check (whole) OK.
+- cadet_test vs 364c80cb: a_start..i_tap0 identical; i_tap1..j_steer2 (7 shots, not only i_tap1 as reported) differ
+  by the firm warning/marker ("Missing people"/call booths instead of "Bursting"). A copy with only social reverted to
+  [3,.25] is ALL IDENTICAL, so every difference is the social rate, as intended.
+- check_fast: FX9's OK (not rerun here: the game change is constants only; the full round runs it).
+- Note for the lead/user (design, not a defect): a "normal" day now needs the gym, a call home and three chats daily
+  to stay above 30 on paper; a 0.92.2-style day (gym or call on alternate days) runs social and fitness low.
