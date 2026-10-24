@@ -6,7 +6,7 @@
 #   Lap of the Wren: on Sundays (not Mondays), Tomas leads, the walk forms a line (leader, you, followers), goes round
 #   and finishes; tapping elsewhere drops you out;
 #   Name on the beam: locked at its start until the crew gather and the leader says its lines (0.92.3 item 13); then tapping
-#   crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined),
+#   crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined), right beside the painted row (item 23),
 #   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew), their nameNew traces through a
 #   real save and reload; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
@@ -101,6 +101,12 @@ with sync_playwright() as pw:
     if bm['goal'] != 'Tap the beam to paint your name' and not (bm['goal'] or '').lower().count('beam'): fail(f"the beam: no arrow to the beam once open: {bm}")
     if bm['joined0'] or bm['tr0'] or not bm['tap']: fail(f"the beam: tapping crew shouldn't paint; the beam's tap should: {bm}")
     if bm['tr'] != ['nameYours'] or bm['joined'] != ['name-on-the-beam@1'] or bm['free'] < 3 or bm['goalAfter']: fail(f"the beam: name up, joined, crowd breaks up: {bm}")
+    # 0.92.3 item 23: your name right beside the painted row (it was the west slot, 1.3 m short of the first name)
+    sl = g.ev("""(() => { const [sa, sy] = BEAM.slots[0], first = BEAM.along - BEAM.len / 2 + BEAM.clear / 2048 * BEAM.len, edge = sa + .6 - BEAM.gap * 1.2 / 256;
+      const r = ROOM_BOX[BEAM.room], w = beamSlotWorld();
+      return { east: BEAM.slots.every(x => x[0] <= sa), top: sy > 0, gap: +(first - edge).toFixed(3), arrow: w ? +Math.abs(w.x - X0(r.i0) - edge).toFixed(3) : null }; })()""")
+    print('Your name on the beam:', sl)
+    if not (sl['east'] and sl['top'] and abs(sl['gap']) <= .25 and sl['arrow'] is not None and sl['arrow'] <= .7): fail(f"the beam: your name should be the top row's east slot, its right edge within 0.25 m of the first painted name, the arrow at it: {sl}")
     nw = g.ev("""(() => ({ names: beamNew(200 * 1440).map(x => x.name + '@' + x.day), on: [...Array(200).keys()].map(x => x + 1).filter(d => eventsOn(d).some(e => e.id === 'name-on-the-beam-new')),
       depts: [...Array(200).keys()].map(x => x + 1).flatMap(d => (eventsOn(d).find(e => e.id === 'name-on-the-beam-new') || { honorees: [] }).honorees.map(p => p.dept)) }))()""")
     print('New Works hands on the beam:', nw)
