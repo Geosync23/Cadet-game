@@ -40487,6 +40487,7 @@ let EV_MIN = -1;
 function eventsTick() {
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
+  if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -41648,6 +41649,23 @@ function weekendDecor(now) {
   if (!WEEKEND_ON || !SHIP.weekend || SHIP.weekend.loaf == null) return [];
   const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   return d === SHIP.weekend.loaf + 1 && m >= 390 && m < 600 ? [{ id: 'loafCard' }] : [];
+}
+// the Sunday story (FX9, 0.92.5 item 16): Holt reads a chapter a week, story.sunday.<n> (SW1's content/banks/sunday-story.lines),
+// n = ((the week - 1) mod the chapters there are) + 1, line by line in his speech bubble from 5 minutes in to 5 before the end,
+// while you're in its room (as the Friday address). Every frame from eventsTick; nothing saved, no R()
+let SUN_SAID = null;
+function sundayChapter(d) {
+  let n = 0; while (typeof LINES !== 'undefined' && Array.isArray(LINES['story.sunday.' + (n + 1)])) n++;
+  return n ? 'story.sunday.' + ((Math.floor((d - 1) / 7) % n) + 1) : null;
+}
+function sundayStoryTick() {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = m >= 1300 && eventsOn(d).find(x => x.id === 'sunday-story'); if (!e) return;
+  const a0 = e.from + 5, a1 = e.to - 5, key = sundayChapter(d), L = key && LINES[key];
+  if (!L || m < a0 || m >= a1 || !friHere(e)) return;
+  const i = Math.floor((m - a0) * L.length / (a1 - a0)); if (SUN_SAID && SUN_SAID[0] === d && SUN_SAID[1] === i) return;
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(c => c.h && c.p && c.p.id === 'holt'); if (!a || typeof bubbleSay !== 'function') return;   // not here yet: next frame
+  SUN_SAID = [d, i]; bubbleSay(friSpeaker(a), L[i].text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
 }
 // ---- the events base, F0 (EV1; plans/events-base-brief.md). Inert while EV_CAL_ON is off ----
 // the ship minute a beat at [day, minute] of an event starting on startDay begins (its phases, meetings, news, felt
