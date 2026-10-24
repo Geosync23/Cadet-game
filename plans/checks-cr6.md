@@ -1,5 +1,30 @@
 # CR6 check results
 
+## 0.92.3 (2026-10-24)
+
+### Round 1: 0dd4e2e2 (sha 4e653844...cd0a2): stopped after one NEW FAIL
+
+- check_fast OK (262 s; gated repair share 53% over Days 2-28, the 14-day line 39% for information), bigevents OK.
+- mech_check FAIL (new): `FAIL m3d taps: done by you, trained, no arrow left (['done', 'you', True, 'Clock in at the time
+  clock', [True]])`. OLD 0.92.2 (364c80cb) passes m3d with the same mech_check.py; NEW failed it again alone. BM16 traced
+  it to AC3's item 6 (clock-in tracked on a Day 3 afternoon); fixed in 4928271f (RV12 PASS). The round was restarted.
+
+### Round 2: d9a387b6: OK
+
+- **Build:** `claude/staging-0.92.3` d9a387b6c795eacd448fc2419c09f6e95e6e1e70, `starship-cadet.html` sha256
+  `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853` (matches BM16's). OLD 364c80cb, not needed.
+- Agreed before starting: controller_check (all but reach) to CR3; food 1 7, food 11 4, clothes to CR4 (CR4: all OK).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 246 s) | `QUICK CHECK OK in 246 s`; `the repairs' share over Days 2-28: machine jobs 76, repairs 40 (53%)` |
+| mech_check | OK (exit 0, 609 s) | `MECH CHECK OK` (m3d passes) |
+| bigevents_check | OK (exit 0, 151 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 1175 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 121 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 113 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 155 s, alone) | `JOIN CHECK OK` |
+
 ## 0.92.2 full round (2026-10-24): OK
 
 - **Build:** `claude/integration-next` ee974894 (0.92.2), `starship-cadet.html` sha256
