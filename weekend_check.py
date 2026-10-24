@@ -64,7 +64,7 @@ with sync_playwright() as pw:
     g = Game(pw, won, 900, 760)
     # ---- Bread day (Day 7, Sunday) ----
     g.ev("(() => { skipTo(6 * 1440 + 428); goToDeck(3, null); player.obj.position.set(37 - OX, 0, 8.5 - OZ); SHIP.device.settings.tips = false; })()")
-    g.step(240)
+    g.step(420)   # to about 07:16: Cook-along's spots (FX9) are a few steps further from the galley door than the old 3-bread-* ones
     b = json.loads(g.ev("JSON.stringify({ dress: dressingOn(), crew: DECK_CREW.filter(a => a.settled && a.spot && /^3-cookalong-/.test(a.spot.id)).length })"))
     check('breadDay' in b['dress'], 'Bread day: flour, dough and tins on the prep island (%s)' % b['dress'])
     check(b['crew'] >= 3, 'Bread day: crew kneading round the island (%d)' % b['crew'])
