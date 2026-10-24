@@ -102,3 +102,13 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
   m6 Day 9). Reading: small repairs (2 of 3 top-ups) fill the follower's Day 8, no scanner use -> m6 never opens. -> FX10.
 - **b75dcf81 (arrows_check only, backlog 15): PASS on its own** — old arrows_check on 0.92.2 FAILs at m6; new one OK.
 - d22d1132: cadet_test 0.92.2 vs FX10 game ALL IDENTICAL; check_fast QUICK CHECK OK (408 s). FX10 (08:14) confirms the arrows FAIL is real on the final game, investigating.
+- **64cc5653 / 1bd0a34e (game 846f8f35...4bb0... ; 1bd0a34e = build-table only): PASS (~09:42 UTC).** fixScanTick (24p slot,
+  WORK_TICKS, FIX_ON-gated): from the first workday after the m7 lesson, while the scanner's unused and no part-cause
+  repair is open for you, jobReserve('washer', d, 570, slot 24, pump, until shift end), once a day. arrows week guide on
+  the fix: OK (scanner first used Day 8, m6 Day 9; earlier d22d1132 FAILed 2/2). machine_check OK with forced states
+  (due once; never before the lesson, after a use, on its day or a day off). Plants: h1 used-gate off FAIL, h2 day-off
+  gate off FAIL, h3 today's-slot guard off OK (the open-repair guard already blocks a second the same day; backstop).
+  career_check OK, mech_check OK, cadet_test 0.92.2 vs fix ALL IDENTICAL, check_fast OK (291 s). FX10: day_check 8 OK,
+  interactions_check full OK on 3e5c4fe2 (my own run cut short, no FAIL; LEAD 33 accepted FX10's).
+  Owner sign-offs given: section 17 (Systems engineer), 15b (small edits), 24p (Works career; LEAD 33).
+  Notes: m2 (work uniform) now Day 9 not Day 8 for the arrow-follower (FX10 notes it in the build table).
