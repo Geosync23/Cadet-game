@@ -14987,9 +14987,10 @@ function needGoal(k) {
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
   if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS || SHIP.player.trayGo)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
     const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
-    const seats = (DECKS[here].places || []).filter(pl => here === 3 ? pl.type === 'mess-seat' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+    const sd = TRAY_TRAVELS ? here : 3;                  // the deck of the seat: the mess's, but (TRAY_TRAVELS, FX12) any seat on the deck you're on; a Pick-your-own tray travels to the mess (RV12, 0.92.4)
+    const seats = (DECKS[sd].places || []).filter(pl => sd === 3 ? pl.type === 'mess-seat' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
     const seat = seats.find(pl => !heldBy(pl.id)) || seats[0];   // all taken: the nearest (sitting there moves you to a free one nearby, actBegin)
-    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true, deck: here }; setGoal({ deck: here, place: seat.id, label: TRAY_SEAT_SAY }); return true; }   // off Deck 3 (TRAY_TRAVELS, FX12): any seat there
+    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true, deck: here }; setGoal({ deck: sd, place: seat.id, label: TRAY_SEAT_SAY }); return true; }
   }
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)

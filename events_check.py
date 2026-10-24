@@ -981,6 +981,12 @@ with sync_playwright() as pw:
         print('  picking again the same day, inside the window:', j, s4a, '| tray', s4[2])
         if not (j and s4a[0] == 'ixGarden' and s4a[2]): fail(f"Pick-your-own: the second pick wasn't inside the tradition ({j}, {s4a})")
         if s4[2]: fail(f"Pick-your-own: a second tray the same day ({s4[:5]})")
+        # off Deck 3 with what you picked, the hunger arrow still points at a mess seat (it travels "to the mess"; RV12, 0.92.4)
+        g.ev("actEnd(true); clearGoal(); NEED_GOAL = null; SHIP.player.tray = PYO_DISH; SHIP.player.trayGo = true; goToDeck(4)"); g.step(20)
+        g.ev("SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
+        s5 = g.ev("[deckDef.num, SHIP.player.tray, IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.deck, IX_GOAL && IX_GOAL.place]")
+        print('  on Deck 4 with what you picked:', s5)
+        if not (s5[0] == 4 and s5[1] and s5[2] == 'A seat for your tray' and s5[3] == 3 and str(s5[4]).startswith('3-mess')): fail(f"Pick-your-own: off Deck 3 the arrow isn't at a mess seat ({s5})")
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
