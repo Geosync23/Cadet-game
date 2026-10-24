@@ -129,7 +129,7 @@ torres-zeke: And Dad's reply came. He wrote it on his last shift, sat by the eng
 torres-zeke: "She's sulking. Give her a minute. You'll know her better than I did."   [sigh]
 torres-zeke: Hang on. Again. "You'll know her better than I did."
 kovac-zainab: Oh. That's. Um. That's a very good line. Sorry. It is.
-dahl-mira: Read it a third time at breakfast. It'll still be true.
+dahl-mira: Read it again at breakfast. It'll still be true.
 ? choice
 * Read it once more. Slowly.   flavour:listen mem:once
   them: "You'll know her better than I did." There. That's three. I'll stop. I won't stop.
