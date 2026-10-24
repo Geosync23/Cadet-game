@@ -154,3 +154,4 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
   shorter). Thin seams between the blocks show in the shots. (2) The check hard-codes /home/user/Cadet-game for the page
   and the shots folder; deriving both from __dirname would let it run from any checkout.
 - a7f3822c: both nits fixed (top/bottom hull blocks y 8-25.6 and -17.6-0, z +0.4 to +139.6: no shared planes; the mouth edges at y 0 and 8 unchanged; the check's paths from __dirname). Read, fine.
+- 7bf86392 (round 2, the user's notes; light look): game untouched; left/right turned round only in input() (camera looks along +z, so screen right is -x; rules and pilots unchanged); prettier view (sky dome, nebula, planet, new Wren/Tern, beacons, ring halos), 17 draw calls, no random calls, colours through col(). SIMFLIGHT CHECK OK twice; shots look good. Nit: the drag-right line passes on a 5 px move (291 -> 296 of 390), since the camera follows: thin margin.
