@@ -6,15 +6,10 @@ The user: "The captain and 10 main characters should have their own large pool o
 talk a while. The captain should introduce herself properly and welcome you aboard first time you talk with her. These
 main characters should never pull from the general pool of talk a while lines."
 
-## Who (the lead is confirming with the user)
+## Who (confirmed by the user, 2026-10-24, via lead 32)
 
-The Captain, plus ten. Two readings:
-
-- **A (recommended): the roster's ten story crew** (`story: true` in ROSTER, besides the Captain): Vance, Sato, Holt,
-  Calder, Pell, Rina, Brennan, Tomas, Nandakumar, Zeke. Exactly "the Captain and 10"; all already have their own talks.
-- **B: the ten crew-story people**: Pell, Zeke, Calder, Kovac, Theo, Basil, Halloran, Salo, Raman, Kowalczyk.
-
-In both: **Marrow, Pell, Zeke, Calder**. Writing starts with them.
+**Captain Marrow, plus the roster's ten story crew:** Vance, Sato, Holt, Calder, Pell, Rina, Brennan, Tomas,
+Nandakumar, Zeke. (All already have 4 own talks each.)
 
 ## What each main character gets
 
@@ -50,12 +45,11 @@ with the duplicate checker, exact and near); no talk that retells a story beat; 
 in trouble now; Zeke's dad well and retiring; Halloran's dad long gone, gently). Lines under 90 characters on the card
 (`them:`), the README's limits for the rest. lines_check PASS on a scratch bake.
 
-## Assignment (first round)
+## Assignment
 
-- **SW3:** Marrow (welcome + 26 talks).
-- **SW1:** Pell, Zeke, Calder.
-- **SW2:** waits for the list; then the next three.
-- After the list is confirmed: the remaining six shared out, three each to whoever finishes first.
+- **SW1:** Pell, Zeke, Calder, then Nandakumar.
+- **SW2:** Tomas, Rina, Brennan, then Sato.
+- **SW3:** Marrow, then Vance, then Holt.
 
 ## ETA
 
