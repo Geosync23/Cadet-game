@@ -712,10 +712,10 @@
 
 // ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
 == bday.circle
-- Happy birthday, {other}. Take an hour. That's an order.   #warm
-- Happy birthday. One slice each. I'm counting.   #funny
+- Nobody tells me. Take an hour, {other}. That's an order.   #funny
+- Birthday? Nobody tells me. One slice each. I'm counting.   #funny
 == bday.circle.you
-- Happy birthday, {me}. Good year. More of it.   #warm
+- Is it? Nobody tells me. Happy birthday, then, {me}.   #funny
 == bday.thanks
 - Thank you. Back to work in ten minutes. Eleven.   #funny
 - Thanks. All of you. That's all I'll say.   #warm

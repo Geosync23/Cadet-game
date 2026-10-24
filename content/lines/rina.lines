@@ -661,7 +661,7 @@
 - Happy birthday, {other}. Drink some water with that cake.   #funny
 - Happy birthday. I'm counting the candles. Out loud.   #funny
 == bday.circle.you
-- Happy birthday, trouble. Slice, then water. In that order.   #warm
+- Happy birthday, {nick}. Slice, then water. In that order.   #warm
 == bday.thanks
 - Thanks. I'm counting this as a win.   #funny
 - Thank you. Don't make me say more. Thank you.   #warm

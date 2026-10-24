@@ -648,9 +648,9 @@
 // ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
 == bday.circle
 - Happy birthday, love! Don't touch the knife, I'll cut it.   #funny
-- Happy birthday, {other}. Your favourite. I checked.   #warm
+- Happy birthday, {other}. Your favourite. I asked around.   #warm
 == bday.circle.you
-- Happy birthday, love! Your favourite. I checked the book.   #warm
+- Happy birthday, love! Your favourite. I asked around.   #warm
 == bday.thanks
 - Thank you, loves. Now eat it before it goes cold. It's cake.   #funny
 - Oh, you lot. Who baked? Not me, for once. Thank you.   #warm
