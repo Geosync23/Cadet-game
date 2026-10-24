@@ -65,7 +65,10 @@ cheer: The ship humming. And a quiet corner.
 first: yes
 topic: crew
 them: Hello. We haven't met properly. I'm Odile Marrow. I command the Wren.
-them: Welcome aboard. Seventy-five of us now, counting you. We're glad you came.   #warm
+them: She's not the biggest ship, or the fastest. She's the kindest I've served on.
+them: Six years in her chair, and she still surprises me most weeks. Kindly, mostly.
+them: Off duty, you'll find me with a book. Something old, with weather in it.
+them: Seventy-five of us now, counting you. Welcome aboard, {me}. We're glad you came.   #warm
 ask: What made you sign up? The short answer will do.
 listen: Why did you sign up, Captain?
   them: To see what's past the last chart. All these years on, I still want to.
@@ -74,7 +77,7 @@ share: I wanted to be useful somewhere far.
 cheer: Honestly? The shuttle looked fun.
   them: Don't tell Raman. He'll fly you round the bay to prove it.   #funny
 
-// ---- any tier and acquaintance
+// ---- any tier and acquaintance (at least 12 with no tier gate, for strangers: FX13)
 
 == evening-walk
 topic: ship
@@ -91,15 +94,15 @@ cheer: The grab shelf. Every time.
 
 == first-posting
 topic: work
-them: My first posting, I was a junior on a supply run. I scrubbed one corridor for a month.
-them: I learnt every scuff on it. I still think it was the best training I had.
-ask: Is there a job aboard you'd quite like never to do again?
-listen: Why was it the best training?
-  them: You learn to notice small things changing. That's most of command.
-share: Scrubbers. I dream about scrubbers.
-  them: Then you'll make a fine officer one day. They all dream about scrubbers.   #warm
-cheer: Anything before breakfast.
-  them: Fair. Nothing good was ever decided before breakfast.   #funny
+them: My first captain asked me the same thing every evening: "What did you notice today?"
+them: For a month I had nothing. Then one night I'd noticed the cook was limping. That was it.
+ask: What's a lesson that's stayed with you, from anyone?
+listen: Was the cook all right?
+  them: A sprained ankle. Two days' rest. But I'd seen it, and nobody else had. I was hooked.   #warm
+share: To ask before I assume.
+  them: That's one I learnt late. You've got it early. Hold on to it.   #warm
+cheer: How to look busy. Badly.
+  them: Everyone learns that one. Nobody learns it well. Captains least of all.   #funny
 
 == same-breakfast
 topic: food
@@ -128,7 +131,6 @@ cheer: I don't. I say "you" a lot.
 
 == logbook
 topic: work
-when: tier>=acquaintance
 them: Every evening I write the ship's log. Most days it's two lines. "All well. On course."
 them: I like those days best. Nothing to explain to anyone.
 ask: If you wrote today in two lines, what would they say?
@@ -154,7 +156,6 @@ cheer: Asleep until someone notices.
 
 == the-chair
 topic: ship
-when: tier>=acquaintance
 them: The captain's chair is the least comfortable seat aboard. I asked for it that way.
 them: A comfortable captain stops looking round. That's the theory.
 ask: Do you work better comfortable, or a little uncomfortable?
@@ -167,9 +168,8 @@ cheer: Comfortable. Very. With a blanket.
 
 == newsletter
 topic: news
-when: tier>=acquaintance
 them: The ship's newsletter came out. I read it front to back. Even the poem.
-them: Especially the poem. Gull's outdone himself this week. I'm not sure in which direction.   #funny
+them: Especially the poem. Gull has outdone Gull this week. I'm not sure in which direction.   #funny
 ask: Which page of the newsletter do you read first?
 listen: Do you know who Gull is?
   them: I know a great many things. I'm keeping most of them.   #funny
@@ -180,7 +180,7 @@ cheer: The poem. For the wrong reasons.
 
 == friday-address
 topic: tradition
-when: tier>=acquaintance weekday:fri
+when: weekday:fri
 them: Friday. The address is at four. I write it on Thursday and cut half of it today.
 them: The half I cut is always the half I liked best. That's how you know.
 ask: If you had two minutes to say something to the whole ship, what would it be?
@@ -208,7 +208,6 @@ cheer: That the step is real.
 
 == washing-up
 topic: food
-when: tier>=acquaintance
 them: Once a month I ask Brennan if I can wash up in the galley. She says no.
 them: I ask again the next month. It's become a small tradition. Hers is to refuse.   #funny
 ask: Is there a job you'd do just to be near the people doing it?
@@ -221,7 +220,6 @@ cheer: Biscuit tester. I'd volunteer.
 
 == thin-charts
 topic: plans
-when: tier>=acquaintance
 them: Past the Line our charts go thin. A few old runs, a lot of blank.
 them: I find I like a thin chart. It leaves room for us.
 ask: Would you rather know the road, or find it as you go?
@@ -318,7 +316,7 @@ when: tier>=acquaintance
 them: I ask everyone a question. Fair's fair. You can ask me one.
 them: Anything. I may not answer. But you can ask.
 ask: Go on, then. What would you ask the Captain?
-listen: What do you miss most, out here?
+listen: Is there anything you miss, Captain?
   them: Weather. A window with rain on it. Out here it's always clear. Too clear, some nights.
 share: Were you ever a nervous junior?
   them: Terribly. I was sick before every inspection. I'm told I hid it well. I didn't.   #warm
@@ -395,7 +393,6 @@ cheer: My name on the beam. Spelt right.
 
 == lost-property
 topic: news
-when: tier>=acquaintance
 them: There are four lost-property boxes aboard now. Four decks. Four keepers.
 them: Each of them thinks they're the only one. I haven't the heart to tell them.   #funny
 ask: What have you lost since you came aboard?
@@ -408,11 +405,10 @@ cheer: My sense of direction. Day one.
 
 == veyli-names
 topic: ship
-when: tier>=acquaintance
 them: Every star out here has a Veyli name. I'm learning a few, slowly.
 them: Envoy Saruth corrects me, very kindly. Most days I get the first half right.
 ask: Is there a word you've picked up since you came aboard?
-listen: Which name do you like best?
+listen: Which one's your favourite to say?
   them: Tavessa. Saruth says I say it like a sneeze. Saruth is right.   #funny
 share: "Bunk." I never said it before.
   them: Ship words stick. In a year you'll say "deck" at home and your family will laugh.   #warm

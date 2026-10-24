@@ -162,7 +162,6 @@ cheer: My pillow. It listens very well.
 
 == lost-once
 topic: work
-when: tier>=acquaintance
 them: Every new hand gets lost once. I find them. I don't say I was looking.
 them: Last season it was a junior in the cargo hold. Looking for the gym. Very lost.   #funny
 ask: Where did you get lost, your first week?
@@ -214,7 +213,6 @@ cheer: Biscuit Thursday. And Friday.
 
 == first-aid
 topic: work
-when: tier>=acquaintance
 them: The Watch does first aid twice a year with Dr. Nandakumar. I go too.
 them: She makes me practise on Mensah. He enjoys it far too much.   #funny
 ask: Could you help someone who's hurt, right now, if you had to?
@@ -227,7 +225,6 @@ cheer: I'd shout for you, Chief.
 
 == morning-question
 topic: crew
-when: tier>=acquaintance
 them: The Captain asks me one thing every morning. "Anything I should know?"
 them: Most days the answer's no. That's the job done. That's a good morning.
 ask: What do you ask yourself first thing?
@@ -253,7 +250,6 @@ cheer: Pell snoring. It's soothing.
 
 == airlocks
 topic: ship
-when: tier>=acquaintance
 them: People think airlocks are frightening. They're the most careful machines aboard.
 them: Three checks before anything opens. Every time. They never get bored of it.
 ask: What's something that looks frightening but isn't?
@@ -310,7 +306,7 @@ topic: day
 when: tier>=colleague mood:high
 them: Everything's adequate today. All of it. The doors, the drill, breakfast.
 them: Don't look at me like that. It's a good day. That's what it sounds like.   #funny
-ask: What does a really good day look like, for you?
+ask: Tell me a proper good day, then. What's in it?
 listen: What made it adequate?
   them: A junior did the right thing before I'd said a word. That's the whole of it.   #warm
 share: Good work, then good company.
@@ -404,7 +400,7 @@ when: tier>=friend
 them: I told Mensah a joke. First in years. He laughed so hard he had to sit down.
 them: I've retired from jokes. Undefeated. One for one. He's still recovering.   #funny
 ask: Whose laugh is the best on the ship?
-listen: What was the joke?
+listen: Will you tell me the joke?
   them: Not telling. He'd want it back. It's mine. I'll keep it for an emergency.   #funny
 share: Yours, Chief. It's rare. That's why.
   them: Hm. Don't spread it about. Rare's how I like it.   #warm

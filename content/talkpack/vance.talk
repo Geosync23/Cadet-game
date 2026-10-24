@@ -136,7 +136,6 @@ cheer: Stand by the buttons. Be useful.
 
 == inspections
 topic: work
-when: tier>=acquaintance
 them: I enjoy inspections. Nobody believes me. I enjoy them anyway.
 them: Someone careful comes to look at your work. What's not to like?
 ask: Does being checked on steady you, or rattle you?
@@ -149,7 +148,6 @@ cheer: Rattles me. I hide in the store.
 
 == counsellor-list
 topic: crew
-when: tier>=acquaintance
 them: The Counsellor asked me how I felt. I gave him a list. A good one. Ordered.
 them: He said that wasn't the question. I said it was the answer. We're still discussing it.   #funny
 ask: When someone asks how you are, do you answer truthfully?
@@ -162,7 +160,6 @@ cheer: "Fine." Always "fine".
 
 == wednesday-stew
 topic: food
-when: tier>=acquaintance
 them: Brennan's Wednesday stew. I've never once guessed what's in it. I've tried, methodically.
 them: I keep notes. Brennan has seen them. She added a wrong answer to throw me off.   #funny
 ask: Is there a dish you could eat every week and not tire of?
@@ -175,7 +172,6 @@ cheer: Pudding. Any pudding. Every day.
 
 == forms
 topic: work
-when: tier>=acquaintance
 them: Everyone sighs at forms. A good form is a kindness. It asks once and never again.
 them: I've rewritten the leave form. It's half a page now. Nobody has noticed. Good.
 ask: What's the most useful thing you've written down this week?
@@ -201,7 +197,6 @@ cheer: Myself, most mornings.
 
 == long-way
 topic: ship
-when: tier>=acquaintance
 them: Chief Holt walks every deck before breakfast. The long way. I offered him a quicker route.
 them: He looked at the route. Then at me. Then he walked the long way.   #funny
 ask: Long way or short way round the ship, usually?
@@ -227,7 +222,6 @@ cheer: It's a code. Only I can read it.
 
 == emergency-light
 topic: ship
-when: tier>=acquaintance
 them: Regulation twelve. Every bunk keeps one emergency light where it can be found in the dark.
 them: Most crew keep theirs in a drawer, under their socks. I know this. I've asked.   #funny
 ask: Where's your emergency light right now? Truthfully.
@@ -298,7 +292,7 @@ when: tier>=colleague
 them: I keep a small book of my own mistakes. Three this month.
 them: One was a semicolon. One was a door. One I won't say. All logged, all fixed.
 ask: Do you write your mistakes down, {nick}, or let them go?
-listen: What was the door?
+listen: Which door was it?
   them: I pulled a push door. In front of the bridge crew. Fixed: I now read the sign.   #funny
 share: I let them go. Mostly.
   them: Also valid. The book is for me. Some people sleep better with it. Others without.   #warm

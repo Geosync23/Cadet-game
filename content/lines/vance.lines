@@ -482,3 +482,50 @@
 == disc.lose
 - Impressive. I'll note it.
 - Hm. Correct. Rematch.   #funny
+
+// ---- SW3, 2026-10-24 (patch 0.92.3 item 15): his own Talk a while card frames, in place of the shared ones.
+== talk.start
+- Very well. Ten minutes. I've set no timer. I'll know anyway.   #funny
+- Agreed. Let's talk. Informally. I'm practising informally.   #funny
+- Good timing. I'm off duty for eleven minutes. Go on.
+? tier>=friend
+- {nick}. Good. Sit. I've three things to tell you. Four, possibly.   #warm
+- Good. I've kept my evening clear. Partly for this.   #warm
+?
+
+== talk.sit
+- Sit. A straight back is optional. I'm told.   #funny
+- Take that chair. It faces the door. Holt would approve.
+- Please sit. Standing conversations are briefings.
+
+== talk.filler
+- The air's on its evening cycle. Two degrees cooler. I notice these things.
+- This is pleasant. I've noted it.   #funny
+- Hm. Correct. Where were we?
+- I'm told pauses are allowed. I'm allowing one.   #funny
+- You're easy company, {nick}. That's not in any regulation.   #warm
+- The lounge clock runs ninety seconds slow. I've reported it. Twice.   #funny
+
+== talk.end
+- Thank you. Useful and pleasant. Two of three. The third was the biscuits.   #funny
+- Carry on, {nick}. That was time well spent.   #warm
+- Good. Same again another day. I'll pencil it in. Informally.   #funny
+- That will do nicely. Thank you, {nick}.
+- Right. I'm due elsewhere in four minutes. Correctly due.
+
+== talk.stop
+- Understood. We'll resume. I'll remember where we stopped.
+- Of course. Another time. I'll hold your place.
+- Very well. Go. Punctually.   #funny
+
+== talk.go.shift
+- The bridge. I'm due in three minutes. I'll be early.
+- Duty calls. On time, as ever. Later, {nick}?
+
+== talk.go.bed
+- Twenty-two hundred. Regulation nine. I obey it now. Mostly.   #funny
+- Bed, I'm afraid. The Counsellor checks. Tomorrow?
+
+== talk.go.trad
+- {trad}. I keep the list of who's there. Walk with me?
+- I'm expected at {trad}. On time. Come, if you're free.
