@@ -15689,7 +15689,7 @@ function ixTheirs(it, at) {
 // After the last stop the work is done (17 sets workDone) and the job waits to be turned in at the job board (Pillar 3:
 // "take and turn in at the board"). Chores on a machine (calibrate, faults, filters) go through section 15's repair. ----
 const IX_STOP = { lamp: ['Replacing the lamp', 'work'], vent: ['Cleaning the vent', 'work'], pickup: ['Picking it up', 'browse'], drop: ['Dropping it off', 'browse'],
-  inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'] };
+  inspect: ['Inspecting', 'work'], fault: ['Clearing the fault', 'work'], fetch: ['Main storage', 'browse'], fix: ['Small repair', 'work'] };   // fix: FX10's small repairs
 Object.assign(PLAYER_ACTS, { ixStop: { mins: 10, pose: 'work', title: 'Your job' } });
 const ixChore = () => { const j = typeof myJob === 'function' && typeof jobStepDone === 'function' && typeof jobStops === 'function' ? myJob() : null; return j && (j.kind === 'chore' || typeof JOB_KINDS === 'object' && JOB_KINDS && JOB_KINDS[j.kind]) && !j.machine ? j : null; };   // a registered kind (17's jobKindAdd) walks like a chore (Pillar 5)
 // a side job of yours (17's mySideJobs: the drill), beside any board job: its stops are tapped like a chore's, before the
@@ -15729,7 +15729,8 @@ function ixChoreTap(it, at, side) {
   if (typeof workStep === 'function' && workStep(j, st, k, spot)) return true;   // look, choose, turn, wait (section 15, Pillar 5)
   const [title, pose] = IX_STOP[st.step] || ['Your job', 'work'];
   // the stop's spot, not the place: a lamp over the lift queue is yours to change even with someone waiting there
-  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: j.title + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
+  const sign = j.fix && typeof fixWord === 'function' ? fixWord(j, 'sign') : '', tool = j.fix && j.tool ? ', with ' + j.tool : '';   // a small repair: what you see, and the tool (FX10)
+  actStart('ixStop', null, { ...o, pose, spot: { ...spot, id: null, pose: 'stand' }, after: (sign ? sign + ' ' : '') + j.title + tool + ': about ' + Math.ceil(st.mins || 10) + ' minutes. Walk away to pause.' });
   if (ACT && ACT.kind === 'ixStop') { ACT.def.mins = st.mins || 10; ACT.def.title = title; }
   return true;
 }
@@ -15941,6 +15942,7 @@ function putFrame() {
   const st = document.createElement('style');
   st.textContent = '.ixboard .ixjob{display:flex;align-items:center;gap:8px;margin:0 0 6px;padding:8px 10px;border:1px solid var(--line);border-radius:12px;background:rgba(38,52,58,.55)}'
     + '.ixboard .ixjob i{flex:none;width:6px;align-self:stretch;border-radius:3px;background:#5fd6c6}.ixboard .ixjob.soon i{background:#e8c06a}.ixboard .ixjob.urgent i{background:#e0503f}'
+    + '.ixboard .ixjob.lesson{border-color:#e8c06a;box-shadow:0 0 0 1px #e8c06a}'   // FX10: your lesson's job (boardLesson)
     + '.ixboard .ixjob.taken{opacity:.55}.ixboard .ixjob div{flex:1;min-width:0}.ixboard .ixjob b{display:block;font-size:13.5px;font-weight:600}.ixboard .ixjob small{display:block;font-size:12px;color:var(--muted);margin-top:1px}'
     + '.ixboard .ixjob button{flex:none;padding:6px 11px;font-size:12.5px}.ixboard .ixlist{flex:1 1 auto;min-height:0;overflow-y:auto;touch-action:pan-y;-webkit-overflow-scrolling:touch}'
     // the panel's own box (0.37.6): centred, always inside the screen and its safe areas, scrolling inside when tall
@@ -16022,6 +16024,12 @@ const ixHealth = (() => {
 })();
 
 // ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
+// boardLesson() -> job id | null (FX10, item 29): the job a lesson's "your turn" (24 core's trainDo: SHIP.works.cur at 'do')
+// put on the board for you, while it's there to take
+function boardLesson() {
+  const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
+  return j && j.status === 'open' && !j.claimedBy ? j.id : null;
+}
 const ixBoard = (() => {
   const el = document.getElementById('ixBoard'), list = document.getElementById('ixBoardL'), sub = document.getElementById('ixBoardX');
   let back = null;
@@ -16037,6 +16045,7 @@ const ixBoard = (() => {
   const BOARD_KINDS = new Set(['rounds', 'haul']);     // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo)
   const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
+  const LESSON = 'Your lesson: take this one';           // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
     close() { el.hidden = true; if (back && back.focus) back.focus(); },
@@ -16048,9 +16057,10 @@ const ixBoard = (() => {
       const jobs = jobsBoard(), mine = myJob(), open = jobs.filter(j => !j.claimedBy);
       // yours to take: section 17's openJobs('you') when it's there (its titles and wording), else the device's rule
       const yours = typeof openJobs === 'function' ? openJobs('you') : open.filter(j => canTake(j, null)).map(j => { const [title, where, state] = jobCard(j); return { id: j.id, title, where, state, urgency: j.urgency }; });
-      const ids = new Set(yours.map(o => o.id));
+      const ids = new Set(yours.map(o => o.id)), les = boardLesson();
+      if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your lesson is on the board: take the marked job.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
@@ -16059,7 +16069,7 @@ const ixBoard = (() => {
       }
       for (const o of yours) {
         const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
-        row(o.title, o.where + ' · ' + o.state + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency], ok ? button('Take it', () => api.take(o.id)) : null, o.id);
+        row(o.title, o.where + ' · ' + (o.id === les ? LESSON : o.state) + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency] + (o.id === les ? ' lesson' : ''), ok ? button('Take it', () => api.take(o.id)) : null, o.id);
       }
       for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
         const [title, where, state, pri] = jobCard(j), why = jobTier(j) > playerTier() ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
@@ -16686,9 +16696,10 @@ function guideShift() {
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
       goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the board' }; } });
-    const L = mine ? [] : guideTakeable();
+    const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
+    if (P && les && L.some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + cur.id, once: 1, path: pointBoard(les, 'Take this one: your lesson'), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } });   // FX10 (item 29)
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
-    if (P && L.length) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
+    if (P && L.length && !les) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
   }
   if (P && mine && mine.workDone) pointAsk({ id: 'p:board:turnin', once: 3, path: pointBoard(mine.id, 'Turn it in'), until: now + 240, done: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return !j || j.id !== mine.id; } });   // S5
   const T = Math.min(E + 60, typeof friAutoOut === 'function' ? friAutoOut(d) : E + 60);
@@ -18533,7 +18544,7 @@ function upkeepHour() { for (const k of SYSTEMS) SHIP.upkeep[k] = Math.min(UPKEE
 // the systems a job helps: [main, ...related]
 function jobMeterSys(j) {
   const K = jobKindOf(j), sysOf = id => { const m = id && machineById(id); return m ? MACHINE_KINDS[m.kind].sys : null; };
-  let main = K && K.sys || sysOf(j.machine);
+  let main = K && K.sys || j.sys || sysOf(j.machine);   // j.sys: a small repair's own (FX10)
   if (!main) { const c = {}; for (const x of j.stops || []) { const pl = x.placeId && placeById(x.placeId), k = pl && sysOf(pl.machine); if (k) c[k] = (c[k] || 0) + 1; }
     main = Object.keys(c).sort((a, b) => c[b] - c[a] || SYSTEMS.indexOf(a) - SYSTEMS.indexOf(b))[0] || null; }
   if (!main) main = j.cargo === 'meals' ? 'food' : JOB_SYS[j.chore] || JOB_SYS[j.kind] || 'hull';
@@ -19277,6 +19288,7 @@ const CHORES = {
   filter:    { tier: 2, per: 1.4, parts: ['filter'], text: 'Swap the filters', helps: { self: 10 },
                where: () => choreMachines(['scrubber', 'airplant', 'o2cell']).map(m => ({ key: m.id, title: 'Swap the filters: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 20, 'filter')] })) },
   joint:     { tier: 1, per: 0, parts: ['seal'], text: 'Burst joint', where: () => [] },   // posted by an incident only (jointJobPost, 0.33.49)
+  fix:       { tier: 1, per: 0, parts: [], text: 'Small repair', where: () => [] },   // posted by Calder's top-up only (fixPost, FX10)
   seal:      { tier: 2, per: 1, parts: [], text: 'Check a pressure seal', helps: { self: 5 },
                where: () => choreMachines(['hullseal', 'doorgear', 'valve', 'manifold']).map(m => ({ key: m.id, title: 'Check a pressure seal: ' + machineLabel(m).split(',')[0].toLowerCase(), deck: m.deck, room: m.room, machine: m.id, tier: 2, stops: [panelStop(m, 15, 'seal')] })) },
 };
@@ -19347,7 +19359,7 @@ function showJob(day) {
 function shareOut(t, jobs) {
   const heldNow = j => j.status === 'open' && !j.claimedBy && !j.released && !j.cargo && !heldForYou(j) && forYou(j) && j.found <= t && t < leaveEnd(j);
   for (const j of jobs) {
-    if (j.shareSeen || j.status !== 'open' || j.claimedBy || j.found > t || j.cargo || heldForYou(j) || !forYou(j) || realRepair(j)) continue;
+    if (j.shareSeen || j.status !== 'open' || j.claimedBy || j.found > t || j.cargo || j.fix || heldForYou(j) || !forYou(j) || realRepair(j)) continue;   // j.fix: a small repair is never the crew's (FX10)
     j.shareSeen = true;
     if (!SHARE_ON || j.released || ((machSeed(j.id) >>> 0) % SHARE_EVERY)) continue;
     const n = jobs.filter(x => x !== j && heldNow(x)).length;
@@ -19503,6 +19515,7 @@ function jobStepDone(id, k, res) {
   if (!left && !j.workDone && typeof caseFitted === 'function' && caseFitted(j)) { MACH_REV++; simFlush(); return { ok: true, left: n, done: false, wrong: true }; }   // 24k: the wrong fix, the machine not put right (0.33.47)
   if (!left && !j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); machRecord(MACH_HOUR - 1); }
   MACH_REV++; jobNote(j, 'stop', { k, tag: jobStops(j)[k].step }); if (fresh && j.workDone) jobNote(j, 'done'); simFlush();
+  if (typeof kr !== 'string' && j.fix && fresh && j.workDone && typeof fixWord === 'function') kr = fixWord(j, 'done') || undefined;   // a small repair's own words when it's done (FX10)
   return { ok: true, left, done: !!j.workDone, ...(typeof kr === 'string' ? { say: kr } : {}) };   // say: the kind's words after the step (P's, for M1)
 }
 // turnInJob(id) -> true | false: at a job board, a job whose work is done is complete
@@ -20310,6 +20323,250 @@ machinesLoad(SAVED);
 jobWhere.on = true;                                      // crew go to their jobs (whereIs asks jobWhere)
 
 // ---- slot: Systems engineer (section 17). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- small repairs (FX10, patch 0.92.3 items 21 and 24: "the first days you repair the exact same things over and over";
+// "work needs to take you to the science area more") ----
+// FIX_ROWS: real fittings all over the ship, none of them a machine: no condition, no wear, never in shipSystems,
+// shipHealth or the fault tables. Each row is 'id|place|part|tool|mins|sys|title': the place you stand at (an existing
+// place, so no new geometry), a part off the shelves or none, the tool (words only), minutes at the stop, the ship meter
+// it helps (jobMeterSys reads j.sys) and a plain title. The Works writer's words replace the title and add what you see
+// (fix.<id>.title / .sign / .done, content/works/fixes.lines; keys in content/works/keys-fix.md). Two streams, each in a
+// fixed seeded order made once (no R()): science (Deck 2) and the rest of the ship. Calder's top-up (boardTopUp) asks
+// fixPost first: from Day FIX_FROM (Day 1: it posted the lift lobby's vent six times), two top-ups in three are a small repair, the first of a shift from the science stream,
+// then the streams by turns. The k-th of a stream on day d starts at (d - FIX_FROM) * FIX_PER + k in its order, so nothing
+// comes round again until the whole stream has (science about 11 shift days, the ship about 20). Skipped: a row on the
+// board already or done today, the bridge till you're invited, a part under half stock, the rec deck while it's shut.
+// Held for you to the shift's end like the other top-ups, then gone; never the crew's (shareOut leaves them be).
+// FIX_ON false: the board as before.
+const FIX_ON = true, FIX_FROM = 1, FIX_PER = 6;
+const FIX_ROWS = [
+  'wo-screen|2-watch-1||a pin driver|15|comms|Reseat a flickering watch screen',
+  'wo-chair|2-watch-2||a hex key|10|hull|Tighten a wobbly watch chair',
+  'wo-blind|2-watch-3||a screwdriver|10|power|Free a stuck glass blind',
+  'wo-lamp|2-watch-4|lamp|a step stool|10|power|Replace a desk lamp in the Watch office',
+  'wo-jack|2-watch-5|cable|a crimper|15|comms|Rewire a crackling headset jack',
+  'wo-vent|2-watch-3||a vent brush|15|air|Clear a rattling ceiling vent',
+  'wo-clock|2-watch-1||a pin driver|10|comms|Reset the drifting watch clock',
+  'cr-table|2-survey-1|lamp|a step stool|15|power|Replace the chart table backlight',
+  'cr-drawer|2-survey-2||a hex key|10|hull|Free a jammed chart drawer',
+  'cr-plotter|2-survey-3|bearing|a pin driver|20|comms|Fit a new bearing in the plotter arm',
+  'cr-projector|2-survey-4||a lens cloth and a hex key|15|comms|Realign the star projector',
+  'cr-shelf|2-survey-5||a hex key|10|hull|Fix a sagging chart shelf',
+  'cr-seat|2-windowseat-5||a screwdriver|10|hull|Fix a loose window-seat hinge',
+  'cr-reading|2-armchair-12|lamp|a step stool|10|power|Replace a reading lamp in the chart room',
+  'cr-hum|2-survey-2||a multimeter|15|power|Find the hum in the chart room sockets',
+  'sl-fume|2-survey-6|fan belt|a spanner|20|air|Fit a new belt on a fume hood fan',
+  'sl-spectro|2-survey-7||a lens cloth and a hex key|15|comms|Realign a spectrometer mount',
+  'sl-tap|2-survey-8|seal|a basin wrench|15|water|Fix a dripping lab tap',
+  'sl-socket|2-survey-9||a multimeter|15|power|Reset a tripped bench socket',
+  'sl-stool|2-survey-10||a hex key|10|hull|Tighten a wobbly lab stool',
+  'sl-lamp|2-survey-11|lamp|a step stool|10|power|Replace a bench lamp in the Survey lab',
+  'sl-screen|2-survey-12|cable|a crimper|15|comms|Replace a frayed screen cable',
+  'sl-eyewash|2-survey-13|valve|a spanner|15|water|Fix the eyewash station valve',
+  'sl-cabinet|2-survey-14||a screwdriver|10|hull|Adjust a sticking cabinet door',
+  'sl-centrifuge|2-survey-15|bearing|a pin driver|20|comms|Fit a bearing in a whining centrifuge',
+  'sl-gastap|2-survey-6|seal|a leak spray|15|air|Reseal a hissing gas tap',
+  'sl-hoodlamp|2-survey-7|lamp|a step stool|10|power|Replace a fume hood lamp',
+  'sl-balance|2-survey-9||a test weight|10|comms|Level and zero a lab balance',
+  'sm-fridge|2-survey-17|seal|a screwdriver|15|power|Replace a sample fridge door seal',
+  'sm-freezer|2-survey-18||a multimeter|15|power|Fix a freezer alarm that goes off for nothing',
+  'sm-glovebox|2-survey-19|seal|a glove-port ring tool|20|air|Change a split glove on the glove box',
+  'sm-scope|2-survey-20|lamp|a small screwdriver|10|comms|Replace a microscope lamp',
+  'sm-sink|2-survey-21||a drain rod|15|water|Clear a slow lab sink',
+  'sm-rack|2-survey-22||a hex key|10|hull|Fix a rattling sample rack',
+  'sm-printer|2-survey-23|cable|a crimper|10|comms|Repair a label printer cable',
+  'sm-cleanbench|2-survey-24|fan belt|a spanner|20|air|Fit a new belt on the clean bench fan',
+  'sm-panel|2-survey-18|lamp|a step stool|10|power|Replace a flickering ceiling panel in the sample lab',
+  'sm-incubator|2-survey-22||a multimeter|15|power|Recalibrate a drifting incubator',
+  'cm-card|2-comms-1||a pin driver|15|comms|Reseat a loose console card',
+  'cm-lead|2-comms-2|cable|a crimper|15|comms|Rewire a headset lead',
+  'cm-chair|2-comms-3||a hex key|10|hull|Fix a comms chair that sinks',
+  'cm-patch|2-comms-4|cable|a cable tester|20|comms|Replace a patch panel lead',
+  'cm-fan|2-comms-5|bearing|a pin driver|15|air|Quiet a buzzing rack fan',
+  'cm-booth|2-comms-6|seal|a screwdriver|15|hull|Reseal the quiet booth door',
+  'cm-lamp|2-comms-7|lamp|a step stool|10|power|Replace a desk lamp in the comms room',
+  'cm-screen|2-comms-8||a lens cloth and a hex key|10|comms|Realign a call-home screen',
+  'cm-mic|2-comms-9||a small screwdriver|10|comms|Fix a crackling microphone arm',
+  'cm-clocks|2-comms-10||a pin driver|10|comms|Set the wall clocks to ship time',
+  'ob-mount|2-survey-16|bearing|a pin driver|20|comms|Fit a bearing in the telescope mount',
+  'ob-dimmer|2-survey-16||a multimeter|15|power|Fix the dimmer for star nights',
+  'ob-shutter|2-windowseat-6||a hex key|15|hull|Free a sticky window shutter',
+  'ob-cushion|2-windowseat-7||a screwdriver|10|hull|Fix a loose window-seat clip',
+  'ob-floor|2-beanbag-1||a multimeter|15|heat|Reset a cold floor heater',
+  'ob-redlamp|2-beanbag-2|lamp|a step stool|10|power|Replace a red night lamp',
+  'ob-eyepiece|2-survey-16||a lens cloth|10|comms|Clean and refit the eyepiece rack',
+  'sc-door|2-bench-2||a screwdriver|15|transport|Adjust a slow lab door',
+  'sc-sign|2-bench-3|lamp|a step stool|10|power|Replace a lamp in the lab sign',
+  'sc-panel|2-bench-4||a hex key|10|hull|Refit a loose wall panel',
+  'sc-vent|2-bench-5||a vent brush|15|air|Clear a whistling vent',
+  'sc-notice|2-watch-8|cable|a crimper|15|comms|Fix the notice screen by the labs',
+  'sc-light|2-bench-2|lamp|a step stool|10|power|Replace a science corridor light',
+  'l2-call|2-liftwait-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'l2-bench|2-bench-1||a hex key|10|hull|Tighten a loose bench by the lift',
+  'l2-planter|2-liftwait-3||a drain rod|10|water|Clear the planter\'s drip tray',
+  'w2-tap|2-wcbasin-1|seal|a basin wrench|15|water|Fix a dripping tap in the science washroom',
+  'w2-cistern|2-wctoilet-1|valve|a spanner|15|water|Fix a running cistern in the science washroom',
+  'd1-blind|1-window-1||a hex key|15|hull|Free a sticky blind in the observation room',
+  'd1-urn|1-tea-1||a descaler|15|water|Descale the observation room urn',
+  'd1-screen|1-conf-1|cable|a crimper|15|comms|Fix the conference screen lead',
+  'd1-chair|1-conf-4||a hex key|10|hull|Fix a creaky conference chair',
+  'd1-lamp|1-window-3|lamp|a step stool|10|power|Replace a window lamp',
+  'd1-call|1-lift-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'd1-ready|1-ready-1|lamp|a step stool|10|power|Replace the ready room desk lamp',
+  'd1-tap|1-basin-1|seal|a basin wrench|15|water|Fix a dripping tap in the bridge washroom',
+  'd1-helm|1-helm-1||a pin driver|15|comms|Reseat a loose helm screen',
+  'd1-swivel|1-command-2||a hex key|10|hull|Fix a stiff bridge chair swivel',
+  'd1-ops|1-ops-1|cable|a crimper|15|comms|Replace a frayed console lead',
+  'p3-call|3-lift-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'p3-bench|3-bench-1||a hex key|10|hull|Tighten a loose plaza bench',
+  'p3-down|3-lift-4|lamp|a step stool|10|power|Replace a plaza downlight',
+  'pr-bench|3-bench-6||a hex key|10|hull|Fix a wobbly promenade bench',
+  'pr-lamp|3-bench-9|lamp|a step stool|10|power|Replace a promenade lamp',
+  'pr-blind|3-bench-12||a screwdriver|15|hull|Free a jammed window blind',
+  'pr-drip|3-bench-14||a drain rod|15|water|Clear a blocked planter drip line',
+  'pr-vent|3-bench-7||a vent brush|15|air|Clear a rattling vent',
+  'pr-rail|3-bench-15||a spanner|10|hull|Tighten a loose hand rail',
+  'ms-table|3-mess-3||a hex key|10|hull|Level a wobbly mess table',
+  'ms-chair|3-mess-20||a hex key|10|hull|Fix a squeaky mess chair',
+  'ms-grab|3-grab-1|lamp|a step stool|10|food|Replace the grab shelf light',
+  'ms-menu|3-mess-30|cable|a crimper|15|comms|Fix the menu screen\'s lead',
+  'ms-trayrack|3-mess-41||a spanner|10|food|Straighten a bent tray rack',
+  'ga-sink|3-galley-2|seal|a basin wrench|15|water|Fix a dripping prep sink',
+  'ga-fridge|3-galley-4|seal|a screwdriver|15|food|Replace a worn fridge door seal',
+  'ga-drawer|3-galley-6|bearing|a hex key|15|food|Fix a stiff drawer runner',
+  'ga-heatlamp|3-galley-pass|lamp|a step stool|10|food|Replace a heat lamp at the pass',
+  'ga-shelf|3-galley-8||a spanner|10|hull|Fix a loose shelf bracket',
+  'bl-tap|3-bar-1|seal|a basin wrench|15|food|Fix the bar\'s sticky drinks tap',
+  'bl-sofa|3-lounge-5||a hex key|10|hull|Fix a sagging sofa',
+  'bl-lamp|3-lounge-12|lamp|a step stool|10|power|Replace a table lamp in the bow lounge',
+  'bl-reader|3-bar-order-1|cable|a crimper|15|comms|Fix the card reader at the bar',
+  'bl-blind|3-lounge-20||a screwdriver|15|hull|Free a jammed window blind',
+  'bl-speaker|3-lounge-28|cable|a crimper|15|comms|Fix a crackling lounge speaker',
+  'gd-hose|3-tend-3|seal|a spanner|15|water|Fix a dripping hose reel',
+  'gd-trolley|3-tend-8|bearing|a hex key|15|transport|Fix a sticky trolley wheel',
+  'gd-mister|3-gardenwork-2||a pin driver|15|water|Clear a blocked misting nozzle',
+  'gd-lamp|3-tend-12|lamp|a step stool|10|food|Replace a potting bench lamp',
+  'gd-bench|3-tend-16||a spanner|10|hull|Tighten a loose potting bench',
+  'in-rail|3-infirmary-1||a hex key|10|hull|Fix a stiff bed side rail',
+  'in-light|3-ward-2|lamp|a step stool|10|power|Replace a reading light over a bed',
+  'in-call|3-infirmary-5|cable|a crimper|15|comms|Fix a call button by a bed',
+  'in-chair|3-visit-1||a hex key|10|hull|Fix a wobbly visitor chair',
+  'ex-lamp|3-infirmary-3|lamp|a step stool|10|power|Replace an exam lamp',
+  'ex-couch|3-infirmary-4||a spanner|15|hull|Fix the exam couch lever',
+  'w3-tap|3-basin-1|seal|a basin wrench|15|water|Fix a dripping tap in the washrooms',
+  'w3-cistern|3-toilet-2|valve|a spanner|15|water|Fix a running cistern in the washrooms',
+  'w3-dryer|3-basin-2||a multimeter|10|power|Reset a hand dryer',
+  'gy-rower|3-gym-2|bearing|a pin driver|20|hull|Fix a squeaking rowing machine',
+  'gy-bench|3-gym-5||a hex key|10|hull|Tighten a weight bench',
+  'gy-tread|3-gym-8||a hex key|15|power|Adjust a slipping treadmill belt',
+  'gy-lamp|3-gym-11|lamp|a step stool|10|power|Replace a gym light',
+  'gy-fountain|3-gym-14|valve|a spanner|15|water|Fix the gym water fountain',
+  'cs-till|3-shop-2||a screwdriver|10|hull|Fix a sticky till drawer',
+  'cs-shelf|3-shop-5|lamp|a step stool|10|power|Replace a shelf light in the crew store',
+  'cs-reader|3-store-1|cable|a crimper|15|comms|Fix the crew store\'s card reader',
+  'cb-headset|3-callhome-1|cable|a crimper|15|comms|Fix a call-home booth headset',
+  'cb-door|3-callhome-3|seal|a screwdriver|15|hull|Reseal a call-home booth door',
+  'cb-light|3-bench-17|lamp|a step stool|10|power|Replace a light by the call-home booths',
+  'co-curtain|3-cold-1||a spanner|15|food|Rehang the cold store strip curtain',
+  'l4-call|4-lift-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'l4-bench|4-bench-2||a hex key|10|hull|Tighten a loose bench by the lift',
+  'l4-lamp|4-lift-3|lamp|a step stool|10|power|Replace a lift lobby downlight',
+  'jc-kettle|4-common-kettle||a descaler|15|water|Descale the common room kettle',
+  'jc-sofa|4-common-2||a hex key|10|hull|Fix a sagging common room sofa',
+  'jc-lamp|4-common-5|lamp|a step stool|10|power|Replace a common room lamp',
+  'jc-table|4-common-8||a spanner|10|hull|Fix the games table leg',
+  'jc-screen|4-common-10|cable|a crimper|15|comms|Fix the screen\'s loose lead',
+  'jc-blind|4-common-11||a screwdriver|15|hull|Free a sticky window blind',
+  'mu-stand|4-music-2||a hex key|10|hull|Tighten a loose music stand',
+  'mu-player|4-music-records|bearing|a small screwdriver|15|comms|Fix the record player\'s tone arm',
+  'mu-lamp|4-music-4|lamp|a step stool|10|power|Replace a music room lamp',
+  'mu-amp|4-music-5|cable|a crimper|15|comms|Fix a buzzing amp lead',
+  'la-catch|4-laundry-2||a screwdriver|10|waste|Fix a sticky dryer door catch',
+  'la-lamp|4-laundry-4|lamp|a step stool|10|power|Replace a laundry room lamp',
+  'la-table|4-laundry-6||a spanner|10|waste|Fix a folding table leg',
+  'la-lint|4-laundry-1||a vent brush|15|air|Clear a clogged lint trap',
+  'wp-shower|4-shower-p1|seal|a spanner|15|water|Fix a dripping shower head',
+  'wp-tap|4-basin-p2|seal|a basin wrench|15|water|Fix a loose basin tap',
+  'wp-rail|4-shower-queue-p1||a multimeter|15|heat|Fix a cold towel rail',
+  'wq-cold|4-shower-q2|valve|a spanner|20|heat|Fix a shower that runs cold',
+  'wq-cistern|4-toilet-q1|valve|a spanner|15|water|Fix a running cistern',
+  'wq-mirror|4-basin-q1|lamp|a step stool|10|power|Replace a mirror light',
+  'wb-vice|5-bench-2||a spanner|15|hull|Fix a vice that won\'t grip',
+  'wb-lamp|5-bench-3|lamp|a step stool|10|power|Replace a bench lamp in the Works bay',
+  'wb-rail|5-toolwall-1||a spanner|15|hull|Rehang the tool wall rail',
+  'wb-stool|5-stool-1||a hex key|10|hull|Fix a wobbly stool',
+  'wb-socket|5-bench-4||a multimeter|15|power|Reset a tripped bench socket',
+  'wo-closer|5-office-1||a screwdriver|15|hull|Adjust the office door closer',
+  'tc-urn|5-tea-1||a descaler|15|water|Descale the tea urn',
+  'tc-table|5-tea-2||a hex key|10|hull|Fix a wobbly tea table',
+  'w5-tap|5-basin-1|seal|a basin wrench|15|water|Fix a dripping tap in the Works washroom',
+  'w5-cistern|5-toilet-1|valve|a spanner|15|water|Fix a running cistern in the Works washroom',
+  'st-ladder|5-aisle-1|bearing|a hex key|15|transport|Fix a sticky shelf ladder wheel',
+  'st-light|5-aisle-2|lamp|a step stool|10|power|Replace an aisle light',
+  'st-scanner|5-store-1|cable|a crimper|15|comms|Fix the parts scanner\'s lead',
+  'sh-press|5-shop-1||a spanner|15|hull|Free a sticking drill press lever',
+  'sh-lamp|5-shop-3|lamp|a step stool|10|power|Replace the lathe lamp',
+  'sh-hose|5-shop-5||a screwdriver|10|air|Fix an extractor hose clamp',
+  'sh-grinder|5-shop-2|fan belt|a spanner|20|power|Fit a new belt on the bench grinder',
+  'sb-floor|5-bay-1|lamp|a step stool|10|power|Replace a bay floor light',
+  'sb-ring|5-bay-2||a spanner|15|hull|Free a stiff tie-down ring',
+  'sb-beacon|5-bay-3|relay|a pin driver|15|power|Fix a bay warning beacon',
+  'bc-screen|5-booth-1||a pin driver|15|comms|Reseat a flickering booth screen',
+  'l5-call|5-lift-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'l5-lamp|5-lift-3|lamp|a step stool|10|power|Replace a lift lobby downlight',
+  'l6-call|6-lift-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'l6-bench|6-bench-3||a hex key|10|hull|Tighten a loose bench by the lift',
+  'l6-lamp|6-lift-4|lamp|a step stool|10|power|Replace a lift lobby downlight',
+  'eo-rail|6-bench-1||a spanner|15|hull|Tighten the overlook hand rail',
+  'eo-lamp|6-bench-1|lamp|a step stool|10|power|Replace an overlook lamp',
+  'ec-chair|6-control-1||a hex key|10|hull|Fix a stiff control room chair',
+  'ew-lamp|6-watch-1|lamp|a step stool|10|power|Replace a desk lamp in the watch room',
+  'ew-jack|6-watch-2|cable|a crimper|15|comms|Fix a loose headset jack',
+  'rc-lamp|7-beanbag-1|lamp|a step stool|10|power|Replace a concourse lamp',
+  'rc-call|7-floatq-1||a pin driver|10|transport|Fix a sticky lift call button',
+  'au-stool|7-stool-1||a hex key|10|hull|Fix a wobbly stage stool',
+  'au-lectern|7-lectern-1|lamp|a small screwdriver|10|power|Fix the lectern\'s reading light',
+  'au-board|7-act-2||a spanner|15|hull|Tighten a loose stage board',
+  'po-lounger|7-lounger-1||a hex key|10|hull|Fix a stiff lounger hinge',
+  'po-lamp|7-pooledge-1|lamp|a step stool|10|power|Replace a poolside lamp',
+  'rv-shower|7-beach-1|seal|a spanner|15|water|Fix the beach shower tap',
+  'rv-cleat|7-dockq-1||a spanner|10|hull|Tighten a loose kayak cleat',
+  'ch-locker|7-locker-1||a screwdriver|10|hull|Free a jammed locker',
+  'ch-shower|7-rshower-1|seal|a spanner|15|water|Fix a dripping shower head in the changing rooms',
+  'ch-lamp|7-locker-2|lamp|a step stool|10|power|Replace a changing room light',
+];
+let FIX_TABLE = null;
+function fixTable() {
+  if (FIX_TABLE) return FIX_TABLE;
+  const rows = FIX_ROWS.map(s => { const [id, place, part, tool, mins, sys, title] = s.split('|'); return { id, place, part: part || null, tool, mins: +mins || 10, sys, title }; });
+  const order = st => { const seed = machSeed('fix:' + st), xs = rows.filter(r => (r.place.split('-')[0] === '2') === (st === 's')); return xs.map((r, i) => [schedU(seed, i, 7), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]); };
+  return FIX_TABLE = { s: order('s'), p: order('p'), byId: new Map(rows.map(r => [r.id, r])) };
+}
+const fixRow = id => fixTable().byId.get(id) || null;
+const fixWord = (j, w) => { const r = j && j.fix && fixRow(j.fix); return r && typeof worksText === 'function' ? worksText('fix.' + r.id + '.' + w, w === 'title' ? r.title : '') : r && w === 'title' ? r.title : ''; };
+function fixOk(r, jobs, B) {
+  const pl = placeById(r.place); if (!pl || (pl.deck === 7 && !REC_DECK) || (inBridge(pl.deck, pl.room) && bridgeShut())) return null;
+  if (r.part && !((SHIP.stores[r.part] || 0) >= Math.max(1, STOCK[r.part] / 2))) return null;   // repairs come first
+  if (jobs.some(j => j.fix === r.id && (j.status !== 'done' || j.found >= B))) return null;   // on the board, or done today
+  return placeTier(r.place) <= playerTier() ? pl : null;
+}
+function fixPost(h, jobs, t, leave) {
+  if (!FIX_ON) return null;
+  const d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (d < FIX_FROM) return null;
+  const today = jobs.filter(j => j.extra && j.found >= B && j.found < B + 1440); if (today.length % 3 === 2) return null;   // every third top-up an old kind
+  const n = { s: today.filter(j => j.fix && j.fixS === 's').length, p: today.filter(j => j.fix && j.fixS === 'p').length }, T = fixTable();
+  for (const st of n.s <= n.p ? ['s', 'p'] : ['p', 's']) {
+    if (n[st] >= FIX_PER) continue;
+    const L = T[st], at = ((d - FIX_FROM) * FIX_PER + n[st]) % L.length;
+    for (let i = 0; i < L.length; i++) {
+      const r = L[(at + i) % L.length], pl = fixOk(r, jobs, B); if (!pl) continue;
+      const j = { id: 'fix-' + r.id + '@' + h, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: r.id, title: '', bring: null, tier: 1,
+                  stops: [{ deck: pl.deck, placeId: r.place, mins: r.mins, tag: 'fix' }], urgency: 0, leave, posted: t, found: t, claimedBy: null, parts: r.part ? [r.part] : [],
+                  status: 'open', extra: true, xp: 0, fix: r.id, fixS: st, sys: SYSTEMS.includes(r.sys) ? r.sys : null, tool: r.tool };
+      j.title = fixWord(j, 'title'); jobs.push(j); return j;
+    }
+  }
+  return null;
+}
 // ---- the board keeps up (JB1, playtest patch 1 note 13: the user cleared the board on Day 1) ----
 // Each hour of your shift (BOARD_FROM minutes or more of it left), if fewer than BOARD_MIN jobs you may take are on the
 // board, boardTopUp posts small chores at your tier (the highest your tier allows first: an officer gets the seals),
@@ -20333,11 +20590,14 @@ function boardTopUp(h, jobs) {
   for (const kind of BOARD_KINDS) for (const c of choreWhere(kind) || []) {
     const C = CHORES[kind], ct = Math.max(C.tier, c.tier || 0);
     if (busy.has(kind + ':' + c.key) || (c.machine && busy.has('m:' + c.machine)) || (c.machine && SHIP.machines[c.machine] && JOB_FOR[SHIP.machines[c.machine].state])) continue;   // not a machine that needs a real job
+    if (FIX_ON && jobs.some(x => x.kind === 'chore' && x.chore === kind && x.target === c.key && x.found >= (d - 1) * 1440)) continue;   // FX10: not the same one twice in a day
     const j = { id: 'extra-' + kind + ':' + c.key + '@' + h, machine: c.machine || null, deck: c.deck, room: c.room, kind: 'chore', chore: kind, target: c.key, title: c.title, bring: c.bring || null, tier: ct,
                 stops: c.stops.map(st => ({ ...st })), urgency: 0, leave: end - m, posted: t, found: t, claimedBy: null, parts: [], status: 'open', extra: true, xp: 0 };
     const jt = jobTier(j); if (jt <= tier && forYou(j)) cands.push([jt, j]);
   }
-  for (let k = 0; n < BOARD_MIN && cands.length; k++) {
+  for (let k = 0; n < BOARD_MIN && (cands.length || FIX_ON); k++) {
+    if (FIX_ON && fixPost(h, jobs, t, end - m)) { n++; continue; }   // FX10: a small repair first, two top-ups in three (the slot below)
+    if (!cands.length) break;
     const top = Math.max(...cands.map(c => c[0])), pool = cands.filter(c => c[0] === top), pick = pool[Math.floor(pool.length * schedU(seed, h, 10 + k))];
     cands.splice(cands.indexOf(pick), 1);
     const j = pick[1], key = j.machine ? 'm:' + j.machine : j.chore + ':' + j.target; if (busy.has(key)) continue;
