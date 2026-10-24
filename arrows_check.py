@@ -26,7 +26,8 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week; default all, about 15 minutes)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo; default all, about 45 minutes; promo alone about 30)
+# Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
 # Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
 # Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
 # Add 'guide' to play shift and week with the arrow queue switched on (GUIDE_ON), e.g. ... BUILD.html week guide
@@ -309,7 +310,7 @@ FOLLOW = r"""(() => {
   }
   // the phone left open (the Scanner opens it by itself): closed after a moment, as a player would (FX3's gap 2)
   if (DEV.open && !DEV.choose && !ACT) { window.__devN = (window.__devN || 0) + 1; if (window.__devN >= 3) { window.__devN = 0; deviceClose(); return 'close the device'; } } else window.__devN = 0;
-  { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^inc:/.test(gq.guide || '') ? gq : null;   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
+  { const gq = typeof GUIDE_ON !== 'undefined' && GUIDE_ON ? goalNow() : null, call = IX_GOAL && /^career:/.test(IX_GOAL.trk || '') ? IX_GOAL : gq && /^(inc|promo):/.test(gq.guide || '') ? gq : null;   // DV1: and the promotion's beats (the queue's promo:*)   // FX10 (backlog 15): with the arrows on, Calder's call is the queue's level-1 'inc:m6', not IX_GOAL
     if (ACT && ACT.phase !== 'walk' && call) { const l = call.label; actEnd(true); return 'leave it for: ' + l; } }   // an urgent career arrow (Calder's call) over your work: you stop and go, as a player would (the repair's time is kept; FX4)
   { const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && SHIP.occasions.find(x => x.key === c.occ), n = shipNow(); if (r && !r.met && r.status === 'asked' && n >= r.at && n < r.at + r.len && deckDef.num === r.deck && roomAt(...player.here()) === r.room && !DIALOGUE && !ACT) return null; }   // in a training meeting's room while it's on: stay a moment for it to start (FX4)
   if (ACT) { if (IX_ACTS[ACT.kind] && ACT.phase !== 'walk' && (ACT.done || 0) >= ((ACT.def && ACT.def.mins) || 0)) { const k = ACT.kind; actEnd(); return 'stand up: ' + k; } return null; }   // a sit-down (tea, a lounge) once its minutes are in: up again, as a player would (AC2)
@@ -362,7 +363,7 @@ def stuck_fix(lab):                                  # who should turn a "stuck 
     return FIX['stuck']
 
 class Follower:
-    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []
+    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}
     def run(self, until_min_abs, every=6):
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
@@ -371,7 +372,9 @@ class Follower:
             if isinstance(r, dict) and r.get('click'):
                 pg.page.mouse.click(*r['click']); pg.step(2, 50); r = 'tap the floor at the pin: ' + r['label'] + (' (working)' if pg.ev('!!ACT') else '')
             if r: self.acts.append((pg.ev('clockText()'), r))
-            s = pg.ev("(() => { const g = goalNow(); return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE)]; })()")
+            s = pg.ev("(() => { const g = goalNow(), v = typeof dvCareerNext === 'function' ? dvCareerNext() : null; return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE), g && g.guide || null, v ? v.label : null]; })()")
+            if s[5] and s[5] not in self.guides: self.guides[s[5]] = (s[0], s[1])   # the queue's entries seen leading, first time and label
+            if s[6] and s[6] not in self.dv: self.dv[s[6]] = s[0]                    # the Dev career arrow's labels
             if s[4] and self.same: self.same = (s[0], self.same[1], self.same[2], self.same[3]); continue   # busy (working, a meeting): not stuck
             if s[1]:
                 if self.same and self.same[1] == s[1]:
@@ -442,6 +445,40 @@ def part_week(ctx, path):
     check(not pg.errors, f'week: page errors {pg.errors[:3]}')
     pg.page.close()
 
+# Part "promo" (DV1 for lead 34, the user: "build and activate the promotion"): Days 8-12 following only the arrows, from a
+# career set to the end of Day 7 (Making it safe due on Day 8). The test job set, taken and passed on its day (its parts set
+# aside: no "Look over" all day for want of filters); the summons met in the Chief's office (not by Mail); the walk to cabin
+# 4-23 walked with Calder (not the 17:30 fallback, even mid-job); the ceremony attended by 17:30; flag 'promoted' set; each
+# beat led by the arrow queue (promo:test, promo:summons, promo:move, promo:ceremony); the Dev career arrow naming each.
+def part_promo(ctx, path):
+    pg = Page(ctx, path); real_game(pg, 8); f = Follower(pg); tday = None; N = {k: {} for k in ('promoted', 'moved', 'commissioned')}
+    for d in range(8, 13):
+        f.run((d - 1) * 1440 + 21 * 60 + 30)
+        s = pg.ev("(() => { const W = SHIP.works; return { rank: W.rank, test: W.test, done: W.done.slice(), cur: W.cur ? W.cur.id + ':' + W.cur.st : null, promoted: !!flag('promoted') }; })()")
+        if tday is None and s['test']: tday = s['test']['day']   # the day she set it for
+        for k, v in pg.ev("Object.fromEntries(['promoted', 'moved', 'commissioned'].map(k => [k, simNotes(k, 0)]))").items():   # gathered each evening (the notes bus keeps a few days)
+            for n in v: N[k][n['t']] = n
+        print(f'  promo: Day {d}: {s}')
+        f.night(d)
+    W = pg.ev("(() => { const W = SHIP.works; return { test: W.test, rank: W.rank, home: W.home, done: W.done, promoted: !!flag('promoted') }; })()")
+    N = {k: [v[t] for t in sorted(v)] for k, v in N.items()}
+    check(W['test'] and W['test']['passed'] and W['test']['tries'] == 1 and tday and W['test']['day'] == tday, f"promo: the test job not passed on its day (Day {tday}), first try (fix: DV1, its parts set aside): {W['test']}")
+    pr = N['promoted'][:1]; check(pr and pr[0].get('how') == 'met', f"promo: the summons not met in the Chief's office (how: {pr})")
+    mv = N['moved'][:1]; check(mv and mv[0].get('how') == 'walked', f"promo: the walk to cabin 4-23 not walked with her (how: {mv}) (fix: DV1, the walk starts at 17:00 even mid-job)")
+    cm = N['commissioned'][:1]; check(cm and cm[0].get('how') == 'met', f"promo: the ceremony not attended (how: {cm})")
+    check(W['rank'] == 'officer' and W['home'] == '4-23' and W['promoted'], f"promo: not an officer in 4-23 with the flag 'promoted' (fix: DV1): {W['rank']}, {W['home']}, promoted {W['promoted']}")
+    for k in ('promo:test', 'promo:summons', 'promo:move', 'promo:ceremony'):
+        check(any(g.startswith(k) for g in f.guides), f"promo: the arrow queue never led with {k} (fix: DV1, the promotion's beats on the queue); seen {sorted(g for g in f.guides if g.startswith('promo'))}")
+    for w in ('Your Tier 2 test job', 'The summons', 'Your cabin', 'The ceremony'):
+        check(any(w in l for l in f.dv), f"promo: the Dev career arrow never named \"{w}\"")
+    PROMO_LAB = re.compile(r'test job|scrubber|Chief|cabin|commission', re.I)   # the promotion's own steps; other stucks are week/shift's business (printed)
+    for t, lab, dk in f.stuck:
+        if PROMO_LAB.search(lab): fail(f'promo: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk}) (fix: DV1)')
+        else: print(f'  promo: (not the promotion) stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    print(f"  promo: test {W['test']}, notes {[(k, [n.get('how') or n.get('step') for n in v]) for k, v in N.items()]}, queue {sorted(g for g in f.guides if g.startswith('promo'))}, stuck {len(f.stuck)}")
+    check(not pg.errors, f'promo: page errors {pg.errors[:3]}')
+    pg.page.close()
+
 def part_clockin(ctx, path):                              # patch 0.92.3 item 6 (AC3; RV12's lines): Days 1-3, into the Works bay before clocking in
     pg = Page(ctx, path)
     pg.ev("localStorage.clear()"); pg.ev("newGameStart(true)"); pg.step(5)
@@ -465,7 +502,7 @@ def part_clockin(ctx, path):                              # patch 0.92.3 item 6 
 
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week'}
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week', 'promo'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)
@@ -487,10 +524,10 @@ with sync_playwright() as pw:
         print('== clockin (patch 0.92.3 item 6)')
         try: part_clockin(ctx, path)
         except Exception as e: fail(f'clockin: stopped: {str(e)[:300]}')
-    for name, part in (('shift', part_shift), ('week', part_week)):
+    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
-        try: part(ctx, path if GUIDE else off_path)
+        try: part(ctx, path if GUIDE or name == 'promo' else off_path)   # promo: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 
