@@ -15,6 +15,8 @@
 #   touch     touch after pad: press, then tap: the picture is the no-pad one and no focus outline is left (base)
 #   walk      walking in all four view directions, letting go stops; turning and zooming (deck)
 #   pick      the ringed thing and A, against cadet_test's taps (pick)
+#   lift      by Deck 3's lift door with people about: the ring offers the lift, and A on it opens the panel after someone
+#             steps in front (CP5: KC1, KC2) (pick)
 #   reach     the non-circular sweep: the clickables are read from the page itself (every element that is a button,
 #             link or input, or has a click/pointer/touch listener, or shows a hand cursor), first by mouse through every
 #             panel and menu; then every one must be reached and pressed by pad (panels)
@@ -34,7 +36,7 @@ exec(open(__file__.replace('controller_check.py', 'cadet_test.py')).read().split
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
-ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'reach', 'day', 'games', 'unplug', 'odd',
+ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'reach', 'day', 'games', 'unplug', 'odd',
              'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
@@ -107,11 +109,18 @@ def check(cond, msg):
     return cond
 
 QUIET = '#toast,.nf{opacity:0!important} #needFx{display:none!important} #devHu{display:none!important} #needStrip{display:none!important} #devBtn{box-shadow:none!important} *,*::before,*::after{transition:none!important;animation:none!important} .bubw{opacity:0!important}'
+# (CP5) the reach sweep compares no pictures: its pages keep the needs strip, which a player always sees (QUIET hid it, so
+# the sweep could never press it or see it shown)
+REACH_QUIET = QUIET.replace(' #needStrip{display:none!important}', '')
 # .bubw (speech bubbles) out of the pictures: mid-fade, one in three runs drew a bubble's layer a shade differently with
 # the same DOM and styles (a compositor quirk). Their text, place and fade are still compared through the page state.
+# (CTT4) padNameIt (P5) names a button with no readable name as the highlight lands on it (an aria-label); mark the ones it
+# named, so the sweep's keys (SCAN, KEY_MARK) stay the names the touch half saw. Only ever runs with the pad in use.
+NAMED_MARK = r"""(() => { if (typeof padNameIt !== 'function') return; const o = padNameIt;
+  padNameIt = el => { const had = el.getAttribute('aria-label'); o(el); if (el.getAttribute('aria-label') !== had && had === null) el.setAttribute('data-ctt-named', ''); }; })()"""
 class Run:
     """One page of the game with the pretend controller in a given mode. extra: JS put into the game's scope at load."""
-    def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None, touch=False):
+    def __init__(self, br, src, tag, mode='none', plug=None, w=900, h=760, query='?nosave&debug', storage=None, touch=False, quiet=QUIET):
         self.errors = []
         # a browser of its own for every run, as cadet_test does: a second page in one browser sometimes drew a speech
         # bubble's layer differently (the same styles and DOM, different pixels), a browser quirk, not the game
@@ -128,12 +137,13 @@ class Run:
         f = WORK / 'test' / f'_ctl_{tag}.html'
         # the same quiet style as cadet_test's, but in the page from the start: added after loading, a speech bubble made
         # on the first frames could be caught mid pop-in, a different picture depending on how fast the machine ran
-        f.write_text(instrument(src).replace('</head>', '<style>' + QUIET + '</style></head>', 1))
+        f.write_text(instrument(src).replace('</head>', '<style>' + quiet + '</style></head>', 1))
         self.page.goto('file://' + str(f) + query)
         try: self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
         except Exception: pass
         if self.page.evaluate('window.__sc === undefined'): raise RuntimeError('game failed to start: ' + ' | '.join(self.errors[:6]))
         self.ev(SKIP_SWITCH)
+        self.ev(NAMED_MARK)
         # let the game's own real-time timers at load run first (section 19's DEV.live at 0 ms, section 17's machine
         # averages from 300 ms), so every run starts from the same place however fast the machine is
         try: self.page.wait_for_function("window.__sc('typeof MACH_NORM === \\'undefined\\' || MACH_NORM !== null')", timeout=30000)
@@ -145,7 +155,7 @@ class Run:
     def reload(self):
         self.page.reload(timeout=90000)
         self.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=90000)
-        self.ev(SKIP_SWITCH); self.page.wait_for_timeout(300)
+        self.ev(SKIP_SWITCH); self.ev(NAMED_MARK); self.page.wait_for_timeout(300)
     def ev(self, s): return self.page.evaluate('s => window.__sc(s)', s)
     def js(self, s): return self.page.evaluate(s)
     def step(self, n, dt=1000/30):
@@ -328,7 +338,9 @@ SCAN = r"""(() => {
     if (k === 4 && [...cand.keys()].some(o => o !== e && o.contains(e))) continue;
     const at = vis(e); if (!at) continue;
     let a = e, path = ''; while (a && a !== document.body && !a.id) { a = a.parentElement; }
-    const own = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40), lab = own.replace(/\d+/g, 'N');   // no digits in keys: a clock or a count isn't a new thing
+    // (CTT4) an aria-label the controller's padNameIt added as the highlight landed (Maps' "1" became "Deck 1") is not in
+    // the key: the touch half never sees it, and the pad half lost the thing it had just reached (0.91.0-0.92.0's map deck row)
+    const own = ((e.hasAttribute('data-ctt-named') ? '' : e.getAttribute('aria-label')) || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40), lab = own.replace(/\d+/g, 'N');   // no digits in keys: a clock or a count isn't a new thing
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
     const d = e.closest('[role=dialog],[aria-modal=true],.lift,.device,dialog');
@@ -349,6 +361,7 @@ CANDS = r"""(() => [...document.body.children].filter(e => (e.hidden || getCompu
   (e.matches('[role=dialog],[aria-modal=true],dialog') || e.querySelector('button,input,select,textarea,a[href],[role=button],h1,h2,h3'))).map(e => e.id))()"""
 OPEN_NOW = r"""((ids) => ids.filter(id => { const e = document.getElementById(id); if (!e || e.hidden) return false; const b = e.getBoundingClientRect();
   return b.width > 0 && b.height > 0 && getComputedStyle(e).display !== 'none' && getComputedStyle(e).visibility !== 'hidden'; }))"""
+SITUATIONS = ['bedtime']   # (CP5) Sweep.situation: set up as a player gets there (#sleepAsk: the alarm card at bedtime)
 NOT_FROM_NEW_GAME = {}   # id: the reason it can't open in a new game at a test URL (filled as the sweep finds them, each with a reason)
 DECK_TARGETS = r"""(() => { const out = [], seen = new Set(), v = new THREE.Vector3();
   const add = (name, x, y, z) => { if (seen.has(name)) return; seen.add(name); out.push({ name, x, y, z }); };
@@ -357,6 +370,13 @@ DECK_TARGETS = r"""(() => { const out = [], seen = new Set(), v = new THREE.Vect
   for (const d of DOOR_OBJS) if (d.e.type === 'lift') { add('lift door', d.e.cx, 1, d.e.cz); break; }
   for (const k in (typeof CLOSED_DOORS !== 'undefined' ? CLOSED_DOORS : {})) { const e = EDGES.get(k); if (e) add('closed door:' + (CLOSED_DOORS[k].t || k), e.cx, 1, e.cz); }
   return out; })()"""
+# (CP5) the tap at (x, y) reaches the item itself (not a wall in front of it); other kinds of target are taken as they are
+AIMED = r"""((t, x, y) => { if (!t.name.startsWith('item:')) return true; const h = pick(x, y), it = h && h.object.userData.item; return !!it && 'item:' + it.t === t.name; })"""
+# (CP5) your own bunk, as a deck target: { go: deck } when it's on another deck
+MY_BUNK_AT = r"""(() => { const id = playerBed(), d = deckOf(id); if (player.deck !== d) return { go: d };
+  const bed = (DECKS[d].places || []).find(p => p.id === id); if (!bed) return null; const c = cellPos(...bed.at), v = new THREE.Vector3(); let best = null, bd = 1.2;
+  ITEMS.forEach(it => { if (!it.hit) return; it.hit.getWorldPosition(v); const dd = Math.hypot(v.x - c.x, v.z - c.z); if (dd <= bd) { bd = dd; best = { name: 'item:' + it.t, x: v.x, y: v.y, z: v.z }; } });
+  return best; })()"""
 TAP_TARGET = r"""((t) => { const c = nearestOpen(t.x, t.z, player); if (!c) return null; player.stop(); player.steer = null;
   player.obj.position.copy(cellPos(...c)); target.copy(player.obj.position).setY(.7); return true; })"""
 WHERE = r"""((t) => { let x = t.x, z = t.z; if (t.name === 'crew' && typeof DECK_CREW !== 'undefined') { const a = DECK_CREW.find(a => a.x !== undefined); if (a) { x = a.x; z = a.z; } }
@@ -377,11 +397,11 @@ class Sweep:
     def load(self):
         try:
             if self.r: self.r.reload()
-            else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
+            else: self.r = Run(self.pw, self.src, f'{self.tag}_sweep', quiet=REACH_QUIET)
         except Exception:   # a reload that hangs on a busy machine: a fresh browser instead
             try: self.r.close()
             except Exception: pass
-            self.r = Run(self.pw, self.src, f'{self.tag}_sweep')
+            self.r = Run(self.pw, self.src, f'{self.tag}_sweep', quiet=REACH_QUIET)
         self.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); self.r.step(20); self.reloads += 1
     def scan(self):
         sc = self.r.ev(SCAN)
@@ -398,19 +418,36 @@ class Sweep:
     FIXED = {'#devBack', '#devHome', '#devClose'}
     @classmethod
     def sig(cls, sc): return (sc.get('deck'), tuple(sorted(sc['dialogs'])), tuple(sorted(i['k'] for i in cls.inner(sc) if i['k'] not in cls.FIXED)))
-    def deck_tap(self, key):
+    def deck_tap(self, key, t=None):
         name = key[len('@tap:'):]
-        t = next((t for t in self.r.ev(DECK_TARGETS) if t['name'] == name), None)
+        t = t or next((t for t in self.r.ev(DECK_TARGETS) if t['name'] == name), None)
         if not t or not self.r.ev(f"({TAP_TARGET})({json.dumps(t)})"): return False
-        self.r.step(6); x, y, on = self.r.ev(f"({WHERE})({json.dumps(t)})")
+        for q in range(4):   # (CP5) a wall in front of it on screen (Deck 1's Ship health board): a quarter turn of the view, as a player would
+            self.r.step(6); x, y, on = self.r.ev(f"({WHERE})({json.dumps(t)})")
+            if on and self.r.ev(f"({AIMED})({json.dumps(t)}, {x}, {y})"): break
+            self.r.ev("azT += Math.PI / 2"); self.r.step(30)
         if not on: return False
         self.r.page.mouse.click(x, y); self.presses += 1
         for _ in range(15):   # up to 5 s of game: a walk to it, then whatever it opens
             self.r.step(10)
             if self.r.ev(SCAN)['dialogs']: break
         return True
+    def situation(self, name):
+        # (CP5) a panel that only a moment of the day brings, set up the way a player gets there: bedtime is 22:00, your
+        # bunk's deck, a tap on your bunk (you lie down and the alarm card comes)
+        if name != 'bedtime': return False
+        self.r.ev("skipTo((SHIP.time.day - 1) * 1440 + 22 * 60)"); self.r.step(20)
+        b = self.r.ev(MY_BUNK_AT)
+        if b and 'go' in b: self.r.ev(f"goToDeck({b['go']})"); self.r.step(40); b = self.r.ev(MY_BUNK_AT)
+        if not b: return False
+        ok = self.deck_tap('@tap:' + b['name'], b)
+        for _ in range(60):
+            if self.r.ev(SCAN)['dialogs']: break
+            self.r.step(10)
+        return ok
     def press(self, sc, key):
         if key.startswith('@deck:'): self.r.ev(f"goToDeck({int(key[6:])})"); self.r.step(40); return True
+        if key.startswith('@sit:'): return self.situation(key[5:])
         if key.startswith('@tap:'): return self.deck_tap(key)
         it = next((i for i in sc['items'] if i['k'] == key), None)
         if not it: return False
@@ -455,6 +492,7 @@ class Sweep:
             if not path:
                 for n in self.r.ev("(typeof DECK_ORDER !== \"undefined\" ? DECK_ORDER : Object.keys(DECKS).map(Number)).filter(n => n !== player.deck)"):
                     todo.append({'k': f'@deck:{n}'})
+                todo += [{'k': '@sit:' + n} for n in SITUATIONS]   # (CP5) panels only a moment of the day brings
         for it in todo:
             if self.presses >= self.MAX_PRESSES: self.capped.add(f'{self.MAX_PRESSES} presses reached'); return
             if it['k'] in self.pressed or (it['k'] in self.SKIP and path): continue
@@ -558,7 +596,7 @@ KEY_MARK = r"""((want) => { for (const o of document.querySelectorAll('[data-ctt
   for (const e of document.body.querySelectorAll('*')) {
     if (e.closest('[hidden]') || !e.getClientRects().length) continue;
     let a = e; while (a && a !== document.body && !a.id) a = a.parentElement;
-    const lab = (e.getAttribute('aria-label') || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
+    const lab = ((e.hasAttribute('data-ctt-named') ? '' : e.getAttribute('aria-label')) || e.textContent || e.value || e.title || '').replace(/\s+/g, ' ').trim().slice(0, 40).replace(/\d+/g, 'N');
     let key = e.id ? '#' + e.id : (a && a.id ? '#' + a.id + ' ' : '') + e.tagName.toLowerCase() + (e.className && typeof e.className === 'string' ? '.' + e.className.trim().split(/\s+/)[0] : '') + '[' + lab + ']';
     if (!want.startsWith(key)) continue;
     const n = (seen.get(key) || 0) + 1; seen.set(key, n); if (n > 1) key += '#' + n;
@@ -592,7 +630,7 @@ def part_reach_pad(pw, src, tag, states):
         if where in done:
             print(f'  {where}: done before (read back): ' + ('; '.join(done[where]) or 'all reached')); fails += done[where]; continue
         n0 = len(fails)
-        sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
+        sw = Sweep(pw, src, f'{tag}_pad'); sw.r = Run(pw, src, f'{tag}_padsweep', mode='pad', plug={}, quiet=REACH_QUIET); sw.r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); sw.r.step(20)
         okp = all(sw.press(sw.scan(), k) for k in st['path'])
         where = ' > '.join(st['path'])
         if not okp: print(f'  {where}: could not get there again'); sw.r.close(); continue
@@ -621,17 +659,24 @@ def part_reach_pad(pw, src, tag, states):
         print(f'  {where}: {len(seen & want & now)} of {len(want & now)} things highlighted by the D-pad' + (f'; never: {missing[:5]}' if missing else '') + (f'; not on the screen this time: {len(gone)} ({gone[:3]})' if gone else ''))
         if missing: fails.append(f'{where}: the D-pad never reaches {len(missing)}: {missing[:5]}')
         if pad_moves.nameless: fails.append(f'{where}: highlighted with no readable name: {sorted(pad_moves.nameless)[:5]}'); pad_moves.nameless = set()
-        # A clicks the highlighted thing
-        sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
-        if f and not Sweep.BACK.match(f['label']):
-            sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
-            sw.r.press('A'); sw.r.step(4)
-            hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
-            if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
-        # B leaves the panel or goes back
+        # B leaves the panel or goes back (CTT4: first, on the screen as the D-pad left it: after A, B was asked of whatever
+        # A had opened or closed, and "B changed nothing" on Pause, Tracked, Hobbies and the lift was the check's)
         sig0 = Sweep.sig(sw.scan())
         sw.r.press('B'); sw.r.step(6); sc3 = sw.scan()
         if Sweep.sig(sc3) == sig0: fails.append(f'{where}: B changed nothing (the panel stays as it was)')
+        # A clicks the highlighted thing: on the screen again (the same presses after a reload), the highlight put back by a
+        # D-pad press (the mouse presses handed the game back to touch)
+        if sw.replay(st['path']):
+            sw.r.press('DOWN'); sw.r.step(2)
+            sc = sw.scan(); f = next((i for i in Sweep.inner(sc) if i['foc']), None)
+            if f and not Sweep.BACK.match(f['label']):
+                sw.r.js("window.__census.lastClick = null; window.__f = document.activeElement")
+                sw.r.press('A'); sw.r.step(4)
+                # (CTT4) a text box isn't clicked: A puts the typing cursor in it (the system keyboard, plan section 3), so A
+                # must leave the highlight on it; a tick box or a choice is clicked as any button
+                hit = sw.r.js("(() => { const c = window.__census.lastClick, f = window.__f; if (/^(INPUT|TEXTAREA|SELECT)$/.test(f.tagName) && !/^(checkbox|radio|button|submit)$/.test(f.type)) return c && c !== f && !f.contains(c) ? (c.id || c.tagName) : document.activeElement === f ? 'it' : 'the highlight left it'; return !c ? 'nothing' : (c === f || f.contains(c)) ? 'it' : (c.id || c.tagName); })()")
+                if hit != 'it': fails.append(f'{where}: A on the highlighted {f["k"]} clicked {hit}, not it')
+        else: print(f'  {where}: could not get there again for A')
         sw.r.close()
         if pdf:
             with open(pdf, 'a') as fh: fh.write(json.dumps({'where': where, 'fails': fails[n0:]}) + '\n')
@@ -1091,6 +1136,48 @@ def part_mess_seat(pw, src, tag):
             print(f'  mess seat: the ring offers {lst}; A on 3-mess-1: {act}')
             if not act or act[1] != '3-mess-1': fails.append(f'mess seat: A on 3-mess-1 should sit you there: {act}')
     if r.errors: fails.append('mess seat: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
+# (CP5) the lift by Deck 3's lift lobby (CTT3's KC1 and KC2 in the day part, round 10 / 0.92.0): standing 0.95 m from the
+# lift door, the lift must be in the ring's list however many people are about (KC1: the 8-thing list filled with people
+# first), and A on "Lift" must open the lift panel when someone has since stepped in front of the point the ring chose
+# (KC2: A searched the full list again, found no lift, and did nothing). People are set down where the round saw them.
+LOBBY = (-5.938, -1.394, 1.8086)
+LOBBY_AT = "(() => { player.stop(); player.steer = null; player.obj.position.set(%s, 0, %s); player.face = %s; target.copy(player.obj.position).setY(.7); })()" % LOBBY
+PEOPLE_AT = r"""((spots, rel) => { const pp = player.obj.position, who = DECK_CREW.filter(a => a.pose !== 'lie').slice(0, spots.length);
+  who.forEach((a, i) => { a.x = (rel ? pp.x : 0) + spots[i][0]; a.z = (rel ? pp.z : 0) + spots[i][1]; }); return who.length; })"""
+LIFT_A = r"""(() => { const P = PAD_PICK, L = padTargets(), t = L.find(o => o.key === 'lift'); if (!t) return 'no lift in the list';
+  P.list = L; P.sel = t; P.chosen = true; P.n = 99;
+  // someone steps in front of it: set down on the far door, then A in the same moment
+  const who = DECK_CREW.filter(a => a.pose !== 'lie')[1]; who.x = -3.3; who.z = -0.8;
+  if (padWhat(t.s[0], t.s[1], 'lift') === 'lift') return 'still clear';
+  padFire('a'); return 'pressed'; })()"""
+def part_lift(pw, src, tag):
+    fails = []
+    r = Run(pw, src, f'{tag}_lift', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    r.ev("goToDeck(3, null)"); r.step(30)
+    # KC1, breakfast: nine people just ahead of you (they come before the lift, nearest first)
+    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 420)"); r.step(20); r.ev(LOBBY_AT); r.step(4)
+    for name, spots in (('a crowd ahead', [[0.7 + 0.5 * i, -1.0 + 0.5 * j] for i in range(3) for j in range(3)]),
+                        ('two rows ahead', [[0.6 + 0.45 * i, -0.6] for i in range(5)] + [[0.8 + 0.45 * i, -1.1] for i in range(4)])):
+        r.ev(LOBBY_AT); n = r.ev(f"({PEOPLE_AT})({json.dumps(spots)}, true)"); lst = r.ev("padTargets().map(o => o.key)")
+        print(f'  lift lobby, breakfast, {name} ({n} people): the ring offers {lst}')
+        if 'lift' not in lst: fails.append(f'lift lobby, breakfast, {name}: the ring never offers the lift 1 m away ({lst})')
+    # KC2, 22:00: the ring has the lift, someone steps in front, A
+    r.ev("skipTo((SHIP.time.day - 1) * 1440 + 1320)"); r.step(20)
+    for name, spots in (('people at both doors', [[-5.0, -0.8], [-3.3, -0.8]]),):
+        r.ev(LOBBY_AT); r.ev(f"({PEOPLE_AT})({json.dumps(spots)}, false)"); lst = r.ev("padTargets().map(o => o.key)")
+        print(f'  lift lobby, 22:00, {name}: the ring offers {lst}')
+        if 'lift' not in lst: fails.append(f'lift lobby, 22:00, {name}: the ring never offers the lift (a finger can tap it) ({lst})')
+    r.ev(LOBBY_AT); r.ev(f"({PEOPLE_AT})({json.dumps([[-5.0, -0.8], [-6.5, -2.5]])}, false)")
+    res = r.ev(LIFT_A); opened = False
+    for k in range(60):
+        r.step(10)
+        if r.ev("!document.getElementById('lift').hidden"): opened = True; break
+    print(f'  lift lobby, 22:00: the ring on "Lift", someone steps in front, A ({res}): the lift panel opened {opened}')
+    if res != 'pressed': fails.append(f'lift lobby, 22:00: could not set it up ({res})')
+    elif not opened: fails.append('lift lobby, 22:00: A on "Lift" after someone stepped in front: the lift panel never opened')
+    if r.errors: fails.append('lift lobby: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
@@ -1885,7 +1972,10 @@ def legacy_parts(GAME, ON, fails):
         p.plug(); p.step(3)
         check(p.ev("document.querySelectorAll('.padk').length") == 0, 'marks: marks on the page before any press')
         # "Controller connected" waits for the message showing (the opening one) to go, then shows
-        p.ev("toast('Deck 4, CSV Wren', 'opening')"); p.press('x'); p.step(12)
+        # (CP5) frames alone decide: every pop-up shows at once (the game's test hook, LEAD31-2: no arrows' queue on real
+        # time), and the message stays until the check puts it away (no 5.6 s real-time hide): it flaked about half the runs
+        p.js("window.cadetPopupsNow = true")
+        p.ev("toast('Deck 4, CSV Wren', 'opening'); clearTimeout(toastTimer)"); p.press('x'); p.step(12)
         check(p.ev("document.getElementById('tt').textContent") == 'Deck 4, CSV Wren', 'marks: "Controller connected" replaced the message showing')
         # (CTT3) put away as its 5.6 s would: with the arrows on, a message within 2.5 s (real time) of the last one waits in
         # their queue, and the check's frames take far less real time than a player's
@@ -2216,9 +2306,9 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
@@ -2292,9 +2382,13 @@ MUTANTS['pick'] = {
     'the bottom line names the wrong thing': EACH_FRAME.replace('__BODY__', "const h = document.getElementById('padHint'); if (h && !h.hidden && h.textContent !== 'A Something') h.textContent = 'A Something';"),
     'A steps the player a tile before tapping': WRAP("if (buttons[0].pressed) { player.obj.position.x += .5; }"),
     # CP1, claude/controller-follow1 0028869c: the ring finds no point for a seat
-    'CP1: a seat never ringed (the mess seat)': ('src', "  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
+    'CP1: a seat never ringed (the mess seat)': ('src', "  const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z); if (!c) return null;", "  return null;"),
 }
 
+MUTANTS['lift'] = {   # CP5, claude/controller-follow2
+    'CP5 KC1: the list stops at 8 before the lift': ('src', "const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));", "const padMore = J => J.i < J.raw.length && J.out.length < PAD_PICK.max;"),
+    'CP5 KC2: the lift gets no wider search': ('src', "const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z);", "const c = key.startsWith('place:') && padScreen(x, ys[0], z);"),
+}
 MUTANTS['day'] = {
     # CP1, claude/controller-follow1 3f17ac95: the ring takes the lift where a tap reaches the Spine ladder (CTT3's find at
     # the Deck 4 lift door: A climbed the ladder, the lift panel never opened)

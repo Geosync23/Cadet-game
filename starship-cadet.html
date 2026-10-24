@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.92.0
+   STARSHIP CADET: CSV Wren                           build 0.92.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -5612,7 +5612,7 @@ DECKS[3] = {
     [1.0, 1.8].forEach((x, k) => place('F', 'rower', x, 4.6, 's', { place: '3-gym-' + (11 + k), it: k ? IT('Rowing machines', 'A matched pair, side by side, so two people can race. Somebody always says it isn\'t a race.') : undefined }));
     place('F', 'punchBag', 7.5, 4.5, 'e', { place: '3-gym-13', it: IT('Punch bag', 'Patched with tape in three places. The Watch crew say it helps them think. The Works crew say it helps them not think.') });
     place('F', 'gymMat', 4.9, 4.6, 's', { it: IT('Stretching mat', 'One more mat, rolled out in the middle of the room, for people who want to stretch where everyone can see them do it.') });
-    [5.5, 6.5].forEach((x, k) => place('F', 'exerciseBike', x, .95, 'n', { place: '3-gym-' + (16 + k), it: k ? undefined : IT('Exercise bikes', 'Two bikes facing the promenade, so everyone walking past can see how hard you aren\'t pedalling.') }));   // 0.38.28
+    [5.5, 6.5].forEach((x, k) => place('F', 'exerciseBike', x, .95, 'n', { place: '3-gym-' + (16 + k), hitH: .7, it: IT('Exercise bikes', 'Two bikes facing the promenade, so everyone walking past can see how hard you aren\'t pedalling.') }));   // 0.38.28; each bike its own tap, saddle-high (LEAD31-1: a tap on bike 17 went through it to bike 16's, or into the air above the other's bars)
     // ---- the galley's root beds and third bean bed (C9, 0.38.7), grown by section 8b's garden view; last, since raisedBed and trellis draw R() ----
     [[8.1, 8.9, 'e'], [8.1, 13.15, 'e'], [5.7, 17.45, 'n']].forEach(([x, z, b], k) => place('G', 'raisedBed', x, z, b, { crop: 'roots', live: 'roots', it: k ? undefined : IT('Root beds', 'Carrots, beets and turnips, a month from seed to the galley. Chef Brennan pulls one up every few days to check, and pretends she\'s only weeding.') }));
     place('G', 'trellis', .3, 14.8, 'w', { live: 'beans', it: IT('Bean trellis', 'A second frame of runner beans against the stern windows. The galley wanted more beans. The galley always wants more beans.') });
@@ -9070,7 +9070,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.92.0';                            // keep in step with the header's build line
+const GAME_BUILD = '0.92.2';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10377,11 +10377,12 @@ function schedBuild(p, d, occ, S) {
   // how long a diner keeps their seat at a meal tradition (the user, 2026-10-23: "the room must not all empty at once"):
   // their own meal and a linger, 35-75 minutes from sitting down, not to the tradition's end, so the table thins a few
   // at a time (at most 20 minutes past its end). Day 0's Sunday table stays seated through Zeke's goodnight to you
-  // (section 21's INTRO_STEPS 'free'), then empties over the next 25 minutes
-  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };   // section 21's fixed minute (a plan never reads what happens live)
+  // (section 21's INTRO_STEPS 'free', its latest minute: a plan never reads what happens live), then trickles out over
+  // the next 50 minutes. When the goodnight really comes earlier, day0Trickle (below shipDay) has the diners get up from then
+  const tradGood = e => { const g = d === 0 && /^ev-sunday-table/.test(e.tag || '') && typeof introStepById === 'function' && introStepById('free'); return g && g.day === 0 && isFinite(g.at) ? g.at : null; };
   const tradLeave = e => {                               // when this diner gets up: sat down about the tradition's start, plus their own meal and linger, never past its end (a seated sitting's seats are the next sitting's): who'd run over leaves in its last 12 minutes
     const g = tradGood(e), end = e.at + e.dur, own = e.at + (e.q || 0) + 3 + 35 + Math.round(40 * U(531)), to = own < end - 12 ? own : end - Math.round(12 * U(533));
-    return g != null ? Math.max(to, g + Math.round(25 * U(532))) : to;
+    return g != null ? (DAY0_LEAVE.has(p.id) ? DAY0_LEAVE.get(p.id) - B : g + 2 + Math.round(48 * U(532))) : to;   // (day0Trickle's re-plan: up at the minute they really stand)   // Day 0: from the goodnight, one at a time over about 50 minutes, whoever finished first (FX5: their own times all fell in the tradition's last quarter hour)
   };
   const tradStay = e => Math.max(e.min || 15, tradLeave(e) - t - 3);
   const tradMeal = (e, end) => {
@@ -10395,6 +10396,7 @@ function schedBuild(p, d, occ, S) {
     if (!take(e.act, e.where, tradStay(e), { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })
       && !(e.seated && take(e.act, e.where, e.min || 15, { wait: 5, by, min: e.min || 15, tag: e.tag, anim: e.anim, event: true })))   // a seated one (the user: nobody eats standing): no seat free for the rest of their stay, one for its least time (Crossing the Line's supper: 12 stood)
       seg(e.meal, Math.min(end, t + 20), null, null);   // no seat at it: eat where they stand (the galley's counted them)
+    if (DAY0_LEAVE.has(p.id) && tradGood(e) != null) { const l = segs[segs.length - 1], up = DAY0_LEAVE.get(p.id) - B; if (l && l.tag === e.tag && l.placeId && l.from < up) { l.to = up; l.kept = 1; t = up; } }   // day0Trickle's re-plan (FX8): up from the table at the minute they really stand (kept: no walk after it starts out of it), and their evening planned from there
     { const l = segs[segs.length - 1], cut = e.at + e.dur;   // Day 0's table, kept past its end for Zeke's goodnight: after the tradition ends they're ordinary diners lingering in the same seat
       if (l && l.tag === e.tag && l.from < cut && l.to > cut) { const x = { ...l, from: cut, kept: 1 }; delete x.tag; l.to = cut; segs.push(x); } }   // kept: a walk after it never starts out of it (FX5: a toilet's walk lead got three up before the goodnight)
     e.ate = true;                                        // that meal eaten, seat or not (PB2: the standing meal was missed, and the ordinary one planned after it)
@@ -10702,7 +10704,7 @@ function jobVisits() {
 const SHIP_DAYS = new Map();
 function shipDay(d) {
   if (evChanged()) { EV_SIG = evSig(); EV_DAY.clear(); SHIP_DAYS.clear(); }   // a ship-wide event began or ended: plan again (C7)
-  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt))) return was;   // planned before its rec hour was settled: plan again (RC, 0.64.1)
+  const was = SHIP_DAYS.get(d); if (was && !(was.occ.recAt != null && !was.occ.recSet && recSettled(was.occ.recAt)) && !(d === 0 && was.free !== day0Free())) return was;   // (Day 0: Zeke's goodnight came: day0Trickle)   // planned before its rec hour was settled: plan again (RC, 0.64.1)
   const S = schedData(), occ = new Map(), plans = new Map();
   // the day's stand-ins: for each spare station, one person from its department (day shift, working today) works there
   occ.rot = new Map();
@@ -10794,11 +10796,50 @@ function shipDay(d) {
     for (const s of plan) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - (d - 1) * 1440); m < Math.min(1440, s.to - (d - 1) * 1440); m++) (s.deck === 3 ? occ.heads : occ.rec)[m]++;
   }
   const day = { d, plans, occ };
+  if (d === 0) day.free = day0Trickle(day, S, leave);
   SHIP_DAYS.set(d, day);
   for (const k of SHIP_DAYS.keys()) if (k < d - 9 || k > d + 2) SHIP_DAYS.delete(k);   // needs look back a week
   return day;
 }
 function planDay(person, day) { return shipDay(day).plans.get(person.id) || []; }
+// Day 0's Sunday table from Zeke's goodnight as it really happens (FX5; the user, 2026-10-23: once his explanation and the
+// Chief's talk are over, "that's the moment people should start trickling out ... slowly and naturally"). The day's plans
+// keep the table to the goodnight's latest minute (tradGood); once it has happened (SHIP.intro.done.free, saved), only its
+// diners' plans change: each gets up 2-50 minutes after it (key 534, one at a time) and from that minute has their own
+// evening (FX8; the user, 2026-10-23: "return to full simulation ... let them do what they will do"): the planner runs
+// again for them alone, up from the table at that minute (DAY0_LEAVE, read by tradLeave), everyone else's bookings as
+// they are; their plan is kept up to it and the new one's steps follow. Nobody else's plan changes, so nobody else
+// moves (RV10: planning the whole day again re-seated people mid-workout). -> the minute used
+const DAY0_LEAVE = new Map();                            // person -> the ship minute they get up from Day 0's table (only while day0Trickle re-plans them)
+const day0Free = () => { const f = typeof introOn === 'function' && introOn() && SHIP.intro && SHIP.intro.done && SHIP.intro.done.free; return typeof f === 'number' ? f : null; };
+function day0Trickle(day, S, leave) {
+  const f = day0Free(), st = typeof introStepById === 'function' && introStepById('free'), B = -1440, occ = day.occ;
+  if (f == null || !st || f - B < 0 || f - B >= st.at) return f;
+  const run = segs => { let i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId), k = i; if (i >= 0) while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++; return [i, k]; };
+  const heads = (segs, n) => { for (const s of segs) if (s.deck === 3 || s.deck === 7 && occ.rec) for (let m = Math.max(0, s.from - B); m < Math.min(1440, s.to - B); m++) (s.deck === 3 ? occ.heads : occ.rec)[m] += n; };
+  const unbook = (who, list) => { for (const [x, y, id] of list) { const rs = occ.get(id) || [], q = rs.findIndex(r => r[0] === x && r[1] === y && r[2] === who); if (q >= 0) rs.splice(q, 1); } };
+  for (const p of S.people) {
+    const segs = day.plans.get(p.id), [i, k] = segs ? run(segs) : [-1, -1]; if (i < 0) continue;
+    const end = segs[k].to, L = f + 2 + Math.round(48 * schedU(p.seed, 0, 534));
+    if (L >= end - 5 || L <= segs[i].from + 10) continue;   // leaving about then anyway, or only just sat down
+    // their bookings and heads out of the day, then their day planned again with everyone else's as they are
+    const was = (occ.who.get(p.id) || []).slice(); unbook(p.id, was); occ.who.set(p.id, []); heads(segs, -1);
+    DAY0_LEAVE.set(p.id, L); let nw;
+    try { nw = introLay(p, 0, occ, guestTrim(p, 0, schedBuild(p, 0, occ, S), leave && leave.get(p.id))); } finally { DAY0_LEAVE.delete(p.id); }
+    const [i2, k2] = run(nw), got = occ.who.get(p.id) || []; unbook(p.id, got);
+    if (i2 < 0 || Math.abs(nw[k2].to - L) > 2) {           // not up from the table then in the new plan (no seat at it this time): their planned day stays as it was
+      occ.who.set(p.id, was); for (const [x, y, id] of was) (occ.get(id) || occ.set(id, []).get(id)).push([x, y, p.id]); heads(segs, 1); continue;
+    }
+    // kept: the plan up to when the new one gets up (U: L, or a minute or two before when the wait for the lift comes out
+    // of the seat), the table run cut there, then the new plan's steps from the table on, and the bookings that go with them
+    const U = nw[k2].to; let j = k; while (j > i && segs[j].from >= U) j--;
+    segs.splice(j + 1); segs[j].to = U; segs.push(...nw.slice(k2 + 1));
+    const keep = was.filter(([x]) => x < U).map(([x, y, id]) => [x, Math.min(y, U), id]).concat(got.filter(([x]) => x >= U - .5));
+    occ.who.set(p.id, keep); for (const [x, y, id] of keep) (occ.get(id) || occ.set(id, []).get(id)).push([x, y, p.id]);
+    heads(segs, 1);
+  }
+  return f;
+}
 // the arrival's beats (Pillar 4, section 21's introPlan(p, d) -> [{ from, to, deck, placeId?, act?, tag?, anim? }],
 // minutes from that day's midnight): laid over the person's planned day as fixed blocks, the way an accepted
 // appointment is, so the escort and the teachers are really busy then (whereIs, needs, dayReport all see it). The
@@ -11358,7 +11399,7 @@ function devDay(d) {
   // up, a wash call at your bunk), the shift's own, meals, tea and traditions are listed already or need no heads-up.
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
-      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room }); } catch (e) { /* not yet */ }
+      out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -11416,7 +11457,7 @@ function devItemGoal(x) {
   if (x.kind === 'shift') return { deck: 5, room: 'w', label: 'The Works bay, Deck 5' };
   if (x.kind === 'tea') return { deck: 5, item: /^tea table$/i, room: 't', label: 'The Tea corner, Deck 5' };   // 0.72.5; the arrow at the table (playtest 1, note 10)
   if (x.kind === 'delivery') return { deck: 5, room: 'c', label: 'The cargo hold, Deck 5' };
-  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, label: x.where };
+  if ((x.kind === 'tradition' || x.kind === 'occasion' || x.kind === 'beat' || x.kind === 'event') && Number.isInteger(x.deck) && x.room) return { deck: x.deck, room: x.room, ...(x.kind === 'beat' && x.place ? { place: x.place } : {}), label: x.where };   // a first-week beat's own standing spot (item 81)
   return null;
 }
 const devHuName = x => x.kind === 'shift' ? 'Your shift' : x.title;
@@ -12753,7 +12794,7 @@ function pointLiftStep() {                               // a watcher: ask when 
 }
 // watchers (pieces F3, F4): small functions run each frame while POINT_ON, each asking its pointer when its panel shows
 // (the Scanner, Fault notes, the valve card). POINT_WATCH.push(fn) from any section; a watcher that throws is dropped
-const POINT_WATCH = [pointLiftStep];
+const POINT_WATCH = [];   // pointLiftStep (p:lift) parked, not watched: the deck row's own "→ Tracked" (openLiftPanel) is the one marker (the user, 2026-10-23, via lead 31); its id stays retired
 function pointWatchStep() {
   requestAnimationFrame(pointWatchStep);
   for (let i = 0; i < POINT_WATCH.length; i++) try { POINT_WATCH[i](); } catch (e) { DEV.errors.push('pointer watcher: ' + (e && e.message || e)); console.warn('pointer watcher dropped:', e); POINT_WATCH.splice(i--, 1); }
@@ -13597,12 +13638,13 @@ function playerFloorTap(point) {
     const sp = placeSpot(pl.id); if (!sp) continue;
     let best = Infinity;
     for (let y = 0; y <= 1.2; y += .1) { const k = (y - o.y) / d.y; if (!(k > 0)) continue; best = Math.min(best, Math.hypot(o.x + d.x * k - sp.x, o.z + d.z * k - sp.z)); }
-    if (best < FLOOR_NEAR) hits.push([best, pl, sp, use]);
+    if (best < FLOOR_NEAR) hits.push([best, pl, sp, use, Math.hypot(point.x - sp.x, point.z - sp.z)]);
   }
   const job = jobHere(point, true);                      // the floor at your job's stop (0.28.52, the user's lamp), unless a usable place is nearer the tap
   if (job && (!hits.length || job.by <= hits.reduce((m, h) => Math.min(m, h[0]), Infinity))) return !!job.go();
   if (!hits.length) return false;
-  const [, pl, sp, use] = hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
+  const on = hits.filter(h => h[4] < FLOOR_NEAR).sort((a, b) => a[4] - b[4])[0];   // the place right where you tapped the floor first; else the nearest along the tap (LEAD31-1: past bike 16 to bike 17's floor)
+  const [, pl, sp, use] = on || hits.sort((a, b) => a[0] - b[0])[0], at = new THREE.Vector3(sp.x, 0, sp.z);
   if (use === 'sit') return sitTap({ t: 'Seat', x: '' }, at, at);
   return playerTap({ t: FLOOR_ACTS[pl.type](pl), x: '', front: 0, depth: 0 }, at, at);
 }
@@ -13637,7 +13679,13 @@ function stubTap(it, at) {
 }
 // head for a place (or, with no place, do it where you stand) and do the activity there
 function actStart(kind, placeId, o = {}) {
-  const trayAt = pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
+  const sp0 = placeId && ACT && ACT.spot && placeSpot(placeId);
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed && (ACT.phase === 'in' || ACT.phase === 'do') && (kind === 'eat' || kind === 'sit')
+      && (placeId === ACT.placeId || sp0 && Math.hypot(sp0.x - ACT.spot.x, sp0.z - ACT.spot.z) < 1.6)) {   // a tap on your seat or table mid-meal keeps the meal (LEAD31-9: it ended it, the tray already eaten into, and sat you down with nothing)
+    toast(ACT.o.title || 'Mess hall', 'You\'re still eating: about ' + taskMins(Math.max(1, ACT.def.mins - ACT.done)) + ' minutes to go. Walk away to stop.'); return;
+  }
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed) actEnd(true);   // any other start mid-meal: the rest of it back on your tray first (actEnd), so another seat finishes it
+  const trayAt =pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
   if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && trayAt(PLACE_OF.get(placeId))) {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
   }
@@ -13647,6 +13695,7 @@ function actStart(kind, placeId, o = {}) {
   actEnd(true);
   const spot = placeId ? placeSpot(placeId) : o.spot || null, here = player.here();
   ACT = { kind, def: { ...PLAYER_ACTS[kind] }, placeId, spot, o, deck: deckDef, phase: 'walk', done: 0, cb: null };
+  if (kind === 'eat' && o.fed && SHIP.player.trayLeft > 0 && SHIP.player.trayLeft < ACT.def.mins) { ACT.def.gain *= SHIP.player.trayLeft / ACT.def.mins; ACT.def.mins = SHIP.player.trayLeft; }   // a tray part eaten: only what's left (LEAD31-9)
   if (!spot) { actBegin(); return; }
   ACT.cb = () => actBegin();
   if (K(spot.walk) === K(here) && !player.path.length) { player.stop(); actBegin(); return; }
@@ -13673,7 +13722,7 @@ function actBegin() {
   }
   if (A.kind === 'queue') { const j = galleyJoin('player'); A.o.ahead = j.ahead; A.o.turnAt = j.turnAt;   // your place in line from when you reach it
     const ln = typeof lineSpot === 'function' && lineAt(lineSpot('player')); if (ln) A.spot = ln; }   // the back of the real line now (0.28.36; section 16 owns who's in it, 15 only reads the spot)
-  if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null;   // sat down with your tray (0.28.31)
+  if (A.kind === 'eat' && A.o.fed) SHIP.player.tray = null, SHIP.player.trayLeft = 0;   // sat down with your tray (0.28.31)
   if (A.kind === 'job' && !jobBegin(A)) return;          // at the machine: fit parts, then inspect or repair (the job loop, below)
   if ((A.kind === 'ixTea' || A.kind === 'ixLounge') && teaHere(A)) teaBegin(A);   // 13:00 in the Tea corner: tea and biscuits (playtest 1)
   if (typeof washBegin === 'function') washBegin(A);     // no hygiene farming (FX6): a shower's cooldown, a basin's only what a toilet took
@@ -13693,6 +13742,10 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
+  if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5) {   // a meal cut short: never lost in silence (LEAD31-9)
+    SHIP.player.tray = A.o.dish; SHIP.player.trayLeft = A.def.mins - A.done;
+    toast(A.o.title || 'Mess hall', 'You get up with your tray: about ' + taskMins(SHIP.player.trayLeft) + ' minutes of ' + A.o.dish + ' left. Tap a seat to finish it.');
+  }
   if (A.release) try { A.release(); } catch (e) { /* theirs */ }   // whoever stepped aside for you goes back (crewMakeWay, 0.28.40)
   if (A.kind === 'queue' && !A.o.dish && typeof galleyLeave === 'function') try { galleyLeave('player'); } catch (e) { /* not ours to mend */ }   // out of the galley's queue and the real line (galley 0.29.32; the owner's ruling: only section 16 joins or leaves you)
   if (A.body) { A.body.dispose(); player.obj.visible = true; }
@@ -13736,7 +13789,7 @@ function actEnd(abort) {
   }
   if (A.kind === 'pay') basket = null;
   if (A.kind === 'queue' && !A.o.dish) { toast('Servery', A.o.why || 'Nothing to eat just now.'); return; }
-  if (A.kind === 'queue') { SHIP.player.tray = dishName(A.o.dish); toast('Servery', 'Your turn. You take a tray: ' + SHIP.player.tray + '. Find a seat and tap it to eat.'); return; }   // 0.28.31: control back, tray in hand
+  if (A.kind === 'queue') { SHIP.player.tray = dishName(A.o.dish); SHIP.player.trayLeft = 0; toast('Servery', 'Your turn. You take a tray: ' + SHIP.player.tray + '. Find a seat and tap it to eat.'); return; }   // 0.28.31: control back, tray in hand
   if (A.kind === 'tray') {                               // tray in hand: the nearest free mess seat
     const seat = [...PLACE_OF.values()].filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).map(pl => [pl, placeSpot(pl.id)])
       .filter(([, s]) => s).sort((m, n) => Math.hypot(m[1].x - A.x, m[1].z - A.z) - Math.hypot(n[1].x - A.x, n[1].z - A.z))[0];
@@ -13749,7 +13802,7 @@ function actEnd(abort) {
 // queue, a tap or a drag doesn't walk you off; it asks "Leave the queue?" (Leave / Stay). Served, you hold your tray
 // (SHIP.player.tray, the dish; not saved) and choose a mess seat yourself: tap it and you sit and eat.
 const queueHeld = () => !!(ACT && ACT.kind === 'queue' && ACT.phase !== 'walk' && ACT.phase !== 'out') && (queueAsk(), true);
-SHIP.player.tray = null;
+SHIP.player.tray = null; SHIP.player.trayLeft = 0;   // trayLeft: a tray part eaten, the minutes of it left (LEAD31-9)
 function queueAsk() {
   let el = document.getElementById('qAsk');
   if (!el) {
@@ -14878,12 +14931,19 @@ SAVE_EXTRA.push(s => { const p = s.player || (s.player = {}); p.wsteps = SHIP.pl
 // one, else the nearest deck's. Cleared when you start fixing it, or the need is back up (WARN_REARM)
 const NEED_FIX = { hunger: ['servery-queue', 'grab-shelf'], energy: ['bed'], hygiene: ['shower'], bathroom: ['toilet'], fitness: ['gym'], social: ['callhome'], leisure: ['lounge-seat'] };
 const NEED_FIX_SAY = { hunger: 'Food', energy: 'Your bunk', hygiene: 'A shower', bathroom: 'A toilet', fitness: 'The gym', social: 'The call booths', leisure: 'Somewhere to sit and unwind' };
-let NEED_GOAL = null;                                     // { need, label } while the marker is ours
+let NEED_GOAL = null;                                     // { need, label, tray? } while the marker is ours (tray: it points at a seat for your tray)
+const TRAY_SEAT_SAY = 'A seat for your tray';
 function needGoal(k) {
   if (k === 'hygiene' && typeof washCooling === 'function' && washCooling()) return false;   // a shower would give nothing yet (FX6)
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
+  if (k === 'hunger' && SHIP.player.tray && here === 3) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
+    const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
+    const seats = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat').sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+    const seat = seats.find(pl => !heldBy(pl.id)) || seats[0];   // all taken: the nearest (sitting there moves you to a free one nearby, actBegin)
+    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true }; setGoal({ deck: 3, place: seat.id, label: TRAY_SEAT_SAY }); return true; }
+  }
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
   const theirs = pl => (DECKS[pl.deck].places || []).some(q => q.type === 'bed' && q.id !== bed && (q.room === pl.room || pl.id.startsWith(q.id + '-')));
@@ -14895,7 +14955,10 @@ function needGoal(k) {
   setGoal({ deck: pl.deck, place: pl.id, label: NEED_GOAL.label }); return true;
 }
 function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX_GOAL && IX_GOAL.label === NEED_GOAL.label) clearGoal(); NEED_GOAL = null; }
-function needGoalTick() { if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) needGoalClear(); }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
+function needGoalTick() {
+  if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) { needGoalClear(); return; }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
+  if (NEED_GOAL && NEED_GOAL.need === 'hunger' && !!SHIP.player.tray !== !!NEED_GOAL.tray) { needGoalClear(); needGoal('hunger'); }   // a tray taken (a seat next) or left behind (food again): LEAD31-14
+}
 // pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
 // after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
 const PUSH_MS = 2000, PASS_MS = 1500; let PUSH = null;   // { who, t0, last, until }
@@ -16510,16 +16573,18 @@ function guideTrained(id) { return !!(SHIP.works && SHIP.works.tr && SHIP.works.
 function guideStage(id, st) { const c = SHIP.works && SHIP.works.cur; return !c || c.id !== id || c.st !== st; }
 // pop-ups: section 11's toast(t, x, o) asks guideToast first. While one has been up under TQ_MIN (real) ms, a new one
 // waits (at most TQ_MAX; the oldest waiting drops first, never the one on screen); the same words aren't queued twice;
-// o.now shows at once. Each waiting one is shown in turn from the frame loop below.
+// o.now shows at once. Each waiting one is shown in turn from the frame loop below. o.keep (a tradition's join notice,
+// LEAD31-3) is a keeper too, as TQ_KEEP's words are. window.cadetPopupsNow (LEAD31-2): a test hook a check harness sets
+// so every pop-up shows at once; nothing in the game sets it, so play is unchanged.
 const TQ_MIN = 2500, TQ_MAX = 3, TQ_KEEP = /^(Trained: |Works reputation)/;   // a training's or your reputation's word is never dropped
 function guideToast(t, x, o) {
-  if (!GUIDE_ON || GUIDE.pass || o && o.now) return false;
+  if (!GUIDE_ON || GUIDE.pass || o && o.now || window.cadetPopupsNow) return false;
   const shown = (document.getElementById('tt').textContent || '') + '|' + (document.getElementById('tx').textContent || '');
   if (performance.now() - TOAST_AT >= TQ_MIN && !GUIDE.tq.length) return false;   // nothing fresh on screen: show it now
   if (shown === t + '|' + x && !GUIDE.tq.length) return false;   // the one on screen again: shown again (its time starts over), as before (RV2)
   if (GUIDE.tq.some(q => q[0] === t && q[1] === x)) return true;
-  GUIDE.tq.push([t, x]);
-  if (GUIDE.tq.length > TQ_MAX) { const i = GUIDE.tq.findIndex(q => !TQ_KEEP.test(String(q[1]))); if (i >= 0) GUIDE.tq.splice(i, 1); }   // the oldest that isn't a keeper goes (lead 29, RV7: "Trained: rounds" was dropped when six came at once)
+  GUIDE.tq.push([t, x, !!(o && o.keep)]);
+  if (GUIDE.tq.length > TQ_MAX) { const i = GUIDE.tq.findIndex(q => !q[2] && !TQ_KEEP.test(String(q[1]))); if (i >= 0) GUIDE.tq.splice(i, 1); }   // the oldest that isn't a keeper goes (lead 29, RV7: "Trained: rounds" was dropped when six came at once)
   guideStart(); return true;
 }
 function guideTick() {
@@ -19766,9 +19831,9 @@ function traceMark(jobId, id) {
 // calls it 15 minutes after the start; jobsHour does it by the next hour, TEAM_WAIT): your steps go to the lead and it
 // takes TEAM_SLOW longer. The crew in a team job take no other job that would overlap it (teamClash), and jobWhere puts
 // each at their spot. Finishing it (the lead's, at j.done; yours, when your stops are done) puts the machine right
-// (TEAM_RESTORE, an overhaul's); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
+// (TEAM_RESTORE: close to new, the user's 2026-10-23; was an overhaul's 90); with j.youIn set (24h: you were at your spot) you get the meters' step (an overhaul's)
 // even when the lead finishes it. simNote('team', ...) is 24h's. Nothing here posts a team job by itself
-const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 90;
+const TEAM_WAIT = 15, TEAM_SLOW = 1.2, TEAM_RESTORE = 98;   // 98: above a repair's 95, a little short of a service's 100 (JOB_TYPES)
 function teamSpots(id) {
   const m = machineById(id), pre = id.replace(/-\d+$/, '') + '-team-'; if (!m) return [];
   return (DECKS[m.deck].places || []).filter(p => p.id.startsWith(pre)).map(p => p.id).sort((a, b) => parseInt(a.slice(pre.length), 10) - parseInt(b.slice(pre.length), 10));
@@ -20012,6 +20077,19 @@ function shelfGlowTick() {
   const now = performance.now(), fl = now < SHELF_FLASH;
   m.material.opacity = fl ? .5 + .16 * Math.sin(now / 90) : .34 + .08 * Math.sin(now / 420);
   m.visible = true;
+}
+// a tap on the glow is a tap on the shelf it lights (FX3, fresh-eyes 2 item 64): the glow reaches down to the floor and out
+// past the shelves, so a thumb on its lower part met the floor in front, or at some camera turns the Filters shelf in front
+// ("No relays on the Filters shelf") and the first job's relay couldn't be had. Section 11's tap asks, after the crew; false: not on it
+const _sgb = new THREE.Box3(), _sgp = new THREE.Vector3();
+function shelfGlowTap(cx, cy) {
+  const G = SHELF_GLOW; if (!G || !G.mesh.visible || !G.id || typeof playerTap !== 'function') return false;
+  ndc.set(cx / innerWidth * 2 - 1, -(cy / innerHeight) * 2 + 1); ray.setFromCamera(ndc, camera);
+  if (!ray.ray.intersectBox(_sgb.setFromObject(G.mesh), _sgp)) return false;
+  let best = null, bd = Infinity;
+  for (const it of ITEMS) if (it.t === SHELF_NAME[G.id] && it.hit) { it.hit.getWorldPosition(_wp); const d = Math.hypot(_wp.x - _sgp.x, _wp.z - _sgp.z); if (d < bd) { bd = d; best = it; } }
+  if (!best) return false;
+  best.hit.getWorldPosition(_wp); return !!playerTap(best, _wp.clone(), _sgp.clone());
 }
 
 // ---- the Wednesday delivery as crates (0.33.42, the plan for 0.60.7, "Stores and the lift") ----
@@ -27723,7 +27801,7 @@ const VOICE = JSON.parse([
   '{"text":"Crew store. Snacks, socks, small things. Bring credits.","id":"1m2r8ok","flag":"walk.deck3.6"},',
   '{"text":"Infirmary. Dr. Nandakumar. She\'ll tell you to drink water.","id":"1dn3q2w","flag":"walk.deck3.7"},',
   '{"text":"Lounge at the bow. Big curved windows. Best seats aboard.","id":"7dsfbj","flag":"walk.deck3.8"},',
-  '{"text":"Tray first, then the servery. Take what smells best.","id":"rl2xnr","flag":"walk.servery.1"},',
+  '{"text":"The servery. Trays here. Food after a sit-down.","id":"1nhnv4a","flag":"walk.servery.1"},',
   '{"text":"That\'s Chef Brennan. Thank her on the way past. It matters.","id":"16z9pgu","flag":"walk.servery.2"},',
   '{"text":"I\'ll find us a table. Window side, if it\'s free.","id":"sgpe67","flag":"walk.servery.3"},',
   '{"text":"She keeps a book of everyone\'s favourite dish. Think hard.","id":"yz5ys","flag":"walk.servery.4"},',
@@ -27736,7 +27814,7 @@ const VOICE = JSON.parse([
   '{"text":"Keep up! The tour\'s free, but it doesn\'t wait.","id":"1uxa8x3","tone":"funny","flag":"walk.call.5"},',
   '{"text":"Engines, me. I came aboard a junior, same as you.","id":"quh8di","flag":"walk.more.1"},',
   '{"text":"First month, Calder had me on scrubbers. Every single one.","id":"vy4er","tone":"funny","flag":"walk.more.2"},',
-  '{"text":"Ask me anything, by the way. Tap me. Questions are the best bit.","id":"120bhqa","flag":"walk.more.3"},',
+  '{"text":"Forget my name? Tap me. I won\'t be offended. Much.","id":"1wwor8v","tone":"funny","flag":"walk.more.3"},',
   '{"text":"I talk to the coils. Out loud. You\'ll get used to it.","id":"fzus50","tone":"funny","flag":"walk.more.4"},',
   '{"text":"Coil three sulks. Reyes, on nights, says she\'s just shy.","id":"128q72x","tone":"funny","flag":"walk.more.5"},',
   '{"text":"Reyes and I leave each other notes about them. Every shift.","id":"4up147","flag":"walk.more.6"},',
@@ -27855,7 +27933,7 @@ const VOICE = JSON.parse([
   '{"text":"Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.","id":"a6q0f5","flag":"walk.hand"},',
   '{"text":"It knows where you\'re meant to be before you do.","id":"7803nn","flag":"walk.hand"},',
   '{"text":"Annoying, but useful.","id":"vb7o6k","flag":"walk.hand"},',
-  '{"text":"Needs tells you you\'re hungry. Before your tummy does.","id":"ll8ou5","tone":"funny","flag":"walk.hand"},',
+  '{"text":"The Roster\'s in there. Every name aboard. Mine\'s best.","id":"1h6pdfp","tone":"funny","flag":"walk.hand"},',
   '{"text":"Lose it and you\'ll spend a week asking strangers what day it is.","id":"q50za5","tone":"funny","flag":"walk.hand"},',
   '{"text":"There. Officially crew.","id":"1mwmfbf","tone":"warm","flag":"walk.hand"},',
   '{"text":"I left you a note in there. Have a look.","id":"1t4airl","flag":"walk.hand"},',
@@ -35381,7 +35459,7 @@ const MEETINGS_BAKED = {
   "introBunk": {"title": "Your bunk", "from": "Zeke Torres", "gist": "Torres showed you Bunk 1 and your wardrobe. Your bag goes in your wardrobe, by the door.", "lines": [{"who": "torres-zeke", "text": "Bunk 1. This is you. This is where you sleep.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "The top bunk in the middle is yours."}, {"who": "tomas", "text": "Oh! You're here! Hi. I'm Tomas. Watch. Bottom bunk, by the door."}, {"who": "tomas", "text": "I only got here last Sunday. So I'm not the newest any more. Sorry. I'm very pleased about that.", "to": "you"}, {"who": "tomas", "text": "I'll show you the washroom in the morning. It's left at the end. It's left. It's probably left."}, {"who": "torres-zeke", "text": "Now, your bag. In your wardrobe, by the door. Go on, it's yours now.", "pose": "gesture", "to": "you"}]},
   "introChief": {"title": "The Chief stops by", "from": "Chief Ines Calder", "gist": "Chief Calder: Torres has you on Monday, ten to nine in the Works bay. Your first solo job on Tuesday is hers.", "lines": [{"who": "torres-zeke", "text": "Chief. Didn't think we'd see you tonight."}, {"who": "calder", "text": "You haven't. I'm not here. Day off.", "pose": "nod"}, {"who": "calder", "text": "Calder. Works is mine. Welcome aboard.", "to": "you"}, {"who": "calder", "text": "Tomorrow you're with Torres. Ten to nine, the Works bay. Not nine. Ten to."}, {"who": "calder", "text": "Tuesday, your first solo job's mine. I'll pick it. You'll do it."}, {"choice": [{"text": "Looking forward to it.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Good."}}, {"text": "What should I read up on?", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "The scrubber manual. Chapter three. Nobody reads chapter three."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Quiet. Good. The ship's loud enough."}}]}, {"who": "calder", "text": "One thing. Nobody thanks the air. That's how you know it's working."}, {"who": "torres-zeke", "text": "She tells everyone that."}, {"who": "calder", "text": "It's true for everyone.", "pose": "nod"}, {"who": "calder", "text": "Eat something. That's an order, and I'm not even here.", "to": "you"}]},
   "introDevice": {"title": "Your device", "from": "Zeke Torres", "gist": "Torres handed you your device: Mail, your Schedule, the Map and your Needs.", "lines": [{"who": "torres-zeke", "text": "And this is yours. Your device.", "pose": "gesture", "to": "you"}, {"who": "torres-zeke", "text": "Mail, Schedule, the Map, your Needs. The lot. Don't lose it."}, {"choice": [{"text": "What do I do first?", "rel": {"torres-zeke": 1}, "flavour": "practical", "reply": {"who": "torres-zeke", "text": "Dinner. Always dinner first. Then everything else.", "pose": "nod"}}, {"text": "Is it always this much?", "rel": {"torres-zeke": 1}, "flavour": "share", "reply": {"who": "torres-zeke", "text": "First night, yes. By Thursday it's just home with a lift in it.", "pose": "nod"}}, {"text": "(Just nod)", "reply": {"who": "torres-zeke", "text": "Good. The quiet ones last longest."}}]}, {"who": "torres-zeke", "text": "Right, onward. The mess is on Deck 3, and Brennan doesn't hold plates for anyone.", "pose": "gesture"}]},
-  "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, coil three, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Eat while it's hot. Brennan notices.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
+  "introDinner": {"title": "Dinner with Zeke", "from": "Zeke Torres", "gist": "Dinner with Zeke Torres: the drive coils, coil three, and what brought you out here.", "lines": [{"who": "torres-zeke", "text": "Sit, sit. Talk first. Then food. I'll be quick.", "pose": "gesture"}, {"who": "torres-zeke", "text": "So. Engines, that's me. Three drive coils on Deck 6. I mind them on days.", "to": "you"}, {"who": "torres-zeke", "text": "Reyes has them on nights. We leave each other notes at shift change. Mostly about coil three."}, {"who": "torres-zeke", "text": "She sulks, coil three. Reyes says she's shy. One of us is wrong, and it isn't me.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Right. Your turn. What brought you all the way out here, {me}?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I wanted to see the stars.", "rel": {"torres-zeke": 1}, "flavour": "share", "mem": "intro.dinner.stars", "reply": {"who": "torres-zeke", "text": "Best reason there is. Get a window seat, then. Every time.", "pose": "nod"}}, {"text": "I like fixing things.", "rel": {"torres-zeke": 1}, "flavour": "practical", "mem": "intro.dinner.fixing", "reply": {"who": "torres-zeke", "text": "Then you're in the right bay. She's got plenty for you. Lovingly.", "pose": "laugh"}}, {"text": "I'm not sure yet.", "rel": {"torres-zeke": 1}, "flavour": "listen", "mem": "intro.dinner.unsure", "reply": {"who": "torres-zeke", "text": "That's allowed. Most of us found out once we got here. Me included.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Oh. Look who's coming over. Sit up straight.", "pose": "gesture"}]},
   "introHealth": {"title": "Your health check", "from": "Rina Deshi", "gist": "Rina's health check: your six needs are in the Needs app. High ones help, low ones slow you down. Drink some water.", "lines": [{"who": "rina", "text": "You're my two o'clock. Sit. Arm out. Don't touch anything blue.", "pose": "gesture"}, {"who": "rina", "text": "Needs. Food, energy, hygiene, social, fitness, bathroom. They're on your device, in the Needs app.", "to": "you"}, {"who": "rina", "text": "Keep one high and it helps. You work faster, or walk faster. That's the good news."}, {"who": "rina", "text": "Let one drop low and it slows you down. Nothing worse. You'll just feel it."}, {"who": "rina", "text": "Eat in the mess. Sleep in your bunk. Shower. Talk to people. The gym, if you must. You know where the toilets are."}, {"choice": [{"text": "What if I forget?", "flavour": "practical", "reply": {"who": "rina", "text": "Your device marks it. Up for good, down for bad. You'll learn.", "pose": "nod"}}, {"text": "Do you check yours?", "flavour": "share", "reply": {"who": "rina", "text": "Every hour. Mostly I just drink water."}}, {"text": "(Hold out your arm)", "reply": {"who": "rina", "text": "Good. You're a better patient than Pell already.", "pose": "laugh"}}]}, {"who": "rina", "text": "Done. Drink some water on the way out. That's not a suggestion."}]},
   "introSoloJob": {"title": "Your first solo job", "from": "Chief Ines Calder", "gist": "Calder gave you your first solo job, the other light relay on Deck 4: it's yours and tracked on your device. A relay from storage (or made in the shop if the shelf's bare), a bracket made in the shop, follow the arrow, then turn it in at the job board. Every job goes in your Record. Book a progress talk any time.", "lines": [{"who": "calder", "text": "Come in. Don't sit. This won't take long.", "pose": "gesture"}, {"who": "calder", "text": "Your first solo job. It's on your device. Deck, machine, part. Read the whole card. Twice.", "to": "you"}, {"who": "calder", "text": "You'll do it alone. Torres has his own work. He'll look in at tea. Once."}, {"who": "calder", "text": "Every job you finish goes in your Record. So does every job you leave half done. I read the Record."}, {"who": "calder", "text": "Progress talks: any time. Book one on your device. I'll keep it."}, {"choice": [{"text": "What if I need help?", "rel": {"calder": 2}, "flavour": "practical", "reply": {"who": "calder", "text": "Ask. Asking isn't failing. Hiding it is.", "pose": "nod"}}, {"text": "I won't let you down, Chief.", "rel": {"calder": 1}, "flavour": "cheer", "reply": {"who": "calder", "text": "Don't let the machine down. I'll be fine."}}, {"text": "(Take the job and go)", "reply": {"who": "calder", "text": "Good. That's an answer too."}}]}, {"who": "calder", "text": "The other light relay on Four. A relay off the Lights shelf, or make one in the shop if it's bare."}, {"who": "calder", "text": "And a bracket. That you make in the shop. Your device's arrow takes you there. Step by step."}, {"who": "calder", "text": "Lit and tested, you come back and turn it in at the board. Not before."}, {"who": "calder", "text": "One more thing. Finish what you start. Off you go."}]},
   "lineLap": {"title": "Lap of the Wren", "from": "Zeke Torres", "gist": "On the Lap of the Wren, the old hands gave Tomas his crossing at the bow lounge door.", "lines": [{"who": "torres-zeke", "text": "Hold up. Stop here, everyone. This is where it happened today.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Tomas Lind. You missed your Line watching the ship. So here it is."}, {"who": "torres-zeke", "text": "From today, this reach knows your name, Lind.", "pose": "nod"}, {"who": "pell", "text": "And the last of the punch. I saved it. It's not got better.", "pose": "laugh"}, {"who": "tomas", "text": "That's... thank you. That's the nicest thing. It's horrible. Thank you.", "pose": "laugh"}]},
@@ -37463,7 +37541,7 @@ function eventJoin(e, d, now, notice) {
   const bb = typeof bondBest === 'function' && typeof DECK_CREW !== 'undefined' ? Math.max(1, bondBest(DECK_CREW.filter(c => c.settled && c.spot && e.rooms.has(deckDef.num + '|' + c.spot.room)).map(c => (c.p || c).id))) : 1;   // 0.28.43: by the best bond there
   const n = SHIP.player && SHIP.player.needs; if (n && typeof n.social === 'number') n.social = Math.min(100, n.social + Math.min(20, 12 * bb));   // at most +20 even among close friends (0.28.49, the lead)
   if (typeof leisureAdd === 'function') leisureAdd(15, 'tradition');   // 0.34.51: going to a tradition fills leisure (PE6's 7th need, +15 in the plan)
-  toast(e.name, notice || evText(e.ev.thanks, e));
+  toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
@@ -37651,7 +37729,7 @@ function tradJoin(e, a) {
   const kind = s.act || 'tj:' + e.id, o = { title: e.name, member: s.act === 'gym', after: notice, end: (d - 1) * 1440 + e.to, tj: e.id + '@' + d };
   if (!sp) {                                             // every spot taken (a full music room): you stand beside the leader and join in there
     const w = nearestOpen(near.x + .9, near.z + .9, player), c = w && cellPos(...w);
-    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.'); return true; }
+    if (!c || s.act) { toast(e.name, notice + ' Every spot\'s taken just now, so you stand and chat with them.', { keep: true }); return true; }
     actStart('tj:' + e.id, null, { ...o, pose: tradPose(s, {}, { pose: 'stand' }), company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(near.x - c.x, near.z - c.z), pose: 'stand' } });
     return true;
   }
@@ -37979,7 +38057,7 @@ const EV_NOTES_ON = EVENTS_ON;                           // F2: a ship note as e
 const EV_DEVICE_ON = EVENTS_ON;                          // F3: the event on your device (Schedule, Tracked, status, Record)
 const EV_REPLAY_ON = EVENTS_ON;                          // F4: safe through reloads (a meeting comes back, a moment isn't felt twice)
 const EV_STORM_ON = EVENTS_ON;                           // the ion storm update (EV3, S1-S9; plans/event-storm-plan.md v1.2), laid over SHIP_EVENTS.ionStorm
-const EV_LINE_ON = false;                                 // Crossing the Line (EV5, L1-L5; plans/event-line-plan.md v2.2): SHIP_EVENTS.crossingLine only while on (L6 makes it EVENTS_ON)
+const EV_LINE_ON = EVENTS_ON;                             // Crossing the Line (EV5, L1-L5; plans/event-line-plan.md v2.2): SHIP_EVENTS.crossingLine only while on; L6, switched on in 0.92.1 (the user's yes, 2026-10-23)
 // F0, the event calendar (plans/events-plan.html v3.2, section 1): a new game's fixed days (Day 0 the arrival, Day 1 a
 // Monday). day: the event's day 0 (its warning's day). One not built yet (no SHIP_EVENTS entry) or a draft is passed over
 const EV_CALENDAR = [
@@ -43109,6 +43187,17 @@ const introMail = (m, at) => { if (m && typeof mailSend === 'function') mailSend
 // any), set its own flags (not the step's: a missed bunk is no device yet) and move on to `later`.
 // rel: points to people when the step is done (the social plan's end state: Torres 10, Tomas 10, Pell 5, Calder 3, Brennan 3).
 // Checkpoint tiles are provisional until wave 2 walks them (intro_check: in the room, on the deck's map).
+// (DS1, FE2 on 0.92.0: "Zeke stands by the lift for 35 minutes") a lead step whose spot is where he stops (the Works bay door,
+// the lift, the junior wing) also counts you there when you're beside him (within 2 tiles, on his deck), once his lines for
+// that place are said: a player who stops beside him, not on the spot, isn't left waiting (he stands on it himself). Only
+// once he's there himself (within a tile of the spot). Bunk 1 too: its talk then plays with you at the door (as the device's)
+const INTRO_BESIDE = id => ({ beside: 2, besideReady: () => !id || introTourSaid(id) });   // (its own key: `near` has him come to you)
+function introTourSaid(id) { return SHIP.intro.done['tour:' + id] !== undefined && !INTRO_UI.tour.some(q => q.t.id === id && q.core.length); }
+function introBeside(st, here, t) {
+  const a = introWalker(), cp = st.checkpoint; if (!st.beside || !a || !cp || !introWithEscort(here, st.beside)) return false;
+  const c = cellAt(a.x, a.z); if (Math.max(Math.abs(c[0] - cp.tile[0]), Math.abs(c[1] - cp.tile[1])) > 1 || !st.besideReady(t)) return false;
+  SHIP.intro.done['beside:' + st.id] = Math.floor(t); return true;   // (introTick: its meeting then plays wherever you are beside him)
+}
 const INTRO_STEPS = [
   { id: 'manifest', day: 0, at: 17 * 60 + 15, who: null, mode: 'free', where: 'the shuttle manifest',
     teaches: 'your name' },
@@ -43119,13 +43208,13 @@ const INTRO_STEPS = [
   { id: 'haulway', day: 0, at: 17 * 60 + 19, who: INTRO_ESCORT, mode: 'lead', where: 'the haulway',
     checkpoint: { deck: 5, tile: [12, 8], room: 'Haulway' }, fallback: { wait: 20, later: 'works' } },
   { id: 'works', day: 0, at: 17 * 60 + 21, who: INTRO_ESCORT, mode: 'lead', where: 'the Works bay door',
-    checkpoint: { deck: 5, tile: [16, 6], room: 'Lift lobby' }, fallback: { wait: 20, later: 'lift' } },
+    checkpoint: { deck: 5, tile: [16, 6], room: 'Lift lobby' }, fallback: { wait: 20, later: 'lift' }, ...INTRO_BESIDE('works') },
   { id: 'lift', day: 0, at: 17 * 60 + 23, who: INTRO_ESCORT, mode: 'lead', where: 'the lift, Deck 5',
-    checkpoint: { deck: 5, tile: [15, 9], room: 'Lift lobby' }, fallback: { wait: 20, later: 'wing' } },
+    checkpoint: { deck: 5, tile: [15, 9], room: 'Lift lobby' }, fallback: { wait: 20, later: 'wing' }, ...INTRO_BESIDE('lift') },
   { id: 'wing', day: 0, at: 17 * 60 + 25, who: INTRO_ESCORT, mode: 'lead', where: 'the junior wing, Deck 4',
-    checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' } },
+    checkpoint: { deck: 4, tile: [12, 4], room: 'Junior corridor' }, fallback: { wait: 20, later: 'bunk' }, ...INTRO_BESIDE('wing') },
   { id: 'bunk', day: 0, at: 17 * 60 + 28, who: INTRO_ESCORT, mode: 'meet', where: 'Bunk 1', meeting: 'introBunk',
-    checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 },
+    checkpoint: { deck: 4, tile: [8, 3], room: 'Bunk 1' }, rel: { [INTRO_ESCORT]: 3, tomas: 10 }, ...INTRO_BESIDE(),
     fallback: { wait: 30, later: 'toMess', laterNear: 'stow', mail: { from: 'Zeke Torres', subject: 'Your bunk', body: 'Couldn\'t find you. Your bunk\'s in Bunk 1, Deck 4: drop your bag in your wardrobe when you can. Your device I\'ll hand you myself. Dinner\'s on Three. — Z.' } } },   // (OR2, the Zeke patch) missed with you near him: on to 'stow' (the bag goes in, he still brings you your device); away: as before
   // (playtest patch 1, #2-#4) your things into your wardrobe (you tap it; the arrow shows it; he waits), then he hands you your
   // device in person (its meeting's first line: introDeviceGive). reach: in the room is enough; ready(t): the step's own gate
@@ -43148,7 +43237,7 @@ const INTRO_STEPS = [
     // (0.71.3, the user's playtest 2: "the Chief isn't at the dinner with Zeke") she's at the dinner from its start; (the patch, #3: "she should
     // walk up to you") she eats at the next table, facing yours, and walks over on Zeke's "Look who's coming over" (introTick's calderGo)
     away: { calder: '3-mess-26' },
-    fallback: { until: 19 * 60 + 45, later: 'free', mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
+    fallback: { until: 19 * 60 + 45, later: 'free', mailAway: true, mail: { from: 'I. Calder', subject: 'Tomorrow', body: 'Missed you at dinner. Torres has you tomorrow; ten to nine, the Works bay.' } } },
   { id: 'free', day: 0, at: 19 * 60 + 45, who: INTRO_ESCORT, mode: 'free', where: 'the mess', rel: { [INTRO_ESCORT]: 3 } },   // he lets you go after his goodnight (introNightTick), 19:45 at the latest (19:00 with the 16:30 arrival) (reviewer 1c: no fixed time; 19:30 before the 16:30 arrival; half an hour, not an hour, earlier: OR2's slow player reaches the table about 18:20)
   { id: 'tomas', day: 0, at: 19 * 60 + 45, who: 'tomas', mode: 'free', where: 'the junior common room or Bunk 1', teaches: 'Chat and Ask about', seek: 22 * 60 },
   { id: 'night', day: 0, at: 20 * 60 + 15, who: null, mode: 'free', where: 'your bunk', teaches: 'sleep' },
@@ -43370,7 +43459,7 @@ function introDeviceGive(quiet) {                         // quiet: in his own b
 const INTRO_HAND = { give: 3, lines: ['Oh, hold on. Nearly forgot the important bit.', 'Hands out. Careful, it\'s still warm from my pocket.',
   'And this is yours. Your device.', 'There. Officially handed over. I\'m a witness.', 'Most important thing you\'ll own aboard.',
   'More than your boots. Slightly less than your mug.', 'Mail, Schedule, the Map, your Needs. The lot. Don\'t lose it.',
-  'It knows where you\'re meant to be before you do.', 'Annoying, but useful.', 'Needs tells you you\'re hungry. Before your tummy does.',
+  'It knows where you\'re meant to be before you do.', 'Annoying, but useful.', 'The Roster\'s in there. Every name aboard. Mine\'s best.',
   'Lose it and you\'ll spend a week asking strangers what day it is.', 'There. Officially crew.', 'I left you a note in there. Have a look.'],
   after: ['Right, onward. The mess is on Deck 3.', 'And Brennan doesn\'t hold plates for anyone.'] };   // the user's mix (ZW1's plans/zeke-words.md), stand-ins for walk.hand / walk.hand.after
 const INTRO_HAND_MAIL = 'Before you land | New hand, I\'m writing this before the Tern docks, so by the time you read it I\'ll have handed you this in person and said most of it already. Here\'s the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it\'s just home with a lift in it. And if you\'re the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I\'ll be the one with the tea. Zeke';
@@ -43481,7 +43570,7 @@ function introAdvance(t, here) {
     const cp = st.checkpoint, f = st.fallback || {};
     const nx = INTRO_STEPS[INTRO_STEPS.indexOf(st) + 1];   // (0.42.31) a lead step on a deck you've ridden on from, to the next step's deck: done (the lift's, passed between two of its minutes)
     const there = (!cp || here && here.deck === cp.deck && (st.near && introWithEscort(here, st.near) || introRoomAt(here.deck, here.tile) === cp.room
-      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH))
+      && Math.max(Math.abs(here.tile[0] - cp.tile[0]), Math.abs(here.tile[1] - cp.tile[1])) <= (st.reach || INTRO_REACH) || introBeside(st, here, t))
       || !!(cp && here && st.mode === 'lead' && here.deck !== cp.deck && nx && nx.checkpoint && nx.checkpoint.deck === here.deck)) && (!st.ready || !!st.ready(t));
     if (there) { introDone(st.id, Math.max(at, Math.floor(t))); continue; }
     // (DS1, the user on 0.91.0 and 2026-10-23) holdBag: while your bag's in your hands it waits for you, wherever you are, with the
@@ -43504,7 +43593,8 @@ function introAdvance(t, here) {
     const prev = INTRO_STEPS[INTRO_STEPS.indexOf(st) - 1], wait = capped || prev && I.missed.includes(prev.id) && !st.noHold ? Math.min(5, f.wait || 20) : (f.wait || 20);   // (a missed 'stow' leaves the device scene its own ten minutes)
     const late = f.until !== undefined ? introAbs(st.day, f.until) : Math.max(at, I.since === null ? at : I.since, I.near ? I.near[1] : at) + wait;
     if (t < late) break;
-    introMail(f.mail, late);                              // you weren't there: the gist by Mail, and on to the next one
+    // (DS1, FE2 on 0.92.0) mailAway: only if you're not with him: Calder's "Missed you at dinner" never comes while he's still taking you
+    if (!(f.mailAway && introWithEscort(here))) introMail(f.mail, late);   // you weren't there: the gist by Mail, and on to the next one
     I.done[st.id] = late; I.missed.push(st.id); introNote('introStep', { step: st.id, who: st.who, missed: true });
     for (const fl of f.flags || []) introFlagSet(fl);
     const later = f.laterNear && introWithEscort(here) ? f.laterNear : f.later, j = INTRO_STEPS.findIndex(x => x.id === later);   // (the Zeke patch) laterNear: where a step missed with him near you goes on to
@@ -43838,14 +43928,17 @@ function introTernTick() {
 // evening up to 'free'), tapping him at a tour place with extras left has him say the next at once; else it opens the writers' introAsk (three questions) instead of the chat card; three asks
 // at most (each counts as a meeting), then he's a plain tap again. Returns true when it opened.
 // "Ask Zeke" is parked (the patch's #31, 2026-10-20): a tap on him while he shows you round plays his next tour line if
-// there is one, else does nothing; the introAsk panel and its lines stay in the file, off behind INTRO_ASK_ON
+// there is one, and shows his usual card (no chat; DS1 for lead 31, 0.92.1); the introAsk panel and its lines stay in the
+// file, off behind INTRO_ASK_ON
 const INTRO_ASK_ON = false;
 function introTap(p) {
+  if (introMeetGo(p)) return true;                      // item 81: the speaker of a first-week meeting that's on takes you in
   if (!introOn() || !p || p.id !== SHIP.intro.escort || !introEscorting(introStep())) return false;
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
   const h = INTRO_UI.tour[0];   // at a tour place with extras left: the next one, now
-  if (h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())) { INTRO_UI.next = 0; return true; }
-  if (!INTRO_ASK_ON) return true;                       // parked (#31): the tap does nothing more, and never opens the chat card
+  const next = !!(h && !h.core.length && h.extra.length && typeof player !== 'undefined' && introAtTour(h.t, player.here())); if (next) INTRO_UI.next = 0;
+  // parked (#31): never the chat card; (DS1, lead 31 on FE2's 0.92.0 playtest) his usual card, as for anyone, and the tour goes on
+  if (!INTRO_ASK_ON || next) { const f = typeof crewFeeling === 'function' ? crewFeeling(p, shipNow()) : null; toast(p.name, p.role + '. ' + (f ? f + ' ' : '') + p.bio); return true; }
   if (typeof dialogueShow !== 'function' || typeof MEETING_SCRIPTS === 'undefined' || !MEETING_SCRIPTS.introAsk) return false;
   const I = SHIP.intro, n = [1, 2, 3].find(k => I.done['ask:' + k] === undefined); if (!n) return false;
   I.done['ask:' + n] = Math.floor(shipNow());
@@ -44120,7 +44213,7 @@ function introTick() {
     // waiting while another dialogue is open; if you've left its room by then, the gist comes by Mail instead
     for (const st of INTRO_UI.meet.slice()) {
       if (typeof dialogueShow !== 'function') { INTRO_UI.meet.length = 0; break; }
-      const cp = st.checkpoint, room = st.near ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
+      const cp = st.checkpoint, room = st.near || st.beside && I.done['beside:' + st.id] ? /./ : new RegExp('^' + cp.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$'), m = { id: 'intro-' + st.id, who: INTRO_MEETINGS[st.meeting].cast.filter(w => !/:/.test(w)), where: { deck: cp.deck, room }, at: now };
       if (!inMeeting(m)) { INTRO_UI.meet.splice(INTRO_UI.meet.indexOf(st), 1); if (typeof meetingGist === 'function') meetingGist(st.meeting); if (st.id === 'chief') I.done['chief:end'] = null; if (st.id === 'table' && I.done['table:end'] === undefined) I.done['table:end'] = now; continue; }
       if (DIALOGUE || INTRO_UI.tour.some(q => q.core.length)) break;   // after the tour's last core lines
       if (st.id === 'chief' && !introCalderIn() && now < (I.done.chief !== undefined ? I.done.chief : now) + 10) break;   // she's still on her way over
@@ -44570,6 +44663,24 @@ function introMeetStand(b) {
   const to = (DECKS[b.where.deck].places || []).find(q => q.id === (b.where.placeId || '')), face = () => {
     if (to) { const p = player.obj.position, c = cellPos(...to.at); player.face = Math.atan2(c.x - p.x, c.z - p.z); } };
   if (K(pl.at) === K(player.here()) && !player.path.length) face(); else playerGo(pl.at, face);
+}
+// item 81 (FE2 on 0.92.0, LEAD31-13: "the first solo job never starts"): the arrow's pin sat on the Chief's desk with her
+// at it, so the tap was hers (section 11's tapCrew asks introTap first) and opened her card; you never got into the office,
+// and the meeting starts only once you're in its room. Now a tap on the speaker of a first-week meeting that's on (its
+// start to its end, not met yet), from outside its room on its deck, walks you to its standing spot (b.stand), else into
+// the room; introWeekMeetings starts it as you enter. In the room, or outside its time, their card as before
+function introMeetGo(p) {
+  if (!introOn() || !p || typeof DIALOGUE !== 'undefined' && DIALOGUE || typeof playerGo !== 'function' || typeof inMeeting !== 'function') return false;
+  const I = SHIP.intro, now = Math.floor(shipNow());
+  const b = INTRO_WEEK.find(x => x.meeting && x.who === p.id && x.where && I.done[x.id + ':met'] === undefined && now >= introAbs(x.day, x.at) && now < introAbs(x.day, x.until) && deckDef.num === x.where.deck);
+  if (!b) return false;
+  const room = new RegExp('^' + b.where.room.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$');
+  if (inMeeting({ where: { deck: b.where.deck, room } })) return false;
+  const pl = b.stand && (DECKS[b.where.deck].places || []).find(q => q.id === b.stand);
+  let to = pl ? pl.at : null;
+  if (!to) { const key = Object.keys(ROOMS).find(k => room.test(ROOMS[k].name || '')); for (let j = 0; j < D && !to && key; j++) for (let i = 0; i < W && !to; i++) if (MAP[j][i] === key) to = [i, j]; }
+  if (!to) return false;
+  playerGo(to); return true;
 }
 function introMeetEnded(now) {                          // a released beat's meeting is over once its panel has closed
   const I = SHIP.intro, open = typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null;
@@ -48254,7 +48365,7 @@ const CASE_BANDS = {                                    // suspects, clues (reac
 const CASE_RANK_BAND = { junior: 'T1', officer: 'T2', senior: 'T3', specialist: 'T4' };
 const CASE_RATE = { junior: .1, officer: .2, senior: .25, specialist: .33 }, CASE_MAX = { junior: 1, officer: 1, senior: 2, specialist: 2 };
 const CASE_WAIT_MAX = 3 * 1440;                         // a case still waiting (P3's tries) after three days is a plain repair
-const CASE_TRIES = 8, CASE_DONE_KEEP = 20, CASE_SPENT = new Set(['seal', 'cartridge', 'filter', 'membrane', 'oxygen cell', 'uv lamp']);   // from Tier 2 a wrong call's consumable is used up (the T2 band: the user's seal or cartridge, and the other NO_MAKE parts)
+const CASE_TRIES = 8, CASE_DONE_KEEP = 8, CASE_SPENT = new Set(['seal', 'cartridge', 'filter', 'membrane', 'oxygen cell', 'uv lamp']);   // from Tier 2 a wrong call's consumable is used up (the T2 band: the user's seal or cartridge, and the other NO_MAKE parts)
 const CASE_STATS = { offered: 0, rolled: 0, posted: 0, fallback: 0, ms: 0, why: {} };   // for puzzle_check
 const caseRank = () => (SHIP.works && SHIP.works.rank) || 'junior';
 const caseBand = rank => CASE_RANK_BAND[rank] || 'T1';
@@ -49287,6 +49398,7 @@ function incWeights() {                                  // by the machines' wea
 function incPlan(w) {
   const I = incState(); if (!I) return null;
   if (I.plan[w]) return I.plan[w];
+  for (const k in I.plan) if (+k < w - 1) delete I.plan[k];   // FX4 (LEAD31-4): only this week and the next are read; older weeks dropped as they are at load (incClean), so the save stays flat
   const W = SHIP.works, days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => incDayOk(d, W));
   if (w < 2 || !days.length) return I.plan[w] = [];
   const seed = machSeed('incident'), d = days[Math.floor(schedU(seed, w, 870) * days.length) % days.length];
@@ -49610,6 +49722,7 @@ function teamNeed(kind) { const ms = TEAM_JOBS[kind].machines.filter(id => SHIP.
 function teamPlan(w) {
   const T = teamState(), W = SHIP.works; if (!T) return [];
   if (T.plan[w]) return T.plan[w];
+  for (const k in T.plan) if (+k < w - 1) delete T.plan[k];   // FX4 (LEAD31-4): only this week and the next are read; older weeks dropped as they are at load (teamClean), so the save stays flat
   const slots = TEAM_ROTA.slice(); if ((w + 1) % 2 === 0) slots.push(friTeamSlot(w));
   const out = [], used = new Set(), taken = new Set();
   for (const [wd, at] of slots) {
@@ -54180,16 +54293,23 @@ function tap(cx, cy) {
   if (ride) return;
   if (FREEZE.frozen) { if (!PAUSE.on && PAUSE.tilesTap) PAUSE.tilesTap(); return; }   // nothing on the deck moves while frozen (0.28.50): mid-Tiles, the board comes back
   if (!liftEl.hidden) { closeLiftPanel(); return; }       // a tap outside the panel puts it away
+  { const ns = document.getElementById('needStrip'); if (ns && ns.classList.contains('open')) { ns.classList.remove('open'); STRIP_SIG = ''; return; } }   // the needs list open: a tap on the deck closes it, nothing more (LEAD31-9: it sat you down and ended your meal)
   // FX3 (arrows_check's week, Day 8: Calder beside the second puddle, or someone crossing it, took every tap there as a chat):
   // someone near the tap on screen, and the tap is on the arrow's pin or beside them, not on them, with your job's stop
   // under it: the job. A tap on the person themselves, away from the pin, still talks to them
   const near = typeof jobSpotTap === 'function' && crewAtScreen(cx, cy);
   const atPin = typeof IX_PIN !== 'undefined' && performance.now() - IX_PIN.t < 500 && Math.hypot(IX_PIN.x - cx, IX_PIN.y - cy) < CREW_PIN_PX;
-  if (near && (atPin || ![.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; }))) {
+  const onThem = near && [.5, 1, 1.4].some(hy => { _cp.set(near.x, near.y + hy, near.z).project(camera); return Math.hypot((_cp.x + 1) / 2 * innerWidth - cx, (1 - _cp.y) / 2 * innerHeight - cy) < CREW_ON_PX; });
+  if (near && (atPin || !onThem)) {
     const h0 = pick(cx, cy); if (h0 && !h0.object.userData.walker && jobSpotTap(h0.point)) return;
+  }
+  if (near && !onThem) {                                 // the servery counter beside the galley staff or the line, not on them, is the counter (LEAD31-9: it opened their cards)
+    const h1 = pick(cx, cy), it1 = h1 && h1.object.userData.item;
+    if (it1 && /^servery$/i.test(it1.t) && it1.hit) { it1.hit.getWorldPosition(_wp); if (playerTap(it1, _wp.clone(), h1.point)) return; }
   }
   if (near && atPin && typeof ixPinBooth === 'function' && ixPinBooth()) return;   // FX5: the call booth's pin, over someone in the next booth
   if (tapCrew(cx, cy)) return;                           // a crew member (section 10)
+  if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
   if (ud.walker && ud.walker.active) {
@@ -55709,9 +55829,10 @@ function padFind(key, x, z, ys, r) {                       // a point on screen 
   for (const y of ys) for (const [ox, oz] of r ? [[0, 0], [r, 0], [-r, 0], [0, r], [0, -r]] : [[0, 0]]) {
     const s = padScreen(x + ox, y, z + oz); PAD_PICK.used++; if (s && padWhat(s[0], s[1], key) === key) return s;
   }
-  // a seat whose own spot's points fall nearer another seat (a mess seat beside a long table's, follow-up 1): a little
-  // further out on screen around it, four rings of eight points (10 to 40 px), the first point a tap really reaches
-  const c = key.startsWith('place:') && padScreen(x, ys[0], z); if (!c) return null;
+  // a seat whose own spot's points fall nearer another seat (a mess seat beside a long table's, follow-up 1), or the lift
+  // with someone walking past in front of it (CP5, KC2): a little further out on screen around it, four rings of eight
+  // points (10 to 40 px), the first point a tap really reaches
+  const c = (key === 'lift' || key.startsWith('place:')) && padScreen(x, ys[0], z); if (!c) return null;
   for (let k = 1; k <= 4; k++) for (let a = 0; a < 8; a++) {
     const cx = c[0] + 10 * k * Math.cos(a * Math.PI / 4 + k), cy = c[1] + 10 * k * Math.sin(a * Math.PI / 4 + k); PAD_PICK.used++;
     if (padWhat(cx, cy, key) === key) return [cx, cy];
@@ -55768,11 +55889,14 @@ function padSearch(budget) {
   if (!P.job) { P.cs = padCrewSeen(); P.wr = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON ? clothesWardrobe() : null; P.job = { raw: padRaw(), i: 0, out: [], cs: P.cs, wr: P.wr }; }
   const J = P.job; P.cs = J.cs; P.wr = J.wr; P.used = 0;
   try {
-    while (J.i < J.raw.length && J.out.length < P.max && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key)) continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
+    while (padMore(J) && P.used < budget) { const t = J.raw[J.i++]; if (J.out.some(o => o.key === t.key) || J.out.length >= P.max && t.key !== 'lift') continue; t.s = padFind(t.key, t.x, t.z, t.ys, t.r); if (t.s) J.out.push(t); }
   } finally { P.cs = null; P.wr = null; }
-  if (J.i < J.raw.length && J.out.length < P.max) return null;
+  if (padMore(J)) return null;
   P.job = null; return J.out;
 }
+// (CP5, KC1) the lift is the way off the deck: when the list is full of people, benches and things before the search
+// gets to it, it goes on searching for the lift alone, and the lift comes last in the list (D-pad left from the first)
+const padMore = J => J.i < J.raw.length && (J.out.length < PAD_PICK.max || !J.out.some(o => o.key === 'lift') && J.raw.some((t, i) => i >= J.i && t.key === 'lift'));
 const padTargets = () => { PAD_PICK.job = null; return padSearch(Infinity); };   // all at once: [{ key, x, z, d, s: [cx, cy] }], best first
 function padPickShow(on) {                                 // the ring and the line, made at the first use
   const P = PAD_PICK;

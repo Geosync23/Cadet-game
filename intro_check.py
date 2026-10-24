@@ -15,6 +15,8 @@
 #      who follows Torres across three decks; every step reached in order, nothing missed, the device and Calder,
 #      draw calls under 450, no page errors
 #   14. Tuesday's first solo job (the playtest patch 1, #7): after the Chief's meeting the arrow leads to it, Take it at the board
+#   18. (item 81) Tuesday 08:51: the solo job's Tracked arrow at your spot in her office; a real tap on the Chief walks you in and it
+#      starts; at 08:35 (before it) and 10:05 a tap on her doesn't (--solotap: this part alone)
 #   Later waves (shown as "not yet"): the reserved jobs, the week in play, Sowing's draw calls.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 intro_check.py BUILD.html
@@ -87,7 +89,17 @@ WALK_TICK = r"""((mode) => {
     act = 'hand-over';
   }
   else if (mode === 'follow' && st && st.checkpoint && typeof INTRO_UI !== 'undefined' && INTRO_UI.pause && a) act = 'listen';   // he's stopped to tell you about a place: stay with him
-  else if (mode === 'follow' && st && st.checkpoint) {
+  else if (mode === 'beside' && st && st.checkpoint && a && cellAt(a.x, a.z) && st.checkpoint.deck === deckDef.num) {   // DS1 (FE2 on 0.92.0): a player who walks beside him,
+    // 2 tiles off, never onto a step's own spot (it's where he stands): toward him a tile at a time when further, else stays put
+    const c = cellAt(a.x, a.z), cp = st.checkpoint.tile;
+    if (Math.max(Math.abs(c[0] - here[0]), Math.abs(c[1] - here[1])) > 2) {
+      const nx = here[0] + Math.sign(c[0] - here[0]), nz = here[1] + Math.sign(c[1] - here[1]);
+      if (free(nx, nz) && !(nx === cp[0] && nz === cp[1])) player.obj.position.copy(cellPos(nx, nz));
+      else { const n = nearestOpen(cellPos(...c).x, cellPos(...c).z, player); if (n && !(n[0] === cp[0] && n[1] === cp[1])) player.obj.position.copy(cellPos(...n)); }
+      act = 'walk';
+    } else act = 'beside';
+  }
+  else if ((mode === 'follow' || mode === 'beside') && st && st.checkpoint) {
     const cp = st.checkpoint;
     if (cp.deck !== deckDef.num) {                      // ride the lift to the checkpoint's deck
       if (typeof ride !== 'undefined' && ride) act = 'riding';   // 0.42.29: the real ride (doors, fade, the new deck built), as a player takes it
@@ -326,6 +338,61 @@ def solo(g):
     if not app: fail('the solo job is not your job (myJob) through its steps')
     if not t_in or fin['mine']: fail(f'the solo job could not be turned in at the board: {t_in}, {fin}')
 
+# item 81 (FE2 on 0.92.0, LEAD31-13): Tuesday 08:51, in the Works bay. The Tracked arrow for the solo job points at the spot
+# you stand at in the Chief's office, not her seat; a real tap on her (as FE2 tapped the pin over her desk) walks you in and
+# her meeting starts; once it has been (or outside its time), a tap on her is her card as before, no walk
+def solo_tap(g):
+    print('18. Tuesday 08:51: the solo job\'s arrow at your spot in her office, a tap on the Chief walks you in and it starts; later her card')
+    g.ev('localStorage.clear()'); g.ev('newGameStart(true)'); g.step(5)
+    g.page.fill('form input[maxlength="24"]', 'Sam'); g.page.click('form button'); g.step(5)
+    g.ev('skipTo(introAbs(1, 8 * 60 + 40))'); g.ev("SHIP.intro.done['d1-shadow:job'] = introAbs(1, 11 * 60)")
+    g.ev('skipTo(introAbs(2, 8 * 60 + 35))'); g.ev("for (const k of NEED_KEYS) SHIP.player.needs[k] = 95")
+    HERE = "(() => { goToDeck(5); player.obj.position.copy(cellPos(12, 5)); player.path.length = 0; if (SHIP.device && SHIP.device.settings) SHIP.device.settings.tips = false; const t = document.getElementById('devTip'); if (t) t.hidden = true; })()"   # a first-time tip card can sit over her (as interactions_check)
+    g.ev(HERE); g.step(60)
+    row = g.ev("(trkItems().find(x => x.title === DEV_BEATS['d2-solo']) || {})")
+    goal = row.get('goal') or {}
+    print(f"  Tracked: {row.get('title')} -> {goal}")
+    if goal.get('place') != '5-office-visit-1': fail(f'the solo job\'s Tracked arrow is not at your spot in her office: {goal}')
+    # a point on her the canvas takes (a speech bubble or a toast can cover part of her, as for a player, who'd tap the rest)
+    TAP = """(() => { const a = DECK_CREW.find(c => c.p.id === 'calder'); if (!a) return null; const room = ROOMS[roomAt(...cellAt(a.x, a.z))].name; let first = null;
+      for (const h of [.9, .5, 1.2, .7, 1.4]) for (const dx of [0, -8, 8]) { const v = new THREE.Vector3(a.x, (a.y || 0) + h, a.z).project(camera), x = (v.x + 1) * innerWidth / 2 + dx, y = (1 - v.y) * innerHeight / 2;
+        const e = document.elementFromPoint(x, y), c = crewAtScreen(x, y); if (!first) first = (e && e.closest('[id]') ? e.closest('[id]').id : e && e.tagName) || '?';
+        if (e && e.tagName === 'CANVAS' && c && c.p.id === 'calder') return [x, y, room, 'canvas']; }
+      return [0, 0, room, 'covered by ' + first]; })()"""
+    # 08:35 (RV11): she's at her desk from 08:25 (early: 20), but her meeting isn't on yet: a tap on her is her card, no walk
+    pt = g.ev(TAP)
+    if pt and pt[3] == 'canvas':
+        g.page.mouse.click(pt[0], pt[1]); g.step(5)
+        early = g.ev("({ path: player.path.length, dlg: !!DIALOGUE, room: ROOMS[roomAt(...player.here())].name })")
+        print(f'  08:35, before her meeting: a tap on her: {early}')
+        if early['path'] or early['dlg']: fail(f'at 08:35, before her meeting, a tap on the Chief walked you in or started it: {early}')
+    else: fail(f'08:35: no point on the Chief in her office to tap: {pt}')
+    g.ev('(() => { if (typeof chatClose === "function") chatClose(); })()'); g.ev('skipTo(introAbs(2, 8 * 60 + 51))'); g.ev(HERE); g.step(60)
+    pt = g.ev(TAP)
+    if not pt or pt[2] != "Works Chief's office": fail(f'the Chief is not in her office at 08:51: {pt}'); return
+    print(f'  the tap on her: {pt}')
+    if pt[3] != 'canvas': fail(f'no point on the Chief to tap: {pt}'); return
+    g.page.mouse.click(pt[0], pt[1]); g.step(5)
+    walking = g.ev('player.path.length')
+    met = None
+    for i in range(40):
+        g.step(30); met = g.ev("DIALOGUE && DIALOGUE.m ? DIALOGUE.m.id : null")
+        if met: break
+    print(f"  a tap on her from the bay at 08:51: walking {walking > 0}, then {met} at {g.ev('clockText()')[-5:]} in {g.ev('ROOMS[roomAt(...player.here())].name')}")
+    if not walking: fail('a tap on the Chief from the bay during her meeting\'s time did not walk you in')
+    if met != 'intro-d2-solo': fail(f'her solo job meeting did not start after the tap: {met}')
+    n = 0
+    while g.ev('!!DIALOGUE') and n < 40:
+        g.ev("(() => { const l = DIALOGUE.queue[DIALOGUE.i]; if (l && l.choice) dialogueChoose(2); else dialogueNext(); })()"); g.step(60); n += 1
+    g.ev('skipTo(introAbs(2, 10 * 60 + 5))'); g.ev(HERE); g.step(60)
+    pt = g.ev(TAP)
+    if pt and pt[3] == 'canvas':
+        g.page.mouse.click(pt[0], pt[1]); g.step(5)
+        late = g.ev("({ path: player.path.length, dlg: !!DIALOGUE, card: !!(document.querySelector('.chat:not([hidden]), #chat:not([hidden])') || (document.getElementById('tt') || {}).textContent) })")
+        print(f'  10:05, the meeting over: a tap on her: {late}')
+        if late['path'] or late['dlg']: fail(f'at 10:05 a tap on the Chief still walked you in or started a meeting: {late}')
+    else: print('  10:05: the Chief is not on Deck 5 (her card not tapped)')
+
 # Day 1 tea (he explains it, leads you to the Tea corner once your first job's turned in, waits for your tea, follows again)
 def clock_tracked(g):
     # fresh-eyes (FE1 item 36): on Day 1 you tap Tracked's "Clock in" on Deck 4, Zeke walks you down, you step out on Deck 5:
@@ -410,6 +477,62 @@ def bunk_leave(g):
 # 15. The talk steps with you near but not there (OR2, after 0.64.15): during 'bunk' you stand in the corridor just
 # outside Bunk 1, during 'table' in the mess away from your table, both within his 10 tiles. On 2b4a05db he waited until
 # 18:00; now the step moves on (missed, its gist by Mail) INTRO_HOLD_MAX + 5 minutes after it became yours
+# part 16 (DS1, FE2 on 0.92.0: "Zeke stands by the Deck 5 lift, silent, for 35 minutes"): a player who walks beside him,
+# 2 tiles off and never onto a step's own spot (he stands on it himself), from the ramp to the servery. Every step comes
+# (none missed), the Works bay door is passed within 10 ship minutes of his reaching it, the bunk talk plays, and dinner's
+# table by 18:45. Also on its own: python3 intro_check.py BUILD.html --beside
+def beside_walk(g):
+    print('16. Beside him, not on the spot: a player who stops 2 tiles off him (never on a step\'s spot) gets the whole evening')
+    g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(160)
+    at, dlgs, still = {}, set(), {}
+    hm = lambda x: int(x[-5:-3]) * 60 + int(x[-2:])   # 'HH:MM' -> minutes
+    for k in range(2000):
+        g.step(20)
+        st = g.ev('SHIP.intro.step')
+        r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow' if st in ('servery', 'table', 'chief', 'free', 'tomas', 'night', None) else 'beside'])
+        m = hm(r['t']); at.setdefault(r['step'], m)
+        if r['dlg']: dlgs.add(r['dlg'])
+        if r['step'] == 'works' and r['esc'] and r['esc'][0] == [16, 6] and r['deck'] == 5:   # he's at the Works bay door
+            if 'works' not in still:   # (lead 31) a tap on him: his usual card, no chat, and the tour goes on
+                tap = g.ev("(() => { const a = DECK_CREW.find(x => x.p && x.p.id === INTRO_ESCORT), seen = []; const t0 = toast; toast = function (t, x, o) { seen.push(t + ': ' + x); return t0.apply(this, arguments); }; const r = introTap(a.p); toast = t0; return { r, seen, dlg: !!DIALOGUE, chat: typeof CHAT !== 'undefined' && !!CHAT }; })()")
+                print(f'  a tap on him at the Works door: {tap}')
+                if not (tap['r'] and any(x.startswith('Zeke Torres: ') for x in tap['seen']) and not tap['dlg'] and not tap['chat']): fail(f'a tap on him during the tour should show his card (no chat): {tap}')
+            still.setdefault('works', m)
+        if r['step'] in ('table', 'chief', 'free', None): break
+    missed = g.ev('SHIP.intro.missed.slice()'); done = g.ev("(() => { const D = SHIP.intro.done, out = {}; for (const k of ['works', 'lift', 'wing', 'bunk', 'beside:works', 'beside:bunk']) out[k] = D[k] === undefined ? null : hhmm(((D[k] % 1440) + 1440) % 1440); return out; })()")
+    print(f"  steps began: {sorted(((v, k) for k, v in at.items()))}; done: {done}; missed: {missed}; talks: {sorted(dlgs)}")
+    if missed: fail(f'walking beside him (not on the spot), steps were missed: {missed}')
+    w0, w1 = still.get('works'), done.get('works') and hm(done['works'])
+    if w0 is None or w1 is None or w1 - w0 > 10: fail(f'at the Works bay door he waited {None if w0 is None or w1 is None else w1 - w0} ship minutes with you beside him (at most 10)')
+    if not any(str(d).startswith('introBunk') for d in dlgs): fail(f'walking beside him, the bunk talk never played: {sorted(dlgs)}')
+    if 'table' not in at or at['table'] > 18 * 60 + 45: fail(f"walking beside him, dinner's table only at {at.get('table')}")
+
+# part 17 (DS1, FE2 on 0.92.0: Calder's "Missed you at dinner" came while Zeke was still taking them to dinner): late on the
+# way (the clock on to 19:32 at the servery step), with him all the way past her step's 19:45: no Mail from her (on 685af944 it
+# came at 19:45, the table and her steps missed)
+def late_dinner(g):
+    print('17. Late to dinner, with him: Calder\'s "Missed you at dinner" Mail never comes while he\'s still taking you')
+    g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(160)
+    for k in range(2000):
+        g.step(20)
+        r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'follow'])
+        if r['step'] == 'servery' and r['deck'] == 3: break
+    if g.ev("SHIP.intro.step !== 'servery'"): fail('part 17: never reached the servery step'); return
+    g.ev('skipTo(introAbs(0, 19 * 60 + 32))'); g.step(10)
+    near = []
+    for k in range(400):
+        g.step(20)
+        r = g.page.evaluate('([s, m]) => window.__sc(s)(m)', [WALK_TICK, 'beside'])
+        near.append(g.ev("introWithEscort({ deck: deckDef.num, tile: player.here() })"))
+        if g.ev('shipNow() >= introAbs(0, 19 * 60 + 58)'): break
+    m = g.ev("(SHIP.mail || []).filter(x => x.from === 'I. Calder' && /Missed you at dinner/.test(x.body || '')).map(x => hhmm(((x.at % 1440) + 1440) % 1440))")
+    st = g.ev("({ t: clockText(), step: SHIP.intro.step, chief: SHIP.intro.done.chief, missed: SHIP.intro.missed.slice() })")
+    print(f"  with him {sum(near)}/{len(near)} frames to {st['t']}; step {st['step']}; missed {st['missed']}; Calder's Mail: {m}")
+    if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
+    if m: fail(f'Calder\'s "Missed you at dinner" Mail came while he was still with you: {m}')
+
 def talk_away(g):
     print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
     for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
@@ -505,6 +628,7 @@ RELOAD_MS = 120000   # parts 9 and 11 reload the page right after part 8's long 
 FIRSTS_ONLY = '--firsts' in sys.argv
 LEAVE_ONLY = '--leave' in sys.argv   # part 14 alone (0.64.15's "Zeke stands in the bunk room")
 WEEK_ONLY = '--week' in sys.argv
+BESIDE_ONLY = '--beside' in sys.argv   # part 16 alone (FE2 on 0.92.0)
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
 with sync_playwright() as pw:
@@ -514,6 +638,14 @@ with sync_playwright() as pw:
     if LEAVE_ONLY:
         talk_away(g)
         bunk_leave(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
+    if '--solotap' in sys.argv:   # part 18 alone (item 81)
+        solo_tap(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
+    if BESIDE_ONLY:
+        beside_walk(g); late_dinner(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
@@ -916,8 +1048,11 @@ with sync_playwright() as pw:
     firsts(g)
     week(g)
     talk_away(g)
+    beside_walk(g)
+    late_dinner(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
+    solo_tap(g)
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
     g.close()
 

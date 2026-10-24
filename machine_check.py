@@ -419,7 +419,8 @@ with sync_playwright() as pw:
         if (tier < Math.max(...c.cand.stops.map(st => placeTier(st.placeId)))) badTier.push(c.kind + ' ' + c.cand.key);
       }
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; let o = [], seen = new Set();
-      for (let t = t0 + 1440 + 180; t < t0 + 4 * 1440; t += 60) { setShipNow(t); machinesNow(); for (const x of openJobs()) { if (!seen.has(x.id)) { seen.add(x.id); o.push(x); } } }
+      for (let t = t0 + 1440 + 180; t < t0 + 5 * 1440; t += 60) { setShipNow(t); machinesNow(); for (const x of openJobs())   // days 2-5 (FX6, 0.92.1: with the Line on, Days 6-7 are in machNorm's week, the wear shifts a little and the crew take Day 4's round at once; the first open lamp and delivery come on Day 5)
+        { if (!seen.has(x.id)) { seen.add(x.id); o.push(x); } } }
       const keys = ['id', 'title', 'kind', 'deck', 'at', 'room', 'place', 'tier', 'mins', 'parts', 'bring', 'urgency', 'state'];
       const shapeBad = o.filter(x => !keys.every(k => k in x) || !(x.tier <= PLAYER_TIER) || !(x.mins > 0) || !Array.isArray(x.at) || !(x.deck >= 1)).map(x => x.id);
       const openKinds = [...new Set(o.map(x => x.kind))];
@@ -435,7 +436,7 @@ with sync_playwright() as pw:
                sample: o.slice(0, 4).map(x => x.title + ' (Deck ' + x.deck + ', ' + x.mins + ' min' + (x.parts.length ? ', bring ' + x.parts.join(' ') : x.bring ? ', ' + x.bring : '') + ')') };
     })()""")
     print(f"Chores over 14 days: {ch['kinds']}; stops not real places {ch['badStop']}, tiers below their rooms {ch['badTier']}")
-    print(f"openJobs (days 2-4): {ch['seen']} jobs you could take, kinds {ch['openKinds']}, bad shape {ch['shapeBad']}; e.g. {ch['sample']}")
+    print(f"openJobs (days 2-5): {ch['seen']} jobs you could take, kinds {ch['openKinds']}, bad shape {ch['shapeBad']}; e.g. {ch['sample']}")
     print(f"  took '{ch['c']}': {ch['took']}, stops {ch['stops']}, finished {ch['fin']}, did its work {ch['helped']}")
     if len(ch['kinds']) < 7 or ch['badStop'] or ch['badTier'] or ch['shapeBad'] or len(ch['openKinds']) < 5: fail('chores and openJobs')
     if not (ch['took'] and ch['fin'] and ch['helped']): fail('taking and finishing a chore')
@@ -446,7 +447,7 @@ with sync_playwright() as pw:
     ti = g.ev("""(() => {
       const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min;
       JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(t0 + 1440 + 180); machinesNow(); TURN_IN = true;
-      let c = null; for (let n = 0; n < 72 && !(c = openJobs().find(x => x.kind === 'delivery' || x.kind === 'lamp' || x.kind === 'vent' || x.kind === 'round')); n++) { setShipNow(shipNow() + 60); machinesNow(); }
+      let c = null; for (let n = 0; n < 96 && !(c = openJobs().find(x => x.kind === 'delivery' || x.kind === 'lamp' || x.kind === 'vent' || x.kind === 'round')); n++) { setShipNow(shipNow() + 60); machinesNow(); }
       if (!c) { TURN_IN = false; return { none: true }; }
       claimJob(c.id); const j = SHIP.jobs.find(x => x.id === c.id), n = jobStops(j).length, steps = [];
       for (let k = 0; k < n; k++) steps.push(jobStepDone(c.id, k));
@@ -1249,7 +1250,9 @@ with sync_playwright() as pw:
             if (mode === 'you' && t >= start && j()) j().youIn = true;   // at your spot from the start
             if (mode === 'you' && t >= start + 30 && j() && j().claimedBy === 'you' && !j().workDone) { jobStops(j()).forEach((x, k) => jobStepDone(id, k)); jobFinish(j(), shipNow(), 'you'); }
             if (mode === 'in' && t >= start && j() && !j().youIn) { j().youIn = true; teamYouOut(id); }
+            if (j() && j().status === 'done' && out.condDone === undefined) out.condDone = SHIP.machines['3-recycler-1'].cond;   // as it's done (the user's close to new, 0.92.2; a lead's finish lands inside machinesNow's hour, so up to an hour's wear after it)
           }
+          out.restore = typeof TEAM_RESTORE !== 'undefined' ? TEAM_RESTORE : 90;
           const J = j(); out.status = J && J.status; out.doneBy = J && J.doneBy; out.youOut = !!(J && J.youOut); out.long = J ? J.done - J.start : 0; out.cond = SHIP.machines['3-recycler-1'].cond;
           out.meters = J && J.meters ? J.meters.length : 0;
           // nobody in it on another job that overlaps it
@@ -1261,11 +1264,12 @@ with sync_playwright() as pw:
         tc = g.ev(TM + "('crew')"); tc2 = g.ev(TM + "('crew')"); ty = g.ev(TM + "('you')"); ti = g.ev(TM + "('in')"); tn = g.ev(TM + "('out')")
         for r in (tc, ty, ti, tn):
             print(f"Team job ({r['mode']}): {r['id']}, team {r['team']}, lead {r['lead']}, claimed by {r['claimed']}, your stops {r['stops']}; at their spots {r['atSpot']}, back after {r['after']}, kept in the save {r['saved']}; "
-                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f}, meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
+                  f"{r['status']} by {r['doneBy']} (you out {r['youOut']}, {r['long']} min), recycler {r['cond']:.0f} ({r.get('condDone')} as it was done, team repairs to {r.get('restore')}), meters {r['meters']}, overlapping jobs {r['overlap'][:3]}")
         print(f"  the same twice {tc['sig'] == tc2['sig']}")
         bad = []
         for r in (tc, ty, ti, tn):
-            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or r['cond'] < 90 or r['overlap']: bad.append(r['mode'])
+            if not r['id'] or (r['team'] or 0) < 2 or not r['atSpot'] or not r['after'] or not r['saved'] or r['status'] != 'done' or (r.get('condDone') if r.get('condDone') is not None else r['cond']) < r.get('restore', 90) - 1 or r['overlap']: bad.append(r['mode'])
+            if r.get('restore', 90) < 98: bad.append('team repairs leave machines at ' + str(r.get('restore')) + ', not close to new (98 or more; the user, 2026-10-23)')
         if tc['claimed'] == 'you' or tc['doneBy'] != tc['lead'] or tc['meters'] or tc['long'] != 40: bad.append('crew only')
         if ty['claimed'] != 'you' or ty['doneBy'] != 'you' or not ty['meters'] or ty['youOut']: bad.append('with you')
         if ti['doneBy'] != ti['lead'] or not ti['meters'] or ti['long'] != 48: bad.append('you at your spot, the lead finishing')
