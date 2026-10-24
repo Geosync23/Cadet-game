@@ -278,10 +278,16 @@ with sync_playwright() as pw:
         for (let k = 0; k < 20; k++) { playerUpdate(.05, 0); player.update(.05, 0); } player.steer = null; return player.vel; };
       for (const b of [0, .5]) { Object.assign(n, { fitness: 50, energy: 50, hunger: 50, bathroom: b }); const v = walk() / PLAYER_V0;
         out.push([Math.round(playerSpeed() * 1000) / 1000, Math.round(v * 100) / 100, !!player.needGo, Math.round((player.k && player.k['+go'] || 0) * 100) / 100, (player.propMeshes || []).length, needEffects().marks.bathroom[1].slice(0, 8)]); }
+      n.bathroom = 100; walk(); walk(); walk();          // 0.92.5 (the user's item 1): after the toilet the walk is fully normal again, knees included
+      out.push(player.rig.legs.map(l => Math.round(Math.abs(l.knee.rotation.z) * 1000) / 1000));
+      n.bathroom = 0; walk(); n.bathroom = 100; player.needGo = false;   // and sitting on the toilet while bursting (the '+go' block skips a sitter)
+      for (let k = 0; k < 60; k++) animateActivity(player, 'sit', .05, k * .05, 0);
+      walk(); walk(); walk(); out.push(player.rig.legs.map(l => Math.round(Math.abs(l.knee.rotation.z) * 1000) / 1000));
       Object.assign(n, NEEDS_FRESH); playerUpdate(0, 0); return JSON.stringify(out); })()""")
-    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note]', bg)
+    bg = json.loads(bg); print('  bathroom 0, then 0.5: [speed, walked, needGo, the pose blend, prop meshes, the device note], then the knees after the toilet', bg)
     check(bg[0][:3] == [.7, .7, True] and bg[0][3] > .9 and bg[0][4] == 0 and bg[0][5] == 'Bursting', f"bathroom 0: hold yourself ('+go', no prop) and walk at 70%: {bg[0]}")
     check(bg[1][:3] == [1, 1, False] and bg[1][3] < .1 and bg[1][5] != 'Bursting', f'bathroom above 0: the pose and the slow walk end: {bg[1]}')
+    check(max(bg[2] + bg[3]) < .005, f"after the toilet the knees come back straight (no knock-kneed '+go' left in the walk), walking and after sitting: knee turn {bg[2]}, {bg[3]}")
 
     print('Pause (0.28.48, the user\'s "Need a pause button"):')
     S1 = "JSON.stringify([SHIP.time.day, Math.round(SHIP.time.min * 1000) / 1000, Math.round(SHIP.player.needs.hunger * 1000) / 1000, player.obj.position.x.toFixed(3), player.obj.position.z.toFixed(3)])"
