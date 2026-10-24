@@ -85,3 +85,21 @@ Game sha256 9262e4a7...; base 364c80cb. (Items 16 and 26 were reverted in this b
   clocked-in line), h3 no Day 1 wait for Zeke (the Day 1 line), h4 arrow despite Teaching arrows Off (the Day 3 line).
 - cadet_test vs 364c80cb ALL IDENTICAL; intro_check (whole) OK; check_fast OK (350 s).
 - AC3 reports arrows_check week guide FAILs m6 the same on 364c80cb (pre-existing in 0.92.2); not rerun here.
+
+## FX12 claude/p923-fx12 da1825d2 (0.92.3 items 19 and 27, trays): PASS (~08:05 UTC)
+Game sha256 44a5cc8e...; 123a778d's game (d643c0da...) plus one toast string ("over to the mess hall").
+- Item 19: on 0.92.2 every mid-meal get-up path already kept the tray (actEnd(true) is the only way out mid-meal;
+  'out' comes only when done); it vanished off Deck 3 (playerUpdate, silent) and wasn't drawn on the way to another
+  activity. Fix: TRAY_TRAVELS = true (section 15), the tray drawn while walking/waiting with one, the hunger arrow's
+  seat on any deck (off Deck 3: any public sit place) and re-aimed on a deck change.
+- Item 27: section 18 Traditions slot pyoMinute/pyoTray + one call in eventsTick: finishing at a bed during
+  Pick-your-own gives the servery's own tray ("the fruit and greens you picked"), a toast and an arrow to a free mess
+  seat (cleared when the tray's gone); walking away early gives none; once a day (not saved, as trays).
+- New lines FAIL on 364c80cb: interactions mess part (4) (3 lines), events part 12 (2 lines). Planted faults caught:
+  TRAY_TRAVELS false, the hold line reverted, no pyoMinute call, no pyo arrow, and (after FX12's fix in da1825d2) the
+  once-a-day rule removed. Finding fixed in da1825d2: the once-a-day line had judged after the tradition ended
+  (passed trivially); now it picks again at 06:25 and checks it's inside the window first.
+- events_check (whole) OK; interactions_check (whole) OK; arrows_check week OK; food_check 1 7 OK; cadet_test vs
+  364c80cb ALL IDENTICAL; check_fast FX12's OK on da1825d2 (string change only since my runs).
+- For the lead (not a defect): TRAY_TRAVELS is on while the design doc says "to confirm with the user". Off-deck the
+  seat can be any public sit place (an auditorium or garden seat included); sitting there eats it, harmless.
