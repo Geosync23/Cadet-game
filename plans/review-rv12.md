@@ -153,3 +153,4 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
   no visible flicker, but against the "no coplanar surfaces" rule (e.g. make the top/bottom blocks a little lower /
   shorter). Thin seams between the blocks show in the shots. (2) The check hard-codes /home/user/Cadet-game for the page
   and the shots folder; deriving both from __dirname would let it run from any checkout.
+- a7f3822c: both nits fixed (top/bottom hull blocks y 8-25.6 and -17.6-0, z +0.4 to +139.6: no shared planes; the mouth edges at y 0 and 8 unchanged; the check's paths from __dirname). Read, fine.
