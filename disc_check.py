@@ -199,7 +199,9 @@ with sync_playwright() as pw:
     check(bool(on) and on[-1][0] >= 1009, '#17 seated for the Captain\'s address: you stay seated till it ends at 16:50 (last seated %s)' % (round(on[-1][0]) if on else None))
     check(not [r for r in seat if r[0] >= 1012 and r[1] == 'recSeat:do'], '#17 ... and get up with everyone once it\'s over')
     # RV11's case: your seat taken before you sit, you're moved one along, and still stay till the end
-    h.ev("(() => { skipTo(11 * 1440 + 958); goToDeck(7, null); const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); const sp = placeSpot(pl[0].id); recGo('seat', { x: sp.x, z: sp.z }, 'Seats', ''); window.__mv = ACT && ACT.placeId; const a = DECK_CREW.find(x => x.p && !x.p.story && x.p.rank !== 'guest'); if (a && ACT) { a.goalId = ACT.placeId; } return JSON.stringify([!!a, ACT && ACT.placeId]); })()")
+    h.ev("(() => { skipTo(11 * 1440 + 962); goToDeck(7, null); return 1; })()"); h.step(200)
+    taken = h.ev("(() => { const a = DECK_CREW.find(x => x.settled && x.spot && /^7-seat-/.test(x.spot.id)); if (!a) return null; actStart('recSeat', a.spot.id, { pose: 'sit', title: 'Seats' }); recSeatHold(); return a.spot.id; })()")
+    check(bool(taken), '#17 (setup) a seat someone is already in, at Day 12\'s address (%s)' % taken)
     mv = []
     while h.ev("SHIP.time.min") < 1016:
         h.step(30); mv.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null, !!(ACT && ACT.o && ACT.o.moved)])")))
