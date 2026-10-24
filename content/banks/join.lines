@@ -121,3 +121,10 @@
 - Zeke hands you the pen. You paint your first name on the beam, beside everyone who's served in Works.
 == join.name-on-the-beam.notice
 - Your name is on the beam. The whole bay cheers. Welcome to Works.
+// SW2 (0.92.3 item 13, DV1's key): Zeke explains the beam before you paint, one bubble each, in order (under 80
+// characters, no placeholders). The last one hands over to you: the tap opens right after it.
+== join.name-on-the-beam.explain
+- Right. This is the beam. Every name on it has worked this bay.
+- First day in Works, your first name goes up there. Every one of us did it.
+- See the Chief's? Tiny letters, dead straight. Mine's the one that's far too big.
+- Go on, then. Your turn. Right on the end, next to the rest of us.
