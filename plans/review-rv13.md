@@ -64,3 +64,4 @@ Game sha256 b3caed3f... (with SW2's words baked in a scratch copy: ba3c31d0...).
   17:19/17:32/17:33/17:34/17:37/17:38, all before 17:40. cadet_test 0.92.2 vs 0e329b12 ALL IDENTICAL. check_fast OK.
   Notes: the dialogue guard isn't exercised by a check (small, reads right); arriving 17:38+ leaves ~2 ship min to paint,
   as on 0.92.2 at 17:38.
+  Words: BM15 takes join.lines from SW2 4533c325 (line 1 softened to "Right. This is the beam..." after RV13's note; CS1 passed); bakes clean, lines_check PASS; PASS covers it.
