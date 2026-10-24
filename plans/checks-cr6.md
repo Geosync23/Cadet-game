@@ -15,6 +15,7 @@
 | disc_check | OK (exit 0, 111 s) | `ALL OK` |
 | tiles_check | OK (exit 0, 107 s, alone) | `ALL OK` |
 | join_check | OK (exit 0, 144 s, alone) | `JOIN CHECK OK` |
+| lines_check --day (taken from CR2) | OK (exit 0, 357 s) | `lines_check --day: PASS (0 errors)` |
 
 ## 0.92.3 (2026-10-24)
 
