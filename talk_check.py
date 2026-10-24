@@ -132,6 +132,8 @@ with sync_playwright() as pw:
         if x['src'] == 'own' and x['id'] not in ownorder.get(x['p'], []): ownorder.setdefault(x['p'], []).append(x['id'])   # the first time each (an "only: own" person's come round again)
     files = ev("Object.fromEntries(Object.entries(TALKS.own).map(([k, v]) => [k, v.map(t => t.id)]))")
     for p, ids in ownorder.items():
+        skip = set(ev(f"(TALKS.own[{json.dumps(p)}] || []).filter(t => t.first || Object.keys(t.when || {{}}).some(k => k !== 'tier')).map(t => t.id)"))   # a first-talk scene comes first; a talk waiting on a day, a time or a mood comes when it's ready (each pick is checked against file order above)
+        ids = [i for i in ids if i not in skip]
         check(ids == [i for i in files[p] if i in ids], f'{p}: own talks out of file order: {ids}')
 
     print('(d) Conditions, strangers to friends:')
