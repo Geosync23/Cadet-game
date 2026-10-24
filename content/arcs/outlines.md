@@ -78,6 +78,8 @@ Tones by beat, at a glance:
 
 ## 1. Zeke Torres (`arc:torres`): "Ready"
 
+> **2026-10-24: Crew stories.** The arcs for Zeke, Calder, Pell and Kovac are re-outlined (steps kept, a crescendo added, Zeke's father rewritten) in "Crew stories" at the end of this file. Where the two differ, "Crew stories" wins.
+
 **The heart of it:** the man who trains you isn't sure he's ready for more himself. Passed over twice for Engine
 Specialist, he wonders if he's too restless to be trusted with the reactor; mentoring you is either a step back or the
 thing that makes him ready. Later, gently: his father, an engine man too, is losing his memory back home.
@@ -99,6 +101,8 @@ upside down. Then you didn't."  **Hooks:** `flag:` set from a meeting reply (bea
 keepsake (beat 6). Nothing else new.  **Agreed** (social B, shape notes below).
 
 ## 2. Chief Ines Calder (`arc:calder`): "Well done"
+
+> **2026-10-24: Crew stories.** The arcs for Zeke, Calder, Pell and Kovac are re-outlined (steps kept, a crescendo added, Zeke's father rewritten) in "Crew stories" at the end of this file. Where the two differ, "Crew stories" wins.
 
 **The heart of it:** the toolbox on her shelf belonged to her first chief, **Chief Rhoda Fenn** (new canon), who taught
 her everything and never once said "well done". Fenn is retiring to **Marra Station**, a long way off, and has written
@@ -141,6 +145,8 @@ new arrival.
 is Holt's (writer-command writes Holt's matching `callback`).  **Agreed** (social B, shape notes below).
 
 ## 4. Pell Okafor (`arc:pell`): "Eat, sleep, call"
+
+> **2026-10-24: Crew stories.** The arcs for Zeke, Calder, Pell and Kovac are re-outlined (steps kept, a crescendo added, Zeke's father rewritten) in "Crew stories" at the end of this file. Where the two differ, "Crew stories" wins.
 
 **Already told (beats 1-4):** the music box from the screw tin; the rusted one from the swap meet; his music-box show in
 the Deck 4 music room; who came.
@@ -257,6 +263,8 @@ for the tea are writer-command's (Saruth).  **Agreed** (social B, shape notes be
 
 ## 10. Zainab Kovac (`arc:kovac`): "Four, please"
 
+> **2026-10-24: Crew stories.** The arcs for Zeke, Calder, Pell and Kovac are re-outlined (steps kept, a crescendo added, Zeke's father rewritten) in "Crew stories" at the end of this file. Where the two differ, "Crew stories" wins.
+
 **The heart of it:** small, funny and kind, to show anyone aboard can matter. She can strip a scrubber in ten minutes
 flat, she knits perfect scarves, and she's secretly afraid of the lift. She rides the lift like everyone, both hands on
 the rail ("Lovely lift"), and keeps sharing it with Tove Cruz and Davi Keane, who hold the rail too. (Was: the ladder;
@@ -307,3 +315,114 @@ confession; beat 3 is hopeful (even "an old loss" ends in a small ritual with yo
 **Note for social B:** the game's code (0.39.0, `VOICE_THEMES`) uses `notEnough` and `starting` where the plan's
 canonical ids are `notgood` and `startover`. The story cards here use `thread: arc:<id>`; the code's fallback uses the
 crew id. One of us should change; I've written to you.
+
+---
+
+# Crew stories (2026-10-24): the ten
+
+**Story lead and editor:** CS1. **Writers:** SW1 (Pell, Zeke, Calder, Kovac: `pell.arc`, `torres.arc`, `calder.arc`,
+`kovac.arc`), SW2 (Theo Teague, Basil Bramwell, Halloran: new `teague.arc`, `bramwell.arc`, `halloran.arc`, and Basil's
+voice card), SW3 (Saad Salo, Dev Raman, Anja Kowalczyk: new `salo.arc`, `raman.arc`, `kowalczyk.arc`). Nobody edits
+another writer's file, and nobody but CS1 edits this one. The user's decisions are in design-doc.md, Social life,
+"Crew stories", and on `plans/crew-stories-pitch.html` (the "What you chose" box). The user (2026-10-24): **"Please
+adhere to the character's traits for who they are writing for. No repeat lines or stories."** Content files only:
+nothing in the game file; it is baked after the user's playtest.
+
+## The rules for all ten
+
+- **The shape.** Steps 1-4 are ordinary story moments (`== beat N`, the arc grammar in content/README.md). Step 5 is
+  the **crescendo**: one more `== beat`, a short scene with **other named crew speaking** (crew ids as speakers, like a
+  meeting), played at a gathering that already happens. Then, where listed, a small **afterglow** beat. Some stories
+  have fewer or more steps; the table for each one is the plan.
+- **The crescendo beat's header.** Use only the fields that exist today (`tone: resolution`, `where:` a room name,
+  `when:` with `trad:<id>`, `weekday:`, `event:`, `beat:`, `flag:`; `duty: true` or `crisis: true` where said). Put
+  what the engine can't say yet on a comment line right under `== beat N`, exactly in this form, for the builders:
+  `// CRESCENDO rides on: <gathering>; day: <N or "from N">; cast: <ids>; quiet ending: beat <M>`.
+- **The quiet ending.** For when the crescendo is missed (you weren't there, or the story wasn't ready in its window).
+  Write it as its own `== beat` with the comment `// QUIET ENDING for beat N: plays only if beat N was missed`, a calm
+  moment of 4-6 lines, and a `mail:` telling you how the crescendo went without you. Never a bad ending: the person is
+  fine, the thing happened, you just weren't in the room. Keepsakes still come.
+- **Tone (the user's).** Lighter. Old grief and old hurts are fine, told gently and briefly. **Nobody is ill or in
+  trouble now. Nobody dies, on screen or in the present.** Every ending is warm. No romance. Tone fields: light or
+  heartfelt for steps 1-4 (no `serious` in any new beat), `resolution` for the crescendo.
+- **Voices.** Write from the person's voice card (`content/voices/<id>.voice`) and roster entry: their `talk`, words,
+  jokes, `never` and `avoid` lines. A line that could be said by anyone is a line to rewrite.
+- **No repeats.** No line that's already anywhere in content/ (lines_check warns "the same line is also in"). No beat
+  that retells an existing arc, theme or bank: in particular **no transfer lists** (Tomas, Zeke), **no exams or
+  certifications** except Pell's practical, **no letters home as a plot** except Zeke's, **no blue sage or soup,
+  no music boxes, no poems, no Tiles, no star maps, no scarves** except Zeke's. Each crescendo has its own shape (the
+  table at the end); don't borrow another's.
+- **Size.** Each step 6-10 lines (the crescendo 10-16), one choice of three replies in the four flavours (listen,
+  cheer, practical, share), the person's `needs` flavour getting the warmer answer (`+ them:`). Every reply gets a
+  `mem:` word. Phone-short lines: under 140 characters.
+- **Calendar.** A new game: Day 0 arrival, Day 1 Monday. Week 1 is training (no step before `week1` is done, except
+  where said). The storm is Days 11-15 (only Salo's story steps in it). One crescendo a day at most; the builders'
+  pace rule moves a ready one to its next gathering.
+- **Who they are to each other.** Halloran keeps the mug rack; Kovac knits perfectly and Zeke badly; Yoon, Lemaire and
+  Yilmaz trade jokes with Halloran; Theo draws for the comics wall with Hart and Abara; Basil takes Theo's berth
+  (4-B7-5); Bakshi is a helm rating eight months aboard. Check the roster before naming anyone else.
+- **For the builders, later (not the writers' job):** the six new stories' people get `thread: arc:<id>` in place of
+  their struggle theme (teague-theo leaving, bramwell-basil homesick, halloran-emeka family, salo-saad notgood, raman
+  leaving, kowalczyk lonely), so nobody has both. Day gates (`day:`), the crescendo hook, the Calendar and Mail before
+  a crescendo, the quiet-ending rule and two new favours (below) are the four small code pieces from the pitch.
+  Calder's question (Day 26), Engine Specialist (Day 23) and your night shift (Days 19-20) are Pillar 5 career beats:
+  three crescendos wait for them.
+
+---
+
+## A. Pell Okafor (`arc:pell`, who `pell`): "Eat, sleep, call" (SW1, keep and stage)
+
+Stays aboard. Beats 1-4 are card lines in the game (`STORY_ARCS.pell`: the music boxes, the show): untouched. Beats 5-8
+are in `pell.arc` today. **Kept:** beats 5 and 6 word for word. **Rewritten:** beat 7 becomes the crescendo; beat 8
+becomes the afterglow (its "told her I'm staying" moves into the crescendo). His mum's stiff hands stay (getting older,
+not illness: never say she's unwell).
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 5 "The practical" (kept) | as written | light | Calder's put his name down; you time his practice. | favour `pellPractice` (built) |
+| 6 "Three messages" (kept) | as written | heartfelt | Mum's fourth message: her hands, the shop. Stay or go. | `mem:messages`; reply mems `listened`/`mechanic`/`help` |
+| 7 **crescendo** "Clean work" | friend, 2+ days after 6; `where: Works bay`, `when: beat:pell.6 trad:open-door weekday:wed`, `duty: true` (some are still on shift); **Day 17 or 24** (any later Wednesday) | resolution | The practical, live, at the Works bay bench during the open-door tea; the tea corner drifts over to watch. Calder times him (numbers, no adjectives). Halloran pretends not to watch; Kovac counts under her breath; Zeke, if there, mouths "properly". One bolt rolls to the edge of the bench and stops (Kovac: "Stopped. It stopped."). He finishes. Calder: "Good. Clean work." He can't speak for a line. Then, to everyone: he's staying; the lad two doors down from his mum is learning the radios by message, one step a week. If you timed him (`flag:` from the favour), he says so to the whole bay; if you suggested the neighbour (`mem:moment.pell.help`), he credits you for that. The one choice: what you say to him in front of everyone. | `flag: pell.certified` (kept), `mem: passed` |
+| 7q quiet ending | if 7 was missed | light | He finds you after: tells it all at speed, the bolt that stopped, "Good. Clean work.", staying. Mail from Pell, subject "PASSED", one line. | same flag |
+| 8 afterglow "Call" (rewritten from 8) | close, 3+ days after 7; the call-home booths, then the bow lounge, as written | resolution | He called his mum. She said eat, sleep, call; he laughed. Keep the secret (nearly left the Wren in his first month) and the keepsake. Cut "told her I'm staying" (already said). | keepsake: the four-note music box (kept) |
+
+Crescendo shape: **a test passed in front of the people who matter.** Nobody else's crescendo is a test.
+
+## B. Zeke Torres (`arc:torres`, who `torres-zeke`): "Ready" (SW1, keep, rewrite the father, stage)
+
+Stays aboard. Your trainer. **The user's change:** his dad is **well and retiring after forty years on the engines**;
+there's no memory loss anywhere in his story. **Kept:** beats 1-3 word for word; beat 5's Calder lines ("Restless isn't
+a fault. Unfinished is.") and "finishing things". **Rewritten:** beat 4 (whole), beat 5's letter question, replies and
+Mail, and beat 6 becomes the crescendo (keep its scarf lines, "Calder signed it", "About time ... a parade").
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "The scarf", 2 "The list", 3 "Restless" (kept) | as written | light, light, heartfelt | The scarf; the Engine Specialist list without his name; "restless". | as written; `flag:torres.askCalder` |
+| 4 "Forty years" (**rewritten**, was "Dad") | friend, 2+ days after 3; calm, ideally the engine overlook | **heartfelt** (was serious) | His dad, forty years an engine man (taught him coils have moods, the hand on the casing: keep those two images), retires next month. There'll be a do at the yard on Hesper Dock. Zeke won't be there. The sting: Dad will ask, the way he always does, "Specialist yet?" and he'll have to say no again. He has never told his dad he isn't sure he's good enough for a reactor. Light at the edges: his dad hums to engines, worse than Zeke. Replies: listen / practical ("Tell him before he asks") / share. Keep "Last biscuit. I was saving it." if it fits; it's his. | `mem: retiring`; reply mems |
+| 5 "Properly" (rewritten in part) | friend, 2+ days after 4; calm | heartfelt | Calder's lines kept. He's finishing things: the scarf, the application, **a letter for his dad's last day at the engines**. New question: "What would you want to read, on your last day at a job you loved?" Three new replies and answers. New Mail (300 minutes after, his last line for the letter, his own words, not the old line). | `mem: letter`; Mail |
+| 6 **crescendo** "Finished" (staged from old 6) | close (or friend if 5 was told 5+ days before), `where: junior common room`, `when: beat:torres.5 trad:knit-and-natter weekday:tue`; **Day 23** (the evening you're made Engine Specialist), else any later Tuesday | resolution | Knit and natter. "Close your eyes. Hold out your arms. Further." (kept) in front of the circle. Kovac: two dropped stitches, she counted, it's perfect anyway. Dahl (who despairs of his knitting) one dry line. Two versions of one line, both written: **if you were made Engine Specialist today**, he says so first, proud, no sting ("Engine Specialist. You. Today. I could knit a second one."); **if not**, he doesn't mention it. Kept: name forward again, Calder signed it, "About time". New, the heart: his dad's reply came from his last shift: "She's sulking. Give her a minute. You'll know her better than I did." He reads it twice. The choice. | keepsake: the scarf (kept); `flag: torres.applied` (kept); `mem: finished` |
+| 6q quiet ending | if 6 was missed | light | The scarf on your bunk, a note in his hand ("Far too long. Wind it three times."); he tells you his dad's line at breakfast. | same keepsake and flag |
+
+Crescendo shape: **a gift given in a circle, and a parent's words read aloud.** Basil's and Halloran's must not read
+letters aloud.
+
+## C. Theo Teague (`arc:teague`, who `teague-theo`): "The last page" (SW2, new)
+
+**Leaves on Day 21** (the Heron, the 15:00 Tern); nothing in his story can change that. Voice: blunt, quick, comic-strip
+beats (set-up, pause, punchline), never mean; Calder is a very tidy cloud; the playlist is one song too long. **Window:
+Day 3 to Day 21**, so his gates are lower than the defaults (written on each beat). **New canon (his reason):** he moved
+stations eight times before he was fourteen, always the new kid; he draws people so he gets to keep them; he leaves
+places before they can get used to him. Don't use: transfer lists, his aunt the pilot (Raman's story has pilots), any
+exam. His roster thread `leaving` is replaced by this arc.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "The new one" | acquaintance, `metDays: 1`; may open in week 1 from Day 3 (`when:` no week1 gate); the junior common room (the comics wall) | light | A new strip on the comics wall: "The New One", a small figure carrying the wrong spanner, three panels. He's beside it with tea. "It's you. It's a kind one. Panel three, you get it right." Calder in the corner of panel two, a very tidy cloud. | `mem: newone` |
+| 2 "Sit still" | colleague, `metDays: 4`; the tea corner after shift | light | He needs you to sit still for a panel, and can't sit still himself. Then a page he's never shown anyone: Calder as the tidy cloud, smiling. Would you take it to her? He can't. Practical reply starts the favour. | favour `theoCloud` (new: carry a page to Calder's glass office; Calder's one line when you hand it over is written here as a reply line: "Hm. Accurate."); `mem: cloud` |
+| 3 "Eight schools" | colleague, `metDays: 7`, after Day 7 (Crossing the Line) if possible; the bow lounge bar or the common-room window, evening | heartfelt | He's going on the 21st. Papers signed. Why, in comic beats that stop being funny halfway: eight stations by fourteen; you learn to draw everyone in the first week, so you've got them. He's started to like it here. "Which is exactly when you go. Before it gets heavy." Replies: listen / cheer / share. Practical "You could stay" is not offered: it's done. | `mem: eight`; `learn:` (his eight stations) |
+| 4 "The last panel" | colleague, 2+ days after 3, **Day 18-20**; `where: meal` on Day 20 (his farewell supper) or calm | heartfelt | The strip about the Wren is finished except one panel. He asks what goes in it. **Your reply is the panel:** you at the beam with your name (`mem: beam`), the whole Works tea corner on a Friday (`mem: tea`), or the Wren from outside, small, lit up (`mem: wren`). | the panel `mem:` (the crescendo reads it) |
+| 5 **crescendo** "Frame it" | `when: beat:teague.4`; the shuttle bay, **Day 21, 14:30-15:00** (his send-off) | resolution | His friends stand with him (farewellCrew: write lines for `them` and you, plus optional one-liners for Pell and Zeke, marked `// optional: if present`). He hands you the last page; the panel is the one you chose (three versions of one line, by `mem:`). "Finished it. Don't frame it." Pause. "Frame it." His last joke is about the playlist (one song too long, as always). He walks up the ramp; from the top, his bye. This is also his goodbye: the builders use it instead of his ordinary goodbye moment. | keepsake: "the last page of the Wren strip, signed, with you in it"; `mem: framed` |
+| 5q quiet ending | if 5 was missed; Day 21 evening, `where: visit` (your bunk) | light | The page is on your bunk with his note, read as 4-5 short `them:` lines ("Didn't see you. Fine. Drew you anyway."). The beat's `mail:` comes three days later from the Heron: one strip told in words (the Heron's new kid with the wrong spanner, and a tidy cloud he misses). | same keepsake |
+
+Crescendo shape: **a goodbye gift at a departure.** The only story you can't keep.
+
+---
