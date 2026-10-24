@@ -7,6 +7,7 @@
 #   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back;
 #   a round or a haul has a Take it; a side job (the drill) and the other registered kinds (an incident, a leak...) not
 #   your lesson's job (FX10, patch 0.92.3 item 29) first and marked on the board; a small repair's stop (FX10) starts with a tap, one in each room
+#   a job you take that runs past your next lesson's start says so in the "Job taken" message (FX10, patch 0.92.4 item D)
 #   the goal pointer: hidden with no goal; your job's next step shows by itself; on another deck it says "Take the
 #   lift to Deck N"; setGoal / clearGoal; an arrow at the screen edge when the place is off screen, a marker when on
 # Setup and environment as for cadet_test.py.
@@ -144,6 +145,22 @@ with sync_playwright() as pw:
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   your lesson on the board:', ls)
     check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and 'Your lesson' in (ls['text'] or '') and not ls['after'], f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
+    # a job that runs past your next lesson (FX10, patch 0.92.4 item D): with a lesson meeting 30 minutes off, taking a repair
+    # whose part has to be made says so in the "Job taken" message; with the meeting 10 hours off, nothing is said
+    LC = r"""((ahead) => { const t = shipNow(), m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && panelPlace(m.id)); if (!m) return 'no machine';
+      const part = MACHINE_KINDS[m.kind].part, keepS = SHIP.stores[part], keepW = SHIP.works, keepO = SHIP.occasions; SHIP.stores[part] = 0;
+      for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+      SHIP.occasions = (keepO || []).concat([{ key: 'ixlc@1', at: t + ahead, len: 15, deck: 5, room: 'o', status: 'asked', met: false }]);
+      SHIP.works = { ...(keepW || {}), tr: (keepW && keepW.tr) || {}, use: (keepW && keepW.use) || {}, op: (keepW && keepW.op) || {}, cur: { id: 'm6', st: 'meet', d: SHIP.time.day, by: 'calder', occ: 'ixlc@1', j: null, w: 0 } };
+      SHIP.jobs.push({ id: 'ixlc@1', machine: m.id, deck: 3, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [part], status: 'open' }); MACH_REV++;
+      let took = false; try { took = ixBoard.take('ixlc@1'); } catch (e) { return 'take: ' + e.message; }
+      const msg = document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent;
+      SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'ixlc@1'); SHIP.stores[part] = keepS; SHIP.works = keepW; SHIP.occasions = keepO; MACH_REV++;
+      return { took, msg }; })"""
+    near, far = g.ev(f"({LC})(30)"), g.ev(f"({LC})(600)")
+    print('   a job past your lesson:', near, '| 10 hours off:', far)
+    check(isinstance(near, dict) and near['took'] and 'Heads up' in near['msg'] and 'machine shop' in near['msg'] and 'starts at' in near['msg']
+          and isinstance(far, dict) and far['took'] and 'Heads up' not in far['msg'], f'a job that runs past your lesson says so when you take it, and only then (FX10, patch 0.92.4 item D) ({near} | {far})')
     # a job you can take, on Deck 3 (a tier 1 machine there), in case the crew have left none
     job = g.ev(r"""(() => { const t = shipNow(); const m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && PLACE_OF && panelPlace(m.id));
       if (!m) return null; const part = MACHINE_KINDS[m.kind].part || 'gasket'; SHIP.stores[part] = Math.max(SHIP.stores[part] || 0, 2);
@@ -1501,8 +1518,8 @@ with sync_playwright() as pw:
 
 # LEAD31-9 (0.92.2, FE2's items 35 and 38): real taps in the mess at Day 1's dinner. (1) A tray, a seat, then one more tap
 # on the same seat mid-meal: the meal goes on (it ended it, the tray already eaten into, and sat you down with nothing);
-# with the needs list open, a tap on the deck only closes it; walking away keeps the rest on your tray, and a seat
-# finishes it, about one meal's Food in all. (2) A tap on the servery counter beside the galley staff or the line, not on them, joins the queue
+# with the needs list open, a tap on the deck only closes it; walking away mid-meal leaves the tray, and you're told
+# (the user, 0.92.4: "the tray goes away when you get up from the table"; 0.92.2 kept the rest on it). (2) A tap on the servery counter beside the galley staff or the line, not on them, joins the queue
 # (it opened their card), in any camera turn; a tap on a person still talks to them
 MESS_SCR = r"""((x, y, z) => { const v = new THREE.Vector3(x, y, z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; })"""
 MESS_ST = "[ACT && ACT.kind, ACT && ACT.placeId, ACT && ACT.phase, SHIP.player.tray, SHIP.player.needs.hunger, document.getElementById('tx').textContent]"
@@ -1536,22 +1553,17 @@ with sync_playwright() as pw:
         g.ev("document.getElementById('needStrip').classList.add('open')"); g.page.mouse.click(x, y); g.step(4)
         sb = g.ev("[document.getElementById('needStrip').classList.contains('open'), ACT && ACT.kind, ACT && ACT.placeId]")
         check(not sb[0] and sb[1] == 'eat' and sb[2] == seat[0], f'with the needs list open, a tap on the deck only closes it: the meal goes on ({sb})')
-        # walking away mid-meal: the rest stays on your tray, and you're told; a seat finishes it
+        # walking away mid-meal: the tray goes, and you're told (the user's rule, 0.92.4); your seat then only sits you
         g.step(150)
         w = g.ev("(() => { const s = placeSpot(ACT.placeId), c = nearestOpen(s.x + 3, s.z + 2, player); playerGo(c); return c; })()"); g.step(20)
         sw = g.ev(MESS_ST)
-        check(sw[0] != 'eat' and sw[3] and 'get up with your tray' in sw[5], f'walking away mid-meal: the rest stays on your tray, and you\'re told ({sw[0]}, {sw[3]}, {sw[5][:70]})')
+        check(sw[0] != 'eat' and not sw[3] and 'leave your tray' in sw[5], f'walking away mid-meal: the tray goes, and you\'re told ({sw[0]}, {sw[3]}, {sw[5][:70]})')
         x, y = g.ev(f"({MESS_SCR})({seat[1]}, {seat[2]}, {seat[3]})"); g.page.mouse.click(x, y)
         for k in range(40):
             g.step(30)
-            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
-        left = g.ev("ACT && ACT.kind === 'eat' ? [ACT.def.mins, ACT.def.gain] : null")
-        check(left and left[0] < 20, f'back at a seat, only what was left on the tray ({left})')
-        for k in range(80):
-            g.step(30)
-            if not g.ev("!!(ACT && ACT.kind === 'eat')"): break
+            if g.ev("!!(ACT && ACT.phase === 'do')"): break
         s2 = g.ev(MESS_ST)
-        check(f0 + 30 < s2[4] < f0 + 62 and not s2[3], f'and Food rises by about one meal in all, the tray done ({round(f0)} -> {round(s2[4])}, tray {s2[3]}: {s2[5][:50]})')
+        check(s2[0] == 'sit' and not s2[3], f'back at your seat with no tray, you only sit ({s2[:4]})')
     # (2) the counter, from 3 m, four camera turns: points on its tap box with someone near on screen but the tap not on them
     g.ev("actEnd(true); SHIP.player.tray = null; setShipNow(18 * 60 + 40)"); g.step(30)
     tried, bad = 0, []
@@ -1602,25 +1614,25 @@ with sync_playwright() as pw:
             if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
         te = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, !!SHIP.player.tray, (goalNow() || {}).label || null, document.getElementById('tx').textContent.slice(0, 80)]")
         check(te[0] == 'eat' and not te[2] and te[3] != 'A seat for your tray', f'a tap on the seat the arrow shows eats your tray, and the arrow goes ({te})')
-    # (4) FX12 (0.92.3 item 19): your tray in your hands on the way to anything else (it wasn't drawn), and it goes with you
-    # off Deck 3 (it vanished at the lift, no word) with the hunger arrow at a seat there
+    # (4) FX12, the user's tray rules (0.92.4, item A; 0.92.3 let it travel): never sat down, your tray stays while you walk
+    # in the mess hall and goes, with a word, once you leave it (here, for the gym); and off Deck 3 it's gone
     g.ev("actEnd(true); clearGoal(); NEED_GOAL = null; SHIP.player.tray = 'stew'; SHIP.player.trayLeft = 0; SHIP.player.needs.hunger = 60"); g.step(4)
-    tw = g.ev("""(() => { const pp = player.obj.position, b = [...PLACE_OF.values()].filter(p => p.type === 'gym' && !heldBy(p.id)).map(p => [p, placeSpot(p.id)]).filter(x => x[1])
-      .sort((a, b) => Math.hypot(a[1].x - pp.x, a[1].z - pp.z) - Math.hypot(b[1].x - pp.x, b[1].z - pp.z))[0]; if (!b) return null; actStart('gym', b[0].id, { pose: 'cycle', title: 'Gym' }); return b[0].id; })()""")
-    g.step(3); hw = g.ev("[ACT && ACT.kind, ACT && ACT.phase, player.holding, !!SHIP.player.tray]")
-    check(tw is None or hw[1] in ('walk', 'wait') and hw[2] == 'tray' and hw[3], f'walking to something else with your tray, it is in your hands ({tw}, {hw})')
-    g.ev("actEnd(true); SHIP.player.tray = 'stew'; goToDeck(4)"); g.step(30)
+    tm = g.ev("""(() => { const pp = player.obj.position, m = [...PLACE_OF.values()].filter(p => p.type === 'mess-seat' && p.room === 'M').map(p => placeSpot(p.id)).filter(Boolean)
+      .sort((a, b) => Math.hypot(b.x - pp.x, b.z - pp.z) - Math.hypot(a.x - pp.x, a.z - pp.z))[0]; playerGo(m.walk); return K(m.walk); })()""")
+    for k in range(60):
+        g.step(10)
+        if not g.ev("player.path.length"): break
+    hm = g.ev("[roomAt(...player.here()), SHIP.player.tray, player.holding]")
+    check(hm == ['M', 'stew', 'tray'], f'never sat down, walking about the mess hall your tray stays in your hands ({tm}, {hm})')
+    tw = g.ev("""(() => { const b = [...PLACE_OF.values()].filter(p => p.type === 'gym' && p.room !== 'M').map(p => placeSpot(p.id)).filter(Boolean)[0]; if (!b) return null; playerGo(b.walk); return K(b.walk); })()""")
+    for k in range(80):
+        g.step(10)
+        if not g.ev("player.path.length"): break
+    hw = g.ev("[roomAt(...player.here()), SHIP.player.tray, document.getElementById('tx').textContent]")
+    check(tw and hw[0] != 'M' and not hw[1] and 'leave your tray' in hw[2], f'out of the mess hall, the tray stays behind, and you\'re told ({tw}, {hw})')
+    g.ev("goToDeck(3); SHIP.player.tray = 'stew'; goToDeck(4)"); g.step(30)
     d4 = g.ev("[deckDef.num, SHIP.player.tray, player.holding]")
-    g.ev("SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
-    a4 = g.ev("[IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.deck, IX_GOAL && IX_GOAL.place, IX_GOAL && IX_GOAL.place && PLACE_OF.has(IX_GOAL.place) && PLACE_OF.get(IX_GOAL.place).pose]")
-    check(d4 == [4, 'stew', 'tray'] and a4[0] == 'A seat for your tray' and a4[1] == 4 and a4[3] == 'sit', f'off Deck 3 your tray goes with you, and the hunger arrow is at a seat there ({d4}, {a4})')
-    if a4[2]:
-        g.ev(f"actStart('sit', '{a4[2]}', {{}})")
-        for k in range(60):
-            g.step(10)
-            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
-        e4 = g.ev("[ACT && ACT.kind, !!SHIP.player.tray, (goalNow() || {}).label || null]")
-        check(e4[0] == 'eat' and not e4[1] and e4[2] != 'A seat for your tray', f'and that seat eats it ({e4})')
+    check(d4[0] == 4 and not d4[1] and d4[2] != 'tray', f'off Deck 3 your tray is gone ({d4})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
@@ -1659,7 +1671,7 @@ with sync_playwright() as pw:
         n = g.ev("document.getElementById('tx').textContent")
         check('Kept' not in n, f'with nothing due, a tap on her is the usual card ({n[:60]})')
         # RV11: she must be there for it: a tap on her outside the infirmary, away from her spot (still on her way), keeps nothing
-        w = g.ev("""(() => { const b = placeSpot('3-visit-1'), rp = schedData().people.find(q => q.id === 'rina'); let best = null;
+        w = g.ev("""(() => { if (typeof apptTapKeep !== 'function') return null; const b = placeSpot('3-visit-1'), rp = schedData().people.find(q => q.id === 'rina'); let best = null;
           for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j) || roomAt(i, j) === 'I' || !roomAt(i, j)) continue; const c = cellPos(i, j), d = Math.hypot(c.x - b.x, c.z - b.z); if (d > 3 && d < 7 && (!best || d < best[0])) best = [d, i, j]; }
           if (!best) return null; const c = cellPos(best[1], best[2]); player.obj.position.copy(c); player.stop();
           SHIP.device.appts.push({ id: 9997, with: ['rina'], at: shipNow() + 1, len: 30, where: '3-visit-1', kind: 'checkup', status: 'yes', by: 'rina', title: 'Health check (test)' });
@@ -1667,7 +1679,7 @@ with sync_playwright() as pw:
           return [roomAt(best[1], best[2]), +best[0].toFixed(1), !!k, st]; })()""")
         check(w and not w[2] and w[3] == 'yes', f'a tap on Rina outside the infirmary, 3+ tiles from her spot, keeps nothing ([room, tiles from the bench, kept, status]: {w})')
     # RV11: an occasion (Calder's progress talk) is met only in its room: a tap on its host near you but outside it leaves it 'yes'
-    oc = g.ev("""(() => { if (typeof occasionAdd !== 'function' || typeof OCCASIONS === 'undefined' || !OCCASIONS.progressTalk) return null;
+    oc = g.ev("""(() => { if (typeof apptTapKeep !== 'function') return 'no apptTapKeep (an older build)'; if (typeof occasionAdd !== 'function' || typeof OCCASIONS === 'undefined' || !OCCASIONS.progressTalk) return null;
       setShipNow(1440 + 15 * 60 + 30); goToDeck(5); const a = DECK_CREW.find(x => x.p.id === 'calder'); if (!a) return 'no calder';
       const rm = roomAt(...cellAt(a.x, a.z)); let best = null;
       for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j) || roomAt(i, j) === rm || !roomAt(i, j)) continue; const c = cellPos(i, j), d = Math.hypot(c.x - a.x, c.z - a.z); if (d < 4 && (!best || d < best[0])) best = [d, i, j]; }

@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.92.3
+   STARSHIP CADET: CSV Wren                           build 0.92.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9073,7 +9073,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.92.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.92.4';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11193,6 +11193,19 @@ function walkLaneStep(a, dt, mid) {                    // mid: ease to the middl
   const k = Math.min(1, dt * 4);
   a.lx += (tx - a.lx) * k; a.lz += (tz - a.lz) * k;
   if (a.settled) { a.lx = 0; a.lz = 0; }
+  crewUpEase(a, dt);
+}
+// getting up from a place (FX8; patch 0.92.4 C, the user's yes): retarget moves them from the seat or station to its
+// walk-to tile at once (paths and timing as ever); hx/hz, drawn only, start at the difference and ease away in
+// a steady glide (CREW_UP_V tiles a second: 0.7 tiles in under a third of a second), so the body steps off the place
+// instead of hopping. Only a short one (CREW_UP_MAX: the usual seat, bed or station): a longer move (a rec-deck stand's
+// 4 tiles, a few mess seats') would glide over the furniture between, so it stays as it was (lead 34)
+const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2;
+function crewUpEase(a, dt) {
+  if (!a.hx && !a.hz) return;
+  const d = Math.hypot(a.hx, a.hz), m = d - dt * CREW_UP_V;
+  if (a.settled || m <= .005) { a.hx = 0; a.hz = 0; return; }
+  a.hx *= m / d; a.hz *= m / d;
 }
 // the washroom stall's red light (#8, the patch): a red cap round the green light (not on its surfaces: it encloses it,
 // its back inside the door), shown only while someone (crew or you) is using that stall and the stall isn't faded.
@@ -13707,7 +13720,7 @@ function actStart(kind, placeId, o = {}) {
       && (placeId === ACT.placeId || sp0 && Math.hypot(sp0.x - ACT.spot.x, sp0.z - ACT.spot.z) < 1.6)) {   // a tap on your seat or table mid-meal keeps the meal (LEAD31-9: it ended it, the tray already eaten into, and sat you down with nothing)
     toast(ACT.o.title || 'Mess hall', 'You\'re still eating: about ' + taskMins(Math.max(1, ACT.def.mins - ACT.done)) + ' minutes to go. Walk away to stop.'); return;
   }
-  if (ACT && ACT.kind === 'eat' && ACT.o.fed) actEnd(true);   // any other start mid-meal: the rest of it back on your tray first (actEnd), so another seat finishes it
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed) actEnd(true);   // any other start mid-meal: you get up, so the tray goes (actEnd; with TRAY_TRAVELS the rest back on your tray first, so another seat finishes it)
   const trayAt =pl => !!pl && (pl.type === 'mess-seat' || SIT_TYPES.has(pl.type) && pl.pose === 'sit');   // any seat you'd sit on: Sunday's long table, the lounge, a bench (fix-eat, FE1's Day 0: they only sat)
   if (SHIP.player.tray && (kind === 'eat' || kind === 'sit') && placeId && trayAt(PLACE_OF.get(placeId))) {   // your tray: eat it at the seat you chose (0.28.31)
     kind = 'eat'; o = { ...o, title: 'Mess hall', fed: true, dish: SHIP.player.tray, pose: (placeSpot(placeId) || {}).pose || o.pose };
@@ -13765,7 +13778,9 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
-  if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5) {   // a meal cut short: never lost in silence (LEAD31-9)
+  if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5 && !TRAY_TRAVELS) {   // a meal cut short: the tray goes, but never in silence (the user, 0.92.4: "the tray goes away when you get up from the table")
+    toast(A.o.title || 'Mess hall', 'You get up and leave your tray. Someone will clear it.');
+  } else if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5) {   // (TRAY_TRAVELS) a meal cut short: the rest on your tray (LEAD31-9)
     SHIP.player.tray = A.o.dish; SHIP.player.trayLeft = A.def.mins - A.done;
     toast(A.o.title || 'Mess hall', 'You get up with your tray: about ' + taskMins(SHIP.player.trayLeft) + ' minutes of ' + A.o.dish + ' left. Tap a seat to finish it.');
   }
@@ -13826,7 +13841,19 @@ function actEnd(abort) {
 // (SHIP.player.tray, the dish; not saved) and choose a mess seat yourself: tap it and you sit and eat.
 const queueHeld = () => !!(ACT && ACT.kind === 'queue' && ACT.phase !== 'walk' && ACT.phase !== 'out') && (queueAsk(), true);
 SHIP.player.tray = null; SHIP.player.trayLeft = 0;   // trayLeft: a tray part eaten, the minutes of it left (LEAD31-9)
-const TRAY_TRAVELS = true;   // your tray goes with you on any deck till you eat it, put it down or sleep (FX12, 0.92.3 item 19; false: left behind off Deck 3, as 0.28.38)
+const TRAY_TRAVELS = false;  // true: your tray goes with you on any deck till you eat it, put it down or sleep, and getting up keeps the rest on it (FX12, 0.92.3 item 19). Off since 0.92.4 (the user, 2026-10-24: "not travelling"): see trayKeep and actEnd
+// a tray of your own that travels (SHIP.player.trayGo, not saved: section 18's Pick-your-own breakfast, to a mess seat). Cleared once the tray's gone
+SHIP.player.trayGo = false;
+// the user's tray rules (0.92.4, item A): get up from your seat and the tray goes, even mid-meal (actEnd); never sat
+// down, it goes when you leave the mess hall (room M, Deck 3). On your way back into it, or to a seat, it's kept
+function trayKeep() {
+  const P = SHIP.player; if (!P.tray) { P.trayGo = false; return; }
+  if (TRAY_TRAVELS || P.trayGo || typeof deckDef === 'undefined') return;
+  if (ACT && ACT.kind === 'eat' && ACT.o.fed && (ACT.phase === 'walk' || ACT.phase === 'wait')) return;   // taking it to a seat
+  const inMess = c => deckDef.num === 3 && roomAt(...c) === 'M', dst = player.path.length ? player.path[player.path.length - 1] : null;
+  if (inMess(player.here()) || dst && inMess(Array.isArray(dst) ? dst : cellAt(dst.x, dst.z))) return;
+  P.tray = null; P.trayLeft = 0; toast('Mess hall', 'You leave your tray in the mess hall. Someone will clear it.');
+}
 function queueAsk() {
   let el = document.getElementById('qAsk');
   if (!el) {
@@ -14168,7 +14195,7 @@ function actBar() {
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
   const now = shipNow(), n = SHIP.player.needs;
-  if (SHIP.player.tray && !TRAY_TRAVELS && typeof deckDef !== 'undefined' && deckDef.num !== 3) SHIP.player.tray = null;   // trays stay in the mess (0.28.38, reviewer 1c): off Deck 3 it's left behind for clearing; with TRAY_TRAVELS it goes with you (FX12)
+  trayKeep();                                            // trays stay in the mess (0.28.38, reviewer 1c; the user's rule, 0.92.4): out of the mess hall it's left behind for clearing
   if (needsT === null || now < needsT) needsT = now;
   const dm = now - needsT;
   if (dm > 0) {
@@ -14204,7 +14231,7 @@ function playerUpdate(dt, t) {
   if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   if (typeof flcTick === 'function') flcTick();          // First Light Cocoa (patch #26, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || ACT.phase === 'walk' || ACT.phase === 'wait') ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || (TRAY_TRAVELS || P.trayGo) && (ACT.phase === 'walk' || ACT.phase === 'wait')) ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -14971,11 +14998,12 @@ function needGoal(k) {
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
-  if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
+  if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS || SHIP.player.trayGo)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
     const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
-    const seats = (DECKS[here].places || []).filter(pl => here === 3 ? pl.type === 'mess-seat' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+    const sd = TRAY_TRAVELS ? here : 3;                  // the deck of the seat: the mess's, but (TRAY_TRAVELS, FX12) any seat on the deck you're on; a Pick-your-own tray travels to the mess (RV12, 0.92.4)
+    const seats = (DECKS[sd].places || []).filter(pl => sd === 3 ? pl.type === 'mess-seat' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
     const seat = seats.find(pl => !heldBy(pl.id)) || seats[0];   // all taken: the nearest (sitting there moves you to a free one nearby, actBegin)
-    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true, deck: here }; setGoal({ deck: here, place: seat.id, label: TRAY_SEAT_SAY }); return true; }   // off Deck 3 (TRAY_TRAVELS, FX12): any seat there
+    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true, deck: here }; setGoal({ deck: sd, place: seat.id, label: TRAY_SEAT_SAY }); return true; }
   }
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
@@ -16060,6 +16088,19 @@ const ixHealth = (() => {
 // ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
 // boardLesson() -> job id | null (FX10, item 29): the job a lesson's "your turn" (24 core's trainDo: SHIP.works.cur at 'do')
 // put on the board for you, while it's there to take
+// lessonClash(j, mins) -> words | null (FX10, patch 0.92.4 item D, the user's yes): a job you take that would run past the
+// start of your next lesson's meeting (SHIP.works.cur at 'meet', its occasion not met yet). The job's end: now, its minutes,
+// the machine shop's time for a part you make (its own make, or one no shelf has: makeMins), and LESSON_WALK minutes of
+// walking. Said at the end of the "Job taken" message; nothing is stopped (walking away pauses the work)
+const LESSON_WALK = 10;
+function lessonClash(j, mins) {
+  const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && (SHIP.occasions || []).find(x => x.key === c.occ), now = shipNow();
+  if (!j || !r || r.met || now >= r.at) return null;
+  const make = typeof madeHere === 'function' && madeHere(j) || (j.parts || []).some(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)));
+  const end = now + (mins || 0) + (make && typeof makeMins === 'function' ? makeMins(j) : 0) + LESSON_WALK; if (end <= r.at) return null;
+  const row = typeof ladderRow === 'function' && ladderRow(c.id), what = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) : 'Your lesson';
+  return 'Heads up: it runs to about ' + hhmm(Math.round(end) % 1440) + (make ? ' (its part has to be made in the machine shop)' : '') + ', and ' + what + ' with ' + worksFirst(c.by) + ' starts at ' + hhmm(r.at % 1440) + '.';
+}
 function boardLesson() {
   const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
   return j && j.status === 'open' && !j.claimedBy ? j.id : null;
@@ -16112,11 +16153,12 @@ const ixBoard = (() => {
       for (const j of crew) { const [title, where, state, pri] = jobCard(j); row(j.title || title, where + ' · ' + state, pri + ' taken', null); }
     },
     take(id) {
+      const est = (typeof openJobs === 'function' ? openJobs('you') : []).find(o => o.id === id);   // its minutes, before it's yours (lessonClash)
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
-      const j = myJob(), [title, where] = jobCard(j);
+      const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
       SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.') + (clash ? ' ' + clash : ''));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
       return true;
     },
@@ -31073,8 +31115,12 @@ const LINES = JSON.parse([
   '{"text":"You\'re in yesterday\'s clothes.","id":"1l3uqw7"}]',
   ',"clothes.tip.grubby":[',
   '{"text":"Your uniform\'s grubby. A shower won\'t fix it: change at your wardrobe in Bunk 1.","id":"1fvc7wo"}]',
+  ',"clothes.tip.laundry":[',
+  '{"text":"No clean clothes left. Take your hamper to the laundry on Deck 4.","id":"uyff0t"}]',
   ',"clothes.tip.yesterday":[',
   '{"text":"You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.","id":"iab6cr"}]',
+  ',"clothes.tip.yesterday2":[',
+  '{"text":"Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.","id":"5jm40j"}]',
   ',"crewjob.carry":[',
   '{"text":"Coming through! Box with legs.","id":"f1bug9","tone":"funny","dept":"works"},',
   '{"text":"Mind your toes. Heavy one.","id":"o2xg2t","dept":"works"},',
@@ -41646,7 +41692,7 @@ function pyoMinute(now) {
 }
 function pyoTray(e, d, A) {
   const P = SHIP.player; if (PYO_DAY === d || P.tray) return;
-  PYO_DAY = d; P.tray = PYO_DISH; P.trayLeft = 0;
+  PYO_DAY = d; P.tray = PYO_DISH; P.trayLeft = 0; P.trayGo = true;   // it travels to the mess (the user, 0.92.4); sat down with it, the usual rules
   if (A) A.def.done = null;                              // the beds' own "watered" toast: this one instead
   toast(e.name, tradWords(e, 'tray', {}) || 'Your basket\'s full. Take it over to the mess hall and tap a seat to eat what you picked.', { keep: true });
   if (typeof NEED_GOAL !== 'undefined' && NEED_GOAL && typeof needGoalClear === 'function') needGoalClear();   // a "Food" arrow at the servery: this one instead
@@ -46873,7 +46919,12 @@ function clothesDirtyTick() {
 // Tips setting, SHIP.device.tipsSeen): yesterday's clothes, and a grubby uniform (the writers' clothes.tip.* lines)
 function clothesDirtyTip(u) {
   if (typeof tipShow !== 'function') return;
-  if (u === 'yesterday') tipShow('clothes.yesterday', clothesText('clothes.tip.yesterday', {}, 'You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.'));
+  const C = SHIP.clothes, d = SHIP.time.day, D = SHIP.device, h = C.hamper;
+  const out = C.clean <= 0 && !(h && h.state === 'clean'), laundry = () => clothesText('clothes.tip.laundry', {}, 'No clean clothes left. Take your hamper to the laundry on Deck 4.');   // out of clean clothes: the laundry, not the wardrobe (RV11; the cut pop-up's own test)
+  if (u === 'yesterday') {                               // the first time; then once more on a later day if you're still in yesterday's clothes (0.92.4, item B)
+    if (!D.tipsSeen['clothes.yesterday']) { if (tipShow('clothes.yesterday', out ? laundry() : clothesText('clothes.tip.yesterday', {}, 'You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.'))) C.said.ytip = d; }
+    else if (Number.isInteger(C.said.ytip) && d > C.said.ytip) tipShow('clothes.yesterday2', out ? laundry() : clothesText('clothes.tip.yesterday2', {}, 'Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.'));
+  }
   else if (u === 'grubby') tipShow('clothes.grubby', clothesText('clothes.tip.grubby', {}, 'Your uniform\'s grubby. A shower won\'t fix it: change at your wardrobe in Bunk 1.'));
 }
 function wardrobeUse() {
@@ -47089,10 +47140,7 @@ function clothesFrame() {
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
   if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
     ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
-  if (C.told !== SHIP.time.day && clothesYesterday()) {
-    C.told = SHIP.time.day;
-    toast('Yesterday\'s clothes', clothesText('clothes.stale', {}, 'You\'re in yesterday\'s clothes.') + (C.clean > 0 || h && h.state === 'clean' ? ' Change at your wardrobe in Bunk 1; till then you\'ll feel grubby sooner.' : ' And there are no clean ones left: your hamper\'s in your wardrobe. Do your laundry.'));
-  }
+  // (the "Yesterday's clothes" pop-up, once a day, is cut: the user, 0.92.3 notes, item B; the green tips say it, clothesDirtyTip)
   const stale = clothesYesterday();                     // the writers' clothes.remark lines are gated on this flag (crew notice)
   if (stale !== CLOTHES_STALE && typeof flagSet === 'function') { CLOTHES_STALE = stale; flagSet('clothes.stale', stale ? true : null); }
   const grubby = uniformState() === 'grubby';            // and clothes.grubby (patch 0.92.3 #26: the writers' clothes.grubby lines)
@@ -55917,7 +55965,7 @@ class CrewAgent {
     this.face = idHash(p.id) % 628 / 100; this.pose = 'stand';
     this.path = []; this.spot = null; this.goalId = undefined; this.settled = false; this.talking = 0;
     this.stuck = 0; this.stuckMax = 0; this.lastX = this.x; this.lastZ = this.z; this.noPath = 0;
-    this.lx = 0; this.lz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >>> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace (>>> since playtest 1, #17: >> made half the crew's hashes negative, lanes to -0.54 tiles, drawn through walls they walked beside)
+    this.lx = 0; this.lz = 0; this.hx = 0; this.hz = 0; this.ux = 0; this.uz = 0; this.spd = 0; this.lane = WALK_LANE * ((idHash(p.id) >>> 3) % 21 - 10) / 10;   // #10: the drawn lane, the last step's way and pace (>>> since playtest 1, #17: >> made half the crew's hashes negative, lanes to -0.54 tiles, drawn through walls they walked beside)
     const bed = PLACE_OF.get(p.bed); this.bedRooms = bed ? [bed.room] : []; this.rooms = new Set(this.bedRooms);
     this.liftCell = (() => { const l = liftTiles(); return l.length ? l[idHash(p.id) % l.length] : cell; })();
   }
@@ -55928,7 +55976,7 @@ class CrewAgent {
     const atSpot = this.spot && (this.settled || !this.path.length);
     let from = atSpot ? this.spot.walk : this.here();
     if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
-    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); this.x = w.x; this.z = w.z; }   // up from the seat
+    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); if (atSpot && Math.hypot(this.x - w.x, this.z - w.z) <= CREW_UP_MAX) { this.hx += this.x - w.x; this.hz += this.z - w.z; } this.x = w.x; this.z = w.z; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
     this.goalId = goalId; this.path = [];
     this.settled = false; this.spot = null;
     let goal = null;
@@ -55952,7 +56000,8 @@ class CrewAgent {
     if (this.talking > 0) {                              // stopped for a word with you
       this.talking -= dt;
       if (!this.settled) { this.pose = 'stand'; this.face = Math.atan2(player.obj.position.x - this.x, player.obj.position.z - this.z); }
-      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this)); return true;
+      crewUpEase(this, dt);
+      if (!((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt))) this.h.set({ x: this.x + this.lx + this.hx, y: this.y, z: this.z + this.lz + this.hz }, this.face, heldPose(this)); return true;
     }
     let goalId;
     if (w.deck !== N && w.act === 'away' && this.goalId && /^5-tern-/.test(this.goalId)) { if (this.settled) return false; goalId = this.goalId; }   // boarding the Tern (section 14's ROT_TERN): into its aisle, then gone
@@ -55999,7 +56048,7 @@ class CrewAgent {
     if (going && Math.hypot(this.x - ox, this.z - oz) < 1e-4) { this.stuck += dt * SHIP_RATE; this.stuckMax = Math.max(this.stuckMax, this.stuck); } else this.stuck = 0;
     if ((this.rk || this.settled && this.spot && this.spot.mv) && recCrewSet(this, dt)) return true;   // 0.84.6: swimming the lane, up the wall (8c)
     walkLaneStep(this, dt);
-    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
+    this.h.set({ x: this.x + this.lx + this.hx, y: this.y, z: this.z + this.lz + this.hz }, this.face, heldPose(this));
     return true;
   }
   // someone's in your place: a free seat of the same kind close by (kept while the plan's place stays the same), else
@@ -56103,7 +56152,7 @@ class CrewAgent {
     } else { this.pose = 'stand'; this.face = Math.atan2(pp.x - this.x, pp.z - this.z); }   // waiting: look at you
     this.y = 0; this.stuck = 0; this.tag = 'escort';
     walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone starts escorting mid-walk)
-    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
+    this.h.set({ x: this.x + this.lx + this.hx, y: this.y, z: this.z + this.lz + this.hz }, this.face, heldPose(this));
     return true;
   }
   // section 20's walk-up (0.71.0): over to you (re-aimed as you move), then standing by you, facing you, while the chip is up
@@ -56127,7 +56176,7 @@ class CrewAgent {
     if (!go && SEEK_COME && SEEK_COME.p === this.p) seekArrive(this);
     this.y = 0; this.stuck = 0; this.settled = false; this.tag = null;
     walkLaneStep(this, dt, true);                        // #10's drawn lane eases back to the middle (no jump when someone comes over mid-walk)
-    this.h.set({ x: this.x + this.lx, y: this.y, z: this.z + this.lz }, this.face, heldPose(this));
+    this.h.set({ x: this.x + this.lx + this.hx, y: this.y, z: this.z + this.lz + this.hz }, this.face, heldPose(this));
     return true;
   }
   remove() { if (this.h.full) this.h.dispose(); else crowd.remove(this.h); }
