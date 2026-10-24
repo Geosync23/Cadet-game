@@ -44,3 +44,39 @@ Runs: `plans/review-rv11/runs.txt` (each check's exit code, time and last line).
 - interactions_check takes about 50 minutes with 3 or 4 browsers running at once; it is about 30 minutes alone.
 - A copy of intro_check.py or interactions_check.py must keep its file name, because it finds cadet_test.py by replacing its own name.
 - `pgrep -f`/`pkill -f` with the pattern in the same command line matches the shell itself; use `ps -eo pid,args | grep '[x]...'`.
+
+# RV11's reviews for 0.92.3 (2026-10-24; lead 32, then lead 33 from ~04:00 UTC)
+
+All from claude/integration 364c80cb (0.92.2). Runs appended to `plans/review-rv11/runs.txt`; new probes fx4_shots.py, fx8_occ.py, ds1_tip.py.
+
+| Fix | Items | Branch, commit | Verdict |
+|---|---|---|---|
+| FX4 | 2, 12, 14, 20, 26 | claude/p923-fx4 97251620 | PASS (after two item-14 fixes) |
+| FX8 | 22, 28 | claude/p923-fx8 9fd5b500 | PASS (after one fix) |
+| DS1 | 1, 7, 8, 9, 10 | claude/p923-ds1 b49a01db | PASS (notes) |
+
+## FX4
+- First look (64b28176) found two item-14 problems. The HUD button still read "Tracked" (only its aria-label had changed). At 320 px the lift's "→ Schedule tracker" badge ran 27 px past its deck button (318 vs 291).
+- 97251620 fixed both; device_check has a line for each, and both fail on 9be5c21e.
+- device_check's new lines fail on 364c80cb. Planted faults caught: meter hidden; beam at 15 min; on-shift badge; old badge style.
+- Item 26: clothes_check's three lines fail on 64b28176. Plants caught: no tip; remarks for stale clothes only; flag renamed.
+- check_fast, player_check and the full interactions_check OK. cadet_test: only the HUD button's box and j_steer1's bump word.
+- Notes: on Day 1 at 10:00 the old "Yesterday's clothes" toast and the new tip say the same at once. Dinner's 16:45 heads-up waits behind the beam strip.
+
+## FX8
+- First look (35c4a252): the tap kept occasion appointments too. Proved (fx8_occ.py): a tap on Calder from the Works bay marked her progress talk met on the device, with the occasion unmet.
+- 9fd5b500 skips occasions and needs the person in the appointment's room or within 2.5 tiles of their spot. Two new lines fail on 35c4a252.
+- Plants caught: occasion skip removed; the "there for it" test removed.
+- Full interactions_check, check_fast and day_check 2 OK; cadet_test ALL IDENTICAL.
+- Nit: on old builds the check crashes on "apptTapKeep is not defined" rather than failing cleanly.
+- Item 28: findings only.
+
+## DS1
+- Part 18 (--p923) fails on 364c80cb for all five items. All five planted faults are caught.
+- check_fast and clothes_check OK; cadet_test ALL IDENTICAL.
+- Full intro_check: two of three runs crashed in part 12 at the new game's form-button click; the third passed, as did 0.92.2's full run. A repro (part 13, then a new game) hangs on that click on 0.92.2 too, so this is read as a check flake.
+- Notes: two "part 18"s in intro_check; a comment moved off INTRO_ARROWS.call; the stand-in bedtime tip is about 220 characters (nine lines at 320 px) and lines_check doesn't see it.
+
+## Gotchas (new)
+- A fake work meter (ACT without kind) breaks recFrame on the next frame; fake it with ACT.kind set and don't step frames.
+- intro_check --firsts runs part 13b, which the full run doesn't, so it is not a faithful repro of the full run's order.

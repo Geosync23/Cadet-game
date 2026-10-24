@@ -35,3 +35,51 @@ e81-fix exit 0 31s | OK
 e81-early exit 1 34s | FAILED
 e81-base exit 1 44s | FAILED
 ix-fx3b exit 0 1751s | INTERACTIONS CHECK OK
+ct-fx4 exit 1 161s | DIFFERENCES FOUND
+dev-base exit 1 488s | device_check: FAILED
+cf-fx4 exit 0 469s | QUICK CHECK OK in 469 s
+dev-fx4 exit 0 384s | device_check: OK
+pl-fx4-hide exit 1 353s | device_check: FAILED
+player-fx4 exit 0 849s | PLAYER CHECK OK
+p923-base exit 1 37s | FAILED
+pl-fx4-ahead exit 1 347s | device_check: FAILED
+p923-ds1 exit 0 39s | OK
+pl-ds1-bed exit 1 33s | FAILED
+pl-ds1-break exit 1 32s | FAILED
+pl-ds1-sure exit 1 29s | FAILED
+pl-ds1-change exit 1 33s | FAILED
+pl-ds1-opener exit 1 31s | FAILED
+ct-ds1 exit 0 115s | ALL IDENTICAL
+pl-fx4-badge exit 1 352s | device_check: FAILED
+clo-fx4a exit 1 280s | 3 FAILED
+cf-ds1 exit 0 422s | QUICK CHECK OK in 422 s
+clo-fx4b exit 0 229s | ALL OK
+clo-ds1 exit 0 227s | ALL OK
+pl-fx4b-notip exit 1 208s | 2 FAILED
+pl-fx4b-stale exit 1 213s | 1 FAILED
+pl-fx4b-noflag exit 1 222s | 1 FAILED
+lines-fx4b exit 0 4s | lines_check: PASS (0 errors, 49 warnings)
+ct-fx4b exit 1 123s | DIFFERENCES FOUND
+cf-fx4b exit 0 435s | QUICK CHECK OK in 435 s
+fx8o-base exit 1 26s |     at UtilityScript.<anonymous> (<anonymous>:1:44)
+fx8o-35c4 exit 1 23s | INTERACTIONS CHECK FAILED
+fx8o-fix exit 0 25s | INTERACTIONS CHECK OK
+pl-fx8-occ exit 1 24s | INTERACTIONS CHECK FAILED
+pl-fx8-there exit 1 23s | INTERACTIONS CHECK FAILED
+ct-fx8b exit 0 118s | ALL IDENTICAL
+intro-ds1 exit 1 1574s | 
+cf-fx8b exit 0 386s | QUICK CHECK OK in 386 s
+ix-fx4 exit 143 4469s | Terminated
+dev-fx4b exit 1 377s | device_check: FAILED
+day2-fx8b exit 0 691s | DAY CHECK OK
+dev-fx4c exit 0 373s | device_check: OK
+pl-fx4c-badge exit 1 369s | device_check: FAILED
+ct-fx4c exit 1 119s | DIFFERENCES FOUND
+intro-ds1-r2 exit 1 1563s | 
+cf-fx4c exit 0 450s | QUICK CHECK OK in 450 s
+ic1312-ds1 exit 1 117s | 
+ic1312-base exit 1 120s | 
+ix-fx8b exit 0 5787s | INTERACTIONS CHECK OK
+ix-fx4c exit 0 5729s | INTERACTIONS CHECK OK
+intro-base exit 0 5628s | OK
+intro-ds1-r3 exit 0 3367s | OK
