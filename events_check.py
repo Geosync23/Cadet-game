@@ -923,5 +923,58 @@ with sync_playwright() as pw:
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
+# 12. Pick-your-own breakfast (FX12, 0.92.3 item 27, the user's): joined and finished at a garden bed, what you picked is
+# your tray (the servery's own), with a toast and an arrow to a mess seat; a seat eats it and the arrow goes. Walked
+# away part way: no tray. Once a day. A page of its own (the ship clock runs here)
+PYO_ST = "[ACT && ACT.kind, ACT && ACT.phase, SHIP.player.tray, IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.place, player.holding, document.getElementById('tx').textContent]"
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== Pick-your-own: a tray of what you picked')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    d = g.ev("(() => { for (let d = 2; d < 30; d++) if (eventsOn(d).some(e => e.id === 'pick-your-own')) return d; return null; })()")
+    JOIN = f"""(() => {{ const e = eventsOn({d}).find(e => e.id === 'pick-your-own'); tradJoinMinute(shipNow()); const lead = tradLeader(e), a = DECK_CREW.find(c => c.p && c.p.id === lead) || DECK_CREW.find(c => c.p); return !!a && tradJoin(e, a); }})()"""
+    def picking():
+        for k in range(80):
+            g.step(10)
+            if g.ev("!!(ACT && ACT.kind === 'ixGarden' && ACT.phase === 'do')"): break
+        g.step(70)
+    # walked away part way: no tray (and still none after the minute ticks)
+    g.ev(f"goToDeck(3); setShipNow(({d} - 1) * 1440 + 6 * 60 + 20)"); g.step(60)
+    j = g.ev(JOIN); picking()
+    s0 = g.ev("[ACT && ACT.kind, !!(ACT && ACT.def.onDone)]")
+    g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(60)
+    s1 = g.ev(PYO_ST)
+    print('  joined', j, d, '| picking', s0, '| walked away', s1[:5])
+    if not (j and s0 == ['ixGarden', True]): fail(f"Pick-your-own: joining didn't start picking with a tray to come ({j}, {s0})")
+    if s1[2] or s1[3] == 'Your breakfast: the mess hall': fail(f"Pick-your-own: walking away part way gave a tray ({s1[:5]})")
+    # back at a bed, finished: the tray, the toast, the arrow at a mess seat, drawn in your hands
+    g.ev("SHIP.events.joined = SHIP.events.joined.filter(k => !k.startsWith('pick-your-own@'))"); j = g.ev(JOIN); picking()
+    g.ev("ACT.done = ACT.def.mins - .05")
+    for k in range(40):
+        g.step(10)
+        if not g.ev("!!ACT"): break
+    g.step(5); s2 = g.ev(PYO_ST); seat = s2[4]
+    print('  finished:', s2[2:6], '|', s2[6][:90])
+    if not (s2[2] == 'the fruit and greens you picked' and s2[3] == 'Your breakfast: the mess hall' and seat and seat.startswith('3-mess') and s2[5] == 'tray' and 'mess hall' in s2[6]):
+        fail(f"Pick-your-own: finished, no tray of what you picked, toast or arrow at a mess seat ({s2})")
+    # the tray is the servery's: a seat eats it (what you picked), and the arrow goes; picking again today: no second tray
+    if seat:
+        g.ev(f"actStart('sit', '{seat}', {{}})")
+        for k in range(80):
+            g.step(10)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        g.step(70); s3 = g.ev(PYO_ST)
+        print('  at the seat:', s3[:5], '|', s3[6][:70])
+        if not (s3[0] == 'eat' and not s3[2] and not s3[3] and 'you picked' in s3[6]): fail(f"Pick-your-own: a seat didn't eat the tray, or the arrow stayed ({s3})")
+        g.ev("actEnd(true); SHIP.player.tray = null; SHIP.events.joined = SHIP.events.joined.filter(k => !k.startsWith('pick-your-own@'))"); g.ev(f"setShipNow(({d} - 1) * 1440 + 6 * 60 + 25)"); g.step(30)
+        j = g.ev(JOIN); picking(); s4a = g.ev(f"[ACT && ACT.kind, !!(ACT && ACT.def.onDone), (() => {{ const m = shipNow() - ({d} - 1) * 1440, e = eventsOn({d}).find(e => e.id === 'pick-your-own'); return m >= e.from && m < e.to; }})()]")
+        g.ev("if (ACT) ACT.done = ACT.def.mins - .05"); g.step(60)
+        s4 = g.ev(PYO_ST)
+        print('  picking again the same day, inside the window:', j, s4a, '| tray', s4[2])
+        if not (j and s4a[0] == 'ixGarden' and s4a[2]): fail(f"Pick-your-own: the second pick wasn't inside the tradition ({j}, {s4a})")
+        if s4[2]: fail(f"Pick-your-own: a second tray the same day ({s4[:5]})")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
 print('EVENTS CHECK OK' if ok else 'EVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)

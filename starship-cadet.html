@@ -13826,6 +13826,7 @@ function actEnd(abort) {
 // (SHIP.player.tray, the dish; not saved) and choose a mess seat yourself: tap it and you sit and eat.
 const queueHeld = () => !!(ACT && ACT.kind === 'queue' && ACT.phase !== 'walk' && ACT.phase !== 'out') && (queueAsk(), true);
 SHIP.player.tray = null; SHIP.player.trayLeft = 0;   // trayLeft: a tray part eaten, the minutes of it left (LEAD31-9)
+const TRAY_TRAVELS = true;   // your tray goes with you on any deck till you eat it, put it down or sleep (FX12, 0.92.3 item 19; false: left behind off Deck 3, as 0.28.38)
 function queueAsk() {
   let el = document.getElementById('qAsk');
   if (!el) {
@@ -14167,7 +14168,7 @@ function actBar() {
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
   const now = shipNow(), n = SHIP.player.needs;
-  if (SHIP.player.tray && typeof deckDef !== 'undefined' && deckDef.num !== 3) SHIP.player.tray = null;   // trays stay in the mess (0.28.38, reviewer 1c): off Deck 3 it's left behind for clearing
+  if (SHIP.player.tray && !TRAY_TRAVELS && typeof deckDef !== 'undefined' && deckDef.num !== 3) SHIP.player.tray = null;   // trays stay in the mess (0.28.38, reviewer 1c): off Deck 3 it's left behind for clearing; with TRAY_TRAVELS it goes with you (FX12)
   if (needsT === null || now < needsT) needsT = now;
   const dm = now - needsT;
   if (dm > 0) {
@@ -14203,7 +14204,7 @@ function playerUpdate(dt, t) {
   if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   if (typeof flcTick === 'function') flcTick();          // First Light Cocoa (patch #26, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || !ACT && P.tray ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || ACT.phase === 'walk' || ACT.phase === 'wait') ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -14970,11 +14971,11 @@ function needGoal(k) {
   if (!NEED_FIX[k] || typeof setGoal !== 'function' || typeof IX_GOAL === 'undefined' || IX_GOAL && !(NEED_GOAL && IX_GOAL.label === NEED_GOAL.label)) return false;   // never over someone else's arrow
   if (k === 'energy' && !(typeof bedtime === 'function' && bedtime()) && !(typeof sickNow === 'function' && sickNow())) return false;   // your bunk only when you can sleep there (FX3: a Day 8 "Your bunk" arrow stood all afternoon)
   const bed = typeof playerBed === 'function' ? playerBed() : null, here = typeof deckDef !== 'undefined' && deckDef ? deckDef.num : 4, pos = player.obj.position;
-  if (k === 'hunger' && SHIP.player.tray && here === 3) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
+  if (k === 'hunger' && SHIP.player.tray && (here === 3 || TRAY_TRAVELS)) {   // a tray in hand: a seat to eat it at, not the servery again (LEAD31-14, FX6: "You already have your tray" till Food 0)
     const d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
-    const seats = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat').sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
+    const seats = (DECKS[here].places || []).filter(pl => here === 3 ? pl.type === 'mess-seat' : SIT_TYPES.has(pl.type) && pl.pose === 'sit' && !privatePlace(pl)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1));
     const seat = seats.find(pl => !heldBy(pl.id)) || seats[0];   // all taken: the nearest (sitting there moves you to a free one nearby, actBegin)
-    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true }; setGoal({ deck: 3, place: seat.id, label: TRAY_SEAT_SAY }); return true; }
+    if (seat) { NEED_GOAL = { need: k, label: TRAY_SEAT_SAY, tray: true, deck: here }; setGoal({ deck: here, place: seat.id, label: TRAY_SEAT_SAY }); return true; }   // off Deck 3 (TRAY_TRAVELS, FX12): any seat there
   }
   // FX1: someone's own, on the place's own deck (privatePlace reads the deck you're on, and room keys repeat between
   // decks: from Deck 5 the junior wing's washrooms read as someone's cabin, and the Chief's shower, 2-shower-1, didn't)
@@ -14990,6 +14991,7 @@ function needGoalClear() { if (NEED_GOAL && typeof IX_GOAL !== 'undefined' && IX
 function needGoalTick() {
   if (NEED_GOAL && (SHIP.player.needs[NEED_GOAL.need] >= WARN_REARM || NEED_GOAL.need === 'energy' && ACT && ACT.kind === 'lie')) { needGoalClear(); return; }   // (FX3) lying in your bunk is the fix for energy (no need on the act)
   if (NEED_GOAL && NEED_GOAL.need === 'hunger' && !!SHIP.player.tray !== !!NEED_GOAL.tray) { needGoalClear(); needGoal('hunger'); }   // a tray taken (a seat next) or left behind (food again): LEAD31-14
+  else if (NEED_GOAL && NEED_GOAL.tray && typeof deckDef !== 'undefined' && deckDef && NEED_GOAL.deck !== deckDef.num) { needGoalClear(); needGoal('hunger'); }   // your tray on another deck (TRAY_TRAVELS): a seat there (FX12)
 }
 // pushing into someone who can't step aside (settled, leading you, talking: section 10's press-and-hold stops you):
 // after PUSH_MS of pushing their way, you get by them for PASS_MS (the user's "push through", playtest 1)
@@ -38952,6 +38954,7 @@ function eventsTick() {
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); weekMailSend(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
   eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
+  pyoMinute(now);                                        // Pick-your-own: what you picked, on a tray (FX12, slot 'Traditions engineer')
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
@@ -40178,6 +40181,34 @@ function eventRecord() {
     return { text: quizText('event.' + l.id + '.record', l.startDay, {}) || def.title + (l.endDay - 1 > l.startDay ? ', Days ' + l.startDay + '-' + (l.endDay - 1) : ', Day ' + l.startDay) + '.',
       sub: def.commend === false ? '' : (quizText('event.record.' + l.band, l.startDay, {}) || EV_RECORD_BAND[l.band] || '') + (c ? ' Commended by the Captain.' : ''), mark: c ? 'hot' : null }; });   // no score, no "came through it" (Crossing the Line)
   return [{ kind: 'text', text: 'Ship-wide events', mark: 'head' }, { kind: 'list', rows: rows.reverse() }];
+}
+// ---- Pick-your-own: breakfast on a tray (FX12, 0.92.3 item 27, the user's: "a tray of the food you picked in your hands
+// when you finish, then an arrow to the mess hall; the tray behaves exactly like the one from the mess hall") ----
+// Once a ship minute (eventsTick): at a garden bed while Pick-your-own is on (joined, or at one of its beds), your
+// activity gets an onDone. Finish it (section 15 calls onDone only when it's done, never on walking away) and, once a
+// day, what you picked is your tray: SHIP.player.tray, the servery's own (any seat eats it; get up and the rest stays on
+// it; Put down; the hunger arrow's seat), with a toast and an arrow to the nearest free mess seat till the tray's gone.
+// Nothing saved (a tray doesn't last the night), nothing calls R()
+const PYO_DISH = 'the fruit and greens you picked', PYO_SAY = 'Your breakfast: the mess hall';
+let PYO_DAY = null;                                      // the day you had your tray: once a day
+function pyoMinute(now) {
+  if (IX_GOAL && IX_GOAL.pyo && !SHIP.player.tray) clearGoal();   // eaten, put down or gone with the night: the arrow goes
+  const A = ACT; if (!A || A.kind !== 'ixGarden' || A.phase !== 'do' || A.def.onDone) return;
+  const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = PYO_DAY === d ? null : eventsOn(d).find(x => x.id === 'pick-your-own' && m >= x.from && m < x.to);
+  if (!e || !SHIP.events.joined.includes(e.id + '@' + d) && !tradSpotIds(e).has(A.placeId)) return;
+  A.def.onDone = B => pyoTray(e, d, B);
+}
+function pyoTray(e, d, A) {
+  const P = SHIP.player; if (PYO_DAY === d || P.tray) return;
+  PYO_DAY = d; P.tray = PYO_DISH; P.trayLeft = 0;
+  if (A) A.def.done = null;                              // the beds' own "watered" toast: this one instead
+  toast(e.name, tradWords(e, 'tray', {}) || 'Your basket\'s full. Take it over to the mess hall and tap a seat to eat what you picked.', { keep: true });
+  if (typeof NEED_GOAL !== 'undefined' && NEED_GOAL && typeof needGoalClear === 'function') needGoalClear();   // a "Food" arrow at the servery: this one instead
+  if (IX_GOAL || deckDef.num !== 3) return;              // never over someone else's arrow
+  const pos = player.obj.position, d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
+  const seat = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1))[0];
+  if (seat) setGoal({ deck: 3, place: seat.id, label: PYO_SAY, pyo: true });
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----

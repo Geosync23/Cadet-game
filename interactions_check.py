@@ -1585,6 +1585,25 @@ with sync_playwright() as pw:
             if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
         te = g.ev("[ACT && ACT.kind, ACT && ACT.placeId, !!SHIP.player.tray, (goalNow() || {}).label || null, document.getElementById('tx').textContent.slice(0, 80)]")
         check(te[0] == 'eat' and not te[2] and te[3] != 'A seat for your tray', f'a tap on the seat the arrow shows eats your tray, and the arrow goes ({te})')
+    # (4) FX12 (0.92.3 item 19): your tray in your hands on the way to anything else (it wasn't drawn), and it goes with you
+    # off Deck 3 (it vanished at the lift, no word) with the hunger arrow at a seat there
+    g.ev("actEnd(true); clearGoal(); NEED_GOAL = null; SHIP.player.tray = 'stew'; SHIP.player.trayLeft = 0; SHIP.player.needs.hunger = 60"); g.step(4)
+    tw = g.ev("""(() => { const pp = player.obj.position, b = [...PLACE_OF.values()].filter(p => p.type === 'gym' && !heldBy(p.id)).map(p => [p, placeSpot(p.id)]).filter(x => x[1])
+      .sort((a, b) => Math.hypot(a[1].x - pp.x, a[1].z - pp.z) - Math.hypot(b[1].x - pp.x, b[1].z - pp.z))[0]; if (!b) return null; actStart('gym', b[0].id, { pose: 'cycle', title: 'Gym' }); return b[0].id; })()""")
+    g.step(3); hw = g.ev("[ACT && ACT.kind, ACT && ACT.phase, player.holding, !!SHIP.player.tray]")
+    check(tw is None or hw[1] in ('walk', 'wait') and hw[2] == 'tray' and hw[3], f'walking to something else with your tray, it is in your hands ({tw}, {hw})')
+    g.ev("actEnd(true); SHIP.player.tray = 'stew'; goToDeck(4)"); g.step(30)
+    d4 = g.ev("[deckDef.num, SHIP.player.tray, player.holding]")
+    g.ev("SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
+    a4 = g.ev("[IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.deck, IX_GOAL && IX_GOAL.place, IX_GOAL && IX_GOAL.place && PLACE_OF.has(IX_GOAL.place) && PLACE_OF.get(IX_GOAL.place).pose]")
+    check(d4 == [4, 'stew', 'tray'] and a4[0] == 'A seat for your tray' and a4[1] == 4 and a4[3] == 'sit', f'off Deck 3 your tray goes with you, and the hunger arrow is at a seat there ({d4}, {a4})')
+    if a4[2]:
+        g.ev(f"actStart('sit', '{a4[2]}', {{}})")
+        for k in range(60):
+            g.step(10)
+            if g.ev("!!(ACT && ACT.kind === 'eat' && ACT.phase === 'do')"): break
+        e4 = g.ev("[ACT && ACT.kind, !!SHIP.player.tray, (goalNow() || {}).label || null]")
+        check(e4[0] == 'eat' and not e4[1] and e4[2] != 'A seat for your tray', f'and that seat eats it ({e4})')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
