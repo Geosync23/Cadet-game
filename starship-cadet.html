@@ -31055,7 +31055,7 @@ const LINES = JSON.parse([
   ',"clothes.tip.grubby":[',
   '{"text":"Your uniform\'s grubby. A shower won\'t fix it: change at your wardrobe in Bunk 1.","id":"1fvc7wo"}]',
   ',"clothes.tip.laundry":[',
-  '{"text":"No clean clothes left. Your hamper\'s in your wardrobe: take it to the laundry on Deck 4.","id":"1dxulge"}]',
+  '{"text":"No clean clothes left. Take your hamper to the laundry on Deck 4.","id":"uyff0t"}]',
   ',"clothes.tip.yesterday":[',
   '{"text":"You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.","id":"iab6cr"}]',
   ',"clothes.tip.yesterday2":[',
@@ -46859,7 +46859,7 @@ function clothesDirtyTick() {
 function clothesDirtyTip(u) {
   if (typeof tipShow !== 'function') return;
   const C = SHIP.clothes, d = SHIP.time.day, D = SHIP.device, h = C.hamper;
-  const out = C.clean <= 0 && !(h && h.state === 'clean'), laundry = () => clothesText('clothes.tip.laundry', {}, 'No clean clothes left. Your hamper\'s in your wardrobe: take it to the laundry on Deck 4.');   // out of clean clothes: the laundry, not the wardrobe (RV11; the cut pop-up's own test)
+  const out = C.clean <= 0 && !(h && h.state === 'clean'), laundry = () => clothesText('clothes.tip.laundry', {}, 'No clean clothes left. Take your hamper to the laundry on Deck 4.');   // out of clean clothes: the laundry, not the wardrobe (RV11; the cut pop-up's own test)
   if (u === 'yesterday') {                               // the first time; then once more on a later day if you're still in yesterday's clothes (0.92.4, item B)
     if (!D.tipsSeen['clothes.yesterday']) { if (tipShow('clothes.yesterday', out ? laundry() : clothesText('clothes.tip.yesterday', {}, 'You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.'))) C.said.ytip = d; }
     else if (Number.isInteger(C.said.ytip) && d > C.said.ytip) tipShow('clothes.yesterday2', out ? laundry() : clothesText('clothes.tip.yesterday2', {}, 'Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.'));
