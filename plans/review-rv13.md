@@ -6,7 +6,7 @@ Base for 0.92.3 pieces: claude/integration 364c80cb (0.92.2). Verdicts go to LEA
 Queue (patch 0.92.3, plans/patch-0.92.3.md on claude/lead-32):
 - DV1: items 13 + 23 (Name on the beam: no signing until people arrive, explaining bubbles; your name with the others)
 - FX10: items 21, 24, 29 (more science-area work; many rotating repair jobs; board pointer for hauling/stores)
-- FX11: items 17, 25 (pool swim camera; light disc players visible)
+- FX11: items 16, 17, 25 (first-use lockers tip for pool/river; pool swim camera; light disc players visible) (16 moved from AC3, lead 03:17 UTC)
 - FX13: item 15 wiring (Talk a while: own line pools for the Captain + main characters; the Captain's first welcome)
 
 Each: diff does only what it says; new check lines FAIL without the fix, PASS with it (planted fault); area checks,
