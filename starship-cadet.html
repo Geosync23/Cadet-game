@@ -36598,7 +36598,7 @@ function talkPackPick(who, t = shipNow()) {
   const ok = tk => !T.fired[tk.id] && (!tk.when || linesOk(tk.when, p, ctx));
   const first = ((TALKS.own && TALKS.own[p.id]) || []).find(tk => tk.first && ok(tk)), fs = first && talkPackFill(first, p, ctx);   // the first-talk scene
   if (fs) return { talk: first, src: 'own', said: fs };
-  if (talkOnlyOwn(p)) { for (const tk of TALKS.own[p.id] || []) { if (!ok(tk)) continue; const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said }; }
+  if (talkOnlyOwn(p)) { for (const tk of (TALKS.own && TALKS.own[p.id]) || []) { if (!ok(tk)) continue; const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said }; }
     return talkPackOwnAgain(p, T, ctx); }
   let lately = null;                                      // topics had with them within TALK_TOPIC_DAYS (any source), made when a seeded source asks
   for (const src of talkPackOrder(p, T)) {

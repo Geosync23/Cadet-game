@@ -326,6 +326,15 @@ with sync_playwright() as pw:
     # question and it comes again; answered, it's had
     STAND = "(() => { if (!(Array.isArray(TALKS.only) && TALKS.only.includes('marrow'))) { TALKS.only = (TALKS.only || []).concat('marrow'); } if (!TALKS.own.marrow.some(tk => tk.first)) { const w = { ...TALKS.own.marrow[0], id: 'marrow.stand-in-welcome', first: 1 }; delete w.when; TALKS.own.marrow = TALKS.own.marrow.concat(w); } SHIP.talks = { fired: {}, small: {} }; return TALKS.own.marrow.find(tk => tk.first).id; })()"
     fid = g.ev(STAND)
+    # stand-in own card lines for her (RV13): a hello the first-talk scene must not have in front, and the own lines the
+    # card may show; with the talkStart / talkNext hooks off a hello or her usual chat would show up
+    OWNL = g.ev("""(() => { const v = VOICE.marrow; v.lines = v.lines || {}; const mk = (k, i) => ({ ...LINES[k][0], id: 'standin.' + k + '.' + i, text: 'Stand-in own ' + k + ' line ' + i + '.' });
+      for (const k of ['talk.start', 'talk.sit']) if (!(v.lines[k] || []).length) v.lines[k] = [mk(k, 1)];
+      return Object.keys(v.lines).filter(k => k.startsWith('talk.')).flatMap(k => v.lines[k].map(e => e.text)); })()""")
+    def only_own(r, who):                                 # every line before the question: the talk's, one of her own talk.* lines (filled), or the ask
+        P = r['pack']; allowed = P['lines'] + [P['ask']]
+        bad = [x[1] for x in r['steps'] if x[1] not in allowed and not any(x[1] == o or x[1].endswith(' ' + P['lines'][0]) and x[1].startswith(o) for o in OWNL) and not (x[1] in OWNL)]
+        check(not bad, f'{who}: lines that are not her own before the question: {bad[:3]}')
     r = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
     P = r['pack']
     print(f"  Marrow, the first time: {P and P['id']} (want {fid})")
@@ -333,6 +342,7 @@ with sync_playwright() as pw:
     check(P and P['id'] == fid, f"the first-talk scene didn't come first: {P and P['id']}")
     if P and P['id'] == fid:
         check(r['steps'][0][1] == P['lines'][0], f"something in front of the first-talk scene: {r['steps'][0][1]!r}")
+        only_own(r, 'the first-talk scene')
         check(r.get('asked') and r['asked'][1] == P['ask'], 'the first-talk scene did not reach its question')
         w = g.ev("(() => { chatClose(); return !!SHIP.talks.fired[" + json.dumps(fid) + "]; })()")
         check(not w, 'walking off before answering used up the first-talk scene')
@@ -344,6 +354,9 @@ with sync_playwright() as pw:
         r3 = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
         print(f"  Marrow, the next time: {r3['pack'] and r3['pack']['id']}")
         check(r3['pack'] and r3['pack']['id'] != fid and r3['pack']['id'].startswith('marrow.'), 'after the first-talk scene: not one of her own talks')
+        for st in r3['steps']: print(f"    {st[0]:>5} min: {st[1]!r}")
+        check(r3['steps'][0][1].startswith('Stand-in own talk.') or r3['steps'][0][1] == r3['pack']['lines'][0] or any(r3['steps'][0][1].startswith(o) for o in OWNL), 'her ordinary talk opened with a shared hello')
+        only_own(r3, 'her next talk')
     # a long first-talk scene (6 lines): the card holds its question until all are said, the last one a while (talkPackHold)
     g.ev("(() => { const w = TALKS.own.marrow.find(tk => tk.first); w.__keep = w.lines; w.lines = [1, 2, 3, 4, 5, 6].map(i => ({ text: 'Stand-in welcome line ' + i + '.' })); SHIP.talks = { fired: {}, small: {} }; })()")
     r = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
