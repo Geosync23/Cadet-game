@@ -6,7 +6,8 @@
 # day), Day 2's empty wardrobe giving the hamper (the tip, the arrow to the laundry, the holding pose), Put down and
 # picking it up again, a washer (busy and broken ones send you to a free one; all busy: which finishes first), the
 # toast when it's done, taking it out, putting it away (the full kit: five outfits, and you change), the save round
-# trip mid-wash, a new game by shuttle and on Monday, and that with clothes off nothing answers.
+# trip mid-wash, a new game by shuttle and on Monday, and that with clothes off nothing answers. Patch 0.92.3 #26: dirty
+# clothes' green tips (once each), the clothes.grubby flag, a passer-by's remark in their own voice.
 import sys, os
 HERE = os.path.dirname(os.path.abspath(__file__))
 exec(open(os.path.join(HERE, 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -139,6 +140,26 @@ with sync_playwright() as pw:
     check(E("window.__uni[window.__uni.length - 1] === 'clean'"), "simNote('uniform', { state: 'clean' })")
     E("actEnd(true); SHIP.clothes.grime = .8; simAct('wash'); SHIP.player.needs.hygiene = 100"); g.step(5)
     check(E("SHIP.clothes.grime === .8 && uniformState() === 'grubby'"), 'a wash (the shower\'s note, hygiene full) leaves the grime')
+    # patch 0.92.3 #26 (FX4): dirty clothes: a green tip the first time each (grubby, yesterday's), the clothes.grubby flag
+    # while grubby (the writers' lines are gated on it), and someone passing remarks in their own voice (socLine), once a day
+    E("SHIP.device.settings.tips = true; delete SHIP.device.tipsSeen['clothes.grubby']; delete SHIP.device.tipsSeen['clothes.yesterday']; TIP_Q.length = 0; SHIP.clothes.changed = SHIP.time.day")
+    g.step(5)
+    gt = E("[!!SHIP.device.tipsSeen['clothes.grubby'], (TIP_Q.find(x => x.id === 'clothes.grubby') || {}).text || null, !!flag('clothes.grubby')]")
+    g.step(5); gn = E("TIP_Q.filter(x => x.id === 'clothes.grubby').length")
+    print('     grubby: tip seen, text, flag:', gt, '| still once:', gn)
+    check(gt[0] and gt[1] and 'grubby' in gt[1] and gt[2] and gn <= 1, f"0.92.3 #26: a grubby uniform gets its green tip once and sets clothes.grubby ({gt}, {gn})")
+    RM = r"""(() => { const C = SHIP.clothes, p = player.obj.position, a = DECK_CREW.find(x => x.p && x.p.id && x.h && x.p.id !== INTRO_ESCORT); if (!a) return null;
+      p.set(a.x + .6, 0, a.z); C.said.remark = -1; const kb = bubbleSay; let said = null; bubbleSay = (h, t) => { said = t; };
+      try { clothesFrame(); CLOTHES_SCAN = 0; clothesFrame(); } finally { bubbleSay = kb; }
+      const bank = (LINES['clothes.remark'] || []).map(e => e.text); return { who: a.p.id, said, bank: said ? bank.some(b => said.includes(b.replace(/\{[^}]+\}/g, '').trim().slice(0, 12))) : null, day: C.said.remark }; })()"""
+    rg = E(RM)
+    print('     a remark on the grubby uniform:', rg)
+    check(rg and rg['said'] and rg['bank'] is False and rg['day'] == E('SHIP.time.day'), f"0.92.3 #26: someone passing remarks on the grubby uniform, a grubby line, not yesterday's ({rg})")
+    E("SHIP.clothes.grime = 0; SHIP.clothes.changed = SHIP.time.day - 1; SHIP.time.min = 10 * 60 + 30; FX_MIN = -1"); g.step(5)
+    yt = E("[!!SHIP.device.tipsSeen['clothes.yesterday'], (TIP_Q.find(x => x.id === 'clothes.yesterday') || {}).text || null, !!flag('clothes.grubby'), uniformState()]")
+    print('     yesterday\'s: tip seen, text, grubby flag, state:', yt)
+    check(yt[0] and yt[1] and "yesterday" in yt[1] and not yt[2] and yt[3] == 'yesterday', f"0.92.3 #26: yesterday's clothes get their green tip; the grubby flag clears ({yt})")
+    E("SHIP.time.min = 9*60+50; SHIP.clothes.changed = SHIP.time.day; SHIP.clothes.grime = .8; TIP_Q.length = 0; FX_MIN = -1"); g.step(3)
     E("SHIP.clothes.grime = 0")
 
     # the cabin Mail and Day 1's training beats (0.42.48)

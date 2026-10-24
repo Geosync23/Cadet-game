@@ -161,3 +161,66 @@ content is covered by bubbles 3, 7 and 14.
 2. Is the Mail's length right? It's six short paragraphs; it could lose the "quiet sort" paragraph if you'd like it shorter, but then that line would be lost.
 
 Your answers here:
+
+---
+
+## Replacement for walk.more.3 (lead 31, 2026-10-23)
+
+The line `walk.more.3` in `content/lines/torres-zeke.lines` (one of his Day 0 linger extras) says "Ask me anything,
+by the way. Tap me. Questions are the best bit." (64 characters). His question menu is parked for now: tapping him
+on the tour shows only his card (name, role, a line about him), so the line promises something the game doesn't do.
+Two options, both shorter. **Picked: option 1** (lead 31, 2026-10-23); DS1 wires it under the same flag walk.more.3.
+
+1. **(ZW1's pick)** Forget my name? Tap me. I won't be offended. Much.   #funny  (50 characters: invites a tap to see his card, promises nothing more)
+2. Questions? Hold them for dinner. I think better fed.   #funny  (52 characters: drops the tap; dinner with him, introDinner, does have a choice for you)
+
+Your answer here:
+
+---
+
+## Two words-only fixes (the user via lead 31, 2026-10-23): agreed as proposed (lead 31: all three, the Roster option); DS1 wires them
+
+Only these lines change; timing, order and who speaks stay exactly as they are. At the arrival dinner you sit with
+Zeke first and only get food after Calder's "Eat something" (the servery arrow then), so no line before that may
+assume you have food.
+
+| Where (flag / meeting line) | Old line | New line |
+|---|---|---|
+| introDinner.meet, first line (Zeke, [gesture]) | Sit, sit. Eat while it's hot. Brennan notices. (47) | Sit, sit. Talk first. Then food. I'll be quick. (47)  #funny |
+| walk.servery.1 (the servery stop, before the table) | Tray first, then the servery. Take what smells best. (52) | The servery. Trays here. Food after a sit-down. (47) |
+| walk.hand, 10th line (the hand-over) | Needs tells you you're hungry. Before your tummy does. (54) | The Roster's in there. Every name aboard. Mine's best. (54)  #funny |
+
+Second option for the hand-over line only: "Calendar's in there too. Every tea, quiz and party." (51)
+
+Checked and kept: the rest of the servery stop (Brennan, the table, her book of favourite dishes, bread day, the
+grab shelf), walk.toMess and walk.deck3, the rest of introDinner, introChief (Calder's "Eat something" is what sends
+you for food), and his goodnight. Line ids are made from the text when the words are baked, so the two bubble
+lines get new ids; their flags stay the same.
+
+---
+
+## Backlog LEAD31-6 (lead 32, 2026-10-23): closed, the line is correct as is
+
+walk.goodnight.1 stays: "Right, that's me. Breakfast from seven, shift at nine, tea at one." The game's breakfast is
+07:00 to 09:00: `const MEALS = { breakfast: [420, 540], dinner: [1020, 1230] };   // breakfast 07:00-09:00 (the user's
+playtest notes, patch 1: was from 06:00)` (starship-cadet.html line 9383 on claude/integration). ZW1's proposed change
+to "from six" came from a stale read of the old 06:00 value and is cancelled; nothing was changed in the content files.
+
+---
+
+## Patch 0.92.3 item 26: crew comment on dirty clothes (ZW1, for AC3's hook)
+
+Content only (not baked into the game file; AC3 or the build master bakes). Two kinds, both bubbles of 60 characters
+or fewer, kind and never mean:
+- `clothes.remark`: you're in yesterday's clothes (`flag:clothes.stale`, set by section 21b today).
+- `clothes.grubby`: your uniform is grubby (`flag:clothes.grubby`; AC3 to set it while `uniformState() === 'grubby'`).
+
+Where: the ten voice templates (new files `content/templates/<tpl>.lines`: 2 plain lines + 1 `tier>=friend` line per
+kind, so every crew member without their own lines speaks in their template's voice), and own lines for Zeke, Brennan,
+Pell, Rina, Tomas and Holt (both kinds) and Calder (`clothes.remark`; her `clothes.grubby` was already there). The shared
+banks stay (`content/banks/clothes.lines`, `content/works/remarks.lines`). The hook proposed to AC3: pick the line with
+`socLine(p, kind, { t, tier, bubble: true })` (own, then template, then bank), falling back to the bank as now.
+
+Facts used, quoted from the game: the laundry is on Deck 4 ("Carry the hamper to the laundry on Deck 4, past the
+washrooms in the junior wing", `tip.laundry` in content/banks/clothes.lines); you change at your wardrobe ("Change at
+your wardrobe in Bunk 1", starship-cadet.html, the yesterday's-clothes toast, about line 44611 on claude/integration).

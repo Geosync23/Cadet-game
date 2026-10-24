@@ -1,0 +1,16 @@
+@template earnest
+// ZW1 (writer), patch 0.92.3 item 26: crew comment when you wear dirty clothes. clothes.remark: yesterday's clothes
+// (flag:clothes.stale); clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3). Bubbles, 60 characters or fewer.
+// Kind, never mean: the joke is on the clothes, not on you.
+== clothes.remark
+? flag:clothes.stale
+- I think that's yesterday's shirt? Sorry. Just saying.
+- I wore mine twice once. Nobody minded. Much.   #funny
+? flag:clothes.stale tier>=friend
+- If you're short of clean ones, the laundry's easy. Honest.   #warm
+== clothes.grubby
+? flag:clothes.grubby
+- Oh, you've got grime on you. Quite a lot, actually.
+- Hard job? It looks like a hard job. On your sleeves.   #funny
+? flag:clothes.grubby tier>=friend
+- You should change. Not that you look bad. Just oily.   #warm

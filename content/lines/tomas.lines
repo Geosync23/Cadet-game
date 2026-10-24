@@ -682,3 +682,15 @@
 == talk.go.trad
 - Oh! {trad}'s starting. I said I'd go. Come with me?
 - Sorry, {trad}'s on. I've been looking forward to it all day. Coming?
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Is that yesterday's shirt? I only know because mine is.   #funny
+- Oh! Same clothes? I can show you the laundry. Sort of.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Wow, you're really grubby. Was it a big job? It looks big.
+- You've got grime on your face. Just there. No, there.   #funny
+? flag:clothes.grubby tier>=friend
+- Go and change, bunkmate. I'll save you a seat. I think.   #warm

@@ -32,6 +32,8 @@
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
 #   New game in Settings (2026-10-22): no New game on the HUD; Settings asks on its page; Keep playing changes nothing;
 #   the question goes with the page; Start over (saving on) starts Day 0 at the arrival (INTRO_START, 17:15) on Deck 5
+#   patch 0.92.3 (FX4): the work meter shows with the device open, never over it; Name on the beam's heads-up 25 minutes
+#   before; the Schedule tracker's name; no "Mind out" bump line
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
 # Setup and environment as for cadet_test.py.
 # Run:  python3 device_check.py BUILD.html
@@ -620,6 +622,40 @@ def run(path):
                 g.page.mouse.move(bz[0], bz[1] + 8); g.page.mouse.down(); g.page.mouse.move(bz[0], bz[1] + 90, steps=5); g.page.mouse.up(); g.step(1)
                 swiped = g.ev("!DEV.open")
                 check([same, drag, tapped, grip, swiped] == [True] * 5, f'phone: no rebuild when unchanged, a drag leaves it open, a tap closes it, the grip reaches 44px, a swipe down closes it: {[same, drag, tapped, grip, swiped]}')
+            # the user's playtest notes, patch 0.92.3 (FX4). #20: a long job's work meter stays on screen with the device open, never
+            # over it (it was hidden while the device was open); on a phone above the device, on a wide screen beside it
+            mt = g.ev("""(() => { const st = document.createElement('style'); st.textContent = '#needStrip:not([hidden]){display:flex!important}'; document.head.appendChild(st);
+              const kA = ACT, kP = actProgress; ACT = { x: player.obj.position.x, y: 0, z: player.obj.position.z }; actProgress = () => ({ title: 'Repairing', frac: .3, left: 20 });
+              const out = {}; try { deviceClose(); actBar(); const b = document.getElementById('actBar'); out.closed = !b.hidden;
+                deviceShow('mail'); actBar(); const r = b.getBoundingClientRect(), d = document.getElementById('device').getBoundingClientRect();
+                out.open = !b.hidden; out.over = r.right > d.left && r.left < d.right && r.bottom > d.top && r.top < d.bottom; out.onScreen = r.top >= 0 && r.bottom <= innerHeight && r.right <= innerWidth; out.w = Math.round(r.width); }
+              finally { ACT = kA; actProgress = kP; deviceClose(); actBar(); st.remove(); }
+              return out; })()""")
+            print('  the work meter with the device open:', mt)
+            check(mt['closed'] and mt['open'] and not mt['over'] and mt['onScreen'] and mt['w'] > 40, f'the work meter shows with the device open, on screen and never over the device (0.92.3 #20): {mt}')
+            # #12: Name on the beam's heads-up 25 minutes before (other heads-ups keep the setting's 15), on shift too, "at the end of shift in the Works department"
+            bm = g.ev("""(() => { const save = { day: SHIP.time.day, min: SHIP.time.min }, out = { day: null };
+              for (let d = 1; d <= 21 && out.day === null; d++) { const x = devDay(d).find(x => x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || '')); if (x) out.day = [d, x.from]; }
+              const kb = devHuBusy; devHuBusy = () => false;   // a tip waiting on this page would hold the strip back (it waits its turn in play)
+              try { if (out.day) { const [d, at] = out.day, look = m => { SHIP.time.day = d; SHIP.time.min = at - m; devHeadsReset(); devTickMin = -1; deviceTick(); const h = document.getElementById('devHu'); return h && !h.hidden ? h.textContent : ''; };
+                out.at26 = look(26); out.at25 = look(25); } } finally { devHuBusy = kb; }
+              SHIP.time.day = save.day; SHIP.time.min = save.min; devHeadsReset(); devTickMin = -1; return out; })()""")
+            print('  Name on the beam heads-up:', bm)
+            check(bm['day'] and 'Name on the beam' not in bm['at26'] and 'Name on the beam starts at the end of shift in the Works department' in bm['at25'], f"Name on the beam's heads-up 25 minutes before, at the end of shift in the Works department (0.92.3 #12): {bm}")
+            # #14: "Tracked" is now the Schedule tracker wherever you see it; #2: the bump line "Mind out" is gone, the others stay
+            nm = g.ev("""({ app: DEVICE_APPS.get('tracked') && DEVICE_APPS.get('tracked').title, head: (document.getElementById('trkT') || {}).textContent, btn: document.getElementById('trkBtn').getAttribute('aria-label'), btnText: document.getElementById('trkBtn').textContent.trim(),
+              view: (DEVICE_APPS.get('tracked').view() || {}).title, pad: typeof PAD_SET_ACTS !== 'undefined' ? (PAD_SET_ACTS.find(a => a[0] === 'view') || [])[1] : 'Schedule tracker', words: SHUFFLE_WORDS.slice() })""")
+            print('  names:', nm)
+            check(nm['app'] == nm['head'] == nm['view'] == nm['pad'] == 'Schedule tracker' and nm['btn'].startswith('Schedule tracker') and nm['btnText'] == 'Schedule tracker', f'"Tracked" renamed the Schedule tracker (0.92.3 #14): {nm}')
+            # the lift's "→ Schedule tracker" badge stays inside its deck button on a 320 px phone (RV11: it ran 27 px past it)
+            g.page.set_viewport_size({'width': 320, 'height': 640}); g.step(2)
+            lb = g.ev("""(() => { const keep = IX_GOAL; setGoal({ deck: deckDef.num === 3 ? 4 : 3, room: 'M', label: 'the check' }); openLiftPanel();
+              const e = document.querySelector('.lift .deckbtn.goal em'), out = e ? (r => { const p = e.closest('.deckbtn').getBoundingClientRect(); return { em: Math.round(r.right), btn: Math.round(p.right), text: e.textContent }; })(e.getBoundingClientRect()) : null;
+              const L = document.getElementById('lift'); if (L) L.hidden = true; clearGoal(); if (keep) setGoal(keep); return out; })()""")
+            g.page.set_viewport_size({'width': w, 'height': h}); g.step(2)
+            print('  the lift badge at 320 px:', lb)
+            check(lb and lb['em'] <= lb['btn'] and 'Schedule tracker' in lb['text'], f'the lift\'s "→ Schedule tracker" badge fits inside its deck button at 320 px (0.92.3 #14, RV11): {lb}')
+            check(not any('mind out' in w.lower() for w in nm['words']) and len(nm['words']) == 4, f'the bump line "Mind out" removed, the others kept (0.92.3 #2): {nm["words"]}')
             errs = g.ev("DEV.errors")
             check(not errs, f'no app errors: {errs}')
             check(not g.errors, f'no page errors: {g.errors[:5]}')

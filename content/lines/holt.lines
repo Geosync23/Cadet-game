@@ -519,3 +519,13 @@
 == talk.go.trad
 - {trad}. I'm on the door. Coming?
 - {trad}'s starting. Someone's got to watch the door. Me.   #funny
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Hm. Yesterday's uniform. Not adequate.
+- Clean uniform tomorrow, cadet. I'll notice.
+== clothes.grubby
+? flag:clothes.grubby
+- Hm. Filthy. Change before you walk my decks.
+- That uniform needs a wash. So do you.
