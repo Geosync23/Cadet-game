@@ -251,3 +251,22 @@ So the Line being on causes it. Sent to BM15 for FX6 (BM15 bisects if needed; CR
 Game sha256 unchanged: `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c`. e1f1ec97's arrows_check.py, all parts, alone:
 **ARROWS CHECK OK** (exit 0, 718 s, no FAIL lines). Week: the scanner first used Day 8, m2 learned Day 8, m6 (Making it
 safe) learned Day 9; nobody stuck.
+
+# Round 11: 0.92.2 (claude/integration-next ee974894, 2026-10-24)
+
+**sha256 of starship-cadet.html: `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4`** (matches BM15's).
+OLD = 0.92.1 e03505fd (2dbb11b8…59b18c). One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 286 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 221 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 205 s | BUBBLE CHECK OK (41.1 px, at most 45) |
+| puzzle_check | **OK** | 54 s | PUZZLE CHECK OK |
+| social_check | **OK** | 20 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 26 s | TALK CHECK OK |
+| arrows_check (default) | **OK** | 675 s | ARROWS CHECK OK; week: m2 Day 8, m6 Day 9; shift: Day 9, 22 jobs, stuck 0 |
+| arrows_pointer_check | **OK** | 100 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 30 s | DEV ARROW CHECK OK |
+
+No FAILs, so no OLD runs were needed.
