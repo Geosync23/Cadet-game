@@ -1325,6 +1325,18 @@ with sync_playwright() as pw:
         m = g.ev("JSON.stringify(machineList().filter(m => m.kind === 'simpod').map(m => [m.id, m.at, m.panel, !!panelPlace(m.id)]))")
         print('   the pods as machines:', m)
         check(len(json.loads(m)) == 2 and all(x[3] for x in json.loads(m)), f'two pod machines, each with its panel place ({m})')
+        # the crew's sim pilots (S5; RV13's ask), on paper: over days 1-6 Dev Raman and at least one other pilot have turns in
+        # the pods; with pod 1 tagged out the evening before (simPlanShut stood in for, every day planned again) no plan puts
+        # anyone in pod 1, and pod 2 is still flown
+        PILOTS = "JSON.stringify((() => { const out = {}; for (let d = 1; d <= 6; d++) for (const p of schedPeople()) for (const s of planDay(p, d)) if (/^7-sim-[12]$/.test(s.placeId || '')) (out[s.placeId] = out[s.placeId] || []).push(p.id); return out; })())"
+        REPLAN = "SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear()"
+        u = json.loads(g.ev(PILOTS)); who = sorted(set(sum(u.values(), [])))
+        print('   pilots in the pods, days 1-6:', {k: len(v) for k, v in u.items()}, who)
+        check('raman' in who and len(who) >= 2, f'the crew fly the pods: Dev Raman and at least one other pilot ({who})')
+        g.ev("window.__simPS = simPlanShut; simPlanShut = d => [true, false]; " + REPLAN)
+        u2 = json.loads(g.ev(PILOTS)); print('   pod 1 tagged out each evening before:', {k: len(v) for k, v in u2.items()})
+        check('7-sim-1' not in u2 and len(u2.get('7-sim-2', [])) > 0, f'a pod tagged out the evening before is never planned; the other still is ({ {k: len(v) for k, v in u2.items()} })')
+        g.ev("simPlanShut = window.__simPS; " + REPLAN)
         g.ev("actEnd(true); REC.q = null")
         check(not g.errors, f'no console errors ({g.errors[:3]})')
     # playtest 1, notes 9-11, on paper: no job on a shift day, the arrow shows the time clock, then (clocked in) the job
