@@ -74,3 +74,6 @@
 - You're in yesterday's clothes, and people notice. Change at your wardrobe in Bunk 1.
 == clothes.tip.grubby
 - Your uniform's grubby. A shower won't fix it: change at your wardrobe in Bunk 1.
+== clothes.tip.yesterday2
+// (FX4, 0.92.4 item B: the second green tip, a later day still in yesterday's clothes; ZW1 may reword)
+- Yesterday's clothes again. A fresh set's waiting in your wardrobe in Bunk 1.
