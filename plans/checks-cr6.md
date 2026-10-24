@@ -2,6 +2,15 @@
 
 ## 0.92.3 (2026-10-24)
 
+Taken from CR2 (its handover, nothing run twice; CR4 told), same build d9a387b6 (sha f18e8540...07853):
+
+| Check | Result | Key lines |
+|---|---|---|
+| path_check | OK (exit 0, 78 s) | `PATH CHECK OK` |
+| arc_check | OK (exit 0, 16 s) | `ARC CHECK OK` |
+| lines_check | OK (exit 0, 5 s) | `lines_check: PASS (0 errors, 49 warnings)` (candidate 1 also 49) |
+| lines_check --day | OK (exit 0, 382 s) | `lines_check --day: PASS (0 errors)` |
+
 ### Round 1: 0dd4e2e2 (sha 4e653844...cd0a2): stopped after one NEW FAIL
 
 - check_fast OK (262 s; gated repair share 53% over Days 2-28, the 14-day line 39% for information), bigevents OK.
