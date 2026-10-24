@@ -80,3 +80,18 @@ All from claude/integration 364c80cb (0.92.2). Runs appended to `plans/review-rv
 ## Gotchas (new)
 - A fake work meter (ACT without kind) breaks recFrame on the next frame; fake it with ACT.kind set and don't step frames.
 - intro_check --firsts runs part 13b, which the full run doesn't, so it is not a faithful repro of the full run's order.
+
+# RV11's reviews for 0.92.4 (2026-10-24; lead 33, then lead 34 from ~15:00 UTC)
+
+From claude/integration 3866c8f3 (0.92.3).
+
+| Fix | Item | Branch, commit | Verdict |
+|---|---|---|---|
+| FX4 | B: dirty clothes | claude/p924-fx4 177bcc37 | PASS (after one fix) |
+| FX8 | C: crew glide off a place | claude/p924-fx8 83808812 | the game is fine; the check needs a fix |
+
+- FX4: 823a6d25 cut the only "no clean clothes left" message, and its next-day tip pointed at an empty wardrobe. 7301d763 gives both tips a laundry wording when you're out of clean clothes, and 177bcc37 rewords it.
+- FX4 checks: clothes_check's new lines fail before and pass after; plants caught (same-day tip; out-of-clothes branch off). check_fast, player_check OK; cadet_test ALL IDENTICAL.
+- FX8: g8_mesh.py reads the drawn body (a.h.pos) frame by frame. On Deck 3, short get-ups move at most 0.13 tiles a frame (0.92.3: 1.09); long ones (over CREW_UP_MAX 1.2) still jump at once, by design.
+- FX8 checks: cadet_test differences are the glide alone (with CREW_UP_V = 1e9, ALL IDENTICAL). day_check, path, bubble and check_fast OK.
+- FX8's open fix: day_check's line sums a.x + a.lx + a.hx instead of reading the drawn body, so a plant that drops hx from h.set (a visible hop) passes.

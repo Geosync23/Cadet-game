@@ -83,3 +83,21 @@ ix-fx8b exit 0 5787s | INTERACTIONS CHECK OK
 ix-fx4c exit 0 5729s | INTERACTIONS CHECK OK
 intro-base exit 0 5628s | OK
 intro-ds1-r3 exit 0 3367s | OK
+clo-b3 exit 1 109s | 2 FAILED
+clo-c4 exit 0 96s | ALL OK
+pl-c4-same exit 1 88s | 1 FAILED
+ct-c4 exit 0 59s | ALL IDENTICAL (apart from renderer noise: some pixels 1 level off)
+clo-c4g exit 1 101s | 1 FAILED
+clo-c5 exit 0 99s | ALL OK
+pl-c5-noout exit 1 94s | 1 FAILED
+ct-c5 exit 0 58s | ALL IDENTICAL
+cf-c5 exit 0 242s | QUICK CHECK OK in 242 s
+day1-b3 exit 1 507s | DAY CHECK FAILED
+player-c5 exit 0 617s | PLAYER CHECK OK
+ct-g8 exit 1 87s | DIFFERENCES FOUND
+cf-g8 exit 0 367s | QUICK CHECK OK in 367 s
+day1-g8 exit 0 568s | DAY CHECK OK
+path-g8 exit 0 94s | PATH CHECK OK
+pl-g8-instant exit 1 447s | DAY CHECK FAILED
+bubble-g8 exit 0 556s | BUBBLE CHECK OK
+pl-g8-nodraw exit 0 464s | DAY CHECK OK
