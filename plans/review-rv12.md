@@ -132,3 +132,8 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
   sitting while bursting.
 - player_check: OK on the fix ([0,0],[0,0]); FAILs on 3866c8f3 ([0.256,0.256] both): the base is the planted fault.
 - cadet_test vs 3866c8f3 ALL IDENTICAL (crew rigs too); check_fast OK (243 s).
+- ceee5664 (game 553603f9...): PASS (~18:45 UTC). FX8's #22 block restored exactly (git diff 3866c8f3 --
+  interactions_check.py: only the mess parts (1) and (4)). Game change since b513e0cc: needGoal's seat deck
+  (sd = TRAY_TRAVELS ? here : 3), so a Pick-your-own tray off Deck 3 is pointed at a mess seat. events part 12 OK on
+  ceee5664, its new line FAILs on b513e0cc (4-bench-2); mess + Rina parts OK; cadet_test vs 3866c8f3 ALL IDENTICAL.
+  b513e0cc's game runs above (planted faults, food, arrows) stand: the only game change since is that line.
