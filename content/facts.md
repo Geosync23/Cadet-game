@@ -349,8 +349,8 @@ stories. These are the facts to keep straight.
 - **Zeke Torres** (Works engine officer, cabin 4-14 "the one with the music"; short, blonde, bearded; curious,
   ambitious). Meets you off the Tern on Day 0 and trains you in your first week. Talks to the drive coils; coil three
   sulks. Knits (the knitting circle; your scarf). Knows every song in the record cabinet (he says). Last in to breakfast:
-  ten more minutes with the coils. Passed over twice for Engine Specialist. His father, also an engine man, lives back
-  home and is losing his memory (arc only: never before it opens).
+  ten more minutes with the coils. Passed over twice for Engine Specialist. His father, also an engine man for forty years, lives back
+  home on Hesper Dock, is well, and retires next month (arc only: never before it opens; no memory loss: the user, 2026-10-22).
 - **Chief Ines Calder** (Head of Works, cabin 2-O, the glass office on Deck 5). Exacting, fair, dry. Started as a
   junior in a shipyard sweeping up swarf. Hears what's wrong with a fan by the sound. Keeps a list of every tech she's
   certified, with a note on each. **The toolbox:** battered, her first chief's, on her shelf; she never uses it and never
@@ -521,7 +521,7 @@ their story's lines, from the beat named.
 | Marrow writes every junior's answer in a little book; you're on page forty; officially there are no cats aboard | Marrow | writer-command, arcs |
 | Holt's favourite dish is in Brennan's book (unnamed); Brennan's mother taught her to cook by ear and sings to her pans; the Port Halloran restaurant had twelve tables and a harbour window | Brennan | writer-commons, arcs |
 | A lad two doors down from Pell's mum's shop is good with his hands | Pell | writer-commons, arcs |
-| Torres's father calls him by his uncle's name; he used to hum to the engines, badly | Torres | writer-works, arcs |
+| Torres's father hums to the engines, badly (worse than Zeke). (Was also "calls him by his uncle's name": retired 2026-10-24, the user's no-memory-loss rule.) | Torres | writer-works, arcs |
 | Kovac counted 112 bolts; she knits two-colour only once, for you | Kovac | writer-works, arcs |
 | Esme Walsh's brother feeds her fish; Thea Grieve's sister sends news of hers; Ravi Hart's nan draws his | the fish keepers | writer-commons, batch 3 |
 | Hamid Larsen's boat is "the Morning Tide" this week (renamed often; never "Gull") | Larsen | writer-commons, batch 3 |
