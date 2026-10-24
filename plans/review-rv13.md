@@ -112,3 +112,6 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
   interactions_check full OK on 3e5c4fe2 (my own run cut short, no FAIL; LEAD 33 accepted FX10's).
   Owner sign-offs given: section 17 (Systems engineer), 15b (small edits), 24p (Works career; LEAD 33).
   Notes: m2 (work uniform) now Day 9 not Day 8 for the arrow-follower (FX10 notes it in the build table).
+
+## 0.92.4 queue (LEAD 33, ~14:57 UTC): item D, FX10: warn when you take a repair job whose part would run past a lesson start
+Base claude/integration 3866c8f3 (0.92.3). Verdicts to LEAD 33 + BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh). Waiting for FX10's sha.
