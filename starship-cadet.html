@@ -16060,6 +16060,19 @@ const ixHealth = (() => {
 // ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
 // boardLesson() -> job id | null (FX10, item 29): the job a lesson's "your turn" (24 core's trainDo: SHIP.works.cur at 'do')
 // put on the board for you, while it's there to take
+// lessonClash(j, mins) -> words | null (FX10, patch 0.92.4 item D, the user's yes): a job you take that would run past the
+// start of your next lesson's meeting (SHIP.works.cur at 'meet', its occasion not met yet). The job's end: now, its minutes,
+// the machine shop's time for a part you make (its own make, or one no shelf has: makeMins), and LESSON_WALK minutes of
+// walking. Said at the end of the "Job taken" message; nothing is stopped (walking away pauses the work)
+const LESSON_WALK = 10;
+function lessonClash(j, mins) {
+  const c = SHIP.works && SHIP.works.cur, r = c && c.st === 'meet' && (SHIP.occasions || []).find(x => x.key === c.occ), now = shipNow();
+  if (!j || !r || r.met || now >= r.at) return null;
+  const make = typeof madeHere === 'function' && madeHere(j) || (j.parts || []).some(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p)));
+  const end = now + (mins || 0) + (make && typeof makeMins === 'function' ? makeMins(j) : 0) + LESSON_WALK; if (end <= r.at) return null;
+  const row = typeof ladderRow === 'function' && ladderRow(c.id), what = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) : 'Your lesson';
+  return 'Heads up: it runs to about ' + hhmm(Math.round(end) % 1440) + (make ? ' (its part has to be made in the machine shop)' : '') + ', and ' + what + ' with ' + worksFirst(c.by) + ' starts at ' + hhmm(r.at % 1440) + '.';
+}
 function boardLesson() {
   const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
   return j && j.status === 'open' && !j.claimedBy ? j.id : null;
@@ -16112,11 +16125,12 @@ const ixBoard = (() => {
       for (const j of crew) { const [title, where, state, pri] = jobCard(j); row(j.title || title, where + ' · ' + state, pri + ' taken', null); }
     },
     take(id) {
+      const est = (typeof openJobs === 'function' ? openJobs('you') : []).find(o => o.id === id);   // its minutes, before it's yours (lessonClash)
       if (!claimJob(id)) { toast('Job board', 'Someone got there first.'); api.draw(); return false; }
-      const j = myJob(), [title, where] = jobCard(j);
+      const j = myJob(), [title, where] = jobCard(j), clash = lessonClash(j, est ? est.mins : 0);
       SHIP.player.track = j.id; clearGoal();             // a job taken is tracked (the device's Track switch: null = off), over any older arrow (playtest 1)
       api.close(); device.refresh(); ixGoalAt = -1;
-      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.'));
+      toast('Job taken', (j.title || title) + ', ' + where + '. Follow the marker' + (j.parts && j.parts.length ? ': parts first, from main storage on Deck 5.' : '.') + (clash ? ' ' + clash : ''));
       ixTip('taken', 'Track it on your device; the marker shows the way.');
       return true;
     },

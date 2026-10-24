@@ -7,6 +7,7 @@
 #   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back;
 #   a round or a haul has a Take it; a side job (the drill) and the other registered kinds (an incident, a leak...) not
 #   your lesson's job (FX10, patch 0.92.3 item 29) first and marked on the board; a small repair's stop (FX10) starts with a tap, one in each room
+#   a job you take that runs past your next lesson's start says so in the "Job taken" message (FX10, patch 0.92.4 item D)
 #   the goal pointer: hidden with no goal; your job's next step shows by itself; on another deck it says "Take the
 #   lift to Deck N"; setGoal / clearGoal; an arrow at the screen edge when the place is off screen, a marker when on
 # Setup and environment as for cadet_test.py.
@@ -144,6 +145,22 @@ with sync_playwright() as pw:
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   your lesson on the board:', ls)
     check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and 'Your lesson' in (ls['text'] or '') and not ls['after'], f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
+    # a job that runs past your next lesson (FX10, patch 0.92.4 item D): with a lesson meeting 30 minutes off, taking a repair
+    # whose part has to be made says so in the "Job taken" message; with the meeting 10 hours off, nothing is said
+    LC = r"""((ahead) => { const t = shipNow(), m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && panelPlace(m.id)); if (!m) return 'no machine';
+      const part = MACHINE_KINDS[m.kind].part, keepS = SHIP.stores[part], keepW = SHIP.works, keepO = SHIP.occasions; SHIP.stores[part] = 0;
+      for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
+      SHIP.occasions = (keepO || []).concat([{ key: 'ixlc@1', at: t + ahead, len: 15, deck: 5, room: 'o', status: 'asked', met: false }]);
+      SHIP.works = { ...(keepW || {}), tr: (keepW && keepW.tr) || {}, use: (keepW && keepW.use) || {}, op: (keepW && keepW.op) || {}, cur: { id: 'm6', st: 'meet', d: SHIP.time.day, by: 'calder', occ: 'ixlc@1', j: null, w: 0 } };
+      SHIP.jobs.push({ id: 'ixlc@1', machine: m.id, deck: 3, kind: 'repair', urgency: 1, posted: t, found: t, claimedBy: null, parts: [part], status: 'open' }); MACH_REV++;
+      let took = false; try { took = ixBoard.take('ixlc@1'); } catch (e) { return 'take: ' + e.message; }
+      const msg = document.getElementById('tt').textContent + ': ' + document.getElementById('tx').textContent;
+      SHIP.jobs = SHIP.jobs.filter(j => j.id !== 'ixlc@1'); SHIP.stores[part] = keepS; SHIP.works = keepW; SHIP.occasions = keepO; MACH_REV++;
+      return { took, msg }; })"""
+    near, far = g.ev(f"({LC})(30)"), g.ev(f"({LC})(600)")
+    print('   a job past your lesson:', near, '| 10 hours off:', far)
+    check(isinstance(near, dict) and near['took'] and 'Heads up' in near['msg'] and 'machine shop' in near['msg'] and 'starts at' in near['msg']
+          and isinstance(far, dict) and far['took'] and 'Heads up' not in far['msg'], f'a job that runs past your lesson says so when you take it, and only then (FX10, patch 0.92.4 item D) ({near} | {far})')
     # a job you can take, on Deck 3 (a tier 1 machine there), in case the crew have left none
     job = g.ev(r"""(() => { const t = shipNow(); const m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && PLACE_OF && panelPlace(m.id));
       if (!m) return null; const part = MACHINE_KINDS[m.kind].part || 'gasket'; SHIP.stores[part] = Math.max(SHIP.stores[part] || 0, 2);
