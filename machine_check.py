@@ -27,6 +27,7 @@
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
 #   the board keeps up (playtest patch 1 note 13, JB1): a quick player always finds a job on the shift, Day 1 included (5z)
+#     and its small repairs (FX10, patch 0.92.3 items 21, 24): some each day, none twice in the week, a third or more in the science area
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
 #   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
@@ -1453,6 +1454,9 @@ with sync_playwright() as pw:
             if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; }
           }
           out.extras = seen.size;
+          const fx = [...seen.values()].filter(j => j.fix), T = typeof fixTable === 'function' ? fixTable() : null;   // FX10's small repairs (patch 0.92.3 items 21, 24)
+          out.fix = fx.length; out.fixSci = fx.filter(j => j.fixS === 's').length; out.fixDup = fx.length - new Set(fx.map(j => j.fix)).size; out.fixOn = typeof FIX_ON !== 'undefined' && FIX_ON;
+          out.fixBad = T ? T.s.concat(T.p).filter(r => !placeById(r.place) || (r.part && !(r.part in STOCK)) || !SYSTEMS.includes(r.sys)).map(r => r.id) : [];
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
           BOARD_ON = true; window.__sc("if (window.__evBk[0]) eventNow = window.__evBk[0]");
           setShipNow(t0); out.sig = JSON.stringify(out.days);
@@ -1464,6 +1468,9 @@ with sync_playwright() as pw:
         print(f"  with BOARD_ON false: " + ' '.join(f"{k}:{v['jobs']}/{v['empty']}" for k, v in sorted(off['days'].items(), key=lambda kv: int(kv[0]))))
         if any(v['empty'] > 30 for v in bk['days'].values()) or bk['maxBoard'] > 8 or bk['crewExtra'] or bk['late'] or bk['sig'] != bk2['sig'] or not bk['extras']:
             fail('the board keeping up')
+        if bk.get('fixOn'):
+            print(f"  small repairs (FX10): {bk['fix']} posted, {bk['fixSci']} in the science area, the same one twice {bk['fixDup']}, rows with no place, a part not in STOCK or no system {bk['fixBad'][:4]}")
+            if not bk['fix'] or bk['fixDup'] or bk['fixBad'] or bk['fixSci'] * 3 < bk['fix']: fail('the small repairs: some each day, never the same twice in a week, a third or more in the science area, every row sound')
         if off['days'].get('1', {}).get('empty', 0) < 120: fail('with BOARD_ON false, Day 1 should be as thin as before (this part would not see a regression)')
 
     print('errors', g.errors[:5])

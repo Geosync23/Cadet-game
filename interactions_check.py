@@ -6,6 +6,7 @@
 #   section 15's own taps (treadmill, shower) are left alone; walking away stops it; draw calls stay under BUDGET
 #   the job board: tapping it opens the list; Take it claims the job (section 17's claimJob); Drop it puts it back;
 #   a round or a haul has a Take it; a side job (the drill) and the other registered kinds (an incident, a leak...) not
+#   your lesson's job (FX10, patch 0.92.3 item 29) first and marked on the board; a small repair's stop (FX10) starts with a tap, one in each room
 #   the goal pointer: hidden with no goal; your job's next step shows by itself; on another deck it says "Take the
 #   lift to Deck N"; setGoal / clearGoal; an arrow at the screen edge when the place is off screen, a marker when on
 # Setup and environment as for cadet_test.py.
@@ -132,6 +133,17 @@ with sync_playwright() as pw:
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   a round on the board:', rk)
     check(isinstance(rk, dict) and rk['row'] and rk['btn'] == 'Take it' and rk['haul'] and not rk['drill'] and not rk['others'], f'a round (and a haul) can be taken at the board; a drill, an incident, a leak, nozzles, a rewire, the trace demo or a machine-less tune not (lead 29) ({rk})')
+    # your lesson's job (FX10, patch 0.92.3 item 29): a lesson at "your turn" (24 core's trainDo: SHIP.works.cur at 'do')
+    # puts its job first on the board, outlined, "Your lesson: take this one"; nothing marked once it isn't your turn
+    ls = g.ev(r"""(() => { if (typeof boardLesson !== 'function') return 'no boardLesson in this build'; let j = null; try { j = roundJob(SHIP.time.day, Math.floor(SHIP.time.min), { train: 'm1', yours: true }); } catch (e) { return 'roundJob: ' + e.message; }
+      if (!j) return 'no round'; if (!SHIP.jobs.includes(j)) SHIP.jobs.push(j); j.claimedBy = null; j.status = 'open'; j.found = Math.min(j.found, shipNow() - 1); MACH_REV++;
+      const W = typeof worksInit === 'function' ? worksInit() : SHIP.works, keep = W.cur, rowOf = () => document.querySelector('#ixBoardL [data-job]');
+      W.cur = { id: 'm1', st: 'do', d: SHIP.time.day, by: ['torres-zeke'], occ: null, j: j.id, w: 0 }; ixBoard.draw();
+      const r = rowOf(), out = { first: !!r && r.dataset.job === j.id, lesson: !!r && r.classList.contains('lesson'), text: r ? r.textContent : null, sub: document.getElementById('ixBoardX').textContent };
+      W.cur = keep; ixBoard.draw(); out.after = [...document.querySelectorAll('#ixBoardL .lesson')].length;
+      SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
+    print('   your lesson on the board:', ls)
+    check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and 'Your lesson' in (ls['text'] or '') and not ls['after'], f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
     # a job you can take, on Deck 3 (a tier 1 machine there), in case the crew have left none
     job = g.ev(r"""(() => { const t = shipNow(); const m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && PLACE_OF && panelPlace(m.id));
       if (!m) return null; const part = MACHINE_KINDS[m.kind].part || 'gasket'; SHIP.stores[part] = Math.max(SHIP.stores[part] || 0, 2);
@@ -251,6 +263,11 @@ with sync_playwright() as pw:
             if (E) add(eventJob(Object.values(E.jobs).flat().find(x => x && x.id === id), E.id, t, 'ixtap-' + id)); }
           if (kind === 'machine') { const m = machineList().find(m => m.id === '3-oven-1');
             if (m) add({ id: 'ixtap-oven', machine: m.id, deck: m.deck, room: m.room, kind: Object.keys(JOB_TYPES)[0], urgency: 1, posted: t, found: t, claimedBy: null, parts: ['seal'], status: 'open', title: 'Repair the oven' }); }
+          if (kind === 'fix' && typeof fixTable === 'function') { const T = fixTable(), one = new Set();   // FX10's small repairs: one in each room they're in
+            for (const r of T.s.concat(T.p)) { const pl = placeById(r.place); if (!pl || (pl.deck === 7 && !REC_DECK) || one.has(pl.deck + pl.room)) continue; one.add(pl.deck + pl.room);
+              if (r.part) SHIP.stores[r.part] = Math.max(SHIP.stores[r.part] || 0, 9);
+              add({ id: 'ixtap-fix-' + r.id, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: r.id, title: r.title, tier: 1, stops: [{ deck: pl.deck, placeId: r.place, mins: r.mins, tag: 'fix' }],
+                urgency: 0, posted: t, found: t, claimedBy: null, parts: r.part ? [r.part] : [], status: 'open', fix: r.id, fixS: pl.deck === 2 ? 's' : 'p', tool: r.tool }); } }
           MACH_REV++; return out; })"""
         HOLD = r"""((id) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
           actEnd(true); SHIP.player.work = null; const j = SHIP.jobs.find(x => x.id === id); j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++;   // claimed by hand: the tier doesn't matter here
@@ -262,7 +279,7 @@ with sync_playwright() as pw:
           for (const [dx, dz] of [[0, 0], [.4, 0], [-.4, 0], [0, .4], [0, -.4], [.4, .4], [-.4, .4], [.4, -.4], [-.4, -.4], [.8, 0], [-.8, 0], [0, .8], [0, -.8]]) { const p = scr(dx, dz); if (!crewAtScreen(...p)) return p; }
           return scr(0, 0); })"""
         PUT = r"""((pid) => { const s = placeSpot(pid), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
-        for kind in ['lamp', 'event', 'machine']:
+        for kind in ['lamp', 'event', 'machine', 'fix']:
             for jid in g.ev(f"({MKJ})('{kind}')"):
                 nx = g.ev(f"({HOLD})('{jid}')")
                 if not check(nx, f'{jid}: a stop to go to'): continue
