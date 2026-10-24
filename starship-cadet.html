@@ -52251,6 +52251,19 @@ function promoCerEscort(p, t) {                          // worksEscort's 24p pa
 WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('ceremony2')) promoPip(); });
 
 // ---- slot: Works career engineer (section 24p). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- FX10 (RV13's find on patch 0.92.3): the scanner's first use, which opens Making it safe (m6 needs { mech: 'm7', uses: 1 }),
+// waited on a real fault with a part coming your way on a workday after the scanner lesson; with small repairs in Calder's
+// top-ups none came on the arrow-follower's Day 8 (0.92.2 had one by luck). Now, from the first workday after the lesson,
+// while the scanner's unused and no real fault with a part is open for you, one is held for you from FIX_SCAN_AT: a washer's
+// leaking pump (section 17's jobReserve, slot FIX_SCAN_SLOT), till the end of that shift. Once a day at most. FIX_ON false: nothing.
+const FIX_SCAN_SLOT = 24, FIX_SCAN_AT = 570;
+if (typeof FIX_ON !== 'undefined' && typeof jobReserve === 'function') WORK_TICKS.push(now => {
+  const W = SHIP.works; if (!FIX_ON || !W || W.tr.m7 === undefined || (W.use.m7 || 0) >= 1) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440; if (d <= W.tr.m7 || !playerShiftOn(d) || m < FIX_SCAN_AT || m >= dayShiftEnd(d) - 60) return;
+  if (SHIP.jobs.some(j => j.reserved === FIX_SCAN_SLOT && j.found >= B)) return;   // today's, held or done
+  if (SHIP.jobs.some(j => j.kind === 'repair' && j.status !== 'done' && (faultCause(j) || {}).part && (j.claimedBy === 'you' || !j.claimedBy && forYou(j)))) return;   // one's already there for you
+  jobReserve('washer', d, FIX_SCAN_AT, FIX_SCAN_SLOT, { cause: 'pump', until: B + dayShiftEnd(d) });
+});
 // FX1 (patch-p5-fix1, bug 2): the training meeting's arrow. trainTell put it up at the ask (06:00 for a 09:00 meeting)
 // with nothing to take it down, so it stayed all day over Clock in and the training job's own arrow. Now trainTick
 // calls trainArrow once a ship minute: while the meeting is asked and told, the arrow is up from 15 ship minutes
