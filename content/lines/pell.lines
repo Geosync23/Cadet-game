@@ -635,3 +635,16 @@
 == disc.lose
 - Ah, nuts. Again!
 - No way. Best of five.   #funny
+
+// ---- ZW1 (writer), patch 0.92.3 item 26: you in dirty clothes. clothes.remark: yesterday's clothes (flag:clothes.stale);
+// clothes.grubby: a grubby uniform (flag:clothes.grubby, AC3's hook). Bubbles, 60 characters or fewer; kind, never mean.
+== clothes.remark
+? flag:clothes.stale
+- Oi oi, yesterday's shirt! Welcome to the club, spanner.   #funny
+- Same shirt? Right, so, I respect it. I also smell it.   #funny
+== clothes.grubby
+? flag:clothes.grubby
+- Look at the state of you! Proper tech, that is.   #funny
+- You're grubbier than me. Nobody's grubbier than me.   #funny
+? flag:clothes.grubby tier>=friend
+- Change before Calder clocks it. I'll keep watch.   #warm
