@@ -1,0 +1,1174 @@
+<title>Wren Crew Stories</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Literata:ital,opsz,wght@0,7..72,400;0,7..72,600;1,7..72,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a reading copy, one column like a script, each story a chapter; the big scene set apart in Works orange. */
+:root {
+  --paper: #f1f3f5; --card: #ffffff; --ink: #18212b; --muted: #5b6672; --line: #d5dbe1;
+  --works: #c25a14; --works-soft: #f6e3d4; --teal: #1f7a70; --teal-soft: #d8ece9; --night-soft: #e0e4f3; --night: #3b4a8a;
+  --display: "Bricolage Grotesque", "Avenir Next", "Segoe UI", system-ui, sans-serif;
+  --body: "Literata", Georgia, "Times New Roman", serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) { --paper: #11161d; --card: #19202a; --ink: #e7ebef; --muted: #9aa6b2; --line: #2c3642;
+    --works: #f08a46; --works-soft: #3a2618; --teal: #5cc3b6; --teal-soft: #173430; --night-soft: #222a4a; --night: #9aa8ea; color-scheme: dark; }
+}
+:root[data-theme="dark"] { --paper: #11161d; --card: #19202a; --ink: #e7ebef; --muted: #9aa6b2; --line: #2c3642;
+  --works: #f08a46; --works-soft: #3a2618; --teal: #5cc3b6; --teal-soft: #173430; --night-soft: #222a4a; --night: #9aa8ea; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--body); font-size: 17px; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 64px; }
+.wrap { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 36px; }
+h1, h2 { font-family: var(--display); line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 6vw, 44px); }
+h2 { font-size: 25px; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--works); }
+.intro { display: flex; flex-direction: column; gap: 12px; }
+.key { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; font-size: 15px; display: flex; flex-direction: column; gap: 6px; }
+.toc ol { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 4px; }
+a { color: var(--teal); }
+.story { display: flex; flex-direction: column; gap: 14px; scroll-margin-top: 16px; }
+.story header { display: flex; flex-direction: column; gap: 6px; border-bottom: 2px solid var(--works); padding-bottom: 10px; }
+.note { font-size: 15px; color: var(--muted); }
+.beat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; }
+.beat.peak { border: 2px solid var(--works); background: var(--works-soft); }
+.beat.quiet { background: var(--night-soft); border-color: transparent; }
+.beat.after { background: var(--teal-soft); border-color: transparent; }
+.bh { display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: baseline; }
+.lab { font-family: var(--display); font-weight: 700; font-size: 16px; }
+.peak .lab { color: var(--works); }
+.meta { font-family: var(--mono); font-size: 12px; color: var(--muted); }
+.hint { font-style: italic; color: var(--muted); font-size: 15.5px; }
+.lines { display: flex; flex-direction: column; gap: 6px; }
+.lines b { font-family: var(--display); font-weight: 700; }
+.if { font-size: 15.5px; }
+.cond { font-family: var(--mono); font-size: 11.5px; color: var(--teal); border: 1px solid var(--teal); border-radius: 999px; padding: 0 7px; margin-right: 4px; white-space: nowrap; }
+.choice { border-left: 3px solid var(--works); padding-left: 12px; margin-block: 4px; }
+.ch { font-family: var(--display); font-size: 13px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 0.04em; }
+.choice ul { margin: 6px 0 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 8px; }
+.say { display: block; font-weight: 600; }
+.rep { display: block; font-size: 15.5px; }
+.warm { display: block; font-size: 14.5px; color: var(--muted); }
+.extra { display: flex; flex-direction: column; gap: 4px; font-size: 14.5px; color: var(--muted); border-top: 1px dashed var(--line); padding-top: 8px; }
+.cbox { display: flex; flex-direction: column; gap: 6px; }
+.cbox label { font-family: var(--display); font-weight: 700; font-size: 15px; }
+textarea { width: 100%; min-height: 70px; font: inherit; font-size: 15px; color: var(--ink); background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; resize: vertical; }
+.savebar { position: sticky; bottom: env(safe-area-inset-bottom, 0px); background: var(--paper); border-top: 1px solid var(--line); padding-block: 10px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+#savebtn { font-family: var(--display); font-weight: 700; font-size: 16px; color: #fff; background: var(--works); border: 0; border-radius: 999px; padding: 10px 22px; cursor: pointer; }
+#savebtn:disabled { opacity: 0.6; }
+#savestate { font-size: 14.5px; color: var(--muted); }
+:focus-visible { outline: 3px solid var(--teal); outline-offset: 2px; }
+</style>
+
+<div class="wrap">
+<header class="intro">
+  <span class="eyebrow">Starship Cadet · the ten crew stories · written 24 Oct 2026, not yet in the game</span>
+  <h1>The Wren's crew stories</h1>
+  <p>All ten, as written, in the order you chose to have them written. Each one has a few quiet steps, then the big scene at a gathering that happens anyway, a kinder short version if you miss it, and sometimes a small scene afterwards. Every line here is what someone says on screen.</p>
+  <div class="key">
+    <p><b>How to read it.</b> Where you get to answer, the three replies are listed with what they say back. Some people have one reply that suits them best; its warmer answer is shown in grey. A small green tag means the line only plays in that case (for example, if you did them a favour).</p>
+    <p><b>[your name]</b> is where the game says your name. There's a notes box under every story, and one at the end: press Save and the lead will read them.</p>
+  </div>
+  <nav class="toc" aria-label="Stories"><ol>
+<li><a href="#s-pell">Pell Okafor: “Eat, sleep, call”</a></li>
+<li><a href="#s-torres">Zeke Torres: “Ready”</a></li>
+<li><a href="#s-teague">Theo Teague: “The last page”</a></li>
+<li><a href="#s-calder">Chief Ines Calder: “Well done”</a></li>
+<li><a href="#s-halloran">Emeka Halloran: “Groaning means breathing”</a></li>
+<li><a href="#s-bramwell">Basil Bramwell: “Your turn”</a></li>
+<li><a href="#s-salo">Saad Salo: “Twice”</a></li>
+<li><a href="#s-kovac">Zainab Kovac: “Four, please”</a></li>
+<li><a href="#s-raman">Dev Raman: “The same comet”</a></li>
+<li><a href="#s-kowalczyk">Anja Kowalczyk: “The beacon”</a></li>
+  </ol></nav>
+</header>
+
+<section class="story" id="s-pell"><header><span class="eyebrow">Works technician, your neighbour in the bunk room. Stays aboard.</span><h2>Pell Okafor: “Eat, sleep, call”</h2>
+<p class="note">Steps 1 to 4 (the music boxes and his show) are already in the game as chat-card lines; the story picks up at step 5.</p>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 5</span><span class="meta"></span></div>
+<p class="hint">Pell: “Right, so. I need someone with a watch. And no mercy.”</p>
+<div class="lines">
+<p><b>Pell:</b> Oi oi. Guess whose name Calder&#x27;s put down for the certification practical? Go on. Guess. It&#x27;s mine.</p>
+<p><b>Pell:</b> I&#x27;m thrilled. I&#x27;m also going to be sick. Both at once. Is that normal?</p>
+<p><b>Pell:</b> You strip a pump in front of her. Clean, in order, against the clock. She just watches. She doesn&#x27;t blink.</p>
+<p><b>Pell:</b> Would you time me? Slower. No, faster. No, don&#x27;t tell me the time. Actually, tell me.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;ll time you. Every evening till you&#x27;re sick of me.”</span><span class="rep"><b>Pell:</b> You&#x27;re a legend. Machine shop, after shift. Bring biscuits. They&#x27;re for my nerves.</span></li>
+<li><span class="say">“You&#x27;ve fixed half this ship. A pump&#x27;s nothing.”</span><span class="rep"><b>Pell:</b> Half? Generous. A third. A good third.</span><span class="warm">If it’s the reply they need most: <b>Pell:</b> Half! I&#x27;ll take that. I&#x27;m going to think it really loudly at Calder while she watches.</span></li>
+<li><span class="say">“What&#x27;s the worst that could happen?”</span><span class="rep"><b>Pell:</b> I drop a bolt, it rolls under the bench, and Calder says &quot;Hm.&quot; I&#x27;d never recover.</span></li>
+</ul></div>
+<p><b>Pell:</b> Right. Practise. Food first. Then practise.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 6</span><span class="meta"></span></div>
+<p class="hint">Pell: “Got a minute? I&#x27;m going to do a thing. I&#x27;d rather not do it on my own.”</p>
+<div class="lines">
+<p><b>Pell:</b> Mum&#x27;s messages. The three. I&#x27;m going to open them. Now. With you here. Don&#x27;t let me stop.</p>
+<p><b>Pell:</b> Eat. Sleep. Call. Ha. Same as ever. She&#x27;s got it down to one word each.</p>
+<p><b>Pell:</b> There&#x27;s a fourth. Her hands are getting stiff. She can&#x27;t do the fine work on the radios any more.</p>
+<p><b>Pell:</b> She wants me home. To run the shop. Kettles, radios, coats, anything. Where I found my first engine manual.</p>
+<p><b>Pell:</b> If I go, I&#x27;m leaving this. If I stay, I&#x27;m leaving her. Either way I&#x27;m letting someone down.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“You don&#x27;t have to decide tonight. I&#x27;m here.”</span><span class="rep"><b>Pell:</b> No. I don&#x27;t, do I. Tonight I just have to know it. That&#x27;s enough for one night.</span></li>
+<li><span class="say">“She raised a mechanic in a scrapyard. She&#x27;ll understand.”</span><span class="rep"><b>Pell:</b> She did, didn&#x27;t she. With a manual with half the pages missing. Ha.</span><span class="warm">If it’s the reply they need most: <b>Pell:</b> She did. A scrapyard and half a manual, and look at me. She made me, [your name]. She&#x27;ll understand. Probably.</span></li>
+<li><span class="say">“Could someone at home help her for now?”</span><span class="rep"><b>Pell:</b> There&#x27;s a lad two doors down who&#x27;s good with his hands. Maybe. I could teach him by message.</span></li>
+</ul></div>
+<p><b>Pell:</b> Right. I&#x27;ve opened them. That&#x27;s the hard bit done. Is it? It feels like the hard bit.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">Open door (Wednesday tea, the Works tea corner, 16:40) · Day 17 or 24, else any later Wednesday</span></div>
+<p class="hint">Pell: “It&#x27;s today. The practical. Stand where I can see you. Not too close.”</p>
+<div class="lines">
+<p><b>Calder:</b> Pump on the bench. Twelve bolts, one impeller, two seals. Strip, inspect, rebuild. The clock starts when you touch it.</p>
+<p><b>Pell:</b> Right, so. Hands clean. Spanners in order. Nobody breathe. No, do breathe. Just quietly.</p>
+<p><b>Halloran:</b> I&#x27;m not watching. I&#x27;m stood here with my tea, facing this way. That&#x27;s all. Lovely tea.</p>
+<p><b>Kovac:</b> Seven. Eight. Um. Sorry. I count. Nine.</p>
+<p><b>Calder:</b> Four minutes ten.</p>
+<p><b>Pell:</b> Impeller&#x27;s out. Seals are good. That&#x27;s a lovely seal, that. Look at it. No, don&#x27;t. I&#x27;m busy.</p>
+<p><b>Kovac:</b> Bolt. The edge. Oh. Oh no. Stopped. It stopped.</p>
+<p class="if"><span class="cond">if Zeke is there</span> <b>Zeke:</b> Properly, Pell. Properly.</p>
+<p><b>Calder:</b> Nine minutes twelve. Hands off.</p>
+<p><b>Calder:</b> Good. Clean work.</p>
+<p><b>Pell:</b> I. Hang on. Give me a second. All my words have gone somewhere.</p>
+<p><b>Pell:</b> Right. While you&#x27;re all here. I&#x27;m staying. On the Wren. I&#x27;ve told Mum. In writing, so she can&#x27;t argue till Sunday.</p>
+<p><b>Pell:</b> And the lad two doors down from her shop is learning the radios. By message. One step a week. He mended his first on Monday.</p>
+<p class="if"><span class="cond">if you timed his practice runs</span> <b>Pell:</b> And [your name] timed me. Every evening, in the machine shop. Every single run. That&#x27;s half of this, right there.</p>
+<p class="if"><span class="cond">if you suggested the neighbour</span> <b>Pell:</b> The lad was [your name]&#x27;s idea, by the way. Credit where it&#x27;s due. It&#x27;s due over there.</p>
+<p><b>Halloran:</b> Oh, that wants biscuits. I&#x27;d say that wants a lot of biscuits.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Told you. Every bolt, in order.”</span><span class="rep"><b>Pell:</b> You did. Every night. I kept not believing it. You win, [your name].</span><span class="warm">If it’s the reply they need most: <b>Pell:</b> You did. Every single evening. Right. One day I&#x27;m saying it about you, in front of this lot. Watch me.</span></li>
+<li><span class="say">“Tell us about the bolt that stopped.”</span><span class="rep"><b>Pell:</b> It rolled. Right to the edge. I watched my whole career go with it. Then it just sat there. Kovac saw.</span></li>
+<li><span class="say">“Sit down before your knees go. I&#x27;ll pour.”</span><span class="rep"><b>Pell:</b> Knees. Yes. They were fine for nine minutes and now they&#x27;ve gone. Cheers. Two sugars. Three.</span></li>
+</ul></div>
+<p><b>Calder:</b> Sign the card on my desk tomorrow. Today, tea.</p>
+<p><b>Pell:</b> Certified. Me. Somebody fill my mug. Then fill it again. Then point me at the biscuits.</p>
+</div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta"></span></div>
+<p class="hint">Pell: “Where were you? No, don&#x27;t tell me. Sit down. I&#x27;ve got news.”</p>
+<div class="lines">
+<p><b>Pell:</b> Oi oi. You missed it. Doesn&#x27;t matter. I&#x27;ll do it again for you. Not the pump. The telling.</p>
+<p><b>Pell:</b> Nine minutes twelve. One bolt rolled to the edge of the bench and stopped. Just stopped. Kovac nearly sat on the floor.</p>
+<p><b>Pell:</b> Then Calder looked at the pump for ages. Ages. And said, &quot;Good. Clean work.&quot;</p>
+<p><b>Pell:</b> I passed, [your name]. Then I told the whole tea corner I&#x27;m staying. And the lad by Mum&#x27;s is learning the radios.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;m sorry I missed it. Tell me again, slower.”</span><span class="rep"><b>Pell:</b> Slower. Right. There&#x27;s a pump. Twelve bolts. Guess how many I dropped. None. That&#x27;s the whole story.</span></li>
+<li><span class="say">“I knew you&#x27;d pass. I&#x27;d have bet my pudding on it.”</span><span class="rep"><b>Pell:</b> Your pudding? That&#x27;s faith, that is. I&#x27;d have taken the bet and lost it happily.</span><span class="warm">If it’s the reply they need most: <b>Pell:</b> Your pudding. That&#x27;s proper faith. Cheers, [your name]. I&#x27;m having it anyway. Pudding&#x27;s owed.</span></li>
+<li><span class="say">“Let&#x27;s celebrate. Grab shelf. I&#x27;m buying.”</span><span class="rep"><b>Pell:</b> It&#x27;s free. You can&#x27;t buy it. I like the gesture though. Come on, before anyone counts the plates.</span></li>
+</ul></div>
+<p><b>Pell:</b> Certified. I keep saying it out loud. I&#x27;ll stop by Friday. Probably.</p>
+</div>
+<div class="extra"><span>A Mail later, “PASSED”: PASSED. Capitals. Calder said &quot;Good. Clean work.&quot; I&#x27;d like it on a mug, please. Pell</span></div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta"></span></div>
+<p class="hint">Pell: “Walk with me? I&#x27;ve just been on the booths. Big call.”</p>
+<div class="lines">
+<p><b>Pell:</b> I called Mum. A proper call, not a message. The relay held the whole way. Can you believe it?</p>
+<p><b>Pell:</b> Told her about the practical. Every bolt. She made me say the time twice. Nine minutes twelve.</p>
+<p><b>Pell:</b> Her hands were stiff today. She mended a kettle while we talked anyway. Course she did.</p>
+<p><b>Pell:</b> She said: eat, sleep, call. Then she laughed. Then I laughed. Then we both cried a bit. Don&#x27;t tell anyone that bit.</p>
+<p><b>Pell:</b> Can I tell you a secret? First month here, I nearly left. Bag packed. I&#x27;m glad every day I didn&#x27;t.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“So am I.”</span><span class="rep"><b>Pell:</b> Course you are. Who&#x27;d show you the panel that sticks?</span><span class="warm">If it’s the reply they need most: <b>Pell:</b> Course you are. Who&#x27;d feed you? Who&#x27;d show you the panel that sticks? Who&#x27;d find you the good spanners?</span></li>
+<li><span class="say">“What changed your mind, back then?”</span><span class="rep"><b>Pell:</b> Brennan gave me pudding and said nothing. Calder gave me a pump and said nothing. That&#x27;s how this ship says stay.</span></li>
+<li><span class="say">“My first week, I nearly packed too.”</span><span class="rep"><b>Pell:</b> Yeah? Look at us. Still here. Still unpacked. Well, I&#x27;m unpacked. You, I&#x27;m not sure.</span></li>
+</ul></div>
+<p><b>Pell:</b> Here. The smallest music box. Four notes. One each for eat, sleep, call. And one for you.</p>
+</div>
+<div class="extra"><span>Keepsake: a tiny music box made from spare screws, that plays four notes</span></div>
+</div>
+<div class="cbox"><label for="c-pell">Your notes on Okafor's story</label><textarea id="c-pell" data-k="pell" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-torres"><header><span class="eyebrow">Engine officer, your trainer. Stays aboard.</span><h2>Zeke Torres: “Ready”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “Don&#x27;t look. I mean it. Don&#x27;t look.”</p>
+<div class="lines">
+<p><b>Zeke:</b> Don&#x27;t look. No, you looked. Fine. It&#x27;s a surprise. It&#x27;s orange.</p>
+<p><b>Zeke:</b> It&#x27;s a scarf. Kovac taught me. Dahl watched once and had to go and sit down.</p>
+<p><b>Zeke:</b> I started it on your first day. Every new hand should have something that&#x27;s theirs.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“It&#x27;s lovely. Honestly.”</span><span class="rep"><b>Zeke:</b> Liar. A kind liar. Thank you. It&#x27;s got eleven dropped stitches, I counted.</span></li>
+<li><span class="say">“You started it on my first day?”</span><span class="rep"><b>Zeke:</b> Monday. Before the briefing. I thought, right, this one&#x27;s staying. So, a scarf.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> Monday, before the briefing. You held the spanner upside down that morning. Then you didn&#x27;t. So, a scarf.</span></li>
+<li><span class="say">“I could learn too. We could be terrible together.”</span><span class="rep"><b>Zeke:</b> Oh, Kovac would love that. Two of us to despair of. Quiet evenings, tea corner. Bring patience.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Right, onward. Two more rows. Don&#x27;t look.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “Board&#x27;s got a new sheet up. Have you seen?”</p>
+<div class="lines">
+<p><b>Zeke:</b> Engine Specialist list&#x27;s up. On the board, by the parts racks.</p>
+<p><b>Zeke:</b> Not on it. Second time. Ha. Well. There it is.</p>
+<p><b>Zeke:</b> Right, onward. Coil three won&#x27;t fix herself.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Their loss. You&#x27;re the best on the coils.”</span><span class="rep"><b>Zeke:</b> You haven&#x27;t met many engine officers. But thanks. Really.</span></li>
+<li><span class="say">“Are you all right?”</span><span class="rep"><b>Zeke:</b> Course. Course I am. It&#x27;s a list.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> Course. It&#x27;s a list. It&#x27;s... Yes. Mostly. Ask me again another day, maybe.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Anyway. Tea?</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “Got a minute? Properly, I mean.”</p>
+<div class="lines">
+<p><b>Zeke:</b> Can I ask you something? Was I any good? As your trainer, I mean. Honestly.</p>
+<p><b>Zeke:</b> Calder called me restless once. Years ago. I think about it more than I should.</p>
+<p><b>Zeke:</b> Restless. Does that mean you can&#x27;t be trusted with a reactor? Maybe it does.</p>
+<p><b>Zeke:</b> And then I think, teaching you. Was that a step back? Or was it the most useful thing I&#x27;ve done all year?</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“You were a brilliant trainer. You never once talked down to me.”</span><span class="rep"><b>Zeke:</b> Oh. Well. That&#x27;s the bit I tried hardest at, actually.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> That&#x27;s the bit I tried hardest at. Nobody&#x27;s ever said. Thank you, [your name]. I&#x27;ll keep that.</span></li>
+<li><span class="say">“Ask Calder what she meant. She&#x27;ll tell you exactly.”</span><span class="rep"><b>Zeke:</b> She would, wouldn&#x27;t she. Exactly. To the decimal place. Maybe I will.</span></li>
+<li><span class="say">“I get restless too. I don&#x27;t think it&#x27;s a fault.”</span><span class="rep"><b>Zeke:</b> No? Huh. Maybe it&#x27;s just being awake. Some of us are louder about it.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Right. Enough of that. The coils will be wondering where I am.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 4</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “Sit with me a bit? I won&#x27;t talk much. I might.”</p>
+<div class="lines">
+<p><b>Zeke:</b> My dad taught me coils have moods. Forty years an engine man. He&#x27;d put his hand on the casing and just know.</p>
+<p><b>Zeke:</b> He&#x27;s retiring. Next month. Last shift, then a do at the yard on Hesper Dock. Cake on a cable drum, knowing that lot.</p>
+<p><b>Zeke:</b> I won&#x27;t be there. Too far. That&#x27;s fine. That&#x27;s the job. He&#x27;d say so himself.</p>
+<p><b>Zeke:</b> He&#x27;ll ask, though. He always asks. &quot;Specialist yet?&quot; And I&#x27;ll say no. Again.</p>
+<p><b>Zeke:</b> I&#x27;ve never told him I&#x27;m not sure I&#x27;m good enough for a reactor. Forty years, and I don&#x27;t think he was ever not sure.</p>
+<p><b>Zeke:</b> He hums to engines, you know. Badly. Worse than me, which takes doing.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Tell me about him. The engine man.”</span><span class="rep"><b>Zeke:</b> He talked a freighter&#x27;s drive home once. Three systems, hand on the casing, humming the whole way.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> Three systems, a freighter&#x27;s drive, his hand on the casing, humming. Nobody else could. I&#x27;ll tell it you properly one day.</span></li>
+<li><span class="say">“Tell him before he asks. Then it&#x27;s your news, not his question.”</span><span class="rep"><b>Zeke:</b> Before he asks. Huh. Then the answer&#x27;s mine, not his. I hadn&#x27;t thought of it like that.</span></li>
+<li><span class="say">“I&#x27;m not sure I&#x27;m good enough most days. I still turn up.”</span><span class="rep"><b>Zeke:</b> Most days. Yes. Maybe that&#x27;s all forty years is. Turning up, and putting your hand on the casing.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Thanks for sitting. Here. Last biscuit. I was saving it. For this, apparently.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 5</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “I&#x27;ve been to see Calder. Got a minute?”</p>
+<div class="lines">
+<p><b>Zeke:</b> I went to see Calder. About &quot;restless&quot;. I asked her straight.</p>
+<p><b>Zeke:</b> She said, &quot;Restless isn&#x27;t a fault. Unfinished is.&quot; Then she went back to her board.</p>
+<p><b>Zeke:</b> So I&#x27;m finishing things. The scarf. The application. And a letter for Dad, for his last day at the engines.</p>
+<p><b>Zeke:</b> Can I ask you? What would you want to read, on your last day at a job you loved?</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That it mattered. That someone noticed.”</span><span class="rep"><b>Zeke:</b> That someone noticed. All those coils nobody ever thanked him for. Yes. I can say that.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> Forty years of coils nobody thanked him for. I noticed. I&#x27;ll tell him I did. That&#x27;s the letter, isn&#x27;t it. Thank you.</span></li>
+<li><span class="say">“What you learnt from him. In his words, not yours.”</span><span class="rep"><b>Zeke:</b> His words. &quot;Feel that? She&#x27;s thinking.&quot; I&#x27;ve said it to every new hand. You too. He&#x27;d like knowing that.</span></li>
+<li><span class="say">“That the job&#x27;s in good hands. I&#x27;d want to hear that.”</span><span class="rep"><b>Zeke:</b> Good hands. Mine, he&#x27;d think. That&#x27;s the bit I&#x27;d have to believe first. I&#x27;m working on it.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Right, onward. I&#x27;ve a letter to write. Properly.</p>
+</div>
+<div class="extra"><span>A Mail later, “The last line”: Dad&#x27;s letter is done. The last line: &quot;I put my hand on the casing every morning, and she still tells me things. You taught me to listen.&quot; Thank you for the question. Zeke</span></div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">Knit and natter (Tuesday 20:00, the junior common room) · Day 23 (the evening you&#x27;re made Engine Specialist), else any later Tuesday</span></div>
+<p class="hint">Zeke: “Close your eyes. No. Open them. No, close them.”</p>
+<div class="lines">
+<p class="if"><span class="cond">if you were made Engine Specialist today</span> <b>Zeke:</b> Engine Specialist. You. Today. I could knit you a second one. I won&#x27;t. I might.</p>
+<p><b>Zeke:</b> Close your eyes. Hold out your arms. Further. Further than that.</p>
+<p><b>Zeke:</b> It&#x27;s finished. Your scarf. It&#x27;s far too long. You&#x27;ll have to wind it round twice. Three times.</p>
+<p><b>Kovac:</b> Two dropped stitches. I counted. Um. It&#x27;s perfect anyway. It is. It&#x27;s perfect.</p>
+<p><b>Mira Dahl:</b> Wind it from the left. The lumps sit at the back that way. Nobody will know.</p>
+<p><b>Zeke:</b> I put my name forward again. Calder signed it. She said &quot;About time,&quot; which from her is a parade.</p>
+<p><b>Zeke:</b> And Dad&#x27;s reply came. He wrote it on his last shift, sat by the engines. You can tell. It&#x27;s short.</p>
+<p><b>Zeke:</b> &quot;She&#x27;s sulking. Give her a minute. You&#x27;ll know her better than I did.&quot;</p>
+<p><b>Zeke:</b> Hang on. Again. &quot;You&#x27;ll know her better than I did.&quot;</p>
+<p><b>Kovac:</b> Oh. That&#x27;s. Um. That&#x27;s a very good line. Sorry. It is.</p>
+<p><b>Mira Dahl:</b> Read it again at breakfast. It&#x27;ll still be true.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Read it once more. Slowly.”</span><span class="rep"><b>Zeke:</b> &quot;You&#x27;ll know her better than I did.&quot; There. That&#x27;s three. I&#x27;ll stop. I won&#x27;t stop.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> &quot;She&#x27;s sulking. Give her a minute. You&#x27;ll know her better than I did.&quot; Thank you, [your name]. I wanted someone to ask.</span></li>
+<li><span class="say">“It&#x27;s perfect. I&#x27;m never taking it off.”</span><span class="rep"><b>Zeke:</b> You&#x27;ll take it off in the engine room. Health and safety. But otherwise, yes. Good.</span></li>
+<li><span class="say">“You were ready all along. I knew it on day one.”</span><span class="rep"><b>Zeke:</b> Day one, you didn&#x27;t know where the lift was. But thank you, [your name]. Properly.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Right, onward. Wear it to the board on Monday. Calder will pretend not to see.</p>
+</div>
+<div class="extra"><span>Keepsake: the scarf in Works orange, finished, far too long</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Zeke: “Been to your bunk yet? Go on. No, wait. I&#x27;ll tell you first.”</p>
+<div class="lines">
+<p><b>Zeke:</b> You missed knit and natter. That&#x27;s all right. The scarf found you anyway. It&#x27;s on your bunk.</p>
+<p><b>Zeke:</b> It&#x27;s far too long. I&#x27;ve left a note saying so, in case you try winding it twice.</p>
+<p><b>Zeke:</b> Calder signed my application. Two words. &quot;About time.&quot; I&#x27;ve been walking taller since. Ask Reyes.</p>
+<p><b>Zeke:</b> And Dad&#x27;s retired. He sent me a line from his last shift. &quot;You&#x27;ll know her better than I did.&quot;</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That&#x27;s a lovely thing to be told.”</span><span class="rep"><b>Zeke:</b> It is, isn&#x27;t it. I&#x27;ve read it more times than I&#x27;ll admit. Eleven. I&#x27;ll admit eleven.</span><span class="warm">If it’s the reply they need most: <b>Zeke:</b> It is. I&#x27;ve read it eleven times. I&#x27;m glad it was you I told first, [your name]. Well. Second. Kovac guessed.</span></li>
+<li><span class="say">“I&#x27;ll wear it to the board on Monday.”</span><span class="rep"><b>Zeke:</b> Calder won&#x27;t say a word. That&#x27;s how you&#x27;ll know she&#x27;s noticed.</span></li>
+<li><span class="say">“Shall I help you write back to him?”</span><span class="rep"><b>Zeke:</b> Write back? Oh. Yes. Short, he likes short. You can cut the rambling. There&#x27;ll be rambling.</span></li>
+</ul></div>
+<p><b>Zeke:</b> Right, onward. Breakfast. I&#x27;ll be last in again. Coil three wanted a word.</p>
+</div>
+<div class="extra"><span>Keepsake: the scarf in Works orange, finished, far too long</span><span>A Mail later, “On your bunk”: Far too long. Wind it three times. Not twice. I&#x27;ll check. Z</span></div>
+</div>
+<div class="cbox"><label for="c-torres">Your notes on Zeke's story</label><textarea id="c-torres" data-k="torres" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-teague"><header><span class="eyebrow">Works technician. Leaves on Day 21 for the Heron.</span><h2>Theo Teague: “The last page”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">Junior common room · Day from 3</span></div>
+<p class="hint">Theo: “Oi. The comics wall. Go and look. I&#x27;ll pretend I&#x27;m not watching.”</p>
+<div class="lines">
+<p><b>Theo:</b> New strip on the wall. Three panels. It&#x27;s called &quot;The New One&quot;. Go on.</p>
+<p><b>Theo:</b> Small figure. Big kitbag. Wrong spanner. It&#x27;s you, before you ask.</p>
+<p><b>Theo:</b> It&#x27;s a kind one. I don&#x27;t do the other kind. Never have.</p>
+<p><b>Theo:</b> Panel two, you ask Calder for help. She&#x27;s up in the corner. Very tidy cloud.</p>
+<p><b>Theo:</b> Panel three, you get it right. Everyone in panel three looks very surprised. Mostly you.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“It&#x27;s brilliant. Can I have a copy?”</span><span class="rep"><b>Theo:</b> No. The wall gets it first. You get a copy when you&#x27;re famous.</span><span class="warm">If it’s the reply they need most: <b>Theo:</b> Ha. No. Wall first. You get a copy when you&#x27;re famous. Or when I&#x27;m gone. Whichever comes first.</span></li>
+<li><span class="say">“Why the wrong spanner?”</span><span class="rep"><b>Theo:</b> Everyone&#x27;s first week is the wrong spanner. Mine was. It&#x27;s the law of comics.</span></li>
+<li><span class="say">“I did grab the wrong spanner. Tuesday. Don&#x27;t tell anyone.”</span><span class="rep"><b>Theo:</b> Too late. It&#x27;s on a wall. That&#x27;s the trouble with walls.</span></li>
+</ul></div>
+<p><b>Theo:</b> Right. My tea&#x27;s gone cold. That&#x27;s not a comic. That&#x27;s just sad.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">Tea corner · Day 3-21</span></div>
+<p class="hint">Theo: “Need you for ten minutes. Sitting still. One of us has to manage it.”</p>
+<div class="lines">
+<p><b>Theo:</b> Sit there. Chin up. No, your chin. Mine won&#x27;t keep still. That&#x27;s why I need yours.</p>
+<p><b>Theo:</b> Ten minutes. I&#x27;ve never managed ten minutes. I timed myself once. Four.</p>
+<p><b>Theo:</b> Done. Look. You, fixing the kettle. You look very serious. The kettle looks worried.</p>
+<p><b>Theo:</b> Want to see a thing? Nobody&#x27;s seen it. Not Hart, not Abara. Here.</p>
+<p><b>Theo:</b> Calder. The tidy cloud. Only she&#x27;s smiling. I saw it once. The board went green on a Friday. Three seconds.</p>
+<p><b>Theo:</b> I want her to have it. I can&#x27;t hand it over. I got as far as her door once. Then I drew the door.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;ll take it to her. You don&#x27;t have to come.”</span><span class="rep"><b>Theo:</b> Would you? Don&#x27;t say it&#x27;s from me. She&#x27;ll know. Say it anyway.</span></li>
+<li><span class="say">“That&#x27;s her exactly. That&#x27;s the three seconds.”</span><span class="rep"><b>Theo:</b> Yeah. That&#x27;s the hard bit. Drawing a smile on someone who saves them up.</span></li>
+<li><span class="say">“Give it to her at Friday tea. Make a show of it.”</span><span class="rep"><b>Theo:</b> A show. With Calder watching. She&#x27;d time my speech. I&#x27;d lose.</span><span class="warm">If it’s the reply they need most: <b>Theo:</b> Ha. Picture it. Me, one page, the whole tea corner. She&#x27;d time my speech. I&#x27;d lose. Worth it, though.</span></li>
+</ul></div>
+<p><b>Theo:</b> Right. Cloud back in the folder. Folder under my arm. Arm back to work.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">Bow lounge · Day 3-21, after Day 7</span></div>
+<p class="hint">Theo: “Bar&#x27;s quiet. Come and be quiet with me. I&#x27;ll talk. You do the quiet bit.”</p>
+<div class="lines">
+<p><b>Theo:</b> Blunt version first. I&#x27;m going. The Heron, on the twenty-first. Papers signed.</p>
+<p><b>Theo:</b> Long version. Eight stations before I was fourteen. Always the new kid. Every single time.</p>
+<p><b>Theo:</b> You get good at it. First week, you draw everyone. Then you&#x27;ve got them, whatever happens.</p>
+<p><b>Theo:</b> Here&#x27;s the punchline. Ready? I like this ship.</p>
+<p><b>Theo:</b> Which is exactly when you go. Before it gets heavy. Before they get used to you.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Go on. I&#x27;m listening.”</span><span class="rep"><b>Theo:</b> That&#x27;s it, mostly. Eight stations, one kitbag, a lot of pencils. And now a ship I like. Annoying.</span></li>
+<li><span class="say">“Eight stations. That&#x27;s a lot of comics walls.”</span><span class="rep"><b>Theo:</b> Eight walls. Every page is in a box under my bunk.</span><span class="warm">If it’s the reply they need most: <b>Theo:</b> Ha. Eight walls. All of it&#x27;s in a box under my bunk. You&#x27;ll go in the box. Near the top.</span></li>
+<li><span class="say">“I know being the new one. Not eight times. But I know it.”</span><span class="rep"><b>Theo:</b> Yeah. You did it well, too. I watched. For the comic. Purely professional.</span></li>
+</ul></div>
+<p><b>Theo:</b> Right. That got heavy. See? This is what I mean.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 4</span><span class="meta">somewhere quiet, off duty · Day 18-20</span></div>
+<p class="hint">Theo: “I need an editor. Five minutes. You&#x27;re it. No pay.”</p>
+<div class="lines">
+<p><b>Theo:</b> The Wren strip. Three months of it. Every panel&#x27;s done but one. The last one.</p>
+<p><b>Theo:</b> I&#x27;ve drawn it six ways. All rubbish. Seven, with the one where the cloud cries. I don&#x27;t count that one.</p>
+<p><b>Theo:</b> You pick. New hands see a place properly. Old hands just see the kettle.</p>
+<p><b>Theo:</b> So. What goes in the last panel?</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Me at the beam, with my name on it.”</span><span class="rep"><b>Theo:</b> Big letters. You&#x27;ll be the first name I&#x27;ve finished on this ship.</span></li>
+<li><span class="say">“The whole tea corner, on a Friday.”</span><span class="rep"><b>Theo:</b> The whole lot. Calder, the mug rack, Halloran halfway through a joke. Big panel. I&#x27;ll draw small.</span><span class="warm">If it’s the reply they need most: <b>Theo:</b> The whole lot. Calder, the mug rack, Halloran halfway through a joke. I&#x27;ll draw very small. Ha. That&#x27;s the one.</span></li>
+<li><span class="say">“The Wren from outside. Small, and all lit up.”</span><span class="rep"><b>Theo:</b> From outside. Like from the Tern&#x27;s window. Yeah. That&#x27;s how I&#x27;ll see her on Sunday.</span></li>
+</ul></div>
+<p><b>Theo:</b> Done, then. The strip&#x27;s finished. Huh. I thought I&#x27;d like that more.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">his send-off, the shuttle bay, 14:30-15:00 (he boards the 15:00 Tern) · Day 21</span></div>
+<p class="hint">Theo: “Shuttle bay, half two. Don&#x27;t be late. I&#x27;m never late for leaving.”</p>
+<div class="lines">
+<p><b>Theo:</b> There you are. Good. I had a speech. I drew it instead. Easier.</p>
+<p><b>Theo:</b> Here. The last page. Careful, the ink&#x27;s two hours old.</p>
+<p><b>Theo:</b> Last panel&#x27;s the one you picked. Look.</p>
+<p class="if"><span class="cond">if you chose the beam</span> <b>Theo:</b> Last panel. You at the beam, your name in big letters. Biggest letters I&#x27;ve got.</p>
+<p class="if"><span class="cond">if you chose the tea corner</span> <b>Theo:</b> Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.</p>
+<p class="if"><span class="cond">if you chose the Wren from outside</span> <b>Theo:</b> Last panel. The Wren from outside, every window lit. You&#x27;re in the third one along.</p>
+<p><b>Theo:</b> Finished it. Don&#x27;t frame it.</p>
+<p><b>Theo:</b> Frame it.</p>
+<p><b>Pell:</b> He drew me with a sandwich. Every panel. Every single one.</p>
+<p><b>Zeke:</b> Your new ship&#x27;s lucky. Tell her coils I said hello. They&#x27;ll know.</p>
+<p><b>Theo:</b> New ship, new playlist. Done. Fifteen songs. One too long. Obviously.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;ll frame it. Promise.”</span><span class="rep"><b>Theo:</b> Good. Somewhere Calder walks past. She&#x27;ll straighten it.</span><span class="warm">If it’s the reply they need most: <b>Theo:</b> Good. Hang it where Calder walks past. She&#x27;ll straighten it every time. That&#x27;s how you&#x27;ll know she likes it.</span></li>
+<li><span class="say">“It was good, having you here.”</span><span class="rep"><b>Theo:</b> Don&#x27;t. Yeah. You too. Stop it now, or I&#x27;ll miss the Tern on purpose.</span></li>
+<li><span class="say">“Draw me a page from your new ship?”</span><span class="rep"><b>Theo:</b> First week. I&#x27;ll draw everyone. Then a page for you, with a very small cloud in the corner. For the Chief.</span></li>
+</ul></div>
+<p><b>Theo:</b> Right. Ramp&#x27;s down. That&#x27;s me.</p>
+<p><b>Theo:</b> Oi. From up here you all look very small. Good panel, that.</p>
+<p><b>Theo:</b> Laters, [your name]. Don&#x27;t do anything I&#x27;d draw.</p>
+</div>
+<div class="extra"><span>Keepsake: the last page of the Wren strip, signed, with you in it</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">your bunk</span></div>
+<p class="hint">Theo: “Left you something on your bunk. Mind the ink.”</p>
+<div class="lines">
+<p><b>Theo:</b> You weren&#x27;t at the bay. Fine. Drew you anyway.</p>
+<p><b>Theo:</b> That&#x27;s the last page of the Wren strip. The last panel&#x27;s yours. You&#x27;ll know which.</p>
+<p><b>Theo:</b> Frame it. Don&#x27;t argue. I can&#x27;t hear you from out here.</p>
+<p><b>Theo:</b> Playlist&#x27;s with O&#x27;Neill. Under protest. Fifteen songs. You know the rest.</p>
+<p><b>Theo:</b> Laters. T.</p>
+</div>
+<div class="extra"><span>Keepsake: the last page of the Wren strip, signed, with you in it</span><span>A Mail later, “From the Heron”: Day three, new ship. New kid: me. Wrong spanner: mine. Their Chief isn&#x27;t a cloud. More of a hedge. A friendly one. I keep drawing a tidy cloud in the corner of every page anyway. Tell Calder. Don&#x27;t tell her. Tell her. T.</span></div>
+</div>
+<div class="cbox"><label for="c-teague">Your notes on Teague's story</label><textarea id="c-teague" data-k="teague" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-calder"><header><span class="eyebrow">Head of Works. Stays aboard.</span><h2>Chief Ines Calder: “Well done”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Calder: “Tea&#x27;s poured. Sit, if you&#x27;re sitting.”</p>
+<div class="lines">
+<p><b>Calder:</b> Friday tea. I&#x27;m not on a break. I&#x27;m standing near the tea.</p>
+<p><b>Calder:</b> I started in a shipyard. Two years sweeping swarf. Metal shavings. Off every floor.</p>
+<p><b>Calder:</b> Best two years. You learn where everything falls. And why.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Two years of sweeping? I&#x27;d have gone mad.”</span><span class="rep"><b>Calder:</b> I did. Quietly. It passed.</span></li>
+<li><span class="say">“What did it teach you?”</span><span class="rep"><b>Calder:</b> Where things go wrong. A lathe throws swarf left when it&#x27;s out of true. You see it before you hear it.</span></li>
+<li><span class="say">“Shall I sweep the bay after shift? I&#x27;d like to see.”</span><span class="rep"><b>Calder:</b> You would. Fine. Left of the lathe first.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> Fine. Left of the lathe first. Then tell me what you find. I&#x27;ll want the numbers.</span></li>
+</ul></div>
+<p><b>Calder:</b> And before you ask. It&#x27;s a mug.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Calder: “Hands free? I need two minutes of them.”</p>
+<div class="lines">
+<p><b>Calder:</b> Hold this. Both hands. I&#x27;m moving the shelf.</p>
+<p><b>Calder:</b> Heavier than it looks. Most things are.</p>
+<p><b>Calder:</b> Don&#x27;t open it. It isn&#x27;t mine.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“(Hold it very carefully)”</span><span class="rep"><b>Calder:</b> Good. Give it here.</span></li>
+<li><span class="say">“Whose is it?”</span><span class="rep"><b>Calder:</b> Someone&#x27;s. Shelf&#x27;s done. Give it here.</span></li>
+<li><span class="say">“I&#x27;ll fix that shelf bracket while it&#x27;s down.”</span><span class="rep"><b>Calder:</b> It&#x27;s at four turns. It wants five. Go on.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> Four turns. It wants five. You heard that too. Good. Go on.</span></li>
+</ul></div>
+<p><b>Calder:</b> Right. Back to it.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Calder: “You&#x27;re still here. So am I. Sit a minute.”</p>
+<div class="lines">
+<p><b>Calder:</b> A letter. On my device. Eleven days ago. Opened. Not answered.</p>
+<p><b>Calder:</b> My first chief. Fenn. Rhoda Fenn. She&#x27;s retiring. Marra Station.</p>
+<p><b>Calder:</b> She taught me everything I know. Every serial number, every sound. She never once said I&#x27;d done well.</p>
+<p><b>Calder:</b> I don&#x27;t know what to write back. That&#x27;s new. I always know what to write.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“What would you want to say, if it were easy?”</span><span class="rep"><b>Calder:</b> Thank you. And: was it on purpose. That&#x27;s two things. That&#x27;s the problem.</span></li>
+<li><span class="say">“Start with one true sentence. The rest follows.”</span><span class="rep"><b>Calder:</b> One true sentence. Hm. That&#x27;s a procedure. I can do a procedure.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> One true sentence. That&#x27;s a procedure. I can follow a procedure. Thank you. I mean that.</span></li>
+<li><span class="say">“I&#x27;ve got a letter I haven&#x27;t answered too.”</span><span class="rep"><b>Calder:</b> Then we&#x27;re both behind. Don&#x27;t tell anyone.</span></li>
+</ul></div>
+<p><b>Calder:</b> That&#x27;s enough of that. Go and eat something.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 4</span><span class="meta">an appointment</span></div>
+<p class="hint">Calder: “Your progress talk. Sit. It&#x27;s not about the numbers today.”</p>
+<div class="lines">
+<p><b>Calder:</b> Your numbers are fine. Better than fine. That&#x27;s not why I wanted the time.</p>
+<p><b>Calder:</b> Am I too hard on you? Honest answer. I&#x27;ll know if it isn&#x27;t.</p>
+<p><b>Calder:</b> The last junior I trained transferred to the Halcyon. Very good hands. Never wrote. Not once.</p>
+<p><b>Calder:</b> I was hard on them. I told myself it was for them. I&#x27;m not sure it was. It might have been for me.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Sometimes. But I always know where I stand. That matters.”</span><span class="rep"><b>Calder:</b> Sometimes. Noted. Thank you for the honest one.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> Sometimes. Noted, and I&#x27;ll act on it. You know where you stand. That was the point. I&#x27;d forgotten it was the point.</span></li>
+<li><span class="say">“Why do you think they never wrote?”</span><span class="rep"><b>Calder:</b> Busy. Or I didn&#x27;t leave a door open. Probably the door.</span></li>
+<li><span class="say">“My best teacher was hard too. I still write to them.”</span><span class="rep"><b>Calder:</b> Do you. Hm. Then it can go either way. That helps more than you&#x27;d think.</span></li>
+</ul></div>
+<p><b>Calder:</b> Right. Next talk in four weeks. Book it.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">Calder&#x27;s question (the Works Friday tea, the Pillar 5 career meeting): plays just before her question · Day 26</span></div>
+<p class="hint">Calder: “Stay for the tea. All of it. Near the front.”</p>
+<div class="lines">
+<p><b>Calder:</b> Four weeks. Mugs down a minute. Not you, Pell. You can hold yours.</p>
+<p><b>Calder:</b> I don&#x27;t do this in front of people. You all know that. I&#x27;m doing it anyway.</p>
+<p><b>Calder:</b> My first chief wrote to me. Fenn. I answered her. Late. Four drafts.</p>
+<p class="if"><span class="cond">if you told her to write one true sentence first</span> <b>Calder:</b> One true sentence first, then the rest. Someone told me that. It works.</p>
+<p><b>Calder:</b> She wrote back two words. Took her thirty years. I won&#x27;t take that long.</p>
+<p><b>Calder:</b> [your name]. Well done.</p>
+<p><b>Halloran:</b> Oh, that&#x27;s lovely. Sorry, Chief. My hands have started clapping on their own.</p>
+<p><b>Calder:</b> Halloran.</p>
+<p><b>Calder:</b> Fine. Carry on, then.</p>
+<p><b>Pell:</b> Get in. That&#x27;s ours, that is. Works trained. Pell approved.</p>
+<p><b>Zeke:</b> Nobody look at me. I&#x27;m fine. It&#x27;s the tea. It&#x27;s very hot tea.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Thank you, Chief.”</span><span class="rep"><b>Calder:</b> Noted. Don&#x27;t make a habit of earning it. No. Do.</span></li>
+<li><span class="say">“Four weeks. Fenn took thirty years.”</span><span class="rep"><b>Calder:</b> I had a head start. I knew what it was like without.</span></li>
+<li><span class="say">“I&#x27;ll sign the board and get back to work.”</span><span class="rep"><b>Calder:</b> Good. Exactly what I&#x27;d have said.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> Good. Exactly what I&#x27;d have said, and the board agrees. Twelve jobs. Take the scrubber first.</span></li>
+</ul></div>
+<p><b>Calder:</b> Right. That&#x27;s that. Now. My question.</p>
+</div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Calder: “There&#x27;s something on your bench. You&#x27;ll want to see it first.”</p>
+<div class="lines">
+<p><b>Calder:</b> You&#x27;ve seen the toolbox on your bench. Borrowed. Return it when you&#x27;re done. No hurry.</p>
+<p><b>Calder:</b> I answered Fenn. One true sentence, then the rest. She wrote back. Two words.</p>
+<p><b>Calder:</b> &quot;Well done.&quot; Took her thirty years.</p>
+<p><b>Calder:</b> I won&#x27;t take that long. So. Plainly, while I&#x27;ve got the nerve.</p>
+<p><b>Calder:</b> Well done, [your name].</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Thank you, Chief. That means a lot.”</span><span class="rep"><b>Calder:</b> It should. I don&#x27;t hand it out.</span></li>
+<li><span class="say">“I&#x27;ll look after the toolbox. Every tool back in its place.”</span><span class="rep"><b>Calder:</b> I know you will. That&#x27;s why it&#x27;s on your bench.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> I know. That&#x27;s why it&#x27;s on your bench and not anyone else&#x27;s. Here. The spare key. Keep it.</span></li>
+<li><span class="say">“Thirty years. You only took one.”</span><span class="rep"><b>Calder:</b> Don&#x27;t get used to it.</span></li>
+</ul></div>
+<p><b>Calder:</b> Right. Back to it. Board&#x27;s at sixteen.</p>
+</div>
+<div class="extra"><span>Keepsake: a spare key to the toolbox, on a loop of Works orange wire</span></div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta">Works bay · Day the next workday after beat 5</span></div>
+<p class="hint">Calder: “Your bench. Before the board.”</p>
+<div class="lines">
+<p><b>Calder:</b> Your bench. Before you start.</p>
+<p><b>You:</b> &quot;Borrowed. Return it when you&#x27;re done. I.C.&quot;</p>
+<p><b>Calder:</b> Fenn&#x27;s. Then mine. Now it&#x27;s on your bench. That&#x27;s all it means. Don&#x27;t read more into it.</p>
+<p><b>Calder:</b> The top tray sticks. Lift from the left. Fenn never fixed it. Neither did I. On purpose, probably.</p>
+<p><b>Calder:</b> Hm.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“(Open it. Every tool in its place.)”</span><span class="rep"><b>Calder:</b> Thirty-one tools. All where she left them. Keep them there.</span></li>
+<li><span class="say">“Every tool back where it was. I&#x27;ll keep it that way.”</span><span class="rep"><b>Calder:</b> I know. That&#x27;s why it&#x27;s on your bench.</span><span class="warm">If it’s the reply they need most: <b>Calder:</b> I know. Oil on the hinges, not the tray. Here. The spare key. That part isn&#x27;t borrowed.</span></li>
+<li><span class="say">“My first teacher lent me a tool once. I&#x27;ve still got it.”</span><span class="rep"><b>Calder:</b> Then you know how this goes. You give it back. Then one day you lend yours.</span></li>
+</ul></div>
+<p><b>Calder:</b> Right. Board&#x27;s at seventeen. Pick two. Back to it.</p>
+</div>
+<div class="extra"><span>Keepsake: a spare key to the toolbox, on a loop of Works orange wire</span></div>
+</div>
+<div class="cbox"><label for="c-calder">Your notes on Calder's story</label><textarea id="c-calder" data-k="calder" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-halloran"><header><span class="eyebrow">Works systems officer. Stays aboard.</span><h2>Emeka Halloran: “Groaning means breathing”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">at a meal</span></div>
+<p class="hint">Halloran: “Morning, morning. I&#x27;ve a joke for you. You&#x27;ll regret it. Sit.”</p>
+<div class="lines">
+<p><b>Halloran:</b> Morning, morning. Sit down, sit down. Have you eaten? Good. Then you&#x27;re strong enough.</p>
+<p><b>Halloran:</b> Number two hundred and seventy-one. Ready? What&#x27;s a spanner&#x27;s favourite day of the week?</p>
+<p><b>Halloran:</b> Torque-sday. Ha! Sorry. I laughed before I got there. I always do.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That&#x27;s dreadful.”</span><span class="rep"><b>Halloran:</b> Isn&#x27;t it? Dreadful&#x27;s the whole point. Dreadful is lovely.</span></li>
+<li><span class="say">“(Groan)”</span><span class="rep"><b>Halloran:</b> There it is. That&#x27;s the noise. Lovely.</span></li>
+<li><span class="say">“Why number two hundred and seventy-one?”</span><span class="rep"><b>Halloran:</b> Because yesterday was two hundred and seventy. I keep count. Somebody has to.</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> Because yesterday was two hundred and seventy. I keep count, so nobody gets the same one twice. Tidy, isn&#x27;t it?</span></li>
+</ul></div>
+<p><b>Halloran:</b> That one&#x27;s my dad&#x27;s. They&#x27;re all my dad&#x27;s, really.</p>
+<p><b>Halloran:</b> A hundred and forty-odd left. Then I&#x27;ll have to write my own. Heaven help you all.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">Tea corner</span></div>
+<p class="hint">Halloran: “Got a minute by the mug rack? I&#x27;ve something to show you. It isn&#x27;t a scone.”</p>
+<div class="lines">
+<p><b>Halloran:</b> Here. Careful with it. The spine&#x27;s held on with tape and hope.</p>
+<p><b>Halloran:</b> My dad&#x27;s joke book. Four hundred and twelve of them. All numbered, all in his hand.</p>
+<p><b>Halloran:</b> Look how the writing goes. Neat at number one. By four hundred you can&#x27;t read it. The jokes get worse too.</p>
+<p><b>Halloran:</b> He had rules. One a day. Never skip one. Never tell the same one twice.</p>
+<p><b>Halloran:</b> And when the whole table groans? &quot;Groaning means they&#x27;re breathing.&quot; That was his.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“He sounds like a lot of fun.”</span><span class="rep"><b>Halloran:</b> He was. Loud, mostly. You&#x27;d hear him a deck away.</span></li>
+<li><span class="say">“Can I read one?”</span><span class="rep"><b>Halloran:</b> Number thirty. &quot;What&#x27;s brown and sticky? A stick.&quot; He laughed at that one for a week.</span></li>
+<li><span class="say">“Do you keep it somewhere safe?”</span><span class="rep"><b>Halloran:</b> Biscuit tin, top shelf in my cabin. Then down to breakfast every morning, in my pocket.</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> Biscuit tin, top shelf. Every morning it comes to breakfast in my pocket, every night it goes home. Safest book on the ship.</span></li>
+</ul></div>
+<p><b>Halloran:</b> Right. Back in the pocket. Have you had a biscuit today? Have one. Go on.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">Hydroponics garden</span></div>
+<p class="hint">Halloran: “Walk round the garden with me? The tomatoes won&#x27;t mind. I&#x27;d like the company.”</p>
+<div class="lines">
+<p><b>Halloran:</b> Dad died a few years back. It was peaceful. I&#x27;m all right about it. Mostly.</p>
+<p><b>Halloran:</b> He filled a room, my dad. You always knew which room. You could hear the groaning.</p>
+<p><b>Halloran:</b> After, nobody groaned at breakfast any more. So I kept telling them. Somebody had to keep them going.</p>
+<p><b>Halloran:</b> I send Mum one every week. She says they&#x27;re not the same written down. You need the groan.</p>
+<p><b>Halloran:</b> She says the kitchen&#x27;s too still without it. She says it kindly. She says everything kindly.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“What if she heard a whole table groan?”</span><span class="rep"><b>Halloran:</b> A whole table? Oh, she&#x27;d love that. But I couldn&#x27;t ask people for jokes. Could I?</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> A whole table, groaning. Oh, she&#x27;d love that. I couldn&#x27;t ask anyone. You&#x27;d do the asking? Ah, you&#x27;re a treasure.</span></li>
+<li><span class="say">“So he&#x27;s there every morning, at breakfast.”</span><span class="rep"><b>Halloran:</b> Every morning. And when I get to four hundred and twelve, I&#x27;ll start again at one.</span></li>
+<li><span class="say">“Our house is never quiet. I miss that, here.”</span><span class="rep"><b>Halloran:</b> Ah, then you know. A home wants a bit of noise in it. Ours had Dad.</span></li>
+</ul></div>
+<p><b>Halloran:</b> Look at me, going on. The tomatoes have heard it all before. Have you eaten tonight?</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 4</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Halloran: “Could I ask you something? It&#x27;s a bit silly. Well. It&#x27;s very silly.”</p>
+<div class="lines">
+<p><b>Halloran:</b> I don&#x27;t ask people for things. You&#x27;ll have noticed. I&#x27;m the one who says yes.</p>
+<p><b>Halloran:</b> But I&#x27;m asking. I&#x27;m nearly at number two hundred and eighty-nine. It was Dad&#x27;s favourite.</p>
+<p><b>Halloran:</b> It&#x27;s awful. The worst in the book. He told it on my birthday every year, and Mum groaned like a door.</p>
+<p><b>Halloran:</b> Will you laugh? Properly. Even if it&#x27;s dreadful. Especially if it&#x27;s dreadful.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;ll laugh. Promise.”</span><span class="rep"><b>Halloran:</b> Not a polite laugh, mind. A proper one. From the boots.</span></li>
+<li><span class="say">“What if I groan instead?”</span><span class="rep"><b>Halloran:</b> Even better. Dad would say that&#x27;s the best laugh there is.</span></li>
+<li><span class="say">“I&#x27;ll get there early and save you a seat.”</span><span class="rep"><b>Halloran:</b> Ah. Nobody saves me a seat. I&#x27;m usually the one saving them.</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> Would you? Nobody saves me a seat. I&#x27;m always saving everyone else&#x27;s. Oh, that&#x27;s lovely. That&#x27;s done me good.</span></li>
+</ul></div>
+<p><b>Halloran:</b> There. That&#x27;s me asked. It wasn&#x27;t so bad. A bit like pulling a tooth.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">breakfast at the Works tables (a weekday) · Day from 15</span></div>
+<p class="hint">Halloran: “Breakfast? Works tables. It&#x27;s a big one today. Number two hundred and eighty-nine.”</p>
+<div class="lines">
+<p><b>Halloran:</b> Morning, morning. Right. Is everyone settled? Number two hundred and eighty-</p>
+<p><b>Pell:</b> Oi oi. Not today, Emeka. Today you&#x27;re the audience. [your name], is it recording? Good.</p>
+<p class="if"><span class="cond">if you collected the jokes</span> <b>Dr Elif Yoon:</b> Sorry. Before you start. Why did the patient climb the ladder? I said take it one step at a time. Oh, I&#x27;m sorry.</p>
+<p class="if"><span class="cond">if you collected the jokes</span> <b>Nils Lemaire:</b> Why do stars never pay for tea? They&#x27;re always out. That&#x27;s two points to me.</p>
+<p class="if"><span class="cond">if you collected the jokes</span> <b>Karin Yilmaz:</b> Why did the loaf join Works? It wanted to rise through the ranks. Treaty terms permitting.</p>
+<p class="if"><span class="cond">if you didn&#x27;t collect the jokes</span> <b>Pell:</b> Why don&#x27;t pumps keep secrets? They always leak. Thank you, thank you.</p>
+<p class="if"><span class="cond">if you didn&#x27;t collect the jokes</span> <b>Kovac:</b> Um. Why was the scrubber sad? It was a bit run down. That&#x27;s it. That&#x27;s the joke. Sorry.</p>
+<p class="if"><span class="cond">if you didn&#x27;t collect the jokes</span> <b>Zeke:</b> What do you call a coil that tells jokes? Current comedy. Shocking, I know. Right, onward.</p>
+<p><b>Halloran:</b> Oh, dear me. Oh, they&#x27;re terrible. Stop. No, don&#x27;t stop.</p>
+<p><b>Halloran:</b> I can&#x27;t. I can&#x27;t breathe. Groaning means breathing, and I&#x27;m doing both.</p>
+<p><b>Halloran:</b> Right. Fair&#x27;s fair. Number two hundred and eighty-nine. How does the Wren say hello?</p>
+<p><b>Halloran:</b> Hull-o.</p>
+<p><b>Halloran:</b> Listen to that. The whole table, like one long note. Dad would be beside himself.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“(A long, loud groan)”</span><span class="rep"><b>Halloran:</b> That&#x27;s the one. Mum&#x27;ll hear that on Coriel without the recording.</span></li>
+<li><span class="say">“Here&#x27;s one for your mum. What&#x27;s a ship full of groaning? The Wren at breakfast.”</span><span class="rep"><b>Halloran:</b> Ha! That&#x27;s dreadful. That&#x27;s perfect. Mum&#x27;ll tell that one to the neighbours for a month.</span></li>
+<li><span class="say">“Let&#x27;s send it to her now, while it&#x27;s warm.”</span><span class="rep"><b>Halloran:</b> Now? Yes. Off it goes. Coriel&#x27;s a long way, but it&#x27;ll get there groaning.</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> Now? Yes, let&#x27;s. Off it goes, groans and all. You think of everything. Have you eaten? You have. Course you have.</span></li>
+</ul></div>
+<p><b>Halloran:</b> Thanks ever so. Every one of you. Number two hundred and ninety&#x27;s tomorrow. You&#x27;ve been warned.</p>
+</div>
+<div class="extra"><span>A Mail later, “From Coriel”: Mum&#x27;s written. She played it twice. She laughed till she cried, the good kind. The kitchen was loud all evening, she says. She&#x27;s sending one back and won&#x27;t say which. Have you eaten? E.</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">Tea corner</span></div>
+<p class="hint">Halloran: “Oh, you missed a morning. Sit. You&#x27;ll want all of it.”</p>
+<div class="lines">
+<p><b>Halloran:</b> You missed a morning. Oh, you missed a morning.</p>
+<p><b>Halloran:</b> Yoon had the whole table going before I&#x27;d sat down. One joke after another. I groaned myself hoarse.</p>
+<p><b>Halloran:</b> Then I told two hundred and eighty-nine, and they all groaned at once. You&#x27;d have heard it on Deck 3.</p>
+<p><b>Halloran:</b> Yoon recorded it for Mum. She&#x27;s had it already. Lovely.</p>
+<p><b>Halloran:</b> Don&#x27;t look sorry. There&#x27;s always tomorrow. Number two hundred and ninety. It&#x27;s worse.</p>
+</div>
+<div class="extra"><span>A Mail later, “Coriel”: Mum&#x27;s had the recording. She says she laughed so much she had to sit on the stairs. She&#x27;s sending one back. She says it&#x27;s a good one. It won&#x27;t be. E.</span></div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta">at a meal</span></div>
+<p class="hint">Halloran: “Breakfast? Mum sent one back. I&#x27;ve been holding it in since six.”</p>
+<div class="lines">
+<p><b>Halloran:</b> Morning, morning. Sit. Mum&#x27;s sent one back. Her first ever. I&#x27;ve written it in the back of the book.</p>
+<p><b>Halloran:</b> Number four hundred and thirteen. Her handwriting, next to his. Look at that.</p>
+<p><b>Halloran:</b> Ready? Why do birds fly south? Because it&#x27;s too far to walk.</p>
+<p><b>Halloran:</b> It&#x27;s the worst yet. She&#x27;s very proud. I groaned so loud Brennan came out of the galley.</p>
+<p><b>Halloran:</b> And this is for you. My scone tin. Don&#x27;t ask about the dent. Long story, short drop.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Your dad would&#x27;ve loved that one.”</span><span class="rep"><b>Halloran:</b> He&#x27;d have pinched it. Told it every day for a week. Then said it was his.</span></li>
+<li><span class="say">“I&#x27;ll bring the tin back full.”</span><span class="rep"><b>Halloran:</b> You&#x27;ll do no such thing. Well. If you insist.</span><span class="warm">If it’s the reply they need most: <b>Halloran:</b> Will you? Oh, that&#x27;s how it works, isn&#x27;t it. A tin goes round. Lovely. I&#x27;ll eat whatever&#x27;s in it.</span></li>
+<li><span class="say">“That&#x27;s terrible. Tell me another.”</span><span class="rep"><b>Halloran:</b> Tomorrow. One a day. Rules are rules. His, and mine, and Mum&#x27;s now.</span></li>
+</ul></div>
+<p><b>Halloran:</b> Right. Have you eaten? You have now.</p>
+</div>
+<div class="extra"><span>Keepsake: a scone tin with a dent in the lid</span></div>
+</div>
+<div class="cbox"><label for="c-halloran">Your notes on Halloran's story</label><textarea id="c-halloran" data-k="halloran" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-bramwell"><header><span class="eyebrow">Works cadet. Arrives on Day 21, in Theo&#x27;s old bunk.</span><h2>Basil Bramwell: “Your turn”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">wherever you meet · Day 21</span></div>
+<p class="hint">Basil: “Hi, hi. Sorry. Are you the one from the beam?”</p>
+<div class="lines">
+<p><b>Basil:</b> Hello. Hi. Sorry. This is Deck 5. Zeke said. Hello.</p>
+<p><b>Basil:</b> Are you the one from the beam? Zeke said there&#x27;d be someone nearly as new as me.</p>
+<p><b>Basil:</b> Which way&#x27;s the Works bay? Do you get lost? Is the lift always that loud? Don&#x27;t answer all of them.</p>
+<p><b>Basil:</b> This is my plant. It&#x27;s from home. It didn&#x27;t like the Tern much. Neither did I.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“The Works bay&#x27;s just through there.”</span><span class="rep"><b>Basil:</b> Through there. Brilliant. I&#x27;ll pretend I knew that.</span></li>
+<li><span class="say">“I got lost twice on my first day.”</span><span class="rep"><b>Basil:</b> Twice? Oh, thank goodness. I&#x27;ll aim for three, then.</span><span class="warm">If it’s the reply they need most: <b>Basil:</b> Twice? Oh, that&#x27;s brilliant. Not for you. For me. So I can get lost loads and still be fine.</span></li>
+<li><span class="say">“The lift&#x27;s always that loud. You stop hearing it.”</span><span class="rep"><b>Basil:</b> Good. I thought it was cross with me.</span></li>
+</ul></div>
+<p><b>Basil:</b> Right. Kitbag, plant, Basil. All here. Hello, Wren.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">somewhere quiet, off duty · Day 22</span></div>
+<p class="hint">Basil: “My name&#x27;s on the beam! Have you seen? Can I show you my shelf? It&#x27;s a very small shelf.”</p>
+<div class="lines">
+<p><b>Basil:</b> My name&#x27;s on the beam. Basil Bramwell. Up there with everyone&#x27;s. I keep going back to look at it.</p>
+<p class="if"><span class="cond">if you&#x27;re close to Zeke</span> <b>Basil:</b> And you handed me the pen. Zeke said you&#x27;d want to. I nearly dropped it. Did I? I didn&#x27;t.</p>
+<p><b>Basil:</b> Then I put my plant on my new shelf. It looked at me. It&#x27;s worse. How is it worse?</p>
+<p class="if"><span class="cond">if you knew Theo</span> <b>Basil:</b> And under the shelf, someone&#x27;s drawn a tiny person waving. &quot;Hi, new one.&quot; Who did that? I love it.</p>
+<p><b>Basil:</b> Yellow at the edges. Is that too much water? Not enough? Is it the air? It&#x27;s the air.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Tove Cruz knows every plant aboard. I&#x27;ll take it to the garden.”</span><span class="rep"><b>Basil:</b> Would you? If I went I&#x27;d ask Cruz forty questions, and the plant would wilt while it waited.</span></li>
+<li><span class="say">“It&#x27;s had a long trip. Give it a day.”</span><span class="rep"><b>Basil:</b> A day. Yes. We&#x27;ve both had a long trip. We&#x27;ll both have a day.</span></li>
+<li><span class="say">“I brought a bit of home too. It&#x27;s on my shelf.”</span><span class="rep"><b>Basil:</b> Did you? What is it? No, don&#x27;t tell me. Show me. When I&#x27;m less new.</span><span class="warm">If it’s the reply they need most: <b>Basil:</b> Did you? Oh, brilliant. So it&#x27;s normal. Everybody&#x27;s shelf has a bit of home on it. I feel much better.</span></li>
+</ul></div>
+<p><b>Basil:</b> Right. Thanks, thanks. I&#x27;ll stop talking now. I won&#x27;t. But I&#x27;ll try.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">somewhere quiet, off duty · Day 23-24</span></div>
+<p class="hint">Basil: “Can I ask you some things? Lots of things. Quick ones. Mostly quick.”</p>
+<div class="lines">
+<p><b>Basil:</b> Does Calder ever blink? I watched her at the board. I counted. I got to none.</p>
+<p><b>Basil:</b> Is the tea rota first come, first served? No. There&#x27;s a rota on the wall. Halloran showed me. Twice.</p>
+<p><b>Basil:</b> Who does the Friday playlist now? Is it still one song too long? Pell says that&#x27;s tradition.</p>
+<p><b>Basil:</b> Sorry. One more. A real one.</p>
+<p><b>Basil:</b> Does it stop? Feeling like a visitor? Like you&#x27;re only borrowing the bunk?</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“It stopped for me in week two. One day it just had.”</span><span class="rep"><b>Basil:</b> One day it just had. All right. I&#x27;ll watch out for that day.</span></li>
+<li><span class="say">“Ask me again when you&#x27;ve got a mug on the rack.”</span><span class="rep"><b>Basil:</b> The mug rack! That&#x27;s how you know? Oh, I want a mug. When do I get a mug?</span></li>
+<li><span class="say">“My first nights, the ship&#x27;s hum kept me awake. Then one night it was just the hum.”</span><span class="rep"><b>Basil:</b> Just the hum. Yes. I&#x27;ve been listening to it too.</span><span class="warm">If it’s the reply they need most: <b>Basil:</b> You lay awake too? I thought it was only me. It&#x27;s quite a friendly hum, once you stop listening for it.</span></li>
+</ul></div>
+<p><b>Basil:</b> That&#x27;s helped. Thanks, thanks. I&#x27;ll still ask you a hundred things tomorrow. Sorry in advance.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">Basil&#x27;s new hand&#x27;s tea, the Works tea corner, Thursday · Day 25</span></div>
+<p class="hint">Basil: “My new hand&#x27;s tea! You&#x27;re coming? Bring nothing. That&#x27;s the rule, isn&#x27;t it?”</p>
+<div class="lines">
+<p><b>Basil:</b> Is that my mug? With my name on? Spelt right and everything. Brilliant.</p>
+<p><b>Tove Cruz:</b> Mm. Here. Less love, more light. That&#x27;s all it wanted. It&#x27;s a Wren plant now.</p>
+<p><b>Basil:</b> My plant. Look at it. It was yellow on Sunday. It&#x27;s green!</p>
+<p><b>Pell:</b> Somebody give the plant a mug. It&#x27;s earned one.</p>
+<p><b>Zeke:</b> Two new names on the beam this month, and now a plant. Coil three&#x27;s jealous.</p>
+<p><b>Halloran:</b> Here. I&#x27;ve cleared a space on the mug-rack shelf. Pop it there. Lovely.</p>
+<p><b>Halloran:</b> Everybody&#x27;s now. That&#x27;s how we do it here.</p>
+<p><b>Basil:</b> Everybody&#x27;s. Oh. It&#x27;s the first thing of mine that lives here. The rest is still in my kitbag.</p>
+<p><b>Basil:</b> This is for you. I painted two pots on the Tern. One for the plant, one for whoever helped. It&#x27;s the Wren. Badly.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Next year you&#x27;ll be clearing that shelf for someone.”</span><span class="rep"><b>Basil:</b> Me? Clearing the shelf? For someone newer than me? Oh. I&#x27;d like that.</span></li>
+<li><span class="say">“That plant&#x27;s more at home than either of us.”</span><span class="rep"><b>Basil:</b> It&#x27;s got a mug rack and everything. I&#x27;m a bit jealous of my own plant.</span></li>
+<li><span class="say">“Somebody made room for me, my first week. That&#x27;s what the shelf is.”</span><span class="rep"><b>Basil:</b> So it goes round. Somebody made room for you, and you made room for me.</span><span class="warm">If it’s the reply they need most: <b>Basil:</b> So it goes round. Someone made room for you, you made room for me, and one day I&#x27;ll make room. That&#x27;s the best thing I&#x27;ve heard here.</span></li>
+</ul></div>
+<p><b>Basil:</b> Everybody&#x27;s. I&#x27;m going to remember that one. Brilliant.</p>
+</div>
+<div class="extra"><span>Keepsake: a little clay pot he painted, with the Wren on it</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">Tea corner</span></div>
+<p class="hint">Basil: “Come and see the shelf! Quick! Well. Slowly. It&#x27;s a plant.”</p>
+<div class="lines">
+<p><b>Basil:</b> Look! On the mug-rack shelf. My plant. Tove Cruz brought it back this morning. Green as anything.</p>
+<p><b>Basil:</b> Cruz said it wanted less love and more light, then walked off. I think that&#x27;s a lot of talking, for Cruz.</p>
+<p><b>Basil:</b> My tea was brilliant. Halloran made room on the shelf for it. It&#x27;s everyone&#x27;s shelf, he said.</p>
+<p><b>Basil:</b> Here. I painted it on the Tern. It&#x27;s the Wren. It was for whoever helped. You answered all my questions.</p>
+</div>
+<div class="extra"><span>Keepsake: a little clay pot he painted, with the Wren on it</span><span>A Mail later, “My tea”: You missed a good one! Pell wanted the plant to have a mug. Zeke said coil three was jealous. Halloran put it on the shelf and said it belongs to everyone now. See you at breakfast? I&#x27;ve got questions. Obviously. B.</span></div>
+</div>
+<div class="cbox"><label for="c-bramwell">Your notes on Bramwell's story</label><textarea id="c-bramwell" data-k="bramwell" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-salo"><header><span class="eyebrow">Engine technician. Stays aboard.</span><h2>Saad Salo: “Twice”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">Engine overlook</span></div>
+<p class="hint">Saad: “Got a minute? New episode from the Halcyon. It&#x27;s a good one.”</p>
+<div class="lines">
+<p><b>Saad:</b> Hello, hello. Sit down. Last time on the Halcyon: my twin found a chair. The good one, by the mess window.</p>
+<p><b>Saad:</b> This week, a visiting inspector sat in it. My twin stood beside the chair for the whole of lunch. Not a word.</p>
+<p><b>Saad:</b> The inspector moved tables. The Halcyon&#x27;s calling it a victory. Next week: the inspector&#x27;s report.</p>
+<p><b>Saad:</b> One more bit of news. Not from the Halcyon. My little sister, Hala. She&#x27;s got into the academy.</p>
+<p><b>Saad:</b> Hala. Who used to hide in the laundry basket at bedtime. She&#x27;s going to be an officer.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“You must be so proud of her.”</span><span class="rep"><b>Saad:</b> I am. More than I can say. So I won&#x27;t, yet.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> I am. I keep reading her message, slowly, as if it might change. It doesn&#x27;t. She&#x27;s in.</span></li>
+<li><span class="say">“Will your twin make it a two-part episode?”</span><span class="rep"><b>Saad:</b> Three parts. Hala&#x27;s a whole series of her own.</span></li>
+<li><span class="say">“My family would have thrown a party.”</span><span class="rep"><b>Saad:</b> Mine will. On the Tevan belt they&#x27;ll hear it over the rain.</span></li>
+</ul></div>
+<p><b>Saad:</b> Anyway. That&#x27;s enough of me. How was your board today? Tell me slowly.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">Engine room</span></div>
+<p class="hint">Saad: “Come and look at something. Mind the floor, it&#x27;s just been done.”</p>
+<div class="lines">
+<p><b>Saad:</b> Hello, hello. Don&#x27;t mind me. I&#x27;m looking at this valve. Again.</p>
+<p><b>Saad:</b> That&#x27;s three. Once for the job. Once for the rule. Once for me.</p>
+<p><b>Saad:</b> Here. My card. It lives in this pocket. My list, my rule at the top: slow hands, open eyes. It&#x27;s gone soft as cloth.</p>
+<p><b>Saad:</b> Shut it, seat it, look again. Nothing clever on it. It&#x27;s the doing it that counts.</p>
+<p><b>Saad:</b> Twice is the rule. Three is me. I&#x27;m working on that. Slowly.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Why three?”</span><span class="rep"><b>Saad:</b> A long story. Not one for the engine room. Another day.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> A long story, and I tell it slowly, so it&#x27;s longer still. Ask me again some evening. Before ten.</span></li>
+<li><span class="say">“I check mine once and hope.”</span><span class="rep"><b>Saad:</b> Then I&#x27;ll go over yours two more times. Between us, that&#x27;s three. Perfect.</span></li>
+<li><span class="say">“Could I copy your list?”</span><span class="rep"><b>Saad:</b> Sure. Copy it in your own hand, though. It sticks better that way.</span></li>
+</ul></div>
+<p><b>Saad:</b> There. Four. No, I&#x27;m joking. Three. On we go, slowly.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">Engine overlook · Day 8-11</span></div>
+<p class="hint">Saad: “Sit with me on the overlook? Before ten. There&#x27;s a story I&#x27;ve not told.”</p>
+<div class="lines">
+<p><b>Saad:</b> Years ago I was on a freighter, the Pallas. Long shifts, old pipes. I liked her.</p>
+<p><b>Saad:</b> End of a long one, I signed off a valve I hadn&#x27;t looked at. I was tired. I wanted my bunk.</p>
+<p><b>Saad:</b> It stuck. A whole deck went cold for a night. People slept in their coats.</p>
+<p><b>Saad:</b> Nobody was hurt. Nobody remembers it now. I asked, once. They&#x27;d forgotten. I haven&#x27;t.</p>
+<p><b>Saad:</b> Hala wrote. She asked what she ought to know before the academy. What I&#x27;d tell her.</p>
+<p><b>Saad:</b> And I thought: she&#x27;s like me. Good at it. Careful. And one tired night away from a cold deck.</p>
+<p><b>Saad:</b> So I haven&#x27;t written back. Three weeks. That&#x27;s not like me either.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That&#x27;s a long time to carry one night. Go on.”</span><span class="rep"><b>Saad:</b> It&#x27;s not heavy. Just old. I keep it in the same pocket as the card.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> It isn&#x27;t heavy. Just old, and always in my pocket. Saying it out loud is different. Thank you for not hurrying me.</span></li>
+<li><span class="say">“A deck full of people in coats. Sounds like a sleepover.”</span><span class="rep"><b>Saad:</b> Ha. One of the engineers said that, in the morning. He was the only one laughing. Well. Now there&#x27;s two.</span></li>
+<li><span class="say">“I&#x27;ve done things I still think about too.”</span><span class="rep"><b>Saad:</b> Everyone has. Nobody says. Thank you for saying.</span></li>
+</ul></div>
+<p><b>Saad:</b> Right. Twenty to ten. I&#x27;ll walk you to the lift, then bed.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">the ion storm (event ionStorm, its Saturday, daytime, Deck 6 coolant loop) · Day 13</span></div>
+<p class="hint">Saad: “Deck 6, the coolant loop. Could you come? Now, if you can.”</p>
+<div class="lines">
+<p><b>Saad:</b> Rest day, and here I am. Nobody called me in. Storms don&#x27;t read the rota. Hello, [your name]. Glad it&#x27;s you.</p>
+<p><b>Saad:</b> Loop three. The valve&#x27;s sticking. Half open, showing shut.</p>
+<p><b>Saad:</b> It&#x27;s the same. The same feel under my hand. The Pallas one did exactly this.</p>
+<p><b>Saad:</b> Give me a moment. My hand won&#x27;t go.</p>
+<p><b>Zeke:</b> Saad? Loop three&#x27;s dropping. Need you on it when you can. No rush. Well. Some rush.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;m here. Take your time. We&#x27;ve got a minute.”</span><span class="rep"><b>Saad:</b> A minute. Yes. Breathe, then the valve. In that order.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> A minute. You said that the way I&#x27;d say it. Breathe, then the valve. Thanks, friend.</span></li>
+<li><span class="say">“Let&#x27;s check it together. Once, properly.”</span><span class="rep"><b>Saad:</b> Together. Once. Shut it, seat it, look again. Your eyes and mine.</span></li>
+<li><span class="say">“If Hala were here, I&#x27;d tell her to watch you do this.”</span><span class="rep"><b>Saad:</b> Would you? Then I&#x27;d better do it well.</span></li>
+</ul></div>
+<p><b>Saad:</b> Shut. Seated. Looking.</p>
+<p><b>Saad:</b> There. I checked it once, properly, and it&#x27;s right. I&#x27;m signing it. Once.</p>
+<p><b>Calder:</b> Deck 6 loop. Holding at forty. Good.</p>
+<p><b>Zeke:</b> Loop&#x27;s steady. Properly done, Saad. Right, onward.</p>
+<p><b>Saad:</b> My hands are shaking now. After. That&#x27;s the right order, isn&#x27;t it?</p>
+<p><b>Saad:</b> Somewhere in the Service it&#x27;s past my bedtime. I&#x27;m counting that.</p>
+</div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta">somewhere quiet, off duty · Day from 14</span></div>
+<p class="hint">Saad: “Before ten, could you sit a minute? I&#x27;ve written to Hala. At last.”</p>
+<div class="lines">
+<p><b>Saad:</b> I&#x27;m sending Hala my old card. The soft one. She&#x27;ll need a good pocket for it.</p>
+<p><b>Saad:</b> I wrote one line on the back. Just one. It took me all week. Want to hear it?</p>
+<p><b>Saad:</b> &quot;Look once, slowly and properly. Then trust your own hands.&quot;</p>
+<p><b>Saad:</b> The second half&#x27;s the hard bit. I only learnt it lately. With you there.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“She&#x27;ll keep that for years.”</span><span class="rep"><b>Saad:</b> I hope so. Soft as cloth by the time she&#x27;s my age.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> I hope so. I kept the first half for years. She gets both at once. That saves her a cold deck.</span></li>
+<li><span class="say">“Tell your twin. That&#x27;s an episode.”</span><span class="rep"><b>Saad:</b> The season finale. The Halcyon will want a sequel.</span></li>
+<li><span class="say">“I might write my own card.”</span><span class="rep"><b>Saad:</b> No need. I&#x27;ve done you one.</span></li>
+</ul></div>
+<p><b>Saad:</b> Here. Your name at the top, my list underneath. In my best writing, which isn&#x27;t very good.</p>
+<p><b>Saad:</b> Now. Nine fifty-two. Off to bed. Night, then.</p>
+</div>
+<div class="extra"><span>Keepsake: a checking card he made for you, with your name at the top</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">Engine room · Day from 16</span></div>
+<p class="hint">Saad: “Have you a minute? This one&#x27;s sticking. I&#x27;d like a second pair of eyes.”</p>
+<div class="lines">
+<p><b>Saad:</b> Hello, [your name]. Small job. A valve on loop two, sticking a little.</p>
+<p><b>Saad:</b> The storm&#x27;s long gone. Just me and a valve now. Easier, in a way. And not.</p>
+<p><b>Saad:</b> Shut. Seated. Looking. Once, properly.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;m watching. Take your time.”</span><span class="rep"><b>Saad:</b> I know. That&#x27;s why I can.</span><span class="warm">If it’s the reply they need most: <b>Saad:</b> I know. It&#x27;s easier with someone who doesn&#x27;t hurry. You never do. There. Done.</span></li>
+<li><span class="say">“Once? Not three times?”</span><span class="rep"><b>Saad:</b> Once. I&#x27;m practising. Don&#x27;t tell Calder. She&#x27;ll want it in writing.</span></li>
+<li><span class="say">“Shall I sign it with you?”</span><span class="rep"><b>Saad:</b> My name&#x27;s enough. But stand there while I write it. That helps.</span></li>
+</ul></div>
+<p><b>Saad:</b> Signed. Once. First time in years.</p>
+</div>
+<div class="extra"><span>A Mail later, “One valve”: Thank you for this afternoon. One valve, checked and signed once. It doesn&#x27;t sound like much. It was a lot. Writing to Hala tonight. Before ten, of course. Saad</span></div>
+</div>
+<div class="cbox"><label for="c-salo">Your notes on Salo's story</label><textarea id="c-salo" data-k="salo" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-kovac"><header><span class="eyebrow">Works technician. Stays aboard.</span><h2>Zainab Kovac: “Four, please”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Kovac: “Oh. Hi. I&#x27;m a bit wobbly. It&#x27;s nothing.”</p>
+<div class="lines">
+<p><b>Kovac:</b> Oh. Hi. Sorry. Bit wobbly. The lift, from Deck 5. I held the rail the whole way.</p>
+<p><b>Kovac:</b> Tove Cruz was in it too. Eyes shut. They said, &quot;Lovely lift.&quot; I said, &quot;Lovely lift.&quot;</p>
+<p><b>Kovac:</b> Then Davi Keane got in at Four. Both hands on the rail. &quot;Lovely lift.&quot; Nobody said anything else.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Lifts can be a lot.”</span><span class="rep"><b>Kovac:</b> They can. Not that I. Um. It&#x27;s a lovely lift. Yes.</span></li>
+<li><span class="say">“Do you not like the lift?”</span><span class="rep"><b>Kovac:</b> It&#x27;s fine. It&#x27;s. Um. The rail&#x27;s good.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> It&#x27;s fine. Mostly. Um. Ask me another day. I might tell you a thing. Maybe.</span></li>
+</ul></div>
+<p><b>Kovac:</b> Anyway. Nine and a half minutes, the scrubber this morning. I timed it.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Kovac: “Can I tell you something? It&#x27;s very small. Sorry.”</p>
+<div class="lines">
+<p><b>Kovac:</b> Can I tell you something? It&#x27;s small. I&#x27;m afraid of the lift. There. Said it.</p>
+<p><b>Kovac:</b> Not a lot. Just. All of it. The doors. The bit between floors.</p>
+<p><b>Kovac:</b> Oh. Oh no. Cruz. And Keane. That&#x27;s why they hold the rail like that.</p>
+<p><b>Kovac:</b> We&#x27;re a club. Oh no. We&#x27;re a club. I&#x27;m delighted. That&#x27;s awful. I&#x27;m delighted.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Thank you for telling me. I won&#x27;t say a word.”</span><span class="rep"><b>Kovac:</b> I know you won&#x27;t. That&#x27;s why I told you.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> I know. That&#x27;s why it was you. Thank you, [your name]. Um. That&#x27;s twice I&#x27;ve said thank you. Sorry. Three.</span></li>
+<li><span class="say">“The lift club. You need badges.”</span><span class="rep"><b>Kovac:</b> Don&#x27;t. I&#x27;ll knit them. You know I&#x27;ll knit them.</span></li>
+</ul></div>
+<p><b>Kovac:</b> Right. Back to the scrubbers. Scrubbers don&#x27;t have doors.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">somewhere quiet, off duty</span></div>
+<p class="hint">Kovac: “Sit with me? I want to tell you the why. If that&#x27;s all right.”</p>
+<div class="lines">
+<p><b>Kovac:</b> When I was small, on Marra Station, a lift stuck between floors. I was in it. On my own.</p>
+<p><b>Kovac:</b> A whole night. Nobody came till the morning shift. The lights stayed on, at least.</p>
+<p><b>Kovac:</b> I counted the bolts in the ceiling. There were a hundred and twelve. I counted them all night.</p>
+<p><b>Kovac:</b> I&#x27;m fine. Really. I just don&#x27;t like the counting. It starts again in there.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That sounds so lonely. I&#x27;m glad you told me.”</span><span class="rep"><b>Kovac:</b> It was. It&#x27;s less now. Telling you made it smaller, somehow.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> It was. It&#x27;s smaller now. I didn&#x27;t think saying it would do that. Thank you for sitting still for it.</span></li>
+<li><span class="say">“We could service the lift&#x27;s brakes together. You&#x27;d see how it works.”</span><span class="rep"><b>Kovac:</b> Inside it? Every bolt? Um. That&#x27;s terrifying. And. Yes. I think yes.</span></li>
+<li><span class="say">“I&#x27;m scared of the reactor door. Not the same. A bit the same.”</span><span class="rep"><b>Kovac:</b> Everyone&#x27;s scared of the reactor door. That&#x27;s sensible. But thank you. It helps.</span></li>
+</ul></div>
+<p><b>Kovac:</b> Right. That&#x27;s enough of that. Tea? I&#x27;ll walk. The long way.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">the lift up to the Captain&#x27;s Friday address (the Deck 5 lift lobby, about 15:35-15:45; the scene plays at the doors, before they ride) · Day 19 (preferred) or 26</span></div>
+<p class="hint">Kovac: “Walk with me? Just to the lift. Well. Into it.”</p>
+<div class="lines">
+<p><b>Kovac:</b> Oh. They&#x27;re both here. Cruz. And Keane. Not looking at each other. That&#x27;s. Um. That&#x27;s us.</p>
+<p><b>Tove Cruz:</b> Mm. Hello. Busy, Fridays. Lots of people going... up. Mm.</p>
+<p class="if"><span class="cond">if Keane is there</span> <b>Davi Keane:</b> Hiya. Engine room floor&#x27;s spotless today, by the way. Anyway. The address. Big one, I hear.</p>
+<p class="if"><span class="cond">if you serviced the lift with her</span> <b>Kovac:</b> Here it comes. Brake shoes, four. Guide rollers, twelve. I tightened every one. I know where they all are.</p>
+<p><b>Kovac:</b> Doors. Okay. Okay.</p>
+<p><b>Kovac:</b> Four, please.</p>
+<p><b>Tove Cruz:</b> Mm. We&#x27;re going to the rec deck.</p>
+<p><b>Kovac:</b> I know. I just wanted to say it. You said it, your first night. I&#x27;ve been practising.</p>
+<p><b>Tove Cruz:</b> Lovely lift.</p>
+<p class="if"><span class="cond">if Keane is there</span> <b>Davi Keane:</b> Lovely lift.</p>
+<p><b>Kovac:</b> It is, actually.</p>
+<p><b>Kovac:</b> Nobody&#x27;s holding the rail. Look. Nobody. No, don&#x27;t look. I&#x27;m not looking.</p>
+<p><b>Kovac:</b> Very brave, all three.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“You did it. I&#x27;m so proud of you.”</span><span class="rep"><b>Kovac:</b> I did it. Oh. I did it. My knees are shaking. I did it.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> I did it. My knees are shaking. Don&#x27;t tell anyone they&#x27;re shaking. Thank you, [your name]. For all of it.</span></li>
+<li><span class="say">“Again on the way down?”</span><span class="rep"><b>Kovac:</b> Don&#x27;t push it. After the address. Maybe after the address.</span></li>
+<li><span class="say">“Same time next Friday? A standing order.”</span><span class="rep"><b>Kovac:</b> Fridays. The lift club rides on Fridays. Um. Cruz is nodding. I think that&#x27;s a yes.</span></li>
+</ul></div>
+<p><b>Tove Cruz:</b> Mm. Rec deck. That&#x27;s us. Mind the... is there a gap? There&#x27;s no gap. Good.</p>
+</div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">Tea corner</span></div>
+<p class="hint">Kovac: “Oh. Hi. We did a thing. Can I tell you? It&#x27;s quick.”</p>
+<div class="lines">
+<p><b>Kovac:</b> Oh. Hi. We did it. Friday. The lift. All three of us.</p>
+<p><b>Kovac:</b> Nobody held the rail. Not once. Cruz kept their eyes open the whole way up.</p>
+<p><b>Kovac:</b> You should have seen Cruz&#x27;s face. Sorry. You should have been there. That&#x27;s what I mean.</p>
+<p><b>Kovac:</b> Next Friday? There&#x27;s room. Well. It&#x27;s a lift. There&#x27;s always room.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Next Friday. I&#x27;ll be at the doors.”</span><span class="rep"><b>Kovac:</b> At the doors. Good. Um. I&#x27;ll count you in. I count everyone in.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> At the doors. Good. I&#x27;ll count you in. That&#x27;s the only counting I do in there now. Thanks, [your name].</span></li>
+<li><span class="say">“I&#x27;m sorry I missed it. Tell me Cruz&#x27;s face.”</span><span class="rep"><b>Kovac:</b> Like a seed that&#x27;s just come up. Surprised to be there. Pleased about it. That&#x27;s how Cruz would put it.</span></li>
+<li><span class="say">“I&#x27;ll ride with you before then. Any deck you like.”</span><span class="rep"><b>Kovac:</b> Any deck. Oh. That&#x27;s a lot of decks. Two. Let&#x27;s say two. Then we&#x27;ll see.</span></li>
+</ul></div>
+<p><b>Kovac:</b> Right. Scrubbers. I like scrubbers. They never surprise me.</p>
+</div>
+<div class="extra"><span>A Mail later, “We did it”: All three of us rode up to the address. Nobody held the rail. Cruz kept their eyes open the whole way. Sorry. You should have been there. Next Friday? Zainab</span></div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta">Tea corner</span></div>
+<p class="hint">Kovac: “I made you a thing. It&#x27;s small. Sorry. It&#x27;s very small.”</p>
+<div class="lines">
+<p><b>Kovac:</b> Oh. Hi. I made you something. Sorry. It&#x27;s small. It&#x27;s very small.</p>
+<p><b>Kovac:</b> A grip. For your spanner. Orange and green. I measured your spanner while you were at lunch. Sorry about that too.</p>
+<p><b>Kovac:</b> So you&#x27;ve got something to hold. Not that you need it.</p>
+<p><b>Kovac:</b> Forty-two rows. I counted. Obviously. I unpicked two and did them again. They were fine. They weren&#x27;t perfect.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“It&#x27;s perfect. Thank you, Zainab.”</span><span class="rep"><b>Kovac:</b> Oh. Um. You&#x27;re welcome. It fits. I made sure it would.</span><span class="warm">If it’s the reply they need most: <b>Kovac:</b> It fits. I made sure it would. You stood by the doors with us. That counted. I count things. That one counted most.</span></li>
+<li><span class="say">“Will you show me how to make one?”</span><span class="rep"><b>Kovac:</b> Oh. Yes. Tea corner, after shift. Small needles. I&#x27;ll go slowly. Slower than with Zeke. Sorry, Zeke.</span></li>
+<li><span class="say">“I&#x27;ll use it every day.”</span><span class="rep"><b>Kovac:</b> Every day. Okay. Then I&#x27;ll make a spare. Wool wears. I&#x27;ll know when.</span></li>
+</ul></div>
+<p><b>Kovac:</b> Right. Scrubbers. I&#x27;ll be at the tea corner after, knitting. If you want. No fuss.</p>
+</div>
+<div class="extra"><span>Keepsake: a knitted grip for your spanner, in Works orange and garden green</span></div>
+</div>
+<div class="cbox"><label for="c-kovac">Your notes on Kovac's story</label><textarea id="c-kovac" data-k="kovac" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-raman"><header><span class="eyebrow">Senior helm officer. Stays aboard.</span><h2>Dev Raman: “The same comet”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">Observation room</span></div>
+<p class="hint">Dev Raman: “Ah, hello. Early, aren&#x27;t you? Sit. The view&#x27;s slow at this hour.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> Ah, hello. Early riser too? This is the finest window aboard before seven. Don&#x27;t tell the Captain.</p>
+<p><b>Dev Raman:</b> People ask me the secret of flying. It&#x27;s soup. Carry a full bowl across a room. That&#x27;s all it is.</p>
+<p><b>Dev Raman:</b> You don&#x27;t look at the bowl. That&#x27;s where they go wrong. You look where you&#x27;re going, and you go gently.</p>
+<p><b>Dev Raman:</b> I flew you in, you know. The Tern, your first night. You gripped the seat strap the whole way down.</p>
+<p><b>Dev Raman:</b> Everyone does. I like that. It means they trust the strap more than the pilot. Very sensible.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Was it a good landing?”</span><span class="rep"><b>Dev Raman:</b> Smooth. I was pleased with it. I&#x27;m pleased with most of them, quietly.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> Very smooth. I logged it. I log the good ones in my head, the way some people keep a diary. Thank you for asking.</span></li>
+<li><span class="say">“I&#x27;ll trust the pilot next time. Probably.”</span><span class="rep"><b>Dev Raman:</b> Probably is plenty. Hold the strap anyway.</span></li>
+<li><span class="say">“I carry my tea like that. Eyes front.”</span><span class="rep"><b>Dev Raman:</b> Then you&#x27;re halfway to the helm already. Gently, now.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> There. The sun&#x27;s catching the hull on the port side. Every morning. I never tire of it.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">Observation room</span></div>
+<p class="hint">Dev Raman: “Have you a minute? I&#x27;ve a small puzzle, and it&#x27;s the size of my thumb.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> My model of the Wren. You&#x27;ve seen it by my door. Every hull plate, every window. She&#x27;s finished.</p>
+<p><b>Dev Raman:</b> Except her shuttle bay. It&#x27;s empty. No shuttle in it. She looks as if she&#x27;s lost something.</p>
+<p><b>Dev Raman:</b> I&#x27;ve carved three. Three little shuttles. Threw every one away. Wrong nose. Wrong wings. Wrong.</p>
+<p><b>Dev Raman:</b> And the docking arm in the bay keeps drooping. It wants a pin. A brass one, very small. I&#x27;ve no lathe.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Why does this one matter so much?”</span><span class="rep"><b>Dev Raman:</b> I&#x27;m not sure yet. I&#x27;ll tell you when I am.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> I&#x27;m not sure yet. Some things you make carefully because you can&#x27;t say them. I&#x27;ll tell you when I can.</span></li>
+<li><span class="say">“Three shuttles in the bin. The bin must be very proud.”</span><span class="rep"><b>Dev Raman:</b> The bin has a better fleet than the Survey Service.</span></li>
+<li><span class="say">“I could make you the pin in the machine shop.”</span><span class="rep"><b>Dev Raman:</b> Would you? Oh, that&#x27;s lovely. Thinner than a match, and polished. Thank you kindly.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> I&#x27;ll try a fourth shuttle. Slowly. The fourth one&#x27;s usually the one.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">Observation room</span></div>
+<p class="hint">Dev Raman: “Sit with me a while? Something I don&#x27;t say much. I&#x27;d like to, to you.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> Twenty years of clean flying. People say that about me. I say it too. It&#x27;s nearly true.</p>
+<p><b>Dev Raman:</b> Years ago, docking at Lisk, a cargo arm on the dock swung wrong. Too close to us. I pulled us off it.</p>
+<p><b>Dev Raman:</b> Nobody was hurt. Not a scratch on anyone. But Asel was at the gallery glass, waving. She was six.</p>
+<p><b>Dev Raman:</b> She saw her dad&#x27;s ship nearly touch that arm. She went very quiet. So did I.</p>
+<p><b>Dev Raman:</b> Since then I fly every hard part myself. Every docking, every long turn. Nobody else&#x27;s hands.</p>
+<p><b>Dev Raman:</b> Now Asel&#x27;s seventeen. She wants to learn to fly. She asked me. I couldn&#x27;t say the word.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“You&#x27;ve carried that a long time. Go on.”</span><span class="rep"><b>Dev Raman:</b> Eleven years. It&#x27;s lighter than it was. It&#x27;s just never quite put down.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> Eleven years. Saying it to you, I can hear how long that is. Thank you for letting me be slow about it.</span></li>
+<li><span class="say">“Six-year-olds wave at everything. She was probably waving at the arm.”</span><span class="rep"><b>Dev Raman:</b> Ha. She might have been. She liked big machines. Still does. That&#x27;s the trouble.</span></li>
+<li><span class="say">“I had a scare once that I never told anyone about.”</span><span class="rep"><b>Dev Raman:</b> Then we each know one. That&#x27;s a fair trade.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> She has my hands, you know. Steady. I&#x27;ve watched them. Ah, me. That&#x27;s the trouble too.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 4</span><span class="meta">Observation room · Day 8-15</span></div>
+<p class="hint">Dev Raman: “May I ask you something? It&#x27;s a question for you, not about flying. Well. A bit.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> Comet nights, the helm brings the bow round so the comet crosses our big window. Slow, very slow.</p>
+<p><b>Dev Raman:</b> I&#x27;ve flown that turn myself every time. Every comet for twenty years. It&#x27;s my favourite thing I do.</p>
+<p><b>Dev Raman:</b> This year I&#x27;m thinking of giving it to Sol Bakshi. Eight months aboard. Good hands. From Lisk, like me.</p>
+<p><b>Dev Raman:</b> Bakshi doesn&#x27;t know yet. I keep nearly telling them, and then I straighten the charts instead.</p>
+<p><b>Dev Raman:</b> So I&#x27;ll ask you. Would you trust someone new with something you love?</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“What would it cost you to let go?”</span><span class="rep"><b>Dev Raman:</b> Nothing, if I&#x27;m honest. Only the habit. Habits feel like walls, from the inside.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> Nothing at all. Only a habit I&#x27;ve worn so long it feels like a wall. You&#x27;ve asked the right question. I&#x27;ll think on it.</span></li>
+<li><span class="say">“Tell Bakshi before you dust the model again.”</span><span class="rep"><b>Dev Raman:</b> That&#x27;s a very short deadline. I dust it a great deal.</span></li>
+<li><span class="say">“Someone trusted me with something big once. It changed me.”</span><span class="rep"><b>Dev Raman:</b> Did it? Then perhaps it&#x27;s time I was that someone.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> Gently, now. I&#x27;ll find Bakshi at the shift change. Before I can straighten anything else.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">comet viewing (event comet, Day 16), the observatory&#x27;s back window, 22:10-22:40, after the knot · Day 16</span></div>
+<p class="hint">Dev Raman: “The back window. Stand with me? It&#x27;s nearly time.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> The back window. Best seat for it. Bakshi&#x27;s on the helm. I&#x27;m not. I&#x27;ve both hands on the sill instead.</p>
+<p><b>Sol Bakshi:</b> Bridge to observatory. Coming round now. Gently.</p>
+<p><b>Dev Raman:</b> Listen to that. Nervous and correct. That&#x27;s how you should sound the first time.</p>
+<p><b>Dr Sato:</b> Here it comes. Look. Dead across the middle of the glass.</p>
+<p><b>Dev Raman:</b> Oh, that&#x27;s lovely. Exactly across. Better than I&#x27;d have done. Don&#x27;t tell anyone I said so.</p>
+<p><b>Dev Raman:</b> Asel&#x27;s watching too. From Lisk, this same minute. I asked her to. Ah. My device. That&#x27;s her.</p>
+<p><b>Dev Raman:</b> She&#x27;s written: &quot;Saw it. Who flew?&quot;</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“What will you tell her?”</span><span class="rep"><b>Dev Raman:</b> The truth. I&#x27;ll say it out loud first, with you, so I don&#x27;t soften it.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> The truth. I&#x27;ll write it with you here, so my hands don&#x27;t go and make it gentle. Some things shouldn&#x27;t be gentle.</span></li>
+<li><span class="say">“Tell her the bowl didn&#x27;t spill.”</span><span class="rep"><b>Dev Raman:</b> Not a drop. She&#x27;ll know exactly what that means.</span></li>
+<li><span class="say">“Tell her someone new flew it. Let her guess the rest.”</span><span class="rep"><b>Dev Raman:</b> She&#x27;s my daughter. She&#x27;ll guess it in one.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> There. &quot;Someone new. Like you will.&quot; Sent.</p>
+<p><b>Sol Bakshi:</b> Turn complete. Thank you for this. I&#x27;ll remember it. All of it.</p>
+<p><b>Dev Raman:</b> So will I, Bakshi. Every comet.</p>
+<p><b>Dev Raman:</b> This is for you. The fourth shuttle. The Tern, tiny. The bay&#x27;s got your docking arm. The Tern belongs with you.</p>
+<p><b>Dev Raman:</b> You were my last good landing. Don&#x27;t tell anyone it was bumpy.</p>
+</div>
+<div class="extra"><span>Keepsake: the tiny shuttle he carved, a Tern for your shelf</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">Observation room · Day from 17</span></div>
+<p class="hint">Dev Raman: “Good morning. Sit? I&#x27;ve news, and something for you.”</p>
+<div class="lines">
+<p><b>Dev Raman:</b> Good morning. Bakshi flew it. The comet turn. Right across the big window, exactly.</p>
+<p><b>Dev Raman:</b> I stood at the back of the observatory like a passenger, hands in my pockets. It was wonderful.</p>
+<p><b>Dev Raman:</b> Asel watched from Lisk. She wrote to ask who&#x27;d flown it. I told her: someone new, the way she will one day.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“That&#x27;s a big thing to write. How do you feel?”</span><span class="rep"><b>Dev Raman:</b> Lighter. As if I&#x27;d been carrying a full bowl for years and someone took the other side.</span><span class="warm">If it’s the reply they need most: <b>Dev Raman:</b> Lighter. As if I&#x27;d carried a full bowl for eleven years and someone finally took the other side. Thank you for asking.</span></li>
+<li><span class="say">“I&#x27;m sorry I missed it. Did Bakshi wobble?”</span><span class="rep"><b>Dev Raman:</b> Not once. I wobbled. Nobody saw.</span></li>
+<li><span class="say">“My family would want to hear about a night like that.”</span><span class="rep"><b>Dev Raman:</b> Then tell them. Tell them the Wren has a new pilot for comets.</span></li>
+</ul></div>
+<p><b>Dev Raman:</b> And this is yours. The fourth shuttle, the Tern, tiny. You were my last good landing, the night you came. It bumped. Keep that to yourself.</p>
+</div>
+<div class="extra"><span>Keepsake: the tiny shuttle he carved, a Tern for your shelf</span><span>A Mail later, “Asel”: Asel&#x27;s written again. She starts lessons on Lisk next month. She says her first landing will be better than mine. It might. Dev</span></div>
+</div>
+<div class="cbox"><label for="c-raman">Your notes on Raman's story</label><textarea id="c-raman" data-k="raman" placeholder="Anything to change, cut or love"></textarea></div></section>
+<section class="story" id="s-kowalczyk"><header><span class="eyebrow">Second officer, the night bridge. Stays aboard.</span><h2>Anja Kowalczyk: “The beacon”</h2>
+</header>
+<div class="beat step"><div class="bh"><span class="lab">Step 1</span><span class="meta">Bow lounge</span></div>
+<p class="hint">Kowalczyk: “Ah. You&#x27;re up early. Or I&#x27;m up late. Sit, if you like.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> Ah. Don&#x27;t mind me. Last page first. Always.</p>
+<p><b>Kowalczyk:</b> Risk management. I like to know who&#x27;s still standing before I get fond of anyone.</p>
+<p><b>Kowalczyk:</b> This one&#x27;s a ship&#x27;s cook who solves a theft. Everybody lives. The cook gets a medal and a nap.</p>
+<p><b>Kowalczyk:</b> There. Now you needn&#x27;t read it. You&#x27;re welcome.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Doesn&#x27;t knowing the end spoil it?”</span><span class="rep"><b>Kowalczyk:</b> No. It leaves me free for the middle.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> No. Once I know the end, I can take the middle slowly. That&#x27;s where the good bits hide. Nobody reads middles properly.</span></li>
+<li><span class="say">“Tell me the end of every book aboard. Saves time.”</span><span class="rep"><b>Kowalczyk:</b> Tempting. Book circle would never speak to me again.</span></li>
+<li><span class="say">“I read the last page first too.”</span><span class="rep"><b>Kowalczyk:</b> Do you. Huh. Nice. We&#x27;re rare. And not popular.</span></li>
+</ul></div>
+<p><b>Kowalczyk:</b> Right. Bed, for me. Breakfast, for you. Go on, then.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 2</span><span class="meta">Bridge lobby · Day 22</span></div>
+<p class="hint">Kowalczyk: “Night shift. Come and see the real ship. Quietly.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> Evening, or near enough. Your first night shift. Welcome to the real ship.</p>
+<p><b>Kowalczyk:</b> The day shift think they run her. They&#x27;re visitors. Very polite ones. They leave at five.</p>
+<p><b>Kowalczyk:</b> Listen. That&#x27;s the air on Deck 2. That tick&#x27;s the hull cooling. That&#x27;s the night helm&#x27;s kettle.</p>
+<p><b>Kowalczyk:</b> A few of us on the bridge, a doctor, the Watch, the engines. That&#x27;s the whole night. You learn the footsteps.</p>
+<p><b>Kowalczyk:</b> My father would like it up here. He keeps a beacon. Marra Station, at the edge. Thirty years.</p>
+<p><b>Kowalczyk:</b> Never mind. Your job: the log, on the hour, every hour. Then leave the quiet alone. It&#x27;s earned it.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“A beacon? What&#x27;s it like?”</span><span class="rep"><b>Kowalczyk:</b> Bright. Patient. Like him. Another time.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> Bright. Patient. Turns all night and never complains. Like him. I&#x27;ll tell you more. Not yet.</span></li>
+<li><span class="say">“I can pick out the kettle already.”</span><span class="rep"><b>Kowalczyk:</b> Good ear. You&#x27;ll be useful by three.</span></li>
+<li><span class="say">“At home I could tell who was up by the stairs creaking.”</span><span class="rep"><b>Kowalczyk:</b> Then you know. Nights are for people who listen.</span></li>
+</ul></div>
+<p><b>Kowalczyk:</b> On the hour. I&#x27;ll be at the chart table, pretending not to read.</p>
+</div>
+</div>
+<div class="beat step"><div class="bh"><span class="lab">Step 3</span><span class="meta">Observation room · Day 22</span></div>
+<p class="hint">Kowalczyk: “Still awake? Good. Sit a minute. It&#x27;s late enough to say a thing.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> The beacon. My father&#x27;s. They switch it off the morning after next. For good. At ten to six.</p>
+<p><b>Kowalczyk:</b> A buoy instead. Smaller. Never needs anyone. Sensible little thing.</p>
+<p><b>Kowalczyk:</b> He won&#x27;t say he minds. He wrote, &quot;About time. The lamp&#x27;s older than me.&quot; Then three lines about the weather.</p>
+<p><b>Kowalczyk:</b> I can&#x27;t be there. Long way to Marra. I&#x27;ll be on the bridge that morning, keeping a log.</p>
+<p><b>Kowalczyk:</b> It&#x27;s why I leave film night before the lighthouse bit. Everyone thinks it&#x27;s the plot. It&#x27;s the light.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“Tell me about him.”</span><span class="rep"><b>Kowalczyk:</b> Quiet man. Big hands. Polished that lamp every Sunday, whether it needed it or not.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> Quiet man. Big hands. Polished the lamp every Sunday whether it needed it or not. Thank you. Nobody asks about him.</span></li>
+<li><span class="say">“Could the Wren answer it?”</span><span class="rep"><b>Kowalczyk:</b> Answer it. Huh. The running lights. Three long, one short. That was his. Every ship out there knew it.</span></li>
+<li><span class="say">“I missed a goodbye like that once. It sits strangely.”</span><span class="rep"><b>Kowalczyk:</b> It does. Like a step that isn&#x27;t there. Thanks for saying.</span></li>
+</ul></div>
+<p><b>Kowalczyk:</b> Right. Long night yet. The log won&#x27;t keep itself. Go on, then.</p>
+</div>
+</div>
+<div class="beat peak"><div class="bh"><span class="lab">The big scene</span><span class="meta">your second night shift, the bridge (Deck 1), 05:50 · Day 24</span></div>
+<p class="hint">Kowalczyk: “Twenty to six. Come up to the bridge. Just yourself.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> Rest night. Came up anyway. Twenty to six. Helm, hold her steady. No flourishes this morning.</p>
+<p><b>Wen Takahashi:</b> Comms are quiet. Nothing but static out there. Clean static.</p>
+<p><b>Kowalczyk:</b> The running lights. This key here. Three long, one short. His pattern.</p>
+<p class="if"><span class="cond">if you suggested answering the beacon</span> <b>Kowalczyk:</b> You asked if the Wren could answer it. She can. So can you.</p>
+<p><b>Kowalczyk:</b> Your hand, not mine. Mine aren&#x27;t steady enough this morning. Don&#x27;t put that in the log.</p>
+<p><b>Kowalczyk:</b> Ten to six. Now.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“(Key it slowly, like a lamp turning.)”</span><span class="rep"><b>Kowalczyk:</b> That&#x27;s his. That&#x27;s exactly it.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> That&#x27;s his. Slow, like the lamp going round. You had it exactly. I didn&#x27;t have to say a word.</span></li>
+<li><span class="say">“(Key it, then once more, for luck.)”</span><span class="rep"><b>Kowalczyk:</b> Twice. Fine. He&#x27;d have said once for the ships and once for the dark.</span></li>
+<li><span class="say">“(Key it, and say good morning to him for her.)”</span><span class="rep"><b>Kowalczyk:</b> Good morning, Dad. There. Somebody said it.</span></li>
+</ul></div>
+<p><b>Kofi Mensah:</b> Every deck&#x27;s quiet. Thought I&#x27;d stand here a minute. If that&#x27;s all right.</p>
+<p><b>Wen Takahashi:</b> Nobody out there for a long way. Clean signal, though. Huh. Clean.</p>
+<p><b>Kowalczyk:</b> Somebody always sees a lamp. That&#x27;s what he says.</p>
+<p><b>Kowalczyk:</b> Thank you.</p>
+<p><b>Kowalczyk:</b> Right. Log it: a test of the running lights. Satisfactory. Very satisfactory.</p>
+<p><b>Kowalczyk:</b> And somebody find me a novel with a dull ending. I&#x27;ve had enough feeling for one shift.</p>
+</div>
+<div class="extra"><span>A Mail later, “From Marra”: A letter from my father. Someone on Marra saw a ship&#x27;s running lights go three long, one short at ten to six, and wrote to tell him. He says the buoy is very sensible. He says thank you. So do I. A.K.</span></div>
+</div>
+<div class="beat after"><div class="bh"><span class="lab">Afterwards</span><span class="meta">somewhere quiet, off duty · Day from 24</span></div>
+<p class="hint">Kowalczyk: “Ah. You. Here, before I think better of it. It&#x27;s only a book.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> Ah. You. Something for you. Don&#x27;t make a thing of it.</p>
+<p><b>Kowalczyk:</b> The novel from the bow lounge, that first morning. My notes are in the margins. Pencil. Mostly rude.</p>
+<p><b>Kowalczyk:</b> I&#x27;ve read the end. It&#x27;s a good one. Read it in order, if you&#x27;re that sort.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“I&#x27;ll read every note in the margins.”</span><span class="rep"><b>Kowalczyk:</b> Do. They&#x27;re the better story.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> Do. The notes are the real book. Nobody&#x27;s read them. Now somebody will.</span></li>
+<li><span class="say">“Should I read the last page first?”</span><span class="rep"><b>Kowalczyk:</b> Up to you. I&#x27;d recommend it. Strongly.</span></li>
+<li><span class="say">“I&#x27;ll lend you one of mine.”</span><span class="rep"><b>Kowalczyk:</b> Fine. A swap. Bring me one with a lamp in it.</span></li>
+</ul></div>
+<p><b>Kowalczyk:</b> Right. Bed, for me. Quiet watch, whenever yours is.</p>
+</div>
+<div class="extra"><span>Keepsake: a paper novel with her notes in the margins</span></div>
+</div>
+<div class="beat quiet"><div class="bh"><span class="lab">If you miss the big scene</span><span class="meta">somewhere quiet, off duty · Day 24</span></div>
+<p class="hint">Kowalczyk: “Morning. Walk me to the lift? Small news.”</p>
+<div class="lines">
+<p><b>Kowalczyk:</b> Six o&#x27;clock. Not even my night. I went up regardless. Three long, one short, at ten to six.</p>
+<p><b>Kowalczyk:</b> The helm held her steady. Mensah came up off his rounds and just stood there. Nobody asked him to.</p>
+<p><b>Kowalczyk:</b> Out into nothing. Nobody to see it. Didn&#x27;t matter.</p>
+<div class="choice"><p class="ch">You choose one:</p><ul>
+<li><span class="say">“How do you feel?”</span><span class="rep"><b>Kowalczyk:</b> Quiet. The good sort.</span><span class="warm">If it’s the reply they need most: <b>Kowalczyk:</b> Quiet. The good sort, for once. Thank you for asking. And for sitting up with me the other night.</span></li>
+<li><span class="say">“Did you log it?”</span><span class="rep"><b>Kowalczyk:</b> A test of the running lights. Satisfactory. The Commander will never know.</span></li>
+<li><span class="say">“I wish I&#x27;d been up there.”</span><span class="rep"><b>Kowalczyk:</b> You were, in a way. You kept me company for the long part.</span></li>
+</ul></div>
+<p><b>Kowalczyk:</b> Right. Bed, for me. Sleep well, if it&#x27;s that time. It&#x27;s that time for me.</p>
+</div>
+<div class="extra"><span>A Mail later, “From Marra”: My father wrote. Someone on Marra saw a ship&#x27;s lights go three long, one short at ten to six, and wrote to tell him. He&#x27;s keeping the letter by the old lamp. A.K.</span></div>
+</div>
+<div class="cbox"><label for="c-kowalczyk">Your notes on Kowalczyk's story</label><textarea id="c-kowalczyk" data-k="kowalczyk" placeholder="Anything to change, cut or love"></textarea></div></section>
+
+<section class="cbox">
+  <label for="c-general">Anything else, about all ten</label>
+  <textarea id="c-general" data-k="general" placeholder="Tone, a favourite moment, anything to change"></textarea>
+</section>
+<div class="savebar"><button type="button" id="savebtn">Save my notes</button><p id="savestate"></p></div>
+</div>
+
+<script>
+// notes saved to the page's shared database (collection "answers", doc "crew-stories-read")
+(function () {
+  const btn = document.getElementById('savebtn'), state = document.getElementById('savestate');
+  const boxes = () => Array.from(document.querySelectorAll('textarea[data-k]'));
+  let db = null, user = null;
+  state.textContent = 'Connecting so your notes can be saved…';
+  (async () => {
+    try { db = window.claude && await window.claude.use('db'); } catch (e) { db = null; }
+    try { user = window.claude && await window.claude.use('user'); } catch (e) { user = null; }
+    if (!db) { state.textContent = 'Saving isn\'t available in this view. Open the page on claude.ai while signed in.'; btn.disabled = true; return; }
+    try {
+      const snap = await db.doc('answers/crew-stories-read').get();
+      if (snap.exists) { const c = snap.data().comments || {}; boxes().forEach(b => { if (c[b.dataset.k]) b.value = c[b.dataset.k]; }); state.textContent = 'Your saved notes are loaded.'; }
+      else state.textContent = 'Not saved yet.';
+    } catch (e) { state.textContent = 'Couldn\'t load earlier notes. You can still save.'; }
+  })();
+  btn.addEventListener('click', async () => {
+    if (!db) return;
+    btn.disabled = true; state.textContent = 'Saving…';
+    const comments = {}; boxes().forEach(b => { if (b.value.trim()) comments[b.dataset.k] = b.value.trim(); });
+    const data = { comments, at: Date.now() };
+    try { data.by = user ? await user.id() : null; } catch (e) { data.by = null; }
+    try { await db.doc('answers/crew-stories-read').set(data); state.textContent = 'Saved at ' + new Date(data.at).toLocaleTimeString() + '. You can add more and save again.'; }
+    catch (e) { state.textContent = 'That didn\'t save (' + ((e && (e.code || e.message)) || 'unknown error') + '). Check you\'re signed in, then try again.'; }
+    finally { btn.disabled = false; }
+  });
+})();
+</script>
