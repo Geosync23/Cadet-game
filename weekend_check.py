@@ -44,7 +44,7 @@ with sync_playwright() as pw:
     for jid, d in [(i, d) for i, d in TRADS.items() if i not in ('saturday-run',)]:
         g = Game(pw, won, 900, 760)
         r = json.loads(g.ev("""(() => { const d = %d, e = eventsOn(d).find(x => x.id === '%s'); if (!e) return JSON.stringify({ err: 'not on' });
-          skipTo((d - 1) * 1440 + e.from + 6); goToDeck(e.where[0].deck, null); SHIP.device.settings.tips = false; return JSON.stringify({ to: e.to, deck: e.where[0].deck }); })()""" % (d, jid)))
+          const w = (e.ev && e.ev.where || e.where || [])[0]; skipTo((d - 1) * 1440 + e.from + 6); goToDeck(w.deck, null); SHIP.device.settings.tips = false; return JSON.stringify({ to: e.to, deck: w.deck }); })()""" % (d, jid)))
         if 'err' in r: check(False, '%s: on Day %d' % (jid, d)); g.close(); continue
         g.step(200)
         st = json.loads(g.ev("""(() => { const e = eventsOn(%d).find(x => x.id === '%s'), s = TRAD_JOIN[e.id], need = s.need || 'social';
