@@ -27,7 +27,8 @@
 #   your side: a job you claim is left to you, and finishing it puts the machine right
 #   the pool leak (0.84.5, rec engineer B; a REC_DECK = true build only): a traced pool-line repair shows as a drip on Deck 5 (5y)
 #   the board keeps up (playtest patch 1 note 13, JB1): a quick player always finds a job on the shift, Day 1 included (5z)
-#     and its small repairs (FX10, patch 0.92.3 items 21, 24): some each day, none twice in the week, a third or more in the science area
+#     and its small repairs (FX10, patch 0.92.3 items 21, 24): none twice in the week, every row sound, never the crew's (forced too);
+#     the quick player's Days 1-7: the same job again 14% at most, 12% or more on Deck 2 (the science area)
 #   the save: machines, jobs and supplies written by the save hook and read back by machinesLoad come out the
 #   same, and run on the same afterwards
 #   play (the player's needs read shipEffects every ship minute) never runs the machines ahead of the clock, and
@@ -901,8 +902,8 @@ with sync_playwright() as pw:
         print(f"    lowest ship health {st['minHealth']:.1f}, worst state {MSTATES[st['worst']] if 'MSTATES' in dir() else st['worst']}, repairs from Day 2 without a cause {st['noCause'][:4]}, causes on Days 0-1 {st['early'][:4]}, the same twice {st['sig'] == st2['sig']}")
         print('    causes seen: ' + ' '.join(f"{k}:{v}" for k, v in sorted(st['causes'].items())))
         # the repairs' share over Days 2-SHARE_DAYS (lead 32 for FX10, 2026-10-24): over 14 days (9 shift days, about 40 machine jobs) a
-        # change that only moves when machines wear (fewer calibrations) swung it from 49% to 39% by chance; over 28 days 0.92.2 and
-        # FX10 both sit near 45-46%, and REAL_SHARE 0 (no real faults) still fails. The other lines keep Days 2-DAYS
+        # change that only moves when machines wear (fewer calibrations) swung it from 49% to 39% by chance; over 28 days 0.92.2 is
+        # 47% and FX10 53% (75 and 76 machine jobs), and REAL_SHARE 0 (no real faults) still fails. The other lines keep Days 2-DAYS
         SHARE_DAYS = max(DAYS, 28)
         if SHARE_DAYS != DAYS:
             sl = g.ev(STEADY_T.replace('DAYS', str(SHARE_DAYS))); lmach = sum(v['machine'] for v in sl['days'].values()); lrep = sum(v['repair'] for v in sl['days'].values())
@@ -1447,11 +1448,12 @@ with sync_playwright() as pw:
     if g.ev("typeof boardTopUp === 'function'"):
         BK = r"""((on) => {
           window.__sc("window.__evBk = [typeof eventNow === 'function' ? eventNow : undefined]; if (window.__evBk[0]) eventNow = () => null");
-          BOARD_ON = on; const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { days: {}, maxBoard: 0, crewExtra: [], late: [], extras: 0 };
+          BOARD_ON = on; const t0 = (SHIP_START.day - 1) * 1440 + SHIP_START.min, out = { days: {}, maxBoard: 0, crewExtra: [], late: [], extras: 0, took: [], fixCrew: [] };
           JOBS_ON = true; MACH_HOUR = null; MACH_SEEN = -1; SHIP.works = null; SHIP.jobs = []; setShipNow(t0); machinesNow();
           let mine = null, until = 0; const seen = new Map();
           for (let t = t0; t <= t0 + 7 * 1440; t += 15) {
             setShipNow(t); machinesNow();
+            for (const j of SHIP.jobs) if (j.fix && (j.released || j.shared || (j.claimedBy && j.claimedBy !== 'you')) && !out.fixCrew.includes(j.id)) out.fixCrew.push(j.id);   // FX10: a small repair is never the crew's
             for (const j of SHIP.jobs) if (j.extra) { seen.set(j.id, j); if (j.claimedBy && j.claimedBy !== 'you') out.crewExtra.push(j.id);
               const d = Math.floor(j.found / 1440) + 1; if (j.status === 'open' && !j.claimedBy && t > (d - 1) * 1440 + dayShiftEnd(d) + 60) out.late.push(j.id); }
             if (mine && t >= until) { const j = SHIP.jobs.find(x => x.id === mine); if (j && j.claimedBy === 'you' && j.status === 'claimed') { jobStops(j).forEach((x, k) => jobStepDone(j.id, k)); finishJob(j.id); } mine = null; }
@@ -1460,9 +1462,16 @@ with sync_playwright() as pw:
             const list = openJobs('you'), D = out.days[d] || (out.days[d] = { jobs: 0, empty: 0 }); out.maxBoard = Math.max(out.maxBoard, list.length);
             if (mine || (md >= 720 && md < 765)) continue;
             if (!list.length) { D.empty += 15; continue; }
-            if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; }
+            if (claimJob(list[0].id)) { mine = list[0].id; until = t + list[0].mins + 20; D.jobs++; out.took.push([d, list[0].title, list[0].deck]); }   // FX10: what the quick player did, and where
           }
           out.extras = seen.size;
+          if (typeof shareOut === 'function' && SHARE_ON) {   // FX10: shareOut forced to share, with three small jobs held for you: a plain one goes to the crew, a small repair never
+            let d = 2; while (!playerShiftOn(d)) d++; const t = (d - 1) * 1440 + 600, mk = (id, o) => ({ id, machine: null, deck: 4, room: null, kind: 'chore', chore: 'vent', target: id, title: id, tier: 1, stops: [], parts: [], urgency: 0, leave: 120, posted: t - 1, found: t - 1, claimedBy: null, status: 'open', ...o });
+            const hit = p => { for (let k = 0; ; k++) if (!((machSeed(p + k) >>> 0) % SHARE_EVERY)) return p + k; };
+            const L = [mk('fx-held-1'), mk('fx-held-2'), mk('fx-held-3'), mk(hit('fx-plain-')), mk(hit('fx-fix-'), { fix: 'wo-chair', extra: true })];
+            L.forEach(j => { if (j.id.startsWith('fx-held')) j.shareSeen = true; }); shareOut(t, L);
+            out.forced = { plain: !!L[3].released, fix: !!L[4].released };
+          }
           const fx = [...seen.values()].filter(j => j.fix), T = typeof fixTable === 'function' ? fixTable() : null;   // FX10's small repairs (patch 0.92.3 items 21, 24)
           out.fix = fx.length; out.fixSci = fx.filter(j => j.fixS === 's').length; out.fixDup = fx.length - new Set(fx.map(j => j.fix)).size; out.fixOn = typeof FIX_ON !== 'undefined' && FIX_ON;
           out.fixBad = T ? T.s.concat(T.p).filter(r => !placeById(r.place) || (r.part && !(r.part in STOCK)) || !SYSTEMS.includes(r.sys)).map(r => r.id) : [];
@@ -1477,9 +1486,18 @@ with sync_playwright() as pw:
         print(f"  with BOARD_ON false: " + ' '.join(f"{k}:{v['jobs']}/{v['empty']}" for k, v in sorted(off['days'].items(), key=lambda kv: int(kv[0]))))
         if any(v['empty'] > 30 for v in bk['days'].values()) or bk['maxBoard'] > 8 or bk['crewExtra'] or bk['late'] or bk['sig'] != bk2['sig'] or not bk['extras']:
             fail('the board keeping up')
-        if bk.get('fixOn'):
-            print(f"  small repairs (FX10): {bk['fix']} posted, {bk['fixSci']} in the science area, the same one twice {bk['fixDup']}, rows with no place, a part not in STOCK or no system {bk['fixBad'][:4]}")
-            if not bk['fix'] or bk['fixDup'] or bk['fixBad'] or bk['fixSci'] * 3 < bk['fix']: fail('the small repairs: some each day, never the same twice in a week, a third or more in the science area, every row sound')
+        # the user's notes 21 and 24 (patch 0.92.3, FX10), on any build: the quick player's jobs over Days 1-7, how many were the
+        # same job again (by its title on the board) and how many were on Deck 2 (the science area; 0.92.2's board sends you there
+        # almost never), and whether a small repair was ever the crew's (forced too: shareOut with jobs enough to share one)
+        took = bk.get('took', []); n = len(took); again = n - len(set(t[1] for t in took)); sci = sum(1 for t in took if t[2] == 2); days3 = [t for t in took if t[0] <= 3]
+        again3 = len(days3) - len(set(t[1] for t in days3))
+        print(f"  the quick player's jobs (notes 21, 24): {n} on Days 1-7, the same job again {again} ({100 * again / max(1, n):.0f}%), Days 1-3 {again3} of {len(days3)}; on Deck 2 {sci} ({100 * sci / max(1, n):.0f}%)")
+        print(f"  small repairs (FX10): {bk.get('fix')} posted, {bk.get('fixSci')} in the science area, the same one twice {bk.get('fixDup')}, rows with no place, a part not in STOCK or no system {bk.get('fixBad', [])[:4]}; the crew's {bk.get('fixCrew', [])[:4]}, forced share {bk.get('forced')}")
+        if bk.get('fixDup') or bk.get('fixBad') or bk.get('fixCrew') or (bk.get('forced') and (bk['forced']['fix'] or not bk['forced']['plain'])):
+            fail('the small repairs: never the same twice in a week, every row sound, never the crew\'s')
+        # limits between the old board and FX10's (3e5c4fe2: 8% again, 21% on Deck 2; 0.92.2: 20% again, 4% on Deck 2)
+        if again * 100 > 14 * n: fail(f"the quick player did the same job again {again} times in {n} (want 14% at most: note 24, \"the same things over and over\")")
+        if sci * 100 < 12 * n: fail(f"the quick player's jobs on Deck 2: {sci} of {n} (want 12% or more: note 21, \"work needs to take you to the science area more\")")
         if off['days'].get('1', {}).get('empty', 0) < 120: fail('with BOARD_ON false, Day 1 should be as thin as before (this part would not see a regression)')
 
     print('errors', g.errors[:5])
