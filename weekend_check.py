@@ -2,7 +2,7 @@
 # Runs on a copy of the build with WEEKEND_ON switched on (the switch is a URL flag, ?weekend, off in the game):
 #   every weekend tradition on its day (eventsOn), and nothing of them with the switch off
 #   each join has its activity (PLAYER_ACTS['tj:<id>'], made after the slot adds the joins: tjActs) and a join ends
-#   Bread day (T3): crew at the kneading spots (3-bread-*), the island's flour and tins (breadDay), you knead, and your
+#   Bread day (T3): crew at the kneading spots (Cook-along's 3-cookalong-*), the island's flour and tins (breadDay), you knead, and your
 #     loaf is in Monday's breakfast basket (loafCard) 06:30-10:00 and not on Tuesday
 #   The big jigsaw (T4): crew at the observation room's table, the puzzle on it (bigJigsaw) only on its Sunday afternoon
 #     (Deck 1 as before on other days), a turn is 20 minutes and counts as your puzzles hobby
@@ -65,7 +65,7 @@ with sync_playwright() as pw:
     # ---- Bread day (Day 7, Sunday) ----
     g.ev("(() => { skipTo(6 * 1440 + 428); goToDeck(3, null); player.obj.position.set(37 - OX, 0, 8.5 - OZ); SHIP.device.settings.tips = false; })()")
     g.step(240)
-    b = json.loads(g.ev("JSON.stringify({ dress: dressingOn(), crew: DECK_CREW.filter(a => a.settled && a.spot && /^3-bread-/.test(a.spot.id)).length })"))
+    b = json.loads(g.ev("JSON.stringify({ dress: dressingOn(), crew: DECK_CREW.filter(a => a.settled && a.spot && /^3-cookalong-/.test(a.spot.id)).length })"))
     check('breadDay' in b['dress'], 'Bread day: flour, dough and tins on the prep island (%s)' % b['dress'])
     check(b['crew'] >= 3, 'Bread day: crew kneading round the island (%d)' % b['crew'])
     j = json.loads(g.ev("(() => { const e = eventsOn(7).find(x => x.id === 'bread-day'), a = DECK_CREW.find(x => x.p.id === 'brennan'); tradJoin({ ...e, day: 7 }, a); return JSON.stringify({ act: ACT && ACT.kind }); })()"))
