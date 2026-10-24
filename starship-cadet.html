@@ -53359,20 +53359,23 @@ WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('cere
 // was stuck on "Look over the air scrubber" with no filters till a delivery). (2) The flag 'promoted' is set once you're an
 // officer (it never was: guiding a newcomer, 20c, and Come over, 20, never opened), and once for a save already an officer.
 // (3) Every beat is led by the arrow queue (15b's guideAsk) when it's on; the old setGoal arrows stay for the queue off
-// (promoQueue): the test job to the board until it's yours (level 3, everyday), the summons (level 2 from 10:30), the walk
-// to your cabin (level 1 while Calder walks you), the ceremony (level 2 from 16:55). Read once a ship minute, nothing saved.
+// (promoQueue): the test job to the board until it's yours (level 3, everyday, once it's on the board for you), the summons
+// (level 2 from 10:30), the walk to your cabin (level 1 while Calder walks you), the ceremony (level 1 from 16:55). Read once
+// a ship minute, nothing saved.
 const promoQueue = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
-function promoPartsAside(j) {
-  if (!j || !Array.isArray(j.parts) || !SHIP.stores) return;
-  const need = {}; for (const p of j.parts) need[p] = (need[p] || 0) + 1;
-  for (const p in need) if ((SHIP.stores[p] || 0) < need[p]) SHIP.stores[p] = need[p];
-  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+function promoPartsAside(j) {                            // what the test job still needs and you haven't got is on the shelf (asked every minute: the crew's own repairs may use the shelf's last ones)
+  if (!j || !Array.isArray(j.parts) || !SHIP.stores || j.status === 'done' || j.workDone) return;
+  let need = []; try { const P = SHIP.player, w = P.work && P.work.job === j.id ? P.work : { fitted: [], make: null }; need = j.claimedBy === 'you' ? jobNeeds(j, w, P.carry) : j.parts.slice(); } catch (e) { need = j.parts.slice(); }
+  const n = {}; for (const p of need) n[p] = (n[p] || 0) + 1; let up = false;
+  for (const p in n) if ((SHIP.stores[p] || 0) < n[p]) { SHIP.stores[p] = n[p]; up = true; }
+  if (up && typeof MACH_REV !== 'undefined') MACH_REV++;
 }
 function promoGuide(now) {
   const W = SHIP.works; if (!W) return;
   if (W.tier >= 2 && typeof flag === 'function' && typeof flagSet === 'function' && !flag('promoted')) flagSet('promoted');
-  if (!promoQueue()) return;
   const c = W.cur, owner = '24p (DV1)';
+  if (c && c.id === 't2' && c.st === 'do' && c.j) promoPartsAside(SHIP.jobs.find(x => x.id === c.j));   // (with the queue off too)
+  if (!promoQueue()) return;
   if (c && c.id === 't2' && c.st === 'do' && c.j) {
     const j = SHIP.jobs.find(x => x.id === c.j);
     let take = false; try { take = typeof guideTakeable === 'function' && guideTakeable().some(o => o.id === c.j); } catch (e) { take = false; }   // once it's on the board for you (clocked in): the shift's clock-in arrow first
@@ -53385,7 +53388,7 @@ function promoGuide(now) {
   if (W.mv && !promoDone('move2')) guideAsk({ id: 'promo:move', level: 1, owner, until: Math.floor(now / 1440) * 1440 + 1440,
     goal: () => ({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home + ': follow ' + guideWho(W.mv.by) }), done: () => promoDone('move2') });
   const cr = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked' && !x.met);
-  if (cr && now >= cr.at - 20) guideAsk({ id: 'promo:ceremony', level: 2, owner, from: cr.at - 20, until: cr.at + cr.len,
+  if (cr && now >= cr.at - 20) guideAsk({ id: 'promo:ceremony', level: 1, owner, from: cr.at - 20, until: cr.at + cr.len,   // level 1: over a direct goal (a team job's arrow), as the summons of your life should be
     goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: 'Your commission, ' + hhmm(cr.at % 1440) + ': the observation room' }), done: () => promoDone('ceremony2') || !!cr.met });
 }
 WORK_TICKS.push((now, skip) => { if (!skip) promoGuide(now); else { const W = SHIP.works; if (W && W.tier >= 2 && typeof flag === 'function' && !flag('promoted')) flagSet('promoted'); } });
