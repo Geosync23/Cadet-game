@@ -114,3 +114,12 @@ Game sha256 44a5cc8e...; 123a778d's game (d643c0da...) plus one toast string ("o
 - arrows_check clockin OK; intro_check --firsts (13, 13b: Day 1 Clock in arrow, tracked till you punch) OK;
   intro_check --p923 (#7 Zeke's clock-in first, Day 1 lines) OK; cadet_test 0dd4e2e2 vs fix ALL IDENTICAL (renderer
   noise only).
+
+## FX12 p924-fx12 (0.92.4 item A, the user's tray rules): in progress
+- b513e0cc (game e5937be9-diff; TRAY_TRAVELS false, trayKeep, actEnd's "leave your tray" toast, trayGo for
+  Pick-your-own): FIXES NEEDED, test only: its interactions_check.py deleted FX8's 0.92.3 #22 block (Rina's health
+  check by a real tap + RV11's two lines). FX12 restoring; also moving the off-Deck-3 Pick-your-own arrow to a mess seat.
+- On b513e0cc's game: servery line and queue tiles all in room M (probe), so a served tray is never cleared at once.
+  Mess part + events part 12 OK; on 3866c8f3 the new lines FAIL; planted faults caught: k1 TRAY_TRAVELS true, k2 never
+  left behind out of the mess, k3 Pick-your-own tray not travelling, k4 no "leave your tray" word. cadet_test ALL
+  IDENTICAL, food 1 7 OK, arrows week OK. To rerun on the new sha (game changes in needGoal).
