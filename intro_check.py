@@ -533,6 +533,60 @@ def late_dinner(g):
     if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
     if m: fail(f'Calder\'s "Missed you at dinner" Mail came while he was still with you: {m}')
 
+# part 18 (DS1, the user's patch 0.92.3 items 1, 7-10), in one new game: the bedtime tip with the bunk's arrow on Day 0; Day 1's
+# wardrobe arrow till you've changed; Tomas's wake-up lines without the towel one (its key retired, the next still said);
+# Zeke's opener says clock in right after his hello; his "quiet days / the ship gets lively" pair comes early on the
+# training day (else before his end-of-day words), his other follow lines still in order
+def patch923(g):
+    print('18. Patch 0.92.3: the bedtime tip, Day 1\'s change-clothes arrow, Tomas without the towel, Zeke\'s clock-in first, the "lively" pair on training day')
+    g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
+    g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)
+    # 1: the bunk's arrow after his goodnight brings the bedtime tip, once
+    g.ev("skipTo(introAbs(0, 19 * 60 + 50))"); g.step(5)
+    bt = g.ev("""(() => { const I = SHIP.intro; I.done.goodnight = Math.floor(shipNow()); delete I.done.bed; INTRO_UI.bed = false; INTRO_UI.goal = false; if (typeof clearGoal === 'function' && IX_GOAL) clearGoal();
+      SHIP.device.settings.tips = true; delete SHIP.device.tipsSeen.bedtime; TIP_Q.length = 0; introBedTick();
+      return { goal: IX_GOAL && IX_GOAL.label, seen: !!SHIP.device.tipsSeen.bedtime, text: (TIP_Q.find(x => x.id === 'bedtime') || {}).text || '' }; })()""")
+    print(f"  #1 the bunk's arrow '{bt['goal']}', the bedtime tip: {bt['seen']} {bt['text'][:90]!r}")
+    if not (bt['seen'] and '20:00' in bt['text']): fail(f'#1: no bedtime tip with the bunk\'s arrow (sleep from 20:00): {bt}')
+    # 10: Tomas's wake-up lines
+    tw = g.ev("introBeatLines(INTRO_WEEK.find(b => b.id === 'd1-wash'))")
+    print(f'  #10 Tomas at 06:00: {tw}')
+    if any('owel' in x for x in tw) or not any(x.startswith('Out the door') for x in tw) or len(tw) != 3: fail(f'#10: Tomas\'s wake-up lines should be three, no towel, "Out the door" still said: {tw}')
+    # 7: Zeke's opener, clock in right after his hello, none removed
+    op = g.ev("[1, 2, 3].map(n => (introWriterLine('walk.train.open.' + n) || [''])[0])")
+    print(f'  #7 his opener: {op}')
+    if not (op[0].startswith('Morning') and 'clock in' in op[1] and op[2].startswith('Anything')): fail(f'#7: his opener should be hello, clock in, then the rest: {op}')
+    # 9: Day 1, up at 07:00 in yesterday's clothes: the wardrobe's arrow; changed: gone
+    g.ev("skipTo(introAbs(1, 7 * 60))"); g.step(5)
+    ch = g.ev("""(() => { const C = SHIP.clothes, I = SHIP.intro; delete I.done['arrow:change']; C.changed = 0; C.clean = Math.max(C.clean, 1);
+      const a = introArrowWant(Math.floor(shipNow())); C.changed = SHIP.time.day; const b = introArrowWant(Math.floor(shipNow()));
+      return { before: a, after: b, label: INTRO_ARROWS.change && INTRO_ARROWS.change.label }; })()""")
+    print(f"  #9 Day 1 07:00: the arrow {ch['before']!r} ('{ch['label']}'), changed: {ch['after']!r}")
+    if ch['before'] != 'change' or ch['after'] == 'change': fail(f'#9: Day 1\'s change-clothes arrow: {ch}')
+    # 8: the pair after his first three follow lines, then the rest in order past them; else before his end-of-day words
+    FT = """((n) => { const I = SHIP.intro, D = I.done, a = introWalker(); if (!a) return null; const said = [], ob = bubbleSay, of = introFollowing;
+      D['follow:n'] = n; for (const k of [15, 16]) delete D['follow:' + k]; bubbleSay = (h, t) => { said.push(t); }; introFollowing = () => true;
+      try { for (let i = 0; i < 4; i++) { INTRO_UI.followAt = -1e9; INTRO_UI.next = 0; INTRO_UI.sayEnd = 0;   /* (8 s since his last: the sim clock may be young) */ a.pose = 'walk'; player.obj.position.set(a.x + .5, player.obj.position.y, a.z); introFollowTick(); } }
+      finally { bubbleSay = ob; introFollowing = of; } return { said, n: D['follow:n'], d15: D['follow:15'] !== undefined, d16: D['follow:16'] !== undefined, why: said.length ? null : { dlg: DIALOGUE && (DIALOGUE.id || 'dlg'), pose: a.pose, d: +Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z).toFixed(2), sim: simNow() < (INTRO_UI.sayEnd || 0) || simNow() < INTRO_UI.next } }; })"""
+    g.ev("skipTo(introAbs(1, 9 * 60 + 30))"); g.ev("goToDeck(5)"); g.step(30)
+    for _ in range(60):
+        if g.ev("!!introWalker()"): break
+        g.step(10)
+    want = g.ev("[3, 4, 5, 6, 14, 15, 16, 17].map(k => (introWriterLine('walk.follow.' + k) || [''])[0])")
+    f1 = g.page.evaluate('([s, n]) => window.__sc(s)(n)', [FT, 3])
+    print(f'  #8 after three follow lines: {f1}')
+    if not f1 or f1['said'] != [want[5], want[6], want[1], want[2]]: fail(f'#8: after his third follow line, the "quiet / lively" pair, then lines 4 and 5: {f1}; wanted {want[5:7] + want[1:3]}')
+    g.ev("for (const k of [15, 16]) SHIP.intro.done['follow:' + k] = 1")
+    f2 = g.page.evaluate('([s, n]) => window.__sc(s)(n)', [FT.replace("for (const k of [15, 16]) delete D['follow:' + k];", ''), 14])
+    print(f'  #8 at line 14, the pair already said: {f2}')
+    if not f2 or not f2['said'] or f2['said'][0] != want[7]: fail(f'#8: past line 14 with the pair said, he goes on with line 17: {f2}')
+    de = g.ev("""(() => { const I = SHIP.intro, D = I.done, a = introWalker(); if (!a) return null; D['follow:n'] = 5; for (const k of [15, 16, 'd1-end:told', 'd1-end:start']) delete D['follow:' + k], delete D[k];
+      INTRO_UI.endQ = null; const said = [], ob = bubbleSay; bubbleSay = (h, t) => { said.push(t); };
+      try { skipTo(introAbs(1, INTRO_DAYEND.at + 1)); player.obj.position.set(a.x + .5, player.obj.position.y, a.z); INTRO_UI.next = 0; if (DIALOGUE) dialogueEnd(true); introDayEndTick(); }
+      finally { bubbleSay = ob; } return { said, q: (INTRO_UI.endQ || []).slice() }; })()""")
+    print(f'  #8 never walked far enough: his end-of-day words {de}')
+    if not de or not (de['said'] + de['q'])[1:3] == want[5:7]: fail(f'#8: the "quiet / lively" pair before his end-of-day words: {de}')
+
 def talk_away(g):
     print('15. Near him but not at the spot: the bunk talk and the dinner chat still move on')
     for step, deck, spot in (('bunk', 4, [12, 4]), ('table', 3, [33, 3])):
@@ -629,6 +683,7 @@ FIRSTS_ONLY = '--firsts' in sys.argv
 LEAVE_ONLY = '--leave' in sys.argv   # part 14 alone (0.64.15's "Zeke stands in the bunk room")
 WEEK_ONLY = '--week' in sys.argv
 BESIDE_ONLY = '--beside' in sys.argv   # part 16 alone (FE2 on 0.92.0)
+P923_ONLY = '--p923' in sys.argv   # part 18 alone (patch 0.92.3)
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
 with sync_playwright() as pw:
@@ -646,6 +701,10 @@ with sync_playwright() as pw:
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if BESIDE_ONLY:
         beside_walk(g); late_dinner(g)
+        if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
+        g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
+    if P923_ONLY:
+        patch923(g)
         if g.errors: fail('page errors: ' + ' | '.join(g.errors[:6]))
         g.close(); print('OK' if ok else 'FAILED'); sys.exit(0 if ok else 1)
     if FIRSTS_ONLY:
@@ -1050,6 +1109,7 @@ with sync_playwright() as pw:
     talk_away(g)
     beside_walk(g)
     late_dinner(g)
+    patch923(g)
     bunk_leave(g)   # last: its reload leaves the page on a saving URL
     solo(g)
     solo_tap(g)

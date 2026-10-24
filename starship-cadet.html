@@ -28000,7 +28000,6 @@ const VOICE = JSON.parse([
   '{"text":"Ready? Garden. Seedling. Bring your hands. That\'s all you need. And maybe a towel.","id":"10k39gg","time":"morning","week1":"true","weekday":"sat"},',
   '{"text":"Morning! Washroom first, before the queue. Hot\'s best early.","id":"1el5hch","flag":"beat.d1-wash.1"},',
   '{"text":"Breakfast\'s till nine. Then Works. Then everything.","id":"1kfgbjo","flag":"beat.d1-wash.2"},',
-  '{"text":"Towel\'s in your locker. Top shelf. I think.","id":"1p0422","flag":"beat.d1-wash.3"},',
   '{"text":"Out the door, then left. Probably left.","id":"179ofgq","tone":"funny","flag":"beat.d1-wash.4"},',
   '{"text":"Sowing morning\'s tomorrow! You plant your own seedling.","id":"1w3byfi","flag":"beat.d5-invite.1"},',
   '{"text":"Garden, before lunch. Bring your hands. That\'s all.","id":"1li8ixq","flag":"beat.d5-invite.2"},',
@@ -28478,8 +28477,8 @@ const VOICE = JSON.parse([
   '{"text":"You\'re quicker than I was. Don\'t let it go to your head.","id":"52s5z2","tone":"funny","flag":"walk.follow.28"},',
   '{"text":"You\'re doing well, you know. Really well.","id":"rwqkxj","tone":"warm","flag":"walk.follow.29"},',
   '{"text":"Morning! It\'s a training day today. I\'m with you all day.","id":"1gdmi07","flag":"walk.train.open.1"},',
-  '{"text":"Anything you\'re not sure of, ask. That\'s what I\'m here for.","id":"167ibnw","tone":"warm","flag":"walk.train.open.2"},',
-  '{"text":"First, clock in. The time clock\'s by the tea corner.","id":"1i4y7xe","flag":"walk.train.open.3"},',
+  '{"text":"First, clock in. The time clock\'s by the tea corner.","id":"1i4y7xe","flag":"walk.train.open.2"},',
+  '{"text":"Anything you\'re not sure of, ask. That\'s what I\'m here for.","id":"167ibnw","tone":"warm","flag":"walk.train.open.3"},',
   '{"text":"You can\'t do every tradition in a day. Nobody can.","id":"1t0t8r1","flag":"walk.eve.choose.1"},',
   '{"text":"So pick the one you fancy. There\'s always next week.","id":"5en3p4","flag":"walk.eve.choose.2"},',
   '{"text":"Small stuff today. Don\'t worry. Jobs get better as you go.","id":"f3m7hy","flag":"walk.train.better.1"},',
@@ -44369,6 +44368,11 @@ function introWriterLines(flagKey, id = SHIP.intro.escort) {
 // steps and between jobs, walk.follow.<n> in order, one every INTRO_FOLLOW_GAP, never repeated (the count is saved)
 const INTRO_TRAIN_JOB = { repair: 'fault', restock: 'cart', inspect: 'round' }, INTRO_TRAIN_STEP = { take: 'take', 'stop.fetch': 'fetch', 'stop.make': 'make', 'stop.job': 'at', done: 'done', turnin: 'turnin' };
 const INTRO_FOLLOW_GAP = 8000;                            // real ms between them
+// (DS1, the user, patch 0.92.3 #8) "Most days are like this. Quiet, steady..." / "But now and then the ship gets lively. You'll
+// see." (walk.follow.15-16) are always heard on the training day: next after his first INTRO_FOLLOW_SURE_AFTER lines (the
+// rest then in order, skipping them), else before his end-of-day words (introDayEndTick). Each said one is done['follow:<k>']
+const INTRO_FOLLOW_SURE = [15, 16], INTRO_FOLLOW_SURE_AFTER = 3;
+const introFollowSureLeft = () => INTRO_FOLLOW_SURE.filter(k => SHIP.intro.done['follow:' + k] === undefined && (SHIP.intro.done['follow:n'] || 0) < k);
 function introFollowing() {
   if (!introOn() || typeof ROSTER === 'undefined') return false;
   const p = ROSTER.find(x => x.id === SHIP.intro.escort), e = p && escortPlan(p, shipNow()); return !!e && e.mode === 'follow';
@@ -44381,8 +44385,10 @@ function introFollowTick() {
   if (!introFollowing() || DIALOGUE || simNow() < (INTRO_UI.sayEnd || 0) || simNow() < INTRO_UI.next) return;   // simNow: the pause-aware clock, like the tour's (reviewer 0607's LOW)
   const a = introWalker(), now = simNow(); if (!a || a.pose !== 'walk' || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 4) return;   // walking together
   if (now - (INTRO_UI.followAt || 0) < INTRO_FOLLOW_GAP) return;
-  INTRO_UI.followAt = now; const k = (SHIP.intro.done['follow:n'] || 0) + 1, l = introWriterLine('walk.follow.' + k);
-  if (l && typeof bubbleSay === 'function') { SHIP.intro.done['follow:n'] = k; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
+  INTRO_UI.followAt = now; const D = SHIP.intro.done, n = D['follow:n'] || 0, sure = n >= INTRO_FOLLOW_SURE_AFTER ? introFollowSureLeft() : [];
+  let k = sure.length ? sure[0] : n + 1; if (!sure.length) while (D['follow:' + k] !== undefined) k++;   // (patch 0.92.3 #8) the pair first; later, past them
+  const l = introWriterLine('walk.follow.' + k);
+  if (l && typeof bubbleSay === 'function') { if (sure.length) D['follow:' + k] = Math.floor(shipNow()); else D['follow:n'] = k; bubbleSay(a.h, l[0], 4.5); INTRO_UI.next = now + INTRO_TOUR_GAP; }
 }
 function introJobNote(n) {
   if (!introOn() || !n) return;
@@ -44859,6 +44865,13 @@ function introNightTick() {
   bubbleSay(a.h, U.night.shift(), 4.5); U.next = now + INTRO_TOUR_GAP; U.hushTo = now + 4500;   // the crowd's chatter waits (introHush)
   if (!U.night.length) { I.done.goodnight = Math.floor(shipNow()); U.night = null; introDone('free'); }   // and he lets you go
 }
+// (DS1, the user, patch 0.92.3 #1) with the bunk's arrow up, once ever, a tip on how bedtime works (the writers' tip.bedtime
+// if there is one; section 13's bunk: sleep from 20:00, the alarm clock, lying down earlier)
+const INTRO_BED_TIP = 'Bedtime: tap your bunk from 20:00 to sleep. You pick when your alarm wakes you (06:00 unless you change it), and a night\'s sleep fills your energy. Before 20:00 you can lie down, but you won\'t sleep. Your shift starts at 09:00.';
+function introBedTip() {
+  if (typeof tipShow !== 'function') return;
+  try { tipShow('bedtime', typeof clothesText === 'function' ? clothesText('tip.bedtime', {}, INTRO_BED_TIP) : INTRO_BED_TIP); } catch (e) { /* the tips aren't ours */ }
+}
 function introBedTick() {
   const I = SHIP.intro; if (I.done.bed !== undefined || typeof setGoal !== 'function') return;
   const now = Math.floor(shipNow()), on = ((now < introAbs(1, 0) && I.done.goodnight !== undefined) || (now >= introAbs(1, 19 * 60) && now < introAbs(2, 0))) && !(typeof flcBusy === 'function' && flcBusy(now));   // patch #26: not while First Light Cocoa is on
@@ -44868,7 +44881,7 @@ function introBedTick() {
   if ((typeof sleeping !== 'undefined' && sleeping) || (pl && deckDef.num === 4 && Math.hypot(me[0] - pl.at[0], me[1] - pl.at[1]) <= 1.5)) {
     I.done.bed = now; if (INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); } return;
   }
-  if (on && !INTRO_UI.goal && !INTRO_UI.bed && !(typeof IX_GOAL !== 'undefined' && IX_GOAL)) { setGoal({ deck: 4, place: bed, label: INTRO_BED_GOAL }); INTRO_UI.bed = true; }
+  if (on && !INTRO_UI.goal && !INTRO_UI.bed && !(typeof IX_GOAL !== 'undefined' && IX_GOAL)) { setGoal({ deck: 4, place: bed, label: INTRO_BED_GOAL }); INTRO_UI.bed = true; introBedTip(); }
   else if (!on && INTRO_UI.bed) { INTRO_UI.bed = false; if (mine) clearGoal(); }
 }
 const introWalker = () => typeof DECK_CREW !== 'undefined' ? DECK_CREW.find(a => a.p && a.p.id === SHIP.intro.escort) || null : null;
@@ -44994,7 +45007,8 @@ function introHealthMissed(n) {
 // they stop while they talk; leave and the rest is dropped. A beat with no room of its own (Friday's invite) plays when they're within
 // INTRO_BEAT_NEAR tiles of you in the four hours after it.
 const INTRO_BEAT_NEAR = 6;
-function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) break; out.push(l[0]); } return out.concat(friBeatLines(b)); }   // friBeatLines (18f): Halloran's Friday lines after the mug, when on
+function introBeatLines(b) { const out = []; for (let n = 1; n <= 12; n++) { const l = introWriterLine('beat.' + b.id + '.' + n, b.who); if (!l) continue; out.push(l[0]); }   // (DS1, patch 0.92.3 #10) a gap is a cut line's retired key: skipped, the rest still said
+  return out.concat(friBeatLines(b)); }   // friBeatLines (18f): Halloran's Friday lines after the mug, when on
 function introBeatHere(b, a) {
   if (!a || typeof player === 'undefined') return false;
   const P = player.obj.position, room = c => (ROOMS[roomAt(...c)] || {}).name;
@@ -45084,7 +45098,8 @@ const INTRO_ARROWS = {
   eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
   stow: { deck: 4, place: '4-B1-4-wardrobe', label: 'Put your bag in your wardrobe' },   // the arrival's 'stow' step (playtest patch 1, #2)
   tea: { deck: 5, room: 't', item: /^tea table$/i, label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below); at the tea table, like FR4's quest arrow (playtest patch 1, #10)
-  call: { deck: 3, room: 'B', place: '3-callhome-1', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick); on a free booth (FX5: introCallTick picks it)
+  call: { deck: 3, room: 'B', place: '3-callhome-1', label: 'Call home from the booths' },
+  change: { deck: 4, place: '4-B1-4-wardrobe', label: 'Change into clean clothes' },   // (DS1, the user, patch 0.92.3 #9) Day 1's morning, until you have   // Day 0's call-home card, when you tap Track it (introCallTick); on a free booth (FX5: introCallTick picks it)
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
 const INTRO_CLOCK_AUTO = 8 * 60 + 50;                     // 0.72.5 (playtest 2, item 6): on your first shift, the time clock's arrow from 08:50 if you're in the Works bay (then the job board's, item 7)
@@ -45111,6 +45126,11 @@ function introArrowWant(now) {
   if (d > 1 || typeof careerClockedIn !== 'function') { fin('clock'); fin('board'); return null; }
   if (d < 1) return typeof bagHeld === 'function' && bagHeld() && I.done.stow !== undefined ? 'stow' : null;   // (DS1) past its step (19:45), the bag's arrow still, after the others
   const out = m >= (typeof CAREER !== 'undefined' ? CAREER.clockOut : 1020);
+  if (I.done['arrow:change'] === undefined) {            // (DS1, the user, patch 0.92.3 #9) Day 1: up and about, to your wardrobe till you've changed (or the briefing's near)
+    const C = typeof CLOTHES_ON !== 'undefined' && CLOTHES_ON && SHIP.clothes;
+    if (!C || C.changed >= d || C.clean <= 0 || m >= INTRO_CLOCK_AUTO) fin('change');
+    else if (m >= 6 * 60 && !(typeof sleeping !== 'undefined' && sleeping) && !(typeof bagHeld === 'function' && bagHeld())) return 'change';
+  }
   if (I.done['arrow:clock'] === undefined) {
     let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
     if (careerClockedIn(1) || out) fin('clock');
@@ -45783,6 +45803,7 @@ function introDayEndTick() {
     if (!near && m < INTRO_DAYEND.at + INTRO_DAYEND.find) return;   // he's on his way over
     if (!near) { I.done['d1-end:told'] = Math.floor(shipNow()); return; }   // he never found you: the arrows anyway
     U.endQ = []; for (let n = 1; n <= 3; n++) { const l = introWriterLine('walk.trainend.' + n); U.endQ.push(l ? l[0] : INTRO_DAYEND.lines[n - 1]); }
+    for (const k of introFollowSureLeft().reverse()) { const l = introWriterLine('walk.follow.' + k); if (l) { U.endQ.splice(1, 0, l[0]); I.done['follow:' + k] = Math.floor(shipNow()); } }   // (patch 0.92.3 #8) not heard yet: after "Good job today"
   }
   if (!a || DIALOGUE || simNow() < (U.next || 0) || typeof bubbleSay !== 'function') return;
   bubbleSay(a.h, U.endQ.shift(), 4.5); U.next = simNow() + INTRO_TOUR_GAP;

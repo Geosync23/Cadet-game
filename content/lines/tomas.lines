@@ -572,8 +572,10 @@
 - Morning! Washroom first, before the queue. Hot's best early.
 ? flag:beat.d1-wash.2
 - Breakfast's till nine. Then Works. Then everything.
-? flag:beat.d1-wash.3
-- Towel's in your locker. Top shelf. I think.
+// cut (the user, 2026-10-24, patch 0.92.3 #10: "remove Tomas's towel line from the wake-up talk"); parked, its key
+// beat.d1-wash.3 retired (section 21's introBeatLines skips the gap):
+// ? flag:beat.d1-wash.3
+// - Towel's in your locker. Top shelf. I think.
 ? flag:beat.d1-wash.4
 - Out the door, then left. Probably left.   #funny
 // beat d5-invite: Friday 18:00, wherever he finds you
