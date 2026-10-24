@@ -167,3 +167,11 @@ Game sha256 67dc4eee...f8cb; base integration ba836359 (2aa6427f...).
 - cadet_test vs ba836359: j_steer1 and j_steer2 differ (FX9 reported j_steer2 only): looked at both: walkers' leg
   phase only (one walker in j_steer1; one at the right and an arm at the left edge in j_steer2), same spots: the jump
   from the origin used to count as walking and advance their stride. Explained. check_fast OK (260 s).
+
+## FX11 p925-fx11 c97fbef0 (0.92.5 #17 follow-up: an auditorium seat has no timer, the user's): PASS (~23:10 UTC)
+Game sha256 b8faa999...; base 23432122 (RV11 PASSed items 2, 3, 14, 17 there).
+- Diff: PLAYER_ACTS.recSeat gets until: () => false (as plain sit); the leisure gain still only over its first 15
+  minutes (actUpdate caps m at mins - done). recSeatHold/REC_AUD_SHOWS (built this patch, never released) and their two
+  calls removed; the seat's toast "Stay as long as you like; walk away to get up."
+- disc_check: ALL OK; on 23432122 the three #17 lines FAIL (up at 16:50, 10:37, 16:50): the base is the planted fault.
+- cadet_test vs 23432122 ALL IDENTICAL (renderer noise only); check_fast OK.
