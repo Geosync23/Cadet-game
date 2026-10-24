@@ -134,3 +134,10 @@ Base 3866c8f3. All behind SIM_BAY (#simbay / ?simbay); tested on copies with `co
   interactions_check OK with the sim part, day_check 2 OK. Planted (screens never play + queue never needed) running.
 - S5 35398d43: sim-pilot habit (Raman always; else only those with no rec habit, key 1035); schedBuild 'sim' kind with
   simPlanShut. No new check line yet -> asked. Nit: REC_HABIT_TEXT "rec dec" (table never read).
+
+## DV1 promo-arrows 81e9065c (0.92.5; game fbabb6ae...): reviewing (~18:10 UTC)
+Diff: 24p promoPartsAside (tops the shelf up to what the t2 test still needs, at the offer and each minute), promoGuide
+(flag 'promoted' once tier >= 2, also for saves already officers; queue asks promo:test/summons/move/ceremony at levels
+3/2/1/1), old setGoal arrows only with the queue off, cabin walk at 17:00 even mid-job; sec 25 dvCareerNext drops row asks
+while a promo beat is pending. Notes to weigh: free parts for the crew while the test's open; 'promoted' opens Come over and
+the newcomer guide (incl. existing officer saves). Plants q1 (no parts aside), q2 (no flag), q3 (no queue asks) ready.
