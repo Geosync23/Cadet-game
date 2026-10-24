@@ -9,6 +9,9 @@
 #   (e) the same pick twice (and after a reload of the record); a topic talked about lately goes behind the others
 #   (f) the save: save.talks only once a talk has happened, loads back the same, bad entries dropped, small, New game clears
 #   (i) repeats over Days 1-3 with a chatty player: filler lines a talk, the most any everyday line comes (DL1, note 21)
+#   (j) own pools only (patch 0.92.3 item 15): an "only: own" person never draws the pool, a work pool or small talk,
+#       their first-talk scene comes first and is had only once answered, then their own talks, then the least lately
+#       had again; their talk.* lines are their own; nobody else's picks change (stand-ins when the content has none)
 # Setup and environment as for cadet_test.py.
 # Run:  python3 talk_check.py BUILD.html
 import sys, json, os
@@ -49,13 +52,15 @@ RUN = r"""(({ days, min, tier, check, start }) => {
       const before = check ? __TC.ready(p, t) : null, a = talkPackPick(p, t), b = talkPackPick(p, t);
       if (JSON.stringify(a) !== JSON.stringify(b)) bad.push(`${p.id} day ${d}: two picks differ`);
       if (!a) { bad.push(`${p.id} day ${d}: no pick`); continue; }
+      const only = talkOnlyOwn(p);                        // "only: own" (item 15): checked in (j); here only that they keep to their own
+      if (only && (!a.talk || a.src !== 'own' || !a.talk.id.startsWith(p.id + '.'))) bad.push(`${p.id} day ${d}: "only: own" but ${a.talk ? a.src + ' ' + a.talk.id : 'small talk'}`);
       if (a.talk) {
         const id = a.talk.id;
-        if (firedBy[id]) bad.push(`${id} again (${firedBy[id]}, then ${p.id} day ${d})`);
+        if (firedBy[id] && !(only && a.again)) bad.push(`${id} again (${firedBy[id]}, then ${p.id} day ${d})`);
         firedBy[id] = p.id + ' day ' + d;
         if (a.src === 'own' && !id.startsWith(p.id + '.')) bad.push(`${p.id} said ${id}, someone else's own talk`);
         if (a.src === 'pool' && p.rank === 'guest') bad.push(`${p.id} (a guest) drew the pool: ${id}`);
-        if (before && a.src === 'own' && before.own[0] !== id) bad.push(`${p.id} day ${d}: own talk ${id}, but ${before.own[0]} was first in file order`);
+        if (before && a.src === 'own' && !a.again && !a.talk.first && before.own.filter(x => !(TALKS.own[p.id].find(tk => tk.id === x) || {}).first)[0] !== id) bad.push(`${p.id} day ${d}: own talk ${id}, but ${before.own[0]} was first in file order`);
         if (before && a.src === 'pool' && before.own.length) bad.push(`${p.id} day ${d}: pool ${id} while own ${before.own.join(',')} was ready`);
         if (before && a.src === 'work' && !before.work.includes(id)) bad.push(`${p.id} day ${d}: work ${id} wasn't ready`);
         if (before && a.src === 'work' && before.own.length) bad.push(`${p.id} day ${d}: work ${id} while own ${before.own.join(',')} was ready`);
@@ -73,7 +78,7 @@ RUN = r"""(({ days, min, tier, check, start }) => {
         (smalls[p.id] = smalls[p.id] || []).push(a.done ? 1 : 0);
         log.push({ d, p: p.id, small: a.small.map(x => x.text), done: a.done, rank: p.rank });
       }
-      talkPackFire(p, a, t);
+      talkPackFire(p, a && a.talk && a.talk.first ? { ...a, answered: true } : a, t);   // a first-talk scene: as if answered
     }
   }
   return { log, bad, smalls, fired: Object.keys(SHIP.talks.fired).length };
@@ -124,9 +129,11 @@ with sync_playwright() as pw:
         check(all(t in allowed for x in sar_small for t in x['small']), 'Saruth used crew small talk (contractions)')
     ownorder = {}
     for x in talks:
-        if x['src'] == 'own': ownorder.setdefault(x['p'], []).append(x['id'])
+        if x['src'] == 'own' and x['id'] not in ownorder.get(x['p'], []): ownorder.setdefault(x['p'], []).append(x['id'])   # the first time each (an "only: own" person's come round again)
     files = ev("Object.fromEntries(Object.entries(TALKS.own).map(([k, v]) => [k, v.map(t => t.id)]))")
     for p, ids in ownorder.items():
+        skip = set(ev(f"(TALKS.own[{json.dumps(p)}] || []).filter(t => t.first || Object.keys(t.when || {{}}).some(k => k !== 'tier')).map(t => t.id)"))   # a first-talk scene comes first; a talk waiting on a day, a time or a mood comes when it's ready (each pick is checked against file order above)
+        ids = [i for i in ids if i not in skip]
         check(ids == [i for i in files[p] if i in ids], f'{p}: own talks out of file order: {ids}')
 
     print('(d) Conditions, strangers to friends:')
@@ -223,6 +230,50 @@ with sync_playwright() as pw:
     check(r['guest'], 'a guest drew a work pool')
     check(r['notTwice'], 'a work talk fired with one person was offered by another')
 
+    print('(j) Own pools only (item 15): the "only: own" people and their first-talk scene:')
+    r = ev("""(() => { const keepOnly = TALKS.only, keepOwn = TALKS.own.marrow, keepV = VOICE.marrow && VOICE.marrow.lines && VOICE.marrow.lines['talk.filler'];
+      const real = Array.isArray(TALKS.only) && TALKS.only.length, out = { real: !!real, bad: [] };
+      const others = __TC.people().filter(p => !(real && TALKS.only.includes(p.id)) && p.id !== 'marrow'), before = {};
+      __TC.reset(3); for (const p of others.slice(0, 12)) before[p.id] = JSON.stringify(talkPackPick(p, 4 * 1440 + 720));
+      if (!real) { TALKS.only = ['marrow']; const w = { ...TALKS.own.marrow[0], id: 'marrow.stand-in-welcome', first: 1 }; delete w.when; TALKS.own.marrow = TALKS.own.marrow.concat(w); }   // stand-ins until the writers' files are baked
+      out.only = TALKS.only.slice();
+      __TC.reset(3); out.othersSame = others.slice(0, 12).every(p => before[p.id] === JSON.stringify(talkPackPick(p, 4 * 1440 + 720)));
+      for (const id of out.only) {
+        const p = socP(id) || linesWho(id), own = TALKS.own[id] || [], first = own.find(tk => tk.first);
+        if (!p) { out.bad.push(id + ': not aboard'); continue; }
+        if (own.filter(tk => tk.first).length > 1) out.bad.push(id + ': two first-talk scenes');
+        for (const tier of [0, 3]) {
+          __TC.reset(tier); const ctx = t => ({ t, trad: talkPackTrad(t) || undefined }), seq = [];
+          for (let d = 1; d <= 3 * own.length + 6; d++) {
+            const t = (d - 1) * 1440 + 720, a = talkPackPick(p, t), T = SHIP.talks;
+            if (!a || !a.talk) { out.bad.push(`${id} tier ${tier} day ${d}: ${a ? 'small talk' : 'nothing'}`); talkPackFire(p, a, t); continue; }
+            if (a.src !== 'own' || !a.talk.id.startsWith(id + '.')) out.bad.push(`${id} day ${d}: ${a.src} ${a.talk.id}`);
+            const ready = own.filter(tk => (!tk.when || linesOk(tk.when, p, ctx(t))) && talkPackFill(tk, p, ctx(t)));
+            if (first && ready.includes(first) && !T.fired[first.id] && a.talk !== first) out.bad.push(`${id} day ${d}: ${a.talk.id} before the first-talk scene`);
+            if (a.talk.first && T.fired[a.talk.id]) out.bad.push(`${id} day ${d}: the first-talk scene again`);
+            if (a.again) { const fresh = ready.filter(tk => !tk.first && !T.fired[tk.id]); if (fresh.length) out.bad.push(`${id} day ${d}: ${a.talk.id} again while ${fresh[0].id} was never had`);
+              const older = ready.filter(tk => !tk.first && T.fired[tk.id] && T.fired[tk.id][0] < T.fired[a.talk.id][0]); if (older.length) out.bad.push(`${id} day ${d}: ${a.talk.id} again before ${older[0].id}, had longer ago`); }
+            else if (T.fired[a.talk.id]) out.bad.push(`${id} day ${d}: ${a.talk.id} twice without being a repeat`);
+            seq.push(a.talk.id.slice(id.length + 1) + (a.again ? '*' : ''));
+            if (a.talk.first && d === 1) { talkPackFire(p, a, t); const b = talkPackPick(p, t + 1440); if (!b || b.talk !== first) out.bad.push(`${id}: the first-talk scene was had without being answered`); }
+            talkPackFire(p, a.talk.first ? { ...a, answered: true } : a, t);
+          }
+          if (tier === 3) out[id] = seq;
+          const minGap = (() => { const last = {}; let g = 1e9; seq.forEach((s, i) => { const k = s.replace('*', ''); if (k in last) g = Math.min(g, i - last[k]); last[k] = i; }); return g; })();
+          out[id + '.gap.' + tier] = minGap;
+        }
+        for (const k of ['talk.start', 'talk.sit', 'talk.filler', 'talk.end', 'talk.stop']) { const l = lineFor(p, k, { t: 720, tier: 3, peek: true }), mine = ((VOICE[id] && VOICE[id].lines && VOICE[id].lines[k]) || []).map(e => e.id);
+          if (l && !mine.includes(l.id)) out.bad.push(`${id}: ${k} from the shared lines: ${l.text}`); }
+      }
+      TALKS.only = keepOnly; TALKS.own.marrow = keepOwn; return out; })()""")
+    print(f"  {'the real list' if r['real'] else 'stand-ins'}: {r['only']}; nobody else's pick changes {r['othersSame']}")
+    for id in r['only']:
+        print(f"  {id}, friends ({len(r.get(id, []))} days; * = had again): {' '.join(r.get(id, [])[:24])}{' ...' if len(r.get(id, [])) > 24 else ''}")
+        print(f"    the fewest days between the same talk: strangers {r.get(id + '.gap.0')}, friends {r.get(id + '.gap.3')}")
+    for b in r['bad'][:12]: print('   ', b)
+    check(not r['bad'], f"{len(r['bad'])} own-pool rules broken")
+    check(r['othersSame'], 'an "only: own" list changed someone else\'s pick')
+
     for e in errors: fail(f'page error: {e}')
     g.close()
 
@@ -271,6 +322,50 @@ with sync_playwright() as pw:
         shot('talk-answer')
     r = g.ev(f"({PLAY})({{ id: 'tomas', tier: 1 }})")
     check(r['pack'] and r['pack']['id'] != P['id'], 'the same talk again the next time')
+    # the first-talk scene on the card (item 15): their own first words, no hello in front; walk off before the
+    # question and it comes again; answered, it's had
+    STAND = "(() => { if (!(Array.isArray(TALKS.only) && TALKS.only.includes('marrow'))) { TALKS.only = (TALKS.only || []).concat('marrow'); } if (!TALKS.own.marrow.some(tk => tk.first)) { const w = { ...TALKS.own.marrow[0], id: 'marrow.stand-in-welcome', first: 1 }; delete w.when; TALKS.own.marrow = TALKS.own.marrow.concat(w); } SHIP.talks = { fired: {}, small: {} }; return TALKS.own.marrow.find(tk => tk.first).id; })()"
+    fid = g.ev(STAND)
+    # stand-in own card lines for her (RV13): a hello the first-talk scene must not have in front, and the own lines the
+    # card may show; with the talkStart / talkNext hooks off a hello or her usual chat would show up
+    OWNL = g.ev("""(() => { const v = VOICE.marrow; v.lines = v.lines || {}; const mk = (k, i) => ({ ...LINES[k][0], id: 'standin.' + k + '.' + i, text: 'Stand-in own ' + k + ' line ' + i + '.' });
+      for (const k of ['talk.start', 'talk.sit']) if (!(v.lines[k] || []).length) v.lines[k] = [mk(k, 1)];
+      return Object.keys(v.lines).filter(k => k.startsWith('talk.')).flatMap(k => v.lines[k].map(e => e.text)); })()""")
+    def only_own(r, who):                                 # every line before the question: the talk's, one of her own talk.* lines (filled), or the ask
+        P = r['pack']; allowed = P['lines'] + [P['ask']]
+        bad = [x[1] for x in r['steps'] if x[1] not in allowed and not any(x[1] == o or x[1].endswith(' ' + P['lines'][0]) and x[1].startswith(o) for o in OWNL) and not (x[1] in OWNL)]
+        check(not bad, f'{who}: lines that are not her own before the question: {bad[:3]}')
+    r = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
+    P = r['pack']
+    print(f"  Marrow, the first time: {P and P['id']} (want {fid})")
+    for st in r['steps']: print(f"    {st[0]:>5} min: {st[1]!r}")
+    check(P and P['id'] == fid, f"the first-talk scene didn't come first: {P and P['id']}")
+    if P and P['id'] == fid:
+        check(r['steps'][0][1] == P['lines'][0], f"something in front of the first-talk scene: {r['steps'][0][1]!r}")
+        only_own(r, 'the first-talk scene')
+        check(r.get('asked') and r['asked'][1] == P['ask'], 'the first-talk scene did not reach its question')
+        w = g.ev("(() => { chatClose(); return !!SHIP.talks.fired[" + json.dumps(fid) + "]; })()")
+        check(not w, 'walking off before answering used up the first-talk scene')
+        r2 = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
+        check(r2['pack'] and r2['pack']['id'] == fid, 'the first-talk scene did not come again after walking off')
+        a = g.ev("(() => { chatDo('reply:listen'); return [!!SHIP.talks.fired[" + json.dumps(fid) + "], CHAT.line.text, CHAT.talk.pack.replies.listen.ans]; })()")
+        check(a[0] and a[1] == a[2], f'answering did not have the first-talk scene: {a}')
+        shot('talk-first')
+        r3 = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
+        print(f"  Marrow, the next time: {r3['pack'] and r3['pack']['id']}")
+        check(r3['pack'] and r3['pack']['id'] != fid and r3['pack']['id'].startswith('marrow.'), 'after the first-talk scene: not one of her own talks')
+        for st in r3['steps']: print(f"    {st[0]:>5} min: {st[1]!r}")
+        check(r3['steps'][0][1].startswith('Stand-in own talk.') or r3['steps'][0][1] == r3['pack']['lines'][0] or any(r3['steps'][0][1].startswith(o) for o in OWNL), 'her ordinary talk opened with a shared hello')
+        only_own(r3, 'her next talk')
+    # a long first-talk scene (6 lines): the card holds its question until all are said, the last one a while (talkPackHold)
+    g.ev("(() => { const w = TALKS.own.marrow.find(tk => tk.first); w.__keep = w.lines; w.lines = [1, 2, 3, 4, 5, 6].map(i => ({ text: 'Stand-in welcome line ' + i + '.' })); SHIP.talks = { fired: {}, small: {} }; })()")
+    r = g.ev(f"({PLAY})({{ id: 'marrow', tier: 0 }})")
+    g.ev("(() => { const w = TALKS.own.marrow.find(tk => tk.first); w.lines = w.__keep; delete w.__keep; })()")
+    said = [x[1] for x in r['steps']]
+    last = max((x[0] for x in r['steps'] if x[1] == 'Stand-in welcome line 6.'), default=None)
+    print(f"  a six-line first-talk scene: {len([x for x in said if x.startswith('Stand-in')])} lines said, the last at {last} min, the question at {r.get('asked') and r['asked'][0]} min")
+    check(all(f'Stand-in welcome line {i}.' in said for i in range(1, 7)), 'a long first-talk scene lost lines before its question')
+    check(r.get('asked') and last is not None and r['asked'][0] - last >= 1, 'the question came straight after the first-talk scene\'s last line')
     r = g.ev(f"({PLAY})({{ id: 'abara-rosa', tier: 2, fireAll: true }})")
     print(f"  everything used, Abara: small talk {r['pack'] and r['pack']['small']}, done opener {r['pack'] and r['pack'].get('done')}")
     for st in r['steps']: print(f"    {st[0]:>5} min: {st[1]!r} {st[2]}")

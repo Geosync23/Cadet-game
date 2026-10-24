@@ -36267,8 +36267,8 @@ function lineFor(who, kind, ctx = {}) {
   const p = linesWho(who); if (!p || typeof LINES === 'undefined') return null;
   const t = ctx.t != null ? ctx.t : shipNow(), h = Math.floor(t / 60), c = { ...ctx, t };
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
-  const pool = [];
-  for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', tp && tp.lines && tp.lines[kind]], ['bank', LINES[kind]]])
+  const pool = [], only = kind.startsWith('talk.') && typeof talkOnlyOwn === 'function' && talkOnlyOwn(p);   // Talk a while with an "only: own" person: their own talk.* lines, never the shared ones (item 15)
+  for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', !only && tp && tp.lines && tp.lines[kind]], ['bank', !only && LINES[kind]]])
     for (const e of list || []) if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) });
   if (!pool.length) return null;
   const mine = LINE_RECENT.filter(r => r.who === p.id).slice(-6), all = LINE_RECENT.slice(-12);
@@ -36579,10 +36579,27 @@ function talkPackFits(tk, p, ctx) {
   if (w.not) { const n = {}; for (const k of TALK_FIXED_NOT) if (k in w.not) n[k] = w.not[k]; if (Object.keys(n).length) f.not = n; }
   return linesOk(f, p, ctx);
 }
+// ---- own pools only (FX13, patch 0.92.3 item 15, the user's playtest note: the Captain and the main characters say
+// only their own things). A person whose .talk file says "only: own" (TALKS.only) never gets the shared pool, a work
+// pool or the shared small talk. Their "first: yes" talk (the first-talk scene: the Captain's welcome) comes before
+// anything else and counts as had only once you've answered its question (talkPackAnswer); their other talks go in
+// file order, and once all are had they come round again, the least lately had first (so none repeats while another
+// ready one hasn't been had since). A repeat moves its day in save.talks.fired: the save's shape is unchanged.
+function talkOnlyOwn(p) { return !!p && typeof TALKS !== 'undefined' && Array.isArray(TALKS.only) && TALKS.only.includes(p.id); }   // a declaration: lineFor asks it
+function talkPackOwnAgain(p, T, ctx) {                    // an "only: own" person with every ready talk had: the least lately had again (never the first-talk scene)
+  const ready = ((TALKS.own && TALKS.own[p.id]) || []).filter(tk => !tk.first && T.fired[tk.id] && (!tk.when || linesOk(tk.when, p, ctx)));
+  ready.sort((a, b) => T.fired[a.id][0] - T.fired[b.id][0]);   // a stable sort: same day, file order
+  for (const tk of ready) { const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said, again: true }; }
+  return null;
+}
 function talkPackPick(who, t = shipNow()) {
   const p = linesWho(who), T = talksState(); if (!p || !T || typeof TALKS === 'undefined') return null;
   const d = Math.floor(t / 1440) + 1, seed = talkPackSeed(p), ctx = { t, trad: talkPackTrad(t) || undefined };
   const ok = tk => !T.fired[tk.id] && (!tk.when || linesOk(tk.when, p, ctx));
+  const first = ((TALKS.own && TALKS.own[p.id]) || []).find(tk => tk.first && ok(tk)), fs = first && talkPackFill(first, p, ctx);   // the first-talk scene
+  if (fs) return { talk: first, src: 'own', said: fs };
+  if (talkOnlyOwn(p)) { for (const tk of (TALKS.own && TALKS.own[p.id]) || []) { if (!ok(tk)) continue; const said = talkPackFill(tk, p, ctx); if (said) return { talk: tk, src: 'own', said }; }
+    return talkPackOwnAgain(p, T, ctx); }
   let lately = null;                                      // topics had with them within TALK_TOPIC_DAYS (any source), made when a seeded source asks
   for (const src of talkPackOrder(p, T)) {
     const all = src.talks(p).filter(ok);
@@ -36608,6 +36625,7 @@ function talkPackPick(who, t = shipNow()) {
 function talkPackFire(who, pick, t = shipNow()) {         // a talk started: it's used up for this save; small talk notes its day (and its "done")
   const p = linesWho(who), T = talksState(); if (!p || !T || !pick) return;
   const d = Math.floor(t / 1440) + 1;
+  if (pick.talk && pick.talk.first && !pick.answered) return;   // the first-talk scene: had once you've answered (talkPackAnswer)
   if (pick.talk) T.fired[pick.talk.id] = [d, p.id]; else T.small[p.id] = [d, pick.done ? 1 : 0];
   if (pick.small && TALK_HEARD_ON) { const h = T.heard || (T.heard = {}); for (const x of pick.small) if (x.key) h[x.key] = Math.floor(t); }   // the small talk you'll hear (DL1)
 }
@@ -36622,26 +36640,29 @@ function talkPackStart(C) {
   const pk = talkPackPick(C.p); if (!pk || (pk.small && !pk.small.length)) return null;
   talkPackFire(C.p, pk);
   const T = C.talk; T.topic = null;
-  T.pack = pk.talk ? { id: pk.talk.id, topic: pk.talk.topic, src: pk.src, lines: pk.said.lines, ask: pk.said.ask, replies: pk.said.replies, i: 1 }
+  T.pack = pk.talk ? { id: pk.talk.id, topic: pk.talk.topic, src: pk.src, first: pk.talk.first ? pk : undefined, lines: pk.said.lines, ask: pk.said.ask, replies: pk.said.replies, i: 1 }
     : { small: true, lines: pk.small.map(x => x.text), done: pk.done, i: 1 };
   if (T.pack.small) T.asked = true;                       // small talk: no question
-  const own = new Set(T.pack.lines); for (const e of (typeof LINES !== 'undefined' && LINES['talk.filler']) || []) if (own.has(e.text)) T.said.push(e.id);   // a filler line that's also one of these isn't said again
+  const own = new Set(T.pack.lines), F = talkFillerOf(C.p); for (const e of F) if (own.has(e.text)) T.said.push(e.id);   // a filler line that's also one of these isn't said again
   const heard = talksHeard() || {}, now = shipNow();      // nor one you've heard in the last TALK_HEARD_DAYS ship days (DL1)
-  for (const e of (typeof LINES !== 'undefined' && LINES['talk.filler']) || []) if (heard[e.id] != null && now - heard[e.id] < TALK_HEARD_DAYS * 1440 && !T.said.includes(e.id)) T.said.push(e.id);
-  T.pack.fill0 = talkFillerSaid(T);
+  for (const e of F) if (heard[e.id] != null && now - heard[e.id] < TALK_HEARD_DAYS * 1440 && !T.said.includes(e.id)) T.said.push(e.id);
+  T.pack.fill0 = talkFillerSaid(T, C.p);
   return T.pack.lines[0];
 }
-const talkFillerSaid = T => { const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || []; return T.said.filter(id => F.some(e => e.id === id)).length; };
+const talkFillerOf = p => (talkOnlyOwn(p) ? typeof VOICE !== 'undefined' && VOICE[p.id] && VOICE[p.id].lines && VOICE[p.id].lines['talk.filler'] : typeof LINES !== 'undefined' && LINES['talk.filler']) || [];   // the filler they can say ("only: own": their own)
+const talkFillerSaid = (T, p) => { const F = talkFillerOf(p); return T.said.filter(id => F.some(e => e.id === id)).length; };
 // nothing new left to say (DL1): its own lines are said, and it's had TALK_FILLER_MAX filler lines, or every filler
 // line is said or heard lately. Section 20's talkNext then wraps the talk up (RV4: a line held for 15 s read as stuck)
 const talkPackQuiet = C => { const P = talkPackOf(C); if (!P || !TALK_PACK_ON || !TALK_HEARD_ON || (!P.small && !C.talk.reply)) return false;   // a talk with a question: only once you've answered
-  const F = (typeof LINES !== 'undefined' && LINES['talk.filler']) || [], n = talkFillerSaid(C.talk);
+  const F = talkFillerOf(C.p), n = talkFillerSaid(C.talk, C.p);
   return n - (P.fill0 || 0) >= TALK_FILLER_MAX || n >= F.length; };
 const talkPackOf = C => C && C.talk && C.talk.pack;
 const talkPackNext = C => { const P = talkPackOf(C); return P && P.i < P.lines.length && !(C.talk.asked && !P.small) ? P.lines[P.i++] : null; };   // the "more" lines before the question (all of small talk)
+const talkPackHold = C => { const P = talkPackOf(C); return !!(P && P.first && (P.i < P.lines.length || C.talk.mins - C.talk.lineAt < TALK_ASK - 3 * TALK_LINE)); };   // a first-talk scene's question waits for its lines, the last one held as long as a talk's third (item 15)
 const talkPackAsk = C => { const P = talkPackOf(C); return P && !P.small ? P.ask : null; };
 const talkPackReply = (C, k) => { const P = talkPackOf(C); return P && P.replies && P.replies[k] ? P.replies[k].text : null; };
-const talkPackAnswer = (C, k) => { const P = talkPackOf(C); return P && P.replies && P.replies[k] ? P.replies[k].ans : null; };
+const talkPackAnswer = (C, k) => { const P = talkPackOf(C); if (P && P.first) { P.first.answered = true; talkPackFire(C.p, P.first); }   // the first-talk scene is had now
+  return P && P.replies && P.replies[k] ? P.replies[k].ans : null; };
 // ---- end of slot: Dialogue engineer ----
 
 // =====================================================================
@@ -42221,7 +42242,7 @@ function talkStart(C) {
   if (seated) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }
   else if (sits && typeof playerSitNear === 'function' && playerSitNear(deckDef.num, cellAt(a.x, a.z), 'Talking with ' + shortName(p))) { C.talk.sits = true; C.reach = Math.max(C.reach, 5); }   // a seat beside them
   const pk = typeof talkPackStart === 'function' ? talkPackStart(C) : null;   // section 22: the Talk a while pack's talk (TE1), fired now; it clears C.talk.topic
-  const open = pk || (C.talk.topic && talkSays(C, 'talk.' + topic + '.open')), hi = talkSays(C, sits ? 'talk.sit' : 'talk.start');
+  const open = pk || (C.talk.topic && talkSays(C, 'talk.' + topic + '.open')), hi = C.talk.pack && C.talk.pack.first ? null : talkSays(C, sits ? 'talk.sit' : 'talk.start');   // section 22's first-talk scene (item 15): their own first words
   if (typeof playerChat === 'function') playerChat(p);   // the hello's little social (section 15)
   const mt = C.talk.pack ? C.talk.pack.topic : topic; memAdd(p.id, 'talk' + (mt ? '.' + mt : ''));
   chatSay([hi, open].filter(Boolean).join(' ') || talkNext(C) || 'Go on then. What\'s new?');
@@ -42232,6 +42253,7 @@ function talkNext(C) {                                    // their next line whi
   if (typeof talkPackQuiet === 'function' && talkPackQuiet(C)) { T.wrap = true; return null; }   // section 22: nothing new left to say (no filler over and over; DL1, playtest 1): the talk wraps up
   const l = (T.topic && talkSays(C, 'talk.' + T.topic + '.more')) || talkSays(C, 'talk.filler');
   if (l) return l;
+  if (typeof talkOnlyOwn === 'function' && talkOnlyOwn(p)) return null;   // section 22 (item 15): an "only: own" person's talk is their own words, not their usual chat
   for (let k = 1; k <= 8; k++) { const c = chatLine(p, shipNow() + 60 * k, true); if (c && c.say !== false && !TALK_KEEP.has(c.kind) && c.kind !== 'greet' && c.kind !== 'go' && !T.said.includes(c.text)) { T.said.push(c.text); return c.text; } }
   return null;
 }
@@ -42269,7 +42291,7 @@ function talkStep(C) {                                    // every frame while y
   if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
   for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
   if (T.mins >= TALK_MINS) { talkEnd(C, 'full'); return; }
-  if (!T.asked && T.mins >= TALK_ASK) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }
+  if (!T.asked && T.mins >= TALK_ASK && !(typeof talkPackHold === 'function' && talkPackHold(C))) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }   // section 22's talkPackHold: a first-talk scene's question waits for its lines (item 15)
   if (T.mins - T.lineAt >= TALK_LINE) { T.lineAt = T.mins; const l = talkNext(C); if (l) { C.line = { text: l, say: true }; chatShow(); return; } }
   talkMeter(document.getElementById('chat'), T);
 }
