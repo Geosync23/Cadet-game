@@ -60,7 +60,7 @@ Every merge so far clashed only on `plans/build-table.md` rows: keep both (`reso
 - Runners finishing early take checks from slow ones; they agree it directly ("taking: <list>") so nothing runs twice.
 - Known items: backlog 14, 23, 32 (a one-off perf frame-time spike; re-measure), KP1 (Line ceremony 335 draw calls), backlog 15 (week guide, above). controller "marks" is deterministic since 0.92.2 (LEAD32-1): any marks FAIL is new.
 - Switches: POINT_ON, GUIDE_ON true; EV_LINE_ON = EVENTS_ON (on); PAD_ON false.
-- PUB1's links: Playtest https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs, Dev https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (Version 11 = 0.92.2). If the lead has given PUB1 a new-links instruction, follow the lead's latest word on it (I haven't had one).
+- PUB1's links: Playtest https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs, Dev https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (Version 11 = 0.92.2). **The user's instruction for 0.92.3 (04:07 UTC, via lead 33): 0.92.3 goes out as NEW Playtest and NEW Dev artifacts with new links; the Version 11 pages above stay untouched so the user keeps their save.** PUB1 already has it. Timing (lead 33): the round starts after RV12's FX12 verdict (~08:00 UTC), within the 10-worker cap (BM + 6 runners + at most 3 others).
 
 ## Gotchas
 
