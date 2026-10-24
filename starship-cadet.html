@@ -20389,7 +20389,7 @@ const FIX_ROWS = [
   'cm-clocks|2-comms-10||a pin driver|10|comms|Set the wall clocks to ship time',
   'ob-mount|2-survey-16|bearing|a pin driver|20|comms|Fit a bearing in the telescope mount',
   'ob-dimmer|2-survey-16||a multimeter|15|power|Fix the dimmer for star nights',
-  'ob-shutter|2-windowseat-6||a hex key|15|hull|Free a sticky window shutter',
+  'ob-shutter|2-beanbag-2||a hex key|15|hull|Free a sticky window shutter',
   'ob-cushion|2-windowseat-7||a screwdriver|10|hull|Fix a loose window-seat clip',
   'ob-floor|2-beanbag-1||a multimeter|15|heat|Reset a cold floor heater',
   'ob-redlamp|2-beanbag-2|lamp|a step stool|10|power|Replace a red night lamp',
@@ -20401,7 +20401,7 @@ const FIX_ROWS = [
   'sc-notice|2-watch-8|cable|a crimper|15|comms|Fix the notice screen by the labs',
   'sc-light|2-bench-2|lamp|a step stool|10|power|Replace a science corridor light',
   'l2-call|2-liftwait-1||a pin driver|10|transport|Fix a sticky lift call button',
-  'l2-bench|2-bench-1||a hex key|10|hull|Tighten a loose bench by the lift',
+  'l2-bench|2-liftwait-5||a hex key|10|hull|Tighten a loose bench by the lift',
   'l2-planter|2-liftwait-3||a drain rod|10|water|Clear the planter\'s drip tray',
   'w2-tap|2-wcbasin-1|seal|a basin wrench|15|water|Fix a dripping tap in the science washroom',
   'w2-cistern|2-wctoilet-1|valve|a spanner|15|water|Fix a running cistern in the science washroom',
@@ -20437,7 +20437,7 @@ const FIX_ROWS = [
   'ga-shelf|3-galley-8||a spanner|10|hull|Fix a loose shelf bracket',
   'bl-tap|3-bar-1|seal|a basin wrench|15|food|Fix the bar\'s sticky drinks tap',
   'bl-sofa|3-lounge-5||a hex key|10|hull|Fix a sagging sofa',
-  'bl-lamp|3-lounge-12|lamp|a step stool|10|power|Replace a table lamp in the bow lounge',
+  'bl-lamp|3-lounge-6|lamp|a step stool|10|power|Replace a table lamp in the bow lounge',
   'bl-reader|3-bar-order-1|cable|a crimper|15|comms|Fix the card reader at the bar',
   'bl-blind|3-lounge-20||a screwdriver|15|hull|Free a jammed window blind',
   'bl-speaker|3-lounge-28|cable|a crimper|15|comms|Fix a crackling lounge speaker',
@@ -20463,7 +20463,7 @@ const FIX_ROWS = [
   'cs-till|3-shop-2||a screwdriver|10|hull|Fix a sticky till drawer',
   'cs-shelf|3-shop-5|lamp|a step stool|10|power|Replace a shelf light in the crew store',
   'cs-reader|3-store-1|cable|a crimper|15|comms|Fix the crew store\'s card reader',
-  'cb-headset|3-callhome-1|cable|a crimper|15|comms|Fix a call-home booth headset',
+  'cb-headset|3-callhome-2|cable|a crimper|15|comms|Fix a call-home booth headset',
   'cb-door|3-callhome-3|seal|a screwdriver|15|hull|Reseal a call-home booth door',
   'cb-light|3-bench-17|lamp|a step stool|10|power|Replace a light by the call-home booths',
   'co-curtain|3-cold-1||a spanner|15|food|Rehang the cold store strip curtain',
@@ -20483,7 +20483,7 @@ const FIX_ROWS = [
   'la-catch|4-laundry-2||a screwdriver|10|waste|Fix a sticky dryer door catch',
   'la-lamp|4-laundry-4|lamp|a step stool|10|power|Replace a laundry room lamp',
   'la-table|4-laundry-6||a spanner|10|waste|Fix a folding table leg',
-  'la-lint|4-laundry-1||a vent brush|15|air|Clear a clogged lint trap',
+  'la-lint|4-laundry-3||a vent brush|15|air|Clear a clogged lint trap',
   'wp-shower|4-shower-p1|seal|a spanner|15|water|Fix a dripping shower head',
   'wp-tap|4-basin-p2|seal|a basin wrench|15|water|Fix a loose basin tap',
   'wp-rail|4-shower-queue-p1||a multimeter|15|heat|Fix a cold towel rail',
@@ -20499,7 +20499,7 @@ const FIX_ROWS = [
   'tc-urn|5-tea-1||a descaler|15|water|Descale the tea urn',
   'tc-table|5-tea-2||a hex key|10|hull|Fix a wobbly tea table',
   'w5-tap|5-basin-1|seal|a basin wrench|15|water|Fix a dripping tap in the Works washroom',
-  'w5-cistern|5-toilet-1|valve|a spanner|15|water|Fix a running cistern in the Works washroom',
+  'w5-cistern|5-toilet-2|valve|a spanner|15|water|Fix a running cistern in the Works washroom',
   'st-ladder|5-aisle-1|bearing|a hex key|15|transport|Fix a sticky shelf ladder wheel',
   'st-light|5-aisle-2|lamp|a step stool|10|power|Replace an aisle light',
   'st-scanner|5-store-1|cable|a crimper|15|comms|Fix the parts scanner\'s lead',
@@ -20524,7 +20524,7 @@ const FIX_ROWS = [
   'rc-lamp|7-beanbag-1|lamp|a step stool|10|power|Replace a concourse lamp',
   'rc-call|7-floatq-1||a pin driver|10|transport|Fix a sticky lift call button',
   'au-stool|7-stool-1||a hex key|10|hull|Fix a wobbly stage stool',
-  'au-lectern|7-lectern-1|lamp|a small screwdriver|10|power|Fix the lectern\'s reading light',
+  'au-lectern|7-lectern-2|lamp|a small screwdriver|10|power|Fix the lectern\'s reading light',
   'au-board|7-act-2||a spanner|15|hull|Tighten a loose stage board',
   'po-lounger|7-lounger-1||a hex key|10|hull|Fix a stiff lounger hinge',
   'po-lamp|7-pooledge-1|lamp|a step stool|10|power|Replace a poolside lamp',
@@ -20534,10 +20534,13 @@ const FIX_ROWS = [
   'ch-shower|7-rshower-1|seal|a spanner|15|water|Fix a dripping shower head in the changing rooms',
   'ch-lamp|7-locker-2|lamp|a step stool|10|power|Replace a changing room light',
 ];
+// parked (kept, words and all, never posted): the machine shop's and main storage's spots are that room's own taps (the
+// benches' crafting, the shelves), so a tap there never reached the repair (interactions_check's tap at every spot, FX10)
+const FIX_PARKED = new Set(['sh-lamp', 'sh-press', 'sh-grinder', 'st-ladder', 'st-light', 'st-scanner']);
 let FIX_TABLE = null;
 function fixTable() {
   if (FIX_TABLE) return FIX_TABLE;
-  const rows = FIX_ROWS.map(s => { const [id, place, part, tool, mins, sys, title] = s.split('|'); return { id, place, part: part || null, tool, mins: +mins || 10, sys, title }; });
+  const rows = FIX_ROWS.map(s => { const [id, place, part, tool, mins, sys, title] = s.split('|'); return { id, place, part: part || null, tool, mins: +mins || 10, sys, title }; }).filter(r => !FIX_PARKED.has(r.id));
   const order = st => { const seed = machSeed('fix:' + st), xs = rows.filter(r => (r.place.split('-')[0] === '2') === (st === 's')); return xs.map((r, i) => [schedU(seed, i, 7), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]); };
   return FIX_TABLE = { s: order('s'), p: order('p'), byId: new Map(rows.map(r => [r.id, r])) };
 }

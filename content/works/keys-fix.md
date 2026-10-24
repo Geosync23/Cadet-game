@@ -12,6 +12,8 @@ File: `content/works/fixes.lines` (header `@bank all`, texts said by nobody, lik
 | `fix.<id>.sign` | what you see or hear when you get there, shown as you start the work | one sentence, only what's there to notice ("The tap drips into the sink, slow and steady.") |
 | `fix.<id>.done` | one short line when it's done, before "Turn it in at the job board" | what's different now, plain ("Not a drop.") |
 
+Parked (in the table and the words, never posted: the machine shop's and main storage's spots are those rooms' own taps): sh-lamp, sh-press, sh-grinder, st-ladder, st-light, st-scanner.
+
 One line per key is enough; a key with several lines uses the first (no rotation). Tools are said by the game ("with a
 hex key"); don't repeat the tool in the title. Science rows (Deck 2) come up most often: write those first.
 
