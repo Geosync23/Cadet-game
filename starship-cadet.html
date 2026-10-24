@@ -9040,6 +9040,9 @@ if (SIM_BAY) {
   D.places.push(...[13, 16].map((r, k) => ({ id: '7-sim-' + (k + 1), type: 'rec:sim', at: [29, r], walk: [30, r], xy: [29.45, r], y: .56, face: 'w', pose: 'sit', room: 'S' })),
     ...[29.25, 28.55].map((x, k) => ({ id: '7-simq-' + (k + 1), type: 'rec:simq', at: [Math.floor(x), 11], walk: [30, 11], xy: [x, 11.32], y: .45, face: 's', pose: 'sit', room: 'S' })));
   // the pods as machines (S4; the user's "now"): kind simpod (section 17's slot adds it), their panels on the aisle by each pod's nose end
+  // sim night's spots (S6): Dev Raman's between the pods, calling the approaches, and three to watch from in the aisle
+  D.places.push({ id: '7-sim-coach', type: 'rec:simcoach', at: [30, 14], xy: [30.45, 14.5], face: 'w', pose: 'stand', room: 'S' },
+    ...[13, 14, 15].map((r, k) => ({ id: '7-simwatch-' + (k + 1), type: 'rec:simwatch', at: [31, r], xy: [31.5, r + .5], face: 'w', pose: 'stand', room: 'S' })));
   const pods = [12, 15].map((r, k) => ({ id: '7-sim-pod-' + (k + 1), kind: 'simpod', at: [29, r], room: 'S', face: 'e', panel: [30, r], look: { lamp: [.2, .95, .45], drip: [.2, .35, .5], light: [.2, 1.5, .45] } }));
   REC_MACHINES.push(...pods);
   D.places.push(...pods.map(m => ({ id: m.id + '-svc', machine: m.id, type: 'work:works', at: m.panel.slice(), face: 'w', pose: 'work', room: 'S' })));
@@ -41653,6 +41656,17 @@ var EV_READY = true;                                     // section 14's hooks w
 if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // anything planned before now is planned again, with the events
 
 // ---- slot: Traditions engineer (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// sim night (FX14, rec-simbay S6; the user's "build it now"; behind SIM_BAY with the rec deck's traditions): every other
+// Thursday from Day 8, 19:30-20:30 in the sim bay. Dev Raman calls the approaches from between the pods, sim pilots fly,
+// the rest wait on the bench or watch from the aisle; nobody's graded (the user's "just fly"). A rec deck tradition like
+// REC_TRADS' (k 457; skips the career's big days, recBigDay; its Mail nudge quiet on them)
+const SIM_NIGHT = { id: 'rec-sim-night', name: 'Sim night', k: 457, when: { every: '2weeks', weekday: 3, week: 2, from: 8 }, skip: d => recBigDay(d), at: [1170, 1230], min: 30, quiet: 'career',
+  where: [{ deck: 7, pool: 'rec:simcoach' }, { deck: 7, pool: 'rec:sim' }, { deck: 7, pool: 'rec:simq' }, { deck: 7, pool: 'rec:simwatch' }], host: 'raman',
+  whereFor: (p, d, o) => o.filter(([, k]) => p.id === 'raman' ? k === 'rec:simcoach' : k !== 'rec:simcoach' && (k !== 'rec:sim' || recIs(p, d, 'sim-pilot'))),
+  who: (p, d) => p.id === 'raman' ? 1 : recIs(p, d, 'sim-pilot') ? .85 : p.dept === 'helm' ? .4 : p.rank === 'junior' ? .12 : .04, anim: p => p.id === 'raman' ? 'talk' : null,
+  from: 'Dev Raman', mail: 'Sim night tomorrow, 19:30 in the rec dec sim bay. Two pods, a queue, and me calling the approaches. Nobody\'s graded. Bring your steadiest hands.',
+  ask: 'Sim night later? Dev\'s calling the approaches.', here: 'Gentle on the stick. Gentle.', thanks: 'You watch the approaches on sim night while Dev Raman talks each pilot down. Everyone lands. Nobody spills anything.' };
+if (SIM_BAY && REC_TRAD_ON) { REC_TRADS.push(SIM_NIGHT); SHIP_TRADITIONS.push(SIM_NIGHT); }
 // ---- the events base, F0 (EV1; plans/events-base-brief.md). Inert while EV_CAL_ON is off ----
 // the ship minute a beat at [day, minute] of an event starting on startDay begins (its phases, meetings, news, felt
 // moments). With the calendar on, a beat that would begin in a held hour (EV_BEATS) waits for that hour's end: a storm
