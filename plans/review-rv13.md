@@ -92,3 +92,12 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
   FIX_ON=false OK -> **no line fails without the fix** (fixOn-gated). g2 (ship stream only) FAIL; g3 (done-today skip
   off) FAIL; **g4 (shareOut j.fix guard off) OK -> crew-never-take not proven.** Asked FX10 for both lines.
 - Nit: machine_check comment "both near 45-46%" vs 47/53 here.
+- d22d1132 (machine_check only, game unchanged): new 5z lines on any build (quick player's repeats <= 14%, Deck 2 >= 12%;
+  small repairs never released/shared/claimed by crew, forced through shareOut). fix OK (8%, 21%); 0.92.2 FAIL (20%, 4%,
+  forced fix released); g1 FIX_ON=false FAIL; g2 ship-stream FAIL; g4 shareOut guard off FAIL. Good.
+- career_check on the game: OK (first run timed out under load; rerun OK). interactions_check: g5 (boardLesson null)
+  FAILs the lesson line; fix run still going.
+- **FINDING (game): arrows_check week guide FAILs on FX10's game, 2 of 2:** "the scanner never counted as used by Day 8,
+  the next workday after its lesson"; no m2. Same (b75dcf81) arrows_check on 0.92.2: OK (m2 Day 8, scanner used Day 8,
+  m6 Day 9). Reading: small repairs (2 of 3 top-ups) fill the follower's Day 8, no scanner use -> m6 never opens. -> FX10.
+- **b75dcf81 (arrows_check only, backlog 15): PASS on its own** — old arrows_check on 0.92.2 FAILs at m6; new one OK.
