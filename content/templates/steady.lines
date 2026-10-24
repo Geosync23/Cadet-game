@@ -14,3 +14,31 @@
 - Grime on you. Change before you sit down to eat.
 ? flag:clothes.grubby tier>=friend
 - Good shift? Change, wash, then eat. In that order.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- {hi}. Good to see you.
+- {hi}. How's the day treating you?
+- {hi}, {nick}. All going well?
+- Hello. Got a minute? I've got a few.
+- {hi}. You look like you've been busy.
+- {hi}. Everything all right your end?
+- {hi}. Glad you stopped by.
+- {hi}. Take a seat if you like.
+? tier>=acquaintance
+- {hi}, {nick}. Always good to see you.
+- {hi}. You've settled in well. People say so.
+? time:morning
+- Morning. Steady start. That's the best kind.
+? time:evening
+- Evening. Nice to stop for a bit, isn't it?
+== near
+- Just finishing this. Won't be long.
+- {room}. I like it when it's tidy.
+- Slow and steady. That's the way.
+- Every job's easy once you've done it a few times.
+- Pass me that, would you? Thanks.
+- No rush. It'll get done.
+- Doing it properly. Takes a little longer.
+- Nearly there. Then I'm all ears.
