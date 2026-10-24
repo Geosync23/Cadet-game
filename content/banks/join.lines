@@ -158,3 +158,8 @@
 - Tap {name} to listen
 == join.sunday-story.notice
 - The Sunday story: Chief Holt reads one chapter in the common room, lights low. Leisure and social up.
+
+== join.garden-picnic.tip
+- Tap {name} to join the picnic
+== join.garden-picnic.notice
+- Garden picnic: take a parcel from the servery and eat it under the big tree. Food and social up.
