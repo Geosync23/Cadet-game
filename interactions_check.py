@@ -1621,6 +1621,23 @@ with sync_playwright() as pw:
         g.step(4)
         n = g.ev("document.getElementById('tx').textContent")
         check('Kept' not in n, f'with nothing due, a tap on her is the usual card ({n[:60]})')
+        # RV11: she must be there for it: a tap on her outside the infirmary, away from her spot (still on her way), keeps nothing
+        w = g.ev("""(() => { const b = placeSpot('3-visit-1'), rp = schedData().people.find(q => q.id === 'rina'); let best = null;
+          for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j) || roomAt(i, j) === 'I' || !roomAt(i, j)) continue; const c = cellPos(i, j), d = Math.hypot(c.x - b.x, c.z - b.z); if (d > 3 && d < 7 && (!best || d < best[0])) best = [d, i, j]; }
+          if (!best) return null; const c = cellPos(best[1], best[2]); player.obj.position.copy(c); player.stop();
+          SHIP.device.appts.push({ id: 9997, with: ['rina'], at: shipNow() + 1, len: 30, where: '3-visit-1', kind: 'checkup', status: 'yes', by: 'rina', title: 'Health check (test)' });
+          const k = apptTapKeep(rp, c.x, c.z), st = SHIP.device.appts.find(a => a.id === 9997).status; SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9997);
+          return [roomAt(best[1], best[2]), +best[0].toFixed(1), !!k, st]; })()""")
+        check(w and not w[2] and w[3] == 'yes', f'a tap on Rina outside the infirmary, 3+ tiles from her spot, keeps nothing ([room, tiles from the bench, kept, status]: {w})')
+    # RV11: an occasion (Calder's progress talk) is met only in its room: a tap on its host near you but outside it leaves it 'yes'
+    oc = g.ev("""(() => { if (typeof occasionAdd !== 'function' || typeof OCCASIONS === 'undefined' || !OCCASIONS.progressTalk) return null;
+      setShipNow(1440 + 15 * 60 + 30); goToDeck(5); const a = DECK_CREW.find(x => x.p.id === 'calder'); if (!a) return 'no calder';
+      const rm = roomAt(...cellAt(a.x, a.z)); let best = null;
+      for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j) || roomAt(i, j) === rm || !roomAt(i, j)) continue; const c = cellPos(i, j), d = Math.hypot(c.x - a.x, c.z - a.z); if (d < 4 && (!best || d < best[0])) best = [d, i, j]; }
+      if (!best) return 'no spot'; player.obj.position.copy(cellPos(best[1], best[2])); player.stop();
+      occasionAdd('progressTalk', shipNow() + 1); const ap = SHIP.device.appts.find(x => x.occ && x.status === 'yes' && (x.with || []).includes('calder')); if (!ap) return 'no appt';
+      const k = apptTapKeep(a.p, a.x, a.z); return [rm, roomAt(best[1], best[2]), +best[0].toFixed(1), !!k, ap.status]; })()""")
+    check(isinstance(oc, list) and not oc[3] and oc[4] == 'yes', f"a tap on Calder near you but outside her office leaves her progress talk's appointment 'yes' ([her room, yours, tiles, kept, status]: {oc})")
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 

@@ -9692,13 +9692,16 @@ function apptTick() {
 }
 // a tap on someone you're due to meet keeps it too (FX8; patch 0.92.3, #22: walking up to Rina for the health check and
 // tapping her did nothing, only standing by the infirmary's bench counted): from 2 minutes before its time to APPT_WAIT
-// after, on its deck, within 4 tiles of them (x, z: where they are). -> the appointment kept, or null
+// after, on its deck, within 4 tiles of them (x, z: where they are), and they're there for it: in its room, or within 2.5
+// tiles of their spot for it (not still on the way). Never an occasion's (a.occ: it's met only in its room, and the
+// device's copy follows the occasion: RV11). -> the appointment kept, or null
 function apptTapKeep(p, x, z) {
   const now = shipNow();
   if (typeof deckDef === 'undefined' || typeof player === 'undefined') return null;
   for (const a of apptList()) {
-    if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2 || now >= a.at + APPT_WAIT || !(a.with || []).includes(p.id)) continue;
-    const pl = apptPlace(a); if (!pl || deckDef.num !== pl.deck || Math.hypot(player.obj.position.x - x, player.obj.position.z - z) > 4) continue;
+    if (a.occ || a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2 || now >= a.at + APPT_WAIT || !(a.with || []).includes(p.id)) continue;
+    const pl = apptPlaceOf(a, p.id); if (!pl || deckDef.num !== pl.deck || Math.hypot(player.obj.position.x - x, player.obj.position.z - z) > 4) continue;
+    const c = cellPos(...pl.at); if (roomAt(...cellAt(x, z)) !== pl.room && Math.hypot(c.x - x, c.z - z) > 2.5) continue;
     a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); return a;
   }
   return null;
