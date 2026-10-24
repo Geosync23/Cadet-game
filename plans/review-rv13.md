@@ -51,3 +51,9 @@ Game sha256 b3caed3f... (with SW2's words baked in a scratch copy: ba3c31d0...).
 - join_check fix OK; 0.92.2 ReferenceError beamReady. Planted d1 (ready always) 4 FAIL, d2 (no lines) FAIL, d4
   (tradJoinMinute gate off) FAIL; **d3 (old slot order) JOIN CHECK OK: item 23 has no check line -> asked DV1.**
 - SW2 2bd054f3 join.lines (4 explain lines) bake clean, lines_check PASS.
+- With SW2's words: join_check OK, Zeke's 4 lines in order, opens 17:19. cadet_test 0.92.2 vs 6aeae8c1 ALL IDENTICAL
+  (j_steer1 6 px 1 level, renderer noise). check_fast OK (200 s).
+- **FINDING (game, item 13): late arrival can't sign.** 4 lines x 4.2 s real = ~10 ship min (SHIP_RATE 0.6), started
+  only once you're in the bay. plans/review-rv13/late_probe.py (BEAM_OPEN reset each run): arrive 17:06 -> open 17:19;
+  17:25 -> 17:35; 17:31/17:34/17:37 -> event ends 17:40 still locked. 0.92.2: sign any time to 17:40. -> DV1.
+- 54853c2b (test only): item 23 line (east/top slot, gap to the first name <= 0.25 m, arrow <= 0.7 m): rerunning.
