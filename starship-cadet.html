@@ -8340,6 +8340,10 @@ function recFloor(g, kind, i, j, x, y, PX) {
     for (let a = 0; a < 2; a++) for (let b = 0; b < 2; b++) { g.fillStyle = (a + b + i + j) % 2 ? '#e3907f' : '#eaa093'; g.fillRect(x + a * 32 + 2, y + b * 32 + 2, 28, 28); }
   } else if (kind === 'river') {                         // the river hall's slate floor, under the banks (0.80.4)
     g.fillStyle = '#4a5654'; g.fillRect(x, y, PX, PX); fleck(10, ['rgba(160,190,170,.18)', 'rgba(20,30,28,.25)']);
+  } else if (kind === 'sim') {                          // the sim bay (rec-simbay S2): a dark blue mat, a dashed runway line down the aisle
+    g.fillStyle = '#1b2638'; g.fillRect(x, y, PX, PX); fleck(6, ['rgba(80,230,255,.12)', 'rgba(255,255,255,.07)']);
+    g.fillStyle = 'rgba(0,0,0,.18)'; g.fillRect(x, y, PX, 1); g.fillRect(x, y, 1, PX);
+    if (i === 31) { g.fillStyle = 'rgba(255,210,63,.75)'; g.fillRect(x + PX / 2 - 2, y + 8, 4, PX - 16); }
   } else {                                               // 'svc': service rooms, plain steel plate
     g.fillStyle = '#353b42'; g.fillRect(x, y, PX, PX);
     g.fillStyle = '#5d666e'; g.fillRect(x + 2, y + 2, PX - 4, PX - 4);
@@ -8975,7 +8979,7 @@ DECKS[7] = {
     place('b', 'dispenser', 4.55, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
     place('b', 'medCabinet', 5.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
     place('b', 'utilShelf', 5.6, 4.6, 'e', { it: IT('Seat spares', 'Hinges, springs and a box of gold seat numbers.') });
-    } else simBayDress();
+    } else { simBayDress(); simBayKit(); }
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
@@ -9023,7 +9027,7 @@ const SIM_MOVE = { '7-aud-lights': [33, 14], '7-aud-sound': [33, 15], '7-grav-pl
 if (SIM_BAY) {
   const D = DECKS[7];
   D.map = D.map.map((row, r) => r >= 11 && r <= 17 ? row.slice(0, 28) + 'SSSS' + row.slice(32) : row);
-  D.rooms.S = { name: 'Sim bay', floor: 'svc', rec: true };
+  D.rooms.S = { name: 'Sim bay', floor: 'sim', rec: true };
   D.rooms.b = { ...D.rooms.b, name: 'Stage booth' };
   Object.assign(D.doors, { 'h,31,11': 'door', 'h,32,11': 'hatch' });
   D.service = D.service.map(s => s.key === 'h,31,11' ? { key: 'h,32,11', tier: s.tier } : s);
@@ -9045,6 +9049,103 @@ function simBayDress() {
   placeWall('b', 'relayBoard', 'e', 5.5, { it: IT('Gravity plates', 'The float room\'s gravity plate controller, set to 0.2 g, with its cooling beside it.') });
   place('b', 'dispenser', .5, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
   place('b', 'medCabinet', 1.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
+}
+// the sim bay's kit (S2; room-local x 0-4 from the washroom wall, z 0-7 from the foyer): two pods facing the west wall,
+// each with its own screen, a bench by the door, a Tern cutaway poster between the screens, a headset shelf. The
+// materials join RK (made with the deck, freed with it); nothing calls R()
+const SIM_PODS = [{ z: 2.0 }, { z: 5.0 }];               // the pods' centres along the room (rows 12-13 and 15-16)
+const SIM_SCREENS = [];                                  // each pod's screen material (simSky), by pod
+function simMats() {
+  Object.assign(RK, { simShell: std('#d8dde3', .45, .2), simTrim: std('#1fa39b', .5), simSeat: std('#22324a', .8), simDark: std('#14181e', .6, .3),
+    simGlow: new THREE.MeshBasicMaterial({ color: col('#50e6ff'), toneMapped: false }) });
+}
+// a pod's screen: deep space; idle (uRun < 0) the stars drift; flying (uRun 0-1, the run's progress) the bay doors
+// part, the stars stream out from the middle, the Wren's hull and its lamps slide by, and her bay grows ahead to land in
+function simSky() {
+  const U = { uT: { value: 0 }, uRun: { value: -1 }, uStar: { value: col('#e8f4ff') }, uHull: { value: col('#8094aa') }, uLamp: { value: col('#ffd23f') }, uBay: { value: col('#50e6ff') }, uSpace: { value: col('#04060c') } };
+  const m = new THREE.ShaderMaterial({ uniforms: U,
+    vertexShader: 'varying vec2 vUv; void main() { vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+    fragmentShader: `uniform float uT, uRun; uniform vec3 uStar, uHull, uLamp, uBay, uSpace; varying vec2 vUv;
+      float h(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      void main() {
+        vec2 p = (vUv - .5) * vec2(1.7, 1.0);
+        float r = length(p), a = atan(p.y, p.x) / 6.2832 + .5, run = uRun;
+        float fly = run < 0.0 ? 0.0 : smoothstep(.1, .22, run) * (1.0 - smoothstep(.7, .85, run));
+        vec3 c = uSpace + uBay * .07 * (1.0 - smoothstep(0.0, .9, r));      // a faint glow, so it reads as a screen
+        for (int k = 0; k < 3; k++) {                                        // three rings of stars, streaming outward
+          float fk = float(k), n = 36.0 + fk * 22.0, b = floor(a * n), s = h(vec2(b, fk + 1.0));
+          float rr = fract(s * 7.0 + uT * (.01 + fly * .45) * (.5 + s)) * 1.05;
+          float da = abs(fract(a * n) - .5) * 6.2832 / n * max(r, .05);
+          float len = .006 + fly * .1 * rr;
+          c += uStar * step(.35, s) * smoothstep(.006, 0.0, da) * smoothstep(len, 0.0, abs(r - rr)) * (.35 + .65 * rr);
+        }
+        if (run >= 0.0) {
+          float open = smoothstep(.02, .14, run);                            // the bay doors part
+          if (run < .2 && abs(p.x) > open * .95) { c = uHull * (.35 + .1 * step(.5, fract(p.y * 6.0))); if (abs(abs(p.x) - open * .95) < .015) c = uLamp; }
+          float hp = (run - .3) / .3;                                        // the Wren's hull slides past below
+          if (hp > 0.0 && hp < 1.0) { float hx = p.x + mix(-1.8, 1.8, hp); if (p.y < -.22 + .08 * sin(hx * 1.3) && abs(hx) < 1.0) { c = uHull * (.5 + .2 * p.y);
+            if (abs(fract(hx * 4.0) - .5) < .06 && abs(p.y + .3) < .025) c = uLamp; } }
+          float w = mix(.03, .95, smoothstep(.7, 1.0, run));                 // her bay grows ahead
+          if (run > .68 && abs(p.x) < w * .85 && abs(p.y) < w * .5) {
+            vec2 q = p / vec2(w * .85, w * .5);
+            c = uHull * .25; if (max(abs(q.x), abs(q.y)) > .9) c = uBay;
+            if (abs(q.y + .6) < .04 && abs(fract(q.x * 3.0 - uT * 2.0) - .5) < .2) c = uLamp;   // the landing lights, running in
+          }
+        }
+        if (max(abs(vUv.x - .5), abs(vUv.y - .5)) > .488) c = mix(c, uBay, .55);   // its lit edge
+        gl_FragColor = vec4(c, 1.0);
+        #include <tonemapping_fragment>
+        #include <encodings_fragment>
+      }` });
+  m.userData.U = U; return m;
+}
+// what a pod's screen shows now: section 15r's run, when there is one (simScreenRun, S3), else drifting stars
+const simScreenRun = k => typeof simRunAt === 'function' ? simRunAt(k) : -1;
+Object.assign(KIT, {
+  simPod(g) {                                            // front (+z) to the screen: a tub on a motion base, a seat, a stick, a roll hoop
+    cyl(.42, .5, .16, RK.simDark, 0, .08, 0, g, 20);
+    box(1.0, .34, 1.7, RK.simShell, 0, .33, 0, g);
+    for (const x of [-.47, .47]) box(.07, .3, 1.5, RK.simShell, x, .65, -.05, g);
+    for (const x of [-.5, .5]) box(.04, .04, 1.56, RK.simTrim, x, .83, -.05, g);
+    box(1.0, .42, .34, RK.simShell, 0, .71, .66, g);
+    box(.86, .04, .3, RK.simDark, 0, .93, .62, g).rotation.x = -.35;
+    box(.46, .03, .14, RK.simGlow, 0, .955, .6, g).rotation.x = -.35;
+    box(.56, .1, .5, RK.simSeat, 0, .56, -.3, g);
+    box(.56, .7, .1, RK.simSeat, 0, .93, -.58, g).rotation.x = -.15;
+    cyl(.025, .025, .3, RK.simDark, 0, .7, .12, g, 8);
+    const hoop = new THREE.Mesh(new THREE.TorusGeometry(.52, .035, 6, 18, Math.PI), RK.simTrim); hoop.position.set(0, .8, -.42); g.add(hoop);
+    return { w: 1.1, d: 1.8 };
+  },
+});
+Object.assign(WALL_KIT, {
+  simScreen(g, o) {                                      // a big screen on the wall in front of a pod, in a dark frame
+    box(2.0, 1.25, .06, RK.simDark, 0, 1.45, .03, g);
+    const m = simSky(), k = o.k; SIM_SCREENS[k] = m;
+    const s = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 1.1), m); s.position.set(0, 1.45, .075); s.userData.noMerge = s.userData.noShadow = true; s.raycast = () => {};
+    s.onBeforeRender = () => { m.userData.U.uT.value = performance.now() / 1000; m.userData.U.uRun.value = simScreenRun(k); }; g.add(s);
+  },
+  simPoster(g) {                                         // the Tern in cutaway, blueprint style, and the bay's rules
+    const t = tex(512, 384, (c, w, h) => {
+      c.fillStyle = '#16365e'; c.fillRect(0, 0, w, h); c.strokeStyle = 'rgba(220,235,255,.18)'; c.lineWidth = 1;
+      for (let x = 0; x < w; x += 32) { c.beginPath(); c.moveTo(x, 0); c.lineTo(x, h); c.stroke(); } for (let y = 0; y < h; y += 32) { c.beginPath(); c.moveTo(0, y); c.lineTo(w, y); c.stroke(); }
+      c.strokeStyle = '#e8f1ff'; c.lineWidth = 4; c.beginPath(); c.moveTo(70, 170); c.lineTo(380, 150); c.quadraticCurveTo(450, 160, 460, 190); c.quadraticCurveTo(450, 220, 380, 230); c.lineTo(70, 215); c.closePath(); c.stroke();
+      c.lineWidth = 2; for (const x of [150, 220, 290]) { c.beginPath(); c.arc(x, 192, 14, 0, Math.PI * 2); c.stroke(); }
+      c.beginPath(); c.moveTo(110, 165); c.lineTo(150, 110); c.lineTo(200, 160); c.stroke(); c.strokeRect(40, 175, 30, 36);
+      c.fillStyle = '#e8f1ff'; c.font = '800 34px system-ui,sans-serif'; c.fillText('TERN', 36, 62); c.font = '600 17px system-ui,sans-serif'; c.fillText("THE WREN'S SHUTTLE · 6 SEATS", 36, 88);
+      c.font = '600 16px system-ui,sans-serif'; ['SIM BAY RULES', '1. Strap in, even for pretend.', '2. Wipe the stick when you\'re done.', '3. Ask Dev before you borrow his headset.'].forEach((l, k) => c.fillText(l, 36, 280 + k * 24));
+    });
+    const p = new THREE.Mesh(new THREE.PlaneGeometry(1.1, .82), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.5, .03); g.add(p);
+  },
+});
+function simBayKit() {
+  simMats(); SIM_SCREENS.length = 0;
+  SIM_PODS.forEach((q, k) => {
+    place('S', 'simPod', 1.15, q.z, 'e', { it: IT('Sim pod', 'A sit-in practice cockpit for the Tern, on a motion base. Strap in and fly a practice run.') });
+    placeWall('S', 'simScreen', 'w', q.z, { k, hitW: 1.8, it: IT('Sim screen', 'A big curved screen of stars. When someone flies, the Wren\'s bay doors open on it.') });
+  });
+  placeWall('S', 'simPoster', 'w', 3.5, { it: IT('Tern poster', 'The Tern in cutaway, and the sim bay\'s rules. Someone has added a fourth in pencil: no loops before breakfast.') });
+  place('S', 'bench', 1.0, .3, 'n', { w: 1.6, it: IT('Bench', 'A bench by the door, for waiting your turn in a pod.') });
+  place('S', 'utilShelf', 3.4, 6.7, 's', { it: IT('Headsets', 'A shelf of flight headsets on hooks, each with a name tape. One says DEV, in capitals.') });
 }
 // ---- end of slot: Rec engineer ----
 
