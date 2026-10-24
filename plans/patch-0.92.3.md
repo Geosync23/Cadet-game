@@ -14,7 +14,7 @@ Every item below is the user's own words, summarised; nothing dropped. Each buil
 | 8 | Zeke's "most days are quiet, then the ship gets lively, you'll see" line must fire during the training day; keep all his lines | DS1 | RV11 |
 | 9 | Day 1 reminds you to change clothes | DS1 | RV11 |
 | 10 | Remove Tomas's towel line from the wake-up talk; keep his other lines | DS1 | RV11 |
-| 11 | Room across from the pool on the rec deck: another activity: PITCH options to the user | PW1 (pitch page) | user |
+| 11 | Room across from the pool on the rec deck: another activity: PITCH options to the user (user picked: flight simulator bay in the rec utility room, machines kept on the deck) | FX14 (plan, then build) | RV13 |
 | 12 | Schedule reminders 15 min before an event stay; Name on the beam only: 25 min early, saying it starts "at the end of shift in the Works department" | FX4 | RV11 |
 | 13 | Name on the beam: you can't sign until people arrive and a few speech bubbles explain the event | DV1 | RV13 |
 | 14 | Rename "task tracker" (Tracked) to "Schedule tracker" | FX4 | RV11 |
