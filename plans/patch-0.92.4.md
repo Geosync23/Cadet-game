@@ -1,6 +1,6 @@
 # Patch 0.92.4: the user's answers to the 0.92.3 morning summary (2026-10-24 ~14:10 UTC, 10:10 AM Eastern)
 
-Base: claude/integration 3866c8f3 (0.92.3, game sha256 f18e8540…7853). Each builder branches from it, runs its area checks + cadet_test, pushes, sends the sha to its reviewer and BM16 (staging claude/staging-0.92.4). Then the full six-runner round, lead's go, PUB1 publishes to the 0.92.3 NEW pages? -> ask PUB1 to publish 0.92.4 as an update of the NEW pages (3HqM5…, 9ZWAg…) unless the user says otherwise.
+Base: claude/integration 3866c8f3 (0.92.3, game sha256 f18e8540…7853). Each builder branches from it, runs its area checks + cadet_test, pushes, sends the sha to its reviewer and BM16 (staging claude/staging-0.92.4). Then the full six-runner round, lead's go, PUB1 publishes 0.92.4 as an update of the 0.92.3 NEW pages (3HqM5…, 9ZWAg…): the user decided 15:08 UTC.
 
 | # | The user's answer | Who | Reviewer |
 |---|---|---|---|
