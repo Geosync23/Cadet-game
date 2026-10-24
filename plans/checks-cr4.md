@@ -1,5 +1,26 @@
 # Check runner CR4: results
 
+## 0.92.3 Round 2 (2026-10-24, new candidate after AC3's item 6 fix)
+
+- **Candidate:** `claude/staging-0.92.3` d9a387b6
+- **starship-cadet.html sha256:** `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853` (matches BM16's)
+- **OLD:** 364c80cb (0.92.2); not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, 6, 8, then CR6's food 1 7, food 11 4, clothes (CR6 handed them over at 10:37, not started there). One at a time, alone, at d9a387b6 (day_check.py unchanged), `CADET_WORK=/tmp/work-cr4`. Reported to BM16 and lead 33.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 229 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450; nobody stuck |
+| day_check 13 | OK (exit 0, 226 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 224 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 218 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 204 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 296 / 450 |
+| day_check 8 | OK (exit 0, 207 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 279 / 450 |
+| food_check 1 7 (from CR6) | OK (exit 0, 55 s) | `FOOD CHECK OK`; no FAIL lines |
+| food_check 11 4 (from CR6) | OK (exit 0, 59 s) | `FOOD CHECK OK`; no FAIL lines |
+| clothes_check (from CR6) | OK (exit 0, 69 s) | `ALL OK` |
+
+**CR4: OK.** No FAILs.
+
 ## 0.92.3 full round (2026-10-24)
 
 - **Candidate:** `claude/staging-0.92.3` 0dd4e2e2 (build 0.92.3)
