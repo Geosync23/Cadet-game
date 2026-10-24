@@ -368,18 +368,18 @@ share: A word from home. Means everything's fine.
 cheer: "Hm." I've caught it off you.
   them: Hm. That's yours now. Use it carefully. It carries.   #funny
 
-== flat-country
+== marra
 topic: home
 when: tier>=friend
-them: I grew up somewhere flat and windy. You could see weather coming for a whole day.
-them: I miss that. Seeing it coming. Out here it's all on the board, or nothing.
+them: I grew up on Marra Station. They rebuilt it twice while I lived there.
+them: Never the same corridor two years running. You learnt the doors or you got lost.
 ask: What did you grow up looking at?
-listen: Did you like the wind?
-  them: Hated it. Every day. Miss it now. That's how it goes with home. Hm.   #warm
+listen: Is that where the doors started?
+  them: Hm. Yes. Counted every one, every rebuild. Never stopped. Now you know why.   #warm
 share: Rooftops. Lots of them. And rain.
-  them: Then you know weather too. The rain lot always do. Ask Lukas Dlamini.
+  them: Then you had weather. Marra had pipes and the old maps. I'd swap, some days.
 cheer: A wall. Very good wall, though.
-  them: Hm. Walls are honest. You know where you stand with a wall.   #funny
+  them: Hm. Walls are honest. On Marra they moved them every few years. Rude.   #funny
 
 == badly-done
 topic: crew
