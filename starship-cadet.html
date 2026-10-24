@@ -48743,6 +48743,21 @@ function worksStage(mech) {                              // the highest stage wh
 // (MEETING_SCRIPTS['train.' + id]), they lead a training job and you watch, then you do one and they follow, then
 // trained. Not there? It's offered again the next workday; nothing is missed. ----
 const TRAIN_WATCH = 15;                                  // ship minutes watching the teacher work before your turn
+const TRAIN_PROMPT_DAY = 4;                              // (DS1, the user, patch 0.92.5 #11) from this day a lesson meets at 09:00 or 09:15 (the first few days as before)
+// (DS1, the user, patch 0.92.5 #15) a lesson not finished by the end of its day's shift ends there: the teacher says so and
+// goes back to their own plans (worksEscort follows only watch / do / held), a training job still in your hands goes back
+// to the board for the crew, and it's offered again on your next workday (ladderTick's 'again', as for a missed one)
+function trainShiftOver(c, now) {                         // (your turn's work already done: you can still turn it in)
+  const j = c.st === 'do' && SHIP.jobs.find(x => x.id === c.j); if (j && j.workDone && j.claimedBy === 'you') return false;
+  return worksDay(now) > c.d || now >= (c.d - 1) * 1440 + dayShiftEnd(c.d);
+}
+function trainLapse(row, c, now) {
+  const j = SHIP.jobs.find(x => x.id === c.j);
+  if (j && j.status !== 'done') { if (j.claimedBy === 'you' && typeof dropJob === 'function') dropJob(j.id); if (!j.claimedBy) { j.freed = j.released = true; if (typeof MACH_REV !== 'undefined') MACH_REV++; } }
+  delete c.hold; c.st = 'again';
+  worksSay(c.by, worksText('works.train.lapse', 'That\'s the shift. We\'ll finish {mech} another day.', { mech: mechName(row.id).replace(/^./, x => x.toLowerCase()) }));
+  simNote('trainLapse', { mech: row.id, day: c.d });
+}
 const TRAIN_NEAR = 3;                                    // tiles from the job's spot that count as watching
 function trainSetup(row) {                               // made when first asked (never at load): the occasion
   const id = 'works.' + row.id;
@@ -48765,7 +48780,8 @@ function trainOffer(row, c, d, t) {                      // the ask, or the ask 
   if (c.st === 'again' && !(WORK_MECH[row.id] || {}).againAsk) return trainWatch(row, c, t, true);   // againAsk (24f's m6): asked again with its own offer, not restarted at 06:00
   const M = WORK_MECH[row.id] || {}; if (M.offer) { try { return !!M.offer(row, c, d, t); } catch (e) { console.error(e); return false; } }   // the sub-block's own ask (24f: m6's urgent call); it sets c.st = 'meet', c.occ, c.by
   let early = 0; try { early = M.at ? +M.at(d) || 0 : 0; } catch (e) { early = 0; }   // a sub-block's earliest meeting (24d: m4 after the delivery's unload)
-  const at = Math.min(Math.max(900, early), Math.max(m + 60, DAY_SHIFT[0] + 15, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);   // FX1: never before 09:15 (it was 08:30: an ask at 06:00 pulled you off before your shift)
+  const at = d >= TRAIN_PROMPT_DAY ? Math.max(m + 60, DAY_SHIFT[0] + (schedU(machSeed(row.id), d, 851) < .5 ? 0 : 15), early)   // (DS1, the user, patch 0.92.5 #11) from Day 4: 09:00 or 09:15, no waiting about
+    : Math.min(Math.max(900, early), Math.max(m + 60, DAY_SHIFT[0] + 15, early) + Math.ceil(schedU(machSeed(row.id), d, 850) * 6) * 10), o = trainSetup(row);   // FX1: never before 09:15 (it was 08:30: an ask at 06:00 pulled you off before your shift)
   o.by = by; o.script = trainScript(row, by); o.title = 'Training: ' + mechName(row.id).replace(/^./, x => x.toLowerCase()) + ' with ' + worksFirst(by);   // FX1: the Calendar, Schedule and Tracked name the teacher
   const r = occasionAdd('works.' + row.id, (d - 1) * 1440 + at, false, o.len);
   if (!r) return false;
@@ -48837,6 +48853,7 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
+  if (/^(watch|do|held)$/.test(c.st) && c.id !== 't2' && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, which keeps its own hours)
   if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
