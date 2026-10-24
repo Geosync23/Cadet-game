@@ -185,3 +185,13 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
 ## Lead 34's remaining asks: sim bay switch-on look (staging-0.92.5 e9ce3351, game b805ded3...) + DS1 items 11/12/15
 - e9ce3351 vs 543ef305: SIM_BAY = true (one line + docs). Running: cadet_test 543ef305 vs e9ce3351 (crew diffs expected:
   sim pilots' plans change), interactions (sim part on), day_check 2, events_check, check_fast.
+
+## DS1 p925-ds1 a99453d8 (0.92.5 items 11, 12, 15; game f7eec988...): PASS (~23:25 UTC)
+- 11: from Day 4 a lesson meets 09:00/09:15 (schedU 851). 12: the lesson named on the board row/line, T3/S3 arrows, the
+  pointer each time (once: 99; only one ring at a time, each needs its own panel open). 15: watch/do lapse at shift end
+  (job back on the board, offered again next workday, teacher says works.train.lapse); 'held' (job already turned in,
+  case open) is trained there instead (a99453d8, my question).
+- mech p925: fix OK; 0.92.4 FAILs all (#11, #12 x2, #15 x2); plants r1 (TRAIN_PROMPT_DAY 999) #11 FAIL, r2 (name always
+  'lesson') #12 FAIL, r3 (lapse line off) #15 x2 FAIL, r4 (held line off) the held line FAIL. cadet_test 0.92.4 vs 4c50fa4d
+  ALL IDENTICAL (DS1: same on a99453d8). check_fast a99453d8 OK. DS1's: career, intro, arrows, arrows_d, day 1/5, mech full,
+  interactions (confirming run: no FAIL so far). Sign-off: 24 core (small edits), 15b.
