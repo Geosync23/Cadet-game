@@ -9,6 +9,17 @@ Read this first if you take over as build master (BM16). Older notes: `plans/han
 - Check runners: CR1 session_01CsWNjCsy8u5mrHJgTVgCst, CR2 session_01BgMQaB1LQmhfU1rSJ2ATvv, CR3 session_016oCbvvzgcqzzCTsBFCkYRB, CR4 session_01636CfY2MhB3DzrzZ59dhXz, CR5 session_01CHoEsvv7zMPZDr1ir7uAiz, CR6 session_01B1FwE5sMmHnMPWsGn23nrk.
 - Reviewers for 0.92.3: RV11 session_01EdBKAgQFMexMSs3JbgH5H7, RV12 session_013JmdoWWEDQde8y1bwrMGnY, RV13 session_016ioWtxM6NJRV4Ck3ADwozc.
 
+## FINAL 0.92.3 CANDIDATE (read this first, BM16)
+
+- **Candidate: claude/staging-0.92.3 0dd4e2e2** (build 0.92.3; build-table row with `Checks: FULLROUND |` as the placeholder; DEV_NOTES line 5 says "in its full round").
+- **Game sha256: 4e6538447d13e4c5398fc74844748e1e9d41776afa7bcc83bc99d5eff87cd0a2**
+- **OLD = 0.92.2, claude/integration 364c80cb** (game sha256 ca2f908d…e7e4).
+- All 0.92.3 pieces are in (all 29 items but 11, a pitch page for the user). After the list further down: AC3 aee83840 (6), FX8 9fd5b500 (22, 28), FX4 97251620 (2, 12, 14, 20, 26; 7 content/lines files clashed with item 15's frames: both appended, kept both), FX12 da1825d2 (19, 27; a design-doc paragraph merged by hand with DV1's edit), DS1 b49a01db + 872d3c2b (1, 7-10), FX10's arrows_check follower fix b75dcf81 (cherry-picked alone), FX10 1bd0a34e (21, 24, 29). Words baked: 11321 lines.
+- My checks on 0dd4e2e2: check_fast OK; cadet_test vs a58a154f (all but FX10) ALL IDENTICAL; vs 0.92.2: every shot differs by the wider "Schedule tracker" HUD button, taps 1-2 read "Missing people" not "Bursting" (FX9's faster social), no page errors: both expected; lines_check PASS 0 errors (49 warnings); `arrows_check week guide` OK (m6 Day 9). Earlier on a58a154f: intro_check OK (DS1's part 19, DV1's part 18).
+- `claude/integration-next` is still at 364c80cb's line; fast-forward it to the candidate (check it's a fast-forward first) before the round.
+- **Round extras** (lead 33): CR1 also runs `arrows_check.py BUILD week guide` on NEW and OLD (backlog 15: OLD fails at Day 9 m6, known-old; NEW must pass now with the follower fix). machine_check FAILs on OLD on purpose for notes 21/24 (FX10's new lines, RV13's ask): expected on OLD only. intro_check part 12's new-game click has flaked (also on OLD; RV11): rerun once before calling it. Known-old list: backlog 12, 14 (lead 33), and 23, 32 (a one-off perf frame-time spike; re-measure), KP1 (Line ceremony 335 draw calls).
+- **Publishing: 0.92.3 goes to NEW Playtest and NEW Dev artifacts (the user, 04:07 UTC); the Version 11 pages stay untouched.** PUB1 has the instruction.
+
 ## Builds I made
 
 | Build | claude/integration | Game sha256 | Notes |
