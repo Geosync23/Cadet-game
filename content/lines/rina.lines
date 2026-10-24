@@ -596,3 +596,50 @@
 == disc.lose
 - Fine. Best of three.   #funny
 - Don't tell Pell.   #funny
+
+// ---- SW2, patch 0.92.3 item 15: her own Talk a while card frames (FX13: main characters skip the shared ones)
+== talk.start
+- Fine. Talk. I've got ten minutes and an opinion.   #funny
+- Go on, then. Sit. Talk. Drink some water first.
+- A chat. Hm. All right. Don't make it weird.
+? tier>=friend
+- Oh, it's you. Good. I was about to go and find you. I wasn't. I was.   #warm
+- {nick}. Sit. I've been saving something to be annoyed about with you.   #funny
+?
+
+== talk.sit
+- Sit there. Not that one, that's mine. That one.
+- Sit. Back straight. I'm joking. Slouch. You've earned it.   #funny
+- Chair. Now. You look like you've been standing since breakfast.
+
+== talk.filler
+- Hm. Have you drunk any water since we sat down? Thought not.   #funny
+- This is nice. Don't tell anyone I said nice.   #funny
+- Mm. Pell's snoring in the next room. You can hear it from here.   #funny
+- I'm not counting how long we've talked. I'm counting. Twelve minutes.   #funny
+- Quiet, isn't it. Good quiet. I like it. Don't spread that.
+- You're all right to talk to. For a non-Tiles player.   #warm
+
+== talk.end
+- Right. That was good. Don't make it a thing.   #warm
+- Done. Off you go. Water, then whatever's next.
+- Ta. For the talk. I mean it. Don't look so surprised.   #warm
+- That's the most I've said all week. You're a bad influence.   #funny
+- Fine. Again sometime. I'll put it in the notebook.   #funny
+
+== talk.stop
+- Off you go, then. I'll finish being right without you.   #funny
+- Fine. Go. Drink some water on the way.
+- Later, then. I'll hold the thought. I'm good at holding things.
+
+== talk.go.shift
+- Shift. Infirmary waits for no one. Neither do bleeding people. Later.
+- Got to go. Nandakumar's waiting, and I've got the keys. Later.
+
+== talk.go.bed
+- Bed. Eight hours. I'm saying it to me this time. Night.
+- I'm yawning. That's not a sign of anything. It's a sign of bed. Night.   #funny
+
+== talk.go.trad
+- {trad}'s on. I'm going. Someone has to bring the water. Coming?
+- Sorry. {trad}. I said I'd be there. I keep my word. Come on.

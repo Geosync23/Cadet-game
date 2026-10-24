@@ -958,3 +958,49 @@
 // after the last walk.hand line. "Subject | body", like mail.zeke.cabin (one line: Mail bodies are plain text).
 == mail.zeke.land
 - Before you land | New hand, I'm writing this before the Tern docks, so by the time you read it I'll have handed you this in person and said most of it already. Here's the rest. What do you do first? Dinner. Always dinner first. Then everything else. Is it always this much? First night, yes. By Thursday it's just home with a lift in it. And if you're the quiet sort, good. The quiet ones last longest. Tomorrow, ten to nine, the Works bay. I'll be the one with the tea. Zeke
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): his own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Oh, hello. A proper chat? Yes. Sit. Tell me things.
+- There you are. Go on, then. What's the news?
+- A chat? Happy to. The coils can manage without me for a bit.   #funny
+? tier>=friend
+- {nick}. Good. I was hoping it'd be you.   #warm
+- Oh, brilliant. I've been saving a question for you.   #warm
+
+== talk.sit
+- Sit, sit. Mind the wool. There's always wool.   #funny
+- Grab a seat. I'll budge up. I budge very well.   #funny
+- Sit down. Properly. Feet up, if you like.
+
+== talk.filler
+- Sorry. Was I humming? I was humming.   #funny
+- Listen. That's coil two. Steady as anything.
+- I like this. Just talking. No board. No sulking coils.   #warm
+- Where was I? Doesn't matter. Go on, you talk.
+- Funny, isn't it. A whole ship humming, and us just sitting here.
+- I've learnt more from your questions than you'd think.   #warm
+
+== talk.end
+- Right, onward. That was lovely. Thank you.   #warm
+- Good talk. Properly good. Same again soon?
+- Off you go, then. I'll be thinking about that all shift.
+- That's set me up. I might even sing. You've been warned.   #funny
+- Thanks for sitting with me. It helps. It always helps.   #warm
+
+== talk.stop
+- Oh. Right. Off you go. We'll finish it properly another time.
+- No, go on. I'll hold the thought. I'll knit it into something.   #funny
+- Of course. Mind the coils on your way.
+
+== talk.go.shift
+- Ah, I'm on in five. Coil three's waiting. Later?
+- Sorry, shift's starting. Find me at the overlook after?
+
+== talk.go.bed
+- Bed for me. I'll say goodnight to the coils on the way. Tomorrow?
+- I'm yawning at you. That's rude. Tomorrow, properly?   #funny
+
+== talk.go.trad
+- I'm running {trad} tonight. Come and help me start it?
+- Sorry, {trad}'s starting. Walk down with me?

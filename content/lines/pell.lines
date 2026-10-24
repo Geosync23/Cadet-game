@@ -635,3 +635,49 @@
 == disc.lose
 - Ah, nuts. Again!
 - No way. Best of five.   #funny
+
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15): his own Talk a while frames (main characters don't use the shared ones)
+== talk.start
+- Oi oi. A natter? Go on. I was only pretending to work.   #funny
+- Right, so. Sit down before I start without you.
+- A chat? You've caught me between snacks. Perfect timing.   #funny
+? tier>=friend
+- {nick}! Good. I've saved up three stories and a biscuit.   #warm
+- There you are. I was just thinking I'd come and find you.   #warm
+
+== talk.sit
+- Shove up. No, you sit there. That's the warm end.
+- Sit. Mind the crumbs. They're mine, but mind them.   #funny
+- Take the comfy bit. I'll perch. I'm a good percher.   #funny
+
+== talk.filler
+- Where was I? Oh, nowhere. Nice here, though.
+- Hear that? Fan on the turn. Tomorrow's job. Not tonight's.
+- I'm going to have a biscuit. I'm thinking about it, anyway.   #funny
+- This is the good bit of a day. The sitting bit.   #warm
+- Hang on, I had a story. It's gone. It'll come back at three in the morning.   #funny
+- Rina would say I'm rambling. Rina's not here. Ramble on.   #funny
+
+== talk.end
+- Right, so. That's me sorted. Cheers for the natter.   #warm
+- Good chat, that. Better than a nap. Nearly.   #funny
+- Go on, then. I'll keep the next one warm. It's a long one.   #funny
+- That's done me good. Like second breakfast, for the ears.   #funny
+- Cheers, {nick}. You're a good one to sit with.   #warm
+
+== talk.stop
+- Off? Fair. I'll finish the story to myself. It goes well.   #funny
+- Go on. We'll pick it up. I never forget a story. Everything else, yes.   #funny
+- No bother. Laters. Bring snacks next time.
+
+== talk.go.shift
+- Ah, nuts. Shift. Calder's board waits for no one. Later?
+- Got to dash. On in five, and I've not found my spanner. Later?
+
+== talk.go.bed
+- I'm off to bed. I won't sleep. I'll try. Tomorrow?   #funny
+- Bunk's calling. It's never sure what for. Night, {nick}.   #funny
+
+== talk.go.trad
+- Can't stop. {trad}'s on. There'll be biscuits. Coming?
+- Sorry, {trad}. I promised I'd be there. Walk with me?
