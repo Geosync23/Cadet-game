@@ -8964,6 +8964,7 @@ DECKS[7] = {
     for (const z of [1.0, 2.0]) place('e', 'powerCabinet', .3, z, 'w', { it: IT('Emitter power', 'The court\'s force-field power units, humming a little higher than anything else aboard.') });
     place('e', 'relayBank', .35, 3.6, 'w', { w: 1.6, it: IT('Emitters', 'The net and side-wall emitters\' controls, and the scoreboard\'s driver.') });
     placeWall('e', 'workLight', 'e', 1.5);
+    if (!SIM_BAY) {                                       // the rec utility room as built; with the sim bay, the stage booth's (simBayDress, the slot below)
     place('b', 'controlBoard', 5.55, 1.6, 'e', { w: 1.6, it: IT('Lighting desk', 'The booth\'s lighting desk, under the window onto the stage. Every fader is labelled; two are labelled DON\'T.') });
     place('b', 'chair', 4.85, 1.6, 'w');
     place('b', 'recProjector', 5.4, 3.0, 'e', { it: IT('Projector', 'The auditorium\'s projector, aimed through the booth window at the screen over the stage.') });
@@ -8974,6 +8975,7 @@ DECKS[7] = {
     place('b', 'dispenser', 4.55, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
     place('b', 'medCabinet', 5.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
     place('b', 'utilShelf', 5.6, 4.6, 'e', { it: IT('Seat spares', 'Hinges, springs and a box of gold seat numbers.') });
+    } else simBayDress();
     REC_STANDS.forEach(([c0, c1], b) => place('T', 'recHit', (c0 + c1) / 2 - 4, 1, 'n', { w: c1 - c0, d: 2, hitH: 1.3, it: IT('Stands', ['Three stepped benches at the stern end, by the scoreboard.', 'The middle of the stands: three stepped benches, right on the net. The best seats for a close game.', 'Three stepped benches at the bow end, by the gate onto the court.'][b]) }));
   },
 };
@@ -9010,6 +9012,40 @@ function recMats() {
 }
 
 // ---- slot: Rec engineer (section 4e). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- the sim bay (FX14, rec-simbay S1; plans/rec-simbay-plan.html and the user's answers of 2026-10-24) ----
+// The rec utility room (room 'b', columns 28-33, rows 11-17) splits: the sim bay 'S' (columns 28-31), its door the old
+// hatch h,31,11, and the stage booth (columns 32-33), which keeps the key 'b' so Maeve's 7-booth-1 and talent night are
+// as they were; a Works hatch h,32,11 into it from the foyer. The booth's three machines keep their ids and jobs; only
+// their tiles move, onto the auditorium wall. SIM_BAY off (the build's default till the switch-on step): nothing here
+// runs and the deck is as before; #simbay on the link (or ?simbay) previews it
+const SIM_BAY = location.hash.slice(1).split('.').some(t => t.split('-')[0] === 'simbay') || new URLSearchParams(location.search).has('simbay');
+const SIM_MOVE = { '7-aud-lights': [33, 14], '7-aud-sound': [33, 15], '7-grav-plates': [33, 16] };   // at; face 'w', the panel the tile west
+if (SIM_BAY) {
+  const D = DECKS[7];
+  D.map = D.map.map((row, r) => r >= 11 && r <= 17 ? row.slice(0, 28) + 'SSSS' + row.slice(32) : row);
+  D.rooms.S = { name: 'Sim bay', floor: 'svc', rec: true };
+  D.rooms.b = { ...D.rooms.b, name: 'Stage booth' };
+  Object.assign(D.doors, { 'h,31,11': 'door', 'h,32,11': 'hatch' });
+  D.service = D.service.map(s => s.key === 'h,31,11' ? { key: 'h,32,11', tier: s.tier } : s);
+  D.plates = D.plates.concat([['h,30,11', 'n', 'Sim bay']]);
+  for (const m of REC_MACHINES) if (SIM_MOVE[m.id]) {
+    m.at = SIM_MOVE[m.id].slice(); m.face = 'w'; m.panel = [m.at[0] - 1, m.at[1]];
+    const p = D.places.find(q => q.id === m.id + '-svc'); p.at = m.panel.slice(); p.face = 'e';
+  }
+}
+// the stage booth's kit (room-local: x 0-2 across, z 0-7 from the foyer end): the desk, chair and window as before, the
+// projector beside them, the dimmers, the sound rack and the gravity plates' board along the auditorium wall, each over
+// its machine's tile, the kettle and first-aid locker at the far end
+function simBayDress() {
+  place('b', 'controlBoard', 1.55, 1.6, 'e', { w: 1.6, it: IT('Lighting desk', 'The booth\'s lighting desk, under the window onto the stage. Every fader is labelled; two are labelled DON\'T.') });
+  place('b', 'chair', .85, 1.6, 'w');
+  place('b', 'recProjector', 1.45, 2.85, 'e', { it: IT('Projector', 'The auditorium\'s projector, aimed through the booth window at the screen over the stage.') });
+  place('b', 'relayBank', 1.65, 3.5, 'e', { w: .9, it: IT('Dimmer racks', 'The stage lights\' dimmers, rack after rack, squeezed in along the wall.') });
+  place('b', 'powerCabinet', 1.7, 4.5, 'e', { it: IT('Sound rack', 'Amplifiers and the lectern microphone\'s receiver.') });
+  placeWall('b', 'relayBoard', 'e', 5.5, { it: IT('Gravity plates', 'The float room\'s gravity plate controller, set to 0.2 g, with its cooling beside it.') });
+  place('b', 'dispenser', .5, 6.6, 's', { it: IT('Kettle', 'A kettle and a tin of tea for whoever runs the lights.') });
+  place('b', 'medCabinet', 1.5, 6.6, 's', { it: IT('First-aid locker', 'Plasters, cold packs and a sign: FLOAT ROOM BUMPS GO IN THE BOOK.') });
+}
 // ---- end of slot: Rec engineer ----
 
 // =====================================================================

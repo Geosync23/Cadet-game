@@ -2009,6 +2009,11 @@ Phase 1: the player only. The rec deck builder wires these to the rooms' places;
 - **The auditorium's show (0.84.8, RB2):** `recShow(null | 'film' | 'talk' | 'allhands' | 'talent')`, called by RA's traditions engine; looks only (house lights while you're in the auditorium, the screen, the stage pools). See the 0.84.8 row.
 - **The stage (0.84.9, RB2):** crew moves `perform { act: 'sing' | 'juggle' | 'piano' | 'bow', len? }` and `address {}`; poses `sing`, `juggle` (balls by `recCrewBalls`), `bow`, `address`. Spots in the 0.84.9 row.
 
+### The sim bay (FX14, rec-simbay, behind SIM_BAY; plans/rec-simbay-plan.html)
+
+The user's pick (2026-10-24): the rec utility room becomes a flight simulator bay. Everything is behind `SIM_BAY` (section 4e's Rec engineer slot): off, nothing runs and the game is identical (cadet_test ALL IDENTICAL); `#simbay` on the link (or `?simbay`) turns it on for a preview. To test with it on, make a copy with `const SIM_BAY = true || ...` (sed) and run the checks on the copy.
+- **S1, the split.** When on, the slot rewrites `DECKS[7]` after it's defined: rows 11-17, columns 28-31 become room `S` ("Sim bay"); room `b` keeps columns 32-33 and is renamed "Stage booth" (its key stays, so `7-booth-1` and talent night's `whereFor` are untouched). `h,31,11` becomes a door, a Works hatch `h,32,11` replaces it in `service`, a "Sim bay" plate on `h,30,11`. `SIM_MOVE` moves the three machines (same ids) onto the auditorium wall, face `w`, panels one tile west: lights 33,14, sound 33,15, gravity plates 33,16; their `-svc` places follow. `dress` runs `simBayDress()` for the booth instead of the old room's lines (desk, chair, projector, dimmers, one sound rack, the gravity plates' board, kettle, first-aid locker; the expansion tank, the second sound rack and the seat-spares shelf don't fit and are only in the switched-off branch).
+
 ## The rec deck's crew (section 14, RA, 0.83.x)
 
 Brief: `plans/brief-recdeck.md` (claude/lead-pillar1), seat RA; plan v5 section 9. Everything waits for `REC_DECK`.
