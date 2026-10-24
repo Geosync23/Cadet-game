@@ -356,6 +356,10 @@ nothing in the game file; it is baked after the user's playtest.
   conditions yet. Write the line that always plays as a normal script line, and each conditional line as a comment
   where it goes: `// IF <conditions>: <speaker>: <text>` (e.g. `// IF mem:moment.pell.timed: pell: ...`). lines_check
   skips comments, so CS1 checks those by hand for length, voice and repeats. (SW1's convention, 2026-10-24.)
+  Versions of one line chosen by a memory are IF lines too (`// IF mem:moment.teague.beam: them: ...`), under one
+  neutral script line. Day gates on any beat: `// DAY: 3-21` (or `// DAY: from 15`) under the header. A new favour:
+  `// FAVOUR <id> (new): <what you do>; <the other person's line, if any>`. Where a voice card and the roster
+  disagree (Theo's needs), **the voice card wins.**
 - **Beat numbers** only go up: a crescendo, its quiet ending and the afterglow are the next numbers in that order
   (Pell 7, 8, 9; Zeke 6, 7). The tables below call them 7 / 7q / 8 and so on; the files number them straight.
 - **Size.** Each step 6-10 lines (the crescendo 10-16), one choice of three replies in the four flavours (listen,
