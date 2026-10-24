@@ -36,7 +36,7 @@ hint: Come and look at something. Mind the floor, it's just been done.
 mem: card
 them: Hello, hello. Don't mind me. I'm looking at this valve. Again.
 them: That's three. Once for the job. Once for the rule. Once for me.   [laugh]
-them: Here. My card. It lives in this pocket. My own list for checking things. It's gone soft as cloth.
+them: Here. My card. It lives in this pocket. My list, my rule at the top: slow hands, open eyes. It's gone soft as cloth.
 them: Shut it, seat it, look again. Nothing clever on it. It's the doing it that counts.
 them: Twice is the rule. Three is me. I'm working on that. Slowly.
 ? choice
@@ -44,13 +44,14 @@ them: Twice is the rule. Three is me. I'm working on that. Slowly.
   them: A long story. Not one for the engine room. Another day.
   + them: A long story, and I tell it slowly, so it's longer still. Ask me again some evening. Before ten.   [nod]
 * I check mine once and hope.   flavour:cheer mem:hope
-  them: Then I'll check yours twice. Between us, that's three. Perfect.   [laugh]
+  them: Then I'll go over yours two more times. Between us, that's three. Perfect.   [laugh]
 * Could I copy your list?   flavour:practical mem:copy
   them: Sure. Copy it in your own hand, though. It sticks better that way.
 them: There. Four. No, I'm joking. Three. On we go, slowly.   [laugh]
 
 == beat 3
-// before Day 12 (the builders' day gate), so the storm can carry beat 4; early evening, before ten
+// DAY: 8-11
+// before the storm, so the storm can carry beat 4; early evening, before ten
 tone: heartfelt
 where: Engine overlook
 when: beat:salo.2 time:evening !event:ionStorm
@@ -74,6 +75,7 @@ them: So I haven't written back. Three weeks. That's not like me either.
 them: Right. Twenty to ten. I'll walk you to the lift, then bed.
 
 == beat 4
+// DAY: 13
 // CRESCENDO rides on: the ion storm (event ionStorm, its Saturday, daytime, Deck 6 coolant loop); day: 13; cast: salo-saad, torres-zeke (on shift), calder (over the comm); quiet ending: beat 6
 tone: resolution
 tier: friend
@@ -85,7 +87,7 @@ hint: Deck 6, the coolant loop. Could you come? Now, if you can.
 mem: once
 flag: salo.signed
 learn: Saad Salo once signed off a valve he hadn't checked. In the ion storm he checked one once, properly, and signed it.
-them: Rest day, and here I am. Storms don't read the rota. Hello, {me}. I'm glad it's you.
+them: Rest day, and here I am. Nobody called me in. Storms don't read the rota. Hello, {me}. Glad it's you.
 them: Loop three. The valve's sticking. Half open, showing shut.   [gesture]
 them: It's the same. The same feel under my hand. The Pallas one did exactly this.
 them: Give me a moment. My hand won't go.   [sigh]
@@ -101,11 +103,12 @@ torres-zeke: Saad? Loop three's dropping. Need you on it when you can. No rush. 
 them: Shut. Seated. Looking.   [listen]
 them: There. I checked it once, properly, and it's right. I'm signing it. Once.   [nod]
 calder: Deck 6 loop. Holding at forty. Good.
-torres-zeke: Loop's steady. Lovely work, Saad. Right, onward.   [gesture]
+torres-zeke: Loop's steady. Properly done, Saad. Right, onward.   [gesture]
 them: My hands are shaking now. After. That's the right order, isn't it?   [laugh]
 them: Somewhere in the Service it's past my bedtime. I'm counting that.
 
 == beat 5
+// DAY: from 14
 // afterglow: after the all-clear (Day 14 on), calm, before ten; plays after beat 4 or beat 6
 tone: resolution
 tier: friend
@@ -113,11 +116,11 @@ where: calm
 when: beat:salo.4 !event:ionStorm
 hint: Before ten, could you sit a minute? I've written to Hala. At last.
 mem: tohala
-keepsake: a double-check card he made for you, with your name at the top
-learn: Saad Salo sent his sister Hala his old double-check card, with one line on the back.
+keepsake: a checking card he made for you, with your name at the top
+learn: Saad Salo sent his sister Hala his old checking card, with one line of his own on the back.
 them: I'm sending Hala my old card. The soft one. She'll need a good pocket for it.
 them: I wrote one line on the back. Just one. It took me all week. Want to hear it?
-them: "Check it twice. Then trust yourself."   [nod]
+them: "Look once, slowly and properly. Then trust your own hands."   [nod]
 them: The second half's the hard bit. I only learnt it lately. With you there.
 ? choice
 * She'll keep that for years.   flavour:listen mem:keep
@@ -131,6 +134,7 @@ them: Here. Your name at the top, my list underneath. In my best writing, which 
 them: Now. Nine fifty-two. Off to bed. Night, then.
 
 == beat 6
+// DAY: from 16
 // QUIET ENDING for beat 4: plays only if beat 4 was missed (not friend by the storm, or not on Deck 6); any Deck 6 job after Day 15
 tone: light
 tier: friend

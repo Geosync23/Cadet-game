@@ -72,7 +72,8 @@ them: Now Asel's seventeen. She wants to learn to fly. She asked me. I couldn't 
 them: She has my hands, you know. Steady. I've watched them. Ah, me. That's the trouble too.
 
 == beat 4
-// friend, 2+ days after beat 3, before Day 16 (the builders' day gate)
+// DAY: 8-15
+// friend, 2+ days after beat 3, before the comet
 tone: heartfelt
 where: Observation room
 when: beat:raman.3 !event:comet
@@ -94,6 +95,7 @@ them: So I'll ask you. Would you trust someone new with something you love?
 them: Gently, now. I'll find Bakshi at the shift change. Before I can straighten anything else.
 
 == beat 5
+// DAY: 16
 // CRESCENDO rides on: comet viewing (event comet, Day 16), the observatory's back window, 22:10-22:40, after the knot; day: 16; cast: raman, bakshi-sol (the bridge speaker, on the night helm), sato (at the scope); quiet ending: beat 6
 tone: resolution
 tier: friend
@@ -126,6 +128,7 @@ them: This is for you. The fourth shuttle. The Tern, tiny. The bay's got your do
 them: You were my last good landing. Don't tell anyone it was bumpy.   [laugh]
 
 == beat 6
+// DAY: from 17
 // QUIET ENDING for beat 5: plays only if beat 5 was missed (not at the back window, or not ready by Day 16); a morning at his window seat, after Day 16
 tone: light
 tier: friend

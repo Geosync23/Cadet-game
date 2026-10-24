@@ -6,7 +6,8 @@ who: kowalczyk
 // edge of Marra Station for thirty years; it goes dark for good at ten to six one morning, a buoy instead. His pattern:
 // three long, one short. Never the command she was passed over for; never loneliness spelled out (the lonely theme).
 // No pictures (the game has none): someone on Marra saw the lights and wrote to her father.
-// Depends on your first night shift (Pillar 5, Days 19-20 from 21:00): beats 2-4 that night; no day numbers in lines.
+// Depends on your night shifts (Pillar 5, moved to Mon-Wed, Days 22-24, 21:00-06:00): beats 2-3 on the first night
+// (Day 22, before midnight), the crescendo at the dawn of the second (Day 24, 05:50; Day 23 is Zeke's). No day numbers in lines.
 // Numbering: beat 4 is the crescendo, beat 5 the afterglow (after 4 or 6), beat 6 the quiet ending for beat 4.
 
 == beat 1
@@ -31,7 +32,8 @@ them: There. Now you needn't read it. You're welcome.   [nod]
 them: Right. Bed, for me. Breakfast, for you. Go on, then.
 
 == beat 2
-// your first night shift (Day 19), 22:00 to midnight; acquaintance, met 3+ days (the builders' gate for the night shift)
+// DAY: 22
+// your first night shift, 21:30-22:30; acquaintance, met 3+ days (the builders' gate for the night shift)
 tone: light
 tier: acquaintance
 metDays: 3
@@ -42,7 +44,7 @@ hint: Night shift. Come and see the real ship. Quietly.
 mem: night
 them: Evening, or near enough. Your first night shift. Welcome to the real ship.
 them: The day shift think they run her. They're visitors. Very polite ones. They leave at five.
-them: Listen. That's the air on Deck 2. That tick's the hull cooling. That's Janssen's kettle.
+them: Listen. That's the air on Deck 2. That tick's the hull cooling. That's the night helm's kettle.
 them: A few of us on the bridge, a doctor, the Watch, the engines. That's the whole night. You learn the footsteps.
 them: My father would like it up here. He keeps a beacon. Marra Station, at the edge. Thirty years.
 them: Never mind. Your job: the log, on the hour, every hour. Then leave the quiet alone. It's earned it.
@@ -57,7 +59,8 @@ them: Never mind. Your job: the log, on the hour, every hour. Then leave the qui
 them: On the hour. I'll be at the chart table, pretending not to read.
 
 == beat 3
-// the same night, two hours or more after beat 2 (about 02:00-03:00); tier and gap set for the one night
+// DAY: 22
+// the same night, an hour after beat 2, 23:00-23:59 (before midnight: that day's one heavy moment); tier and gap set for the night
 tone: heartfelt
 tier: acquaintance
 gapDays: 0
@@ -66,10 +69,10 @@ duty: true
 when: beat:kowalczyk.2 time:night
 hint: Still awake? Good. Sit a minute. It's late enough to say a thing.
 mem: dark
-them: The beacon. My father's. They switch it off this morning. For good. At ten to six.
+them: The beacon. My father's. They switch it off the morning after next. For good. At ten to six.
 them: A buoy instead. Smaller. Never needs anyone. Sensible little thing.
 them: He won't say he minds. He wrote, "About time. The lamp's older than me." Then three lines about the weather.   [sigh]
-them: I can't be there. Long way to Marra. I'll be up on the bridge, keeping a log.
+them: I can't be there. Long way to Marra. I'll be on the bridge that morning, keeping a log.
 them: It's why I leave film night before the lighthouse bit. Everyone thinks it's the plot. It's the light.
 ? choice
 * Tell me about him.   flavour:listen mem:father
@@ -79,10 +82,11 @@ them: It's why I leave film night before the lighthouse bit. Everyone thinks it'
   them: Answer it. Huh. The running lights. Three long, one short. That was his. Every ship out there knew it.
 * I missed a goodbye like that once. It sits strangely.   flavour:share mem:missedbye
   them: It does. Like a step that isn't there. Thanks for saying.
-them: Right. Three hours. The log won't keep itself. Go on, then.
+them: Right. Long night yet. The log won't keep itself. Go on, then.
 
 == beat 4
-// CRESCENDO rides on: your first night shift, the bridge (Deck 1), 05:50; day: 20; cast: kowalczyk, janssen-hugo (night helm), mensah (night Watch, on his rounds; the builders confirm who's on watch); quiet ending: beat 6
+// DAY: 24
+// CRESCENDO rides on: your second night shift, the bridge (Deck 1), 05:50; day: 24; cast: kowalczyk, takahashi-wen (night comms), mensah (night Watch, on his rounds; the builders confirm who's on watch); quiet ending: beat 6
 tone: resolution
 tier: acquaintance
 gapDays: 0
@@ -93,10 +97,11 @@ hint: Twenty to six. Come up to the bridge. Just yourself.
 mem: signal
 flag: kowalczyk.lit
 learn: Anja Kowalczyk's father kept a beacon on Marra Station. The morning it went dark, the Wren's running lights sent his pattern.
-mail: 10080 | From Marra | A letter from my father. Someone on Marra saw a ship's running lights go three long, one short at ten to six, and wrote to tell him. He says the buoy is very sensible. He says thank you. So do I. A.K.
-them: Twenty to six. Janssen, hold her steady. No flourishes this morning.
-janssen-hugo: Steady, yes. I've turned the kettle off. It felt right.
+mail: 5770 | From Marra | A letter from my father. Someone on Marra saw a ship's running lights go three long, one short at ten to six, and wrote to tell him. He says the buoy is very sensible. He says thank you. So do I. A.K.
+them: Twenty to six. Helm, hold her steady. No flourishes this morning.
+takahashi-wen: Comms are quiet. Nothing but static out there. Clean static.
 them: The running lights. This key here. Three long, one short. His pattern.
+// IF flag:kowalczyk.signal: them: You asked if the Wren could answer it. She can. So can you.
 them: Your hand, not mine. Mine aren't steady enough this morning. Don't put that in the log.
 them: Ten to six. Now.   [nod]
 ? choice
@@ -108,13 +113,14 @@ them: Ten to six. Now.   [nod]
 * (Key it, and say good morning to him for her.)   flavour:share mem:goodmorning
   them: Good morning, Dad. There. Somebody said it.
 mensah: Every deck's quiet. Thought I'd stand here a minute. If that's all right.
-janssen-hugo: Nothing out there to see them. Not for a long way.
+takahashi-wen: Nobody out there for a long way. Clean signal, though. Huh. Clean.
 them: Somebody always sees a lamp. That's what he says.
 them: Thank you.   [nod]
 them: Right. Log it: a test of the running lights. Satisfactory. Very satisfactory.
 them: And somebody find me a novel with a dull ending. I've had enough feeling for one shift.   [laugh]
 
 == beat 5
+// DAY: from 24
 // afterglow: after the night shift, any early morning as she comes off (06:00-07:00); plays after beat 4 or beat 6
 tone: light
 tier: acquaintance
@@ -138,6 +144,7 @@ them: I've read the end. It's a good one. Read it in order, if you're that sort.
 them: Right. Bed, for me. Quiet watch, whenever yours is.
 
 == beat 6
+// DAY: 24
 // QUIET ENDING for beat 4: plays only if beat 4 was missed (not on the bridge at 05:50); at 06:00 by the lift as she comes off. If you had no night shift at all, the builders play only beat 5 (with one line about the beacon)
 tone: light
 tier: acquaintance
@@ -146,9 +153,9 @@ where: calm
 when: beat:kowalczyk.3 time:morning !flag:kowalczyk.lit
 hint: Off watch. Walk me to the lift? Small news.
 mem: quietsignal
-mail: 10080 | From Marra | My father wrote. Someone on Marra saw a ship's lights go three long, one short at ten to six, and wrote to tell him. He's keeping the letter by the old lamp. A.K.
+mail: 5770 | From Marra | My father wrote. Someone on Marra saw a ship's lights go three long, one short at ten to six, and wrote to tell him. He's keeping the letter by the old lamp. A.K.
 them: Off watch. Six o'clock. I did it. Three long, one short, at ten to six.
-them: Janssen held her steady. Mensah came up off his rounds and just stood there. Nobody asked him to.
+them: The helm held her steady. Mensah came up off his rounds and just stood there. Nobody asked him to.
 them: Out into nothing. Nobody to see it. Didn't matter.
 ? choice
 * How do you feel?   flavour:listen mem:howfeel
