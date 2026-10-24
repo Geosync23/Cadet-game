@@ -159,3 +159,9 @@ the newcomer guide (incl. existing officer saves). Plants q1 (no parts aside), q
   play + queue never needed -> 3 FAIL; sim night who=0 -> 3 FAIL; REC_HABITS sim-pilot removed -> both pilot lines FAIL.
   Screenshots plans/simbay-shots (bdff907c) look right. Sign-offs: 4e, 15r, 17 slot, 14 (recHabit/schedBuild + sim slot),
   18 traditions slot, where the owner seat isn't live.
+
+## FX14 weekend traditions claude/p925-weekend 9e840769 (0.92.5 item 16; game 8ab993b2...), from 0.92.4 ba836359: reviewing ~22:00 UTC
+Six .trad files baked into TRADITIONS; the loader skips them unless WEEKEND_ON (#weekend); joins in TRAD_JOIN (18's slot)
+only when on. Ungated: EV_MAILBOX cap 40 -> 80: nothing reads it but events_check (not saved), so no player-visible change.
+Picnic: Saturday 13:00-13:50 in the garden, hunger +30 on join (FX14: not yet verified). Running: events/join on, join and
+events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
