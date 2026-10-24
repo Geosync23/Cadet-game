@@ -18,12 +18,12 @@ Every item below is the user's own words, summarised; nothing dropped. Each buil
 | 12 | Schedule reminders 15 min before an event stay; Name on the beam only: 25 min early, saying it starts "at the end of shift in the Works department" | FX4 | RV11 |
 | 13 | Name on the beam: you can't sign until people arrive and a few speech bubbles explain the event | DV1 | RV13 |
 | 14 | Rename "task tracker" (Tracked) to "Schedule tracker" | FX4 | RV11 |
-| 15 | Talk a while: the Captain and the main characters get their own large pool of original lines, never the general pool; the Captain introduces herself properly and welcomes you aboard the first time you talk | CS1 + SW1-3 (words), FX10 (wiring) | CS1 (words), RV13 (code) |
+| 15 | Talk a while: the Captain and the main characters get their own large pool of original lines, never the general pool; the Captain introduces herself properly and welcomes you aboard the first time you talk | CS1 + SW1-3 (words), FX13 (wiring) | CS1 (words), RV13 (code) |
 | 16 | First time using the pool or the river: green tip about changing in the lockers | AC3 | RV12 |
 | 17 | Camera doesn't track the player swimming in the pool | FX11 | RV13 |
 | 18 | Hunger needs to drop a lot more overnight | FX9 | RV12 |
 | 19 | Get up while eating, even if not done: the tray goes away (still happens on 0.92.2) | FX12 | RV12 |
-| 20 | While working, the work meter shouldn't disappear when the device is open | AC3 | RV12 |
+| 20 | While working, the work meter shouldn't disappear when the device is open | FX4 | RV11 |
 | 21 | Work needs to take you to the science area more | FX10 | RV13 |
 | 22 | Can't tap Rina to complete the crew health check-up | FX8 | RV11 |
 | 23 | Your name on the beam goes next to the other names (now way off to the side) | DV1 | RV13 |
