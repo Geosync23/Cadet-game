@@ -2,6 +2,8 @@
 // TW1, the Talk a while pack: Pell Okafor's own talks. Easygoing, chatty; "Oi oi", "Right, so"; stories that go
 // sideways; teases fondly about sleep and food. Mum's shop from tier friend only; not the opened messages (beat pell.6).
 
+only: own
+
 == screw-tin
 topic: hobby
 them: Right, so. This tin. Screws from seven ships. One from every ship I've fixed something on.
@@ -53,8 +55,8 @@ share: My family. Little things, every day.
 cheer: Trial and error. Mostly error.
   them: Ha! Best teacher going. Bit rough. Very thorough.   #funny
 
-// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Pell's own, laddered (8 any or
-// acquaintance, 8 colleague, 6 friend, 4 close). Same gates as above: Mum's shop from friend; no practical, no
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Pell's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close). Same gates as above: Mum's shop from friend; no practical, no
 // opened messages, no "nearly left" (his arc's beats); no music boxes (his arc's); the secret tins stay secret.
 
 == good-drawer
@@ -170,7 +172,6 @@ cheer: Still waiting for my first word.
 
 == three-pages
 topic: food
-when: tier>=colleague
 them: Brennan's got a book of everyone's favourite dish. I'm three pages. She ran out of room.
 them: It's mostly puddings. And one salad, so it looks balanced.   #funny
 ask: Has she asked you yours yet? What did you say?
@@ -183,7 +184,6 @@ cheer: Whatever you're not eating.
 
 == tool-roll
 topic: plans
-when: tier>=colleague
 them: I'm saving for a proper tool roll. Leather. A pocket for everything. Even the bent screw.
 ask: Saving up for anything yourself?
 listen: Where would you even get one?
@@ -195,7 +195,6 @@ cheer: Biscuits. Long-term investment.
 
 == warm-pipe
 topic: ship
-when: tier>=colleague
 them: There's a pipe behind the laundry that's always warm. Always. I've checked at three.
 them: I lean on it when I can't sleep. Just me and the pipe. Old friends.   #funny
 ask: What helps you sleep, when nothing does?
@@ -221,7 +220,7 @@ cheer: Find the good biscuits.
 
 == spanner-joke
 topic: crew
-when: tier>=colleague time:morning
+when: tier>=acquaintance time:morning
 them: Halloran told a joke at breakfast. Something about a spanner and a nut. I laughed.
 them: I didn't get it. Laughed anyway. You've got to support the arts.   #funny
 ask: Do you laugh at bad jokes? Honestly?
@@ -234,7 +233,6 @@ cheer: Only Halloran's.
 
 == team-name
 topic: tradition
-when: tier>=colleague
 them: Our quiz team needs a new name. We've been "Team Pell" for a year. Rina hates it.
 ask: Go on. What should we be called?
 listen: What were the other ideas?
@@ -272,7 +270,7 @@ cheer: My own snoring, apparently.
 
 == missing-pages
 topic: work
-when: tier>=friend
+when: tier>=colleague
 them: My first manual had pages missing. Four to nine. So I worked out four to nine myself.
 them: Got a full copy here, years later. Read four to nine. I'd got most of it right.   #warm
 ask: Ever taught yourself something the hard way?
@@ -285,7 +283,7 @@ cheer: Toast. Still learning.
 
 == lights-off
 topic: crew
-when: tier>=friend
+when: tier>=colleague
 them: Can I tell you about Rina? She acts like she doesn't care. She cares about everything.
 them: She checked my bunk light was off every night for a year. Never said a word.   #warm
 ask: Have you got a Rina? Someone who'd never admit it?
@@ -311,7 +309,7 @@ cheer: You can practise on me.
 
 == cold-pie
 topic: food
-when: tier>=friend time:night
+when: tier>=acquaintance time:night
 them: The mess at night's a different place. Lights low. Cold store humming. Me and a plate.
 ask: Ever up this late on purpose?
 listen: What's on tonight's plate?
@@ -323,7 +321,7 @@ cheer: Only when you're here.
 
 == the-list
 topic: day
-when: tier>=friend weekday:tue
+when: tier>=acquaintance weekday:tue
 them: Rest day. I had a list. I've done the first thing on it, which was "lie in".
 them: The rest of the list is still there. Glaring at me. I'm ignoring it gently.   #funny
 ask: What's a perfect day off, for you?
@@ -362,7 +360,7 @@ cheer: The grab shelf. Top spot.
 
 == repair-corner
 topic: plans
-when: tier>=close
+when: tier>=friend
 them: Big plan. Don't laugh. A repair corner in the common room. Bench, lamp, a little sign.
 them: Like Mum's shop, but on a ship. I asked Calder. She said she'd think. She's thinking.   #funny
 ask: If you had a corner of the ship, what would you do with it?
@@ -385,26 +383,3 @@ share: That you're kind. And always hungry.
   them: Both true. She'd like that. She'd feed you inside a minute.   #warm
 cheer: That you're a terrible influence.
   them: She knows. She raised me. She'd say you're a good one anyway.   #funny
-
-// ---- small talk for when every talk he can give today is used (FX13: the reader takes "== small.pell" and
-// "== done.pell" only in smalltalk.talk today; uncomment these when crew files can hold them, or move them there)
-// == small.pell
-// - Right, so. Nothing to report. Which is a report, really.   #funny
-// - Bay's quiet. I like it quiet. For about ten minutes.
-// - I could eat. I could always eat. That's not news.   #funny
-// - Tea's gone cold. I'll drink it anyway. Builds character.   #funny
-// - My spanner's warm. Means I've been working. That's proof, that.   #funny
-// - Coil three's quiet today. Zeke will be pleased.
-// - Nice, this. Just sitting.   #warm
-// - Rina's somewhere winning at something. I can feel it.   #funny
-// - Had a plan for this afternoon. Can't remember it. Happy here instead.
-// - That light on Deck 5's flickering again. Tomorrow's problem.
-// - Nap's booked for later. Pencilled in. Underlined.   #funny
-// - Smells like Brennan's baking. Good day for it.
-// - Talked myself out today. I'll just sit a minute.
-// - Good ship, this. Good people. Good shelf.   #warm
-// - Oily hands. Don't shake them. Do wave.   #funny
-// == done.pell
-// - We've done every story, haven't we. Even the long ones.   #warm
-// - Right, so. I've run out of stories. First time ever. Write it down.   #funny
-// - Nothing new to tell you. Doesn't matter. Sitting's good.   #warm

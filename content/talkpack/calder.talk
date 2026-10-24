@@ -3,6 +3,8 @@
 // humour a beat late. NEVER "well done" (before beat calder.5), "great job" or an exclamation mark. Not the toolbox's
 // owner, not her first chief.
 
+only: own
+
 == serials
 topic: work
 them: Scrubber two on Deck 4. Serial ending four-one-seven. It's started to whistle.
@@ -54,8 +56,8 @@ share: Pick the right next job. Not every job.
 cheer: Hide behind the parts racks with a biscuit.
   them: The tea corner's behind the parts racks. I've seen you. Carry on.
 
-// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Calder's own, laddered (8 any or
-// acquaintance, 8 colleague, 6 friend, 4 close; friend and close also need rep:well, as above). The same NEVERs:
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Calder's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close; colleague up also need rep:known or rep:well). The same NEVERs:
 // no "well done" (her arc's payoff), no "great job", no exclamation marks; nothing of the toolbox's owner, her first
 // chief or the junior who left (her arc's beats). Her card's needs are practical: the listen answers are the warm ones.
 
@@ -161,7 +163,6 @@ cheer: Whether you ever take a break.
 
 == back-in-five
 topic: work
-when: tier>=colleague
 them: A half-done job's worse than one not started. Not started, you know where you are.
 ask: Do you finish things, or start lots of things?
 listen: What's the worst half-done job you've found?
@@ -173,7 +174,7 @@ cheer: Start lots. Finish the fun ones.
 
 == nine-twenty-eight
 topic: crew
-when: tier>=colleague
+when: tier>=acquaintance
 them: Kovac strips a scrubber in nine and a half minutes. Says ten. Rounds up, to be polite.
 them: I've timed her. Twice. Nine twenty-eight, the second time.   #funny
 ask: Is there something you're quietly very good at?
@@ -199,7 +200,6 @@ cheer: The ovens. Brennan talks to them.
 
 == the-spoon
 topic: hobby
-when: tier>=colleague
 them: Day off, I make small things on the lathe. Brackets. Hooks. A spoon, once. Badly.
 them: The spoon's in my drawer. It works. It isn't pretty. Most good things aren't.   #funny
 ask: Do you make anything, off shift?
@@ -212,7 +212,7 @@ cheer: A mess, mostly.
 
 == weekend-faults
 topic: day
-when: tier>=colleague weekday:mon
+when: weekday:mon
 them: Monday. Weekend faults: nine. Seven small. Two of them the Deck 4 washer.
 them: The washer and I have an understanding. It breaks. I fix it. Neither of us comments.   #funny
 ask: How do you start a week? Head down, or a look round first?
@@ -225,7 +225,6 @@ cheer: Coffee first. Then decide.
 
 == every-egg
 topic: food
-when: tier>=colleague
 them: Brennan feeds seventy-odd people three times a day. Never runs short. I asked her how.
 them: She said "I count." I respect that more than she knows.   #warm
 ask: Do you think about where your food comes from, aboard?
@@ -238,7 +237,7 @@ cheer: Only when the grab shelf's empty.
 
 == two-points
 topic: plans
-when: tier>=colleague rep:known
+when: tier>=acquaintance rep:known
 them: Next year: Deck 4 air at ninety-eight. It's ninety-six now. Two points. Twelve months.
 ask: Have you got a number you're aiming for?
 listen: Why ninety-eight, not a hundred?
@@ -250,7 +249,6 @@ cheer: Three biscuits at tea. Up from two.
 
 == through-the-glass
 topic: work
-when: tier>=colleague
 them: People think I watch them through the glass. I watch the board. You're in front of it.
 them: Mostly. Sometimes I watch how someone holds a spanner. It tells me a lot.
 ask: Does it bother you, being watched while you work?
@@ -263,7 +261,7 @@ cheer: I try not to look up.
 
 == cranes
 topic: home
-when: tier>=friend rep:well
+when: tier>=colleague rep:known
 them: I grew up by a shipyard. Cranes outside my window. The noise put me to sleep.
 them: Quiet still keeps me awake. The Wren's never quiet. That suits me.
 ask: What did you fall asleep to, growing up?
@@ -276,7 +274,7 @@ cheer: Nothing. I was asleep.
 
 == thank-you-first
 topic: work
-when: tier>=friend rep:well
+when: tier>=colleague rep:known
 them: When someone tells me they've made a mistake, I say thank you first. Then we fix it.
 them: The ones who hide them worry me. Not the ones who make them.
 ask: Is it hard for you to own up to a mistake?
@@ -302,7 +300,7 @@ cheer: You. Terrifying, but you.
 
 == small-clocks
 topic: plans
-when: tier>=friend rep:well
+when: tier>=colleague rep:known
 them: When I stop, I'll mend clocks. Small ones. Nobody's air depends on a clock.   #warm
 them: That's the appeal. A clock can be wrong for a week and nobody suffers.
 ask: Is there something you'd do just because you liked it?
@@ -315,7 +313,7 @@ cheer: Nap. Professionally.
 
 == no-sugar
 topic: food
-when: tier>=friend rep:well
+when: tier>=colleague rep:known
 them: Tea. Strong, no sugar, the mug with nothing on it. Twenty-two years. I'm not changing.
 them: Halloran made it with sugar once. By mistake. He apologised for a week.   #funny
 ask: Is there something you've never changed, and won't?
@@ -354,7 +352,7 @@ cheer: When Pell shared his late plate.
 
 == one-joke
 topic: crew
-when: tier>=close rep:well
+when: tier>=friend rep:well
 them: I have one joke. I tell it once a year. Works Friday tea, last week of Lanterns.
 them: It's about a bearing. Nobody laughs. Halloran laughs. He's kind.   #funny
 ask: Have you got a joke you always tell?
@@ -390,26 +388,3 @@ share: Yes. I don't tell many people.
   them: Good. Keep one thing quiet. It stays yours that way.   #warm
 cheer: Eating Brennan's bread. Counts.
   them: It counts. Someone has to finish what I start.   #funny
-
-// ---- small talk for when every talk she can give today is used (FX13: the reader takes "== small.calder" and
-// "== done.calder" only in smalltalk.talk today; uncomment these when crew files can hold them, or move them there)
-// == small.calder
-// - Board's at nine. Respectable.
-// - Hear that? No. Good.
-// - Fan on Deck 4's improved. A quarter-tone.
-// - Pot's warm. Help yourself.
-// - Sit. Or don't. Either's fine.
-// - Twelve jobs closed today. Thirteen tomorrow.
-// - I'm reading the logs. Carry on.
-// - The air's good. Nobody's said. Exactly right.
-// - Quiet bay. I'll take it.
-// - Scrubber two's at seventy. Up from sixty-eight.
-// - Torres is humming. The coils must be fine.
-// - Long day. Short sentences. Mine are always short.   #funny
-// - Seal kit's back where it lives. Someone listened.
-// - Nil faults on Deck 2. I checked twice.
-// - Five minutes. The board can wait that long.
-// == done.calder
-// - We've covered it. All of it. Sit anyway.   #warm
-// - I've nothing new. I rarely do. Stay if you like.   #warm
-// - That's every subject I have. There are fewer than people think.   #funny

@@ -2,6 +2,8 @@
 // TW1, the Talk a while pack: Zeke Torres's own talks. Quick, warm, tumbling; machines as moody people; asks back
 // and listens; "Right, onward"; "properly". Never his father (until beat torres.4) or the Specialist list (beat 2).
 
+only: own
+
 == coil-three
 topic: work
 them: Coil three sulked all morning. Wouldn't settle. I sat with her a bit.
@@ -53,8 +55,8 @@ share: You meeting me. It helped.
 cheer: The lift. I said "Four, please" to a wall.
   them: Ha! I remember. The wall was very understanding.   #funny
 
-// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Zeke's own, laddered (8 any or
-// acquaintance, 8 colleague, 6 friend, 4 close). His dad only after beat torres.4, and only well and retiring (the
+// ---- SW1 (2026-10-24, patch 0.92.3 item 15, plans/talk-main-plan.md): 26 more of Zeke's own, laddered (10 with no tier
+// gate, the rest acquaintance, colleague, friend, close). His dad only after beat torres.4, and only well and retiring (the
 // user's change). No Specialist list, no scarf (his arc and scarf-rows have those), no beat retold.
 
 == the-overlook
@@ -74,7 +76,7 @@ topic: work
 them: Best thing a new hand can do? Ask questions. Lots. Even the ones that feel silly.
 them: The silly ones are usually the ones nobody else dared to ask.
 ask: What's something you've wanted to ask, but haven't?
-listen: Did you ask a lot, when you were new?
+listen: Were you a question-asker, back then?
   them: Constantly. Calder once answered three in a row without looking up. A record.   #funny
 share: Why the bay's painted orange.
   them: Good question. Annoying, but good. I don't know. I'll find out. Properly.   #funny
@@ -172,7 +174,6 @@ cheer: Terrifying. The good kind.
 
 == coil-two
 topic: work
-when: tier>=colleague
 them: Everyone asks after coil three. Nobody asks after coil two. Coil two does the work.
 them: Steady as anything. Never sulks. I'll say hello to her later. She's earned it.   #warm
 ask: Is there someone aboard who does loads and never gets noticed?
@@ -185,7 +186,7 @@ cheer: The tea urn. Never a day off.
 
 == right-words
 topic: plans
-when: tier>=colleague
+when: tier>=acquaintance
 them: This year I'm going to learn one song properly. All the words. The right words.
 them: Takahashi says I'll never do it. Takahashi will eat those words. The right ones.   #funny
 ask: Got something you want to get properly good at?
@@ -198,10 +199,10 @@ cheer: Sleeping through the night.
 
 == sing-quieter
 topic: day
-when: tier>=colleague mood:high
+when: tier>=acquaintance mood:high
 them: Good day. I've been singing all shift. Halloran's asked me to sing quieter. Twice.
 ask: What's put a song in you lately?
-listen: What went right today?
+listen: Go on. Tell me the good things.
   them: Coil three settled first try. And there was pie. Two good things. A great day.   #warm
 share: Getting one thing properly done.
   them: Yes. One thing, properly. Then you can sing about it. I do.   #funny
@@ -210,7 +211,7 @@ cheer: Nobody asking me to sing quieter.
 
 == eleven-minutes
 topic: day
-when: tier>=colleague weekday:thu
+when: tier>=acquaintance weekday:thu
 them: Day off. I meant to sit still. I've sat still for eleven minutes. A personal best.   #funny
 ask: Are you good at days off? Properly good?
 listen: What did you do after minute eleven?
@@ -222,7 +223,6 @@ cheer: Worse than you, probably.
 
 == tambourine
 topic: tradition
-when: tier>=colleague
 them: The Friday jam. Someone always starts a song nobody knows the end of. It's wonderful.
 ask: What would you play, if you played something?
 listen: What do you play?
@@ -234,7 +234,6 @@ cheer: The tambourine. Low risk.
 
 == count-forty
 topic: food
-when: tier>=colleague
 them: I make tea the way Kovac told me. Bag in, count forty, bag out. Forty. Not thirty-nine.
 them: She checked once. I'd done thirty-eight. She didn't say a word. She didn't need to.   #funny
 ask: How do you take your tea? Or don't you?
@@ -247,7 +246,6 @@ cheer: However the machine does it.
 
 == low-for-me
 topic: home
-when: tier>=colleague
 them: My cabin's the one with the music. Sorry. I play it low. Low for me.   #funny
 them: Something always on. A ship's too quiet for me without it.
 ask: Do you like quiet, or a bit of noise?
@@ -273,7 +271,7 @@ cheer: Sleep. For about a year.
 
 == stitch-finder
 topic: crew
-when: tier>=friend
+when: tier>=colleague
 them: Kovac's been teaching me to knit for two years. Never once lost her patience.
 them: I've dropped hundreds of stitches. She finds every one. Quietly. Like a medic.   #warm
 ask: Who's the most patient person you know?
@@ -286,7 +284,7 @@ cheer: You, with all my questions.
 
 == upside-down
 topic: work
-when: tier>=friend
+when: tier>=colleague
 them: My first fault on my own, I put a panel back on upside down. It fitted. Somehow.
 them: Ran a week. Then Calder opened it, looked at me, and turned it round. Not a word.   #funny
 ask: What's a mistake you're glad you made?
@@ -312,7 +310,7 @@ cheer: The kettle. Always the kettle.
 
 == corner-rota
 topic: food
-when: tier>=friend
+when: tier>=colleague
 them: Brennan made crumble. Reyes's note this morning just said "CRUMBLE." In capitals.
 them: Two engine officers, one crumble. We take turns with the corner bit. It's in the log.   #funny
 ask: What's the one dish you'd fight someone for? Politely.
@@ -325,7 +323,7 @@ cheer: Crumble. I'm joining the rota.
 
 == left-a-bit
 topic: tradition
-when: tier>=friend
+when: tier>=colleague
 them: Observatory nights, I go for the stars. I stay for Rossi naming the same star every time.
 them: Rossi swears it's a different one. It isn't. We all nod.   #funny
 ask: Do you look up much, out here? Or not really?
@@ -338,7 +336,7 @@ cheer: Only when I trip over something.
 
 == kind-bit
 topic: work
-when: tier>=close
+when: tier>=friend
 them: Know why I asked to train new hands? Someone trained me. Kindly. But badly.
 them: I'd keep the kind bit and fix the rest. Turns out the kind bit's most of it.   #warm
 ask: What's the kindest thing someone did when you were new?
@@ -387,26 +385,3 @@ share: You. I'd trust you with it.
   them: Then we've a deal. Your thing, my coils. Both looked after. Properly.   #warm
 cheer: Whoever brings the most biscuits.
   them: Pell, then. That's a worrying answer. Let's keep thinking.   #funny
-
-// ---- small talk for when every talk he can give today is used (FX13: the reader takes "== small.torres-zeke"
-// and "== done.torres-zeke" only in smalltalk.talk today; uncomment these when crew files can hold them, or move them)
-// == small.torres-zeke
-// - Coil three's settled. For now. I'm not saying it louder than that.   #funny
-// - Nice to sit. I don't do enough of it.
-// - Mm-hm, lighthouse, mm-hm. Sorry. Thinking.   #funny
-// - Board's quiet. Too quiet. Something's about to sulk.   #funny
-// - Good tea, this. Forty, exactly. Kovac would be proud.
-// - I could listen to the drive all day. I sort of do.
-// - Reyes's note said "all calm". I love an all calm.   #warm
-// - Two rows done at lunch. Don't ask of what. You'll find out.   #funny
-// - Right. Just a minute. Then onward.
-// - Hear her? Steady. That's a good sound.
-// - Halloran's joke this morning. Still thinking about it. Still don't get it.   #funny
-// - I'll hum something. Stop me if it's the lighthouse one.   #funny
-// - Long day, good day. They're often the same day.
-// - My hands smell of coil grease. Best smell going.   #funny
-// - Glad you came by. Properly.   #warm
-// == done.torres-zeke
-// - We've talked about everything, haven't we. Every coil. Every song.   #warm
-// - I've run out of stories. Coil three hasn't. She'll make more.   #funny
-// - Nothing new from me. Sit anyway. That's the best bit.   #warm
