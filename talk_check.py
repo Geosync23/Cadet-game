@@ -12,6 +12,9 @@
 #   (j) own pools only (patch 0.92.3 item 15): an "only: own" person never draws the pool, a work pool or small talk,
 #       their first-talk scene comes first and is had only once answered, then their own talks, then the least lately
 #       had again; their talk.* lines are their own; nobody else's picks change (stand-ins when the content has none)
+#   (k) the chat card's opener (patch 0.92.5 item 5): tapped hour after hour, nobody says a greet/near/life line again
+#       until every one that fits has been said, their own first, then their voice template's, then the shared ones;
+#       a peek marks nothing; the record saves, loads back and a New game clears it
 # Setup and environment as for cadet_test.py.
 # Run:  python3 talk_check.py BUILD.html
 import sys, json, os
@@ -273,6 +276,47 @@ with sync_playwright() as pw:
     for b in r['bad'][:12]: print('   ', b)
     check(not r['bad'], f"{len(r['bad'])} own-pool rules broken")
     check(r['othersSame'], 'an "only: own" list changed someone else\'s pick')
+
+    print('(k) The chat card\'s opener, tapped hour after hour (item 5):')
+    r = ev("""(() => { socInit(); const out = { people: [], bad: [] }, fresh = typeof LINE_FRESH_KINDS !== 'undefined';
+      const ppl = ['torres-zeke', 'mensah', 'tomas'].map(id => socP(id)).concat(SOC.crew.filter(p => p.id !== 'you' && !(VOICE[p.id] && VOICE[p.id].lines && VOICE[p.id].lines.greet)).slice(0, 2));
+      if (typeof SHIP.fresh !== 'undefined') SHIP.fresh = {};
+      for (const p of ppl) for (const kind of ['greet', 'near']) {
+        const r = relGet(p.id); r.tier = 1;
+        const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl], t0 = 3 * 1440 + 10 * 60, ctx = t => ({ t, tier: 1 });
+        const lists = [['own', (v && v.lines && v.lines[kind]) || []], ['tpl', (tp && tp.lines && tp.lines[kind]) || []], ['bank', LINES[kind] || []]];
+        const fits = lists.map(([src, l]) => [src, l.filter(e => lineQuick(e, p, ctx(t0)) && linesOk(e, p, ctx(t0))).map(e => e.id)]);
+        const n = fits.reduce((a, x) => a + x[1].length, 0), seq = [], src = {}; for (const [k, ids] of fits) for (const id of ids) src[id] = k;
+        const pk = lineFor(p, kind, { ...ctx(t0), peek: true }), pk2 = lineFor(p, kind, { ...ctx(t0), peek: true });
+        if (fresh && pk && pk2 && pk.id !== pk2.id) out.bad.push(`${p.id} ${kind}: a peek marked its line`);
+        // one tap an hour from 10:00 (time: conditions change, so what fits is worked out at each tap): a line said
+        // before only once nothing that fits is still unsaid; never a template or shared one while one of theirs fits unsaid
+        const rank = { own: 0, tpl: 1, bank: 2 }, said = new Set(); let firstAgain = -1, backwards = -1, tplHeard = 0;
+        for (let i = 0; i < Math.min(n + 4, 70); i++) { const t = t0 + i * 60, l = lineFor(p, kind, ctx(t)); if (!l) continue;
+          const now = lists.flatMap(([s, ls]) => ls.filter(e => lineQuick(e, p, ctx(t)) && linesOk(e, p, ctx(t)) && linesFill(e.text, p, ctx(t)) != null).map(e => [s, e.id]));   // what they could say now (a {room} line needs a room)
+          if (now.every(x => said.has(x[1]))) for (const x of now) said.delete(x[1]);   // all said: they start again (as lineFor does)
+          const unsaid = now.filter(x => !said.has(x[1]));
+          const mine = now.find(x => x[1] === l.id), best = Math.min(...unsaid.map(x => rank[x[0]]));
+          if (said.has(l.id) && unsaid.length && firstAgain < 0) firstAgain = i;
+          if (mine && unsaid.length && rank[mine[0]] > best && backwards < 0) backwards = i;
+          if (mine && mine[0] === 'tpl') tplHeard++; seq.push(l.id); said.add(l.id); }
+        out.people.push({ id: p.id, kind, own: fits[0][1].length, tpl: fits[1][1].length, bank: fits[2][1].length, said: seq.length, firstAgain, tplHeard, backwards });
+      }
+      const s = {}; for (const f of SAVE_EXTRA) { try { f(s); } catch (e) { } }
+      out.saved = s.fresh ? JSON.stringify(s.fresh).length : 0; out.keys = s.fresh ? Object.keys(s.fresh).length : 0;
+      if (fresh) { out.back = JSON.stringify(freshClean(JSON.parse(JSON.stringify(s.fresh || {})))) === JSON.stringify(SHIP.fresh);
+        out.junk = JSON.stringify(freshClean({ 'a|greet': 'zz', 'b|greet': 7, 'c': '1', 'd|near': '1v' }));
+        linesNew(); out.cleared = JSON.stringify(SHIP.fresh) === '{}'; }
+      return out; })()""")
+    for x in r['people']:
+        print(f"  {x['id']:16} {x['kind']:5}: fits own {x['own']}, template {x['tpl']}, shared {x['bank']}; {x['said']} taps, first repeat at {x['firstAgain']}, template lines heard {x['tplHeard']}{', OUT OF ORDER at ' + str(x['backwards']) if x['backwards'] > 0 else ''}")
+        check(x['firstAgain'] == -1, f"{x['id']} {x['kind']}: a line again at tap {x['firstAgain']} with {x['own'] + x['tpl'] + x['bank']} that fit")
+        check(x['backwards'] <= 0, f"{x['id']} {x['kind']}: a template or shared line before their own were all said")
+        check(not x['tpl'] or x['said'] < x['own'] + 1 or x['tplHeard'] > 0, f"{x['id']} {x['kind']}: their template's lines never heard")
+    for b in r['bad']: fail(b)
+    print(f"  the record: {r['keys']} person-kinds, {r['saved']} bytes; loads back {r.get('back')}; junk read back as {r.get('junk')}; New game clears {r.get('cleared')}")
+    check(r.get('back') and r.get('cleared') and r.get('junk') == '{"d|near":"1v"}', 'the opener record does not save, load back or clear')
+    check(r['saved'] < 3000, f"the opener record is {r['saved']} bytes for a handful of people")
 
     for e in errors: fail(f'page error: {e}')
     g.close()
