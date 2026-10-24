@@ -14,3 +14,31 @@
 - Oh. You're a bit... grubby. Sorry.
 ? flag:clothes.grubby tier>=friend
 - Go and change? I'll wait. It's fine.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
+// Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
+== greet
+- Oh. Hi.
+- Um. {hi}. Hello.
+- Oh, it's you. That's... nice. Hi.
+- {hi}. I was just... here. Hello.
+- Hi. Sorry. I didn't see you there.
+- {hi}. Are you... all right? Good.
+- Oh. Hello. I'm a bit quiet today. Always, really.
+- {hi}. I like your... never mind. Hi.
+? tier>=acquaintance
+- {hi}, {nick}. I'm glad it's you.
+- Oh, good. It's you. I can talk to you.
+? time:morning
+- Morning. It's early. Isn't it?
+? time:evening
+- Evening. Quiet out. I like it.
+== near
+- I'm just... doing this. Sorry.
+- {room}. It's nice in here. Quiet.
+- Don't mind me. I'll be done soon.
+- I'm not very good at this yet. Getting there.
+- Oh. You can stay. If you want.
+- Um. Hold that? Thanks.
+- It's easier when nobody's watching. You're fine, though.
+- Nearly done. I think.

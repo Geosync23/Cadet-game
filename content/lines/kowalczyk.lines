@@ -118,3 +118,13 @@
 - New posting. Quiet nights. Good. Finished a paper novel on the first watch. Hello.
 ? tier>=friend
 - Read an old book about a ship like the Wren. It ended well. I thought that was right.
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {nick}. Night bridge was so quiet I heard the stars. Nearly.   #funny
+- {hi}, {me}. Quiet ship. My favourite kind.
+- {me}. Sit a minute. Nobody ever does. Be the exception.   #warm
+- {hi}. Woke up before the alarm. The alarm was offended.   #funny
+- {hi}, {me}. New novel. I've already read the last page.   #funny
+- {me}. You look like you've been doing a lot. Good. Less, tonight.   #warm

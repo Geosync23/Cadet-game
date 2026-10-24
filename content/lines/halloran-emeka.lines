@@ -240,3 +240,13 @@
 - Then the auditorium at four. Rec deck. She'll say your name.
 ? flag:beat.d5-friday.3
 - Don't hide. Have a biscuit first. Have you eaten?   #funny
+
+// ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
+== greet
+? tier>=acquaintance
+- {hi}, {me}. Lovely. Have you eaten? Go on, I'll know if you lie.
+- {hi}. Knock knock. No, I'll save it for breakfast.   #funny
+- {me}! Lovely timing. Kettle's just boiled at the tea corner.   #warm
+- {hi}. Tomatoes are coming on in the garden. I check them daily. Twice.
+- {hi}, {me}. Friday's tea rota has a gap. Just saying. Lovely.   #funny
+- {hi}. Brennan let me near the oven yesterday. Briefly. Lovely day.   #funny
