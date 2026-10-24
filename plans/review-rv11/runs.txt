@@ -101,3 +101,7 @@ path-g8 exit 0 94s | PATH CHECK OK
 pl-g8-instant exit 1 447s | DAY CHECK FAILED
 bubble-g8 exit 0 556s | BUBBLE CHECK OK
 pl-g8-nodraw exit 0 464s | DAY CHECK OK
+day7-g8 exit 0 379s | DAY CHECK OK
+g9-nodraw exit 1 687s | DAY CHECK FAILED
+g9-fix exit 0 691s | DAY CHECK OK
+g9-base exit 1 702s | DAY CHECK FAILED
