@@ -288,7 +288,7 @@ with sync_playwright() as pw:
                 if jid == 'ixtap-veyliLamp':                 # the Captain's quarters are locked: your job's stop opens the door for you
                     path = g.ev(f"(() => {{ const pl = PLACE_OF.get('{pid}'), lw = [...PLACE_OF.values()].find(p => p.type === 'lift-wait'); return !!findPath(lw.walk || lw.at, pl.walk || pl.at, null, player); }})()")
                     check(path, f'{jid}: the way into the Captain\'s quarters is open while the job is yours')
-                g.ev(f"({PUT})('{pid}')"); g.step(15)
+                g.ev(f"({PUT})('{pid}')"); g.step(60 if kind == 'fix' else 15)   # fix: one stop after another on a deck, far apart: the camera catches up first (FX10)
                 x, y = g.ev(f"({SCR})('{pid}')")
                 g.page.mouse.click(x, y); g.step(90); s = st()
                 check(s['act'] and s['act'][0] in ('ixStop', 'job'), f'{jid}: a tap at the stop ({step}, Deck {deck}) starts the work ({s["act"]}, {s["toast"][:70]})')
