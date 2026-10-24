@@ -141,3 +141,11 @@ Diff: 24p promoPartsAside (tops the shelf up to what the t2 test still needs, at
 3/2/1/1), old setGoal arrows only with the queue off, cabin walk at 17:00 even mid-job; sec 25 dvCareerNext drops row asks
 while a promo beat is pending. Notes to weigh: free parts for the crew while the test's open; 'promoted' opens Come over and
 the newcomer guide (incl. existing officer saves). Plants q1 (no parts aside), q2 (no flag), q3 (no queue asks) ready.
+- promo-arrows: arrows promo on the fix: ARROWS CHECK OK (test Day 9 first try; met/walked/met; promoted; 4 queue entries;
+  4 "brace the housing" stuck spots = backlog DV1-2, printed only). 0.92.3: FAILs (test Day 10, move by mail, no flag, no queue
+  entries). Plant q1 (no parts aside): FAIL (Day 10, stuck on "Look over the air scrubber"). q2/q3 running. DV1's answers:
+  parts top-up bounded (own parts, test day, <= 2) and the flag for existing officer saves is intended ("activate").
+- sim bay S5: day_check 2 and 6 with SIM_BAY on: OK. S6/S7 cb4387e8 (game ed2b6fc8...): sim night (every other Thursday
+  from Day 8, Raman hosts) in SHIP_TRADITIONS when on; S7 loosens the pod test for crew pilots. "rec dec" is the crew's name
+  for the deck (not a typo; my nit withdrawn). Still asked: a check line that crew pilots fly. Running: events_check on
+  (+ who=0 plant), cadet_test off vs 0.92.3, check_fast.
