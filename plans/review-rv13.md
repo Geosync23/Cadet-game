@@ -23,6 +23,7 @@ Game sha256 aac49362...c40b (1aabb091 = talk_check only). Base 364c80cb.
   scene picked first, fired only on answer, lineFor cuts tpl+bank for talk.* when only-own, talkFillerOf); sec 20
   talkStart (no hello before a first scene) and talkNext (no chatLine fallback for only-own). Docs + build row.
 - Switched by content: baked TALKS block byte-identical to 0.92.2; content_gen --check up to date; lines_check PASS.
+- check_fast on 95b68182: QUICK CHECK OK in 285 s.
 - talk_check fix OK; 0.92.2 stops on ReferenceError talkOnlyOwn. cadet_test 0.92.2 vs fix ALL IDENTICAL (0 px).
 - Planted (plans: /tmp/rv13/plant.py): p1 bank, p2 fire guard, p3 only branch, p4 sort, p7 first pick: all FAIL.
   p5 (talkStart hook off) and p6 (talkNext hook off): TALK CHECK OK = not caught -> asked FX13 for test lines.
