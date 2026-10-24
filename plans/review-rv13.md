@@ -15,3 +15,16 @@ check_fast, cadet_test (every pixel diff explained); nothing else changes.
 ## Status
 - Set up ~03:30 UTC: playwright, three r128, acorn 8.12.1 in /tmp/cadet-work. Waiting for shas.
 - Baseline 364c80cb (game sha256 ca2f908d...e7e4 = 0.92.2): check_fast QUICK CHECK OK in 206 s here.
+
+## FX13 own-talks claude/p923-fx13 95b68182 / 1aabb091 (item 15 engine): interim FIXES NEEDED (test only), ~03:45 UTC
+Game sha256 aac49362...c40b (1aabb091 = talk_check only). Base 364c80cb.
+- Diff: content_gen (several .talk files a person, sorted, <id>.talk first; `only: own` -> TALKS.only; `first: yes`,
+  1-4 them: lines; global id-uniqueness check still at line ~937); sec 22 slot (talkOnlyOwn, talkPackOwnAgain, first
+  scene picked first, fired only on answer, lineFor cuts tpl+bank for talk.* when only-own, talkFillerOf); sec 20
+  talkStart (no hello before a first scene) and talkNext (no chatLine fallback for only-own). Docs + build row.
+- Switched by content: baked TALKS block byte-identical to 0.92.2; content_gen --check up to date; lines_check PASS.
+- talk_check fix OK; 0.92.2 stops on ReferenceError talkOnlyOwn. cadet_test 0.92.2 vs fix ALL IDENTICAL (0 px).
+- Planted (plans: /tmp/rv13/plant.py): p1 bank, p2 fire guard, p3 only branch, p4 sort, p7 first pick: all FAIL.
+  p5 (talkStart hook off) and p6 (talkNext hook off): TALK CHECK OK = not caught -> asked FX13 for test lines.
+- Notes: only-own with no own talk.filler holds the last pack line ~2-7 ship min; tier-0 stand-in repeats daily
+  (gap 1) because only one ungated stand-in talk: writers need many ungated talks.
