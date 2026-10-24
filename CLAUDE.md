@@ -36,6 +36,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
     4. a runner finishes early: offer to take a check from the slowest runner, agree it between them, copy the lead, and never run a check twice by accident;
     5. any FAIL that isn't on the known-old list (today backlog 12 and 14): tell the build master and the lead at once, without waiting for the end of the share.
   Results go in plans/checks-crN.md; each runner sends its final OK/FAIL to the lead and the build master. The full steps are in plans/testing-guide.md.
+- **The user's "current save" Dev link (the user, 2026-10-24):** https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (Version 11 = 0.92.2), where their longer playthrough is saved. When the user asks for "my current save dev link", give this one. Never publish over it unless the user says so.
 - Keep `DEV_NOTES.md` current so a fresh session can pick up from it.
 - **Update `design-doc.md` when a design decision is made,** in the same commit as the work that depends on it: edit the section it belongs to, and move answered questions out of its Open questions.
 - The user is new to Claude Code and git: explain in plain language, no jargon. No emojis in anything for the user (the user, 2026-10-21).

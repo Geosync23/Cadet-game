@@ -1084,3 +1084,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:31 UTC: FX11 (~40%) joins the weekend traditions: T3 Bread day + T4 big jigsaw on its own branch on FX14's WEEKEND_ON scaffold (after T1), agreed with FX14; SW1 words; RV13.
 - ~21:32 UTC: Sim flight prototype v2 (FX13 7bf86392: steering inverted, prettier, 17 draw calls) published as Version 2 of RMgibsuh2KdxcF3kd8vuJr (1792877525-2be7); shots sent to the user; RV12 light look.
 - ~21:45 UTC: **USER:** hold the landing prototype for now (no more work on it; it stays at RMgibsuh2KdxcF3kd8vuJr v2, out of the game); keep working on the rest. Asked for the 0.92.2 Dev link: given 6daNCLCJAcsLCZn27CEthq (Version 11, untouched).
+- ~21:47 UTC: **USER:** the 0.92.2 Dev page 6daNCLCJAcsLCZn27CEthq is their longer playthrough: "my current save dev link" = this one. Never publish over it. Written into CLAUDE.md; PUB1 told.
