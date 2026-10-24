@@ -39226,7 +39226,7 @@ function pyoTray(e, d, A) {
   const P = SHIP.player; if (PYO_DAY === d || P.tray) return;
   PYO_DAY = d; P.tray = PYO_DISH; P.trayLeft = 0;
   if (A) A.def.done = null;                              // the beds' own "watered" toast: this one instead
-  toast(e.name, tradWords(e, 'tray', {}) || 'Your basket\'s full. Take it up to the mess hall and tap a seat to eat what you picked.', { keep: true });
+  toast(e.name, tradWords(e, 'tray', {}) || 'Your basket\'s full. Take it over to the mess hall and tap a seat to eat what you picked.', { keep: true });
   if (typeof NEED_GOAL !== 'undefined' && NEED_GOAL && typeof needGoalClear === 'function') needGoalClear();   // a "Food" arrow at the servery: this one instead
   if (IX_GOAL || deckDef.num !== 3) return;              // never over someone else's arrow
   const pos = player.obj.position, d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
