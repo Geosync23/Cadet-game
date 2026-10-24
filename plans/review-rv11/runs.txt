@@ -105,3 +105,11 @@ day7-g8 exit 0 379s | DAY CHECK OK
 g9-nodraw exit 1 687s | DAY CHECK FAILED
 g9-fix exit 0 691s | DAY CHECK OK
 g9-base exit 1 702s | DAY CHECK FAILED
+pl-p5-booth exit 1 297s | DECK CHECK FAILED
+deck-b3 exit 1 300s | DECK CHECK FAILED
+cf-p5 exit 0 448s | QUICK CHECK OK in 448 s
+pl-p5-arm exit 1 244s | DECK CHECK FAILED
+deck-p5 exit 0 250s | DECK CHECK OK
+ct-p5 exit 1 120s | DIFFERENCES FOUND
+pl-p5-piano exit 1 190s | DECK CHECK FAILED
+ev-p5 exit 0 528s | EVENTS CHECK OK

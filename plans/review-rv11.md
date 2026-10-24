@@ -96,3 +96,14 @@ From claude/integration 3866c8f3 (0.92.3).
 - FX8 checks: cadet_test differences are the glide alone (with CREW_UP_V = 1e9, ALL IDENTICAL). day_check, path, bubble and check_fast OK.
 - FX8's open fix: day_check's line sums a.x + a.lx + a.hx instead of reading the drawn body, so a plant that drops hx from h.set (a visible hop) passes.
 - FX8 69356d11: day_check's line reads a.h.pos. The hx-dropped plant now fails all 7 decks (0.94-1.19); OK on the fix; fails on 3866c8f3. Long get-ups still hop by design; backlog FX8-1 (swimmer leaving a lane, 5.2 tiles) is old.
+
+# RV11's reviews for 0.92.5 (2026-10-24; lead 34)
+
+| Fix | Items | Branch, commit | Verdict |
+|---|---|---|---|
+| FX9 | 6 (piano only for talent night), 7 (booth/sofa/armchair flicker) | claude/p925-fx9b 863d43d0 | PASS |
+
+- deck_check's two new parts fail on 3866c8f3 and pass on the fix. Plants caught: booth backrest back to 1.40; armchair arms back to the old sizes; piano always visible.
+- A hidden piano takes no taps (pick uses isShown); floor taps ignore its rec:act place. Its tiles stay blocked on other nights.
+- check_fast and events_check OK. cadet_test differs only at Deck 4's lounge seats (crops viewed).
+- The screenshots FX9 named (plans/shots-0925-*.png) aren't in the commit.
