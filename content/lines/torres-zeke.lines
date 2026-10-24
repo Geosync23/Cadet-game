@@ -808,10 +808,11 @@
 // Day 1: the training-day opener at the briefing's end
 ? flag:walk.train.open.1
 - Morning! It's a training day today. I'm with you all day.
+// (the user, patch 0.92.3 #7: clock in right after his hello, then the rest; the two lines swapped, none removed)
 ? flag:walk.train.open.2
-- Anything you're not sure of, ask. That's what I'm here for.   #warm
-? flag:walk.train.open.3
 - First, clock in. The time clock's by the tea corner.
+? flag:walk.train.open.3
+- Anything you're not sure of, ask. That's what I'm here for.   #warm
 // Day 1 dinner: you can't do every tradition (after walk.dinner.eve.1-3)
 ? flag:walk.eve.choose.1
 - You can't do every tradition in a day. Nobody can.
