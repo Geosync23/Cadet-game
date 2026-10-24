@@ -313,3 +313,23 @@ expected, backlog 15 was a test gap).
 | arrows_check week guide, NEW | **OK** | 612 s | m6 learned Day 9 |
 
 No FAILs.
+
+# 0.92.4 (claude/staging-0.92.4 5bad724d, 2026-10-24)
+
+**sha256 of starship-cadet.html: `2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2`** (matches BM16's).
+OLD = 0.92.3 3866c8f3. One at a time, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 372 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 257 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 301 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 68 s | PUZZLE CHECK OK |
+| social_check | **OK** | 28 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 37 s | TALK CHECK OK |
+| arrows_check (default) | **OK** | 771 s | ARROWS CHECK OK |
+| arrows_pointer_check | **OK** | 145 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 36 s | DEV ARROW CHECK OK |
+| arrows_check week guide, NEW | **OK** | 658 s | m6 learned Day 9 |
+
+No FAILs, so no OLD runs were needed.
