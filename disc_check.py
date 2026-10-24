@@ -171,7 +171,7 @@ with sync_playwright() as pw:
     check(s['g'] and hid, '#25 during your own game the crew\'s disc is hidden')
     check(not h.errors, '0.92.3 parts: no errors: ' + ' | '.join(h.errors[:5]))
     h.close()
-    # ---- 0.92.5 (FX11): the kayak's stroke (#2), the camera in an auditorium seat (#14), staying seated for a show (#17) ----
+    # ---- 0.92.5 (FX11): the kayak's stroke (#2), the camera in an auditorium seat (#14), an auditorium seat with no timer (#17) ----
     h = Game(pw, build, 600, 600)
     h.ev("(() => { skipTo(1440 + 600); goToDeck(7, null); SHIP.device.settings.tips = false; playerKit('rec'); const c = recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'); player.obj.position.set(c.x, 0, c.z); recStart('kayak', 'River', null, null); return 1; })()")
     for k in range(40):
@@ -191,25 +191,31 @@ with sync_playwright() as pw:
     h = Game(pw, build, 390, 844)
     h.ev("(() => { skipTo(4 * 1440 + 958); goToDeck(7, null); SHIP.device.settings.tips = false; const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); const sp = placeSpot(pl[pl.length - 1].id); recGo('seat', { x: sp.x, z: sp.z }, 'Seats', ''); return 1; })()")
     seat = []
-    while h.ev("SHIP.time.min") < 1016:
+    while h.ev("SHIP.time.min") < 1032:
         h.step(30); seat.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null, ACT && ACT.body ? Math.hypot(target.x - ACT.x, target.z - ACT.z) : null, ACT && ACT.body ? Math.hypot(target.x - (42.2 - OX), target.z - (9 - OZ)) : null, ACT && ACT.body ? Math.hypot(ACT.x - (42.2 - OX), ACT.z - (9 - OZ)) : null])")))
     on = [r for r in seat if r[1] == 'recSeat:do']
     cam = [r for r in on if r[0] > on[0][0] + 2] if on else []
     check(bool(cam) and all(r[3] < r[4] - 2 and r[2] < r[4] for r in cam), '#14 seated in the auditorium, the camera centres between you and the stage (%s)' % ([[round(x, 1) for x in r[2:]] for r in cam[:1]]))
-    check(bool(on) and on[-1][0] >= 1009, '#17 seated for the Captain\'s address: you stay seated till it ends at 16:50 (last seated %s)' % (round(on[-1][0]) if on else None))
-    check(not [r for r in seat if r[0] >= 1012 and r[1] == 'recSeat:do'], '#17 ... and get up with everyone once it\'s over')
-    # RV11's case: your seat taken before you sit, you're moved one along, and still stay till the end
+    check(bool(on) and on[-1][0] >= 1028, '#17 seated for the Captain\'s address: no timer, you\'re still seated after it ends at 16:50 (last seated %s)' % (round(on[-1][0]) if on else None))
+    # no show: a seat in the auditorium at 10:00 on a weekday is any other seat: still seated an hour and a half on (0.92.4: up after 15 minutes)
+    h.ev("(() => { skipTo(8 * 1440 + 600); goToDeck(7, null); const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); const sp = placeSpot(pl[0].id); recGo('seat', { x: sp.x, z: sp.z }, 'Seats', ''); return 1; })()")
+    quiet = []
+    while h.ev("SHIP.time.min") < 700:
+        h.step(60); quiet.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null])")))
+    qon = [r for r in quiet if r[1] == 'recSeat:do']
+    check(bool(qon) and qon[-1][0] >= 698 and qon[0][0] <= 630, '#17 no show on: you stay seated till you get up (seated %s to %s)' % (round(qon[0][0]) if qon else None, round(qon[-1][0]) if qon else None))
+    # RV11's case: your seat taken before you sit, you're moved one along, and you still stay seated
     h.ev("(() => { skipTo(11 * 1440 + 962); goToDeck(7, null); return 1; })()"); h.step(200)
     taken = h.ev("""(() => { const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); if (pl.length < 2) return null;
-      const id = pl[0].id; actStart('recSeat', id, { pose: 'sit', title: 'Seats' }); if (typeof recSeatHold === 'function') recSeatHold();
+      const id = pl[0].id; actStart('recSeat', id, { pose: 'sit', title: 'Seats' });
       DECK_CREW.push({ goalId: id, p: { id: 'stub' } }); try { actBegin(); } finally { DECK_CREW.pop(); }   // someone got there first, the moment you arrive
       return ACT && ACT.o.moved && ACT.placeId !== id ? ACT.placeId : null; })()""")
     check(bool(taken), '#17 (setup) your seat taken as you arrive: moved one along (%s)' % taken)
     mv = []
-    while h.ev("SHIP.time.min") < 1016:
+    while h.ev("SHIP.time.min") < 1032:
         h.step(30); mv.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null, !!(ACT && ACT.o && ACT.o.moved)])")))
     mon = [r for r in mv if r[1] == 'recSeat:do']
-    check(bool(mon) and mon[-1][2] and mon[-1][0] >= 1009, '#17 moved one seat along (yours taken first), you still stay till 16:50 (moved %s, last seated %s)' % (bool(mon) and mon[-1][2], round(mon[-1][0]) if mon else None))
+    check(bool(mon) and mon[-1][2] and mon[-1][0] >= 1028, '#17 moved one seat along (yours taken first), you\'re still seated after the address (moved %s, last seated %s)' % (bool(mon) and mon[-1][2], round(mon[-1][0]) if mon else None))
     check(not h.errors, '0.92.5 parts: no errors: ' + ' | '.join(h.errors[:5]))
     h.close()
 print('ALL OK' if ok else 'FAILED')

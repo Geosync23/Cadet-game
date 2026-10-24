@@ -13748,7 +13748,7 @@ function actBegin() {
     const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !held(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
-    if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); if (ACT && ACT.kind === 'recSeat' && typeof recSeatHold === 'function') recSeatHold(); return; }   // moved one along for a show: still till it's over (0.92.5 #17, RV11)
+    if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
     ACT = null; toast(A.o.title, 'In use: ' + who.p.name + ' got there first.'); return;
   }
   if (A.kind === 'tray' || A.kind === 'grab') {          // take the food now (an 'eat' is always a served tray since 0.28.45)
@@ -13772,7 +13772,7 @@ function actBegin() {
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
-    A.def.need ? (A.o.showEnd ? 'You stay till it\'s over; walk away to leave.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // showEnd: a seat for an auditorium show (15r's recSeatHold, 0.92.5 #17)
+    A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
@@ -16866,7 +16866,7 @@ Object.assign(PLAYER_ACTS, {
   recClimb:  { need: 'leisure', gain: 20, mins: 8, cost: { energy: 6 }, also: { fitness: 8 }, pose: 'climb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
   recFloat:  { need: 'leisure', gain: 25, mins: 10, also: { fitness: 10 }, pose: 'float',   // 0.82.5: fitness as the gym (1 a minute)
     title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
-  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
+  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.', until: () => false },   // 0.92.5 #17 (the user's): like any seat, you sit till you get up (the gain over its first 15 minutes)
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
   recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
   recShower: { need: 'hygiene', gain: 20, mins: 3, pose: 'stand', title: 'Shower' },
@@ -16906,17 +16906,6 @@ function recSeatView(pp) {
   if (typeof ACT === 'undefined' || !ACT || ACT.kind !== 'recSeat' || ACT.phase !== 'do' || !deckDef || deckDef.num !== 7) return pp;
   _rsv.x = L(pp.x, REC_AUD_STAGE[0] - OX, .5); _rsv.z = L(pp.z, REC_AUD_STAGE[1] - OZ, .5); return _rsv;
 }
-// a seat for a show (0.92.5 #17, FX11; the user: "You keep standing up. Stay seated until the captain is done speaking
-// and everyone gets up to leave"): taken while one of the auditorium's shows is on, or up to 20 minutes before it, the
-// seat lasts until the show ends and the crew stand to go (it was 15 minutes, whatever was on). Walking away still ends it
-const REC_AUD_SHOWS = ['captains-address', 'rec-all-hands', 'rec-chiefs-talk', 'rec-wren-talk', 'rec-film-night', 'rec-talent-night'];
-function recSeatHold() {
-  const A = ACT; if (!A || A.kind !== 'recSeat' || typeof eventsOn !== 'function') return;
-  const d = SHIP.time.day, m = SHIP.time.min, x = eventsOn(d).find(e => REC_AUD_SHOWS.includes(e.id) && e.from - 20 <= m && m < e.to);
-  if (!x) return;
-  const end = (d - 1) * 1440 + x.to; A.o.showEnd = end;
-  A.def.mins = Math.max(A.def.mins, x.to - m); A.def.until = () => shipNow() >= end; A.def.done = 'It\'s over. You get up with everyone else and stretch.';
-}
 // the first swim or paddle: a green tip about changing at the lockers, once (0.92.3 #16, FX11; it replaces the tip 'recChange', id retired)
 const recChangeTip = () => { if (typeof tipShow === 'function') tipShow('rec.change', 'First swim or paddle? Change at the lockers first, in the changing rooms by the lift: any free locker, into rec kit, and a quick shower on the way back.'); };
 function recRoomIn(r) {
@@ -16931,7 +16920,6 @@ function recGo(kind, point, title, flavour) {
     if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
     if (kind === 'bean') { actStart('recBean', pl[0].id, { pose: 'sit', title, flavour, after: 'You flop into the beanbag. It swallows you whole.' }); return; }
     actStart(kind === 'seat' ? 'recSeat' : 'recWatch', pl[0].id, { pose: 'sit', title, flavour, after: kind === 'seat' ? 'You sink into a violet seat and look at the stars behind the stage.' : 'You take a seat on the bench and watch the court.' });
-    if (kind === 'seat') recSeatHold();
     return;
   }
   if (kind === 'unchange') { actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: null, after: 'You change back into your uniform.' }); return; }
