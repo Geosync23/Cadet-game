@@ -101,3 +101,4 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
   the next workday after its lesson"; no m2. Same (b75dcf81) arrows_check on 0.92.2: OK (m2 Day 8, scanner used Day 8,
   m6 Day 9). Reading: small repairs (2 of 3 top-ups) fill the follower's Day 8, no scanner use -> m6 never opens. -> FX10.
 - **b75dcf81 (arrows_check only, backlog 15): PASS on its own** — old arrows_check on 0.92.2 FAILs at m6; new one OK.
+- d22d1132: cadet_test 0.92.2 vs FX10 game ALL IDENTICAL; check_fast QUICK CHECK OK (408 s). FX10 (08:14) confirms the arrows FAIL is real on the final game, investigating.
