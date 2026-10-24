@@ -1,0 +1,281 @@
+<title>Rec Deck Room Pitch</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; the six ideas as equal cards in a grid; the answers form at the end, set off as the one boxed panel. */
+:root {
+  --bg: #f3f7f7; --surface: #ffffff; --ink: #14262b; --muted: #4f6870; --line: #cfdcde;
+  --teal: #0f7f7a; --coral: #d4574a; --coral-soft: #fbe5e1; --teal-soft: #ddefed; --pick: #0f7f7a;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0e1a1d; --surface: #152428; --ink: #e5f0f1; --muted: #9ab3b8;
+  --line: #2a4146; --teal: #49c2b9; --coral: #f08a7d; --coral-soft: #3a2422; --teal-soft: #173533; --pick: #49c2b9; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0e1a1d; --surface: #152428; --ink: #e5f0f1; --muted: #9ab3b8;
+  --line: #2a4146; --teal: #49c2b9; --coral: #f08a7d; --coral-soft: #3a2422; --teal-soft: #173533; --pick: #49c2b9; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 960px; margin: 0 auto; display: grid; gap: 28px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 44px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 24px; font-weight: 800; }
+h3 { font-size: 19px; font-weight: 700; }
+p { margin: 0; max-width: 68ch; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+.lead { font-size: 18px; color: var(--muted); }
+.stack { display: grid; gap: 10px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 10px; }
+.fact { border-top: 3px solid var(--teal); padding-top: 8px; font-size: 14.5px; }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.plan { overflow-x: auto; }
+.plan pre { font: 13px/1.25 ui-monospace, 'SFMono-Regular', Menlo, monospace; margin: 0; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; width: max-content; }
+.plan .F { background: var(--coral-soft); color: var(--coral); font-weight: 700; }
+.plan .P { background: var(--teal-soft); color: var(--teal); font-weight: 700; }
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.card .tag { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; color: var(--teal); }
+.card.rec { border: 2px solid var(--coral); }
+.card.rec .tag { color: var(--coral); }
+dl { margin: 0; display: grid; grid-template-columns: 92px 1fr; gap: 6px 10px; font-size: 14.5px; }
+dt { color: var(--muted); font-weight: 700; }
+dd { margin: 0; min-width: 0; }
+.cost { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: var(--teal-soft); color: var(--teal); font-variant-numeric: tabular-nums; }
+.chip.hot { background: var(--coral-soft); color: var(--coral); }
+.reco { border-left: 4px solid var(--coral); padding: 4px 0 4px 16px; display: grid; gap: 8px; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 18px; }
+fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: 8px; }
+legend { font-family: var(--display); font-weight: 700; font-size: 18px; margin-bottom: 6px; }
+label.opt { display: flex; gap: 10px; align-items: flex-start; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; }
+label.opt:has(input:checked) { border-color: var(--pick); background: var(--teal-soft); }
+input[type=checkbox], input[type=radio] { width: 18px; height: 18px; margin-top: 3px; accent-color: var(--pick); flex: none; }
+textarea, input[type=text] { width: 100%; font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px; }
+textarea { min-height: 96px; resize: vertical; }
+button { font: 700 16px var(--body); background: var(--teal); color: var(--surface); border: 0; border-radius: 8px; padding: 12px 20px; cursor: pointer; justify-self: start; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--coral); outline-offset: 2px; }
+.status { font-size: 14.5px; color: var(--muted); min-height: 1.4em; }
+.small { font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header class="stack">
+    <span class="eyebrow">Starship Cadet · rec deck · patch 0.92.3, item 11</span>
+    <h1>A new activity for the room across from the pool</h1>
+    <p class="lead">You asked for the room across the concourse from the pool to become another activity, and for options. Here are six, with what each would mean for the crew, the build and your phone, and one recommendation. Tick what you like at the bottom; your answers are saved on this page.</p>
+  </header>
+
+  <section class="reco" id="decision">
+    <span class="eyebrow">Decided, 24 October 2026</span>
+    <h2>Flight simulator bay, in the rec utility room</h2>
+    <p>You picked idea 4, the flight simulator bay, built in the rec utility room. The room's machines are kept elsewhere on the deck (the room can be made smaller, whatever works), and the float room stays as it is. FX14 plans and builds it.</p>
+  </section>
+
+  <section class="stack">
+    <h2>The room today</h2>
+    <p>Across the concourse from the pool is the <b>float room</b>: a padded room in coral and pink with drifting light orbs, where the gravity plates are turned down to about a fifth of normal. You walk in and float, which gives leisure and a little fitness. Floating is one of the six rec habits crew can pick up, and crew drop in now and then without one. It is 8 by 6 tiles, with a glass wall onto the lift lobby, so everyone walking past can see in.</p>
+    <div class="plan" aria-label="Rec deck plan, rows 0 to 17">
+<pre>
+..KKKKKKKKKKKKKKKwwwwww<span class="P">PPPPPPPPP</span>ppAAAA........   K river hall  w changing
+.KKKKKKKKKKKKKKKKwwwwww<span class="P">PPPPPPPPP</span>ppAAAAAA......   <span class="P">P pool</span>        A auditorium
+.KKKKKKKKKKKKKKKKkkkkkk<span class="P">PPPPPPPPP</span>ppAAAAAAAAAA..   k kit hire    p pool plant
+.KKKKKKKKKKKKKKKK++YY++<span class="P">PPPPPPPPP</span>ppAAAAAAAAAAA.
+.rrr=============++@@++=======ffffAAAAAAAAAAAA   = concourse   @ lift
+.rrr=============++ZZ++=======ffffAAAAAAAAAAA.   f foyer
+.eeeTTTTTTTTTTTTT++++++==uuubbbbbbAAAAAAAAAAA.
+.eeeTTTTTTTTTTTTT<span class="F">FFFFFFFF</span>uuubbbbbbAAAAAAAAAAA.   <span class="F">F float room (8 x 6)</span>
+.eeeCCCCCCCCCCCCC<span class="F">FFFFFFFF</span>uuubbbbbbAAAAAAAAAA..   C Lightdisc court
+.eeeCCCCCCCCCCCCC<span class="F">FFFFFFFF</span>uuubbbbbbAAAAAAAAA...   T stands   u washroom
+.eeeCCCCCCCCCCCCC<span class="F">FFFFFFFF</span>uuubbbbbbAAAAAAAA....   b rec utility room
+</pre>
+    </div>
+    <p class="small">A trimmed copy of the built deck's map (0.92.2). Only the rows around the two rooms are shown.</p>
+    <div class="facts">
+      <div class="fact"><b>Already on the rec deck</b>Pool, kayak rivers, climbing wall, Lightdisc court and stands, the 76-seat auditorium, the float room.</div>
+      <div class="fact"><b>Elsewhere aboard</b>The gym (Deck 3), the music room (Deck 4), the bow lounge bar and Tiles, the observatory, the garden.</div>
+      <div class="fact"><b>Your hobbies today</b>Reading, writing, games, films, drawing, knitting, puzzles, stargazing, gardening.</div>
+      <div class="fact"><b>Your rule</b>Cut things are parked, never deleted. The float room's code, lines and the floater habit would stay, switched off.</div>
+    </div>
+  </section>
+
+  <section class="stack" id="mech">
+    <h2>The mechanical room</h2>
+    <p>You asked whether the mechanical room on the rec deck matters for the career, and whether it could be the activity room instead. The rec deck has four machine rooms, all Works-only, behind hatches. I checked each one in the built game (0.92.2).</p>
+    <div class="facts">
+      <div class="fact"><b>Rec utility room (the likely one)</b>6 by 7 tiles, across the concourse from the pool's bow end, between the washroom and the auditorium. Holds the stage lights, the sound rack and the gravity plates for the float room, plus the lighting desk, the projector and the booth window onto the stage.</div>
+      <div class="fact"><b>Pool plant</b>A narrow room at the pool's bow end: two pool filters, the dosing unit and the heat exchanger.</div>
+      <div class="fact"><b>River pump room</b>At the aft end of the concourse: the two river pumps.</div>
+      <div class="fact"><b>Emitter room</b>Beside the Lightdisc court: the court's net and its scoreboard.</div>
+    </div>
+    <h3>Does the career need the rec utility room?</h3>
+    <p><b>No.</b> No career lesson, training or promotion step uses it. Its three machines only make ordinary jobs on the board (stage lights at Tier 1, the sound rack at Tier 2, the gravity plates at Tier 3), and when they wear, the auditorium's lights dim or flicker, the microphone fails, or the float room closes. The one rec deck story that is part of the Works career, tracing the leak (a drip in main storage on Deck 5 that you follow up the ladder to a pool filter), lives in the <b>pool plant</b>, and Chief Calder mentions that filter in a talk. So the pool plant should stay as it is.</p>
+    <h3>Could the rec utility room become the activity room?</h3>
+    <p><b>Yes, with one catch.</b> The booth has to stay next to the auditorium: the lighting desk and the projector work through its window onto the stage, and on talent night Maeve Volkov sits in the booth to run the show. The simplest version keeps a narrow booth strip along the auditorium wall, with the three machines in it, still repairable as now, and turns the rest of the room (about 5 by 7 tiles) into the activity room with a door from the foyer.</p>
+    <ul class="small" style="margin:0;padding-left:20px;display:grid;gap:4px;max-width:68ch">
+      <li><b>Kept:</b> every job and machine, the booth and talent night, the leak story, and the float room itself.</li>
+      <li><b>Moves:</b> the machines shift a few tiles into the booth strip; the kettle and first-aid locker go with them.</li>
+      <li><b>New work:</b> the room is rebuilt inside, a hatch becomes a door, and the deck checks are run again.</li>
+    </ul>
+    <p>The upside of this option is that you get a new activity <b>and keep the float room</b>. Any of the six ideas could go in either room, though bowling needs the float room's longer 8 tiles.</p>
+  </section>
+
+  <section class="stack">
+    <h2>Six ideas</h2>
+    <p class="small">Draw calls are the phone's main cost for a room. They are rough guesses from similar rooms already built, and would be measured before anything ships. "Small" is about one builder turn; "medium" two or three; "large" more, or a new mini-game.</p>
+    <div class="cards">
+
+      <article class="card rec">
+        <span class="tag">Recommended</span>
+        <h3>1. Table tennis and darts</h3>
+        <p>Two table tennis tables and a dartboard wall. Tap a table and a free crew member comes over to play you, the way Lightdisc's "ask someone to play" already works; a rally plays out and you see who won. A chalk "winner stays on" board by the door.</p>
+        <dl>
+          <dt>Who comes</dt><dd>Lightdisc players and juniors after shift; a weekly ping-pong ladder evening; crew drop in between other rec turns.</dd>
+          <dt>What it adds</dt><dd>Leisure and social (more with friends), a little fitness. A quick game with a person, which the deck doesn't have yet.</dd>
+          <dt>Build</dt><dd>Medium. Tables and paddles are new kit; the "ask someone" flow exists.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 30-40 draw calls</span><span class="chip">reads well through the glass</span></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">Calm, and cheapest</span>
+        <h3>2. Steam room and sauna</h3>
+        <p>Wooden benches in two tiers, a hot stone stove, a cold-water bucket. Steam drifts up behind the glass. You sit and warm up after a swim or a hard shift; people chat quietly beside you.</p>
+        <dl>
+          <dt>Who comes</dt><dd>Swimmers straight from the pool across the way, the night shift after work, a Sunday "long steam".</dd>
+          <dt>What it adds</dt><dd>Leisure and energy rest, social from sitting near people. Pairs naturally with the pool and changing rooms.</dd>
+          <dt>Build</dt><dd>Small. Benches and the steam effect already exist on other decks.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 15-25 draw calls</span></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">Big groups</span>
+        <h3>3. Dance and movement studio</h3>
+        <p>A sprung wooden floor, wall bars and mats, and a frosted wall panel standing in for a mirror. A weekly dance class with one crew member leading and everyone copying in rows; a morning stretch could move in here too.</p>
+        <dl>
+          <dt>Who comes</dt><dd>Gym regulars and anyone free on class night; up to about 12 dancing at once, with more watching through the glass.</dd>
+          <dt>What it adds</dt><dd>Fitness, leisure and social in one, and another large-group moment, which you said you want more of.</dd>
+          <dt>Build</dt><dd>Small to medium. The furniture is simple; a group dance animation is the new work.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 20-30 draw calls</span><span class="chip hot">crowd adds triangles</span></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">Story hook</span>
+        <h3>4. Flight simulator bay</h3>
+        <p>Two sim pods facing big screens of stars. Climb in and fly a practice run in the Tern. Dev Raman, the pilot who flew you in, runs a "sim night" now and then and keeps a board of the smoothest landings.</p>
+        <dl>
+          <dt>Who comes</dt><dd>Helm and bridge crew keeping their hand in, curious juniors, Dev Raman on sim night.</dd>
+          <dt>What it adds</dt><dd>Leisure and a new hobby; ties the rec deck to the bridge and the shuttle.</dd>
+          <dt>Build</dt><dd>Medium as a sit-and-watch animation; large if it becomes a playable mini-game later.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 30-45 draw calls</span><span class="chip hot">animated screens</span></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">League nights</span>
+        <h3>5. Two-lane bowling alley</h3>
+        <p>Two short lanes running the length of the room, with pins that reset themselves. Bowl a frame alone or with a crew member; a fortnightly league night by department.</p>
+        <dl>
+          <dt>Who comes</dt><dd>Department teams on league night, friends in pairs, anyone waiting for the pool.</dd>
+          <dt>What it adds</dt><dd>Leisure and social, and a friendly rivalry between departments for the crew to talk about.</dd>
+          <dt>Build</dt><dd>Medium to large. The room is only 8 tiles long, so the lanes are short; pins and the reset are new work.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 35-50 draw calls</span></div>
+      </article>
+
+      <article class="card">
+        <span class="tag">Keepsakes</span>
+        <h3>6. Makers' studio</h3>
+        <p>A pottery wheel and a small kiln, a table of model kits and paints. A 30-minute hobby like knitting, and what you make (a mug, a model of the Wren) goes on your cabin shelf.</p>
+        <dl>
+          <dt>Who comes</dt><dd>The crafty crew who knit and draw today, quiet evenings, a monthly "show your make".</dd>
+          <dt>What it adds</dt><dd>A new hobby with leisure, and a keepsake. It sits a little close to the machine shop and the drawing hobby.</dd>
+          <dt>Build</dt><dd>Medium. The hobby works like the others; the kiln and the finished pieces are new kit.</dd>
+        </dl>
+        <div class="cost"><span class="chip">about 35-50 draw calls</span></div>
+      </article>
+    </div>
+  </section>
+
+  <section class="reco">
+    <span class="eyebrow">Recommendation</span>
+    <h2>Table tennis and darts</h2>
+    <p>It is the one idea that adds something the deck doesn't have: a quick game with another person, in a room everyone can watch through the glass. It reuses Lightdisc's "ask someone to play" flow, it reads clearly on a small screen, and its cost sits in the middle. If you'd rather keep it cheap and calm, the steam room is the best second choice, since it sits right across from the pool and the changing rooms.</p>
+    <p>If the new activity goes in the float room, floating would be parked, not deleted: its code, its lines and the floater habit stay in the game, switched off, and the gravity plates would go with it unless you want them kept. If it goes in the rec utility room instead (see "The mechanical room" above), the float room stays as it is.</p>
+  </section>
+
+  <form id="answers" novalidate>
+    <h2>Your answers</h2>
+    <fieldset id="f-ideas">
+      <legend>Which ideas do you like? Tick one or more.</legend>
+      <label class="opt"><input type="checkbox" id="i-tt" name="ideas" value="Table tennis and darts"><span><b>1. Table tennis and darts</b> (recommended)</span></label>
+      <label class="opt"><input type="checkbox" id="i-steam" name="ideas" value="Steam room and sauna"><span><b>2. Steam room and sauna</b></span></label>
+      <label class="opt"><input type="checkbox" id="i-dance" name="ideas" value="Dance and movement studio"><span><b>3. Dance and movement studio</b></span></label>
+      <label class="opt"><input type="checkbox" id="i-sim" name="ideas" value="Flight simulator bay"><span><b>4. Flight simulator bay</b></span></label>
+      <label class="opt"><input type="checkbox" id="i-bowl" name="ideas" value="Two-lane bowling alley"><span><b>5. Two-lane bowling alley</b></span></label>
+      <label class="opt"><input type="checkbox" id="i-make" name="ideas" value="Makers' studio"><span><b>6. Makers' studio</b></span></label>
+      <label class="opt" for="i-other"><span style="width:100%"><b>Something else:</b><input type="text" id="i-other" name="other" placeholder="Your own idea"></span></label>
+    </fieldset>
+    <fieldset id="f-room">
+      <legend>Which room should the new activity go in?</legend>
+      <label class="opt"><input type="radio" id="rm-float" name="room" value="The float room"><span>The float room, across from the pool (the float room is parked)</span></label>
+      <label class="opt"><input type="radio" id="rm-util" name="room" value="The rec utility room"><span>The rec utility room, with a booth strip kept by the auditorium (the float room stays)</span></label>
+    </fieldset>
+    <fieldset id="f-float">
+      <legend>If it goes in the float room, what happens to floating?</legend>
+      <label class="opt"><input type="radio" id="fl-park" name="float" value="Park it (switched off, kept on record)"><span>Park it: switched off, kept on record (recommended)</span></label>
+      <label class="opt"><input type="radio" id="fl-keep" name="float" value="Keep floating somewhere else on the rec deck"><span>Keep floating, but somewhere else on the rec deck</span></label>
+      <label class="opt"><input type="radio" id="fl-other" name="float" value="I meant a different room"><span>I meant a different room (say which in the notes)</span></label>
+    </fieldset>
+    <fieldset>
+      <legend><label for="notes">Notes</label></legend>
+      <textarea id="notes" name="notes" placeholder="Anything to change, combine or add"></textarea>
+    </fieldset>
+    <button type="submit" id="save">Save my answers</button>
+    <p class="status" id="status" aria-live="polite">Loading any saved answers...</p>
+  </form>
+</div>
+
+<script>
+(() => {
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const b of form.querySelectorAll('input[name=ideas]')) b.checked = (d.ideas || []).includes(b.value);
+    for (const r of form.querySelectorAll('input[name=float]')) r.checked = r.value === d.float;
+    for (const r of form.querySelectorAll('input[name=room]')) r.checked = r.value === d.room;
+    document.getElementById('i-other').value = d.other || '';
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => ({
+    ideas: [...form.querySelectorAll('input[name=ideas]:checked')].map(b => b.value),
+    other: document.getElementById('i-other').value.trim(),
+    float: (form.querySelector('input[name=float]:checked') || {}).value || '',
+    room: (form.querySelector('input[name=room]:checked') || {}).value || '',
+    notes: document.getElementById('notes').value.trim(),
+    savedAt: new Date().toISOString(),
+  });
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try {
+      const s = await ref.get();
+      if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; }
+      else status.textContent = 'Nothing saved yet.';
+    } catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved. The team will read your answers from here.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
