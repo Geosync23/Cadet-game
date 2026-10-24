@@ -377,6 +377,7 @@ window.FL = {
   input: (x, y) => { inp.x = x; inp.y = y; },
   calls: () => renderer.info.render.calls,
   screenX: () => screenX(),
+  screenVx: () => G ? G.s.vx * new THREE.Vector3().setFromMatrixColumn(camera.matrixWorld, 0).x : 0,   // how fast the Tern moves along the screen's right (m/s; + is right)
   jump: (name, z) => { if (!G) return null; const P = PILOTS[name]; while (!G.s.end && G.s.z < z) fstep(G.s, P(G.s)); return FL.state(); },   // fly the live go on paper up to z with a scripted pilot (the screenshots)
   pilot: name => { FL.auto = name && PILOTS[name]; },
   sim: name => { const s = fnew(), P = PILOTS[name]; let n = 0; while (!s.end && n++ < 60 * 200) fstep(s, P(s)); return { end: s.end, secs: +(s.t / 60).toFixed(1), rings: s.rings.slice(), land: s.land && { v: +s.land.v.toFixed(2), vx: +s.land.vx.toFixed(2), vy: +s.land.vy.toFixed(2) }, x: +s.x.toFixed(2), y: +s.y.toFixed(2) }; },

@@ -62,7 +62,8 @@ async function land(p, name, shot) {                  // a live go flown by a sc
   const sx = await p.evaluate(() => FL.screenX());
   ok(s1.vy > 2 && Math.abs(s1.vx) > 3, `a finger dragged up climbs and turns (vx ${s1.vx.toFixed(1)}, vy ${s1.vy.toFixed(1)})`);
   await p.waitForTimeout(800); const sx2 = await p.evaluate(() => FL.screenX());
-  ok(sx > 390 / 2 + 20 && sx2 >= sx, `dragging right moves the Tern right on the screen (x ${sx.toFixed(0)} -> ${sx2.toFixed(0)} px of 390)`);
+  const sv = await p.evaluate(() => FL.screenVx());
+  ok(sv > 3 && sx > 390 / 2 + 20 && sx2 >= sx, `dragging right moves the Tern right on the screen (${sv.toFixed(1)} m/s along the screen's right; x ${sx.toFixed(0)} -> ${sx2.toFixed(0)} px of 390)`);
   await p.screenshot({ path: OUT + 'phone-3-flying.png' });
   await touch('touchEnd'); await p.waitForTimeout(2500);
   const s2 = await p.evaluate(() => FL.state());
@@ -89,11 +90,11 @@ async function land(p, name, shot) {                  // a live go flown by a sc
   ok((await w.evaluate(() => FL.state().tip)) === -1, 'Skip ends the tips');
   await w.mouse.move(640, 400); await w.mouse.down(); await w.mouse.move(540, 400, { steps: 6 }); await w.waitForTimeout(1200);
   const m = await w.evaluate(() => FL.state()); await w.mouse.up();
-  const mx = await w.evaluate(() => FL.screenX());
-  ok(Math.abs(m.vx) > 3 && mx < 640 - 10, `a mouse drag left moves the Tern left on the screen (x ${mx.toFixed(0)} of 1280)`);
+  const mx = await w.evaluate(() => FL.screenX()), mv = await w.evaluate(() => FL.screenVx());
+  ok(mv < -3 && mx < 640 - 10, `a mouse drag left moves the Tern left on the screen (${mv.toFixed(1)} m/s along the screen's right; x ${mx.toFixed(0)} of 1280)`);
   await w.waitForTimeout(2500); await w.keyboard.down('ArrowRight'); await w.waitForTimeout(1500);
-  const kr = await w.evaluate(() => FL.screenX()); await w.keyboard.up('ArrowRight');
-  ok(kr > 640 + 10, `the right arrow moves the Tern right on the screen (x ${kr.toFixed(0)} of 1280)`);
+  const kr = await w.evaluate(() => FL.screenX()), kv = await w.evaluate(() => FL.screenVx()); await w.keyboard.up('ArrowRight');
+  ok(kv > 3 && kr > 640 + 10, `the right arrow moves the Tern right on the screen (x ${kr.toFixed(0)} of 1280)`);
   await w.waitForTimeout(2500); await w.keyboard.down('ArrowDown'); await w.waitForTimeout(1200);
   const k = await w.evaluate(() => FL.state()); await w.keyboard.up('ArrowDown');
   ok(k.vy < -2, `the down arrow descends (vy ${k.vy.toFixed(1)})`);
