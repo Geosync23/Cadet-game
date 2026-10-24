@@ -4,6 +4,24 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.92.3 full round, Round 2 (2026-10-24, started 10:58 UTC, for BM16 and lead 33)
+
+- Candidate 2: `claude/staging-0.92.3` d9a387b6 (0.92.3 with AC3's m3d fix 4928271f; the game differs from candidate 1
+  by one line). Checks run from a worktree of d9a387b6 (its own scripts). Started straight after Round 1 passed, as
+  BM16 asked.
+- `starship-cadet.html` sha256 `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853`: matches BM16's.
+- OLD: 0.92.2 364c80cb. Not needed: nothing failed.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `day_check.py BUILD 21` | OK | 0 | 252 s | `DAY CHECK OK`; draw calls peak 204 / 195 / 295 / 236 on Decks 1-4 (budget 450) |
+| `day_check.py BUILD 27` | OK | 0 | 239 s | `DAY CHECK OK` |
+| `interactions_check.py BUILD` | OK | 0 | 2055 s | `INTERACTIONS CHECK OK` |
+| `events_check.py BUILD` | OK | 0 | 368 s | `EVENTS CHECK OK`; Day 0 table 48 of 48 |
+| `career_check.py BUILD` | OK | 0 | 115 s | `CAREER CHECK OK`; ship.works after 30 busy days 2534 bytes, log 30 |
+
+No FAIL lines in any log. **Round 2: CR5 OK** (5 of 5).
+
 ## 0.92.3 full round, Round 1 (2026-10-24, started 10:03 UTC, for BM16 and lead 33)
 
 - Candidate 1: `claude/staging-0.92.3` 0dd4e2e2 (0.92.3). Switches in the file: `POINT_ON = true` (12677),
