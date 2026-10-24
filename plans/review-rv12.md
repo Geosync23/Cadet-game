@@ -137,3 +137,6 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
   (sd = TRAY_TRAVELS ? here : 3), so a Pick-your-own tray off Deck 3 is pointed at a mess seat. events part 12 OK on
   ceee5664, its new line FAILs on b513e0cc (4-bench-2); mess + Rina parts OK; cadet_test vs 3866c8f3 ALL IDENTICAL.
   b513e0cc's game runs above (planted faults, food, arrows) stand: the only game change since is that line.
+
+## DV1 promo-arrows 81e9065c: not mine after all (lead 34, 19:18 UTC): RV13 had already reviewed and PASSed it
+(the shelf top-up point covered: at most 2 free parts on test day). Nothing run here.
