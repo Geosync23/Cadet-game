@@ -144,7 +144,8 @@ with sync_playwright() as pw:
       W.cur = keep; if (!had) SHIP.works = had; ixBoard.draw(); out.after = [...document.querySelectorAll('#ixBoardL .lesson')].length;
       SHIP.jobs = SHIP.jobs.filter(x => x !== j); MACH_REV++; ixBoard.draw(); return out; })()""")
     print('   your lesson on the board:', ls)
-    check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and 'Your lesson' in (ls['text'] or '') and not ls['after'], f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
+    check(isinstance(ls, dict) and ls['first'] and ls['lesson'] and re.search(r'Your [a-z ]*lesson: take this one', ls['text'] or '') and not ls['after'],   # (DS1, patch 0.92.5 #12: the lesson named)
+          f'your lesson\'s job is first on the board and marked, and only while it\'s your turn (FX10, item 29) ({ls})')
     # a job that runs past your next lesson (FX10, patch 0.92.4 item D): with a lesson meeting 30 minutes off, taking a repair
     # whose part has to be made says so in the "Job taken" message; with the meeting 10 hours off, nothing is said
     LC = r"""((ahead) => { const t = shipNow(), m = machineList().find(m => m.deck === 3 && !m.stub && jobTier({ machine: m.id }) <= PLAYER_TIER && !ENGINE_KINDS.has(m.kind) && panelPlace(m.id)); if (!m) return 'no machine';
