@@ -696,3 +696,13 @@
 - You've got grime on your face. Just there. No, there.   #funny
 ? flag:clothes.grubby tier>=friend
 - Go and change, bunkmate. I'll save you a seat. I think.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}! Is it okay if I have two slices?   #funny
+- Happy birthday! I made a wish for you. Is that allowed?   #warm
+== bday.circle.you
+- Happy birthday, bunkmate! Your first one aboard, I think!   #warm
+== bday.thanks
+- Thank you so much! Thank you. Sorry. Thank you!   #warm
+- This is the best birthday. I think. Yes. Thank you!   #warm

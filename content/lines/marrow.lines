@@ -480,3 +480,13 @@
 == talk.go.trad
 - {trad} is starting. I said I'd look in. Walk with me?
 - I promised I'd show my face at {trad}. Come along?
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}. We're glad you're with us.   #warm
+- Happy birthday. Tell me later what this year taught you.   #warm
+== bday.circle.you
+- Happy birthday, {me}. Welcome to another year aboard.   #warm
+== bday.thanks
+- Thank you, everyone. We're a good crew. You're the proof.   #warm
+- Thank you. Now, please, someone else cut it.   #funny

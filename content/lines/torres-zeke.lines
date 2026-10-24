@@ -1019,3 +1019,13 @@
 - Coil three did that to me once. Change before tea.   #funny
 ? flag:clothes.grubby tier>=friend
 - Good job, by the look of you. Now change. Properly.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Happy birthday, {other}! Coil three sends her best.   #funny
+- Happy birthday! I'd knit you a scarf, but you'd see it.   #funny
+== bday.circle.you
+- Happy birthday, {me}! Proper cake, proper candles. Properly.   #warm
+== bday.thanks
+- Thanks, all! Right, cake. Then onward. Properly.   #warm
+- You lot. I'm going to hum. Sorry. Thank you.   #funny
