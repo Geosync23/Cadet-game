@@ -286,3 +286,17 @@ sha256 **4e6538447d13e4c5398fc74844748e1e9d41776afa7bcc83bc99d5eff87cd0a2** (BM1
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 27 s |
 
 No FAIL. (The same numbers as 0.92.2.)
+
+## 0.92.3 Round 2 (claude/staging-0.92.3 d9a387b6, + AC3's clock-in fix), BM16's fresh round
+
+sha256 **f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853** (BM16's). Round 1's controller/food/clothes
+runs on 0dd4e2e2 (taken from CR6) were stopped unfinished at BM16's word; no results from them.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 262 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 250 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 258 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 261 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 59 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 28 s |
