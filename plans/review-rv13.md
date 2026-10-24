@@ -114,4 +114,4 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
   Notes: m2 (work uniform) now Day 9 not Day 8 for the arrow-follower (FX10 notes it in the build table).
 
 ## 0.92.4 queue (LEAD 33, ~14:57 UTC): item D, FX10: warn when you take a repair job whose part would run past a lesson start
-Base claude/integration 3866c8f3 (0.92.3). Verdicts to LEAD 33 + BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh). Waiting for FX10's sha.
+Base claude/integration 3866c8f3 (0.92.3). Lead 34 (session_019RdVfeRPRiJpHGjKujZZJA) took over ~15:00 UTC. Verdicts to Lead 34, FX10 + BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh). Waiting for FX10's sha.
