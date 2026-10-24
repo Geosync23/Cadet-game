@@ -212,3 +212,18 @@ perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 31).
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | OK (CR4) | exit 0; the Line ceremony 335 calls (KP1); vs OLD only Sunday dinner 66 people vs 69, junior wing +5k triangles, storm all-clear +2 calls |
 | lines_check --day | OK (CR4) | PASS |
+
+# Round 11: 0.92.2 (claude/integration-next ee974894), CR2's share — **OK**
+
+NEW ee974894, sha256 `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4` (matches BM15's).
+OLD e03505fd (0.92.1), sha256 `2dbb11b81c6d0da3bcaf32ad0d78ead80e4dcc8fa8b4ea5fc142bf1d2a59b18c`.
+perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 32).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | OK | `ALL IDENTICAL` |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 50 warnings; the same as 0.92.1) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check, lines_check --day | CR4 | handed over |
