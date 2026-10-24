@@ -18,6 +18,15 @@
 
 **CR4: OK.** No FAILs. Draw-call peaks identical to 0.92.1.
 
+### Taken over from CR2 (0.92.2 ee974894, same sha256)
+
+BM15's idea at 00:09; CR2 handed both over (off its list, neither started; it kept intro). Run one at a time, alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| perf_check vs OLD e03505fd | exit 1 on one problem, **known old (backlog 32)** (1967 s) | `PROBLEM Sunday dinner, the mess 18:30 landscape: js 1.66 -> 3.28 ms a frame`, a single-scene game-time spike. Re-measured that scene alone twice (`PERF_SCENES='^Sunday dinner'`, NEW vs OLD): `PERF CHECK OK` both times; landscape NEW 2.08 / 2.34 ms vs OLD 2.13 / 2.59 ms, so it doesn't repeat: backlog 32's one-sample spike. Nothing else: all 16 scenes' draw calls, triangles and people identical to OLD (the Line ceremony 335c = KP1); deck round trips 521 -> 521 -> 521 (backlog 14 didn't show); week 521 -> 523 in both; file 6.04 MB vs 6.03. |
+| lines_check --day | PASS (exit 0, 277 s) | `lines_check --day: PASS (0 errors)` |
+
 ## 0.92.1 full round (2026-10-23; Crossing the Line ON)
 
 - **Candidate:** `claude/integration-next` 51a1bb34 (also claude/staging-0.92.1)
