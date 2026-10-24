@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>Sim Flight Prototype</title>
+<!--
+  Sim flight landing prototype for Starship Cadet. A standalone test page, NOT part of the game file
+  (the user: "do not put flight game into the main game yet"). Follows plans/simflight-plan.html and the
+  user's answers: land the Tern in the Wren's lit bay; one finger drags to steer (mouse drag, arrow keys
+  or WASD too); speed looks after itself (it slows as the bay gets close; coming in steep makes it faster);
+  chase view; four glowing rings; about a minute a go; a plain result line, then Again or Done; no scores;
+  three first-time tips with Next and Skip.
+  Rules from the game kept here: no coplanar surfaces, every colour through col(), about 10 draw calls.
+  The rules are plain numbers stepped at a fixed 60 a second (fstep), kept apart from the drawing, with no
+  random calls, so a go with the same input plays the same anywhere.
+  Test hooks: window.FL (start, state, sim, calls, input).
+-->
+<style>
+  :root { --teal: #49d6c6; --gold: #ffcf6e; --ink: #e8f2f5; --dim: #9fb2b8; --panel: rgba(8, 12, 20, .9); --line: rgba(255,255,255,.14); }
+  html, body { margin: 0; height: 100%; background: #04060c; color: var(--ink); font: 15px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; }
+  canvas { display: block; }
+  .hide { display: none !important; }
+  button { font: inherit; color: var(--ink); background: rgba(255,255,255,.08); border: 1px solid var(--line); border-radius: 999px; padding: 9px 18px; cursor: pointer; }
+  button:active { transform: scale(.97); }
+  button.go { background: #0f3a3a; border-color: var(--teal); color: #e0fffb; font-weight: 600; }
+  #hud { position: fixed; left: 0; right: 0; top: 0; display: flex; justify-content: center; padding: calc(env(safe-area-inset-top) + 10px) 12px 0; pointer-events: none; }
+  #read { background: rgba(5,8,14,.7); border: 1px solid var(--line); border-radius: 999px; padding: 4px 14px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  #leave { position: fixed; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 12px); font-size: 13px; padding: 6px 14px; background: rgba(5,8,14,.6); }
+  #hint { position: fixed; left: 0; right: 0; bottom: calc(env(safe-area-inset-bottom) + 16px); text-align: center; color: var(--dim); font-size: 13px; pointer-events: none; }
+  #tip { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 58px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--teal); border-radius: 14px; padding: 10px 10px 10px 14px; max-width: 520px; margin: 0 auto; }
+  #tip .t { flex: 1; } #tip .n { color: var(--teal); font-size: 12px; display: block; } #tip button { padding: 6px 12px; font-size: 13px; }
+  .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; width: 100%; max-width: 420px; box-sizing: border-box; }
+  h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: .04em; color: var(--teal); }
+  .sub { color: var(--dim); font-size: 14px; }
+  .res p { margin: 0; font-size: 18px; }
+  .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+  .row { margin-top: 12px; font-size: 13px; color: var(--dim); }
+</style>
+</head>
+<body>
+<div id="hud" class="hide"><div id="read"></div></div>
+<div id="hint" class="hide">drag anywhere to steer</div>
+<button id="leave" class="hide">Leave</button>
+<div id="tip" class="hide"><div class="t"><span class="n"></span><span class="x"></span></div><button id="tipNext" class="go">Next</button><button id="tipSkip">Skip</button></div>
+
+<div id="menu" class="over">
+  <div class="card">
+    <h1>Land the Tern</h1>
+    <div class="sub">Sim pod, rec deck, CSV Wren. Bring the Tern down through the rings into the Wren's lit bay. A prototype to feel the landing: steer only, the speed looks after itself.</div>
+    <div class="btns"><button id="start" class="go">Start</button></div>
+    <div class="row"><label><input type="checkbox" id="tipsAgain"> Show the tips again</label></div>
+  </div>
+</div>
+
+<div id="result" class="over hide">
+  <div class="card res">
+    <p id="resText"></p>
+    <div class="btns"><button id="again" class="go">Again</button><button id="done">Done</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+'use strict';
+// =====================================================================
+// 1. THE RULES (plain numbers; no drawing, no random calls; fixed 60 steps a second)
+// z runs from the start (0) to the bay's mouth (BAY_Z); y is height above the bay floor; x is left/right.
+// =====================================================================
+const DT = 1 / 60, BAY_Z = 600, BAY_W = 16, BAY_H = 8;            // the mouth: x in [-8, 8], y in [0, 8]
+const START = { x: 0, y: 60, z: 0 };
+const RINGS = [{ z: 140, x: -10, y: 44, r: 13 }, { z: 290, x: 8, y: 28, r: 11 }, { z: 430, x: -4, y: 14, r: 9 }, { z: 540, x: 0, y: 6, r: 7 }];
+const V_FAR = 16, V_NEAR = 2.2, V_EASE = 1.4, STEEP = 1.6;         // speed: from 16 m/s far out to 2.2 m/s at the mouth; steep adds STEEP per m/s down
+const SIDE = 7, CLIMB = 5, LEVEL = 2.2;                             // full drag: 7 m/s sideways, 5 m/s up or down; let go and it levels out at LEVEL per second
+const SOFT_V = 3, SOFT_VY = 1.2, SOFT_VX = 1.6;                     // soft: under 3 m/s, sinking under 1.2, sliding under 1.6
+
+function fnew() { return { x: START.x, y: START.y, z: START.z, vx: 0, vy: 0, v: V_FAR, t: 0, ring: 0, rings: [0, 0, 0, 0], end: null }; }
+// one step: in = { x, y } in [-1, 1] (drag right / drag up); returns the state (changed in place)
+function fstep(s, inp) {
+  if (s.end) return s;
+  const ix = Math.max(-1, Math.min(1, inp.x || 0)), iy = Math.max(-1, Math.min(1, inp.y || 0));
+  const ease = (a, b, k) => a + (b - a) * Math.min(1, k * DT);
+  s.vx = ease(s.vx, ix * SIDE, ix ? 3 : LEVEL); s.vy = ease(s.vy, iy * CLIMB, iy ? 3 : LEVEL);
+  const rem = Math.max(0, BAY_Z - s.z), vt = V_NEAR + (V_FAR - V_NEAR) * Math.pow(rem / BAY_Z, .8) + STEEP * Math.max(0, -s.vy);
+  s.v = ease(s.v, vt, V_EASE);
+  const z0 = s.z;
+  s.x += s.vx * DT; s.y = Math.max(-30, Math.min(90, s.y + s.vy * DT)); s.z += s.v * DT; s.t++;
+  for (let i = 0; i < RINGS.length; i++) { const R = RINGS[i]; if (z0 < R.z && s.z >= R.z) { s.rings[i] = Math.hypot(s.x - R.x, s.y - R.y) <= R.r ? 1 : -1; s.ring = i + 1; } }
+  if (z0 < BAY_Z && s.z >= BAY_Z) {
+    const inMouth = Math.abs(s.x) <= BAY_W / 2 - .6 && s.y >= .4 && s.y <= BAY_H - .6;
+    s.end = !inMouth ? 'miss' : s.v < SOFT_V && Math.abs(s.vy) < SOFT_VY && Math.abs(s.vx) < SOFT_VX ? 'soft' : 'hard';
+    s.land = { v: s.v, vx: s.vx, vy: s.vy };
+  }
+  if (s.t > 60 * 150 && !s.end) s.end = 'miss';                      // two and a half minutes: the sim calls it
+  return s;
+}
+const SAY = { soft: 'Soft landing. The deck crew wave you in.', hard: 'Hard landing. The Tern bounces once and settles. Slower next time.', miss: 'You overshoot the bay. The sim swings you round.' };
+
+// =====================================================================
+// 2. THE VIEW (its own small scene: stars, the Wren and her lit bay, the rings, the Tern)
+// =====================================================================
+const col = h => new THREE.Color(h).convertSRGBToLinear();
+const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding;
+document.body.prepend(renderer.domElement);
+const scene = new THREE.Scene();
+scene.background = col('#04060c');
+const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, .3, 2400);
+scene.add(new THREE.HemisphereLight(col('#a9c2e6'), col('#141020'), .8));
+const sun = new THREE.DirectionalLight(col('#ffffff'), .8); sun.position.set(-60, 120, -40); scene.add(sun);
+
+// merged vertex-coloured parts: one draw call a group (lightdisc-proto's partsToGeo)
+function partsToGeo(parts) {
+  const P = [], N = [], C = [];
+  for (const p of parts) {
+    const g = (p.g.index ? p.g.toNonIndexed() : p.g.clone()).applyMatrix4(p.m);
+    const c = col(p.c), pa = g.attributes.position.array, na = g.attributes.normal.array;
+    for (let i = 0; i < pa.length; i += 3) { P.push(pa[i], pa[i + 1], pa[i + 2]); N.push(na[i], na[i + 1], na[i + 2]); C.push(c.r, c.g, c.b); }
+    g.dispose();
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  geo.setAttribute('normal', new THREE.Float32BufferAttribute(N, 3));
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(C, 3));
+  return geo;
+}
+const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, ry = 0, rx = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
+const BOX = new THREE.BoxGeometry(1, 1, 1);
+
+// stars: one points object, placed by a fixed hash (no random calls)
+{ const P = [], h = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
+  for (let i = 0; i < 900; i++) { const u = h(i) * 2 - 1, a = h(i + 999) * Math.PI * 2, r = 1500, s = Math.sqrt(1 - u * u); P.push(r * s * Math.cos(a), r * u, r * s * Math.sin(a) + 300); }
+  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
+  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col('#dbe6f5'), size: 2.2, sizeAttenuation: false }))); }
+
+// the Wren: her hull as blocks round the bay's mouth (the mouth left open), a few shapes on top; one draw call
+const W = BAY_W / 2, HULL = '#8e9bb0', DARK = '#5d6a80';
+const hull = partsToGeo([
+  { g: BOX, m: M4(-W - 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },          // left of the mouth (inner face at x = -8)
+  { g: BOX, m: M4(W + 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },           // right (inner face at x = 8)
+  { g: BOX, m: M4(0, BAY_H + 9, BAY_Z + 70.2, 2 * W + 2, 18, 139.6), c: HULL },   // above (lower face at y = 8); reaching into the side blocks with its front a little back, so no faces are shared
+  { g: BOX, m: M4(0, -9, BAY_Z + 70.2, 2 * W + 2, 18, 139.6), c: HULL },          // below (upper face at y = 0)
+  { g: BOX, m: M4(0, 32, BAY_Z + 95, 40, 14, 80), c: DARK },                // the bridge block, sitting on top (overlaps, no shared face)
+  { g: BOX, m: M4(-36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },            // engine pods at the back
+  { g: BOX, m: M4(36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },
+]);
+scene.add(new THREE.Mesh(hull, new THREE.MeshLambertMaterial({ vertexColors: true })));
+// the bay inside: a lit box seen from inside, a little inside the mouth's edges (no shared faces)
+const bay = new THREE.Mesh(new THREE.BoxGeometry(2 * W - .3, BAY_H - .3, 40), new THREE.MeshBasicMaterial({ color: col('#ffd79a'), side: THREE.BackSide }));
+bay.position.set(0, BAY_H / 2, BAY_Z + 20.2); scene.add(bay);
+// floor stripes in the bay (raised, so never on the bay's floor plane), and the glowing frame round the mouth: one draw call
+const glow = partsToGeo([
+  { g: BOX, m: M4(-W - .4, BAY_H / 2, BAY_Z - .5, .8, BAY_H + 1.6, .8), c: '#49d6c6' },
+  { g: BOX, m: M4(W + .4, BAY_H / 2, BAY_Z - .5, .8, BAY_H + 1.6, .8), c: '#49d6c6' },
+  { g: BOX, m: M4(0, BAY_H + .4, BAY_Z - .5, 2 * W, .8, .8), c: '#49d6c6' },
+  { g: BOX, m: M4(0, -.4, BAY_Z - .5, 2 * W, .8, .8), c: '#49d6c6' },
+  { g: BOX, m: M4(-3, .35, BAY_Z + 18, .5, .3, 32), c: '#f2a649' },
+  { g: BOX, m: M4(3, .35, BAY_Z + 18, .5, .3, 32), c: '#f2a649' },
+]);
+scene.add(new THREE.Mesh(glow, new THREE.MeshBasicMaterial({ vertexColors: true })));
+
+// the rings: one torus drawn four times (instanced), the next one brightest, a passed one dim
+const rings = new THREE.InstancedMesh(new THREE.TorusGeometry(1, .045, 8, 48), new THREE.MeshBasicMaterial({ color: col('#ffffff') }), RINGS.length);
+RINGS.forEach((R, i) => rings.setMatrixAt(i, M4(R.x, R.y, R.z, R.r, R.r, R.r * 1.0)));
+scene.add(rings);
+const RING_COL = { next: col('#7ff5e6'), later: col('#2f8f86'), through: col('#2c5a55'), missed: col('#7a3b34') };
+const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
+function ringsPaint(s) {                               // a ring once it's behind the camera isn't drawn (it would fill the view)
+  RINGS.forEach((R, i) => { rings.setColorAt(i, s.rings[i] > 0 ? RING_COL.through : s.rings[i] < 0 ? RING_COL.missed : i === s.ring ? RING_COL.next : RING_COL.later);
+    rings.setMatrixAt(i, R.z < s.z - 8 ? ZERO : M4(R.x, R.y, R.z, R.r, R.r, R.r)); });
+  rings.instanceColor.needsUpdate = true; rings.instanceMatrix.needsUpdate = true;
+}
+
+// the Tern: a small shuttle, nose to +z; one draw call
+const tern = new THREE.Mesh(partsToGeo([
+  { g: BOX, m: M4(0, 0, 0, 1.3, .8, 3.2), c: '#e9eef5' },                  // body
+  { g: new THREE.ConeGeometry(.62, 1.2, 8), m: M4(0, 0, 2.2, 1, .7, 1, 0, Math.PI / 2), c: '#e9eef5' },   // nose
+  { g: BOX, m: M4(0, -.1, -.4, 4.2, .12, 1.4), c: '#c85b4a' },             // wings (through the body: no shared face)
+  { g: BOX, m: M4(0, .55, -1.3, .12, .9, .8), c: '#c85b4a' },              // fin
+  { g: BOX, m: M4(0, .18, 1.05, .9, .3, .9), c: '#244a6b' },               // canopy
+  { g: BOX, m: M4(0, 0, -1.75, .9, .5, .3), c: '#ffb45c' },                // engine glow
+]), new THREE.MeshLambertMaterial({ vertexColors: true }));
+scene.add(tern);
+
+// draw a state: the Tern where it is, tilted with how it's moving; the chase camera behind and above
+const camPos = new THREE.Vector3(), camAim = new THREE.Vector3();
+function draw(s, snap) {
+  tern.position.set(s.x, s.y, s.z);
+  tern.rotation.set(-Math.atan2(s.vy, s.v) * .8, Math.atan2(s.vx, s.v) * .6, -s.vx / SIDE * .5, 'YXZ');
+  const want = new THREE.Vector3(s.x - s.vx * .4, s.y + 4.5, s.z - 15), aim = new THREE.Vector3(s.x, s.y + 1, s.z + 20);
+  if (snap || camPos.distanceTo(want) > 40) { camPos.copy(want); camAim.copy(aim); } else { camPos.lerp(want, .12); camAim.lerp(aim, .15); }
+  camera.position.copy(camPos); camera.lookAt(camAim);
+  ringsPaint(s);
+}
+
+// =====================================================================
+// 3. THE PAGE (start, tips, flying, the result) and the input
+// =====================================================================
+const $ = id => document.getElementById(id);
+const TIPS = ['Drag to steer. Up to climb, down to descend, left and right to turn.', 'Fly through the rings. They lead you to the bay.', 'Come in slow and level. Let go to level out.'];
+let G = null;                                          // the go: { s, tip, paused, done }
+const inp = { x: 0, y: 0 }, keys = new Set();
+let drag = null;
+function tipsSeen() { try { return localStorage.getItem('sf.tips') === '1'; } catch (e) { return false; } }
+function tipsDone() { try { localStorage.setItem('sf.tips', '1'); } catch (e) { /* private window: shows again next time */ } }
+function show(id, on) { $(id).classList.toggle('hide', !on); }
+function start() {
+  G = { s: fnew(), tip: $('tipsAgain').checked || !tipsSeen() ? 0 : -1, acc: 0 };
+  $('tipsAgain').checked = false;
+  show('menu', false); show('result', false); show('hud', true); show('leave', true); show('hint', G.tip < 0);
+  tipShow(); draw(G.s, true);
+}
+function tipShow() {
+  const on = G && G.tip >= 0; show('tip', on); if (!on) return;
+  $('tip').querySelector('.n').textContent = 'Tip ' + (G.tip + 1) + ' of ' + TIPS.length;
+  $('tip').querySelector('.x').textContent = TIPS[G.tip];
+  $('tipNext').textContent = G.tip === TIPS.length - 1 ? 'Fly' : 'Next';
+}
+function tipEnd() { G.tip = -1; tipsDone(); tipShow(); show('hint', true); }
+$('tipNext').onclick = e => { e.stopPropagation(); if (!G) return; if (++G.tip >= TIPS.length) tipEnd(); else tipShow(); };
+$('tipSkip').onclick = e => { e.stopPropagation(); if (G) tipEnd(); };
+$('start').onclick = start;
+$('again').onclick = start;
+$('done').onclick = () => { G = null; show('result', false); show('menu', true); };
+$('leave').onclick = e => { e.stopPropagation(); G = null; ['hud', 'leave', 'tip', 'hint'].forEach(i => show(i, false)); show('menu', true); };
+function finish() {
+  show('hud', false); show('leave', false); show('hint', false);
+  $('resText').textContent = SAY[G.s.end]; $('again').textContent = G.s.end === 'miss' ? 'Try again' : 'Again';
+  show('result', true);
+}
+// one finger (or the mouse) anywhere: how far you've dragged from where you put it down steers, 110 px for full
+const DRAG_FULL = 110;
+addEventListener('pointerdown', e => { if (!G || G.tip >= 0 || e.target.closest('button, .card, #tip')) return; drag = { id: e.pointerId, x: e.clientX, y: e.clientY }; show('hint', false); });
+addEventListener('pointermove', e => { if (!drag || e.pointerId !== drag.id) return; inp.x = Math.max(-1, Math.min(1, (e.clientX - drag.x) / DRAG_FULL)); inp.y = Math.max(-1, Math.min(1, (drag.y - e.clientY) / DRAG_FULL)); });
+const up = e => { if (drag && e.pointerId === drag.id) { drag = null; inp.x = 0; inp.y = 0; } };
+addEventListener('pointerup', up); addEventListener('pointercancel', up);
+const KEYX = { ArrowLeft: -1, KeyA: -1, ArrowRight: 1, KeyD: 1 }, KEYY = { ArrowUp: 1, KeyW: 1, ArrowDown: -1, KeyS: -1 };
+addEventListener('keydown', e => { if (KEYX[e.code] || KEYY[e.code]) { keys.add(e.code); e.preventDefault(); } });
+addEventListener('keyup', e => keys.delete(e.code));
+function input() {                                     // what the step sees: keys if any are down, else the drag
+  let kx = 0, ky = 0; for (const k of keys) { kx += KEYX[k] || 0; ky += KEYY[k] || 0; }
+  if (window.FL && FL.auto && G) return FL.auto(G.s);   // a test's scripted pilot
+  return kx || ky ? { x: Math.sign(kx), y: Math.sign(ky) } : { x: inp.x, y: inp.y };
+}
+addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
+
+let last = performance.now();
+function frame(now) {
+  const dt = Math.min(.1, (now - last) / 1000); last = now;
+  if (G && G.tip < 0 && !G.s.end) {
+    G.acc += dt; while (G.acc >= DT && !G.s.end) { fstep(G.s, input()); G.acc -= DT; }
+    if (G.s.end) setTimeout(() => { if (G && G.s.end) finish(); }, 900);
+  }
+  const s = G ? G.s : fnew();
+  draw(s, !G);
+  if (G) $('read').textContent = Math.max(0, Math.round(BAY_Z - s.z)) + ' m · ' + s.v.toFixed(0) + ' m/s';
+  renderer.render(scene, camera);
+  requestAnimationFrame(frame);
+}
+requestAnimationFrame(frame);
+
+// =====================================================================
+// 4. TEST HOOKS: FL.sim(policy) flies a whole go on paper with a scripted pilot, the same every time
+// =====================================================================
+const PILOTS = {
+  steady: s => { const R = RINGS[s.ring] || { x: 0, y: 3.5, z: BAY_Z }, k = 1 / Math.max(25, R.z - s.z);   // aim at the next ring's middle, then the bay's
+    return { x: (R.x - s.x) * k * 6 - s.vx * .15, y: (R.y - s.y) * k * 7 - s.vy * .15 }; },
+  dive: s => s.z < 430 ? PILOTS.steady(s) : { x: -s.x * .2 - s.vx * .2, y: BAY_Z - s.z <= 2 * (s.y - 4) ? -1 : (16 - s.y) * .3 - s.vy * .2 },   // the first rings, then stays high and comes down steep into the bay
+  drift: () => ({ x: .12, y: 0 }),                                                                        // hardly touches it: drifts off the line
+};
+window.FL = {
+  start, fnew, fstep, RINGS, BAY_Z,
+  state: () => G && { ...G.s, tip: G.tip },
+  input: (x, y) => { inp.x = x; inp.y = y; },
+  calls: () => renderer.info.render.calls,
+  jump: (name, z) => { if (!G) return null; const P = PILOTS[name]; while (!G.s.end && G.s.z < z) fstep(G.s, P(G.s)); return FL.state(); },   // fly the live go on paper up to z with a scripted pilot (the screenshots)
+  pilot: name => { FL.auto = name && PILOTS[name]; },
+  sim: name => { const s = fnew(), P = PILOTS[name]; let n = 0; while (!s.end && n++ < 60 * 200) fstep(s, P(s)); return { end: s.end, secs: +(s.t / 60).toFixed(1), rings: s.rings.slice(), land: s.land && { v: +s.land.v.toFixed(2), vx: +s.land.vx.toFixed(2), vy: +s.land.vy.toFixed(2) }, x: +s.x.toFixed(2), y: +s.y.toFixed(2) }; },
+};
+</script>
+</body>
+</html>
