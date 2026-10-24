@@ -34,3 +34,9 @@ Game sha256 aac49362...c40b (1aabb091 = talk_check only). Base 364c80cb.
   hold. talk_check OK (6 lines, last at 10, ask at 11). Planted p8 (hold off): FAIL both new lines; p9 (no 1-min tail):
   FAIL (ask at 10.5). cadet_test 0.92.2 vs 7047bf90: ALL IDENTICAL apart from j_steer1 6 px max 1 level (renderer
   noise; nothing in the change touches drawing). p5/p6 test gaps still open on this sha.
+- **bc976e7d (game 4ff22c1c...1aae): PASS (~04:05 UTC).** Game change since 7047bf90: only the TALKS.own guard.
+  talk_check OK; planted q5 (talkStart hello hook off) FAIL "something in front of the first-talk scene"; q6 (talkNext
+  fallback off) FAIL "lines that are not her own" (her chatLine lines). cadet_test 0.92.2 vs bc976e7d ALL IDENTICAL.
+  check_fast QUICK CHECK OK 217 s. Section 20 sign-off (owner seat not live): talkStart hi hook, talkNext only-own
+  return, talkStep ask hold: all three correct, guarded with typeof, no change for anyone without first/only content.
+  Open for the content sha: own talk.filler for only-own people; many ungated talks (strangers repeat otherwise).
