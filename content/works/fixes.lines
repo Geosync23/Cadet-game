@@ -1,0 +1,1273 @@
+@bank all
+// ZW1 (writer), patch 0.92.3 items 21 and 24: the small repairs on the job board (FX10's FIX_ROWS, section 17;
+// keys and places from content/works/keys-fix.md). TEXTS, said by nobody. title: the board card, an order of about
+// 40 characters at most, no deck numbers, no tool (the game says the tool). sign: what you notice when you arrive.
+// done: what's different now. One line per key.
+
+// ---- Watch office (deck 2)
+== fix.wo-screen.title
+- Reseat a flickering watch screen
+== fix.wo-screen.sign
+- The left watch screen blinks off for a second, then back on.
+== fix.wo-screen.done
+- Steady picture. Not a blink.
+== fix.wo-chair.title
+- Tighten a wobbly watch chair
+== fix.wo-chair.sign
+- The chair rocks every time someone leans back.
+== fix.wo-chair.done
+- Firm as a rock.
+== fix.wo-blind.title
+- Free a stuck glass blind
+== fix.wo-blind.sign
+- The blind on the glass wall is stuck halfway, at a tilt.
+== fix.wo-blind.done
+- Up and down, smooth all the way.
+== fix.wo-lamp.title
+- Replace the watch office desk lamp
+== fix.wo-lamp.sign
+- The desk lamp stays dark, whichever way you click it.
+== fix.wo-lamp.done
+- A warm pool of light on the desk again.
+== fix.wo-jack.title
+- Rewire a crackling headset jack
+== fix.wo-jack.sign
+- The headset crackles whenever its lead moves.
+== fix.wo-jack.done
+- Clean sound. No crackle.
+== fix.wo-vent.title
+- Clear a rattling ceiling vent
+== fix.wo-vent.sign
+- The vent above the desks rattles like a loose tooth.
+== fix.wo-vent.done
+- Just the quiet hush of the air.
+== fix.wo-clock.title
+- Reset the drifting watch clock
+== fix.wo-clock.sign
+- The wall clock is four minutes ahead of everyone's devices.
+== fix.wo-clock.done
+- On ship time, to the second.
+
+// ---- Chart room (deck 2)
+== fix.cr-table.title
+- Replace the chart table backlight
+== fix.cr-table.sign
+- One corner of the chart table has gone dark.
+== fix.cr-table.done
+- The whole table glows evenly now.
+== fix.cr-drawer.title
+- Free a jammed chart drawer
+== fix.cr-drawer.sign
+- A wide drawer under the table won't open past a finger's width.
+== fix.cr-drawer.done
+- It slides out and back without a fight.
+== fix.cr-plotter.title
+- Fit a new bearing in the plotter arm
+== fix.cr-plotter.sign
+- The plotter arm grinds as it sweeps across the table.
+== fix.cr-plotter.done
+- The arm glides. You can barely hear it.
+== fix.cr-projector.title
+- Realign the star projector
+== fix.cr-projector.sign
+- The stars on the ceiling are smeared and a little off true.
+== fix.cr-projector.done
+- Sharp, bright stars, right where they belong.
+== fix.cr-shelf.title
+- Fix a sagging chart shelf
+== fix.cr-shelf.sign
+- The top shelf dips in the middle under its rolls of charts.
+== fix.cr-shelf.done
+- Level again, and the charts sit straight.
+== fix.cr-seat.title
+- Fix a loose window-seat hinge
+== fix.cr-seat.sign
+- The window seat's lid drops with a bang when you lift it.
+== fix.cr-seat.done
+- The lid opens and stays open.
+== fix.cr-reading.title
+- Replace a window reading lamp
+== fix.cr-reading.sign
+- The reading lamp by the window flickers, then gives up.
+== fix.cr-reading.done
+- Good light to read by again.
+== fix.cr-hum.title
+- Find the hum in the sockets
+== fix.cr-hum.sign
+- A low hum comes from the wall sockets by the door.
+== fix.cr-hum.done
+- Found it, fixed it. Quiet.
+
+// ---- Survey lab (deck 2)
+== fix.sl-fume.title
+- Fit a new fume hood fan belt
+== fix.sl-fume.sign
+- The fume hood fan squeals and slows when it's switched on.
+== fix.sl-fume.done
+- The fan spins up quietly and pulls well.
+== fix.sl-spectro.title
+- Realign a spectrometer mount
+== fix.sl-spectro.sign
+- The spectrometer's readings wander when the bench is touched.
+== fix.sl-spectro.done
+- Steady readings, even with a nudge.
+== fix.sl-tap.title
+- Fix a dripping lab tap
+== fix.sl-tap.sign
+- The tap at the sink drips, slow and steady.
+== fix.sl-tap.done
+- Not a drop.
+== fix.sl-socket.title
+- Reset a tripped bench socket
+== fix.sl-socket.sign
+- Half the bench has no power; its socket light is off.
+== fix.sl-socket.done
+- Power back along the bench.
+== fix.sl-stool.title
+- Tighten a wobbly lab stool
+== fix.sl-stool.sign
+- One stool lurches whenever someone sits on it.
+== fix.sl-stool.done
+- Sits square on all four feet.
+== fix.sl-lamp.title
+- Replace a buzzing bench lamp
+== fix.sl-lamp.sign
+- A bench lamp buzzes and glows a dull orange.
+== fix.sl-lamp.done
+- Bright, white and quiet.
+== fix.sl-screen.title
+- Replace a frayed screen cable
+== fix.sl-screen.sign
+- The bench screen's cable is frayed where it bends.
+== fix.sl-screen.done
+- A new cable, neatly clipped in.
+== fix.sl-eyewash.title
+- Fix the eyewash station valve
+== fix.sl-eyewash.sign
+- The eyewash gives a weak, spluttering trickle when tested.
+== fix.sl-eyewash.done
+- A good, even stream. Ready if it's needed.
+== fix.sl-cabinet.title
+- Adjust a sticking cabinet door
+== fix.sl-cabinet.sign
+- A cabinet door catches on its frame and has to be yanked.
+== fix.sl-cabinet.done
+- It swings shut with a soft click.
+== fix.sl-centrifuge.title
+- Fit a bearing in a whining centrifuge
+== fix.sl-centrifuge.sign
+- The centrifuge whines higher and higher as it spins up.
+== fix.sl-centrifuge.done
+- It spins up with a low, even hum.
+== fix.sl-gastap.title
+- Reseal a hissing gas tap
+== fix.sl-gastap.sign
+- A faint hiss comes from the bench gas tap, even when it's off.
+== fix.sl-gastap.done
+- Off means off. No hiss.
+== fix.sl-hoodlamp.title
+- Replace a fume hood lamp
+== fix.sl-hoodlamp.sign
+- The light inside the fume hood is out.
+== fix.sl-hoodlamp.done
+- The hood's lit, end to end.
+== fix.sl-balance.title
+- Level and zero a lab balance
+== fix.sl-balance.sign
+- The balance reads a few milligrams with nothing on it.
+== fix.sl-balance.done
+- Zero, and it stays at zero.
+
+// ---- Sample lab (deck 2)
+== fix.sm-fridge.title
+- Replace a sample fridge door seal
+== fix.sm-fridge.sign
+- The fridge door seal has split, and frost is creeping in.
+== fix.sm-fridge.done
+- The door shuts snug. No more frost.
+== fix.sm-freezer.title
+- Stop a freezer alarm going off
+== fix.sm-freezer.sign
+- The freezer alarm beeps, but the freezer's as cold as ever.
+== fix.sm-freezer.done
+- The alarm stays quiet, as it should.
+== fix.sm-glovebox.title
+- Change a split glove on the glove box
+== fix.sm-glovebox.sign
+- One glove on the glove box has a split at the thumb.
+== fix.sm-glovebox.done
+- A new glove, sealed tight.
+== fix.sm-scope.title
+- Replace a microscope lamp
+== fix.sm-scope.sign
+- The microscope's light flickers under the slide.
+== fix.sm-scope.done
+- A clear, bright field.
+== fix.sm-sink.title
+- Clear a slow lab sink
+== fix.sm-sink.sign
+- Water sits in the sink and drains away very slowly.
+== fix.sm-sink.done
+- It drains in seconds now.
+== fix.sm-rack.title
+- Fix a rattling sample rack
+== fix.sm-rack.sign
+- The sample rack rattles every time a drawer closes.
+== fix.sm-rack.done
+- Everything sits still in the rack.
+== fix.sm-printer.title
+- Repair a label printer cable
+== fix.sm-printer.sign
+- The label printer cuts out halfway through a label.
+== fix.sm-printer.done
+- Labels print clean, start to finish.
+== fix.sm-cleanbench.title
+- Fit a new clean bench fan belt
+== fix.sm-cleanbench.sign
+- The clean bench fan slips and flutters.
+== fix.sm-cleanbench.done
+- A steady, quiet draught across the bench.
+== fix.sm-panel.title
+- Replace a flickering ceiling panel
+== fix.sm-panel.sign
+- A ceiling panel over the benches flickers on and off.
+== fix.sm-panel.done
+- Even light across the lab.
+== fix.sm-incubator.title
+- Recalibrate a drifting incubator
+== fix.sm-incubator.sign
+- The incubator reads half a degree warmer than its setting.
+== fix.sm-incubator.done
+- Right on its setting.
+
+// ---- Comms room (deck 2)
+== fix.cm-card.title
+- Reseat a loose console card
+== fix.cm-card.sign
+- One console channel drops out now and then.
+== fix.cm-card.done
+- Every channel holds.
+== fix.cm-lead.title
+- Rewire a headset lead
+== fix.cm-lead.sign
+- A headset cuts out when its lead is twisted.
+== fix.cm-lead.done
+- Clear sound, however the lead lies.
+== fix.cm-chair.title
+- Fix a comms chair that sinks
+== fix.cm-chair.sign
+- One chair slowly sinks until the person in it is at knee height.
+== fix.cm-chair.done
+- It stays at the height you set.
+== fix.cm-patch.title
+- Replace a patch panel lead
+== fix.cm-patch.sign
+- One lead in the patch panel is kinked and warm.
+== fix.cm-patch.done
+- A fresh lead, neatly routed.
+== fix.cm-fan.title
+- Quiet a buzzing rack fan
+== fix.cm-fan.sign
+- The rack fan buzzes like a trapped wasp.
+== fix.cm-fan.done
+- Just a soft whirr now.
+== fix.cm-booth.title
+- Reseal the quiet booth door
+== fix.cm-booth.sign
+- Voices from the room leak into the quiet booth.
+== fix.cm-booth.done
+- Door shut, booth quiet.
+== fix.cm-lamp.title
+- Replace the comms room desk lamp
+== fix.cm-lamp.sign
+- The desk lamp at the end station is dead.
+== fix.cm-lamp.done
+- Light on the desk again.
+== fix.cm-screen.title
+- Realign a call-home screen
+== fix.cm-screen.sign
+- The call screen's picture sits crooked and slightly blurred.
+== fix.cm-screen.done
+- Straight, sharp and ready for a call home.
+== fix.cm-mic.title
+- Fix a crackling microphone arm
+== fix.cm-mic.sign
+- The desk microphone crackles when its arm is moved.
+== fix.cm-mic.done
+- Move it anywhere. Not a crackle.
+== fix.cm-clocks.title
+- Set the wall clocks to ship time
+== fix.cm-clocks.sign
+- The wall clocks disagree by a minute or two.
+== fix.cm-clocks.done
+- Every clock on ship time.
+
+// ---- Observatory (deck 2)
+== fix.ob-mount.title
+- Fit a bearing in the telescope mount
+== fix.ob-mount.sign
+- The telescope mount judders as it turns.
+== fix.ob-mount.done
+- It turns smooth and slow, without a judder.
+== fix.ob-dimmer.title
+- Fix the dimmer for star nights
+== fix.ob-dimmer.sign
+- The lights won't dim; they jump from bright to off.
+== fix.ob-dimmer.done
+- They fade down nice and gently.
+== fix.ob-shutter.title
+- Free a sticky window shutter
+== fix.ob-shutter.sign
+- One shutter sticks a hand's width from open.
+== fix.ob-shutter.done
+- It opens all the way. Stars.
+== fix.ob-cushion.title
+- Fix a loose window-seat clip
+== fix.ob-cushion.sign
+- A seat cushion slides off when anyone sits down.
+== fix.ob-cushion.done
+- The cushion stays put.
+== fix.ob-floor.title
+- Reset a cold floor heater
+== fix.ob-floor.sign
+- One patch of floor is cold underfoot.
+== fix.ob-floor.done
+- Warm all over, toes included.
+== fix.ob-redlamp.title
+- Replace a red night lamp
+== fix.ob-redlamp.sign
+- One of the red night lamps by the steps is out.
+== fix.ob-redlamp.done
+- A soft red glow by every step.
+== fix.ob-eyepiece.title
+- Clean and refit the eyepiece rack
+== fix.ob-eyepiece.sign
+- The eyepieces are smudged, and one sits loose in the rack.
+== fix.ob-eyepiece.done
+- Clean glass, every one in its slot.
+
+// ---- Science corridor (deck 2)
+== fix.sc-door.title
+- Adjust a slow lab door
+== fix.sc-door.sign
+- A lab door takes its time opening, then hesitates.
+== fix.sc-door.done
+- It opens briskly, like the others.
+== fix.sc-sign.title
+- Replace a lamp in the lab sign
+== fix.sc-sign.sign
+- Half the letters on the lab sign are dark.
+== fix.sc-sign.done
+- The whole sign lit up.
+== fix.sc-panel.title
+- Refit a loose wall panel
+== fix.sc-panel.sign
+- A wall panel buzzes against its frame when the lift runs.
+== fix.sc-panel.done
+- Flush and silent.
+== fix.sc-vent.title
+- Clear a whistling vent
+== fix.sc-vent.sign
+- A vent near the labs whistles a thin, high note.
+== fix.sc-vent.done
+- No more whistle.
+== fix.sc-notice.title
+- Fix the notice screen by the labs
+== fix.sc-notice.sign
+- The notice screen scrolls half a message, then goes blank.
+== fix.sc-notice.done
+- Every notice, start to finish.
+== fix.sc-light.title
+- Replace a science corridor light
+== fix.sc-light.sign
+- One corridor light blinks, making the corridor feel uneasy.
+== fix.sc-light.done
+- Steady light all the way along.
+
+// ---- Lift lobby (deck 2)
+== fix.l2-call.title
+- Fix a sticky lift call button
+== fix.l2-call.sign
+- The call button sticks in and has to be prised out.
+== fix.l2-call.done
+- Press, click, back out. The lift's on its way.
+== fix.l2-bench.title
+- Tighten a loose bench by the lift
+== fix.l2-bench.sign
+- The bench by the lift shifts when someone sits down.
+== fix.l2-bench.done
+- Solid. Sit as long as you like.
+== fix.l2-planter.title
+- Clear the planter's drip tray
+== fix.l2-planter.sign
+- The planter's tray is brimming, and the floor is damp.
+== fix.l2-planter.done
+- Dry tray, dry floor, happy plant.
+
+// ---- Washroom (deck 2)
+== fix.w2-tap.title
+- Fix the science washroom tap
+== fix.w2-tap.sign
+- A washroom tap drips into the basin.
+== fix.w2-tap.done
+- Dry basin. Not a drip.
+== fix.w2-cistern.title
+- Fix the science washroom cistern
+== fix.w2-cistern.sign
+- The cistern keeps running long after it's been flushed.
+== fix.w2-cistern.done
+- It fills, then stops. Quiet.
+
+// ---- Observation room (deck 1)
+== fix.d1-blind.title
+- Free a sticky blind
+== fix.d1-blind.sign
+- A blind on the observation windows stops halfway with a jolt.
+== fix.d1-blind.done
+- It glides down and up, no jolt.
+== fix.d1-urn.title
+- Descale the observation room urn
+== fix.d1-urn.sign
+- The urn takes an age to boil, and white flakes float in the water.
+== fix.d1-urn.done
+- Quick to boil, and clear water.
+== fix.d1-screen.title
+- Fix the conference screen lead
+== fix.d1-screen.sign
+- The conference screen shows a band of snow whenever the lead is touched.
+== fix.d1-screen.done
+- A clean picture, lead or no lead.
+== fix.d1-chair.title
+- Fix a creaky conference chair
+== fix.d1-chair.sign
+- One conference chair creaks loudly whenever anyone leans back.
+== fix.d1-chair.done
+- Lean back all you like. Silence.
+== fix.d1-lamp.title
+- Replace a window lamp
+== fix.d1-lamp.sign
+- A lamp by the windows is out, and that corner's gone gloomy.
+== fix.d1-lamp.done
+- The corner's bright again.
+
+// ---- Bridge lobby (deck 1)
+== fix.d1-call.title
+- Free the bridge lobby lift button
+== fix.d1-call.sign
+- The call button sticks, and the lift light never comes on.
+== fix.d1-call.done
+- One press, light on, lift coming.
+
+// ---- Ready room (deck 1)
+== fix.d1-ready.title
+- Replace the ready room desk lamp
+== fix.d1-ready.sign
+- The desk lamp in the ready room hums but stays dark.
+== fix.d1-ready.done
+- A good light on the desk, and no hum.
+
+// ---- Bridge washroom (deck 1)
+== fix.d1-tap.title
+- Fix the bridge washroom tap
+== fix.d1-tap.sign
+- The basin tap won't turn fully off and dribbles.
+== fix.d1-tap.done
+- Off is off. Not a dribble.
+
+// ---- Bridge (deck 1)
+== fix.d1-helm.title
+- Reseat a loose helm screen
+== fix.d1-helm.sign
+- The helm screen judders on its mount when anyone touches it.
+== fix.d1-helm.done
+- Firm on its mount, steady picture.
+== fix.d1-swivel.title
+- Fix a stiff bridge chair swivel
+== fix.d1-swivel.sign
+- A bridge chair turns only with a heave and a groan.
+== fix.d1-swivel.done
+- It turns smoothly and quietly.
+== fix.d1-ops.title
+- Replace a frayed console lead
+== fix.d1-ops.sign
+- A console lead is frayed at the plug, and the screen blinks.
+== fix.d1-ops.done
+- A fresh lead and a steady screen.
+
+// ---- Lift plaza (deck 3)
+== fix.p3-call.title
+- Unstick the plaza lift button
+== fix.p3-call.sign
+- The plaza call button stays pressed in after you let go.
+== fix.p3-call.done
+- Clicks in, springs back. Lift called.
+== fix.p3-bench.title
+- Tighten a loose plaza bench
+== fix.p3-bench.sign
+- The plaza bench creaks and shifts under the lightest sitter.
+== fix.p3-bench.done
+- No creak, no shift.
+== fix.p3-down.title
+- Replace a plaza downlight
+== fix.p3-down.sign
+- One downlight over the plaza is out, leaving a dim patch.
+== fix.p3-down.done
+- The plaza's evenly lit again.
+
+// ---- Promenade (deck 3)
+== fix.pr-bench.title
+- Fix a wobbly promenade bench
+== fix.pr-bench.sign
+- A bench facing the windows tips forward when anyone stands up.
+== fix.pr-bench.done
+- It stays put, view and all.
+== fix.pr-lamp.title
+- Replace a promenade lamp
+== fix.pr-lamp.sign
+- A lamp along the promenade glows faintly, then fades out.
+== fix.pr-lamp.done
+- A bright, steady glow along the walk.
+== fix.pr-blind.title
+- Free a jammed promenade blind
+== fix.pr-blind.sign
+- A blind on the big windows is stuck a third of the way down.
+== fix.pr-blind.done
+- It rolls up and down without a snag.
+== fix.pr-drip.title
+- Clear a blocked planter drip line
+== fix.pr-drip.sign
+- The planters at one end are dry while the rest are damp.
+== fix.pr-drip.done
+- Every planter's getting its drip.
+== fix.pr-vent.title
+- Clear a rattling promenade vent
+== fix.pr-vent.sign
+- A vent above the windows rattles whenever the air kicks in.
+== fix.pr-vent.done
+- Nothing but a soft breeze.
+== fix.pr-rail.title
+- Tighten a loose hand rail
+== fix.pr-rail.sign
+- The rail along the windows gives a little when you lean on it.
+== fix.pr-rail.done
+- Solid. Lean all you like.
+
+// ---- Mess hall (deck 3)
+== fix.ms-table.title
+- Level a wobbly mess table
+== fix.ms-table.sign
+- A table by the servery rocks, and the mugs slop.
+== fix.ms-table.done
+- Flat and steady. Not a slop.
+== fix.ms-chair.title
+- Fix a squeaky mess chair
+== fix.ms-chair.sign
+- One chair squeaks every time someone shifts in it.
+== fix.ms-chair.done
+- Silent, however you sit.
+== fix.ms-grab.title
+- Replace the grab shelf light
+== fix.ms-grab.sign
+- The light over the grab shelf is out; the covered plates sit in shadow.
+== fix.ms-grab.done
+- The grab shelf's lit. Easy to see what's left.
+== fix.ms-menu.title
+- Fix the menu screen's lead
+== fix.ms-menu.sign
+- The menu screen flickers and drops to black now and then.
+== fix.ms-menu.done
+- Today's menu, steady on the screen.
+== fix.ms-trayrack.title
+- Straighten a bent tray rack
+== fix.ms-trayrack.sign
+- One slot in the tray rack is bent, and trays jam in it.
+== fix.ms-trayrack.done
+- Trays slide in and out cleanly.
+
+// ---- Galley (deck 3)
+== fix.ga-sink.title
+- Fix a dripping prep sink
+== fix.ga-sink.sign
+- The prep sink tap drips onto the chopping boards beside it.
+== fix.ga-sink.done
+- Dry boards. Not a drip.
+== fix.ga-fridge.title
+- Replace a worn fridge door seal
+== fix.ga-fridge.sign
+- A galley fridge door seal is cracked, and the door won't hold shut.
+== fix.ga-fridge.done
+- The door closes with a firm suck.
+== fix.ga-drawer.title
+- Fix a stiff drawer runner
+== fix.ga-drawer.sign
+- A utensil drawer judders and sticks halfway out.
+== fix.ga-drawer.done
+- It runs smooth, in and out.
+== fix.ga-heatlamp.title
+- Replace a heat lamp at the pass
+== fix.ga-heatlamp.sign
+- One heat lamp over the pass is cold, and the plates under it are going cool.
+== fix.ga-heatlamp.done
+- Warm light over every plate.
+== fix.ga-shelf.title
+- Fix a loose shelf bracket
+== fix.ga-shelf.sign
+- A shelf of pans tilts on a loose bracket.
+== fix.ga-shelf.done
+- Level shelf. Pans safe.
+
+// ---- Bow lounge (deck 3)
+== fix.bl-tap.title
+- Fix the bar's sticky drinks tap
+== fix.bl-tap.sign
+- The bar's drinks tap sticks open and has to be pushed back.
+== fix.bl-tap.done
+- It pours, then stops when you let go.
+== fix.bl-sofa.title
+- Fix a sagging sofa
+== fix.bl-sofa.sign
+- One sofa sags in the middle so far it swallows people.
+== fix.bl-sofa.done
+- Firm seat. Nobody gets swallowed.
+== fix.bl-lamp.title
+- Replace a lounge table lamp
+== fix.bl-lamp.sign
+- A table lamp by the windows won't come on.
+== fix.bl-lamp.done
+- A soft light by the window again.
+== fix.bl-reader.title
+- Fix the card reader at the bar
+== fix.bl-reader.sign
+- The card reader at the bar works on the third tap, if at all.
+== fix.bl-reader.done
+- One tap and it beeps.
+== fix.bl-blind.title
+- Free a jammed lounge blind
+== fix.bl-blind.sign
+- A lounge blind is stuck down, hiding half the view.
+== fix.bl-blind.done
+- Blind up. The stars are back.
+== fix.bl-speaker.title
+- Fix a crackling lounge speaker
+== fix.bl-speaker.sign
+- A speaker in the corner crackles over the music.
+== fix.bl-speaker.done
+- Clean music, corner to corner.
+
+// ---- Hydroponics garden (deck 3)
+== fix.gd-hose.title
+- Fix a dripping hose reel
+== fix.gd-hose.sign
+- The hose reel drips steadily into a puddle by the beds.
+== fix.gd-hose.done
+- No drip, no puddle.
+== fix.gd-trolley.title
+- Fix a sticky trolley wheel
+== fix.gd-trolley.sign
+- A garden trolley drags one wheel and pulls to the left.
+== fix.gd-trolley.done
+- It rolls straight and easy.
+== fix.gd-mister.title
+- Clear a blocked misting nozzle
+== fix.gd-mister.sign
+- One misting nozzle spits instead of misting, and the leaves under it are dry.
+== fix.gd-mister.done
+- A fine, even mist.
+== fix.gd-lamp.title
+- Replace a potting bench lamp
+== fix.gd-lamp.sign
+- The lamp over the potting bench flickers on and off.
+== fix.gd-lamp.done
+- Good light for potting.
+== fix.gd-bench.title
+- Tighten a loose potting bench
+== fix.gd-bench.sign
+- The potting bench sways when anyone presses down on it.
+== fix.gd-bench.done
+- Solid. Press away.
+
+// ---- Infirmary (deck 3)
+== fix.in-rail.title
+- Fix a stiff bed side rail
+== fix.in-rail.sign
+- A bed's side rail sticks and takes two hands to lower.
+== fix.in-rail.done
+- Up and down with one hand.
+== fix.in-light.title
+- Replace a bed reading light
+== fix.in-light.sign
+- The reading light over one bed is dark.
+== fix.in-light.done
+- Light to read by, bed by bed.
+== fix.in-call.title
+- Fix a call button by a bed
+== fix.in-call.sign
+- A bedside call button does nothing when pressed.
+== fix.in-call.done
+- Press it and the light comes on at the desk.
+== fix.in-chair.title
+- Fix a wobbly visitor chair
+== fix.in-chair.sign
+- A visitor's chair by the beds rocks on an uneven leg.
+== fix.in-chair.done
+- Four legs on the floor.
+
+// ---- Exam room (deck 3)
+== fix.ex-lamp.title
+- Replace an exam lamp
+== fix.ex-lamp.sign
+- The exam lamp is dim and a little yellow.
+== fix.ex-lamp.done
+- Bright, clear light over the couch.
+== fix.ex-couch.title
+- Fix the exam couch lever
+== fix.ex-couch.sign
+- The couch's lever is stiff, and the back won't tilt.
+== fix.ex-couch.done
+- It tilts smoothly and locks.
+
+// ---- Washrooms (deck 3)
+== fix.w3-tap.title
+- Fix a dripping washroom tap
+== fix.w3-tap.sign
+- A basin tap drips, and a ring of water spreads around it.
+== fix.w3-tap.done
+- Dry basin, dry floor.
+== fix.w3-cistern.title
+- Fix a running cistern
+== fix.w3-cistern.sign
+- A cistern hisses and runs on long after the flush.
+== fix.w3-cistern.done
+- Fills, then quiet.
+== fix.w3-dryer.title
+- Reset a hand dryer
+== fix.w3-dryer.sign
+- A hand dryer won't start, whatever you wave at it.
+== fix.w3-dryer.done
+- It roars into life on the first wave.
+
+// ---- Gym (deck 3)
+== fix.gy-rower.title
+- Fix a squeaking rowing machine
+== fix.gy-rower.sign
+- The rowing machine squeaks on every pull.
+== fix.gy-rower.done
+- Smooth, silent strokes.
+== fix.gy-bench.title
+- Tighten a weight bench
+== fix.gy-bench.sign
+- A weight bench shifts when someone lies back on it.
+== fix.gy-bench.done
+- Firm under a full lift.
+== fix.gy-tread.title
+- Adjust a slipping treadmill belt
+== fix.gy-tread.sign
+- A treadmill belt slips and lurches mid-stride.
+== fix.gy-tread.done
+- A steady belt, stride after stride.
+== fix.gy-lamp.title
+- Replace a gym light
+== fix.gy-lamp.sign
+- One ceiling light over the mats is out.
+== fix.gy-lamp.done
+- The whole gym's bright again.
+== fix.gy-fountain.title
+- Fix the gym water fountain
+== fix.gy-fountain.sign
+- The water fountain dribbles instead of spouting.
+== fix.gy-fountain.done
+- A good arc of cold water.
+
+// ---- Crew store (deck 3)
+== fix.cs-till.title
+- Fix a sticky till drawer
+== fix.cs-till.sign
+- The till drawer sticks and has to be thumped to open.
+== fix.cs-till.done
+- It slides open with a ping.
+== fix.cs-shelf.title
+- Replace a crew store shelf light
+== fix.cs-shelf.sign
+- A shelf light is out, and the socks are in the dark.
+== fix.cs-shelf.done
+- Every shelf lit, socks included.
+== fix.cs-reader.title
+- Fix the crew store's card reader
+== fix.cs-reader.sign
+- The card reader by the counter keeps saying try again.
+== fix.cs-reader.done
+- One tap. Paid.
+
+// ---- Call-home booths (deck 3)
+== fix.cb-headset.title
+- Fix a call-home booth headset
+== fix.cb-headset.sign
+- A booth headset hisses and drops the sound in one ear.
+== fix.cb-headset.done
+- Clear sound, both ears. Ready for home.
+== fix.cb-door.title
+- Reseal a call-home booth door
+== fix.cb-door.sign
+- Noise from the commons leaks in round a booth door.
+== fix.cb-door.done
+- Door shut, booth quiet. Private again.
+== fix.cb-light.title
+- Replace a light by the booths
+== fix.cb-light.sign
+- The light outside the booths flickers.
+== fix.cb-light.done
+- A calm, steady light by the booths.
+
+// ---- Cold store (deck 3)
+== fix.co-curtain.title
+- Rehang the cold store strip curtain
+== fix.co-curtain.sign
+- Some strips of the cold store curtain have come off their hooks, and cold air spills out.
+== fix.co-curtain.done
+- Every strip on its hook. The cold stays in.
+
+// ---- Lift lobby (deck 4)
+== fix.l4-call.title
+- Fix the quarters lift button
+== fix.l4-call.sign
+- The call button only works if you press it hard, twice.
+== fix.l4-call.done
+- A light press does it now.
+== fix.l4-bench.title
+- Steady the bench by the quarters lift
+== fix.l4-bench.sign
+- The bench by the lift rocks on a loose leg.
+== fix.l4-bench.done
+- Steady as anything.
+== fix.l4-lamp.title
+- Replace a downlight by the lift
+== fix.l4-lamp.sign
+- A downlight by the lift blinks, then sulks.
+== fix.l4-lamp.done
+- Even light by the lift doors.
+
+// ---- Junior common room (deck 4)
+== fix.jc-kettle.title
+- Descale the common room kettle
+== fix.jc-kettle.sign
+- The kettle rumbles for ages, and scale rattles inside it.
+== fix.jc-kettle.done
+- Boils fast, and the tea tastes of tea.
+== fix.jc-sofa.title
+- Fix a sagging common room sofa
+== fix.jc-sofa.sign
+- The end seat of the sofa sinks almost to the floor.
+== fix.jc-sofa.done
+- Sit anywhere. No sinking.
+== fix.jc-lamp.title
+- Replace a common room lamp
+== fix.jc-lamp.sign
+- A floor lamp by the sofa won't switch on.
+== fix.jc-lamp.done
+- A warm lamp to read by again.
+== fix.jc-table.title
+- Fix the games table leg
+== fix.jc-table.sign
+- The games table tips when anyone leans on it, and the pieces slide.
+== fix.jc-table.done
+- Level table. Pieces stay put.
+== fix.jc-screen.title
+- Fix the screen's loose lead
+== fix.jc-screen.sign
+- The common room screen cuts out in the middle of a film.
+== fix.jc-screen.done
+- Picture all the way to the credits.
+== fix.jc-blind.title
+- Free a sticky common room blind
+== fix.jc-blind.sign
+- The window blind is stuck at an angle.
+== fix.jc-blind.done
+- Straight, and it rolls freely.
+
+// ---- Music room (deck 4)
+== fix.mu-stand.title
+- Tighten a loose music stand
+== fix.mu-stand.sign
+- A music stand slowly droops while you're reading from it.
+== fix.mu-stand.done
+- It holds where you set it.
+== fix.mu-player.title
+- Fix the record player's tone arm
+== fix.mu-player.sign
+- The tone arm skips and drags across the record.
+== fix.mu-player.done
+- It tracks smoothly. The music's back.
+== fix.mu-lamp.title
+- Replace a music room lamp
+== fix.mu-lamp.sign
+- The lamp by the record cabinet is out.
+== fix.mu-lamp.done
+- A soft light over the records.
+== fix.mu-amp.title
+- Fix a buzzing amp lead
+== fix.mu-amp.sign
+- The amp buzzes under every note.
+== fix.mu-amp.done
+- Just the music now.
+
+// ---- Laundry (deck 4)
+== fix.la-catch.title
+- Fix a sticky dryer door catch
+== fix.la-catch.sign
+- A dryer door won't catch, so the dryer won't start.
+== fix.la-catch.done
+- Click, and it starts.
+== fix.la-lamp.title
+- Replace a laundry room lamp
+== fix.la-lamp.sign
+- A lamp over the washers is out.
+== fix.la-lamp.done
+- Bright enough to match your socks.
+== fix.la-table.title
+- Fix a folding table leg
+== fix.la-table.sign
+- The folding table sags at one corner.
+== fix.la-table.done
+- A flat table for folding.
+== fix.la-lint.title
+- Clear a clogged lint trap
+== fix.la-lint.sign
+- A dryer runs hot and slow, and fluff pokes out of the trap.
+== fix.la-lint.done
+- Clean trap. The dryer breathes again.
+
+// ---- Port washroom (deck 4)
+== fix.wp-shower.title
+- Fix a dripping port shower head
+== fix.wp-shower.sign
+- A shower head in the port washroom drips long after it's off.
+== fix.wp-shower.done
+- Off, and dry.
+== fix.wp-tap.title
+- Fix a loose basin tap
+== fix.wp-tap.sign
+- A basin tap spins loosely in its mount.
+== fix.wp-tap.done
+- Firm tap, clean turn.
+== fix.wp-rail.title
+- Fix a cold towel rail
+== fix.wp-rail.sign
+- One towel rail is stone cold.
+== fix.wp-rail.done
+- Warm towels again.
+
+// ---- Starboard washroom (deck 4)
+== fix.wq-cold.title
+- Fix a shower that runs cold
+== fix.wq-cold.sign
+- One starboard shower runs warm, then turns cold.
+== fix.wq-cold.done
+- Warm from start to finish.
+== fix.wq-cistern.title
+- Fix a running starboard cistern
+== fix.wq-cistern.sign
+- A starboard cistern keeps trickling into the bowl.
+== fix.wq-cistern.done
+- It fills, and stops.
+== fix.wq-mirror.title
+- Replace a mirror light
+== fix.wq-mirror.sign
+- The light over one mirror is dead.
+== fix.wq-mirror.done
+- A good light to shave or brush by.
+
+// ---- Works bay (deck 5)
+== fix.wb-vice.title
+- Fix a vice that won't grip
+== fix.wb-vice.sign
+- A bench vice slips, however hard it's tightened.
+== fix.wb-vice.done
+- It bites and holds.
+== fix.wb-lamp.title
+- Replace a Works bay bench lamp
+== fix.wb-lamp.sign
+- A bench lamp in the bay flickers over the work.
+== fix.wb-lamp.done
+- Steady light on the bench.
+== fix.wb-rail.title
+- Rehang the tool wall rail
+== fix.wb-rail.sign
+- One rail on the tool wall has dropped at one end.
+== fix.wb-rail.done
+- Level rail, every tool in its outline.
+== fix.wb-stool.title
+- Fix a wobbly stool
+== fix.wb-stool.sign
+- A bay stool rocks on a short leg.
+== fix.wb-stool.done
+- Four legs down. Sit and work.
+== fix.wb-socket.title
+- Reset a tripped Works bench socket
+== fix.wb-socket.sign
+- A bench socket's light is off, and nothing on it works.
+== fix.wb-socket.done
+- Power back on the bench.
+
+// ---- Works Chief's office (deck 5)
+== fix.wo-closer.title
+- Adjust the office door closer
+== fix.wo-closer.sign
+- The Chief's door slams shut with a bang.
+== fix.wo-closer.done
+- It closes gently, with a soft click.
+
+// ---- Tea corner (deck 5)
+== fix.tc-urn.title
+- Descale the tea urn
+== fix.tc-urn.sign
+- The tea urn is slow and furred with scale.
+== fix.tc-urn.done
+- Hot water, quick. Tea's on.
+== fix.tc-table.title
+- Fix a wobbly tea table
+== fix.tc-table.sign
+- The tea table wobbles, and the biscuit tin edges off.
+== fix.tc-table.done
+- Steady. The biscuits are safe.
+
+// ---- Works washroom (deck 5)
+== fix.w5-tap.title
+- Fix the Works washroom tap
+== fix.w5-tap.sign
+- The basin tap drips, and the drip echoes.
+== fix.w5-tap.done
+- Quiet basin. No echo.
+== fix.w5-cistern.title
+- Fix the Works washroom cistern
+== fix.w5-cistern.sign
+- The cistern runs and runs with a thin hiss.
+== fix.w5-cistern.done
+- Hiss gone. It fills and stops.
+
+// ---- Main storage (deck 5)
+== fix.st-ladder.title
+- Fix a sticky shelf ladder wheel
+== fix.st-ladder.sign
+- The shelf ladder drags along its rail with a squeal.
+== fix.st-ladder.done
+- It rolls along the shelves without a sound.
+== fix.st-light.title
+- Replace an aisle light
+== fix.st-light.sign
+- One aisle in storage is dark half the way down.
+== fix.st-light.done
+- The whole aisle lit. Easy to find things.
+== fix.st-scanner.title
+- Fix the parts scanner's lead
+== fix.st-scanner.sign
+- The parts scanner beeps but never reads.
+== fix.st-scanner.done
+- Beep, read, logged.
+
+// ---- Machine shop (deck 5)
+== fix.sh-press.title
+- Free a sticking drill press lever
+== fix.sh-press.sign
+- The drill press lever sticks on the way back up.
+== fix.sh-press.done
+- It springs back up by itself.
+== fix.sh-lamp.title
+- Replace the lathe lamp
+== fix.sh-lamp.sign
+- The lamp over the lathe is out.
+== fix.sh-lamp.done
+- Clear light over the lathe.
+== fix.sh-hose.title
+- Fix an extractor hose clamp
+== fix.sh-hose.sign
+- The extractor hose has slipped off its clamp, and dust drifts out.
+== fix.sh-hose.done
+- Hose on tight. The dust goes where it should.
+== fix.sh-grinder.title
+- Fit a new belt on the bench grinder
+== fix.sh-grinder.sign
+- The bench grinder slows and slips under the lightest touch.
+== fix.sh-grinder.done
+- Full speed, steady and even.
+
+// ---- Shuttle bay (deck 5)
+== fix.sb-floor.title
+- Replace a bay floor light
+== fix.sb-floor.sign
+- One of the guide lights in the bay floor is dark.
+== fix.sb-floor.done
+- An unbroken line of floor lights.
+== fix.sb-ring.title
+- Free a stiff tie-down ring
+== fix.sb-ring.sign
+- A tie-down ring in the deck won't fold flat.
+== fix.sb-ring.done
+- It folds flush with the deck.
+== fix.sb-beacon.title
+- Fix a bay warning beacon
+== fix.sb-beacon.sign
+- The warning beacon by the doors stays dark during its test.
+== fix.sb-beacon.done
+- It turns and flashes on its test.
+
+// ---- Bay control booth (deck 5)
+== fix.bc-screen.title
+- Reseat a flickering booth screen
+== fix.bc-screen.sign
+- A screen in the control booth flickers between two pictures.
+== fix.bc-screen.done
+- One clear picture. No flicker.
+
+// ---- Lift lobby (deck 5)
+== fix.l5-call.title
+- Fix the Works deck lift button
+== fix.l5-call.sign
+- The call button lights, then goes out without calling the lift.
+== fix.l5-call.done
+- It stays lit until the lift arrives.
+== fix.l5-lamp.title
+- Replace a Works deck lift downlight
+== fix.l5-lamp.sign
+- A downlight by the lift buzzes and blinks.
+== fix.l5-lamp.done
+- No buzz, no blink.
+
+// ---- Lift lobby (deck 6)
+== fix.l6-call.title
+- Fix the engine deck lift button
+== fix.l6-call.sign
+- The call button is warm and won't press in.
+== fix.l6-call.done
+- Cool, and it presses clean.
+== fix.l6-bench.title
+- Fix the bench by the engine deck lift
+== fix.l6-bench.sign
+- The bench by the lift squeaks and slides an inch.
+== fix.l6-bench.done
+- No squeak, no slide.
+== fix.l6-lamp.title
+- Replace an engine deck lift downlight
+== fix.l6-lamp.sign
+- The downlight by the lift is dark.
+== fix.l6-lamp.done
+- Lit, and you can see your feet.
+
+// ---- Engine overlook (deck 6)
+== fix.eo-rail.title
+- Tighten the overlook hand rail
+== fix.eo-rail.sign
+- The overlook rail shifts a little under your hand.
+== fix.eo-rail.done
+- Rock solid. Look down all you like.
+== fix.eo-lamp.title
+- Replace an overlook lamp
+== fix.eo-lamp.sign
+- One lamp along the overlook is out.
+== fix.eo-lamp.done
+- The whole overlook lit, coils and all.
+
+// ---- Engine control (deck 6)
+== fix.ec-chair.title
+- Fix a stiff control room chair
+== fix.ec-chair.sign
+- A control room chair won't roll or turn without a shove.
+== fix.ec-chair.done
+- It rolls and turns at a touch.
+
+// ---- Engine watch room (deck 6)
+== fix.ew-lamp.title
+- Replace the engine watch desk lamp
+== fix.ew-lamp.sign
+- The desk lamp in the watch room flickers over the logbook.
+== fix.ew-lamp.done
+- Steady light on the logbook.
+== fix.ew-jack.title
+- Fix a loose headset jack
+== fix.ew-jack.sign
+- The headset drops out whenever its plug is nudged.
+== fix.ew-jack.done
+- Plug in, stay in.
+
+// ---- Concourse (deck 7)
+== fix.rc-lamp.title
+- Replace a concourse lamp
+== fix.rc-lamp.sign
+- A concourse lamp flickers over the benches.
+== fix.rc-lamp.done
+- Steady light along the concourse.
+
+// ---- Lift lobby (deck 7)
+== fix.rc-call.title
+- Fix the rec deck lift button
+== fix.rc-call.sign
+- The call button clicks but the lift never comes.
+== fix.rc-call.done
+- Click, and the lift's on its way.
+
+// ---- Auditorium (deck 7)
+== fix.au-stool.title
+- Fix a wobbly stage stool
+== fix.au-stool.sign
+- The stool on the stage wobbles under anyone who sits.
+== fix.au-stool.done
+- Steady enough for a solo.
+== fix.au-lectern.title
+- Fix the lectern's reading light
+== fix.au-lectern.sign
+- The lectern's little light is out.
+== fix.au-lectern.done
+- A neat pool of light on the notes.
+== fix.au-board.title
+- Tighten a loose stage board
+== fix.au-board.sign
+- One stage board creaks and lifts at the edge.
+== fix.au-board.done
+- Flat and silent underfoot.
+
+// ---- Pool (deck 7)
+== fix.po-lounger.title
+- Fix a stiff lounger hinge
+== fix.po-lounger.sign
+- A poolside lounger's back won't lie down.
+== fix.po-lounger.done
+- It reclines all the way. Lovely.
+== fix.po-lamp.title
+- Replace a poolside lamp
+== fix.po-lamp.sign
+- A lamp by the pool is out, and its reflection is missing.
+== fix.po-lamp.done
+- Every lamp, and its reflection, back.
+
+// ---- River hall (deck 7)
+== fix.rv-shower.title
+- Fix the beach shower tap
+== fix.rv-shower.sign
+- The beach shower tap won't turn off properly and drizzles.
+== fix.rv-shower.done
+- Off, and the sand stays dry.
+== fix.rv-cleat.title
+- Tighten a loose kayak cleat
+== fix.rv-cleat.sign
+- A kayak cleat on the jetty wobbles when a rope's pulled.
+== fix.rv-cleat.done
+- Firm cleat. The kayak's going nowhere.
+
+// ---- Changing rooms (deck 7)
+== fix.ch-locker.title
+- Free a jammed locker
+== fix.ch-locker.sign
+- A locker door is stuck shut, and its catch won't turn.
+== fix.ch-locker.done
+- It opens with a click.
+== fix.ch-shower.title
+- Fix a dripping changing room shower
+== fix.ch-shower.sign
+- A changing room shower drips on the tiles all night.
+== fix.ch-shower.done
+- Dry tiles by morning.
+== fix.ch-lamp.title
+- Replace a changing room light
+== fix.ch-lamp.sign
+- One light in the changing rooms flickers.
+== fix.ch-lamp.done
+- Steady light by the lockers.
