@@ -292,3 +292,24 @@ OLD = 0.92.2 364c80cb (ca2f908d…06e7e4). One at a time, CADET_WORK=/tmp/work-c
 
 Note: BM16 expected OLD's week guide to fail at Day 9 m6 (backlog 15). With 0dd4e2e2's arrows_check.py it passes on
 0.92.2's game too (m6 learned Day 9, clocked 540 min). Reported to BM16; not a NEW FAIL.
+
+## Round 2: 0.92.3 candidate 2 (claude/staging-0.92.3 d9a387b6)
+
+**sha256 of starship-cadet.html: `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853`** (matches BM16's;
+AC3's m3d fix 4928271f). Whole share again, one at a time. OLD's week guide reused from candidate 1 (BM16: OLD passing is
+expected, backlog 15 was a test gap).
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 353 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 267 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 317 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 69 s | PUZZLE CHECK OK |
+| social_check | **OK** | 25 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 35 s | TALK CHECK OK |
+| arrows_check (default) | **OK** | 714 s | ARROWS CHECK OK |
+| arrows_pointer_check | **OK** | 135 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 34 s | DEV ARROW CHECK OK |
+| arrows_check week guide, NEW | **OK** | 612 s | m6 learned Day 9 |
+
+No FAILs.
