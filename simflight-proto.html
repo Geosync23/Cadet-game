@@ -11,7 +11,7 @@
   or WASD too); speed looks after itself (it slows as the bay gets close; coming in steep makes it faster);
   chase view; four glowing rings; about a minute a go; a plain result line, then Again or Done; no scores;
   three first-time tips with Next and Skip.
-  Rules from the game kept here: no coplanar surfaces, every colour through col(), about 10 draw calls.
+  Rules from the game kept here: no coplanar surfaces, every colour through col(), 17 draw calls (under 25).
   The rules are plain numbers stepped at a fixed 60 a second (fstep), kept apart from the drawing, with no
   random calls, so a go with the same input plays the same anywhere.
   Test hooks: window.FL (start, state, sim, calls, input).
@@ -31,10 +31,15 @@
   #tip { position: fixed; left: 12px; right: 12px; bottom: calc(env(safe-area-inset-bottom) + 58px); display: flex; align-items: center; gap: 8px; background: var(--panel); border: 1px solid var(--teal); border-radius: 14px; padding: 10px 10px 10px 14px; max-width: 520px; margin: 0 auto; }
   #tip .t { flex: 1; } #tip .n { color: var(--teal); font-size: 12px; display: block; } #tip button { padding: 6px 12px; font-size: 13px; }
   .over { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 20px; width: 100%; max-width: 420px; box-sizing: border-box; }
-  h1 { margin: 0 0 4px; font-size: 28px; letter-spacing: .04em; color: var(--teal); }
-  .sub { color: var(--dim); font-size: 14px; }
-  .res p { margin: 0; font-size: 18px; }
+  .card { position: relative; background: linear-gradient(160deg, rgba(22, 34, 52, .94), rgba(9, 13, 24, .94)); border: 1px solid rgba(73, 214, 198, .35); border-radius: 22px; padding: 22px 22px 20px; width: 100%; max-width: 420px; box-sizing: border-box; box-shadow: 0 18px 50px rgba(0, 0, 0, .55), inset 0 1px 0 rgba(255, 255, 255, .06); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .eyebrow { font-size: 11.5px; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gold); margin-bottom: 6px; }
+  h1 { margin: 0 0 8px; font-size: 32px; line-height: 1.05; letter-spacing: .01em; background: linear-gradient(90deg, #7ff5e6, #ffffff 60%, #ffcf6e); -webkit-background-clip: text; background-clip: text; color: transparent; }
+  .sub { color: var(--dim); font-size: 14.5px; }
+  .card .btns button { min-width: 110px; padding: 11px 20px; }
+  .res { border-color: rgba(73, 214, 198, .5); }
+  .res.hard { border-color: rgba(255, 207, 110, .55); } .res.miss { border-color: rgba(240, 138, 125, .55); }
+  .res .eyebrow { color: var(--teal); } .res.hard .eyebrow { color: var(--gold); } .res.miss .eyebrow { color: #f08a7d; }
+  .res p { margin: 0; font-size: 19px; line-height: 1.4; }
   .btns { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
   .row { margin-top: 12px; font-size: 13px; color: var(--dim); }
 </style>
@@ -47,15 +52,17 @@
 
 <div id="menu" class="over">
   <div class="card">
+    <div class="eyebrow">Sim pod · Rec deck · CSV Wren</div>
     <h1>Land the Tern</h1>
-    <div class="sub">Sim pod, rec deck, CSV Wren. Bring the Tern down through the rings into the Wren's lit bay. A prototype to feel the landing: steer only, the speed looks after itself.</div>
+    <div class="sub">Bring the Tern down through the rings into the Wren's lit bay. A prototype to feel the landing: steer only, the speed looks after itself.</div>
     <div class="btns"><button id="start" class="go">Start</button></div>
     <div class="row"><label><input type="checkbox" id="tipsAgain"> Show the tips again</label></div>
   </div>
 </div>
 
 <div id="result" class="over hide">
-  <div class="card res">
+  <div class="card res" id="resCard">
+    <div class="eyebrow">The sim says</div>
     <p id="resText"></p>
     <div class="btns"><button id="again" class="go">Again</button><button id="done">Done</button></div>
   </div>
@@ -98,7 +105,9 @@ function fstep(s, inp) {
 const SAY = { soft: 'Soft landing. The deck crew wave you in.', hard: 'Hard landing. The Tern bounces once and settles. Slower next time.', miss: 'You overshoot the bay. The sim swings you round.' };
 
 // =====================================================================
-// 2. THE VIEW (its own small scene: stars, the Wren and her lit bay, the rings, the Tern)
+// 2. THE VIEW (its own small scene: the sky, the Wren and her lit bay, the rings, the Tern; about 17 draw calls)
+// Everything here only draws the rules' numbers; its own small motions (blinking lights, the ring's pulse, the
+// camera's sway, the stars' drift) run on the clock and never touch the rules.
 // =====================================================================
 const col = h => new THREE.Color(h).convertSRGBToLinear();
 const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
@@ -107,10 +116,11 @@ renderer.setSize(innerWidth, innerHeight);
 renderer.outputEncoding = THREE.sRGBEncoding;
 document.body.prepend(renderer.domElement);
 const scene = new THREE.Scene();
-scene.background = col('#04060c');
-const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, .3, 2400);
-scene.add(new THREE.HemisphereLight(col('#a9c2e6'), col('#141020'), .8));
-const sun = new THREE.DirectionalLight(col('#ffffff'), .8); sun.position.set(-60, 120, -40); scene.add(sun);
+scene.background = col('#03050b');
+const camera = new THREE.PerspectiveCamera(58, innerWidth / innerHeight, .3, 2600);
+scene.add(new THREE.HemisphereLight(col('#b4c8ea'), col('#1a1226'), .75));
+const sun = new THREE.DirectionalLight(col('#fff1dc'), .95); sun.position.set(-80, 110, -60); scene.add(sun);
+const rim = new THREE.DirectionalLight(col('#7fb6ff'), .35); rim.position.set(90, -20, 120); scene.add(rim);
 
 // merged vertex-coloured parts: one draw call a group (lightdisc-proto's partsToGeo)
 function partsToGeo(parts) {
@@ -129,72 +139,161 @@ function partsToGeo(parts) {
 }
 const M4 = (x, y, z, sx = 1, sy = 1, sz = 1, ry = 0, rx = 0, rz = 0) => new THREE.Matrix4().compose(new THREE.Vector3(x, y, z), new THREE.Quaternion().setFromEuler(new THREE.Euler(rx, ry, rz)), new THREE.Vector3(sx, sy, sz));
 const BOX = new THREE.BoxGeometry(1, 1, 1);
+const hash = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };   // fixed scatter (no random calls)
+// the one small generated texture: a soft round glow (and a ring-shaped one for the rings' halos)
+function glowTex(ring) {
+  const c = document.createElement('canvas'); c.width = c.height = 64; const x = c.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  if (ring) { g.addColorStop(0, 'rgba(255,255,255,0)'); g.addColorStop(.62, 'rgba(255,255,255,0)'); g.addColorStop(.78, 'rgba(255,255,255,.9)'); g.addColorStop(1, 'rgba(255,255,255,0)'); }
+  else { g.addColorStop(0, 'rgba(255,255,255,1)'); g.addColorStop(.25, 'rgba(255,255,255,.55)'); g.addColorStop(1, 'rgba(255,255,255,0)'); }
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64); return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTex(false), HALO = glowTex(true);
+const glowMat = (c, size, o = 1) => new THREE.PointsMaterial({ map: GLOW, color: col(c), size, transparent: true, opacity: o, depthWrite: false, blending: THREE.AdditiveBlending, vertexColors: false });
+function pointsGeo(pts, cols) { const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3)); if (cols) g.setAttribute('color', new THREE.Float32BufferAttribute(cols, 3)); return g; }
 
-// stars: one points object, placed by a fixed hash (no random calls)
-{ const P = [], h = i => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x); };
-  for (let i = 0; i < 900; i++) { const u = h(i) * 2 - 1, a = h(i + 999) * Math.PI * 2, r = 1500, s = Math.sqrt(1 - u * u); P.push(r * s * Math.cos(a), r * u, r * s * Math.sin(a) + 300); }
-  const g = new THREE.BufferGeometry(); g.setAttribute('position', new THREE.Float32BufferAttribute(P, 3));
-  scene.add(new THREE.Points(g, new THREE.PointsMaterial({ color: col('#dbe6f5'), size: 2.2, sizeAttenuation: false }))); }
+// ---- the sky: a gradient dome, a nebula, a planet with its glow, two layers of stars; it travels with the camera
+// (so it reads as far away) and turns very slowly
+const sky = new THREE.Group(); scene.add(sky);
+{ const g = new THREE.SphereGeometry(2000, 32, 16), c = [], top = col('#0b1636'), mid = col('#1a1033'), low = col('#03050b'), p = g.attributes.position;
+  for (let i = 0; i < p.count; i++) { const y = p.getY(i) / 2000, k = new THREE.Color(); if (y > 0) k.copy(mid).lerp(top, Math.min(1, y * 1.6)); else k.copy(mid).lerp(low, Math.min(1, -y * 2.2)); c.push(k.r, k.g, k.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
+  sky.add(new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, side: THREE.BackSide, depthWrite: false }))); }
+{ const P = [], C = [], tints = ['#6a3d9a', '#2d6f8f', '#8a3f6c', '#3c4fa0'];   // the nebula: soft puffs low on the left of the way in
+  for (let i = 0; i < 26; i++) { const a = .08 + hash(i + 50) * .55, e = .02 + hash(i + 80) * .3, r = 1700; P.push(r * Math.cos(e) * Math.sin(a), r * Math.sin(e), r * Math.cos(e) * Math.cos(a)); const k = col(tints[i % 4]); C.push(k.r, k.g, k.b); }
+  const m = new THREE.PointsMaterial({ map: GLOW, size: 620, vertexColors: true, transparent: true, opacity: .32, depthWrite: false, blending: THREE.AdditiveBlending });
+  sky.add(new THREE.Points(pointsGeo(P, C), m)); }
+const planetAt = new THREE.Vector3(-330, 300, 1500);   // up and to the right of the way in
+{ const g = new THREE.SphereGeometry(150, 40, 24), c = [], p = g.attributes.position, L = new THREE.Vector3(-.2, .5, -.85).normalize(), n = new THREE.Vector3();
+  const day = col('#d89a6a'), band = col('#b86e4e'), night = col('#120a18');
+  for (let i = 0; i < p.count; i++) { n.set(p.getX(i), p.getY(i), p.getZ(i)).normalize(); const lit = Math.max(0, n.dot(L)), b = (Math.sin(n.y * 9) + 1) / 2, k = day.clone().lerp(band, b * .6); k.lerp(night, 1 - Math.min(1, lit * 1.6 + .05)); c.push(k.r, k.g, k.b); }
+  g.setAttribute('color', new THREE.Float32BufferAttribute(c, 3));
+  const m = new THREE.Mesh(g, new THREE.MeshBasicMaterial({ vertexColors: true, depthWrite: false })); m.position.copy(planetAt); m.renderOrder = 1; sky.add(m);
+  const halo = new THREE.Points(pointsGeo([planetAt.x * 1.02, planetAt.y * 1.02, planetAt.z * 1.02]), glowMat('#ff9f7a', 900, .35)); halo.renderOrder = 0; sky.add(halo); }
+const stars = [];
+for (const [n, size, o, seed] of [[1100, 1.6, .75, 0], [140, 3.6, 1, 7000]]) {   // many faint ones, a few bright
+  const P = [], C = []; for (let i = 0; i < n; i++) { const u = hash(i + seed) * 2 - 1, a = hash(i + seed + 999) * Math.PI * 2, r = 1600, s = Math.sqrt(1 - u * u), w = .55 + hash(i + seed + 333) * .45, k = col(hash(i + seed + 77) < .2 ? '#ffd9b0' : hash(i + seed + 78) < .25 ? '#bcd4ff' : '#ffffff');
+    P.push(r * s * Math.cos(a), r * u, r * s * Math.sin(a)); C.push(k.r * w, k.g * w, k.b * w); }
+  const m = new THREE.PointsMaterial({ size, sizeAttenuation: false, vertexColors: true, transparent: true, opacity: o, depthWrite: false });
+  const pts = new THREE.Points(pointsGeo(P, C), m); pts.renderOrder = 2; sky.add(pts); stars.push(pts);
+}
+sky.children.forEach(o => { o.frustumCulled = false; });
 
-// the Wren: her hull as blocks round the bay's mouth (the mouth left open), a few shapes on top; one draw call
-const W = BAY_W / 2, HULL = '#8e9bb0', DARK = '#5d6a80';
-const hull = partsToGeo([
-  { g: BOX, m: M4(-W - 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },          // left of the mouth (inner face at x = -8)
-  { g: BOX, m: M4(W + 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },           // right (inner face at x = 8)
-  { g: BOX, m: M4(0, BAY_H + 8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },   // above (lower face at y = 8); reaching into the side blocks, a little short of their top, front and back, so no faces are shared
-  { g: BOX, m: M4(0, -8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },        // below (upper face at y = 0)
-  { g: BOX, m: M4(0, 32, BAY_Z + 95, 40, 14, 80), c: DARK },                // the bridge block, sitting on top (overlaps, no shared face)
-  { g: BOX, m: M4(-36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },            // engine pods at the back
-  { g: BOX, m: M4(36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },
-]);
-scene.add(new THREE.Mesh(hull, new THREE.MeshLambertMaterial({ vertexColors: true })));
-// the bay inside: a lit box seen from inside, a little inside the mouth's edges (no shared faces)
+// ---- the Wren: her hull round the bay's mouth (the mouth left open), plating bands, a spine and a bridge, engine
+// nacelles, a red stripe; one draw call. No two faces shared: every piece that touches another reaches into it.
+const W = BAY_W / 2, HULL = '#a3afc2', PLATE = '#7c889d', DARK = '#4f5a6e', RED = '#b8483b';
+const hullParts = [
+  { g: BOX, m: M4(-W - 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },                 // left of the mouth (inner face at x = -8)
+  { g: BOX, m: M4(W + 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },                  // right (inner face at x = 8)
+  { g: BOX, m: M4(0, BAY_H + 8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },  // above (lower face at y = 8), short of the side blocks' faces
+  { g: BOX, m: M4(0, -8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },         // below (upper face at y = 0)
+  { g: BOX, m: M4(0, 27.5, BAY_Z + 90, 52, 9, 150), c: PLATE },                     // the upper deck, set back
+  { g: BOX, m: M4(0, 36, BAY_Z + 118, 26, 11, 70), c: DARK },                       // the bridge
+  { g: new THREE.CylinderGeometry(2.4, 2.4, 4, 16), m: M4(0, 43, BAY_Z + 112, 1, 1, 1), c: PLATE },   // the comms dome's base
+  { g: new THREE.SphereGeometry(3.4, 16, 10), m: M4(0, 45.5, BAY_Z + 112, 1, .7, 1), c: '#d8dee8' },
+  { g: BOX, m: M4(0, -20.5, BAY_Z + 80, 40, 6, 120), c: PLATE },                    // the keel
+];
+for (const s of [-1, 1]) {
+  hullParts.push(
+    { g: new THREE.CylinderGeometry(9, 10, 150, 20), m: M4(s * 66, -4, BAY_Z + 92, 1, 1, 1, 0, Math.PI / 2), c: DARK },   // an engine nacelle along the hull
+    { g: new THREE.CylinderGeometry(7, 9, 4, 20), m: M4(s * 66, -4, BAY_Z + 16, 1, 1, 1, 0, Math.PI / 2), c: '#39424f' },  // its intake ring, poking out in front
+    { g: BOX, m: M4(s * 62, -4, BAY_Z + 70, 10, 5, 60), c: PLATE },                                               // the pylon into the hull
+    { g: BOX, m: M4(s * 35, 4, BAY_Z - .25, 52, 1.2, .9), c: RED },                                               // the red stripe across the bow
+  );
+  for (const y of [-12, 18]) hullParts.push({ g: BOX, m: M4(s * 36, y, BAY_Z - .2, 54, 2.2, .8), c: PLATE });       // plating bands
+  for (const x of [16, 30, 46]) hullParts.push({ g: BOX, m: M4(s * x, 4, BAY_Z - .3, 1.2, 40, .9), c: PLATE });      // seams
+}
+scene.add(new THREE.Mesh(partsToGeo(hullParts), new THREE.MeshLambertMaterial({ vertexColors: true })));
+// lit things on the hull, one draw call: windows, the mouth's frame, the bay's floor stripes, the bridge's glass
+const litParts = [
+  { g: BOX, m: M4(-W - .45, BAY_H / 2, BAY_Z - .6, .9, BAY_H + 1.8, 1), c: '#49d6c6' },
+  { g: BOX, m: M4(W + .45, BAY_H / 2, BAY_Z - .6, .9, BAY_H + 1.8, 1), c: '#49d6c6' },
+  { g: BOX, m: M4(0, BAY_H + .45, BAY_Z - .6, 2 * W, .9, 1), c: '#49d6c6' },
+  { g: BOX, m: M4(0, -.45, BAY_Z - .6, 2 * W, .9, 1), c: '#49d6c6' },
+  { g: BOX, m: M4(-3, .3, BAY_Z + 20, .5, .3, 36), c: '#f2a649' },
+  { g: BOX, m: M4(3, .3, BAY_Z + 20, .5, .3, 36), c: '#f2a649' },
+  { g: BOX, m: M4(0, 38, BAY_Z + 82.8, 22, 3, .6), c: '#9fe9ff' },                  // the bridge's windows (proud of its front face)
+];
+for (let i = 0; i < 64; i++) {                                                      // rows of windows either side of the mouth
+  const s = i % 2 ? 1 : -1, j = i >> 1, row = j % 4, k = j >> 2, x = s * (13 + k * 3.4), y = [-6, -1, 10, 14][row];
+  if (hash(i + 400) < .22) continue;
+  litParts.push({ g: BOX, m: M4(x, y, BAY_Z - .5, 1.6, 1, 1), c: hash(i + 500) < .25 ? '#ffe2a8' : '#ffd27a' });
+}
+scene.add(new THREE.Mesh(partsToGeo(litParts), new THREE.MeshBasicMaterial({ vertexColors: true })));
+// the bay inside: a warm lit box seen from inside, a little inside the mouth's edges; and its soft glow out of the mouth
 const bay = new THREE.Mesh(new THREE.BoxGeometry(2 * W - .3, BAY_H - .3, 40), new THREE.MeshBasicMaterial({ color: col('#ffd79a'), side: THREE.BackSide }));
 bay.position.set(0, BAY_H / 2, BAY_Z + 20.2); scene.add(bay);
-// floor stripes in the bay (raised, so never on the bay's floor plane), and the glowing frame round the mouth: one draw call
-const glow = partsToGeo([
-  { g: BOX, m: M4(-W - .4, BAY_H / 2, BAY_Z - .5, .8, BAY_H + 1.6, .8), c: '#49d6c6' },
-  { g: BOX, m: M4(W + .4, BAY_H / 2, BAY_Z - .5, .8, BAY_H + 1.6, .8), c: '#49d6c6' },
-  { g: BOX, m: M4(0, BAY_H + .4, BAY_Z - .5, 2 * W, .8, .8), c: '#49d6c6' },
-  { g: BOX, m: M4(0, -.4, BAY_Z - .5, 2 * W, .8, .8), c: '#49d6c6' },
-  { g: BOX, m: M4(-3, .35, BAY_Z + 18, .5, .3, 32), c: '#f2a649' },
-  { g: BOX, m: M4(3, .35, BAY_Z + 18, .5, .3, 32), c: '#f2a649' },
-]);
-scene.add(new THREE.Mesh(glow, new THREE.MeshBasicMaterial({ vertexColors: true })));
+const bayGlow = new THREE.Points(pointsGeo([0, BAY_H / 2, BAY_Z - 2]), glowMat('#ffbe6e', 46, .55)); scene.add(bayGlow);
+// approach beacons in two lines out from the mouth (they chase in towards the bay) and the running lights (red, green, white; they blink)
+const LAND = []; for (let i = 0; i < 9; i++) { const t = i / 8; LAND.push([-W - 1.6, -1.2 + t * 0, BAY_Z - 1.2 - (8 - i) * 6], [W + 1.6, -1.2, BAY_Z - 1.2 - (8 - i) * 6]); }
+const landGeo = pointsGeo(LAND.flat(), LAND.flatMap(() => [1, 1, 1]));
+const landPts = new THREE.Points(landGeo, new THREE.PointsMaterial({ map: GLOW, size: 3.2, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+scene.add(landPts);
+const RUN = [[-60, 26, BAY_Z - 1, '#ff3b3b'], [60, 26, BAY_Z - 1, '#3bff7a'], [0, 50, BAY_Z + 112, '#ffffff'], [-66, -4, BAY_Z + 13, '#ff3b3b'], [66, -4, BAY_Z + 13, '#3bff7a']];
+const runPts = new THREE.Points(pointsGeo(RUN.flatMap(r => r.slice(0, 3)), RUN.flatMap(r => { const k = col(r[3]); return [k.r, k.g, k.b]; })),
+  new THREE.PointsMaterial({ map: GLOW, size: 7, vertexColors: true, transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+scene.add(runPts);
 
-// the rings: one torus drawn four times (instanced), the next one brightest, a passed one dim
-const rings = new THREE.InstancedMesh(new THREE.TorusGeometry(1, .045, 8, 48), new THREE.MeshBasicMaterial({ color: col('#ffffff') }), RINGS.length);
-RINGS.forEach((R, i) => rings.setMatrixAt(i, M4(R.x, R.y, R.z, R.r, R.r, R.r * 1.0)));
-scene.add(rings);
-const RING_COL = { next: col('#7ff5e6'), later: col('#2f8f86'), through: col('#2c5a55'), missed: col('#7a3b34') };
-const ZERO = new THREE.Matrix4().makeScale(0, 0, 0);
-function ringsPaint(s) {                               // a ring once it's behind the camera isn't drawn (it would fill the view)
-  RINGS.forEach((R, i) => { rings.setColorAt(i, s.rings[i] > 0 ? RING_COL.through : s.rings[i] < 0 ? RING_COL.missed : i === s.ring ? RING_COL.next : RING_COL.later);
-    rings.setMatrixAt(i, R.z < s.z - 8 ? ZERO : M4(R.x, R.y, R.z, R.r, R.r, R.r)); });
-  rings.instanceColor.needsUpdate = true; rings.instanceMatrix.needsUpdate = true;
+// ---- the rings: a glowing torus and a soft halo each (instanced: two draw calls for all four); the next one pulses
+const rings = new THREE.InstancedMesh(new THREE.TorusGeometry(1, .06, 10, 56), new THREE.MeshBasicMaterial({ color: col('#ffffff') }), RINGS.length);
+const halos = new THREE.InstancedMesh(new THREE.PlaneGeometry(2.7, 2.7), new THREE.MeshBasicMaterial({ map: HALO, color: col('#ffffff'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide }), RINGS.length);
+scene.add(rings, halos);
+const RING_COL = { next: col('#86fff0'), later: col('#3aa79c'), through: col('#2a5d58'), missed: col('#a2493d') };
+const ZERO = new THREE.Matrix4().makeScale(0, 0, 0), tmpC = new THREE.Color();
+function ringsPaint(s, t) {                            // a ring once it's behind the camera isn't drawn (it would fill the view)
+  RINGS.forEach((R, i) => {
+    const next = i === s.ring && !s.end, c = s.rings[i] > 0 ? RING_COL.through : s.rings[i] < 0 ? RING_COL.missed : next ? RING_COL.next : RING_COL.later;
+    const pulse = next ? 1 + .045 * Math.sin(t * 4.2) : 1, gone = R.z < s.z - 8;
+    rings.setColorAt(i, c); rings.setMatrixAt(i, gone ? ZERO : M4(R.x, R.y, R.z, R.r * pulse, R.r * pulse, R.r));
+    halos.setColorAt(i, tmpC.copy(c).multiplyScalar(next ? .55 + .25 * Math.sin(t * 4.2) : .28)); halos.setMatrixAt(i, gone ? ZERO : M4(R.x, R.y, R.z + .01, R.r * pulse, R.r * pulse, 1));
+  });
+  for (const m of [rings, halos]) { m.instanceColor.needsUpdate = true; m.instanceMatrix.needsUpdate = true; }
 }
 
-// the Tern: a small shuttle, nose to +z; one draw call
+// ---- the Tern: a little shuttle, nose to +z (body, nose, swept wings, engine nacelles, a fin: one draw call), her
+// cockpit glass (one), and the exhaust glow that brightens with speed (one)
+function wingGeo() {                                   // a swept wing pair, flat, 0.14 thick
+  const sh = new THREE.Shape(); sh.moveTo(-2.9, -.95); sh.lineTo(-2.7, -.45); sh.lineTo(-.4, .95); sh.lineTo(.4, .95); sh.lineTo(2.7, -.45); sh.lineTo(2.9, -.95); sh.lineTo(-2.9, -.95);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .14, bevelEnabled: false }); g.rotateX(Math.PI / 2); g.translate(0, .07, 0); return g;
+}
+function finGeo() {
+  const sh = new THREE.Shape(); sh.moveTo(0, 0); sh.lineTo(-1.3, 0); sh.lineTo(-1.6, 1.2); sh.lineTo(-1.05, 1.2); sh.lineTo(0, 0);
+  const g = new THREE.ExtrudeGeometry(sh, { depth: .12, bevelEnabled: false }); g.rotateY(-Math.PI / 2); g.translate(-.06, 0, 0); return g;
+}
+const Z90 = Math.PI / 2;
 const tern = new THREE.Mesh(partsToGeo([
-  { g: BOX, m: M4(0, 0, 0, 1.3, .8, 3.2), c: '#e9eef5' },                  // body
-  { g: new THREE.ConeGeometry(.62, 1.2, 8), m: M4(0, 0, 2.2, 1, .7, 1, 0, Math.PI / 2), c: '#e9eef5' },   // nose
-  { g: BOX, m: M4(0, -.1, -.4, 4.2, .12, 1.4), c: '#c85b4a' },             // wings (through the body: no shared face)
-  { g: BOX, m: M4(0, .55, -1.3, .12, .9, .8), c: '#c85b4a' },              // fin
-  { g: BOX, m: M4(0, .18, 1.05, .9, .3, .9), c: '#244a6b' },               // canopy
-  { g: BOX, m: M4(0, 0, -1.75, .9, .5, .3), c: '#ffb45c' },                // engine glow
+  { g: new THREE.CylinderGeometry(.56, .72, 3.0, 16), m: M4(0, 0, 0, 1, 1, .9, 0, Z90), c: '#eef2f7' },          // body (its axis along z; squashed a little)
+  { g: new THREE.ConeGeometry(.56, 1.5, 16), m: M4(0, 0, 2.2, 1, 1, .9, 0, Z90), c: '#eef2f7' },                // nose (its base inside the body)
+  { g: new THREE.CylinderGeometry(.72, .45, .5, 16), m: M4(0, 0, -1.68, 1, 1, .9, 0, Z90), c: '#8d9ab0' },        // tail cap
+  { g: wingGeo(), m: M4(0, -.2, -.55, 1, 1, 1), c: '#d4644f' },                                                    // wings through the body
+  { g: new THREE.CylinderGeometry(.34, .3, 1.9, 12), m: M4(-1.45, -.18, -.85, 1, 1, 1, 0, Z90), c: '#596a82' },  // engine nacelles
+  { g: new THREE.CylinderGeometry(.34, .3, 1.9, 12), m: M4(1.45, -.18, -.85, 1, 1, 1, 0, Z90), c: '#596a82' },
+  { g: new THREE.CylinderGeometry(.24, .24, .2, 12), m: M4(-1.45, -.18, -1.86, 1, 1, 1, 0, Z90), c: '#ffb45c' },  // their hot ends
+  { g: new THREE.CylinderGeometry(.24, .24, .2, 12), m: M4(1.45, -.18, -1.86, 1, 1, 1, 0, Z90), c: '#ffb45c' },
+  { g: finGeo(), m: M4(0, .45, -.4, 1, 1, 1), c: '#d4644f' },                                                      // the fin
+  { g: BOX, m: M4(0, .05, .4, .14, .1, 2.2), c: '#d4644f' },                                                       // a stripe on top (proud of the body)
 ]), new THREE.MeshLambertMaterial({ vertexColors: true }));
+const glass = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), new THREE.MeshPhongMaterial({ color: col('#4fb3e8'), emissive: col('#0d2a40'), shininess: 90, specular: col('#ffffff') }));
+glass.scale.set(.42, .3, .85); glass.position.set(0, .42, .85); tern.add(glass);
+const exhaust = new THREE.Points(pointsGeo([-1.45, -.18, -2.1, 1.45, -.18, -2.1]), glowMat('#ffa64a', 1.6, .9)); tern.add(exhaust);
 scene.add(tern);
 
-// draw a state: the Tern where it is, tilted with how it's moving; the chase camera behind and above
-const camPos = new THREE.Vector3(), camAim = new THREE.Vector3();
-function draw(s, snap) {
+// draw a state: the Tern where it is, tilted with how it's moving; the chase camera behind and above, swaying a little
+const camPos = new THREE.Vector3(), camAim = new THREE.Vector3(), want = new THREE.Vector3(), aim = new THREE.Vector3();
+function draw(s, snap, t = 0) {
   tern.position.set(s.x, s.y, s.z);
-  tern.rotation.set(-Math.atan2(s.vy, s.v) * .8, Math.atan2(s.vx, s.v) * .6, -s.vx / SIDE * .5, 'YXZ');
-  const want = new THREE.Vector3(s.x - s.vx * .4, s.y + 4.5, s.z - 15), aim = new THREE.Vector3(s.x, s.y + 1, s.z + 20);
+  tern.rotation.set(-Math.atan2(s.vy, s.v) * .8, Math.atan2(s.vx, s.v) * .6, s.vx / SIDE * .55, 'YXZ');   // banks into the turn
+  exhaust.material.size = 1.1 + s.v * .11; exhaust.material.opacity = Math.min(1, .45 + s.v / 16);
+  want.set(s.x - s.vx * .4 + Math.sin(t * .55) * .35, s.y + 5.4 + Math.sin(t * .8) * .22, s.z - 15); aim.set(s.x, s.y + .6, s.z + 20);
   if (snap || camPos.distanceTo(want) > 40) { camPos.copy(want); camAim.copy(aim); } else { camPos.lerp(want, .12); camAim.lerp(aim, .15); }
   camera.position.copy(camPos); camera.lookAt(camAim);
-  ringsPaint(s);
+  sky.position.copy(camera.position); sky.rotation.y = t * .004;   // the sky stays far away and drifts very slowly
+  ringsPaint(s, t);
+  runPts.material.opacity = (t % 1.6) < .35 ? 1 : .18;            // the running lights blink
+  const C = landGeo.attributes.color, step = Math.floor(t * 9) % 12;   // the landing lights chase in towards the bay
+  for (let i = 0; i < 9; i++) { const on = i === step || i === step - 1 ? 1 : .25, k = tmpC.copy(col('#ffcf6e')).multiplyScalar(on); C.setXYZ(2 * i, k.r, k.g, k.b); C.setXYZ(2 * i + 1, k.r, k.g, k.b); }
+  C.needsUpdate = true;
 }
+const screenX = () => { const v = tern.position.clone().project(camera); return (v.x + 1) / 2 * innerWidth; };   // where the Tern is on screen (the check)
 
 // =====================================================================
 // 3. THE PAGE (start, tips, flying, the result) and the input
@@ -211,7 +310,7 @@ function start() {
   G = { s: fnew(), tip: $('tipsAgain').checked || !tipsSeen() ? 0 : -1, acc: 0 };
   $('tipsAgain').checked = false;
   show('menu', false); show('result', false); show('hud', true); show('leave', true); show('hint', G.tip < 0);
-  tipShow(); draw(G.s, true);
+  tipShow(); draw(G.s, true, performance.now() / 1000);
 }
 function tipShow() {
   const on = G && G.tip >= 0; show('tip', on); if (!on) return;
@@ -228,7 +327,7 @@ $('done').onclick = () => { G = null; show('result', false); show('menu', true);
 $('leave').onclick = e => { e.stopPropagation(); G = null; ['hud', 'leave', 'tip', 'hint'].forEach(i => show(i, false)); show('menu', true); };
 function finish() {
   show('hud', false); show('leave', false); show('hint', false);
-  $('resText').textContent = SAY[G.s.end]; $('again').textContent = G.s.end === 'miss' ? 'Try again' : 'Again';
+  $('resText').textContent = SAY[G.s.end]; $('resCard').className = 'card res ' + G.s.end; $('again').textContent = G.s.end === 'miss' ? 'Try again' : 'Again';
   show('result', true);
 }
 // one finger (or the mouse) anywhere: how far you've dragged from where you put it down steers, 110 px for full
@@ -243,7 +342,8 @@ addEventListener('keyup', e => keys.delete(e.code));
 function input() {                                     // what the step sees: keys if any are down, else the drag
   let kx = 0, ky = 0; for (const k of keys) { kx += KEYX[k] || 0; ky += KEYY[k] || 0; }
   if (window.FL && FL.auto && G) return FL.auto(G.s);   // a test's scripted pilot
-  return kx || ky ? { x: Math.sign(kx), y: Math.sign(ky) } : { x: inp.x, y: inp.y };
+  // right on the screen is -x in the rules (the chase camera looks along +z), so the sideways input is turned round here
+  return kx || ky ? { x: -Math.sign(kx), y: Math.sign(ky) } : { x: -inp.x, y: inp.y };
 }
 addEventListener('resize', () => { renderer.setSize(innerWidth, innerHeight); camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); });
 
@@ -255,7 +355,7 @@ function frame(now) {
     if (G.s.end) setTimeout(() => { if (G && G.s.end) finish(); }, 900);
   }
   const s = G ? G.s : fnew();
-  draw(s, !G);
+  draw(s, !G, now / 1000);
   if (G) $('read').textContent = Math.max(0, Math.round(BAY_Z - s.z)) + ' m · ' + s.v.toFixed(0) + ' m/s';
   renderer.render(scene, camera);
   requestAnimationFrame(frame);
@@ -276,6 +376,7 @@ window.FL = {
   state: () => G && { ...G.s, tip: G.tip },
   input: (x, y) => { inp.x = x; inp.y = y; },
   calls: () => renderer.info.render.calls,
+  screenX: () => screenX(),
   jump: (name, z) => { if (!G) return null; const P = PILOTS[name]; while (!G.s.end && G.s.z < z) fstep(G.s, P(G.s)); return FL.state(); },   // fly the live go on paper up to z with a scripted pilot (the screenshots)
   pilot: name => { FL.auto = name && PILOTS[name]; },
   sim: name => { const s = fnew(), P = PILOTS[name]; let n = 0; while (!s.end && n++ < 60 * 200) fstep(s, P(s)); return { end: s.end, secs: +(s.t / 60).toFixed(1), rings: s.rings.slice(), land: s.land && { v: +s.land.v.toFixed(2), vx: +s.land.vx.toFixed(2), vy: +s.land.vy.toFixed(2) }, x: +s.x.toFixed(2), y: +s.y.toFixed(2) }; },

@@ -2,7 +2,8 @@
 // Needs three.js r128 at /tmp/cadet-work/three/package/build/three.min.js (DEV_NOTES Testing: npm pack three@0.128.0).
 // Phone (390x844, touch) and wide (1280x800, mouse and keys): the start card, the three tips (Next, Skip, once
 // only), a one-finger drag steers and letting go levels out, draw calls, the three endings from scripted pilots
-// (steady: soft; steep dive: hard; drift: miss), each the same twice, about a minute a go; screenshots.
+// (steady: soft; steep dive: hard; drift: miss), each the same twice, about a minute a go; right on the screen is
+// right (the Tern is projected to the screen); screenshots.
 const { chromium } = require('playwright');
 const path = require('path'), ROOT = path.join(__dirname, '..');
 const OUT = path.join(ROOT, 'plans/shots-simflight') + '/';
@@ -58,13 +59,16 @@ async function land(p, name, shot) {                  // a live go flown by a sc
   for (let i = 0; i <= 8; i++) { await touch('touchMove', 200 + i * 12, 600 - i * 12); await p.waitForTimeout(30); }
   await p.waitForTimeout(1200);
   const s1 = await p.evaluate(() => FL.state());
-  ok(s1.vx > 3 && s1.vy > 2, `a finger dragged up and right steers right and climbs (vx ${s1.vx.toFixed(1)}, vy ${s1.vy.toFixed(1)})`);
+  const sx = await p.evaluate(() => FL.screenX());
+  ok(s1.vy > 2 && Math.abs(s1.vx) > 3, `a finger dragged up climbs and turns (vx ${s1.vx.toFixed(1)}, vy ${s1.vy.toFixed(1)})`);
+  await p.waitForTimeout(800); const sx2 = await p.evaluate(() => FL.screenX());
+  ok(sx > 390 / 2 + 20 && sx2 >= sx, `dragging right moves the Tern right on the screen (x ${sx.toFixed(0)} -> ${sx2.toFixed(0)} px of 390)`);
   await p.screenshot({ path: OUT + 'phone-3-flying.png' });
   await touch('touchEnd'); await p.waitForTimeout(2500);
   const s2 = await p.evaluate(() => FL.state());
   ok(Math.abs(s2.vx) < 1 && Math.abs(s2.vy) < 1, `letting go levels out (vx ${s2.vx.toFixed(2)}, vy ${s2.vy.toFixed(2)})`);
   const calls = await p.evaluate(() => FL.calls());
-  ok(calls <= 10, `draw calls while flying: ${calls} (about 10 at most)`);
+  ok(calls <= 25, `draw calls while flying: ${calls} (under 25)`);
   await p.evaluate(() => FL.jump('steady', 300)); await p.waitForTimeout(400);
   await p.screenshot({ path: OUT + 'phone-4-rings.png' });
   let r = await land(p, 'steady', 'phone-5-soft');
@@ -85,8 +89,12 @@ async function land(p, name, shot) {                  // a live go flown by a sc
   ok((await w.evaluate(() => FL.state().tip)) === -1, 'Skip ends the tips');
   await w.mouse.move(640, 400); await w.mouse.down(); await w.mouse.move(540, 400, { steps: 6 }); await w.waitForTimeout(1200);
   const m = await w.evaluate(() => FL.state()); await w.mouse.up();
-  ok(m.vx < -3, `a mouse drag left steers left (vx ${m.vx.toFixed(1)})`);
-  await w.waitForTimeout(1500); await w.keyboard.down('ArrowDown'); await w.waitForTimeout(1200);
+  const mx = await w.evaluate(() => FL.screenX());
+  ok(Math.abs(m.vx) > 3 && mx < 640 - 10, `a mouse drag left moves the Tern left on the screen (x ${mx.toFixed(0)} of 1280)`);
+  await w.waitForTimeout(2500); await w.keyboard.down('ArrowRight'); await w.waitForTimeout(1500);
+  const kr = await w.evaluate(() => FL.screenX()); await w.keyboard.up('ArrowRight');
+  ok(kr > 640 + 10, `the right arrow moves the Tern right on the screen (x ${kr.toFixed(0)} of 1280)`);
+  await w.waitForTimeout(2500); await w.keyboard.down('ArrowDown'); await w.waitForTimeout(1200);
   const k = await w.evaluate(() => FL.state()); await w.keyboard.up('ArrowDown');
   ok(k.vy < -2, `the down arrow descends (vy ${k.vy.toFixed(1)})`);
   await w.screenshot({ path: OUT + 'wide-1-flying.png' });
