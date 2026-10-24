@@ -7,7 +7,7 @@
 #   on the deck: Ask someone to play brings one free crew member down by lift to the stern baseline and the game starts;
 #   the ship's clock stands still while you play and the notice says so; the game view stays under 200 draw calls;
 #   How to play on your first game; Leave mid-game isn't counted and the clock runs again; a whole game (your side on
-#   the autopilot) ends with the result (Again, Quick game, Done), the record and the social; Done ends the activity and
+#   the autopilot) ends with the result (Again, Done; your games first to 3 from 0.92.5), the record and the social; Done ends the activity and
 #   your opponent goes back to their own plans; in quiet hours nobody comes; the page has no errors
 # Setup and environment as for cadet_test.py.
 # Run:  python3 disc_check.py BUILD.html [GAMES]   (GAMES per level for the balance table, default 40)
@@ -56,6 +56,8 @@ with sync_playwright() as pw:
       return [k, w, Math.round(steps / %d / 60), +(rally / n).toFixed(1)]; }))""" % (GAMES, GAMES)))
     allend = json.loads(g.ev("JSON.stringify([1,2,3,4,5,6,7,8].map(s => ldPaper({ seed: s, you: LD_LEVEL.sharp, them: LD_LEVEL.sharp })).every(x => x.winner >= 0 && Math.max(...x.score) >= 7 && Math.abs(x.score[0] - x.score[1]) >= 2))"))
     check(allend, 'games end, first to 7 win by 2')
+    yours = json.loads(g.ev("JSON.stringify([1,2,3,4,5,6,7,8].map(s => ldPaper({ seed: s, to: typeof LD_YOURS !== 'undefined' ? LD_YOURS : undefined, you: LD_LEVEL.sharp, them: LD_LEVEL.steady }).score))"))
+    check(all(max(x) == 3 and min(x) < 3 for x in yours) and any(abs(x[0] - x[1]) == 1 for x in yours), '0.92.5 #3: your games end at first to 3, no win by 2 (%s)' % yours)
     print('     balance, the sharp autopilot against each (games won of %d, minutes a game, returns a point):' % GAMES)
     for k, w, m, ra in bal: print('       %-7s %3d   %4.1f min   %4.1f' % (k, w, m / 60, ra))
     B = {k: w for k, w, m, ra in bal}
@@ -102,14 +104,14 @@ with sync_playwright() as pw:
         if g.ev("!DISC.g || DISC.g.phase === 'over'"): break
     s = json.loads(g.ev(STATE))
     check(s['phase'] == 'over' and s['frozen'], 'the game plays to the end (%s); the clock waits through the result' % s['score'])
-    check(g.ev("!document.querySelector('#ld .res').classList.contains('hide') && [...document.querySelectorAll('#ld .res button')].map(b => b.textContent).join() === 'Again,Quick game,Done'"), 'the result: Again, Quick game, Done')
+    check(g.ev("!document.querySelector('#ld .res').classList.contains('hide') && [...document.querySelectorAll('#ld .res button')].map(b => b.textContent).join() === 'Again,Done'"), 'the result: Again, Done (0.92.5: no Quick game)')
     rec = json.loads(g.ev("JSON.stringify(SHIP.disc)"))
     check(rec['played'] == 1 and rec['won'] + rec['lost'] == 1 and sum(rec['vs'][g.ev('DISC.opp')]) == 1 and rec['taught'], 'the record: one game, against them (%s)' % rec['vs'])
     check(g.ev("SHIP.player.needs.social") > soc0, 'the social comes at the end')
     g.step(5); g.shot('ld-2-result.png')
-    g.ev("[...document.querySelectorAll('#ld .res button')].find(b => b.textContent === 'Quick game').click()")
+    g.ev("[...document.querySelectorAll('#ld .res button')].find(b => b.textContent === 'Again').click()")
     g.step(30); s = json.loads(g.ev(STATE))
-    check(s['g'] and s['phase'] in ('serve', 'live') and g.ev("DISC.g.target") == 5 and s['frozen'], 'Quick game starts a game to 5 with the same opponent')
+    check(s['g'] and s['phase'] in ('serve', 'live') and g.ev("DISC.g.target") == 3 and s['frozen'], 'Again starts a game to 3 with the same opponent (0.92.5 #3)')
     check(g.ev("DISC.how") == -1, 'How to play only the first time')
     g.ev("document.querySelector('#ld .lv').click()"); g.step(30)
     check(g.ev("ACT === null || ACT.kind !== 'disc'"), 'Done/Leave ends the activity')

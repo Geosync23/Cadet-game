@@ -47964,6 +47964,7 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 // The rules are pure: game space is x across the court (+ is your right), z along it (+ is your end, the bow), no DOM,
 // no three.js, no R() and no Math.random. A game's stream is seeded from the save (schedU key 830); 831 picks a crew
 // member's level when they have no personality of their own. Fixed 60 steps a second, whatever the frame rate.
+const LD_YOURS = 3;                                       // 0.92.5 #3 (the user's, lead 34): your games end at first to 3, no win by 2; the crew's on paper keep 7 (5 quick), win by 2
 const LD_DT = 1 / 60, LD_S0 = 5.0, LD_CAP = 13.5, LD_UP = 1.1, LD_REACH = .9, LD_MAXA = Math.PI / 3, LD_CURVE = .5, LD_CURL = 1.5, LD_CHARGE = 4 / 3, LD_YOU = 9;
 const LD_HX = 2.38, LD_BASE = 5.6, LD_ZONE = 1.9, LD_OUT = 6.3, LD_R = .2;   // the court (DA6's recCourt): fields at ±2.38, baselines at 5.9, your zone to 3.9
 // the crew's levels (plan section 4): reaction, speed, how often they misjudge, how wide, how often they curve, how off-centre they aim
@@ -47993,7 +47994,7 @@ function ldRng(seed) {   // mulberry32, as the prototype and Tiles (the view's c
 }
 // o: { seed, quick, you: level or null (null: you play by input), them: level }. Side 0 is you (+z), side 1 them (-z).
 function ldNew(o) {
-  const g = { seed: (o.seed >>> 0) || 1, target: o.quick ? 5 : 7, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], over: false, winner: -1, trail: [], ev: [] };
+  const g = { seed: (o.seed >>> 0) || 1, target: o.to || (o.quick ? 5 : 7), straight: !!o.to, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], over: false, winner: -1, trail: [], ev: [] };
   g.rs = g.seed; g.rng = () => ldNext(g);              // the stream's state is plain data (g.rs), so a game can be copied (ldClone)
   const pl = (side, ai) => ({ side, ai, x: 0, z: side * LD_BASE, vx: 0, streak: 0, swing: 0, plan: null, hits: 0 });
   g.p = [pl(1, o.you || null), pl(-1, o.them)];
@@ -48119,7 +48120,7 @@ function ldHit(g, i, dx) {
 function ldPoint(g, w) {
   g.score[w]++; g.server = 1 - w; g.phase = 'point'; g.timer = 1.1;
   const [a, b] = g.score;
-  if ((a >= g.target || b >= g.target) && Math.abs(a - b) >= 2) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
+  if ((a >= g.target || b >= g.target) && (g.straight || Math.abs(a - b) >= 2)) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
   g.log.push({ step: g.step, w, rally: g.rally });
   g.ev.push({ k: 'point', w });
 }
@@ -48185,7 +48186,7 @@ function discBegin(a, quick) {
   const D = SHIP.disc; D.games++;
   DISC.opp = a.p.id; DISC.name = shortName(a.p); DISC.agent = a; DISC.quick = !!quick;
   DISC.short = DISC.name.split(' ').length > 1 && /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(DISC.name.split(' ')[0]) ? DISC.name.split(' ').pop() : DISC.name;   // on the score: Vance, not Commander Vance
-  DISC.g = ldNew({ seed: Math.floor(schedU(D.games, SHIP.time.day, 830) * 4294967296), quick, you: null, them: ldLevel(a.p.id) });
+  DISC.g = ldNew({ seed: Math.floor(schedU(D.games, SHIP.time.day, 830) * 4294967296), quick, to: LD_YOURS, you: null, them: ldLevel(a.p.id) });   // your games: first to 3 (0.92.5 #3)
   DISC.how = D.taught ? -1 : 0; DISC.moved = 0;
   discViewOn();
 }
@@ -48390,7 +48391,7 @@ function discResult() {
   ldEl('div', 's', card, 'Your record against ' + DISC.name + ': ' + v[0] + '–' + v[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.');
   const b = ldEl('div', 'b', card);
   const btn = (t, f, go) => { const e = ldEl('button', go ? 'go' : null, b, t); e.onclick = ev => { ev.stopPropagation(); f(); }; };
-  btn('Again', () => discEnd('full'), true); btn('Quick game', () => discEnd('quick')); btn('Done', () => discEnd(false));
+  btn('Again', () => discEnd('full'), true); btn('Done', () => discEnd(false));   // 0.92.5 #3: no Quick game now a game is first to 3 (discEnd('quick') kept, unused)
   V.res.classList.remove('hide'); V.how.classList.add('hide'); V.leave.classList.add('hide');
 }
 // the players' moves (plan v5 section 8, "disc ready / side-step / return"), posed straight onto a full rig each frame:
