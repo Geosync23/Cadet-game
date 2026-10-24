@@ -14,3 +14,4 @@ check_fast, cadet_test (every pixel diff explained); nothing else changes.
 
 ## Status
 - Set up ~03:30 UTC: playwright, three r128, acorn 8.12.1 in /tmp/cadet-work. Waiting for shas.
+- Baseline 364c80cb (game sha256 ca2f908d...e7e4 = 0.92.2): check_fast QUICK CHECK OK in 206 s here.
