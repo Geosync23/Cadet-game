@@ -44089,8 +44089,8 @@ const INTRO_ARROWS = {
   eat: { deck: 3, item: /^servery$/i, label: 'Get your dinner at the servery' },
   stow: { deck: 4, place: '4-B1-4-wardrobe', label: 'Put your bag in your wardrobe' },   // the arrival's 'stow' step (playtest patch 1, #2)
   tea: { deck: 5, room: 't', item: /^tea table$/i, label: 'Tea and biscuits with Zeke' },   // Zeke's Day 1 tea (introTeaTick, below); at the tea table, like FR4's quest arrow (playtest patch 1, #10)
-  call: { deck: 3, room: 'B', place: '3-callhome-1', label: 'Call home from the booths' },
-  change: { deck: 4, place: '4-B1-4-wardrobe', label: 'Change into clean clothes' },   // (DS1, the user, patch 0.92.3 #9) Day 1's morning, until you have   // Day 0's call-home card, when you tap Track it (introCallTick); on a free booth (FX5: introCallTick picks it)
+  call: { deck: 3, room: 'B', place: '3-callhome-1', label: 'Call home from the booths' },   // Day 0's call-home card, when you tap Track it (introCallTick); on a free booth (FX5: introCallTick picks it)
+  change: { deck: 4, place: '4-B1-4-wardrobe', label: 'Change into clean clothes' },   // (DS1, the user, patch 0.92.3 #9) Day 1's morning, until you have
 };
 INTRO_ARROWS.call.label = (typeof LINES !== 'undefined' && Array.isArray(LINES['tip.callhome.goal']) && LINES['tip.callhome.goal'][0] && LINES['tip.callhome.goal'][0].text) || INTRO_ARROWS.call.label;
 const INTRO_CLOCK_AUTO = 8 * 60 + 50;                     // 0.72.5 (playtest 2, item 6): on your first shift, the time clock's arrow from 08:50 if you're in the Works bay (then the job board's, item 7)

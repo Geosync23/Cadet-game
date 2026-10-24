@@ -533,12 +533,12 @@ def late_dinner(g):
     if not all(near): fail('part 17: the walker lost him (the check needs you with him all the way)')
     if m: fail(f'Calder\'s "Missed you at dinner" Mail came while he was still with you: {m}')
 
-# part 18 (DS1, the user's patch 0.92.3 items 1, 7-10), in one new game: the bedtime tip with the bunk's arrow on Day 0; Day 1's
+# part 19 (DS1, the user's patch 0.92.3 items 1, 7-10), in one new game: the bedtime tip with the bunk's arrow on Day 0; Day 1's
 # wardrobe arrow till you've changed; Tomas's wake-up lines without the towel one (its key retired, the next still said);
 # Zeke's opener says clock in right after his hello; his "quiet days / the ship gets lively" pair comes early on the
 # training day (else before his end-of-day words), his other follow lines still in order
 def patch923(g):
-    print('18. Patch 0.92.3: the bedtime tip, Day 1\'s change-clothes arrow, Tomas without the towel, Zeke\'s clock-in first, the "lively" pair on training day')
+    print('19. Patch 0.92.3: the bedtime tip, Day 1\'s change-clothes arrow, Tomas without the towel, Zeke\'s clock-in first, the "lively" pair on training day')
     g.ev('localStorage.clear()'); g.ev('CLOTHES_ON = true'); g.ev('newGameStart(true)'); g.step(5)
     g.ev("(() => { if (DIALOGUE) dialogueEnd(true); const f = document.querySelector('form input[maxlength=\"24\"]'); f.value = 'Sam'; f.form.requestSubmit(); })()"); g.step(20)
     # 1: the bunk's arrow after his goodnight brings the bedtime tip, once
@@ -683,7 +683,7 @@ FIRSTS_ONLY = '--firsts' in sys.argv
 LEAVE_ONLY = '--leave' in sys.argv   # part 14 alone (0.64.15's "Zeke stands in the bunk room")
 WEEK_ONLY = '--week' in sys.argv
 BESIDE_ONLY = '--beside' in sys.argv   # part 16 alone (FE2 on 0.92.0)
-P923_ONLY = '--p923' in sys.argv   # part 18 alone (patch 0.92.3)
+P923_ONLY = '--p923' in sys.argv   # part 19 alone (patch 0.92.3)
 EVENING_ONLY = '--evening' in sys.argv or '--dawdle' in sys.argv
 DAWDLE = '--dawdle' in sys.argv   # 0.42.31 (the user on 0.60.6): part 8 lingers ~40 s by the Deck 5 lift and again after the bunk; Torres must still ride with you   # part 8 alone: the evening walked in the real game (the tour's quick check)
 with sync_playwright() as pw:
