@@ -426,3 +426,172 @@ exam. His roster thread `leaving` is replaced by this arc.
 Crescendo shape: **a goodbye gift at a departure.** The only story you can't keep.
 
 ---
+
+## D. Chief Ines Calder (`arc:calder`, who `calder`): "Well done" (SW1, keep and stage)
+
+Stays aboard. Gated by your Works record (`rep:known` beats 1-2, `rep:well` 3 on), as written. **Kept:** beats 1-4 word
+for word. **Rewritten:** old beat 5 splits: its Fenn reply and her "Well done." move into the crescendo; the toolbox on
+your bench becomes the afterglow. **The rule stays absolute: nobody hears Calder say "well done" anywhere before the
+crescendo** (or its quiet ending). Her voice card says she never praises anyone in front of others: the crescendo
+breaks that on purpose, and she says so.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Swarf", 2 "Don't open it", 3 "Fenn", 4 "Too hard" (kept) | as written | light, light, heartfelt, heartfelt | The shipyard swarf; the toolbox; Fenn's letter; "Am I too hard on you?" | as written |
+| 5 **crescendo** "In front of people" | close, `rep:well`, 3+ days after 4; `where: Tea corner`; `when: beat:calder.4 weekday:fri`; **Day 26 at the Works Friday tea, inside "Calder's question"** (a Pillar 5 career meeting: write this beat so it plays just before her question) | resolution | The whole of Works at the tea corner for your four weeks. Before her question, she puts her mug down. "I don't do this in front of people." She did answer Fenn. Fenn wrote back two words. (Kept: "Took her thirty years. I won't take that long.") Then, to you, plainly, in front of everyone: "Well done." Silence for one line; Halloran is the first to clap and she stops him with a look; then she lets him. A cast line each from Halloran, Pell and Zeke, short. The choice is small: what you say back. Then her question goes on as built. | `flag: calder.welldone` (kept); `mem: welldone` |
+| 6 afterglow "Borrowed" (from old 5) | the next workday after 5 (Day 29 in a new game: she's off at weekends), `where: Works bay`, `duty: true`, morning | light | The toolbox on your bench with the note: "Borrowed. Return it when you're done. I.C." (kept). She isn't there; she's at her board, and says only "Hm." when you look over. Remove every "well done" from this beat. | keepsake: the spare key on Works orange wire (kept) |
+| 5q quiet ending | if Calder's question passes without 5 (the story wasn't ready by Day 26) | resolution | **Old beat 5, as written** (the bench, the note, Fenn's two words, "Well done." in private) plays when the story is ready. Mark it with the quiet-ending comment. | the same keepsake and flag |
+
+Crescendo shape: **plain words, said in public, by someone who never says them.**
+
+## E. Zainab Kovac (`arc:kovac`, who `kovac-zainab`): "Four, please" (SW1, keep and stage)
+
+Stays aboard. Shy, exact, counts things, says sorry for nothing. **Kept:** beats 1-3 word for word (the lift club;
+"A whole night"; 112 bolts; beat 3's practical reply sets `flag:kovac.liftjob` and the favour `liftBrakes`). **Rewritten:**
+beat 4 becomes the crescendo, at the lift lobby before the Friday address. **Changed for "no repeats":** her keepsake
+is no longer a scarf (Zeke's is the only scarf): it's **a knitted grip for your spanner, in Works orange and garden
+green**, given in the afterglow.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1, 2, 3 (kept) | as written | light, light, heartfelt | "Lovely lift"; the club; the whole night and the 112 bolts. | as written |
+| 4 **crescendo** "Four, please" | close, `when: beat:kovac.3 weekday:fri trad:captains-address`; `where:` the Deck 5 lift lobby (the scene plays at the doors, before they ride: no lift code needed), about 15:35-15:45 as half the ship heads up to the address; **Day 19 or 26** (19 preferred: 26 is Calder's day) | resolution | Cruz and Keane are at the doors already, not looking at each other. If you serviced the brakes with her (`flag:kovac.liftjob`), she names the bolts as the car arrives, calmly, counting. She steps in first. "Four, please." (kept: your first words on the Wren, `mem:intro.arrival` if it reads). Cruz: "Lovely lift." Keane: "Lovely lift." Kovac, last: "It is, actually." Nobody holds the rail. Keep "Very brave, all three." as her line. The ride itself is one line. Keane's lines `// optional: if present` (he's on nights; half the night shift goes). | `mem: four` |
+| 5 afterglow "A proper grip" | light, the next day or two; calm, the tea corner, knitting | light | She's made you something, sorry, it's small: a grip for your spanner. Orange and green. "So you've got something to hold. Not that you need it." Short, shy, done. | keepsake (new, above) |
+| 4q quiet ending | if 4 was missed | light | At the tea corner: "We did it. All three. You should have seen Cruz's face. Sorry. You should have been there. Next Friday?" (the afterglow follows as usual). | |
+
+Crescendo shape: **a small fear faced together, in a crowd that doesn't notice.**
+
+## F. Basil Bramwell (`arc:bramwell`, who `bramwell-basil`): "Your turn" (SW2, new; and his voice card)
+
+**Arrives Day 21** (off the Tern at 17:40, Theo's place, Theo's old berth 4-B7-5). A Works cadet; optimistic,
+cheerful, chatty; asks a lot of questions; writes home every week; brought a plant from home that isn't doing well
+(roster). **SW2 writes his voice card first** (`content/voices/bramwell-basil.voice`, the house style of the other
+cards, from his `ROSTER_RESERVE` entry in the game: tpl chatty, open, needs share, loves made, likes book and star, joy
+writing letters home). Pick his keepsake there: **a little clay pot he painted, with the Wren on it** (not "a cutting in
+a jar": three crew already have that). **Window: Days 21-30**, so his gates are the lowest of all: met counts from Day
+21. The story is about you, four weeks on, not being the newest any more. **Never mention** his parents' repair shop
+(Pell's mum has a mending shop) or letters read aloud (Zeke's crescendo).
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Down the ramp" | stranger is fine, `metDays: 0`; **Day 21**, the shuttle bay as the Tern's ramp opens (Off the Tern), `where: any` | light | He comes down the ramp holding a drooping plant in both hands, to Zeke at the bottom. Sees you. "Are you the one from the beam? Zeke said there'd be someone nearly as new as me." Three quick questions in one breath. You answer one. | `mem: ramp` |
+| 2 "Somewhere to put it" | acquaintance, `metDays: 1`; **Day 22**, after Name on the beam (17:05) in the Works bay, or his bunk (calm) | light | His name's on the beam. If you're close to Zeke (`beat:torres.6` or close tier, a variant line), Zeke let **you** hand Basil the pen, and he says so. The plant on his new shelf is worse. Under the shelf, if you did Theo's story (`beat:teague.5`), a tiny doodle Theo left: a stick figure waving, "Hi, new one." Basil is delighted. Practical reply: take the plant to Tove Cruz. | favour `basilPlant` (new: a fetch to the garden; back in two days); `mem: shelf` |
+| 3 "Does it stop?" | acquaintance, `metDays: 2`; **Day 23-24**, calm | light (with one heartfelt question at the end) | Questions, rapid, funny (which lift is fastest, whether Calder blinks). Then the real one, quietly: "Does it stop? Feeling like a visitor?" Your reply: honest (when it stopped for you), funny, or share (your first evening: `mem:intro.arrival` callback). | `mem: visitor` |
+| 4 **crescendo** "Everybody's" | `when: beat:bramwell.3 trad:new-hands-tea`, `where: Tea corner`; **Day 25** (his new hand's tea, Thursday) | resolution | You bring the plant back from the garden, green again (Cruz's one line about what it needed: "Less love, more light."). The table cheers in the Works way (a cast line each from Halloran, Pell, Zeke). Halloran clears a space on the mug-rack shelf: "Everybody's now. That's how it works here." Basil: it's the first thing of his that lives here. He gives you the pot's twin, the one he painted on the shuttle: the clay pot with the Wren on it. The choice: what you tell him about the shelf. | keepsake (above); `mem: everybody` |
+| 4q quiet ending | if 4 was missed, or the favour wasn't done | light | Cruz brought the plant back herself; it's on the mug-rack shelf. Basil shows you, proud, and gives you the pot anyway. | same keepsake |
+
+Crescendo shape: **something brought back to life and given a home.**
+
+## G. Emeka Halloran (`arc:halloran`, who `halloran-emeka`): "Groaning means breathing" (SW2, new)
+
+Stays aboard. Works systems officer; kind, loyal, warm, unhurried; laughs before the punchline; says "lovely"; always
+asks if you've eaten; never says no to anyone; never an unkind joke. **The user's change:** the terrible jokes were
+**his late dad's**, who died some years ago (past grief, told gently, briefly, never on screen); his mum, on Coriel,
+is well and writes every week. **New canon:** his dad's joke notebook: four hundred and twelve jokes, numbered, in his
+dad's hand; Emeka tells one every breakfast and is on number 289. His mum says the house is too quiet without the
+groaning. Don't use: hospital, illness, letters read aloud, baking as the plot (his baking is flavour only; Brennan's
+story is about food).
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Number 271" | colleague; `where: meal` (breakfast, the Works tables) | light | His joke of the morning (write a new, truly terrible, clean one). He laughs before the end. Asks if you've eaten. Then, offhand: "That one's my dad's. They're all my dad's. I've got a hundred and forty-odd left." | `mem: joke` |
+| 2 "The notebook" | colleague; the tea corner, by the mug rack | light | He shows you the notebook: worn, numbered, the handwriting gets worse as the jokes get worse. He has rules: one a day, never skip, never repeat. "Groaning means they're breathing. Dad's rule." | `mem: notebook` |
+| 3 "The quiet house" | friend; the garden, evening (he's a garden lover) | heartfelt | His dad, some years ago: the man who filled a room. Emeka kept telling the jokes so the joke-teller never stopped. He sends one to his mum every week; she says they're not the same written down, and the house is too quiet. Practical reply: "What if she heard a whole table groan?" starts the favour. | favour `emekaJokes` (new shape: one terrible joke each from Yoon, Lemaire and Yilmaz, his joke-trading friends: three short stops); `mem: quiet` |
+| 4 "Will you laugh?" | friend, 2+ days after 3; calm | light | He never asks anyone for anything. Now he does, awkwardly: tomorrow's is number 289, his dad's favourite, and it's awful. "Will you laugh? Properly. Even if it's dreadful." | `mem: laugh` |
+| 5 **crescendo** "Two hundred and eighty-nine" | close (or friend with 4 told); `where: meal`, breakfast at the Works tables, `time: morning`; **from Day 15** (after the storm), the first weekday the story is ready | resolution | Before he can start, the table tells **him** jokes, one after another, worst first (Yoon, Lemaire, Yilmaz if you collected them; otherwise Pell, Kovac and Zeke, each in their own voice), recorded on your device for his mum. He groans at every one, louder each time, then can't stop laughing. Then number 289, told by him, and the whole table groans like a held note. The choice: your joke, or your groan. | `mem: groan`; Mail (via him, days later): his mum's reply, she laughed until she cried, the good kind, and she's sending one back |
+| 6 afterglow "Four hundred and thirteen" | light, a breakfast a few days after 5 | light | He tells the joke his mum sent back: number 413, in her handwriting now, at the back of the book. It's the worst yet. He hands you a scone in a tin with a dent in the lid. | keepsake: the scone tin with a dent in the lid (his card) |
+| 5q quiet ending | if 5 was missed | light | Yoon organised it anyway; you hear about the groaning in chatter, and he tells you at the tea corner. The afterglow follows. | |
+
+Crescendo shape: **a crowd's gift turned back on the giver** (a whole table doing his ritual for him).
+
+## H. Saad Salo (`arc:salo`, who `salo-saad`): "Twice" (SW3, new)
+
+Stays aboard. Engine technician; cheerful, slow, patient; never rushes anyone; in bed by ten, every night; keeps the
+engine room clean enough to eat in; tells his twin's news from the Halcyon like a serial ("Last time on the Halcyon...").
+**New canon:** years ago, on an old ship (the **Pallas**, a freighter), tired at the end of a long shift, he signed off a
+valve he hadn't checked; a deck went cold for a night. **Nobody was hurt. Nobody remembers but him.** Since then he
+checks everything twice. His little sister **Hala** (new name) has been accepted to the Service academy and wants his
+advice; he hasn't written back. **This is the story that lives in the storm.** It must not retell the `notgood` theme
+(nobody tells him it was fine: he trusts himself), nor Pell's test. Scenes before ten at night, always.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Last time on the Halcyon" | colleague; the tea corner or the engine overlook after shift | light | An episode of the twin serial (new, funny). Then Hala's news, as a cliffhanger: she got in. He looks prouder than he can say, then changes the subject. | `mem: halcyon` |
+| 2 "Twice" | colleague; the engine room, `duty: true` | light | You catch him checking a valve three times. He laughs, shows you the card he keeps in his pocket: his own double-check list, worn soft. "Twice is the rule. Three is me." | `mem: card` |
+| 3 "The cold deck" | friend; **before Day 12**; the engine overlook, early evening | heartfelt | The Pallas, told slowly and plainly, short. Then why it matters now: Hala asked what to know, and he's afraid she'll be like him: good, and one tired night away from the same thing. He hasn't answered her. Replies: listen (his needs) / cheer / share. | `mem: cold` |
+| 4 **crescendo** "Signed once" | friend, `when: beat:salo.3 event:ionStorm`, `crisis: true`, `duty: true`, `where: Engine room`; **Day 13** (the storm's Saturday, daytime) | resolution | Mid-storm, on Deck 6, a coolant valve sticks the way the Pallas one did. He stops, hand on it, and can't move for a line. You're there. The choice is how you help: steady him (listen), check it with him once, together (practical), or tell him what you'd write to Hala (share). He checks it, once, properly, and signs once. Calder over the comm, one line in her numbers ("Deck 6 loop. Holding at forty. Good."). He laughs, shaky, and says it's past his bedtime somewhere. | `mem: once` |
+| 5 afterglow "To Hala" | friend; **after Day 14** (the all-clear); calm, before ten | resolution | He's sending Hala his old double-check card, with one line on the back. He reads you the line before he seals it: "Check it twice. Then trust yourself." Then he gives you a new card he made, your name at the top, his list underneath. | keepsake: a double-check card he made for you, with your name at the top |
+| 4q quiet ending | if 4 was missed (not friend by Day 12, or not on Deck 6) | light | It happens later on an ordinary fault you work with him (any Deck 6 job after Day 15): a smaller version of 4 in 5-6 lines, then the afterglow. | |
+
+Crescendo shape: **an old fear faced in the middle of a crisis.**
+
+## I. Dev Raman (`arc:raman`, who `raman`): "The same comet" (SW3, new)
+
+Stays aboard. Senior Helm Officer; careful, proud, gentle; soft and exact; flies like it might spill; dusts the model
+of the Wren more than his cabin; flew you in on Day 0 (and runs First Light Cocoa: don't retell it). **Changed from the
+pitch for "no repeats":** his turning point is **trusting someone new with the flying he loves**, not choosing a post
+near home (that's the Captain's story). Don't use or resolve the desk-job offer in his About lines. **New canon:**
+years ago, docking at Lisk, a cargo arm swung wrong; nobody was hurt, but his small daughter was watching from the
+dock gallery (the near miss his voice card holds back). Since then he flies every hard part himself. His elder
+daughter (**Asel**, seventeen, new name) wants to learn to fly, and he hasn't said yes. Comet viewing is EP2's event
+(plans/events-final-plan.html): his scene is **22:10-22:40 at the observatory's back window**, after Saruth's comet
+knot; never mention the knot or Saruth.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Like soup" | acquaintance; the observation room window seats, early morning (he's an early riser), calm | light | He talks about flying like carrying soup. Calls back your landing on Day 0 ("You held the rail the whole way. Everyone does. I like that."). | `mem: soup` |
+| 2 "The missing piece" | colleague; his cabin door or the observation room | light | The model Wren is finished except for her shuttle bay: there's no shuttle in it. He's carved three and thrown them all away. Practical reply: make a tiny brass pin for the model's docking arm in the machine shop. | favour `ramanPin` (new: a stop at the machine shop bench); `mem: model` |
+| 3 "Clean twenty" | friend; the observation room, evening | heartfelt | Twenty years of clean flying, and the one that wasn't: Lisk, the arm, his daughter at the gallery glass. Nobody hurt. He's flown every hard part himself since. Now Asel wants to fly, and he can't say the word. | `mem: lisk` |
+| 4 "Someone new" | friend, 2+ days after 3; **before Day 16** | heartfelt | Every comet night the helm brings the bow round so the comet crosses the big window. He has always flown it himself. This year he's thinking of giving it to Sol Bakshi, eight months aboard. He asks you: would you trust someone new with something you love? | `mem: trust` |
+| 5 **crescendo** "Who flew?" | friend; `when: beat:raman.4 event:comet`; `where: Observatory`; **Day 16, 22:10-22:40** | resolution | At the back window. Bakshi on the bridge speaker, one line, nervous and correct: "Coming round now." Raman's hands, which have been holding the rail, let go. The comet slides across the window exactly. Asel watched it from Lisk at the same minute, because he asked her to; her message comes: "Saw it. Who flew?" He writes back with you beside him: "Someone new. Like you will." He gives you the shuttle: finished at last, tiny, carved. "You were my last good landing. Don't tell anyone it was bumpy." | keepsake: the tiny shuttle he carved (the roster's) |
+| 5q quiet ending | if 5 was missed or not ready by Day 16 | light | A morning at his window seat: he tells you Bakshi flew the turn, what Asel wrote, and gives you the shuttle. Its `mail:` if you weren't at the comet at all: two lines from him that night. | same keepsake |
+
+Note from EP2: on Day 27 he may be called in to fly the Tern for the Veyli. That's EP2's scene; if he flies, nothing in
+this story should stop him being proud of it.
+
+Crescendo shape: **letting go of the controls, and being seen to.**
+
+## J. Anja Kowalczyk (`arc:kowalczyk`, who `kowalczyk`): "The beacon" (SW3, new)
+
+Stays aboard. Second Officer, the night bridge; steady, private, wry; low, unhurried night voice; long pause before
+she answers; reads the endings first ("risk management"); third in command and first to be woken. **New canon:** her
+father has kept the beacon at the edge of Marra Station for thirty years (the roster's "lighthouse beacon"); it's
+being switched off for good and replaced by a buoy, at ten to six one morning, and he won't say how much he minds. The
+ship's running joke about the lighthouse film and the lighthouse song: she always leaves film night before the
+lighthouse bit; she can say why, once, here. Don't use: the command she was passed over for (her card holds it back:
+not this story), loneliness spelled out (that's the `lonely` theme). **Depends on your night shift** (a Pillar 5 career
+beat, Days 19-20 from 21:00): her steps 2-4 happen on your first night.
+
+| Step | Gate, where, when | Tone | What happens | Leaves |
+| --- | --- | --- | --- | --- |
+| 1 "Risk management" | acquaintance (you met at First Light Cocoa, her tip); early morning 06:00-07:00 as she comes off, the bow lounge, a quiet corner, reading | light | She's reading the last page of a paper novel first. "Risk management." Dry, few words. Maybe she tells you how this one ends. | `mem: endings` |
+| 2 "The real ship" | acquaintance, `metDays: 3`; **your first night shift, Day 19, 22:00-midnight**; the bridge lobby or the observation room | light | The night ship is the real ship; the day shift are visitors. She shows you the quiet: who's awake, what hums. A beacon, in passing: her father keeps one. | `mem: night` |
+| 3 "Ten to six" | 2+ hours after 2, the same night (Day 20, about 02:00-03:00), calm | heartfelt | The beacon goes dark for good at ten to six this morning. A buoy instead. She can't be there; he won't say he minds. Why she leaves film night early. Practical reply: "Could the Wren answer it?" She goes quiet, then: running lights, three long and one short. His pattern. | `flag: kowalczyk.signal` if suggested; `mem: dark` |
+| 4 **crescendo** "Three long, one short" | `when: beat:kowalczyk.3`; `where:` the bridge (Deck 1); **Day 20, 05:50** | resolution | The night watch on the bridge (one or two night crew with a line each: the builders confirm who's on watch). At ten to six she lets you key the running lights (if you suggested it; otherwise she asks you to). Three long, one short, out into nothing. Nobody is asked to stand; everyone does. A long pause. "Thank you." Then a wry line to end. | `mem: signal`; Mail a week later (Day 27): someone on Marra saw a ship's lights do it, and sent her father the picture |
+| 5 afterglow "Endings first" | acquaintance or better, after Day 20, any early morning | light | She gives you the novel she was reading, her notes in the margins: "I've read the end. It's a good one." | keepsake: a paper novel with her notes in the margins (her card) |
+| 4q quiet ending | if 4 was missed (not on the bridge at 05:50) | light | At 06:00 by the lift, coming off: "I did it. Three long, one short." The afterglow follows. If you had no night shift at all, only the afterglow and one line about the beacon. | |
+
+Crescendo shape: **a signal sent into the dark for someone far away.**
+
+---
+
+## The ten crescendos side by side (each shape used once)
+
+| Story | Crescendo | Where, when | Shape |
+| --- | --- | --- | --- |
+| Salo | Signed once | Engine room, Day 13, the storm | an old fear faced in a crisis |
+| Raman | Who flew? | Observatory back window, Day 16, 22:10 | letting go of the controls, and being seen to |
+| Halloran | 289 | Breakfast, the Works tables, from Day 15 | a crowd's gift turned back on the giver |
+| Kovac | Four, please | Deck 5 lift lobby, Friday 19 (or 26), before the address | a small fear faced together, unnoticed |
+| Kowalczyk | Three long, one short | The bridge, Day 20, 05:50 | a signal sent into the dark |
+| Theo | Frame it | Shuttle bay, Day 21, 14:30 | a goodbye gift at a departure |
+| Zeke | Finished | Knit and natter, Day 23, 20:00 | a gift in a circle, and a parent's words |
+| Pell | Clean work | Works bay, open door, Wednesday 17 or 24 | a test passed in front of the people who matter |
+| Basil | Everybody's | Tea corner, new hand's tea, Day 25 | something brought back and given a home |
+| Calder | In front of people | Tea corner, Calder's question, Day 26 | plain words said in public by someone who never does |
+
+## New favours (for the builders; social's `STORY_FAVOURS`)
+
+`theoCloud` (carry a page to Calder's office), `basilPlant` (a plant to the garden and back), `emekaJokes` (three short
+stops: Yoon, Lemaire, Yilmaz), `ramanPin` (a stop at the machine shop bench). Existing and kept: `pellPractice`,
+`liftBrakes`.
