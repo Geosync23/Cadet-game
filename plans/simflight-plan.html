@@ -1,0 +1,237 @@
+<title>Sim Flight Landing</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&display=swap">
+<style>
+/* Layout: one reading column like the sim bay plan; two diagrams side by side (stacked on a phone); the answers form at the end, the one boxed panel. */
+:root {
+  --bg: #f2f5f9; --surface: #ffffff; --ink: #142030; --muted: #4f5f73; --line: #cdd7e3;
+  --teal: #0f7f7a; --coral: #c9503f; --navy: #23406b; --gold: #a87a12;
+  --space: #0f1b2e; --star: #dbe6f5; --glow: #49c2b9; --other: #e4e9ef;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0d141e; --surface: #141e2b; --ink: #e4ebf3; --muted: #9aabbf; --line: #2a3a4e;
+  --teal: #49c2b9; --coral: #f08a7d; --navy: #8fb4ea; --gold: #e3b54a;
+  --space: #070d17; --star: #c9d6e8; --glow: #5fd6c6; --other: #1c2633; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0d141e; --surface: #141e2b; --ink: #e4ebf3; --muted: #9aabbf; --line: #2a3a4e;
+  --teal: #49c2b9; --coral: #f08a7d; --navy: #8fb4ea; --gold: #e3b54a;
+  --space: #070d17; --star: #c9d6e8; --glow: #5fd6c6; --other: #1c2633; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 920px; margin: 0 auto; display: grid; gap: 30px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--coral); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 12px; }
+code { font: 13.5px var(--mono); background: var(--other); padding: 1px 5px; border-radius: 4px; overflow-wrap: anywhere; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.fact { border-top: 3px solid var(--navy); padding-top: 8px; font-size: 14.5px; min-width: 0; }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.figs { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+figure { margin: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px; display: grid; gap: 8px; min-width: 0; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption { font-size: 13.5px; color: var(--muted); }
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 520px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 18px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 8px; }
+legend { font-weight: 700; margin-bottom: 6px; padding: 0; }
+.opt { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+.opt input { margin-top: 4px; }
+textarea { width: 100%; min-height: 110px; font: inherit; padding: 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--navy); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <div class="eyebrow">Rec deck plan · sim bay · flight mini-game · v1 · 2026-10-24</div>
+    <h1>Land the Tern yourself</h1>
+    <p class="lead">Your ask: "Sim flight mini game. Very simple touch and drag controls. Simple visuals. Landing mini game." In a sim pod you can fly the last part of the practice run yourself: bring the Tern down into the Wren's bay with one finger. No scores, just fly. Nothing gets built until you've seen this page.</p>
+  </header>
+
+  <section>
+    <h2>The idea in one look</h2>
+    <div class="facts">
+      <div class="fact"><b>Where</b>A sim pod in the sim bay on the rec deck (FX14's build), after you've watched one practice run.</div>
+      <div class="fact"><b>What you do</b>Drag one finger to steer the Tern down a line of glowing rings into the Wren's open bay.</div>
+      <div class="fact"><b>How long</b>About a minute a go. Again or Done at the end.</div>
+      <div class="fact"><b>How it ends</b>A plain line: a soft landing, a hard one, or a miss and another try. No grade, no board.</div>
+      <div class="fact"><b>What it fills</b>Leisure, a little each go.</div>
+      <div class="fact"><b>Phones</b>About 10 draw calls while you fly; the deck isn't drawn behind it.</div>
+    </div>
+  </section>
+
+  <section>
+    <h2>1. How it starts</h2>
+    <ul>
+      <li>Tap a sim pod. Once you've sat through one practice run (FX14's turn S3), the pod asks: <b>Watch a practice run</b> or <b>Fly the landing yourself</b>. Before that, it's the watched run only, so the first time you see what a landing looks like.</li>
+      <li>You climb in and the pod's screen fills your view: the game opens over the deck, as Lightdisc does on the court. A Leave button sits in the corner the whole time.</li>
+      <li>The very first go shows three short tips, one at a time, with Next and Skip: "Drag to steer", "Fly through the rings", "Come in slow and level". After that they don't show again.</li>
+      <li>I'll agree the exact hook with FX14 (the pod's choice card, its activity and place names) so we never edit the same lines.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Flying it</h2>
+    <div class="figs">
+      <figure>
+        <svg viewBox="0 0 360 170" role="img" aria-labelledby="sideT">
+          <title id="sideT">Side view: the Tern comes down a line of four rings into the Wren's bay</title>
+          <rect x="0" y="0" width="360" height="170" rx="6" fill="var(--space)"/>
+          <g fill="var(--star)"><circle cx="30" cy="22" r="1.2"/><circle cx="92" cy="48" r="1"/><circle cx="150" cy="18" r="1.3"/><circle cx="205" cy="40" r="1"/><circle cx="60" cy="140" r="1"/><circle cx="130" cy="150" r="1.2"/><circle cx="335" cy="20" r="1"/></g>
+          <rect x="258" y="70" width="100" height="62" rx="8" fill="var(--navy)" opacity=".85"/>
+          <rect x="258" y="88" width="12" height="26" fill="var(--gold)"/>
+          <text x="306" y="62" font-size="11" fill="var(--star)" text-anchor="middle">the Wren</text>
+          <text x="264" y="128" font-size="10" fill="var(--star)">bay</text>
+          <path d="M40 40 Q150 70 258 101" stroke="var(--glow)" stroke-width="1.5" stroke-dasharray="4 4" fill="none"/>
+          <g fill="none" stroke="var(--glow)" stroke-width="2"><ellipse cx="95" cy="53" rx="4" ry="11"/><ellipse cx="150" cy="68" rx="4" ry="10"/><ellipse cx="200" cy="83" rx="4" ry="9"/><ellipse cx="238" cy="95" rx="4" ry="8"/></g>
+          <path d="M28 34 L48 40 L28 46 Z" fill="var(--coral)"/>
+          <text x="22" y="62" font-size="10" fill="var(--star)">the Tern</text>
+          <text x="150" y="160" font-size="10" fill="var(--star)" text-anchor="middle">about 600 m, about a minute</text>
+        </svg>
+        <figcaption>You start lined up behind the Wren. Fly through the rings; they shrink as you get close, so the last one is the bay's mouth.</figcaption>
+      </figure>
+      <figure>
+        <svg viewBox="0 0 360 230" role="img" aria-labelledby="phoneT">
+          <title id="phoneT">A phone screen: the Wren ahead, a ring, the Tern seen from behind, distance and speed at the top, Leave in the corner</title>
+          <rect x="105" y="4" width="150" height="222" rx="16" fill="var(--space)" stroke="var(--line)"/>
+          <text x="180" y="24" font-size="10" fill="var(--star)" text-anchor="middle">240 m · 9 m/s</text>
+          <rect x="216" y="13" width="32" height="15" rx="4" fill="none" stroke="var(--star)"/>
+          <text x="232" y="24" font-size="8.5" fill="var(--star)" text-anchor="middle">Leave</text>
+          <rect x="150" y="62" width="60" height="30" rx="5" fill="var(--navy)"/>
+          <rect x="170" y="70" width="20" height="14" fill="var(--gold)"/>
+          <ellipse cx="180" cy="100" rx="26" ry="20" fill="none" stroke="var(--glow)" stroke-width="2.5"/>
+          <path d="M165 150 L180 138 L195 150 L180 146 Z" fill="var(--coral)"/>
+          <circle cx="200" cy="190" r="13" fill="none" stroke="var(--star)" stroke-dasharray="3 3"/>
+          <text x="180" y="216" font-size="9" fill="var(--star)" text-anchor="middle">drag anywhere to steer</text>
+        </svg>
+        <figcaption>What you see on a phone: the Tern from behind, the next ring, the bay ahead. Only distance and speed are written on screen.</figcaption>
+      </figure>
+    </div>
+    <ul>
+      <li><b>One finger, anywhere on the screen.</b> Drag left or right to turn, up or down to nose up or down. Let go and the Tern levels out by itself. A mouse drag works the same, and the arrow keys or WASD too.</li>
+      <li><b>Speed looks after itself.</b> The Tern slows by itself as the bay gets closer. Coming in steep makes it faster, and a level approach keeps it slow, so steering is all you do. (Question 2 below offers a slow-down button instead.)</li>
+      <li><b>Gentle by design.</b> The Tern can't spin or roll over. The rings show the way, and drifting off the line just means steering back.</li>
+      <li><b>The ship's clock pauses</b> while you fly, as it does for Lightdisc and Tiles. Question 3 below asks if you'd rather it ran.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. How a go ends</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>What happened</th><th>What it says</th><th>Then</th></tr></thead>
+      <tbody>
+        <tr><td>Into the bay, slow and level (under 3 m/s)</td><td>"Soft landing. The deck crew wave you in."</td><td>Again or Done</td></tr>
+        <tr><td>Into the bay, too fast or tilted</td><td>"Hard landing. The Tern bounces once and settles. Slower next time."</td><td>Again or Done</td></tr>
+        <tr><td>Missed the bay's mouth</td><td>"You overshoot the bay. The sim swings you round."</td><td>Try again or Done</td></tr>
+      </tbody>
+    </table></div>
+    <p>No grade, no numbers kept, no board: you asked for "No scores, just fly". Each go adds a little Leisure. Leaving partway through is fine and counts for nothing either way.</p>
+  </section>
+
+  <section>
+    <h2>4. How it's built</h2>
+    <ul>
+      <li><b>The Lightdisc pattern.</b> Lightdisc plays live in the 3D view with its own camera, a full-screen layer on top (score, Leave, the tips, the result) and its rules kept apart from the drawing. The flight follows the same pattern: the rules are plain numbers (no drawing, no random calls; a fixed 60 steps a second, so a go plays the same on any phone), and the view only draws them.</li>
+      <li><b>Its own small scene.</b> Unlike the court, the flight happens out in space, so while you fly the game draws its own tiny scene instead of the deck: stars, the Wren as a few simple shapes with a lit bay, the rings, the Tern. The deck comes back exactly as it was when you leave.</li>
+      <li><b>Simple visuals.</b> Flat colours, no textures beyond one soft glow for the rings, every colour through the game's usual colour step.</li>
+      <li><b>Saving.</b> Only how many goes you've flown, so the tips show once and the pod knows to offer the choice. Nothing else is kept.</li>
+      <li><b>A switch.</b> It sits behind its own switch, off while it's built (the game stays identical), and inside FX14's sim bay switch. A preview link lets you try it before it's switched on.</li>
+    </ul>
+    <div class="tbl"><table>
+      <thead><tr><th>Part</th><th>Draw calls</th><th>How</th></tr></thead>
+      <tbody>
+        <tr><td>Stars</td><td class="n">1</td><td>One points object, made once</td></tr>
+        <tr><td>The Wren and her lit bay</td><td class="n">3-4</td><td>Boxes and a glowing frame, shared materials</td></tr>
+        <tr><td>The rings</td><td class="n">1</td><td>One shape drawn several times at once</td></tr>
+        <tr><td>The Tern</td><td class="n">2</td><td>A wedge body and its engine glow</td></tr>
+        <tr><td>Bay lights</td><td class="n">1</td><td>A row of small lamps as one object</td></tr>
+        <tr><td><b>In all</b></td><td class="n"><b>about 10</b></td><td>The deck isn't drawn while you fly (it draws 170 by the lift today)</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>5. Testing and build turns</h2>
+    <ul>
+      <li><b>A new check, simflight_check.py.</b> The rules on their own: a steady autopilot lands soft, a fast one lands hard, one that drifts misses; each the same twice. The view at phone size (390 × 844) and wide: a drag turns the Tern, Leave puts the deck, camera and clock back, draw calls stay under 15. Saving: the goes counted and read back.</li>
+      <li><b>Existing checks:</b> interactions_check (the pod's choice card opens the game), player_check (Leisure, saving), check_fast before every push, and cadet_test: the whole game identical with the switch off.</li>
+      <li><b>F1</b> the rules and the check · <b>F2</b> the view, the controls and the tips · <b>F3</b> the pod's choice and the result · <b>F4</b> records, the full round of checks and a playable preview with screenshots for you.</li>
+      <li>It comes after FX14's sim bay turns S1-S3, since it starts from their pod.</li>
+    </ul>
+  </section>
+
+  <form id="answers">
+    <h2>Your answers</h2>
+    <fieldset>
+      <legend>1. Where do you land?</legend>
+      <label class="opt"><input type="radio" name="where" value="bay" id="where-bay"> Back in the Wren's bay (recommended: the same story as the watched run)</label>
+      <label class="opt"><input type="radio" name="where" value="pad" id="where-pad"> On a landing pad outside, on a moon or station</label>
+    </fieldset>
+    <fieldset>
+      <legend>2. Speed</legend>
+      <label class="opt"><input type="radio" name="speed" value="auto" id="speed-auto"> It slows by itself; you only steer (recommended: one finger, nothing else)</label>
+      <label class="opt"><input type="radio" name="speed" value="brake" id="speed-brake"> A Slow button you hold with your other thumb</label>
+    </fieldset>
+    <fieldset>
+      <legend>3. The ship's clock while you fly</legend>
+      <label class="opt"><input type="radio" name="clock" value="pause" id="clock-pause"> Paused, like Lightdisc and Tiles (recommended)</label>
+      <label class="opt"><input type="radio" name="clock" value="run" id="clock-run"> Runs: each go takes 5 ship minutes</label>
+    </fieldset>
+    <fieldset>
+      <legend>4. The view</legend>
+      <label class="opt"><input type="radio" name="view" value="chase" id="view-chase"> From just behind the Tern (recommended: easier to judge on a phone)</label>
+      <label class="opt"><input type="radio" name="view" value="cockpit" id="view-cockpit"> From the cockpit</label>
+    </fieldset>
+    <fieldset>
+      <legend>5. When can you fly it?</legend>
+      <label class="opt"><input type="radio" name="when" value="after" id="when-after"> After you've watched one practice run (recommended)</label>
+      <label class="opt"><input type="radio" name="when" value="always" id="when-always"> From your very first visit</label>
+    </fieldset>
+    <fieldset>
+      <legend>Notes</legend>
+      <textarea id="notes" aria-label="Notes" placeholder="Anything else: what it should feel like, what to leave out..."></textarea>
+    </fieldset>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status">Loading any saved answers...</p>
+  </form>
+</div>
+
+<script>
+(() => {
+  // answers, kept in the page's own store (as the sim bay plan's page)
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  const radios = ['where', 'speed', 'clock', 'view', 'when'];
+  let ref = null;
+  const fill = d => { if (!d) return; for (const n of radios) for (const r of form.querySelectorAll('input[name=' + n + ']')) r.checked = r.value === d[n]; document.getElementById('notes').value = d.notes || ''; };
+  const read = () => { const o = {}; for (const n of radios) o[n] = (form.querySelector('input[name=' + n + ']:checked') || {}).value || ''; o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o; };
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved. The team will read your answers from here.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
