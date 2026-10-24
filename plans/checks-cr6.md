@@ -1,5 +1,23 @@
 # CR6 check results
 
+## 0.92.2 full round (2026-10-24): OK
+
+- **Build:** `claude/integration-next` ee974894 (0.92.2), `starship-cadet.html` sha256
+  `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4` (matches BM15's).
+- **OLD:** 0.92.1 e03505fd (2dbb11b8...59b18c). Not needed: no FAIL.
+- Share: check_fast, mech, bigevents, fridays, disc, tiles (alone), join (alone). Handed to CR3 before they started:
+  controller_check (all but reach), food 1 7, food 11 4, clothes.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 224 s) | `QUICK CHECK OK in 223 s`; machine repair share `machine jobs 39, repairs 19 (49%)` |
+| mech_check | OK (exit 0, 481 s) | `MECH CHECK OK` (m8 passes) |
+| bigevents_check | OK (exit 0, 121 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 973 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 72 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 94 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 112 s, alone) | `JOIN CHECK OK` |
+
 ## 0.92.1 full round (2026-10-23): OK (mech after FX6's test-only m8 fix)
 
 - **Build:** `claude/integration-next` 51a1bb34 (0.92.1, Crossing the Line ON), `starship-cadet.html` sha256
