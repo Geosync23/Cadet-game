@@ -1064,7 +1064,7 @@ with sync_playwright() as pw:
         g.ev("clearGoal(); if (myJob()) SHIP.player.track = myJob().id"); g.step(3)   # as Take it at the board does (no other arrow up)
         g.page.click('#devBtn'); g.step(3); g.ev("deviceShow('home')"); g.step(1)
         first = g.ev("(document.querySelector('.device .app span') || {}).textContent || ''")
-        check(first.lower() == 'tracked', f'Tracked is the first app on the device ({first})')
+        check(first.lower() == 'schedule tracker', f'the Schedule tracker (was Tracked; the user, 0.92.3 #14) is the first app on the device ({first})')
         ROWS = "JSON.stringify([...document.querySelectorAll('#devBody .list .row')].map(r => [r.querySelector('.rt').textContent, r.classList.contains('hot'), r.tagName === 'BUTTON']))"
         OPEN = "deviceShow('tracked')"
         def tap(text):
@@ -1142,7 +1142,8 @@ with sync_playwright() as pw:
             hit = g.ev(f"[...document.querySelectorAll('.controls button,#devBtn,#needStrip')].filter(o => o.offsetWidth).map(o => o.getBoundingClientRect()).some(r => r.left < {b['right']} && {b['left']} < r.right && r.top < {b['bottom']} && {b['top']} < r.bottom)")
             check(g.ev("document.getElementById('trkPanel').hidden") and not hit and b['right'] <= 320, f'a tap outside closes it; the button clears the other HUD buttons on a 320 px phone ({b})')
         g.page.click('#devBtn'); g.step(3); g.ev("deviceShow('home')"); g.step(1)
-        wrap = g.ev("[...document.querySelectorAll('.device .app span')].filter(e => e.getClientRects().length > 1 || e.getBoundingClientRect().height > 24).map(e => e.textContent)")
+        # the Schedule tracker's two words (the user's name for it, 0.92.3 #14) may take two lines, inside its tile; no other label wraps
+        wrap = g.ev("[...document.querySelectorAll('.device .app span')].filter(e => (e.getClientRects().length > 1 || e.getBoundingClientRect().height > 24) && !(/^schedule tracker$/i.test(e.textContent.trim()) && e.getBoundingClientRect().height <= 40 && e.getBoundingClientRect().bottom <= e.closest('.app').getBoundingClientRect().bottom)).map(e => e.textContent)")
         check(g.ev("document.querySelectorAll('.device .app span').length") > 4 and not wrap, f'no device app label wraps at 320 px ({wrap})')
         if g.ev("typeof HOBBIES !== 'undefined' && !!HOBBIES.film"):   # Watch a film (0.72.1, the user's): a device hobby exactly like reading
             g.ev("deviceShow('hobbies')"); g.step(2)

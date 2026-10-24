@@ -271,9 +271,9 @@ body.dlgon .devhu{display:none}
   <button class="stay" id="sleepNo">Not yet</button>
 </div>
 <button class="devbtn" id="devBtn" aria-label="Your device: the time and your needs"><svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2.5"/><path d="M10 17.5h4"/></svg><span>Device</span><b id="devMail" hidden></b></button>
-<button class="trkbtn" id="trkBtn" aria-label="Tracked: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
+<button class="trkbtn" id="trkBtn" aria-label="Schedule tracker: what's on and coming up, and where to go" aria-haspopup="dialog"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="2.5"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3"/></svg><span>Tracked</span></button>
 <div class="lift" id="trkPanel" role="dialog" aria-labelledby="trkT" hidden>
-  <h2 id="trkT">Tracked</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
+  <h2 id="trkT">Schedule tracker</h2><p>Tap one to follow the arrow there. Tap it again to stop.</p>
   <div id="trkList"></div>
   <button class="stay" id="trkClose">Close</button>
 </div>
@@ -11473,16 +11473,17 @@ function devHeadsTick(t) {
   if (DEV.hu && devHuBusy()) devHeadsBack();             // 0.35.33: something that takes the screen (a chat card...) sends a showing strip back to wait
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
     const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
-    if (x.kind === 'off' || at - R.ahead > t || at + 3 <= t) continue;
+    const beam = x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || ''), ahead = beam ? Math.max(R.ahead, 25) : R.ahead;   // Name on the beam (the user's playtest notes, 0.92.3 #12): 25 minutes before, even on shift, "at the end of shift in the Works department"
+    if (x.kind === 'off' || at - ahead > t || at + 3 <= t) continue;
     if (!R.on && x.kind !== 'appt' && x.kind !== 'beat') continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift' || x.kind === 'tea') && !R.everyday) continue;   // tea like the meals (0.72.5)
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
     if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;   // a 'soon' with under 3 minutes left waits for the start
     devHear(k);
-    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
+    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
-    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x) });
+    HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}) });
   }
   for (const a of SHIP.device.appts) if (a && a.kind === 'invite' && a.status === 'asked' && a.by && Number.isFinite(a.at)) {   // 0.72.6 (playtest 2, item 12): an invitation still waiting for your answer reminds you too, like an appointment
     const at = a.at, key = 'invite|' + a.id; if (at - R.ahead > t || at + 3 <= t) continue;
@@ -11503,8 +11504,8 @@ function devHeadsShow(t = shipNow()) {
   if (devHuBusy()) return;
   if (typeof introHoldNudges === 'function' && introHoldNudges()) { const k = HU_Q.findIndex(h => !/^meal\|/.test(h.key)); if (k < 0) return; if (k > 0) HU_Q.unshift(HU_Q.splice(k, 1)[0]); }   // section 21: training day's end, the beam first: a meal's heads-up waits (the patch, #19)
   const h = HU_Q[0], left = Math.max(1, Math.round(h.at - t));
-  DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + ' starts in ' + left + ' min' : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
-    where: h.where, soft: h.stage === 'start', go: !!h.goal });
+  DEV.hu = h; DEVICE_SKIN.heads({ text: h.stage === 'soon' ? h.title + (h.beam ? ' starts at the end of shift in the Works department' : ' starts in ' + left + ' min') : h.title + (h.title === 'Your shift' ? ' starts now' : ' is starting'),
+    where: h.beam && h.stage === 'soon' ? '' : h.where, soft: h.stage === 'start', go: !!h.goal });
 }
 function devHeadsReset() { SHIP.device.calendarRemind.heard = []; HU_Q.length = 0; DEV.hu = null; DEVICE_SKIN.heads(null); }   // a new game, and the checks
 if (typeof onSim === 'function') onSim('newGame', () => {   // the clock starts again: nothing is heard yet; 0.35.37 (reviewer 1b): no appointments
@@ -13101,7 +13102,7 @@ const TEACH = [   // text: head writer 3. A 4th element { sure: true }: shown wh
   // The patch (#28): any time on Day 2 you're up and not clocked in, in the words for the time (before, late, after the shift)
   // the patch (#13): it waits for a long work step under way (a hold of 10 ship minutes or more), any day of your first week
   ['t:devwork', c => c.d >= 1 && c.d <= 7 && !c.app && !!ACT && ACT.phase === 'do' && WORK_ACTS.has(ACT.kind) && ACT.def.mins >= 10 && ACT.done > 0 && ACT.done < ACT.def.mins,
-    () => careerText('tip.device') || 'While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.', { sure: true }],
+    () => careerText('tip.device') || 'While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Schedule tracker. The work carries on.', { sure: true }],
   ['t:laund2', c => c.d === 2 && c.min >= 6 * 60 && !sleeping && !(typeof careerClockedIn === 'function' && careerClockedIn() && !careerClockedOut()),
     () => SHIP.time.min < DAY_SHIFT[0] ? careerText('tip.laundry.day2') || 'New day: fresh clothes from your wardrobe. When they run out, take your hamper to the laundry on Deck 4.'
       : SHIP.time.min < DAY_SHIFT[1] ? careerText('tip.laundry.day2.late') || 'Laundry\'s for after your shift. Clock in first; the washers will wait.'
@@ -14128,9 +14129,18 @@ function actBar() {
   floatV.set(A.x, A.y + BAR_Y, A.z).project(camera);
   const sb = document.getElementById('needStrip'), tb = document.getElementById('trkBtn');   // under the needs strip (0.28.32); on a phone under the Tracked button there (item D, the user's, 0.64.2: the bar always last)
   const under = sb && sb.offsetWidth && tb && !tb.hidden && tb.offsetWidth && matchMedia('(max-width:720px),(max-height:500px)').matches ? tb.getBoundingClientRect().bottom : null;
-  const y = under !== null ? Math.round(under + 6) : sb ? sb.offsetTop + sb.offsetHeight + 6 : 124;
-  el.style.transform = 'translateY(' + y + 'px)'; el.style.width = sb ? sb.offsetWidth + 'px' : '';
-  el.hidden = typeof DEV !== 'undefined' && !!DEV.open;  // never over the device
+  let y = under !== null ? Math.round(under + 6) : sb ? sb.offsetTop + sb.offsetHeight + 6 : 124, dx = 0;
+  el.style.width = sb ? sb.offsetWidth + 'px' : '';
+  // the device open (the user's playtest notes, 0.92.3 #20: the work meter stayed hidden while you read your device): still
+  // shown, never over it: where it is if the device is lower down (a phone), else beside it (a wide screen), else just above it
+  const dv = typeof DEV !== 'undefined' && DEV.open ? document.getElementById('device') : null, r = dv && !dv.hidden ? dv.getBoundingClientRect() : null;
+  if (r && r.width && y + el.offsetHeight + 6 > r.top) {
+    const w = el.offsetWidth || 180;
+    if (r.right + 14 + w <= innerWidth - 8) { dx = Math.round(r.right + 14 - 14); y = Math.round(r.top + 44); }   // beside its top, under the button row (a tip shows lower down)
+    else y = Math.max(6, Math.round(r.top - el.offsetHeight - 6));
+  }
+  el.style.transform = 'translate(' + dx + 'px, ' + y + 'px)';
+  el.hidden = false;
 }
 // once a frame from the main loop (section 12): needs over ship time, walking speed, the activity, the device
 function playerUpdate(dt, t) {
@@ -14224,7 +14234,7 @@ function squeezeStep() {                                 // each frame: slow dow
 // word in a speech bubble over them (8b's bubbleSay; never a toast, so the need warnings never wait on it), at most once
 // a person a minute (SHUFFLE_SAID, real ms), and never over something they're already saying.
 const SHUFFLE_STEP = .5, SHUFFLE_SHORT = .25, SHUFFLE_V = 2, SHUFFLE_NEAR = .45, SHUFFLE_SAY = 60000, SHUFFLE_COOL = 1500;
-const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Oops, mind out.', 'Sorry, go ahead.'];
+const SHUFFLE_WORDS = ['Oh, sorry.', 'After you.', 'Excuse me.', 'Sorry, go ahead.'];   // "Oops, mind out." cut (the user's playtest notes, 0.92.3 #2)
 const SHUFFLE = new Map(), SHUFFLE_SAID = new Map(), SHUFFLE_DONE = new Map();   // crew agent -> { x, z, left } (the step still to take); person id -> when they last said it; crew agent -> when their step ended
 const shuffleable = a => !!a && !a.settled && !(a.esc && !/^follow\|/.test(a.esc)) && !(a.talking > 0 && !(a.esc && /^follow\|/.test(a.esc))) && !(a.p && a.p.player) && a.pose !== 'sit' && a.pose !== 'lie';   // the patch (#12): an escort following you steps aside even while talking (and talks on)
 const shuffleStep = (b, c) => {                           // from tile b to the next tile c: no wall between (a diagonal: open round one corner)
@@ -15351,7 +15361,7 @@ function ladderPanel() {
     const built = !!DECKS[n], me = n === here, b = mk('button', 'deckbtn' + (me ? ' here' : '')); b.type = 'button'; b.disabled = me || !built;
     const sp = mk('span'); sp.append(mk('b', '', DECK_NAMES[n]), mk('small', '', me ? 'You are here' : !built ? 'Not built yet' : k + (k > 1 ? ' decks ' : ' deck ') + (DECK_ORDER.indexOf(n) < at ? 'up' : 'down') + ' · ' + DECKS[n].blurb));
     b.append(mk('i', '', deckLabel(n)), sp);
-    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Tracked')); }   // the deck of what you're tracking (playtest 1, the user's word)
+    if (gl && gl.deck === n && !me && built) { b.classList.add('goal'); b.appendChild(mk('em', '', '→ Schedule tracker')); }   // the deck of what you're tracking (playtest 1, the user's word; renamed 0.92.3 #14)
     if (!me && built) b.onclick = () => { el.hidden = true; ladderClimb(n, k); };
     return b;
   };
@@ -16406,7 +16416,7 @@ function trkPlace() {
 addEventListener('resize', trkPlace); setTimeout(trkPlace, 0);
 // the device app (0.72.4, the user's: "move it into the personal device as its own app, first in the list"); its glyph
 // is the skin's 'track'
-deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
+deviceApp({ id: 'tracked', title: 'Schedule tracker', icon: 'track', order: 1,   // "Schedule tracker" (the user's playtest notes, 0.92.3 #14; was "Tracked"); its id stays
   act(verb, key) { if (verb === 'track' && trkTap(key)) deviceClose(); },   // on its way: the device closes so the arrow shows
   view: () => {
     const items = trkItems(), fk = trkFollowKey(items), B = [{ kind: 'text', text: 'Tap one to follow the arrow there. Tap it again to stop.' }];
@@ -16417,7 +16427,7 @@ deviceApp({ id: 'tracked', title: 'Tracked', icon: 'track', order: 1,
         return { text: it.title, sub: (sec === 'on' && it.tag ? it.tag + ' · ' : '') + it.sub + (on ? ' · Tracking' : arrow ? ' · The arrow points here' : can ? '' : ' · no arrow for this one') + trkSaid(it), mark: arrow ? 'hot' : null,
           action: can ? { app: 'tracked', do: 'track', arg: it.key } : null }; }) });
     }
-    return { title: 'Tracked', blocks: B };
+    return { title: 'Schedule tracker', blocks: B };
   } });
 // ---- the turn-in's gains (0.72.3, HUD U; Pillar 5 Step 3, the user's: "the job turn-in shows rep going up AND the points
 // added to each ship meter the job helped"). The board's turnIn calls turnInShow(job, before) after its toast, which gets
@@ -34503,7 +34513,7 @@ const LINES = JSON.parse([
   ',"tip.clothes":[',
   '{"text":"Fresh clothes are in your wardrobe: change each morning. When you run out, do your laundry on Deck 4.","id":"19o8qsh"}]',
   ',"tip.device":[',
-  '{"text":"While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Tracked. The work carries on.","id":"1hdhyql"}]',
+  '{"text":"While a long job\'s bar fills, you can open your device: check your Schedule, Mail or Schedule tracker. The work carries on.","id":"azoslg"}]',
   ',"tip.eve.call":[',
   '{"text":"Your people at home would love to hear from you. The call booths are on Deck 3.","id":"4ujlfr"}]',
   ',"tip.eve.hobby":[',
@@ -50845,7 +50855,7 @@ function trainArrow(c, now) {                           // (its state on the fun
   const row = ladderRow(c.id), base = row ? mechName(row.id).replace(/^./, x => x.toUpperCase()) + ' with ' + worksFirst(c.by) + ', ' + hhmm(r.at % 1440) : null;
   const label = here ? 'Wait here: ' + base.charAt(0).toLowerCase() + base.slice(1) : base;
   const held = typeof myJob === 'function' ? myJob() : null, busy = !A.up && !!held && !((held.start || 0) >= r.at - A.lead);   // holding a job: it keeps the arrow (the playtest patch 1, #7); a word 10 minutes before instead. FX4: not a job taken once the window had opened (a steady player turns one in and takes the next at the board: Day 5's scanner was missed till Monday with the queue off)
-  if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: Tracked shows the way.'); } catch (e) { /* no UI */ } } return; }
+  if (want && busy) { if (A.said !== r.key && now >= r.at - 10 && base) { A.said = r.key; try { toast(worksName(c.by), base + ', ' + ((DECKS[r.deck].rooms || {})[r.room] || { name: 'the Works bay' }).name + '. In ten minutes: the Schedule tracker shows the way.'); } catch (e) { /* no UI */ } } return; }
   if (want && base && !A.lost && (!A.up || A.mine.label !== label)) {
     setGoal({ deck: r.deck, room: r.room, label });
     A.mine = IX_GOAL; A.up = true;
@@ -54528,7 +54538,7 @@ function openLiftPanel() {
     i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
-    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Tracked'; b.appendChild(g); }   // playtest 1: the user's word
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Schedule tracker'; b.appendChild(g); }   // playtest 1: the user's word
     b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. What you\'re tracking is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);
@@ -56300,7 +56310,7 @@ const PAD_SET = JSON.parse(JSON.stringify(PAD_SET0));
 const PAD_MAPK = PAD_BTN.slice();                         // pad button k (the standard order) -> the action it does (section 26's names)
 const PAD_PHY = {};                                       // the action -> its pad button's index
 const PAD_SET_CH = { dead: [.12, .22, .32], zoom: [.6, 1, 1.6], first: [.5, .8, 1.2], every: [.25, .5, 0], marks: ['auto', 'xbox', 'ps', 'nin', 'off'] };
-const PAD_SET_ACTS = [['a', 'Use, press'], ['b', 'Back'], ['x', 'Action button (Repair, Hobby, Put down)'], ['y', 'Your device'], ['view', 'Tracked'], ['menu', 'Pause'],
+const PAD_SET_ACTS = [['a', 'Use, press'], ['b', 'Back'], ['x', 'Action button (Repair, Hobby, Put down)'], ['y', 'Your device'], ['view', 'Schedule tracker'], ['menu', 'Pause'],
   ['lb', 'Turn left'], ['rb', 'Turn right'], ['lt', 'Zoom out, page up'], ['rt', 'Zoom in, page down'], ['rs', 'The usual zoom'],
   ['up', 'Up (the screen\'s edge buttons)'], ['down', 'Down'], ['left', 'Previous thing nearby'], ['right', 'Next thing nearby'], ['ls', 'Spare (does nothing)']];
 const PAD_SET_NAMES = {                                   // each pad button's name, in the pad's own style (the standard order)
