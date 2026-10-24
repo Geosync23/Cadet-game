@@ -115,7 +115,7 @@ keepsake: the last page of the Wren strip, signed, with you in it
 them: There you are. Good. I had a speech. I drew it instead. Easier.   [gesture]
 them > you: Here. The last page. Careful, the ink's two hours old.
 them: Last panel's the one you picked. Look.
-// IF mem:moment.teague.beam: them: Last panel. You at the beam, your name in big letters. Spelt right. I checked twice.
+// IF mem:moment.teague.beam: them: Last panel. You at the beam, your name in big letters. Biggest letters I've got.
 // IF mem:moment.teague.tea: them: Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.
 // IF mem:moment.teague.wren: them: Last panel. The Wren from outside, every window lit. You're in the third one along.
 them: Finished it. Don't frame it.   [nod]
