@@ -1,10 +1,11 @@
 @tradition every-song
 // Every song (FX14, 0.92.5 item 16; SW1's pitch): Saturdays before dinner, the five who know every song in the record
 // cabinet sing through it in the music room, one record at a time, arguing about the second verse. Behind WEEKEND_ON.
+// 17:15 (lead 34, 2026-10-24): Zeke works the Saturday shift to 17:00, so he hosts from the start.
 k: 459
 title: Every song
 when: weekly saturday
-at: 17:00-17:50
+at: 17:15-18:05
 min: 20
 jitter: 10
 where: 4 pool music

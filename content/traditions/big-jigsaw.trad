@@ -4,7 +4,8 @@
 // pieces, Commander Vance always on the edges. The puzzle is decor (DECK_DRESS bigJigsaw) on the table, the seats are
 // the table's own (common-room), so Deck 1 is as before other days. A turn is 20 minutes and counts as your puzzles
 // hobby (the weekend slot in section 18). Still picture: the week-by-week fill is the large version, not built (ask first).
-// Behind WEEKEND_ON.
+// Behind WEEKEND_ON. Host Dev Raman (lead 34, 2026-10-24: Vance works Sundays; Raman is off and builds a model of the Wren,
+// the jigsaw's picture); Vance drops in after his shift.
 k: 468
 title: The big jigsaw
 when: weekly sunday from day 1
@@ -12,10 +13,10 @@ at: 13:00-15:30
 min: 25
 where: 1 room Observation room: common-room
 hold: none
-who: vance always, quiet-corner 60%, common-room 50%, window-seat 30%, officers 25%, juniors 20%, everyone 12%
+who: raman always, vance always, quiet-corner 60%, common-room 50%, window-seat 30%, officers 25%, juniors 20%, everyone 12%
 anim: read
-host: vance
-from: vance
+host: raman
+from: raman
 ties: decor bigJigsaw
 
 == mail
