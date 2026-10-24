@@ -1307,7 +1307,7 @@ with sync_playwright() as pw:
         print('   after:', s['act'], round(l0, 1), '->', round(l1, 1), s['toast'][:90])
         check(not (s['act'] and s['act'][0] == 'recSim'), f"the run ends by itself ({s['act']})")
         check(14 <= l1 - l0 <= 24 or l1 >= 99, f'leisure up about 20 ({l0:.1f} -> {l1:.1f})')
-        check(g.ev("Math.max(simRunAt(0), simRunAt(1))") == -1, 'the screens go back to drifting stars')
+        check(g.ev("SIM_POD_IDS.every((id, k) => simRunAt(k) === -1 || !!heldBy(id))"), 'the screens go back to drifting stars (unless one of the crew is flying)')   # the crew's sim pilots (S5) fly too
         w = g.ev("(() => { const fakes = SIM_POD_IDS.map(id => ({ goalId: id, x: -999, z: -999, path: [] })); DECK_CREW.push(...fakes); actEnd(true); REC.q = null; const r = recQueue('sim', 'Sim pod', null); const a = [r, ACT && ACT.kind, ACT && ACT.placeId, REC.q && REC.q.kind]; for (const f of fakes) DECK_CREW.splice(DECK_CREW.indexOf(f), 1); return a; })()")
         check(w[0] is True and w[1] == 'recWait' and (w[2] or '').startswith('7-simq-') and w[3] == 'sim', f'both pods taken: you wait on the bench ({w})')
         g.step(60); s = json.loads(g.ev(STATE))   # (the stand-ins leave in the same breath: they aren't real crew to step)
@@ -1316,8 +1316,8 @@ with sync_playwright() as pw:
         g.ev("actEnd(true); REC.q = null")
         # the pods are machines (S4): one tagged out, a tap takes the other; both, a tap is refused and says why
         g.ev("window.__simShut = simPodsShut; simPodsShut = () => [true, false]"); tap('Sim pod', [29, 13]); g.step(30)
-        s = json.loads(g.ev(STATE)); print('   pod 1 tagged out:', s['act'])
-        check(s['act'] and s['act'][0] == 'recSim' and s['act'][1] == '7-sim-2', f"one pod tagged out: you get the other ({s['act']})")
+        s = json.loads(g.ev(STATE)); busy = g.ev("!!heldBy('7-sim-2')"); print('   pod 1 tagged out:', s['act'], 'pod 2 in use by the crew' if busy else '')
+        check(s['act'] and (s['act'][0] == 'recSim' and s['act'][1] == '7-sim-2' or busy and s['act'][0] == 'recWait'), f"one pod tagged out: you get the other, or wait for it while one of the crew flies it ({s['act']}, {busy})")
         g.ev("actEnd(true); REC.q = null; simPodsShut = () => [true, true]"); tap('Sim pod'); g.step(5)
         s = json.loads(g.ev(STATE)); print('   both tagged out:', s['act'], s['toast'][:90])
         check(not (s['act'] and s['act'][0] in ('recSim', 'recWait')) and 'tagged out' in s['toast'], f"both tagged out: refused, and says why ({s['act']}, {s['toast'][:90]})")
