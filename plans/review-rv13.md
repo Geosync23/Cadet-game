@@ -120,3 +120,7 @@ Base claude/integration 3866c8f3 (0.92.3). Lead 34 (session_019RdVfeRPRiJpHGjKuj
   meeting. interactions_check line: near (30 min) warns, far (10 h) not; fails on 0.92.3 (FX10).
   Device Jobs path: not reachable (verified: sec 19 native deviceApp jobs at ~12100 registers first; the shim skips legacy addSection; the live app says "You take jobs at the job board"). Closed.
   Running: interactions fix + k1 (always warn) plant, cadet_test vs 0.92.3, check_fast.
+- **PASS 0.92.4 D (~16:45 UTC)** at the branch head (backlog row FX10-1 only after d8f128be; game c05d277a). interactions_check
+  OK (near: heads-up with end 11:03, machine shop, "Making it safe with Ines starts at 09:51"; far: none); planted k1 (no
+  end<=start return: always warns) FAIL; 0.92.3 has no heads-up text at all (line fails there). cadet_test 0.92.3 vs fix
+  ALL IDENTICAL; check_fast OK. Section 15b small edit: sign-off given.
