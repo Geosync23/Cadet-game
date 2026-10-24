@@ -245,7 +245,7 @@ when: tier>=colleague
 them: Rina will make a fine doctor. She listens with her whole face. People tell her things.
 them: I haven't told her. She'd argue. Then she'd work harder, and she doesn't need to.
 ask: Is there someone you think the world of, and haven't said?
-listen: Why not tell her?
+listen: When will you tell her?
   them: When it helps her most. Not before. Timing's half of medicine.   #warm
 share: Yes. I should say it.
   them: Then say it. This week. Don't wait for a good moment. There isn't one.
