@@ -16748,6 +16748,13 @@ function clockFirstTick() {
   else tipFront('career.clock.' + d, careerText('career.tip.clock.again') || 'Clock in first: the time clock is past the tool wall, by the tea corner. Your shift starts at 09:00; Tracked shows you the way.');
   if (guideMode() !== 'off' && !(IX_GOAL && IX_GOAL.trk === 'clock:in')) setGoal(clockRmGoal('in'));
 }
+// patch 0.92.3, item 26 (AC3; ZW1 writes the crew's comments on the same uniformState()): wearing yesterday's clothes or
+// a grubby uniform, awake and out of the shower: a green tip, once ever for each (tipShow's own once; the Tips setting rules)
+function clothesDirtyTip(u) {
+  if (typeof tipShow !== 'function' || u !== 'yesterday' && u !== 'grubby') return;
+  if (u === 'yesterday') tipShow('clothes.yesterday', worksText('clothes.tip.yesterday', 'You\'re still in yesterday\'s clothes: people notice, and your hygiene drops faster. Change at your wardrobe in Bunk 1; the old ones go in the hamper.'));
+  else tipShow('clothes.grubby', worksText('clothes.tip.grubby', 'Your uniform\'s grubby from the job: people notice, and your hygiene drops faster. A change at your wardrobe gives you a clean one.'));
+}
 // ---- end of slot: Interactions engineer ----
 
 // =====================================================================
@@ -44410,6 +44417,7 @@ const CLOTHES_DIRTY = { at: null, v: 0 };                // the last ship minute
 function clothesDirtyTick() {
   const now = shipNow(), D = CLOTHES_DIRTY, asleep = typeof sleeping !== 'undefined' && sleeping, held = typeof devmodeHold === 'function' && devmodeHold();
   if (uniformState() === 'clean' || asleep || held || ACT && ACT.def && ACT.def.need === 'hygiene') { D.at = null; return; }
+  if (typeof clothesDirtyTip === 'function') clothesDirtyTip(uniformState());   // patch 0.92.3 item 26 (AC3): a green tip, once per state
   if (D.at !== null && now > D.at && now - D.at < 30) {  // (a skip of half an hour or more isn't shown)
     const fx = typeof playerFx === 'function' ? playerFx() : null, d = fxD(fx, 'hygiene');
     D.v += NEED_DRAIN.hygiene[0] * (d - d / CLOTHES_DRAIN) * (now - D.at) / 60;
