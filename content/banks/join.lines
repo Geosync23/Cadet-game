@@ -128,3 +128,33 @@
 - First day in Works, your first name goes up there. Every one of us did it.
 - See the Chief's? Tiny letters, dead straight. Mine's the one that's far too big.
 - Go on, then. Your turn. Right on the end, next to the rest of us.
+
+// SW1 (2026-10-24, patch 0.92.5): the weekend traditions (WEEKEND_ON)
+== join.saturday-run.tip
+- Tap {name} to join the run
+== join.saturday-run.notice
+- Saturday run: three easy laps of the promenade before breakfast, any speed. Fitness and social up.
+== join.saturday-run.done
+- Three laps done. Breakfast has never looked better.
+== join.saturday-run.left
+- You've dropped out of the run. They'll finish the laps without you.
+
+== join.every-song.tip
+- Tap {name} to join Every song
+== join.every-song.notice
+- Every song: sing through the record cabinet in the music room, whatever the words are. Leisure and social up.
+
+== join.night-owls-cocoa.tip
+- Tap {name} for a late cocoa
+== join.night-owls-cocoa.notice
+- Night owls' cocoa: a mug and the stars in the bow lounge, lamps low. Social up, but staying up costs a little energy.
+
+== join.gerald-clinic.tip
+- Tap {name} to join the Gerald clinic
+== join.gerald-clinic.notice
+- Gerald clinic: bring a cactus to Cruz for a look, or take a new one home. Leisure and social up.
+
+== join.sunday-story.tip
+- Tap {name} to listen
+== join.sunday-story.notice
+- The Sunday story: Chief Holt reads one chapter in the common room, lights low. Leisure and social up.
