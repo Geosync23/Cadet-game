@@ -68,7 +68,7 @@ listen: Why is Four the shiniest?
 share: Five. The Works bay feels like home.
   them: That's lovely. The button agrees with you. Five's very shiny too. Second shiniest.
 cheer: Three. Three has the mess.
-  them: Ha! Three has the mess. That's all Three needs. That's a very good argument.   #funny
+  them: Oh! Three has the mess. That's all Three needs. That's a very good argument.   #funny
 
 == firm-friendly
 topic: work
@@ -144,7 +144,7 @@ listen: Where's the best seat, really?
 share: Near the door. Easy to help carry.
   them: That's so you. I'd sit by the door and then forget to help. Then help twice.
 cheer: Wherever the gravy is.
-  them: Ha! The gravy seat. That's always Pell. You'd have to get there very early.   #funny
+  them: Oh, wow. The gravy seat. That's always Pell. You'd have to get there very early.   #funny
 
 == whistle
 topic: plans
@@ -207,7 +207,7 @@ ask: Is there someone aboard who asks you the same thing every day?
 listen: What did you tell him today?
   them: That the stars were sharp. He said "Good. Keep them sharp." I don't know how. I'll try.
 share: Brennan. "Have you eaten?" Every day.
-  them: Ha! Mine too. And Halloran. I'm the best-fed person on the ship, I think.   #funny
+  them: Oh! Mine too. And Halloran. I'm the best-fed person on the ship, I think.   #funny
 cheer: The lift. "Which deck?" Every time.
   them: The lift does ask a lot. You'd think it would learn by now.   #funny
 
@@ -250,7 +250,7 @@ listen: Who asked you?
 share: Last week. I stopped looking at signs.
   them: That's the moment! I'm nearly there. I still look at the signs, but I nod at them now.
 cheer: I'll tell you when it happens.
-  them: Ha! Me too. We'll know at the same time. We'll have a cake. Brennan'll make it.   #funny
+  them: Yes! Me too. We'll know at the same time. We'll have a cake. Brennan'll make it.   #funny
 
 == watch-log
 topic: work
@@ -289,7 +289,7 @@ listen: Does the window help?
 share: Go to the gym. Run it out.
   them: Vance would be so pleased with you. Maybe I'll try it. A slow run. Very slow.
 cheer: Find Tomas and make him laugh.
-  them: Ha. That's working, actually. Look. That's a laugh. A small one. It counts.   #warm
+  them: Oh! That's working, actually. Look. That's a laugh. A small one. It counts.   #warm
 
 == bridge-hour
 topic: plans
@@ -315,7 +315,7 @@ listen: Is it still blue?
 share: Small. Lots of things on the walls.
   them: Like a bunk! So you were ready for the Wren before you knew. That's nice.
 cheer: Messy. Very, very messy.
-  them: Ha! Like your berth. I'm joking. Sort of joking. It's a bit like your berth.   #funny
+  them: Oh, wow. Like your berth. I'm joking. Sort of joking. It's a bit like your berth.   #funny
 
 // ---- SW2: friend (3)
 
@@ -356,7 +356,7 @@ listen: What would you show him first?
 share: My family. They'd want to see the mess.
   them: Of course they would. Brennan would feed them till they couldn't stand. Like us.   #funny
 cheer: Nobody. I'd keep it all for me.
-  them: Ha! I don't believe you. You'd show them the lift. Everyone shows people the lift.   #funny
+  them: Oh! I don't believe you. You'd show them the lift. Everyone shows people the lift.   #funny
 
 // ---- SW2: close friend (3)
 
@@ -371,7 +371,7 @@ listen: Tell me what you remember.
 share: Something about the common room.
   them: Was it? I think it was. I'd only just found it myself. I was very proud of it.
 cheer: "Is it left?" Probably.
-  them: Ha! It probably was. It's always "Is it left?" with me. It was left, though. I think.   #funny
+  them: Yes! It probably was. It's always "Is it left?" with me. It was left, though. I think.   #funny
 
 == short-way
 topic: ship
@@ -384,7 +384,7 @@ listen: Why sad, do you think?
 share: Everyone being patient with me.
   them: They still are, though. They're like that. It's the Wren. That bit doesn't stop.   #warm
 cheer: Getting away with everything.
-  them: Ha! That's true. You can't say "I'm new" any more. I tried it on Holt. Didn't work.   #funny
+  them: Oh! That's true. You can't say "I'm new" any more. I tried it on Holt. Didn't work.   #funny
 
 == bunk-star
 topic: hobby

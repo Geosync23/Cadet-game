@@ -68,7 +68,7 @@ listen: Was it a big splinter?
 share: No. I hate waiting.
   them: Everyone does. Bring a book. Or bleed less. Those are the options.
 cheer: Very. I'll wait all day for a biscuit.
-  them: Ha. Good answer. There's a tin under the desk. You didn't hear that from me.   #warm
+  them: Hm. Good answer. There's a tin under the desk. You didn't hear that from me.   #warm
 
 == sleep-score
 topic: day
@@ -119,7 +119,7 @@ listen: Is it windy all year?
 share: I still check the sky before I go out.
   them: Yeah. You can't help it. Nothing up there here but ceiling. Still check, though.
 cheer: I still expect the floor to be dirt.
-  them: Ha. Good. The Works floor gets close, some days. Don't tell Calder I said so.   #warm
+  them: Fine. Good. The Works floor gets close, some days. Don't tell Calder I said so.   #warm
 
 == sour-ranks
 topic: food
@@ -145,7 +145,7 @@ listen: Who's last up in Bunk 2?
 share: Last. Every time.
   them: Thought so. You've got a last-up face. It's not an insult. It's a diagnosis.
 cheer: I don't sleep. I recharge.
-  them: Ha. Then recharge for eight hours. That's a prescription. Signed.   #warm
+  them: Hm. Then recharge for eight hours. That's a prescription. Signed.   #warm
 
 == second-thing
 topic: news
@@ -171,7 +171,7 @@ listen: Does Kovac drop stitches?
 share: The jam. I never play anything.
   them: Good. Somebody has to listen. Clap on the beat, though. People notice.
 cheer: You. Losing at Tiles.
-  them: Ha. Fair. That's a very good show. Free, too. Every evening. Bring tea.   #warm
+  them: Honestly. Fair. That's a very good show. Free, too. Every evening. Bring tea.   #warm
 
 == bed-three
 topic: ship
@@ -251,7 +251,7 @@ listen: Who won?
 share: "She". She's got moods.
   them: Exactly. Coil three alone. Zeke would back us. I'll forward him the diagram.
 cheer: "She." With a capital S.
-  them: Ha. A capital S. That's going straight to my sister. She'll hate it. Perfect.   #warm
+  them: Hm. A capital S. That's going straight to my sister. She'll hate it. Perfect.   #warm
 
 == second-thing-said
 topic: crew
@@ -303,7 +303,7 @@ listen: Did you tell your sister?
 share: My family's soup. Always too salty.
   them: Yes. Exactly that. The wrong thing is the right thing. Honestly. Families.
 cheer: Toast. Burnt toast. Every time.
-  them: Ha. You'd get on with my sister. Don't meet her. I'd never win again.   #warm
+  them: Fine. You'd get on with my sister. Don't meet her. I'd never win again.   #warm
 
 == opposite-pell
 topic: tradition
@@ -316,7 +316,7 @@ listen: How many thirds has he had?
 share: Whoever's on their own.
   them: Good. That's the right answer. Annoyingly right. Fine. I'll sit there too.
 cheer: The gravy, mainly.
-  them: Ha. Honest. Sit by me, then. Pell can't reach it from his side. I've measured.   #warm
+  them: Hm. Honest. Sit by me, then. Pell can't reach it from his side. I've measured.   #warm
 
 // ---- SW2: friend (3)
 
@@ -331,7 +331,7 @@ listen: What number are you on now?
 share: I keep the little notes people leave me.
   them: Good. That's the same thing. Paper's better than numbers. Keep them somewhere dry.
 cheer: I count the times you've won. It's zero.
-  them: Ha. Correct. Keep counting. One day it'll be one. I'll let you have that day.   #warm
+  them: Honestly. Correct. Keep counting. One day it'll be one. I'll let you have that day.   #warm
 
 == gran-new-game
 topic: home
@@ -357,7 +357,7 @@ listen: Who else is on the list?
 share: Tomas. He thanks too many doors.
   them: Yeah. He's on my other list too. We'll keep an eye. You on the left. Me on the right.
 cheer: Pell. Pell's on every list.
-  them: Ha. He is. He's on lists he doesn't know exist. Good. Keep watching him with me.   #warm
+  them: Hm. He is. He's on lists he doesn't know exist. Good. Keep watching him with me.   #warm
 
 // ---- SW2: close friend (3)
 
@@ -385,7 +385,7 @@ listen: What's day one going to look like?
 share: Still on the Wren, I hope.
   them: Good. Me too. Mostly. The Wren's all right. Don't tell her I said so. Ships hear things.
 cheer: In your infirmary. Arguing.
-  them: Ha. I knew it. You'd argue. You'd lose. You'd stay anyway. That's the job.   #warm
+  them: Fine. I knew it. You'd argue. You'd lose. You'd stay anyway. That's the job.   #warm
 
 == let-win
 topic: hobby
@@ -398,4 +398,4 @@ listen: Would you, really?
 share: My family. Every board game.
   them: That's kind. That's very kind. You're too kind, honestly. It's annoying. Never stop.   #warm
 cheer: No. I'd want to beat you fairly.
-  them: Ha. Good. That's the answer. That's exactly the answer. Sit down. Board's set.   #warm
+  them: Hm. Good. That's the answer. That's exactly the answer. Sit down. Board's set.   #warm

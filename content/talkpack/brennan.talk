@@ -80,7 +80,7 @@ listen: How do you hear it coming?
 share: The morning. Everyone wants Works at once.
   them: Course they do. Have a proper breakfast, then. You can't ride a wave hungry.   #warm
 cheer: Getting to the front of your queue.
-  them: Ha! You'd be surprised how many people try that. I see you all, love.   #funny
+  them: Oh, love! You'd be surprised how many people try that. I see you all, love.   #funny
 
 == pudding-vote
 topic: food
@@ -106,7 +106,7 @@ listen: Why don't you use timers?
 share: A scarf from home. Far too warm here.
   them: Keep it, love. You'll want it one day. Things from home come round again.   #warm
 cheer: Pell's gift. A sock. Just the one.
-  them: Ha! That sounds like Pell. Keep it safe. It'll find its partner. They always do.   #funny
+  them: Oh, love. That sounds like Pell. Keep it safe. It'll find its partner. They always do.   #funny
 
 == herb-jobs
 topic: hobby
@@ -132,7 +132,7 @@ listen: Does Commander Vance know?
 share: Early. Being late makes me itch.
   them: Same here, love. I'm up before the ovens. We'll get on, you and me.   #warm
 cheer: Two minutes late, apparently.
-  them: Ha! Then you're right on time. That's the trick of it. You've worked it out.   #funny
+  them: Bless you. Then you're right on time. That's the trick of it. You've worked it out.   #funny
 
 == envoy-bows
 topic: crew
@@ -145,7 +145,7 @@ listen: Have you asked the Envoy what it means?
 share: We always said thank you to the cook.
   them: Oh, bless your family. You've done it here every night. I noticed. I always notice.   #warm
 cheer: Clear my plate before anyone sees.
-  them: Ha! I do see, love. I see everything from that servery. Very tidy, though.   #funny
+  them: Oh, love. I do see, love. I see everything from that servery. Very tidy, though.   #funny
 
 == sit-on-hands
 topic: tradition
@@ -184,7 +184,7 @@ listen: Whose cooking would you eat?
 share: Sleep, mostly. Then call home.
   them: That's a good week. Sleep first. The people at home can wait one morning.   #warm
 cheer: Eat your cooking. Every meal.
-  them: Ha! Well, that's my week off gone, then. Flatterer. Here. Biscuit.   #funny
+  them: Oh, love! Well, that's my week off gone, then. Flatterer. Here. Biscuit.   #funny
 
 == spoon
 topic: work
@@ -236,7 +236,7 @@ listen: What happens to the last crumbs?
 share: Waste-not. My family saved everything.
   them: Good families do. I could tell. You scrape your plate. You don't leave a pea.   #warm
 cheer: It goes in Pell. Same thing.
-  them: Ha! Pell's my best bin. Don't tell him. He'll want paying.   #funny
+  them: Bless you. Pell's my best bin. Don't tell him. He'll want paying.   #funny
 
 // ---- SW2: colleague (6)
 
@@ -251,7 +251,7 @@ listen: What's the best answer you've had?
 share: Warm and salty. Like a kitchen at home.
   them: Oh, love. That's a real answer. That's the best kind. I'll cook to that.   #warm
 cheer: Crunchy. Then soft. Then gone.
-  them: Ha! That's a biscuit, that is. That's very accurate. You could taste for me.   #funny
+  them: Oh, love. That's a biscuit, that is. That's very accurate. You could taste for me.   #funny
 
 == first-dish
 topic: hobby
@@ -275,7 +275,7 @@ ask: Is there someone aboard whose habits you know by heart now?
 listen: How do you know she's noticed?
   them: She nods at the cup. Once. From Calder, love, that's a whole conversation.   #funny
 share: My bunkmates. Every snore.
-  them: Ha! That's love, that is. Knowing every snore. Bunks make families.   #warm
+  them: Oh, love! That's love, that is. Knowing every snore. Bunks make families.   #warm
 cheer: Pell's. All of them involve food.
   them: That's no secret, love. The whole ship knows Pell's habits. The grab shelf knows.   #funny
 
@@ -316,7 +316,7 @@ listen: Did anyone say anything?
 share: Saying good morning to everyone.
   them: Oh, that'd be missed, love. It's the little bells that hold a place together.   #warm
 cheer: Eating the last biscuit.
-  them: Ha! That's a duty, that is. Somebody's got to. Ring a bell before you do it.   #funny
+  them: Bless you. That's a duty, that is. Somebody's got to. Ring a bell before you do it.   #funny
 
 // ---- SW2: friend (3)
 
@@ -344,7 +344,7 @@ listen: What did the Captain say?
 share: "Sorted." Everything's sorted, at home.
   them: That's a good one. It sounds like a hug. Keep saying it, love. It suits you.   #warm
 cheer: "Love", now. Thanks to you.
-  them: Ha! It's catching, isn't it? Well. There's worse things to catch. Love.   #funny
+  them: Oh, love. It's catching, isn't it? Well. There's worse things to catch. Love.   #funny
 
 == table-four
 topic: ship
@@ -372,7 +372,7 @@ listen: Can you really tell from how people eat?
 share: When I stopped counting the days.
   them: Oh, love. That's the moment. I stopped counting too, once. Never started again.   #warm
 cheer: When I found the grab shelf.
-  them: Ha! The grab shelf's home for a lot of people. Pell lives on it. You're welcome to visit.   #funny
+  them: Bless you. The grab shelf's home to lots of us. Pell lives on it. Visit any time.   #funny
 
 == one-dish
 topic: plans
