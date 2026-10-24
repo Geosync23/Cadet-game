@@ -47,7 +47,7 @@ Zeke's father: no roster text mentions him. content/facts.md is fixed (well, ret
 
 ## 4. Content outside the story files (done, or to note)
 
-- `content/lines/kovac-zainab.lines`: the joy line under `? mem:moment.kovac.fourplease` changed from a scarf to the
-  spanner grip (CS1, done). The callback under `? told:moment.kovac.tellclub` no longer fires (the club is together at
+- `content/lines/kovac-zainab.lines`: the joy line changed from a scarf to the spanner grip and re-gated on
+  `mem:moment.kovac.grip` (SW1, claude/stories-sw1 564472fd). The callback under `? told:moment.kovac.tellclub` no longer fires (the club is together at
   the doors in the new crescendo); harmless, left in place.
 - `content/facts.md`: the new canon rows (CS1, done).
