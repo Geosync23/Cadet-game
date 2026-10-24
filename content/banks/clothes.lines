@@ -77,3 +77,6 @@
 == clothes.tip.yesterday2
 // (FX4, 0.92.4 item B: the second green tip, a later day still in yesterday's clothes; ZW1 may reword)
 - Yesterday's clothes again. A fresh set's waiting in your wardrobe in Bunk 1.
+== clothes.tip.laundry
+// (FX4, 0.92.4 item B, RV11: in yesterday's clothes with no clean ones left, either tip says this instead; ZW1 may reword)
+- No clean clothes left. Your hamper's in your wardrobe: take it to the laundry on Deck 4.

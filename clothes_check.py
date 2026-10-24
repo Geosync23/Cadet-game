@@ -165,6 +165,14 @@ with sync_playwright() as pw:
     E("SHIP.time.day -= 1")
     print('     the next day, still in yesterday\'s:', y2, '| the same day:', same)
     check(not same and y2[0] and y2[1] and y2[2] == 'yesterday', f"0.92.4 B: a second green tip the next day if you're still in yesterday's clothes, not the same day ({y2}, {same})")
+    # RV11: out of clean clothes (none left, no clean hamper), both tips send you to the laundry, not to an empty wardrobe
+    lt = E("""(() => { const C = SHIP.clothes, keep = [C.clean, C.hamper, C.changed, C.said.ytip, SHIP.time.day, SHIP.time.min], out = [];
+      C.clean = 0; C.hamper = null; delete SHIP.device.tipsSeen['clothes.yesterday']; delete SHIP.device.tipsSeen['clothes.yesterday2']; TIP_Q.length = 0;
+      SHIP.time.min = 10 * 60 + 30; C.changed = SHIP.time.day - 1; clothesDirtyTip('yesterday'); out.push((TIP_Q.find(x => x.id === 'clothes.yesterday') || {}).text || null);
+      TIP_Q.length = 0; SHIP.time.day += 1; C.changed = SHIP.time.day - 2; clothesDirtyTip('yesterday'); out.push((TIP_Q.find(x => x.id === 'clothes.yesterday2') || {}).text || null);
+      [C.clean, C.hamper, C.changed, C.said.ytip, SHIP.time.day, SHIP.time.min] = keep; TIP_Q.length = 0; return out; })()""")
+    print('     out of clean clothes, the tips:', lt)
+    check(all(t and 'laundry' in t and 'fresh set' not in t for t in lt), f"0.92.4 B (RV11): out of clean clothes, both tips send you to the laundry, not a fresh set ({lt})")
     E("SHIP.time.min = 9*60+50; SHIP.clothes.changed = SHIP.time.day; SHIP.clothes.grime = .8; TIP_Q.length = 0; FX_MIN = -1"); g.step(3)
     E("SHIP.clothes.grime = 0")
 
