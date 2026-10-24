@@ -42,7 +42,8 @@ TRAIN = r"""((id) => {
     for (let n = 0; n < 240 && j.status !== 'done'; n++, t++) { setShipNow(t); machinesNow(); worksCareerTick(t); for (const f of WORK_TICKS) f(t, false); if (j.seq && t >= j.start - 5) j.youIn = true; const mine = (j.seq || []).map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur); if (k >= 0 && !(j.stepsDone || []).includes(k)) jobStepDone(jid, k, j.seq[j.cur].how === 'turn' ? { value: 3 } : {}); }
     return j.status === 'done';
   };
-  const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+  const seen = [], doJob = jid => { const j0 = SHIP.jobs.find(x => x.id === jid); if (j0 && j0.kind === 'team') return teamDo(jid); if (!(j0 && j0.claimedBy === 'you') && !claimJob(jid)) return false; const j = SHIP.jobs.find(x => x.id === jid);
+    if (j.train === 'm7' && typeof scanRead === 'function') { scanRead(jid); if (typeof caseTick === 'function') caseTick(); }   // the scanner's training: you read it first (it shows Day 5's case; p5-fix2)
     const cs = SHIP.works && SHIP.works.cases && (SHIP.works.cases.open || []).find(c => c.job === jid);   // a head-scratcher (24k): call it right first
     if (cs && typeof caseCall === 'function') caseCall(cs.id, cs.cause);
     jobStops(j).forEach((s, k) => jobStepDone(jid, k, j.kind === 'rewire' && s.step === 'wire' ? { pick: rewRight(j, k) } : undefined)); return turnInJob(jid); };   // 24q: a rewire's pairs answered from its chart
@@ -54,7 +55,7 @@ TRAIN = r"""((id) => {
     if (c) seen.push(c.st);
     if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
     if (c && c.st === 'watch') { c.w = TRAIN_WATCH; worksCareerTick(t + 2); const dj = SHIP.jobs.filter(x => x.train === id && x.status === 'done').pop(); teacher = dj ? dj.doneBy : null; }
-    if (c && c.st === 'do' && (!myJob() || (SHIP.jobs.find(x => x.id === c.j) || {}).kind === 'team') && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
+    if (c && c.st === 'do' && (!myJob() || myJob().id === c.j || (SHIP.jobs.find(x => x.id === c.j) || {}).kind === 'team') && doJob(c.j)) yours = (SHIP.jobs.find(x => x.id === c.j) || {}).doneBy;
     if (row.size === 'small' && worksOpened().has(id) && W.tr[id] === undefined) worksUse(id);
     if (W.tr[id] !== undefined) break;
   }
@@ -211,9 +212,142 @@ def m3d_jump(g):
       return [before, j && j.status, SHIP.jobs.filter(x => x.kind === 'drill' && x.status !== 'done').length]; }})()""")
     print('  24c drill, missed then a jump to Day 11:', r)
     check(r[0] == 'claimed' and r[1] == 'done' and r[2] == 0, f"m3d: a missed drill is closed after a jump {r}")
+# the fire drill played by taps (p5-fix2: a side job, so myJob() left it out and the taps did nothing; Calder always said
+# "Four and a half minutes", it never counted, the arrow stayed up and the Calendar named the crew's lift lobbies): Day 3
+# at 14:52 on Deck 5, tap the extinguisher, stand at the hatch (a tap on the floor there), tap it again to put it back;
+# each a stop done, the extinguisher in your hand between, the arrow on to each next stop and off after; the all-clear
+# by you, trained; the Calendar's Wednesday names the Works bay
+M3D_TAPS = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  const run = (from, to) => { for (let m = from; m <= to; m++) { setShipNow(m); machinesNow(); worksCareerTick(m); } };
+  setShipNow(1440 + 300); machinesNow(); const W = worksInit(); W.tr.m1 = 2; W.use.m1 = 1; W.use.m4 = 1; W.op[1] = ['m1'];
+  run(2 * 1440 + 360, 2 * 1440 + 860); if (deckDef.num !== 5) goToDeck(5);
+  const it = ITEMS.filter(i => i.t === 'Fire extinguisher').map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })[0], gl = nearestOpen(it[1].x, it[1].z, player);   // 14:20, before Calder's call: a tap only reads it (AR2's A1)
+  player.obj.position.copy(cellPos(...gl)); player.stop(); playerTap(it[0], it[1].clone(), it[1].clone()); const early = [ACT && ACT.kind, (drillJobOf(3).stepsDone || []).length]; if (ACT) actEnd(true);
+  run(2 * 1440 + 861, 2 * 1440 + 892);
+  const e = DEV_WEEK[2].find(x => x.at === 900);
+  return [!!drillJobOf(3), IX_GOAL && IX_GOAL.label, e && e.where, early];
+})()"""
+M3D_TAP = r"""(({ title, place }) => {
+  if (place) { const s = placeSpot(place), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return [jobSpotTap(new THREE.Vector3(s.x, 0, s.z)), ACT && ACT.kind]; }
+  const it = ITEMS.filter(i => i.t === title).map(i => { i.hit.getWorldPosition(_wp); return [i, _wp.clone()]; })[0]; if (!it) return ['no item'];
+  const gl = nearestOpen(it[1].x, it[1].z, player); player.obj.position.copy(cellPos(...gl)); player.stop();
+  return [playerTap(it[0], it[1].clone(), it[1].clone()), ACT && ACT.kind];
+})"""
+M3D_SEE = "(() => { const j = drillJobOf(3); return [(j.stepsDone || []).slice(), typeof ixHold === 'function' ? ixHold() : null, IX_GOAL ? IX_GOAL.label : null]; })()"
+def m3d_taps(g):
+    if not g.ev("!!(DECKS[5].drill && placeById(DECKS[5].drill.ext))"): return
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
+    a = g.ev(M3D_TAPS); seen = [a]
+    def wait():
+        for k in range(300):
+            g.step(10)
+            if not g.ev("ACT && ACT.kind"): break
+    for t in ({'title': 'Fire extinguisher'}, {'place': '5-drill-hatch'}, {'title': 'Fire extinguisher'}):
+        r = g.ev(f"({M3D_TAP})({json.dumps(t)})"); wait(); seen.append([r, g.ev(M3D_SEE)])
+    for k in range(80):
+        g.step(30)
+        if g.ev("drillJobOf(3).status") == 'done': break
+    g.step(5)
+    end = g.ev("(() => { const j = drillJobOf(3); return [j.status, j.doneBy, SHIP.works.tr.m3d !== undefined, IX_GOAL ? IX_GOAL.label : null, simNotes('drill', 2880).map(n => n.you)]; })()")
+    print('  24c drill by taps:', json.dumps(seen), json.dumps(end))
+    check(a[0] and a[2] and 'Works bay' in a[2], f"m3d taps: the Calendar's drill place is the Works bay ({a[2]})")
+    check(a[3] == [None, 0], f"m3d taps: a tap on the extinguisher at 14:20, before the call, starts nothing ({a[3]})")
+    check([x[0][0] for x in seen[1:]] == [True, True, True], f"m3d taps: each tap starts the stop ({[x[0] for x in seen[1:]]})")
+    check([x[1][0] for x in seen[1:]] == [[0], [0, 1], [0, 1, 2]], f"m3d taps: each stop done in turn ({[x[1][0] for x in seen[1:]]})")
+    check([x[1][1] for x in seen[1:]] == ['extinguisher', 'extinguisher', None], f"m3d taps: the extinguisher in your hand till it's back ({[x[1][1] for x in seen[1:]]})")
+    check(seen[1][1][2] and seen[2][1][2] and seen[3][1][2] is None, f"m3d taps: the arrow on to each stop, off after the last ({[x[1][2] for x in seen[1:]]})")
+    check(end[:4] == ['done', 'you', True, None] and end[4] == [True], f"m3d taps: done by you, trained, no arrow left ({end})")
+    g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
 def m3d_both(g):
-    m3d_part(g); m3d_jump(g)
+    m3d_part(g); m3d_jump(g); m3d_taps(g)
 PARTS['m3d'] = m3d_both
+
+# 24g the scanner's training played by taps (p5-fix2: the Day 5 job listed the washer's pump, so after Take it the arrow
+# said "Fetch a pump", the pump went in as a plain repair, the head-scratcher closed unseen, and you were trained without
+# a scan; and a repair at the panel never asked the case, so an uncalled head-scratcher was "fixed"): to the training
+# job's "do", take it; the arrow says look it over; the look-over is the scan and shows the case; a repair before a call
+# leaves it faulty; the right call, the fetch, the fit, the turn-in: trained. Then on paper, the job finished without a
+# scan: not trained
+M7_SETUP = TRAIN.replace("if (c && c.st === 'do' && (!myJob()", "if (c && c.st === 'do') break; if (false && (!myJob()").replace("const st0 = worksStage(id);", "const st0 = 0; const c = SHIP.works.cur; window.__m7j = c && c.j; return { st: c && c.st };")
+M7_WATCH = TRAIN.replace("if (c && c.st === 'watch') {", "if (c && c.st === 'watch') break; if (false) {").replace("const st0 = worksStage(id);", "const st0 = 0; const c = SHIP.works.cur; return { st: c && c.st, board: !!c && jobsBoard().some(x => x.id === c.j), took: !!c && claimJob(c.j) };")
+M7_LATER = r"""(() => { const W = SHIP.works; if (!W.tr.m7) W.tr.m7 = 5; toolGive('scanner'); const use0 = W.use.m7 || 0;
+  const m = machineList().find(x => !x.stub && (x.deck === 3 || x.deck === 4) && panelPlace(x.id) && caseCauses(x).some(f => f.part) && !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done'));
+  const f = caseCauses(m).find(x => x.part), id = jobReserve(m.id, worksDay(shipNow()), shipNow() % 1440, 21, { tier: 1, cause: f.id }), j = SHIP.jobs.find(x => x.id === id);
+  delete j.make; delete j.makeMins; j.cause = f.id; j.parts = [f.part]; delete j.case; claimJob(id);
+  const before = ixJobStep().label; scanRead(id); SHIP.player.carry = []; const after = ixJobStep().label;
+  jobStops(j).forEach((x, k) => jobStepDone(id, k)); turnInJob(id);
+  return { before, scan: !!j.scan, after, use0, use: W.use.m7 || 0 }; })()"""
+M7_SEE = "(() => { const j = SHIP.jobs.find(x => x.id === window.__m7j) || {}, cs = ((SHIP.works.cases || {}).open || []).find(c => c.job === j.id), g = ixJobStep(); return { goal: g && g.label, scan: !!j.scan, shown: cs ? !cs.wait : null, work: !!j.workDone, st: j.status, tr: SHIP.works.tr.m7 !== undefined }; })()"
+M7_PANEL = r"""(() => { const j = myJob(), m = machineById(j.machine); if (deckDef.num !== m.deck) goToDeck(m.deck); const s = placeSpot(panelPlace(m.id)), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return jobSpotTap(new THREE.Vector3(s.x, 0, s.z)); })()"""
+M7_FETCH = r"""(() => { if (deckDef.num !== 5) goToDeck(5); const need = jobNeeds(myJob(), myWork().w, SHIP.player.carry), it = ITEMS.find(i => i.t === shelfName(shelfOf(need[0]))); if (!it) return false; it.hit.getWorldPosition(_wp); const gl = nearestOpen(_wp.x, _wp.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); return playerTap(it, _wp.clone(), _wp.clone()); })()"""
+def m7_taps(g):
+    keep = g.ev("JSON.stringify({ t: shipNow(), deck: deckDef.num, pos: [player.obj.position.x, player.obj.position.z], needs: SHIP.player.needs, carry: SHIP.player.carry })")
+    def wait():
+        for k in range(300):
+            g.step(10)
+            if not g.ev("ACT && ACT.kind"): break
+    for rid in ('m7', 'm4', 'm5'):                         # any training's watch job (AR2: Yara's load-only run, Calder's oven)
+        watch = g.ev(f"({M7_WATCH})('{rid}')")
+        print(f'  the teacher\'s job while you watch ({rid}):', watch)
+        check(watch['st'] == 'watch' and not watch['board'] and not watch['took'], f"{rid}: the teacher's job isn't on your board and can't be taken ({watch})")
+    g.ev("window.__kt = toast; window.__said = []; toast = (a, b) => { window.__said.push(a + ' | ' + b); return window.__kt(a, b); }")
+    st = g.ev(f"({M7_SETUP})('m7')"); took = g.ev("claimJob(window.__m7j)"); seen = [g.ev(M7_SEE)]
+    for f in (M7_PANEL, M7_PANEL):
+        r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
+    call = g.ev("(() => { const c = SHIP.works.cases.open.find(x => x.job === window.__m7j); return !!c && caseCall(c.id, c.cause); })()")
+    for f in (M7_FETCH, M7_PANEL):
+        r = g.ev(f); wait(); seen.append([r, g.ev(M7_SEE)])
+    g.ev("turnInJob(window.__m7j)"); g.step(60); end = g.ev(M7_SEE)
+    # FX5: Day 5's case is the scanner job, so it's solved before the p3 row can open (it needs m7 trained); the row then
+    # opens within the next ship hours and that solve trains you (it was lost: p3 never learned on Day 5)
+    p3 = g.ev("(() => { const t0 = shipNow(), W = SHIP.works, use = W.use.p3 || 0; for (let m = 1; m <= 150 && W.tr.p3 === undefined; m++) { setShipNow(t0 + m); worksCareerTick(t0 + m); } const r = { use, open: worksIsOpen('p3'), tr: W.tr.p3, at: clockText(), ask: flag('works.ask.p3') }; setShipNow(t0); return r; })()")
+    print('  24k Day 5\'s case solved on the scanner job, then the p3 row:', p3)
+    check(p3['use'] == 1 and p3['open'] and p3['tr'] is not None and not p3['ask'], f"p3: the training case solved on Day 5's scanner job trains you once the p3 row opens, with no ask to go to the board (FX5) ({p3})")
+    said = g.ev("(() => { toast = window.__kt; return window.__said.filter(x => /clue|undefined/.test(x)); })()")
+    print('  24g the clue toasts:', said)
+    check(said and not any('undefined' in x for x in said), f"m7: the clue toasts have a title and a line, no 'undefined' ({said})")
+    after = g.ev(M7_LATER)
+    print('  24g an ordinary job once you have the scanner:', after)
+    check(after['before'] and after['before'].startswith('Look over') and after['scan'] and after['after'] and after['after'].startswith('Fetch') and after['use'] == after['use0'] + 1,
+          f"m7: scan first on any faulty job (look it over, then the part), and the use counts with no Fetch pressed ({after})")
+    print('  24g scanner training by taps:', st, took, json.dumps(seen), call, json.dumps(end))
+    check(st['st'] == 'do' and took and seen[0]['goal'].startswith('Look over') and not seen[0]['scan'], f"m7 taps: after Take it the arrow says look it over ({seen[0]['goal']})")
+    check(seen[1][0] and seen[1][1]['scan'] and seen[1][1]['shown'], f"m7 taps: the look-over is the scan, and the head-scratcher shows ({seen[1]})")
+    check(seen[2][0] and not seen[2][1]['work'], f"m7 taps: a repair before the call leaves it faulty ({seen[2]})")
+    check(call and seen[3][0] and seen[4][0] and seen[4][1]['work'], f"m7 taps: called, fetched and fitted: the work's done ({seen[3:]})")
+    check(end['st'] == 'done' and end['tr'], f"m7 taps: turned in, trained ({end})")
+    paper = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const id = window.__m7j; claimJob(id); const j = SHIP.jobs.find(x => x.id === id);
+      jobStops(j).forEach((x, k) => jobStepDone(id, k)); const t = turnInJob(id); for (let m = 1; m <= 30; m++) worksCareerTick(shipNow() + m);
+      return [t, !!j.scan, SHIP.works.tr.m7 !== undefined]; }})()""")
+    print('  24g scanner training finished without a scan:', paper)
+    check(paper[0] and not paper[1] and not paper[2], f"m7: a training job finished without a scan doesn't train you ({paper})")
+    g.ev(f"(() => {{ const k = {keep}; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; clearGoal(); }})()")   # as it was, for the parts after
+PARTS['m7'] = m7_taps
+
+# p5-fix2 C: what the career's notes say. The Tuning ask names one time, the meeting's real one (the writer's line had
+# 10:15 fixed and the code added the real time after it); the Hauling ask names where the meeting is (Main storage, not
+# "the hold"); a Tune job's arrow says Tune, not Repair; the Calendar's Thursday inspection is at 06:30, the walk's time
+C_ASK = TRAIN.replace("if (c && c.st === 'meet') {", "if (c && c.st === 'meet') break; if (false) {").replace("const st0 = worksStage(id);", """const st0 = 0; const c = SHIP.works.cur, r = c && SHIP.occasions.find(x => x.key === c.occ);
+  const m = c && ((SHIP.mail || []).find(x => x.subject === c.mail) || TRAIN_HELD.mail);
+  return { st: c && c.st, at: r ? hhmm(r.at % 1440) : null, room: r ? DECKS[r.deck].rooms[r.room].name : null, subject: m && m.subject, body: m && m.body };""")
+def part_fix2_c(g):
+    import re
+    for rid in ('m5', 'm4'):
+        a = g.ev(f"({C_ASK})('{rid}')")
+        print(f'  the {rid} ask:', a)
+        times = re.findall(r'\b\d\d:\d\d\b', (a.get('subject') or '') + ' | ' + (a.get('body') or ''))
+        check(a['st'] == 'meet' and a['body'] and set(times) == {a['at']}, f"{rid}: the ask names the meeting's time, and only that ({times} vs {a['at']})")
+        check(a['room'] and a['room'].lower() in a['body'].lower() and 'the hold' not in a['body'], f"{rid}: the ask names where the meeting is ({a['room']}: {a['body']})")
+    t = g.ev("""(() => { SHIP.works = null; SHIP.jobs = []; setShipNow(4 * 1440 + 600); machinesNow(); const W = worksInit(); W.tr.m5 = 4;
+      const m = machineList().find(x => x.kind === 'oven'); const j = tuneJob(m.id, shipNow()); if (!j) return null; SHIP.jobs.push(j); claimJob(j.id);
+      const g = ixJobStep(); dropJob(j.id); SHIP.jobs = []; SHIP.works = null; return g && g.label; })()""")
+    print('  a tune job\'s arrow:', t)
+    check(t and t.startswith('Tune the'), f"m5: a tune job's arrow says Tune ({t})")
+    cal = g.ev("(() => { const e = DEV_WEEK[3][0]; return [e.at, e.title]; })()")
+    print('  the Calendar\'s Thursday:', cal)
+    check(cal[0] == 390, f"m3i: the Calendar's inspection is at 06:30, the walk ({cal})")
 
 # 24c the inspection (seat M1): Thursday 06:30. Each set of items gives its remark (nod, one, two, none); in the bunk
 # room it's said, away it's Mail at 07:00; turning up (or a nod while out) is the row's use; none on a day off
@@ -426,10 +560,10 @@ M8 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  out.plans = [1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]]));
  SHIP.works.team.plan = {}; out.again = JSON.stringify([1, 2, 3, 4].map(w => teamPlan(w).map(e => [e[0], weekday(e[0]), e[1], e[3]])));
  const run = (rank, act) => { reset(15 * 1440 + 900); SHIP.works.rank = rank; const r = {};
-   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); }
+   for (let t = 15 * 1440 + 900; t <= 16 * 1440 + 760; t += 5) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); const j = SHIP.jobs.find(x => x.kind === 'team'); if (j && act) act(j, t, r); if (j && j.status === 'done' && r.right === undefined) r.right = j.machines.every(id => SHIP.machines[id].cond >= TEAM_RESTORE); }   // right when it's done (FX6, 0.92.1: with the Line on the plan picks the washers, which wear under 90 again within the hour)
    const j = SHIP.jobs.find(x => x.kind === 'team');
    r.job = j && { team: j.team.length + (j.you ? 1 : 0), you: !!j.you && !j.youOut, status: j.status, by: j.doneBy, late: j.late, mins: j.doneAt - j.start, posted: j.posted - j.start };
-   r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= 90) : null; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
+   if (r.right === undefined) r.right = j ? j.machines.every(id => SHIP.machines[id].cond >= TEAM_RESTORE) : null; r.restore = TEAM_RESTORE; r.rep = SHIP.works.xp; r.uses = SHIP.works.use.m8 || 0; return r; };
  out.crew = run('junior');
  out.late = run('officer');
  out.you = run('officer', (j, t, r) => { if (j.status === 'done') return; if (t >= j.start - 5) j.youIn = true; const mine = j.seq.map((s, i) => s.who === 'you' ? i : -1).filter(i => i >= 0), k = mine.indexOf(j.cur);
@@ -450,6 +584,7 @@ def part_m8(g):
     check(P == json.loads(a['again']), 'm8: the plan the same when made again')
     c, l, y = a['crew'], a['late'], a['you']
     check(c['job'] and c['job']['status'] == 'done' and not c['job']['you'] and c['right'], 'm8: a crew-only team job runs and puts the machines right')
+    check((c.get('restore') or 0) >= 98, f"m8: a team job leaves its machines close to new (TEAM_RESTORE {c.get('restore')}, want 98 or more; the user, 2026-10-23)")
     check(l['job'] and l['job']['status'] == 'done' and l['job']['late'] and l['job']['mins'] > c['job']['mins'], 'm8: without you it starts after 15 minutes and runs slower')
     check(y['job'] and y['job']['by'] == 'you' and y.get('turns') == [True, True, True] and y['uses'] == 1 and y['rep'] >= 2, 'm8: your three turns in order, finished by you, +2')
     if not y.get('early'): print('  m8: (a turn out of order is not refused: section 17\'s stepDone hook not in this build)')
@@ -744,6 +879,7 @@ PARTS['m11'] = part_m11
 # quicker for whoever takes them); stage 2's flag looked at by the night crew at 22:00; logLast; saved; the same twice
 M12 = r"""(() => {
   SHIP.works = null; SHIP.notes = []; SHIP.jobs = []; MACH_HOUR = null; MACH_SEEN = -1; setShipNow(11 * 1440 + 990); machinesNow(); ACT = null;   // the machines replayed from the start, whatever the part before left (BM8, 0.63.5)
+  SHIP.jobs = SHIP.jobs.filter(j => !/^4-washer-[123]$/.test(j.machine || ''));   // the shift below is the only work on Washers 1-3 (patch 1 F: the replay can post a real Washer 3 job by Day 12, which the logbook and the night crew rightly take first)
   const W = worksInit(), out = {}, t = shipNow(); W.tier = 2; W.rank = 'officer'; W.op[12] = ['m12'];
   SHIP.jobs.push({ id: '4-washer-2@x', machine: '4-washer-2', deck: 4, kind: 'repair', parts: ['pump'], status: 'done', doneBy: 'you', posted: t - 300, found: t - 300 });
   W.log.push(['4-washer-2@x', 12, 0, 'repair']);
@@ -808,6 +944,10 @@ SIDE = r"""(() => {
     const took = workStep(j, st, 63, null); const m = ACT && ACT.def ? ACT.def.mins : null; ACT = null; SHIP.player.wsteps = []; return [took, m]; };
   for (let i = 0; i < 18; i++) toolWear('pipekit', 5);
   const a = look(null), b = look('pipekit'); out.look = [a[0], b[0], a[1] && b[1] ? Math.round(b[1] / a[1] * 100) / 100 : null];
+  // a wait step keeps its start when you come back before it's ready (wsOf: the step under way, not a fresh one; TS3, a planted fault)
+  { SHIP.player.wsteps = []; ACT = null; const j = { id: 'probe@w', title: 'Probe' }, st = { step: 'wait', places: [], how: 'wait', opts: { mins: 30 } }, t0 = shipNow();
+    workStep(j, st, 5, null); const at1 = (wsFind(j.id, 5) || {}).at; setShipNow(t0 + 10); workStep(j, st, 5, null); const at2 = (wsFind(j.id, 5) || {}).at;
+    out.wait = [at1 === t0, at2 === at1]; SHIP.player.wsteps = []; ACT = null; setShipNow(t0); }
   // the cap
   const x0 = W.xp; out.xp = [worksSideXp(1, 'a'), worksSideXp(3, 'b'), worksSideXp(1, 'c'), worksSideXp(-1, 'd')]; out.gain = W.xp - x0;
   setShipNow(12 * 1440 + 540); out.xp2 = worksSideXp(3, 'e');
@@ -841,6 +981,7 @@ def part_side(g):
     check(a['none'] == [None, 1, 0], 'side: a tool you don\'t have has no state and doesn\'t slow you')
     check(a['uses'] == [100, 28], f"side: worksUse doesn't wear the scanner or the pipe kit again ({a['uses']})")
     check(a['look'][0] and a['look'][1] and a['look'][2] == 1.25, f"side: a look step with a due tool takes a quarter longer and still starts ({a['look']})")
+    check(a.get('wait') == [True, True], f"side: a wait step keeps its start when you come back before it's ready ({a.get('wait')})")
     check(a['xp'] == [1, 1, 0, 0] and a['gain'] == 2 and a['xp2'] == 2, f"side: side jobs give at most +2 a day ({a['xp']}, {a['xp2']})")
     check(a['notes'] == ['a1', 'b1', 'e2', 'probe1', 'probe1'], f"side: the sideXp notes ({a['notes']})")
     check(a['turnin'] == 3, f"side: side-job kinds turned in at the board are capped too (+2), an ordinary job isn't (+1) ({a['turnin']})")
@@ -1092,6 +1233,8 @@ FF = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works);
  const rigN = () => { let m = 0, v = 0; player.rig.root.traverse(o => { if (o.isMesh) { m++; v += o.geometry.attributes.position.count; } }); return [m, v]; };
  delete PLAYER_SPEC.pin; delete player.spec.pin; playerRigRebuild(); out.rig0 = rigN();
  let W = reset(12 * 1440 + 300); out.kinds = caseKindsOpen();
+ // head-scratchers are offered on ordinary workdays: with the events base off, the career-beat guard sees no event day (caseOffer asks eventDay; TS3)
+ out.evDays = typeof eventDay !== 'function' || typeof EV_GUARD_ON === 'undefined' || EV_GUARD_ON ? null : Array.from({ length: 60 }, (_, i) => i + 1).filter(d => eventDay(d));
  tick(12 * 1440 + 480, 12 * 1440 + 500); out.mail = [SHIP.mail.filter(x => /Calder/.test(x.from || '')).length, worksSide().ff.mail];
  tick(14 * 1440 + 470, 14 * 1440 + 490); let j = SHIP.jobs.find(x => x.ticket);
  out.posted = j ? [worksDay(j.posted), Math.round(j.posted % 1440), j.reserved, jobTier(j), j.title] : null; if (!j) return out;
@@ -1110,6 +1253,7 @@ def extra_ff(g):
     a, b = g.ev(FF), g.ev(FF)
     print('  ff kinds', a['kinds'], 'mail', a['mail'], 'posted', a.get('posted'), 'solved', a.get('solved'), 'grade', a.get('grade'), 'after', a.get('after'), 'wrong', a.get('wrong'), a.get('wrongAfter'), 'notYet', a.get('notYet'))
     check(a['mail'] == [1, 1], "ff: Calder's Mail on Day 13")
+    check(a.get('evDays') in (None, []), f"ff: with the events base off no day is an event day, so cases are offered (Days 1-60: {a.get('evDays')})")
     if not check(a.get('posted') and a['posted'][0] == 15 and a['posted'][1] == 480 and a['posted'][2] == 23 and a['posted'][3] == 2, 'ff: a ticket at 08:00 on the next workday, Tier 2, held in slot 23'): return
     check(a['solved'][0] == 'T2' and a['solved'][2] and a['solved'][3], 'ff: a T2 case, solved and turned in')
     check(a['grade'][0] == 1 and a['grade'][1], 'ff: right first time: grade 1, the Record\'s ff1')
@@ -1440,6 +1584,138 @@ def part_m17(g):
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
 PARTS['m17'] = part_m17
 
+
+# ---- FX3 (AR1's play of 0.64.15) ----
+# Making it safe (m6, Day 8): a word before the 10:30 call (Mail when it's set, a toast ten minutes before); after the talk
+# the arrow follows Calder to the pipe on Deck 4; not following for 30 minutes, the crew make it safe and she says the next
+# try's day, 10:30 and place; that day it's the 10:30 call again (not "Let's try that again" at 06:00); followed, your turn
+# is yours at once and points at the pipe. Small lessons: the drill's and the inspection's talks before them and readable
+# (not closed by the meetings tick within a minute), their asks sent (the drill's that morning, the inspection's the day before)
+FX3M6 = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; clearGoal(); if (DIALOGUE) dialogueEnd(true); goToDeck(5);   // you, far from the pipe
+  const row = ladderRow('m6'); let d = row.day; while (!playerShiftOn(d) || !ladderTeacher(row, d)) d++;
+  setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit(); W.log.push(['earlier', 1, 0, 'service']);
+  for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+  const said = [], kt = toast; toast = (a, b) => said.push(a + ': ' + b);
+  const run = (a, b, f) => { for (let t = a; t <= b; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE) dialogueEnd(true); if (f && f(t)) return t; } return null; };
+  const T = m => (d - 1) * 1440 + m, out = { day: d };
+  run(T(359), T(600)); out.st0 = W.cur && W.cur.st; out.warnMail = SHIP.mail.map(x => x.subject + ': ' + x.body).filter(x => /10:30/.test(x));
+  run(T(601), T(625)); out.soon = said.filter(x => /Ten minutes/.test(x)).length;
+  const c = W.cur; run(T(626), T(640), t => { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at && !r.met) { r.met = true; worksCareerTick(t + .5); } return c.st === 'watch'; });
+  const seen = () => { if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof goalNow === 'function') { GUIDE.key = ''; return goalNow(); } return IX_GOAL; };   // the arrow you see: with the teaching arrows on (0.92.0) the burst's follow is the queue's inc:m6 entry
+  const sg = seen(); out.watch = c.st; out.goal = sg ? [sg.deck, sg.place, sg.label] : null;
+  const t1 = shipNow(); run(t1 + 1, t1 + 40, () => c.st !== 'watch');
+  out.after = c.st; out.goalAfter = !!seen(); out.open = W.inc.open; out.again = SHIP.mail.filter(x => /Next time/.test(x.subject)).map(x => x.body);
+  let d2 = d + 1; while (!playerShiftOn(d2)) d2++;
+  const U = m => (d2 - 1) * 1440 + m; run(U(300), U(400)); const r2 = SHIP.occasions.find(x => x.key === c.occ);
+  out.next = [worksDay(shipNow()), c.st, r2 ? r2.at % 1440 : null, said.filter(x => /try that again/i.test(x)).length];
+  run(U(401), U(640), t => { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at && !r.met) { r.met = true; worksCareerTick(t + .5); } return c.st === 'watch'; });
+  setGoal({ deck: 3, place: '3-grab-1', label: 'Food, Deck 3' });   // another section's arrow (a need's) put up meanwhile: never cleared by this one (PR9)
+  const tv = shipNow(), vp = (DECKS[3].places || []).find(p => p.type === 'lift-wait');   // a job you hold when your turn comes (RV6/lead 28: the burst leads, it waits)
+  SHIP.jobs.push({ id: 'fx3-held', machine: null, deck: 3, room: vp.room, kind: 'chore', chore: 'vent', title: 'Clean a vent: test', tier: 1, urgency: 1, posted: tv, found: tv, claimedBy: null, parts: [], status: 'open', stops: [{ deck: 3, placeId: vp.id, mins: 20, tag: 'vent' }] }); MACH_REV++;
+  out.heldTaken = claimJob('fx3-held');
+  c.w = 1; const t2 = Math.floor(shipNow()) + 1; run(t2, t2 + 1);
+  const mj = myJob(); out.yours = [c.st, mj && mj.id === c.j, mj && (ixJobStep() || {}).deck, IX_GOAL ? IX_GOAL.label : null];
+  out.parked = (SHIP.jobs.find(x => x.id === 'fx3-held') || {}).claimedBy;
+  if (mj && mj.id === c.j) { jobFinish(mj, shipNow(), 'you'); const t3 = Math.floor(shipNow()) + 1; run(t3, t3 + 1); }
+  out.back = (myJob() || {}).id || null;
+  toast = kt; SHIP.works = null; SHIP.jobs = []; clearGoal(); return out;
+})()"""
+FX3SMALL = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; if (DIALOGUE) dialogueEnd(true);
+  const out = {}, open = m => !!(DIALOGUE && DIALOGUE.id.startsWith('train.' + m));
+  setShipNow(1440 + 1080); machinesNow(); const W = worksInit(); W.log.push(['earlier', 1, 0, 'service']); W.tr.m1 = W.tr.m4 = 2; W.use.m1 = W.use.m4 = 1; (W.op[2] = ['m1', 'm4']);
+  let wed = 2; while (weekday(wed) !== 2 || !playerShiftOn(wed) || !playerShiftOn(wed + 1)) wed++;
+  const at = m => (wed - 1) * 1440 + m, tick = t => { setShipNow(t); machinesNow(); worksCareerTick(t); };
+  for (let t = at(300); t <= at(400); t += 10) tick(t);
+  out.drillAsk = SHIP.mail.filter(x => /Drill at three/.test(x.subject)).length; out.m3dOpen = worksOpened(W).has('m3d');
+  for (let t = at(880); t <= at(DRILL_TOAST + 1); t++) tick(t);
+  out.brief = open('m3d'); meetingsTick(shipNow()); meetingsTick(shipNow() + 1); out.briefStays = open('m3d'); if (DIALOGUE) dialogueEnd(true);
+  goToDeck(5); for (let t = at(DRILL_TOAST + 2); t <= at(1200); t += 5) tick(t);   // you're not in your bunk room: no word from Tomas in person, so his Mail at 21:30
+  out.inspectEarly = SHIP.mail.filter(x => /Inspection tomorrow/.test(x.subject)).length;
+  for (let t = at(1205); t <= at(1300); t += 5) tick(t);
+  out.inspectAsk = SHIP.mail.filter(x => /Inspection tomorrow/.test(x.subject)).length;
+  const bed = placeById(playerBed()); goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
+  const th = m => wed * 1440 + m; for (let t = th(300); t <= th(375); t += 5) tick(t);
+  out.m3iOpen = worksOpened(W).has('m3i'); out.tomas = open('m3i'); meetingsTick(shipNow()); out.tomasStays = open('m3i'); if (DIALOGUE) dialogueEnd(true);
+  // the inspection morning's arrows (the week guide's Day 4, lead 29): wardrobe, bed, locker, then your berth if you've left it
+  const gq0 = typeof GUIDE_ON !== 'undefined' && GUIDE_ON; if (gq0) GUIDE_ON = false;   // FX3's direct arrows: the queue off (on from 0.92.0, the queue's own path is the week guide's Day 4, AC2's F2)
+  const C = SHIP.clothes, P = SHIP.player, lab = () => { const g = goalNow(); return g ? g.label : null; }; clearGoal(); out.arrows = [];
+  goToDeck(5); const keep = [C && C.changed, P.bedMade, P.untidy]; if (C) C.changed = null; P.bedMade = null; P.untidy = true;
+  let t9 = th(376); tick(t9); out.arrows.push(lab());
+  if (C) C.changed = wed + 1; tick(++t9); out.arrows.push(lab()); P.bedMade = wed + 1; tick(++t9); out.arrows.push(lab()); P.untidy = false; tick(++t9); out.arrows.push(lab());
+  goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at)); tick(++t9); out.arrows.push(lab());
+  goToDeck(5); tick(++t9); out.arrows.push(lab()); setGoal({ deck: 3, place: '3-galley-1', label: 'someone else' }); P.bedMade = null; tick(++t9); out.arrows.push(lab()); clearGoal();
+  const gq = typeof GUIDE_ON === 'undefined' ? null : GUIDE_ON, setQ = v => { if (gq === null) window.GUIDE_ON = v; else GUIDE_ON = v; };   // the arrow queue on: the arrows step aside (AC2's piece F2 asks the queue)
+  setQ(true); tick(++t9); out.queued = lab(); if (gq === null) delete window.GUIDE_ON; else GUIDE_ON = gq;
+  tick(++t9); for (let t = t9; t <= th(INSPECT_AT); t++) tick(t); out.arrows.push(lab());
+  if (gq0) { GUIDE_ON = true; guideStart(); }
+  if (C) C.changed = keep[0]; P.bedMade = keep[1]; P.untidy = keep[2]; goToDeck(bed.deck); player.obj.position.copy(cellPos(...bed.at));
+  const n0 = SHIP.mail.length; worksTrained('m3i'); out.again = open('m3i'); if (DIALOGUE) dialogueEnd(true);
+  W.tr.m2 = undefined; delete W.tr.m2; worksTrained('m2'); out.m2 = open('m2'); meetingsTick(shipNow()); out.m2Stays = open('m2'); if (DIALOGUE) dialogueEnd(true);
+  goToDeck(4); SHIP.works = null; SHIP.jobs = []; return out;
+})()"""
+FX3M4 = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = []; SHIP.manifest = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; clearGoal(); if (DIALOGUE) dialogueEnd(true); goToDeck(5);
+  const row = ladderRow('m4'); let d = row.day; while (haulDay(d) || !playerShiftOn(d) || !ladderTeacher(row, d)) d++;   // a day with no delivery
+  setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit(); W.log.push(['earlier', 1, 0, 'service']); W.tr.m1 = 1; W.use.m1 = 1; (W.op[1] = W.op[1] || []).push('m1');
+  SHIP.manifest = []; const out = { day: d, wd: weekday(d) }, run = (a, b, f) => { for (let t = a; t <= b; t++) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE) dialogueEnd(true); if (f && f(t)) return t; } return null; };
+  const T = m => (d - 1) * 1440 + m; run(T(359), T(400)); const c = W.cur; out.st0 = c && c.id + ':' + c.st;
+  run(T(401), T(900), t => { const r = c && SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at && !r.met) { r.met = true; worksCareerTick(t + .5); } return c && c.st !== 'meet'; });
+  out.watch = c && c.st; const wj = c && SHIP.jobs.find(x => x.id === c.j); out.watchJob = wj ? (wj.crates || []).length : 0;
+  if (c && c.st === 'watch') { c.w = 99; const t2 = Math.floor(shipNow()) + 1; run(t2, t2 + 1); }
+  const yj = c && c.st === 'do' && SHIP.jobs.find(x => x.id === c.j); out.yours = yj ? (yj.crates || []).length : 0;
+  out.labels = [];
+  if (yj && claimJob(yj.id)) { const n = jobStops(yj).length; for (let k = 0; k < n; k++) { out.labels.push((ixJobStep() || {}).label || null); jobStepDone(yj.id, k); } }
+  // a lesson that didn't happen: asked again at its own time on the next workday, not restarted at 06:00
+  W.tr.m4 = undefined; delete W.tr.m4; W.cur = { id: 'm4', st: 'again', d, by: row.by[0], occ: null, j: null, w: 0 }; SHIP.jobs = [];
+  let d2 = d + 1; while (!playerShiftOn(d2) || !ladderTeacher(row, d2)) d2++; WORKS_TICK.h = -1; run((d2 - 1) * 1440 + 359, (d2 - 1) * 1440 + 362);
+  const r2 = SHIP.occasions.find(x => x.key === W.cur.occ); out.again = [W.cur.st, r2 ? r2.at % 1440 : null];
+  SHIP.works = null; SHIP.jobs = []; SHIP.manifest = []; clearGoal(); return out;
+})()"""
+FX3PROMO = r"""(() => {
+  if (typeof promoSeekTick !== 'function') return null;
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.flags = {}; SHIP.jobs = []; if (DIALOGUE) dialogueEnd(true); goToDeck(5);
+  const now = Math.floor(shipNow()), p = player.obj.position, fake = { p: { id: 'calder' }, x: p.x, z: p.z }, say = worksSayAll;
+  SHIP.occasions.push({ id: 'promoSummons', key: 'promoSummons@' + worksDay(now), at: now - 20, len: 30, deck: 5, room: 'o', by: 'calder', kind: 'meeting', status: 'asked', f: { seek: now - 5 } });
+  DECK_CREW.push(fake); worksSayAll = () => {}; let out = null;
+  try { promoSeekTick(now); const a = !!(DIALOGUE && DIALOGUE.id === 'promo.officer'); meetingsTick(now); meetingsTick(now + 1); out = [a, !!(DIALOGUE && DIALOGUE.id === 'promo.officer')]; }
+  finally { worksSayAll = say; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); DIALOGUE = null; if (typeof deviceDialogue === 'function') deviceDialogue(null); SHIP.occasions.length = 0; SHIP.works = null; }
+  return out;
+})()"""
+def part_fx3(g):
+    pr = g.ev(FX3PROMO); print('  the promotion talk where she finds you:', pr)
+    check(pr is None or pr == [True, True], f"promo: Calder's talk where she finds you stays to be read ({pr})")
+    h = g.ev(FX3M4); print('  m4 off a delivery day:', h)
+    check(h['watch'] == 'watch' and h['watchJob'] == 1, f"m4: off a delivery day Yara's lesson still has its crates ({h})")
+    check(h['yours'] >= 2, f"m4: your run after it, with the rest of the crates ({h})")
+    check(len(h['labels']) >= 4 and h['labels'][0].startswith('Take a hover cart') and any(l and l.startswith('Load the') and '(1 of' in l for l in h['labels']) and any(l and ' to ' in l and 'Deck' in l for l in h['labels']) and h['labels'][-1].startswith('Cart back'), f"m4: each stop's own words on the arrow ({h['labels']})")
+    check(h['again'][0] == 'meet' and h['again'][1] and h['again'][1] >= 660, f"m4: a lesson that didn't happen is asked again at its own time after the delivery, not at 06:00 ({h['again']})")
+
+    a = g.ev(FX3M6); print('  m6 flow:', a)
+    check(a['st0'] == 'meet' and a['warnMail'], f"m6: a Mail when the training's set, naming 10:30 ({a['warnMail']})")
+    check(a['soon'] == 1, f"m6: a word ten minutes before the call ({a['soon']})")
+    check(a['watch'] == 'watch' and a['goal'] and a['goal'][0] == 4 and a['goal'][1] == '4-valve-panel' and 'Follow' in a['goal'][2], f"m6: after the talk the arrow follows the teacher to the pipe ({a['goal']})")
+    gl = (a['goal'] or [None, None, ''])[2] or ''   # no crash when there's no arrow (FX3)
+    check('Calder' in gl and 'Ines' not in gl, f"m6: the label calls her Calder, as everywhere else (RV6) ({gl})")
+    check(a.get('heldTaken') and a.get('parked') == 'you-parked' and a.get('back') == 'fx3-held', f"m6: a job you hold waits while the burst pipe leads, and comes back after it ({a.get('heldTaken')}, {a.get('parked')}, {a.get('back')})")
+    check(a['after'] == 'ask' and not a['goalAfter'] and a['open'] is None and a['again'] and '10:30' in a['again'][0], f"m6: not followed: the crew make it safe, the next try with its day, time and place ({a['after']}, {a['again']})")
+    check(a['next'][1] == 'meet' and a['next'][2] == 630 and a['next'][3] == 0, f"m6: the next try is the 10:30 call again, not a 06:00 restart ({a['next']})")
+    check(a['yours'][0] == 'do' and a['yours'][1] and a['yours'][2] == 4 and a['yours'][3] == 'Food, Deck 3', f"m6: followed, your turn is yours at once and points at the pipe; another section's arrow left alone ({a['yours']})")
+    b = g.ev(FX3SMALL); print('  small lessons:', b)
+    A = b.get('arrows') or []
+    check(A[:4] == ['Fresh uniform for inspection: your wardrobe', 'Make your bed: your bunk', 'Tidy your locker: your bunk', 'Inspection at 06:30: your berth'] and A[4] is None
+          and A[5] == 'Inspection at 06:30: your berth' and A[6] == 'someone else' and A[7] is None and b.get('queued') is None,
+          f'fx3: the inspection morning\'s arrows lead through wardrobe, bed and locker to your berth, never over another arrow, none with the arrow queue on, gone at 06:30 ({A}, queue on: {b.get("queued")})')
+    check(b['m3dOpen'] and b['drillAsk'] == 1, f"m3d: Calder's ask the morning of your first drill ({b})")
+    check(b['brief'] and b['briefStays'], f"m3d: her briefing before the drill, and it stays to be read ({b})")
+    check(b['inspectEarly'] == 0 and b['inspectAsk'] == 1, f"m3i: Tomas's ask the evening before your first inspection (in person in your bunk room, else Mail at 21:30) ({b})")
+    check(b['m3iOpen'] and b['tomas'] and b['tomasStays'] and not b['again'], f"m3i: his talk before the walk, readable, and not again after it ({b})")
+    check(b['m2'] and b['m2Stays'], f"m2: Torres's word stays to be read ({b})")
+
 only = set(sys.argv[2:])
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
@@ -1475,7 +1751,9 @@ with sync_playwright() as pw:
         part_round23(g)
     for k, f in EXTRA.items():                             # parts that aren't ladder rows (24l's favour cases)
         if (not only or k in only) and ev(f"!!JOB_KINDS['{k}'] || (typeof ffState === 'function' && '{k}' === 'ff') || (typeof teamParts === 'function' && '{k}' === 'tparts')"): print(k + ':'); f(g)
+    if not only or 'fix2' in only: print('fix2 (the notes\' words):'); part_fix2_c(g)
     if not only or 't24' in only: part_t24(g)
+    if not only or 'fx3' in only: print('fx3 (Making it safe\'s flow, the small lessons):'); part_fx3(g)
     ev("SHIP.works = null")
     if g.errors: fail('page errors: ' + ' | '.join(g.errors[:5]))
     g.close()

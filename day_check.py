@@ -16,6 +16,7 @@ from playwright.sync_api import sync_playwright
 
 DAY = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 BUDGET = 450
+LANE_WALL = .001               # the share of walking frames a lane may bring a body within .1 tile of a wall its tile isn't near (playtest 1, #17: a body leaving a seat, its tile still off the middle, while the lane eases in; 0.03% on Day 1's busiest deck)
 STEP = 0.05                    # real seconds a step (the main loop's longest frame): 0.03 ship minutes at SHIP_RATE 0.6
 
 # run one deck through the day: the crew logic only, a step at a time; every ship hour, draw a frame or two
@@ -25,12 +26,22 @@ SIM = r"""(async ({ n, day, step, draw }) => {
   const LL = typeof LINE_LOG === 'object' ? LINE_LOG : null;   // the servery line (0.26.30): counted afresh for this deck
   if (LL) for (const k in LL) LL[k] = Array.isArray(LL[k]) ? [] : 0;
   out.trayOut = 0; out.trayWho = []; out.trayStill = 0; out.stillWho = []; const still = new Map();
+  // the drawn lane (#10; playtest 1, #17): every walker's lane within WALK_LANE, and never drawn into a wall it isn't at: a
+  // walking frame where the lane alone brings the body within .1 tile of a wall or a blocked tile (its tile position not)
+  out.laneMax = 0; out.laneWall = 0; out.laneWho = []; out.walkF = 0;
+  const wallE = k => { const e = EDGES.get(k); return !!e && (e.type === 'wall' || e.type === 'hull'); };
+  const wallD = (X, Z) => { const gx = X + OX, gz = Z + OZ, i = Math.floor(gx), j = Math.floor(gz), fx = gx - i, fz = gz - j; let d = 9;
+    if (wallE(`v,${i},${j}`) || !free(i - 1, j)) d = Math.min(d, fx); if (wallE(`v,${i + 1},${j}`) || !free(i + 1, j)) d = Math.min(d, 1 - fx);
+    if (wallE(`h,${i},${j}`) || !free(i, j - 1)) d = Math.min(d, fz); if (wallE(`h,${i},${j + 1}`) || !free(i, j + 1)) d = Math.min(d, 1 - fz); return d; };
   const own = new Map(schedPeople().map(p => [p.id, p.bed]));
   for (let k = 0; B + k * step * SHIP_RATE < B + 1440; k++) {
     setShipNow(B + k * step * SHIP_RATE);
     updateDeckCrew(step);
     const now = shipNow(), held = new Map();
     for (const a of DECK_CREW) {
+      if (typeof a.lane === 'number') out.laneMax = Math.max(out.laneMax, Math.abs(a.lane));
+      if (a.pose === 'walk') out.walkF++;
+      if (a.pose === 'walk' && (a.lx || a.lz) && wallD(a.x + a.lx, a.z + a.lz) < .1 && wallD(a.x, a.z) >= .1) { out.laneWall++; if (out.laneWho.length < 6 && !out.laneWho.some(w => w.startsWith(a.p.id + ' '))) out.laneWho.push(a.p.id + ' ' + hhmm(now - B)); }
       if (a.stuckMax > out.stuck) { out.stuck = a.stuckMax; out.stuckWho = a.p.id + ' ' + hhmm(now - B); }
       if (a.noPath && !out.noPath.includes(a.p.id)) out.noPath.push(a.p.id);
       if (a.hold === 'tray' && roomAt(...a.here()) !== 'M') { out.trayOut++; if (out.trayWho.length < 6) out.trayWho.push(a.p.id + ' ' + hhmm(now - B)); }   // a tray only in the mess hall
@@ -196,6 +207,11 @@ with sync_playwright() as pw:
         busiest = sorted(o['calls'], key=lambda c: -c[2])[:2]
         print('  busiest frames:', ', '.join(f"{c[0]} {c[1]} {c[2]} calls, {c[3]} crew" for c in busiest))
         if o['stuck'] > 10: fail(f"deck {n}: {o['stuckWho']} stuck {o['stuck']:.1f} ship minutes")
+        wl = g.ev("typeof WALK_LANE !== 'undefined' ? WALK_LANE : null")
+        if wl is not None:   # the drawn lane (#10; playtest 1, #17): within WALK_LANE, and never drawn into a wall by it alone
+            print(f"  walking lanes: widest {o['laneMax']:.2f} tiles (limit {wl}), drawn into a wall by the lane {o['laneWall']} of {o['walkF']} walking frames {o['laneWho']}")
+            if o['laneMax'] > wl + 1e-9: fail(f"deck {n}: a walking lane {o['laneMax']:.2f} tiles wide, over WALK_LANE {wl}")
+            if o['laneWall'] > LANE_WALL * o['walkF']: fail(f"deck {n}: drawn into a wall by the walking lane {o['laneWall']} frames: {o['laneWho']}")
         if o['shared']: fail(f"deck {n}: two people settled in one place {o['shared']} times: {o['sharedWho']}")
         if o['notOwnBed']: fail(f"deck {n}: in someone else's bed: {sorted(set(o['notOwnBed']))[:6]}")
         if o['noPath']: fail(f"deck {n}: no way to their place: {o['noPath'][:8]}")

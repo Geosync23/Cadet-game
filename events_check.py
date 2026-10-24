@@ -11,6 +11,7 @@
 #   the player joining by being in the room (a little social, once); the tap line before it;
 #   a whole ship year on paper (Pillar 4): the new rhythms (every 2 or 4 weeks, by quarter, by year, from your arrival)
 #   due exactly when they should be, the four seasons, the baked traditions (content/traditions) loaded and filled;
+#   meal traditions thin out: at most 6 diners get up in any one minute (Days 0-21), Day 0's table full till Zeke's goodnight;
 #   a ship-wide event on paper: the ion storm's skeleton from day 10, its phases in order, eventMod in each, the same twice.
 # Setup and environment as for cadet_test.py.
 # Run:  python3 events_check.py BUILD.html [DAYS]     (DAYS defaults to 28, from Day 1, plus days 100 and 300)
@@ -136,7 +137,7 @@ SIM = r"""(async ({ d, id, step }) => {
 STORM = r"""(() => {
   const run = () => {
     const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm')); SHIP.traces.length = 0; const m0 = MEETINGS.splice(0);
     const recKeep = typeof recClean === 'function' ? { rec: JSON.stringify(SHIP.rec), f: ['rec.allHands', 'rec.filmMoved'].map(k => [k, SHIP.flags && SHIP.flags[k]]) } : null;   // the rec deck's first all-hands comes with the storm's first address (0.83): from a clean slate each run
     if (recKeep) { SHIP.rec = recClean(null); for (const [k] of recKeep.f) if (SHIP.flags) delete SHIP.flags[k]; }
     const due = eventDueDay();                           // as in a new game
@@ -163,7 +164,7 @@ STORM = r"""(() => {
     const addr = ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 + ' ' + hhmm(x.at % 1440) + ' ' + x.text);
     const meets = MEETINGS.slice(ms).map(m => m.id + ' day ' + (Math.floor(m.at / 1440) + 1) + ' ' + hhmm(m.at % 1440) + ' ' + m.script);
     ADDRESSES.length = a0; MEETINGS.length = 0; MEETINGS.push(...m0); EV_DAYS.clear();
-    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog)), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
+    const res = { steps, sig: sig.join('|'), mods, log: JSON.parse(JSON.stringify(SHIP.eventLog.filter(l => l.id === 'ionStorm'))), traces: SHIP.traces.slice(), left: SHIP.event, addr, mails, meets, paused, news, on, gath, due,
       scripts: Object.keys(MEETING_SCRIPTS), lines: Object.values(MEETING_SCRIPTS).map(sc => sc.lines.length), modAfter: eventMod('wear', 'power', 12 * 1440) };
     SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
     if (recKeep) { SHIP.rec = recClean(JSON.parse(recKeep.rec)); for (const [k, v] of recKeep.f) if (SHIP.flags) { if (v === undefined) delete SHIP.flags[k]; else SHIP.flags[k] = v; } EV_DAYS.clear(); }
@@ -183,7 +184,7 @@ LIVE = r"""(() => {
   if (hadDress) dressShow = l => { spy(l); return ds(l); }; else window.dressShow = spy;
   const D = {}, mails = [], send = mailSend; mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
   const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice() };
-  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm')); SHIP.traces.length = 0; MEETINGS.length = 0; FEEL.log.length = 0; FEEL_DONE.clear();
   const put = (n, id) => { if (deckDef.num !== n) goToDeck(n); const at = DECKS[n].places.find(p => p.id === id).at;
     player.obj.position.copy(cellPos(...nearestOpen(...cellPos(...at).toArray().filter((_, i) => i !== 1), player))); target.copy(player.obj.position).setY(.7); };
   const tick = (a, b) => { for (let t = a; t <= b; t++) { setShipNow(t); eventsTick(); } };
@@ -212,7 +213,7 @@ LIVE = r"""(() => {
   D.allClear = DIALOGUE ? dialogueView() : null; D.calls3 = frames();
   put(1, '1-works-1'); tick(12 * 1440 + 10 * 60 + 2, 12 * 1440 + 10 * 60 + 2); D.walked = !DIALOGUE;
   skipTo(15 * 1440 + 10);
-  D.log = JSON.parse(JSON.stringify(SHIP.eventLog)); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
+  D.log = JSON.parse(JSON.stringify(SHIP.eventLog.filter(l => l.id === 'ionStorm'))); D.traces = SHIP.traces.slice(); D.left = SHIP.event; D.mails = mails;
   D.dress = dress; if (hadDress) dressShow = ds; else delete window.dressShow;
   mailSend = send; SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr);
   MEETINGS.length = 0; EV_DAYS.clear(); if (DIALOGUE) dialogueEnd(true); if (typeof deviceAddress === 'function') deviceAddress(null);
@@ -311,7 +312,7 @@ DIPLO = r"""(() => {
   SHIP_EVENTS.diplomatic.draft = false;                  // as it will be when it's switched on
   const run = () => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.traces.length = 0; MEETINGS.length = 0; EV_DAYS.clear();
-    SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
+    SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} });
     const due = eventDueDay(), sd = due.day, a0 = ADDRESSES.length, mails = [], send = mailSend;
     mailSend = m => { mails.push(Math.floor(m.at / 1440) + 1 - sd + ' ' + hhmm(m.at % 1440) + ' ' + m.subject); };
     eventStart('diplomatic', sd); EV_DAYS.clear();
@@ -325,14 +326,14 @@ DIPLO = r"""(() => {
     const R = { due, steps, batch, guestsOn, mails, addr: ADDRESSES.slice(a0).map(x => x.text.slice(0, 60)), meets: MEETINGS.map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - sd) + ' ' + hhmm(m.at % 1440)),
       farewell: eventsOn(sd + 7).filter(e => e.id === 'farewell').map(e => e.from + '-' + e.to), going: schedPeople().filter(p => planDay(p, sd + 7).some(s => s.tag && s.tag.startsWith('ev-farewell'))).length,
       guests: ['teshavi', 'kesrin'].map(id => { const g = typeof GUESTS !== 'undefined' && GUESTS.find(x => x.id === id); return g ? id + ':' + (eventGuestDays(g) || []).map(d => d - sd).join('-') : id + ':-'; }),
-      log: SHIP.eventLog.slice(1).map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
+      log: SHIP.eventLog.filter(l => l.id === 'diplomatic').map(l => l.band + ' ' + JSON.stringify(l.threads)), traces: SHIP.traces.slice() };
     ADDRESSES.length = a0; return R;
   };
   const a = run(), b = run();
   const sc = MEETING_SCRIPTS.veyliGreeting; dialogueShow('veyliGreeting', { id: 'veyliGreeting', who: ['marrow', 'vance', 'saruth', 'teshavi', 'kesrin'], at: shipNow() });
   const names = []; let n = 0; while (DIALOGUE && n++ < 20) { const v = dialogueView(); names.push(v.choices ? '[choice]' : v.who); dialogueStep(v.choices ? 1 : undefined); }
   // live: the greeting plays when you're in the shuttle bay at 10:00 on the visit's day 2
-  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push({ id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
+  SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('ionStorm'), { id: 'ionStorm', startDay: 10, endDay: 16, band: 'smooth', threads: {}, mine: {} }); MEETINGS.length = 0; EV_DAYS.clear();
   const sd = a.due.day; eventStart('diplomatic', sd); EV_DAYS.clear();
   skipTo((sd + 1) * 1440 + 580); goToDeck(5); const bx = ROOM_BOX.S;
   player.obj.position.copy(cellPos(Math.floor((bx.i0 + bx.i1) / 2), Math.floor((bx.j0 + bx.j1) / 2))); target.copy(player.obj.position).setY(.7);
@@ -375,6 +376,64 @@ with sync_playwright() as pw:
     same = g.ev(f"({SAME})(4)")
     print('Plans the same twice (day 4):', same)
     if not same: fail('day 4 planned differently the second time')
+
+    # 1a. meal traditions thin out (the user, 2026-10-23: "the room must not all empty at once"; SC1's dinner-spread, RV8's
+    # condition): on paper, Days 0-21, at most 6 diners get up from a meal tradition in any one minute (a diner's leaving is
+    # the end of their seat, kept on past the tradition's end in the same seat: Day 0's linger), and Day 0's Sunday table is
+    # still full 5 minutes before Zeke's goodnight to you (section 21's INTRO_STEPS 'free')
+    SP = g.ev(r"""(() => { const worst = [];
+      for (let d = 0; d <= 21; d++) { const day = shipDay(d), by = new Map();
+        for (const [id, segs] of day.plans) segs.forEach((s, i) => {
+          if (!(s.tag && /^ev-/.test(s.tag) && s.placeId && /dinner|breakfast|supper|lunch|meal|eat|sit/i.test(String(s.act)))) return;
+          let k = i; while (segs[k + 1] && segs[k + 1].placeId === s.placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+          if (!by.has(s.tag)) by.set(s.tag, new Map()); const L = by.get(s.tag); if (!L.has(id)) L.set(id, Math.round(segs[k].to)); });
+        for (const [tag, L] of by) { const c = new Map(); for (const m of L.values()) c.set(m, (c.get(m) || 0) + 1);
+          let w = 0, wm = 0; for (const [m, n] of c) if (n > w) { w = n; wm = m; } worst.push([d, tag, L.size, w, ((wm % 1440) + 1440) % 1440]); } }
+      const f = typeof introStepById === 'function' && introStepById('free'), day = shipDay(0), B = -1440, pl = new Set();
+      for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
+      const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
+      let most = 0; if (f) for (let m = B + 17 * 60; m < B + f.at; m += 5) most = Math.max(most, at(m));
+      return { worst: worst.sort((a, b) => b[3] - a[3]), day0: f ? { seats: pl.size, free: f.at, most, before: at(B + f.at - 5) } : null }; })()""")
+    print('Meal traditions, most getting up in one minute (day, tag, diners, most, at):', SP['worst'][:3], '| Day 0 table:', SP['day0'])
+    for w in SP['worst']:
+        if w[3] > 6: fail(f"Day {w[0]} {w[1]}: {w[3]} of {w[2]} diners get up in the same minute ({w[4] // 60:02d}:{w[4] % 60:02d}); at most 6 (the room must not empty at once)")
+    D0 = SP['day0']
+    if not D0 or not D0['most'] or D0['before'] < D0['most']: fail(f"Day 0's Sunday table not full 5 minutes before Zeke's goodnight: {D0}")
+    # the user, 2026-10-23 (FX5): once Zeke's goodnight has really happened (the Chief's talk and his explanation over;
+    # SHIP.intro.done.free, live), the table trickles out from that minute: full till then, nobody up before it, a few
+    # at a time after (at most 4 in a minute), nearly empty an hour later, and nobody else's plan changes (RV10: no one
+    # off the table moves at that minute). On paper with the arrival on, at 18:20 and 19:10
+    LV = g.ev(r"""(() => { const I = SHIP.intro, keep = [I.on, I.ended, I.done.free], out = [], B = -1440;
+      I.on = true; I.ended = false;
+      delete I.done.free; const base = new Map([...shipDay(0).plans].map(([id, x]) => [id, JSON.stringify(x)]));   // without a live goodnight
+      for (const fr of [18 * 60 + 20, 19 * 60 + 10]) {
+        I.done.free = B + fr; const day = shipDay(0), pl = new Set();
+        const diners = new Set([...day.plans].filter(([, x]) => x.some(q => q.tag && /^ev-sunday-table/.test(q.tag))).map(([id]) => id));
+        const others = [...day.plans].filter(([id, x]) => !diners.has(id) && base.get(id) !== JSON.stringify(x)).map(([id]) => id);   // RV10: nobody off the table may change
+        for (const [, segs] of day.plans) for (const s of segs) if (s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId) pl.add(s.placeId);
+        const at = m => { let n = 0; for (const [, segs] of day.plans) if (segs.some(s => pl.has(s.placeId) && s.from <= m && s.to > m)) n++; return n; };
+        const ups = new Map(), filler = [], pre = []; let early = 0;
+        for (const [, segs] of day.plans) { const i = segs.findIndex(s => s.tag && /^ev-sunday-table/.test(s.tag) && s.placeId); if (i < 0) continue;   // the tradition's diners: when they get up from its seat (kept on in the same seat)
+          let k = i; while (segs[k + 1] && segs[k + 1].placeId === segs[i].placeId && Math.abs(segs[k + 1].from - segs[k].to) < .5) k++;
+          const m = Math.round(segs[k].to - B); if (m < fr) early++; ups.set(m, (ups.get(m) || 0) + 1);
+          // FX8 (the user, 2026-10-23: "let them do what they will do"): once up, their own planned evening, no made-up wait
+          // (0.92.1's bunk trip or standing about until their old time: the first step after the lift is 'off' at their bed
+          // or nowhere); and nothing of theirs changes before the goodnight
+          let n = k + 1; while (segs[n] && (segs[n].act === 'commute' || segs[n].type === 'lift-wait')) n++;
+          const nx = segs[n], me = [...day.plans].find(([, x]) => x === segs)[0], bed = (schedData().people.find(q => q.id === me) || {}).bed;
+          if (nx && m > fr && nx.act === 'off' && (!nx.placeId || nx.placeId === bed)) filler.push(me + ' ' + nx.type + ' ' + Math.round(nx.from - B));
+          const cut = x => JSON.stringify(x.filter(q => q.from < B + fr).map(q => ({ ...q, to: Math.min(q.to, B + fr) })));
+          if (cut(segs) !== cut(JSON.parse(base.get(me)))) pre.push(me); }
+        out.push({ free: fr, seats: pl.size, before: at(B + fr - 5), most: Math.max(...[0, 10, 20, 30, 40].map(k => at(B + fr - 5 - k))), early, top: Math.max(0, ...ups.values()), others, after10: at(B + fr + 10), after60: at(B + fr + 60), filler, pre, span: [Math.min(...ups.keys()) - fr, Math.max(...ups.keys()) - fr] });
+      }
+      I.on = keep[0]; I.ended = keep[1]; if (keep[2] === undefined) delete I.done.free; else I.done.free = keep[2]; return out; })()""")
+    print('Day 0 table from the live goodnight (free, seats, before, most, up before it, most up in a minute, others changed, 10 and 60 min after):', LV)
+    for r in LV:
+        if r['before'] < r['most'] or r['early'] or r['top'] > 4 or not (r['after10'] < r['before']) or r['after60'] > r['before'] // 5:
+            fail(f"Day 0's table after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} doesn't trickle out from it (full till then, nobody up before, at most 4 a minute, nearly empty an hour later): {r}")
+        if r['others']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed the plans of people not at the table (they'd move mid-activity): {r['others'][:6]}")
+        if r['filler']: fail(f"after the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d}, diners up from the table wait about instead of their own evening (bunk or standing till their old time): {r['filler'][:6]}")
+        if r['pre']: fail(f"the live goodnight at {r['free'] // 60:02d}:{r['free'] % 60:02d} changed diners' plans before it: {r['pre'][:6]}")
 
     # 1b. a whole ship year on paper (Pillar 4): the new rhythms due exactly when they should be, from day 0 (your
     # arrival) to day 364; the four seasons; the baked traditions (content/traditions, the TRADITIONS block) loaded
@@ -563,7 +622,7 @@ with sync_playwright() as pw:
         if len(x) != 1: fail(f"tradition note for {w['key']}: {len(x)} sent")
         elif x[0]['n'] != w['n'] or x[0]['kind'] != 'tradition': fail(f"tradition note for {w['key']}: came {x[0]['n']}, planned {w['n']}")
     m = g.ev("EV_MAILBOX.map(x => [x.event, x.at, x.subject])")
-    due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).filter(e => !(e.ev.quiet === 'career' && typeof recBigDay === 'function' && recBigDay(d))).map(e => e.id + '@' + d))")   # the rec deck's weekly sport ones send none on the career's big days (0.83)
+    due = g.ev("[2, 3, 4, 5, 6, 7, 8].flatMap(d => eventsOn(d).filter(e => !(e.ev.quiet === 'career' && typeof recBigDay === 'function' && recBigDay(d)) && !e.ev.when.ship && e.ev.mail !== null).map(e => e.id + '@' + d))")   # the rec deck's weekly sport ones send none on the career's big days (0.83); a ship-wide event's gatherings (its own Mail and banner announce them) and a day it dresses with no Mail (Crossing the Line's supper: Vance's Mail covers it) send none
     got = [x[0] for x in m]
     print(f"Mail: {len(m)} announcements for days 2-8 ({len(due)} events due); e.g. {m[0][2] if m else '-'}")
     for k in due:
@@ -646,6 +705,9 @@ with sync_playwright() as pw:
 
 
     # 5. a ship-wide event on paper: the ion storm's skeleton, twice
+    # the calendar's events before one (with Crossing the Line on: the Line, Days 6-8, before the storm), as already
+    # run: the storm's and the visit's runs below log them first, as a game that got there would have
+    g.ev("window.EV_BEFORE = id => { if (typeof EV_CAL_ON === 'undefined' || !EV_CAL_ON) return []; const r0 = EV_CALENDAR.find(r => r.id === id); return evCalPlan().filter(r => r.id !== id && r0 && r.day < r0.day).map(r => ({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} })); }")
     st = g.ev(STORM); a = st['a']
     print('Ion storm on paper (days 10-16):'); [print('  ' + x) for x in a['steps']]
     print(f"  wear and flicker by phase: {a['mods']}; result {a['log'][0]['band'] if a['log'] else '-'}, threads {a['log'][0]['threads'] if a['log'] else '-'}, traces {a['traces']}")

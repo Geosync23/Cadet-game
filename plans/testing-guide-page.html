@@ -1,0 +1,232 @@
+<title>How Starship Cadet Is Tested</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Saira+Condensed:wght@600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: one readable column like a ship's procedure card; deck-sign headings, check names in mono, amber signal for the rules that gate a merge */
+:root {
+  --bg: #f3f5f7; --panel: #ffffff; --fg: #17212b; --muted: #55636f; --line: #d5dde4;
+  --hull: #2c4a63; --signal: #b36200; --signal-bg: #fff3e2; --ok: #1f7a4d; --ok-bg: #e5f4ec;
+  --display: "Saira Condensed", "Arial Narrow", "Helvetica Neue", sans-serif;
+  --body: "Atkinson Hyperlegible", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f161d; --panel: #16212b; --fg: #e6edf2; --muted: #9aabb8; --line: #2a3a47;
+  --hull: #8fb4d4; --signal: #f0a548; --signal-bg: #2e2112; --ok: #6cc79a; --ok-bg: #12291e; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f161d; --panel: #16212b; --fg: #e6edf2; --muted: #9aabb8; --line: #2a3a47;
+  --hull: #8fb4d4; --signal: #f0a548; --signal-bg: #2e2112; --ok: #6cc79a; --ok-bg: #12291e; color-scheme: dark }
+body { background: var(--bg); color: var(--fg); font: 17px/1.6 var(--body); }
+.wrap { max-width: 44rem; margin: 0 auto; padding-block: 28px 64px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; flex-direction: column; gap: 28px; }
+header { display: flex; flex-direction: column; gap: 8px; }
+.eyebrow { font: 600 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+h1 { font: 700 2.4rem/1.05 var(--display); letter-spacing: .01em; color: var(--hull); margin: 0; text-wrap: balance; }
+h2 { font: 700 1.6rem/1.15 var(--display); letter-spacing: .02em; color: var(--hull); margin: 0; text-wrap: balance; }
+h3 { font: 700 1.05rem/1.3 var(--body); margin: 0; }
+p { margin: 0; }
+.lead { font-size: 1.1rem; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 14px; }
+.sec-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.comment-btn { font: 600 13px/1 var(--body); color: var(--hull); background: transparent; border: 1px solid var(--line);
+  border-radius: 999px; padding: 8px 12px; cursor: pointer; min-height: 36px; }
+.comment-btn:focus-visible, a:focus-visible { outline: 3px solid var(--signal); outline-offset: 2px; }
+.rule { background: var(--signal-bg); border-left: 4px solid var(--signal); padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.rule strong { color: var(--signal); }
+ol, ul { margin: 0; padding-left: 1.3em; display: flex; flex-direction: column; gap: 8px; }
+code, .chk { font: 600 .88em var(--mono); color: var(--hull); overflow-wrap: anywhere; }
+.runners { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 12px; }
+.runner { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; display: flex; flex-direction: column; gap: 8px; min-width: 0; }
+.runner .id { font: 700 1.3rem/1 var(--display); color: var(--hull); display: flex; justify-content: space-between; gap: 8px; }
+.runner .min { font: 600 13px/1.3 var(--mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.runner ul { padding-left: 1.1em; gap: 4px; font-size: .95rem; }
+.checks { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.check { display: grid; grid-template-columns: minmax(7.5rem, 10rem) 1fr; gap: 4px 14px; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.check .chk { padding-top: 2px; }
+.check p { min-width: 0; }
+@media (max-width: 30rem) { .check { grid-template-columns: 1fr; } }
+.group { font: 600 13px/1 var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 14px; }
+.known { display: flex; flex-direction: column; gap: 10px; }
+.pill { display: inline-block; font: 600 12px/1 var(--mono); padding: 5px 8px; border-radius: 999px; }
+.pill.old { background: var(--signal-bg); color: var(--signal); }
+.pill.fixed { background: var(--ok-bg); color: var(--ok); }
+.days { display: grid; grid-template-columns: 3.2rem 1fr; gap: 6px 12px; }
+.days b { font: 700 1.1rem/1.4 var(--display); color: var(--hull); font-variant-numeric: tabular-nums; }
+dl { margin: 0; display: grid; grid-template-columns: 1fr; gap: 10px; }
+dt { font-weight: 700; }
+dd { margin: 0; color: var(--muted); }
+.foot { font-size: .9rem; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <span class="eyebrow">Starship Cadet · the team's testing rules</span>
+    <h1>How Starship Cadet is tested</h1>
+    <p class="lead">Every change to the game is checked in full before it reaches you. This page explains how, in plain words. It's the short version of the team's testing guide.</p>
+  </header>
+
+  <section id="rule">
+    <div class="sec-head"><h2>The rule</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <div class="rule">
+      <p><strong>Every change to the game runs the full round of checks before it is merged or published.</strong> Your words: "We just need to keep testing fully."</p>
+      <p>The full round is 33 checks. Run one after another it would take about 3 hours, so it's always shared between <strong>six check runners at once</strong>. Each runner is a separate session with its own copy of the game. Together they finish in about 30 to 35 minutes.</p>
+      <p>The team also has a quick test picker that guesses which checks a change needs. It's only a helper while someone is working. It never decides whether a change is safe; the full round does.</p>
+    </div>
+  </section>
+
+  <section id="split">
+    <div class="sec-head"><h2>Who runs what</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <p>The split is fixed, so everyone knows their share. It's balanced on how long each check really takes.</p>
+    <div class="runners">
+      <div class="runner"><div class="id">CR1 <span class="min">about 34 min</span></div>
+        <ul><li><span class="chk">player</span> (the longest single check, so a light share)</li><li><span class="chk">devmode</span>, <span class="chk">bubble</span>, <span class="chk">puzzle</span>, <span class="chk">social</span>, <span class="chk">talk</span></li></ul></div>
+      <div class="runner"><div class="id">CR2 <span class="min">about 35 min</span></div>
+        <ul><li><span class="chk">intro</span> (the whole first week)</li><li><span class="chk">perf</span> and <span class="chk">cadet_test</span>, both compared with the last release</li><li><span class="chk">path</span>, <span class="chk">arc</span>, <span class="chk">lines</span> (and its day part)</li></ul></div>
+      <div class="runner"><div class="id">CR3 <span class="min">about 32 min</span></div>
+        <ul><li><span class="chk">day</span> check on Days 0, 1, 5 and 7</li></ul></div>
+      <div class="runner"><div class="id">CR4 <span class="min">about 32 min</span></div>
+        <ul><li><span class="chk">day</span> check on Days 12, 13, 16 and 19</li></ul></div>
+      <div class="runner"><div class="id">CR5 <span class="min">about 32 min</span></div>
+        <ul><li><span class="chk">day</span> check on Days 21 and 27</li><li><span class="chk">interactions</span>, <span class="chk">events</span>, <span class="chk">career</span></li></ul></div>
+      <div class="runner"><div class="id">CR6 <span class="min">about 35 min</span></div>
+        <ul><li>the quick check (words, names, decks, machines, leave, device)</li><li><span class="chk">mech</span>, <span class="chk">bigevents</span>, <span class="chk">fridays</span>, <span class="chk">disc</span>, <span class="chk">tiles</span>, <span class="chk">join</span>, <span class="chk">food</span> (two runs), <span class="chk">clothes</span></li></ul></div>
+    </div>
+  </section>
+
+  <section id="days">
+    <div class="sec-head"><h2>The days the crew check covers</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <p>The day check fast-forwards one whole ship day and makes sure everyone sleeps, eats, works and gets where they're going. Special days break in their own ways, so it runs on each of these:</p>
+    <div class="days">
+      <b>0</b><p>Your arrival (Sunday)</p>
+      <b>1</b><p>The first Monday: an ordinary working day</p>
+      <b>5</b><p>The first Friday: the short Friday and the Captain's address</p>
+      <b>7</b><p>Crossing the Line</p>
+      <b>12</b><p>The ion storm arrives</p>
+      <b>13</b><p>The storm's Saturday, with the rec deck shut</p>
+      <b>16</b><p>The comet</p>
+      <b>19</b><p>A Friday with its own address, and your first night shift</p>
+      <b>21</b><p>The first crew rotation off the Tern</p>
+      <b>27</b><p>The diplomatic visit's finale</p>
+    </div>
+  </section>
+
+  <section id="runner-steps">
+    <div class="sec-head"><h2>How a runner does its share</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <ol>
+      <li>Take the exact version of the game the build master names.</li>
+      <li>Check its fingerprint (a sha256 code) matches the one the build master sent. If it doesn't, stop: they'd be testing a different file.</li>
+      <li>Run the checks in its share one at a time, keeping each result.</li>
+      <li>If a check fails, run it again on the last release. If it fails there in exactly the same way and it's on the known list below, it's an old problem. Anything else is new, and it's reported plainly.</li>
+      <li>Write the results in its own notes file and tell the build master and the lead: "OK", or which check failed and whether it's old or new.</li>
+    </ol>
+  </section>
+
+  <section id="talk">
+    <div class="sec-head"><h2>When runners talk to each other</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <p>The six runners, the build master and the lead message each other directly when:</p>
+    <ul>
+      <li>a fingerprint doesn't match: everyone is told and everyone stops;</li>
+      <li>a problem could spoil other shares, like a broken build or the game failing to start;</li>
+      <li>someone fixes a setup problem, so the others get the fix;</li>
+      <li>someone finishes early: they offer to take a check from the slowest runner, agree it between them and tell the lead, so no check runs twice by accident;</li>
+      <li>any check fails that isn't on the known list: the build master and the lead hear at once.</li>
+    </ul>
+  </section>
+
+  <section id="release">
+    <div class="sec-head"><h2>How a release is tested</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <ol>
+      <li>The build master puts the release together and runs the quick check.</li>
+      <li>They send all six runners the version and its fingerprint, plus the last release to compare with.</li>
+      <li>They wait for all six reports.</li>
+      <li>They merge and publish only when every runner says OK, or every failure is a known old one.</li>
+      <li>Any new failure goes back to the person who made the change. Nothing is merged or published until it's fixed.</li>
+    </ol>
+  </section>
+
+  <section id="known">
+    <div class="sec-head"><h2>Known old problems</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <p>A failure counts as known and old only if it has a row on the team's list of small known bugs, it fails the same way on the last release, and its message matches. Today there are two:</p>
+    <div class="known">
+      <p><span class="pill old">known</span> The career check says a very busy player reaches "Relied on" before Day 5. It's waiting for your balancing pass. (List row 12.)</p>
+      <p><span class="pill old">known</span> The performance check sees two extra shapes kept in memory after walking between decks. (List row 14.)</p>
+      <p><span class="pill fixed">fixed in 0.64.14</span> Three that used to fail now must pass: the Day 12 rec deck, the Tiles board count, and the harvest salad on a farewell-supper day. If one fails again, it's treated as a real failure.</p>
+    </div>
+  </section>
+
+  <section id="checks">
+    <div class="sec-head"><h2>What each check looks after</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <div class="checks">
+      <div class="group">The quick check (before every save to GitHub)</div>
+      <div class="check"><span class="chk">words</span><p>Everything the writers wrote is baked into the game correctly.</p></div>
+      <div class="check"><span class="chk">names</span><p>The game's code reads properly, and nothing is defined twice.</p></div>
+      <div class="check"><span class="chk">deck</span><p>Every room and everything you can tap can be reached on every deck.</p></div>
+      <div class="check"><span class="chk">machine</span><p>The ship's machines wear, break and get repaired sensibly over two weeks.</p></div>
+      <div class="check"><span class="chk">leave</span><p>Booking leave, sick days, missed shifts and what happens if you keep missing them.</p></div>
+      <div class="check"><span class="chk">device</span><p>Every app on your device opens and shows the right things.</p></div>
+      <div class="group">Your days</div>
+      <div class="check"><span class="chk">intro</span><p>Your arrival and the whole first week: the tour, the meetings, saving and reloading at every step.</p></div>
+      <div class="check"><span class="chk">player</span><p>Your needs, sleep, activities, walking speed and that your save stays small.</p></div>
+      <div class="check"><span class="chk">interactions</span><p>Tapping things starts the right activity, the job board works, and the arrow points the right way.</p></div>
+      <div class="check"><span class="chk">clothes</span><p>Changing clothes, the laundry hamper and the washers.</p></div>
+      <div class="check"><span class="chk">career</span><p>Your Works career: training, reputation and promotion for a steady, a very busy and a lazy player.</p></div>
+      <div class="check"><span class="chk">mech</span><p>Each repair skill you learn, from its training to doing the job yourself.</p></div>
+      <div class="check"><span class="chk">puzzle</span><p>The head-scratcher repair cases.</p></div>
+      <div class="check"><span class="chk">devmode</span><p>Dev mode does nothing without its link and never touches your real save.</p></div>
+      <div class="group">The crew and the ship's life</div>
+      <div class="check"><span class="chk">day</span><p>A whole ship day: everyone sleeps, eats, works and nobody gets stuck (on each day listed above).</p></div>
+      <div class="check"><span class="chk">food</span><p>The galley has food ready on time and nobody waits too long.</p></div>
+      <div class="check"><span class="chk">events</span><p>The ship's traditions happen when they're due, and people go to them.</p></div>
+      <div class="check"><span class="chk">bigevents</span><p>The storm, the comet and the diplomatic visit, on their days, in their rooms, without clashes.</p></div>
+      <div class="check"><span class="chk">fridays</span><p>Short Fridays and the Captain's address.</p></div>
+      <div class="check"><span class="chk">join</span><p>Tapping a group's leader lets you join what they're doing.</p></div>
+      <div class="check"><span class="chk">social</span><p>Friendships, news and chats among the crew.</p></div>
+      <div class="check"><span class="chk">talk</span><p>"Talk a while" picks fresh topics and doesn't repeat itself.</p></div>
+      <div class="check"><span class="chk">arc</span><p>Every story can reach its ending.</p></div>
+      <div class="check"><span class="chk">lines</span><p>The writers' files are tidy, and nobody talks too much in a day.</p></div>
+      <div class="group">Looks, speed and games</div>
+      <div class="check"><span class="chk">cadet_test</span><p>The game looks exactly the same as the last release wherever nothing was meant to change, pixel for pixel.</p></div>
+      <div class="check"><span class="chk">perf</span><p>The busiest moments stay smooth enough for a phone, and memory doesn't grow.</p></div>
+      <div class="check"><span class="chk">bubble</span><p>Speech bubbles follow whoever is speaking without shaking or jumping.</p></div>
+      <div class="check"><span class="chk">path</span><p>People find the same routes around the ship as before.</p></div>
+      <div class="check"><span class="chk">tiles</span><p>The Tiles game's rules, fairness and the board on a phone.</p></div>
+      <div class="check"><span class="chk">disc</span><p>The Lightdisc game's rules, fairness and a game on the deck.</p></div>
+    </div>
+  </section>
+
+  <section id="glossary">
+    <div class="sec-head"><h2>Words used here</h2><button class="comment-btn" type="button" hidden>Comment</button></div>
+    <dl>
+      <div><dt>Check</dt><dd>A small program that plays part of the game by itself and says OK or FAIL.</dd></div>
+      <div><dt>Full round</dt><dd>Every check, all 33, including the special days.</dd></div>
+      <div><dt>Quick check</dt><dd>A 5-minute set of checks run before every save to GitHub. GitHub also runs it by itself.</dd></div>
+      <div><dt>Check runner</dt><dd>A team member session that runs one sixth of the full round.</dd></div>
+      <div><dt>Build master</dt><dd>The one session that puts changes together into the shared version of the game and publishes it.</dd></div>
+      <div><dt>Release</dt><dd>A version of the game published for you to play.</dd></div>
+      <div><dt>Merge</dt><dd>Bringing one piece of work into the shared version of the game.</dd></div>
+      <div><dt>Fingerprint (sha256)</dt><dd>A code worked out from a file. Two files with the same code are exactly the same.</dd></div>
+      <div><dt>Known old problem</dt><dd>A failure that was already there before, is on the list of small known bugs, and fails the same way on the last release.</dd></div>
+      <div><dt>Test picker</dt><dd>A helper that guesses which checks a change needs. Useful while working, never the final word.</dd></div>
+    </dl>
+  </section>
+
+  <p class="foot">Each part has a Comment button: tap it to leave a note or a question for the team on that part. The full guide, with every detail, is <code>plans/testing-guide.md</code> in the project.</p>
+</div>
+
+<script>
+(async () => {
+  const buttons = document.querySelectorAll('.comment-btn');
+  let comments = null;
+  try { comments = await window.claude?.use?.('comments'); } catch (e) { comments = null; }
+  if (!comments) return;
+  buttons.forEach(b => {
+    b.hidden = false;
+    b.addEventListener('click', () => {
+      const sec = b.closest('section');
+      comments.openComposer({ element: sec }).catch(() => {});
+    });
+  });
+})();
+</script>

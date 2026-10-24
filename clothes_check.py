@@ -2,7 +2,7 @@
 # Run:  CADET_CHROME=/opt/pw-browsers/chromium python3 clothes_check.py BUILD.html     (about 2 minutes)
 # Uses cadet_test.py's Game (?nosave&debug) and switches clothes on (CLOTHES_ON; ?clothes in a real URL does the same).
 # Checks, by real taps where a person would tap: the arrival's one spare outfit and the change on Day 1 (one minute,
-# Settling-in's 'clothes' note), yesterday's clothes from 10:00 (hygiene drains faster, the status note, one toast a
+# Settling-in's 'clothes' note; playtest patch 1: +CLOTHES_FRESH hygiene at once), yesterday's clothes from 10:00 (hygiene drains faster, the status note, one toast a
 # day), Day 2's empty wardrobe giving the hamper (the tip, the arrow to the laundry, the holding pose), Put down and
 # picking it up again, a washer (busy and broken ones send you to a free one; all busy: which finishes first), the
 # toast when it's done, taking it out, putting it away (the full kit: five outfits, and you change), the save round
@@ -20,6 +20,8 @@ def check(ok, what):
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(30); E = g.ev
+    # The teaching arrows are on from 0.92.0: here every pop-up shows at once (the pop-up queue is arrows_check's)
+    E("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
     toast = lambda: E("document.getElementById('toast').innerText")
     E("window.__toasts = []; { const t0 = toast; toast = (a, b) => { window.__toasts.push(a + ': ' + b); return t0(a, b); }; }")
     said = lambda: ' || '.join(E('window.__toasts.slice(-4)'))
@@ -41,8 +43,11 @@ with sync_playwright() as pw:
     E("CLOTHES_ON = true; simNote('newGame', { arrival: true })")
     check(E("SHIP.clothes.clean === 1 && SHIP.clothes.kit === false && SHIP.clothes.changed === 0"), 'by shuttle: one spare outfit, no full kit')
     heard = E("(() => { window.__acts = []; onSim('act', n => window.__acts.push(n.act)); return true; })()")
+    E("SHIP.player.needs.hygiene = 50"); fresh = E("typeof CLOTHES_FRESH !== 'undefined' ? CLOTHES_FRESH : 0")
     tap_wardrobe()
     check(until("!!ACT && ACT.kind === 'clothes'"), 'Day 1: a tap on the wardrobe starts changing')
+    h1 = E("SHIP.player.needs.hygiene")   # playtest patch 1, #8: clean clothes give hygiene at once
+    check(fresh > 0 and 50 + fresh - 1 <= h1 <= 50 + fresh, f'changing ticks hygiene up: 50 -> {h1:.1f} (CLOTHES_FRESH {fresh})')
     check(E("SHIP.clothes.clean === 0 && SHIP.clothes.changed === SHIP.time.day"), 'changed into the spare: none left')
     check('spare outfit' in toast() and 'laundry before tomorrow' in toast(), 'the toast: your one spare, laundry before tomorrow')
     check(E("window.__acts.includes('clothes')"), "the 'clothes' note for Settling-in")
@@ -57,6 +62,10 @@ with sync_playwright() as pw:
     E("SHIP.time.min = 10*60+1; FX_MIN = -1"); g.step(3)
     check(E("clothesYesterday() && Math.abs(fxD(playerFx(), 'hygiene') - CLOTHES_DRAIN * fxD(shipEffects(deckDef.num), 'hygiene')) < 1e-9"), "from 10:00: hygiene drains x" + str(E("CLOTHES_DRAIN")))
     check(E("playerFx().notes[0].text === \"In yesterday's clothes\""), 'the status note')
+    if E("typeof clothesDirtyTick === 'function'"):   # playtest patch 1, #8: the extra drain shows as '−2 Hygiene' in the needs strip
+        fl = E("(() => { FLOAT_LOG.length = 0; CLOTHES_DIRTY.at = null; CLOTHES_DIRTY.v = 0; const m0 = SHIP.time.min; for (let k = 0; k <= 120; k += 5) { SHIP.time.min = m0 + k; FX_MIN = -1; clothesDirtyTick(); } SHIP.time.min = m0; FX_MIN = -1; return FLOAT_LOG.slice(); })()")
+        check(any(x == '\u2212' + '2 Hygiene' for x in fl), f"two hours in yesterday's clothes show the extra drain: {fl}")
+    else: check(False, 'no clothesDirtyTick (playtest patch 1, #8)')
     check("yesterday's clothes" in said() and 'no clean ones left' in said(), 'one toast, pointing at the laundry')
     check(E("SHIP.clothes.told === 2"), 'told once today')
 

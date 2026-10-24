@@ -30,6 +30,8 @@
 #   the meeting panel (deviceDialogue(view, onTap)) and the Captain's address (deviceAddress) draw and report taps
 #   the shim: device.addSection(id, title, render) still draws, and never replaces a native app
 #   the look (0.35.1): nothing under 15px, buttons 44px high, no blur or backdrop filter, the screen's text 7:1
+#   New game in Settings (2026-10-22): no New game on the HUD; Settings asks on its page; Keep playing changes nothing;
+#   the question goes with the page; Start over (saving on) starts Day 0 at the arrival (INTRO_START, 17:15) on Deck 5
 #   phone and wide sizes: the panel fits on screen; opening it adds nothing to the 3D scene, draw calls stay under 450
 # Setup and environment as for cadet_test.py.
 # Run:  python3 device_check.py BUILD.html
@@ -58,6 +60,39 @@ LOOK = r"""(() => {
     bgc = getComputedStyle(dev.querySelector('.crt')).backgroundColor, bg = lum(bgc);
   return { small: small.slice(0, 4), tiny: tiny.slice(0, 4), blur: blur.slice(0, 4), contrast: Math.round((Math.max(ink, bg) + .05) / (Math.min(ink, bg) + .05) * 10) / 10 };
 })()"""
+
+# New game in Settings (2026-10-22, from the HUD's "+"): no "+" on the HUD; Settings > New game asks on the page;
+# Keep playing changes nothing; leaving Settings forgets the question; Start over (real saving, no ?nosave) starts a
+# fresh game on Day 0 at the arrival (INTRO_START) by the shuttle
+NEWQ = "(() => { const b = [...document.querySelectorAll('#devBody button')].map(x => x.textContent); const t = document.getElementById('devBody').textContent; return { b, ask: t.includes('Start a new game? Your current game will be lost.') }; })()"
+def newgame(pw, path):
+    print('new game in Settings:')
+    g = Game(pw, path, 390, 844); g.step(3)
+    hud = g.ev("[!!document.getElementById('newgame'), [...document.querySelectorAll('.controls button, #hud button, button')].filter(b => b.offsetWidth && !b.closest('#device') && /new game|^\\+$/i.test(b.textContent.trim() + ' ' + (b.getAttribute('aria-label') || ''))).length]")
+    check(hud == [False, 0], f'new game: no New game button left on the HUD: {hud}')
+    st = "JSON.stringify([SHIP.time.day, Math.floor(SHIP.time.min / 60), deckDef.num, Object.keys(SHIP.flags).length, player.here()])"
+    g.ev("deviceShow('settings')"); g.step(2); s0 = g.ev(st)
+    q = g.ev(NEWQ); check('New game' in q['b'] and not q['ask'], f'new game: Settings has a New game button and isn\'t asking yet: {q}')
+    g.page.get_by_role('button', name='New game', exact=True).click(); g.step(2); q = g.ev(NEWQ)
+    check(q['ask'] and 'Start over' in q['b'] and 'Keep playing' in q['b'] and 'New game' not in q['b'], f'new game: it asks on the page with Start over and Keep playing: {q}')
+    g.page.get_by_role('button', name='Keep playing', exact=True).click(); g.step(2); q = g.ev(NEWQ)
+    check(not q['ask'] and 'New game' in q['b'] and g.ev(st) == s0 and g.ev("DEV.open && DEV.app") == 'settings', f'new game: Keep playing changes nothing: {q} {s0} -> {g.ev(st)}')
+    g.ev("deviceDo({ app: 'settings', do: 'newgame' }); deviceShow('home'); deviceShow('settings')"); g.step(2)
+    check(not g.ev(NEWQ)['ask'], 'new game: the question should not outlive the Settings page')
+    g.ev("deviceDo({ app: 'settings', do: 'newgame' }); deviceClose(); deviceShow('settings')"); g.step(2)
+    check(not g.ev(NEWQ)['ask'], 'new game: the question should not outlive closing the device')
+    g.close()
+    # Start over with real saving: a game moved on (a flag, an hour later), then Settings > New game > Start over
+    g = Game(pw, path, 390, 844)
+    g.page.goto(g.page.url.replace('?nosave&debug', '?debug')); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000); g.step(5)
+    g.ev("SHIP.flags.__probe = 1; introFlagSet('intro.device'); SHIP.time.min += 60")   # (the device is locked on the arrival evening until it's handed over)
+    g.ev("deviceShow('settings'); deviceShow('settings'); deviceDo({ app: 'settings', do: 'newgame' })"); g.step(2)
+    g.ev("[...document.querySelectorAll('#devBody button')].find(b => b.textContent === 'Start over').click()"); g.step(5)   # (the arrival's own panels may sit over the sheet)
+    s1 = g.ev("({ day: SHIP.time.day, min: SHIP.time.min, deck: deckDef.num, probe: !!SHIP.flags.__probe, open: DEV.open, intro: typeof introOn === 'function' ? introOn() : null })")
+    arr = g.ev('INTRO_START.min')   # (DS1: the arrival moved to 17:15; the check reads it)
+    check(s1['day'] == 0 and s1['min'] == arr and s1['deck'] == 5 and not s1['probe'] and not s1['open'], f'new game: Start over should start a fresh game on Day 0 at the arrival time ({arr}) on Deck 5, the device shut: {s1}')
+    check(not [e for e in g.errors if 'favicon' not in e], f'new game: page errors: {g.errors[:4]}')
+    g.ev('localStorage.clear()'); g.close()
 
 def run(path):
     with sync_playwright() as pw:
@@ -99,8 +134,8 @@ def run(path):
               deviceShow('mail'); document.querySelector('#devBody button.row').click();
               out.read = mailUnread(); out.body = document.getElementById('devBody').textContent.includes('Two left.'); deviceShow('home'); return out; })()""")
             check(ml == {'btn': '1', 'tile': '1', 'read': 0, 'body': True}, f'mail: badges, tap to read: {ml}')
-            # notify: a badge until the app is opened; urgent ones toast
-            nt = g.ev("""(() => { deviceNotify({ app: 'wallet', text: 'Paid', urgent: true }); const t = (document.querySelector('#devBody .app[data-app="wallet"] b') || {}).textContent;
+            # notify: a badge until the app is opened; urgent ones toast (the arrow queue's pop-up queue, on from 0.92.0, emptied first: a pop-up then shows at once)
+            nt = g.ev("""(() => { if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'wallet', text: 'Paid', urgent: true }); const t = (document.querySelector('#devBody .app[data-app="wallet"] b') || {}).textContent;
               const toast = document.getElementById('tx').textContent; deviceShow('wallet'); deviceShow('home');
               return [t, toast, !!document.querySelector('#devBody .app[data-app="wallet"] b')]; })()""")
             check(nt == ['1', 'Paid', False], f'deviceNotify: badge, toast, cleared on opening: {nt}')
@@ -404,9 +439,9 @@ def run(path):
             # Quiet off shift (0.35.11): off shift, a work notice is a badge, not a toast; on shift it still toasts.
             # Section 20's #seek chip in the screen's style (a stand-in chip when the build has none)
             qt = g.ev("""(() => { const st = SHIP.device.settings, save = SHIP.time.min, tx = () => document.getElementById('tx').textContent, out = [];
-              st.quiet = true; SHIP.time.min = 1200; document.getElementById('tx').textContent = ''; deviceNotify({ app: 'jobs', text: 'Quiet test', urgent: true }); out.push(DEV.notes.jobs, tx().includes('Quiet test'));
-              SHIP.time.min = 600; deviceNotify({ app: 'jobs', text: 'Shift test', urgent: true }); out.push(tx().includes('Shift test'));
-              st.quiet = false; SHIP.time.min = 1200; deviceNotify({ app: 'jobs', text: 'Loud test', urgent: true }); out.push(tx().includes('Loud test'));
+              st.quiet = true; SHIP.time.min = 1200; document.getElementById('tx').textContent = ''; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Quiet test', urgent: true }); out.push(DEV.notes.jobs, tx().includes('Quiet test'));
+              SHIP.time.min = 600; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Shift test', urgent: true }); out.push(tx().includes('Shift test'));
+              st.quiet = false; SHIP.time.min = 1200; if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0; TOAST_AT = -1e9; deviceNotify({ app: 'jobs', text: 'Loud test', urgent: true }); out.push(tx().includes('Loud test'));
               SHIP.time.min = save; delete DEV.notes.jobs; document.getElementById('tx').textContent = '';
               out.push(deviceLoad({ device: { settings: { quiet: true } } }).settings.quiet, deviceLoad({}).settings.quiet);
               let sk = document.getElementById('seek'), made = false; if (!sk) { sk = document.createElement('div'); sk.id = 'seek'; sk.innerHTML = '<b>Tomas</b> waves you over.'; document.body.appendChild(sk); made = true; }
@@ -589,6 +624,7 @@ def run(path):
             check(not errs, f'no app errors: {errs}')
             check(not g.errors, f'no page errors: {g.errors[:5]}')
             g.close()
+        newgame(pw, path)
     print('device_check:', 'OK' if ok else 'FAILED')
     return ok
 
