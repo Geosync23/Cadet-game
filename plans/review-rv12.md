@@ -71,3 +71,17 @@ Game commit 0e9243f9, sha256 fd28b42c...d5a4 (fb3a5d1a and de1e97e9 test/docs on
 - check_fast: FX9's OK (not rerun here: the game change is constants only; the full round runs it).
 - Note for the lead/user (design, not a defect): a "normal" day now needs the gym, a call home and three chats daily
   to stay above 30 on paper; a 0.92.2-style day (gym or call on alternate days) runs social and fitness low.
+
+## AC3 arrows-c aee83840 (0.92.3 item 6, the clock-in tip + Clock in tracked, Days 1-3): PASS (~06:45 UTC)
+Game sha256 9262e4a7...; base 364c80cb. (Items 16 and 26 were reverted in this branch: net nothing.)
+- Diff: section 15b slot (clockFirstTick, tipFront, clockFirstDrop) + one call in guideTick (GUIDE_ON true since
+  0.92.0). Days 1-3, first time in the Works bay from 08:00 before clocking in: Clock in tracked (not with Teaching
+  arrows Off), the tip to the front; Day 1 waits for Zeke's opener or 09:15; stale clock-in tips dropped; the arrow goes
+  the frame you punch in.
+- Findings, both fixed in aee83840: (1) no check lines at first; AC3 added arrows_check part clockin (in the default
+  parts); (2) the career's one-off bay tip held back only on Day 1 (a missed Day 1 could double it on Day 2): now any day.
+- clockin part: OK on the fix; on 364c80cb 4 of 5 lines FAIL (there the career tip queues behind the "walk" tip, the
+  user's complaint). Planted faults all caught: h1 no clockFirstTick call (4 FAIL), h2 no instant arrow clear (the
+  clocked-in line), h3 no Day 1 wait for Zeke (the Day 1 line), h4 arrow despite Teaching arrows Off (the Day 3 line).
+- cadet_test vs 364c80cb ALL IDENTICAL; intro_check (whole) OK; check_fast OK (350 s).
+- AC3 reports arrows_check week guide FAILs m6 the same on 364c80cb (pre-existing in 0.92.2); not rerun here.
