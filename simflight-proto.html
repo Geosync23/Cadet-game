@@ -141,8 +141,8 @@ const W = BAY_W / 2, HULL = '#8e9bb0', DARK = '#5d6a80';
 const hull = partsToGeo([
   { g: BOX, m: M4(-W - 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },          // left of the mouth (inner face at x = -8)
   { g: BOX, m: M4(W + 30, 4, BAY_Z + 70, 60, 44, 140), c: HULL },           // right (inner face at x = 8)
-  { g: BOX, m: M4(0, BAY_H + 9, BAY_Z + 70.2, 2 * W + 2, 18, 139.6), c: HULL },   // above (lower face at y = 8); reaching into the side blocks with its front a little back, so no faces are shared
-  { g: BOX, m: M4(0, -9, BAY_Z + 70.2, 2 * W + 2, 18, 139.6), c: HULL },          // below (upper face at y = 0)
+  { g: BOX, m: M4(0, BAY_H + 8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },   // above (lower face at y = 8); reaching into the side blocks, a little short of their top, front and back, so no faces are shared
+  { g: BOX, m: M4(0, -8.8, BAY_Z + 70, 2 * W + 2, 17.6, 139.2), c: HULL },        // below (upper face at y = 0)
   { g: BOX, m: M4(0, 32, BAY_Z + 95, 40, 14, 80), c: DARK },                // the bridge block, sitting on top (overlaps, no shared face)
   { g: BOX, m: M4(-36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },            // engine pods at the back
   { g: BOX, m: M4(36, -14, BAY_Z + 160, 14, 14, 60), c: DARK },

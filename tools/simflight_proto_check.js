@@ -4,8 +4,9 @@
 // only), a one-finger drag steers and letting go levels out, draw calls, the three endings from scripted pilots
 // (steady: soft; steep dive: hard; drift: miss), each the same twice, about a minute a go; screenshots.
 const { chromium } = require('playwright');
-const OUT = '/home/user/Cadet-game/plans/shots-simflight/';
-const URL = 'file:///home/user/Cadet-game/simflight-proto.html';
+const path = require('path'), ROOT = path.join(__dirname, '..');
+const OUT = path.join(ROOT, 'plans/shots-simflight') + '/';
+const URL = 'file://' + path.join(ROOT, 'simflight-proto.html');
 let fails = 0; const ok = (c, m) => { console.log((c ? 'ok   ' : 'FAIL ') + m); if (!c) fails++; };
 async function page(ctx) {
   const p = await ctx.newPage();
