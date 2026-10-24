@@ -300,3 +300,6 @@ runs on 0dd4e2e2 (taken from CR6) were stopped unfinished at BM16's word; no res
 | day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 261 s |
 | arrows_d_check | **OK** | `arrows_d_check: OK`; 59 s |
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 28 s |
+| controller_check (every part but reach; taken from CR6, agreed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK (marks, lift OK); 1957 s |
+
+No FAIL in Round 2.
