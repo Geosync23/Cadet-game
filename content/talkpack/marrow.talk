@@ -3,6 +3,8 @@
 // remembers the answers; a quiet joke folded in; "we" for the ship. Never her daughter before friend; never retiring
 // before close; never what the Admiral is. Not her one question or the Admiral's theories (beats 1-2).
 
+only: own
+
 == the-step
 topic: ship
 them: The ready room step. Everyone trips. I had it measured. A perfectly ordinary step.
@@ -55,10 +57,12 @@ cheer: The ship humming. And a quiet corner.
   them: A good pairing. I may borrow it for Thursdays.   #funny
 
 // ---- SW3, 2026-10-24 (patch 0.92.3 item 15, plans/talk-main-plan.md): her welcome, 26 more talks and her own small
-// talk. Never the general pool. Her needs: share, so the share answer is the warm one. Not her ready-room question
+// talk. Never the general pool (only: own). Her small and done lines were dropped (CS1, 2026-10-24: the engine repeats
+// her own talks instead). Weighted early: players stay strangers with the Captain a long time. Her needs: share, so the share answer is the warm one. Not her ready-room question
 // (beat 1), the theories, page forty, her loneliness in the chair, the letters or the academy post (her beats).
 
 == welcome
+first: yes
 topic: crew
 them: Hello. We haven't met properly. I'm Odile Marrow. I command the Wren.
 them: Welcome aboard. Seventy-five of us now, counting you. We're glad you came.   #warm
@@ -187,7 +191,7 @@ share: Thank you. Just that, to everyone.
 cheer: Hands off the thermostat, please.
   them: Half the ship would cheer. The other half would sneak back and turn it up.   #funny
 
-// ---- from colleague
+// ---- from colleague (and more at acquaintance below, moved down for the early ladder)
 
 == first-week
 topic: work
@@ -204,7 +208,7 @@ cheer: That the step is real.
 
 == washing-up
 topic: food
-when: tier>=colleague
+when: tier>=acquaintance
 them: Once a month I ask Brennan if I can wash up in the galley. She says no.
 them: I ask again the next month. It's become a small tradition. Hers is to refuse.   #funny
 ask: Is there a job you'd do just to be near the people doing it?
@@ -217,7 +221,7 @@ cheer: Biscuit tester. I'd volunteer.
 
 == thin-charts
 topic: plans
-when: tier>=colleague
+when: tier>=acquaintance
 them: Past the Line our charts go thin. A few old runs, a lot of blank.
 them: I find I like a thin chart. It leaves room for us.
 ask: Would you rather know the road, or find it as you go?
@@ -243,7 +247,7 @@ cheer: The coffee machine's groan.
 
 == good-mood
 topic: day
-when: tier>=colleague mood:high
+when: tier>=acquaintance mood:high
 them: I'm in a good mood and I've no idea why. I'm trying not to look into it.
 them: Is your day good? Is everyone's? I keep asking people. They look worried.   #funny
 ask: What puts you in a good mood for no reason at all?
@@ -256,7 +260,7 @@ cheer: Seeing the Captain in a good mood.
 
 == never-seen
 topic: hobby
-when: tier>=colleague
+when: tier>=acquaintance
 them: I've never seen a sea. Not once. Big water, with weather on top of it.
 them: I read about them every night. I could tell you the tides of places I'll never stand.
 ask: Is there something you love that you've never actually seen?
@@ -282,7 +286,7 @@ cheer: Pretend I'm a scrubber. Just hum.
 
 == who-thanks
 topic: crew
-when: tier>=colleague
+when: tier>=acquaintance
 them: I asked who fixed the lounge lamp. Four people said Works. Works said Pell.
 them: Pell was asleep. In the parts store. Calder knows. Everybody knows.   #funny
 ask: Who aboard do you think nobody thanks enough?
@@ -293,7 +297,7 @@ share: The night crew. We never see them.
 cheer: The air. Nobody thanks the air.
   them: That's Calder's line. She'll be pleased you stole it. She won't show it.   #funny
 
-// ---- from friend
+// ---- from friend (the tiers below are as each when: says; most moved to acquaintance)
 
 == birthday-cards
 topic: home
@@ -310,7 +314,7 @@ cheer: That the lift had a favourite.
 
 == ask-me
 topic: crew
-when: tier>=friend
+when: tier>=acquaintance
 them: I ask everyone a question. Fair's fair. You can ask me one.
 them: Anything. I may not answer. But you can ask.
 ask: Go on, then. What would you ask the Captain?
@@ -323,7 +327,7 @@ cheer: What is the Admiral?
 
 == small-calls
 topic: work
-when: tier>=friend
+when: tier>=acquaintance
 them: The big decisions are the easy ones. Everyone helps with those.
 them: It's the small ones that are mine. Who works the holiday. Who gets the window cabin.
 ask: Which is harder for you: a big choice, or a lot of small ones?
@@ -336,7 +340,7 @@ cheer: Big ones. I just flip a coin.
 
 == a-first
 topic: plans
-when: tier>=friend
+when: tier>=acquaintance
 them: Somewhere on this tour there's a star nobody's charted. Not even the Veyli.
 them: I'd like to be on the bridge when we find it. That's my plan. That's the whole plan.
 ask: What do you want to have done by the end of this tour?
@@ -349,7 +353,7 @@ cheer: Beaten Rina at Tiles. Once.
 
 == calm-kind
 topic: day
-when: tier>=friend
+when: tier>=colleague
 them: When I'm worried I go very calm and very kind. The bridge knows. They get nervous.
 them: Calder brings me numbers. Numbers help. She knows they do.
 ask: How can people tell when you're worried?
@@ -360,7 +364,6 @@ share: I go quiet and tidy everything.
 cheer: I bake. Badly.
   them: Then we should never be worried on the same day. The galley couldn't take it.   #funny
 
-// ---- from close friend
 
 == after-me
 topic: plans
@@ -375,35 +378,9 @@ share: Sometimes. I like not knowing yet.
 cheer: Lunch. I think about lunch.
   them: Wise. Lunch is the right size of future. I'll think about lunch too.   #funny
 
-== noticed
-topic: crew
-when: tier>=close
-them: I've watched you this month. You notice who's been left out. You make room.
-them: That's rarer than skill. Skill I can teach. That I can't.   #warm
-ask: Who taught you to notice people?
-listen: Did someone notice you, once?
-  them: My first captain. She sat by me at dinner, my first week. She never said why.   #warm
-share: Someone at home. Always made room.
-  them: Then they did a good job, and it travelled a long way. Tell them, some day.   #warm
-cheer: Being left out myself, mostly.
-  them: That's how most of us learn it. You learnt it kindly. That's the trick.
-
-== first-name
-topic: day
-when: tier>=close time:evening
-them: After shift, at this table, you may call me Odile. Just here. Just you.
-them: Not in front of Commander Vance. He'd need to sit down.   #funny
-ask: What do the people at home call you?
-listen: Does anyone aboard call you Odile?
-  them: Nobody. Not in six years. You're the first. Use it gently.   #warm
-share: A name only my family uses.
-  them: Then keep it for them. Names like that are for the people who gave them.   #warm
-cheer: "Oi, you." Mostly.
-  them: Then I'm in good company. Mine at home was "Dilly". Tell no one.   #funny
-
 == outlast
 topic: ship
-when: tier>=close
+when: tier>=acquaintance
 them: The Wren's older than I am, and she'll outlast me. I find that a comfort.
 them: Most nights. Some nights I'd like her to need me a bit more.   #warm
 ask: What's something you hope lasts longer than you?
@@ -414,27 +391,30 @@ share: Something I made with my hands.
 cheer: My name on the beam. Spelt right.
   them: I'll check the spelling myself. Captain's privilege.   #funny
 
-// ---- Her own small talk (SW3). content_gen.py reads small.<id> and done.<id> only from smalltalk.talk today, so
-// these wait here as comments for FX13 (uncomment, or move into smalltalk.talk). Checked with lines_check in a scratch
-// copy of smalltalk.talk: PASS.
-// == small.marrow
-// - Listen. She's humming nicely tonight.
-// - All quiet up top. I'll take it.
-// - Sit a while. The bridge can spare me.
-// - Vance has tripped on the step again. Don't mention it.   #funny
-// - Thursday's coming. I'm practising the slow bit.
-// - The garden smells of tomatoes. Somebody's done well.
-// - I had toast. And a different jam. It's Friday somewhere.   #funny
-// - Everyone where they should be. Good.
-// - I like this hour. Nobody needs the Captain for ten minutes.
-// - The corridors are quiet. Someone's left a light on in the gym.
-// - Tavessa's a little brighter this week. Have a look later.
-// - Brennan refused my washing up again. Tradition holds.   #funny
-// - Calder brought me numbers. They were good numbers.
-// - The Admiral sends nothing. As usual.   #funny
-// - It's nice, just sitting. We should do it more.   #warm
-// 
-// == done.marrow
-// - I think we've talked about everything, {me}. Then let's just sit. I like that too.   #warm
-// - No questions left today. That's a first. Tomorrow I'll have one.   #funny
-// - We've covered the ship, the crew and the toast. Good. Sit a minute anyway.   #warm
+// ---- more at acquaintance
+
+== lost-property
+topic: news
+when: tier>=acquaintance
+them: There are four lost-property boxes aboard now. Four decks. Four keepers.
+them: Each of them thinks they're the only one. I haven't the heart to tell them.   #funny
+ask: What have you lost since you came aboard?
+listen: Which box should I try first?
+  them: Deck 3. It's the one with the most socks. Socks always go to Deck 3.   #funny
+share: A good pen. I miss that pen.
+  them: Ask all four boxes. Pens travel. I've had mine come back from Deck 6.   #warm
+cheer: My sense of direction. Day one.
+  them: Nobody's ever handed one of those in. I'll ask the keepers to watch for it.   #funny
+
+== veyli-names
+topic: ship
+when: tier>=acquaintance
+them: Every star out here has a Veyli name. I'm learning a few, slowly.
+them: Envoy Saruth corrects me, very kindly. Most days I get the first half right.
+ask: Is there a word you've picked up since you came aboard?
+listen: Which name do you like best?
+  them: Tavessa. Saruth says I say it like a sneeze. Saruth is right.   #funny
+share: "Bunk." I never said it before.
+  them: Ship words stick. In a year you'll say "deck" at home and your family will laugh.   #warm
+cheer: "Blast." From Works, mostly.
+  them: The strongest word aboard. Use it wisely. Calder rations hers.   #funny
