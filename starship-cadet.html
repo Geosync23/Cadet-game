@@ -53071,6 +53071,7 @@ WORK_MECH.t2 = {
     if (!id) return false;
     c.st = 'do'; c.j = id; c.occ = null; c.told = true; W.test.tries++; W.test.day = d;
     const j = SHIP.jobs.find(x => x.id === id); if (j) j.train = 't2';
+    promoPartsAside(j);                                  // DV1 (lead 34): its parts set aside, so the test is never stuck waiting on a delivery
     if (t >= shipNow() - 1) promoTestTell(c);
     simNote('promoTest', { step: 'start', day: d, job: id });
     return true;
@@ -53080,7 +53081,7 @@ WORK_MECH.t2 = {
 function promoTestTell(c) {                              // the start in play: Calder's word (or a toast), the goal to the job
   promoSay(c.by, 'test.start', 'Your test job\'s on the board: one of Four\'s scrubbers. Take it when you\'re ready. I\'ll be with you.');
   const j = SHIP.jobs.find(x => x.id === c.j), m = j && typeof machineById === 'function' ? machineById(j.machine) : null;
-  if (m && typeof setGoal === 'function' && !(SHIP.player && (typeof trackFresh === 'function' ? trackFresh() : SHIP.player.track))) setGoal({ deck: m.deck, room: m.room, label: 'Your test job', trk: 'career:test', ...(j.until ? { trkTo: j.until } : {}) });   // FX1: gone once you're there, you take it, or its time is up
+  if (m && typeof setGoal === 'function' && !promoQueue() && !(SHIP.player && (typeof trackFresh === 'function' ? trackFresh() : SHIP.player.track))) setGoal({ deck: m.deck, room: m.room, label: 'Your test job', trk: 'career:test', ...(j.until ? { trkTo: j.until } : {}) });   // the arrow queue on: promoGuide's entry instead   // FX1: gone once you're there, you take it, or its time is up
 }
 function promoPassed(t) {                                // the test job turned in: passed, whatever it took
   const W = SHIP.works, c = W && W.cur; if (!W || !W.test || W.test.passed) return false;
@@ -53183,7 +53184,7 @@ function promoSummonsTick(now) {                         // book it, warn at 10:
     const text = worksText('promo.summons', 'Chief Calder: My office, 11:00. — C.');
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); } catch (e) { /* no device */ }
     try { toast('Chief Calder', text); } catch (e) { /* no UI */ }
-    if (typeof setGoal === 'function') setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00', trk: 'career:summons', trkFrom: r.at, trkTo: r.at + (r.len || 30) });   // FX1: gone once it's begun with you there, or it's over
+    if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: 5, room: 'o', label: 'The Chief\'s office, 11:00', trk: 'career:summons', trkFrom: r.at, trkTo: r.at + (r.len || 30) });   // FX1: gone once it's begun with you there, or it's over
     if (promoInBay()) promoSay('torres-zeke', 'summons.torres', 'Go on. She doesn\'t bite. Usually.'); }
   if (m >= PROMO.seekAt && !f.seek && !r.met && !promoInBay() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) f.seek = now;   // 11:15: she comes to you
 }
@@ -53237,12 +53238,13 @@ function promoMoveTick(now) {
   if (d > od || m >= PROMO.moveBy) { promoMoved(Math.min(now, (od - 1) * 1440 + PROMO.moveBy), W.mv ? 'late' : 'mail'); return; }   // never missed: by 17:30 it's done (a skip past it: at 17:30)
   if (d < od || m < DAY_SHIFT[1]) return;
   if (!W.mv) {
-    if (myJob() && m < DAY_SHIFT[1] + PROMO.moveWait) return;   // mid-job: she waits a while
+    // DV1 (lead 34): no more waiting while you're mid-job (a working player was moved by the 17:30 fallback, no walk): she comes
+    // at 17:00 and your job waits, as Calder's call does
     W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [] };
     if (!promoInBay()) promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.');
     promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
     simNote('moveStart', { by: W.mv.by });   // the sim engineer's box carry (Tomas and Pell at 4-23's door)
-    if (typeof setGoal === 'function') setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: Math.floor(now / 1440) * 1440 + 1440 });   // FX1: gone once you're there (or at midnight)
+    if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: Math.floor(now / 1440) * 1440 + 1440 });   // FX1: gone once you're there (or at midnight)
   }
   try { const rm = roomAt(...player.here()), n = deckDef.num, M = PROMO.homeRoom, bed = typeof PLACE_OF !== 'undefined' && PLACE_OF.get(PROMO.home), [c, r] = player.here();   // her lines along the way (W2's promo.walk.*)
     if (rm === '@') promoWalkSay('promo.walk.lift', 'Officers\' corridor\'s on Four, the far side from the bunks.');
@@ -53343,7 +53345,7 @@ function promoCerTick(now) {
     f.gr = 1; worksSayAll('calder', worksVoice('calder', 'promo.grubby') || ['(Calder looks at your uniform, then at you, and says nothing.)']); } } catch (e) { /* not in play */ }   // a clean uniform matters (M2): her look, nothing else
   if (m >= PROMO.cerSeek && !f.seek && !r.met && r.status === 'asked') { f.seek = now; r.len = PROMO.cerLate - PROMO.cerAt + 20;   // 17:30: Calder walks you up; the room waits for you
     worksSayAll('calder', worksVoice('calder', 'promo.fetch.ceremony') || ['There you are. The Captain\'s waiting. Come on.']);
-    if (typeof setGoal === 'function') setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room', trk: 'career:ceremony', trkFrom: r.at, trkTo: r.at + r.len }); }   // FX1: gone once you're there, or it's over
+    if (typeof setGoal === 'function' && !promoQueue()) setGoal({ deck: 1, room: 'O', label: 'Your commission, the observation room', trk: 'career:ceremony', trkFrom: r.at, trkTo: r.at + r.len }); }   // FX1: gone once you're there, or it's over
 }
 function promoCerEscort(p, t) {                          // worksEscort's 24p part: Calder walking you up to the ceremony
   const r = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');
@@ -53352,6 +53354,41 @@ function promoCerEscort(p, t) {                          // worksEscort's 24p pa
 WORK_TICKS.push((now, skip) => { promoCerTick(now); if (!skip && promoDone('ceremony2')) promoPip(); });
 
 // ---- slot: Works career engineer (section 24p). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- DV1 (lead 34, the user: "build and activate the promotion ... supported by the newer arrow system"): the promotion
+// in play. (1) The test job's parts are set aside when it's made (promoPartsAside: the stores topped up to what it needs; it
+// was stuck on "Look over the air scrubber" with no filters till a delivery). (2) The flag 'promoted' is set once you're an
+// officer (it never was: guiding a newcomer, 20c, and Come over, 20, never opened), and once for a save already an officer.
+// (3) Every beat is led by the arrow queue (15b's guideAsk) when it's on; the old setGoal arrows stay for the queue off
+// (promoQueue): the test job to the board until it's yours (level 3, everyday), the summons (level 2 from 10:30), the walk
+// to your cabin (level 1 while Calder walks you), the ceremony (level 2 from 16:55). Read once a ship minute, nothing saved.
+const promoQueue = () => typeof GUIDE_ON !== 'undefined' && GUIDE_ON && typeof guideAsk === 'function';
+function promoPartsAside(j) {
+  if (!j || !Array.isArray(j.parts) || !SHIP.stores) return;
+  const need = {}; for (const p of j.parts) need[p] = (need[p] || 0) + 1;
+  for (const p in need) if ((SHIP.stores[p] || 0) < need[p]) SHIP.stores[p] = need[p];
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function promoGuide(now) {
+  const W = SHIP.works; if (!W) return;
+  if (W.tier >= 2 && typeof flag === 'function' && typeof flagSet === 'function' && !flag('promoted')) flagSet('promoted');
+  if (!promoQueue()) return;
+  const c = W.cur, owner = '24p (DV1)';
+  if (c && c.id === 't2' && c.st === 'do' && c.j) {
+    const j = SHIP.jobs.find(x => x.id === c.j);
+    let take = false; try { take = typeof guideTakeable === 'function' && guideTakeable().some(o => o.id === c.j); } catch (e) { take = false; }   // once it's on the board for you (clocked in): the shift's clock-in arrow first
+    if (j && j.status !== 'done' && j.claimedBy !== 'you' && take) guideAsk({ id: 'promo:test:' + worksDay(now), level: 3, everyday: true, owner, until: j.until || now + 360,
+      goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 2 test job: take it at the board' }), done: () => guideTaken(c.j) });
+  }
+  const sm = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked' && !x.met);
+  if (sm && now >= sm.at - 30) guideAsk({ id: 'promo:summons', level: 2, owner, from: sm.at - 30, until: sm.at + (sm.len || 30),
+    goal: () => ({ deck: 5, room: 'o', label: 'The Chief\'s office, ' + hhmm(sm.at % 1440) }), done: () => sm.met || sm.status !== 'asked' || promoDone('summons2') });
+  if (W.mv && !promoDone('move2')) guideAsk({ id: 'promo:move', level: 1, owner, until: Math.floor(now / 1440) * 1440 + 1440,
+    goal: () => ({ deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room, label: 'Your cabin, ' + PROMO.home + ': follow ' + guideWho(W.mv.by) }), done: () => promoDone('move2') });
+  const cr = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked' && !x.met);
+  if (cr && now >= cr.at - 20) guideAsk({ id: 'promo:ceremony', level: 2, owner, from: cr.at - 20, until: cr.at + cr.len,
+    goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: 'Your commission, ' + hhmm(cr.at % 1440) + ': the observation room' }), done: () => promoDone('ceremony2') || !!cr.met });
+}
+WORK_TICKS.push((now, skip) => { if (!skip) promoGuide(now); else { const W = SHIP.works; if (W && W.tier >= 2 && typeof flag === 'function' && !flag('promoted')) flagSet('promoted'); } });
 // ---- FX10 (RV13's find on patch 0.92.3): the scanner's first use, which opens Making it safe (m6 needs { mech: 'm7', uses: 1 }),
 // waited on a real fault with a part coming your way on a workday after the scanner lesson; with small repairs in Calder's
 // top-ups none came on the arrow-follower's Day 8 (0.92.2 had one by luck). Now, from the first workday after the lesson,
@@ -58108,6 +58145,7 @@ function dvCareerNext() {                                // the next career step
     try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
   }
   if (!C.length) return null;
+  if (C.some(x => x.k === 'promo')) for (let i = C.length - 1; i >= 0; i--) if (/^(row|small):/.test(C[i].k)) C.splice(i, 1);   // lead 34: the promotion's beats before the next row's ask
   const score = x => x.when <= now || x.soon && x.when - x.soon <= now ? now - 1 + C.indexOf(x) / 100 : x.when + C.indexOf(x) / 100;   // started or close: now, in the order above; else by its time
   const best = C.slice().sort((a, b) => score(a) - score(b))[0];
   return { ...best.g, when: best.when, key: best.k, label: best.g.label + (best.when > now ? ', ' + dvWhen(best.when) : '') };
