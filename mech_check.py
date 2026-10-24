@@ -310,12 +310,22 @@ P925_LAPSE = r"""((took) => {
   return { st0, st, before: before && before.mode, after, mine: !!j2 && j2.claimedBy === 'you', lapse, next: W.cur && W.cur.id === c.id ? W.cur.st + ' Day ' + W.cur.d : null };
 })"""
 def part_p925(g):
-    print('p925 (patch 0.92.5: lessons at 09:00/09:15 from Day 4; an unfinished lesson ends with the shift):')
+    print('p925 (patch 0.92.5: lessons at 09:00/09:15 from Day 4; the lesson\'s job named on the board; an unfinished lesson ends with the shift):')
     early = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m1', 'm4')]
     late = [g.ev(f"({P925_OPEN})('{i}')") for i in ('m5', 'm7')]   # (m6's is its own urgent call at the pipe, 24f: not a booked meeting)
     print(f'  meets, the first days: {[(e["d"], e["at"]) for e in early]}; from Day 4: {[(e["d"], e["at"]) for e in late]}')
     check(all(e['st'] == 'meet' and e['at'] is not None and e['at'] >= 9 * 60 + 25 for e in early), f'#11: the first few days\' lessons meet as before (09:15 and a wait): {early}')
     check(all(e['st'] == 'meet' and e['at'] in (9 * 60, 9 * 60 + 15) for e in late), f'#11: from Day 4 a lesson meets at 09:00 or 09:15: {late}')
+    bd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const c = SHIP.works.cur, d = SHIP.time.day;
+      if (SHIP.career) SHIP.career.ci = 0;   // not clocked in yet: you're at the board first
+      ixBoard.open(); const row = [...document.querySelectorAll('#ixBoardL .ixjob')].find(r => r.dataset.job === c.j), sub = document.getElementById('ixBoardX').textContent;
+      SHIP.device.pointsSeen = SHIP.device.pointsSeen || {{}}; SHIP.device.pointsSeen['p:board:lesson:m7'] = 1;   // rung once before: rung again
+      POINT_Q.length = 0; guideShift(); const q = POINT_Q.find(x => x.id === 'p:board:lesson:m7'), lab = q ? q.path.map(s => s.label || '').join('|') : null; ixBoard.close();
+      return {{ st: c.st, clocked: careerClockedIn(d), row: row ? row.textContent.slice(0, 120) : null, lesson: !!row && /lesson/.test(row.className), sub, pointer: lab }}; }})()""")
+    print(f'  the scanner lesson at the board: {bd}')
+    check(bd['st'] == 'do' and bd['row'] and 'Your scanner lesson: take this one' in bd['row'] and bd['lesson'] and 'scanner lesson' in bd['sub'],
+          f'#12: the board names the lesson\'s job: "Your scanner lesson: take this one", and its line says so ({bd})')
+    check(bool(bd['pointer']) and 'scanner lesson' in bd['pointer'] and not bd['clocked'], f'#12: the pointer rings the lesson\'s Take it again, before you\'ve clocked in, naming the lesson ({bd})')
     do = g.ev(f"(() => {{ ({M7_SETUP})('m7'); return ({P925_LAPSE})(true); }})()")
     print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
     check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),

@@ -16064,6 +16064,12 @@ function boardLesson() {
   const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
   return j && j.status === 'open' && !j.claimedBy ? j.id : null;
 }
+// (DS1, the user, patch 0.92.5 #12: "for scanner training it's not clear which job to take") the lesson by name, for the
+// board's row and line, the arrow and the pointer: "scanner lesson", "tuning lesson"
+function boardLessonName() {
+  const c = SHIP.works && SHIP.works.cur; let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
+  n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
+}
 const ixBoard = (() => {
   const el = document.getElementById('ixBoard'), list = document.getElementById('ixBoardL'), sub = document.getElementById('ixBoardX');
   let back = null;
@@ -16079,7 +16085,7 @@ const ixBoard = (() => {
   const BOARD_KINDS = new Set(['rounds', 'haul']);     // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo)
   const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
-  const LESSON = 'Your lesson: take this one';           // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you
+  const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
   const api = {
     open() { back = document.activeElement; el.hidden = false; api.draw(); document.getElementById('ixBoardC').focus(); },
     close() { el.hidden = true; if (back && back.focus) back.focus(); },
@@ -16094,7 +16100,7 @@ const ixBoard = (() => {
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
       if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your lesson is on the board: take the marked job.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked job.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
@@ -16103,7 +16109,7 @@ const ixBoard = (() => {
       }
       for (const o of yours) {
         const raw = SHIP.jobs.find(j => j.id === o.id), ok = !mine && doable(raw);
-        row(o.title, o.where + ' · ' + (o.id === les ? LESSON : o.state) + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency] + (o.id === les ? ' lesson' : ''), ok ? button('Take it', () => api.take(o.id)) : null, o.id);
+        row(o.title, o.where + ' · ' + (o.id === les ? LESSON() : o.state) + (doable(raw) ? '' : ' · not yet: coming soon'), PRI[o.urgency] + (o.id === les ? ' lesson' : ''), ok ? button('Take it', () => api.take(o.id)) : null, o.id);
       }
       for (const j of open.filter(j => !ids.has(j.id))) {   // on the board, but not yours to take: say why
         const [title, where, state, pri] = jobCard(j), why = jobTier(j) > playerTier() ? 'tier ' + jobTier(j) : j.status === 'waiting' ? '' : 'crew only';
@@ -16673,8 +16679,8 @@ function guideTrain() {
       goal: () => ({ deck: s.deck, crew: c.by, at: s.tile, room: s.room, label: 'Stay close and watch ' + who }),
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
   } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
-    guideAsk({ id: 'train:' + c.id + ':do', level: 3, once: true, owner: '24 core (read)', until: now + 480,
-      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your turn: ' + what.toLowerCase() }; },   // at the shift's end it gives way to clock out (piece D)
+    guideAsk({ id: 'train:' + c.id + ':do:' + c.d, level: 3, once: true, owner: '24 core (read)', until: now + 480,   // (per day: a lesson offered again leads again; patch 0.92.5 #12)
+      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName() + ': at the job board' }; },   // at the shift's end it gives way to clock out (piece D)
       done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
   }
 }
@@ -16726,13 +16732,15 @@ function guideShift() {
     guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
     if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
   }
+  { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
+    const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur;
+    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + cur.id, once: 99, path: pointBoard(les, 'Take this one: your ' + boardLessonName()), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
   if (!inn || out) return;
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
-      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Take a job at the board' }; } });
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() + ': at the job board' : 'Take a job at the board' }; } });
     const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
-    if (P && les && L.some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + cur.id, once: 1, path: pointBoard(les, 'Take this one: your lesson'), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } });   // FX10 (item 29)
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
     if (P && L.length && !les) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
   }
