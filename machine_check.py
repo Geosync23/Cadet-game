@@ -890,7 +890,8 @@ with sync_playwright() as pw:
           window.__sc("if (window.__evSt[0]) eventNow = window.__evSt[0]; if (window.__evSt[1]) eventMod = window.__evSt[1]");
           setShipNow(t0);
           return out;
-        })()""".replace('DAYS', str(DAYS))
+        })()"""
+        STEADY, STEADY_T = STEADY.replace('DAYS', str(DAYS)), STEADY
         st = g.ev(STEADY); st2 = g.ev(STEADY)
         days = sorted(st['days'].items(), key=lambda kv: int(kv[0]))
         mach = sum(v['machine'] for k, v in days); rep = sum(v['repair'] for k, v in days); alln = sum(v['all'] for k, v in days)
@@ -899,7 +900,15 @@ with sync_playwright() as pw:
         print('    by day (all/machine/repairs): ' + ' '.join(f"{k}:{v['all']}/{v['machine']}/{v['repair']}" for k, v in days))
         print(f"    lowest ship health {st['minHealth']:.1f}, worst state {MSTATES[st['worst']] if 'MSTATES' in dir() else st['worst']}, repairs from Day 2 without a cause {st['noCause'][:4]}, causes on Days 0-1 {st['early'][:4]}, the same twice {st['sig'] == st2['sig']}")
         print('    causes seen: ' + ' '.join(f"{k}:{v}" for k, v in sorted(st['causes'].items())))
-        if not (40 <= share <= 60): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does (want 40-60%)")
+        # the repairs' share over Days 2-SHARE_DAYS (lead 32 for FX10, 2026-10-24): over 14 days (9 shift days, about 40 machine jobs) a
+        # change that only moves when machines wear (fewer calibrations) swung it from 49% to 39% by chance; over 28 days 0.92.2 and
+        # FX10 both sit near 45-46%, and REAL_SHARE 0 (no real faults) still fails. The other lines keep Days 2-DAYS
+        SHARE_DAYS = max(DAYS, 28)
+        if SHARE_DAYS != DAYS:
+            sl = g.ev(STEADY_T.replace('DAYS', str(SHARE_DAYS))); lmach = sum(v['machine'] for v in sl['days'].values()); lrep = sum(v['repair'] for v in sl['days'].values())
+            share = 100 * lrep / lmach if lmach else 0
+            print(f"  the repairs' share over Days 2-{SHARE_DAYS}: machine jobs {lmach}, repairs {lrep} ({share:.0f}%)")
+        if not (40 <= share <= 60): fail(f"repairs are {share:.0f}% of the machine jobs a steady player does over Days 2-{SHARE_DAYS} (want 40-60%)")
         if not (7 <= per <= 12): fail(f"a steady player does {per:.1f} jobs a shift day (want 7-12)")   # 3-6 until the patch's #16: 6.0 before JOB_PACE .72, 6.2 after; 3-7 until playtest patch 1's note 13 (6.8 then, 9.0 after: the board keeps up, so the job's length is the limit now, not the board's work; JB1)
         if st['minHealth'] < 85 or st['worst'] >= 4: fail('ship health or a broken machine with the steady player')
         if st['sig'] != st2['sig']: print('    first run only', sorted(set(json.loads(st['sig'])) - set(json.loads(st2['sig'])))[:6], 'second only', sorted(set(json.loads(st2['sig'])) - set(json.loads(st['sig'])))[:6])
