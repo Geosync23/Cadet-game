@@ -260,3 +260,14 @@ sha256 **ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4** (BM1
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 25 s |
 
 No FAIL. (Peaks the same as 0.92.1.)
+
+## Taken from CR6 on 0.92.2 (BM15's ask; CR6 "hand over" before each started)
+
+ee974894's own checks, one at a time, game sha ca2f908d…e7e4.
+
+| Check | Result | Key lines |
+|---|---|---|
+| controller_check (every part but reach) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK (marks, now deterministic, OK; lift OK); 1886 s |
+| food_check 1 7 | **OK** | FOOD CHECK OK; 58 s |
+| food_check 11 4 | **OK** | FOOD CHECK OK; 64 s |
+| clothes_check | **OK** | ALL OK; 80 s |
