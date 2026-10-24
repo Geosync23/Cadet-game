@@ -103,3 +103,14 @@ Game sha256 44a5cc8e...; 123a778d's game (d643c0da...) plus one toast string ("o
   364c80cb ALL IDENTICAL; check_fast FX12's OK on da1825d2 (string change only since my runs).
 - For the lead (not a defect): TRAY_TRAVELS is on while the design doc says "to confirm with the user". Off-deck the
   seat can be any public sit place (an auditorium or garden seat included); sitting there eats it, harmless.
+
+## AC3 arrows-c 4928271f (item 6 follow-up for the round's mech_check m3d FAIL on 0dd4e2e2): PASS (~10:35 UTC)
+- Diff: one condition in clockFirstTick: `m < CAREER.missBy` (12:30). The help (tip + Clock in tracked) now only from
+  08:00 (CAREER.clockIn) till the shift counts as missed; "near 09:00" read as the clock-in window the career already
+  uses. After 12:30 want is false, so a waiting clock-in tip is dropped too. (An arrow set before 12:30 and never
+  punched stays to the shift's end through Tracked's own clock row, clockRemindTick: as before this change.)
+- Tested as the fix applied to the candidate 0dd4e2e2 (game 4e653844... -> f18e8540...).
+- mech_check m3d: FAILs on 0dd4e2e2 ("no arrow left": Clock in at the time clock), OK with the fix.
+- arrows_check clockin OK; intro_check --firsts (13, 13b: Day 1 Clock in arrow, tracked till you punch) OK;
+  intro_check --p923 (#7 Zeke's clock-in first, Day 1 lines) OK; cadet_test 0dd4e2e2 vs fix ALL IDENTICAL (renderer
+  noise only).
