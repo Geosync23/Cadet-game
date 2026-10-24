@@ -165,3 +165,8 @@ Six .trad files baked into TRADITIONS; the loader skips them unless WEEKEND_ON (
 only when on. Ungated: EV_MAILBOX cap 40 -> 80: nothing reads it but events_check (not saved), so no player-visible change.
 Picnic: Saturday 13:00-13:50 in the garden, hunger +30 on join (FX14: not yet verified). Running: events/join on, join and
 events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
+- **FIXES NEEDED 9e840769** (FX11's find, confirmed): weekend joins' PLAYER_ACTS 'tj:'+id never built (the load-time loop runs
+  before the slot) -> empty activity, no gain, never ends. join_check OK anyway (+12 generic social), and OK with every-song's
+  join deleted (it only walks TRAD_JOIN). events_check on OK; off: cadet_test vs 0.92.4 ALL IDENTICAL, check_fast OK.
+  Day 6 leaders not the hosts (every-song: haddad-tamsin vs torres-zeke; picnic: soto-marta vs cruz-tove "always") -> asked.
+  FX14 handed over; FX11 fixes with T3/T4 (tjActs() rerun). Review T1-T4 together.
