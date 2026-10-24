@@ -303,3 +303,16 @@ runs on 0dd4e2e2 (taken from CR6) were stopped unfinished at BM16's word; no res
 | controller_check (every part but reach; taken from CR6, agreed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK (marks, lift OK); 1957 s |
 
 No FAIL in Round 2.
+
+# 0.92.4 (claude/staging-0.92.4 5bad724d), BM16's start; reported to BM16 and lead 34
+
+sha256 **2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2** (BM16's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 246 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 253 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 244 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 247 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 50 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 26 s |
