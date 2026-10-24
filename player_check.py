@@ -83,20 +83,22 @@ PAPER = r"""(({ normal }) => {
   const work = mins => { for (let m = 0; m < mins; m++) { needsDrain(1, false); if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure - WORK_LEISURE / 60);   // work wears leisure down (0.73.0)
     if (typeof WORK_HUNGER !== 'undefined') n.hunger = needClamp(n.hunger - WORK_HUNGER / 60);   // and hunger: 7 an hour at work (the patch's #20)
     if (playerSpeed() < 1) slowMins++; look(); } };
-  // the patch's #22 (social 3 an hour): a steady player eats at a table of three and has two chats a day (as PP1's fnet.py)
+  // the patch's #22 (social 3 an hour): a steady player eats at a table of three and has two chats a day (as PP1's fnet.py);
+  // 0.92.3 (social 4.5 an hour, fitness 1.4, leisure 2.4, hunger 6 asleep): three chats, a call home and the gym every day,
+  // a grab at lunch, and two fun things after the hobby in the evening
   const meal = () => { const d = PLAYER_ACTS.eat; for (let m = 0; m < d.mins; m++) { needsDrain(1, false); n.hunger = needClamp(n.hunger + d.gain / d.mins + NEED_DRAIN.hunger[0] / 60);
     if (typeof COMPANY_GAIN !== 'undefined') n.social = needClamp(n.social + COMPANY_GAIN * 3 * needEffects(n).socialGain); look(); } };
-  const chats = () => { if (typeof CHAT_GAIN !== 'undefined') for (let c = 0; c < 2; c++) n.social = needClamp(n.social + CHAT_GAIN * needEffects(n).socialGain); look(); };
+  const chats = () => { if (typeof CHAT_GAIN !== 'undefined') for (let c = 0; c < 3; c++) n.social = needClamp(n.social + CHAT_GAIN * needEffects(n).socialGain); look(); };
   const ends = [];                                        // energy at bedtime, each day
   for (let day = 1; day <= 7; day++) {                    // 06:00 to 06:00
     if (normal) {
       act('toilet'); awake(57); act('shower'); awake(5); meal(); chats(); awake(25);   // 06:00-08:00 (the toilet: 0.28.19)
       const sh = day <= 5 ? work : awake;                                         // Monday to Friday on shift, the weekend off (0.73.0)
-      awake(60); sh(3 * 60); act('toilet'); sh(5 * 60 - 3);                        // the shift, 09:00-17:00, with a break at noon
+      awake(60); sh(3 * 60); act('toilet'); act('grab'); sh(5 * 60 - 6);                        // the shift, 09:00-17:00, with a break at noon
       awake(30); meal(); act('toilet'); awake(37);                                // dinner about 17:30
-      if (day % 2) act('gym'); else act('call'); act('hobby');                    // a hobby every evening keeps leisure up after work (0.28.63; every evening from 0.73.0)
-      if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure + 15);   // and something fun: a tradition, Tiles or a talk (0.73.0: work wears leisure down)
-      awake(22 * 60 - (18 * 60 + 30) - (day % 2 ? 60 : 45) - 3); act('toilet');   // to 22:00, and before bed
+      act('gym'); act('call'); act('hobby');                    // a hobby every evening keeps leisure up after work (0.28.63; every evening from 0.73.0)
+      if (typeof WORK_LEISURE !== 'undefined') n.leisure = needClamp(n.leisure + 15 + 25);   // and something fun: a tradition, Tiles or a talk (0.73.0: work wears leisure down); and a swim or a game (0.92.3)
+      awake(22 * 60 - (18 * 60 + 30) - 75 - 15 - 3); act('toilet');   // to 22:00, and before bed
       ends.push(Math.round(n.energy * 10) / 10); sleep(8 * 60);
     } else { awake(16 * 60); sleep(8 * 60); }                                     // no meals, no shower, no gym, no calls
   }
