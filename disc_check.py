@@ -164,7 +164,7 @@ with sync_playwright() as pw:
     h.step(150)
     solo = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
     check(all(len(x['crew']) == 1 and x['crew'][0][0] == '7-disc-2' for x in solo) and sum(1 for x in solo if x['disc']) >= 6, '#25 Day 2 19:15: one alone at the stern practises, the disc in the air (%d of 8 looks)' % sum(1 for x in solo if x['disc']))
-    h.ev("discAsk(recCourtWaiting())"); s = wait_game(h); h.step(30)
+    h.ev("(() => { const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - .6, 0, c.z); discAsk(recCourtWaiting()); return 1; })()"); s = wait_game(h); h.step(30)   # from your baseline (from the lift: backlog FX11-1)
     hid = h.ev("!!DISC.g && !(typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible)")
     check(s['g'] and hid, '#25 during your own game the crew\'s disc is hidden')
     check(not h.errors, '0.92.3 parts: no errors: ' + ' | '.join(h.errors[:5]))
