@@ -4,6 +4,26 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.92.2 full round (2026-10-23, started 23:49 UTC, for BM15 and lead 32)
+
+- Candidate: `claude/integration-next` ee974894 (0.92.2: team repairs to 98, meals never lost in silence, first solo
+  job's arrow, Day 0 diners' own evening, relay shelf glow tap, tray-in-hand seat arrow). Switches in the file:
+  `POINT_ON = true` (12657), `GUIDE_ON = true` (16499), `EV_LINE_ON = EVENTS_ON` (38060), `PAD_ON = false` (55638).
+  Checks run from a worktree of ee974894 (its own scripts).
+- `starship-cadet.html` sha256 `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129d9ea494a206e7e4`: matches BM15's.
+- OLD: 0.92.1 e03505fd (`2dbb11b8...59b18c`). Not needed: nothing failed.
+- BM15's message reached this session at 23:48 UTC (sent ~23:05); started at once.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `day_check.py BUILD 21` | OK | 0 | 284 s | `DAY CHECK OK`; draw calls peak 204 / 195 / 295 / 236 on Decks 1-4 (budget 450; same as 0.92.1) |
+| `day_check.py BUILD 27` | OK | 0 | 269 s | `DAY CHECK OK` |
+| `interactions_check.py BUILD` | OK | 0 | 2078 s | `INTERACTIONS CHECK OK` |
+| `events_check.py BUILD` | OK | 0 | 264 s | `EVENTS CHECK OK`; Day 0 table 48 of 48 before Zeke's goodnight |
+| `career_check.py BUILD` | OK | 0 | 136 s | `CAREER CHECK OK`; ship.works after 30 busy days 2664 bytes (0.92.1: 2714), log 30 |
+
+No FAIL lines in any log. **CR5: OK** (5 of 5).
+
 ## 0.92.1 full round (2026-10-23, started 16:46 UTC, for BM15 and lead 31)
 
 - Candidate: `claude/integration-next` 51a1bb34 (0.92.1: Crossing the Line ON, save trim, join notices, Day 0 table
