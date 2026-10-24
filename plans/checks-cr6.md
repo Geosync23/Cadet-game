@@ -1,5 +1,21 @@
 # CR6 check results
 
+## 0.92.4 full round (2026-10-24): OK
+
+- **Build:** `claude/staging-0.92.4` 5bad724de037282a640bc742449a908ff8e8b7bb, `starship-cadet.html` sha256
+  `2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2` (matches BM16's). OLD 3866c8f3 (0.92.3), not needed.
+- Agreed before starting: controller_check (all but reach) to CR3; food 1 7, food 11 4, clothes to CR4 (CR4: all OK).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 261 s) | `QUICK CHECK OK`; `the repairs' share over Days 2-28: machine jobs 76, repairs 40 (53%)` |
+| mech_check | OK (exit 0, 599 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 152 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 1137 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 111 s) | `ALL OK` |
+| tiles_check | OK (exit 0, 107 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 144 s, alone) | `JOIN CHECK OK` |
+
 ## 0.92.3 (2026-10-24)
 
 Taken from CR2 (its handover, nothing run twice; CR4 told), same build d9a387b6 (sha f18e8540...07853):
