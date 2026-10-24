@@ -41773,6 +41773,16 @@ function tladJoin(e, a, notice, lead) {
   dialogueShow('tiles.ladder', { id: 'tiles.ladder@' + d, who: [q.id], at: now });
   return true;
 }
+// set off ahead (lead 34's ask): the walk in from an afternoon elsewhere on Deck 3 is up to about 30 m, some 15 ship
+// minutes, so the host plans to leave 20 minutes early (at the table by the start) and anyone free then 15 (most of the
+// ring by about 15:10); someone not free that early comes at the start as before. Read by eventPlan (ev.lead), as the
+// Friday address's friLead; a function declaration, as the planner calls it
+function tladLead(p, d, at, e) {
+  if (p.id === e.ev.host) return at - 20;
+  return eventFree(p, d, at - 15, e.to, e.ev.wake) ? at - 15 : at;
+}
+{ const tl = SHIP_TRADITIONS.find(x => x.id === TLAD_ID); if (tl) tl.lead = tladLead;
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); } }   // anything planned before now is planned again, with it
 // already joined and watching: a tap on Olu or anyone at the ladder asks again whether you'd like the next game
 function tladAgain(a) {
   if (!TLAD.key || TLAD.you || typeof deckDef === 'undefined' || deckDef.num !== 3) return false;
