@@ -1,5 +1,23 @@
 # Check runner CR4: results
 
+## 0.92.3 full round (2026-10-24)
+
+- **Candidate:** `claude/staging-0.92.3` 0dd4e2e2 (build 0.92.3)
+- **starship-cadet.html sha256:** `4e6538447d13e4c5398fc74844748e1e9d41776afa7bcc83bc99d5eff87cd0a2` (matches BM16's and lead 33's TEAM.md)
+- **OLD:** 364c80cb (0.92.2); not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, 6, 8; one at a time, alone, at 0dd4e2e2 (day_check.py unchanged since ee974894), `CADET_WORK=/tmp/work-cr4`. Reported to BM16 (took over from BM15) and lead 33.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 236 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped, as designed); draw calls peak 249 / 450; nobody stuck |
+| day_check 13 | OK (exit 0, 213 s) | `DAY CHECK OK`; plans the same twice; rec deck shut for the storm (skipped); draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 221 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 212 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 208 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 296 / 450 |
+| day_check 8 | OK (exit 0, 224 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 279 / 450 |
+
+**CR4: OK.** No FAILs. Draw-call peaks identical to 0.92.2.
+
 ## 0.92.2 full round (2026-10-24)
 
 - **Candidate:** `claude/integration-next` ee974894 (also claude/staging-0.92.2)
