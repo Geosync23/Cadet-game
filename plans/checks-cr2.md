@@ -243,3 +243,15 @@ OLD 364c80cb (0.92.2), sha256 `ca2f908d603a53c24c110d26e22b71bc43d26b94d904f2129
 | intro_check (whole) | OK | `OK`, 0 FAIL lines (part 12 did not time out) |
 | perf_check NEW OLD | known old (backlog 32) | Only `Tiles night, bow lounge Tue 20:30 portrait-wide: js 1.38 -> 2.61 ms` (one-off; re-measured in candidate 2's run); no memory growth (521/521/521); the Line ceremony equal on both (both have breakfast). |
 | lines_check --day | OK | PASS (0 errors) |
+
+# Round 12, Round 2: 0.92.3 candidate 2 (claude/staging-0.92.3 d9a387b6), CR2's share — **OK**
+
+NEW d9a387b6, sha256 `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853` (matches BM16's).
+OLD 364c80cb (0.92.2), sha256 `ca2f908d...e7e4`. path, arc, lines, lines_check --day handed to CR6 (agreed 11:21, cc BM16, lead 33).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Every DIFF line and every shot's pixel count identical to candidate 1 (taps 1-2 "Missing people", the HUD button); no page errors. |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check NEW OLD | OK | `PERF CHECK OK`; candidate 1's Tiles night spike gone (portrait-wide 1.32 → 1.64 ms: backlog 32 confirmed one-off); no memory growth (521/521/521) |
+| path, arc, lines, lines_check --day | OK (CR6) | PATH CHECK OK; ARC CHECK OK; lines PASS 0 errors, 49 warnings; --day PASS (claude/checks-cr6 fdbfb8a) |
