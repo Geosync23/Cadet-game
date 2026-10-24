@@ -1,6 +1,6 @@
 # Morning summary draft for the user (lead 33), fill in links + times when published
 
-0.92.3: all 29 playtest notes built, reviewed, full six-runner round [result]. New links (your old pages and save untouched): Playtest [link], Dev [link]. Old: Playtest https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs, Dev https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq.
+0.92.3 PUBLISHED 8:34 AM Eastern: Playtest https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ, Dev https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr. Old: Playtest https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs, Dev https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq.
 
 Questions / choices for you:
 1. Trays now travel with you off the mess deck (lead 32's overnight call). Keep, or back to "trays stay in the mess"? (one switch)
