@@ -16745,7 +16745,7 @@ function clockFirstTick() {
   if (typeof CAREER === 'undefined' || typeof clockRmDue !== 'function') return;
   const now = Math.floor(shipNow()), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   if (d < 1 || d > CLOCK_FIRST.days + 1 || DIALOGUE) return;
-  const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && d <= CLOCK_FIRST.days;
+  const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && m < CAREER.missBy && d <= CLOCK_FIRST.days;   // near 09:00 (the user's words): 08:00 till the shift counts as missed (12:30)
   if (CLOCK_FIRST.tip) clockFirstDrop(want && CLOCK_FIRST.tip === d ? 'career.clock.' + d : null);
   if (!(due && due.want === 'in') && CLOCK_FIRST.d === d && IX_GOAL && IX_GOAL.trk === 'clock:in') { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); }   // punched in: its arrow goes at once (not at the next minute's clockRemindTick)
   if (!want) return;
