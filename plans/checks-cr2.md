@@ -255,3 +255,19 @@ OLD 364c80cb (0.92.2), sha256 `ca2f908d...e7e4`. path, arc, lines, lines_check -
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | OK | `PERF CHECK OK`; candidate 1's Tiles night spike gone (portrait-wide 1.32 → 1.64 ms: backlog 32 confirmed one-off); no memory growth (521/521/521) |
 | path, arc, lines, lines_check --day | OK (CR6) | PATH CHECK OK; ARC CHECK OK; lines PASS 0 errors, 49 warnings; --day PASS (claude/checks-cr6 fdbfb8a) |
+
+# 0.92.4 (claude/staging-0.92.4 5bad724d), CR2's share — **OK**
+
+NEW 5bad724d, sha256 `2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2` (matches BM16's).
+OLD 3866c8f3 (0.92.3), sha256 `f18e85405e2f18893bb97d10915f3d068a4b02ac66ff74c441353eb22f107853`.
+lines_check --day handed to CR6 (agreed, cc BM16, lead 34).
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Exactly BM16's list: b_wander10s 3564, c_rotated 6, d_wallslow 4216, i_tap0 2625, i_tap1 8597, i_tap2 6429, i_tap4 919, j_steer2 2662 px (item C's glide); g_nocrew 0; no state/tap DIFF lines; no page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 49 warnings) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (part 12 did not time out) |
+| perf_check NEW OLD | OK | `PERF CHECK OK`; no memory growth (521/521/521) |
+| lines_check --day | OK (CR6) | PASS (0 errors) (claude/checks-cr6 8907760) |
