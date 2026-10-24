@@ -352,6 +352,12 @@ nothing in the game file; it is baked after the user's playtest.
   certifications** except Pell's practical, **no letters home as a plot** except Zeke's, **no blue sage or soup,
   no music boxes, no poems, no Tiles, no star maps, no scarves** except Zeke's. Each crescendo has its own shape (the
   table at the end); don't borrow another's.
+- **Lines that depend on something** (a favour done, a memory, your rank): the arc grammar has no per-line
+  conditions yet. Write the line that always plays as a normal script line, and each conditional line as a comment
+  where it goes: `// IF <conditions>: <speaker>: <text>` (e.g. `// IF mem:moment.pell.timed: pell: ...`). lines_check
+  skips comments, so CS1 checks those by hand for length, voice and repeats. (SW1's convention, 2026-10-24.)
+- **Beat numbers** only go up: a crescendo, its quiet ending and the afterglow are the next numbers in that order
+  (Pell 7, 8, 9; Zeke 6, 7). The tables below call them 7 / 7q / 8 and so on; the files number them straight.
 - **Size.** Each step 6-10 lines (the crescendo 10-16), one choice of three replies in the four flavours (listen,
   cheer, practical, share), the person's `needs` flavour getting the warmer answer (`+ them:`). Every reply gets a
   `mem:` word. Phone-short lines: under 140 characters.
@@ -365,8 +371,8 @@ nothing in the game file; it is baked after the user's playtest.
   their struggle theme (teague-theo leaving, bramwell-basil homesick, halloran-emeka family, salo-saad notgood, raman
   leaving, kowalczyk lonely), so nobody has both. Day gates (`day:`), the crescendo hook, the Calendar and Mail before
   a crescendo, the quiet-ending rule and two new favours (below) are the four small code pieces from the pitch.
-  Calder's question (Day 26), Engine Specialist (Day 23) and your night shift (Days 19-20) are Pillar 5 career beats:
-  three crescendos wait for them.
+  Calder's question (Day 26), Engine Specialist and your night shift (moved to **Mon-Wed, Days 22-24, 21:00-06:00**
+  in the comet and visit plan agreed with Pillar 5's planner) are Pillar 5 career beats: three crescendos wait for them.
 
 ---
 
@@ -381,7 +387,7 @@ not illness: never say she's unwell).
 | --- | --- | --- | --- | --- |
 | 5 "The practical" (kept) | as written | light | Calder's put his name down; you time his practice. | favour `pellPractice` (built) |
 | 6 "Three messages" (kept) | as written | heartfelt | Mum's fourth message: her hands, the shop. Stay or go. | `mem:messages`; reply mems `listened`/`mechanic`/`help` |
-| 7 **crescendo** "Clean work" | friend, 2+ days after 6; `where: Works bay`, `when: beat:pell.6 trad:open-door weekday:wed`, `duty: true` (some are still on shift); **Day 17 or 24** (any later Wednesday) | resolution | The practical, live, at the Works bay bench during the open-door tea; the tea corner drifts over to watch. Calder times him (numbers, no adjectives). Halloran pretends not to watch; Kovac counts under her breath; Zeke, if there, mouths "properly". One bolt rolls to the edge of the bench and stops (Kovac: "Stopped. It stopped."). He finishes. Calder: "Good. Clean work." He can't speak for a line. Then, to everyone: he's staying; the lad two doors down from his mum is learning the radios by message, one step a week. If you timed him (`flag:` from the favour), he says so to the whole bay; if you suggested the neighbour (`mem:moment.pell.help`), he credits you for that. The one choice: what you say to him in front of everyone. | `flag: pell.certified` (kept), `mem: passed` |
+| 7 **crescendo** "Clean work" | friend, 2+ days after 6; `where: Works bay`, `when: beat:pell.6 trad:open-door weekday:wed`, `duty: true` (some are still on shift); **Day 17** preferred (Day 24 is your night-shift week), or any later Wednesday | resolution | The practical, live, at the Works bay bench during the open-door tea; the tea corner drifts over to watch. Calder times him (numbers, no adjectives). Halloran pretends not to watch; Kovac counts under her breath; Zeke, if there, mouths "properly". One bolt rolls to the edge of the bench and stops (Kovac: "Stopped. It stopped."). He finishes. Calder: "Good. Clean work." He can't speak for a line. Then, to everyone: he's staying; the lad two doors down from his mum is learning the radios by message, one step a week. If you timed him (`flag:` from the favour), he says so to the whole bay; if you suggested the neighbour (`mem:moment.pell.help`), he credits you for that. The one choice: what you say to him in front of everyone. | `flag: pell.certified` (kept), `mem: passed` |
 | 7q quiet ending | if 7 was missed | light | He finds you after: tells it all at speed, the bolt that stopped, "Good. Clean work.", staying. Mail from Pell, subject "PASSED", one line. | same flag |
 | 8 afterglow "Call" (rewritten from 8) | close, 3+ days after 7; the call-home booths, then the bow lounge, as written | resolution | He called his mum. She said eat, sleep, call; he laughed. Keep the secret (nearly left the Wren in his first month) and the keepsake. Cut "told her I'm staying" (already said). | keepsake: the four-note music box (kept) |
 
@@ -512,15 +518,19 @@ engine room clean enough to eat in; tells his twin's news from the Halcyon like 
 valve he hadn't checked; a deck went cold for a night. **Nobody was hurt. Nobody remembers but him.** Since then he
 checks everything twice. His little sister **Hala** (new name) has been accepted to the Service academy and wants his
 advice; he hasn't written back. **This is the story that lives in the storm.** It must not retell the `notgood` theme
-(nobody tells him it was fine: he trusts himself), nor Pell's test. Scenes before ten at night, always.
+(nobody tells him it was fine: he trusts himself), nor Pell's test. Scenes before ten at night, always. **Day 13 is a Saturday, his day off:** he says plainly he came in for the storm
+(on his own: he couldn't sit in his bunk while the engine room needed hands). **Don't use "check it twice" or "check
+twice" anywhere:** it's said all over the ship already (Calder, Jovanovic, Grieve, Mbeki, Achterberg, Yoon, the work
+pools). His rule and his line to Hala are his own words (the writer finds them; no photos either: there are none in
+the game).
 
 | Step | Gate, where, when | Tone | What happens | Leaves |
 | --- | --- | --- | --- | --- |
 | 1 "Last time on the Halcyon" | colleague; the tea corner or the engine overlook after shift | light | An episode of the twin serial (new, funny). Then Hala's news, as a cliffhanger: she got in. He looks prouder than he can say, then changes the subject. | `mem: halcyon` |
-| 2 "Twice" | colleague; the engine room, `duty: true` | light | You catch him checking a valve three times. He laughs, shows you the card he keeps in his pocket: his own double-check list, worn soft. "Twice is the rule. Three is me." | `mem: card` |
+| 2 "Twice" | colleague; the engine room, `duty: true` | light | You catch him checking a valve three times. He laughs, shows you the card he keeps in his pocket: his own checking list, worn soft, with his own rule at the top (his words, not "twice"). | `mem: card` |
 | 3 "The cold deck" | friend; **before Day 12**; the engine overlook, early evening | heartfelt | The Pallas, told slowly and plainly, short. Then why it matters now: Hala asked what to know, and he's afraid she'll be like him: good, and one tired night away from the same thing. He hasn't answered her. Replies: listen (his needs) / cheer / share. | `mem: cold` |
 | 4 **crescendo** "Signed once" | friend, `when: beat:salo.3 event:ionStorm`, `crisis: true`, `duty: true`, `where: Engine room`; **Day 13** (the storm's Saturday, daytime) | resolution | Mid-storm, on Deck 6, a coolant valve sticks the way the Pallas one did. He stops, hand on it, and can't move for a line. You're there. The choice is how you help: steady him (listen), check it with him once, together (practical), or tell him what you'd write to Hala (share). He checks it, once, properly, and signs once. Calder over the comm, one line in her numbers ("Deck 6 loop. Holding at forty. Good."). He laughs, shaky, and says it's past his bedtime somewhere. | `mem: once` |
-| 5 afterglow "To Hala" | friend; **after Day 14** (the all-clear); calm, before ten | resolution | He's sending Hala his old double-check card, with one line on the back. He reads you the line before he seals it: "Check it twice. Then trust yourself." Then he gives you a new card he made, your name at the top, his list underneath. | keepsake: a double-check card he made for you, with your name at the top |
+| 5 afterglow "To Hala" | friend; **after Day 14** (the all-clear); calm, before ten | resolution | He's sending Hala his old checking card, with one line of his own on the back (the writer's words: about looking properly once, then trusting your own hands). He reads it to you before he seals it. Then he gives you a new card he made, your name at the top, his list underneath. | keepsake: a checking card he made for you, with your name at the top (not the roster's jar or the card's drawing: decided 2026-10-24) |
 | 4q quiet ending | if 4 was missed (not friend by Day 12, or not on Deck 6) | light | It happens later on an ordinary fault you work with him (any Deck 6 job after Day 15): a smaller version of 4 in 5-6 lines, then the afterglow. | |
 
 Crescendo shape: **an old fear faced in the middle of a crisis.**
@@ -560,15 +570,16 @@ being switched off for good and replaced by a buoy, at ten to six one morning, a
 ship's running joke about the lighthouse film and the lighthouse song: she always leaves film night before the
 lighthouse bit; she can say why, once, here. Don't use: the command she was passed over for (her card holds it back:
 not this story), loneliness spelled out (that's the `lonely` theme). **Depends on your night shift** (a Pillar 5 career
-beat, Days 19-20 from 21:00): her steps 2-4 happen on your first night.
+beat, now **Mon-Wed, Days 22-24, 21:00-06:00**): steps 2-3 on your first night (Day 22, before midnight, so step 3
+is that day's one heavy moment), the crescendo at the dawn of your second night (**Day 24, 05:50**: Day 23 is Zeke's).
 
 | Step | Gate, where, when | Tone | What happens | Leaves |
 | --- | --- | --- | --- | --- |
 | 1 "Risk management" | acquaintance (you met at First Light Cocoa, her tip); early morning 06:00-07:00 as she comes off, the bow lounge, a quiet corner, reading | light | She's reading the last page of a paper novel first. "Risk management." Dry, few words. Maybe she tells you how this one ends. | `mem: endings` |
-| 2 "The real ship" | acquaintance, `metDays: 3`; **your first night shift, Day 19, 22:00-midnight**; the bridge lobby or the observation room | light | The night ship is the real ship; the day shift are visitors. She shows you the quiet: who's awake, what hums. A beacon, in passing: her father keeps one. | `mem: night` |
-| 3 "Ten to six" | 2+ hours after 2, the same night (Day 20, about 02:00-03:00), calm | heartfelt | The beacon goes dark for good at ten to six this morning. A buoy instead. She can't be there; he won't say he minds. Why she leaves film night early. Practical reply: "Could the Wren answer it?" She goes quiet, then: running lights, three long and one short. His pattern. | `flag: kowalczyk.signal` if suggested; `mem: dark` |
-| 4 **crescendo** "Three long, one short" | `when: beat:kowalczyk.3`; `where:` the bridge (Deck 1); **Day 20, 05:50** | resolution | The night watch on the bridge (one or two night crew with a line each: the builders confirm who's on watch). At ten to six she lets you key the running lights (if you suggested it; otherwise she asks you to). Three long, one short, out into nothing. Nobody is asked to stand; everyone does. A long pause. "Thank you." Then a wry line to end. | `mem: signal`; Mail a week later (Day 27): someone on Marra saw a ship's lights do it, and sent her father the picture |
-| 5 afterglow "Endings first" | acquaintance or better, after Day 20, any early morning | light | She gives you the novel she was reading, her notes in the margins: "I've read the end. It's a good one." | keepsake: a paper novel with her notes in the margins (her card) |
+| 2 "The real ship" | acquaintance, `metDays: 3`; **your first night shift, Day 22, 21:30-22:30**; the bridge lobby or the observation room | light | The night ship is the real ship; the day shift are visitors. She shows you the quiet: who's awake, what hums. A beacon, in passing: her father keeps one. | `mem: night` |
+| 3 "Ten to six" | an hour after 2, the same night (**Day 22, 23:00-23:59**, before midnight), calm | heartfelt | The beacon goes dark for good at ten to six the morning after next (Day 24). A buoy instead. She can't be there; he won't say he minds. Why she leaves film night early. Practical reply: "Could the Wren answer it?" She goes quiet, then: running lights, three long and one short. His pattern. | `flag: kowalczyk.signal` if suggested; `mem: dark` |
+| 4 **crescendo** "Three long, one short" | `when: beat:kowalczyk.3`; `where:` the bridge (Deck 1); **Day 24, 05:50** (the end of your second night) | resolution | The night watch on the bridge (one or two night crew with a line each: the builders confirm who's on watch). At ten to six she lets you key the running lights (if you suggested it; otherwise she asks you to). Three long, one short, out into nothing. Nobody is asked to stand; everyone does. A long pause. "Thank you." Then a wry line to end. | `mem: signal`; Mail a few days later (Day 28): someone on Marra saw a ship's lights do it, and sent her father the picture |
+| 5 afterglow "Endings first" | acquaintance or better, after Day 24, any early morning | light | She gives you the novel she was reading, her notes in the margins: "I've read the end. It's a good one." | keepsake: a paper novel with her notes in the margins (her card) |
 | 4q quiet ending | if 4 was missed (not on the bridge at 05:50) | light | At 06:00 by the lift, coming off: "I did it. Three long, one short." The afterglow follows. If you had no night shift at all, only the afterglow and one line about the beacon. | |
 
 Crescendo shape: **a signal sent into the dark for someone far away.**
@@ -583,10 +594,10 @@ Crescendo shape: **a signal sent into the dark for someone far away.**
 | Raman | Who flew? | Observatory back window, Day 16, 22:10 | letting go of the controls, and being seen to |
 | Halloran | 289 | Breakfast, the Works tables, from Day 15 | a crowd's gift turned back on the giver |
 | Kovac | Four, please | Deck 5 lift lobby, Friday 19 (or 26), before the address | a small fear faced together, unnoticed |
-| Kowalczyk | Three long, one short | The bridge, Day 20, 05:50 | a signal sent into the dark |
+| Kowalczyk | Three long, one short | The bridge, Day 24, 05:50 | a signal sent into the dark |
 | Theo | Frame it | Shuttle bay, Day 21, 14:30 | a goodbye gift at a departure |
 | Zeke | Finished | Knit and natter, Day 23, 20:00 | a gift in a circle, and a parent's words |
-| Pell | Clean work | Works bay, open door, Wednesday 17 or 24 | a test passed in front of the people who matter |
+| Pell | Clean work | Works bay, open door, Wednesday 17 (or later) | a test passed in front of the people who matter |
 | Basil | Everybody's | Tea corner, new hand's tea, Day 25 | something brought back and given a home |
 | Calder | In front of people | Tea corner, Calder's question, Day 26 | plain words said in public by someone who never does |
 
