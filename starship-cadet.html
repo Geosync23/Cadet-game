@@ -7484,8 +7484,8 @@ const placeCalm = p => !!p && (p.calm !== undefined ? !!p.calm : CALM_TYPES.incl
 // The new places are type 'event' with an event tag ('sowing', 'tiles'), so nobody uses them day to day (crew plans unchanged).
 DECKS[3].places.push(
   { id: '3-seedlings-1', type: 'event', event: 'sowing', at: [11, 1], xy: [11.6, 1.2], face: 'n', pose: 'stand', anim: 'water', room: 'G' },   // in front of the stand
-  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },   // the station's stools
-  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'talk', y: .49, calm: true, room: 'L' },
+  { id: '3-tiles-1', type: 'event', event: 'tiles', at: [43, 18], xy: [43.9, 18.5], face: 'e', pose: 'sit', anim: 'play', y: .49, calm: true, room: 'L' },   // the station's stools (anim play: whoever sits there plays; 0.92.5 item 20)
+  { id: '3-tiles-2', type: 'event', event: 'tiles', at: [45, 18], xy: [45.1, 18.5], face: 'w', pose: 'sit', anim: 'play', y: .49, calm: true, room: 'L' },
 );
 // 0.38.11: twelve lantern places on the promenade's two outer lanes (Lantern walk: crew stand under the lanterns, facing
 // the middle), event-tagged like the rest. (The postbox and its place went with Letters evening: 0.62.0, 0.62.5.)
@@ -8293,6 +8293,12 @@ function ladderStand() {                                 // this deck's ladder r
   const p = cellPos(L.stand[0], L.stand[1]);
   return { e, i: L.stand[0], j: L.stand[1], x: p.x, z: p.z, face: 'n' };
 }
+// patch 0.92.5 item 20 (FX13): the Tiles ladder's ring, standing watch spots round the bow lounge's Tiles station
+// (its board at 44.5, 18.5; the stools west and east), facing the board: three along the north side, three along the south,
+// two past the east stool, one behind the south row. Event-tagged, so only the ladder uses them (crew plans otherwise unchanged).
+DECKS[3].places.push(...[[43.5, 17.45, 's'], [44.5, 17.35, 's'], [45.5, 17.45, 's'], [43.5, 19.55, 'n'], [44.5, 19.65, 'n'], [45.5, 19.55, 'n'],
+  [46.45, 18.5, 'w'], [46.45, 19.45, 'w'], [44.5, 20.4, 'n']].map(([x, z, f], k) =>
+  ({ id: '3-ladder-' + (k + 1), type: 'event', event: 'tiles-ladder', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'stand', anim: 'talk', room: 'L' })));
 // ---- end of slot: Deck architect ----
 
 // =====================================================================
@@ -37660,7 +37666,7 @@ const TRADITIONS = [
   {"id": "talent-night", "k": 455, "name": "Talent night", "when": {"every": "year", "dayOfYear": 152}, "at": [1215, 1305], "min": 25, "jitter": 20, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "who": [["dahl-mira", 1], ["musician", 0.85], ["music", 0.55], ["lounge-regular", 0.5], ["bar-regular", 0.45], ["everyone", 0.25]], "anim": [["musician", "play"], ["bar-regular", "drink"], ["everyone", "talk"]], "host": "dahl-mira", "from": "dahl-mira", "ties": {"decor": "talentStage"}, "invite": {"host": "dahl-mira", "odds": 0.35, "line": "Talent night tonight. You don't have to get up. But you could."}, "text": {"mail": [{"t": "Talent night tomorrow, {time} in the bow lounge. Sing, play, juggle, read a poem, or just clap loudly. Sign up at the bar.", "tone": "light"}], "ask": [{"t": "Talent night later. I'm doing a card trick. It works about half the time.", "tone": "funny"}, {"t": "Are you coming to talent night? Somebody has to clap.", "tone": "light"}, {"t": "I've practised my song in the shower all week. Ask anyone in my bunk room.", "tone": "funny"}], "here": [{"t": "Give them a big hand!", "tone": "light"}, {"t": "Next up, someone very brave.", "tone": "funny"}, {"t": "Shh, this one's lovely.", "tone": "warm"}], "thanks": [{"t": "You find a seat for talent night. Every act gets a cheer, even the one that goes wrong.", "tone": "warm"}], "chatter": [{"t": "Who's on first at talent night? Not me. Never me.", "tone": "funny"}, {"t": "Mira says anyone can do talent night. Even a talk about bolts.", "tone": "funny"}, {"t": "Last talent night, someone played a tune on the water pipes.", "tone": "light"}, {"t": "I clapped so hard at talent night my hands hurt.", "tone": "warm"}]}},
   {"id": "tap-night", "k": 447, "name": "Tap night", "when": {"weekday": 4}, "at": [1200, 1320], "min": 25, "jitter": 30, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "hold": [0], "who": [["bar-regular", 0.85], ["lounge-regular", 0.5], ["night-owl", 0.35], ["everyone", 0.18]], "anim": "drink", "from": "The bow lounge bar", "text": {"mail": [{"t": "Tap night tomorrow at {time} in the bow lounge. New drink of the week. Bring a friend and a guess what's in it.", "tone": "light"}], "ask": [{"t": "Tap night at the bar. There's a drink of the week.", "tone": "light"}, {"t": "Friday at the bar? Or the jam? Can't do both.", "tone": "light"}], "here": [{"t": "What's in it? Don't tell me. Yes, tell me.", "tone": "funny"}, {"t": "Same again? Go on, it's Friday.", "tone": "light"}, {"t": "Best seats are by the window. Grab one.", "tone": "light"}], "thanks": [{"t": "The bow lounge bar is busy and bright. You try the drink of the week and lean on the counter with everyone else.", "tone": "light"}], "chatter": [{"t": "Tap night later. Last week's drink was purple.", "tone": "funny"}, {"t": "Friday at the bar. Best way to end a week.", "tone": "light"}, {"t": "Jam or tap night? I'm doing both. Somehow.", "tone": "funny"}]}},
   {"id": "tasting-table", "k": 436, "name": "Brennan's tasting table", "when": {"weekday": 2}, "at": [1095, 1155], "min": 20, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["brennan", 1], ["galley", 0.7], ["lingers-at-meals", 0.6], ["everyone", 0.35]], "anim": "talk", "host": "brennan", "from": "brennan", "ties": {"galley": {"meal": "dinner", "extra": "tasting", "batch": 20}, "decor": "tastingTable", "tally": {"kind": "tasting", "choices": ["herb-flatbread", "pickled-beans", "tomato-jam-oatcakes", "root-crisps", "miso-greens", "bean-fritters", "carrot-ginger-soup", "chilli-lime-corn"], "per": 2}}, "invite": {"host": "brennan", "odds": 0.25, "line": "Two new dishes at the end of the servery tonight. Taste both and vote. Honestly."}, "meal": "dinner", "text": {"mail": [{"t": "Tasting table tomorrow at dinner, from {time}: two small new dishes by the servery. Try both, drop your token in a jar. The winner comes back on Sunday.", "tone": "light"}], "ask": [{"t": "Tasting table tonight. I'm voting for whichever one has more garlic.", "tone": "funny"}, {"t": "Brennan's trying two new dishes at dinner. One of them is green. Very green.", "tone": "funny"}, {"t": "Tasting table at dinner. Bring an open mind and an empty plate.", "tone": "light"}, {"t": "Did you vote last week? I did. Twice. Don't tell anyone.", "tone": "funny"}], "here": [{"t": "Try this one first. Then that one. Then tell me honestly.", "tone": "light"}, {"t": "Hmm. Hmm! Give me another spoonful, I need to be sure.", "tone": "funny"}, {"t": "Which jar are you going for?", "tone": "light"}], "thanks": [{"t": "You try both little dishes and drop your token in a jar. Brennan watches the jars like a hawk.", "tone": "funny"}, {"t": "You join the tasting table. Both dishes are good; one of them is better. You vote.", "tone": "light"}], "chatter": [{"t": "Last week's winner was so good I had thirds.", "tone": "light"}, {"t": "Brennan pretends not to care which dish wins. Then counts the tokens twice.", "tone": "funny"}, {"t": "I voted for the green one. It lost. I'm not bitter.", "tone": "funny"}]}},
-  {"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990], "min": 25, "jitter": 15, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "hold": [0], "who": [["farouk-olu", 1], ["rina", 0.9], ["lounge-regular", 0.4], ["everyone", 0.1]], "anim": "play", "host": "farouk-olu", "from": "farouk-olu", "ties": {"decor": "tilesNight"}, "invite": {"host": "farouk-olu", "odds": 0.3, "line": "Tiles ladder this afternoon. You're on the board. Bottom rung, but on the board."}, "text": {"mail": [{"t": "Tiles ladder tomorrow at {time} in the bow lounge. Everyone plays everyone. The winner's name goes on the chalkboard.", "tone": "light"}], "ask": [{"t": "Tiles ladder this afternoon. Everyone plays everyone.", "tone": "light"}, {"t": "Fancy the ladder? Your name could be on the chalkboard.", "tone": "light"}], "here": [{"t": "Who's next? Me? Already?", "tone": "light"}, {"t": "Good game. Rematch on the ladder next week.", "tone": "light"}, {"t": "The chalkboard's watching. No pressure.", "tone": "funny"}], "thanks": [{"t": "You play your way round the Tiles ladder in the bow lounge, one friendly game after another, under the chalkboard.", "tone": "light"}], "chatter": [{"t": "Tiles ladder today. My name was up there once.", "tone": "funny"}, {"t": "Who's top of the chalkboard this week?", "tone": "light"}, {"t": "The ladder's friendly. Mostly. Nearly.", "tone": "funny"}]}},
+  {"id": "tiles-ladder", "k": 450, "name": "Tiles ladder", "when": {"weekday": 5}, "at": [900, 990], "min": 25, "jitter": 15, "where": [{"deck": 3, "pool": "@tiles-ladder"}, {"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "hold": [0], "who": [["farouk-olu", 1], ["rina", 0.9], ["lounge-regular", 0.4], ["everyone", 0.1]], "anim": "talk", "host": "farouk-olu", "from": "farouk-olu", "invite": {"host": "farouk-olu", "odds": 0.3, "line": "Tiles ladder this afternoon. You're on the board. Bottom rung, but on the board."}, "text": {"mail": [{"t": "Tiles ladder tomorrow at {time} in the bow lounge. Everyone plays everyone. The winner's name goes on the chalkboard.", "tone": "light"}], "ask": [{"t": "Tiles ladder this afternoon. Everyone plays everyone.", "tone": "light"}, {"t": "Fancy the ladder? Your name could be on the chalkboard.", "tone": "light"}], "here": [{"t": "Who's next? Me? Already?", "tone": "light"}, {"t": "Good game. Rematch on the ladder next week.", "tone": "light"}, {"t": "The chalkboard's watching. No pressure.", "tone": "funny"}], "thanks": [{"t": "You play your way round the Tiles ladder in the bow lounge, one friendly game after another, under the chalkboard.", "tone": "light"}], "chatter": [{"t": "Tiles ladder today. My name was up there once.", "tone": "funny"}, {"t": "Who's top of the chalkboard this week?", "tone": "light"}, {"t": "The ladder's friendly. Mostly. Nearly.", "tone": "funny"}]}},
   {"id": "tiles-night", "k": 435, "name": "Tiles night", "when": {"weekday": 1}, "at": [1200, 1290], "min": 25, "jitter": 15, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "hold": [0], "who": [["rina", 1], ["lounge-regular", 0.6], ["bar-regular", 0.45], ["juniors", 0.35], ["everyone", 0.12]], "anim": "play", "host": "rina", "from": "rina", "ties": {"decor": "tilesNight"}, "invite": {"host": "rina", "odds": 0.4, "line": "Tiles tonight in the lounge. Come and lose to me. It's educational."}, "text": {"mail": [{"t": "Tiles night tomorrow, {time} in the bow lounge. A board on every table. Beginners welcome; my title is not up for discussion.", "tone": "light"}], "ask": [{"t": "Tiles night later. I've been practising my losing face. Haven't needed it yet.", "tone": "funny"}, {"t": "Coming to Tiles tonight? There's a board with your name on it.", "tone": "light"}, {"t": "Tiles at eight. Rina says it's a friendly game. Rina is lying.", "tone": "funny"}, {"t": "I'm playing Tiles tonight. Last week I nearly won. Nearly.", "tone": "light"}], "here": [{"t": "Your move. Take your time. No, really, take your time.", "tone": "funny"}, {"t": "Hang on, that tile goes there? Since when?", "tone": "light"}, {"t": "One more game. Then bed. Probably.", "tone": "light"}, {"t": "Good move. I hate it.", "tone": "funny"}], "thanks": [{"t": "You pull up a chair at a Tiles board. The tiles click, the lounge hums, and someone groans at a good move.", "tone": "light"}, {"t": "You join Tiles night. Rina looks up from the board and cracks her knuckles.", "tone": "funny"}], "chatter": [{"t": "Has anyone actually beaten Rina at Tiles? Ever?", "tone": "funny"}, {"t": "I dreamt in Tiles last night. Little hexes everywhere.", "tone": "funny"}, {"t": "Tiles is easy to learn. That's the trap.", "tone": "light"}, {"t": "Tuesday's the best night aboard. Tiles, tea, and nobody talking about work.", "tone": "warm"}]}},
   {"id": "years-end", "k": 479, "name": "Year's end", "when": {"every": "year", "dayOfYear": 364}, "at": [1200, 1275], "min": 30, "prio": 3, "jitter": 10, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}, {"deck": 3, "room": "^Promenade$", "types": ["bench"]}, {"deck": 3, "pool": "mess-seat"}], "hold": [], "who": [["marrow", 1], ["oduya", 1], ["everyone", 0.8]], "anim": [["officers", "talk"], ["everyone", "drink"]], "host": "marrow", "from": "marrow", "cake": true, "ties": {"decor": "yearsEnd"}, "text": {"mail": [{"t": "Tomorrow is the year's last evening. Bow lounge, {time}: I'll read a little from the log, and Matthias has your Midtour letters. Come as you are.", "tone": "light"}], "ask": [{"t": "Year's end tonight. The Captain reads from the log.", "tone": "light"}, {"t": "Last night of the year. I want to hear what the Captain reads.", "tone": "warm"}, {"t": "Year's end at eight. I hope my letter isn't too silly.", "tone": "funny"}], "here": [{"t": "Shh. This is the bit about the storm.", "tone": "light"}, {"t": "To the Wren, and to another year of her.", "tone": "warm"}, {"t": "I'd forgotten half of this. What a year.", "tone": "light"}, {"t": "My letter says I'd learn the clarinet. I did not.", "tone": "funny"}], "thanks": [{"t": "You find a spot in the bow lounge as the Captain reads from the year's log. Some of it is about you.", "tone": "warm"}], "chatter": [{"t": "The Captain reads at every year's end. Practises for days, you know.", "tone": "warm"}, {"t": "Year's end always makes me miss the people who've moved on.", "tone": "warm"}, {"t": "I'm keeping my Midtour letter. It's going in the drawer with the others.", "tone": "light"}]}},
 ];
@@ -40026,7 +40032,7 @@ const TRAD_JOIN = {
   sowing: { act: 'ixGarden', verb: 'sow with them', what: 'sow the new season\'s seeds with the gardeners' },
   harvest: { act: 'ixGarden', host: 'brennan', verb: 'help with the harvest', what: 'pick the harvest with the crew' },
   'tiles-night': { pose: 'sit:play', verb: 'play Tiles', what: 'sit in on a game of Tiles' },
-  'tiles-ladder': { pose: 'sit:play', verb: 'play on the ladder', what: 'play a ladder game of Tiles' },
+  'tiles-ladder': { pose: 'talk', verb: 'join the ladder', what: 'watch the games at the Tiles table and take the next one when you like' },   // 0.92.5 item 20: a ring round the board; tladJoin asks play or watch
   quiz: { pose: 'sit:talk', verb: 'join a quiz team', what: 'squeeze onto a team; Tomas asks the questions' },
   jam: { pose: 'sit:play', verb: 'sit in on the jam', what: 'sit in and play along',
     lead: (e, goers) => (goers.filter(p => evHas(p, e.day, 'musician')).length ? goers.filter(p => evHas(p, e.day, 'musician')) : goers).slice().sort((a, b) => schedU(idHash(a.id), e.day, 701) - schedU(idHash(b.id), e.day, 701))[0] },
@@ -40126,6 +40132,7 @@ function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const o = eventOf(a.p, now), e = o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null;
+  if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to || SHIP.events.joined.includes(e.id + '@' + d)) return false;
   return tradJoin(e, a);
 }
@@ -40133,6 +40140,7 @@ function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  if (e.id === 'tiles-ladder' && typeof tladJoin === 'function') return tladJoin(e, a, notice, lead);   // 0.92.5 item 20: play the next game, or watch
   if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
@@ -40425,7 +40433,7 @@ function eventsTick() {
   const prev = EV_MIN;
   EV_MIN = m; eventTags();
   if (EV_LAST === null) EV_LAST = now; else if (now > EV_LAST) { eventsMail(EV_LAST, now); weekMailSend(EV_LAST, now); eventsNoted(EV_LAST, now); EV_LAST = now; } else EV_LAST = now;
-  eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
+  eventsDecor(now); eventsPlayer(now); tradJoinMinute(now); beamTraces(now); if (typeof tladMinute === 'function') tladMinute(now);   // 0.70.0: the tradition you could tap to join (marker, arrow, tip)
   pyoMinute(now);                                        // Pick-your-own: what you picked, on a tray (FX12, slot 'Traditions engineer')
   eventAdvance(now);                                     // a ship-wide event's phases (inert while none is due)
   eventMomentsTick(prev, m); meetingsTick(now);          // its felt moments and meetings, in play
@@ -41681,6 +41689,96 @@ function pyoTray(e, d, A) {
   const pos = player.obj.position, d2 = pl => { const c = cellPos(...pl.at); return Math.hypot(c.x - pos.x, c.z - pos.z); };
   const seat = (DECKS[3].places || []).filter(pl => pl.type === 'mess-seat' && !heldBy(pl.id)).sort((a, b) => d2(a) - d2(b) || (a.id < b.id ? -1 : 1))[0];
   if (seat) setGoal({ deck: 3, place: seat.id, label: PYO_SAY, pyo: true });
+}
+// ---- the Tiles ladder round the Tiles table (FX13, patch 0.92.5 item 20; the user: "the group should stand around the
+// tiles table watching two people play and the player always has the choice to join in or watch"). The ladder's goers
+// plan to stand in the ring of watch spots round the bow lounge's Tiles station (the deck architect's '3-ladder-*',
+// event-tagged; plans only ever put them there). While it's on and you're on Deck 3, a game is played at the station's
+// two stools every TLAD_GAME ship minutes: the winner stays on their stool, the loser goes back to the ring and the next
+// in the queue sits down (the queue: whoever's standing in the ring, Olu first, then by a hash of the day, schedU k 334).
+// Who wins is a hash too (k 335), weighted by Tiles level (tilesStyle: hard 3, medium 2, easy 1), so a reload plays the
+// same. The two at the board are sent there with section 14's crewComeTo and go back to their plans after. Only what you
+// see: nothing here is saved, and nobody's plan changes. A tap on anyone at it (tradJoin asks tladJoin) joins you and
+// asks: "Play the next game" (when this game ends you sit on the free stool and play the winner the real game, the
+// station's sit-down flow: time stops while you play) or "Watch" (a ring spot, as any tradition's join).
+const TLAD_ID = 'tiles-ladder', TLAD_GAME = 10, TLAD_STOOLS = ['3-tiles-1', '3-tiles-2'], TLAD_LEVEL = { hard: 3, medium: 2, easy: 1 };
+const TLAD = { key: null, seat: {}, until: 0, n: 0, queue: [], rel: {}, you: null, vs: null, log: [] };   // seat: stool -> crew id
+const tladRing = () => DECKS[3].places.filter(pl => pl.event === TLAD_ID).map(pl => pl.id);
+function tladEvent(now) { const d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440; return eventsOn(d).find(e => e.id === TLAD_ID && m >= e.from && m < e.to) || null; }
+function tladSend(id, stool, until) {                    // a crew member to a stool till `until` (renewed each game they stay)
+  const p = schedPeople().find(q => q.id === id); if (!p) return;
+  if (TLAD.rel[id]) TLAD.rel[id]();
+  TLAD.rel[id] = crewComeTo(p, stool, null, { until: until + 3 }); TLAD.seat[stool] = id;   // a little past the game's end, so the winner doesn't get up before the next game renews it
+}
+function tladFree(id) { if (TLAD.rel[id]) { TLAD.rel[id](); delete TLAD.rel[id]; } for (const k in TLAD.seat) if (TLAD.seat[k] === id) delete TLAD.seat[k]; }
+function tladStop() { for (const id of Object.keys(TLAD.rel)) tladFree(id); TLAD.key = null; TLAD.seat = {}; TLAD.you = null; TLAD.until = 0; }
+// who's watching in the ring now, in ladder order (Olu first)
+function tladWaiting(e) {
+  const ring = new Set(tladRing()), seated = new Set(Object.values(TLAD.seat));
+  return DECK_CREW.filter(a => a.p && a.p.id && a.settled && a.spot && ring.has(a.spot.id) && !seated.has(a.p.id) && !COME_TO.has(a.p.id))
+    .map(a => a.p).sort((p, q) => (p.id === e.ev.host ? -1 : 0) - (q.id === e.ev.host ? -1 : 0) || schedU(idHash(p.id), e.day, 334) - schedU(idHash(q.id), e.day, 334));
+}
+function tladWinner(a, b, e) {                           // who wins a crew game: a hash of the day and the game, weighted by level
+  const lv = id => TLAD_LEVEL[tilesStyle(schedPeople().find(q => q.id === id)).level] || 2;
+  return schedU(idHash(a) ^ idHash(b), e.day * 64 + TLAD.n, 335) < lv(a) / (lv(a) + lv(b)) ? a : b;
+}
+function tladMinute(now) {
+  const e = typeof deckDef !== 'undefined' && deckDef.num === 3 ? tladEvent(now) : null;
+  if (!e) { if (TLAD.key) tladStop(); return; }
+  const key = e.id + '@' + e.day, end = (e.day - 1) * 1440 + e.to;
+  if (TLAD.key !== key) { tladStop(); TLAD.key = key; TLAD.n = 0; TLAD.log = []; }
+  const youAt = typeof ACT !== 'undefined' && ACT && ACT.kind === 'tiles' && TLAD_STOOLS.includes(ACT.placeId) ? ACT.placeId : null;
+  if (TLAD.you === 'playing') {                          // your game: the one across from you stays put; after it, the ladder goes on
+    if (youAt) { const opp = TLAD.seat[TLAD_STOOLS.find(s => s !== youAt)]; if (opp) tladSend(opp, TLAD_STOOLS.find(s => s !== youAt), Math.min(end, now + 60)); TLAD.until = now + 2; return; }
+    const opp = TLAD.vsId, v = SHIP.tiles.vs[opp] || [0, 0], won = TLAD.vs && v[0] > TLAD.vs[0];
+    TLAD.log.push([won ? 'you' : opp, won ? opp : 'you']); TLAD.you = null;
+    if (won && opp) tladFree(opp);                       // you beat them: they go back to the ring (you've got up: the stool's free)
+    TLAD.until = now;
+  }
+  if (now < TLAD.until) return;
+  // a game ends (or none yet): the loser goes back to the ring, the winner stays
+  const sat = TLAD_STOOLS.map(s => TLAD.seat[s]);
+  if (sat[0] && sat[1]) { const w = tladWinner(sat[0], sat[1], e), l = w === sat[0] ? sat[1] : sat[0]; TLAD.log.push([w, l]); tladFree(l); }
+  const free = TLAD_STOOLS.filter(s => !TLAD.seat[s]), waiting = tladWaiting(e);
+  if (TLAD.you === 'next' && free.length) { TLAD.you = 'seat'; TLAD.until = now + 1; return; }   // your turn: a minute for the one who lost to get up
+  if (TLAD.you === 'seat' && free.length) {              // you take the free stool; the winner (or the next in line) plays you
+    const stool = free[0], other = TLAD_STOOLS.find(s => s !== stool);
+    if (!TLAD.seat[other] && waiting.length) tladSend(waiting[0].id, other, Math.min(end, now + 60));
+    const opp = TLAD.seat[other]; if (!opp || heldBy(stool)) { TLAD.until = now + 1; return; }   // nobody to play yet, or the stool not clear: next minute
+    TLAD.you = 'playing'; TLAD.vsId = opp; TLAD.vs = (SHIP.tiles.vs[opp] || [0, 0]).slice();
+    actStart('tiles', stool, { pose: 'sit:play', title: e.name, flavour: 'Your turn on the ladder. You sit down across from ' + tjFirst(opp) + '.', board: TLAD_STOOLS.slice(), mode: 'full' });
+    TLAD.until = now + 2; return;
+  }
+  if (end - now < TLAD_GAME / 2) { for (const id of Object.values(TLAD.seat)) tladFree(id); TLAD.until = end; return; }   // no time for another game
+  const until = Math.min(end, now + TLAD_GAME);
+  for (const s of TLAD_STOOLS) { if (TLAD.seat[s]) tladSend(TLAD.seat[s], s, until); else if (waiting.length) tladSend(waiting.shift().id, s, until); }
+  if (TLAD_STOOLS.every(s => TLAD.seat[s])) { TLAD.n++; TLAD.until = until; } else TLAD.until = now + 1;   // only one there yet: they wait at the board
+}
+// the join (tradJoin asks this first for the ladder): it counts as joining (eventJoin: social, leisure, the notice), then
+// the card: play the next game, or watch from the ring
+function tladJoin(e, a, notice, lead) {
+  const d = e.day, now = shipNow(), q = schedPeople().find(p => p.id === (lead || a.p.id)) || a.p;
+  eventJoin(e, d, now, notice);
+  const watch = () => { const s = TRAD_JOIN[e.id], near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z); if (!sp) return;
+    const [pl, spot] = sp; actStart('tj:' + e.id, pl.id, { title: e.name, after: notice, end: (d - 1) * 1440 + e.to, tj: e.id + '@' + d, pose: tradPose(s, pl, spot), company: typeof ixBond === 'function' ? ixBond(spot) : 1 }); };
+  const say = (k, x) => { const L = typeof lineFor === 'function' ? lineFor(q.id, k, { t: now }) : null; return L && L.text || x; };
+  if (typeof dialogueShow !== 'function') { watch(); return true; }
+  let picked = false;
+  MEETING_SCRIPTS['tiles.ladder'] = { title: e.name, gist: 'The Tiles ladder at the Tiles table.', noCount: true,
+    onEnd: () => { if (!picked) watch(); },              // closed without a pick: you watch
+    onPick: k => { picked = true; watch(); if (k === 0) { TLAD.you = 'next'; toast(e.name, 'You\'re next on the ladder. When this game ends, you take the free stool.'); } },
+    lines: [{ who: q.id, text: say('ladder.ask', 'Ladder\'s on. Winner stays at the board. Fancy the next game, or watch a round first?') },
+      { choice: [{ text: 'Play the next game', rel: { [q.id]: 1 }, reply: { who: q.id, text: say('ladder.play', 'You\'re up next. Stand by the board; the stool\'s yours when this one ends.') } },
+        { text: 'Watch', reply: { who: q.id, text: say('ladder.watch', 'Grab a spot by the board. You can still jump in later: just tap me.') } }] }] };
+  dialogueShow('tiles.ladder', { id: 'tiles.ladder@' + d, who: [q.id], at: now });
+  return true;
+}
+// already joined and watching: a tap on Olu or anyone at the ladder asks again whether you'd like the next game
+function tladAgain(a) {
+  if (!TLAD.key || TLAD.you || typeof deckDef === 'undefined' || deckDef.num !== 3) return false;
+  const now = shipNow(), e = tladEvent(now); if (!e || !SHIP.events.joined.includes(e.id + '@' + e.day)) return false;
+  const o = eventOf(a.p, now); if (!(o && o.now && o.e.id === TLAD_ID) && !Object.values(TLAD.seat).includes(a.p.id)) return false;
+  TLAD.you = 'next'; toast(e.name, 'You\'re next on the ladder. When this game ends, you take the free stool.'); return true;
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----

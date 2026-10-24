@@ -8,7 +8,11 @@
 #   Name on the beam: locked at its start until the crew gather and the leader says its lines (0.92.3 item 13); then tapping
 #   crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined), right beside the painted row (item 23),
 #   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew), their nameNew traces through a
-#   real save and reload; no page errors.
+#   real save and reload; the Tiles ladder (0.92.5 item 20, the user: "the group should stand around the tiles table
+#   watching two people play and the player always has the choice to join in or watch"): on Day 6 at 15:15 two crew sit
+#   at the Tiles station playing, and by 15:30 at least three stand in the ring round it facing the board; a tap on Olu asks "Play the
+#   next game" or "Watch"; playing, you sit at the board when the game ends and play the winner; after it the ladder goes
+#   on; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
 import sys
 exec(open(__file__.replace('join_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -31,6 +35,7 @@ EACH = r"""(id => {
   const goal = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.label : null; tradJoinFrame();
   const mark = document.getElementById('tjMark'), marked = !!mark && /★/.test(mark.textContent);
   const s0 = SHIP.player.needs.social = 40, ok = tradJoinTap(TJ_NOW ? TJ_NOW.agent : a);
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.id === 'tiles.ladder') { dialogueNext(); dialogueChoose(1); dialogueEnd(true); }   // the ladder asks play or watch (0.92.5 item 20): watch
   const r = { id, d, lead, passive, now, goal, marked, ok, joined: SHIP.events.joined.includes(id + '@' + d), social: SHIP.player.needs.social - s0,
     act: ACT ? [ACT.kind, ACT.placeId, ACT.o.pose] : null, walk: !!TJ_WALK, goalAfter: !!(IX_GOAL && IX_GOAL.tj), toast: document.getElementById('tx').textContent };
   if (TJ_WALK) tradWalkEnd('over'); actEnd(true); return r;
@@ -142,6 +147,56 @@ with sync_playwright() as pw:
     g.ev("localStorage.clear()")
     print('nameNew traces after a reload at day 100:', rt)
     if rt != ['Basil@22', 'Rafe@78']: fail(f"nameNew traces through the save: {rt}")   # Basil joins on day 21 since PT1 (was 35: Basil@36)
+    for e in g.errors: fail('page: ' + e)
+    g.close()
+    # the Tiles ladder round the Tiles table (0.92.5 item 20), in a fresh game
+    g = Game(pw, sys.argv[1])
+    g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+    g.ev("""(() => { const d = 6, e = eventsOn(d).find(x => x.id === 'tiles-ladder'); window.__le = e; goToDeck(3); actEnd(true); clearGoal(); SHIP.events.joined = [];
+      skipTo((d - 1) * 1440 + e.from + 2); deckCrewFill(); const sp = placeSpot('3-ladder-2') || placeSpot('3-tiles-1'); player.obj.position.set(sp.x, 0, sp.z - 1.6); player.stop(); EV_MIN = -1; eventsTick(); })()""")
+    LAD = r"""(() => { const st = ['3-tiles-1', '3-tiles-2'], ring = DECKS[3].places.filter(p => p.event === 'tiles-ladder').map(p => p.id), b = [placeSpot(st[0]), placeSpot(st[1])].filter(Boolean);
+      const bx = b.length ? (b[0].x + b[1].x) / 2 : 0, bz = b.length ? (b[0].z + b[1].z) / 2 : 0, ang = d => Math.abs(Math.atan2(Math.sin(d), Math.cos(d)));
+      const at = DECK_CREW.filter(a => a.p && a.settled && a.spot);
+      const seated = at.filter(a => st.includes(a.spot.id)).map(a => [a.p.id, a.spot.id, a.pose]);
+      const ring2 = at.filter(a => ring.includes(a.spot.id)).map(a => [a.p.id, a.spot.id, +(ang(Math.atan2(bx - a.spot.x, bz - a.spot.z) - a.spot.face) * 180 / Math.PI).toFixed(0)]);
+      const lounge = at.filter(a => /^3-lounge/.test(a.spot.id) && /tiles-ladder/.test((whereIs(a.p, shipNow()) || {}).tag || '')).map(a => a.p.id);
+      return { t: hhmm(shipNow() % 1440), seated, ring: ring2, lounge, boards: dressingOn().includes('tilesNight') }; })()"""
+    for _ in range(80):
+        g.step(30)
+        if g.ev("shipNow() >= (__le.day - 1) * 1440 + __le.from + 15"): break
+    lr = g.ev(LAD)
+    print('The Tiles ladder at', lr['t'], ':', lr)
+    if len(lr['seated']) != 2 or any(not x[2].startswith('sit') for x in lr['seated']): fail(f"the ladder: two crew should sit playing at the Tiles station at 15:15: {lr['seated']}")
+    for _ in range(80):                                  # the rest walk in from their afternoons (30 m and more away, the slowest about 25 minutes): the ring by 15:30
+        g.step(30)
+        if g.ev("shipNow() >= (__le.day - 1) * 1440 + __le.from + 30"): break
+    lr = g.ev(LAD)
+    print('            at', lr['t'], ':', lr)
+    facing = [x for x in lr['ring'] if x[2] <= 70]
+    if len(facing) < 3: fail(f"the ladder: at least three should stand in the ring round the Tiles table facing the board: {lr['ring']}")
+    if lr['lounge'] or lr['boards']: fail(f"the ladder: nobody at it in the lounge seats, no boards on every table: {lr}")
+    card = g.ev("""(() => { const a = tjAgent(__le.ev.host) || DECK_CREW.find(c => c.p && c.settled && c.spot && /^3-ladder/.test(c.spot.id)); if (!a) return { err: 'nobody at the ladder to tap' };
+      const ok = tradJoinTap(a), id = DIALOGUE && DIALOGUE.id; if (DIALOGUE) dialogueNext(); const v = DIALOGUE ? dialogueView() : null;
+      return { ok, id, choices: v && v.choices, joined: SHIP.events.joined.includes('tiles-ladder@' + __le.day) }; })()""")
+    print('A tap on the ladder:', card)
+    if not card.get('choices') or 'Play the next game' not in card['choices'] or 'Watch' not in card['choices'] or not card.get('joined'): fail(f"the ladder: a tap should join and offer 'Play the next game' or 'Watch': {card}")
+    if card.get('choices'):
+        g.ev("(() => { dialogueChoose(card = 0); dialogueNext(); dialogueEnd(true); })()".replace('card = 0', '0'))
+        play = None
+        for _ in range(40):
+            g.step(30)
+            play = g.ev("({ t: hhmm(shipNow() % 1440), act: ACT && ACT.kind, place: ACT && ACT.placeId, opp: TL_GAME && TL_GAME.opp, across: (DECK_CREW.find(a => a.settled && a.spot && ['3-tiles-1', '3-tiles-2'].includes(a.spot.id) && (!ACT || a.spot.id !== ACT.placeId)) || { p: {} }).p.id })")
+            if play['opp']: break
+        print('Playing the next game:', play)
+        if not play or play['act'] != 'tiles' or play['place'] not in ('3-tiles-1', '3-tiles-2') or not play['opp'] or play['opp'] != play['across']: fail(f"the ladder: 'Play the next game' should sit you at the board against the one across from you: {play}")
+        if play and play['opp']:
+            g.ev("(() => { tilesEnd('leave'); actEnd(true); })()")
+            for _ in range(20):
+                g.step(30)
+                if len(g.ev(LAD)['seated']) == 2: break
+            after = g.ev(LAD)
+            print('After your game:', after['t'], after['seated'])
+            if len(after['seated']) != 2: fail(f"the ladder: after your game two crew should be playing again: {after}")
     for e in g.errors: fail('page: ' + e)
     g.close()
 print('JOIN CHECK ' + ('FAILED' if FAILS else 'OK'))
