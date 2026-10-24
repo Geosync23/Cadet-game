@@ -1,0 +1,36 @@
+@tradition garden-picnic
+// Garden picnic (FX14, 0.92.5 item 16; SW1's pitch, the user's yes 2026-10-24): Saturday lunch in paper parcels, eaten in
+// the garden just before the garden hour. On the garden's EXISTING benches and the beds' edges, no new seats (the user's
+// rule: extra meal seats only inside the mess). The crew have no lunch in the sim, so it isn't a meal: for you, a parcel
+// fills you up (its join, section 18's slot). Behind WEEKEND_ON.
+k: 466
+title: Garden picnic
+when: weekly saturday
+at: 13:00-13:50
+min: 20
+jitter: 10
+where: 3 room Hydroponics garden: garden, ids ^3-garden-
+where: 3 pool garden-tend
+where: 3 pool @stretch-garden
+hold: 1
+who: cruz-tove always, garden-lover 50%, lingers-at-meals 50%, juniors 25%, everyone 8%
+anim: talk
+host: cruz-tove
+from: brennan
+
+== mail
+- Picnic in the garden tomorrow at one. Lunch is in parcels at the servery. Benches are by the tree. Mind the beds.
+
+== ask
+- Picnic in the garden at one? Brennan's doing parcels.
+- Lunch under the big tree today. Grab a parcel.
+
+== here
+- Mind the beds. The basil has feelings.   #funny
+- Swap you half my parcel for your apple.
+
+== thanks
+- You take a paper parcel and eat lunch on a bench under the big tree, someone lying on their back looking up into the leaves.
+
+== chatter
+- Garden picnic tomorrow. Brennan wraps the parcels like presents.

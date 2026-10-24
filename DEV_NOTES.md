@@ -2009,6 +2009,10 @@ Phase 1: the player only. The rec deck builder wires these to the rooms' places;
 - **The auditorium's show (0.84.8, RB2):** `recShow(null | 'film' | 'talk' | 'allhands' | 'talent')`, called by RA's traditions engine; looks only (house lights while you're in the auditorium, the screen, the stage pools). See the 0.84.8 row.
 - **The stage (0.84.9, RB2):** crew moves `perform { act: 'sing' | 'juggle' | 'piano' | 'bow', len? }` and `address {}`; poses `sing`, `juggle` (balls by `recCrewBalls`), `bow`, `address`. Spots in the 0.84.9 row.
 
+### The weekend traditions (FX14, p925-weekend, behind WEEKEND_ON; 0.92.5 item 16)
+
+`WEEKEND_ON` (section 13; `#weekend` previews) and `WEEKEND_TRADS` (the ids): section 18's loader skips their baked .trad files when off, so the game is identical. Each tradition is a .trad file in content/traditions (rules and stand-in words, baked by content_gen.py) and a join in `TRAD_JOIN` (section 18's slot). Built: T1 (Saturday run, Every song, Night owls' cocoa, the Sunday story, Gerald clinic) and T2 (Garden picnic: not a meal, the crew have no lunch; your parcel fills you). Next: Bread day, the jigsaw, decor, the birthday hour (FX12). Plan and how-to: plans/handover-fx14.md.
+
 ## The rec deck's crew (section 14, RA, 0.83.x)
 
 Brief: `plans/brief-recdeck.md` (claude/lead-pillar1), seat RA; plan v5 section 9. Everything waits for `REC_DECK`.

@@ -1,0 +1,33 @@
+@tradition sunday-story
+// The Sunday story (FX14, 0.92.5 item 16; SW1's pitch): a bedtime story for grown-ups. After his last round of the decks
+// on Sunday, Chief Holt reads one chapter of a long adventure book in the junior common room, doing the voices, badly.
+// Behind WEEKEND_ON. The chapters themselves are a writing job (SW1): a few to start.
+k: 464
+title: The Sunday story
+when: weekly sunday
+at: 22:15-22:55
+min: 25
+jitter: 5
+where: 4 pool common-room
+hold: 1
+who: holt always, night-owl 50%, juniors 45%, common-room 40%, everyone 8%
+anim: holt read, everyone none
+host: holt
+from: holt
+
+== mail
+- Chapter nine tomorrow at 22:15. The common room. Be on time. I don't recap.
+
+== ask
+- The Sunday story later? Holt's doing the pirate voice again.   #funny
+- Story time tonight in the common room. Don't tell anyone you're coming for the voices.
+
+== here
+- Shh. He's getting to the storm.
+- That's not what a parrot sounds like. Don't tell him.   #funny
+
+== thanks
+- You settle on a beanbag while Chief Holt reads the next chapter, doing all the voices, badly. Nobody admits they love it.
+
+== chatter
+- Did you hear what happened in the story last night? I'll tell you at breakfast.
