@@ -200,8 +200,11 @@ with sync_playwright() as pw:
     check(not [r for r in seat if r[0] >= 1012 and r[1] == 'recSeat:do'], '#17 ... and get up with everyone once it\'s over')
     # RV11's case: your seat taken before you sit, you're moved one along, and still stay till the end
     h.ev("(() => { skipTo(11 * 1440 + 962); goToDeck(7, null); return 1; })()"); h.step(200)
-    taken = h.ev("(() => { const a = DECK_CREW.find(x => x.settled && x.spot && /^7-seat-/.test(x.spot.id)); if (!a) return null; actStart('recSeat', a.spot.id, { pose: 'sit', title: 'Seats' }); recSeatHold(); return a.spot.id; })()")
-    check(bool(taken), '#17 (setup) a seat someone is already in, at Day 12\'s address (%s)' % taken)
+    taken = h.ev("""(() => { const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); if (pl.length < 2) return null;
+      const id = pl[0].id; actStart('recSeat', id, { pose: 'sit', title: 'Seats' }); if (typeof recSeatHold === 'function') recSeatHold();
+      DECK_CREW.push({ goalId: id, p: { id: 'stub' } }); try { actBegin(); } finally { DECK_CREW.pop(); }   // someone got there first, the moment you arrive
+      return ACT && ACT.o.moved && ACT.placeId !== id ? ACT.placeId : null; })()""")
+    check(bool(taken), '#17 (setup) your seat taken as you arrive: moved one along (%s)' % taken)
     mv = []
     while h.ev("SHIP.time.min") < 1016:
         h.step(30); mv.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null, !!(ACT && ACT.o && ACT.o.moved)])")))
