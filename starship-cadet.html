@@ -39812,9 +39812,19 @@ function evStay(p, d, e) {
   const st = e.ev.stay, len = Math.min(e.to - e.from, st[0] + Math.round((st[1] - st[0]) * schedU(p.seed + e.ev.k, d, 1035)));
   const from = e.from + Math.round((e.to - e.from - len) * schedU(p.seed + e.ev.k, d, 1036)); return [from, from + len];
 }
+// toBed (FX9, 0.92.5 item 16; the shared rule for late traditions, FX12's late piano too): a tradition with toBed: n
+// (minutes) takes someone whose bedtime falls inside it, from its start, leaving 20 minutes before their bed (eventFree's
+// own margin), if that gives them at least n minutes there; otherwise free as usual. -> [from, to] (minutes from midnight)
+// or null. Pure: the frame of the day only
+function tradToBed(p, d, e) {
+  const ev = e.ev; if (!ev.toBed) return null;
+  const F = schedFrame(p, d), to = Math.min(e.to, F.bed - 20);
+  return to < e.to && to - e.from >= ev.toBed && eventFree(p, d, e.from, to, ev.wake) ? [e.from, to] : null;
+}
 function evArrive(p, d, e) {
   const ev = e.ev;
   if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, e))) return null;
+  if (ev.toBed && tradToBed(p, d, e)) return e.from;    // a late one: they come, and leave in time for bed (tradToBed)
   const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
@@ -39854,6 +39864,7 @@ function eventPlan(p, d) {
     const anim = ev.anim(p, d) || null;
     let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
     if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
+    if (ev.toBed) { const tb = tradToBed(p, d, e); if (tb) to = Math.min(to, tb[1]); }   // a late one: off 20 minutes before their bed (FX9)
     if (ev.lead) from = ev.lead(p, d, from, e);            // set off ahead, so they're seated by the start (the Captain's Friday address, 18f)
     const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
@@ -41638,6 +41649,7 @@ if (WEEKEND_ON) {
   SAVE_EXTRA.push(sv => { if (SHIP.weekend.loaf != null) sv.weekend = { loaf: SHIP.weekend.loaf }; });
   onSim('newGame', () => { SHIP.weekend = { loaf: null }; });
   tjActs();                                              // the weekend joins' activities (FX14's and these): made after they're added
+  for (const id of ['night-owls-cocoa', 'sunday-story']) { const t = SHIP_TRADITIONS.find(x => x.id === id); if (t) t.toBed = 20; }   // FX9: the late ones take people whose bedtime falls in them (tradToBed)
   onSim('tradition', x => {
     if (!x || !x.you) return;
     if (x.id === 'bread-day') SHIP.weekend.loaf = x.day;   // your loaf, for Monday
