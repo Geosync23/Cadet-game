@@ -124,3 +124,13 @@ Base claude/integration 3866c8f3 (0.92.3). Lead 34 (session_019RdVfeRPRiJpHGjKuj
   OK (near: heads-up with end 11:03, machine shop, "Making it safe with Ines starts at 09:51"; far: none); planted k1 (no
   end<=start return: always warns) FAIL; 0.92.3 has no heads-up text at all (line fails there). cadet_test 0.92.3 vs fix
   ALL IDENTICAL; check_fast OK. Section 15b small edit: sign-off given.
+
+## FX14 sim bay (claude/rec-simbay), Lead 34's ask ~16:55 UTC
+Base 3866c8f3. All behind SIM_BAY (#simbay / ?simbay); tested on copies with `const SIM_BAY = true;`.
+- S1-S4 8ee61c90 (game 85e62d4d...): room split (S cols 28-31, booth b 32-33; 7-booth-1 at col 32 stays), doors, hatch,
+  booth machines moved (ids kept), simBayDress/simBayKit (pods, screens with a small shader, poster, bench, shelf), recSim
+  (15 min, leisure +20, queue on the bench), simpod machines (sys 'rec' like the other 13 rec machines; parts bearing/lamp).
+  Off: cadet_test vs 0.92.3 ALL IDENTICAL, check_fast OK. On: deck_check OK (Deck 7 lift view 170 -> 171 calls),
+  interactions_check OK with the sim part, day_check 2 OK. Planted (screens never play + queue never needed) running.
+- S5 35398d43: sim-pilot habit (Raman always; else only those with no rec habit, key 1035); schedBuild 'sim' kind with
+  simPlanShut. No new check line yet -> asked. Nit: REC_HABIT_TEXT "rec dec" (table never read).
