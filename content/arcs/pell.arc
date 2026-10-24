@@ -81,7 +81,7 @@ halloran-emeka: Oh, that wants biscuits. I'd say that wants a lot of biscuits.
 * Sit down before your knees go. I'll pour.   flavour:practical mem:pour
   pell: Knees. Yes. They were fine for nine minutes and now they've gone. Cheers. Two sugars. Three.
 calder: Sign the card on my desk tomorrow. Today, tea.
-pell: Certified. Me. Somebody hold my mug. My hands have started shaking now it's over.   [laugh]
+pell: Certified. Me. Somebody fill my mug. Then fill it again. Then point me at the biscuits.   [laugh]
 
 == beat 8
 // QUIET ENDING for beat 7: plays only if beat 7 was missed (it still happened: certified, staying)

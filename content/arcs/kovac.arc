@@ -76,7 +76,7 @@ cruz-tove: Mm. Hello. Busy, Fridays. Lots of people going... up. Mm.
 // IF flag:kovac.liftjob: them: Here it comes. Brake shoes, four. Guide rollers, twelve. I tightened every one. I know where they all are.
 them: Doors. Okay. Okay.   [sigh]
 them: Four, please.   [nod]
-cruz-tove: Mm. We're going to Seven.
+cruz-tove: Mm. We're going to the rec deck.
 them: I know. I just wanted to say it. You said it, your first night. I've been practising.   [laugh]
 cruz-tove: Lovely lift.
 // IF keane-davi is there: keane-davi: Lovely lift.
@@ -91,7 +91,7 @@ them: Very brave, all three.
   them: Don't push it. After the address. Maybe after the address.   [laugh]
 * Same time next Friday? A standing order.   flavour:practical mem:friday
   them: Fridays. The lift club rides on Fridays. Um. Cruz is nodding. I think that's a yes.
-cruz-tove: Mm. Seven. That's us. Mind the... is there a gap? There's no gap. Good.
+cruz-tove: Mm. Rec deck. That's us. Mind the... is there a gap? There's no gap. Good.
 
 == beat 5
 // QUIET ENDING for beat 4: plays only if beat 4 was missed (they still rode up together)
