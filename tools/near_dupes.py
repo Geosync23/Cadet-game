@@ -16,11 +16,13 @@ def text(l):
         return m.group(2) if m else None
     m=re.match(r'^\s*(?:\+\s*)?(?:[a-z-]+):\s*(.*)',l)
     if m and not re.match(r'^(tone|tier|gapDays|duty|where|when|hint|mem|flag|mail|keepsake|learn|metDays|who|crisis)\b',l): return m.group(1)
+    m=re.match(r'^-\s+(.*?)(?:\s{2,}#\w+)*\s*$',l)
+    if m: return m.group(1)
     m=re.match(r'^\*\s*(.*?)\s{2,}flavour',l)
     if m: return m.group(1)
     if l.startswith('hint:'): return l[5:]
     return None
-def norm(s): return re.sub(r'\[.*?\]','',re.sub(r'\s+',' ',s)).strip().lower().rstrip('.!?')
+def norm(s): return re.sub(r'#\w+','',re.sub(r'\[.*?\]','',re.sub(r'\s+',' ',s))).strip().lower().rstrip('.!?')
 corpus={}
 for root,_,fs in os.walk('content'):
     for x in fs:
