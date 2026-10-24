@@ -250,6 +250,16 @@ with sync_playwright() as pw:
     p = g.ev(f"({PAPER})({{ normal: false }})"); print('  end', p['end'], 'lowest', p['lo'], 'highest', p['hi'])
     check(all(0 <= p['lo'][k] and p['hi'][k] <= 100 for k in p['lo']), 'neglect: a need left 0-100')
     check(p['end']['fitness'] < 25 and p['end']['hunger'] == 0, 'neglect: fitness and hunger should be low')
+    # 0.92.3 (the user's notes 3, 4, 5, 18; FX9): one neglected day off from 100, 16 hours awake then 8 asleep, nothing done
+    nd = g.ev("""(() => { const n = SHIP.player.needs, r = x => Math.round(x * 10) / 10; for (const k of NEED_KEYS) n[k] = 100;
+      needsDrain(16 * 60, false); const day = { fitness: r(100 - n.fitness), social: r(100 - n.social), leisure: r(100 - n.leisure) };
+      for (const k of NEED_KEYS) n[k] = 100; needsDrain(8 * 60, true); day.hunger = r(100 - n.hunger);
+      for (const k of NEED_KEYS) n[k] = 100; needsDrain(16 * 60, false); needsDrain(8 * 60, true); day.fitnessDay = r(100 - n.fitness); day.socialDay = r(100 - n.social); return day; })()""")
+    print('  a neglected day: lost', nd)
+    check(24 <= nd['fitnessDay'] <= 27, f"fitness should fall about 25 a day (a workout most days), not {nd['fitnessDay']}")
+    check(74 <= nd['socialDay'] <= 78, f"social should fall about 76 a day, not {nd['socialDay']}")
+    check(36 <= nd['leisure'] <= 40, f"leisure should fall about 38 over a day off, not {nd['leisure']}")
+    check(46 <= nd['hunger'] <= 50, f"hunger should fall about 48 over an 8-hour sleep (you wake hungry), not {nd['hunger']}")
 
     print('The speed rule:')
     sp = g.ev(r"""(() => { const n = SHIP.player.needs, out = {};
