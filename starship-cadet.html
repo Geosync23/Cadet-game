@@ -618,7 +618,7 @@ const REC_SHOWS = {
   film: { dim: .62, scr: 1, pools: [0, 0, 0] }, talk: { dim: .3, scr: 0, pools: [1, .25, 0] },
   allhands: { dim: .28, scr: 0, pools: [1, .5, 0] }, talent: { dim: .5, scr: 0, pools: [.45, 1, .8] },
 };
-const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null, ring: null, mic: null };
+const REC_SHOW = { state: null, dim: 0, scr: 0, piv: null, pools: null, ring: null, mic: null, piano: null };
 const deckLabel = n => +n === 7 ? 'R' : String(n);
 const deckWord = n => +n === 7 ? 'Rec deck' : 'Deck ' + n;
 const deckIn = n => +n === 7 ? 'the rec deck' : 'Deck ' + n;   // 0.84.2 (lead 18): a deck's name mid-sentence ("on the rec deck"); deckWord for labels and signs
@@ -1353,8 +1353,8 @@ const KIT = {
     const f = o.fab || M.tealFab, w = o.w || 2;          // 0.27.44: the seat ends .12 ahead of centre (was .425), so knees reach its front; d unchanged
     box(w, .3, .54, M.slateDark, 0, .15, -.155, g);
     box(w - .3, .14, .41, f, 0, .37, -.085, g);
-    box(w, .5, .2, f, 0, .55, -.32, g);
-    for (const sd of [-1, 1]) box(.16, .55, .555, f, sd * (w / 2 - .08), .4, -.1475, g);
+    box(w - .01, .51, .2, f, 0, .545, -.32, g);              // 0.92.5 (the user's item 7, flicker): no face shared with the base or the arms
+    for (const sd of [-1, 1]) box(.17, .55, .565, f, sd * (w / 2 - .075), .4, -.1475, g);   // the arms a centimetre proud, out and back
     soft(M.mustard, -w * .28, .58, -.12, .2, .16, .07, g).rotation.z = .2;
     return { w, d: .85 };
   },
@@ -1362,8 +1362,8 @@ const KIT = {
     const f = o.fab || M.plum;                            // 0.27.44: the seat ends .125 ahead of centre (was .41), so knees reach its front; d unchanged
     box(.86, .3, .53, M.slateDark, 0, .15, -.145, g);
     box(.56, .14, .395, f, 0, .37, -.0725, g);
-    box(.86, .52, .2, f, 0, .55, -.31, g);
-    for (const sd of [-1, 1]) box(.15, .52, .54, f, sd * .355, .41, -.14, g);
+    box(.85, .52, .2, f, 0, .55, -.3125, g);                // 0.92.5 (the user's item 7, flicker): no face shared with the base or the arms
+    for (const sd of [-1, 1]) box(.16, .52, .55, f, sd * .36, .41, -.1425, g);
     return { w: .86, d: .82 };
   },
   coffeeTable(g) {
@@ -2122,8 +2122,8 @@ const KIT = {
     for (const sd of [-1, 1]) {
       box(.5, .42, 1.4, LNG.wood, sd * .7, .21, .05, g);
       box(.46, .12, 1.36, f, sd * .7, .48, .05, g);
-      box(.14, 1.25, 1.4, f, sd * .9, .66, .05, g);
-      box(.16, .06, 1.42, LNG.wood, sd * .9, 1.31, .05, g);
+      box(.14, 1.25, 1.42, f, sd * .9, .66, .05, g);         // 0.92.5 (the user's item 7, flicker): a little longer than the bench, so their ends aren't one plane
+      box(.16, .06, 1.44, LNG.wood, sd * .9, 1.31, .05, g);
     }
     box(.86, .05, 1.1, LNG.wood, 0, .74, .1, g); cyl(.05, .05, .7, M.metal, 0, .37, .1, g, 10); box(.5, .03, .5, M.slateDark, 0, .015, .1, g);
     cyl(.05, .045, .09, MESS.white, -.15, .8, .2, g, 12); cyl(.04, .04, .14, LNG.bottles[o.k || 0], .2, .84, -.05, g, 10);
@@ -8916,8 +8916,9 @@ DECKS[7] = {
     { const ms = place('A', 'micStand', 8.95, 9.6, 'e', { it: IT('Microphone', 'A mic stand at centre stage. Talent night\'s first act always adjusts it, and the second puts it back.') });   // 0.84.9: perform's mic (the music room's kit)
       ms.position.y = .55; mergeMeshes(ms); ms.traverse(m => { if (m.isMesh) m.userData.noMerge = true; }); REC_SHOW.mic = ms; ms.visible = REC_SHOW.state !== 'talk'; }   // 0.84.12: put aside for a talk (it stood in the ring)
     place('A', 'recLectern', 8.8, 7.3, 'e', { it: IT('Lectern', 'The Captain\'s lectern, with the Wren\'s crest on the front. The microphone is bent at exactly her height.') });
-    place('A', 'grandPiano', 9.0, 12.6, 's', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }).position.y = .55;
-    place('A', 'pianoBench', 9.0, 11.25, 's').position.y = .55;   // 0.84.9: talent night's pianist sits here (perform { act: 'piano' }); the piano turned side-on (was 9.4, 12.4 facing w: no room for a bench on the curve)
+    { const pg = place('A', 'grandPiano', 9.0, 12.6, 's', { it: IT('Grand piano', 'A black grand piano at stage left, lid propped. Someone keeps it tuned, and nobody admits to it.') }), pb = place('A', 'pianoBench', 9.0, 11.25, 's');
+      pg.position.y = pb.position.y = .55;
+      REC_SHOW.piano = [pg, pb]; for (const q of REC_SHOW.piano) { mergeMeshes(q); q.traverse(m => { if (m.isMesh) m.userData.noMerge = true; }); q.visible = REC_SHOW.state === 'talent'; } }   // 0.92.5 (the user's item 6): on stage only for talent night (it clipped the stage's other kit); its tiles stay blocked, so nobody's path changes   // 0.84.9: talent night's pianist sits here (perform { act: 'piano' }); the piano turned side-on (was 9.4, 12.4 facing w: no room for a bench on the curve)
     // the foyer: the REC DEC neon over the four doors, the deck's poster, a bench
     placeWall('f', 'recNeon', 'e', 2.0, { hitW: 2.4, it: IT('REC DEC', 'A curved pink neon over the auditorium\'s doors. The official sign, RECREATION DECK, was too long to fit.') });
     placeWall('f', 'recPoster', 'n', 2.5, { it: IT('Poster', 'THE REC DEC: pool, rivers, climbing wall, float room, Lightdisc. Open 06:00 to midnight.') });
@@ -56612,6 +56613,7 @@ function recPoolsSet() {                                 // each pool's colour f
   a.needsUpdate = true; m.visible = !!S && S.pools.some(x => x > 0);
   if (REC_SHOW.ring) REC_SHOW.ring.visible = REC_SHOW.state === 'talk';   // 0.84.12: the talk's chairs and stool; the mic put aside
   if (REC_SHOW.mic) REC_SHOW.mic.visible = REC_SHOW.state !== 'talk';
+  if (REC_SHOW.piano) for (const q of REC_SHOW.piano) q.visible = REC_SHOW.state === 'talent';   // 0.92.5: the piano and its bench, talent night only
 }
 const _recFilm = [col('#3a5b8c'), col('#c98a4a'), col('#5c8f6a'), col('#d9d2c4')], _recCloth = col('#e8e6df');   // the film's light on the screen: a slow drift through a few scenes' colours
 function recShowTick(dt, t) {
