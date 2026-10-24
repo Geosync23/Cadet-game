@@ -1,0 +1,387 @@
+<title>Wren Weekend Traditions</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; a timeline strip for each day (existing in grey, new in the day's colour); one card per new tradition; the answers form at the end. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --sat: #2f6f9e; --satSoft: #dbe9f4; --sun: #b0631c; --sunSoft: #f6e4d2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sun); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--sat); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--sun); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+/* the day strips */
+.strip-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px 8px; }
+.strip { position: relative; min-width: 760px; font-size: 11.5px; }
+.hours { position: relative; height: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hours span { position: absolute; transform: translateX(-50%); }
+.lane { position: relative; height: 34px; margin-bottom: 6px; border-radius: 6px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 18 - 1px), var(--line) calc(100% / 18 - 1px) calc(100% / 18)); }
+.lane-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2px 0 3px; }
+.blk { position: absolute; top: 3px; bottom: 3px; border-radius: 5px; padding: 2px 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 28px; font-weight: 700; }
+.blk.old { background: var(--old); color: var(--oldInk); }
+.blk.some { background: var(--some); color: var(--oldInk); border: 1px dashed var(--muted); }
+.blk.new-sat { background: var(--sat); color: var(--surface); }
+.blk.new-sun { background: var(--sun); color: var(--surface); }
+.blk.bday { background: transparent; border: 2px dotted var(--flag); color: var(--flag); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); }
+.key i { display: inline-block; width: 14px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* tradition cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.sat { border-top: 4px solid var(--sat); }
+.card.sun { border-top: 4px solid var(--sun); }
+.card header { display: grid; gap: 4px; }
+.when { font: 700 13px var(--mono); color: var(--muted); }
+.card dl { display: grid; grid-template-columns: 92px 1fr; gap: 6px 12px; margin: 0; font-size: 14.5px; }
+.card dt { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.card dd { margin: 0; min-width: 0; }
+.size { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.flagnote { font-size: 14px; color: var(--flag); }
+.mail { font-style: italic; color: var(--muted); }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 600px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* answers */
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--sat); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">Patch 0.92.5 · item 16 · pitch · SW1 · 2026-10-24</span>
+    <h1>A full weekend on the Wren</h1>
+    <p class="lead">You asked for traditions to fill the weekend, so that Saturday and Sunday have something going on all day. This page proposes nine new ones (eight, plus one optional) that slot into the gaps the current week leaves. Nothing here is built. Answer each one at the bottom: yes now, later, or no.</p>
+  </header>
+
+  <section class="facts" aria-label="At a glance">
+    <div class="fact"><b>New traditions</b>8 core + 1 optional, 4 or 5 on each day</div>
+    <div class="fact"><b>Rooms</b>All in rooms the Wren already has. One needs your OK on a rule (the garden picnic)</div>
+    <div class="fact"><b>Birthdays</b>None of the new ones runs within an hour of a birthday party (20:15-21:10)</div>
+    <div class="fact"><b>Busy rule kept</b>Never more than two at once, never two in one room</div>
+  </section>
+
+  <section>
+    <h2>Where the gaps are today</h2>
+    <p>The weekend already has a good spine: the Saturday long breakfast, the garden hour, the Tiles ladder, film night and the observatory; on Sunday, the slow stretch, the swap meet, Winner Stays On on the rec deck, the reading corner, the long table and the Lap of the Wren. What's missing:</p>
+    <ul>
+      <li><b>Saturday late morning</b> (09:30-14:00) has nothing except the Sowing morning once a season.</li>
+      <li><b>Saturday early evening</b> (16:30-20:00) is just dinner.</li>
+      <li><b>Saturday late night</b>: the observatory ends at 22:35, and then the ship goes to bed.</li>
+      <li><b>Sunday early</b> (before 08:00) and <b>Sunday early afternoon</b> (12:30-16:00) have only Winner Stays On, which is down on the rec deck.</li>
+      <li><b>Sunday late night</b>: nothing after the Lap of the Wren ends at 21:15.</li>
+    </ul>
+    <p>The strips below show both days from 06:00 to midnight. Grey is what runs every week, dashed is what runs some weeks, and colour is new.</p>
+  </section>
+
+  <section aria-label="Saturday timeline">
+    <h3>Saturday</h3>
+    <div class="strip-wrap"><div class="strip" id="strip-sat"></div></div>
+  </section>
+  <section aria-label="Sunday timeline">
+    <h3>Sunday</h3>
+    <div class="strip-wrap"><div class="strip" id="strip-sun"></div></div>
+    <div class="key">
+      <span><i style="background:var(--old)"></i>Already every week</span>
+      <span><i style="background:var(--some);border:1px dashed var(--muted)"></i>Already, some weeks</span>
+      <span><i style="background:var(--sat)"></i>New on Saturday</span>
+      <span><i style="background:var(--sun)"></i>New on Sunday</span>
+      <span><i style="border:2px dotted var(--flag)"></i>A birthday party, when there is one, with its hour of space each side</span>
+    </div>
+  </section>
+
+  <section>
+    <h2>Saturday</h2>
+    <div class="cards">
+      <article class="card sat">
+        <header><span class="when">SAT 07:00-07:40 · every other week · optional</span><h3>Saturday run</h3></header>
+        <p>Dr. Nandakumar has started running before breakfast and tells everyone to try it. Every other Saturday she leads three easy laps of the promenade before the long breakfast opens. Nobody is timed. Commander Vance times everyone anyway.</p>
+        <dl>
+          <dt>Place</dt><dd>Promenade, Deck 3 (the route the Lap of the Wren already uses)</dd>
+          <dt>Who</dt><dd>Nandakumar always; runners and gym regulars about half; Vance most weeks; anyone else now and then. About 8-12.</dd>
+          <dt>You</dt><dd>Run the laps with them (a walking pace counts). Breakfast after, at the long breakfast.</dd>
+          <dt>You see</dt><dd>A small group jogging past the big windows; a chalk "3 laps" sign at the lift end.</dd>
+          <dt>Mail</dt><dd class="mail">"Saturday run tomorrow at seven. Three laps of the promenade, any speed. Then breakfast. Then water." (Nandakumar)</dd>
+          <dt>Build</dt><dd><span class="size">Small to medium</span> It uses the walking-gathering kind the Lap of the Wren already has; the jog is a faster walk.</dd>
+        </dl>
+      </article>
+
+      <article class="card sat">
+        <header><span class="when">SAT 10:00-11:30 · weekly</span><h3>Mend-it morning</h3></header>
+        <p>Pell sets out a mat and his screw tin on the big table in the junior common room, and people bring him anything small that's broken: a torch, a clock, a lamp, Ivo's hairdryer again. You can sit with him and fix things too.</p>
+        <dl>
+          <dt>Place</dt><dd>Junior common room, Deck 4</dd>
+          <dt>Who</dt><dd>Pell always; Works juniors about a third; people who "made" things half; anyone now and then. About 6-10, coming and going.</dd>
+          <dt>You</dt><dd>Sit and help. Each half hour there you get a "you fixed someone's..." line and a little Works standing, the same small amount a favour gives.</dd>
+          <dt>You see</dt><dd>A cloth mat covered in screws, a desk lamp, a short queue of people holding broken things.</dd>
+          <dt>Mail</dt><dd class="mail">"Mend-it morning tomorrow, ten till half eleven, common room. Bring your broken things. I'll bring the screw tin and the good lamp." (Pell)</dd>
+          <dt>Build</dt><dd><span class="size">Small to medium</span> A trad file and a mat-and-lamp decor. The "help" lines can be words only at first.</dd>
+          <dd class="flagnote" style="grid-column:1/-1">Note: in Pell's close-friend talk he dreams of "a repair corner in the common room". If you say yes, that talk gets reworded so it's about how the morning started, not a wish.</dd>
+        </dl>
+      </article>
+
+      <article class="card sat">
+        <header><span class="when">SAT 13:00-13:50 · weekly</span><h3>Garden picnic</h3></header>
+        <p>Brennan's galley packs Saturday lunch in paper parcels. People take one from the servery and eat it in the garden on rugs under the big tree, just before the garden hour.</p>
+        <dl>
+          <dt>Place</dt><dd>Garden, Deck 3 (straight after the Sowing morning on its Saturdays; ends before the garden hour at 14:00)</dd>
+          <dt>Who</dt><dd>Garden lovers most; people who linger at meals; juniors; Cruz always. About 15-25.</dd>
+          <dt>You</dt><dd>Take a parcel and sit on a rug. It's your lunch, like any meal tradition.</dd>
+          <dt>You see</dt><dd>Checked rugs on the grass, paper parcels, someone lying on their back looking up into the tree.</dd>
+          <dt>Mail</dt><dd class="mail">"Picnic in the garden tomorrow at one. Lunch is in parcels at the servery. Rugs are by the tree. Mind the beds." (Chef Brennan)</dd>
+          <dt>Build</dt><dd><span class="size">Medium</span> A meal tradition outside the mess, rug props and new places to sit on them.</dd>
+          <dd class="flagnote" style="grid-column:1/-1">Needs your OK: your rule from 2026-10-17 says extra meal seats only appear inside the mess (no trestle table on the promenade). Rugs in the garden would be an exception. The other way to do it: no new seats, people take their parcel to the garden's existing benches and the edge of the beds.</dd>
+        </dl>
+      </article>
+
+      <article class="card sat">
+        <header><span class="when">SAT 17:00-17:50 · weekly</span><h3>Every song</h3></header>
+        <p>Five people aboard say they know every song in the record cabinet, and they don't agree on the words. Every Saturday before dinner they sing through the cabinet in the music room, one record at a time, arguing about the second verse. Anyone can join in.</p>
+        <dl>
+          <dt>Place</dt><dd>Music room, Deck 4</dd>
+          <dt>Who</dt><dd>Zeke Torres, Wen Takahashi, Olu Farouk, Lars Achterberg and Tamsin Haddad always; musicians and music lovers about half; anyone now and then. About 10-14.</dd>
+          <dt>You</dt><dd>Sing along. Now and then you're asked which words are right: three choices, none wrong, and the room takes sides.</dd>
+          <dt>You see</dt><dd>The record cabinet open, a record on, five people singing slightly different words at once.</dd>
+          <dt>Mail</dt><dd class="mail">"Every song, tomorrow at five, the music room. This week: the lighthouse one. I'm right about the second verse. Come and tell Takahashi." (Zeke)</dd>
+          <dt>Build</dt><dd><span class="size">Small</span> A trad file using the music room's places. The "which words?" choice is a short meeting, also small.</dd>
+        </dl>
+      </article>
+
+      <article class="card sat">
+        <header><span class="when">SAT 22:30-23:30 · weekly</span><h3>Night owls' cocoa</h3></header>
+        <p>For the people who aren't ready for bed after film night and the observatory. Davi Keane, off the night shift on Saturdays and wide awake as always, makes a big pot of cocoa in the bow lounge with the lights down low.</p>
+        <dl>
+          <dt>Place</dt><dd>Bow lounge, Deck 3 (free on Saturday nights; Tap night is Friday)</dd>
+          <dt>Who</dt><dd>Keane always; night owls most; film-night goers about a quarter; anyone now and then. About 8-12.</dd>
+          <dt>You</dt><dd>Sit with a mug. It gives social, and a little energy cost for staying up.</dd>
+          <dt>You see</dt><dd>The bow lounge's curved windows full of stars, low lamps, a big cocoa pot on the bar.</dd>
+          <dt>Mail</dt><dd class="mail">"Night owls' cocoa tomorrow from half ten, bow lounge. Lights low, cocoa high. Pyjamas welcome." (Davi Keane)</dd>
+          <dt>Build</dt><dd><span class="size">Small</span> A trad file using the lounge's places, plus a cocoa-pot decor.</dd>
+        </dl>
+      </article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Sunday</h2>
+    <div class="cards">
+      <article class="card sun">
+        <header><span class="when">SUN 07:00-07:50 · weekly</span><h3>Bread day</h3></header>
+        <p>Already a line in the game: Zeke tells you on your first night that "Sunday's bread day; she lets juniors knead, if you're early." This makes it real. Brennan opens the galley early on Sundays and anyone who turns up kneads a loaf for the week's bread. (Chief Calder kneads too, very quietly. Only close friends find out.)</p>
+        <dl>
+          <dt>Place</dt><dd>Galley, Deck 3 (the working galley behind the servery)</dd>
+          <dt>Who</dt><dd>Brennan always; galley crew; early risers; juniors; Calder most weeks. About 6-10.</dd>
+          <dt>You</dt><dd>Knead a loaf. Your loaf turns up in Monday's breakfast basket ("{me}'s loaf" on a card).</dd>
+          <dt>You see</dt><dd>Flour on the galley counters, a row of tins, the ovens warming. The mess smells of bread by eight.</dd>
+          <dt>Mail</dt><dd class="mail">"Bread day tomorrow at seven, in the galley. Clean hands, rolled sleeves. You knead, I bake, and Monday's toast is yours." (Chef Brennan)</dd>
+          <dt>Build</dt><dd><span class="size">Medium</span> New kneading places at the galley counters, flour decor, and the Monday card.</dd>
+        </dl>
+      </article>
+
+      <article class="card sun">
+        <header><span class="when">SUN 13:00-15:30 · weekly</span><h3>The big jigsaw</h3></header>
+        <p>A huge jigsaw of the Wren sits on the table in the Observation room on Deck 1 all Sunday afternoon. People drift in and out and add a few pieces. Commander Vance always does the edges first. The picture fills in week by week, and when it's done a new one starts.</p>
+        <dl>
+          <dt>Place</dt><dd>Observation room, Deck 1</dd>
+          <dt>Who</dt><dd>Vance always; quiet-corner people and puzzlers most; anyone now and then. About 6-10 at a time, coming and going.</dd>
+          <dt>You</dt><dd>Add pieces (about 20 minutes). It counts as your puzzles hobby. You see how far the picture has got.</dd>
+          <dt>You see</dt><dd>A long table with the puzzle half done, its box lid propped up, a little dish of loose pieces.</dd>
+          <dt>Mail</dt><dd class="mail">"The jigsaw is out tomorrow from one, Observation room. Edges are done. Edges are always done first. That is not negotiable." (Commander Vance)</dd>
+          <dt>Build</dt><dd><span class="size">Medium</span> with a still picture. <span class="size">Large</span> if the picture really fills in week by week and the save remembers it.</dd>
+        </dl>
+      </article>
+
+      <article class="card sun">
+        <header><span class="when">SUN 14:30-15:15 · every other week</span><h3>Gerald clinic</h3></header>
+        <p>Every cactus on the Wren is called Gerald, and they all came from Tove Cruz's cuttings. Every other Sunday Cruz holds a clinic in the garden: bring your Gerald for a look-over, a repot or a little water, and take home a new one if you haven't got one.</p>
+        <dl>
+          <dt>Place</dt><dd>Garden, Deck 3 (the potting bench end)</dd>
+          <dt>Who</dt><dd>Cruz always; the Gerald keepers (Janssen, Esposito, Alvarez, Walsh) always; gardeners half; anyone now and then. About 8-12.</dd>
+          <dt>You</dt><dd>Get your own Gerald the first time you go: a little cactus on your shelf. After that you bring it along.</dd>
+          <dt>You see</dt><dd>A row of small cacti in mismatched pots on the bench, Cruz murmuring to them.</dd>
+          <dt>Mail</dt><dd class="mail">"Gerald clinic tomorrow at half two. Bring your Gerald. Mm. Or come and get one. They're very easy. Mostly." (Tove Cruz)</dd>
+          <dt>Build</dt><dd><span class="size">Small</span> A trad file and cactus decor. <span class="size">Medium</span> if your Gerald becomes a shelf item you keep.</dd>
+        </dl>
+      </article>
+
+      <article class="card sun">
+        <header><span class="when">SUN 22:15-22:55 · weekly</span><h3>The Sunday story</h3></header>
+        <p>A bedtime story for grown-ups. Chief Holt reads one chapter of a long, old adventure book to whoever comes to the junior common room, with the lights low. He does the voices, badly. Nobody admits they come for the voices.</p>
+        <dl>
+          <dt>Place</dt><dd>Junior common room, Deck 4</dd>
+          <dt>Who</dt><dd>Holt always; juniors about a third; the book circle lot; night owls. About 10-15.</dd>
+          <dt>You</dt><dd>Listen, then go to bed. Miss a week and someone tells you what happened at breakfast.</dd>
+          <dt>You see</dt><dd>Holt in the big chair with the book, everyone else on beanbags and the floor.</dd>
+          <dt>Mail</dt><dd class="mail">"Chapter nine tomorrow at 22:15. The common room. Be on time. I don't recap." (Chief Holt)</dd>
+          <dt>Build</dt><dd><span class="size">Small</span> A trad file using the common room's places. The story itself is a writing job: a few lines per chapter, about a year of chapters.</dd>
+        </dl>
+      </article>
+    </div>
+    <p class="flagnote">The Sunday story runs at 22:15, not straight after the Lap of the Wren (21:15), so it keeps an hour clear of a 20:15 birthday party, as your new rule asks.</p>
+  </section>
+
+  <section>
+    <h2>All nine at a glance</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Tradition</th><th>When</th><th>Place</th><th>How often</th><th>Size</th><th>Hours from a birthday</th></tr></thead>
+      <tbody>
+        <tr><td>Saturday run (optional)</td><td class="n">Sat 07:00-07:40</td><td>Promenade</td><td>Every other week</td><td>Small-medium</td><td class="n">12+ h</td></tr>
+        <tr><td>Mend-it morning</td><td class="n">Sat 10:00-11:30</td><td>Junior common room</td><td>Weekly</td><td>Small-medium</td><td class="n">8+ h</td></tr>
+        <tr><td>Garden picnic</td><td class="n">Sat 13:00-13:50</td><td>Garden</td><td>Weekly</td><td>Medium (needs your OK)</td><td class="n">6+ h</td></tr>
+        <tr><td>Every song</td><td class="n">Sat 17:00-17:50</td><td>Music room</td><td>Weekly</td><td>Small</td><td class="n">2 h 25 m</td></tr>
+        <tr><td>Night owls' cocoa</td><td class="n">Sat 22:30-23:30</td><td>Bow lounge</td><td>Weekly</td><td>Small</td><td class="n">1 h 20 m</td></tr>
+        <tr><td>Bread day</td><td class="n">Sun 07:00-07:50</td><td>Galley</td><td>Weekly</td><td>Medium</td><td class="n">12+ h</td></tr>
+        <tr><td>The big jigsaw</td><td class="n">Sun 13:00-15:30</td><td>Observation room</td><td>Weekly</td><td>Medium or large</td><td class="n">4 h 45 m</td></tr>
+        <tr><td>Gerald clinic</td><td class="n">Sun 14:30-15:15</td><td>Garden</td><td>Every other week</td><td>Small</td><td class="n">5 h</td></tr>
+        <tr><td>The Sunday story</td><td class="n">Sun 22:15-22:55</td><td>Junior common room</td><td>Weekly</td><td>Small</td><td class="n">1 h 05 m</td></tr>
+      </tbody>
+    </table></div>
+    <p>Every one gets the usual tradition kit: Mail the evening before, a Calendar entry and reminder, an ask line and a "here" line from crew, and chatter the day after. All the crew named are on the roster. Head counts stay inside today's deck limits; none of the new ones is on the rec deck.</p>
+  </section>
+
+  <form id="answers" novalidate>
+    <h2>Your answers</h2>
+    <p class="status">Pick one for each tradition. Notes are optional.</p>
+    <div id="rows"></div>
+    <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px">
+      <legend style="font-weight:700;margin-bottom:6px;padding:0"><label for="notes">Anything else? A tradition you'd like that isn't here?</label></legend>
+      <textarea id="notes" name="notes" placeholder="Ideas, changes, times you'd move"></textarea>
+    </fieldset>
+    <button type="submit" id="save">Save my answers</button>
+    <p class="status" id="status" aria-live="polite">Loading any saved answers...</p>
+  </form>
+</div>
+
+<script>
+(() => {
+  // timelines: minutes from midnight; the strip runs 06:00-24:00
+  const T0 = 360, T1 = 1440, pct = m => ((m - T0) / (T1 - T0) * 100).toFixed(3) + '%';
+  const days = {
+    sat: { lanes: [
+      ['Every week', [[480, 570, 'Long breakfast', 'old'], [840, 900, 'Garden hour', 'old'], [900, 990, 'Tiles ladder', 'old'], [1200, 1335, 'Film night (rec deck)', 'old']]],
+      ['Every week, second', [[930, 990, 'Cook-along', 'old'], [1275, 1355, 'Observatory', 'old']]],
+      ['Some weeks', [[705, 760, 'Sowing (once a season)', 'some'], [1215, 1270, 'Birthday', 'bday']]],
+      ['New', [[420, 460, 'Run (optional)', 'new-sat'], [600, 690, 'Mend-it morning', 'new-sat'], [780, 830, 'Garden picnic', 'new-sat'], [1020, 1070, 'Every song', 'new-sat'], [1350, 1410, "Night owls' cocoa", 'new-sat']]],
+    ] },
+    sun: { lanes: [
+      ['Every week', [[480, 525, 'Slow stretch', 'old'], [630, 750, 'Swap meet', 'old'], [960, 1020, 'Reading corner', 'old'], [1080, 1140, 'Long table', 'old'], [1230, 1275, 'Lap of the Wren', 'old']]],
+      ['Every week, second', [[690, 990, 'Winner Stays On (rec deck)', 'old']]],
+      ['Some weeks', [[570, 690, 'Harvest / regatta', 'some'], [1170, 1290, 'Talent night', 'some']]],
+      ['Birthday', [[1215, 1270, 'Birthday', 'bday']]],
+      ['New', [[420, 470, 'Bread day', 'new-sun'], [780, 930, 'The big jigsaw', 'new-sun'], [870, 915, 'Gerald clinic', 'new-sun'], [1335, 1375, 'Sunday story', 'new-sun']]],
+    ] },
+  };
+  for (const [id, d] of Object.entries(days)) {
+    const root = document.getElementById('strip-' + id);
+    const hrs = document.createElement('div'); hrs.className = 'hours';
+    for (let h = 6; h <= 24; h += 2) { const s = document.createElement('span'); s.style.left = pct(h * 60); s.textContent = String(h % 24).padStart(2, '0') + ':00'; hrs.appendChild(s); }
+    root.appendChild(hrs);
+    for (const [label, blocks] of d.lanes) {
+      const l = document.createElement('div'); l.className = 'lane-label'; l.textContent = label; root.appendChild(l);
+      const lane = document.createElement('div'); lane.className = 'lane';
+      for (const [a, b, name, kind] of blocks) {
+        const e = document.createElement('div'); e.className = 'blk ' + kind;
+        e.style.left = pct(a); e.style.width = ((b - a) / (T1 - T0) * 100).toFixed(3) + '%';
+        e.title = name + ' ' + [a, b].map(m => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0')).join('-');
+        e.textContent = name; lane.appendChild(e);
+      }
+      root.appendChild(lane);
+    }
+  }
+
+  // answers, kept in the page's own store at answers/user
+  const items = [
+    ['satRun', 'Saturday run (optional)'], ['mendIt', 'Mend-it morning'], ['picnic', 'Garden picnic'],
+    ['everySong', 'Every song'], ['nightOwls', "Night owls' cocoa"], ['breadDay', 'Bread day'],
+    ['jigsaw', 'The big jigsaw'], ['gerald', 'Gerald clinic'], ['sundayStory', 'The Sunday story'],
+  ];
+  const opts = [['yes', 'Yes, now'], ['later', 'Later'], ['no', 'No']];
+  const rows = document.getElementById('rows');
+  for (const [k, name] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional): a time, a host, a change';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved. The team will read your answers from here.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
