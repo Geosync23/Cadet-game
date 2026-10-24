@@ -16747,6 +16747,7 @@ function clockFirstTick() {
   if (d < 1 || d > CLOCK_FIRST.days + 1 || DIALOGUE) return;
   const due = clockRmDue(now), want = !!due && due.want === 'in' && m >= CAREER.clockIn && d <= CLOCK_FIRST.days;
   if (CLOCK_FIRST.tip) clockFirstDrop(want && CLOCK_FIRST.tip === d ? 'career.clock.' + d : null);
+  if (!(due && due.want === 'in') && CLOCK_FIRST.d === d && IX_GOAL && IX_GOAL.trk === 'clock:in') { if (typeof trkDone === 'function') trkDone(IX_GOAL); else clearGoal(); }   // punched in: its arrow goes at once (not at the next minute's clockRemindTick)
   if (!want) return;
   let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
   if (inBay && CLOCK_FIRST.d !== d) {
