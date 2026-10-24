@@ -330,6 +330,12 @@ def part_p925(g):
     print(f'  your turn (the scanner), its job in your hands at 17:01: {do}')
     check(bool(do) and do['st0'] == 'do' and do['before'] and do['st'] == 'again' and not do['after'] and not do['mine'] and do['lapse'] >= 1 and (do['next'] or '').split(' ')[0] in ('watch', 'meet', 'do'),
           f'#15: an unfinished lesson ends at the shift\'s end: offered again, the teacher stops following, the job back on the board ({do})')
+    hd = g.ev(f"""(() => {{ ({M7_SETUP})('m7'); const W = SHIP.works, c = W.cur, j = SHIP.jobs.find(x => x.id === c.j); if (!c || !j) return null;
+      j.status = 'done'; j.doneBy = 'you'; c.st = 'held'; c.hold = true; const open = worksCaseOpen(c.j), p = ROSTER.find(x => x.id === c.by), t = (c.d - 1) * 1440 + dayShiftEnd(c.d) + 1;
+      const before = (e => e && e.mode)(worksEscort(p, t - 30)); setShipNow(t); trainTick(t);
+      return {{ open, before, cur: W.cur && W.cur.st, trained: W.tr.m7 !== undefined, after: (e => e && e.mode)(worksEscort(p, t + 1)) }}; }})()""")
+    print(f'  held (its job turned in, its case open) at 17:01: {hd}')
+    check(bool(hd) and hd['before'] == 'follow' and hd['trained'] and not hd['cur'] and not hd['after'], f'#15: a lesson held at the shift\'s end (job done, case open) is trained and the teacher goes ({hd})')
     wa = g.ev(f"(() => {{ ({M7_WATCH})('m7'); const c = SHIP.works.cur; if (c && c.st !== 'watch') {{ c.st = 'watch'; }} return ({P925_LAPSE})(false); }})()")
     print(f'  watching at 17:01: {wa}')
     check(bool(wa) and wa['st0'] == 'watch' and wa['st'] == 'again' and not wa['after'], f'#15: a lesson still at its watching ends at the shift\'s end, the teacher off ({wa})')

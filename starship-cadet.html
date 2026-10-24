@@ -48802,7 +48802,8 @@ const TRAIN_WATCH = 15;                                  // ship minutes watchin
 const TRAIN_PROMPT_DAY = 4;                              // (DS1, the user, patch 0.92.5 #11) from this day a lesson meets at 09:00 or 09:15 (the first few days as before)
 // (DS1, the user, patch 0.92.5 #15) a lesson not finished by the end of its day's shift ends there: the teacher says so and
 // goes back to their own plans (worksEscort follows only watch / do / held), a training job still in your hands goes back
-// to the board for the crew, and it's offered again on your next workday (ladderTick's 'again', as for a missed one)
+// to the board for the crew, and it's offered again on your next workday (ladderTick's 'again', as for a missed one). One
+// 'held' (its job turned in, its training case still open: 24g's m7) is trained there instead (worksEscortEnd)
 function trainShiftOver(c, now) {                         // (your turn's work already done: you can still turn it in)
   const j = c.st === 'do' && SHIP.jobs.find(x => x.id === c.j); if (j && j.workDone && j.claimedBy === 'you') return false;
   return worksDay(now) > c.d || now >= (c.d - 1) * 1440 + dayShiftEnd(c.d);
@@ -48909,7 +48910,8 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
-  if (/^(watch|do|held)$/.test(c.st) && c.id !== 't2' && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, which keeps its own hours)
+  if (c.st === 'held' && c.id !== 't2' && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
+  if (/^(watch|do)$/.test(c.st) && c.id !== 't2' && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, which keeps its own hours)
   if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
