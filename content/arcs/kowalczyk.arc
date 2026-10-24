@@ -98,7 +98,7 @@ mem: signal
 flag: kowalczyk.lit
 learn: Anja Kowalczyk's father kept a beacon on Marra Station. The morning it went dark, the Wren's running lights sent his pattern.
 mail: 5770 | From Marra | A letter from my father. Someone on Marra saw a ship's running lights go three long, one short at ten to six, and wrote to tell him. He says the buoy is very sensible. He says thank you. So do I. A.K.
-them: Twenty to six. Helm, hold her steady. No flourishes this morning.
+them: Rest night. Came up anyway. Twenty to six. Helm, hold her steady. No flourishes this morning.
 takahashi-wen: Comms are quiet. Nothing but static out there. Clean static.
 them: The running lights. This key here. Three long, one short. His pattern.
 // IF flag:kowalczyk.signal: them: You asked if the Wren could answer it. She can. So can you.
@@ -151,16 +151,16 @@ tier: acquaintance
 gapDays: 0
 where: calm
 when: beat:kowalczyk.3 time:morning !flag:kowalczyk.lit
-hint: Off watch. Walk me to the lift? Small news.
+hint: Morning. Walk me to the lift? Small news.
 mem: quietsignal
 mail: 5770 | From Marra | My father wrote. Someone on Marra saw a ship's lights go three long, one short at ten to six, and wrote to tell him. He's keeping the letter by the old lamp. A.K.
-them: Off watch. Six o'clock. I did it. Three long, one short, at ten to six.
+them: Six o'clock. Not even my night. I went up regardless. Three long, one short, at ten to six.
 them: The helm held her steady. Mensah came up off his rounds and just stood there. Nobody asked him to.
 them: Out into nothing. Nobody to see it. Didn't matter.
 ? choice
 * How do you feel?   flavour:listen mem:howfeel
   them: Quiet. The good sort.
-  + them: Quiet. The good sort, for once. Thank you for asking. And for sitting up with me at two.   [nod]
+  + them: Quiet. The good sort, for once. Thank you for asking. And for sitting up with me the other night.   [nod]
 * Did you log it?   flavour:cheer mem:logged
   them: A test of the running lights. Satisfactory. The Commander will never know.   [laugh]
 * I wish I'd been up there.   flavour:share mem:wish
