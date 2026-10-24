@@ -90,7 +90,7 @@ when: tier>=acquaintance
 them: Day off, I read old maintenance manuals. Other ships. Other people's faults.
 them: Some read novels. Same thing. Someone gets into trouble. Someone gets out.   #funny
 ask: What do you read, when you read?
-listen: What's the best one you've read?
+listen: Which one stayed with you?
   them: A freighter manual. Forty years of notes in the margins. Four different hands.   #warm
 share: Whatever's lying about the common room.
   them: That's how most good books get found. Leave one there when you're done.
@@ -252,7 +252,7 @@ topic: work
 them: People think I watch them through the glass. I watch the board. You're in front of it.
 them: Mostly. Sometimes I watch how someone holds a spanner. It tells me a lot.
 ask: Does it bother you, being watched while you work?
-listen: What does a spanner tell you?
+listen: What can you tell from a grip?
   them: Whether you trust it. Too tight, you don't. Too loose, you don't care. Yours is right.   #warm
 share: A bit. Less every week.
   them: Good. In a month you won't notice. That's when I stop watching.
@@ -317,7 +317,7 @@ when: tier>=colleague rep:known
 them: Tea. Strong, no sugar, the mug with nothing on it. Twenty-two years. I'm not changing.
 them: Halloran made it with sugar once. By mistake. He apologised for a week.   #funny
 ask: Is there something you've never changed, and won't?
-listen: Did you drink it?
+listen: And you drank it anyway?
   them: All of it. You don't waste tea. Or an apology.   #warm
 share: How I take my tea, too.
   them: Good. Some things should stay put. Tea's one. Torque settings are another.
