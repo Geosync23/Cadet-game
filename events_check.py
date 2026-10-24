@@ -990,5 +990,19 @@ with sync_playwright() as pw:
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
+# 13. Cook-along in the galley (0.92.5 item 19, the user's: "Cook along tradition should be in the kitchen"): on a Saturday
+# while it's on, everyone at it is at a 3-cookalong place in the galley (room K), cooking; none in the mess hall
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    print('== Cook-along: in the galley')
+    ca = g.ev(r"""(() => { goToDeck(3); let d = 2; while (d < 30 && !eventsOn(d).some(e => e.id === 'cook-along')) d++;
+      const e = eventsOn(d).find(e => e.id === 'cook-along'); setShipNow((d - 1) * 1440 + e.from + 20); deckCrewFill(); for (let k = 0; k < 120; k++) updateDeckCrew(1 / 30);
+      const at = DECK_CREW.filter(a => a.spot && a.spot.id.startsWith('3-cookalong-'));
+      return { day: d, at: at.map(a => [a.p.id, a.spot.id, roomAt(...a.here()), a.settled, a.pose]), places: deckDef.places.filter(p => p.id.startsWith('3-cookalong-')).map(p => p.room + ' ' + p.anim) }; })()""")
+    print('  Day', ca['day'], '| at it:', ca['at'], '| its places:', sorted(set(ca['places'])))
+    if not ca['at'] or any(x[2] != 'K' for x in ca['at']) or set(ca['places']) != {'K cook'}: fail(f"Cook-along: not in the galley (room K, cooking): {ca}")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
 print('EVENTS CHECK OK' if ok else 'EVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)
