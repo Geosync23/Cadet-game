@@ -19,3 +19,16 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   at 3-galley-6 (38.5,6.8, prep) 0.18 m apart. Bread-4 has the same point (Sunday samples clear, but galley-6 is a bake
   station). -> FIXES NEEDED (sent ~23:20 UTC): move off galley stations; add a no-overlap line to part 13.
 - Depends on bbcea5cb's evTagId 'cook' (tag ev-cook-along-cook): not pickable alone (told BM16).
+
+## Later finds (~23:10-23:45 UTC)
+- Full events_check on the shipped tip (off, 56293048): FAILED. (1) events_check.py's own tagId lacks 'cook': Cook-along
+  "never happened"/"not on" Days 6, 20, 27. (2) Since T1: with the switch off, the content/traditions vs loaded check
+  flags the eight weekend files "not loaded" (16 FAILs). Sent to FX9/BM16/lead. Log /tmp/rv14/ev_tip.txt.
+- f18d18d5 (game 483625fb...): Sunday story chapters (sundayStoryTick, story.sunday.<week mod 4 + 1>, friHere room),
+  Every song 17:15, jigsaw host Raman (off Sat/Sun), SW1 df94ab2c merged.
+  day_check on: Day 6 OK; Day 7 FAILED (pell hops 0.77 tiles getting up from 3-mess-31 at 08:21). Off f18 and 0.92.4:
+  Day 7 OK -> weekend-caused; sent to FX9. food_check on (1 7): OK.
+- Plants through weekend_check (357ff7ac): skip line removed -> "switch off" FAIL; loaf not noted -> both loaf lines FAIL;
+  jigsaw mins ignored -> 20-minute lines FAIL; hobbyCount removed -> hobby line FAIL. RV13: second tjActs() removed -> FAIL.
+- FX9's next sha promises: events_check fixes, cookalong-3 moved + no-overlap line, Bread day on Cook-along spots,
+  host-stays rule (picnic), tradToBed attendance, Mensah hosts cocoa, SW1 c5f1fc7b/faac7054, Sunday story check, Day 7 fix.
