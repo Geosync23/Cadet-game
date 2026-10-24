@@ -37785,8 +37785,9 @@ function beamFloorTap(point) {                           // section 15's playerF
 // beam (or BEAM_WAIT minutes on, so it never stalls) and you're in the Works bay, its leader says the event's own lines
 // (the writer's join.<id>.explain if there are any, else its text.here), a bubble every BEAM_GAP ms; after the last, the
 // tip, the arrow and a tap on the beam. Till then a tap on the beam says they're gathering. Not saved: after a reload,
-// said again. Read every BEAM_LOOK ms (no R())
-const BEAM_CROWD = 5, BEAM_WAIT = 12, BEAM_GAP = 4200, BEAM_NEAR = 5, BEAM_LOOK = 500;
+// said again. Read every BEAM_LOOK ms (no R()). RV13: a late arrival must still sign before it ends (e.to): only as many
+// of the lines (the last ones: the hand-over stays) as end BEAM_SPARE ship minutes before it ends, and it opens then whatever is left
+const BEAM_CROWD = 5, BEAM_WAIT = 12, BEAM_GAP = 4200, BEAM_NEAR = 5, BEAM_LOOK = 500, BEAM_SPARE = 5;
 const BEAM_OPEN = { key: null, q: null, next: 0, look: 0, open: false };
 function beamReady() { return !!TJ_NOW && BEAM_OPEN.key === TJ_NOW.key && BEAM_OPEN.open; }
 function beamLines(e) {
@@ -37805,8 +37806,10 @@ function beamGather() {
     if (!inBay || !sp) return;
     const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= BEAM_NEAR && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
     if (at < BEAM_CROWD && m < e.from + BEAM_WAIT) return;
-    B.q = beamLines(e); B.next = simNow();
+    const L = beamLines(e), per = BEAM_GAP / 1000 * SHIP_RATE, k = Math.max(0, Math.floor((e.to - m - BEAM_SPARE) / per));   // ship minutes a line takes; how many fit
+    B.q = k ? L.slice(-k) : []; B.next = simNow();
   }
+  if ((shipNow() - (e.day - 1) * 1440) >= e.to - BEAM_SPARE) B.q.length = 0;   // running late (a dialogue held them): open now
   if (typeof DIALOGUE !== 'undefined' && DIALOGUE || simNow() < B.next) return;
   const text = B.q.shift();
   if (text) { const a = TJ_NOW.agent; if (a && a.h && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4); B.next = simNow() + BEAM_GAP; return; }

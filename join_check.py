@@ -101,6 +101,18 @@ with sync_playwright() as pw:
     if bm['goal'] != 'Tap the beam to paint your name' and not (bm['goal'] or '').lower().count('beam'): fail(f"the beam: no arrow to the beam once open: {bm}")
     if bm['joined0'] or bm['tr0'] or not bm['tap']: fail(f"the beam: tapping crew shouldn't paint; the beam's tap should: {bm}")
     if bm['tr'] != ['nameYours'] or bm['joined'] != ['name-on-the-beam@1'] or bm['free'] < 3 or bm['goalAfter']: fail(f"the beam: name up, joined, crowd breaks up: {bm}")
+    # RV13: a late arrival (in the bay at 17:32, 8 minutes before it ends) can still sign: fewer lines (the hand-over at least), then it opens in time
+    g.ev("""(() => { actEnd(true); clearGoal(); const d = 1, e = eventsOn(d).find(x => x.id === 'name-on-the-beam'); window.__le = e;
+      SHIP.traces.length = 0; SHIP.events.joined = []; BEAM_OPEN.key = null; setShipNow((d - 1) * 1440 + e.to - 8); deckCrewFill(); const sp = placeSpot('5-beam-4'); player.obj.position.set(sp.x, 0, sp.z); player.stop(); EV_MIN = -1; eventsTick(); window.__said = []; })()""")
+    for _ in range(80):
+        g.step(15)
+        if g.ev('beamReady() || shipNow() >= (__le.day - 1) * 1440 + __le.to'): break
+    late = g.ev("""(() => { const it = ITEMS.find(i => i.t === 'The beam'), p = it.hit.getWorldPosition(new THREE.Vector3()), ready = beamReady(), at = hhmm(shipNow() % 1440);
+      return { at, ready, inTime: ready && shipNow() <= (__le.day - 1) * 1440 + __le.to - 3, said: window.__said.length, tap: ready && PLAYER_TAPS.some(f => f(it, p, p)) }; })()""")   # inTime: 3 minutes to paint before it ends
+    g.step(400)
+    late['tr'] = g.ev("SHIP.traces.map(x => x.id)")
+    print('A late arrival at 17:32:', late)
+    if not late['ready'] or not late['inTime'] or not late['tap'] or late['tr'] != ['nameYours'] or late['said'] < 1: fail(f"the beam: arriving 8 minutes before the end you should still sign: {late}")
     # 0.92.3 item 23: your name right beside the painted row (it was the west slot, 1.3 m short of the first name)
     sl = g.ev("""(() => { const [sa, sy] = BEAM.slots[0], first = BEAM.along - BEAM.len / 2 + BEAM.clear / 2048 * BEAM.len, edge = sa + .6 - BEAM.gap * 1.2 / 256;
       const r = ROOM_BOX[BEAM.room], w = beamSlotWorld();
