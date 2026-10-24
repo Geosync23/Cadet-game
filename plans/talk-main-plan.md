@@ -26,6 +26,15 @@ Nandakumar, Zeke. (All already have 4 own talks each.)
   (name, rank, the ship) and welcomes you aboard; up to **4** `them:` lines (90 characters each), one `ask:` and the
   three replies. It counts as used only once you've answered; the generic hello isn't put in front of it.
 
+- **Strangers only get talks with no tier gate** (FX13): keep a good share fully ungated. Of the early talks, at
+  least **10 with no `when:` tier at all** (the Captain: at least 12), so a player who has only just met them still has
+  plenty.
+- **Their own card frames** (FX13: for main characters the card no longer uses the shared hello, filler and goodbye):
+  in the person's `content/lines/<crewId>.lines`, add `== talk.start` (5, two of them behind `? tier>=friend`),
+  `== talk.sit` (3), `== talk.filler` (6), `== talk.end` (5), `== talk.stop` (3), and `== talk.go.shift`,
+  `== talk.go.bed`, `== talk.go.trad` (2 each): about 28 lines, `- ` lines as in banks/talk.lines, in their voice.
+  Written after their talks, by the same writer. Without them the card opens with the talk and closes plainly.
+
 ## The format (agreed with FX13, 2026-10-24)
 
 The existing `.talk` grammar, in the person's own file `content/talkpack/<crewId>.talk`:
