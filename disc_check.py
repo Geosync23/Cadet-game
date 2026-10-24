@@ -134,5 +134,40 @@ with sync_playwright() as pw:
     for fps in (60, 30, 20):
         o = live(fps)
         check(o['same'] and abs(o['k'] - 2400) <= 3, '%d frames a second: %d steps in 40 s, the same game as on paper (%s)' % (fps, o['k'], o['score']))
+    # ---- 0.92.3 (FX11): the pool's camera (#17), the lockers tip (#16), the crew's games you can see (#25) ----
+    h = Game(pw, build, 390, 844)
+    h.ev("(() => { skipTo(1440 + 600); goToDeck(7, null); TIP_Q.length = 0; delete SHIP.device.tipsSeen['rec.change']; delete SHIP.device.tipsSeen.recChange; return 1; })()")
+    t1 = json.loads(h.ev("(() => { recTap({ t: 'Pool', x: '' }, null, null); return JSON.stringify({ q: TIP_Q.map(x => x.id), act: ACT && ACT.kind }); })()"))
+    t2 = json.loads(h.ev("(() => { actEnd(true); TIP_Q.length = 0; DEVICE_SKIN.tip(null); playerKit(null); recTap({ t: 'River', x: '' }, null, null); return JSON.stringify({ q: TIP_Q.map(x => x.id), old: !!SHIP.device.tipsSeen.recChange, act: ACT && ACT.kind }); })()"))
+    check(t1['q'] == ['rec.change'] and t1['act'] == 'recChange', '#16 your first swim: the lockers tip (rec.change) as you go to change (%s)' % t1)
+    check('rec.change' not in t2['q'] and not t2['old'] and t2['act'] == 'recChange', '#16 your first paddle after it: no tip again, and never the old recChange (%s)' % t2)
+    h.ev("(() => { actEnd(true); TIP_Q.length = 0; DEVICE_SKIN.tip(null); const c = recLocker(); player.obj.position.set(c.x, 0, c.z); playerKit('rec'); recStart('swim', 'Pool', null, null); return 1; })()")
+    gaps = []
+    for k in range(50):
+        h.step(15)
+        r = json.loads(h.ev("JSON.stringify({ ph: ACT && ACT.phase, k: ACT && ACT.kind, ax: ACT && ACT.x, az: ACT && ACT.z, tx: target.x, tz: target.z })"))
+        if r['k'] == 'recSwim' and r['ph'] == 'do' and r['ax'] is not None: gaps.append(((r['ax'] - r['tx']) ** 2 + (r['az'] - r['tz']) ** 2) ** .5)
+    check(len(gaps) > 20 and max(gaps) < .5, '#17 the camera swims with you: %d frames in the pool, the camera at most %.2f m from you' % (len(gaps), max(gaps) if gaps else -1))
+    h.ev("(() => { actEnd(true); playerKit(null); skipTo(1440 + 1040); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")
+    h.step(150)
+    SEE = "JSON.stringify({ crew: DECK_CREW.filter(a => a.settled && a.spot && /^7-disc/.test(a.spot.id)).map(a => [a.spot.id, +a.h.pos.x.toFixed(3), +a.h.pos.z.toFixed(3)]).sort(), disc: typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible ? [+LD_CV.m.position.x.toFixed(3), +LD_CV.m.position.z.toFixed(3)] : null })"
+    pair = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
+    both = all(len(x['crew']) == 2 for x in pair)
+    check(both, '#25 Day 2 17:22: two crew on the court\'s baselines (%s)' % pair[0]['crew'])
+    discs = [tuple(x['disc']) for x in pair if x['disc']]
+    moves = [len(set(tuple(x['crew'][i][1:]) for x in pair if len(x['crew']) == 2)) for i in (0, 1)]
+    check(len(discs) >= 6 and len(set(discs)) >= 5, '#25 their game: the disc in the air and moving (%d of 8 looks, %d places)' % (len(discs), len(set(discs))))
+    check(both and min(moves) >= 3, '#25 their game: both players move to meet it (%s places each)' % moves)
+    same = h.ev("typeof ldCrewRally === 'function' && [3.1, 9.7, 14.2, 22.5].every(t => JSON.stringify(ldCrewRally(12345, t, false)) === JSON.stringify(ldCrewRally(12345, t, false)))")
+    check(same, '#25 a pair at a moment plays the same rally twice')
+    h.ev("(() => { skipTo(1440 + 1155); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")
+    h.step(150)
+    solo = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
+    check(all(len(x['crew']) == 1 and x['crew'][0][0] == '7-disc-2' for x in solo) and sum(1 for x in solo if x['disc']) >= 6, '#25 Day 2 19:15: one alone at the stern practises, the disc in the air (%d of 8 looks)' % sum(1 for x in solo if x['disc']))
+    h.ev("(() => { const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - .6, 0, c.z); discAsk(recCourtWaiting()); return 1; })()"); s = wait_game(h); h.step(30)   # from your baseline (the walk from the lift works too, slower)
+    hid = h.ev("!!DISC.g && !(typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible)")
+    check(s['g'] and hid, '#25 during your own game the crew\'s disc is hidden')
+    check(not h.errors, '0.92.3 parts: no errors: ' + ' | '.join(h.errors[:5]))
+    h.close()
 print('ALL OK' if ok else 'FAILED')
 sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

@@ -16780,6 +16780,8 @@ function recTap(it, at, point) {
 }
 PLAYER_TAPS.push(recTap);
 // 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
+// the first swim or paddle: a green tip about changing at the lockers, once (0.92.3 #16, FX11; it replaces the tip 'recChange', id retired)
+const recChangeTip = () => { if (typeof tipShow === 'function') tipShow('rec.change', 'First swim or paddle? Change at the lockers first, in the changing rooms by the lift: any free locker, into rec kit, and a quick shower on the way back.'); };
 function recRoomIn(r) {
   if (r !== 'F' || !deckDef || deckDef.num !== 7 || ACT || !recOpen() || recEventShut()) return;
   recGo('float', null, 'Float room', 'A fifth of a g. The padding is soft underfoot.');
@@ -16796,7 +16798,7 @@ function recGo(kind, point, title, flavour) {
   }
   if (kind === 'unchange') { actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: null, after: 'You change back into your uniform.' }); return; }
   if ((kind === 'swim' || kind === 'kayak') && !recKitOn()) {   // the wet way: change first
-    if (typeof ixTip === 'function') ixTip('recChange', 'Swimming and kayaking: change first. You\'ll stop at the changing rooms by the lift.');
+    recChangeTip();
     REC.chain = { then: kind, title, flavour, point: point ? [point.x + OX, point.z + OZ] : null };
     actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: 'rec', after: 'You change into rec kit at a locker: teal, with a coral stripe.' });
     return;
@@ -16851,11 +16853,12 @@ function recStart(kind, title, flavour, p) {             // p: the tap in deck c
   if (kind === 'climb' && !recShut().belays) { toast('Climbing wall', worksText('rec.shut.belays', 'Both auto-belays are tagged out. Works are on it.')); return; }   // 0.84.4 (rec engineer B); 0.84.8 W3's key
   if (kind === 'climb' && REC_DECK && !recBelaysUsable()) { toast('Climbing wall', worksText('rec.shut.wall', 'One auto-belay\'s tagged out and the other one\'s route is taped off. No climbing till Works are done.')); return; }   // one tagged out, the other's route taped: no waiting for a turn that won't come (R7's note; RE20, 0.64.1)
   const water = { pool: .35, river: .36 };
+  if (kind === 'swim' || kind === 'kayak') recChangeTip();
   if (recQueue(kind, title, p)) return;
   if (kind === 'swim') {
     const free = recLanesFree(), lane = free.reduce((m, z) => p && Math.abs(z - p[1]) < Math.abs(m - p[1]) ? z : m, free.includes(REC_LANES[1]) ? REC_LANES[1] : free[0]);
     actStart('recSwim', null, { title, flavour, spot: recSpot([23, Math.min(4, Math.floor(lane))], 23.55, lane, Math.PI / 2, 'stand'),
-      move: { kind: 'swim', path: [[24.5, lane], [30.5, lane]], y: water.pool, lengths: 4 }, after: 'You slip in at the shallow end and start your lengths.' });
+      move: { kind: 'swim', path: [[24.5, lane], [30.5, lane]], y: water.pool, lengths: 4 }, follow: true, after: 'You slip in at the shallow end and start your lengths.' });   // follow: the camera swims with you (0.92.3 #17, FX11)
   } else if (kind === 'kayak') {
     actStart('recKayak', null, { title, flavour, spot: recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'),
       move: { kind: 'kayak', path: REC_LOOP, y: water.river, laps: 2 }, follow: true, after: 'You take a kayak from the dock and push off into the slow channel.' });
@@ -46403,8 +46406,8 @@ function ldPaper(o) {   // a whole game with no drawing (disc_check, and crew ga
 const LD_COURT = [10.5, 15.5];                           // the court's centre in deck tiles: game z runs along deck x (+ is the bow), game x across it (+ is deck -z)
 const ldWorld = (gx, gz) => ({ x: LD_COURT[0] + gz - OX, z: LD_COURT[1] - gx - OZ });
 DECKS[7].places.push(
-  { id: '7-disc-1', type: 'rec:disc', at: [16, 15], xy: [16.1, 15.5], face: 'w', pose: 'stand', room: 'C' },   // yours, at the bow end
-  { id: '7-disc-2', type: 'rec:disc', at: [4, 15], xy: [4.9, 15.5], face: 'e', pose: 'stand', room: 'C' });    // theirs, at the stern end
+  { id: '7-disc-1', type: 'rec:disc', at: [16, 15], xy: [16.1, 15.5], face: 'w', pose: 'stand', room: 'C', move: { kind: 'disc' } },   // yours, at the bow end; move: the crew's games you can watch (0.92.3 #25, ldCrewAt)
+  { id: '7-disc-2', type: 'rec:disc', at: [4, 15], xy: [4.9, 15.5], face: 'e', pose: 'stand', room: 'C', move: { kind: 'disc' } });    // theirs, at the stern end
 function discLoad(s) {   // save.disc, read defensively (saves from before 0.82 have none)
   const d = s && s.disc && typeof s.disc === 'object' ? s.disc : {}, n = k => Number.isFinite(d[k]) && d[k] >= 0 ? Math.floor(d[k]) : 0, vs = {}, relDay = {};
   if (d.vs && typeof d.vs === 'object') for (const k in d.vs) { const v = d.vs[k]; if (Array.isArray(v) && v.length === 2 && k.length < 40) vs[k] = [Math.max(0, v[0] | 0), Math.max(0, v[1] | 0)]; }
@@ -46779,6 +46782,62 @@ function discEvent(e) {
 }
 
 // ---- slot: Games engineer (section 23b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- crew games you can watch (0.92.3 #25, FX11). Two crew on the baselines (7-disc-1 and 7-disc-2, whose places carry
+// move { kind: 'disc' } for 8c's REC_CREW.disc) rally: the disc flies end to end with a slight curve, each sidesteps to
+// meet it and sends it back, and after a few shots someone misses and it sails out; a short pause, then a new serve, the
+// server taking turns. One alone on the stern baseline, waiting for a game, practises against the far end's field (the
+// disc comes back off it). Looks only: the frame clock, nothing saved, no R(); the same pair at the same moment plays the
+// same rally. One disc and its glow (2 draw calls), made the first time a crew game shows, hidden while you play.
+const LD_CV = { m: null, halo: null, n: 0, d: null, c: null };
+const LD_CPER = 15, LD_CGAP = 1.5;                      // one rally's seconds, the last of them the pause before the next serve (a long rally is a quick one)
+function ldCrewRally(seed, ct, solo) {                   // game space (section 23b's): { disc: { x, y, z, by } | null, p: [bow x, stern x], pose: [bow, stern] }
+  const r = Math.floor(ct / LD_CPER), u = ct - r * LD_CPER, h = k => recMix((seed * 7919 + r * 104729 + k * 31 + 7) | 0) / 4294967296;
+  let n = 5 + Math.floor(h(0) * 5); const srv = solo ? 1 : r % 2;   // shots 0..n-1 returned, shot n missed; alone, you serve and you miss
+  if (solo && (srv + n) % 2 === 1) n++;
+  const ts = (LD_CPER - LD_CGAP) / (n + 1);             // a shot's seconds: 1.2 to 2.2
+  const side = j => (srv + j) % 2, Z = s => s ? -LD_BASE : LD_BASE;   // who sends shot j (0 the bow); a side's baseline
+  const X = j => j <= 0 ? 0 : j === n + 1 ? (h(j) < .5 ? -1 : 1) * (LD_HX - .3) : (h(j) * 2 - 1) * (LD_HX - .6);   // where shot j is met (the missed one wide)
+  const ease = k => ss(Math.min(1, k / .85));
+  const at = (q, j, k) => {                              // a player's x during shot j, k of the way through it
+    if (side(j) === q) return L(X(j), X(j) * .5, k);     // just sent it: drift back toward the middle
+    const s = X(j - 1) * .5, e = X(j + 1);               // coming to meet it (the missed one: only partway)
+    return L(s, e, (j === n ? .45 : 1) * ease(k));
+  };
+  const j = Math.floor(u / ts), k = u / ts - j, out = { disc: null, p: [0, 0], pose: ['stand', 'stand'] };
+  if (j > n) {                                           // the pause: both back to the middle
+    const w = ss(Math.min(1, (u - (n + 1) * ts) / LD_CGAP));
+    for (const q of [0, 1]) out.p[q] = L(at(q, n, 1), 0, w);
+    return out;
+  }
+  for (const q of [0, 1]) {
+    out.p[q] = at(q, j, k);
+    out.pose[q] = side(j) === q && k < .22 ? 'punch' : side(j) !== q && Math.abs(at(q, j, Math.min(1, k + .1)) - out.p[q]) > .06 ? 'run' : 'stand';
+  }
+  const s = side(j), c = (h(j + 50) * 2 - 1) * .5, z1 = j === n ? Z(1 - s) * 1.2 : Z(1 - s);
+  out.disc = { x: L(X(j), X(j + 1), k) + c * Math.sin(Math.PI * k), z: L(Z(s), z1, k), y: .9 + .05 * Math.sin(Math.PI * k), by: s };
+  return out;
+}
+function ldCrewAt(a, o) {                                // 8c's REC_CREW.disc: a crew player on a baseline (o: world x, y, z), their pose; null: just stand
+  if (typeof DISC !== 'undefined' && DISC.g) return null;
+  const bow = a.spot.id === '7-disc-1', b = heldBy(bow ? '7-disc-2' : '7-disc-1'), pair = !!(b && b.settled && b.spot && b.spot.id === (bow ? '7-disc-2' : '7-disc-1'));
+  if (bow && !pair) return null;                         // alone at the bow end: waits (the planner puts a lone player at the stern)
+  const seed = pair ? idHash(bow ? a.p.id : b.p.id) * 31 + idHash(bow ? b.p.id : a.p.id) : idHash(a.p.id), q = bow ? 0 : 1;
+  const R = ldCrewRally(seed, clock.elapsedTime, !pair), w = ldWorld(R.p[q], q ? -LD_BASE : LD_BASE);
+  o.x = w.x; o.z = w.z; o.y = 0;
+  LD_CV.n++; if (q || !LD_CV.d) LD_CV.d = R.disc;        // the disc as the stern player sees it (the same rally either way)
+  return R.pose[q];
+}
+function ldCrewDisc() {                                  // after the crowd is posed (the main loop): the crew game's disc, hidden when there's none
+  const V = LD_CV, on = V.n > 0 && !!V.d && crowd.visible && !(typeof DISC !== 'undefined' && DISC.g);
+  if (!V.m && on) {
+    V.m = new THREE.Mesh(new THREE.CylinderGeometry(LD_R, LD_R, .05, 20), new THREE.MeshBasicMaterial({ color: col('#eaffff'), toneMapped: false }));
+    V.halo = new THREE.Sprite(new THREE.SpriteMaterial({ map: discGlow(false), color: col('#50e6ff'), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, toneMapped: false }));
+    V.halo.scale.setScalar(1.1); V.m.add(V.halo); V.m.raycast = V.halo.raycast = () => {}; V.m.userData.noShadow = true; V.c = [col('#50e6ff'), col('#ffa03c')]; scene.add(V.m);
+  }
+  if (V.m) V.m.visible = on;
+  if (on) { const w = ldWorld(V.d.x, V.d.z); V.m.position.set(w.x, V.d.y, w.z); V.m.rotation.y = clock.elapsedTime * 12; V.halo.material.color.copy(V.c[V.d.by]); }
+  V.n = 0; V.d = null;
+}
 // ---- end of slot: Games engineer ----
 
 // =====================================================================
@@ -54780,6 +54839,7 @@ const REC_CREW = {
     return act;
   },
   address() { return 'address'; },
+  disc(a, M, T, o) { return (typeof ldCrewAt === 'function' && ldCrewAt(a, o)) || 'stand'; },   // 0.92.3 #25 (FX11): a crew game of Lightdisc on the court, or practice alone (section 23b's slot)
   fan(a, M, T, o) {                                      // watching; every six seconds the room may cheer a point or groan a miss, each a moment late
     const ct = clock.elapsedTime - a.fs % 7 * .09, n = Math.floor(ct / 6), m = recMix(n * 7919 + 13) % 20, me = recMix(n * 31 + a.fs) % 10;
     const sat = a.spot.pose === 'sit', still = sat ? (M.slump ? 'sit:slump' : 'sit') : 'stand';
@@ -57276,6 +57336,7 @@ function loop() {
   crowd.update(dt, t);
   if (REC_CREW_ROPES) recCrewRopes();                    // 0.84.6: the crew's belay lines, on the posed bodies (8c)
   if (REC_JUGGLE.m || REC_JUGGLE.n) recCrewBalls();      // 0.84.9: a juggler's balls (8c)
+  if (LD_CV.m || LD_CV.n) ldCrewDisc();                  // 0.92.3 #25: the crew's Lightdisc disc (23b's slot)
   simTimers();                                           // section 13's simTimeout (0.28.50)
   }
   shadowStep();                                          // 0.27.33: the shadow stand-ins, a slice a frame after a deck change
