@@ -16752,7 +16752,7 @@ function clockFirstTick() {
   let inBay = false; try { inBay = deckDef.num === 5 && roomAt(...player.here()) === 'w'; } catch (e) { inBay = false; }
   if (inBay && CLOCK_FIRST.d !== d) {
     CLOCK_FIRST.d = d;
-    if (d === 1 && typeof tipSeen === 'function') tipSeen('career.clock');   // the career's own one-off bay tip: this one instead, after Zeke's line
+    if (typeof tipSeen === 'function') tipSeen('career.clock');   // the career's own one-off bay tip: this one instead (on Day 1 after Zeke's line; any day, so a Day 1 missed never doubles it, RV12)
     if (guideMode() !== 'off' && !(IX_GOAL && IX_GOAL.trk === 'clock:in')) setGoal(clockRmGoal('in'));
   }
   if (CLOCK_FIRST.d !== d || CLOCK_FIRST.tip === d) return;
