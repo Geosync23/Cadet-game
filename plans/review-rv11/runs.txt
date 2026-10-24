@@ -113,3 +113,29 @@ deck-p5 exit 0 250s | DECK CHECK OK
 ct-p5 exit 1 120s | DIFFERENCES FOUND
 pl-p5-piano exit 1 190s | DECK CHECK FAILED
 ev-p5 exit 0 528s | EVENTS CHECK OK
+ct-k1 exit 0 127s | ALL IDENTICAL
+pl-k1-cam exit 1 444s | FAILED
+disc-b3 exit 1 455s | FAILED
+pl-k1-hold exit 1 468s | FAILED
+disc-k1 exit 0 457s | ALL OK
+ev-k1 exit 0 890s | EVENTS CHECK OK
+talk-b3 exit 1 62s | TALK CHECK FAILED
+talk-t13 exit 0 61s | TALK CHECK OK
+pl-t13-nomark exit 1 58s | TALK CHECK FAILED
+pl-t13-noclear exit 1 64s | TALK CHECK FAILED
+pl-k1-hands exit 1 420s | FAILED
+pl-k1-ld exit 1 423s | FAILED
+pl-t13-nosave exit 1 66s | TALK CHECK FAILED
+talk-t13m exit 0 45s | TALK CHECK OK
+ct-t13 exit 0 87s | ALL IDENTICAL
+social-t13 exit 0 38s | SOCIAL CHECK OK
+lines-t13 exit 0 4s | lines_check: PASS (0 errors, 49 warnings)
+ct-t13m exit 0 113s | ALL IDENTICAL
+cf-t13 exit 0 353s | QUICK CHECK OK in 353 s
+disc-k1g exit 1 516s | FAILED
+disc-k2 exit 1 430s | FAILED
+ct-k2 exit 0 100s | ALL IDENTICAL
+cf-k2 exit 0 402s | QUICK CHECK OK in 402 s
+disc-k3 exit 0 570s | ALL OK
+disc-k3-old exit 1 574s | FAILED
+ix-k2 exit 0 3039s | INTERACTIONS CHECK OK

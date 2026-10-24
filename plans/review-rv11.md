@@ -101,9 +101,15 @@ From claude/integration 3866c8f3 (0.92.3).
 
 | Fix | Items | Branch, commit | Verdict |
 |---|---|---|---|
-| FX9 | 6 (piano only for talent night), 7 (booth/sofa/armchair flicker) | claude/p925-fx9b 863d43d0 | PASS |
+| FX9 | 6 (piano only for talent night), 7 (booth/sofa/armchair flicker) | claude/p925-fx9b 863d43d0 (f67dd971 adds screenshots) | PASS |
+| FX13 | 5 (no repeat first-tap lines) | claude/p925-fx13 04a9385d | PASS |
+| FX11 | 2 kayak, 3 Lightdisc to 3, 14 auditorium camera, 17 seated for a show | claude/p925-fx11 23432122 | PASS (after a game fix and a test fix) |
 
 - deck_check's two new parts fail on 3866c8f3 and pass on the fix. Plants caught: booth backrest back to 1.40; armchair arms back to the old sizes; piano always visible.
 - A hidden piano takes no taps (pick uses isShown); floor taps ignore its rec:act place. Its tiles stay blocked on other nights.
 - check_fast and events_check OK. cadet_test differs only at Deck 4's lounge seats (crops viewed).
-- The screenshots FX9 named (plans/shots-0925-*.png) aren't in the commit.
+- The screenshots FX9 named were added in f67dd971.
+- FX13: talk_check (k) fails on 3866c8f3 (repeats at taps 3-7) and passes. Plants caught: no mark; no clear; not saved. The biggest pool is about 115 lines (the save allows 400). social, lines, check_fast OK; cadet_test ALL IDENTICAL.
+- FX11: from the diff, a seat taken by someone first restarted the sit without the show hold (you stood up mid-show). Fixed in 8b0347a8. k2_moved.py proves it: before, you stand at 16:33; after, you stay till 16:50.
+- FX11's first version of the new line was timing-dependent (it failed on the fix too); 23432122 uses a stub held for one synchronous actBegin. It fails on the old game (moved, up at 16:42) and passes on the fix.
+- FX11: every new line fails on 3866c8f3. Plants caught: hands swinging; camera off; hold off; win by 2. events, interactions, check_fast OK; cadet_test ALL IDENTICAL.
