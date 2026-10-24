@@ -71,6 +71,6 @@
 // worksText). Facts from section 21b: change at your wardrobe in Bunk 1; a change while grubby always takes a clean
 // outfit; a shower leaves the grime; either state makes you feel grubby sooner (one CLOTHES_DRAIN).
 == clothes.tip.yesterday
-- You're in yesterday's clothes, and people notice. Change at your wardrobe in Bunk 1: you'll stay fresh for longer.
+- You're in yesterday's clothes, and people notice. Change at your wardrobe in Bunk 1.
 == clothes.tip.grubby
-- Your uniform's grubby from the job. A shower won't fix it: change at your wardrobe in Bunk 1 for a clean one.
+- Your uniform's grubby. A shower won't fix it: change at your wardrobe in Bunk 1.
