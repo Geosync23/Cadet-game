@@ -316,3 +316,6 @@ sha256 **2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2** (BM1
 | day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 247 s |
 | arrows_d_check | **OK** | `arrows_d_check: OK`; 50 s |
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 26 s |
+| controller_check (every part but reach; taken from CR6, agreed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK; 1772 s |
+
+No FAIL on 0.92.4.
