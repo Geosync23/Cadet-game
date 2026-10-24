@@ -174,3 +174,9 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
   tjActs() fix (rerun after the weekend block), weekend_check.py, SW1's words. Not final (attendance gap for Night owls'
   cocoa / Sunday story, switch-on runs, host question open). Running weekend_check on the tip and with the second tjActs()
   removed. Full verdict on FX9's next sha.
+- weekend_check on 357ff7ac: FAILs only the known attendance gap (night-owls-cocoa, sunday-story: nobody at it). With the
+  weekend block's tjActs() removed: joins/activity lines FAIL for all seven, each tap-join "ends by itself and gives its
+  gain" FAILs (picnic hunger 0 -> 0), Bread day loaf and jigsaw 20-min lines FAIL. The new lines catch the T1+T2 bug.
+- FX9 on hosts: Lukas/Brennan lead from the galley by design; Zeke on Saturday shift to 17:01 (every-song 17:00); Vance works
+  Sundays (jigsaw); Keane/Holt bedtime (attendance gap); Tove refused by the picnic's place take() (FX9 digging). Zeke/Vance
+  decisions with the lead. Handover note written pre-emptively (plans/handover-rv13.md, cf2f59c6).
