@@ -10,7 +10,7 @@
 #   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew), their nameNew traces through a
 #   real save and reload; the Tiles ladder (0.92.5 item 20, the user: "the group should stand around the tiles table
 #   watching two people play and the player always has the choice to join in or watch"): on Day 6 its host is at the Tiles table
-#   by 15:02 and at 15:12 two crew sit at the Tiles station playing and at least three stand in the ring round it facing the board; a tap on Olu asks "Play the
+#   by 15:02 and at 15:15 two crew sit at the Tiles station playing and at least three stand in the ring round it facing the board; a tap on Olu asks "Play the
 #   next game" or "Watch"; playing, you sit at the board when the game ends and play the winner; after it the ladder goes
 #   on; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
@@ -153,7 +153,7 @@ with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
     g.ev("""(() => { const d = 6, e = eventsOn(d).find(x => x.id === 'tiles-ladder'); window.__le = e; goToDeck(3); actEnd(true); clearGoal(); SHIP.events.joined = [];
-      skipTo((d - 1) * 1440 + e.from + 2); deckCrewFill(); const sp = placeSpot('3-ladder-2') || placeSpot('3-tiles-1'); player.obj.position.set(sp.x, 0, sp.z - 1.6); player.stop(); EV_MIN = -1; eventsTick(); })()""")
+      skipTo((d - 1) * 1440 + e.from - 25); deckCrewFill(); const sp = placeSpot('3-ladder-2') || placeSpot('3-tiles-1'); player.obj.position.set(sp.x, 0, sp.z - 1.6); player.stop(); EV_MIN = -1; eventsTick(); })()""")
     LAD = r"""(() => { const st = ['3-tiles-1', '3-tiles-2'], ring = DECKS[3].places.filter(p => p.event === 'tiles-ladder').map(p => p.id), b = [placeSpot(st[0]), placeSpot(st[1])].filter(Boolean);
       const bx = b.length ? (b[0].x + b[1].x) / 2 : 0, bz = b.length ? (b[0].z + b[1].z) / 2 : 0, ang = d => Math.abs(Math.atan2(Math.sin(d), Math.cos(d)));
       const at = DECK_CREW.filter(a => a.p && a.settled && a.spot);
@@ -161,18 +161,18 @@ with sync_playwright() as pw:
       const ring2 = at.filter(a => ring.includes(a.spot.id)).map(a => [a.p.id, a.spot.id, +(ang(Math.atan2(bx - a.spot.x, bz - a.spot.z) - a.spot.face) * 180 / Math.PI).toFixed(0)]);
       const lounge = at.filter(a => /^3-lounge/.test(a.spot.id) && /tiles-ladder/.test((whereIs(a.p, shipNow()) || {}).tag || '')).map(a => a.p.id);
       return { t: hhmm(shipNow() % 1440), seated, ring: ring2, lounge, boards: dressingOn().includes('tilesNight') }; })()"""
-    host = g.ev("__le.ev.host")
+    host = g.ev("__le.ev.host")                       # from 14:35: the crew walk in as they would (their plans set off from 14:40)
     for _ in range(80):
         g.step(30)
         if g.ev("shipNow() >= (__le.day - 1) * 1440 + __le.from + 2"): break
     lr = g.ev(LAD)
     print('The Tiles ladder at', lr['t'], ':', lr)
     if not any(x[0] == host for x in lr['seated'] + lr['ring']): fail(f"the ladder: its host {host} should be at the Tiles table by the start (they set off ahead: tladLead): {lr}")
-    for _ in range(80):                                  # the others set off 15 minutes ahead when they're free (tladLead): the ring by 15:12
+    for _ in range(80):                                  # the others set off 15 minutes ahead when they're free (tladLead): the ring by 15:15, mid-game (a new pair sits down at 15:10)
         g.step(30)
-        if g.ev("shipNow() >= (__le.day - 1) * 1440 + __le.from + 12"): break
+        if g.ev("shipNow() >= (__le.day - 1) * 1440 + __le.from + 15"): break
     lr = g.ev(LAD)
-    if len(lr['seated']) != 2 or any(not x[2].startswith('sit') for x in lr['seated']): fail(f"the ladder: two crew should sit playing at the Tiles station at 15:12: {lr['seated']}")
+    if len(lr['seated']) != 2 or any(not x[2].startswith('sit') for x in lr['seated']): fail(f"the ladder: two crew should sit playing at the Tiles station at 15:15: {lr['seated']}")
     print('            at', lr['t'], ':', lr)
     facing = [x for x in lr['ring'] if x[2] <= 70]
     if len(facing) < 3: fail(f"the ladder: at least three should stand in the ring round the Tiles table facing the board: {lr['ring']}")
