@@ -17,7 +17,7 @@ WEEKDAYS = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 
 TONES = ('light', 'funny', 'warm', 'serious')
 TEXT_KINDS = ('mail', 'ask', 'here', 'thanks', 'chatter')
 KEY_ORDER = ('id', 'k', 'name', 'when', 'at', 'min', 'prio', 'jitter', 'early', 'where', 'hold', 'who', 'anim', 'host',
-             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'unflag', 'stay', 'quiet', 'text')
+             'from', 'cake', 'decor', 'ties', 'invite', 'trace', 'meal', 'flag', 'wake', 'afterShift', 'spare', 'venue', 'unflag', 'stay', 'quiet', 'toBed', 'text')
 
 
 class TradError(Exception):
@@ -230,6 +230,10 @@ def parse_field(tr, key, v, where):
         tr['afterShift'] = v.lower() in ('yes', 'true')
     elif key == 'cake':
         tr['cake'] = v.lower() in ('yes', 'true')
+    elif key == 'to-bed':                                  # 0.92.5 (FX12): someone whose bedtime falls in it still comes, and goes 20 minutes before bed
+        if v.lower() not in ('yes', 'true'):
+            raise TradError(f'{where}: to-bed is "yes"')
+        tr['toBed'] = True
     elif key == 'ties':
         parse_ties(v, where, tr.setdefault('ties', {}))
     elif key == 'invite':

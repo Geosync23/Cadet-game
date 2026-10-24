@@ -457,7 +457,8 @@ with sync_playwright() as pw:
         for (const x of t) if (t.filter(k => k.from <= x.from && x.from < k.to).length > 2) out.bad.push('day ' + d + ': more than two traditions at once at ' + x.from);
         for (const a of all) for (const b of all) if (a !== b && recOnly(a) && recOnly(b) && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
         for (const a of t) for (const b of t) if (a !== b && a.from < b.to && b.from < a.to && evRooms(a.ev).some(r => evRooms(b.ev).includes(r))) out.bad.push('day ' + d + ': ' + a.id + ' and ' + b.id + ' at once in one room');
-        if (d >= 1 && weekday(d) < 5 && t.length < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + t.length + ' tradition(s), not 2-3');
+        const bday = eventsOn(d).some(e => e.ev.when.birthday) ? 1 : 0;   // 0.92.5 (FX12): a birthday counts, as the weekly ones within an hour of it give way to it
+        if (d >= 1 && weekday(d) < 5 && t.length + bday < 2 && !eventOn(d)) out.bad.push('day ' + d + ' (a weekday) has ' + (t.length + bday) + ' tradition(s), not 2-3');
         if (EV_DROPPED.get(d)) out.dropped.push(d + ':' + EV_DROPPED.get(d).join('+'));
       }
       for (const d of [0, 1, 91, 92, 182, 183, 273, 274, 364, 365]) out.seasons.push(d + ':' + season(d) + ':' + seasonOf(d).week);
@@ -973,6 +974,70 @@ with sync_playwright() as pw:
         print('  picking again the same day, inside the window:', j, s4a, '| tray', s4[2])
         if not (j and s4a[0] == 'ixGarden' and s4a[2]): fail(f"Pick-your-own: the second pick wasn't inside the tradition ({j}, {s4a})")
         if s4[2]: fail(f"Pick-your-own: a second tray the same day ({s4[:5]})")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
+# 13. 0.92.5 (FX12, the user's playtest notes): (4) late piano: never two nights running, the Captain and a few others
+# really there; (9) a birthday an hour apart from the day's other traditions; (10) the birthday redone: the birthday
+# person at the head of the long table, the cake on it, a ring round them with bubbles (names, not ids; no line twice),
+# a tap on the cake: a slice in your hand, eaten as you go, once a party. A page of its own (the ship clock runs here)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== 0.92.5: late piano, birthdays')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    LP = g.ev("""(() => { const out = []; for (let d = 1; d <= 28; d++) { const e = eventsOn(d).find(e => e.id === 'late-piano'); if (!e) continue;
+      const goers = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id); out.push([d, weekday(d), goers.length, goers.includes('marrow')]); } return out; })()""")
+    print('  late piano (day, weekday, going, the Captain):', LP)
+    days = [x[0] for x in LP]
+    if not LP or any(b - a == 1 for a, b in zip(days, days[1:])): fail(f"late piano two nights running ({days})")
+    if any(x[2] < 4 for x in LP) or sum(1 for x in LP if x[3]) < len(LP) - 1: fail(f"late piano: fewer than 4 going, or the Captain missing more than once ({LP})")
+    BD = g.ev("""(() => { const out = []; for (let d = 1; d <= 120; d++) { const l = eventsOn(d), b = l.find(e => e.id === 'birthday'); if (!b) continue;
+      out.push([d, b.from, b.to, l.filter(e => e !== b && evIsTrad(e.ev) && !evRare(e.ev.when) && (e.ev.prio || 0) < 2 && !e.ev.meal && e.from < b.to + 60 && b.from - 60 < e.to).map(e => e.id)]); } return out; })()""")   # a weekly one (the rest never give way: their time is taken last)
+    print('  birthdays (day, from, to, a weekly tradition within the hour):', BD[:6], '...', len(BD))
+    if not BD or any(x[3] for x in BD): fail(f"a birthday within an hour of a weekly tradition: {[x for x in BD if x[3]]}")
+    d, fr = BD[0][0], BD[0][1]
+    P0 = g.ev(f"""(() => {{ const e = eventsOn({d}).find(e => e.id === 'birthday'), at = id => schedPeople().filter(p => planDay(p, {d}).some(s => evTagId(s.tag) === 'birthday' && s.placeId && s.placeId.startsWith(id)));
+      return [e.honorees.map(p => p.id), at('3-bday-head').map(p => p.id), at('3-bday-').length]; }})()""")
+    print(f'  Day {d}: birthday for', P0[0], '| at the head', P0[1], '| planned in the ring and the head', P0[2])
+    if not (P0[1] and P0[1][0] == P0[0][0] and P0[2] >= 6): fail(f"the birthday: its person not planned at the head, or the ring nearly empty ({P0})")
+    g.ev(f"skipTo(({d} - 1) * 1440 + {fr} - 25); goToDeck(3)")
+    g.ev("window.__bub = []; const _bs = bubbleSay; bubbleSay = (w, t, s) => { __bub.push(t); return _bs(w, t, s); }")
+    for k in range(200):
+        g.step(30)
+        if g.ev("shipNow() % 1440") > fr + 15: break
+    L = g.ev("""[dressingOn(), !!ITEMS.find(i => i.bdayCake), DECK_CREW.filter(a => a.p && a.settled && a.spot && a.spot.id === '3-bday-head').map(a => a.p.id),
+      DECK_CREW.filter(a => a.p && a.settled && a.spot && /^3-bday-\\d/.test(a.spot.id)).length, __bub.filter(t => /birthday|Thank|returns|Hip|wish|cake/i.test(t))]""")
+    print('  live:', L[:4], '| bubbles', L[4][:6])
+    if 'birthdayTable' not in L[0] or not L[1]: fail(f"the birthday: no cake on the table ({L[:2]})")
+    if L[2] != P0[0][:1] or L[3] < 4: fail(f"the birthday: its person not in the birthday chair, or fewer than 4 in the ring ({L[2]}, {L[3]})")
+    bl = L[4]
+    if len(bl) < 3 or len(set(bl)) < len(bl) or any('{' in t or '-' in t.split(',')[-1].strip(' .!').split(' ')[-1] for t in bl): fail(f"the birthday's bubbles: fewer than 3, a line twice, or an id for a name ({bl})")
+    g.ev("(() => { const s = placeSpot('3-bday-head') || placeSpot('3-longtable-4'), c = nearestOpen(s.x + 1.5, s.z + 2.5, player); player.obj.position.copy(cellPos(...c)); player.stop(); })()"); g.step(30)
+    TAP = "(() => { const it = ITEMS.find(i => i.bdayCake); if (!it) return false; it.hit.getWorldPosition(_wp); return playerTap(it, _wp.clone(), _wp.clone()); })()"
+    g.ev(TAP)
+    for k in range(60):
+        g.step(10)
+        if g.ev("!!SLICE"): break
+    g.step(10); S1 = g.ev("[!!SLICE, player.holding, document.getElementById('tx').textContent]")
+    g.ev(TAP); g.step(4)
+    S2 = g.ev("document.getElementById('tx').textContent")
+    for k in range(200):
+        g.step(30)
+        if not g.ev("!!SLICE"): break
+    S3 = g.ev("[!!SLICE, document.getElementById('tx').textContent]")
+    print('  the cake:', S1, '| again:', S2[:50], '| after:', S3)
+    if not (S1[0] and S1[1] == 'slice' and 'slice' in S1[2].lower()): fail(f"a tap on the cake: no slice in your hand ({S1})")
+    if 'had your slice' not in S2: fail(f"the cake: a second slice the same party ({S2})")
+    if S3[0] or 'finish your slice' not in S3[1]: fail(f"the slice wasn't eaten as you go ({S3})")
+    if days:
+        d = next((x for x in days if x >= BD[0][0]), days[-1])   # on or after the birthday's day: the ship clock only runs forward
+        g.ev(f"skipTo(({d} - 1) * 1440 + 21 * 60 + 20); goToDeck(4)")
+        for k in range(40):
+            g.step(60)
+            if g.ev("shipNow() % 1440") >= 1325: break
+        live = g.ev("DECK_CREW.filter(a => a.p && a.settled && roomAt(...cellAt(a.x, a.z)) === 'n').map(a => a.p.id)")
+        print(f"  Day {d} at 22:05, settled in the music room:", live)
+        if len(live) < 3 or 'marrow' not in live: fail(f"late piano, Day {d}: the Captain and at least 2 others not there by 22:05 ({live})")
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
