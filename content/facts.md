@@ -23,7 +23,8 @@ in section 20, the meetings in section 18) are canon too: never contradict a bea
   at the same hour every day. Veyli ships are rare visitors. Holt's distrust of the Veyli is voiced and argued with,
   never a slur, never a joke about them as a people.
 - **The shuttle:** the **Tern**, on its pad in the Deck 5 shuttle bay. You arrive on it.
-- **Other ships, by name:** the **Halcyon** (another survey ship; where transfers often go). Ask before adding more.
+- **Other ships, by name:** the **Halcyon** (another survey ship; where transfers often go), the **Heron** (another survey
+  ship: Theo Teague's next posting) and the **Pallas** (an old freighter, Saad Salo's ship before the Wren). Ask before adding more.
 - **Places people come from** (only these, for now): **Port Halloran** (a port city; rain; Brennan's old restaurant),
   **Hesper Dock** (a big station-port: market stalls, boats, rain), **Kesh**, **Lisk** (a place: "letters home to Lisk"), **Valo**, **Coriel**,
   **Marra Station** (rebuilt twice; Kim collects its old maps), **New Aberdeen**, **the Ostrander colonies**, **the Tevan belt**, and Tomas's **farm moon** (unnamed: "the farm moon", a sky that is always the same
@@ -467,11 +468,25 @@ introduces them), unless noted.
 | The six hours of Veyli silence (a mourning rite) | Holt, Saruth | from `beat:holt.3` |
 | Kovac's night stuck in a lift on Marra Station as a child (she counted 112 bolts) | Kovac | from `beat:kovac.3` |
 | Pell's mum's mending shop (kettles, radios, coats) and the scrapyard behind it | Pell | the shop from tier friend; her stiff hands from `beat:pell.6` |
-| Torres's father, an engine man for forty years, losing his memory | Torres | from `beat:torres.4` |
+| Torres's father, an engine man for forty years, **well, and retiring** next month (the user, 2026-10-22: no memory loss; was "losing his memory") | Torres | from `beat:torres.4` |
 | The Engine Specialist list (Torres passed over twice) | Torres | from `beat:torres.2` |
 | The posting near the farm moon on the transfer list | Tomas | from `beat:tomas.6` |
 | Rina hasn't sat the qualifying exam (not failed: hasn't sat) | Rina | that she studies: any time (roster); the putting off: from `beat:rina.5` |
 | Marrow's offer of a post at the Concord academy | Marrow | from `beat:marrow.5` |
+
+**Crew stories (CS1, the story lead, 2026-10-24; `content/arcs/outlines.md` "Crew stories").** Same rule: only in
+their story's lines, from the beat named.
+
+| What | Who it belongs to | When it can be mentioned |
+| --- | --- | --- |
+| **The Heron**, the survey ship Theo Teague transfers to on Day 21 (the roster's `transferTo`) | Theo | that he's going: from `beat:teague.3`; after he leaves, anyone who knew him |
+| Theo moved stations eight times before he was fourteen | Theo | from `beat:teague.3` |
+| Halloran's late dad, who died some years ago, and his notebook of 412 numbered jokes (Emeka is on 289; his mum is well, on Coriel) | Halloran | the jokes are his dad's: from `beat:halloran.1`; his dad's death: from `beat:halloran.3` |
+| **The Pallas**, the old freighter where Saad Salo once signed off a valve he hadn't checked (a deck went cold for a night; nobody was hurt) | Salo | from `beat:salo.3` |
+| **Hala**, Salo's little sister, accepted to the Service academy | Salo | from `beat:salo.1` |
+| Dev Raman's near miss docking at Lisk years ago (nobody hurt; his small daughter watched from the dock gallery) | Raman | from `beat:raman.3` |
+| **Asel**, Raman's elder daughter (seventeen), who wants to learn to fly | Raman | from `beat:raman.3` |
+| Kowalczyk's father's beacon at the edge of Marra Station (kept thirty years; switched off for a buoy, at ten to six one morning) | Kowalczyk | the beacon: from `beat:kowalczyk.2`; switching off: from `beat:kowalczyk.3` |
 
 ## 11. Small canon from the writers' batches (approved by the head writer)
 
