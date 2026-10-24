@@ -169,5 +169,34 @@ with sync_playwright() as pw:
     check(s['g'] and hid, '#25 during your own game the crew\'s disc is hidden')
     check(not h.errors, '0.92.3 parts: no errors: ' + ' | '.join(h.errors[:5]))
     h.close()
+    # ---- 0.92.5 (FX11): the kayak's stroke (#2), the camera in an auditorium seat (#14), staying seated for a show (#17) ----
+    h = Game(pw, build, 600, 600)
+    h.ev("(() => { skipTo(1440 + 600); goToDeck(7, null); SHIP.device.settings.tips = false; playerKit('rec'); const c = recSpot([11, 6], 11.4, 5.75, Math.PI, 'stand'); player.obj.position.set(c.x, 0, c.z); recStart('kayak', 'River', null, null); return 1; })()")
+    for k in range(40):
+        h.step(15)
+        if h.ev("ACT && ACT.phase === 'do' && !!ACT.mv && !!ACT.mv.go"): break
+    h.step(20)
+    KM = """(() => { const b = ACT.body, rig = b.rig, ch = rig.chest, pad = (b.propMeshes || []).find(m => m.parent === ch); rig.root.updateMatrixWorld(true);
+      const hs = rig.arms.map(a => { const v = a.hand.getWorldPosition(new THREE.Vector3()); ch.worldToLocal(v); return [v.x, v.y, v.z]; });
+      const e = [-.65, .65].map(x => pad.localToWorld(new THREE.Vector3(x, .1, .4))), d = e[1].clone().sub(e[0]);
+      return JSON.stringify({ hs, tilt: Math.asin(d.y / d.length()), low: Math.min(e[0].y, e[1].y), water: ACT.y }); })()"""
+    km = [json.loads(h.ev(KM)) for k in range(40) if h.step(2) is None]
+    slide = max(max(sum((a - b) ** 2 for a, b in zip(r['hs'][i], km[0]['hs'][i])) ** .5 for r in km) for i in (0, 1))
+    tilt = max(abs(r['tilt']) for r in km); low = min(r['low'] for r in km)
+    check(slide < .02, '#2 the kayak: your hands stay on the paddle through the stroke (they move %.3f m on the shaft)' % slide)
+    check(tilt > .42 and low < km[0]['water'] - .03, '#2 the kayak: each blade goes into the water (the paddle tilts to %.2f, its end %.2f m under the surface)' % (tilt, km[0]['water'] - low))
+    h.close()
+    h = Game(pw, build, 390, 844)
+    h.ev("(() => { skipTo(4 * 1440 + 958); goToDeck(7, null); SHIP.device.settings.tips = false; const pl = [...PLACE_OF.values()].filter(p => p.type === 'rec:seat' && p.room === 'A' && !p.ring && !heldBy(p.id)); const sp = placeSpot(pl[pl.length - 1].id); recGo('seat', { x: sp.x, z: sp.z }, 'Seats', ''); return 1; })()")
+    seat = []
+    while h.ev("SHIP.time.min") < 1016:
+        h.step(30); seat.append(json.loads(h.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind + ':' + ACT.phase : null, ACT && ACT.body ? Math.hypot(target.x - ACT.x, target.z - ACT.z) : null, ACT && ACT.body ? Math.hypot(target.x - (42.2 - OX), target.z - (9 - OZ)) : null, ACT && ACT.body ? Math.hypot(ACT.x - (42.2 - OX), ACT.z - (9 - OZ)) : null])")))
+    on = [r for r in seat if r[1] == 'recSeat:do']
+    cam = [r for r in on if r[0] > on[0][0] + 2] if on else []
+    check(bool(cam) and all(r[3] < r[4] - 2 and r[2] < r[4] for r in cam), '#14 seated in the auditorium, the camera centres between you and the stage (%s)' % ([[round(x, 1) for x in r[2:]] for r in cam[:1]]))
+    check(bool(on) and on[-1][0] >= 1009, '#17 seated for the Captain\'s address: you stay seated till it ends at 16:50 (last seated %s)' % (round(on[-1][0]) if on else None))
+    check(not [r for r in seat if r[0] >= 1012 and r[1] == 'recSeat:do'], '#17 ... and get up with everyone once it\'s over')
+    check(not h.errors, '0.92.5 parts: no errors: ' + ' | '.join(h.errors[:5]))
+    h.close()
 print('ALL OK' if ok else 'FAILED')
 sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)

@@ -13759,7 +13759,7 @@ function actBegin() {
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
-    A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+    A.def.need ? (A.o.showEnd ? 'You stay till it\'s over; walk away to leave.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // showEnd: a seat for an auditorium show (15r's recSeatHold, 0.92.5 #17)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
@@ -16857,6 +16857,24 @@ function recTap(it, at, point) {
 }
 PLAYER_TAPS.push(recTap);
 // 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
+// seated in the auditorium (0.92.5 #14, FX11; the user: "the camera should center so you see the stage"): the view
+// centres between you and the stage, not on you at the back; read by the main loop's camera line (looks only)
+const REC_AUD_STAGE = [42.2, 9], _rsv = { x: 0, z: 0 };   // the stage's middle, deck coordinates (the lectern is at 43.3, 7.3)
+function recSeatView(pp) {
+  if (typeof ACT === 'undefined' || !ACT || ACT.kind !== 'recSeat' || ACT.phase !== 'do' || !deckDef || deckDef.num !== 7) return pp;
+  _rsv.x = L(pp.x, REC_AUD_STAGE[0] - OX, .5); _rsv.z = L(pp.z, REC_AUD_STAGE[1] - OZ, .5); return _rsv;
+}
+// a seat for a show (0.92.5 #17, FX11; the user: "You keep standing up. Stay seated until the captain is done speaking
+// and everyone gets up to leave"): taken while one of the auditorium's shows is on, or up to 20 minutes before it, the
+// seat lasts until the show ends and the crew stand to go (it was 15 minutes, whatever was on). Walking away still ends it
+const REC_AUD_SHOWS = ['captains-address', 'rec-all-hands', 'rec-chiefs-talk', 'rec-wren-talk', 'rec-film-night', 'rec-talent-night'];
+function recSeatHold() {
+  const A = ACT; if (!A || A.kind !== 'recSeat' || typeof eventsOn !== 'function') return;
+  const d = SHIP.time.day, m = SHIP.time.min, x = eventsOn(d).find(e => REC_AUD_SHOWS.includes(e.id) && e.from - 20 <= m && m < e.to);
+  if (!x) return;
+  const end = (d - 1) * 1440 + x.to; A.o.showEnd = end;
+  A.def.mins = Math.max(A.def.mins, x.to - m); A.def.until = () => shipNow() >= end; A.def.done = 'It\'s over. You get up with everyone else and stretch.';
+}
 // the first swim or paddle: a green tip about changing at the lockers, once (0.92.3 #16, FX11; it replaces the tip 'recChange', id retired)
 const recChangeTip = () => { if (typeof tipShow === 'function') tipShow('rec.change', 'First swim or paddle? Change at the lockers first, in the changing rooms by the lift: any free locker, into rec kit, and a quick shower on the way back.'); };
 function recRoomIn(r) {
@@ -16871,6 +16889,7 @@ function recGo(kind, point, title, flavour) {
     if (!pl) { toast(title, 'Every seat\'s taken.'); return; }
     if (kind === 'bean') { actStart('recBean', pl[0].id, { pose: 'sit', title, flavour, after: 'You flop into the beanbag. It swallows you whole.' }); return; }
     actStart(kind === 'seat' ? 'recSeat' : 'recWatch', pl[0].id, { pose: 'sit', title, flavour, after: kind === 'seat' ? 'You sink into a violet seat and look at the stars behind the stage.' : 'You take a seat on the bench and watch the court.' });
+    if (kind === 'seat') recSeatHold();
     return;
   }
   if (kind === 'unchange') { actStart('recChange', null, { title: 'Changing rooms', spot: recLocker(), kit: null, after: 'You change back into your uniform.' }); return; }
@@ -56207,6 +56226,7 @@ Object.assign(PROP_KIT, {
     part(p, GEO.sph, '#f4f1ea', .17, .33, 0, .075, .04, .2); part(p, GEO.box, REC_KIT.coral, .16, .0724, .2179, .122, .03, .008, -.12);   // on the front piece's face, tilted with it
   },
 });
+const KAYAK_RATE = 2.6, KAYAK_TWIST = .4, KAYAK_TILT = .38, KAYAK_LEAN = .045;   // the stroke's beat (radians a second) and how far the chest turns and tilts, the hull leans (0.92.5 #2)
 const REC_ACTS = {
   swim: { root(o, root, s, t) {                          // face down along the lane, the back just at the water; the point is the chest
     const h = o.h, th = (Math.PI / 2 - .1) * s, c = 1.0 * h * s;
@@ -56242,19 +56262,23 @@ const REC_ACTS = {
     r.head.rotation.x = L(r.head.rotation.x, -.08, s); r.head.rotation.y = L(r.head.rotation.y, .3 * Math.sin(t * .4 + ph), s);
   } },
   kayak: { props: { B: 'kayak', C: 'paddle' }, root(o, root, s, t) {   // sitting in the hull, which bobs and rocks
-    root.position.y = L(root.position.y, o.pos.y - .66 + .02 * Math.sin(t * 1.9) * (o.fast ? 2.5 : 1), s);
-    root.rotation.z = L(root.rotation.z, (o.fast ? .09 : .04) * Math.sin(t * 1.4), s);
-    root.rotation.x = L(root.rotation.x, (o.fast ? .05 : .015) * Math.sin(t * 2.3), s);
+    const w = Math.sin(t * KAYAK_RATE + (o.ph || 0)), f = o.fast ? 1 : 0;   // 0.92.5 #2 (FX11): the hull leans and lifts with each stroke, in step with the paddle
+    root.position.y = L(root.position.y, o.pos.y - .66 + .012 * w * w + .02 * f * Math.sin(t * 1.9), s);
+    root.rotation.z = L(root.rotation.z, KAYAK_LEAN * w + .05 * f * Math.sin(t * 1.4), s);
+    root.rotation.x = L(root.rotation.x, (f ? .05 : .015) * Math.sin(t * 2.3), s);
   }, f(r, s, t, b, ph) {
-    const w = Math.sin(t * 2.3 + ph);                     // the paddle dips one side, then the other
+    // 0.92.5 #2 (FX11; the user: "pretty rough"): the paddle rides the chest, so the hands stay put on the shaft (they
+    // used to swing on their own and slide off it) and the stroke is the torso's: a twist and a tilt that put one blade
+    // in the water by the feet and pull it back past the hip, then the other, smoothly, at the hull's beat
+    const w = Math.sin(t * KAYAK_RATE + ph);
     r.hips.position.y = L(r.hips.position.y, HIP_Y, s); r.hips.rotation.y = L(r.hips.rotation.y, 0, s); r.hips.rotation.z = L(r.hips.rotation.z, 0, s);
     for (const leg of r.legs) {                          // legs out in front, inside the hull
       leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.42, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .15, s);
       leg.ankle.rotation.x = L(leg.ankle.rotation.x, -.25, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .08, s);
     }
-    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
-    r.chest.rotation.y = L(r.chest.rotation.y, .42 * w, s); r.chest.rotation.z = L(r.chest.rotation.z, .3 * w, s);
-    for (const a of r.arms) armTo(a, s, -1.2 - .22 * w * a.side, -.5, -.06, .2);
+    r.torso.rotation.x = L(r.torso.rotation.x, .1 + .05 * w * w, s);   // a little forward into each catch
+    r.chest.rotation.y = L(r.chest.rotation.y, KAYAK_TWIST * w, s); r.chest.rotation.z = L(r.chest.rotation.z, KAYAK_TILT * w, s);
+    for (const a of r.arms) armTo(a, s, -1.2, -.5, -.06, .2);   // on the shaft: still against the chest the paddle rides
     r.head.rotation.x = L(r.head.rotation.x, 0, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);   // still: the helmet rides the chest
   } },
   climb: { props: { C: 'harness' }, root(o, root, s) { root.position.y = L(root.position.y, o.pos.y, s); },
@@ -59067,7 +59091,8 @@ function loop() {
   // camera follows you
   az += (azT - az) * Math.min(1, dt * 6);
   const pp = typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.follow && ACT.body && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;   // 0.80.8: a rec deck activity that moves you round the room (floating, paddling) takes the camera with it
-  target.x += (pp.x - target.x) * Math.min(1, dt * 3); target.z += (pp.z - target.z) * Math.min(1, dt * 3);
+  const cp = typeof recSeatView === 'function' ? recSeatView(pp) : pp;   // 0.92.5 #14: in an auditorium seat, between you and the stage (15r)
+  target.x += (cp.x - target.x) * Math.min(1, dt * 3); target.z += (cp.z - target.z) * Math.min(1, dt * 3);
   placeCam(); placeSun(target);
 
   // cutaway: wall runs between the camera and you drop to knee height, a whole run at a time
