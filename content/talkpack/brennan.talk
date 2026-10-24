@@ -34,7 +34,7 @@ cheer: Cold tea. Like you and warm stores.
 topic: hobby
 when: tier>=colleague
 them: Hear that? That's a pan nearly done. Three minutes from done, that one.
-them: My mum taught me to cook by ear. She used to sing to the pans. I hum. Close enough.   #warm
+them: My mum used to sing to her pans, every night. I hum. Close enough.   #warm
 ask: Is there something you just know how to do, without thinking?
 listen: What does "done" sound like?
   them: Quieter. Like a crowd settling. You'll hear it if you stand with me a while.   #warm
@@ -65,7 +65,7 @@ them: Lukas offered to buy me a cloth on a string. Round my neck. Like a gran. C
 ask: What's the first thing you do when you start work? Before anything else?
 listen: How do you cook blind?
   them: By ear, love. And by nose. My eyes are just for finding the spoon.   #funny
-share: Check the board. Then a tea.
+share: Wash my hands. Then the board.
   them: Good. Tea first would be better. I'll have a word with the board.   #warm
 cheer: Look for the biscuits.
   them: That's the right order. Biscuits, then the day. I've raised you well already.   #funny
@@ -84,7 +84,6 @@ cheer: Getting to the front of your queue.
 
 == pudding-vote
 topic: food
-when: tier>=acquaintance
 them: Pudding's a vote, love. Whatever's left on the trolley at the end, that's lost.
 them: Rice pudding's lost four weeks running. I keep making it. Someone's got to back it.   #funny
 ask: What's your favourite pudding? I'm taking a count.
@@ -110,7 +109,6 @@ cheer: Pell's gift. A sock. Just the one.
 
 == herb-jobs
 topic: hobby
-when: tier>=acquaintance
 them: Every pot on my windowsill has a job. The thyme's on breakfast. The mint's on Fridays.
 them: Nobody picks them but me. I know how many leaves are on each one. Near enough.   #funny
 ask: If you had a windowsill and one pot, what would you grow?
@@ -123,7 +121,6 @@ cheer: Biscuits. A biscuit tree.
 
 == fast-clock
 topic: ship
-when: tier>=acquaintance
 them: The mess clock runs two minutes fast. I set it like that. Don't tell anyone, love.
 them: Everybody thinks they're late, so nobody is. Works a treat. Even on Commander Vance.   #funny
 ask: Are you an early person or a late one? Honestly, now.
@@ -136,7 +133,6 @@ cheer: Two minutes late, apparently.
 
 == envoy-bows
 topic: crew
-when: tier>=acquaintance
 them: The Envoy eats everything I put out. Slowly. Then bows to the empty plate. Every meal.
 them: I don't know what it means, love. But I've never been so pleased by a bow in my life.   #warm
 ask: Is there something polite you do at meals that came from home?
@@ -149,7 +145,6 @@ cheer: Clear my plate before anyone sees.
 
 == sit-on-hands
 topic: tradition
-when: tier>=acquaintance
 them: Lukas runs the cook-along on Saturdays. My day off. I go. I sit at the back. On my hands.
 them: Twenty people, twenty bowls, one recipe. Twenty different pancakes. I don't say a word.   #funny
 ask: Do you cook at all? Even a little? Toast counts. Nearly.
@@ -157,7 +152,7 @@ listen: Do you really not say anything?
   them: Not a word. I nod. Lukas says my nodding's louder than shouting. He's not wrong.   #funny
 share: A bit. Simple things. Nothing fancy.
   them: Simple's the hardest, love. Anyone can do fancy. Come on Saturday. I'll sit by you.   #warm
-cheer: I can boil a kettle. Mostly.
+cheer: A decent sandwich, on a good day.
   them: That's a start. Lukas will have you on pancakes in a week. Hands on, love.   #funny
 
 == surprise
@@ -175,7 +170,6 @@ cheer: Very good. You'll never know.
 
 == week-off
 topic: plans
-when: tier>=acquaintance
 them: One day I'll take a whole week off and eat someone else's cooking. Three meals a day.
 them: I'll be very polite about it. I'll only go in the galley twice. Maybe three times.   #funny
 ask: What would you do with a whole week off, love? No jobs. Nothing.
@@ -188,7 +182,6 @@ cheer: Eat your cooking. Every meal.
 
 == spoon
 topic: work
-when: tier>=acquaintance
 them: This spoon's thirty years old, love. Wooden. Burnt at the end. My first one.
 them: I've pointed it at captains. I've pointed it at Pell. It's done more than most officers.   #funny
 ask: Have you got a tool you'd never let anyone replace?
@@ -227,7 +220,6 @@ cheer: Worry. It can't last.
 
 == waste-not
 topic: food
-when: tier>=acquaintance
 them: Nothing goes in the bin in my galley. Yesterday's bread is today's pudding.
 them: Tomorrow it's crumbs on top of a pie. By Friday it's had a whole career.   #funny
 ask: Are you a waste-not person? Or does it go in the bin?
@@ -274,7 +266,7 @@ them: She just knows. I make it before she asks now. She's never said a word. Sh
 ask: Is there someone aboard whose habits you know by heart now?
 listen: How do you know she's noticed?
   them: She nods at the cup. Once. From Calder, love, that's a whole conversation.   #funny
-share: My bunkmates. Every snore.
+share: My bunk. I know every snore.
   them: Oh, love! That's love, that is. Knowing every snore. Bunks make families.   #warm
 cheer: Pell's. All of them involve food.
   them: That's no secret, love. The whole ship knows Pell's habits. The grab shelf knows.   #funny
@@ -285,7 +277,7 @@ when: tier>=colleague
 them: Before I go to bed I leave plates out for the night shift. Names on the cloths.
 them: In the morning there's a note on a napkin. Dr. Yoon writes a joke. Always a terrible one.   #funny
 ask: Who looks after the people who work while we sleep, do you think?
-listen: What was the last joke?
+listen: Was the last one any good?
   them: Something about a sleepy egg. I didn't get it. I laughed anyway. That's manners.   #funny
 share: Each other. And whoever's awake.
   them: That's right, love. And me, with a plate. That's my bit. Everyone's got a bit.   #warm
@@ -356,7 +348,7 @@ listen: Why table four?
   them: You can see the whole mess. All the chairs pushed in a bit wrong. It's a good sight.   #warm
 share: Sit by a window. Same as you.
   them: Then come and sit at four. Bring a tea. We'll not say a word. Lovely.   #warm
-cheer: Eat. Obviously.
+cheer: Eat something. Every time.
   them: Ha! Course you do. There's a biscuit in my apron. Always. Here.   #funny
 
 // ---- SW2: close friend (3)

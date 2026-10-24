@@ -635,3 +635,50 @@
 - Oh, good question! I think. Sort of. Yes. Here's what I know.
 == talk.listen
 - Thanks for coming. Really. You can keep the tea. Not the cups.
+
+// ---- SW2, patch 0.92.3 item 15: his own Talk a while card frames (FX13: main characters skip the shared ones)
+== talk.start
+- Oh! A proper chat? Yes. Definitely. I mean, yes.
+- Talk? I'd like that. I've been saving up questions. Small ones.
+- Yes! Sorry. Yes. I was hoping someone would ask. Was it obvious?   #funny
+? tier>=friend
+- {nick}! Good. I've got about a hundred things to tell you. Three, really.   #warm
+- Oh, I'm so glad it's you. Go on. You first. No, me first. Sorry.   #warm
+?
+
+== talk.sit
+- Sit here. It's the best seat. I think. It's the one I always pick.
+- Have this one. The cushion's flatter, but you can see out.
+- Sit down. Mind the corner. I always hit the corner.   #funny
+
+== talk.filler
+- Is it just me, or is the ship quieter today? It might be me.
+- Sorry. I was looking out of the window again. Where were we?   #funny
+- I like this. Just talking. Nobody needs us anywhere. I think.
+- My brother would love this. Two people, chatting, on a starship.   #warm
+- Did you hear the lift just then? That was Deck 5. I'm nearly sure.   #funny
+- I'm going to remember this bit. I don't know why. I just am.   #warm
+
+== talk.end
+- Thanks for that. Really. I feel less lost. Is that silly?   #warm
+- That was good. Can we do it again? Not now. Another day.
+- Right. I'll let you go. Thanks for not getting bored. You weren't, were you?   #funny
+- I'm writing to my brother about this. Not all of it. The good bits.   #warm
+- That's made my day better. Sort of a lot better.   #warm
+
+== talk.stop
+- Oh! Course. Go. Sorry, I talk too much.
+- That's all right. We'll finish it later. I'll remember where we were. Probably.   #funny
+- Off you go. I'll be here. At the window, likely.
+
+== talk.go.shift
+- Oh, no. Patrol. Holt hates me being late. Well. Holt notices. Later?
+- I'm on in five. Sorry! I'll walk fast. I'll still be late.   #funny
+
+== talk.go.bed
+- I'm falling asleep at the window. Bed. Tomorrow, though? Promise?
+- Bunk time. I'll say goodnight to the star map for you.   #warm
+
+== talk.go.trad
+- Oh! {trad}'s starting. I said I'd go. Come with me?
+- Sorry, {trad}'s on. I've been looking forward to it all day. Coming?

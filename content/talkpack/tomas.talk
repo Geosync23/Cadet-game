@@ -122,7 +122,6 @@ cheer: A very grumpy cat. Now that's weather.
 
 == notice-board
 topic: news
-when: tier>=acquaintance
 them: I read the notice board every morning. Watch should know what's on. That's my excuse.
 them: Best one today: "Lost: blue mug with a duck on it. The duck is not optional."   #funny
 ask: Heard anything good this week? Anything at all?
@@ -135,7 +134,6 @@ cheer: Only that the lift's in a good mood.
 
 == long-table
 topic: tradition
-when: tier>=acquaintance
 them: First Sunday table, I sat right at the end. Every dish got to me last. I got the corners.
 them: I like corners now. The crispy bits. Is that a lesson? It feels like a lesson.   #funny
 ask: Where do you like to sit at a big meal? Middle, end, near the door?
@@ -148,7 +146,6 @@ cheer: Wherever the gravy is.
 
 == whistle
 topic: plans
-when: tier>=acquaintance
 them: I'm learning to whistle. Properly, with a tune. It's harder than it looks.
 them: Holt heard me on patrol and asked who was whistling. I said it was the air vents.   #funny
 ask: Is there a small thing you'd like to be able to do? Just a small one?
@@ -165,7 +162,7 @@ when: time:morning
 them: Three cups of tea and I'm still not awake. My eyes are open. The rest of me isn't.
 them: Watch starts at nine. By nine I'm a person. Just about. A small person.   #funny
 ask: Are you a morning person? You look like you might be. That's not a criticism.
-listen: When do you feel most awake?
+listen: So when are you at your best?
   them: Just after dinner, at the window. Which is no use to anyone. Holt doesn't do evenings.
 share: Not really. I fake it till ten.
   them: Ten! You're a professional. I can only fake it till half nine.   #funny
@@ -174,7 +171,6 @@ cheer: I'm a breakfast person. Close enough.
 
 == the-tern
 topic: ship
-when: tier>=acquaintance
 them: I go and look at the Tern sometimes. On its pad. It brought me here. Seems rude not to.
 them: I say "Hello." Quietly. In case the shuttle bay crew think I've gone strange.   #funny
 ask: Do you ever go back to look at where you started? Anywhere?
@@ -213,7 +209,7 @@ cheer: The lift. "Which deck?" Every time.
 
 == crossing
 topic: tradition
-when: tier>=acquaintance week1:true
+when: week1:true
 them: Is there really a ceremony when the ship crosses the Line? Rina says yes. Pell says yes.
 them: Then they both laughed. So now I don't know anything. I've stopped asking people.   #funny
 ask: Do you believe what people tell you on your first month? Or check?
@@ -226,7 +222,6 @@ cheer: I believe everything. It's more fun.
 
 == laundry-day
 topic: day
-when: tier>=acquaintance
 them: I did all my washing at once and now I've got nothing to wear but the itchy jumper.
 them: It's not even a rest day. I'm on patrol in a jumper. Holt hasn't noticed yet. He will.   #funny
 ask: What's your worst habit? A small one. I've told you mine. Everyone knows mine.
@@ -391,10 +386,10 @@ topic: hobby
 when: tier>=close
 them: I named a new star last night. Low down, by the long cloud. It's called Bunk One.
 them: For all of us. Chloe, Zofia, Lukas, you, me. It's a very crowded star.   #warm
-ask: If you could name one star, what would you call it?
+ask: If you could wake up to any view at all, out of any window, what would it be?
 listen: Why Bunk One?
   them: Because when I think of the Wren, I think of the bunk first. Everyone breathing. Home.   #warm
-share: After someone back home.
-  them: That's the best kind. Tell me who, one day. I'll find you a good bright one for them.
-cheer: Toast. Obviously.
-  them: Toast's taken! I named it ages ago. You can have the one next to it. Toast needs a friend.   #funny
+share: My street at home, in the rain.
+  them: Oh, that's a good one. Rain on a street. We never had streets. I'd look at that with you.
+cheer: Breakfast, arriving on a tray.
+  them: Ha! That's not a view, that's a dream. Mine too. Toast, at the window, brought to me.   #funny

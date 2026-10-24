@@ -84,7 +84,6 @@ cheer: Like a log. A ten, surely.
 
 == eleven-seconds
 topic: work
-when: tier>=acquaintance
 them: I can wrap a hand bandage in eleven seconds. Timed. It's in the notebook.
 them: Nandakumar does it in nine. I'm not bitter. I'm practising on Pell.   #funny
 ask: What are you fastest at? There's always something.
@@ -97,7 +96,6 @@ cheer: Eating. Nobody's faster.
 
 == strong-tea
 topic: food
-when: tier>=acquaintance
 them: My tea's strong enough to stand a spoon in. Brennan says it's a crime. Makes it anyway.
 them: One sugar. Milk last. Anyone who puts milk first is wrong, and I've told them.   #funny
 ask: How do you take your tea? This matters. I'm judging.
@@ -123,7 +121,6 @@ cheer: I still expect the floor to be dirt.
 
 == sour-ranks
 topic: food
-when: tier>=acquaintance
 them: I've ranked every sweet in the crew store. Sour first. Soft ones last. Out of the list.
 them: Number one is the green ones. They make your eyes water. That's how you know.   #funny
 ask: What's your favourite sweet? I'll tell you where it ranks.
@@ -157,12 +154,11 @@ listen: What's the best thing you've heard?
   them: Can't say. But someone aboard can juggle. Badly. That's all you're getting.   #funny
 share: Whoever's next to me at breakfast.
   them: Dangerous. Sit next to me. I'll just tell you to eat.
-cheer: The lift. It's a good listener.
-  them: It is. Never repeats anything. Unlike Chloe Tran. Good choice.   #warm
+cheer: My pillow. Very discreet.
+  them: Good choice. Pillows never repeat a word. Unlike Chloe Tran. Very wise.   #warm
 
 == dropped-stitches
 topic: tradition
-when: tier>=acquaintance
 them: I go to knit and natter. I don't knit. I count Zeke's dropped stitches.
 them: Twelve last week. He says nine. I've got it written down. He knows I have.   #funny
 ask: Is there something you go to just to watch? Not join in. Watch.
@@ -175,7 +171,6 @@ cheer: You. Losing at Tiles.
 
 == bed-three
 topic: ship
-when: tier>=acquaintance
 them: Bed three, in the infirmary. Against the wall. Nobody's in it most days.
 them: I sit on it on my break. Quietest place on the ship. Don't tell anyone. They'll want it.   #funny
 ask: Have you found a quiet spot yet? Somewhere that's yours?
@@ -188,7 +183,6 @@ cheer: My bunk, with the curtain shut.
 
 == plant-names
 topic: plans
-when: tier>=acquaintance
 them: I'm learning the name of every plant in the garden. Cruz quizzes me. I'm at sixty-one.
 them: Cruz says there are three hundred. I think Cruz is making some up. I can't prove it yet.   #funny
 ask: Are you learning anything just because? Not for work. Just because.
@@ -214,7 +208,6 @@ cheer: Hold a biscuit. Eat the biscuit.
 
 == hiccups
 topic: day
-when: tier>=acquaintance
 them: Someone came in with hiccups today. I scared them out of them. Clipboard, dropped. Loud.
 them: Nandakumar called it unorthodox. Then she wrote it down. That's a yes, from her.   #funny
 ask: What's your cure for hiccups? Everybody's got one. They're all wrong.
@@ -227,7 +220,7 @@ cheer: Ask Rina to drop a clipboard.
 
 == quiet-eight
 topic: ship
-when: tier>=acquaintance time:evening
+when: time:evening
 them: The infirmary at eight in the evening. Lights low, nobody in. Best room on the ship.
 them: I do the cupboards. Count the bandages. It's very calming. Don't look at me like that.   #funny
 ask: What's your favourite time of day aboard? Pick one. No "all of them".

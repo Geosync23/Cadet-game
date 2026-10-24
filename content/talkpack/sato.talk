@@ -85,7 +85,6 @@ cheer: I'm good with biscuits.
 
 == three-am
 topic: work
-when: tier>=acquaintance
 them: The array pinged at three this morning. I sleep with the alert on. Always have.
 them: It was a cloud of dust. Very ordinary dust. I watched it for an hour anyway. Lovely dust.   #funny
 ask: What would get you out of bed at three in the morning?
@@ -111,7 +110,6 @@ cheer: The ceiling. I wasn't a dreamy child.
 
 == new-blend
 topic: food
-when: tier>=acquaintance
 them: Week four of the new blend. It tastes of a library. Old paper and a bit of dust.
 them: Week three tasted of a boot. So this is progress. I think. Yes. Progress.   #funny
 ask: What does your favourite drink taste of? Not "nice". Actual words.
@@ -124,7 +122,6 @@ cheer: Like a library. Apparently.
 
 == question-jar
 topic: work
-when: tier>=acquaintance
 them: I keep a jar of questions juniors have asked me that I couldn't answer. Yet.
 them: Thirty-one in it. "Why is the dark dark?" is my favourite. A cadet asked it. Brilliant.   #warm
 ask: What's a question you've always wanted answered? Any size.
@@ -137,7 +134,6 @@ cheer: Where my left sock goes.
 
 == glasses
 topic: day
-when: tier>=acquaintance
 them: Have you seen my glasses? No. Don't say it. They're on my head. They're always on my head.
 them: Mori finds them four times a day. She doesn't say anything. She just points upward.   #funny
 ask: What do you lose the most? Everyone loses one thing over and over.
@@ -150,7 +146,6 @@ cheer: Track of time, mostly.
 
 == small-dull
 topic: tradition
-when: tier>=acquaintance
 them: At observatory night everyone wants something big. A comet. A nebula. Fireworks.
 them: The best things are small and dull. A faint star, slightly the wrong colour. Exciting.   #funny
 ask: Which do you like more? Big and dramatic, or small and quiet?
@@ -163,7 +158,6 @@ cheer: Big and dramatic. With snacks.
 
 == mixer
 topic: news
-when: tier>=acquaintance
 them: The array picked up a regular signal on Tuesday. Pulsing. Every four seconds.
 them: I was very excited for an hour. It was the galley's mixer, two decks down. Bread day.   #funny
 ask: Have you ever got very excited over something that turned out to be nothing?
@@ -202,7 +196,6 @@ cheer: You, now. The tea's terrible.
 
 == lunch
 topic: day
-when: tier>=acquaintance
 them: What time is it? No. Don't say. Then I'll realise I haven't eaten, and I'll have to.
 them: Brennan sends a plate up at two if I'm not in the mess. Every day. Seven years.   #funny
 ask: Do you forget to eat when you're busy? Or are you sensible?
@@ -228,7 +221,7 @@ cheer: The back of my eyelids. Quickly.
 
 == honest-sky
 topic: ship
-when: tier>=acquaintance time:night
+when: time:night
 them: Night is when the sky's honest. By day the ship's lights get in the way. Now it's just us.
 them: I'm not on shift. I'm just looking. Mori says that's the same thing, for me. Fair.   #funny
 ask: Are you a night person or a day person, really?
