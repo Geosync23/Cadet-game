@@ -3,6 +3,8 @@
 // galley early and anyone who turns up kneads a loaf for the week's bread, round the prep island (Cook-along's places 3-cookalong-1..6 since FX9: one set of event spots in the galley, off the cooks' own; the
 // weekend slot in section 18). Zeke's first-night line ("Sunday's bread day") made real. Your loaf is in Monday's
 // breakfast basket with your name on a card. Flour and tins on the galley counters while it's on. Behind WEEKEND_ON.
+// Nandakumar never (FX9, RV14's events_check with the switch on): she hosts the rec deck's slow stretch at 08:00 on Sundays,
+// and from Bread day she missed it (Days 21, 35, 42).
 k: 467
 title: Bread day
 when: weekly sunday from day 1
@@ -11,7 +13,7 @@ min: 25
 wake: 15
 where: 3 pool @cook-along
 hold: none
-who: brennan always, calder 60%, galley 30%, early-riser 50%, juniors 25%, lingers-at-meals 20%, everyone 5%
+who: nandakumar 0%, brennan always, calder 60%, galley 30%, early-riser 50%, juniors 25%, lingers-at-meals 20%, everyone 5%
 anim: cook
 host: brennan
 from: brennan
