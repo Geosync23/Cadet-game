@@ -46,6 +46,21 @@ files differ from 364c80cb. Kovac's joy line in content/lines/kovac-zainab.lines
 - **Never name a deck by number on screen** (say "the rec deck", not "Seven").
 - **The secret biscuit tins are canon** (Ibarra's and Soto's; Pell has told no one): don't give anyone else a tin.
 
+## Second job: Talk a while for main characters (patch 0.92.3 item 15, CS1 PASS at 01293d50)
+
+From plans/talk-main-plan.md (on claude/crew-stories-pitch), in FX13's agreed format: `only: own` before the first
+talk; each person's 4 old talks kept and 26 new ones added (10 with no tier gate, then about 7 acquaintance, 6
+colleague, 4 friend, 3 close); no small/done blocks (the engine repeats their own talks when the pool runs out). Files:
+`content/talkpack/pell.talk`, `torres-zeke.talk`, `calder.talk`, `nandakumar.talk`, and their own card frames at the
+end of `content/lines/<id>.lines` (talk.start 5, two behind tier>=friend; sit 3; filler 6; end 5; stop 3;
+talk.go.shift/bed/trad 2 each). Calder's colleague tier and above also need rep:known or rep:well. Nandakumar: never anyone's
+medical details, her burnout only hinted at close, Rina's exam left out.
+
+- **lines_check needs FX13's reader** (claude/p923-fx13) for `only: own`: check in a worktree of that branch with
+  these files copied in, bake, then run lines_check. Integration's reader rejects the line until FX13 is merged.
+- **CS1's duplicate checker:** `tools/near_dupes.py` (on claude/crew-stories-pitch): `python3 near_dupes.py HEAD <file>`
+  after committing. Aim for 0 EXACT and 0 NEAR. All 8 files are clean.
+
 ## Loose ends
 
 None open. If the user asks for changes after reading, edit only the four .arc files, rerun the checks above, push
