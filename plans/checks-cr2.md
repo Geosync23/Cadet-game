@@ -226,4 +226,5 @@ perf_check and lines_check --day handed to CR4 (agreed, cc BM15, lead 32).
 | arc_check | OK | `ARC CHECK OK` |
 | lines_check | OK | PASS (0 errors, 50 warnings; the same as 0.92.1) |
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
-| perf_check, lines_check --day | CR4 | handed over |
+| perf_check NEW OLD | known old only (CR4) | backlog 32: Sunday dinner landscape js 1.66 -> 3.28 ms, gone on 2 re-measures; everything else identical to OLD; the Line ceremony 335 calls (KP1) |
+| lines_check --day | OK (CR4) | PASS |
