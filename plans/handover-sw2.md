@@ -37,6 +37,17 @@ Plain `lines_check.py` fails on a content-only branch ("baked blocks out of date
 `python3 content_gen.py <copy>`, then `python3 lines_check.py <copy>`: PASS, with no "the same line is also in" warnings
 for these files. Lines in `// IF` comments aren't seen by the checker: check them by hand (140 characters, voice, repeats).
 
+## Second job: Talk a while pools (patch 0.92.3 item 15, CS1 passed 905ec5f1)
+
+- `content/talkpack/{tomas,rina,brennan,sato}.talk`: TW1's four talks kept, `only: own` before the first `==`, 26 new
+  each (11 with no tier gate, then acquaintance, 7 colleague, 4 friend, 3 close). Story secrets kept out (Tomas's exam,
+  Rina's exam and Gran before beat rina.4, Brennan's fire/Nell/sage/book, Sato's lucky survey and third comet).
+  Brennan's TW1 `pans` talk had one line changed at CS1's request (cook-by-ear half cut; id kept).
+- Their own card frames in `content/lines/<id>.lines`: talk.start (5, 2 behind tier>=friend), sit 3, filler 6, end 5,
+  stop 3, go.shift/bed/trad 2 each.
+- Checking: the current .talk reader rejects `only:` until FX13's change; check on a scratch copy with that line
+  stripped. Run CS1's `tools/near_dupes.py <branch> <file>` (claude/crew-stories-pitch) on every file: zero EXACT.
+
 ## Open
 
 Nothing. Waiting in case the user has changes after reading.
