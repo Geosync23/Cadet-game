@@ -451,15 +451,17 @@ def part_week(ctx, path):
 # 4-23 walked with Calder (not the 17:30 fallback, even mid-job); the ceremony attended by 17:30; flag 'promoted' set; each
 # beat led by the arrow queue (promo:test, promo:summons, promo:move, promo:ceremony); the Dev career arrow naming each.
 def part_promo(ctx, path):
-    pg = Page(ctx, path); real_game(pg, 8); f = Follower(pg); tday = None
+    pg = Page(ctx, path); real_game(pg, 8); f = Follower(pg); tday = None; N = {k: {} for k in ('promoted', 'moved', 'commissioned')}
     for d in range(8, 13):
         f.run((d - 1) * 1440 + 21 * 60 + 30)
         s = pg.ev("(() => { const W = SHIP.works; return { rank: W.rank, test: W.test, done: W.done.slice(), cur: W.cur ? W.cur.id + ':' + W.cur.st : null, promoted: !!flag('promoted') }; })()")
         if tday is None and s['test']: tday = s['test']['day']   # the day she set it for
+        for k, v in pg.ev("Object.fromEntries(['promoted', 'moved', 'commissioned'].map(k => [k, simNotes(k, 0)]))").items():   # gathered each evening (the notes bus keeps a few days)
+            for n in v: N[k][n['t']] = n
         print(f'  promo: Day {d}: {s}')
         f.night(d)
-    W = pg.ev("(() => { const W = SHIP.works; return { test: W.test, rank: W.rank, home: W.home, done: W.done, promoted: !!flag('promoted'), notes: Object.fromEntries(['promoTest', 'promoted', 'moved', 'commissioned'].map(k => [k, simNotes(k, 0)])) }; })()")
-    N = W['notes']
+    W = pg.ev("(() => { const W = SHIP.works; return { test: W.test, rank: W.rank, home: W.home, done: W.done, promoted: !!flag('promoted') }; })()")
+    N = {k: [v[t] for t in sorted(v)] for k, v in N.items()}
     check(W['test'] and W['test']['passed'] and W['test']['tries'] == 1 and tday and W['test']['day'] == tday, f"promo: the test job not passed on its day (Day {tday}), first try (fix: DV1, its parts set aside): {W['test']}")
     pr = N['promoted'][:1]; check(pr and pr[0].get('how') == 'met', f"promo: the summons not met in the Chief's office (how: {pr})")
     mv = N['moved'][:1]; check(mv and mv[0].get('how') == 'walked', f"promo: the walk to cabin 4-23 not walked with her (how: {mv}) (fix: DV1, the walk starts at 17:00 even mid-job)")

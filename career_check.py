@@ -252,7 +252,7 @@ FX_LIFE = r"""(() => {
     const items = trkItems().filter(x => x.sec === 'on').map(x => x.title); out.order = items;
     SHIP.works = null; SHIP.occasions.length = 0; }
   { const m = machineList().find(x => x.deck === 4) || machineList()[0], t = shipNow(); const j = { id: 'fx-test', machine: m.id, deck: m.deck, room: m.room, kind: 'service', status: 'open', posted: t, found: t, until: t + 30, parts: [], title: 'Test' }; SHIP.jobs.push(j);
-    clearGoal(); promoTestTell({ j: 'fx-test', by: 'calder' }); out.test = IX_GOAL && [IX_GOAL.label, IX_GOAL.trk, IX_GOAL.trkTo === j.until];
+    clearGoal(); const gq = GUIDE_ON; GUIDE_ON = false; promoTestTell({ j: 'fx-test', by: 'calder' }); GUIDE_ON = gq; out.test = IX_GOAL && [IX_GOAL.label, IX_GOAL.trk, IX_GOAL.trkTo === j.until];   // the old arrow, for the arrow queue off (with it on, 24p's promoGuide leads: arrows_check promo)
     setShipNow(t + 31); trkDoneCheck(); out.testAfter = IX_GOAL && IX_GOAL.label; SHIP.jobs = SHIP.jobs.filter(x => x !== j); clearGoal(); }
   { goToDeck(5); clearGoal(); const t = shipNow(), m = machineById('5-junction-1');   // the light relays' own tap starts the work (arrows_check: "Repair the light relays" up all day)
     const j = { id: 'fx-relays', machine: m.id, deck: m.deck, room: m.room, kind: 'chore', chore: 'fault', target: m.id, title: 'Reset a tripped breaker: light relays', parts: [], stops: [{ tag: 'fault', placeId: '5-junction-1-svc', mins: 10 }], status: 'claimed', claimedBy: 'you', posted: t, found: t, start: t };
