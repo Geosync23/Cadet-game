@@ -40186,7 +40186,7 @@ function tradSpot(e, x, z) {
   const s = TRAD_JOIN[e.id];
   const ok = pl => pl && !heldBy(pl.id) && !BUSY.has(pl.id) && pl.id !== PLAYER_PLACE && !(PRIVATE_TYPES.has(pl.type) && privatePlace(pl))
     && (s.act !== 'gym' || pl.type === 'gym' && pl.anim !== 'drink') && (s.act !== 'ixGarden' || pl.pose !== 'sit') && (s.act !== 'ixStars' || pl.type !== 'bench');
-  const stand = s.pose && !/^sit/.test(s.pose), off = sp => stand && sp.pose === 'sit' ? 50 : 0;   // a standing one (stretch, cook) at a standing spot first
+  const stand = s.pose && !/^sit/.test(s.pose), seat = !stand && WEEKEND_ON && WEEKEND_TRADS.has(e.id), off = sp => stand && sp.pose === 'sit' || seat && sp.pose !== 'sit' ? 50 : 0;   // a standing one (stretch, cook) at a standing spot first; a weekend one you sit for, a seat first (FX9: the Sunday story put you at the kettle)
   const pick = l => l.filter(ok).map(pl => [pl, placeSpot(pl.id)]).filter(([, sp]) => sp)
     .sort((a, b) => off(a[1]) + Math.hypot(a[1].x - x, a[1].z - z) - off(b[1]) - Math.hypot(b[1].x - x, b[1].z - z) || (a[0].id < b[0].id ? -1 : 1))[0] || null;
   // every one taken (a full music room): any free seat or spot in its rooms, so there's always room for you (like Gym club's spare)
