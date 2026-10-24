@@ -2012,6 +2012,7 @@ Brief: `plans/brief-recdeck.md` (claude/lead-pillar1), seat RA; plan v5 section 
 - **Habits** (`REC_HABITS`, `recHabit(p)`, key 1030): never in HABIT_TAKE or HABIT_DROP, so the weekly habit changes are as before.
 - **Visits** (`schedBuild`'s `recVisit` and `recSwap`, keys 1031-1034): only in place of rest, or of a block off the Commons (see the row). `REC_ODDS` (a habit 0.9, anyone 0.35, of a block off the Commons 0.6 of that), `REC_TURN` 20-40, `REC_Q` 10, `REC_CAP` 15 / 6 (`recCap(d, m)`).
 - **The cap's count:** `shipDay` keeps `occ.rec` beside `occ.heads` (Deck 3's).
+- **Crew Lightdisc you can see** (0.92.3 #25, FX11; section 23b's slot): the two baseline places carry `move: { kind: 'disc' }`, so 8c's `REC_CREW.disc` asks `ldCrewAt(a, o)`: two settled on 7-disc-1 and 7-disc-2 rally (`ldCrewRally(seed, clock.elapsedTime, solo)`, game space, 15 s a rally, a miss and a 1.5 s pause), one alone at the stern practises off the far field; `ldCrewDisc()` (main loop, after the crowd) draws one disc and its glow (`LD_CV`, made the first time, +2 draw calls while shown, hidden while you play). Looks only: no save, no R(), planner untouched.
 
 ## Dev mode (section 25, the Dev mode engineer DB1, Stop 1a; plans/devmode-plan.html v3.1 on claude/devmode-plan)
 
