@@ -118,6 +118,5 @@ Base claude/integration 3866c8f3 (0.92.3). Lead 34 (session_019RdVfeRPRiJpHGjKuj
 - FX10 p924-fx10 d8f128be (game c05d277a...; code dcff694f): lessonClash (15b) + ixBoard.take appends "Heads up: it runs to
   about HH:MM (its part has to be made...), and <lesson> with <name> starts at HH:MM." when now + mins + make + 10 > the
   meeting. interactions_check line: near (30 min) warns, far (10 h) not; fails on 0.92.3 (FX10).
-  **Open:** the device's Jobs section (sec 17 jobsSection via the 19 shim) has its own Take it -> claimJob, no heads-up.
-  Asked FX10 to cover it or show it's unreachable. Wording "parts first, from main storage" left alone (backlog if needed).
+  Device Jobs path: not reachable (verified: sec 19 native deviceApp jobs at ~12100 registers first; the shim skips legacy addSection; the live app says "You take jobs at the job board"). Closed.
   Running: interactions fix + k1 (always warn) plant, cadet_test vs 0.92.3, check_fast.
