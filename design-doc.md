@@ -306,6 +306,8 @@ One list for the whole ship, shown on the big job board in the Works bay and on 
 
 **Your lesson's job on the board** (patch 0.92.3, note 29). When a lesson hands you your turn (hauling and stores, tuning, the scanner...), the job board lists that job first, outlined, saying "Your lesson: take this one", and the pointer shows its Take it button once per lesson.
 
+**A job that would run past your lesson** (patch 0.92.4, item D, the user's yes, 2026-10-24). When you take a job that would still be going when your next lesson starts (its minutes, an hour at the lathe if its part has to be made, and the walk), the "Job taken" message ends with a heads-up: "Heads up: it runs to about 11:42 (its part has to be made in the machine shop), and Making it safe with Ines starts at 10:30." It's only a warning: the job is still yours, and walking away pauses it.
+
 **Real faults and their causes** (Pillar 5 foundation, approved by the lead 2026-10-18; plans/mechanics/foundation.html and fault-tables.html). From Day 2, on your shift days, about half the machine jobs left for you are real faults rather than servicing: some worn machines wear on unseen and are found already faulty. Each real fault has a cause from its kind's fault table (an oven runs cool because its element is failing, or its door seal is worn), and the job card says what everyone notices: "Repair: Oven 2 (runs cool)". Before the scanner, the job still tells you the part. Days 0 and 1 and your days off are unchanged. A job may be a junior job, or kept for a rank (a senior technician, an Engine Specialist); the crew follow the same rule, so nothing waits on you.
 
 ### Consequences
