@@ -31,6 +31,8 @@ AC3, session_01DiLRzrXgkeoAZCoX1mVJn9, 2026-10-23. Took over from AC2 (plans/han
   front + Clock in tracked on entering the Works bay; Day 1's tip waits for Zeke's opener (DS1) or 09:15. Reviewer RV12.
   Items 16 and 26 went to FX11 and FX4 (built here first, reverted 21a3425, 267696e).
 - Patch 0.92.3 item 6 final: aee83840 (+ arrows_check part `clockin`; the bay tip held back on any of Days 1-3). RV12 PASS (all 4 planted faults caught); with BM15.
+- Item 6 follow-up: 4928271f limits it to 08:00-12:30 (CAREER.missBy); CR6's mech_check m3d on 0dd4e2e2 (Day 3 14:52 drill, never
+  clocked in) was left with Clock in tracked. Sent to BM16 + RV12.
 - Open, not mine: arrows_check week guide FAILs m6 on claude/integration 364c80cb (0.92.2) itself: the scanner first used
   Day 8 (was Day 5 on 0.92.0's 7d97d538), so Making it safe opens Day 9; reported to lead 33 (2026-10-24 ~04:40).
 - Save size (career_check, 3001 > 3000 bytes by Day 30): not the arrows; works.cases.done/team/inc.plan grow untrimmed (lead's call).
