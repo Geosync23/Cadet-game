@@ -153,3 +153,9 @@ the newcomer guide (incl. existing officer saves). Plants q1 (no parts aside), q
   setter, passes: the skip path sets it too: redundant by design); q3 queue asks off FAIL (all four beats, move late, ceremony
   by mail). social_check OK (the flag's features). cadet_test 0.92.3 vs fix identical (j_steer1 6 px 1 level, noise).
   check_fast OK. DV1's own: career, mech, intro, day 1, devmode, dev_arrow OK. Sign-off: 24p, 25 (small edit).
+- **PASS sim bay claude/rec-simbay 328f678a (~20:05 UTC; game ed2b6fc8...8c07, unchanged since cb4387e8).** Off: cadet_test vs
+  0.92.3 ALL IDENTICAL, check_fast OK. On: deck OK, day 2/6 OK (S5), events OK (sim night), interactions OK incl. the sim part
+  and S7b's pilots (6 pilots incl. Raman, 62 turns; pod 1 tagged out -> never planned, pod 2 51 turns). Plants: screens never
+  play + queue never needed -> 3 FAIL; sim night who=0 -> 3 FAIL; REC_HABITS sim-pilot removed -> both pilot lines FAIL.
+  Screenshots plans/simbay-shots (bdff907c) look right. Sign-offs: 4e, 15r, 17 slot, 14 (recHabit/schedBuild + sim slot),
+  18 traditions slot, where the owner seat isn't live.
