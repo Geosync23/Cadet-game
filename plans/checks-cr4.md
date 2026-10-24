@@ -19,7 +19,7 @@
 | food_check 11 4 (from CR6) | OK (exit 0, 65 s) | `FOOD CHECK OK`; no FAIL lines |
 | clothes_check (from CR6) | OK (exit 0, 85 s) | `ALL OK` |
 
-FX8's new line ("getting up from a place: ... the drawn body's biggest move in that step"): 0.06-0.19 tiles on every deck of every day (limit 0.35), 0 off a place drawn.
+FX8's new line ("getting up from a place: ... the drawn body's biggest move in that step"): 0.06-0.19 tiles on every deck of every day (limit 0.35). The rec deck's "off a place drawn moving (8c), not counted" (swimming lane, climbing wall; backlog FX8-1) was 18 / 0 / 100 / 111 / 76 / 74 on Days 12 / 13 / 16 / 19 / 6 / 8, counted apart as designed; 0 on every other deck.
 
 **CR4: OK.** No FAILs.
 
