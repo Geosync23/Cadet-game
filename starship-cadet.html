@@ -13959,7 +13959,7 @@ function actBegin() {
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
   toast(A.o.title || A.def.title, [A.o.flavour && A.kind !== 'eat' && A.kind !== 'tray' && !what.includes(A.o.flavour) ? A.o.flavour : '', what,   // the words once (fresh eyes #27: a seat with no tray put its words in `after` too)
-    A.def.need ? 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.' : ''].filter(Boolean).join(' '));
+    A.def.need ? (A.kind === 'recSeat' ? 'Stay as long as you like; walk away to get up.' : 'About ' + taskMins(A.def.mins) + ' minutes; walk away to stop.') : ''].filter(Boolean).join(' '));   // an auditorium seat has no set time (0.92.5 #17, the user's)
   if (A.kind === 'call' && typeof homeBooth === 'function') homeBooth();   // social B2's call picker at a booth (0.28.30)
 }
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
@@ -17053,7 +17053,7 @@ Object.assign(PLAYER_ACTS, {
   recClimb:  { need: 'leisure', gain: 20, mins: 8, cost: { energy: 6 }, also: { fitness: 8 }, pose: 'climb', title: 'Climbing', done: 'Back on the floor. Your arms are jelly. You rang the bell, though.' },
   recFloat:  { need: 'leisure', gain: 25, mins: 10, also: { fitness: 10 }, pose: 'float',   // 0.82.5: fitness as the gym (1 a minute)
     title: 'Float room', done: 'Back to full gravity. Your legs feel very heavy.' },
-  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.' },
+  recSeat:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Auditorium', done: 'You get up and stretch.', until: () => false },   // 0.92.5 #17 (the user's): like any seat, you sit till you get up (the gain over its first 15 minutes)
   recWatch:  { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Stands', done: 'You get up and stretch.' },
   recBean:   { need: 'leisure', gain: 8, mins: 15, pose: 'sit', title: 'Beanbag', done: 'You haul yourself out of the beanbag. It takes two goes.' },
   recSim:    { need: 'leisure', gain: 20, mins: 15, pose: 'sit', title: 'Sim pod', done: 'Down and parked in the bay. You climb out, legs a little wobbly from the motion base.' },   // the sim bay (rec-simbay S3, SIM_BAY)
@@ -17087,6 +17087,13 @@ function recTap(it, at, point) {
 }
 PLAYER_TAPS.push(recTap);
 // 0.82.5 (the user's): walking into the float room starts floating, no tap; walking out (or a tap elsewhere) ends it, as any activity
+// seated in the auditorium (0.92.5 #14, FX11; the user: "the camera should center so you see the stage"): the view
+// centres between you and the stage, not on you at the back; read by the main loop's camera line (looks only)
+const REC_AUD_STAGE = [42.2, 9], _rsv = { x: 0, z: 0 };   // the stage's middle, deck coordinates (the lectern is at 43.3, 7.3)
+function recSeatView(pp) {
+  if (typeof ACT === 'undefined' || !ACT || ACT.kind !== 'recSeat' || ACT.phase !== 'do' || !deckDef || deckDef.num !== 7) return pp;
+  _rsv.x = L(pp.x, REC_AUD_STAGE[0] - OX, .5); _rsv.z = L(pp.z, REC_AUD_STAGE[1] - OZ, .5); return _rsv;
+}
 // the first swim or paddle: a green tip about changing at the lockers, once (0.92.3 #16, FX11; it replaces the tip 'recChange', id retired)
 const recChangeTip = () => { if (typeof tipShow === 'function') tipShow('rec.change', 'First swim or paddle? Change at the lockers first, in the changing rooms by the lift: any free locker, into rec kit, and a quick shower on the way back.'); };
 function recRoomIn(r) {
@@ -48515,6 +48522,7 @@ const tilesTrophy = () => SHIP.tiles.beatRina !== null;   // for the deck archit
 // The rules are pure: game space is x across the court (+ is your right), z along it (+ is your end, the bow), no DOM,
 // no three.js, no R() and no Math.random. A game's stream is seeded from the save (schedU key 830); 831 picks a crew
 // member's level when they have no personality of their own. Fixed 60 steps a second, whatever the frame rate.
+const LD_YOURS = 3;                                       // 0.92.5 #3 (the user's, lead 34): your games end at first to 3, no win by 2; the crew's on paper keep 7 (5 quick), win by 2
 const LD_DT = 1 / 60, LD_S0 = 5.0, LD_CAP = 13.5, LD_UP = 1.1, LD_REACH = .9, LD_MAXA = Math.PI / 3, LD_CURVE = .5, LD_CURL = 1.5, LD_CHARGE = 4 / 3, LD_YOU = 9;
 const LD_HX = 2.38, LD_BASE = 5.6, LD_ZONE = 1.9, LD_OUT = 6.3, LD_R = .2;   // the court (DA6's recCourt): fields at ±2.38, baselines at 5.9, your zone to 3.9
 // the crew's levels (plan section 4): reaction, speed, how often they misjudge, how wide, how often they curve, how off-centre they aim
@@ -48544,7 +48552,7 @@ function ldRng(seed) {   // mulberry32, as the prototype and Tiles (the view's c
 }
 // o: { seed, quick, you: level or null (null: you play by input), them: level }. Side 0 is you (+z), side 1 them (-z).
 function ldNew(o) {
-  const g = { seed: (o.seed >>> 0) || 1, target: o.quick ? 5 : 7, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], over: false, winner: -1, trail: [], ev: [] };
+  const g = { seed: (o.seed >>> 0) || 1, target: o.to || (o.quick ? 5 : 7), straight: !!o.to, step: 0, phase: 'serve', timer: 1, score: [0, 0], rally: 0, log: [], over: false, winner: -1, trail: [], ev: [] };
   g.rs = g.seed; g.rng = () => ldNext(g);              // the stream's state is plain data (g.rs), so a game can be copied (ldClone)
   const pl = (side, ai) => ({ side, ai, x: 0, z: side * LD_BASE, vx: 0, streak: 0, swing: 0, plan: null, hits: 0 });
   g.p = [pl(1, o.you || null), pl(-1, o.them)];
@@ -48670,7 +48678,7 @@ function ldHit(g, i, dx) {
 function ldPoint(g, w) {
   g.score[w]++; g.server = 1 - w; g.phase = 'point'; g.timer = 1.1;
   const [a, b] = g.score;
-  if ((a >= g.target || b >= g.target) && Math.abs(a - b) >= 2) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
+  if ((a >= g.target || b >= g.target) && (g.straight || Math.abs(a - b) >= 2)) { g.over = true; g.winner = a > b ? 0 : 1; g.timer = 1.4; }
   g.log.push({ step: g.step, w, rally: g.rally });
   g.ev.push({ k: 'point', w });
 }
@@ -48736,7 +48744,7 @@ function discBegin(a, quick) {
   const D = SHIP.disc; D.games++;
   DISC.opp = a.p.id; DISC.name = shortName(a.p); DISC.agent = a; DISC.quick = !!quick;
   DISC.short = DISC.name.split(' ').length > 1 && /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?|Lieutenant|Ensign)$/.test(DISC.name.split(' ')[0]) ? DISC.name.split(' ').pop() : DISC.name;   // on the score: Vance, not Commander Vance
-  DISC.g = ldNew({ seed: Math.floor(schedU(D.games, SHIP.time.day, 830) * 4294967296), quick, you: null, them: ldLevel(a.p.id) });
+  DISC.g = ldNew({ seed: Math.floor(schedU(D.games, SHIP.time.day, 830) * 4294967296), quick, to: LD_YOURS, you: null, them: ldLevel(a.p.id) });   // your games: first to 3 (0.92.5 #3)
   DISC.how = D.taught ? -1 : 0; DISC.moved = 0;
   discViewOn();
 }
@@ -48941,7 +48949,7 @@ function discResult() {
   ldEl('div', 's', card, 'Your record against ' + DISC.name + ': ' + v[0] + '–' + v[1] + '. Longest rally: ' + Math.max(0, ...G.log.map(l => l.rally)) + '.');
   const b = ldEl('div', 'b', card);
   const btn = (t, f, go) => { const e = ldEl('button', go ? 'go' : null, b, t); e.onclick = ev => { ev.stopPropagation(); f(); }; };
-  btn('Again', () => discEnd('full'), true); btn('Quick game', () => discEnd('quick')); btn('Done', () => discEnd(false));
+  btn('Again', () => discEnd('full'), true); btn('Done', () => discEnd(false));   // 0.92.5 #3: no Quick game now a game is first to 3 (discEnd('quick') kept, unused)
   V.res.classList.remove('hide'); V.how.classList.add('hide'); V.leave.classList.add('hide');
 }
 // the players' moves (plan v5 section 8, "disc ready / side-step / return"), posed straight onto a full rig each frame:
@@ -56819,6 +56827,7 @@ Object.assign(PROP_KIT, {
     part(p, GEO.sph, '#f4f1ea', .17, .33, 0, .075, .04, .2); part(p, GEO.box, REC_KIT.coral, .16, .0724, .2179, .122, .03, .008, -.12);   // on the front piece's face, tilted with it
   },
 });
+const KAYAK_RATE = 2.6, KAYAK_TWIST = .4, KAYAK_TILT = .38, KAYAK_LEAN = .045;   // the stroke's beat (radians a second) and how far the chest turns and tilts, the hull leans (0.92.5 #2)
 const REC_ACTS = {
   swim: { root(o, root, s, t) {                          // face down along the lane, the back just at the water; the point is the chest
     const h = o.h, th = (Math.PI / 2 - .1) * s, c = 1.0 * h * s;
@@ -56854,19 +56863,23 @@ const REC_ACTS = {
     r.head.rotation.x = L(r.head.rotation.x, -.08, s); r.head.rotation.y = L(r.head.rotation.y, .3 * Math.sin(t * .4 + ph), s);
   } },
   kayak: { props: { B: 'kayak', C: 'paddle' }, root(o, root, s, t) {   // sitting in the hull, which bobs and rocks
-    root.position.y = L(root.position.y, o.pos.y - .66 + .02 * Math.sin(t * 1.9) * (o.fast ? 2.5 : 1), s);
-    root.rotation.z = L(root.rotation.z, (o.fast ? .09 : .04) * Math.sin(t * 1.4), s);
-    root.rotation.x = L(root.rotation.x, (o.fast ? .05 : .015) * Math.sin(t * 2.3), s);
+    const w = Math.sin(t * KAYAK_RATE + (o.ph || 0)), f = o.fast ? 1 : 0;   // 0.92.5 #2 (FX11): the hull leans and lifts with each stroke, in step with the paddle
+    root.position.y = L(root.position.y, o.pos.y - .66 + .012 * w * w + .02 * f * Math.sin(t * 1.9), s);
+    root.rotation.z = L(root.rotation.z, KAYAK_LEAN * w + .05 * f * Math.sin(t * 1.4), s);
+    root.rotation.x = L(root.rotation.x, (f ? .05 : .015) * Math.sin(t * 2.3), s);
   }, f(r, s, t, b, ph) {
-    const w = Math.sin(t * 2.3 + ph);                     // the paddle dips one side, then the other
+    // 0.92.5 #2 (FX11; the user: "pretty rough"): the paddle rides the chest, so the hands stay put on the shaft (they
+    // used to swing on their own and slide off it) and the stroke is the torso's: a twist and a tilt that put one blade
+    // in the water by the feet and pull it back past the hip, then the other, smoothly, at the hull's beat
+    const w = Math.sin(t * KAYAK_RATE + ph);
     r.hips.position.y = L(r.hips.position.y, HIP_Y, s); r.hips.rotation.y = L(r.hips.rotation.y, 0, s); r.hips.rotation.z = L(r.hips.rotation.z, 0, s);
     for (const leg of r.legs) {                          // legs out in front, inside the hull
       leg.thigh.rotation.x = L(leg.thigh.rotation.x, -1.42, s); leg.knee.rotation.x = L(leg.knee.rotation.x, .15, s);
       leg.ankle.rotation.x = L(leg.ankle.rotation.x, -.25, s); leg.thigh.rotation.z = L(leg.thigh.rotation.z, leg.side * .08, s);
     }
-    r.torso.rotation.x = L(r.torso.rotation.x, .1, s);
-    r.chest.rotation.y = L(r.chest.rotation.y, .42 * w, s); r.chest.rotation.z = L(r.chest.rotation.z, .3 * w, s);
-    for (const a of r.arms) armTo(a, s, -1.2 - .22 * w * a.side, -.5, -.06, .2);
+    r.torso.rotation.x = L(r.torso.rotation.x, .1 + .05 * w * w, s);   // a little forward into each catch
+    r.chest.rotation.y = L(r.chest.rotation.y, KAYAK_TWIST * w, s); r.chest.rotation.z = L(r.chest.rotation.z, KAYAK_TILT * w, s);
+    for (const a of r.arms) armTo(a, s, -1.2, -.5, -.06, .2);   // on the shaft: still against the chest the paddle rides
     r.head.rotation.x = L(r.head.rotation.x, 0, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);   // still: the helmet rides the chest
   } },
   climb: { props: { C: 'harness' }, root(o, root, s) { root.position.y = L(root.position.y, o.pos.y, s); },
@@ -59682,7 +59695,8 @@ function loop() {
   // camera follows you
   az += (azT - az) * Math.min(1, dt * 6);
   const pp = typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.follow && ACT.body && ACT.phase === 'do' ? { x: ACT.x, z: ACT.z } : player.obj.position;   // 0.80.8: a rec deck activity that moves you round the room (floating, paddling) takes the camera with it
-  target.x += (pp.x - target.x) * Math.min(1, dt * 3); target.z += (pp.z - target.z) * Math.min(1, dt * 3);
+  const cp = typeof recSeatView === 'function' ? recSeatView(pp) : pp;   // 0.92.5 #14: in an auditorium seat, between you and the stage (15r)
+  target.x += (cp.x - target.x) * Math.min(1, dt * 3); target.z += (cp.z - target.z) * Math.min(1, dt * 3);
   placeCam(); placeSun(target);
 
   // cutaway: wall runs between the camera and you drop to knee height, a whole run at a time
