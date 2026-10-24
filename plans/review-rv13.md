@@ -40,3 +40,14 @@ Game sha256 aac49362...c40b (1aabb091 = talk_check only). Base 364c80cb.
   check_fast QUICK CHECK OK 217 s. Section 20 sign-off (owner seat not live): talkStart hi hook, talkNext only-own
   return, talkStep ask hold: all three correct, guarded with typeof, no change for anyone without first/only content.
   Open for the content sha: own talk.filler for only-own people; many ungated talks (strangers repeat otherwise).
+
+## DV1 p923-dv1 6aeae8c1 (items 13 + 23, Name on the beam) + SW2 join.lines 2bd054f3: interim FIXES NEEDED (test only)
+Game sha256 b3caed3f... (with SW2's words baked in a scratch copy: ba3c31d0...).
+- Diff: BEAM.slots reordered (yours = top-row east slot 4.98, right-aligned by BEAM.gap 36/256), nameYours/nameNew text
+  alignment; sec 18 beamGather/beamReady/beamWaitTap/beamLines; beamReady gates beamOn, tradJoinMinute tip/arrow, the
+  leader's tell. nameNew's plane unchanged (a0/a1 same values). No R(). Not saved (lines again after a reload).
+- Screenshots (plans/p923-dv1): before = your name off-screen west; after = "Sam" right before "Ada"; new hands: Basil
+  under Sam, Rafe/Priya west column. Looks right.
+- join_check fix OK; 0.92.2 ReferenceError beamReady. Planted d1 (ready always) 4 FAIL, d2 (no lines) FAIL, d4
+  (tradJoinMinute gate off) FAIL; **d3 (old slot order) JOIN CHECK OK: item 23 has no check line -> asked DV1.**
+- SW2 2bd054f3 join.lines (4 explain lines) bake clean, lines_check PASS.
