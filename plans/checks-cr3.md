@@ -271,3 +271,18 @@ ee974894's own checks, one at a time, game sha ca2f908d…e7e4.
 | food_check 1 7 | **OK** | FOOD CHECK OK; 58 s |
 | food_check 11 4 | **OK** | FOOD CHECK OK; 64 s |
 | clothes_check | **OK** | ALL OK; 80 s |
+
+# Round on 0.92.3 (claude/staging-0.92.3 0dd4e2e2), BM16's start; reported to BM16 and lead 33
+
+sha256 **4e6538447d13e4c5398fc74844748e1e9d41776afa7bcc83bc99d5eff87cd0a2** (BM16's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 285 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 257 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 255 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 270; worst stuck 0.0; 253 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 54 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 27 s |
+
+No FAIL. (The same numbers as 0.92.2.)
