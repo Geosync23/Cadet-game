@@ -140,3 +140,16 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
 
 ## DV1 promo-arrows 81e9065c: not mine after all (lead 34, 19:18 UTC): RV13 had already reviewed and PASSed it
 (the shelf top-up point covered: at most 2 free parts on test day). Nothing run here.
+
+## FX13 simflight 9fa1e1ae (sim flight landing prototype, standalone, a light look for lead 34): PASS with nits (~20:55 UTC)
+- starship-cadet.html untouched (git diff 3866c8f3 empty). New: simflight-proto.html (285 lines), tools/
+  simflight_proto_check.js, plans/simflight-plan.html, screenshots.
+- Read: rules (fnew/fstep) plain numbers at a fixed 60 steps/s, no Math.random/R; drawing apart; colours through col();
+  instanced rings; 6 draw calls flying; three r128 from cdnjs; tips once (localStorage in try/catch); Leave/Done/Again.
+- SIMFLIGHT CHECK OK twice (run with the paths pointed at a worktree copy): soft/hard/miss from scripted pilots, each
+  the same twice; touch drag, mouse, keys; tips once; no page errors. Screenshots look right (rings, lit bay, result).
+- Nits (not blocking, a prototype): (1) coplanar faces in the hull: the top and bottom blocks share the side blocks'
+  top (y = 26) and bottom (y = -18) planes over a 1-wide strip, and the back plane (z = BAY_Z + 140); same colour, so
+  no visible flicker, but against the "no coplanar surfaces" rule (e.g. make the top/bottom blocks a little lower /
+  shorter). Thin seams between the blocks show in the shots. (2) The check hard-codes /home/user/Cadet-game for the page
+  and the shots folder; deriving both from __dirname would let it run from any checkout.
