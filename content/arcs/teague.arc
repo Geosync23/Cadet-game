@@ -32,7 +32,7 @@ them: Right. My tea's gone cold. That's not a comic. That's just sad.
 
 == beat 2
 // DAY: 3-21
-// FAVOUR theoCloud (new): carry the smiling-cloud page to Calder's glass office. When you hand it over, Calder: "Hm. Accurate."
+// FAVOUR theoCloud (new): carry the smiling-cloud page to Calder's glass office; calder: Hm. Accurate.
 tone: light
 metDays: 4
 where: Tea corner
@@ -115,9 +115,9 @@ keepsake: the last page of the Wren strip, signed, with you in it
 them: There you are. Good. I had a speech. I drew it instead. Easier.   [gesture]
 them > you: Here. The last page. Careful, the ink's two hours old.
 them: Last panel's the one you picked. Look.
-// VARIANT mem:moment.teague.beam | them: Last panel. You at the beam, your name in big letters. Spelt right. I checked twice.
-// VARIANT mem:moment.teague.tea | them: Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.
-// VARIANT mem:moment.teague.wren | them: Last panel. The Wren from outside, every window lit. You're in the third one along.
+// IF mem:moment.teague.beam: them: Last panel. You at the beam, your name in big letters. Spelt right. I checked twice.
+// IF mem:moment.teague.tea: them: Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.
+// IF mem:moment.teague.wren: them: Last panel. The Wren from outside, every window lit. You're in the third one along.
 them: Finished it. Don't frame it.   [nod]
 them: Frame it.   [laugh]
 // optional: if present
