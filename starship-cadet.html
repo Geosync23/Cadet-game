@@ -9173,7 +9173,9 @@ function simStart(title, flavour, p) {                   // p: the tap in deck c
 // a pod's screen: your run's progress (0-1) while you're flying in it, else -1 (the stars drift)
 function simRunAt(k) {
   const A = typeof ACT !== 'undefined' ? ACT : null;
-  return A && A.kind === 'recSim' && A.phase === 'do' && A.placeId === SIM_POD_IDS[k] ? Math.min(1, A.done / A.def.mins) : -1;
+  if (A && A.kind === 'recSim' && A.phase === 'do' && A.placeId === SIM_POD_IDS[k]) return Math.min(1, A.done / A.def.mins);
+  const a = typeof heldBy === 'function' ? heldBy(SIM_POD_IDS[k]) : null;   // someone of the crew settled in it (S5): a run every 15 minutes
+  return a && a.settled ? (shipNow() / 15 + k * .37) % 1 : -1;
 }
 // ---- end of slot: Rec engineer ----
 
@@ -10216,8 +10218,9 @@ const REC_LIKES = [[h => h.includes('gym-regular') || h.includes('runner'), [['s
 const REC_SHARE = .3;                                    // with the fixed ones, about a third of the crew
 function recHabit(p) {
   if (!REC_ON || !p || p.guest || p.rank === 'guest' || p.player) return null;
+  if (SIM_BAY && p.id === SIM_PILOT_FIX) return 'sim-pilot';   // the sim bay (rec-simbay S5): Dev Raman, always
   if (REC_HABIT_FIX[p.id]) return REC_HABIT_FIX[p.id];
-  if (schedU(p.seed, 0, 1030) >= REC_SHARE) return null;
+  if (schedU(p.seed, 0, 1030) >= REC_SHARE) return SIM_BAY ? simHabit(p) : null;
   const opts = REC_LIKES.find(([f]) => f(p.habits || []))[1], tot = opts.reduce((a, o) => a + o[1], 0);
   let r = schedU(p.seed, 1, 1030) * tot; for (const [h, w] of opts) if ((r -= w) < 0) return h;
   return opts[opts.length - 1][0];
@@ -10490,11 +10493,12 @@ function schedBuild(p, d, occ, S) {
     else if (vu(0) > 1 - odds * REC_ODDS.casual) kind = ['watch', 'bean', 'float'][Math.floor(vu(1) * 3)];
     if (!kind) return false;
     const sh = typeof recPlanShut === 'function' ? recPlanShut(d, occ) : null;   // rec engineer B's machines (0.84.6): what's shut or off, as the day's plan sees it (RC, 0.64.1)
-    if (sh && (kind === 'disc' && sh.court || kind === 'float' && sh.float || kind === 'climb' && !sh.belays || kind === 'swim' && sh.pool && vu(5) < .7 || kind === 'kayak' && sh.river && vu(5) < .5)) return false;
+    const simSh = kind === 'sim' ? simPlanShut(d) : null;   // the sim bay's pods tagged out, as the day's plan sees them (rec-simbay S5)
+    if (sh && (kind === 'disc' && sh.court || kind === 'float' && sh.float || kind === 'climb' && !sh.belays || kind === 'swim' && sh.pool && vu(5) < .7 || kind === 'kayak' && sh.river && vu(5) < .5) || simSh && simSh.every(Boolean)) return false;
     const R = REC_DO[kind], wet = !!R.wet, pre = wet ? 2 : 0, post = wet ? 6 : 0, dur = REC_TURN[0] + Math.round((REC_TURN[1] - REC_TURN[0]) * vu(2));
     const a0 = ride ? ride.a0 : t + C, open = DECKS[7].open, last = Math.min(to - C - post, open[1] * 60 - 15);
     if (a0 < open[0] * 60 || last - (a0 + pre) < 15) return false;
-    const pool = (S.shared.get('7|' + R.type) || []).filter((q, b) => !(kind === 'climb' && sh && ((sh.belayOff || [])[b] || sh.route === b + 1))); if (!pool.length) return false;   // not under a tagged-out belay or a taped route
+    const pool = (S.shared.get('7|' + R.type) || []).filter((q, b) => !(kind === 'climb' && sh && ((sh.belayOff || [])[b] || sh.route === b + 1)) && !(simSh && simSh[b])); if (!pool.length) return false;   // not under a tagged-out belay or a taped route
     const capOk = (a, b) => { for (let m = a; m < b; m++) if (occ.rec[m] + 1 > recCap(d, m)) return false; return true; };
     const free1 = (type, a, b) => (S.shared.get('7|' + type) || []).find(pl => isFree(pl.id, a, b)) || null;
     // the place and the turn: the earliest start within REC_Q minutes; Lightdisc: the bow end (7-disc-1, your baseline) only
@@ -11301,6 +11305,20 @@ function dayReport(day) {
 SIM_ADVANCE.push((from, to) => { shipDay(Math.floor(to / 1440) + 1); });
 
 // ---- slot: Sim engineer (section 14). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// the sim bay's pilots (FX14, rec-simbay S5; behind SIM_BAY, section 4e's slot): Dev Raman always; of those with no other
+// rec habit (recHabit's key 1030 roll above REC_SHARE, so nobody's existing habit changes), about half the helm and command
+// crew and a few others (juniors more often) on a roll of their own (key 1035). A visit: a turn in a free pod (not one
+// tagged out the evening before: simPlanShut), else the bench as the queue, like the pool's lanes
+const SIM_PILOT_FIX = 'raman', SIM_PILOT_ODDS = { crew: .5, junior: .08, other: .04 };
+function simHabit(p) {
+  const o = p.dept === 'helm' || p.dept === 'command' ? SIM_PILOT_ODDS.crew : p.rank === 'junior' ? SIM_PILOT_ODDS.junior : SIM_PILOT_ODDS.other;
+  return schedU(p.seed, 0, 1035) < o ? 'sim-pilot' : null;
+}
+if (SIM_BAY) {
+  REC_HABITS['sim-pilot'] = 'sim';
+  REC_HABIT_TEXT['sim-pilot'] = 'Flies practice runs in the rec dec sim pods, keeping a hand in.';
+  REC_DO.sim = { type: 'rec:sim', q: 'rec:simq' };
+}
 // your day shift's end on ship day d (FR1, Short Fridays turn 3; PB's contract): d is the ship day number (SHIP.time.day,
 // 1 = the first Monday); minutes after midnight: DAY_SHIFT[1] (17:00, section 17), or 15:30 on a short Friday
 // (weekday(d) === 4, 0 = Monday, with SHORT_FRIDAY: section 18f's friShort). The night shift isn't covered. Off: DAY_SHIFT[1]
