@@ -36658,6 +36658,7 @@ const talkPackQuiet = C => { const P = talkPackOf(C); if (!P || !TALK_PACK_ON ||
   return n - (P.fill0 || 0) >= TALK_FILLER_MAX || n >= F.length; };
 const talkPackOf = C => C && C.talk && C.talk.pack;
 const talkPackNext = C => { const P = talkPackOf(C); return P && P.i < P.lines.length && !(C.talk.asked && !P.small) ? P.lines[P.i++] : null; };   // the "more" lines before the question (all of small talk)
+const talkPackHold = C => { const P = talkPackOf(C); return !!(P && P.first && (P.i < P.lines.length || C.talk.mins - C.talk.lineAt < TALK_ASK - 3 * TALK_LINE)); };   // a first-talk scene's question waits for its lines, the last one held as long as a talk's third (item 15)
 const talkPackAsk = C => { const P = talkPackOf(C); return P && !P.small ? P.ask : null; };
 const talkPackReply = (C, k) => { const P = talkPackOf(C); return P && P.replies && P.replies[k] ? P.replies[k].text : null; };
 const talkPackAnswer = (C, k) => { const P = talkPackOf(C); if (P && P.first) { P.first.answered = true; talkPackFire(C.p, P.first); }   // the first-talk scene is had now
@@ -42290,7 +42291,7 @@ function talkStep(C) {                                    // every frame while y
   if (P && P.needs && typeof needClamp === 'function') { P.needs.social = needClamp(P.needs.social + g); T.gained += g; }
   for (let k = Math.floor(was / TALK_EVERY) + 1; k <= Math.floor(T.mins / TALK_EVERY); k++) { const pts = REL_PTS.talk * talkBoost(); relAdd(C.p.id, 'talk', pts); T.pts += pts; }
   if (T.mins >= TALK_MINS) { talkEnd(C, 'full'); return; }
-  if (!T.asked && T.mins >= TALK_ASK) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }
+  if (!T.asked && T.mins >= TALK_ASK && !(typeof talkPackHold === 'function' && talkPackHold(C))) { T.asked = true; T.ask = true; T.askAt = t; chatSay((typeof talkPackAsk === 'function' && talkPackAsk(C)) || (T.topic && talkSays(C, 'talk.' + T.topic + '.ask')) || 'What do you think?'); return; }   // section 22's talkPackHold: a first-talk scene's question waits for its lines (item 15)
   if (T.mins - T.lineAt >= TALK_LINE) { T.lineAt = T.mins; const l = talkNext(C); if (l) { C.line = { text: l, say: true }; chatShow(); return; } }
   talkMeter(document.getElementById('chat'), T);
 }

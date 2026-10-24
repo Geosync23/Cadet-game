@@ -290,7 +290,7 @@ def parse_talk_file(path, rel, out):
         t, where = cur['t'], cur['where']
         if not t['topic']:
             raise GenError(f'{where}: talk "{cur["slug"]}" has no topic: (a "topic:" line under its "==")')
-        most = 4 if t['first'] else 3                    # a first-talk scene may say a little more (4 fit before the ask at TALK_ASK)
+        most = 6 if t['first'] else 3                    # a first-talk scene may say more (the card holds its question until they're said: talkPackHold)
         if not 1 <= len(t['lines']) <= most:
             raise GenError(f'{where}: talk "{cur["slug"]}" has {len(t["lines"])} them: lines before its ask: (1-{most})')
         if not t['ask']:

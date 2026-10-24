@@ -90,7 +90,7 @@ only: own                         <- file level, before the first "==" (in any o
 == welcome
 first: yes                        <- straight under the "==": the first-talk scene (one a person)
 topic: crew
-them: ...                         <- a first-talk scene may have 1-4 them: lines (others 1-3; 4 fit before the ask)
+them: ...                         <- a first-talk scene may have 1-6 them: lines (others 1-3); the card holds its question until they're said
 ask: ...
 listen: ...  (and share:, cheer:, each with its indented answer, as for every talk)
 ```
