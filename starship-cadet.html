@@ -7599,8 +7599,10 @@ DECKS[5].places.push({ id: '5-delivery-1', type: 'event', event: 'delivery', at:
 const BEAM = { room: 'w', along: 7.0, len: 7.8, y: 2.42, yours: 3.6,   // the bay's hull wall runs from along 3 (the Chief's office) to 11
   past: ['Ada', 'Lars', 'Mireille', 'Tom', 'Celine', 'Ivar', 'Juno', 'Kemi', 'Petra', 'Luis', 'Harpreet', 'Gil', 'Rosa', 'Mateo', 'Yuki', 'Otto'],   // 0.47.6 (playtest): first names, all of them
   // 0.47.6 (playtest): the west end (the first 2.5 m, 650 of the canvas's 2048 px) is kept for the four newest, a 2 x 2 grid: slot 0 is
-  // yours (DECK_DRESS.nameYours), slots 1-3 the Works hands who join later (DECK_DRESS.nameNew, the traces { id: 'nameNew', day, name })
-  slots: [[3.72, .085], [4.98, .085], [3.72, -.085], [4.98, -.085]], clear: 650 };
+  // yours (DECK_DRESS.nameYours), slots 1-3 the Works hands who join later (DECK_DRESS.nameNew, the traces { id: 'nameNew', day, name }).
+  // 0.92.3 item 23 (the user: "your name is way off to the side"): yours is the top row's east slot, right up against the
+  // first painted name (it was the west one, 1.3 m short of them); the next hand's goes under yours, then the west column
+  slots: [[4.98, .085], [4.98, -.085], [3.72, .085], [3.72, -.085]], clear: 650, gap: 36 };   // gap: px of a slot's 256 between an east-column name and the row (the row's own spacing, about 17 cm)
 const firstName = n => String(n || '').trim().split(/\s+/)[0] || 'Cadet';
 Object.assign(WALL_KIT, {
   nameBeam(g) {
@@ -8194,10 +8196,10 @@ const DECK_DRESS = {
     }
     return { t: 'Spice shelf', x: n + (n === 1 ? ' jar' : ' jars') + ' on the shelf, each brought from home by someone aboard, labelled in their handwriting. Brennan cooks with three of them at every Spice shelf supper.', wall: [SPICES.room, SPICES.wall, SPICES.along], y: SPICES.y + .1, w: 1.3, h: .3 };
   } },
-  // 0.38.30: nameYours: a lasting trace from Name on the beam: your name, freshly painted at the beam's west end. 1 draw call
+  // 0.38.30: nameYours: a lasting trace from Name on the beam: your name, freshly painted at the end of the row (0.92.3: beside it). 1 draw call
   nameYours: { deck: 5, what: 'your name, freshly painted on the Works bay\'s beam', make(g) {
     const [sa, sy] = BEAM.slots[0], s = dressAt(g, BEAM.room, 'n', sa), name = firstName(SHIP.player && SHIP.player.name);   // 0.47.6: your first name, in slot 0
-    const t = tex(256, 40, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 32px Georgia,serif'; const tw = Math.min(w - 8, c.measureText(name).width); c.fillText(name, (w - tw) / 2, 30, w - 8); });
+    const t = tex(256, 40, (c, w, h) => { c.fillStyle = '#f8f4ea'; c.font = '700 32px Georgia,serif'; const tw = Math.min(w - BEAM.gap - 4, c.measureText(name).width); c.fillText(name, w - BEAM.gap - tw, 30, w - BEAM.gap - 4); });   // 0.92.3: right up to the row
     const p = new THREE.Mesh(new THREE.PlaneGeometry(1.2, .1875), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y + sy, .138); s.add(p);
     return { t: 'Your name', x: 'Your name on the beam, the paint still bright, at the end of the row. Every new hand gets one. Yours will fade like the others, slowly, and somebody will touch it up.', wall: [BEAM.room, 'n', sa], y: BEAM.y + sy, w: 1.2, h: .2 };
   } },
@@ -8207,8 +8209,9 @@ const DECK_DRESS = {
     const list = (SHIP.traces || []).filter(x => x && x.id === 'nameNew' && x.name).slice(-3), [a0] = BEAM.slots[1], [a1] = BEAM.slots[2], mid = (a0 + a1) / 2;
     const s = dressAt(g, BEAM.room, 'n', mid), span = a0 - a1 + 1.2;   // one plane over slots 1-3 (slot 0's corner stays clear)
     const t = tex(512, 80, (c, w, h) => { c.font = '700 32px Georgia,serif'; list.forEach((x, k) => { const [sa, sy] = BEAM.slots[k + 1], n = firstName(x.name);
-      const cx = (sa - mid + span / 2) / span * w, tw = Math.min(w * 1.2 / span - 8, c.measureText(n).width); c.fillStyle = ['#f8f4ea', '#e8c06a', '#7fd6c8'][k];
-      c.fillText(n, cx - tw / 2, sy > 0 ? 30 : 70, w * 1.2 / span - 8); }); });
+      const cx = (sa - mid + span / 2) / span * w, sw = w * 1.2 / span, tw = Math.min(sw - 8, c.measureText(n).width); c.fillStyle = ['#f8f4ea', '#e8c06a', '#7fd6c8'][k];
+      const east = sa === BEAM.slots[0][0], tx = east ? cx + sw / 2 - BEAM.gap * sw / 256 - tw : cx - tw / 2;   // 0.92.3: the east column's right up to the row, as yours
+      c.fillText(n, tx, sy > 0 ? 30 : 70, sw - 8); }); });
     const p = new THREE.Mesh(new THREE.PlaneGeometry(span, .375), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false })); p.position.set(0, BEAM.y, .132); s.add(p);   // 6 mm in front of the beam's names, 6 mm behind yours (0.47.8, R2: at least 5 mm)
     return { t: 'New names', x: 'The newest names on the beam, beside yours: ' + list.map(x => firstName(x.name)).join(', ') + '. The paint is still bright.', wall: [BEAM.room, 'n', mid], y: BEAM.y, w: span, h: .4 };
   } },
@@ -38383,6 +38386,7 @@ function tradJoinMinute(now) {
   const here = deckDef.num + '|' + roomAt(...player.here()), name = tjFirst(TJ_NOW.lead), s = TRAD_JOIN[TJ_NOW.e.id];
   if (!TJ_NOW.e.rooms.has(here)) return;
   const beam = s.act === 'beam', label = tradWords(TJ_NOW.e, 'tip', { name }) || (beam ? 'Tap the beam to paint your name' : 'Tap ' + name + ' to ' + s.verb);
+  if (beam && !beamReady()) return;                      // 0.92.3 item 13: not till they've gathered and said their piece (beamGather)
   if (!g || g.tj === TJ_NOW.key || tradGoalHere(g, TJ_NOW.e)) { if (!g || g.tj !== TJ_NOW.key) setGoal(beam ? { deck: 5, item: /^The beam$/, beam: true, label, tj: TJ_NOW.key } : { deck: deckDef.num, crew: TJ_NOW.lead, label, tj: TJ_NOW.key }); }
   ixTip('t:join:' + TJ_NOW.e.id, label + (beam ? '. The Works crew are waiting to see it go up.' : '. Anyone taking part will do: you join in with them.'));
 }
@@ -38434,7 +38438,7 @@ function tradJoin(e, a) {
   const s = TRAD_JOIN[e.id], now = shipNow(), d = e.day, lead = TJ_NOW && TJ_NOW.e === e ? TJ_NOW.lead : tradLeader(e), name = tjFirst(lead || a.p.id);
   const notice = tradWords(e, 'notice', { name }) || e.name + ': ' + s.what + '. Social and leisure up.';
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
-  if (s.act === 'beam') { toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
+  if (s.act === 'beam') { if (beamWaitTap()) return true; toast(a.p.name, '"' + (tradWords(e, 'tell', { name }) || 'Go on, tap the beam. Your name goes up there, with ours.') + '"'); return true; }
   if (s.act === 'walk') { eventJoin(e, d, now, notice); tradWalkStart(e, lead); return true; }
   const near = tjAgent(lead) || a, sp = tradSpot(e, near.x, near.z);
   eventJoin(e, d, now, notice);
@@ -38475,7 +38479,7 @@ let TJ_FREE = null;                                      // { ids: Map(id -> the
 // painting your name (0.71.3, the user's playtest 2: "couldn't tap the Name Beam": the beam is a thin target high on the
 // wall): a tap on the beam or on the floor within BEAM_REACH tiles of the beam's spot starts it (its leader still only says to)
 const BEAM_REACH = 2.5;
-const beamOn = () => !!TJ_NOW && TRAD_JOIN[TJ_NOW.e.id].act === 'beam' && PLACE_OF.has('5-beam-1') && !(typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.beam);
+const beamOn = () => !!TJ_NOW && TRAD_JOIN[TJ_NOW.e.id].act === 'beam' && PLACE_OF.has('5-beam-1') && beamReady() && !(typeof ACT !== 'undefined' && ACT && ACT.o && ACT.o.beam);
 function beamPaint() {
   if (!beamOn()) return false;
   const e = TJ_NOW.e;
@@ -38483,13 +38487,53 @@ function beamPaint() {
     after: tradWords(e, 'paint', {}) || 'Zeke hands you the pen. You paint your name, big letters, at the end of the row.' });
   return true;
 }
-PLAYER_TAPS.push((it, at) => !!it && it.t === 'The beam' && beamPaint());
+PLAYER_TAPS.push((it, at) => !!it && it.t === 'The beam' && (beamPaint() || beamWaitTap()));
 function beamFloorTap(point) {                           // section 15's playerFloorTap asks first
   if (!point || !beamOn() || deckDef.num !== 5) return false;
   const sp = placeSpot('5-beam-1'); return !!sp && Math.hypot(point.x - sp.x, point.z - sp.z) <= BEAM_REACH && beamPaint();
 }
+// 0.92.3 item 13 (the user's playtest: "you can sign before anyone's there"): the beam opens for your name only once the
+// crew have gathered and a few words have been said. From the event's start, once BEAM_CROWD of those at it stand round the
+// beam (or BEAM_WAIT minutes on, so it never stalls) and you're in the Works bay, its leader says the event's own lines
+// (the writer's join.<id>.explain if there are any, else its text.here), a bubble every BEAM_GAP ms; after the last, the
+// tip, the arrow and a tap on the beam. Till then a tap on the beam says they're gathering. Not saved: after a reload,
+// said again. Read every BEAM_LOOK ms (no R()). RV13: a late arrival must still sign before it ends (e.to): only as many
+// of the lines (the last ones: the hand-over stays) as end BEAM_SPARE ship minutes before it ends, and it opens then whatever is left
+const BEAM_CROWD = 5, BEAM_WAIT = 12, BEAM_GAP = 4200, BEAM_NEAR = 5, BEAM_LOOK = 500, BEAM_SPARE = 5;
+const BEAM_OPEN = { key: null, q: null, next: 0, look: 0, open: false };
+function beamReady() { return !!TJ_NOW && BEAM_OPEN.key === TJ_NOW.key && BEAM_OPEN.open; }
+function beamLines(e) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES['join.' + e.id + '.explain']) ? LINES['join.' + e.id + '.explain'].map(x => x && x.text) : (((e.ev && e.ev.text) || {}).here || []).map(x => x && x.t);
+  return L.filter(x => typeof x === 'string' && x);
+}
+function beamGather() {
+  if (!TJ_NOW || TRAD_JOIN[TJ_NOW.e.id].act !== 'beam' || typeof deckDef === 'undefined' || deckDef.num !== 5) return;
+  const B = BEAM_OPEN, e = TJ_NOW.e;
+  if (B.key !== TJ_NOW.key) Object.assign(B, { key: TJ_NOW.key, q: null, next: 0, look: 0, open: false });
+  if (B.open) return;
+  if (!B.q) {
+    if (simNow() < B.look) return; B.look = simNow() + BEAM_LOOK;
+    let inBay = false; try { inBay = roomAt(...player.here()) === BEAM.room; } catch (x) { inBay = false; }
+    const now = shipNow(), m = now - (e.day - 1) * 1440, sp = placeSpot('5-beam-1');
+    if (!inBay || !sp) return;
+    const at = DECK_CREW.filter(c => c.p && Math.hypot(c.x - sp.x, c.z - sp.z) <= BEAM_NEAR && (o => o && o.now && o.e.id === e.id)(eventOf(c.p, now))).length;
+    if (at < BEAM_CROWD && m < e.from + BEAM_WAIT) return;
+    const L = beamLines(e), per = BEAM_GAP / 1000 * SHIP_RATE, k = Math.max(0, Math.floor((e.to - m - BEAM_SPARE) / per));   // ship minutes a line takes; how many fit
+    B.q = k ? L.slice(-k) : []; B.next = simNow();
+  }
+  if ((shipNow() - (e.day - 1) * 1440) >= e.to - BEAM_SPARE) B.q.length = 0;   // running late (a dialogue held them): open now
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE || simNow() < B.next) return;
+  const text = B.q.shift();
+  if (text) { const a = TJ_NOW.agent; if (a && a.h && typeof bubbleSay === 'function') bubbleSay(a.h, text, 4); B.next = simNow() + BEAM_GAP; return; }
+  B.open = true; tradJoinMinute(Math.floor(shipNow()));   // the tip and the arrow now, not at the next minute
+}
+function beamWaitTap() {                                 // a tap on the beam while they gather
+  if (!TJ_NOW || TRAD_JOIN[TJ_NOW.e.id].act !== 'beam' || beamReady() || SHIP.events.joined.includes(TJ_NOW.key)) return false;
+  toast(TJ_NOW.e.name, 'The Works crew are gathering at the beam. Your turn comes in a moment.'); return true;
+}
 let BEAM_CHEERS = [];                                    // [{ c: agent, text, at: real ms }]: the welcomes, said in turn
 function tradBeamFrame() {
+  beamGather();
   while (BEAM_CHEERS.length && simNow() >= BEAM_CHEERS[0].at) { const b = BEAM_CHEERS.shift(); if (b.c.h && DECK_CREW.includes(b.c) && typeof bubbleSay === 'function') bubbleSay(b.c.h, b.text, 4); }
   const A = typeof ACT !== 'undefined' ? ACT : null;
   if (!A || !A.o.beam || A.o.painted || !(A.phase === 'do' || A.phase === 'out') || A.done < A.def.mins) return;
