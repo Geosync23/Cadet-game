@@ -115,3 +115,9 @@ Game sha256 10240cb2...8fa88. Base 364c80cb.
 
 ## 0.92.4 queue (LEAD 33, ~14:57 UTC): item D, FX10: warn when you take a repair job whose part would run past a lesson start
 Base claude/integration 3866c8f3 (0.92.3). Lead 34 (session_019RdVfeRPRiJpHGjKujZZJA) took over ~15:00 UTC. Verdicts to Lead 34, FX10 + BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh). Waiting for FX10's sha.
+- FX10 p924-fx10 d8f128be (game c05d277a...; code dcff694f): lessonClash (15b) + ixBoard.take appends "Heads up: it runs to
+  about HH:MM (its part has to be made...), and <lesson> with <name> starts at HH:MM." when now + mins + make + 10 > the
+  meeting. interactions_check line: near (30 min) warns, far (10 h) not; fails on 0.92.3 (FX10).
+  **Open:** the device's Jobs section (sec 17 jobsSection via the 19 shim) has its own Take it -> claimJob, no heads-up.
+  Asked FX10 to cover it or show it's unreachable. Wording "parts first, from main storage" left alone (backlog if needed).
+  Running: interactions fix + k1 (always warn) plant, cadet_test vs 0.92.3, check_fast.
