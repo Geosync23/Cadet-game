@@ -123,3 +123,12 @@ Game sha256 44a5cc8e...; 123a778d's game (d643c0da...) plus one toast string ("o
   Mess part + events part 12 OK; on 3866c8f3 the new lines FAIL; planted faults caught: k1 TRAY_TRAVELS true, k2 never
   left behind out of the mess, k3 Pick-your-own tray not travelling, k4 no "leave your tray" word. cadet_test ALL
   IDENTICAL, food 1 7 OK, arrows week OK. To rerun on the new sha (game changes in needGoal).
+
+## FX9 go-walk claude/p925-fx9 84e14d89 (0.92.5 item 1, the walk after the toilet): PASS (~18:30 UTC)
+Game sha256 c0ed76be...534d; base 3866c8f3.
+- Diff: one line in section 8b animateRig's leg loop (runs every frame, unconditionally): leg.knee.rotation.z = 0.
+  Nothing else in the game sets knee z (grep), so only HOLDS.go's knees turn them in, now from straight each frame
+  (L(0, target, s)); full blend unchanged (0.256). player_check: knees read after a toilet visit, walking and after
+  sitting while bursting.
+- player_check: OK on the fix ([0,0],[0,0]); FAILs on 3866c8f3 ([0.256,0.256] both): the base is the planted fault.
+- cadet_test vs 3866c8f3 ALL IDENTICAL (crew rigs too); check_fast OK (243 s).
