@@ -80,3 +80,15 @@ Game sha256 6e445254...75b1 (b2c73694 = game; 838bf732/42bf2eaa/789f1ff0 = disc_
 - cadet_test 0.92.2 vs fix ALL IDENTICAL; check_fast OK (198 s). FX11's own: day_check 2, perf (court +2 calls).
 - Owner sign-off for 15r and 8c (Rec engineer seat not live, LEAD 33): given.
 - FX11-1 backlog row: withdrawn by FX11 (probe error), fine.
+
+## FX10 p923-fx10 bce5e885 (items 21, 24, 29 + machine_check share line + arrows backlog 15): interim FIXES NEEDED (test only), ~07:05 UTC
+Game sha256 10240cb2...8fa88. Base 364c80cb.
+- Diff: sec 17 slot FIX_ROWS (194, 6 parked) / fixTable (lazy, machSeed+schedU, no R()) / fixOk / fixPost; boardTopUp asks
+  fixPost first (2 of 3 top-ups), old kinds never the same target twice a day; CHORES.fix (per 0); jobMeterSys j.sys;
+  shareOut skips j.fix; jobStepDone done line. 15b: IX_STOP.fix, ixChoreTap sign + tool, boardLesson + board row first,
+  class 'lesson', guideShift lesson pointer. Words content/works/fixes.lines baked (1164 baked lines). Extras lapse at
+  leaveEnd (boardTopUp line ~20586), as before.
+- machine_check: fix OK (18 small repairs, 10 science, 0 repeats; share Days 2-28 53%); 0.92.2 OK (47%) and planted g1
+  FIX_ON=false OK -> **no line fails without the fix** (fixOn-gated). g2 (ship stream only) FAIL; g3 (done-today skip
+  off) FAIL; **g4 (shareOut j.fix guard off) OK -> crew-never-take not proven.** Asked FX10 for both lines.
+- Nit: machine_check comment "both near 45-46%" vs 47/53 here.
