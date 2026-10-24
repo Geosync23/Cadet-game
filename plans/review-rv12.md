@@ -156,3 +156,14 @@ Game sha256 c0ed76be...534d; base 3866c8f3.
 - a7f3822c: both nits fixed (top/bottom hull blocks y 8-25.6 and -17.6-0, z +0.4 to +139.6: no shared planes; the mouth edges at y 0 and 8 unchanged; the check's paths from __dirname). Read, fine.
 - 7bf86392 (round 2, the user's notes; light look): game untouched; left/right turned round only in input() (camera looks along +z, so screen right is -x; rules and pilots unchanged); prettier view (sky dome, nebula, planet, new Wren/Tern, beacons, ring halos), 17 draw calls, no random calls, colours through col(). SIMFLIGHT CHECK OK twice; shots look good. Nit: the drag-right line passes on a 5 px move (291 -> 296 of 390), since the camera follows: thin margin.
 - 6d5611ee: the nit taken: FL.screenVx() (vx along the camera's right vector; the page's only change), the three steering lines need > 3 m/s the right way; FX13 planted the unflipped steering: all three FAIL. Read, fine.
+
+## FX9 lift-flash claude/p925-fx9c 8777fc44 (game 91cc7716's, 0.92.5 item 21): PASS (~23:00 UTC)
+Game sha256 67dc4eee...f8cb; base integration ba836359 (2aa6427f...).
+- Diff: one line at the end of updateDeckCrew: each newcomer (not in `here`) gets h.set at x+lx+hx, y, z+lz+hz, face,
+  heldPose: the same call as CrewAgent's per-frame update (l.55984), so the first drawn frame is where it is. day_check:
+  a per-deck "arriving" line (first drawn spot within .1). Backlog FX9-1 row (separate).
+- day_check 1 OK: 0 of 560 arrivals drawn elsewhere; on ba836359 FAILs on every deck (29/29, 59/60, 196/196, 167/168,
+  40/40, 5/5, ...), all "drawn at 0.0,0.0": the base is the planted fault.
+- cadet_test vs ba836359: j_steer1 and j_steer2 differ (FX9 reported j_steer2 only): looked at both: walkers' leg
+  phase only (one walker in j_steer1; one at the right and an arm at the left edge in j_steer2), same spots: the jump
+  from the origin used to count as walking and advance their stride. Explained. check_fast OK (260 s).
