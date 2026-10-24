@@ -53848,6 +53848,7 @@ function animateRig(rig, g, dt, t, sk, rnd = R) {      // rnd: the crowd passes 
     const ang = legIK(leg, ANK + lift * w - (hipY - HIP_OFF), z * w);
     leg.ankle.rotation.x = -ang + pitch * w;
     leg.thigh.rotation.z = -hipX / hipY - rig.hips.rotation.z + leg.side * .02;
+    leg.knee.rotation.z = 0;                             // 0.92.5 (the user's item 1): only '+go' turns the knees in; straight again each frame, so none is left after the toilet
     if (leg.side > 0) zL = z;
   }
   const fl = zL / (STRIDE / 2) * w;
