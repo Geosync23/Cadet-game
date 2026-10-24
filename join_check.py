@@ -5,7 +5,8 @@
 #   it's on, the arrow gone once joined; a turn-up tradition (the birthday) still joins by being there;
 #   Lap of the Wren: on Sundays (not Mondays), Tomas leads, the walk forms a line (leader, you, followers), goes round
 #   and finishes; tapping elsewhere drops you out;
-#   Name on the beam: tapping crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined),
+#   Name on the beam: locked at its start until the crew gather and the leader says its lines (0.92.3 item 13); then tapping
+#   crew tells you to tap the beam; the beam's tap paints your name (trace nameYours, joined),
 #   the crowd breaks up after; the newcomer's version only for new Works hands (beamNew), their nameNew traces through a
 #   real save and reload; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
@@ -81,15 +82,23 @@ with sync_playwright() as pw:
       tradJoinTap(TJ_NOW.agent); const was = !!TJ_WALK; playerGo(nearestOpen(player.obj.position.x - 3, player.obj.position.z, player)); tradWalkFrame(.1); return { was, now: !!TJ_WALK }; })()""")
     print('Dropping out of the lap:', dr)
     if not dr['was'] or dr['now']: fail(f"walking off should drop you out of the lap: {dr}")
-    # Name on the beam
+    # Name on the beam (0.92.3 item 13: locked till the crew have gathered and the leader has said the event's lines)
     g.ev("""(() => { goToDeck(5); actEnd(true); clearGoal(); const d = 1, e = eventsOn(d).find(x => x.id === 'name-on-the-beam');
-      SHIP.traces.length = 0; SHIP.events.joined = []; setShipNow((d - 1) * 1440 + e.from + 6); deckCrewFill(); const sp = placeSpot('5-beam-4'); player.obj.position.set(sp.x, 0, sp.z); player.stop(); EV_MIN = -1; eventsTick();
+      SHIP.traces.length = 0; SHIP.events.joined = []; setShipNow((d - 1) * 1440 + e.from + 1); deckCrewFill(); const sp = placeSpot('5-beam-4'); player.obj.position.set(sp.x, 0, sp.z); player.stop(); EV_MIN = -1; eventsTick();
       const it = ITEMS.find(i => i.t === 'The beam'), p = it.hit.getWorldPosition(new THREE.Vector3());
-      window.__beam = { goal: IX_GOAL && IX_GOAL.label, tell: TJ_NOW && tradJoinTap(TJ_NOW.agent), joined0: SHIP.events.joined.length, tr0: SHIP.traces.length, tap: PLAYER_TAPS.some(f => f(it, p, p)) }; })()""")
+      window.__said = []; { const b0 = bubbleSay; bubbleSay = (h, t, s) => { if (TJ_NOW && TJ_NOW.agent && h === TJ_NOW.agent.h) window.__said.push(t); return b0(h, t, s); }; }
+      window.__beam = { early: { goal: IX_GOAL && IX_GOAL.label, ready: beamReady(), tap: PLAYER_TAPS.some(f => f(it, p, p)), tr: SHIP.traces.length, toast: document.getElementById('tx').textContent } }; })()""")
+    for _ in range(120):
+        g.step(30)
+        if g.ev('beamReady()'): break
+    g.ev("""(() => { const it = ITEMS.find(i => i.t === 'The beam'), p = it.hit.getWorldPosition(new THREE.Vector3()); tradJoinMinute(Math.floor(shipNow()));
+      Object.assign(window.__beam, { opened: hhmm(shipNow() % 1440), said: window.__said.slice(), goal: IX_GOAL && IX_GOAL.label, tell: TJ_NOW && tradJoinTap(TJ_NOW.agent), joined0: SHIP.events.joined.length, tr0: SHIP.traces.length, tap: PLAYER_TAPS.some(f => f(it, p, p)) }); })()""")
     g.step(400)
     bm = g.ev("({ ...__beam, tr: SHIP.traces.map(x => x.id), joined: SHIP.events.joined, free: TJ_FREE ? TJ_FREE.ids.size : 0, goalAfter: IX_GOAL && IX_GOAL.label })")
     print('Name on the beam:', bm)
-    if bm['goal'] != 'Tap the beam to paint your name' and not (bm['goal'] or '').lower().count('beam'): fail(f"the beam: no arrow to the beam: {bm}")
+    if bm['early']['ready'] or bm['early']['tr'] or not bm['early']['tap'] or 'gathering' not in (bm['early']['toast'] or '') or 'paint' in (bm['early']['goal'] or '').lower(): fail(f"the beam: at the start (17:06) it should wait for the crew: no arrow to paint, a tap says they're gathering: {bm['early']}")
+    if len(bm['said']) < 3: fail(f"the beam: the leader should say the event's lines before it opens: {bm['said']}")
+    if bm['goal'] != 'Tap the beam to paint your name' and not (bm['goal'] or '').lower().count('beam'): fail(f"the beam: no arrow to the beam once open: {bm}")
     if bm['joined0'] or bm['tr0'] or not bm['tap']: fail(f"the beam: tapping crew shouldn't paint; the beam's tap should: {bm}")
     if bm['tr'] != ['nameYours'] or bm['joined'] != ['name-on-the-beam@1'] or bm['free'] < 3 or bm['goalAfter']: fail(f"the beam: name up, joined, crowd breaks up: {bm}")
     nw = g.ev("""(() => ({ names: beamNew(200 * 1440).map(x => x.name + '@' + x.day), on: [...Array(200).keys()].map(x => x + 1).filter(d => eventsOn(d).some(e => e.id === 'name-on-the-beam-new')),
