@@ -18,26 +18,29 @@ In both: **Marrow, Pell, Zeke, Calder**. Writing starts with them.
 
 ## What each main character gets
 
-- **30 own talks** in all: their 4 existing ones kept unchanged, plus **26 new**. Laddered by tier so a player who
-  talks to them every day has something new each day: about 8 at any tier or acquaintance, 8 from colleague, 6 from
-  friend, 4 from close friend (`when: tier>=...`). A game of about 30 days uses at most about 30.
+- **30 own talks** in all: their 4 existing ones kept unchanged, plus **26 new**, laddered by tier. Because a player
+  stays a stranger or acquaintance with some people for a long while, most talks open early:
+  - **the Captain:** about 22 at any tier or acquaintance (of the 30), 5 from colleague, 3 from friend or close;
+  - **everyone else:** about 16 at any tier or acquaintance, 7 from colleague, 4 from friend, 3 from close.
 - Varied by topic (the ten topics: hobby, home, their day, work, food, news, a tradition, crew, the ship, plans), and
   some by time or mood (`time:`, `mood:`, `weekday:`), so the same week doesn't feel samey.
-- **Their own small talk** for when every talk they can give today is used: `== small.<id>` (15 lines, no question,
-  may repeat, in their voice) and `== done.<id>` (3 lines, "we've talked about everything"). The pattern Saruth
-  already has (`small.saruth`, `done.saruth`).
-- **Never the general pool:** no `pool-*`, `work-*` or generic `smalltalk` lines for them (FX13's engine side).
-- **The Captain's welcome:** her first talk ever is `== welcome`: she introduces herself properly (name, that she
-  commands the Wren) and welcomes you aboard. One question and three replies, like any talk. FX13 makes it play first.
+- **When they run out** (FX13's engine, agreed 2026-10-24): they **repeat their own talks**, the least lately heard
+  first and none heard in the last 20 days if possible. No small-talk blocks are needed, and the general pool and
+  shared small talk are never used for them (`only: own`).
+- **The Captain's welcome:** her first talk ever is `== welcome` with `first: yes`: she introduces herself properly
+  (name, rank, the ship) and welcomes you aboard; up to **4** `them:` lines (90 characters each), one `ask:` and the
+  three replies. It counts as used only once you've answered; the generic hello isn't put in front of it.
 
-## The format (FX13 to confirm)
+## The format (agreed with FX13, 2026-10-24)
 
-The existing `.talk` grammar, in each person's own file `content/talkpack/<crewId>.talk` (one writer per file):
+The existing `.talk` grammar, in the person's own file `content/talkpack/<crewId>.talk`:
 
-- New talks: ordinary `== <talk-id>` blocks (`topic:`, `when:`, `them:`, `ask:`, `listen:`/`share:`/`cheer:` with the
-  indented answer), appended after the existing four. Ids unique within the file.
-- `== welcome` (Marrow only): plays as her first talk.
-- `== small.<crewId>` and `== done.<crewId>`: `- ` lines, as in smalltalk.talk, placed at the end of the person's file.
+- New talks: ordinary `== <talk-id>` blocks (`topic:`, `when:`, `them:` x1-3, `ask:`, `listen:`/`share:`/`cheer:` with
+  the indented answer), appended after the existing four. Ids unique across that person's files, never reused.
+- `only: own` on its own line before the first `==` (once per person): own pool only.
+- `first: yes` straight under `== welcome` (Marrow only; one per person at most).
+- A person may have more than one file (`marrow-2.talk`, all `@talks marrow`), baked in filename order, if a pool is
+  split between writers. Not needed this round.
 
 ## Rules (as for the crew stories)
 
@@ -49,7 +52,7 @@ in trouble now; Zeke's dad well and retiring; Halloran's dad long gone, gently).
 
 ## Assignment (first round)
 
-- **SW3:** Marrow (welcome + 26 talks + small).
+- **SW3:** Marrow (welcome + 26 talks).
 - **SW1:** Pell, Zeke, Calder.
 - **SW2:** waits for the list; then the next three.
 - After the list is confirmed: the remaining six shared out, three each to whoever finishes first.
