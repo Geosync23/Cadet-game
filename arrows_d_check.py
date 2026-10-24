@@ -127,10 +127,10 @@ def part_on(pg):
       SHIP.jobs.push({ id: 'arrows-tj', machine: myJob().machine, deck: 5, kind: 'repair', urgency: 1, posted: now, found: now, claimedBy: null, parts: [], status: 'open' });
       W.cur = { id: 'm4', st: 'do', d: 9, by: 'esposito-yara', j: 'arrows-tj' }; guideTrain();
       guideAsk({ id: 'arrows-q4', level: 4, goal: () => ({ deck: 5, room: 'w', label: 'arrows-q4' }), until: now + 30 });
-      GUIDE.key = ''; const g = goalNow(), t3 = guideList().find(e => e.id === 'train:m4:do');
+      GUIDE.key = ''; const g = goalNow(), t3 = guideList().find(e => e.id === 'train:m4:do:9');   /* (DS1, patch 0.92.5 #12: T3 is per day) */
       guideDrop('arrows-q4'); window.__keep = keep; return { lab: g && g.label, t3: !!t3, pick: guidePick() && guidePick().id }; })()""")
     print('  pass-over:', r)
-    check(r['t3'] and r['pick'] == 'train:m4:do' and r['lab'] == 'arrows-q4', f'pass-over: T3 (the pick) has nothing to show, the next live entry should ({r})')
+    check(r['t3'] and r['pick'] == 'train:m4:do:9' and r['lab'] == 'arrows-q4', f'pass-over: T3 (the pick) has nothing to show, the next live entry should ({r})')
     # S7: clock out over a held job and over T3
     at(pg, 1019); shift(pg); lab0 = pg.ev(LAB)
     at(pg, 1020); pg.ev("guideTrain()"); shift(pg); lab = pg.ev(LAB)

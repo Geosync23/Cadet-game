@@ -16722,7 +16722,7 @@ function guideTrain() {
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
   } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
     guideAsk({ id: 'train:' + c.id + ':do:' + c.d, level: 3, once: true, owner: '24 core (read)', until: now + 480,   // (per day: a lesson offered again leads again; patch 0.92.5 #12)
-      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName() + ': at the job board' }; },   // at the shift's end it gives way to clock out (piece D)
+      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName() }; },   // (on the board itself; 258 px at 390)   // at the shift's end it gives way to clock out (piece D)
       done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
   }
 }
@@ -16781,7 +16781,7 @@ function guideShift() {
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
-      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() + ': at the job board' : 'Take a job at the board' }; } });
+      goal: () => { let j = null; try { j = myJob(); } catch (e) { j = null; } return j || !guideTakeable().length ? null : { deck: 5, item: /job board/i, room: 'w', label: boardLesson() ? 'Your ' + boardLessonName() : 'Take a job at the board' }; } });
     const L = mine ? [] : guideTakeable(), les = !mine && boardLesson(), cur = SHIP.works && SHIP.works.cur;
     const ids = L.map(o => o.id), take = () => { for (const id of ids) { const b = boardButton(id); if (b) return b; } return null; };   // the first row of these with its Take it
     if (P && L.length && !les) pointAsk({ id: 'p:board:take', once: 3, path: [pointBoard(null)[0], { el: take, label: 'Take it' }], until: now + 60, done: () => { try { return !!myJob(); } catch (e) { return true; } } });
