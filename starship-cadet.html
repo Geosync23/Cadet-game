@@ -9690,6 +9690,19 @@ function apptTick() {
     if (now >= a.at + APPT_WAIT) { a.status = 'missed'; simNote('apptMissed', { id: a.id, with: a.with }); }
   }
 }
+// a tap on someone you're due to meet keeps it too (FX8; patch 0.92.3, #22: walking up to Rina for the health check and
+// tapping her did nothing, only standing by the infirmary's bench counted): from 2 minutes before its time to APPT_WAIT
+// after, on its deck, within 4 tiles of them (x, z: where they are). -> the appointment kept, or null
+function apptTapKeep(p, x, z) {
+  const now = shipNow();
+  if (typeof deckDef === 'undefined' || typeof player === 'undefined') return null;
+  for (const a of apptList()) {
+    if (a.status !== 'yes' || !isFinite(a.at) || now < a.at - 2 || now >= a.at + APPT_WAIT || !(a.with || []).includes(p.id)) continue;
+    const pl = apptPlace(a); if (!pl || deckDef.num !== pl.deck || Math.hypot(player.obj.position.x - x, player.obj.position.z - z) > 4) continue;
+    a.status = 'kept'; a.keptAt = now; simNote('apptKept', { id: a.id, with: a.with }); return a;
+  }
+  return null;
+}
 // ---- doors for invitations and summons (C3, C10): the ready room, Deck 2 bedrooms, officers' cabins ----
 // doorOpenFor(room, who, t, deck): a locked room is open to you ('player') and to the crew in the appointment while an
 // accepted invitation or summons to a place in it runs (from 15 minutes before to 15 after it ends). False otherwise:
@@ -54231,6 +54244,8 @@ function tapCrew(cx, cy) {
   if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   if (typeof tradJoinTap === 'function' && tradJoinTap(a)) return true;   // section 18: tap someone at a tradition to join in (0.70.0)
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  const ap = typeof apptTapKeep === 'function' ? apptTapKeep(a.p, a.x, a.z) : null;   // section 14: due to meet them now (Rina's health check): kept
+  if (ap) { toast(ap.title || 'Appointment', 'Kept: ' + a.p.name + ' is seeing you now.'); if (typeof playerChat === 'function') playerChat(a.p); return true; }
   if (typeof chatOpen === 'function' && chatOpen(a.p)) return true;   // section 20: the chat card
   const f = crewFeeling(a.p, shipNow());               // section 14: "Tomas looks tired"
   const el = typeof eventLine === 'function' ? eventLine(a.p, shipNow()) : null;   // section 18: "Coming to the quiz tonight?"

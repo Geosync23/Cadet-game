@@ -1587,5 +1587,42 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+# patch 0.92.3 #22 (FX8): a real tap on the person you're due to meet keeps the appointment (Rina's health check: you
+# walked up to her and tapped her, but only standing by the infirmary's bench counted, 2.2 tiles from where she stands)
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1], 390, 844); g.step(3)
+    print('== an appointment kept by tapping the person (Rina in the infirmary, a real tap)')
+    if g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON"): g.ev("GUIDE.tq.length = 0; guideToast = () => false")
+    g.ev("setShipNow(1440 + 15 * 60 + 30); goToDeck(3)"); g.step(60)   # Day 2, 15:30: Rina at her infirmary station
+    r = g.ev("""(() => { const a = DECK_CREW.find(x => x.p.id === 'rina'); if (!a || !a.settled) return null;
+      const b = placeSpot('3-visit-1'), c = nearestOpen(a.x + 1.5, a.z + 1.5, player), q = cellPos(...c);
+      player.obj.position.copy(q); player.stop();
+      if (!Array.isArray(SHIP.device.appts)) SHIP.device.appts = [];
+      SHIP.device.appts.push({ id: 9998, with: ['rina'], at: shipNow() + 1, len: 30, where: '3-visit-1', kind: 'checkup', status: 'yes', by: 'rina', title: 'Health check (test)' });
+      return { rina: [a.x, a.z], bench: Math.hypot(q.x - b.x, q.z - b.z), her: Math.hypot(q.x - a.x, q.z - a.z) }; })()""")
+    check(r and r['bench'] > 2.2 and r['her'] < 4, f'standing by Rina, not by the bench, with a health check due ({r})')
+    if r:
+        g.step(4); pt = None
+        for k in range(20):
+            pt = g.ev("""(() => { const a = DECK_CREW.find(x => x.p.id === 'rina'), scr = """ + MESS_SCR + """;
+              for (const hy of [1.0, .5, 1.4]) { const q = scr(a.x, a.y + hy, a.z), el = document.elementFromPoint(q[0], q[1]);
+                if (q[0] > 20 && q[0] < 370 && q[1] > 120 && q[1] < 760 && crewAtScreen(q[0], q[1]) === a && el && el.tagName === 'CANVAS') return q; } return null; })()""")
+            if pt: break
+            g.step(10)
+        st0 = g.ev("SHIP.device.appts.find(a => a.id === 9998).status")
+        if pt: g.page.mouse.click(*pt)
+        g.step(4)
+        st = g.ev("[SHIP.device.appts.find(a => a.id === 9998).status, document.getElementById('tt').textContent, document.getElementById('tx').textContent]")
+        check(pt and st0 == 'yes' and st[0] == 'kept' and 'Kept' in st[2], f'a real tap on Rina keeps the health check, and says so ({pt}, {st0} -> {st})')
+        g.ev("SHIP.device.appts = SHIP.device.appts.filter(a => a.id !== 9998)")
+        # with nothing due, a tap on her is a word with her as ever (no appointment touched)
+        g.step(200)
+        if pt: g.page.mouse.click(*pt)
+        g.step(4)
+        n = g.ev("document.getElementById('tx').textContent")
+        check('Kept' not in n, f'with nothing due, a tap on her is the usual card ({n[:60]})')
+    check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
