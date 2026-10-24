@@ -10,7 +10,7 @@ full log in `plans/review-rv13.md` (every verdict, sha, planted fault, check res
 - 0.92.5: DV1 promo-arrows 81e9065c (24p, 25 sign-off).
 - Sim bay (behind SIM_BAY): FX14 rec-simbay 328f678a (S1-S7b; 4e/15r/14/17/18 sign-offs where owners not live).
 
-## Open: weekend traditions (0.92.5 item 16), claude/p925-weekend, all behind WEEKEND_ON
+## Weekend traditions: handed to RV14 (Lead 34, ~22:50 UTC); notes below kept for history
 - FX14's T1+T2 9e840769: FIXES NEEDED (joins' PLAYER_ACTS 'tj:'+id never built). FX14 handed over to FX11, now FX9
   (session_01WeXGZBS3DyyLqHGpRjWZzA). FX9's 357ff7ac (game d2ca64c2) has T3 Bread day, T4 big jigsaw, the tjActs() rerun,
   weekend_check.py, SW1's words. Not final: attendance gap (Night owls' cocoa, Sunday story: bedtime), hosts not at their
@@ -32,3 +32,7 @@ full log in `plans/review-rv13.md` (every verdict, sha, planted fault, check res
 ## Shared formats
 Verdicts: PASS / FIXES NEEDED, sha + game sha256, what the diff does, checks (fix/base/plants), sign-offs, notes. To the
 builder, the lead and the build master (BM16 session_01MB7n4yvCAeGyWN4WZCAGPh).
+
+## Update ~23:30 UTC (final)
+- Also PASS: DS1 p925-ds1 a99453d8 (0.92.5 items 11/12/15); the sim bay switch-on at staging-0.92.5 e9ce3351.
+- Weekend traditions + item 19 (Cook-along in the galley) are RV14's. Nothing open for RV13. Idle.

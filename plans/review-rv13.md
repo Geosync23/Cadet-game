@@ -195,3 +195,8 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
   'lesson') #12 FAIL, r3 (lapse line off) #15 x2 FAIL, r4 (held line off) the held line FAIL. cadet_test 0.92.4 vs 4c50fa4d
   ALL IDENTICAL (DS1: same on a99453d8). check_fast a99453d8 OK. DS1's: career, intro, arrows, arrows_d, day 1/5, mech full,
   interactions (confirming run: no FAIL so far). Sign-off: 24 core (small edits), 15b.
+- **Sim bay switch-on look, staging-0.92.5 e9ce3351 (game b805ded3...): PASS (~23:30 UTC).** One line (SIM_BAY = true) + docs.
+  interactions OK (pilots 6 incl. Raman, 62 turns), day_check 2 OK, events OK, check_fast OK. cadet_test vs 543ef305: a-d and
+  g_nocrew identical, crew shots differ; e9ce3351 with SIM_BAY false vs 543ef305: ALL IDENTICAL, so every diff is the
+  switch (crew plans with the sim-pilot habit). Perf: BM16's first run flagged JS frame-time rises under a shared machine
+  (draw calls same, no memory growth); BM16 rerunning alone (theirs to decide).
