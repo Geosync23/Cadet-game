@@ -11198,8 +11198,9 @@ function walkLaneStep(a, dt, mid) {                    // mid: ease to the middl
 // getting up from a place (FX8; patch 0.92.4 C, the user's yes): retarget moves them from the seat or station to its
 // walk-to tile at once (paths and timing as ever); hx/hz, drawn only, start at the difference and ease away in
 // a steady glide (CREW_UP_V tiles a second: 0.7 tiles in under a third of a second), so the body steps off the place
-// instead of hopping up to a few tiles in one frame
-const CREW_UP_V = 2.5;
+// instead of hopping. Only a short one (CREW_UP_MAX: the usual seat, bed or station): a longer move (a rec-deck stand's
+// 4 tiles, a few mess seats') would glide over the furniture between, so it stays as it was (lead 34)
+const CREW_UP_V = 2.5, CREW_UP_MAX = 1.2;
 function crewUpEase(a, dt) {
   if (!a.hx && !a.hz) return;
   const d = Math.hypot(a.hx, a.hz), m = d - dt * CREW_UP_V;
@@ -55920,7 +55921,7 @@ class CrewAgent {
     const atSpot = this.spot && (this.settled || !this.path.length);
     let from = atSpot ? this.spot.walk : this.here();
     if (!free(...from)) from = nearestOpen(this.x, this.z, null) || from;
-    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); if (atSpot) { this.hx += this.x - w.x; this.hz += this.z - w.z; } this.x = w.x; this.z = w.z; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
+    if (atSpot && !this.spot.onTile || !free(...this.here())) { const w = cellPos(...from); if (atSpot && Math.hypot(this.x - w.x, this.z - w.z) <= CREW_UP_MAX) { this.hx += this.x - w.x; this.hz += this.z - w.z; } this.x = w.x; this.z = w.z; }   // up from the seat (drawn: eased off it, hx/hz, FX8)
     this.goalId = goalId; this.path = [];
     this.settled = false; this.spot = null;
     let goal = null;
