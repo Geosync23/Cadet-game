@@ -31054,8 +31054,12 @@ const LINES = JSON.parse([
   '{"text":"You\'re in yesterday\'s clothes.","id":"1l3uqw7"}]',
   ',"clothes.tip.grubby":[',
   '{"text":"Your uniform\'s grubby. A shower won\'t fix it: change at your wardrobe in Bunk 1.","id":"1fvc7wo"}]',
+  ',"clothes.tip.laundry":[',
+  '{"text":"No clean clothes left. Your hamper\'s in your wardrobe: take it to the laundry on Deck 4.","id":"1dxulge"}]',
   ',"clothes.tip.yesterday":[',
   '{"text":"You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.","id":"iab6cr"}]',
+  ',"clothes.tip.yesterday2":[',
+  '{"text":"Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.","id":"5jm40j"}]',
   ',"crewjob.carry":[',
   '{"text":"Coming through! Box with legs.","id":"f1bug9","tone":"funny","dept":"works"},',
   '{"text":"Mind your toes. Heavy one.","id":"o2xg2t","dept":"works"},',
@@ -46854,7 +46858,12 @@ function clothesDirtyTick() {
 // Tips setting, SHIP.device.tipsSeen): yesterday's clothes, and a grubby uniform (the writers' clothes.tip.* lines)
 function clothesDirtyTip(u) {
   if (typeof tipShow !== 'function') return;
-  if (u === 'yesterday') tipShow('clothes.yesterday', clothesText('clothes.tip.yesterday', {}, 'You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.'));
+  const C = SHIP.clothes, d = SHIP.time.day, D = SHIP.device, h = C.hamper;
+  const out = C.clean <= 0 && !(h && h.state === 'clean'), laundry = () => clothesText('clothes.tip.laundry', {}, 'No clean clothes left. Your hamper\'s in your wardrobe: take it to the laundry on Deck 4.');   // out of clean clothes: the laundry, not the wardrobe (RV11; the cut pop-up's own test)
+  if (u === 'yesterday') {                               // the first time; then once more on a later day if you're still in yesterday's clothes (0.92.4, item B)
+    if (!D.tipsSeen['clothes.yesterday']) { if (tipShow('clothes.yesterday', out ? laundry() : clothesText('clothes.tip.yesterday', {}, 'You\'re in yesterday\'s clothes, and people notice. Change at your wardrobe in Bunk 1.'))) C.said.ytip = d; }
+    else if (Number.isInteger(C.said.ytip) && d > C.said.ytip) tipShow('clothes.yesterday2', out ? laundry() : clothesText('clothes.tip.yesterday2', {}, 'Yesterday\'s clothes again. A fresh set\'s waiting in your wardrobe in Bunk 1.'));
+  }
   else if (u === 'grubby') tipShow('clothes.grubby', clothesText('clothes.tip.grubby', {}, 'Your uniform\'s grubby. A shower won\'t fix it: change at your wardrobe in Bunk 1.'));
 }
 function wardrobeUse() {
@@ -47070,10 +47079,7 @@ function clothesFrame() {
   if (h && h.at === 'washer' && !h.done && now >= h.until) { h.done = true; toast('Laundry', clothesText('laundry.done', {}, 'Your washing\'s done. Collect it from the laundry on Deck 4.') + ' It\'s in ' + washerName(h.washer) + '.'); }
   if (C.changed < SHIP.time.day && C.clean > 0 && SHIP.time.min >= 6 * 60 && SHIP.time.min < CLOTHES_LATE && deckDef.num === 4 && typeof ixTip === 'function' && !ACT)
     ixTip('clothes', clothesText('tip.clothes', {}, 'Fresh clothes every morning from your wardrobe, by the door in Bunk 1 (by 10:00 you\'re in yesterday\'s clothes). When they run out, do your laundry when you can.'));   // once (the device's tips)
-  if (C.told !== SHIP.time.day && clothesYesterday()) {
-    C.told = SHIP.time.day;
-    toast('Yesterday\'s clothes', clothesText('clothes.stale', {}, 'You\'re in yesterday\'s clothes.') + (C.clean > 0 || h && h.state === 'clean' ? ' Change at your wardrobe in Bunk 1; till then you\'ll feel grubby sooner.' : ' And there are no clean ones left: your hamper\'s in your wardrobe. Do your laundry.'));
-  }
+  // (the "Yesterday's clothes" pop-up, once a day, is cut: the user, 0.92.3 notes, item B; the green tips say it, clothesDirtyTip)
   const stale = clothesYesterday();                     // the writers' clothes.remark lines are gated on this flag (crew notice)
   if (stale !== CLOTHES_STALE && typeof flagSet === 'function') { CLOTHES_STALE = stale; flagSet('clothes.stale', stale ? true : null); }
   const grubby = uniformState() === 'grubby';            // and clothes.grubby (patch 0.92.3 #26: the writers' clothes.grubby lines)
