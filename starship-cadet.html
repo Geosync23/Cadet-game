@@ -13735,7 +13735,7 @@ function actBegin() {
     const alt = [...PLACE_OF.values()].filter(q => q.type === pl.type && q.id !== pl.id && !held(q.id) && !(PRIVATE_TYPES.has(q.type) && privatePlace(q)))
       .map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && Math.hypot(s.x - A.spot.x, s.z - A.spot.z) < ACT_NEAR)
       .sort((m, n) => Math.hypot(m[1].x - A.spot.x, m[1].z - A.spot.z) - Math.hypot(n[1].x - A.spot.x, n[1].z - A.spot.z))[0];
-    if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); return; }
+    if (alt && !A.o.moved) { actStart(A.kind, alt[0].id, { ...A.o, moved: true, pose: A.kind === 'eat' ? alt[1].pose : A.o.pose }); if (ACT && ACT.kind === 'recSeat' && typeof recSeatHold === 'function') recSeatHold(); return; }   // moved one along for a show: still till it's over (0.92.5 #17, RV11)
     ACT = null; toast(A.o.title, 'In use: ' + who.p.name + ' got there first.'); return;
   }
   if (A.kind === 'tray' || A.kind === 'grab') {          // take the food now (an 'eat' is always a served tray since 0.28.45)
