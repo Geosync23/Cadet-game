@@ -122,7 +122,7 @@
 // ---- ZW1 (writer), patch 0.92.5 item 5: more chat-card openers, so a tap doesn't repeat (FX13's no-repeat).
 == greet
 ? tier>=acquaintance
-- {nick}. Read the ending first again. Risk management.   #funny
+- {nick}. Night bridge was so quiet I heard the stars. Nearly.   #funny
 - {hi}, {me}. Quiet ship. My favourite kind.
 - {me}. Sit a minute. Nobody ever does. Be the exception.   #warm
 - {hi}. Woke up before the alarm. The alarm was offended.   #funny

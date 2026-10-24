@@ -18,7 +18,7 @@
 // ---- ZW1 (writer), patch 0.92.5 item 5: more lines for the chat card's opener (greet, near), so a tap doesn't repeat.
 // Heard after a person's own lines are used up (FX13's no-repeat). {hi}, {nick} and {me} are the speaker's own words.
 == greet
-- {hi}. Good to see you.
+- {hi}. Nice to run into you.
 - {hi}. How's the day treating you?
 - {hi}, {nick}. All going well?
 - Hello. Got a minute? I've got a few.
@@ -27,7 +27,7 @@
 - {hi}. Glad you stopped by.
 - {hi}. Take a seat if you like.
 ? tier>=acquaintance
-- {hi}, {nick}. Always good to see you.
+- {hi}, {nick}. You've a knack for good timing.
 - {hi}. You've settled in well. People say so.
 ? time:morning
 - Morning. Steady start. That's the best kind.
