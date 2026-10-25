@@ -179,3 +179,9 @@
 - Tap {name} to sit down for tea
 == join.one-week-aboard.notice
 - One week aboard: tea with Zeke in the bow lounge, going over your first week. Social up.
+
+// SW2, 0.92.6 item 2: the Sunday swap meet (host Orla Ishikawa).
+== join.market.tip
+- Tap {name} to join the swap meet
+== join.market.notice
+- Sunday swap meet: browse the stalls on the promenade and swap one thing for another. Social and leisure up.
