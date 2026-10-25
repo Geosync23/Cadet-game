@@ -80,3 +80,16 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
 - perf weekend scenes vs 0.92.4: 7 PROBLEM flags, all from more people (jigsaw 119->174 calls, story 200->235, Bread day
   landscape js 1.36->2.39 ms); under budget 450 (max 342). Told BM16 to record them as expected for CR2.
 - Verdicts sent to lead 35, BM16, FX16.
+
+## 0.92.6, FX17's traditions (claude/p926-fx17; behind P926_TRADS; items 2, 3, 4, 5, 7, 8, 13, 15), lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi)
+- b2cb366c -> dd211641 (0.92.5 candidate 53c11f88 merged, SW2's words, the eight 8-week traditions) -> b397ddd5 (my finds:
+  Garden walk 09:15, host-away skip) -> 40715af8 (part 8 leader-gone line) -> d1097923 (window-sketch-2, Lumi from Day 77).
+- Finds: Garden walk Day 63 host Cruz at breakfast to 08:47 (1 there) -> fixed. Window sketch Day 104 host away -> skip + copy.
+  Part 8 fallback-leader plant not caught -> FX17 added the leader-gone line (verified: OK on fix, FAIL planted).
+- **d1097923 (game 56834fff...): FIXES NEEDED (~08:55 UTC).** All four cards (week1.zeke, swap.meet, spice.guess,
+  talk.<by>.ask) close with no input at the next ship minute (probe /tmp/rv14/scripts/cards.py, cards2.py). The plain
+  talk.<by> card does the same on 0.92.5 53c11f88 (old). FX22 knows the cause (a scene with no room closed by the meetings code).
+  Asked: fix + "still open after 3 ship minutes" line in parts 5, 2, 15, 13.
+- Green on d1097923: p926_check OK, events on OK, day 104 on OK, cadet off vs 53c11f88 ALL IDENTICAL, check_fast OK.
+  Earlier: plants 13/15/2/3/4/5/7 FAIL their lines; day 8/14/35/63 on OK; deck on OK; host probe all hosts present.
+- Section 19 device lines (Calendar/Home "on now, until", Schedule real end): signed off as owner (off: unchanged).

@@ -20,6 +20,10 @@ Builders so far: FX14 -> FX11 -> FX9 -> DS1 -> now **FX16** (session_01MbKpntrDk
 - Item 16 switched ON: **PASS at 3307ded5** (game 49ba25a4...). Details in plans/review-rv14.md. Nothing open from me;
   the six-runner round is the lead's. perf_check weekend: flags expected (more people), told BM16.
 
+## 0.92.6 (now): FX17's traditions, FIXES NEEDED at d1097923 (cards close at the next minute). See review-rv14.md.
+Next: FX17's fix sha -> rerun p926_check (with the new card lines), cadet off vs 53c11f88, events on, check_fast, my
+cards.py/cards2.py probes (all four cards must stay open), then PASS/FIXES to lead 36.
+
 ## Earlier plan for the final verdict (done)
 - The user (00:30/00:40 UTC): 0.92.5 ships the weekend SWITCHED ON, on a 4-week rotation; old weekend traditions keep
   days/times/places/hosts, lose at most 2 people, not below their floor (lead 35's rule).
