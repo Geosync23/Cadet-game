@@ -1,48 +1,42 @@
-# Handover: RV14 (code reviewer), 2026-10-25 ~01:55 UTC
+# Handover: RV14 (code reviewer), 2026-10-25 ~10:00 UTC
 
-**Role:** reviewer under Lead 35 (session_01VQkkt8RXcvvGs1Dmzn2emM; was Lead 34). Notes-only branch `claude/review-rv14`;
-full log `plans/review-rv14.md`. Never change the game. Verdicts to the builder, the lead and BM16
-(session_01MB7n4yvCAeGyWN4WZCAGPh), with priority "next".
-
-## Scope
-0.92.5 item 16 (the weekend traditions; branch claude/p925-weekend) and item 19 (Cook-along in the galley).
-Builders so far: FX14 -> FX11 -> FX9 -> DS1 -> now **FX16** (session_01MbKpntrDkcWAKrTj1HRUMm).
+**Role:** reviewer under Lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi; before: Lead 34, Lead 35). Notes-only branch
+`claude/review-rv14`; full log `plans/review-rv14.md` (every verdict, sha, plant, result). Never change the game.
+Verdicts (PASS / FIXES NEEDED, sha + game sha256, what it does, checks, plants, sign-offs) to the lead, copy the builder.
 
 ## Verdicts given
-- Item 19 Cook-along in the galley: **PASS at 7ff6a818**. Merge note: needs bbcea5cb's evTagId 'cook' line and
-  events_check's tagId 'cook' (6039daa2).
-- Section 8c crewDetail swap line (80dff612, FX9's root cause of the Day 7 Pell hop): **PASS** (owner idle).
-- 3e323170 (turn 1 + 4-week rotation): **PASS for its stage**.
-- Told lead: food_check 7 'garden, good' is OLD (same numbers on ba836359); Day 62 observatory-night -4 vs 0.92.4 comes
-  with FX12's merge (not the weekend).
+- 0.92.5 item 19 Cook-along in the galley: PASS 7ff6a818. Section 8c crewDetail line (80dff612): PASS.
+- 0.92.5 item 16 weekend traditions, switched ON: PASS 3307ded5 (perf flags expected, told BM16).
+- 0.92.6 FX17 traditions (items 2, 3, 4, 5, 7, 8, 13, 15; P926_TRADS): PASS fa4c1d38; section 19 lines signed off.
+  Re-look of 173f21ed (cardWhere(e): the tradition's own rooms + the tap room): see the log's last line for the result.
 
-## Final (2026-10-25 ~04:30 UTC)
-- Item 16 switched ON: **PASS at 3307ded5** (game 49ba25a4...). Details in plans/review-rv14.md. Nothing open from me;
-  the six-runner round is the lead's. perf_check weekend: flags expected (more people), told BM16.
-
-## 0.92.6: FX17's traditions PASS at fa4c1d38 (sent to lead 36 ~09:45 UTC). See review-rv14.md.
-Next: FX17's fix sha -> rerun p926_check (with the new card lines), cadet off vs 53c11f88, events on, check_fast, my
-cards.py/cards2.py probes (all four cards must stay open), then PASS/FIXES to lead 36.
-
-## Earlier plan for the final verdict (done)
-- The user (00:30/00:40 UTC): 0.92.5 ships the weekend SWITCHED ON, on a 4-week rotation; old weekend traditions keep
-  days/times/places/hosts, lose at most 2 people, not below their floor (lead 35's rule).
-- Wait for FX16's switch-on sha (seat-first line, T5 decor/head counts/perf, T6 birthday hour/records/design-doc).
-- Then on the shipped file (switch ON as shipped): weekend_check, events_check, join_check, food_check 1 7, day_check 6,
-  7, 14 (and 28), deck_check, check_fast, my plans/rv14-old_trads.py (BASE = the same build with WEEKEND_ON forced off;
-  also vs 0.92.4 for information), cadet_test vs 0.92.4: only the expected weekend/FX12 differences (ask FX16 for the
-  list), plants for any new check line (seat line: turn seat-first off).
+## Next (for RV17): FX22's appointments (0.92.6 item 9), claude/p926-fx22 582a3544 (game 1389038c...), P926_APPT / ?appt
+Built on FX17 4eab8c9f; FX22 still has to merge FX17 173f21ed and staging's promo-sight.lines (lead 36 sends the final sha).
+Read plans/handover-fx22.md and DEV_NOTES "Appointments as small traditions". What to watch:
+- **Cards closing**: section 18's meetingsTick closes any dialogue with no `where` at the next ship minute (FX22's find).
+  apptScene calls `cardWhere()` with NO argument -> only the room you tapped from: tap the host from a doorway, walk in,
+  the card closes. After merging 173f21ed it should pass the booking's event (cardWhere(e)). Probe: plans/rv14-probes/cards4.py
+  pattern (put the player next to the host, tap, step 20 frames x 24, print DIALOGUE.id each time; and once from outside the
+  room). cards.py / cards2.py: the same for FX17's four cards.
+- Hooks outside the slot (each `P926_APPT &&`): eventsTick apptFrame, eventJoin apptJoin, tradJoinable (appointment one-offs),
+  evOneOffDefs (`only`, `appt`, `toBed`; absent = as before), the Appointments app, the Record. Off must be cadet_test
+  ALL IDENTICAL vs 53c11f88 (rerun once if a_start alone differs: a timing flake, backlog FX17-2).
+- Save: SHIP.apptx saved only with the switch; check a save/reload mid-booking.
+- Planner purity: bookings reach the planner only as one-offs (eventOneOff), as player invitations already do.
+- Plant one fault per appt_check part and see each FAIL its own line (the review rule). appt_check has its own "planted" part.
+- Words: content/appointments/*.appt baked by content_gen's new parse_appt; content_gen --check; lines_check.
+- appt_check on 582a3544 was running when I wrote this (/tmp/rv14/a926/appt.txt; container-local).
 
 ## How I test
-- Setup: plans/testing-guide.md 2.0 (playwright, three r128, acorn into /tmp/cadet-work). A worktree of the branch at
-  /tmp/rv14/wk; builds in /tmp/rv14/b; each run its own CADET_WORK (/tmp/rv14/w-*) with three symlinked. Two browser
-  runs at once; background commands need run_in_background and a timeout up to 2 h (the 30-min default kills them).
-- Switch-on copy (while it ships off): sed "s/^const WEEKEND_ON = URL_FLAGS.has('weekend')/const WEEKEND_ON = true/".
-  Once it ships on, the off copy is the reverse, for the old-traditions base.
-- Running part of a check: take the file's text up to the first `with sync_playwright() as pw:` plus the part, set
-  `__file__` to the real check's path (it execs cadet_test.py by replacing its own name).
-- Gotchas: never pkill -f a pattern in your own command line (I killed my own background job that way). A weekend_check
-  that "passed" for a builder once had never parsed: always run the check yourself. Vance is "he" in the game's words.
+- Setup: plans/testing-guide.md 2.0. A worktree of the branch (/tmp/rv14/wk); builds in /tmp/rv14/b; each run its own CADET_WORK
+  with three symlinked; two browser runs at once (three makes page loads time out: join_check died twice that way).
+- Background runs: run_in_background with timeout up to 2 h (the 30-min default kills long checks).
+- Switch-on copies: sed "s/^const P926_TRADS = URL_FLAGS.has('p926')/const P926_TRADS = true/" (P926_APPT: 'appt').
+- Part of a check: the file up to its first `with sync_playwright() as pw:` plus the part, `__file__` set to the real check.
+- Probes in plans/rv14-probes/ (exec cadet_test.py's head; run with CADET_WORK set): hosts926.py (each new tradition's host
+  planned at each showing), old_trads.py (old traditions unchanged between two builds), cruz63.py (a person's plan that day).
+- Gotchas: never pkill -f a pattern in your own command line (use the [x]yz trick); a builder's "check passed" once came from
+  a check that never parsed: always run it yourself; Vance is "he"; Calder is "she"; food_check 7 'garden, good' FAIL is old.
 
 ## Open questions for the user
 None from me.
