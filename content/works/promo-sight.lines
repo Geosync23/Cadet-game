@@ -41,6 +41,9 @@
 // the Record's "What's next" while you're below Relied on ({band} now, {next} the next step's word)
 == next.t2.rep
 - Your Tier 2 test needs Relied on and Making it safe. You're {band}. Next: {next}.
+// the same, with the steps left ({steps}), when FX19's switch is on
+== next.t2.steps
+- Tier 2 test: Relied on and Making it safe. You're {band}, {steps} steps away. Next: {next}.
 
 // the Works app's Training tab, "Your promotion" checklist
 == works.promo.check.title
@@ -53,10 +56,14 @@
 - Making it safe, with the Chief
 == works.promo.check.set
 - Test job: {day}, 09:00
+== works.promo.check.done
+- Done
+== works.promo.check.not
+- Not yet
 
-// a crew remark (any Works crewmate, not Calder), the first time your ship-wide work reputation turns dependable
+// Calder's Mail, the first time your ship-wide work reputation turns dependable
 == promo.dependable
-- People are calling you dependable. That word gets back to the Chief. It always does.
+- Dependable | Word is you're dependable. Keep it up. Then we talk about your Tier 2 test.
 
 // optional (item 11): the chip on board jobs of a kind you're trained in
 == works.board.trade
