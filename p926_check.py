@@ -18,7 +18,8 @@
 #       14:30 (of about 30 crew off duty and aboard on a Sunday afternoon). Off: thinner (3-9) at least once
 #   7   the career's weeks: (b) a talk on every Monday from Day 36 to 78 and a chief's on Days 32, 46, 60, 74, each on the calendar;
 #       (c) Six weeks aboard on Day 42 and Twelve weeks on Day 84; and (a) from week 5 to 12 each week has a tradition not seen in
-#       any earlier week. Off: no talk after Day 29 and no milestones
+#       any earlier week; every new one's host at each showing to Day 112, and none on a day its host is away. Off: no talk after Day 29
+#       and no milestones
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -201,13 +202,19 @@ with sync_playwright() as pw:
           const ms = [42, 84].map(d => [d, eventsOn(d).map(e => e.id).filter(i => /weeks-aboard$/.test(i))]);
           const seen = new Set(), wk = []; for (let w = 0; w < 12; w++) { const ids = new Set(); for (let d = w * 7 + 1; d <= w * 7 + 7; d++) for (const e of eventsOn(d)) if (e.id !== 'birthday') ids.add(e.id);
             wk.push([w + 1, [...ids].filter(i => !seen.has(i))]); for (const i of ids) seen.add(i); }
-          return { talks, ms, wk, spk }; })())"""
+          const hosts = []; for (let d = 1; d <= 112; d++) for (const e of eventsOn(d)) { if (!P926_NEW.has(e.id) || !e.ev.host) continue; const h = schedPeople().find(q => q.id === e.ev.host);
+            hosts.push([d, e.id, e.ev.host, !!h && planDay(h, d).some(s => evTagId(s.tag) === e.id)]); }
+          const away = []; for (let d = 1; d <= 112; d++) for (const ev of SHIP_TRADITIONS) if (P926_NEW.has(ev.id) && ev.host && evDue(ev.when, d)) { const h = schedPeople().find(q => q.id === ev.host); if (h && !aboard(h, d)) away.push([d, ev.id, eventsOn(d).some(e => e.id === ev.id)]); }
+          return { talks, ms, wk, spk, hosts, away }; })())"""
         def weeks7(path):
             g = Game(pw, path, 900, 760); r = json.loads(g.ev(WEEKS)); err = g.errors; g.close(); return r, err
         r, err = weeks7(woff); print('  7 off: talks', [(t[0], bool(t[1])) for t in r['talks']], 'milestones', r['ms'], 'new by week', r['wk'][4:])
         check(not any(t[1] for t in r['talks'] if t[0] > 29) and not any(m[1] for m in r['ms']), '7 off: as 0.92.5, no talks after Day 29, no milestones')
         r, err = weeks7(won); print('  7 on: talks', [(t[0], t[1] and t[1]['by'], t[2]) for t in r['talks']], 'milestones', r['ms'], 'new by week', r['wk'])
         check(all(t[1] and t[2] for t in r['talks']), '7 (b): a talk on each of Days 32-78\'s talk days, on the calendar (%s)' % [t[0] for t in r['talks'] if not (t[1] and t[2])])
+        print('  7 new traditions, Days 1-112 (day, id, host, host there):', r['hosts'])
+        check(r['hosts'] and all(x[3] for x in r['hosts']), '7: each new tradition\'s host is planned at every showing, Days 1-112 (RV14) (missing: %s)' % [x[:3] for x in r['hosts'] if not x[3]])
+        check(not any(x[2] for x in r['away']), '7: a new tradition gives way when its host is away (RV14) (%s)' % r['away'])
         check(r['spk'] and all(x[2] for x in r['spk']), '7 (b): every talk\'s speaker is planned at it, Days 30-84 (missing: %s)' % [x[:2] for x in r['spk'] if not x[2]])
         check([m[1] for m in r['ms']] == [['six-weeks-aboard'], ['twelve-weeks-aboard']], '7 (c): Six weeks aboard on Day 42, Twelve weeks on Day 84 (%s)' % r['ms'])
         check(all(w[1] for w in r['wk'][4:]), '7 (a): weeks 5-12 each bring a tradition not seen before (%s)' % [w[0] for w in r['wk'][4:] if not w[1]])

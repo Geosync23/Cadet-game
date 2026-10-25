@@ -1,11 +1,11 @@
 @tradition garden-walk
-// SW2, 0.92.6 item 7(a), week 9 (FX17's shape: Sunday 08:45, the garden or the promenade). Garden walk: every 8 weeks
-// from Day 63, after Slow stretch (08:00-08:45). Tove Cruz (they/them) leads a slow walk round the garden and names
+// SW2, 0.92.6 item 7(a), week 9 (FX17's shape: Sunday morning, the garden or the promenade). Garden walk: every 8 weeks
+// from Day 63, after Slow stretch (08:00-08:45); 09:15 since RV14 (FX17: the host was still at breakfast at 08:45). Tove Cruz (they/them) leads a slow walk round the garden and names
 // every bed by the week it was sown; you may pick one leaf to taste. Cruz hosts.
 k: 716
 title: Garden walk
 when: every 8 weeks sunday week 1 from day 57
-at: 08:45-09:30
+at: 09:15-10:00
 min: 20
 where: 3 pool garden
 where: 3 room Promenade: bench
