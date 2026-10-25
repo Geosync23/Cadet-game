@@ -12227,6 +12227,7 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   const B = [{ kind: 'text', text: clockText(), mark: 'big' }], sn = devSeasonLine(SHIP.time.day);
   if (sn) B.push({ kind: 'text', text: 'Season: ' + sn + '.' });
   const say = text => B.push({ kind: 'text', text }), dn = devNow(), t = shipNow(), today = devTraditions(t, SHIP.time.day * 1440 - 1);
+  const ol = typeof outfitLine === 'function' ? outfitLine() : null; if (ol) say(ol);   // 0.92.6 #17: the outfit, clean or dirty (section 21b), at the top (the user's "at the top"; lead 36); its own need note then isn't repeated below
   B.push({ kind: 'text', text: dn.now + (dn.next ? '. ' + dn.next + '.' : '.'), mark: 'hot' });
   if (today.length) say('Today aboard' + (today.length > 1 ? ', ' + today.length + ' traditions' : '') + ': ' + today.map(x => x.title + ' at ' + devWhen(x.at)).join(', ') + '.');   // 0.34.51: how many, then each
   try { const es = typeof eventStatus === 'function' ? eventStatus(t) : null; if (es) B.push({ kind: 'text', text: es, mark: 'hot' }); } catch (e) { /* not yet */ }   // section 18's Ship status line (the events base F3b)
@@ -12236,7 +12237,6 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (P.carry.length) say('Carrying: ' + P.carry.join(', ') + '.');
   if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
-  const ol = typeof outfitLine === 'function' ? outfitLine() : null; if (ol) say(ol);   // 0.92.6 #17: the outfit, clean or dirty (section 21b); its own need note then isn't repeated below
   for (const nt of (playerFx().notes || []).filter(n => !(ol && n && n.clothes)).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
   const sl = settleList(), sa = DEVICE_APPS.get('settle');
   if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');

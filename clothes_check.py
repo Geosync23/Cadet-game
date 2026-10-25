@@ -70,6 +70,8 @@ with sync_playwright() as pw:
            " SHIP.clothes.grime = g0; SHIP.clothes.changed = c0; SHIP.time.min = m0; FX_MIN = -1; return out; })()")
     print('  the outfit line:', oh)
     check(oh['late'][0] == "Dirty outfit: yesterday's. Change at your wardrobe." and oh['late'][0] in oh['late'][1] and "In yesterday's clothes" not in oh['late'][1], f"Home: yesterday's outfit after 10:00 is dirty, said once (0.92.6 #17): {oh['late']}")
+    hb = oh['late'][1].split(' | '); si = next((k for k, x in enumerate(hb) if x.startswith('Season')), 0)
+    check(oh['late'][0] in hb and hb.index(oh['late'][0]) == si + 1, f'the outfit line is at the top of Home, right under the clock and season (0.92.6 #17, lead 36): {hb[:4]}')
     check(oh['early'] == "Yesterday's outfit: change before 10:00." and oh['clean'] == 'Clean outfit on.' and oh['grubby'] == 'Dirty outfit: grubby from work. Change at your wardrobe.', f'the outfit line before 10:00, clean, and grubby (0.92.6 #17): {oh}')
     if E("typeof clothesDirtyTick === 'function'"):   # playtest patch 1, #8: the extra drain shows as '−2 Hygiene' in the needs strip
         fl = E("(() => { FLOAT_LOG.length = 0; CLOTHES_DIRTY.at = null; CLOTHES_DIRTY.v = 0; const m0 = SHIP.time.min; for (let k = 0; k <= 120; k += 5) { SHIP.time.min = m0 + k; FX_MIN = -1; clothesDirtyTick(); } SHIP.time.min = m0; FX_MIN = -1; return FLOAT_LOG.slice(); })()")
