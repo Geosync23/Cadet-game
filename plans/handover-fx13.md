@@ -9,7 +9,7 @@ Session: session_01KVmjkTUis1ktZ3U7Ryc3jr. Leads over time: 32, 33, 34 (session_
 | 0.92.3 item 15: own Talk a while pools only for the Captain and main characters; the Captain's first-talk welcome | claude/p923-fx13 bc976e7d (engine) | RV13 PASS (incl. section 20 sign-off) | merged in 0.92.3 (BM15 baked CS1's words on top: 11 people `only: own`) |
 | 0.92.5 item 5: the chat card's line before hello doesn't repeat till all are said | claude/p925-fx13 04a9385d (dab87131 + merge of 0.92.4 ba836359) | RV11 PASS | with BM16 for 0.92.5 |
 | Sim flight landing prototype (standalone, NOT in the game) | claude/simflight 6d5611ee (simflight-proto.html, tools/simflight_proto_check.js, plans/shots-simflight/) | RV12 PASS | PUB1 publishes; on hold per lead 34 |
-| 0.92.5 item 20: the Tiles ladder round the Tiles table | claude/p925-fx13b 5e1d82d5 (first push ae8c8bc9; then tladLead) | RV12 (in review) | see "Loose ends" |
+| 0.92.5 item 20: the Tiles ladder round the Tiles table | claude/p925-fx13b 5e1d82d5 (first push ae8c8bc9; then tladLead) | RV12 PASS (4 planted faults caught) | with BM16 for 0.92.5 |
 
 ## How each works (where to look)
 
@@ -27,7 +27,7 @@ Session: session_01KVmjkTUis1ktZ3U7Ryc3jr. Leads over time: 32, 33, 34 (session_
 
 ## Loose ends
 
-- Item 20: RV12's verdict on the ladder; the set-off-early change (tladLead) was added at lead 34's ask after the first push.
+- Item 20: PASS (RV12, 5e1d82d5); the set-off-early change (tladLead) was added at lead 34's ask after the first push.
 - The ladder card's step counter shows "2/2" (dialogueView counts lines for a choice without a prompt; cosmetic).
 - Possible writer work: the host's `ladder.ask`, `ladder.play`, `ladder.watch` lines (stand-ins in tladJoin now).
 
