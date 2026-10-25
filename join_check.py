@@ -31,7 +31,10 @@ EACH = r"""(id => {
   const goal = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.label : null; tradJoinFrame();
   const mark = document.getElementById('tjMark'), marked = !!mark && /★/.test(mark.textContent);
   const s0 = SHIP.player.needs.social = 40, ok = tradJoinTap(TJ_NOW ? TJ_NOW.agent : a);
-  const r = { id, d, lead, passive, now, goal, marked, ok, joined: SHIP.events.joined.includes(id + '@' + d), social: SHIP.player.needs.social - s0,
+  // (DS1, RV14's (a) on Bread day) the leader shown is TJ_NOW's (the host on duty near the spots leads: Brennan), not only
+  // the planner's pick (tradLeader): the marker's name, the arrow's person and the tap must all be that one
+  const shown = TJ_NOW ? TJ_NOW.lead : null, markName = mark ? mark.textContent : '', goalCrew = IX_GOAL && IX_GOAL.tj === id + '@' + d ? IX_GOAL.crew || null : null;
+  const r = { id, d, lead: shown || lead, plan: lead, passive, now, goal, marked, ok, same: !!shown && markName.includes(tjFirst(shown)) && (goalCrew === null || goalCrew === shown) && (!goal || goal.includes(tjFirst(shown)) || /beam/i.test(goal)), joined: SHIP.events.joined.includes(id + '@' + d), social: SHIP.player.needs.social - s0,
     act: ACT ? [ACT.kind, ACT.placeId, ACT.o.pose] : null, walk: !!TJ_WALK, goalAfter: !!(IX_GOAL && IX_GOAL.tj), toast: document.getElementById('tx').textContent };
   if (TJ_WALK) tradWalkEnd('over'); actEnd(true); return r;
 })"""
@@ -50,6 +53,7 @@ with sync_playwright() as pw:
         print(f"  {i} day {r['d']}: leader {r['lead']}, arrow '{r['goal']}', marker {r['marked']}; tap -> joined {r['joined']} (+{r['social']:.0f} social), {('walk' if r['walk'] else r['act'])}")
         if r['passive']: fail(f"{i}: joined by being there (it's tap to join)")
         if not r['now'] or not r['goal'] or not r['marked']: fail(f"{i}: no arrow/marker at the leader: {r}")
+        elif not r['same']: fail(f"{i}: the marker, the arrow and its words don't name the same person: {r}")
         if not r['ok'] or not r['joined'] or r['social'] <= 0: fail(f"{i}: the tap didn't join: {r}")
         if not r['walk'] and not r['act']: fail(f"{i}: joined but no activity: {r}")
         if r['goalAfter']: fail(f"{i}: the arrow at the leader stayed after joining")

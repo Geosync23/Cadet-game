@@ -41806,6 +41806,10 @@ if (WEEKEND_ON) Object.assign(TRAD_JOIN, {
 // No R(); colours through col(); nothing saved or drawn with the switch off.
 if (WEEKEND_ON) {
   // its kneading spots are Cook-along's, 3-cookalong-1..6 round the prep island (FX9: 3-bread-6 sat on a cook's place, 3-galley-4)
+  // (DS1, RV14's (c)) Every song: two standing places by the piano in Deck 4's music room (room n: its west edge, x 44, is open
+  // to the corridor; these are in from it), tagged for every-song alone (type event: no other music event gets them), so the
+  // room's six music places don't cap it
+  DECKS[4].places.push(...[[46, 6, 46.5, 6.45], [47, 6, 47.5, 6.55]].map(([c, r, x, z], k) => ({ id: '4-song-' + (k + 1), type: 'event', event: 'every-song', at: [c, r], xy: [x, z], walk: [c, r], face: 'w', pose: 'stand', room: 'n' })));   // (its anim: the tradition's, by who)
   Object.assign(TRAD_JOIN, {
     'bread-day': { host: 'brennan', pose: 'cook', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'knead a loaf', what: 'knead a loaf for the week\'s bread' },
     'big-jigsaw': { host: 'raman', pose: 'sit:read', need: 'leisure', gain: 15, also: { social: 4 }, mins: 20, verb: 'add a few pieces', what: 'add a few pieces to the jigsaw' },
