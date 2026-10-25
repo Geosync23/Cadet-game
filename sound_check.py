@@ -6,7 +6,7 @@
 #   R(); the hum and the core hooks (turns 2-5)
 #   activities (FX20) and music (FX22b): their own functions
 # Setup and environment as for cadet_test.py.  Run:  python3 sound_check.py BUILD.html
-import sys, os, pathlib
+import sys, os, pathlib, json
 exec(open(__file__.replace('sound_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -79,7 +79,79 @@ def check_pause_suspends(pw, path):
         check(g.ev("SND._.state()") == 'running', 'resume runs it again')
     finally: g.close()
 
-CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends]
+# ---- activities (FX20): the approved activity sounds, what each activity plays, the hooks, and never R() ----
+ACT_NAMES = ['ratchet', 'panelOff', 'panelOn', 'partSwap', 'torch', 'scanA', 'vent', 'unstick', 'hingeSqueak', 'hingeOil', 'drain', 'wipe', 'cratePick', 'crateSet',
+             'typing', 'drill', 'cartDock', 'valve', 'hold', 'relay', 'flushVac', 'showerOff', 'sink', 'towel', 'callRing', 'hangUp', 'wardrobe', 'changing', 'hamper',
+             'bedLie', 'makeBed', 'sitChair', 'sitCouch', 'cup', 'tray', 'badge', 'locker', 'page', 'pencil', 'knit', 'trayPick', 'pour', 'bench', 'splash', 'kayak',
+             'climb', 'discThrow', 'piano', 'guitar', 'tileShuffle', 'telescope', 'watering', 'storm', 'announce', 'flicker', 'clockIn', 'clockOut', 'hello']
+# what an activity plays: [kind, extra fields on A.o, expected at the start, the loop, expected at its end]
+ACT_CASES = [['shower', {}, None, 'shower', 'showerOff'], ['toilet', {}, None, None, 'flushVac'], ['call', {}, 'callRing', None, 'hangUp'],
+             ['gym', {'title': 'Treadmill'}, None, 'treadmill', None], ['gym', {'title': 'Weights bench'}, 'bench', None, None], ['lie', {}, 'bedLie', None, None],
+             ['eat', {'fed': True}, 'tray', None, None], ['recSwim', {}, 'splash', 'swim', None], ['recFloat', {}, None, 'float', None], ['pay', {}, 'badge', None, None],
+             ['workStep', {'how': 'look'}, 'scanA', None, None], ['workStep', {'how': 'turn'}, 'valve', None, None], ['ixTea', {}, 'cup', None, None]]
+def check_activities(pw, path):
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        names = g.ev('Object.keys(SND._.FX)')
+        missing = [n for n in ACT_NAMES if n not in names]
+        check(not missing, f'activity sounds registered (missing {missing})')
+        played = g.ev(f"(() => {{ const out = [], t = SND.ctx.currentTime + 0.05; for (const n of {ACT_NAMES!r}) {{ try {{ SND._.FX[n](t, {{}}); }} catch (e) {{ out.push(n + ': ' + e.message); }} }} return out; }})()")
+        check(not played, f'every activity sound is made without an error (not: {played[:6]})')
+        seed0 = g.ev('seed')
+        g.ev(f"for (let k = 0; k < 200; k++) SND.fx({ACT_NAMES!r}[k % {len(ACT_NAMES)}])")
+        res = []
+        for kind, o, one, loop, end in ACT_CASES:
+            got = g.ev(f"""(() => {{ SND.log.length = 0; const A = {{ kind: {kind!r}, o: {json.dumps(o)}, def: {{}}, phase: 'in', placeId: null }};
+              SND.act('begin', A); const b = SND.log.map(e => e.name), lp = [...SND._.LOOPS].map(l => l.label); SND.log.length = 0; SND.act('end', A, false);
+              return [b, lp, SND.log.map(e => e.name), [...SND._.LOOPS].map(l => l.label)]; }})()""")
+            b, lp, e, after = got
+            good = (one is None or one in b) and (end is None or end in e) and (loop is None or (loop in b and loop in lp and loop not in after))
+            if not good: res.append((kind, o, got))
+        check(not res, f'each activity plays its sound, its loop runs till it ends, then stops: {res[:3]}')
+        walked = g.ev("(() => { SND.log.length = 0; SND.act('end', { kind: 'toilet', o: {}, phase: 'walk' }, true); return SND.log.length; })()")
+        check(walked == 0, 'no flush for a toilet you walked away from before sitting down')
+        chore = g.ev("""(() => { const t = shipNow(), mk = (id, title, tool, chore) => ({ id, title, tool, chore: chore || 'fix', kind: 'chore', status: 'open', stops: [] }), out = {};
+          for (const [id, title, tool, ch] of [['sc-v', 'Clean the lift lobby vent', 'a vent brush'], ['sc-h', 'Oil a squeaky corridor door', 'an oil can'], ['sc-d', 'Clear a slow basin drain', 'a drain snake'],
+              ['sc-u', 'Unstick a gym locker', 'a screwdriver'], ['sc-l', 'Replace a lobby light', 'a step stool', 'lamp'], ['sc-r', 'Tighten a wobbly lobby bench', 'a hex key']]) {
+            const j = mk(id, title, tool, ch); SHIP.jobs.push(j); SND.log.length = 0; SND.act('begin', { kind: 'ixStop', o: { job: id, title }, phase: 'in' }); out[id] = SND.log.map(e => e.name)[0]; SND.act('end', { kind: 'ixStop', o: {} }); }
+          SHIP.jobs = SHIP.jobs.filter(j => !String(j.id).startsWith('sc-')); return out; })()""")
+        check(chore == {'sc-v': 'vent', 'sc-h': 'hingeSqueak', 'sc-d': 'drain', 'sc-u': 'unstick', 'sc-l': 'partSwap', 'sc-r': 'ratchet'}, f'chores and small repairs by what you do: {chore}')
+        check(g.ev('seed') == seed0, 'the activity sounds never draw on R()')
+        # the hooks, through the game's own functions
+        real = g.ev("""(() => { SND.log.length = 0; const pl = [...PLACE_OF.values()].find(p => p.type === 'shower' && !(PRIVATE_TYPES.has(p.type) && privatePlace(p)));
+          if (!pl) return null; actStart('shower', pl.id, { title: 'Shower' }); return pl.id; })()""")
+        for _ in range(40):
+            if g.ev("!ACT || ACT.phase !== 'walk'"): break
+            g.step(30)
+        began = g.ev("[ACT ? ACT.phase : null, SND.log.map(e => e.name), [...SND._.LOOPS].map(l => l.label)]")
+        check(real and 'shower' in began[1] and 'shower' in began[2], f'a real shower (actStart at {real}) starts the running water: {began}')
+        g.ev("SND.log.length = 0; actEnd(false)"); g.step(2)
+        ended = g.ev("[SND.log.map(e => e.name), [...SND._.LOOPS].map(l => l.label)]")
+        check('showerOff' in ended[0] and 'shower' not in ended[1], f'and stepping out turns it off: {ended}')
+        ann = g.ev("(() => { SND.log.length = 0; deviceAddress({ text: 'All hands.' }); deviceAddress(null); return SND.log.map(e => e.name); })()")
+        check(ann == ['announce'], f'a ship-wide address chimes once: {ann}')
+        hello = g.ev("""(() => { const scr = a => { const v = new THREE.Vector3(a.x, (a.y || 0) + 1.0, a.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; };
+          const a = DECK_CREW.find(c => { const [x, y] = scr(c); return x > 40 && x < innerWidth - 40 && y > 80 && y < innerHeight - 80 && crewAtScreen(x, y) === c; }); if (!a) return 'no crew';
+          const [x, y] = scr(a);
+          SND.log.length = 0; const r = tapCrew(x, y); return [r, SND.log.map(e => e.name)]; })()""")
+        check(hello == 'no crew' or not hello[0] or 'hello' in hello[1], f'tapping someone says hello: {hello}')
+        clk = g.ev("""(() => { let d = 2; while (!playerShiftOn(d)) d++; setShipNow((d - 1) * 1440 + 485); SND.log.length = 0; const r = clockPunch(false); return [r, SND.log.map(e => e.name)]; })()""")
+        check(clk[0] in (None, 'in', 'out') and (clk[0] is None or ('clockIn' if clk[0] == 'in' else 'clockOut') in clk[1]), f'the time clock: {clk}')
+        print('  activities (FX20):', len(ACT_NAMES), 'sounds;', len(ACT_CASES), 'activities; chores', chore, '; shower', began[1], '->', ended[0], '; address', ann, '; hello', hello, '; clock', clk)
+    finally: g.close()
+
+def check_activities_silent(pw, path):
+    g = Game(pw, path)
+    try:
+        g.step(30); click_world(g)
+        r = g.ev("(() => { const pl = [...PLACE_OF.values()].find(p => p.type === 'shower'); actStart('shower', pl.id, { title: 'Shower' }); return [SND._.state(), SND._.LOOPS.size]; })()")
+        g.step(60); r2 = g.ev("[SND._.state(), SND._.LOOPS.size, SND.log === null]"); g.ev('actEnd(true)')
+        check(r[0] == 'off' and r2[0] == 'off' and r2[1] == 0, f'under webdriver an activity makes no sound and starts nothing: {r} {r2}')
+    finally: g.close()
+
+CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_activities, check_activities_silent]
 # (activities and music add theirs here)
 
 with sync_playwright() as pw:
