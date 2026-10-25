@@ -7,7 +7,14 @@
 4. Message every working seat with your session id (priority "next", never "now"). Tell lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi) you've taken over.
 5. User in US Eastern (EDT, UTC-4). Plain words, no emojis, few messages. Cap 8 working seats; during a six-runner round only BM + 6 + 1.
 
-## Latest (~17:15 UTC, 1:15 PM Eastern)
+## Latest (~18:00 UTC, 2 PM Eastern) — READ THIS FIRST
+- **0.92.6 GO** (BM17 package): claude/staging-0.92.6 tip d4be69cf (docs only on ec28a7f2; game sha256 10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266, HUD 0.92.6, all six switches ON incl. crew stories). **USER said publish to BOTH Playtest 3HqM5xiXaHXzgrpq7JbesJ and Dev 9ZWAgqiZCvkJvVjjhjVkEr** (~1:55 PM Eastern); PUB1 (session_01GnpjFR6oumvuvTrmcXSqeg) is publishing; it will report links + versions to lead 36 or you. NEVER over 6daNCLCJAcsLCZn27CEthq. Next: tell the user the links; then ask the user's OK to fast-forward claude/integration to the published commit (a BM does it; BM17 ~60% can do this one small ask, else BM18 from plans/handover-bm17.md). CS1's design-doc stories commit ae4d60de: BM17 may still need to cherry-pick it (docs only).
+- 0.92.5 was never published on its own (user: wait for 0.92.6).
+- Career pace = backlog 12 (lead call, user told; the user may overrule, e.g. ODD_MIN 2).
+- **Sound/music (SD1 session_012DnJzEerXDa6SScxbQZ1q5, claude/sound-sd1)**: all sound decided (Soundscape PP6pDpiZw8jzaNoLygCTgC, Activities 5sjuT5XCJqCvMP68AipdZP, Round 2 1MXY7YxN9DGUChzUhAUyU7). Music: player/test page https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy v6 = planetarium space music, no noise, no drums, 21 tracks renamed, 3-4 per time of day, rotation, Music app, on by default, silent Day 0 (just shown to the user; awaiting reaction). Build sound + music into the game only on the user's go AFTER 0.92.6 (plans/sound/integration-plan.md, audio-todo.md; ~1.5 days + music 3.5-5 h). Tradition music held.
+- Seats idle and reusable: FX17 (~52%), FX18, FX19 (~45%), FX20, FX22b, RV15, RV16, RV17, CR1-5, SW2, CS1, SD1. Need fresh CR6 (and BM18) before the next round.
+
+## Earlier (~17:15 UTC, 1:15 PM Eastern)
 - All round fixes PASSED: FX17 3e8c78a6 + eba4d365 (RV17), FX19 acb36503 (RV15), FX22b join 3d011393 (RV17), arc_check 70813dc8 (in staging). BM17 merging + re-running (bigevents, mech, arrows_d, join alone, p926, events, day 7, check_fast, cadet vs b78e1e22). Career pace = backlog 12 (lead call, told user; user may overrule: e.g. ODD_MIN 2). Then BM17 package → user → PUB1 on the user's say (Playtest 3HqM5xiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr; NEVER 6daN…), then the user's OK to fast-forward integration.
 - Music: approved, ON by default, no music Day 0, Music app on device; test page https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy; module plans/sound/music-module.js (claude/sound-sd1 aef13a0). Sound + music build after 0.92.6 on the user's go (plans/sound/integration-plan.md, audio-todo.md).
 - Fresh CR6 needed before the next full round (old CR6 ~60%).
