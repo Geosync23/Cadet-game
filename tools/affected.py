@@ -46,7 +46,7 @@ CHECKS = {
     'bubble': ('python3 bubble_check.py {g}', 5), 'devmode': ('python3 devmode_check.py {g}', 5), 'dev_arrow': ('python3 dev_arrow_check.py {g}', 2),   # Dev mode's career arrow (DV1)
     'arrows_pointer': ('python3 arrows_pointer_check.py {g}', 4),   # the panel pointer (arrows plan, piece C)
     'disc': ('python3 disc_check.py {g}', 3), 'tiles': ('python3 tiles_check.py {g}', 3),
-    'join': ('python3 join_check.py {g}', 3), 'clothes': ('python3 clothes_check.py {g}', 2),
+    'join': ('python3 join_check.py {g}', 3), 'weekend': ('python3 weekend_check.py {g}', 12), 'clothes': ('python3 clothes_check.py {g}', 2),
     'path': ('python3 path_check.py {g}', 2), 'puzzle': ('python3 puzzle_check.py {g}', 2),
     'food': ('python3 food_check.py {g}', 2), 'career': ('python3 career_check.py {g}', 2),
     'social': ('python3 social_check.py {g}', 1), 'talk': ('python3 talk_check.py {g}', 2),
@@ -70,7 +70,7 @@ RULES = {
     '5': ['cadet', 'perf'], '13': ['*'], '14': ['day1', 'events', 'food', 'machine', 'intro', 'cadet', 'join', 'bigevents', 'fridays', 'day12', 'day21'],
     '19': ['device', 'puzzle', 'player', 'arrows_pointer'], '15': ['player', 'interactions', 'clothes', 'leave'], '15b': ['interactions', 'player', 'join', 'arrows_pointer'],
     '15r': ['deck', 'disc', 'interactions'], '16': ['food', 'day1'], '17': ['machine', 'mech', 'career', 'puzzle'],
-    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
+    '22': ['lines', 'talk', 'bubble'], '18': ['events', 'join', 'weekend', 'intro', 'bigevents', 'fridays', 'day7', 'day12', 'day13', 'day16', 'day27'],
     '18f': ['fridays', 'events', 'join', 'intro', 'bigevents', 'day1', 'food', 'perf', 'day5', 'day19'], '20': ['social', 'arc', 'bubble', 'lines'],
     '20c': ['social', 'arc'], '21': ['intro', 'clothes', 'day0'], '21b': ['clothes'], '23': ['tiles'], '23b': ['disc'], '6': ['cadet', 'bubble'],
     '7': ['path', 'day1'], '8': ['cadet', 'perf'], '8b': ['cadet', 'perf', 'day1'], '9': ['day1', 'events', 'cadet', 'deck', 'day21'],

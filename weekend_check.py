@@ -1,5 +1,5 @@
 # Starship Cadet: the weekend traditions check (0.92.5 item 16; FX14's T1-T2, FX11's T3-T4 on; keep in the repo)
-# Runs on a copy of the build with WEEKEND_ON switched on (the switch is a URL flag, ?weekend, off in the game):
+# Runs on a copy of the build with WEEKEND_ON on (on in the game from 0.92.5; older builds had a URL flag), and a copy with it off as the base:
 #   every weekend tradition on its day (eventsOn), and nothing of them with the switch off
 #   each join has its activity (PLAYER_ACTS['tj:<id>'], made after the slot adds the joins: tjActs) and a join ends
 #   Bread day (T3): crew at the kneading spots (Cook-along's 3-cookalong-*), the island's flour and tins (breadDay), you knead, and your
@@ -22,9 +22,13 @@ def check(cond, msg):
     return cond
 
 build = sys.argv[1]; src = pathlib.Path(build).read_text()
-on = re.sub(r"^const WEEKEND_ON = URL_FLAGS\.has\('weekend'\)", "const WEEKEND_ON = true", src, count=1, flags=re.M)
-check(on != src, 'the build has the WEEKEND_ON switch')
+# (FX16) on in the game from 0.92.5: the shipped build is the switch-on one, and a copy with it false is the base; a build from
+# before the switch-on (a URL flag) is switched on in a copy, as before
+SW = r"^const WEEKEND_ON = (?:URL_FLAGS\.has\('weekend'\)|true)"
+check(bool(re.search(SW, src, flags=re.M)), 'the build has the WEEKEND_ON switch')
+on = re.sub(SW, "const WEEKEND_ON = true", src, count=1, flags=re.M); off = re.sub(SW, "const WEEKEND_ON = false", src, count=1, flags=re.M)
 won = str(WORK / 'test' / ('_weekend_' + pathlib.Path(build).name)); pathlib.Path(won).write_text(on)
+build = str(WORK / 'test' / ('_weekend_off_' + pathlib.Path(build).name)); pathlib.Path(build).write_text(off)   # the base: the same build, the switch off
 TRADS = {'saturday-run': 6, 'bread-day': 7, 'every-song': 69, 'gerald-clinic': 14, 'garden-picnic': 20, 'big-jigsaw': 21, 'night-owls-cocoa': 27, 'sunday-story': 28}   # a day each is on (the 4-week rotation, the user 2026-10-25: two a weekend; Every song's first is Day 69: Day 13 is the storm's lantern supper, and on Day 41 it gives way to a birthday)
 DAYS = sorted(set(TRADS.values()))
 EVS = "JSON.stringify(%s.map(d => [d, eventsOn(d).map(e => e.id)]))" % json.dumps(DAYS)

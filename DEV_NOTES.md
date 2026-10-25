@@ -2009,9 +2009,9 @@ Phase 1: the player only. The rec deck builder wires these to the rooms' places;
 - **The auditorium's show (0.84.8, RB2):** `recShow(null | 'film' | 'talk' | 'allhands' | 'talent')`, called by RA's traditions engine; looks only (house lights while you're in the auditorium, the screen, the stage pools). See the 0.84.8 row.
 - **The stage (0.84.9, RB2):** crew moves `perform { act: 'sing' | 'juggle' | 'piano' | 'bow', len? }` and `address {}`; poses `sing`, `juggle` (balls by `recCrewBalls`), `bow`, `address`. Spots in the 0.84.9 row.
 
-### The weekend traditions (FX14, p925-weekend, behind WEEKEND_ON; 0.92.5 item 16)
+### The weekend traditions (FX14, p925-weekend; 0.92.5 item 16; on in the game from 0.92.5)
 
-`WEEKEND_ON` (section 13; `#weekend` previews) and `WEEKEND_TRADS` (the ids): section 18's loader skips their baked .trad files when off, so the game is identical. Each tradition is a .trad file in content/traditions (rules and words, baked by content_gen.py) and a join in `TRAD_JOIN` (section 18's slot). The eight and their times, hosts and the rotation are in design-doc.md (the weekend traditions); builders' notes: plans/handover-fx14.md, -fx11, -fx9, -ds1, -fx16.
+`WEEKEND_ON` (section 13; **true from 0.92.5**, the user 2026-10-25: "ship them switched on, no preview") and `WEEKEND_TRADS` (the ids): section 18's loader skips their baked .trad files when it's false, which gives the game before them (weekend_check's base). Each tradition is a .trad file in content/traditions (rules and words, baked by content_gen.py) and a join in `TRAD_JOIN` (section 18's slot). The eight and their times, hosts and the rotation are in design-doc.md (the weekend traditions); builders' notes: plans/handover-fx14.md, -fx11, -fx9, -ds1, -fx16.
 
 - **The rotation:** each .trad's `when: every 4 weeks <day> week N from day 1` (week 1 = Days 6-7). **New ones give way** (section 18): `evNewWk(e)` sorts them last in evBudget; evBdaySlot places a birthday ignoring them and drops one within its hour; `evOldGoer(p, d, e)` in evArrive keeps a new one from drawing anyone an overlapping old tradition would have had.
 - **Late ones:** `tradToBed(p, d, e)` with `toBed: 20` on cocoa and the story (come from the start, leave 20 minutes before bed). A weekend host stays to its end (section 14's leisureUntil, `weekendTag`).

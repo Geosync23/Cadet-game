@@ -9212,7 +9212,7 @@ const NOSAVE = URL_FLAGS.has('nosave') || URL_FLAGS.has('crowd') || URL_FLAGS.ha
       DEBUG = URL_FLAGS.has('debug');
 const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 25; plans/devmode-plan.html): only with #dev, and its own save ("-dev" on the names); off, nothing changes
 const SHORT_FRIDAY = true;                               // Short Fridays and the Captain's address (section 18f; plans/fridays-build-brief.md): on (the user's yes, 2026-10-21); false gives the game without them
-const WEEKEND_ON = URL_FLAGS.has('weekend'), WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): off till the switch-on step, #weekend previews; their .trad files load only with it (section 18's loader)
+const WEEKEND_ON = true, WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): on in the game from 0.92.5 (the user, 2026-10-25: "ship them switched on, no preview"; FX16); false = the game before them. Their .trad files load only with it (section 18's loader)
 const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [...WEEKEND_TRADS].some(id => tag === 'ev-' + id || tag.startsWith('ev-' + id + '-'));   // a weekend tradition's plan tag (FX9: their hosts stay to its end)
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
