@@ -311,6 +311,52 @@ with sync_playwright() as pw:
         g.ev("localStorage.clear()")
         check(not [e for e in g.errors if 'pageerror' in e], 'fixes: reload: no page errors')
         g.close()
+        # RV17 R1: the rejoin after a reload when the host is at work for it (not planned there): Brennan, and Mensah's round
+        def reload(g):
+            g.ev("eval('(' + saveGame.toString().replace('if (NOSAVE ||', 'if (false &&') + ')')()")
+            g.page.goto(g.page.url.replace('?nosave&debug', '?debug'), wait_until='commit', timeout=180000); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=180000, polling=500); g.step(5)
+        g = Game(pw, won, 900, 760); g.ev(SETUP % (2 * 1440 + 600, "['brennan']"))
+        b = json.loads(g.ev("JSON.stringify(" + (INVITE % ('brennan-book', 'brennan-book')) + ")"))
+        if check(bool(b), 'fixes: Brennan\'s book booked for the reload'):
+            g.ev(f"skipTo(({b['day']} - 1) * 1440 + {b['from']} - 20)"); g.step(5); to_room(g, b)
+            for _ in range(40):
+                g.step(45)
+                if g.ev("TJ_NOW && TJ_NOW.e.id === 'appt-brennan-book' && (() => { const a = DECK_CREW.find(c => c.p.id === TJ_NOW.lead); return !!a && a.settled; })()"): break
+            tapB = "(() => { const a = DECK_CREW.find(c => c.p.id === 'brennan'); if (!a) return false; player.obj.position.set(a.x + .9, 0, a.z); player.stop(); return tradJoinTap(a) && !!DIALOGUE && DIALOGUE.id.startsWith('appt:brennan-book'); })()"
+            check(g.ev(tapB), 'fixes: a tap on Brennan opens her scene')
+            g.ev("dialogueStep(0)"); g.step(2); reload(g)
+            if check(g.ev(tapB), 'fixes: after a reload a tap on Brennan (at work for it) opens the scene again (RV17 R1)'): scene(g, 'fixes: Brennan again')
+            g.step(20)
+            r = json.loads(g.ev(f"JSON.stringify(SHIP.apptx.book.find(x => x.id === {b['id']}))"))
+            check(bool(r['done']) and not r.get('gone'), f'fixes: Brennan\'s book kept after the reload ({r.get("done")}, {r.get("gone")})')
+        g.ev("localStorage.clear()"); check(not [e for e in g.errors if 'pageerror' in e], 'fixes: Brennan reload: no page errors'); g.close()
+        g = Game(pw, won, 900, 760); g.ev(SAYHOOK); g.ev(SETUP % (3 * 1440 + 600, "['mensah']"))
+        b = json.loads(g.ev("JSON.stringify(" + (INVITE % ('night-round', 'night-round')) + ")"))
+        if check(bool(b), 'fixes: the night round booked for the reload'):
+            BENCH = "(() => { const pl = DECKS[3].places.find(q => q.room === '+' && q.type === 'bench'), c = cellPos(...pl.at); player.obj.position.set(c.x + .8, 0, c.z + .8); player.stop(); })()"
+            MENSAH = "(() => { const a = DECK_CREW.find(c => c.p.id === 'mensah'); return !!a && a.settled && SHIP.time.min >= %d; })()"
+            tapM = "(() => { const a = DECK_CREW.find(c => c.p.id === 'mensah'); return !!a && tradJoinTap(a) && !!APPT_ROUND_NOW; })()"
+            g.ev(f"skipTo(({b['day']} - 1) * 1440 + {b['from']} - 12)"); g.step(5); g.ev("goToDeck(3, null)"); g.step(10); g.ev(BENCH)
+            for _ in range(30):
+                g.step(45)
+                if g.ev(MENSAH % 1350): break
+            check(g.ev(tapM), 'fixes: a tap on Mensah starts the round')
+            OUT = """(() => { const [c0, r0] = DECKS[deckDef.num].lift; let best = null; for (let dc = -3; dc <= 3; dc++) for (let dr = -3; dr <= 3; dr++) { const c = c0 + dc, r = r0 + dr, k = roomAt(c, r); if (!k || k === '@' || BLOCKED.has(c + ',' + r)) continue; const d = Math.abs(dc) + Math.abs(dr); if (!best || d < best[0]) best = [d, c, r]; }
+              const p = cellPos(best[1], best[2]); player.obj.position.set(p.x, 0, p.z); player.stop(); return 1; })()"""
+            g.ev("goToDeck(6, null)"); g.step(20); g.ev(OUT)
+            for _ in range(40):
+                g.step(30)
+                if (g.ev("APPT_ROUND_NOW ? APPT_ROUND_NOW.i : 0") or 0) >= 1: break
+            ri = g.ev(f"SHIP.apptx.book.find(x => x.id === {b['id']}).ri || 0")
+            check(ri == 1, f'fixes: one stop walked, saved on the booking (ri {ri})')
+            now = g.ev("Math.round(SHIP.time.min)"); reload(g)
+            g.ev("goToDeck(3, null)"); g.step(10); g.ev(BENCH)
+            for _ in range(30):
+                g.step(45)
+                if g.ev(MENSAH % 0): break
+            r = g.ev("(() => { const a = DECK_CREW.find(c => c.p.id === 'mensah'); return !!a && tradJoinTap(a) && !!APPT_ROUND_NOW ? APPT_ROUND_NOW.i : -1; })()")
+            check(r == 1, f'fixes: after a reload (at {now}) Mensah waits at the bench again, and a tap picks the round up at stop 2 (RV17 R1: {r})')
+        g.ev("localStorage.clear()"); check(not [e for e in g.errors if 'pageerror' in e], 'fixes: round reload: no page errors'); g.close()
         # RV17 #3: Brennan's book (14:30, a weekday) on your shift, and with heads-ups off
         g = Game(pw, won, 900, 760); g.ev(SETUP % (2 * 1440 + 600, "['brennan']"))
         b = json.loads(g.ev("JSON.stringify(" + (INVITE % ('brennan-book', 'brennan-book')) + ")"))

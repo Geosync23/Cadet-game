@@ -41303,7 +41303,7 @@ function tradPose(s, pl, sp) {
 function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const o = eventOf(a.p, now), e = o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null;
+  const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to) return false;
   if (SHIP.events.joined.includes(e.id + '@' + d)) return P926_APPT && !!e.ev.appt && apptRejoin(e, d, a);   // 0.92.6 item 9: an appointment's scene again after a reload (FX22b, Appointments builder slot)
@@ -44099,6 +44099,7 @@ function apptRejoin(e, d, a) {                          // joined already, the b
   player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
   apptJoin(e, d, shipNow()); return !!DIALOGUE || !!APPT_ROUND_NOW;
 }
+const apptHostEvent = (a, d) => eventsOn(d).find(x => x.ev.appt && SHIP.events.joined.includes(x.id + '@' + d) && (apptBooking(x, d) || {}).host === a.p.id) || null;   // tradJoinTap: a joined one-off whose host isn't planned there (at work for it: Brennan, a shadow host, Mensah), so apptRejoin can reach it
 function apptOver(b) {                                   // its time is up: kept if you joined it (a reload closed its card; the night round with four stops walked), else missed
   if (DIALOGUE && String(DIALOGUE.id).startsWith('appt:' + b.kind + ':')) return;   // its scene still open: its end keeps it
   if (!b.aid && SHIP.events.joined.includes('appt-' + b.kind + '@' + b.day) && (b.kind !== 'night-round' || b.ri >= 4)) apptKeep(b); else b.gone = 1;
