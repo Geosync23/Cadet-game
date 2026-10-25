@@ -45,3 +45,17 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   (session_01VQkkt8RXcvvGs1Dmzn2emM) replaces lead 34. USER (00:30): 0.92.5 ships the weekend SWITCHED ON: final verdict on
   the shipped switch-on file; cadet_test diffs vs 0.92.4 only the expected weekend ones.
 - Asked for check lines: host at each weekend tradition; >=5 at cocoa/story.
+
+## ~01:10 UTC
+- **8c crewDetail line (80dff612): PASS.** Off: cadet_test vs 0.92.4 ALL IDENTICAL; day 7 off OK; day 7 on OK; plant r_swap
+  (line reverted) day 7 on FAIL (pell 0.77 hop, 08:21 3-mess-31).
+- food_check 7 'garden, good' FAIL is OLD: same numbers on ba836359 and 80dff612 (told lead 35).
+- weekend_check (fixed f-string, local): Sunday story FAILs on the fix: the check put you in the corridor (Holt not yet
+  settled at 22:18) AND Holt settles ~22:27, so the chapter's line 0 is never read (index by clock). To DS1. FX9 says it
+  fixed the check (room tile + host lines + >=5) but its push isn't on origin (DS1's e462655f is the tip): asked FX9.
+- Plants with the fixed check: q_tobed -> sunday-story join FAIL (ok). q_chap, q_seat: not judgeable until the story
+  lines pass on the fix. Rerun on the next sha.
+- Lead 35's rule for the old traditions (same days/times/places/hosts; lose <= 2; not below minimum): my script
+  plans/rv14-old_trads.py (c5ea9ebf). 80dff612 on: 5 FAILs (rec-wso -5/-3/-3/-6 Days 14/21/42/49; lineCeremony -4 Day 7).
+  Off: OK, 0 shifts. DS1 to fold it into weekend_check.
+- User (00:40): a 4-week rotation (W1 run/bread, W2 song/Gerald, W3 picnic/jigsaw, W4 cocoa/story); ships switched ON.
