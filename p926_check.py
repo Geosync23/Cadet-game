@@ -3,6 +3,9 @@
 # off as the base. Each part is one of the user's playtest notes; each fails on 0.92.5 and passes with the switch on:
 #   13  the Day 8 talk is spoken: Dr. Sato on the stool says talk.sato line by line in her bubble, every line in order once, while
 #       you're in the auditorium; joined, the question card (talk.sato.ask) opens after the last line, not before. Off: nothing said
+#   8   a tradition can be joined to its end: 5 minutes before the end of Tiles night (Day 2), quiz night (Day 4) and the jam (Day 5),
+#       in its room, the join is offered (TJ_NOW, its leader on the deck) and a tap on the leader joins you; the device's Calendar and
+#       Home still list it ("on now, until"). Off: at least one of them not offered or not listed
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -59,5 +62,28 @@ with sync_playwright() as pw:
         check(r['joined'] and len(asks) == 1 and asks[0][0] == 'talk.sato.ask' and last is not None and asks[0][1] >= last,
               '13: joined, the question card opens once, after her last line (%s; last line at %s)' % (asks, last))
         check(not err, '13: no errors: ' + ' | '.join(err[:5]))
+    if want('8'):
+        END = [(2, 'tiles-night', 3), (4, 'quiz', 3), (5, 'jam', 4)]
+        def late8(path):
+            res = []
+            for d, tid, deck in END:
+                g = Game(pw, path, 900, 760)
+                to = g.ev("(() => { const e = eventsOn(%d).find(x => x.id === '%s'); return e ? e.to : null; })()" % (d, tid))
+                if to is None: res.append((tid, 'not on')); g.close(); continue
+                g.ev("(() => { skipTo((%d - 1) * 1440 + %d - 9); goToDeck(%d, null); SHIP.device.settings.tips = false; })()" % (d, to, deck)); g.step(10)
+                g.ev(INROOM % (d, tid)); g.step(120)
+                r = json.loads(g.ev("""(() => { const now = shipNow(), t = SHIP.time.min, cal = JSON.stringify(DEVICE_APPS.get('calendar').view()), home = JSON.stringify(DEVICE_APPS.get('home').view());
+                  const e = eventsOn(%d).find(x => x.id === '%s'), n = TJ_NOW && TJ_NOW.e.id === e.id ? TJ_NOW : null;
+                  let joined = false; if (n && n.agent) { tradJoinTap(n.agent); joined = SHIP.events.joined.includes(e.id + '@%d'); }
+                  return JSON.stringify({ t, to: e.to, offered: !!n, lead: n && n.lead, joined, cal: cal.includes(e.name), home: home.includes(e.name) }); })()""" % (d, tid, d)))
+                res.append((tid, r)); err = g.errors; g.close()
+                check(not err, '8 (%s): no errors: %s' % (tid, ' | '.join(err[:3])))
+            return res
+        roff = late8(woff); print('  8 off:', roff)
+        check(any(isinstance(r, dict) and not (r['offered'] and r['joined'] and r['cal'] and r['home']) for _, r in roff), '8 off: as 0.92.5, at least one is no longer offered or listed near its end')
+        for tid, r in late8(won):
+            if not check(isinstance(r, dict), '8: %s on (%s)' % (tid, r)): continue
+            check(r['to'] - r['t'] <= 8 and r['offered'] and r['joined'], '8: %s at %d (ends %d): the join is offered (leader %s) and a tap joins you' % (tid, r['t'], r['to'], r['lead']))
+            check(r['cal'] and r['home'], '8: %s still on the device near its end: Calendar %s, Home %s' % (tid, r['cal'], r['home']))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)
