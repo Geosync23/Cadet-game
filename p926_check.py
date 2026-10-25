@@ -38,7 +38,7 @@ want = lambda p: not PARTS or p in PARTS
 SW = r"^const P926_TRADS = (?:URL_FLAGS\.has\('p926'\)|true)"
 has = check(bool(re.search(SW, src, flags=re.M)), 'the build has the P926_TRADS switch')
 on = re.sub(SW, "const P926_TRADS = true", src, count=1, flags=re.M); off = re.sub(SW, "const P926_TRADS = false", src, count=1, flags=re.M)
-won = str(WORK / 'test' / ('_p926_%d_' % os.getpid() + pathlib.Path(build).name))   # (the pid: two runs at once don't write each other's copies); pathlib.Path(won).write_text(on)
+won = str(WORK / 'test' / ('_p926_%d_' % os.getpid() + pathlib.Path(build).name)); pathlib.Path(won).write_text(on)   # (the pid: two runs at once don't write each other's copies)
 woff = str(WORK / 'test' / ('_p926_off_%d_' % os.getpid() + pathlib.Path(build).name)); pathlib.Path(woff).write_text(off)
 
 # what was said in bubbles (bubbleSay, hooked once) and which dialogue cards opened (dialogueShow)
@@ -126,7 +126,7 @@ with sync_playwright() as pw:
               if (z) tradJoinTap(z); out.cards = window.__cards.map(c => c[0]); out.act = ACT && ACT.kind;
               const v = DIALOGUE && DIALOGUE.id === 'week1.zeke' ? MEETING_SCRIPTS['week1.zeke'].lines.filter(l => l.text).map(l => evText(l.text, {})) : [];
               out.lines = v; return JSON.stringify(out); })()"""))
-            g.step(120); r['open'] = g.ev('!!DIALOGUE && DIALOGUE.id')
+            g.step(180); r['open'] = g.ev('[!!DIALOGUE && DIALOGUE.id, SHIP.time.min]')
             err = g.errors; g.close(); return r, err
         r, err = week5(woff); print('  5 off:', r)
         check('week1.zeke' not in r['cards'], '5 off: as 0.92.5, no sit-down with Zeke')
@@ -134,7 +134,7 @@ with sync_playwright() as pw:
         check(r['zeke'] and r['room'] == 'Bow lounge' and r['sit'], '5: Zeke is in the bow lounge, sitting, at %s (%s, %s)' % (r['t'], r['room'], r['sit']))
         check(r['lead'] == 'torres-zeke', '5: the join is Zeke\'s (%s)' % r['lead'])
         check('week1.zeke' in r['cards'] and len(r['lines']) >= 4 and not any('{' in l for l in r['lines']), '5: a tap opens his card going over your week, filled in (%s)' % r['lines'][:2])
-        check(r.get('open') == 'week1.zeke', '5: his card stays open across the next ship minutes (FX22) (%s)' % r.get('open'))
+        check(r.get('open', [0])[0] == 'week1.zeke' and r['open'][1] - r['t'] >= 3, '5: his card is still open 3 ship minutes later, no input (RV14, FX22) (%s, tapped at %.1f)' % (r.get('open'), r['t']))
         check(not err, '5: no errors: ' + ' | '.join(err[:5]))
     if want('2'):
         def swap2(path):
@@ -147,7 +147,7 @@ with sync_playwright() as pw:
             r = json.loads(g.ev("""(() => { const at = DECK_CREW.filter(a => a.settled && a.spot && evTagId(a.tag || '') === 'market'), n = TJ_NOW && TJ_NOW.e.id === 'market' ? TJ_NOW : null;
               const out = { t: SHIP.time.min, stall: at.filter(a => /^3-swap-stall-/.test(a.spot.id)).map(a => a.p.id).sort(), n: at.length, lead: n && n.lead, said: window.__said.length };
               const o = DECK_CREW.find(a => a.p.id === 'ishikawa-orla'); if (o) tradJoinTap(o); out.cards = window.__cards.map(c => c[0]); return JSON.stringify(out); })()"""))
-            g.step(120); r['open'] = g.ev('!!DIALOGUE && DIALOGUE.id')
+            g.step(180); r['open'] = g.ev('[!!DIALOGUE && DIALOGUE.id, SHIP.time.min]')
             err = g.errors; g.close(); return r, err
         r, err = swap2(woff); print('  2 off:', r)
         check(not r['stall'] and 'swap.meet' not in r['cards'], '2 off: as 0.92.5, nobody at the stalls and no swap')
@@ -155,7 +155,7 @@ with sync_playwright() as pw:
         check(r['stall'] == ['ishikawa-orla', 'shah-dara'], '2: Orla and Dara at the stalls (%s)' % r['stall'])
         check(r['n'] >= 5 and r['lead'] == 'ishikawa-orla', '2: people at it (%d), the join Orla\'s (%s)' % (r['n'], r['lead']))
         check('swap.meet' in r['cards'] and r['said'] >= 3, '2: a tap opens the swap card (%s), and the stalls talk (%d bubbles)' % (r['cards'], r['said']))
-        check(r.get('open') == 'swap.meet', '2: the swap card stays open across the next ship minutes (FX22) (%s)' % r.get('open'))
+        check(r.get('open', [0])[0] == 'swap.meet' and r['open'][1] - r['t'] >= 3, '2: the swap card is still open 3 ship minutes later, no input (RV14, FX22) (%s, tapped at %.1f)' % (r.get('open'), r['t']))
         check(not err, '2: no errors: ' + ' | '.join(err[:5]))
     if want('15'):
         def spice15(path):
@@ -168,7 +168,7 @@ with sync_playwright() as pw:
                 x = json.loads(g.ev("JSON.stringify([SHIP.time.min, (DECK_CREW.find(a => a.p.id === 'brennan') || {}).spot ? DECK_CREW.find(a => a.p.id === 'brennan').spot.id : null, !!DIALOGUE && DIALOGUE.id])"))
                 if x[1] == '3-spice-host' and seen is None: seen = x[0]
                 if x[2] == 'spice.guess' and card is None: card = x[0]
-                if card is not None and held is None and x[0] >= card + 2: held = x[2]; g.ev("dialogueStep(0)")
+                if card is not None and held is None and x[0] >= card + 3: held = x[2]; g.ev("dialogueStep(0)")
                 if x[0] >= 1141: break
             r = json.loads(g.ev("""JSON.stringify({ said: window.__said.map(x => x[0] + ': ' + x[1]), cards: window.__cards.map(c => c[0]), joined: SHIP.events.joined.includes('spice-shelf-supper@16') })"""))
             err = g.errors; g.close(); r['seen'] = seen; r['held'] = held; return r, err
@@ -180,7 +180,7 @@ with sync_playwright() as pw:
         check(len(b) >= 5, '15: she opens, names three jars and says whose (%d lines)' % len(b))
         check(len(o) >= 3, '15: the mess guesses out loud (%d bubbles)' % len(o))
         check(r['joined'] and 'spice.guess' in r['cards'], '15: joined, your guess card (%s)' % r['cards'])
-        check(r.get('held') == 'spice.guess', '15: the guess card stays open 2 ship minutes (FX22) (%s)' % r.get('held'))
+        check(r.get('held') == 'spice.guess', '15: the guess card is still open 3 ship minutes later, no input (RV14, FX22) (%s)' % r.get('held'))
         check(not err, '15: no errors: ' + ' | '.join(err[:5]))
     if want('4'):
         def read4(path):
