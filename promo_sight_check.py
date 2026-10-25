@@ -12,7 +12,8 @@
 #           simple ones still come (at least BOARD_MIN not of your trade); the held list keeps your trade first
 #   move:   the walk to 4-23 (the user, 05:20 UTC): off, the old 17:30; on, it starts at 17:00 with a notice; she waits through a
 #           talk, an activity, sleep; on another deck it starts; open past 17:30; by 22:00 (or a load the next morning) the
-#           cabin's yours (bed, door, Mail), then a notice, an arrow to it and the Training tab's line, done once you're in
+#           cabin's yours (bed, door, Mail), then a notice, an arrow to it and the Training tab's line, done once you're in;
+#           and she still walks you there the next day (after the ceremony; a day off from 09:00), again if missed
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 promo_sight_check.py BUILD.html [part ...]   Good is PROMO SIGHT CHECK OK (exit 0); a failure exits 1.
 import sys, pathlib
@@ -140,6 +141,16 @@ def part_move(g):
     check(k['moved'] and k['guide'] == 'promo:home' and k['bed'] == '4-23', f"move: a save loaded the next morning, the cabin yours and the arrow to it ({k})")
     m = g.ev(f"""(() => {{ goToDeck(4); player.obj.position.copy(cellPos(...ROOM_TILES['W'][0])); promoHomeTick({10 * 1440 + 482}, false); const r = __mvLook(); r.live = guideLive({10 * 1440 + 483}).some(x => x.id === 'promo:home'); return r; }})()""")
     check(m['seen'] and not m['live'], f"move: stepping into 4-23, the arrow's done ({m})")
+    n = g.ev(f"""(() => {{ const W = SHIP.works, r = {{ miss: flag('promo.sight.walk') }}; __out(); __toasts.length = 0; setShipNow({10 * 1440 + 1021}); promoWalkAgainTick(shipNow(), false); r.cer = !!(W.mv && W.mv.again);
+      W.done.push('ceremony2'); promoWalkAgainTick(shipNow(), false); r.mv = !!(W.mv && W.mv.again); r.toasts = __toasts.map(t => t[1]); r.esc = !!promoMoveEscort({{ id: W.mv ? W.mv.by : 'x' }}, shipNow());
+      r.guide = GUIDE.list.some(x => x.id === 'promo:move:again'); goToDeck(4); player.obj.position.copy(cellPos(...ROOM_TILES['W'][0])); promoWalkAgainTick(shipNow() + 1, false); r.after = !!W.mv; r.missAfter = flag('promo.sight.walk') || null; return r; }})()""")
+    print('    the walk the next day:', n)
+    check(n['miss'] == 10, f"move: missed on Day 10, the walk owed ({n['miss']})")
+    check(not n['cer'] and n['mv'] and any('4-23' in t for t in n['toasts']) and n['esc'] and n['guide'], f"move: the next day after the ceremony, she walks you (notice, her lead, the arrow) ({n})")
+    check(not n['after'] and n['missAfter'] is None, f"move: in your cabin with her, the walk done ({n})")
+    q = g.ev(f"""(() => {{ const W = SHIP.works; flagSet('promo.sight.walk', 12); __out(); setShipNow({12 * 1440 + 545}); promoWalkAgainTick(shipNow(), false); const r = {{ off: !playerShiftOn(13), mv: !!(W.mv && W.mv.again) }};
+      setShipNow({12 * 1440 + 1321}); promoWalkAgainTick(shipNow(), false); r.late = !!W.mv; r.miss = flag('promo.sight.walk'); return r; }})()""")
+    check(q['off'] and q['mv'] and not q['late'] and q['miss'] == 12, f"move: a day off, from 09:00; not there by 22:00, owed again ({q})")
 
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])

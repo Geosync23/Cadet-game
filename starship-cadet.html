@@ -35609,7 +35609,7 @@ const LINES = JSON.parse([
   ',"next.t2.soon":[',
   '{"text":"You\'re ready for your Tier 2 test. Calder will set the day.","id":"1frwk58"}]',
   ',"next.t2.steps":[',
-  '{"text":"Your Tier 2 test needs Reliable and Making it safe. You\'re {band}.","id":"15p3o6e"}]',
+  '{"text":"Your Tier 2 test needs Reliable and Making it safe. You\'re {band} now.","id":"5dy5km"}]',
   ',"next.wait.m1":[',
   '{"text":"Torres is waiting to show you his round. Find him.","id":"15mbvgm"}]',
   ',"next.wait.m2":[',
@@ -35657,27 +35657,36 @@ const LINES = JSON.parse([
   ',"promo.ceremony.mail":[',
   '{"text":"Your commission | We missed you at the ceremony, so the Captain signed it anyway. You are commissioned an Officer of the Wren. Your framed commission is on your shelf in 4-23. The Captain asks you to drop by the observation room some evening. She still has a question for you.","id":"xg208d"}]',
   ',"promo.dependable":[',
-  '{"text":"Dependable | Word is you\'re dependable. Get to Reliable at work, and we talk about your Tier 2 test.","id":"p18p5k"}]',
+  '{"text":"Dependable | Word is you\'re dependable. Reach Reliable at work, and we\'ll talk Tier 2.","id":"1yzj3cd"}]',
+  ',"promo.home.arrow":[',
+  '{"text":"Your cabin, 4-23. Your things are in.","id":"1i0pbju"}]',
+  ',"promo.home.notice":[',
+  '{"text":"Cabin 4-23 is yours now. Your bed and your things are there. Officers\' corridor, Deck 4.","id":"183je8x"}]',
+  ',"promo.home.title":[',
+  '{"text":"Your cabin","id":"17lher6"}]',
   ',"promo.keepsake":[',
   '{"text":"your framed commission","id":"1tqr0mt"}]',
   ',"promo.mail":[',
   '{"text":"Your promotion | You weren\'t about, so you\'ll read it instead. You passed. As of today you\'re an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Ten minutes early.","id":"a6tydv"}]',
   ',"promo.move.mail":[',
   '{"text":"Your cabin | You weren\'t about, so we moved you anyway. Cabin 4-23, officers\' corridor. Your things are there, and your key opens it. Quiet hours after 23:00. Your door\'s your own now: use it. Tomas says don\'t be a stranger.","id":"l3qjey"}]',
+  ',"promo.move.notice":[',
+  '{"text":"Your own cabin, 4-23: {name} is walking you there now.","id":"qx8x3h"}]',
   ',"promo.move.tomas":[',
   '{"text":"Don\'t be a stranger, Officer.","id":"1dz229a"}]',
   ',"promo.news":[',
   '{"text":"Works news: {me} made Officer today. Cake at the tea corner, while it lasts.","id":"ztxof1"}]',
   ',"promo.ready":[',
-  '{"text":"Reliable, and Making it safe done. That\'s all of it. Your Tier 2 test.","id":"1ows3"}]',
+  '{"text":"Reliable. Making it safe, done. That\'s all of it. Your Tier 2 test is your next workday.","id":"3m2mcz"}]',
   ',"promo.ready.mail":[',
   '{"text":"Your Tier 2 test | Ready. Test job {day}, 09:00, Works bay. Pass it and you\'re an Officer.","id":"1kgsu6i"}]',
   ',"promo.ready.notice":[',
   '{"text":"Your Tier 2 test: {day}, 09:00, the Works bay.","id":"1af2hu1"}]',
   ',"promo.sight":[',
-  '{"text":"Reliable. Good. One thing left: Making it safe, with me. Then your Tier 2 test.","id":"ys6qlv"}]',
+  '{"text":"Reliable. Good. One thing left: Making it safe, with me. Then I put you up for Tier 2.","id":"1mngyfj"},',
+  '{"text":"Reliable now. That\'s the reputation. Making it safe with me, and then your test.","id":"1jnxomx"}]',
   ',"promo.sight.mail":[',
-  '{"text":"Your next step | Reliable. One thing left before your Tier 2 test: Making it safe, with me, from Day 8.","id":"14oc8ph"}]',
+  '{"text":"Next step | Reliable. One thing left: Making it safe, with me, from Day 8. Then Tier 2.","id":"4owcxx"}]',
   ',"promo.summons":[',
   '{"text":"Chief Calder: My office, 11:00. — C.","id":"1214vha"}]',
   ',"promo.summons.torres":[',
@@ -37670,6 +37679,8 @@ const LINES = JSON.parse([
   '{"text":"Test job: {day}, 09:00","id":"t5x0gj"}]',
   ',"works.promo.check.title":[',
   '{"text":"Your promotion: the Tier 2 test","id":"1oatm2o"}]',
+  ',"works.promo.home":[',
+  '{"text":"Your cabin: 4-23, on the officers\' corridor, Deck 4.","id":"14hwx2x"}]',
   ',"works.rank.junior":[',
   '{"text":"Junior Officer","id":"1g2etsb"}]',
   ',"works.rank.officer":[',
@@ -54541,11 +54552,12 @@ function promoMoved(now, how) {                          // 4-23 is yours
   W.home = PROMO.home; W.done.push('move2'); const by = (W.mv && W.mv.by) || promoMoveBy(); delete W.mv;
   if (how !== 'walked' && typeof mailSend === 'function') { const t = worksText('mail.promo.move', worksText('promo.move.mail', 'Your cabin | Cabin 4-23 is yours from tonight: your things are in, your name\'s on the door. Officers\' corridor, the quiet end. — C.')), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your cabin', body: i > 0 ? t.slice(i + 3) : t }); }
+  if (typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON && how !== 'walked' && typeof flagSet === 'function') flagSet('promo.sight.walk', worksDay(now));   // FX19: she walks you there another day
   simNote('moved', { home: W.home, how, t: now });
   return true;
 }
 function promoMoveEscort(p, t) {                         // worksEscort's 24p part: the walk to your cabin
-  const W = SHIP.works; return W && W.mv && !promoDone('move2') && p.id === W.mv.by ? { mode: 'lead', to: { deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room } } : null;
+  const W = SHIP.works; return W && W.mv && (!promoDone('move2') || W.mv.again) && p.id === W.mv.by ? { mode: 'lead', to: { deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room } } : null;
 }
 WORK_TICKS.push((now, skip) => promoMoveTick(now, skip));
 // Part 4, the officer ceremony (0.44.21): the day after your promotion, Mail from the Captain's office at 08:00, and at
@@ -54840,6 +54852,34 @@ function promoHomeLine() {                               // the Training tab: wh
   return [{ kind: 'text', text: worksText('works.promo.home', 'Your cabin: 4-23, the officers\' corridor, Deck 4.') }];
 }
 WORK_TICKS.push((now, skip) => promoHomeTick(now, skip));
+// Lead 35 (the user: the moment itself mustn't be missed): moved without the walk, Calder (or Vance) still walks you
+// there on a later day (flag promo.sight.walk: the day it was missed), at the end of your shift (after the ceremony, on
+// its day) or on a day off the first free moment from 09:00, with the same notice and a level-1 arrow; open till 22:00,
+// else again the next day. The cabin's yours meanwhile. W.mv.again: worksEscort's lead (promoMoveEscort) and her lines.
+function promoWalkAgainTick(now, skip) {
+  const W = SHIP.works, miss = flag('promo.sight.walk'); if (!PROMO_SIGHT_ON || !W || !miss || W.home !== PROMO.home) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, M = PROMO.homeRoom;
+  if (W.mv && W.mv.again) {
+    if (m >= PROMO.moveLate || worksDay(W.mv.at) !== d) { delete W.mv; return; }   // not today: tomorrow again
+    if (promoQueue()) guideAsk({ id: 'promo:move:again', level: 1, owner: '24p (FX19)', until: (d - 1) * 1440 + PROMO.moveLate,
+      goal: () => ({ deck: M.deck, room: M.room, label: 'Your cabin, ' + PROMO.home + ': follow ' + guideWho(W.mv ? W.mv.by : 'calder') }), done: () => !(SHIP.works.mv && SHIP.works.mv.again) });
+    try { const rm = roomAt(...player.here()), n = deckDef.num, bed = typeof PLACE_OF !== 'undefined' && PLACE_OF.get(PROMO.home), [c, r] = player.here();
+      if (rm === '@') promoWalkSay('promo.walk.lift', 'Officers\' corridor\'s on Four, the far side from the bunks.');
+      if (n === M.deck && bed && Math.hypot(c - bed.at[0], r - bed.at[1]) < 5) promoWalkSay('promo.walk.door', 'Your door. Your name\'s on it.');
+      if (n === M.deck && rm === M.room) { promoWalkSay('promo.walk.inside', 'And when someone says "come over", they mean it. Goodnight, Officer.'); delete W.mv; flagSet('promo.sight.walk', null); flagSet('promo.sight.home', d); } } catch (e) { /* not in play */ }
+    return;
+  }
+  if (skip || d <= miss || now < shipNow() - 1 || W.mv || promoBusy() || m >= PROMO.moveLate) return;
+  const P = typeof promoPlan === 'function' ? promoPlan() : null;
+  if (P && P.ceremony && P.ceremony.day === d && !promoDone('ceremony2') && m < PROMO.cerAt + PROMO.cerLen + 15) return;   // her ceremony first
+  if (m < (playerShiftOn(d) ? DAY_SHIFT[1] : 540)) return;
+  W.mv = { by: promoMoveBy(), at: Math.floor(now), s: [], again: true };
+  const text = worksText('promo.move.notice', 'Your cabin, 4-23: {name} is taking you there now.', { name: worksName(W.mv.by) });
+  if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+  promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.'); promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
+  if (!promoQueue() && typeof setGoal === 'function') setGoal({ deck: M.deck, room: M.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: (d - 1) * 1440 + PROMO.moveLate });
+}
+WORK_TICKS.push((now, skip) => promoWalkAgainTick(now, skip));
 // ---- end of slot: Works career engineer ----
 
 
