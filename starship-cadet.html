@@ -43021,7 +43021,7 @@ function tradTalk(id, say) {
   R.next = t + 2600 + (R.n % 3) * 900;
   const at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === id);
   const r = at.length ? say(at, R.n, e, m) : null; if (!r || !r[0] || !r[1]) return;
-  bubbleSay(r[0].h, r[1]); R.n++;
+  bubbleSay(friSpeaker(r[0]), r[1]); R.n++;
 }
 const trLine = (kind, k, ctx, fb) => quizText(kind, k, ctx) || (fb ? fb[k % fb.length].replace(/\{(\w+)\}/g, (x, w) => ctx && ctx[w] != null ? ctx[w] : x) : null);
 function p926Frame() {
@@ -43093,18 +43093,18 @@ function spiceFrame() {
   if (!SPICE.hold) SPICE.hold = crewHold(b.p, '3-spice-host');
   if (!friHere(e) || typeof bubbleSay !== 'function') return;
   const nm = j => { const p = evPerson(j[0]); return p ? shortName(p) : j[0]; };
-  const say = (a, key, text) => { if (SPICE.said.includes(key) || !text) return; SPICE.said = SPICE.said.slice(-60) + '|' + key; bubbleSay(a.h, text, 5); };
+  const say = (a, key, text) => { if (SPICE.said.includes(key) || !text) return; SPICE.said = SPICE.said.slice(-60) + '|' + key; bubbleSay(friSpeaker(a), text, 5); };
   const dk = d + ':';
   if (b.settled && b.spot && b.spot.id === '3-spice-host') {
-    if (m >= SPICE_AT.open && m < SPICE_AT.jars[0]) say(b, dk + 'open', trLine('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.']));
-    SPICE_AT.jars.forEach((t, i) => { if (m >= t && m < (SPICE_AT.jars[i + 1] || SPICE_AT.reveal)) say(b, dk + 'jar' + i, trLine('spice.jar', d * 3 + i, { spice: jars[i][1] }, ['Jar ' + (i + 1) + ': {spice}. Whose is it? No telling.'])); });
+    if (m >= SPICE_AT.open && m < SPICE_AT.reveal) say(b, dk + 'open', trLine('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.']));
+    SPICE_AT.jars.forEach((t, i) => { if (m >= t && m < (SPICE_AT.jars[i + 1] || SPICE_AT.reveal) + 3 && SPICE.said.includes(dk + (i ? 'jar' + (i - 1) : 'open'))) say(b, dk + 'jar' + i, trLine('spice.jar', d * 3 + i, { spice: jars[i][1] }, ['Jar ' + (i + 1) + ': {spice}. Whose is it? No telling.'])); });
     if (m >= SPICE_AT.reveal) { const i = Math.min(2, Math.floor((m - SPICE_AT.reveal) / 2)); say(b, dk + 'rev' + i, trLine('spice.reveal', d * 3 + i, { name: nm(jars[i]), spice: jars[i][1] }, ['The {spice}? That was {name}\'s. From home.'])); }
   }
   const t = performance.now(), at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === 'spice-shelf-supper' && a.p.id !== 'brennan');
-  if (m >= SPICE_AT.jars[0] && m < SPICE_AT.reveal && at.length && t >= SPICE.next) {   // the guesses, one bubble every few seconds
+  if (SPICE.said.includes(dk + 'jar0') && m < SPICE_AT.reveal && at.length && t >= SPICE.next) {   // the guesses, one bubble every few seconds
     SPICE.next = t + 3000 + (SPICE.n % 3) * 800; const a = at[SPICE.n % at.length], who = schedPeople()[(SPICE.n * 7 + d) % schedPeople().length];
     const mine = jars.find(j => j[0] === a.p.id);
-    bubbleSay(a.h, mine && SPICE.n % 4 === 3 ? trLine('spice.mine', SPICE.n, { spice: mine[1] }, ['Not saying. But it might be mine.']) : trLine('spice.guess', SPICE.n, { name: shortName(who) }, ['That\'s {name}\'s, surely?', 'Smells like {name}\'s cooking.', 'I\'d bet a pudding it\'s {name}\'s.'])); SPICE.n++;
+    bubbleSay(friSpeaker(a), mine && SPICE.n % 4 === 3 ? trLine('spice.mine', SPICE.n, { spice: mine[1] }, ['Not saying. But it might be mine.']) : trLine('spice.guess', SPICE.n, { name: shortName(who) }, ['That\'s {name}\'s, surely?', 'Smells like {name}\'s cooking.', 'I\'d bet a pudding it\'s {name}\'s.'])); SPICE.n++;
   }
   if (SPICE.joined === d && SPICE.asked !== d && m >= SPICE_AT.card && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; spiceCard(d, jars, now); }
 }
@@ -43149,7 +43149,7 @@ if (P926_TRADS) {
 // most of them through the middle of the afternoon (evStay's stayMid), and more of the ship comes to watch
 if (P926_TRADS) {
   const w = REC_TRADS.find(x => x.id === 'rec-wso');
-  if (w) { const who = w.who; Object.assign(w, { stay: [90, 180], stayMid: true, who: (p, d, c) => { const x = who(p, d, c); return x >= 1 ? x : Math.min(.95, x + .15); } }); }
+  if (w) { const who = w.who; Object.assign(w, { stay: [150, 270], stayMid: true, who: (p, d, c) => { const x = who(p, d, c); return x >= 1 ? x : Math.min(.95, x + .3); } }); }
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
 }
 // ---- 0.92.6 item 7 (b) (FX17, behind P926_TRADS; lead 35's yes): the full talk rota to Day 84. The talks marked later (no

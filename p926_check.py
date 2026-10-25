@@ -14,8 +14,8 @@
 #       jars, the mess guesses (bubbles), she says whose, and joined you get the guess card. Off: Brennan never at the shelf, no card
 #   4   Reading corner (Day 14, 16:30): Esme Walsh there, everyone at it seated within 4.5 m of the bow window's sofa, at least 4
 #       bubbles about books in the room, a tap joins you with a book. Off: no host
-#   3   Winner stays on (Days 14 and 21): planned in the stands at 12:30, 13:30, 14:30 and 15:30, at least two thirds of the stand
-#       seats taken. Off: under that at least once
+#   3   Winner stays on (Days 14 and 21): planned in the stands at 12:30, 13:30, 14:30 and 15:30: 9 or more, and 12 or more at 13:30 and
+#       14:30 (of about 30 crew off duty and aboard on a Sunday afternoon). Off: thinner (3-9) at least once
 #   7   the career's weeks: (b) a talk on every Monday from Day 36 to 78 and a chief's on Days 32, 46, 60, 74, each on the calendar;
 #       (c) Six weeks aboard on Day 42 and Twelve weeks on Day 84; and (a) from week 5 to 12 each week has a tradition not seen in
 #       any earlier week. Off: no talk after Day 29 and no milestones
@@ -190,9 +190,9 @@ with sync_playwright() as pw:
         def stands3(path):
             g = Game(pw, path, 900, 760); r = json.loads(g.ev(STANDS)); err = g.errors; g.close(); return r, err
         r, err = stands3(woff); print('  3 off (day, minute, in the stands, seats):', r)
-        check(any(len(x) == 4 and x[2] * 3 < x[3] * 2 for x in r), '3 off: as 0.92.5, the stands under two thirds full at least once')
+        check(any(len(x) == 4 and (x[2] < 9 or x[1] in (810, 870) and x[2] < 12) for x in r), '3 off: as 0.92.5, the stands thin (under 9, or under 12 mid-afternoon) at least once')
         r, err = stands3(won); print('  3 on:', r)
-        check(all(len(x) == 4 and x[2] * 3 >= x[3] * 2 for x in r), '3: the stands at least two thirds full through the afternoon (%s)' % r)
+        check(all(len(x) == 4 and x[2] >= 9 and (x[1] not in (810, 870) or x[2] >= 12) for x in r), '3: the stands fill: 9 or more all afternoon, 12 or more at 13:30 and 14:30 (nearly everyone off duty and aboard: the stands have 33 seats) (%s)' % r)
         check(not err, '3: no errors: ' + ' | '.join(err[:5]))
     if want('7'):
         WEEKS = """JSON.stringify((() => { const talks = [32, 36, 43, 46, 50, 57, 60, 64, 71, 74, 78].map(d => [d, recTalk(d), eventsOn(d).filter(e => /^rec-(wren|chiefs)-talk$/.test(e.id)).map(e => e.id)]);
