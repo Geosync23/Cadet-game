@@ -133,11 +133,69 @@ All the activity sounds on Wren Sounds: Activities (`plans/sound/activities.html
 
 **Where they hook in** (one more build turn, now that Round 2 is picked): `actStart(kind, ...)` for the player's activities (shower, toilet, eat, sit, lie, gym, call, browse and pay, cart moves, hobbies); the work steps (`wsFinish`, and the `turn`, `hold` and `wait` steps) for repairs and chores; the laundry machines; the rec deck activities; the time clock (`careerStarted` and clocking out); tapping a crew member (the talk start); and the ship events (the ion storm phases, the diplomatic shuttle, announcements). The same rules as the rest: never `R()`, nothing on screen, silent in the checks, under the hum. Estimate: about 4 to 6 more builder hours (the sounds already exist; most of the work is the hooks and a sound_check pass over a day of activities).
 
+## Music: approved, built, ready to go in (the user, 2026-10-25, 12:55 PM Eastern)
+
+All the music is approved: the three full tracks (Morning, Evening, Late night) and the eleven samples, which are now full tracks too. That makes 14 tracks of about ten minutes each, all made live, each evolving through 18 to 40 sections with a new tune and lead instrument on every pass, so nothing loops audibly. Tradition music stays on hold (`plans/sound/audio-todo.md`).
+
+**The module:** `plans/sound/music-module.js` (about 350 lines, 32 KB). It is self-contained: its own small mixer, room echo and noise buffers, and one function, `createWrenMusic({ ctx, dest, shipTime })`. It can be pasted into the SND block or loaded as it is. It is **not in `starship-cadet.html`** yet. **Test page:** Wren Music Player (`plans/sound/music-player.html`, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy) runs the same module against a pretend ship clock with a speed slider.
+
+**The schedule** (ship time; while you're clocked in, the working set plays instead):
+
+| Time of day | Ship time | Tracks |
+| --- | --- | --- |
+| Late night | 00:30 to 05:00 | Late night, Night watch |
+| Early morning | 05:00 to 07:30 | First light, Morning |
+| Morning | 07:30 to 11:00 | Morning, First light, Tea break |
+| Midday | 11:00 to 14:00 | Midday, Lunch break |
+| Afternoon | 14:00 to 17:30 | Afternoon, Tea break, Golden hour |
+| Evening | 17:30 to 21:00 | Evening, Golden hour |
+| Night | 21:00 to 00:30 | Night watch, Lights out, Evening |
+| Working (on shift) | whenever you're clocked in | Shift start, Steady work, On your rounds, Midday, Afternoon |
+
+**How it plays.**
+- It picks one track from the set, never the one that just played, and plays it through.
+- Then it waits through a quiet gap before the next track: 1 to 3 minutes, which can be changed (`gapMin`/`gapMax`).
+- When the time of day changes, or you clock in or out, it waits for the end of the current section (at most 30 seconds) and cross-fades over 6 seconds into the new set.
+- A jump in ship time (sleeping through the night) changes over straight away.
+- One ship hour is 100 real seconds, so most times of day last 4 to 6 real minutes. A ten-minute track usually hands over at a section end before it finishes. That is by design: the tracks are made to be heard in part.
+
+**Settings (proposed; the lead will ask the user).** Music On/Off, on by default, plus Music volume Low / Medium / High (0.45 / 0.7 / 1), Medium by default. They sit beside Sound and Volume in the Settings app and are saved in the same `starship-cadet-sound` key. Sound Off also silences music.
+
+**Levels.** At High, every track's loudest moment is 3 to 7 dB under the Quarters hum (-22.8 to -26.8 against -19.9). At Medium it is about 3 dB lower again.
+
+**Hooks** (all reading only):
+- Create it on the first tap, with SND: `createWrenMusic({ ctx: SND.ctx, dest: SND.musicBus, shipTime })`.
+- `shipTime = () => ({ min: shipNow() % 1440, onShift: <the time clock's clocked-in state> })`. Clocking in is in section 13 (`careerStarted`, the "Clocked in" toast); the builder confirms the exact field.
+- `music.update()` from `loop()` each frame. It costs almost nothing between bars.
+- `music.pause()` / `resume()` with `pauseSet()` and `freezeSync()` (pause and Tiles).
+- `music.setEnabled()` / `setVolume()` from the Settings rows.
+- Same rules as all sound: never `R()` (the schedule uses Math.random; tunes use each track's own seeded numbers), nothing on screen except two Settings rows, off under webdriver, `?nosave` and `?mute`.
+
+**Phone cost.**
+- Each bar starts 10 to 30 short-lived notes. The audio thread handles them in well under 3% of a core on a recent phone; the frame loop is untouched.
+- Memory: the module's own buffers are about 1.5 MB. They could share SND's buffers to save that.
+
+**Build turn (one turn, after the sound build).**
+1. Paste the module into SND (or load it).
+2. Add the four hooks and the two Settings rows.
+3. Add a music part to `sound_check.py`, with a fake ship clock:
+   - each time of day plays from its own set, and the working set plays while on shift;
+   - no track repeats back to back over 50 picks;
+   - a change waits for a section end of at most 30 s;
+   - a sleep jump changes at once;
+   - Off and pause go quiet;
+   - every track is under the hum;
+   - `seed` is unchanged;
+   - no AudioContext is made under webdriver.
+4. Run the full round.
+
+**Estimate:** 2 to 3 builder hours, plus a listening pass with the user (about an hour of tuning), plus a full round of checks (about 30 minutes across six runners).
+
 ## Decided (the user, 2026-10-25, 12:25 PM Eastern, via lead 36)
 
 1. **Sound is on by default, at Medium.** The Settings rows can turn it off or change the volume.
 2. **Crew doors near you make sound,** within the ~7-tile radius, quieter than your own (about 6 dB) and capped (at most 2 at once, 1 new one per 0.4 s) so busy corridors don't pile up. See "Where each sound hooks in".
 3. **No night dip.** The hum stays the same day and night.
-4. **Music: not yet, and by time of day, not by room** (the user, 2026-10-25, 12:40 PM). Three full tracks of about 10 minutes (Morning, Evening, Late night) and eleven samples (work music, and alternates for early morning, midday, afternoon, evening and night) are on the Wren Sound Lab page (`plans/sound/soundlab.html`, https://claude.ai/artifact/Q6j5kSrYRvPxmSZdRB1DMg), not chosen yet. Tradition music is on hold: only some traditions get it, and the user decides which (`plans/sound/audio-todo.md`). Music is its own later job and is not in this plan's estimate.
+4. **Music: by time of day, not by room** (the user, 2026-10-25, 12:40 PM). Three full tracks of about 10 minutes (Morning, Evening, Late night) and eleven samples (work music, and alternates for early morning, midday, afternoon, evening and night) are on the Wren Sound Lab page (`plans/sound/soundlab.html`, https://claude.ai/artifact/Q6j5kSrYRvPxmSZdRB1DMg), not chosen yet. Tradition music is on hold: only some traditions get it, and the user decides which (`plans/sound/audio-todo.md`). Music is its own later job and is not in this plan's estimate.
 
 **When:** sound is built after the next release (after 0.92.6 ships), when the user gives the go. Until then this plan, the mockup page and design-doc's "Sound" section (on branch `claude/sound-sd1`) are the record.
