@@ -205,3 +205,8 @@ Games: 20860227 cfb237c9...; 91b97ee9 84ece11c... (diff 20860227..91b97ee9 = 0.9
 - arrows_check week (no 'guide'): FAILs on 20860227: Day 9 "m6" not learned; stuck from Day 9 10:39 at "! Burst pipe,
   Deck 4" (the arrow up 3+ hours from 10:34); OK on 3866c8f3. Reproduced (DV1 had no repro with the queue on). DV1
   digging (lead 34/35's call).
+- DV1 claude/m6-day9 e823a74f (on 91b97ee9, arrows_check.py only, game unchanged): the follower closes Dev mode's
+  sheet (#dmSheet, opened by a pin tap under the top-left place-and-clock card in the #dev page) and the Ship health
+  panel if left open, as a player would. PASS: arrows_check week on 91b97ee9 and on 20860227 with it: ARROWS CHECK OK,
+  m6 learned Day 9, stuck 0 (before: stuck 10:39 at the burst pipe). No game bug (the normal game has no Dev sheet).
+- So FX12 91b97ee9 + DV1 e823a74f: PASS (~01:45 UTC).
