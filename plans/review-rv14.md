@@ -70,3 +70,5 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   birthdays (intended) + Day 62 observatory-night -4 (with FX12, also with the switch off; flagged to lead 35).
 - Rotation code all gated (evNewWk 0 when off). sundayStoryTick: SUN_GO starts the chapter at line 0 once Holt settled.
 - Builders: DS1 handed over -> FX16 (session_01MbKpntrDkcWAKrTj1HRUMm): seat line, T5, T6, switch-on.
+- 3b6e48bb (game 44d07c49..., FX16 T5 + DS1 seats; switch off): weekend_check OK; plant u_seat (tradSpot seat=false) FAILs
+  all five q_seat rule lines. Decor cocoaPot/picnicBasket read OK. Perf noted (Bread day js 2.79 ms within Sunday dinner peak).
