@@ -86,3 +86,8 @@ For the lead (a feel point, not a fault): Kovac's walk booking is 11 ship minute
 at the normal speed. The invite names the time, but a player a little late gets the quiet ending. Widening her `lead:`
 would give more slack if the user finds it tight. Older moments' chatter (socialChatter has no DIALOGUE guard) is
 backlog FX21-1.
+
+## Follow-up: 0905bed8 (Kovac 4 lead: 10 -> 28): PASS
+Only the lead: value changed (kovac.arc, the baked table, the handover). Her booking is now Day 19 15:10-15:39; by her
+plan she is on Deck 5 (at work) every minute of it and rides up at 15:38, so the scene is open the whole window, never
+in her seat (probed every 2 ship minutes). cadet_test vs 53c11f8 ALL IDENTICAL (alone, switch off); stories_check 30 OK.
