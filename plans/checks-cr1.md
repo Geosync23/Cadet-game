@@ -333,3 +333,24 @@ OLD = 0.92.3 3866c8f3. One at a time, CADET_WORK=/tmp/work-cr1.
 | arrows_check week guide, NEW | **OK** | 658 s | m6 learned Day 9 |
 
 No FAILs, so no OLD runs were needed.
+
+# 0.92.5 (claude/staging-0.92.5 53c11f88, 2026-10-25)
+
+**sha256 of starship-cadet.html: `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559`** (matches BM17's).
+OLD = 0.92.4 ba836359 (2aa6427f…13a2). One at a time (arrows_check alone), CADET_WORK=/tmp/work-cr1. The arrow checks
+added at BM17's ask (FX15 and DV1 changed the arrows).
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 313 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 239 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 219 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 57 s | PUZZLE CHECK OK |
+| social_check | **OK** | 22 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 31 s | TALK CHECK OK |
+| arrows_check (default) | **OK** | 1105 s | ARROWS CHECK OK; now also a promo part (Day 9 junior test passed); shift Day 9, 22 jobs, stuck 0 |
+| arrows_pointer_check | **OK** | 108 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 31 s | DEV ARROW CHECK OK |
+| arrows_check week guide, NEW | **OK** | 573 s | the scanner first used Day 5; m6 learned Day 8 (Day 9 on 0.92.4) |
+
+No FAILs, so no OLD runs were needed.
