@@ -36,6 +36,7 @@ The builder (FX22) owns the reader; these are proposals in a shape a reader can 
 | `once:` | `yes` (once a game), or how often it can be booked again |
 | `mem:` / `flag:` | set when it's kept (memory `appt.<id>`; flags for what follows) |
 | `record:` | the line for your Record (the device), if any |
+| `where <id>:` / `at <id>:` | in a `per-host` file, that host's place and hour |
 
 ## The text sections
 
@@ -48,7 +49,8 @@ The builder (FX22) owns the reader; these are proposals in a shape a reader can 
 | `== scene` | the scripted moment when you're both there, in the meeting format (`id: text   [pose]`, `? choice`, `* reply   flavour:... mem:...`, the answer indented); per-host files use `== scene <id>` | 140 a line, 4-10 lines |
 | `== here` | bubbles while it's on, if it runs long (walks, visits) | 60 |
 | `== thanks` | the toast when it's done | 140 |
-| `== after` | what they say later, once (`told:`), about it | 90 |
+| `== after` | what they say later, once (`told:`), about it; `== after <id>` per host | 90 |
+| `== stops` / `== tend` / `== harvest` | lines said in order at each step of a longer one (the night round's decks; the garden bed's visits and its harvest), in the scene format | 140 |
 
 Placeholders are only the ones lines_check already knows ({me}, {name}, {first}, {dish}, {thing}, {time}, {weekday},
 {room}, {deck}, {hobby}...), plus voice tokens ({hi}, {bye}, {yes}, {thanks}, {nick}). Never "Deck 7" on screen.
