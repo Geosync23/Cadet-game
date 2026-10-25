@@ -21,3 +21,6 @@ Probes: /tmp/rv15/probe_cheer.py, probe_tomorrow.py (container only).
 - FX18 a9fc0eb2 (game 82fd7a1f...4e51): PASS. Outfit line moved under the season line (lead 36); clothes_check ALL OK.
 - FX19 b7c4e3c5 (game c64590d0...6c10): PASS. Fix 1 (Tomorrow only when it is) and fix 2 (cheerTick skips Calder,
   not behind a switch) confirmed; promo_sight OK, cadet_test ALL IDENTICAL, arrows promo with the switches on OK.
+
+## FX18 claude/fx18-det 8ed625fa (test-only, backlog FX17-2): PASS (~09:50 UTC)
+Each run copy gets its own name (pid + count); two cadet_tests at once in one CADET_WORK each used their own copy; staging vs itself ALL IDENTICAL; no _run_ files left.
