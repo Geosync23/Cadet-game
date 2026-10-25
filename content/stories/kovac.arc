@@ -5,7 +5,7 @@ who: kovac-zainab
 // The lift isn't admitted until beat 2. Marra Station's night is told only in beat 3.
 // Crew stories (SW1, 2026-10-24, from outlines.md "E. Zainab Kovac"): beats 1-3 kept word for word. Beat 4 is the
 // crescendo at the Deck 5 lift doors before the Friday address; beat 5 its quiet ending; beat 6 the afterglow, where
-// her keepsake is now a knitted spanner grip (Zeke's is the only scarf). A line under "// IF <conditions>:" plays
+// her keepsake is now a knitted spanner grip (Zeke's is the only scarf). A line starting "if <conditions> |" plays
 // only when they hold (for the builders).
 
 == beat 1
@@ -65,21 +65,21 @@ them: Right. That's enough of that. Tea? I'll walk. The long way.
 == beat 4
 // CRESCENDO rides on: the lift up to the Captain's Friday address (the Deck 5 lift lobby, about 15:35-15:45; the scene plays at the doors, before they ride); day: 19 (preferred) or 26; cast: kovac-zainab, cruz-tove, keane-davi (only if there: he's on nights), you; quiet ending: beat 5
 tone: resolution
-when: beat:kovac.3 weekday:fri trad:captains-address
+when: beat:kovac.3 weekday:fri trad:captains-address day:19-26
 where: Lift lobby
 hint: Walk with me? Just to the lift. Well. Into it.
 mem: doors
 flag: kovac.rode
 them: Oh. They're both here. Cruz. And Keane. Not looking at each other. That's. Um. That's us.
 cruz-tove: Mm. Hello. Busy, Fridays. Lots of people going... up. Mm.
-// IF keane-davi is there: keane-davi: Hiya. Engine room floor's spotless today, by the way. Anyway. The address. Big one, I hear.
-// IF flag:kovac.liftjob: them: Here it comes. Brake shoes, four. Guide rollers, twelve. I tightened every one. I know where they all are.
+if here:keane-davi | keane-davi: Hiya. Engine room floor's spotless today, by the way. Anyway. The address. Big one, I hear.
+if flag:liftBrakes | them: Here it comes. Brake shoes, four. Guide rollers, twelve. I tightened every one. I know where they all are.
 them: Doors. Okay. Okay.   [sigh]
 them: Four, please.   [nod]
 cruz-tove: Mm. We're going to the rec deck.
 them: I know. I just wanted to say it. You said it, your first night. I've been practising.   [laugh]
 cruz-tove: Lovely lift.
-// IF keane-davi is there: keane-davi: Lovely lift.
+if here:keane-davi | keane-davi: Lovely lift.
 them: It is, actually.
 them: Nobody's holding the rail. Look. Nobody. No, don't look. I'm not looking.
 them: Very brave, all three.

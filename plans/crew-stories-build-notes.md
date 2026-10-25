@@ -6,11 +6,11 @@ decisions in design-doc.md, Social life, "Crew stories"). Each item says who own
 
 ## 0. Where the story files are (2026-10-25, for FX21's stage 1, patch 0.92.6 item 19)
 
-- `content/stories/<arc>.story`: the six for stage 1 (pell, teague, bramwell, halloran, kovac, salo).
-  `content/stories/waiting/<arc>.story`: the four that wait for career steps (torres, calder, raman, kowalczyk).
-  Same grammar as `.arc`. Today's baker (content_gen.py) skips the `.story` extension, so the game is unchanged
-  (checked: a bake on 0.92.5 staging with these files says "no change"). The builder bakes `content/stories/*.story`
-  into its own table, used only when the stories switch is on; `waiting/` is not baked until its career steps exist.
+- `content/stories/<arc>.arc`: the six for stage 1 (pell, teague, bramwell, halloran, kovac, salo), baked by FX21's
+  content_gen.py into `STORY_MOMENTS`, read only while `STORIES_ON` is on. Their per-line conditions (`if <conds> | who:
+  text`, with `here:<crewId>`) and `day:` gates are real now (CS1, from the writers' `// IF` and `// DAY` notes).
+  `content/stories/waiting/<arc>.story`: the four that wait for career steps (torres, calder, raman, kowalczyk); the
+  `.story` extension isn't baked; they become `.arc` (and get the same conversion) when their steps exist.
 - `content/arcs/pell.arc`, `kovac.arc`, `torres.arc`, `calder.arc` are back to the old stories, as in the game. With
   the switch on, a person's `.story` replaces their `.arc`; the old ones stay on file (parked, not deleted).
 - Kovac: the new beat 4 sets `mem: doors` (the old one's `fourplease` is left to the old story), and her new joy line
