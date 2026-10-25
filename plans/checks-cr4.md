@@ -19,6 +19,16 @@
 
 **CR4: OK.** No FAILs. (CR2's arc_check stall with STORIES_ON is outside this share.)
 
+### Extra days for the new traditions (0.92.6 b78e1e22, same sha256)
+
+Asked by BM17 and lead 36 at 16:02 (first finisher); nobody else runs them. All switches on as shipped. One at a time, alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 29 (Tool night) | OK (exit 0, 284 s) | `DAY CHECK OK`; plans the same twice; nobody stuck; 0 arrivals drawn elsewhere; draw calls peak 259 / 450 |
+| day_check 42 (Six weeks aboard) | OK (exit 0, 299 s) | `DAY CHECK OK`; plans the same twice; nobody stuck; draw calls peak 270 / 450 (Deck 3) |
+| day_check 53 (Open house) | OK (exit 0, 294 s) | `DAY CHECK OK`; plans the same twice; nobody stuck; draw calls peak **350** / 450 on Deck 3 (71 crew): the highest seen in my checks so far (others 247-281), still under budget |
+
 ## 0.92.5 full round (2026-10-25)
 
 - **Candidate:** `claude/staging-0.92.5` 53c11f8
