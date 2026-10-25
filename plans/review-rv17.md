@@ -117,3 +117,16 @@ and use it. Re-test: reload mid-Brennan and mid-round, tap the host, the scene /
 Verdict on bae25ae7: **FIXES NEEDED (one small)**: R1. Everything else passes.
 Note (BM17, 13:18 UTC): 6b03bea7 (passed 11:24) is already on staging-0.92.6 (merge 2f0c29de, P926_APPT off); bae25ae7
 held locally; BM17 merges the next sha I pass on top.
+
+## Re-review of dd4d8797 (game sha256 23ad7d70...f008): R1 fixed
+Diff bae25ae7..dd4d8797: `apptHostEvent` (slot) and one guarded `||` in tradJoinTap (off: unchanged).
+| Check | Result |
+|---|---|
+| cadet_test off vs 0.92.5, alone | ALL IDENTICAL |
+| check_fast | QUICK CHECK OK |
+| appt_check all parts (new Brennan and round reload lines) | APPT CHECK OK (223 ok; planted faults caught) |
+| events_check, switch on | EVENTS CHECK OK |
+| my reload probe: Brennan | mid-scene, save, reload, tap Brennan: the scene opens again; read through: kept, one Record row |
+| my reload probe: night round | stop 1, reload, Mensah back at the bench, tap: the round goes on from stop 2; reload again after 5 stops: kept at its end |
+
+## Final verdict: PASS at dd4d8797 (replaces the earlier PASS at 6b03bea7).
