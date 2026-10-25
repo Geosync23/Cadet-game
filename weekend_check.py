@@ -98,7 +98,7 @@ with sync_playwright() as pw:
     # ---- The Sunday story (FX9): Holt reads the week's chapter in his bubble, story.sunday.1 on Day 7, .2 on Day 14 ----
     g = Game(pw, won, 900, 760)
     for d, ch in [(7, 1), (14, 2)]:
-        g.ev(f"(() => {{ skipTo(({d} - 1) * 1440 + 1338); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
+        g.ev(f"""(() => {{ skipTo(({d} - 1) * 1440 + 1338); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
           const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }})()""")
         g.step(10)
         g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === 'holt'); if (a) { const c = cellPos(...nearestOpen(a.x, a.z, player)); player.obj.position.set(c.x, 0, c.z); } })()")
