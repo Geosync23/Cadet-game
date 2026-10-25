@@ -16289,7 +16289,8 @@ const ixHealth = (() => {
 
 // ---- the job board: the open jobs, most urgent first, with Take it (claimJob: the same rule as the device's Jobs) ----
 // boardLesson() -> job id | null (FX10, item 29): the job a lesson's "your turn" (24 core's trainDo: SHIP.works.cur at 'do')
-// put on the board for you, while it's there to take
+// put on the board for you, while it's there to take; else a training job held for you there (FX15, patch 0.92.5 #22: a
+// head-scratcher lesson's first case, the arrival week's jobs). boardLessonName(id) -> its name ("scanner lesson", "shadow job")
 // lessonClash(j, mins) -> words | null (FX10, patch 0.92.4 item D, the user's yes): a job you take that would run past the
 // start of your next lesson's meeting (SHIP.works.cur at 'meet', its occasion not met yet). The job's end: now, its minutes,
 // the machine shop's time for a part you make (its own make, or one no shelf has: makeMins), and LESSON_WALK minutes of
@@ -16305,12 +16306,20 @@ function lessonClash(j, mins) {
 }
 function boardLesson() {
   const c = SHIP.works && SHIP.works.cur, j = c && c.st === 'do' && c.j && (SHIP.jobs || []).find(x => x.id === c.j);
-  return j && j.status === 'open' && !j.claimedBy ? j.id : null;
+  let can = x => true; try { can = ixBoard.doable; } catch (e) { /* the board not made yet */ }   // (FX15, patch 0.92.5 #22) only a job you take at the board (not m6's call at the pipe)
+  if (j && j.status === 'open' && !j.claimedBy) return can(j) ? j.id : null;
+  // (FX15, the user, patch 0.92.5 #22: "all training and lessons") a training job no lesson's "your turn" put up, held for
+  // you on the board: a head-scratcher lesson's first case (24k: P1, P2, P3) or the arrival week's jobs (section 21's slots 1-3)
+  const now = shipNow(), o = (SHIP.jobs || []).find(x => x.status === 'open' && !x.claimedBy && x.found <= now && heldForYou(x) && !(typeof caseHidden === 'function' && caseHidden(x)) && can(x) && (x.case && (caseOf(x) || {}).train || x.reserved >= 1 && x.reserved <= 3 && typeof introOn === 'function' && introOn() && !(x.reserved === 3 && introSoloHold(now))));   // (Day 2's: not before Calder's meeting is over: she gives it you)
+  return o ? o.id : null;
 }
 // (DS1, the user, patch 0.92.5 #12: "for scanner training it's not clear which job to take") the lesson by name, for the
 // board's row and line, the arrow and the pointer: "scanner lesson", "tuning lesson"
-function boardLessonName() {
-  const c = SHIP.works && SHIP.works.cur; let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
+function boardLessonName(id = boardLesson()) {
+  const c = SHIP.works && SHIP.works.cur, j = id && (SHIP.jobs || []).find(x => x.id === id);
+  if (j && !(c && c.j === id)) return j.case ? 'head-scratcher lesson' : ({ 1: 'shadow job', 2: 'job to lead', 3: 'first solo job' })[j.reserved] || 'lesson';   // (FX15, patch 0.92.5 #22)
+  if (c && c.id === 't2') return 'Tier 2 test job';     // (FX15) 24p's test, not a lesson
+  let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
   n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
 }
 const ixBoard = (() => {
@@ -16343,7 +16352,7 @@ const ixBoard = (() => {
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
       if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked job.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
@@ -16908,6 +16917,11 @@ function guideTeacherIn(by, deck, room) {                // the teacher on this 
   try { return roomAt(...a.here()) === room; } catch (e) { return false; }
 }
 function guideTrain() {
+  { const les = boardLesson(), c0 = SHIP.works && SHIP.works.cur, now0 = Math.floor(shipNow());   // (FX15, patch 0.92.5 #22) a training job no lesson's "your turn" put up (a head-scratcher's first case, Day 2's solo job waiting): T3 at the board, by its name (Day 1's: the intro's own arrow)
+    if (les && !(c0 && c0.j === les) && !(SHIP.time.day <= 1 && typeof introOn === 'function' && introOn()))
+      guideAsk({ id: 'train:board:' + les.slice(0, 40), level: 3, once: true, owner: '15b (FX15)', until: now0 + 480,
+        goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m || guideShiftOver() || boardLesson() !== les ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName(les) }; },
+        done: () => guideTaken(les) }); }
   const W = SHIP.works, c = W && W.cur; if (!c || typeof ladderRow !== 'function') return;
   const row = ladderRow(c.id); if (!row) return;
   const now = Math.floor(shipNow()), who = guideWho(c.by), what = typeof mechName === 'function' ? mechName(c.id) : row.name;
@@ -16924,7 +16938,7 @@ function guideTrain() {
       done: () => guideStage(c.id, 'watch'), tip: { id: 'guide:watch', text: 'Stay near while ' + who + ' works: your turn comes next.' } });
   } else if (c.st === 'do' && c.j && !(WORK_MECH[c.id] || {}).offer) {
     guideAsk({ id: 'train:' + c.id + ':do:' + c.d, level: 3, once: true, owner: '24 core (read)', until: now + 480,   // (per day: a lesson offered again leads again; patch 0.92.5 #12)
-      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName() }; },   // (on the board itself; 258 px at 390)   // at the shift's end it gives way to clock out (piece D)
+      goal: () => { let m = null; try { m = myJob(); } catch (e) { m = null; } return m && m.id !== c.j || guideShiftOver() ? null : { deck: 5, item: /job board/i, room: 'w', label: 'Your ' + boardLessonName(c.j) }; },   // (on the board itself; 258 px at 390)   // at the shift's end it gives way to clock out (piece D)
       done: () => guideTaken(c.j) || guideStage(c.id, 'do') });
   }
 }
@@ -16970,16 +16984,17 @@ function guideShift() {
   guideShiftWords(now, P);
   if (typeof inspectDue === 'function' && typeof inspectGoal === 'function' && typeof INSPECT_AT !== 'undefined' && m >= 360 && m < INSPECT_AT && !(typeof SIM_AT !== 'undefined' && SIM_AT) && inspectDue(d))   // the inspection morning (F2, FX3's arrows in 24c): level 2, an event you're expected at; its goal empty once you're ready and there
     guideAsk({ id: 'inspect:' + d, level: 2, owner: '15b (piece D, F2)', from: base + 360, until: base + INSPECT_AT, goal: () => inspectGoal(d), done: () => !inspectDue(d) });
-  if (d <= 1 && typeof introOn === 'function' && introOn() || !playerShiftOn(d) || SHIP.career && SHIP.career.end) return;   // training day: the intro's own arrows
+  if (!playerShiftOn(d) || SHIP.career && SHIP.career.end) return;
+  const intro = d <= 1 && typeof introOn === 'function' && introOn();   // training day: the intro's own arrows (only the lesson's pointer below rings: FX15, patch 0.92.5 #22)
   const E = dayShiftEnd(d), inn = careerClockedIn(d), out = careerClockedOut(d), owner = '15b (piece D)';
-  if (!inn && m >= CAREER.clockIn && m < E) {            // S2
+  if (!intro && !inn && m >= CAREER.clockIn && m < E) {            // S2
     guideAsk({ id: 'shift:in:' + d, level: 4, owner, from: base + CAREER.clockIn, until: base + E, goal: () => guideClock('Clock in: shift at ' + hhmm(DAY_SHIFT[0])), done: () => careerClockedIn(d) });
     if (P) pointAsk({ id: 'p:clock:in', once: 3, path: pointClock('in', 'Clock in'), until: base + E, done: () => careerClockedIn(d) });
   }
   { let mn = null; try { mn = myJob(); } catch (e) { mn = null; }   // (DS1, patch 0.92.5 #12) your lesson's job on the board: the pointer rings its Take it each time it waits, clocked in or not (FX10's, once)
-    const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur;
-    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + cur.id, once: 99, path: pointBoard(les, 'Take this one: your ' + boardLessonName()), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
-  if (!inn || out) return;
+    const les = !mn && m < E && boardLesson(), cur = SHIP.works && SHIP.works.cur, lj = les && SHIP.jobs.find(x => x.id === les), key = lj && (cur && cur.j === les ? cur.id : lj.train || 'intro' + lj.reserved);   // (FX15: a training job no lesson put up, by its own name)
+    if (P && les && guideTakeable().some(o => o.id === les)) pointAsk({ id: 'p:board:lesson:' + key, once: 99, path: pointBoard(les, 'Take this one: your ' + boardLessonName(les)), until: now + 120, done: () => { try { return !!myJob() || boardLesson() !== les; } catch (e) { return true; } } }); }
+  if (intro || !inn || out) return;
   let mine = null; try { mine = myJob(); } catch (e) { mine = null; }
   if (m < E) {                                           // S3 (S6, the empty board's word: FX1's boardEmptySay, from ixWorkStep)
     guideAsk({ id: 'shift:job:' + d, level: 4, owner, until: base + E, done: () => careerClockedOut(d),
@@ -47750,12 +47765,15 @@ function introArrowWant(now) {
     if (out || typeof myJob === 'function' && myJob() || I.done['d1-end:start'] !== undefined) fin('board');   // (the patch, #19: or Zeke's begun his end of the day)
     else return 'board';
   }
+  else if (careerClockedIn(1) && !out && I.done['d1-end:start'] === undefined && !introTeaLead() && !(typeof myJob === 'function' && myJob()) && typeof boardLesson === 'function' && (SHIP.jobs.find(x => x.id === boardLesson()) || {}).reserved === 2) return 'board';   // (FX15, patch 0.92.5 #22) the 13:00 job you lead, waiting on the board: the board's arrow again, once Zeke's tea is over
   return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
 }
 function introArrowTick() {
   const t = simNow(); if (t < (INTRO_UI.arrowAt || 0)) return; INTRO_UI.arrowAt = t + 250;   // four times a second
   introTeaTick(Math.floor(shipNow())); introCallTick(Math.floor(shipNow()));
-  const id = introArrowWant(Math.floor(shipNow())), g = id && INTRO_ARROWS[id];
+  const id = introArrowWant(Math.floor(shipNow())), les = id === 'board' && typeof boardLesson === 'function' && boardLesson();
+  const g = les ? { ...INTRO_ARROWS.board, label: 'Your ' + boardLessonName(les) + ': take it at the board' } : id && INTRO_ARROWS[id];   // (FX15, patch 0.92.5 #22) named: "Your shadow job: take it at the board"
+  if (les) INTRO_ARROW_LABELS.add(g.label);              // ours, to clear
   const cur = typeof IX_GOAL !== 'undefined' ? IX_GOAL : null, ours = cur && (INTRO_ARROW_LABELS.has(cur.label) && !cur.trk || cur.label === INTRO_BED_GOAL && id === 'call' || cur.label === 'Zeke Torres');   // (playtest patch 1: a first-time arrow over his own, the wardrobe's while he waits)   // 0.72.5 (playtest 2, item 3): the call-home arrow takes over from the first night's bunk arrow (up since the goodnight), which comes back once you're at the booths
   if (!g) { if (INTRO_UI.arrow) introArrowClear(); return; }
   if (cur && !ours && !((id === 'clockout' || id === 'beam') && introHoldNudges())) return;   // someone else's arrow is up: ours waits for it (not the end of training day's: the beam wins, the patch #19)
