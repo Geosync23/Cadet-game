@@ -1,0 +1,47 @@
+@appointment brennan-book
+// SW2, 0.92.6 item 9 (the user: yes). A page in Brennan's book: after the lunch rush she asks you into the galley to taste
+// three spoonfuls and tell her which is your favourite. It goes in her book of favourite dishes (canon), and it turns up
+// on a Wednesday now and then (design-doc "Menus": a crew member's favourite on Wednesdays). The three spoons are dishes
+// already on MENU.cycle; FX22 stores your pick as your favourite (the reply's mem word names it).
+title: A page in Brennan's book
+starts: invite
+host: brennan
+gate: tier>=acquaintance !mem:appt.brennan-book
+when: weekday
+at: 14:30-15:00
+where: 3 room Galley: work:galley
+who: host, you
+once: yes
+mem: appt.brennan-book
+record: Your favourite dish is in Brennan's book.
+
+== invite
+- Got a minute after lunch tomorrow, love? Galley, half two. I need a taster.   #funny
+- Half two tomorrow, come to the galley. Three spoons, one question. Don't eat lunch first.
+
+== busy
+- Not today, love, the cold store's sulking. Tomorrow, half two?
+
+== mail
+- Galley, {time} tomorrow. Brennan wants you to taste three things. Come hungry, she says, and honest.
+
+== scene
+brennan: Stool's there, love. Three spoons. Don't be polite. Tell me which.   [gesture]
+brennan: First: my spiced lentils. Second: dumplings and greens. Third: the mushroom risotto. Go.
+brennan: I keep a book. Every soul on this ship and the dish that makes them feel at home.   [nod]
+brennan: Took me years to fill. Some of them took a month to tell me. You've got one spoon each.
+? choice
+* The lentils. Definitely the lentils.   flavour:share mem:appt.brennan-book.lentils
+  brennan: Knew it. You went quiet on the first spoon. That's how I tell.   [laugh]
+* The dumplings. I'd eat those every day.   flavour:cheer mem:appt.brennan-book.dumplings
+  brennan: Every day? Wednesdays, love. I'm generous, not daft.   [laugh]
+* The risotto. It tastes like somewhere I've been.   flavour:listen mem:appt.brennan-book.risotto
+  brennan: That's the best reason there is. Don't tell me where. Not yet.   [nod]
+brennan: There. Written in. In ink, so you can't change your mind. Now off you go, I've a dinner to make.   [gesture]
+
+== thanks
+- Brennan writes your favourite in her book, in ink, under your name. It'll turn up on a Wednesday one of these weeks.   #warm
+
+== after
+- Your dish is on Wednesday, love. Don't tell anyone it was you. Everyone will know.   #funny
+- Saw your name in Brennan's book. Right next to the Captain's. Fancy.   #warm

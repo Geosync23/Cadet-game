@@ -1,0 +1,83 @@
+@appointment teach-me
+// SW2, 0.92.6 item 9 (the user: yes). Teach me your thing: you ask someone whose hobby it is to teach you. Half an hour
+// side by side, off duty; it counts double toward that hobby, unlocks it if you didn't have it, and gives you the
+// supplies the first time. Four teachers, one per hobby the game has (section 9's HOBBIES): Zeke (knit; Kovac taught
+// him, and he's bad at it: canon), Cruz (garden: a cutting), Rina (games: Tiles, and she wins), Ravi Hart (draw: the
+// comics wall). Zeke's scene keeps clear of your scarf (his beat 1 tells that).
+title: Teach me your thing
+starts: ask
+host: per-host
+gate: tier>=colleague (the host), host off duty
+when: any day
+at: 30 minutes, the host's free time
+where torres-zeke: 4 pool common-room
+where cruz-tove: 3 pool garden
+where rina: 4 pool common-room
+where hart-ravi: 4 pool common-room
+who: host, you
+once: no (the first time unlocks the hobby)
+mem: appt.teach.<hobby>
+record: {first} taught you {hobby}.
+
+== ask
+- Will you teach me your hobby?
+- {yes}! Half an hour, somewhere comfy. Bring patience.
+- {yes}. Nobody ever asks. I'm ridiculously pleased.   #warm
+
+== busy
+- I'd love to, just not today. Ask me again tomorrow?
+
+== mail
+- Tomorrow, {time}: {first} is teaching you {hobby}. Supplies provided, the first time.
+
+== scene torres-zeke
+torres-zeke: Right! Needles. Wool. Kovac taught me. She'd say badly. Now I teach you badly. Tradition.   [laugh]
+torres-zeke: Needle here. Wool round. No, round. There. That's a stitch. Look at you.   [gesture]
+torres-zeke: Now do it again. And again. That's the whole secret. It's just again, forever.
+? choice
+* Keep going, very slowly.   flavour:practical mem:appt.teach.knit
+  torres-zeke: Look at that row! It's wonky. Mine are wonky. We're a wonky team.   [laugh]
+* Ask what he's knitting at the moment.   flavour:listen mem:appt.teach.knit
+  torres-zeke: A hat. Mostly a hat. It's had three goes at being a hat.   [laugh]
+torres-zeke: Keep the needles. Bring them to Knit and natter on Tuesday. Kovac will fix us both.
+
+== scene cruz-tove
+cruz-tove: Oh. You came. Hello. This is a week-six mint. It's going to give us a bit of itself.   [gesture]
+cruz-tove: Find a stem with new leaves. Cut just under the joint. Clean. Like that.
+cruz-tove: Strip the bottom leaves. Into the water. Tell it hello. That bit's important.   [nod]
+? choice
+* Tell the cutting hello.   flavour:cheer mem:appt.teach.garden
+  cruz-tove: It heard you. It'll root by next week. Probably. They usually listen.   [laugh]
+* Ask how long until it grows.   flavour:practical mem:appt.teach.garden
+  cruz-tove: Roots in a week. A plant in four. Then Brennan steals it. That's the cycle.   [nod]
+cruz-tove: Take it home. Windowsill. Water when it's dry. Don't overwater. Everyone overwaters.
+
+== scene rina
+rina: Sit. Tiles. You put down a tile, I put down a tile, I win. That's the short version.   [gesture]
+rina: The long version: match the edges. Block my rows. Watch my hands, not the board.
+rina: I'll go easy. I won't. But I'll explain why you lost each time.   [laugh]
+? choice
+* Watch her hands, like she said.   flavour:practical mem:appt.teach.games
+  rina: Annoying. You're learning. I'll have to start actually trying.   [laugh]
+* Ask how she learnt.   flavour:listen mem:appt.teach.games
+  rina: Every evening, for years, against anyone who'd sit down. Nobody sits down now.   [laugh]
+rina: Keep that set. Practise. Then come and lose to me in the common room. Properly.
+
+== scene hart-ravi
+hart-ravi: Pencil. Paper. Four boxes. That's a comic. That's all a comic is.   [gesture]
+hart-ravi: Box one: someone wants something. Box two: it goes wrong. Box three: worse. Box four: a duck.   [laugh]
+hart-ravi: There's always a duck. Nobody knows why. Don't ask. Draw.
+? choice
+* Draw the duck first.   flavour:cheer mem:appt.teach.draw
+  hart-ravi: Bold. Duck first. That's a good duck, actually. Stubborn-looking.   [laugh]
+* Draw someone aboard instead.   flavour:share mem:appt.teach.draw
+  hart-ravi: Who's that? Oh, it's Pell, asleep. You've got his face exactly.   [laugh]
+hart-ravi: Keep the pencil. Finish it. Pin it on the comics wall when it's done.
+
+== thanks
+- Half an hour learning something new, side by side, and you go home with the things to keep practising.   #warm
+
+== after
+- How's the knitting? Show me. Oh, that's wonkier than mine. Brilliant.   #funny
+- Your mint cutting's got roots, I bet. Cruz says they always listen to you.   #warm
+- Saw your comic on the wall. The duck is excellent.   #funny
