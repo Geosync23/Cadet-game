@@ -176,6 +176,9 @@ def part_on2(pg):
     pg.ev("POINT.aim.click()"); p = ptr(pg); pg.ev("deviceClose()")
     check(not p['up'] and pg.ev("!POINT_Q.some(x => x.id === 'p:works:log')"), f'S8: the tab shown: gone ({p})')
     # S6: nothing with a Take it (a row without one counts as nothing): no arrow; FX1's word said (boardEmptySay)
+    # (FX19, 0.92.6: with PROMO_SIGHT_ON the Day 8 career's test is offered at once and runs on Day 9, its stage 'do' all day,
+    # and boardEmptySay rightly holds its word in a training or test; the empty board is tried with nothing under way, then put back)
+    pg.ev("window.__kc = SHIP.works ? SHIP.works.cur : null; if (SHIP.works) SHIP.works.cur = null")
     pg.ev("window.__oj = openJobs; openJobs = () => [{ id: 'arrows-none', asked: false }]; __toasts.length = 0; if (boardEmptySay.s) boardEmptySay.s.dry = false, boardEmptySay.s.at = -1e9")
     at(pg, 605); shift(pg); pg.ev("ixGoalAt = -1"); pg.step(2); lab = pg.ev(LAB); n1 = pg.ev("__toasts.filter(t => /Nothing on the board/.test(t)).length")
     hold = pg.ev("""(() => { boardEmptySay.s.dry = false; boardEmptySay.s.at = -1e9; __toasts.length = 0; const now = Math.floor(shipNow()), occ = { key: 'arrows-occ4', deck: 5, room: 'r', at: now - 2, len: 15, status: 'asked' };
@@ -184,7 +187,7 @@ def part_on2(pg):
       const W = SHIP.works, keep = W.cur, dk = DIALOGUE, out = {};
       DIALOGUE = { arrows: true }; out.dialogue = say(); DIALOGUE = dk;
       W.cur = { id: 'm4', st: 'watch', d: 9, by: 'esposito-yara' }; out.watch = say(); W.cur.st = 'do'; out.doo = say(); W.cur = keep; out.free = say(); return out; })()""")
-    pg.ev("openJobs = __oj")
+    pg.ev("openJobs = __oj; if (SHIP.works) SHIP.works.cur = __kc")
     print('  S6:', lab, n1, 'in a meeting, then after:', hold, '| in a dialogue, a watch, a turn, then free:', hold2)
     check(hold2 == {'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 1}, f'S6: the board\'s word waits through a dialogue and a training\'s watch and turn (RV7) ({hold2})')
     check(hold == [0, 1], f'S6: the board\'s word waits through a meeting, then is said (lead 29) ({hold})')
