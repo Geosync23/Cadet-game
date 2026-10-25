@@ -7,7 +7,12 @@
 4. Message every working seat with your session id (priority "next", never "now"). Tell lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi) you've taken over.
 5. User in US Eastern (EDT, UTC-4). Plain words, no emojis, few messages. Cap 8 working seats; during a six-runner round only BM + 6 + 1.
 
-## Latest (~17:00 UTC, 1 PM Eastern)
+## Latest (~17:15 UTC, 1:15 PM Eastern)
+- All round fixes PASSED: FX17 3e8c78a6 + eba4d365 (RV17), FX19 acb36503 (RV15), FX22b join 3d011393 (RV17), arc_check 70813dc8 (in staging). BM17 merging + re-running (bigevents, mech, arrows_d, join alone, p926, events, day 7, check_fast, cadet vs b78e1e22). Career pace = backlog 12 (lead call, told user; user may overrule: e.g. ODD_MIN 2). Then BM17 package → user → PUB1 on the user's say (Playtest 3HqM5xiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr; NEVER 6daN…), then the user's OK to fast-forward integration.
+- Music: approved, ON by default, no music Day 0, Music app on device; test page https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy; module plans/sound/music-module.js (claude/sound-sd1 aef13a0). Sound + music build after 0.92.6 on the user's go (plans/sound/integration-plan.md, audio-todo.md).
+- Fresh CR6 needed before the next full round (old CR6 ~60%).
+
+## Earlier (~17:00 UTC, 1 PM Eastern)
 - Round fixes: RV15 PASS FX19 acb36503 (arrows_d test fix). Waiting RV17 on FX17 3e8c78a6 (Line clash, game) + eba4d365 (m17 check) and FX22b 3d011393 (join_check test); BM17 bisecting career pace (+1 xp by Day 4 with switches off = backlog 12 edge; ODD_ON adds ~8 jobs/day, 0 xp each). Lead default: keep 0.92.5 pace. Then BM17 merges, re-runs, package → user.
 - Sound (all SD1, session_012DnJzEerXDa6SScxbQZ1q5, claude/sound-sd1): decided Soundscape PP6pDpiZw8jzaNoLygCTgC; Activities approved 5sjuT5XCJqCvMP68AipdZP (no on-the-line call sound); Round 2 1MXY7YxN9DGUChzUhAUyU7 (clock C, tap B louder, no mood); Sound Lab Q6j5kSrYRvPxmSZdRB1DMg: music APPROVED, ON by default; SD1 building game-ready music module + Music app mockup + harness (not in game). Sound + music build after 0.92.6 on the user's go. Tradition music held (audio-todo.md).
 
