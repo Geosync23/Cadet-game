@@ -675,6 +675,26 @@ The look is locked: textured low-poly in a cozy isometric cutaway, with every te
 - **UI:** the personal device (its old-school screen look and apps are under "The player"), the machine inspection panel and a two-slot carry indicator. The only time control is Pause (above).
 
 
+## Sound
+
+*Designed with the user on 2026-10-25 in the soundscape mockup (`plans/sound/soundscape.html`, https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC). Not built yet: sound goes into the game after the next release (after 0.92.6), from `plans/sound/integration-plan.md`.*
+
+**What it is.** A quiet, cozy soundscape that makes the Wren feel alive without ever startling you. Every sound is made live by the browser (Web Audio), with no recordings, so the game needs no sound files. The deck hum is the loudest thing you hear: every door, beep and footstep sits under it. Beeps only play when you do something; nothing in the background beeps.
+
+**The chosen sounds** (the user's picks):
+
+- **Ship hum, one per deck.** Warm and low, slowly breathing, never repeating. Quarters (Deck 4) is the home hum; the Commons (Deck 3) is a touch brighter; Engineering (Deck 6) is deeper, with a slow turning throb; the Bridge (Deck 1) is cleaner and steadier; the hydroponics garden is mostly soft moving air. It cross-fades when you change deck, and stays the same day and night.
+- **Device and job sounds.** Device tap: a soft tick (A). Open and close a panel: two notes up, two notes down. Job posted: a small marimba pair. Job done: a warm four-note rise. Mail arrived: a soft two-note bell (B). Heads-up: a soft rising pad (B). "Not now": a low, gentle "uh-uh", never a buzzer.
+- **Doors.** Room doors: the Cabin door (C), a puff of air, a soft slide and a solid stop. Hatches: the Bulkhead (A), two latch clacks, a slow heavy roll and a low metal clang. There are no beeps or tones in any door. Doors the crew open near you make sound too, quieter than your own and capped, so a busy corridor never piles up.
+- **The lift,** with its own signature: the Smooth lift (C), with quieter doors parting from the middle, a gliding ride with a rising rush of air, a soft settle and three falling notes on a struck-metal chime in its own key. The deck button is the Two-step (B): the Mail bell made short, two quick rising notes over a soft press.
+- **Footsteps.** Only yours, soft like walking on carpet on every floor, with a faint hint of each surface: a firm tap on plating, a hollow knock on the promenade planks, a little grit on the garden path. Quiet, and well under the hum.
+- **No crowd chatter.** The user tried it and preferred none.
+
+**Settings and rules.** Sound is on by default at Medium; the Settings app has Sound On/Off and Volume Low/Medium/High, kept as a preference apart from the save. Sound starts on your first tap (a browser rule), pauses whenever the game pauses or the tab is hidden, and costs nothing when off. It never touches the ship's random numbers or anything you can see, so the regressions stay pixel-identical, and the checks run silent.
+
+**Music: later.** The design calls for music in time, and the device's Music app comes with it. The mockup page has four samples to start the conversation, none chosen yet: Quarters, evening (slow electric piano); Galley, morning (marimba and whistle); Observatory (pads and glassy bells, no beat); Tradition night (a gentle waltz). Music always plays under the hum.
+
+
 ## Technical plan: how decks work in the build
 
 The game stays one HTML file using three.js r128 from cdnjs, built in chat on a phone (Galaxy TriFold), with no image assets. Ship, decks, machines, crew and jobs are all stored as data, so adding content never means rewriting code.
