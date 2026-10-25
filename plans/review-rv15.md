@@ -27,3 +27,6 @@ Each run copy gets its own name (pid + count); two cadet_tests at once in one CA
 
 ## FX18 claude/fx18-det 28f4669d (test-only, backlog FX18-1): PASS (~10:45 UTC)
 RUN_ID per process in 8 checks; two career_checks at once in one CADET_WORK both OK, own copies, none left; controller_check named its copies per run, no FAILs, hit my 50 min timeout under load (not a fault). The cleanup is atexit only: a killed run leaves its uniquely named copies.
+
+## FX20 claude/p926-fx20 bb0aefed (item 10, odd jobs, ODD_ON off): PASS (~15:40 UTC)
+f8c9235b: cadet_test off ALL IDENTICAL; on: machine, day 2, deck OK; IX_ODD=oddall interactions FAIL (oj-d3prom-rail dead after oj-d5bay-clock, the time clock). Fixed by parking oj-d5bay-clock (9755ca3f): oddall interactions OK, 114 rows. bb0aefed = staging 1fe6d523 + that line; machine_check on OK (revised bar). Crew-occupancy note: 12 of 114 places busy at least 20% (FX10: 46 of 181).
