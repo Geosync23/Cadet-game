@@ -56861,7 +56861,7 @@ function crewDetail() {                                  // who gets a full rig:
     const want = near.includes(a);
     if (want === !!a.h.full) continue;
     a.remove(); a.h = want ? new FullPerson(rosterSpec(a.p), a.p.id) : crowd.add(rosterSpec(a.p));
-    a.h.set({ x: a.x, y: a.y, z: a.z }, a.face, heldPose(a));
+    a.h.set({ x: a.x + a.lx + a.hx, y: a.y, z: a.z + a.lz + a.hz }, a.face, heldPose(a));   // where it's drawn, glide and lane included (FX9: a swap mid get-up drew Pell .63 tiles ahead for a frame)
   }
 }
 // placeBusy(id): is someone settled at that place on this deck? A Set rebuilt once a frame, so it's a cheap lookup
