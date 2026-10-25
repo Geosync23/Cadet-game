@@ -350,7 +350,7 @@ def main(argv):
         if kind.startswith('event.'):
             lim = 400 if re.match(r'event\.[^.]+\.mail\.', kind) else 60 if re.match(r'event\.[^.]+\.status\.', kind) else 200 if re.search(r'\.(mail|thanks|keepsake)(\.\d+)?$|\.plaque\.', kind) else CARD
         else:
-            lim = 44 if kind == 'talk.reply' else 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') or kind in ('promo.announce.mail', 'promo.mail', 'promo.captain', 'promo.ceremony.mail', 'promo.move.mail', 'promo.ceremony.invite') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
+            lim = 44 if kind == 'talk.reply' else 90 if kind in ('trad.chatter', 'trad.ask', 'trad.here') else 200 if kind in ('trad.mail', 'trad.thanks') or kind.startswith(('tip.', 'join.')) else 400 if kind == 'letter' or kind.startswith('mail.') or kind in ('promo.announce.mail', 'promo.mail', 'promo.captain', 'promo.ceremony.mail', 'promo.move.mail', 'promo.ceremony.invite', 'promo.sight.mail', 'promo.ready.mail', 'promo.missing.m6', 'promo.missing.day', 'promo.dependable') else 60 if kind in BUBBLE_KINDS else 140 if kind.startswith(LONG_KINDS) else CARD
         # one Mail longer than 400 by the user's choice: Zeke's "Before you land" (mail.zeke.land, 475 with a name filled
         # in), the words the user picked (plans/zeke-words.md, final); it scrolls and reads whole in the device at 320x640
         # and 390x844 (DS1, 0.92.0). Its own cap, so it can't grow further unnoticed

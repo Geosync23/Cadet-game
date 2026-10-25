@@ -35608,6 +35608,8 @@ const LINES = JSON.parse([
   '{"text":"Your Tier 2 test job: {day}, nine o\'clock in the Works bay.","id":"1i92rmn"}]',
   ',"next.t2.soon":[',
   '{"text":"You\'re ready for your Tier 2 test. Calder will set the day.","id":"1frwk58"}]',
+  ',"next.t2.steps":[',
+  '{"text":"Tier 2 test: Relied on and Making it safe. You\'re {band}. Next step: {next}.","id":"2c7syu"}]',
   ',"next.wait.m1":[',
   '{"text":"Torres is waiting to show you his round. Find him.","id":"15mbvgm"}]',
   ',"next.wait.m2":[',
@@ -35654,16 +35656,33 @@ const LINES = JSON.parse([
   '{"text":"Your commission, 17:15 | The officer ceremony is at 17:15 today, in the observation room on Deck 1. Clean uniform, please. It takes ten minutes, and there will be tea.","id":"n19eej"}]',
   ',"promo.ceremony.mail":[',
   '{"text":"Your commission | We missed you at the ceremony, so the Captain signed it anyway. You are commissioned an Officer of the Wren. Your framed commission is on your shelf in 4-23. The Captain asks you to drop by the observation room some evening. She still has a question for you.","id":"xg208d"}]',
+  ',"promo.dependable":[',
+  '{"text":"Dependable | Word is you\'re dependable. Keep it up. Then we talk about your Tier 2 test.","id":"p6cel6"}]',
   ',"promo.keepsake":[',
   '{"text":"your framed commission","id":"1tqr0mt"}]',
   ',"promo.mail":[',
-  '{"text":"Your promotion | You weren\'t about, so you\'ll read it instead. You passed. As of today you\'re an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Well done.","id":"14wogek"}]',
+  '{"text":"Your promotion | You weren\'t about, so you\'ll read it instead. You passed. As of today you\'re an Officer: Technician, Tier 2. Your badge and your pip are on my desk; collect them. You move to cabin 4-23 tonight. The Captain commissions you tomorrow at 17:15. Clean uniform. Ten minutes early.","id":"a6tydv"}]',
+  ',"promo.missing.day":[',
+  '{"text":"Soon | You\'re ready early. I set Tier 2 tests from the second Monday. We\'ll talk then.","id":"62iqf4"}]',
+  ',"promo.missing.m6":[',
+  '{"text":"Almost | Relied on. One thing left before your Tier 2 test: Making it safe, with me.","id":"58brba"}]',
   ',"promo.move.mail":[',
   '{"text":"Your cabin | You weren\'t about, so we moved you anyway. Cabin 4-23, officers\' corridor. Your things are there, and your key opens it. Quiet hours after 23:00. Your door\'s your own now: use it. Tomas says don\'t be a stranger.","id":"l3qjey"}]',
   ',"promo.move.tomas":[',
   '{"text":"Don\'t be a stranger, Officer.","id":"1dz229a"}]',
   ',"promo.news":[',
   '{"text":"Works news: {me} made Officer today. Cake at the tea corner, while it lasts.","id":"ztxof1"}]',
+  ',"promo.ready":[',
+  '{"text":"People rely on your work. Making it safe is done. That\'s all of it. Tier 2 test.","id":"21l7vp"}]',
+  ',"promo.ready.mail":[',
+  '{"text":"Your Tier 2 test | Ready. Test job {day}, 09:00, Works bay. Pass it and you\'re an Officer.","id":"1kgsu6i"}]',
+  ',"promo.ready.notice":[',
+  '{"text":"Your Tier 2 test: {day}, 09:00, the Works bay.","id":"1af2hu1"}]',
+  ',"promo.sight":[',
+  '{"text":"Reliable. Good. Two more steps and Making it safe, and I\'ll put you up for Tier 2.","id":"mb428q"},',
+  '{"text":"Reliable now. Trusted next, then Relied on. Making it safe with me. Then your test.","id":"1vnsitq"}]',
+  ',"promo.sight.mail":[',
+  '{"text":"Your next step | Reliable. Then Trusted, Relied on, Making it safe. Then Tier 2.","id":"hpp3t3"}]',
   ',"promo.summons":[',
   '{"text":"Chief Calder: My office, 11:00. — C.","id":"1214vha"}]',
   ',"promo.summons.torres":[',
@@ -35674,6 +35693,8 @@ const LINES = JSON.parse([
   '{"text":"Filter in, fan settled. That\'ll do. Go and have your tea.","id":"gly479"}]',
   ',"promo.test.start":[',
   '{"text":"There it is. Yours. I\'m watching, not helping.","id":"px977m"}]',
+  ',"promo.trusted":[',
+  '{"text":"Trusted. One more step. Then we talk about your test.","id":"1p4zm87"}]',
   ',"promo.walk":[',
   '{"text":"Right. Your things are already moving. With me.","id":"1wa786k"}]',
   ',"promoted":[',
@@ -37522,6 +37543,8 @@ const LINES = JSON.parse([
   '{"text":"Steady","id":"10cjvay"}]',
   ',"works.band.trusted":[',
   '{"text":"Trusted","id":"1c70966"}]',
+  ',"works.board.trade":[',
+  '{"text":"Your trade","id":"zm1bkx"}]',
   ',"works.grade.1":[',
   '{"text":"Fault-finder","id":"1rnpxuy"}]',
   ',"works.grade.2":[',
@@ -37640,6 +37663,20 @@ const LINES = JSON.parse([
   '{"text":"your fault-finder pin","id":"1vkrjh7"}]',
   ',"works.plate":[',
   '{"text":"{name} · {rank}","id":"1644586"}]',
+  ',"works.promo.check.day":[',
+  '{"text":"From Day 8","id":"upa6xt"}]',
+  ',"works.promo.check.done":[',
+  '{"text":"Done","id":"n60edb"}]',
+  ',"works.promo.check.m6":[',
+  '{"text":"Making it safe, with the Chief","id":"18vfmj3"}]',
+  ',"works.promo.check.not":[',
+  '{"text":"Not yet","id":"1g2qh"}]',
+  ',"works.promo.check.rep":[',
+  '{"text":"Relied on (you\'re {band})","id":"gg8zbp"}]',
+  ',"works.promo.check.set":[',
+  '{"text":"Test job: {day}, 09:00","id":"t5x0gj"}]',
+  ',"works.promo.check.title":[',
+  '{"text":"Your promotion: the Tier 2 test","id":"1oatm2o"}]',
   ',"works.rank.junior":[',
   '{"text":"Junior Officer","id":"1g2etsb"}]',
   ',"works.rank.officer":[',
@@ -37660,6 +37697,10 @@ const LINES = JSON.parse([
   '{"text":"Your reputation","id":"19ityk4"}]',
   ',"works.rep.up":[',
   '{"text":"Up to {band}. People are noticing your work.","id":"z7vqf0"}]',
+  ',"works.rep.up.reliable":[',
+  '{"text":"Now Reliable. Trusted, then Relied on, and you\'re up for your Tier 2 test.","id":"12v6hcz"}]',
+  ',"works.rep.up.trusted":[',
+  '{"text":"Now Trusted. One more step, Relied on, and you\'re up for your Tier 2 test.","id":"3bxij2"}]',
   ',"works.skill.hang":[',
   '{"text":"getting the hang of these","id":"piahj7"}]',
   ',"works.skill.know":[',
@@ -38323,7 +38364,7 @@ const MEETINGS_BAKED = {
   "lineSupperGuess": {"title": "What's in the punch?", "from": "Pell Okafor", "gist": "At the Line supper, Pell tried to guess what's in Brennan's punch.", "lines": [{"who": "pell", "text": "You carried it up. You know. What's in the punch? It's ginger. It's definitely ginger.", "pose": "listen", "to": "you"}, {"choice": [{"text": "No idea. Ask Brennan.", "rel": {"brennan": 1}, "flavour": "practical", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "She'd tell me. She wouldn't. You're both the same. Unbearable.", "pose": "laugh"}}, {"text": "It's pickle brine.", "rel": {"pell": 1}, "flavour": "share", "mem": "line.secret.told", "reply": {"who": "pell", "text": "Pickle... no. No. I've had three mugs. Why would you tell me that?", "pose": "laugh"}}, {"text": "Ginger. Definitely ginger.", "rel": {"brennan": 1}, "flavour": "funny", "mem": "line.secret.kept", "reply": {"who": "pell", "text": "I knew it! Ha. Ginger. I'm never wrong about these things.", "pose": "laugh"}}]}]},
   "lineTomasMug": {"title": "A mug for the watch", "from": "Tomas Lind", "gist": "You took Tomas a mug of Line punch at his watch post.", "lines": [{"who": "tomas", "text": "You brought it up. Nobody brings things to the watch.", "pose": "laugh"}, {"who": "tomas", "text": "It's green. Why is it green? Don't tell me. I'm drinking it anyway."}, {"who": "tomas", "text": "Tell me one thing. Just one. Then I have to look at the screen again.", "pose": "listen"}]},
   "lineTomasSat": {"title": "Tomas, the night before", "from": "Tomas Lind", "gist": "Tomas is on watch all day tomorrow, so he'll miss his first Line.", "lines": [{"who": "tomas", "text": "Hey. Can I complain at you for a minute? A small complaint. Medium.", "pose": "sigh"}, {"who": "tomas", "text": "I'm on watch tomorrow. All day. My first Line, and I'll be watching a corridor screen."}, {"who": "tomas", "text": "Everyone keeps saying it's the best bit of being out here. The horn, the gold, the oath.", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'll bring you some punch.", "rel": {"tomas": 1}, "flavour": "practical", "flag": "line.promised", "reply": {"who": "tomas", "text": "Would you? Even if it's awful? Especially if it's awful. I want the whole thing.", "pose": "laugh"}}, {"text": "I'll tell you every bit of it.", "rel": {"tomas": 1}, "flavour": "cheer", "reply": {"who": "tomas", "text": "Every bit. Who cries, who spills, what the Captain says. I'll want it twice.", "pose": "laugh"}}, {"text": "Can't you swap?", "rel": {"tomas": 1}, "flavour": "listen", "reply": {"who": "tomas", "text": "Not on a crossing. Someone has to watch her cross.", "pose": "nod"}}]}, {"who": "tomas", "text": "Why does it matter, anyway? It's just a line. Pell says past it we're guests in someone else's sky."}, {"who": "tomas", "text": "Help a long way off, every star with somebody else's name. So the oath's about each other. Huh.", "pose": "nod"}, {"who": "tomas", "text": "Right. Climbing wall, then bed. Early start. Cross well for me, {me}."}]},
-  "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Well done.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
+  "promo.ceremony": {"title": "Your commission", "from": "Captain Odile Marrow", "gist": "The Captain commissioned you as an Officer of the Wren. The framed commission is on your cabin shelf.", "lines": [{"who": "vance", "text": "Attention, please. The Captain.", "pose": "nod"}, {"who": "marrow", "text": "Thank you, Teo. Sit, everyone, if there are chairs. There never are.", "pose": "laugh"}, {"who": "marrow", "text": "Cadet. Chief Calder tells me you're ready. The Chief doesn't say that often.", "to": "you"}, {"who": "marrow", "text": "By the Survey Service, I commission you an Officer of the Wren. With all that comes with it."}, {"who": "marrow", "text": "Hold still. Pins are not my strong point.", "pin": true, "pose": "gesture"}, {"who": "marrow", "text": "There. Now, my question. What should an officer never forget?", "to": "you"}, {"choice": [{"text": "The people. Everyone aboard.", "rel": {"marrow": 2}, "mem": "promo.answer.people", "reply": {"who": "marrow", "text": "Good answer. The ship is the people in it. The rest is metal.", "pose": "nod"}}, {"text": "To ask when I don't know.", "rel": {"marrow": 2}, "mem": "promo.answer.ask", "reply": {"who": "marrow", "text": "Good answer. The ones who stop asking are the ones who worry me.", "pose": "nod"}}, {"text": "To mind the step in the ready room.", "rel": {"marrow": 1}, "mem": "promo.answer.step", "reply": {"who": "marrow", "text": "Ha. Calder warned me about you. Also correct.", "pose": "laugh"}}]}, {"who": "calder", "text": "Tier 2. On the day I said. Good.", "pose": "nod"}, {"who": "torres-zeke", "text": "Told everyone. Didn't I tell everyone?", "pose": "laugh"}, {"who": "marrow", "text": "Tea, then. Mine's the good stuff. Don't tell the galley."}, {"who": "marrow", "text": "Welcome, Officer. My door is open. Mind the step.", "to": "you"}]},
   "promo.officer": {"title": "My office, 11:00", "from": "Chief Ines Calder", "gist": "Calder promoted you to Officer: Technician, Tier 2. A badge, a collar pip, and your own cabin from tonight.", "lines": [{"who": "calder", "text": "Sit. No, stay standing. This won't take long.", "pose": "gesture", "to": "you"}, {"who": "calder", "text": "The scrubber. Filter in, fan settled, nobody had to tell you twice."}, {"who": "calder", "text": "You've passed. As of now you're an Officer. Technician, Tier 2."}, {"who": "calder", "text": "The badge. And the pip. Collar, left side. Straight, please."}, {"choice": [{"text": "Thank you, Chief. I won't let you down.", "rel": {"calder": 2}, "reply": {"who": "calder", "text": "I know. That's why you're standing here.", "pose": "nod"}}, {"text": "Me? Already?", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Already. I don't promote people to be kind. I promote them because they're ready."}}, {"text": "About time, honestly.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "Hm. Torres said you'd say that. He owes me a biscuit.", "pose": "laugh"}}]}, {"who": "calder", "text": "The board leaves you Tier 2 work from tomorrow. Harder faults. Fewer carts."}, {"who": "calder", "text": "Tonight you move to 4-23. Your own cabin. I'll walk you there at five."}, {"who": "calder", "text": "The Captain commissions you tomorrow. Clean uniform. Go on, then. They're waiting outside."}]},
   "rec.talent.you": {"title": "Talent night: your act", "from": "Lucia Ferreira", "gist": "You did an act at talent night, and the crowd cheered.", "lines": [{"who": "ferreira", "text": "And now, a first-timer. Be kind, everyone. Here's {me}!", "pose": "gesture"}, {"choice": [{"text": "(Play a tune on the piano)", "flavour": "share", "mem": "talent.tune", "reply": {"who": "ferreira", "text": "Lovely! Not a single wrong note. Well, one. It was the best one.", "pose": "laugh"}}, {"text": "(Tell a ship joke)", "flavour": "cheer", "mem": "talent.joke", "reply": {"who": "ferreira", "text": "Oh, that's terrible. They're all laughing. That's a win, {me}.", "pose": "laugh"}}, {"text": "(Do a Works trick with a spanner)", "flavour": "practical", "mem": "talent.trick", "reply": {"who": "ferreira", "text": "Spinning a spanner on one finger! Chief Calder's clapping. Mark the day.", "pose": "laugh"}}]}, {"who": "ferreira", "text": "Give it up for {me}, everybody!", "pose": "gesture"}]},
   "sickExam1": {"title": "The infirmary", "from": "Rina Deshi", "gist": "Rina in the infirmary: a ship cold, some medicine, and orders to drink water.", "lines": [{"who": "rina", "text": "Sit. On the bed, not the stool. The stool's mine.", "pose": "gesture"}, {"who": "rina", "text": "Open. Say \"ah\". Longer. Fine, that'll do.", "to": "you"}, {"who": "rina", "text": "Your temperature's up. Your throat's red. You've got a ship cold. Everyone gets one. Recycled air."}, {"who": "rina", "text": "It's not serious. It's just rubbish. I've had three this year."}, {"who": "rina", "text": "Two of these, with water. All the water. The whole cup.", "pose": "nod", "to": "you"}, {"choice": [{"text": "Thanks, Rina.", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "Don't thank me. Drink the water."}}, {"text": "Do I have to go back to shift?", "rel": {"rina": 1}, "reply": {"who": "rina", "text": "You're excused. It's on the board. Calder knows. She said \"Fine.\" Twice."}}]}, {"who": "rina", "text": "You'll feel better in an hour. If you don't, come back and I'll be smug about something else."}]},
@@ -54736,7 +54777,7 @@ function promoReady(now, by, here) {                     // promoAnnounce's beat
   flagSet('promo.sight.ready', d);
   if (here) worksSayAll(by, [worksText('promo.ready', 'This is it. People rely on you, and you\'ve done Making it safe. You\'re ready for your Tier 2 test.'),
     worksText('promo.announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.')]);
-  promoMail('promo.ready.mail', 'Your Tier 2 test | You\'re ready. Your test job is {day}, nine o\'clock in the Works bay. Pass it and you\'re a Works Officer. — C.', { day }, now);
+  promoMail('promo.ready.mail', 'Your Tier 2 test | You\'re ready. Your test job is {day}, nine o\'clock in the Works bay. Pass it and you\'re a Works Officer.', { day }, now);
   if (now >= shipNow() - 1) { const text = worksText('promo.ready.notice', 'Your Tier 2 test: {day}, 09:00, Works bay.', { day });
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
     if (!here) try { toast(worksName(by), text); } catch (e) { /* no UI */ } }
@@ -54749,20 +54790,20 @@ function promoSightTick(now, skip) {                     // the beats on the way
     flagSet('promo.sight', d); if (i >= promoBandAt('trusted')) flagSet('promo.sight.trusted', d);
     if (i < promoBandAt('relied')) {
       if (here) worksSayAll('calder', [worksText('promo.sight', 'Word is you\'re reliable. Keep it up. Get people relying on you, finish Making it safe with me, and I\'ll put you up for your Tier 2 test. That\'s Officer.')]);
-      else promoMail('promo.sight.mail', 'Your next step | You\'re Reliable now. Two more steps, Trusted then Relied on, and Making it safe with me, and I\'ll set your Tier 2 test: a promotion to Works Officer. — C.', null, now);
+      else promoMail('promo.sight.mail', 'Your next step | You\'re Reliable now. Two more steps, Trusted then Relied on, and Making it safe with me, and I\'ll set your Tier 2 test: a promotion to Works Officer.', null, now);
       return; } }
   if (i >= promoBandAt('trusted') && i < promoBandAt('relied') && !flag('promo.sight.trusted')) { flagSet('promo.sight.trusted', d);
     if (here) worksSay('calder', worksText('promo.trusted', 'Trusted. One more step and we\'ll talk about your test.')); return; }
   if (i >= promoBandAt('relied')) {
-    if (d < PROMO.from && !flag('promo.sight.day')) { flagSet('promo.sight.day', d); promoMail('promo.missing.day', 'Soon | You\'re ready sooner than most. I set Tier 2 tests from the second Monday; we\'ll talk then. — C.', null, now); return; }
+    if (d < PROMO.from && !flag('promo.sight.day')) { flagSet('promo.sight.day', d); promoMail('promo.missing.day', 'Soon | You\'re ready sooner than most. I set Tier 2 tests from the second Monday; we\'ll talk then.', null, now); return; }
     if (d >= PROMO.from && W.tr.m6 === undefined && !(W.cur && W.cur.id === 'm6') && !flag('promo.sight.m6')) { flagSet('promo.sight.m6', d);
-      promoMail('promo.missing.m6', 'Almost | You\'re Relied on. One thing left before your Tier 2 test: Making it safe, with me. — C.', null, now); }
+      promoMail('promo.missing.m6', 'Almost | You\'re Relied on. One thing left before your Tier 2 test: Making it safe, with me.', null, now); }
   }
 }
 function promoDependTick(now) {                          // item 14: the ship-wide work word turns "dependable" (section 20's 60), once
   if (!promoSightOn() || flag('promo.sight.dependable') || !SHIP.rep || !SHIP.rep.ship || !(SHIP.rep.ship.work >= 60)) return;
   flagSet('promo.sight.dependable', worksDay(now));
-  if (!SHIP.works.test) promoMail('promo.dependable', 'Dependable | Word around the ship is you\'re dependable. Keep that up and we\'ll be talking about your Tier 2 test. — C.', null, now);
+  if (!SHIP.works.test) promoMail('promo.dependable', 'Dependable | Word around the ship is you\'re dependable. Keep that up and we\'ll be talking about your Tier 2 test.', null, now);
 }
 function promoTestDay(now) {                             // the test morning: an arrow to the Works bay from 08:30 until the job's on the board
   const W = SHIP.works; if (!promoSightOn() || !W.test || !promoQueue()) return;
