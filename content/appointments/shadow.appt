@@ -38,7 +38,7 @@ record: Spent an hour with {dept}.
 
 == scene dlamini-lukas
 dlamini-lukas: Galley. Breakfast. Two hundred eggs. Stand there. Not there. There.   [gesture]
-dlamini-lukas: Brennan's off, so the galley runs itself. That's what I tell her. It doesn't.   [laugh]
+dlamini-lukas: Breakfast is mine. Brennan says it runs itself. It doesn't.   [laugh]
 dlamini-lukas: Everything has a minute. Porridge at seven. Toast at five past. Nobody waits.
 dlamini-lukas: Your turn. Stir the beans. Slowly. Like you're not in a hurry. You're not.
 ? choice
@@ -92,7 +92,7 @@ holt: Every door, every airlock, every deck, checked twice a shift. The board sh
 holt: Your turn. Read the board. Tell me which airlock was last checked.
 ? choice
 * Read it carefully, then answer.   flavour:practical mem:appt.shadow.watch
-  holt: Correct. Took you a while. Took Tomas longer. Adequate.   [nod]
+  holt: Correct. Took you a while. Took the last junior longer. Adequate.   [nod]
 * Ask why he walks every deck himself.   flavour:listen mem:appt.shadow.watch
   holt: The board can't hear a door that sounds wrong. I can.   [nod]
 holt: That's an hour. Off with you. Mention the board to no one.
