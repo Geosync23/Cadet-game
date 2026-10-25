@@ -137,7 +137,7 @@ All the activity sounds on Wren Sounds: Activities (`plans/sound/activities.html
 
 All the music is approved: the three full tracks (Morning, Evening, Late night) and the eleven samples, which are now full tracks too, plus seven more added since (below). That makes 21 tracks of about ten minutes each, all made live, each evolving through 18 to 40 sections with a new tune and lead instrument on every pass, so nothing loops audibly. Tradition music stays on hold (`plans/sound/audio-todo.md`).
 
-**The module:** `plans/sound/music-module.js` (about 450 lines, 44 KB). It is self-contained: its own small mixer, room echo and noise buffers, and one function, `createWrenMusic({ ctx, dest, shipTime })`. It can be pasted into the SND block or loaded as it is. It is **not in `starship-cadet.html`** yet. **Test page:** Wren Music Player (`plans/sound/music-player.html`, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy) runs the same module against a pretend ship clock with a speed slider.
+**The module:** `plans/sound/music-module.js` (about 440 lines, 47 KB). It is self-contained: its own small mixer, room echo and noise buffers, and one function, `createWrenMusic({ ctx, dest, shipTime })`. It can be pasted into the SND block or loaded as it is. It is **not in `starship-cadet.html`** yet. **Test page:** Wren Music Player (`plans/sound/music-player.html`, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy) runs the same module against a pretend ship clock with a speed slider.
 
 **The schedule** (ship time; while you're clocked in, the working set plays instead):
 
