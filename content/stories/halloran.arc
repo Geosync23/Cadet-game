@@ -100,18 +100,22 @@ tone: resolution
 tier: friend
 gapDays: 0
 where: meal
-when: beat:halloran.4 time:morning
+when: beat:halloran.4 time:morning day:15-
+crescendo: meal:breakfast
+quiet: 6
+title: Breakfast with Halloran
+invite: Number 289 | Breakfast tomorrow, the Works tables. A big one. Don't be late, and bring your best laugh. You'll need it. E.
 hint: Breakfast? Works tables. It's a big one today. Number two hundred and eighty-nine.
 mem: groan
 mail: 4320 | From Coriel | Mum's written. She played it twice. She laughed till she cried, the good kind. The kitchen was loud all evening, she says. She's sending one back and won't say which. Have you eaten? E.
 them: Morning, morning. Right. Is everyone settled? Number two hundred and eighty-
 pell: Oi oi. Not today, Emeka. Today you're the audience. {me}, is it recording? Good.   [gesture]
-// IF flag:halloran.jokes.done: yoon-elif: Sorry. Before you start. Why did the patient climb the ladder? I said take it one step at a time. Oh, I'm sorry.
-// IF flag:halloran.jokes.done: lemaire-nils: Why do stars never pay for tea? They're always out. That's two points to me.
-// IF flag:halloran.jokes.done: yilmaz-karin: Why did the loaf join Works? It wanted to rise through the ranks. Treaty terms permitting.
-// IF !flag:halloran.jokes.done: pell: Why don't pumps keep secrets? They always leak. Thank you, thank you.
-// IF !flag:halloran.jokes.done: kovac-zainab: Um. Why was the scrubber sad? It was a bit run down. That's it. That's the joke. Sorry.
-// IF !flag:halloran.jokes.done: torres-zeke: What do you call a coil that tells jokes? Current comedy. Shocking, I know. Right, onward.
+if flag:halloran.jokes.done here:yoon-elif | yoon-elif: Sorry. Before you start. Why did the patient climb the ladder? I said take it one step at a time. Oh, I'm sorry.
+if flag:halloran.jokes.done here:lemaire-nils | lemaire-nils: Why do stars never pay for tea? They're always out. That's two points to me.
+if flag:halloran.jokes.done here:yilmaz-karin | yilmaz-karin: Why did the loaf join Works? It wanted to rise through the ranks. Treaty terms permitting.
+if !flag:halloran.jokes.done | pell: Why don't pumps keep secrets? They always leak. Thank you, thank you.
+if !flag:halloran.jokes.done here:kovac-zainab | kovac-zainab: Um. Why was the scrubber sad? It was a bit run down. That's it. That's the joke. Sorry.
+if !flag:halloran.jokes.done here:torres-zeke | torres-zeke: What do you call a coil that tells jokes? Current comedy. Shocking, I know. Right, onward.
 them: Oh, dear me. Oh, they're terrible. Stop. No, don't stop.   [laugh]
 them: I can't. I can't breathe. Groaning means breathing, and I'm doing both.   [laugh]
 them: Right. Fair's fair. Number two hundred and eighty-nine. How does the Wren say hello?
@@ -149,7 +153,8 @@ tone: light
 tier: friend
 gapDays: 2
 where: meal
-when: beat:halloran.5 time:morning
+when: time:morning
+follows: 5|6
 hint: Breakfast? Mum sent one back. I've been holding it in since six.
 mem: fromMum
 keepsake: a scone tin with a dent in the lid

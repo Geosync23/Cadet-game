@@ -4,7 +4,7 @@
 #   1. Off: the build as it is. With STORIES_ON off nothing of the stories is read: storyMoment is null, momentDef gives
 #      the old MOMENTS words (Pell 5-8, Kovac 1-4), the story people keep their roster threads, no state is written.
 #   2. On, twice over DAYS ship days (default 30) as a diligent player: a chat and a meal with each story person a day,
-#      a Works job a day; every half hour from 06:00 the stories' clock (storyTick) runs and whatever beat is ready is
+#      a Works job a day; every 10 minutes from 06:00 the stories' clock (storyTick) runs and whatever beat is ready is
 #      played (the first reply each time); a favour from a story is done at once. Run "play" goes to every crescendo;
 #      run "miss" never does. Rules checked on each run's log:
 #        - every beat is told or skipped by the end (else STALLED, with why);
@@ -42,23 +42,28 @@ OFF = r"""
 RUN = r"""
 ([DAYS, MODE]) => {
   socInit();
-  const ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
+  const diag = {}, ids = [...storyIdx().beats.keys()], log = [], mails = [], cal = {}, books = {}, byes = [], lines = {}, err = [];
   const play = (id) => { let n = 0; const said = []; while (DIALOGUE && n++ < 80) { const v = dialogueView(); if (!v) break; if (v.text) said.push(v.text); if (v.choices) dialogueStep(0); else dialogueStep(); } lines[id] = said; };
   const live = t => { setShipNow(t); if (typeof socialTo === 'function') socialTo(t); return t; };
   const C = () => storyPeekCS();
   let mailSeen = 0;
   for (let d = 1; d <= DAYS; d++) {
-    for (let m = 360; m < 1440; m += 30) {
+    for (let m = 360; m < 1440; m += 10) {   // every 10 minutes: a gathering can be 20 minutes long (Off the Tern)
       const t = live((d - 1) * 1440 + m);
       if (m === 720) for (const id of ids) { const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
       try { storyTick(t); } catch (e) { err.push('storyTick: ' + e.message); }
       for (const x of SHIP.social.mail.slice(mailSeen)) mails.push({ at: x.at, queued: t, from: x.from, subject: x.subject }); mailSeen = SHIP.social.mail.length;
-      for (const id in C().book) { const b = C().book[id]; books[id + ':' + b.beat] = { ...b };
+      for (const id in C().book) { const b = C().book[id], dd = storyMoment(id + ':' + b.beat), p = socP(id);
+        if (dd && t >= b.from && t < b.to) { const k = id + ':' + b.beat, x = diag[k] || (diag[k] = { steps: 0, atSlot: 0, cast: {}, where: {}, ready: 0, gates: 0 }); x.steps++;
+          if (storyAtSlot(p, t, dd, b)) x.atSlot++; for (const c of dd.cast || []) if (storyHere(c, p, { t })) x.cast[c] = (x.cast[c] || 0) + 1;
+          const w = whereIs(p, t); x.where[(w && (w.act + ':' + (w.tag || '') + ':' + (storyRoom(p, t) || 'moving'))) || 'none'] = 1; if (momentReady(p, t)) x.ready++; if (storyGates(p, dd, k, t, b.trad)) x.gates++; }
+        books[id + ':' + b.beat] = { ...b };
         const rows = storyCalRows(b.day, (b.day - 1) * 1440); if (rows.length) cal[id + ':' + b.beat] = b.day; }
       for (const id of ids) {
         const p = socP(id); if (!p || !socAboard(p, d)) continue;
         const g = goodbyeMoment(p, t); if (g) byes.push(id + '@' + d);
+        if (STORY_ARCS[id] && arcBeat(p, t)) arcTold(p);   // the older card beats (Pell 1-4), told on their chat card
         const mid = momentReady(p, t); if (!mid) continue;
         const dd = momentDef(mid);
         if (dd.crescendo && MODE === 'miss') continue;
@@ -73,8 +78,13 @@ RUN = r"""
   for (const k of Object.keys(C().told)) for (const b of C().told[k]) if (!log.some(x => x.id === k && x.beat === b)) log.push({ id: k, beat: b, day: null, posted: true });   // told without a scene (a quiet ending by Mail)
   const beats = {}; for (const id of ids) beats[id] = storyIdx().beats.get(id).map(b => { const d = storyMoment(id + ':' + b); return { beat: b, cres: d.crescendo || null, quiet: d.quiet || null, follows: d.follows || null }; });
   const why = {}; for (const id of ids) { const p = socP(id), mid = p && momentNextId(p), dd = mid && momentDef(mid), r = SHIP.rel[id];
-    if (mid) why[id] = { next: mid, tier: r && r.tier, met: metDays(id), when: dd.when || null, where: dd.where || 'calm', cres: dd.crescendo || null, aboard: socAboard(p, DAYS) }; }
-  return { ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
+    if (mid) { const w0 = { next: mid, tier: r && r.tier, met: metDays(id), when: dd.when || null, where: dd.where || 'calm', cres: dd.crescendo || null, aboard: socAboard(p, DAYS) };
+      let whenOk = 0, whereOk = 0, both = 0, n = 0, rooms = {};   // the last 7 days, every half hour: how often its when and its where held, and where they were off duty
+      for (let d = Math.max(1, DAYS - 6); d <= DAYS; d++) for (let m = 360; m < 1440; m += 30) { const t = (d - 1) * 1440 + m; setShipNow(t); n++;
+        let a = true; if (dd.when) { try { a = !!linesOk(dd.when, p, momentCtx(p, t, mid)); } catch (e) { a = false; } } const b = momentWhere(p, t, dd); whenOk += a; whereOk += b; both += a && b;
+        const w = whereIs(p, t), pl = w && !w.moving && w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room]; if (rm && (w.act === 'leisure' || w.act === 'off')) rooms[rm.name] = (rooms[rm.name] || 0) + 1; }
+      why[id] = { ...w0, whenOk, whereOk, both, of: n, offDuty: rooms }; } }
+  return { diag, ids, log, mails, cal, books, byes, told: C().told, skip: C().skip, beats, why, err, names: Object.fromEntries(ids.map(id => [id, socP(id) ? socP(id).name : id])) };
 }
 """
 
@@ -106,6 +116,9 @@ def rules(r, mode):
     for x in r['log']:
         if x.get('posted') or not x.get('day_'): continue
         for v in (x['day_'] if isinstance(x['day_'], list) else [x['day_']]):
+            if ',' in str(v):
+                if x['day'] not in [int(y) for y in str(v).split(',')]: bad.append(f'{x["id"]} beat {x["beat"]}: told on day {x["day"]}, outside day:{v}')
+                continue
             lo, dash, hi = str(v).partition('-'); lo = int(lo) if lo else 1; hi = (int(hi) if hi else 10**6) if dash else lo
             if not lo <= x['day'] <= hi: bad.append(f'{x["id"]} beat {x["beat"]}: told on day {x["day"]}, outside day:{v}')
     for x in r['log']:
@@ -166,6 +179,8 @@ with sync_playwright() as pw:
             got = sorted(x['beat'] for x in r['log'] if x['id'] == id)
             print(f'  {id}: told {sorted(r["told"].get(id, []))}, skipped {sorted(r["skip"].get(id, []))}; days ' + ' '.join(f'{x["beat"]}@{x["day"] if x["day"] else "mail"}' for x in sorted(r['log'], key=lambda x: (x['day'] or 99, x.get('t', 0))) if x['id'] == id))
         print('  bookings:', ', '.join(f'{k} day {v["day"]} {v["from"] % 1440 // 60:02d}:{v["from"] % 60:02d}' for k, v in r['books'].items()) or 'none')
+        for k, v in r['diag'].items():
+            if not any(x['id'] + ':' + str(x['beat']) == k for x in r['log']): print('  crescendo', k, 'booked, not told:', json.dumps(v))
         bad = rules(r, mode) + ['page error: ' + e for e in errs]
         for b in bad: print('  FAIL', mode + ':', b)
         fails += [mode + ': ' + b for b in bad]

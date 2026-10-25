@@ -54,7 +54,7 @@ them: There. Four. No, I'm joking. Three. On we go, slowly.   [laugh]
 // before the storm, so the storm can carry beat 4; early evening, before ten
 tone: heartfelt
 where: Engine overlook
-when: beat:salo.2 time:evening !event:ionStorm
+when: beat:salo.2 time:evening !event:ionStorm day:8-11
 hint: Sit with me on the overlook? Before ten. There's a story I've not told.
 mem: cold
 them: Years ago I was on a freighter, the Pallas. Long shifts, old pipes. I liked her.
@@ -82,7 +82,11 @@ tier: friend
 where: Engine room
 duty: true
 crisis: true
-when: beat:salo.3 event:ionStorm
+when: beat:salo.3 event:ionStorm day:13
+crescendo: event:ionStorm
+quiet: 6
+title: The coolant loop with Saad
+invite: Tomorrow | Storm's due at two. It's my rest day, but I'll be down by the Deck 6 coolant loop all the same. I'd be glad of the company. Saad
 hint: Deck 6, the coolant loop. Could you come? Now, if you can.
 mem: once
 flag: salo.signed
@@ -113,7 +117,8 @@ them: Somewhere in the Service it's past my bedtime. I'm counting that.
 tone: resolution
 tier: friend
 where: calm
-when: beat:salo.4 !event:ionStorm
+when: !event:ionStorm day:14-
+follows: 4|6
 hint: Before ten, could you sit a minute? I've written to Hala. At last.
 mem: tohala
 keepsake: a checking card he made for you, with your name at the top
@@ -140,7 +145,7 @@ tone: light
 tier: friend
 where: Engine room
 duty: true
-when: beat:salo.3 !event:ionStorm !flag:salo.signed
+when: beat:salo.3 !event:ionStorm !flag:salo.signed day:16-
 hint: Have you a minute? This one's sticking. I'd like a second pair of eyes.
 mem: quietvalve
 mail: 180 | One valve | Thank you for this afternoon. One valve, checked and signed once. It doesn't sound like much. It was a lot. Writing to Hala tonight. Before ten, of course. Saad

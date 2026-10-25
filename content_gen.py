@@ -107,8 +107,8 @@ def parse_conds(text, where):
             raise GenError(f'{where}: unknown condition "{k}" (see content/README.md, "Conditions")')
         if not v:
             raise GenError(f'{where}: "{tok}" has no value')
-        if k == 'day' and not re.fullmatch(r'\d+|\d+-\d*|-\d+', v):
-            raise GenError(f'{where}: day is a ship day (21), a span (3-21), from (15-) or until (-20)')
+        if k == 'day' and not re.fullmatch(r'\d+(,\d+)*|\d+-\d*|-\d+', v):
+            raise GenError(f'{where}: day is a ship day (21), a few (19,26), a span (3-21), from (15-) or until (-20)')
         if k in dst:                              # the same key twice: all must hold
             dst[k] = (dst[k] if isinstance(dst[k], list) else [dst[k]]) + [v]
         else:
@@ -569,7 +569,7 @@ def parse_meeting(path, rel, out):
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
 MOMENT_FIELDS = ('tone', 'where', 'when', 'tier', 'metDays', 'gapDays', 'duty', 'crisis', 'hint', 'mem', 'flag', 'keepsake',
-                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite')   # the last six: crew stories (FX21)
+                 'learn', 'mail', 'needs', 'via', 'crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast')   # the last seven: crew stories (FX21)
 THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', 'talent', 'burnout', 'leaving', 'rivalry',
           'startover')                    # social B's frozen theme names
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
@@ -657,7 +657,7 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 cur['after'] = {'mail': {'after': int(parts[0]), 'subject': parts[1], 'body': parts[2]}}
             elif k == 'needs':
                 cur[k] = [x.strip() for x in v.split(',') if x.strip()]
-            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite') and not rel.startswith('stories/'):
+            elif k in ('crescendo', 'quiet', 'follows', 'lead', 'title', 'invite', 'cast') and not rel.startswith('stories/'):
                 raise GenError(f'{where}: {k}: is for crew stories (content/stories) only')
             elif k == 'crescendo':                 # crew stories (FX21): the beat plays at this gathering (section 20c's storySlots)
                 if not re.fullmatch(r'(trad|event):[\w-]+|farewell|meal:(breakfast|dinner)', v):
@@ -671,6 +671,11 @@ def parse_arc(path, rel, out, home=False, store='MOMENTS'):
                 if not re.fullmatch(r'\d+(\|\d+)*', v):
                     raise GenError(f'{where}: follows is a beat or beats (4|6): it plays after either')
                 cur[k] = [int(x) for x in v.split('|')]
+            elif k == 'cast':                      # the people a crescendo needs there (it waits for them, in its booking)
+                ids = [x for x in re.split(r'[\s,]+', v) if x]
+                if not ids or not all(re.fullmatch(r'[\w-]+', x) for x in ids):
+                    raise GenError(f'{where}: cast is crew ids (pell, calder, ...)')
+                cur[k] = ids
             elif k == 'invite':
                 parts = [x.strip() for x in v.split('|')]
                 if len(parts) != 2 or not all(parts):

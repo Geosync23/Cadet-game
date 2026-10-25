@@ -12,7 +12,7 @@ tone: light
 tier: stranger
 metDays: 0
 where: any
-when: trad:off-the-tern
+when: trad:off-the-tern day:21
 hint: Hi, hi. Sorry. Are you the one from the beam?
 mem: ramp
 learn: Basil Bramwell came aboard on Day 21 with a plant from home, and a great many questions.
@@ -37,13 +37,13 @@ tone: light
 tier: acquaintance
 metDays: 1
 where: calm
-when: beat:bramwell.1
+when: beat:bramwell.1 day:22
 hint: My name's on the beam! Have you seen? Can I show you my shelf? It's a very small shelf.
 mem: shelf
 them: My name's on the beam. Basil Bramwell. Up there with everyone's. I keep going back to look at it.
-// IF beat:torres.5: them: And you handed me the pen. Zeke said you'd want to. I nearly dropped it. Did I? I didn't.
+if beat:torres.5 | them: And you handed me the pen. Zeke said you'd want to. I nearly dropped it. Did I? I didn't.
 them: Then I put my plant on my new shelf. It looked at me. It's worse. How is it worse?   [sigh]
-// IF beat:teague.5: them: And under the shelf, someone's drawn a tiny person waving. "Hi, new one." Who did that? I love it.
+if beat:teague.5 | them: And under the shelf, someone's drawn a tiny person waving. "Hi, new one." Who did that? I love it.
 them: Yellow at the edges. Is that too much water? Not enough? Is it the air? It's the air.
 ? choice
 * Tove Cruz knows every plant aboard. I'll take it to the garden.   flavour:practical favour:basilPlant flag:bramwell.plant mem:garden
@@ -61,7 +61,7 @@ tone: light
 tier: acquaintance
 metDays: 2
 where: calm
-when: beat:bramwell.2
+when: beat:bramwell.2 day:23-24
 hint: Can I ask you some things? Lots of things. Quick ones. Mostly quick.
 mem: visitor
 them: Does Calder ever blink? I watched her at the board. I counted. I got to none.
@@ -86,7 +86,11 @@ tone: resolution
 tier: acquaintance
 gapDays: 0
 where: Tea corner
-when: beat:bramwell.3 trad:new-hands-tea flag:bramwell.plant.done
+when: beat:bramwell.3 trad:new-hands-tea flag:bramwell.plant.done day:25
+crescendo: trad:new-hands-tea
+quiet: 5
+title: Basil's new hand's tea
+invite: My tea! | It's my new hand's tea tomorrow, the Works tea corner. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
 hint: My new hand's tea! You're coming? Bring nothing. That's the rule, isn't it?
 mem: everybody
 keepsake: a little clay pot he painted, with the Wren on it

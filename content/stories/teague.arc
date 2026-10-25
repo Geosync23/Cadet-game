@@ -9,6 +9,7 @@ who: teague-theo
 
 == beat 1
 // DAY: from 3 (may open in week 1)
+when: day:3-
 tone: light
 tier: acquaintance
 metDays: 1
@@ -32,6 +33,7 @@ them: Right. My tea's gone cold. That's not a comic. That's just sad.
 
 == beat 2
 // DAY: 3-21
+when: beat:teague.1 day:3-21
 // FAVOUR theoCloud (new): carry the smiling-cloud page to Calder's glass office; calder: Hm. Accurate.
 tone: light
 metDays: 4
@@ -56,6 +58,7 @@ them: Right. Cloud back in the folder. Folder under my arm. Arm back to work.
 
 == beat 3
 // DAY: 3-21, after Day 7 (Crossing the Line) if possible; evening
+when: beat:teague.2 day:3-21
 tone: heartfelt
 tier: colleague
 metDays: 7
@@ -84,7 +87,7 @@ tone: heartfelt
 tier: colleague
 gapDays: 2
 where: calm
-when: beat:teague.3
+when: beat:teague.3 day:18-20
 hint: I need an editor. Five minutes. You're it. No pay.
 mem: lastpanel
 them: The Wren strip. Three months of it. Every panel's done but one. The last one.   [gesture]
@@ -109,21 +112,23 @@ tier: colleague
 gapDays: 0
 where: Shuttle bay
 when: beat:teague.4
+crescendo: farewell
+quiet: 6
+title: Theo's send-off
+invite: Last day | The Tern goes at three tomorrow. Shuttle bay, half two. Pens packed last. Come and wave. Properly, with the whole arm. Theo
 hint: Shuttle bay, half two. Don't be late. I'm never late for leaving.
 mem: framed
 keepsake: the last page of the Wren strip, signed, with you in it
 them: There you are. Good. I had a speech. I drew it instead. Easier.   [gesture]
 them > you: Here. The last page. Careful, the ink's two hours old.
 them: Last panel's the one you picked. Look.
-// IF mem:moment.teague.beam: them: Last panel. You at the beam, your name in big letters. Biggest letters I've got.
-// IF mem:moment.teague.tea: them: Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.
-// IF mem:moment.teague.wren: them: Last panel. The Wren from outside, every window lit. You're in the third one along.
+if mem:moment.teague.beam | them: Last panel. You at the beam, your name in big letters. Biggest letters I've got.
+if mem:moment.teague.tea | them: Last panel. The tea corner on a Friday. Halloran mid-joke. Calder not laughing. Nearly.
+if mem:moment.teague.wren | them: Last panel. The Wren from outside, every window lit. You're in the third one along.
 them: Finished it. Don't frame it.   [nod]
 them: Frame it.   [laugh]
-// optional: if present
-pell: He drew me with a sandwich. Every panel. Every single one.   [laugh]
-// optional: if present
-torres-zeke: Your new ship's lucky. Tell her coils I said hello. They'll know.
+if here:pell | pell: He drew me with a sandwich. Every panel. Every single one.   [laugh]
+if here:torres-zeke | torres-zeke: Your new ship's lucky. Tell her coils I said hello. They'll know.
 them: New ship, new playlist. Done. Fifteen songs. One too long. Obviously.
 ? choice
 * I'll frame it. Promise.   flavour:cheer mem:promise

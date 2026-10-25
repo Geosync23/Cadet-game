@@ -4,7 +4,7 @@ who: pell
 // (STORY_ARCS.pell: the screw-tin music box, the swap-meet one, the show, who came). Pell's card: needs cheer.
 // Crew stories (SW1, 2026-10-24, from outlines.md "A. Pell Okafor"): beats 5-6 kept word for word; beat 7 is the
 // crescendo at the open-door tea; beat 8 its quiet ending; beat 9 the afterglow (was beat 8). His mum's stiff hands
-// are getting older, not illness. A line under "// IF <conditions>:" plays only when they hold (for the builders).
+// are getting older, not illness. A line starting "if <conditions> |" plays only when they hold (for the builders).
 
 == beat 5
 tone: light
@@ -52,7 +52,11 @@ tier: friend
 gapDays: 2
 duty: true
 where: Works bay
-when: beat:pell.6 trad:open-door weekday:wed
+when: beat:pell.6 trad:open-door weekday:wed day:17-
+crescendo: trad:open-door
+quiet: 8
+title: Pell's practical
+invite: The practical | Tomorrow. Open door tea, the bench in the Works bay, 16:40. Calder's timing it. Stand where I can see you. Pell
 hint: It's today. The practical. Stand where I can see you. Not too close.
 mem: passed
 flag: pell.certified
@@ -63,14 +67,14 @@ kovac-zainab: Seven. Eight. Um. Sorry. I count. Nine.
 calder: Four minutes ten.
 pell: Impeller's out. Seals are good. That's a lovely seal, that. Look at it. No, don't. I'm busy.
 kovac-zainab: Bolt. The edge. Oh. Oh no. Stopped. It stopped.   [sigh]
-// IF torres-zeke is there: torres-zeke: Properly, Pell. Properly.   [nod]
+if here:torres-zeke | torres-zeke: Properly, Pell. Properly.   [nod]
 calder: Nine minutes twelve. Hands off.
 calder: Good. Clean work.   [nod]
 pell: I. Hang on. Give me a second. All my words have gone somewhere.   [sigh]
 pell: Right. While you're all here. I'm staying. On the Wren. I've told Mum. In writing, so she can't argue till Sunday.
 pell: And the lad two doors down from her shop is learning the radios. By message. One step a week. He mended his first on Monday.
-// IF mem:moment.pell.timed: pell: And {me} timed me. Every evening, in the machine shop. Every single run. That's half of this, right there.
-// IF mem:moment.pell.help: pell: The lad was {me}'s idea, by the way. Credit where it's due. It's due over there.
+if mem:moment.pell.timed | pell: And {me} timed me. Every evening, in the machine shop. Every single run. That's half of this, right there.
+if mem:moment.pell.help | pell: The lad was {me}'s idea, by the way. Credit where it's due. It's due over there.
 halloran-emeka: Oh, that wants biscuits. I'd say that wants a lot of biscuits.
 ? choice
 * Told you. Every bolt, in order.   flavour:cheer mem:knew
@@ -111,6 +115,7 @@ them: Certified. I keep saying it out loud. I'll stop by Friday. Probably.
 // AFTERGLOW (was beat 8): plays after beat 7 or its quiet ending, beat 8
 tone: resolution
 when: flag:pell.certified
+follows: 7|8
 hint: Walk with me? I've just been on the booths. Big call.
 mem: call
 keepsake: a tiny music box made from spare screws, that plays four notes
