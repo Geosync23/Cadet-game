@@ -14,6 +14,8 @@
 #       jars, the mess guesses (bubbles), she says whose, and joined you get the guess card. Off: Brennan never at the shelf, no card
 #   4   Reading corner (Day 14, 16:30): Esme Walsh there, everyone at it seated within 4.5 m of the bow window's sofa, at least 4
 #       bubbles about books in the room, a tap joins you with a book. Off: no host
+#   3   Winner stays on (Days 14 and 21): planned in the stands at 12:30, 13:30, 14:30 and 15:30, at least two thirds of the stand
+#       seats taken. Off: under that at least once
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -177,5 +179,17 @@ with sync_playwright() as pw:
         check(r['said'] >= 4, '4: they talk about their books (%d bubbles)' % r['said'])
         check(r['act'] == 'tj:reading-corner', '4: a tap joins you (%s)' % r['act'])
         check(not err, '4: no errors: ' + ' | '.join(err[:5]))
+    if want('3'):
+        STANDS = """JSON.stringify((() => { const S = schedData(), seats = new Set((S.shared.get('7|rec-stand') || []).map(pl => pl.id)), out = [];
+          for (const d of [14, 21]) { if (!eventsOn(d).some(e => e.id === 'rec-wso')) { out.push([d, 'not on']); continue; }
+            for (const m of [750, 810, 870, 930]) { const t = (d - 1) * 1440 + m; let n = 0; for (const p of schedPeople()) { const s = planDay(p, d).find(x => x.from <= t && x.to > t); if (s && seats.has(s.placeId)) n++; } out.push([d, m, n, seats.size]); } }
+          return out; })())"""
+        def stands3(path):
+            g = Game(pw, path, 900, 760); r = json.loads(g.ev(STANDS)); err = g.errors; g.close(); return r, err
+        r, err = stands3(woff); print('  3 off (day, minute, in the stands, seats):', r)
+        check(any(len(x) == 4 and x[2] * 3 < x[3] * 2 for x in r), '3 off: as 0.92.5, the stands under two thirds full at least once')
+        r, err = stands3(won); print('  3 on:', r)
+        check(all(len(x) == 4 and x[2] * 3 >= x[3] * 2 for x in r), '3: the stands at least two thirds full through the afternoon (%s)' % r)
+        check(not err, '3: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)

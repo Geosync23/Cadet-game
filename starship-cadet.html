@@ -40550,7 +40550,8 @@ function eventFree(p, d, a, b, wake = 60) {
 // be free for only that part of it (keys 1035, 1036 on the person's seed and the tradition's k)
 function evStay(p, d, e) {
   const st = e.ev.stay, len = Math.min(e.to - e.from, st[0] + Math.round((st[1] - st[0]) * schedU(p.seed + e.ev.k, d, 1035)));
-  const from = e.from + Math.round((e.to - e.from - len) * schedU(p.seed + e.ev.k, d, 1036)); return [from, from + len];
+  const u = e.ev.stayMid ? (schedU(p.seed + e.ev.k, d, 1036) + schedU(p.seed + e.ev.k, d, 1037)) / 2 : schedU(p.seed + e.ev.k, d, 1036);   // stayMid (0.92.6, FX17): most come for the middle of it
+  const from = e.from + Math.round((e.to - e.from - len) * u); return [from, from + len];
 }
 // toBed (FX9, 0.92.5 item 16; the shared rule for late traditions, FX12's late piano too): a tradition with toBed: n
 // (minutes) takes someone whose bedtime falls inside it, from its start, leaving 20 minutes before their bed (eventFree's
@@ -43014,6 +43015,14 @@ if (P926_TRADS) {
   if (rc && rc.where[0]) { const who = rc.who; rc.where[0] = { ...rc.where[0], ids: /^3-lounge-(2[5-9]|3[13])$/ }; Object.assign(rc, { host: 'walsh-esme', spare: 1, who: (p, d, c) => p.id === 'walsh-esme' ? 1 : who(p, d, c) }); }
   TRAD_JOIN['reading-corner'] = { host: 'walsh-esme', pose: 'sit:read', need: 'leisure', gain: 15, also: { social: 5 }, verb: 'read with them', what: 'sit with the readers and read, and hear what everyone\'s reading' };
   tjActs();
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
+}
+// ---- 0.92.6 item 3 (FX17, behind P926_TRADS; the user: "the stands should fill for the Winner stays on tradition"): each goer
+// came for 40-120 minutes anywhere in its five hours, so only about a quarter were there at once. Now 90-180 minutes,
+// most of them through the middle of the afternoon (evStay's stayMid), and more of the ship comes to watch
+if (P926_TRADS) {
+  const w = REC_TRADS.find(x => x.id === 'rec-wso');
+  if (w) { const who = w.who; Object.assign(w, { stay: [90, 180], stayMid: true, who: (p, d, c) => { const x = who(p, d, c); return x >= 1 ? x : Math.min(.95, x + .15); } }); }
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }
 }
 // ---- end of slot: Traditions engineer ----
