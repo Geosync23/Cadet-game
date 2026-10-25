@@ -150,7 +150,9 @@ with sync_playwright() as pw:
           if (!window.__bsHook) {{ window.__bsHook = 1; const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }} }})()""")   # (hooked once)
         g.step(10)
         g.ev(f"(() => {{ const e = eventsOn({d}).find(x => x.id === 'sunday-story'); if (!e) return; const rk = [...eventRooms(e.ev)].map(r => r.split('|')).find(r => +r[0] === 4)[1], tl = ROOM_TILES[rk], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.set(c.x, 0, c.z); player.stop(); }})()")   # (in its room: at 21:18 Holt may still be on his way in)
-        g.step(900)
+        for _ in range(60):   # to near its end (21:55): the chapter is spread over what's left once he's settled
+            g.step(30)
+            if g.ev('SHIP.time.min') >= 1312: break
         r = json.loads(g.ev(f"JSON.stringify({{ holt: DECK_CREW.some(x => x.p.id === 'holt'), said: window.__said.filter(x => x[0] === 'holt').map(x => x[1]), want: (LINES['story.sunday.{ch}'] || []).map(x => x.text) }})"))
         print('  the Sunday story, Day %d: Holt here %s, said %d lines, chapter %d has %d' % (d, r['holt'], len(r['said']), ch, len(r['want'])))
         check(r['holt'] and r['said'] == r['want'], 'the Sunday story on Day %d: Holt reads chapter %d from its first line, every line in order once (RV14) (%s)' % (d, ch, r['said'][:2]))
