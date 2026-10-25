@@ -66,3 +66,23 @@ Notes, no change asked:
 - A few non-story crew snap 0.7-0.9 tiles in one frame near seats during the scenes (Kowalczyk, Janssen, Walsh,
   Alvarez, Hart, Pell): matches the known "seated one-frame snaps" backlog, not the stories.
 - Halloran 5 is offered only while he's seated (half of its 07:40-08:30 booking); he's in the serving queue at first.
+
+## Re-check: claude/p926-stories 13ea7fb7 (CS1 f4117e20, lead's (a') for Kovac): PASS
+
+Fixes read right: Kovac 4 books her own walk (storyWalk: lead minutes before her lift ride to the ride, on the deck she
+rides from), no cast; Saad 4's event window starts at 08:30 and only once he's up (sleep and wash skipped); invites use
+{at}, the booked time the Calendar shows; closing a no-reply beat early no longer counts (onEnd uses `finished`);
+socialChatter skips an open story scene's speaker (behind STORIES_ON); stories_check fails a crescendo told away from
+its named room. All new code behind STORIES_ON, no R(), no colours or meshes.
+
+- Switch off: check_fast QUICK CHECK OK; cadet_test vs 53c11f8 ALL IDENTICAL (run alone).
+- Switch-on copy: stories_check 30 OK both ways (play: Saad 4 Day 13 08:30, Halloran 5 Day 18, Kovac 4 Day 19 15:28,
+  Theo 5 Day 21, Basil 4 Day 25; miss: every quiet ending, Theo's by Mail); day_check 12, 13, 19 OK.
+- Browser at phone size (plans/rv16/recheck_strip.png): Kovac 4 opens at the Deck 5 lift lobby at 15:32 while she's on
+  her way ("Four, please."), told, no errors; Saad 4 opens at 08:35 with him awake (resting on his bunk in Bunk 7), the
+  call from Zeke and the walk down, told, no errors. Bubbles on their speakers, no crew jumps.
+
+For the lead (a feel point, not a fault): Kovac's walk booking is 11 ship minutes (15:28-15:39), about 18 real seconds
+at the normal speed. The invite names the time, but a player a little late gets the quiet ending. Widening her `lead:`
+would give more slack if the user finds it tight. Older moments' chatter (socialChatter has no DIALOGUE guard) is
+backlog FX21-1.
