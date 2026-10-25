@@ -53,6 +53,10 @@ gapDays: 2
 duty: true
 where: Works bay
 when: beat:pell.6 trad:open-door weekday:wed day:17-
+crescendo: trad:open-door
+quiet: 8
+title: Pell's practical
+invite: The practical | Tomorrow. Open door tea, the bench in the Works bay, 16:40. Calder's timing it. Stand where I can see you. Pell
 hint: It's today. The practical. Stand where I can see you. Not too close.
 mem: passed
 flag: pell.certified
@@ -111,6 +115,7 @@ them: Certified. I keep saying it out loud. I'll stop by Friday. Probably.
 // AFTERGLOW (was beat 8): plays after beat 7 or its quiet ending, beat 8
 tone: resolution
 when: flag:pell.certified
+follows: 7|8
 hint: Walk with me? I've just been on the booths. Big call.
 mem: call
 keepsake: a tiny music box made from spare screws, that plays four notes

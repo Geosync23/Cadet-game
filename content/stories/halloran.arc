@@ -101,6 +101,10 @@ tier: friend
 gapDays: 0
 where: meal
 when: beat:halloran.4 time:morning day:15-
+crescendo: meal:breakfast
+quiet: 6
+title: Breakfast with Halloran
+invite: Number 289 | Breakfast tomorrow, the Works tables. A big one. Don't be late, and bring your best laugh. You'll need it. E.
 hint: Breakfast? Works tables. It's a big one today. Number two hundred and eighty-nine.
 mem: groan
 mail: 4320 | From Coriel | Mum's written. She played it twice. She laughed till she cried, the good kind. The kitchen was loud all evening, she says. She's sending one back and won't say which. Have you eaten? E.
@@ -149,7 +153,8 @@ tone: light
 tier: friend
 gapDays: 2
 where: meal
-when: beat:halloran.5 time:morning
+when: time:morning
+follows: 5|6
 hint: Breakfast? Mum sent one back. I've been holding it in since six.
 mem: fromMum
 keepsake: a scone tin with a dent in the lid

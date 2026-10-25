@@ -83,6 +83,10 @@ where: Engine room
 duty: true
 crisis: true
 when: beat:salo.3 event:ionStorm day:13
+crescendo: event:ionStorm
+quiet: 6
+title: The coolant loop with Saad
+invite: Tomorrow | Storm's due at two. It's my rest day, but I'll be down by the Deck 6 coolant loop all the same. I'd be glad of the company. Saad
 hint: Deck 6, the coolant loop. Could you come? Now, if you can.
 mem: once
 flag: salo.signed
@@ -113,7 +117,8 @@ them: Somewhere in the Service it's past my bedtime. I'm counting that.
 tone: resolution
 tier: friend
 where: calm
-when: beat:salo.4 !event:ionStorm day:14-
+when: !event:ionStorm day:14-
+follows: 4|6
 hint: Before ten, could you sit a minute? I've written to Hala. At last.
 mem: tohala
 keepsake: a checking card he made for you, with your name at the top

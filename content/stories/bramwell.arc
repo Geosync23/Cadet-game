@@ -86,7 +86,11 @@ tone: resolution
 tier: acquaintance
 gapDays: 0
 where: Tea corner
-when: beat:bramwell.3 trad:new-hands-tea flag:bramwell.plant.done day:25-
+when: beat:bramwell.3 trad:new-hands-tea flag:bramwell.plant.done day:25
+crescendo: trad:new-hands-tea
+quiet: 5
+title: Basil's new hand's tea
+invite: My tea! | It's my new hand's tea tomorrow, the Works tea corner. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
 hint: My new hand's tea! You're coming? Bring nothing. That's the rule, isn't it?
 mem: everybody
 keepsake: a little clay pot he painted, with the Wren on it

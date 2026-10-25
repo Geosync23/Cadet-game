@@ -112,6 +112,10 @@ tier: colleague
 gapDays: 0
 where: Shuttle bay
 when: beat:teague.4
+crescendo: farewell
+quiet: 6
+title: Theo's send-off
+invite: Last day | The Tern goes at three tomorrow. Shuttle bay, half two. Pens packed last. Come and wave. Properly, with the whole arm. Theo
 hint: Shuttle bay, half two. Don't be late. I'm never late for leaving.
 mem: framed
 keepsake: the last page of the Wren strip, signed, with you in it
