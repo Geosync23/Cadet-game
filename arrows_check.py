@@ -36,6 +36,8 @@ import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
 
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 THREE = (WORK / 'three/package/build/three.min.js').read_text()
 INIT = """(() => { let vt = 1000; const cbs = []; performance.now = () => vt; Date.now = () => vt;
@@ -58,7 +60,7 @@ class Page:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = pathlib.Path(path).read_text(); i = html.rfind('})();')
-        self.tmp = WORK / 'test' / ('_arrows_' + pathlib.Path(path).name)
+        self.tmp = WORK / 'test' / ('_arrows_' + RUN_ID + pathlib.Path(path).name)
         self.tmp.write_text(html[:i] + "window.__sc = src => eval(src);\n" + html[i:])
         self.page.goto('file://' + str(self.tmp) + '#dev'); self.ready()
     def ready(self):
@@ -507,8 +509,8 @@ TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' 
 PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week', 'promo'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
-    if off != src: (WORK / 'test' / ('_off_' + pathlib.Path(path).name)).write_text(off)
-    off_path = str(WORK / 'test' / ('_off_' + pathlib.Path(path).name)) if off != src else path   # queue's 'off' part, and shift / week without 'guide': the arrows switched off
+    if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
+    off_path = str(WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)) if off != src else path   # queue's 'off' part, and shift / week without 'guide': the arrows switched off
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
     if 'queue' in PARTS:
