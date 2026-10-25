@@ -47040,7 +47040,9 @@ function storyTick(now) {                                 // once a ship minute 
     if (C.book[id]) continue;
     const p = socP(id); if (!p || !SOC.idx.has(id)) continue;
     const mid = momentNextId(p), d = mid && momentDef(mid); if (!d) continue;
-    if (!d.crescendo) { if (d.quiet && day > storyDayHi(d.when)) storySkip(p, d.beat, now); continue; }   // a plain beat with a quiet ending (Pell 7): missed once its day: window has passed
+    if (!d.crescendo) {                                   // a plain beat whose day: window has passed: missed. With a quiet ending (Pell 7), that's next; without one (Saad 3), the story counts it as passed (rel.arc) and carries on
+      if (day > storyDayHi(d.when)) { storySkip(p, d.beat, now); if (!d.quiet) { const r = relGet(p.id); if ((r.arc || 0) < d.beat) { r.arc = d.beat; r.arcDay = day; } } }
+      continue; }
     const past = s => s.to <= now;
     if (day > storyDayHi(d.when) || (storyOneOff(d.crescendo) && (storySlots(d.crescendo, p, day, d.lead || 0).some(past) || (d.crescendo === 'farewell' && leaveDay(p) != null && leaveDay(p) < day)))) { storySkip(p, d.beat, now); continue; }   // its window has passed
     if (!socAboard(p, day)) continue;
