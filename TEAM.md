@@ -1215,3 +1215,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:59 UTC: USER: music ON by default (ship schedule).
 - ~16:58 UTC check-in (lead 36): waiting RV17 (3 verdicts, nudged) and BM17 career-pace bisect; RV15 PASS FX19 acb36503. SD1 on music module/app/harness. Handover note updated.
 - ~17:00 UTC: USER: no music on arrival night (Day 0); music starts Day 1.
+- ~17:02 UTC: RV17 PASS FX17 3e8c78a6 (evMeetClash) + eba4d365 (m17 check). Lead: rec-wso Day 7 11->8 goers accepted (they're at the Line). BM17 merging FX17 + FX19 acb36503; FX22b join pending RV17; re-runs after. CR3 share all OK. USER: no music Day 0.
