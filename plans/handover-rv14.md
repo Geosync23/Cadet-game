@@ -16,7 +16,11 @@ Builders so far: FX14 -> FX11 -> FX9 -> DS1 -> now **FX16** (session_01MbKpntrDk
 - Told lead: food_check 7 'garden, good' is OLD (same numbers on ba836359); Day 62 observatory-night -4 vs 0.92.4 comes
   with FX12's merge (not the weekend).
 
-## Still to do (the final verdict)
+## Final (2026-10-25 ~04:30 UTC)
+- Item 16 switched ON: **PASS at 3307ded5** (game 49ba25a4...). Details in plans/review-rv14.md. Nothing open from me;
+  the six-runner round is the lead's. perf_check weekend: flags expected (more people), told BM16.
+
+## Earlier plan for the final verdict (done)
 - The user (00:30/00:40 UTC): 0.92.5 ships the weekend SWITCHED ON, on a 4-week rotation; old weekend traditions keep
   days/times/places/hosts, lose at most 2 people, not below their floor (lead 35's rule).
 - Wait for FX16's switch-on sha (seat-first line, T5 decor/head counts/perf, T6 birthday hour/records/design-doc).

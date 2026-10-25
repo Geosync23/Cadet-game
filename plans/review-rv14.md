@@ -72,3 +72,11 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
 - Builders: DS1 handed over -> FX16 (session_01MbKpntrDkcWAKrTj1HRUMm): seat line, T5, T6, switch-on.
 - 3b6e48bb (game 44d07c49..., FX16 T5 + DS1 seats; switch off): weekend_check OK; plant u_seat (tradSpot seat=false) FAILs
   all five q_seat rule lines. Decor cocoaPot/picnicBasket read OK. Perf noted (Bread day js 2.79 ms within Sunday dinner peak).
+
+## ~04:30 UTC: FINAL, item 16 switched ON: PASS at 3307ded5 (game 49ba25a4...; = c7982f2c + one decor tap text)
+- cadet_test vs 0.92.4: ALL IDENTICAL (c7982f2c and 3307ded5). weekend, events, food 1 7, day 6/7/14/28, deck OK (c7982f2c);
+  join OK alone on 3307ded5 (two earlier runs timed out at the save-reload goto under load; load/skip times equal to 0.92.4);
+  check_fast OK 234 s (3307ded5). old_trads shipped vs WEEKEND_ON=false copy, Days 1-84: OK, 5 one-person shifts.
+- perf weekend scenes vs 0.92.4: 7 PROBLEM flags, all from more people (jigsaw 119->174 calls, story 200->235, Bread day
+  landscape js 1.36->2.39 ms); under budget 450 (max 342). Told BM16 to record them as expected for CR2.
+- Verdicts sent to lead 35, BM16, FX16.
