@@ -45315,7 +45315,7 @@ function socialChatter(m) {
   if (typeof introHush === 'function' && introHush()) return;   // section 21: Zeke's goodnight bubbles on the arrival evening (the patch, #4)
   const t = shipNow(), heard = new Set(SHIP.heard.map(x => x.id)), P = player.obj.position;
   const v = new THREE.Vector3(), onScreen = a => { v.set(a.x, (a.y || 0) + 1.6, a.z).project(camera); return Math.abs(v.x) < .7 && v.y < .8 && v.y > -.9; };   // well inside the screen, so the bubble fits
-  const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a))
+  const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a) && !(STORIES_ON && storyInScene(a.p.id)))   // not the speaker of an open crew story scene (RV16 #4)
     .sort((a, b) => schedU(a.p.seed, m, 636) - schedU(b.p.seed, m, 636));
   for (const a of near) {
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
@@ -46465,7 +46465,7 @@ function momentShow(id) {
   let picked = null;
   MEETING_SCRIPTS['moment:' + id] = { title: shortName(p), lines,
     onPick: (k, c) => { picked = c; if (c.fit && c.c.warm) c.reply = say(c.c.warm); },   // the reply that fits them best can have a warmer answer
-    onEnd: () => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); else if (STORIES_ON && storyMoment(id) && !lines.some(l => l.choice)) momentDone(p, d, { flavour: 'listen', c: {}, fit: false }); } };   // a crew story's beat with no reply counts when it ends (FX21)
+    onEnd: f => { delete MEETING_SCRIPTS['moment:' + id]; if (picked) momentDone(p, d, picked); else if (f && STORIES_ON && storyMoment(id) && !lines.some(l => l.choice)) momentDone(p, d, { flavour: 'listen', c: {}, fit: false }); } };   // a crew story's beat with no reply counts when it ends (FX21)
   return dialogueShow('moment:' + id, { id: 'moment:' + id, who: [p.id], at: t, where: hereWhere() });
 }
 // favours that matter (0.39.6, B4): a moment's practical reply with `favour: <id>` starts one of these on section 20's
@@ -46884,10 +46884,20 @@ function storyDayHi(when) {                               // the last ship day a
   let hi = Infinity; for (const v of [].concat(when && when.day || [])) { const s = String(v); if (/^\d+(,\d+)+$/.test(s)) { hi = Math.min(hi, Math.max(...s.split(',').map(Number))); continue; } const m = /^(\d*)(-?)(\d*)$/.exec(s); if (m) hi = Math.min(hi, m[2] ? (m[3] ? +m[3] : Infinity) : +m[1]); }
   return hi;
 }
-function storySlots(spec, p, day, lead = 0) {             // the gathering's times on a day: [{ from, to, trad }] in absolute ship minutes
+const storyRoomOf = d => typeof d.where === 'string' && !['calm', 'any', 'meal', 'visit', 'appt'].includes(d.where) ? d.where : null;
+function storyWalk(p, day, evId, lead) {                  // on their way to a gathering (lead: and a room, Kovac 4): from lead minutes before their lift ride there to the ride, by their plan -> { from, to, deck } | null
+  const segs = typeof planDay === 'function' ? planDay(p, day) : [], i = segs.findIndex(s => s.tag && (s.tag === 'ev-' + evId || String(s.tag).startsWith('ev-' + evId + '-')));
+  if (i < 1) return null;
+  for (let k = i - 1; k >= 0 && k >= i - 3; k--) { const s = segs[k]; if (s.act === 'commute' && s.fromDeck != null) return { from: s.from - lead, to: s.from + 1, deck: s.fromDeck }; }
+  return null;
+}
+function storySlots(spec, p, day, lead = 0, d = null) {   // the gathering's times on a day: [{ from, to, trad, walk? }] in absolute ship minutes
   const B = (day - 1) * 1440, out = [];
-  if (spec.startsWith('trad:')) { let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(day) || [] : []; } catch (e) { es = []; } for (const e of es) if (e.id === spec.slice(5)) out.push({ from: B + e.from - lead, to: B + e.to, trad: e.id }); }
-  else if (spec.startsWith('event:')) { const id = spec.slice(6); let a = null, b = null; for (let m = 360; m < 1320; m += 15) { let n = null; try { n = typeof eventNow === 'function' ? eventNow(B + m) : null; } catch (e) { n = null; } if (n && n.id === id) { if (a === null) a = m; b = m + 15; } } if (a !== null) out.push({ from: B + a, to: B + b }); }
+  if (spec.startsWith('trad:')) { let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(day) || [] : []; } catch (e) { es = []; }
+    for (const e of es) if (e.id === spec.slice(5)) { if (lead && d && storyRoomOf(d)) { const w = storyWalk(p, day, e.id, lead); if (w) out.push({ from: w.from, to: w.to, trad: e.id, walk: w.deck }); }   // RV16 #1: the scene on their way (the lift lobby), not in their seat
+      else out.push({ from: B + e.from - lead, to: B + e.to, trad: e.id }); } }
+  else if (spec.startsWith('event:')) { const id = spec.slice(6); let a = null, b = null; for (let m = 360; m < 1320; m += 5) { let n = null; try { n = typeof eventNow === 'function' ? eventNow(B + m) : null; } catch (e) { n = null; } const w = n && n.id === id && typeof whereIs === 'function' ? whereIs(p, B + m) : null;
+      if (w && w.act !== 'sleep' && w.act !== 'wash') { if (a === null) a = m; b = m + 5; } } if (a !== null) out.push({ from: B + a, to: B + b }); }   // RV16 #2: from once they're up (no arrow at them asleep)
   else if (spec === 'farewell') { if (leaveDay(p) === day) out.push({ from: B + ROTA_OFF - ROTA_WAIT - lead, to: B + ROTA_OFF }); }
   else if (spec.startsWith('meal:')) { const act = spec.slice(5); let a = null, b = null; for (let m = 300; m < 1320; m += 5) { const w = typeof whereIs === 'function' ? whereIs(p, B + m) : null; if (w && w.act === act && !w.moving) { if (a === null) a = m; b = m + 5; } else if (a !== null) break; } if (a !== null) out.push({ from: B + a, to: B + b }); }
   return out;
@@ -46905,8 +46915,9 @@ function storyInRoom(p, t, name) {                        // standing in a room 
   return !!rm && String(rm.name || '').toLowerCase().includes(String(name).toLowerCase());
 }
 function storyAtSlot(p, t, d, b) {                        // they're at the crescendo's gathering now (you tapped them: you're with them)
-  const spec = d.crescendo, w = typeof whereIs === 'function' ? whereIs(p, t) : null, room = typeof d.where === 'string' && !['calm', 'any', 'meal', 'visit', 'appt'].includes(d.where) ? d.where : null;
+  const spec = d.crescendo, w = typeof whereIs === 'function' ? whereIs(p, t) : null, room = storyRoomOf(d);
   if (!w) return false;
+  if (b.walk != null) return t < b.to && w.deck === b.walk && w.act !== 'sleep';   // on their way: on the deck they ride from, before the ride
   if (room && storyInRoom(p, t, room)) return true;
   if (spec.startsWith('trad:')) return t < b.from + (d.lead || 0) || (!!w.tag && String(w.tag).startsWith('ev-' + spec.slice(5)));   // on the way to it (lead:), or there
   if (spec === 'farewell') return w.tag === 'farewell';
@@ -46933,6 +46944,7 @@ function storyGoes(p, d, s, now) {                        // by their plans (pur
   for (let t = Math.max(now, s.from); t < s.to; t += 5) if (storyAtSlot(p, t, d, s) && (!Array.isArray(d.cast) || d.cast.every(c => storyHere(c, p, { t })))) return true;
   return false;
 }
+function storyInScene(id) { const D = typeof DIALOGUE !== 'undefined' && DIALOGUE; return !!D && /^moment:/.test(String(D.id)) && !!storyMoment(String(D.id).slice(7)) && !!D.m && Array.isArray(D.m.who) && D.m.who.includes(id); }
 function storyCrescReady(p, t, id, d, ctx = {}) {
   const b = storyPeekCS().book[p.id];
   if (!b || b.beat !== d.beat || t < b.from || t >= b.to) return null;
@@ -46942,7 +46954,7 @@ function storyCrescReady(p, t, id, d, ctx = {}) {
 }
 function storyInvite(p, d, b, now) {                      // the Mail the evening before (18:00), or now if that's past
   const sub = d.invite ? d.invite.subject : shortName(p), body = d.invite ? d.invite.body : (d.hint || '') + ' ' + hhmm(b.from % 1440) + (Math.floor(b.from / 1440) + 1 > Math.floor(now / 1440) + 1 ? ', tomorrow.' : ', today.');
-  SHIP.social.mail.push({ at: Math.max(Math.floor(now), (b.day - 2) * 1440 + 1080), from: p.name, subject: sub, body: voiceFill(p.id, body).trim() });
+  SHIP.social.mail.push({ at: Math.max(Math.floor(now), (b.day - 2) * 1440 + 1080), from: p.name, subject: sub, body: voiceFill(p.id, body.replace(/\{at\}/g, hhmm(b.from % 1440))).trim() });   // {at}: the booked time, as the Calendar shows it
 }
 function storyCalRows(day, B0) {                          // the Calendar's rows for the crescendos booked that day
   const out = [], bk = storyPeekCS().book;
@@ -47045,13 +47057,13 @@ function storyTick(now) {                                 // once a ship minute 
       continue; }
     const past = s => s.to <= now;
     const dayOk = [].concat(d.when && d.when.day || []).every(v => storyDayIn(v, day));   // a one-off gathering that spans days (the storm) passes only on a day its day: allows
-    if (day > storyDayHi(d.when) || (storyOneOff(d.crescendo) && dayOk && (storySlots(d.crescendo, p, day, d.lead || 0).some(past) || (d.crescendo === 'farewell' && leaveDay(p) != null && leaveDay(p) < day)))) { storySkip(p, d.beat, now); continue; }   // its window has passed
+    if (day > storyDayHi(d.when) || (storyOneOff(d.crescendo) && dayOk && (storySlots(d.crescendo, p, day, d.lead || 0, d).some(past) || (d.crescendo === 'farewell' && leaveDay(p) != null && leaveDay(p) < day)))) { storySkip(p, d.beat, now); continue; }   // its window has passed
     if (!socAboard(p, day)) continue;
     for (const dd of [day, day + 1]) {
       if (C.cday[dd] || Object.values(C.book).some(b => b.day === dd)) continue;   // one crescendo a day
-      const slot = storySlots(d.crescendo, p, dd, d.lead || 0).find(s => s.to > now && storyGoes(p, d, s, now));   // only a time they (and its cast) will be there: their own plans
+      const slot = storySlots(d.crescendo, p, dd, d.lead || 0, d).find(s => s.to > now && storyGoes(p, d, s, now));   // only a time they (and its cast) will be there: their own plans
       if (!slot || !storyGates(p, d, mid, Math.max(now, slot.from), slot.trad)) continue;
-      C.book[id] = { beat: d.beat, day: dd, from: slot.from, to: slot.to, trad: slot.trad || null };
+      C.book[id] = { beat: d.beat, day: dd, from: slot.from, to: slot.to, trad: slot.trad || null, ...(slot.walk != null ? { walk: slot.walk } : {}) };
       storyInvite(p, d, C.book[id], now); break;
     }
   }

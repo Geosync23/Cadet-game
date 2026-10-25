@@ -53,7 +53,7 @@ RUN = r"""
       if (m === 720) for (const id of ids) { const p = socP(id); if (p && socAboard(p, d)) { relAdd(id, 'chat', 2); relAdd(id, 'meal', 3); } }
       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
       if (m === 360) for (const id of ids) { const p = socP(id), mid = p && momentNextId(p), dd = mid && momentDef(mid); if (!dd || !dd.crescendo || C().book[id]) continue;   // a crescendo due but not booked: why, today
-        const sl = storySlots(dd.crescendo, p, d, dd.lead || 0); if (!sl.length) continue; const s0 = sl[0];
+        const sl = storySlots(dd.crescendo, p, d, dd.lead || 0, dd); if (!sl.length) continue; const s0 = sl[0];
         const cast = {}; for (const c of dd.cast || []) { let n = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyHere(c, p, { t: x })) n++; cast[c] = n; }
         let at = 0; for (let x = s0.from; x < s0.to; x += 5) if (storyAtSlot(p, x, dd, s0)) at++;
         (nobook[mid] || (nobook[mid] = [])).push({ d, at: s0.from % 1440, here: at, cast, gates: storyGates(p, dd, mid, s0.from, s0.trad), flags: (dd.when && dd.when.flag) ? [].concat(dd.when.flag).map(f => f + '=' + !!flag(f)) : undefined }); }
@@ -72,9 +72,10 @@ RUN = r"""
         const mid = momentReady(p, t); if (!mid) continue;
         const dd = momentDef(mid);
         if (dd.crescendo && MODE === 'miss') continue;
-        const before = (C().told[id] || []).length;
+        const before = (C().told[id] || []).length, bk = C().book[id], room = storyRoomOf(dd), w0 = whereIs(p, t);
+        const atRoom = !dd.crescendo || !room ? null : (storyInRoom(p, t, room) || (bk && bk.walk != null && w0 && w0.deck === bk.walk));   // RV16: a crescendo that names a room plays there (or on the way, on the deck they ride from)
         momentShow(mid); play(mid);
-        if ((C().told[id] || []).length > before) log.push({ id, beat: dd.beat, day: d, t, cres: dd.crescendo || null, quiet: dd.quiet || null, follows: dd.follows || null, day_: dd.when && dd.when.day || null, book: dd.crescendo ? books[mid] || null : null });
+        if ((C().told[id] || []).length > before) log.push({ id, beat: dd.beat, day: d, t, cres: dd.crescendo || null, atRoom, room, quiet: dd.quiet || null, follows: dd.follows || null, day_: dd.when && dd.when.day || null, book: dd.crescendo ? books[mid] || null : null });
         for (const j of (typeof myFavours === 'function' ? myFavours() : []).filter(j => j.from === id)) { j.workDone = j.workDone || t; if (!favourTurnIn(j.id)) { j.status = 'done'; j.doneAt = t; j.doneBy = 'you'; } }
       }
       SHIP.social.mail = SHIP.social.mail.filter(x => x.at > t); mailSeen = SHIP.social.mail.length;   // delivered (socialMail's job; the device isn't needed on paper)
@@ -116,6 +117,7 @@ def rules(r, mode):
         b = x.get('book')
         if not b: bad.append(f'{x["id"]} crescendo {x["beat"]}: told without a booking'); continue
         if not (b['from'] <= x['t'] < b['to']) or b['day'] != x['day']: bad.append(f'{x["id"]} crescendo {x["beat"]}: told outside its booking (day {x["day"]})')
+        if x.get('room') and x.get('atRoom') is False: bad.append(f'{x["id"]} crescendo {x["beat"]}: told away from its room ({x["room"]})')
         name = r['names'].get(x['id'])
         eve = (b['day'] - 2) * 1440 + 1080
         if not any(m['from'] == name and m['at'] <= max(eve, m['queued']) and m['queued'] <= x['t'] for m in r['mails']): bad.append(f'{x["id"]} crescendo {x["beat"]}: no Mail from them the evening before')
