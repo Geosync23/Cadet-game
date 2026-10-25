@@ -286,3 +286,29 @@ OLD ba836359 (0.92.4), sha256 `2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f7
 | intro_check (whole) | OK | `OK`, 0 FAIL lines |
 | perf_check NEW OLD | OK (expected + backlog 32) | Both runs: the six weekend draw-call lines BM17 listed, repeating exactly (jigsaw 119→174, 186→239, 153→222; story 200→235, 307→342, 238→273; max 342, under 450). Plus one js spike per run, a different scene each time (run 1 storm all-clear landscape 1.29 → 2.42 ms, gone in run 2 at 1.68 → 1.56; run 2 the Line supper trifold-folded 1.99 → 3.1) = backlog 32. No memory growth (521/521/521). |
 | lines_check --day | OK | PASS (0 errors) |
+
+# 0.92.6 (claude/staging-0.92.6 b78e1e22, all six switches on), CR2's share (fresh CR2) — **OK** (one stale check, fixed)
+
+NEW b78e1e22, sha256 `88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4` (matches BM17's).
+OLD 39f7741d (0.92.5), sha256 `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559` (matches).
+An earlier start on defc327f (ODD_ON off) was stopped at BM17's word during cadet_test and discarded.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Only f_noshadow 3896, g_nocrew 3875, h_crewback 3861 px, all inside one speech bubble: Oona's line "The washer's fixed. Clean socks for everyone." (OLD) vs "No more blinking lights. My eyes thank whoever it was." (NEW), a different chatter pick. The other 12 shots 0 px; no state/tap DIFF lines; `errors A [] errors B []`. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | FAIL on b78e1e22's arc_check, stale check (no storyTick), fixed by 70813dc8, re-run **OK** | See below. Re-run with 9d758ada's arc_check.py on the same game (sha256 checked): `ARC CHECK OK`, errors [], everyone finished (kovac-zainab 6/4, pell 9/8). |
+| lines_check | OK | PASS (0 errors, 66 warnings; = BM17's expected 66) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (37 min; part 12 did not time out) |
+| perf_check NEW OLD | OK (backlog 32) | One flag: night owls' cocoa Sat 22:55 portrait js 0.81 -> 2.1 ms, same draw calls (277c). Re-measured alone (`PERF_SCENES="night owls"`): OLD 1.15 ms, NEW 1.06 ms: did not repeat = backlog 32. Draw calls: no rise; the Line ceremony 335 -> 318 (KP1 lower), jigsaw and story a few lower; max 418 (portrait-wide, both builds), under 450. No memory growth (521/40/87 throughout). File 6.56 -> 6.90 MB. |
+| lines_check --day | OK | PASS (0 errors) |
+| p926_check | OK | `P926 CHECK OK` |
+
+## arc_check on b78e1e22: what happened
+
+`ARC CHECK: STALLS`: kovac-zainab at 3 (next beat kovac.3, the Friday captains-address, Days 19-26, whenOk 0) and
+pell at 6 (beat pell.6, afternoons Days 17-24, Works bay, both 0). OLD: OK. Bisected over the first-parent merges
+with b78e1e22's arc_check.py (unchanged since 0.92.5): OK through 9813e0d (BOARD_TRADE_ON), STALLS from 74007d8
+(STORIES_ON true); flipping only STORIES_ON on 6615b82, 0c2259a and 68920cf gave the same two stalls. RV16 found the
+cause: with STORIES_ON those beats are booked or skipped by the stories' clock `storyTick`, which arc_check never ran.
+FX21's one-line fix 70813dc8 (merged in 9d758ada, game unchanged) runs it; re-run OK. Test-only, not a game bug.
