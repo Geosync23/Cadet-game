@@ -136,6 +136,16 @@ with sync_playwright() as pw:
         check('week1.zeke' in r['cards'] and len(r['lines']) >= 4 and not any('{' in l for l in r['lines']), '5: a tap opens his card going over your week, filled in (%s)' % r['lines'][:2])
         check(r.get('open', [0])[0] == 'week1.zeke' and r['open'][1] - r['t'] >= 3, '5: his card is still open 3 ship minutes later, no input (RV14, FX22) (%s, tapped at %.1f)' % (r.get('open'), r['t']))
         check(not err, '5: no errors: ' + ' | '.join(err[:5]))
+        # lead 36: tapped from the doorway (on the promenade, outside the bow lounge), then walking in: the card stays open
+        g = Game(pw, won, 900, 760)
+        g.ev("(() => { skipTo(6 * 1440 + 1040); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.step(150)
+        r = json.loads(g.ev("""(() => { const c = cellPos(40, 10); player.obj.position.set(c.x, 0, c.z); player.stop(); const room0 = (deckDef.rooms[roomAt(...player.here())] || {}).name;
+          const z = DECK_CREW.find(x => x.p.id === 'torres-zeke'); tradJoinMinute(shipNow()); if (z) tradJoinTap(z); return JSON.stringify({ room0, t: SHIP.time.min, card: !!DIALOGUE && DIALOGUE.id }); })()"""))
+        g.step(240); r2 = json.loads(g.ev("JSON.stringify({ t: SHIP.time.min, card: !!DIALOGUE && DIALOGUE.id, room: (deckDef.rooms[roomAt(...player.here())] || {}).name })"))
+        err = g.errors; g.close()
+        check(r['room0'] != 'Bow lounge' and r['card'] == 'week1.zeke' and r2['card'] == 'week1.zeke' and r2['room'] == 'Bow lounge' and r2['t'] - r['t'] >= 3,
+              '5: tapped from the doorway (%s), you walk in and his card is still open %.1f ship minutes later (lead 36) (%s -> %s)' % (r['room0'], r2['t'] - r['t'], r, r2))
+        check(not err, '5 (doorway): no errors: ' + ' | '.join(err[:3]))
     if want('2'):
         def swap2(path):
             g = Game(pw, path, 900, 760)
