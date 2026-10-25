@@ -48481,7 +48481,7 @@ function homeMessage(k, t = shipNow()) {                 // their message, one-s
 //   storyHere(id, p, ctx) -> crew member id is in the scene with p (here: conditions): ctx.here (a list of ids) when the
 //     caller knows who is there, else standing in the same room as p now (on paper, by their plans: whereIs)
 //   storyLineOk(l, p, t) -> a script line's own conditions ('if <conditions> | ...' in the .arc) hold as the scene starts
-var STORIES_ON = false;                                   // var: momentDef may ask before this line has run. false = the game before them
+var STORIES_ON = true;                                    // var: momentDef may ask before this line has run. false = the game before them
 function storyMoment(id) {
   if (!STORIES_ON) return null;
   let S = null; try { S = typeof STORY_MOMENTS !== 'undefined' ? STORY_MOMENTS : null; } catch (e) { S = null; }
