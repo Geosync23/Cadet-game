@@ -154,18 +154,19 @@ with sync_playwright() as pw:
     h.step(150)
     SEE = "JSON.stringify({ crew: DECK_CREW.filter(a => a.settled && a.spot && /^7-disc/.test(a.spot.id)).map(a => [a.spot.id, +a.h.pos.x.toFixed(3), +a.h.pos.z.toFixed(3)]).sort(), disc: typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible ? [+LD_CV.m.position.x.toFixed(3), +LD_CV.m.position.z.toFixed(3)] : null })"
     pair = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
+    long = [json.loads(h.ev(SEE)) for k in range(16) if h.step(30) is None]   # 8 s: a look at 1.2 s can land on a serve, where the server stands in the middle
     both = all(len(x['crew']) == 2 for x in pair)
     check(both, '#25 Day 2 17:22: two crew on the court\'s baselines (%s)' % pair[0]['crew'])
     discs = [tuple(x['disc']) for x in pair if x['disc']]
-    moves = [len(set(tuple(x['crew'][i][1:]) for x in pair if len(x['crew']) == 2)) for i in (0, 1)]
+    moves = [len(set(tuple(x['crew'][i][1:]) for x in long if len(x['crew']) == 2)) for i in (0, 1)]
     check(len(discs) >= 6 and len(set(discs)) >= 5, '#25 their game: the disc in the air and moving (%d of 8 looks, %d places)' % (len(discs), len(set(discs))))
-    check(both and min(moves) >= 3, '#25 their game: both players move to meet it (%s places each)' % moves)
+    check(both and min(moves) >= 3, '#25 their game: both players move to meet it (%s places each in 8 s)' % moves)
     same = h.ev("typeof ldCrewRally === 'function' && [3.1, 9.7, 14.2, 22.5].every(t => JSON.stringify(ldCrewRally(12345, t, false)) === JSON.stringify(ldCrewRally(12345, t, false)))")
     check(same, '#25 a pair at a moment plays the same rally twice')
-    h.ev("(() => { skipTo(1440 + 1155); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")
+    h.ev("(() => { skipTo(1440 + 1210); goToDeck(7, null); const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - 5.6, 0, c.z + 2.6); return 1; })()")   # 20:10 (0.92.5: late piano on Tuesdays moves the Captain's practice from 19:06 to 19:59-20:33)
     h.step(150)
     solo = [json.loads(h.ev(SEE)) for k in range(8) if h.step(9) is None]
-    check(all(len(x['crew']) == 1 and x['crew'][0][0] == '7-disc-2' for x in solo) and sum(1 for x in solo if x['disc']) >= 6, '#25 Day 2 19:15: one alone at the stern practises, the disc in the air (%d of 8 looks)' % sum(1 for x in solo if x['disc']))
+    check(all(len(x['crew']) == 1 and x['crew'][0][0] == '7-disc-2' for x in solo) and sum(1 for x in solo if x['disc']) >= 6, '#25 Day 2 20:10: one alone at the stern practises, the disc in the air (%d of 8 looks)' % sum(1 for x in solo if x['disc']))
     h.ev("(() => { const c = placeSpot('7-disc-1'); player.obj.position.set(c.x - .6, 0, c.z); discAsk(recCourtWaiting()); return 1; })()"); s = wait_game(h); h.step(30)   # from your baseline (the walk from the lift works too, slower)
     hid = h.ev("!!DISC.g && !(typeof LD_CV !== 'undefined' && LD_CV.m && LD_CV.m.visible)")
     check(s['g'] and hid, '#25 during your own game the crew\'s disc is hidden')
