@@ -12302,6 +12302,7 @@ deviceApp({ id: 'calendar', title: 'Calendar', icon: 'calendar', order: 15,
         rows.push({ m: x.at - B0, text: devWhen(x.at) + '  ' + x.title, sub: x.where + (same.length ? ' · same time as ' + same.map(y => y.title).join(' and ') : '') + (R.on ? p === false ? ' · no reminder' : p === true ? ' · remind me, even on shift' : ' · reminder' : ''),
           button: R.on ? p === false ? 'Remind me' : 'Don\'t' : null, action: R.on ? { app: 'calendar', do: 'remind', arg: x.kind } : null });
       }
+      if (STORIES_ON && typeof storyCalRows === 'function') rows.push(...storyCalRows(d, B0));   // a crew story's crescendo, booked (FX21, section 20c's slot)
       if (rows.length) B.push({ kind: 'list', rows: rows.sort((a, b) => a.m - b.m).map(({ m, ...r }) => r) });   // in time order, the ship's items among them
     }
     B.push({ kind: 'text', text: 'Heads-ups before things start (also in Settings)', mark: 'head' }, { kind: 'buttons', items: [
@@ -45257,7 +45258,7 @@ function socialTick() {                                  // the main loop: the c
   if (typeof linesTick === 'function') linesTick();       // section 22: overheard conversations (0.43.12)
   const m = Math.floor(shipNow()); if (m === SOC_MIN) return;
   const step = SOC_MIN >= 0 && m > SOC_MIN && m - SOC_MIN < 30 ? m - SOC_MIN : 0;
-  SOC_MIN = m; socialTo(m); socialTogether(step); promoTick(); socialSeek(m); socialChatter(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
+  SOC_MIN = m; socialTo(m); socialTogether(step); promoTick(); socialSeek(m); socialChatter(m); if (STORIES_ON) storyTick(m); socialMail(m); socialAppts(); socInviteMail(m); socialVisit(m);
 }
 // chatter you overhear (0.36.5) in the performance engineer's speech bubbles (section 8b: bubbleSay(who, text, secs),
 // at most two on screen; inert without it). Now and then (CHATTER_ODDS a ship minute, at most one every CHATTER_GAP
@@ -46032,7 +46033,7 @@ function voiceOf(id) {
     openness: pickV('openness', has(VOICE_GUARDED) ? 'guarded' : has(VOICE_OPEN) ? 'open' : 'normal'),
     loves: pickV('loves', [...new Set(tags.map(x => x[0]))].slice(0, 2)), likes: pickV('likes', ['tea', 'sweet']),
     invites: pickV('invites', []), joy: pickV('joy', tags.length ? tags[0][1] : null),
-    thread: /^arc:/.test(W.thread || '') ? W.thread : p && p.thread ? p.thread : arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null),   // the writers' VOICE decides story arcs only; the roster decides themes (the lead, 0.39.17)
+    thread: storyThread(id) || (/^arc:/.test(W.thread || '') ? W.thread : null) || (p && p.thread ? p.thread : arc || theme || (p ? VOICE_THEMES[Math.floor(schedU(p.seed, 0, 672) * VOICE_THEMES.length)] : null)),   // crew stories first, while STORIES_ON (FX21); the writers' VOICE decides story arcs only; the roster decides themes (the lead, 0.39.17)
     keepsake: pickV('keepsake', null), avoid: pickV('avoid', []), mentors: pickV('mentors', has(VOICE_MENTOR)), lines: W.lines || {},
     opennessSet: W.openness !== undefined || !!(p && p.openness !== undefined) };   // written, not guessed: only then does it change points
   if (!OPENNESS[card.openness]) card.openness = 'normal';
@@ -46368,6 +46369,7 @@ const STORY_M0 = Object.freeze({ b: 0, at: null, hf: null });
 const storyPeek = id => { const S = SHIP.social && SHIP.social.stories, M = S && S.m; return (M && M[id]) || STORY_M0; };   // read-only (queries never write the save; reviewer 1b, 0.39.19)
 const storyM = id => { const S = SHIP.social.stories || (SHIP.social.stories = {}), M = S.m || (S.m = {}); return M[id] || (M[id] = { b: 0, at: null, hf: null }); };
 function momentNextId(p) {                               // the next beat's id that has a script, ready or not (writers' beats may have gaps)
+  if (STORIES_ON) { const sx = storyNextId(p); if (sx !== undefined) return sx; }   // a crew story's own order (crescendos, quiet endings; FX21)
   const v = voiceOf(p.id), th = v.thread || '', r = SHIP.rel[p.id];
   const n = th.startsWith('arc:') ? (r ? r.arc || 0 : 0) : storyPeek(p.id).b;   // beats told so far (rel.arc for arcs)
   if (th.startsWith('arc:') && n < 1 && STORY_ARCS[p.id]) return null;   // an arc with card lines tells beat 1 on the card
@@ -46417,6 +46419,7 @@ function momentWantsVisit(p, t = shipNow()) {
 function momentReady(p, t = shipNow(), ctx = {}) {
   socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return null;
   const id = momentNextId(p), d = id && momentDef(id); if (!d) return null;
+  if (STORIES_ON && d.crescendo && storyMoment(id)) return storyCrescReady(p, t, id, d, ctx);   // a crew story's crescendo: at its gathering, when booked (FX21)
   const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyPeek(p.id), day = Math.floor(t / 1440) + 1, S = SHIP.social.stories || {};
   if (relTier(p.id) < (d.tier ?? g.tier) || metDays(p.id, t) < (d.metDays ?? g.met)) return null;
   const last = d.tone === 'resolution' ? st.hf : st.at; if (last !== null && (t - last) / 1440 < (d.gapDays ?? g.gap)) return null;
@@ -46482,6 +46485,7 @@ function momentDone(p, d, c) {                           // the reply was picked
     if (typeof arcTold === 'function') arcTold(p, arc[n]);
     if ((r.arc || 0) === n) { r.arc = n + 1; r.arcDay = SHIP.time.day; if (arc[n].mail) SHIP.social.mail.push({ at: t + arc[n].mail.after, from: p.name, subject: arc[n].mail.subject, body: arc[n].mail.body }); }   // an older arcTold that takes no beat
   } else if ((d.thread || '').startsWith('arc:') && (r.arc || 0) < d.beat) { r.arc = d.beat; r.arcDay = SHIP.time.day; }   // beats past section 20's card lines, and the new story crew's
+  if (STORIES_ON && storyMoment(p.id + ':' + d.beat)) storyDone(p, d, t);   // a crew story's beat: told, its quiet ending skipped (FX21)
 }
 // ---- goodbyes (0.39.4, B5; plans/social-deep-plan.md Part 8b "Goodbyes") ----
 // A day or two before someone is transferred off, section 20's card leads with their goodbye (anyone at acquaintance
@@ -46816,6 +46820,129 @@ function storyHere(id, p, ctx = {}) {
 function storyLineOk(l, p, t = shipNow()) {
   if (!l || !l.if) return true;
   try { return typeof linesOk === 'function' && !!linesOk(l.if, p, { t, trad: momentTrad(t) }); } catch (e) { return false; }
+}
+// S2: the order of a story's beats, and crescendos. A crew story person's thread is 'arc:<arcId>' (storyThread, read by
+// voiceOf). The next beat (storyNextId, asked by momentNextId) is the lowest one not told and not skipped whose
+// `follows` (an afterglow: after either beat) is told; beats up to rel.arc count as told, except those with `follows`.
+// A crescendo (`crescendo: trad:<id> | event:<id> | farewell | meal:<act>`) plays only at its gathering: storyTick
+// books the next one it can (gates as they'll be then; one crescendo a day), sends a Mail for the evening before
+// (`invite:`, else the hint) and shows it on the Calendar (storyCalRows); on the day, their card offers it there
+// (storyCrescReady). Told: its `quiet:` beat is skipped. Missed (the booking's time passes, the day: bound in its when
+// passes, or a one-off gathering (event:, farewell) ends unbooked): the crescendo is skipped, so its quiet ending is
+// next; if they've left the ship by then, the quiet ending comes as Mail (storyPost). State: SHIP.social.stories.cs =
+// { told: { id: [beats] }, skip: { id: [beats] }, book: { id: { beat, day, from, to, trad } }, cday: { day: 1 } } (saved
+// by section 20 with the rest of SHIP.social.stories; written only while STORIES_ON)
+var STORY_IDX = null;                                     // { thread: Map id -> 'arc:<arcId>', beats: Map id -> [n, ...] }, from STORY_MOMENTS (var: voiceOf may ask first)
+function storyIdx() {
+  if (STORY_IDX) return STORY_IDX;
+  let S = null; try { S = typeof STORY_MOMENTS !== 'undefined' ? STORY_MOMENTS : null; } catch (e) { S = null; }
+  const X = { thread: new Map(), beats: new Map() };
+  for (const k in S || {}) { const m = S[k]; if (!X.thread.has(m.who)) X.thread.set(m.who, m.thread); X.beats.set(m.who, (X.beats.get(m.who) || []).concat(m.beat).sort((a, b) => a - b)); }
+  return (STORY_IDX = X);
+}
+function storyThread(id) { return STORIES_ON && id ? storyIdx().thread.get(id) || null : null; }   // a declaration, not a const: voiceOf may ask before this line has run
+var STORY_CS0 = null;
+function storyPeekCS() { return (SHIP.social && SHIP.social.stories && SHIP.social.stories.cs) || STORY_CS0 || (STORY_CS0 = Object.freeze({ told: {}, skip: {}, book: {}, cday: {} })); }   // read-only
+function storyCS() { const S = SHIP.social.stories || (SHIP.social.stories = {}); return S.cs || (S.cs = { told: {}, skip: {}, book: {}, cday: {} }); }
+function storyNextId(p) {                                 // undefined: not a crew story person (momentNextId as before)
+  const bs = STORIES_ON && storyIdx().beats.get(p.id); if (!bs) return undefined;
+  const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0;
+  if (STORY_ARCS[p.id] && n < 1) return null;             // an arc with card lines tells beat 1 on the card
+  const C = storyPeekCS(), told = C.told[p.id] || [], skip = C.skip[p.id] || [];
+  for (const b of bs) {
+    const d = storyMoment(p.id + ':' + b); if (!d) continue;
+    if (told.includes(b) || skip.includes(b) || (b <= n && !d.follows)) continue;
+    if (d.follows && !d.follows.some(x => told.includes(x))) continue;
+    return p.id + ':' + b;
+  }
+  return null;
+}
+function storyDayHi(when) {                               // the last ship day a when's day: conditions allow (Infinity: none)
+  let hi = Infinity; for (const v of [].concat(when && when.day || [])) { const m = /^(\d*)(-?)(\d*)$/.exec(String(v)); if (m) hi = Math.min(hi, m[2] ? (m[3] ? +m[3] : Infinity) : +m[1]); }
+  return hi;
+}
+function storySlots(spec, p, day, lead = 0) {             // the gathering's times on a day: [{ from, to, trad }] in absolute ship minutes
+  const B = (day - 1) * 1440, out = [];
+  if (spec.startsWith('trad:')) { let es = []; try { es = typeof eventsOn === 'function' ? eventsOn(day) || [] : []; } catch (e) { es = []; } for (const e of es) if (e.id === spec.slice(5)) out.push({ from: B + e.from - lead, to: B + e.to, trad: e.id }); }
+  else if (spec.startsWith('event:')) { const id = spec.slice(6); let a = null, b = null; for (let m = 360; m < 1320; m += 15) { let n = null; try { n = typeof eventNow === 'function' ? eventNow(B + m) : null; } catch (e) { n = null; } if (n && n.id === id) { if (a === null) a = m; b = m + 15; } } if (a !== null) out.push({ from: B + a, to: B + b }); }
+  else if (spec === 'farewell') { if (leaveDay(p) === day) out.push({ from: B + ROTA_OFF - ROTA_WAIT - lead, to: B + ROTA_OFF }); }
+  else if (spec.startsWith('meal:')) { const act = spec.slice(5); let a = null, b = null; for (let m = 300; m < 1320; m += 5) { const w = typeof whereIs === 'function' ? whereIs(p, B + m) : null; if (w && w.act === act && !w.moving) { if (a === null) a = m; b = m + 5; } else if (a !== null) break; } if (a !== null) out.push({ from: B + a, to: B + b }); }
+  return out;
+}
+function storyOneOff(spec) { return spec === 'farewell' || spec.startsWith('event:'); }
+function storyGates(p, d, id, t, trad) {                  // the beat's gates as they'll be at t (the place aside)
+  const g = STEP_GATES[d.tone] || STEP_GATES.heartfelt, st = storyPeek(p.id);
+  if (relTier(p.id) < (d.tier ?? g.tier) || metDays(p.id, t) < (d.metDays ?? g.met)) return false;
+  const last = d.tone === 'resolution' ? st.hf : st.at; if (last !== null && (t - last) / 1440 < (d.gapDays ?? g.gap)) return false;
+  if (!d.when) return true;
+  try { return typeof linesOk === 'function' && !!linesOk(d.when, p, { ...momentCtx(p, t, id), trad: trad || momentTrad(t) }); } catch (e) { return false; }
+}
+function storyInRoom(p, t, name) {                        // standing in a room whose name has `name` (any act)
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null, pl = w && !w.moving && w.placeId && schedData().byId.get(w.placeId), rm = pl && DECKS[pl.deck] && (DECKS[pl.deck].rooms || {})[pl.room];
+  return !!rm && String(rm.name || '').toLowerCase().includes(String(name).toLowerCase());
+}
+function storyAtSlot(p, t, d, b) {                        // they're at the crescendo's gathering now (you tapped them: you're with them)
+  const spec = d.crescendo, w = typeof whereIs === 'function' ? whereIs(p, t) : null, room = typeof d.where === 'string' && !['calm', 'any', 'meal', 'visit', 'appt'].includes(d.where) ? d.where : null;
+  if (!w) return false;
+  if (room && storyInRoom(p, t, room)) return true;
+  if (spec.startsWith('trad:')) return t < b.from + (d.lead || 0) || (!!w.tag && String(w.tag).startsWith('ev-' + spec.slice(5)));   // on the way to it (lead:), or there
+  if (spec === 'farewell') return w.tag === 'farewell';
+  if (spec.startsWith('meal:')) return w.act === spec.slice(5) && !w.moving;
+  return !room;                                           // an event: anywhere, unless the beat names its room
+}
+function storyCrescReady(p, t, id, d, ctx = {}) {
+  const b = storyPeekCS().book[p.id];
+  if (!b || b.beat !== d.beat || t < b.from || t >= b.to) return null;
+  if (!ctx.anywhere && !storyAtSlot(p, t, d, b)) return null;
+  return id;
+}
+function storyInvite(p, d, b, now) {                      // the Mail the evening before (18:00), or now if that's past
+  const sub = d.invite ? d.invite.subject : shortName(p), body = d.invite ? d.invite.body : (d.hint || '') + ' ' + hhmm(b.from % 1440) + (Math.floor(b.from / 1440) + 1 > Math.floor(now / 1440) + 1 ? ', tomorrow.' : ', today.');
+  SHIP.social.mail.push({ at: Math.max(Math.floor(now), (b.day - 2) * 1440 + 1080), from: p.name, subject: sub, body: voiceFill(p.id, body).trim() });
+}
+function storyCalRows(day, B0) {                          // the Calendar's rows for the crescendos booked that day
+  const out = [], bk = storyPeekCS().book;
+  for (const id in bk) { const b = bk[id], p = b.day === day && socP(id), d = p && storyMoment(id + ':' + b.beat); if (!d) continue;
+    out.push({ m: b.from - B0, text: hhmm(b.from % 1440) + '  ' + (d.title || 'With ' + shortName(p)), sub: typeof d.where === 'string' && !['calm', 'any', 'meal', 'visit', 'appt'].includes(d.where) ? d.where : 'aboard' }); }
+  return out;
+}
+function storySkip(p, beat, now) {                        // a crescendo missed: its quiet ending is next (as Mail if they've left)
+  const C = storyCS(); (C.skip[p.id] || (C.skip[p.id] = [])).push(beat); delete C.book[p.id];
+  const d = storyMoment(p.id + ':' + beat), q = d && d.quiet && storyMoment(p.id + ':' + d.quiet), day = Math.floor(now / 1440) + 1;
+  if (q && !socAboard(p, day + 1)) storyPost(p, q, now);
+}
+function storyPost(p, d, now) {                           // a quiet ending for someone who has gone: the scene's words as a note in Mail, then it counts
+  const said = d.lines.filter(l => !l.choice && (!l.who || l.who === p.id) && (!l.if || storyLineOk(l, p, now))).map(l => voiceFill(p.id, l.text)).join(' ');
+  SHIP.social.mail.push({ at: Math.floor(now), from: p.name, subject: d.title || shortName(p), body: said.slice(0, 400) });
+  momentDone(p, d, { flavour: 'listen', c: {}, fit: false });
+}
+function storyDone(p, d, t) {                             // momentDone told a crew story's beat
+  const C = storyCS(), day = Math.floor(t / 1440) + 1;
+  (C.told[p.id] || (C.told[p.id] = [])).push(d.beat);
+  if (d.quiet) (C.skip[p.id] || (C.skip[p.id] = [])).push(d.quiet);
+  if (d.crescendo) { C.cday[day] = 1; delete C.book[p.id]; }
+  if (d.keepsake && d.tone !== 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake);   // a quiet ending's keepsake (momentDone gives resolution beats theirs)
+}
+function storyTick(now) {                                 // once a ship minute (socialTick), while STORIES_ON
+  if (!STORIES_ON) return;
+  socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
+  for (const id of Object.keys(C.book)) { const b = C.book[id], p = socP(id); if (p && now >= b.to && !(C.told[id] || []).includes(b.beat)) storySkip(p, b.beat, now); else if (!p || now >= b.to) delete C.book[id]; }
+  if (now % 30) return;                                   // bookings: twice a ship hour
+  for (const id of storyIdx().beats.keys()) {
+    if (C.book[id]) continue;
+    const p = socP(id); if (!p || !SOC.idx.has(id)) continue;
+    const mid = momentNextId(p), d = mid && momentDef(mid); if (!d || !d.crescendo) continue;
+    const past = s => s.to <= now;
+    if (day > storyDayHi(d.when) || (storyOneOff(d.crescendo) && (storySlots(d.crescendo, p, day, d.lead || 0).some(past) || (d.crescendo === 'farewell' && leaveDay(p) != null && leaveDay(p) < day)))) { storySkip(p, d.beat, now); continue; }   // its window has passed
+    if (!socAboard(p, day)) continue;
+    for (const dd of [day, day + 1]) {
+      if (C.cday[dd] || Object.values(C.book).some(b => b.day === dd)) continue;   // one crescendo a day
+      const slot = storySlots(d.crescendo, p, dd, d.lead || 0).find(s => s.to > now);
+      if (!slot || !storyGates(p, d, mid, Math.max(now, slot.from), slot.trad)) continue;
+      C.book[id] = { beat: d.beat, day: dd, from: slot.from, to: slot.to, trad: slot.trad || null };
+      storyInvite(p, d, C.book[id], now); break;
+    }
+  }
 }
 // ---- end of slot: Social engineer ----
 
