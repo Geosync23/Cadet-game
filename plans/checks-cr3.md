@@ -333,7 +333,7 @@ sha256 **fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559** (BM1
 | weekend_check (new) | **OK** | WEEKEND CHECK OK; 400 s |
 | arrows_d_check | **OK** | `arrows_d_check: OK`; 48 s |
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 23 s |
-| controller_check (every part but reach) | **FAIL: NEW, but the check is out of date, not the game** | 27 parts OK; `disc` FAILs: `disc: D-pad right on the result card should reach Quick game (Done)`, `disc: A on Quick game should start a game to 5`; 1650 s |
+| controller_check (every part but reach) | **FAIL, test out of date for item 3, FX23 fixing** (on claude/p925-disc; lead 35 and BM17) | 27 parts OK; `disc` FAILs: `disc: D-pad right on the result card should reach Quick game (Done)`, `disc: A on Quick game should start a game to 5`; 1650 s |
 
 **The disc FAIL.** Repeats (a second run on 53c11f88: the same two lines). OLD ba836359 (0.92.4) with the same
 controller_check.py: disc OK. Bisected along the candidate's first-parent line (disc part alone, ~25 s a build): OK up to
