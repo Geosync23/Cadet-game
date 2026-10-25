@@ -210,3 +210,4 @@ longer marked); boardLessonName(id) names them ("head-scratcher lesson", "shadow
 arrow still the intro's); introArrowWant's 13:00 board arrow once Zeke's tea is over; introArrowTick names the board arrow.
 Running: interactions + arrows (all) -> career + day 1; mech p925l on fix, 0aaf48b7 and plants u1 (no held-job branch),
 u2 (doable filter off), u3 (t2 name off). Note: p925l has no Day 2 solo-job line.
+- mech p925l: fix OK; 0aaf48b7 FAILs 5 (t2 name, case, m6 marked, Day 1 slots 1 and 2); u1 FAILs case + Day 1 x2; u2 FAILs m6; u3 FAILs t2. Good.
