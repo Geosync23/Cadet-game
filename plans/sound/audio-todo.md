@@ -9,7 +9,8 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 ## For the listening pass (0.93.0)
 
 - **Shuttle bay doors and the shuttle landing** (the activities page's Ship events: bayDoors, shuttle): left out of 0.93.0's activity sounds (lead 37, 2026-10-25): no clean hook yet for the diplomatic guests' arrival. Decide with the user whether they want it, then hook it to that event's arrival phase.
-- **Activity sounds not hooked to anything yet** (made but unused, or left on the page): wrench B, sealant gun B, scanner pulses B, the water flush B, announcement B (the A picks are in); mop, airlock, kettle, range, sizzle, chop, oven, the washers and dryer running, lightdisc catch, tile place, trowel, party popper. Each would need its own hook (the galley's crew at work, a washer near you, a celebration); say which matter after a listen.
+- **Not in 0.93.0's activity sounds** (lead 37's hard stop, 20:30 UTC): the **dryer** (the game has washers only, no dryer machine to read), the **cargo airlock** (nothing in the game cycles it yet), and the shuttle bay above. The B alternates (wrench, sealant gun, scanner pulses, water flush, two-note announcement) stay on the page, unused, since A is the pick.
+- **Added late in 0.93.0 (FX20, a.4), worth a listen:** the galley at work while you're in it (a pan sizzling, now and then a knife, a burner or the oven; only with cooks at their stations), a running washer while you're in the laundry, the kettle at a kettle, the blanket after you lie down, a tile placed after the shuffle, the disc caught after a throw, the hinge's quiet swing after the oil, the trowel or the watering can at a garden bed, the mop for floor jobs, and a party popper when you join a celebration (a tradition named birthday, party, celebration or cake).
 
 ## Building (after the next release)
 

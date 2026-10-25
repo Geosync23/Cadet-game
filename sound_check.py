@@ -131,7 +131,8 @@ def check_core_hooks(pw, path):
 ACT_NAMES = ['ratchet', 'panelOff', 'panelOn', 'partSwap', 'torch', 'scanA', 'vent', 'unstick', 'hingeSqueak', 'hingeOil', 'drain', 'wipe', 'cratePick', 'crateSet',
              'typing', 'drill', 'cartDock', 'valve', 'hold', 'relay', 'flushVac', 'showerOff', 'sink', 'towel', 'callRing', 'hangUp', 'wardrobe', 'changing', 'hamper',
              'bedLie', 'makeBed', 'sitChair', 'sitCouch', 'cup', 'tray', 'badge', 'locker', 'page', 'pencil', 'knit', 'trayPick', 'pour', 'bench', 'splash', 'kayak',
-             'climb', 'discThrow', 'piano', 'guitar', 'tileShuffle', 'telescope', 'watering', 'storm', 'announce', 'flicker', 'clockIn', 'clockOut', 'hello']
+             'climb', 'discThrow', 'piano', 'guitar', 'tileShuffle', 'telescope', 'watering', 'storm', 'announce', 'flicker', 'clockIn', 'clockOut', 'hello',
+             'kettle', 'chop', 'ovenOpen', 'ovenClose', 'stove', 'mop', 'trowel', 'blanket', 'tilePlace', 'discCatch', 'hingeAfter', 'popper']
 # what an activity plays: [kind, extra fields on A.o, expected at the start, the loop, expected at its end]
 ACT_CASES = [['shower', {}, None, 'shower', 'showerOff'], ['toilet', {}, None, None, 'flushVac'], ['call', {}, 'callRing', None, 'hangUp'],
              ['gym', {'title': 'Treadmill'}, None, 'treadmill', None], ['gym', {'title': 'Weights bench'}, 'bench', None, None], ['lie', {}, 'bedLie', None, None],
@@ -196,6 +197,11 @@ def check_activities(pw, path):
             blackoutAt = () => ({ from: 0, to: 1 }); SND.actTick(); out.push(SND.log.map(e => e.name)); }
           finally { eventNow = en; blackoutAt = ba; } return out; })()""")
         check(storm == [['storm'], [], ['flicker']], f'the storm warning chimes once as it begins, and the lights dip with a blackout: {storm}')
+        laundry = g.ev("""(() => { goToDeck(4); const s = placeSpot('4-laundry-1'), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop();
+          SND.log.length = 0; SND.actTick(); const before = SND.log.filter(e => e.loop).map(e => e.name);
+          machineUse('4-washer-1'); MACH_REV++; SND.actTick(); const on = SND.log.filter(e => e.loop).map(e => e.name), loops = [...SND._.LOOPS].map(l => l.label);
+          return [before, on, loops]; })()""")
+        check('washer' not in laundry[0] and 'washer' in laundry[1] and 'washer' in laundry[2], f'in the laundry a running washer is heard: {laundry}')
         print('  activities (FX20):', len(ACT_NAMES), 'sounds;', len(ACT_CASES), 'activities; chores', chore, '; shower', began[1], '->', ended[0], '; address', ann, '; hello', hello, '; clock', clk)
     finally: g.close()
 
