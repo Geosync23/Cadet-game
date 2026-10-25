@@ -62,3 +62,11 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
 - eebed514 (game = e462655f, 80a82f67...): weekend_check OK. Plants: s_host (weekendTag clause) -> picnic host FAIL;
   s_tobed -> >=5 lines + Holt FAIL; s_chap -> Day 14 chapter FAIL; s_seat (seat-first off) -> NOT caught (asked DS1 for a
   line). Chapter line 0 point still open (DS1).
+
+## ~01:55 UTC: 3e323170 (game 23eb60a5...): PASS for its stage (DS1 turn 1 + rotation; switch still off)
+- Off: cadet_test vs FX12's 91b97ee9 (84ece11c...) ALL IDENTICAL. On: weekend_check OK (old-trads rule folded in, hosts,
+  >=5, story read in full from line 1), events_check OK, day_check 7 OK.
+- rv14-old_trads.py same build off vs on, Days 1-84: OK, 5 one-person shifts. vs 0.92.4: 71 "differ" = FX12's late piano and
+  birthdays (intended) + Day 62 observatory-night -4 (with FX12, also with the switch off; flagged to lead 35).
+- Rotation code all gated (evNewWk 0 when off). sundayStoryTick: SUN_GO starts the chapter at line 0 once Holt settled.
+- Builders: DS1 handed over -> FX16 (session_01MbKpntrDkcWAKrTj1HRUMm): seat line, T5, T6, switch-on.
