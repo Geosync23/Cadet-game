@@ -19546,7 +19546,7 @@ function jobsHour(h) {
   // Trusted and Relied on; without it (or at Reliable), the newest first as before
   const band = typeof worksBand === 'function' ? worksBand() : null, pref = band === 'new' || band === 'steady' ? 'service' : band === 'trusted' || band === 'relied' ? 'repair' : null;
   const held = jobs.filter(j => j.status === 'open' && !j.claimedBy && !j.leave && !j.cargo && j.found <= t && t < leaveEnd(j))
-    .sort((a, b) => (pref ? (b.kind === pref) - (a.kind === pref) : 0) || b.found - a.found || (a.id < b.id ? -1 : 1));
+    .sort((a, b) => (BOARD_TRADE_ON ? boardTrade(b) - boardTrade(a) : 0) || (pref ? (b.kind === pref) - (a.kind === pref) : 0) || b.found - a.found || (a.id < b.id ? -1 : 1));   // FX19 (0.92.6 #11): your trade first
   // a mechanic's job held for you (a registered kind: a round, a tune, a haul, the drill; an incident's joint) takes one of those places (0.33.53, M2's ask: jobs
   // left for you stay 3-6 a day with the mechanics in); at least one ordinary job is still held
   const mech = jobs.filter(j => (jobKindOf(j) || j.chore === 'joint') && j.status === 'open' && !j.claimedBy && j.found <= t && (heldForYou(j) || (forYou(j) && t < leaveEnd(j)))).length;   // rounds, tuning, hauling, the drill, an incident's joint (the lead)
@@ -20932,7 +20932,8 @@ function boardTopUp(h, jobs) {
   for (let k = jobs.length - 1; k >= 0; k--) if (jobs[k].status === 'gone') jobs.splice(k, 1);
   if (!BOARD_ON || h < 0 || !playerShiftOn(d) || m < DAY_SHIFT[0] || end - m < BOARD_FROM) return;
   if (jobs.some(j => j.reserved && j.status === 'open' && !j.claimedBy && j.found >= (d - 1) * 1440 && j.found <= t + 60)) return;   // a job reserved for you today (Day 1's two with Zeke, a training job) comes first: none while it's due within the hour or untaken
-  let n = jobs.filter(j => boardForYou(j, t)).length; if (n >= BOARD_MIN) return;
+  if (BOARD_TRADE_ON) try { boardTradePost(h, jobs, t, m, end); } catch (e) { /* 24a's rounds not loaded yet */ }   // FX19 (0.92.6 #11): a job of your trade, beside the simple ones
+  let n = jobs.filter(j => boardForYou(j, t) && !j.trade).length; if (n >= BOARD_MIN) return;
   const busy = new Set(jobs.filter(j => j.status !== 'done').map(j => j.machine ? 'm:' + j.machine : j.chore + ':' + j.target)), tier = playerTier(), seed = machSeed('board:extra');
   const cands = [];
   for (const kind of BOARD_KINDS) for (const c of choreWhere(kind) || []) {
@@ -20951,6 +20952,45 @@ function boardTopUp(h, jobs) {
     const j = pick[1], key = j.machine ? 'm:' + j.machine : j.chore + ':' + j.target; if (busy.has(key)) continue;
     busy.add(key); jobs.push(j); n++;
   }
+}
+// ---- FX19 (patch 0.92.6 #11, the user: "Once you're trained on a job it should show up more frequently on the job board, in
+// addition to simpler missions"). BOARD_TRADE_ON: your trade (boardTrade: a kind you're trained in) is kept first among the
+// jobs held for you, and each hour of your shift from 10:00 (boardTopUp asks), if none of it is up for you, boardTradePost
+// posts one, at most BOARD_TRADE_MAX a shift and one an hour: a tune on a machine drifted by one (Tuning, m5: section 17
+// posts its own from two) or an afternoon round on another deck from 13:00 (Rounds, m1). Like the top-up's: held to the
+// shift's end then lapsed (extra), no Works reputation (xp 0), seeded by the hour; j.trade, so they don't count against
+// BOARD_MIN and the simple ones still come. BOARD_TRADE_ON false: as before.
+var BOARD_TRADE_ON = false;                              // var: section 17's jobsHour may ask before this line has run
+const BOARD_TRADE_MAX = 3, BOARD_TRADE_FROM = 600, BOARD_TRADE_ROUND = 780;
+function boardTrade(j) {                                 // is j a job of a kind you're trained in
+  const W = SHIP.works; if (!W || !j) return false;
+  if (j.kind === 'tune') return W.tr.m5 !== undefined;
+  if (j.kind === 'rounds') return W.tr.m1 !== undefined && !j.reserved && !j.train;
+  if (j.kind === 'haul' || j.kind === 'stocktake') return W.tr.m4 !== undefined;
+  if (j.kind === 'repair' || j.kind === 'overhaul') return W.tr.m7 !== undefined;   // the scanner finds their cause
+  if (j.kind === 'incident' || j.chore === 'joint') return W.tr.m6 !== undefined;
+  return false;
+}
+function boardTradePost(h, jobs, t, m, end) {
+  const W = SHIP.works, d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (!BOARD_TRADE_ON || !W || m < BOARD_TRADE_FROM) return null;
+  const mine = jobs.filter(j => j.trade && j.found >= B); if (mine.length >= BOARD_TRADE_MAX || mine.some(j => j.found > t - 60)) return null;
+  if (jobs.some(j => boardTrade(j) && boardForYou(j, t))) return null;   // one of your trade's already up for you
+  const seed = machSeed('board:trade'), free = id => !jobs.some(x => x.machine === id && x.status !== 'done') && !JOB_FOR[(SHIP.machines[id] || {}).state];
+  const o = { leave: end - m, extra: true, trade: true, xp: 0 }, out = [];
+  if (W.tr.m5 !== undefined && driftOn()) {
+    const ms = machineList().filter(x => Math.abs(machineDrift(x.id)) === 1 && free(x.id)).sort((a, b) => a.id < b.id ? -1 : 1);
+    const x = ms[Math.floor(ms.length * schedU(seed, h, 1))];
+    if (x) { const dc = (FAULT_CAUSES[x.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = machineDrift(x.id) > 0 ? w[0] : w[w.length - 1];
+      out.push(jobMake('tune', { id: 'tune:' + x.id + '@' + h, machine: x.id, deck: x.deck, room: x.room, h, tier: jobTier({ machine: x.id }), title: 'Tune: ' + machineTitle(x.id) + (word ? ' (' + word + ')' : ''), ...o })); }
+  }
+  if (W.tr.m1 !== undefined && W.tr.m1 < d && m >= BOARD_TRADE_ROUND && !jobs.some(j => j.kind === 'rounds' && j.trade && j.found >= B)) {
+    const n0 = roundDeck(d, false), ds = ROUND_DECKS.filter(x => x !== n0), n = ds[Math.floor(ds.length * schedU(seed, h, 2))];
+    const pool = n ? roundPool(n).filter(x => free(x.id)).sort((a, b) => schedU(seed ^ a.seed, h, 3) - schedU(seed ^ b.seed, h, 3) || (a.id < b.id ? -1 : 1)) : [];
+    if (pool.length >= 4) { const route = roundWalk(pool.slice(0, 4), DECKS[n]), m0 = machineById(route[0]);
+      out.push(jobMake('rounds', { id: 'round-pm-d' + n + '@' + h, deck: n, room: m0.room, h, title: roundText('round.title.pm', 'Afternoon round, Deck {deck}', { deck: n }), route, marks: {}, ...o })); }
+  }
+  const ok = out.filter(j => forYou(j)); if (!ok.length) return null;
+  const j = ok[Math.floor(ok.length * schedU(seed, h, 4))]; j.shareSeen = true; jobs.push(j); return j;
 }
 // ---- end of slot: Systems engineer ----
 
@@ -50172,7 +50212,7 @@ function worksXp(n) { const W = worksInit(); if (!W || !n) return; const b0 = wo
 // your reputation said when its word changes (FX3, AR1: it moved and nobody told you; "Relied on" is what the test job waits for)
 function worksRepTell(b0, b1) {
   const B = WORK_BANDS[SHIP.works.tier] || WORK_BANDS[1], up = B.findIndex(x => x[1] === b1) > B.findIndex(x => x[1] === b0), band = worksBandWord();
-  try { toast(worksText('works.rep.title', 'Your reputation'), up ? worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
+  try { toast(worksText('works.rep.title', 'Your reputation'), up ? (typeof promoRepUp === 'function' && promoRepUp(b1)) || worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
   if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
 }
 function worksBand() {                                   // 'new' ... 'relied', or null before SHIP.works (section 17 keeps today's order)
@@ -50232,7 +50272,7 @@ function worksNext() {
   const next = CAREER_LADDER.find(r => !opened.has(r.id) && WORK_MECH[r.id] && r.tier <= W.tier && r.size === 'big');
   if (next && next.id === 't2' && !(W.test && W.test.passed)) {   // the test job not open yet (FX3, AR1): what it waits for, not "Calder has a test job"
     if (W.test) return worksText('next.t2.set', 'Your Tier 2 test job: {day}, nine o\'clock in the Works bay.', { day: (dd => dd === 0 ? 'today' : dd === 1 ? 'tomorrow' : dayName(W.test.day))(W.test.day - SHIP.time.day) }, k);
-    if (!ladderNeeds({ rep: 'relied' }, W)) return worksText('next.t2.rep', 'Calder sets your Tier 2 test once people rely on you. You\'re at {band}.', { band: worksBandWord() }, k);
+    if (!ladderNeeds({ rep: 'relied' }, W)) return (typeof promoSteps === 'function' && promoSteps(k)) || worksText('next.t2.rep', 'Calder sets your Tier 2 test once people rely on you. You\'re at {band}.', { band: worksBandWord() }, k);
     return worksText('next.t2.soon', 'You\'re ready for your Tier 2 test. Calder will set the day.', null, k); }
   if (next) return worksText('next.' + next.id, worksFirst(next.by[0]) + ' will show you ' + mechName(next.id).replace(/^./, x => x.toLowerCase()) + ' when you\'re ready.', { name: worksName(next.by[0]), mech: mechName(next.id) }, k);
   return worksText('next.band.' + (worksBand() || 'new'), 'Keep at it: Calder\'s watching your work.', null, k);
@@ -50270,6 +50310,7 @@ worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training')
   const W = SHIP.works, B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
   say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
+  if (typeof promoCheck === 'function') B.push(...promoCheck());   // FX19 (24p's slot): the promotion's steps, ticked
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
   if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: mechName(r.id), sub: 'Day ' + W.tr[r.id] });
@@ -54257,7 +54298,8 @@ function promoAnnounce(now) {                            // Day 8 on: "Tomorrow,
   const by = ladderTeacher(row, d) || 'calder', here = promoInBay();
   if (!here && m < PROMO.mailAt) return;
   W.test = { tier: 2, day: Math.max(row.day, promoWorkday(d)), tries: 0, passed: false };
-  if (here) promoSay(by, 'announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.');
+  if (typeof promoSightOn === 'function' && promoSightOn()) promoReady(now, by, here);   // FX19 (patch 0.92.6 #18): the big beat
+  else if (here) promoSay(by, 'announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.');
   else if (typeof mailSend === 'function') { const t = worksText('promo.announce.mail', 'Your test job | Tomorrow: your Tier 2 test job, with me watching. Be in the bay at nine. — C.'), i = t.indexOf(' | ');
     mailSend({ at: now, from: worksName(by), subject: i > 0 ? t.slice(0, i) : 'Your test job', body: i > 0 ? t.slice(i + 3) : t }); }
   simNote('promoTest', { step: 'set', day: W.test.day });
@@ -54652,6 +54694,84 @@ function trainWatchArrow() {
   if (!ours || S.mine.label !== label) { setGoal({ deck: sp.deck, at: sp.tile, room: sp.room, label }); S.mine = IX_GOAL; }
 }
 if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => trainWatchArrow());
+// ---- FX19 (patch 0.92.6 items 18 + 14, the user playing 0.92.4: "I got to Reliable and no offer of a test to be promoted
+// came. It must be a big deal and obvious how to get the test once Reliable"; "The game should mention the possible
+// promotion as you become dependable"). The test waits for "Relied on" (two steps above Reliable) and Making it safe, and
+// nothing said so. Now, at Tier 1 before the test is set, each once (flags promo.sight.*, saved): at Reliable, Calder
+// names the steps (her bubble in the Works bay, else Mail); at Trusted, one step left; Relied on but before Day 8, or
+// without Making it safe, a Mail says what's missing; qualified (promoAnnounce sets the test), the big beat: her word,
+// always a Mail, an urgent device notice, and on the test morning an arrow to the bay from 08:30 (the arrow queue).
+// The reputation toast names the test at Reliable and Trusted, "What's next" names the steps, the Training tab lists
+// them; the ship-wide work word turning "dependable" brings one note. Words: SW1's promo.sight* / promo.ready* /
+// promo.missing.* / promo.dependable / next.t2.steps / works.rep.up.<band> / works.promo.check.*. PROMO_SIGHT_ON false: as before.
+var PROMO_SIGHT_ON = false;                              // var: worksRepTell, worksNext and the Training tab ask before this line has run
+function promoSightOn() { return !!PROMO_SIGHT_ON && !!SHIP.works && SHIP.works.tier === 1 && !(SHIP.works.test && SHIP.works.test.passed); }
+function promoBandAt(b) { return WORK_BANDS[1].findIndex(x => x[1] === b); }
+function promoMail(key, fallback, vars, now) {           // a writer's 'Subject | body' line, by Mail from Calder
+  if (typeof mailSend !== 'function') return; const t = worksText(key, fallback, vars), i = t.indexOf(' | ');
+  mailSend({ at: now, from: worksName('calder'), subject: i > 0 ? t.slice(0, i) : 'Your Tier 2 test', body: i > 0 ? t.slice(i + 3) : t });
+}
+function promoRepUp(b1) {                                // worksRepTell's line at Reliable and Trusted (null: its own)
+  if (!promoSightOn() || SHIP.works.test) return null;
+  if (b1 === 'reliable') return worksText('works.rep.up.reliable', 'Up to Reliable. Two more steps, Trusted then Relied on, and Calder puts you up for your Tier 2 test.');
+  if (b1 === 'trusted') return worksText('works.rep.up.trusted', 'Up to Trusted. One more step to your Tier 2 test.');
+  return null;
+}
+function promoSteps(k) {                                 // worksNext's line below Relied on (null: its own)
+  if (!promoSightOn()) return null;
+  const b = worksBand() || 'new', B = WORK_BANDS[1], i = promoBandAt(b), n = B.length - 1 - i;
+  return worksText('next.t2.steps', 'Your Tier 2 test (a promotion to Officer) needs Relied on and Making it safe. You\'re at {band}: {next} next.', { band: worksBandWord(), next: BAND_WORD[B[Math.min(i + 1, B.length - 1)][1]], steps: n }, k);
+}
+function promoCheck() {                                  // the Training tab's "Your promotion" list, from Reliable (or the beat) until the test's passed
+  if (!promoSightOn()) return [];
+  const W = SHIP.works, d = SHIP.time.day; if (promoBandAt(worksBand()) < promoBandAt('reliable') && !flag('promo.sight')) return [];
+  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('works.promo.check.day', 'Day 8 or later'), d >= PROMO.from), row(worksText('works.promo.check.rep', 'Relied on (now {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
+    row(worksText('works.promo.check.m6', 'Making it safe'), W.tr.m6 !== undefined)];
+  if (W.test) rows.push({ text: worksText('works.promo.check.set', 'Test set: {day}, 09:00', { day: W.test.day === d ? 'today' : W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day) }) });
+  return [{ kind: 'text', text: worksText('works.promo.check.title', 'Your promotion: the Tier 2 test'), mark: 'head' }, { kind: 'list', rows }];
+}
+function promoReady(now, by, here) {                     // promoAnnounce's beat with the switch on: the test is set
+  const W = SHIP.works, d = worksDay(now), day = W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day);
+  flagSet('promo.sight.ready', d);
+  if (here) worksSayAll(by, [worksText('promo.ready', 'This is it. People rely on you, and you\'ve done Making it safe. You\'re ready for your Tier 2 test.'),
+    worksText('promo.announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.')]);
+  promoMail('promo.ready.mail', 'Your Tier 2 test | You\'re ready. Your test job is {day}, nine o\'clock in the Works bay. Pass it and you\'re a Works Officer. — C.', { day }, now);
+  if (now >= shipNow() - 1) { const text = worksText('promo.ready.notice', 'Your Tier 2 test: {day}, 09:00, Works bay.', { day });
+    if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+    if (!here) try { toast(worksName(by), text); } catch (e) { /* no UI */ } }
+}
+function promoSightTick(now, skip) {                     // the beats on the way (once a ship minute; hourly while time skips)
+  if (!promoSightOn() || typeof flagSet !== 'function') return;
+  const W = SHIP.works, d = worksDay(now), i = promoBandAt(worksBand()), here = !skip && promoInBay() && now >= shipNow() - 1;
+  if (W.test) { if (!flag('promo.sight')) flagSet('promo.sight', d); return; }   // a save already past the offer: nothing to say
+  if (i >= promoBandAt('reliable') && !flag('promo.sight')) {
+    flagSet('promo.sight', d); if (i >= promoBandAt('trusted')) flagSet('promo.sight.trusted', d);
+    if (i < promoBandAt('relied')) {
+      if (here) worksSayAll('calder', [worksText('promo.sight', 'Word is you\'re reliable. Keep it up. Get people relying on you, finish Making it safe with me, and I\'ll put you up for your Tier 2 test. That\'s Officer.')]);
+      else promoMail('promo.sight.mail', 'Your next step | You\'re Reliable now. Two more steps, Trusted then Relied on, and Making it safe with me, and I\'ll set your Tier 2 test: a promotion to Works Officer. — C.', null, now);
+      return; } }
+  if (i >= promoBandAt('trusted') && i < promoBandAt('relied') && !flag('promo.sight.trusted')) { flagSet('promo.sight.trusted', d);
+    if (here) worksSay('calder', worksText('promo.trusted', 'Trusted. One more step and we\'ll talk about your test.')); return; }
+  if (i >= promoBandAt('relied')) {
+    if (d < PROMO.from && !flag('promo.sight.day')) { flagSet('promo.sight.day', d); promoMail('promo.missing.day', 'Soon | You\'re ready sooner than most. I set Tier 2 tests from the second Monday; we\'ll talk then. — C.', null, now); return; }
+    if (d >= PROMO.from && W.tr.m6 === undefined && !(W.cur && W.cur.id === 'm6') && !flag('promo.sight.m6')) { flagSet('promo.sight.m6', d);
+      promoMail('promo.missing.m6', 'Almost | You\'re Relied on. One thing left before your Tier 2 test: Making it safe, with me. — C.', null, now); }
+  }
+}
+function promoDependTick(now) {                          // item 14: the ship-wide work word turns "dependable" (section 20's 60), once
+  if (!promoSightOn() || flag('promo.sight.dependable') || !SHIP.rep || !SHIP.rep.ship || !(SHIP.rep.ship.work >= 60)) return;
+  flagSet('promo.sight.dependable', worksDay(now));
+  if (!SHIP.works.test) promoMail('promo.dependable', 'Dependable | Word around the ship is you\'re dependable. Keep that up and we\'ll be talking about your Tier 2 test. — C.', null, now);
+}
+function promoTestDay(now) {                             // the test morning: an arrow to the Works bay from 08:30 until the job's on the board
+  const W = SHIP.works; if (!promoSightOn() || !W.test || !promoQueue()) return;
+  const d = worksDay(now), B = (d - 1) * 1440; if (d !== W.test.day || now < B + PROMO.jobAt - 30 || now >= B + PROMO.until) return;
+  const c = W.cur, open = () => !!(c && c.id === 't2' && c.st === 'do' && c.j);
+  if (!open()) guideAsk({ id: 'promo:testday:' + d, level: 2, owner: '24p (FX19)', from: B + PROMO.jobAt - 30, until: B + PROMO.jobAt + 15,
+    goal: () => ({ deck: 5, room: 'w', label: 'Your Tier 2 test, 09:00: the Works bay' }), done: () => open() || promoInBay() || !!(SHIP.works.test && SHIP.works.test.passed) });
+}
+WORK_TICKS.push((now, skip) => { promoSightTick(now, skip); promoDependTick(now); if (!skip) promoTestDay(now); });
 // ---- end of slot: Works career engineer ----
 
 
