@@ -47,10 +47,12 @@ stories lead (session_01QcPAXHjQZ2HfZKMCTbaW9v; branch claude/crew-stories-pitch
 - Probe pattern used: a small script that loads a page through cadet_test's Game and evals JS (see the scratchpad's
   probe.py idea: exec cadet_test.py up to 'import sys, json, hashlib').
 
-## Last results (01077e4c)
-stories_check OK: Theo 1-5 (Day 21 send-off) / 6 by Mail; Kovac 4 Day 19 15:50; Halloran 5 Day 16-18 breakfast; Basil 4
-Day 25 welcome tea; Pell both endings; Saad 1@6 2@10 3@11, then 4 (the storm, Day 13) never books (he's off duty all
-Day 13, never in the Engine room), so 6 then 5. Open with CS1: Saad 4 "where: any" plus gapDays: 0.
+## Last results (042f1659, the sha for RV16)
+Switch off: check_fast OK; cadet_test against 53c11f8 ALL IDENTICAL. Switch-on copy: stories_check OK (all six end both
+ways: play: Theo 5 Day 21, Kovac 4 Day 19 15:50, Halloran 5 Day 18, Basil 4 Day 25, Saad 4 Day 13 (the storm), Pell 7 Day
+22; miss: each quiet ending, Theo's by Mail); day_check Days 17, 19, 24, 25 OK and events_check 28 OK (run on b0b3d7f4;
+the planner hook hasn't changed since). Saad 4 is lead 36's (b): where: calm, a call and a walk down; "Saad at the valve
+as a day-plan piece" is a later option for the user.
 
 ## Loose ends
 - S7 (switch on, after review and the user's yes): flip STORIES_ON; retire the old Pell and Kovac words (content/arcs
