@@ -11709,15 +11709,16 @@ function devHeadsTick(t) {
   if (DEV.hu && devHuBusy()) devHeadsBack();             // 0.35.33: something that takes the screen (a chat card...) sends a showing strip back to wait
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
     const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
-    const beam = x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || ''), ahead = beam ? Math.max(R.ahead, 25) : R.ahead;   // Name on the beam (the user's playtest notes, 0.92.3 #12): 25 minutes before, even on shift, "at the end of shift in the Works department"
+    const beam = x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || ''), ahead = beam ? Math.max(R.ahead, 25) : R.ahead;
+    const mine = P926_APPT && x.kind === 'tradition' && /^appt-/.test(x.tkind || '');   // 0.92.6 item 9 (FX22, RV17): an appointment booked as a one-off reminds you as an appointment does   // Name on the beam (the user's playtest notes, 0.92.3 #12): 25 minutes before, even on shift, "at the end of shift in the Works department"
     if (x.kind === 'off' || at - ahead > t || at + 3 <= t) continue;
-    if (!R.on && x.kind !== 'appt' && x.kind !== 'beat') continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
+    if (!R.on && x.kind !== 'appt' && x.kind !== 'beat' && !mine) continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift' || x.kind === 'tea') && !R.everyday) continue;   // tea like the meals (0.72.5)
     if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
     if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;   // a 'soon' with under 3 minutes left waits for the start
     devHear(k);
-    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
+    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam && !mine) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
     HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}) });
   }
@@ -41305,6 +41306,7 @@ function tradJoinTap(a) {
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const o = eventOf(a.p, now), e = o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null;
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
+  if (P926_APPT && e && e.ev.appt && m >= e.from && m < e.to && SHIP.events.joined.includes(e.id + '@' + d) && typeof apptRejoin === 'function' && apptRejoin(e, d)) return true;   // 0.92.6 item 9 (RV17): joined, then a reload: the scene again
   if (!e || !tradJoinable(e) || m < e.from || m >= e.to || SHIP.events.joined.includes(e.id + '@' + d)) return false;
   return tradJoin(e, a);
 }
@@ -43966,7 +43968,8 @@ const apptWord = (kind, sec, k, ctx, who) => { const L = (APPT_WORDS[kind] || {}
 const apptState = () => SHIP.apptx || (SHIP.apptx = { book: [], offers: [], kept: {}, told: [] });
 function apptxLoad(s) {
   const x = s && s.ship && s.ship.apptx, arr = a => Array.isArray(a) ? a.filter(o => o && typeof o === 'object' && typeof o.kind === 'string' && APPT_WORDS[o.kind]) : [];
-  return { book: arr(x && x.book).slice(-30), offers: arr(x && x.offers).slice(-10), kept: x && x.kept && typeof x.kept === 'object' ? x.kept : {}, told: x && Array.isArray(x.told) ? x.told.slice(-40) : [],
+  return { book: arr(x && x.book).slice(-30).map(({ waits, shown, ...b }) => b),   // waits, shown: this session's (a reload waits at the bench again, shows the scene again)
+     offers: arr(x && x.offers).slice(-10), kept: x && x.kept && typeof x.kept === 'object' ? x.kept : {}, told: x && Array.isArray(x.told) ? x.told.slice(-40) : [],
     declined: x && x.declined && typeof x.declined === 'object' ? x.declined : {}, offerDay: x && Number.isInteger(x.offerDay) ? x.offerDay : 0 };
 }
 const apptKeyOf = (kind, host) => kind + ':' + host;
@@ -44012,7 +44015,7 @@ function apptBookIt(kind, host, slot, key0) {            // the one-off (or the 
   } else {
     const only = R.guests ? R.guests(slot.day) : slot.shift ? [] : [host];
     if (!eventOneOff({ id, day: slot.day, name: A.title, at: [slot.from, slot.to], where: R.where(host), host: R.guests ? null : host, only, appt: kind, key, hold: [], from: R.guests ? 'Bunk 1' : evPerson(host).name, ...(R.toBed ? { toBed: R.toBed } : {}) })) return null;
-    const went = only.filter(q => planDay(evPerson(q), slot.day).some(s => evTagId(s.tag) === id));
+    const went = only.filter(q => planDay(evPerson(q), slot.day).some(s => evTagId(s.tag) === id && (R.guests || s.from % 1440 <= slot.from + 5 && s.to % 1440 >= slot.to - 10)));   // a single host there for (nearly) all of it (RV17: Sato left at 19:15 of 19:00-19:30)
     if (R.guests ? went.length < 2 : !slot.shift && !went.length) { apptUnbook(id, slot.day); return null; }   // planned elsewhere after all
     if (R.guests) { host = went[0]; guests = went.slice(1); }
   }
@@ -44057,6 +44060,7 @@ function apptHour(now) {
     return;
   }
 }
+const apptOfferKey = o => o.kind + '|' + o.host + '|' + o.made;
 function apptAnswer(i, yes) {
   const X = apptState(), o = X.offers[i]; if (!o || o.status !== 'asked') return;
   o.status = yes ? 'yes' : 'no';
@@ -44065,6 +44069,10 @@ function apptAnswer(i, yes) {
   APPT_SAY = b ? 'Booked: ' + APPT_WORDS[o.kind].title + ', ' + devDayName(b.day) + ' ' + hhmm(b.from) + '.' : shortName(evPerson(o.host)) + ': "Oh, that time\'s gone now. Ask me again?"';
 }
 // the scene: a tap on the host joins (tradJoin), and eventJoin calls this
+function apptRejoin(e, d) {                              // joined but not kept (a reload in the middle of the scene): open it again
+  const b = apptBooking(e, d); if (!b || b.kind === 'night-round' || DIALOGUE) return false;
+  apptScene(b, shipNow(), e); return true;
+}
 function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) b.kind === 'night-round' ? apptRoundStart(b, now) : apptScene(b, now, e); }
 // a group scene's lines with only those there: a line from someone not there goes, and so does the line right after it
 // when it's about them (it starts He, She or They: "He means days to home" after Lukas's "Ninety-one"), and any line or
@@ -44101,7 +44109,9 @@ function apptKeep(b) {                                   // the scene's end (or 
 // the Record: what you've kept (titles and their record lines)
 function apptRecord() {
   const X = apptState(), rows = [];
-  for (const b of X.book.filter(x => x.done).slice(-6).reverse()) { const A = APPT_WORDS[b.kind], R = APPT_RULES[b.kind];
+  const seen = new Set();   // one row per appointment and host, the latest (RV17); the garden's only once harvested
+  for (const b of X.book.filter(x => x.done && (x.kind !== 'garden-bed' || x.key === 'harvest')).reverse()) { const A = APPT_WORDS[b.kind], R = APPT_RULES[b.kind];
+    if (seen.has(b.kind + ':' + b.host) || seen.size >= 6) continue; seen.add(b.kind + ':' + b.host);
     rows.push({ text: A.record ? apptFill(A.record, b.host, { first: apptFirst(b.host), dept: R.dept ? APPT_DEPT_WORD[R.dept(b.host)] : '', hobby: APPT_TEACH[b.host] ? APPT_HOBBY_WORD[APPT_TEACH[b.host][2]] : '' }) : A.title + ' with ' + evPerson(b.host).name + '.', sub: 'Day ' + b.day }); }
   return rows.length ? [{ kind: 'text', text: 'Appointments kept', mark: 'head' }, { kind: 'list', rows }] : [];
 }
@@ -44111,7 +44121,7 @@ function apptViewX() {
   if (APPT_SAY) B.push({ kind: 'text', text: APPT_SAY, mark: 'hot' });
   X.offers.forEach((o, i) => { if (o.status !== 'asked') return;
     B.push({ kind: 'list', rows: [{ text: shortName(evPerson(o.host)) + ': "' + (apptWord(o.kind, 'invite', o.made, {}, o.host) || APPT_WORDS[o.kind].title) + '"', sub: APPT_WORDS[o.kind].title + ' · ' + devDayName(o.day) + ' ' + hhmm(o.from), mark: 'new' }] },
-      { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'x:yes', arg: i } }, { label: 'Decline', action: { app: 'appointments', do: 'x:no', arg: i } }] }); });
+      { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'x:yes', arg: apptOfferKey(o) } }, { label: 'Decline', action: { app: 'appointments', do: 'x:no', arg: apptOfferKey(o) } }] }); });
   const up = X.book.filter(b => !b.done && b.day >= SHIP.time.day);
   if (up.length) B.push({ kind: 'text', text: 'Booked', mark: 'head' }, { kind: 'list', rows: up.map(b => ({ text: devDayName(b.day) + ' ' + hhmm(b.from) + '  ' + APPT_WORDS[b.kind].title, sub: 'with ' + apptHostName(b.guests && b.guests.length ? 'bunk' : b.host) })) });
   const ask = apptAskable();
@@ -44120,7 +44130,7 @@ function apptViewX() {
 }
 function apptActX(verb, arg) {                           // true when it was one of ours
   if (verb === 'x:ask' && typeof arg === 'string') { const [k, h] = arg.split('|'); if (APPT_RULES[k]) apptAsk(k, h); return true; }
-  if (verb === 'x:yes' || verb === 'x:no') { apptAnswer(arg, verb === 'x:yes'); return true; }
+  if (verb === 'x:yes' || verb === 'x:no') { apptAnswer(typeof arg === 'string' ? apptState().offers.findIndex(o => apptOfferKey(o) === arg) : arg, verb === 'x:yes'); return true; }   // by its key: apptHour filters the list hourly (RV17)
   if (verb === 'open' || verb === 'new') APPT_SAY = null;
   return false;
 }
@@ -44217,6 +44227,7 @@ function apptRoundFrame() {
     if (b && !N) { const pl = (DECKS[3].places || []).find(q => q.room === '+' && q.type === 'bench'); b.waits = 1; if (pl) crewScene(b.host, { mode: 'wait', to: pl.id, until: (b.day - 1) * 1440 + b.to }); } }
   if (!N || typeof DECK_CREW === 'undefined' || !deckDef) return;
   const b = N.b, end = (b.day - 1) * 1440 + b.to + 30;
+  if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();   // the ship's chatter hushes while he says his good nights (RV17: his ordinary line came up with Deck 5's)
   if (now >= end || b.done) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); if (!b.done && N.i >= 4 && !DIALOGUE) apptScene(b, now); else if (!b.done) b.gone = 1; return; }
   const t = now, P = player.obj.position, m = DECK_CREW.find(c => c.p && c.p.id === b.host && c.h && Math.hypot(c.x - P.x, c.z - P.z) < APPT_NEAR + 1);   // following you: never 'settled'
   if (N.i >= N.L.length) { if (!DIALOGUE && t >= N.at) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); apptScene(b, now); } return; }

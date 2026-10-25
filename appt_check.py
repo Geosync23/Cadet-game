@@ -94,9 +94,12 @@ def one_off(path, kind, host, day0, how='ask', min0=600, label=None, quiet=False
     x = json.loads(g.ev(BOOKED % json.dumps(b)))
     check(x['on'] and x['cal'], f'{label}: the one-off on Day {b["day"]} and in the Schedule')
     if kind == 'midnight-feast': check(len(x['guests']) + 1 >= 2 and all(x['guests']), f'{label}: {len(x["guests"]) + 1} bunkmates planned there')
-    elif x['seg']: check(x['seg'][0][0] <= b['from'] + 5, f'{label}: the host planned there from {x["seg"][0][0]} ({x["seg"][0][2]})')
+    elif x['seg']: check(x['seg'][0][0] <= b['from'] + 5 and x['seg'][-1][1] >= b['to'] - 10, f'{label}: the host planned there {x["seg"][0][0]}-{x["seg"][-1][1]} for {b["from"]}-{b["to"]} ({x["seg"][0][2]})')
     else: check(all(a == 'work' for a in x['work']), f'{label}: the host at work for it ({x["work"]})')
     g.ev(f"skipTo(({b['day']} - 1) * 1440 + {b['from']} - 20)"); g.step(5)
+    hu = g.ev(f"""(() => {{ SHIP.device.calendarRemind.on = false; HU_Q.length = 0; devHeadsTick(({b['day']} - 1) * 1440 + {b['from']} - 4); const q = HU_Q.slice(); SHIP.device.calendarRemind.on = true;
+      return q.some(x => /{APPT_TITLE[kind]}/.test(x.title || '')) || !!(DEV.hu && /{APPT_TITLE[kind]}/.test(DEV.hu.title || '')); }})()""")
+    check(hu, f'{label}: a heads-up before it, even with heads-ups off (RV17 3)')
     mail = json.loads(g.ev("JSON.stringify(window.__mail)"))
     check(any(m and APPT_TITLE[kind] in m for m in mail), f'{label}: its Mail the evening before (or that day)')
     to_room(g, b)
@@ -111,11 +114,15 @@ def one_off(path, kind, host, day0, how='ask', min0=600, label=None, quiet=False
     if tap:
         g.step(60)                                        # a ship minute or more with the card open: it stays (meetingsTick)
         check(g.ev("!!DIALOGUE"), f'{label}: the card stays open across a ship minute')
+        if kind == 'scope':                               # RV17 2: a reload mid-scene (the card gone, joined, not kept): a tap opens it again
+            g.ev("DIALOGUE = null; if (typeof deviceDialogue === 'function') deviceDialogue(null)"); g.step(5)
+            check(g.ev(f"(() => {{ const a = DECK_CREW.find(c => c.p.id === '{lead}'); return !!a && tradJoinTap(a) && !!DIALOGUE && DIALOGUE.id.startsWith('appt:scope'); }})()"), f'{label}: after a reload mid-scene, a tap opens it again')
         scene(g, label)
     g.step(20)
     r = json.loads(g.ev(f"JSON.stringify({{ b: SHIP.apptx.book.find(x => x.id === {b['id']}), rec: JSON.stringify(apptRecord()) }})"))
     check(bool(r['b']['done']), f'{label}: kept')
-    check(APPT_TITLE[kind] in r['rec'] or 'Appointments kept' in r['rec'], f'{label}: in the Record')
+    if kind == 'garden-bed': check('lettuce' not in r['rec'], f'{label}: not in the Record until the harvest (RV17 5)')
+    else: check(APPT_TITLE[kind] in r['rec'] or 'Appointments kept' in r['rec'], f'{label}: in the Record')
     errs = [e for e in g.errors if 'pageerror' in e]
     check(not errs, f'{label}: no page errors {errs[:2]}')
     res = ok; ok = saved and res
@@ -236,6 +243,11 @@ with sync_playwright() as pw:
         if b:
             g.ev(f"apptKeep(SHIP.apptx.book.find(x => x.id === {b['id']}))")
             check(not g.ev("apptCan('brennan-book', 'brennan', SHIP.time.day + 10)"), 'rules: Brennan\'s book once a game')
+            n = g.ev("""(() => { const X = SHIP.apptx; X.book.push({ id: 90, kind: 'scope', key: 'tavessa', host: 'sato', guests: [], day: 3, from: 1170, to: 1200, done: 3 }, { id: 91, kind: 'scope', key: 'shoals', host: 'sato', guests: [], day: 10, from: 1170, to: 1200, done: 10 },
+              { id: 92, kind: 'garden-bed', key: '', host: 'cruz-tove', guests: [], day: 6, from: 600, to: 630, done: 6 }, { id: 93, kind: 'garden-bed', key: 'tend:0', host: 'cruz-tove', guests: [], day: 13, from: 600, to: 615, done: 13 });
+              const r = apptRecord(); const rows = r.length ? r[1].rows.map(x => x.text) : []; return JSON.stringify(rows); })()""")
+            rows = json.loads(n)
+            check(sum('scope' in t for t in rows) == 1 and not any('lettuce' in t for t in rows), f'rules: the Record has one row for the scope and no garden line before the harvest (RV17 5) {rows}')
         else: check(False, 'rules: Brennan\'s book offered')
         g.close()
     if want('off'):
