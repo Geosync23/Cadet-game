@@ -47277,7 +47277,7 @@ function introArrowWant(now) {
     if (out || typeof myJob === 'function' && myJob() || I.done['d1-end:start'] !== undefined) fin('board');   // (the patch, #19: or Zeke's begun his end of the day)
     else return 'board';
   }
-  else if (careerClockedIn(1) && !out && I.done['d1-end:start'] === undefined && !(typeof myJob === 'function' && myJob()) && typeof boardLesson === 'function' && (SHIP.jobs.find(x => x.id === boardLesson()) || {}).reserved === 2) return 'board';   // (FX15, patch 0.92.5 #22) the 13:00 job you lead, waiting on the board: the board's arrow again
+  else if (careerClockedIn(1) && !out && I.done['d1-end:start'] === undefined && !introTeaLead() && !(typeof myJob === 'function' && myJob()) && typeof boardLesson === 'function' && (SHIP.jobs.find(x => x.id === boardLesson()) || {}).reserved === 2) return 'board';   // (FX15, patch 0.92.5 #22) the 13:00 job you lead, waiting on the board: the board's arrow again, once Zeke's tea is over
   return introDayEndWant(now, m);                         // the patch (#19): after Zeke's end-of-day word, the clock, then the beam
 }
 function introArrowTick() {

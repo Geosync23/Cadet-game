@@ -658,7 +658,7 @@ def firsts(g):
     c1 = g.ev(G); g.ev('careerClock()'); g.step(20); c2 = g.ev(G)
     took = g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1) || SHIP.jobs.find(x => !x.by); return !!j && claimJob(j.id); })()"); g.step(20); c3 = g.ev(G)
     print(f"  Day 1 after the briefing: '{c1}'; clocked in: '{c2}'; job taken {took}: {c3}")
-    if c1 != 'Clock in at the time clock' or c2 != 'Take a job at the job board' or c3 in ('Clock in at the time clock', 'Take a job at the job board'): fail(f'the Day 1 arrows went wrong: {c1}, {c2}, {c3}')
+    if c1 != 'Clock in at the time clock' or c2 not in ('Take a job at the job board', 'Your shadow job: take it at the board') or c3 in ('Clock in at the time clock', 'Take a job at the job board', 'Your shadow job: take it at the board'):   # (FX15, patch 0.92.5 #22: the board's arrow names the job) fail(f'the Day 1 arrows went wrong: {c1}, {c2}, {c3}')
     if not g.ev("typeof teaOut === 'function'"):
         print('  tea: not yet (no teaOut, the player engineer\'s 0.28.74)'); return
     g.ev("(() => { const j = SHIP.jobs.find(x => x.reserved === 1); if (j) { jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); j.workDone = true; turnInJob(j.id); } SHIP.intro.done['d1-shadow:job'] = SHIP.intro.done['d1-shadow:job'] || Math.floor(shipNow()); })()")
