@@ -63,32 +63,29 @@ them: I'm fine. Really. I just don't like the counting. It starts again in there
 them: Right. That's enough of that. Tea? I'll walk. The long way.
 
 == beat 4
-// CRESCENDO rides on: the lift up to the Captain's Friday address (the Deck 5 lift lobby, about 15:50-16:00; the scene plays at the doors, before they ride); day: 19 (preferred) or 26; cast: kovac-zainab, cruz-tove, keane-davi (only if there: he's on nights), you; quiet ending: beat 5
+// CRESCENDO rides on: the lift up to the Captain's Friday address (the Deck 5 lift lobby, about 15:50-16:00; the scene plays at the doors, before they ride); day: 19 (preferred) or 26; cast: kovac-zainab and you (Keane only if there: he's on nights; Cruz no longer in it, lead 36 for RV16, 2026-10-25); quiet ending: beat 5
 tone: resolution
 when: beat:kovac.3 weekday:fri trad:captains-address day:19-26
 crescendo: trad:captains-address
-cast: cruz-tove
 quiet: 5
 lead: 10
 title: The lift with Kovac
-invite: Friday | Before the address tomorrow. The Deck 5 lift lobby, 15:50. Cruz is coming. Will you? Sorry. I mean, please. Zainab
+invite: Friday | Before the address tomorrow. The Deck 5 lift lobby, {at}. Will you come? Sorry. I mean, please. Zainab
 where: Lift lobby
 hint: Walk with me? Just to the lift. Well. Into it.
 mem: doors
 flag: kovac.rode
-them: Oh. They're both here. Cruz. And Keane. Not looking at each other. That's. Um. That's us.
-cruz-tove: Mm. Hello. Busy, Fridays. Lots of people going... up. Mm.
+them: Oh. You came. It's just us today. Well. Us and the lift.
 if here:keane-davi | keane-davi: Hiya. Engine room floor's spotless today, by the way. Anyway. The address. Big one, I hear.
 if flag:liftBrakes | them: Here it comes. Brake shoes, four. Guide rollers, twelve. I tightened every one. I know where they all are.
 them: Doors. Okay. Okay.   [sigh]
 them: Four, please.   [nod]
-cruz-tove: Mm. We're going to the rec deck.
-them: I know. I just wanted to say it. You said it, your first night. I've been practising.   [laugh]
-cruz-tove: Lovely lift.
+them: We're going to the rec deck, I know. I just wanted to say it. You said it, your first night. I've been practising.   [laugh]
 if here:keane-davi | keane-davi: Lovely lift.
-them: It is, actually.
-them: Nobody's holding the rail. Look. Nobody. No, don't look. I'm not looking.
-them: Very brave, all three.
+them: Lovely lift. It is, actually.
+them: I'm not holding the rail. Look. No, don't look. I'm not looking.
+if here:keane-davi | them: Very brave, all three.
+if !here:keane-davi | them: Very brave, both of us.
 ? choice
 * You did it. I'm so proud of you.   flavour:listen mem:proud
   them: I did it. Oh. I did it. My knees are shaking. I did it.
@@ -96,8 +93,8 @@ them: Very brave, all three.
 * Again on the way down?   flavour:cheer mem:again
   them: Don't push it. After the address. Maybe after the address.   [laugh]
 * Same time next Friday? A standing order.   flavour:practical mem:friday
-  them: Fridays. The lift club rides on Fridays. Um. Cruz is nodding. I think that's a yes.
-cruz-tove: Mm. Rec deck. That's us. Mind the... is there a gap? There's no gap. Good.
+  them: Fridays. The lift club rides on Fridays. I'll tell Cruz. Cruz will nod. That's a yes.
+them: Rec deck. That's us. Mind the... is there a gap? There's no gap. Good.
 
 == beat 5
 // QUIET ENDING for beat 4: plays only if beat 4 was missed (they still rode up together)

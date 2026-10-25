@@ -66,6 +66,13 @@ as a day-plan piece" is a later option for the user.
 stories_check: a crescendo naming a room must be told there (or on its walk). Checks at c1feef46: stories_check OK,
 day_check 12, 13, 19 OK (on), cadet_test ALL IDENTICAL (run alone: beside check_fast it can show f/g/h diffs), check_fast OK.
 
+## Final turn (lead 36's (a') for Kovac; CS1's f4117e20)
+Kovac 4 has no cast (Cruz's lines folded into Kovac's); her walk booking (Day 19 15:28-15:39, Deck 5) plays while she's on
+Deck 5 or riding from it; invites use {at}. Saad's storm window starts no earlier than 08:30 (STORY_EVENT_FROM), once he's
+up. stories_check tries every minute in a walk booking. Results: stories_check OK (play: Kovac 4 Day 19, Saad 4 Day 13
+08:30); day_check 13 and 19 OK (on); cadet_test vs 53c11f8 ALL IDENTICAL (alone, off). Backlog FX21-1 (RV16): socialChatter
+has no DIALOGUE guard (older moments and meetings). If RV16 asks for more, a fresh FX21b takes it from here.
+
 ## Loose ends
 - S7 (switch on, after review and the user's yes): flip STORIES_ON; retire the old Pell and Kovac words (content/arcs
   pell.arc, kovac.arc parked by CS1's rule); kovac-zainab.lines' joy line (the spanner grip, a comment at kovac.story beat

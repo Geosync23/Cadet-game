@@ -69,13 +69,16 @@ RUN = r"""
         const p = socP(id); if (!p || !socAboard(p, d)) continue;
         const g = goodbyeMoment(p, t); if (g) byes.push(id + '@' + d);
         if (STORY_ARCS[id] && arcBeat(p, t)) arcTold(p);   // the older card beats (Pell 1-4), told on their chat card
-        const mid = momentReady(p, t); if (!mid) continue;
+        let mid = momentReady(p, t);
+        const wb = C().book[id]; if (!mid && wb && wb.walk != null && t + 10 > wb.from && t < wb.to) for (let k = 1; k < 10 && !mid; k++) { if (t + k < wb.from) continue; live(t + k); mid = momentReady(p, t + k); }   // a walk booking is minutes long: try each minute (the player taps them as they pass)
+        if (!mid) { if (shipNow() !== t) live(t); continue; }
+        const t1 = shipNow();
         const dd = momentDef(mid);
         if (dd.crescendo && MODE === 'miss') continue;
-        const before = (C().told[id] || []).length, bk = C().book[id], room = storyRoomOf(dd), w0 = whereIs(p, t);
-        const atRoom = !dd.crescendo || !room ? null : (storyInRoom(p, t, room) || (bk && bk.walk != null && w0 && w0.deck === bk.walk));   // RV16: a crescendo that names a room plays there (or on the way, on the deck they ride from)
+        const before = (C().told[id] || []).length, bk = C().book[id], room = storyRoomOf(dd), w0 = whereIs(p, t1);
+        const atRoom = !dd.crescendo || !room ? null : (storyInRoom(p, t1, room) || (bk && bk.walk != null && w0 && (w0.deck === bk.walk || (w0.moving && w0.fromDeck === bk.walk))));   // RV16: a crescendo that names a room plays there (or on the way, on the deck they ride from)
         momentShow(mid); play(mid);
-        if ((C().told[id] || []).length > before) log.push({ id, beat: dd.beat, day: d, t, cres: dd.crescendo || null, atRoom, room, quiet: dd.quiet || null, follows: dd.follows || null, day_: dd.when && dd.when.day || null, book: dd.crescendo ? books[mid] || null : null });
+        if ((C().told[id] || []).length > before) log.push({ id, beat: dd.beat, day: d, t: t1, cres: dd.crescendo || null, atRoom, room, quiet: dd.quiet || null, follows: dd.follows || null, day_: dd.when && dd.when.day || null, book: dd.crescendo ? books[mid] || null : null });
         for (const j of (typeof myFavours === 'function' ? myFavours() : []).filter(j => j.from === id)) { j.workDone = j.workDone || t; if (!favourTurnIn(j.id)) { j.status = 'done'; j.doneAt = t; j.doneBy = 'you'; } }
       }
       SHIP.social.mail = SHIP.social.mail.filter(x => x.at > t); mailSeen = SHIP.social.mail.length;   // delivered (socialMail's job; the device isn't needed on paper)
