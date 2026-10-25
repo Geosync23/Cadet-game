@@ -100,7 +100,7 @@ def check_core_hooks(pw, path):
             for v in (0.0, 0.5, 1.0, 0.5):
                 g.ev(f"(() => {{ const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
             names = g.ev("SND.log.map(e => e.name + (e.crew ? ':crew' : ''))")
-            check('doorOpen' in names, f'your door opening plays: {names}')
+            check(names.count('doorOpen') == 1 and names.count('doorClose') == 1 and not any(':crew' in n for n in names), f'your door opening and closing play once each: {names}')
             g.ev("DOOR_OBJS.forEach(d => delete d.force)")
         # footsteps: walk the player along by hand
         g.ev("SND.log.length = 0"); g.step(2)
@@ -117,10 +117,14 @@ def check_core_hooks(pw, path):
           SHIP.mail.push({ at: 0, from: 'Test', subject: 'Seed', body: 'x', read: false }); SND.onFrame.forEach(f => f(true));
           return seed === s0; })()""")
         check(same, "SND's watcher never draws on R()")
+        ticks = g.ev("(() => { window.__t = [0, 0]; SND.actTick = () => window.__t[0]++; SND.musicTick = () => window.__t[1]++; return 1; })()")
+        g.page.wait_for_timeout(2300); g.step(3); g.page.wait_for_timeout(1100); g.step(3)
+        t = g.ev('window.__t'); g.ev('SND.actTick = SND.musicTick = null')
+        check(t[0] >= 1 and t[1] >= 1, f'the slots get their once-a-second ticks: {t}')
         g.ev("SND.log.length = 0; (() => { const b = ROOM_BOX['@']; if (b) player.obj.position.copy(cellPos(b.i0 + 1, b.j0 + 1)); })(); startRide(3)")
         g.step(80)
         lift = g.ev("SND.log.map(e => e.name).filter(n => n.startsWith('lift'))")
-        check(lift[:2] == ['liftPress', 'liftDoorsClose'] and 'liftRide' in lift and 'liftArrive' in lift, f'the lift: press, doors, ride, arrival: {lift}')
+        check(lift == ['liftPress', 'liftDoorsClose', 'liftRide', 'liftArrive', 'liftDoorsOpen'], f'the lift: press, doors shut, ride, arrival, doors open, once each: {lift}')
     finally: g.close()
 
 # ---- activities (FX20): the approved activity sounds, what each activity plays, the hooks, and never R() ----
@@ -183,6 +187,15 @@ def check_activities(pw, path):
         check(hello == 'no crew' or not hello[0] or 'hello' in hello[1], f'tapping someone says hello: {hello}')
         clk = g.ev("""(() => { let d = 2; while (!playerShiftOn(d)) d++; setShipNow((d - 1) * 1440 + 485); SND.log.length = 0; const r = clockPunch(false); return [r, SND.log.map(e => e.name)]; })()""")
         check(clk[0] in (None, 'in', 'out') and (clk[0] is None or ('clockIn' if clk[0] == 'in' else 'clockOut') in clk[1]), f'the time clock: {clk}')
+        tick = g.ev("typeof SND.actTick === 'function'")
+        check(tick, 'the activity slot ticks once a second (SND.actTick: the storm and the blackout)')
+        storm = g.ev("""(() => { const en = eventNow, ba = blackoutAt, out = [];
+          try { eventNow = () => null; blackoutAt = () => null; SND.actTick(); SND.log.length = 0;
+            eventNow = () => ({ id: 'ionStorm', phase: 'warning', day: 0 }); SND.actTick(); out.push(SND.log.map(e => e.name)); SND.log.length = 0;
+            SND.actTick(); out.push(SND.log.map(e => e.name)); SND.log.length = 0;
+            blackoutAt = () => ({ from: 0, to: 1 }); SND.actTick(); out.push(SND.log.map(e => e.name)); }
+          finally { eventNow = en; blackoutAt = ba; } return out; })()""")
+        check(storm == [['storm'], [], ['flicker']], f'the storm warning chimes once as it begins, and the lights dip with a blackout: {storm}')
         print('  activities (FX20):', len(ACT_NAMES), 'sounds;', len(ACT_CASES), 'activities; chores', chore, '; shower', began[1], '->', ended[0], '; address', ann, '; hello', hello, '; clock', clk)
     finally: g.close()
 
