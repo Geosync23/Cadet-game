@@ -6,7 +6,7 @@ build master BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh), words SW1 (session_01Mjn7e
 
 ## Branch and builds
 
-**claude/p925-weekend**, tip **c7982f2b** (pushed; check_fast OK). Game sha256 39e8b873... (see the build-table T6 row).
+**claude/p925-weekend**, tip **3307ded** (pushed; check_fast OK). Game sha256 49ba25a4... (see the build-table T6 row).
 - 9a249f75 T5 (decor, weekend_check lines, perf scenes, records); 3b6e48bb merge of DS1's b413cde7 (`spare: 1` on the story
   and cocoa: a seat kept for you) and DV1's arrows_check fix; c7982f2b **WEEKEND_ON = true for good** (the user, 2026-10-25).
 
@@ -26,9 +26,9 @@ build master BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh), words SW1 (session_01Mjn7e
 
 ## Loose ends
 
-1. RV14's verdict on c7982f2b (and on Bread day's js: 1.65 -> 2.79 ms portrait, 29 -> 33 people; Sunday dinner today is
+1. RV14's verdict on 3307ded (RV14 and lead 35 are OK with Bread day's js: 1.65 -> 2.79 ms portrait, 29 -> 33 people; Sunday dinner today is
    2.37-2.79 with 66). If asked to dig: profile the galley at Day 7 07:25 (cook anim near the cooks? the cook-along spots?).
-2. SW1's words for the two decor tap texts (asked; stand-ins in the code). Put them in, CS1 checks.
+2. (done) The decor tap texts: cocoa as written, the picnic basket's final words in 3307ded (SW1, CS1 PASS).
 3. The full six-runner round on the shipped build: the lead calls it.
 4. The pitch page (claude/weekend-pitch) still says the story is 22:15: SW1's file.
 
