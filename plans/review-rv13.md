@@ -211,3 +211,9 @@ arrow still the intro's); introArrowWant's 13:00 board arrow once Zeke's tea is 
 Running: interactions + arrows (all) -> career + day 1; mech p925l on fix, 0aaf48b7 and plants u1 (no held-job branch),
 u2 (doable filter off), u3 (t2 name off). Note: p925l has no Day 2 solo-job line.
 - mech p925l: fix OK; 0aaf48b7 FAILs 5 (t2 name, case, m6 marked, Day 1 slots 1 and 2); u1 FAILs case + Day 1 x2; u2 FAILs m6; u3 FAILs t2. Good.
+- **PASS FX15 item 22 at 87ab69e6 (~06:00 UTC; game 2368913e...; one text line over ccf77d05, "take the marked one").**
+  On ccf77d05: interactions_check OK, career_check OK, day_check 1 OK. On 87ab69e6: arrows_check (all parts: queue, clockin,
+  shift, week, promo) ARROWS CHECK OK alone (a first combined run died on a page-load timeout under load). mech p925l as above.
+  FX15/BM17: check_fast, cadet_test vs staging identical, intro_check OK, mech p925. Sign-off for 15b and 21's small edits.
+  Note: p925l has no Day 2 solo-job line (FX15: it's usually handed to you; marked only if left on the board).
+- **RV13 idle after this (memory ~62%).** Handover note plans/handover-rv13.md is current.
