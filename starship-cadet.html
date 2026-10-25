@@ -9391,6 +9391,7 @@ const DEVMODE = URL_FLAGS.has('dev') && !NOSAVE;          // Dev mode (section 2
 const SHORT_FRIDAY = true;                               // Short Fridays and the Captain's address (section 18f; plans/fridays-build-brief.md): on (the user's yes, 2026-10-21); false gives the game without them
 const WEEKEND_ON = true, WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): on in the game from 0.92.5 (the user, 2026-10-25: "ship them switched on, no preview"; FX16); false = the game before them. Their .trad files load only with it (section 18's loader)
 const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [...WEEKEND_TRADS].some(id => tag === 'ev-' + id || tag.startsWith('ev-' + id + '-'));   // a weekend tradition's plan tag (FX9: their hosts stay to its end)
+const P926_TRADS = URL_FLAGS.has('p926');               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
   if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -40775,7 +40776,7 @@ function eventJoin(e, d, now, notice) {
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
-  if (/^rec-(wren|chiefs)-talk$/.test(e.id)) recTalkCard(e, d, now);   // a Wren talk: listen, or ask one question (0.83.2, RA)
+  if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
 }
@@ -40801,7 +40802,7 @@ function recActCard(e, d, now) {
 // the Wren talks' panel (0.83.2): the speaker's opening, then a choice: ask one question (a friendship step with the
 // speaker; a chief remembers who asked) or just listen. Words: the speaker's own lines (kinds talk.open, talk.answer,
 // talk.listen, the writer's), else stand-ins. SHIP.rec.talk keeps the talks heard and the speakers asked, by day
-function recTalkCard(e, d, now) {
+function recTalkCard(e, d, now, ask) {
   const t = recTalk(d), q = t && schedPeople().find(p => p.id === t.by);
   if (t && t.by === 'you' && MEETING_SCRIPTS['talk.you'] && typeof dialogueShow === 'function') { dialogueShow('talk.you', { id: 'rec.talk@' + d, who: [], at: now }); return; }   // your own talk (W3's script)
   if (!q || typeof dialogueShow !== 'function') return;
@@ -40809,7 +40810,7 @@ function recTalkCard(e, d, now) {
   const key = t.by + '@' + d, T = SHIP.rec.talk;
   if (!T.heard.includes(key)) { T.heard.push(key); if (T.heard.length > 40) T.heard.shift(); }
   const baked = MEETING_SCRIPTS['talk.' + t.by];          // the writer's longer script for this talk (W3's talk.<speaker>), when it's baked
-  if (baked) { dialogueShow('talk.' + t.by, { id: 'rec.talk@' + d, who: [q.id], at: now }); return; }
+  if (baked) { dialogueShow(ask ? talkAskScript(t.by) : 'talk.' + t.by, { id: 'rec.talk@' + d, who: [q.id], at: now }); return; }   // ask: the talk was said aloud (0.92.6, talkTick), so only its questions
   MEETING_SCRIPTS['rec.talk'] = { title: '"' + t.title + '"', gist: shortName(q) + ' gave a talk: "' + t.title + '".',
     onPick: k => { if (k === 0 && !T.asked.includes(key)) { T.asked.push(key); if (T.asked.length > 40) T.asked.shift(); if (t.size === 'chief' && typeof memAdd === 'function') memAdd(q.id, 'asked.talk'); } },
     lines: [{ who: q.id, text: say('talk.open', 'So. ' + t.title + '. Stop me if you\'ve heard this one.') },
@@ -41243,7 +41244,8 @@ function eventsTick() {
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
   bdayFrame();                                           // 0.92.5: the birthday's bubbles and your slice (slot 'Traditions engineer')
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
-  if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
+  if (WEEKEND_ON) sundayStoryTick();
+  if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -42814,6 +42816,38 @@ function sliceTick() {                                   // eaten as you go; asl
   SLICE = null;
   for (const k in BDAY_SLICE_GAIN) if (typeof n[k] === 'number') n[k] = needClamp(n[k] + BDAY_SLICE_GAIN[k]);
   if (!quiet) toast('Birthday cake', 'You finish your slice. Not a crumb left.');
+}
+// ---- 0.92.6 item 13 (FX17, behind P926_TRADS; the user: "the Chief didn't give a talk on Day 8. Talks are a ship
+// tradition"): a Wren talk was only a card that opened when you joined, so from the seats the speaker said nothing.
+// Now the speaker says the talk's script (talk.<speaker>, W3's) line by line in a bubble while you're in the
+// auditorium, its lines spread from when they've sat down to TALK_Q minutes before the end (as the Sunday story); then,
+// if you've joined, the card with only its questions (talkAskScript). Joined while it's still being said: the card
+// waits (talkLater). TALK_FROM [day, first minute], TALK_SAID [day, line], TALK_ASKED: the day the card opened
+const TALK_Q = 12;
+let TALK_SAID = null, TALK_FROM = null, TALK_ASKED = 0;
+const talkLines = by => { const S = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS['talk.' + by]; return S ? S.lines.filter(x => x.text && !x.choice) : []; };
+function talkAskScript(by) {                             // the script's choice lines alone, as a script of their own
+  const id = 'talk.' + by + '.ask', S = MEETING_SCRIPTS['talk.' + by];
+  if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = { ...S, lines: S.lines.filter(x => x.choice) };
+  return id;
+}
+const talkSpoken = d => { const t = P926_TRADS && recTalk(d); return !!t && t.by !== 'you' && talkLines(t.by).length > 0; };
+const talkLater = (e, d, now) => talkSpoken(d) && now - (d - 1) * 1440 < e.to - TALK_Q;
+function talkTick() {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = m >= 1080 && eventsOn(d).find(x => x.id === 'rec-chiefs-talk' || x.id === 'rec-wren-talk'); if (!e || m < e.from || m >= e.to || !talkSpoken(d)) return;
+  const t = recTalk(d), L = talkLines(t.by), a1 = e.to - TALK_Q;
+  if (m >= a1 || TALK_SAID && TALK_SAID[0] === d && TALK_SAID[1] >= L.length - 1) {   // said (or the time for it gone): your questions
+    if (TALK_ASKED !== d && SHIP.events.joined.includes(e.id + '@' + d) && !DIALOGUE && (m >= a1 || now - TALK_SAID[2] >= 2)) { TALK_ASKED = d; recTalkCard(e, d, now, true); }
+    return;
+  }
+  if (!friHere(e)) return;
+  const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(c => c.h && c.p && c.p.id === t.by); if (!a || typeof bubbleSay !== 'function') return;
+  if (!TALK_FROM || TALK_FROM[0] !== d) { if (!a.settled || !e.rooms.has(deckDef.num + '|' + roomAt(...cellAt(a.x, a.z)))) return; TALK_FROM = [d, Math.max(m, e.from + 2)]; }
+  const a0 = TALK_FROM[1]; if (a1 - a0 < 4) return;
+  const due = Math.min(L.length - 1, Math.floor((m - a0) * L.length / (a1 - a0))), i = TALK_SAID && TALK_SAID[0] === d ? TALK_SAID[1] + 1 : 0;
+  if (i > due || i >= L.length) return;
+  TALK_SAID = [d, i, now]; bubbleSay(friSpeaker(a), L[i].text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
