@@ -6,6 +6,8 @@
 #   8   a tradition can be joined to its end: 5 minutes before the end of Tiles night (Day 2), quiz night (Day 4) and the jam (Day 5),
 #       in its room, the join is offered (TJ_NOW, its leader on the deck) and a tap on the leader joins you; the device's Calendar and
 #       Home still list it ("on now, until"). Off: at least one of them not offered or not listed
+#   5   One week aboard (Day 7): Zeke is in the bow lounge, sitting, by 17:25; the join is his (TJ_NOW leads with him); a tap sits you
+#       down and opens his card going over your week (week1.zeke), its lines filled. Off: no card
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -85,5 +87,26 @@ with sync_playwright() as pw:
             if not check(isinstance(r, dict), '8: %s on (%s)' % (tid, r)): continue
             check(r['to'] - r['t'] <= 8 and r['offered'] and r['joined'], '8: %s at %d (ends %d): the join is offered (leader %s) and a tap joins you' % (tid, r['t'], r['to'], r['lead']))
             check(r['cal'] and r['home'], '8: %s still on the device near its end: Calendar %s, Home %s' % (tid, r['cal'], r['home']))
+    if want('5'):
+        def week5(path):
+            g = Game(pw, path, 900, 760)
+            g.ev("(() => { skipTo(6 * 1440 + 1028); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            room = g.ev(INROOM % (7, 'one-week-aboard'))
+            for _ in range(80):
+                g.step(30)
+                if g.ev('SHIP.time.min') >= 1045: break
+            r = json.loads(g.ev("""(() => { const z = DECK_CREW.find(x => x.p.id === 'torres-zeke'), here = z && roomAt(...cellAt(z.x, z.z));
+              const n = TJ_NOW && TJ_NOW.e.id === 'one-week-aboard' ? TJ_NOW : null, out = { t: SHIP.time.min, zeke: !!z, room: here ? (deckDef.rooms[here] || {}).name : null, sit: z ? /^sit/.test(z.pose || '') || (z.spot || {}).pose === 'sit' : false, lead: n && n.lead };
+              if (z) tradJoinTap(z); out.cards = window.__cards.map(c => c[0]); out.act = ACT && ACT.kind;
+              const v = DIALOGUE && DIALOGUE.id === 'week1.zeke' ? MEETING_SCRIPTS['week1.zeke'].lines.filter(l => l.text).map(l => evText(l.text, {})) : [];
+              out.lines = v; return JSON.stringify(out); })()"""))
+            err = g.errors; g.close(); return r, err
+        r, err = week5(woff); print('  5 off:', r)
+        check('week1.zeke' not in r['cards'], '5 off: as 0.92.5, no sit-down with Zeke')
+        r, err = week5(won); print('  5 on:', r)
+        check(r['zeke'] and r['room'] == 'Bow lounge' and r['sit'], '5: Zeke is in the bow lounge, sitting, at %s (%s, %s)' % (r['t'], r['room'], r['sit']))
+        check(r['lead'] == 'torres-zeke', '5: the join is Zeke\'s (%s)' % r['lead'])
+        check('week1.zeke' in r['cards'] and len(r['lines']) >= 4 and not any('{' in l for l in r['lines']), '5: a tap opens his card going over your week, filled in (%s)' % r['lines'][:2])
+        check(not err, '5: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)

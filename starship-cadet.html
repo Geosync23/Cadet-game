@@ -40775,7 +40775,8 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
-  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
+  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);
+  if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
@@ -42849,6 +42850,34 @@ function talkTick() {
   const due = Math.min(L.length - 1, Math.floor((m - a0) * L.length / (a1 - a0))), i = TALK_SAID && TALK_SAID[0] === d ? TALK_SAID[1] + 1 : 0;
   if (i > due || i >= L.length) return;
   TALK_SAID = [d, i, now]; bubbleSay(friSpeaker(a), L[i].text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
+}
+// ---- 0.92.6 item 5 (FX17, behind P926_TRADS; the user: "a message about tea with Zeke but he isn't there. He should sit
+// down with you going over your first week"): One week aboard is joined by a tap on Zeke (TRAD_JOIN: you sit with your
+// tea), and he goes over your week from what the game kept: the jobs you signed off, a tradition you went to, the one you
+// talk with most (SHIP.rel's points). Words: SW1's week1.zeke.* (quizText), else these stand-ins
+function week1Ctx(d) {
+  const jobs = typeof yourJobsDone === 'function' ? yourJobsDone() : 0;
+  const tj = SHIP.events.joined.map(k => k.split('@')).filter(([id, x]) => id !== 'one-week-aboard' && +x <= d).map(([id, x]) => (eventsOn(+x).find(e => e.id === id) || {}).name).filter(Boolean);
+  const fr = Object.entries(SHIP.rel || {}).filter(([id]) => id !== 'torres-zeke' && evPerson(id)).sort((a, b) => (b[1].pts || 0) - (a[1].pts || 0) || (a[0] < b[0] ? -1 : 1))[0];
+  return { jobs, trad: tj.length ? tj[0] : null, friend: fr && (fr[1].pts || 0) > 0 ? shortName(evPerson(fr[0])) : null };
+}
+function week1Card(e, d, now) {
+  if (typeof dialogueShow !== 'function') return;
+  const c = week1Ctx(d), z = 'torres-zeke', W = (k, fb) => quizText('week1.zeke.' + k, d, c) || fb;
+  MEETING_SCRIPTS['week1.zeke'] = { title: 'One week aboard', from: 'Zeke Torres', gist: 'Zeke went over your first week with you, over tea in the bow lounge.',
+    lines: [{ who: z, text: W('open', 'Sit, sit. Tea first. Then I want to hear about your week.'), pose: 'gesture' },
+      { who: z, text: c.jobs ? W('jobs', c.jobs + (c.jobs === 1 ? ' job' : ' jobs') + ' signed off already. Calder noticed. She won\'t say so, but she did.') : W('jobs.none', 'No jobs signed off yet. That\'s fine. Week one is for finding the toilets.') },
+      { who: z, text: c.trad ? W('trad', 'And you came to ' + c.trad.toLowerCase() + '. That\'s how you get to know a ship.') : W('trad.none', 'You haven\'t been to a tradition yet. Pick one this week. Any one. I\'ll come.') },
+      { who: z, text: c.friend ? W('friend', 'You and ' + c.friend + ' get on, I hear. Good. Everyone needs a someone aboard.') : W('friend.none', 'Talk to people. Anyone. They all want to meet the new hand.'), to: 'you' },
+      { choice: [{ text: 'It went fast.', rel: { [z]: 2 }, reply: { who: z, text: W('reply.1', 'They all do. The first one feels like a month and a minute.') } },
+        { text: 'I\'m still getting lost.', rel: { [z]: 2 }, reply: { who: z, text: W('reply.2', 'Everyone does. I got lost on Deck 5 for a whole shift once.'), pose: 'laugh' } },
+        { text: 'Thanks for showing me round.', rel: { [z]: 3 }, reply: { who: z, text: W('reply.3', 'Any time. You did the hard part. You turned up.') } }] },
+      { who: z, text: W('close', 'To week one. The hardest one, everyone says.'), pose: 'nod' }] };
+  dialogueShow('week1.zeke', { id: 'week1.zeke@' + d, who: [z], at: now });
+}
+if (P926_TRADS) {
+  TRAD_JOIN['one-week-aboard'] = { host: 'torres-zeke', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'sit down with him', what: 'have a tea with Zeke and go over your first week' };
+  tjActs();
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
