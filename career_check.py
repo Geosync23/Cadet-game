@@ -24,6 +24,8 @@
 # Run:  python3 career_check.py BUILD.html     (--fx: only parts (p) and (q))
 import sys, json, os, re, pathlib
 exec(open(__file__.replace('career_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 ok = True
@@ -407,7 +409,7 @@ with sync_playwright() as pw:
     check(j and j['tier'] == 1 and j['rank'] == 'junior' and j['xp'] == 0 and j['tr'] == {} and j['log'] == [] and j['tools'] == {'scanner': [3, 1]} and j['op'] == {'2': ['m1']} and j['cur'] is None, 'worksClean on junk')
     check(sv['bad'] is None, 'worksClean(null) should be none')
     # a real reload, saving on: mid-training, then an old save (no ship.works)
-    tmp = WORK / 'test' / '_career_save.html'
+    tmp = WORK / 'test' / ('_career_save_' + RUN_ID + '.html')
     tmp.write_text(instrument(pathlib.Path(sys.argv[1]).read_text()))
     b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
     page = b.new_page(viewport={'width': 600, 'height': 500})

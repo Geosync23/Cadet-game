@@ -33,6 +33,8 @@
 # Run:  python3 bigevents_check.py BUILD.html
 import sys, re, json, pathlib, os
 exec(open(__file__.replace('bigevents_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
@@ -41,7 +43,7 @@ ON_ALREADY = 'const EVENTS_ON = true;' in SRC
 if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
     SRC = SRC.replace('const EVENTS_ON = true;', 'const EVENTS_ON = false;', 1)
     (WORK / 'test').mkdir(parents=True, exist_ok=True)
-    OFF_BUILD = str(WORK / 'test' / 'bigev_off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
+    OFF_BUILD = str(WORK / 'test' / f'bigev_{RUN_ID}off.html'); pathlib.Path(OFF_BUILD).write_text(SRC)
 CROWD = 80                     # a standing crowd's limit on meaning to go, set by performance tests, not a fixed 60 (the user, 2026-10-21: "60 was just a guess
                                # on performance. We can go higher. Just need to test for performance."; was the events plan v3.2 answer 4's 60; lead 24: unseated only).
                                # LB3's measure (perf_check's Line ceremony scene with 0-90 extra people stood in the bow lounge, the phone and trifold sizes): draw
@@ -73,7 +75,7 @@ def variant(tag, on):
     if on == 'all': src = src.replace('const EVENTS_ON = false;', 'const EVENTS_ON = true;', 1)
     else:
         for s in on: src = re.sub(r'const ' + s + r' = EVENTS_ON;', 'const ' + s + ' = true;', src, count=1)
-    p = WORK / 'test' / f'bigev_{tag}.html'; p.write_text(src); return str(p)
+    p = WORK / 'test' / f'bigev_{RUN_ID}{tag}.html'; p.write_text(src); return str(p)
 
 # the events on paper: everything from the data and pure functions, nothing stepped. The saved and live state
 # (SHIP.event, SHIP.eventLog, the clock) is set aside first (a new game: nothing running, nothing logged) and put back
@@ -635,7 +637,7 @@ with sync_playwright() as pw:
     if 'const EV_LINE_ON = false;' in SRC:
         print('\n3b. With Crossing the Line (EV_LINE_ON):')
         lsrc = SRC.replace('const EVENTS_ON = false;', 'const EVENTS_ON = true;', 1).replace('const EV_LINE_ON = false;', 'const EV_LINE_ON = EVENTS_ON;', 1)
-        lp = WORK / 'test' / 'bigev_line.html'; lp.write_text(lsrc)
+        lp = WORK / 'test' / f'bigev_{RUN_ID}line.html'; lp.write_text(lsrc)
         g = Game(pw, str(lp)); a = paper(g, 'line'); show(a); judge(a, 'line'); check_device(g, 'line', True); check_line(g, 'line')
         for e in g.errors[:3]: fail(f'line: page error: {e}')
         g.close()
@@ -705,8 +707,8 @@ with sync_playwright() as pw:
             ship = {'decks': {}, 'eventLog': log or []}
             if frm != 'none': ship['evFrom'] = frm
             return {'v': 2, 'build': 'x', 'time': {'day': day, 'min': 600}, 'player': {'deck': 4, 'tile': [7, 3], 'facing': 0}, 'ship': ship, 'crew': {}}
-        on_html = WORK / 'test' / '_run_bigev_late.html'; on_html.write_text(instrument(pathlib.Path(variant('late', 'all')).read_text()))
-        off_html = WORK / 'test' / '_run_bigev_lateoff.html'; off_html.write_text(instrument(SRC))
+        on_html = WORK / 'test' / f'_run_bigev_{RUN_ID}late.html'; on_html.write_text(instrument(pathlib.Path(variant('late', 'all')).read_text()))
+        off_html = WORK / 'test' / f'_run_bigev_{RUN_ID}lateoff.html'; off_html.write_text(instrument(SRC))
         errs = []
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         storm = ['ionStorm'] if 'ionStorm' in P5['cal'] else []
