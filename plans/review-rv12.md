@@ -175,3 +175,17 @@ Game sha256 b8faa999...; base 23432122 (RV11 PASSed items 2, 3, 14, 17 there).
   calls removed; the seat's toast "Stay as long as you like; walk away to get up."
 - disc_check: ALL OK; on 23432122 the three #17 lines FAIL (up at 16:50, 10:37, 16:50): the base is the planted fault.
 - cadet_test vs 23432122 ALL IDENTICAL (renderer noise only); check_fast OK.
+
+## FX13 tiles-ladder claude/p925-fx13b 5e1d82d5 (0.92.5 item 20): PASS (~00:40 UTC 2026-10-25)
+Game sha256 515233c1...; base integration ba836359. (ae8c8bc9 replaced by 5e1d82d5 at lead 34's ask: tladLead.)
+- Diff: 4d deck architect slot: 9 standing ring spots 3-ladder-1..9 (event-tagged), the stools' anim play; trad file:
+  where pool @tiles-ladder first (lounge seats overflow), no tilesNight boards, anim talk; section 18 slot: tladMinute
+  (live only, Deck 3 while on: two at the stools via crewComeTo, 10-minute games, winner stays by a level-weighted
+  hash k 335, queue from the settled ring, host first; nothing saved, plans unchanged), tladJoin (eventJoin + a Play /
+  Watch card; MEETING_SCRIPTS written at runtime, as rec.talent and FLC already do), tladAgain, tladLead (ev.lead like
+  friLead: host 20 min early, others 15 when eventFree; the planner caches cleared once at load, as section 18's end).
+- join_check (run alone; side by side two runs timed out at its save/reload page.goto, line ~143, not the ladder):
+  OK on the fix; on ba836359 5 ladder lines FAIL; plants caught: t1 no tladMinute (nobody plays, you never sit), t2
+  no tladJoin (no Play/Watch card), t3 ring spots untagged (ring empty, all in lounge seats), t4 no tladLead (host
+  not at the table by 15:02, ring empty).
+- events_check OK, day_check 6 OK, tiles_check ALL OK, cadet_test vs ba836359 ALL IDENTICAL, check_fast OK (249 s).
