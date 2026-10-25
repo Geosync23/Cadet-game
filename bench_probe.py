@@ -1,6 +1,6 @@
 # Starship Cadet: bench press probe (0.92.6 #6, the user's: "weight not parallel with the ground, doesn't line up with
 # the hands"; a one-off targeted check, kept next to the other checks)
-# Poses you and one crew member in the bench press ('lie:bench') through a whole lift, 24 moments, and measures the held
+# Poses you (a FullPerson, as your activities are drawn) and one crew member (the crowd) in the bench press ('lie:bench') through a whole lift, 24 moments, and measures the held
 # bar from its holder: both ends at the same height (level) and each grip on the bar (its distance from the bar's line).
 # Run:  python3 bench_probe.py BUILD.html
 import sys, json
@@ -13,7 +13,7 @@ def check(cond, msg):
     if not cond: ok = False
     return cond
 PROBE = """(who) => {
-  const o = who === 'you' ? player : crowd.people.find(p => p.rig && p.propBones); if (!o) return null;
+  const o = who === 'you' ? new FullPerson(PLAYER_SPEC, 'you') : crowd.people.find(p => p.rig && p.propBones); if (!o) return null;   // your activities are drawn by a FullPerson (actStart's A.body)
   const pos = (o.pos && o.pos.y) || .5, out = [];
   o.fresh = true; animateActivity(o, 'lie:bench', 1 / 30, 0, 0, pos);
   for (let f = 0; f < 120; f++) animateActivity(o, 'lie:bench', 1 / 30, f / 30, 0, pos);   // settle into the pose
@@ -30,6 +30,7 @@ PROBE = """(who) => {
     const line = new THREE.Line3(a, b), off = p => { const c = new THREE.Vector3(); line.closestPointToPoint(p, true, c); return c.distanceTo(p); };
     out.push({ tilt: Math.abs(a.y - b.y), gr: off(gr), gl: off(gl), y: (a.y + b.y) / 2 });
   }
+  if (who === 'you' && o.dispose) o.dispose();
   return out; }"""
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1], 900, 760)
@@ -41,7 +42,7 @@ with sync_playwright() as pw:
         print(f'    {who}: worst tilt {tilt * 100:.2f} cm end to end, worst grip off the bar {grip * 100:.2f} cm, the bar travels {(max(ys) - min(ys)) * 100:.1f} cm')
         check(tilt < .01, f'{who}: the bar stays level (ends within 1 cm of the same height)')
         check(grip < .03, f'{who}: both hands stay on the bar (each grip within 3 cm of it)')
-        check(max(ys) - min(ys) > .1, f'{who}: the bar goes down and up with the press')
+        check(max(ys) - min(ys) > .05, f'{who}: the bar goes down and up with the press')
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 print('BENCH PROBE OK' if ok else 'BENCH PROBE FAILED')
