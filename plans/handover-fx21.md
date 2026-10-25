@@ -54,6 +54,18 @@ ways: play: Theo 5 Day 21, Kovac 4 Day 19 15:50, Halloran 5 Day 18, Basil 4 Day 
 the planner hook hasn't changed since). Saad 4 is lead 36's (b): where: calm, a call and a walk down; "Saad at the valve
 as a day-plan piece" is a later option for the user.
 
+## RV16's review (findings at claude/review-rv16 e4231dbe, plans/review-rv16-stories.md) and the fixes (c1feef46)
+1. Kovac 4 at the lift: a crescendo with `lead:` and a named room now books the person's own walk by plan (`storyWalk`:
+   lead minutes before their lift ride to the ride; plays only on the deck they ride from, `b.walk`). Open: her cast
+   Cruz rides from Deck 3, so it never books; lead 36 to pick (a') drop Cruz from cast (here: lines) or (b) re-place it.
+2. Saad 4: an event crescendo's window starts once they're up (storySlots skips sleep and wash). CS1 rewords the invite.
+   Invites may use `{at}` (the booked time, as the Calendar shows it).
+3. A no-reply story beat counts only when the scene finished (onEnd's flag).
+4. `storyInScene`: no overheard chatter from an open story scene's speaker (switch-on only; older moments may do the same:
+   backlog if RV16 confirms).
+stories_check: a crescendo naming a room must be told there (or on its walk). Checks at c1feef46: stories_check OK,
+day_check 12, 13, 19 OK (on), cadet_test ALL IDENTICAL (run alone: beside check_fast it can show f/g/h diffs), check_fast OK.
+
 ## Loose ends
 - S7 (switch on, after review and the user's yes): flip STORIES_ON; retire the old Pell and Kovac words (content/arcs
   pell.arc, kovac.arc parked by CS1's rule); kovac-zainab.lines' joy line (the spanner grip, a comment at kovac.story beat
