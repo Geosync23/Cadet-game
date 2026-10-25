@@ -13,6 +13,8 @@ starship-cadet.html), everything between these markers, which sit in section 22 
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
     // ---- BEGIN ADDRESSES ...   // ---- END ADDRESSES ----    FRI_ADDRESSES, the Captain's Friday addresses (content/addresses/*.address;
                                                                  section 18f's player, the Fridays builder's)
+    // ---- BEGIN APPTS ...       // ---- END APPTS ----        APPTS, the appointments' words (content/appointments/*.appt; 0.92.6 item 9,
+                                                                 section 18's appointment code, FX22)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
 --check changes nothing and exits 1 if the game file is out of date. The shapes are the social plan's Part 9
@@ -492,6 +494,51 @@ def parse_voice_file(path, rel, out):
             raise GenError(f'{where}: unknown voice card field "{k}"')
 
 
+def meet_line(l, s, where, body, choice):
+    """One line of a meeting script (a .meet file's == lines, an .appt file's scenes) into body; returns the open choice."""
+    if s == '? choice':
+        choice = {'choice': []}
+        body.append(choice)
+        return choice
+    if s.startswith('* '):
+        if choice is None:
+            raise GenError(f'{where}: a "* choice" outside "? choice"')
+        parts = re.split(r'\s+(?=(?:rel|job|flavour|mem|flag|favour):)', s[2:].strip())
+        ch = {'text': parts[0]}
+        for p in parts[1:]:
+            k, v = p.split(':', 1)
+            if k == 'rel':
+                ch['rel'] = {}
+                for r in v.split(','):
+                    m = re.fullmatch(r'([\w-]+)([+-]\d+)', r)
+                    if not m:
+                        raise GenError(f'{where}: rel is like calder+2,tech2+1')
+                    ch['rel'][m.group(1)] = int(m.group(2))
+            else:
+                ch[k] = v
+        choice['choice'].append(ch)
+        return choice
+    pin = s.endswith(' {pin}')                      # Pillar 5 Step 3: the line where the insignia is pinned (seat C2's pin: true)
+    if pin:
+        s = s[:-len(' {pin}')].rstrip()
+    m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s)
+    if not m:
+        raise GenError(f'{where}: meeting lines are "who: text [pose]"')
+    ln = {'who': m.group(1), 'text': m.group(3)}
+    if pin:
+        ln['pin'] = True
+    if m.group(4):
+        ln['pose'] = m.group(4)
+    if m.group(2):
+        ln['to'] = m.group(2)
+    if l.startswith(' ') and choice is not None and choice['choice']:
+        choice['choice'][-1]['reply'] = ln
+        return choice
+    choice = None
+    body.append(ln)
+    return choice
+
+
 def parse_meeting(path, rel, out):
     """@meeting <id>; title/from/gist/notify: fields; == lines; 'who: text [pose]' or 'who > to: text' (a trailing ' {pin}'
     bakes pin: true on that line);
@@ -518,50 +565,77 @@ def parse_meeting(path, rel, out):
                 raise GenError(f'{where}: before "== lines" only title:, from:, gist:, notify:')
             sc[m.group(1)] = m.group(2)
             continue
-        if s == '? choice':
-            choice = {'choice': []}
-            body.append(choice)
-            continue
-        if s.startswith('* '):
-            if choice is None:
-                raise GenError(f'{where}: a "* choice" outside "? choice"')
-            parts = re.split(r'\s+(?=(?:rel|job|flavour|mem|flag|favour):)', s[2:].strip())
-            ch = {'text': parts[0]}
-            for p in parts[1:]:
-                k, v = p.split(':', 1)
-                if k == 'rel':
-                    ch['rel'] = {}
-                    for r in v.split(','):
-                        m = re.fullmatch(r'([\w-]+)([+-]\d+)', r)
-                        if not m:
-                            raise GenError(f'{where}: rel is like calder+2,tech2+1')
-                        ch['rel'][m.group(1)] = int(m.group(2))
-                else:
-                    ch[k] = v
-            choice['choice'].append(ch)
-            continue
-        pin = s.endswith(' {pin}')                      # Pillar 5 Step 3: the line where the insignia is pinned (seat C2's pin: true)
-        if pin:
-            s = s[:-len(' {pin}')].rstrip()
-        m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s)
-        if not m:
-            raise GenError(f'{where}: meeting lines are "who: text [pose]"')
-        ln = {'who': m.group(1), 'text': m.group(3)}
-        if pin:
-            ln['pin'] = True
-        if m.group(4):
-            ln['pose'] = m.group(4)
-        if m.group(2):
-            ln['to'] = m.group(2)
-        if l.startswith(' ') and choice is not None and choice['choice']:
-            choice['choice'][-1]['reply'] = ln
-            continue
-        choice = None
-        body.append(ln)
+        choice = meet_line(l, s, where, body, choice)
     if not body:
         raise GenError(f'{path}: no "== lines"')
     sc['lines'] = body
     out['MEETINGS_BAKED'][hd[1]] = sc
+
+
+APPT_FIELDS = ('title', 'starts', 'host', 'gate', 'when', 'at', 'where', 'who', 'once', 'mem', 'flag', 'record')
+APPT_TEXTS = ('invite', 'ask', 'busy', 'mail', 'here', 'thanks', 'after')       # "- text  #tone" lists
+APPT_SCENES = ('scene', 'stops', 'tend', 'harvest')                             # meeting-format lines (meet_line)
+
+
+def parse_appt(path, rel, out):
+    """@appointment <id> (0.92.6 item 9, FX22; content/appointments/README.md): fields, then == sections. A per-host file's
+    'where <id>:' / 'at <id>:' fields and '== scene <id>' / '== after <id>' sections are keyed by that host. Baked into
+    APPTS[id] = { fields..., where: {id: ...} when per host, invite: [{text, tone?}], ..., scene: {'' | id: [lines]},
+    stops / tend / harvest: [lines] }; the rules (who, when, where on the deck) are section 18's appointment code's."""
+    lines = read_lines(path)
+    hd = header(lines, path)
+    if hd[0] != 'appointment' or len(hd) != 2:
+        raise GenError(f'{path}: an .appt file starts with "@appointment <id>"')
+    a, sec, key, body, choice = {}, None, None, None, None
+    for i, l in lines:
+        where = f'{path}:{i}'
+        s = l.strip()
+        if not s or s.startswith('@'):
+            continue
+        if s.startswith('=='):
+            m = re.fullmatch(r'==\s*([a-z]+)(?:\s+([\w-]+))?', s)
+            if not m or m.group(1) not in APPT_TEXTS + APPT_SCENES:
+                raise GenError(f'{where}: "{s}" is not an appointment section ({", ".join(APPT_TEXTS + APPT_SCENES)})')
+            sec, key, choice = m.group(1), m.group(2) or '', None
+            if sec in APPT_SCENES:
+                body = []
+                if sec == 'scene':
+                    if key in a.setdefault('scene', {}):
+                        raise GenError(f'{where}: "== scene {key}" twice')
+                    a['scene'][key] = body
+                elif key or sec in a:
+                    raise GenError(f'{where}: "== {sec}" takes no id and comes once')
+                else:
+                    a[sec] = body
+            continue
+        if sec is None:
+            m = re.fullmatch(r'([a-z]+)(?:\s+([\w-]+))?:\s*(.+)', s)
+            if not m or m.group(1) not in APPT_FIELDS or m.group(2) and m.group(1) not in ('where', 'at'):
+                raise GenError(f'{where}: before the first "==" only the fields {", ".join(APPT_FIELDS)} (and "where <id>:", "at <id>:")')
+            if m.group(2):
+                a.setdefault(m.group(1) + 'Of', {})[m.group(2)] = m.group(3)
+            else:
+                a[m.group(1)] = m.group(3)
+            continue
+        if sec in APPT_TEXTS:
+            if not s.startswith('- '):
+                raise GenError(f'{where}: "== {sec}" lines start with "- "')
+            text, tone = split_tone(s[2:], where)
+            e = {'text': text}
+            if tone != 'light':
+                e['tone'] = tone
+            if key:
+                a.setdefault(sec + 'Of', {}).setdefault(key, []).append(e)
+            else:
+                a.setdefault(sec, []).append(e)
+            continue
+        choice = meet_line(l, s, where, body, choice)
+    for f in ('title', 'starts', 'host'):
+        if f not in a:
+            raise GenError(f'{path}: no "{f}:"')
+    if 'scene' not in a:
+        raise GenError(f'{path}: no "== scene"')
+    out['APPTS'][hd[1]] = a
 
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
@@ -898,7 +972,7 @@ def parse_address(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPTS': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -921,6 +995,8 @@ def bake():
             parse_talk_file(path, rel, out)
         elif ext == 'address':
             parse_address(path, rel, out)
+        elif ext == 'appt':
+            parse_appt(path, rel, out)
     # traditions: the traditions engineer's grammar and shape (plans/trad-format.md), read by their trad_parse.read_all
     # (the interface is theirs and frozen). Baked as one array: const TRADITIONS = [ one tradition a line ];
     tdir = os.path.join(CONTENT, 'traditions')
@@ -1049,7 +1125,8 @@ def blocks(out):
             addr.append('    ]},')
         addr.append('  ]},')
     addr.append('};')
-    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr}
+    appt = ['const APPTS = {'] + [f'  {js(k)}: {js(out["APPTS"][k])},' for k in sorted(out['APPTS'])] + ['};']
+    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr, 'APPTS': appt}
 
 
 def talks_parsed(name, T):
@@ -1096,7 +1173,7 @@ def main(argv):
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
                f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, {len(out["ADDRESSES"])} addresses, '
-               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks')
+               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks, {len(out["APPTS"])} appointments')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1
