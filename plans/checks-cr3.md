@@ -383,3 +383,21 @@ said in S6's setup; the arrow half of S6 holds. Routed by lead 36 (FX19). Not fi
 and boardEmptySay rightly holds its word during a test; the check now tries the empty board with nothing under way.
 
 **Final 0.92.6 commit** (claude/staging-0.92.6 6b425814; game sha256 **10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266**, FX17's Line-clash fix since b78e1e22): arrows_d_check alone with 6b425814's script: `arrows_d_check: OK` (exit 0). BM17's ask.
+
+# 0.93.0 (claude/staging-0.93.0 4f1e52bf, sound + music), BM18's start; reported to BM18 and lead 37
+
+sha256 **97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8** (BM18's). OLD 5898c190 (0.92.6). Own CADET_WORK.
+Setup checked before the round on 5898c190 (arrows_f OK in 40 s).
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 266; worst stuck 0.0; 296 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 283 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 279 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 270 s |
+| weekend_check | **OK** | WEEKEND CHECK OK; 504 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 63 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 32 s |
+| controller_check (every part but reach) | **OK** | CONTROLLER CHECK OK, all 28 parts; 2048 s (CR6's and CR4's offers declined: it had started) |
+
+No FAIL.
