@@ -53,6 +53,7 @@ them: There. Four. No, I'm joking. Three. On we go, slowly.   [laugh]
 // DAY: 8-12
 // before the storm, so the storm can carry beat 4; early evening, before ten
 tone: heartfelt
+gapDays: 0
 where: calm
 when: beat:salo.2 time:evening !event:ionStorm.onset !event:ionStorm.escalation day:8-12
 hint: Sit with me a minute? Before ten. There's a story I've not told.
@@ -79,6 +80,7 @@ them: Right. Twenty to ten. I'll walk you to the lift, then bed.
 // CRESCENDO rides on: the ion storm (event ionStorm, its Saturday, daytime, Deck 6 coolant loop); day: 13; cast: salo-saad, torres-zeke (on shift), calder (over the comm); quiet ending: beat 6
 tone: resolution
 tier: friend
+gapDays: 0
 where: Engine room
 duty: true
 crisis: true
