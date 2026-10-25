@@ -271,3 +271,18 @@ lines_check --day handed to CR6 (agreed, cc BM16, lead 34).
 | intro_check (whole) | OK | `OK`, 0 FAIL lines (part 12 did not time out) |
 | perf_check NEW OLD | OK | `PERF CHECK OK`; no memory growth (521/521/521) |
 | lines_check --day | OK (CR6) | PASS (0 errors) (claude/checks-cr6 8907760) |
+
+# 0.92.5 (claude/staging-0.92.5 53c11f8), CR2's share (my last) — **OK**
+
+NEW 53c11f8, sha256 `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559` (matches BM17's).
+OLD ba836359 (0.92.4), sha256 `2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2`.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Every shot, pixels only (a_start 2239, b 2344, c 448, d 5771, e 2010, f 11412, g_nocrew 468, h 16910, i_tap0-4 15009-18653, j 15118/20772): FX9b's lounge seats, the walking pose, crew plans; no state/path/tap DIFF lines; no page errors. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 49 warnings; = BM17's run) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines |
+| perf_check NEW OLD | OK (expected + backlog 32) | Both runs: the six weekend draw-call lines BM17 listed, repeating exactly (jigsaw 119→174, 186→239, 153→222; story 200→235, 307→342, 238→273; max 342, under 450). Plus one js spike per run, a different scene each time (run 1 storm all-clear landscape 1.29 → 2.42 ms, gone in run 2 at 1.68 → 1.56; run 2 the Line supper trifold-folded 1.99 → 3.1) = backlog 32. No memory growth (521/521/521). |
+| lines_check --day | OK | PASS (0 errors) |

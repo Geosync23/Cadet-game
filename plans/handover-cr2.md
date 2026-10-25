@@ -42,4 +42,4 @@ About 75 minutes alone; perf (~37 min) and intro (~27-32 min) are the long ones.
 
 ## Loose ends
 
-None open. Last round: 0.92.4 5bad724d OK (claude/checks-cr2 a0008108). Waiting for 0.92.5.
+None open. Last round: 0.92.5 53c11f8 OK. CR2 (this session) is idle; a fresh CR2 takes the next round.
