@@ -43,6 +43,7 @@ COND_KEYS = {
     'birthday': 'lines', 'pair': 'lines', 'topic': 'lines', 'who': 'lines', 'with': 'lines', 'gift': 'lines',
     'came': 'lines', 'friend': 'lines',
     'thread': 'lines',                       # the speaker's roster thread (the struggle theme): the Talk a while pack's
+    'day': 'lines', 'here': 'lines',         # crew stories (FX21, 0.92.6): the ship day (21, 3-21, 15-, -20), and someone in the scene
 }
 NUM_KEYS = ('w', 'odds')                     # numbers, not conditions: a weight, and a seeded chance
 TONES = ('light', 'funny', 'warm', 'serious')
@@ -106,6 +107,8 @@ def parse_conds(text, where):
             raise GenError(f'{where}: unknown condition "{k}" (see content/README.md, "Conditions")')
         if not v:
             raise GenError(f'{where}: "{tok}" has no value')
+        if k == 'day' and not re.fullmatch(r'\d+|\d+-\d*|-\d+', v):
+            raise GenError(f'{where}: day is a ship day (21), a span (3-21), from (15-) or until (-20)')
         if k in dst:                              # the same key twice: all must hold
             dst[k] = (dst[k] if isinstance(dst[k], list) else [dst[k]]) + [v]
         else:
@@ -572,14 +575,15 @@ THEMES = ('homesick', 'exams', 'family', 'stuck', 'notgood', 'lonely', 'loss', '
 FLAVOURS = ('listen', 'cheer', 'practical', 'share')
 
 
-def parse_arc(path, rel, out, home=False):
+def parse_arc(path, rel, out, home=False, store='MOMENTS'):
     """A story arc (content/arcs/<arcId>.arc: '@arc <arcId>' then 'who: <crewId>') or a struggle theme
     (content/themes/<theme>.arc: '@theme <theme>'). Each '== beat <n>' has fields, then the script:
       tone: light|heartfelt|serious|resolution   where: calm|visit|appt|<room name>   when: <conditions>
       tier: <0-4 or a tier name>  metDays: <n>  gapDays: <n>  duty: true  crisis: true  hint: <the tap line while ready>
       mem: <word>  flag: <key set when it's told>  keepsake: <text>  learn: <one line>  mail: <minutes> | <subject> | <body>
       needs: home, family (themes: the roster fields a beat needs)
-    then lines 'who: text [pose]' (who: a crew id, them (the arc's person), or you), '? choice', and
+    then lines 'who: text [pose]' (who: a crew id, them (the arc's person), or you), each may start 'if <conditions> | '
+    (played only when they hold, judged as the scene starts: crew stories, FX21), '? choice', and
     '* reply  flavour:listen mem:word flag:key favour:job' with its answer indented under it ('  them: text [pose]')
     and, optionally, a warmer answer for the person whose needs it fits ('  + them: text').
     Baked: MOMENTS['<crewId>:<n>'] = { who, thread: 'arc:<arcId>', beat, ...fields, lines } and
@@ -678,6 +682,10 @@ def parse_arc(path, rel, out, home=False):
             choice['choice'].append(ch)
             continue
         warm = s.startswith('+ ')
+        lif = None
+        mi = re.fullmatch(r'if\s+(.+?)\s+\|\s+(.+)', s)
+        if mi and not warm:                    # a line with its own conditions (crew stories, FX21)
+            lif, s = parse_conds(mi.group(1), where), mi.group(2)
         m = re.fullmatch(r'([\w-]+)(?:\s*>\s*([\w-]+))?:\s*(.+?)(?:\s+\[(\w+)\])?', s[2:].strip() if warm else s)
         if not m:
             raise GenError(f'{where}: script lines are "who: text [pose]" ("? choice", "* reply ...", indented answers)')
@@ -689,6 +697,10 @@ def parse_arc(path, rel, out, home=False):
             ln['pose'] = m.group(4)
         if m.group(2):
             ln['to'] = m.group(2)
+        if lif is not None:
+            if l.startswith(' '):
+                raise GenError(f'{where}: "if ... |" goes on a script line, not on an answer')
+            ln['if'] = lif
         if l.startswith(' ') and choice is not None and choice['choice']:
             ch = choice['choice'][-1]
             if warm:
@@ -726,9 +738,9 @@ def parse_arc(path, rel, out, home=False):
     else:
         for b in beats:
             mid = f'{who}:{b["beat"]}'
-            if mid in out['MOMENTS']:
+            if mid in out[store]:
                 raise GenError(f'{path}: moment {mid} is defined twice')
-            out['MOMENTS'][mid] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
+            out[store][mid] = {'who': who, 'thread': 'arc:' + aid, **{k: b[k] for k in order if k in b}}
 
 
 def parse_home_rest(lines, path, rel, cid, who, out):
@@ -898,7 +910,7 @@ def parse_address(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -913,6 +925,8 @@ def bake():
             parse_voice_file(path, rel, out)
         elif ext == 'meet':
             parse_meeting(path, rel, out)
+        elif ext == 'arc' and rel.startswith('stories/'):   # crew stories (FX21, 0.92.6): the new beats, read only while STORIES_ON (section 20c)
+            parse_arc(path, rel, out, store='STORY_MOMENTS')
         elif ext == 'arc':
             parse_arc(path, rel, out)
         elif ext == 'call':
@@ -1034,6 +1048,7 @@ def blocks(out):
     lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) \
         + lists_parsed('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
+        + ['const STORY_MOMENTS = {'] + [f'  {js(k)}: {js(out["STORY_MOMENTS"][k])},' for k in sorted(out['STORY_MOMENTS'])] + ['};'] \
         + ['const MOMENT_THEMES = {'] + [f'  {js(k)}: {js(out["MOMENT_THEMES"][k])},' for k in sorted(out['MOMENT_THEMES'])] + ['};'] \
         + sum(([f'const {n} = {{'] + [f'  {js(k)}: {js(out[n][k])},' for k in sorted(out[n])] + ['};']
                for n in ('HOME_CONTACTS', 'HOME_MOMENTS', 'HOME_SEND', 'HOME_CHAT')), [])

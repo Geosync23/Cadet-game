@@ -107,6 +107,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `newhere` | the speaker arrived within the last 7 days (a bare word, no value) | `newhere` |
 | `moved:<id>` | that crew member has left the Wren | `moved:okoro` |
 | `guide:` | `true` while you're guiding a newcomer | `guide:true` |
+| `here:<crewId>` | crew stories (FX21): that crew member is in the scene with the speaker (same room now); `you` always is | `here:torres-zeke` |
 
 **About the moment** (the dialogue engine):
 
@@ -122,6 +123,7 @@ These are the only condition words. `lines_check.py` rejects anything else. Put 
 | `dept:` `rank:` `trait:` `habit:` | the speaker's department, rank, trait (one of the roster's, `_` for a space) or habit | `dept:galley`, `rank:junior`, `trait:dry_humour`, `habit:gardener` |
 | `act:` | what they're doing | `work`, `breakfast`, `dinner`, `meal` (either), `gym`, `wash`, `leisure`, `off`, `free` (either), `call` (on a call home) |
 | `birthday:` | `me` (the speaker's) or `you` (yours) | `birthday:me` |
+| `day:` | crew stories (FX21): the ship day: one day, a span, from a day on, or up to a day | `day:21`, `day:3-21`, `day:15-`, `day:-20` |
 | `came:` | calls home: you went to a tradition lately (`any`, or its id); the call passes it, and `{trad}` fills from it | `came:any` |
 | `friend:` | calls home: you have a friend aboard (`any`); `{friend}` fills from it | `friend:any` |
 | `gift:` | thanking for a gift: how it landed (`loved`, `liked`, `polite`) or its tag | `gift:loved`, `gift:sweet` |
@@ -304,6 +306,11 @@ them: Was I any good, as your trainer?   [sigh]
 
 - **The script** follows: `them: text [pose]` (`them` is the arc's person; a crew id or `you` also work;
   `them > you: ...` for a line said to you). Poses: `sigh`, `laugh`, `listen`, `nod`, `gesture`.
+- **A line with its own conditions** (crew stories, FX21): `if <conditions> | them: text`, played only when they hold
+  as the scene starts (`if here:torres-zeke | torres-zeke: Properly, Pell.`, `if !flag:halloran.jokes.done | pell: ...`).
+  The ` | ` has a space each side (a `|` inside a value still means "either"). Script lines only, not the answers.
+- **Crew stories** (stage 1, FX21): `content/stories/<arcId>.arc`, the same format, baked into `STORY_MOMENTS` and read
+  only while the game's `STORIES_ON` is on; the older words in `content/arcs/` stay the game's until then.
 - **Choices:** `? choice`, then up to three `* reply` lines. Each can carry `flavour:` (`listen`, `cheer`, `practical`,
   `share`), `mem:<word>`, `flag:<key>` (set when chosen) and `favour:<job>` (a practical reply that starts a favour).
   Indent the answer under it (`  them: ...`), and if you like a warmer answer for the person this flavour suits,
