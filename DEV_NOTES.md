@@ -420,6 +420,19 @@ plans/pillar3-plan.md, C3 (crew side) and C10 (doors).
     - Pell, with nobody coming, is `missed` at +15 and back to his evening.
     - An invitation to the Captain's quarters lets your path in during it and not after.
 
+### Appointments as small traditions (0.92.6 item 9, FX22; behind `P926_APPT`, `?appt` previews)
+
+The user: "Appointments work almost exactly the same as ship traditions but are usually one on one or very small group." All code in the slot "Appointments builder" (section 18); the hand-over is plans/handover-fx22.md.
+- **Words:** `content/appointments/*.appt` (SW2; README there = format) baked by content_gen.py's `parse_appt` into `APPT_WORDS` (markers after FRI_ADDRESSES); `talk-fix.lines` as LINES `appt.arrive/wait/late/notalk/bye`.
+- **The cheap fix** (`apptTalkFrame`): a kept plain appointment (no occasion, no tradition, not one of ours) opens their chat with appt.arrive / wait / late, then `talkStart` (or appt.notalk if you talked today); appt.bye in a bubble at its end.
+- **Rules:** `APPT_RULES[kind]` (hosts, tier, once true / 'week' / 'host', where, onShift(host, d), anyDeck, times(p, d), key, guests, toBed, days, today, path 'appt'). Asked for: "What for?" in the Appointments app (`apptAskable`, `apptAsk`); offered: `apptHour` (once a ship hour 08:00-20:00, one a day, a declined kind not for a week), Accept / Decline in the app, the invite line in a bubble when you're near the host.
+- **Booking:** `apptSlots` (candidates from tomorrow, or today with `today`; not when the host goes to a tradition then; not in a ship-wide event's paused hours) and `apptTry` -> `apptBookIt`: a one-off tradition through `eventOneOff` (`only`: the host, or none when they're at work for it, or the bunkmates; `hold: []`), checked once planned (else `apptUnbook` and the next candidate). Overlay ones (`path: 'appt'`: show and tell in a locked cabin, rehearse tonight) go through `apptAdd` with `appt` on the appointment. Mail the evening before (18:00) or on the day.
+- **Joining and the scene:** `tradJoinable` takes an appointment one-off; a tap on the host -> `eventJoin` -> `apptJoin` -> `apptScene` (the scene as a meeting script, filled in the speaker's voice; group scenes drop lines from anyone not there, `apptPresent`; `where` = the room you're in, or meetingsTick would close it at the next ship minute). Its end -> `apptKeep` (relationship, flag, a department's +1, the hobby's kit, the thanks toast). Overlay ones: `apptOverlayFrame` once kept and the host is near. The after line once later (`apptNearMinute`; rehearse's at their tradition the next day). The Record lists them (`apptRecord`).
+- **The night round:** `apptRoundFrame`: Mensah waits at the Deck 3 lift plaza from 22:25 (`crewScene` wait), follows you once joined (`crewScene` follow, across decks), a stop line per deck (`APPT_ROUND`: 6, 5, 4, rec from Deck 4, 3, 2, 1) 3 ship minutes apart, then the scene.
+- **The garden bed:** `apptGardenKept` / `apptGardenNext` (planting, three visits, the harvest), trace `gardenBedYours` drawn by `DECK_DRESS.gardenBedYours` (two boxes at 3-tend-7). The feast's five standing spots in Bunk 1 (`4-feast-1..5`, tagged `appt-midnight-feast`) exist only with the switch.
+- **Saved:** `save.ship.apptx` (only with the switch): bookings, offers, kept days, told, declined, the garden's stage.
+- **Testing:** `appt_check.py BUILD.html [part ...]` (about 15 minutes; parts talk, ask, invite, overlay, round, rules, off, planted). Ends "APPT CHECK OK".
+
 ## Pillar 3: guests (section 14, the sim engineer, 0.26.14, fixed in 0.26.15)
 
 - **Data:** `GUESTS` (section 9, the crew designer): `{ id, name, looks | spec, role, cabin, arrive, leave, template, work?, habits?, seed? }`, and `GUEST_TEMPLATES` (also section 9).

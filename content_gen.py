@@ -13,7 +13,7 @@ starship-cadet.html), everything between these markers, which sit in section 22 
     // ---- BEGIN TRADITIONS ...  // ---- END TRADITIONS ----   TRADITIONS, an array (section 18's loader; plans/trad-format.md)
     // ---- BEGIN ADDRESSES ...   // ---- END ADDRESSES ----    FRI_ADDRESSES, the Captain's Friday addresses (content/addresses/*.address;
                                                                  section 18f's player, the Fridays builder's)
-    // ---- BEGIN APPTS ...       // ---- END APPTS ----        APPTS, the appointments' words (content/appointments/*.appt; 0.92.6 item 9,
+    // ---- BEGIN APPT_WORDS ...       // ---- END APPT_WORDS ----        APPT_WORDS, the appointments' words (content/appointments/*.appt; 0.92.6 item 9,
                                                                  section 18's appointment code, FX22)
 
 Nobody hand-edits a generated block. Running it again with no changes to content/ gives byte-identical output.
@@ -580,7 +580,7 @@ APPT_SCENES = ('scene', 'stops', 'tend', 'harvest')                             
 def parse_appt(path, rel, out):
     """@appointment <id> (0.92.6 item 9, FX22; content/appointments/README.md): fields, then == sections. A per-host file's
     'where <id>:' / 'at <id>:' fields and '== scene <id>' / '== after <id>' sections are keyed by that host. Baked into
-    APPTS[id] = { fields..., where: {id: ...} when per host, invite: [{text, tone?}], ..., scene: {'' | id: [lines]},
+    APPT_WORDS[id] = { fields..., where: {id: ...} when per host, invite: [{text, tone?}], ..., scene: {'' | id: [lines]},
     stops / tend / harvest: [lines] }; the rules (who, when, where on the deck) are section 18's appointment code's."""
     lines = read_lines(path)
     hd = header(lines, path)
@@ -635,7 +635,7 @@ def parse_appt(path, rel, out):
             raise GenError(f'{path}: no "{f}:"')
     if 'scene' not in a:
         raise GenError(f'{path}: no "== scene"')
-    out['APPTS'][hd[1]] = a
+    out['APPT_WORDS'][hd[1]] = a
 
 
 MOMENT_TONES = ('light', 'heartfelt', 'serious', 'resolution')
@@ -972,7 +972,7 @@ def parse_address(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPTS': {},
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {}, 'APPT_WORDS': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -1125,8 +1125,8 @@ def blocks(out):
             addr.append('    ]},')
         addr.append('  ]},')
     addr.append('};')
-    appt = ['const APPTS = {'] + [f'  {js(k)}: {js(out["APPTS"][k])},' for k in sorted(out['APPTS'])] + ['};']
-    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr, 'APPTS': appt}
+    appt = ['const APPT_WORDS = {'] + [f'  {js(k)}: {js(out["APPT_WORDS"][k])},' for k in sorted(out['APPT_WORDS'])] + ['};']
+    return {'LINES': lines, 'MEETINGS': meet, 'TRADITIONS': trad, 'TALKS': talks_parsed('TALKS', out['TALKS']), 'ADDRESSES': addr, 'APPT_WORDS': appt}
 
 
 def talks_parsed(name, T):
@@ -1173,7 +1173,7 @@ def main(argv):
     n = sum(len(v) for v in out['LINES'].values()) + sum(len(es) for c in list(out['VOICE'].values()) + list(out['VOICE_TEMPLATES'].values()) for es in c.get('lines', {}).values())
     summary = (f'{n} lines, {len(out["VOICE"])} voice cards, {len(out["VOICE_TEMPLATES"])} templates, {len(out["CONVOS"])} conversations, '
                f'{len(out["MOMENTS"])} moments, {len(out["MOMENT_THEMES"])} themes, {len(out["HOME_CONTACTS"])} home contacts, {len(out["MEETINGS_BAKED"])} meetings, {len(out["TRADITIONS"])} traditions, {len(out["ADDRESSES"])} addresses, '
-               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks, {len(out["APPTS"])} appointments')
+               f'{len(out["TALKS"]["pool"]) + sum(len(v) for d in ("own", "work") for v in out["TALKS"][d].values())} talks, {len(out["APPT_WORDS"])} appointments')
     if check:
         print(('up to date: ' if new == html else 'OUT OF DATE: ') + summary)
         return 0 if new == html else 1
