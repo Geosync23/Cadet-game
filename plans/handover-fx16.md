@@ -26,11 +26,24 @@ build master BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh), words SW1 (session_01Mjn7e
 
 ## Loose ends
 
-1. RV14's verdict on 3307ded (RV14 and lead 35 are OK with Bread day's js: 1.65 -> 2.79 ms portrait, 29 -> 33 people; Sunday dinner today is
-   2.37-2.79 with 66). If asked to dig: profile the galley at Day 7 07:25 (cook anim near the cooks? the cook-along spots?).
+1. (done) RV14 FINAL PASS at 3307ded5 (2026-10-25 ~04:20 UTC), Bread day's js accepted (RV14, lead 35). Waits on the full round, then BM16's merge.
 2. (done) The decor tap texts: cocoa as written, the picnic basket's final words in 3307ded (SW1, CS1 PASS).
 3. The full six-runner round on the shipped build: the lead calls it.
-4. The pitch page (claude/weekend-pitch) still says the story is 22:15: SW1's file.
+4. (done by SW1) The pitch page has a "Since your answers" box (claude/weekend-pitch cbaac1db).
+5. **Every song, Day 69:** the music room was full (six seats and both standing places by the piano taken), so joining stood you
+   beside the leader with the game's own words ("Every spot's taken just now..."). The picnic on Day 20 did the same (garden benches
+   full). weekend_check prints these, not fails. If the user wants a seat always there, add `spare: 1` to every-song.trad and
+   garden-picnic.trad as DS1 did for the story and the cocoa (garden: the user's no-new-meal-seats rule, so only an existing bench).
+
+## How to test
+
+- Setup: `pip install playwright numpy pillow`; three r128 and acorn 8.12.1 into /tmp/cadet-work (testing guide 2.0);
+  `CADET_CHROME=/opt/pw-browsers/chromium`; each parallel run its own CADET_WORK.
+- `python3 weekend_check.py starship-cadet.html` (~12 min; WEEKEND CHECK OK). Also on the shipped file: events_check, join_check,
+  day_check 6 and 7, food_check 1 7, check_fast. Perf: `PERF_SCENES=weekend python3 perf_check.py NEW OLD`, run alone.
+- Proving the seat line: copy with tradSpot's `seat = !stand && WEEKEND_ON && WEEKEND_TRADS.has(e.id)` made `seat = false`:
+  weekend_check must FAIL the five "RV14's q_seat" lines.
+- After a .trad edit: `python3 content_gen.py starship-cadet.html`.
 
 ## Gotchas
 
