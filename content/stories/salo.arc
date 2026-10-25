@@ -77,11 +77,12 @@ them: Right. Twenty to ten. I'll walk you to the lift, then bed.
 
 == beat 4
 // DAY: 13
-// CRESCENDO rides on: the ion storm (event ionStorm, its Saturday, daytime, Deck 6 coolant loop); day: 13; cast: salo-saad, torres-zeke (on shift), calder (over the comm); quiet ending: beat 6
+// CRESCENDO rides on: the ion storm (event ionStorm, its Saturday, daytime); he's off duty, so it starts wherever he's sitting:
+// Zeke's call on the comm, then the walk down to the Deck 6 coolant loop (lead 36, 2026-10-25); day: 13; cast: salo-saad, torres-zeke (on shift), calder (over the comm); quiet ending: beat 6
 tone: resolution
 tier: friend
 gapDays: 0
-where: Engine room
+where: calm
 crisis: true
 when: beat:salo.3 event:ionStorm day:13
 crescendo: event:ionStorm
@@ -92,11 +93,11 @@ hint: Deck 6, the coolant loop. Could you come? Now, if you can.
 mem: once
 flag: salo.signed
 learn: Saad Salo once signed off a valve he hadn't checked. In the ion storm he checked one once, properly, and signed it.
-them: Rest day, and here I am. Nobody called me in. Storms don't read the rota. Hello, {me}. Glad it's you.
-them: Loop three. The valve's sticking. Half open, showing shut.   [gesture]
+torres-zeke: Saad? Loop three's dropping. Need you on it when you can. No rush. Well. Some rush.
+them: That's me. Rest day, and I'm going anyway. Storms don't read the rota. Walk down with me, {me}? Glad it's you.
+them: Deck 6. Loop three. Here. The valve's sticking. Half open, showing shut.   [gesture]
 them: It's the same. The same feel under my hand. The Pallas one did exactly this.
 them: Give me a moment. My hand won't go.   [sigh]
-torres-zeke: Saad? Loop three's dropping. Need you on it when you can. No rush. Well. Some rush.
 ? choice
 * I'm here. Take your time. We've got a minute.   flavour:listen mem:steady
   them: A minute. Yes. Breathe, then the valve. In that order.
