@@ -1,0 +1,288 @@
+<title>Wren Appointments</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; a table of what exists, then one card per new appointment, grouped by who starts it; the answers form at the end. */
+:root {
+  --bg: #f4f3f7; --surface: #ffffff; --ink: #1c1a26; --muted: #5a5670; --line: #d9d6e3;
+  --plum: #6a3d8f; --plumSoft: #ece2f4; --teal: #1d7a72; --tealSoft: #dcefec; --gold: #946b12;
+  --chip: #ebe9f1; --chipInk: #453f5c; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #121019; --surface: #1b1824; --ink: #e8e5f0; --muted: #a7a1bd; --line: #312c40;
+  --plum: #c49ce6; --plumSoft: #2e2140; --teal: #63c6bb; --tealSoft: #17332f; --gold: #e2bb5a;
+  --chip: #2a2638; --chipInk: #d5d0e6; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #121019; --surface: #1b1824; --ink: #e8e5f0; --muted: #a7a1bd; --line: #312c40;
+  --plum: #c49ce6; --plumSoft: #2e2140; --teal: #63c6bb; --tealSoft: #17332f; --gold: #e2bb5a;
+  --chip: #2a2638; --chipInk: #d5d0e6; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--plum); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.tbl { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 9px 12px; border-bottom: 1px solid var(--line); }
+tr:last-child td { border-bottom: 0; }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+.gap { color: var(--flag); font-weight: 700; }
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.ask { border-top: 4px solid var(--teal); }
+.card.inv { border-top: 4px solid var(--plum); }
+.card.pick { box-shadow: 0 0 0 2px var(--gold); }
+.card header { display: grid; gap: 4px; }
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tag { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--chip); color: var(--chipInk); }
+.tag.rec { background: var(--gold); color: var(--surface); }
+.card dl { display: grid; grid-template-columns: 96px 1fr; gap: 6px 12px; margin: 0; font-size: 14.5px; }
+.card dt { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.card dd { margin: 0; min-width: 0; }
+.say { font-style: italic; color: var(--muted); }
+.note { font-size: 14px; color: var(--flag); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); }
+.key i { display: inline-block; width: 14px; height: 4px; margin-right: 6px; vertical-align: 3px; }
+.box { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--gold); border-radius: 10px; padding: 14px 18px; display: grid; gap: 8px; }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--plum); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--teal); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+</style>
+
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">Patch 0.92.6 · item 9 · pitch · SW1 · 2026-10-25</span>
+    <h1>Appointments worth keeping</h1>
+    <p class="lead">You said appointments need to be more interesting. This page looks at what an appointment is today, then pitches ten new kinds, each with something that actually happens when you turn up. Nothing is built. Answer each one at the bottom.</p>
+  </header>
+
+  <section>
+    <h2>What an appointment is today</h2>
+    <p>The Appointments app lets you pick a person, a time and a room (the mess, a lounge, the gym, the garden, the common room, the tea corner, the music room, the observatory, the infirmary, the Chief's office, the promenade). Crew answer from their real day, and accepted ones go in their plans. The game also makes a few itself:</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Appointment</th><th>Who starts it</th><th>What happens when you turn up</th></tr></thead>
+      <tbody>
+        <tr><td>One you make with anyone</td><td>You</td><td class="gap">They come and sit with you. You get the friendship for keeping it (+3). Nothing is said or done.</td></tr>
+        <tr><td>An invitation to a tradition</td><td>A friend</td><td>You go to the tradition together.</td></tr>
+        <tr><td>Rina's health check (Day 2), check-ups</td><td>The infirmary</td><td>A short scene in the infirmary.</td></tr>
+        <tr><td>Training sessions</td><td>Your teachers (Pillar 5)</td><td>A meeting, then you try the new task.</td></tr>
+        <tr><td>Progress talks with Chief Calder</td><td>You ask</td><td>She tells you how close certification is. One step of her story happens here.</td></tr>
+        <tr><td>The Captain's ready room, the Captain's table</td><td>The Captain</td><td>A meeting with her; a framed menu from the dinner.</td></tr>
+        <tr><td>An officer's cabin visit</td><td>An officer friend</td><td class="gap">The door opens for the visit, and a chat there counts double. Nothing else.</td></tr>
+        <tr><td>The Chief's talking-to, the reprimand</td><td>Missed shifts</td><td>A serious meeting, only if things go wrong.</td></tr>
+      </tbody>
+    </table></div>
+    <p>So the special ones (trainings, the Captain, the Chief) work well, but the everyday ones, the ones you make yourself and the cabin visits, have nothing in them. The pitch below gives every appointment a reason: something you do together, something you see, and usually something you keep.</p>
+  </section>
+
+  <section class="box">
+    <h3>First, the cheap fix for all of them</h3>
+    <p>Any appointment you make with someone plays one of their own "Talk a while" talks when you sit down (the main characters now have thirty each). So even a plain "meet me at the tea corner" has a real conversation in it. It reuses what's built, so it's small to build. It's recommended whatever you pick below.</p>
+  </section>
+
+  <section>
+    <h2>Ten new appointments</h2>
+    <div class="key"><span><i style="background:var(--teal)"></i>You ask for it (a new "What for?" list in the Appointments app)</span><span><i style="background:var(--plum)"></i>They invite you, when you're close enough</span><span><i style="background:var(--gold)"></i>Gold outline: recommended first</span></div>
+    <div class="cards">
+
+      <article class="card inv pick">
+        <header><div class="tags"><span class="tag rec">Recommended</span><span class="tag">Galley · Brennan</span><span class="tag">Small to medium</span></div><h3>A page in Brennan's book</h3></header>
+        <p>Chef Brennan keeps a book of everyone's favourite dish. One afternoon after the lunch rush she asks you into the galley to taste three things and tell her yours. Your pick goes in the book, and from then on it turns up on a Wednesday menu now and then (Wednesday is already "a crew member's favourite" day).</p>
+        <dl>
+          <dt>Who, when</dt><dd>Brennan invites you once you know her a little (acquaintance), a weekday at 14:30.</dd>
+          <dt>You do</dt><dd>Taste three spoonfuls, pick one. Three choices, none wrong.</dd>
+          <dt>You keep</dt><dd>Your dish on the menu board, your name under it, and crew who mention it.</dd>
+          <dt>She says</dt><dd class="say">"Sit. Spoon. Try this one first. No, don't be polite, love. Tell me which."</dd>
+        </dl>
+      </article>
+
+      <article class="card inv pick">
+        <header><div class="tags"><span class="tag rec">Recommended</span><span class="tag">Every deck · Mensah</span><span class="tag">Medium</span></div><h3>The night round</h3></header>
+        <p>Kofi Mensah walks the whole ship once a night and says good night to every deck by name. When you're friends he asks if you'd like to come. You walk it with him, deck by deck, and he tells you one thing about each that only the night shift knows.</p>
+        <dl>
+          <dt>Who, when</dt><dd>Mensah invites you at friend, a night you're off the next morning, 22:30.</dd>
+          <dt>You do</dt><dd>Walk with him, lift to lift (it uses the walking gathering the Lap of the Wren has), about 40 minutes.</dd>
+          <dt>You keep</dt><dd>A Record line, and later he says good night to your bunk room by name.</dd>
+          <dt>He says</dt><dd class="say">"Good night, Deck 4. That's the speech. She likes it short."</dd>
+        </dl>
+      </article>
+
+      <article class="card ask pick">
+        <header><div class="tags"><span class="tag rec">Recommended</span><span class="tag">Their workplace</span><span class="tag">Medium</span></div><h3>An hour in another department</h3></header>
+        <p>Ask someone from another department if you can follow them for an hour: the galley at prep, the infirmary's morning clinic, Survey's lab, the garden at first watering, the Watch office. You watch, they explain, and once you get to try one small thing (a seedling, a label, a stir of the pot).</p>
+        <dl>
+          <dt>Who, when</dt><dd>Anyone you're a colleague with, during their shift, once a week.</dd>
+          <dt>You do</dt><dd>A short meeting in their room: a few lines, one small "you try" choice.</dd>
+          <dt>You keep</dt><dd>"Spent an hour with Survey" in your Record, and a little standing with that department.</dd>
+          <dt>Note</dt><dd class="note">Never the bridge: the bridge stays special (your rule). The Watch office and the observatory are fine.</dd>
+        </dl>
+      </article>
+
+      <article class="card ask pick">
+        <header><div class="tags"><span class="tag rec">Recommended</span><span class="tag">Common room, garden, music room</span><span class="tag">Medium</span></div><h3>Teach me your thing</h3></header>
+        <p>Ask someone to teach you their hobby. Zeke teaches you to knit (already promised in the game: "Zeke can teach you to knit"); Cruz shows you how to take a cutting; Raman lets you help with one part of his model Wren; Rina teaches you Tiles, badly on purpose; Kovac shows you how she strips a scrubber in nine and a half minutes.</p>
+        <dl>
+          <dt>Who, when</dt><dd>Anyone whose roster hobby it is, at colleague, off duty.</dd>
+          <dt>You do</dt><dd>Half an hour of the hobby side by side; it counts double toward your hobby.</dd>
+          <dt>You keep</dt><dd>The hobby unlocked if you didn't have it, and the supplies the first time.</dd>
+          <dt>Zeke says</dt><dd class="say">"Needle here. Wool round. No, round. There. That's a stitch. Look at you."</dd>
+        </dl>
+      </article>
+
+      <article class="card inv">
+        <header><div class="tags"><span class="tag">Their cabin · officers</span><span class="tag">Medium</span></div><h3>Show and tell</h3></header>
+        <p>Cabin visits get a reason: the officer shows you the thing they care about. Zeke plays you one record from the cabinet and argues with it. Raman lets you hold the model's bridge section. Sato makes her tea and shows you a comet she's tracking. Halloran gives you a warm scone from his tin.</p>
+        <dl>
+          <dt>Who, when</dt><dd>As today: an officer friend invites you to their cabin.</dd>
+          <dt>You do</dt><dd>A short scene with them and their thing; one choice.</dd>
+          <dt>You keep</dt><dd>A small memory they mention later.</dd>
+        </dl>
+      </article>
+
+      <article class="card ask">
+        <header><div class="tags"><span class="tag">Observatory · Sato</span><span class="tag">Small to medium</span></div><h3>Your turn at the big scope</h3></header>
+        <p>Book twenty minutes on the observatory's big telescope with Dr. Sato. She lines it up on something real that's out there that week (a comet, a nebula, the next star on the route) and tells you what it is.</p>
+        <dl>
+          <dt>Who, when</dt><dd>Anyone can ask Sato, any evening she's off duty.</dd>
+          <dt>You do</dt><dd>Look. Ask one of three questions.</dd>
+          <dt>You keep</dt><dd>A line in a little star log on your device.</dd>
+        </dl>
+      </article>
+
+      <article class="card inv">
+        <header><div class="tags"><span class="tag">Garden · Cruz</span><span class="tag">Medium to large</span></div><h3>A bed of your own</h3></header>
+        <p>Cruz gives you one small bed in the garden. You plant it together, then Cruz books a few more short visits over the next weeks to tend it. When it's ready you pick it and take it to Brennan, and it's in that night's dinner.</p>
+        <dl>
+          <dt>Who, when</dt><dd>Cruz invites you at friend, a Saturday morning.</dd>
+          <dt>You do</dt><dd>Plant, then three or four ten-minute visits, then the harvest.</dd>
+          <dt>You keep</dt><dd>Your bed in the garden with a little sign, and your crop on the menu.</dd>
+        </dl>
+      </article>
+
+      <article class="card inv">
+        <header><div class="tags"><span class="tag">Wherever they rehearse</span><span class="tag">Small</span></div><h3>Help me rehearse</h3></header>
+        <p>The day before something they're nervous about, a friend asks you to listen while they practise: a song for talent night, Holt reading the next Sunday chapter (doing the voices for an audience of one), Tomas's questions for quiz night.</p>
+        <dl>
+          <dt>Who, when</dt><dd>A friend, the evening before their thing.</dd>
+          <dt>You do</dt><dd>Listen, then pick how to encourage them: practical, cheerful or honest.</dd>
+          <dt>You keep</dt><dd>A thank-you at the real thing ("You heard it first.").</dd>
+        </dl>
+      </article>
+
+      <article class="card ask">
+        <header><div class="tags"><span class="tag">Bunk room · your bunkmates</span><span class="tag">Small</span></div><h3>Midnight feast</h3></header>
+        <p>Book a late snack in your bunk room with your bunkmates (a group appointment, already possible). Someone brings the grab shelf's best, someone tells a story, and someone falls asleep first.</p>
+        <dl>
+          <dt>Who, when</dt><dd>You, with two or more bunkmates, after 22:00 on a night before a day off.</dd>
+          <dt>You do</dt><dd>Sit together; a short overheard-style chat plays between them.</dd>
+          <dt>You keep</dt><dd>Bunk-room friendship for everyone there.</dd>
+        </dl>
+      </article>
+
+      <article class="card inv">
+        <header><div class="tags"><span class="tag">The bridge · Raman</span><span class="tag">Medium</span></div><h3>The spare helm chair</h3></header>
+        <p>Once you're invited to the bridge and close friends with Dev Raman, he asks you up for a quiet night watch. You sit in the spare chair while he flies a slow, gentle turn, and he tells you how it feels.</p>
+        <dl>
+          <dt>Who, when</dt><dd>Raman, close friend, after your bridge invite, once.</dd>
+          <dt>You do</dt><dd>Sit and watch the stars swing round the windows.</dd>
+          <dt>You keep</dt><dd>A Record line: "Sat at the helm with Dev Raman."</dd>
+          <dt>Note</dt><dd class="note">The bridge stays special: by invitation only, once, near the end of a friendship. Not something you can book.</dd>
+        </dl>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="box">
+    <h3>My recommendation</h3>
+    <p>Start with the cheap fix plus four: <b>A page in Brennan's book</b>, <b>The night round</b>, <b>An hour in another department</b> and <b>Teach me your thing</b>. Two are invitations and two are things you ask for. They cover four corners of the ship, and each leaves something visible behind: a dish on the menu, a goodnight, a Record line, a hobby. The rest can follow.</p>
+  </section>
+
+  <form id="answers" novalidate>
+    <h2>Your answers</h2>
+    <p class="status">Pick one for each. Notes are optional.</p>
+    <div id="rows"></div>
+    <fieldset style="border:0;padding:0;margin:0;display:grid;gap:8px">
+      <legend style="font-weight:700;margin-bottom:6px;padding:0"><label for="notes">Anything else? An appointment you'd like that isn't here?</label></legend>
+      <textarea id="notes" name="notes" placeholder="Ideas, people, places"></textarea>
+    </fieldset>
+    <button type="submit" id="save">Save my answers</button>
+    <p class="status" id="status" aria-live="polite">Loading any saved answers...</p>
+  </form>
+</div>
+
+<script>
+(() => {
+  const items = [
+    ['talkFix', 'The cheap fix: a real talk at every appointment'],
+    ['brennanBook', "A page in Brennan's book"], ['nightRound', 'The night round'], ['shadow', 'An hour in another department'],
+    ['teachMe', 'Teach me your thing'], ['showTell', 'Show and tell'], ['scope', 'Your turn at the big scope'],
+    ['gardenBed', 'A bed of your own'], ['rehearse', 'Help me rehearse'], ['feast', 'Midnight feast'], ['helmChair', 'The spare helm chair'],
+  ];
+  const opts = [['yes', 'Yes, now'], ['later', 'Later'], ['no', 'No']];
+  const rows = document.getElementById('rows');
+  for (const [k, name] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    const db = window.claude && window.claude.use ? await window.claude.use('db') : null;
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved. The team will read your answers from here.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
