@@ -11,7 +11,7 @@ min: 20
 where: 3 room Mess hall: mess-seat
 where: 3 room Bow lounge: lounge-seat
 hold: none
-who: holt always, mensah always, juniors 40%, watch 40%, everyone 25%
+who: holt always, mensah always, halloran-emeka 80%, juniors 40%, watch 40%, everyone 25%
 anim: talk
 host: holt
 from: The Watch
@@ -26,7 +26,7 @@ invite: host=holt odds=20% line="Hm. Worst joke night, the mess. Bring a bad one
 - Bring a joke to the mess later. The worse the better.
 
 == here
-- Why did the coil sulk? It had too much current. Sorry.   #funny
+- Why did the spanner blush? It saw the bolt undone. Sorry.   #funny
 - Oh, that was awful. Do another.   #funny
 - He's smiling. Is Holt smiling? No. False alarm.   #funny
 - The groans in here. Brilliant.
@@ -38,3 +38,4 @@ invite: host=holt odds=20% line="Hm. Worst joke night, the mess. Bring a bad one
 - Worst joke night was the loudest the mess has ever been.   #funny
 - Holt nearly laughed at worst joke night. Nearly. Mensah swears he saw it.   #funny
 - I told the airlock joke. Everyone groaned. I've never been prouder.   #funny
+- Halloran brought the book to worst joke night. Holt didn't stand a chance.   #funny
