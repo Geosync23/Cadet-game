@@ -20,7 +20,7 @@ Read this first if you take over as build master (BM18). Before me: `plans/hando
 ## State right now (2026-10-25 ~17:50 UTC)
 
 - 0.92.6 go/no-go package sent to lead 36 (GO from testing). Waiting for the user's say; PUB1 publishes on lead 36's go. claude/integration untouched (still 0.92.4, ba836359); moving it needs the lead's go.
-- Not yet merged, by lead 36's word: CS1's design-doc "Crew stories" section, commit ae4d60de on claude/crew-stories-pitch. CHERRY-PICK that single commit only (the branch carries old story files); docs only, confirm the game sha256 stays 10f654de.
+- CS1's design-doc "Crew stories" section (ae4d60de) cherry-picked onto staging-0.92.6 as 1da1c7b3 (docs only, game unchanged), lead 36's go.
 - Known-old for 0.92.6: backlog 12 (career busy pace; numbers in the row), 14, 23, 32, KP1, RV14-1, FX8-1.
 - Backlog rows added this session: FX21-2 (arc_check doesn't walk the four new story people), backlog 12's 0.92.6 note. The two rows numbered 17 in backlog.md are left as is (lead 36).
 - Round plan for next time: plans/testing-guide.md's six shares plus: CR1 the four arrows checks; CR2 + p926_check; CR3 + arrows_d, arrows_f, controller (every part but reach); CR4 + day 6, 8, appt_check; CR5 + promo_sight_check; CR6 + stories_check. Reach is left out (controller off). The guide's table doesn't list these extras yet: worth adding.
