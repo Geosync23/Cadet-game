@@ -113,6 +113,10 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <h1>Wren Soundscape</h1>
     <p class="lede">A first pass at how the ship could sound. Every sound here is made live in your browser, with no recordings, so it can be tuned by changing a few numbers. Tap any button to start; nothing plays on its own.</p>
     <p class="hint">Headphones or a speaker help with the hum. Phone speakers can't play the deepest notes, so each hum also carries higher overtones you can still hear. On an iPhone, if you hear nothing, check the silent switch.</p>
+    <div class="v2"><b>Version 5</b><ul>
+      <li>Your picks are marked Chosen: room doors C (Cabin) and hatches A (Bulkhead).</li>
+      <li>Still to pick: lift A, B or C, and deck button A, B or C.</li>
+    </ul></div>
     <div class="v2"><b>Version 4</b><ul>
       <li>Your picks are marked Chosen: device tap A, Mail arrived B, heads-up B.</li>
       <li>The lift's deck button is new: the same soft bell as Mail B, but short, with a pressed feel and its own notes. Three versions under The lift. The whole trip and the scene use whichever one is selected.</li>
@@ -216,7 +220,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
       <p class="variant-note">Less air, more weight: you hear the panel rumble on its rollers and land with a deep thud.</p>
     </div>
     <div class="sub">
-      <h3>C · Cabin</h3>
+      <h3>C · Cabin <span class="pick">Chosen</span></h3>
       <div class="chips">
         <button class="chip small" data-door="roomC" data-act="open"><span class="dot"></span>Open</button>
         <button class="chip small" data-door="roomC" data-act="close"><span class="dot"></span>Close</button>
@@ -225,7 +229,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     </div>
     <h3 class="group-title">Hatches</h3>
     <div class="sub">
-      <h3>A · Bulkhead</h3>
+      <h3>A · Bulkhead <span class="pick">Chosen</span></h3>
       <div class="chips">
         <button class="chip small" data-door="hatchA" data-act="open"><span class="dot"></span>Open</button>
         <button class="chip small" data-door="hatchA" data-act="close"><span class="dot"></span>Close</button>

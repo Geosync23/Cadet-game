@@ -13,8 +13,8 @@ All sound is made live by the browser (Web Audio), exactly as in the mockup, so 
 | Sound | Hook point in `starship-cadet.html` | Notes |
 | --- | --- | --- |
 | Deck hum | `goToDeck(n, at)` (~43210): cross-fade to that deck's hum. Also checked once a second against the player's room, for the garden. | Deck 1 Bridge hum; 2 Bridge hum (a touch warmer); 3 Commons; 4 Quarters; 5 Quarters hum made deeper (a workshop); 6 Engineering; R Commons. The hydroponics garden room on Deck 3 (floor `'garden'`) uses the Garden hum. Optional: about 2 dB softer at night, following `nightT`. |
-| Room doors | The door loop in `loop()` (~43377): `d.open += ...`. Play "open" when `d.open` starts rising from about 0, and "close" when it starts falling from about 1. | Type from the door: `d.e.type === 'door'` gets room door A (Pneumatic). Cabins in the officers' corridor and quiet rooms get C. Deck 5 and 6 work areas get B. Only doors within about 7 tiles of the player play, quieter with distance and panned left or right by screen position. |
-| Hatches | Same loop; `d.svc` (a service hatch, already "heavier" in the code). | Machine rooms get hatch A (Bulkhead), reactor and plant rooms B (Pressure), crawlways and closets C. A small table maps room keys to the kind, with a default of A. |
+| Room doors | The door loop in `loop()` (~43377): `d.open += ...`. Play "open" when `d.open` starts rising from about 0, and "close" when it starts falling from about 1. | Every room door uses room door **C (Cabin)**, the user's pick (2026-10-25). Only doors within about 7 tiles of the player play, quieter with distance and panned left or right by screen position. |
+| Hatches | Same loop; `d.svc` (a service hatch, already "heavier" in the code). | Every hatch uses hatch **A (Bulkhead)**, the user's pick (2026-10-25). |
 | Lift | `startRide(n)` (~43286) and `updateRide(dt)` (~43292), using the `RIDE` times. | At the start: the deck button press (the Mail B bell made short, with a pressed feel; version A, B or C still to pick), then the lift doors closing. From `RIDE.shut` to `RIDE.light`: the ride. At about `RIDE.light`: the clunk and settle, then the chime, then the doors open (they already open from `d.force` there). The game's whole ride is only 1.8 s against 3.6 s in the mockup, so the ride sound is squeezed to fit and the chime rings on as the doors open. The lift door loop must not also fire the room-door sound (check `d.e.type === 'lift'`). |
 | Device open / close | `deviceFire('open')` and `deviceFire('close')` (~10479): register with `deviceOn('open', ...)` and `deviceOn('close', ...)`, the hook the device already offers. | No edits inside the device code. |
 | Device tap | `deviceDo(action)` (~10251 describes it): the soft tick (tap A, the user's pick). | One line at the top of `deviceDo`. |
@@ -112,11 +112,9 @@ It is a contained job: one sealed block and a few dozen hook lines, with no chan
 
 ## Chosen so far, and still open
 
-The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), Mail arrived **B** (soft bell), heads-up **B** (rising pad). Everything else on the page is locked as it is: the deck hums, open and close panel, job posted, job done, "not now", the archway cue and the soft footsteps.
+The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), Mail arrived **B** (soft bell), heads-up **B** (rising pad). Then (via lead 36): room doors **C** (Cabin) and hatches **A** (Bulkhead). Everything else on the page is locked as it is: the deck hums, open and close panel, job posted, job done, "not now", the archway cue and the soft footsteps.
 
 Still to pick (the plan above assumes the first choice in brackets until the user decides):
-- Room door: A Pneumatic, B Heavy slide, C Cabin (A, with C for cabins and B for work areas).
-- Hatch: A Bulkhead, B Pressure hatch, C Crawlway (A, with B and C by room).
 - Lift: A Grand, B Service, C Smooth (A).
 - Lift deck button: A Press, B Two-step, C Low press (A).
 
