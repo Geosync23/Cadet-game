@@ -16349,7 +16349,7 @@ const ixBoard = (() => {
       const ids = new Set(yours.map(o => o.id)), les = boardLesson();
       if (les && ids.has(les)) yours.sort((a, b) => (b.id === les) - (a.id === les));   // your lesson's job first (FX10)
       const crew = jobs.filter(j => j.claimedBy && j.claimedBy !== 'you');   // the crew's, as the board on the wall shows them (0.37.6)
-      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked job.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
+      sub.textContent = mine ? 'You have a job. Finish it or drop it to take another.' : les && ids.has(les) ? 'Your ' + boardLessonName() + ' is on the board: take the marked one.' : yours.length ? 'Pick a job and take it. Tier ' + playerTier() + ' work is yours to take.'
         : 'Nothing open for you just now. New jobs come in through the day shift, and the crew take the urgent ones first: check back in an hour or two.';
       if (mine) {                                        // yours: Turn it in once the work's done (section 17's turnInJob), else Drop it
         const [title, where, state, pri] = jobCard(mine), done = mine.workDone && typeof turnInJob === 'function';
