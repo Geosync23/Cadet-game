@@ -342,3 +342,15 @@ controller_check.py: disc OK. Bisected along the candidate's first-parent line (
 took the Quick game button off Lightdisc's result card by design and FX11 updated disc_check, but controller_check's `disc`
 part still steers to "Quick game" and expects a game to 5. The game is as designed; controller_check's disc part needs the
 same update (the controller is off in the game, PAD_ON false). Not fixed (check runner); BM17 / CTT to decide.
+
+## 0.92.5: the disc re-run on FX23's fix (claude/p925-disc 404accd9, test only), lead 36 and BM17's ask
+
+Game file at 404accd9: sha256 **fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559** (unchanged; only
+controller_check.py and disc_check.py differ from 53c11f88). FX23's scripts on that game, each alone:
+
+| Check | Result | Key lines |
+|---|---|---|
+| controller_check disc | **OK** | CONTROLLER CHECK OK; `disc OK` (result card Again / Done); 36 s |
+| disc_check (whole) | **OK** | ALL OK; 53 ok lines; the game view draws in 129 calls (under 200); 297 s |
+
+So the 0.92.5 controller_check disc FAIL above is resolved by FX23's test fix; no game change.
