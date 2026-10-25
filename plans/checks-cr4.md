@@ -19,6 +19,15 @@
 
 **CR4: OK.** No FAILs. Every number identical to 0.92.6.
 
+### Taken over from CR2 (0.93.0 4f1e52bf, same sha256)
+
+BM18's and lead 37's idea at 21:43; CR2 handed both over (in its skip list, neither started). CR3 had nothing to hand over (arrows_f done, controller already running there). Run one at a time, alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| lines_check --day | PASS (exit 0, 307 s) | `lines_check --day: PASS (0 errors)` |
+| p926_check | OK (exit 0, 514 s) | `P926 CHECK OK`; no FAIL lines; last parts: 7 (c) Six weeks aboard on Day 42, Twelve weeks on Day 84; 7 (a) weeks 5-12 each bring a new tradition; 7 no errors |
+
 ## 0.92.6 full round (2026-10-25; all six switches ON incl. odd jobs)
 
 - **Candidate:** `claude/staging-0.92.6` b78e1e22 (the final candidate; a first run on defc327f was stopped in Day 12 on BM17's word and discarded)
