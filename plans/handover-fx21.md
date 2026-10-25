@@ -67,7 +67,7 @@ stories_check: a crescendo naming a room must be told there (or on its walk). Ch
 day_check 12, 13, 19 OK (on), cadet_test ALL IDENTICAL (run alone: beside check_fast it can show f/g/h diffs), check_fast OK.
 
 ## Final turn (lead 36's (a') for Kovac; CS1's f4117e20)
-Kovac 4 has no cast (Cruz's lines folded into Kovac's); her walk booking (Day 19 15:28-15:39, Deck 5) plays while she's on
+Kovac 4 has no cast (Cruz's lines folded into Kovac's); lead: 28 (lead 36: a wider window), so her walk booking is Day 19 15:10-15:39 (Deck 5) plays while she's on
 Deck 5 or riding from it; invites use {at}. Saad's storm window starts no earlier than 08:30 (STORY_EVENT_FROM), once he's
 up. stories_check tries every minute in a walk booking. Results: stories_check OK (play: Kovac 4 Day 19, Saad 4 Day 13
 08:30); day_check 13 and 19 OK (on); cadet_test vs 53c11f8 ALL IDENTICAL (alone, off). Backlog FX21-1 (RV16): socialChatter
