@@ -7,6 +7,11 @@
 4. Message every working seat with your session id (priority "next", never "now"). Tell lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi) you've taken over.
 5. User in US Eastern (EDT, UTC-4). Plain words, no emojis, few messages. Cap 8 working seats; during a six-runner round only BM + 6 + 1.
 
+## Latest (~16:00 UTC, noon Eastern)
+- USER: 0.92.5 not published, waits for 0.92.6. USER YES crew stories ON.
+- 0.92.6 round on claude/staging-0.92.6 b78e1e22 (game 88f4cc8d…, all six switches ON); arc_check stale-check fix 9d758ada (test only, CR2 OK). Open: CR6 mech m17 (BM17 isolating by switch) and bigevents Day 7 Captain at Winner-stays stands (FX17 fixing, RV17 reviews). Then BM17 package → user → PUB1 on the user's say (Playtest + Dev; never 6daN…).
+- Sound: SD1 session_012DnJzEerXDa6SScxbQZ1q5, page https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC (v2; v3 coming: footsteps like carpet, no crowd chatter) + plans/sound/integration-plan.md (user asked how much work to put it in the game).
+
 ## State (~15:00 UTC, 11 AM Eastern)
 - **0.92.5**: GO from testing. Candidate claude/staging-0.92.5 39f7741d (game fddc0ef6…5559). Waiting on the user's say to publish (PUB1 session_01GnpjFR6oumvuvTrmcXSqeg: Playtest 3HqM5xiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr; confirm with the user; NEVER 6daNCLCJAcsLCZn27CEthq), then the user's OK to fast-forward integration.
 - **0.92.6**: all items built and reviewed. claude/staging-0.92.6 1fe6d523 (switches off). BM17 (session_01WxdNuUeTUoneMvqKiF6GQL) holds candidate 48b839b2 locally: switch-ons P926_TRADS, P926_APPT, PROMO_SIGHT_ON, BOARD_TRADE_ON + HUD 0.92.6; ODD_ON joins if RV15 passes FX20 9755ca3f by ~15:30 UTC, else follow-up. STORIES_ON stays off until the user says yes. Round plan in TEAM.md ~14:28 UTC; runners CR1, CR2 (new: session_01DsTDi6xJcpdDVhSkELEm24), CR3, CR4, CR5, CR6 (last round).
