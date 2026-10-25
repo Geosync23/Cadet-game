@@ -319,3 +319,26 @@ sha256 **2aa6427fde381f3ddf746900ed9e7a62f51aa27f0bb6460f73c557836fa313a2** (BM1
 | controller_check (every part but reach; taken from CR6, agreed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK; 1772 s |
 
 No FAIL on 0.92.4.
+
+# 0.92.5 (claude/staging-0.92.5 53c11f88), BM17's start (lead 35's go); reported to BM17 and lead 35
+
+sha256 **fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559** (BM17's). Checked out as it is; own CADET_WORK.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 269; worst stuck 0.0; 241 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 223 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 222 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 224 s |
+| weekend_check (new) | **OK** | WEEKEND CHECK OK; 400 s |
+| arrows_d_check | **OK** | `arrows_d_check: OK`; 48 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 23 s |
+| controller_check (every part but reach) | **FAIL: NEW, but the check is out of date, not the game** | 27 parts OK; `disc` FAILs: `disc: D-pad right on the result card should reach Quick game (Done)`, `disc: A on Quick game should start a game to 5`; 1650 s |
+
+**The disc FAIL.** Repeats (a second run on 53c11f88: the same two lines). OLD ba836359 (0.92.4) with the same
+controller_check.py: disc OK. Bisected along the candidate's first-parent line (disc part alone, ~25 s a build): OK up to
+6425f1a4, FAIL from c8811199 (Merge claude/p925-fx11 c97fbef0); inside FX11: dd1479ac OK, **2877ea5d FAIL**:
+"p925 (FX11): #3 your Lightdisc games first to 3, no Quick game; design-doc; disc_check; build-table row". So 0.92.5 item 3
+took the Quick game button off Lightdisc's result card by design and FX11 updated disc_check, but controller_check's `disc`
+part still steers to "Quick game" and expects a game to 5. The game is as designed; controller_check's disc part needs the
+same update (the controller is off in the game, PAD_ON false). Not fixed (check runner); BM17 / CTT to decide.
