@@ -88,6 +88,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `weekly wednesday,thursday` | two evenings a week |
 | `every 2 weeks tuesday` / `every 2 weeks tuesday week 2` | every other Tuesday (week 1 = days 1-7, the default; week 2 = days 8-14) |
 | `every 4 weeks saturday week 3` | the Saturday of every fourth week, starting with week 3 (days 20, 48, 76...) |
+| `every 8 weeks monday week 5 from day 29` | the Monday of every eighth week, starting with week 5 (0.92.6, FX17: the new traditions of weeks 5-12) |
 | `quarter week 1 saturday` | the first Saturday of each season (days 6, 97, 188, 279) |
 | `quarter day 1` | the first day of each season |
 | `year day 182` | one day a year (the year is 364 days, Day 1 a Monday) |

@@ -1,0 +1,31 @@
+@tradition twelve-weeks-aboard
+// Twelve weeks aboard (0.92.6 item 7 (c), FX17; lead 35's yes): Day 84 after you came aboard, a Sunday. A toast at the
+// Sunday table in the mess hall: Calder says a few words before dinner. Behind P926_TRADS (section 13's P926_NEW).
+// STAND-IN WORDS: SW1 writes them (CS1 checks).
+k: 711
+title: Twelve weeks aboard
+when: arrival +84
+at: 17:30-17:55
+min: 15
+prio: 1
+where: 3 room Mess hall: mess-seat
+hold: 1
+who: calder always, torres-zeke always, works 60%, friends-of-host 40%, everyone 15%
+anim: talk
+host: calder
+from: calder
+
+== mail
+- Twelve weeks aboard tomorrow. A quick toast in the mess at {time}, before the Sunday table. Don't be late. I'm counting.
+
+== ask
+- Twelve weeks! A toast in the mess before dinner.
+
+== here
+- To twelve weeks. And the next twelve.   #warm
+
+== thanks
+- Calder raises a cup in the mess hall. "Twelve weeks. Still here, still learning. Good." The table drinks to you.   #warm
+
+== chatter
+- The new hand's twelve weeks aboard. The Chief made a toast. A short one.   #funny

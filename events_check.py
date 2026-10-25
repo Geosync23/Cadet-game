@@ -469,6 +469,7 @@ with sync_playwright() as pw:
       for (const t of TRAD_LIST) {
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
         if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
+        if (typeof P926_NEW !== 'undefined' && P926_NEW.has(t.id) && !P926_TRADS) continue;   // 0.92.6's new traditions (FX17): loaded only with P926_TRADS
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
@@ -515,6 +516,7 @@ with sync_playwright() as pw:
     flc_on = g.ev("typeof FLC_ON !== 'undefined' && FLC_ON")
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
     wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
+    wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON

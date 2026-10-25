@@ -16,6 +16,9 @@
 #       bubbles about books in the room, a tap joins you with a book. Off: no host
 #   3   Winner stays on (Days 14 and 21): planned in the stands at 12:30, 13:30, 14:30 and 15:30, at least two thirds of the stand
 #       seats taken. Off: under that at least once
+#   7   the career's weeks: (b) a talk on every Monday from Day 36 to 78 and a chief's on Days 32, 46, 60, 74, each on the calendar;
+#       (c) Six weeks aboard on Day 42 and Twelve weeks on Day 84; and (a) from week 5 to 12 each week has a tradition not seen in
+#       any earlier week. Off: no talk after Day 29 and no milestones
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -191,5 +194,20 @@ with sync_playwright() as pw:
         r, err = stands3(won); print('  3 on:', r)
         check(all(len(x) == 4 and x[2] * 3 >= x[3] * 2 for x in r), '3: the stands at least two thirds full through the afternoon (%s)' % r)
         check(not err, '3: no errors: ' + ' | '.join(err[:5]))
+    if want('7'):
+        WEEKS = """JSON.stringify((() => { const talks = [32, 36, 43, 46, 50, 57, 60, 64, 71, 74, 78].map(d => [d, recTalk(d), eventsOn(d).filter(e => /^rec-(wren|chiefs)-talk$/.test(e.id)).map(e => e.id)]);
+          const ms = [42, 84].map(d => [d, eventsOn(d).map(e => e.id).filter(i => /weeks-aboard$/.test(i))]);
+          const seen = new Set(), wk = []; for (let w = 0; w < 12; w++) { const ids = new Set(); for (let d = w * 7 + 1; d <= w * 7 + 7; d++) for (const e of eventsOn(d)) if (e.id !== 'birthday') ids.add(e.id);
+            wk.push([w + 1, [...ids].filter(i => !seen.has(i))]); for (const i of ids) seen.add(i); }
+          return { talks, ms, wk }; })())"""
+        def weeks7(path):
+            g = Game(pw, path, 900, 760); r = json.loads(g.ev(WEEKS)); err = g.errors; g.close(); return r, err
+        r, err = weeks7(woff); print('  7 off: talks', [(t[0], bool(t[1])) for t in r['talks']], 'milestones', r['ms'], 'new by week', r['wk'][4:])
+        check(not any(t[1] for t in r['talks'] if t[0] > 29) and not any(m[1] for m in r['ms']), '7 off: as 0.92.5, no talks after Day 29, no milestones')
+        r, err = weeks7(won); print('  7 on: talks', [(t[0], t[1] and t[1]['by'], t[2]) for t in r['talks']], 'milestones', r['ms'], 'new by week', r['wk'])
+        check(all(t[1] and t[2] for t in r['talks']), '7 (b): a talk on each of Days 32-78\'s talk days, on the calendar (%s)' % [t[0] for t in r['talks'] if not (t[1] and t[2])])
+        check([m[1] for m in r['ms']] == [['six-weeks-aboard'], ['twelve-weeks-aboard']], '7 (c): Six weeks aboard on Day 42, Twelve weeks on Day 84 (%s)' % r['ms'])
+        check(all(w[1] for w in r['wk'][4:]), '7 (a): weeks 5-12 each bring a tradition not seen before (%s)' % [w[0] for w in r['wk'][4:] if not w[1]])
+        check(not err, '7: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)
