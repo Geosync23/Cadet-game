@@ -693,3 +693,13 @@
 - You're grubbier than me. Nobody's grubbier than me.   #funny
 ? flag:clothes.grubby tier>=friend
 - Change before Calder clocks it. I'll keep watch.   #warm
+
+// ---- ZW1 (writer), patch 0.92.5 item 10: the birthday gathering (content/banks/birthday-party.lines has the kinds).
+== bday.circle
+- Oi oi! Happy birthday, {other}! Corner piece is mine.   #funny
+- Happy birthday! Right, so, I'll have a slice. For you.   #funny
+== bday.circle.you
+- Oi oi, {nick}! Happy birthday! Cake time!   #warm
+== bday.thanks
+- Oi oi! Thanks, everyone! I'll stay awake for this one.   #funny
+- Right, so, you lot. Thanks. I'm touched. And hungry.   #warm

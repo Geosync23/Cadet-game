@@ -75,6 +75,7 @@ One tradition per file, the file named after its id.
 | `stay:` | no | (0.83, the rec deck) each goer drifts in and stays this many ship minutes somewhere in the window, so they need be free for only that part (Winner Stays On's five hours) | `stay: 40-120` |
 | `unless-flag:` | no | (0.83) the opposite of `flag:`: it happens only until that flag is set (film night in the junior common room, until it moves to the auditorium) | `unless-flag: rec.filmMoved` |
 | `quiet:` | no | (0.83) `career`: no Mail the evening before the career's big days (the rec deck's weekly sport ones) | `quiet: career` |
+| `to-bed:` | no | (0.92.5) `yes`: someone whose bedtime falls in it still comes, if they get 20 minutes or more (its `min`), and leaves 20 minutes before bed (late piano) | `to-bed: yes` |
 | `meal:` | no | `dinner` or `breakfast`: going to it IS that meal for those who go (the sim engineer plans them there instead of the servery); the galley's dish goes in `ties: galley ...` | `meal: dinner` |
 
 Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, `pell`...: see `plans/crew-roster.html`).

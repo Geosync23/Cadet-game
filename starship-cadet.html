@@ -7552,6 +7552,12 @@ function ternHinge(P) {                                  // the kit hands over t
 const MESS_EXTRA = { heads: [[.42, 1.0, 1], [.42, 4.0, 1], [9.58, 1.0, -1], [9.58, 4.0, -1]] };   // heads: [x, z, the way they face (+1 east)]
 DECKS[3].places.push(...[[23.42, 1.0, 90], [23.42, 4.0, 90], [32.58, 1.0, -90], [32.58, 4.0, -90]].map(([x, z, f], k) =>
   ({ id: '3-longtable-' + (k + 1), type: 'event', event: 'long-table', at: [Math.floor(x), Math.floor(z)], xy: [x, z], face: f, pose: 'sit', y: .47, room: 'M' })));
+// 0.92.5 (FX12, the user's birthday): a ring of 8 standing spots round the head of the second long table's east end
+// (3-longtable-4, where the birthday person sits), facing them: 3-bday-1..8, type 'event' with event: 'birthday', so
+// they're the birthday's own places (section 14 holds them for its goers, the ring first) and nobody else's
+DECKS[3].places.push(...[[31.9, 2.55, 25], [32.75, 2.5, -6], [33.55, 2.9, -41], [33.7, 3.65, -73], [33.7, 4.4, -110], [33.55, 5.15, -140], [32.75, 5.5, -174], [31.9, 5.45, 155]].map(([x, z, f], k) =>
+  ({ id: '3-bday-' + (k + 1), type: 'event', event: 'birthday', at: [Math.floor(x), Math.floor(z)], xy: [x, z], walk: [Math.floor(x), Math.floor(z)], face: f, pose: 'stand', anim: 'talk', room: 'M' })),
+  { id: '3-bday-head', type: 'event', event: 'bday-head', at: [32, 4], xy: [32.58, 4.0], face: -90, pose: 'sit', y: .47, room: 'M' });   // the birthday chair: 3-longtable-4's spot (its own pool, @bday-head, for the birthday person alone)
 DECKS[3].seedlings = { room: 'G', place: '3-seedlings-1', yours: 1, pots: [0, 1, 2].flatMap(t => [0, 1, 2, 3].map(k => [+(11.405 + k * .15).toFixed(3), +(.386 + t * .24).toFixed(3), +(.59 - t * .17).toFixed(2)])) };
 DECKS[3].tiles = { room: 'L', station: ['3-tiles-1', '3-tiles-2'], board: [44.5, .722, 18.5],
   boards: [[42.25, .765, 14.52, 0, .26, [16, 14, 15, 13]], [42.25, .765, 16.52, 0, .26, [20, 18, 19, 17]], [42.25, .765, 18.52, 0, .26, [24, 22, 23, 21]],
@@ -14424,7 +14430,7 @@ function playerUpdate(dt, t) {
   if (typeof mugTick === 'function') mugTick();          // the mug in your hands (patch #30, in this section's slot; off: nothing)
   if (typeof flcTick === 'function') flcTick();          // First Light Cocoa (patch #26, in this section's slot; off: nothing)
   const P = SHIP.player, hold = P.cart ? (P.cart.stage === 'full' ? 'cartfull' : 'cart') : P.carry.length > 0 || typeof hamperHeld === 'function' && hamperHeld() ? true
-    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || (TRAY_TRAVELS || P.trayGo) && (ACT.phase === 'walk' || ACT.phase === 'wait')) ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); 15b's ixHold: a job's toolbox or crate
+    : ACT && ACT.kind === 'eat' && ACT.o.fed && ACT.phase === 'walk' || P.tray && (!ACT || (TRAY_TRAVELS || P.trayGo) && (ACT.phase === 'walk' || ACT.phase === 'wait')) ? 'tray' : typeof ixHold === 'function' && ixHold() || typeof mugHeld === 'function' && mugHeld() || typeof sliceHeld === 'function' && sliceHeld() || false;   // a tray from the servery to your seat (0.28.15), and in your hands on the way to anything else (FX12: it wasn't drawn); a slice of birthday cake (section 18, 0.92.5); 15b's ixHold: a job's toolbox or crate
   if (hold || player.holding) player.holding = hold;   // in hand (Walker.update): parts (true, the crate) or a hover cart ('cart', 'cartfull')
   player.maxV = PLAYER_V0 * playerSpeed();
   const crouch = crawlTiles().has(K(player.here()));   // a crawlway (0.28.11): crouch-walk, slower
@@ -17652,7 +17658,7 @@ function galleyCake(d) {
   // (a cake for a tradition held off Deck 3, or with its own decor 'cake', isn't on the servery: four weeks aboard's at Works tea)
   const away = e => !!(e.ev && ((e.ev.ties && e.ev.ties.decor === 'cake') || (Array.isArray(e.ev.where) && e.ev.where.length && e.ev.where.every(w => w.deck !== 3))));
   const bev = all.find(e => e.id === 'birthday'), other = all.find(e => e.id !== 'birthday' && (e.cake || (e.ev && e.ev.cake)) && !away(e));
-  if (who.length) return { who, name: '', gather: bev ? bev.from : null, out: CAKE.out };
+  if (who.length) return { who, name: '', gather: bev ? bev.from : null, out: bev ? Math.min(CAKE.out, bev.from - 15) : CAKE.out };   // out before the party when it's early (0.92.5: the birthday's time moves, evBdaySlot)
   if (other) {                                           // a gathering in the mess before 19:30 (the welcome tea at 18:40) has it out from its start
     const g = other.ev && other.ev.ties && other.ev.ties.galley, mess = Array.isArray(other.ev && other.ev.where) && other.ev.where.some(w => w.deck === 3 && /Mess/.test(w.room || ''));
     const early = mess && other.from >= FOOD.open.dinner && other.from < CAKE.out;
@@ -18230,7 +18236,7 @@ function galleyShow() {
   const S = SHIP.galley, p = S.servery.portions, g = Math.ceil(S.grab.items / 2), dirty = Math.min(24, Math.ceil(S.dirty / 3));
   const bk = SHIP.time.day + '|' + (galleyEvDish(S.ev && S.ev.menu) || '');   // redrawn each day, and when an event changes the menu
   if (GV.board && GV.boardDay !== bk) { GV.boardDay = bk; galleyBoardDraw(GV.board, SHIP.time.day); }
-  const bags = Math.min(3, Math.ceil((S.bin || 0) / 10)), cake = !!(S.cake && S.cake.out), pie = cake && !!S.cake.pie;
+  const bags = Math.min(3, Math.ceil((S.bin || 0) / 10)), cake = !!(S.cake && S.cake.out) && !(typeof bdayTableOut === 'function' && bdayTableOut()), pie = cake && !!S.cake.pie;   // the birthday's cake is on its table (section 18, 0.92.5): one cake
   const T = S.tasting && S.tasting.d === SHIP.time.day && S.tasting.out ? S.tasting : null, tl = T ? Math.ceil(4 * T.left / Math.max(1, T.n || 20)) : 0;
   const key = p + '|' + g + '|' + dirty + '|' + bags + '|' + cake + pie + '|' + tl; if (key === GV.key) return; GV.key = key;
   const put = (m, i, x, y, z, sx, sy, sz) => { _gm.compose(_gpo.set(x, y, z), _gq, _gsc.set(sx, sy, sz)); m.setMatrixAt(i, _gm); };
@@ -22220,6 +22226,14 @@ const VOICE = JSON.parse([
   ',"accept":[',
   '{"text":"Oh, lovely. I\'ll put a plate by.","id":"tlxdd7"},',
   '{"text":"Course, love. I\'ll be there. I\'ll bring something. I always bring something.","id":"1xhes5e"}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, love! Don\'t touch the knife, I\'ll cut it.","id":"qs7f3o","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. Your favourite. I asked around.","id":"5qmw25","tone":"warm"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, love! Your favourite. I asked around.","id":"1s6ysjr","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you, loves. Now eat it before it goes cold. It\'s cake.","id":"9sjs01","tone":"funny"},',
+  '{"text":"Oh, you lot. Who baked? Not me, for once. Thank you.","id":"1rsoa1a","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"Is it my birthday? Who told? I\'m not making my own cake. Well. Just a small one.","id":"ly21qj","tone":"funny","birthday":"me"},',
   '{"text":"Happy birthday, love! There\'s a cake. Of course there\'s a cake. Your favourite, too.","id":"er81gh","tone":"warm","birthday":"you"}]',
@@ -22551,6 +22565,14 @@ const VOICE = JSON.parse([
   '{"text":"Fine. Ten minutes.","id":"vhpdsl"},',
   '{"text":"Agreed. I\'ll be there on time. Be early.","id":"yhromk"},',
   '{"text":"Yes. I\'d like that. Don\'t make it a thing.","id":"nk45ym","tone":"warm","tier":[3,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Nobody tells me. Take an hour, {other}. That\'s an order.","id":"1e73wpu","tone":"funny"},',
+  '{"text":"Birthday? Nobody tells me. One slice each. I\'m counting.","id":"1bunkfj","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Is it? Nobody tells me. Happy birthday, then, {me}.","id":"2y42d1","tone":"funny"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you. Back to work in ten minutes. Eleven.","id":"chxsuc","tone":"funny"},',
+  '{"text":"Thanks. All of you. That\'s all I\'ll say.","id":"1btf0ch","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"Someone said it\'s your birthday. I\'ve written it down. I won\'t remember.","id":"w6voh8","tone":"funny","birthday":"you"},',
   '{"text":"Your birthday. Fine. Take the easy job. Just today.","id":"crw9pm","birthday":"you"},',
@@ -24178,6 +24200,14 @@ const VOICE = JSON.parse([
   '"accept":[',
   '{"text":"Fine. I\'ll be there. On time. Early, more likely.","id":"7itwlo","tier":[1,4]},',
   '{"text":"Hm. Yes. All right.","id":"14a0s6c","tier":[1,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Hm. Happy birthday, {other}. Adequate cake.","id":"e3cmo3","tone":"funny"},',
+  '{"text":"Happy birthday. Don\'t make it a habit.","id":"ksy","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Hm. Happy birthday, {me}. Carry on.","id":"1bvgzwy","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Hm. Thank you. Don\'t tell anyone I smiled.","id":"1nwnjvc","tone":"funny"},',
+  '{"text":"Thank you. All of you. That\'ll do.","id":"1f8mbt1","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"Happy birthday, cadet. That\'s all. Hm. Enjoy the cake.","id":"rtvjkb","tone":"warm","birthday":"you","tier":[1,4]},',
   '{"text":"Your birthday, I\'m told. Happy birthday. Stay out of trouble today.","id":"17wa43r","birthday":"you","tier":[0,0]},',
@@ -24932,6 +24962,14 @@ const VOICE = JSON.parse([
   '{"text":"Yes. Yes, fine. Thank you for asking me.","id":"1717mu3","tone":"warm"},',
   '{"text":"Oh. Um. Yes. Okay. Yes.","id":"ibvucd"},',
   '{"text":"Yes. I\'d like that. I\'ll bring biscuits. Soto\'s. She won\'t mind. She\'ll mind.","id":"fwmml0","tone":"funny","tier":[3,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}. Um. That\'s all. Happy birthday.","id":"rg8gpc","tone":"warm"},',
+  '{"text":"Happy birthday. Nice cake. Very level.","id":"zkjr76","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {me}. I\'m glad you came aboard.","id":"5eb6m7","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Oh. Thank you. Um. Thank you.","id":"tn5ag8","tone":"warm"},',
+  '{"text":"Thanks. Sorry. I mean, thank you. Cake?","id":"1s7q0r1","tone":"funny"}]',
   ',"birthday":[',
   '{"text":"Happy birthday. I made you something. It\'s small. It\'s very neat. Sorry.","id":"en02ej","tone":"warm","birthday":"you"},',
   '{"text":"It\'s my birthday. Um. Don\'t tell anyone. Especially not loudly.","id":"14v7epp","birthday":"me"},',
@@ -25575,6 +25613,14 @@ const VOICE = JSON.parse([
   '"accept":[',
   '{"text":"Yes. I\'d like that. Thank you for asking.","id":"1epenr4","tier":[1,4]},',
   '{"text":"Of course. I\'ll make the time. It\'s the one thing I can always find.","id":"ptyyed","tier":[1,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}. We\'re glad you\'re with us.","id":"4brdba","tone":"warm"},',
+  '{"text":"Happy birthday. Tell me later what this year taught you.","id":"7c2dz9","tone":"warm"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {me}. Welcome to another year aboard.","id":"9798w","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you, everyone. We\'re a good crew. You\'re the proof.","id":"1r32in4","tone":"warm"},',
+  '{"text":"Thank you. Now, please, someone else cut it.","id":"kr04d4","tone":"funny"}]',
   ',"birthday":[',
   '{"text":"Happy birthday, {me}. I asked the galley for something. Captain\'s privilege.","id":"k1j3ca","tone":"warm","birthday":"you","tier":[1,4]},',
   '{"text":"I\'m told it\'s your birthday, cadet. Happy birthday. We\'re glad you\'re aboard.","id":"18snxqi","birthday":"you","tier":[0,0]},',
@@ -26556,6 +26602,14 @@ const VOICE = JSON.parse([
   ',"accept":[',
   '{"text":"Go on, then! I\'ll bring snacks. I always bring snacks.","id":"1lee612"},',
   '{"text":"You bet. Wouldn\'t miss it. Unless I fall asleep. I won\'t. Probably.","id":"1ssxpvx","tone":"funny"}]',
+  ',"bday.circle":[',
+  '{"text":"Oi oi! Happy birthday, {other}! Corner piece is mine.","id":"sn9tmu","tone":"funny"},',
+  '{"text":"Happy birthday! Right, so, I\'ll have a slice. For you.","id":"19gr3iy","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Oi oi, {nick}! Happy birthday! Cake time!","id":"xa4e7i","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Oi oi! Thanks, everyone! I\'ll stay awake for this one.","id":"3psfwv","tone":"funny"},',
+  '{"text":"Right, so, you lot. Thanks. I\'m touched. And hungry.","id":"gjzq8g","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"It\'s my birthday. I\'ve told everyone. Twice. Is there cake? There\'s always cake.","id":"1yxi69v","tone":"funny","birthday":"me"},',
   '{"text":"Happy birthday, {nick}! I made you something. Three notes. The fourth\'s coming.","id":"1ryaf95","tone":"warm","birthday":"you"}]',
@@ -27254,6 +27308,14 @@ const VOICE = JSON.parse([
   '{"text":"Fine. I\'ll be there. Don\'t make it weird.","id":"2z5yg9"},',
   '{"text":"Go on, then. But I\'m winning. Just so you know.","id":"11qfr60"},',
   '{"text":"Yes. Fine. Good. I mean, good. I\'ll be there.","id":"i34po"}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}. Drink some water with that cake.","id":"yrd4y7","tone":"funny"},',
+  '{"text":"Happy birthday. I\'m counting the candles. Out loud.","id":"13rv5iu","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {nick}. Slice, then water. In that order.","id":"1h79t4x","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thanks. I\'m counting this as a win.","id":"194zewz","tone":"funny"},',
+  '{"text":"Thank you. Don\'t make me say more. Thank you.","id":"1dej1fl","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"Yes, it\'s my birthday. No, I don\'t want a fuss. A small fuss. A cake-sized fuss.","id":"iqmf4j","tone":"funny","birthday":"me"},',
   '{"text":"Happy birthday. I\'ll let you win at Tiles today. Once. Don\'t get used to it.","id":"13jql5r","tone":"warm","birthday":"you"}]',
@@ -28486,6 +28548,14 @@ const VOICE = JSON.parse([
   ',"accept":[',
   '{"text":"{yes}! I\'ll be there. I\'ll probably be early. I\'m always early. It\'s a nerves thing.","id":"drg5w8"},',
   '{"text":"Yes! Thanks for asking. Nobody asks me things. Well, you do.","id":"p0hubr","tone":"warm"}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}! Is it okay if I have two slices?","id":"4wt4g3","tone":"funny"},',
+  '{"text":"Happy birthday! I made a wish for you. Is that allowed?","id":"wc4e7k","tone":"warm"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, bunkmate! Your first one aboard, I think!","id":"m3rsdi","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you so much! Thank you. Sorry. Thank you!","id":"b1ybq2","tone":"warm"},',
+  '{"text":"This is the best birthday. I think. Yes. Thank you!","id":"noq3z","tone":"warm"}]',
   ',"birthday":[',
   '{"text":"It\'s my birthday! I wasn\'t going to say. I\'ve said. Is there cake? Is that rude?","id":"m7wrqc","tone":"funny","birthday":"me"},',
   '{"text":"Happy birthday! I made you a card. It\'s got a star on it. Well, a dot. A star-ish dot.","id":"1670qnk","tone":"warm","birthday":"you"}]',
@@ -28848,6 +28918,14 @@ const VOICE = JSON.parse([
   '{"text":"Course! Happy to. I\'ll be there early. I\'m always early.","id":"1dzw9u3"},',
   '{"text":"Yes. Brilliant. Right, onward, then. Lead the way.","id":"cstxc5"},',
   '{"text":"Yes! Brilliant. I\'ll bring biscuits. The good ones, from Soto\'s tin.","id":"8pv7n","tone":"warm","tier":[3,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}! Coil three sends her best.","id":"opoke2","tone":"funny"},',
+  '{"text":"Happy birthday! I\'d knit you a scarf, but you\'d see it.","id":"gx6slx","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {me}! Proper cake, proper candles. Properly.","id":"lsefkt","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thanks, all! Right, cake. Then onward. Properly.","id":"3ksjvy","tone":"warm"},',
+  '{"text":"You lot. I\'m going to hum. Sorry. Thank you.","id":"1nvu0bs","tone":"funny"}]',
   ',"birthday":[',
   '{"text":"Happy birthday! I\'d have knitted you something, but you know what that\'s like.","id":"1kbmx67","tone":"funny","birthday":"you"},',
   '{"text":"It\'s your birthday? Nobody told me. Right. Tea\'s on me. All day.","id":"159f8cq","birthday":"you"},',
@@ -30134,6 +30212,14 @@ const VOICE = JSON.parse([
   '"accept":[',
   '{"text":"Agreed. I\'ll be there. Early.","id":"1e8dt6l","tier":[1,4]},',
   '{"text":"Very well. Put it in your calendar. I already have.","id":"1rcnyv8","tier":[1,4]}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}. Cake, candles, cheer. All present.","id":"nrumzh","tone":"funny"},',
+  '{"text":"Happy birthday. Regulations permit one slice. Have two.","id":"1clwsds","tone":"funny"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {nick}. Carry on. With cake.","id":"1foainw","tone":"warm"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you. Noted, appreciated, and remembered.","id":"1tt7s6w","tone":"warm"},',
+  '{"text":"Thank you all. That didn\'t happen. Carry on.","id":"766rxb","tone":"funny"}]',
   ',"birthday":[',
   '{"text":"Happy birthday, {nick}. Regulations don\'t cover cake. I checked. Enjoy it.","id":"188i4t4","tone":"funny","birthday":"you","tier":[1,4]},',
   '{"text":"Cadet. Happy birthday. That\'s on the roster, so I\'m saying it. And I mean it.","id":"1ihyf4n","birthday":"you","tier":[0,0]},',
@@ -31101,6 +31187,86 @@ const LINES = JSON.parse([
   '{"text":"The usual? A {drink}?","id":"j8cc6w"},',
   '{"text":"Another {drink}? Coming up before you ask.","id":"j8m99f"},',
   '{"text":"Let me guess. {drink}.","id":"txqvmq","tone":"funny"}]',
+  ',"bday.circle":[',
+  '{"text":"Happy birthday, {other}!","id":"5y4mya"},',
+  '{"text":"Happy birthday! Make a wish. A big one.","id":"iu6cyr"},',
+  '{"text":"Many happy returns, {other}.","id":"1z0wk56"},',
+  '{"text":"Happy birthday! Cake first, speeches never.","id":"f7x72c","tone":"funny"},',
+  '{"text":"Here\'s to you, {other}. Happy birthday.","id":"14ojogd","tone":"warm"},',
+  '{"text":"Happy birthday! You don\'t look a day older.","id":"162zzdj","tone":"funny"},',
+  '{"text":"Another year round the sun. Well, round a lot of suns.","id":"ee0chz","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. The ship\'s lucky to have you.","id":"h6lgk","tone":"warm"},',
+  '{"text":"Blow them out! All of them! In one go!","id":"1odf766"},',
+  '{"text":"Happy birthday! Who made the cake? It\'s perfect.","id":"o4ai8f"},',
+  '{"text":"Cheers, {other}. Have a lovely day.","id":"xknujy","tone":"warm"},',
+  '{"text":"Happy birthday! Go on, cut it. We\'re all waiting.","id":"cdw2wy","tone":"funny"},',
+  '{"text":"Many happy returns! Save me a corner piece.","id":"11kohpi","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. You make this place better.","id":"1qah19x","tone":"warm"},',
+  '{"text":"Hip hip! Come on, everyone. Hip hip!","id":"1mo28e8"},',
+  '{"text":"Happy birthday! You\'ve earned a day off. Nearly.","id":"13n7axj","tone":"funny"},',
+  '{"text":"To {other}! Happy birthday!","id":"1c0dtak"},',
+  '{"text":"Happy birthday. I brought my appetite. And good wishes.","id":"3kmexg","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. Thanks for all the help this year.","id":"11j1vmf","tone":"warm"},',
+  '{"text":"A whole cake, just for you. Well. For us. For you.","id":"1qw7g9d","tone":"funny"},',
+  '{"text":"Happy birthday! Did you make a wish? Don\'t tell us.","id":"7mgwf2"},',
+  '{"text":"Happy birthday, {other}. Have the biggest slice.","id":"1viuop3","tone":"warm"},',
+  '{"text":"Happy birthday! I\'d sing, but nobody wants that.","id":"h636vb","tone":"funny"},',
+  '{"text":"Here\'s to many more, {other}. Happy birthday.","id":"nimck6","tone":"warm"},',
+  '{"text":"Happy birthday! Look at that cake. Look at it.","id":"k69cx6"},',
+  '{"text":"Happy birthday! The best thing about today is you.","id":"1r1v8hs","tone":"warm"},',
+  '{"text":"Happy birthday, {other}. Mind the candles.","id":"1r9esya","tone":"funny"},',
+  '{"text":"Happy birthday! I wrote you a card. It\'s mostly stars.","id":"1booqs","tone":"warm"},',
+  '{"text":"Happy birthday! Another year of putting up with us.","id":"1sq6oqp","tone":"funny"},',
+  '{"text":"Many happy returns, {other}. Truly.","id":"1kdma8m","tone":"warm"},',
+  '{"text":"Happy birthday! Speech! Speech! No? Fair enough.","id":"hye4is","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. Enjoy every crumb.","id":"10xwafu"},',
+  '{"text":"Happy birthday! You\'re the best kind of crewmate.","id":"8vnv0d","tone":"warm"},',
+  '{"text":"Happy birthday! Somebody find a candle that\'s still lit.","id":"1y3x2hn","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. Same time next year?","id":"fd8ai7","tone":"warm"},',
+  '{"text":"Happy birthday! Who\'s counting candles? Not me.","id":"1e49dqz","tone":"funny"},',
+  '{"text":"Happy birthday! I\'ve been looking forward to this all week.","id":"1cmazen"},',
+  '{"text":"Happy birthday, {other}. Here\'s to a smooth year.","id":"g7pj74","tone":"warm"},',
+  '{"text":"Happy birthday! Cut it, cut it, cut it!","id":"60fk2o","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. We\'d be lost without you.","id":"xjmcpi","tone":"warm"},',
+  '{"text":"Happy birthday! It smells amazing. The cake, I mean.","id":"vbtbkf","tone":"funny"},',
+  '{"text":"Happy birthday, {other}! Best day of the week.","id":"1d5vqni"},',
+  '{"text":"Happy birthday! A wish, a slice, and a nap.","id":"1lgc8ea","tone":"funny"},',
+  '{"text":"Happy birthday, {other}. You deserve a fuss. So: fuss.","id":"aqtst9","tone":"warm"}]',
+  ',"bday.circle.you":[',
+  '{"text":"Happy birthday, {me}!","id":"bboau7"},',
+  '{"text":"Happy birthday, {me}! Make a wish.","id":"1pawzav","tone":"warm"},',
+  '{"text":"Happy birthday, new hand! Your first one aboard?","id":"e2vb53","tone":"warm"},',
+  '{"text":"Many happy returns, {me}!","id":"3kof4o"},',
+  '{"text":"Happy birthday, {me}! Speech! Kidding. Cake!","id":"15mknov","tone":"funny"},',
+  '{"text":"Happy birthday! You\'ve fitted right in, {me}.","id":"jwc9vd","tone":"warm"},',
+  '{"text":"Happy birthday, {me}. Glad you\'re one of us.","id":"zn5j0c","tone":"warm"},',
+  '{"text":"Blow them out, {me}! All of them!","id":"1qs2w2f"},',
+  '{"text":"Happy birthday! First slice is yours, {me}.","id":"ueugix"},',
+  '{"text":"Happy birthday, {me}! The whole ship knows, sorry.","id":"gc95rm","tone":"funny"},',
+  '{"text":"To {me}! Happy birthday!","id":"3f25vj"},',
+  '{"text":"Happy birthday, {me}. Here\'s to your first year.","id":"ppewsx","tone":"warm"}]',
+  ',"bday.slice":[',
+  '{"text":"You take a slice. It\'s soft, sweet and still a little warm.","id":"1awfoo3"},',
+  '{"text":"A slice of birthday cake, on a little plate. It\'s very good.","id":"w15alt"},',
+  '{"text":"You cut yourself a slice. Someone\'s already eyeing the last corner.","id":"mx26nu"},',
+  '{"text":"You take a slice of cake. Thick icing, light sponge. Lovely.","id":"atyacm"},',
+  '{"text":"A slice for you. The candle smoke still hangs over the table.","id":"jwk9s0"},',
+  '{"text":"You take a slice and a napkin. Somebody cheers, for no reason.","id":"1c8ghyo"}]',
+  ',"bday.slice.you":[',
+  '{"text":"You cut the first slice of your own cake. Everyone cheers.","id":"j0hbx8"},',
+  '{"text":"Your birthday cake, your slice. It tastes even better for that.","id":"u3tn57"},',
+  '{"text":"You take a slice of your cake. The circle cheers you on.","id":"5am7l"}]',
+  ',"bday.thanks":[',
+  '{"text":"Thank you, all of you. Really.","id":"sd7r08","tone":"warm"},',
+  '{"text":"Oh, stop it. No, don\'t stop. Thank you.","id":"6t7ktx","tone":"funny"},',
+  '{"text":"You lot. Thank you. This is lovely.","id":"13gu2at","tone":"warm"},',
+  '{"text":"Thank you! Now, who wants the first slice?","id":"p18kve"},',
+  '{"text":"Thank you. I didn\'t want a fuss. I loved the fuss.","id":"q7kime","tone":"funny"},',
+  '{"text":"Thanks, everyone. Best birthday in a long while.","id":"hda5g1","tone":"warm"},',
+  '{"text":"Thank you! I\'m not making a speech. Thank you, though.","id":"xvw1gd","tone":"funny"},',
+  '{"text":"Cake for everyone. That\'s my thank-you.","id":"vs9mc4"},',
+  '{"text":"Thank you. I\'ll remember this one.","id":"1kdk95n","tone":"warm"},',
+  '{"text":"You\'re all very kind. Now eat. Please.","id":"1h0li37","tone":"funny"}]',
   ',"beam.cheer":[',
   '{"text":"Welcome to Works, {other}!","id":"1vsuie3","tone":"warm","dept":"works"},',
   '{"text":"Another name on the beam. Welcome aboard.","id":"lkaa9f","dept":"works"},',
@@ -38140,7 +38306,7 @@ const TRADITIONS = [
   {"id": "knit-and-natter", "k": 444, "name": "Knit and natter", "when": {"weekday": 1}, "at": [1200, 1290], "min": 25, "jitter": 15, "where": [{"deck": 4, "pool": "common-room"}], "hold": [0], "who": [["torres-zeke", 1], ["common-room", 0.55], ["quiet-corner", 0.35], ["juniors", 0.2], ["everyone", 0.06]], "anim": "read", "host": "torres-zeke", "from": "torres-zeke", "invite": {"host": "torres-zeke", "odds": 0.35, "line": "Knit and natter tonight, common room. Bring whatever you're making. Or just come and natter."}, "text": {"mail": [{"t": "Knit and natter tomorrow at {time}, junior common room. Bring any hobby, or none. I've got spare needles. Lots.", "tone": "light"}], "ask": [{"t": "Knit and natter tonight. Bring anything. Or nothing.", "tone": "light"}, {"t": "Zeke's circle's on later. Even if you just sit and chat.", "tone": "light"}], "here": [{"t": "Hold it like this. No, like this. There you go.", "tone": "light"}, {"t": "Can I see your sketch? Oh, that's lovely.", "tone": "light"}, {"t": "Anyone seen the blue wool? Zeke's eaten it again.", "tone": "funny"}], "thanks": [{"t": "You sit down with Zeke's circle in the junior common room: needles clicking, pencils scratching, and plenty of natter.", "tone": "warm"}], "chatter": [{"t": "Knit and natter tonight. Or Tiles. Hard choice.", "tone": "light"}, {"t": "Zeke's making scarves for half the ship now.", "tone": "funny"}, {"t": "I went to knit and natter for the tea and stayed for the people.", "tone": "warm"}]}},
   {"id": "lantern-walk", "k": 477, "name": "Lantern walk", "when": {"every": "quarter", "week": 7, "weekday": 0, "season": "lanterns"}, "at": [1230, 1280], "min": 20, "prio": 1, "jitter": 10, "where": [{"deck": 3, "room": "^Promenade$", "types": ["bench"]}, {"deck": 3, "room": "^Lift plaza$", "types": ["bench"]}, {"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}], "hold": [], "who": [["holt", 1], ["tomas", 0.9], ["stargazer", 0.75], ["quiet-corner", 0.6], ["juniors", 0.5], ["everyone", 0.35]], "anim": "talk", "host": "holt", "from": "holt", "ties": {"decor": "lanternWalk"}, "invite": {"host": "tomas", "odds": 0.4, "line": "Lantern walk tonight. I made you one. It's a bit lopsided, but it lights."}, "text": {"mail": [{"t": "Lantern walk tomorrow at {time}. The Watch will dim the promenade, and there are paper lanterns at the lift plaza for anyone who wants one. Walk slowly.", "tone": "light"}], "ask": [{"t": "Lantern walk tonight. I've been folding mine all week.", "tone": "light"}, {"t": "The promenade goes dark at half eight. Bring a lantern.", "tone": "light"}, {"t": "Lantern walk later. It's the one night the promenade is quiet.", "tone": "warm"}], "here": [{"t": "Hold it up a bit. There. Now everyone can see you.", "tone": "warm"}, {"t": "Mine's crooked. It still counts.", "tone": "funny"}, {"t": "Look back down the rail. All those little lights.", "tone": "light"}, {"t": "Slow down. There's nowhere to be tonight.", "tone": "warm"}], "thanks": [{"t": "You carry a paper lantern down the dim promenade with the others, and hang it on the rail.", "tone": "warm"}, {"t": "You walk the promenade with a lantern. For a while, nobody says much, and it's nice.", "tone": "warm"}], "chatter": [{"t": "Did you see the lanterns on the rail? One was shaped like a fish.", "tone": "funny"}, {"t": "The lantern walk is my favourite night of {season}.", "tone": "warm"}, {"t": "Holt pretends the lantern walk is just a lighting test. Nobody believes it.", "tone": "funny"}]}},
   {"id": "lap-of-the-wren", "k": 442, "name": "Lap of the Wren", "when": {"weekday": 6, "from": 1}, "at": [1230, 1275], "min": 20, "jitter": 10, "where": [{"deck": 3, "room": "^Promenade$", "types": ["bench"]}, {"deck": 3, "room": "^Lift plaza$", "types": ["bench"]}], "hold": [], "who": [["tomas", 1], ["window-seat", 0.5], ["lingers-at-meals", 0.35], ["early-to-bed", 0.1], ["everyone", 0.22]], "anim": "talk", "host": "tomas", "from": "tomas", "text": {"mail": [{"t": "Lap of the Wren at {time}: one slow walk round the promenade. No pace, no rules, just company.", "tone": "light"}], "ask": [{"t": "Lap of the Wren tonight? It's just walking. And gossip.", "tone": "funny"}, {"t": "Walk the promenade with us later? Slow as you like.", "tone": "light"}], "here": [{"t": "Slower, slower. It's not a race. It's a stroll.", "tone": "funny"}, {"t": "Look at the stars from this side. Different, isn't it?", "tone": "light"}, {"t": "One lap, then tea. That's the deal.", "tone": "light"}], "thanks": [{"t": "You join the slow walk round the promenade. People fall into step, chat, and drift between groups as the stars slide past.", "tone": "light"}], "chatter": [{"t": "Lap of the Wren's the best bit of a Sunday.", "tone": "light"}, {"t": "I walk the lap to stretch my legs and my ears.", "tone": "funny"}, {"t": "Sunday lap tonight. Bring someone new.", "tone": "light"}]}},
-  {"id": "late-piano", "k": 438, "name": "Late piano", "when": {"weekday": [2, 3]}, "at": [1305, 1350], "min": 20, "jitter": 10, "where": [{"deck": 4, "pool": "music"}], "hold": [0], "who": [["marrow", 1], ["music", 0.55], ["musician", 0.4], ["night-owl", 0.25], ["everyone", 0.04]], "anim": [["marrow", "play"], ["everyone", null]], "host": "marrow", "from": "The music room", "invite": {"host": "marrow", "odds": 0.1, "line": "I'll be at the piano later. Come and listen, if you like. I take requests. Sometimes."}, "text": {"mail": [{"t": "Late piano tomorrow, {time} in the music room, Deck 4. The Captain plays; anyone may listen. Quiet voices, please.", "tone": "light"}], "ask": [{"t": "The Captain's playing tonight, late. I'll be in the music room.", "tone": "light"}, {"t": "Late piano tonight. I always mean to go to bed early. I never do.", "tone": "funny"}, {"t": "Going to hear the Captain play later. It's the calmest hour aboard.", "tone": "warm"}], "here": [{"t": "Shh. This is the slow one.", "tone": "light"}, {"t": "Listen to that. Who knew?", "tone": "warm"}, {"t": "I don't know what it's called. I just like it.", "tone": "light"}], "thanks": [{"t": "You slip into the music room and sit with the listeners. The Captain plays something slow and doesn't look up.", "tone": "warm"}], "chatter": [{"t": "The Captain played something new the other night. Nobody asked what it was.", "tone": "warm"}, {"t": "I didn't know the Captain could play until my first week aboard.", "tone": "light"}, {"t": "Late piano is the only time the Captain looks off duty.", "tone": "light"}]}},
+  {"id": "late-piano", "k": 438, "name": "Late piano", "when": {"weekday": [1, 3]}, "at": [1300, 1345], "min": 20, "jitter": 10, "where": [{"deck": 4, "pool": "music"}], "hold": [0], "who": [["marrow", 1], ["music", 0.55], ["musician", 0.4], ["night-owl", 0.25], ["everyone", 0.1]], "anim": [["marrow", "play"], ["everyone", null]], "host": "marrow", "from": "The music room", "invite": {"host": "marrow", "odds": 0.1, "line": "I'll be at the piano later. Come and listen, if you like. I take requests. Sometimes."}, "toBed": true, "text": {"mail": [{"t": "Late piano tomorrow, {time} in the music room, Deck 4. The Captain plays; anyone may listen. Quiet voices, please.", "tone": "light"}], "ask": [{"t": "The Captain's playing tonight, late. I'll be in the music room.", "tone": "light"}, {"t": "Late piano tonight. I always mean to go to bed early. I never do.", "tone": "funny"}, {"t": "Going to hear the Captain play later. It's the calmest hour aboard.", "tone": "warm"}], "here": [{"t": "Shh. This is the slow one.", "tone": "light"}, {"t": "Listen to that. Who knew?", "tone": "warm"}, {"t": "I don't know what it's called. I just like it.", "tone": "light"}], "thanks": [{"t": "You slip into the music room and sit with the listeners. The Captain plays something slow and doesn't look up.", "tone": "warm"}], "chatter": [{"t": "The Captain played something new the other night. Nobody asked what it was.", "tone": "warm"}, {"t": "I didn't know the Captain could play until my first week aboard.", "tone": "light"}, {"t": "Late piano is the only time the Captain looks off duty.", "tone": "light"}]}},
   {"id": "long-breakfast", "k": 439, "name": "Long breakfast", "when": {"weekday": 5}, "at": [480, 570], "min": 25, "jitter": 20, "where": [{"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["late-sleeper", 0.85], ["lingers-at-meals", 0.8], ["juniors", 0.5], ["everyone", 0.4]], "anim": "talk", "from": "brennan", "ties": {"galley": {"meal": "breakfast", "dish": "pancakes", "until": "10:00"}}, "meal": "breakfast", "text": {"mail": [{"t": "Long breakfast tomorrow: Saturday pancakes in the mess hall until ten. Sleep in. We'll keep the griddle warm.", "tone": "light"}], "ask": [{"t": "Long breakfast this morning. Pancakes until ten.", "tone": "light"}, {"t": "I slept in on purpose. It's Saturday. There are pancakes.", "tone": "funny"}, {"t": "Coming down for pancakes? There's no rush. That's the whole point.", "tone": "warm"}], "here": [{"t": "Pass the syrup? No, the other syrup.", "tone": "funny"}, {"t": "Third pancake. I'm not counting. You're not counting.", "tone": "funny"}, {"t": "No shift, no hurry. This is the life.", "tone": "warm"}], "thanks": [{"t": "You take a stack of pancakes to a table in the sun lamps' light. Nobody's in a hurry.", "tone": "warm"}], "chatter": [{"t": "Saturday pancakes are what gets me through the week.", "tone": "funny"}, {"t": "The long breakfast table is the only place you see the whole galley sitting down.", "tone": "light"}, {"t": "Best thing about a day off: pancakes until ten.", "tone": "light"}]}},
   {"id": "midtour", "k": 478, "name": "Midtour", "when": {"every": "year", "dayOfYear": 182}, "at": [1200, 1260], "min": 25, "prio": 2, "jitter": 10, "where": [{"deck": 3, "room": "^Bow lounge$", "types": ["lounge-seat"]}, {"deck": 3, "room": "^Mess hall$", "types": ["mess-seat"]}], "hold": [], "who": [["oduya", 1], ["calls-home", 0.7], ["quiet-corner", 0.65], ["everyone", 0.5]], "anim": "read", "host": "oduya", "from": "oduya", "invite": {"host": "oduya", "odds": 0.2, "line": "Midtour tonight. Write to the you of six months from now. I'll keep it safe."}, "text": {"mail": [{"t": "Tomorrow is half the year. Midtour, {time}, in the bow lounge: write a letter to yourself. I'll seal them, and you'll get yours back at Year's end.", "tone": "light"}], "ask": [{"t": "Midtour tonight. I never know what to write until I start.", "tone": "light"}, {"t": "Half the year gone. Are you writing a letter tonight?", "tone": "light"}, {"t": "Midtour letters at eight. I'm going to tell myself to drink more water.", "tone": "funny"}], "here": [{"t": "Don't read over my shoulder. It's for future me.", "tone": "funny"}, {"t": "Six months. Say something kind to yourself.", "tone": "warm"}, {"t": "I read last year's letter back. I was worried about things that never happened.", "tone": "warm"}], "thanks": [{"t": "You write a letter to yourself and fold it into an envelope. Oduya seals it with a smile.", "tone": "warm"}], "chatter": [{"t": "What did you write for Midtour? No, don't tell me. That's the rule.", "tone": "light"}, {"t": "My Midtour letter last year was one line long. It was a good line.", "tone": "funny"}, {"t": "Oduya keeps the Midtour letters in a box nobody's allowed to touch.", "tone": "light"}]}},
   {"id": "name-on-the-beam-new", "k": 485, "name": "Name on the beam", "when": {"rotation": "after", "weekday": 0, "dept": "works"}, "at": [1025, 1060], "min": 15, "prio": 2, "where": [{"deck": 5, "pool": "@name-beam"}, {"deck": 5, "room": "^Tea corner$", "types": ["lounge-seat"]}], "hold": [], "who": [["honoree", 1], ["calder", 1], ["torres-zeke", 1], ["pell", 0.95], ["works", 0.8]], "anim": "talk", "host": "torres-zeke", "from": "calder", "afterShift": true, "venue": "works-bay", "text": {"mail": [{"t": "{first} joins Works today. After shift, stay in the bay a minute: there's a name going on the beam.", "tone": "light"}], "ask": [{"t": "Stay after shift. {first}'s name goes on the beam.", "tone": "light"}, {"t": "New hand on the beam tonight. Come and cheer.", "tone": "light"}], "here": [{"t": "Big letters, {first}. Make it last.", "tone": "light"}, {"t": "That's the same pen we all used.", "tone": "warm"}, {"t": "Welcome to Works! You're on the beam now.", "tone": "warm"}], "thanks": [{"t": "Under the cross beam, the Works crew gather round while {first} paints their name beside everyone else's. Then a cheer, and back to the evening.", "tone": "warm"}], "chatter": [{"t": "New name on the beam tonight.", "tone": "light"}, {"t": "Remember yours going up? I do.", "tone": "warm"}, {"t": "More names than beam, soon. Someone get a ladder.", "tone": "funny"}]}},
@@ -39690,11 +39856,15 @@ const SHIP_TRADITIONS = [
     invite: { host: 'brennan', odds: .3, line: 'Harvest in the garden at half nine. Many hands, quick picking. Coming?' },
     ask: 'Harvest in the garden this morning. Fresh salad tonight.', here: 'These tomatoes are huge this time.', thanks: 'You help pick the harvest. Your hands smell of tomato leaves all morning.' },
   { id: 'birthday', name: 'Birthday', k: 328, when: { birthday: true }, at: [1215, 1270], jitter: 15, early: 5, min: 20, prio: 2,
-    where: [{ deck: 3, room: /^Mess hall$/, types: ['mess-seat'], ids: /^3-mess-([1-9]|1[0-6])$/ }, { deck: 3, pool: 'mess-seat' }, { deck: 3, pool: 'lounge-seat' }, { deck: 3, pool: 'bench' }],
+    // 0.92.5 (the user's redo): the birthday person at the head of the second long table's east end (3-longtable-4), a
+    // second one beside them; everyone else to the ring round them (its own places, 3-bday-*, first), then that table, the mess, the lounge
+    where: [{ deck: 3, pool: '@bday-head' }, { deck: 3, room: /^Mess hall$/, types: ['mess-seat'], ids: /^3-mess-(2[5-9]|3[0-2])$/ }, { deck: 3, pool: 'mess-seat' }, { deck: 3, pool: 'lounge-seat' }, { deck: 3, pool: 'bench' }],
+    hold: [0, 1],
+    whereFor: (p, d, o) => { const e = eventsOn(d).find(x => x.id === 'birthday'), h = e ? e.honorees : []; return o.filter(([, k]) => h[0] === p ? k === '@bday-head' : h.includes(p) ? k === 'ev:birthday:1' : k !== '@bday-head'); },
     who: (p, d, c) => c.honorees.includes(p) ? 1 : c.honorees.some(h => h.dept === p.dept) ? .8 : c.honorees.some(h => bedRoom(h) === bedRoom(p)) ? .7 : .45,
-    anim: () => 'talk', decor: 'cake', cake: true,
-    from: 'Matthias Oduya', mail: c => 'Tomorrow is ' + c.names + '\'s birthday. Chef Brennan is baking; cake in the mess hall at 20:15.',
-    ask: c => 'Cake in the mess at quarter past eight, for ' + c.names + '.', here: c => 'Happy birthday, ' + c.first + '!', thanks: c => 'You join the birthday table and sing for ' + c.names + '. The cake is lemon.' },
+    anim: () => 'talk', decor: null, ties: { decor: 'birthdayTable' }, cake: true,   // the cake on that table (DECK_DRESS.birthdayTable, the Traditions slot), not EV_KIT's
+    from: 'Matthias Oduya', mail: c => 'Tomorrow is ' + c.names + '\'s birthday. Chef Brennan is baking; cake in the mess hall at ' + hhmm(c.from) + '.',   // the time evBdaySlot gives it (0.92.5)
+    ask: c => 'Cake in the mess at ' + hhmm(c.from) + ', for ' + c.names + '.', here: c => 'Happy birthday, ' + c.first + '!', thanks: c => 'You join the birthday table and sing for ' + c.names + '. The cake is lemon.' },
   { id: 'hull-lights', name: 'Hull-lights evening', k: 329, when: { every: 28, on: 24 }, at: [1260, 1320], min: 25, hold: [],
     where: [{ deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 1, room: /^Observation room$/, types: ['common-room', 'lounge-seat'], who: 'officer' },
       { deck: 3, room: /^Promenade$/, types: ['bench'] }],
@@ -39825,7 +39995,7 @@ function tradLoad(t) {
     id: t.id, name: t.name || t.id, k: t.k, when: t.when, at: t.at.slice(), min: t.min || 20, prio: t.prio || 0, jitter: t.jitter || 0, early: t.early || 0,
     hold: t.hold, cake: !!t.cake, decor: t.decor || null, host: t.host || null, ties: t.ties || null, invite: t.invite || null, trace: t.trace || null, meal: t.meal || null, flag: t.flag || null, text: t.text || {}, baked: true,
     wake: t.wake, afterShift: !!t.afterShift, spare: t.spare, venue: t.venue || null,   // 0.34.51: early mornings, straight from shift, places left free
-    unflag: t.unflag || null, stay: Array.isArray(t.stay) ? t.stay.slice() : null, quiet: t.quiet || null,   // 0.83 (RA): until a flag, drifting in and out, no Mail on the career's big days
+    unflag: t.unflag || null, stay: Array.isArray(t.stay) ? t.stay.slice() : null, quiet: t.quiet || null, toBed: !!t.toBed,   // 0.83 (RA): until a flag, drifting in and out, no Mail on the career's big days; 0.92.5: to bed from it (evArrive)
     where: t.where.map(w => w.room ? { ...w, room: new RegExp(w.room), ids: w.ids ? new RegExp(w.ids) : undefined } : { ...w }),
     who: (p, d, c) => { words(); return tradRule(t.who, p, d, c, t.host, 0); },
     anim: (p, d) => typeof t.anim === 'string' ? t.anim : Array.isArray(t.anim) ? tradRule(t.anim, p, d, null, t.host, null) : null,
@@ -40151,7 +40321,10 @@ function eventsOn(d) {
     const names = honorees.map(p => p.name).join(', ').replace(/, ([^,]*)$/, ' and $1');   // 'A and B', 'A, B and C'
     out.push({ id: ev.id, name: ev.name, ev, day: d, from: ev.at[0], to: ev.at[1], honorees, names, first: honorees.length ? honorees[0].name.split(' ').slice(-2)[0] : '' });
   }
-  const drop = evBudget(out); if (drop.length) { EV_DROPPED.set(d, drop.map(e => e.id)); for (const e of drop) out.splice(out.indexOf(e), 1); }
+  const drop0 = evBudget(out); for (const e of drop0) out.splice(out.indexOf(e), 1);
+  EV_DAYS.set(d, out);                                   // (the birthday's time looks at its people's duty, and the galley rota's day asks for this day's events: it gets this list, the same array, as it is so far)
+  const drop = drop0.concat(evBdaySlot(out)); for (const e of drop) if (out.includes(e)) out.splice(out.indexOf(e), 1);
+  if (drop.length) EV_DROPPED.set(d, drop.map(e => e.id));
   if (DEVMODE) devmodeTradsOn(d, out);                   // section 25: a tradition started from the Dev panel (only with the Dev link)
   EV_DAYS.set(d, out);
   for (const k of EV_DAYS.keys()) if (k < d - 30 || k > d + 30) EV_DAYS.delete(k);
@@ -40184,6 +40357,35 @@ function evBudget(list) {
     if (clash || crowd) drop.push(e); else keep.push(e);
   }
   return drop.concat(recDrop);
+}
+// a birthday an hour apart from every other tradition (0.92.5, the user: "birthdays need an hour's separation from
+// other traditions"): its start is the quarter hour from 17:00 to 21:30 that leaves the fewest of the day's other
+// traditions within the hour of it (before its start or after its end), nearest 20:15 (its old time) on a tie; those
+// few drop out that day (returned, for EV_DROPPED): only weekly ones (a rarer one is on again only weeks later). One the birthday people can all be at comes first (off duty: the
+// galley rota's own blocks, the day shift's end, a night shift's start; not eventFree, whose frame asks the rec deck's
+// traditions and so this day's events again): a galley hand on the late shift has theirs from 21:30. Never a meal tradition or one of prio 2 or more (the Captain's
+// address, Name on the beam, a welcome tea): a time near one of those is taken last (then it stays, an hour or not).
+// The ship's evenings are full from 17:00 to 22:30, so most birthdays cost one or two. After evBudget, so only the
+// day's kept ones count; a ship-wide event's gatherings and one-offs aren't traditions. Pure
+const EV_BDAY = { from: 1020, to: 1290, step: 15, at: 1215, gap: 60 };
+function evBdayBusy(p, d, a, b) {
+  const gp = shiftBlocks(p, d), over = (x, y) => a < y + 15 && x - 15 < b;
+  if (gp && gp.blocks) return gp.blocks.some(([x, y]) => over(x, y));
+  if (!isWorkDay(p, d)) return false;
+  return p.shift === 'night' ? over(1260, 1440) : over(SHIFTS.day[0], SHIFTS.day[1] + 30);   // a day hand can be kept on to about 17:30
+}
+function evBdaySlot(list) {
+  const b = list.find(e => e.ev.when && e.ev.when.birthday); if (!b) return [];
+  const len = b.to - b.from, kept = list.filter(e => e !== b && evIsTrad(e.ev));   // evBudget's left out are out of the list already
+  const near = (o, s) => o.from < s + len + EV_BDAY.gap && s - EV_BDAY.gap < o.to, fixed = o => (o.ev.prio || 0) >= 2 || !!o.ev.meal || evRare(o.ev.when) >= 1;   // only a weekly one gives way (it's on again next week)
+  let best = null;
+  for (let s = EV_BDAY.from; s <= EV_BDAY.to; s += EV_BDAY.step) {
+    const hit = kept.filter(o => near(o, s)), stay = hit.filter(fixed).length;   // one that never gives way: kept, and a time near it last
+    const away = b.honorees.filter(p => evBdayBusy(p, b.day, s, s + len)).length;   // their own party: all of them there, first
+    const k = away * 1e6 + stay * 1e4 + hit.length * 1000 + Math.abs(s - EV_BDAY.at); if (!best || k < best.k) best = { s, hit, k };
+  }
+  b.from = best.s; b.to = best.s + len;
+  return best.hit.filter(o => !fixed(o));
 }
 // ties (Pillar 4): what a tradition asks of other sections, kept as data on it: ties = { galley: { dish, batch, meal },
 // garden: 'sow' | 'tend' | 'harvest', decor: '<id>', tally: { kind, choices } }. Each owner reads only its own kind:
@@ -40297,6 +40499,7 @@ function evArrive(p, d, e) {
   const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
+  if (ev.toBed) { const bed = schedFrame(p, d).bed - 20; if (bed - e.from >= (ev.min || 20) && eventFree(p, d, e.from, bed, ev.wake)) return e.from; }   // 0.92.5 (late piano): bedtime in it, still 20 minutes or more there; they go 20 minutes before bed (eventPlan)
   if (ev.easy && lineEasy(p, d, e)) return e.from;        // Crossing the Line: the day shift stands easy for the ceremony (slot 'Line builder')
   if (ev.ownFor && ev.ownFor(p, d) && lineOwnUp(p, d, e)) return e.from;   // Crossing the Line: a first-timer up from a night shift's day sleep comes to their own (ER3 fix 9)
   if (!ev.afterShift) return null;
@@ -40333,6 +40536,7 @@ function eventPlan(p, d) {
     const anim = ev.anim(p, d) || null;
     let from = at - (ev.early && e.honorees.includes(p) ? ev.early : 0), to = e.to - Math.round((ev.jitter || 0) * schedU(p.seed, d, ev.k + 100));   // 420-433
     if (ev.stay && ev.host !== p.id) [from, to] = evStay(p, d, e);   // 0.83 (RA): drifting in and out
+    if (ev.toBed) to = Math.min(to, schedFrame(p, d).bed - 20);   // 0.92.5: off to bed from it (evArrive let them come)
     if (ev.lead) from = ev.lead(p, d, from, e);            // set off ahead, so they're seated by the start (the Captain's Friday address, 18f)
     const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
@@ -40967,6 +41171,7 @@ function eventsDecor(now) {
 let EV_MIN = -1;
 function eventsTick() {
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
+  bdayFrame();                                           // 0.92.5: the birthday's bubbles and your slice (slot 'Traditions engineer')
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
@@ -42341,6 +42546,81 @@ function tladAgain(a) {
   const now = shipNow(), e = tladEvent(now); if (!e || !SHIP.events.joined.includes(e.id + '@' + e.day)) return false;
   const o = eventOf(a.p, now); if (!(o && o.now && o.e.id === TLAD_ID) && !Object.values(TLAD.seat).includes(a.p.id)) return false;
   TLAD.you = 'next'; toast(e.name, 'You\'re next on the ladder. When this game ends, you take the free stool.'); return true;
+}
+// ---- Birthdays redone (FX12, 0.92.5 item 10, the user's: "the birthday person sits at a table with a birthday cake on
+// it. A group circles around them with speech bubbles saying happy birthday and other nice things. Then you can click
+// the cake to have a slice. You actually see a piece of cake in your hands") ----
+// The birthday person sits at the head of the second long table's east end (3-bday-head, 3-longtable-4's spot: the
+// row's where 0 and whereFor), the cake on the table in front of them and their chair (DECK_DRESS.birthdayTable: the row's ties.decor, from
+// 30 minutes before to 15 after; the servery's own cake is put away meanwhile, section 16 asks bdayTableOut). The goers
+// stand in the ring round them first (3-bday-1..8, the deck's places). bdayFrame (each frame, eventsTick): while it's on
+// and you're on Deck 3, one bubble every few seconds, each in the ring in turn saying a bday.circle line to the birthday
+// person (their own lines first: lineFor; {other} is them), bday.circle.you when it's your birthday too; every fourth,
+// and twice near the end, the birthday person answers bday.thanks. A tap on the cake while it's on (PLAYER_TAPS): you walk
+// up and take a slice (a bday.slice line), held in your hand (sliceHeld: section 15's hold, 8b's PROP_KIT.slice) and
+// eaten as you go over BDAY_SLICE_MINS (Food and a little leisure), once a party. Live only: nothing planned, nothing
+// saved (a reload, a sleep or a time skip finishes the slice quietly), no R()
+const BDAY_SLICE_MINS = 5, BDAY_SLICE_GAIN = { hunger: 8, leisure: 3 };
+const bdayNow = (pre = 0, post = 0) => { if (typeof shipNow !== 'function') return null; const t = shipNow(), d = Math.floor(t / 1440) + 1, m = t - (d - 1) * 1440;
+  return eventsOn(d).find(e => e.id === 'birthday' && m >= e.from - pre && m < e.to + post) || null; };
+const bdayTableOut = () => !!bdayNow(30, 15);
+DECK_DRESS.birthdayTable = { deck: 3, what: 'a birthday: the cake on the head of the long table, and the birthday chair', make(g) {
+  const s = dressAt(g, 'M', 'floor', 0, 0), W = '#7a5a3e', [hx, hz, f] = MESS_EXTRA.heads[3], x = hx - .8, z = hz;   // the east head of the second long table; the cake on the table's end, in front of them
+  dressBox(s, .42, .05, .42, W, hx, .45, hz); dressBox(s, .06, .5, .42, W, hx - f * .19, .72, hz);
+  for (const dx of [-.17, .17]) for (const dz of [-.17, .17]) dressBox(s, .04, .43, .04, W, hx + dx, .215, hz + dz);
+  const cy = (r, h, c, y) => { const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, h, 20), dressMat(c)); m.position.set(x, y, z); s.add(m); };
+  cy(.22, .02, '#e6e0d3', .783); cy(.16, .13, '#f2d7a0', .858); cy(.165, .03, '#f7f1e8', .917);   // the plate, the cake, the icing (as EV_KIT's)
+  for (const [dx, dz] of [[-.06, -.03], [.05, -.04], [0, .06]]) { const c = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .07, 6), dressMat('#c45a3f')); c.position.set(x + dx, .967, z + dz); s.add(c);
+    const fl = new THREE.Mesh(new THREE.SphereGeometry(.012, 8, 6), dressMat('#ffd27a')); fl.position.set(x + dx, 1.01, z + dz); s.add(fl); }   // three candles and their flames
+  return { t: 'Birthday cake', x: 'A lemon cake with white icing and three candles, on the head of the long table. Tap it for a slice.', floor: ['M', x, z], y: .9, w: .5, h: .3, d: .5, tag: { bdayCake: true } };
+} };
+let BDAY_LIVE = null, SLICE = null, BDAY_SLICE_DAY = null;   // the party's bubbles now; the slice in your hand { d, from }; the day you had one
+function bdayFrame() {
+  if (SLICE) sliceTick();
+  const e = typeof deckDef !== 'undefined' && deckDef && deckDef.num === 3 && typeof bubbleSay === 'function' ? bdayNow() : null;
+  if (!e || typeof DECK_CREW === 'undefined') { BDAY_LIVE = null; return; }
+  const t = performance.now(), key = 'birthday@' + e.day;
+  if (!BDAY_LIVE || BDAY_LIVE.key !== key) BDAY_LIVE = { key, next: t + 1500, said: new Set(), ids: new Set(), n: 0, thanked: 0 };
+  const L = BDAY_LIVE; if (t < L.next) return;
+  L.next = t + 2600 + (L.n % 3) * 900;                   // a bubble every 2.6 to 4.4 seconds
+  const at = a => a.p && a.h && a.settled && a.spot, ring = DECK_CREW.filter(a => at(a) && /^3-bday-/.test(a.spot.id));
+  const hon = DECK_CREW.find(a => at(a) && e.honorees.includes(a.p)), m = shipNow() - (e.day - 1) * 1440;
+  const you = typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && !!ROSTER_PLAYER && isBirthday(ROSTER_PLAYER, shipNow());
+  const say = (a, kind, ctx) => {                       // a line nobody's said at this party yet (ctx.keep), else any
+    const l = lineFor(a.p.id, kind, { ...ctx, keep: x => !L.ids.has(x.id) }) || lineFor(a.p.id, kind, ctx);
+    if (l && l.text) { bubbleSay(a.h, l.text); L.ids.add(l.id); }
+  };
+  if (hon && (L.n % 4 === 3 || e.to - m < 8 && L.thanked < 2 && L.n > L.thanked * 4)) { say(hon, 'bday.thanks', {}); L.thanked++; L.n++; return; }   // the birthday person answers
+  let left = ring.filter(a => !L.said.has(a.p.id)); if (!left.length) { L.said.clear(); left = ring; }
+  const a = left[0]; if (!a) return;
+  say(a, you ? 'bday.circle.you' : 'bday.circle', { other: hon ? hon.p : e.honorees[0] });   // the person, not the id: lineFor's {other} is their name
+  L.said.add(a.p.id); L.n++;
+}
+// a tap on the cake (section 15's PLAYER_TAPS): walk up, take a slice. True when it was the cake
+PLAYER_TAPS.push((it, at) => {
+  if (!it || !it.bdayCake) return false;
+  const e = bdayNow(), d = e && e.day;
+  if (!e) { toast('Birthday cake', 'The party\'s not on just now. Brennan will cut it when it is.'); return true; }
+  if (BDAY_SLICE_DAY === d || SLICE) { toast('Birthday cake', 'You\'ve had your slice. Leave some for everyone else.'); return true; }
+  const P = SHIP.player; if (P.tray || P.carry.length || P.cart || (typeof hamperHeld === 'function' && hamperHeld())) { toast('Birthday cake', 'Your hands are full. Put things down first.'); return true; }
+  approach(at.clone(), it.front, it.depth, () => {
+    if (!bdayNow() || BDAY_SLICE_DAY === d) return;
+    SLICE = { d, from: shipNow() }; BDAY_SLICE_DAY = d;
+    const you = typeof isBirthday === 'function' && typeof ROSTER_PLAYER !== 'undefined' && !!ROSTER_PLAYER && isBirthday(ROSTER_PLAYER, shipNow());
+    const ls = (typeof LINES !== 'undefined' && LINES[you ? 'bday.slice.you' : 'bday.slice']) || [];
+    toast('Birthday cake', ls.length ? ls[(d * 7 + (e.honorees[0] ? idHash(e.honorees[0].id) : 0)) % ls.length].text : 'You take a slice of cake on a little plate. It\'s very good.');
+  });
+  return true;
+});
+// section 15's hold: the slice in your hand while you stand or walk (an activity's own pose wins, but walking to it)
+const sliceHeld = () => SLICE && (typeof ACT === 'undefined' || !ACT || ACT.phase === 'walk') ? 'slice' : null;
+function sliceTick() {                                   // eaten as you go; asleep, a skip or another activity: finished quietly
+  const P = SHIP.player, n = P.needs, gone = shipNow() - SLICE.from;
+  const quiet = (typeof sleeping !== 'undefined' && sleeping) || gone > BDAY_SLICE_MINS + 5 || gone < 0 || P.tray || P.carry.length || P.cart;
+  if (!quiet && gone < BDAY_SLICE_MINS && !(ACT && ACT.phase !== 'walk')) return;
+  SLICE = null;
+  for (const k in BDAY_SLICE_GAIN) if (typeof n[k] === 'number') n[k] = needClamp(n[k] + BDAY_SLICE_GAIN[k]);
+  if (!quiet) toast('Birthday cake', 'You finish your slice. Not a crumb left.');
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
@@ -55969,6 +56249,16 @@ if (typeof MUG_ON !== 'undefined' && MUG_ON) {
   ACTS.cocoa = { props: { R: 'mug' }, f: ACTS.drink.f };
   ACT_SEATED.add('cocoa'); CROWD_ANIMS.add('cocoa');
 }
+// 0.92.5 (FX12, the user's birthday: "you actually see a piece of cake in your hands"): a slice of birthday cake on a
+// small plate, held one-handed at the chest like the mug (HOLDS.slice; section 18's sliceHeld). About 1.6x life size, as
+// the mug, to read at a phone's zoom; the icing a little wider than the sponge and over its top (no shared faces). Three
+// small parts on your rig; colours through part's col(); no R()
+PROP_KIT.slice = p => {
+  part(p, cylG(.1, .1, .012, 14), '#e8ebe8', 0, -.12, .06, 1, 1, 1, -Math.PI / 2);   // the plate, its face at z .066
+  part(p, GEO.box, '#f2d7a0', 0, -.12, .105, .1, .07, .08);                          // the sponge, z .065-.145 (into the plate)
+  part(p, GEO.box, '#f7f1e8', 0, -.12, .145, .102, .072, .014);                      // the icing over its top, z .138-.152
+};
+HOLDS.slice = { prop: 'slice', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .14 };
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
