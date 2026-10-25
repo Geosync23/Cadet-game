@@ -40777,7 +40777,8 @@ function eventJoin(e, d, now, notice) {
   if (e.id === 'quiz') quizStart(d, now);
   if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
   if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
-  if (e.id === 'market' && P926_TRADS) swapCard(e, d, now);   // 0.92.6 item 2: the swap (FX17)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
+  if (e.id === 'market' && P926_TRADS) swapCard(e, d, now);   // 0.92.6 item 2: the swap (FX17)
+  if (e.id === 'spice-shelf-supper' && P926_TRADS) SPICE.joined = d;   // 0.92.6 item 15: your guess card once the jars are named (spiceFrame)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
@@ -42897,7 +42898,7 @@ function tradTalk(id, say) {
 const trLine = (kind, k, ctx, fb) => quizText(kind, k, ctx) || (fb ? fb[k % fb.length].replace(/\{(\w+)\}/g, (x, w) => ctx && ctx[w] != null ? ctx[w] : x) : null);
 function p926Frame() {
   if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
-  if (deckDef.num === 3) tradTalk('market', swapSay);
+  if (deckDef.num === 3) { tradTalk('market', swapSay); spiceFrame(); }
 }
 // ---- 0.92.6 item 2 (FX17, behind P926_TRADS; the user: "Sunday swap meet doesn't work, no host"): two stallholders at the
 // promenade's stalls (EV_KIT.stalls: Orla Ishikawa, the storekeeper off on Sunday mornings, hosts; Dara Shah keeps the other),
@@ -42939,6 +42940,57 @@ if (P926_TRADS) {
   tjActs();
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before these rules: planned again
 }
+// ---- 0.92.6 item 15 (FX17, behind P926_TRADS; the user: "Spice shelf night does nothing: no leader, no dialogue, no scripted
+// moment, no guessing"): Brennan cooks that dinner, so she was never in the mess. Now, while you're on Deck 3, she steps out
+// of the galley to the spice shelf (3-spice-host, by the drinks; crewHold, looks only: her plan runs on underneath) from
+// 18:32 to 19:02: she opens, names the week's three jars one by one, the mess guesses whose (bubbles from those at the supper),
+// and at 18:55 she says whose they were. Joined, your guess card: whose is the first jar, of three names. Jars: SW1's spice.jars
+// ("<owner id> | <spice> | <a few words>"), else these stand-ins; three a week by the week's number. Words: spice.*
+const SPICE_JARS = [['kovac-zainab', 'smoked paprika', 'from her gran\'s kitchen'], ['torres-zeke', 'chilli flakes', 'very hot, very proud'], ['sato', 'sansho pepper', 'it makes your lips buzz'],
+  ['holt', 'juniper', 'he says it\'s for the gin he doesn\'t drink'], ['rina', 'cardamom', 'green pods, a whole jar'], ['tomas', 'dill seed', 'for fish he never catches'],
+  ['mori', 'yuzu salt', 'bright and sharp'], ['calder', 'black pepper', 'just pepper. Very good pepper'], ['oneill-imani', 'nutmeg', 'with its own little grater'],
+  ['esposito-yara', 'fennel pollen', 'tiny, gold, expensive'], ['vasquez-uma', 'achiote', 'it turns everything red'], ['pell', 'cinnamon', 'for toast, mostly']];
+const SPICE = { joined: 0, asked: 0, hold: null, said: '', next: 0, n: 0 };
+const SPICE_AT = { open: 1112, jars: [1117, 1124, 1131], reveal: 1135, card: 1133, end: 1142 };
+function spiceWeek(d) {
+  const L = typeof LINES !== 'undefined' && Array.isArray(LINES['spice.jars']) && LINES['spice.jars'].length ? LINES['spice.jars'].map(x => x.text.split(/\s*\|\s*/)) : SPICE_JARS;
+  const ok = L.filter(j => schedPeople().some(p => p.id === j[0])), wk = Math.floor((d - 1) / 7);
+  return ok.length >= 3 ? [0, 1, 2].map(i => ok[(wk * 3 + i) % ok.length]) : null;
+}
+function spiceFrame() {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = m >= SPICE_AT.open - 3 && m < SPICE_AT.end && eventsOn(d).find(x => x.id === 'spice-shelf-supper'), jars = e && spiceWeek(d);
+  const b = jars && DECK_CREW.find(a => a.p && a.p.id === 'brennan');
+  if (!b) { if (SPICE.hold) { SPICE.hold(); SPICE.hold = null; } return; }
+  if (!SPICE.hold) SPICE.hold = crewHold(b.p, '3-spice-host');
+  if (!friHere(e) || typeof bubbleSay !== 'function') return;
+  const nm = j => { const p = evPerson(j[0]); return p ? shortName(p) : j[0]; };
+  const say = (a, key, text) => { if (SPICE.said.includes(key) || !text) return; SPICE.said = SPICE.said.slice(-60) + '|' + key; bubbleSay(a.h, text, 5); };
+  const dk = d + ':';
+  if (b.settled && b.spot && b.spot.id === '3-spice-host') {
+    if (m >= SPICE_AT.open && m < SPICE_AT.jars[0]) say(b, dk + 'open', trLine('spice.open', d, {}, ['Right, everyone. Three jars off the shelf tonight. Taste, then guess whose.']));
+    SPICE_AT.jars.forEach((t, i) => { if (m >= t && m < (SPICE_AT.jars[i + 1] || SPICE_AT.reveal)) say(b, dk + 'jar' + i, trLine('spice.jar', d * 3 + i, { spice: jars[i][1] }, ['Jar ' + (i + 1) + ': {spice}. Whose is it? No telling.'])); });
+    if (m >= SPICE_AT.reveal) { const i = Math.min(2, Math.floor((m - SPICE_AT.reveal) / 2)); say(b, dk + 'rev' + i, trLine('spice.reveal', d * 3 + i, { name: nm(jars[i]), spice: jars[i][1] }, ['The {spice}? That was {name}\'s. From home.'])); }
+  }
+  const t = performance.now(), at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === 'spice-shelf-supper' && a.p.id !== 'brennan');
+  if (m >= SPICE_AT.jars[0] && m < SPICE_AT.reveal && at.length && t >= SPICE.next) {   // the guesses, one bubble every few seconds
+    SPICE.next = t + 3000 + (SPICE.n % 3) * 800; const a = at[SPICE.n % at.length], who = schedPeople()[(SPICE.n * 7 + d) % schedPeople().length];
+    const mine = jars.find(j => j[0] === a.p.id);
+    bubbleSay(a.h, mine && SPICE.n % 4 === 3 ? trLine('spice.mine', SPICE.n, { spice: mine[1] }, ['Not saying. But it might be mine.']) : trLine('spice.guess', SPICE.n, { name: shortName(who) }, ['That\'s {name}\'s, surely?', 'Smells like {name}\'s cooking.', 'I\'d bet a pudding it\'s {name}\'s.'])); SPICE.n++;
+  }
+  if (SPICE.joined === d && SPICE.asked !== d && m >= SPICE_AT.card && !DIALOGUE && typeof dialogueShow === 'function') { SPICE.asked = d; spiceCard(d, jars, now); }
+}
+function spiceCard(d, jars, now) {                       // whose is the first jar: its owner and two other jar owners, in an order by the day
+  const j = jars[0], names = [jars[0], jars[1], jars[2]].map(x => x[0]), order = [0, 1, 2].map(i => names[(i + d) % 3]);
+  const pn = id => { const p = evPerson(id); return p ? shortName(p) : id; };
+  MEETING_SCRIPTS['spice.guess'] = { title: 'Spice shelf supper', from: 'Chef Auda Brennan', gist: 'You guessed whose spice it was at the spice shelf supper.',
+    onPick: k => { if (order[k] === j[0] && typeof newsAdd === 'function') newsAdd({ id: 'spice-you@' + d, about: 'you', lines: [trLine('spice.news', d, { name: pn(j[0]) }, ['The new hand guessed {name}\'s jar at the spice supper. First go.'])], seed: [j[0], 'brennan'], weight: .5, life: 3 }); },
+    lines: [{ who: 'brennan', text: trLine('spice.ask', d, { spice: j[1] }, ['Your turn. The {spice}. Whose?']), to: 'you' },
+      { choice: order.map(id => ({ text: pn(id) + '\'s', rel: id === j[0] ? { [id]: 2, brennan: 1 } : { brennan: 1 },
+        reply: { who: 'brennan', text: id === j[0] ? trLine('spice.right', d, { name: pn(id) }, ['Got it in one. {name} will be thrilled.']) : trLine('spice.wrong', d, { name: pn(j[0]) }, ['Not even close. It\'s {name}\'s. Have some more.']), pose: id === j[0] ? 'nod' : 'laugh' } })) }] };
+  dialogueShow('spice.guess', { id: 'spice.guess@' + d, who: ['brennan'], at: now });
+}
+if (P926_TRADS) DECKS[3].places.push({ id: '3-spice-host', type: 'event', event: 'spice-host', at: [33, 0], xy: [33.9, .5], walk: [33, 0], face: -40, pose: 'stand', anim: 'talk', room: 'M' });   // by the spice shelf and the drinks, facing the room
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----
 // ---- the events base, F0b (EV2; plans/events-base-brief.md): called in on a day off, and an event meeting's cast in

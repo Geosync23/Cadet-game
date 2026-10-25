@@ -10,6 +10,8 @@
 #       down and opens his card going over your week (week1.zeke), its lines filled. Off: no card
 #   2   the Sunday swap meet (Day 14, 11:00): Orla Ishikawa (the host) and Dara Shah at the stalls' spots, people browsing or on the
 #       benches, the join is Orla's, her swap card opens on a tap, and the stalls talk (bubbles). Off: nobody at a stall, no card
+#   15  Spice shelf supper (Day 16, a Tuesday): Brennan comes out to the spice shelf (3-spice-host) by 18:40, opens and names three
+#       jars, the mess guesses (bubbles), she says whose, and joined you get the guess card. Off: Brennan never at the shelf, no card
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -129,5 +131,28 @@ with sync_playwright() as pw:
         check(r['n'] >= 5 and r['lead'] == 'ishikawa-orla', '2: people at it (%d), the join Orla\'s (%s)' % (r['n'], r['lead']))
         check('swap.meet' in r['cards'] and r['said'] >= 3, '2: a tap opens the swap card (%s), and the stalls talk (%d bubbles)' % (r['cards'], r['said']))
         check(not err, '2: no errors: ' + ' | '.join(err[:5]))
+    if want('15'):
+        def spice15(path):
+            g = Game(pw, path, 900, 760)
+            g.ev("(() => { skipTo(15 * 1440 + 1100); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev(INROOM % (16, 'spice-shelf-supper'))
+            seen = None
+            for _ in range(200):
+                g.step(30)
+                x = json.loads(g.ev("JSON.stringify([SHIP.time.min, (DECK_CREW.find(a => a.p.id === 'brennan') || {}).spot ? DECK_CREW.find(a => a.p.id === 'brennan').spot.id : null, !!DIALOGUE && DIALOGUE.id])"))
+                if x[1] == '3-spice-host' and seen is None: seen = x[0]
+                if x[2] == 'spice.guess': g.ev("dialogueStep(0)")
+                if x[0] >= 1141: break
+            r = json.loads(g.ev("""JSON.stringify({ said: window.__said.map(x => x[0] + ': ' + x[1]), cards: window.__cards.map(c => c[0]), joined: SHIP.events.joined.includes('spice-shelf-supper@16') })"""))
+            err = g.errors; g.close(); r['seen'] = seen; return r, err
+        r, err = spice15(woff); print('  15 off:', r['seen'], r['cards'], len(r['said']))
+        check(r['seen'] is None and 'spice.guess' not in r['cards'], '15 off: as 0.92.5, Brennan never at the shelf, no guessing')
+        r, err = spice15(won); print('  15 on: Brennan at the shelf from', r['seen'], r['cards'], r['said'][:12])
+        b = [x for x in r['said'] if x.startswith('brennan: ')]; o = [x for x in r['said'] if not x.startswith('brennan: ')]
+        check(r['seen'] is not None and r['seen'] <= 1120, '15: Brennan at the spice shelf by 18:40 (%s)' % r['seen'])
+        check(len(b) >= 5, '15: she opens, names three jars and says whose (%d lines)' % len(b))
+        check(len(o) >= 3, '15: the mess guesses out loud (%d bubbles)' % len(o))
+        check(r['joined'] and 'spice.guess' in r['cards'], '15: joined, your guess card (%s)' % r['cards'])
+        check(not err, '15: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)
