@@ -8,7 +8,7 @@ Verdicts (PASS / FIXES NEEDED, sha + game sha256, what it does, checks, plants, 
 - 0.92.5 item 19 Cook-along in the galley: PASS 7ff6a818. Section 8c crewDetail line (80dff612): PASS.
 - 0.92.5 item 16 weekend traditions, switched ON: PASS 3307ded5 (perf flags expected, told BM16).
 - 0.92.6 FX17 traditions (items 2, 3, 4, 5, 7, 8, 13, 15; P926_TRADS): PASS fa4c1d38; section 19 lines signed off.
-  Re-look of 173f21ed (cardWhere(e): the tradition's own rooms + the tap room): see the log's last line for the result.
+  Re-look of 173f21ed (cardWhere(e): the tradition's own rooms + the tap room): PASS.
 
 ## Next (for RV17): FX22's appointments (0.92.6 item 9), claude/p926-fx22 582a3544 (game 1389038c...), P926_APPT / ?appt
 Built on FX17 4eab8c9f; FX22 still has to merge FX17 173f21ed and staging's promo-sight.lines (lead 36 sends the final sha).
@@ -25,7 +25,8 @@ Read plans/handover-fx22.md and DEV_NOTES "Appointments as small traditions". Wh
 - Planner purity: bookings reach the planner only as one-offs (eventOneOff), as player invitations already do.
 - Plant one fault per appt_check part and see each FAIL its own line (the review rule). appt_check has its own "planted" part.
 - Words: content/appointments/*.appt baked by content_gen's new parse_appt; content_gen --check; lines_check.
-- appt_check on 582a3544 was running when I wrote this (/tmp/rv14/a926/appt.txt; container-local).
+- appt_check on 582a3544: APPT CHECK OK on my side. FX22's newer eaaa6446 merges 173f21ed and passes the one-off to
+  cardWhere(e) (the doorway point above): review that sha (or later).
 
 ## How I test
 - Setup: plans/testing-guide.md 2.0. A worktree of the branch (/tmp/rv14/wk); builds in /tmp/rv14/b; each run its own CADET_WORK

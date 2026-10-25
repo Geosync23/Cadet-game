@@ -98,3 +98,7 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   standing in the room, all four cards stay (9+ min Zeke/swap, 4+ min spice/talk ask); from the lift they close as you
   walk out (by design). Follow-up offered (lead's call): use the tradition's room, not the tap room. a_start 14812 px:
   timing flake (same files identical on rerun), FX17-2 reworded.
+- **173f21ed (game 1252fb01...): PASS (~10:15 UTC).** cardWhere(e): own rooms + tap room. Off cadet vs 53c11f88 ALL IDENTICAL,
+  check_fast OK, p926 all OK incl. the doorway line; cards4 probe: Zeke/swap open all 9+ min. Sent to lead 36.
+- FX22 appointments handed to RV17 (lead 36). appt_check on 582a3544: APPT CHECK OK (its planted self-test FAILs as meant).
+  FX22's eaaa6446 = 582a3544 + 173f21ed, apptScene passes its one-off to cardWhere(e).
