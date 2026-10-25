@@ -21044,7 +21044,7 @@ const ODD_ROWS = [
   'oj-d7float-vent|7-float-1||a vent brush|15|air|Clean the float room vent',
   'oj-d7change-drain|7-rshower-2||a drain snake|15|waste|Clear a slow shower drain',
 ];
-const ODD_PARKED = new Set(['oj-d4port-vent', 'oj-d5lobby-sign']);   // rows whose tap misses (interactions_check, IX_ODD=oddall): the port washroom's toilet stall takes it; by the machine shop it can reach the crafting bench
+const ODD_PARKED = new Set(['oj-d4port-vent', 'oj-d5lobby-sign', 'oj-d5bay-clock']);   // rows whose tap misses (interactions_check, IX_ODD=oddall): the port washroom's toilet stall takes it; by the machine shop it can reach the crafting bench; the time clock is your clock in and out (RV15: the next job's tap did nothing after it)
 const boardMin = () => ODD_ON ? ODD_MIN : BOARD_MIN;
 let FIX_TABLE = null;
 function fixTable() {
