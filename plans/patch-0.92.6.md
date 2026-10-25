@@ -1,0 +1,25 @@
+# Patch 0.92.6: the user's playtest notes + crew stories (2026-10-25 ~05:00 UTC, 1:00 AM Eastern)
+
+The user, going to bed: "Once completed, for overnight mode, add in crew stories and tend to these playtest patch notes." Base: the frozen 0.92.5 candidate (claude/staging-0.92.5; builders start from b0916bb1 and merge the final candidate when BM17 freezes). Publishing 0.92.5 still waits for the user's say in the morning. Cap: at most 8 seats working at once; the 0.92.5 round (BM17 + 6 runners) comes first, so builders do their step-1 reports now and build after the round. Each builder: report (cause + plan) to lead first, build after lead's OK, area checks + cadet_test, push, sha to reviewer + build master. Staging: claude/staging-0.92.6.
+
+| # | The user's note | Lead's reading | Who | Reviewer |
+|---|---|---|---|---|
+| 1 | Auditorium doors need to be wider. | Widen the auditorium's doorways (deck geometry; crowds and the player pass easily); expected pixel change on that deck only. | FX18 | RV15 |
+| 2 | Sunday swap meet doesn't work, no host. | Find why; give it a host who's there, people come, the swap happens. | FX17 | RV14 |
+| 3 | The stands should fill for the Winner stays on tradition. | Goers sit in the court's stands to watch. | FX17 | RV14 |
+| 4 | Reading corner doesn't work, no host. They should gather closely and use the couches and seats and speak about the book they're reading. | Host present; goers sit close on couches/seats; bubbles about the book (lines by SW1). | FX17 + SW1 | RV14 + CS1 |
+| 5 | One week aboard doesn't work: a message about tea with Zeke but he isn't there. He should sit down with you going over your first week. | Zeke comes and sits with you; a short sit-down talk about your first week (from what you did). | FX17 + SW1 | RV14 + CS1 |
+| 6 | Bench press animation is weird: weight not parallel with the ground, doesn't line up with the hands. | Bar stays level; hands on the bar through the lift. | FX18 | RV15 |
+| 7 | Each week of the career needs new traditions; some repeat but new ones coming in all the time. Enough? If not, make some. First week stays the same except the new weekend ones. | Audit Days 1-84 (which week has what is new); write and build more where weeks repeat; week 1 unchanged. | FX17 (audit, build) + SW1 (new ones, words) | RV14 + CS1 |
+| 8 | You should be able to join a ship tradition all the way to its end. | Join offered until the tradition ends (not only at the start). | FX17 | RV14 |
+| 9 | Need more interesting appointments. | Pitch page first (SW1), user picks, then build. | SW1 (pitch) | CS1 |
+| 10 | Add a lot more simple jobs around the ship (cleaning vents, unsticking things); Works lets you see the ship; the bridge stays special. | Many new small Tier 1 jobs on every deck except the bridge. | FX20 (after FX19's jobs part) | RV15 |
+| 11 | Once you're trained on a job it should show up more often on the board, plus simpler jobs. | Board weights jobs you're trained on up. | FX19 | RV15 |
+| 12 | The lift panel arrow for your tracker should just say "Tracked". | Label change. | FX18 | RV15 |
+| 13 | The Chief didn't give a talk at the tradition on Day 8. Talks are a ship tradition. | Find why (Wren talk Day 8); the talk happens with its words. | FX17 | RV14 |
+| 14 | The game should mention the possible promotion as you become dependable. | Words + a beat as rep rises to Dependable. | FX19 (+ SW1 words) | RV15 + CS1 |
+| 15 | Spice shelf night does nothing: no leader, no dialogue, no scripted moment, no guessing as the schedule says. | Host, guessing moment, lines. | FX17 + SW1 | RV14 + CS1 |
+| 16 | A small button like "Put it down" to call up the lift panel when standing very close to it. | Proximity button. | FX18 | RV15 |
+| 17 | Device summary at the top should say "clean outfit on" when wearing one and "dirty" when not. | Summary line. | FX18 | RV15 |
+| 18 | Got to Reliable and no offer of a test came. It must be a big deal and obvious how to get the test once Reliable. | Check against 0.92.5's promotion fix (DV1 item 18); make the offer a clear beat (Mail + summons + arrow), named on the device. | FX19 | RV15 |
+| 19 | Add in crew stories. | Stage 1: the six ready stories (Pell, Theo, Basil, Halloran, Kovac, Saad) from claude/crew-stories-pitch (CS1's), behind a switch, switched on after review. | FX21 + CS1 | RV16 |
