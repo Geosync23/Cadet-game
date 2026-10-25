@@ -381,3 +381,5 @@ said in S6's setup; the arrow half of S6 holds. Routed by lead 36 (FX19). Not fi
 `arrows_d_check: OK` (exit 0). S6 now: `in a meeting, then after: [0, 1]`, `in a dialogue, a watch, a turn, then free:
 {'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 1}`. FX19's reading: with PROMO_SIGHT_ON the Day 8 career's test runs on Day 9,
 and boardEmptySay rightly holds its word during a test; the check now tries the empty board with nothing under way.
+
+**Final 0.92.6 commit** (claude/staging-0.92.6 6b425814; game sha256 **10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266**, FX17's Line-clash fix since b78e1e22): arrows_d_check alone with 6b425814's script: `arrows_d_check: OK` (exit 0). BM17's ask.
