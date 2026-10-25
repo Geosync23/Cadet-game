@@ -138,3 +138,27 @@ Diff bae25ae7..dd4d8797: `apptHostEvent` (slot) and one guarded `||` in tradJoin
 - **FX22b join_check** claude/p926-fx22b-join 3d011393 (test only, game 88f4cc8d = 9d758ada): **PASS**. JOIN CHECK OK
   with all switches on (the scope booked, a tap on Sato, the scene to its end, kept) and with P926_APPT off; the old
   check on the same game FAILs "appt-*: not on in 400 days" (the check, not the game).
+
+## 0.93.0 sound reviews for lead 37 (2026-10-25 evening)
+Base 0.92.6 = claude/integration 5898c190 (game 10f654de...).
+
+### FX20 activity sounds: PASS at claude/sound-act 7e63f194 (game 84290839...; 0.93.0-a.5)
+- Code: section 27's activity slot; Math.random only (`rand`/`pick` inside SND); nothing runs without an AudioContext
+  (S.frame returns at once), so checks stay silent; hooks (actBegin/actEnd, clockPunch, tapCrew, deviceAddress, wsFinish)
+  are one line, try-wrapped, read-only; activity sounds are the player's own ACT only (crew never go through actBegin).
+  Room ambience (galley sizzle/chop, laundry washer) only while you're in that room, read-only (machineLook, DECK_CREW).
+- 81aa8a35: cadet vs 0.92.6 ALL IDENTICAL, sound_check, check_fast, day 1, interactions, events OK; player_check's 3
+  reserved-job FAILs identical on 0.92.6 (old). Planted: shower loop removed -> sound_check FAILs.
+- Scope (lead 37): ~18 approved sounds were missing; 9aa5098a added them, dryer/airlock/shuttle bay on audio-todo.
+  9aa5098a: cadet ALL IDENTICAL, sound_check, check_fast OK (FX20: interactions OK).
+- The user's ask (blanket follow-up after getting straight up): 7e63f194 cancels follow-ups on any begin/end; cadet
+  ALL IDENTICAL, sound_check OK (new case).
+
+### FX22b music + Music app: PASS at claude/sound-music a4ac9e31 (game 6b5f15c9...; 0.93.0-m.2)
+- Code: v7 module in the music slot (Math.random + per-track seeded tunes); prefs only in starship-cadet-sound
+  (SND.prefs.music; savePrefs skips under nosave); clock read-only (day, min, clocked in); made on the first running frame.
+- cadet vs 0.92.6 ALL IDENTICAL, sound_check OK (core + music), check_fast OK, day 1 OK.
+- Played at phone size with ?sound: evening plays Evening star (Ship schedule: music for the evening); Choose a track ->
+  Quiet stars on repeat; Next -> Nebula; Ship schedule back; Low; Off; the game save has no music data. Music tile next
+  to Hobbies (text glyph), grouped track list readable, no sideways scroll. Day 0 quiet is covered by sound_check (my
+  test page opens on Day 1). Not measured by me: levels under the hum (SD1's Sound Lab numbers; no levels check exists).
