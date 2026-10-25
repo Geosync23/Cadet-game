@@ -95,13 +95,31 @@ with sync_playwright() as pw:
     check('bigJigsaw' not in g.ev("dressingOn()"), 'after 15:45: the jigsaw is put away')
     check(not g.errors, 'no errors: ' + ' | '.join(g.errors[:5]))
     g.close()
+    # ---- hosts and late attendance, on the plans (FX9, RV14's ask): each host is at their tradition (a weekend host stays to its end,
+    # section 14's leisureUntil; Brennan at a galley station for Bread day), and the two late ones draw at least 5 (tradToBed)
+    g = Game(pw, won, 900, 760)
+    hp = json.loads(g.ev(r"""(() => { const P = id => schedPeople().find(p => p.id === id), out = { hosts: [], late: [] };
+      const at = (p, d, e, f) => planDay(p, d).some(s => s.from < (d - 1) * 1440 + e.to && s.to > (d - 1) * 1440 + e.from && f(s));
+      for (const [id, d, host] of [['garden-picnic', 6, 'cruz-tove'], ['every-song', 6, 'torres-zeke'], ['night-owls-cocoa', 6, 'mensah'], ['big-jigsaw', 7, 'raman'], ['sunday-story', 7, 'holt'], ['bread-day', 7, 'brennan']]) {
+        const e = eventsOn(d).find(x => x.id === id); if (!e) { out.hosts.push([id, d, host, 'not on']); continue; }
+        const ok = id === 'bread-day' ? at(P(host), d, e, s => /^3-galley-/.test(s.placeId || '')) : at(P(host), d, e, s => (s.tag || '').startsWith('ev-' + id));
+        out.hosts.push([id, d, host, ok]); }
+      for (const [id, d, m] of [['night-owls-cocoa', 6, 1356], ['night-owls-cocoa', 20, 1356], ['sunday-story', 7, 1350], ['sunday-story', 14, 1350]]) {
+        const B = (d - 1) * 1440; let n = 0; for (const p of schedPeople()) if (planDay(p, d).some(s => (s.tag || '').startsWith('ev-' + id) && s.from <= B + m && s.to > B + m)) n++;
+        out.late.push([id, d, n]); }
+      return JSON.stringify(out); })()"""))
+    for h in hp['hosts']: check(h[3] is True, '%s Day %d: its host %s is at it' % (h[0], h[1], h[2]))
+    for l in hp['late']: check(l[2] >= 5, '%s Day %d: at least 5 there late on (%d)' % tuple(l))
+    g.close()
     # ---- The Sunday story (FX9): Holt reads the week's chapter in his bubble, story.sunday.1 on Day 7, .2 on Day 14 ----
     g = Game(pw, won, 900, 760)
     for d, ch in [(7, 1), (14, 2)]:
         g.ev(f"""(() => {{ skipTo(({d} - 1) * 1440 + 1338); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
           const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }})()""")
         g.step(10)
-        g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === 'holt'); if (a) { const c = cellPos(...nearestOpen(a.x, a.z, player)); player.obj.position.set(c.x, 0, c.z); } })()")
+        g.ev("""(() => { const a = DECK_CREW.find(x => x.p.id === 'holt'); if (!a) return; const [i0, j0] = a.spot && a.spot.walk || a.here(), R = a.spot && a.spot.room || roomAt(i0, j0); let best = null;   // a free tile in the room of his place (he may still be in the corridor)
+          for (let di = -4; di <= 4; di++) for (let dj = -4; dj <= 4; dj++) { const i = i0 + di, j = j0 + dj; if (roomAt(i, j) === R && free(i, j) && (!best || Math.hypot(di, dj) < best[2])) best = [i, j, Math.hypot(di, dj)]; }
+          if (best) { const c = cellPos(best[0], best[1]); player.obj.position.set(c.x, 0, c.z); } })()""")
         g.step(900)
         r = json.loads(g.ev(f"JSON.stringify({{ holt: DECK_CREW.some(x => x.p.id === 'holt'), said: window.__said.filter(x => x[0] === 'holt').map(x => x[1]), want: (LINES['story.sunday.{ch}'] || []).map(x => x.text) }})"))
         print('  the Sunday story, Day %d: Holt here %s, said %d lines, chapter %d has %d' % (d, r['holt'], len(r['said']), ch, len(r['want'])))
