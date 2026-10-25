@@ -79,7 +79,89 @@ def check_pause_suspends(pw, path):
         check(g.ev("SND._.state()") == 'running', 'resume runs it again')
     finally: g.close()
 
+# ---- music (FX22b) ----
+# The module on a test clock: a stand-in AudioContext whose time the check moves (nothing is made or heard), and a pretend
+# ship clock. MUSIC_RIG(day, min, onShift) -> window.__mr = { m (the module), clock, ship, run(secs, step) }.
+MUSIC_RIG = r"""((day, min, onShift) => {
+  const FK = () => { const f = function () { return FK(); }; return new Proxy(f, { get(t, k) { if (k === 'value') return 0; if (k === 'getChannelData') return () => new Float32Array(8); if (k === Symbol.toPrimitive) return () => 0; return FK(); }, set() { return true; } }); };
+  const clock = { t: 0 }, ship = { day, min, onShift }, ctx = new Proxy({}, { get(_, k) { return k === 'currentTime' ? clock.t : k === 'sampleRate' ? 8000 : FK(); } });
+  let a = 12345; const rnd = () => { a = (a * 1103515245 + 12345) % 2147483648; return a / 2147483648; };   // the check's own numbers (never R())
+  const m = SND.makeMusic({ ctx, dest: FK(), shipTime: () => ({ ...ship }), random: rnd });
+  const run = (secs, step = 0.5) => { for (let s = 0; s < secs; s += step) { clock.t += step; m.update(); } return m.state(); };
+  window.__mr = { m, clock, ship, run }; return 1; })"""
+
+def check_music_schedule(pw, path):
+    g = Game(pw, path)
+    try:
+        seed0 = g.ev('seed')
+        sets = g.ev("(() => { " + "window.__x = " + MUSIC_RIG + "; __x(3, 600, false); return __mr.m.SETS; })()")
+        for name, minute, shift in [('early morning', 360, False), ('morning', 600, False), ('midday', 720, False), ('afternoon', 900, False),
+                                    ('evening', 1100, False), ('night', 1300, False), ('late night', 120, False), ('working', 600, True)]:
+            st = g.ev(f"(() => {{ __x(3, {minute}, {str(shift).lower()}); return __mr.run(5); }})()")
+            check(st['set'] == name and st['track'] in sets[name], f'music: {name} plays from its own set ({st["set"]}, {st["track"]})')
+        # the rotation: 50 picks in a set, never the same twice running, the whole set before any repeats
+        r = g.ev("""(() => { __x(3, 600, false); const ks = []; __mr.run(5); ks.push(__mr.m.state().track);
+          for (let k = 1; k < 50; k++) { __mr.m.next(); ks.push(__mr.run(3).track); } return ks; })()""")
+        n = len(sets['morning'])
+        check(all(r[k] != r[k + 1] for k in range(len(r) - 1)), f'music: never the same track twice running over 50 picks')
+        check(sorted(set(r[:n])) == sorted(sets['morning']), f'music: the whole morning set before a repeat ({r[:n]})')
+        # a new time of day waits for the end of a section (30 s at most); a jump in ship time changes at once
+        r = g.ev("""(() => { __x(3, 655, false); __mr.run(20); const a = __mr.m.state().track; __mr.ship.min = 662; let t0 = __mr.clock.t, s = __mr.m.state();
+          while (s.set !== 'midday' && __mr.clock.t - t0 < 60) s = __mr.run(0.5); const waited = __mr.clock.t - t0, b = s.track;
+          __mr.ship.min = 1000; s = __mr.run(0.5); return { a, b, waited, jump: s.set, jt: s.track }; })()""")
+        check(0 < r['waited'] <= 30.5 and r['b'] in sets['midday'], f'music: midday came in at a section end, within 30 s ({r["waited"]:.1f} s, {r["a"]} -> {r["b"]})')
+        check(r['jump'] == 'afternoon', f'music: a jump in ship time (sleep) changes over at once ({r["jump"]}, {r["jt"]})')
+        # Off and pause go quiet; arrival night is silent and Day 1 starts the music
+        r = g.ev("""(() => { __x(3, 600, false); __mr.run(5); __mr.m.setEnabled(false); const off = __mr.run(10); __mr.m.setEnabled(true); __mr.m.pause(); const p = __mr.m.state();
+          __x(0, 1200, false); const d0 = __mr.run(120); __mr.ship.day = 1; __mr.ship.min = 400; const d1 = __mr.run(10); return { off: off.track, paused: p.paused, d0: d0.track, rest: d0.resting, d1: d1.track }; })()""")
+        check(r['off'] is None and r['paused'], f'music: Off stops it and pause holds it ({r})')
+        check(r['d0'] is None and r['rest'] and r['d1'] in sets['early morning'], f'music: nothing on arrival night (Day 0), music on Day 1 ({r})')
+        # a chosen track plays and plays again after it ends; Ship schedule goes back to the time of day
+        r = g.ev("""(() => { __x(3, 600, false); __mr.m.setMode('lullaby'); let s = __mr.run(5); const a = s.track, total = s.total;
+          s = __mr.run(total + 200, 2); const b = s.track || __mr.run(60, 2).track; __mr.m.setMode('schedule'); const c = __mr.run(5).track; return { a, b, c }; })()""")
+        check(r['a'] == 'lullaby' and r['b'] == 'lullaby' and r['c'] in sets['morning'], f'music: a chosen track repeats, Ship schedule returns ({r})')
+        check(g.ev('seed') == seed0, 'music: never draws on R()')
+    finally: g.close()
+
+def check_music_app(pw, path):
+    g = Game(pw, path)
+    try:
+        # under webdriver (no ?sound): no audio, no music; the app still shows and keeps your choices
+        click_world(g)
+        r = g.ev("""(() => { const v = JSON.stringify(deviceView('music')); return { ctx: !!SND.ctx, music: SND.music, app: DEVICE_APPS.has('music'), order: DEVICE_APPS.get('music').order, v }; })()""")
+        check(not r['ctx'] and r['music'] is None and r['app'] and 'Now playing' in r['v'] and 'Ship schedule' in r['v'], f'music: silent under webdriver, the Music app there ({r["ctx"]}, {r["music"]}, {r["app"]})')
+        # the app's list is the module's, track for track and time by time
+        same = g.ev("""(() => { window.__x = """ + MUSIC_RIG + """; __x(3, 600, false); const L = __mr.m.LIST.map(g => g.time + ':' + g.tracks.map(t => t.key + '=' + t.name).sort().join(','));
+          const A = SND.musicList.map(([time, ts]) => time + ':' + ts.map(([k, n]) => k + '=' + n).sort().join(',')); return JSON.stringify(L) === JSON.stringify(A) ? true : [L, A]; })()""")
+        check(same is True, f'music: the app lists every track under its time, as the module does ({same})')
+        r = g.ev("""(() => { const P = () => JSON.stringify(SND.prefs.music); const out = [P()];
+          deviceDo({ app: 'music', do: 'vol', arg: 1 }); deviceDo({ app: 'music', do: 'on', arg: false }); out.push(P()); deviceDo({ app: 'music', do: 'on', arg: true });
+          deviceDo({ app: 'music', do: 'browse' }); const v = JSON.stringify(deviceView('music')); deviceDo({ app: 'music', do: 'mode', arg: 'tea' }); const m1 = SND.prefs.music.mode;
+          deviceDo({ app: 'music', do: 'next' }); const m2 = SND.prefs.music.mode; const why = JSON.stringify(deviceView('music'));
+          deviceDo({ app: 'music', do: 'mode', arg: 'schedule' }); const day = SHIP.time.day; SHIP.time.day = 0; const d0 = JSON.stringify(deviceView('music')); SHIP.time.day = day;
+          return { out, list: v.includes('Late night') && v.includes('Nebula'), m1, m2, why: why.includes('Your choice: Zenith, on repeat'), d0: d0.includes('Quiet tonight'), mode: SND.prefs.music.mode }; })()""")
+        check(r['out'][0] == '{"on":true,"vol":0.7,"mode":"schedule","heard":{}}', f'music: on, Medium, Ship schedule by default ({r["out"][0]})')
+        check('"vol":1' in r['out'][1] and '"on":false' in r['out'][1], f'music: Volume and Off kept in the sound key\'s music part ({r["out"][1]})')
+        check(r['list'] and r['m1'] == 'tea' and r['m2'] == 'midday' and r['why'], f'music: Choose a track lists them all; a pick plays it; Next is the next in the list ({r["m1"]} -> {r["m2"]})')
+        check(r['d0'] and r['mode'] == 'schedule', f'music: arrival night says Quiet tonight ({r["d0"]})')
+        save = g.ev("""(() => { let s = null; const ls = localStorage.setItem; localStorage.setItem = (k, v) => { if (k === SAVE_KEY) s = v; };
+          try { eval('(' + saveGame.toString().replace('if (NOSAVE ||', 'if (false &&') + ')')(); } finally { localStorage.setItem = ls; }
+          const mine = o => o && typeof o === 'object' && (('mode' in o && 'heard' in o && 'vol' in o) || Object.values(o).some(mine)); return { n: (s || '').length, mine: mine(JSON.parse(s || 'null')) }; })()""")
+        check(save['n'] > 1000 and not save['mine'], f'music: nothing of it in the game save ({save})')
+        # with ?sound: a tap starts the sound, and the music with it, on the schedule
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(10); click_world(g); g.ev("skipTo(2 * 1440 + 600)")
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        for _ in range(10):
+            g.page.wait_for_timeout(1000); g.step(3)
+            if g.ev("!!(SND.music && SND.music.state().track)"): break
+        st = g.ev("SND.music ? SND.music.state() : null")
+        check(bool(st) and st['set'] == 'morning' and bool(st['track']), f'music: with sound on, the morning set plays at 10:00 on Day 3 ({st and (st["set"], st["track"])})')
+        check(g.ev("JSON.stringify(SND.prefs.music.heard)") != '{}', 'music: the rotation is kept in the sound key')
+        check(not [e for e in g.errors if 'pageerror' in e], f'music: no page errors {g.errors[:2]}')
+    finally: g.close()
+
 CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends]
+CHECKS += [check_music_schedule, check_music_app]   # music (FX22b)
 # (activities and music add theirs here)
 
 with sync_playwright() as pw:
