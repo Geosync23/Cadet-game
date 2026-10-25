@@ -59,3 +59,6 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   plans/rv14-old_trads.py (c5ea9ebf). 80dff612 on: 5 FAILs (rec-wso -5/-3/-3/-6 Days 14/21/42/49; lineCeremony -4 Day 7).
   Off: OK, 0 shifts. DS1 to fold it into weekend_check.
 - User (00:40): a 4-week rotation (W1 run/bread, W2 song/Gerald, W3 picnic/jigsaw, W4 cocoa/story); ships switched ON.
+- eebed514 (game = e462655f, 80a82f67...): weekend_check OK. Plants: s_host (weekendTag clause) -> picnic host FAIL;
+  s_tobed -> >=5 lines + Holt FAIL; s_chap -> Day 14 chapter FAIL; s_seat (seat-first off) -> NOT caught (asked DS1 for a
+  line). Chapter line 0 point still open (DS1).
