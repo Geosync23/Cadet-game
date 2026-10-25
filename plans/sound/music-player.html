@@ -1269,7 +1269,7 @@ $('#devBody').addEventListener('click', e => {
 renderApp(true);
 // ---- before and after: a second player, used only for comparing
 const BA = ['dawn', 'wake', 'firstlight', 'systems', 'morning', 'tea', 'midday', 'lunch', 'promenade', 'afternoon', 'circuits', 'golden', 'evening', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'shift', 'steady', 'rounds'];
-$('#baRows').innerHTML = BA.map(k => `<div class="barow"><span>${NAMES0[k]}${OLDNAMES[k] ? ' <small>(was ' + OLDNAMES[k] + ')</small>' : ''}</span><button class="chip small" data-ba="${k}" data-old="0" aria-pressed="false"><span class="dot"></span>New</button><button class="chip small" data-ba="${k}" data-old="1" aria-pressed="false"><span class="dot"></span>Old</button></div>`).join('');
+$('#baRows').innerHTML = BA.map(k => `<div class="barow"><span>${NAMES0[k]}${OLDNAMES[k] && OLDNAMES[k] !== NAMES0[k] ? ' <small>(was ' + OLDNAMES[k] + ')</small>' : ''}</span><button class="chip small" data-ba="${k}" data-old="0" aria-pressed="false"><span class="dot"></span>New</button><button class="chip small" data-ba="${k}" data-old="1" aria-pressed="false"><span class="dot"></span>Old</button></div>`).join('');
 let cmp = null, cmpT = null, cmpTick = null;
 function cmpStop() { if (cmpT) { cmpT.fadeOut(ctx.currentTime, 1); cmpT = null; } clearInterval(cmpTick); $$('[data-ba]').forEach(c => c.setAttribute('aria-pressed', 'false')); }
 $$('[data-ba]').forEach(b => b.addEventListener('click', () => {
