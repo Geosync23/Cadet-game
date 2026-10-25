@@ -1212,3 +1212,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:54 UTC: FX19 arrows_d S6 = stale check (with PROMO_SIGHT_ON the Day 9 test is under way, so "Nothing on the board" is rightly held); test-only fix claude/p926-fx19 acb36503 (game identical) → RV15. FX17 FX17-3 m17 check fix eba4d365 (test only) → RV17. Open: RV17 (FX17 3e8c78a6 + eba4d365, FX22b 3d011393), RV15 (FX19 acb36503), BM17 career-pace bisect. SD1 Round 2 v2 (picks recorded; louder bubble).
 - ~16:56 UTC: **USER: music approved** (all); build it out ready for the game but don't add yet → SD1: full tracks for all, music module (time-of-day + working schedule, cross-fade, quiet gaps, setting), harness page with fake ship clock; docs.
 - ~16:58 UTC: USER: plan a Music app on the device (turn off, choose track, volume) → SD1 adds mockup to the harness + plan/design-doc.
+- ~16:59 UTC: USER: music ON by default (ship schedule).
