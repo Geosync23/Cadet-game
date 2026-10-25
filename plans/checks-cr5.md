@@ -42,6 +42,19 @@ gives that last point. Each copy changes only its switch lines (2 or 8 diff line
 
 **CR5: FAIL** (5 of 6 OK; career NEW).
 
+**Lead 36's follow-up** (the two suspects together, and an odd job's reputation):
+- A copy with `ODD_ON` and `BOARD_TRADE_ON` both false (4 diff lines): still `FAIL busy: "Relied on" before Day 5`;
+  Days 1-5 22, 20, 22, 19, 18 jobs; xp 4, 14, 32, **40 relied** on Day 4. The extra point already shows on Day 1
+  (xp 4; OLD 3).
+- An odd job's reputation: **none of its own**. Every board top-up, odd ones included, is made with `xp: 0`
+  (game line 21088, `fixPost`: `extra: true, xp: 0, fix: r.id, fixS: st`), the same as the small repairs; line 21100
+  says why (the career's pace waits for the balancing pass, backlog 12 and 17). So odd jobs add jobs (about 8 a day
+  for the busy player), not xp directly; with them on the player still gains a point more by Day 4 (41 against 40),
+  through what the extra work leads to.
+- The calls that give reputation (`worksXp(...)`) are the same in OLD and b78e1e22 (same list, same arguments), so
+  the Day 1 point comes from what the busy player gets to do, not from a new reward. Which 0.92.6 change it is needs a
+  bisect of the build's other items (not a switch).
+
 ## 0.92.5 full round (2026-10-25, started 05:50 UTC, for BM17 and lead 35)
 
 - Candidate: `claude/staging-0.92.5` 53c11f8 (0.92.5: items 1-12, 14-22, the sim bay and the weekend on). Switches in
