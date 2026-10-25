@@ -6,7 +6,7 @@
 //   reading.titles   12 invented books, one title per line. Data: FX17 hands one to each reader as {title}.
 //   reading.book     a reader on their book (bubbles, 60 or fewer with the longest title in).
 //   reading.reply    someone answering a reader (bubbles, 60 or fewer).
-// Titles name only canon places (Coriel, Hesper Dock, Lisk); nothing real.
+// Titles name only canon places (Coriel, Hesper Dock); nothing real.
 
 == reading.welcome
 - Hello. Armchairs are free, books are on the shelf. Sit close. Talk quietly.
@@ -23,9 +23,9 @@
 - Bread on Sundays
 - Rain on Hesper Dock
 - The Long Way Round
-- Letters to Lisk
+- Small Hours
 - The Quiet Star
-- Soup for a Long Voyage
+- Soup for the Way Home
 - What the Coil Said
 - The Last Ferry Home
 - A Map of Grey Skies
