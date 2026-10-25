@@ -24,3 +24,6 @@ Probes: /tmp/rv15/probe_cheer.py, probe_tomorrow.py (container only).
 
 ## FX18 claude/fx18-det 8ed625fa (test-only, backlog FX17-2): PASS (~09:50 UTC)
 Each run copy gets its own name (pid + count); two cadet_tests at once in one CADET_WORK each used their own copy; staging vs itself ALL IDENTICAL; no _run_ files left.
+
+## FX18 claude/fx18-det 28f4669d (test-only, backlog FX18-1): PASS (~10:45 UTC)
+RUN_ID per process in 8 checks; two career_checks at once in one CADET_WORK both OK, own copies, none left; controller_check named its copies per run, no FAILs, hit my 50 min timeout under load (not a fault). The cleanup is atexit only: a killed run leaves its uniquely named copies.
