@@ -77,3 +77,20 @@ scene. Screenshots: /tmp/rv17/shots (not in the repo).
 ## Verdict
 **FIXES NEEDED (small).** Everything works and every check is green; the switch-off build is pixel-identical to 0.92.5.
 Before switch-on: 2 and 3 (a player can lose an appointment or miss it), and ideally 4-6. 7 is optional.
+
+## Re-review of the fix sha 6b03bea7 (game sha256 84819518...cbe1)
+FX22's fixes for 2-6 and 7 (a), (c). Diff read: every change is behind P926_APPT.
+| Check | Result |
+|---|---|
+| cadet_test off vs 0.92.5 | first run: only a_start differed (14812 px), the known timing-sensitive first shot (backlog FX17-2), on a busy machine; run again alone: ALL IDENTICAL (1-level noise) |
+| check_fast | QUICK CHECK OK |
+| appt_check (all parts, now with lines for 2-5) | APPT CHECK OK (183 ok; both planted faults fail their part) |
+| events_check (28 days), switch on | EVENTS CHECK OK |
+| 2: my reload probe | joined, saved, reloaded: a tap on Sato reopens the scene; read through: kept, one Record row |
+| 3: heads-up probe (Brennan 14:30, on shift, Accept tapped on screen) | the strip comes at 14:15 on shift, and with heads-ups switched off too |
+| 4: booking matrix again | every single host now covers the slot; the only new miss is Cruz's garden from Day 33 (its one Saturday no longer passes; the invite comes later), fine |
+| 6: night round at phone size | the seven stop lines only; no chatter bubble beside them |
+Left (lead's question): a reload in the middle of the night round still ends as missed. Not a must-fix: a missed
+round isn't counted as kept, so Mensah can invite you again; nothing is lost.
+
+## Final verdict: PASS at 6b03bea7.
