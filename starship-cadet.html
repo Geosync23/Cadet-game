@@ -39866,6 +39866,8 @@ const evEvening = e => e.from >= 1020 && e.to > 1080;
 // (DS1, the user 2026-10-25: "keep some that were already there") the weekend's new traditions (WEEKEND_TRADS, with the switch
 // on) always give way: last in evBudget's order, and never what a birthday's time is chosen round (evBdaySlot drops one near it)
 const evNewWk = e => WEEKEND_ON && WEEKEND_TRADS.has(e.ev.id) ? 1 : 0;
+// someone the day's old traditions overlapping e (by time, with their own arrive rules) would have: a new one leaves them be. Pure
+function evOldGoer(p, d, e) { for (const o of eventsOn(d)) if (o !== e && !evNewWk(o) && o.from < e.to && e.from < o.to && evIsTrad(o.ev) && evArrive(p, d, o) != null) return true; return false; }
 function evBudget(list) {
   const rank = e => SHIP_TRADITIONS.indexOf(e.ev.base || e.ev), recOnly = e => e.ev.where.every(w => w.deck === 7);
   // the rec deck's own (0.83, RA) are budgeted among themselves (one at a time in a room), so the ship's others never change
@@ -40030,6 +40032,7 @@ function tradToBed(p, d, e) {
 function evArrive(p, d, e) {
   const ev = e.ev;
   if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, e))) return null;
+  if (evNewWk(e) && ev.host !== p.id && evOldGoer(p, d, e)) return null;   // (DS1, lead 35: an old tradition loses at most 2) a new weekend one never draws someone going to an old one at the same time
   const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
@@ -41876,7 +41879,7 @@ function weekendDecor(now) {
 // the Sunday story (FX9, 0.92.5 item 16): Holt reads a chapter a week, story.sunday.<n> (SW1's content/banks/sunday-story.lines),
 // n = ((the week - 1) mod the chapters there are) + 1, line by line in his speech bubble from 5 minutes in to 5 before the end,
 // while you're in its room (as the Friday address). Every frame from eventsTick; nothing saved, no R()
-let SUN_SAID = null;
+let SUN_SAID = null, SUN_GO = null;
 function sundayChapter(d) {
   let n = 0; while (typeof LINES !== 'undefined' && Array.isArray(LINES['story.sunday.' + (n + 1)])) n++;
   const t = (SHIP_TRADITIONS || []).find(x => x.id === 'sunday-story'), per = 7 * ((t && t.when && EV_CYCLE[t.when.every]) || 1);   // (DS1, the 4-week rotation: a chapter a showing, not a week; SW1)
@@ -41885,10 +41888,15 @@ function sundayChapter(d) {
 function sundayStoryTick() {
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
   const e = m >= 1200 && eventsOn(d).find(x => x.id === 'sunday-story'); if (!e) return;   // (from 20:00: it's at 21:15 since the rotation)
-  const a0 = e.from + 5, a1 = e.to - 5, key = sundayChapter(d), L = key && LINES[key];
-  if (!L || m < a0 || m >= a1 || !friHere(e)) return;
-  const i = Math.floor((m - a0) * L.length / (a1 - a0)); if (SUN_SAID && SUN_SAID[0] === d && SUN_SAID[1] === i) return;
+  const key = sundayChapter(d), L = key && LINES[key], a1 = e.to - 5;
+  if (!L || m < e.from || m >= a1 || !friHere(e)) return;
   const a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(c => c.h && c.p && c.p.id === 'holt'); if (!a || typeof bubbleSay !== 'function') return;   // not here yet: next frame
+  // (DS1, RV14: he sits down some minutes in, and the clock's window had moved past the opening line) the chapter starts from
+  // its first line once he's settled in the room (SUN_GO), its lines spread over what's left of it
+  if (!SUN_GO || SUN_GO[0] !== d) { if (!a.settled || !friHere({ ...e, rooms: e.rooms }) || !(e.rooms || new Set()).has(deckDef.num + '|' + roomAt(...cellAt(a.x, a.z)))) return; SUN_GO = [d, Math.max(m, e.from + 2)]; }
+  const a0 = SUN_GO[1]; if (a1 - a0 < 4) return;
+  const due = Math.min(L.length - 1, Math.floor((m - a0) * L.length / (a1 - a0))), i = SUN_SAID && SUN_SAID[0] === d ? SUN_SAID[1] + 1 : 0;   // in order, none skipped
+  if (i > due || i >= L.length) return;
   SUN_SAID = [d, i]; bubbleSay(friSpeaker(a), L[i].text, Math.max(3.5, (a1 - a0) / L.length / SHIP_RATE - .4));
 }
 // ---- the events base, F0 (EV1; plans/events-base-brief.md). Inert while EV_CAL_ON is off ----

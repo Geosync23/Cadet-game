@@ -30,6 +30,12 @@ EVS = "JSON.stringify(%s.map(d => [d, eventsOn(d).map(e => e.id)]))" % json.dump
 # Sunday of Days 6-84: the traditions that were already there, with their times, and the new ones on it
 WKND = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) { if (weekday(d) < 5) continue;
   const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id)).map(e => e.id)]); } return out; })())"""
+# lead 35's rule (RV14's rv14-old_trads.py folded in): with the switch on, every tradition that was already there keeps its days,
+# times, places and host (Days 1-56, the switch off as the base: the same build), loses at most 2 people on any day, and never
+# goes below its fewest on any day with the switch off (the format has no attendance minimum: its own worst day is the floor)
+OLDT = """JSON.stringify((() => { const out = {}; for (let d = 1; d <= 56; d++) out[d] = eventsOn(d).filter(e => !WEEKEND_TRADS.has(e.id)).map(e => {
+  const came = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id).sort();
+  return [e.id, e.from, e.to, JSON.stringify(e.ev.where || null), e.ev.host || null, came]; }); return out; })())"""
 # RV14: each weekend tradition's host planned at it, and how many go to each showing of the late ones
 HOSTS = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) for (const e of eventsOn(d)) { if (!WEEKEND_TRADS.has(e.id)) continue;
   const goers = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
@@ -40,7 +46,7 @@ with sync_playwright() as pw:
     g = Game(pw, build, 900, 760)
     evs = dict(json.loads(g.ev(EVS)))
     check(not any(i in evs[d] for i, d in TRADS.items()), 'switch off: none of the weekend traditions')
-    off_w = json.loads(g.ev(WKND))
+    off_w = json.loads(g.ev(WKND)); off_t = json.loads(g.ev(OLDT))
     g.close()
     g = Game(pw, won, 900, 760)
     evs = dict(json.loads(g.ev(EVS)))
@@ -49,7 +55,23 @@ with sync_playwright() as pw:
     check(len(acts) >= 7 and all(a for _, a in acts), 'every weekend join has its activity, with an end (%s)' % acts)
     miss = json.loads(g.ev("JSON.stringify([...WEEKEND_TRADS].filter(id => !TRAD_JOIN[id] || (!TRAD_JOIN[id].act && !PLAYER_ACTS['tj:' + id])))"))
     check(not miss, 'every weekend tradition has a join, and each tap-join its activity (missing: %s)' % miss)
-    on_w = json.loads(g.ev(WKND))
+    on_w = json.loads(g.ev(WKND)); on_t = json.loads(g.ev(OLDT))
+    floor = {}
+    for d, L in off_t.items():
+        for x in L: floor[x[0]] = min(floor.get(x[0], 99), len(x[5]))
+    diff, lost3, under, shifts = [], [], [], 0
+    for d in map(str, range(1, 57)):
+        ea, eb = {x[0]: x for x in off_t[d]}, {x[0]: x for x in on_t[d]}
+        for k in sorted(set(ea) | set(eb)):
+            x, y = ea.get(k), eb.get(k)
+            if not x or not y or x[:5] != y[:5]: diff.append((d, k, x and x[:5], y and y[:5])); continue
+            lost = sorted(set(x[5]) - set(y[5]))
+            if lost or set(y[5]) - set(x[5]): shifts += 1
+            if len(lost) > 2: lost3.append((d, k, len(x[5]), len(y[5]), lost))
+            if len(y[5]) < floor[k]: under.append((d, k, len(y[5]), floor[k]))
+    print('  the old traditions with the switch on (Days 1-56): %d with a few people shifted; lost more than 2: %s; under their floor: %s' % (shifts, lost3[:4], under[:4]))
+    check(not diff, 'lead 35: every old tradition keeps its days, times, places and host with the switch on (%s)' % diff[:3])
+    check(not lost3 and not under, 'lead 35: no old tradition loses more than 2 people on a day, or goes below its fewest without the weekend ones (%s %s)' % (lost3[:3], under[:3]))
     moved = [(a[0], sorted(set(a[2]) ^ set(b[2]))) for a, b in zip(off_w, on_w) if a[2] != b[2]]
     print('  the weekends, Days 6-84 (day, new ones):', [(b[0], b[3]) for b in on_w])
     check(not moved, 'the rotation: every tradition that was already on a weekend is on the same days at the same times with the switch on (%s)' % moved[:4])
@@ -125,13 +147,13 @@ with sync_playwright() as pw:
     g = Game(pw, won, 900, 760)
     for d, ch in [(28, 1), (56, 2)]:
         g.ev(f"""(() => {{ skipTo(({d} - 1) * 1440 + 1278); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
-          const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }})()""")
+          if (!window.__bsHook) {{ window.__bsHook = 1; const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }} }})()""")   # (hooked once)
         g.step(10)
         g.ev(f"(() => {{ const e = eventsOn({d}).find(x => x.id === 'sunday-story'); if (!e) return; const rk = [...eventRooms(e.ev)].map(r => r.split('|')).find(r => +r[0] === 4)[1], tl = ROOM_TILES[rk], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.set(c.x, 0, c.z); player.stop(); }})()")   # (in its room: at 21:18 Holt may still be on his way in)
         g.step(900)
         r = json.loads(g.ev(f"JSON.stringify({{ holt: DECK_CREW.some(x => x.p.id === 'holt'), said: window.__said.filter(x => x[0] === 'holt').map(x => x[1]), want: (LINES['story.sunday.{ch}'] || []).map(x => x.text) }})"))
         print('  the Sunday story, Day %d: Holt here %s, said %d lines, chapter %d has %d' % (d, r['holt'], len(r['said']), ch, len(r['want'])))
-        check(r['holt'] and len(r['said']) >= 2 and all(x in r['want'] for x in r['said']), 'the Sunday story on Day %d: Holt reads chapter %d, line by line (%s)' % (d, ch, r['said'][:2]))
+        check(r['holt'] and r['said'] == r['want'], 'the Sunday story on Day %d: Holt reads chapter %d from its first line, every line in order once (RV14) (%s)' % (d, ch, r['said'][:2]))
     check(not g.errors, 'no errors: ' + ' | '.join(g.errors[:5]))
     g.close()
 print('WEEKEND CHECK OK' if ok else 'WEEKEND CHECK FAILED')
