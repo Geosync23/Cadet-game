@@ -21033,7 +21033,10 @@ function fixTable() {
   const order = st => { const seed = machSeed('fix:' + st), xs = rows.filter(r => (r.place.split('-')[0] === '2') === (st === 's')); return xs.map((r, i) => [schedU(seed, i, 7), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]); };
   const T = { s: order('s'), p: order('p'), byId: new Map(rows.map(r => [r.id, r])) };
   if (ODD_ON) { const seed = machSeed('fix:o'), xs = ODD_ROWS.map(s => { const [id, place, part, tool, mins, sys, title] = s.split('|'); return { id, place, part: part || null, tool, mins: +mins || 10, sys, title }; }).filter(r => !ODD_PARKED.has(r.id));   // FX20: the odd jobs' stream
-    T.o = xs.map((r, i) => [schedU(seed, i, 7), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]); for (const r of xs) T.byId.set(r.id, r); }
+    const sh = xs.map((r, i) => [schedU(seed, i, 7), r]).sort((a, b) => a[0] - b[0]).map(x => x[1]), by = {};
+    for (const r of sh) (by[r.place.split('-')[0]] || (by[r.place.split('-')[0]] = [])).push(r);
+    T.o = Object.keys(by).flatMap(n => by[n].map((r, j) => [(j + .5) / by[n].length, +n, r])).sort((a, b) => a[0] - b[0] || a[1] - b[1]).map(x => x[2]);   // each deck spread evenly along the stream: a day's few go all over the ship
+    for (const r of xs) T.byId.set(r.id, r); }
   return FIX_TABLE = T;
 }
 const fixRow = id => fixTable().byId.get(id) || null;
