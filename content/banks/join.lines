@@ -185,3 +185,9 @@
 - Tap {name} to join the swap meet
 == join.market.notice
 - Sunday swap meet: browse the stalls on the promenade and swap one thing for another. Social and leisure up.
+
+// SW2, 0.92.6 item 4: Reading corner (host Esme Walsh).
+== join.reading-corner.tip
+- Tap {name} to join the reading corner
+== join.reading-corner.notice
+- Reading corner: sit close in the bow lounge with a book and talk about what you're reading. Leisure and social up.
