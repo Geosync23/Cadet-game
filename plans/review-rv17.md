@@ -115,3 +115,5 @@ whose open booking's host is `a.p.id` (`eventsOn(d).find(x => x.ev.appt && (appt
 and use it. Re-test: reload mid-Brennan and mid-round, tap the host, the scene / round goes on.
 
 Verdict on bae25ae7: **FIXES NEEDED (one small)**: R1. Everything else passes.
+Note (BM17, 13:18 UTC): 6b03bea7 (passed 11:24) is already on staging-0.92.6 (merge 2f0c29de, P926_APPT off); bae25ae7
+held locally; BM17 merges the next sha I pass on top.
