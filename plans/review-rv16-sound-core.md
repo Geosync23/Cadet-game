@@ -45,3 +45,15 @@ claude/integration 5898c190 (0.92.6, sha256 10f654de... checked).
    catches a double fire later.
 4. Footsteps play during any scripted move of the player that isn't an activity (the plan says none in a scripted
    move). Probably rare; leave it unless the listening pass hears it.
+
+## Re-check: s.6 66cee7e4 and s.7 6cea352d (game sha256 a8c32381...): PASS
+- s.6: SND.actTick / SND.musicTick, called once a second inside S.frame while sound runs (only after the context is
+  running, so never in checks). cadet_test 5898c190 vs s.6 alone: ALL IDENTICAL.
+- s.7 takes notes 1-3: liftDoorsOpen once at r.t >= RIDE.light + 0.05; the tap handler also resumes a stopped context
+  (not while hidden); sound_check requires the door's open and close once each and the exact five-sound lift list.
+  Note 4 left for the listening pass.
+- cadet_test 5898c190 vs s.7 alone: ALL IDENTICAL (renderer noise only). sound_check: OK. Real-frame probe: no door
+  fired twice in a row, no burst on a deck change, lift = liftPress, liftDoorsClose, liftRide, liftArrive,
+  liftDoorsOpen (once each), no page errors.
+- player_check's 3 FAILs (the reserved job's bracket at the Lathe) are old: the same 3 lines fail on plain 0.92.6
+  5898c190 (run side by side with s.6). Worth a backlog row if it isn't on the known-old list.
