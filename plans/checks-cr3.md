@@ -354,3 +354,4 @@ controller_check.py and disc_check.py differ from 53c11f88). FX23's scripts on t
 | disc_check (whole) | **OK** | ALL OK; 53 ok lines; the game view draws in 129 calls (under 200); 297 s |
 
 So the 0.92.5 controller_check disc FAIL above is resolved by FX23's test fix; no game change.
+| controller_check every part but reach (BM17's ask, the file changed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK; 1805 s |
