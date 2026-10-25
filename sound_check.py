@@ -278,6 +278,13 @@ def check_activities(pw, path):
             blackoutAt = () => ({ from: 0, to: 1 }); SND.actTick(); out.push(SND.log.map(e => e.name)); }
           finally { eventNow = en; blackoutAt = ba; } return out; })()""")
         check(storm == [['storm'], [], ['flicker']], f'the storm warning chimes once as it begins, and the lights dip with a blackout: {storm}')
+        g.ev("SND.log.length = 0; window.__lie = { kind: 'lie', o: {}, def: {}, phase: 'in' }; SND.act('begin', window.__lie); SND.act('end', window.__lie, true)")
+        g.page.wait_for_timeout(2200); g.step(2)
+        quick = g.ev("SND.log.map(e => e.name)")
+        g.ev("SND.log.length = 0; window.__lie = { kind: 'lie', o: {}, def: {}, phase: 'in' }; SND.act('begin', window.__lie)")
+        g.page.wait_for_timeout(2200); g.step(2)
+        stay = g.ev("(() => { const n = SND.log.map(e => e.name); SND.act('end', window.__lie, false); return n; })()")
+        check('blanket' not in quick and 'bedLie' in quick and 'blanket' in stay, f'a follow-up (the blanket) is cancelled if you get up first, and comes if you stay: {quick} / {stay}')
         laundry = g.ev("""(() => { goToDeck(4); const s = placeSpot('4-laundry-1'), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop();
           SND.log.length = 0; SND.actTick(); const before = SND.log.filter(e => e.loop).map(e => e.name);
           machineUse('4-washer-1'); MACH_REV++; SND.actTick(); const on = SND.log.filter(e => e.loop).map(e => e.name), loops = [...SND._.LOOPS].map(l => l.label);

@@ -63010,7 +63010,8 @@ const SND = (() => {
     return null;
   }
   // the activity's sounds start as you step in (actBegin) and stop as it ends (actEnd); one loop at a time, yours
-  let actLoop = null;
+  let actLoop = null, actThen = [], ACT_OF = null;                       // actThen: the follow-ups still to come (a blanket after lying down), cancelled if the activity ends or changes first
+  const actThenClear = () => { actThen.forEach(id => clearTimeout(id)); actThen = []; };
   function actLoopStop(f = 0.5) { const L = actLoop; actLoop = null; if (L) L.stop(f); }
   function actLoopStart(name) {
     actLoopStop(0.2);
@@ -63026,7 +63027,8 @@ const SND = (() => {
   S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
     if (!A) return;
     const p = actPick(A);
-    if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) setTimeout(() => S.fx(n), d * 1000); if (p.loop) actLoopStart(p.loop); return; }
+    actThenClear(); ACT_OF = phase === 'begin' ? A : null;
+    if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) actThen.push(setTimeout(() => { if (ACT_OF === A) S.fx(n); }, d * 1000)); if (p.loop) actLoopStart(p.loop); return; }
     actLoopStop(0.5);
     if (p && p.end && !(abort && A.phase === 'walk')) S.fx(p.end, { long: 4 });   // never for one you walked away from before it began
   };
