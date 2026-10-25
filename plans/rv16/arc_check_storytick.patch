@@ -1,0 +1,10 @@
+--- a/arc_check.py	2026-10-25 15:29:13.083984035 +0000
++++ b/arc_check.py	2026-10-25 15:29:13.138861752 +0000
+@@ -33,6 +33,7 @@
+   for (let d = 1; d <= DAYS; d++) {
+     for (let m = 360; m < 1440; m += 30) {
+       const t = live(d, m);
++      if (typeof storyTick === 'function' && STORIES_ON) storyTick(t);   // RV16 probe: the stories' clock
+       if (m === 720) for (const p of ppl) { relAdd(p.id, 'chat', 2); relAdd(p.id, 'meal', 3); }
+       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
+       const wantsMe = p => { const x = momentNextId(p), dd = x && momentDef(x); return dd && [].concat(dd.where || []).some(w => w === 'appt' || w === 'visit') ? 0 : 1; };
