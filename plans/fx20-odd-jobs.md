@@ -75,7 +75,7 @@ The user: "Add a lot more simple jobs around the ship (cleaning vents, unstickin
 - oj-d3inf-vent|3-visit-2||a vent brush|15|air|Clean the waiting room vent
 - oj-d3wash-drain|3-toilet-1||a drain snake|15|waste|Clear a slow washroom drain
 - oj-d3wash-vent|3-toilet-3||a vent brush|15|air|Clean the washroom extractor grille
-- oj-d3wash-door|3-toilet-4||a screwdriver|10|hull|Fix a cubicle door that won't latch
+- oj-d3wash-door|3-toilet-4||a screwdriver|10|hull|Fix a cubicle door that will not latch
 - oj-d4lobby-vent|4-lift-2||a vent brush|15|air|Clean the lift lobby vent
 - oj-d4lobby-bench|4-bench-1||a hex key|10|hull|Tighten a wobbly lobby bench
 - oj-d4lobby-board|4-bench-3||a pin box|10|comms|Tidy the notice board
@@ -110,7 +110,7 @@ The user: "Add a lot more simple jobs around the ship (cleaning vents, unstickin
 - oj-d5tea-kettle|5-tea-3||descaler|15|water|Descale the tea corner kettle
 - oj-d5wash-drain|5-basin-2||a drain snake|15|waste|Clear a slow basin drain
 - oj-d5wash-vent|5-toilet-1||a vent brush|15|air|Clean the washroom extractor grille
-- oj-d5bay-clock|5-timeclock-1||a screwdriver|10|comms|Unstick the time clock's card slot
+- oj-d5bay-clock|5-timeclock-1||a screwdriver|10|comms|Unstick the time clock card slot
 - oj-d6lobby-vent|6-lift-2||a vent brush|15|air|Clean the lift lobby vent
 - oj-d6lobby-bench|6-bench-2||a hex key|10|hull|Tighten a lobby bench
 - oj-d6lobby-hatch|6-lift-3||an oil can|10|hull|Oil a stiff inspection hatch

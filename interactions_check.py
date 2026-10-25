@@ -286,6 +286,11 @@ with sync_playwright() as pw:
               if (r.part) SHIP.stores[r.part] = Math.max(SHIP.stores[r.part] || 0, 9);
               add({ id: 'ixtap-fix-' + r.id, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: r.id, title: r.title, tier: 1, stops: [{ deck: pl.deck, placeId: r.place, mins: r.mins, tag: 'fix' }],
                 urgency: 0, posted: t, found: t, claimedBy: null, parts: r.part ? [r.part] : [], status: 'open', fix: r.id, fixS: pl.deck === 2 ? 's' : 'p', tool: r.tool }); } }
+          if (kind.startsWith('odd') && typeof fixTable === 'function' && fixTable().o) { const one = new Set();   // FX20's odd jobs (ODD_ON): one in each room ('odd'), or every row ('oddall', a probe)
+            for (const r of fixTable().o) { const pl = placeById(r.place); if (!pl || (pl.deck === 7 && !REC_DECK) || (kind === 'odd' && one.has(pl.deck + pl.room))) continue; one.add(pl.deck + pl.room);
+              if (r.part) SHIP.stores[r.part] = Math.max(SHIP.stores[r.part] || 0, 9);
+              add({ id: 'ixtap-odd-' + r.id, machine: null, deck: pl.deck, room: pl.room, kind: 'chore', chore: 'fix', target: r.id, title: r.title, tier: 1, stops: [{ deck: pl.deck, placeId: r.place, mins: r.mins, tag: 'fix' }],
+                urgency: 0, posted: t, found: t, claimedBy: null, parts: r.part ? [r.part] : [], status: 'open', fix: r.id, fixS: 'o', tool: r.tool }); } }
           MACH_REV++; return out; })"""
         HOLD = r"""((id) => { for (const j of SHIP.jobs) if (j.claimedBy === 'you' && j.status === 'claimed') { j.claimedBy = null; j.status = 'open'; }
           actEnd(true); SHIP.player.work = null; const j = SHIP.jobs.find(x => x.id === id); j.claimedBy = 'you'; j.status = 'claimed'; j.start = shipNow(); MACH_REV++;   // claimed by hand: the tier doesn't matter here
@@ -297,7 +302,7 @@ with sync_playwright() as pw:
           for (const [dx, dz] of [[0, 0], [.4, 0], [-.4, 0], [0, .4], [0, -.4], [.4, .4], [-.4, .4], [.4, -.4], [-.4, -.4], [.8, 0], [-.8, 0], [0, .8], [0, -.8]]) { const p = scr(dx, dz); if (!crewAtScreen(...p)) return p; }
           return scr(0, 0); })"""
         PUT = r"""((pid) => { const s = placeSpot(pid), gl = nearestOpen(s.x, s.z, player); player.obj.position.copy(cellPos(...gl)); player.stop(); })"""
-        for kind in ['lamp', 'event', 'machine', 'fix']:
+        for kind in ['lamp', 'event', 'machine', 'fix', os.environ.get('IX_ODD', 'odd')]:   # IX_ODD=oddall: every odd job's stop (FX20's probe)
             for jid in g.ev(f"({MKJ})('{kind}')"):
                 nx = g.ev(f"({HOLD})('{jid}')")
                 if not check(nx, f'{jid}: a stop to go to'): continue
@@ -306,7 +311,7 @@ with sync_playwright() as pw:
                 if jid == 'ixtap-veyliLamp':                 # the Captain's quarters are locked: your job's stop opens the door for you
                     path = g.ev(f"(() => {{ const pl = PLACE_OF.get('{pid}'), lw = [...PLACE_OF.values()].find(p => p.type === 'lift-wait'); return !!findPath(lw.walk || lw.at, pl.walk || pl.at, null, player); }})()")
                     check(path, f'{jid}: the way into the Captain\'s quarters is open while the job is yours')
-                g.ev(f"({PUT})('{pid}')"); g.step(60 if kind == 'fix' else 15)   # fix: one stop after another on a deck, far apart: the camera catches up first (FX10)
+                g.ev(f"({PUT})('{pid}')"); g.step(60 if kind in ('fix', 'odd', 'oddall') else 15)   # fix: one stop after another on a deck, far apart: the camera catches up first (FX10)
                 x, y = g.ev(f"({SCR})('{pid}')")
                 g.page.mouse.click(x, y); g.step(90); s = st()
                 check(s['act'] and s['act'][0] in ('ixStop', 'job'), f'{jid}: a tap at the stop ({step}, Deck {deck}) starts the work ({s["act"]}, {s["toast"][:70]})')
