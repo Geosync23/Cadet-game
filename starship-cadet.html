@@ -54688,7 +54688,8 @@ function promoGuide(now) {
   if (!promoQueue()) return;
   if (c && c.id === 't2' && c.st === 'do' && c.j) {
     const j = SHIP.jobs.find(x => x.id === c.j);
-    let take = false; try { take = typeof guideTakeable === 'function' && guideTakeable().some(o => o.id === c.j); } catch (e) { take = false; }   // once it's on the board for you (clocked in): the shift's clock-in arrow first
+    let take = false; try { take = typeof guideTakeable === 'function' && guideTakeable().some(o => o.id === c.j); } catch (e) { take = false; }
+    { let mj = null; try { mj = typeof myJob === 'function' ? myJob() : null; } catch (e) { mj = null; } if (mj && mj.id !== c.j && !jobSide(mj)) take = false; }   // FX19 (0.92.6): holding another job, the board has no Take it for the test: that job's own arrow first (the follower stood at the board all Day 9)   // once it's on the board for you (clocked in): the shift's clock-in arrow first
     if (j && j.status !== 'done' && j.claimedBy !== 'you' && take) guideAsk({ id: 'promo:test:' + worksDay(now), level: 3, everyday: true, owner, until: j.until || now + 360,
       goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 2 test job: take it at the board' }), done: () => guideTaken(c.j) });
   }
