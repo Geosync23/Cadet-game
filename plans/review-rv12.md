@@ -189,3 +189,19 @@ Game sha256 515233c1...; base integration ba836359. (ae8c8bc9 replaced by 5e1d82
   no tladJoin (no Play/Watch card), t3 ring spots untagged (ring empty, all in lounge seats), t4 no tladLead (host
   not at the table by 15:02, ring empty).
 - events_check OK, day_check 6 OK, tiles_check ALL OK, cadet_test vs ba836359 ALL IDENTICAL, check_fast OK (249 s).
+
+## FX12 claude/p925-fx12 91b97ee9 (= 20860227 + 0.92.4 merged; 0.92.5 items 4, 9, 10): all OK but arrows week: FIXES NEEDED (blocking), ~00:55 UTC
+Games: 20860227 cfb237c9...; 91b97ee9 84ece11c... (diff 20860227..91b97ee9 = 0.92.4's game changes + the one resolved hold line).
+- Read: late piano Tue+Thu 21:40-22:25 with a new .trad field to-bed (evArrive/eventPlan: off to bed 20 min before
+  bedtime); evBdaySlot inside eventsOn after evBudget (the day's list stored first for the galley/shift recursion; pure
+  per day) moves the birthday to the quarter hour 17:00-21:30 with the fewest weekly traditions within an hour, only
+  weekly ones dropped; birthdays redone (head chair 3-bday-head, ring 3-bday-1..8, DECK_DRESS.birthdayTable, bubbles
+  via lineFor live only, a cake tap gives a slice in hand eaten over 5 min, once a party; the servery cake hidden).
+- events part 13 OK; on 3866c8f3 it FAILs (piano two nights running, the birthday within an hour, no head, no cake).
+  Plants caught: b1 evBdaySlot off, b2 to-bed ignored, b3 whereFor off (park-noor at the head), b4 no slice in hand.
+  Also OK on 91b97ee9.
+- events_check OK, day_check 1 OK, food 1 7 OK, check_fast OK, cadet_test 91b97ee9 vs ba836359 ALL IDENTICAL.
+  FX12: intro_check OK.
+- arrows_check week (no 'guide'): FAILs on 20860227: Day 9 "m6" not learned; stuck from Day 9 10:39 at "! Burst pipe,
+  Deck 4" (the arrow up 3+ hours from 10:34); OK on 3866c8f3. Reproduced (DV1 had no repro with the queue on). DV1
+  digging (lead 34/35's call).
