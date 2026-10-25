@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-a.4
+   STARSHIP CADET: CSV Wren                           build 0.93.0-a.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.0-a.4';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-a.5';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -62999,7 +62999,8 @@ const SND = (() => {
     return null;
   }
   // the activity's sounds start as you step in (actBegin) and stop as it ends (actEnd); one loop at a time, yours
-  let actLoop = null;
+  let actLoop = null, actThen = [], ACT_OF = null;                       // actThen: the follow-ups still to come (a blanket after lying down), cancelled if the activity ends or changes first
+  const actThenClear = () => { actThen.forEach(id => clearTimeout(id)); actThen = []; };
   function actLoopStop(f = 0.5) { const L = actLoop; actLoop = null; if (L) L.stop(f); }
   function actLoopStart(name) {
     actLoopStop(0.2);
@@ -63015,7 +63016,8 @@ const SND = (() => {
   S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
     if (!A) return;
     const p = actPick(A);
-    if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) setTimeout(() => S.fx(n), d * 1000); if (p.loop) actLoopStart(p.loop); return; }
+    actThenClear(); ACT_OF = phase === 'begin' ? A : null;
+    if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) actThen.push(setTimeout(() => { if (ACT_OF === A) S.fx(n); }, d * 1000)); if (p.loop) actLoopStart(p.loop); return; }
     actLoopStop(0.5);
     if (p && p.end && !(abort && A.phase === 'walk')) S.fx(p.end, { long: 4 });   // never for one you walked away from before it began
   };
