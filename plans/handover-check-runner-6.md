@@ -3,6 +3,7 @@
 2026-10-25, update: a fresh CR6 took over, session_013wLtAmKooMrgGrXF4Ljiof, hired by lead **37**
 (session_019GcNZ4GGEqfiuYDYnue7nX). Build master now **BM18** (session_01A3S2VBMYmTt2wCZa8ej7XR). Setup done in
 /tmp/work-cr6 and proved with check_fast on claude/integration 5898c190 (sha 10f654de...f266): QUICK CHECK OK in 235 s.
+CR2 is now session_01DsTDi6xJcpdDVhSkELEm24 (per BM18); the others are unchanged.
 Next: the full round on claude/staging-0.93.0 (sound + music), about 21:00 UTC; BM18 sends commit, sha and share.
 
 Written 2026-10-25 by CR6 (session_01B1FwE5sMmHnMPWsGn23nrk), at about 55% memory, while idle. Read this first if you
