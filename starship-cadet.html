@@ -45337,7 +45337,7 @@ function cheerTick(m) {
   const C = CHEER; if (!C) return false; if (shipNow() >= C.until) { CHEER = null; return false; }
   const P = player.obj.position;
   for (const id of C.ids) {
-    if (C.said.has(id)) continue;
+    if (C.said.has(id) || id === 'calder') continue;   // FX19 (0.92.6, RV15): not Calder, just out of the office scene (she never says "well done" before her story's payoff)
     const a = DECK_CREW.find(x => x.p.id === id); if (!a || !a.h || a.pose !== 'stand' || Math.hypot(a.x - P.x, a.z - P.z) > CHATTER_NEAR) continue;
     const l = socLine(a.p, 'promoted', { t: shipNow(), tier: relTier(id), bubble: true, flags: { 'promo.gather': true } });
     bubbleSay(a.h, l ? l.text : CHEER_LINES[(Math.floor(schedU(a.p.seed, m, 640) * CHEER_LINES.length) + C.said.size) % CHEER_LINES.length]); C.said.add(id); CHATTER_AT = simNow(); return true;
@@ -54803,8 +54803,7 @@ function promoCheck() {                                  // the Training tab's "
 function promoReady(now, by, here) {                     // promoAnnounce's beat with the switch on: the test is set
   const W = SHIP.works, d = worksDay(now), day = W.test.day === d + 1 ? 'tomorrow' : dayName(W.test.day);
   flagSet('promo.sight.ready', d); if (!flag('promo.sight')) flagSet('promo.sight', d);
-  if (here) worksSayAll(by, [worksText('promo.ready', 'Reliable, and Making it safe done. That\'s all of it. Your Tier 2 test.'),
-    worksText('promo.announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.')]);
+  if (here) worksSayAll(by, [worksText('promo.ready', 'Reliable, and Making it safe done. That\'s all of it. Your Tier 2 test.')].concat(day === 'tomorrow' ? [worksText('promo.announce', 'Tomorrow, your test job. Tier 2, with me watching. Nothing you haven\'t done.')] : []));   // "Tomorrow" only when it is (RV15: a Friday offer's test is Monday)
   promoMail('promo.ready.mail', 'Your Tier 2 test | Ready. Test job {day}, 09:00, Works bay. Pass it and you\'re an Officer.', { day }, now);
   if (now >= shipNow() - 1) { const text = worksText('promo.ready.notice', 'Your Tier 2 test: {day}, 09:00, the Works bay.', { day });
     if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
