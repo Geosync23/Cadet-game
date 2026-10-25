@@ -2011,7 +2011,14 @@ Phase 1: the player only. The rec deck builder wires these to the rooms' places;
 
 ### The weekend traditions (FX14, p925-weekend, behind WEEKEND_ON; 0.92.5 item 16)
 
-`WEEKEND_ON` (section 13; `#weekend` previews) and `WEEKEND_TRADS` (the ids): section 18's loader skips their baked .trad files when off, so the game is identical. Each tradition is a .trad file in content/traditions (rules and stand-in words, baked by content_gen.py) and a join in `TRAD_JOIN` (section 18's slot). Built: T1 (Saturday run, Every song, Night owls' cocoa, the Sunday story, Gerald clinic) and T2 (Garden picnic: not a meal, the crew have no lunch; your parcel fills you). Next: Bread day, the jigsaw, decor, the birthday hour (FX12). Plan and how-to: plans/handover-fx14.md.
+`WEEKEND_ON` (section 13; `#weekend` previews) and `WEEKEND_TRADS` (the ids): section 18's loader skips their baked .trad files when off, so the game is identical. Each tradition is a .trad file in content/traditions (rules and words, baked by content_gen.py) and a join in `TRAD_JOIN` (section 18's slot). The eight and their times, hosts and the rotation are in design-doc.md (the weekend traditions); builders' notes: plans/handover-fx14.md, -fx11, -fx9, -ds1, -fx16.
+
+- **The rotation:** each .trad's `when: every 4 weeks <day> week N from day 1` (week 1 = Days 6-7). **New ones give way** (section 18): `evNewWk(e)` sorts them last in evBudget; evBdaySlot places a birthday ignoring them and drops one within its hour; `evOldGoer(p, d, e)` in evArrive keeps a new one from drawing anyone an overlapping old tradition would have had.
+- **Late ones:** `tradToBed(p, d, e)` with `toBed: 20` on cocoa and the story (come from the start, leave 20 minutes before bed). A weekend host stays to its end (section 14's leisureUntil, `weekendTag`).
+- **Places:** Bread day uses Cook-along's six galley spots (`3 pool @cook-along`); Every song has two standing places by the piano (4-song-1/2, type event, tagged every-song). Seated weekend joins take a seat first (tradSpot).
+- **Decor** (DECK_DRESS, the weekend block, `ties: decor` in the .trad): breadDay, loafCard (Monday 06:30-10:00 if you kneaded; `SHIP.weekend.loaf`, saved as `save.weekend`), bigJigsaw, cocoaPot (+2 draw calls), picnicBasket (+3). Every song has none (the piano and the record cabinet are the scene).
+- **The Sunday story:** `sundayChapter(d)` (a chapter a showing) and `sundayStoryTick()` (Holt's bubble, from the first line once he's settled, every line in order).
+- **The check:** `python3 weekend_check.py BUILD` (~12 min; switches the weekend on in a copy, the same build off is the base): rotation days, the old traditions' days/times/places/hosts and people, hosts at theirs, >= 5 at the late ones, every join (seated ones in a seat whenever one is free, and the seat-first rule itself with every place free), decor on its days, no weekend one within an hour of a birthday (Days 1-364), the deck head-count table, Bread day, the jigsaw, the story. perf_check has a scene for each (`PERF_SCENES=weekend`).
 
 ## The rec deck's crew (section 14, RA, 0.83.x)
 

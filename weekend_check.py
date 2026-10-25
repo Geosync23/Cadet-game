@@ -6,6 +6,8 @@
 #     loaf is in Monday's breakfast basket (loafCard) 06:30-10:00 and not on Tuesday
 #   The big jigsaw (T4): crew at the observation room's table, the puzzle on it (bigJigsaw) only on its Sunday afternoon
 #     (Deck 1 as before on other days), a turn is 20 minutes and counts as your puzzles hobby
+#   RV14's seat line: each weekend join you sit for puts you in a seat, sitting (tradSpot's seat-first), not standing
+#   T5 (FX16): the deck head counts at each (a table), the picnic's basket and the cocoa pot only while they're on
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 weekend_check.py BUILD.html
 import sys, json, re
@@ -42,6 +44,22 @@ HOSTS = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++)
   const h = e.ev.host && ROSTER.find(p => p.id === e.ev.host), B = (d - 1) * 1440, pl = id => { const n = +String(id).split('-')[0]; return ((DECKS[n] || {}).places || []).find(q => q.id === id); }, room = h && planDay(h, d).some(s => s.placeId && s.from < B + e.to && s.to > B + e.from && pl(s.placeId) && [...(e.rooms || (e.rooms = eventRooms(e.ev)))].includes(s.placeId.split('-')[0] + '|' + pl(s.placeId).room));
   out.push([e.id, d, e.ev.host || null, !!e.ev.host && (goers.includes(e.ev.host) || !!room), goers.length]); } return out; })())"""   # (at it, or at work in its room through it: Brennan cooks in the galley on Bread day)
 
+# T5 (FX16, the user's "deck head counts"): at the middle of each weekend tradition, Days 6-84, where everyone is planned to be,
+# by deck (from the planner: the slot covering that minute and its deck; Deck 7 is the rec deck, R); printed as a table, the deck of the
+# tradition marked; the last column is everyone else: away (guests and crew not aboard that day: the planner's 'away') or in the lift
+HEADS = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) for (const e of eventsOn(d)) { if (!WEEKEND_TRADS.has(e.id)) continue;
+  const B = (d - 1) * 1440, mid = B + Math.round((e.from + e.to) / 2), n = {}; let none = 0;
+  for (const p of schedPeople()) { const s = planDay(p, d).find(x => x.from <= mid && x.to > mid); if (s && s.act !== 'away' && s.type !== 'lift' && s.deck) { const k = String(s.deck); n[k] = (n[k] || 0) + 1; } else none++; }
+  out.push([e.id, d, (e.ev.where || [])[0] ? (e.ev.where[0].deck) : null, n, none]); } return out; })())"""
+
+# T6 (FX16; FX12's rule, the user: birthdays at least an hour from any tradition): every birthday of a year, and the eight new ones
+# near it (they give way: evBdaySlot drops one within the gap)
+BDAY = """JSON.stringify((() => { const near = [], wk = []; let n = 0;
+  for (let d = 1; d <= 364; d++) { const L = eventsOn(d), b = L.find(e => e.id === 'birthday'); if (!b) continue; n++;
+    for (const e of L) if (WEEKEND_TRADS.has(e.id) && e.from < b.to + EV_BDAY.gap && b.from - EV_BDAY.gap < e.to) near.push([d, e.id, b.from, b.to, e.from, e.to]);
+    if (weekday(d) >= 5) wk.push([d, b.from, L.filter(e => WEEKEND_TRADS.has(e.id)).map(e => e.id)]); }
+  return { n, near, wk, gap: EV_BDAY.gap }; })())"""
+
 with sync_playwright() as pw:
     g = Game(pw, build, 900, 760)
     evs = dict(json.loads(g.ev(EVS)))
@@ -55,6 +73,8 @@ with sync_playwright() as pw:
     check(len(acts) >= 7 and all(a for _, a in acts), 'every weekend join has its activity, with an end (%s)' % acts)
     miss = json.loads(g.ev("JSON.stringify([...WEEKEND_TRADS].filter(id => !TRAD_JOIN[id] || (!TRAD_JOIN[id].act && !PLAYER_ACTS['tj:' + id])))"))
     check(not miss, 'every weekend tradition has a join, and each tap-join its activity (missing: %s)' % miss)
+    SEATED = set(json.loads(g.ev("JSON.stringify([...WEEKEND_TRADS].filter(id => TRAD_JOIN[id] && /^sit/.test(TRAD_JOIN[id].pose || '')))")))
+    print('  the weekend joins you sit for:', sorted(SEATED))
     on_w = json.loads(g.ev(WKND)); on_t = json.loads(g.ev(OLDT))
     floor = {}
     for d, L in off_t.items():
@@ -85,6 +105,13 @@ with sync_playwright() as pw:
     hs = json.loads(g.ev(HOSTS))
     print('  hosts and goers (id, day, host, host there, going):', hs)
     check(all(h[3] for h in hs if h[2]), 'RV14: each weekend tradition\'s host is planned at it (%s)' % [h for h in hs if h[2] and not h[3]])
+    bd = json.loads(g.ev(BDAY))
+    print('  T6 birthdays on a weekend day with a new one due, Days 1-364 (day, birthday time, the new ones left that day):', bd['wk'])
+    check(bd['n'] > 0 and not bd['near'], 'T6: no weekend tradition within %s minutes of a birthday, Days 1-364 (%d birthdays; near: %s)' % (bd['gap'], bd['n'], bd['near'][:4]))
+    hd = json.loads(g.ev(HEADS)); decks = sorted({k for h in hd for k in h[3]}, key=lambda k: (not k.isdigit(), int(k) if k.isdigit() else 0, k))
+    print('  T5 deck head counts at the middle of each (planned; * its deck; last: away or in the lift):')
+    print('    %-17s %3s ' % ('tradition', 'day') + ' '.join('%5s' % ('R' if k == '7' else 'D' + k) for k in decks) + '  away')
+    for h in hd: print('    %-17s %3d ' % (h[0], h[1]) + ' '.join('%5s' % ((('*' if str(h[2]) == k else '') + str(h[3].get(k, 0)))) for k in decks) + ' %5d' % h[4])
     late = [h for h in hs if h[0] in ('night-owls-cocoa', 'sunday-story')]
     check(late and all(h[4] >= 5 for h in late), 'RV14: at least 5 go to every Night owls\' cocoa and Sunday story (%s)' % late)
     g.close()
@@ -98,8 +125,13 @@ with sync_playwright() as pw:
         st = json.loads(g.ev("""(() => { const e = eventsOn(%d).find(x => x.id === '%s'), s = TRAD_JOIN[e.id], need = s.need || 'social';
           const a = DECK_CREW.find(x => x.settled && x.spot && x.goalId && (evTagId(x.tag || '') === e.id || tradSpotIds({ ...e, day: %d }).has(x.spot.id))) || DECK_CREW.find(x => x.p.id === s.host);
           if (!a) return JSON.stringify({ err: 'nobody at it' }); SHIP.player.needs[need] = Math.min(SHIP.player.needs[need], 40);
-          const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); return JSON.stringify({ need, n0, act: ACT && ACT.kind }); })()""" % (d, jid, d, d)))
+          const rooms = e.rooms || (e.rooms = eventRooms(e.ev)), free = [...PLACE_OF.values()].filter(pl => rooms.has(deckDef.num + '|' + pl.room) && !heldBy(pl.id) && !BUSY.has(pl.id) && (placeSpot(pl.id) || {}).pose === 'sit').length;   // seats free in its rooms just before you join
+          const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); const pl = ACT && ACT.placeId, sp = pl && placeSpot(pl);
+          return JSON.stringify({ need, n0, act: ACT && ACT.kind, free, seat: [pl || null, sp ? sp.pose : null, ACT && ACT.o ? ACT.o.pose || null : null] }); })()""" % (d, jid, d, d)))
         if 'err' in st: check(False, '%s: someone at it to join (%s)' % (jid, st['err'])); g.close(); continue
+        if jid in SEATED:   # RV14's q_seat: a seated weekend join puts you in a seat (tradSpot's seat-first), not standing (the Sunday story had you at the kettle)
+            if st['free'] == 0: print('  %s: every seat in its room taken, so you stand beside them (the game\'s own fallback, its words say so): %s' % (jid, st['seat']))
+            else: check(st['seat'][1] == 'sit' and str(st['seat'][2] or '').startswith('sit'), '%s: you join in a seat, sitting, with %d free (place, its pose, yours: %s)' % (jid, st['free'], st['seat']))
         best = st['n0']; ended = None
         for k in range(200):
             g.step(60); x = json.loads(g.ev("JSON.stringify([SHIP.time.min, ACT ? ACT.kind : null, SHIP.player.needs['%s']])" % st['need']))
@@ -109,6 +141,22 @@ with sync_playwright() as pw:
         check(st['act'] == 'tj:' + jid and ended is not None and ended <= r['to'] + 3 and best > st['n0'] + 5,
               '%s: a tap-join starts, ends by itself (%s, its end %d) and gives its %s (%.0f -> %.0f)' % (jid, round(ended) if ended else None, r['to'], st['need'], st['n0'], best))
         g.close()
+    # RV14's q_seat, the rule itself (the showings above are often full, so the join's own fallback stands you beside them): on each
+    # seated one's day, every place counted free, standing at its nearest standing spot (the Sunday story's kettle), the join picks a seat
+    g = Game(pw, won, 900, 760)
+    for jid, d in sorted([(i, d) for i, d in TRADS.items() if i in SEATED], key=lambda x: x[1]):
+        q = json.loads(g.ev("""(() => { const d = %d, e = eventsOn(d).find(x => x.id === '%s'); if (!e) return JSON.stringify({ err: 'not on' });
+          const w = (e.ev.where || [])[0]; skipTo((d - 1) * 1440 + e.from + 10); goToDeck(w.deck, null); SHIP.device.settings.tips = false; e.rooms = e.rooms || eventRooms(e.ev);
+          const E = { ...e, day: d }, ids = [...tradSpotIds(E)], st = ids.map(id => [id, placeSpot(id)]).filter(([, sp]) => sp && sp.pose !== 'sit');
+          const goals = DECK_CREW.map(a => a.goalId), busy = [...BUSY]; for (const a of DECK_CREW) a.goalId = null; BUSY.clear();   // (heldBy reads goalId; put back below)
+          let r; try { const at = st[0] && st[0][1], got = at ? tradSpot(E, at.x, at.z) : null; r = { stand: st.map(x => x[0]), seats: ids.length - st.length, got: got && got[0].id, pose: got && got[1].pose }; }
+          finally { DECK_CREW.forEach((a, k) => { a.goalId = goals[k]; }); for (const b of busy) BUSY.add(b); }
+          return JSON.stringify(r); })()""" % (d, jid)))
+        if 'err' in q: check(False, '%s: on Day %d (%s)' % (jid, d, q['err'])); continue
+        if not q['stand']: print('  %s: no standing spot among its places (%d seats): nothing to prefer a seat over' % (jid, q['seats'])); continue
+        check(q['pose'] == 'sit', "RV14's q_seat: %s, every place free, from its standing spot %s: the join picks a seat (%s, %s)" % (jid, q['stand'][0], q['got'], q['pose']))
+    check(not g.errors, 'no errors: ' + ' | '.join(g.errors[:5]))
+    g.close()
     g = Game(pw, won, 900, 760)
     # ---- Bread day (Day 7, Sunday) ----
     g.ev("(() => { skipTo(6 * 1440 + 428); goToDeck(3, null); player.obj.position.set(37 - OX, 0, 8.5 - OZ); SHIP.device.settings.tips = false; })()")
@@ -124,6 +172,18 @@ with sync_playwright() as pw:
     check('loafCard' in g.ev("dressingOn()"), 'Monday 07:00: your loaf in the breakfast basket')
     g.ev("(() => { skipTo(8 * 1440 + 420); })()"); g.step(30)
     check('loafCard' not in g.ev("dressingOn()") and 'breadDay' not in g.ev("dressingOn()"), 'Tuesday: no loaf, no flour')
+    g.close()
+    # ---- T5 decor (FX16): the picnic's basket (Day 20, 13:20) and the cocoa pot (Day 27, 22:50) while they're on, gone after ----
+    g = Game(pw, won, 900, 760)
+    for dd, deck, m, did in [(20, 3, 800, 'picnicBasket'), (27, 3, 1370, 'cocoaPot')]:
+        g.ev("(() => { skipTo(%d * 1440 + %d - 1440); goToDeck(%d, null); SHIP.device.settings.tips = false; })()" % (dd - 1, m, deck)); g.step(30)
+        before = did in g.ev("dressingOn()")
+        g.ev("(() => { skipTo(%d * 1440 + %d); goToDeck(%d, null); })()" % (dd - 1, m, deck)); g.step(30)
+        on_ = did in g.ev("dressingOn()"); calls = g.ev("renderer.info.render.calls")
+        g.ev("(() => { skipTo(%d * 1440 + %d + 120); })()" % (dd - 1, m)); g.step(30)
+        after = did in g.ev("dressingOn()")
+        check(not before and on_ and not after, 'T5 decor: %s on Day %d only while it\'s on (day before %s, on %s, two hours later %s; draw calls %s)' % (did, dd, before, on_, after, calls))
+    check(not g.errors, 'no errors: ' + ' | '.join(g.errors[:5]))
     g.close()
     # ---- The big jigsaw (Day 21, Sunday afternoon; Day 20 the same room is as before) ----
     g = Game(pw, won, 900, 760)

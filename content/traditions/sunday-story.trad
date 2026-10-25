@@ -1,6 +1,6 @@
 @tradition sunday-story
-// The Sunday story (FX14, 0.92.5 item 16; SW1's pitch): a bedtime story for grown-ups. After his last round of the decks
-// on Sunday, Chief Holt reads one chapter of a long adventure book in the junior common room, doing the voices, badly.
+// The Sunday story (FX14, 0.92.5 item 16; SW1's pitch): a bedtime story for grown-ups. On Sunday evening at 21:15, before his early night
+// (his Monday start), Chief Holt reads one chapter of a long adventure book in the junior common room, doing the voices, badly.
 // Behind WEEKEND_ON. The chapters themselves are a writing job (SW1): a few to start.
 k: 464
 title: The Sunday story
