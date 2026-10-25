@@ -10,6 +10,8 @@
 # Setup and environment as for cadet_test.py.  Run:  python3 arrows_f_check.py BUILD.html
 import sys, json, pathlib
 exec(open(__file__.replace('arrows_f_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 from playwright.sync_api import sync_playwright
 
 ok = True
@@ -27,9 +29,9 @@ def arrows_off(src):                                 # the build with the teachi
 def run(path):
     src = arrows_off(pathlib.Path(path).read_text())
     if not check('const POINT_ON = false;' in src and 'function incStopWord' in src and 'function caseNextGoal' in src, 'the build has F3 and F4'): return
-    on = WORK / 'test' / ('_f34_on_' + pathlib.Path(path).name)
+    on = WORK / 'test' / ('_f34_on_' + RUN_ID + pathlib.Path(path).name)
     on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
-    off = WORK / 'test' / ('_f34_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
+    off = WORK / 'test' / ('_f34_off_' + RUN_ID + pathlib.Path(path).name); off.write_text(src); path = str(off)
     with sync_playwright() as pw:
         print('off (the build switched off):')
         g = Game(pw, path, 390, 844); g.step(3)

@@ -1,0 +1,67 @@
+@appointment scope
+// SW2, 0.92.6 item 9 (the user: yes). Your turn at the big scope: twenty minutes on the observatory's big telescope
+// with Dr. Sato, any evening she's off duty. She lines it up on something real out there (canon sights only: Tavessa,
+// the Veyli-named cluster dead ahead; the Pale Shoals, the dust behind; her first comet, the one that counts). One scene per sight
+// (`== scene tavessa` etc.); FX22 picks by the week (Tavessa as the default). A line goes in a star log on your device.
+title: Your turn at the big scope
+starts: ask
+host: sato
+gate: tier>=acquaintance, Sato off duty
+when: evening
+at: 20 minutes, 19:00-22:00
+where: 2 room Observatory: common-room
+who: host, you
+once: no (once a week)
+mem: appt.scope
+record: Looked through the big scope with Dr. Sato.
+
+== ask
+- Can I have a turn at the big scope?
+- Yes. Twenty minutes. Don't touch the focus, I'll do the focus. I always do the focus.
+- Of course. Bring questions. Not about the tea.   #funny
+
+== busy
+- Not tonight, the scope's being cleaned. Mori's doing it. Mori does everything. Tomorrow?
+
+== mail
+- Tomorrow, {time}: the big scope in the observatory with Dr. Sato. Twenty minutes.
+
+== scene tavessa
+sato: Eye there. Don't blink. Well, blink, you're not a statue. That's Tavessa.   [gesture]
+sato: The Veyli named every star in it. We've got numbers. They've got names. Theirs are better.
+sato: We'll be there in a few months. You're looking at where we're going. Not many people get that.   [nod]
+? choice
+* How many stars are in it?   flavour:practical mem:appt.scope
+  sato: About two hundred you can see. Thousands you can't. Survey's counting. Slowly.   [nod]
+* It's beautiful.   flavour:listen mem:appt.scope
+  sato: Yes. I try to say something cleverer every time. I never manage it.   [laugh]
+sato: Time's up. Write it in your log. The time, what you saw. Not what you think it was.
+
+== scene shoals
+sato: Swing round. Behind us. That pale smudge? The Pale Shoals. We were in it six weeks before you came.
+sato: Dust. Mostly. Very old dust. Some of it is in a jar in my lab with a label on it.   [laugh]
+sato: Funny how a place you've been looks like a rumour from far enough off.
+? choice
+* What was it like inside?   flavour:listen mem:appt.scope
+  sato: Grey. Quiet. Every window looked like fog. Mori loved it. I missed the stars.   [nod]
+* Could I see that jar some time?   flavour:cheer mem:appt.scope
+  sato: Open lab. Second shelf. Touch only the label. I'll know.   [laugh]
+sato: That's twenty minutes. Log it. Off you go.
+
+== scene comet
+sato: Look. That tiny smear just off centre. That's my first comet. The one that counts.   [gesture]
+sato: It goes round once every hundred and nine years. Nobody aboard will see it come back. That's fine.
+sato: Someone will. They'll look it up and find a note from me. A very good note.   [nod]
+? choice
+* And you'll leave them a message?   flavour:cheer mem:appt.scope
+  sato: "Told you so." In my handwriting. They'll know exactly who I was.   [laugh]
+* What did you name it?   flavour:listen mem:appt.scope
+  sato: Not telling. Look it up. It's in the catalogue, spelt right.   [laugh]
+sato: Time's up. Log it. And thank you for not touching the focus.
+
+== thanks
+- Twenty minutes at the big scope with Dr. Sato. She tells you what you're looking at, and you write it in your star log.   #warm
+
+== after
+- Sato says you didn't touch the focus. She's very impressed.   #funny
+- Did you log what you saw? Time, place, what you saw. Not what you think it was.

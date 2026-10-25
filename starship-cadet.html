@@ -9392,6 +9392,7 @@ const SHORT_FRIDAY = true;                               // Short Fridays and th
 const WEEKEND_ON = true, WEEKEND_TRADS = new Set(['saturday-run', 'every-song', 'night-owls-cocoa', 'sunday-story', 'gerald-clinic', 'garden-picnic', 'bread-day', 'big-jigsaw']);   // the weekend traditions (0.92.5 item 16, FX14; plans/handover-fx14.md): on in the game from 0.92.5 (the user, 2026-10-25: "ship them switched on, no preview"; FX16); false = the game before them. Their .trad files load only with it (section 18's loader)
 const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [...WEEKEND_TRADS].some(id => tag === 'ev-' + id || tag.startsWith('ev-' + id + '-'));   // a weekend tradition's plan tag (FX9: their hosts stay to its end)
 const P926_TRADS = URL_FLAGS.has('p926'), P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-aboard', 'tool-night', 'route-night', 'window-sketch', 'open-house', 'garden-walk', 'spoon-band', 'card-night', 'worst-joke']);               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
+const P926_APPT = URL_FLAGS.has('appt');                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
 const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
 function saveGame() {
   if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
@@ -11708,15 +11709,15 @@ function devHeadsTick(t) {
   if (DEV.hu && devHuBusy()) devHeadsBack();             // 0.35.33: something that takes the screen (a chat card...) sends a showing strip back to wait
   for (let d = SHIP.time.day; d <= SHIP.time.day + 1; d++) for (const x of devDay(d)) {
     const at = (d - 1) * 1440 + x.from, key = x.kind + '|' + at + '|' + (x.kind === 'appt' ? x.aid : x.title);   // an appointment by its id: a group that grows isn't new
-    const beam = x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || ''), ahead = beam ? Math.max(R.ahead, 25) : R.ahead;   // Name on the beam (the user's playtest notes, 0.92.3 #12): 25 minutes before, even on shift, "at the end of shift in the Works department"
+    const beam = x.kind === 'tradition' && /^name-on-the-beam/.test(x.tkind || ''), ahead = beam ? Math.max(R.ahead, 25) : R.ahead, mine = P926_APPT && x.kind === 'tradition' && /^appt-/.test(x.tkind || '');   // mine: an appointment you booked (0.92.6 item 9, FX22b): it always reminds you   // Name on the beam (the user's playtest notes, 0.92.3 #12): 25 minutes before, even on shift, "at the end of shift in the Works department"
     if (x.kind === 'off' || at - ahead > t || at + 3 <= t) continue;
-    if (!R.on && x.kind !== 'appt' && x.kind !== 'beat') continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
+    if (!R.on && x.kind !== 'appt' && x.kind !== 'beat' && !mine) continue;   // the arrival week's beats like appointments (0.73.2); 0.35.33 (the lead): what you're booked for still comes with heads-ups off
     if ((x.kind === 'meal' || x.kind === 'shift' || x.kind === 'tea') && !R.everyday) continue;   // tea like the meals (0.72.5)
-    if (x.kind === 'tradition' && R.per[x.tkind] === false) continue;
+    if (x.kind === 'tradition' && R.per[x.tkind] === false && !mine) continue;
     const stage = t < at ? 'soon' : 'start', k = key + '|' + stage;
     if (devHeard(k) || (stage === 'soon' && at - t < 3)) continue;   // a 'soon' with under 3 minutes left waits for the start
     devHear(k);
-    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
+    if (x.kind === 'tradition' && devOnShift() && R.per[x.tkind] !== true && !beam && !mine) { DEV.notes.calendar = (DEV.notes.calendar || 0) + 1; continue; }   // on shift: a quiet badge
     for (let i = HU_Q.length - 1; i >= 0; i--) if (HU_Q[i].key === key) HU_Q.splice(i, 1);   // the start replaces a waiting 'soon'
     HU_Q.push({ key, stage, at, title: devHuName(x), where: x.where, goal: devItemGoal(x), ...(beam ? { beam: true } : {}) });
   }
@@ -12567,6 +12568,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
   try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
+  if (P926_APPT) B.push(...apptRecord());                 // 0.92.6 item 9: appointments kept (FX22)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
   return { title: 'Record', blocks: B };
@@ -12679,6 +12681,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
   badge: () => SHIP.device.appts.filter(a => a.by && a.status === 'asked').length || null,
   act(verb, arg) {
     const D = SHIP.device, now = shipNow();
+    if (P926_APPT && apptActX(verb, arg)) return;           // 0.92.6 item 9: What for?, invitations (FX22, section 18's Appointments builder slot)
     if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
     else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
       apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
@@ -12751,6 +12754,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     }
     if (apptSay) B.push({ kind: 'text', text: apptSay, mark: 'hot' });
     B.push({ kind: 'buttons', items: [{ label: 'New appointment', action: { app: 'appointments', do: 'new' } }] });
+    if (P926_APPT) B.push(...apptViewX());                 // 0.92.6 item 9 (FX22)
     const inv = D.appts.filter(a => a.by && a.status === 'asked');
     if (inv.length) {
       B.push({ kind: 'text', text: 'Invitations', mark: 'head' });
@@ -31329,6 +31333,27 @@ const LINES = JSON.parse([
   '{"text":"Alarm set for {time}.","id":"bv5dg6"}]',
   ',"alarm.wake":[',
   '{"text":"Wake at {time}","id":"1tflmmw"}]',
+  ',"appt.arrive":[',
+  '{"text":"{hi}. Right, I\'m here. All yours.","id":"1o1ive2"},',
+  '{"text":"{hi}, {nick}. Sorry, the lift was full.","id":"1if96q0"},',
+  '{"text":"There you are. I saved you a seat. Well, I sat near one.","id":"1axk32w","tone":"funny"},',
+  '{"text":"{hi}. I\'ve been looking forward to this, honestly.","id":"4r7khm","tone":"warm"}]',
+  ',"appt.bye":[',
+  '{"text":"Right, that\'s me. Same again some time?","id":"1891lg5"},',
+  '{"text":"{bye}. Thanks for this. I mean it.","id":"kps87h","tone":"warm"},',
+  '{"text":"Time\'s up, I\'m afraid. The ship calls. {bye}.","id":"njlxi4"}]',
+  ',"appt.late":[',
+  '{"text":"There you are. I was about to send the Watch out.","id":"1mn3cfd","tone":"funny"},',
+  '{"text":"No harm done. Sit. I\'ve only just got comfy.","id":"k84ybe"},',
+  '{"text":"{hi}. Late\'s fine. Here\'s better than not at all.","id":"ybs2o9","tone":"warm"}]',
+  ',"appt.notalk":[',
+  '{"text":"So. How\'s it going, really? The board treating you all right?","id":"ig0fi8"},',
+  '{"text":"Tell me one good thing about your week. Just one.","id":"1urbtuj"},',
+  '{"text":"I like this. Sitting still. We should do it more.","id":"1stu1b1","tone":"warm"}]',
+  ',"appt.wait":[',
+  '{"text":"{hi}. You found it, then. Sit down.","id":"1ta0u0p"},',
+  '{"text":"I was early. I\'m never early. Don\'t get used to it.","id":"1crktoj","tone":"funny"},',
+  '{"text":"{hi}, {nick}. Sit. I\'ve got ten minutes before anyone needs me.","id":"1iysvmm"}]',
   ',"ask.mixup":[',
   '{"text":"It was playing up at {time}! I was in {place}. Heard {machine} clear as day.","id":"sw0pkq"},',
   '{"text":"{time}, in {place}. It was {machine}, definitely. I\'m certain.","id":"blkkpw"},',
@@ -40213,6 +40238,19 @@ const FRI_ADDRESSES = {
   ]},
 };
 // ---- END ADDRESSES ----
+// ---- BEGIN APPT_WORDS (generated by content_gen.py from content/: never hand-edit; edit content/ and re-run it) ----
+const APPT_WORDS = {
+  "brennan-book": {"title": "A page in Brennan's book", "starts": "invite", "host": "brennan", "gate": "tier>=acquaintance !mem:appt.brennan-book", "when": "weekday", "at": "14:30-15:00", "where": "3 room Galley: work:galley", "who": "host, you", "once": "yes", "mem": "appt.brennan-book", "record": "Your favourite dish is in Brennan's book.", "invite": [{"text": "Got a minute after lunch tomorrow, love? Galley, half two. I need a taster.", "tone": "funny"}, {"text": "Half two tomorrow, come to the galley. Three spoons, one question. Don't eat lunch first."}], "busy": [{"text": "Not today, love, the cold store's sulking. Tomorrow, half two?"}], "mail": [{"text": "Galley, {time} tomorrow. Brennan wants you to taste three things. Come hungry, she says, and honest."}], "scene": {"": [{"who": "brennan", "text": "Stool's there, love. Three spoons. Don't be polite. Tell me which.", "pose": "gesture"}, {"who": "brennan", "text": "First: my spiced lentils. Second: dumplings and greens. Third: the mushroom risotto. Go."}, {"who": "brennan", "text": "I keep a book. Every soul on this ship and the dish that makes them feel at home.", "pose": "nod"}, {"who": "brennan", "text": "Took me years to fill. Some of them took a month to tell me. You've got one spoon each."}, {"choice": [{"text": "The lentils. Definitely the lentils.", "flavour": "share", "mem": "appt.brennan-book.lentils", "reply": {"who": "brennan", "text": "Knew it. You went quiet on the first spoon. That's how I tell.", "pose": "laugh"}}, {"text": "The dumplings. I'd eat those every day.", "flavour": "cheer", "mem": "appt.brennan-book.dumplings", "reply": {"who": "brennan", "text": "Every day? Wednesdays, love. I'm generous, not daft.", "pose": "laugh"}}, {"text": "The risotto. It tastes like somewhere I've been.", "flavour": "listen", "mem": "appt.brennan-book.risotto", "reply": {"who": "brennan", "text": "That's the best reason there is. Don't tell me where. Not yet.", "pose": "nod"}}]}, {"who": "brennan", "text": "There. Written in. In ink, so you can't change your mind. Now off you go, I've a dinner to make.", "pose": "gesture"}]}, "thanks": [{"text": "Brennan writes your favourite in her book, in ink, under your name. It'll turn up on a Wednesday one of these weeks.", "tone": "warm"}], "after": [{"text": "Your dish is on Wednesday, love. Don't tell anyone it was you. Everyone will know.", "tone": "funny"}, {"text": "Saw your name in Brennan's book. Right next to the Captain's. Fancy.", "tone": "warm"}]},
+  "garden-bed": {"title": "A bed of your own", "starts": "invite", "host": "cruz-tove", "gate": "tier>=friend !mem:appt.garden-bed", "when": "Saturday morning, then three short visits about a week apart, then the harvest", "at": "10:00-10:30 (the planting); 10 minutes (each visit)", "where": "3 room Hydroponics garden: garden", "who": "host, you", "once": "yes", "mem": "appt.garden-bed", "flag": "garden.bed.planted", "record": "Grew your own bed of lettuce in the garden.", "invite": [{"text": "I've got a spare bed. Small. By the tree. Would you... it could be yours. Saturday?"}, {"text": "There's a bed in the garden with nothing in it. It's sad. You could fix that. Saturday?"}], "busy": [{"text": "Oh. Not this Saturday? Next one, then. The bed will wait. Beds are patient."}], "mail": [{"text": "Saturday, {time}: Cruz is giving you a bed in the garden. Wear old clothes. Soil gets everywhere."}], "scene": {"": [{"who": "cruz-tove", "text": "This one. By the tree. It gets the good light in the afternoon. It's yours now.", "pose": "gesture"}, {"who": "cruz-tove", "text": "Seeds in a line. A finger deep. Not two fingers. One. Then cover them up and say hello."}, {"who": "cruz-tove", "text": "That makes it a week-one lettuce. Today's its birthday.", "pose": "nod"}, {"choice": [{"text": "Say hello to the seeds.", "flavour": "cheer", "mem": "appt.garden-bed", "reply": {"who": "cruz-tove", "text": "They heard you. I always know when they hear.", "pose": "laugh"}}, {"text": "Ask what to call the bed.", "flavour": "share", "mem": "appt.garden-bed", "reply": {"who": "cruz-tove", "text": "I'll make a sign. Your name on it. Small letters. Plants are shy.", "pose": "nod"}}]}, {"who": "cruz-tove", "text": "I'll come and find you next week. We'll check on it. Ten minutes. It's enough."}]}, "tend": [{"who": "cruz-tove", "text": "Look. Shoots. Week two. Tiny. Don't touch them, just look. Lovely."}, {"who": "cruz-tove", "text": "Week three. Water at the roots. You remembered. They're leaning to the light. Good sign."}, {"who": "cruz-tove", "text": "Week four. Nearly. One more week and Brennan will be after them. We'll beat her to it."}], "harvest": [{"who": "cruz-tove", "text": "Today. Pick from the outside in. Leave the heart, it grows back. There. That's yours.", "pose": "gesture"}, {"who": "cruz-tove", "text": "Take it to Brennan. She'll put it in tonight's salad, and she'll say whose."}, {"who": "cruz-tove", "text": "Your first crop. I'll put a little mark on the sign. Week five. A good week.", "pose": "nod"}], "thanks": [{"text": "Cruz gives you a bed of your own in the garden, by the tree, with your name on a little sign.", "tone": "warm"}], "after": [{"text": "Your lettuce was in the salad tonight. Brennan told the whole mess whose it was.", "tone": "warm"}, {"text": "Your bed's doing well. Cruz checks it every morning. Don't tell them I said.", "tone": "warm"}]},
+  "midnight-feast": {"title": "Midnight feast", "starts": "ask", "host": "you", "gate": "two or more bunkmates free, the night before your day off", "when": "after 22:00", "at": "22:00-22:45", "where": "4 pool bunk", "who": "you, your bunkmates (2-4)", "once": "no", "mem": "appt.feast", "record": "Had a midnight feast with Bunk 1.", "ask": [{"text": "Midnight feast in the bunk room?"}, {"text": "Yes! I'll raid the grab shelf. Don't tell Pell. He'll want in.", "tone": "funny"}, {"text": "Only if I'm in bed by midnight. Fine. I'm bringing biscuits."}], "busy": [{"text": "Not tonight. I'm on early. Next time, I promise."}], "mail": [{"text": "Tonight, {time}: a midnight feast in the bunk room. Bring something from the grab shelf. Whisper."}], "scene": {"": [{"who": "santos-zofia", "text": "Right. I've got the grab shelf's last two plates, and I didn't even have to trade for them.", "pose": "laugh"}, {"who": "tran-chloe", "text": "It's after ten. It's lights out. ...Pass me a plate.", "pose": "laugh"}, {"who": "tomas", "text": "Can we tell stories? Like at camp? We never had camp. Like I imagine camp."}, {"who": "dlamini-lukas", "text": "Ninety-one.", "pose": "nod"}, {"who": "santos-zofia", "text": "He means days to home. He says it to the ceiling every night."}, {"who": "tran-chloe", "text": "Zofia, tell the one about your stall back home. Not the gossip one. Fine, the gossip one.", "pose": "laugh"}, {"who": "dlamini-lukas", "text": "Mm. Not asleep. ...Mm.", "pose": "sigh"}, {"who": "tomas", "text": "He's asleep. He's always first. He says it's the early team. It's not.", "pose": "laugh"}, {"choice": [{"text": "Tell a story of your own.", "flavour": "share", "mem": "appt.feast", "reply": {"who": "tomas", "text": "That was a good one! Do another. Quietly. Lukas is snoring.", "pose": "laugh"}}, {"text": "Quietly take the last biscuit.", "flavour": "cheer", "mem": "appt.feast", "reply": {"who": "santos-zofia", "text": "Bold move. I'd have traded you something for that.", "pose": "laugh"}}, {"text": "Just listen to everyone.", "flavour": "listen", "mem": "appt.feast", "reply": {"who": "tran-chloe", "text": "You're the only one in this bunk who listens. Don't change.", "pose": "nod"}}]}, {"who": "tran-chloe", "text": "Right. Now it's lights out. Actually. Good night, Bunk 1."}]}, "thanks": [{"text": "A midnight feast in the bunk room: the grab shelf's best, a story or two, and Lukas asleep first, as always.", "tone": "warm"}], "after": [{"text": "Best midnight feast yet. Lukas didn't even make it to the biscuits.", "tone": "funny"}, {"text": "Chloe said \"lights out\" four times last night. She stayed up latest.", "tone": "funny"}]},
+  "night-round": {"title": "The night round", "starts": "invite", "host": "mensah", "gate": "tier>=friend !mem:appt.night-round", "when": "the night before your day off", "at": "22:30-23:15", "where": "3 room Lift plaza: bench", "who": "host, you", "once": "yes", "mem": "appt.night-round", "flag": "night.round.walked", "record": "Walked the night round with Kofi Mensah.", "invite": [{"text": "Night round tonight, half ten. You're off tomorrow. Come and say good night to her."}, {"text": "I walk her every night. Fancy coming once? She's lovely at night. Half ten, the lift."}], "busy": [{"text": "Not tonight. Bit of a busy one. Next time you're off, ask me again."}], "mail": [{"text": "The night round with Kofi Mensah tonight, {time}, from the Deck 3 lift. Wear soft shoes, he says."}], "stops": [{"who": "mensah", "text": "Deck 6 first. Hear that hum? That's the coils asleep. They still sing, just lower. Good night, Deck 6."}, {"who": "mensah", "text": "Deck 5. The board's empty, see? Only time it ever is. Calder's office light's off. Good night, Deck 5."}, {"who": "mensah", "text": "Deck 4. Short and sweet, here. She likes it short. Good night, Deck 4.", "pose": "laugh"}, {"who": "mensah", "text": "The rec deck's closed, so we say it from the lift. Good night, rec deck. Mind the pool.", "pose": "laugh"}, {"who": "mensah", "text": "Deck 3. The grab shelf's restocked at eleven. Pell knows. Pell always knows. Good night, Deck 3."}, {"who": "mensah", "text": "Deck 2. Every door shut, every light low. The Envoy keeps a lamp on. We leave it be. Good night, Deck 2."}, {"who": "mensah", "text": "Deck 1, from the lobby. We don't go in. Good night, Deck 1. Fly gently.", "pose": "nod"}], "scene": {"": [{"who": "mensah", "text": "That's her. Every deck. Takes me forty minutes, and I've never once been bored.", "pose": "nod"}, {"who": "mensah", "text": "The chief walks her in the morning. I walk her at night. Between us she's never alone."}, {"choice": [{"text": "Does she ever say good night back?", "flavour": "cheer", "mem": "appt.night-round", "reply": {"who": "mensah", "text": "Every night. You just have to be quiet enough. The air vents, mostly.", "pose": "laugh"}}, {"text": "Thank you for bringing me.", "flavour": "listen", "mem": "appt.night-round", "reply": {"who": "mensah", "text": "Thank you for coming. It's nice to have someone to point things out to.", "pose": "nod"}}, {"text": "Could I walk it again one night?", "flavour": "share", "mem": "appt.night-round", "reply": {"who": "mensah", "text": "Any night you're off. Fair warning: I'll make you say good night to Deck 5.", "pose": "laugh"}}]}, {"who": "mensah", "text": "Off to bed with you. I'll say good night to your bunk room on my way past. By name."}]}, "here": [{"text": "Shh. Softly, now."}, {"text": "Lovely and quiet."}, {"text": "That's the air changing over. Hear it?"}], "thanks": [{"text": "You walk the whole ship with Kofi Mensah, deck by deck, and he says good night to every one of them by name.", "tone": "warm"}], "after": [{"text": "Said good night to your bunk room last night. By name. You were snoring.", "tone": "funny"}, {"text": "The night round's not the same without you. Well. It's exactly the same. But still.", "tone": "funny"}]},
+  "rehearse": {"title": "Help me rehearse", "starts": "invite", "host": "per-host", "gate": "tier>=friend, the evening before the host's tradition (rossi-femi: talent night; holt: the Sunday story; tomas: quiz night)", "when": "the evening before", "at": "20 minutes, 19:30-21:30", "whereOf": {"rossi-femi": "4 pool music", "holt": "4 pool common-room", "tomas": "4 pool common-room"}, "who": "host, you", "once": "no (once per tradition day)", "mem": "appt.rehearse.<id>", "invite": [{"text": "Can I practise on you tonight? Just you. Twenty minutes. Please?"}, {"text": "I need an audience of one. A kind one. Tonight, after dinner?"}], "busy": [{"text": "No? That's all right. I'll practise on the mirror. It never says anything nice.", "tone": "funny"}], "mail": [{"text": "Tonight, {time}: {first} wants to rehearse in front of you. Be kind. Be honest. Both."}], "scene": {"rossi-femi": [{"who": "rossi-femi", "text": "Right! The Veyli song. Two verses. Don't laugh. Well, laugh at the end.", "pose": "gesture"}, {"who": "rossi-femi", "text": "Verse one went well. Verse two had a word in it that I think means \"spoon\". It shouldn't.", "pose": "laugh"}, {"who": "rossi-femi", "text": "Ferreira says it's close. Close isn't right. Was it close?"}, {"choice": [{"text": "Practise the hard word with him.", "flavour": "practical", "mem": "appt.rehearse.rossi-femi", "reply": {"who": "rossi-femi", "text": "Again. Again. Yes! That's not spoon. That's the right one. I think.", "pose": "laugh"}}, {"text": "It was lovely. Spoon and all.", "flavour": "cheer", "mem": "appt.rehearse.rossi-femi", "reply": {"who": "rossi-femi", "text": "You're kind. Too kind. I'm keeping the spoon. It's my spoon now.", "pose": "laugh"}}, {"text": "Honestly? Verse two needs work.", "flavour": "listen", "mem": "appt.rehearse.rossi-femi", "reply": {"who": "rossi-femi", "text": "Thank you. Nobody else said. One more time, then.", "pose": "nod"}}]}, {"who": "rossi-femi", "text": "Thanks. Really. Come tomorrow? Sit at the front. I'll look at you, not the crowd."}], "holt": [{"who": "holt", "text": "Sit. Don't tell anyone about this. I'm going to try the voices. The cook has a voice.", "pose": "gesture"}, {"who": "holt", "text": "\"Her engine was older than both of them, and grumpier.\" That's me doing the engine. Hm."}, {"who": "holt", "text": "Was the cook too much? Mensah said the cook was too much. Mensah laughed for a minute.", "pose": "sigh"}, {"choice": [{"text": "Do the cook again. Louder.", "flavour": "cheer", "mem": "appt.rehearse.holt", "reply": {"who": "holt", "text": "Louder. Fine. ...That was louder. You're smiling. Is that good? Hm. It's good.", "pose": "laugh"}}, {"text": "Read it plainly. That's how they like it.", "flavour": "listen", "mem": "appt.rehearse.holt", "reply": {"who": "holt", "text": "Plainly. Yes. That's what I'd have done anyway. Thank you.", "pose": "nod"}}, {"text": "Keep the engine voice. It's brilliant.", "flavour": "practical", "mem": "appt.rehearse.holt", "reply": {"who": "holt", "text": "The engine stays. The cook goes. Adequate plan.", "pose": "nod"}}]}, {"who": "holt", "text": "That's enough. Off with you. You heard nothing."}], "tomas": [{"who": "tomas", "text": "Okay. I wrote the questions. Twenty. Can I ask you them? Is that weird? Is it too weird?", "pose": "gesture"}, {"who": "tomas", "text": "Question one: what colour are the holds on the hardest route? It's green. Everyone thinks red."}, {"who": "tomas", "text": "Is that too easy? Too hard? Is it only easy for me? I can't tell anymore.", "pose": "laugh"}, {"choice": [{"text": "Say red, on purpose.", "flavour": "cheer", "mem": "appt.rehearse.tomas", "reply": {"who": "tomas", "text": "Ha! See? Everyone says red. It's perfect. It stays in.", "pose": "laugh"}}, {"text": "Help him sort them easy to hard.", "flavour": "practical", "mem": "appt.rehearse.tomas", "reply": {"who": "tomas", "text": "Easy ones first so nobody feels bad. Yes. That's much better.", "pose": "nod"}}, {"text": "Tell him they're good questions.", "flavour": "listen", "mem": "appt.rehearse.tomas", "reply": {"who": "tomas", "text": "Really? Okay. Okay. Thank you. I'll stop rewriting them now. Maybe.", "pose": "laugh"}}]}, {"who": "tomas", "text": "Thanks. You'll come tomorrow, right? Don't answer the green one. You know it."}]}, "afterOf": {"rossi-femi": [{"text": "You heard it first. The spoon's gone. Mostly.", "tone": "warm"}], "holt": [{"text": "Hm. You heard it first. Not a word to anyone.", "tone": "warm"}], "tomas": [{"text": "You heard them first! Nobody's got the green one yet.", "tone": "warm"}]}, "thanks": [{"text": "You're the audience of one the night before. Tomorrow, they'll look for you in the crowd.", "tone": "warm"}]},
+  "scope": {"title": "Your turn at the big scope", "starts": "ask", "host": "sato", "gate": "tier>=acquaintance, Sato off duty", "when": "evening", "at": "20 minutes, 19:00-22:00", "where": "2 room Observatory: common-room", "who": "host, you", "once": "no (once a week)", "mem": "appt.scope", "record": "Looked through the big scope with Dr. Sato.", "ask": [{"text": "Can I have a turn at the big scope?"}, {"text": "Yes. Twenty minutes. Don't touch the focus, I'll do the focus. I always do the focus."}, {"text": "Of course. Bring questions. Not about the tea.", "tone": "funny"}], "busy": [{"text": "Not tonight, the scope's being cleaned. Mori's doing it. Mori does everything. Tomorrow?"}], "mail": [{"text": "Tomorrow, {time}: the big scope in the observatory with Dr. Sato. Twenty minutes."}], "scene": {"tavessa": [{"who": "sato", "text": "Eye there. Don't blink. Well, blink, you're not a statue. That's Tavessa.", "pose": "gesture"}, {"who": "sato", "text": "The Veyli named every star in it. We've got numbers. They've got names. Theirs are better."}, {"who": "sato", "text": "We'll be there in a few months. You're looking at where we're going. Not many people get that.", "pose": "nod"}, {"choice": [{"text": "How many stars are in it?", "flavour": "practical", "mem": "appt.scope", "reply": {"who": "sato", "text": "About two hundred you can see. Thousands you can't. Survey's counting. Slowly.", "pose": "nod"}}, {"text": "It's beautiful.", "flavour": "listen", "mem": "appt.scope", "reply": {"who": "sato", "text": "Yes. I try to say something cleverer every time. I never manage it.", "pose": "laugh"}}]}, {"who": "sato", "text": "Time's up. Write it in your log. The time, what you saw. Not what you think it was."}], "shoals": [{"who": "sato", "text": "Swing round. Behind us. That pale smudge? The Pale Shoals. We were in it six weeks before you came."}, {"who": "sato", "text": "Dust. Mostly. Very old dust. Some of it is in a jar in my lab with a label on it.", "pose": "laugh"}, {"who": "sato", "text": "Funny how a place you've been looks like a rumour from far enough off."}, {"choice": [{"text": "What was it like inside?", "flavour": "listen", "mem": "appt.scope", "reply": {"who": "sato", "text": "Grey. Quiet. Every window looked like fog. Mori loved it. I missed the stars.", "pose": "nod"}}, {"text": "Could I see that jar some time?", "flavour": "cheer", "mem": "appt.scope", "reply": {"who": "sato", "text": "Open lab. Second shelf. Touch only the label. I'll know.", "pose": "laugh"}}]}, {"who": "sato", "text": "That's twenty minutes. Log it. Off you go."}], "comet": [{"who": "sato", "text": "Look. That tiny smear just off centre. That's my first comet. The one that counts.", "pose": "gesture"}, {"who": "sato", "text": "It goes round once every hundred and nine years. Nobody aboard will see it come back. That's fine."}, {"who": "sato", "text": "Someone will. They'll look it up and find a note from me. A very good note.", "pose": "nod"}, {"choice": [{"text": "And you'll leave them a message?", "flavour": "cheer", "mem": "appt.scope", "reply": {"who": "sato", "text": "\"Told you so.\" In my handwriting. They'll know exactly who I was.", "pose": "laugh"}}, {"text": "What did you name it?", "flavour": "listen", "mem": "appt.scope", "reply": {"who": "sato", "text": "Not telling. Look it up. It's in the catalogue, spelt right.", "pose": "laugh"}}]}, {"who": "sato", "text": "Time's up. Log it. And thank you for not touching the focus."}]}, "thanks": [{"text": "Twenty minutes at the big scope with Dr. Sato. She tells you what you're looking at, and you write it in your star log.", "tone": "warm"}], "after": [{"text": "Sato says you didn't touch the focus. She's very impressed.", "tone": "funny"}, {"text": "Did you log what you saw? Time, place, what you saw. Not what you think it was."}]},
+  "shadow": {"title": "An hour in another department", "starts": "ask", "host": "per-host", "gate": "tier>=colleague (the host), host's department isn't yours, host on shift", "when": "weekday, once a week", "at": "60 minutes inside the host's shift", "whereOf": {"dlamini-lukas": "3 room Galley: work:galley", "nandakumar": "3 room Infirmary: work:infirmary", "mori": "2 room Survey lab: work:survey", "hart-ravi": "3 room Hydroponics garden: garden", "holt": "2 room Watch office: work:watch"}, "atOf": {"dlamini-lukas": "07:30-08:30", "nandakumar": "09:30-10:30", "mori": "14:00-15:00", "hart-ravi": "06:30-07:30", "holt": "10:00-11:00"}, "who": "host, you", "once": "weekly", "mem": "appt.shadow.<dept>", "record": "Spent an hour with {dept}.", "ask": [{"text": "Can I follow you for an hour on shift?"}, {"text": "{yes}. Come at the start of the hour. Watch, don't touch. Then you can try one thing."}, {"text": "{yes}. Bring sensible shoes and a question."}], "busy": [{"text": "Not this week. We're short-handed. Ask me again next week?"}], "mail": [{"text": "Tomorrow, {time}: an hour with {dept}. Watch, ask, and try one thing."}], "scene": {"dlamini-lukas": [{"who": "dlamini-lukas", "text": "Galley. Breakfast. Two hundred eggs. Stand there. Not there. There.", "pose": "gesture"}, {"who": "dlamini-lukas", "text": "Breakfast is mine. Brennan says it runs itself. It doesn't.", "pose": "laugh"}, {"who": "dlamini-lukas", "text": "Everything has a minute. Porridge at seven. Toast at five past. Nobody waits."}, {"who": "dlamini-lukas", "text": "Your turn. Stir the beans. Slowly. Like you're not in a hurry. You're not."}, {"choice": [{"text": "Stir slowly, like he said.", "flavour": "practical", "mem": "appt.shadow.galley", "reply": {"who": "dlamini-lukas", "text": "Good. Not one bean on the floor. You can come back.", "pose": "nod"}}, {"text": "Ask what the number on the board means.", "flavour": "listen", "mem": "appt.shadow.galley", "reply": {"who": "dlamini-lukas", "text": "Days to home. Mine. Don't tell Brennan I said it out loud.", "pose": "nod"}}]}, {"who": "dlamini-lukas", "text": "That's breakfast. Two hundred eggs, none wasted. Off you go."}], "nandakumar": [{"who": "nandakumar", "text": "Wash your hands. Thank you. Now stand by the cupboard and touch nothing blue.", "pose": "gesture"}, {"who": "nandakumar", "text": "Morning clinic. Mostly sore hands and people who forgot to drink water."}, {"who": "nandakumar", "text": "What anyone tells me stays in this room. So you'll see the room, not the people.", "pose": "nod"}, {"who": "nandakumar", "text": "Everything here has a label and a place. Rina did the labels. Rina does everything."}, {"who": "nandakumar", "text": "Your turn. Restock the bandages. Smallest at the front. Count them as you go."}, {"choice": [{"text": "Count them out loud.", "flavour": "practical", "mem": "appt.shadow.infirmary", "reply": {"who": "nandakumar", "text": "Forty. Correct. Rina will be pleased, and she's never pleased.", "pose": "laugh"}}, {"text": "Ask why she became a doctor.", "flavour": "listen", "mem": "appt.shadow.infirmary", "reply": {"who": "nandakumar", "text": "Someone has to tell everyone to drink water. It may as well be me.", "pose": "laugh"}}]}, {"who": "nandakumar", "text": "That's the hour. Drink some water on your way out. That's not advice."}], "mori": [{"who": "mori", "text": "Hello. Sorry. This is the Survey lab. It's tidier than it looks. It's tidy.", "pose": "laugh"}, {"who": "mori", "text": "These are samples from the last survey. Dust, ice, one rock. Every jar has a label in Dr. Sato's hand."}, {"who": "mori", "text": "My job is the list. What's here, where it came from, which shelf. The list is everything.", "pose": "nod"}, {"who": "mori", "text": "You can do one. Write the label for this jar. Date, place, then what it is. In that order."}, {"choice": [{"text": "Write the label slowly and neatly.", "flavour": "practical", "mem": "appt.shadow.survey", "reply": {"who": "mori", "text": "Oh. That's very neat. Neater than mine. Don't tell anyone that.", "pose": "laugh"}}, {"text": "Ask which sample is her favourite.", "flavour": "listen", "mem": "appt.shadow.survey", "reply": {"who": "mori", "text": "This one. Grey dust. Very plain. It came from further out than anything else we have.", "pose": "nod"}}]}, {"who": "mori", "text": "Thank you. That's... thank you. Come back. I mean it."}], "hart-ravi": [{"who": "hart-ravi", "text": "Morning. It's half six. I hate it. Don't tell anyone I love it.", "pose": "laugh"}, {"who": "hart-ravi", "text": "First watering. Every bed, every morning, before the misting starts at seven."}, {"who": "hart-ravi", "text": "Cruz sows them. I keep them alive till breakfast. It's a team.", "pose": "nod"}, {"who": "hart-ravi", "text": "Here. The small can. Water the seedlings by the wall. At the roots, not the leaves."}, {"choice": [{"text": "Water at the roots, slowly.", "flavour": "practical", "mem": "appt.shadow.garden", "reply": {"who": "hart-ravi", "text": "Good. They'll be taller by Friday. You won't notice. I will.", "pose": "nod"}}, {"text": "Ask what the bed by the tree is.", "flavour": "listen", "mem": "appt.shadow.garden", "reply": {"who": "hart-ravi", "text": "Herbs for the galley. Brennan counts the basil leaves. I'm not joking.", "pose": "laugh"}}]}, {"who": "hart-ravi", "text": "That's the watering. Go and get breakfast. You've earned it. I haven't, yet."}], "holt": [{"who": "holt", "text": "Hm. You. Sit there. Don't touch the board.", "pose": "gesture"}, {"who": "holt", "text": "The Watch knows where everyone is. Not to spy. So that if anything goes wrong, we know who to find."}, {"who": "holt", "text": "Every door, every airlock, every deck, checked twice a shift. The board shows it all."}, {"who": "holt", "text": "Your turn. Read the board. Tell me which airlock was last checked."}, {"choice": [{"text": "Read it carefully, then answer.", "flavour": "practical", "mem": "appt.shadow.watch", "reply": {"who": "holt", "text": "Correct. Took you a while. Took the last junior longer. Adequate.", "pose": "nod"}}, {"text": "Ask why he walks every deck himself.", "flavour": "listen", "mem": "appt.shadow.watch", "reply": {"who": "holt", "text": "The board can't hear a door that sounds wrong. I can.", "pose": "nod"}}]}, {"who": "holt", "text": "That's an hour. Off with you. Mention the board to no one."}]}, "thanks": [{"text": "An hour on someone else's shift. You watched, you asked, and you got to try one thing yourself.", "tone": "warm"}], "after": [{"text": "You did well in the galley. Lukas said \"fine\". From Lukas, that's a medal.", "tone": "funny"}, {"text": "Holt says you read the Watch board right first time. He looked almost pleased.", "tone": "funny"}, {"text": "Mori's still talking about your label. It's on the shelf now.", "tone": "warm"}]},
+  "show-tell": {"title": "Show and tell", "starts": "invite", "host": "per-host", "gate": "as the cabin visit today (an officer friend invites you)", "when": "the host's evening off duty", "at": "30 minutes", "whereOf": {"torres-zeke": "4 room Cabin 4-14: cabin", "raman": "2 room Cabin 2-H: cabin", "sato": "2 room Cabin 2-V: cabin", "halloran-emeka": "4 room Cabin 4-13: cabin"}, "who": "host, you", "once": "yes (per host)", "mem": "appt.show.<id>", "invite": [{"text": "Come by my cabin tomorrow evening? There's something I've been meaning to show you."}, {"text": "Cabin, tomorrow, after dinner. I'll put the kettle on. Bring nothing. I mean it."}], "busy": [{"text": "Not tomorrow, sorry. Ask me again at the weekend?"}], "mail": [{"text": "Tomorrow, {time}: {first}'s cabin. They want to show you something."}], "scene": {"torres-zeke": [{"who": "torres-zeke", "text": "Come in! Mind the wool. Sit anywhere that isn't wool. This is the one I wanted you to hear.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Listen. Here. The bit about the lighthouse. Everyone sings \"the light\". It's \"the night\". Has to be."}, {"who": "torres-zeke", "text": "Five people aboard say they know every song in that cabinet. We all know different words.", "pose": "laugh"}, {"choice": [{"text": "It's definitely \"the light\".", "flavour": "cheer", "mem": "appt.show.torres-zeke", "reply": {"who": "torres-zeke", "text": "Traitor! No. Fine. Play it again. Listen properly this time.", "pose": "laugh"}}, {"text": "Play it again so I can hear.", "flavour": "listen", "mem": "appt.show.torres-zeke", "reply": {"who": "torres-zeke", "text": "See? \"The night\". Told you. Nobody ever listens properly. You did.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Right, onward. One more song. Then you're allowed to leave. Maybe."}], "raman": [{"who": "raman", "text": "Come in. Gently, if you would. This is her. The Wren, one to five hundred.", "pose": "gesture"}, {"who": "raman", "text": "Every panel is right. It took me four years. The bridge section lifts out. Here."}, {"who": "raman", "text": "Hold it with both hands. That's where I sit. Third window from the left.", "pose": "nod"}, {"choice": [{"text": "Hold it very carefully.", "flavour": "practical", "mem": "appt.show.raman", "reply": {"who": "raman", "text": "Like a full cup on a turn. Yes. You'd make a good helm officer, you know.", "pose": "laugh"}}, {"text": "Ask which part was hardest.", "flavour": "listen", "mem": "appt.show.raman", "reply": {"who": "raman", "text": "The hull lights. Forty of them, each the size of a grain of rice. I counted twice.", "pose": "nod"}}]}, {"who": "raman", "text": "Thank you. Not many people ask to hold her. Put her back the way she came, please."}], "sato": [{"who": "sato", "text": "Sit. Tea. Don't ask what's in it, it's a long answer. I'll give you the long answer.", "pose": "gesture"}, {"who": "sato", "text": "Right. Look at this. That smudge on the plate. That's a comet. It's mine. Well. I found it."}, {"who": "sato", "text": "I've named three comets. This is the third. The third doesn't count. Don't ask.", "pose": "laugh"}, {"choice": [{"text": "Go on. Why doesn't it count?", "flavour": "cheer", "mem": "appt.show.sato", "reply": {"who": "sato", "text": "I said don't ask. Fine. I named it after my tea. The committee was not amused.", "pose": "laugh"}}, {"text": "Can I try the tea?", "flavour": "listen", "mem": "appt.show.sato", "reply": {"who": "sato", "text": "Brave. Sip. Don't make that face. Everyone makes that face.", "pose": "laugh"}}]}, {"who": "sato", "text": "You didn't finish the tea. Nobody does. One day someone will, and I'll faint."}], "halloran-emeka": [{"who": "halloran-emeka", "text": "Come in, come in! Have you eaten? Doesn't matter. Scone. Still warm. Brennan passed it.", "pose": "gesture"}, {"who": "halloran-emeka", "text": "Rest days, I bake. One oven, one batch, and Brennan inspects it like it's a reactor.", "pose": "laugh"}, {"who": "halloran-emeka", "text": "This batch got a nod. A nod! I nearly framed it. The nod, not the scone."}, {"choice": [{"text": "Tell him it's the best scone you've had.", "flavour": "cheer", "mem": "appt.show.halloran-emeka", "reply": {"who": "halloran-emeka", "text": "Lovely! Don't tell Brennan. Actually, do tell Brennan. Loudly.", "pose": "laugh"}}, {"text": "Ask him to show you how he makes them.", "flavour": "practical", "mem": "appt.show.halloran-emeka", "reply": {"who": "halloran-emeka", "text": "Next rest day. Bring an apron. And an appetite.", "pose": "nod"}}]}, {"who": "halloran-emeka", "text": "Take one for the road. Take two. Lovely."}]}, "thanks": [{"text": "You spend half an hour in their cabin, and they show you the thing they care about most aboard.", "tone": "warm"}], "after": [{"text": "Still say it's \"the night\". You'll come round.", "tone": "funny"}, {"text": "Raman said you held the bridge section perfectly. That's high praise from him.", "tone": "warm"}, {"text": "Sato says you drank half her tea. She's thinking of naming a comet after you.", "tone": "funny"}]},
+  "teach-me": {"title": "Teach me your thing", "starts": "ask", "host": "per-host", "gate": "tier>=colleague (the host), host off duty", "when": "any day", "at": "30 minutes, the host's free time", "whereOf": {"torres-zeke": "4 pool common-room", "cruz-tove": "3 pool garden", "rina": "4 pool common-room", "hart-ravi": "4 pool common-room"}, "who": "host, you", "once": "no (the first time unlocks the hobby)", "mem": "appt.teach.<hobby>", "record": "{first} taught you {hobby}.", "ask": [{"text": "Will you teach me your hobby?"}, {"text": "{yes}! Half an hour, somewhere comfy. Bring patience."}, {"text": "{yes}. Nobody ever asks. I'm ridiculously pleased.", "tone": "warm"}], "busy": [{"text": "I'd love to, just not today. Ask me again tomorrow?"}], "mail": [{"text": "Tomorrow, {time}: {first} is teaching you {hobby}. Supplies provided, the first time."}], "scene": {"torres-zeke": [{"who": "torres-zeke", "text": "Right! Needles. Wool. Kovac taught me. She'd say badly. Now I teach you badly. Tradition.", "pose": "laugh"}, {"who": "torres-zeke", "text": "Needle here. Wool round. No, round. There. That's a stitch. Look at you.", "pose": "gesture"}, {"who": "torres-zeke", "text": "Now do it again. And again. That's the whole secret. It's just again, forever."}, {"choice": [{"text": "Keep going, very slowly.", "flavour": "practical", "mem": "appt.teach.knit", "reply": {"who": "torres-zeke", "text": "Look at that row! It's wonky. Mine are wonky. We're a wonky team.", "pose": "laugh"}}, {"text": "Ask what he's knitting at the moment.", "flavour": "listen", "mem": "appt.teach.knit", "reply": {"who": "torres-zeke", "text": "A hat. Mostly a hat. It's had three goes at being a hat.", "pose": "laugh"}}]}, {"who": "torres-zeke", "text": "Keep the needles. Bring them to Knit and natter on Tuesday. Kovac will fix us both."}], "cruz-tove": [{"who": "cruz-tove", "text": "Oh. You came. Hello. This is a week-six mint. It's going to give us a bit of itself.", "pose": "gesture"}, {"who": "cruz-tove", "text": "Find a stem with new leaves. Cut just under the joint. Clean. Like that."}, {"who": "cruz-tove", "text": "Strip the bottom leaves. Into the water. Tell it hello. That bit's important.", "pose": "nod"}, {"choice": [{"text": "Tell the cutting hello.", "flavour": "cheer", "mem": "appt.teach.garden", "reply": {"who": "cruz-tove", "text": "It heard you. It'll root by next week. Probably. They usually listen.", "pose": "laugh"}}, {"text": "Ask how long until it grows.", "flavour": "practical", "mem": "appt.teach.garden", "reply": {"who": "cruz-tove", "text": "Roots in a week. A plant in four. Then Brennan steals it. That's the cycle.", "pose": "nod"}}]}, {"who": "cruz-tove", "text": "Take it home. Windowsill. Water when it's dry. Don't overwater. Everyone overwaters."}], "rina": [{"who": "rina", "text": "Sit. Tiles. You put down a tile, I put down a tile, I win. That's the short version.", "pose": "gesture"}, {"who": "rina", "text": "The long version: match the edges. Block my rows. Watch my hands, not the board."}, {"who": "rina", "text": "I'll go easy. I won't. But I'll explain why you lost each time.", "pose": "laugh"}, {"choice": [{"text": "Watch her hands, like she said.", "flavour": "practical", "mem": "appt.teach.games", "reply": {"who": "rina", "text": "Annoying. You're learning. I'll have to start actually trying.", "pose": "laugh"}}, {"text": "Ask how she learnt.", "flavour": "listen", "mem": "appt.teach.games", "reply": {"who": "rina", "text": "Every evening, for years, against anyone who'd sit down. Nobody sits down now.", "pose": "laugh"}}]}, {"who": "rina", "text": "Keep that set. Practise. Then come and lose to me in the common room. Properly."}], "hart-ravi": [{"who": "hart-ravi", "text": "Pencil. Paper. Four boxes. That's a comic. That's all a comic is.", "pose": "gesture"}, {"who": "hart-ravi", "text": "Box one: someone wants something. Box two: it goes wrong. Box three: worse. Box four: a duck.", "pose": "laugh"}, {"who": "hart-ravi", "text": "There's always a duck. Nobody knows why. Don't ask. Draw."}, {"choice": [{"text": "Draw the duck first.", "flavour": "cheer", "mem": "appt.teach.draw", "reply": {"who": "hart-ravi", "text": "Bold. Duck first. That's a good duck, actually. Stubborn-looking.", "pose": "laugh"}}, {"text": "Draw someone aboard instead.", "flavour": "share", "mem": "appt.teach.draw", "reply": {"who": "hart-ravi", "text": "Who's that? Oh, it's Pell, asleep. You've got his face exactly.", "pose": "laugh"}}]}, {"who": "hart-ravi", "text": "Keep the pencil. Finish it. Pin it on the comics wall when it's done."}]}, "thanks": [{"text": "Half an hour learning something new, side by side, and you go home with the things to keep practising.", "tone": "warm"}], "after": [{"text": "How's the knitting? Show me. Oh, that's wonkier than mine. Brilliant.", "tone": "funny"}, {"text": "Your mint cutting's got roots, I bet. Cruz says they always listen to you.", "tone": "warm"}, {"text": "Saw your comic on the wall. The duck is excellent.", "tone": "funny"}]},
+};
+// ---- END APPT_WORDS ----
 const LINE_TIER = [0, 1, 2, 3, 4], LINE_SRC = { own: 300, tpl: 200, bank: 100 };
 const LINE_WORDS = { hi: ['Hi'], bye: ['See you'], yes: ['Sure'], thanks: ['Thanks'], wow: ['Wow'], sigh: ['Oh well'] };   // when neither card nor template has one
 const LINE_ACTS = { meal: ['breakfast', 'dinner'], free: ['leisure', 'off'], call: ['callhome', 'call'] };   // act: groups (call: section 14's callhome)
@@ -41362,7 +41400,8 @@ function evOneOffDefs() {
   return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
     id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
     where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
-    who: (p, d) => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinityPlan === 'function' ? Math.max(0, affinityPlan(r.host, p.id, d)) / 100 * .6 : 0)),   // pure
+    who: (p, d) => r.only ? (r.only.includes(p.id) ? 1 : 0) : p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinityPlan === 'function' ? Math.max(0, affinityPlan(r.host, p.id, d)) / 100 * .6 : 0)),   // pure; only: an appointment's guest list (0.92.6 item 9, FX22)
+    ...(r.appt ? { appt: r.appt, toBed: r.toBed || null } : {}),
     anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
     from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
 }
@@ -41802,6 +41841,7 @@ function eventJoin(e, d, now, notice) {
   if (e.id === 'spice-shelf-supper' && P926_TRADS) SPICE.joined = d;   // 0.92.6 item 15: your guess card once the jars are named (spiceFrame)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
+  if (P926_APPT && e.ev.appt) apptJoin(e, d, now);       // 0.92.6 item 9: the appointment's scene (FX22, Appointments builder slot)
   return true;
 }
 // talent night's choice card (0.83.1): Lucia asks if you're on the sheet: play a tune, tell a ship joke, a Works trick, or
@@ -41890,7 +41930,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && evIsTrad(e.ev));
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt));   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -41972,9 +42012,10 @@ function tradPose(s, pl, sp) {
 function tradJoinTap(a) {
   if (!a || !a.p || typeof deckDef === 'undefined') return false;
   const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
-  const o = eventOf(a.p, now), e = o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null;
+  const o = eventOf(a.p, now), e = (o && o.now ? o.e : TJ_NOW && TJ_NOW.lead === a.p.id ? TJ_NOW.e : null) || (P926_APPT ? apptHostEvent(a, d) : null);   // 0.92.6 item 9: an appointment joined already, its host at work for it (RV17 R1)
   if (e && e.id === 'tiles-ladder' && SHIP.events.joined.includes(e.id + '@' + d) && typeof tladAgain === 'function' && tladAgain(a)) return true;   // 0.92.5 item 20: watching, a tap asks for the next game
-  if (!e || !tradJoinable(e) || m < e.from || m >= e.to || SHIP.events.joined.includes(e.id + '@' + d)) return false;
+  if (!e || !tradJoinable(e) || m < e.from || m >= e.to) return false;
+  if (SHIP.events.joined.includes(e.id + '@' + d)) return P926_APPT && !!e.ev.appt && apptRejoin(e, d, a);   // 0.92.6 item 9: an appointment's scene again after a reload (FX22b, Appointments builder slot)
   return tradJoin(e, a);
 }
 function tradJoin(e, a) {
@@ -42272,6 +42313,7 @@ function eventsTick() {
   if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
   if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
+  if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -44525,6 +44567,412 @@ function lineStoryTick(now) {
   }
 }
 // ---- end of slot: Line builder ----
+// ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
+// Behind P926_APPT (section 13; URL flag 'appt'). The user: "Appointments work almost exactly the same as ship traditions
+// but are usually one on one or very small group." Words: content/appointments/ (SW2's, CS1 passed), baked into APPT_WORDS.
+// ---- the cheap fix (the user: yes): a real talk at every appointment. An appointment you keep (section 14's apptTick or a
+// tap, status 'kept') with someone, that has no scene of its own (not an occasion, not an invitation along to a tradition,
+// not one of the appointments below), opens their chat once they're settled near you: appt.arrive (they came to you),
+// appt.wait (they were there first) or appt.late (you came late), then after APPT_TALK_GAP ms their own Talk a while talk
+// (section 20's talkStart, the pack's), or appt.notalk if you've talked with them today already. At its end, if they're
+// still near, appt.bye in a bubble. A group meeting's first person speaks for it. Flags ride on the appointment (saved
+// with the device's): talk 1 opened, 2 talked; bye 1. Looks and the chat only: plans never read them
+const APPT_TALK_GAP = 2600, APPT_NEAR = 4.5;
+const apptTalkLine = (p, kind) => { const l = typeof lineFor === 'function' ? lineFor(p, kind) : null; return l && l.text ? l.text : null; };
+function apptPlain(a) {                                   // an appointment the cheap fix speaks for: kept, with crew, no scene of its own
+  return !!a && !a.occ && !a.trad && !a.appt && Array.isArray(a.with) && a.with.length > 0 && typeof a.with[0] === 'string' && SOC.idx.has(a.with[0])
+    && !(a.grp && apptList().some(o => o.grp === a.grp && o.id < a.id));
+}
+function apptTalkFrame() {
+  if (typeof DECK_CREW === 'undefined' || typeof player === 'undefined' || !deckDef || typeof apptList !== 'function') return;
+  const now = shipNow(), t = performance.now();
+  for (const a of apptList()) {
+    if (a.status !== 'kept' || !apptPlain(a)) continue;
+    const p = apptPerson(a.with[0]), ag = p && DECK_CREW.find(c => c.p && c.p.id === p.id), P = player.obj.position;
+    const near = ag && ag.h && Math.hypot(ag.x - P.x, ag.z - P.z) < APPT_NEAR;
+    if (!a.talk) {
+      if (a.waited == null) a.waited = ag && ag.settled ? 1 : 0;   // were they there first, the moment it was kept?
+      if (now > a.at + (a.len || 30) || !near || !ag.settled || DIALOGUE || CHAT && CHAT.p !== p) continue;
+      const kind = (a.keptAt || now) > a.at + 5 ? 'appt.late' : a.waited ? 'appt.wait' : 'appt.arrive';
+      chatOpen(p, false, { text: apptTalkLine(p, kind) || 'There you are.', kind: 'appt', say: true });
+      a.talk = 1; APPT_TALK.set(a.id, t + APPT_TALK_GAP); continue;
+    }
+    if (a.talk === 1) {
+      if (!CHAT || CHAT.p !== p || CHAT.talk) { a.talk = 2; continue; }   // walked off (or they began talking themselves)
+      if (t < (APPT_TALK.get(a.id) || 0)) continue;
+      a.talk = 2;
+      if (relGet(p.id).talkDay === SHIP.time.day) chatSay(apptTalkLine(p, 'appt.notalk') || 'So. How\'s it going, really?');
+      else talkStart(CHAT);
+      continue;
+    }
+    if (!a.bye && now >= a.at + (a.len || 30)) {
+      a.bye = 1;
+      if (near && !(CHAT && CHAT.p === p && CHAT.talk && !CHAT.talk.end) && typeof bubbleSay === 'function') bubbleSay(friSpeaker(ag), apptTalkLine(p, 'appt.bye') || 'Right, that\'s me.');
+    }
+  }
+}
+const APPT_TALK = new Map();                              // appointment id -> when (performance.now) the talk begins
+function apptFrame() {                                    // every frame from eventsTick, only with P926_APPT
+  apptTalkFrame();
+  apptOverlayFrame();
+  apptRoundFrame();
+  const now = shipNow(); if (Math.floor(now) !== APPT_MIN) { APPT_MIN = Math.floor(now); apptMinute(now); }
+}
+// ---- appointments as small traditions (T2). An appointment (APPT_WORDS' words, APPT_RULES' rules) is offered by its host
+// (starts: invite, once an hour from apptHour, accepted in the Appointments app) or asked for ("What for?" in the app,
+// starts: ask). Booked, it becomes one of section 18's one-off traditions on a later day (eventOneOff, never today, so
+// today's plans never change): `only` its host (and guests) may come, so the host is planned there through eventPlan's
+// door like any tradition (free time only); a host on shift (Brennan in the galley, a shadow host) isn't planned at all:
+// the time comes from their own work block in that room, and they lead it from their station (tradJoinMinute's host
+// nearby). It's in the Schedule, the Calendar and the heads-ups as a tradition; a tap on the host joins you (TRAD_JOIN
+// 'appt-<kind>'), and eventJoin opens its scene (APPT_WORDS[kind].scene[key], the meeting format); its end keeps it (apptKeep:
+// thanks, Record, flag). SHIP.apptx (saved, only with the switch): { book: [booking], offers: [offer], kept: { key: [days] },
+// told: [booking ids whose after line was said] }. booking: { id, kind, key, host, guests, day, from, to, mail, mailAt, done }
+const APPT_ASK_DAYS = 7;                                  // a slot in the next week, or "busy"
+const apptFirst = id => { const p = evPerson(id); return p ? p.name.split(' ').length > 2 && /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?)$/.test(p.name.split(' ')[0]) ? p.name.split(' ')[1] : p.name.split(' ')[0] : id; };
+const apptFill = (text, who, ctx) => { const p = evPerson(who); let t = String(text || ''); for (const k in ctx || {}) t = t.split('{' + k + '}').join(ctx[k]); return p && typeof linesFill === 'function' ? linesFill(t, p, {}) || t : t; };
+const apptWork = (p, d, from, to, deck, room) => { for (let t = from; t < to; t += 5) { const w = planWhere(p, (d - 1) * 1440 + t), pl = w && w.placeId && PLACE_OF.get(w.placeId);   // a work block with no place (a cook's stint) counts on its deck
+  if (!w || w.act !== 'work' || w.deck !== deck || pl && !room.test(((DECKS[deck].rooms || {})[pl.room] || {}).name || '')) return false; } return true; };
+// the rules, kind -> { hosts: [id] | (d) => [id], tier, once (true: once a game; 'week': once a ship week per key), path: 'plan',
+//   key(host): the scene's key, where(host) -> [{ deck, room, types } | { deck, pool }], onShift(host): true when they're
+//   at work for it, times(host, d) -> [[from, to], ...] in-day minutes to try, pose, gain }
+// shadow hosts: [deck, room, work type, the hours their scene fits (first: SW2's), dept]. Lukas's is breakfast, Ravi's the 06:30 watering
+const APPT_SHADOW = { 'dlamini-lukas': [3, /^Galley$/, 'work:galley', [450, 420, 480], 'galley'], nandakumar: [3, /^Infirmary$/, 'work:infirmary', [570, 600, 630, 660, 840, 870, 900], 'infirmary'],
+  mori: [2, /^Survey lab$/, 'work:survey', [840, 870, 900, 570, 600, 630, 660], 'survey'], 'hart-ravi': [3, /^Hydroponics garden$/, 'work:garden', [390], 'garden'], holt: [2, /^Watch office$/, 'work:watch', [600, 630, 660, 570, 840, 870], 'watch'] };
+const APPT_TEACH = { 'torres-zeke': [4, 'common-room', 'knit'], 'cruz-tove': [3, 'garden', 'garden'], rina: [4, 'common-room', 'games'], 'hart-ravi': [4, 'common-room', 'draw'] };
+const APPT_HOBBY_WORD = { knit: 'knitting', garden: 'growing things', games: 'Tiles', draw: 'drawing comics' };
+const APPT_DEPT_WORD = { galley: 'the galley', infirmary: 'the Infirmary', survey: 'Survey', garden: 'the garden', watch: 'the Watch' };
+const apptWorking = (p, d, from, to) => { for (let t = from; t < to; t += 5) { const w = planWhere(p, (d - 1) * 1440 + t); if (!w || w.act !== 'work') return false; } return true; };   // at work, any deck
+const apptEvenings = (p, d, len) => { const out = []; for (let a = 1140; a + len + 10 <= 1320; a += 15) out.push([a, a + len + 10]); return out; };   // 10 minutes more: the host's walk there (a scope turn at 19:00 had Sato seated at 19:12)
+const APPT_RULES = {
+  'brennan-book': { hosts: ['brennan'], tier: 1, once: true, onShift: () => true, where: () => [{ deck: 3, room: /^Galley$/, types: ['event', 'work:galley'] }],
+    times: (p, d) => weekday(d) < 5 ? [[870, 900]] : [], pose: 'talk', what: 'taste three spoons and pick your favourite' },
+  scope: { hosts: ['sato'], tier: 1, once: 'week', onShift: () => false, where: () => [{ deck: 2, room: /^Observatory$/, types: ['common-room', 'window'] }],
+    times: (p, d) => apptEvenings(p, d, 20), key: (h, d) => ['tavessa', 'shoals', 'comet'][Math.floor((d - 1) / 7) % 3], pose: 'sit:talk', what: 'take a turn at the big scope with her' },
+  'teach-me': { hosts: Object.keys(APPT_TEACH), tier: 2, once: 'week', onShift: () => false, key: h => h,
+    where: h => [{ deck: APPT_TEACH[h][0], pool: APPT_TEACH[h][1] }], times: (p, d) => apptEvenings(p, d, 30), pose: 'sit:read', what: 'learn their hobby side by side' },
+  shadow: { hosts: Object.keys(APPT_SHADOW), tier: 2, once: 'week', onShift: () => true, key: h => h, dept: h => APPT_SHADOW[h][4],
+    where: h => [{ deck: APPT_SHADOW[h][0], room: APPT_SHADOW[h][1], types: ['event', APPT_SHADOW[h][2]] }],
+    times: (p, d) => APPT_SHADOW[p.id][3].map(a => [a, a + 60]), pose: 'talk', what: 'follow them for an hour on shift' },
+  // T3. Show and tell: an officer friend's cabin (locked: the overlay, which doorOpenFor opens for it), tomorrow evening
+  'show-tell': { hosts: ['torres-zeke', 'raman', 'sato', 'halloran-emeka'], tier: 3, once: 'host', path: 'appt', key: h => h, room: h => { const b = schedData().byId.get(evPerson(h).bed); return b ? [b.deck, b.room] : null; },
+    times: (p, d) => apptEvenings(p, d, 20) },
+  // Help me rehearse: the evening before their tradition (tonight, the overlay), in the music room or the common room
+  rehearse: { hosts: ['rossi-femi', 'holt', 'tomas'], tier: 3, once: 'host', path: 'appt', today: true, key: h => h, room: h => apptPoolRoom(4, h === 'rossi-femi' ? 'music' : 'common-room'),
+    can: (h, d) => relTier(h) >= 3 && eventsOn(SHIP.time.day + 1).some(e => e.id === APPT_REHEARSE[h]), times: (p, d) => d === SHIP.time.day ? [[1170, 1200], [1200, 1230], [1230, 1260], [1260, 1290]] : [] },
+  // Midnight feast: your bunkmates (2-4 of them) in the bunk room the night before your day off, going to bed from it
+  'midnight-feast': { hosts: ['bunk'], once: false, key: () => '', guests: d => apptBunkmates(), toBed: 10, mailDay: 720,
+    can: (h, d) => apptBunkmates().length >= 2 && !devShiftOn(d + 1), where: () => [{ deck: 4, pool: '@appt-midnight-feast' }],
+    times: (p, d) => !devShiftOn(d + 1) ? [[1320, 1380]] : [], pose: 'talk', what: 'a midnight feast with your bunkmates' },
+  // The night round (T4): Kofi Mensah walks the ship on his night Watch; from the Deck 3 lift plaza at 22:30 the night before
+  // your day off, deck by deck (apptRoundFrame). He's at work for it anywhere aboard
+  'night-round': { hosts: ['mensah'], tier: 3, once: true, onShift: () => true, anyDeck: true, where: () => [{ deck: 3, room: /^Lift plaza$/, types: ['bench'] }],
+    times: (p, d) => !devShiftOn(d + 1) ? [[1350, 1395]] : [], pose: 'talk', what: 'walk the night round with him' },
+  // A bed of your own: planting with Cruz on a Saturday morning (10:00, else 10:30 or 11:00 when Cruz can't stay all of it), then three short visits and the harvest (apptGardenNext)
+  'garden-bed': { hosts: ['cruz-tove'], tier: 3, once: true, days: 14, onShift: (h, d) => apptWork(evPerson(h), d, 600, 630, 3, /^Hydroponics garden$/),
+    where: () => [{ deck: 3, room: /^Hydroponics garden$/, types: ['garden', 'work:garden'] }], times: (p, d) => apptState().garden ? [[600, 615]] : weekday(d) === 5 ? [[600, 630], [630, 660], [660, 690]] : [], pose: 'water', what: 'plant a bed of your own with Cruz' },
+};
+const apptWord = (kind, sec, k, ctx, who) => { const L = (APPT_WORDS[kind] || {})[sec]; if (!Array.isArray(L) || !L.length) return null; return apptFill(L[((k % L.length) + L.length) % L.length].text, who, ctx); };
+const apptState = () => SHIP.apptx || (SHIP.apptx = { book: [], offers: [], kept: {}, told: [] });
+function apptxLoad(s) {
+  const x = s && s.ship && s.ship.apptx, arr = a => Array.isArray(a) ? a.filter(o => o && typeof o === 'object' && typeof o.kind === 'string' && APPT_WORDS[o.kind]) : [];
+  return { book: arr(x && x.book).slice(-30).map(({ waits, shown, ...b }) => b), offers: arr(x && x.offers).slice(-10), kept: x && x.kept && typeof x.kept === 'object' ? x.kept : {}, told: x && Array.isArray(x.told) ? x.told.slice(-40) : [],
+    declined: x && x.declined && typeof x.declined === 'object' ? x.declined : {}, offerDay: x && Number.isInteger(x.offerDay) ? x.offerDay : 0 };
+}
+const apptKeyOf = (kind, host) => kind + ':' + host;
+const apptKeptOn = (kind, host) => (apptState().kept[apptKeyOf(kind, host)] || []);
+function apptCan(kind, host, d) {                        // the gate: tier, once, nothing booked already
+  const R = APPT_RULES[kind]; if (!R || !APPT_WORDS[kind]) return false;
+  if (R.can) { if (!R.can(host, d)) return false; }
+  else { const p = evPerson(host); if (!p || typeof relTier === 'function' && relTier(host) < R.tier) return false; }
+  if (R.dept && R.dept(host) === 'works') return false;
+  const K = apptKeptOn(kind, host); if (R.once === true && K.length) return false;
+  if (R.once === 'week' && K.some(x => Math.floor((x - 1) / 7) === Math.floor((d - 1) / 7))) return false;
+  return !apptState().book.some(b => b.kind === kind && (R.once === 'host' ? b.host === host : true) && !b.done && !b.gone && b.day >= SHIP.time.day);
+}
+// the first slot (from tomorrow; R.today: from now on today too): the host there for all of it (at work in that room, or free
+// and planned there once booked; an overlay one: free, as section 14's apptReply sees it); never on top of another booking of
+// yours. -> [{ day, from, to, shift }, ...] (at most n), the first first; apptSlot: the first or null. A slot can still fail to
+// book (the host's plan takes another tradition at that hour once it's planned): apptTry books the first that holds
+const apptSlot = (kind, host, from) => apptSlots(kind, host, from, 1)[0] || null;
+function apptTry(kind, host, list, key) { for (const s of list) { const b = apptBookIt(kind, host, s, key); if (b) return b; } return null; }
+function apptSlots(kind, host, from, n = 6) {
+  const R = APPT_RULES[kind], p = evPerson(host), today = SHIP.time.day, now = shipNow(), mine = apptState().book.filter(b => !b.done && !b.gone), out = [];
+  const push = x => { out.push(x); return out.length >= n; };
+  for (let d = Math.max(from || 0, R.today ? today : today + 1); d <= today + (R.days || APPT_ASK_DAYS); d++) {
+    if (p && typeof aboard === 'function' && !aboard(p, d)) continue;
+    for (const [a, b] of R.times(p, d)) {
+      if ((d - 1) * 1440 + a < now + 30 || mine.some(x => x.day === d && x.from < b && a < x.to) || eventPauses({ id: 'appt-' + kind, at: [a, b] }, d)) continue;   // never in a ship-wide event's paused hours (the storm)
+      if (R.path === 'appt') { const w = apptOverlayAt(kind, host); if (w && apptReply(p, { with: [host], at: (d - 1) * 1440 + a, len: b - a, where: w, kind: 'invite' }).answer === 'yes' && push({ day: d, from: a, to: b, shift: false })) return out; continue; }
+      if (R.guests) { if (R.guests(d).filter(q => apptLate(evPerson(q), d, a, b, R)).length >= 2 && push({ day: d, from: a, to: b, shift: false })) return out; continue; }
+      const sh = R.onShift(host, d), w = R.where(host)[0];
+      const trad = !sh && planDay(p, d).some(x => x.tag && x.tag.startsWith('ev-') && x.from % 1440 < b && a < x.to % 1440) || apptClash(w, d, a, b);   // going to a tradition then: they'd go to that instead
+      if (!trad && (sh ? R.anyDeck ? apptWorking(p, d, a, b) : apptWork(p, d, a, b, w.deck, w.room) : eventFree(p, d, a, b)) && push({ day: d, from: a, to: b, shift: sh })) return out;
+    }
+  }
+  return out;
+}
+const apptClash = (w, d, a, b) => !!w && !!w.room && eventsOn(d).some(e => e.from < b && a < e.to && !/^appt-/.test(e.id) && [...(e.rooms || (e.rooms = eventRooms(e.ev)))]   // another tradition on then in its room (a harvest morning in the garden): its join would take the tap
+  .some(k => { const [n, r] = k.split('|'); return +n === w.deck && w.room.test(((DECKS[n].rooms || {})[r] || {}).name || ''); }));
+const apptLate = (p, d, a, b, R) => eventFree(p, d, a, b) || R.toBed && (() => { const to = Math.min(b, schedFrame(p, d).bed - 20); return to - a >= R.toBed && eventFree(p, d, a, to); })();   // the feast: tradToBed's rule
+function apptBookIt(kind, host, slot, key0) {            // the one-off (or the overlay), then a check that the host is there for it; -> booking or null
+  const R = APPT_RULES[kind], A = APPT_WORDS[kind], X = apptState(), id = 'appt-' + kind, key = key0 != null ? key0 : R.key ? R.key(host, slot.day) : '';
+  let guests = [], aid = null;
+  if (R.path === 'appt') {                               // an overlay appointment (section 14's apptWhere): a locked cabin, or tonight
+    const a = apptAdd({ with: [host], at: (slot.day - 1) * 1440 + slot.from, len: slot.to - slot.from, where: apptOverlayWhere(kind, host), kind: 'invite', status: 'yes', by: host, title: A.title });
+    if (!a) return null; a.appt = kind; aid = a.id;
+  } else {
+    const only = R.guests ? R.guests(slot.day) : slot.shift ? [] : [host];
+    if (!eventOneOff({ id, day: slot.day, name: A.title, at: [slot.from, slot.to], where: R.where(host), host: R.guests ? null : host, only, appt: kind, key, hold: [], from: R.guests ? 'Bunk 1' : evPerson(host).name, ...(R.toBed ? { toBed: R.toBed } : {}) })) return null;
+    const went = only.filter(q => R.guests ? planDay(evPerson(q), slot.day).some(s => evTagId(s.tag) === id) : apptStays(evPerson(q), slot, id));
+    if (R.guests ? went.length < 2 : !slot.shift && !went.length) { apptUnbook(id, slot.day); return null; }   // planned elsewhere after all
+    if (R.guests) { host = went[0]; guests = went.slice(1); }
+  }
+  const b = { id: X.book.reduce((m, x) => Math.max(m, x.id || 0), 0) + 1, kind, key, host, guests, day: slot.day, from: slot.from, to: slot.to, done: 0, ...(aid ? { aid } : {}) };
+  X.book.push(b); if (X.book.length > 30) X.book.splice(0, X.book.length - 30);
+  const ctx = { time: hhmm(slot.from), first: apptFirst(host), dept: R.dept ? APPT_DEPT_WORD[R.dept(host)] : '', hobby: APPT_TEACH[host] && kind === 'teach-me' ? APPT_HOBBY_WORD[APPT_TEACH[host][2]] : '' };
+  b.mail = apptWord(kind, 'mail', 0, ctx, host);
+  b.mailAt = slot.day === SHIP.time.day || R.mailDay ? Math.max(shipNow(), (slot.day - 1) * 1440 + (R.mailDay || 0)) : (slot.day - 2) * 1440 + EV_MAIL_AT;   // the evening before, as a tradition's; "tonight" ones on the day
+  return b;
+}
+const apptStays = (p, s, id) => { const B = (s.day - 1) * 1440, S = planDay(p, s.day).filter(x => evTagId(x.tag) === id);   // planned there all the slot (its first 5 and last 10 minutes aside: the walk, the goodbye), not leaving halfway (RV17 #4)
+  for (let t = s.from + 5; t < s.to - 10; t += 5) if (!S.some(x => x.from - B <= t && t < x.to - B)) return false; return S.length > 0; };
+function apptUnbook(id, day) {
+  const i = SHIP.events.oneOffs.findIndex(r => r.id === id && r.day === day); if (i < 0) return;
+  SHIP.events.oneOffs.splice(i, 1); SCHED_DATA = null; EV_DAYS.clear(); for (const x of [...SHIP_DAYS.keys()]) if (x >= day) SHIP_DAYS.delete(x);
+}
+const apptBooking = (e, d) => apptState().book.find(b => 'appt-' + b.kind === e.id && b.day === d && !b.done) || null;
+// "What for?": the appointments you can ask for now -> [{ kind, host, text }]
+function apptAskable() {
+  const d = SHIP.time.day, out = [];
+  for (const kind of Object.keys(APPT_RULES)) if ((APPT_WORDS[kind] || {}).starts === 'ask')
+    for (const host of APPT_RULES[kind].hosts) if (apptCan(kind, host, d + 1)) out.push({ kind, host, text: APPT_WORDS[kind].title + ': ' + apptHostName(host) + (APPT_RULES[kind].dept ? ' (' + APPT_DEPT_WORD[APPT_RULES[kind].dept(host)] + ')' : APPT_TEACH[host] && kind === 'teach-me' ? ' (' + APPT_HOBBY_WORD[APPT_TEACH[host][2]] + ')' : '') });
+  return out;
+}
+let APPT_SAY = null;
+function apptAsk(kind, host) {                           // you ask; they answer with a time, or not this week
+  const b = apptCan(kind, host, SHIP.time.day + 1) ? apptTry(kind, host, apptSlots(kind, host)) : null, n = (APPT_WORDS[kind].ask || []).length;
+  const p = evPerson(b ? b.host : host === 'bunk' ? apptBunkmates()[0] : host), q = apptWord(kind, 'ask', 0, {}, p.id);
+  if (!b) { APPT_SAY = 'You: "' + q + '" ' + shortName(p) + ': "' + (apptWord(kind, 'busy', SHIP.time.day, {}, p.id) || 'Not this week, sorry.') + '"'; return null; }
+  APPT_SAY = 'You: "' + q + '" ' + shortName(p) + ': "' + (n > 1 ? apptWord(kind, 'ask', 1 + (b.id + SHIP.time.day) % (n - 1), {}, p.id) : 'Yes.') + '" ' + devDayName(b.day) + ', ' + hhmm(b.from) + '.';
+  deviceRefresh(); return b;
+}
+// invitations: once a ship hour, 08:00-20:00, a host whose gate is met may ask you (at most one new one a day, each kind
+// at most once a week); it waits in the Appointments app (Accept / Decline) and their invite line is said near you once
+function apptHour(now) {
+  const X = apptState(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  X.offers = X.offers.filter(o => o.day >= d - 1 && o.status === 'asked');
+  if (m < 480 || m > 1200 || X.offerDay === d) return;
+  for (const kind of Object.keys(APPT_RULES)) if ((APPT_WORDS[kind] || {}).starts === 'invite') for (const host of APPT_RULES[kind].hosts) {
+    if (!apptCan(kind, host, d + 1) || (X.declined || {})[apptKeyOf(kind, host)] > d - 7 || schedU(idHash(host), d * 24 + Math.floor(m / 60), 1201) > .25) continue;
+    const s = apptSlot(kind, host); if (!s) continue;
+    X.offers.push({ kind, host, day: s.day, from: s.from, to: s.to, made: d, status: 'asked', said: 0 }); X.offerDay = d;
+    if (typeof deviceNotify === 'function') deviceNotify({ app: 'appointments', text: shortName(evPerson(host)) + ' has invited you: ' + APPT_WORDS[kind].title + '.', urgent: false });
+    return;
+  }
+}
+const apptOfferKey = o => [o.kind, o.host, o.day, o.from].join('|');
+function apptAnswer(i, yes) {                            // i: the offer's key (apptOfferKey; the list is trimmed each hour), or its index
+  const X = apptState(), o = typeof i === 'string' ? X.offers.find(x => apptOfferKey(x) === i) : X.offers[i]; if (!o || o.status !== 'asked') return;
+  o.status = yes ? 'yes' : 'no';
+  if (!yes) { (X.declined || (X.declined = {}))[apptKeyOf(o.kind, o.host)] = SHIP.time.day; APPT_SAY = shortName(evPerson(o.host)) + ': "' + (apptWord(o.kind, 'busy', SHIP.time.day, {}, o.host) || 'Another time, then.') + '"'; return; }
+  const b = apptCan(o.kind, o.host, o.day) ? apptTry(o.kind, o.host, [o].filter(x => (x.day - 1) * 1440 + x.from > shipNow() + 30).concat(apptSlots(o.kind, o.host, o.day))) : null;   // its time, else the next that holds
+  APPT_SAY = b ? 'Booked: ' + APPT_WORDS[o.kind].title + ', ' + devDayName(b.day) + ' ' + hhmm(b.from) + '.' : shortName(evPerson(o.host)) + ': "Oh, that time\'s gone now. Ask me again?"';
+}
+// the scene: a tap on the host joins (tradJoin), and eventJoin calls this
+function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) b.kind === 'night-round' ? apptRoundStart(b, now) : apptScene(b, now, e); }
+// a group scene's lines with only those there: a line from someone not there goes, and so does the line right after it
+// when it's about them (it starts He, She or They: "He means days to home" after Lukas's "Ninety-one"), and any line or
+// reply naming them (a choice keeps its reply only if it names nobody away)
+function apptPresent(b, L, here) {
+  const R = APPT_RULES[b.kind], gone = (R.guests ? R.guests(b.day) : []).filter(id => !here.has(id)), names = gone.map(apptFirst), out = [];
+  let drop = false;
+  for (const [i, l] of L.entries()) {
+    const away = !!l.who && evPerson(l.who) && !here.has(l.who) && i < L.length - 1, named = !!l.text && names.some(n => new RegExp('\\b' + n + '\\b').test(l.text));
+    if (away || named || drop && l.who && /^(He|She|They)\b/.test(l.text || '')) { drop = away; continue; }
+    drop = false; out.push(l.who && !here.has(l.who) && evPerson(l.who) ? { ...l, who: b.host } : l.choice ? { choice: l.choice.map(c => c.reply && names.some(n => new RegExp('\\b' + n + '\\b').test(c.reply.text)) ? (({ reply, ...x }) => x)(c) : c) } : l);
+  }
+  return out;
+}
+function apptScene(b, now, e) {                         // the scene for a booking: its key's (a garden visit: tend:<n> or harvest); lines from anyone not there are left out. e: its one-off (the card stays open in its rooms too: FX17's cardWhere(e))
+  if (typeof dialogueShow !== 'function') return;
+  const A = APPT_WORDS[b.kind], k = String(b.key || ''), L = /^tend:\d$/.test(k) ? [A.tend[+k.slice(5)]].filter(Boolean) : k === 'harvest' ? A.harvest : A.scene && (A.scene[k] || A.scene['']); if (!L || !L.length) return;
+  const id = 'appt:' + b.kind + ':' + (k || b.host), ctx = { me: typeof linesMe === 'function' ? linesMe() : 'you' }, here = new Set([b.host].concat(b.guests || []));
+  const who = w => here.has(w) || !evPerson(w) ? w : b.host;   // a reply from someone not there: the host says it
+  const fill = l => l.text ? { ...l, text: apptFill(l.text, l.who, ctx) } : l.choice ? { choice: l.choice.map(c => ({ ...c, ...(c.reply ? { reply: { ...c.reply, who: who(c.reply.who), text: apptFill(c.reply.text, who(c.reply.who), ctx) } } : {}) })) } : l;
+  MEETING_SCRIPTS[id] = { title: A.title, from: evPerson(b.host).name, gist: A.title + ' with ' + apptHostName(b.guests && b.guests.length ? 'bunk' : b.host) + '.', lines: apptPresent(b, L, here).map(fill), onEnd: () => apptKeep(b) };
+  dialogueShow(id, { id: id + '@' + b.day, who: [...here], at: now, ...cardWhere(e) });   // the room you're in (FX17's shared cardWhere: with no where, meetingsTick closed it at the next ship minute)
+}
+function apptRejoin(e, d, a) {                          // joined already, the booking still open (a reload closed its card, RV17 #2): a tap on the host opens its scene again
+  const b = apptBooking(e, d); if (!b || b.gone || DIALOGUE || APPT_ROUND_NOW) return false;
+  player.stop(); a.talking = 2; player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
+  apptJoin(e, d, shipNow()); return !!DIALOGUE || !!APPT_ROUND_NOW;
+}
+const apptHostEvent = (a, d) => eventsOn(d).find(x => x.ev.appt && SHIP.events.joined.includes(x.id + '@' + d) && (apptBooking(x, d) || {}).host === a.p.id) || null;   // tradJoinTap: a joined one-off whose host isn't planned there (at work for it: Brennan, a shadow host, Mensah), so apptRejoin can reach it
+function apptOver(b) {                                   // its time is up: kept if you joined it (a reload closed its card; the night round with four stops walked), else missed
+  if (DIALOGUE && String(DIALOGUE.id).startsWith('appt:' + b.kind + ':')) return;   // its scene still open: its end keeps it
+  if (!b.aid && SHIP.events.joined.includes('appt-' + b.kind + '@' + b.day) && (b.kind !== 'night-round' || b.ri >= 4)) apptKeep(b); else b.gone = 1;
+}
+function apptKeep(b) {                                   // the scene's end (or walking off it): kept, once
+  if (b.done) return; b.done = SHIP.time.day;
+  const X = apptState(), k = apptKeyOf(b.kind, b.host), R = APPT_RULES[b.kind], A = APPT_WORDS[b.kind]; (X.kept[k] || (X.kept[k] = [])).push(b.day); if (X.kept[k].length > 12) X.kept[k].shift();
+  if (typeof relAdd === 'function' && !b.aid) for (const id of [b.host].concat(b.guests || [])) relAdd(id, 'appt', REL_PTS.appt);   // an overlay one: section 20's socialAppts gives it
+  if (b.kind === 'garden-bed') apptGardenKept(b);
+  if (A.flag && typeof flagSet === 'function') flagSet(A.flag);
+  if (R.dept && typeof repAdd === 'function') repAdd(R.dept(b.host), 1);   // a little standing with that department
+  if (b.kind === 'teach-me') { const h = APPT_TEACH[b.host][2]; hobbyGive(h); hobbyCount(h); hobbyCount(h); }   // the kit the first time, and it counts double
+  const t = apptWord(b.kind, 'thanks', b.id, {}, b.host); if (t) toast(A.title, t, { keep: true });
+}
+// the Record: what you've kept (titles and their record lines)
+function apptRecord() {
+  const X = apptState(), rows = [], seen = new Set();   // one row each (the latest day); the garden's at the harvest (RV17 #5)
+  for (const b of X.book.filter(x => x.done && (x.kind !== 'garden-bed' || x.key === 'harvest')).sort((p, q) => q.day - p.day)) { const A = APPT_WORDS[b.kind], R = APPT_RULES[b.kind], k = b.kind + ':' + (R.guests ? '' : b.host);
+    if (seen.has(k) || rows.length >= 6) continue; seen.add(k);
+    rows.push({ text: A.record ? apptFill(A.record, b.host, { first: apptFirst(b.host), dept: R.dept ? APPT_DEPT_WORD[R.dept(b.host)] : '', hobby: APPT_TEACH[b.host] ? APPT_HOBBY_WORD[APPT_TEACH[b.host][2]] : '' }) : A.title + ' with ' + evPerson(b.host).name + '.', sub: 'Day ' + b.day }); }
+  return rows.length ? [{ kind: 'text', text: 'Appointments kept', mark: 'head' }, { kind: 'list', rows }] : [];
+}
+// the Appointments app: "What for?", your invitations, and what's booked (section 19's app asks these)
+function apptViewX() {
+  const X = apptState(), B = [];
+  if (APPT_SAY) B.push({ kind: 'text', text: APPT_SAY, mark: 'hot' });
+  X.offers.forEach((o, i) => { if (o.status !== 'asked') return;
+    B.push({ kind: 'list', rows: [{ text: shortName(evPerson(o.host)) + ': "' + (apptWord(o.kind, 'invite', o.made, {}, o.host) || APPT_WORDS[o.kind].title) + '"', sub: APPT_WORDS[o.kind].title + ' · ' + devDayName(o.day) + ' ' + hhmm(o.from), mark: 'new' }] },
+      { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'x:yes', arg: apptOfferKey(o) } }, { label: 'Decline', action: { app: 'appointments', do: 'x:no', arg: apptOfferKey(o) } }] }); });
+  const up = X.book.filter(b => !b.done && b.day >= SHIP.time.day);
+  if (up.length) B.push({ kind: 'text', text: 'Booked', mark: 'head' }, { kind: 'list', rows: up.map(b => ({ text: devDayName(b.day) + ' ' + hhmm(b.from) + '  ' + APPT_WORDS[b.kind].title, sub: 'with ' + apptHostName(b.guests && b.guests.length ? 'bunk' : b.host) })) });
+  const ask = apptAskable();
+  if (ask.length) B.push({ kind: 'text', text: 'What for?', mark: 'head' }, { kind: 'list', rows: ask.map(x => ({ text: x.text, action: { app: 'appointments', do: 'x:ask', arg: x.kind + '|' + x.host } })) });
+  return B;
+}
+function apptActX(verb, arg) {                           // true when it was one of ours
+  if (verb === 'x:ask' && typeof arg === 'string') { const [k, h] = arg.split('|'); if (APPT_RULES[k]) apptAsk(k, h); return true; }
+  if (verb === 'x:yes' || verb === 'x:no') { apptAnswer(arg, verb === 'x:yes'); return true; }
+  if (verb === 'open' || verb === 'new') APPT_SAY = null;
+  return false;
+}
+// once a ship minute (apptFrame): invitations hourly, the Mail the evening before, a booking that's over keeps or goes
+function apptMinute(now) {
+  const X = apptState();
+  if (Math.floor(now / 60) !== APPT_HOUR) { APPT_HOUR = Math.floor(now / 60); apptHour(now); }
+  if (typeof deckDef !== 'undefined' && deckDef && typeof player !== 'undefined') apptNearMinute(now);
+  apptGardenNext(now);
+  for (const b of X.book) {
+    if (b.mail && !b.mailed && now >= b.mailAt) { b.mailed = 1; if (typeof mailSend === 'function') mailSend({ at: now, from: evPerson(b.host).name, subject: APPT_WORDS[b.kind].title + ', ' + WEEKDAYS[weekday(b.day)] + ' ' + hhmm(b.from), body: b.mail, quiet: now - b.mailAt > 30 }); }
+    if (!b.done && !b.gone && (now >= (b.day - 1) * 1440 + b.to + 30 || b.aid && (apptList().find(a => a.id === b.aid) || { status: 'missed' }).status === 'missed')) apptOver(b);   // missed: nothing lost, it can be asked for again
+  }
+}
+// near you (once a ship minute, on the deck): a standing invitation's line from its host, once; and once on a later day, a
+// kept appointment's after line. A line naming the host is someone else's ("Holt says you read the board right"), said by
+// whoever's settled near you; the rest are the host's own. A per-host appointment's line must be about that host
+// (APPT_AFTER_KEY); none fits: nothing said
+const APPT_AFTER_KEY = { 'dlamini-lukas': /galley|Lukas/, holt: /Holt|Watch/, mori: /Mori|label/, 'torres-zeke': /knitting|"the night"/, 'cruz-tove': /mint|Cruz/, 'hart-ravi': /comic/, raman: /Raman/, sato: /Sato|tea/, nandakumar: /Nandakumar|water/ };
+const apptNear = (id, not) => { const P = player.obj.position; return DECK_CREW.find(c => c.p && c.h && c.settled && (id ? c.p.id === id : c.p.id !== not && !c.p.player) && Math.hypot(c.x - P.x, c.z - P.z) < APPT_NEAR) || null; };
+function apptNearMinute(now) {
+  if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function' || DIALOGUE || CHAT) return;
+  const X = apptState(), d = Math.floor(now / 1440) + 1;
+  for (const o of X.offers) if (o.status === 'asked' && !o.said) { const a = apptNear(o.host); if (a) { o.said = 1; bubbleSay(friSpeaker(a), apptWord(o.kind, 'invite', o.made, {}, o.host)); return; } }
+  for (const b of X.book) if (b.kind === 'rehearse' && b.done && b.day === d - 1 && !X.told.includes(b.id)) {   // "You heard it first": at their tradition the next day, near you
+    const e = eventsOn(d).find(x => x.id === APPT_REHEARSE[b.host]), m = now - (d - 1) * 1440, a = e && m >= e.from && m < e.to && apptNear(b.host), L = (APPT_WORDS.rehearse.afterOf || {})[b.host];
+    if (a && L && L.length) { X.told.push(b.id); bubbleSay(friSpeaker(a), apptFill(L[0].text, b.host, {})); return; }
+  }
+  for (const b of X.book) {
+    if (!b.done || b.done >= d || X.told.includes(b.id) || d - b.done > 14 || b.kind === 'rehearse') continue;
+    const L = APPT_WORDS[b.kind].after || [], host = evPerson(b.host), names = [apptFirst(b.host), host.name.split(' ').slice(-1)[0]], key = APPT_RULES[b.kind].key && APPT_AFTER_KEY[b.host];
+    for (let i = 0; i < L.length; i++) {
+      const t = L[(i + b.id) % L.length].text; if (key && !key.test(t)) continue;
+      const other = names.some(n => t.includes(n)), a = other ? apptNear(null, b.host) : apptNear(b.host); if (!a) continue;
+      X.told.push(b.id); if (X.told.length > 40) X.told.shift(); bubbleSay(friSpeaker(a), apptFill(t, a.p.id, {})); return;
+    }
+  }
+}
+// T3's helpers. Rehearse: whose tradition is the next day's (Femi Rossi plays talent night, Holt reads the Sunday story,
+// Tomas asks the quiz). The overlay's place: a spot in the room (apptOccSpot: a locked cabin too). Your bunkmates: the crew
+// whose beds are in your bunk room (none once you've moved to a cabin of your own)
+const APPT_REHEARSE = { 'rossi-femi': 'rec-talent-night', holt: 'sunday-story', tomas: 'quiz' };
+const apptHostName = h => h === 'bunk' ? 'your bunkmates' : (evPerson(h) || { name: h }).name;
+const apptPoolRoom = (n, type) => { const q = (DECKS[n].places || []).find(x => x.type === type && !x.machine); return q ? [n, q.room] : null; };
+const apptOverlayWhere = (kind, host) => { const r = APPT_RULES[kind].room(host); return r ? r[0] + '|' + r[1] : null; };
+const apptOverlayAt = (kind, host) => { const r = APPT_RULES[kind].room(host); return r ? apptOccSpot(r[0], r[1]) : null; };
+function apptBunkmates() {
+  const S = schedData(), mine = S.byId.get(playerBed()); if (!mine || mine.type !== 'bed') return [];
+  return schedPeople().filter(p => !p.player && p.rank !== 'guest' && p.bed && (S.byId.get(p.bed) || {}).room === mine.room && (S.byId.get(p.bed) || {}).deck === mine.deck).map(p => p.id).sort();
+}
+// an overlay appointment's scene (show and tell, rehearse): once it's kept (section 14's apptTick or a tap) and the host is
+// settled near you, nothing else open; missed: nothing lost
+function apptOverlayFrame() {
+  if (typeof DECK_CREW === 'undefined' || typeof player === 'undefined' || !deckDef || DIALOGUE || CHAT) return;
+  for (const b of apptState().book) {
+    if (!b.aid || b.done || b.gone || b.shown) continue;
+    const a = apptList().find(x => x.id === b.aid); if (!a || a.status !== 'kept' || !apptNear(b.host)) continue;
+    b.shown = 1; apptScene(b, shipNow()); return;
+  }
+}
+// A bed of your own (garden-bed): the planting kept puts your bed's sign up (the trace gardenBedYours, drawn by
+// DECK_DRESS.gardenBedYours) and starts the visits: three tend visits a week apart, then the harvest. apptGardenNext books
+// the next one with Cruz (no asking: "I'll come and find you next week") when it's due; X.garden = { stage, due }
+function apptGardenKept(b) {
+  const X = apptState(), k = String(b.key || ''), n = /^tend:\d$/.test(k) ? +k.slice(5) + 2 : k === 'harvest' ? 5 : 1;
+  if (n === 1 && typeof traceAdd === 'function') traceAdd('gardenBedYours', b.day);
+  X.garden = n < 5 ? { stage: n, due: b.day + 7 } : { stage: 5, due: 0 };
+}
+function apptGardenNext(now) {
+  const X = apptState(), G = X.garden, d = Math.floor(now / 1440) + 1; if (!G || G.stage >= 5 || d < G.due - 1) return;
+  if (X.book.some(b => b.kind === 'garden-bed' && !b.done && !b.gone && b.day >= d)) return;
+  const b = apptTry('garden-bed', 'cruz-tove', apptSlots('garden-bed', 'cruz-tove', G.due), G.stage < 4 ? 'tend:' + (G.stage - 1) : 'harvest');
+  if (b && typeof deviceNotify === 'function') deviceNotify({ app: 'appointments', text: 'Cruz will meet you at your bed: ' + devDayName(b.day) + ', ' + hhmm(b.from) + '.', urgent: false });
+}
+// ---- the night round (T4; lead 36: Mensah at your lift lobby, deck by deck; stop and tell if fragile). At 22:25 Mensah
+// waits at the Deck 3 lift plaza's bench (section 14's crewScene 'wait', looks only: his plan runs on); a tap joins you,
+// and from then he follows you (crewScene 'follow': he comes out of the lift after you on every deck). The stops come in
+// APPT_ROUND's order: on each deck, once you're out of the lift with him near, he says its stop line (the rec deck's
+// from Deck 4's lobby, after Deck 4's: it's closed at night); a toast says where next. After Deck 1's lobby, the scene.
+// The round has until 23:45; at least four stops by then and the scene still plays, else it's left (nothing lost).
+// APPT_ROUND_NOW: { b, i, at (the ship minute of the next line: 3 apart, about 5 seconds), next } while it runs; nothing saved
+// (a reload ends it)
+const APPT_ROUND = [6, 5, 4, 7, 3, 2, 1];
+let APPT_ROUND_NOW = null;
+function apptRoundStart(b, now) {
+  const A = APPT_WORDS['night-round'], L = (A.stops || []).filter((l, k) => APPT_ROUND[k] !== 7 || REC_DECK), decks = APPT_ROUND.filter(n => n !== 7 || REC_DECK), i = Math.min(b.ri || 0, L.length);   // b.ri: stops walked before a reload
+  APPT_ROUND_NOW = { b, i, L, decks, at: 0 };
+  crewScene(b.host, { mode: 'follow', until: (b.day - 1) * 1440 + b.to + 30 });
+  toast(A.title, i && decks[i] != null ? 'On to ' + deckIn(decks[i] === 7 ? 4 : decks[i]) + '. Mensah comes with you.' : 'Take the lift down to ' + deckIn(6) + '. Mensah comes with you, and says good night to each deck.', { keep: true });
+}
+function apptRoundFrame() {
+  const N = APPT_ROUND_NOW, now = shipNow();
+  { const b = apptState().book.find(x => x.kind === 'night-round' && !x.done && !x.gone && !x.waits && now >= (x.day - 1) * 1440 + x.from - 5 && now < (x.day - 1) * 1440 + x.to);   // 22:25: he's at the bench
+    if (b && !N) { const pl = (DECKS[3].places || []).find(q => q.room === '+' && q.type === 'bench'); b.waits = 1; if (pl) crewScene(b.host, { mode: 'wait', to: pl.id, until: (b.day - 1) * 1440 + b.to }); } }
+  if (!N || typeof DECK_CREW === 'undefined' || !deckDef) return;
+  const b = N.b, end = (b.day - 1) * 1440 + b.to + 30;
+  if (now >= end || b.done) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); if (!b.done && N.i >= 4 && !DIALOGUE) apptScene(b, now); else if (!b.done) b.gone = 1; return; }
+  const t = now, P = player.obj.position, m = DECK_CREW.find(c => c.p && c.p.id === b.host && c.h && Math.hypot(c.x - P.x, c.z - P.z) < APPT_NEAR + 1);   // following you: never 'settled'
+  if (N.i >= N.L.length) { if (!DIALOGUE && t >= N.at) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); apptScene(b, now); } return; }
+  const want = N.decks[N.i], here = want === 7 ? 4 : want;
+  if (deckDef.num !== here || inLift() || !m || t < N.at) return;
+  const l = N.L[N.i]; bubbleSay(friSpeaker(m), apptFill(l.text, b.host, {}), 5.5); N.i++; b.ri = N.i; N.at = t + 3;
+  const nx = N.decks[N.i];
+  if (nx != null && nx !== 7) toast(APPT_WORDS['night-round'].title, nx === 1 ? 'Up to ' + deckIn(1) + '\'s lobby, the last stop.' : 'On to ' + deckIn(nx) + '.', { keep: false });
+}
+const apptHush = a => !!APPT_ROUND_NOW && !!a.p && a.p.id === APPT_ROUND_NOW.b.host;   // section 20's chatter: not the night round's host while it runs (RV17 #6)
+let APPT_HOUR = -1, APPT_MIN = -1;
+if (P926_APPT) {
+  SHIP.apptx = apptxLoad(SAVED);
+  SAVE_EXTRA.push(s => { s.ship.apptx = JSON.parse(JSON.stringify(apptState())); });
+  for (const kind of Object.keys(APPT_RULES)) { const R = APPT_RULES[kind];
+    TRAD_JOIN['appt-' + kind] = { pose: R.pose || 'talk', need: 'social', gain: 12, also: { leisure: 10 }, verb: 'start', what: R.what }; }
+  tjActs();
+  // the midnight feast's five standing spots in Bunk 1's two aisles (cols 7 and 9, between the bunks; type event, inert),
+  // facing the bunks: tagged for it, so its one-off finds them (section 14's '@' list)
+  DECKS[4].places.push(...[[7, 1, 'e'], [9, 1, 'w'], [7, 2, 'e'], [9, 2, 'w'], [9, 0, 'w']].map(([c, r, f], k) => ({ id: '4-feast-' + (k + 1), type: 'event', event: 'appt-midnight-feast', at: [c, r], xy: [c + .5, r + .5], walk: [c, r], face: f, pose: 'stand', anim: 'talk', room: 'a' })));
+  // your bed's sign (A bed of your own): a stake and a little board at the front of the bed by 3-tend-7, once planted
+  DECK_DRESS.gardenBedYours = { deck: 3, what: 'a little sign at your bed in the garden', make(g, o) {
+    const r = ROOM_BOX.G, pl = DECKS[3].places.find(q => q.id === '3-tend-7'), x = pl.xy[0] - r.i0 + .32, z = pl.xy[1] - r.j0 - .28, s = dressAt(g, 'G', 'floor', 0, 0);
+    dressBox(s, .026, .46, .026, '#a07a4f', x, .23, z);                 // the stake
+    dressBox(s, .22, .11, .016, '#f4efe2', x, .43, z + .029);          // the board, its back .008 in front of the stake's face (no shared plane)
+    return { t: 'Your bed', x: 'Your bed in the garden, by the tree. Cruz made the sign: your name, in small letters. Plants are shy.', floor: ['G', x, z], y: .3, w: .3, h: .5, d: .2 };
+  } };
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the feast's spots: planned again
+}
+// ---- end of slot: Appointments builder ----
 
 // =====================================================================
 // 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
@@ -46528,6 +46976,7 @@ function socialChatter(m) {
   const near = DECK_CREW.filter(a => a.h && SOC.idx.has(a.p.id) && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && onScreen(a) && !(STORIES_ON && storyInScene(a.p.id)))   // not the speaker of an open crew story scene (RV16 #4)
     .sort((a, b) => schedU(a.p.seed, m, 636) - schedU(b.p.seed, m, 636));
   for (const a of near) {
+    if (P926_APPT && apptHush(a)) continue;              // 0.92.6 item 9: the night round's host says only its lines (FX22b, Appointments builder slot)
     const w = whereIs(a.p, t); if (!w || w.act === 'sleep' || w.act === 'wash') continue;
     const tj = teamJobOf(w); if (tj) {                   // at a team job: work talk first (m8, 0.71.2)
       const l = socLine(a.p, 'team', { t, act: 'work', bubble: true, flags: { 'team.on': true } }), text = l ? l.text : TEAM_TALK[Math.floor(schedU(a.p.seed, m, 641) * TEAM_TALK.length)];

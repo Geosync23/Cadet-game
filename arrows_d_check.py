@@ -26,6 +26,8 @@ import sys, json, re, os, pathlib
 from playwright.sync_api import sync_playwright
 
 WORK = pathlib.Path(os.environ.get('CADET_WORK', '/tmp/cadet-work'))
+RUN_ID = f'p{os.getpid()}_'   # FX18-1: this run's copies carry the process id (two runs in one CADET_WORK never open each other's), gone at exit
+__import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK / 'test').glob(f'*_{RUN_ID}*') if f.is_file()])
 (WORK / 'test').mkdir(parents=True, exist_ok=True)
 THREE = (WORK / 'three/package/build/three.min.js').read_text()
 INIT = """(() => { let vt = 1000; const cbs = []; performance.now = () => vt; Date.now = () => vt;
@@ -46,7 +48,7 @@ class Page:
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
         html = pathlib.Path(path).read_text(); i = html.rfind('})();')
-        tmp = WORK / 'test' / ('_arrows_d_' + tag + '_' + pathlib.Path(path).name)
+        tmp = WORK / 'test' / ('_arrows_d_' + RUN_ID + tag + '_' + pathlib.Path(path).name)
         tmp.write_text(html[:i] + "window.__sc = src => eval(src);\n" + html[i:])
         self.page.goto('file://' + str(tmp) + '#dev')
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
@@ -267,9 +269,9 @@ with sync_playwright() as pw:
     path = sys.argv[1] if len(sys.argv) > 1 else 'starship-cadet.html'
     src = arrows_off(pathlib.Path(path).read_text())
     if check('const POINT_ON = false;' in src and 'function guideShift' in src, 'the build has piece D (guideShift) and the pointer switch'):
-        on = WORK / 'test' / ('_d_on_' + pathlib.Path(path).name)
+        on = WORK / 'test' / ('_d_on_' + RUN_ID + pathlib.Path(path).name)
         on.write_text(src.replace('const POINT_ON = false;', 'const POINT_ON = true;', 1))
-        off = WORK / 'test' / ('_d_off_' + pathlib.Path(path).name); off.write_text(src); path = str(off)
+        off = WORK / 'test' / ('_d_off_' + RUN_ID + pathlib.Path(path).name); off.write_text(src); path = str(off)
         b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
         ctx = b.new_context(viewport={'width': 390, 'height': 844}, device_scale_factor=1)
         for name, fn, p, guide in (('off', part_off, path, False), ('on: S2, S3, pass-over, S7', part_on, str(on), True), ('on: S5, S8, S6, S9', part_on2, str(on), True), ('tick', part_tick, str(on), True), ('the drill arrow', part_drill, path, False)):

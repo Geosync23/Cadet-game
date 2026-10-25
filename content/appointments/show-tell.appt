@@ -1,0 +1,81 @@
+@appointment show-tell
+// SW2, 0.92.6 item 9 (the user: yes). Show and tell: the officer's cabin visit gets a reason. When an officer friend
+// invites you to their cabin (as today), they show you the thing they care about. Four hosts: Zeke (cabin 4-14 "the one
+// with the music": one record from the cabinet, and he argues with it; never quote a real song), Raman (2-H: holding
+// the model Wren's bridge section), Sato (2-V: her tea, explained at length, and the comet she's tracking; she has named
+// three and "the third doesn't count"), Halloran (4-13: a scone from his rest-day baking, which Brennan inspects).
+title: Show and tell
+starts: invite
+host: per-host
+gate: as the cabin visit today (an officer friend invites you)
+when: the host's evening off duty
+at: 30 minutes
+where torres-zeke: 4 room Cabin 4-14: cabin
+where raman: 2 room Cabin 2-H: cabin
+where sato: 2 room Cabin 2-V: cabin
+where halloran-emeka: 4 room Cabin 4-13: cabin
+who: host, you
+once: yes (per host)
+mem: appt.show.<id>
+
+== invite
+- Come by my cabin tomorrow evening? There's something I've been meaning to show you.
+- Cabin, tomorrow, after dinner. I'll put the kettle on. Bring nothing. I mean it.
+
+== busy
+- Not tomorrow, sorry. Ask me again at the weekend?
+
+== mail
+- Tomorrow, {time}: {first}'s cabin. They want to show you something.
+
+== scene torres-zeke
+torres-zeke: Come in! Mind the wool. Sit anywhere that isn't wool. This is the one I wanted you to hear.   [gesture]
+torres-zeke: Listen. Here. The bit about the lighthouse. Everyone sings "the light". It's "the night". Has to be.
+torres-zeke: Five people aboard say they know every song in that cabinet. We all know different words.   [laugh]
+? choice
+* It's definitely "the light".   flavour:cheer mem:appt.show.torres-zeke
+  torres-zeke: Traitor! No. Fine. Play it again. Listen properly this time.   [laugh]
+* Play it again so I can hear.   flavour:listen mem:appt.show.torres-zeke
+  torres-zeke: See? "The night". Told you. Nobody ever listens properly. You did.   [nod]
+torres-zeke: Right, onward. One more song. Then you're allowed to leave. Maybe.
+
+== scene raman
+raman: Come in. Gently, if you would. This is her. The Wren, one to five hundred.   [gesture]
+raman: Every panel is right. It took me four years. The bridge section lifts out. Here.
+raman: Hold it with both hands. That's where I sit. Third window from the left.   [nod]
+? choice
+* Hold it very carefully.   flavour:practical mem:appt.show.raman
+  raman: Like a full cup on a turn. Yes. You'd make a good helm officer, you know.   [laugh]
+* Ask which part was hardest.   flavour:listen mem:appt.show.raman
+  raman: The hull lights. Forty of them, each the size of a grain of rice. I counted twice.   [nod]
+raman: Thank you. Not many people ask to hold her. Put her back the way she came, please.
+
+== scene sato
+sato: Sit. Tea. Don't ask what's in it, it's a long answer. I'll give you the long answer.   [gesture]
+sato: Right. Look at this. That smudge on the plate. That's a comet. It's mine. Well. I found it.
+sato: I've named three comets. This is the third. The third doesn't count. Don't ask.   [laugh]
+? choice
+* Go on. Why doesn't it count?   flavour:cheer mem:appt.show.sato
+  sato: I said don't ask. Fine. I named it after my tea. The committee was not amused.   [laugh]
+* Can I try the tea?   flavour:listen mem:appt.show.sato
+  sato: Brave. Sip. Don't make that face. Everyone makes that face.   [laugh]
+sato: You didn't finish the tea. Nobody does. One day someone will, and I'll faint.
+
+== scene halloran-emeka
+halloran-emeka: Come in, come in! Have you eaten? Doesn't matter. Scone. Still warm. Brennan passed it.   [gesture]
+halloran-emeka: Rest days, I bake. One oven, one batch, and Brennan inspects it like it's a reactor.   [laugh]
+halloran-emeka: This batch got a nod. A nod! I nearly framed it. The nod, not the scone.
+? choice
+* Tell him it's the best scone you've had.   flavour:cheer mem:appt.show.halloran-emeka
+  halloran-emeka: Lovely! Don't tell Brennan. Actually, do tell Brennan. Loudly.   [laugh]
+* Ask him to show you how he makes them.   flavour:practical mem:appt.show.halloran-emeka
+  halloran-emeka: Next rest day. Bring an apron. And an appetite.   [nod]
+halloran-emeka: Take one for the road. Take two. Lovely.
+
+== thanks
+- You spend half an hour in their cabin, and they show you the thing they care about most aboard.   #warm
+
+== after
+- Still say it's "the night". You'll come round.   #funny
+- Raman said you held the bridge section perfectly. That's high praise from him.   #warm
+- Sato says you drank half her tea. She's thinking of naming a comet after you.   #funny
