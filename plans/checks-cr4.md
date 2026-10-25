@@ -1,5 +1,24 @@
 # Check runner CR4: results
 
+## 0.93.0 full round (2026-10-25; sound and music)
+
+- **Candidate:** `claude/staging-0.93.0` 4f1e52bf (HUD 0.93.0)
+- **starship-cadet.html sha256:** `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8` (matches BM18's)
+- **OLD:** 5898c190 (0.92.6); not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, 6, 8, then appt_check. One at a time, alone, at 4f1e52bf, `CADET_WORK=/tmp/work-cr4`. Reported to BM18 (took over from BM17) and lead 37.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 241 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450; nobody stuck; 0 arrivals drawn elsewhere |
+| day_check 13 | OK (exit 0, 219 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 223 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 210 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 207 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 210 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| appt_check | OK (exit 0, 514 s) | `APPT CHECK OK`; 223 ok lines; its 4 FAIL lines are all inside the planted self-tests (as in 0.92.6) |
+
+**CR4: OK.** No FAILs. Every number identical to 0.92.6.
+
 ## 0.92.6 full round (2026-10-25; all six switches ON incl. odd jobs)
 
 - **Candidate:** `claude/staging-0.92.6` b78e1e22 (the final candidate; a first run on defc327f was stopped in Day 12 on BM17's word and discarded)
