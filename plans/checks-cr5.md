@@ -20,12 +20,14 @@ on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying)
 | `day_check.py BUILD 21` | OK | 0 | 310 s | `DAY CHECK OK`; draw calls peak 225 / 195 / 295 / 237 on Decks 1-4 (budget 450) |
 | `day_check.py BUILD 27` | OK | 0 | 282 s | `DAY CHECK OK` |
 | `interactions_check.py BUILD` | OK | 0 | 2446 s | `INTERACTIONS CHECK OK` |
-| `events_check.py BUILD` | run by CR6 | | | (CR6's result to follow) |
+| `events_check.py BUILD` | OK (run by CR6) | 0 | 527 s | `EVENTS CHECK OK`, no FAIL lines (CR6, same sha256 rechecked; also in plans/checks-cr6.md) |
 | `career_check.py BUILD` | **known (backlog 12)** | 1 | 125 s | only `FAIL busy: "Relied on" before Day 5`; OLD 5898c190 fails the same way with identical busy-player numbers (Days 1-5: 30, 28, 28, 25, 24 jobs; xp 4, 16, 32, 40 relied, 59); ship.works 2571 bytes at Day 30 |
 | `promo_sight_check.py BUILD` | OK | 0 | 16 s | `PROMO SIGHT CHECK OK` |
-| `sound_check.py BUILD` (new) | run by CR6 | | | (CR6's result to follow) |
+| `sound_check.py BUILD` (new) | OK (run by CR6) | 0 | 169 s | `SOUND CHECK OK`, no FAIL lines (CR6) |
 
 **CR5's own part: OK** (day 21, 27, interactions, promo_sight OK; career the known backlog 12 line only).
+
+**CR5 share, whole (with CR6's two): OK** (6 OK, career known backlog 12).
 
 ## 0.92.6 full round (2026-10-25, started 15:24 UTC, for BM17 and lead 36)
 
