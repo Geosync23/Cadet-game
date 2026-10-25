@@ -95,7 +95,7 @@
 == fix.oj-d3prom-rail.sign
 - The handrail shifts in its bracket when you lean on it.
 == fix.oj-d3prom-rail.done
-- Solid. Lean all you like.
+- Solid as the deck. Lean away.
 // Unclog a planter drip line
 == fix.oj-d3prom-planter.sign
 - One promenade planter's soil is bone dry; its drip line is blocked.
@@ -150,7 +150,7 @@
 == fix.oj-d3mess-chair.sign
 - A mess chair squeaks like a mouse whenever anyone sits.
 == fix.oj-d3mess-chair.done
-- Silent. Brennan will notice. She notices everything.
+- Silent. Not a peep from it at dinner now.
 // Clean a greasy mess hall vent
 == fix.oj-d3mess-vent.sign
 - The mess hall vent is coated with a film of kitchen grease.
