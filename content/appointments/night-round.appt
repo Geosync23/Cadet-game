@@ -1,0 +1,62 @@
+@appointment night-round
+// SW2, 0.92.6 item 9 (the user: yes). The night round: Kofi Mensah (night Watch, Holt's deputy) walks the whole ship once
+// a night and says good night to every deck by name (canon: mensah.lines). At friend tier he asks if you'd like to come,
+// on a night before your day off. You walk it with him, lift to lift, deck by deck (it can use the walking gathering
+// the Lap of the Wren has), and at each deck he tells you one thing only the night shift knows. The rec deck is closed
+// overnight (it lies under Deck 4's officers' corridor), so he says good night to it from the lift. Never the bridge's
+// inside: he stops at the bridge lobby. The `== stops` lines are said in order, one per deck, as you arrive.
+title: The night round
+starts: invite
+host: mensah
+gate: tier>=friend !mem:appt.night-round
+when: the night before your day off
+at: 22:30-23:15
+where: 3 room Lift plaza: bench
+who: host, you
+once: yes
+mem: appt.night-round
+flag: night.round.walked
+record: Walked the night round with Kofi Mensah.
+
+== invite
+- Night round tonight, half ten. You're off tomorrow. Come and say good night to her.
+- I walk her every night. Fancy coming once? She's lovely at night. Half ten, the lift.
+
+== busy
+- Not tonight. Bit of a busy one. Next time you're off, ask me again.
+
+== mail
+- The night round with Kofi Mensah tonight, {time}, from the Deck 3 lift. Wear soft shoes, he says.
+
+== stops
+mensah: Deck 6 first. Hear that hum? That's the coils asleep. They still sing, just lower. Good night, Deck 6.
+mensah: Deck 5. The board's empty, see? Only time it ever is. Calder's office light's off. Good night, Deck 5.
+mensah: Deck 4. Short and sweet, here. She likes it short. Good night, Deck 4.   [laugh]
+mensah: The rec deck's closed, so we say it from the lift. Good night, rec deck. Mind the pool.   [laugh]
+mensah: Deck 3. The grab shelf's restocked at eleven. Pell knows. Pell always knows. Good night, Deck 3.
+mensah: Deck 2. Every door shut, every light low. The Envoy keeps a lamp on. We leave it be. Good night, Deck 2.
+mensah: Deck 1, from the lobby. We don't go in. Good night, Deck 1. Fly gently.   [nod]
+
+== scene
+mensah: That's her. Every deck. Takes me forty minutes, and I've never once been bored.   [nod]
+mensah: The chief walks her in the morning. I walk her at night. Between us she's never alone.
+? choice
+* Does she ever say good night back?   flavour:cheer mem:appt.night-round
+  mensah: Every night. You just have to be quiet enough. The air vents, mostly.   [laugh]
+* Thank you for bringing me.   flavour:listen mem:appt.night-round
+  mensah: Thank you for coming. It's nice to have someone to point things out to.   [nod]
+* Could I walk it again one night?   flavour:share mem:appt.night-round
+  mensah: Any night you're off. Fair warning: I'll make you say good night to Deck 5.   [laugh]
+mensah: Off to bed with you. I'll say good night to your bunk room on my way past. By name.
+
+== here
+- Shh. Softly, now.
+- Lovely and quiet.
+- That's the air changing over. Hear it?
+
+== thanks
+- You walk the whole ship with Kofi Mensah, deck by deck, and he says good night to every one of them by name.   #warm
+
+== after
+- Said good night to your bunk room last night. By name. You were snoring.   #funny
+- The night round's not the same without you. Well. It's exactly the same. But still.   #funny

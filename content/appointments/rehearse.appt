@@ -1,0 +1,78 @@
+@appointment rehearse
+// SW2, 0.92.6 item 9 (the user: yes). Help me rehearse: the evening before something a friend is nervous about, they
+// ask you to listen while they practise. Three hosts: Femi Rossi (the Veyli song he's learning, for talent night; he
+// gets one word wrong, as ever), Chief Holt (the next Sunday story chapter, trying the voices for an audience of one:
+// he reads plainly in public, and is gruffer when embarrassed), Tomas (his questions for quiz night). You listen, then
+// pick how to encourage them (practical, cheerful or honest). At the real thing they thank you ("You heard it first."):
+// `== after <id>` is said there, at their tradition.
+title: Help me rehearse
+starts: invite
+host: per-host
+gate: tier>=friend, the evening before the host's tradition (rossi-femi: talent night; holt: the Sunday story; tomas: quiz night)
+when: the evening before
+at: 20 minutes, 19:30-21:30
+where rossi-femi: 4 pool music
+where holt: 4 pool common-room
+where tomas: 4 pool common-room
+who: host, you
+once: no (once per tradition day)
+mem: appt.rehearse.<id>
+
+== invite
+- Can I practise on you tonight? Just you. Twenty minutes. Please?
+- I need an audience of one. A kind one. Tonight, after dinner?
+
+== busy
+- No? That's all right. I'll practise on the mirror. It never says anything nice.   #funny
+
+== mail
+- Tonight, {time}: {first} wants to rehearse in front of you. Be kind. Be honest. Both.
+
+== scene rossi-femi
+rossi-femi: Right! The Veyli song. Two verses. Don't laugh. Well, laugh at the end.   [gesture]
+rossi-femi: Verse one went well. Verse two had a word in it that I think means "spoon". It shouldn't.   [laugh]
+rossi-femi: Ferreira says it's close. Close isn't right. Was it close?
+? choice
+* Practise the hard word with him.   flavour:practical mem:appt.rehearse.rossi-femi
+  rossi-femi: Again. Again. Yes! That's not spoon. That's the right one. I think.   [laugh]
+* It was lovely. Spoon and all.   flavour:cheer mem:appt.rehearse.rossi-femi
+  rossi-femi: You're kind. Too kind. I'm keeping the spoon. It's my spoon now.   [laugh]
+* Honestly? Verse two needs work.   flavour:listen mem:appt.rehearse.rossi-femi
+  rossi-femi: Thank you. Nobody else said. One more time, then.   [nod]
+rossi-femi: Thanks. Really. Come tomorrow? Sit at the front. I'll look at you, not the crowd.
+
+== scene holt
+holt: Sit. Don't tell anyone about this. I'm going to try the voices. The cook has a voice.   [gesture]
+holt: "Her engine was older than both of them, and grumpier." That's me doing the engine. Hm.
+holt: Was the cook too much? Mensah said the cook was too much. Mensah laughed for a minute.   [sigh]
+? choice
+* Do the cook again. Louder.   flavour:cheer mem:appt.rehearse.holt
+  holt: Louder. Fine. ...That was louder. You're smiling. Is that good? Hm. It's good.   [laugh]
+* Read it plainly. That's how they like it.   flavour:listen mem:appt.rehearse.holt
+  holt: Plainly. Yes. That's what I'd have done anyway. Thank you.   [nod]
+* Keep the engine voice. It's brilliant.   flavour:practical mem:appt.rehearse.holt
+  holt: The engine stays. The cook goes. Adequate plan.   [nod]
+holt: That's enough. Off with you. You heard nothing.
+
+== scene tomas
+tomas: Okay. I wrote the questions. Twenty. Can I ask you them? Is that weird? Is it too weird?   [gesture]
+tomas: Question one: what colour are the holds on the hardest route? It's green. Everyone thinks red.
+tomas: Is that too easy? Too hard? Is it only easy for me? I can't tell anymore.   [laugh]
+? choice
+* Say red, on purpose.   flavour:cheer mem:appt.rehearse.tomas
+  tomas: Ha! See? Everyone says red. It's perfect. It stays in.   [laugh]
+* Help him sort them easy to hard.   flavour:practical mem:appt.rehearse.tomas
+  tomas: Easy ones first so nobody feels bad. Yes. That's much better.   [nod]
+* Tell him they're good questions.   flavour:listen mem:appt.rehearse.tomas
+  tomas: Really? Okay. Okay. Thank you. I'll stop rewriting them now. Maybe.   [laugh]
+tomas: Thanks. You'll come tomorrow, right? Don't answer the green one. You know it.
+
+== after rossi-femi
+- You heard it first. The spoon's gone. Mostly.   #warm
+== after holt
+- Hm. You heard it first. Not a word to anyone.   #warm
+== after tomas
+- You heard them first! Nobody's got the green one yet.   #warm
+
+== thanks
+- You're the audience of one the night before. Tomorrow, they'll look for you in the crowd.   #warm
