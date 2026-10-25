@@ -1,6 +1,6 @@
 # CR6 check results
 
-## 0.93.0 full round (2026-10-25): all 11 OK
+## 0.93.0 full round (2026-10-25): all 11 OK, plus 2 taken from CR5 (OK)
 
 - **Build:** `claude/staging-0.93.0` 4f1e52bf (sound and music, section 27; FX17's reserved-job fix), `starship-cadet.html`
   sha256 `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8` (matches BM18's). OLD 5898c190 (0.92.6).
@@ -19,6 +19,8 @@
 | food_check 11 4 | OK (exit 0, 59 s) | `FOOD CHECK OK` |
 | clothes_check | OK (exit 0, 73 s) | `ALL OK` |
 | fridays_check | OK (exit 0, 944 s) | `FRIDAYS CHECK OK` |
+| events_check (taken from CR5) | OK (exit 0, 527 s) | `EVENTS CHECK OK` |
+| sound_check (taken from CR5) | OK (exit 0, 169 s) | `SOUND CHECK OK` |
 
 ## 0.92.6 full round (2026-10-25): 3 new FAILs on b78e1e22, all OK on the final 6b425814
 
