@@ -99,6 +99,19 @@ with sync_playwright() as pw:
             if not check(isinstance(r, dict), '8: %s on (%s)' % (tid, r)): continue
             check(r['to'] - r['t'] <= 8 and r['offered'] and r['joined'], '8: %s at %d (ends %d): the join is offered (leader %s) and a tap joins you' % (tid, r['t'], r['to'], r['lead']))
             check(r['cal'] and r['home'], '8: %s still on the device near its end: Calendar %s, Home %s' % (tid, r['cal'], r['home']))
+        # RV14: the leader really gone (Tiles night, Day 2, 5 minutes before its end: Rina taken out of DECK_CREW for one minute's
+        # tradJoinMinute, put back in the same evaluate): anyone still at it leads, and a tap on them joins you
+        g = Game(pw, won, 900, 760)
+        to = g.ev("eventsOn(2).find(x => x.id === 'tiles-night').to")
+        g.ev("(() => { skipTo(1440 + %d - 9); goToDeck(3, null); SHIP.device.settings.tips = false; })()" % to); g.step(10); g.ev(INROOM % (2, 'tiles-night')); g.step(120)
+        r = json.loads(g.ev("""(() => { const e = eventsOn(2).find(x => x.id === 'tiles-night'), lead = tradLeader({ ...e, day: 2 }), k = DECK_CREW.findIndex(a => a.p && a.p.id === lead);
+          if (k < 0) return JSON.stringify({ err: 'the leader ' + lead + ' not on the deck' }); const gone = DECK_CREW.splice(k, 1)[0];
+          let out; try { tradJoinMinute(shipNow()); const n = TJ_NOW && TJ_NOW.e.id === 'tiles-night' ? TJ_NOW : null; out = { lead, now: n && n.lead };
+            if (n && n.agent) { tradJoinTap(n.agent); out.joined = SHIP.events.joined.includes('tiles-night@2'); } } finally { DECK_CREW.splice(k, 0, gone); }
+          return JSON.stringify(out); })()"""))
+        err = g.errors; g.close()
+        check('err' not in r and r.get('now') and r['now'] != r['lead'] and r.get('joined'), '8: the leader gone near the end, someone still at it leads and a tap joins you (RV14) (%s)' % r)
+        check(not err, '8 (leader gone): no errors: ' + ' | '.join(err[:3]))
     if want('5'):
         def week5(path):
             g = Game(pw, path, 900, 760)
