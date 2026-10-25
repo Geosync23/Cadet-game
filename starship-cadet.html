@@ -40775,8 +40775,9 @@ function eventJoin(e, d, now, notice) {
   toast(e.name, notice || evText(e.ev.thanks, e), { keep: true });   // the join notice: never dropped from the pop-up queue (LEAD31-3)
   if (typeof mailSend === 'function') mailSend({ at: now, from: e.ev.from, subject: 'Thanks for coming', body: 'Good to see you at ' + e.name.toLowerCase() + '. Same time next one?', quiet: true });   // the join toast says it already
   if (e.id === 'quiz') quizStart(d, now);
-  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);
-  if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)   // patch #26: a free cocoa, then the meeting (section 15's slot)
+  if (e.id === 'first-light' && typeof flcJoin === 'function') flcJoin(e, d, now);   // patch #26: a free cocoa, then the meeting (section 15's slot)
+  if (e.id === 'one-week-aboard' && P926_TRADS) week1Card(e, d, now);
+  if (e.id === 'market' && P926_TRADS) swapCard(e, d, now);   // 0.92.6 item 2: the swap (FX17)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
   return true;
@@ -41246,8 +41247,9 @@ function eventsTick() {
   tradJoinFrame(); tradWalkFrame(TJ_DT()); tradBeamFrame();               // 0.70.0: the leader's marker; a walk in one line
   bdayFrame();                                           // 0.92.5: the birthday's bubbles and your slice (slot 'Traditions engineer')
   if (SHORT_FRIDAY) friAddressTick();                    // the Captain's Friday address, line by line (section 18f)
-  if (WEEKEND_ON) sundayStoryTick();
-  if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
+  if (WEEKEND_ON) sundayStoryTick();                     // the Sunday story, Holt's chapter of the week (FX9, weekend slot)
+  if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)
+  if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -42878,6 +42880,64 @@ function week1Card(e, d, now) {
 if (P926_TRADS) {
   TRAD_JOIN['one-week-aboard'] = { host: 'torres-zeke', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'sit down with him', what: 'have a tea with Zeke and go over your first week' };
   tjActs();
+}
+// ---- 0.92.6: a tradition's room talk (FX17; items 2, 4, 15). While one is on and you're in its rooms, a bubble every 2.6 to
+// 4.4 seconds from those at it (planned there, sat or stood), in turn: say(at, n, e, m) -> [agent, text] | null. Looks only
+const TR_TALK = {};
+function tradTalk(id, say) {
+  const now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const e = eventsOn(d).find(x => x.id === id && m >= x.from && m < x.to); if (!e || !friHere(e) || typeof bubbleSay !== 'function') return;
+  const t = performance.now(), key = id + '@' + d, R = TR_TALK[id] && TR_TALK[id].key === key ? TR_TALK[id] : (TR_TALK[id] = { key, next: t + 1500, n: 0 });
+  if (t < R.next) return;
+  R.next = t + 2600 + (R.n % 3) * 900;
+  const at = DECK_CREW.filter(a => a.p && a.h && a.settled && a.spot && evTagId(a.tag || '') === id);
+  const r = at.length ? say(at, R.n, e, m) : null; if (!r || !r[0] || !r[1]) return;
+  bubbleSay(r[0].h, r[1]); R.n++;
+}
+const trLine = (kind, k, ctx, fb) => quizText(kind, k, ctx) || (fb ? fb[k % fb.length].replace(/\{(\w+)\}/g, (x, w) => ctx && ctx[w] != null ? ctx[w] : x) : null);
+function p926Frame() {
+  if (typeof deckDef === 'undefined' || !deckDef || typeof DECK_CREW === 'undefined') return;
+  if (deckDef.num === 3) tradTalk('market', swapSay);
+}
+// ---- 0.92.6 item 2 (FX17, behind P926_TRADS; the user: "Sunday swap meet doesn't work, no host"): two stallholders at the
+// promenade's stalls (EV_KIT.stalls: Orla Ishikawa, the storekeeper off on Sunday mornings, hosts; Dara Shah keeps the other),
+// browsers in front of them, the rest on the benches as before. A tap on anyone at it joins you, and Orla's swap card
+// offers three things (the week's, from SW1's swap.thing); what you take is ship news for a few days. Words: swap.*
+const SWAP_HOLD = ['ishikawa-orla', 'shah-dara'];
+const SWAP_STALL = ['Hot tea, and the good tins. Swaps only. No money.', 'Everything on this table is somebody\'s favourite. Was.', 'That one\'s been on three ships. Still works.', 'Come and look. Looking\'s free.', 'I\'ll swap you. Go on. What have you got?', 'Mind the jar. Nobody knows what\'s in it.'];
+const SWAP_BROWSE = ['Is that a real paper map?', 'I swapped a scarf for this. Worth it.', 'Who brings one sock to a swap meet?', 'I\'m only looking. Mostly.', 'That mug! I want that mug.', 'Two bolts for a book. Fair, I think.', 'Has anyone seen a decent spanner?', 'Same jar as last week. Still nobody\'s.'];
+const SWAP_THINGS = [['A paperback', 'Cracked spine, all its pages. Probably.'], ['A ship\'s mug', 'The Wren on one side. A chip on the other.'], ['A knitted cosy', 'For a mug, or a very small engine.'],
+  ['A pocket torch', 'Clicks on. Clicks off. Mostly on.'], ['A tin of buttons', 'Every colour. Nobody knows whose.'], ['A deck of cards', 'Fifty-one. The missing one is a seven.']];
+function swapSay(at, n) {
+  const stall = at.filter(a => /^3-swap-stall-/.test(a.spot.id)), rest = at.filter(a => !/^3-swap-stall-/.test(a.spot.id));
+  if (stall.length && (n % 3 === 0 || !rest.length)) return [stall[(n / 3 | 0) % stall.length], trLine('swap.stall', n / 3 | 0, {}, SWAP_STALL)];
+  const a = rest[n % rest.length]; return a ? [a, trLine('swap.browse', n, { name: shortName(a.p) }, SWAP_BROWSE)] : null;
+}
+function swapCard(e, d, now) {
+  if (typeof dialogueShow !== 'function') return;
+  const wk = Math.floor((d - 1) / 7), host = 'ishikawa-orla', L = typeof LINES !== 'undefined' && Array.isArray(LINES['swap.thing']) && LINES['swap.thing'].length ? LINES['swap.thing'] : null;
+  const N = L ? L.length : SWAP_THINGS.length, three = [0, 1, 2].map(i => (wk * 3 + i) % N);
+  const thing = i => L ? L[three[i]].text.split(/\s*[:|]\s*/)[0] : SWAP_THINGS[three[i]][0], about = i => L ? (L[three[i]].text.split(/\s*[:|]\s*/)[1] || '') : SWAP_THINGS[three[i]][1];
+  const pick = k => { if (typeof newsAdd === 'function') newsAdd({ id: 'swap-you@' + d, about: 'you', lines: [trLine('swap.after', k, { thing: thing(k).toLowerCase() }, ['The new hand went home from the swap meet with {thing}. Good eye.'])], seed: SWAP_HOLD, weight: .5, life: 3 }); };
+  MEETING_SCRIPTS['swap.meet'] = { title: 'Sunday swap meet', from: 'Orla Ishikawa', gist: 'You swapped at the Sunday swap meet.', onPick: pick,
+    lines: [{ who: host, text: trLine('swap.open', wk, {}, ['Morning! Swap something, take something. Today\'s three are good ones.']), pose: 'gesture' },
+      { who: host, text: [0, 1, 2].map(i => thing(i) + (about(i) ? ' (' + about(i) + ')' : '')).join(' Or '), to: 'you' },
+      { choice: [0, 1, 2].map(i => ({ text: 'Take ' + thing(i).replace(/^A /, 'the ').replace(/^An /, 'the ').toLowerCase(), rel: { [host]: 1 }, reply: { who: host, text: trLine('swap.reply', three[i], { thing: thing(i).toLowerCase() }, ['Good choice. It\'s yours.', 'That one\'s been waiting for you.', 'Treat it kindly. It\'s had a life.']) } })) }] };
+  dialogueShow('swap.meet', { id: 'swap.meet@' + d, who: [host], at: now });
+}
+if (P926_TRADS) {
+  // the stallholders' places at the west end of each stall (EV_KIT.stalls: 39-40,9 by the north wall and 39-40,12 by the south), and
+  // four browsing spots in front of them, all type 'event' (inert), on the promenade (room '=')
+  DECKS[3].places.push(
+    ...[[38, 9, 38.8, 9.45, 'e'], [38, 12, 38.8, 12.55, 'e']].map(([c, r, x, z, f], k) => ({ id: '3-swap-stall-' + (k + 1), type: 'event', event: 'swap-stall', at: [c, r], xy: [x, z], walk: [c, r], face: f, pose: 'stand', anim: 'talk', room: '=' })),
+    ...[[39, 10, 39.6, 10.1, 'n'], [40, 10, 40.4, 10.1, 'n'], [39, 11, 39.6, 11.9, 's'], [40, 11, 40.4, 11.9, 's']].map(([c, r, x, z, f], k) => ({ id: '3-swap-browse-' + (k + 1), type: 'event', event: 'swap-browse', at: [c, r], xy: [x, z], walk: [c, r], face: f, pose: 'stand', anim: 'talk', room: '=' })));
+  const mk = SHIP_TRADITIONS.find(x => x.id === 'market');
+  if (mk) { const who = mk.who; Object.assign(mk, { host: 'ishikawa-orla', hold: [0, 1], where: [{ deck: 3, pool: '@swap-stall' }, { deck: 3, pool: '@swap-browse' }, ...mk.where],
+    whereFor: (p, d, o) => o.filter(([, k]) => SWAP_HOLD.includes(p.id) === (k === '@swap-stall')),
+    who: (p, d, c) => SWAP_HOLD.includes(p.id) ? 1 : who(p, d, c) }); }
+  TRAD_JOIN.market = { host: 'ishikawa-orla', pose: 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: 'swap with her', what: 'look round the stalls and swap something' };
+  tjActs();
+  if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before these rules: planned again
 }
 // ---- end of slot: Traditions engineer ----
 // ---- slot: Events engineer 2 (section 18). New code of this seat's goes here, above the end line (plans/owners.md) ----

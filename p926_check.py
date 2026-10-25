@@ -8,6 +8,8 @@
 #       Home still list it ("on now, until"). Off: at least one of them not offered or not listed
 #   5   One week aboard (Day 7): Zeke is in the bow lounge, sitting, by 17:25; the join is his (TJ_NOW leads with him); a tap sits you
 #       down and opens his card going over your week (week1.zeke), its lines filled. Off: no card
+#   2   the Sunday swap meet (Day 14, 11:00): Orla Ishikawa (the host) and Dara Shah at the stalls' spots, people browsing or on the
+#       benches, the join is Orla's, her swap card opens on a tap, and the stalls talk (bubbles). Off: nobody at a stall, no card
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -108,5 +110,24 @@ with sync_playwright() as pw:
         check(r['lead'] == 'torres-zeke', '5: the join is Zeke\'s (%s)' % r['lead'])
         check('week1.zeke' in r['cards'] and len(r['lines']) >= 4 and not any('{' in l for l in r['lines']), '5: a tap opens his card going over your week, filled in (%s)' % r['lines'][:2])
         check(not err, '5: no errors: ' + ' | '.join(err[:5]))
+    if want('2'):
+        def swap2(path):
+            g = Game(pw, path, 900, 760)
+            g.ev("(() => { skipTo(13 * 1440 + 640); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev("(() => { const c = cellPos(36, 10); player.obj.position.set(c.x, 0, c.z); player.stop(); })()")
+            for _ in range(80):
+                g.step(30)
+                if g.ev('SHIP.time.min') >= 660: break
+            r = json.loads(g.ev("""(() => { const at = DECK_CREW.filter(a => a.settled && a.spot && evTagId(a.tag || '') === 'market'), n = TJ_NOW && TJ_NOW.e.id === 'market' ? TJ_NOW : null;
+              const out = { t: SHIP.time.min, stall: at.filter(a => /^3-swap-stall-/.test(a.spot.id)).map(a => a.p.id).sort(), n: at.length, lead: n && n.lead, said: window.__said.length };
+              const o = DECK_CREW.find(a => a.p.id === 'ishikawa-orla'); if (o) tradJoinTap(o); out.cards = window.__cards.map(c => c[0]); return JSON.stringify(out); })()"""))
+            err = g.errors; g.close(); return r, err
+        r, err = swap2(woff); print('  2 off:', r)
+        check(not r['stall'] and 'swap.meet' not in r['cards'], '2 off: as 0.92.5, nobody at the stalls and no swap')
+        r, err = swap2(won); print('  2 on:', r)
+        check(r['stall'] == ['ishikawa-orla', 'shah-dara'], '2: Orla and Dara at the stalls (%s)' % r['stall'])
+        check(r['n'] >= 5 and r['lead'] == 'ishikawa-orla', '2: people at it (%d), the join Orla\'s (%s)' % (r['n'], r['lead']))
+        check('swap.meet' in r['cards'] and r['said'] >= 3, '2: a tap opens the swap card (%s), and the stalls talk (%d bubbles)' % (r['cards'], r['said']))
+        check(not err, '2: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)
