@@ -12565,7 +12565,8 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
       .concat(rv.depts.some(x => x.band === 'new') ? [{ text: 'Elsewhere', sub: 'A new face: ' + rv.depts.filter(x => x.band === 'new').map(x => DN[x.dept] || x.dept).join(', '), mark: 'past' }] : []) });
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
-  try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
+  try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }
+  if (P926_APPT) B.push(...apptRecord());                 // 0.92.6 item 9: appointments kept (FX22)   // section 18's ship-wide events lived through (the events base F3b)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
   return { title: 'Record', blocks: B };
@@ -12678,6 +12679,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
   badge: () => SHIP.device.appts.filter(a => a.by && a.status === 'asked').length || null,
   act(verb, arg) {
     const D = SHIP.device, now = shipNow();
+    if (P926_APPT && apptActX(verb, arg)) return;           // 0.92.6 item 9: What for?, invitations (FX22, section 18's Appointments builder slot)
     if (verb === 'open' && arg && arg.with) { apptDraft = { with: [].concat(arg.with).filter(x => typeof x === 'string').slice(0, APPT_MAX), day: SHIP.time.day, min: Math.max(360, Math.ceil((SHIP.time.min + 60) / 15) * 15) % 1440, where: null }; apptSay = null; }
     else if (verb === 'open' && arg && Number.isInteger(arg.day) && arg.day >= SHIP.time.day) {   // from the Calendar: that day, after shift unless it's today
       apptDraft = { with: [], day: arg.day, min: arg.day === SHIP.time.day ? Math.ceil((SHIP.time.min + 60) / 15) * 15 % 1440 : 1080, where: null }; apptSay = null; }
@@ -12750,6 +12752,7 @@ deviceApp({ id: 'appointments', title: 'Appointments', short: 'Appts', icon: 'ca
     }
     if (apptSay) B.push({ kind: 'text', text: apptSay, mark: 'hot' });
     B.push({ kind: 'buttons', items: [{ label: 'New appointment', action: { app: 'appointments', do: 'new' } }] });
+    if (P926_APPT) B.push(...apptViewX());                 // 0.92.6 item 9 (FX22)
     const inv = D.appts.filter(a => a.by && a.status === 'asked');
     if (inv.length) {
       B.push({ kind: 'text', text: 'Invitations', mark: 'head' });
@@ -40688,7 +40691,8 @@ function evOneOffDefs() {
   return ((typeof SHIP !== 'undefined' && SHIP.events && SHIP.events.oneOffs) || []).map(r => r.def || (r.def = {
     id: r.id, name: r.name, k: 341, when: { date: r.day }, host: r.host || null, at: r.at, min: 20, prio: 1, hold: r.hold || [0], venue: r.venue || null,
     where: r.where.map(w => w.room ? { ...w, room: new RegExp(w.room) } : { ...w }),
-    who: (p, d) => p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinityPlan === 'function' ? Math.max(0, affinityPlan(r.host, p.id, d)) / 100 * .6 : 0)),   // pure
+    who: (p, d) => r.only ? (r.only.includes(p.id) ? 1 : 0) : p.id === r.host ? 1 : Math.min(1, (r.chance || .2) + (r.host && typeof affinityPlan === 'function' ? Math.max(0, affinityPlan(r.host, p.id, d)) / 100 * .6 : 0)),   // pure; only: an appointment's guest list (0.92.6 item 9, FX22)
+    ...(r.appt ? { appt: r.appt, toBed: r.toBed || null } : {}),
     anim: p => p.id === r.host && r.hostAnim ? r.hostAnim : r.anim || null, early: 0,
     from: r.from || null, mail: r.mail || null, ask: r.ask || null, here: r.here || null, thanks: r.thanks || 'You join in for a while.' }));
 }
@@ -41128,6 +41132,7 @@ function eventJoin(e, d, now, notice) {
   if (e.id === 'spice-shelf-supper' && P926_TRADS) SPICE.joined = d;   // 0.92.6 item 15: your guess card once the jars are named (spiceFrame)   // 0.92.6 item 5: Zeke goes over your first week (FX17, Traditions slot)
   if (/^rec-(wren|chiefs)-talk$/.test(e.id) && !talkLater(e, d, now)) recTalkCard(e, d, now);   // 0.92.6: a spoken talk's question card waits for its end (talkTick)   // a Wren talk: listen, or ask one question (0.83.2, RA)
   if (e.id === 'rec-talent-night') recActCard(e, d, now); // talent night: do an act, or watch (0.83.1, RA)
+  if (P926_APPT && e.ev.appt) apptJoin(e, d, now);       // 0.92.6 item 9: the appointment's scene (FX22, Appointments builder slot)
   return true;
 }
 // talent night's choice card (0.83.1): Lucia asks if you're on the sheet: play a tune, tell a ship joke, a Works trick, or
@@ -41216,7 +41221,7 @@ function tjActs() { for (const [id, s] of Object.entries(TRAD_JOIN)) if (!s.act 
   PLAYER_ACTS['tj:' + id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + id] = def;
 } }
 tjActs();
-const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && evIsTrad(e.ev));
+const tradJoinable = e => !!(e && TRAD_JOIN[e.id] && (evIsTrad(e.ev) || P926_APPT && e.ev.appt));   // an appointment's one-off too (0.92.6 item 9, FX22)
 const tradWords = (e, k, ctx) => { const t = quizText('join.' + e.id + '.' + k, e.day, ctx); return t; };
 // the people going (their plan has them there today), and the leader: the tradition's host, else the spec's, when going;
 // else the spec's pick or the first of the goers by a hash of the day. Cached per day
@@ -43890,6 +43895,208 @@ function apptTalkFrame() {
 const APPT_TALK = new Map();                              // appointment id -> when (performance.now) the talk begins
 function apptFrame() {                                    // every frame from eventsTick, only with P926_APPT
   apptTalkFrame();
+  const now = shipNow(); if (Math.floor(now) !== APPT_MIN) { APPT_MIN = Math.floor(now); apptMinute(now); }
+}
+// ---- appointments as small traditions (T2). An appointment (APPTS' words, APPT_RULES' rules) is offered by its host
+// (starts: invite, once an hour from apptHour, accepted in the Appointments app) or asked for ("What for?" in the app,
+// starts: ask). Booked, it becomes one of section 18's one-off traditions on a later day (eventOneOff, never today, so
+// today's plans never change): `only` its host (and guests) may come, so the host is planned there through eventPlan's
+// door like any tradition (free time only); a host on shift (Brennan in the galley, a shadow host) isn't planned at all:
+// the time comes from their own work block in that room, and they lead it from their station (tradJoinMinute's host
+// nearby). It's in the Schedule, the Calendar and the heads-ups as a tradition; a tap on the host joins you (TRAD_JOIN
+// 'appt-<kind>'), and eventJoin opens its scene (APPTS[kind].scene[key], the meeting format); its end keeps it (apptKeep:
+// thanks, Record, flag). SHIP.apptx (saved, only with the switch): { book: [booking], offers: [offer], kept: { key: [days] },
+// told: [booking ids whose after line was said] }. booking: { id, kind, key, host, guests, day, from, to, mail, mailAt, done }
+const APPT_ASK_DAYS = 7;                                  // a slot in the next week, or "busy"
+const apptFirst = id => { const p = evPerson(id); return p ? p.name.split(' ').length > 2 && /^(Captain|Commander|Dr\.|Chief|Chef|Lt\.?)$/.test(p.name.split(' ')[0]) ? p.name.split(' ')[1] : p.name.split(' ')[0] : id; };
+const apptFill = (text, who, ctx) => { const p = evPerson(who); let t = String(text || ''); for (const k in ctx || {}) t = t.split('{' + k + '}').join(ctx[k]); return p && typeof linesFill === 'function' ? linesFill(t, p, {}) || t : t; };
+const apptWork = (p, d, from, to, deck, room) => { for (let t = from; t < to; t += 5) { const w = planWhere(p, (d - 1) * 1440 + t), pl = w && w.placeId && PLACE_OF.get(w.placeId);   // a work block with no place (a cook's stint) counts on its deck
+  if (!w || w.act !== 'work' || w.deck !== deck || pl && !room.test(((DECKS[deck].rooms || {})[pl.room] || {}).name || '')) return false; } return true; };
+// the rules, kind -> { hosts: [id] | (d) => [id], tier, once (true: once a game; 'week': once a ship week per key), path: 'plan',
+//   key(host): the scene's key, where(host) -> [{ deck, room, types } | { deck, pool }], onShift(host): true when they're
+//   at work for it, times(host, d) -> [[from, to], ...] in-day minutes to try, pose, gain }
+// shadow hosts: [deck, room, work type, the hours their scene fits (first: SW2's), dept]. Lukas's is breakfast, Ravi's the 06:30 watering
+const APPT_SHADOW = { 'dlamini-lukas': [3, /^Galley$/, 'work:galley', [450, 420, 480], 'galley'], nandakumar: [3, /^Infirmary$/, 'work:infirmary', [570, 600, 630, 660, 840, 870, 900], 'infirmary'],
+  mori: [2, /^Survey lab$/, 'work:survey', [840, 870, 900, 570, 600, 630, 660], 'survey'], 'hart-ravi': [3, /^Hydroponics garden$/, 'work:garden', [390], 'garden'], holt: [2, /^Watch office$/, 'work:watch', [600, 630, 660, 570, 840, 870], 'watch'] };
+const APPT_TEACH = { 'torres-zeke': [4, 'common-room', 'knit'], 'cruz-tove': [3, 'garden', 'garden'], rina: [4, 'common-room', 'games'], 'hart-ravi': [4, 'common-room', 'draw'] };
+const APPT_HOBBY_WORD = { knit: 'knitting', garden: 'growing things', games: 'Tiles', draw: 'drawing comics' };
+const APPT_DEPT_WORD = { galley: 'the galley', infirmary: 'the Infirmary', survey: 'Survey', garden: 'the garden', watch: 'the Watch' };
+const apptEvenings = (p, d, len) => { const out = []; for (let a = 1140; a + len + 10 <= 1320; a += 15) out.push([a, a + len + 10]); return out; };   // 10 minutes more: the host's walk there (a scope turn at 19:00 had Sato seated at 19:12)
+const APPT_RULES = {
+  'brennan-book': { hosts: ['brennan'], tier: 1, once: true, onShift: () => true, where: () => [{ deck: 3, room: /^Galley$/, types: ['event', 'work:galley'] }],
+    times: (p, d) => weekday(d) < 5 ? [[870, 900]] : [], pose: 'talk', what: 'taste three spoons and pick your favourite' },
+  scope: { hosts: ['sato'], tier: 1, once: 'week', onShift: () => false, where: () => [{ deck: 2, room: /^Observatory$/, types: ['common-room', 'window'] }],
+    times: (p, d) => apptEvenings(p, d, 20), key: (h, d) => ['tavessa', 'shoals', 'comet'][Math.floor((d - 1) / 7) % 3], pose: 'sit:talk', what: 'take a turn at the big scope with her' },
+  'teach-me': { hosts: Object.keys(APPT_TEACH), tier: 2, once: 'week', onShift: () => false, key: h => h,
+    where: h => [{ deck: APPT_TEACH[h][0], pool: APPT_TEACH[h][1] }], times: (p, d) => apptEvenings(p, d, 30), pose: 'sit:read', what: 'learn their hobby side by side' },
+  shadow: { hosts: Object.keys(APPT_SHADOW), tier: 2, once: 'week', onShift: () => true, key: h => h, dept: h => APPT_SHADOW[h][4],
+    where: h => [{ deck: APPT_SHADOW[h][0], room: APPT_SHADOW[h][1], types: ['event', APPT_SHADOW[h][2]] }],
+    times: (p, d) => APPT_SHADOW[p.id][3].map(a => [a, a + 60]), pose: 'talk', what: 'follow them for an hour on shift' },
+};
+const apptWord = (kind, sec, k, ctx, who) => { const L = (APPTS[kind] || {})[sec]; if (!Array.isArray(L) || !L.length) return null; return apptFill(L[((k % L.length) + L.length) % L.length].text, who, ctx); };
+const apptState = () => SHIP.apptx || (SHIP.apptx = { book: [], offers: [], kept: {}, told: [] });
+function apptxLoad(s) {
+  const x = s && s.ship && s.ship.apptx, arr = a => Array.isArray(a) ? a.filter(o => o && typeof o === 'object' && typeof o.kind === 'string' && APPTS[o.kind]) : [];
+  return { book: arr(x && x.book).slice(-30), offers: arr(x && x.offers).slice(-10), kept: x && x.kept && typeof x.kept === 'object' ? x.kept : {}, told: x && Array.isArray(x.told) ? x.told.slice(-40) : [],
+    declined: x && x.declined && typeof x.declined === 'object' ? x.declined : {}, offerDay: x && Number.isInteger(x.offerDay) ? x.offerDay : 0 };
+}
+const apptKeyOf = (kind, host) => kind + ':' + host;
+const apptKeptOn = (kind, host) => (apptState().kept[apptKeyOf(kind, host)] || []);
+function apptCan(kind, host, d) {                        // the gate: tier, once, nothing booked already
+  const R = APPT_RULES[kind], p = evPerson(host); if (!R || !p || !APPTS[kind]) return false;
+  if (typeof relTier === 'function' && relTier(host) < R.tier) return false;
+  if (R.dept && R.dept(host) === 'works') return false;
+  const K = apptKeptOn(kind, host); if (R.once === true && K.length) return false;
+  if (R.once === 'week' && K.some(x => Math.floor((x - 1) / 7) === Math.floor((d - 1) / 7))) return false;
+  return !apptState().book.some(b => b.kind === kind && !b.done && b.day >= SHIP.time.day);
+}
+// the first slot from tomorrow: the host there for all of it (at work in that room, or free and planned there once booked);
+// never on top of another booking of yours. -> { day, from, to } or null
+function apptSlot(kind, host) {
+  const R = APPT_RULES[kind], p = evPerson(host), today = SHIP.time.day, mine = apptState().book.filter(b => !b.done);
+  for (let d = today + 1; d <= today + APPT_ASK_DAYS; d++) {
+    if (typeof aboard === 'function' && !aboard(p, d)) continue;
+    for (const [a, b] of R.times(p, d)) {
+      if (mine.some(x => x.day === d && x.from < b && a < x.to)) continue;
+      if (R.onShift(host)) { const w = R.where(host)[0]; if (apptWork(p, d, a, b, w.deck, w.room)) return { day: d, from: a, to: b }; }
+      else if (eventFree(p, d, a, b)) return { day: d, from: a, to: b };
+    }
+  }
+  return null;
+}
+function apptBookIt(kind, host, slot) {                  // the one-off, then a check that the host is there for it; -> booking or null
+  const R = APPT_RULES[kind], A = APPTS[kind], X = apptState(), id = 'appt-' + kind, key = R.key ? R.key(host, slot.day) : '';
+  const o = { id, day: slot.day, name: A.title, at: [slot.from, slot.to], where: R.where(host), host, only: R.onShift(host) ? [] : [host], appt: kind, key, hold: [], from: evPerson(host).name };
+  if (!eventOneOff(o)) return null;
+  if (!R.onShift(host) && !planDay(evPerson(host), slot.day).some(s => evTagId(s.tag) === id)) { apptUnbook(id, slot.day); return null; }   // planned elsewhere after all
+  const b = { id: X.book.reduce((m, x) => Math.max(m, x.id || 0), 0) + 1, kind, key, host, day: slot.day, from: slot.from, to: slot.to, done: 0 };
+  X.book.push(b); if (X.book.length > 30) X.book.splice(0, X.book.length - 30);
+  const ctx = { time: hhmm(slot.from), first: apptFirst(host), dept: R.dept ? APPT_DEPT_WORD[R.dept(host)] : '', hobby: APPT_TEACH[host] && kind === 'teach-me' ? APPT_HOBBY_WORD[APPT_TEACH[host][2]] : '' };
+  b.mail = apptWord(kind, 'mail', 0, ctx, host); b.mailAt = (slot.day - 2) * 1440 + EV_MAIL_AT;   // the evening before, as a tradition's
+  return b;
+}
+function apptUnbook(id, day) {
+  const i = SHIP.events.oneOffs.findIndex(r => r.id === id && r.day === day); if (i < 0) return;
+  SHIP.events.oneOffs.splice(i, 1); SCHED_DATA = null; EV_DAYS.clear(); for (const x of [...SHIP_DAYS.keys()]) if (x >= day) SHIP_DAYS.delete(x);
+}
+const apptBooking = (e, d) => apptState().book.find(b => 'appt-' + b.kind === e.id && b.day === d && !b.done) || null;
+// "What for?": the appointments you can ask for now -> [{ kind, host, text }]
+function apptAskable() {
+  const d = SHIP.time.day, out = [];
+  for (const kind of Object.keys(APPT_RULES)) if ((APPTS[kind] || {}).starts === 'ask')
+    for (const host of APPT_RULES[kind].hosts) if (apptCan(kind, host, d + 1)) out.push({ kind, host, text: APPTS[kind].title + ': ' + evPerson(host).name + (APPT_RULES[kind].dept ? ' (' + APPT_DEPT_WORD[APPT_RULES[kind].dept(host)] + ')' : APPT_TEACH[host] && kind === 'teach-me' ? ' (' + APPT_HOBBY_WORD[APPT_TEACH[host][2]] + ')' : '') });
+  return out;
+}
+let APPT_SAY = null;
+function apptAsk(kind, host) {                           // you ask; they answer with a time, or not this week
+  const p = evPerson(host), s = apptCan(kind, host, SHIP.time.day + 1) && apptSlot(kind, host), b = s && apptBookIt(kind, host, s), n = (APPTS[kind].ask || []).length;
+  const q = apptWord(kind, 'ask', 0, {}, host);
+  if (!b) { APPT_SAY = 'You: "' + q + '" ' + shortName(p) + ': "' + (apptWord(kind, 'busy', SHIP.time.day, {}, host) || 'Not this week, sorry.') + '"'; return null; }
+  APPT_SAY = 'You: "' + q + '" ' + shortName(p) + ': "' + (n > 1 ? apptWord(kind, 'ask', 1 + (b.id + SHIP.time.day) % (n - 1), {}, host) : 'Yes.') + '" ' + devDayName(b.day) + ', ' + hhmm(b.from) + '.';
+  deviceRefresh(); return b;
+}
+// invitations: once a ship hour, 08:00-20:00, a host whose gate is met may ask you (at most one new one a day, each kind
+// at most once a week); it waits in the Appointments app (Accept / Decline) and their invite line is said near you once
+function apptHour(now) {
+  const X = apptState(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  X.offers = X.offers.filter(o => o.day >= d - 1 && o.status === 'asked');
+  if (m < 480 || m > 1200 || X.offerDay === d) return;
+  for (const kind of Object.keys(APPT_RULES)) if ((APPTS[kind] || {}).starts === 'invite') for (const host of APPT_RULES[kind].hosts) {
+    if (!apptCan(kind, host, d + 1) || (X.declined || {})[apptKeyOf(kind, host)] > d - 7 || schedU(idHash(host), d * 24 + Math.floor(m / 60), 1201) > .25) continue;
+    const s = apptSlot(kind, host); if (!s) continue;
+    X.offers.push({ kind, host, day: s.day, from: s.from, to: s.to, made: d, status: 'asked', said: 0 }); X.offerDay = d;
+    if (typeof deviceNotify === 'function') deviceNotify({ app: 'appointments', text: shortName(evPerson(host)) + ' has invited you: ' + APPTS[kind].title + '.', urgent: false });
+    return;
+  }
+}
+function apptAnswer(i, yes) {
+  const X = apptState(), o = X.offers[i]; if (!o || o.status !== 'asked') return;
+  o.status = yes ? 'yes' : 'no';
+  if (!yes) { (X.declined || (X.declined = {}))[apptKeyOf(o.kind, o.host)] = SHIP.time.day; APPT_SAY = shortName(evPerson(o.host)) + ': "' + (apptWord(o.kind, 'busy', SHIP.time.day, {}, o.host) || 'Another time, then.') + '"'; return; }
+  const b = o.day > SHIP.time.day && apptCan(o.kind, o.host, o.day) ? apptBookIt(o.kind, o.host, o) : null;
+  APPT_SAY = b ? 'Booked: ' + APPTS[o.kind].title + ', ' + devDayName(b.day) + ' ' + hhmm(b.from) + '.' : shortName(evPerson(o.host)) + ': "Oh, that time\'s gone now. Ask me again?"';
+}
+// the scene: a tap on the host joins (tradJoin), and eventJoin calls this
+function apptJoin(e, d, now) {
+  const b = apptBooking(e, d); if (!b || typeof dialogueShow !== 'function') return;
+  const A = APPTS[b.kind], L = A.scene && (A.scene[b.key] || A.scene['']); if (!L) return;
+  const id = 'appt:' + b.kind + ':' + (b.key || b.host), ctx = { me: typeof linesMe === 'function' ? linesMe() : 'you' };
+  const fill = l => l.text ? { ...l, text: apptFill(l.text, l.who, ctx) } : l.choice ? { choice: l.choice.map(c => ({ ...c, ...(c.reply ? { reply: { ...c.reply, text: apptFill(c.reply.text, c.reply.who, ctx) } } : {}) })) } : l;
+  MEETING_SCRIPTS[id] = { title: A.title, from: evPerson(b.host).name, gist: A.title + ' with ' + evPerson(b.host).name + '.', lines: L.map(fill), onEnd: () => apptKeep(b) };
+  dialogueShow(id, { id: id + '@' + d, who: [b.host].concat(b.guests || []), at: now });
+}
+function apptKeep(b) {                                   // the scene's end (or walking off it): kept, once
+  if (b.done) return; b.done = SHIP.time.day;
+  const X = apptState(), k = apptKeyOf(b.kind, b.host), R = APPT_RULES[b.kind], A = APPTS[b.kind]; (X.kept[k] || (X.kept[k] = [])).push(b.day); if (X.kept[k].length > 12) X.kept[k].shift();
+  if (typeof relAdd === 'function') relAdd(b.host, 'appt', REL_PTS.appt);
+  if (A.flag && typeof flagSet === 'function') flagSet(A.flag);
+  if (R.dept && typeof repAdd === 'function') repAdd(R.dept(b.host), 1);   // a little standing with that department
+  if (b.kind === 'teach-me') { const h = APPT_TEACH[b.host][2]; hobbyGive(h); hobbyCount(h); hobbyCount(h); }   // the kit the first time, and it counts double
+  const t = apptWord(b.kind, 'thanks', b.id, {}, b.host); if (t) toast(A.title, t, { keep: true });
+}
+// the Record: what you've kept (titles and their record lines)
+function apptRecord() {
+  const X = apptState(), rows = [];
+  for (const b of X.book.filter(x => x.done).slice(-6).reverse()) { const A = APPTS[b.kind], R = APPT_RULES[b.kind];
+    rows.push({ text: A.record ? apptFill(A.record, b.host, { first: apptFirst(b.host), dept: R.dept ? APPT_DEPT_WORD[R.dept(b.host)] : '', hobby: APPT_TEACH[b.host] ? APPT_HOBBY_WORD[APPT_TEACH[b.host][2]] : '' }) : A.title + ' with ' + evPerson(b.host).name + '.', sub: 'Day ' + b.day }); }
+  return rows.length ? [{ kind: 'text', text: 'Appointments kept', mark: 'head' }, { kind: 'list', rows }] : [];
+}
+// the Appointments app: "What for?", your invitations, and what's booked (section 19's app asks these)
+function apptViewX() {
+  const X = apptState(), B = [];
+  if (APPT_SAY) B.push({ kind: 'text', text: APPT_SAY, mark: 'hot' });
+  X.offers.forEach((o, i) => { if (o.status !== 'asked') return;
+    B.push({ kind: 'list', rows: [{ text: shortName(evPerson(o.host)) + ': "' + (apptWord(o.kind, 'invite', o.made, {}, o.host) || APPTS[o.kind].title) + '"', sub: APPTS[o.kind].title + ' · ' + devDayName(o.day) + ' ' + hhmm(o.from), mark: 'new' }] },
+      { kind: 'buttons', items: [{ label: 'Accept', action: { app: 'appointments', do: 'x:yes', arg: i } }, { label: 'Decline', action: { app: 'appointments', do: 'x:no', arg: i } }] }); });
+  const up = X.book.filter(b => !b.done && b.day >= SHIP.time.day);
+  if (up.length) B.push({ kind: 'text', text: 'Booked', mark: 'head' }, { kind: 'list', rows: up.map(b => ({ text: devDayName(b.day) + ' ' + hhmm(b.from) + '  ' + APPTS[b.kind].title, sub: 'with ' + evPerson(b.host).name })) });
+  const ask = apptAskable();
+  if (ask.length) B.push({ kind: 'text', text: 'What for?', mark: 'head' }, { kind: 'list', rows: ask.map(x => ({ text: x.text, action: { app: 'appointments', do: 'x:ask', arg: x.kind + '|' + x.host } })) });
+  return B;
+}
+function apptActX(verb, arg) {                           // true when it was one of ours
+  if (verb === 'x:ask' && typeof arg === 'string') { const [k, h] = arg.split('|'); if (APPT_RULES[k]) apptAsk(k, h); return true; }
+  if (verb === 'x:yes' || verb === 'x:no') { apptAnswer(arg, verb === 'x:yes'); return true; }
+  if (verb === 'open' || verb === 'new') APPT_SAY = null;
+  return false;
+}
+// once a ship minute (apptFrame): invitations hourly, the Mail the evening before, a booking that's over keeps or goes
+function apptMinute(now) {
+  const X = apptState();
+  if (Math.floor(now / 60) !== APPT_HOUR) { APPT_HOUR = Math.floor(now / 60); apptHour(now); }
+  if (typeof deckDef !== 'undefined' && deckDef && typeof player !== 'undefined') apptNearMinute(now);
+  for (const b of X.book) {
+    if (b.mail && !b.mailed && now >= b.mailAt) { b.mailed = 1; if (typeof mailSend === 'function') mailSend({ at: now, from: evPerson(b.host).name, subject: APPTS[b.kind].title + ', ' + WEEKDAYS[weekday(b.day)] + ' ' + hhmm(b.from), body: b.mail, quiet: now - b.mailAt > 30 }); }
+    if (!b.done && !b.gone && now >= (b.day - 1) * 1440 + b.to + 30) b.gone = 1;   // missed: nothing lost, it can be asked for again
+  }
+}
+// near you (once a ship minute, on the deck): a standing invitation's line from its host, once; and once on a later day, a
+// kept appointment's after line. A line naming the host is someone else's ("Holt says you read the board right"), said by
+// whoever's settled near you; the rest are the host's own. A per-host appointment's line must be about that host
+// (APPT_AFTER_KEY); none fits: nothing said
+const APPT_AFTER_KEY = { 'dlamini-lukas': /galley|Lukas/, holt: /Holt|Watch/, mori: /Mori|label/, 'torres-zeke': /knitting|"the night"/, 'cruz-tove': /mint|Cruz/, 'hart-ravi': /comic/, raman: /Raman/, sato: /Sato|tea/, nandakumar: /Nandakumar|water/ };
+const apptNear = (id, not) => { const P = player.obj.position; return DECK_CREW.find(c => c.p && c.h && c.settled && (id ? c.p.id === id : c.p.id !== not && !c.p.player) && Math.hypot(c.x - P.x, c.z - P.z) < APPT_NEAR) || null; };
+function apptNearMinute(now) {
+  if (typeof DECK_CREW === 'undefined' || typeof bubbleSay !== 'function' || DIALOGUE || CHAT) return;
+  const X = apptState(), d = Math.floor(now / 1440) + 1;
+  for (const o of X.offers) if (o.status === 'asked' && !o.said) { const a = apptNear(o.host); if (a) { o.said = 1; bubbleSay(friSpeaker(a), apptWord(o.kind, 'invite', o.made, {}, o.host)); return; } }
+  for (const b of X.book) {
+    if (!b.done || b.done >= d || X.told.includes(b.id) || d - b.done > 14) continue;
+    const L = APPTS[b.kind].after || [], host = evPerson(b.host), names = [apptFirst(b.host), host.name.split(' ').slice(-1)[0]], key = APPT_RULES[b.kind].key && APPT_AFTER_KEY[b.host];
+    for (let i = 0; i < L.length; i++) {
+      const t = L[(i + b.id) % L.length].text; if (key && !key.test(t)) continue;
+      const other = names.some(n => t.includes(n)), a = other ? apptNear(null, b.host) : apptNear(b.host); if (!a) continue;
+      X.told.push(b.id); if (X.told.length > 40) X.told.shift(); bubbleSay(friSpeaker(a), apptFill(t, a.p.id, {})); return;
+    }
+  }
+}
+let APPT_HOUR = -1, APPT_MIN = -1;
+if (P926_APPT) {
+  SHIP.apptx = apptxLoad(SAVED);
+  SAVE_EXTRA.push(s => { s.ship.apptx = JSON.parse(JSON.stringify(apptState())); });
+  for (const kind of Object.keys(APPT_RULES)) { const R = APPT_RULES[kind];
+    TRAD_JOIN['appt-' + kind] = { pose: R.pose || 'talk', need: 'social', gain: 12, also: { leisure: 10 }, verb: 'start', what: R.what }; }
+  tjActs();
 }
 // ---- end of slot: Appointments builder ----
 
