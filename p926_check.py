@@ -235,7 +235,10 @@ with sync_playwright() as pw:
           const hosts = []; for (let d = 1; d <= 112; d++) for (const e of eventsOn(d)) { if (!P926_NEW.has(e.id) || !e.ev.host) continue; const h = schedPeople().find(q => q.id === e.ev.host);
             hosts.push([d, e.id, e.ev.host, !!h && planDay(h, d).some(s => evTagId(s.tag) === e.id)]); }
           const away = []; for (let d = 1; d <= 112; d++) for (const ev of SHIP_TRADITIONS) if (P926_NEW.has(ev.id) && ev.host && evDue(ev.when, d)) { const h = schedPeople().find(q => q.id === ev.host); if (h && !aboard(h, d)) away.push([d, ev.id, eventsOn(d).some(e => e.id === ev.id)]); }
-          return { talks, ms, wk, spk, hosts, away }; })())"""
+          const meet = []; for (let d = 1; d <= 112; d++) for (const e of eventsOn(d)) { if (!(e.ev.stay || P926_NEW.has(e.id))) continue;
+            for (const p of schedPeople()) { const segs = planDay(p, d), mine = segs.filter(s => evTagId(s.tag) === e.id); if (!mine.length) continue;
+              for (const g of (typeof eventMeetPlan === 'function' ? eventMeetPlan(p, d, null) : [])) if (mine.some(s => s.from < (d - 1) * 1440 + g.at + g.dur && (d - 1) * 1440 + g.at < s.to)) meet.push([d, e.id, p.id, g.tag]); } }
+          return { talks, ms, wk, spk, hosts, away, meet }; })())"""
         def weeks7(path):
             g = Game(pw, path, 900, 760); r = json.loads(g.ev(WEEKS)); err = g.errors; g.close(); return r, err
         r, err = weeks7(woff); print('  7 off: talks', [(t[0], bool(t[1])) for t in r['talks']], 'milestones', r['ms'], 'new by week', r['wk'][4:])
@@ -245,6 +248,7 @@ with sync_playwright() as pw:
         print('  7 new traditions, Days 1-112 (day, id, host, host there):', r['hosts'])
         check(r['hosts'] and all(x[3] for x in r['hosts']), '7: each new tradition\'s host is planned at every showing, Days 1-112 (RV14) (missing: %s)' % [x[:3] for x in r['hosts'] if not x[3]])
         check(not any(x[2] for x in r['away']), '7: a new tradition gives way when its host is away (RV14) (%s)' % r['away'])
+        check(not r['meet'], '7: nobody planned at Winner stays on or a new tradition over their own ship-wide event meeting, Days 1-112 (lead 36: the Captain at the Line on Day 7) (%s)' % r['meet'][:5])
         check(r['spk'] and all(x[2] for x in r['spk']), '7 (b): every talk\'s speaker is planned at it, Days 30-84 (missing: %s)' % [x[:2] for x in r['spk'] if not x[2]])
         check([m[1] for m in r['ms']] == [['six-weeks-aboard'], ['twelve-weeks-aboard']], '7 (c): Six weeks aboard on Day 42, Twelve weeks on Day 84 (%s)' % r['ms'])
         check(all(w[1] for w in r['wk'][4:]), '7 (a): weeks 5-12 each bring a tradition not seen before (%s)' % [w[0] for w in r['wk'][4:] if not w[1]])
