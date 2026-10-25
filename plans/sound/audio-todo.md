@@ -1,0 +1,28 @@
+# Audio to-do
+
+The sound designer (SD1) keeps this list. Newest decisions first in each part. Times are US Eastern.
+
+## Waiting on the user
+
+- **Tradition music** (the user, 2026-10-25, 12:40 PM): only some traditions get music, and the user decides which. The old "Tradition night" waltz is on hold until then; it isn't on the Sound Lab page.
+- **Music picks:** which of the three full tracks (Morning, Evening, Late night) and the samples to keep, change or drop. All are on the Wren Sound Lab page. Music is by time of day, not by room (the user, 2026-10-25).
+- **Activity sound picks:** the A/B choices and anything to change or drop on the Wren Sound Lab page. Groups: work and repairs, washroom, personal, galley and food, leisure, ship events.
+
+## Building (after the next release)
+
+- **Sound in the game:** after 0.92.6 ships, on the user's go. The plan is `plans/sound/integration-plan.md`. It covers the decided sounds: hums, device and job sounds, doors, hatches, the lift and footsteps.
+- **Activity sounds in the game:** once picked, add their hooks and a turn to the integration plan, with an estimate.
+- **Music in the game:** its own later job, once picked. It needs a time-of-day switch (cross-fade as the ship's clock moves from morning to midday and so on), a Music volume in Settings, the device's Music app (design-doc: "Music later, with sound"), and a check that music stays under the hum.
+- **design-doc "Sound" section:** on `claude/sound-sd1`; merge it with the sound build. Update it when music and activity sounds are picked.
+
+## Pages
+
+- Decided sounds: Wren Soundscape, https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC (`plans/sound/soundscape.html`).
+- New sounds to try: Wren Sound Lab (`plans/sound/soundlab.html`).
+- Superseded, kept so old links still work: Wren Sounds: Activities (`activities.html`) and Wren Music Samples (`music.html`). Both now point to the Sound Lab.
+
+## Done
+
+- 2026-10-25: Soundscape mockup Versions 1 to 8. All core sounds chosen: tap A, Mail B, heads-up B, room doors C, hatches A, lift C, deck button B, soft footsteps, no chatter.
+- 2026-10-25: The user's answers: sound on at Medium by default; crew doors near you make sound (quieter, capped); no night dip; music later.
+- 2026-10-25: Integration plan written (`plans/sound/integration-plan.md`).

@@ -692,7 +692,7 @@ The look is locked: textured low-poly in a cozy isometric cutaway, with every te
 
 **Settings and rules.** Sound is on by default at Medium; the Settings app has Sound On/Off and Volume Low/Medium/High, kept as a preference apart from the save. Sound starts on your first tap (a browser rule), pauses whenever the game pauses or the tab is hidden, and costs nothing when off. It never touches the ship's random numbers or anything you can see, so the regressions stay pixel-identical, and the checks run silent.
 
-**Music: later.** The design calls for music in time, and the device's Music app comes with it. Four samples start the conversation, none chosen yet (`plans/sound/music.html`, https://claude.ai/artifact/5hXuYyetv2gvNdPuKpz63D): Quarters, evening (slow electric piano); Galley, morning (marimba and whistle); Observatory (pads and glassy bells, no beat); Tradition night (a gentle waltz). Music always plays under the hum.
+**Music: later, by time of day.** The design calls for music in time, and the device's Music app comes with it. Music follows the time of day, not the room (the user, 2026-10-25). Three full tracks of about ten minutes (Morning, Evening, Late night) and eleven shorter lo-fi samples (music for working, and other ideas for each part of the day) are in the Wren Sound Lab (`plans/sound/soundlab.html`), none chosen yet. Only some ship traditions will have music, and the user decides which. Music always plays under the hum.
 
 
 ## Technical plan: how decks work in the build
