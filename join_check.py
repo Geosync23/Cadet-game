@@ -12,7 +12,7 @@
 #   watching two people play and the player always has the choice to join in or watch"): on Day 6 its host is at the Tiles table
 #   by 15:02 and at 15:15 two crew sit at the Tiles station playing and at least three stand in the ring round it facing the board; a tap on Olu asks "Play the
 #   next game" or "Watch"; playing, you sit at the board when the game ends and play the winner; after it the ladder goes
-#   on; no page errors.
+#   on; an appointment (with P926_APPT): booked, a tap on its host joins it, its scene to its end, kept; no page errors.
 # Setup and environment as for cadet_test.py.   Run:  python3 join_check.py BUILD.html    (about 3 minutes)
 import sys
 exec(open(__file__.replace('join_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
@@ -50,7 +50,7 @@ with sync_playwright() as pw:
     # behind one just shown; each part here runs in one frozen moment of the test's clock, so the join notice would
     # still be waiting. Every pop-up shows at once, as in interactions_check (AC3's line; the queue is arrows_check's)
     g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
-    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam')")
+    ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id))")   # appointments (appt-*): only on the calendar once booked (below)
     print(f"{len(ids)} joinable traditions (plus the beam): {', '.join(ids)}")
     for i in ids:
         r = g.ev(f"({EACH})('{i}')")
@@ -203,6 +203,29 @@ with sync_playwright() as pw:
             after = g.ev(LAD)
             print('After your game:', after['t'], after['seated'])
             if len(after['seated']) != 2: fail(f"the ladder: after your game two crew should be playing again: {after}")
+    for e in g.errors: fail('page: ' + e)
+    g.close()
+    # an appointment (0.92.6 item 9, P926_APPT): a one-off that's only on the calendar once booked, so not in the sweep
+    # above; here one is booked (the big scope with Sato, asked for) and joined by a tap on her, its scene read to its end
+    g = Game(pw, sys.argv[1])
+    if g.ev("typeof TRAD_JOIN['appt-scope'] !== 'undefined'"):
+        g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+        b = g.ev("""(() => { skipTo(2 * 1440 + 600); SHIP.device.settings.tips = false; socInit(); const r = relGet('sato'); r.pts = 65; r.tier = 3;
+          apptAsk('scope', 'sato'); const b = SHIP.apptx.book.slice(-1)[0]; if (!b) return null; skipTo((b.day - 1) * 1440 + b.from - 20);
+          const e = eventsOn(b.day).find(x => x.id === 'appt-scope'), rk = [...eventRooms(e.ev)][0].split('|'); goToDeck(+rk[0]); deckCrewFill();
+          const tl = ROOM_TILES[rk[1]], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.set(c.x, 0, c.z); player.stop(); return { id: b.id, day: b.day, from: b.from }; })()""")
+        r = None
+        if b:
+            for _ in range(40):
+                g.step(45)
+                if g.ev("!!TJ_NOW && TJ_NOW.e.id === 'appt-scope' && !!TJ_NOW.agent && TJ_NOW.agent.settled"): break
+            r = g.ev("""(() => { const a = TJ_NOW && TJ_NOW.e.id === 'appt-scope' ? TJ_NOW.agent : null; if (!a) return { err: 'no join offered' };
+              const ok = tradJoinTap(a), open = !!DIALOGUE && DIALOGUE.id.startsWith('appt:scope'); let n = 0;
+              while (DIALOGUE && n++ < 40) { const v = dialogueView(); if (v && v.choices) dialogueStep(0); else dialogueStep(0); }
+              return { ok, lead: a.p.id, open, done: !!SHIP.apptx.book.find(x => x.id === %d).done, joined: SHIP.events.joined.includes('appt-scope@%d') }; })()""" % (b['id'], b['day']))
+        print('An appointment (the big scope, booked):', b, r)
+        if not b or not r or r.get('err') or not (r['ok'] and r['open'] and r['joined'] and r['done'] and r['lead'] == 'sato'): fail(f"an appointment: booked, a tap on Sato joins it and its scene runs to the end, kept: {b} {r}")
+    else: print('An appointment: P926_APPT off, none to join')
     for e in g.errors: fail('page: ' + e)
     g.close()
 print('JOIN CHECK ' + ('FAILED' if FAILS else 'OK'))
