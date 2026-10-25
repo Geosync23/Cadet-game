@@ -2654,7 +2654,7 @@ const WALL_KIT = {
 };
 
 // 0.47.5: the weight bench's bar: hidden (scaled to nothing) for half a second after anyone presses it (ACTS.bench); dx centres the held bar between the hands
-const BENCH_BAR = { g: null, t: -1e9, dx: .3, rz: .42 };   // rz: the grip's spread, undone so the bar lies level
+const BENCH_BAR = { g: null, t: -1e9, dx: .3, rz: .42 };   // rz: the grip's spread, undone so the bar lies level (dx, rz: unused since 0.92.6 #6, section 8b's benchBarFit; kept for older probes)
 // ---- placing things ----
 const FACING = { n: 0, w: Math.PI / 2, e: -Math.PI / 2, s: Math.PI };   // which wall the back of a piece is against
 // place a floor piece in room-local units (0,0 = room's top-left corner)
@@ -8843,7 +8843,7 @@ DECKS[7] = {
     'v,4,15': 'hatch',                                       // the court's emitter room
     'h,26,7': 'door', 'h,23,7': 'glass', 'h,24,7': 'glass', 'h,25,7': 'glass', 'h,27,7': 'glass', 'h,28,7': 'glass', 'h,29,7': 'glass',   // the pool's gallery
     'v,32,3': 'hatch',                                       // pool plant, from the pool deck
-    'v,34,7': 'door', 'v,34,8': 'door', 'v,34,9': 'door', 'v,34,10': 'door',   // foyer into the auditorium: four wide doors
+    'v,34,7': 'open', 'v,34,8': 'open', 'v,34,9': 'open', 'v,34,10': 'open',   // foyer into the auditorium: one 4 m archway, no leaves or posts (0.92.6 #1, the user's: "doors need to be wider"; were four one-tile doors)
     'h,26,11': 'door',                                       // washroom
     'h,18,12': 'door', 'h,17,12': 'glass', 'h,21,12': 'glass', 'h,22,12': 'glass', 'h,23,12': 'glass', 'h,24,12': 'glass',   // float room
     'h,31,11': 'hatch', 'v,34,12': 'glass', 'v,34,11': 'hatch',   // rec utility room: from the foyer, the booth window and the stage door
@@ -12236,7 +12236,8 @@ deviceApp({ id: 'home', title: 'Home', icon: 'home', order: 0, view: () => {
   if (P.carry.length) say('Carrying: ' + P.carry.join(', ') + '.');
   if (P.cart) say('Pushing a hover cart (' + (P.cart.stage === 'full' ? 'loaded' : 'empty') + '). ' + (CART_STEP[P.cart.stage] || (mj ? 'Take the load to ' + cartDest(mj).name + '.' : '')));
   if (mj && w && w.job === mj.id && (w.fitted.length || w.done)) say('Your job: ' + w.fitted.length + ' of ' + mj.parts.length + ' parts fitted' + (w.done ? ', ' + Math.floor(w.done) + ' of ' + Math.round(jobMins(mj)) + ' min of repair done' : '') + '.');
-  for (const nt of (playerFx().notes || []).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
+  const ol = typeof outfitLine === 'function' ? outfitLine() : null; if (ol) say(ol);   // 0.92.6 #17: the outfit, clean or dirty (section 21b); its own need note then isn't repeated below
+  for (const nt of (playerFx().notes || []).filter(n => !(ol && n && n.clothes)).slice(0, 2)) if (nt && nt.text) say(nt.text + '.');
   const sl = settleList(), sa = DEVICE_APPS.get('settle');
   if (sl && sa && !devTry(sa.hidden)) say('Settling in: ' + sl.filter(x => settleDone(x.id)).length + ' of ' + sl.length + ' done.');
   const pin = SHIP.device.memos.find(x => x.pinned);
@@ -14847,11 +14848,13 @@ function handEl() {
   document.head.appendChild(st);
   el = document.createElement('div'); el.id = 'handBtns';
   el.innerHTML = '<button type="button" id="hobbyBtn" hidden aria-label="Hobby: something to do while you sit"><svg viewBox="0 0 24 24"><path d="' + NEED_ICON.leisure + '"/></svg><span>Hobby</span></button>'   // 0.28.61
-    + '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>';
+    + '<button type="button" id="repairBtn" hidden aria-label="Repair: start the work here"><svg viewBox="0 0 24 24"><path d="M14.7 6.3a4 4 0 0 0-5.4 5.1L4 16.7 7.3 20l5.3-5.3a4 4 0 0 0 5.1-5.4l-2.6 2.6-2.4-.6-.6-2.4z"/></svg><span>Repair</span></button>'
+    + '<button type="button" id="liftBtn" hidden aria-label="Lift: open the lift panel"><svg viewBox="0 0 24 24"><path d="M8 10l4-4 4 4"/><path d="M8 14l4 4 4-4"/></svg><span>Lift</span></button>';   // 0.92.6 #16
   document.body.appendChild(el);
   for (const b of el.querySelectorAll('button')) b.addEventListener('pointerdown', e => e.stopPropagation());   // never a tap on the deck behind
   document.getElementById('repairBtn').onclick = e => { e.stopPropagation(); const h = handRepair(); if (h) h.go(); handTick(true); };
   document.getElementById('hobbyBtn').onclick = e => { e.stopPropagation(); hobbyPick(); handTick(true); };
+  document.getElementById('liftBtn').onclick = e => { e.stopPropagation(); enterLift(); handTick(true); };   // as a tap on the panel (section 11)
   return el;
 }
 // ---- hobbies (0.28.61, the 0.60.7 plan's "Hobbies"): seven, each 30 ship minutes for +25 leisure, a meter like a
@@ -14978,13 +14981,27 @@ function handTick(now) {
   const hob = !h && !PAUSE.on && ACT && ACT.kind === 'sit' && ACT.phase === 'do' && hobbyHere().some(id => !HOBBIES[id].dev);   // the Hobby button (0.28.61): sitting, with a prop hobby or a window
   if (hb.hidden !== !hob) hb.hidden = !hob;
   HAND.repair = !!h; if (r.hidden !== !h) r.hidden = !h;
-  if (!h && !hob) return;
+  const lb = document.getElementById('liftBtn'), lift = liftBtnShow(); if (lb.hidden !== !lift) lb.hidden = !lift;
+  if (!h && !hob && !lift) return;
   // never over Put down (player engineer 8's #putDown, below us, lifts above a toast on phones) or a toast (0.28.55)
   const tops = [innerHeight - 76], pd = document.getElementById('putDown'), tt = document.getElementById('toast');
   if (pd && !pd.hidden) tops.push(pd.getBoundingClientRect().top - 10);
   if (tt && tt.classList.contains('show') && innerWidth <= 720) tops.push(tt.getBoundingClientRect().top - 10 - (pd && !pd.hidden ? 58 : 0));
   const b = Math.round(innerHeight - Math.min(...tops)), key = b + 'px';
   if (HAND.bottom !== key) { HAND.bottom = key; el.style.bottom = b > 76 ? b + 'px' : ''; }   // measured: the safe area is already in it
+}
+// the Lift button (0.92.6 #16, the user's: "a small button like Put down to call up the lift panel when you stand very
+// close to it"; lead 35: in the car too): in the stack above Put down, within LIFT_BTN_NEAR m of a lift panel or anywhere
+// in the car, when you're free to ride. A tap is a tap on the panel (enterLift). Off at test URLs unless ?liftbtn, as every
+// deck's shots start in the car beside the panel (a check sets LIFT_BTN_ON); nothing it does touches the ship
+let LIFT_BTN_ON = !NOSAVE || URL_FLAGS.has('liftbtn');
+const LIFT_BTN_NEAR = 1.1;
+function liftBtnShow() {
+  if (!LIFT_BTN_ON || PAUSE.on || ACT && ACT.phase !== 'walk' || (typeof ride !== 'undefined' && ride) || (typeof DEV !== 'undefined' && DEV.open)
+    || document.body.classList.contains('dlgon') || !document.getElementById('lift').hidden) return false;
+  const p = player.obj.position, rm = ROOMS[roomAt(...player.here())];
+  if (rm && rm.floor === 'lift') return true;            // in the car
+  const q = ixLiftPanel(); return !!q && Math.hypot(q.x - p.x, q.z - p.z) < LIFT_BTN_NEAR;
 }
 // the Record's words for your hobbies (0.28.63): the head writer's hobby.record.<h>, else by how often and how lately
 function hobbyWords() {
@@ -47955,7 +47972,16 @@ let UNIFORM_SEEN = null;
 function uniformWatch() { const u = uniformState(); if (u !== UNIFORM_SEEN) { const was = UNIFORM_SEEN; UNIFORM_SEEN = u; if (was !== null) simNote('uniform', { state: u }); } }
 function clothesFx(fx) {                                 // section 15's playerFx: hygiene drains faster in yesterday's clothes, or a grubby uniform
   const u = uniformState(); if (u === 'clean') return fx;
-  return { ...fx, drain: { ...(fx.drain || {}), hygiene: fxD(fx, 'hygiene') * CLOTHES_DRAIN }, notes: [{ text: u === 'grubby' ? 'Your uniform is grubby' : 'In yesterday\'s clothes' }, ...(fx.notes || [])] };
+  return { ...fx, drain: { ...(fx.drain || {}), hygiene: fxD(fx, 'hygiene') * CLOTHES_DRAIN }, notes: [{ text: u === 'grubby' ? 'Your uniform is grubby' : 'In yesterday\'s clothes', clothes: true }, ...(fx.notes || [])] };
+}
+// the device Home's outfit line (0.92.6 #17, the user's: "clean outfit on" when it is, dirty when it isn't; words: lead 35):
+// null while clothes are off (test URLs), so Home keeps its old lines there
+function outfitLine() {
+  if (!CLOTHES_ON) return null;
+  if (PLAYER_SPEC.kit) return 'Rec kit on.';   // rec kit is clean (0.81.0)
+  if (uniformState() === 'grubby') return 'Dirty outfit: grubby from work. Change at your wardrobe.';
+  if (SHIP.clothes.changed < SHIP.time.day) return SHIP.time.min < CLOTHES_LATE ? 'Yesterday\'s outfit: change before 10:00.' : 'Dirty outfit: yesterday\'s. Change at your wardrobe.';
+  return 'Clean outfit on.';
 }
 Object.assign(PLAYER_ACTS, { clothes: { mins: 1, pose: 'browse', title: 'Changing' } });
 const clothesHandsFull = () => { const P = SHIP.player; return P.carry.length > 0 || !!P.tray || !!P.cart || hamperHeld(); };
@@ -55407,7 +55433,7 @@ const CROWD_ANIMS = new Set(Object.keys(ACTS));        // the activities drawn: 
 // Built the first time they're needed, from the character kit's primitives; colours through col(); no R().
 const PROP_BONE = { R: 0, L: 1, C: 2, B: 3 };            // B: the body, at the feet facing forward (a cart)
 const PROP_KIT = {
-  barbell(p) { const a = BENCH_BAR.rz, c = Math.cos(a), n = Math.sin(a); for (const [x, geo, colr] of [[0, cylG(.014, .014, 1.5, 8), '#a4aeb4'], [-.62, cylG(.15, .15, .045, 14), '#2b2f33'], [.62, cylG(.15, .15, .045, 14), '#2b2f33']]) part(p, geo, colr, (BENCH_BAR.dx + x) * c, -.055 + (BENCH_BAR.dx + x) * n, .01, 1, 1, 1, 0, 0, Math.PI / 2 + a); },   // 0.47.5: the bench's bar, centred between the hands
+  barbell(p) { for (const [x, geo, colr] of [[0, cylG(.014, .014, 1.5, 8), '#a4aeb4'], [-.62, cylG(.15, .15, .045, 14), '#2b2f33'], [.62, cylG(.15, .15, .045, 14), '#2b2f33']]) part(p, geo, colr, x, 0, 0, 1, 1, 1, 0, 0, Math.PI / 2); },   // 0.47.5: the bench's bar; 0.92.6 #6: centred on its holder, along x (benchBarFit puts it between the hands)
   dumbbell(p) { part(p, cylG(.012, .012, .17, 8), '#a4aeb4', 0, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); for (const x of [-.07, .07]) part(p, cylG(.04, .04, .035, 10), '#2b2f33', x, -.055, .01, 1, 1, 1, 0, 0, Math.PI / 2); },
   receiver(p) { part(p, GEO.box, '#2b2f33', 0, -.07, .045, .04, .17, .045, .3); part(p, GEO.sph, '#2b2f33', 0, -.15, .07, .03, .025, .03); },
   basket(p) { part(p, GEO.box, '#2a9d8f', 0, -.2, .02, .24, .12, .16); part(p, GEO.box, '#1f6f66', 0, -.11, .02, .015, .1, .015); },
@@ -55613,7 +55639,27 @@ function animateActivity(o, pose, dt, t, sk, y = 0) {
     if (o.propBones) { if (o.chunk) o.chunk.dirty = true; }   // the crowd: rebuilt into its group's mesh
     else rigProps(o, key);
   }
+  if (act === 'bench' && pk) benchBarFit(o); else if (o.benchFit) { o.benchFit = false; if (o.propBones) { const b = o.propBones[0]; b.position.set(0, 0, 0); b.quaternion.identity(); b.scale.setScalar(1); } }   // 0.92.6 #6
   return { base, act, seat };
+}
+// the bench press's bar (0.92.6 #6, the user's: "weight not parallel with the ground, doesn't line up with the hands"): each
+// frame of a lift, the bar's holder under the right hand (the crowd's prop bone, a full rig's prop mesh) is set so the bar's
+// middle is halfway between the two grips and its axis is the body's own left-right (root x: level while lying on the bench)
+const BENCH_M = new THREE.Matrix4(), BENCH_N = new THREE.Matrix4(), BENCH_A = new THREE.Vector3(), BENCH_B = new THREE.Vector3();
+function benchBarFit(o) {
+  const arms = o.rig.arms, aR = arms[0].side < 0 ? arms[0] : arms[1], aL = aR === arms[0] ? arms[1] : arms[0];
+  let hold = o.propBones ? o.propBones[0] : null;
+  if (!hold && o.propMeshes) for (const m of o.propMeshes) if (m.parent === aR.hand) hold = m;
+  if (!hold) return;
+  const root = o.rig.root; root.updateMatrixWorld(true);
+  BENCH_M.copy(root.matrixWorld).invert();
+  BENCH_A.set(0, -.055, .01).applyMatrix4(aR.hand.matrixWorld).applyMatrix4(BENCH_M);   // the grips (in the palm, where the props sit), in the body's frame
+  BENCH_B.set(0, -.055, .01).applyMatrix4(aL.hand.matrixWorld).applyMatrix4(BENCH_M);
+  BENCH_A.add(BENCH_B).multiplyScalar(.5);
+  BENCH_N.makeTranslation(BENCH_A.x, BENCH_A.y, BENCH_A.z).premultiply(root.matrixWorld);   // the bar, in the world
+  BENCH_M.copy(aR.hand.matrixWorld).invert().multiply(BENCH_N);   // and in the hand's frame, where its holder hangs
+  BENCH_M.decompose(hold.position, hold.quaternion, hold.scale);
+  o.benchFit = true;
 }
 class CrowdPerson {
   constructor(spec, n) {
@@ -58333,7 +58379,7 @@ function openLiftPanel() {
     i.textContent = deckLabel(n); t.textContent = DECK_NAMES[n]; sm.textContent = here ? 'You are here' : built ? DECKS[n].blurb : 'Not built yet';
     sp.append(t, sm); b.append(i, sp);
     const gl = typeof goalNow === 'function' ? goalNow() : null, goal = !!(gl && gl.deck === n && !here && built);   // 0.28.58 (0.60.6a, the user's): the deck your goal arrow wants
-    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Schedule tracker'; b.appendChild(g); }   // playtest 1: the user's word
+    if (goal) { b.classList.add('goal'); const g = document.createElement('em'); g.textContent = '→ Tracked'; b.appendChild(g); }   // playtest 1: the user's word (0.92.6 #12, the user's: "just say Tracked"; was "→ Schedule tracker")
     b.setAttribute('aria-label', `${deckWord(n)}, ${DECK_NAMES[n]}: ${sm.textContent}` + (goal ? '. What you\'re tracking is here' + (gl.label ? ': ' + gl.label : '') : ''));
       b.onclick = () => { closeLiftPanel(); pressPanel(n); };
     liftList.appendChild(b);

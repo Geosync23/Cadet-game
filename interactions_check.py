@@ -1742,5 +1742,31 @@ with sync_playwright() as pw:
     check(not g.errors, f'no console errors ({g.errors[:3]})')
     g.close()
 
+    # 0.92.6 #16 (the user's): a small Lift button, like Put down, when you stand very close to a lift panel (and in the car,
+    # lead 35); hidden a few metres off and with the panel open; a tap opens the panel. Off at test URLs unless switched on
+    g = Game(pw, sys.argv[1]); g.step(5)
+    if g.ev("typeof liftBtnShow === 'function'"):
+        lift = g.ev("""(() => { const out = {}, vis = () => { handTick(true); const b = document.getElementById('liftBtn'); return !!b && !b.hidden; };
+          LIFT_BTN_ON = false; goToDeck(4); player.stop(); out.off = vis(); LIFT_BTN_ON = true;
+          const q = ixLiftPanel(), here = player.here(); out.room = roomAt(...here); out.car = vis();
+          let near = null, far = null;
+          for (let i = 0; i < W; i++) for (let j = 0; j < D; j++) { if (!free(i, j) || !roomAt(i, j) || ROOMS[roomAt(i, j)].floor === 'lift') continue; const c = cellPos(i, j), d = Math.hypot(c.x - q.x, c.z - q.z);
+            if (d < LIFT_BTN_NEAR && (!near || d < near[0])) near = [d, i, j]; if (d > 3 && d < 5 && !far) far = [d, i, j]; }
+          if (near) { player.obj.position.copy(cellPos(near[1], near[2])); player.stop(); out.near = [+near[0].toFixed(2), roomAt(near[1], near[2]), vis()]; }
+          if (far) { player.obj.position.copy(cellPos(far[1], far[2])); player.stop(); out.far = [+far[0].toFixed(2), vis()]; }
+          if (near) { player.obj.position.copy(cellPos(near[1], near[2])); player.stop(); vis(); }
+          return out; })()""")
+        print('  the Lift button:', lift)
+        check(lift['off'] is False and lift['car'] is True and lift.get('near') and lift['near'][2] is True and lift.get('far') and lift['far'][1] is False,
+              f'the Lift button: off at test URLs till switched on, shown in the car and by the landing panel, hidden 3+ m away (0.92.6 #16): {lift}')
+        bb = g.ev("(() => { const b = document.getElementById('liftBtn').getBoundingClientRect(); return [Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)]; })()")
+        g.page.mouse.click(*bb); g.step(40)
+        op = g.ev("[!document.getElementById('lift').hidden, (handTick(true), document.getElementById('liftBtn').hidden)]")
+        check(op[0] and op[1], f'a tap on the Lift button opens the lift panel, and the button hides while it is open (0.92.6 #16): {op}')
+        g.ev("closeLiftPanel(); LIFT_BTN_ON = false")
+    else: check(False, 'no liftBtnShow (0.92.6 #16)')
+    check(not g.errors, f'no console errors ({g.errors[:3]})')
+    g.close()
+
 print('INTERACTIONS CHECK OK' if ok else 'INTERACTIONS CHECK FAILED')
 sys.exit(0 if ok else 1)
