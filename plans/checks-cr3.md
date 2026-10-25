@@ -355,3 +355,24 @@ controller_check.py and disc_check.py differ from 53c11f88). FX23's scripts on t
 
 So the 0.92.5 controller_check disc FAIL above is resolved by FX23's test fix; no game change.
 | controller_check every part but reach (BM17's ask, the file changed) | **OK** | CONTROLLER CHECK OK, exit 0, all 28 parts OK; 1805 s |
+
+# 0.92.6 (claude/staging-0.92.6 b78e1e22, all six switches on incl. ODD_ON), BM17's start (lead 36's go)
+
+sha256 **88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4** (BM17's). OLD = staging-0.92.5 39f7741d (fddc0ef6…).
+A first start on defc327f was stopped at BM17's word (replaced by b78e1e22); nothing from it is counted.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 0 | **OK** | DAY CHECK OK; peak 266; worst stuck 0.0; 281 s |
+| day_check 1 | **OK** | DAY CHECK OK; peak 247; worst stuck 0.0; 275 s |
+| day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 278 s |
+| day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 261 s |
+| weekend_check | **OK** | WEEKEND CHECK OK; 499 s |
+| arrows_d_check | **FAIL: NEW (PROMO_SIGHT_ON)** | 3 lines, all S6 (FX1's empty-board word): `S6: the board's word waits through a dialogue and a training's watch and turn (RV7) ({'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 0})`; `S6: the board's word waits through a meeting, then is said (lead 29) ([0, 0])`; `S6: an empty board: no arrow, and the board's word said (None; said 0)`; 65 s |
+| arrows_f_check | **OK** | `arrows_f_check: OK`; 30 s |
+| controller_check (every part but reach) | **OK** | CONTROLLER CHECK OK, all 28 parts; 2227 s (kept: started before CR1's offer) |
+
+**The arrows_d FAIL.** OLD 39f7741d: arrows_d_check OK. One-switch-off copies of b78e1e22 (own CADET_WORK, beside
+controller_check): PROMO_SIGHT_ON off → OK; ODD_ON off, BOARD_TRADE_ON off, STORIES_ON off → each the same 3 FAIL lines
+(P926_TRADS not flipped). So with FX19's promotion sight on, FX1's "Nothing on the board" word (boardEmptySay) is never
+said in S6's setup; the arrow half of S6 holds. Routed by lead 36 (FX19). Not fixed (check runner); BM17 confirming.
