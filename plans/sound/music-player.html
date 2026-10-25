@@ -177,7 +177,7 @@ table.sched { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 
   <section class="card" aria-labelledby="h-sched">
     <div class="card-head"><span class="tag">The schedule</span><h2 id="h-sched">Which music plays when</h2>
-      <p class="lede">The player picks one track from the set for the time of day, never the same one twice in a row, plays it through, then leaves a quiet gap before the next. When the time of day changes (or you clock in or out), it waits for the end of the current section, at most 30 seconds, and cross-fades into the new set. Sleeping through the night changes it straight away.</p></div>
+      <p class="lede">Each time of day has several tracks, and the player rotates through them: never the same one twice in a row, and the one you've heard least recently comes next. It plays a track through, then leaves a quiet gap before the next. When the time of day changes (or you clock in or out), it waits for the end of the current section, at most 30 seconds, and cross-fades into the new set. Sleeping through the night changes it straight away.</p></div>
     <div class="tablewrap"><table class="sched" id="sched"></table></div>
   </section>
 </div>
@@ -570,7 +570,7 @@ function startWalk(surface, segs) {
    xfade (seconds, default 6), sectionWait (max seconds to wait for a section
    end before changing on a new time of day, default 30), random (default
    Math.random), onEvent(text) for a log, firstDay (default 1), mode, volume,
-   enabled (the saved choices from the sound key).
+   enabled, heard (the saved choices and rotation from the sound key).
    ===================================================================== */
 function createWrenMusic(opts) {
   const ctx = opts.ctx, rnd = opts.random || Math.random, log = opts.onEvent || (() => {});
@@ -780,6 +780,105 @@ function createWrenMusic(opts) {
     });
     return bars;
   }
+  // ---- ambient sci-fi synth (morning take 2, 2026-10-25): Systems online picked for mornings; Wake cycle and Station dawn for early morning
+  Object.assign(MI, {
+    // a wide, slow synth pad: three detuned saws through a low filter that slowly opens and closes over the bar
+    synthPad(t, notes, d, g, out, open = 1) {
+      notes.forEach(m => [-9, 0, 9].forEach(c => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain();
+        o.type = 'sawtooth'; o.frequency.value = mtof(m); o.detune.value = c; lp.type = 'lowpass'; lp.Q.value = 0.7;
+        lp.frequency.setValueAtTime(380, t); lp.frequency.linearRampToValueAtTime(380 + 900 * open, t + d * 0.55); lp.frequency.linearRampToValueAtTime(420, t + d);
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + Math.min(2, d * 0.4)); e.gain.setValueAtTime(g, t + d - 0.8); e.gain.linearRampToValueAtTime(0, t + d + 0.8);
+        o.connect(lp); lp.connect(e); e.connect(out); o.start(t); o.stop(t + d + 0.9);
+      }));
+    },
+    // a soft synth pluck with an echo (the same note again, quieter, a dotted beat later)
+    echoPluck(t, m, d, g, out, s = 0.6) {
+      [[0, 1], [0.75, 0.4], [1.5, 0.16]].forEach(([dt, k]) => {
+        const at = t + dt * s, o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain();
+        o.type = 'triangle'; o.frequency.value = mtof(m); lp.type = 'lowpass'; lp.frequency.value = 1700 - dt * 500;
+        env(e, at, g * k, 0.004, 0.45); o.connect(lp); lp.connect(e); e.connect(out); o.start(at); o.stop(at + 0.55);
+      });
+    },
+    // a soft sci-fi lead: a gentle saw through a low filter, with slow vibrato
+    synthLead(t, m, d, g, out) {
+      const o = ctx.createOscillator(), v = ctx.createOscillator(), vg = ctx.createGain(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); d = Math.max(0.3, d);
+      o.type = 'sawtooth'; o.frequency.value = mtof(m); v.frequency.value = 4.5; vg.gain.value = mtof(m) * 0.006; v.connect(vg); vg.connect(o.frequency);
+      lp.type = 'lowpass'; lp.frequency.value = 1100; lp.Q.value = 1;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + 0.25); e.gain.setValueAtTime(g, t + d * 0.75); e.gain.linearRampToValueAtTime(0, t + d + 0.3);
+      o.connect(lp); lp.connect(e); e.connect(out); o.start(t); v.start(t); o.stop(t + d + 0.4); v.stop(t + d + 0.4);
+    },
+    // moving air: a slow swell of filtered noise, like the ship's air plant breathing in the morning
+    air(t, d, g, out) {
+      const src = ctx.createBufferSource(); src.buffer = WHITE; src.loop = true; const f = ctx.createBiquadFilter(), e = ctx.createGain();
+      f.type = 'bandpass'; f.Q.value = 1.2; f.frequency.setValueAtTime(900, t); f.frequency.linearRampToValueAtTime(2600, t + d * 0.5); f.frequency.linearRampToValueAtTime(1200, t + d);
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + d * 0.5); e.gain.linearRampToValueAtTime(0, t + d);
+      src.connect(f); f.connect(e); e.connect(out); src.start(t, Math.random()); src.stop(t + d + 0.1);
+    },
+  });
+  Object.assign(PARTS, {
+    synthPad: c => MI.synthPad(c.t, c.ch, c.s * c.beats, 0.0055, c.out, c.e >= 2 ? 1 : 0.6),
+    synthPadHi: c => MI.synthPad(c.t, c.ch.map(m => m + 12), c.s * c.beats, 0.004, c.out, 0.8),
+    echoArp: c => { const up = c.ch.map(m => m + 12), seq = [up[0], up[2], up[1], up[3] ?? up[0] + 12]; for (let k = 0; k < c.beats; k++) MI.echoPluck(c.t + k * c.s, seq[(k + c.bar) % seq.length], 0, 0.022, c.out, c.s); },
+    echoArp8: c => { const up = c.ch.map(m => m + 12), seq = [...up, up[1] + 12]; for (let k = 0; k < c.beats * 2; k++) MI.echoPluck(c.t + k * c.s / 2, seq[k % seq.length], 0, k % 2 ? 0.012 : 0.018, c.out, c.s); },
+    pulse8: c => { for (let k = 0; k < c.beats * 2; k++) tone(c.t + k * c.s / 2, mtof(c.root + 12), c.s * 0.4, { gain: k % 2 ? 0.02 : 0.03, type: 'triangle', lp: 500, a: 0.01, bus: c.out }); },
+    heart: c => { MI.bass(c.t, c.root, c.s * 1.2, 0.06, c.out); if (c.beats === 4) MI.bass(c.t + 2 * c.s, c.root, c.s * 1.2, 0.04, c.out); },
+    air: c => MI.air(c.t, c.s * c.beats, 0.012, c.out),
+  });
+  Object.assign(TRACKS, {
+    wake: { name: 'Wake cycle', time: 'Morning', full: true, bpm: 72, beats: 4, swing: 0, wet: 0.5, seed: 211, scale: PENTA(2), range: [74, 90], lg: 0.022, lead: 'synthLead',
+      note: 'Slow, wide synth pads that open up like a dimmer coming on, a soft echoing arpeggio and a gentle heartbeat bass. The ship waking up.',
+      prog: { A: CH([[50, 57, 62, 64, 38], [47, 54, 57, 62, 35], [43, 50, 55, 59, 31], [45, 52, 57, 61, 33]]), B: CH([[52, 57, 59, 64, 40], [43, 50, 54, 59, 31], [50, 54, 57, 62, 38], [45, 49, 52, 57, 33]]), C: CH([[47, 50, 54, 57, 35], [43, 47, 50, 55, 31], [52, 55, 59, 62, 40], [45, 50, 52, 57, 33]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['synthPad', 'air'], 1)],
+        [sec('Pads', 'A', 8, ['synthPad', 'air', 'heart'], 1), sec('Arpeggio', 'A', 8, ['synthPad', 'echoArp', 'heart'], 2), sec('B', 'B', 8, ['synthPad', 'echoArp', 'heart', 'mel'], 2, '*'),
+         sec('Open', 'B', 8, ['synthPad', 'synthPadHi', 'echoArp8', 'heart', 'mel'], 3, '*'), sec('Bridge', 'C', 8, ['synthPad', 'air', 'bells'], 1)],
+        [sec('Outro', 'A', 4, ['synthPad', 'air'], 1)], 72, 4, 10, ['synthLead', 'glass', 'synthLead', 'box']) },
+    systems: { name: 'Systems online', time: 'Morning', full: true, bpm: 84, beats: 4, swing: 0, wet: 0.4, seed: 223, scale: PENTA(9), range: [76, 88], lg: 0.02, lead: 'echoPluck',
+      note: 'A soft pulse ticking under the pads and a rising arpeggio, as the ship\'s systems come online one by one. The most motion of the three, but still calm.',
+      prog: { A: CH([[57, 60, 64, 67, 45], [53, 57, 60, 64, 41], [48, 52, 55, 59, 36], [55, 59, 62, 64, 43]]), B: CH([[50, 53, 57, 60, 38], [53, 57, 60, 64, 41], [57, 60, 64, 67, 45], [52, 55, 59, 64, 40]]), C: CH([[48, 52, 55, 59, 36], [53, 57, 60, 62, 41], [50, 53, 57, 60, 38], [52, 56, 59, 62, 40]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['synthPad', 'pulse8'], 1)],
+        [sec('Pulse', 'A', 8, ['synthPad', 'pulse8', 'heart'], 2), sec('Arpeggio', 'A', 8, ['synthPad', 'pulse8', 'echoArp8'], 2), sec('B', 'B', 8, ['synthPad', 'pulse8', 'echoArp8', 'mel'], 3, '*'),
+         sec('Bridge', 'C', 8, ['synthPadHi', 'air', 'bells'], 1), sec('A again', 'A', 8, ['synthPad', 'pulse8', 'echoArp', 'mel'], 2, '*')],
+        [sec('Outro', 'A', 4, ['synthPad'], 1)], 84, 4, 10, ['echoPluck', 'synthLead', 'glass']) },
+    dawn: { name: 'Station dawn', time: 'Early morning', full: true, bpm: 60, beats: 4, swing: 0, wet: 0.6, seed: 227, scale: PENTA(4), range: [76, 92], lg: 0.022, lead: 'glass',
+      note: 'The most ambient: long pad swells, slow moving air and a few glassy bells, with a faint pulse arriving later. Before anyone else is up.',
+      prog: { A: CH([[52, 59, 63, 66, 40], [49, 56, 59, 64, 37], [45, 52, 56, 59, 33], [47, 54, 59, 61, 35]]), B: CH([[44, 51, 56, 59, 32], [45, 52, 57, 61, 33], [52, 56, 59, 64, 40], [47, 51, 54, 59, 35]]), C: CH([[49, 52, 56, 59, 37], [45, 49, 52, 57, 33], [47, 50, 54, 59, 35], [52, 54, 59, 63, 40]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['synthPad', 'air'], 1)],
+        [sec('Swells', 'A', 8, ['synthPad', 'air'], 1), sec('Bells', 'A', 8, ['synthPad', 'air', 'bells'], 1), sec('B', 'B', 8, ['synthPad', 'synthPadHi', 'mel'], 1, '*'),
+         sec('Pulse', 'B', 8, ['synthPad', 'echoArp', 'heart', 'mel'], 2, '*'), sec('Bridge', 'C', 8, ['synthPadHi', 'air'], 1)],
+        [sec('Outro', 'A', 4, ['synthPad', 'air'], 1)], 60, 4, 10, ['glass', 'synthLead', 'echoPluck']) },
+  });
+  // ---- four more tracks (2026-10-25) so every time of day has several to rotate through
+  Object.assign(TRACKS, {
+    promenade: { name: 'Promenade', time: 'Midday', full: true, bpm: 98, beats: 4, swing: 0.06, wet: 0.22, seed: 233, scale: PENTA(2), range: [74, 88], lg: 0.022, lead: 'chip', vinyl: true,
+      note: 'Happy, bouncy lo-fi with a cute lead and little bells. A sunny walk down the promenade at lunchtime.',
+      prog: { A: CH([[50, 54, 57, 61, 38], [47, 50, 54, 57, 35], [55, 59, 62, 66, 43], [45, 49, 52, 54, 33]]), B: CH([[55, 59, 62, 66, 43], [57, 61, 64, 67, 45], [54, 57, 61, 64, 42], [47, 50, 54, 59, 35]]), C: CH([[43, 47, 50, 54, 31], [45, 49, 52, 57, 33], [47, 50, 54, 57, 35], [45, 49, 52, 55, 33]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['keysLofi', 'pad'], 1)],
+        [sec('Beat', 'A', 8, ['keysLofi', 'drums', 'bass'], 2), sec('Tune', 'A', 8, ['keysLofi', 'drums', 'bass', 'mel'], 3, '*'), sec('B', 'B', 8, ['keys', 'arp', 'bass', 'drums', 'mel'], 3, 'box'),
+         sec('Bridge', 'C', 8, ['pad', 'bells', 'bass'], 1), sec('A again', 'A', 8, ['keysLofi', 'drums', 'bass', 'mel'], 2, '*')],
+        [sec('Outro', 'A', 4, ['keysLofi', 'pad'], 1)], 98, 4, 10, ['chip', 'box', 'pluck']) },
+    circuits: { name: 'Warm circuits', time: 'Afternoon', full: true, bpm: 78, beats: 4, swing: 0.1, wet: 0.35, seed: 239, scale: PENTA(0), range: [74, 88], lg: 0.02, lead: 'synthLead', vinyl: true,
+      note: 'Chill lo-fi keys and a soft beat with a gentle synth echo on top. A long, easy afternoon at the bench.',
+      prog: { A: CH([[48, 52, 55, 59, 62, 36], [45, 48, 52, 55, 59, 33], [53, 57, 60, 64, 41], [55, 59, 62, 65, 43]]), B: CH([[52, 55, 59, 62, 40], [57, 60, 64, 67, 45], [50, 53, 57, 60, 38], [55, 59, 62, 64, 43]]), C: CH([[53, 57, 60, 64, 41], [52, 55, 59, 62, 40], [50, 53, 57, 62, 38], [43, 47, 50, 55, 31]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['keysLofi', 'air'], 1)],
+        [sec('Beat', 'A', 8, ['keysLofi', 'drums', 'bass'], 2), sec('Echoes', 'A', 8, ['keysLofi', 'drums', 'bass', 'echoArp'], 2), sec('B', 'B', 8, ['keysLofi', 'drums', 'bass', 'mel'], 2, '*'),
+         sec('Bridge', 'C', 8, ['synthPad', 'bells', 'bass'], 1), sec('A again', 'A', 8, ['keysLofi', 'drums', 'bass', 'echoArp', 'mel'], 2, '*')],
+        [sec('Outro', 'A', 4, ['keysLofi'], 1)], 78, 4, 10, ['synthLead', 'pluck', 'glass']) },
+    porthole: { name: 'Porthole', time: 'Evening', full: true, bpm: 70, beats: 4, swing: 0.1, wet: 0.35, seed: 241, scale: PENTA(8), range: [75, 88], lg: 0.036, lead: 'pluck', vinyl: true,
+      note: 'Warm electric piano and a soft brushed beat, watching the stars go by through a porthole after dinner.',
+      prog: { A: CH([[56, 60, 63, 67, 44], [53, 56, 60, 63, 41], [49, 53, 56, 60, 37], [51, 55, 58, 60, 39]]), B: CH([[49, 53, 56, 60, 37], [51, 55, 58, 62, 39], [48, 51, 55, 58, 36], [53, 56, 60, 63, 41]]), C: CH([[46, 49, 53, 56, 34], [51, 55, 58, 61, 39], [44, 48, 51, 55, 32], [49, 53, 56, 58, 37]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['keys', 'pad'], 1)],
+        [sec('Keys', 'A', 8, ['keys', 'bass', 'brushes'], 1), sec('Tune', 'A', 8, ['keysLofi', 'bass', 'drums', 'mel'], 2, '*'), sec('B', 'B', 8, ['keysLofi', 'bass', 'drums', 'mel'], 2, '*'),
+         sec('Bridge', 'C', 8, ['pad', 'bells', 'bass'], 1), sec('A again', 'A', 8, ['keys', 'bass', 'brushes', 'mel'], 2, 'glass')],
+        [sec('Outro', 'A', 4, ['keys', 'pad'], 1)], 70, 4, 10, ['pluck', 'glass', 'box']) },
+    deepspace: { name: 'Deep space', time: 'Late night', full: true, bpm: 52, beats: 4, swing: 0, wet: 0.6, seed: 251, scale: PENTA(9), range: [76, 91], lg: 0.022, lead: 'glass',
+      note: 'Slow synth pads, drifting air and a few far-off bells, with a faint echo pattern later on. The ship gliding through the dark.',
+      prog: { A: CH([[45, 52, 57, 59, 64, 33], [41, 48, 53, 57, 60, 29], [43, 50, 55, 59, 62, 31], [40, 47, 52, 55, 59, 28]]), B: CH([[38, 45, 50, 53, 57, 26], [41, 48, 52, 57, 29], [45, 52, 55, 60, 33], [43, 50, 55, 59, 31]]), C: CH([[41, 48, 53, 57, 29], [40, 47, 52, 56, 28], [45, 52, 57, 60, 33], [43, 47, 50, 55, 31]]) },
+      form: () => longForm([sec('Intro', 'A', 4, ['synthPad', 'air'], 1)],
+        [sec('Drift', 'A', 8, ['synthPad', 'air'], 1), sec('Bells', 'A', 8, ['synthPad', 'bells', 'bass'], 1), sec('B', 'B', 8, ['synthPad', 'synthPadHi', 'mel'], 1, '*'),
+         sec('Echoes', 'C', 8, ['synthPad', 'echoArp', 'air'], 1), sec('B again', 'B', 8, ['synthPad', 'bass', 'mel'], 1, '*')],
+        [sec('Outro', 'A', 4, ['synthPad', 'air'], 1)], 52, 4, 10, ['glass', 'synthLead', 'box']) },
+  });
   // ---- every sample grows into a full ten-minute track: its own sections, a B part on the same chords moved round,
   // a quiet bridge, and its sections again with a new tune and lead each pass
   function grow(d) {
@@ -792,22 +891,22 @@ function createWrenMusic(opts) {
   }
   for (const d of Object.values(TRACKS)) if (!d.full) { grow(d); d.full = true; }
   // levels per track (measured against the hum in the Sound Lab)
-  const MLV = { morning: 1.12, evening: 0.851, latenight: 0.661, shift: 1.047, steady: 1.12, rounds: 1.035, firstlight: 0.891, midday: 1.012, lunch: 1.12, afternoon: 1.12, tea: 0.923, golden: 1.023, watch: 0.785, lullaby: 0.841 };
+  const MLV = { wake: 1.65, systems: 1.75, dawn: 1.9, promenade: 1.19, circuits: 0.95, porthole: 0.85, deepspace: 1.75,  morning: 1.12, evening: 0.851, latenight: 0.661, shift: 1.047, steady: 1.12, rounds: 1.035, firstlight: 0.891, midday: 1.012, lunch: 1.12, afternoon: 1.12, tea: 0.923, golden: 1.023, watch: 0.785, lullaby: 0.841 };
 
   // ---- the schedule: ship time of day, and a working set while you're on shift
   const PERIODS = [   // [name, from minute]; each runs to the next one's start
     ['late night', 0 * 60 + 30], ['early morning', 5 * 60], ['morning', 7 * 60 + 30], ['midday', 11 * 60],
     ['afternoon', 14 * 60], ['evening', 17 * 60 + 30], ['night', 21 * 60],
   ];
-  const SETS = {
-    'early morning': ['firstlight', 'morning'],
-    'morning': ['morning', 'firstlight', 'tea'],
-    'midday': ['midday', 'lunch'],
-    'afternoon': ['afternoon', 'tea', 'golden'],
-    'evening': ['evening', 'golden'],
-    'night': ['watch', 'lullaby', 'evening'],
-    'late night': ['latenight', 'watch'],
-    'working': ['shift', 'steady', 'rounds', 'midday', 'afternoon'],
+  const SETS = {   // several tracks for each time of day (the user, 2026-10-25); the player rotates through them
+    'early morning': ['dawn', 'wake', 'firstlight'],
+    'morning': ['systems', 'morning', 'firstlight', 'tea'],
+    'midday': ['midday', 'lunch', 'promenade'],
+    'afternoon': ['afternoon', 'tea', 'circuits', 'golden'],
+    'evening': ['evening', 'golden', 'porthole'],
+    'night': ['watch', 'lullaby', 'porthole', 'evening'],
+    'late night': ['latenight', 'deepspace', 'watch', 'dawn'],
+    'working': ['shift', 'steady', 'rounds', 'circuits'],
   };
   // the Music app's list: every track, grouped by when it plays
   const TIMES = ['Work', 'Early morning', 'Morning', 'Midday', 'Afternoon', 'Evening', 'Night', 'Late night'];
@@ -857,11 +956,15 @@ function createWrenMusic(opts) {
   let cur = null, curSet = null, seenSet = null, nextAt = ctx.currentTime + (opts.firstGap ?? 3), lastKey = null, lastMin = null, pendingChange = null;
   const applyVol = (f = 1.5) => { const v = enabled && !paused ? LEVEL * volume : 0; main.gain.cancelScheduledValues(ctx.currentTime); main.gain.setValueAtTime(main.gain.value, ctx.currentTime); main.gain.linearRampToValueAtTime(v, ctx.currentTime + f); };
   applyVol(0.5);
-  function pick(set) {   // a track from the set, never the one that just played (a chosen track is just that track)
+  // rotation: never the one that just played, and of the rest, the one heard least recently (never heard comes first;
+  // ties are broken at random). heard[key] counts up across the day and can be saved with the music settings.
+  const heard = { ...(opts.heard || {}) }; let heardN = Math.max(0, ...Object.values(heard).filter(Number.isFinite));
+  function pick(set) {
     if (set === 'chosen') return mode;
-    const list = SETS[set].filter(k => k !== lastKey); return list[(rnd() * list.length) | 0] || SETS[set][0];
+    const list = SETS[set].filter(k => k !== lastKey), best = Math.min(...list.map(k => heard[k] ?? -1));
+    const pool = list.filter(k => (heard[k] ?? -1) === best); return pool[(rnd() * pool.length) | 0] || SETS[set][0];
   }
-  function startNext(set, fadeIn) { const k = pick(set); cur = play(k, { fadeIn }); lastKey = k; curSet = set; log(`Playing ${TRACKS[k].name} (${set})`); }
+  function startNext(set, fadeIn) { const k = pick(set); cur = play(k, { fadeIn }); lastKey = k; heard[k] = ++heardN; curSet = set; log(`Playing ${TRACKS[k].name} (${set})`); }
   function update() {
     if (!enabled || paused) return;
     const now = ctx.currentTime, st = opts.shipTime();
@@ -904,7 +1007,7 @@ function createWrenMusic(opts) {
       if (cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; } pendingChange = null; nextAt = ctx.currentTime + 1;
     },
     skip() { return this.next(); },
-    state() { return { enabled, paused, mode, resting, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
+    state() { return { enabled, paused, mode, resting, heard: { ...heard }, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
     play,   // for tests and the harness: play(key, { startBar, fadeIn })
     TRACKS, SETS, PERIODS, LIST, periodAt,
   };
@@ -955,8 +1058,8 @@ let prefs = { on: true, vol: 0.7, mode: 'schedule', browse: false };
 try { const p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (p && typeof p === 'object') prefs = { ...prefs, ...p }; } catch (e) {}
 function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} }
 const VOLS = [['Low', 0.45], ['Medium', 0.7], ['High', 1]];
-const LIST0 = [['Work', ['shift', 'steady', 'rounds']], ['Early morning', ['firstlight']], ['Morning', ['morning']], ['Midday', ['midday', 'lunch']], ['Afternoon', ['afternoon', 'tea']], ['Evening', ['evening', 'golden']], ['Night', ['watch', 'lullaby']], ['Late night', ['latenight']]];
-const NAMES0 = { firstlight: 'First light', morning: 'Morning', tea: 'Tea break', midday: 'Midday', lunch: 'Lunch break', afternoon: 'Afternoon', golden: 'Golden hour', evening: 'Evening', watch: 'Night watch', lullaby: 'Lights out', latenight: 'Late night', shift: 'Shift start', steady: 'Steady work', rounds: 'On your rounds' };
+const LIST0 = [['Work', ['shift', 'steady', 'rounds']], ['Early morning', ['dawn', 'wake', 'firstlight']], ['Morning', ['systems', 'morning']], ['Midday', ['midday', 'lunch', 'promenade']], ['Afternoon', ['afternoon', 'tea', 'circuits']], ['Evening', ['evening', 'golden', 'porthole']], ['Night', ['watch', 'lullaby']], ['Late night', ['latenight', 'deepspace']]];
+const NAMES0 = { firstlight: 'First light', morning: 'Morning', tea: 'Tea break', midday: 'Midday', lunch: 'Lunch break', afternoon: 'Afternoon', golden: 'Golden hour', evening: 'Evening', watch: 'Night watch', lullaby: 'Lights out', latenight: 'Late night', shift: 'Shift start', steady: 'Steady work', rounds: 'On your rounds', wake: 'Wake cycle', systems: 'Systems online', dawn: 'Station dawn', promenade: 'Promenade', circuits: 'Warm circuits', porthole: 'Porthole', deepspace: 'Deep space' };
 let appSig = '';
 function appView() {
   const st = music ? music.state() : null, sched = prefs.mode === 'schedule';
@@ -991,8 +1094,8 @@ function renderSched() {
 }
 // draw the schedule before Start too (the module isn't made until the first tap)
 (function () { const P = [['late night', 30], ['early morning', 300], ['morning', 450], ['midday', 660], ['afternoon', 840], ['evening', 1050], ['night', 1260]];
-  const NAMES = { firstlight: 'First light', morning: 'Morning', tea: 'Tea break', midday: 'Midday', lunch: 'Lunch break', afternoon: 'Afternoon', golden: 'Golden hour', evening: 'Evening', watch: 'Night watch', lullaby: 'Lights out', latenight: 'Late night', shift: 'Shift start', steady: 'Steady work', rounds: 'On your rounds' };
-  const SETS = { 'early morning': ['firstlight', 'morning'], 'morning': ['morning', 'firstlight', 'tea'], 'midday': ['midday', 'lunch'], 'afternoon': ['afternoon', 'tea', 'golden'], 'evening': ['evening', 'golden'], 'night': ['watch', 'lullaby', 'evening'], 'late night': ['latenight', 'watch'], 'working': ['shift', 'steady', 'rounds', 'midday', 'afternoon'] };
+  const NAMES = NAMES0;
+  const SETS = { 'early morning': ['dawn', 'wake', 'firstlight'], 'morning': ['systems', 'morning', 'firstlight', 'tea'], 'midday': ['midday', 'lunch', 'promenade'], 'afternoon': ['afternoon', 'tea', 'circuits', 'golden'], 'evening': ['evening', 'golden', 'porthole'], 'night': ['watch', 'lullaby', 'porthole', 'evening'], 'late night': ['latenight', 'deepspace', 'watch', 'dawn'], 'working': ['shift', 'steady', 'rounds', 'circuits'] };
   const rows = P.map(([n, f], i) => [n, hm(f) + ' to ' + hm(P[(i + 1) % P.length][1]), SETS[n]]).sort((a, b) => (a[1] < b[1] ? -1 : 1)); rows.push(['working (on shift)', 'whenever you are clocked in', SETS.working]);
   $('#sched').innerHTML = '<tr><th>Time of day</th><th>Ship time</th><th>Tracks</th></tr>' + rows.map(([n, w, l]) => `<tr data-p="${n}"><td>${n}</td><td>${w}</td><td>${l.map(k => NAMES[k]).join(', ')}</td></tr>`).join(''); })();
 setInterval(() => {

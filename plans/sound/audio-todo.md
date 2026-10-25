@@ -10,7 +10,7 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 
 - **Sound in the game:** after 0.92.6 ships, on the user's go. The plan is `plans/sound/integration-plan.md`. It covers the decided sounds: hums, device and job sounds, doors, hatches, the lift and footsteps.
 - **Activity sounds in the game:** approved; hooks and an estimate (about 4 to 6 builder hours) are in the integration plan. Round 2 is picked, so this is one more build turn.
-- **Music in the game:** approved and built as `plans/sound/music-module.js`, ready to go in as one turn after the sound build (hooks, the Music app, a music check, about 3.5 to 5 builder hours). Not in the game yet, by the user's word. The Music app is designed and mocked up on the Wren Music Player page.
+- **Music in the game:** approved and built as `plans/sound/music-module.js`, ready to go in as one turn after the sound build (hooks, the Music app, a music check, about 3.5 to 5 builder hours; 21 tracks, rotating). Not in the game yet, by the user's word. The Music app is designed and mocked up on the Wren Music Player page.
 - **design-doc "Sound" section:** on `claude/sound-sd1`; merge it with the sound build. Update it when music and activity sounds are picked.
 
 ## Pages
@@ -24,6 +24,7 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 
 ## Done
 
+- 2026-10-25, 1:24 PM: morning take 2: Systems online picked for mornings, the old morning tracks kept. Several tracks per time of day, rotating (least recently heard first): Wake cycle and Station dawn added for early morning, four new tracks (Promenade, Warm circuits, Porthole, Deep space). 21 tracks in all.
 - 2026-10-25, about 1 PM: music on by default (Ship schedule); no music on arrival night (Day 0), it starts on Day 1; a Music app on the device (on/off, volume, Next, Ship schedule or choose a track), built into the module and mocked up on the player page.
 - 2026-10-25, 12:55 PM: all music approved. The eleven samples grown into full ten-minute tracks (14 in all); the music module and its test page (Wren Music Player) built.
 - 2026-10-25, 12:52 PM: Round 2 picked: clock in and out C (Lever and latch); tapping someone B (Bubble), louder, no mood range.

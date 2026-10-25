@@ -135,25 +135,32 @@ All the activity sounds on Wren Sounds: Activities (`plans/sound/activities.html
 
 ## Music: approved, built, ready to go in (the user, 2026-10-25, 12:55 PM Eastern)
 
-All the music is approved: the three full tracks (Morning, Evening, Late night) and the eleven samples, which are now full tracks too. That makes 14 tracks of about ten minutes each, all made live, each evolving through 18 to 40 sections with a new tune and lead instrument on every pass, so nothing loops audibly. Tradition music stays on hold (`plans/sound/audio-todo.md`).
+All the music is approved: the three full tracks (Morning, Evening, Late night) and the eleven samples, which are now full tracks too, plus seven more added since (below). That makes 21 tracks of about ten minutes each, all made live, each evolving through 18 to 40 sections with a new tune and lead instrument on every pass, so nothing loops audibly. Tradition music stays on hold (`plans/sound/audio-todo.md`).
 
-**The module:** `plans/sound/music-module.js` (about 350 lines, 32 KB). It is self-contained: its own small mixer, room echo and noise buffers, and one function, `createWrenMusic({ ctx, dest, shipTime })`. It can be pasted into the SND block or loaded as it is. It is **not in `starship-cadet.html`** yet. **Test page:** Wren Music Player (`plans/sound/music-player.html`, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy) runs the same module against a pretend ship clock with a speed slider.
+**The module:** `plans/sound/music-module.js` (about 450 lines, 44 KB). It is self-contained: its own small mixer, room echo and noise buffers, and one function, `createWrenMusic({ ctx, dest, shipTime })`. It can be pasted into the SND block or loaded as it is. It is **not in `starship-cadet.html`** yet. **Test page:** Wren Music Player (`plans/sound/music-player.html`, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy) runs the same module against a pretend ship clock with a speed slider.
 
 **The schedule** (ship time; while you're clocked in, the working set plays instead):
 
-| Time of day | Ship time | Tracks |
+| Time of day | Ship time | Tracks (rotating) |
 | --- | --- | --- |
-| Late night | 00:30 to 05:00 | Late night, Night watch |
-| Early morning | 05:00 to 07:30 | First light, Morning |
-| Morning | 07:30 to 11:00 | Morning, First light, Tea break |
-| Midday | 11:00 to 14:00 | Midday, Lunch break |
-| Afternoon | 14:00 to 17:30 | Afternoon, Tea break, Golden hour |
-| Evening | 17:30 to 21:00 | Evening, Golden hour |
-| Night | 21:00 to 00:30 | Night watch, Lights out, Evening |
-| Working (on shift) | whenever you're clocked in | Shift start, Steady work, On your rounds, Midday, Afternoon |
+| Late night | 00:30 to 05:00 | Late night, Deep space (new), Night watch, Station dawn |
+| Early morning | 05:00 to 07:30 | Station dawn, Wake cycle, First light |
+| Morning | 07:30 to 11:00 | Systems online (the user's pick), Morning, First light, Tea break |
+| Midday | 11:00 to 14:00 | Midday, Lunch break, Promenade (new) |
+| Afternoon | 14:00 to 17:30 | Afternoon, Tea break, Warm circuits (new), Golden hour |
+| Evening | 17:30 to 21:00 | Evening, Golden hour, Porthole (new) |
+| Night | 21:00 to 00:30 | Night watch, Lights out, Porthole, Evening |
+| Working (on shift) | whenever you're clocked in | Shift start, Steady work, On your rounds, Warm circuits |
+
+**21 tracks** (the user, 2026-10-25, 1:24 PM: "several tracks for each time of day and we rotate"):
+- The first 14.
+- Three ambient sci-fi synth tracks from morning take 2: Systems online (the user's pick for mornings), and Wake cycle and Station dawn (early morning).
+- Four new ones so every time of day has 3 or 4: Promenade (happy lo-fi, midday), Warm circuits (chill lo-fi with a synth echo, afternoon and work), Porthole (warm lo-fi, evening and night), Deep space (ambient synth, late night).
+
+**Rotation:** never the same track twice in a row; of the rest, the one heard least recently plays next (never heard first, ties at random). The module counts plays in `heard`; the game saves it with the music settings so the rotation carries on across days.
 
 **How it plays.**
-- It picks one track from the set, never the one that just played, and plays it through.
+- It picks a track from the set by the rotation (below) and plays it through.
 - Then it waits through a quiet gap before the next track: 1 to 3 minutes, which can be changed (`gapMin`/`gapMax`).
 - When the time of day changes, or you clock in or out, it waits for the end of the current section (at most 30 seconds) and cross-fades over 6 seconds into the new set.
 - A jump in ship time (sleeping through the night) changes over straight away.
@@ -168,7 +175,7 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 - **On / Off, and Next:** in Ship schedule, Next is another track from the same set; with a chosen track, it moves to the next one in the list.
 - **Volume:** Low / Medium / High (0.45 / 0.7 / 1).
 - **What plays:** Ship schedule (the default) or Choose a track. Choose a track shows every track grouped by Work, Early morning, Morning, Midday, Afternoon, Evening, Night and Late night (`music.LIST`). A chosen track repeats, with the usual quiet gap, until you change it or go back to Ship schedule.
-- **Saved per player,** apart from the game save, in the sound key: `starship-cadet-sound` = `{ on, vol, music: { on, vol, mode } }`. It carries over to a new game.
+- **Saved per player,** apart from the game save, in the sound key: `starship-cadet-sound` = `{ on, vol, music: { on, vol, mode, heard } }`. It carries over to a new game.
 - **Mockup:** the Music app on the Wren Music Player test page works against the pretend clock.
 - **Hooks:** the app's `act(verb, arg)` calls `music.setEnabled`, `setVolume`, `setMode` and `next`, then saves the key. Its `view()` reads `music.state()`. The device redraws an open app when it's told to (`deviceFire`); the builder confirms the call for a live "Now playing" line. A redraw on the app's own taps is enough to start with.
 
@@ -192,7 +199,7 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 2. Add the Music app (about 70 lines in section 19's style) and its saved choices.
 3. Add a music part to `sound_check.py`, with a fake ship clock:
    - each time of day plays from its own set, and the working set plays while on shift;
-   - no track repeats back to back over 50 picks;
+   - no track repeats back to back over 50 picks, and each set cycles through all its tracks before repeating;
    - a change waits for a section end of at most 30 s;
    - a sleep jump changes at once;
    - Off and pause go quiet;
