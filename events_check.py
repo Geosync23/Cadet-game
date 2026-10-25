@@ -955,6 +955,10 @@ with sync_playwright() as pw:
         g.step(10)
         if not g.ev("!!ACT"): break
     g.step(5); s2 = g.ev(PYO_ST); seat = s2[4]
+    # it travels (the user, 0.92.4: the only tray that leaves the mess hall): still yours a while later, out in the garden
+    g.step(90); s2b = g.ev("[roomAt(...player.here()), SHIP.player.tray, player.holding]")
+    print('  a while later, out of the mess hall:', s2b)
+    if not (s2b[0] != 'M' and s2b[1] == 'the fruit and greens you picked' and s2b[2] == 'tray'): fail(f"Pick-your-own: the tray didn't travel outside the mess hall ({s2b})")
     print('  finished:', s2[2:6], '|', s2[6][:90])
     if not (s2[2] == 'the fruit and greens you picked' and s2[3] == 'Your breakfast: the mess hall' and seat and seat.startswith('3-mess') and s2[5] == 'tray' and 'mess hall' in s2[6]):
         fail(f"Pick-your-own: finished, no tray of what you picked, toast or arrow at a mess seat ({s2})")
@@ -967,6 +971,10 @@ with sync_playwright() as pw:
         g.step(70); s3 = g.ev(PYO_ST)
         print('  at the seat:', s3[:5], '|', s3[6][:70])
         if not (s3[0] == 'eat' and not s3[2] and not s3[3] and 'you picked' in s3[6]): fail(f"Pick-your-own: a seat didn't eat the tray, or the arrow stayed ({s3})")
+        # sat down with it, the usual rule: get up mid-meal and the tray goes (0.92.4)
+        g.ev("player.steer = { x: 1, z: 0, k: 1 }"); g.step(10); g.ev("player.steer = null"); g.step(5); s3b = g.ev(PYO_ST)
+        print('  got up mid-meal:', s3b[:3], '|', s3b[6][:60])
+        if s3b[0] == 'eat' or s3b[2] or 'leave your tray' not in s3b[6]: fail(f"Pick-your-own: getting up from what you picked kept the tray ({s3b})")
         g.ev("actEnd(true); SHIP.player.tray = null; SHIP.events.joined = SHIP.events.joined.filter(k => !k.startsWith('pick-your-own@'))"); g.ev(f"setShipNow(({d} - 1) * 1440 + 6 * 60 + 25)"); g.step(30)
         j = g.ev(JOIN); picking(); s4a = g.ev(f"[ACT && ACT.kind, !!(ACT && ACT.def.onDone), (() => {{ const m = shipNow() - ({d} - 1) * 1440, e = eventsOn({d}).find(e => e.id === 'pick-your-own'); return m >= e.from && m < e.to; }})()]")
         g.ev("if (ACT) ACT.done = ACT.def.mins - .05"); g.step(60)
@@ -974,6 +982,12 @@ with sync_playwright() as pw:
         print('  picking again the same day, inside the window:', j, s4a, '| tray', s4[2])
         if not (j and s4a[0] == 'ixGarden' and s4a[2]): fail(f"Pick-your-own: the second pick wasn't inside the tradition ({j}, {s4a})")
         if s4[2]: fail(f"Pick-your-own: a second tray the same day ({s4[:5]})")
+        # off Deck 3 with what you picked, the hunger arrow still points at a mess seat (it travels "to the mess"; RV12, 0.92.4)
+        g.ev("actEnd(true); clearGoal(); NEED_GOAL = null; SHIP.player.tray = PYO_DISH; SHIP.player.trayGo = true; goToDeck(4)"); g.step(20)
+        g.ev("SHIP.player.needs.hunger = 5; needGoal('hunger')"); g.step(4)
+        s5 = g.ev("[deckDef.num, SHIP.player.tray, IX_GOAL && IX_GOAL.label, IX_GOAL && IX_GOAL.deck, IX_GOAL && IX_GOAL.place]")
+        print('  on Deck 4 with what you picked:', s5)
+        if not (s5[0] == 4 and s5[1] and s5[2] == 'A seat for your tray' and s5[3] == 3 and str(s5[4]).startswith('3-mess')): fail(f"Pick-your-own: off Deck 3 the arrow isn't at a mess seat ({s5})")
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
