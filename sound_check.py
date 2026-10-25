@@ -1,0 +1,90 @@
+# Starship Cadet: sound check (section 27, the SND block; plans/sound/integration-plan.md "Checks to add")
+# Sound is silent in every other check (webdriver). Here the game is opened with ?sound&soundlog, which lets SND start
+# on a real (Playwright) click and keeps a list of what it played in SND.log.
+# The builders each add their own check functions and one entry each to CHECKS at the bottom:
+#   core (SD1): silent by default; starts on a tap with ?sound; Settings rows; pause/hidden suspend; SND.fx never draws on
+#   R(); the hum and the core hooks (turns 2-5)
+#   activities (FX20) and music (FX22b): their own functions
+# Setup and environment as for cadet_test.py.  Run:  python3 sound_check.py BUILD.html
+import sys, os, pathlib
+exec(open(__file__.replace('sound_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
+from playwright.sync_api import sync_playwright
+
+ok = True
+def check(cond, msg):
+    global ok
+    if not cond: ok = False; print('FAIL', msg)
+    return cond
+
+def open_with(g, query):
+    """Reopen the game's page with another query (the Game class opens it with ?nosave&debug)."""
+    g.page.goto('file://' + str(g.tmp) + query)
+    g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=60000)
+
+def click_world(g):
+    g.page.mouse.click(450, 380)   # a real (trusted) tap on the ship
+    g.step(3)
+
+# ---- core (SD1) ----
+def check_silent_by_default(pw, path):
+    g = Game(pw, path)
+    try:
+        g.step(30); click_world(g)
+        st = g.ev("({ allowed: SND._.allowed, state: SND._.state(), ctx: !!SND.ctx })")
+        check(st['allowed'] is False and st['ctx'] is False and st['state'] == 'off', f'silent under webdriver: {st}')
+    finally: g.close()
+
+def check_start_and_fx(pw, path):
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30)
+        check(g.ev('SND.ctx === null'), 'nothing starts before a tap')
+        click_world(g)
+        check(g.ev('!!SND.ctx'), 'a tap starts the sound')
+        seed0 = g.ev('seed')
+        names = g.ev('Object.keys(SND._.FX)')
+        for n in ['tap', 'open', 'close', 'no', 'jobPosted', 'jobDone', 'mail', 'heads', 'doorOpen', 'doorClose', 'hatchOpen', 'hatchClose',
+                  'liftPress', 'liftDoorsOpen', 'liftDoorsClose', 'liftRide', 'liftArrive', 'step']:
+            check(n in names, f'core sound {n} is registered')
+        g.ev("SND.log.length = 0; for (let k = 0; k < 200; k++) SND.fx(['tap', 'mail', 'doorOpen', 'step'][k % 4], { surface: 'plate' })")
+        check(g.ev('seed') == seed0, 'SND.fx never draws on R()')
+        check(g.ev('SND.log.length') == 200, 'every fx call is logged with ?soundlog')
+        far = g.ev("(() => { const p = player.obj.position; SND.log.length = 0; SND.fx('doorOpen', { x: p.x + 20, z: p.z }); return SND.log.length; })()")
+        check(far == 0, 'a door 20 tiles away plays nothing')
+        near = g.ev("(() => { const p = player.obj.position; SND.log.length = 0; SND.fx('doorOpen', { x: p.x + 3, z: p.z }); SND.fx('doorOpen', { x: p.x, z: p.z }); return SND.log.map(e => e.g); })()")
+        check(len(near) == 2 and near[0] < near[1], f'a nearer door is louder: {near}')
+    finally: g.close()
+
+def check_settings_rows(pw, path):
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30)
+        txt = g.ev("JSON.stringify(SND.settingsBlocks())")
+        check('Sound' in txt and 'Volume' in txt and 'Medium' in txt, 'Settings has Sound and Volume rows')
+        view = g.ev("JSON.stringify(DEV.apps ? (DEV.apps.settings || {}).id || '' : '')")
+        on = g.ev("(() => { SND.settingsAct('sound', false); const a = SND.prefs.on; SND.settingsAct('sound', true); SND.settingsAct('soundvol', 'high'); return [a, SND.prefs.on, SND.prefs.vol]; })()")
+        check(on == [False, True, 'high'], f'Sound Off/On and Volume change the settings: {on}')
+    finally: g.close()
+
+def check_pause_suspends(pw, path):
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        g.ev('pauseSet(true)'); g.step(5)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'suspended'", timeout=10000)
+        check(g.ev("SND._.state()") == 'suspended', 'pause suspends the sound')
+        g.ev('pauseSet(false)'); g.step(5)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        check(g.ev("SND._.state()") == 'running', 'resume runs it again')
+    finally: g.close()
+
+CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends]
+# (activities and music add theirs here)
+
+with sync_playwright() as pw:
+    for c in CHECKS:
+        try: c(pw, sys.argv[1])
+        except Exception as e: check(False, f'{c.__name__}: {e}')
+print('SOUND CHECK OK' if ok else 'SOUND CHECK FAILED')
+sys.exit(0 if ok else 1)

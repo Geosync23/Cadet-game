@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.92.6
+   STARSHIP CADET: CSV Wren                           build 0.93.0-s.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.92.6';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-s.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -12851,7 +12851,7 @@ function devNewAct(verb) {
 }
 deviceOn('close', () => { devNewSure = false; });
 deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
-  act(verb, arg) { if (devNewAct(verb)) return; const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
+  act(verb, arg) { if (devNewAct(verb)) return; if (SND.settingsAct(verb, arg)) return; const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
     else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg;
     else if (verb === 'teach' && TEACH_MODES[arg]) st.teach = arg; },
@@ -12863,6 +12863,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
+      ...SND.settingsBlocks(),                         // section 27: Sound On/Off and Volume
       ...(devNewSure ? [{ kind: 'text', text: 'Start a new game? Your current game will be lost.', mark: 'urgent' }, { kind: 'buttons', items: [{ label: 'Start over', action: { app: 'settings', do: 'newgo' } }, { label: 'Keep playing', action: { app: 'settings', do: 'newkeep' } }] }]
         : [{ kind: 'text', text: 'Start the game again from the beginning' }, { kind: 'buttons', items: [{ label: 'New game', action: { app: 'settings', do: 'newgame' } }] }]),
       { kind: 'text', text: 'Heads-ups before things on your Schedule start (your appointments always remind you)' }, { kind: 'buttons', items: on(R.on, 'heads') },
@@ -62464,6 +62465,440 @@ padOn('unuse', () => {                                     // a touch takes back
 // ---- end of slot: Controller engineer ----
 
 // =====================================================================
+// 27. SOUND (the sound designer SD1, 0.93.0; plans/sound/integration-plan.md, plans/sound-build-brief.md)
+// One sealed block. Everything is made live with Web Audio: no files. Rules: Math.random only (never R()); it draws
+// nothing and changes nothing in the ship (it only reads where you are and what happens); silent and never even starts
+// under webdriver (every check), ?mute and ?nosave, unless ?sound is given (sound_check.py). It starts on your first tap
+// or key press (a browser rule), suspends while the game is paused, in Tiles or hidden, and costs nothing when off.
+// Public: SND.fx(name, { x, z, crew, vol, ... }) plays a named one-shot (near you: x, z for distance and side; crew:
+// quieter and capped); SND.ctx; SND.bus.music (under the master volume); SND.whenReady(fn); SND.onFrame (a list of
+// fn(run) the main loop calls); SND.settingsBlocks() / SND.settingsAct(verb, arg) (Settings: Sound On/Off, Volume);
+// SND.prefs (the starship-cadet-sound key: { on, vol, ... }; the music slot keeps its own part under prefs.music);
+// SND.log (a list of what played, with ?soundlog).
+// =====================================================================
+const SND = (() => {
+  const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
+  const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
+  let ctx = null, BUS = null, ROUTE = null, WHITE = null, BROWN = null;
+  const LOOPS = new Set();
+  const rand = (a, b) => a + Math.random() * (b - a);
+  const pick = a => a[(Math.random() * a.length) | 0];
+  function makeBuffers(c) {
+    const sr = c.sampleRate;
+    const w = c.createBuffer(1, sr * 3, sr), wd = w.getChannelData(0);
+    for (let i = 0; i < wd.length; i++) wd[i] = Math.random() * 2 - 1;
+    const b = c.createBuffer(1, sr * 4, sr), bd = b.getChannelData(0);
+    let last = 0;
+    for (let i = 0; i < bd.length; i++) { last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02; bd[i] = last * 3.5; }
+    // smooth the loop seam
+    const n = 2000; for (let i = 0; i < n; i++) { const k = i / n; bd[i] = bd[i] * k + bd[bd.length - n + i] * (1 - k); }
+    const ir = c.createBuffer(2, sr * 1.8, sr);
+    for (let ch = 0; ch < 2; ch++) {
+      const d = ir.getChannelData(ch); let lp = 0;
+      for (let i = 0; i < d.length; i++) { const t = i / sr; lp = lp * 0.6 + (Math.random() * 2 - 1) * 0.4; d[i] = lp * Math.exp(-t * 3.2) * (t < 0.012 ? t / 0.012 : 1); }
+    }
+    return { w, b, ir };
+  }
+
+  // Builds the mixing desk for a context: four layer buses -> master -> soft limiter -> out.
+  function buildGraph(c, dest) {
+    const buf = makeBuffers(c);
+    const comp = c.createDynamicsCompressor();
+    comp.threshold.value = -16; comp.knee.value = 12; comp.ratio.value = 4; comp.attack.value = 0.008; comp.release.value = 0.3;
+    const master = c.createGain(); master.gain.value = 1;
+    master.connect(comp); comp.connect(dest);
+    const verb = c.createConvolver(); verb.buffer = buf.ir;
+    const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
+    const g = {};
+    // fixed trims set by measuring each layer against the hum (plans/sound, the mockups' __measure)
+    const TRIM = { hum: 0.4, steps: 1.0, ui: 1, music: 1 };   // music: the music module applies its own level
+    for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
+    return { buf, comp, master, verb, ...g };
+  }
+
+  function conn(node, bus, pan, wet) {
+    let out = node;
+    if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; node.connect(p); out = p; }
+    out.connect(bus);
+    if (wet) { const s = ctx.createGain(); s.gain.value = wet; out.connect(s); s.connect(BUS.verb); }
+  }
+  function env(g, t, peak, a, d) {
+    g.gain.setValueAtTime(0.0001, t);
+    g.gain.exponentialRampToValueAtTime(peak, t + a);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + a + d);
+  }
+  function tone(t, f, d, o = {}) {
+    const osc = ctx.createOscillator(), g = ctx.createGain(), a = o.a ?? 0.006;
+    osc.type = o.type || 'sine';
+    osc.frequency.setValueAtTime(f, t);
+    if (o.to) osc.frequency.exponentialRampToValueAtTime(o.to, t + (o.toT ?? d * 0.7));
+    env(g, t, o.gain ?? 0.2, a, d);
+    if (o.lp) { const f2 = ctx.createBiquadFilter(); f2.type = 'lowpass'; f2.frequency.value = o.lp; osc.connect(f2); f2.connect(g); } else osc.connect(g);
+    conn(g, o.bus || ROUTE.ui, o.pan, o.wet);
+    osc.start(t); osc.stop(t + a + d + 0.05);
+  }
+  function noise(t, d, o = {}) {
+    const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE;
+    const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass';
+    f.frequency.setValueAtTime(o.f || 1000, t);
+    if (o.fTo) f.frequency.exponentialRampToValueAtTime(o.fTo, t + (o.fT ?? d));
+    f.Q.value = o.q ?? 1;
+    const g = ctx.createGain();
+    if (o.swell) { g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(o.gain, t + d * o.swell); g.gain.exponentialRampToValueAtTime(0.0001, t + d); }
+    else env(g, t, o.gain ?? 0.1, o.a ?? 0.003, d);
+    src.connect(f); f.connect(g); conn(g, o.bus || ROUTE.ui, o.pan, o.wet);
+    src.loop = d > src.buffer.duration - 0.3;
+    src.start(t, src.loop ? 0 : Math.random() * (src.buffer.duration - d - 0.2)); src.stop(t + d + 0.1);
+  }
+  // Soft bell: a sine with two quieter overtones that fade faster.
+  function bell(t, f, d, gain, o = {}) {
+    tone(t, f, d, { gain, a: 0.004, ...o });
+    tone(t, f * 2, d * 0.55, { gain: gain * 0.22, a: 0.003, ...o });
+    tone(t, f * 3.01, d * 0.25, { gain: gain * 0.07, a: 0.002, ...o });
+  }
+  function marimba(t, f, gain, o = {}) {
+    tone(t, f, 0.42, { gain, a: 0.003, ...o });
+    tone(t, f * 4, 0.07, { gain: gain * 0.18, a: 0.002, ...o });
+  }
+
+  /* ---------- one-shot sounds ---------- */
+  const N = { C5: 523.25, D5: 587.33, E5: 659.25, G5: 783.99, A5: 880, C6: 1046.5, D6: 1174.7, E6: 1318.5, G4: 392, A4: 440, C4: 261.63, E4: 329.63 };
+  const SFX = {
+    tapA: t => { tone(t, 1760, 0.04, { type: 'triangle', gain: 0.06, lp: 3000 }); tone(t, 880, 0.035, { gain: 0.05 }); },
+    tapB: t => tone(t, 620, 0.07, { gain: 0.1, to: 940, toT: 0.05 }),
+    tapC: t => { noise(t, 0.025, { f: 2400, q: 5, gain: 0.16 }); tone(t, 1180, 0.03, { gain: 0.04 }); },
+    open: t => { tone(t, N.C5, 0.12, { gain: 0.11, type: 'triangle', lp: 2400 }); tone(t + 0.07, N.G5, 0.2, { gain: 0.11, type: 'triangle', lp: 2400 }); },
+    close: t => { tone(t, N.G5, 0.1, { gain: 0.09, type: 'triangle', lp: 2400 }); tone(t + 0.07, N.C5, 0.18, { gain: 0.09, type: 'triangle', lp: 2400 }); },
+    jobPosted: t => { marimba(t, N.E5, 0.13); marimba(t + 0.13, N.A5, 0.12); },
+    jobDone: t => { marimba(t, N.C5, 0.08); marimba(t + 0.09, N.E5, 0.08); marimba(t + 0.18, N.G5, 0.08); bell(t + 0.27, N.C6, 1.1, 0.08, { wet: 0.25 }); },
+    mailA: t => { tone(t, 480, 0.11, { gain: 0.12, to: 760, toT: 0.08 }); tone(t + 0.14, 640, 0.14, { gain: 0.12, to: 1020, toT: 0.09 }); },
+    mailB: t => { bell(t, N.G5, 0.9, 0.09, { wet: 0.2 }); bell(t + 0.03, N.D6, 0.8, 0.05, { wet: 0.2 }); },
+    headsA: t => { bell(t, N.A5, 0.6, 0.1, { wet: 0.2 }); bell(t + 0.24, N.A5, 0.9, 0.08, { wet: 0.2 }); },
+    headsB: t => { [N.A4, N.C5 * 1.0595, N.E5].forEach((f, i) => tone(t + i * 0.09, f, 0.7 - i * 0.1, { type: 'triangle', gain: 0.07, a: 0.06, lp: 1800, wet: 0.2 })); },
+    no: t => { tone(t, N.E4, 0.12, { type: 'triangle', gain: 0.12, lp: 1100 }); tone(t + 0.16, N.C4, 0.2, { type: 'triangle', gain: 0.12, lp: 1000 }); },
+    arch: t => noise(t, 0.7, { brown: true, ft: 'lowpass', f: 260, fTo: 900, fT: 0.35, q: 0.5, gain: 0.22, swell: 0.45 }),
+  };
+
+  /* ---------- doors, version 2: a pneumatic release, a heavy panel rolling on its track, a solid stop. No tones. ---------- */
+  // The panel's rumble: low noise through a moving band, roughened by a fast wobble like rollers on a track.
+  function slide(t, d, o) {
+    const src = ctx.createBufferSource(); src.buffer = BROWN; src.loop = true;
+    const bp = ctx.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = o.q ?? 0.9;
+    bp.frequency.setValueAtTime(o.f0, t); bp.frequency.linearRampToValueAtTime(o.f1, t + d);
+    const rough = ctx.createGain(); rough.gain.value = 1;
+    const lfo = ctx.createOscillator(); lfo.type = 'triangle'; lfo.frequency.setValueAtTime(o.rate, t); lfo.frequency.linearRampToValueAtTime(o.rate * 0.7, t + d);
+    const lg = ctx.createGain(); lg.gain.value = o.rough; lfo.connect(lg); lg.connect(rough.gain);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.0001, t); g.gain.linearRampToValueAtTime(o.gain, t + d * 0.22); g.gain.setValueAtTime(o.gain, t + d * 0.65); g.gain.linearRampToValueAtTime(0.0001, t + d);
+    src.connect(bp); bp.connect(rough); rough.connect(g);
+    let out = g;
+    if (o.pan !== undefined && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.setValueAtTime(o.pan, t); p.pan.linearRampToValueAtTime(o.panTo ?? o.pan, t + d); g.connect(p); out = p; }
+    out.connect(o.bus || ROUTE.ui);
+    if (o.wet) { const sg = ctx.createGain(); sg.gain.value = o.wet; out.connect(sg); sg.connect(BUS.verb); }
+    noise(t, d, { f: o.f1 * 4, q: 0.8, gain: o.gain * 0.1, swell: 0.4, bus: o.bus, pan: o.panTo }); // the edge brushing its seal
+    src.start(t, Math.random() * 2); src.stop(t + d + 0.05); lfo.start(t); lfo.stop(t + d + 0.05);
+  }
+  // A body impact: a burst of deep noise with a short low push under it.
+  function thud(t, o) {
+    const d = o.d ?? 0.18, b = o.bus || ROUTE.ui, body = o.body ?? 68;
+    noise(t, d, { brown: true, ft: 'lowpass', f: o.f ?? 180, q: 0.7, gain: o.gain, a: 0.002, bus: b, wet: o.wet });
+    tone(t, body, d, { gain: o.gain * 0.5, to: body * 0.6, toT: d * 0.6, a: 0.002, bus: b });
+  }
+  // Air: a bright rush with a deeper body under it, both falling as the pressure drops.
+  function hiss(t, d, gain, o = {}) {
+    const f = o.f ?? 3800;
+    noise(t, d, { f, fTo: f * 0.5, q: 0.6, gain, a: 0.012, bus: o.bus, pan: o.pan, wet: 0.15 });
+    noise(t, d * 0.8, { f: 650, fTo: 400, q: 0.7, gain: gain * 0.8, a: 0.015, bus: o.bus, pan: o.pan });
+  }
+  // A latch or lever: a short hard knock of metal on metal.
+  function clack(t, gain, o = {}) {
+    noise(t, 0.012, { ft: 'highpass', f: 1500, gain, a: 0.0008, bus: o.bus, pan: o.pan });
+    noise(t, 0.04, { f: o.f ?? 900, q: 4, gain: gain * 1.4, a: 0.001, bus: o.bus, pan: o.pan });
+  }
+  // Struck metal or wood: noise exciting narrow bands, so it rings like a body, not like a beep.
+  function ring(t, freqs, gain, o = {}) {
+    freqs.forEach((f, i) => noise(t, o.d ?? 0.25, { f, q: o.q ?? 25, gain: gain / (1 + i * 0.6), a: 0.001, bus: o.bus, pan: o.pan, wet: o.wet ?? 0.25 }));
+  }
+  const DOORS = {
+    roomA: { lv: 0.33, d: 0.55, f: [200, 520], g: 0.9, rate: 30, rough: 0.3, hiss: 0.09, hissD: 0.5, thud: 0.5, seal: 0.25 },
+    roomB: { lv: 0.2, d: 0.75, f: [130, 340], g: 1.2, rate: 21, rough: 0.45, hiss: 0.04, hissD: 0.3, thud: 0.7, seal: 0.3, ring: [170, 430], ringG: 2 },
+    roomC: { lv: 0.5, d: 0.5, f: [260, 600], g: 0.6, rate: 38, rough: 0.18, hiss: 0.05, hissD: 0.35, thud: 0.35, seal: 0.18 },
+    hatchA: { lv: 0.2, d: 1.0, f: [100, 260], g: 1.3, rate: 16, rough: 0.5, hiss: 0.04, hissD: 0.35, thud: 0.8, seal: 0.25, latch: 2, ring: [150, 395, 720], ringG: 3 },
+    hatchB: { lv: 0.24, d: 0.8, f: [120, 300], g: 1.1, rate: 19, rough: 0.35, hiss: 0.16, hissD: 0.9, thud: 0.75, seal: 0.35, lever: true },
+    hatchC: { lv: 0.48, d: 0.45, f: [300, 760], g: 0.7, rate: 44, rough: 0.6, hiss: 0.03, hissD: 0.25, thud: 0.35, seal: 0.15, latch: 1, ring: [510, 1290], ringG: 1.5 },
+  };
+  // a level trim per door, so each one sits under the hum (set by measuring)
+  function trim(level, bus) { const g = ctx.createGain(); g.gain.value = level; g.connect(bus || ROUTE.ui); return g; }
+  function door(t, open, k, o = {}) {
+    const p = typeof k === 'string' ? DOORS[k] : k, b = trim(p.lv, o.bus);
+    let s = t;
+    if (open) {
+      if (p.latch) { for (let i = 0; i < p.latch; i++) clack(s + i * 0.11, 0.18, { bus: b }); s += 0.1 + p.latch * 0.11; }
+      if (p.lever) { clack(s, 0.2, { f: 500, bus: b }); thud(s + 0.02, { gain: 0.35, d: 0.12, f: 220, bus: b }); s += 0.18; }
+      hiss(s, p.hissD, p.hiss, { bus: b }); s += 0.05;
+    }
+    slide(s, p.d, { f0: open ? p.f[0] : p.f[1], f1: open ? p.f[1] : p.f[0], gain: p.g, rate: p.rate, rough: p.rough, bus: b, wet: 0.15, pan: o.pan, panTo: o.panTo });
+    const e = s + p.d;
+    thud(e - 0.01, { gain: open ? p.thud * 0.6 : p.thud, bus: b, wet: 0.2 });
+    if (p.ring) ring(e, p.ring, p.ringG * (open ? 0.5 : 1), { bus: b });
+    if (!open) {
+      noise(e - 0.03, 0.22, { brown: true, ft: 'lowpass', f: 420, gain: p.seal, swell: 0.3, bus: b }); // the seal closing
+      hiss(e + 0.06, 0.25, p.hiss * 0.5, { f: 2400, bus: b });
+      if (p.latch) clack(e + 0.16, 0.15, { bus: b });
+      if (p.lever) clack(e + 0.2, 0.18, { f: 500, bus: b });
+    }
+  }
+
+  /* ---------- the lift, version 2: its own doors, ride, settle and chime ---------- */
+  const LIFTS = {
+    A: { note: 'Grand: wide doors parting from the middle, a smooth ride with soft rail joints, a deep clunk as the car settles, and two notes on a struck metal chime with a gentle shimmer.',
+      door: { lv: 0.3, d: 0.85, f: [120, 320], g: 1.0, rate: 22, rough: 0.3, hiss: 0.08, hissD: 0.5, thud: 0.6, seal: 0.25 },
+      ride: { lv: 0.6, rumble: 0.35, clack: 0.12, gap: 0.65, whoosh: 0.12 }, arrive: 1, clunk: 1, chime: [[466.16, 0], [349.23, 0.42]], ratio: 3.5, index: 2.2, trem: 5.2 },
+    B: { note: 'Service: heavier and more mechanical. The doors rumble, the ride rattles over every rail joint, the brake grabs with a ratchet, and one deep chime bar rings out.',
+      door: { lv: 0.22, d: 1.0, f: [100, 260], g: 1.3, rate: 16, rough: 0.5, hiss: 0.05, hissD: 0.35, thud: 0.8, seal: 0.3 },
+      ride: { lv: 0.56, rumble: 0.45, clack: 0.22, gap: 0.42, whoosh: 0.06 }, arrive: 0.85, clunk: 1.0, ratchet: true, chime: [[174.61, 0]], ratio: 2.76, index: 3, trem: 0 },
+    C: { note: 'Smooth: quieter doors, a gliding ride with a rising rush of air and no rail joints, a soft settle, and three falling notes on the chime.',
+      door: { lv: 0.37, d: 0.7, f: [160, 420], g: 0.8, rate: 30, rough: 0.2, hiss: 0.1, hissD: 0.55, thud: 0.45, seal: 0.22 },
+      ride: { lv: 1, rumble: 0.25, clack: 0, gap: 1, whoosh: 0.2 }, arrive: 0.8, clunk: 0.7, chime: [[622.25, 0], [466.16, 0.28], [392, 0.56]], ratio: 4, index: 1.5, trem: 4.5 },
+  };
+  // Two door leaves parting from the middle, one heard on each side.
+  function liftDoors(t, open, v, b) {
+    const p = LIFTS[v].door;
+    if (open) clack(t, 0.14 * p.lv, { f: 700, bus: b }); // the interlock lets go
+    const t2 = open ? t + 0.08 : t;
+    door(t2, open, p, { bus: b, pan: open ? -0.15 : -0.85, panTo: open ? -0.85 : -0.15 });
+    door(t2 + 0.012, open, p, { bus: b, pan: open ? 0.15 : 0.85, panTo: open ? 0.85 : 0.15 });
+  }
+  // A real button: a firm mechanical press, not a device beep.
+  // Version 4: the deck button is the Mail B soft bell made short, with a soft press under it and its own notes.
+  const PRESS = {
+    A: { note: 'Press: a soft press, then one short high bell. Mail rings two notes together and lingers; this is one note, quickly gone.', notes: [[N.E6, 0, 0.32, 0.07]] },
+    B: { note: 'Two-step: a soft press, then two bell notes one after the other, quickly rising, like the button lighting up.', notes: [[N.C6, 0, 0.22, 0.055], [1567.98, 0.07, 0.34, 0.05]] },
+    C: { note: 'Low press: a firmer press and one lower, rounder bell note. The calmest, and pitched below Mail.', notes: [[N.D5, 0, 0.4, 0.08]], firm: true },
+  };
+  let pressV = 'B';                                        // the user's pick
+  function liftPress(t, b, v = pressV) {
+    const p = PRESS[v];
+    noise(t, 0.012, { ft: 'lowpass', f: 1400, gain: p.firm ? 0.05 : 0.03, a: 0.001, bus: b });                  // the button going in
+    tone(t, p.firm ? 150 : 190, 0.05, { gain: p.firm ? 0.06 : 0.04, to: 110, a: 0.002, bus: b });
+    p.notes.forEach(([f, dt, d, g]) => bell(t + 0.03 + dt, f, d, g, { wet: 0.15, bus: b }));
+  }
+  function liftRide(t, d, v, b) {
+    const r = LIFTS[v].ride; b = trim(r.lv, b);
+    noise(t, d, { brown: true, ft: 'lowpass', f: 140, fTo: 220, fT: d * 0.5, q: 0.8, gain: r.rumble, swell: 0.35, bus: b }); // the car's rumble
+    noise(t, d, { f: 300, fTo: 900, fT: d * 0.5, q: 0.7, gain: r.whoosh, swell: 0.5, bus: b, wet: 0.2 });                  // air in the shaft
+    if (r.clack) for (let s = t + 0.5; s < t + d - 0.5; s += r.gap * (1 + rand(-0.08, 0.08))) {                           // rail joints going by
+      const k = Math.sin(Math.PI * (s - t) / d);
+      thud(s, { gain: r.clack * k, d: 0.07, f: 300, bus: b });
+      clack(s + 0.06, r.clack * 0.25 * k, { f: 600, bus: b });
+    }
+  }
+  // Struck chime bar: a bell made by frequency modulation, so it rings like metal and sits apart from the device beeps.
+  function fmBell(t, f, d, gain, ratio, index, trem, b) {
+    const car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), g = ctx.createGain();
+    car.frequency.value = f; mod.frequency.value = f * ratio;
+    mg.gain.setValueAtTime(f * index, t); mg.gain.exponentialRampToValueAtTime(f * 0.05, t + d * 0.5);
+    mod.connect(mg); mg.connect(car.frequency);
+    env(g, t, gain, 0.002, d);
+    let src = car;
+    if (trem) { const tg = ctx.createGain(); tg.gain.value = 0.75; const l = ctx.createOscillator(); l.frequency.value = trem; const lg = ctx.createGain(); lg.gain.value = 0.25; l.connect(lg); lg.connect(tg.gain); car.connect(tg); src = tg; l.start(t); l.stop(t + d + 0.1); }
+    src.connect(g); conn(g, b || ROUTE.ui, 0, 0.35);
+    car.start(t); mod.start(t); car.stop(t + d + 0.1); mod.stop(t + d + 0.1);
+  }
+  // The car arrives: the brake takes it with a deep clunk, it settles, the brake air lets go, then the chime. Returns when the doors can open.
+  function liftArrive(t, v, b) {
+    const L = LIFTS[v], w = L.clunk; b = trim(L.arrive, b);
+    thud(t, { gain: 0.55 * w, d: 0.35, f: 120, body: 50, bus: b, wet: 0.25 });
+    clack(t, 0.12 * w, { f: 450, bus: b });
+    thud(t + 0.2, { gain: 0.22 * w, d: 0.2, f: 100, body: 46, bus: b });
+    thud(t + 0.36, { gain: 0.1 * w, d: 0.15, f: 90, body: 44, bus: b });
+    if (L.ratchet) for (let i = 0; i < 5; i++) clack(t + 0.05 + i * 0.045, 0.08 * (1 - i * 0.15), { f: 1400, bus: b });
+    hiss(t + 0.5, 0.45, 0.05, { f: 2600, bus: b });
+    const c = t + 0.85;
+    L.chime.forEach(([f, dt]) => fmBell(c + dt, f, 2.2, 0.09, L.ratio, L.index, L.trem, b));
+    return c + 0.5 + L.chime[L.chime.length - 1][1];
+  }
+  function liftTrip(t, v, b) {
+    liftPress(t, b); liftDoors(t + 0.4, false, v, b);
+    const rs = t + 0.4 + LIFTS[v].door.d + 0.5, rd = 3.6;
+    liftRide(rs, rd, v, b);
+    liftDoors(liftArrive(rs + rd - 0.2, v, b), true, v, b);
+  }
+
+  /* ---------- hum ---------- */
+  const HUMS = {
+    quarters: { f: 55, h: [[1, .5], [2, .32], [3, .2], [4, .1], [6, .04]], lp: 420, n: .22, nf: 450, br: .07, bd: .22,
+      note: 'Quarters: the home hum. Warm and low, with the slow breath of the air plant. This is the one you fall asleep to.' },
+    commons: { f: 58.27, h: [[1, .45], [2, .3], [3, .2], [4, .12], [5, .05]], lp: 540, n: .26, nf: 650, br: .06, bd: .2,
+      note: 'Commons: a touch brighter and airier than Quarters, a lived-in room tone under the promenade.' },
+    engine: { f: 41.2, h: [[1, .6], [2, .45], [3, .32], [4, .18], [6, .1], [8, .04]], lp: 340, n: .32, nf: 320, br: .045, bd: .18, throb: .9, td: 140,
+      note: 'Engineering: deeper, with a slow turning throb, as if the engine were just through the wall. Warm, not menacing.' },
+    garden: { f: 65.4, h: [[1, .22], [2, .14], [3, .07]], lp: 700, n: .5, nf: 1500, br: .11, bd: .4,
+      note: 'Garden: the machine sound pulled right back, more moving air, a slower, deeper breath. The quietest deck.' },
+    bridge: { f: 73.4, h: [[1, .32], [2, .2], [1.5, .13], [3, .08], [4, .04]], lp: 1100, n: .1, nf: 2600, br: .04, bd: .12,
+      note: 'Bridge: cleaner and steadier, built on a tidy fifth. Cool, like its lighting.' },
+  };
+  function startHum(key, level = 1, fade = 1.5) {
+    const p = HUMS[key], now = ctx.currentTime, nodes = [];
+    const out = ctx.createGain(); out.gain.setValueAtTime(0, now); out.gain.linearRampToValueAtTime(level, now + fade);
+    const breath = ctx.createGain(); breath.gain.value = 1 - p.bd / 2;
+    const lfo = ctx.createOscillator(); lfo.frequency.value = p.br; const lg = ctx.createGain(); lg.gain.value = p.bd / 2;
+    lfo.connect(lg); lg.connect(breath.gain); nodes.push(lfo);
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = p.lp; lp.Q.value = 0.7;
+    const drift = ctx.createOscillator(); drift.frequency.value = 0.031; const dg = ctx.createGain(); dg.gain.value = 0.25; drift.connect(dg); nodes.push(drift);
+    p.h.forEach(([m, g], i) => {
+      const o = ctx.createOscillator(); o.frequency.value = p.f * m; o.detune.value = i % 2 ? 4 : -3;
+      dg.connect(o.frequency);
+      const og = ctx.createGain(); og.gain.value = g * 0.22; o.connect(og); og.connect(lp); nodes.push(o);
+    });
+    lp.connect(breath);
+    const ns = ctx.createBufferSource(); ns.buffer = BROWN; ns.loop = true;
+    const nf = ctx.createBiquadFilter(); nf.type = 'lowpass'; nf.frequency.value = p.nf;
+    const ng = ctx.createGain(); ng.gain.value = p.n * 0.5; ns.connect(nf); nf.connect(ng); ng.connect(breath); nodes.push(ns);
+    if (p.throb) { const t2 = ctx.createOscillator(); t2.frequency.value = p.throb; const tg = ctx.createGain(); tg.gain.value = p.td; t2.connect(tg); tg.connect(lp.frequency); nodes.push(t2); }
+    breath.connect(out); out.connect(ROUTE.hum);
+    nodes.forEach(n => n.start(now));
+    return {
+      out, label: key,
+      stop(f = 1.2, at, from) { const t = at ?? ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(from ?? out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f); nodes.forEach(n => n.stop(t + f + 0.1)); },
+    };
+  }
+
+  /* ---------- footsteps ---------- */
+  // Version 3: every floor is the soft carpet step; only a gentle hint tells them apart.
+  function softStep(t, pan, b, o = {}) {
+    const br = o.bright ?? 1;
+    tone(t, rand(75, 85) * (o.pitch ?? 1), 0.07, { gain: 0.16, to: 55, a: 0.006, bus: b, pan });
+    noise(t, 0.09, { ft: 'lowpass', f: 520 * br, gain: 0.13, a: 0.012, bus: b, pan });
+    noise(t + 0.05, 0.07, { ft: 'lowpass', f: 900 * br, gain: 0.035, a: 0.01, bus: b, pan });
+  }
+  const STEP = {
+    plating(t, pan, b) { softStep(t, pan, b, { bright: 1.25, pitch: 1.08 }); noise(t, 0.03, { f: 1800, q: 2, gain: 0.025, a: 0.002, bus: b, pan }); },  // a faint firm tap
+    carpet(t, pan, b) { softStep(t, pan, b); },
+    planks(t, pan, b) { softStep(t, pan, b, { bright: 1.1, pitch: 1.15 }); noise(t, 0.05, { f: rand(380, 430), q: 4, gain: 0.05, a: 0.002, bus: b, pan }); }, // a faint hollow knock
+    garden(t, pan, b) {
+      softStep(t, pan, b, { bright: 0.9 });
+      for (let i = 0; i < 4; i++) noise(t + rand(0, 0.12), 0.014, { f: rand(2400, 4800), q: 2, gain: rand(0.015, 0.03), bus: b, pan }); // a little grit
+    },
+  };
+  function startWalk(surface, segs) {
+    const route = ROUTE;
+    const w = {
+      label: surface, next: ctx.currentTime + 0.05, foot: 0, pace: 1.85,
+      tick(u) {
+        while (this.next < u) {
+          let s = surface;
+          if (segs) { const seg = segs.find(x => this.next >= x[0] && this.next < x[1]); s = seg && seg[2]; }
+          if (s) STEP[s](this.next, this.foot ? 0.12 : -0.12, route.steps);
+          this.foot ^= 1; this.next += (1 / this.pace) * (1 + rand(-0.03, 0.03));
+        }
+      },
+      stop() { LOOPS.delete(w); },
+    };
+    LOOPS.add(w);
+    return w;
+  }
+
+  /* ---------- music samples (version 7, not chosen yet) ---------- */
+  // Each sample is a short loop: a fixed chord sequence, and a melody drawn once from its own seeded numbers so it repeats exactly.
+  // ---- the named one-shots that SND.fx plays: fn(t, opts) ----
+  const FX = {
+    tap: t => SFX.tapA(t), open: t => SFX.open(t), close: t => SFX.close(t), no: t => SFX.no(t),
+    jobPosted: t => SFX.jobPosted(t), jobDone: t => SFX.jobDone(t), mail: t => SFX.mailB(t), heads: t => SFX.headsB(t),
+    doorOpen: t => door(t, true, 'roomC'), doorClose: t => door(t, false, 'roomC'),
+    hatchOpen: t => door(t, true, 'hatchA'), hatchClose: t => door(t, false, 'hatchA'),
+    liftPress: t => liftPress(t, undefined, 'B'), liftDoorsOpen: t => liftDoors(t, true, 'C'), liftDoorsClose: t => liftDoors(t, false, 'C'),
+    liftRide: (t, o) => liftRide(t, o.d ?? 1.2, 'C'), liftArrive: t => liftArrive(t, 'C'),
+    step: (t, o) => (STEP[o.surface] || STEP.carpet)(t, o.pan || 0, ROUTE.steps),
+  };
+
+  // ---- SND: activity sounds ----
+  // (the activity sounds' builder adds its makers here: Object.assign(FX, { name: (t, opts) => ..., ... }))
+
+  // ---- SND: music ----
+  // (the music builder puts the music module here and sets S.music; it plays into S.bus.music and starts from
+  // S.whenReady(ctx => ...); its update goes on S.onFrame)
+  S.music = null;
+
+  // ---- settings: the starship-cadet-sound key (not the game save), Sound On/Off and Volume in the Settings app ----
+  const KEY = 'starship-cadet-sound', VOLS = { low: 0.45, med: 0.7, high: 1 };
+  S.prefs = { on: true, vol: 'med' };
+  try { const p = JSON.parse(localStorage.getItem(KEY) || 'null'); if (p && typeof p === 'object') S.prefs = { ...S.prefs, ...p }; } catch (e) {}
+  if (!VOLS[S.prefs.vol]) S.prefs.vol = 'med';
+  S.savePrefs = () => { if (NOSAVE) return; try { localStorage.setItem(KEY, JSON.stringify(S.prefs)); } catch (e) {} };
+  const applyVol = () => { if (BUS) BUS.master.gain.setTargetAtTime(S.prefs.on ? VOLS[S.prefs.vol] : 0, ctx.currentTime, 0.05); };
+  S.settingsBlocks = () => [
+    { kind: 'text', text: 'Sound' },
+    { kind: 'buttons', items: [{ label: 'On', action: { app: 'settings', do: 'sound', arg: true }, on: !!S.prefs.on }, { label: 'Off', action: { app: 'settings', do: 'sound', arg: false }, on: !S.prefs.on }] },
+    { kind: 'text', text: 'Volume' },
+    { kind: 'buttons', items: [['low', 'Low'], ['med', 'Medium'], ['high', 'High']].map(([k, label]) => ({ label, action: { app: 'settings', do: 'soundvol', arg: k }, on: S.prefs.vol === k })) },
+  ];
+  S.settingsAct = (verb, arg) => {
+    if (verb === 'sound') { S.prefs.on = !!arg; S.savePrefs(); if (S.prefs.on) start(); applyVol(); return true; }
+    if (verb === 'soundvol' && VOLS[arg]) { S.prefs.vol = arg; S.savePrefs(); applyVol(); return true; }
+    return false;
+  };
+
+  // ---- start on the first real tap or key press ----
+  const ready = [];
+  S.whenReady = fn => { if (ctx) { try { fn(ctx); } catch (e) {} } else ready.push(fn); };
+  function start() {
+    if (ctx || !ALLOWED || !S.prefs.on) return;
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return;
+    try { ctx = new AC({ latencyHint: 'interactive' }); } catch (e) { return; }
+    try { if (navigator.audioSession) navigator.audioSession.type = 'playback'; } catch (e) {}
+    BUS = buildGraph(ctx, ctx.destination); WHITE = BUS.buf.w; BROWN = BUS.buf.b; ROUTE = BUS;
+    S.ctx = ctx; S.bus = { master: BUS.master, ui: BUS.ui, hum: BUS.hum, steps: BUS.steps, music: BUS.music, verb: BUS.verb };
+    applyVol();
+    ready.splice(0).forEach(fn => { try { fn(ctx); } catch (e) {} });
+  }
+  S.start = start;
+  const gesture = e => { if (e.isTrusted) start(); };
+  addEventListener('pointerdown', gesture, true); addEventListener('keydown', gesture, true);
+
+  // ---- each frame (the main loop): suspend with pause, Tiles, a hidden tab or Sound off; tick the loops ----
+  let busy = false;
+  S.frame = run => {
+    if (!ctx) return;
+    const want = run && !document.hidden && S.prefs.on;
+    if (!busy && want && ctx.state === 'suspended') { busy = true; ctx.resume().then(() => busy = false, () => busy = false); }
+    else if (!busy && !want && ctx.state === 'running') { busy = true; ctx.suspend().then(() => busy = false, () => busy = false); }
+    if (ctx.state !== 'running') return;
+    const u = ctx.currentTime + 0.35; LOOPS.forEach(l => l.tick && l.tick(u));
+    for (let k = 0; k < S.onFrame.length; k++) try { S.onFrame[k](run); } catch (e) {}
+  };
+
+  // ---- SND.fx: play a named one-shot, quieter with distance, to the side it came from; crew sounds quieter and capped ----
+  let voices = [], lastCrew = -1;
+  S.fx = (name, o = {}) => {
+    const f = FX[name]; if (!f) return false;
+    let g = o.vol ?? 1, pan = 0;
+    if (o.x !== undefined && typeof player !== 'undefined' && player.obj) {   // near you only: about 7 tiles
+      const p = player.obj.position, dx = o.x - p.x, dz = o.z - p.z, d = Math.hypot(dx, dz);
+      if (d > 7) return false;
+      g *= Math.pow(1 - Math.max(0, d - 1.5) / 5.5, 1.5);
+      const a = typeof az === 'number' ? az : 0; pan = Math.max(-0.7, Math.min(0.7, (dx * Math.cos(a) - dz * Math.sin(a)) / 6));
+    }
+    if (S.log) S.log.push({ name, g: Math.round(g * 100) / 100, crew: !!o.crew });
+    if (!ctx || ctx.state !== 'running' || !S.prefs.on) return false;
+    const now = ctx.currentTime; voices = voices.filter(v => v.end > now);
+    if (o.crew) { if (voices.filter(v => v.crew).length >= 2 || now - lastCrew < 0.4) return false; g *= 0.5; lastCrew = now; }
+    if (voices.length >= 12 || g <= 0.01) return false;
+    const bus = ctx.createGain(); bus.gain.value = g; let tail = bus;
+    if (pan && ctx.createStereoPanner) { const pn = ctx.createStereoPanner(); pn.pan.value = pan; bus.connect(pn); tail = pn; }
+    tail.connect(o.layer === 'steps' ? BUS.steps : BUS.ui);
+    const prev = ROUTE; ROUTE = { ...BUS, ui: bus, steps: bus };
+    try { f(now + 0.02, o); } catch (e) {} finally { ROUTE = prev; }
+    voices.push({ end: now + (o.long || 2), crew: !!o.crew }); setTimeout(() => { try { tail.disconnect(); } catch (e) {} }, ((o.long || 2) + 6) * 1000);
+    return true;
+  };
+  S.has = name => !!FX[name];
+  // for sound_check: the deck hum and the loops, and the parts the other slots build on
+  S._ = { FX, HUMS, STEP, LOOPS, startHum: (...a) => startHum(...a), state: () => ctx ? ctx.state : 'off', allowed: ALLOWED };
+  return S;
+})();
+
+// =====================================================================
 // 12. MAIN LOOP
 // =====================================================================
 const HRUN_EDGES = { of: null, n: -1, list: [] };          // 0.27.31: see the wall cut below
@@ -62471,6 +62906,7 @@ const clock = new THREE.Clock(); let scrT = 0;
 function loop() {
   const dt = Math.min(clock.getDelta(), .05), t = clock.elapsedTime;
   const run = !freezeSync();                             // section 15's pause (0.28.48) and a game of Tiles (0.28.50): nothing moves and ship time stands still; the view still draws
+  SND.frame(run);                                        // section 27: sound suspends with pause, Tiles and a hidden tab; its loops tick
   if (PAD.live) padTick(dt);                             // section 26: a game controller, once one has said hello (frozen or not: the panels)
   if (!run) clock.elapsedTime -= dt;                     // the frame clock too, so poses and blinks carry on where they stopped (0.28.50)
   if (run) {
