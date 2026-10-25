@@ -4,7 +4,7 @@ Reviewer RV17 (session_01CBbf1dZKv1LCrACof9HgyP), hired by lead 36. Notes only, 
 Builder FX22 (session_013hfW44u1PvirfEXtYYtwVF), `claude/p926-fx22`.
 
 ## What was reviewed
-- First pass on **582a3544** (game sha256 1389038c...), then **eaaa6446** (game ce0f6595...; FX17 173f21ed merged,
+- Final sha (lead 36): **eaaa6446**. First pass on **582a3544** (game sha256 1389038c...), then **eaaa6446** (game ce0f6595...; FX17 173f21ed merged,
   `apptScene(b, now, e)` -> `cardWhere(e)`). staging's promo-sight.lines not merged yet when this was written.
 - Diff read against FX17's base 4eab8c9f: the switch line, the Record and Appointments app hooks, `evOneOffDefs` (`only`,
   `appt`, `toBed`), the `eventJoin` and `eventsTick` hooks, `tradJoinable`, the LINES and APPT_WORDS blocks, and the
@@ -28,8 +28,8 @@ Builder FX22 (session_013hfW44u1PvirfEXtYYtwVF), `claude/p926-fx22`.
 | cadet_test vs 0.92.5 | eaaa6446 off | ALL IDENTICAL |
 | check_fast | 582a3544 | QUICK CHECK OK |
 | appt_check (all parts incl. off and planted) | 582a3544 | APPT CHECK OK (171 ok; both planted faults fail their part) |
-| appt_check | eaaa6446 | see the end of this page |
-| check_fast | eaaa6446 | see the end of this page |
+| appt_check (all parts) | eaaa6446 | APPT CHECK OK (171 ok; both planted faults fail their part) |
+| check_fast | eaaa6446 | QUICK CHECK OK |
 | events_check (28 days) | 582a3544, both switches on | EVENTS CHECK OK |
 | lines_check | 582a3544 on | PASS (0 errors, 66 old warnings) |
 | day_check Day 5 and Day 19 with 7 appointments planted on each (shadow, Brennan, teach me, scope, feast, night round, garden) | 582a3544 on | DAY CHECK OK, both |
