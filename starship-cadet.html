@@ -21136,7 +21136,7 @@ function boardTopUp(h, jobs) {
 // machine drifted by one (Tuning, m5: section 17 posts its own from two) or an afternoon round on another deck, 13:00-15:00 (Rounds, m1). Like the top-up's: held to the
 // shift's end then lapsed (extra), no Works reputation (xp 0), seeded by the hour; j.trade, so they don't count against
 // BOARD_MIN and the simple ones still come. BOARD_TRADE_ON false: as before.
-var BOARD_TRADE_ON = false;                              // var: section 17's jobsHour may ask before this line has run
+var BOARD_TRADE_ON = true;                               // var: section 17's jobsHour may ask before this line has run
 const BOARD_TRADE_MAX = 3, BOARD_TRADE_FROM = 600, BOARD_TRADE_ROUND = [780, 900], BOARD_TRADE_LEFT = 120;   // a round from 13:00 to 15:00; never with under two hours of the shift left (one taken late kept you into the next day)
 function boardTrade(j) {                                 // is j a job of a kind you're trained in
   const W = SHIP.works; if (!W || !j) return false;
