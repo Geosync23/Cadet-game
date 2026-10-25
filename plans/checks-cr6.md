@@ -1,6 +1,6 @@
 # CR6 check results
 
-## 0.92.5 full round (2026-10-25): FAIL (1 new: disc_check #25)
+## 0.92.5 full round (2026-10-25): FAIL (1 new: disc_check #25, traced to FX12 0aaf48b, check fix pending)
 
 - **Build:** `claude/staging-0.92.5` 53c11f888efe00dbff89cadbfbd81c326e82de84, `starship-cadet.html` sha256
   `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559` (matches BM17's). OLD ba836359 (0.92.4, 2aa6427f...13a2).
@@ -30,8 +30,11 @@ FAIL #25 Day 2 19:15: one alone at the stern practises, the disc in the air (0 o
   moving (8 of 8). The lone player at 19:15 never has the disc in the air (0 of 8).
 - Passing around them: the pair on the baselines at 17:22, the same rally twice, the crew's disc hidden during your game,
   all older parts, no page errors.
-- #25 is new in this build (disc_check.py +53 lines vs ba836359), so OLD has nothing to compare. A re-run alone gave the
-  identical two FAILs (deterministic). Not on the known list. Reported to BM17 and lead 35 at once.
+- Correction (BM17): #25 dates from 0.92.3, not this build; I misread the disc_check.py diff. OLD 0.92.4 (ba836359)
+  passes all six #25 lines with the same script. A re-run alone here gave the identical two FAILs (deterministic).
+- **Status: NEW FAIL, traced to FX12 0aaf48b, owner fixing the check.** BM17 bisected it to FX12's merge 0aaf48b: the new
+  Tuesday late piano moves the 19:15 practiser off the court on Day 2, and the pair's rally differs, so one player moves
+  to only 2 places in the 8 looks. A check pinned to a schedule, not a broken game; lead 35 is picking the owner.
 
 ## 0.92.4 full round (2026-10-24): OK
 
