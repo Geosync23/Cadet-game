@@ -3,10 +3,6 @@ who: torres-zeke
 // "Ready" (content/arcs/outlines.md, section 1). The Works writer, arc batch. The man who trains you isn't sure he's
 // ready for more himself. Opens after week 1 (he's the confident one that week). needs: listen.
 // Places: written so each scene works wherever calm finds him (the overlook is named only as somewhere he goes).
-// Crew stories (SW1, 2026-10-24, from outlines.md "B. Zeke Torres"): beats 1-3 kept word for word. The user's change:
-// his dad is well and retiring after forty years on the engines (no memory loss anywhere). Beat 4 rewritten, beat 5
-// in part (Calder's lines kept), beat 6 is the crescendo at Knit and natter, beat 7 its quiet ending.
-// A line under "// IF <conditions>:" plays only when they hold (for the builders).
 
 == beat 1
 tone: light
@@ -67,25 +63,22 @@ them: And then I think, teaching you. Was that a step back? Or was it the most u
 them: Right. Enough of that. The coils will be wondering where I am.
 
 == beat 4
-tone: heartfelt
-when: beat:torres.3
+tone: serious
 where: calm
 hint: Sit with me a bit? I won't talk much. I might.
-mem: retiring
+mem: dad
 them: My dad taught me coils have moods. Forty years an engine man. He'd put his hand on the casing and just know.
-them: He's retiring. Next month. Last shift, then a do at the yard on Hesper Dock. Cake on a cable drum, knowing that lot.   [laugh]
-them: I won't be there. Too far. That's fine. That's the job. He'd say so himself.
-them: He'll ask, though. He always asks. "Specialist yet?" And I'll say no. Again.   [sigh]
-them: I've never told him I'm not sure I'm good enough for a reactor. Forty years, and I don't think he was ever not sure.
-them: He hums to engines, you know. Badly. Worse than me, which takes doing.
+them: I called home last night. He called me by my uncle's name. Third time this month.   [sigh]
+them: He's still him. Mostly. He asked if the Wren's coils were behaving. That part he had.
+them: Coil three's been quiet all week. I keep thinking she's tired. I know she isn't. It's me.
 ? choice
-* Tell me about him. The engine man.   flavour:listen mem:engineman
-  them: He talked a freighter's drive home once. Three systems, hand on the casing, humming the whole way.
-  + them: Three systems, a freighter's drive, his hand on the casing, humming. Nobody else could. I'll tell it you properly one day.   [laugh]
-* Tell him before he asks. Then it's your news, not his question.   flavour:practical mem:tellfirst
-  them: Before he asks. Huh. Then the answer's mine, not his. I hadn't thought of it like that.
-* I'm not sure I'm good enough most days. I still turn up.   flavour:share mem:notsure
-  them: Most days. Yes. Maybe that's all forty years is. Turning up, and putting your hand on the casing.
+* I'm here. Tell me about him.   flavour:listen mem:listened
+  them: He used to hum to the engines. Badly. Worse than me, if you can picture it.
+  + them: He hums to engines. Badly. Worse than me, which takes doing. I'll tell you about the time he hummed a freighter home.   [laugh]
+* Is there anything I can do? Even small.   flavour:practical mem:offered
+  them: This is the small thing. You sitting there. It's doing more than you'd think.
+* Someone I love got muddled like that. They still knew who loved them.   flavour:share mem:shared
+  them: Yes. That's it, isn't it. The names go. Not the rest. I hope not the rest.
 them: Thanks for sitting. Here. Last biscuit. I was saving it. For this, apparently.   [nod]
 
 == beat 5
@@ -93,75 +86,39 @@ tone: heartfelt
 where: calm
 hint: I've been to see Calder. Got a minute?
 mem: letter
-mail: 300 | The last line | Dad's letter is done. The last line: "I put my hand on the casing every morning, and she still tells me things. You taught me to listen." Thank you for the question. Zeke
+mail: 300 | The last line | I finished the letter to Dad. The last line is: "The coils on the Wren have moods, like you said. I'm learning them." Thanks for helping me find it. Zeke
 them: I went to see Calder. About "restless". I asked her straight.
 them: She said, "Restless isn't a fault. Unfinished is." Then she went back to her board.   [laugh]
-them: So I'm finishing things. The scarf. The application. And a letter for Dad, for his last day at the engines.
-them: Can I ask you? What would you want to read, on your last day at a job you loved?
+them: So I'm finishing things. The scarf. The application. And a letter to Dad, about the Wren's coils.
+them: Can I ask you? If you'd forgotten nearly everything, what would you want to hear in a letter?
 ? choice
-* That it mattered. That someone noticed.   flavour:listen mem:noticed
-  them: That someone noticed. All those coils nobody ever thanked him for. Yes. I can say that.
-  + them: Forty years of coils nobody thanked him for. I noticed. I'll tell him I did. That's the letter, isn't it. Thank you.   [nod]
-* What you learnt from him. In his words, not yours.   flavour:practical mem:hiswords
-  them: His words. "Feel that? She's thinking." I've said it to every new hand. You too. He'd like knowing that.
-* That the job's in good hands. I'd want to hear that.   flavour:share mem:goodhands
-  them: Good hands. Mine, he'd think. That's the bit I'd have to believe first. I'm working on it.   [laugh]
+* Something you used to do together. So it feels like his.   flavour:listen mem:together
+  them: The engines. Putting our hands on the casing. Yes. He'd know that one.
+  + them: The engines. Our hands on the casing, him saying, "Feel that? She's thinking." Yes. He'd know that. Thank you.   [nod]
+* That you're all right. That's what my family always wants.   flavour:share mem:allright
+  them: That I'm all right. I am, you know. Mostly. More than I was.
+* Keep it short. One good thing. He can read it twice.   flavour:practical mem:short
+  them: One good thing, read twice. That's very you. I'll try. I talk too much on paper too.   [laugh]
 them: Right, onward. I've a letter to write. Properly.
 
 == beat 6
-// CRESCENDO rides on: Knit and natter (Tuesday 20:00, the junior common room); day: 23 (the evening you're made Engine Specialist), else any later Tuesday; cast: torres-zeke, kovac-zainab, dahl-mira, you; quiet ending: beat 7
-// Gate: close, or friend if beat 5 was told 5+ days before (the builders' day gate)
 tone: resolution
-when: beat:torres.5 trad:knit-and-natter weekday:tue
-where: junior common room
+where: calm
 hint: Close your eyes. No. Open them. No, close them.
 mem: finished
 flag: torres.applied
 keepsake: the scarf in Works orange, finished, far too long
-learn: Zeke Torres put his name forward again and finished your scarf. His dad retired after forty years on the engines.
-// IF you were made Engine Specialist today: torres-zeke: Engine Specialist. You. Today. I could knit you a second one. I won't. I might.   [laugh]
-torres-zeke: Close your eyes. Hold out your arms. Further. Further than that.   [laugh]
-torres-zeke: It's finished. Your scarf. It's far too long. You'll have to wind it round twice. Three times.
-kovac-zainab: Two dropped stitches. I counted. Um. It's perfect anyway. It is. It's perfect.
-dahl-mira: Wind it from the left. The lumps sit at the back that way. Nobody will know.   [nod]
-torres-zeke: I put my name forward again. Calder signed it. She said "About time," which from her is a parade.
-torres-zeke: And Dad's reply came. He wrote it on his last shift, sat by the engines. You can tell. It's short.
-torres-zeke: "She's sulking. Give her a minute. You'll know her better than I did."   [sigh]
-torres-zeke: Hang on. Again. "You'll know her better than I did."
-kovac-zainab: Oh. That's. Um. That's a very good line. Sorry. It is.
-dahl-mira: Read it again at breakfast. It'll still be true.
+learn: Zeke Torres was passed over twice, put his name forward again, and finished your scarf.
+them: Close your eyes. Hold out your arms. Further. Further than that.   [laugh]
+them: It's finished. Your scarf. It's far too long. You'll have to wind it round twice. Three times.
+them: I put my name forward again. Calder signed it. She said "About time," which from her is a parade.
+them: And Dad had a good day. He knew me. He asked about the coils. He said, "She's sulking. Give her a minute."   [sigh]
 ? choice
-* Read it once more. Slowly.   flavour:listen mem:once
-  them: "You'll know her better than I did." There. That's three. I'll stop. I won't stop.
-  + them: "She's sulking. Give her a minute. You'll know her better than I did." Thank you, {me}. I wanted someone to ask.   [nod]
 * It's perfect. I'm never taking it off.   flavour:cheer mem:wearing
   them: You'll take it off in the engine room. Health and safety. But otherwise, yes. Good.   [laugh]
+* I'm so glad he had a good day.   flavour:listen mem:goodday
+  them: Me too. It won't always be like that. But that one was. I wanted to tell someone.
+  + them: Me too. They won't all be like that. That one was, though. And I wanted you to be the one I told.   [nod]
 * You were ready all along. I knew it on day one.   flavour:share mem:ready
   them: Day one, you didn't know where the lift was. But thank you, {me}. Properly.
-torres-zeke: Right, onward. Wear it to the board on Monday. Calder will pretend not to see.
-
-== beat 7
-// QUIET ENDING for beat 6: plays only if beat 6 was missed (the scarf is left on your bunk; he tells you at breakfast)
-tone: light
-tier: friend
-when: beat:torres.5
-where: calm
-hint: Been to your bunk yet? Go on. No, wait. I'll tell you first.
-mem: onbunk
-flag: torres.applied
-keepsake: the scarf in Works orange, finished, far too long
-learn: Zeke Torres put his name forward again and finished your scarf. His dad retired after forty years on the engines.
-mail: 0 | On your bunk | Far too long. Wind it three times. Not twice. I'll check. Z
-them: You missed knit and natter. That's all right. The scarf found you anyway. It's on your bunk.
-them: It's far too long. I've left a note saying so, in case you try winding it twice.   [laugh]
-them: Calder signed my application. Two words. "About time." I've been walking taller since. Ask Reyes.
-them: And Dad's retired. He sent me a line from his last shift. "You'll know her better than I did."   [sigh]
-? choice
-* That's a lovely thing to be told.   flavour:listen mem:toldline
-  them: It is, isn't it. I've read it more times than I'll admit. Eleven. I'll admit eleven.
-  + them: It is. I've read it eleven times. I'm glad it was you I told first, {me}. Well. Second. Kovac guessed.   [laugh]
-* I'll wear it to the board on Monday.   flavour:cheer mem:wearit
-  them: Calder won't say a word. That's how you'll know she's noticed.
-* Shall I help you write back to him?   flavour:practical mem:writeback
-  them: Write back? Oh. Yes. Short, he likes short. You can cut the rambling. There'll be rambling.
-them: Right, onward. Breakfast. I'll be last in again. Coil three wanted a word.
+them: Right, onward. Wear it to the board on Monday. Calder will pretend not to see.

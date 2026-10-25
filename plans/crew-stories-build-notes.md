@@ -1,8 +1,20 @@
 # Crew stories: build notes (game-side changes, for when they're built)
 
 Kept by CS1 (the crew stories lead). **Nothing here goes into the game file now** (the user's rule: writing first,
-built after the playtest). The stories are in `content/arcs/` (outlines in `content/arcs/outlines.md`, "Crew stories";
+built after the playtest). The stories are in `content/stories/` (outlines in `content/arcs/outlines.md`, "Crew stories";
 decisions in design-doc.md, Social life, "Crew stories"). Each item says who owns the part of the game it touches.
+
+## 0. Where the story files are (2026-10-25, for FX21's stage 1, patch 0.92.6 item 19)
+
+- `content/stories/<arc>.story`: the six for stage 1 (pell, teague, bramwell, halloran, kovac, salo).
+  `content/stories/waiting/<arc>.story`: the four that wait for career steps (torres, calder, raman, kowalczyk).
+  Same grammar as `.arc`. Today's baker (content_gen.py) skips the `.story` extension, so the game is unchanged
+  (checked: a bake on 0.92.5 staging with these files says "no change"). The builder bakes `content/stories/*.story`
+  into its own table, used only when the stories switch is on; `waiting/` is not baked until its career steps exist.
+- `content/arcs/pell.arc`, `kovac.arc`, `torres.arc`, `calder.arc` are back to the old stories, as in the game. With
+  the switch on, a person's `.story` replaces their `.arc`; the old ones stay on file (parked, not deleted).
+- Kovac: the new beat 4 sets `mem: doors` (the old one's `fourplease` is left to the old story), and her new joy line
+  (the spanner grip) is written in `kovac.story` at beat 6, to add to her `.lines` file when the switch goes on.
 
 ## 1. Roster text that the stories contradict (section 9, the crew designer's; proposed wording)
 
@@ -47,8 +59,8 @@ Zeke's father: no roster text mentions him. content/facts.md is fixed (well, ret
 
 ## 4. Content outside the story files (done, or to note)
 
-- `content/lines/kovac-zainab.lines`: the joy line changed from a scarf to the spanner grip and re-gated on
-  `mem:moment.kovac.grip` (SW1's wording; it stands on claude/crew-stories-pitch, CS1's branch; SW1's branch no longer
-  touches the file). The callback under `? told:moment.kovac.tellclub` no longer fires (the club is together at
-  the doors in the new crescendo); harmless, left in place.
+- `content/lines/kovac-zainab.lines`: unchanged for now (the old scarf line stays for the old story). The new joy
+  line, the spanner grip under `? mem:moment.kovac.grip` (SW1's wording), is in `content/stories/kovac.story` at
+  beat 6, to add when the switch goes on. The callback under `? told:moment.kovac.tellclub` doesn't fire with the new
+  story (the club is together at the doors in the new crescendo); harmless, left in place.
 - `content/facts.md`: the new canon rows (CS1, done).
