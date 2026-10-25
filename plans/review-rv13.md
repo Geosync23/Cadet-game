@@ -200,3 +200,13 @@ events with every-song's join removed, cadet_test off vs 0.92.4, check_fast.
   g_nocrew identical, crew shots differ; e9ce3351 with SIM_BAY false vs 543ef305: ALL IDENTICAL, so every diff is the
   switch (crew plans with the sim-pilot habit). Perf: BM16's first run flagged JS frame-time rises under a shared machine
   (draw calls same, no memory growth); BM16 rerunning alone (theirs to decide).
+
+## FX15 item 22 (0.92.5): every training job on the board marked/pointed/named; claude/p925-fx15 ccf77d05 (game 4b3abdcb...), over staging 0aaf48b7 (e08e31f0...)
+Lead 35's ask (~03:56 UTC): I run interactions, arrows (all parts), career, day_check 1 myself (FX15's container slow).
+Diff: boardLesson also returns a training job held for you that no lesson put up (24k's head-scratcher first case; Day 1-2
+INTRO_JOBS slots 1-3, Day 2's after Calder's meeting), only jobs takeable at the board (ixBoard.doable: m6's pipe job no
+longer marked); boardLessonName(id) names them ("head-scratcher lesson", "shadow job", "job to lead", "first solo job",
+"Tier 2 test job"); guideTrain's T3 for those; guideShift continues on Day 1's intro to ring the lesson pointer (clock-in
+arrow still the intro's); introArrowWant's 13:00 board arrow once Zeke's tea is over; introArrowTick names the board arrow.
+Running: interactions + arrows (all) -> career + day 1; mech p925l on fix, 0aaf48b7 and plants u1 (no held-job branch),
+u2 (doable filter off), u3 (t2 name off). Note: p925l has no Day 2 solo-job line.
