@@ -53,6 +53,7 @@ them: There. Four. No, I'm joking. Three. On we go, slowly.   [laugh]
 // DAY: 8-12
 // before the storm, so the storm can carry beat 4; early evening, before ten
 tone: heartfelt
+gapDays: 0
 where: calm
 when: beat:salo.2 time:evening !event:ionStorm day:8-12
 hint: Sit with me a minute? Before ten. There's a story I've not told.
