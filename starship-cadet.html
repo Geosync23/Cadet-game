@@ -39819,7 +39819,8 @@ function evStay(p, d, e) {
 function tradToBed(p, d, e) {
   const ev = e.ev; if (!ev.toBed) return null;
   const F = schedFrame(p, d), to = Math.min(e.to, F.bed - 20);
-  return to < e.to && to - e.from >= ev.toBed && eventFree(p, d, e.from, to, ev.wake) ? [e.from, to] : null;
+  const n = typeof ev.toBed === 'number' ? ev.toBed : ev.min || 20;   // FX12's `to-bed: yes` (true) reads as the tradition's min
+  return to < e.to && to - e.from >= n && eventFree(p, d, e.from, to, ev.wake) ? [e.from, to] : null;
 }
 function evArrive(p, d, e) {
   const ev = e.ev;
