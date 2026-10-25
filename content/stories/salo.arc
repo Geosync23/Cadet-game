@@ -82,7 +82,6 @@ tone: resolution
 tier: friend
 gapDays: 0
 where: Engine room
-duty: true
 crisis: true
 when: beat:salo.3 event:ionStorm day:13
 crescendo: event:ionStorm
