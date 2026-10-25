@@ -80,6 +80,7 @@ them: Right. Twenty to ten. I'll walk you to the lift, then bed.
 // CRESCENDO rides on: the ion storm (event ionStorm, its Saturday, daytime, Deck 6 coolant loop); day: 13; cast: salo-saad, torres-zeke (on shift), calder (over the comm); quiet ending: beat 6
 tone: resolution
 tier: friend
+gapDays: 0
 where: Engine room
 duty: true
 crisis: true
