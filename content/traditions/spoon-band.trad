@@ -1,0 +1,36 @@
+@tradition spoon-band
+// SW2, 0.92.6 item 7(a), week 10 (FX17's shape: Monday 17:45, music in the junior common room). The spoon band: every
+// 8 weeks from Day 64. Anything that makes a noise is an instrument: spoons, a pan lid, a comb, a jar of rice. Femi Rossi
+// counts everyone in (keen, competitive; off Mondays). Ends 18:30, before the Wren talk at 19:00.
+k: 717
+title: The spoon band
+when: every 8 weeks monday week 2 from day 64
+at: 17:45-18:30
+min: 20
+where: 4 pool common-room
+hold: 1
+who: rossi-femi always, musician 60%, juniors 35%, everyone 10%
+anim: musician play, everyone play
+host: rossi-femi
+from: rossi-femi
+invite: host=rossi-femi odds=30% line="Spoon band tonight! Bring a spoon. Or two. Junior common room."
+
+== mail
+- The spoon band tomorrow, {time}, in the junior common room. Bring anything that makes a noise. Two spoons is a whole instrument. No skill needed.
+
+== ask
+- Spoon band later. I'm on pan lid. It's a big responsibility.   #funny
+- Coming to the spoon band? Rossi counts us in. Loudly.
+
+== here
+- One, two, one, two, three, four!
+- Who's got the jar of rice? We need the rice.   #funny
+- Keep up, spoons!
+
+== thanks
+- Rossi counts everyone in, and the junior common room fills with spoons, pan lids, a comb and a jar of rice. It nearly sounds like a song.   #funny
+
+== chatter
+- The spoon band played three songs. I think it was three.   #funny
+- I was on pan lid at the spoon band. I've never been happier.   #warm
+- Rossi wants the spoon band at talent night. Somebody stop him.   #funny
