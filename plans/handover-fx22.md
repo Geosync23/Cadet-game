@@ -33,3 +33,11 @@ Lead: lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi). Reviewer: RV14 (session_01RwUY
 
 ## How to test
 - `python3 appt_check.py starship-cadet.html` (switch on in a copy; off copy for "nothing happens"); cadet_test vs 53c11f8 (off); names_check; content_gen --check; lines_check.
+
+## FX22b (session_01Lzi6Fe2HQJsVbaJBFxXtyx), took over from FX22 at eaaa6446: RV17's findings
+- Brief from lead 36: fix RV17's must-fix 2 and 3, and 4-6; cheap nits from 7; a check line for each (failing on eaaa6446).
+- Done (T6, see the build table row "p926-fx22 T6"): `apptRejoin` (section 18's tradJoinTap: a joined one-off, its booking open, a tap reopens the scene), `apptOver` (a joined booking is kept at its end; the night round with `ri` >= 4), `ri` (stops walked, saved; the round resumes there), `waits`/`shown` dropped on load, devHeadsTick's `mine` (section 19: an `appt-` one-off always reminds you), `apptStays` (host planned there the whole slot, the first 5 and last 10 minutes aside), `apptClash` (no slot with another tradition in its room), the garden planting's 10:30 and 11:00 fallbacks, `apptRecord` one row per kind and host (the garden's at the harvest), `apptHush` (section 20's socialChatter: the round's host), `apptOfferKey` (Accept/Decline by key), two comments put back.
+- Why the garden fallbacks: Cruz takes a toilet break about 10:14 on many Saturdays, so the 10:00-10:30 planting failed apptStays; and Harvest morning (every 14 days, 09:30-11:30, same room) took the join's tap at 11:00.
+- appt_check part `fixes`: the reload test writes the save itself (saveGame's body without its NOSAVE line) and reloads without ?nosave; wait_for_function needs `polling=500` after a reload (rAF polling never fires under the test clock).
+- All of RV17's 2-6 and nits 7a-7d done. For lead 36 to decide: the garden has no Record row until the harvest (no new words written); the planting may now be 10:30 or 11:00; Brennan's book (14:30) can fall in your shift (now with a heads-up strip); a garden invitation before about Day 17 may find no Saturday (harvest Saturdays are skipped).
+- Booked-day day_check: a copy that books at load (apptTry with SHIP.time set to the day before), then `day_check.py COPY DAY`.

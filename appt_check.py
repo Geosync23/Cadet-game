@@ -17,6 +17,10 @@
 #            book once a game, the after line said once on a later day by the host near you
 #   off      the switch off: no appointment one-offs on Days 1-21, no SHIP.apptx, no "What for?" in the app, no appt joins
 #   planted  faults planted in copies must fail their part: the scope's scene removed (ask), teach me's room gone (ask)
+#   fixes    RV17's findings (FX22b): a reload mid-scene, then a tap on the host opens it again and it's kept, not missed;
+#            a booked appointment's heads-up with heads-ups off and on your shift; the host planned there all the slot;
+#            the Record one row each, the garden's at the harvest; Mensah's chatter hushed on the round; a reload keeps
+#            the round's stops (four walked: kept), lets Mensah wait again, and an invitation answered by its key
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 appt_check.py BUILD.html [part ...]   (about 15 minutes)
 import sys, json, re
@@ -115,7 +119,8 @@ def one_off(path, kind, host, day0, how='ask', min0=600, label=None, quiet=False
     g.step(20)
     r = json.loads(g.ev(f"JSON.stringify({{ b: SHIP.apptx.book.find(x => x.id === {b['id']}), rec: JSON.stringify(apptRecord()) }})"))
     check(bool(r['b']['done']), f'{label}: kept')
-    check(APPT_TITLE[kind] in r['rec'] or 'Appointments kept' in r['rec'], f'{label}: in the Record')
+    if kind == 'garden-bed': check('lettuce' not in r['rec'], f'{label}: not in the Record till the harvest (RV17 #5)')
+    else: check(APPT_TITLE[kind] in r['rec'] or 'Appointments kept' in r['rec'], f'{label}: in the Record')
     errs = [e for e in g.errors if 'pageerror' in e]
     check(not errs, f'{label}: no page errors {errs[:2]}')
     res = ok; ok = saved and res
@@ -263,5 +268,91 @@ with sync_playwright() as pw:
             res = one_off(p, kind, host, 3, label='planted ' + kind)
             ok = ok_before
             check(res is False, f'planted: {name}: its part fails')
+    if want('fixes'):
+        # RV17 #2: save and reload in the middle of the scope's scene
+        k = None
+        g = Game(pw, won, 900, 760); g.ev(SAYHOOK); g.ev(SETUP % (2 * 1440 + 600, "['sato']"))
+        g.ev("DEVICE_APPS.get('appointments').act('x:ask', 'scope|sato')")
+        b = json.loads(g.ev("JSON.stringify(SHIP.apptx.book.slice(-1)[0] || null)"))
+        if check(bool(b), 'fixes: the scope booked for the reload'):
+            g.ev(f"skipTo(({b['day']} - 1) * 1440 + {b['from']} - 20)"); g.step(5); to_room(g, b)
+            for _ in range(40):
+                g.step(45)
+                if g.ev("TJ_NOW && TJ_NOW.e.id === 'appt-scope' && (() => { const a = DECK_CREW.find(c => c.p.id === 'sato'); return !!a && a.settled; })()"): break
+            tap = "(() => { const a = DECK_CREW.find(c => c.p.id === 'sato'); return !!a && tradJoinTap(a) && !!DIALOGUE && DIALOGUE.id.startsWith('appt:scope'); })()"
+            check(g.ev(tap), 'fixes: a tap on Sato opens the scene')
+            g.ev("dialogueStep(0)"); g.step(2)
+            g.ev("eval('(' + saveGame.toString().replace('if (NOSAVE ||', 'if (false &&') + ')')()")   # the save as the game writes it (the page is ?nosave)
+            g.page.goto(g.page.url.replace('?nosave&debug', '?debug'), wait_until='commit', timeout=180000); g.page.wait_for_function('window.__sc !== undefined || window.__err', timeout=180000, polling=500); g.step(5)
+            r = json.loads(g.ev(f"JSON.stringify({{ open: !!DIALOGUE, joined: SHIP.events.joined.includes('appt-scope@{b['day']}'), deck: deckDef.num, b: SHIP.apptx.book.find(x => x.id === {b['id']}) }})"))
+            check(r['joined'] and not r['open'] and r['deck'] == 2, f'fixes: reloaded mid-scene, the card closed, still joined ({r["deck"]}, {r["open"]}, {r["joined"]})')
+            for _ in range(20):
+                if g.ev("(() => { const a = DECK_CREW.find(c => c.p.id === 'sato'); if (!a || !a.settled) return false; player.obj.position.set(a.x + .9, 0, a.z); player.stop(); return true; })()"): break
+                g.step(45)
+            if check(g.ev(tap), 'fixes: after the reload a tap on Sato opens the scene again (RV17 #2)'): scene(g, 'fixes: the scope again')
+            g.step(20)
+            r = json.loads(g.ev(f"JSON.stringify(SHIP.apptx.book.find(x => x.id === {b['id']}))"))
+            check(bool(r['done']) and not r.get('gone'), f'fixes: kept after the reload, not missed ({r.get("done")}, {r.get("gone")})')
+            # a reload with the card closed and no tap: at its end still kept (you were there)
+            g.ev(f"(() => {{ const b = SHIP.apptx.book.find(x => x.id === {b['id']}); b.done = 0; b.gone = 0; apptMinute(({b['day']} - 1) * 1440 + {b['to']} + 31); }})()")
+            r = json.loads(g.ev(f"JSON.stringify(SHIP.apptx.book.find(x => x.id === {b['id']}))"))
+            check(bool(r['done']) and not r.get('gone'), f'fixes: joined, the card closed by a reload: kept at its end ({r.get("done")}, {r.get("gone")})')
+        g.ev("localStorage.clear()")
+        check(not [e for e in g.errors if 'pageerror' in e], 'fixes: reload: no page errors')
+        g.close()
+        # RV17 #3: Brennan's book (14:30, a weekday) on your shift, and with heads-ups off
+        g = Game(pw, won, 900, 760); g.ev(SETUP % (2 * 1440 + 600, "['brennan']"))
+        b = json.loads(g.ev("JSON.stringify(" + (INVITE % ('brennan-book', 'brennan-book')) + ")"))
+        if check(bool(b), 'fixes: Brennan\'s book booked for the heads-ups'):
+            at = (b['day'] - 1) * 1440 + b['from']
+            HU = "(() => { HU_Q.length = 0; DEV.notes.calendar = 0; SHIP.device.calendarRemind.heard.length = 0; devHeadsTick(shipNow()); return JSON.stringify({ q: HU_Q.map(h => h.title), badge: DEV.notes.calendar || 0, shift: devOnShift() }); })()"
+            g.ev(f"skipTo({at} - SHIP.device.calendarRemind.ahead + 1); SHIP.device.calendarRemind.on = true"); r = json.loads(g.ev(HU))
+            check(r['shift'] and any('Brennan' in x for x in r['q']), f'fixes: on your shift, a heads-up strip, not just a badge (RV17 #3: {r})')
+            g.ev(f"skipTo({at}); SHIP.device.calendarRemind.on = false"); r = json.loads(g.ev(HU))
+            check(any('Brennan' in x for x in r['q']), f'fixes: with heads-ups off, the booked appointment still reminds you (RV17 #3: {r})')
+        g.close()
+        # RV17 #4: the host planned there for all of the slot (RV17's days: Sato Day 48, Cruz Day 41, Zeke Day 34)
+        g = Game(pw, won, 900, 760)
+        for kind, host, d0 in [('scope', 'sato', 5), ('teach-me', 'rina', 10), ('teach-me', 'torres-zeke', 33), ('garden-bed', 'cruz-tove', 40), ('scope', 'sato', 47)]:
+            r = json.loads(g.ev(f"""(() => {{ skipTo(({d0} - 1) * 1440 + 600); const R = APPT_RULES['{kind}'], b = apptTry('{kind}', '{host}', apptSlots('{kind}', '{host}')); if (!b) return 'null';
+              const B = (b.day - 1) * 1440, S = planDay(evPerson(b.host), b.day).filter(s => evTagId(s.tag) === 'appt-{kind}').map(s => [s.from - B, s.to - B]), sh = R.onShift('{host}', b.day);
+              let all = true; for (let t = b.from + 5; t < b.to - 10; t += 5) if (!S.some(([a, c]) => a <= t && t < c)) all = false;
+              const out = {{ day: b.day, from: b.from, to: b.to, S, sh, all: sh || all }}; apptUnbook('appt-{kind}', b.day); SHIP.apptx.book.pop(); return JSON.stringify(out); }})()"""))
+            check(r != 'null' and r['all'], f'fixes: {kind} with {host} from Day {d0}: the host there all the slot (RV17 #4: {r})')
+        check(not [e for e in g.errors if 'pageerror' in e], 'fixes: slots: no page errors')
+        g.close()
+        # RV17 #5, #6 and the nits, on paper
+        g = Game(pw, won, 900, 760); g.ev(SAYHOOK); g.ev(SETUP % (9 * 1440 + 600, "['sato', 'cruz-tove']"))
+        r = json.loads(g.ev("""(() => { const X = SHIP.apptx, mk = (id, kind, host, day, key) => ({ id, kind, key, host, guests: [], day, from: 1140, to: 1170, done: day });
+          X.book.push(mk(1, 'garden-bed', 'cruz-tove', 3, ''), mk(2, 'scope', 'sato', 4, 'tavessa'), mk(3, 'garden-bed', 'cruz-tove', 10, 'tend:0'), mk(4, 'scope', 'sato', 11, 'shoals'));
+          const before = apptRecord(); X.book.push(mk(5, 'garden-bed', 'cruz-tove', 31, 'harvest')); const after = apptRecord();
+          const rows = B => (B[1] || { rows: [] }).rows.map(x => x.text); return JSON.stringify({ before: rows(before), after: rows(after) }); })()"""))
+        lettuce = lambda L: sum(1 for x in L if 'lettuce' in x)
+        check(lettuce(r['before']) == 0 and sum(1 for x in r['before'] if 'scope' in x) == 1, f'fixes: the Record: one scope row, no lettuce before the harvest (RV17 #5: {r["before"]})')
+        check(lettuce(r['after']) == 1, f'fixes: the Record: the lettuce once, at the harvest ({r["after"]})')
+        # Mensah's chatter while the round runs (RV17 #6): only him near you, his chatter tried over many ship minutes
+        CH = """(() => { const keep = DECK_CREW.slice(), m = keep.find(c => c.p.id === 'mensah'); if (!m) return -1; DECK_CREW.splice(0, DECK_CREW.length, m);
+          player.obj.position.set(m.x + 1.2, 0, m.z); let n = 0; const bs = bubbleSay; bubbleSay = function (w) { if (w === m.h || w && w.p && w.p.id === 'mensah') n++; return bs.apply(this, arguments); };
+          try { for (let k = 0; k < 400; k++) { CHATTER_AT = -1e9; CHATTER_LAST.length = 0; socialChatter(20000 + k); } } finally { DECK_CREW.splice(0, DECK_CREW.length, ...keep); bubbleSay = bs; }
+          return n; })()"""
+        d = g.ev("""(() => { for (let d = SHIP.time.day + 1; d < SHIP.time.day + 8; d++) { const w = planWhere(evPerson('mensah'), (d - 1) * 1440 + 1380); if (w && w.act === 'work' && w.deck) return [d, w.deck]; } return null; })()""")
+        if check(bool(d), f'fixes: Mensah on watch at 23:00 ({d})'):
+            g.ev(f"skipTo(({d[0]} - 1) * 1440 + 1380)"); g.step(5); g.ev(f"goToDeck({d[0] and d[1]}, null)"); g.step(30)
+            g.ev("(() => { const m = DECK_CREW.find(c => c.p.id === 'mensah'); if (m) { player.obj.position.set(m.x + 1.2, 0, m.z); player.stop(); } })()"); g.step(10)
+            free = g.ev(CH)
+            g.ev(f"APPT_ROUND_NOW = {{ b: {{ host: 'mensah', kind: 'night-round', day: {d[0]}, to: 1439, done: 0 }}, i: 0, L: [], decks: [], at: 1e12 }}")
+            hushed = g.ev(CH); g.ev("APPT_ROUND_NOW = null")
+            check(free > 0 and hushed == 0, f'fixes: Mensah chatters ({free} bubbles), but not while the round runs ({hushed}) (RV17 #6)')
+        r = json.loads(g.ev("""(() => { const s = { ship: { apptx: { book: [{ id: 9, kind: 'night-round', key: '', host: 'mensah', guests: [], day: 12, from: 1350, to: 1395, done: 0, waits: 1, ri: 4 }, { id: 10, kind: 'show-tell', key: 'raman', host: 'raman', day: 12, from: 1150, to: 1180, done: 0, aid: 5, shown: 1 }], offers: [] } } };
+          const L = apptxLoad(s); return JSON.stringify(L.book); })()"""))
+        check(not any('waits' in x or 'shown' in x for x in r) and r[0].get('ri') == 4, f'fixes: a reload: Mensah waits again, an overlay scene can show again, the round\'s stops kept (RV17 7a: {r})')
+        r = g.ev("""(() => { const X = SHIP.apptx; X.book.push({ id: 11, kind: 'night-round', key: '', host: 'mensah', guests: [], day: 12, from: 1350, to: 1395, done: 0, ri: 4 }); SHIP.events.joined.push('appt-night-round@12');
+          APPT_ROUND_NOW = null; apptMinute(11 * 1440 + 1395 + 31); const b = X.book.find(x => x.id === 11); return JSON.stringify([b.done, b.gone || 0]); })()""")
+        check(json.loads(r)[0] and not json.loads(r)[1], f'fixes: a reload mid-round with four stops walked: kept at its end (RV17 7b: {r})')
+        r = json.loads(g.ev("""(() => { const X = SHIP.apptx; X.offers = [{ kind: 'scope', host: 'sato', day: 30, from: 1140, to: 1170, made: 10, status: 'asked', said: 0 }, { kind: 'teach-me', host: 'rina', day: 31, from: 1140, to: 1180, made: 10, status: 'asked', said: 0 }];
+          const v = apptViewX(), btn = v.filter(x => x.kind === 'buttons')[1].items[1].action; X.offers.shift(); apptActX(btn.do, btn.arg); return JSON.stringify(X.offers.map(o => o.status)); })()"""))
+        check(r == ['no'], f'fixes: Decline answers its own invitation after the list moved (RV17 7c: {r})')
+        check(not [e for e in g.errors if 'pageerror' in e], 'fixes: on paper: no page errors')
+        g.close()
     print('APPT CHECK ' + ('OK' if ok else 'FAILED'))
 sys.exit(0 if ok else 1)
