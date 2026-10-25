@@ -6,7 +6,9 @@ k: 464
 title: The Sunday story
 // (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday)
 when: every 4 weeks sunday week 4 from day 1
-at: 22:15-22:55
+// (DS1, the rotation turn: the new one moves, never an old one) 21:15, was 22:15: Holt's Sunday bedtime runs 22:24-23:08 (his Monday
+// early start), so at 22:15 he, its host and reader, left before it began on most showings
+at: 21:15-21:55
 min: 25
 jitter: 5
 where: 4 pool common-room

@@ -23,14 +23,24 @@ build = sys.argv[1]; src = pathlib.Path(build).read_text()
 on = re.sub(r"^const WEEKEND_ON = URL_FLAGS\.has\('weekend'\)", "const WEEKEND_ON = true", src, count=1, flags=re.M)
 check(on != src, 'the build has the WEEKEND_ON switch')
 won = str(WORK / 'test' / ('_weekend_' + pathlib.Path(build).name)); pathlib.Path(won).write_text(on)
-TRADS = {'saturday-run': 6, 'every-song': 6, 'night-owls-cocoa': 6, 'garden-picnic': 6, 'sunday-story': 7, 'gerald-clinic': 14, 'bread-day': 7, 'big-jigsaw': 7}   # a day each is on
+TRADS = {'saturday-run': 6, 'bread-day': 7, 'every-song': 69, 'gerald-clinic': 14, 'garden-picnic': 20, 'big-jigsaw': 21, 'night-owls-cocoa': 27, 'sunday-story': 28}   # a day each is on (the 4-week rotation, the user 2026-10-25: two a weekend; Every song's first is Day 69: Day 13 is the storm's lantern supper, and on Day 41 it gives way to a birthday)
 DAYS = sorted(set(TRADS.values()))
 EVS = "JSON.stringify(%s.map(d => [d, eventsOn(d).map(e => e.id)]))" % json.dumps(DAYS)
+# (DS1, the user 2026-10-25: "spread the new ones across weeks, and keep some that were already there") every Saturday and
+# Sunday of Days 6-84: the traditions that were already there, with their times, and the new ones on it
+WKND = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) { if (weekday(d) < 5) continue;
+  const L = eventsOn(d); out.push([d, weekday(d), L.filter(e => !WEEKEND_TRADS.has(e.id)).map(e => e.id + ' ' + e.from + '-' + e.to).sort(), L.filter(e => WEEKEND_TRADS.has(e.id)).map(e => e.id)]); } return out; })())"""
+# RV14: each weekend tradition's host planned at it, and how many go to each showing of the late ones
+HOSTS = """JSON.stringify((() => { const out = []; for (let d = 6; d <= 84; d++) for (const e of eventsOn(d)) { if (!WEEKEND_TRADS.has(e.id)) continue;
+  const goers = schedPeople().filter(p => planDay(p, d).some(s => evTagId(s.tag) === e.id)).map(p => p.id);
+  const h = e.ev.host && ROSTER.find(p => p.id === e.ev.host), B = (d - 1) * 1440, pl = id => { const n = +String(id).split('-')[0]; return ((DECKS[n] || {}).places || []).find(q => q.id === id); }, room = h && planDay(h, d).some(s => s.placeId && s.from < B + e.to && s.to > B + e.from && pl(s.placeId) && [...(e.rooms || (e.rooms = eventRooms(e.ev)))].includes(s.placeId.split('-')[0] + '|' + pl(s.placeId).room));
+  out.push([e.id, d, e.ev.host || null, !!e.ev.host && (goers.includes(e.ev.host) || !!room), goers.length]); } return out; })())"""   # (at it, or at work in its room through it: Brennan cooks in the galley on Bread day)
 
 with sync_playwright() as pw:
     g = Game(pw, build, 900, 760)
     evs = dict(json.loads(g.ev(EVS)))
     check(not any(i in evs[d] for i, d in TRADS.items()), 'switch off: none of the weekend traditions')
+    off_w = json.loads(g.ev(WKND))
     g.close()
     g = Game(pw, won, 900, 760)
     evs = dict(json.loads(g.ev(EVS)))
@@ -39,6 +49,22 @@ with sync_playwright() as pw:
     check(len(acts) >= 7 and all(a for _, a in acts), 'every weekend join has its activity, with an end (%s)' % acts)
     miss = json.loads(g.ev("JSON.stringify([...WEEKEND_TRADS].filter(id => !TRAD_JOIN[id] || (!TRAD_JOIN[id].act && !PLAYER_ACTS['tj:' + id])))"))
     check(not miss, 'every weekend tradition has a join, and each tap-join its activity (missing: %s)' % miss)
+    on_w = json.loads(g.ev(WKND))
+    moved = [(a[0], sorted(set(a[2]) ^ set(b[2]))) for a, b in zip(off_w, on_w) if a[2] != b[2]]
+    print('  the weekends, Days 6-84 (day, new ones):', [(b[0], b[3]) for b in on_w])
+    check(not moved, 'the rotation: every tradition that was already on a weekend is on the same days at the same times with the switch on (%s)' % moved[:4])
+    ROT = [['saturday-run', 'bread-day'], ['every-song', 'gerald-clinic'], ['garden-picnic', 'big-jigsaw'], ['night-owls-cocoa', 'sunday-story']]   # lead 35's table
+    want = {b[0]: ROT[((b[0] - 1) // 7) % 4][0 if b[1] == 5 else 1] for b in on_w}
+    wrong = [(b[0], b[3]) for b in on_w if b[3] not in ([], [want[b[0]]])]
+    gave = [(b[0], want[b[0]], 'storm day' if not b[2] else 'gave way') for b in on_w if not b[3]]
+    print('  the rotation: none that day (the new one gave way to an old one, or a ship-wide event took the day):', gave)
+    check(not wrong, 'the rotation: each weekend day has its own new one from the lead\'s table and no other (%s)' % wrong)
+    check(all(any(b[3] == [i] for b in on_w) for i in TRADS) and len(gave) <= 6, 'the rotation: each of the eight on at least once in Days 6-84, and few giving way (%s)' % gave)
+    hs = json.loads(g.ev(HOSTS))
+    print('  hosts and goers (id, day, host, host there, going):', hs)
+    check(all(h[3] for h in hs if h[2]), 'RV14: each weekend tradition\'s host is planned at it (%s)' % [h for h in hs if h[2] and not h[3]])
+    late = [h for h in hs if h[0] in ('night-owls-cocoa', 'sunday-story')]
+    check(late and all(h[4] >= 5 for h in late), 'RV14: at least 5 go to every Night owls\' cocoa and Sunday story (%s)' % late)
     g.close()
     # each tap-join on its day: starts, ends by itself in its tradition's time, and gives its own gain (RV13's ask)
     for jid, d in [(i, d) for i, d in TRADS.items() if i not in ('saturday-run',)]:
@@ -77,31 +103,31 @@ with sync_playwright() as pw:
     g.ev("(() => { skipTo(8 * 1440 + 420); })()"); g.step(30)
     check('loafCard' not in g.ev("dressingOn()") and 'breadDay' not in g.ev("dressingOn()"), 'Tuesday: no loaf, no flour')
     g.close()
-    # ---- The big jigsaw (Day 14, Sunday afternoon; Day 13 the same room is as before) ----
+    # ---- The big jigsaw (Day 21, Sunday afternoon; Day 20 the same room is as before) ----
     g = Game(pw, won, 900, 760)
-    g.ev("(() => { skipTo(12 * 1440 + 830); goToDeck(1, null); })()"); g.step(30)
+    g.ev("(() => { skipTo(19 * 1440 + 830); goToDeck(1, null); })()"); g.step(30)
     check('bigJigsaw' not in g.ev("dressingOn()"), 'Saturday: no jigsaw on the conference table')
-    g.ev("(() => { skipTo(13 * 1440 + 815); goToDeck(1, null); player.obj.position.set(4.5 - OX, 0, 3.5 - OZ); SHIP.device.settings.tips = false; })()")
+    g.ev("(() => { skipTo(20 * 1440 + 815); goToDeck(1, null); player.obj.position.set(4.5 - OX, 0, 3.5 - OZ); SHIP.device.settings.tips = false; })()")
     g.step(240)
     jz = json.loads(g.ev("JSON.stringify({ dress: dressingOn(), crew: DECK_CREW.filter(a => a.settled && a.spot && a.spot.room === 'O').length })"))
     check('bigJigsaw' in jz['dress'] and jz['crew'] >= 3, 'Sunday 13:35: the jigsaw on the table, %d crew at it' % jz['crew'])
-    t = json.loads(g.ev("(() => { const e = eventsOn(14).find(x => x.id === 'big-jigsaw'), a = DECK_CREW.find(x => x.spot && x.spot.room === 'O'); tradJoin({ ...e, day: 14 }, a); return JSON.stringify({ act: ACT && ACT.kind, mins: ACT ? Math.round(ACT.o.end - shipNow()) : null }); })()"))
+    t = json.loads(g.ev("(() => { const e = eventsOn(21).find(x => x.id === 'big-jigsaw'), a = DECK_CREW.find(x => x.spot && x.spot.room === 'O'); tradJoin({ ...e, day: 21 }, a); return JSON.stringify({ act: ACT && ACT.kind, mins: ACT ? Math.round(ACT.o.end - shipNow()) : null }); })()"))
     check(t['act'] == 'tj:big-jigsaw' and t['mins'] == 20, 'the jigsaw: a turn is 20 minutes (%s)' % t)
     while g.ev("SHIP.time.min") < 845: g.step(60)
     check(g.ev("!ACT || ACT.kind !== 'tj:big-jigsaw'"), 'the jigsaw: your turn ends after its 20 minutes')
     while g.ev("SHIP.time.min") < 935: g.step(60)
     check(g.ev("SHIP.player.hobbies.done.puzzle || 0") >= 1, 'the jigsaw counts as your puzzles hobby')
-    g.ev("(() => { skipTo(13 * 1440 + 960); })()"); g.step(30)
+    g.ev("(() => { skipTo(20 * 1440 + 960); })()"); g.step(30)
     check('bigJigsaw' not in g.ev("dressingOn()"), 'after 15:45: the jigsaw is put away')
     check(not g.errors, 'no errors: ' + ' | '.join(g.errors[:5]))
     g.close()
-    # ---- The Sunday story (FX9): Holt reads the week's chapter in his bubble, story.sunday.1 on Day 7, .2 on Day 14 ----
+    # ---- The Sunday story (FX9): Holt reads the showing's chapter in his bubble, story.sunday.1 on Day 28, .2 on Day 56 (a chapter a showing: the rotation) ----
     g = Game(pw, won, 900, 760)
-    for d, ch in [(7, 1), (14, 2)]:
-        g.ev(f"""(() => {{ skipTo(({d} - 1) * 1440 + 1338); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
+    for d, ch in [(28, 1), (56, 2)]:
+        g.ev(f"""(() => {{ skipTo(({d} - 1) * 1440 + 1278); goToDeck(4, null); SHIP.device.settings.tips = false; window.__said = [];
           const bs = bubbleSay; bubbleSay = function (who, text, secs) {{ if (who && who.p) window.__said.push([who.p.id, text]); return bs.apply(this, arguments); }}; }})()""")
         g.step(10)
-        g.ev("(() => { const a = DECK_CREW.find(x => x.p.id === 'holt'); if (a) { const c = cellPos(...nearestOpen(a.x, a.z, player)); player.obj.position.set(c.x, 0, c.z); } })()")
+        g.ev(f"(() => {{ const e = eventsOn({d}).find(x => x.id === 'sunday-story'); if (!e) return; const rk = [...eventRooms(e.ev)].map(r => r.split('|')).find(r => +r[0] === 4)[1], tl = ROOM_TILES[rk], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.set(c.x, 0, c.z); player.stop(); }})()")   # (in its room: at 21:18 Holt may still be on his way in)
         g.step(900)
         r = json.loads(g.ev(f"JSON.stringify({{ holt: DECK_CREW.some(x => x.p.id === 'holt'), said: window.__said.filter(x => x[0] === 'holt').map(x => x[1]), want: (LINES['story.sunday.{ch}'] || []).map(x => x.text) }})"))
         print('  the Sunday story, Day %d: Holt here %s, said %d lines, chapter %d has %d' % (d, r['holt'], len(r['said']), ch, len(r['want'])))
