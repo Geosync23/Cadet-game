@@ -1475,6 +1475,7 @@ with sync_playwright() as pw:
           const fx = [...seen.values()].filter(j => j.fix), T = typeof fixTable === 'function' ? fixTable() : null;   // FX10's small repairs (patch 0.92.3 items 21, 24)
           out.fix = fx.length; out.fixSci = fx.filter(j => j.fixS === 's').length; out.fixDup = fx.length - new Set(fx.map(j => j.fix)).size; out.fixOn = typeof FIX_ON !== 'undefined' && FIX_ON;
           out.odd = fx.filter(j => j.fixS === 'o').map(j => [j.found, j.fix, j.deck]);   // FX20's odd jobs (patch 0.92.6 item 10), while ODD_ON
+          out.fixDays = fx.map(j => Math.floor(j.found / 1440) + 1);   // the day of each small job posted (an odd job comes second in a shift: the first is science)
           out.fixBad = T ? T.s.concat(T.p).filter(r => !placeById(r.place) || (r.part && !(r.part in STOCK)) || !SYSTEMS.includes(r.sys)).map(r => r.id) : [];
           for (const j of SHIP.jobs) if (j.claimedBy === 'you') { j.claimedBy = null; j.status = 'open'; }
           BOARD_ON = true; window.__sc("if (window.__evBk[0]) eventNow = window.__evBk[0]");
@@ -1497,8 +1498,8 @@ with sync_playwright() as pw:
         if bk.get('fixDup') or bk.get('fixBad') or bk.get('fixCrew') or (bk.get('forced') and (bk['forced']['fix'] or not bk['forced']['plain'])):
             fail('the small repairs: never the same twice in a week, every row sound, never the crew\'s')
         # FX20's odd jobs (patch 0.92.6 item 10), on a build that has them: every row sound on any build (a real place on Decks
-        # 2-7, your tier, a STOCK part or none, a real system, an id of its own); with ODD_ON, odd jobs on every shift day of the
-        # week, on 4 decks or more (about 11 in the week, Deck 3 has 51 of the 117), any 12 in a row of the stream's order on 5
+        # 2-7, your tier, a STOCK part or none, a real system, an id of its own); with ODD_ON, an odd job on every day of the week
+        # with two small jobs or more (the shift's first is science, FX10; a busy Friday may need only that one), on 4 decks or more (about 11 in the week, Deck 3 has 51 of the 117), any 12 in a row of the stream's order on 5
         # decks or more, none twice, never the crew's (the small repairs' line above covers both); ODD_ON false: none
         if g.ev("typeof ODD_ROWS !== 'undefined'"):
             od = g.ev("""(() => { const ids = new Set(FIX_ROWS.map(s => s.split('|')[0])), bad = [];
@@ -1508,10 +1509,10 @@ with sync_playwright() as pw:
               for (let i = 0; i + 12 <= o.length; i++) spread = Math.min(spread, new Set(o.slice(i, i + 12)).size);
               return { n: ODD_ROWS.length, parked: ODD_PARKED.size, on: ODD_ON, min: boardMin(), bad, spread: ODD_ON ? spread : null }; })()""")
             odd = bk.get('odd', []); odays = sorted(set(1 + f // 1440 for f, _, _ in odd)); odecks = sorted(set(dk for _, _, dk in odd))
-            sdays = sorted(int(k) for k, v in bk['days'].items())
-            print(f"  odd jobs (FX20): {od['n']} rows ({od['parked']} parked), unsound {od['bad'][:4]}; ODD_ON {od['on']}, the board keeps {od['min']}; posted {len(odd)} on days {odays} (shift days {sdays}), decks {odecks}, the same twice {len(odd) - len(set(x[1] for x in odd))}; the fewest decks in any 12 in a row of its order {od['spread']}")
+            fdays = bk.get('fixDays', []); sdays = sorted(d for d in set(fdays) if fdays.count(d) >= 2)   # days with two small jobs or more: one of them is odd (a busy Friday may need only one top-up, the science one)
+            print(f"  odd jobs (FX20): {od['n']} rows ({od['parked']} parked), unsound {od['bad'][:4]}; ODD_ON {od['on']}, the board keeps {od['min']}; posted {len(odd)} on days {odays} (days with 2+ small jobs {sdays}), decks {odecks}, the same twice {len(odd) - len(set(x[1] for x in odd))}; the fewest decks in any 12 in a row of its order {od['spread']}")
             if od['bad'] or (od['on'] and (len(odd) - len(set(x[1] for x in odd)) or len(odecks) < 4 or od['spread'] < 5 or any(d not in odays for d in sdays) or od['min'] != 3)) or (not od['on'] and (odd or od['min'] != 2)):
-                fail("the odd jobs: every row sound; switched on, some every shift day, on 4 decks or more, spread in their order, never twice in the week; switched off, none")
+                fail("the odd jobs: every row sound; switched on, one on every day with two small jobs or more, on 4 decks or more, spread in their order, never twice in the week; switched off, none")
         # limits between the old board and FX10's (3e5c4fe2: 8% again, 21% on Deck 2; 0.92.2: 20% again, 4% on Deck 2)
         if again * 100 > 14 * n: fail(f"the quick player did the same job again {again} times in {n} (want 14% at most: note 24, \"the same things over and over\")")
         if sci * 100 < 12 * n: fail(f"the quick player's jobs on Deck 2: {sci} of {n} (want 12% or more: note 21, \"work needs to take you to the science area more\")")
