@@ -12,6 +12,8 @@
 #       benches, the join is Orla's, her swap card opens on a tap, and the stalls talk (bubbles). Off: nobody at a stall, no card
 #   15  Spice shelf supper (Day 16, a Tuesday): Brennan comes out to the spice shelf (3-spice-host) by 18:40, opens and names three
 #       jars, the mess guesses (bubbles), she says whose, and joined you get the guess card. Off: Brennan never at the shelf, no card
+#   4   Reading corner (Day 14, 16:30): Esme Walsh there, everyone at it seated within 4.5 m of the bow window's sofa, at least 4
+#       bubbles about books in the room, a tap joins you with a book. Off: no host
 #   no page errors
 # Setup and environment as for cadet_test.py.  Run:  python3 p926_check.py BUILD.html [part ...]   (no parts: all of them)
 import sys, json, re
@@ -154,5 +156,26 @@ with sync_playwright() as pw:
         check(len(o) >= 3, '15: the mess guesses out loud (%d bubbles)' % len(o))
         check(r['joined'] and 'spice.guess' in r['cards'], '15: joined, your guess card (%s)' % r['cards'])
         check(not err, '15: no errors: ' + ' | '.join(err[:5]))
+    if want('4'):
+        def read4(path):
+            g = Game(pw, path, 900, 760)
+            g.ev("(() => { skipTo(13 * 1440 + 965); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev(INROOM % (14, 'reading-corner'))
+            for _ in range(120):
+                g.step(30)
+                if g.ev('SHIP.time.min') >= 990: break
+            r = json.loads(g.ev("""(() => { const at = DECK_CREW.filter(a => a.settled && a.spot && evTagId(a.tag || '') === 'reading-corner');
+              const far = at.map(a => { const pl = PLACE_OF.get(a.spot.id), xy = pl && (pl.xy || pl.at); return [a.p.id, a.spot.id, xy ? +Math.hypot(xy[0] - 48.7, xy[1] - 11).toFixed(1) : 99, (a.spot.pose || '')]; });
+              const host = at.find(a => a.p.id === 'walsh-esme'), out = { t: SHIP.time.min, at: far, host: !!host, said: window.__said.length };
+              const a = host || at[0]; if (a) tradJoinTap(a); out.act = ACT && ACT.kind; return JSON.stringify(out); })()"""))
+            err = g.errors; g.close(); return r, err
+        r, err = read4(woff); print('  4 off:', r)
+        check(not r['host'], '4 off: as 0.92.5, no host')
+        r, err = read4(won); print('  4 on:', r)
+        check(r['host'] and len(r['at']) >= 3, '4: Esme Walsh hosts, %d at it' % len(r['at']))
+        check(all(x[2] <= 4.5 and x[3] == 'sit' for x in r['at']), '4: everyone at it sits within 4.5 m of the window sofa (%s)' % [x for x in r['at'] if x[2] > 4.5 or x[3] != 'sit'])
+        check(r['said'] >= 4, '4: they talk about their books (%d bubbles)' % r['said'])
+        check(r['act'] == 'tj:reading-corner', '4: a tap joins you (%s)' % r['act'])
+        check(not err, '4: no errors: ' + ' | '.join(err[:5]))
 print('P926 CHECK OK' if ok else 'P926 CHECK FAILED')
 sys.exit(0 if ok else 1)
