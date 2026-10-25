@@ -43896,6 +43896,7 @@ const APPT_TALK = new Map();                              // appointment id -> w
 function apptFrame() {                                    // every frame from eventsTick, only with P926_APPT
   apptTalkFrame();
   apptOverlayFrame();
+  apptRoundFrame();
   const now = shipNow(); if (Math.floor(now) !== APPT_MIN) { APPT_MIN = Math.floor(now); apptMinute(now); }
 }
 // ---- appointments as small traditions (T2). An appointment (APPTS' words, APPT_RULES' rules) is offered by its host
@@ -43922,6 +43923,7 @@ const APPT_SHADOW = { 'dlamini-lukas': [3, /^Galley$/, 'work:galley', [450, 420,
 const APPT_TEACH = { 'torres-zeke': [4, 'common-room', 'knit'], 'cruz-tove': [3, 'garden', 'garden'], rina: [4, 'common-room', 'games'], 'hart-ravi': [4, 'common-room', 'draw'] };
 const APPT_HOBBY_WORD = { knit: 'knitting', garden: 'growing things', games: 'Tiles', draw: 'drawing comics' };
 const APPT_DEPT_WORD = { galley: 'the galley', infirmary: 'the Infirmary', survey: 'Survey', garden: 'the garden', watch: 'the Watch' };
+const apptWorking = (p, d, from, to) => { for (let t = from; t < to; t += 5) { const w = planWhere(p, (d - 1) * 1440 + t); if (!w || w.act !== 'work') return false; } return true; };   // at work, any deck
 const apptEvenings = (p, d, len) => { const out = []; for (let a = 1140; a + len + 10 <= 1320; a += 15) out.push([a, a + len + 10]); return out; };   // 10 minutes more: the host's walk there (a scope turn at 19:00 had Sato seated at 19:12)
 const APPT_RULES = {
   'brennan-book': { hosts: ['brennan'], tier: 1, once: true, onShift: () => true, where: () => [{ deck: 3, room: /^Galley$/, types: ['event', 'work:galley'] }],
@@ -43943,6 +43945,10 @@ const APPT_RULES = {
   'midnight-feast': { hosts: ['bunk'], once: false, key: () => '', guests: d => apptBunkmates(), toBed: 10, mailDay: 720,
     can: (h, d) => apptBunkmates().length >= 2 && !devShiftOn(d + 1), where: () => [{ deck: 4, pool: '@appt-midnight-feast' }],
     times: (p, d) => !devShiftOn(d + 1) ? [[1320, 1380]] : [], pose: 'talk', what: 'a midnight feast with your bunkmates' },
+  // The night round (T4): Kofi Mensah walks the ship on his night Watch; from the Deck 3 lift plaza at 22:30 the night before
+  // your day off, deck by deck (apptRoundFrame). He's at work for it anywhere aboard
+  'night-round': { hosts: ['mensah'], tier: 3, once: true, onShift: () => true, anyDeck: true, where: () => [{ deck: 3, room: /^Lift plaza$/, types: ['bench'] }],
+    times: (p, d) => !devShiftOn(d + 1) ? [[1350, 1395]] : [], pose: 'talk', what: 'walk the night round with him' },
   // A bed of your own: planting with Cruz on a Saturday morning, then three short visits and the harvest (apptGardenNext)
   'garden-bed': { hosts: ['cruz-tove'], tier: 3, once: true, days: 14, onShift: (h, d) => apptWork(evPerson(h), d, 600, 630, 3, /^Hydroponics garden$/),
     where: () => [{ deck: 3, room: /^Hydroponics garden$/, types: ['garden', 'work:garden'] }], times: (p, d) => apptState().garden ? [[600, 615]] : weekday(d) === 5 ? [[600, 630]] : [], pose: 'water', what: 'plant a bed of your own with Cruz' },
@@ -43982,7 +43988,7 @@ function apptSlots(kind, host, from, n = 6) {
       if (R.guests) { if (R.guests(d).filter(q => apptLate(evPerson(q), d, a, b, R)).length >= 2 && push({ day: d, from: a, to: b, shift: false })) return out; continue; }
       const sh = R.onShift(host, d), w = R.where(host)[0];
       const trad = !sh && planDay(p, d).some(x => x.tag && x.tag.startsWith('ev-') && x.from % 1440 < b && a < x.to % 1440);   // going to a tradition then: they'd go to that instead
-      if (!trad && (sh ? apptWork(p, d, a, b, w.deck, w.room) : eventFree(p, d, a, b)) && push({ day: d, from: a, to: b, shift: sh })) return out;
+      if (!trad && (sh ? R.anyDeck ? apptWorking(p, d, a, b) : apptWork(p, d, a, b, w.deck, w.room) : eventFree(p, d, a, b)) && push({ day: d, from: a, to: b, shift: sh })) return out;
     }
   }
   return out;
@@ -44050,7 +44056,7 @@ function apptAnswer(i, yes) {
   APPT_SAY = b ? 'Booked: ' + APPTS[o.kind].title + ', ' + devDayName(b.day) + ' ' + hhmm(b.from) + '.' : shortName(evPerson(o.host)) + ': "Oh, that time\'s gone now. Ask me again?"';
 }
 // the scene: a tap on the host joins (tradJoin), and eventJoin calls this
-function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) apptScene(b, now); }
+function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) b.kind === 'night-round' ? apptRoundStart(b, now) : apptScene(b, now); }
 // a group scene's lines with only those there: a line from someone not there goes, and so does the line right after it
 // when it's about them (it starts He, She or They: "He means days to home" after Lukas's "Ninety-one"), and any line or
 // reply naming them (a choice keeps its reply only if it names nobody away)
@@ -44180,6 +44186,37 @@ function apptGardenNext(now) {
   if (X.book.some(b => b.kind === 'garden-bed' && !b.done && !b.gone && b.day >= d)) return;
   const b = apptTry('garden-bed', 'cruz-tove', apptSlots('garden-bed', 'cruz-tove', G.due), G.stage < 4 ? 'tend:' + (G.stage - 1) : 'harvest');
   if (b && typeof deviceNotify === 'function') deviceNotify({ app: 'appointments', text: 'Cruz will meet you at your bed: ' + devDayName(b.day) + ', ' + hhmm(b.from) + '.', urgent: false });
+}
+// ---- the night round (T4; lead 36: Mensah at your lift lobby, deck by deck; stop and tell if fragile). At 22:25 Mensah
+// waits at the Deck 3 lift plaza's bench (section 14's crewScene 'wait', looks only: his plan runs on); a tap joins you,
+// and from then he follows you (crewScene 'follow': he comes out of the lift after you on every deck). The stops come in
+// APPT_ROUND's order: on each deck, once you're out of the lift with him near, he says its stop line (the rec deck's
+// from Deck 4's lobby, after Deck 4's: it's closed at night); a toast says where next. After Deck 1's lobby, the scene.
+// The round has until 23:45; at least four stops by then and the scene still plays, else it's left (nothing lost).
+// APPT_ROUND_NOW: { b, i, at (the ship minute of the next line: 3 apart, about 5 seconds), next } while it runs; nothing saved
+// (a reload ends it)
+const APPT_ROUND = [6, 5, 4, 7, 3, 2, 1];
+let APPT_ROUND_NOW = null;
+function apptRoundStart(b, now) {
+  const A = APPTS['night-round'], L = (A.stops || []).filter((l, k) => APPT_ROUND[k] !== 7 || REC_DECK);
+  APPT_ROUND_NOW = { b, i: 0, L, decks: APPT_ROUND.filter(n => n !== 7 || REC_DECK), at: 0 };
+  crewScene(b.host, { mode: 'follow', until: (b.day - 1) * 1440 + b.to + 30 });
+  toast(A.title, 'Take the lift down to ' + deckIn(6) + '. Mensah comes with you, and says good night to each deck.', { keep: true });
+}
+function apptRoundFrame() {
+  const N = APPT_ROUND_NOW, now = shipNow();
+  { const b = apptState().book.find(x => x.kind === 'night-round' && !x.done && !x.gone && !x.waits && now >= (x.day - 1) * 1440 + x.from - 5 && now < (x.day - 1) * 1440 + x.to);   // 22:25: he's at the bench
+    if (b && !N) { const pl = (DECKS[3].places || []).find(q => q.room === '+' && q.type === 'bench'); b.waits = 1; if (pl) crewScene(b.host, { mode: 'wait', to: pl.id, until: (b.day - 1) * 1440 + b.to }); } }
+  if (!N || typeof DECK_CREW === 'undefined' || !deckDef) return;
+  const b = N.b, end = (b.day - 1) * 1440 + b.to + 30;
+  if (now >= end || b.done) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); if (!b.done && N.i >= 4 && !DIALOGUE) apptScene(b, now); else if (!b.done) b.gone = 1; return; }
+  const t = now, P = player.obj.position, m = DECK_CREW.find(c => c.p && c.p.id === b.host && c.h && Math.hypot(c.x - P.x, c.z - P.z) < APPT_NEAR + 1);   // following you: never 'settled'
+  if (N.i >= N.L.length) { if (!DIALOGUE && t >= N.at) { APPT_ROUND_NOW = null; crewSceneEnd(b.host); apptScene(b, now); } return; }
+  const want = N.decks[N.i], here = want === 7 ? 4 : want;
+  if (deckDef.num !== here || inLift() || !m || t < N.at) return;
+  const l = N.L[N.i]; bubbleSay(friSpeaker(m), apptFill(l.text, b.host, {}), 5.5); N.i++; N.at = t + 3;
+  const nx = N.decks[N.i];
+  if (nx != null && nx !== 7) toast(APPTS['night-round'].title, nx === 1 ? 'Up to ' + deckIn(1) + '\'s lobby, the last stop.' : 'On to ' + deckIn(nx) + '.', { keep: false });
 }
 let APPT_HOUR = -1, APPT_MIN = -1;
 if (P926_APPT) {
