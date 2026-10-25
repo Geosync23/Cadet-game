@@ -44065,7 +44065,7 @@ function apptAnswer(i, yes) {
   APPT_SAY = b ? 'Booked: ' + APPT_WORDS[o.kind].title + ', ' + devDayName(b.day) + ' ' + hhmm(b.from) + '.' : shortName(evPerson(o.host)) + ': "Oh, that time\'s gone now. Ask me again?"';
 }
 // the scene: a tap on the host joins (tradJoin), and eventJoin calls this
-function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) b.kind === 'night-round' ? apptRoundStart(b, now) : apptScene(b, now); }
+function apptJoin(e, d, now) { const b = apptBooking(e, d); if (b) b.kind === 'night-round' ? apptRoundStart(b, now) : apptScene(b, now, e); }
 // a group scene's lines with only those there: a line from someone not there goes, and so does the line right after it
 // when it's about them (it starts He, She or They: "He means days to home" after Lukas's "Ninety-one"), and any line or
 // reply naming them (a choice keeps its reply only if it names nobody away)
@@ -44079,14 +44079,14 @@ function apptPresent(b, L, here) {
   }
   return out;
 }
-function apptScene(b, now) {                             // the scene for a booking: its key's (a garden visit: tend:<n> or harvest); lines from anyone not there are left out
+function apptScene(b, now, e) {                         // e: its one-off (the card stays open in its rooms too: FX17's cardWhere(e))                             // the scene for a booking: its key's (a garden visit: tend:<n> or harvest); lines from anyone not there are left out
   if (typeof dialogueShow !== 'function') return;
   const A = APPT_WORDS[b.kind], k = String(b.key || ''), L = /^tend:\d$/.test(k) ? [A.tend[+k.slice(5)]].filter(Boolean) : k === 'harvest' ? A.harvest : A.scene && (A.scene[k] || A.scene['']); if (!L || !L.length) return;
   const id = 'appt:' + b.kind + ':' + (k || b.host), ctx = { me: typeof linesMe === 'function' ? linesMe() : 'you' }, here = new Set([b.host].concat(b.guests || []));
   const who = w => here.has(w) || !evPerson(w) ? w : b.host;   // a reply from someone not there: the host says it
   const fill = l => l.text ? { ...l, text: apptFill(l.text, l.who, ctx) } : l.choice ? { choice: l.choice.map(c => ({ ...c, ...(c.reply ? { reply: { ...c.reply, who: who(c.reply.who), text: apptFill(c.reply.text, who(c.reply.who), ctx) } } : {}) })) } : l;
   MEETING_SCRIPTS[id] = { title: A.title, from: evPerson(b.host).name, gist: A.title + ' with ' + apptHostName(b.guests && b.guests.length ? 'bunk' : b.host) + '.', lines: apptPresent(b, L, here).map(fill), onEnd: () => apptKeep(b) };
-  dialogueShow(id, { id: id + '@' + b.day, who: [...here], at: now, ...cardWhere() });   // the room you're in (FX17's shared cardWhere: with no where, meetingsTick closed it at the next ship minute)
+  dialogueShow(id, { id: id + '@' + b.day, who: [...here], at: now, ...cardWhere(e) });   // the room you're in (FX17's shared cardWhere: with no where, meetingsTick closed it at the next ship minute)
 }
 function apptKeep(b) {                                   // the scene's end (or walking off it): kept, once
   if (b.done) return; b.done = SHIP.time.day;
