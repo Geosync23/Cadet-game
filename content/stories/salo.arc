@@ -8,7 +8,7 @@ who: salo-saad
 
 == beat 1
 tone: light
-where: Engine overlook
+where: calm
 when: !event:ionStorm
 hint: Got a minute? New episode from the Halcyon. It's a good one.
 mem: halcyon
@@ -53,9 +53,9 @@ them: There. Four. No, I'm joking. Three. On we go, slowly.   [laugh]
 // DAY: 8-11
 // before the storm, so the storm can carry beat 4; early evening, before ten
 tone: heartfelt
-where: Engine overlook
+where: Bow lounge
 when: beat:salo.2 time:evening !event:ionStorm day:8-11
-hint: Sit with me on the overlook? Before ten. There's a story I've not told.
+hint: Sit with me in the bow lounge? Before ten. There's a story I've not told.
 mem: cold
 them: Years ago I was on a freighter, the Pallas. Long shifts, old pipes. I liked her.
 them: End of a long one, I signed off a valve I hadn't looked at. I was tired. I wanted my bunk.

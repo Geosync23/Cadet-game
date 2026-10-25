@@ -102,6 +102,7 @@ gapDays: 0
 where: meal
 when: beat:halloran.4 time:morning day:15-
 crescendo: meal:breakfast
+cast: pell
 quiet: 6
 title: Breakfast with Halloran
 invite: Number 289 | Breakfast tomorrow, the Works tables. A big one. Don't be late, and bring your best laugh. You'll need it. E.
@@ -136,7 +137,7 @@ them: Thanks ever so. Every one of you. Number two hundred and ninety's tomorrow
 tone: light
 tier: friend
 gapDays: 0
-where: Tea corner
+where: calm
 when: beat=halloran.4
 hint: Oh, you missed a morning. Sit. You'll want all of it.
 mem: missed

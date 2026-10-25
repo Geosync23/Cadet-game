@@ -63,14 +63,15 @@ them: I'm fine. Really. I just don't like the counting. It starts again in there
 them: Right. That's enough of that. Tea? I'll walk. The long way.
 
 == beat 4
-// CRESCENDO rides on: the lift up to the Captain's Friday address (the Deck 5 lift lobby, about 15:35-15:45; the scene plays at the doors, before they ride); day: 19 (preferred) or 26; cast: kovac-zainab, cruz-tove, keane-davi (only if there: he's on nights), you; quiet ending: beat 5
+// CRESCENDO rides on: the lift up to the Captain's Friday address (the Deck 5 lift lobby, about 15:50-16:00; the scene plays at the doors, before they ride); day: 19 (preferred) or 26; cast: kovac-zainab, cruz-tove, keane-davi (only if there: he's on nights), you; quiet ending: beat 5
 tone: resolution
 when: beat:kovac.3 weekday:fri trad:captains-address day:19-26
 crescendo: trad:captains-address
+cast: cruz-tove
 quiet: 5
 lead: 10
 title: The lift with Kovac
-invite: Friday | Before the address tomorrow. The Deck 5 lift lobby, 15:35. Cruz is coming. Will you? Sorry. I mean, please. Zainab
+invite: Friday | Before the address tomorrow. The Deck 5 lift lobby, 15:50. Cruz is coming. Will you? Sorry. I mean, please. Zainab
 where: Lift lobby
 hint: Walk with me? Just to the lift. Well. Into it.
 mem: doors
