@@ -75,7 +75,7 @@ def part_sight(g):
     check(f['test'] and f['test']['day'] == 9, f"sight: the test set for Day 9 ({f['test']})")
     check(len(f['mail']) == 5 and 'tomorrow' in f['mail'][0] and not any('Sleep' in m for m in f['mail']), f"sight: the ready Mail names tomorrow, not the old announce Mail ({f['mail'][:2]})")
     check(any('09:00' in t[1] for t in f['toasts']), f"sight: the notice ({f['toasts']})")
-    check(any('Test set' in x for x in f['check']), f"sight: the list's test line ({f['check']})")
+    check(any('09:00' in x for x in f['check']), f"sight: the list's test line ({f['check']})")
     h = g.ev("""(() => { const W = __w(9, 300, { xp: 45, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); __tick(); return __look(); })()""")
     check(not h['mail'] and 'promo.sight' in h['flags'], f"sight: a save past the offer, nothing said ({h['mail']}, {h['flags']})")
     k = g.ev("""(() => { if (!promoQueue()) return 'no queue'; setShipNow(8 * 1440 + 515); __tick(); const e = GUIDE.list.find(x => x.id === 'promo:testday:9'); return e ? e.goal().label : null; })()""")
