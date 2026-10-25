@@ -1228,3 +1228,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:55 UTC: **USER: publish 0.92.6 to both Playtest + Dev.** PUB1 told (staging-0.92.6 newest tip, sha256 10f654de… check; never 6daN…). After: ask the user's OK to fast-forward integration.
 - ~17:58 UTC check-in (lead 36, memory ~60%): 0.92.6 publishing (PUB1). SD1 music v6 planetarium (shown). Handing over to lead 37 now (plans/handover-lead36.md updated).
 - ~17:59 UTC: **LEAD 37 started** session_019GcNZ4GGEqfiuYDYnue7nX (from plans/handover-lead36.md). Lead 36 relays anything that reaches it until lead 37 confirms, then idles.
+- ~18:00 UTC: **0.92.6 LIVE** (PUB1): Playtest https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ v3, Dev https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr v3; game 10f654de… from staging-0.92.6 ec28a7f2; 6daN… untouched. Relayed to lead 37; user told.
