@@ -43143,10 +43143,10 @@ function sliceTick() {                                   // eaten as you go; asl
 const TALK_Q = 12;
 // (FX22's find) a card opened with no `where` is closed by section 18's meetingsTick at the next ship minute (inMeeting: no deck):
 // 0.92.6's cards say where they're played, the room you're in, so they stay open until you walk out (as a meeting). Off: {} (as before)
-// dlgHere() (shared with FX22's appointments, one fix for both): { where } for a card played here, the room you're in, else anywhere
-const dlgHere = () => { const r = typeof deckDef !== 'undefined' && deckDef ? roomAt(...player.here()) : null, room = r && deckDef.rooms && deckDef.rooms[r];
+// cardWhere() (shared with FX22's appointments, one fix for both): { where } for a card played here, the room you're in, else anywhere
+const cardWhere = () => { const r = typeof deckDef !== 'undefined' && deckDef ? roomAt(...player.here()) : null, room = r && deckDef.rooms && deckDef.rooms[r];
   return { where: room ? { deck: deckDef.num, room: new RegExp('^' + String(room.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') } : { any: true } }; };
-const p926Where = () => P926_TRADS ? dlgHere() : {};   // the Wren talk cards: as before with the switch off
+const p926Where = () => P926_TRADS ? cardWhere() : {};   // the Wren talk cards: as before with the switch off
 let TALK_SAID = null, TALK_FROM = null, TALK_ASKED = 0;
 const talkLines = by => { const S = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS['talk.' + by]; return S ? S.lines.filter(x => x.text && !x.choice) : []; };
 function talkAskScript(by) {                             // the script's choice lines alone, as a script of their own
