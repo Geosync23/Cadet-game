@@ -1,5 +1,24 @@
 # Check runner CR4: results
 
+## 0.92.6 full round (2026-10-25; all six switches ON incl. odd jobs)
+
+- **Candidate:** `claude/staging-0.92.6` b78e1e22 (the final candidate; a first run on defc327f was stopped in Day 12 on BM17's word and discarded)
+- **starship-cadet.html sha256:** `88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4` (matches BM17's)
+- **OLD:** 39f7741d (0.92.5), sha256 `fddc0ef6...b595559`; not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, 6, 8, then appt_check (new). One at a time, alone, at b78e1e22, `CADET_WORK=/tmp/work-cr4`. Reported to BM17 and lead 36.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 286 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450; nobody stuck; 0 arrivals drawn elsewhere |
+| day_check 13 | OK (exit 0, 280 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 289 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 264 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 267 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 271 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| appt_check | OK (exit 0, 617 s) | `APPT CHECK OK`; no FAIL line outside its self-test; last parts: RV17 7a/7b/7c reload and Decline fixes OK, "on paper: no page errors" |
+
+**CR4: OK.** No FAILs. (CR2's arc_check stall with STORIES_ON is outside this share.)
+
 ## 0.92.5 full round (2026-10-25)
 
 - **Candidate:** `claude/staging-0.92.5` 53c11f8
