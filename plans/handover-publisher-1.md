@@ -1,6 +1,6 @@
 # Handover: publisher 1 (PUB1)
 
-Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note only). Started under lead 25; now reports to **lead 34** (session_019RdVfeRPRiJpHGjKujZZJA). Before taking orders from a new lead or build master, check that TEAM.md on the previous lead's branch records the handover, or ask the previous lead.
+Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note only). Started under lead 25; now reports to **lead 36** (session_015LyT1p2Kivp1eaMBC7dMQi). Before taking orders from a new lead or build master, check that TEAM.md on the previous lead's branch records the handover, or ask the previous lead.
 
 ## The user's standing rules for the pages
 - **The old Dev page https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (Version 11 = 0.92.2) holds the user's longer playthrough save. Never publish over it unless the user explicitly says so** (lead 34, 2026-10-24).
@@ -10,11 +10,12 @@ Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note 
 ## Pages (all private to the user's account; sharing is the user's, from each page's Share menu)
 | Page | Link | Now | Scratchpad source (same path = same link) |
 |---|---|---|---|
-| Playtest (current) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v2 = 0.92.4 (staging-0.92.4 5bad724d) | play-0.92.3/starship-cadet-playtest-0.92.3.html |
-| Dev (current) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v2 = 0.92.4 | dev-0.92.3/starship-cadet-dev-0.92.3.html |
+| Playtest (current) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v3 = 0.92.6 (staging-0.92.6 ec28a7f2) | play-0.92.3/starship-cadet-playtest-0.92.3.html |
+| Dev (current) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v3 = 0.92.6 | dev-0.92.3/starship-cadet-dev-0.92.3.html |
 | Playtest (old, user's save) | https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs | v11 = 0.92.2, **don't touch** | play/starship-cadet-playtest.html |
 | Dev (old, user's longer save) | https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq | v11 = 0.92.2, **don't touch** | dev/starship-cadet-dev.html |
 | Sim Bay Preview | https://claude.ai/artifact/G1fpE2YeMtPukqTZ2J3u77 | v1 = claude/rec-simbay cb4387e8 | simbay-preview/sim-bay-preview.html |
+| Appointments pitch (db: answers/user) | https://claude.ai/artifact/CTLouY4DK2gFuWBF8YwS3L | v1 = claude/appointments-pitch 52dd1cc1 | appointments/appointments-pitch.html |
 | Sim Flight Prototype | https://claude.ai/artifact/RMgibsuh2KdxcF3kd8vuJr | v2 = claude/simflight 7bf86392 | simflight/sim-flight-prototype.html |
 
 History of the old pairs: 0.64.12 (v1), 0.64.13, 0.64.14, 0.64.15, 0.64.16, 0.64.17 (v6), rolled back to 0.64.16 at the user's request (v7), 0.91.0, 0.92.0, 0.92.1, 0.92.2 (v11). Then 0.92.3 went on new links (the user's wish, to keep the old saves), and 0.92.4 updated those.
@@ -34,4 +35,4 @@ History of the old pairs: 0.64.12 (v1), 0.64.13, 0.64.14, 0.64.15, 0.64.16, 0.64
 <parameter name="command">cd /home/user/Cadet-game && git add plans/handover-publisher-1.md && git commit -q -m "Publisher 1 handover: all pages, the user's save-keeping rules, the recipe
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
-Claude-Session: https://claude.ai/code/session_01GnpjFR6oumvuvTrmcXSqeg" && git push -q -u origin claude/publish-25 2>&1 | tail -1; git log --oneline -1
+Claude-Session: https://claude.ai/code/session_01GnpjFR6oumvuvTrmcXSqeg" && git push -q -u origin claude/publish-25 2>&1 | tail -1; git log --oneline -1- **Phone-size check** (when a lead asks): headless Chromium (Playwright, NODE_PATH=$(npm root -g)) at 390x844 with touch, opening the scratchpad file; cdnjs is blocked in the container, so serve three.js from `npm pack three@0.128.0` with page.route, as cadet_test.py does. A fresh game opens on the shuttle manifest: fill the name and click "Sign and go aboard" to see the HUD. The build number is on screen only in Dev mode's Speed card.
