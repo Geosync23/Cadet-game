@@ -50351,7 +50351,7 @@ worksTabAdd({ id: 'training', title: worksText('works.tab.training', 'Training')
   const W = SHIP.works, B = [], say = (text, mark) => B.push({ kind: 'text', text, mark });
   say(worksRankTitle(W) + '. ' + worksText('works.rep.title', 'Your reputation') + ': ' + (W ? worksBandWord() : worksText('works.band.new', 'New')) + '.', 'hot');
   say(worksText('works.training.next', 'What\'s next:') + ' ' + worksNext());
-  if (typeof promoCheck === 'function') B.push(...promoCheck());   // FX19 (24p's slot): the promotion's steps, ticked
+  if (typeof promoCheck === 'function') B.push(...promoCheck(), ...promoHomeLine());   // FX19 (24p's slot): the promotion's steps, ticked
   const rows = [];
   if (worksShadowDone(W)) rows.push({ text: mechName('job').replace(/^job$/, 'The job loop'), sub: 'with Zeke Torres, Day 1' });
   if (W) for (const r of CAREER_LADDER) if (W.tr[r.id] !== undefined) rows.push({ text: mechName(r.id), sub: 'Day ' + W.tr[r.id] });
@@ -54515,12 +54515,14 @@ function worksHomeOpen(deck, room) {                     // is this your own cab
 function promoMoveBy() {                                 // who walks you: Calder, or Vance on her day off
   const d = worksDay(shipNow()); try { return occOnShift('calder', d) ? 'calder' : 'vance'; } catch (e) { return 'calder'; }
 }
-function promoMoveTick(now) {
+function promoMoveTick(now, skip) {
   const W = SHIP.works; if (!W || W.tier < 2 || promoDone('move2')) return;
   const od = (W.ms.find(x => x[0] === 'officer') || [])[1]; if (!od) return;
   const d = worksDay(now), m = now - (d - 1) * 1440;
-  if (d > od || m >= PROMO.moveBy) { promoMoved(Math.min(now, (od - 1) * 1440 + PROMO.moveBy), W.mv ? 'late' : 'mail'); return; }   // never missed: by 17:30 it's done (a skip past it: at 17:30)
+  const by = typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON ? PROMO.moveLate : PROMO.moveBy;   // FX19 (0.92.6): open till 22:00 with the switch on
+  if (d > od || m >= by) { promoMoved(Math.min(now, (od - 1) * 1440 + by), W.mv ? 'late' : 'mail'); return; }   // never missed: by 17:30 it's done (a skip past it: at 17:30)
   if (d < od || m < DAY_SHIFT[1]) return;
+  if (!W.mv && typeof promoMoveWait === 'function' && promoMoveWait(now, skip)) return;   // FX19: she waits till you're free
   if (!W.mv) {
     // DV1 (lead 34): no more waiting while you're mid-job (a working player was moved by the 17:30 fallback, no walk): she comes
     // at 17:00 and your job waits, as Calder's call does
@@ -54551,7 +54553,7 @@ function promoMoved(now, how) {                          // 4-23 is yours
 function promoMoveEscort(p, t) {                         // worksEscort's 24p part: the walk to your cabin
   const W = SHIP.works; return W && W.mv && !promoDone('move2') && p.id === W.mv.by ? { mode: 'lead', to: { deck: PROMO.homeRoom.deck, room: PROMO.homeRoom.room } } : null;
 }
-WORK_TICKS.push((now, skip) => promoMoveTick(now));
+WORK_TICKS.push((now, skip) => promoMoveTick(now, skip));
 // Part 4, the officer ceremony (0.44.21): the day after your promotion, Mail from the Captain's office at 08:00, and at
 // 17:15 in Deck 1's observation room (OCCASIONS.promoCeremony, booked that morning) the Captain reads your commission,
 // pins your Officer's insignia (your collar shows a second pip: the character kit's rank pips, no new mesh), a
@@ -54813,6 +54815,44 @@ function promoTestDay(now) {                             // the test morning: an
     goal: () => ({ deck: 5, room: 'w', label: 'Your Tier 2 test, 09:00: the Works bay' }), done: () => open() || promoInBay() || !!(SHIP.works.test && SHIP.works.test.passed) });
 }
 WORK_TICKS.push((now, skip) => { promoSightTick(now, skip); promoDependTick(now); if (!skip) promoTestDay(now); });
+// FX19 (the user, 05:20 UTC: "Make sure getting taken to your new quarters can't be missed"), on the same switch. The walk
+// to 4-23 waits for you: asleep, in a talk or an activity (promoBusy), it starts once you're free, with an urgent notice;
+// it stays open till 22:00 (PROMO.moveLate, not 17:30), you on any deck (her lead and the arrow). Not walked by then (a
+// skip or a load past it too): 4-23 is yours anyway (promoMoved: bed, door, Mail), and each day you're in play after, an
+// urgent notice once and an arrow to your cabin until you've stepped in (flag promo.sight.home). The Training tab says where it is.
+PROMO.moveLate = 1320;
+function promoBusy() {                                   // asleep, in a talk, or in an activity that isn't a job's step, a seat or a queue
+  if (typeof sleeping !== 'undefined' && sleeping) return true;
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return true;
+  return typeof ACT !== 'undefined' && !!ACT && !['workStep', 'job', 'sit', 'lie', 'queue', 'ixStop'].includes(ACT.kind);
+}
+function promoMoveWait(now, skip) {                      // promoMoveTick asks before the walk starts: true = not yet
+  if (!PROMO_SIGHT_ON) return false;
+  if (skip || now < shipNow() - 1 || promoBusy()) return true;
+  const text = worksText('promo.move.notice', 'Your cabin, 4-23: {name} is taking you there now.', { name: worksName(promoMoveBy()) });
+  if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+  try { toast(worksName(promoMoveBy()), text); } catch (e) { /* no UI */ }
+  return false;
+}
+function promoHomeIn() { try { return deckDef.num === PROMO.homeRoom.deck && roomAt(...player.here()) === PROMO.homeRoom.room; } catch (e) { return false; } }
+function promoHomeTick(now, skip) {                      // moved without the walk: shown the way until you've been in
+  const W = SHIP.works; if (!PROMO_SIGHT_ON || !W || W.home !== PROMO.home || skip || flag('promo.sight.home') || now < shipNow() - 1) return;
+  const d = worksDay(now), M = PROMO.homeRoom;
+  if (promoHomeIn()) { flagSet('promo.sight.home', d); return; }
+  if (W.mv || promoBusy()) return;
+  if (flag('promo.sight.homeTold') !== d) { flagSet('promo.sight.homeTold', d);
+    const text = worksText('promo.home.notice', 'Cabin 4-23 is yours now: your bed and your things are there. Officers\' corridor, Deck 4.');
+    if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+    try { toast(worksText('promo.home.title', 'Your cabin'), text); } catch (e) { /* no UI */ } }
+  const label = worksText('promo.home.arrow', 'Your cabin, 4-23: your things are in');
+  if (promoQueue()) guideAsk({ id: 'promo:home', level: 1, owner: '24p (FX19)', until: d * 1440, goal: () => ({ deck: M.deck, room: M.room, label }), done: () => !!flag('promo.sight.home') });
+  else if (typeof setGoal === 'function' && typeof IX_GOAL !== 'undefined' && !IX_GOAL) setGoal({ deck: M.deck, room: M.room, label, trk: 'career:home', trkTo: d * 1440 });
+}
+function promoHomeLine() {                               // the Training tab: where your cabin is, once it's yours
+  const W = SHIP.works; if (!PROMO_SIGHT_ON || !W || W.home !== PROMO.home) return [];
+  return [{ kind: 'text', text: worksText('works.promo.home', 'Your cabin: 4-23, the officers\' corridor, Deck 4.') }];
+}
+WORK_TICKS.push((now, skip) => promoHomeTick(now, skip));
 // ---- end of slot: Works career engineer ----
 
 

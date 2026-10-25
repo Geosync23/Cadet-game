@@ -11,6 +11,9 @@
 #   trade:  switch on. Day 9, trained in Rounds and Tuning, a machine drifted by one: over the shift the top-up posts your
 #           trade (a tune, an afternoon round from 13:00), at most 3 and one an hour, xp 0, held to the shift's end; the
 #           simple ones still come (at least BOARD_MIN not of your trade); the held list keeps your trade first
+#   move:   the walk to 4-23 (the user, 05:20 UTC): off, the old 17:30; on, it starts at 17:00 with a notice; she waits through a
+#           talk, an activity, sleep; on another deck it starts; open past 17:30; by 22:00 (or a load the next morning) the
+#           cabin's yours (bed, door, Mail), then a notice, an arrow to it and the Training tab's line, done once you're in
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 promo_sight_check.py BUILD.html [part ...]   Good is PROMO SIGHT CHECK OK (exit 0); a failure exits 1.
 import sys, pathlib
@@ -102,11 +105,47 @@ def part_trade(g):
     s = g.ev("""(() => { BOARD_TRADE_ON = true; const a = { kind: 'tune' }, b = { kind: 'service' }; return [boardTrade(a), boardTrade(b)]; })()""")
     check(s == [True, False], f"trade: boardTrade knows your trade ({s})")
 
+MOVE = r"""(() => { window.__mv = (on, min, o = {}) => { PROMO_SIGHT_ON = on; const W = __w(10, min, { xp: 5 }); W.tier = 2; W.rank = 'officer'; W.test = { tier: 2, day: 9, tries: 1, passed: true };
+    W.done.push('summons2'); W.ms.push(['officer', 10]); W.home = 'bunk'; delete W.mv; __toasts.length = 0; if (typeof GUIDE !== 'undefined') GUIDE.list.length = 0; return W; };
+  window.__mvLook = () => { const W = SHIP.works; return { mv: !!W.mv, moved: promoDone('move2'), home: W.home, bed: playerBed(), door: worksHomeOpen(4, 'W'), mail: SHIP.mail.map(m => m.subject),
+    toasts: __toasts.map(t => t[1]), guide: (GUIDE.list.find(x => x.id === 'promo:home') || {}).id || null, seen: !!flag('promo.sight.home'), line: promoHomeLine().map(b => b.text) }; };
+  window.__out = () => { if (deckDef.num !== 5) goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); };
+  return true; })()"""
+
+def part_move(g):
+    print('(move) the walk to 4-23 can\'t be missed:')
+    check(g.ev(MOVE), 'move setup')
+    t17, t1740, t2200 = 9 * 1440 + 1020, 9 * 1440 + 1060, 9 * 1440 + 1320
+    a = g.ev(f"""(() => {{ __out(); const W = __mv(false, 1020); promoMoveTick({t17}); delete W.mv; setShipNow({9 * 1440 + 1051}); promoMoveTick(shipNow()); return __mvLook(); }})()""")
+    print('    off, 17:31 away from it:', a)
+    check(a['moved'] and not a['line'], f"move off: as before, moved by 17:30 ({a})")
+    b = g.ev(f"""(() => {{ __out(); __mv(true, 1020); promoMoveTick({t17}); return __mvLook(); }})()""")
+    print('    17:00, free, in the Works bay:', b)
+    check(b['mv'] and any('4-23' in t for t in b['toasts']), f"move: the walk starts at 17:00 with the notice ({b})")
+    c = g.ev(f"""(() => {{ __out(); __mv(true, 1020); DIALOGUE = DIALOGUE || {{ id: 'x' }}; const was = DIALOGUE; promoMoveTick({t17}); const r1 = __mvLook(); DIALOGUE = null;
+      setShipNow({t1740}); promoMoveTick({t1740}); const r2 = __mvLook(); setShipNow({t1740 + 5}); promoMoveTick({t1740 + 5}); return [r1, r2, __mvLook()]; }})()""")
+    print('    in a talk at 17:00, free at 17:40:', c[0]['mv'], c[1]['mv'], c[2]['moved'])
+    check(not c[0]['mv'] and c[1]['mv'] and not c[2]['moved'], f"move: a talk at 17:00, she waits; the walk at 17:40, still open after 17:30 ({c})")
+    d = g.ev(f"""(() => {{ __out(); __mv(true, 1020); ACT = {{ kind: 'eat' }}; promoMoveTick({t17}); const r1 = __mvLook(); ACT = null; return r1; }})()""")
+    check(not d['mv'] and not d['moved'], f"move: in an activity (eating), she waits ({d})")
+    e = g.ev(f"""(() => {{ __out(); __mv(true, 1080); promoMoveTick({9 * 1440 + 1080}, true); return __mvLook(); }})()""")
+    check(not e['mv'] and not e['moved'], f"move: asleep (time skipping) at 18:00, she waits ({e})")
+    f = g.ev(f"""(() => {{ goToDeck(3); player.obj.position.copy(cellPos(...ROOM_TILES[Object.keys(ROOM_TILES).find(k => ROOM_TILES[k].length > 4)][0])); __mv(true, 1020); promoMoveTick({t17}); return __mvLook(); }})()""")
+    check(f['mv'], f"move: on another deck, the walk starts ({f})")
+    h = g.ev(f"""(() => {{ __out(); __mv(true, 1320); promoMoveTick({t2200}); setShipNow({t2200 + 1}); promoHomeTick({t2200 + 1}, false); return __mvLook(); }})()""")
+    print('    not walked by 22:00:', h)
+    check(h['moved'] and h['bed'] == '4-23' and h['door'] and 'Your cabin' in h['mail'], f"move: by 22:00 4-23 is yours (bed, door, Mail) ({h})")
+    check(any('4-23' in t for t in h['toasts']) and h['guide'] == 'promo:home' and h['line'], f"move: then the notice, the arrow to your cabin and the Training tab's line ({h})")
+    k = g.ev(f"""(() => {{ __out(); __mv(true, 1440 + 480); promoMoveTick({10 * 1440 + 480}); setShipNow({10 * 1440 + 481}); promoHomeTick({10 * 1440 + 481}, false); return __mvLook(); }})()""")
+    check(k['moved'] and k['guide'] == 'promo:home' and k['bed'] == '4-23', f"move: a save loaded the next morning, the cabin yours and the arrow to it ({k})")
+    m = g.ev(f"""(() => {{ goToDeck(4); player.obj.position.copy(cellPos(...ROOM_TILES['W'][0])); promoHomeTick({10 * 1440 + 482}, false); const r = __mvLook(); r.live = guideLive({10 * 1440 + 483}).some(x => x.id === 'promo:home'); return r; }})()""")
+    check(m['seen'] and not m['live'], f"move: stepping into 4-23, the arrow's done ({m})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('sight', part_sight), ('trade', part_trade)]:
+    for name, fn in [('off', part_off), ('sight', part_sight), ('trade', part_trade), ('move', part_move)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')
