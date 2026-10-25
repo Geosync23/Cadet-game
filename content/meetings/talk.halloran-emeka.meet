@@ -12,7 +12,7 @@ halloran-emeka: One at breakfast, every day. People have asked me to stop. Polit
 halloran-emeka: I've never told the same one twice. Not once. That's the rule.
 halloran-emeka: Some mornings it's the only thing anyone says before tea. That's still something.   [nod]
 halloran-emeka: Right. That's the talk. Short, like the jokes. Shorter than the jokes.   [laugh]
-halloran-emeka: Questions? Or jokes. I'll take jokes.
+halloran-emeka: Questions? Go on. I'll answer most of them.   [laugh]
 ? choice
 * What's your worst one ever?   rel:halloran-emeka+2 flavour:cheer mem:talk.halloran-emeka.asked
   halloran-emeka: Can't tell you. Calder heard it once. She has never mentioned it since. That's worse.   [laugh]
