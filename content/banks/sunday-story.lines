@@ -1,6 +1,6 @@
 @bank all
 // SW1 (2026-10-24, patch 0.92.5, the weekend traditions): the Sunday story (sunday-story.trad), read aloud by Chief Holt
-// in the junior common room, one chapter a week (FX14 picks the chapter by the week). Each chapter is said in order,
+// in the junior common room, one chapter each time it's on (the builder picks the chapter in order). Each chapter is said in order,
 // line by line. An old adventure book about a slow mail ship; no names, so nothing clashes with the roster. Holt reads
 // it plainly; the crew's lines about it are in the tradition's own file.
 
@@ -14,7 +14,7 @@
 - Chapter two. The cook held the letter up to the galley lamp. No name. No station. Just a small green star.
 - The pilot said, deliver what you're given. The cook said, to whom? The engine said nothing. Engines rarely do.
 - So they asked at every station. Nobody knew the star. Somebody always knew someone who might.
-- At the fourth station, a boy said his grandmother drew stars like that. On everything. Next week.
+- At the fourth station, a boy said his grandmother drew stars like that. On everything. Next time.
 
 == story.sunday.3
 - Chapter three. The grandmother lived at the far end of the last station, in a room full of green stars.
