@@ -20971,12 +20971,12 @@ function boardTopUp(h, jobs) {
 // ---- FX19 (patch 0.92.6 #11, the user: "Once you're trained on a job it should show up more frequently on the job board, in
 // addition to simpler missions"). BOARD_TRADE_ON: your trade (boardTrade: a kind you're trained in) is kept first among the
 // jobs held for you, and each hour of your shift from 10:00 (boardTopUp asks), if none of it is up for you, boardTradePost
-// posts one, at most BOARD_TRADE_MAX a shift and one an hour: a tune on a machine drifted by one (Tuning, m5: section 17
-// posts its own from two) or an afternoon round on another deck from 13:00 (Rounds, m1). Like the top-up's: held to the
+// posts one, at most BOARD_TRADE_MAX a shift and one an hour, never with under two hours of the shift left: a tune on a
+// machine drifted by one (Tuning, m5: section 17 posts its own from two) or an afternoon round on another deck, 13:00-15:00 (Rounds, m1). Like the top-up's: held to the
 // shift's end then lapsed (extra), no Works reputation (xp 0), seeded by the hour; j.trade, so they don't count against
 // BOARD_MIN and the simple ones still come. BOARD_TRADE_ON false: as before.
 var BOARD_TRADE_ON = false;                              // var: section 17's jobsHour may ask before this line has run
-const BOARD_TRADE_MAX = 3, BOARD_TRADE_FROM = 600, BOARD_TRADE_ROUND = 780;
+const BOARD_TRADE_MAX = 3, BOARD_TRADE_FROM = 600, BOARD_TRADE_ROUND = [780, 900], BOARD_TRADE_LEFT = 120;   // a round from 13:00 to 15:00; never with under two hours of the shift left (one taken late kept you into the next day)
 function boardTrade(j) {                                 // is j a job of a kind you're trained in
   const W = SHIP.works; if (!W || !j) return false;
   if (j.kind === 'tune') return W.tr.m5 !== undefined;
@@ -20987,7 +20987,7 @@ function boardTrade(j) {                                 // is j a job of a kind
   return false;
 }
 function boardTradePost(h, jobs, t, m, end) {
-  const W = SHIP.works, d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (!BOARD_TRADE_ON || !W || m < BOARD_TRADE_FROM) return null;
+  const W = SHIP.works, d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (!BOARD_TRADE_ON || !W || m < BOARD_TRADE_FROM || end - m < BOARD_TRADE_LEFT) return null;
   const mine = jobs.filter(j => j.trade && j.found >= B); if (mine.length >= BOARD_TRADE_MAX || mine.some(j => j.found > t - 60)) return null;
   if (jobs.some(j => boardTrade(j) && boardForYou(j, t))) return null;   // one of your trade's already up for you
   const seed = machSeed('board:trade'), free = id => !jobs.some(x => x.machine === id && x.status !== 'done') && !JOB_FOR[(SHIP.machines[id] || {}).state];
@@ -20998,7 +20998,7 @@ function boardTradePost(h, jobs, t, m, end) {
     if (x) { const dc = (FAULT_CAUSES[x.kind] || []).find(c => c.setting), w = dc ? dc.shows.split('|') : [], word = machineDrift(x.id) > 0 ? w[0] : w[w.length - 1];
       out.push(jobMake('tune', { id: 'tune:' + x.id + '@' + h, machine: x.id, deck: x.deck, room: x.room, h, tier: jobTier({ machine: x.id }), title: 'Tune: ' + machineTitle(x.id) + (word ? ' (' + word + ')' : ''), ...o })); }
   }
-  if (W.tr.m1 !== undefined && W.tr.m1 < d && m >= BOARD_TRADE_ROUND && !jobs.some(j => j.kind === 'rounds' && j.trade && j.found >= B)) {
+  if (W.tr.m1 !== undefined && W.tr.m1 < d && m >= BOARD_TRADE_ROUND[0] && m < BOARD_TRADE_ROUND[1] && !jobs.some(j => j.kind === 'rounds' && j.trade && j.found >= B)) {
     const n0 = roundDeck(d, false), ds = ROUND_DECKS.filter(x => x !== n0), n = ds[Math.floor(ds.length * schedU(seed, h, 2))];
     const pool = n ? roundPool(n).filter(x => free(x.id)).sort((a, b) => schedU(seed ^ a.seed, h, 3) - schedU(seed ^ b.seed, h, 3) || (a.id < b.id ? -1 : 1)) : [];
     if (pool.length >= 4) { const route = roundWalk(pool.slice(0, 4), DECKS[n]), m0 = machineById(route[0]);
