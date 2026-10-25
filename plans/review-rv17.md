@@ -162,3 +162,9 @@ Base 0.92.6 = claude/integration 5898c190 (game 10f654de...).
   Quiet stars on repeat; Next -> Nebula; Ship schedule back; Low; Off; the game save has no music data. Music tile next
   to Hobbies (text glyph), grouped track list readable, no sideways scroll. Day 0 quiet is covered by sound_check (my
   test page opens on Day 1). Not measured by me: levels under the hum (SD1's Sound Lab numbers; no levels check exists).
+
+### RV16 arrows_check promo fix: PASS at claude/fix-promo-arrow 32374ef3 (test only; for 0.93.1)
+Game byte-identical to staging-0.93.0 4f1e52bf (97f21893...). New check: promo OK, printing "the test job led by the board
+arrow naming it (shift:job:9, Day 9 09:15), not promo:test"; the old check on the same game FAILs "never led with
+promo:test". The new condition still needs the label to name the Tier 2 test job AND the job to be takeable (guideTakeable),
+so 08:01-09:00 (label up, job not yet on the board) doesn't count; the other three beats unchanged.
