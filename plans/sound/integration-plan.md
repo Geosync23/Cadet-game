@@ -157,6 +157,18 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 - Three ambient sci-fi synth tracks from morning take 2: Systems online (the user's pick for mornings), and Wake cycle and Station dawn (early morning).
 - Four new ones so every time of day has 3 or 4: Promenade (happy lo-fi, midday), Warm circuits (chill lo-fi with a synth echo, afternoon and work), Porthole (warm lo-fi, evening and night), Deep space (ambient synth, late night).
 
+**Version 7** (the user, 2026-10-25, 2:02 PM: "the first 4 tracks I want the old. The rest go for new except how some are too ambient. Give a little more shape.").
+- **Back to their earlier versions:** Station dawn, Wake cycle, First light and Systems online (the take 2 synth tracks and First light from the sci-fi pass). Their soft "air" layer was filtered noise, so it is silenced: no noise anywhere (checked again: zero noise sources in all 21).
+- **More shape:** Long view, Still point, Porthole, Night watch, Quiet stars, Nebula and Deep space now have:
+  - clear four-bar phrases: a call, a held high note, an answer and a resting note on the home note;
+  - a bass that moves to the fifth;
+  - the sequence in more sections;
+  - a Build section in every pass.
+
+  They are still calm, with no noise and no drums.
+- **Unchanged from v6:** the other ten.
+- The module keeps the v6 versions as `V6` for the player page's before-and-after list. The builder drops `V6`, `OLD_TRACKS` and the unused old definitions when pasting into the game.
+
 **Space music pass** (the user, 2026-10-25, 1:50 PM: "many tracks have background white noise. Kill it ... too happy and cutesy ... contemplative. Space music! Like a planetarium's music."). All 21 tracks are rebuilt in one style (`space()` in the module):
 - no noise layers at all (checked: none of the 21 makes a single noise source in ten minutes; the hum is the only noise-like sound);
 - slow suspended and modal harmony (Lydian, Dorian, Mixolydian, suspended major, one Aeolian), each chord held two bars;

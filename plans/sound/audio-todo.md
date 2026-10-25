@@ -24,6 +24,7 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 
 ## Done
 
+- 2026-10-25, 2:02 PM: music v7. Station dawn, Wake cycle, First light and Systems online back to their earlier versions (noise layer silenced); seven ambient tracks given more shape (phrases, moving bass, more sequence, a build); the rest kept from v6.
 - 2026-10-25, 1:50 PM: space music pass. All 21 tracks rebuilt as contemplative, planetarium-style space music: no noise layers, no drums (a soft pulse on working and midday), slow modal harmony, pads, sequences, chimes, swells and singing leads. Some renamed. Before/After on the player page.
 - 2026-10-25, 1:33 PM: sci-fi synth pass. Festive voices (marimba-like pluck, music box, whistle, square lead, shaker) re-voiced as synths in every track, and the bounciest tempos slowed. A before-and-after list is on the Wren Music Player page.
 - 2026-10-25, 1:24 PM: morning take 2: Systems online picked for mornings, the old morning tracks kept. Several tracks per time of day, rotating (least recently heard first): Wake cycle and Station dawn added for early morning, four new tracks (Promenade, Warm circuits, Porthole, Deep space). 21 tracks in all.

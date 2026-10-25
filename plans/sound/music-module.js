@@ -239,7 +239,7 @@ function createWrenMusic(opts) {
     const form = def.form(), bars = []; const grid = def.beats === 4 ? [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] : [0, 1, 2];
     form.forEach((x, si) => {
       const rng = seeded(def.seed * 97 + si * 13 + (x.pass || 0) * 7), prog = def.prog[x.prog];
-      const tune = () => def.space ? slowTune(rng, 4, def.scale, def.range[0], def.range[1]) : walkMelody(rng, 4, def.scale, def.range[0], def.range[1], grid, def.beats === 4 ? [2, 4] : [1, 3], [3]);
+      const tune = () => def.shape ? def.phrase(rng) : def.space ? slowTune(rng, 4, def.scale, def.range[0], def.range[1]) : walkMelody(rng, 4, def.scale, def.range[0], def.range[1], grid, def.beats === 4 ? [2, 4] : [1, 3], [3]);
       const phrase = tune(), alt = tune();
       for (let b = 0; b < x.bars; b++) {
         const ph = b >= 4 && b % 4 === 2 ? alt[2] : phrase[b % 4];
@@ -533,6 +533,48 @@ function createWrenMusic(opts) {
   for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
   const SPACE_LV = {dawn: 0.417, wake: 0.442, firstlight: 0.525, systems: 0.631, morning: 0.479, tea: 0.479, midday: 0.417, lunch: 0.452, promenade: 0.537, afternoon: 0.452, circuits: 0.525, golden: 0.49, evening: 0.468, porthole: 0.468, watch: 0.452, lullaby: 0.447, latenight: 0.484, deepspace: 0.484, shift: 0.513, steady: 0.495, rounds: 0.495};   // levels for the space tracks (set by measuring against the hum)
   for (const k of Object.keys(SPACE)) MLV[k] = SPACE_LV[k] ?? 1;
+  // =====================================================================
+  // ---- v7 (the user, 2026-10-25, 2:02 PM): "the first 4 tracks I want the old. The rest go for new except how some are
+  // too ambient. Give a little more shape."
+  // =====================================================================
+  const V6 = { ...TRACKS }, MLV_V6 = { ...MLV };   // the v6 planetarium versions, for the before-and-after list
+  // (1) Station dawn, Wake cycle, First light and Systems online go back to their versions from before the space pass.
+  // Their soft "air" layer was filtered noise, which the user asked to be rid of, so it is silenced.
+  PARTS.air = () => {};
+  for (const k of ['dawn', 'wake', 'firstlight', 'systems']) { TRACKS[k] = OLD_TRACKS[k]; MLV[k] = MLV_OLD[k]; }
+  TRACKS.wake.time = 'Early morning';
+  // (2) More shape for the most ambient space tracks: clear four-bar phrases (a call, a held note, an answer, a resting
+  // note on the home note), a bass that moves, the sequence in more sections, and a build in every pass. Still calm.
+  function phraseTune(rng, scale, lo, hi, key) {
+    const pool = scale.filter(m => m >= lo && m <= hi), home = pool.filter(m => (m - key) % 12 === 0);
+    const R1 = [[0, 2], [0, 1.5, 2.5], [0, 1, 2], [0, 2, 3], [0, 1, 3]], C = [[1, 1, -2], [2, -1, -1], [-1, 2, 1], [1, 2, -1], [-2, 1, 2]];
+    const rhythm = R1[(rng() * R1.length) | 0], contour = C[(rng() * C.length) | 0];
+    let k = (pool.length / 2 + (rng() * 3 - 1)) | 0;
+    const call = rhythm.map((p, i) => { if (i) k = Math.max(0, Math.min(pool.length - 1, k + contour[(i - 1) % contour.length])); return pool[k]; });
+    const peak = pool[Math.max(0, Math.min(pool.length - 1, k + 1))];
+    const answer = call.map((m, i) => { const j = pool.indexOf(m) - 1 - (i === call.length - 1 ? 1 : 0); return pool[Math.max(0, Math.min(pool.length - 1, j))]; });
+    const end = home.length ? home.reduce((a, b) => Math.abs(b - answer[answer.length - 1]) < Math.abs(a - answer[answer.length - 1]) ? b : a) : answer[answer.length - 1];
+    const lens = r => r.map((p, i) => (r[i + 1] ?? 4) - p);
+    return [rhythm.map((p, i) => [p, call[i], lens(rhythm)[i]]), [[0, peak, 4]], rhythm.map((p, i) => [p, answer[i], lens(rhythm)[i]]), [[0, end, 4]]];
+  }
+  Object.assign(PARTS, {
+    sBassMove: c => { if (c.bar % 2 === 1) SX.swell(c.t + 2 * c.s, c.root + 7, c.s * 1.8, 0.05, c.out); },
+    sAnswer: c => { if (c.bar % 4 === 3) SX.chime(c.t + 2 * c.s, c.ch[2] + 24, 0.014, c.out); },
+  });
+  function shaped(k) {
+    const d = TRACKS[k] = { ...TRACKS[k] }, seq = 'sSeq', lead = d.prog && SPACE[k].bells ? 'sBellTune' : 'sSing';
+    const keyNote = SPACE[k].key;
+    d.shape = true; d.phrase = (rng) => phraseTune(rng, d.scale, d.range[0], d.range[1], keyNote);
+    d.form = () => longForm([sec('Opening', 'A', 4, ['sPad', 'sSwell'], 1)],
+      [sec('Theme', 'A', 8, ['sPad', 'sSwell', 'sSeqSlow', lead, 'sAnswer'], 2), sec('Answer', 'B', 8, ['sPad', 'sBassMove', seq, lead], 2),
+       sec('Build', 'B', 8, ['sPad', 'sSwell', 'sBassMove', seq, lead, 'sChime'], 3), sec('Drift', 'C', 8, ['sPad', 'sStars', 'sChime'], 1),
+       sec('Theme returns', 'A', 8, ['sPad', 'sBassMove', 'sSeqSlow', lead, 'sAnswer'], 2)],
+      [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], d.bpm, 4, 10, ['x']);
+  }
+  const SHAPED = ['tea', 'lunch', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace'];
+  SHAPED.forEach(shaped);
+  const SHAPE_LV = {};   // levels for the reshaped tracks (set by measuring)
+  for (const k of SHAPED) MLV[k] = SHAPE_LV[k] ?? MLV[k];
 
   // ---- the schedule: ship time of day, and a working set while you're on shift
   const PERIODS = [   // [name, from minute]; each runs to the next one's start
@@ -558,8 +600,8 @@ function createWrenMusic(opts) {
 
   // ---- one playing track
   function play(key, o = {}) {
-    const classic = !!o.classic && !!OLD_TRACKS[key], def = classic ? OLD_TRACKS[key] : TRACKS[key], bars = layout(def), s = 60 / def.bpm, len = s * def.beats, t0 = ctx.currentTime + 0.1;
-    const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = (classic ? MLV_OLD[key] : MLV[key]) ?? 1;
+    const classic = !!o.classic && !!V6[key], def = classic ? V6[key] : TRACKS[key], bars = layout(def), s = 60 / def.bpm, len = s * def.beats, t0 = ctx.currentTime + 0.1;
+    const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = (classic ? MLV_V6[key] : MLV[key]) ?? 1;
     out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(lvl, t0 + fin); out.connect(main);
     const send = ctx.createGain(); send.gain.value = def.wet; out.connect(send); send.connect(verb);
     const rng = seeded(def.seed), nodes = [];
@@ -649,7 +691,7 @@ function createWrenMusic(opts) {
     },
     skip() { return this.next(); },
     state() { return { enabled, paused, mode, resting, heard: { ...heard }, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
-    play,   // for tests and the harness: play(key, { startBar, fadeIn, classic: the version before the space pass })
+    play,   // for tests and the harness: play(key, { startBar, fadeIn, classic: the v6 version, for before and after })
     TRACKS, SETS, PERIODS, LIST, periodAt,
   };
 }
