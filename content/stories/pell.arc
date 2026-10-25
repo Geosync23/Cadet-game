@@ -54,6 +54,7 @@ duty: true
 where: Works bay
 when: beat:pell.6 trad:open-door weekday:wed day:17-
 crescendo: trad:open-door
+cast: calder halloran-emeka kovac-zainab
 quiet: 8
 title: Pell's practical
 invite: The practical | Tomorrow. Open door tea, the bench in the Works bay, 16:40. Calder's timing it. Stand where I can see you. Pell

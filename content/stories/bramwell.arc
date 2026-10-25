@@ -80,26 +80,28 @@ them: Does it stop? Feeling like a visitor? Like you're only borrowing the bunk?
 them: That's helped. Thanks, thanks. I'll still ask you a hundred things tomorrow. Sorry in advance.
 
 == beat 4
-// CRESCENDO rides on: Basil's new hand's tea, the Works tea corner, Thursday; day: 25; cast: bramwell-basil, cruz-tove, pell, torres-zeke, halloran-emeka; quiet ending: beat 5
+// CRESCENDO rides on: Basil's new hand's tea (crew-welcome-tea, the mess, Thursday Day 25, 18:40); cast: bramwell-basil, halloran-emeka; the others only if there; quiet ending: beat 5
 // DAY: 25 (or the next tea the pace rule allows); plays only if the plant came back (flag:bramwell.plant.done)
 tone: resolution
 tier: acquaintance
 gapDays: 0
-where: Tea corner
-when: beat:bramwell.3 trad:new-hands-tea flag:bramwell.plant.done day:25
-crescendo: trad:new-hands-tea
+where: Mess hall
+when: beat:bramwell.3 trad:crew-welcome-tea flag:bramwell.plant.done day:25
+crescendo: trad:crew-welcome-tea
+cast: halloran-emeka
 quiet: 5
 title: Basil's new hand's tea
-invite: My tea! | It's my new hand's tea tomorrow, the Works tea corner. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
+invite: My tea! | It's my new hand's tea tomorrow, 18:40 in the mess. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
 hint: My new hand's tea! You're coming? Bring nothing. That's the rule, isn't it?
 mem: everybody
 keepsake: a little clay pot he painted, with the Wren on it
 them: Is that my mug? With my name on? Spelt right and everything. Brilliant.   [gesture]
-cruz-tove: Mm. Here. Less love, more light. That's all it wanted. It's a Wren plant now.
+if here:cruz-tove | cruz-tove: Mm. Here. Less love, more light. That's all it wanted. It's a Wren plant now.
+if !here:cruz-tove | them: Tove Cruz left it by my mug this morning. With a note: less love, more light.
 them: My plant. Look at it. It was yellow on Sunday. It's green!   [laugh]
-pell: Somebody give the plant a mug. It's earned one.   [laugh]
-torres-zeke: Two new names on the beam this month, and now a plant. Coil three's jealous.
-halloran-emeka: Here. I've cleared a space on the mug-rack shelf. Pop it there. Lovely.   [gesture]
+if here:pell | pell: Somebody give the plant a mug. It's earned one.   [laugh]
+if here:torres-zeke | torres-zeke: Two new names on the beam this month, and now a plant. Coil three's jealous.
+halloran-emeka: Here. I've cleared a space on the mug-rack shelf, back in Works. It goes there after. Lovely.   [gesture]
 halloran-emeka: Everybody's now. That's how we do it here.
 them: Everybody's. Oh. It's the first thing of mine that lives here. The rest is still in my kitbag.
 them > you: This is for you. I painted two pots on the Tern. One for the plant, one for whoever helped. It's the Wren. Badly.
@@ -118,13 +120,13 @@ them: Everybody's. I'm going to remember that one. Brilliant.
 tone: light
 tier: acquaintance
 gapDays: 0
-where: Tea corner
+where: calm
 when: beat=bramwell.3
-hint: Come and see the shelf! Quick! Well. Slowly. It's a plant.
+hint: Have you seen the shelf? My plant's on it! Well. It's a plant. But still.
 mem: shelfplant
 keepsake: a little clay pot he painted, with the Wren on it
 mail: 600 | My tea | You missed a good one! Pell wanted the plant to have a mug. Zeke said coil three was jealous. Halloran put it on the shelf and said it belongs to everyone now. See you at breakfast? I've got questions. Obviously. B.
-them: Look! On the mug-rack shelf. My plant. Tove Cruz brought it back this morning. Green as anything.
+them: My plant's on the mug-rack shelf in Works. Tove Cruz brought it back this morning. Green as anything.
 them: Cruz said it wanted less love and more light, then walked off. I think that's a lot of talking, for Cruz.   [laugh]
 them: My tea was brilliant. Halloran made room on the shelf for it. It's everyone's shelf, he said.
 them > you: Here. I painted it on the Tern. It's the Wren. It was for whoever helped. You answered all my questions.
