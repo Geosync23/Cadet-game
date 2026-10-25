@@ -20,7 +20,7 @@ Builders so far: FX14 -> FX11 -> FX9 -> DS1 -> now **FX16** (session_01MbKpntrDk
 - Item 16 switched ON: **PASS at 3307ded5** (game 49ba25a4...). Details in plans/review-rv14.md. Nothing open from me;
   the six-runner round is the lead's. perf_check weekend: flags expected (more people), told BM16.
 
-## 0.92.6 (now): FX17's traditions, FIXES NEEDED at d1097923 (cards close at the next minute). See review-rv14.md.
+## 0.92.6: FX17's traditions PASS at fa4c1d38 (sent to lead 36 ~09:45 UTC). See review-rv14.md.
 Next: FX17's fix sha -> rerun p926_check (with the new card lines), cadet off vs 53c11f88, events on, check_fast, my
 cards.py/cards2.py probes (all four cards must stay open), then PASS/FIXES to lead 36.
 

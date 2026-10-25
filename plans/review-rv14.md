@@ -93,3 +93,8 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
 - Green on d1097923: p926_check OK, events on OK, day 104 on OK, cadet off vs 53c11f88 ALL IDENTICAL, check_fast OK.
   Earlier: plants 13/15/2/3/4/5/7 FAIL their lines; day 8/14/35/63 on OK; deck on OK; host probe all hosts present.
 - Section 19 device lines (Calendar/Home "on now, until", Schedule real end): signed off as owner (off: unchanged).
+- 774fb473 -> **fa4c1d38 (game 8f39aaae...): PASS (~09:45 UTC) to lead 36.** cardWhere()/p926Where(): cards carry the
+  room you're in. Off: cadet vs 53c11f88 ALL IDENTICAL, check_fast OK. On: p926 OK (hold-open lines), events OK. Probes:
+  standing in the room, all four cards stay (9+ min Zeke/swap, 4+ min spice/talk ask); from the lift they close as you
+  walk out (by design). Follow-up offered (lead's call): use the tradition's room, not the tap room. a_start 14812 px:
+  timing flake (same files identical on rerun), FX17-2 reworded.
