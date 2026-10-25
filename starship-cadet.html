@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-s.5
+   STARSHIP CADET: CSV Wren                           build 0.93.0-s.6
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.0-s.5';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-s.6';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -62475,7 +62475,7 @@ padOn('unuse', () => {                                     // a touch takes back
 // quieter and capped); SND.ctx; SND.bus.music (under the master volume); SND.whenReady(fn); SND.onFrame (a list of
 // fn(run) the main loop calls); SND.settingsBlocks() / SND.settingsAct(verb, arg) (Settings: Sound On/Off, Volume);
 // SND.prefs (the starship-cadet-sound key: { on, vol, ... }; the music slot keeps its own part under prefs.music);
-// SND.log (a list of what played, with ?soundlog).
+// SND.log (a list of what played, with ?soundlog); SND.actTick / SND.musicTick (set by the slots: called once a second).
 // =====================================================================
 // sndFx: the hook lines' way in. A function declaration (hoisted), safe to call before section 27 has run (it does nothing then).
 function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
@@ -62913,7 +62913,8 @@ const SND = (() => {
   addEventListener('pointerdown', gesture, true); addEventListener('keydown', gesture, true);
 
   // ---- each frame (the main loop): suspend with pause, Tiles, a hidden tab or Sound off; tick the loops ----
-  let busy = false;
+  let busy = false, lastSec = -1;
+  S.actTick = null; S.musicTick = null;   // the slots set these: called once a second while sound runs
   S.frame = run => {
     if (!ctx) return;
     const want = run && !document.hidden && S.prefs.on;
@@ -62922,6 +62923,11 @@ const SND = (() => {
     if (ctx.state !== 'running') return;
     const u = ctx.currentTime + 0.35; LOOPS.forEach(l => l.tick && l.tick(u));
     for (let k = 0; k < S.onFrame.length; k++) try { S.onFrame[k](run); } catch (e) {}
+    if (ctx.currentTime - lastSec >= 1) {   // once a second: the activity and music slots' own ticks (set S.actTick / S.musicTick)
+      lastSec = ctx.currentTime;
+      if (S.actTick) try { S.actTick(run); } catch (e) {}
+      if (S.musicTick) try { S.musicTick(run); } catch (e) {}
+    }
   };
 
   // ---- SND.fx: play a named one-shot, quieter with distance, to the side it came from; crew sounds quieter and capped ----

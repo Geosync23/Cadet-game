@@ -117,6 +117,10 @@ def check_core_hooks(pw, path):
           SHIP.mail.push({ at: 0, from: 'Test', subject: 'Seed', body: 'x', read: false }); SND.onFrame.forEach(f => f(true));
           return seed === s0; })()""")
         check(same, "SND's watcher never draws on R()")
+        ticks = g.ev("(() => { window.__t = [0, 0]; SND.actTick = () => window.__t[0]++; SND.musicTick = () => window.__t[1]++; return 1; })()")
+        g.page.wait_for_timeout(2300); g.step(3); g.page.wait_for_timeout(1100); g.step(3)
+        t = g.ev('window.__t'); g.ev('SND.actTick = SND.musicTick = null')
+        check(t[0] >= 1 and t[1] >= 1, f'the slots get their once-a-second ticks: {t}')
         g.ev("SND.log.length = 0; (() => { const b = ROOM_BOX['@']; if (b) player.obj.position.copy(cellPos(b.i0 + 1, b.j0 + 1)); })(); startRide(3)")
         g.step(80)
         lift = g.ev("SND.log.map(e => e.name).filter(n => n.startsWith('lift'))")
