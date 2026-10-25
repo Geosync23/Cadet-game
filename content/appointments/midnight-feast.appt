@@ -10,7 +10,7 @@ starts: ask
 host: you
 gate: two or more bunkmates free, the night before your day off
 when: after 22:00
-at: 22:15-23:00
+at: 22:00-22:45
 where: 4 pool bunk
 who: you, your bunkmates (2-4)
 once: no
@@ -20,7 +20,7 @@ record: Had a midnight feast with Bunk 1.
 == ask
 - Midnight feast in the bunk room?
 - Yes! I'll raid the grab shelf. Don't tell Pell. He'll want in.   #funny
-- Only if I'm in bed by midnight. Fine. Quarter past ten. I'm bringing biscuits.
+- Only if I'm in bed by midnight. Fine. I'm bringing biscuits.
 
 == busy
 - Not tonight. I'm on early. Next time, I promise.
