@@ -103,6 +103,24 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
 #stopAll { font-family: var(--body); font-size: 14px; background: var(--panel-2); color: var(--text); border: 1px solid var(--line); border-radius: 999px; padding: 9px 14px; cursor: pointer; min-height: 40px; }
 #stopAll:hover { border-color: var(--lamp); }
 .choices { display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--muted); }
+.device{--crt-ink:#6ff0dc;--crt-dim:#4ab1a3;--crt-bg:#03141a;--crt-hot:#e8fffb;--crt-glow:rgba(95,227,208,.45);--crt-scan:rgba(0,0,0,.2);--crt-font:ui-monospace,"Cascadia Mono",Menlo,Consolas,monospace;--crt-size:16px;--bezel:#1b1f24;
+  display:flex;flex-direction:column;background:var(--bezel);color:var(--crt-ink);font-family:var(--crt-font);font-size:var(--crt-size);line-height:1.35;border-radius:24px;padding:8px 10px 10px;height:560px;max-width:100%;box-shadow:0 6px 30px rgba(0,0,0,.45),inset 0 1px 0 rgba(255,255,255,.07)}
+.device .bez{display:flex;align-items:center;gap:8px;height:22px;flex:none;font-size:13px;letter-spacing:.14em;color:#8d969e;padding:0 4px}
+.device .bez .grip{flex:1;display:flex;justify-content:center}.device .bez .grip::before{content:"";width:44px;height:4px;border-radius:2px;background:#3a4148}
+.device .led{width:8px;height:8px;border-radius:50%;background:var(--crt-ink);box-shadow:0 0 6px var(--crt-glow)}
+.device .crt{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;background:var(--crt-bg);border-radius:18px;overflow:hidden;box-shadow:inset 0 0 0 2px #0a0d10,inset 0 0 28px rgba(0,0,0,.85)}
+.device .crt::after{content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;z-index:2;background:repeating-linear-gradient(to bottom,rgba(255,255,255,.025) 0,rgba(255,255,255,.025) 1px,transparent 1px,transparent 2px,var(--crt-scan) 2px,var(--crt-scan) 3px),radial-gradient(ellipse at 50% 50%,transparent 58%,rgba(0,0,0,.42) 100%)}
+.device .devhead{padding:12px 16px 6px;flex:none}
+.device h2{margin:0;font:inherit;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--crt-hot);text-shadow:0 0 6px var(--crt-glow)}
+.device #devBody{flex:1;min-height:0;overflow:auto;padding:4px 16px 16px;text-shadow:0 0 4px var(--crt-glow);scrollbar-width:thin;scrollbar-color:var(--crt-dim) transparent}
+.device #devBody p{margin:4px 0 10px;color:var(--crt-ink)} .device #devBody p.big{font-size:21px;color:var(--crt-hot);text-shadow:0 0 7px var(--crt-glow);margin-bottom:2px}
+.device #devBody p.head{margin:14px 0 4px;padding-bottom:4px;border-bottom:2px solid var(--crt-dim);color:var(--crt-hot);text-transform:uppercase;letter-spacing:.1em}
+.device #devBody p.sub{margin:12px 0 0;color:var(--crt-dim);text-transform:uppercase;letter-spacing:.08em;font-size:14px}
+.device button{font-family:var(--crt-font);font-size:var(--crt-size);color:var(--crt-ink);background:transparent;border:2px solid var(--crt-dim);border-radius:6px;min-height:44px;padding:6px 12px;cursor:pointer;text-shadow:inherit}
+.device .btns{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px} .device .btns .act.on{background:var(--crt-ink);color:var(--crt-bg);text-shadow:none}
+.device button.row{display:block;width:100%;text-align:left;margin:2px 0;padding:8px 10px;border-width:0 0 2px;border-color:transparent transparent rgba(255,255,255,.06);border-radius:0}
+.device button.row.hot{border-color:var(--crt-ink);color:var(--crt-hot)}
+.device button:focus-visible{outline:2px solid var(--crt-hot);outline-offset:2px}
 .lede a, .hint a { color: var(--lamp); }
 .clockrow { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 14px; }
 .bigclock { font-family: var(--mono); font-size: 28px; font-variant-numeric: tabular-nums; }
@@ -132,11 +150,11 @@ table.sched { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 
   <section class="card" aria-labelledby="h-clock">
     <div class="card-head"><span class="tag">Pretend ship clock</span><h2 id="h-clock">Ship time</h2></div>
-    <div class="clockrow"><span class="bigclock" id="shipClock">Day 1 · 06:00</span><span class="period" id="periodName">early morning</span></div>
+    <div class="clockrow"><span class="bigclock" id="shipClock">Day 0 · 18:00</span><span class="period" id="periodName">arrival night: no music</span></div>
     <div class="scene-top"><button class="big-play" id="startBtn"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg><span>Start</span></button>
       <button class="chip" id="shiftBtn" aria-pressed="false"><span class="dot"></span>On shift</button></div>
     <label class="fader"><span>Clock speed</span><input type="range" id="speed" min="0" max="100" value="0"><output id="speedOut">1×</output></label>
-    <p class="hint">1× is the game's own speed: one ship hour every 100 seconds. Faster speeds hear the day go by; the music itself always plays at its normal pace.</p>
+    <p class="hint">1× is the game's own speed: one ship hour every 100 seconds. Faster speeds hear the day go by; the music itself always plays at its normal pace. The clock starts on arrival night (Day 0), when there is no music: it begins on Day 1.</p>
     <div class="sub"><h3>Jump to</h3><div class="chips" id="jumps"></div></div>
   </section>
 
@@ -144,17 +162,17 @@ table.sched { border-collapse: collapse; width: 100%; font-size: 13.5px; }
     <div class="card-head"><span class="tag">Music</span><h2 id="h-now">Now playing</h2></div>
     <div class="nowplaying"><span id="nowName">Nothing yet</span><span id="nowSec"></span><span class="clock" id="nowTime"></span></div>
     <div class="track" aria-hidden="true"><i id="nowBar"></i></div>
-    <div class="sub"><h3>Music (Settings)</h3><div class="chips" data-group="mon">
-      <button class="chip small" data-mon="on" aria-pressed="true"><span class="dot"></span>On</button>
-      <button class="chip small" data-mon="off" aria-pressed="false"><span class="dot"></span>Off</button></div>
-      <div class="chips" data-group="vol">
-      <button class="chip small" data-vol="0.45" aria-pressed="false"><span class="dot"></span>Low</button>
-      <button class="chip small" data-vol="0.7" aria-pressed="true"><span class="dot"></span>Medium</button>
-      <button class="chip small" data-vol="1" aria-pressed="false"><span class="dot"></span>High</button></div></div>
     <label class="fader"><span>Quiet between</span><input type="range" id="gap" min="5" max="180" value="120"><output id="gapOut">40 s to 2 min</output></label>
-    <div class="chips"><button class="chip small" id="skipBtn"><span class="dot"></span>Skip to the next track</button>
+    <div class="chips">
       <button class="chip small" data-hum="quarters" aria-pressed="false"><span class="dot"></span>Quarters hum underneath</button></div>
     <div class="sub"><h3>What happened</h3><ol class="log" id="log"></ol></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-app">
+    <div class="card-head"><span class="tag">On your device · mockup</span><h2 id="h-app">The Music app</h2>
+      <p class="lede">A new app on your crew device, in the same old-school screen look as the others. Music is on by default and follows the ship's schedule. You can turn it off, set its volume, or pick a track yourself. Your choices are kept apart from the saved game, so they carry over to a new game. It works here: try it while the clock runs.</p></div>
+    <div class="device" id="dev"><div class="bez"><span class="led on"></span><span class="grip"></span><span>WREN</span></div>
+      <div class="crt"><div class="devhead"><h2>Music</h2></div><div id="devBody"></div></div></div>
   </section>
 
   <section class="card" aria-labelledby="h-sched">
@@ -534,20 +552,29 @@ function startWalk(surface, segs) {
      const music = createWrenMusic({ ctx, dest, shipTime });
        ctx: an AudioContext (or OfflineAudioContext for tests)
        dest: where the music goes (the SND music bus, or ctx.destination)
-       shipTime: () => ({ min: minutes since midnight 0-1439, onShift: bool })
+       shipTime: () => ({ day, min: minutes since midnight 0-1439, onShift: bool })
      music.update()            call often (each frame, or every 100-250 ms)
      music.setEnabled(on)      Settings: Music on/off (off stops after a fade)
      music.setVolume(v)        Settings: 0..1 (Low 0.45, Medium 0.7, High 1)
      music.pause() / resume()  with the game's pause
-     music.state()             what's playing, for a debug line or a check
+     music.setMode(m)          'schedule' (the default: by time of day, work on
+                               shift) or a track key to play that track
+     music.next()              schedule: the next track from the set now;
+                               chosen track: the next track in the list
+     music.state()             what's playing, for the Music app or a check
+     music.LIST                the tracks grouped for the Music app
+   Rules from the user: music is on by default, in Ship schedule mode; there
+   is no music on arrival night (Day 0). It starts on Day 1. Sound effects and
+   the hum still play on Day 0; that is the SND block's business.
    Options: gapMin/gapMax (seconds of quiet between tracks, default 60-180),
    xfade (seconds, default 6), sectionWait (max seconds to wait for a section
    end before changing on a new time of day, default 30), random (default
-   Math.random), onEvent(text) for a log.
+   Math.random), onEvent(text) for a log, firstDay (default 1), mode, volume,
+   enabled (the saved choices from the sound key).
    ===================================================================== */
 function createWrenMusic(opts) {
   const ctx = opts.ctx, rnd = opts.random || Math.random, log = opts.onEvent || (() => {});
-  const cfg = { gapMin: 60, gapMax: 180, xfade: 6, sectionWait: 30, ...opts };
+  const cfg = { gapMin: 60, gapMax: 180, xfade: 6, sectionWait: 30, firstDay: 1, ...opts };
   // ---- the module's own small mixer: music bus -> volume -> dest, and a soft room echo
   const main = ctx.createGain(); main.gain.value = 0; main.connect(opts.dest);
   const sr = ctx.sampleRate;
@@ -782,6 +809,10 @@ function createWrenMusic(opts) {
     'late night': ['latenight', 'watch'],
     'working': ['shift', 'steady', 'rounds', 'midday', 'afternoon'],
   };
+  // the Music app's list: every track, grouped by when it plays
+  const TIMES = ['Work', 'Early morning', 'Morning', 'Midday', 'Afternoon', 'Evening', 'Night', 'Late night'];
+  const LIST = TIMES.map(time => ({ time, tracks: Object.keys(TRACKS).filter(k => TRACKS[k].time === time).map(k => ({ key: k, name: TRACKS[k].name })) })).filter(g => g.tracks.length);
+  const ORDER = LIST.flatMap(g => g.tracks.map(t => t.key));
   function periodAt(min) { let p = PERIODS[PERIODS.length - 1][0]; for (const [n, from] of PERIODS) if (min >= from) p = n; return p; }
   const setFor = st => st.onShift ? 'working' : periodAt(((st.min % 1440) + 1440) % 1440);
 
@@ -822,20 +853,27 @@ function createWrenMusic(opts) {
   }
 
   // ---- the player
-  let enabled = opts.enabled ?? true, volume = opts.volume ?? 0.7, paused = false;
+  let enabled = opts.enabled ?? true, volume = opts.volume ?? 0.7, paused = false, mode = opts.mode && TRACKS[opts.mode] ? opts.mode : 'schedule', resting = false;
   let cur = null, curSet = null, seenSet = null, nextAt = ctx.currentTime + (opts.firstGap ?? 3), lastKey = null, lastMin = null, pendingChange = null;
   const applyVol = (f = 1.5) => { const v = enabled && !paused ? LEVEL * volume : 0; main.gain.cancelScheduledValues(ctx.currentTime); main.gain.setValueAtTime(main.gain.value, ctx.currentTime); main.gain.linearRampToValueAtTime(v, ctx.currentTime + f); };
   applyVol(0.5);
-  function pick(set) {   // a track from the set, never the one that just played
+  function pick(set) {   // a track from the set, never the one that just played (a chosen track is just that track)
+    if (set === 'chosen') return mode;
     const list = SETS[set].filter(k => k !== lastKey); return list[(rnd() * list.length) | 0] || SETS[set][0];
   }
   function startNext(set, fadeIn) { const k = pick(set); cur = play(k, { fadeIn }); lastKey = k; curSet = set; log(`Playing ${TRACKS[k].name} (${set})`); }
   function update() {
     if (!enabled || paused) return;
-    const now = ctx.currentTime, st = opts.shipTime(), set = setFor(st);
+    const now = ctx.currentTime, st = opts.shipTime();
+    if ((st.day ?? cfg.firstDay) < cfg.firstDay) {   // arrival night: no music until Day 1 (the user's rule)
+      if (!resting) { resting = true; log('Arrival night: no music until Day 1'); }
+      if (cur) { cur.fadeOut(now, 3); cur = null; } pendingChange = null; nextAt = now + 2; lastMin = st.min; return;
+    }
+    if (resting) { resting = false; log('Day 1: music begins'); }
+    const set = mode === 'schedule' ? setFor(st) : 'chosen';
     // a big jump in ship time (sleeping skips the night) changes over straight away
     const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
-    if (set !== seenSet) { if (seenSet !== null) log(`Time of day is now ${set}`); seenSet = set; }
+    if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(`Time of day is now ${set}`); seenSet = set; }
     if (cur) {
       cur.tick(now + 0.5);
       if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
@@ -856,10 +894,19 @@ function createWrenMusic(opts) {
     pause() { paused = true; applyVol(0.3); },
     resume() { paused = false; applyVol(0.6); },
     setGaps(min, max) { cfg.gapMin = min; cfg.gapMax = Math.max(min, max); if (!cur) nextAt = Math.min(nextAt, ctx.currentTime + cfg.gapMax); },
-    skip() { if (cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; } nextAt = ctx.currentTime + 2.5; },
-    state() { return { enabled, paused, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
+    setMode(m) {   // 'schedule', or a track key to play that one; changes over with a short cross-fade
+      const want = m === 'schedule' || !TRACKS[m] ? 'schedule' : m; if (want === mode) return; mode = want;
+      log(mode === 'schedule' ? 'Ship schedule' : `Chosen: ${TRACKS[mode].name}`);
+      if (cur && !resting) { cur.fadeOut(ctx.currentTime, 2); cur = null; pendingChange = null; nextAt = ctx.currentTime + 1; }
+    },
+    next() {
+      if (mode !== 'schedule') return this.setMode(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length]);
+      if (cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; } pendingChange = null; nextAt = ctx.currentTime + 1;
+    },
+    skip() { return this.next(); },
+    state() { return { enabled, paused, mode, resting, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
     play,   // for tests and the harness: play(key, { startBar, fadeIn })
-    TRACKS, SETS, PERIODS, periodAt,
+    TRACKS, SETS, PERIODS, LIST, periodAt,
   };
 }
 
@@ -880,7 +927,7 @@ FADERS.forEach(k => $('#v-' + k).addEventListener('input', applyFaders));
 
 const hm = m => String(Math.floor(m / 60) % 24).padStart(2, '0') + ':' + String(Math.floor(m % 60)).padStart(2, '0');
 const mmss = x => Math.floor(x / 60) + ':' + String(Math.floor(x % 60)).padStart(2, '0');
-let ship = { day: 1, min: 6 * 60, onShift: false }, speed = 1, running = false, music = null, hum = null, lastReal = 0;
+let ship = { day: 0, min: 18 * 60, onShift: false }, speed = 1, running = false, music = null, hum = null, lastReal = 0;
 const SPEEDS = [1, 2, 5, 10, 20, 40, 60, 120];
 function speedFromSlider(v) { return SPEEDS[Math.round(v / 100 * (SPEEDS.length - 1))]; }
 $('#speed').addEventListener('input', e => { speed = speedFromSlider(+e.target.value); $('#speedOut').textContent = speed + '×'; });
@@ -892,19 +939,48 @@ $('#gap').addEventListener('input', e => { $('#gapOut').textContent = gapText(+e
 $('#gapOut').textContent = gapText(+$('#gap').value);
 function boot() {
   ensure();
-  if (!music) { music = createWrenMusic({ ctx, dest: B.master, shipTime: () => ship, onEvent: logLine, firstGap: 1, gapMin: gapRange(+$('#gap').value)[0], gapMax: gapRange(+$('#gap').value)[1] }); renderSched(); }
+  if (!music) { music = createWrenMusic({ ctx, dest: B.master, shipTime: () => ship, onEvent: logLine, firstGap: 1, enabled: prefs.on, volume: prefs.vol, mode: prefs.mode, gapMin: gapRange(+$('#gap').value)[0], gapMax: gapRange(+$('#gap').value)[1] }); renderSched(); }
 }
 $('#startBtn').addEventListener('click', () => {
   boot(); running = !running; if (running) { music.resume(); lastReal = performance.now(); } else music.pause();
   $('#startBtn span').textContent = running ? 'Pause' : 'Start'; $('#startBtn path').setAttribute('d', running ? 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z' : 'M3 1.5v13l11-6.5z');
 });
 $('#shiftBtn').addEventListener('click', () => { ship.onShift = !ship.onShift; $('#shiftBtn').setAttribute('aria-pressed', String(ship.onShift)); logLine(ship.onShift ? 'Clocked in' : 'Clocked out'); });
-const JUMPS = [['Early morning', 5 * 60 + 15], ['Morning', 7 * 60 + 40], ['Midday', 11 * 60 + 10], ['Afternoon', 14 * 60 + 10], ['Evening', 17 * 60 + 40], ['Night', 21 * 60 + 10], ['Late night', 0 * 60 + 40], ['Sleep to 06:00', -1]];
+const JUMPS = [['Arrival (Day 0, 18:00)', -2], ['Early morning', 5 * 60 + 15], ['Morning', 7 * 60 + 40], ['Midday', 11 * 60 + 10], ['Afternoon', 14 * 60 + 10], ['Evening', 17 * 60 + 40], ['Night', 21 * 60 + 10], ['Late night', 0 * 60 + 40], ['Sleep to 06:00', -1]];
 $('#jumps').innerHTML = JUMPS.map(([n], i) => `<button class="chip small" data-jump="${i}"><span class="dot"></span>${n}</button>`).join('');
-$$('[data-jump]').forEach(b => b.addEventListener('click', () => { const [n, m] = JUMPS[+b.dataset.jump]; if (m < 0) { ship.day++; ship.min = 6 * 60; } else { if (m < ship.min) ship.day++; ship.min = m; } logLine('Jumped: ' + n); flash(b); }));
-$$('[data-mon]').forEach(b => b.addEventListener('click', () => { boot(); music.setEnabled(b.dataset.mon === 'on'); setPressed('mon', 'mon', b.dataset.mon); }));
-$$('[data-vol]').forEach(b => b.addEventListener('click', () => { boot(); music.setVolume(+b.dataset.vol); setPressed('vol', 'vol', b.dataset.vol); }));
-$('#skipBtn').addEventListener('click', () => { boot(); music.skip(); flash($('#skipBtn')); });
+$$('[data-jump]').forEach(b => b.addEventListener('click', () => { const [n, m] = JUMPS[+b.dataset.jump]; if (m === -2) { ship.day = 0; ship.min = 18 * 60; } else if (m < 0) { ship.day++; ship.min = 6 * 60; } else { if (m < ship.min) ship.day++; ship.min = m; } logLine('Jumped: ' + n); flash(b); }));
+// ---- the Music app mockup. Saved apart from the game (here in this browser; in the game, the sound key).
+const PREF_KEY = 'wren-music-app';
+let prefs = { on: true, vol: 0.7, mode: 'schedule', browse: false };
+try { const p = JSON.parse(localStorage.getItem(PREF_KEY) || 'null'); if (p && typeof p === 'object') prefs = { ...prefs, ...p }; } catch (e) {}
+function savePrefs() { try { localStorage.setItem(PREF_KEY, JSON.stringify(prefs)); } catch (e) {} }
+const VOLS = [['Low', 0.45], ['Medium', 0.7], ['High', 1]];
+const LIST0 = [['Work', ['shift', 'steady', 'rounds']], ['Early morning', ['firstlight']], ['Morning', ['morning']], ['Midday', ['midday', 'lunch']], ['Afternoon', ['afternoon', 'tea']], ['Evening', ['evening', 'golden']], ['Night', ['watch', 'lullaby']], ['Late night', ['latenight']]];
+const NAMES0 = { firstlight: 'First light', morning: 'Morning', tea: 'Tea break', midday: 'Midday', lunch: 'Lunch break', afternoon: 'Afternoon', golden: 'Golden hour', evening: 'Evening', watch: 'Night watch', lullaby: 'Lights out', latenight: 'Late night', shift: 'Shift start', steady: 'Steady work', rounds: 'On your rounds' };
+let appSig = '';
+function appView() {
+  const st = music ? music.state() : null, sched = prefs.mode === 'schedule';
+  const now = !prefs.on ? 'Music is off' : ship.day < 1 ? 'Quiet tonight' : st && st.track ? st.name : running ? 'Quiet between tracks' : 'Not playing';
+  const sub = !prefs.on ? 'Turn it on to hear the ship\'s music.' : ship.day < 1 ? 'Music starts tomorrow, your first full day aboard.' : sched ? 'Ship schedule: ' + (ship.onShift ? 'work music while you\'re on shift' : 'music for the ' + (music ? music.periodAt(Math.floor(ship.min)) : 'time of day')) : 'Your choice: ' + NAMES0[prefs.mode] + ', on repeat';
+  const btn = (label, act, on) => `<button class="act${on ? ' on' : ''}" data-app="${act}">${label}</button>`;
+  let h = `<p class="head">Now playing</p><p class="big">${now}</p><p>${sub}</p>`;
+  h += `<div class="btns">${btn('On', 'on', prefs.on)}${btn('Off', 'off', !prefs.on)}${prefs.on ? btn('Next', 'next', false) : ''}</div>`;
+  h += `<p class="head">Volume</p><div class="btns">${VOLS.map(([n, v]) => btn(n, 'vol:' + v, prefs.vol === v)).join('')}</div>`;
+  h += `<p class="head">What plays</p><div class="btns">${btn('Ship schedule', 'mode:schedule', sched)}${btn('Choose a track', 'browse', !sched || prefs.browse)}</div>`;
+  if (!sched || prefs.browse) h += LIST0.map(([time, keys]) => `<p class="sub">${time}</p>` + keys.map(k => `<button class="row${prefs.mode === k ? ' hot' : ''}" data-app="mode:${k}"><span class="rt">${prefs.mode === k ? '&gt; ' : ''}${NAMES0[k]}</span></button>`).join('')).join('');
+  return h;
+}
+function renderApp(force) { const h = appView(); if (!force && h === appSig) return; appSig = h; $('#devBody').innerHTML = h; }
+$('#devBody').addEventListener('click', e => {
+  const b = e.target.closest('[data-app]'); if (!b) return; boot(); const a = b.dataset.app;
+  if (a === 'on' || a === 'off') { prefs.on = a === 'on'; music.setEnabled(prefs.on); }
+  else if (a === 'next') { music.next(); if (prefs.mode !== 'schedule') prefs.mode = music.state().mode; }
+  else if (a.startsWith('vol:')) { prefs.vol = +a.slice(4); music.setVolume(prefs.vol); }
+  else if (a === 'browse') prefs.browse = !prefs.browse || prefs.mode !== 'schedule';
+  else if (a.startsWith('mode:')) { prefs.mode = a.slice(5); prefs.browse = prefs.mode !== 'schedule'; music.setMode(prefs.mode); }
+  savePrefs(); renderApp(true);
+});
+renderApp(true);
 $$('[data-hum]').forEach(b => b.addEventListener('click', () => { boot(); if (hum) { hum.stop(1.2); hum = null; } else hum = startHum('quarters'); b.setAttribute('aria-pressed', String(!!hum)); }));
 $('#stopAll').addEventListener('click', () => { if (!music) return; running = false; music.pause(); $('#startBtn span').textContent = 'Start'; $('#startBtn path').setAttribute('d', 'M3 1.5v13l11-6.5z'); if (hum) { hum.stop(0.8); hum = null; } $$('[data-hum]').forEach(c => c.setAttribute('aria-pressed', 'false')); });
 function renderSched() {
@@ -925,13 +1001,14 @@ setInterval(() => {
   lastReal = nowR;
   $('#shipClock').textContent = `Day ${ship.day} · ${hm(ship.min)}`;
   const per = ship.onShift ? 'working (on shift)' : (music ? music.periodAt(ship.min) : '');
-  $('#periodName').textContent = ship.onShift ? 'on shift' : (music ? music.periodAt(Math.floor(ship.min)) : '');
+  $('#periodName').textContent = ship.day < 1 ? 'arrival night: no music' : ship.onShift ? 'on shift' : (music ? music.periodAt(Math.floor(ship.min)) : '');
   $$('#sched tr[data-p]').forEach(r => r.classList.toggle('now', r.dataset.p === per));
+  renderApp();
   if (!music) return;
   if (running) music.update();
   const st = music.state();
   if (st.track) { $('#nowName').textContent = st.name; $('#nowSec').textContent = st.where.sec; $('#nowTime').textContent = mmss(st.where.e) + ' / ' + mmss(st.total); $('#nowBar').style.width = Math.min(100, st.where.e / st.total * 100) + '%'; }
-  else { $('#nowName').textContent = !st.enabled ? 'Music is off' : running ? 'Quiet' : 'Paused'; $('#nowSec').textContent = st.enabled && running ? 'next in ' + mmss(st.quietFor) : ''; $('#nowTime').textContent = ''; $('#nowBar').style.width = '0'; }
+  else { $('#nowName').textContent = !st.enabled ? 'Music is off' : st.resting ? 'Arrival night: no music' : running ? 'Quiet' : 'Paused'; $('#nowSec').textContent = st.enabled && running ? 'next in ' + mmss(st.quietFor) : ''; $('#nowTime').textContent = ''; $('#nowBar').style.width = '0'; }
   $('#status').textContent = running ? (st.track ? 'Playing: ' + st.name + ' (' + st.set + ')' : 'Quiet between tracks') : 'Paused';
 }, 200);
 /* level meter in the bottom bar */

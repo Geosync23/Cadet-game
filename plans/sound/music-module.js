@@ -20,20 +20,29 @@
      const music = createWrenMusic({ ctx, dest, shipTime });
        ctx: an AudioContext (or OfflineAudioContext for tests)
        dest: where the music goes (the SND music bus, or ctx.destination)
-       shipTime: () => ({ min: minutes since midnight 0-1439, onShift: bool })
+       shipTime: () => ({ day, min: minutes since midnight 0-1439, onShift: bool })
      music.update()            call often (each frame, or every 100-250 ms)
      music.setEnabled(on)      Settings: Music on/off (off stops after a fade)
      music.setVolume(v)        Settings: 0..1 (Low 0.45, Medium 0.7, High 1)
      music.pause() / resume()  with the game's pause
-     music.state()             what's playing, for a debug line or a check
+     music.setMode(m)          'schedule' (the default: by time of day, work on
+                               shift) or a track key to play that track
+     music.next()              schedule: the next track from the set now;
+                               chosen track: the next track in the list
+     music.state()             what's playing, for the Music app or a check
+     music.LIST                the tracks grouped for the Music app
+   Rules from the user: music is on by default, in Ship schedule mode; there
+   is no music on arrival night (Day 0). It starts on Day 1. Sound effects and
+   the hum still play on Day 0; that is the SND block's business.
    Options: gapMin/gapMax (seconds of quiet between tracks, default 60-180),
    xfade (seconds, default 6), sectionWait (max seconds to wait for a section
    end before changing on a new time of day, default 30), random (default
-   Math.random), onEvent(text) for a log.
+   Math.random), onEvent(text) for a log, firstDay (default 1), mode, volume,
+   enabled (the saved choices from the sound key).
    ===================================================================== */
 function createWrenMusic(opts) {
   const ctx = opts.ctx, rnd = opts.random || Math.random, log = opts.onEvent || (() => {});
-  const cfg = { gapMin: 60, gapMax: 180, xfade: 6, sectionWait: 30, ...opts };
+  const cfg = { gapMin: 60, gapMax: 180, xfade: 6, sectionWait: 30, firstDay: 1, ...opts };
   // ---- the module's own small mixer: music bus -> volume -> dest, and a soft room echo
   const main = ctx.createGain(); main.gain.value = 0; main.connect(opts.dest);
   const sr = ctx.sampleRate;
@@ -268,6 +277,10 @@ function createWrenMusic(opts) {
     'late night': ['latenight', 'watch'],
     'working': ['shift', 'steady', 'rounds', 'midday', 'afternoon'],
   };
+  // the Music app's list: every track, grouped by when it plays
+  const TIMES = ['Work', 'Early morning', 'Morning', 'Midday', 'Afternoon', 'Evening', 'Night', 'Late night'];
+  const LIST = TIMES.map(time => ({ time, tracks: Object.keys(TRACKS).filter(k => TRACKS[k].time === time).map(k => ({ key: k, name: TRACKS[k].name })) })).filter(g => g.tracks.length);
+  const ORDER = LIST.flatMap(g => g.tracks.map(t => t.key));
   function periodAt(min) { let p = PERIODS[PERIODS.length - 1][0]; for (const [n, from] of PERIODS) if (min >= from) p = n; return p; }
   const setFor = st => st.onShift ? 'working' : periodAt(((st.min % 1440) + 1440) % 1440);
 
@@ -308,20 +321,27 @@ function createWrenMusic(opts) {
   }
 
   // ---- the player
-  let enabled = opts.enabled ?? true, volume = opts.volume ?? 0.7, paused = false;
+  let enabled = opts.enabled ?? true, volume = opts.volume ?? 0.7, paused = false, mode = opts.mode && TRACKS[opts.mode] ? opts.mode : 'schedule', resting = false;
   let cur = null, curSet = null, seenSet = null, nextAt = ctx.currentTime + (opts.firstGap ?? 3), lastKey = null, lastMin = null, pendingChange = null;
   const applyVol = (f = 1.5) => { const v = enabled && !paused ? LEVEL * volume : 0; main.gain.cancelScheduledValues(ctx.currentTime); main.gain.setValueAtTime(main.gain.value, ctx.currentTime); main.gain.linearRampToValueAtTime(v, ctx.currentTime + f); };
   applyVol(0.5);
-  function pick(set) {   // a track from the set, never the one that just played
+  function pick(set) {   // a track from the set, never the one that just played (a chosen track is just that track)
+    if (set === 'chosen') return mode;
     const list = SETS[set].filter(k => k !== lastKey); return list[(rnd() * list.length) | 0] || SETS[set][0];
   }
   function startNext(set, fadeIn) { const k = pick(set); cur = play(k, { fadeIn }); lastKey = k; curSet = set; log(`Playing ${TRACKS[k].name} (${set})`); }
   function update() {
     if (!enabled || paused) return;
-    const now = ctx.currentTime, st = opts.shipTime(), set = setFor(st);
+    const now = ctx.currentTime, st = opts.shipTime();
+    if ((st.day ?? cfg.firstDay) < cfg.firstDay) {   // arrival night: no music until Day 1 (the user's rule)
+      if (!resting) { resting = true; log('Arrival night: no music until Day 1'); }
+      if (cur) { cur.fadeOut(now, 3); cur = null; } pendingChange = null; nextAt = now + 2; lastMin = st.min; return;
+    }
+    if (resting) { resting = false; log('Day 1: music begins'); }
+    const set = mode === 'schedule' ? setFor(st) : 'chosen';
     // a big jump in ship time (sleeping skips the night) changes over straight away
     const jumped = lastMin !== null && Math.abs(st.min - lastMin) > 30 && Math.abs(st.min - lastMin) < 1410; lastMin = st.min;
-    if (set !== seenSet) { if (seenSet !== null) log(`Time of day is now ${set}`); seenSet = set; }
+    if (set !== seenSet) { if (seenSet !== null && set !== 'chosen') log(`Time of day is now ${set}`); seenSet = set; }
     if (cur) {
       cur.tick(now + 0.5);
       if (set !== curSet) {   // time of day (or the shift) changed: cross-fade at the end of this section, or now after a jump
@@ -342,10 +362,19 @@ function createWrenMusic(opts) {
     pause() { paused = true; applyVol(0.3); },
     resume() { paused = false; applyVol(0.6); },
     setGaps(min, max) { cfg.gapMin = min; cfg.gapMax = Math.max(min, max); if (!cur) nextAt = Math.min(nextAt, ctx.currentTime + cfg.gapMax); },
-    skip() { if (cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; } nextAt = ctx.currentTime + 2.5; },
-    state() { return { enabled, paused, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
+    setMode(m) {   // 'schedule', or a track key to play that one; changes over with a short cross-fade
+      const want = m === 'schedule' || !TRACKS[m] ? 'schedule' : m; if (want === mode) return; mode = want;
+      log(mode === 'schedule' ? 'Ship schedule' : `Chosen: ${TRACKS[mode].name}`);
+      if (cur && !resting) { cur.fadeOut(ctx.currentTime, 2); cur = null; pendingChange = null; nextAt = ctx.currentTime + 1; }
+    },
+    next() {
+      if (mode !== 'schedule') return this.setMode(ORDER[(ORDER.indexOf(mode) + 1) % ORDER.length]);
+      if (cur) { cur.fadeOut(ctx.currentTime, 2); cur = null; } pendingChange = null; nextAt = ctx.currentTime + 1;
+    },
+    skip() { return this.next(); },
+    state() { return { enabled, paused, mode, resting, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
     play,   // for tests and the harness: play(key, { startBar, fadeIn })
-    TRACKS, SETS, PERIODS, periodAt,
+    TRACKS, SETS, PERIODS, LIST, periodAt,
   };
 }
 if (typeof module !== 'undefined') module.exports = { createWrenMusic };

@@ -159,7 +159,19 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 - A jump in ship time (sleeping through the night) changes over straight away.
 - One ship hour is 100 real seconds, so most times of day last 4 to 6 real minutes. A ten-minute track usually hands over at a section end before it finishes. That is by design: the tracks are made to be heard in part.
 
-**Settings (proposed; the lead will ask the user).** Music On/Off, on by default, plus Music volume Low / Medium / High (0.45 / 0.7 / 1), Medium by default. They sit beside Sound and Volume in the Settings app and are saved in the same `starship-cadet-sound` key. Sound Off also silences music.
+**Defaults and rules (the user, 2026-10-25).**
+- **Music is on by default, in Ship schedule mode,** at Medium volume.
+- **No music on arrival night (Day 0): music starts on Day 1.** The module does this itself from `shipTime().day` (option `firstDay`, default 1). Sound effects and the hum still play on Day 0.
+
+**The Music app (the user, 2026-10-25, 12:58 PM: "a music app ... choose which track to play or turn off and control volume").** A new device app, `deviceApp({ id: 'music', title: 'Music', ... })`, next to Hobbies and Tiles in the app list, in the same blocks as the other apps (text, buttons, list). It replaces a Settings row for music; Settings keeps only Sound On/Off and Volume. The app has:
+- **Now playing:** the track's name and a line saying why it's playing ("Ship schedule: music for the evening", "work music while you're on shift", or "Your choice: Tea break, on repeat"). On arrival night it says "Quiet tonight. Music starts tomorrow, your first full day aboard."
+- **On / Off, and Next:** in Ship schedule, Next is another track from the same set; with a chosen track, it moves to the next one in the list.
+- **Volume:** Low / Medium / High (0.45 / 0.7 / 1).
+- **What plays:** Ship schedule (the default) or Choose a track. Choose a track shows every track grouped by Work, Early morning, Morning, Midday, Afternoon, Evening, Night and Late night (`music.LIST`). A chosen track repeats, with the usual quiet gap, until you change it or go back to Ship schedule.
+- **Saved per player,** apart from the game save, in the sound key: `starship-cadet-sound` = `{ on, vol, music: { on, vol, mode } }`. It carries over to a new game.
+- **Mockup:** the Music app on the Wren Music Player test page works against the pretend clock.
+- **Hooks:** the app's `act(verb, arg)` calls `music.setEnabled`, `setVolume`, `setMode` and `next`, then saves the key. Its `view()` reads `music.state()`. The device redraws an open app when it's told to (`deviceFire`); the builder confirms the call for a live "Now playing" line. A redraw on the app's own taps is enough to start with.
+
 
 **Levels.** At High, every track's loudest moment is 3 to 7 dB under the Quarters hum (-22.8 to -26.8 against -19.9). At Medium it is about 3 dB lower again.
 
@@ -175,21 +187,23 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 - Each bar starts 10 to 30 short-lived notes. The audio thread handles them in well under 3% of a core on a recent phone; the frame loop is untouched.
 - Memory: the module's own buffers are about 1.5 MB. They could share SND's buffers to save that.
 
-**Build turn (one turn, after the sound build).**
-1. Paste the module into SND (or load it).
-2. Add the four hooks and the two Settings rows.
+**Build turns (after the sound build).**
+1. Paste the module into SND (or load it) and add the hooks.
+2. Add the Music app (about 70 lines in section 19's style) and its saved choices.
 3. Add a music part to `sound_check.py`, with a fake ship clock:
    - each time of day plays from its own set, and the working set plays while on shift;
    - no track repeats back to back over 50 picks;
    - a change waits for a section end of at most 30 s;
    - a sleep jump changes at once;
    - Off and pause go quiet;
+   - Day 0 is silent and Day 1 starts music;
+   - a chosen track plays and repeats, Next moves through the list, and Ship schedule returns to the time of day;
    - every track is under the hum;
    - `seed` is unchanged;
    - no AudioContext is made under webdriver.
 4. Run the full round.
 
-**Estimate:** 2 to 3 builder hours, plus a listening pass with the user (about an hour of tuning), plus a full round of checks (about 30 minutes across six runners).
+**Estimate:** 3.5 to 5 builder hours (module and hooks 2 to 3, the Music app 1.5 to 2), plus a listening pass with the user (about an hour of tuning), plus a full round of checks (about 30 minutes across six runners).
 
 ## Decided (the user, 2026-10-25, 12:25 PM Eastern, via lead 36)
 
