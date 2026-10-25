@@ -395,3 +395,34 @@ The 3 lines: `reserved job: the bracket made, in your hands, with the progress b
 So it follows the game, not the check. The only game change between b78e1e22 and 5898c190 is **27ad3cba** (FX17,
 section 18, 4 lines): `evMeetClash` and its use in `evArrive` (nobody goes to Winner stays on or a new tradition over a
 ship-wide event meeting they're needed at). NEW in the published 0.92.6. Not fixed (check runner).
+
+# 0.93.0 (claude/staging-0.93.0 4f1e52bf, 2026-10-25)
+
+**sha256 of starship-cadet.html: `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8`** (matches BM18's).
+OLD = 0.92.6 5898c190 (10f654de…f266). One at a time (arrows_check alone), CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 378 s | PLAYER CHECK OK (the 3 reserved-job lines from 0.92.6 pass: FX17's fix works) |
+| devmode_check | **OK** | 258 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 289 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 66 s | PUZZLE CHECK OK |
+| social_check | **OK** | 27 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 34 s | TALK CHECK OK |
+| arrows_check (default) | **FAIL (NEW)** | 1120 s | promo: `the arrow queue never led with promo:test (fix: DV1, the promotion's beats on the queue); seen ['promo:ceremony', 'promo:move', 'promo:summons']` |
+| arrows_pointer_check | **OK** | 122 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 33 s | DEV ARROW CHECK OK |
+
+## arrows_check promo: NEW in 0.92.6 as published, still in 0.93.0
+
+`arrows_check.py GAME promo` with 4f1e52bf's check (unchanged since 0.92.6), each alone:
+
+| Game | Result | Queue seen |
+|---|---|---|
+| 0.93.0 4f1e52bf (twice) | FAIL | ceremony, move, summons (no test) |
+| 0.92.6 published 5898c190 | FAIL | the same |
+| 0.92.6 before the round fixes b78e1e22 | OK | ceremony, move, summons, **promo:test:9** |
+
+The promotion itself still works (test passed Day 9, officer Day 10, ceremony attended); only the arrow to the test is
+missing. The only game change b78e1e22 → 5898c190 is 27ad3cba (FX17's evMeetClash in evArrive), the same change behind
+0.92.6's reserved-job FAILs; FX17's 0.93.0 fix cured the reserved job but not this. Not fixed (check runner).
