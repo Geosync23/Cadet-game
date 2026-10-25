@@ -130,3 +130,11 @@ Diff bae25ae7..dd4d8797: `apptHostEvent` (slot) and one guarded `||` in tradJoin
 | my reload probe: night round | stop 1, reload, Mensah back at the bench, tap: the round goes on from stop 2; reload again after 5 stops: kept at its end |
 
 ## Final verdict: PASS at dd4d8797 (replaces the earlier PASS at 6b03bea7).
+
+## Other reviews for lead 36 (2026-10-25 afternoon)
+- **FX17 Day 7 Line fix** claude/p926-fx17 3e8c78a6 (+ check-only eba4d365; game 10f654de...): **PASS**. cadet_test vs
+  9d758ada ALL IDENTICAL; bigevents, p926 (new 7 line), events, day_check 7 OK; mech_check m17 OK on 9d758ada and
+  3e8c78a6 with eba4d365. Goers Days 1-112 old vs new: only rec-wso Day 7, 11 -> 8 (Marrow, Cruz, Walsh: the Line cast).
+- **FX22b join_check** claude/p926-fx22b-join 3d011393 (test only, game 88f4cc8d = 9d758ada): **PASS**. JOIN CHECK OK
+  with all switches on (the scope booked, a tap on Sato, the scene to its end, kept) and with P926_APPT off; the old
+  check on the same game FAILs "appt-*: not on in 400 days" (the check, not the game).
