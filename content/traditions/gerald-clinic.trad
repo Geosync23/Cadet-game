@@ -3,7 +3,8 @@
 // Cruz's cuttings. Every other Sunday she holds a clinic at the garden's potting bench end. Behind WEEKEND_ON.
 k: 465
 title: Gerald clinic
-when: every 2 weeks sunday week 2 from day 1
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: every 2 weeks sunday week 2 from day 1)
+when: every 4 weeks sunday week 2 from day 1
 at: 14:30-15:15
 min: 20
 jitter: 10

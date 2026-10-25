@@ -7,7 +7,8 @@
 // and from Bread day she missed it (Days 21, 35, 42).
 k: 467
 title: Bread day
-when: weekly sunday from day 1
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday from day 1)
+when: every 4 weeks sunday week 1 from day 1
 at: 07:00-07:50
 min: 25
 wake: 15

@@ -8,7 +8,8 @@
 // the jigsaw's picture); Vance drops in after his shift.
 k: 468
 title: The big jigsaw
-when: weekly sunday from day 1
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday from day 1)
+when: every 4 weeks sunday week 3 from day 1
 at: 13:00-15:30
 min: 25
 where: 1 room Observation room: common-room

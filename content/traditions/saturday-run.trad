@@ -3,7 +3,8 @@
 // long breakfast, Dr. Nandakumar leads three easy laps of the promenade, the Lap of the Wren's loop. Behind WEEKEND_ON.
 k: 458
 title: Saturday run
-when: every 2 weeks saturday week 1
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: every 2 weeks saturday week 1)
+when: every 4 weeks saturday week 1 from day 1
 at: 07:00-07:40
 min: 20
 wake: 15

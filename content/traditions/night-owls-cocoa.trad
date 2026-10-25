@@ -4,7 +4,8 @@
 // Host Kofi Mensah since FX9 (lead 34, 2026-10-24: Keane goes to bed at 22:46, too early to host; he stays a regular).
 k: 463
 title: Night owls' cocoa
-when: weekly saturday
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly saturday)
+when: every 4 weeks saturday week 4 from day 1
 at: 22:30-23:30
 min: 20
 jitter: 15

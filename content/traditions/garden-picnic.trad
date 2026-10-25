@@ -5,7 +5,8 @@
 // fills you up (its join, section 18's slot). Behind WEEKEND_ON.
 k: 466
 title: Garden picnic
-when: weekly saturday
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly saturday)
+when: every 4 weeks saturday week 3 from day 1
 at: 13:00-13:50
 min: 20
 jitter: 10

@@ -4,7 +4,8 @@
 // Behind WEEKEND_ON. The chapters themselves are a writing job (SW1): a few to start.
 k: 464
 title: The Sunday story
-when: weekly sunday
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday)
+when: every 4 weeks sunday week 4 from day 1
 at: 22:15-22:55
 min: 25
 jitter: 5
