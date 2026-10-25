@@ -41165,13 +41165,13 @@ function recTalkCard(e, d, now, ask) {
   const key = t.by + '@' + d, T = SHIP.rec.talk;
   if (!T.heard.includes(key)) { T.heard.push(key); if (T.heard.length > 40) T.heard.shift(); }
   const baked = MEETING_SCRIPTS['talk.' + t.by];          // the writer's longer script for this talk (W3's talk.<speaker>), when it's baked
-  if (baked) { dialogueShow(ask ? talkAskScript(t.by) : 'talk.' + t.by, { id: 'rec.talk@' + d, who: [q.id], at: now }); return; }   // ask: the talk was said aloud (0.92.6, talkTick), so only its questions
+  if (baked) { dialogueShow(ask ? talkAskScript(t.by) : 'talk.' + t.by, { id: 'rec.talk@' + d, who: [q.id], at: now, ...p926Where() }); return; }   // ask: the talk was said aloud (0.92.6, talkTick), so only its questions
   MEETING_SCRIPTS['rec.talk'] = { title: '"' + t.title + '"', gist: shortName(q) + ' gave a talk: "' + t.title + '".',
     onPick: k => { if (k === 0 && !T.asked.includes(key)) { T.asked.push(key); if (T.asked.length > 40) T.asked.shift(); if (t.size === 'chief' && typeof memAdd === 'function') memAdd(q.id, 'asked.talk'); } },
     lines: [{ who: q.id, text: say('talk.open', 'So. ' + t.title + '. Stop me if you\'ve heard this one.') },
       { choice: [{ text: 'Ask a question', rel: { [q.id]: 3 }, reply: { who: q.id, text: say('talk.answer', 'Good question. Nobody\'s asked me that before.') } },
         { text: 'Just listen', reply: { who: q.id, text: say('talk.listen', 'Right, where was I?') } }] }] };
-  dialogueShow('rec.talk', { id: 'rec.talk@' + d, who: [q.id], at: now });
+  dialogueShow('rec.talk', { id: 'rec.talk@' + d, who: [q.id], at: now, ...p926Where() });
 }
 // ---- tap to join (playtest 1, the traditions engineer, 0.70.0; the user: "tap the leader or anyone taking part to
 // join; you then do the activity with them automatically") ----
@@ -43182,6 +43182,12 @@ function sliceTick() {                                   // eaten as you go; asl
 // if you've joined, the card with only its questions (talkAskScript). Joined while it's still being said: the card
 // waits (talkLater). TALK_FROM [day, first minute], TALK_SAID [day, line], TALK_ASKED: the day the card opened
 const TALK_Q = 12;
+// (FX22's find) a card opened with no `where` is closed by section 18's meetingsTick at the next ship minute (inMeeting: no deck):
+// 0.92.6's cards say where they're played, the room you're in, so they stay open until you walk out (as a meeting). Off: {} (as before)
+// cardWhere() (shared with FX22's appointments, one fix for both): { where } for a card played here, the room you're in, else anywhere
+const cardWhere = () => { const r = typeof deckDef !== 'undefined' && deckDef ? roomAt(...player.here()) : null, room = r && deckDef.rooms && deckDef.rooms[r];
+  return { where: room ? { deck: deckDef.num, room: new RegExp('^' + String(room.name || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') } : { any: true } }; };
+const p926Where = () => P926_TRADS ? cardWhere() : {};   // the Wren talk cards: as before with the switch off
 let TALK_SAID = null, TALK_FROM = null, TALK_ASKED = 0;
 const talkLines = by => { const S = typeof MEETING_SCRIPTS !== 'undefined' && MEETING_SCRIPTS['talk.' + by]; return S ? S.lines.filter(x => x.text && !x.choice) : []; };
 function talkAskScript(by) {                             // the script's choice lines alone, as a script of their own
@@ -43229,7 +43235,7 @@ function week1Card(e, d, now) {
         { text: W('reply.2', 'I\'m still getting lost.'), rel: { [z]: 2 }, reply: { who: z, text: W('answer.2', 'Everyone does. I got lost on Deck 5 for a whole shift once.'), pose: 'laugh' } },
         { text: W('reply.3', 'Thanks for showing me round.'), rel: { [z]: 3 }, reply: { who: z, text: W('answer.3', 'Any time. You did the hard part. You turned up.') } }] },
       { who: z, text: W('close', 'To week one. The hardest one, everyone says.'), pose: 'nod' }] };
-  dialogueShow('week1.zeke', { id: 'week1.zeke@' + d, who: [z], at: now });
+  dialogueShow('week1.zeke', { id: 'week1.zeke@' + d, who: [z], at: now, ...p926Where() });
 }
 if (P926_TRADS) {
   TRAD_JOIN['one-week-aboard'] = { host: 'torres-zeke', pose: 'sit:drink', need: 'social', gain: 15, also: { leisure: 8 }, verb: 'sit down with him', what: 'have a tea with Zeke and go over your first week' };
@@ -43278,7 +43284,7 @@ function swapCard(e, d, now) {
       { who: host, text: [0, 1, 2].map(i => thing(i) + (about(i) ? ' (' + about(i) + ')' : '')).join(' Or '), to: 'you' },
       { choice: [0, 1, 2].map(i => ({ text: 'Take ' + thing(i).replace(/^A /, 'the ').replace(/^An /, 'the ').toLowerCase(), rel: { [host]: 1 }, reply: { who: host, text: trLine('swap.reply.' + (i + 1), d, { thing: thing(i) }, ['Good choice. It\'s yours.', 'That one\'s been waiting for you.', 'Treat it kindly. It\'s had a life.'].slice(i, i + 1)) } })) },
       { who: host, text: trLine('swap.close', d, {}, ['Same time next Sunday. Bring something good.']) }] };
-  dialogueShow('swap.meet', { id: 'swap.meet@' + d, who: [host], at: now });
+  dialogueShow('swap.meet', { id: 'swap.meet@' + d, who: [host], at: now, ...p926Where() });
 }
 if (P926_TRADS) {
   // the stallholders' places at the west end of each stall (EV_KIT.stalls: 39-40,9 by the north wall and 39-40,12 by the south), and
@@ -43342,7 +43348,7 @@ function spiceCard(d, jars, now) {                       // whose is the first j
     lines: [{ who: 'brennan', text: trLine('spice.ask', d, { spice: j[1] }, ['Your turn. The {spice}. Whose?']), to: 'you' },
       { choice: order.map(id => ({ text: pn(id) + '\'s', rel: id === j[0] ? { [id]: 2, brennan: 1 } : { brennan: 1 },
         reply: { who: 'brennan', text: id === j[0] ? trLine('spice.right', d, { name: pn(id) }, ['Got it in one. {name} will be thrilled.']) : trLine('spice.wrong', d, { name: pn(j[0]) }, ['Not even close. It\'s {name}\'s. Have some more.']), pose: id === j[0] ? 'nod' : 'laugh' } })) }] };
-  dialogueShow('spice.guess', { id: 'spice.guess@' + d, who: ['brennan'], at: now });
+  dialogueShow('spice.guess', { id: 'spice.guess@' + d, who: ['brennan'], at: now, ...p926Where() });
 }
 if (P926_TRADS) DECKS[3].places.push({ id: '3-spice-host', type: 'event', event: 'spice-host', at: [33, 0], xy: [33.9, .5], walk: [33, 0], face: -40, pose: 'stand', anim: 'talk', room: 'M' });   // by the spice shelf and the drinks, facing the room
 // ---- 0.92.6 item 4 (FX17, behind P926_TRADS; the user: "Reading corner doesn't work, no host. They should gather closely and
@@ -44077,8 +44083,7 @@ function apptScene(b, now) {                             // the scene for a book
   const who = w => here.has(w) || !evPerson(w) ? w : b.host;   // a reply from someone not there: the host says it
   const fill = l => l.text ? { ...l, text: apptFill(l.text, l.who, ctx) } : l.choice ? { choice: l.choice.map(c => ({ ...c, ...(c.reply ? { reply: { ...c.reply, who: who(c.reply.who), text: apptFill(c.reply.text, who(c.reply.who), ctx) } } : {}) })) } : l;
   MEETING_SCRIPTS[id] = { title: A.title, from: evPerson(b.host).name, gist: A.title + ' with ' + apptHostName(b.guests && b.guests.length ? 'bunk' : b.host) + '.', lines: apptPresent(b, L, here).map(fill), onEnd: () => apptKeep(b) };
-  const rk = roomAt(...player.here()), rn = rk && ((DECKS[deckDef.num].rooms || {})[rk] || {}).name;   // where: the room you're in (meetingsTick closes it when you walk out; with no where it closed at the next minute)
-  dialogueShow(id, { id: id + '@' + b.day, who: [...here], at: now, where: rn ? { deck: deckDef.num, room: new RegExp('^' + rn.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '$') } : { any: true } });
+  dialogueShow(id, { id: id + '@' + b.day, who: [...here], at: now, ...cardWhere() });   // the room you're in (FX17's shared cardWhere: with no where, meetingsTick closed it at the next ship minute)
 }
 function apptKeep(b) {                                   // the scene's end (or walking off it): kept, once
   if (b.done) return; b.done = SHIP.time.day;
