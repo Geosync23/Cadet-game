@@ -20,7 +20,7 @@ while you work; it is **never the gate**. check_fast still runs before every pus
 | **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day` | ~35 |
 | **CR3** | `day_check` Days **0, 1, 5, 7**, weekend (from 0.92.5) | ~44 |
 | **CR4** | `day_check` Days **12, 13, 16, 19** | ~32 |
-| **CR5** | `day_check` Days **21, 27**, interactions, events, career | ~32 |
+| **CR5** | `day_check` Days **21, 27**, interactions, events, career, `sound_check` (from 0.93.0) | ~37 |
 | **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes | ~35 |
 
 `OLD` = the last release's game (`git show <release commit>:starship-cadet.html > old.html`). Every check runs with

@@ -52,6 +52,7 @@ CHECKS = {
     'social': ('python3 social_check.py {g}', 1), 'talk': ('python3 talk_check.py {g}', 2),
     'arc': ('python3 arc_check.py {g}', 1), 'lines': ('python3 lines_check.py {g}', 1),
     'bigevents': ('python3 bigevents_check.py {g}', 5), 'fridays': ('python3 fridays_check.py {g}', 4),
+    'sound': ('python3 sound_check.py {g}', 5),   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
     # in check_fast already (listed only so a check file of theirs is known)
     'deck': ('python3 deck_check.py {g}', 4), 'machine': ('python3 machine_check.py {g}', 1),
     'leave': ('python3 leave_check.py {g}', 1), 'device': ('python3 device_check.py {g}', 4),
