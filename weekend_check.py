@@ -98,7 +98,13 @@ with sync_playwright() as pw:
         st = json.loads(g.ev("""(() => { const e = eventsOn(%d).find(x => x.id === '%s'), s = TRAD_JOIN[e.id], need = s.need || 'social';
           const a = DECK_CREW.find(x => x.settled && x.spot && x.goalId && (evTagId(x.tag || '') === e.id || tradSpotIds({ ...e, day: %d }).has(x.spot.id))) || DECK_CREW.find(x => x.p.id === s.host);
           if (!a) return JSON.stringify({ err: 'nobody at it' }); SHIP.player.needs[need] = Math.min(SHIP.player.needs[need], 40);
-          const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); return JSON.stringify({ need, n0, act: ACT && ACT.kind }); })()""" % (d, jid, d, d)))
+          const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); const pl = ACT && ACT.placeId && ((DECKS[deckDef.num] || {}).places || []).find(q => q.id === ACT.placeId);
+          return JSON.stringify({ need, n0, act: ACT && ACT.kind, place: ACT && ACT.placeId || null, pose: pl ? pl.pose || null : null }); })()""" % (d, jid, d, d)))
+        if jid == 'sunday-story':   # RV14: a seated weekend join takes a seat first (tradSpot's seat-first, FX9's 7ff6a818), never the kettle (the common room has both; the bow lounge only seats)
+            g.step(90); sp = json.loads(g.ev("(() => { const pl = ACT && ACT.placeId && ((DECKS[deckDef.num] || {}).places || []).find(q => q.id === ACT.placeId); return JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId || null, pl ? pl.pose || null : null, player.pose || null]); })()"))
+            check(str(sp[2] or '').startswith('sit') and 'kettle' not in str(sp[1]), '%s: your join puts you in a seat (%s)' % (jid, sp))
+            kt = json.loads(g.ev("(() => { const e = eventsOn(%d).find(x => x.id === 'sunday-story'), k = placeSpot('4-common-kettle'); if (!e || !k) return JSON.stringify(null); const r = tradSpot({ ...e, day: %d }, k.x, k.z); return JSON.stringify(r ? [r[0].id, r[0].pose || null] : null); })()" % (d, d)))
+            check(bool(kt) and str(kt[1] or '').startswith('sit'), '%s: asked from right by the kettle, a seated join still picks a seat (seat-first) (%s)' % (jid, kt))
         if 'err' in st: check(False, '%s: someone at it to join (%s)' % (jid, st['err'])); g.close(); continue
         best = st['n0']; ended = None
         for k in range(200):

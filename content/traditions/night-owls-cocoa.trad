@@ -8,6 +8,8 @@ title: Night owls' cocoa
 when: every 4 weeks saturday week 4 from day 1
 at: 22:30-23:30
 min: 20
+// (DS1, RV14: a full room had you standing beside the leader; a seated weekend join keeps a seat for you)
+spare: 1
 jitter: 15
 where: 3 room Bow lounge: lounge-seat, bench
 hold: 1
