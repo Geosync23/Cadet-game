@@ -143,21 +143,30 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 
 | Time of day | Ship time | Tracks (rotating) |
 | --- | --- | --- |
-| Late night | 00:30 to 05:00 | Late night, Deep space (new), Night watch, Station dawn |
+| Late night | 00:30 to 05:00 | Nebula, Deep space, Night watch, Station dawn |
 | Early morning | 05:00 to 07:30 | Station dawn, Wake cycle, First light |
-| Morning | 07:30 to 11:00 | Systems online (the user's pick), Morning, First light, Tea break |
-| Midday | 11:00 to 14:00 | Midday, Lunch break, Promenade (new) |
-| Afternoon | 14:00 to 17:30 | Afternoon, Tea break, Warm circuits (new), Golden hour |
-| Evening | 17:30 to 21:00 | Evening, Golden hour, Porthole (new) |
-| Night | 21:00 to 00:30 | Night watch, Lights out, Porthole, Evening |
-| Working (on shift) | whenever you're clocked in | Shift start, Steady work, On your rounds, Warm circuits |
+| Morning | 07:30 to 11:00 | Systems online, Orbit rise, First light, Long view |
+| Midday | 11:00 to 14:00 | Zenith, Still point, Promenade |
+| Afternoon | 14:00 to 17:30 | Slow orbit, Long view, Warm circuits, Terminator line |
+| Evening | 17:30 to 21:00 | Evening star, Terminator line, Porthole |
+| Night | 21:00 to 00:30 | Night watch, Quiet stars, Porthole, Evening star |
+| Working (on shift) | whenever you're clocked in | Clockwork stars, Steady state, Rounds, Warm circuits |
 
 **21 tracks** (the user, 2026-10-25, 1:24 PM: "several tracks for each time of day and we rotate"):
 - The first 14.
 - Three ambient sci-fi synth tracks from morning take 2: Systems online (the user's pick for mornings), and Wake cycle and Station dawn (early morning).
 - Four new ones so every time of day has 3 or 4: Promenade (happy lo-fi, midday), Warm circuits (chill lo-fi with a synth echo, afternoon and work), Porthole (warm lo-fi, evening and night), Deep space (ambient synth, late night).
 
-**Sci-fi synth pass** (the user, 2026-10-25, 1:33 PM: "No steel drums, no kalimba. Sci-fi synth, that's what we want."). In the module, the festive voices are re-voiced for every track:
+**Space music pass** (the user, 2026-10-25, 1:50 PM: "many tracks have background white noise. Kill it ... too happy and cutesy ... contemplative. Space music! Like a planetarium's music."). All 21 tracks are rebuilt in one style (`space()` in the module):
+- no noise layers at all (checked: none of the 21 makes a single noise source in ten minutes; the hum is the only noise-like sound);
+- slow suspended and modal harmony (Lydian, Dorian, Mixolydian, suspended major, one Aeolian), each chord held two bars;
+- long wide pads, a quiet high shimmer, gentle echoing sequences, soft FM chimes, deep bass swells and slow singing leads that glide into their notes;
+- no drums: the working and midday tracks have only a very soft low pulse;
+- 48 to 74 beats a minute, lots of space and echo.
+
+Some tracks have new names to fit (same slots): Morning became Orbit rise, Tea break Long view, Midday Zenith, Lunch break Still point, Afternoon Slow orbit, Golden hour Terminator line, Evening Evening star, Lights out Quiet stars, Late night Nebula, Shift start Clockwork stars, Steady work Steady state, and On your rounds Rounds. The versions before this pass are kept as `OLD_TRACKS` for the player page's before-and-after list (`play(key, { classic: true })`). The builder drops `OLD_TRACKS`, `MI_OLD` and the old track definitions when pasting into the game, which makes the module much smaller.
+
+Earlier, superseded: **Sci-fi synth pass** (the user, 2026-10-25, 1:33 PM: "No steel drums, no kalimba. Sci-fi synth, that's what we want."). In the module, the festive voices are re-voiced for every track:
 - the marimba-like pluck is now a glassy synth pluck;
 - the music box is now a crystal FM bell;
 - the whistled flute is now a warm synth lead;

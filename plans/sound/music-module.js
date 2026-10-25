@@ -239,8 +239,8 @@ function createWrenMusic(opts) {
     const form = def.form(), bars = []; const grid = def.beats === 4 ? [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5] : [0, 1, 2];
     form.forEach((x, si) => {
       const rng = seeded(def.seed * 97 + si * 13 + (x.pass || 0) * 7), prog = def.prog[x.prog];
-      const phrase = walkMelody(rng, 4, def.scale, def.range[0], def.range[1], grid, def.beats === 4 ? [2, 4] : [1, 3], [3]);
-      const alt = walkMelody(rng, 4, def.scale, def.range[0], def.range[1], grid, def.beats === 4 ? [2, 4] : [1, 3], [3]);
+      const tune = () => def.space ? slowTune(rng, 4, def.scale, def.range[0], def.range[1]) : walkMelody(rng, 4, def.scale, def.range[0], def.range[1], grid, def.beats === 4 ? [2, 4] : [1, 3], [3]);
+      const phrase = tune(), alt = tune();
       for (let b = 0; b < x.bars; b++) {
         const ph = b >= 4 && b % 4 === 2 ? alt[2] : phrase[b % 4];
         bars.push({ sec: x, si, b, chord: prog[b % prog.length], mel: ph });
@@ -391,6 +391,148 @@ function createWrenMusic(opts) {
   for (const d of Object.values(TRACKS)) if (!d.full) { grow(d); d.full = true; }
   // levels per track (measured against the hum in the Sound Lab)
   const MLV = { wake: 1.65, systems: 1.75, dawn: 1.7, promenade: 1.19, circuits: 0.95, porthole: 0.85, deepspace: 1.3,  morning: 1.12, evening: 0.851, latenight: 0.661, shift: 1.047, steady: 1.12, rounds: 1.035, firstlight: 0.891, midday: 1.012, lunch: 1.12, afternoon: 1.12, tea: 0.923, golden: 1.023, watch: 0.785, lullaby: 0.841 };
+  // =====================================================================
+  // ---- SPACE MUSIC (the user, 2026-10-25, 1:50 PM): "contemplative ... Space music! Like a planetarium's music."
+  // Every track is rebuilt in this style. No noise layers at all (the hum is the only noise-like sound); slow suspended
+  // and modal harmony (Lydian, Dorian, Mixolydian, suspended major), each chord held for two bars; long pads, soft
+  // sequences, bells and chimes, deep bass swells and slow singing leads; at most a very soft pulse on the working and
+  // midday sets. The versions before this pass are kept in OLD_TRACKS for the player page's before-and-after list.
+  // =====================================================================
+  const OLD_TRACKS = { ...TRACKS }, MLV_OLD = { ...MLV };
+  const SX = {
+    // a wide, slow pad: detuned saws and a triangle, a warm low filter that breathes over the chord, long fades in and out
+    pad(t, notes, d, g, out, bright = 1) {
+      notes.forEach((m, i) => [['sawtooth', -7, -0.5], ['sawtooth', 7, 0.5], ['triangle', 0, 0]].forEach(([type, c, pan]) => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); let node = e;
+        o.type = type; o.frequency.value = mtof(m); o.detune.value = c + (i % 2 ? 2 : -2);
+        lp.type = 'lowpass'; lp.Q.value = 0.5; lp.frequency.setValueAtTime(300 * bright, t); lp.frequency.linearRampToValueAtTime(900 * bright, t + d * 0.5); lp.frequency.linearRampToValueAtTime(350 * bright, t + d + 2);
+        const k = type === 'triangle' ? 1.4 : 1;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * k, t + Math.min(3, d * 0.45)); e.gain.setValueAtTime(g * k, t + d); e.gain.linearRampToValueAtTime(0, t + d + 2.5);
+        o.connect(lp); lp.connect(e);
+        if (pan && ctx.createStereoPanner) { const p = ctx.createStereoPanner(); p.pan.value = pan; e.connect(p); node = p; }
+        node.connect(out); o.start(t); o.stop(t + d + 2.6);
+      }));
+    },
+    // stars: a very quiet high shimmer, two sines with a slow tremolo
+    stars(t, notes, d, g, out) {
+      notes.slice(-2).forEach((m, i) => {
+        const o = ctx.createOscillator(), e = ctx.createGain(), tr = ctx.createGain(), l = ctx.createOscillator(), lg = ctx.createGain();
+        o.frequency.value = mtof(m + 24); l.frequency.value = 0.25 + i * 0.13; lg.gain.value = 0.5; l.connect(lg); lg.connect(tr.gain); tr.gain.value = 0.5;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + d * 0.4); e.gain.linearRampToValueAtTime(0, t + d + 1.5);
+        o.connect(tr); tr.connect(e); e.connect(out); o.start(t); l.start(t); o.stop(t + d + 1.6); l.stop(t + d + 1.6);
+      });
+    },
+    // a soft sequence note: sine and triangle through a gentle filter, with a soft echo a dotted beat later
+    seq(t, m, g, out, s, open = 1) {
+      [[0, 1], [0.75, 0.35], [1.5, 0.12]].forEach(([dt, k]) => {
+        const at = t + dt * s, o = ctx.createOscillator(), o2 = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain();
+        o.type = 'sine'; o2.type = 'triangle'; o.frequency.value = o2.frequency.value = mtof(m); o2.detune.value = 5;
+        lp.type = 'lowpass'; lp.frequency.value = 900 + 900 * open; env(e, at, g * k, 0.012, 0.7);
+        o.connect(lp); o2.connect(lp); lp.connect(e); e.connect(out); o.start(at); o2.start(at); o.stop(at + 0.8); o2.stop(at + 0.8);
+      });
+    },
+    // a chime: a soft FM bell with a long ring
+    chime(t, m, g, out) { fmBell(t, mtof(m), 4, g, 2.01, 0.45, 0, out); },
+    // a deep, warm bass swell under the chord
+    swell(t, m, d, g, out) {
+      [[mtof(m), 1, 'sine'], [mtof(m) * 2, 0.25, 'triangle']].forEach(([f, k, type]) => {
+        const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); o.type = type; o.frequency.value = f; lp.type = 'lowpass'; lp.frequency.value = 400;
+        e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * k, t + Math.min(2.5, d * 0.4)); e.gain.setValueAtTime(g * k, t + d * 0.8); e.gain.linearRampToValueAtTime(0, t + d + 1.5);
+        o.connect(lp); lp.connect(e); e.connect(out); o.start(t); o.stop(t + d + 1.6);
+      });
+    },
+    // a slow, singing lead: a sine and a soft triangle, gliding into each note, with a slow vibrato that grows
+    sing(t, m, d, g, out, prev) {
+      const o = ctx.createOscillator(), o2 = ctx.createOscillator(), v = ctx.createOscillator(), vg = ctx.createGain(), lp = ctx.createBiquadFilter(), e = ctx.createGain(), f = mtof(m);
+      o2.type = 'triangle'; o.frequency.setValueAtTime(prev ? mtof(prev) : f, t); o.frequency.exponentialRampToValueAtTime(f, t + 0.25); o2.frequency.setValueAtTime(prev ? mtof(prev) : f, t); o2.frequency.exponentialRampToValueAtTime(f, t + 0.25);
+      v.frequency.value = 4.2; vg.gain.setValueAtTime(0, t); vg.gain.linearRampToValueAtTime(f * 0.006, t + d * 0.6); v.connect(vg); vg.connect(o.frequency); vg.connect(o2.frequency);
+      lp.type = 'lowpass'; lp.frequency.value = 1700; const g2 = ctx.createGain(); g2.gain.value = 0.5;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + 0.45); e.gain.setValueAtTime(g, t + d * 0.8); e.gain.linearRampToValueAtTime(0, t + d + 0.6);
+      o.connect(lp); o2.connect(g2); g2.connect(lp); lp.connect(e); e.connect(out); [o, o2, v].forEach(n => { n.start(t); n.stop(t + d + 0.7); });
+    },
+    // a very soft pulse (no drums): a low sine on the beat, for the working and midday sets
+    pulse(t, m, g, out) { tone(t, mtof(m), 0.35, { gain: g, a: 0.02, lp: 300, bus: out }); },
+  };
+  // modes and chord colours (semitones from the key note): suspended, add9, maj7#11, min9 - never a plain cheerful triad
+  const MODES = { lydian: [0, 2, 4, 6, 7, 9, 11], dorian: [0, 2, 3, 5, 7, 9, 10], mixo: [0, 2, 4, 5, 7, 9, 10], ionian: [0, 2, 4, 5, 7, 9, 11], aeolian: [0, 2, 3, 5, 7, 8, 10] };
+  const COLOURS = {
+    lydian: [[0, 7, 11, 14, 18], [2, 9, 14, 18, 21], [-3, 4, 7, 11, 14], [7, 14, 18, 21, 23], [-1, 6, 11, 14, 18]],
+    dorian: [[0, 7, 10, 14, 15], [5, 12, 16, 19, 21], [-2, 5, 9, 12, 14], [3, 10, 14, 17, 19], [7, 14, 17, 22, 24]],
+    mixo: [[0, 7, 14, 16, 19], [-2, 5, 10, 14, 17], [5, 12, 16, 19, 21], [-3, 4, 9, 12, 14], [7, 12, 14, 19, 22]],
+    ionian: [[0, 7, 14, 19, 21], [5, 12, 19, 21, 24], [-3, 4, 9, 12, 16], [7, 12, 14, 19, 24], [2, 9, 12, 17, 21]],
+    aeolian: [[0, 7, 10, 14, 15], [-4, 3, 7, 10, 14], [-2, 5, 10, 14, 17], [3, 10, 14, 17, 19], [5, 12, 15, 19, 20]],
+  };
+  // chords for a part of the track: colour indexes from the mode, each held two bars; the bass note is the chord's root
+  function prog(key, mode, idx) { return idx.flatMap(i => { const c = COLOURS[mode][i], notes = c.map(x => key + x), root = key + c[0] - 12; return [{ notes, root }, { notes, root }]; }); }
+  function scaleOf(key, mode) { const out = []; for (let o = -24; o <= 36; o += 12) MODES[mode].forEach(x => out.push(key + o + x)); return out.sort((a, b) => a - b); }
+  // slow tunes: one to three long notes a bar, on the beat, leaning on the chord's own notes
+  function slowTune(rng, bars, scale, lo, hi) {
+    const pool = scale.filter(m => m >= lo && m <= hi); let k = (pool.length / 2) | 0;
+    return Array.from({ length: bars }, (_, b) => {
+      if (b % 4 === 3) return [];
+      const n = 1 + ((rng() * 2.4) | 0), pos = [...new Set(Array.from({ length: n }, () => [0, 1, 2, 3][(rng() * 4) | 0]))].sort();
+      return pos.map((p, i) => { k = Math.max(0, Math.min(pool.length - 1, k + [-2, -1, 0, 1, 1, 2][(rng() * 6) | 0])); return [p, pool[k], (pos[i + 1] ?? 4) - p]; });
+    });
+  }
+  // the parts. c: { t, s, beats, ch, root, out, rng, e, mel, lg, bar, def }
+  Object.assign(PARTS, {
+    sPad: c => { if (c.bar % 2 === 0) SX.pad(c.t, c.ch, c.s * c.beats * 2, 0.0042, c.out, c.def.bright ?? 1); },
+    sStars: c => { if (c.bar % 2 === 0) SX.stars(c.t, c.ch, c.s * c.beats * 2, 0.006, c.out); },
+    sSwell: c => { if (c.bar % 2 === 0) SX.swell(c.t, c.root, c.s * c.beats * 2, 0.08, c.out); },
+    sSeq: c => { const up = c.ch.slice(1).map(m => m + 12), pat = c.def.pattern || [0, 2, 1, 3, 2, 1, 3, 0], n = c.beats * 2; for (let k = 0; k < n; k++) SX.seq(c.t + k * c.s / 2, up[pat[k % pat.length] % up.length], k % 2 ? 0.013 : 0.018, c.out, c.s, 0.4 + 0.6 * ((c.bar % 8) / 8)); },
+    sSeqSlow: c => { const up = c.ch.slice(1).map(m => m + 12); for (let k = 0; k < c.beats; k++) SX.seq(c.t + k * c.s, up[(k + c.bar) % up.length], 0.016, c.out, c.s, 0.5); },
+    sChime: c => { const n = (c.rng() * 2.2) | 0; for (let k = 0; k < n; k++) SX.chime(c.t + ((c.rng() * c.beats) | 0) * c.s, c.ch[1 + ((c.rng() * (c.ch.length - 1)) | 0)] + 24, 0.016, c.out); },
+    sSing: c => { let prev = null; c.mel.forEach(([b, m, d]) => { SX.sing(c.t + b * c.s, m, d * c.s, c.lg, c.out, prev); prev = m; }); },
+    sBellTune: c => c.mel.forEach(([b, m]) => SX.chime(c.t + b * c.s, m + 12, c.lg * 0.8, c.out)),
+    sPulse: c => { for (let k = 0; k < c.beats; k++) SX.pulse(c.t + k * c.s, c.root + 12, k === 0 ? 0.045 : 0.03, c.out); },
+  });
+  // a space track: intro, then a cycle of sections (open, stars, sequence, theme, drift, theme again) until about ten minutes, then an outro
+  function space(d) {
+    const work = d.pulse, A = prog(d.key, d.mode, d.a), B = prog(d.key, d.mode, d.b), C = prog(d.key, d.mode, d.c);
+    const seq = d.slow ? 'sSeqSlow' : 'sSeq', lead = d.bells ? 'sBellTune' : 'sSing';
+    const P = (...p) => work ? [...p, 'sPulse'] : p;
+    return { name: d.name, time: d.time, full: true, bpm: d.bpm, beats: 4, swing: 0, wet: d.wet ?? 0.6, seed: d.seed, lg: d.lg ?? 0.03, bright: d.bright, pattern: d.pattern, note: d.note, space: true,
+      scale: scaleOf(d.key, d.mode), range: d.range || [d.key + 12, d.key + 26], prog: { A, B, C },
+      form: () => longForm([sec('Opening', 'A', 4, ['sPad', 'sSwell'], 1)],
+        [sec('Open sky', 'A', 8, ['sPad', 'sSwell', 'sStars'], 1), sec('Sequence', 'A', 8, P('sPad', 'sSwell', seq), 2), sec('Theme', 'B', 8, P('sPad', 'sSwell', seq, lead), 2),
+         sec('Drift', 'C', 8, ['sPad', 'sStars', 'sChime'], 1), sec('Theme returns', 'B', 8, P('sPad', 'sSwell', 'sChime', lead), 2), sec('Wide', 'A', 8, P('sPad', 'sSwell', 'sStars', seq), 1)],
+        [sec('Closing', 'A', 4, ['sPad', 'sStars'], 1)], d.bpm, 4, 10, ['x']) };
+  }
+  // tunes for space tracks use slow long notes (layout() calls walkMelody; space tracks swap in slowTune)
+  const SPACE = {
+    // early morning
+    dawn:       { name: 'Station dawn', time: 'Early morning', key: 52, mode: 'lydian', bpm: 56, a: [0, 1], b: [0, 2, 1, 0], c: [4, 2], seed: 301, slow: true, bells: true, note: 'Light coming up over the hull: Lydian pads, a slow sequence and a tune played on soft chimes.' },
+    wake:       { name: 'Wake cycle', time: 'Early morning', key: 50, mode: 'ionian', bpm: 60, a: [0, 1], b: [0, 3, 2, 1], c: [2, 4], seed: 307, note: 'Suspended chords opening slowly, a gentle sequence and a singing lead. The ship waking up.' },
+    firstlight: { name: 'First light', time: 'Early morning', key: 55, mode: 'mixo', bpm: 58, a: [0, 1], b: [2, 1, 0, 4], c: [3, 1], seed: 311, slow: true, note: 'The quietest of the mornings: long pads and a few chimes, a slow sequence later.' },
+    // morning
+    systems:    { name: 'Systems online', time: 'Morning', key: 57, mode: 'lydian', bpm: 66, a: [0, 1], b: [0, 3, 1, 2], c: [4, 1], seed: 313, pattern: [0, 1, 2, 3, 2, 1, 2, 0], note: 'A gentle sequence that builds as the ship comes online, under wide Lydian pads.' },
+    morning:    { name: 'Orbit rise', time: 'Morning', key: 53, mode: 'ionian', bpm: 64, a: [0, 1, 0, 3], b: [2, 1, 3, 0], c: [4, 2], seed: 317, note: 'The planet turning into view: a singing lead over a soft rising sequence.' },
+    tea:        { name: 'Long view', time: 'Morning', key: 48, mode: 'lydian', bpm: 60, a: [0, 1], b: [2, 1, 0, 3], c: [4, 1], seed: 331, slow: true, bells: true, note: 'Standing at a window with a cup: a slow sequence and a chime tune. Also plays in the afternoon.' },
+    // midday
+    midday:     { name: 'Zenith', time: 'Midday', key: 55, mode: 'lydian', bpm: 70, a: [0, 1], b: [0, 3, 1, 2], c: [4, 2], seed: 337, pulse: true, note: 'The brightest of the set: a moving sequence and a soft pulse under a singing lead.' },
+    lunch:      { name: 'Still point', time: 'Midday', key: 50, mode: 'mixo', bpm: 62, a: [0, 1], b: [3, 1, 0, 2], c: [4, 1], seed: 347, slow: true, bells: true, note: 'A pause in the day: chimes and long pads, with a slow sequence.' },
+    promenade:  { name: 'Promenade', time: 'Midday', key: 52, mode: 'ionian', bpm: 68, a: [0, 3], b: [0, 1, 2, 3], c: [4, 2], seed: 349, pulse: true, note: 'Walking the promenade under the big windows: a light sequence and a soft pulse.' },
+    // afternoon
+    afternoon:  { name: 'Slow orbit', time: 'Afternoon', key: 51, mode: 'dorian', bpm: 62, a: [0, 1], b: [0, 2, 3, 1], c: [4, 2], seed: 353, note: 'Dorian colours and a long singing line: the steady turn of the afternoon.' },
+    circuits:   { name: 'Warm circuits', time: 'Afternoon', key: 48, mode: 'mixo', bpm: 66, a: [0, 1], b: [3, 1, 0, 2], c: [2, 4], seed: 359, pulse: true, pattern: [0, 2, 1, 3, 1, 2, 0, 3], note: 'A patient sequence ticking over like instruments at work, with a very soft pulse.' },
+    golden:     { name: 'Terminator line', time: 'Afternoon', key: 54, mode: 'lydian', bpm: 58, a: [0, 2], b: [1, 0, 3, 2], c: [4, 1], seed: 367, note: 'The line between day and night sliding across the planet below. Also plays in the evening.' },
+    // evening
+    evening:    { name: 'Evening star', time: 'Evening', key: 53, mode: 'dorian', bpm: 58, a: [0, 1], b: [2, 0, 3, 1], c: [4, 2], seed: 373, note: 'A slow singing lead over warm Dorian pads as the lights go amber.' },
+    porthole:   { name: 'Porthole', time: 'Evening', key: 49, mode: 'lydian', bpm: 56, a: [0, 1], b: [2, 1, 0, 3], c: [4, 2], seed: 379, slow: true, bells: true, note: 'Watching the stars go by after dinner: chimes, pads and a slow sequence.' },
+    // night
+    watch:      { name: 'Night watch', time: 'Night', key: 50, mode: 'dorian', bpm: 54, a: [0, 2], b: [0, 1, 3, 2], c: [4, 1], seed: 383, slow: true, note: 'Keeping watch: deep swells, a slow sequence and a quiet singing line.' },
+    lullaby:    { name: 'Quiet stars', time: 'Night', key: 55, mode: 'ionian', bpm: 50, a: [0, 2], b: [1, 0, 2, 3], c: [4, 2], seed: 389, slow: true, bells: true, wet: 0.7, note: 'Lights out: very slow chimes over long pads. The gentlest track.' },
+    // late night
+    latenight:  { name: 'Nebula', time: 'Late night', key: 45, mode: 'aeolian', bpm: 50, a: [0, 1], b: [2, 0, 3, 1], c: [4, 2], seed: 397, slow: true, wet: 0.7, bright: 0.8, note: 'Drifting through a cloud of gas and stars: wide, slow and deep, never dark.' },
+    deepspace:  { name: 'Deep space', time: 'Late night', key: 48, mode: 'lydian', bpm: 48, a: [0, 4], b: [1, 0, 2, 3], c: [4, 1], seed: 401, slow: true, bells: true, wet: 0.7, bright: 0.85, note: 'The ship gliding through the dark: far-off chimes and long, slow swells.' },
+    // working (on shift)
+    shift:      { name: 'Clockwork stars', time: 'Work', key: 52, mode: 'mixo', bpm: 74, a: [0, 1], b: [0, 3, 1, 2], c: [4, 2], seed: 409, pulse: true, note: 'A steady sequence and a soft pulse for getting into the work, under wide pads.' },
+    steady:     { name: 'Steady state', time: 'Work', key: 50, mode: 'lydian', bpm: 70, a: [0, 1], b: [3, 0, 1, 2], c: [2, 4], seed: 419, pulse: true, bells: true, note: 'Heads-down work: a patient sequence, a chime tune and a very soft pulse.' },
+    rounds:     { name: 'Rounds', time: 'Work', key: 55, mode: 'dorian', bpm: 72, a: [0, 1], b: [0, 2, 3, 1], c: [4, 1], seed: 421, pulse: true, pattern: [0, 1, 2, 1, 3, 2, 1, 2], note: 'Walking the ship with your job list: a moving sequence, a soft pulse and a singing lead.' },
+  };
+  for (const [k, d] of Object.entries(SPACE)) TRACKS[k] = space(d);
+  const SPACE_LV = {};   // levels for the space tracks (set by measuring against the hum)
+  for (const k of Object.keys(SPACE)) MLV[k] = SPACE_LV[k] ?? 1;
 
   // ---- the schedule: ship time of day, and a working set while you're on shift
   const PERIODS = [   // [name, from minute]; each runs to the next one's start
@@ -416,8 +558,8 @@ function createWrenMusic(opts) {
 
   // ---- one playing track
   function play(key, o = {}) {
-    const def = TRACKS[key], bars = layout(def), classic = !!o.classic, s = 60 / (classic && def.was ? def.was.bpm : def.bpm), len = s * def.beats, t0 = ctx.currentTime + 0.1;
-    const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = MLV[key] ?? 1;
+    const classic = !!o.classic && !!OLD_TRACKS[key], def = classic ? OLD_TRACKS[key] : TRACKS[key], bars = layout(def), s = 60 / def.bpm, len = s * def.beats, t0 = ctx.currentTime + 0.1;
+    const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = (classic ? MLV_OLD[key] : MLV[key]) ?? 1;
     out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(lvl, t0 + fin); out.connect(main);
     const send = ctx.createGain(); send.gain.value = def.wet; out.connect(send); send.connect(verb);
     const rng = seeded(def.seed), nodes = [];
@@ -426,14 +568,12 @@ function createWrenMusic(opts) {
     const T = {
       key, def, out, len, total: bars.length * len, startAt: t0 - i * len, bars,
       tick(u) {   // schedule bars up to time u; the track plays once through, then ends
-        if (classic) Object.assign(MI, MI_OLD);
         while (next < u && i < bars.length && !ending) {
-          const bar = bars[i], c = { t: next, s, beats: def.beats, ch: bar.chord.notes, root: bar.chord.root, out, rng, e: bar.sec.e, sw: def.swing * s, mel: bar.mel, lead: bar.sec.lead || def.lead || 'pluck', lg: def.lg, bar: bar.b };
+          const bar = bars[i], c = { t: next, s, beats: def.beats, ch: bar.chord.notes, root: bar.chord.root, out, rng, e: bar.sec.e, sw: def.swing * s, mel: bar.mel, lead: bar.sec.lead || def.lead || 'pluck', lg: def.lg, bar: bar.b, def };
           bar.sec.parts.forEach(p => PARTS[p](c));
           if (def.vinyl && rng() < 0.5) noise(next + rng() * len, 0.004, { f: 2500, q: 0.7, gain: 0.02, a: 0.001, bus: out });
           i++; next += len;
         }
-        if (classic) Object.assign(MI, MI_NEW);
       },
       endsAt() { return ending ?? (T.startAt + T.total); },
       sectionEnd() {   // when the current section ends (to change at a musical moment)
@@ -509,7 +649,7 @@ function createWrenMusic(opts) {
     },
     skip() { return this.next(); },
     state() { return { enabled, paused, mode, resting, heard: { ...heard }, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
-    play,   // for tests and the harness: play(key, { startBar, fadeIn, classic })
+    play,   // for tests and the harness: play(key, { startBar, fadeIn, classic: the version before the space pass })
     TRACKS, SETS, PERIODS, LIST, periodAt,
   };
 }
