@@ -1,26 +1,27 @@
 @tradition cook-along
-// Cook-along (0.60.7, the user's pick): Brennan's deputy, Lukas Dlamini, teaches one simple dish at the galley pass;
+// Cook-along (0.60.7, the user's pick): Brennan's deputy, Lukas Dlamini, teaches one simple dish in the galley;
 // you stir, taste, and get a portion. It's helping make dinner, so Saturday afternoons only, done before dinner
-// service (the user, 2026-10-18; it was Thursdays 19:30). DA4's tagged places 3-cookalong-* come first.
+// service (the user, 2026-10-18; it was Thursdays 19:30). In the galley round the prep island since 0.92.5 (the user's item 19:
+// "Cook along tradition should be in the kitchen"; it was at the mess side of the pass): the six places 3-cookalong-*.
 k: 449
 title: Cook-along
 when: weekly saturday
 at: 15:30-16:30
 min: 25
-where: 3 room Mess hall: mess-seat
+where: 3 pool @cook-along
 hold: none
 who: dlamini-lukas always, galley 25%, lingers-at-meals 35%, everyone 10%
-anim: talk
+anim: cook
 host: dlamini-lukas
 from: dlamini-lukas
 
 
 == mail
-- Cook-along tomorrow at {time} at the galley pass. One simple dish. You stir, you taste, you eat it. Aprons provided.
+- Cook-along tomorrow at {time} in the galley. One simple dish. You stir, you taste, you eat it. Aprons provided.
 
 == ask
 - Cook-along this afternoon. We help make dinner. You make it, you eat it.
-- Learn a dish at the galley pass later? It's easy.
+- Learn a dish in the galley later? It's easy.
 
 == here
 - Stir, don't splash. Well, splash a little.   #funny
@@ -28,7 +29,7 @@ from: dlamini-lukas
 - That's yours. You made that. Look at you.   #warm
 
 == thanks
-- At the galley pass, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.   #warm
+- In the galley, {host} shows you one simple dish. You stir, taste, and walk away with a portion you made yourself.   #warm
 
 == chatter
 - Cook-along later. Last week I made soup. Proper soup.

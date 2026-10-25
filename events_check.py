@@ -43,7 +43,7 @@ PLANS = r"""(days => {
   const out = { days: [], bad: [], empty: [], ids: SHIP_TRADITIONS.filter(e => !e.flag || (typeof flag === 'function' && flag(e.flag))).map(e => e.id) }, LINGER = 25;   // staying on a little after the end is fine
   const isNew = """ + IS_NEW + r""", dueNew = """ + DUE_NEW + r""", lo = Math.min(...days), hi = Math.max(...days);
   const DUE = new Map(SHIP_TRADITIONS.filter(ev => isNew(ev.when)).map(ev => [ev.id, dueNew(ev.when, lo, hi)]));
-  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
+  const tagId = tag => { if (SHIP_TRADITIONS.some(e => e.id === tag.slice(3))) return tag.slice(3); const m = /^ev-(.+?)(-(talk|drink|play|water|wash|read|cheer|clap|disc|cocoa|cook))?$/.exec(tag); return m && m[1]; };   // an id first (rec-chiefs-talk ends like an anim)   // cheer, clap, disc: the rec deck's (0.83, RA)
   for (const d of days) {
     const on = eventsOn(d), wd = weekday(d), yd = shipYearDay(d), row = { d, wd: WEEKDAYS[wd].slice(0, 3), ev: [] };
     // due exactly when the table says
@@ -468,7 +468,8 @@ with sync_playwright() as pw:
         if (!schedPeople().some(p => p.id === v.host) || !(v.odds > 0 && v.odds <= 1) || typeof v.line !== 'string' || !v.line || v.line.length > 140) out.bad.push(e.id + ': invite ' + JSON.stringify(v)); }
       for (const t of TRAD_LIST) {
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
-        if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
+        if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
+        if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
         let n = 0; for (let d = 0; d <= 364; d++) if (eventsOn(d).some(e => e.id === t.id)) n++;
         if (!n && !t.when.birthday && !t.flag) out.bad.push('baked ' + t.id + ' never happens in a whole year');   // a flagged one waits for its story beat (tested above)
@@ -513,10 +514,12 @@ with sync_playwright() as pw:
     rec_on = g.ev("typeof REC_DECK !== 'undefined' && REC_DECK")
     flc_on = g.ev("typeof FLC_ON !== 'undefined' && FLC_ON")
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
+    wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
         if i == 'captains-address' and not fri_on: continue  # the Captain's Friday address (Short Fridays, 18f) loads only with SHORT_FRIDAY
+        if i in wk_off: continue                             # the weekend traditions (0.92.5 item 16) load only with WEEKEND_ON
         if i not in loaded: fail(f"content/traditions has {i}, but the game didn't load it (bake the TRADITIONS block again)")
     # every decor and trace id a tradition names is one the deck architect built (DECK_DRESS) or has announced, or one
     # a designer has asked for (it shows nothing until built); anything else is a typo
@@ -991,7 +994,31 @@ with sync_playwright() as pw:
     if g.errors: fail(f"console: {g.errors[:4]}")
     g.b.close()
 
-# 13. 0.92.5 (FX12, the user's playtest notes): (4) late piano: never two nights running, the Captain and a few others
+# 13. Cook-along in the galley (0.92.5 item 19, the user's: "Cook along tradition should be in the kitchen"): on a Saturday
+# while it's on, everyone at it is at a 3-cookalong place in the galley (room K), cooking; none in the mess hall
+with sync_playwright() as pw:
+    g = Game(pw, sys.argv[1]); g.step(3)
+    print('== Cook-along: in the galley')
+    ca = g.ev(r"""(() => { goToDeck(3); let d = 2; while (d < 30 && !eventsOn(d).some(e => e.id === 'cook-along')) d++;
+      const e = eventsOn(d).find(e => e.id === 'cook-along'); setShipNow((d - 1) * 1440 + e.from + 20); deckCrewFill(); for (let k = 0; k < 120; k++) updateDeckCrew(1 / 30);
+      const at = DECK_CREW.filter(a => a.spot && a.spot.id.startsWith('3-cookalong-'));
+      // nobody at a galley event spot inside a cook (RV14: Sato at 3-cookalong-3 .18 m from Madsen at 3-galley-6, 15:46): over
+      // .45 m from anyone settled at a 3-galley-* place, every 2 ship minutes through Cook-along (and Bread day with the switch on)
+      const close = [], gap = (a, b) => Math.hypot(a.x - b.x, a.z - b.z);
+      const sweep = (dd, id) => { const x = eventsOn(dd).find(e => e.id === id); if (!x) return; setShipNow((dd - 1) * 1440 + x.from); deckCrewFill();
+        const B0 = (dd - 1) * 1440 + x.from, st = .2; for (let k = 0; B0 + k * st * SHIP_RATE < (dd - 1) * 1440 + x.to; k++) { setShipNow(B0 + k * st * SHIP_RATE); updateDeckCrew(st); if (k % Math.max(1, Math.round(2 / (st * SHIP_RATE)))) continue;   // every 2 ship minutes
+          const ev = DECK_CREW.filter(a => a.settled && a.spot && a.spot.id.startsWith('3-cookalong-')), ck = DECK_CREW.filter(a => a.settled && a.spot && a.spot.id.startsWith('3-galley-'));
+          for (const a of ev) for (const b of ck) if (gap(a, b) < .45 && close.length < 6) close.push(id + ' day ' + dd + ' ' + hhmm(shipNow() % 1440) + ' ' + a.p.id + '@' + a.spot.id + ' / ' + b.p.id + '@' + b.spot.id + ' ' + gap(a, b).toFixed(2)); } };
+      sweep(d, 'cook-along'); for (let dd = 7; dd < 30; dd++) if (eventsOn(dd).some(e => e.id === 'bread-day')) { sweep(dd, 'bread-day'); break; }
+      return { day: d, at: at.map(a => [a.p.id, a.spot.id, roomAt(...a.here()), a.settled, a.pose]), places: deckDef.places.filter(p => p.id.startsWith('3-cookalong-')).map(p => p.room + ' ' + p.anim), close }; })()""")
+    print('  Day', ca['day'], '| at it:', ca['at'], '| its places:', sorted(set(ca['places'])))
+    if not ca['at'] or any(x[2] != 'K' for x in ca['at']) or set(ca['places']) != {'K cook'}: fail(f"Cook-along: not in the galley (room K, cooking): {ca}")
+    print('  at a galley event spot within .45 m of a cook:', ca['close'] or 'nobody')
+    if ca['close']: fail(f"a galley event spot inside a cook's place: {ca['close']}")
+    if g.errors: fail(f"console: {g.errors[:4]}")
+    g.b.close()
+
+# 14. 0.92.5 (FX12, the user's playtest notes): (4) late piano: never two nights running, the Captain and a few others
 # really there; (9) a birthday an hour apart from the day's other traditions; (10) the birthday redone: the birthday
 # person at the head of the long table, the cake on it, a ring round them with bubbles (names, not ids; no line twice),
 # a tap on the cake: a slice in your hand, eaten as you go, once a party. A page of its own (the ship clock runs here)

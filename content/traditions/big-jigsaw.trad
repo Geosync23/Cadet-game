@@ -1,0 +1,44 @@
+@tradition big-jigsaw
+// The big jigsaw (FX11, 0.92.5 item 16 T4; SW1's weekend pitch, the user's yes 2026-10-24): all Sunday afternoon a huge
+// jigsaw of the Wren sits on the observation room's conference table on Deck 1; people drift in and out and add a few
+// pieces, Commander Vance always on the edges. The puzzle is decor (DECK_DRESS bigJigsaw) on the table, the seats are
+// the table's own (common-room), so Deck 1 is as before other days. A turn is 20 minutes and counts as your puzzles
+// hobby (the weekend slot in section 18). Still picture: the week-by-week fill is the large version, not built (ask first).
+// Behind WEEKEND_ON. Host Dev Raman (lead 34, 2026-10-24: Vance works Sundays; Raman is off and builds a model of the Wren,
+// the jigsaw's picture); Vance drops in after his shift.
+k: 468
+title: The big jigsaw
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: weekly sunday from day 1)
+when: every 4 weeks sunday week 3 from day 1
+at: 13:00-15:30
+min: 25
+where: 1 room Observation room: common-room
+hold: none
+who: raman always, vance always, quiet-corner 60%, common-room 50%, window-seat 30%, officers 25%, juniors 20%, everyone 12%
+anim: read
+host: raman
+from: raman
+ties: decor bigJigsaw
+
+== mail
+- The jigsaw is out tomorrow from {time}, the Observation room: the Wren, in a thousand pieces. Come and find a bit of her. The Commander asks that the edges be left for him.
+
+== ask
+- The big jigsaw's out this afternoon, up on Deck 1. Bring good eyes.
+- Jigsaw on Deck 1 after lunch. I'm doing the stars. Wish me luck.   #funny
+- Raman's put the jigsaw out. It's the Wren. He knows where every hull plate goes.
+
+== here
+- Is this sky, or more sky? It's all sky.   #funny
+- Found it. Found it. No. Not that one.   #funny
+- Turn it, don't push it. It'll find its place.
+- That's the bridge window. I'd know it anywhere.
+- The Commander's off shift. Everyone off the edges.   #funny
+
+== thanks
+- You pull up a chair at the long table on Deck 1. Dev Raman turns each piece gently until it fits, the hull is coming together, and after his shift Commander Vance comes up to do the edges.
+
+== chatter
+- Twenty minutes at the jigsaw. Placed four pieces. One was the right way up.   #funny
+- Raman did the whole bridge on the jigsaw without looking at the box. Of course he did.   #funny
+- Vance came up after shift, placed the last edge piece and said "There." Very satisfied.   #warm

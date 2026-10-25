@@ -18,7 +18,7 @@ while you work; it is **never the gate**. check_fast still runs before every pus
 |---|---|---|
 | **CR1** | `player_check` (the long one, ~20 min on a release run: a light share), devmode, bubble, puzzle, social, talk | ~34 |
 | **CR2** | `intro_check` (whole), `perf_check BUILD OLD`, `cadet_test OLD BUILD`, path, arc, lines, `lines_check --day` | ~35 |
-| **CR3** | `day_check` Days **0, 1, 5, 7** | ~32 |
+| **CR3** | `day_check` Days **0, 1, 5, 7**, weekend (from 0.92.5) | ~44 |
 | **CR4** | `day_check` Days **12, 13, 16, 19** | ~32 |
 | **CR5** | `day_check` Days **21, 27**, interactions, events, career | ~32 |
 | **CR6** | `bash check_fast.sh` (words, names, deck, machine, leave, device), mech, bigevents, fridays, disc, tiles, join, food (`1 7` and `11 4`), clothes | ~35 |
@@ -174,6 +174,7 @@ or item you can't reach.
 | **disc_check.py** | Lightdisc (23b): rules, determinism, balance, the same game at 60/30/20 fps, the save, a game on the deck under 200 draw calls. | 3 | `python3 disc_check.py BUILD.html [GAMES]` | `ALL OK` |
 | **tiles_check.py** | Tiles (23): rules, balance, skill order, determinism, the board on 320/390 phones (44 px squares, a game by taps), the board adds nothing to the 3D scene. | 3 | `python3 tiles_check.py BUILD.html [GAMES]` | `ALL OK` |
 | **join_check.py** | Tap to join (18): being there doesn't join, tapping the leader does, markers and arrows, Lap of the Wren, Name on the beam, through a reload. | 3 | `python3 join_check.py BUILD.html` | `JOIN CHECK OK` |
+| **weekend_check.py** | The weekend traditions (18, on from 0.92.5; a copy with WEEKEND_ON off is the base): the 4-week rotation's days, the old weekend traditions unchanged (days, times, places, hosts; at most 2 people fewer, never under their fewest), hosts, at least 5 at the late ones, every join and its end (seated ones in a seat), decor on its days, no birthday within an hour, the deck head-count table, Bread day, the jigsaw, the Sunday story. | 12 | `python3 weekend_check.py BUILD.html` | `WEEKEND CHECK OK` |
 | **clothes_check.py** | Clothes and laundry by real taps: the wardrobe, yesterday's clothes, the hamper, the washers, the save mid-wash. | 2 | `python3 clothes_check.py BUILD.html` | `ALL OK` |
 | **path_check.py** | `findPath` gives exactly the old `findPathScan`'s paths: random pairs on every deck, then every real call of a played Monday. | 2 | `python3 path_check.py BUILD.html [PAIRS]` | `PATH CHECK OK` |
 | **puzzle_check.py** | The head-scratchers (24k): the chips, the case engine's bands and rates, a case in play, the save. | 2 | `python3 puzzle_check.py BUILD.html` | `PUZZLE CHECK OK` |

@@ -1,0 +1,37 @@
+@tradition gerald-clinic
+// Gerald clinic (FX14, 0.92.5 item 16; SW1's pitch): every cactus on the Wren is called Gerald, and they all came from Tove
+// Cruz's cuttings. Every other Sunday she holds a clinic at the garden's potting bench end. Behind WEEKEND_ON.
+k: 465
+title: Gerald clinic
+// (the user, 2026-10-25: spread across weeks, two new a weekend; was: every 2 weeks sunday week 2 from day 1)
+when: every 4 weeks sunday week 2 from day 1
+at: 14:30-15:15
+min: 20
+jitter: 10
+where: 3 pool garden
+hold: 1
+who: cruz-tove always, janssen-hugo always, esposito-yara always, alvarez-luca always, walsh-esme always, gardener 50%, garden-lover 30%, everyone 5%
+anim: water
+host: cruz-tove
+from: cruz-tove
+
+== mail
+- Gerald clinic tomorrow at {time}, the garden. Bring your Gerald. Mm. Or come and get one. They're very easy. Mostly.
+
+== ask
+- Gerald clinic later. Mine's leaning. Cruz says it's thinking.   #funny
+- Bring your cactus to the garden this afternoon. Cruz checks every one.
+- No Gerald yet? Cruz hands them out at the clinic. They're all called Gerald.   #funny
+
+== here
+- This one's thirsty. Just a sip. Mm. Good.
+- Mine's got a new spike. I'm far too proud of it.   #funny
+- Same pot, bigger Gerald. That's growth.   #funny
+
+== thanks
+- You join the line at the potting bench. Cruz turns each little cactus over in their hands, murmurs to it, and sends it home with a sip of water.
+
+== chatter
+- My Gerald passed the clinic. Cruz said "mm". That's a pass.   #funny
+- There are more cacti called Gerald on the Wren than people now. Probably.   #funny
+- I didn't have a Gerald. Now I've got one. It's on my shelf, looking pleased.   #warm
