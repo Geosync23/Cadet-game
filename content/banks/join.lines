@@ -173,3 +173,9 @@
 - Tap {name} to join the jigsaw
 == join.big-jigsaw.notice
 - The big jigsaw: add pieces to the Wren at the long table on Deck 1. Counts as your puzzles hobby. Leisure and social up.
+
+// SW2, 0.92.6 item 5: One week aboard (Zeke's sit-down, Day 7).
+== join.one-week-aboard.tip
+- Tap {name} to sit down for tea
+== join.one-week-aboard.notice
+- One week aboard: tea with Zeke in the bow lounge, going over your first week. Social up.
