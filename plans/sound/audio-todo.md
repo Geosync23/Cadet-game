@@ -19,11 +19,12 @@ The sound designer (SD1) keeps this list. Newest decisions first in each part. T
 - Approved activity sounds: Wren Sounds: Activities, https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP (`plans/sound/activities.html`).
 - Chosen: Wren Sounds: Round 2, https://claude.ai/artifact/1MXY7YxN9DGUChzUhAUyU7 (`plans/sound/round2.html`).
 - Music player test: Wren Music Player, https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy (`plans/sound/music-player.html`).
-- Music (approved): Wren Sound Lab, https://claude.ai/artifact/Q6j5kSrYRvPxmSZdRB1DMg (`plans/sound/soundlab.html`).
+- First versions of the music (before the sci-fi synth pass): Wren Sound Lab, https://claude.ai/artifact/Q6j5kSrYRvPxmSZdRB1DMg (`plans/sound/soundlab.html`).
 - Old link kept: Wren Music Samples (`music.html`) now points to the Sound Lab.
 
 ## Done
 
+- 2026-10-25, 1:33 PM: sci-fi synth pass. Festive voices (marimba-like pluck, music box, whistle, square lead, shaker) re-voiced as synths in every track, and the bounciest tempos slowed. A before-and-after list is on the Wren Music Player page.
 - 2026-10-25, 1:24 PM: morning take 2: Systems online picked for mornings, the old morning tracks kept. Several tracks per time of day, rotating (least recently heard first): Wake cycle and Station dawn added for early morning, four new tracks (Promenade, Warm circuits, Porthole, Deep space). 21 tracks in all.
 - 2026-10-25, about 1 PM: music on by default (Ship schedule); no music on arrival night (Day 0), it starts on Day 1; a Music app on the device (on/off, volume, Next, Ship schedule or choose a track), built into the module and mocked up on the player page.
 - 2026-10-25, 12:55 PM: all music approved. The eleven samples grown into full ten-minute tracks (14 in all); the music module and its test page (Wren Music Player) built.

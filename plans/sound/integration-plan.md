@@ -157,6 +157,15 @@ All the music is approved: the three full tracks (Morning, Evening, Late night) 
 - Three ambient sci-fi synth tracks from morning take 2: Systems online (the user's pick for mornings), and Wake cycle and Station dawn (early morning).
 - Four new ones so every time of day has 3 or 4: Promenade (happy lo-fi, midday), Warm circuits (chill lo-fi with a synth echo, afternoon and work), Porthole (warm lo-fi, evening and night), Deep space (ambient synth, late night).
 
+**Sci-fi synth pass** (the user, 2026-10-25, 1:33 PM: "No steel drums, no kalimba. Sci-fi synth, that's what we want."). In the module, the festive voices are re-voiced for every track:
+- the marimba-like pluck is now a glassy synth pluck;
+- the music box is now a crystal FM bell;
+- the whistled flute is now a warm synth lead;
+- the square "cute" lead is now a rounded pulse lead;
+- the shaker is now a soft noise tick.
+
+The bounciest tracks are slower: Morning 92 to 84, On your rounds 112 to 96, Shift start 100 to 90, Midday 96 to 88, Promenade 98 to 88. Systems online and Station dawn were already all synth and are unchanged. The old voices and tempos are kept in the module only for the player page's before-and-after list (`play(key, { classic: true })`); the builder can drop them (`MI_OLD`, `was`) when pasting into the game.
+
 **Rotation:** never the same track twice in a row; of the rest, the one heard least recently plays next (never heard first, ties at random). The module counts plays in `heard`; the game saves it with the music settings so the rotation carries on across days.
 
 **How it plays.**

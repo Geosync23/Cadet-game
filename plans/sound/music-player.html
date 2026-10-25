@@ -134,6 +134,8 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
 table.sched { border-collapse: collapse; width: 100%; font-size: 13.5px; }
 .sched th, .sched td { text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
 .sched th { color: var(--muted); font-weight: 400; font-family: var(--mono); font-size: 11.5px; letter-spacing: .06em; text-transform: uppercase; }
+.ba { display: flex; flex-direction: column; gap: 6px; }
+.barow { display: grid; grid-template-columns: 1fr auto auto; gap: 8px; align-items: center; font-size: 14.5px; }
 .sched td:first-child { text-transform: capitalize; white-space: nowrap; }
 .sched tr.now td { color: var(--live); }
 .choices ul { margin: 0; padding-left: 18px; display: flex; flex-direction: column; gap: 6px; }
@@ -173,6 +175,12 @@ table.sched { border-collapse: collapse; width: 100%; font-size: 13.5px; }
       <p class="lede">A new app on your crew device, in the same old-school screen look as the others. Music is on by default and follows the ship's schedule. You can turn it off, set its volume, or pick a track yourself. Your choices are kept apart from the saved game, so they carry over to a new game. It works here: try it while the clock runs.</p></div>
     <div class="device" id="dev"><div class="bez"><span class="led on"></span><span class="grip"></span><span>WREN</span></div>
       <div class="crt"><div class="devhead"><h2>Music</h2></div><div id="devBody"></div></div></div>
+  </section>
+
+  <section class="card" aria-labelledby="h-ba">
+    <div class="card-head"><span class="tag">Sci-fi synth pass · 2026-10-25</span><h2 id="h-ba">Before and after</h2>
+      <p class="lede">No more marimba, steel-drum or kalimba-like plucks, music box, whistle, square "cute" leads or shakers. Those voices are now soft synths: a glassy synth pluck, a crystal FM bell, a warm synth lead, a rounded pulse lead and a soft noise tick. The bounciest tracks are a little slower too. Systems online and Station dawn were already all synth and are unchanged. Compare any track: New is how it plays now, Old is how it was. This pauses the ship clock.</p></div>
+    <div class="ba" id="baRows"></div>
   </section>
 
   <section class="card" aria-labelledby="h-sched">
@@ -703,7 +711,7 @@ function createWrenMusic(opts) {
       form: () => longForm([sec('Intro', 'A', 4, ['pad', 'arp'], 1)],
         [sec('A', 'A', 8, ['pad', 'arp', 'bass', 'shaker'], 2), sec('A with tune', 'A', 8, ['arp', 'bass', 'shaker', 'mel'], 3, '*'), sec('B', 'B', 8, ['keys', 'bass', 'mel', 'shaker'], 2, 'pluck'),
          sec('B, full', 'B', 8, ['keys', 'arp', 'bass', 'mel', 'shaker'], 3, '*'), sec('Bridge', 'C', 8, ['pad', 'bells'], 1), sec('A again', 'A', 8, ['pad', 'arp', 'bass', 'mel', 'shaker'], 3, 'flute')],
-        [sec('Outro', 'A', 4, ['pad', 'arp'], 1)], 92, 4, 10, ['flute', 'pluck', 'chip', 'box']) },
+        [sec('Outro', 'A', 4, ['pad', 'arp'], 1)], 84, 4, 10, ['flute', 'pluck', 'chip', 'box']) },
     evening: { name: 'Evening', time: 'Evening', full: true, bpm: 66, beats: 4, swing: 0.06, wet: 0.35, seed: 11, scale: PENTA(0), range: [72, 86], lg: 0.04,
       note: 'Slow electric piano, a soft pad and plucked notes, with soft brushes later on. Winding down after the shift.',
       prog: { A: CH([[53, 57, 60, 64, 41], [52, 55, 59, 62, 40], [50, 53, 57, 60, 38], [48, 52, 55, 59, 36]]), B: CH([[46, 50, 53, 57, 34], [45, 48, 52, 55, 33], [43, 46, 50, 53, 31], [48, 52, 55, 60, 36]]), C: CH([[50, 53, 57, 60, 64, 38], [46, 50, 53, 57, 34], [53, 57, 60, 64, 41], [48, 52, 55, 57, 36]]) },
@@ -856,7 +864,7 @@ function createWrenMusic(opts) {
       form: () => longForm([sec('Intro', 'A', 4, ['keysLofi', 'pad'], 1)],
         [sec('Beat', 'A', 8, ['keysLofi', 'drums', 'bass'], 2), sec('Tune', 'A', 8, ['keysLofi', 'drums', 'bass', 'mel'], 3, '*'), sec('B', 'B', 8, ['keys', 'arp', 'bass', 'drums', 'mel'], 3, 'box'),
          sec('Bridge', 'C', 8, ['pad', 'bells', 'bass'], 1), sec('A again', 'A', 8, ['keysLofi', 'drums', 'bass', 'mel'], 2, '*')],
-        [sec('Outro', 'A', 4, ['keysLofi', 'pad'], 1)], 98, 4, 10, ['chip', 'box', 'pluck']) },
+        [sec('Outro', 'A', 4, ['keysLofi', 'pad'], 1)], 88, 4, 10, ['chip', 'box', 'pluck']) },
     circuits: { name: 'Warm circuits', time: 'Afternoon', full: true, bpm: 78, beats: 4, swing: 0.1, wet: 0.35, seed: 239, scale: PENTA(0), range: [74, 88], lg: 0.02, lead: 'synthLead', vinyl: true,
       note: 'Chill lo-fi keys and a soft beat with a gentle synth echo on top. A long, easy afternoon at the bench.',
       prog: { A: CH([[48, 52, 55, 59, 62, 36], [45, 48, 52, 55, 59, 33], [53, 57, 60, 64, 41], [55, 59, 62, 65, 43]]), B: CH([[52, 55, 59, 62, 40], [57, 60, 64, 67, 45], [50, 53, 57, 60, 38], [55, 59, 62, 64, 43]]), C: CH([[53, 57, 60, 64, 41], [52, 55, 59, 62, 40], [50, 53, 57, 62, 38], [43, 47, 50, 55, 31]]) },
@@ -879,6 +887,37 @@ function createWrenMusic(opts) {
          sec('Echoes', 'C', 8, ['synthPad', 'echoArp', 'air'], 1), sec('B again', 'B', 8, ['synthPad', 'bass', 'mel'], 1, '*')],
         [sec('Outro', 'A', 4, ['synthPad', 'air'], 1)], 52, 4, 10, ['glass', 'synthLead', 'box']) },
   });
+  // ---- sci-fi synth voices (the user, 2026-10-25, 1:33 PM: "No steel drums, no kalimba. Sci-fi synth, that's what we want.")
+  // The plucked marimba, the music box, the whistled flute, the square "cute" lead and the shaker are re-voiced as soft
+  // synths, so every track that used them now sounds sci-fi. The old voices are kept for the before-and-after list.
+  const MI_OLD = { pluck: MI.pluck, box: MI.box, flute: MI.flute, chip: MI.chip, shaker: MI.shaker };
+  const MI_NEW = {
+    // glassy synth pluck: a saw and a triangle through a filter that closes fast (was a marimba-like pluck)
+    pluck(t, m, d, g, out) {
+      const f = mtof(m), lp = ctx.createBiquadFilter(), e = ctx.createGain(); lp.type = 'lowpass'; lp.Q.value = 2;
+      lp.frequency.setValueAtTime(2600, t); lp.frequency.exponentialRampToValueAtTime(500, t + 0.3);
+      [['sawtooth', 0.5, -4], ['triangle', 1, 4]].forEach(([type, k, c]) => { const o = ctx.createOscillator(), og = ctx.createGain(); o.type = type; o.frequency.value = f; o.detune.value = c; og.gain.value = k; o.connect(og); og.connect(lp); o.start(t); o.stop(t + 0.6); });
+      env(e, t, g * 0.9, 0.004, 0.5); lp.connect(e); e.connect(out);
+    },
+    // crystal: a soft, glassy FM bell, short (was a music box)
+    box(t, m, d, g, out) { fmBell(t, mtof(m), 1.2, g * 0.8, 3.5, 0.7, 0, out); },
+    // warm synth lead (was a whistled flute)
+    flute(t, m, d, g, out) { MI.synthLead(t, m, d, g * 0.8, out); },
+    // a rounder pulse lead with a little glide (was a square "cute" lead)
+    chip(t, m, d, g, out) {
+      const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain(); d = Math.max(0.2, d);
+      o.type = 'triangle'; o.frequency.setValueAtTime(mtof(m) * 0.985, t); o.frequency.exponentialRampToValueAtTime(mtof(m), t + 0.06);
+      lp.type = 'lowpass'; lp.frequency.value = 1300;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g * 1.3, t + 0.04); e.gain.setValueAtTime(g * 1.1, t + d * 0.7); e.gain.linearRampToValueAtTime(0, t + d + 0.15);
+      o.connect(lp); lp.connect(e); e.connect(out); o.start(t); o.stop(t + d + 0.2);
+    },
+    // a soft filtered-noise tick (was a shaker)
+    shaker(t, g, out) { noise(t, 0.03, { f: 9000, q: 0.6, gain: g * 0.55, a: 0.004, bus: out }); },
+  };
+  Object.assign(MI, MI_NEW);
+  // calmer tempos for the bounciest tracks (the old speed is kept for the before-and-after list)
+  for (const [k, bpm] of [['morning', 84], ['rounds', 96], ['shift', 90], ['midday', 88], ['promenade', 88]]) { TRACKS[k].was = { bpm: TRACKS[k].bpm }; TRACKS[k].bpm = bpm; }
+  TRACKS.morning.note = 'Glassy synth arpeggios, a warm synth lead and soft ticks. It builds through the morning and drops back to a quiet bridge now and then.';
   // ---- every sample grows into a full ten-minute track: its own sections, a B part on the same chords moved round,
   // a quiet bridge, and its sections again with a new tune and lead each pass
   function grow(d) {
@@ -891,7 +930,7 @@ function createWrenMusic(opts) {
   }
   for (const d of Object.values(TRACKS)) if (!d.full) { grow(d); d.full = true; }
   // levels per track (measured against the hum in the Sound Lab)
-  const MLV = { wake: 1.65, systems: 1.75, dawn: 1.9, promenade: 1.19, circuits: 0.95, porthole: 0.85, deepspace: 1.75,  morning: 1.12, evening: 0.851, latenight: 0.661, shift: 1.047, steady: 1.12, rounds: 1.035, firstlight: 0.891, midday: 1.012, lunch: 1.12, afternoon: 1.12, tea: 0.923, golden: 1.023, watch: 0.785, lullaby: 0.841 };
+  const MLV = { wake: 1.65, systems: 1.75, dawn: 1.7, promenade: 1.19, circuits: 0.95, porthole: 0.85, deepspace: 1.3,  morning: 1.12, evening: 0.851, latenight: 0.661, shift: 1.047, steady: 1.12, rounds: 1.035, firstlight: 0.891, midday: 1.012, lunch: 1.12, afternoon: 1.12, tea: 0.923, golden: 1.023, watch: 0.785, lullaby: 0.841 };
 
   // ---- the schedule: ship time of day, and a working set while you're on shift
   const PERIODS = [   // [name, from minute]; each runs to the next one's start
@@ -917,7 +956,7 @@ function createWrenMusic(opts) {
 
   // ---- one playing track
   function play(key, o = {}) {
-    const def = TRACKS[key], bars = layout(def), s = 60 / def.bpm, len = s * def.beats, t0 = ctx.currentTime + 0.1;
+    const def = TRACKS[key], bars = layout(def), classic = !!o.classic, s = 60 / (classic && def.was ? def.was.bpm : def.bpm), len = s * def.beats, t0 = ctx.currentTime + 0.1;
     const out = ctx.createGain(), fin = o.fadeIn ?? cfg.xfade, lvl = MLV[key] ?? 1;
     out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(lvl, t0 + fin); out.connect(main);
     const send = ctx.createGain(); send.gain.value = def.wet; out.connect(send); send.connect(verb);
@@ -927,12 +966,14 @@ function createWrenMusic(opts) {
     const T = {
       key, def, out, len, total: bars.length * len, startAt: t0 - i * len, bars,
       tick(u) {   // schedule bars up to time u; the track plays once through, then ends
+        if (classic) Object.assign(MI, MI_OLD);
         while (next < u && i < bars.length && !ending) {
           const bar = bars[i], c = { t: next, s, beats: def.beats, ch: bar.chord.notes, root: bar.chord.root, out, rng, e: bar.sec.e, sw: def.swing * s, mel: bar.mel, lead: bar.sec.lead || def.lead || 'pluck', lg: def.lg, bar: bar.b };
           bar.sec.parts.forEach(p => PARTS[p](c));
           if (def.vinyl && rng() < 0.5) noise(next + rng() * len, 0.004, { f: 2500, q: 0.7, gain: 0.02, a: 0.001, bus: out });
           i++; next += len;
         }
+        if (classic) Object.assign(MI, MI_NEW);
       },
       endsAt() { return ending ?? (T.startAt + T.total); },
       sectionEnd() {   // when the current section ends (to change at a musical moment)
@@ -1008,7 +1049,7 @@ function createWrenMusic(opts) {
     },
     skip() { return this.next(); },
     state() { return { enabled, paused, mode, resting, heard: { ...heard }, set: curSet, track: cur && cur.key, name: cur && cur.def.name, where: cur && cur.where(), total: cur && cur.total, quietFor: cur ? 0 : Math.max(0, nextAt - ctx.currentTime), pending: !!pendingChange }; },
-    play,   // for tests and the harness: play(key, { startBar, fadeIn })
+    play,   // for tests and the harness: play(key, { startBar, fadeIn, classic })
     TRACKS, SETS, PERIODS, LIST, periodAt,
   };
 }
@@ -1045,7 +1086,7 @@ function boot() {
   if (!music) { music = createWrenMusic({ ctx, dest: B.master, shipTime: () => ship, onEvent: logLine, firstGap: 1, enabled: prefs.on, volume: prefs.vol, mode: prefs.mode, gapMin: gapRange(+$('#gap').value)[0], gapMax: gapRange(+$('#gap').value)[1] }); renderSched(); }
 }
 $('#startBtn').addEventListener('click', () => {
-  boot(); running = !running; if (running) { music.resume(); lastReal = performance.now(); } else music.pause();
+  boot(); if (typeof cmpStop === 'function' && cmpT) cmpStop(); running = !running; if (running) { music.resume(); lastReal = performance.now(); } else music.pause();
   $('#startBtn span').textContent = running ? 'Pause' : 'Start'; $('#startBtn path').setAttribute('d', running ? 'M3 2h3.5v12H3zM9.5 2H13v12H9.5z' : 'M3 1.5v13l11-6.5z');
 });
 $('#shiftBtn').addEventListener('click', () => { ship.onShift = !ship.onShift; $('#shiftBtn').setAttribute('aria-pressed', String(ship.onShift)); logLine(ship.onShift ? 'Clocked in' : 'Clocked out'); });
@@ -1084,8 +1125,21 @@ $('#devBody').addEventListener('click', e => {
   savePrefs(); renderApp(true);
 });
 renderApp(true);
+// ---- before and after: a second player, used only for comparing
+const BA = ['morning', 'firstlight', 'tea', 'rounds', 'shift', 'steady', 'midday', 'lunch', 'promenade', 'afternoon', 'circuits', 'golden', 'evening', 'porthole', 'watch', 'lullaby', 'latenight', 'deepspace', 'wake'];
+$('#baRows').innerHTML = BA.map(k => `<div class="barow"><span>${NAMES0[k]}</span><button class="chip small" data-ba="${k}" data-old="0" aria-pressed="false"><span class="dot"></span>New</button><button class="chip small" data-ba="${k}" data-old="1" aria-pressed="false"><span class="dot"></span>Old</button></div>`).join('');
+let cmp = null, cmpT = null, cmpTick = null;
+function cmpStop() { if (cmpT) { cmpT.fadeOut(ctx.currentTime, 1); cmpT = null; } clearInterval(cmpTick); $$('[data-ba]').forEach(c => c.setAttribute('aria-pressed', 'false')); }
+$$('[data-ba]').forEach(b => b.addEventListener('click', () => {
+  boot(); if (running) $('#startBtn').click();
+  if (!cmp) cmp = createWrenMusic({ ctx, dest: B.master, shipTime: () => ({ day: 1, min: 600, onShift: false }), volume: 0.7 });
+  const on = b.getAttribute('aria-pressed') === 'true'; cmpStop(); if (on) return;
+  cmpT = cmp.play(b.dataset.ba, { fadeIn: 1, classic: b.dataset.old === '1', startBar: 4 }); b.setAttribute('aria-pressed', 'true');
+  cmpTick = setInterval(() => { if (cmpT) cmpT.tick(ctx.currentTime + 0.5); }, 200);
+  $('#status').textContent = 'Comparing: ' + NAMES0[b.dataset.ba] + (b.dataset.old === '1' ? ' (old)' : ' (new)');
+}));
 $$('[data-hum]').forEach(b => b.addEventListener('click', () => { boot(); if (hum) { hum.stop(1.2); hum = null; } else hum = startHum('quarters'); b.setAttribute('aria-pressed', String(!!hum)); }));
-$('#stopAll').addEventListener('click', () => { if (!music) return; running = false; music.pause(); $('#startBtn span').textContent = 'Start'; $('#startBtn path').setAttribute('d', 'M3 1.5v13l11-6.5z'); if (hum) { hum.stop(0.8); hum = null; } $$('[data-hum]').forEach(c => c.setAttribute('aria-pressed', 'false')); });
+$('#stopAll').addEventListener('click', () => { if (!music) return; cmpStop(); running = false; music.pause(); $('#startBtn span').textContent = 'Start'; $('#startBtn path').setAttribute('d', 'M3 1.5v13l11-6.5z'); if (hum) { hum.stop(0.8); hum = null; } $$('[data-hum]').forEach(c => c.setAttribute('aria-pressed', 'false')); });
 function renderSched() {
   const P = music.PERIODS, rows = P.map(([n, from], i) => [n, hm(from) + ' to ' + hm(P[(i + 1) % P.length][1]), music.SETS[n]]);
   rows.sort((a, b) => (a[1] < b[1] ? -1 : 1));
@@ -1112,6 +1166,7 @@ setInterval(() => {
   const st = music.state();
   if (st.track) { $('#nowName').textContent = st.name; $('#nowSec').textContent = st.where.sec; $('#nowTime').textContent = mmss(st.where.e) + ' / ' + mmss(st.total); $('#nowBar').style.width = Math.min(100, st.where.e / st.total * 100) + '%'; }
   else { $('#nowName').textContent = !st.enabled ? 'Music is off' : st.resting ? 'Arrival night: no music' : running ? 'Quiet' : 'Paused'; $('#nowSec').textContent = st.enabled && running ? 'next in ' + mmss(st.quietFor) : ''; $('#nowTime').textContent = ''; $('#nowBar').style.width = '0'; }
+  if (cmpT) return;
   $('#status').textContent = running ? (st.track ? 'Playing: ' + st.name + ' (' + st.set + ')' : 'Quiet between tracks') : 'Paused';
 }, 200);
 /* level meter in the bottom bar */

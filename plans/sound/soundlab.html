@@ -104,7 +104,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
 #stopAll:hover { border-color: var(--lamp); }
 .choices { display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--muted); }
 .jump { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 14px; }
-.jump a, .choices a, .lede a { color: var(--lamp); }
+.jump a, .choices a, .lede a, .v2 a { color: var(--lamp); }
 .wrap-inner { display: flex; flex-direction: column; gap: 18px; }
 .chip.loop .dot { background: transparent; border: 2px solid var(--live); width: 10px; height: 10px; }
 .chip.loop[aria-pressed="true"] .dot { background: var(--live); }
@@ -121,7 +121,8 @@ section.card { scroll-margin-top: 12px; }
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">CSV Wren · sound lab · music · approved · not in the game yet</div>
+    <div class="eyebrow">CSV Wren · sound lab · first versions</div>
+    <div class="v2"><b>Newer versions are on the Music Player</b><ul><li>These are the first versions of the music. Since then every track is sci-fi synth (no marimba, music box, whistle or shakers), there are 21 tracks, and they rotate by time of day. Hear the current music on the <a href="https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy" target="_blank" rel="noopener">Wren Music Player</a>.</li></ul></div>
     <h1>Wren Sound Lab</h1>
     <p class="lede">Music for each time of day: three full tracks of about ten minutes, and more short samples to try. All of it is made live in your browser, with no recordings, and plays under the ship hum. Nothing here is in the game yet. Decided sounds: <a href="https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC" target="_blank" rel="noopener">Wren Soundscape</a>, <a href="ACT_URL" target="_blank" rel="noopener">Activities (approved)</a>. To choose: <a href="https://claude.ai/artifact/1MXY7YxN9DGUChzUhAUyU7" target="_blank" rel="noopener">Round 2</a>.</p>
     <p class="hint">Tap a piece to hear it; tap again to stop. One piece plays at a time. The volume sliders and a deck hum to play underneath are at the bottom. On an iPhone, if you hear nothing, check the silent switch.</p>
@@ -144,7 +145,7 @@ section.card { scroll-margin-top: 12px; }
     <div class="card-head">
       <span class="tag">Music · samples · 30 to 90 seconds</span>
       <h2 id="h-samples">More samples</h2>
-      <p class="lede">Lo-fi, chill, happy and cute: music for working, and other ideas for each time of day. Labelled by when they'd play. Here they are short, so they loop. All approved: in the <a href="https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy" target="_blank" rel="noopener">Music Player</a> each one is now a full ten-minute track, playing on the ship's schedule.</p>
+      <p class="lede">Lo-fi, chill, happy and cute: music for working, and other ideas for each time of day. Labelled by when they'd play. Here they are short, so they loop. All approved: in the <a href="PLAYER_URL" target="_blank" rel="noopener">Music Player</a> each one is now a full ten-minute track, playing on the ship's schedule.</p>
     </div>
     <div id="sampleGroups" class="sgroups"></div>
     <p class="variant-note" id="sampleNote">Pick a sample to hear it.</p>
