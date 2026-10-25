@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-a.1
+   STARSHIP CADET: CSV Wren                           build 0.93.0-a.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -11854,7 +11854,7 @@ requestAnimationFrame(deviceFrameStep);
 // no onTap the taps call section 18's dialogueNext() and dialogueChoose(k). null closes it.
 // the Captain's ship-wide address (section 18's captainAddress calls this first): a banner across the top in the
 // screen's style, about 20 real seconds, a tap dismisses it. deviceAddress(null) hides it.
-function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); if (a && a.text) try { SND.fx('announce', { long: 4 }); } catch (e) { /* section 27 */ } return true; }   // 0.93.0: the three-note chime
+function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); if (a && a.text) sndFx('announce', { long: 4 }); return true; }   // 0.93.0: the three-note chime (section 27)
 let devDlgTap = null;
 function deviceDialogue(v, onTap) {
   if (DEV.choose) { const f = DEV.choose; DEV.choose = null; try { f(-1); } catch (e) { /* the asker's */ } }   // 0.35.25: a meeting takes the panel; a pending question is Not now
@@ -15203,7 +15203,7 @@ function wsFinish(j, k, res, title, said) {
   if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
   if (r.retry) { toast(title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }
-  if (r.done) try { SND.fx('panelOn'); } catch (e) { /* section 27 */ }   // the work's done: the panel back on (0.93.0)   // the kind said no (17's def.veto): the stop stays to do
+  if (r.done) sndFx('panelOn');                          // the work's done: the panel back on (section 27, 0.93.0)   // the kind said no (17's def.veto): the stop stays to do
   toast(r.done ? 'Work done' : title, [said, typeof r.say === 'string' ? r.say : '', r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
   device.refresh();
 }
@@ -15465,7 +15465,7 @@ function clockPunch(early) {                             // a punch from the scr
   const C = careerInit(), d = SHIP.time.day, keep = { ci: C.ci, co: C.co, on: C.on, log: SHIP.player.clockLog[d], sent: flag('shiftSent') };
   clockUndoSettle();
   let fx = null; const r = careerClock(shipNow(), true, early ? null : f => { fx = f; });
-  if (r) try { SND.fx(r === 'in' ? 'clockIn' : 'clockOut'); } catch (e) { /* section 27 */ }   // the lever and latch (0.93.0)
+  if (r) sndFx(r === 'in' ? 'clockIn' : 'clockOut');   // the lever and latch (section 27, 0.93.0)
   if (r && fx) { const p = player.obj.position; CLOCK_UNDO = { what: r, t: shipNow(), d, keep, fx, at: performance.now(), deck: deckDef.num, x: p.x, z: p.z }; requestAnimationFrame(clockUndoFrame); }
   return r;
 }
@@ -60198,7 +60198,7 @@ function crewAtScreen(cx, cy) {
 }
 function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
-  try { SND.fx('hello'); } catch (e) { /* section 27 */ }   // a friendly bloop (0.93.0)
+  sndFx('hello');                                        // a friendly bloop (section 27, 0.93.0)
   if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   if (typeof tradJoinTap === 'function' && tradJoinTap(a)) return true;   // section 18: tap someone at a tradition to join in (0.70.0)
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
