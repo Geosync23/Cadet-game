@@ -1,0 +1,22 @@
+@meeting talk.cruz-tove
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 50, Monday. Tove Cruz, the garden (they / them).
+title: Where the Geralds come from
+from: Tove Cruz
+gist: Cruz's small talk on the ship's cacti, every one of them called Gerald, and how to keep one happy.
+== lines
+cruz-tove: Oh. Hello. People. Um. Sit. There's soil on that chair. It's fine soil.   [gesture]
+cruz-tove: This is Gerald. Well, a Gerald. A week-four cutting. Pass him round. Mind the spines.
+cruz-tove: Every cactus on the Wren is called Gerald. I grow the cuttings. The name comes with them.
+cruz-tove: People ask who started it. Nobody remembers. Not even me, and I was there. Probably.   [laugh]
+cruz-tove: A Gerald wants very little. Light, a sip of water a fortnight, someone to say hello.
+cruz-tove: Most people overwater them. That's love, really. Just too much of it.   [nod]
+cruz-tove: So. Um. That's Gerald. If anyone has... questions are fine.
+? choice
+* Can I have a Gerald?   rel:cruz-tove+2 flavour:share mem:talk.cruz-tove.asked
+  cruz-tove: Oh. Yes. Come to the garden. There's a week-six one that likes you already.   [nod]
+* How do you know a Gerald's happy?   rel:cruz-tove+2 flavour:listen mem:talk.cruz-tove.asked
+  cruz-tove: He leans to the light and doesn't sulk. Like most people, really.   [laugh]
+* (Just listen)
+  cruz-tove: No? That's all right. Gerald didn't have questions either.
+cruz-tove: Gerald goes home now. Thank you for coming. And for not dropping him.
