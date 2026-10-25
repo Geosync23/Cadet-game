@@ -4,6 +4,44 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.92.6 full round (2026-10-25, started 15:24 UTC, for BM17 and lead 36)
+
+- Candidate: `claude/staging-0.92.6` b78e1e22 (the final one, with odd jobs). Switches in the file: `ODD_ON = true`
+  (20931), `BOARD_TRADE_ON = true` (21139), `STORIES_ON = true` (48484), `PROMO_SIGHT_ON = true` (56665), `PAD_ON =
+  false` (61602). Checks run from a worktree of b78e1e22 (its own scripts).
+- `starship-cadet.html` sha256 `88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4`: matches BM17's.
+- OLD: 0.92.5 39f7741d (`fddc0ef6...5559`, the file of my 0.92.5 round).
+- A first start on defc327f (without odd jobs) was stopped after ~1 minute at BM17's word and thrown away.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `day_check.py BUILD 21` | OK | 0 | 297 s | `DAY CHECK OK` |
+| `day_check.py BUILD 27` | OK | 0 | 295 s | `DAY CHECK OK` |
+| `interactions_check.py BUILD` | OK | 0 | 2597 s | `INTERACTIONS CHECK OK` (now with the odd jobs) |
+| `events_check.py BUILD` | OK | 0 | 645 s | `EVENTS CHECK OK` (slower: 0.92.5 took 522 s) |
+| `career_check.py BUILD` | **FAIL (NEW)** | 1 | 140 s | `FAIL busy: "Relied on" before Day 5` |
+| `promo_sight_check.py BUILD` (new) | OK | 0 | 17 s | `PROMO SIGHT CHECK OK` |
+
+### The career FAIL
+
+One line, `FAIL busy: "Relied on" before Day 5`: backlog 12's words, but **OLD passes** (the same career_check.py on
+39f7741d: `CAREER CHECK OK`), so it is NEW by the rule. The very busy player (part c), Days 1-5:
+
+| Build | Jobs a day | xp and reputation on Day 4 | Relied on |
+|---|---|---|---|
+| OLD 0.92.5 | 21, 21, 22, 18, 18 | 39, trusted | Day 5 (pass) |
+| b78e1e22 | 30, 28, 28, 26, 24 | 41, relied | Day 4 (FAIL) |
+| copy, `ODD_ON` false | 22, 20, 23, 22, 19 | 40, relied | Day 4 (FAIL) |
+| copy, `BOARD_TRADE_ON` false | 30, 28, 28, 26, 21 | 41, relied | Day 4 (FAIL) |
+| copy, `PROMO_SIGHT_ON` false | 30, 28, 28, 26, 24 | 41, relied | Day 4 (FAIL) |
+| copy, all four new `_ON` false | 22, 20, 22, 19, 18 | 40, relied | Day 4 (FAIL) |
+
+So odd jobs add about 8 jobs a day, but even with all four new switches off, the busy player ends Day 4 one xp over
+OLD (40 against 39) and reaches Relied on a day early: another 0.92.6 change (not one of the four `_ON` switches)
+gives that last point. Each copy changes only its switch lines (2 or 8 diff lines); the real file is untouched.
+
+**CR5: FAIL** (5 of 6 OK; career NEW).
+
 ## 0.92.5 full round (2026-10-25, started 05:50 UTC, for BM17 and lead 35)
 
 - Candidate: `claude/staging-0.92.5` 53c11f8 (0.92.5: items 1-12, 14-22, the sim bay and the weekend on). Switches in
