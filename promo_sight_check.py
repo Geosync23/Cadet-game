@@ -2,12 +2,11 @@
 # On paper, in one page (the game's own functions at the times they'd run, no walking):
 #   off:    with PROMO_SIGHT_ON and BOARD_TRADE_ON false (as shipped until review), nothing new: no beat, no flag, no Mail,
 #           the reputation toast and "What's next" as before, no trade job on the board over a shift
-#   sight:  switch on. Reliable (Day 6, out of the bay): the toast names the test; one Mail from Calder naming the steps,
-#           once; "What's next" names Relied on and Making it safe (not "rely on you"); the Training tab's list. Trusted:
-#           the toast says one more step. The ship word turning "dependable": one Mail. Relied on before Day 8: one Mail
-#           (from the second Monday). Day 8 without Making it safe: one Mail. Trained: promoAnnounce's beat, a Mail naming
-#           tomorrow (and not the old announce Mail), the urgent notice, the list's "Test set". A save already past the
-#           offer: nothing said. The test morning (arrow queue on): the 08:30 arrow to the Works bay
+#   sight:  off, the old gate (Relied on, shift hours). Switch on (the user, 05:25 UTC: the test the day after Reliable): the
+#           need is Reliable; Steady's toast names the next step, the list from Steady, "dependable" one Mail; Reliable
+#           without Making it safe: the toast, one Mail saying what's left, no test; Making it safe done (Day 8 18:30): the
+#           offer that moment, the test Day 9, the ready Mail naming tomorrow (not the old announce Mail), the notice, the
+#           list's line; Friday evening: the test on Monday; a save past the offer: nothing; the 08:30 arrow; Dev mode's needs
 #   trade:  switch on. Day 9, trained in Rounds and Tuning, a machine drifted by one: over the shift the top-up posts your
 #           trade (a tune, an afternoon round from 13:00), at most 3 and one an hour, xp 0, held to the shift's end; the
 #           simple ones still come (at least BOARD_MIN not of your trade); the held list keeps your trade first
@@ -55,35 +54,36 @@ def part_off(g):
     check(t == 0, f"off: no trade job on the board ({t})")
 
 def part_sight(g):
-    print('(sight) PROMO_SIGHT_ON:')
-    a = g.ev("""(() => { PROMO_SIGHT_ON = true; const W = __w(6, 600, { xp: 17 }); __toasts.length = 0; worksXp(1); __tick(); __tick(); return __look(); })()""")
-    print('    Reliable:', a)
-    check(a['toasts'] and 'Tier 2 test' in a['toasts'][0][1], f"sight: the Reliable toast names the test ({a['toasts']})")
-    check(len(a['mail']) == 1 and 'Relied on' in a['mail'][0] and a['mail'][0].startswith('Chief Ines Calder'), f"sight: one Mail from Calder naming the steps ({a['mail']})")
-    check('promo.sight' in a['flags'], f"sight: the flag ({a['flags']})")
-    check('Relied on' in a['next'] and 'Making it safe' in a['next'], f"sight: What's next names the steps ({a['next']})")
-    check(len(a['check']) == 2 and 'Not yet' in a['check'][1], f"sight: the Training tab's list ({a['check']})")
-    b = g.ev("""(() => { const W = SHIP.works; __toasts.length = 0; W.xp = 29; worksXp(1); __tick(); return __look(); })()""")
-    print('    Trusted:', b['toasts'], b['flags'], len(b['mail']))
-    check(b['toasts'] and 'One more step' in b['toasts'][0][1] and 'promo.sight.trusted' in b['flags'] and len(b['mail']) == 1, f"sight: Trusted, the toast and the flag, no new Mail ({b['toasts']}, {b['flags']}, {b['mail']})")
-    c = g.ev("""(() => { SHIP.rep.ship.work = 61; __tick(); __tick(); return __look(); })()""")
-    check(len(c['mail']) == 2 and 'dependable' in c['mail'][0].lower(), f"sight: dependable, one Mail ({c['mail'][:2]})")
-    d = g.ev("""(() => { SHIP.works.xp = 41; __tick(); __tick(); return __look(); })()""")
-    check(len(d['mail']) == 3 and 'promo.sight.day' in d['flags'], f"sight: Relied on before Day 8, one Mail ({d['mail'][:1]}, {d['flags']})")
-    e = g.ev("""(() => { setShipNow(7 * 1440 + 601); __tick(); __tick(); return __look(); })()""")
-    print('    Day 8, no m6:', e['mail'][0])
-    check(len(e['mail']) == 4 and 'Making it safe' in e['mail'][0] and 'promo.sight.m6' in e['flags'], f"sight: Day 8 without Making it safe, one Mail ({e['mail'][:1]})")
-    f = g.ev("""(() => { const W = SHIP.works; W.tr.m6 = 8; __toasts.length = 0; setShipNow(7 * 1440 + 602); __tick(); __tick(); return { ...__look(), test: W.test }; })()""")
-    print('    trained:', f['mail'][0], f['test'], f['check'])
-    check(f['test'] and f['test']['day'] == 9, f"sight: the test set for Day 9 ({f['test']})")
-    check(len(f['mail']) == 5 and 'tomorrow' in f['mail'][0] and not any('Sleep' in m for m in f['mail']), f"sight: the ready Mail names tomorrow, not the old announce Mail ({f['mail'][:2]})")
+    print('(sight) PROMO_SIGHT_ON (the test the day after Reliable, the user 05:25 UTC):')
+    o = g.ev("""(() => { PROMO_SIGHT_ON = false; const W = __w(8, 1110, { xp: 20, tr: { m6: 8 } }); __tick(); const a = !!W.test; setShipNow(7 * 1440 + 620); __tick(); return [a, !!W.test, ladderRow('t2').needs[0].rep]; })()""")
+    check(o == [False, False, 'relied'], f"sight off: Reliable with Making it safe on Day 8 gets no test (the old Relied on) ({o})")
+    a = g.ev("""(() => { PROMO_SIGHT_ON = true; const W = __w(4, 600, { xp: 7 }); __toasts.length = 0; worksXp(1); SHIP.rep.ship.work = 61; __tick(); __tick(); return { ...__look(), rep: ladderRow('t2').needs[0].rep }; })()""")
+    print('    Steady:', a)
+    check(a['rep'] == 'reliable', f"sight: the test's need is Reliable ({a['rep']})")
+    check(a['toasts'] and 'Reliable' in a['toasts'][0][1] and 'Tier 2' in a['toasts'][0][1], f"sight: the Steady toast names the next step ({a['toasts']})")
+    check(len(a['mail']) == 1 and 'dependable' in a['mail'][0].lower(), f"sight: dependable before Reliable, one Mail ({a['mail']})")
+    check(len(a['check']) == 2 and 'Not yet' in a['check'][1], f"sight: the Training tab's list from Steady ({a['check']})")
+    st = g.ev("promoSteps(0)")
+    check('Reliable' in st and 'Making it safe' in st, f"sight: What's next names the needs ({st})")
+    b = g.ev("""(() => { const W = SHIP.works; __toasts.length = 0; W.xp = 17; worksXp(1); __tick(); __tick(); return { ...__look(), test: W.test }; })()""")
+    print('    Reliable, Day 4:', b['toasts'][:1], b['mail'][:1])
+    check(b['toasts'] and 'Tier 2' in b['toasts'][0][1], f"sight: the Reliable toast names the test ({b['toasts']})")
+    check(len(b['mail']) == 2 and 'Making it safe' in b['mail'][0] and not b['test'], f"sight: Reliable without Making it safe, one Mail saying what's left, no test yet ({b['mail'][:1]}, {b['test']})")
+    f = g.ev("""(() => { const W = SHIP.works; W.tr.m6 = 8; __toasts.length = 0; setShipNow(7 * 1440 + 1110); __tick(); __tick(); return { ...__look(), test: W.test }; })()""")
+    print('    Making it safe done, Day 8 18:30:', f['mail'][0], f['test'], f['check'])
+    check(f['test'] and f['test']['day'] == 9, f"sight: offered the moment all hold (18:30), the test on Day 9 ({f['test']})")
+    check(len(f['mail']) == 3 and 'tomorrow' in f['mail'][0] and not any('Sleep' in m for m in f['mail']), f"sight: the ready Mail names tomorrow, not the old announce Mail ({f['mail'][:2]})")
     check(any('09:00' in t[1] for t in f['toasts']), f"sight: the notice ({f['toasts']})")
     check(any('09:00' in x for x in f['check']), f"sight: the list's test line ({f['check']})")
+    w = g.ev("""(() => { const W = __w(12, 1200, { xp: 18, tr: { m6: 8 } }); __tick(); return { ...__look(), test: W.test }; })()""")
+    check(w['test'] and w['test']['day'] == 15 and w['mail'] and 'Monday' in w['mail'][0], f"sight: qualified Friday evening, the test on Monday (Day 15) ({w['test']}, {w['mail'][:1]})")
     h = g.ev("""(() => { const W = __w(9, 300, { xp: 45, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); __tick(); return __look(); })()""")
     check(not h['mail'] and 'promo.sight' in h['flags'], f"sight: a save past the offer, nothing said ({h['mail']}, {h['flags']})")
-    k = g.ev("""(() => { if (!promoQueue()) return 'no queue'; setShipNow(8 * 1440 + 515); __tick(); const e = GUIDE.list.find(x => x.id === 'promo:testday:9'); return e ? e.goal().label : null; })()""")
+    k = g.ev("""(() => { if (!promoQueue()) return 'no queue'; __w(9, 515, { xp: 20, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); __tick(); const e = GUIDE.list.find(x => x.id === 'promo:testday:9'); return e ? e.goal().label : null; })()""")
     print('    the test morning:', k)
     check(k and 'Works bay' in k, f"sight: the 08:30 arrow on the test morning ({k})")
+    dv = g.ev("devmodeTestNeeds(SHIP.works, 9, 515).map(x => x[0]).join(' | ')")
+    check('Reliable' in dv, f"sight: Dev mode's test needs name Reliable ({dv})")
 
 def part_trade(g):
     print('(trade) BOARD_TRADE_ON:')

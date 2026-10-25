@@ -1,29 +1,32 @@
 @bank all
 // SW1 (2026-10-25, patch 0.92.6 items 18, 14 and 11, for FX19's worksText): the first promotion made obvious. The
-// Tier 1 steps are New, Steady, Reliable, Trusted, Relied on; the Tier 2 test needs Relied on and Making it safe, from
+// Tier 1 steps are New, Steady, Reliable, Trusted, Relied on; the Tier 2 test needs Reliable (Relied on until 2026-10-25) and Making it safe, from
 // Day 8. Calder speaks unless noted: exact, numbers not adjectives, never "well done" (her arc's payoff) and no "!".
 // Mails are "Subject | body", unsigned (the game adds the sender). Each beat fires once.
 
 // toasts, said by nobody, when your reputation word changes at Tier 1 ({band})
+// FX19, interim for SW2 to re-voice (the user's design change, 05:25 UTC: the test the day after Reliable; Making it
+// safe and Day 9 still needed). Retired with it, kept here: works.rep.up.trusted, promo.trusted, promo.missing.m6,
+// promo.missing.day (their keys not reused).
+== works.rep.up.steady
+- Now Steady. One more step, Reliable, and you're up for your Tier 2 test.
 == works.rep.up.reliable
-- Now Reliable. Trusted, then Relied on, and you're up for your Tier 2 test.
-== works.rep.up.trusted
-- Now Trusted. One more step, Relied on, and you're up for your Tier 2 test.
+- Now Reliable. That's the reputation your Tier 2 test needs.
+// retired 2026-10-25: == works.rep.up.trusted
+// - Now Trusted. One more step, Relied on, and you're up for your Tier 2 test.
 
-// Calder, at Reliable, if she's near (a bubble); else the Mail
+// Calder, at Reliable without Making it safe yet, if she's near (a bubble); else the Mail
 == promo.sight
-- Reliable. Good. Two more steps and Making it safe, and I'll put you up for Tier 2.
-- Reliable now. Trusted next, then Relied on. Making it safe with me. Then your test.
+- Reliable. Good. One thing left: Making it safe, with me. Then your Tier 2 test.
 == promo.sight.mail
-- Your next step | Reliable. Then Trusted, Relied on, Making it safe. Then Tier 2.
+- Your next step | Reliable. One thing left before your Tier 2 test: Making it safe, with me, from Day 8.
 
-// Calder, at Trusted (short)
-== promo.trusted
-- Trusted. One more step. Then we talk about your test.
+// retired 2026-10-25: == promo.trusted
+// - Trusted. One more step. Then we talk about your test.
 
-// the big beat: Relied on + Making it safe + Day 8 or later (her bubble; promo.announce follows it)
+// the big beat: Reliable + Making it safe + Day 8 or later (her bubble; promo.announce follows it)
 == promo.ready
-- People rely on your work. Making it safe is done. That's all of it. Tier 2 test.
+- Reliable, and Making it safe done. That's all of it. Your Tier 2 test.
 // the Mail, always ({day}: a weekday or "tomorrow")
 == promo.ready.mail
 - Your Tier 2 test | Ready. Test job {day}, 09:00, Works bay. Pass it and you're an Officer.
@@ -32,24 +35,24 @@
 - Your Tier 2 test: {day}, 09:00, the Works bay.
 
 // Mail once: Relied on, but Making it safe not done
-== promo.missing.m6
-- Almost | Relied on. One thing left before your Tier 2 test: Making it safe, with me.
+// retired 2026-10-25: == promo.missing.m6
+// - Almost | Relied on. One thing left before your Tier 2 test: Making it safe, with me.
 // Mail once: qualified before Day 8
-== promo.missing.day
-- Soon | You're ready early. I set Tier 2 tests from the second Monday. We'll talk then.
+// retired 2026-10-25: == promo.missing.day
+// - Soon | You're ready early. I set Tier 2 tests from the second Monday. We'll talk then.
 
-// the Record's "What's next" while you're below Relied on, with FX19's switch on ({band} now, {next} the next step's word;
+// the Record's "What's next" while you're below Reliable, with FX19's switch on ({band} now;
 // next.t2.rep in next.lines stays the switch-off line: it's given {band} only)
 == next.t2.steps
-- Tier 2 test: Relied on and Making it safe. You're {band}. Next step: {next}.
+- Your Tier 2 test needs Reliable and Making it safe. You're {band}.
 
 // the Works app's Training tab, "Your promotion" checklist
 == works.promo.check.title
 - Your promotion: the Tier 2 test
 == works.promo.check.day
-- From Day 8
+- The test from Day 9
 == works.promo.check.rep
-- Relied on (you're {band})
+- Reliable (you're {band})
 == works.promo.check.m6
 - Making it safe, with the Chief
 == works.promo.check.set
@@ -61,7 +64,7 @@
 
 // Calder's Mail, the first time your ship-wide work reputation turns dependable
 == promo.dependable
-- Dependable | Word is you're dependable. Keep it up. Then we talk about your Tier 2 test.
+- Dependable | Word is you're dependable. Get to Reliable at work, and we talk about your Tier 2 test.
 
 // optional (item 11): the chip on board jobs of a kind you're trained in
 == works.board.trade
