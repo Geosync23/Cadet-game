@@ -61,6 +61,46 @@ medical details, her burnout only hinted at close, Rina's exam left out.
 - **CS1's duplicate checker:** `tools/near_dupes.py` (on claude/crew-stories-pitch): `python3 near_dupes.py HEAD <file>`
   after committing. Aim for 0 EXACT and 0 NEAR. All 8 files are clean.
 
+## Later jobs (2026-10-24/25), all pushed
+
+- **Weekend traditions pitch** (0.92.5 item 16): plans/weekend-traditions-pitch.html on claude/weekend-pitch cbaac1db,
+  artifact https://claude.ai/artifact/C43EjSi7MJXUq9jz6yx5Sn (answers in its db at answers/user; a "Since your
+  answers" box lists the changes after the user answered).
+- **Weekend tradition words** (CS1 PASS): claude/weekend-words-sw1 8d2e66b0. The == sections of saturday-run,
+  every-song, night-owls-cocoa (host Mensah), gerald-clinic, sunday-story (21:15), garden-picnic, bread-day and
+  big-jigsaw (host Raman); join.lines; content/banks/sunday-story.lines (story.sunday.1-4, Holt reads in order).
+  Everything is worded for a 4-week rotation, so nothing says "every week". The decor tap texts sent to FX16 are
+  cocoaPot (FX16's) and picnicBasket ("Brown paper parcels in a basket, still warm from the galley. Brennan has tucked a
+  bit of garden basil under each knot.").
+- **Appointments pitch** (0.92.6 item 9, CS1 PASS): plans/appointments-pitch.html on claude/appointments-pitch
+  52dd1cc1. PUB1 publishes it (capabilities {db:{}}).
+- **Promotion words for FX19** (0.92.6 items 18/14/11): content/works/promo-sight.lines on claude/promo-words-sw1
+  0ba7c452. All 14 keys are as FX19 named them, and the Mails stay at 90 characters (lines_check caps these keys). CS1's
+  glance is pending. Flagged to CS1: step3.lines promo.mail ends "Well done." (it breaks Calder's arc rule).
+
+## NOT STARTED: FX17's word list (0.92.6, behind P926_TRADS), handed over at 70% memory
+
+FX17 (session_01YKeSjUhEnJRbmjyHz2aa6u) sent the list on 2026-10-25 ~05:07 UTC. Items, in FX17's build order:
+1. Item 13: spoken talk scripts, 8-12 bubble lines (90 characters or fewer) each, as MEETING_SCRIPTS `talk.<speaker>`,
+   like talk.sato. Chiefs' talks: Day 32 Holt "The oldest log in the Watch office", Day 46 Ferreira "Messages that
+   came home late", Days 60 and 74 the writer's pick. Wren talks (Mondays from Day 32): Day 36 Volkov "How the float room
+   floats", Day 39 Zeke "How a drive coil sings", Day 43 Brennan "A spice for every port", then Days 50, 57, 64, 71
+   and 78 (+ Thursdays 53/67/81 optional): the writer's speakers and titles.
+2. Item 5: One week aboard, Zeke's sit-down card week1.zeke.* (open; jobs/jobs.none; trad/trad.none;
+   friend/friend.none; meals.good/meals.missed; late/late.none; 3 replies with answers; close) + join.one-week-aboard.*.
+3. Item 2: the swap meet (host Orla Ishikawa): join.market.*, swap.open, swap.thing.1-3 (6-9 to rotate),
+   swap.reply.1-3, swap.after.1-3, swap.stall (~6), swap.browse (~8).
+4. Item 15: Spice shelf supper: spice.jars (12: owner id, spice, 3-6 word note), spice.open, spice.jar (~12),
+   spice.guess (~10), spice.reveal (~4), spice.mine (~8), spice.ask/right/wrong.
+5. Item 4: Reading corner (host Esme Walsh): reading.welcome/wrap, reading.titles (~12 invented),
+   reading.book (~20, {title}), reading.reply (~8), join.reading-corner.*.
+6. Item 3: optional wso.cheer (4-6).
+7. Item 7(a): 8 new .trad files, weeks 5-12, each every 8 weeks (k left blank): W5 Mon 17:45 Works hands-on (no
+   repairs: Mend-it is cut); W6 Wed 19:30 chart room, Survey or Helm; W7 Sat 11:45 a quiet room (observatory or Deck 1
+   observation room); W8 Thu 17:15 a department's open space (2-3 departments); W9 Sun 08:45 garden or promenade; W10
+   Mon 17:45 music in the junior common room; W11 Wed 19:30 a making evening; W12 Thu 17:15 a big laugh, 20+ people.
+8. Item 7(c): Six weeks aboard (Day 42) and Twelve weeks aboard (Day 84, a toast in the mess) .trad words.
+
 ## Loose ends
 
 None open. If the user asks for changes after reading, edit only the four .arc files, rerun the checks above, push
