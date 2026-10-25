@@ -1,0 +1,21 @@
+@meeting talk.mori
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 67, Thursday (her day off). Hana Mori, Deputy Survey Chief. Not the rock names (a secret).
+title: How a chart gets made
+from: Hana Mori
+gist: Mori's small talk on survey charts: three readings, two people, one dot.
+== lines
+mori: Hello. Sorry. I talk fast when there are people. Tell me if I'm fast. I'm fast.   [laugh]
+mori: This is a survey chart. Every dot on it took somebody a whole shift to check.
+mori: Three readings, two people, one dot. If they don't agree, we go back and look again.
+mori: Past the Line the charts go thin. Not empty. Thin. Every survey fills a bit in.
+mori: Years from now, someone will fly through here using a dot you helped check.   [nod]
+mori: That's... that's the talk. Somebody does the exciting bits. I do the dots. Questions?
+? choice
+* Can I help check a dot?   rel:mori+2 flavour:practical mem:talk.mori.asked
+  mori: Yes. Chart room, any afternoon. I'll give you an easy one. Well, a short one.   [nod]
+* Why's there a chart over your nameplate?   rel:mori+2 flavour:cheer mem:talk.mori.asked
+  mori: Oh. You noticed. It's a nicer view than my name. Next question. Please.   [laugh]
+* (Just listen)
+  mori: No questions. That's fine. That's good, actually. Thank you.
+mori: Thank you for coming. I'll put the chart back now. Carefully.
