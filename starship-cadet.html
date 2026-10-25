@@ -41612,6 +41612,9 @@ function evStay(p, d, e) {
   const u = e.ev.stayMid ? (schedU(p.seed + e.ev.k, d, 1036) + schedU(p.seed + e.ev.k, d, 1041)) / 2 : schedU(p.seed + e.ev.k, d, 1036);   // stayMid (0.92.6, FX17): most come for the middle of it
   const from = e.from + Math.round((e.to - e.from - len) * u); return [from, from + len];
 }
+// evMeetClash(p, d, [a, b]): p is in a ship-wide event's meeting on day d that overlaps minutes [a, b) (with its early lead). Pure
+// (the calendar and the cast: section 18's eventMeetPlan, [] while the events are off)
+const evMeetClash = (p, d, [a, b]) => typeof eventMeetPlan === 'function' && eventMeetPlan(p, d, null).some(g => g.at < b && a < g.at + g.dur);
 // toBed (FX9, 0.92.5 item 16; the shared rule for late traditions, FX12's late piano too): a tradition with toBed: n
 // (minutes) takes someone whose bedtime falls inside it, from its start, leaving 20 minutes before their bed (eventFree's
 // own margin), if that gives them at least n minutes there; otherwise free as usual. -> [from, to] (minutes from midnight)
@@ -41627,6 +41630,7 @@ function evArrive(p, d, e) {
   if (!(schedU(p.seed, d, ev.k) < ev.who(p, d, e)) && !(STORIES_ON && storyCastGoes(ev.id, p.id, d))) return null;   // crew stories (FX21, lead 35's (A)): a crescendo's person and cast go on its named days, if free (the rest below still holds)
   if (evNewWk(e) && ev.host !== p.id && evOldGoer(p, d, e)) return null;   // (DS1, lead 35: an old tradition loses at most 2) a new weekend one never draws someone going to an old one at the same time
   const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; if (dx && dx[0] < e.to && e.from < dx[1]) return Math.max(e.from, dx[0]);   // S2: off a double shift for it (the Friday address)
+  if (P926_TRADS && (ev.stay || P926_NEW.has(ev.id)) && evMeetClash(p, d, ev.stay && ev.host !== p.id ? evStay(p, d, e) : [e.from, e.to])) return null;   // 0.92.6 (lead 36, CR6's bigevents_check): never someone a ship-wide event's meeting needs then (the Captain at the Line's oath, not in the stands)
   if (ev.stay && ev.host !== p.id) { const [a, b] = evStay(p, d, e); return eventFree(p, d, a, b, ev.wake) ? a : null; }
   if (eventFree(p, d, e.from, e.to, ev.wake)) return e.from;
   if (ev.toBed && tradToBed(p, d, e)) return e.from;    // 0.92.5 (late piano; FX9's weekend late ones): bedtime in it, still n minutes or more there (tradToBed: toBed's number, else the min); they go 20 minutes before bed (eventPlan). One hook (FX12's place; FX9's earlier copy dropped, DS1's merge)

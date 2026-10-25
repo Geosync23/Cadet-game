@@ -1689,7 +1689,11 @@ def part_m17(g):
     res = g.ev("(() => { const kt = toast, said = []; toast = (a, b) => said.push(b); ROOF.r = null; roofData().on = 32; const S = worksSide(); for (const f of WORK_TICKS) { try { f(shipNow(), false); } catch (e) {} } for (const f of WORK_TICKS) { try { f(shipNow() + 1, false); } catch (e) {} } toast = kt; return [said.filter(x => /saved on the lift roof|back at the top/i.test(x)).length, 'on' in roofData()]; })()")
     check(res == [1, False], f"m17: loaded from a save made on the roof, roof.resume once ({res})")
     a2 = g.ev(M17P)
-    check(json.dumps({**a2, 'talk': 0}, sort_keys=True) == json.dumps({**a, 'talk': 0}, sort_keys=True), 'm17: the paper part differs after the rides')
+    # (FX17-3, lead 36) after the rides the lift runs smoother, so the machines' repair jobs (and the plans around them: whoever
+    # took a job, and the knock-ons) can rightly differ from the first read: compare the roof's rules and the hold's (open,
+    # once a day, held 15:35-16:30, nobody off the rule, the talk, the saves), not the day's crowd counts (movers, waiting)
+    rules = lambda x: {**x, 'talk': 0, 'hold': {k: v for k, v in x['hold'].items() if k not in ('movers', 'waiting')}}
+    check(json.dumps(rules(a2), sort_keys=True) == json.dumps(rules(a), sort_keys=True), 'm17: the paper part differs after the rides (%s)' % [k for k in a if rules(a).get(k) != rules(a2).get(k)])
     g.ev(f"(() => {{ const k = {keep}; LIFT_HOLD = null; setShipNow(k.t); if (deckDef.num !== k.deck) goToDeck(k.deck); player.obj.position.x = k.pos[0]; player.obj.position.z = k.pos[1]; Object.assign(SHIP.player.needs, k.needs); SHIP.player.carry = k.carry; }})()")   # as it was, for the parts after
 PARTS['m17'] = part_m17
 
