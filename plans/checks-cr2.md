@@ -312,3 +312,19 @@ with b78e1e22's arc_check.py (unchanged since 0.92.5): OK through 9813e0d (BOARD
 (STORIES_ON true); flipping only STORIES_ON on 6615b82, 0c2259a and 68920cf gave the same two stalls. RV16 found the
 cause: with STORIES_ON those beats are booked or skipped by the stories' clock `storyTick`, which arc_check never ran.
 FX21's one-line fix 70813dc8 (merged in 9d758ada, game unchanged) runs it; re-run OK. Test-only, not a game bug.
+
+# 0.93.0 (claude/staging-0.93.0 4f1e52bf, sound and music), CR2's share — **OK**
+
+NEW 4f1e52bf, sha256 `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8` (matches BM18's).
+OLD 5898c190 (0.92.6), sha256 `10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266`.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone, quiet machine) | OK | `ALL IDENTICAL`: all 15 shots 0 px (j_steer1 0 too), `errors A [] errors B []`, taps the same. No rerun needed (lead 37's ask). |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 66 warnings; = 0.92.6) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (28 min) |
+| perf_check NEW OLD | OK (backlog 32) | One flag: garden picnic Sat 13:25 landscape js 0.99 -> 2.25 ms, same draw calls (192c). Re-measured alone (`PERF_SCENES="picnic"`): OLD 0.95 ms, NEW 1.06 ms: did not repeat = backlog 32. Every scene's draw calls identical OLD/NEW (max 418, under 450; the Line ceremony 318). No memory growth (521/40/87). File 6.90 -> 7.03 MB. |
+| lines_check --day | OK (CR4) | PASS (0 errors), 307 s; handed over before it started |
+| p926_check | OK (CR4) | `P926 CHECK OK`, 64 ok lines, no FAIL, 514 s; handed over before it started |
