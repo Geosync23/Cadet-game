@@ -4,6 +4,7 @@
 # reply each time), an appointment booked for 18:00 when a beat waits for one, a bunk visit at 20:00 from whoever's next
 # beat wants one (momentWantsVisit), the struggle themes through one crew member each (beats 1-3), and one call home a day at 20:00 (the user's rule, 0.62.0: whoever the booth says has news, else the next of Mum, Gran, Jo and Sam in turn; a second call that day must be refused). Then lists every arc
 # that didn't finish, with its next beat and how often (in the last 7 days) its when and its where held.
+# With STORIES_ON the crew stories' clock (storyTick) runs too, as in the game; a story's later beats come from content/stories (stories_check checks them in depth).
 # The crew arcs need the writers' baked MOMENTS (a build with claude/dialogue and claude/content, content_gen run).
 # Run: CADET_CHROME=/opt/pw-browsers/chromium python3 arc_check.py BUILD.html [DAYS] [arcs|themes|calls|booth]   (themes: one crew
 #   member per struggle theme, in a game of their own: one serious moment a day is shared, and nobody's close to 20 people)   (a few minutes)
@@ -35,6 +36,7 @@ JS = r"""
       const t = live(d, m);
       if (m === 720) for (const p of ppl) { relAdd(p.id, 'chat', 2); relAdd(p.id, 'meal', 3); }
       if (m === 900) repAdd('works', 1.5, { work: 1 }, 'job');
+      if (typeof STORIES_ON !== 'undefined' && STORIES_ON) storyTick(t);   // the crew stories' own clock (socialTick runs it in the game): books crescendos, closes missed ones so their quiet endings come next (FX21b, 0.92.6)
       const wantsMe = p => { const x = momentNextId(p), dd = x && momentDef(x); return dd && [].concat(dd.where || []).some(w => w === 'appt' || w === 'visit') ? 0 : 1; };
       for (const p of ppl.slice().sort((a, b) => wantsMe(a) - wantsMe(b))) {   // a beat you made time for (an appointment, a visit) goes first, as you'd play it
         const b0 = beatNow(p);
