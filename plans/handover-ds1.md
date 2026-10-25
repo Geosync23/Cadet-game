@@ -6,7 +6,7 @@ build master BM16 (session_01MB7n4yvCAeGyWN4WZCAGPh), words SW1 (session_01Mjn7e
 
 ## Branch and builds
 
-**claude/p925-weekend**, tip **3e323170** (pushed; check_fast OK). From integration ba836359 (0.92.4) + FX12's claude/p925-fx12
+**claude/p925-weekend**, tip **b413cde7** (pushed; check_fast OK). From integration ba836359 (0.92.4) + FX12's claude/p925-fx12
 91b97ee9 (late piano, birthdays) merged + SW1's final words (claude/weekend-words-sw1 8d2e66b0) baked. Everything weekend is
 behind `WEEKEND_ON` (section 13); **the user (00:30 UTC 2026-10-25): 0.92.5 ships with it ON** (no preview): the last turn
 flips `const WEEKEND_ON = URL_FLAGS.has('weekend')` to `true`, with design-doc/DEV_NOTES saying so, and the checks then run on
@@ -34,14 +34,20 @@ the shipped file; cadet_test vs 0.92.4 will differ on weekend days (say which di
   only its own new one (gave-way days printed: Day 13 storm, Day 41 Every song for a birthday); hosts at it (or at work in its
   room: Brennan) Days 6-84; >= 5 at every cocoa/story; the story read in full on Days 28 and 56. WEEKEND CHECK OK.
 
-## Results on 3e323170
+- **Seats:** the Sunday story and the cocoa have `spare: 1` (a full common room had your join standing by the leader);
+  weekend_check: your story join is on a sit place, and tradSpot from the kettle's spot still gives a seat (RV14's q_seat).
+  Note: RV14's plant (seat-first off) is NOT caught in this setup (crew stand at the kettle then); outcome-only lines.
+- **DV1's arrows_check fix** (claude/m6-day9 e823a74f, test only) merged: the week's Day 9 burst pipe.
 
-weekend_check OK; events_check OFF OK, ON OK; check_fast OK (202 s); cadet_test switch-off vs FX12's 91b97ee9 ALL IDENTICAL.
+## Results
+
+On 3e323170: weekend_check OK; events_check OFF OK, ON OK; check_fast OK (202 s); cadet_test switch-off vs FX12's 91b97ee9 ALL
+IDENTICAL. On b413cde7 (spare: 1 and the seat lines on top): weekend_check OK, check_fast OK (201 s); events_check and cadet_test
+not rerun since (spare changes only the story/cocoa, both behind the switch).
 
 ## Left
 
-1. **RV14's q_seat line:** a seated weekend join puts you in a seat (tradSpot's switch-gated seat-first), not standing (the
-   kettle): add to weekend_check (e.g. join the Sunday story or Every song, read ACT's place pose).
+1. (done) RV14's q_seat line. If RV14 wants its plant caught, free the kettle in the test first.
 2. **T5:** decor on the days (Bread day and the jigsaw have theirs; consider small ones for the picnic, cocoa, Every song only
    if they fit; watch draw calls), head counts per deck at each (a printed table from the planner, Days 6-84), perf numbers
    (perf_check alone, `PERF_SCENES=regexp`: Deck 3 Sunday morning, the rec deck, Deck 1 jigsaw) vs 0.92.4.
