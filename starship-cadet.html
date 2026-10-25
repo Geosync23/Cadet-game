@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-s.1
+   STARSHIP CADET: CSV Wren                           build 0.93.0-s.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.0-s.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-s.5';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11776,6 +11776,7 @@ function deviceDo(action) {
 const DEV_WORK_APPS = new Set(['jobs', 'ship', 'record']);
 const devOnShift = () => devShiftOn(SHIP.time.day) && SHIP.time.min >= DEV_SHIFT.from && SHIP.time.min < dayShiftEnd(SHIP.time.day);
 function deviceNotify({ app, text, urgent } = {}) {
+  if (app === 'jobs') sndFx('jobPosted');                 // section 27: a job for you on the board
   if (urgent && SHIP.device.settings.quiet && DEV_WORK_APPS.has(app) && !devOnShift()) urgent = false;
   if (app) DEV.notes[app] = (DEV.notes[app] || 0) + 1;
   DEVICE_SKIN.notify({ app, text, urgent });
@@ -14246,7 +14247,7 @@ function floatsTick() {
 // reads "No device yet", is dimmed and doesn't open: a capture listener here stops section 19's onclick and says why.
 // Section 19 may ask deviceLocked() too, for the other ways in (its screen is theirs).
 const deviceLocked = () => typeof introOn === 'function' && introOn() && typeof introFlag === 'function' && !introFlag('intro.device');
-const deviceLockedTap = () => toast('No device yet', 'Torres hands you your device at your bunk, Bunk 1 on Deck 4.');
+const deviceLockedTap = () => { sndFx('no'); toast('No device yet', 'Torres hands you your device at your bunk, Bunk 1 on Deck 4.'); };   // section 27
 let DEV_LOCK_SHOWN = false;
 function deviceLockLook() {
   const b = document.getElementById('devBtn'), on = deviceLocked(); if (!b || on === DEV_LOCK_SHOWN) return;
@@ -19861,7 +19862,7 @@ function finishJob(id) {
   if (TURN_IN) { if (!j.workDone) { jobEffect(j, shipNow(), 'you'); j.workDone = shipNow(); } }   // done, awaiting turn-in
   else jobFinish(j, shipNow(), 'you');
   machRecord(MACH_HOUR - 1); MACH_REV++;
-  if (!was) jobNote(j, 'done'); if (!TURN_IN) jobNote(j, 'turnin'); simFlush(); return true;
+  if (!was) jobNote(j, 'done'); if (!TURN_IN) jobNote(j, 'turnin'); simFlush(); sndFx('jobDone'); return true;   // section 27
 }
 // turning jobs in at the board (0.33.23, for the interactions engineer and plans/pillar3-plan.md "Jobs: take and turn in
 // at the board"). Your job's stops are ticked off with jobStepDone; after the last one (or finishJob) its work is done:
@@ -62476,6 +62477,8 @@ padOn('unuse', () => {                                     // a touch takes back
 // SND.prefs (the starship-cadet-sound key: { on, vol, ... }; the music slot keeps its own part under prefs.music);
 // SND.log (a list of what played, with ?soundlog).
 // =====================================================================
+// sndFx: the hook lines' way in. A function declaration (hoisted), safe to call before section 27 has run (it does nothing then).
+function sndFx(name, o) { try { return SND.fx(name, o); } catch (e) { return false; } }
 const SND = (() => {
   const S = { ctx: null, bus: {}, onFrame: [], log: URL_FLAGS.has('soundlog') ? [] : null };
   const ALLOWED = URL_FLAGS.has('sound') || !(navigator.webdriver || URL_FLAGS.has('mute') || NOSAVE);
@@ -62811,6 +62814,59 @@ const SND = (() => {
     liftRide: (t, o) => liftRide(t, o.d ?? 1.2, 'C'), liftArrive: t => liftArrive(t, 'C'),
     step: (t, o) => (STEP[o.surface] || STEP.carpet)(t, o.pan || 0, ROUTE.steps),
   };
+
+  // ---- turns 2-5: what the game does, read each frame (nothing here changes the ship) ----
+  HUMS.ops = { f: 49, h: [[1, .55], [2, .38], [3, .24], [4, .12], [6, .05]], lp: 380, n: .28, nf: 380, br: .055, bd: .2 };   // Deck 5: a deeper workshop hum
+  const DECK_HUM = { 1: 'bridge', 2: 'bridge', 3: 'commons', 4: 'quarters', 5: 'ops', 6: 'engine', 7: 'commons' };
+  const STEP_OF = { plate: 'plating', steel: 'plating', grate: 'plating', grating: 'plating', lift: 'plating', wood: 'planks', mess: 'planks', garden: 'garden' };
+  const W8 = { hum: null, humKey: null, humT: 0, mail: null, hu: null, ride: null, rideStage: 0, px: null, pz: null, dist: 0, foot: 0, doors: new WeakMap() };
+  const floorHere = () => { try { const r = roomAt(...player.here()), st = r && deckDef && deckDef.rooms && deckDef.rooms[r]; return st ? st.floor : null; } catch (e) { return null; } };
+  function watch(run, dt) {
+    const now = ctx.currentTime;
+    // turn 2: the deck's hum (the garden's own in the hydroponics garden), cross-faded when it changes; checked twice a second
+    if (now - W8.humT > 0.5) {
+      W8.humT = now;
+      const key = typeof deckDef !== 'undefined' && deckDef ? (floorHere() === 'garden' ? 'garden' : DECK_HUM[deckDef.num] || 'quarters') : null;
+      if (key !== W8.humKey) { if (W8.hum) W8.hum.stop(2); W8.hum = key ? startHum(key, 1, 2.5) : null; W8.humKey = key; if (S.log) S.log.push({ name: 'hum:' + key, g: 1 }); }
+    }
+    if (!run) return;
+    // turn 3: Mail arriving (unread goes up) and a heads-up appearing
+    const un = typeof mailUnread === 'function' ? mailUnread() : 0;
+    if (W8.mail !== null && un > W8.mail) S.fx('mail');
+    W8.mail = un;
+    const hu = typeof DEV !== 'undefined' ? DEV.hu : null;
+    if (hu && hu !== W8.hu) S.fx('heads');
+    W8.hu = hu;
+    // turn 4: the lift (the ride's own clock: doors shut, the ride, the arrival chime as the doors open) and every door near you
+    const r = typeof ride !== 'undefined' ? ride : null;
+    if (r && !r.ladder) {
+      if (r !== W8.ride) { W8.ride = r; W8.rideStage = 0; S.fx('liftPress'); S.fx('liftDoorsClose'); }
+      if (W8.rideStage === 0 && r.t >= RIDE.shut) { W8.rideStage = 1; S.fx('liftRide', { d: RIDE.light - RIDE.shut + 0.3, long: 3 }); }
+      if (W8.rideStage === 1 && r.swapped && r.t >= RIDE.light - 0.45) { W8.rideStage = 2; S.fx('liftArrive', { long: 4 }); }
+    } else W8.ride = null;
+    const p = player.obj.position;
+    for (let k = 0; k < DOOR_OBJS.length; k++) {
+      const d = DOOR_OBJS[k]; if (d.e.type === 'lift') continue;
+      const was = W8.doors.get(d); W8.doors.set(d, d.open); if (was === undefined) continue;
+      const opening = was < 0.04 && d.open >= 0.04, closing = was > 0.96 && d.open <= 0.96;
+      if (!opening && !closing) continue;
+      const mine = Math.hypot(d.cx - p.x, d.cz - p.z) < 1.9;
+      S.fx(d.svc ? (opening ? 'hatchOpen' : 'hatchClose') : (opening ? 'doorOpen' : 'doorClose'), { x: d.cx, z: d.cz, crew: !mine });
+    }
+    // turn 5: your footsteps, by the floor under you; none while riding or doing something; a crawlway is softer
+    if (W8.px === null || r || (typeof ACT !== 'undefined' && ACT)) { W8.px = p.x; W8.pz = p.z; W8.dist = 0; return; }
+    const step = Math.hypot(p.x - W8.px, p.z - W8.pz); W8.px = p.x; W8.pz = p.z;
+    if (step > 1.5 || step < 0.001) { if (step > 1.5) W8.dist = 0; return; }   // a jump (a deck change), or standing still
+    W8.dist += step; const stride = player.crouch ? 0.42 : 0.62;
+    if (W8.dist >= stride) {
+      W8.dist -= stride; W8.foot ^= 1;
+      S.fx('step', { surface: STEP_OF[floorHere()] || 'carpet', pan: W8.foot ? 0.12 : -0.12, layer: 'steps', vol: player.crouch ? 0.6 : 1, long: 0.4 });
+    }
+  }
+  S.onFrame.push(run => watch(run));
+  // turn 3: the device opening and closing, and a tap on any of its buttons
+  if (typeof deviceOn === 'function') { deviceOn('open', () => S.fx('open')); deviceOn('close', () => S.fx('close')); }
+  addEventListener('click', e => { if (e.isTrusted && e.target && e.target.closest && e.target.closest('#device button')) S.fx('tap'); }, true);
 
   // ---- SND: activity sounds ----
   // (the activity sounds' builder adds its makers here: Object.assign(FX, { name: (t, opts) => ..., ... }))
