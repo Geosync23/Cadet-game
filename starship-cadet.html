@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-s.7
+   STARSHIP CADET: CSV Wren                           build 0.93.0-a.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.0-s.7';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-a.4';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11854,7 +11854,7 @@ requestAnimationFrame(deviceFrameStep);
 // no onTap the taps call section 18's dialogueNext() and dialogueChoose(k). null closes it.
 // the Captain's ship-wide address (section 18's captainAddress calls this first): a banner across the top in the
 // screen's style, about 20 real seconds, a tap dismisses it. deviceAddress(null) hides it.
-function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); return true; }
+function deviceAddress(a) { DEVICE_SKIN.address(a && a.text ? a : null); if (a && a.text) sndFx('announce', { long: 4 }); return true; }   // 0.93.0: the three-note chime (section 27)
 let devDlgTap = null;
 function deviceDialogue(v, onTap) {
   if (DEV.choose) { const f = DEV.choose; DEV.choose = null; try { f(-1); } catch (e) { /* the asker's */ } }   // 0.35.25: a meeting takes the panel; a pending question is Not now
@@ -13979,6 +13979,7 @@ function actBegin() {
   A.body = new FullPerson(PLAYER_SPEC, 'you'); A.x = p.x; A.z = p.z; A.y = 0; A.face = player.face;
   A.to = s; A.pose = A.o.pose || A.def.pose || 'stand'; A.phase = 'in';
   A.body.set({ x: A.x, y: 0, z: A.z }, A.face, 'stand'); player.obj.visible = false;
+  try { SND.act('begin', A); } catch (e) { /* section 27: not loaded yet */ }   // the activity's sound (0.93.0)
   const what = A.kind === 'queue' ? 'You join the queue.' :   // no count (0.28.30, the user's: you see the people ahead of you)
     A.kind === 'tray' ? 'You take a tray: ' + A.o.dish + '.' : A.kind === 'eat' ? (A.spot ? 'You sit down to ' : 'You eat ') + A.o.dish + '.'
     : A.kind === 'grab' ? 'You take ' + A.o.dish + '.' : A.o.after || '';
@@ -13989,6 +13990,7 @@ function actBegin() {
 // stop: abort (walked away, a time skip, a new deck) leaves at once; otherwise step back out first (actUpdate)
 function actEnd(abort) {
   const A = ACT; if (!A) return; ACT = null; trayOnTable(null);
+  try { SND.act('end', A, abort); } catch (e) { /* section 27: not loaded yet */ }   // its sound stops, or ends (a flush, a hang-up; 0.93.0)
   if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5 && !TRAY_TRAVELS) {   // a meal cut short: the tray goes, but never in silence (the user, 0.92.4: "the tray goes away when you get up from the table")
     toast(A.o.title || 'Mess hall', 'You get up and leave your tray. Someone will clear it.');
   } else if (abort && A.kind === 'eat' && A.o.fed && (A.phase === 'in' || A.phase === 'do') && A.deck === deckDef && A.done < A.def.mins - .5) {   // (TRAY_TRAVELS) a meal cut short: the rest on your tray (LEAD31-9)
@@ -15210,6 +15212,7 @@ function wsFinish(j, k, res, title, said) {
   if (!r || !r.ok) { toast('Your job', 'The job isn\'t yours any more.'); return; }
   if (r.wrong) { device.refresh(); return; }               // a wrong part: 24k's caseFitted has said so
   if (r.retry) { toast(title, typeof r.say === 'string' && r.say ? r.say : 'Not quite. Try again.'); device.refresh(); return; }   // the kind said no (17's def.veto): the stop stays to do
+  if (r.done) sndFx('panelOn');                          // the work's done: the panel back on (section 27, 0.93.0)
   toast(r.done ? 'Work done' : title, [said, typeof r.say === 'string' ? r.say : '', r.done ? j.title + ': done. Turn it in at the job board in the Works bay, Deck 5.' : 'Done here. ' + r.left + (r.left === 1 ? ' stop' : ' stops') + ' to go: follow the marker.'].filter(Boolean).join(' '));
   device.refresh();
 }
@@ -15471,6 +15474,7 @@ function clockPunch(early) {                             // a punch from the scr
   const C = careerInit(), d = SHIP.time.day, keep = { ci: C.ci, co: C.co, on: C.on, log: SHIP.player.clockLog[d], sent: flag('shiftSent') };
   clockUndoSettle();
   let fx = null; const r = careerClock(shipNow(), true, early ? null : f => { fx = f; });
+  if (r) sndFx(r === 'in' ? 'clockIn' : 'clockOut');   // the lever and latch (section 27, 0.93.0)
   if (r && fx) { const p = player.obj.position; CLOCK_UNDO = { what: r, t: shipNow(), d, keep, fx, at: performance.now(), deck: deckDef.num, x: p.x, z: p.z }; requestAnimationFrame(clockUndoFrame); }
   return r;
 }
@@ -60205,6 +60209,7 @@ function crewAtScreen(cx, cy) {
 }
 function tapCrew(cx, cy) {
   const a = crewAtScreen(cx, cy); if (!a) return false;
+  sndFx('hello');                                        // a friendly bloop (section 27, 0.93.0)
   if (typeof introTap === 'function' && introTap(a.p)) return true;   // section 21: the arrival evening's tap-to-ask (0.26.31)
   if (typeof tradJoinTap === 'function' && tradJoinTap(a)) return true;   // section 18: tap someone at a tradition to join in (0.70.0)
   a.talking = 6; player.stop(); player.face = Math.atan2(a.x - player.obj.position.x, a.z - player.obj.position.z);
@@ -62826,6 +62831,242 @@ const SND = (() => {
     step: (t, o) => (STEP[o.surface] || STEP.carpet)(t, o.pan || 0, ROUTE.steps),
   };
 
+  // ---- SND: activity sounds (FX20, 0.93.0; plans/sound/activities.html + round2.html, approved 2026-10-25) ----
+  // The player's activities, chores and repairs, the time clock, tapping someone, and the ship's announcements. Only the
+  // approved picks: ratchet A, torch A, scanner A, vacuum flush A, announcement A; clock in/out C (lever and latch); a tap on
+  // someone B (bubble, louder, the same for everyone); the call home rings and hangs up, with nothing while you're on the line.
+  // Never R() (Math.random only); nothing on screen; levels from the pages' LV (measured against the hum).
+  const ACTS = (() => {
+    // the activities page's own rounded click (a band, a 2 ms attack, so small knocks never spike)
+    const aclack = (t, gain, o = {}) => { noise(t, 0.014, { f: 3200, q: 0.8, gain: gain * 0.8, a: 0.002, bus: o.bus, pan: o.pan }); noise(t, 0.04, { f: o.f ?? 900, q: 4, gain: gain * 1.4, a: 0.002, bus: o.bus, pan: o.pan }); };
+    function sus(t, d, o) {                              // a noise that holds steady, then lets go (running water, air)
+      const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE; src.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass'; f.frequency.setValueAtTime(o.f, t); if (o.fTo) f.frequency.linearRampToValueAtTime(o.fTo, t + d); f.Q.value = o.q ?? 0.8;
+      const g = ctx.createGain(), a = o.a ?? 0.06, r = o.r ?? 0.25;
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(o.gain, t + a); g.gain.setValueAtTime(o.gain, t + Math.max(a, d - r)); g.gain.linearRampToValueAtTime(0, t + d);
+      src.connect(f); f.connect(g); conn(g, o.bus || ROUTE.ui, o.pan, o.wet); src.start(t, Math.random() * 2); src.stop(t + d + 0.05);
+    }
+    const rustle = (t, d, o = {}) => { const n = o.n ?? Math.round(d * 6); for (let k = 0; k < n; k++) noise(t + rand(0, Math.max(0.01, d - 0.25)), rand(0.12, 0.3), { f: rand(o.lo ?? 1800, o.hi ?? 4000), q: 0.7, gain: rand(0.6, 1) * (o.gain ?? 0.04), swell: 0.4, bus: o.bus }); };
+    const bubbles = (t, n, o = {}) => { for (let k = 0; k < n; k++) tone(t + k * (o.gap ?? 0.05) + rand(0, 0.03), rand(180, 420), 0.06, { gain: o.gain ?? 0.02, to: rand(420, 750), toT: 0.04, a: 0.004, bus: o.bus }); };
+    const drip = (t, o = {}) => tone(t, rand(900, 1400), 0.08, { gain: o.gain ?? 0.02, to: rand(1500, 2200), toT: 0.03, a: 0.002, bus: o.bus });
+    const grains = (t, d, n, o = {}) => { for (let k = 0; k < n; k++) noise(t + rand(0, d), 0.008, { f: (o.f ?? 2500) * 1.4, q: 0.8, gain: rand(0.5, 1) * (o.gain ?? 0.05), a: 0.002, bus: o.bus }); };
+    function bedNoise(out, o) {
+      const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE; src.loop = true;
+      const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass'; f.frequency.value = o.f; f.Q.value = o.q ?? 0.8;
+      const g = ctx.createGain(); g.gain.value = o.gain; src.connect(f); f.connect(g); g.connect(out); src.start(ctx.currentTime, Math.random() * 2); return { src, f, g };
+    }
+    const lfo = (param, rate, depth) => { const l = ctx.createOscillator(); l.frequency.value = rate; const g = ctx.createGain(); g.gain.value = depth; l.connect(g); g.connect(param); l.start(); return l; };
+    const every = (gap, fn) => { let next = ctx.currentTime + 0.05; return u => { while (next < u) { fn(next); next += typeof gap === 'function' ? gap() : gap; } }; };
+    const mt = m => 440 * Math.pow(2, (m - 69) / 12);
+    const pianoNote = (t, m, g) => { const f = mt(m); tone(t, f, 1.8, { gain: g, a: 0.004 }); tone(t, f * 2, 0.9, { gain: g * 0.3, a: 0.003 }); tone(t, f * 3, 0.4, { gain: g * 0.1, a: 0.002 }); noise(t, 0.02, { ft: 'lowpass', f: 1500, gain: g * 0.4, a: 0.001 }); };
+    const stringPluck = (t, m, g) => { const f = mt(m); tone(t, f, 1.6, { type: 'triangle', lp: 2400, gain: g, a: 0.002 }); tone(t, f * 2, 0.5, { gain: g * 0.25, a: 0.002 }); };
+    const dateWheel = (t, n, up) => { for (let i = 0; i < n; i++) clack(t + i * 0.055, 0.05, { f: up ? 1300 + i * 120 : 1700 - i * 120 }); };   // round 2's (the plain click)
+    // one-shots: fn(t); loops: { loop: out => ({ nodes, tick }) }
+    const ONE = {
+      ratchet: t => { for (let i = 0; i < 7; i++) { const s = t + i * 0.085; aclack(s, 0.05, { f: 2600 }); ring(s, [3100], 0.25, { d: 0.03, q: 20, wet: 0 }); } },
+      panelOff: t => { aclack(t, 0.1, { f: 1800 }); aclack(t + 0.18, 0.1, { f: 1700 }); noise(t + 0.35, 0.35, { f: 900, fTo: 1600, q: 1.5, gain: 0.05, swell: 0.4 }); thud(t + 0.8, { gain: 0.12, d: 0.1, f: 400 }); ring(t + 0.8, [620, 1580], 0.8, { d: 0.2, q: 25 }); },
+      panelOn: t => { noise(t, 0.3, { f: 1600, fTo: 900, q: 1.5, gain: 0.05, swell: 0.4 }); thud(t + 0.32, { gain: 0.12, d: 0.1, f: 400 }); ring(t + 0.32, [620, 1580], 0.6, { d: 0.15, q: 25 }); aclack(t + 0.55, 0.1, { f: 1800 }); aclack(t + 0.75, 0.12, { f: 1900 }); },
+      partSwap: t => { noise(t, 0.25, { f: 1200, fTo: 700, q: 2, gain: 0.05, swell: 0.3 }); aclack(t + 0.25, 0.08, { f: 1000 }); noise(t + 0.7, 0.2, { f: 700, fTo: 1200, q: 2, gain: 0.05, swell: 0.3 }); aclack(t + 0.92, 0.14, { f: 1400 }); thud(t + 0.92, { gain: 0.1, d: 0.06, f: 500 }); },
+      torch: t => { sus(t, 1.6, { f: 3500, q: 0.5, gain: 0.035, a: 0.15, r: 0.3 }); sus(t, 1.6, { brown: true, ft: 'lowpass', f: 400, gain: 0.1, a: 0.15, r: 0.3 }); grains(t + 0.1, 1.4, 40, { f: 3000, gain: 0.05 }); },
+      scanA: t => { tone(t, 500, 1.0, { type: 'triangle', lp: 2000, gain: 0.03, to: 1100, toT: 0.9, a: 0.15 }); tone(t + 1.05, 1320, 0.15, { gain: 0.035 }); tone(t + 1.2, 1760, 0.25, { gain: 0.035 }); },
+      vent: t => { for (let i = 0; i < 6; i++) noise(t + i * 0.28, 0.26, { f: rand(2300, 2900), q: 0.9, gain: 0.06, swell: 0.5 }); noise(t + 1.8, 0.45, { brown: true, ft: 'lowpass', f: 600, gain: 0.2, swell: 0.2 }); },
+      unstick: t => { [0, 0.15, 0.27, 0.45, 0.58].forEach((d, i) => aclack(t + d, 0.06 + 0.02 * (i % 2), { f: rand(700, 1100) })); thud(t + 0.9, { gain: 0.2, d: 0.12, f: 300 }); aclack(t + 0.9, 0.12, { f: 1500 }); },
+      hingeSqueak: t => { tone(t, 780, 0.5, { type: 'sawtooth', lp: 1500, gain: 0.012, to: 1150, toT: 0.45, a: 0.05 }); tone(t + 0.65, 1100, 0.45, { type: 'sawtooth', lp: 1500, gain: 0.01, to: 820, toT: 0.4, a: 0.05 }); },
+      hingeOil: t => { noise(t, 0.08, { ft: 'lowpass', f: 1200, gain: 0.06 }); noise(t + 0.25, 0.08, { ft: 'lowpass', f: 1200, gain: 0.06 }); drip(t + 0.6); },
+      drain: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.55; noise(s, 0.15, { brown: true, ft: 'lowpass', f: 300, gain: 0.35, a: 0.01 }); bubbles(s + 0.15, 4); } sus(t + 1.8, 1.2, { f: 700, fTo: 300, q: 1.2, gain: 0.05, r: 0.6 }); bubbles(t + 1.8, 12, { gap: 0.08 }); },
+      wipe: t => { for (let i = 0; i < 4; i++) noise(t + i * 0.22, 0.2, { f: rand(2500, 3500), q: 1.2, gain: 0.04, swell: 0.5 }); },
+      cratePick: t => { noise(t, 0.25, { f: 500, q: 1, gain: 0.05, swell: 0.3 }); aclack(t + 0.05, 0.04, { f: 800 }); noise(t + 0.3, 0.3, { brown: true, ft: 'lowpass', f: 400, gain: 0.08, swell: 0.5 }); },
+      crateSet: t => { thud(t, { gain: 0.3, d: 0.16, f: 250 }); ring(t, [180, 420], 1.2, { d: 0.15, q: 8 }); aclack(t + 0.03, 0.05, { f: 900 }); aclack(t + 0.09, 0.03, { f: 1300 }); },
+      typing: t => { let s = t; for (let i = 0; i < 14; i++) { const space = i % 5 === 4; noise(s, 0.008, { f: 3500, q: 0.8, gain: space ? 0.03 : 0.05, a: 0.002 }); noise(s, 0.03, { brown: true, ft: 'lowpass', f: space ? 400 : 700, gain: space ? 0.14 : 0.1, a: 0.001 }); s += rand(0.08, 0.16); } },
+      drill: t => { sus(t, 1.6, { f: 900, fTo: 1400, q: 4, gain: 0.05, a: 0.25, r: 0.4 }); tone(t, 180, 1.6, { type: 'sawtooth', lp: 700, gain: 0.012, to: 240, toT: 0.3, a: 0.15 }); },
+      cartDock: t => { thud(t, { gain: 0.25, d: 0.15, f: 200 }); aclack(t + 0.05, 0.1, { f: 1200 }); hiss(t + 0.2, 0.3, 0.03); tone(t + 0.6, 660, 0.25, { gain: 0.03 }); tone(t + 0.75, 880, 0.3, { gain: 0.03 }); },
+      valve: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.42; noise(s, 0.35, { f: 300, fTo: 450, q: 3, gain: 0.08, swell: 0.5 }); ring(s + 0.32, [240, 610], 0.9, { d: 0.2, q: 20 }); } thud(t + 1.3, { gain: 0.15, d: 0.12, f: 300 }); },
+      hold: t => { sus(t, 1.6, { brown: true, ft: 'lowpass', f: 300, gain: 0.12, a: 0.2, r: 0.3 }); sus(t, 1.6, { f: 2500, q: 0.7, gain: 0.015, a: 0.2, r: 0.3 }); aclack(t + 1.65, 0.08, { f: 1100 }); },
+      relay: t => { grains(t, 0.15, 10, { gain: 0.06 }); aclack(t + 0.4, 0.12, { f: 1100 }); thud(t + 0.4, { gain: 0.15, d: 0.08, f: 350 }); },
+      flushVac: t => { aclack(t, 0.05, { f: 900 }); noise(t + 0.1, 1.1, { f: 1800, fTo: 300, q: 0.7, gain: 0.12, swell: 0.15 }); noise(t + 0.1, 1.1, { brown: true, ft: 'lowpass', f: 500, gain: 0.35, swell: 0.2 }); thud(t + 1.15, { gain: 0.12, d: 0.12, f: 200 }); sus(t + 1.4, 1.6, { f: 2500, q: 0.8, gain: 0.02, r: 0.8 }); },
+      showerOff: t => { tone(t, 1100, 0.15, { type: 'sawtooth', lp: 1400, gain: 0.008, to: 900 }); drip(t + 0.5); drip(t + 1.1); drip(t + 1.9, { gain: 0.012 }); },
+      sink: t => { aclack(t, 0.04, { f: 1100 }); sus(t + 0.05, 2.4, { f: 2200, q: 0.7, gain: 0.06 }); sus(t + 0.05, 2.4, { brown: true, ft: 'lowpass', f: 900, gain: 0.1 }); aclack(t + 2.5, 0.04, { f: 1100 }); drip(t + 2.9); drip(t + 3.5); },
+      towel: t => rustle(t, 1.2, { lo: 900, hi: 2400, gain: 0.05 }),
+      callRing: t => { for (const r of [0, 0.9]) { tone(t + r, 440, 0.45, { gain: 0.03, a: 0.03 }); tone(t + r, 480, 0.45, { gain: 0.03, a: 0.03 }); } aclack(t + 2, 0.05, { f: 1500 }); sus(t + 2.05, 1.2, { f: 1000, q: 0.4, gain: 0.01, a: 0.3, r: 0.4 }); },
+      hangUp: t => { thud(t, { gain: 0.15, d: 0.08, f: 400 }); aclack(t, 0.08, { f: 1000 }); tone(t + 0.15, 660, 0.12, { gain: 0.03, to: 440 }); },
+      wardrobe: t => { slide(t, 0.5, { f0: 500, f1: 900, gain: 0.3, rate: 40, rough: 0.2 }); for (let i = 0; i < 4; i++) ring(t + 0.6 + i * 0.07 + rand(0, 0.03), [rand(2400, 2700), rand(4100, 4400)], 0.4, { d: 0.08, q: 30 }); },
+      changing: t => rustle(t, 1.6, { gain: 0.045 }),
+      hamper: t => { noise(t, 0.25, { f: 1400, q: 6, gain: 0.03, swell: 0.5 }); noise(t + 0.35, 0.3, { brown: true, ft: 'lowpass', f: 500, gain: 0.15, swell: 0.3 }); rustle(t + 0.35, 0.4, { n: 3, lo: 1200, hi: 2500 }); thud(t + 0.9, { gain: 0.06, d: 0.06, f: 500 }); },
+      bedLie: t => { noise(t, 0.4, { f: 320, q: 8, gain: 0.08, swell: 0.5 }); thud(t + 0.3, { gain: 0.12, d: 0.2, f: 150 }); rustle(t + 0.6, 1.0, { lo: 1000, hi: 2500, gain: 0.04 }); },
+      makeBed: t => { rustle(t, 1.4, { lo: 1000, hi: 2600, gain: 0.04 }); for (const d of [0.5, 0.9, 1.3]) noise(t + d, 0.08, { brown: true, ft: 'lowpass', f: 400, gain: 0.15 }); },
+      sitChair: t => { noise(t, 0.3, { f: 420, q: 7, gain: 0.06, swell: 0.5 }); thud(t + 0.15, { gain: 0.1, d: 0.1, f: 200 }); },
+      sitCouch: t => { thud(t, { gain: 0.14, d: 0.3, f: 140 }); noise(t, 0.4, { brown: true, ft: 'lowpass', f: 300, gain: 0.1, swell: 0.2 }); rustle(t + 0.2, 0.4, { n: 2, lo: 800, hi: 1600 }); },
+      cup: t => { thud(t, { gain: 0.06, d: 0.05, f: 600 }); ring(t, [2950, 5100], 0.7, { d: 0.12, q: 40 }); },
+      tray: t => { thud(t, { gain: 0.1, d: 0.06, f: 500 }); aclack(t + 0.02, 0.03, { f: 1500 }); for (const d of [0.7, 1.3, 1.8]) ring(t + d, [rand(3200, 3600)], 0.35, { d: 0.08, q: 30 }); },
+      badge: t => { aclack(t, 0.04, { f: 1500 }); tone(t + 0.05, 990, 0.08, { gain: 0.03 }); tone(t + 0.15, 1320, 0.12, { gain: 0.03 }); },
+      locker: t => { aclack(t, 0.08, { f: 1200 }); noise(t + 0.05, 0.3, { f: 800, fTo: 1200, q: 2, gain: 0.04, swell: 0.4 }); thud(t + 0.9, { gain: 0.1, d: 0.06, f: 450 }); aclack(t + 0.92, 0.1, { f: 1300 }); },
+      page: t => noise(t, 0.35, { f: 3000, fTo: 1800, q: 0.7, gain: 0.05, swell: 0.3 }),
+      pencil: t => { for (let i = 0; i < 6; i++) noise(t + i * 0.2 + rand(0, 0.05), rand(0.1, 0.18), { f: rand(4000, 6000), q: 2, gain: 0.025, swell: 0.5 }); },
+      knit: t => { for (let i = 0; i < 5; i++) { const s = t + i * 0.42 + rand(0, 0.04); ring(s, [rand(2800, 3200)], 0.4, { d: 0.04, q: 25, wet: 0 }); ring(s + 0.09, [rand(2600, 3000)], 0.3, { d: 0.04, q: 25, wet: 0 }); } },
+      trayPick: t => { noise(t, 0.25, { f: 1400, fTo: 900, q: 1.5, gain: 0.05, swell: 0.4 }); ring(t + 0.2, [3100, 4900], 0.5, { d: 0.1, q: 35 }); thud(t + 0.2, { gain: 0.05, d: 0.05, f: 500 }); },
+      pour: t => { sus(t, 1.4, { f: 900, fTo: 1600, q: 1.5, gain: 0.05, a: 0.1, r: 0.3 }); bubbles(t + 0.2, 8, { gap: 0.12, gain: 0.012 }); },
+      bench: t => { for (const s of [t, t + 1.4]) { ring(s, [210, 540, 1100], 1.4, { d: 0.35, q: 25 }); thud(s, { gain: 0.15, d: 0.1, f: 300 }); ring(s + 0.05, [2300, 3700], 0.4, { d: 0.1, q: 30, wet: 0 }); } },
+      splash: t => { noise(t, 0.9, { f: 1500, fTo: 600, q: 0.5, gain: 0.15, swell: 0.08 }); noise(t, 0.6, { brown: true, ft: 'lowpass', f: 500, gain: 0.3, swell: 0.1 }); bubbles(t + 0.3, 10, { gap: 0.06, gain: 0.015 }); },
+      kayak: t => { for (const [d, p] of [[0, -0.4], [0.9, 0.4]]) { noise(t + d, 0.4, { f: 900, fTo: 500, q: 0.8, gain: 0.06, swell: 0.25, pan: p }); drip(t + d + 0.5, { gain: 0.012 }); } },
+      climb: t => { for (const d of [0, 0.7, 1.3]) { thud(t + d, { gain: 0.06, d: 0.05, f: 700 }); noise(t + d, 0.014, { f: 2600, q: 0.8, gain: 0.04, a: 0.002 }); } noise(t + 1.7, 0.4, { f: 2500, q: 0.5, gain: 0.02, swell: 0.3 }); },
+      discThrow: t => { noise(t, 0.6, { f: 600, fTo: 2500, fT: 0.3, q: 2, gain: 0.06, swell: 0.4 }); tone(t, 220, 0.6, { gain: 0.012, to: 330, a: 0.1, type: 'triangle', lp: 900 }); },
+      piano: t => [[60, 0], [64, 0.35], [67, 0.7], [72, 1.05], [71, 1.6], [67, 2.0]].forEach(([m, d]) => pianoNote(t + d, m, 0.045)),
+      guitar: t => [40, 47, 52, 56, 59, 64].forEach((m, i) => stringPluck(t + i * 0.025, m, 0.03)),
+      tileShuffle: t => { for (let i = 0; i < 14; i++) { const s = t + rand(0, 0.9); aclack(s, rand(0.02, 0.04), { f: rand(1500, 2500) }); ring(s, [rand(2000, 2400)], 0.2, { d: 0.03, q: 20, wet: 0 }); } },
+      telescope: t => { sus(t, 1.2, { f: 700, fTo: 1100, q: 6, gain: 0.05, a: 0.15, r: 0.2 }); tone(t, 140, 1.2, { type: 'sawtooth', lp: 500, gain: 0.008, a: 0.2 }); aclack(t + 1.25, 0.06, { f: 1400 }); },
+      watering: t => { sus(t, 2.5, { f: 2000, q: 0.8, gain: 0.05, a: 0.2, r: 0.5 }); grains(t + 0.2, 2.2, 30, { f: 1500, gain: 0.02 }); },
+      kettle: t => { aclack(t, 0.06, { f: 1300 }); sus(t + 0.1, 4, { brown: true, ft: 'lowpass', f: 200, fTo: 700, gain: 0.2, a: 1.5, r: 0.4 }); bubbles(t + 2.2, 20, { gap: 0.09, gain: 0.015 }); aclack(t + 4.2, 0.07, { f: 1300 }); },
+      chop: t => { for (let i = 0; i < 8; i++) { const s = t + i * 0.26; thud(s, { gain: 0.12, d: 0.05, f: 600 }); noise(s, 0.014, { f: 3000, q: 0.8, gain: 0.03, a: 0.002 }); ring(s, [700], 0.6, { d: 0.04, q: 6, wet: 0 }); } },
+      ovenOpen: t => { noise(t, 0.5, { f: 500, q: 6, gain: 0.04, swell: 0.5 }); noise(t + 0.3, 0.9, { brown: true, ft: 'lowpass', f: 500, gain: 0.12, swell: 0.3 }); thud(t + 0.5, { gain: 0.1, d: 0.12, f: 300 }); },
+      ovenClose: t => { noise(t, 0.3, { f: 600, q: 6, gain: 0.03, swell: 0.5 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 250 }); aclack(t + 0.32, 0.06, { f: 1000 }); },
+      stove: t => { for (let i = 0; i < 3; i++) aclack(t + i * 0.12, 0.05, { f: 3000 }); noise(t + 0.4, 0.4, { brown: true, ft: 'lowpass', f: 500, gain: 0.25, swell: 0.25 }); sus(t + 0.5, 1.2, { f: 1500, q: 0.6, gain: 0.015, r: 0.5 }); },
+      mop: t => { for (let i = 0; i < 4; i++) noise(t + i * 0.45, 0.42, { f: rand(900, 1300), q: 0.8, gain: 0.07, swell: 0.45 }); sus(t + 2, 0.5, { f: 1500, q: 1, gain: 0.03 }); drip(t + 2.6); drip(t + 2.9); },
+      trowel: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.6; noise(s, 0.25, { f: rand(700, 1100), q: 1.5, gain: 0.08, swell: 0.3 }); grains(s, 0.25, 6, { f: 3000, gain: 0.03 }); } },
+      blanket: t => rustle(t, 1.2, { lo: 900, hi: 2200, gain: 0.05 }),
+      tilePlace: t => { ring(t, [2200, 3900], 0.6, { d: 0.05, q: 20, wet: 0 }); thud(t, { gain: 0.04, d: 0.03, f: 800 }); },
+      discCatch: t => { thud(t, { gain: 0.08, d: 0.06, f: 600 }); noise(t, 0.08, { f: 1500, q: 1, gain: 0.04 }); tone(t, 330, 0.3, { gain: 0.012, to: 220, type: 'triangle', lp: 900 }); },
+      hingeAfter: t => { noise(t, 0.6, { f: 400, fTo: 700, q: 0.8, gain: 0.05, swell: 0.5 }); thud(t + 0.6, { gain: 0.08, d: 0.08, f: 300 }); },
+      popper: t => { noise(t, 0.05, { ft: 'highpass', f: 800, gain: 0.15, a: 0.001 }); thud(t, { gain: 0.08, d: 0.05, f: 400 }); rustle(t + 0.1, 1.2, { n: 8, lo: 2500, hi: 5000, gain: 0.025 }); },
+      storm: t => { noise(t, 3, { brown: true, ft: 'lowpass', f: 150, fTo: 250, fT: 1.5, gain: 0.25, swell: 0.5 }); fmBell(t + 0.3, 523.25, 1.6, 0.045, 1.4, 1, 4); fmBell(t + 0.8, 392, 2, 0.045, 1.4, 1, 4); },
+      announce: t => [659.25, 523.25, 783.99].forEach((f, i) => fmBell(t + i * 0.38, f, 1.8, 0.05, 1, 0.8, 0)),   // A, three notes
+      flicker: t => { grains(t, 0.5, 14, { f: 1800, gain: 0.05 }); tone(t + 0.1, 90, 0.8, { to: 45, gain: 0.06, a: 0.02 }); noise(t + 0.1, 0.8, { brown: true, ft: 'lowpass', f: 200, gain: 0.15, swell: 0.1 }); },
+      clockIn: t => clockC(t, true), clockOut: t => clockC(t, false),
+      hello: t => { tone(t, 300, 0.14, { gain: 0.1, to: 460, toT: 0.1, a: 0.01 }); noise(t, 0.06, { f: 900, q: 1, gain: 0.015 }); },   // round 2's B, no mood range
+    };
+    function clockC(t, isIn) {                            // round 2's C, lever and latch: ratchets up to clock in, down to clock out
+      dateWheel(t, 6, isIn); thud(t + 0.38, { gain: 0.3, d: 0.15, f: 220 }); clack(t + 0.38, 0.11, { f: 800 }); ring(t + 0.38, [300, 780], 1, { d: 0.18, q: 20 });
+      noise(t + 0.6, 0.18, { f: isIn ? 700 : 1400, fTo: isIn ? 1400 : 700, q: 3, gain: 0.03, swell: 0.3 }); clack(t + 0.78, 0.06, { f: 1500 });
+    }
+    const LOOP = {
+      shower: (out, t0) => { tone(t0, 900, 0.15, { type: 'sawtooth', lp: 1400, gain: 0.008, to: 1100, bus: out }); const a = bedNoise(out, { f: 3000, q: 0.5, gain: 0.05 }), b = bedNoise(out, { brown: true, ft: 'lowpass', f: 700, gain: 0.22 }); const tick = every(() => rand(0.03, 0.12), s => tone(s, rand(1500, 3500), 0.02, { gain: rand(0.004, 0.01), bus: out })); return { nodes: [a.src, b.src], tick }; },
+      cart: out => { const a = bedNoise(out, { brown: true, ft: 'lowpass', f: 220, gain: 0.25 }); const o = ctx.createOscillator(); o.frequency.value = 110; const og = ctx.createGain(); og.gain.value = 0.012; o.connect(og); og.connect(out); o.start(); const w = lfo(o.frequency, 0.7, 3); const air = bedNoise(out, { f: 1200, q: 0.6, gain: 0.012 }); return { nodes: [a.src, o, w, air.src] }; },
+      treadmill: out => { const m = bedNoise(out, { brown: true, ft: 'lowpass', f: 300, gain: 0.12 }), belt = bedNoise(out, { f: 1500, q: 0.6, gain: 0.012 }); let f = 0; const tick = every(0.36, s => { thud(s, { gain: f ? 0.06 : 0.07, d: 0.06, f: 300, bus: out }); f ^= 1; }); return { nodes: [m.src, belt.src], tick }; },
+      swim: out => ({ tick: every(0.9, s => { noise(s, 0.45, { f: 1200, fTo: 700, q: 0.6, gain: 0.05, swell: 0.2, bus: out }); bubbles(s + 0.2, 3, { gain: 0.01, bus: out }); }) }),
+      washer: out => { const m = bedNoise(out, { brown: true, ft: 'lowpass', f: 250, gain: 0.18 }), s = bedNoise(out, { f: 600, q: 0.8, gain: 0.04 }), w = lfo(s.g.gain, 0.45, 0.035); return { nodes: [m.src, s.src, w] }; },
+      sizzle: out => { const a = bedNoise(out, { ft: 'highpass', f: 3000, gain: 0.02 }), b = bedNoise(out, { f: 6000, q: 0.7, gain: 0.015 }); return { nodes: [a.src, b.src], tick: every(() => rand(0.02, 0.15), s => noise(s, 0.004, { ft: 'highpass', f: 2000, gain: rand(0.02, 0.05), bus: out })) }; },
+      float: out => { const b = bedNoise(out, { brown: true, ft: 'lowpass', f: 300, gain: 0.05 }); return { nodes: [b.src], tick: every(() => rand(1.6, 2.6), s => noise(s, 1.2, { brown: true, ft: 'lowpass', f: 500, gain: 0.1, swell: 0.5, bus: out })) }; },
+    };
+    const LV = { ratchet: 1.883, panelOff: 1.084, panelOn: 1.175, partSwap: 1.288, torch: 1, scanA: 1, vent: 1, unstick: 0.989, hingeSqueak: 3.89, hingeOil: 3.162, drain: 0.851, wipe: 2.065, cratePick: 2.755, crateSet: 1,
+      typing: 2.188, drill: 1.462, cartDock: 1, valve: 1.047, hold: 1, relay: 1.304, flushVac: 0.776, shower: 0.355, showerOff: 3.428, sink: 0.944, towel: 1.548, callRing: 1, hangUp: 1.64, wardrobe: 1, changing: 1.23,
+      hamper: 1.188, bedLie: 1.072, makeBed: 1.567, sitChair: 1.641, sitCouch: 1, cup: 2.114, tray: 2.63, badge: 1.698, locker: 2.066, page: 1.799, pencil: 4.027, knit: 2.542, trayPick: 1.884, pour: 1, bench: 1,
+      treadmill: 0.733, cart: 0.343, splash: 1, swim: 1.567, kayak: 4.027, climb: 2.138, float: 1, discThrow: 1.549, piano: 1, guitar: 1, tileShuffle: 2.455, telescope: 2.089, watering: 1, storm: 0.978, announce: 1, flicker: 1,
+      clockIn: 0.9, clockOut: 0.75, hello: 2.9,
+      kettle: 0.724, chop: 1, ovenOpen: 1, ovenClose: 1, stove: 1, mop: 1.334, trowel: 3.02, blanket: 1.778, tilePlace: 2.265, discCatch: 3.673, hingeAfter: 1.585, popper: 1.047, washer: 0.495, sizzle: 0.923 };
+    return { ONE, LOOP, LV };
+  })();
+  // which sound an activity makes: { one: at the start, loop: while it runs, end: as it ends } (actSnd, from actBegin and actEnd)
+  const ACT_TOOL = [[/vent brush|lint brush|degreaser/, 'vent'], [/oil can|grease/, 'hingeOil'], [/drain snake|plunger|skimmer/, 'drain'], [/multimeter|scanner/, 'scanA'],
+    [/cloth|polish|squeegee|scraper|anti-fog|descaler/, 'wipe'], [/putty|glue|sealant/, 'torch'], [/crimper|pin driver|pin box/, 'relay'], [/step stool/, 'partSwap'], [/pry bar|ratchet/, 'unstick']];
+  function actPick(A) {
+    const k = A.kind, o = A.o || {}, pl = A.placeId && typeof PLACE_OF !== 'undefined' ? PLACE_OF.get(A.placeId) : null, ty = pl ? pl.type : '', t = String(o.title || '');
+    const seat = /lounge-seat|common-room|beanbag|rec:seat/.test(ty) || k === 'recBean' ? 'sitCouch' : 'sitChair';
+    switch (k) {
+      case 'shower': case 'recShower': return { loop: 'shower', end: 'showerOff' };
+      case 'toilet': return { end: 'flushVac' };
+      case 'ixBasin': return { one: 'sink' };
+      case 'tray': case 'grab': return { one: 'trayPick' };
+      case 'eat': return { one: o.fed ? 'tray' : seat };
+      case 'sit': case 'ixLounge': case 'ixRead': case 'recSeat': case 'recWatch': case 'recBean': case 'recWait': case 'recSim': return { one: seat };
+      case 'ixStars': return { one: /telescope/i.test(t) ? 'telescope' : seat };
+      case 'ixTea': return { one: /kettle|hot water/i.test(t) ? 'kettle' : 'cup' };
+      case 'ixDrink': return { one: 'cup' };
+      case 'ixWater': return { one: 'pour' };
+      case 'ixGarden': return { one: Math.random() < 0.5 ? 'trowel' : 'watering' };
+      case 'ixMusic': return { one: /guitar/i.test(t) ? 'guitar' : 'piano' };
+      case 'ixFold': case 'clothes': case 'recChange': return { one: 'changing' };
+      case 'lie': return { one: 'bedLie', then: [['blanket', 1.4]] };
+      case 'bedMake': return { one: 'makeBed' };
+      case 'tidy': return { one: 'locker' };
+      case 'call': return { one: 'callRing', end: 'hangUp' };   // nothing while you're on the line (the user)
+      case 'pay': return { one: 'badge' };
+      case 'hobby': { const h = String(o.hobby || (A.def && A.def.title) || t); return { one: /draw|sketch/i.test(h) ? 'pencil' : /knit/i.test(h) ? 'knit' : 'page' }; }
+      case 'gym': return /treadmill|rowing/i.test(t) ? { loop: 'treadmill' } : { one: 'bench' };
+      case 'recSwim': return { one: 'splash', loop: 'swim' };
+      case 'recKayak': return { one: 'kayak' };
+      case 'recClimb': return { one: 'climb' };
+      case 'recFloat': return { loop: 'float' };
+      case 'disc': return { one: 'discThrow', then: [['discCatch', 1.1]] };
+      case 'tiles': return { one: 'tileShuffle', then: [['tilePlace', 1.3]] };
+      case 'fetch': return { one: 'cratePick' };
+      case 'stow': return { one: 'crateSet' };
+      case 'make': case 'craft': case 'shopFinish': return { one: 'drill' };
+      case 'job': return { one: 'panelOff' };
+      case 'cartTake': case 'cartBack': return { one: 'cartDock' };
+      case 'cartLoad': return { one: 'cratePick' };
+      case 'cartUnload': return { one: 'crateSet' };
+      case 'workStep': return { one: o.how === 'look' ? 'scanA' : o.how === 'turn' ? 'valve' : o.how === 'wait' ? 'typing' : 'ratchet' };
+      case 'ixStop': {                                    // a chore's or a small repair's stop: by what you do there
+        const j = typeof SHIP !== 'undefined' && o.job ? (SHIP.jobs || []).find(x => x.id === o.job) : null, tool = String(j && j.tool || ''), ttl = String(j && j.title || t);
+        if (j && j.chore === 'vent' || /\bvent\b|grille|lint/i.test(ttl)) return { one: 'vent' };
+        if (/squeak|hinge/i.test(ttl)) return { one: 'hingeSqueak', then: [['hingeOil', 1.3], ['hingeAfter', 2.4]] };
+        if (/\bmop|spill|sticky patch|floor\b/i.test(ttl)) return { one: 'mop' };
+        if (/drain|gutter/i.test(ttl)) return { one: 'drain' };
+        if (/stuck|sticky|unstick|free a|jammed|won't|latch/i.test(ttl)) return { one: 'unstick' };
+        if (j && (j.chore === 'lamp' || j.chore === 'fault')) return { one: j.chore === 'lamp' ? 'partSwap' : 'relay' };
+        const hit = ACT_TOOL.find(([re]) => re.test(tool)); return { one: hit ? hit[1] : 'ratchet' };
+      }
+    }
+    if (/^tj:/.test(k) && /birthday|party|celebrat|cake/i.test(t)) return { one: 'popper' };   // a tradition you join that's a celebration
+    return null;
+  }
+  // the activity's sounds start as you step in (actBegin) and stop as it ends (actEnd); one loop at a time, yours
+  let actLoop = null;
+  function actLoopStop(f = 0.5) { const L = actLoop; actLoop = null; if (L) L.stop(f); }
+  function actLoopStart(name) {
+    actLoopStop(0.2);
+    if (S.log) S.log.push({ name, loop: true });
+    if (!ctx || ctx.state !== 'running' || !S.prefs.on || !ACTS.LOOP[name]) return;
+    const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 0.4); out.connect(trim(ACTS.LV[name] ?? 1, BUS.ui));
+    let h = {}; try { h = ACTS.LOOP[name](out, t0) || {}; } catch (e) { h = {}; }
+    const L = { label: name, tick: h.tick,
+      stop(f = 0.5) { const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+        (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 1) * 1000); } };
+    LOOPS.add(L); actLoop = L; if (L.tick) L.tick(t0 + 0.3);
+  }
+  S.act = (phase, A, abort) => {                         // from actBegin ('begin') and actEnd ('end'); reads the activity, changes nothing
+    if (!A) return;
+    const p = actPick(A);
+    if (phase === 'begin') { actLoopStop(0.2); if (!p) return; if (p.one) S.fx(p.one, { long: 4 }); if (p.then) for (const [n, d] of p.then) setTimeout(() => S.fx(n), d * 1000); if (p.loop) actLoopStart(p.loop); return; }
+    actLoopStop(0.5);
+    if (p && p.end && !(abort && A.phase === 'walk')) S.fx(p.end, { long: 4 });   // never for one you walked away from before it began
+  };
+  // the ship's own moments, read once a second: the ion storm's warning and front, and the lights dipping in a blackout
+  let evKey, dark;
+  const actTick = () => {                                // section 27 calls it once a second while sound runs (installed from S.onFrame: the core's S.actTick = null comes after this slot)
+    if (typeof shipNow !== 'function') return;
+    let e = null, b = null; try { e = typeof eventNow === 'function' ? eventNow() : null; b = typeof blackoutAt === 'function' ? !!blackoutAt(shipNow()) : false; } catch (x) { return; }
+    const k = e ? e.id + ':' + e.phase : null;
+    if (evKey !== undefined && k !== evKey && e && e.id === 'ionStorm' && (e.phase === 'warning' || e.phase === 'onset')) S.fx('storm', { long: 4 });
+    if (dark !== undefined && b && !dark) S.fx('flicker');
+    evKey = k; dark = b;
+    ambTick();
+  };
+  // the rooms around you: the galley's cooks at work (a pan sizzling, now and then a knife, a burner, the oven) and the
+  // laundry's washers running; read once a second, only while you're in that room; changes nothing
+  const amb = {};
+  function ambSet(name, on) { if (on && !amb[name]) { amb[name] = 1; ambLoop(name); } else if (!on && amb[name]) { const L = amb[name]; delete amb[name]; if (L && L.stop) L.stop(1); } }
+  function ambLoop(name) {
+    if (S.log) S.log.push({ name, loop: true });
+    if (!ctx || ctx.state !== 'running' || !S.prefs.on) return;
+    const t0 = ctx.currentTime, out = ctx.createGain(); out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 1); out.connect(trim(ACTS.LV[name] ?? 1, BUS.ui));
+    let h = {}; try { h = ACTS.LOOP[name](out, t0) || {}; } catch (e) { h = {}; }
+    const L = { label: name, tick: h.tick, stop(f = 1) { const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
+      (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L); setTimeout(() => { try { out.disconnect(); } catch (e) {} }, (f + 1) * 1000); } };
+    LOOPS.add(L); amb[name] = L;
+  }
+  function ambTick() {
+    let cook = false, wash = false;
+    try {
+      const n = deckDef && deckDef.num, here = roomAt(...player.here()), roomOf = id => { const pl = PLACE_OF.get(id); return pl ? pl.room : null; };
+      if (n === 3 && here && here === roomOf('3-galley-1')) cook = DECK_CREW.some(a => a.settled && a.spot && /^3-galley/.test(a.spot.id || ''));
+      if (n === 4 && here && here === roomOf('4-laundry-1')) wash = ['4-washer-1', '4-washer-2', '4-washer-3', '4-washer-4'].some(id => { const l = machineLook(id); return l && l.running; });
+    } catch (e) { cook = wash = false; }
+    ambSet('sizzle', cook); ambSet('washer', wash);
+    if (cook && Math.random() < 0.12) S.fx(pick(['chop', 'chop', 'stove', 'ovenOpen', 'ovenClose']), { long: 3 });
+  }
+  let actTickSet = false;
+  S.onFrame.push(() => { if (!actTickSet) { actTickSet = true; S.actTick = actTick; } });   // once, on the first frame: S.whenReady and the core's S.actTick = null come later in the block
+  for (const k in ACTS.ONE) FX[k] = (t, o) => { const prev = ROUTE; ROUTE = { ...ROUTE, ui: trim(ACTS.LV[k] ?? 1, ROUTE.ui) }; try { ACTS.ONE[k](t, o); } finally { ROUTE = prev; } };
   // ---- turns 2-5: what the game does, read each frame (nothing here changes the ship) ----
   HUMS.ops = { f: 49, h: [[1, .55], [2, .38], [3, .24], [4, .12], [6, .05]], lp: 380, n: .28, nf: 380, br: .055, bd: .2 };   // Deck 5: a deeper workshop hum
   const DECK_HUM = { 1: 'bridge', 2: 'bridge', 3: 'commons', 4: 'quarters', 5: 'ops', 6: 'engine', 7: 'commons' };
