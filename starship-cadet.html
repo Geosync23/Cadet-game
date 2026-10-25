@@ -56662,7 +56662,7 @@ if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(() => trainWatchArrow());
 // says what's left (her bubble in the Works bay, else Mail); qualified, the big beat: her word, always a Mail, an urgent
 // device notice, and on the test morning an arrow to the bay from 08:30 (the arrow queue). "What's next" names the needs,
 // the Training tab ticks them; the ship-wide work word turning "dependable" first brings a note. PROMO_SIGHT_ON false: as before.
-var PROMO_SIGHT_ON = false;                              // var: worksRepTell, worksNext and the Training tab ask before this line has run
+var PROMO_SIGHT_ON = true;                               // var: worksRepTell, worksNext and the Training tab ask before this line has run
 function promoSightOn() { return !!PROMO_SIGHT_ON && !!SHIP.works && SHIP.works.tier === 1 && !(SHIP.works.test && SHIP.works.test.passed); }
 { const n = (ladderRow('t2') || { needs: [] }).needs.find(x => x && x.rep);   // the test's reputation need follows the switch
   if (n) Object.defineProperty(n, 'rep', { get: () => PROMO_SIGHT_ON ? 'reliable' : 'relied', enumerable: true }); }
