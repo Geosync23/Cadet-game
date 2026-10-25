@@ -12,3 +12,4 @@ Read CLAUDE.md, this note, plans/handover-lead36.md (still valid for seats, gotc
 - ~18:15 UTC: USER GO for sound + music (target playable ~22:00 UTC / 6 PM Eastern). See plans/sound-build-brief.md and TEAM.md 18:15 for seats. BM18 session_01A3S2VBMYmTt2wCZa8ej7XR, fresh CR6 session_013wLtAmKooMrgGrXF4Ljiof. When SD1 sends turn 1's commit: forward it to FX20 and FX22b (and RV16). Ask the user where to publish 0.93.0 (likely Dev first for the listening pass).
 - USER: 0.93.0 goes to BOTH Playtest 3HqM5XiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr (PUB1) after a GO round; never 6daN….
 - USER 21:05 UTC: traditions variety per week + ship-wide order swap (visit before comet): CS1 planning on claude/trad-variety; publish the page to the user; build after 0.93.0 on the user's OK; update design-doc then.
+- Plan page for traditions + swap: https://claude.ai/artifact/DfXQg3Ff4eX2hfoiTA86Jh (answers in its db: ArtifactData get answers/user).
