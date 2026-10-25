@@ -117,11 +117,15 @@ The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), M
 
 Final picks (via lead 36, 2026-10-25): lift **C** (Smooth: quieter parting doors, a gliding ride with a rising rush of air and no rail joints, a soft settle, three falling chime notes) and deck button **B** (Two-step). Nothing is left to pick. The builder takes exactly the chosen versions from the mockup (`DOORS.roomC`, `DOORS.hatchA`, `LIFTS.C`, `PRESS.B`, `SFX.tapA`, `SFX.mailB`, `SFX.headsB`) and can leave the rest out.
 
+## Activity sounds (to choose, not in this estimate yet)
+
+The user asked for sounds for work, repairs and everyday activities (2026-10-25). They are on their own page to choose from: Wren Sounds: Activities (`plans/sound/activities.html`, https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP), covering work and repairs, washrooms, personal things, the galley, leisure and ship events. Once the user picks, each one hooks to the matching activity start (`actStart(kind, ...)`, the work steps in `wsFinish`, the hobby and rec-deck activities, the washer and the ship events), and this plan gets a turn and an estimate for them.
+
 ## Decided (the user, 2026-10-25, 12:25 PM Eastern, via lead 36)
 
 1. **Sound is on by default, at Medium.** The Settings rows can turn it off or change the volume.
 2. **Crew doors near you make sound,** within the ~7-tile radius, quieter than your own (about 6 dB) and capped (at most 2 at once, 1 new one per 0.4 s) so busy corridors don't pile up. See "Where each sound hooks in".
 3. **No night dip.** The hum stays the same day and night.
-4. **Music: not yet.** The mockup page has four samples (Version 7, "Music samples"), not chosen yet. Music is its own later job and is not in this plan's estimate.
+4. **Music: not yet.** Four samples are on their own page, Wren Music Samples (`plans/sound/music.html`, https://claude.ai/artifact/5hXuYyetv2gvNdPuKpz63D), not chosen yet. Music is its own later job and is not in this plan's estimate.
 
 **When:** sound is built after the next release (after 0.92.6 ships), when the user gives the go. Until then this plan, the mockup page and design-doc's "Sound" section (on branch `claude/sound-sd1`) are the record.
