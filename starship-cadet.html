@@ -54878,6 +54878,7 @@ function promoWalkAgainTick(now, skip) {
   if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
   promoWalkSay('promo.fetch.move', 'There you are. Come on: your cabin.'); promoWalkSay('promo.walk.start', 'Right, Officer. Your cabin. Follow me.');
   if (!promoQueue() && typeof setGoal === 'function') setGoal({ deck: M.deck, room: M.room, label: 'Your cabin, ' + PROMO.home, trk: 'career:move', trkTo: (d - 1) * 1440 + PROMO.moveLate });
+  promoWalkAgainTick(now, skip);                         // the arrow (and her lines) from this minute
 }
 WORK_TICKS.push((now, skip) => promoWalkAgainTick(now, skip));
 // ---- end of slot: Works career engineer ----

@@ -500,7 +500,8 @@ with sync_playwright() as pw:
         check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
         print('   the move:', sm['moved'], sm['home'])
         check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
-        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= '17:30' and len(sm['moved']) == 1, f"moved once, on Day 10 by 17:30: {sm['moved']}")
+        by = '22:00' if ev("typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON") else '17:30'   # FX19 (0.92.6, the user: the walk can't be missed): open till 22:00 with the switch on
+        check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= by and len(sm['moved']) == 1, f"moved once, on Day 10 by {by}: {sm['moved']}")
         print('   the ceremony:', sm['cer'], sm['com'], 'pip', sm['pip'], sm['keep'], sm['guests'], sm['mailCer'])
         check(sm['cer'] and sm['cer'][0][:3] == [11, '17:15', '1/O'] and sm['com'] == [[11, 'met']], f"the ceremony on Day 11 at 17:15 in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
         check(sm['pip'] == [1, 1] and sm['keep'] and 'commissioned officer, day 11' in (sm['head'] or '').lower() and 'ceremony2' in sm['works']['done'] and ['commissioned', 11] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
@@ -605,7 +606,7 @@ with sync_playwright() as pw:
       W.xp = 999; out.ready = worksNext(); W.test = { tier: 2, day: SHIP.time.day + 1, tries: 0, passed: false }; out.set = worksNext();
       W.rank = 'officer'; W.tier = 2; out.officer = worksRecordHead().text; SHIP.works = was; return out; })()""")
     print('  what\'s next before the test:', rn)
-    check('test job for you' not in rn['low'] and 'rely' in rn['low'], f"not Relied on yet: say so, not \"a test job for you\" ({rn['low']})")
+    check('test job for you' not in rn['low'] and ('rely' in rn['low'] or 'Reliable' in rn['low']), f"not Relied on (Reliable with FX19's switch) yet: say so, not \"a test job for you\" ({rn['low']})")
     check('test job for you' not in rn['ready'] and 'tomorrow' in rn['set'], f"ready, then set for tomorrow: the real state ({rn['ready']} / {rn['set']})")
     check('Junior Technician · Junior Officer' not in rn['head'] and rn['head'].startswith('Junior Technician.') and rn['officer'].startswith('Technician · Officer.'), f"the Record's title ({rn['head'][:40]} / {rn['officer'][:40]})")
 
