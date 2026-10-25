@@ -41,9 +41,10 @@
 // the Record's "What's next" while you're below Relied on ({band} now, {next} the next step's word)
 == next.t2.rep
 - Your Tier 2 test needs Relied on and Making it safe. You're {band}. Next: {next}.
-// the same, with the steps left ({steps}), when FX19's switch is on
-== next.t2.steps
-- Tier 2 test: Relied on and Making it safe. You're {band}, {steps} steps away. Next: {next}.
+// the same, with the steps left, when FX19's switch is on: lines_check doesn't know {steps} yet, so this waits as a
+// comment until FX19 adds the token to lines_check; then make it live:
+// == next.t2.steps
+// - Tier 2 test needs Relied on and Making it safe. {band} now, {steps} steps to go.
 
 // the Works app's Training tab, "Your promotion" checklist
 == works.promo.check.title
