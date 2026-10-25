@@ -41,7 +41,7 @@ won = str(WORK / 'test' / ('_p926_' + pathlib.Path(build).name)); pathlib.Path(w
 woff = str(WORK / 'test' / ('_p926_off_' + pathlib.Path(build).name)); pathlib.Path(woff).write_text(off)
 
 # what was said in bubbles (bubbleSay, hooked once) and which dialogue cards opened (dialogueShow)
-HOOK = """(() => { window.__said = []; window.__cards = []; if (window.__hook) return; window.__hook = 1;
+SAYHOOK = """(() => { window.__said = []; window.__cards = []; if (window.__hook) return; window.__hook = 1;
   const bs = bubbleSay; bubbleSay = function (who, text, secs) { if (who && who.p) window.__said.push([who.p.id, text, SHIP.time.min]); return bs.apply(this, arguments); };
   const ds = dialogueShow; dialogueShow = function (id, m) { window.__cards.push([id, SHIP.time.min]); return ds.apply(this, arguments); }; })()"""
 # put you in the middle of one of a tradition's rooms on this deck (day d, id)
@@ -50,17 +50,17 @@ INROOM = """(() => { const e = eventsOn(%d).find(x => x.id === '%s'); if (!e) re
 
 def talk13(path, label):
     g = Game(pw, path, 900, 760)
-    g.ev("(() => { skipTo(7 * 1440 + 1135); goToDeck(7, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+    g.ev("(() => { skipTo(7 * 1440 + 1135); goToDeck(7, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
     room = g.ev(INROOM % (8, 'rec-chiefs-talk'))
     for _ in range(120):
         g.step(30)
         if g.ev('SHIP.time.min') >= 1180: break
-    r = json.loads(g.ev("""JSON.stringify({ t: recTalk(8), sato: DECK_CREW.some(x => x.p.id === 'sato'), stool: (DECK_CREW.find(x => x.p.id === 'sato') || {}).spot ? DECK_CREW.find(x => x.p.id === 'sato').spot.type : null,
+    r = json.loads(g.ev("""JSON.stringify({ t: recTalk(8), sato: DECK_CREW.some(x => x.p.id === 'sato'), stool: (() => { const a = DECK_CREW.find(x => x.p.id === 'sato'), pl = a && a.goalId && PLACE_OF.get(a.goalId); return pl ? pl.type : null; })(),
       said: window.__said.filter(x => x[0] === 'sato'), want: (MEETING_SCRIPTS['talk.sato'] || { lines: [] }).lines.filter(x => x.text && !x.choice).map(x => x.text),
       cards: window.__cards, joined: SHIP.events.joined.includes('rec-chiefs-talk@8') })"""))
     g.close()
     said = [x[1] for x in r['said']]
-    print('  13 (%s): in %s; the talk %s; Sato here %s (at %s); said %d of %d lines; cards %s; joined %s' % (label, room, r['t'], r['sato'], r['stool'], len(said), len(r['want']), r['cards'], r['joined']))
+    print('  13 (%s): in %s; the talk %s; Sato here %s (at %s); said %d of %d lines; cards %s; joined %s' % (label, room, r['t'], r['sato'], r.get('stool'), len(said), len(r['want']), r['cards'], r['joined']))
     return r, said, g.errors
 
 with sync_playwright() as pw:
@@ -68,7 +68,7 @@ with sync_playwright() as pw:
         r, said, err = talk13(woff, 'off')
         check(not said, '13 off: as 0.92.5, Sato says nothing from the stool (%d lines)' % len(said))
         r, said, err = talk13(won, 'on')
-        check(r['sato'] and r['stool'] == 'rec:stool', '13: Dr. Sato is on the stool for her Day 8 talk (%s)' % r['stool'])
+        check(r['sato'] and r.get('stool') == 'rec:stool', '13: Dr. Sato is on the stool for her Day 8 talk (%s)' % r.get('stool'))
         check(len(r['want']) >= 4 and said == r['want'], '13: she says the whole of talk.sato, from its first line, every line in order once (%s)' % said[:2])
         last = r['said'][-1][2] if r['said'] else None
         asks = [c for c in r['cards'] if c[0].startswith('talk.sato')]
@@ -101,7 +101,7 @@ with sync_playwright() as pw:
     if want('5'):
         def week5(path):
             g = Game(pw, path, 900, 760)
-            g.ev("(() => { skipTo(6 * 1440 + 1028); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev("(() => { skipTo(6 * 1440 + 1028); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
             room = g.ev(INROOM % (7, 'one-week-aboard'))
             for _ in range(80):
                 g.step(30)
@@ -122,7 +122,7 @@ with sync_playwright() as pw:
     if want('2'):
         def swap2(path):
             g = Game(pw, path, 900, 760)
-            g.ev("(() => { skipTo(13 * 1440 + 640); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev("(() => { skipTo(13 * 1440 + 640); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
             g.ev("(() => { const c = cellPos(36, 10); player.obj.position.set(c.x, 0, c.z); player.stop(); })()")
             for _ in range(80):
                 g.step(30)
@@ -141,7 +141,7 @@ with sync_playwright() as pw:
     if want('15'):
         def spice15(path):
             g = Game(pw, path, 900, 760)
-            g.ev("(() => { skipTo(15 * 1440 + 1100); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev("(() => { skipTo(15 * 1440 + 1100); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
             g.ev(INROOM % (16, 'spice-shelf-supper'))
             seen = None
             for _ in range(200):
@@ -164,7 +164,7 @@ with sync_playwright() as pw:
     if want('4'):
         def read4(path):
             g = Game(pw, path, 900, 760)
-            g.ev("(() => { skipTo(13 * 1440 + 965); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(HOOK); g.step(10)
+            g.ev("(() => { skipTo(13 * 1440 + 965); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
             g.ev(INROOM % (14, 'reading-corner'))
             for _ in range(120):
                 g.step(30)
