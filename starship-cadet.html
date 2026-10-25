@@ -31094,6 +31094,12 @@ const VOICE = JSON.parse([
   '}',
   '}',
 ].join(''));
+const STORY_VOICE = JSON.parse([
+  '{',
+  '"bramwell-basil":{"avoid":["his parents\' repair shop","the ticket home he\'s saved for (never said)","reading his letters aloud"],"cares":["the plant from home","learning every name and every word","writing home every week","not looking new"],"invites":["observatory"],"jokes":["three questions in one breath","the plant has a worse day than he does, every day","the Ostrander colonies did it bigger"],"joy":"writing letters home","keepsake":"a little clay pot he painted, with the Wren on it","likes":["book","star"],"loves":["made"],"needs":"share","openness":"open","talk":"Quick and bright; three questions in one breath, then answers one himself; tries to sound like an old hand.","tpl":"chatty","words":{"hi":["Oh, hi","Hello","Hi, hi"],"bye":["See you, then","Right, off I go","Bye for now"],"yes":["Yes, course","Brilliant, yes","Oh, definitely"],"thanks":["Thanks, thanks","Brilliant, thank you"],"wow":["Oh, brilliant","Look at that"],"sigh":["Oh well","Ah"],"nick":[null,null,"{me}","{me}","{me}"]}',
+  '}',
+  '}',
+].join(''));
 const LINES = JSON.parse([
   '{',
   '"alarm.energy":[',
@@ -45600,7 +45606,7 @@ function chatLine(p, t = shipNow(), peek = false) {    // peek: only looking ahe
   const missed = apptMissedBy(p, t); if (missed) return { text: apptRemark(p, missed, t), kind: 'missed', appt: missed.id, say: true };
   if (p.id === 'holt' && typeof eventMod === 'function' && (() => { try { return eventMod('effect', 'guests', t); } catch (e) { return null; } })())
     return { text: ['Veyli on my ship. Don\'t expect me to smile about it.', 'I\'m keeping an eye on our guests. Someone has to.', 'The Captain wants courtesy. I\'m being courteous. This is my courteous face.'][Math.floor(schedU(p.seed, Math.floor(t / 60), 643) * 3)], kind: 'guests', say: true };
-  const lv = ctx.leaving, rb = SHIP.rel[p.id]; if (lv !== null && lv <= 2 && tier >= 1 && !(rb && rb.bye >= Math.floor(t / 1440) - 1)) {   // leaving in a day or two: their goodbye
+  const lv = ctx.leaving, rb = SHIP.rel[p.id]; if (lv !== null && lv <= 2 && tier >= 1 && !(STORIES_ON && storyOwnBye(p)) && !(rb && rb.bye >= Math.floor(t / 1440) - 1)) {   // leaving in a day or two: their goodbye
     const gm = typeof goodbyeMoment === 'function' ? goodbyeMoment(p, t) : null; return { text: gm ? (gm.hint || byeLine(p)) : byeLine(p), kind: 'goodbye', moment: gm ? gm.id : undefined, say: true }; }
   if (socIntroOn()) { const l = eng('week1', { escort: p.id === SHIP.social.mentor }); if (l) return l; }   // onboarding's week-1 lines
   const G = SHIP.social.guide; if (p.id === 'calder' && G && !G.told && !G.end) return { text: guideAskLine(G), kind: 'guide', say: true };   // A10: Calder assigns you a newcomer
@@ -46458,9 +46464,10 @@ const STORY_FAVOURS = {
   liftBrakes: p => { const pl = p.work && storyPlace(p.work.place, p.work.deck); return pl && { from: p.id, title: 'Check the lift brakes with ' + shortName(p) + ' (' + deckIn(pl.deck) + ')', stops: [{ deck: pl.deck, placeId: pl.id, mins: 15, tag: 'favour' }] }; },   // a stop at their station (reviewer 1: not a lamp swap)
 };
 function storyFavour(p, id) {
-  const mk = STORY_FAVOURS[id]; if (!mk || typeof favourPost !== 'function') return false;
+  const mk = STORY_FAVOURS[id] || (STORIES_ON && STORY_FAVOURS_S[id]); if (!mk || typeof favourPost !== 'function') return false;   // crew stories' favours too, while on (FX21)
   let post = null; try { post = mk(p); } catch (e) { post = null; } if (!post) return false;
   const fid = favourPost(post); if (!fid) return false;
+  if (STORIES_ON && post.storyFlag) storyCS().fav[fid] = { flag: post.storyFlag, delay: post.storyDelay || 0 };   // a flag once you've handed it back (FX21)
   if (typeof favourAccept === 'function') favourAccept(fid);
   return true;
 }
@@ -46499,7 +46506,7 @@ function momentDone(p, d, c) {                           // the reply was picked
 const GOODBYE_PTS = 3;
 const GOODBYE_WHEN = ['today', 'tomorrow', 'the day after tomorrow'];
 function goodbyeMoment(p, t = shipNow()) {
-  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyPeek(p.id).bye) return null;
+  socInit(); p = socP(p); if (!p || !SOC.idx.has(p.id) || storyPeek(p.id).bye || (STORIES_ON && storyOwnBye(p))) return null;   // a crew story's farewell crescendo is their goodbye (FX21)
   const left = typeof leavingSoon === 'function' ? leavingSoon(p, Math.floor(t / 1440) + 1) : null; if (left === null || left > 2) return null;
   const d = goodbyeDef(p.id); if (!d) return null;
   return { id: p.id + ':bye', hint: voiceFill(p.id, d.hint, t) };
@@ -46842,8 +46849,8 @@ function storyIdx() {
 }
 function storyThread(id) { return STORIES_ON && id ? storyIdx().thread.get(id) || null : null; }   // a declaration, not a const: voiceOf may ask before this line has run
 var STORY_CS0 = null;
-function storyPeekCS() { return (SHIP.social && SHIP.social.stories && SHIP.social.stories.cs) || STORY_CS0 || (STORY_CS0 = Object.freeze({ told: {}, skip: {}, book: {}, cday: {} })); }   // read-only
-function storyCS() { const S = SHIP.social.stories || (SHIP.social.stories = {}); return S.cs || (S.cs = { told: {}, skip: {}, book: {}, cday: {} }); }
+function storyPeekCS() { return (SHIP.social && SHIP.social.stories && SHIP.social.stories.cs) || STORY_CS0 || (STORY_CS0 = Object.freeze({ told: {}, skip: {}, book: {}, cday: {}, fav: {} })); }   // read-only
+function storyCS() { const S = SHIP.social.stories || (SHIP.social.stories = {}), C = S.cs || (S.cs = { told: {}, skip: {}, book: {}, cday: {}, fav: {} }); if (!C.fav) C.fav = {}; return C; }
 function storyNextId(p) {                                 // undefined: not a crew story person (momentNextId as before)
   const bs = STORIES_ON && storyIdx().beats.get(p.id); if (!bs) return undefined;
   const r = SHIP.rel[p.id], n = r ? r.arc || 0 : 0;
@@ -46923,10 +46930,41 @@ function storyDone(p, d, t) {                             // momentDone told a c
   if (d.crescendo) { C.cday[day] = 1; delete C.book[p.id]; }
   if (d.keepsake && d.tone !== 'resolution' && typeof giftKeepsake === 'function') giftKeepsake(p, d.keepsake);   // a quiet ending's keepsake (momentDone gives resolution beats theirs)
 }
+// S3: the stories' favours (STORY_FAVOURS_S, beside section 20c's STORY_FAVOURS; storyFlag: the flag set once you've
+// handed it back, storyDelay minutes later), the farewell crescendo as their goodbye (storyOwnBye: chatLine and
+// goodbyeMoment leave it to the story), the stories' voice cards (content/stories/*.voice, baked as STORY_VOICE, laid
+// over VOICE once at load) and the roster's words the stories change (STORY_ABOUT, laid over the roster once it's there)
+var STORY_FAVOURS_S = {
+  theoCloud: p => { const c = socP('calder'), pl = c && c.work && storyPlace(c.work.place, c.work.deck); return pl && { from: p.id, title: 'Take ' + shortName(p) + '\'s drawing to Calder (' + deckIn(pl.deck) + ')', bring: 'a drawing in a folder', stops: [{ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'favour' }] }; },
+  basilPlant: p => { const pl = storyPlace('garden', 3); return pl && { from: p.id, title: 'Take ' + shortName(p) + '\'s plant to Tove Cruz in the garden (Deck 3)', bring: 'a plant from home', stops: [{ deck: pl.deck, placeId: pl.id, mins: 3, tag: 'favour' }], storyFlag: 'bramwell.plant.done', storyDelay: 2880 }; },   // Cruz brings it back two days later
+  emekaJokes: p => { const st = ['yoon-elif', 'lemaire-nils', 'yilmaz-karin'].map(x => socP(x)).map(q => q && q.work && storyPlace(q.work.place, q.work.deck));
+    return st.every(Boolean) && { from: p.id, title: 'Ask Yoon, Lemaire and Yilmaz for a terrible joke each, for ' + shortName(p), stops: st.map(pl => ({ deck: pl.deck, placeId: pl.id, mins: 2, tag: 'favour' })), expires: shipNow() + 4320, storyFlag: 'halloran.jokes.done' }; },
+};
+function storyOwnBye(p) {                                 // their story ends with a farewell crescendo, not skipped
+  const bs = STORIES_ON && p && storyIdx().beats.get(p.id); if (!bs) return false;
+  const skip = storyPeekCS().skip[p.id] || [];
+  return bs.some(b => { const d = storyMoment(p.id + ':' + b); return d && d.crescendo === 'farewell' && !skip.includes(b); });
+}
+if (STORIES_ON) { try { for (const k in STORY_VOICE) VOICE[k] = Object.assign({}, VOICE[k] || {}, STORY_VOICE[k], VOICE[k] && VOICE[k].lines ? { lines: VOICE[k].lines } : {}); VOICE_CARD.clear(); } catch (e) { /* no words baked */ } }
+const STORY_ABOUT = {                                     // CS1's build notes, section 1 (the crew designer's text, laid over while on)
+  'halloran-emeka': [[3, 'home', 'Tells one of his late dad\'s jokes every breakfast, from a numbered book in his pocket.']],
+  'teague-theo': [[3, 'work', 'Moved stations eight times before he was fourteen, and draws everyone in his first week.'], [4, 'secret', 'Likes the Wren more than any station he\'s lived on, which is exactly why he\'s going.']],
+};
+var STORY_ABOUT_DONE = false;
+function storyAbout() {                                   // once, after the roster is there
+  if (STORY_ABOUT_DONE || !STORIES_ON) return;
+  try { socInit(); for (const id in STORY_ABOUT) { const p = socP(id); if (!p || !Array.isArray(p.about)) continue; for (const [tier, topic, text] of STORY_ABOUT[id]) { const a = p.about.find(x => x.tier === tier && x.topic === topic); if (a) a.text = text; } } STORY_ABOUT_DONE = true; } catch (e) { /* not yet */ }
+}
 function storyTick(now) {                                 // once a ship minute (socialTick), while STORIES_ON
   if (!STORIES_ON) return;
-  socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
+  storyAbout(); socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
   for (const id of Object.keys(C.book)) { const b = C.book[id], p = socP(id); if (p && now >= b.to && !(C.told[id] || []).includes(b.beat)) storySkip(p, b.beat, now); else if (!p || now >= b.to) delete C.book[id]; }
+  for (const fid of Object.keys(C.fav)) {                 // S3: a story favour handed back sets its flag (after its delay)
+    const e = C.fav[fid], j = typeof favourById === 'function' ? favourById(fid) : null;
+    if (!j || j.declined || (j.status === 'done' && j.doneBy !== 'you')) { delete C.fav[fid]; continue; }
+    if (j.status === 'done' && e.at == null) e.at = (j.doneAt || now) + e.delay;
+    if (e.at != null && now >= e.at) { if (typeof flagSet === 'function') flagSet(e.flag); delete C.fav[fid]; }
+  }
   if (now % 30) return;                                   // bookings: twice a ship hour
   for (const id of storyIdx().beats.keys()) {
     if (C.book[id]) continue;

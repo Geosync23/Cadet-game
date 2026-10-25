@@ -465,7 +465,7 @@ def parse_voice_file(path, rel, out):
     lines = read_lines(path)
     hd = header(lines, path)
     if hd[0] == 'voice' and len(hd) == 2:
-        card = out['VOICE'].setdefault(hd[1], {})
+        card = out['STORY_VOICE' if rel.startswith('stories/') else 'VOICE'].setdefault(hd[1], {})   # content/stories: crew stories' cards, read only while STORIES_ON (FX21)
     elif hd[0] == 'template' and len(hd) == 2:
         card = out['VOICE_TEMPLATES'].setdefault(hd[1], {})
     else:
@@ -929,7 +929,7 @@ def parse_address(path, rel, out):
 
 
 def bake():
-    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
+    out = {'VOICE_TEMPLATES': {}, 'VOICE': {}, 'LINES': {}, 'CONVOS': [], 'MOMENTS': {}, 'STORY_MOMENTS': {}, 'STORY_VOICE': {}, 'MOMENT_THEMES': {}, 'HOME_CONTACTS': {}, 'HOME_MOMENTS': {}, 'HOME_SEND': {}, 'HOME_CHAT': {}, 'MEETINGS_BAKED': {}, 'TRADITIONS': [], 'ADDRESSES': {},
            'TALKS': {'pool': [], 'own': {}, 'work': {}, 'small': {}}}
     files = []
     for d, _, fs in os.walk(CONTENT):
@@ -1064,7 +1064,7 @@ def js_cards(name, d):
 
 
 def blocks(out):
-    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) \
+    lines = js_cards('VOICE_TEMPLATES', out['VOICE_TEMPLATES']) + cards_parsed('VOICE', out['VOICE']) + cards_parsed('STORY_VOICE', out['STORY_VOICE']) \
         + lists_parsed('LINES', out['LINES']) + ['const CONVOS = ['] + [f'  {js(c)},' for c in out['CONVOS']] + ['];'] \
         + ['const MOMENTS = {'] + [f'  {js(k)}: {js(out["MOMENTS"][k])},' for k in sorted(out['MOMENTS'])] + ['};'] \
         + ['const STORY_MOMENTS = {'] + [f'  {js(k)}: {js(out["STORY_MOMENTS"][k])},' for k in sorted(out['STORY_MOMENTS'])] + ['};'] \
