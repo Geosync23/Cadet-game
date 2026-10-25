@@ -1,0 +1,318 @@
+<title>Wren Week Variety</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; lists of what stays and what takes turns, a card per fresh tradition, a week-by-week table, the event swap as options and a table, then the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --sat: #2f6f9e; --satSoft: #dbe9f4; --sun: #b0631c; --sunSoft: #f6e4d2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sun); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--sat); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--sun); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+/* the day strips */
+.strip-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px 8px; }
+.strip { position: relative; min-width: 760px; font-size: 11.5px; }
+.hours { position: relative; height: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hours span { position: absolute; transform: translateX(-50%); }
+.lane { position: relative; height: 34px; margin-bottom: 6px; border-radius: 6px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 18 - 1px), var(--line) calc(100% / 18 - 1px) calc(100% / 18)); }
+.lane-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2px 0 3px; }
+.blk { position: absolute; top: 3px; bottom: 3px; border-radius: 5px; padding: 2px 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 28px; font-weight: 700; }
+.blk.old { background: var(--old); color: var(--oldInk); }
+.blk.some { background: var(--some); color: var(--oldInk); border: 1px dashed var(--muted); }
+.blk.new-sat { background: var(--sat); color: var(--surface); }
+.blk.new-sun { background: var(--sun); color: var(--surface); }
+.blk.bday { background: transparent; border: 2px dotted var(--flag); color: var(--flag); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); }
+.key i { display: inline-block; width: 14px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* tradition cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.sat { border-top: 4px solid var(--sat); }
+.card.sun { border-top: 4px solid var(--sun); }
+.card header { display: grid; gap: 4px; }
+.when { font: 700 13px var(--mono); color: var(--muted); }
+.card dl { display: grid; grid-template-columns: 92px 1fr; gap: 6px 12px; margin: 0; font-size: 14.5px; }
+.card dt { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.card dd { margin: 0; min-width: 0; }
+.size { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.flagnote { font-size: 14px; color: var(--flag); }
+.mail { font-style: italic; color: var(--muted); }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 600px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* answers */
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--sat); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+/* week table: the "same every week" spine is muted; what changes is in colour */
+.wk td:first-child { font-weight: 700; white-space: nowrap; }
+.wk .same { color: var(--muted); }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.new { background: var(--sat); color: var(--surface); }
+.tag.back { background: var(--satSoft); color: var(--ink); }
+.tag.rot { background: var(--sunSoft); color: var(--ink); }
+.tag.ev { background: var(--flag); color: var(--surface); }
+.risk { color: var(--flag); font-weight: 700; }
+.easy { color: var(--sat); font-weight: 700; }
+.opts { display: grid; gap: 10px; }
+.optcard { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.optcard.rec { border-left: 4px solid var(--sat); }
+</style>
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">Plan · traditions variety and the event order · CS1 for lead 37 · 2026-10-25</span>
+    <h1>Every week a little different</h1>
+    <p class="lead">You asked for each week to have different traditions: some can repeat, like gym club, but more fresh ones coming in. And for the ship-wide events, the diplomatic visit now comes before the comet viewing. This page shows what the first twelve weeks look like today, what would change, and what the event swap touches. Nothing is built. Answer at the bottom.</p>
+  </header>
+
+  <section class="facts" aria-label="At a glance">
+    <div class="fact"><b>Today</b>About 60 traditions run in weeks 1-12. Most are weekly, and the rest repeat on a 4-week loop, so weeks 5-8 and 9-12 look like weeks 1-4 plus one new thing.</div>
+    <div class="fact"><b>Proposed</b>6 weekly ones take turns (every other week), and 9 fresh ones come in on 3- and 6-week rhythms. No two weeks of the first twelve look the same.</div>
+    <div class="fact"><b>Busy rule kept</b>Never more than two at once, never two in one room, birthdays an hour clear. No weekday gets busier than its busiest today.</div>
+    <div class="fact"><b>The swap</b>Neither the visit nor the comet is switched on yet, so moving them is mostly words and the calendar. The visit's length is the one real decision.</div>
+  </section>
+
+  <section>
+    <h2>1. Traditions: what stays weekly</h2>
+    <p>These make sense every week: they're the ship's routine, its meals, or clubs people keep up. They stay as they are.</p>
+    <ul>
+      <li><b>Routine and meals:</b> the Captain's Friday address, Works Friday tea, Open door (Wednesday), the Saturday long breakfast, the Sunday long table, the spice shelf supper (Tuesday), Brennan's tasting table (Wednesday), pick-your-own breakfast, sunrise stretch.</li>
+      <li><b>Clubs and evenings:</b> gym club (Monday), quiz night (Thursday), music jam and tap night (Friday), knit and natter and Tiles night (Tuesday), late piano on Thursdays, observatory night and film night (Saturday), the swap meet, the Lap of the Wren (Sunday), garden hour (Saturday).</li>
+      <li><b>The rec deck's clubs:</b> dawn swim, wall night, paddle club, float hour, slow stretch, Winner Stays On.</li>
+      <li><b>Already rotating</b> (no change): book circle and Sim night (every 2 weeks); Open lab, Gerald clinic, talent night, the regatta, the big jigsaw, garden picnic, the Saturday run, bread day, Every song, department cup, bridge hour, night owls' cocoa, the Lightdisc Cup and the Sunday story (every 4 weeks); harvest morning (fortnightly); the eight 0.92.6 ones (every 8 weeks, weeks 5-12); the Wren talks and chiefs' talks (their own lists); birthdays; the arrival and rotation ones.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Traditions: six weekly ones take turns</h2>
+    <p>These are good, but every week is too often. From week 2 they alternate, so one week feels different from the next. Week 1 stays exactly as it is (your rule for 0.92.6: "first week stays the same").</p>
+    <div class="tbl"><table>
+      <thead><tr><th>Tradition</th><th>Today</th><th>Proposed</th><th>Why</th></tr></thead>
+      <tbody>
+        <tr><td>Tiles ladder (Sat 15:00, bow lounge)</td><td>weekly</td><td>odd weeks</td><td>Tiles night already runs every Tuesday; Saturday is the busiest day (9).</td></tr>
+        <tr><td>Cook-along (Sat 15:30, galley)</td><td>weekly</td><td>even weeks</td><td>Takes turns with the Tiles ladder in the same Saturday hour.</td></tr>
+        <tr><td>Reading corner (Sun 16:00, bow lounge)</td><td>weekly</td><td>odd weeks</td><td>A book takes more than a week; the off weeks leave room for a fresh Sunday one.</td></tr>
+        <tr><td>Postcard night (Thu 18:45, booths)</td><td>weekly</td><td>even weeks</td><td>Postcards home every fortnight still fits the relay.</td></tr>
+        <tr><td>Late piano, Tuesdays (21:40, music room)</td><td>Tue and Thu</td><td>Thursdays weekly, Tuesdays odd weeks</td><td>The Captain at the piano feels special when it isn't twice every week.</td></tr>
+        <tr><td>Float hour (Wed 21:30, rec deck)</td><td>weekly</td><td>stays weekly</td><td>Considered and kept: the Counsellor's quiet hour is the point of it.</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>3. Traditions: nine fresh ones</h2>
+    <p>One new tradition starts in each of weeks 2 to 10, so something fresh arrives every week (weeks 5 to 12 also keep their 0.92.6 ones). They come back on 3- and 6-week rhythms rather than every 4 weeks, which is what stops the weeks repeating in a 4-week loop. Each is in a room the Wren already has, with a host from the roster, and each was checked against what's already in that room and hour on its weeks. The builder confirms each host is free in their own day plan before it goes in.</p>
+    <div class="cards">
+      <article class="card sat"><header><span class="when">SAT 11:00-11:45 · every 3 weeks · from week 2 (weeks 2, 5, 8, 11)</span><h3>Comics wall day</h3></header>
+        <p>Ravi Hart pins a long strip of paper along the comics wall, and everyone adds one panel: something from their week aboard. By lunch it's a comic of the whole ship.</p>
+        <dl><dt>Place</dt><dd>Junior common room, Deck 4 (the comics wall)</dd><dt>Host</dt><dd>Ravi Hart (draws comics; canon)</dd><dt>Fits</dt><dd>The room is free on Saturday mornings. Window sketching (11:45, week 7 only) is in the observatory, a different room.</dd></dl></article>
+      <article class="card sun"><header><span class="when">WED 21:00-21:40 · every 3 weeks · from week 3 (weeks 3, 6, 9, 12)</span><h3>Hum night</h3></header>
+        <p>Alejandro Reyes, before his night shift, takes a few people to the engine overlook. Hands on the rail, eyes shut: which coil is singing flat tonight? Zeke usually comes and argues.</p>
+        <dl><dt>Place</dt><dd>Engine overlook, Deck 6</dd><dt>Host</dt><dd>Alejandro Reyes (off Tue and Wed; he and Zeke leave each other notes about the coils' moods: canon)</dd><dt>Fits</dt><dd>Nothing else on Deck 6 in the evening. In week 12, Hull-lights (bow lounge, 21:00) is the other one at that hour: two at once, different rooms.</dd></dl></article>
+      <article class="card sat"><header><span class="when">THU 17:30-18:15 · every 3 weeks · from week 4 (weeks 4, 7, 10)</span><h3>Sato's tea, braved</h3></header>
+        <p>Dr. Sato makes a pot of the tea nobody else will drink and explains it, at length. The brave try a cup. Anyone who finishes one gets their name chalked on the chart room board.</p>
+        <dl><dt>Place</dt><dd>Chart room, Deck 2</dd><dt>Host</dt><dd>Dr. Imra Sato (the tea is her running joke)</dd><dt>Fits</dt><dd>After her shift. Open lab is also in the chart room, but on Tuesdays.</dd></dl></article>
+      <article class="card sun"><header><span class="when">MON 20:00-20:45 · every 6 weeks · from week 5 (weeks 5, 11)</span><h3>Map night</h3></header>
+        <p>Yusuf Kim spreads his old maps of Marra Station and asks everyone to draw one corridor of the Wren from memory. Nobody's map agrees. That's the point.</p>
+        <dl><dt>Place</dt><dd>Chart room, Deck 2</dd><dt>Host</dt><dd>Yusuf Kim (off Mondays; collects Marra Station's old maps: canon)</dd><dt>Fits</dt><dd>A small one (Kim dislikes crowds). Book circle (20:15) is in the junior common room: two at once, different rooms.</dd></dl></article>
+      <article class="card sat"><header><span class="when">SUN 15:00-15:45 · every 6 weeks · from week 6 (weeks 6, 12)</span><h3>Paper boat race</h3></header>
+        <p>Femi Rossi hands out paper and folds the first boat. Everyone launches theirs at the top of the river hall's slow channel, and the crowd cheers them down. The one that sinks last wins.</p>
+        <dl><dt>Place</dt><dd>River hall, the rec deck</dd><dt>Host</dt><dd>Femi Rossi (keen, competitive)</dd><dt>Fits</dt><dd>The river hall is free on Sunday afternoons (the regatta is the morning, other weeks). A rec deck one, so its rules go in the rec deck's table.</dd></dl></article>
+      <article class="card sun"><header><span class="when">MON 20:00-20:45 · every 6 weeks · from week 7 (weeks 7, 13)</span><h3>Newsletter night</h3></header>
+        <p>Lucia Ferreira puts the ship's newsletter together with whoever turns up: the week's news, a recipe, a drawing, and a very bad poem by "Gull", read out anonymously.</p>
+        <dl><dt>Place</dt><dd>Comms room, Deck 2</dd><dt>Host</dt><dd>Lucia Ferreira (comms; the newsletter and Gull's poems are canon. Who Gull is stays secret.)</dd><dt>Fits</dt><dd>Week 7's book circle is in the junior common room: two at once, different rooms.</dd></dl></article>
+      <article class="card sat"><header><span class="when">WED 19:45-20:45 · every 6 weeks · from week 8 (weeks 8, 14)</span><h3>Learn a dance</h3></header>
+        <p>Tamsin Haddad teaches one old dance from home, step by step, in the bow lounge with the chairs to the sides. Everyone is bad at it together.</p>
+        <dl><dt>Place</dt><dd>Bow lounge, Deck 3 (its floor, no furniture moved by the game: people stand where the lounge already has room)</dd><dt>Host</dt><dd>Tamsin Haddad (warm; one of the five who know every song)</dd><dt>Fits</dt><dd>Ends at 20:45, before Hull-lights (21:00, week 8, same room).</dd></dl></article>
+      <article class="card sun"><header><span class="when">THU 19:30-20:30 · every 6 weeks · from week 9 (weeks 9, 15)</span><h3>A thousand cranes</h3></header>
+        <p>Chloe Tran teaches everyone to fold a paper crane. Every session's cranes go on one long string in the junior common room. One day there'll be a thousand.</p>
+        <dl><dt>Place</dt><dd>Junior common room, Deck 4</dd><dt>Host</dt><dd>Chloe Tran (your bunkmate)</dd><dt>Fits</dt><dd>Postcard night (booths) and quiz (bow lounge) are in other rooms: never more than two at once. The string can be words only at first (no new decor needed).</dd></dl></article>
+      <article class="card sat"><header><span class="when">SUN 09:30-10:15 · every 6 weeks · from week 10 (weeks 10, 16)</span><h3>Scone morning</h3></header>
+        <p>On his rest day Emeka Halloran bakes one batch of scones, Brennan inspects them, and the Works tea corner gets them warm. One joke, free with every scone.</p>
+        <dl><dt>Place</dt><dd>Tea corner, Deck 5</dd><dt>Host</dt><dd>Emeka Halloran (off Sat and Sun; baking is his joy; the scone tin is his keepsake)</dd><dt>Fits</dt><dd>Before the swap meet (10:30, promenade). The tea corner is empty on Sunday mornings.</dd></dl></article>
+    </div>
+    <p class="flagnote">Two build notes: the game's traditions only know "every 2, 4 or 8 weeks" today, so "every 3" and "every 6 weeks" are a small addition; and the numbers each tradition is filed under are almost used up, so the traditions builder needs a new range.</p>
+  </section>
+
+  <section>
+    <h2>4. Week by week, Days 1-84</h2>
+    <p>What's different in each week, beyond the things that happen every week. Grey is today. Below it, in colour, is what the plan adds: <span class="tag new">new</span> a first time, <span class="tag back">back</span> a fresh one returning, <span class="tag rot">turn</span> the weekly ones taking turns, <span class="tag ev">event</span> ship-wide events (after the swap).</p>
+    <div class="tbl"><table class="wk">
+      <thead><tr><th>Week</th><th>Today: what's different that week</th><th>Proposed: added or changed</th></tr></thead>
+      <tbody>
+        <tr><td>1 (Days 1-7)</td><td class="same">Arrival week: Name on the beam, First Light cocoa, new hand's tea, Saturday run, harvest, sowing, bread day, One week aboard; Crossing the Line on Sunday</td><td>No change (your week-1 rule)</td></tr>
+        <tr><td>2 (8-14)</td><td class="same">Chief's talk, Open lab, Gerald clinic; the ion storm Thursday to Monday</td><td><span class="tag new">Comics wall day</span> <span class="tag rot">Cook-along, postcards</span></td></tr>
+        <tr><td>3 (15-21)</td><td class="same">Book circle, garden picnic, harvest, regatta, big jigsaw, talent night, Theo's farewell, Off the Tern</td><td><span class="tag new">Hum night</span> <span class="tag rot">Tiles ladder, reading corner, late piano Tue</span> <span class="tag ev">Diplomatic visit Tue-Fri, Days 16-19</span></td></tr>
+        <tr><td>4 (22-28)</td><td class="same">Basil on the beam, department cup, bridge hour, hull-lights, welcome tea, first Wren talk, Sim night, four weeks aboard, night owls' cocoa, Lightdisc Cup, Sunday story</td><td><span class="tag new">Sato's tea</span> <span class="tag rot">Cook-along, postcards</span> <span class="tag ev">Comet viewing, Day 26 or 27</span></td></tr>
+        <tr><td>5 (29-35)</td><td class="same">Tool night, book circle, Saturday run, harvest, bread day</td><td><span class="tag new">Map night</span> <span class="tag back">Comics wall day</span> <span class="tag rot">odd-week set</span></td></tr>
+        <tr><td>6 (36-42)</td><td class="same">Route night, Open lab, Gerald clinic, talent night, six weeks aboard</td><td><span class="tag new">Paper boat race</span> <span class="tag back">Hum night</span> <span class="tag rot">even-week set</span></td></tr>
+        <tr><td>7 (43-49)</td><td class="same">Window sketching, book circle, garden picnic, harvest, regatta, big jigsaw</td><td><span class="tag new">Newsletter night</span> <span class="tag back">Sato's tea</span> <span class="tag rot">odd</span></td></tr>
+        <tr><td>8 (50-56)</td><td class="same">Open house, department cup, bridge hour, hull-lights, night owls' cocoa, Lightdisc Cup, Sunday story</td><td><span class="tag new">Learn a dance</span> <span class="tag back">Comics wall day</span> <span class="tag rot">even</span></td></tr>
+        <tr><td>9 (57-63)</td><td class="same">Garden walk, book circle, Saturday run, harvest, bread day</td><td><span class="tag new">A thousand cranes</span> <span class="tag back">Hum night</span> <span class="tag rot">odd</span></td></tr>
+        <tr><td>10 (64-70)</td><td class="same">Spoon band, Open lab, Every song, Gerald clinic, talent night</td><td><span class="tag new">Scone morning</span> <span class="tag back">Sato's tea</span> <span class="tag rot">even</span></td></tr>
+        <tr><td>11 (71-77)</td><td class="same">Card night, book circle, picnic, harvest, regatta, jigsaw, farewell supper, Off the Tern</td><td><span class="tag back">Map night, Comics wall day</span> <span class="tag rot">odd</span></td></tr>
+        <tr><td>12 (78-84)</td><td class="same">Worst joke night, department cup, bridge hour, hull-lights, welcome tea, cocoa, Lightdisc Cup, Sunday story, twelve weeks aboard</td><td><span class="tag back">Paper boat race, Hum night</span> <span class="tag rot">even</span></td></tr>
+      </tbody>
+    </table></div>
+    <p>Busy check: Saturday drops from 9 to 8 on most weeks (the Tiles ladder and cook-along take turns), Sunday stays at 7-8, and Tuesday drops by one on even weeks (late piano). Every weekday keeps at least 2-3 traditions. The new ones only ever make two at once, in different rooms.</p>
+  </section>
+
+  <section>
+    <h2>5. The ship-wide events: the visit first, then the comet</h2>
+    <p>Today the plan is Crossing the Line (Day 7), the ion storm (Days 11-15), the comet viewing (Tuesday Day 16, short) and the diplomatic visit (from Friday Day 26, the finale). Only the first two are switched on. The comet exists as a draft, and the visit is built but switched off. So the swap changes no play today, except the words of two Friday addresses that already mention the comet and the visit.</p>
+    <h3>The one real decision: how long the visit is</h3>
+    <div class="opts">
+      <div class="optcard rec"><b>A (recommended): a short visit, Tuesday to Friday, Days 16-19.</b> Tuesday 16: the warning Mail and prep jobs. Wednesday 17: the Veyli come aboard at 10:00 in the shuttle bay. Thursday 18: the formal dinner. Friday 19: the farewell at 09:00, before the Friday hold, so the Captain's address that afternoon can talk about it. It clears out before your night shifts, the Captain's table (Day 20), Theo's send-off and Basil's arrival (Day 21). Building the shorter shape is the main work: the built visit is nine days long.</div>
+      <div class="optcard"><b>B: the built nine-day visit, Days 16-24.</b> No reshaping, but it runs straight across the Senior Officer scenes (Days 16-17), your night shifts, the Captain's table (same room as the visit's dinners), Theo's send-off in the same shuttle bay, the bridge invite (Commander Vance hosts both), and the Pell, Basil and Zeke stories. Nothing in the game stops those clashes today. Risky.</div>
+      <div class="optcard"><b>Comet viewing after it</b>, around Day 26: either <b>Friday 26 at 21:30</b>, after Calder's question and the four-weeks-aboard tea (tap night would end early or pause), or <b>Saturday 27 at 21:30</b> in place of that week's observatory night, which fits it naturally. It becomes the end of the career's first stretch, instead of the visit.</div>
+    </div>
+    <h3>What the swap touches</h3>
+    <div class="tbl"><table>
+      <thead><tr><th>What</th><th>Change</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><td>The event calendar</td><td>Swap the two rows' order as well as their days (the calendar takes them in order, so only changing the numbers would push the visit after the comet).</td><td class="easy">Easy</td></tr>
+        <tr><td>The visit's shape (option A)</td><td>Shorten from nine days to four: greeting, one dinner, farewell; the guests' stay, its news, Mail and the greeting's words ("for five days").</td><td class="risk">Main work</td></tr>
+        <tr><td>The comet</td><td>Paste in from the draft, on its new day; its draft times (20:30-22:30) already disagree with the design's 21:30; it pauses tap night if it's on a Friday.</td><td class="easy">Easy to medium</td></tr>
+        <tr><td>Friday addresses, Days 19 and 26</td><td>Both already play and name the comet then the visit ("Then on Tuesday, the comet", "Tomorrow at ten a Veyli delegation comes aboard"). Day 19 becomes "the guests have just left"; Day 26 becomes "a storm, the Veyli, and the comet tonight". A writer, about an hour.</td><td class="risk">Words, live</td></tr>
+        <tr><td>Commander Vance's Day 22 memo and the Day 29 senior briefing</td><td>Both exist only for the visit on its old days. Move the memo before Day 16 (Day 15 is your Tier 3 test) or drop it; the briefing moves into the visit's week or goes.</td><td class="risk">Decision</td></tr>
+        <tr><td>Calder's question, Day 26, and the career's end</td><td>Unchanged. The design's "only the events up to the career's end are built" now covers the visit and the comet; the comet becomes the finale. Design-doc words.</td><td class="easy">Easy</td></tr>
+        <tr><td>Crew stories</td><td>Kovac (Fridays 19 and 26): fine with option A, as long as the Friday address is never paused by the visit (add it to the visit's keep list). Pell (Days 17-24) and Basil (21-25): fine with A. Raman's waiting story rides on the comet: its notes move to the new day; on a Saturday its night-helm crewmate (Bakshi) is off, so Friday suits it better. Calder's waiting story (Day 26): unchanged.</td><td class="easy">Easy with A</td></tr>
+        <tr><td>Your night shifts</td><td>The game holds them on Days 19-20; Kowalczyk's waiting story says Days 22-24. Settle which before building either.</td><td class="risk">Decision</td></tr>
+        <tr><td>The new hand's tea</td><td>It moved to Thursday because "Day 26 is the visit's first day". That reason goes; it can stay Thursday or go back to Friday.</td><td class="easy">Your choice</td></tr>
+        <tr><td>The checks</td><td>events_check (expects the visit from Day 23), bigevents_check (names the comet as the event a Day 20 load skips), puzzle_check (two repair-case days may shift), the day-check event days in the testing guide and tools, and the comet draft's own test.</td><td class="easy">Easy, many places</td></tr>
+        <tr><td>Design doc and plans</td><td>"Ship-wide events" (the calendar, the table, the scope sentence), the events plan, DEV_NOTES. The old order stays on record as history.</td><td class="easy">Easy</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section>
+    <h2>6. Estimate</h2>
+    <ul>
+      <li><b>Traditions:</b> the six take-turns changes are one-line edits. The nine new ones: a writer for their words (about 2-3 hours), a builder for the "every 3 and 6 weeks" rhythm, the new number range, the paper boats' rec deck rules and the nine files (about half a day), then a review and the full round of checks. All behind a switch until you say yes.</li>
+      <li><b>The swap, option A:</b> a builder for the calendar, the shorter visit and the comet (about a day, the shorter visit being most of it), a writer for the two Friday addresses and the visit's words (2-3 hours), the checks updated, a review and the full round. Option B is less building but leaves the clashes.</li>
+      <li>Both can be built at the same time by different people; they touch different parts of the game.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Your answers</h2>
+    <p>Pick one for each. Notes are optional.</p>
+    <form id="answers">
+      <div id="rows"></div>
+      <div class="row"><h3>Anything else? A tradition you'd like, or one that should stay weekly?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+      <button type="submit">Save my answers</button>
+      <p class="status" id="status" role="status">Loading any saved answers...</p>
+    </form>
+  </section>
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user
+  const yn = [['yes', 'Yes, now'], ['later', 'Later'], ['no', 'No']];
+  const items = [
+    ['weekOne', 'Week 1', [['keep', 'Keep week 1 as it is (your earlier rule)'], ['new', 'Fresh ones from week 1 too']]],
+    ['takeTurns', 'The six weekly ones taking turns (section 2)', [['yes', 'Yes, as listed'], ['some', 'Some of them (say which)'], ['no', 'No, keep them weekly']]],
+    ['comicsWall', 'Comics wall day (Ravi Hart)', yn], ['humNight', 'Hum night (Alejandro Reyes)', yn],
+    ['satoTea', "Sato's tea, braved", yn], ['mapNight', 'Map night (Yusuf Kim)', yn],
+    ['paperBoats', 'Paper boat race (Femi Rossi)', yn], ['newsletter', 'Newsletter night (Lucia Ferreira)', yn],
+    ['dance', 'Learn a dance (Tamsin Haddad)', yn], ['cranes', 'A thousand cranes (Chloe Tran)', yn],
+    ['scones', 'Scone morning (Emeka Halloran)', yn],
+    ['visitShape', 'The visit', [['short', 'A: short, Days 16-19 (recommended)'], ['nine', 'B: the built nine days, Days 16-24'], ['other', 'Something else (say)']]],
+    ['cometDay', 'The comet', [['fri26', 'Friday Day 26, 21:30'], ['sat27', 'Saturday Day 27, 21:30 (in place of observatory night)'], ['other', 'Another day (say)']]],
+    ['nightShifts', 'Your night shifts', [['d1920', 'Days 19-20 (as the game has them)'], ['d2224', 'Days 22-24 (as the Kowalczyk story has them)']]],
+    ['memo', "Commander Vance's memo and the senior briefing", [['move', 'Move them into the visit\'s week'], ['drop', 'Drop them'], ['other', 'Other (say)']]],
+    ['welcomeTea', "The new hand's tea", [['thu', 'Stay on Thursday'], ['fri', 'Back to Friday']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
