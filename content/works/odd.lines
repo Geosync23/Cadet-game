@@ -384,7 +384,7 @@
 - Clean trap. The dryer roars happily.
 // Clear the laundry sink drain
 == fix.oj-d4laundry-drain.sign
-- The laundry sink drains slowly, with a sulky gurgle and bubbles.
+- The laundry sink drains slowly, burping bubbles back up.
 == fix.oj-d4laundry-drain.done
 - The sink empties in one go.
 // Oil the music room door
@@ -432,7 +432,7 @@
 == fix.oj-d5lobby-vent.sign
 - The lobby vent outside Works is dark with fine metal dust.
 == fix.oj-d5lobby-vent.done
-- Clean slats. The lobby air is clear.
+- Bright slats. The lobby air is clear.
 // Polish the deck sign by the lift
 == fix.oj-d5lobby-sign.sign
 - The deck sign outside Works is smeared with oily prints.
