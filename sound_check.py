@@ -160,7 +160,55 @@ def check_music_app(pw, path):
         check(not [e for e in g.errors if 'pageerror' in e], f'music: no page errors {g.errors[:2]}')
     finally: g.close()
 
-CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends]
+def check_core_hooks(pw, path):
+    """turns 2-5: the hum by deck, doors (yours and crew, near only), the lift, footsteps, Mail, a heads-up; seed untouched"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        g.page.wait_for_timeout(800); g.step(5)   # the hum is checked twice a second (real time)
+        hums = g.ev("SND.log.filter(e => e.name.startsWith('hum:')).map(e => e.name)")
+        check(len(hums) >= 1, f'a deck hum starts: {hums}')
+        g.ev('goToDeck(3)'); g.page.wait_for_timeout(700); g.step(5)
+        check(g.ev("SND.log.some(e => e.name === 'hum:commons')"), 'Deck 3 gets the Commons hum')
+        g.ev('goToDeck(6)'); g.page.wait_for_timeout(700); g.step(5)
+        check(g.ev("SND.log.some(e => e.name === 'hum:engine')"), 'Deck 6 gets the Engineering hum')
+        g.ev('goToDeck(4)'); g.page.wait_for_timeout(700); g.step(5)
+        # a door next to you opening and closing (driven by hand: open goes 0 -> 1 -> 0)
+        res = g.ev("""(() => { const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); if (!d) return null;
+          player.obj.position.set(d.cx + 0.5, 0, d.cz); SND.log.length = 0; return [d.cx, d.cz]; })()""")
+        if check(res is not None, 'Deck 4 has a door to test'):
+            for v in (0.0, 0.5, 1.0, 0.5):
+                g.ev(f"(() => {{ const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
+            names = g.ev("SND.log.map(e => e.name + (e.crew ? ':crew' : ''))")
+            check(names.count('doorOpen') == 1 and names.count('doorClose') == 1 and not any(':crew' in n for n in names), f'your door opening and closing play once each: {names}')
+            g.ev("DOOR_OBJS.forEach(d => delete d.force)")
+        # footsteps: walk the player along by hand
+        g.ev("SND.log.length = 0"); g.step(2)
+        for k in range(30):
+            g.ev("player.obj.position.x += 0.09"); g.step(1)
+        steps = g.ev("SND.log.filter(e => e.name === 'step').length")
+        check(3 <= steps <= 6, f'about one step every 0.62 tiles walked: {steps} for 2.7 tiles')
+        # Mail and a heads-up
+        g.ev("SND.log.length = 0; SHIP.mail.push({ at: 0, from: 'Test', subject: 'Test', body: 'Test', read: false })"); g.step(3)
+        check(g.ev("SND.log.some(e => e.name === 'mail')"), 'new Mail plays the Mail sound')
+        # SND's own per-frame watcher, driven by hand with no game frames between (the game's frames draw on R() themselves)
+        same = g.ev("""(() => { const s0 = seed, d = DOOR_OBJS.find(x => x.e.type !== 'lift');
+          for (let k = 0; k < 60; k++) { player.obj.position.x += 0.05; if (d) d.open = k % 20 < 10 ? 1 : 0; SND.onFrame.forEach(f => f(true)); }
+          SHIP.mail.push({ at: 0, from: 'Test', subject: 'Seed', body: 'x', read: false }); SND.onFrame.forEach(f => f(true));
+          return seed === s0; })()""")
+        check(same, "SND's watcher never draws on R()")
+        ticks = g.ev("(() => { window.__t = [0, 0]; SND.actTick = () => window.__t[0]++; SND.musicTick = () => window.__t[1]++; return 1; })()")
+        g.page.wait_for_timeout(2300); g.step(3); g.page.wait_for_timeout(1100); g.step(3)
+        t = g.ev('window.__t'); g.ev('SND.actTick = SND.musicTick = null')
+        check(t[0] >= 1 and t[1] >= 1, f'the slots get their once-a-second ticks: {t}')
+        g.ev("SND.log.length = 0; (() => { const b = ROOM_BOX['@']; if (b) player.obj.position.copy(cellPos(b.i0 + 1, b.j0 + 1)); })(); startRide(3)")
+        g.step(80)
+        lift = g.ev("SND.log.map(e => e.name).filter(n => n.startsWith('lift'))")
+        check(lift == ['liftPress', 'liftDoorsClose', 'liftRide', 'liftArrive', 'liftDoorsOpen'], f'the lift: press, doors shut, ride, arrival, doors open, once each: {lift}')
+    finally: g.close()
+
+CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_core_hooks]
 CHECKS += [check_music_schedule, check_music_app]   # music (FX22b)
 # (activities and music add theirs here)
 
