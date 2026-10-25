@@ -113,6 +113,9 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <h1>Wren Soundscape</h1>
     <p class="lede">A first pass at how the ship could sound. Every sound here is made live in your browser, with no recordings, so it can be tuned by changing a few numbers. Tap any button to start; nothing plays on its own.</p>
     <p class="hint">Headphones or a speaker help with the hum. Phone speakers can't play the deepest notes, so each hum also carries higher overtones you can still hear. On an iPhone, if you hear nothing, check the silent switch.</p>
+    <div class="v2"><b>Version 7</b><ul>
+      <li>Four music samples to try (not chosen yet), with a Music slider in the mixer. Music comes later, after sound is in the game.</li>
+    </ul></div>
     <div class="v2"><b>Version 6: all sounds chosen</b><ul>
       <li>Your last picks are marked Chosen: lift C (Smooth) and deck button B (Two-step). They are selected when the page opens.</li>
       <li>The scene now uses only your chosen sounds: Cabin doors, the Smooth lift and the Two-step button, with device tap A and Mail B as before.</li>
@@ -308,6 +311,22 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <p class="variant-note" id="stepsNote">All soft, like carpet, with just a hint of each floor: plating for the junior wing and Deck 5, carpet for the officers' corridor, planks for the Deck 3 promenade, gravel for the garden.</p>
   </section>
 
+  <!-- MUSIC -->
+  <section class="card" aria-labelledby="h-music">
+    <div class="card-head">
+      <span class="tag">Samples · not chosen yet · version 7</span>
+      <h2 id="h-music">Music samples</h2>
+      <p class="lede">Four short, cozy loops (about 40 to 60 seconds each) for later. They're made live like everything else, with no recordings, and play quieter than the hum. Tap one to hear it; tap again to stop. You can play a hum under it to hear them together.</p>
+    </div>
+    <div class="chips" data-group="music">
+      <button class="chip" data-music="evening" aria-pressed="false"><span class="dot"></span>Quarters, evening</button>
+      <button class="chip" data-music="galley" aria-pressed="false"><span class="dot"></span>Galley, morning</button>
+      <button class="chip" data-music="stars" aria-pressed="false"><span class="dot"></span>Observatory</button>
+      <button class="chip" data-music="party" aria-pressed="false"><span class="dot"></span>Tradition night</button>
+    </div>
+    <p class="variant-note" id="musicNote">Pick a sample to hear it.</p>
+  </section>
+
   <!-- SCENE -->
   <section class="card" aria-labelledby="h-scene">
     <div class="card-head">
@@ -324,6 +343,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <div class="mixer">
       <label class="fader"><span>Hum</span><input type="range" id="v-hum" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader"><span>Footsteps</span><input type="range" id="v-steps" min="0" max="100" value="80"><output>80</output></label>
+      <label class="fader"><span>Music</span><input type="range" id="v-music" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader"><span>Beeps, doors</span><input type="range" id="v-ui" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader master"><span>Master</span><input type="range" id="v-master" min="0" max="100" value="80"><output>80</output></label>
     </div>
@@ -392,8 +412,8 @@ function buildGraph(c, dest) {
   const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
   const g = {};
   // fixed trims set by measuring each layer against the hum (see __measure below)
-  const TRIM = { hum: 0.4, steps: 1.0, ui: 1 };
-  for (const k of ['hum', 'steps', 'ui']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
+  const TRIM = { hum: 0.4, steps: 1.0, ui: 1, music: 0.55 };
+  for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
   return { buf, comp, master, verb, ...g };
 }
 
@@ -696,18 +716,124 @@ function startWalk(surface, segs) {
   return w;
 }
 
+/* ---------- music samples (version 7, not chosen yet) ---------- */
+// Each sample is a short loop: a fixed chord sequence, and a melody drawn once from its own seeded numbers so it repeats exactly.
+const mtof = m => 440 * Math.pow(2, (m - 69) / 12);
+function seeded(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+const MI = {
+  // soft pad: two detuned triangles per note through a low filter, slow in and out
+  pad(t, notes, d, g, out, att = 0.8) {
+    notes.forEach(m => [-6, 6].forEach(c => {
+      const o = ctx.createOscillator(), lp = ctx.createBiquadFilter(), e = ctx.createGain();
+      o.type = 'triangle'; o.frequency.value = mtof(m); o.detune.value = c; lp.type = 'lowpass'; lp.frequency.value = 900;
+      e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + att); e.gain.setValueAtTime(g, t + d - 0.6); e.gain.linearRampToValueAtTime(0, t + d + 0.4);
+      o.connect(lp); lp.connect(e); e.connect(out); o.start(t); o.stop(t + d + 0.5);
+    }));
+  },
+  // electric piano: a gently modulated sine with a soft bell edge
+  keys(t, m, d, g, out) {
+    const f = mtof(m), car = ctx.createOscillator(), mod = ctx.createOscillator(), mg = ctx.createGain(), e = ctx.createGain();
+    car.frequency.value = f; mod.frequency.value = f; mg.gain.setValueAtTime(f * 1.1, t); mg.gain.exponentialRampToValueAtTime(f * 0.02, t + 0.4);
+    mod.connect(mg); mg.connect(car.frequency); env(e, t, g, 0.006, d); car.connect(e); e.connect(out);
+    car.start(t); mod.start(t); car.stop(t + d + 0.1); mod.stop(t + d + 0.1);
+  },
+  pluck(t, m, g, out) { const f = mtof(m); tone(t, f, 0.5, { gain: g, a: 0.003, bus: out }); tone(t, f * 4, 0.06, { gain: g * 0.15, a: 0.002, bus: out }); },
+  bass(t, m, d, g, out) { tone(t, mtof(m), d, { gain: g, a: 0.02, bus: out }); tone(t, mtof(m + 12), d * 0.6, { gain: g * 0.3, type: 'triangle', lp: 600, a: 0.02, bus: out }); },
+  glass(t, m, g, out) { fmBell(t, mtof(m), 2.6, g, 2, 0.6, 0, out); },
+  flute(t, m, d, g, out) {
+    const o = ctx.createOscillator(), v = ctx.createOscillator(), vg = ctx.createGain(), e = ctx.createGain();
+    o.frequency.value = mtof(m); v.frequency.value = 5; vg.gain.value = mtof(m) * 0.004; v.connect(vg); vg.connect(o.frequency);
+    e.gain.setValueAtTime(0, t); e.gain.linearRampToValueAtTime(g, t + 0.07); e.gain.setValueAtTime(g, t + d * 0.8); e.gain.linearRampToValueAtTime(0, t + d);
+    o.connect(e); e.connect(out); o.start(t); v.start(t); o.stop(t + d + 0.05); v.stop(t + d + 0.05);
+    noise(t, 0.08, { f: mtof(m) * 2, q: 2, gain: g * 0.3, a: 0.02, bus: out });   // a little breath at the start
+  },
+  shaker(t, g, out) { noise(t, 0.05, { ft: 'highpass', f: 6000, gain: g, a: 0.006, bus: out }); },
+};
+// a melody walking a scale: per bar, a few notes on the beat grid
+function walkMelody(rng, bars, scale, lo, hi, grid, count, rests = []) {
+  const pool = scale.filter(m => m >= lo && m <= hi); let k = (pool.length / 2) | 0;
+  return Array.from({ length: bars }, (_, b) => {
+    if (rests.includes(b % 4)) return [];
+    const n = count[0] + ((rng() * (count[1] - count[0] + 1)) | 0);
+    const pos = [...new Set(Array.from({ length: n }, () => grid[(rng() * grid.length) | 0]))].sort((x, y) => x - y);
+    return pos.map((p, i) => { k = Math.max(0, Math.min(pool.length - 1, k + [-2, -1, -1, 1, 1, 2][(rng() * 6) | 0])); return [p, pool[k], ((pos[i + 1] ?? grid[grid.length - 1] + 1) - p)]; });
+  });
+}
+const PENTA = r => [0, 2, 4, 7, 9].flatMap(d => [36, 48, 60, 72, 84, 96].map(o => o + r + d)).sort((a, b) => a - b);
+const MUSIC = {
+  evening: { bpm: 66, beats: 4, wet: 0.35, seed: 11,
+    note: 'Quarters, evening: slow electric piano chords, a soft pad and a few plucked notes. For winding down in your bunk room or the common room.',
+    bars: [[53, 57, 60, 64, 41], [52, 55, 59, 62, 40], [50, 53, 57, 60, 38], [48, 52, 55, 59, 36]],
+    make(rng) { return { mel: walkMelody(rng, 16, PENTA(0), 72, 86, [0, 0.5, 1, 1.5, 2, 2.5, 3, 3.5], [2, 4], [3]) }; },
+    bar(t, i, s, out, plan) {
+      const ch = this.bars[i % 4], notes = ch.slice(0, 4), root = ch[4];
+      notes.forEach(m => MI.keys(t, m, s * 3.6, 0.02, out)); notes.slice(2).forEach(m => MI.keys(t + s * 2.5, m, s * 1.4, 0.012, out));
+      MI.pad(t, notes.map(m => m + 12), s * 4, 0.012, out);
+      MI.bass(t, root, s * 3.5, 0.08, out);
+      plan.mel[i].forEach(([b, m]) => MI.pluck(t + b * s, m, 0.045, out));
+    } },
+  galley: { bpm: 92, beats: 4, wet: 0.25, seed: 23,
+    note: 'Galley, morning: a bright marimba pattern, a light shaker and a whistled tune in the second half. Breakfast with the kettle on.',
+    bars: [[55, 59, 62, 67, 43], [54, 57, 62, 66, 42], [52, 55, 59, 64, 40], [48, 55, 60, 64, 36]],
+    make(rng) { return { mel: walkMelody(rng, 16, PENTA(7), 74, 88, [0, 1, 1.5, 2, 3, 3.5], [2, 4], [3]) }; },
+    bar(t, i, s, out, plan) {
+      const ch = this.bars[i % 4], up = ch.slice(0, 4).map(m => m + 12), arp = [...up, ...up.slice(1, 3).reverse(), up[0] + 12, up[2]];
+      arp.forEach((m, k) => MI.pluck(t + k * s / 2, m, k % 2 ? 0.035 : 0.05, out));
+      for (let k = 0; k < 8; k++) MI.shaker(t + k * s / 2, k % 2 ? 0.03 : 0.015, out);
+      MI.bass(t, ch[4], s * 1.6, 0.11, out); MI.bass(t + 2 * s, ch[4] + 7, s * 1.6, 0.08, out);
+      MI.pad(t, ch.slice(0, 3), s * 4, 0.008, out);
+      if (i >= 8) plan.mel[i].forEach(([b, m, d]) => MI.flute(t + b * s, m, Math.min(d, 1.5) * s * 0.9, 0.035, out));
+    } },
+  stars: { bpm: 56, beats: 4, wet: 0.55, seed: 37,
+    note: 'Observatory: long, slow pad swells and a few glassy bells, no beat at all. For stargazing, the observatory and late watches.',
+    bars: [[50, 57, 61, 64, 66, 38], [47, 54, 57, 61, 62, 35], [43, 50, 54, 59, 61, 31], [45, 52, 57, 59, 62, 33]],
+    make(rng) { return { mel: walkMelody(rng, 12, PENTA(2), 78, 93, [0, 1, 1.5, 2.5, 3], [1, 3]) }; },
+    bar(t, i, s, out, plan) {
+      const ch = this.bars[i % 4];
+      MI.pad(t, ch.slice(0, 5), s * 4, 0.012, out, 1.6);
+      MI.bass(t, ch[5] + 12, s * 3.8, 0.07, out);
+      plan.mel[i].forEach(([b, m]) => MI.glass(t + b * s, m, 0.03, out));
+    } },
+  party: { bpm: 108, beats: 3, wet: 0.3, seed: 5,
+    note: 'Tradition night: a gentle waltz with bass, piano on the off-beats and a flute tune. For the ship\'s traditions and small celebrations.',
+    bars: [[60, 64, 67, 48], [57, 60, 64, 45], [57, 60, 65, 41], [59, 62, 67, 43], [60, 64, 67, 48], [57, 60, 64, 45], [57, 60, 62, 65, 38], [59, 62, 65, 67, 43]],
+    make(rng) { return { mel: walkMelody(rng, 24, PENTA(0), 72, 84, [0, 1, 2], [1, 3], [3]) }; },
+    bar(t, i, s, out, plan) {
+      const ch = this.bars[i % 8], root = ch[ch.length - 1], up = ch.slice(0, -1);
+      MI.bass(t, root, s * 1.8, 0.11, out);
+      [1, 2].forEach(b => up.forEach(m => MI.keys(t + b * s, m, s * 0.7, 0.022, out)));
+      [1, 2].forEach(b => noise(t + b * s, 0.09, { ft: 'bandpass', f: 4000, q: 0.6, gain: 0.012, a: 0.02, bus: out }));   // soft brushes
+      plan.mel[i].forEach(([b, m, d]) => MI.flute(t + b * s, m, d * s * 0.92, 0.04, out));
+    } },
+};
+function startMusic(key) {
+  const P = MUSIC[key], now = ctx.currentTime, route = R, rng = seeded(P.seed), plan = P.make(rng);
+  const out = ctx.createGain(); out.gain.setValueAtTime(0, now); out.gain.linearRampToValueAtTime(1, now + 1);
+  out.connect(route.music); const send = ctx.createGain(); send.gain.value = P.wet; out.connect(send); send.connect(B.verb);
+  const s = 60 / P.bpm, len = s * P.beats, nBars = plan.mel.length;
+  let bar = 0, next = now + 0.1;
+  const m = {
+    label: key, out,
+    tick(u) { while (next < u) { P.bar(next, bar % nBars, s, out, plan); bar++; next += len; } },
+    stop(f = 1.2) { const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f); LOOPS.delete(m); setTimeout(() => out.disconnect(), (f + 6) * 1000); },
+  };
+  LOOPS.add(m); m.tick(now + 0.2);
+  return m;
+}
+
 /* ---------- page wiring ---------- */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 const PLAY_ICON = '<svg viewBox="0 0 16 16"><path d="M4 2v12l10-6z"/></svg>';
 $$('.play').forEach(b => b.innerHTML = PLAY_ICON);
 const statusEl = $('#status');
-const live = { hum: null, steps: null };
+const live = { hum: null, steps: null, music: null };
 const NAMES = { quarters: 'Quarters hum', commons: 'Commons hum', engine: 'Engineering hum', garden: 'Garden hum', bridge: 'Bridge hum',
   plating: 'steps on plating', carpet: 'steps on carpet', planks: 'steps on planks', garden_s: 'steps on the garden path' };
 function updateStatus() {
   const bits = [];
   if (live.hum) bits.push(NAMES[live.hum.label]);
   if (live.steps) bits.push(NAMES[live.steps.label === 'garden' ? 'garden_s' : live.steps.label]);
+  if (live.music) bits.push(MUSIC_NAMES[live.music.label]);
   if (scene) bits.push('the scene');
   statusEl.textContent = bits.length ? 'Playing: ' + bits.join(', ') : (ctx ? 'Quiet. Tap any sound.' : 'Tap any button to start sound.');
 }
@@ -750,14 +876,22 @@ $$('[data-steps]').forEach(b => b.addEventListener('click', () => {
 }));
 
 function stopLoops() {
-  if (live.hum) live.hum.stop(0.8); if (live.steps) live.steps.stop();
-  live.hum = live.steps = null;
-  setPressed('hum', 'hum', null); setPressed('steps', 'steps', null);
+  if (live.hum) live.hum.stop(0.8); if (live.steps) live.steps.stop(); if (live.music) live.music.stop();
+  live.hum = live.steps = live.music = null;
+  setPressed('hum', 'hum', null); setPressed('steps', 'steps', null); setPressed('music', 'music', null);
 }
 $('#stopAll').addEventListener('click', () => { if (!ctx) return; stopLoops(); stopScene(); updateStatus(); });
 
 /* faders: 80 = normal (gain 1), squared curve so the low end is gentle */
-const FADERS = ['hum', 'steps', 'ui', 'master'];
+const FADERS = ['hum', 'steps', 'ui', 'music', 'master'];
+const MUSIC_NAMES = { evening: 'Quarters, evening', galley: 'Galley, morning', stars: 'Observatory', party: 'Tradition night' };
+$$('[data-music]').forEach(b => b.addEventListener('click', () => {
+  ensure(); stopScene();
+  const k = b.dataset.music, was = live.music && live.music.label;
+  if (live.music) { live.music.stop(); live.music = null; }
+  if (was !== k) { live.music = startMusic(k); $('#musicNote').textContent = MUSIC[k].note; }
+  setPressed('music', 'music', live.music ? k : null); updateStatus();
+}));
 function applyFaders() {
   FADERS.forEach(k => {
     const el = $('#v-' + k); el.nextElementSibling.textContent = el.value;

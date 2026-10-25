@@ -12,7 +12,7 @@ All sound is made live by the browser (Web Audio), exactly as in the mockup, so 
 
 | Sound | Hook point in `starship-cadet.html` | Notes |
 | --- | --- | --- |
-| Deck hum | `goToDeck(n, at)` (~43210): cross-fade to that deck's hum. Also checked once a second against the player's room, for the garden. | Deck 1 Bridge hum; 2 Bridge hum (a touch warmer); 3 Commons; 4 Quarters; 5 Quarters hum made deeper (a workshop); 6 Engineering; R Commons. The hydroponics garden room on Deck 3 (floor `'garden'`) uses the Garden hum. Optional: about 2 dB softer at night, following `nightT`. |
+| Deck hum | `goToDeck(n, at)` (~43210): cross-fade to that deck's hum. Also checked once a second against the player's room, for the garden. | Deck 1 Bridge hum; 2 Bridge hum (a touch warmer); 3 Commons; 4 Quarters; 5 Quarters hum made deeper (a workshop); 6 Engineering; R Commons. The hydroponics garden room on Deck 3 (floor `'garden'`) uses the Garden hum. |
 | Room doors | The door loop in `loop()` (~43377): `d.open += ...`. Play "open" when `d.open` starts rising from about 0, and "close" when it starts falling from about 1. | Every room door uses room door **C (Cabin)**, the user's pick (2026-10-25). Only doors within about 7 tiles of the player play, quieter with distance and panned left or right by screen position. |
 | Hatches | Same loop; `d.svc` (a service hatch, already "heavier" in the code). | Every hatch uses hatch **A (Bulkhead)**, the user's pick (2026-10-25). |
 | Lift (**C, Smooth**, the user's pick) | `startRide(n)` (~43286) and `updateRide(dt)` (~43292), using the `RIDE` times. | At the start: the deck button press (**B, Two-step**, the user's pick: the Mail B bell made short, two quick rising notes over a soft press), then the lift doors closing. From `RIDE.shut` to `RIDE.light`: the ride. At about `RIDE.light`: the clunk and settle, then the chime, then the doors open (they already open from `d.force` there). The game's whole ride is only 1.8 s against 3.6 s in the mockup, so the ride sound is squeezed to fit and the chime rings on as the doors open. The lift door loop must not also fire the room-door sound (check `d.e.type === 'lift'`). |
@@ -25,13 +25,13 @@ All sound is made live by the browser (Web Audio), exactly as in the mockup, so 
 | "Not now" | The places that refuse you: `deviceLockedTap`, the tap text on sealed rooms and hatches, carrying with full hands, "too early to sleep". | One line each. The first turn lists them all with a `grep`. |
 | Footsteps | `playerUpdate(dt, t)` (~12760): add up the distance walked and play a step every half stride, using the floor of the player's tile. | Floors from the tile's `st.floor` (~3130-3200): `plate` and grating get plating; `wood` and the promenade get planks; `carpet`, `corridor`, `lobby` and `warm` get carpet; `garden` gets the garden path. Crawl tiles are quieter and slower. No steps when sitting, riding, or in a scripted move. |
 
-Crew footsteps and crew doors far from the player stay silent, and there is no crowd sound, as the user decided.
+**Crew doors near you make sound** (the user, 2026-10-25): any door or hatch that opens or closes within the same ~7-tile radius plays, whoever opened it. A door the crew opened plays about 6 dB quieter than one you walk through, and crew doors have their own cap: at most 2 at once and no more than 1 new one every 0.4 s (others are skipped, not queued), so a busy corridor doesn't pile up. Crew footsteps stay silent, and there is no crowd sound, as the user decided.
 
 ## The setting: sound on/off and volume (saved)
 
 - Two new rows in the Settings app (`deviceApp({ id: 'settings' ... })`, ~11506), in the same On/Off button style: **Sound: On / Off** and **Volume: Low / Medium / High**.
 - Saved in its own small key, `starship-cadet-sound` (`{ on, vol }`), not in the game save. The save format and the save budget stay as they are, and `player_check`'s saving tests don't change. The setting also survives starting a new game, as a preference should.
-- Default: on, Medium. (Open question for the user.)
+- Default: **on, at Medium** (the user, 2026-10-25).
 
 ## Starting, pausing, stopping
 
@@ -68,7 +68,7 @@ Crew footsteps and crew doors far from the player stay silent, and there is no c
 Each turn makes small exact edits, bumps the build number, adds a row to the DEV_NOTES build table, runs the quick tests and `cadet_test` (decks pixel-identical), then commits and pushes.
 
 1. **Engine and setting.** The `SND` block with the hum, beep, door, lift and step makers (still silent everywhere); first-tap start; suspend on pause, Tiles and hidden; off under webdriver, `?nosave` and `?mute`; the sound key and the two Settings rows. Check: `cadet_test` identical, device_check sees the new rows.
-2. **Hum.** Deck hums on `goToDeck`, the garden room, the cross-fade, the night dip. Check: a deck tour with `?sound`, logging the hum per deck.
+2. **Hum.** Deck hums on `goToDeck`, the garden room, the cross-fade (no night dip: the user, 2026-10-25). Check: a deck tour with `?sound`, logging the hum per deck.
 3. **Device and job sounds.** Open, close, tap, Mail, heads-up, job done, job posted (badge only), "not now".
 4. **Doors and the lift.** The door loop sounds with distance, pan, type and the voice cap; the lift timeline fitted to `RIDE`.
 5. **Footsteps.** Distance-based steps, floor lookup, crawl and sitting rules.
@@ -85,6 +85,7 @@ Each turn makes small exact edits, bumps the build number, adds a row to the DEV
 - **Silent by default.** With no `?sound`, under webdriver, no `AudioContext` is ever made (the constructor is wrapped to count calls).
 - **Levels.** Each sound is rendered offline, the same way as the mockup's measurement. No one-shot is louder than the Quarters hum, and footsteps are at least 8 dB under it.
 - **Pause.** After `pauseSet(true)` the audio is suspended; after resume it runs again.
+- **Crew doors.** With crew walking through a door near you, crew door sounds are quieter than yours, never more than 2 at once, and at most 1 new one per 0.4 s.
 
 Add `sound_check` to the full round. It is quick (about 2 minutes) and fits in the lightest runner's share.
 
@@ -116,9 +117,11 @@ The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), M
 
 Final picks (via lead 36, 2026-10-25): lift **C** (Smooth: quieter parting doors, a gliding ride with a rising rush of air and no rail joints, a soft settle, three falling chime notes) and deck button **B** (Two-step). Nothing is left to pick. The builder takes exactly the chosen versions from the mockup (`DOORS.roomC`, `DOORS.hatchA`, `LIFTS.C`, `PRESS.B`, `SFX.tapA`, `SFX.mailB`, `SFX.headsB`) and can leave the rest out.
 
-## Open questions for the user
+## Decided (the user, 2026-10-25, 12:25 PM Eastern, via lead 36)
 
-1. Sound on by default, at Medium? Or off until you turn it on?
-2. Should crew doors near you make sound, or only doors you walk through yourself?
-3. Night: should the hum dip a little at night?
-4. Music: the design doc says "Music later, with sound". Is music part of this job, or later?
+1. **Sound is on by default, at Medium.** The Settings rows can turn it off or change the volume.
+2. **Crew doors near you make sound,** within the ~7-tile radius, quieter than your own (about 6 dB) and capped (at most 2 at once, 1 new one per 0.4 s) so busy corridors don't pile up. See "Where each sound hooks in".
+3. **No night dip.** The hum stays the same day and night.
+4. **Music: not yet.** The mockup page has four samples (Version 7, "Music samples"), not chosen yet. Music is its own later job and is not in this plan's estimate.
+
+**When:** sound is built after the next release (after 0.92.6 ships), when the user gives the go. Until then this plan, the mockup page and design-doc's "Sound" section (on branch `claude/sound-sd1`) are the record.
