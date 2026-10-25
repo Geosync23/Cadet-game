@@ -105,7 +105,7 @@ def rules(r, mode):
         for b in bs:
             n = b['beat']
             if n not in told.get(id, set()) and n not in skip.get(id, set()): bad.append(f'{id} beat {n}: never told or skipped (STALLED: {json.dumps(r["why"].get(id))})')
-            if b['cres'] and b['quiet'] and n in told.get(id, set()) and b['quiet'] in told.get(id, set()): bad.append(f'{id}: crescendo {n} and its quiet ending {b["quiet"]} both told')
+            if b['quiet'] and n in told.get(id, set()) and b['quiet'] in told.get(id, set()): bad.append(f'{id}: beat {n} and its quiet ending {b["quiet"]} both told')
             if mode == 'miss' and b['cres']:
                 if n in told.get(id, set()): bad.append(f'{id}: crescendo {n} told in the miss run')
                 if b['quiet'] and b['quiet'] not in told.get(id, set()): bad.append(f'{id}: crescendo {n} missed but quiet ending {b["quiet"]} not told')
@@ -145,7 +145,7 @@ def selftest():
     out = []
     r = base(); out.append(('clean log passes', not rules(r, 'play')))
     r = base(); r['told']['a'] = [1, 2]; r['skip']['a'] = [3]; out.append(('a stalled beat', any('never told' in x for x in rules(r, 'play'))))
-    r = base(); r['told']['a'] = [1, 2, 3, 4]; r['skip']['a'] = []; out.append(('crescendo and quiet both', any('both told' in x for x in rules(r, 'play'))))
+    r = base(); r['told']['a'] = [1, 2, 3, 4]; r['skip']['a'] = []; out.append(('beat and its quiet ending both', any('both told' in x for x in rules(r, 'play'))))
     r = base(); r['mails'] = []; out.append(('no Mail', any('no Mail' in x for x in rules(r, 'play'))))
     r = base(); r['cal'] = {}; out.append(('no Calendar', any('Calendar' in x for x in rules(r, 'play'))))
     r = base(); r['log'][1]['t'] = 4 * 1440 + 800; out.append(('outside its booking', any('outside its booking' in x for x in rules(r, 'play'))))
