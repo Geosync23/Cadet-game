@@ -1,5 +1,25 @@
 # CR6 check results
 
+## 0.93.0 full round (2026-10-25): all 11 OK
+
+- **Build:** `claude/staging-0.93.0` 4f1e52bf (sound and music, section 27; FX17's reserved-job fix), `starship-cadet.html`
+  sha256 `97f21893d17bce087b2ab4b3a3cd769a2f696da88da263a3f5d4f2ae8c38f6a8` (matches BM18's). OLD 5898c190 (0.92.6).
+- Fresh CR6 (session_013wLtAmKooMrgGrXF4Ljiof). Run from a separate worktree (/tmp/work-cr6/b093), one check at a time.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 240 s) | `QUICK CHECK OK in 240 s` |
+| stories_check | OK (exit 0, 35 s) | `STORIES CHECK OK` |
+| mech_check | OK (exit 0, 472 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 153 s) | `BIGEVENTS CHECK OK` |
+| join_check | OK (exit 0, 237 s, alone) | `JOIN CHECK OK` |
+| tiles_check | OK (exit 0, 112 s, alone) | `ALL OK` |
+| disc_check | OK (exit 0, 274 s) | `ALL OK` |
+| food_check 1 7 | OK (exit 0, 54 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 59 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 73 s) | `ALL OK` |
+| fridays_check | OK (exit 0, 944 s) | `FRIDAYS CHECK OK` |
+
 ## 0.92.6 full round (2026-10-25): 3 new FAILs on b78e1e22, all OK on the final 6b425814
 
 - **Build:** `claude/staging-0.92.6` b78e1e22 (all six switches on, odd jobs included), `starship-cadet.html` sha256
