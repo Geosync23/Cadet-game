@@ -111,11 +111,15 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <h1>Wren Soundscape</h1>
     <p class="lede">A first pass at how the ship could sound. Every sound here is made live in your browser, with no recordings, so it can be tuned by changing a few numbers. Tap any button to start; nothing plays on its own.</p>
     <p class="hint">Headphones or a speaker help with the hum. Phone speakers can't play the deepest notes, so each hum also carries higher overtones you can still hear. On an iPhone, if you hear nothing, check the silent switch.</p>
-    <div class="v2"><b>Version 2, after your listen</b><ul>
+    <div class="v2"><b>Version 3</b><ul>
+      <li>All footsteps are now soft, like the carpet ones, with only a gentle hint of each floor.</li>
+      <li>The crowd chatter is gone, from its own section and from the scene.</li>
+    </ul></div>
+    <div class="v2"><b>Version 2</b><ul>
       <li>Doors rebuilt to sound heavy and mechanical, with no beeps in them. Three versions of room doors and hatches.</li>
       <li>The lift has its own section and its own sound: parting doors, a ride you can feel, a clunk as it settles and a struck-metal chime. Three lifts to compare.</li>
-      <li>Footsteps are quieter. Plating and planks now sound hard: a firm heel, a short metal ring or a woody knock.</li>
-      <li>Background beeps taken out: the bridge's high whine, the cutlery clinks in the crowd, and the little tones inside the old doors and footsteps.</li>
+      <li>Footsteps are quieter.</li>
+      <li>Background beeps taken out: the bridge's high whine, the cutlery clinks, and the little tones inside the old doors and footsteps.</li>
       <li>The scene uses the new doors, lift and footsteps.</li>
     </ul></div>
   </header>
@@ -265,25 +269,6 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     </div>
   </section>
 
-  <!-- CROWD -->
-  <section class="card" aria-labelledby="h-crowd">
-    <div class="card-head">
-      <span class="tag">Voices without words</span>
-      <h2 id="h-crowd">Crowd</h2>
-      <p class="lede">Made from simple voices that "talk" in vowel sounds, blurred so no words come through. Now and then someone laughs. The auditorium is a bigger, more echoing room than the mess.</p>
-    </div>
-    <div class="chips" data-group="crowd">
-      <button class="chip" data-crowd="small" aria-pressed="false"><span class="dot"></span>Small</button>
-      <button class="chip" data-crowd="medium" aria-pressed="false"><span class="dot"></span>Medium</button>
-      <button class="chip" data-crowd="busy" aria-pressed="false"><span class="dot"></span>Busy</button>
-    </div>
-    <div class="chips" data-group="room" role="group" aria-label="Room">
-      <button class="chip small" data-room="mess" aria-pressed="true"><span class="dot"></span>In the mess</button>
-      <button class="chip small" data-room="hall" aria-pressed="false"><span class="dot"></span>In the auditorium</button>
-    </div>
-    <p class="variant-note" id="crowdNote">Small is a table of three; medium is the mess at lunch; busy is the dinner rush or the hall before a show.</p>
-  </section>
-
   <!-- STEPS -->
   <section class="card" aria-labelledby="h-steps">
     <div class="card-head">
@@ -297,7 +282,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
       <button class="chip" data-steps="planks" aria-pressed="false"><span class="dot"></span>Promenade planks</button>
       <button class="chip" data-steps="garden" aria-pressed="false"><span class="dot"></span>Garden path</button>
     </div>
-    <p class="variant-note" id="stepsNote">Plating for the junior wing and Deck 5, carpet for the officers' corridor, planks for the Deck 3 promenade, gravel for the garden.</p>
+    <p class="variant-note" id="stepsNote">All soft, like carpet, with just a hint of each floor: plating for the junior wing and Deck 5, carpet for the officers' corridor, planks for the Deck 3 promenade, gravel for the garden.</p>
   </section>
 
   <!-- SCENE -->
@@ -305,7 +290,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <div class="card-head">
       <span class="tag">Listen together · 48 seconds</span>
       <h2 id="h-scene">Cabin to the mess at dinner</h2>
-      <p class="lede">Everything layered: you check your device in your bunk room, walk to the lift, ride up to the Commons and walk into a busy mess hall. Move the sliders while it plays.</p>
+      <p class="lede">Everything layered: you check your device in your bunk room, walk to the lift, ride up to the Commons and walk along the promenade into the mess hall. Move the sliders while it plays.</p>
     </div>
     <div class="scene-top">
       <button class="big-play" id="sceneBtn"><svg viewBox="0 0 16 16"><path d="M3 1.5v13l11-6.5z"/></svg><span>Play the scene</span></button>
@@ -315,7 +300,6 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <ol class="beats" id="beats"></ol>
     <div class="mixer">
       <label class="fader"><span>Hum</span><input type="range" id="v-hum" min="0" max="100" value="80"><output>80</output></label>
-      <label class="fader"><span>Crowd</span><input type="range" id="v-crowd" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader"><span>Footsteps</span><input type="range" id="v-steps" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader"><span>Beeps, doors</span><input type="range" id="v-ui" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader master"><span>Master</span><input type="range" id="v-master" min="0" max="100" value="80"><output>80</output></label>
@@ -334,7 +318,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
         <li>The hum sets the loudness for everything else. Each sound was measured against it, so a beep or a door is never louder than the hum.</li>
         <li>A gentle limiter sits on the master volume as a safety net, so stacked sounds can't spike.</li>
         <li>The beeps share one family of notes so they sound like they belong to the same device. The lift chime is deliberately outside that family, in its own key and with a struck-metal tone, so you always know it's the lift.</li>
-        <li>Beeps only play when you do something. Nothing in the hum, the crowd, the doors or the footsteps is a beep.</li>
+        <li>Beeps only play when you do something. Nothing in the hum, the doors or the footsteps is a beep.</li>
         <li>Sound pauses when you switch away from the page, like the game does.</li>
       </ul>
     </div>
@@ -385,8 +369,8 @@ function buildGraph(c, dest) {
   const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
   const g = {};
   // fixed trims set by measuring each layer against the hum (see __measure below)
-  const TRIM = { hum: 0.4, crowd: 1.8, steps: 1.0, ui: 1 };
-  for (const k of ['hum', 'crowd', 'steps', 'ui']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
+  const TRIM = { hum: 0.4, steps: 1.0, ui: 1 };
+  for (const k of ['hum', 'steps', 'ui']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
   return { buf, comp, master, verb, ...g };
 }
 
@@ -642,103 +626,21 @@ function startHum(key, level = 1, fade = 1.5) {
   };
 }
 
-/* ---------- crowd ---------- */
-const VOWELS = [[730, 1090], [270, 2290], [530, 1840], [570, 840], [300, 870], [640, 1190], [440, 1020], [490, 1350]];
-class Voice {
-  constructor(out, o) {
-    const c = ctx; this.base = o.pitch; this.lvl = o.lvl; this.fs = o.pitch > 160 ? 1.13 : 1;
-    this.src = c.createOscillator(); this.src.type = 'sawtooth'; this.src.frequency.value = this.base;
-    const pre = c.createBiquadFilter(); pre.type = 'lowpass'; pre.frequency.value = 2200;
-    this.f1 = c.createBiquadFilter(); this.f1.type = 'bandpass'; this.f1.Q.value = 6;
-    this.f2 = c.createBiquadFilter(); this.f2.type = 'bandpass'; this.f2.Q.value = 8;
-    const g2 = c.createGain(); g2.gain.value = 0.5;
-    this.env = c.createGain(); this.env.gain.value = 0;
-    this.src.connect(pre); pre.connect(this.f1); this.f1.connect(this.env); pre.connect(this.f2); this.f2.connect(g2); g2.connect(this.env);
-    const pan = c.createStereoPanner ? c.createStereoPanner() : null;
-    if (pan) { pan.pan.value = o.pan; this.env.connect(pan); pan.connect(out); } else this.env.connect(out);
-    this.next = c.currentTime + rand(0, 2.5); this.left = 0; this.len = 1;
-    this.src.start();
-  }
-  tick(until) {
-    while (this.next < until) {
-      const t = this.next;
-      if (this.left <= 0) {
-        if (!this.pausing) { this.pausing = true; this.next = t + rand(0.4, 2.6); continue; }
-        this.pausing = false; this.laugh = Math.random() < 0.06;
-        this.len = this.left = this.laugh ? (4 + Math.random() * 3) | 0 : (3 + Math.random() * 9) | 0;
-        this.rise = Math.random() < 0.2 ? 0.12 : -0.14;
-      }
-      const prog = 1 - this.left / this.len;
-      const d = this.laugh ? 0.08 : rand(0.1, 0.27), v = this.laugh ? VOWELS[0] : pick(VOWELS);
-      const pitch = this.base * (this.laugh ? 1.35 : 1) * (1 + this.rise * prog + rand(-0.04, 0.04));
-      this.src.frequency.setTargetAtTime(pitch, t, 0.04);
-      this.f1.frequency.setTargetAtTime(v[0] * this.fs, t, 0.025);
-      this.f2.frequency.setTargetAtTime(v[1] * this.fs, t, 0.025);
-      this.env.gain.setTargetAtTime(this.lvl * (this.laugh ? 0.8 : rand(0.6, 1)), t, 0.018);
-      this.env.gain.setTargetAtTime(0, t + d * 0.75, 0.035);
-      this.left--; this.next = t + d + (this.laugh ? 0.06 : rand(0.03, 0.1));
-    }
-  }
-  stop(t) { this.env.gain.cancelScheduledValues(t); this.env.gain.setTargetAtTime(0, t, 0.05); this.src.stop(t + 0.5); }
-}
-const CROWD = { small: { v: 3, bed: 0 }, medium: { v: 7, bed: 0.04 }, busy: { v: 14, bed: 0.1 } };
-function startCrowd(size, room = 'mess', level = 1, fade = 1.2) {
-  const p = CROWD[size], now = ctx.currentTime, route = R;
-  const out = ctx.createGain(); out.gain.setValueAtTime(0, now); out.gain.linearRampToValueAtTime(level, now + fade);
-  const mix = ctx.createGain(); mix.gain.value = 1 / Math.sqrt(p.v / 3);
-  const hp = ctx.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 140;
-  const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = room === 'hall' ? 1300 : 1600;
-  mix.connect(hp); hp.connect(lp); lp.connect(out); out.connect(route.crowd);
-  const send = ctx.createGain(); send.gain.value = room === 'hall' ? 0.7 : 0.3; out.connect(send); send.connect(B.verb);
-  const voices = [];
-  for (let i = 0; i < p.v; i++) {
-    const high = i % 2 === 1, far = i >= 6 ? rand(0.4, 0.8) : rand(0, 0.3);
-    voices.push(new Voice(mix, { pitch: high ? rand(175, 235) : rand(95, 140), lvl: 0.11 * (1 - far * 0.6), pan: rand(-0.6, 0.6) }));
-  }
-  let bed = null;
-  if (p.bed) {
-    bed = ctx.createBufferSource(); bed.buffer = BROWN; bed.loop = true;
-    const bf = ctx.createBiquadFilter(); bf.type = 'bandpass'; bf.frequency.value = 500; bf.Q.value = 0.6;
-    const bg = ctx.createGain(); bg.gain.value = p.bed; bed.connect(bf); bf.connect(bg); bg.connect(out); bed.start(now);
-  }
-  const c = {
-    out, label: size,
-    tick(u) {
-      voices.forEach(v => v.tick(u));
-    },
-    stop(f = 1, at) {
-      const t = at ?? ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
-      voices.forEach(v => v.stop(t + f)); if (bed) bed.stop(t + f + 0.1); LOOPS.delete(c);
-    },
-  };
-  LOOPS.add(c);
-  return c;
-}
-
 /* ---------- footsteps ---------- */
+// Version 3: every floor is the soft carpet step; only a gentle hint tells them apart.
+function softStep(t, pan, b, o = {}) {
+  const br = o.bright ?? 1;
+  tone(t, rand(75, 85) * (o.pitch ?? 1), 0.07, { gain: 0.16, to: 55, a: 0.006, bus: b, pan });
+  noise(t, 0.09, { ft: 'lowpass', f: 520 * br, gain: 0.13, a: 0.012, bus: b, pan });
+  noise(t + 0.05, 0.07, { ft: 'lowpass', f: 900 * br, gain: 0.035, a: 0.01, bus: b, pan });
+}
 const STEP = {
-  plating(t, pan, b) {
-    noise(t, 0.01, { ft: 'highpass', f: 2000, gain: 0.1, a: 0.0008, bus: b, pan });              // hard heel click
-    noise(t, 0.05, { brown: true, ft: 'lowpass', f: 260, gain: 0.25, a: 0.001, bus: b, pan });   // heel weight
-    ring(t, [rand(1150, 1260), rand(2700, 2850), rand(4300, 4500)], 1.2, { d: 0.09, q: 30, bus: b, pan, wet: 0.15 }); // the plate rings briefly
-    noise(t + 0.065, 0.008, { ft: 'highpass', f: 2500, gain: 0.05, a: 0.0008, bus: b, pan });    // toe
-  },
-  carpet(t, pan, b) {
-    tone(t, rand(75, 85), 0.07, { gain: 0.16, to: 55, a: 0.006, bus: b, pan });
-    noise(t, 0.09, { ft: 'lowpass', f: 520, gain: 0.13, a: 0.012, bus: b, pan });
-    noise(t + 0.05, 0.07, { ft: 'lowpass', f: 900, gain: 0.035, a: 0.01, bus: b, pan });
-  },
-  planks(t, pan, b) {
-    noise(t, 0.008, { ft: 'highpass', f: 1600, gain: 0.12, a: 0.0008, bus: b, pan });            // heel
-    noise(t, 0.06, { brown: true, ft: 'lowpass', f: 300, gain: 0.25, a: 0.001, bus: b, pan });   // weight
-    ring(t, [rand(360, 420), rand(820, 900)], 2.4, { d: 0.07, q: 9, bus: b, pan, wet: 0.12 });   // hollow woody knock
-    ring(t + 0.06, [rand(500, 560)], 0.6, { d: 0.05, q: 8, bus: b, pan, wet: 0 });               // toe
-  },
+  plating(t, pan, b) { softStep(t, pan, b, { bright: 1.25, pitch: 1.08 }); noise(t, 0.03, { f: 1800, q: 2, gain: 0.025, a: 0.002, bus: b, pan }); },  // a faint firm tap
+  carpet(t, pan, b) { softStep(t, pan, b); },
+  planks(t, pan, b) { softStep(t, pan, b, { bright: 1.1, pitch: 1.15 }); noise(t, 0.05, { f: rand(380, 430), q: 4, gain: 0.05, a: 0.002, bus: b, pan }); }, // a faint hollow knock
   garden(t, pan, b) {
-    tone(t, 80, 0.06, { gain: 0.12, to: 55, a: 0.004, bus: b, pan });
-    const n = 6 + ((Math.random() * 5) | 0);
-    for (let i = 0; i < n; i++) noise(t + rand(0, 0.13), 0.014, { f: rand(2400, 5200), q: 2, gain: rand(0.03, 0.07), bus: b, pan });
-    noise(t, 0.12, { ft: 'lowpass', f: 1400, gain: 0.04, a: 0.01, bus: b, pan });
+    softStep(t, pan, b, { bright: 0.9 });
+    for (let i = 0; i < 4; i++) noise(t + rand(0, 0.12), 0.014, { f: rand(2400, 4800), q: 2, gain: rand(0.015, 0.03), bus: b, pan }); // a little grit
   },
 };
 function startWalk(surface, segs) {
@@ -764,13 +666,12 @@ const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAl
 const PLAY_ICON = '<svg viewBox="0 0 16 16"><path d="M4 2v12l10-6z"/></svg>';
 $$('.play').forEach(b => b.innerHTML = PLAY_ICON);
 const statusEl = $('#status');
-const live = { hum: null, crowd: null, steps: null };
+const live = { hum: null, steps: null };
 const NAMES = { quarters: 'Quarters hum', commons: 'Commons hum', engine: 'Engineering hum', garden: 'Garden hum', bridge: 'Bridge hum',
-  small: 'small crowd', medium: 'medium crowd', busy: 'busy crowd', plating: 'steps on plating', carpet: 'steps on carpet', planks: 'steps on planks', garden_s: 'steps on the garden path' };
+  plating: 'steps on plating', carpet: 'steps on carpet', planks: 'steps on planks', garden_s: 'steps on the garden path' };
 function updateStatus() {
   const bits = [];
   if (live.hum) bits.push(NAMES[live.hum.label]);
-  if (live.crowd) bits.push(NAMES[live.crowd.label]);
   if (live.steps) bits.push(NAMES[live.steps.label === 'garden' ? 'garden_s' : live.steps.label]);
   if (scene) bits.push('the scene');
   statusEl.textContent = bits.length ? 'Playing: ' + bits.join(', ') : (ctx ? 'Quiet. Tap any sound.' : 'Tap any button to start sound.');
@@ -801,21 +702,6 @@ $$('[data-hum]').forEach(b => b.addEventListener('click', () => {
   setPressed('hum', 'hum', live.hum ? k : null); updateStatus();
 }));
 
-let room = 'mess';
-function restartCrowd(size) {
-  if (live.crowd) { live.crowd.stop(0.8); live.crowd = null; }
-  if (size) live.crowd = startCrowd(size, room);
-  setPressed('crowd', 'crowd', size); updateStatus();
-}
-$$('[data-crowd]').forEach(b => b.addEventListener('click', () => {
-  ensure(); stopScene();
-  const k = b.dataset.crowd; restartCrowd(live.crowd && live.crowd.label === k ? null : k);
-}));
-$$('[data-room]').forEach(b => b.addEventListener('click', () => {
-  room = b.dataset.room; setPressed('room', 'room', room);
-  if (live.crowd) { ensure(); restartCrowd(live.crowd.label); }
-}));
-
 $$('[data-steps]').forEach(b => b.addEventListener('click', () => {
   ensure(); stopScene();
   const k = b.dataset.steps, was = live.steps && live.steps.label;
@@ -825,14 +711,14 @@ $$('[data-steps]').forEach(b => b.addEventListener('click', () => {
 }));
 
 function stopLoops() {
-  if (live.hum) live.hum.stop(0.8); if (live.crowd) live.crowd.stop(0.6); if (live.steps) live.steps.stop();
-  live.hum = live.crowd = live.steps = null;
-  setPressed('hum', 'hum', null); setPressed('crowd', 'crowd', null); setPressed('steps', 'steps', null);
+  if (live.hum) live.hum.stop(0.8); if (live.steps) live.steps.stop();
+  live.hum = live.steps = null;
+  setPressed('hum', 'hum', null); setPressed('steps', 'steps', null);
 }
 $('#stopAll').addEventListener('click', () => { if (!ctx) return; stopLoops(); stopScene(); updateStatus(); });
 
 /* faders: 80 = normal (gain 1), squared curve so the low end is gentle */
-const FADERS = ['hum', 'crowd', 'steps', 'ui', 'master'];
+const FADERS = ['hum', 'steps', 'ui', 'master'];
 function applyFaders() {
   FADERS.forEach(k => {
     const el = $('#v-' + k); el.nextElementSibling.textContent = el.value;
@@ -851,8 +737,8 @@ const BEATS = [
   [13.4, 'The lift doors part; you step in and press 3.'],
   [16.6, 'The ride up. The hum changes from Quarters to Commons.'],
   [19.6, 'The car settles with a clunk, the chime rings, the doors open.'],
-  [22.6, 'Walking the planks; voices from the mess grow.'],
-  [30.6, 'The mess door opens. Dinner rush.'],
+  [22.6, 'Walking the promenade planks.'],
+  [30.6, 'The mess door opens, and closes behind you.'],
   [34.6, 'You find a seat.'],
   [37.5, 'Mail arrives on your device.'],
   [41.5, 'A job is posted for tomorrow.'],
@@ -866,20 +752,13 @@ function playScene() {
   ensure(); stopLoops(); stopScene();
   const t0 = ctx.currentTime + 0.15, T = s => t0 + s;
   // the scene gets its own sub-buses so Stop cuts everything already scheduled
-  const sub = {}; for (const k of ['hum', 'crowd', 'steps', 'ui']) { sub[k] = ctx.createGain(); sub[k].connect(B[k]); }
+  const sub = {}; for (const k of ['hum', 'steps', 'ui']) { sub[k] = ctx.createGain(); sub[k].connect(B[k]); }
   const prev = R; R = sub;
   const humA = startHum('quarters', 1, 2);
   humA.out.gain.setValueAtTime(1, T(15.8)); humA.out.gain.linearRampToValueAtTime(0, T(19.6));
   const humB = startHum('commons', 1, 0.01); humB.out.gain.cancelScheduledValues(ctx.currentTime);
   humB.out.gain.setValueAtTime(0, ctx.currentTime); humB.out.gain.setValueAtTime(0, T(16.8)); humB.out.gain.linearRampToValueAtTime(1, T(20.4));
   const walk = startWalk(null, [[T(4), T(6.3), 'plating'], [T(7.3), T(14.2), 'plating'], [T(22.6), T(30.4), 'planks'], [T(31.6), T(34.6), 'planks']]);
-  const crowd = startCrowd('busy', 'mess', 0, 0.01);
-  const cg = crowd.out.gain; cg.cancelScheduledValues(ctx.currentTime); cg.setValueAtTime(0, ctx.currentTime);
-  cg.setValueAtTime(0, T(21)); cg.linearRampToValueAtTime(0.18, T(30.3)); cg.linearRampToValueAtTime(0.9, T(32)); cg.setValueAtTime(0.9, T(44.5)); cg.linearRampToValueAtTime(0, T(48));
-  // muffled crowd until the mess door opens
-  const muff = ctx.createBiquadFilter(); muff.type = 'lowpass'; muff.frequency.setValueAtTime(500, t0); muff.frequency.setValueAtTime(500, T(30.6)); muff.frequency.exponentialRampToValueAtTime(8000, T(31.6));
-  crowd.out.disconnect(); crowd.out.connect(muff); muff.connect(sub.crowd);
-  const send = ctx.createGain(); send.gain.value = 0.3; crowd.out.connect(send); send.connect(B.verb);
   SFX.tapA(T(1.5)); SFX.open(T(1.8)); SFX.tapA(T(2.9)); SFX.close(T(3.4));
   door(T(6.6), true, 'roomA'); door(T(8.2), false, 'roomA');
   liftDoors(T(13.4), true, 'A'); liftPress(T(15.2)); liftDoors(T(15.6), false, 'A');
@@ -888,7 +767,7 @@ function playScene() {
   SFX.mailB(T(37.5)); SFX.tapA(T(39)); SFX.open(T(39.3)); SFX.close(T(40.6)); SFX.jobPosted(T(41.5));
   humA.stop(0.1, T(20), 0); humB.stop(3, T(45), 1);
   R = prev;
-  scene = { t0, sub, humA, humB, walk, crowd };
+  scene = { t0, sub, humA, humB, walk };
   $('#sceneBtn span').textContent = 'Stop the scene'; $('#sceneBtn path').setAttribute('d', 'M3 3h10v10H3z');
   updateStatus(); requestAnimationFrame(sceneFrame);
 }
@@ -896,7 +775,7 @@ function stopScene() {
   if (!scene) return;
   const s = scene, t = ctx.currentTime; scene = null;
   for (const k in s.sub) { s.sub[k].gain.setTargetAtTime(0, t, 0.08); }
-  s.walk.stop(); s.crowd.stop(0.4); try { s.humA.stop(0.3); } catch (e) {} try { s.humB.stop(0.3); } catch (e) {}
+  s.walk.stop(); try { s.humA.stop(0.3); } catch (e) {} try { s.humB.stop(0.3); } catch (e) {}
   setTimeout(() => { for (const k in s.sub) s.sub[k].disconnect(); }, 700);
   $('#sceneBtn span').textContent = 'Play the scene'; $('#sceneBtn path').setAttribute('d', 'M3 1.5v13l11-6.5z'); $('#sceneBar').style.width = '0';
   $('#sceneClock').textContent = '0:00 / 0:48'; $$('#beats li').forEach(li => li.classList.remove('now'));
