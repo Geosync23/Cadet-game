@@ -121,10 +121,10 @@ section.card { scroll-margin-top: 12px; }
 
 <div class="wrap">
   <header>
-    <div class="eyebrow">CSV Wren · sound lab · new sounds to try · not in the game</div>
+    <div class="eyebrow">CSV Wren · sound lab · music to try · not in the game</div>
     <h1>Wren Sound Lab</h1>
-    <p class="lede">Everything new in one place: music for each time of day, and the sounds of doing things aboard. All of it is made live in your browser, with no recordings, and plays under the ship hum. Nothing here is in the game yet. The sounds already decided are on <a href="https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC" target="_blank" rel="noopener">Wren Soundscape</a>.</p>
-    <p class="hint">Tap a button to hear it. One piece of music plays at a time. Buttons with a ring around their dot are loops: tap once to start, again to stop. The volume sliders and a deck hum to play underneath are at the bottom. On an iPhone, if you hear nothing, check the silent switch.</p>
+    <p class="lede">Music for each time of day: three full tracks of about ten minutes, and more short samples to try. All of it is made live in your browser, with no recordings, and plays under the ship hum. Nothing here is in the game yet. Decided sounds: <a href="https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC" target="_blank" rel="noopener">Wren Soundscape</a>, <a href="https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP" target="_blank" rel="noopener">Activities (approved)</a>. To choose: <a href="https://claude.ai/artifact/1MXY7YxN9DGUChzUhAUyU7" target="_blank" rel="noopener">Round 2</a>.</p>
+    <p class="hint">Tap a piece to hear it; tap again to stop. One piece plays at a time. The volume sliders and a deck hum to play underneath are at the bottom. On an iPhone, if you hear nothing, check the silent switch.</p>
     <nav class="jump" aria-label="Sections"><a href="#music">Music: full tracks</a><a href="#samples">Music: samples</a></nav>
   </header>
 
@@ -151,7 +151,6 @@ section.card { scroll-margin-top: 12px; }
     <p class="hint">Held for later: music for the ship's traditions. Only some traditions will have it, and you'll decide which. It's on the audio to-do list.</p>
   </section>
 
-  <div id="groups" class="wrap-inner"></div>
 
   <section class="card" id="mix" aria-labelledby="h-mix">
     <div class="card-head"><span class="tag">Listen against the hum</span><h2 id="h-mix">Hum and volume</h2></div>
@@ -162,13 +161,12 @@ section.card { scroll-margin-top: 12px; }
     </div>
     <div class="mixer">
       <label class="fader"><span>Music</span><input type="range" id="v-music" min="0" max="100" value="80"><output>80</output></label>
-      <label class="fader"><span>Activities</span><input type="range" id="v-ui" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader"><span>Hum</span><input type="range" id="v-hum" min="0" max="100" value="80"><output>80</output></label>
       <label class="fader master"><span>Master</span><input type="range" id="v-master" min="0" max="100" value="80"><output>80</output></label>
     </div>
     <div class="choices"><ul>
-      <li>Every sound and every piece of music was measured against the Quarters hum and plays under it. Music sits well under it, about 7 to 12 dB quieter on average.</li>
-      <li>In activities, the only beeps are where a real device would make one: the scanner, the cart's charger, the airlock all-clear, the till and the phone ring.</li>
+      <li>Every piece was measured against the Quarters hum and plays under it: at its loudest about 4 to 6 dB quieter, and about 10 to 13 dB quieter on average.</li>
+      <li>The full tracks are built from sections (an intro, a tune, a fuller part, a quiet bridge, an outro). Each pass brings a new tune and a new lead instrument, so ten minutes never sounds like one loop.</li>
       <li>The lo-fi pieces have a very quiet vinyl crackle. It's part of the style and easy to take out.</li>
     </ul></div>
   </section>
@@ -724,221 +722,11 @@ function startTrack(key, o = {}) {
   LOOPS.add(T); T.tick(now + 0.2);
   return T;
 }
-/* ---------- activity sounds ---------- */
-// On this page clicks are rounded off (a band instead of a bare high-pass, a 2 ms attack), so small knocks never spike.
-clack = function (t, gain, o = {}) {
-  noise(t, 0.014, { f: 3200, q: 0.8, gain: gain * 0.8, a: 0.002, bus: o.bus, pan: o.pan });
-  noise(t, 0.04, { f: o.f ?? 900, q: 4, gain: gain * 1.4, a: 0.002, bus: o.bus, pan: o.pan });
-};
-// Helpers on top of the engine: steady water and air (sus), rustles, bubbles, drips, and loops that run until stopped.
-function sus(t, d, o) {                       // a noise that holds steady, then lets go (running water, air)
-  const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE; src.loop = true;
-  const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass'; f.frequency.setValueAtTime(o.f, t); if (o.fTo) f.frequency.linearRampToValueAtTime(o.fTo, t + d); f.Q.value = o.q ?? 0.8;
-  const g = ctx.createGain(), a = o.a ?? 0.06, r = o.r ?? 0.25;
-  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(o.gain, t + a); g.gain.setValueAtTime(o.gain, t + Math.max(a, d - r)); g.gain.linearRampToValueAtTime(0, t + d);
-  src.connect(f); f.connect(g); conn(g, o.bus || R.ui, o.pan, o.wet); src.start(t, Math.random() * 2); src.stop(t + d + 0.05);
-}
-function rustle(t, d, o = {}) { const n = o.n ?? Math.round(d * 6); for (let k = 0; k < n; k++) noise(t + rand(0, Math.max(0.01, d - 0.25)), rand(0.12, 0.3), { f: rand(o.lo ?? 1800, o.hi ?? 4000), q: 0.7, gain: rand(0.6, 1) * (o.gain ?? 0.04), swell: 0.4, bus: o.bus }); }
-function bubbles(t, n, o = {}) { for (let k = 0; k < n; k++) tone(t + k * (o.gap ?? 0.05) + rand(0, 0.03), rand(180, 420), 0.06, { gain: o.gain ?? 0.02, to: rand(420, 750), toT: 0.04, a: 0.004, bus: o.bus }); }
-function drip(t, o = {}) { tone(t, rand(900, 1400), 0.08, { gain: o.gain ?? 0.02, to: rand(1500, 2200), toT: 0.03, a: 0.002, bus: o.bus }); }
-function grains(t, d, n, o = {}) { for (let k = 0; k < n; k++) noise(t + rand(0, d), 0.008, { f: (o.f ?? 2500) * 1.4, q: 0.8, gain: rand(0.5, 1) * (o.gain ?? 0.05), a: 0.002, bus: o.bus }); }
-function bedNoise(out, o) {
-  const src = ctx.createBufferSource(); src.buffer = o.brown ? BROWN : WHITE; src.loop = true;
-  const f = ctx.createBiquadFilter(); f.type = o.ft || 'bandpass'; f.frequency.value = o.f; f.Q.value = o.q ?? 0.8;
-  const g = ctx.createGain(); g.gain.value = o.gain; src.connect(f); f.connect(g); g.connect(out); src.start(ctx.currentTime, Math.random() * 2); return { src, f, g };
-}
-function lfo(param, rate, depth) { const l = ctx.createOscillator(); l.frequency.value = rate; const g = ctx.createGain(); g.gain.value = depth; l.connect(g); g.connect(param); l.start(); return l; }
-function every(gap, fn) { let next = ctx.currentTime + 0.05; return u => { while (next < u) { fn(next); next += typeof gap === 'function' ? gap() : gap; } }; }
-function makeLoop(build) {
-  const out = ctx.createGain(), t0 = ctx.currentTime; out.gain.setValueAtTime(0, t0); out.gain.linearRampToValueAtTime(1, t0 + 0.4); out.connect(R.ui);
-  const h = build(out, t0) || {};
-  const L = {
-    tick: h.tick,
-    stop(f = 0.5) {
-      const t = ctx.currentTime; out.gain.cancelScheduledValues(t); out.gain.setValueAtTime(out.gain.value, t); out.gain.linearRampToValueAtTime(0, t + f);
-      (h.nodes || []).forEach(n => { try { n.stop(t + f + 0.05); } catch (e) {} }); LOOPS.delete(L);
-    },
-  };
-  LOOPS.add(L); if (L.tick) L.tick(t0 + 0.3);
-  return L;
-}
-const mt = m => 440 * Math.pow(2, (m - 69) / 12);
-function pianoNote(t, m, g, b) { const f = mt(m); tone(t, f, 1.8, { gain: g, a: 0.004, bus: b }); tone(t, f * 2, 0.9, { gain: g * 0.3, a: 0.003, bus: b }); tone(t, f * 3, 0.4, { gain: g * 0.1, a: 0.002, bus: b }); noise(t, 0.02, { ft: 'lowpass', f: 1500, gain: g * 0.4, a: 0.001, bus: b }); }
-function stringPluck(t, m, g, b) { const f = mt(m); tone(t, f, 1.6, { type: 'triangle', lp: 2400, gain: g, a: 0.002, bus: b }); tone(t, f * 2, 0.5, { gain: g * 0.25, a: 0.002, bus: b }); }
-
-// Each sound: fn(t) plays a one-shot; loop() starts a loop and returns a handle with stop().
-const ACT = {
-  // ---- work and repairs
-  ratchet: t => { for (let i = 0; i < 7; i++) { const s = t + i * 0.085; clack(s, 0.05, { f: 2600 }); ring(s, [3100], 0.25, { d: 0.03, q: 20, wet: 0 }); } },
-  wrench: t => { for (const s of [t, t + 0.6]) { noise(s, 0.32, { f: 1500, fTo: 900, q: 2, gain: 0.03, swell: 0.3 }); thud(s + 0.3, { gain: 0.12, d: 0.08, f: 500 }); ring(s + 0.3, [880, 2350], 0.9, { d: 0.25, q: 30 }); } },
-  panelOff: t => { clack(t, 0.1, { f: 1800 }); clack(t + 0.18, 0.1, { f: 1700 }); noise(t + 0.35, 0.35, { f: 900, fTo: 1600, q: 1.5, gain: 0.05, swell: 0.4 }); thud(t + 0.8, { gain: 0.12, d: 0.1, f: 400 }); ring(t + 0.8, [620, 1580], 0.8, { d: 0.2, q: 25 }); },
-  panelOn: t => { noise(t, 0.3, { f: 1600, fTo: 900, q: 1.5, gain: 0.05, swell: 0.4 }); thud(t + 0.32, { gain: 0.12, d: 0.1, f: 400 }); ring(t + 0.32, [620, 1580], 0.6, { d: 0.15, q: 25 }); clack(t + 0.55, 0.1, { f: 1800 }); clack(t + 0.75, 0.12, { f: 1900 }); },
-  partSwap: t => { noise(t, 0.25, { f: 1200, fTo: 700, q: 2, gain: 0.05, swell: 0.3 }); clack(t + 0.25, 0.08, { f: 1000 }); noise(t + 0.7, 0.2, { f: 700, fTo: 1200, q: 2, gain: 0.05, swell: 0.3 }); clack(t + 0.92, 0.14, { f: 1400 }); thud(t + 0.92, { gain: 0.1, d: 0.06, f: 500 }); },
-  torch: t => { sus(t, 1.6, { f: 3500, q: 0.5, gain: 0.035, a: 0.15, r: 0.3 }); sus(t, 1.6, { brown: true, ft: 'lowpass', f: 400, gain: 0.1, a: 0.15, r: 0.3 }); grains(t + 0.1, 1.4, 40, { f: 3000, gain: 0.05 }); },
-  sealant: t => { noise(t, 0.7, { brown: true, ft: 'lowpass', f: 500, gain: 0.25, swell: 0.5 }); noise(t + 0.1, 0.5, { f: 900, fTo: 500, q: 3, gain: 0.04, swell: 0.5 }); clack(t + 0.75, 0.06, { f: 1200 }); },
-  scanA: t => { tone(t, 500, 1.0, { type: 'triangle', lp: 2000, gain: 0.03, to: 1100, toT: 0.9, a: 0.15 }); tone(t + 1.05, 1320, 0.15, { gain: 0.035 }); tone(t + 1.2, 1760, 0.25, { gain: 0.035 }); },
-  scanB: t => { [0, 0.3, 0.6].forEach((d, i) => tone(t + d, 900 + i * 200, 0.08, { gain: 0.035, type: 'triangle', lp: 2500 })); tone(t + 0.95, 1500, 0.35, { gain: 0.035 }); },
-  jobDone: t => SFX.jobDone(t),
-  vent: t => { for (let i = 0; i < 6; i++) noise(t + i * 0.28, 0.26, { f: rand(2300, 2900), q: 0.9, gain: 0.06, swell: 0.5 }); noise(t + 1.8, 0.45, { brown: true, ft: 'lowpass', f: 600, gain: 0.2, swell: 0.2 }); },
-  unstick: t => { [0, 0.15, 0.27, 0.45, 0.58].forEach((d, i) => clack(t + d, 0.06 + 0.02 * (i % 2), { f: rand(700, 1100) })); thud(t + 0.9, { gain: 0.2, d: 0.12, f: 300 }); clack(t + 0.9, 0.12, { f: 1500 }); },
-  hingeSqueak: t => { tone(t, 780, 0.5, { type: 'sawtooth', lp: 1500, gain: 0.012, to: 1150, toT: 0.45, a: 0.05 }); tone(t + 0.65, 1100, 0.45, { type: 'sawtooth', lp: 1500, gain: 0.01, to: 820, toT: 0.4, a: 0.05 }); },
-  hingeOil: t => { noise(t, 0.08, { ft: 'lowpass', f: 1200, gain: 0.06 }); noise(t + 0.25, 0.08, { ft: 'lowpass', f: 1200, gain: 0.06 }); drip(t + 0.6); },
-  hingeAfter: t => { noise(t, 0.6, { f: 400, fTo: 700, q: 0.8, gain: 0.05, swell: 0.5 }); thud(t + 0.6, { gain: 0.08, d: 0.08, f: 300 }); },
-  drain: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.55; noise(s, 0.15, { brown: true, ft: 'lowpass', f: 300, gain: 0.35, a: 0.01 }); bubbles(s + 0.15, 4); } sus(t + 1.8, 1.2, { f: 700, fTo: 300, q: 1.2, gain: 0.05, r: 0.6 }); bubbles(t + 1.8, 12, { gap: 0.08 }); },
-  mop: t => { for (let i = 0; i < 4; i++) noise(t + i * 0.45, 0.42, { f: rand(900, 1300), q: 0.8, gain: 0.07, swell: 0.45 }); sus(t + 2, 0.5, { f: 1500, q: 1, gain: 0.03 }); drip(t + 2.6); drip(t + 2.9); },
-  wipe: t => { for (let i = 0; i < 4; i++) noise(t + i * 0.22, 0.2, { f: rand(2500, 3500), q: 1.2, gain: 0.04, swell: 0.5 }); },
-  cratePick: t => { noise(t, 0.25, { f: 500, q: 1, gain: 0.05, swell: 0.3 }); clack(t + 0.05, 0.04, { f: 800 }); noise(t + 0.3, 0.3, { brown: true, ft: 'lowpass', f: 400, gain: 0.08, swell: 0.5 }); },
-  crateSet: t => { thud(t, { gain: 0.3, d: 0.16, f: 250 }); ring(t, [180, 420], 1.2, { d: 0.15, q: 8 }); clack(t + 0.03, 0.05, { f: 900 }); clack(t + 0.09, 0.03, { f: 1300 }); },
-  typing: t => { let s = t; for (let i = 0; i < 14; i++) { const space = i % 5 === 4; noise(s, 0.008, { f: 3500, q: 0.8, gain: space ? 0.03 : 0.05, a: 0.002 }); noise(s, 0.03, { brown: true, ft: 'lowpass', f: space ? 400 : 700, gain: space ? 0.14 : 0.1, a: 0.001 }); s += rand(0.08, 0.16); } },
-  drill: t => { sus(t, 1.6, { f: 900, fTo: 1400, q: 4, gain: 0.05, a: 0.25, r: 0.4 }); tone(t, 180, 1.6, { type: 'sawtooth', lp: 700, gain: 0.012, to: 240, toT: 0.3, a: 0.15 }); },
-  cart: { loop: () => makeLoop(out => { const a = bedNoise(out, { brown: true, ft: 'lowpass', f: 220, gain: 0.25 }); const o = ctx.createOscillator(); o.frequency.value = 110; const og = ctx.createGain(); og.gain.value = 0.012; o.connect(og); og.connect(out); o.start(); const w = lfo(o.frequency, 0.7, 3); const air = bedNoise(out, { f: 1200, q: 0.6, gain: 0.012 }); return { nodes: [a.src, o, w, air.src] }; }) },
-  cartDock: t => { thud(t, { gain: 0.25, d: 0.15, f: 200 }); clack(t + 0.05, 0.1, { f: 1200 }); hiss(t + 0.2, 0.3, 0.03); tone(t + 0.6, 660, 0.25, { gain: 0.03 }); tone(t + 0.75, 880, 0.3, { gain: 0.03 }); },
-  valve: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.42; noise(s, 0.35, { f: 300, fTo: 450, q: 3, gain: 0.08, swell: 0.5 }); ring(s + 0.32, [240, 610], 0.9, { d: 0.2, q: 20 }); } thud(t + 1.3, { gain: 0.15, d: 0.12, f: 300 }); },
-  hold: t => { sus(t, 1.6, { brown: true, ft: 'lowpass', f: 300, gain: 0.12, a: 0.2, r: 0.3 }); sus(t, 1.6, { f: 2500, q: 0.7, gain: 0.015, a: 0.2, r: 0.3 }); clack(t + 1.65, 0.08, { f: 1100 }); },
-  relay: t => { grains(t, 0.15, 10, { gain: 0.06 }); clack(t + 0.4, 0.12, { f: 1100 }); thud(t + 0.4, { gain: 0.15, d: 0.08, f: 350 }); },
-  airlock: t => { clack(t, 0.1, { f: 900 }); thud(t + 0.05, { gain: 0.2, d: 0.15, f: 200 }); sus(t + 0.4, 2.2, { f: 2400, fTo: 900, q: 0.6, gain: 0.06, a: 0.2, r: 0.8 }); sus(t + 0.4, 2.2, { brown: true, ft: 'lowpass', f: 400, gain: 0.18, a: 0.2, r: 0.8 }); clack(t + 2.8, 0.1, { f: 1200 }); tone(t + 3.0, 660, 0.3, { gain: 0.03 }); tone(t + 3.15, 990, 0.4, { gain: 0.03 }); },
-  timeClock: t => { clack(t, 0.12, { f: 900 }); thud(t, { gain: 0.15, d: 0.08, f: 400 }); bell(t + 0.12, 1568, 0.4, 0.035); },
-
-  // ---- washroom
-  flushVac: t => { clack(t, 0.05, { f: 900 }); noise(t + 0.1, 1.1, { f: 1800, fTo: 300, q: 0.7, gain: 0.12, swell: 0.15 }); noise(t + 0.1, 1.1, { brown: true, ft: 'lowpass', f: 500, gain: 0.35, swell: 0.2 }); thud(t + 1.15, { gain: 0.12, d: 0.12, f: 200 }); sus(t + 1.4, 1.6, { f: 2500, q: 0.8, gain: 0.02, r: 0.8 }); },
-  flushWater: t => { clack(t, 0.05, { f: 900 }); sus(t + 0.1, 2.2, { ft: 'lowpass', f: 1400, gain: 0.12, a: 0.15, r: 1.2 }); bubbles(t + 1.0, 14, { gap: 0.07 }); },
-  shower: { loop: () => makeLoop((out, t0) => { tone(t0, 900, 0.15, { type: 'sawtooth', lp: 1400, gain: 0.008, to: 1100, bus: out }); const a = bedNoise(out, { f: 3000, q: 0.5, gain: 0.05 }); const b = bedNoise(out, { brown: true, ft: 'lowpass', f: 700, gain: 0.22 }); const tick = every(() => rand(0.03, 0.12), s => tone(s, rand(1500, 3500), 0.02, { gain: rand(0.004, 0.01), bus: out })); return { nodes: [a.src, b.src], tick }; }) },
-  showerOff: t => { tone(t, 1100, 0.15, { type: 'sawtooth', lp: 1400, gain: 0.008, to: 900 }); drip(t + 0.5); drip(t + 1.1); drip(t + 1.9, { gain: 0.012 }); },
-  sink: t => { clack(t, 0.04, { f: 1100 }); sus(t + 0.05, 2.4, { f: 2200, q: 0.7, gain: 0.06 }); sus(t + 0.05, 2.4, { brown: true, ft: 'lowpass', f: 900, gain: 0.1 }); clack(t + 2.5, 0.04, { f: 1100 }); drip(t + 2.9); drip(t + 3.5); },
-  towel: t => rustle(t, 1.2, { lo: 900, hi: 2400, gain: 0.05 }),
-
-  // ---- personal
-  callRing: t => { for (const r of [0, 0.9]) { tone(t + r, 440, 0.45, { gain: 0.03, a: 0.03 }); tone(t + r, 480, 0.45, { gain: 0.03, a: 0.03 }); } clack(t + 2, 0.05, { f: 1500 }); sus(t + 2.05, 1.2, { f: 1000, q: 0.4, gain: 0.01, a: 0.3, r: 0.4 }); },
-  callLine: { loop: () => makeLoop(out => { const a = bedNoise(out, { f: 1200, q: 0.4, gain: 0.008 }); const w = lfo(a.g.gain, 0.3, 0.003); return { nodes: [a.src, w] }; }) },
-  hangUp: t => { thud(t, { gain: 0.15, d: 0.08, f: 400 }); clack(t, 0.08, { f: 1000 }); tone(t + 0.15, 660, 0.12, { gain: 0.03, to: 440 }); },
-  wardrobe: t => { slide(t, 0.5, { f0: 500, f1: 900, gain: 0.3, rate: 40, rough: 0.2 }); for (let i = 0; i < 4; i++) ring(t + 0.6 + i * 0.07 + rand(0, 0.03), [rand(2400, 2700), rand(4100, 4400)], 0.4, { d: 0.08, q: 30 }); },
-  changing: t => rustle(t, 1.6, { gain: 0.045 }),
-  hamper: t => { noise(t, 0.25, { f: 1400, q: 6, gain: 0.03, swell: 0.5 }); noise(t + 0.35, 0.3, { brown: true, ft: 'lowpass', f: 500, gain: 0.15, swell: 0.3 }); rustle(t + 0.35, 0.4, { n: 3, lo: 1200, hi: 2500 }); thud(t + 0.9, { gain: 0.06, d: 0.06, f: 500 }); },
-  washer: { loop: () => makeLoop(out => { const m = bedNoise(out, { brown: true, ft: 'lowpass', f: 250, gain: 0.18 }); const s = bedNoise(out, { f: 600, q: 0.8, gain: 0.04 }); const w = lfo(s.g.gain, 0.45, 0.035); return { nodes: [m.src, s.src, w] }; }) },
-  dryer: { loop: () => makeLoop(out => { const m = bedNoise(out, { brown: true, ft: 'lowpass', f: 300, gain: 0.14 }); const air = bedNoise(out, { f: 1800, q: 0.5, gain: 0.01 }); const tick = every(() => rand(0.65, 0.85), s => { thud(s, { gain: 0.07, d: 0.12, f: 250, bus: out }); if (Math.random() < 0.3) clack(s + 0.05, 0.02, { f: 2200, bus: out }); }); return { nodes: [m.src, air.src], tick }; }) },
-  bedLie: t => { noise(t, 0.4, { f: 320, q: 8, gain: 0.08, swell: 0.5 }); thud(t + 0.3, { gain: 0.12, d: 0.2, f: 150 }); rustle(t + 0.6, 1.0, { lo: 1000, hi: 2500, gain: 0.04 }); },
-  blanket: t => rustle(t, 1.2, { lo: 900, hi: 2200, gain: 0.05 }),
-  makeBed: t => { rustle(t, 1.4, { lo: 1000, hi: 2600, gain: 0.04 }); for (const d of [0.5, 0.9, 1.3]) noise(t + d, 0.08, { brown: true, ft: 'lowpass', f: 400, gain: 0.15 }); },
-  sitChair: t => { noise(t, 0.3, { f: 420, q: 7, gain: 0.06, swell: 0.5 }); thud(t + 0.15, { gain: 0.1, d: 0.1, f: 200 }); },
-  sitCouch: t => { thud(t, { gain: 0.14, d: 0.3, f: 140 }); noise(t, 0.4, { brown: true, ft: 'lowpass', f: 300, gain: 0.1, swell: 0.2 }); rustle(t + 0.2, 0.4, { n: 2, lo: 800, hi: 1600 }); },
-  cup: t => { thud(t, { gain: 0.06, d: 0.05, f: 600 }); ring(t, [2950, 5100], 0.7, { d: 0.12, q: 40 }); },
-  tray: t => { thud(t, { gain: 0.1, d: 0.06, f: 500 }); clack(t + 0.02, 0.03, { f: 1500 }); for (const d of [0.7, 1.3, 1.8]) ring(t + d, [rand(3200, 3600)], 0.35, { d: 0.08, q: 30 }); },
-  badge: t => { clack(t, 0.04, { f: 1500 }); tone(t + 0.05, 990, 0.08, { gain: 0.03 }); tone(t + 0.15, 1320, 0.12, { gain: 0.03 }); },
-  locker: t => { clack(t, 0.08, { f: 1200 }); noise(t + 0.05, 0.3, { f: 800, fTo: 1200, q: 2, gain: 0.04, swell: 0.4 }); thud(t + 0.9, { gain: 0.1, d: 0.06, f: 450 }); clack(t + 0.92, 0.1, { f: 1300 }); },
-  page: t => noise(t, 0.35, { f: 3000, fTo: 1800, q: 0.7, gain: 0.05, swell: 0.3 }),
-  pencil: t => { for (let i = 0; i < 6; i++) noise(t + i * 0.2 + rand(0, 0.05), rand(0.1, 0.18), { f: rand(4000, 6000), q: 2, gain: 0.025, swell: 0.5 }); },
-  knit: t => { for (let i = 0; i < 5; i++) { const s = t + i * 0.42 + rand(0, 0.04); ring(s, [rand(2800, 3200)], 0.4, { d: 0.04, q: 25, wet: 0 }); ring(s + 0.09, [rand(2600, 3000)], 0.3, { d: 0.04, q: 25, wet: 0 }); } },
-
-  // ---- galley and food
-  kettle: t => { clack(t, 0.06, { f: 1300 }); sus(t + 0.1, 4, { brown: true, ft: 'lowpass', f: 200, fTo: 700, gain: 0.2, a: 1.5, r: 0.4 }); bubbles(t + 2.2, 20, { gap: 0.09, gain: 0.015 }); clack(t + 4.2, 0.07, { f: 1300 }); },
-  sizzle: { loop: () => makeLoop(out => { const a = bedNoise(out, { ft: 'highpass', f: 3000, gain: 0.02 }); const b = bedNoise(out, { f: 6000, q: 0.7, gain: 0.015 }); const tick = every(() => rand(0.02, 0.15), s => noise(s, 0.004, { ft: 'highpass', f: 2000, gain: rand(0.02, 0.05), bus: out })); return { nodes: [a.src, b.src], tick }; }) },
-  chop: t => { for (let i = 0; i < 8; i++) { const s = t + i * 0.26; thud(s, { gain: 0.12, d: 0.05, f: 600 }); noise(s, 0.014, { f: 3000, q: 0.8, gain: 0.03, a: 0.002 }); ring(s, [700], 0.6, { d: 0.04, q: 6, wet: 0 }); } },
-  ovenOpen: t => { noise(t, 0.5, { f: 500, q: 6, gain: 0.04, swell: 0.5 }); noise(t + 0.3, 0.9, { brown: true, ft: 'lowpass', f: 500, gain: 0.12, swell: 0.3 }); thud(t + 0.5, { gain: 0.1, d: 0.12, f: 300 }); },
-  ovenClose: t => { noise(t, 0.3, { f: 600, q: 6, gain: 0.03, swell: 0.5 }); thud(t + 0.3, { gain: 0.2, d: 0.12, f: 250 }); clack(t + 0.32, 0.06, { f: 1000 }); },
-  stove: t => { for (let i = 0; i < 3; i++) clack(t + i * 0.12, 0.05, { f: 3000 }); noise(t + 0.4, 0.4, { brown: true, ft: 'lowpass', f: 500, gain: 0.25, swell: 0.25 }); sus(t + 0.5, 1.2, { f: 1500, q: 0.6, gain: 0.015, r: 0.5 }); },
-  trayPick: t => { noise(t, 0.25, { f: 1400, fTo: 900, q: 1.5, gain: 0.05, swell: 0.4 }); ring(t + 0.2, [3100, 4900], 0.5, { d: 0.1, q: 35 }); thud(t + 0.2, { gain: 0.05, d: 0.05, f: 500 }); },
-  pour: t => { sus(t, 1.4, { f: 900, fTo: 1600, q: 1.5, gain: 0.05, a: 0.1, r: 0.3 }); bubbles(t + 0.2, 8, { gap: 0.12, gain: 0.012 }); },
-
-  // ---- leisure
-  bench: t => { for (const s of [t, t + 1.4]) { ring(s, [210, 540, 1100], 1.4, { d: 0.35, q: 25 }); thud(s, { gain: 0.15, d: 0.1, f: 300 }); ring(s + 0.05, [2300, 3700], 0.4, { d: 0.1, q: 30, wet: 0 }); } },
-  treadmill: { loop: () => makeLoop(out => { const m = bedNoise(out, { brown: true, ft: 'lowpass', f: 300, gain: 0.12 }); const belt = bedNoise(out, { f: 1500, q: 0.6, gain: 0.012 }); let f = 0; const tick = every(0.36, s => { thud(s, { gain: f ? 0.06 : 0.07, d: 0.06, f: 300, bus: out }); f ^= 1; }); return { nodes: [m.src, belt.src], tick }; }) },
-  splash: t => { noise(t, 0.9, { f: 1500, fTo: 600, q: 0.5, gain: 0.15, swell: 0.08 }); noise(t, 0.6, { brown: true, ft: 'lowpass', f: 500, gain: 0.3, swell: 0.1 }); bubbles(t + 0.3, 10, { gap: 0.06, gain: 0.015 }); },
-  swim: { loop: () => makeLoop(out => { const tick = every(0.9, s => { noise(s, 0.45, { f: 1200, fTo: 700, q: 0.6, gain: 0.05, swell: 0.2, bus: out }); bubbles(s + 0.2, 3, { gain: 0.01, bus: out }); }); return { tick }; }) },
-  kayak: t => { for (const [d, p] of [[0, -0.4], [0.9, 0.4]]) { noise(t + d, 0.4, { f: 900, fTo: 500, q: 0.8, gain: 0.06, swell: 0.25, pan: p }); drip(t + d + 0.5, { gain: 0.012 }); } },
-  climb: t => { for (const d of [0, 0.7, 1.3]) { thud(t + d, { gain: 0.06, d: 0.05, f: 700 }); noise(t + d, 0.014, { f: 2600, q: 0.8, gain: 0.04, a: 0.002 }); } noise(t + 1.7, 0.4, { f: 2500, q: 0.5, gain: 0.02, swell: 0.3 }); },
-  float: { loop: () => makeLoop(out => { const b = bedNoise(out, { brown: true, ft: 'lowpass', f: 300, gain: 0.05 }); const tick = every(() => rand(1.6, 2.6), s => noise(s, 1.2, { brown: true, ft: 'lowpass', f: 500, gain: 0.1, swell: 0.5, bus: out })); return { nodes: [b.src], tick }; }) },
-  discThrow: t => { noise(t, 0.6, { f: 600, fTo: 2500, fT: 0.3, q: 2, gain: 0.06, swell: 0.4 }); tone(t, 220, 0.6, { gain: 0.012, to: 330, a: 0.1, type: 'triangle', lp: 900 }); },
-  discCatch: t => { thud(t, { gain: 0.08, d: 0.06, f: 600 }); noise(t, 0.08, { f: 1500, q: 1, gain: 0.04 }); tone(t, 330, 0.3, { gain: 0.012, to: 220, type: 'triangle', lp: 900 }); },
-  piano: t => [[60, 0], [64, 0.35], [67, 0.7], [72, 1.05], [71, 1.6], [67, 2.0]].forEach(([m, d]) => pianoNote(t + d, m, 0.045)),
-  guitar: t => [40, 47, 52, 56, 59, 64].forEach((m, i) => stringPluck(t + i * 0.025, m, 0.03)),
-  tilePlace: t => { ring(t, [2200, 3900], 0.6, { d: 0.05, q: 20, wet: 0 }); thud(t, { gain: 0.04, d: 0.03, f: 800 }); },
-  tileShuffle: t => { for (let i = 0; i < 14; i++) { const s = t + rand(0, 0.9); clack(s, rand(0.02, 0.04), { f: rand(1500, 2500) }); ring(s, [rand(2000, 2400)], 0.2, { d: 0.03, q: 20, wet: 0 }); } },
-  telescope: t => { sus(t, 1.2, { f: 700, fTo: 1100, q: 6, gain: 0.05, a: 0.15, r: 0.2 }); tone(t, 140, 1.2, { type: 'sawtooth', lp: 500, gain: 0.008, a: 0.2 }); clack(t + 1.25, 0.06, { f: 1400 }); },
-  watering: t => { sus(t, 2.5, { f: 2000, q: 0.8, gain: 0.05, a: 0.2, r: 0.5 }); grains(t + 0.2, 2.2, 30, { f: 1500, gain: 0.02 }); },
-  trowel: t => { for (let i = 0; i < 3; i++) { const s = t + i * 0.6; noise(s, 0.25, { f: rand(700, 1100), q: 1.5, gain: 0.08, swell: 0.3 }); grains(s, 0.25, 6, { f: 3000, gain: 0.03 }); } },
-
-  // ---- ship events
-  storm: t => { noise(t, 3, { brown: true, ft: 'lowpass', f: 150, fTo: 250, fT: 1.5, gain: 0.25, swell: 0.5 }); fmBell(t + 0.3, 523.25, 1.6, 0.045, 1.4, 1, 4); fmBell(t + 0.8, 392, 2, 0.045, 1.4, 1, 4); },
-  announceA: t => [659.25, 523.25, 783.99].forEach((f, i) => fmBell(t + i * 0.38, f, 1.8, 0.05, 1, 0.8, 0)),
-  announceB: t => { fmBell(t, 587.33, 1.8, 0.05, 1, 0.8, 0); fmBell(t + 0.45, 440, 2.2, 0.05, 1, 0.8, 0); },
-  flicker: t => { grains(t, 0.5, 14, { f: 1800, gain: 0.05 }); tone(t + 0.1, 90, 0.8, { to: 45, gain: 0.06, a: 0.02 }); noise(t + 0.1, 0.8, { brown: true, ft: 'lowpass', f: 200, gain: 0.15, swell: 0.1 }); },
-  bayDoors: t => { const b = trim(0.35); slide(t, 3, { f0: 80, f1: 200, gain: 1.2, rate: 9, rough: 0.5, bus: b }); hiss(t, 1, 0.08, { bus: b }); thud(t + 3, { gain: 0.4, d: 0.4, f: 120, body: 45, bus: b }); ring(t + 3, [95, 240, 410], 2, { d: 0.6, q: 20, bus: b }); },
-  shuttle: t => { sus(t, 4, { f: 300, fTo: 900, q: 0.6, gain: 0.06, a: 2, r: 1.5 }); sus(t, 4, { brown: true, ft: 'lowpass', f: 200, gain: 0.2, a: 2, r: 1.5 }); thud(t + 3.6, { gain: 0.25, d: 0.3, f: 150 }); thud(t + 3.8, { gain: 0.15, d: 0.2, f: 150 }); hiss(t + 4, 0.8, 0.05); },
-  popper: t => { noise(t, 0.05, { ft: 'highpass', f: 800, gain: 0.15, a: 0.001 }); thud(t, { gain: 0.08, d: 0.05, f: 400 }); rustle(t + 0.1, 1.2, { n: 8, lo: 2500, hi: 5000, gain: 0.025 }); },
-};
-
-// The page: groups of rows, each with a note and its chips (one-shots or loops).
-const GROUPS = [
-  { id: 'work', tag: 'Your job', title: 'Work and repairs', lede: 'The Works technician\'s day: tools, panels, parts and chores. Mechanical and real, no beeps except where a tool would really make one.', rows: [
-    ['Ratchet and wrench', 'A quick ratchet for bolts; a wrench turn with a scrape and a ring.', [['A · Ratchet', 'ratchet'], ['B · Wrench', 'wrench']]],
-    ['Access panel', 'Two clips, the panel lifted off and set down; then back on and clipped.', [['Off', 'panelOff'], ['On', 'panelOn']]],
-    ['Swap a part', 'Slide the old part out, a click; the new one in, seated with a firm click.', [['Swap', 'partSwap']]],
-    ['Seal a joint', 'A soft torch with gentle crackle, or a sealant gun squeeze. For burst joints.', [['A · Torch', 'torch'], ['B · Sealant gun', 'sealant']]],
-    ['Diagnostic scanner', 'The one tool that beeps, softly, when the reading is done. For looking over a machine.', [['A · Sweep', 'scanA'], ['B · Pulses', 'scanB']]],
-    ['Turn a valve, hold a setting', 'A wheel turned in three pulls with a clank; holding a setting is a steady low hiss and a click when it takes.', [['Turn', 'valve'], ['Hold', 'hold']]],
-    ['Relay or junction', 'A small spark as it comes out, then the new one seats with a clunk.', [['Swap a relay', 'relay']]],
-    ['Clean a vent', 'Brush strokes in the grille and a puff of dust.', [['Clean', 'vent']]],
-    ['Unstick a latch or locker', 'A jiggle, a jiggle, then it pops free.', [['Unstick', 'unstick']]],
-    ['Squeaky hinge', 'The squeak, a couple of drops of oil, and the quiet swing after.', [['Squeak', 'hingeSqueak'], ['Oil', 'hingeOil'], ['After', 'hingeAfter']]],
-    ['Clear a drain', 'Three plunges and a gurgle as it runs away.', [['Clear', 'drain']]],
-    ['Mop and wipe', 'Wet mop strokes and a wring; a cloth across a counter.', [['Mop', 'mop'], ['Wipe', 'wipe']]],
-    ['Crates', 'Lifting a crate, and setting it down with a woody knock.', [['Pick up', 'cratePick'], ['Set down', 'crateSet']]],
-    ['Console typing', 'Soft keys on a work console, with the odd space bar.', [['Type', 'typing']]],
-    ['Machine shop drill', 'A short, soft drill run at the bench.', [['Drill', 'drill']]],
-    ['Hover cart', 'A steady low float hum with a gentle wobble while you push it; docking with a clunk and two soft charging notes.', [['Moving', 'cart', 1], ['Dock', 'cartDock']]],
-    ['Airlock', 'The cargo airlock cycling: lock, air out, lock, all clear.', [['Cycle', 'airlock']]],
-    ['Time clock', 'Clocking in for your shift: a punch and a small bell.', [['Clock in', 'timeClock']]],
-    ['Job done', 'Already chosen on the Soundscape page; here for comparison.', [['Job done', 'jobDone']]],
-  ] },
-  { id: 'wash', tag: 'Washrooms', title: 'Washroom', lede: 'Showers, sinks and toilets in the shared washrooms and the suites. The game has towels, not hand dryers, so there is a towel instead.', rows: [
-    ['Toilet flush', 'A ship\'s vacuum toilet (a soft whoosh, a thump, a quiet refill), or a gentler water flush.', [['A · Vacuum', 'flushVac'], ['B · Water', 'flushWater']]],
-    ['Shower', 'A tap squeak and the water running until you stop it; then drips.', [['Running', 'shower', 1], ['Turn off', 'showerOff']]],
-    ['Sink tap', 'Tap on, water for a couple of seconds, tap off, a drip or two.', [['Wash hands', 'sink']]],
-    ['Towel', 'Drying off.', [['Towel', 'towel']]],
-  ] },
-  { id: 'personal', tag: 'Your own things', title: 'Personal', lede: 'Calling home, getting dressed, laundry, sleep, sitting down, a cup of tea, the store and your hobbies.', rows: [
-    ['Call home booth', 'A warm two-tone ring and the line picking up; the quiet line while you talk; a soft hang-up.', [['Ring and connect', 'callRing'], ['On the line', 'callLine', 1], ['Hang up', 'hangUp']]],
-    ['Wardrobe and changing', 'The wardrobe door and hangers; then changing clothes.', [['Wardrobe', 'wardrobe'], ['Change', 'changing']]],
-    ['Laundry', 'The hamper lid and clothes going in; a washer and a dryer running.', [['Hamper', 'hamper'], ['Washer', 'washer', 1], ['Dryer', 'dryer', 1]]],
-    ['Your bunk', 'Lying down with a creak and the blanket; making the bed with a few pats.', [['Lie down', 'bedLie'], ['Blanket', 'blanket'], ['Make the bed', 'makeBed']]],
-    ['Sitting down', 'A chair with a small creak, or sinking into a couch or beanbag.', [['Chair', 'sitChair'], ['Couch', 'sitCouch']]],
-    ['A cup and a tray', 'A mug set down; a meal tray and a few quiet fork sounds as you eat.', [['Cup', 'cup'], ['Eating', 'tray']]],
-    ['Locker', 'Your locker door: open, rummage, shut.', [['Locker', 'locker']]],
-    ['Crew store', 'Paying at the till: your badge scanned with a soft two-note okay.', [['Pay', 'badge']]],
-    ['Hobbies', 'A page turning (reading, puzzles), a pencil on a sketchpad, knitting needles.', [['Page', 'page'], ['Drawing', 'pencil'], ['Knitting', 'knit']]],
-  ] },
-  { id: 'galley', tag: 'Deck 3', title: 'Galley and food', lede: 'The galley at work and the servery. Nothing louder than a quiet kitchen.', rows: [
-    ['Kettle', 'Click on, the rumble building to a boil, click off. Shortened to a few seconds.', [['Kettle', 'kettle']]],
-    ['Range', 'The burner lighting (tick, tick, whump), and a pan sizzling.', [['Light', 'stove'], ['Sizzle', 'sizzle', 1]]],
-    ['Chopping', 'A knife on a board, steady.', [['Chop', 'chop']]],
-    ['Oven', 'The door dropping open with a breath of warm air; closing with a thunk.', [['Open', 'ovenOpen'], ['Close', 'ovenClose']]],
-    ['Servery and drinks', 'Sliding a tray off the rail with a plate on it; pouring a drink.', [['Take a tray', 'trayPick'], ['Pour', 'pour']]],
-  ] },
-  { id: 'leisure', tag: 'Off shift', title: 'Leisure', lede: 'The gym, the rec deck, the music room, Tiles, the observatory and the garden.', rows: [
-    ['Gym', 'A barbell lifted off the rack and set back with a clank; a treadmill running with your steps.', [['Bench press', 'bench'], ['Treadmill', 'treadmill', 1]]],
-    ['Pool', 'Jumping in; swimming lengths.', [['Splash', 'splash'], ['Swimming', 'swim', 1]]],
-    ['River hall and float room', 'Kayak paddle strokes; grabbing climbing-wall holds; the float room\'s slow lapping water.', [['Kayak', 'kayak'], ['Climbing', 'climb'], ['Float room', 'float', 1]]],
-    ['Lightdisc', 'The disc\'s soft hum as it flies, and the catch.', [['Throw', 'discThrow'], ['Catch', 'discCatch']]],
-    ['Music room', 'A few soft piano notes, and a guitar strum.', [['Piano', 'piano'], ['Guitar', 'guitar']]],
-    ['Tiles', 'Placing a tile on the table, and shuffling them face down.', [['Place', 'tilePlace'], ['Shuffle', 'tileShuffle']]],
-    ['Observatory', 'The telescope\'s little motor turning to a new star.', [['Telescope', 'telescope']]],
-    ['Garden', 'A watering can, and a trowel in the soil.', [['Water', 'watering'], ['Trowel', 'trowel']]],
-  ] },
-  { id: 'events', tag: 'Ship-wide', title: 'Ship events', lede: 'Calm signals for the big moments. Even a storm warning stays gentle: never an alarm.', rows: [
-    ['Ion storm warning', 'A low swell and two soft falling chimes, once. The ship is fine; hold on to your mug.', [['Warning', 'storm']]],
-    ['Ship-wide announcement', 'A chime before the Captain or the bridge speaks. A is three notes, B is two.', [['A · Three notes', 'announceA'], ['B · Two notes', 'announceB']]],
-    ['Lights flicker', 'For the ion storm: a crackle and a dip in power.', [['Flicker', 'flicker']]],
-    ['Shuttle bay', 'The big bay doors rolling with a deep clang; a shuttle coming in to land (the guests\' arrival).', [['Bay doors', 'bayDoors'], ['Shuttle lands', 'shuttle']]],
-    ['Celebration', 'A party popper and streamers, for birthdays and traditions.', [['Popper', 'popper']]],
-  ] },
-];
 
 // levels, set by measuring each piece against the hum (see __measure)
-const LV = {"ratchet":1.883,"wrench":1.0,"panelOff":1.084,"panelOn":1.175,"partSwap":1.288,"torch":1.0,"sealant":1.0,"scanA":1.0,"scanB":1.0,"jobDone":0.795,"vent":1.0,"unstick":0.989,"hingeSqueak":3.89,"hingeOil":3.162,"hingeAfter":1.585,"drain":0.851,"mop":1.334,"wipe":2.065,"cratePick":2.755,"crateSet":1.0,"typing":2.188,"drill":1.462,"cart":0.343,"cartDock":1.0,"valve":1.047,"hold":1.0,"relay":1.304,"airlock":0.661,"timeClock":1.0,"flushVac":0.776,"flushWater":1.0,"shower":0.355,"showerOff":3.428,"sink":0.944,"towel":1.548,"callRing":1.0,"callLine":1.758,"hangUp":1.64,"wardrobe":1.0,"changing":1.23,"hamper":1.188,"washer":0.495,"dryer":0.624,"bedLie":1.072,"blanket":1.778,"makeBed":1.567,"sitChair":1.641,"sitCouch":1.0,"cup":2.114,"tray":2.63,"badge":1.698,"locker":2.066,"page":1.799,"pencil":4.027,"knit":2.542,"kettle":0.724,"sizzle":0.923,"chop":1.0,"ovenOpen":1.0,"ovenClose":1.0,"stove":1.0,"trayPick":1.884,"pour":1.0,"bench":1.0,"treadmill":0.733,"splash":1.0,"swim":1.567,"kayak":4.027,"climb":2.138,"float":1.0,"discThrow":1.549,"discCatch":3.673,"piano":1.0,"guitar":1.0,"tilePlace":2.265,"tileShuffle":2.455,"telescope":2.089,"watering":1.0,"trowel":3.02,"storm":0.978,"announceA":1.0,"announceB":1.0,"flicker":1.0,"bayDoors":0.49,"shuttle":0.716,"popper":1.047};
 const MLV = {"morning":1.12,"evening":0.851,"latenight":0.661,"shift":1.047,"steady":1.12,"rounds":1.035,"firstlight":0.891,"midday":1.012,"lunch":1.12,"afternoon":1.12,"tea":0.923,"golden":1.023,"watch":0.785,"lullaby":0.841};
-function play(key, t) { const prev = R; R = Object.assign({}, B, { ui: trim(LV[key] ?? 1, B.ui) }); try { const a = ACT[key]; return typeof a === 'function' ? a(t) : a.loop(); } finally { R = prev; } }
 function playTrack(key, o = {}) { return startTrack(key, { ...o, level: MLV[key] ?? 1 }); }
-const FADERS = ['music', 'ui', 'hum', 'master'];
+const FADERS = ['music', 'hum', 'master'];
 /* ---------- page helpers ---------- */
 const $ = s => document.querySelector(s), $$ = s => [...document.querySelectorAll(s)];
 function setPressed(group, attr, val) { $$(`[data-group="${group}"] .chip`).forEach(c => c.setAttribute('aria-pressed', String(c.dataset[attr] === val))); }
@@ -957,24 +745,18 @@ const chip = (k, d) => `<button class="chip small" data-track="${k}" aria-presse
 $('#fullChips').innerHTML = Object.entries(TRACKS).filter(([, d]) => d.full).map(([k, d]) => chip(k, d).replace('chip small', 'chip')).join('');
 const TIMES = ['Work', 'Early morning', 'Midday', 'Afternoon', 'Evening', 'Night'];
 $('#sampleGroups').innerHTML = TIMES.map(tm => `<div class="sgroup"><h3>${tm}</h3><div class="chips">${Object.entries(TRACKS).filter(([, d]) => !d.full && d.time === tm).map(([k, d]) => chip(k, d)).join('')}</div></div>`).join('');
-$('#groups').innerHTML = GROUPS.map(g => `<section class="card" id="${g.id}" aria-labelledby="h-${g.id}">
-    <div class="card-head"><span class="tag">Activities · ${esc(g.tag)}</span><h2 id="h-${g.id}">${esc(g.title)}</h2><p class="lede">${esc(g.lede)}</p></div>
-    ${g.rows.map(([name, note, chips]) => `<div class="sub"><h3>${esc(name)}</h3><div class="chips">${chips.map(([label, key, loop]) =>
-      `<button class="chip small${loop ? ' loop' : ''}" data-act="${key}"${loop ? ' aria-pressed="false"' : ''}><span class="dot"></span>${esc(label)}</button>`).join('')}</div><p class="variant-note">${esc(note)}</p></div>`).join('')}
-  </section>`).join('');
-$('.jump').innerHTML += GROUPS.map(g => `<a href="#${g.id}">${esc(g.title)}</a>`).join('') + '<a href="#mix">Hum and volume</a>';
+$('.jump').innerHTML += '<a href="#mix">Hum and volume</a>';
 const loops = {}; let hum = null, track = null;
 const mmss = x => Math.floor(x / 60) + ':' + String(Math.floor(x % 60)).padStart(2, '0');
 function updateStatus() {
   const on = [];
   if (track) on.push(TRACKS[track.label].name);
-  Object.keys(loops).forEach(k => on.push($(`[data-act="${k}"]`).textContent.trim()));
   if (hum) on.push(hum.label + ' hum');
   $('#status').textContent = on.length ? 'Playing: ' + on.join(', ') : 'Quiet. Tap any sound.';
 }
 function setTrack(k) {
   if (track) { track.stop(); track = null; }
-  if (k) { track = playTrack(k); const d = TRACKS[k]; $(d.full ? '#fullNote' : '#sampleNote').textContent = d.name + ': ' + d.note; }
+  if (k) { track = playTrack(k); const d = TRACKS[k]; $(d.full ? '#fullNote' : '#sampleNote').innerHTML = '<b>' + esc(d.name) + '.</b> ' + esc(d.note); }
   $$('[data-track]').forEach(c => c.setAttribute('aria-pressed', String(!!track && c.dataset.track === k)));
   $('#nowFull').hidden = !(track && TRACKS[k].full); if ($('#nowFull').hidden) $('#nowBar').style.width = '0';
   updateStatus();
@@ -987,14 +769,6 @@ $$('[data-track]').forEach(b => b.addEventListener('click', () => { ensure(); se
   $('#nowName').textContent = TRACKS[track.label].name; $('#nowSec').textContent = w.sec; $('#nowTime').textContent = mmss(w.e) + ' / ' + mmss(track.total);
   $('#nowBar').style.width = (w.e / track.total * 100) + '%';
 })();
-$$('[data-act]').forEach(b => b.addEventListener('click', () => {
-  ensure(); const k = b.dataset.act;
-  if (b.classList.contains('loop')) {
-    if (loops[k]) { loops[k].stop(); delete loops[k]; b.setAttribute('aria-pressed', 'false'); }
-    else { loops[k] = play(k); b.setAttribute('aria-pressed', 'true'); }
-    updateStatus();
-  } else { play(k, ctx.currentTime + 0.02); flash(b); }
-}));
 $$('[data-hum]').forEach(b => b.addEventListener('click', () => {
   ensure(); const k = b.dataset.hum, was = hum && hum.label;
   if (hum) { hum.stop(1.2); hum = null; }
@@ -1003,7 +777,6 @@ $$('[data-hum]').forEach(b => b.addEventListener('click', () => {
 }));
 $('#stopAll').addEventListener('click', () => {
   setTrack(null);
-  for (const k in loops) { loops[k].stop(); delete loops[k]; } $$('.chip.loop').forEach(c => c.setAttribute('aria-pressed', 'false'));
   if (hum) { hum.stop(0.8); hum = null; } setPressed('hum', 'hum', null); updateStatus();
 });
 /* level meter in the bottom bar */

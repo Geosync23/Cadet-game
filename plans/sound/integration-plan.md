@@ -117,15 +117,27 @@ The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), M
 
 Final picks (via lead 36, 2026-10-25): lift **C** (Smooth: quieter parting doors, a gliding ride with a rising rush of air and no rail joints, a soft settle, three falling chime notes) and deck button **B** (Two-step). Nothing is left to pick. The builder takes exactly the chosen versions from the mockup (`DOORS.roomC`, `DOORS.hatchA`, `LIFTS.C`, `PRESS.B`, `SFX.tapA`, `SFX.mailB`, `SFX.headsB`) and can leave the rest out.
 
-## Activity sounds (to choose, not in this estimate yet)
+## Activity sounds: approved (the user, 2026-10-25, 12:47 PM Eastern)
 
-The user asked for sounds for work, repairs and everyday activities (2026-10-25). They are on the Wren Sound Lab page (`plans/sound/soundlab.html`, LAB_URL) to choose from, covering work and repairs, washrooms, personal things, the galley, leisure and ship events. Once the user picks, each one hooks to the matching activity start (`actStart(kind, ...)`, the work steps in `wsFinish`, the hobby and rec-deck activities, the washer and the ship events), and this plan gets a turn and an estimate for them.
+All the activity sounds on Wren Sounds: Activities (`plans/sound/activities.html`, https://claude.ai/artifact/5sjuT5XCJqCvMP68AipdZP) are approved. Where the page offers an A and a B and the user didn't pick, **A is the default**:
+
+- Ratchet and wrench: A, the ratchet (the wrench B stays available for heavier bolts if wanted).
+- Seal a joint: A, the torch.
+- Diagnostic scanner: A, the sweep.
+- Toilet flush: A, the vacuum flush.
+- Ship-wide announcement: A, the three notes.
+
+**Calling home:** the ring and connect, and the hang-up. **No sound while you're on the line** (the user's call; the on-the-line loop is dropped).
+
+Still to choose, on Wren Sounds: Round 2 (`plans/sound/round2.html`, https://claude.ai/artifact/1MXY7YxN9DGUChzUhAUyU7): **clock in and clock out** (A Punch clock, B Big stamp, C Lever and latch; this replaces the activity page's small time-clock sound) and **tapping someone** (A Hello, B Bubble, C Kalimba, with an optional mood switch: a touch higher and quicker when they're happy, lower and slower when they're low).
+
+**Where they hook in** (to be planned as a turn once Round 2 is picked): `actStart(kind, ...)` for the player's activities (shower, toilet, eat, sit, lie, gym, call, browse and pay, cart moves, hobbies); the work steps (`wsFinish`, and the `turn`, `hold` and `wait` steps) for repairs and chores; the laundry machines; the rec deck activities; the time clock (`careerStarted` and clocking out); tapping a crew member (the talk start); and the ship events (the ion storm phases, the diplomatic shuttle, announcements). The same rules as the rest: never `R()`, nothing on screen, silent in the checks, under the hum. Estimate: about 4 to 6 more builder hours (the sounds already exist; most of the work is the hooks and a sound_check pass over a day of activities).
 
 ## Decided (the user, 2026-10-25, 12:25 PM Eastern, via lead 36)
 
 1. **Sound is on by default, at Medium.** The Settings rows can turn it off or change the volume.
 2. **Crew doors near you make sound,** within the ~7-tile radius, quieter than your own (about 6 dB) and capped (at most 2 at once, 1 new one per 0.4 s) so busy corridors don't pile up. See "Where each sound hooks in".
 3. **No night dip.** The hum stays the same day and night.
-4. **Music: not yet, and by time of day, not by room** (the user, 2026-10-25, 12:40 PM). Three full tracks of about 10 minutes (Morning, Evening, Late night) and eleven samples (work music, and alternates for early morning, midday, afternoon, evening and night) are on the Wren Sound Lab page (`plans/sound/soundlab.html`, LAB_URL), not chosen yet. Tradition music is on hold: only some traditions get it, and the user decides which (`plans/sound/audio-todo.md`). Music is its own later job and is not in this plan's estimate.
+4. **Music: not yet, and by time of day, not by room** (the user, 2026-10-25, 12:40 PM). Three full tracks of about 10 minutes (Morning, Evening, Late night) and eleven samples (work music, and alternates for early morning, midday, afternoon, evening and night) are on the Wren Sound Lab page (`plans/sound/soundlab.html`, https://claude.ai/artifact/Q6j5kSrYRvPxmSZdRB1DMg), not chosen yet. Tradition music is on hold: only some traditions get it, and the user decides which (`plans/sound/audio-todo.md`). Music is its own later job and is not in this plan's estimate.
 
 **When:** sound is built after the next release (after 0.92.6 ships), when the user gives the go. Until then this plan, the mockup page and design-doc's "Sound" section (on branch `claude/sound-sd1`) are the record.
