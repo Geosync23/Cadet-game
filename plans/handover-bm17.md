@@ -19,7 +19,8 @@ Read this first if you take over as build master (BM18). Before me: `plans/hando
 
 ## State right now (2026-10-25 ~17:50 UTC)
 
-- 0.92.6 go/no-go package sent to lead 36 (GO from testing). Waiting for the user's say; PUB1 publishes on lead 36's go. claude/integration untouched (still 0.92.4, ba836359); moving it needs the lead's go.
+- **0.92.6 is LIVE** (PUB1, ~18:00 UTC; Playtest and Dev pages v3; game 10f654de...). The user OK'd it (2:02 PM Eastern) and, on lead 37's go, BM17 fast-forwarded **claude/integration to 5898c190** (no merge commit; game sha256 on origin 10f654de...f266, build 0.92.6). Lead now: lead 37, session_019GcNZ4GGEqfiuYDYnue7nX.
+- (Earlier) 0.92.6 go/no-go package sent to lead 36 (GO from testing). Waiting for the user's say; PUB1 publishes on lead 36's go. claude/integration untouched (still 0.92.4, ba836359); moving it needs the lead's go.
 - CS1's design-doc "Crew stories" section (ae4d60de) cherry-picked onto staging-0.92.6 as 1da1c7b3 (docs only, game unchanged), lead 36's go.
 - Known-old for 0.92.6: backlog 12 (career busy pace; numbers in the row), 14, 23, 32, KP1, RV14-1, FX8-1.
 - Backlog rows added this session: FX21-2 (arc_check doesn't walk the four new story people), backlog 12's 0.92.6 note. The two rows numbered 17 in backlog.md are left as is (lead 36).
