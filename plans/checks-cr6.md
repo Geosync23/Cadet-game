@@ -1,6 +1,6 @@
 # CR6 check results
 
-## 0.92.6 full round (2026-10-25): FAIL (3 new: mech m17, bigevents Line vs traditions, join appointments)
+## 0.92.6 full round (2026-10-25): 3 new FAILs on b78e1e22, all OK on the final 6b425814
 
 - **Build:** `claude/staging-0.92.6` b78e1e22 (all six switches on, odd jobs included), `starship-cadet.html` sha256
   `88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4` (matches BM17's). The first candidate defc327f
@@ -39,6 +39,18 @@ FAIL on: marrow isn't on a lead spot at the oath: {'place': '7-stand-28', 'tag':
   appointments are booked, not calendared. Probably the check needs to skip or book them. OLD has appointments off.
 
 All three reported to BM17 and lead 36 at once.
+
+### Re-run of the three FAILs on the final 0.92.6 commit: all OK
+
+- `claude/staging-0.92.6` 6b425814, game sha256 `10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266`
+  (matches BM17's): FX17's Line-clash fix in the game; FX17's m17 and FX22b's join_check fixes in the checks. Run with
+  6b425814's own scripts, one at a time, join alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| mech_check | OK (exit 0, 643 s) | `MECH CHECK OK` (m17 passes) |
+| bigevents_check | OK (exit 0, 158 s) | `BIGEVENTS CHECK OK` (the Line ceremony's guard clear) |
+| join_check | OK (exit 0, 264 s, alone) | `JOIN CHECK OK` (no appointment FAILs) |
 
 ## 0.92.5 full round (2026-10-25): FAIL (1 new: disc_check #25, traced to FX12 0aaf48b, check fix pending)
 
