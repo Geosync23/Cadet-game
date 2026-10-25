@@ -1,7 +1,7 @@
 @tradition six-weeks-aboard
 // Six weeks aboard (0.92.6 item 7 (c), FX17; lead 35's yes): Day 42 after you came aboard, a Sunday. A small tea with Zeke,
 // your escort, in the bow lounge after his shift, before the Sunday table (as One week aboard). Behind P926_TRADS
-// (section 13's P926_NEW). STAND-IN WORDS: SW1 writes them (CS1 checks).
+// (section 13's P926_NEW). Words: SW2 (CS1 checks).
 k: 710
 title: Six weeks aboard
 when: arrival +42
@@ -17,16 +17,20 @@ from: torres-zeke
 after-shift: yes
 
 == mail
-- Six weeks aboard tomorrow. Tea in the bow lounge at {time}? My turn to buy. Again.
+- Six weeks aboard tomorrow. Tea's on me again, bow lounge, {time}. Bring your questions. And biscuits, if you've got any.
 
 == ask
-- Six weeks! Tea after shift, bow lounge.
+- Six weeks! Tea with Zeke after shift, bow lounge.
+- Six weeks aboard. You know where everything is now. Nearly everything.   #funny
 
 == here
-- Six weeks. You're not new any more, you know.   #warm
+- Six weeks. Someone asked you the way yesterday. I saw.   #funny
+- To six weeks. Remember your first board? Look at you now.   #warm
+- Your turn. Tell me one thing about the Wren I don't know. Go on.
 
 == thanks
-- You share a tea with Zeke. Six weeks, and the Wren feels like home.   #warm
+- You share a tea with Zeke in the bow lounge. Six weeks ago you didn't know where the lift was.   #warm
 
 == chatter
-- The new hand's been aboard six weeks. Not so new now.
+- The new hand's six weeks aboard. Zeke's still buying the tea.   #funny
+- Six weeks for the new hand already. Where does it go?

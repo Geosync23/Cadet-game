@@ -1,0 +1,23 @@
+@meeting talk.kim-yusuf
+// SW2, 0.92.6 item 13 (FX17's word list): a small Wren talk, 19:00-19:40 on the auditorium stage (a ring of eight
+// chairs, house dark, the stars behind, tea from the kettle). Day 43, Monday (his day off), in Brennan's place (she
+// cooks dinner on Mondays; FX17's planner). Yusuf Kim, Survey assistant: his old maps of Marra Station (rebuilt twice).
+title: Corridors that aren't there any more
+from: Yusuf Kim
+gist: Kim's small talk on his old maps of Marra Station, and the corridors that were rebuilt away.
+== lines
+kim-yusuf: Hi. Thanks. Can everyone see? I'll pass them round. Hold them by the edges.   [gesture]
+kim-yusuf: These are maps of Marra Station. Old ones. It's been rebuilt twice, so they're all wrong.
+kim-yusuf: That's why I like them. This corridor here? Gone. There was a bakery in it.
+kim-yusuf: It had two mess halls once. Imagine choosing. I don't think I could.   [laugh]
+kim-yusuf: A map is someone saying "this is how it was, today". Then today stops being today.
+kim-yusuf: So I keep them. Somebody should remember the bakery. That's my whole talk, really.   [nod]
+kim-yusuf: Questions? Small ones are fine. Small ones are my favourite.
+? choice
+* Which map is the oldest?   rel:kim-yusuf+2 flavour:listen mem:talk.kim-yusuf.asked
+  kim-yusuf: This one. The ink's brown now. Someone drew a cat in the corner. I like them already.   [nod]
+* Will you draw the Wren one day?   rel:kim-yusuf+2 flavour:share mem:talk.kim-yusuf.asked
+  kim-yusuf: Oh. I hadn't thought. Yes. Then in fifty years someone can say it's all wrong.   [laugh]
+* (Just listen)
+  kim-yusuf: No questions? That's fine. Come and look at the maps after. Edges only.
+kim-yusuf: Thank you. Can I have them back? Carefully. Thanks.

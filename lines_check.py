@@ -21,7 +21,7 @@ import content_gen as cg
 ROOT = os.path.dirname(os.path.abspath(__file__))
 
 TOKENS = {'hi', 'bye', 'yes', 'thanks', 'wow', 'sigh', 'nick'}
-PLACEHOLDERS = {'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
+PLACEHOLDERS = {'jobs', 'spice', 'me', 'name', 'first', 'friend', 'best', 'rival', 'partner', 'mentor', 'mentee', 'boss', 'thing', 'trad',
                 'machine', 'room', 'deck', 'dish', 'weekday', 'home', 'family', 'hobby', 'since', 'other',
                 'kin', 'lost', 'hobbyNoun', 'missed',
                 'time', 'hours', 'n', 'max', 'part', 'shelf', 'drink', 'answer',

@@ -10,7 +10,7 @@ mori: This is a survey chart. Every dot on it took somebody a whole shift to che
 mori: Three readings, two people, one dot. If they don't agree, we go back and look again.
 mori: Past the Line the charts go thin. Not empty. Thin. Every survey fills a bit in.
 mori: Years from now, someone will fly through here using a dot you helped check.   [nod]
-mori: That's... that's the talk. Dr. Sato does the exciting bits. I do the dots. Questions?
+mori: That's... that's the talk. Somebody does the exciting bits. I do the dots. Questions?
 ? choice
 * Can I help check a dot?   rel:mori+2 flavour:practical mem:talk.mori.asked
   mori: Yes. Chart room, any afternoon. I'll give you an easy one. Well, a short one.   [nod]

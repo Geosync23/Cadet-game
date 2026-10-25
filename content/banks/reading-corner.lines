@@ -1,0 +1,63 @@
+@bank all
+// SW2, 0.92.6 item 4 (FX17's word list): Reading corner, Sundays 16:00-17:00 in the bow lounge armchairs; host Esme
+// Walsh (galley, late team; off at weekends: quiet, exact, minutes and grams, never "a bit"). Goers sit close on the
+// couches and seats and talk about the book they're reading. Keys, as FX17 named them:
+//   reading.welcome  Esme opens (90 or fewer).       reading.wrap   Esme closes.
+//   reading.titles   12 invented books, one title per line. Data: FX17 hands one to each reader as {title}.
+//   reading.book     any reader, Esme too, on their book (bubbles, 60 or fewer with the longest title in).
+//   reading.reply    someone answering a reader (bubbles, 60 or fewer).
+// Titles name only canon places (Coriel); nothing real.
+
+== reading.welcome
+- Hello. Armchairs are free, books are on the shelf. Sit close. Talk quietly.
+- Reading corner. Sixty minutes. Pull your chair in, and tell us what you're reading.
+- Come in. Tea's poured, two hundred millilitres each. Pick a chair. Pick a book.   #funny
+== reading.wrap
+- That's sixty minutes. Shelf books back where they live, please. Thank you.
+- Time. Spines out on the shelf. Same chairs next Sunday, if you like.   #warm
+
+== reading.titles
+- The Lighthouse at Coriel
+- Tea for the Night Watch
+- A Hundred Small Repairs
+- Bread on Sundays
+- Rain on the Harbour Wall
+- The Long Way Round
+- Small Hours
+- The Quiet Star
+- Soup for the Way Home
+- What the Coil Said
+- The Last Ferry Home
+- A Map of Grey Skies
+
+== reading.book
+- I'm on {title}. Can't put it down.
+- {title}. Third time. Still gets me.   #warm
+- Reading {title}. The ending's coming.
+- {title}. Slow start. Worth it.
+- I'm halfway through {title}.
+- {title}. Off the lounge shelf.
+- Has anyone read {title}? No spoilers.
+- {title}. Reading it slowly, on purpose.
+- {title} has the best first page.
+- Reading {title} aloud. In my head.   #funny
+- Started {title} last night. Up too late.   #funny
+- {title}. Short chapters. Dangerous.   #funny
+- {title}. It's about a ship like ours.
+- {title}. I keep reading bits to my bunkmates.   #funny
+- {title}. Somebody's underlined things.
+- {title}. Is it sad? Tell me it's not.
+- {title}. Smells like the lounge shelf.
+- Back on {title}. Lost my place twice.   #funny
+- {title}. The cook in it is wonderful.
+- {title}. My third Sunday on it.
+
+== reading.reply
+- Ooh, I loved that one.
+- Lend it me after?
+- Read that one twice. Wait for chapter nine.
+- No spoilers. I'm next on the list for it.
+- That one's on my shelf. Still unread.   #funny
+- The ending. Oh, the ending.   #warm
+- Is it good? It looks good.
+- Read me the first line?

@@ -1,0 +1,38 @@
+@tradition window-sketch
+// SW2, 0.92.6 item 7(a), week 7 (FX17's shape: Saturday 11:45, a quiet room: the observatory, not the bridge deck).
+// Window sketching: every 8 weeks from Day 48. Paper and pencils at the observatory windows; everyone draws what's
+// outside (Tavessa ahead, the dust, the hull). Luca Alvarez hosts (Survey; off Saturdays; takes his Gerald to the
+// observatory). Theo Teague, who drew comics, left on Day 21 (CS1). Quiet: anim read.
+k: 714
+title: Window sketching
+when: every 8 weeks saturday week 7 from day 43
+at: 11:45-12:30
+min: 20
+where: 2 room Observatory: common-room
+where: 2 room Science corridor: bench
+hold: 1
+who: alvarez-luca always, stargazer 50%, window-seat 40%, quiet-corner 30%, everyone 8%
+anim: read
+host: alvarez-luca
+from: alvarez-luca
+invite: host=alvarez-luca odds=25% line="Window sketching at the observatory! Bring nothing. I've got pencils. And Gerald."
+
+== mail
+- Window sketching tomorrow, {time}, at the observatory. Paper and pencils provided. Draw what's out there. Nobody has to be good at it.
+
+== ask
+- Window sketching at the observatory this morning. Alvarez brings the pencils.
+- Sketching later. I can't draw. That's allowed, apparently.   #funny
+
+== here
+- Shh. I'm doing the stars. All of them.   #funny
+- That's Tavessa. The smudge. My smudge is better.   #funny
+- Can I borrow the grey pencil?
+
+== thanks
+- You take a pencil and a sheet of paper to the observatory window. Everyone draws what's out there, quietly.   #warm
+
+== chatter
+- I drew Tavessa at window sketching. It looks like a sneeze.   #funny
+- Alvarez put everyone's sketch up on the wall after. Mine too.   #warm
+- Window sketching. The quietest hour I've had all week.
