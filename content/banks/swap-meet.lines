@@ -1,54 +1,52 @@
 @bank all
 // SW2, 0.92.6 item 2 (FX17's word list): the Sunday swap meet (tradition id market), 10:30-12:30 on the promenade
-// stalls; host Orla Ishikawa (the crew store; she keeps a list, of course). Keys, as FX17 named them:
-//   swap.open        Orla opens the meet (card or bubble, 90 or fewer).
-//   swap.thing.1-3   a stallholder (any goer) shows you a thing; three slots, three things each, so 9 rotate.
-//   swap.reply.1-3   your three buttons; swap.after.N is the stallholder's answer to swap.reply.N.
-//   swap.stall       stallholders' bubbles (60 or fewer); swap.browse: browsers' bubbles (60 or fewer).
+// stalls; host Orla Ishikawa (the crew store; she keeps a list, of course), with Dara Shah on the other stall.
+// Keys and speakers, as FX17 set them:
+//   swap.open        Orla opens the meet (90 or fewer).
+//   swap.thing       one thing a line, "Name | short description"; 9 here, 3 shown a week.
+//   swap.reply.1-3   Orla's answer when you pick a thing; {thing} the thing's name as written ("A paperback").
+//   swap.after.1-3   ship chatter later, said to you, about what you took; {thing} as above.
+//   swap.stall       the two stallholders, Orla and Dara Shah (bubbles, 60 or fewer).
+//   swap.browse      any goer (bubbles, 60 or fewer).
 //   swap.close       optional: Orla closes the meet.
 // Things already canon at the swap meet: Kovac swapped a scarf for buttons; Holt buys mints; Cruz brings Gerald cuttings;
 // Pell's rusted music box came from it; everyone haggles with the Captain. Nobody here sells for credits: things swap.
 
 == swap.open
 - Good morning, everyone. Stalls are open. One thing for one thing, and be kind about it.
-- Hello, hello. The swap meet's open. Swap fair. I'm keeping a list. Of course I am.   #funny
+- Hello, all. The swap meet's open. Swap fair. I'm keeping a list. Of course I am.   #funny
 - Morning. Lay your things out nicely. If it isn't yours to swap, it goes back. Enjoy.
 
-== swap.thing.1
-- This paperback's only slightly bent. The ending's good. I won't tell you it.
-- A chess set. One knight's a button now. He plays just as well.   #funny
-- A puzzle of the Wren. A thousand pieces. Well. Nine hundred and ninety-eight.   #funny
-== swap.thing.2
-- A knitted tea cosy. It's a bit lopsided. So is the teapot, so it fits.   #funny
-- Two pairs of thick socks. Clean, I promise. Too warm for me. Perfect for you.
-- A hand-drawn star map. The stars are right. The labels are mostly right.
-== swap.thing.3
-- A wind-up torch. Wind it for a minute, it shines for two. Bargain, really.
-- A jar of odd buttons. Nobody knows where they came from. That's the charm.
-- A pressed-flower bookmark from the garden. Cruz didn't see. Cruz never sees.   #funny
+== swap.thing
+- A paperback | Slightly bent. The ending's good, they say.
+- A chess set | One knight's a button now. He plays just as well.
+- A puzzle of the Wren | A thousand pieces. Well. Nine hundred and ninety-eight.
+- A tea cosy | Knitted, a bit lopsided. So is the teapot.
+- Thick socks | Two pairs, clean, very warm.
+- A star map | Hand-drawn. The stars are right. The labels, mostly.
+- A wind-up torch | Wind it a minute, it shines for two.
+- A jar of buttons | Odd ones. Nobody knows where from.
+- A flower bookmark | Pressed, from the garden. Cruz didn't see.
 
-// Your three buttons, then the stallholder's answer to each (swap.after.N answers swap.reply.N).
 == swap.reply.1
-- I'll swap you something for it.
-== swap.after.1
-- Deal. Shake on it. Pleasure doing business.
-- Done. Look after it. It's had a good life so far.   #warm
+- {thing}? Good choice. It's been waiting for the right person. It's yours.   #warm
 == swap.reply.2
-- What's the story behind it?
-== swap.after.2
-- It's been on three ships before this one. It always finds a new home on a Sunday.
-- Came from a stall on Hesper Dock, years back. Its turn to travel again.
+- {thing}. Lovely. I'll write it on the list. There. Now it's properly yours.
 == swap.reply.3
-- Just looking, thanks.
+- {thing}! I nearly took that myself. Look after it.   #funny
+
+== swap.after.1
+- Heard what you took home from the swap meet. {thing}. Good pick.
+== swap.after.2
+- Who swapped for it on Sunday? {thing}, I mean. Oh, it was you. Lucky.   #funny
 == swap.after.3
-- Course. Have a wander. It'll be here if you change your mind.
-- No rush. Half the fun's the looking.
+- Sunday's swap meet: {thing}, off to a good home. Yours.   #warm
 
 == swap.stall
 - Everything must go. Well. Some things.   #funny
 - One thing for one thing. That's the rule.
 - Have a look. No pressure. Lots of socks.   #funny
-- Fair swaps only. Orla's got the list.
+- Fair swaps only. It all goes on the list.
 - Mind that jar. It's full of buttons.
 - Swapping a puzzle. Most of the pieces are in.   #funny
 
