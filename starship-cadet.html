@@ -14573,6 +14573,15 @@ function playerNew() {
 // with no job to use them go back on a shelf (17's returnPart, when it's there). Without section 17, none of this. ----
 const CARRY_MAX = 2, INSPECT_MINS = 3;
 // a free place of a type in a room of this deck, nearest a point: the storage places by the shelves and the lathe
+// the machine shop's making spots (MAKE_AT) all held by crew: the nearest one, its crew stepping aside for a while
+// (section 10's crewMakeWay) so you can make your job's part; null when there are none
+function jobMakeWay(at) {
+  const l = MAKE_AT.map(id => PLACE_OF.get(id)).filter(Boolean).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s && s.walk)
+    .sort((m, n) => Math.hypot(m[1].x - at.x, m[1].z - at.z) - Math.hypot(n[1].x - at.x, n[1].z - at.z))[0];
+  if (!l) return null;
+  if (typeof crewMakeWay === 'function') crewMakeWay(l[1].walk, 20);
+  return l[0];
+}
 function jobPlaceNear(type, room, at) {
   return [...PLACE_OF.values()].filter(q => q.type === type && q.room === room && !heldBy(q.id)).map(q => [q, placeSpot(q.id)]).filter(([, s]) => s)
     .sort((m, n) => Math.hypot(m[1].x - at.x, m[1].z - at.z) - Math.hypot(n[1].x - at.x, n[1].z - at.z)).map(m => m[0])[0] || null;
@@ -14744,7 +14753,7 @@ function jobTap(it, at) {
   if (deckDef.num === 5 && roomAt(...c) === 'f') {         // the machine shop: make a part storage has run out of
     const want = jobNeeds(mw.j, mw.w, P.carry);           // the job's own made part first (0.28.24), else one storage has run out of
     const make = (P.work.make && P.work.make.part) || (want.includes(madeHere(mw.j)) ? mw.j.make : want.find(p => !(SHIP.stores[p] > 0) && !(typeof NO_MAKE !== 'undefined' && NO_MAKE.has(p))));
-    const pl = make && jobPlaceNear('storage', 'f', at);
+    const pl = make && (jobPlaceNear('storage', 'f', at) || jobMakeWay(at));   // both spots taken by crew making parts: the nearer one makes way for you (lead 37, CR1's player_check)
     if (make && pl) {
       if (P.carry.length >= CARRY_MAX) { toast(it.t, 'Your hands are full (' + partList(P.carry) + '). ' + handsFix('Fit those first') + '.'); return true; }
       if (!P.work.make || P.work.make.part !== make) P.work.make = { part: make, done: 0 };
@@ -41614,9 +41623,11 @@ function evStay(p, d, e) {
   const u = e.ev.stayMid ? (schedU(p.seed + e.ev.k, d, 1036) + schedU(p.seed + e.ev.k, d, 1041)) / 2 : schedU(p.seed + e.ev.k, d, 1036);   // stayMid (0.92.6, FX17): most come for the middle of it
   const from = e.from + Math.round((e.to - e.from - len) * u); return [from, from + len];
 }
-// evMeetClash(p, d, [a, b]): p is in a ship-wide event's meeting on day d that overlaps minutes [a, b) (with its early lead). Pure
-// (the calendar and the cast: section 18's eventMeetPlan, [] while the events are off)
-const evMeetClash = (p, d, [a, b]) => typeof eventMeetPlan === 'function' && eventMeetPlan(p, d, null).some(g => g.at < b && a < g.at + g.dur);
+// evMeetClash(p, d, [a, b]): p is in a ship-wide event's meeting on day d that overlaps minutes [a, b) (with its early lead). Pure:
+// the calendar and the cast only (evMeetsOn, evMeetCast), never the meeting's venue or lead spots (lead 37, CR1: through
+// eventMeetPlan, gatherVenue/evLeadWhere were built mid-plan and the machine shop's reserved job broke in player_check)
+const evMeetClash = (p, d, [a, b]) => typeof evMeetsOn === 'function' && EV_CALLIN_ON && evMeetsOn(d).some(g => evMeetCast(g, d).some(c => c.p.id === p.id)
+  && g.at - (g.early || 5) < b && a < g.at + g.len);
 // toBed (FX9, 0.92.5 item 16; the shared rule for late traditions, FX12's late piano too): a tradition with toBed: n
 // (minutes) takes someone whose bedtime falls inside it, from its start, leaving 20 minutes before their bed (eventFree's
 // own margin), if that gives them at least n minutes there; otherwise free as usual. -> [from, to] (minutes from midnight)
