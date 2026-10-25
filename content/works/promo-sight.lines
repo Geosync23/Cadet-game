@@ -1,0 +1,89 @@
+@bank all
+// SW1 (2026-10-25, patch 0.92.6 items 18, 14 and 11, for FX19's worksText): the first promotion made obvious.
+// SW2 re-voice (2026-10-25, the user's change at 05:25 UTC: "Test job should be the day after getting Reliable."): the
+// Tier 1 steps are New, Steady, Reliable, Trusted, Relied on; the Tier 2 test now needs Reliable and Calder's Making it
+// safe (which she runs from Day 8), and is never before Day 9. The offer comes the moment both hold; the test is your
+// next workday. Calder speaks unless noted: exact, numbers not adjectives, never "well done" (her arc's payoff) and no
+// "!". Mails are "Subject | body", unsigned (the game adds the sender). Each beat fires once.
+
+// toasts, said by nobody, when your reputation word changes at Tier 1 ({band})
+== works.rep.up.steady
+- Now Steady. One more step, Reliable, and you're up for your Tier 2 test.
+== works.rep.up.reliable
+- Now Reliable. That's the reputation your Tier 2 test needs.
+// RETIRED (0.92.6, the test moved to Reliable; key not reused):
+// == works.rep.up.trusted
+// - Up to Trusted. One more step, Relied on, and you're up for your Tier 2 test.
+
+// Calder, at Reliable while Making it safe isn't done, if she's near (a bubble); else the Mail
+== promo.sight
+- Reliable. Good. One thing left: Making it safe, with me. Then I put you up for Tier 2.
+- Reliable now. That's the reputation. Making it safe with me, and then your test.
+== promo.sight.mail
+- Next step | Reliable. One thing left: Making it safe, with me, from Day 8. Then Tier 2.
+
+// RETIRED (0.92.6; key not reused): Calder, at Trusted
+// == promo.trusted
+// - Trusted. One more step. Then we talk about your test.
+
+// the big beat: Reliable + Making it safe + Day 9 or later (her bubble; promo.announce follows it)
+== promo.ready
+- Reliable. Making it safe, done. That's all of it. Your Tier 2 test is your next workday.
+// the Mail, always ({day}: a weekday or "tomorrow")
+== promo.ready.mail
+- Your Tier 2 test | Ready. Test job {day}, 09:00, Works bay. Pass it and you're an Officer.
+// the device's urgent notice ({day})
+== promo.ready.notice
+- Your Tier 2 test: {day}, 09:00, the Works bay.
+
+// RETIRED (0.92.6: the offer now waits for both, so neither "almost" Mail is sent; keys not reused):
+// == promo.missing.m6
+// - Almost | Relied on. One thing left before your Tier 2 test: Making it safe, with me.
+// == promo.missing.day
+// - Soon | You're ready early. I set Tier 2 tests from the second Monday. We'll talk then.
+
+// the Record's "What's next" while you're below Reliable ({band} now, {next} the next step's word)
+// (next.t2.rep stays next.lines' own switch-off line: it's given {band} only, so a {next} here would show as written; FX19)
+== next.t2.steps
+- Your Tier 2 test needs Reliable and Making it safe. You're {band} now.
+
+// the Works app's Training tab, "Your promotion" checklist
+== works.promo.check.title
+- Your promotion: the Tier 2 test
+== works.promo.check.day
+- The test from Day 9
+== works.promo.check.rep
+- Reliable (you're {band})
+== works.promo.check.m6
+- Making it safe, with the Chief
+== works.promo.check.set
+- Test job: {day}, 09:00
+== works.promo.check.done
+- Done
+== works.promo.check.not
+- Not yet
+
+// Calder's Mail, the first time your ship-wide work reputation turns dependable (sent only before Reliable)
+== promo.dependable
+- Dependable | Word is you're dependable. Reach Reliable at work, and we'll talk Tier 2.
+
+// optional (item 11): the chip on board jobs of a kind you're trained in
+== works.board.trade
+- Your trade
+
+// Your new cabin after the promotion (the user: "new quarters can't be missed"). Said by nobody.
+// the urgent notice as the walk to cabin 4-23 starts ({name}: who walks you there)
+== promo.move.notice
+- Your own cabin, 4-23: {name} is walking you there now.
+// the cabin's title on the device
+== promo.home.title
+- Your cabin
+// when the cabin became yours without the walk (you weren't there by 22:00)
+== promo.home.notice
+- Cabin 4-23 is yours now. Your bed and your things are there. Officers' corridor, Deck 4.
+// the arrow's label
+== promo.home.arrow
+- Your cabin, 4-23. Your things are in.
+// the Works app's Training tab line
+== works.promo.home
+- Your cabin: 4-23, on the officers' corridor, Deck 4.
