@@ -94,3 +94,24 @@ Left (lead's question): a reload in the middle of the night round still ends as 
 round isn't counted as kept, so Mensah can invite you again; nothing is lost.
 
 ## Final verdict: PASS at 6b03bea7.
+
+## Re-review of FX22b's bae25ae7 (game sha256 ad896a8d...d6df; lead 36: this replaces 6b03bea7)
+Diff 6b03bea7..bae25ae7 read; all new lines behind P926_APPT; the tradJoinTap line returns false as before with it off.
+| Check | Result |
+|---|---|
+| cadet_test off vs 0.92.5 | under load only a_start (known FX17-2 flip); alone: ALL IDENTICAL |
+| check_fast | QUICK CHECK OK |
+| appt_check all parts incl. `fixes` | APPT CHECK OK (210 ok; planted faults caught) |
+| events_check, switch on | EVENTS CHECK OK |
+| my reload probe: scope (Sato) | joined, saved, reloaded: a tap reopens the scene; kept; one Record row |
+| my reload probe: Brennan's book | **FAIL**: after the reload a tap on Brennan does nothing; at the end apptOver keeps it, but the scene (and your dish choice) never comes |
+| my reload probe: night round | **FAIL**: after a reload Mensah waits at the bench again, but a tap does nothing (stop 1 walked, `ri: 1` saved), so the round can't resume and ends missed |
+
+**Finding R1 (new).** The rejoin needs the one-off from the tap. `tradJoinTap` gets it from `eventOf(a.p)` (only when
+the host is planned there: Sato, the teachers, Cruz) or from `TJ_NOW.lead`, and tradJoinMinute drops a joined tradition
+from TJ_NOW. Hosts at work for it (`only: []`: Brennan, the five shadow hosts, Mensah) have neither after you've joined,
+so `apptRejoin` is never reached. Suggest: when `e` is null and P926_APPT, look for today's appointment one-off on now
+whose open booking's host is `a.p.id` (`eventsOn(d).find(x => x.ev.appt && (apptBooking(x, d) || {}).host === a.p.id)`)
+and use it. Re-test: reload mid-Brennan and mid-round, tap the host, the scene / round goes on.
+
+Verdict on bae25ae7: **FIXES NEEDED (one small)**: R1. Everything else passes.
