@@ -56,6 +56,9 @@ then one `run` line per check (`run check_fast bash check_fast.sh`, `run mech py
 - Monitors expire after 30 min; re-arm with `tail -n +N -f summary.txt | grep --line-buffered exit`.
 
 ## Latest results
+- 0.92.6 (b78e1e22, sha 88f4cc8d...16fe4), CR6's last round: 8 OK; NEW FAILs mech m17, bigevents (the Captain at a
+  tradition over the Line ceremony), join (appointments "not on in 400 days"). See plans/checks-cr6.md.
+- disc_check #25 is fixed (FX23); stories_check is new in the share (~35 s).
 - 0.92.5 (53c11f88, sha fddc0ef6...5559): 9 OK; disc_check #25 NEW FAIL (two lines), traced by BM17 to FX12 0aaf48b
   (a check pinned to a schedule). FX23's fix will be re-run by CR3, not CR6.
 - Full history: plans/checks-cr6.md (newest at the top).

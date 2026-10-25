@@ -1,5 +1,45 @@
 # CR6 check results
 
+## 0.92.6 full round (2026-10-25): FAIL (3 new: mech m17, bigevents Line vs traditions, join appointments)
+
+- **Build:** `claude/staging-0.92.6` b78e1e22 (all six switches on, odd jobs included), `starship-cadet.html` sha256
+  `88f4cc8db099337d1ae61cf05e58be93af6577abea5458ba1449a27733f16fe4` (matches BM17's). The first candidate defc327f
+  was withdrawn before any check finished. OLD 39f7741d (0.92.5).
+- Share: all 11 here, one at a time (join alone), including the new stories_check.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 290 s) | `QUICK CHECK OK`; repair share 56% (45/80, Days 2-28); odd jobs: 10 posted, days with 2+ small jobs [1, 2, 3, 4] |
+| mech_check | **FAIL** (exit 1, 638 s) | `FAIL m17: the paper part differs after the rides` |
+| bigevents_check | **FAIL** (exit 1, 215 s) | two lines: Captain Marrow at the stands, not the Line (below) |
+| fridays_check | OK (exit 0, 1280 s) | `FRIDAYS CHECK OK` |
+| disc_check | OK (exit 0, 325 s) | `ALL OK` (0.92.5's #25 FAIL fixed by FX23) |
+| tiles_check | OK (exit 0, 121 s) | `ALL OK` |
+| join_check | **FAIL** (exit 1, 239 s, alone) | 9 lines `appt-<id>: not on in 400 days` |
+| food_check 1 7 | OK (exit 0, 63 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 67 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 91 s) | `ALL OK` |
+| stories_check | OK (exit 0, 34 s) | `STORIES CHECK OK` |
+
+### mech_check m17 (the lift roof): NEW
+- `FAIL m17: the paper part differs after the rides` (mech_check.py:1692): m17's paper state read again after the two roof
+  rides doesn't match the first read ('talk' aside). OLD `mech_check.py OLD m17`: exit 0. NEW m17 alone: fails again.
+
+### bigevents_check: NEW (traditions vs the Line)
+```
+FAIL on: marrow (off) isn't planned at crossingCeremony (D7 Sun 14:40, Deck 3 bow lounge): leisure at 7-stand-28 (Stands, Deck 7)
+FAIL on: marrow isn't on a lead spot at the oath: {'place': '7-stand-28', 'tag': 'ev-rec-wso-cheer', 'act': 'leisure', 'from': 743, 'to': 903}
+```
+- The Captain is planned cheering at the rec deck stands (a tradition, switched on in this build) 12:23-15:03 on Day 7,
+  over the Line ceremony she leads at 14:40. OLD (traditions off): `BIGEVENTS CHECK OK` alone.
+
+### join_check: NEW (appointments)
+- 9 lines, all `FAIL appt-<id>: not on in 400 days` (brennan-book, scope, teach-me, shadow, show-tell, rehearse,
+  midnight-feast, night-round, garden-bed); nothing else fails. join_check looks each tradition up on the calendar; the
+  appointments are booked, not calendared. Probably the check needs to skip or book them. OLD has appointments off.
+
+All three reported to BM17 and lead 36 at once.
+
 ## 0.92.5 full round (2026-10-25): FAIL (1 new: disc_check #25, traced to FX12 0aaf48b, check fix pending)
 
 - **Build:** `claude/staging-0.92.5` 53c11f888efe00dbff89cadbfbd81c326e82de84, `starship-cadet.html` sha256
