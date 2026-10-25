@@ -40739,7 +40739,7 @@ function eventPlan(p, d) {
     const dx = EV_STORM_ON ? evDoubleExcept(p, d) : null; let meet = !!(dx && dx[0] < e.to && e.from < dx[1]);   // S2: a break in a double shift, from its exception's start (section 14's shiftWithBreaks)
     if (meet) { from = dx[0]; to = Math.min(to, dx[1]); }
     if (!meet && ev.easy && lineEasy(p, d, e)) meet = true;   // Crossing the Line's standing easy: a break in the shift (section 14's 'meet')
-    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}), ...(ev.seated ? { seated: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
+    out.push({ id: ev.id, from, to, opts, anim, tag: 'ev-' + ev.id + (anim ? '-' + anim : ''), min: ev.host === p.id ? Math.min(ev.min || 20, to - from) : ev.min || 20, prio: ev.prio || 0, host: !!(ev.host && ev.host === p.id || P926_TRADS && /^rec-(wren|chiefs)-talk$/.test(ev.id) && recSpeaker(p, d)), own: e.honorees.includes(p) || !!(ev.ownFor && ev.ownFor(p, d)), meal: ev.meal || null, ...(meet ? { meet: true } : {}), ...(ev.seated ? { seated: true } : {}) });   // host: section 14 seats them first; meal: going IS their dinner or breakfast (section 14)
   }
   out.sort((x, y) => y.own - x.own || y.host - x.host || y.prio - x.prio || x.from - y.from);   // their own birthday, then one they host (0.34.52: Tomas's quiz on a birthday night), then prio
   const keep = [];

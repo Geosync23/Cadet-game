@@ -546,6 +546,7 @@ with sync_playwright() as pw:
                 'rec-slow-stretch': list(range(7, 43, 7)), 'rec-regatta': [21], 'rec-talent-night': [14, 42], 'rec-chiefs-talk': [8, 18], 'rec-wren-talk': [25, 29],
                 'rec-film-night': [], 'rec-all-hands': []}
         storm_cal = g.ev("typeof EV_CAL_ON !== 'undefined' && EV_CAL_ON")
+        if g.ev("typeof P926_TRADS !== 'undefined' && P926_TRADS"): PLAN['rec-chiefs-talk'] = PLAN['rec-chiefs-talk'] + [32]; PLAN['rec-wren-talk'] = PLAN['rec-wren-talk'] + [36, 39]   # 0.92.6 (FX17): the full talk rota
         dress = g.ev("(() => { const o = {}; if (typeof EV_DAY_DRESS !== 'undefined') for (const [k, v] of EV_DAY_DRESS) { const [id, d] = k.split('@'); ((o[id] = o[id] || { drop: [], add: [] })[v.drop ? 'drop' : 'add']).push(+d); } return o; })()")
         rc = g.ev("""(() => { const out = { on: {}, n: {}, hosts: [], talks: [] };
           for (let d = 1; d <= 42; d++) for (const e of eventsOn(d)) if (/^rec-/.test(e.id)) {
