@@ -20900,8 +20900,9 @@ const FIX_PARKED = new Set(['sh-lamp', 'sh-press', 'sh-grinder', 'st-ladder', 's
 // ---- odd jobs (FX20, patch 0.92.6 item 10, the user: "Add a lot more simple jobs around the ship (cleaning vents, unsticking
 // things); Works lets you see the ship; the bridge stays special") ----
 // ODD_ROWS: FIX_ROWS' format, at public places on Decks 2-7 no small repair uses (never Deck 1, never a cabin), no new
-// geometry. While ODD_ON they're a third stream ('o') in fixTable and fixPost: the streams take turns by the fewest posted
-// today, the odd one up to ODD_PER a day in its own seeded order, and the board keeps ODD_MIN jobs up for you, not BOARD_MIN.
+// geometry. While ODD_ON they're a third stream ('o') in fixTable and fixPost: three top-ups in four are a small job, an odd
+// one whenever there are fewer of them than small repairs today (about half), up to ODD_PER a day in its own seeded order,
+// and the board keeps ODD_MIN jobs up for you, not BOARD_MIN.
 // Words: fix.oj-<id>.title|sign|done (content/works/odd.lines); the title here till then. ODD_ON false: as before.
 const ODD_ON = false, ODD_PER = 8, ODD_MIN = 3;
 const ODD_ROWS = [
@@ -21046,10 +21047,11 @@ function fixOk(r, jobs, B) {
 function fixPost(h, jobs, t, leave) {
   if (!FIX_ON) return null;
   const d = Math.floor(h / 24) + 1, B = (d - 1) * 1440; if (d < FIX_FROM) return null;
-  const today = jobs.filter(j => j.extra && j.found >= B && j.found < B + 1440); if (today.length % 3 === 2) return null;   // every third top-up an old kind
+  const today = jobs.filter(j => j.extra && j.found >= B && j.found < B + 1440); if (ODD_ON ? today.length % 4 === 3 : today.length % 3 === 2) return null;   // every third top-up an old kind (FX20: every fourth while ODD_ON)
   const n = { s: today.filter(j => j.fix && j.fixS === 's').length, p: today.filter(j => j.fix && j.fixS === 'p').length }, T = fixTable();
   if (ODD_ON) n.o = today.filter(j => j.fix && j.fixS === 'o').length;   // FX20: the odd jobs take their turn by the fewest today
-  for (const st of ODD_ON ? ['s', 'p', 'o'].sort((a, b) => n[a] - n[b]) : n.s <= n.p ? ['s', 'p'] : ['p', 's']) {
+  const sp = n.s <= n.p ? ['s', 'p'] : ['p', 's'];       // FX20: while ODD_ON an odd job comes next while there are fewer of them than small repairs today (about half; the shift's first still science)
+  for (const st of !ODD_ON ? sp : n.o < n.s + n.p ? ['o', ...sp] : [...sp, 'o']) {
     const per = st === 'o' ? ODD_PER : FIX_PER; if (n[st] >= per) continue;
     const L = T[st], at = ((d - FIX_FROM) * per + n[st]) % L.length;
     for (let i = 0; i < L.length; i++) {
