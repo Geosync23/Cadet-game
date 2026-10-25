@@ -7,7 +7,11 @@
 4. Message every working seat with your session id (priority "next", never "now"). Tell lead 36 (session_015LyT1p2Kivp1eaMBC7dMQi) you've taken over.
 5. User in US Eastern (EDT, UTC-4). Plain words, no emojis, few messages. Cap 8 working seats; during a six-runner round only BM + 6 + 1.
 
-## Latest (~16:00 UTC, noon Eastern)
+## Latest (~17:00 UTC, 1 PM Eastern)
+- Round fixes: RV15 PASS FX19 acb36503 (arrows_d test fix). Waiting RV17 on FX17 3e8c78a6 (Line clash, game) + eba4d365 (m17 check) and FX22b 3d011393 (join_check test); BM17 bisecting career pace (+1 xp by Day 4 with switches off = backlog 12 edge; ODD_ON adds ~8 jobs/day, 0 xp each). Lead default: keep 0.92.5 pace. Then BM17 merges, re-runs, package → user.
+- Sound (all SD1, session_012DnJzEerXDa6SScxbQZ1q5, claude/sound-sd1): decided Soundscape PP6pDpiZw8jzaNoLygCTgC; Activities approved 5sjuT5XCJqCvMP68AipdZP (no on-the-line call sound); Round 2 1MXY7YxN9DGUChzUhAUyU7 (clock C, tap B louder, no mood); Sound Lab Q6j5kSrYRvPxmSZdRB1DMg: music APPROVED, ON by default; SD1 building game-ready music module + Music app mockup + harness (not in game). Sound + music build after 0.92.6 on the user's go. Tradition music held (audio-todo.md).
+
+## Earlier (~16:00 UTC, noon Eastern)
 - USER: 0.92.5 not published, waits for 0.92.6. USER YES crew stories ON.
 - 0.92.6 round on claude/staging-0.92.6 b78e1e22 (game 88f4cc8d…, all six switches ON); arc_check stale-check fix 9d758ada (test only, CR2 OK). Open: CR6 mech m17 (BM17 isolating by switch) and bigevents Day 7 Captain at Winner-stays stands (FX17 fixing, RV17 reviews). Then BM17 package → user → PUB1 on the user's say (Playtest + Dev; never 6daN…).
 - Sound: SD1 session_012DnJzEerXDa6SScxbQZ1q5, page https://claude.ai/artifact/PP6pDpiZw8jzaNoLygCTgC (v2; v3 coming: footsteps like carpet, no crowd chatter) + plans/sound/integration-plan.md (user asked how much work to put it in the game).

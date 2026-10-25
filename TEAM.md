@@ -1213,3 +1213,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:56 UTC: **USER: music approved** (all); build it out ready for the game but don't add yet → SD1: full tracks for all, music module (time-of-day + working schedule, cross-fade, quiet gaps, setting), harness page with fake ship clock; docs.
 - ~16:58 UTC: USER: plan a Music app on the device (turn off, choose track, volume) → SD1 adds mockup to the harness + plan/design-doc.
 - ~16:59 UTC: USER: music ON by default (ship schedule).
+- ~16:58 UTC check-in (lead 36): waiting RV17 (3 verdicts, nudged) and BM17 career-pace bisect; RV15 PASS FX19 acb36503. SD1 on music module/app/harness. Handover note updated.
