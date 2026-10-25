@@ -368,7 +368,7 @@ A first start on defc327f was stopped at BM17's word (replaced by b78e1e22); not
 | day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 278 s |
 | day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 261 s |
 | weekend_check | **OK** | WEEKEND CHECK OK; 499 s |
-| arrows_d_check | **FAIL: NEW (PROMO_SIGHT_ON)** | 3 lines, all S6 (FX1's empty-board word): `S6: the board's word waits through a dialogue and a training's watch and turn (RV7) ({'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 0})`; `S6: the board's word waits through a meeting, then is said (lead 29) ([0, 0])`; `S6: an empty board: no arrow, and the board's word said (None; said 0)`; 65 s |
+| arrows_d_check | **FAIL on b78e1e22's check, check out of date for PROMO_SIGHT_ON, fixed by acb36503, re-run OK** | 3 lines, all S6 (FX1's empty-board word): `S6: the board's word waits through a dialogue and a training's watch and turn (RV7) ({'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 0})`; `S6: the board's word waits through a meeting, then is said (lead 29) ([0, 0])`; `S6: an empty board: no arrow, and the board's word said (None; said 0)`; 65 s |
 | arrows_f_check | **OK** | `arrows_f_check: OK`; 30 s |
 | controller_check (every part but reach) | **OK** | CONTROLLER CHECK OK, all 28 parts; 2227 s (kept: started before CR1's offer) |
 
@@ -376,3 +376,8 @@ A first start on defc327f was stopped at BM17's word (replaced by b78e1e22); not
 controller_check): PROMO_SIGHT_ON off → OK; ODD_ON off, BOARD_TRADE_ON off, STORIES_ON off → each the same 3 FAIL lines
 (P926_TRADS not flipped). So with FX19's promotion sight on, FX1's "Nothing on the board" word (boardEmptySay) is never
 said in S6's setup; the arrow half of S6 holds. Routed by lead 36 (FX19). Not fixed (check runner); BM17 confirming.
+
+**Re-run on FX19's fix** (claude/staging-0.92.6 acb36503, check only; game sha256 88f4cc8d…6fe4 unchanged), alone:
+`arrows_d_check: OK` (exit 0). S6 now: `in a meeting, then after: [0, 1]`, `in a dialogue, a watch, a turn, then free:
+{'dialogue': 0, 'watch': 0, 'doo': 0, 'free': 1}`. FX19's reading: with PROMO_SIGHT_ON the Day 8 career's test runs on Day 9,
+and boardEmptySay rightly holds its word during a test; the check now tries the empty board with nothing under way.
