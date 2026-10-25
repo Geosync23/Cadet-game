@@ -367,7 +367,7 @@ def stuck_fix(lab):                                  # who should turn a "stuck 
     return FIX['stuck']
 
 class Follower:
-    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}
+    def __init__(self, pg): self.pg = pg; self.acts = []; self.same = None; self.stuck = []; self.long = []; self.guides = {}; self.dv = {}; self.test_led = None
     def run(self, until_min_abs, every=6):
         pg = self.pg
         while pg.ev('shipNow()') < until_min_abs:
@@ -378,6 +378,7 @@ class Follower:
             if r: self.acts.append((pg.ev('clockText()'), r))
             s = pg.ev("(() => { const g = goalNow(), v = typeof dvCareerNext === 'function' ? dvCareerNext() : null; return [Math.floor(shipNow()), g ? g.label : null, player.here().join(','), deckDef.num, !!ACT || !!(DIALOGUE), g && g.guide || null, v ? v.label : null]; })()")
             if s[5] and s[5] not in self.guides: self.guides[s[5]] = (s[0], s[1])   # the queue's entries seen leading, first time and label
+            if s[5] and s[1] and 'Tier 2 test job' in s[1] and not self.test_led and pg.ev("(() => { const c = SHIP.works && SHIP.works.cur; return !!(c && c.id === 't2' && c.j && guideTakeable().some(o => o.id === c.j)); })()"): self.test_led = (s[0], s[5])   # RV16: the queue leading to the test job by name while it can be taken (promo:test, or the shift's board arrow naming it)
             if s[6] and s[6] not in self.dv: self.dv[s[6]] = s[0]                    # the Dev career arrow's labels
             if s[4] and self.same: self.same = (s[0], self.same[1], self.same[2], self.same[3]); continue   # busy (working, a meeting): not stuck
             if s[1]:
@@ -471,7 +472,12 @@ def part_promo(ctx, path):
     mv = N['moved'][:1]; check(mv and mv[0].get('how') == 'walked', f"promo: the walk to cabin 4-23 not walked with her (how: {mv}) (fix: DV1, the walk starts at 17:00 even mid-job)")
     cm = N['commissioned'][:1]; check(cm and cm[0].get('how') == 'met', f"promo: the ceremony not attended (how: {cm})")
     check(W['rank'] == 'officer' and W['home'] == '4-23' and W['promoted'], f"promo: not an officer in 4-23 with the flag 'promoted' (fix: DV1): {W['rank']}, {W['home']}, promoted {W['promoted']}")
-    for k in ('promo:test', 'promo:summons', 'promo:move', 'promo:ceremony'):
+    # promo:test, or (RV16, lead 37) the shift's board arrow already naming "Your Tier 2 test job" when the test is takeable: FX19's
+    # rule holds promo:test while you hold another job, and a job turned in and the test taken in the same ship minute leaves
+    # promo:test no tick to lead (seen on 0.92.6 after 27ad3cba moved Day 9's jobs); the player is led to the test by name either way
+    check(any(g.startswith('promo:test') for g in f.guides) or f.test_led, f"promo: the arrow queue never led to the Tier 2 test job while it could be taken (promo:test, or the board arrow naming it) (fix: DV1, the promotion's beats on the queue); seen {sorted(g for g in f.guides if g.startswith('promo'))}")
+    if f.test_led and not any(g.startswith('promo:test') for g in f.guides): print(f"  promo: the test job led by the board arrow naming it ({f.test_led[1]}, Day {f.test_led[0] // 1440 + 1} {hhmm(f.test_led[0])}), not promo:test")
+    for k in ('promo:summons', 'promo:move', 'promo:ceremony'):
         check(any(g.startswith(k) for g in f.guides), f"promo: the arrow queue never led with {k} (fix: DV1, the promotion's beats on the queue); seen {sorted(g for g in f.guides if g.startswith('promo'))}")
     for w in ('Your Tier 2 test job', 'The summons', 'Your cabin', 'The ceremony'):
         check(any(w in l for l in f.dv), f"promo: the Dev career arrow never named \"{w}\"")
