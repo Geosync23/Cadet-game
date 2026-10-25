@@ -1,0 +1,38 @@
+@tradition card-night
+// SW2, 0.92.6 item 7(a), week 11 (FX17's shape: Wednesday 19:30, a making evening). Card night: every 8 weeks from
+// Day 73. Paper, pens and glue at the junior common room tables; everyone makes cards for the next weeks' birthdays.
+// Matthias Oduya hosts (he knows every birthday; never says whose until the day). Birthday cards are canon (Kim made
+// Garcia one that plays a tune). No names on the cards until they're given.
+k: 718
+title: Card night
+when: every 8 weeks wednesday week 3 from day 71
+at: 19:30-20:30
+min: 20
+where: 4 pool common-room
+where: 3 room Bow lounge: lounge-seat
+hold: 1
+who: oduya always, juniors 30%, friends-of-host 30%, everyone 10%
+anim: talk
+host: oduya
+from: oduya
+invite: host=oduya odds=25% line="Card night. Paper, pens, glue, and a list of birthdays I'm not allowed to show you."
+
+== mail
+- Card night tomorrow, {time}, in the junior common room. We make cards for the birthdays coming up. I'll tell you how many. I won't tell you whose.
+
+== ask
+- Card night later. Oduya's got a list of birthdays and he won't show anyone.   #funny
+- Making cards tonight. Glue everywhere, probably. Come anyway.
+
+== here
+- Is this one for anyone I know? He won't say.   #funny
+- Pass the gold pen. The good one.
+- I've glued my sleeve to the table.   #funny
+
+== thanks
+- Oduya hands round paper, pens and glue, and everyone makes a card for a birthday coming up. He won't say whose.   #warm
+
+== chatter
+- I made a card at card night. Someone's getting a very wonky rocket.   #funny
+- Oduya keeps the cards until the day. Every one of them.   #warm
+- Card night. Still finding glitter in my bunk.   #funny

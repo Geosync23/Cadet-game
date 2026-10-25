@@ -1,0 +1,23 @@
+@meeting talk.halloran-emeka
+// SW2, 0.92.6 item 13: a small Wren talk, 19:00-19:40 on the auditorium stage. Day 81, Thursday, in Oduya's place
+// (FX17's planner: the Counsellor never reaches the ring that evening). Emeka Halloran, Works systems officer: his
+// terrible joke at every breakfast (canon) and his one rule. Not why (his crew story: his dad's numbered book).
+title: One joke every breakfast
+from: Emeka Halloran
+gist: Halloran's small talk on the terrible joke he tells at every breakfast, and his one rule.
+== lines
+halloran-emeka: Evening, evening! Have you eaten? Good. Sit. I'll start with a joke. You knew I would.   [laugh]
+halloran-emeka: What do you call a coil with no friends? A loner-ator. ...That groan. That's the one.
+halloran-emeka: One at breakfast, every day. People have asked me to stop. Politely. Then less politely.   [laugh]
+halloran-emeka: I've never told the same one twice. Not once. That's the rule.
+halloran-emeka: Some mornings it's the only thing anyone says before tea. That's still something.   [nod]
+halloran-emeka: Right. That's the talk. Short, like the jokes. Shorter than the jokes.   [laugh]
+halloran-emeka: Questions? Go on. I'll answer most of them.   [laugh]
+? choice
+* What's your worst one ever?   rel:halloran-emeka+2 flavour:cheer mem:talk.halloran-emeka.asked
+  halloran-emeka: Can't tell you. Calder heard it once. She has never mentioned it since. That's worse.   [laugh]
+* Where do you get them all?   rel:halloran-emeka+2 flavour:listen mem:talk.halloran-emeka.asked
+  halloran-emeka: A little book. Numbered. That's all you're getting tonight.   [nod]
+* (Just listen)
+  halloran-emeka: No questions? Then one more joke. No? Lovely. Thanks for coming.
+halloran-emeka: See you at breakfast. I've got a good one for tomorrow. It's not good.   [laugh]

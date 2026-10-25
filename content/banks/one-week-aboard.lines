@@ -1,0 +1,55 @@
+@bank all
+// SW2, 0.92.6 item 5 (FX17's word list): One week aboard, Day 7. Zeke Torres sits down with you in the bow lounge and
+// goes over your first week. FX17 builds the card from these keys, in order: open; then one of each pair, picked from
+// what you did (jobs or jobs.none, trad or trad.none, friend or friend.none); then your reply (reply.1-3, your three
+// buttons) and his answer (answer.N answers reply.N); then close. Picked by chance within a key. Placeholders (FX17):
+// {jobs} the number of jobs you've signed off (1 or more; jobs.none covers 0), {trad} a tradition you went to, as the
+// Calendar names it, lower-cased ("quiz night"), {friend} the short name of the crewmate you know best other than Zeke
+// ("Tomas", "Chief Calder"). The game keeps no record of meals or lateness, so there are no lines for them. Week 1 rule
+// from torres-zeke.lines: no father, no Engine Specialist list, no scarf (beat 1 hasn't happened). Card lines 90 or fewer.
+
+== week1.zeke.open
+- There you are. Sit, sit. Tea's yours, milk's in. So. One whole week. How did that happen?
+- Sit down, that one's yours. Right. Your first week. Let's have a proper look at it.
+- Hey, you made it. Sit. I've been looking forward to this all shift. Your first week, then.
+
+== week1.zeke.jobs
+- Jobs signed off this week: {jobs}. I looked at every one after. Tidy. Properly tidy.
+- Calder saw your turn-ins. Every one. Not a word from her. That's good. Very good.
+- Off the board and signed off, first week: {jobs}. I was slower than that. Much slower.   #funny
+== week1.zeke.jobs.none
+- No jobs off the board yet. That's fine. Week one's for looking. The board will wait.
+- The board's still waiting for you. No rush. Pick a small one tomorrow. I'll be close by.
+
+== week1.zeke.trad
+- And you went to {trad}! Good. That's how you find out who everyone is.
+- I heard you were at {trad}. Look at you. Proper crew already.   #warm
+== week1.zeke.trad.none
+- You haven't been to a ship tradition yet. Try one this week. They're the best bit.
+- No traditions yet? Check your Calendar. There's one most evenings. Drag me along.
+
+== week1.zeke.friend
+- And {friend}'s been asking after you. That's a good sign, on a ship this size.
+- You and {friend}, eh? Good. Everyone needs someone to sit with at breakfast.
+== week1.zeke.friend.none
+- Still finding your people? Normal. Took me a month. Say yes to a tea. That's the trick.
+- Nobody's quite got to know you yet. They will. Sit at a full table in the mess. Try it.
+
+// Your three replies (FX17: the player's buttons) and his answer to each.
+== week1.zeke.reply.1
+- It went fast.
+== week1.zeke.answer.1
+- Weeks do, out here. Wait till you've done a month. You'll wonder where it went.
+== week1.zeke.reply.2
+- I still get lost.
+== week1.zeke.answer.2
+- Everyone does. Ask anyone for the way and they'll walk you there. That's the Wren.
+== week1.zeke.reply.3
+- Thanks for showing me round.
+== week1.zeke.answer.3
+- Ah, go on. You did the hard bit. I just pointed at things and talked a lot.   #warm
+
+== week1.zeke.close
+- That's week one. Good week. Right, onward. Drink up, supper's at six.
+- Right, onward. Week two's waiting, and you're ready for it. I mean that.   #warm
+- There. One week. Same time next year? Joking. Mostly. Off you go, then.   #funny

@@ -1912,9 +1912,10 @@ def legacy_parts(GAME, ON, fails):
         p.ev(begin % 'false'); p.step(3)
         p.ev("(() => { const G = DISC.g; G.over = true; G.winner = 0; G.score = [7, 3]; G.phase = 'over'; discOver(); discResult(); })()"); p.step(3)
         check(p.ev(LD_FOCUS) == 'Again', f'disc: the result card should land on Again ({p.ev(LD_FOCUS)})')
-        p.press('right'); check(p.ev(LD_FOCUS) == 'Quick game', f'disc: D-pad right on the result card should reach Quick game ({p.ev(LD_FOCUS)})')
-        p.press('a'); p.step(3); check(p.ev('!!DISC.g && DISC.g.target') == 5, 'disc: A on Quick game should start a game to 5')
-        p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the quick game')
+        p.press('right'); check(p.ev(LD_FOCUS) == 'Done', f'disc: D-pad right on the result card should reach Done ({p.ev(LD_FOCUS)})')   # 0.92.5 #3: Again, Done (no Quick game)
+        p.press('left'); check(p.ev(LD_FOCUS) == 'Again', f'disc: D-pad left should go back to Again ({p.ev(LD_FOCUS)})')
+        p.press('a'); p.step(3); check(p.ev('!!DISC.g && DISC.g.target') == 3, 'disc: A on Again should start a game to 3')
+        p.press('b'); p.step(3); check(p.ev('!DISC.g'), 'disc: B should leave the new game')
         p.close()
     FOCUS_ID = "(() => { const a = document.activeElement; return a ? (a.id || a.textContent.trim().slice(0, 24)) : null; })()"
     def part_screens(pw):

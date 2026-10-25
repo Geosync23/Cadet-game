@@ -647,14 +647,14 @@ def run(path):
               view: (DEVICE_APPS.get('tracked').view() || {}).title, pad: typeof PAD_SET_ACTS !== 'undefined' ? (PAD_SET_ACTS.find(a => a[0] === 'view') || [])[1] : 'Schedule tracker', words: SHUFFLE_WORDS.slice() })""")
             print('  names:', nm)
             check(nm['app'] == nm['head'] == nm['view'] == nm['pad'] == 'Schedule tracker' and nm['btn'].startswith('Schedule tracker') and nm['btnText'] == 'Schedule tracker', f'"Tracked" renamed the Schedule tracker (0.92.3 #14): {nm}')
-            # the lift's "→ Schedule tracker" badge stays inside its deck button on a 320 px phone (RV11: it ran 27 px past it)
+            # the lift's badge stays inside its deck button on a 320 px phone (RV11: it ran 27 px past it); it says "→ Tracked" (0.92.6 #12, the user's)
             g.page.set_viewport_size({'width': 320, 'height': 640}); g.step(2)
             lb = g.ev("""(() => { const keep = IX_GOAL; setGoal({ deck: deckDef.num === 3 ? 4 : 3, room: 'M', label: 'the check' }); openLiftPanel();
               const e = document.querySelector('.lift .deckbtn.goal em'), out = e ? (r => { const p = e.closest('.deckbtn').getBoundingClientRect(); return { em: Math.round(r.right), btn: Math.round(p.right), text: e.textContent }; })(e.getBoundingClientRect()) : null;
               const L = document.getElementById('lift'); if (L) L.hidden = true; clearGoal(); if (keep) setGoal(keep); return out; })()""")
             g.page.set_viewport_size({'width': w, 'height': h}); g.step(2)
             print('  the lift badge at 320 px:', lb)
-            check(lb and lb['em'] <= lb['btn'] and 'Schedule tracker' in lb['text'], f'the lift\'s "→ Schedule tracker" badge fits inside its deck button at 320 px (0.92.3 #14, RV11): {lb}')
+            check(lb and lb['em'] <= lb['btn'] and lb['text'] == '→ Tracked', f'the lift\'s "→ Tracked" badge (0.92.6 #12) fits inside its deck button at 320 px (0.92.3 #14, RV11): {lb}')
             check(not any('mind out' in w.lower() for w in nm['words']) and len(nm['words']) == 4, f'the bump line "Mind out" removed, the others kept (0.92.3 #2): {nm["words"]}')
             errs = g.ev("DEV.errors")
             check(not errs, f'no app errors: {errs}')

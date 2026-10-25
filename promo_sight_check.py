@@ -6,7 +6,8 @@
 #           need is Reliable; Steady's toast names the next step, the list from Steady, "dependable" one Mail; Reliable
 #           without Making it safe: the toast, one Mail saying what's left, no test; Making it safe done (Day 8 18:30): the
 #           offer that moment, the test Day 9, the ready Mail naming tomorrow (not the old announce Mail), the notice, the
-#           list's line; Friday evening: the test on Monday; a save past the offer: nothing; the 08:30 arrow; Dev mode's needs
+#           list's line; Friday evening: the test on Monday; in the bay no "Tomorrow" on a Friday;
+#           Calder no cheer line (RV15); a save past the offer: nothing; the 08:30 arrow; Dev mode's needs
 #   trade:  switch on. Day 9, trained in Rounds and Tuning, a machine drifted by one: over the shift the top-up posts your
 #           trade (a tune, an afternoon round from 13:00), at most 3 and one an hour, xp 0, held to the shift's end; the
 #           simple ones still come (at least BOARD_MIN not of your trade); the held list keeps your trade first
@@ -37,6 +38,7 @@ SETUP = r"""(() => {
     try { repInit().ship.work = 50; } catch (e) { /* no social */ } const W = worksInit(); W.log.push(['x', 1, 0, 'service']); W.cur = null; Object.assign(W.tr, o.tr || {}); W.xp = o.xp || 0; if (o.test) W.test = o.test; return W; };
   window.__look = () => ({ mail: SHIP.mail.map(m => m.from + ': ' + m.subject + ' | ' + m.body), flags: Object.keys(SHIP.flags).filter(k => /^promo\./.test(k)).sort(),
     toasts: window.__toasts.slice(), next: worksNext(), check: (typeof promoCheck === 'function' ? promoCheck() : []).map(b => b.text || (b.rows || []).map(r => r.text + (r.sub ? ' = ' + r.sub : '')).join(' ; ')) });
+  window.__out = () => { if (deckDef.num !== 5) goToDeck(5); player.obj.position.copy(cellPos(...ROOM_TILES['w'][0])); };   // into the Works bay
   window.__tick = () => { for (const f of WORK_TICKS) try { f(shipNow(), false); } catch (e) { console.error(e); } };
   return true;
 })()"""
@@ -78,6 +80,21 @@ def part_sight(g):
     check(any('09:00' in x for x in f['check']), f"sight: the list's test line ({f['check']})")
     w = g.ev("""(() => { const W = __w(12, 1200, { xp: 18, tr: { m6: 8 } }); __tick(); return { ...__look(), test: W.test }; })()""")
     check(w['test'] and w['test']['day'] == 15 and w['mail'] and 'Monday' in w['mail'][0], f"sight: qualified Friday evening, the test on Monday (Day 15) ({w['test']}, {w['mail'][:1]})")
+    fb = g.ev("""(() => { const said = [], ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push(t); worksSayAll = (id, L) => said.push(...L); try {
+      const r = {};
+      __w(12, 990, { xp: 18, tr: { m6: 8 } }); __out(); __tick(); r.fri = said.slice(); said.length = 0;
+      __w(8, 990, { xp: 18, tr: { m6: 8 } }); __out(); __tick(); r.thu = said.slice(); return r; } finally { worksSay = ws; worksSayAll = wa; } })()""")
+    print('    in the bay, Friday and Monday 16:30:', fb)
+    check(fb['fri'] and not any('omorrow' in t for t in fb['fri']), f"sight: a Friday offer in the bay never says \"Tomorrow\" (RV15) ({fb['fri']})")
+    check(len(fb['thu']) == 2 and 'omorrow' in fb['thu'][1], f"sight: a Monday (Day 8) offer in the bay: the ready line, then \"Tomorrow, your test job\" ({fb['thu']})")
+    g.ev("__out()"); g.step(20)   # the crew on the deck drawn (their bubbles' anchors)
+    ch = g.ev("""(() => { const P = player.obj.position, a = { p: evPerson('calder'), h: {}, x: P.x + .5, z: P.z, pose: 'stand' }, b = DECK_CREW.find(x => x.p && x.p.id !== 'calder' && x.h);
+      const said = [], bs = bubbleSay, keep = b && { x: b.x, z: b.z, pose: b.pose }; bubbleSay = (h, t) => said.push(h === a.h ? 'calder: ' + t : 'other: ' + t); DECK_CREW.push(a);
+      try { if (b) { b.x = P.x - .5; b.z = P.z; b.pose = 'stand'; } CHEER = { ids: ['calder'].concat(b ? [b.p.id] : []), said: new Set(), until: shipNow() + 30 };
+        cheerTick(SHIP.time.min); cheerTick(SHIP.time.min); return said.length ? said : ['(none) b ' + (b ? b.p.id + ' h ' + !!b.h + ' d ' + Math.hypot(b.x - P.x, b.z - P.z).toFixed(1) + ' pose ' + b.pose : 'none') + ' deck ' + deckDef.num + ' until ' + (shipNow() + 30)]; }
+      finally { bubbleSay = bs; CHEER = null; DECK_CREW.splice(DECK_CREW.indexOf(a), 1); if (b) Object.assign(b, keep); } })()""")
+    print('    the cheer, Calder beside you:', ch)
+    check(isinstance(ch, list) and not any(x.startswith('calder') for x in ch) and any(x.startswith('other') for x in ch), f"sight: Calder says no cheer line after the summons (no \"well done\"; RV15), the others still cheer ({ch})")
     h = g.ev("""(() => { const W = __w(9, 300, { xp: 45, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); __tick(); return __look(); })()""")
     check(not h['mail'] and 'promo.sight' in h['flags'], f"sight: a save past the offer, nothing said ({h['mail']}, {h['flags']})")
     k = g.ev("""(() => { if (!promoQueue()) return 'no queue'; __w(9, 515, { xp: 20, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); __tick(); const e = GUIDE.list.find(x => x.id === 'promo:testday:9'); return e ? e.goal().label : null; })()""")
@@ -89,7 +106,7 @@ def part_sight(g):
 def part_trade(g):
     print('(trade) BOARD_TRADE_ON:')
     r = g.ev("""(() => { BOARD_TRADE_ON = true; const W = __w(9, 360, { xp: 20, tr: { m1: 2, m5: 4 } }); SHIP.jobs.length = 0;
-      const ms = machineList().filter(m => TUNABLE.has(m.kind) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= 1 && m.deck !== 1);
+      const ms = machineList().filter(m => TUNABLE.has(m.kind) && !ENGINE_KINDS.has(m.kind) && jobTier({ machine: m.id }) <= 1 && m.deck !== 1 && !JOB_FOR[(SHIP.machines[m.id] || {}).state]);   // a machine in good order (a worn one gets a real job)
       for (const m of ms) SHIP.machines[m.id].drift = 0; if (ms[0]) SHIP.machines[ms[0].id].drift = 1;
       const per = [];
       for (let h = 8 * 24 + 8; h < 8 * 24 + 17; h++) { setShipNow(h * 60); boardTopUp(h, SHIP.jobs); per.push([h % 24, SHIP.jobs.filter(j => j.trade && j.found === h * 60).map(j => j.kind), SHIP.jobs.filter(j => boardForYou(j, h * 60) && !j.trade).length]); }
