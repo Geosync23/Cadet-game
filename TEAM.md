@@ -1214,3 +1214,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:58 UTC: USER: plan a Music app on the device (turn off, choose track, volume) → SD1 adds mockup to the harness + plan/design-doc.
 - ~16:59 UTC: USER: music ON by default (ship schedule).
 - ~16:58 UTC check-in (lead 36): waiting RV17 (3 verdicts, nudged) and BM17 career-pace bisect; RV15 PASS FX19 acb36503. SD1 on music module/app/harness. Handover note updated.
+- ~17:00 UTC: USER: no music on arrival night (Day 0); music starts Day 1.
