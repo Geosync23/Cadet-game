@@ -13,3 +13,4 @@ Read CLAUDE.md, this note, plans/handover-lead36.md (still valid for seats, gotc
 - USER: 0.93.0 goes to BOTH Playtest 3HqM5XiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr (PUB1) after a GO round; never 6daN….
 - USER 21:05 UTC: traditions variety per week + ship-wide order swap (visit before comet): CS1 planning on claude/trad-variety; publish the page to the user; build after 0.93.0 on the user's OK; update design-doc then.
 - Plan page for traditions + swap: https://claude.ai/artifact/DfXQg3Ff4eX2hfoiTA86Jh (answers in its db: ArtifactData get answers/user).
+- USER 23:22 UTC: 0.93.0 = base (BM18 ff integration df8d58b9); HOLD 0.93.1 round until the user's further changes arrive; traditions survey answers later.
