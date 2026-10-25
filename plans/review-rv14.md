@@ -32,3 +32,16 @@ Base: claude/integration ba836359 (0.92.4, game 2aa6427f...).
   jigsaw mins ignored -> 20-minute lines FAIL; hobbyCount removed -> hobby line FAIL. RV13: second tjActs() removed -> FAIL.
 - FX9's next sha promises: events_check fixes, cookalong-3 moved + no-overlap line, Bread day on Cook-along spots,
   host-stays rule (picnic), tradToBed attendance, Mensah hosts cocoa, SW1 c5f1fc7b/faac7054, Sunday story check, Day 7 fix.
+
+## 2026-10-25 ~00:30 UTC
+- **Item 19 PASS at 7ff6a818** (game e9118344...): off: cadet_test vs 0.92.4 ALL IDENTICAL, events_check OK (FX9's tagId
+  'cook' + weekend-files skip), food 1 7 OK, day 6 OK, check_fast OK (235 s). Part 13: FAIL on 0.92.4, its overlap sweep
+  FAIL on f18d18d5 (Sato/Madsen .18), OK on 7ff6a818 (on, incl. Bread day). Merge note: needs bbcea5cb's evTagId 'cook'.
+- weekend_check.py at 7ff6a818/80dff612 does not start (f-string SyntaxError line ~101, 8cef93c7). Testing with a local
+  fix in /tmp/rv14/chk. Told FX9, then DS1.
+- 80dff612 (game d4f3bc0d...): section 8c crewDetail swap sets the body at x+lx+hx / z+lz+hz (FX9's root cause of Day 7
+  pell 0.77 hop). Ungated, affects everyone; its owner idle -> I review it. Plant r_swap (line reverted) prepared.
+- FX9 handed over; DS1 (session_01MZBSf7MZeb9C89wpoavLko) builds T5/T6, (a)/(c), the switch-on. Lead 35
+  (session_01VQkkt8RXcvvGs1Dmzn2emM) replaces lead 34. USER (00:30): 0.92.5 ships the weekend SWITCHED ON: final verdict on
+  the shipped switch-on file; cadet_test diffs vs 0.92.4 only the expected weekend ones.
+- Asked for check lines: host at each weekend tradition; >=5 at cocoa/story.
