@@ -88,7 +88,7 @@ when: beat:salo.3 event:ionStorm day:13
 crescendo: event:ionStorm
 quiet: 6
 title: The coolant loop with Saad
-invite: Tomorrow | Storm's due at two. It's my rest day, but I'll be down by the Deck 6 coolant loop all the same. I'd be glad of the company. Saad
+invite: Tomorrow | The storm's meant to get worse overnight. It's my rest day, but after breakfast I'll be down by the Deck 6 coolant loop all the same. I'd be glad of the company. Saad
 hint: Deck 6, the coolant loop. Could you come? Now, if you can.
 mem: once
 flag: salo.signed
