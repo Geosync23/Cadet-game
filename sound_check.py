@@ -100,7 +100,7 @@ def check_core_hooks(pw, path):
             for v in (0.0, 0.5, 1.0, 0.5):
                 g.ev(f"(() => {{ const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
             names = g.ev("SND.log.map(e => e.name + (e.crew ? ':crew' : ''))")
-            check('doorOpen' in names, f'your door opening plays: {names}')
+            check(names.count('doorOpen') == 1 and names.count('doorClose') == 1 and not any(':crew' in n for n in names), f'your door opening and closing play once each: {names}')
             g.ev("DOOR_OBJS.forEach(d => delete d.force)")
         # footsteps: walk the player along by hand
         g.ev("SND.log.length = 0"); g.step(2)
@@ -124,7 +124,7 @@ def check_core_hooks(pw, path):
         g.ev("SND.log.length = 0; (() => { const b = ROOM_BOX['@']; if (b) player.obj.position.copy(cellPos(b.i0 + 1, b.j0 + 1)); })(); startRide(3)")
         g.step(80)
         lift = g.ev("SND.log.map(e => e.name).filter(n => n.startsWith('lift'))")
-        check(lift[:2] == ['liftPress', 'liftDoorsClose'] and 'liftRide' in lift and 'liftArrive' in lift, f'the lift: press, doors, ride, arrival: {lift}')
+        check(lift == ['liftPress', 'liftDoorsClose', 'liftRide', 'liftArrive', 'liftDoorsOpen'], f'the lift: press, doors shut, ride, arrival, doors open, once each: {lift}')
     finally: g.close()
 
 CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_core_hooks]

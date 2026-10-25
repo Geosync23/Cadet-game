@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.0-s.6
+   STARSHIP CADET: CSV Wren                           build 0.93.0-s.7
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.0-s.6';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.0-s.7';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -62843,6 +62843,7 @@ const SND = (() => {
       if (r !== W8.ride) { W8.ride = r; W8.rideStage = 0; S.fx('liftPress'); S.fx('liftDoorsClose'); }
       if (W8.rideStage === 0 && r.t >= RIDE.shut) { W8.rideStage = 1; S.fx('liftRide', { d: RIDE.light - RIDE.shut + 0.3, long: 3 }); }
       if (W8.rideStage === 1 && r.swapped && r.t >= RIDE.light - 0.45) { W8.rideStage = 2; S.fx('liftArrive', { long: 4 }); }
+      if (W8.rideStage === 2 && r.t >= RIDE.light + 0.05) { W8.rideStage = 3; S.fx('liftDoorsOpen'); }   // the doors open as the view comes back
     } else W8.ride = null;
     const p = player.obj.position;
     for (let k = 0; k < DOOR_OBJS.length; k++) {
@@ -62909,7 +62910,7 @@ const SND = (() => {
     ready.splice(0).forEach(fn => { try { fn(ctx); } catch (e) {} });
   }
   S.start = start;
-  const gesture = e => { if (e.isTrusted) start(); };
+  const gesture = e => { if (!e.isTrusted) return; start(); if (ctx && ctx.state !== 'running' && S.prefs.on && !document.hidden) ctx.resume().catch(() => {}); };   // Safari only resumes inside a tap (after a call or a hidden tab)
   addEventListener('pointerdown', gesture, true); addEventListener('keydown', gesture, true);
 
   // ---- each frame (the main loop): suspend with pause, Tiles, a hidden tab or Sound off; tick the loops ----
