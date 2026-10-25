@@ -40,7 +40,7 @@ tomas: He's asleep. He's always first. He says it's the early team. It's not.   
 ? choice
 * Tell a story of your own.   flavour:share mem:appt.feast
   tomas: That was a good one! Do another. Quietly. Lukas is snoring.   [laugh]
-* Eat the last biscuit.   flavour:cheer mem:appt.feast
+* Quietly take the last biscuit.   flavour:cheer mem:appt.feast
   santos-zofia: Bold move. I'd have traded you something for that.   [laugh]
 * Just listen to everyone.   flavour:listen mem:appt.feast
   tran-chloe: You're the only one in this bunk who listens. Don't change.   [nod]

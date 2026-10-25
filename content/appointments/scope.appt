@@ -44,7 +44,7 @@ sato: Funny how a place you've been looks like a rumour from far enough off.
 ? choice
 * What was it like inside?   flavour:listen mem:appt.scope
   sato: Grey. Quiet. Every window looked like fog. Mori loved it. I missed the stars.   [nod]
-* Can I see the jar?   flavour:cheer mem:appt.scope
+* Could I see that jar some time?   flavour:cheer mem:appt.scope
   sato: Open lab. Second shelf. Touch only the label. I'll know.   [laugh]
 sato: That's twenty minutes. Log it. Off you go.
 
@@ -53,7 +53,7 @@ sato: Look. That tiny smear just off centre. That's my comet. The third one. It 
 sato: It goes round once every hundred and nine years. Nobody aboard will see it come back. That's fine.
 sato: Someone will. They'll look it up and find a note from me. A very good note.   [nod]
 ? choice
-* What does the note say?   flavour:cheer mem:appt.scope
+* What will the note say?   flavour:cheer mem:appt.scope
   sato: "Told you so." In my handwriting. They'll know exactly who I was.   [laugh]
 * Why doesn't it count?   flavour:listen mem:appt.scope
   sato: Long story. Involves tea and a committee. Look at the comet, not at me.   [laugh]
