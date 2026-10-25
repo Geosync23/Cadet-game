@@ -1,0 +1,597 @@
+@bank all
+// SW2 (writer), patch 0.92.6 item 10: the odd jobs around the ship (FX20's ODD_ROWS, behind ODD_ON; ids and titles
+// from plans/fx20-odd-jobs.md on claude/p926-fx20). Read by fixWord as fix.oj-<id>.sign|done, as FX10's small repairs
+// in fixes.lines. TEXTS, said by nobody. sign: what you notice when you arrive. done: what's different now. The
+// titles are in FX20's table; each job's title is in the comment above its lines. One line per key. No bridge.
+
+// ---- Deck 2: the senior corridor, washroom, observatory, chart room
+// Clean the lift lobby vent
+== fix.oj-d2lobby-vent.sign
+- A grey fur of dust has grown across the lobby vent's slats.
+== fix.oj-d2lobby-vent.done
+- Clean slats. The air comes through cool.
+// Tighten a wobbly lobby bench
+== fix.oj-d2lobby-bench.sign
+- The lobby bench tips forward whenever someone sits on the end.
+== fix.oj-d2lobby-bench.done
+- Sit on either end. It doesn't budge.
+// Polish the deck sign by the lift
+== fix.oj-d2lobby-sign.sign
+- The deck sign by the lift is dull with fingerprints.
+== fix.oj-d2lobby-sign.done
+- The sign shines. You can see your face in the number.
+// Replace a buzzing lobby light
+== fix.oj-d2lobby-light.sign
+- One lobby light buzzes like a trapped fly and dims every few seconds.
+== fix.oj-d2lobby-light.done
+- Quiet, even light. The buzzing's gone.
+// Oil a squeaky door in the senior corridor
+== fix.oj-d2corr-hinge.sign
+- A door in the senior corridor squeals every time it opens.
+== fix.oj-d2corr-hinge.done
+- It swings shut without a sound. Someone will be grateful.
+// Refit a loose wall panel
+== fix.oj-d2corr-panel.sign
+- A wall panel in the corridor rattles when anyone walks past.
+== fix.oj-d2corr-panel.done
+- Flush and firm. Not a rattle.
+// Clear a slow drain in the washroom
+== fix.oj-d2wc-drain.sign
+- The washroom basin drains slowly, with a sulky gurgle.
+== fix.oj-d2wc-drain.done
+- The water swirls straight down.
+// Clean the washroom extractor grille
+== fix.oj-d2wc-vent.sign
+- The extractor grille hums, but the mirror stays fogged.
+== fix.oj-d2wc-vent.done
+- The grille pulls properly. The mirror clears in seconds.
+// Unstick a window blind in the observatory
+== fix.oj-d2obs-blind.sign
+- An observatory blind is stuck half down across the stars.
+== fix.oj-d2obs-blind.done
+- It rolls right up. Nothing between you and the view.
+// Free a sticky locker latch
+== fix.oj-d2chart-latch.sign
+- A chart locker latch won't let go without a hard yank.
+== fix.oj-d2chart-latch.done
+- One light push and it clicks open.
+// Clean a dusty vent in the chart room
+== fix.oj-d2chart-vent.sign
+- Dust from the chart room vent keeps settling on the big table.
+== fix.oj-d2chart-vent.done
+- The vent's clean. Mori's charts will stay dust-free.
+// ---- Deck 3: Commons
+// Clean the lift plaza floor vent
+== fix.oj-d3plaza-vent.sign
+- Crumbs and fluff have filled the lift plaza floor vent.
+== fix.oj-d3plaza-vent.done
+- The floor vent breathes again.
+// Tighten a rocking plaza bench
+== fix.oj-d3plaza-bench.sign
+- A plaza bench rocks from side to side like a boat.
+== fix.oj-d3plaza-bench.done
+- Steady. You could balance a cup on it.
+// Scrape gum off a bench
+== fix.oj-d3plaza-gum.sign
+- Someone has left a grey blob of gum under the bench edge.
+== fix.oj-d3plaza-gum.done
+- Gone. Nobody will ever know who.
+// Polish the lift call plate
+== fix.oj-d3plaza-sign.sign
+- The lift call plate is smeared from a hundred thumbs.
+== fix.oj-d3plaza-sign.done
+- The plate gleams. The arrows look brand new.
+// Stick down a curling floor mat
+== fix.oj-d3plaza-mat.sign
+- The corner of the plaza floor mat curls up, waiting to trip someone.
+== fix.oj-d3plaza-mat.done
+- Flat to the floor, edge to edge.
+// Clean a promenade vent
+== fix.oj-d3prom-vent.sign
+- A promenade vent whistles a thin, high note.
+== fix.oj-d3prom-vent.done
+- The whistle's gone. Just the soft rush of air.
+// Tighten a loose handrail
+== fix.oj-d3prom-rail.sign
+- The handrail shifts in its bracket when you lean on it.
+== fix.oj-d3prom-rail.done
+- Solid as the deck. Lean away.
+// Unclog a planter drip line
+== fix.oj-d3prom-planter.sign
+- One promenade planter's soil is bone dry; its drip line is blocked.
+== fix.oj-d3prom-planter.done
+- The drip line ticks again. The plants will perk up by lunch.
+// Clean the smudged view glass
+== fix.oj-d3prom-glass.sign
+- The view glass is smudged with nose prints from keen stargazers.
+== fix.oj-d3prom-glass.done
+- Clear glass. The stars look sharper.
+// Replace a flickering path light
+== fix.oj-d3prom-light.sign
+- A path light flickers on and off along the promenade floor.
+== fix.oj-d3prom-light.done
+- A steady glow along the path.
+// Clean a lounge ceiling vent
+== fix.oj-d3lounge-vent.sign
+- The lounge ceiling vent ticks, like a clock that's lost count.
+== fix.oj-d3lounge-vent.done
+- Quiet. The lounge is calm again.
+// Fix a sagging sofa leg
+== fix.oj-d3lounge-sofa.sign
+- One end of a lounge sofa sinks lower than the other.
+== fix.oj-d3lounge-sofa.done
+- Level cushions. Nobody slides off now.
+// Level a wobbly lounge table
+== fix.oj-d3lounge-table.sign
+- A lounge table rocks whenever anyone puts a drink down.
+== fix.oj-d3lounge-table.done
+- Rock steady. No more saucers of spilt tea.
+// Unstick a window blind in the lounge
+== fix.oj-d3lounge-blind.sign
+- A lounge blind is jammed at a tilt across the curved windows.
+== fix.oj-d3lounge-blind.done
+- Smooth up, smooth down. The view's all yours.
+// Replace a lounge reading lamp
+== fix.oj-d3lounge-lamp.sign
+- The reading lamp by the armchairs is dead.
+== fix.oj-d3lounge-lamp.done
+- A warm circle of light. Somebody will read there tonight.
+// Reset a dead lounge socket
+== fix.oj-d3lounge-socket.sign
+- A lounge socket gives nothing, whatever is plugged in.
+== fix.oj-d3lounge-socket.done
+- A green light. Power's back.
+// Level a wobbly mess table
+== fix.oj-d3mess-table.sign
+- A mess table see-saws whenever someone leans on their elbows.
+== fix.oj-d3mess-table.done
+- Firm and flat. Elbows welcome.
+// Tighten a squeaky mess chair
+== fix.oj-d3mess-chair.sign
+- A mess chair squeaks like a mouse whenever anyone sits.
+== fix.oj-d3mess-chair.done
+- Silent. Not a peep from it at dinner now.
+// Clean a greasy mess hall vent
+== fix.oj-d3mess-vent.sign
+- The mess hall vent is coated with a film of kitchen grease.
+== fix.oj-d3mess-vent.done
+- The slats are clean. The mess smells only of dinner now.
+// Unjam the tray rack runner
+== fix.oj-d3mess-tray.sign
+- The tray rack runner sticks halfway, and the trays pile up.
+== fix.oj-d3mess-tray.done
+- Trays glide in and out.
+// Scrape a sticky patch off the floor
+== fix.oj-d3mess-floor.sign
+- A sticky patch by the servery grabs at every shoe.
+== fix.oj-d3mess-floor.done
+- Clean floor. No more squelch.
+// Replace a mess hall downlight
+== fix.oj-d3mess-light.sign
+- One downlight over the long tables has gone out.
+== fix.oj-d3mess-light.done
+- Every table's lit again.
+// Degrease the galley hood filters
+== fix.oj-d3galley-hood.sign
+- The galley hood filters are thick with grease. Brennan has left a pointed note.
+== fix.oj-d3galley-hood.done
+- The filters shine. The steam goes straight up and out.
+// Free a jammed utensil drawer
+== fix.oj-d3galley-drawer.sign
+- The utensil drawer jams on a ladle every time it opens.
+== fix.oj-d3galley-drawer.done
+- It slides open first go. The ladle's behaving.
+// Clear the galley floor drain
+== fix.oj-d3galley-drain.sign
+- Water pools round the galley floor drain after every wipe-down.
+== fix.oj-d3galley-drain.done
+- The floor drains dry in seconds.
+// Oil a squeaky cupboard hinge
+== fix.oj-d3galley-hinge.sign
+- A galley cupboard hinge creaks loud enough to hear over the pans.
+== fix.oj-d3galley-hinge.done
+- Not a creak. The pans have the room to themselves.
+// Refit the cold store door seal
+== fix.oj-d3cold-seal.sign
+- The cold store door seal has come away at one corner. You can feel the chill leak out.
+== fix.oj-d3cold-seal.done
+- Sealed all round. The cold stays where it belongs. Brennan will be pleased.
+// Fix a sagging shop shelf
+== fix.oj-d3store-shelf.sign
+- A shelf in the crew store sags in the middle under the biscuit tins.
+== fix.oj-d3store-shelf.done
+- Straight and strong. The biscuits are safe.
+// Oil the sticking shop door
+== fix.oj-d3store-door.sign
+- The crew store door sticks and needs a shove to open.
+== fix.oj-d3store-door.done
+- It swings open at a touch. Orla will like that.
+// Replace a crew store light
+== fix.oj-d3store-light.sign
+- A light over the store counter flickers on the ledger.
+== fix.oj-d3store-light.done
+- Steady light on the counter.
+// Ease a sticky booth door
+== fix.oj-d3call-door.sign
+- A call-home booth door sticks, and closes with a bang.
+== fix.oj-d3call-door.done
+- It closes softly now. Better for quiet calls.
+// Clean a stuffy booth vent
+== fix.oj-d3call-vent.sign
+- The booth vent barely moves the air. It's stuffy inside.
+== fix.oj-d3call-vent.done
+- Fresh air in the booth. Long calls will be easier.
+// Tighten the booth bench
+== fix.oj-d3call-bench.sign
+- The bench outside the booths wobbles under anyone waiting.
+== fix.oj-d3call-bench.done
+- Steady seat for the queue.
+// Clean a gym vent
+== fix.oj-d3gym-vent.sign
+- The gym vent can't keep up. The air is warm and heavy.
+== fix.oj-d3gym-vent.done
+- A cool draught. Better for everyone on the rowers.
+// Stick down a lifting gym mat
+== fix.oj-d3gym-mat.sign
+- A gym mat's corner lifts every time someone steps on it.
+== fix.oj-d3gym-mat.done
+- Flat and stuck down. No more tripping.
+// Tighten a rattling weight rack
+== fix.oj-d3gym-rack.sign
+- The weight rack rattles every time a weight goes back.
+== fix.oj-d3gym-rack.done
+- Quiet. The weights sit snug.
+// Refix a loose gym mirror
+== fix.oj-d3gym-mirror.sign
+- A gym mirror shifts on its fixing when the floor shakes.
+== fix.oj-d3gym-mirror.done
+- Fixed firm. Your reflection holds still.
+// Fix the dripping water fountain
+== fix.oj-d3gym-fountain.sign
+- The water fountain drips steadily into its tray.
+== fix.oj-d3gym-fountain.done
+- Not a drip. Nandakumar would approve.
+// Unstick a gym locker
+== fix.oj-d3gym-locker.sign
+- A gym locker door is stuck shut. Someone's towel is in there.
+== fix.oj-d3gym-locker.done
+- The door opens. The towel's free.
+// Unblock a garden drip line
+== fix.oj-d3garden-drip.sign
+- One drip line in the garden has stopped dripping; the soil beneath is pale and dry.
+== fix.oj-d3garden-drip.done
+- Drip, drip, drip. The bed darkens as you watch.
+// Refix a leaning trellis
+== fix.oj-d3garden-trellis.sign
+- A trellis leans over, and the beans on it lean with it.
+== fix.oj-d3garden-trellis.done
+- Upright again. The beans look relieved.
+// Clear a clogged tray drain
+== fix.oj-d3garden-drain.sign
+- Water sits in a grow tray because its drain is clogged with roots.
+== fix.oj-d3garden-drain.done
+- The tray drains clear.
+// Replace a grow light tube
+== fix.oj-d3garden-light.sign
+- A grow light tube flickers pink over the seedlings.
+== fix.oj-d3garden-light.done
+- An even glow. The seedlings will love it.
+// Clean the garden air vent
+== fix.oj-d3garden-vent.sign
+- The garden air vent is furred with fluff from the seed heads.
+== fix.oj-d3garden-vent.done
+- Clean vent. The leaves stir in the breeze again.
+// Fix a leaking hose joint
+== fix.oj-d3garden-hose.sign
+- A hose joint sprays a fine mist sideways onto the path.
+== fix.oj-d3garden-hose.done
+- A dry joint. The path stays dry too.
+// Free a stuck bed curtain
+== fix.oj-d3inf-curtain.sign
+- A bed curtain in the infirmary is stuck on its rail.
+== fix.oj-d3inf-curtain.done
+- It glides all the way round.
+// Oil a squeaking bed wheel
+== fix.oj-d3inf-wheel.sign
+- An infirmary bed wheel squeaks every time it moves.
+== fix.oj-d3inf-wheel.done
+- Rolls without a sound.
+// Clean the waiting room vent
+== fix.oj-d3inf-vent.sign
+- The waiting room vent is clogged, and the room feels close.
+== fix.oj-d3inf-vent.done
+- Fresh air in the waiting room.
+// Clear a slow washroom drain
+== fix.oj-d3wash-drain.sign
+- A washroom basin holds a pool of grey water.
+== fix.oj-d3wash-drain.done
+- Down it goes, with a satisfying gulp.
+// Clean the washroom extractor grille
+== fix.oj-d3wash-vent.sign
+- The washroom extractor grille is clogged; the room stays steamy.
+== fix.oj-d3wash-vent.done
+- The steam clears quickly now.
+// Fix a cubicle door that will not latch
+== fix.oj-d3wash-door.sign
+- A cubicle door swings open on its own. The latch won't catch.
+== fix.oj-d3wash-door.done
+- Click. It latches properly. Everyone's relieved.
+// ---- Deck 4: the junior wing
+// Clean the lift lobby vent
+== fix.oj-d4lobby-vent.sign
+- The junior wing lobby vent is grey with lint from the laundry.
+== fix.oj-d4lobby-vent.done
+- Clean vent. The lobby smells of nothing in particular.
+// Tighten a wobbly lobby bench
+== fix.oj-d4lobby-bench.sign
+- The lobby bench creaks and leans when two sit on it.
+== fix.oj-d4lobby-bench.done
+- Two can sit, or three. Not a creak.
+// Tidy the notice board
+== fix.oj-d4lobby-board.sign
+- The notice board is a jumble of old notes and loose pins.
+== fix.oj-d4lobby-board.done
+- Tidy rows. Last week's notes are down; this week's are easy to read.
+// Refit a rattling wall panel
+== fix.oj-d4lobby-panel.sign
+- A wall panel in the lobby rattles when the lift arrives.
+== fix.oj-d4lobby-panel.done
+- The lift comes and goes. The panel stays quiet.
+// Oil a squeaky corridor door
+== fix.oj-d4corr-hinge.sign
+- A corridor door in the junior wing groans like it's tired.
+== fix.oj-d4corr-hinge.done
+- It opens quietly. The night shift will thank you.
+// Clean a corridor ceiling vent
+== fix.oj-d4corr-vent.sign
+- A corridor ceiling vent drips a little condensation.
+== fix.oj-d4corr-vent.done
+- Dry and clear. No more drips on heads.
+// Fix a lifting floor strip
+== fix.oj-d4corr-strip.sign
+- A floor strip in the corridor has lifted at one end.
+== fix.oj-d4corr-strip.done
+- Flush with the floor. Nothing to catch a toe.
+// Clean the common room vent
+== fix.oj-d4common-vent.sign
+- The common room vent hums and blows dust over the Tiles board.
+== fix.oj-d4common-vent.done
+- Quiet air. The Tiles board stays clean.
+// Fix a sagging common room sofa
+== fix.oj-d4common-sofa.sign
+- The common room sofa dips in the middle. Whoever sits there ends up in a heap.
+== fix.oj-d4common-sofa.done
+- Firm all along. Room for three.
+// Reset the common room screen
+== fix.oj-d4common-screen.sign
+- The common room screen shows nothing but a blue square.
+== fix.oj-d4common-screen.done
+- The picture's back. Film night is saved.
+// Level the games table
+== fix.oj-d4common-table.sign
+- The games table rocks, and the Tiles slide about.
+== fix.oj-d4common-table.done
+- Level. Rina will have no excuses now.
+// Unstick a cupboard door
+== fix.oj-d4common-cup.sign
+- A common room cupboard door is jammed. The board games are inside.
+== fix.oj-d4common-cup.done
+- It opens. The games tumble out, all present.
+// Clear the dryer lint trap
+== fix.oj-d4laundry-lint.sign
+- The dryer's lint trap is packed thick with fluff.
+== fix.oj-d4laundry-lint.done
+- Clean trap. The dryer roars happily.
+// Clear the laundry sink drain
+== fix.oj-d4laundry-drain.sign
+- The laundry sink drains slowly, burping bubbles back up.
+== fix.oj-d4laundry-drain.done
+- The sink empties in one go.
+// Oil the music room door
+== fix.oj-d4music-door.sign
+- The music room door squeaks on the open and the close.
+== fix.oj-d4music-door.done
+- Silent door. Only the music makes noise in here now.
+// Tighten a floppy music stand
+== fix.oj-d4music-stand.sign
+- A music stand droops whenever anyone puts music on it.
+== fix.oj-d4music-stand.done
+- Upright and firm. The music stays put.
+// Clear a slow basin drain
+== fix.oj-d4port-drain.sign
+- A basin in the port washroom is slow to empty.
+== fix.oj-d4port-drain.done
+- The basin clears straight away.
+// Clean the washroom extractor grille
+== fix.oj-d4port-vent.sign
+- The port washroom extractor rattles and barely pulls.
+== fix.oj-d4port-vent.done
+- It pulls steady and quiet.
+// Refix a loose towel hook
+== fix.oj-d4port-hook.sign
+- A towel hook by the showers hangs loose by one screw.
+== fix.oj-d4port-hook.done
+- Firm hook. Towels stay off the floor.
+// Clear a slow basin drain
+== fix.oj-d4stbd-drain.sign
+- The starboard washroom basin keeps a puddle in its bowl.
+== fix.oj-d4stbd-drain.done
+- Empty bowl, every time.
+// Clean a fogged mirror
+== fix.oj-d4stbd-mirror.sign
+- The mirror by the starboard showers is fogged and streaked.
+== fix.oj-d4stbd-mirror.done
+- Clear mirror. It stays clear after a shower now.
+// Refix a loose towel hook
+== fix.oj-d4stbd-hook.sign
+- A towel hook on the starboard side swings round when touched.
+== fix.oj-d4stbd-hook.done
+- Fixed straight. It holds a wet towel fine.
+// ---- Deck 5: Operations
+// Clean the lift lobby vent
+== fix.oj-d5lobby-vent.sign
+- The lobby vent outside Works is dark with fine metal dust.
+== fix.oj-d5lobby-vent.done
+- Bright slats. The lobby air is clear.
+// Polish the deck sign by the lift
+== fix.oj-d5lobby-sign.sign
+- The deck sign outside Works is smeared with oily prints.
+== fix.oj-d5lobby-sign.done
+- A clean, bright sign. Calder will notice. She won't say.
+// Oil a squeaky corridor hatch
+== fix.oj-d5corr-hinge.sign
+- A corridor hatch squeals when it swings open.
+== fix.oj-d5corr-hinge.done
+- It swings without a whisper.
+// Clean a corridor ceiling vent
+== fix.oj-d5corr-vent.sign
+- A corridor vent near the bay rattles a loose slat.
+== fix.oj-d5corr-vent.done
+- Every slat sits tight.
+// Fix a lifting floor strip
+== fix.oj-d5corr-strip.sign
+- A floor strip near the bay is lifting and catches cart wheels.
+== fix.oj-d5corr-strip.done
+- Flat strip. The carts roll right over.
+// Free a stuck cargo latch
+== fix.oj-d5hold-latch.sign
+- A cargo latch in the hold won't release.
+== fix.oj-d5hold-latch.done
+- The latch swings free. The crate can come out.
+// Re-tension a cargo strap
+== fix.oj-d5hold-strap.sign
+- A cargo strap has gone slack round a stack of crates.
+== fix.oj-d5hold-strap.done
+- Tight strap. The crates won't shift.
+// Grease the cart bay guide rail
+== fix.oj-d5cart-rail.sign
+- The cart bay guide rail is dry, and the carts judder along it.
+== fix.oj-d5cart-rail.done
+- Greased rail. The carts glide.
+// Replace a cart bay light
+== fix.oj-d5cart-light.sign
+- A cart bay light has gone dark over the charging spot.
+== fix.oj-d5cart-light.done
+- The bay's bright again.
+// Descale the tea corner kettle
+== fix.oj-d5tea-kettle.sign
+- The tea corner kettle is furred white inside and takes ages to boil.
+== fix.oj-d5tea-kettle.done
+- A clean kettle, boiling in half the time. Halloran will be thrilled.
+// Clear a slow basin drain
+== fix.oj-d5wash-drain.sign
+- A Works washroom basin is slow, and grey with soap.
+== fix.oj-d5wash-drain.done
+- Clean basin, quick drain.
+// Clean the washroom extractor grille
+== fix.oj-d5wash-vent.sign
+- The Works washroom grille is caked with dust.
+== fix.oj-d5wash-vent.done
+- The grille's clean. The air moves.
+// Unstick the time clock card slot
+== fix.oj-d5bay-clock.sign
+- The time clock's card slot is jammed. Someone's card is stuck halfway in.
+== fix.oj-d5bay-clock.done
+- The card pops out. The slot takes the next one cleanly.
+// ---- Deck 6: Engineering
+// Clean the lift lobby vent
+== fix.oj-d6lobby-vent.sign
+- The engineering lobby vent hums with the coils and blows warm dust.
+== fix.oj-d6lobby-vent.done
+- Clean vent. Just the coils humming now.
+// Tighten a lobby bench
+== fix.oj-d6lobby-bench.sign
+- The bench by the engineering lift has a wobble.
+== fix.oj-d6lobby-bench.done
+- Steady bench.
+// Oil a stiff inspection hatch
+== fix.oj-d6lobby-hatch.sign
+- An inspection hatch by the lift is stiff and grinds when it opens.
+== fix.oj-d6lobby-hatch.done
+- It opens smooth and easy.
+// Replace a lobby light
+== fix.oj-d6lobby-light.sign
+- A light in the engineering lobby has died.
+== fix.oj-d6lobby-light.done
+- The lobby is bright again.
+// ---- the rec deck
+// Clean the lift lobby vent
+== fix.oj-d7lobby-vent.sign
+- The rec deck lobby vent smells faintly of pool water.
+== fix.oj-d7lobby-vent.done
+- Fresh air. Only a hint of the pool now.
+// Clean a concourse vent
+== fix.oj-d7conc-vent.sign
+- A concourse vent is clogged with fluff from the beanbags.
+== fix.oj-d7conc-vent.done
+- The vent breathes. The beanbags shed elsewhere.
+// Skim the pool gutter
+== fix.oj-d7pool-drain.sign
+- Leaves and fluff have collected in the pool gutter.
+== fix.oj-d7pool-drain.done
+- A clean gutter. The water runs clear.
+// Tighten a pool ladder
+== fix.oj-d7pool-ladder.sign
+- A pool ladder shifts when anyone climbs out.
+== fix.oj-d7pool-ladder.done
+- Firm rungs. Out you climb.
+// Oil a stiff lounger hinge
+== fix.oj-d7pool-lounger.sign
+- A lounger's backrest is stiff and won't lie back.
+== fix.oj-d7pool-lounger.done
+- It lies back easily. Very relaxing.
+// Clean a river hall vent
+== fix.oj-d7river-vent.sign
+- A river hall vent is damp and drips onto the pebbles.
+== fix.oj-d7river-vent.done
+- Dry vent. The pebbles stay dry.
+// Tighten a spinning climbing hold
+== fix.oj-d7river-hold.sign
+- A climbing hold on the wall spins when grabbed. Not ideal.
+== fix.oj-d7river-hold.done
+- Tight hold. It doesn't move an inch. Tomas will be glad.
+// Tighten a loose dock board
+== fix.oj-d7river-dock.sign
+- A dock board knocks when anyone steps on it.
+== fix.oj-d7river-dock.done
+- Quiet board. The kayaks can launch in peace.
+// Oil the sim bay door
+== fix.oj-d7sim-door.sign
+- The sim bay door grinds as it slides.
+== fix.oj-d7sim-door.done
+- It slides open with a soft hiss.
+// Clean the sim bay vent
+== fix.oj-d7sim-vent.sign
+- The sim bay vent struggles, and the room is warm.
+== fix.oj-d7sim-vent.done
+- Cool air. The sim bay is comfortable again.
+// Fix a stuck tip-up seat in the stands
+== fix.oj-d7stand-seat.sign
+- A tip-up seat in the stands is stuck folded up.
+== fix.oj-d7stand-seat.done
+- It folds down for sitting and up for leaving.
+// Fix a squeaky auditorium seat
+== fix.oj-d7aud-seat.sign
+- An auditorium seat squeaks every time someone shifts.
+== fix.oj-d7aud-seat.done
+- Silent seat. Talks will be quieter now.
+// Clean an auditorium vent
+== fix.oj-d7aud-vent.sign
+- An auditorium vent rattles during the quiet bits.
+== fix.oj-d7aud-vent.done
+- Silent vent. The quiet bits are quiet.
+// Refit a loose court wall panel
+== fix.oj-d7disc-panel.sign
+- A court wall panel rattles each time the disc hits it.
+== fix.oj-d7disc-panel.done
+- Firm panel. The disc bounces clean.
+// Clean the float room vent
+== fix.oj-d7float-vent.sign
+- The float room vent is clogged; the air feels thick.
+== fix.oj-d7float-vent.done
+- Fresh air in the float room. Maeve will be pleased.
+// Clear a slow shower drain
+== fix.oj-d7change-drain.sign
+- A shower drain in the changing room is slow and puddles.
+== fix.oj-d7change-drain.done
+- The drain gulps the water down.
