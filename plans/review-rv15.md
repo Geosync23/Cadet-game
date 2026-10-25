@@ -30,3 +30,6 @@ RUN_ID per process in 8 checks; two career_checks at once in one CADET_WORK both
 
 ## FX20 claude/p926-fx20 bb0aefed (item 10, odd jobs, ODD_ON off): PASS (~15:40 UTC)
 f8c9235b: cadet_test off ALL IDENTICAL; on: machine, day 2, deck OK; IX_ODD=oddall interactions FAIL (oj-d3prom-rail dead after oj-d5bay-clock, the time clock). Fixed by parking oj-d5bay-clock (9755ca3f): oddall interactions OK, 114 rows. bb0aefed = staging 1fe6d523 + that line; machine_check on OK (revised bar). Crew-occupancy note: 12 of 114 places busy at least 20% (FX10: 46 of 181).
+
+## FX19 claude/p926-fx19 acb36503 (test-only, arrows_d S6): PASS (~17:20 UTC)
+On the 9d758ada game: the old arrows_d_check FAILS S6 (as in CR3), the new one passes (exit 0). The game holds the empty-board word during a test (W.cur do), and S6 now clears W.cur.
