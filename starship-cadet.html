@@ -41872,7 +41872,7 @@ if (WEEKEND_ON) {
       dressBox(s, .42, .2, .3, '#b88a52', 0, .09, 0);    // the basket, sunk .01 into the grass
       dressBox(s, .44, .025, .03, '#8a6438', 0, .2, 0);  // its handle's foot
       for (const [x, z] of [[-.1, -.05], [.1, .06], [0, .02]]) dressBox(s, .14, .07, .11, '#e6d8b8', x, .205 + (x === 0 ? .05 : 0), z);   // parcels in brown paper, poking out
-      return { t: 'Picnic parcels', x: 'Lunch in brown paper, tied with string, a little bow on every one. Brennan does them all by hand.', floor: ['G', 1.7, 12.25], y: .2, w: .5, h: .3, d: .4 };
+      return { t: 'Picnic parcels', x: 'Brown paper parcels in a basket, still warm from the galley. Brennan has tucked a bit of garden basil under each knot.', floor: ['G', 1.7, 12.25], y: .2, w: .5, h: .3, d: .4 };
     } },
   });
   SHIP.weekend = { loaf: SAVED && SAVED.weekend && Number.isInteger(SAVED.weekend.loaf) ? SAVED.weekend.loaf : null };
