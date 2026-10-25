@@ -15001,6 +15001,7 @@ function liftBtnShow() {
     || document.body.classList.contains('dlgon') || !document.getElementById('lift').hidden) return false;
   const p = player.obj.position, rm = ROOMS[roomAt(...player.here())];
   if (rm && rm.floor === 'lift') return true;            // in the car
+  if (!rm || !rm.hall) return false;                     // a landing panel only from the landing (a hall), never through a wall or the trunks' glass
   const q = ixLiftPanel(); return !!q && Math.hypot(q.x - p.x, q.z - p.z) < LIFT_BTN_NEAR;
 }
 // the Record's words for your hobbies (0.28.63): the head writer's hobby.record.<h>, else by how often and how lately
