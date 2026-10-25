@@ -15,11 +15,11 @@ All sound is made live by the browser (Web Audio), exactly as in the mockup, so 
 | Deck hum | `goToDeck(n, at)` (~43210): cross-fade to that deck's hum. Also checked once a second against the player's room, for the garden. | Deck 1 Bridge hum; 2 Bridge hum (a touch warmer); 3 Commons; 4 Quarters; 5 Quarters hum made deeper (a workshop); 6 Engineering; R Commons. The hydroponics garden room on Deck 3 (floor `'garden'`) uses the Garden hum. Optional: about 2 dB softer at night, following `nightT`. |
 | Room doors | The door loop in `loop()` (~43377): `d.open += ...`. Play "open" when `d.open` starts rising from about 0, and "close" when it starts falling from about 1. | Type from the door: `d.e.type === 'door'` gets room door A (Pneumatic). Cabins in the officers' corridor and quiet rooms get C. Deck 5 and 6 work areas get B. Only doors within about 7 tiles of the player play, quieter with distance and panned left or right by screen position. |
 | Hatches | Same loop; `d.svc` (a service hatch, already "heavier" in the code). | Machine rooms get hatch A (Bulkhead), reactor and plant rooms B (Pressure), crawlways and closets C. A small table maps room keys to the kind, with a default of A. |
-| Lift | `startRide(n)` (~43286) and `updateRide(dt)` (~43292), using the `RIDE` times. | At the start: the deck button press, then the lift doors closing. From `RIDE.shut` to `RIDE.light`: the ride. At about `RIDE.light`: the clunk and settle, then the chime, then the doors open (they already open from `d.force` there). The game's whole ride is only 1.8 s against 3.6 s in the mockup, so the ride sound is squeezed to fit and the chime rings on as the doors open. The lift door loop must not also fire the room-door sound (check `d.e.type === 'lift'`). |
+| Lift | `startRide(n)` (~43286) and `updateRide(dt)` (~43292), using the `RIDE` times. | At the start: the deck button press (the Mail B bell made short, with a pressed feel; version A, B or C still to pick), then the lift doors closing. From `RIDE.shut` to `RIDE.light`: the ride. At about `RIDE.light`: the clunk and settle, then the chime, then the doors open (they already open from `d.force` there). The game's whole ride is only 1.8 s against 3.6 s in the mockup, so the ride sound is squeezed to fit and the chime rings on as the doors open. The lift door loop must not also fire the room-door sound (check `d.e.type === 'lift'`). |
 | Device open / close | `deviceFire('open')` and `deviceFire('close')` (~10479): register with `deviceOn('open', ...)` and `deviceOn('close', ...)`, the hook the device already offers. | No edits inside the device code. |
-| Device tap | `deviceDo(action)` (~10251 describes it): the soft tick (tap A). | One line at the top of `deviceDo`. |
-| Mail arrived | `deviceNotify({ app, ... })` (~10472) when `app === 'mail'`, plus a check in the main loop when `mailUnread()` goes up (Mail is queued with an `at` time, so it lands later). | Mail B (the soft bell). |
-| Heads-up | Where a heads-up goes on screen: `DEVICE_SKIN.heads(h)` with a non-null `h` (~10795, fed from `HU_Q`, ~10391). | Heads-up A (two chimes). |
+| Device tap | `deviceDo(action)` (~10251 describes it): the soft tick (tap A, the user's pick). | One line at the top of `deviceDo`. |
+| Mail arrived | `deviceNotify({ app, ... })` (~10472) when `app === 'mail'`, plus a check in the main loop when `mailUnread()` goes up (Mail is queued with an `at` time, so it lands later). | Mail B (the soft bell), the user's pick. |
+| Heads-up | Where a heads-up goes on screen: `DEVICE_SKIN.heads(h)` with a non-null `h` (~10795, fed from `HU_Q`, ~10391). | Heads-up B (the rising pad), the user's pick. |
 | Job done | `finishJob(id)` (~16715) when it returns true. | The four-note rise. |
 | Job posted | Only when the device shows a new job badge for the player, through `deviceNotify({ app: 'jobs' })`. Never for every job the sim posts. | Machines post jobs all day, so tying this to `SHIP.jobs.push` would be noise. |
 | "Not now" | The places that refuse you: `deviceLockedTap`, the tap text on sealed rooms and hatches, carrying with full hands, "too early to sleep". | One line each. The first turn lists them all with a `grep`. |
@@ -109,6 +109,16 @@ Add `sound_check` to the full round. It is quick (about 2 minutes) and fits in t
 | **Total** | **about 1.5 working days end to end, one builder** |
 
 It is a contained job: one sealed block and a few dozen hook lines, with no changes to the sim, the save or the art. Most of the uncertainty is in tuning to the user's ear, not in the code.
+
+## Chosen so far, and still open
+
+The user's picks (2026-10-25, 12:05 PM Eastern): device tap **A** (soft tick), Mail arrived **B** (soft bell), heads-up **B** (rising pad). Everything else on the page is locked as it is: the deck hums, open and close panel, job posted, job done, "not now", the archway cue and the soft footsteps.
+
+Still to pick (the plan above assumes the first choice in brackets until the user decides):
+- Room door: A Pneumatic, B Heavy slide, C Cabin (A, with C for cabins and B for work areas).
+- Hatch: A Bulkhead, B Pressure hatch, C Crawlway (A, with B and C by room).
+- Lift: A Grand, B Service, C Smooth (A).
+- Lift deck button: A Press, B Two-step, C Low press (A).
 
 ## Open questions for the user
 

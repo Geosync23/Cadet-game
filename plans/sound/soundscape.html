@@ -62,6 +62,8 @@ section.card { background: var(--panel); border: 1px solid var(--line); border-r
 .group-title { color: var(--lamp); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
 .v2 { font-size: 13.5px; color: var(--text); background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
 .v2 ul { margin: 0; padding-left: 18px; color: var(--muted); }
+.pick { font-family: var(--mono); font-size: 10.5px; letter-spacing: .06em; text-transform: uppercase; color: var(--hull); background: var(--lamp); border-radius: 999px; padding: 1px 7px; }
+.chip[data-chosen] { border-color: var(--lamp); }
 .variant-note { font-size: 13.5px; color: var(--muted); min-height: 2.6em; }
 .sub { display: flex; flex-direction: column; gap: 8px; }
 .sub + .sub { border-top: 1px solid var(--line); padding-top: 14px; }
@@ -111,6 +113,11 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <h1>Wren Soundscape</h1>
     <p class="lede">A first pass at how the ship could sound. Every sound here is made live in your browser, with no recordings, so it can be tuned by changing a few numbers. Tap any button to start; nothing plays on its own.</p>
     <p class="hint">Headphones or a speaker help with the hum. Phone speakers can't play the deepest notes, so each hum also carries higher overtones you can still hear. On an iPhone, if you hear nothing, check the silent switch.</p>
+    <div class="v2"><b>Version 4</b><ul>
+      <li>Your picks are marked Chosen: device tap A, Mail arrived B, heads-up B.</li>
+      <li>The lift's deck button is new: the same soft bell as Mail B, but short, with a pressed feel and its own notes. Three versions under The lift. The whole trip and the scene use whichever one is selected.</li>
+      <li>Still to pick: room door A, B or C; hatch A, B or C; lift A, B or C; deck button A, B or C.</li>
+    </ul></div>
     <div class="v2"><b>Version 3</b><ul>
       <li>All footsteps are now soft, like the carpet ones, with only a gentle hint of each floor.</li>
       <li>The crowd chatter is gone, from its own section and from the scene.</li>
@@ -151,7 +158,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
     <div class="sub">
       <h3>Device tap</h3>
       <div class="chips">
-        <button class="chip small" data-sfx="tapA"><span class="dot"></span>A · soft tick</button>
+        <button class="chip small" data-sfx="tapA" data-chosen><span class="dot"></span>A · soft tick <span class="pick">Chosen</span></button>
         <button class="chip small" data-sfx="tapB"><span class="dot"></span>B · bubble</button>
         <button class="chip small" data-sfx="tapC"><span class="dot"></span>C · wood click</button>
       </div>
@@ -167,7 +174,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
       <h3>Mail arrived</h3>
       <div class="chips">
         <button class="chip small" data-sfx="mailA"><span class="dot"></span>A · double bloop</button>
-        <button class="chip small" data-sfx="mailB"><span class="dot"></span>B · soft bell</button>
+        <button class="chip small" data-sfx="mailB" data-chosen><span class="dot"></span>B · soft bell <span class="pick">Chosen</span></button>
       </div>
       <p class="variant-note">A says "message" in a playful way; B is calmer and would suit evening Mail about tomorrow's traditions.</p>
     </div>
@@ -175,7 +182,7 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
       <h3>Heads-up</h3>
       <div class="chips">
         <button class="chip small" data-sfx="headsA"><span class="dot"></span>A · two chimes</button>
-        <button class="chip small" data-sfx="headsB"><span class="dot"></span>B · rising pad</button>
+        <button class="chip small" data-sfx="headsB" data-chosen><span class="dot"></span>B · rising pad <span class="pick">Chosen</span></button>
       </div>
       <p class="variant-note">For a tradition starting soon or a shift reminder. It should catch your ear without making you jump.</p>
     </div>
@@ -263,9 +270,17 @@ input[type=range] { width: 100%; accent-color: var(--lamp); min-width: 0; height
       <button class="chip small" data-lact="trip"><span class="dot"></span>Whole trip</button>
       <button class="chip small" data-lact="open"><span class="dot"></span>Doors open</button>
       <button class="chip small" data-lact="close"><span class="dot"></span>Doors close</button>
-      <button class="chip small" data-lact="press"><span class="dot"></span>Deck button</button>
       <button class="chip small" data-lact="ride"><span class="dot"></span>Ride</button>
       <button class="chip small" data-lact="arrive"><span class="dot"></span>Arrival</button>
+    </div>
+    <div class="sub">
+      <h3>Deck button · version 4</h3>
+      <div class="chips" data-group="press" role="group" aria-label="Deck button">
+        <button class="chip small" data-press="A" aria-pressed="true"><span class="dot"></span>A · Press</button>
+        <button class="chip small" data-press="B" aria-pressed="false"><span class="dot"></span>B · Two-step</button>
+        <button class="chip small" data-press="C" aria-pressed="false"><span class="dot"></span>C · Low press</button>
+      </div>
+      <p class="variant-note" id="pressNote"></p>
     </div>
   </section>
 
@@ -544,7 +559,19 @@ function liftDoors(t, open, v, b) {
   door(t2 + 0.012, open, p, { bus: b, pan: open ? 0.15 : 0.85, panTo: open ? 0.85 : 0.15 });
 }
 // A real button: a firm mechanical press, not a device beep.
-function liftPress(t, b) { clack(t, 0.12, { f: 1200, bus: b }); thud(t + 0.005, { gain: 0.15, d: 0.06, f: 300, bus: b }); }
+// Version 4: the deck button is the Mail B soft bell made short, with a soft press under it and its own notes.
+const PRESS = {
+  A: { note: 'Press: a soft press, then one short high bell. Mail rings two notes together and lingers; this is one note, quickly gone.', notes: [[N.E6, 0, 0.32, 0.07]] },
+  B: { note: 'Two-step: a soft press, then two bell notes one after the other, quickly rising, like the button lighting up.', notes: [[N.C6, 0, 0.22, 0.055], [1567.98, 0.07, 0.34, 0.05]] },
+  C: { note: 'Low press: a firmer press and one lower, rounder bell note. The calmest, and pitched below Mail.', notes: [[N.D5, 0, 0.4, 0.08]], firm: true },
+};
+let pressV = 'A';
+function liftPress(t, b) {
+  const p = PRESS[pressV];
+  noise(t, 0.012, { ft: 'lowpass', f: 1400, gain: p.firm ? 0.05 : 0.03, a: 0.001, bus: b });                  // the button going in
+  tone(t, p.firm ? 150 : 190, 0.05, { gain: p.firm ? 0.06 : 0.04, to: 110, a: 0.002, bus: b });
+  p.notes.forEach(([f, dt, d, g]) => bell(t + 0.03 + dt, f, d, g, { wet: 0.15, bus: b }));
+}
 function liftRide(t, d, v, b) {
   const r = LIFTS[v].ride; b = trim(r.lv, b);
   noise(t, d, { brown: true, ft: 'lowpass', f: 140, fTo: 220, fT: d * 0.5, q: 0.8, gain: r.rumble, swell: 0.35, bus: b }); // the car's rumble
@@ -688,6 +715,10 @@ function flash(b) { const dot = b.querySelector('.dot'); if (dot) { dot.style.ba
 $$('[data-door]').forEach(b => b.addEventListener('click', () => { ensure(); door(ctx.currentTime + 0.02, b.dataset.act === 'open', b.dataset.door); flash(b); }));
 let liftV = 'A';
 $('#liftNote').textContent = LIFTS[liftV].note;
+$('#pressNote').textContent = PRESS[pressV].note;
+$$('[data-press]').forEach(b => b.addEventListener('click', () => {
+  ensure(); pressV = b.dataset.press; setPressed('press', 'press', pressV); $('#pressNote').textContent = PRESS[pressV].note; liftPress(ctx.currentTime + 0.02);
+}));
 $$('[data-lift]').forEach(b => b.addEventListener('click', () => { liftV = b.dataset.lift; setPressed('lift', 'lift', liftV); $('#liftNote').textContent = LIFTS[liftV].note; }));
 $$('[data-lact]').forEach(b => b.addEventListener('click', () => {
   ensure(); flash(b); const t = ctx.currentTime + 0.02, a = b.dataset.lact;
