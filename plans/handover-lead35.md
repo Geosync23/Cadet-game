@@ -20,6 +20,11 @@
 - The 8 new traditions (told the user): Tool night D29 Kovac; Route night D38 Raman; Window sketching D48 Luca Alvarez; Open house D53 Ferreira + Holt; Garden walk D63 Tove Cruz; The spoon band D64 Femi Rossi; Card night D73 the Counsellor; Worst joke night D81 Holt (+ Halloran). Six weeks aboard D42 (Zeke), Twelve weeks aboard D84 (Calder toast).
 - After the round: un-pause FX17/18/19/21 + CS1 (tell them "round done, merge 19a7c30"); hire RV15 (FX18 + FX19), RV16 (FX21), FX22 (appointments), FX20 (simple jobs) as the cap allows; a BM for claude/staging-0.92.6.
 
+## Latest (06:57 UTC, lead 35 handing over at ~60%)
+- 0.92.5 round on 53c11f8: CR1, CR4, CR5 OK; CR3 OK except controller_check disc (stale: Quick game removed by item 3); CR6 OK except disc_check #25 (test pinned Day 2 19:15, moved by FX12's Tuesday late piano; game fine). FX23 session_01SU6NhoM56vuTMc3d6Pk18D fixes both checks test-only on claude/p925-disc (game bytes stay fddc0ef6); CR3 re-runs the disc part on it; BM17 folds in. CR2 (perf etc.) still running. Then BM17's go/no-go package → the user in the morning → PUB1 only on the user's say.
+- 0.92.6 resumed after the round's runners finished: FX17 (merging 53c11f8 + SW2 words ac684e57/fbee25be), FX18 (a9429e83, checks), FX19 (open: arrows promo FAIL with both switches on; Reliable gate; cabin next-day walk), FX21 (switch-on proofs, S6 with CS1), RV14 reviewing FX17. CS1 still paused: resume it when a seat frees. Hire RV15 (FX18 + FX19) and RV16 (FX21) as soon as CR2/FX23 finish; then FX22 (appointments; SW2's words claude/p926-appt-words c1eb49d3, CS1 to check) and FX20 (simple jobs); a BM18 for claude/staging-0.92.6.
+- CR6 ~55% (one or two more rounds), CR2 needs a fresh replacement after this round.
+
 ## Idle / retired (handover notes exist)
 BM16, DS1, DV1 (plans/handover-dv1.md on claude/handover-dv1), FX9, FX12, FX13, FX14, FX15 (idle, low memory), FX16 (weekend; plans/handover-fx16.md), RV12, RV13, SW1, ZW1, PUB1 (idle), CR1-6 (in the round; CR2 needs a fresh replacement after this round).
 
