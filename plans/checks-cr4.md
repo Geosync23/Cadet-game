@@ -1,5 +1,25 @@
 # Check runner CR4: results
 
+## 0.92.5 full round (2026-10-25)
+
+- **Candidate:** `claude/staging-0.92.5` 53c11f8
+- **starship-cadet.html sha256:** `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559` (matches BM17's)
+- **OLD:** ba836359 (0.92.4), sha256 `2aa6427f...13a2`; not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, then 6 and 8 for Crossing the Line (still on; BM17 confirmed at 05:49 nobody else has them). One at a time, alone, with 53c11f8's day_check.py (+7 lines: the new "arriving" check, the user's item 21), `CADET_WORK=/tmp/work-cr4`. Reported to BM17 (took over from BM16), copy lead 35.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 244 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450; nobody stuck |
+| day_check 13 | OK (exit 0, 237 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 235 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 224 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 222 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 (was 296 on Deck 3 in 0.92.1-0.92.4: lower) |
+| day_check 8 | OK (exit 0, 232 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 279 / 450 |
+
+New "arriving" line: 564 / 647 / 638 / 677 / 598 / 601 crew came onto a deck on Days 12 / 13 / 16 / 19 / 6 / 8, **0 drawn anywhere else on their first frame** every day. FX8's get-up line: biggest step 0.19 tiles every day (limit 0.35); the rec deck's swimmers/climbers counted apart (FX8-1): 18 / 0 / 99 / 100 / 75 / 76.
+
+**CR4: OK.** No FAILs.
+
 ## 0.92.4 full round (2026-10-24)
 
 - **Candidate:** `claude/staging-0.92.4` 5bad724d (build 0.92.4)
