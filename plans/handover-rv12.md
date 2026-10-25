@@ -14,18 +14,14 @@ AC3 session_01DiLRzrXgkeoAZCoX1mVJn9, DV1 session_01GewvUTCXkDVkHsz53ex71o.
 0.92.5: FX9 go-walk 84e14d89 PASS; FX9 lift-flash 8777fc44 PASS; FX11 c97fbef0 (auditorium seat) PASS;
 FX13 simflight proto (light look) PASS, 6d5611ee last.
 
-## Open (at ~00:05 UTC 2026-10-25)
-- FX13 Tiles ladder claude/p925-fx13b 5e1d82d5 (game 515233c1...): events, day 6, cadet_test ALL IDENTICAL, check_fast,
-  tiles OK; join_check OK on the fix; plant t4 (tladLead hook off) caught. join_check on base ba836359 and plants
-  t1-t3 rerun one at a time (earlier runs hit a page-load timeout at join_check's save/reload step, line ~143, under
-  load: not the ladder). On ae8c8bc9 the same plants t1/t2 were caught. Then PASS unless something new.
-- FX12 claude/p925-fx12 20860227 (game cfb237c9...; items 4 late piano, 9 birthday an hour apart, 10 birthdays redone):
-  code read; plants b1 (evBdaySlot off), b2 (toBed ignored), b3 (whereFor off), b4 (no slice in hand). Runs queued:
-  events part 13 trimmed (fix, base 3866c8f3, b1-b4), events, day 1, then cadet_test, check_fast, arrows week (fix and
-  base), food 1 7, lines. FX12's known FAIL: arrows_check week Day 9 stuck at "! Burst pipe, Deck 4" (passes on base;
-  fails with any Day 9 crew-plan change): DV1 is digging (lead 34); review DV1's fix with FX12's.
-- Read notes: evBdaySlot runs inside eventsOn (EV_DAYS set to the partial list first, galleyDay recursion); check the
-  "same plans twice" lines; bdayFrame uses performance.now (bubbles only, live).
+## Open (at ~00:55 UTC 2026-10-25)
+- FX13 tiles-ladder 5e1d82d5: PASS (sent).
+- FX12 claude/p925-fx12 91b97ee9 (items 4, 9, 10): all OK (events part 13 + 4 plants, events, day 1, food, check_fast,
+  cadet_test ALL IDENTICAL) except arrows_check week (plain, no 'guide'): Day 9 stuck at "! Burst pipe, Deck 4" from
+  10:39, m6 not learned; OK on 3866c8f3. Verdict sent as FIXES NEEDED pending DV1's fix (DV1 had no repro with the
+  queue on; I sent the exact command). Next: review DV1's fix, rerun arrows week on FX12 + fix (and base), then PASS.
+  Plants and trimmed check in scratch only (bd/): rebuild if needed (b1 evBdaySlot -> return [], b2 toBed false,
+  b3 whereFor removed, b4 sliceHeld false).
 
 ## How I run checks
 - `plans/review-rv12/pair.sh OUT CODEDIR "name|cmd" ...`: two at a time, each its own CADET_WORK (/tmp/work-NAME),
