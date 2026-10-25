@@ -46955,6 +46955,39 @@ function storyAbout() {                                   // once, after the ros
   if (STORY_ABOUT_DONE || !STORIES_ON) return;
   try { socInit(); for (const id in STORY_ABOUT) { const p = socP(id); if (!p || !Array.isArray(p.about)) continue; for (const [tier, topic, text] of STORY_ABOUT[id]) { const a = p.about.find(x => x.tier === tier && x.topic === topic); if (a) a.text = text; } } STORY_ABOUT_DONE = true; } catch (e) { /* not yet */ }
 }
+// S4: arrows (the newer queue, section 15b's guideAsk; and Dev mode's career arrow, section 25's dvCareerNext). A booked
+// crescendo asks for level 2 (a meeting) from 15 minutes before to its end, pointing at the person; a story beat that's
+// ready now asks for level 6 (something you chose: shown only when nothing else is), checked every 5 ship minutes.
+// storyDevNext(now) -> the Dev arrow's story row: the soonest booking, else whoever's beat is ready (an hour behind
+// the career's own steps, so those win)
+function storyGoal(p, label, t = shipNow()) {
+  const w = typeof whereIs === 'function' ? whereIs(p, t) : null; if (!w || w.deck == null) return null;
+  return { deck: w.deck, crew: p.id, label };
+}
+const storyLabel = (p, d) => d && d.title ? d.title : shortName(p);
+function storyArrows(now) {
+  if (typeof guideAsk !== 'function' || typeof GUIDE_ON === 'undefined' || !GUIDE_ON) return;
+  const C = storyPeekCS();
+  for (const id in C.book) {
+    const b = C.book[id], p = socP(id), d = p && storyMoment(id + ':' + b.beat); if (!d || now < b.from - 15 || now >= b.to) continue;
+    guideAsk({ id: 'story:cres:' + id + ':' + b.beat, level: 2, owner: '20c stories', from: b.from - 15, until: b.to, goal: () => storyGoal(p, hhmm(b.from % 1440) + ' ' + storyLabel(p, d)),
+      done: () => !storyPeekCS().book[id] || (storyPeekCS().told[id] || []).includes(b.beat) });
+  }
+  if (now % 5) return;
+  for (const id of storyIdx().beats.keys()) {
+    const p = socP(id); if (!p || !SOC.idx.has(id) || storyPeekCS().book[id]) continue;
+    const mid = momentReady(p, now); if (!mid) continue;
+    guideAsk({ id: 'story:word:' + id, level: 6, owner: '20c stories', until: now + 10, goal: () => storyGoal(p, shortName(p) + ' wants a word'), done: () => momentReady(p, shipNow()) !== mid });
+  }
+}
+function storyDevNext(now) {
+  if (!STORIES_ON) return null;
+  const C = storyPeekCS(); let best = null;
+  for (const id in C.book) { const b = C.book[id], p = socP(id), d = p && storyMoment(id + ':' + b.beat), g = d && storyGoal(p, storyLabel(p, d)); if (g && b.to > now && (!best || b.from < best.when)) best = { when: b.from, soon: 15, g }; }
+  if (best) return best;
+  for (const id of storyIdx().beats.keys()) { const p = socP(id); if (!p || !SOC.idx.has(id)) continue; const mid = momentReady(p, now), g = mid && storyGoal(p, shortName(p) + ' wants a word'); if (g) return { when: now + 60, g }; }
+  return null;
+}
 function storyTick(now) {                                 // once a ship minute (socialTick), while STORIES_ON
   if (!STORIES_ON) return;
   storyAbout(); socInit(); const C = storyCS(), day = Math.floor(now / 1440) + 1;
@@ -46965,7 +46998,7 @@ function storyTick(now) {                                 // once a ship minute 
     if (j.status === 'done' && e.at == null) e.at = (j.doneAt || now) + e.delay;
     if (e.at != null && now >= e.at) { if (typeof flagSet === 'function') flagSet(e.flag); delete C.fav[fid]; }
   }
-  if (now % 30) return;                                   // bookings: twice a ship hour
+  if (now % 30) { storyArrows(now); return; }            // bookings: twice a ship hour (the arrows every minute)
   for (const id of storyIdx().beats.keys()) {
     if (C.book[id]) continue;
     const p = socP(id); if (!p || !SOC.idx.has(id)) continue;
@@ -46981,6 +47014,7 @@ function storyTick(now) {                                 // once a ship minute 
       storyInvite(p, d, C.book[id], now); break;
     }
   }
+  storyArrows(now);
 }
 // ---- end of slot: Social engineer ----
 
@@ -59599,6 +59633,7 @@ function dvCareerNext() {                                // the next career step
     for (const id of ['m3d', 'm3i']) try { add(dvFixed(W, id), id); } catch (e) { /* none */ }
     const small = CAREER_LADDER.find(r => r.size === 'small' && !r.fixed && W.tr[r.id] === undefined && WORK_MECH[r.id] && r.tier <= W.tier && (!r.needs || !r.needs.trained || W.tr[r.needs.trained] !== undefined));
     try { if (small) add(ladderNeeds(small.needs, W) ? dvWork(dvName(small.id) + ': it comes with a job', small.day) : dvNeed(small, W), 'small:' + small.id); } catch (e) { /* none */ }
+    try { if (STORIES_ON && typeof storyDevNext === 'function') add(storyDevNext(now), 'story'); } catch (e) { /* none */ }   // a crew story's next step (FX21, section 20c's slot)
     try { if (W.test && W.test.passed) { const s = devmodePromoSteps().find(x => !x.done && DV_PROMO[x.label]); if (s) add({ when: s.at, soon: 15, g: { ...DV_PROMO[s.label], label: s.label } }, 'promo'); } } catch (e) { /* none */ }
   }
   if (!C.length) return null;
