@@ -79,6 +79,50 @@ def check_pause_suspends(pw, path):
         check(g.ev("SND._.state()") == 'running', 'resume runs it again')
     finally: g.close()
 
+def check_core_hooks(pw, path):
+    """turns 2-5: the hum by deck, doors (yours and crew, near only), the lift, footsteps, Mail, a heads-up; seed untouched"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        g.page.wait_for_timeout(800); g.step(5)   # the hum is checked twice a second (real time)
+        hums = g.ev("SND.log.filter(e => e.name.startsWith('hum:')).map(e => e.name)")
+        check(len(hums) >= 1, f'a deck hum starts: {hums}')
+        g.ev('goToDeck(3)'); g.page.wait_for_timeout(700); g.step(5)
+        check(g.ev("SND.log.some(e => e.name === 'hum:commons')"), 'Deck 3 gets the Commons hum')
+        g.ev('goToDeck(6)'); g.page.wait_for_timeout(700); g.step(5)
+        check(g.ev("SND.log.some(e => e.name === 'hum:engine')"), 'Deck 6 gets the Engineering hum')
+        g.ev('goToDeck(4)'); g.page.wait_for_timeout(700); g.step(5)
+        # a door next to you opening and closing (driven by hand: open goes 0 -> 1 -> 0)
+        res = g.ev("""(() => { const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); if (!d) return null;
+          player.obj.position.set(d.cx + 0.5, 0, d.cz); SND.log.length = 0; return [d.cx, d.cz]; })()""")
+        if check(res is not None, 'Deck 4 has a door to test'):
+            for v in (0.0, 0.5, 1.0, 0.5):
+                g.ev(f"(() => {{ const d = DOOR_OBJS.find(x => x.e.type !== 'lift' && !x.svc); d.open = {v}; d.force = {1 if v >= 0.5 else 0}; }})()"); g.step(1)
+            names = g.ev("SND.log.map(e => e.name + (e.crew ? ':crew' : ''))")
+            check('doorOpen' in names, f'your door opening plays: {names}')
+            g.ev("DOOR_OBJS.forEach(d => delete d.force)")
+        # footsteps: walk the player along by hand
+        g.ev("SND.log.length = 0"); g.step(2)
+        for k in range(30):
+            g.ev("player.obj.position.x += 0.09"); g.step(1)
+        steps = g.ev("SND.log.filter(e => e.name === 'step').length")
+        check(3 <= steps <= 6, f'about one step every 0.62 tiles walked: {steps} for 2.7 tiles')
+        # Mail and a heads-up
+        g.ev("SND.log.length = 0; SHIP.mail.push({ at: 0, from: 'Test', subject: 'Test', body: 'Test', read: false })"); g.step(3)
+        check(g.ev("SND.log.some(e => e.name === 'mail')"), 'new Mail plays the Mail sound')
+        # SND's own per-frame watcher, driven by hand with no game frames between (the game's frames draw on R() themselves)
+        same = g.ev("""(() => { const s0 = seed, d = DOOR_OBJS.find(x => x.e.type !== 'lift');
+          for (let k = 0; k < 60; k++) { player.obj.position.x += 0.05; if (d) d.open = k % 20 < 10 ? 1 : 0; SND.onFrame.forEach(f => f(true)); }
+          SHIP.mail.push({ at: 0, from: 'Test', subject: 'Seed', body: 'x', read: false }); SND.onFrame.forEach(f => f(true));
+          return seed === s0; })()""")
+        check(same, "SND's watcher never draws on R()")
+        g.ev("SND.log.length = 0; (() => { const b = ROOM_BOX['@']; if (b) player.obj.position.copy(cellPos(b.i0 + 1, b.j0 + 1)); })(); startRide(3)")
+        g.step(80)
+        lift = g.ev("SND.log.map(e => e.name).filter(n => n.startsWith('lift'))")
+        check(lift[:2] == ['liftPress', 'liftDoorsClose'] and 'liftRide' in lift and 'liftArrive' in lift, f'the lift: press, doors, ride, arrival: {lift}')
+    finally: g.close()
+
 # ---- activities (FX20): the approved activity sounds, what each activity plays, the hooks, and never R() ----
 ACT_NAMES = ['ratchet', 'panelOff', 'panelOn', 'partSwap', 'torch', 'scanA', 'vent', 'unstick', 'hingeSqueak', 'hingeOil', 'drain', 'wipe', 'cratePick', 'crateSet',
              'typing', 'drill', 'cartDock', 'valve', 'hold', 'relay', 'flushVac', 'showerOff', 'sink', 'towel', 'callRing', 'hangUp', 'wardrobe', 'changing', 'hamper',
@@ -151,7 +195,7 @@ def check_activities_silent(pw, path):
         check(r[0] == 'off' and r2[0] == 'off' and r2[1] == 0, f'under webdriver an activity makes no sound and starts nothing: {r} {r2}')
     finally: g.close()
 
-CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_activities, check_activities_silent]
+CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_core_hooks, check_activities, check_activities_silent]
 # (activities and music add theirs here)
 
 with sync_playwright() as pw:
