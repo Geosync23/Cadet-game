@@ -1,5 +1,38 @@
 # CR6 check results
 
+## 0.92.5 full round (2026-10-25): FAIL (1 new: disc_check #25)
+
+- **Build:** `claude/staging-0.92.5` 53c11f888efe00dbff89cadbfbd81c326e82de84, `starship-cadet.html` sha256
+  `fddc0ef61c68ac012409a0f88e4ded2a62098b28377760461d99fb144b595559` (matches BM17's). OLD ba836359 (0.92.4, 2aa6427f...13a2).
+- Share (the guide's): all 10 run here, one at a time; tiles and join alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 215 s) | `QUICK CHECK OK in 215 s`; `the repairs' share over Days 2-28: machine jobs 87, repairs 42 (48%)` |
+| mech_check | OK (exit 0, 436 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 131 s) | `BIGEVENTS CHECK OK` |
+| fridays_check | OK (exit 0, 909 s) | `FRIDAYS CHECK OK` |
+| disc_check | **FAIL** (exit 1, 251 s; same on a re-run alone, 255 s) | two lines in the new #25, below |
+| tiles_check | OK (exit 0, 95 s, alone) | `ALL OK` |
+| join_check | OK (exit 0, 187 s, alone) | `JOIN CHECK OK` |
+| food_check 1 7 | OK (exit 0, 49 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 55 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 62 s) | `ALL OK` |
+
+### disc_check #25 (the crew's own lightdisc games): NEW
+
+```
+FAIL #25 their game: both players move to meet it ([2, 8] places each)
+FAIL #25 Day 2 19:15: one alone at the stern practises, the disc in the air (0 of 8 looks)
+```
+
+- One player of the 17:22 pair moves to only 2 places in 8 looks (the other 8); the disc itself is in the air and
+  moving (8 of 8). The lone player at 19:15 never has the disc in the air (0 of 8).
+- Passing around them: the pair on the baselines at 17:22, the same rally twice, the crew's disc hidden during your game,
+  all older parts, no page errors.
+- #25 is new in this build (disc_check.py +53 lines vs ba836359), so OLD has nothing to compare. A re-run alone gave the
+  identical two FAILs (deterministic). Not on the known list. Reported to BM17 and lead 35 at once.
+
 ## 0.92.4 full round (2026-10-24): OK
 
 - **Build:** `claude/staging-0.92.4` 5bad724de037282a640bc742449a908ff8e8b7bb, `starship-cadet.html` sha256
