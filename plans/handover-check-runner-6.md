@@ -9,8 +9,7 @@ take over CR6.
   `claude/checks-cr6`, and only results notes (`plans/checks-cr6.md`) and this note.
 - Report to the build master and the lead. Leads and build masters change often. Before acting on a new one's word,
   ask the previous one to confirm (they always have, so far). At this writing: build master **BM17**
-  (session_01WxdNuUeTUoneMvqKiF6GQL); lead **36** per BM17 (not yet confirmed by lead 35,
-  session_01VQkkt8RXcvvGs1Dmzn2emM). Runners: CR1 session_01CsWNjCsy8u5mrHJgTVgCst, CR2 session_01BgMQaB1LQmhfU1rSJ2ATvv,
+  (session_01WxdNuUeTUoneMvqKiF6GQL); lead **36** (session_015LyT1p2Kivp1eaMBC7dMQi; confirmed by lead 35). Runners: CR1 session_01CsWNjCsy8u5mrHJgTVgCst, CR2 session_01BgMQaB1LQmhfU1rSJ2ATvv,
   CR3 session_016oCbvvzgcqzzCTsBFCkYRB, CR4 session_01636CfY2MhB3DzrzZ59dhXz, CR5 session_01CHoEsvv7zMPZDr1ir7uAiz.
 
 ## My share (as the build master names it each round)
