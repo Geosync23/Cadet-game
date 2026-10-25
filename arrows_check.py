@@ -319,6 +319,8 @@ FOLLOW = r"""(() => {
     const b = [...cs.querySelectorAll('button')].find(b => want.test(b.textContent)) || [...cs.querySelectorAll('button')].find(b => /close/i.test(b.textContent));
     if (b) { const t = b.textContent; b.click(); return 'clock screen: ' + t; }
   }
+  { const ds = document.getElementById('dmSheet'); if (ds && !ds.hidden && typeof devmodeOpen === 'function') { devmodeOpen(false); return 'close the Dev panel'; } }   // DV1 (lead 35, FX12's Day 9 FAIL, the real cause): a tap at a pin under the top-left card (the place and clock, which opens Dev mode's sheet in this Dev-save page) left the sheet open over the deck, and every later tap landed on its buttons
+  { const hp = document.getElementById('ixHealth'); if (hp && !hp.hidden) { document.getElementById('ixHealthC').click(); return 'close Ship health'; } }   // DV1 (lead 35, FX12's Day 9 FAIL): a Ship health board tapped on the way (the nearest thing to a pin) left its panel open over the deck, and every later tap landed on its list: closed, as a player would
   const bd = document.getElementById('ixBoard');
   if (bd && !bd.hidden) { const bs = [...bd.querySelectorAll('#ixBoardL button')], b = bs.find(b => /turn it in/i.test(b.textContent)) || bs.find(b => /take/i.test(b.textContent) && /asked for you/i.test((b.closest('.ixjob') || b.parentNode).textContent)) || bs.find(b => /take/i.test(b.textContent));   // a job held for you first (your turn at a lesson), as a player reading the arrow would (AC2)
     const t = b ? b.textContent + ': ' + ((b.closest('.ixjob') || b.parentNode).querySelector('b') || { textContent: '' }).textContent : 'nothing to take'; if (b) b.click(); else document.getElementById('ixBoardC').click(); return 'board: ' + t; }

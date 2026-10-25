@@ -128,6 +128,11 @@ with sync_playwright() as pw:
           const rooms = e.rooms || (e.rooms = eventRooms(e.ev)), free = [...PLACE_OF.values()].filter(pl => rooms.has(deckDef.num + '|' + pl.room) && !heldBy(pl.id) && !BUSY.has(pl.id) && (placeSpot(pl.id) || {}).pose === 'sit').length;   // seats free in its rooms just before you join
           const n0 = SHIP.player.needs[need]; tradJoin({ ...e, day: %d }, a); const pl = ACT && ACT.placeId, sp = pl && placeSpot(pl);
           return JSON.stringify({ need, n0, act: ACT && ACT.kind, free, seat: [pl || null, sp ? sp.pose : null, ACT && ACT.o ? ACT.o.pose || null : null] }); })()""" % (d, jid, d, d)))
+        if jid == 'sunday-story':   # RV14: a seated weekend join takes a seat first (tradSpot's seat-first, FX9's 7ff6a818), never the kettle (the common room has both; the bow lounge only seats)
+            g.step(90); sp = json.loads(g.ev("(() => { const pl = ACT && ACT.placeId && ((DECKS[deckDef.num] || {}).places || []).find(q => q.id === ACT.placeId); return JSON.stringify([ACT && ACT.kind, ACT && ACT.placeId || null, pl ? pl.pose || null : null, player.pose || null]); })()"))
+            check(str(sp[2] or '').startswith('sit') and 'kettle' not in str(sp[1]), '%s: your join puts you in a seat (%s)' % (jid, sp))
+            kt = json.loads(g.ev("(() => { const e = eventsOn(%d).find(x => x.id === 'sunday-story'), k = placeSpot('4-common-kettle'); if (!e || !k) return JSON.stringify(null); const r = tradSpot({ ...e, day: %d }, k.x, k.z); return JSON.stringify(r ? [r[0].id, r[0].pose || null] : null); })()" % (d, d)))
+            check(bool(kt) and str(kt[1] or '').startswith('sit'), '%s: asked from right by the kettle, a seated join still picks a seat (seat-first) (%s)' % (jid, kt))
         if 'err' in st: check(False, '%s: someone at it to join (%s)' % (jid, st['err'])); g.close(); continue
         if jid in SEATED:   # RV14's q_seat: a seated weekend join puts you in a seat (tradSpot's seat-first), not standing (the Sunday story had you at the kettle)
             if st['free'] == 0: print('  %s: every seat in its room taken, so you stand beside them (the game\'s own fallback, its words say so): %s' % (jid, st['seat']))

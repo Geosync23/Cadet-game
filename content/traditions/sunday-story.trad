@@ -10,6 +10,8 @@ when: every 4 weeks sunday week 4 from day 1
 // early start), so at 22:15 he, its host and reader, left before it began on most showings
 at: 21:15-21:55
 min: 25
+// (DS1, RV14: a full room had you standing beside the leader; a seated weekend join keeps a seat for you)
+spare: 1
 jitter: 5
 where: 4 pool common-room
 hold: 1
