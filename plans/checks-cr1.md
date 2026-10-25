@@ -376,3 +376,22 @@ One at a time (arrows_check alone), CADET_WORK=/tmp/work-cr1.
 | arrows_check week guide, NEW | **OK** | 534 s | m6 learned Day 8 |
 
 No FAILs, so no OLD runs were needed.
+
+# Lead 37's job: player_check on 0.92.6 as published (claude/integration 5898c190, 2026-10-25)
+
+Game sha256 `10f654de56f76598c0747530fe5d05185fcc6eb5e91398584d462aafc8ebf266` (confirmed). Each run alone.
+
+| Check version | Game | Result |
+|---|---|---|
+| 5898c190's player_check | 5898c190 | **FAIL**, 3 lines (SD1's) |
+| 5898c190's player_check | b78e1e22 (88f4cc8d…) | OK |
+| b78e1e22's player_check | 5898c190 | **FAIL**, the same 3 lines |
+| b78e1e22's player_check | b78e1e22 | OK (round of 0.92.6 above) |
+
+The 3 lines: `reserved job: the bracket made, in your hands, with the progress bar (['relay'], None)`;
+`reserved job: the fetch and make stops marked done ([[0], ['fetch', 'make', 'job']])`;
+`reserved job: done after fitting both parts and the repair (['claimed', True])`.
+
+So it follows the game, not the check. The only game change between b78e1e22 and 5898c190 is **27ad3cba** (FX17,
+section 18, 4 lines): `evMeetClash` and its use in `evArrive` (nobody goes to Winner stays on or a new tradition over a
+ship-wide event meeting they're needed at). NEW in the published 0.92.6. Not fixed (check runner).
