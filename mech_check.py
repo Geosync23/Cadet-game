@@ -1423,9 +1423,9 @@ M20 = r"""(() => { const out = {};
  // the ask and the beats
  let W = reset(18 * 1440 + 300); const notes = [], pn = promoNotice; promoNotice = (text) => notes.push([Math.floor(shipNow()) % 1440, text]);
  try { for (let t = 18 * 1440 + 300; t <= 18 * 1440 + 598; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true); } } finally { promoNotice = pn; }
- const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).filter(a => r && (a.occ === r.key || a.occ === r.key + ':calder'));
+ const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).filter(a => r && (a.occ === r.key || a.occ === r.key + ':2'));
  out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null; out.notice = notes;
- out.arrow = g ? [g.level, g.from % 1440] : null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
+ out.arrow = g ? [g.level, g.from % 1440] : null; worksTrained('m20'); out.later = flag('m20.mori.later') || null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
  // a job of yours
  W = reset(22 * 1440 + 480); let j = arrJob(shipNow(), { key: 81 }); SHIP.jobs.push(j);
  out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
@@ -1456,7 +1456,8 @@ def part_m20(g):
     check(a['ask'] and a['ask'][:5] == ['m20', 'meet', 600, 2, 'A'], f"m20: asked on Day 19 for 10:00 in the array room, Deck 2 ({a['ask']})")
     check(len(a['notice']) == 1 and a['notice'][0][0] == 570 and 'sensor array' in a['notice'][0][1], f"m20: one urgent notice at 09:30 naming it ({a['notice']})")
     check(a['arrow'] == [1, 585], f"m20: a level 1 arrow from 09:45 ({a['arrow']})")
-    check(a['appt'] and a['appt'][0] == ['calder', 'mori'] and a['appt'][1] == 595 and a['appt'][2] == 2, f"m20: Mori and Calder booked from 09:55, each at their own panel in the array room ({a['appt']})")
+    check(a['appt'] and a['appt'][0] == ['calder'] and a['appt'][1] == 595, f"m20: Calder (Mori is off on Fridays) booked at the array's panel from 09:55; Mori not brought in on her day off ({a['appt']})")
+    check(a['later'] == 1, f"m20: Mori's word saved for the next time you meet her ({a['later']})")
     check(a['board'] and a['claimed'], 'm20: a calibration job on the board for a Senior Officer, taken')
     check(a['stops'] == ['pick:choose', 'turn:turn', 'look:look', 'module:hold'], f"m20: the steps ({a['stops']})")
     check(not a['badPick'] and a['pick'] and not a['dialOff'] and a['dialOn'] and a['turnin'], f"m20: a star picked, only a settled dial counts, turned in")

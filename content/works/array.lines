@@ -19,3 +19,6 @@
 // said in person after the ask, the first time you're near the teacher (Mori, or Calder on Mori's days off)
 == m20.ask.say
 - You're the one Calder sent? {time}, the array room on Deck 2. Bring your eyes.
+// Mori wasn't at the lesson (her day off): her word the first time you're near her after it
+== m20.mori.later
+- Calder says you calibrated my array without me. I checked your numbers. Good.

@@ -36327,6 +36327,8 @@ const LINES = JSON.parse([
   '{"text":"amber","id":"9lf2tx"}]',
   ',"m20.module.green":[',
   '{"text":"green","id":"1ky65vx"}]',
+  ',"m20.mori.later":[',
+  '{"text":"Calder says you calibrated my array without me. I checked your numbers. Good.","id":"ryjeyg"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -58962,7 +58964,7 @@ function arrStepDone(j, k, res) {
   if (st.tag === 'pick') {
     const pick = res && res.pick, o = arrStars(j).find(x => x.id === pick); if (!o) return false;
     j.star = o.label;
-    const n = +String(pick).slice(1), who = 'mori';
+    const n = +String(pick).slice(1), c = SHIP.works && SHIP.works.cur, who = c && c.id === 'm20' && c.by ? c.by : 'mori';   // the lesson's teacher; else Mori (her bubble if she's on your deck, else a toast from her)
     if (pick[0] === 'w') worksSay(who, worksText('m20.star.yours', 'That\'s in your own star log: {star}. Hana noticed before you did.', { star: o.label }));
     else worksSay(who, worksText('m20.star.' + n + '.line', ['', 'The brightest in Tavessa. It\'s steady. Steady is what we want.', 'Low and white. Very quiet star. It never surprises anyone.', 'Big and red and slow. It breathes, a little. Watch the reading.', 'Two stars, very close. Pick the left one. Everyone picks the right.', 'We passed it six weeks ago. It\'s still the best-measured star we have.'][n] || ''));
   }
@@ -59006,9 +59008,10 @@ function arrBeats(now) {
 function arrHost(now) {
   const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm20' || c.st !== 'meet' || typeof apptAdd !== 'function' || !SHIP.device) return;
   const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || now >= r.at + r.len) return;
-  const title = (OCCASIONS['works.m20'] || {}).title || 'The sensor array';   // Mori at the array's panel, Calder at the first rack's (two spots: nobody stands inside anyone)
-  if (!(SHIP.device.appts || []).some(a => a.occ === r.key)) apptAdd({ id: r.key, with: ['mori'], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_ARRAY), kind: 'meeting', status: 'yes', by: 'mori', title });
-  if (!(SHIP.device.appts || []).some(a => a.occ === r.key + ':calder')) apptAdd({ id: r.key + ':calder', with: ['calder'], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_RACKS[0]), kind: 'meeting', status: 'yes', by: 'calder', title });
+  const title = (OCCASIONS['works.m20'] || {}).title || 'The sensor array', other = c.by === 'mori' ? 'calder' : 'mori';   // the teacher at the array's panel; the other at the first rack's, only if on shift (lead 40: crew keep their rest days; Mori is off on Fridays)
+  if (!(SHIP.device.appts || []).some(a => a.occ === r.key)) apptAdd({ id: r.key, with: [c.by], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_ARRAY), kind: 'meeting', status: 'yes', by: c.by, title });
+  let on = false; try { on = occOnShift(other, c.d); } catch (e) { on = false; }
+  if (on && !(SHIP.device.appts || []).some(a => a.occ === r.key + ':2')) apptAdd({ id: r.key + ':2', with: [other], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_RACKS[0]), kind: 'meeting', status: 'yes', by: other, title });
 }
 // said in person first: the first time you're near Mori after the ask (her deck, the same room or within 6 tiles), before
 // 09:30's notice, she tells you herself; the Mail stays the record
@@ -59036,7 +59039,14 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
     at: () => {                                          // the lesson at 10:00 (the beats table); done before 12:00, ahead of a booked shutdown after lunch (S5-4)
       // Mori is off on Fridays, so on Day 19 the ladder's teacher is Calder (the row's second): Mori comes in for it all the same
       // (arrHost books her), and her meeting plays whoever teaches (asked here, before 24 core's trainScript picks one)
-      const k = 'train.m20.calder'; if (!MEETING_SCRIPTS[k] && MEETING_SCRIPTS['train.m20.mori']) MEETING_SCRIPTS[k] = MEETING_SCRIPTS['train.m20.mori'];
+      const k = 'train.m20.calder'; if (!MEETING_SCRIPTS[k]) MEETING_SCRIPTS[k] = { title: 'The sensor array', from: 'Chief Ines Calder', stub: true,   // Calder's stand-in (Mori's meeting has Mori speaking)
+        gist: 'Calder showed you the sensor array in Hana Mori\'s place: pick a reference star, turn the dial till the reading agrees, swap the amber module.',
+        lines: [{ who: 'calder', text: 'Hana\'s off today, so you get me. She\'ll want to see your numbers.', pose: 'gesture', to: 'you' },
+          { who: 'calder', text: 'The array drifts. Point it at a star we know and turn till it agrees.' },
+          { choice: [{ text: 'Which star?', rel: { calder: 1 }, reply: { who: 'calder', text: 'Any of the three. Hana says pick the one you like.' } },
+            { text: 'How close is close enough?', rel: { calder: 1 }, reply: { who: 'calder', text: 'When the reading stops arguing with the sky. Her words.' } }] },
+          { who: 'calder', text: 'Watch me do one. Then it\'s yours.' }] };
+      // (Mori is off on Fridays, so on Day 19 the ladder's teacher is Calder, the row's second; Mori's word comes the next time you meet her)
       return ARR_AT; },
     reserve(d, at, slot, o = {}) {                       // Mori's on her rack, then yours on the other, in this row's own slot
       const t = (d - 1) * 1440 + at;
@@ -59049,8 +59059,11 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
   };
   onSim('tool', n => { if (n && n.id === 'arrayrig') { try { toast(worksName('mori'), worksText('m20.rig.give', 'Hana Mori gave you the calibration rig. Survey\'s spare, now yours.')); } catch (e) { /* no UI */ } } });
   onSim('trained', n => { if (n && n.mech === 'm20') worksTeach('m20', 'calder', 'calder', [worksText('m20.calder', 'Survey asks for you by name now. Don\'t make me regret it.')]); });   // Calder's one line: her flag train.m20.calder (SW3), else the stand-in   // Calder's one line
+  onSim('trained', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.mech === 'm20' && !flag('m20.mori.later')) { let on = false; try { on = occOnShift('mori', worksDay(shipNow())); } catch (e) { on = false; } if (!on) flagSet('m20.mori.later', 1); } });   // Mori wasn't there: her word later
   WORK_TICKS.push((now, skip) => {
     arrHost(now);
+    if (!skip && flag('m20.mori.later') === 1) { let near = false; try { const a = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).find(x => x.p && x.p.id === 'mori'), P = player.obj.position; near = !!a && Math.hypot(a.x - P.x, a.z - P.z) <= 6; } catch (e) { near = false; }
+      if (near) { flagSet('m20.mori.later', 2); { const v = worksVoice('mori', 'm20.later'); if (v) worksSayAll('mori', v); else worksSay('mori', worksText('m20.mori.later', 'Calder says you calibrated my array without me. I checked your numbers. Good.')); } } }   // the first time you're near her after it (lead 40)
     if (!skip) { arrBeats(now); arrAskSay(now); }
     const W = SHIP.works; if (!W || W.tr.m20 === undefined || !arrState()) return;
     const A = arrState(), st = worksStage('m20');
