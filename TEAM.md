@@ -1415,3 +1415,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~17:40 UTC: **0.93.2 LIVE** (PUB1): Playtest 3HqM5XiXaHXzgrpq7JbesJ v6, Dev 9ZWAgqiZCvkJvVjjhjVkEr v6, both capabilities {downloads}, from staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3); 6daN untouched. Asked the user: tap-test Download/Load; OK to ff integration to d9c7e5f0. Lead 38 handing over: user to start lead 39 directly.
 - ~17:45 UTC: USER started lead 39 directly. Lead 38 idle once lead 39 confirms (then disable lead 38 check-in if lead 39 has not).
 - ~17:47 UTC: **USER: 0.93.2 = new base** → BM18 ff integration to d9c7e5f0.
+- ~17:58 UTC: **claude/integration = d9c7e5f0 (0.93.2)**, ff by BM18, sha checked.
