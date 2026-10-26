@@ -33,6 +33,7 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/ending-words-a (SW6) | E-5 week + both endings | FIXES NEEDED (1 must) | 6dd03f57 |
 | claude/ending-words-a (SW6) | fixes | PASS | aed8af49, b8c89e7a |
 | claude/vessel-sky (VB2) | V-5 + V-3 spots, v.1-v.3 | PASS (3 shoulds) | c070862c |
+| claude/vessel-sky (VB2) | v.4-v.5 (shoulds done + SW4 words) | PASS | cfc2dbe3 |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -80,3 +81,18 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   asserts VSKY.m exists (off screen from the lounge middle at 900x760).
 - VB1 V-1 claude/vessel 581fc84f received ~20:50; code read: off guarded (VESSEL undefined, vesselGuestAt null), times per spec,
   C1-C3 as switches, late rule from Day 28; section 14 guestTrim one-line hook (sim owner to review). Checks running.
+- ~21:05 UTC: VB2 cfc2dbe3 (v.4 12 blades + hub crack, SW4's keys, on-screen assertion; v.5 SW4 words + lead's shelf word
+  fix): PASS.
+- In progress (~21:45 UTC):
+  - VB1 V-1 581fc84f: cadet vs d6bb0aba ALL IDENTICAL; events_check: only FAIL = known-old FX24-2 (Farouk, reading corner
+    Day 7), vessel part OK; day_check 27, 28 OK on a switched-on copy; 29, 30, bigevents running.
+  - VB1 V-2 73942e8a (V-2a f7a32c4a + V-2b; merges SW4 7dd2eb5d, VB2 c070862c, FX29 8a91f1dc): code read. Notes: Taavek's
+    goodbye window 14:45-15:00 only (missable: start earlier / the Tern waits like C3); the round one has no fallback if
+    missed (12:45); Saturday's sheet: arrow to Calder, Calder doesn't come to you (spec: she comes to find you);
+    vesselFind uses setTimeout (real time) not simTimeout. Queue: phone probe (plans/rv21-shots/v2_probe.py), cadet vs
+    acbb52e0, events_check.
+  - EN1 7029e8ad: cadet vs d9c7e5f0 ALL IDENTICAL, ending_check OK, check_fast OK 540 s, saves_check OK. Head now 93eb5380
+    (SW6 words wired, EN2 API, Zeke Sunday, search fix): cadet, ending_check, phone probe, check_fast running. Shoulds so far:
+    stale "questions are open" comment (section 29 core); last breakfast arrow level 2 and no fetch (missable); the Monday
+    crowd re-staged every minute with no end if you never board (crew stuck all day: needs a fetch/disperse rule);
+    end page "What you kept" shows raw trace ids; the handover's plans/ending-shots/ is not in the commit.
