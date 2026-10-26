@@ -703,7 +703,8 @@ with sync_playwright() as pw:
       if (!d1) return { err: 'no tasting table' };
       const a = tallyOf('tasting-table', d1); TALLY_MEMO.clear(); const a2 = tallyOf('tasting-table', d1), b = tallyOf('tasting-table', d2);
       const votes0 = { ...SHIP.events.votes }, t0 = shipNow();
-      setShipNow((d1 - 1) * 1440 + 1100); const ok = tallyVote('tasting-table', a.choices[1]); const late = (setShipNow((d1 - 1) * 1440 + 1200), tallyVote('tasting-table', a.choices[0]));
+      const e0 = eventsOn(d1).find(x => x.id === 'tasting-table');   // its own window (0.93.2: after dinner with TRAD_0932_ON; off: 1100 in and 1200 after, as before)
+      setShipNow((d1 - 1) * 1440 + e0.from + 5); const ok = tallyVote('tasting-table', a.choices[1]); const late = (setShipNow((d1 - 1) * 1440 + e0.to + 45), tallyVote('tasting-table', a.choices[0]));
       const v = tallyOf('tasting-table', d1), last = tallyLast('tasting-table', d1 + 4);
       const e = eventsOn(d1).find(x => x.id === 'tasting-table'), ties = e.ev.ties; e.ev.ties = { ...ties, decor: 'testDecor' };
       const dec = tradDecor((d1 - 1) * 1440 + Math.round((e.from + e.to) / 2)).find(x => x.id === 'testDecor'); e.ev.ties = ties;
