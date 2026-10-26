@@ -1,19 +1,26 @@
 # Handover: lead 37
 
 ## START HERE (next lead)
-Read CLAUDE.md, this note, plans/handover-lead36.md (still valid for seats, gotchas and background), then the bottom of TEAM.md on claude/lead-37.
+Read CLAUDE.md, this note, then the bottom of TEAM.md on claude/lead-37 (from "LEAD 37 started", incl. the "CURRENT SEATS" line ~00:12 UTC Oct 26). plans/handover-lead36.md has older background and gotchas.
+Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-in trig_01Wyf6MPuWdJCXF7DMdQoixq (57 * * * *): disable it when you take over and make your own.
 
-## Latest (~18:00 UTC, 2 PM Eastern)
-- Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, check-in trig_01Wyf6MPuWdJCXF7DMdQoixq.
-- 0.92.6 LIVE (Playtest 3HqM5XiXaHXzgrpq7JbesJ v3, Dev 9ZWAgqiZCvkJvVjjhjVkEr v3); claude/integration = 5898c190. BM17 done for good; next BM = BM18 from plans/handover-bm17.md.
-- Music v7 published (179f4f5), shown to the user; awaiting reaction and the go for the sound + music build.
-- Music: user reviewing SD1's player v6 https://claude.ai/artifact/2eiwTWnoSjg9SWcwi3k6Cy; relay feedback to SD1. Sound + music into the game only on the user's go after 0.92.6.
-- ~18:57: core s.6 66cee7e4; act + music building; player_check bracket FAILs being compared to 0.92.6.
-- ~18:15 UTC: USER GO for sound + music (target playable ~22:00 UTC / 6 PM Eastern). See plans/sound-build-brief.md and TEAM.md 18:15 for seats. BM18 session_01A3S2VBMYmTt2wCZa8ej7XR, fresh CR6 session_013wLtAmKooMrgGrXF4Ljiof. When SD1 sends turn 1's commit: forward it to FX20 and FX22b (and RV16). Ask the user where to publish 0.93.0 (likely Dev first for the listening pass).
-- USER: 0.93.0 goes to BOTH Playtest 3HqM5XiXaHXzgrpq7JbesJ + Dev 9ZWAgqiZCvkJvVjjhjVkEr (PUB1) after a GO round; never 6daN….
-- USER 21:05 UTC: traditions variety per week + ship-wide order swap (visit before comet): CS1 planning on claude/trad-variety; publish the page to the user; build after 0.93.0 on the user's OK; update design-doc then.
-- Plan page for traditions + swap: https://claude.ai/artifact/DfXQg3Ff4eX2hfoiTA86Jh (answers in its db: ArtifactData get answers/user).
-- USER 23:22 UTC: 0.93.0 = base (BM18 ff integration df8d58b9); HOLD 0.93.1 round until the user's further changes arrive; traditions survey answers later.
-- Before next round: hire fresh CR3 (plans/handover-cr3.md on claude/checks-cr3); fresh reviewer for big jobs (plans/handover-rv17.md).
-- USER answers in: CS1 round-2 traditions pitch; FX22b event swap build (claude/event-swap). Next version (0.93.2) batches swap + traditions (scones, take-turns, picks from round 2, new hand's tea removed) + the user's other changes.
-- Round-2 traditions page: https://claude.ai/artifact/EFioZPqoM6X6BT7obruTgx (answers: ArtifactData get answers/user).
+## State (~02:00 UTC Oct 26, 10 PM Eastern Oct 25)
+- LIVE: 0.93.1 on Playtest 3HqM5XiXaHXzgrpq7JbesJ v5 + Dev 9ZWAgqiZCvkJvVjjhjVkEr v5 (claude/staging-0.93.1 b957b92d, game 6cd54ab9...8eee). claude/integration = b957b92d. User's current-save link 6daNCLCJAcsLCZn27CEthq (0.92.2): NEVER publish over it.
+- 0.93.0 = sound + music (SD1 core, FX20 activities, FX22b music + Music app) + reserved-job fix (FX17). 0.93.1 = promo-arrow fix (RV16).
+- Publishing: the user's standing say is BOTH Playtest + Dev after a GO round (PUB1 session_01GnpjFR6oumvuvTrmcXSqeg). Always ask the user before fast-forwarding integration.
+- Every game change: full six-runner round before merge/publish (BM18 runs it).
+
+## Next version (0.93.2), being prepared, NOT tested yet
+1. Event order swap (user decided): FX22b on claude/event-swap from b957b92d, behind EV_SWAP_ON (off): short visit Days 16-19, comet Fri Day 26 21:30 (both stay draft), Vance memo -> Day 16 08:30, senior briefing -> Day 19 08:00, night shifts Days 19-20 (Kowalczyk crescendo dawn Day 21), new hand's tea retired, Basil 4 = welcome dinner in the mess Day 25 (CS1 abe48f47), Friday address words Days 19/26 drafted by FX22b -> SW2 (session_017dLaLFBnRUQin3PQEQq6so) to polish. design-doc updated in the same commit. Needs a fresh reviewer (RV17 ~52%, RV16 ~43% can do small ones).
+2. Traditions: Scone morning (yes), six weekly ones take turns from week 2 (yes), week 1 unchanged, new hand's tea retired; round-2 picks pending: page https://claude.ai/artifact/EFioZPqoM6X6BT7obruTgx (22 ideas; answers in its db: ArtifactData get collection answers doc user). Round-1 page DfXQg3Ff4eX2hfoiTA86Jh (answered). Builder needed for traditions once picks are in (trad_parse needs "every 3/6 weeks" for scones; new key range).
+3. The user said "more changes" are coming for the next version: wait for them, batch, then one round.
+- Listening pass on sound: user hasn't given feedback yet; route to SD1 (core), FX20 (activities), FX22b (music). Listening list: plans/sound/audio-todo.md (dryer, airlock, shuttle bay not built).
+
+## Seats (see TEAM.md CURRENT SEATS)
+BM18 session_01A3S2VBMYmTt2wCZa8ej7XR (fine). Runners CR1, CR2, CR4, CR5, new CR6 fine; CR3 ~59% retired -> hire fresh CR3 from plans/handover-cr3.md (claude/checks-cr3) before the next round. FX17, BM17, old CR6 retired.
+
+## Gotchas
+- Messages to helpers can arrive late (FX22b got 18:16-19:24 messages at 19:57). Builders should send shas directly to reviewers and BM.
+- Retired sessions still get messages; keep TEAM.md "CURRENT SEATS" current.
+- cadet_test pixel noise on a busy machine: rerun alone; must be 0 px.
+- Checks that move with a game change (arrows promo, arrows_d S3) were stale, not game bugs; still trace each one.
