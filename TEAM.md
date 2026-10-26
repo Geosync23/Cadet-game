@@ -1413,3 +1413,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:58 UTC check-in (lead 38): round 2: CR4 OK (stood down), CR1 OK; CR2/CR3/CR5/CR6 running; ETA ~17:30 UTC.
 - ~17:36 UTC: **0.93.2 GO** (BM18): staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3, 7.23 MB); all six OK; known-old 12/FX28-1, 32, FX24-2, 3 Oona shots; no new FAILs. **PUB1 GO** both links with {downloads: true}.
 - ~17:40 UTC: **0.93.2 LIVE** (PUB1): Playtest 3HqM5XiXaHXzgrpq7JbesJ v6, Dev 9ZWAgqiZCvkJvVjjhjVkEr v6, both capabilities {downloads}, from staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3); 6daN untouched. Asked the user: tap-test Download/Load; OK to ff integration to d9c7e5f0. Lead 38 handing over: user to start lead 39 directly.
+- ~17:45 UTC: USER started lead 39 directly. Lead 38 idle once lead 39 confirms (then disable lead 38 check-in if lead 39 has not).
