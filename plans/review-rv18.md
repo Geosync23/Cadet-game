@@ -151,9 +151,9 @@ counts as a tap on that door. A tap beyond works, so not a must. cadet_test and 
 | claude/trad-0932 | PASS | d126a657 (426a79f9...170d) |
 | claude/steps-quiet | PASS | 0d41441f (1260dfe1...d79c) |
 | claude/auto-doors-0932 | PASS | 98768969 (8f3c0461...a5) |
-| claude/tray-seat-0932 | pending: my interactions_check run | 5892511c (47b0e1d0...0074) |
-| claude/comet (with sound-comet) | c.2 FIXES NEEDED (C1 lounge silent); c.4 fda75fb2 (e00af1c4...20bc) under test | |
-| claude/storm-sat | first look sent (S1 corridor, S2 no bubbles, S3 torchlight done in w.3); 41d891b9 (6e8fc1d2...686e) under test | |
+| claude/tray-seat-0932 | PASS | 5892511c (47b0e1d0...0074) |
+| claude/comet (includes sound-comet and event-swap) | PASS (c.2 was FIXES NEEDED: C1) | 157d1cfb (740a63a2...ac50) |
+| claude/storm-sat | handed to RV19 (lead 38) after my first look | 41d891b9 then 67e918f2 |
 
 ## trad-0932 final checks (d126a657)
 join_check alone with it on: JOIN CHECK OK. interactions_check alone with it on: OK. Row for the board: with the rowers
@@ -184,3 +184,20 @@ unused); S3 (torchlight look) done in 41d891b9 (torches, room dimmed).
 - fridays_check hangs in this container (no output, even on 0.93.1); CR6 runs it.
 - Probes (not in the repo): /tmp/rv18/probe/play.py (traditions: tap the host at phone size, card, activity, bubbles,
   close line; args ID:DAY ...; REC=1 sets rec.on), comet.py, doors.py, seat.py, stormsat.py, stage.py, speech.py.
+
+## The comet, final (c.4 fda75fb2 tested; c.5 157d1cfb = c.4 + SW2's words + the look-up gate)
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d alone | c.4 and c.5, as shipped (comet on) and EV_COMET_ON false | ALL IDENTICAL, all four |
+| events, bigevents, day_check 22, sound_check | c.4 | OK |
+| join_check | c.4 | the four comet joins pass; then a reload page-load timeout under load (CR6 passed it whole on c.2) |
+| fridays_check (CR6) | c.4 and c.5, on and off | OK |
+| content_gen --check, names_check, lines_check | c.5 | OK, OK, PASS (0 errors) |
+Played in real time (no clock jumps): tap Sato 21:31; her lines every ~5 min with Holt and Farouk between (C1 fixed); the
+naming card at 21:50, pick kept; Saruth's knot; scope, blankets, a Cadet turned away from the Captain's tea. Shoulds left
+for the next comet builder: the bedtime arrow ("Your bunk, Deck 4") holds the goal at 22:02, so the arrow to Saruth never
+shows (setGoal only replaces an empty or tradition goal); with one speaker present a room repeats that one line every 4 min.
+Note: my early comet probes jumped the clock with setShipNow; the crew only walk while frames run, so hosts looked absent.
+Play in real time (comet_real.py) before calling a host missing.
+
+## Take a seat: PASS at 5892511c. interactions_check alone OK (its Take a seat part all true).
