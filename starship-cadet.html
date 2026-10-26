@@ -44379,6 +44379,7 @@ function t932Join(e, a, notice, lead) {
   if (e.id === 'tasting-table') return tastJoin(e, a, notice, lead);
   const d = e.day, s = TRAD_JOIN[e.id], hid = s.host && tjAgent(s.host) ? s.host : lead || a.p.id, q = schedPeople().find(p => p.id === hid) || a.p;
   const go = () => {
+    if (e.id === 'row-for-the-board') { t932Row(e, a, notice, lead); return; }   // a rower, else you shout the numbers (RV18)
     if (s.rec) { const was = typeof ACT !== 'undefined' ? ACT : null; if (typeof recStart === 'function') recStart(s.rec, e.name, null, null); if (typeof ACT !== 'undefined' && ACT && ACT !== was) eventJoin(e, d, shipNow(), notice); return; }   // the rec deck's own kayak or climb (or its line); joined only once you're at it, not when the wall or kayaks are shut (RV18 S5)
     T932_GO = true; try { tradJoin(e, a); } finally { T932_GO = false; }
   };
@@ -44388,6 +44389,17 @@ function t932Join(e, a, notice, lead) {
     lines: [{ who: q.id, text: line }] };
   dialogueShow('t932.join', { id: 't932.join@' + e.id + '@' + d, who: [q.id], at: shipNow(), ...cardWhere(e) });   // its rooms: with no where, meetingsTick closed it at the next ship minute (RV18 M1)
   return true;
+}
+// Row for the board's join: a free rower (3-gym-4, -11, -12) if there is one; all booked, you stand by them and shout the
+// numbers with the rest (RV18's note: it put you on the weights)
+const T932_ROWERS = ['3-gym-4', '3-gym-11', '3-gym-12'];
+function t932Row(e, a, notice, lead) {
+  const d = e.day, now = shipNow(), end = (d - 1) * 1440 + e.to, s = TRAD_JOIN[e.id], free = T932_ROWERS.find(id => PLACE_OF.has(id) && !heldBy(id));
+  eventJoin(e, d, now, notice);
+  if (free) { const pl = PLACE_OF.get(free); actStart('gym', free, { title: e.name, member: true, after: notice, end, tj: e.id + '@' + d, pose: (typeof poseOf === 'function' ? poseOf(pl) : null) || pl.anim }); return; }
+  if (!PLAYER_ACTS['tj:' + e.id]) { const def = { need: 'social', gain: 12, mins: TJ_MINS, also: { leisure: 10 }, with: 4, title: e.id, until: tjEnd }; PLAYER_ACTS['tj:' + e.id] = def; if (typeof IX_ACTS !== 'undefined') IX_ACTS['tj:' + e.id] = def; }
+  const near = tjAgent(lead) || a, w = nearestOpen(near.x + .9, near.z + .9, player), c = w && cellPos(...w); if (!c) return;
+  actStart('tj:' + e.id, null, { title: e.name, after: notice, end, tj: e.id + '@' + d, pose: 'talk', company: 1, spot: { id: null, walk: w, x: c.x, z: c.z, y: 0, face: Math.atan2(near.x - c.x, near.z - c.z), pose: 'stand' } });
 }
 // the talk while it's on (tradTalk's say): near the end the host's close line, once; else a line of its `here` from each
 // in turn (the host among them; a host on duty at their station, the tasting table's Brennan, Jar day's Tariq, too)
