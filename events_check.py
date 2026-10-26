@@ -1300,6 +1300,15 @@ if _von or _vline:
         B1 = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:bench').map(x => x.level + (x.shown ? '*' : '')) })"); B1['lines'] = g.ev("__vplay()")
         B1['done'] = g.ev("SHIP.event.mine['vessel:roundOne']"); print('  V-2b live, the round one:', B1)
         if B1['dlg'] != 'vesselRoundOne' or not B1['done']: fail(f"the round one at the bench: {B1}")
+        # V-3 live: the parts chain, Sunday 13:00 (the arrow at Zeke from 12:45, tapping Zeke takes a gap, crates through your
+        # hands counted, three of them your part toward C1); turnout planned (the spec: 25 or more)
+        CH = g.ev("(() => { const d = 28; return { on: eventsOn(d).filter(x => x.id === 'vesselChain').map(x => hhmm(x.from) + '-' + hhmm(x.to)), going: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselChain'))).length }; })()")
+        g.ev("skipTo(27 * 1440 + 766); __vat(16, 3)"); vmins(15)
+        CH.update(g.ev("({ arrow: guideList().filter(x => x.id === 'vessel:chain').map(x => x.level + (x.shown ? '*' : '')) })"))
+        CH['tap'] = g.ev("(() => { const a = DECK_CREW.find(a => a.p.id === 'torres-zeke'); return a ? tradJoinTap(a) : 'no zeke'; })()"); vmins(18)
+        CH.update(g.ev("({ t: hhmm(shipNow() % 1440), joined: SHIP.events.joined.includes('vesselChain@28'), passed: SHIP.event.mine['vessel:chainN'], part: SHIP.event.mine['vessel:chain'], ring: guideList().filter(x => x.id === 'vessel:crate').map(x => x.level + (x.shown ? '*' : '')) })"))
+        print('  V-3 live, the parts chain:', CH)
+        if CH['on'] != ['13:00-14:00'] or CH['going'] < 25 or not CH['arrow'] or CH['tap'] is not True or not CH['joined'] or (CH['passed'] or 0) < 3 or not CH['part'] or not CH['ring']: fail(f"the parts chain: {CH}")
         g.ev("skipTo(28 * 1440 + 875); __vat(5, 11)")
         for _ in range(12):
             vmins(1)

@@ -43557,6 +43557,7 @@ function eventsTick() {
   if (STORM_SAT_ON) stormStoriesFrame();                 // 0.93.2 (FX26): the storm stories' talk (slot 'Storm Saturday')
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
+  if (EV_VESSEL_ON && VESSEL) vesselChainHands();        // the Veyli vessel's parts chain: each crate through your hands (slot 'Vessel builder')
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
   if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
   if (vesselOn()) vesselSkyFrame();                      // the little Veyli ship off the bow (slot 'Vessel sky', VB2; EV_VESSEL_ON)
@@ -44331,6 +44332,17 @@ if (EV_VESSEL_ON && EVENTS_ON) {
     thanks: c => evWord('event.veyliVessel.gather.lights.thanks', c) || 'Saruth makes room for you at the glass. Out in the dark, the little Veyli ship waits, its lights low.' });
   SHIP_EVENTS.veyliVessel.routines = { escalation: [{ where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true, off: [[2, 0, 1035], [2, 1085, 1440], [3, 0, 1440]] }] };
   Object.assign(TRAD_JOIN, { vesselLights: { host: 'saruth', pose: 'talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: w('join.lights.verb') || 'stand at the glass with Saruth', what: w('join.lights.what') || 'stand at the bow glass beside Saruth and watch the little ship' } });
+  tjActs();
+  // V-3: the parts chain, Sunday 13:00-14:00 (k 359): VB2's line of 40 spots from Main storage's door to the Tern's ramp
+  // (pool '@vessel-chain'), Zeke calling the count at his own spot; the day shift stands easy for it (the Line's rule:
+  // the bridge, the watch and the galley stay); you tap Zeke to join (TRAD_JOIN below)
+  SHIP_EVENTS.veyliVessel.moments.push({ id: 'vesselChain', name: w('gather.chain.name') || 'The parts chain', phase: 'onset', at: [1, 780], len: 60, k: 359,
+    where: { deck: 5, room: /^Works bay$/ }, gathering: true, who: vesselChainWho, anim: null, host: 'torres-zeke', easy: true, lead: lineLead, from: 'Zeke Torres',
+    places: [{ deck: 5, pool: '@vessel-chain' }], whereFor: cometWhereFor({ 'torres-zeke': [5, '@vessel-chain-call'] }),
+    ask: w('gather.chain.ask') || 'Parts chain at one. Storage door to the ramp. Bring your arms.', here: w('gather.chain.here') || 'Find a gap in the line. Face the next person. I\'ll call the count.',
+    thanks: c => evWord('event.veyliVessel.gather.chain.thanks', c) || 'Zeke waves you into a gap in the line. The first crate is already coming down it toward you.' });
+  SHIP_EVENTS.veyliVessel.routines.onset = [{ who: 'all', rule: 'standEasy', at: [780, 840], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] }];
+  Object.assign(TRAD_JOIN, { vesselChain: { host: 'torres-zeke', pose: 'stand', need: 'fitness', gain: 10, also: { social: 6 }, verb: w('join.chain.verb') || 'take a gap in the chain', what: w('join.chain.what') || 'take a gap in the line and pass the crates along' } });
   tjActs();
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
@@ -46623,7 +46635,7 @@ function vesselTick(now, quiet) {
     e.mine['addr:' + key] = 1; vesselAddress(key, t, !!quiet || now - t > 5);
   }
   if (quiet) return;
-  { const v = vesselNow(now); if (v && typeof deckDef !== 'undefined' && deckDef) { vesselScenes(v); vesselScenes2(v); vesselShelf(v); vesselTern(v); vesselTalkNow(v); } }   // V-2: your beats in person
+  { const v = vesselNow(now); if (v && typeof deckDef !== 'undefined' && deckDef) { vesselScenes(v); vesselScenes2(v); vesselChain(v); vesselShelf(v); vesselTern(v); vesselTalkNow(v); } }   // V-2: your beats in person
   for (const [id, at] of Object.entries(VESSEL.turns)) {
     const t = evBeatAt(e.startDay, at); if (now < t || e.mine['snd:' + id]) continue;
     e.mine['snd:' + id] = 1; if (now - t >= 3) continue;
@@ -46698,7 +46710,7 @@ function vesselGuestTrim(p, d, segs) {
   const B = (d - 1) * 1440, S = VESSEL_SPOTS(), at = (from, to, placeId, tag) => ({ from: B + from, to: B + to, act: 'off', deck: 5, type: 'event', placeId, tag });
   const away = (from, to) => ({ from: B + from, to: B + to, act: 'away', deck: 0, type: null, placeId: null });
   if (d === g[0]) return vesselOverlay(segs, [away(0, VESSEL.arrive), at(VESSEL.arrive, VESSEL.arrive + 3, S.aisle, 'arrive'), at(VESSEL.arrive + 3, VESSEL.arrive + VESSEL.rampWait, S.rampTop, 'ev-veyliVessel-ramp'),
-    at(VESSEL.arrive + VESSEL.rampWait, 720, S.bench[0], 'ev-veyliVessel-bench')], B, B + 1440);
+    at(VESSEL.arrive + VESSEL.rampWait, 720, S.bench[0], 'ev-veyliVessel-bench'), at(770, 845, S.rampTop, 'ev-veyliVessel-chain')], B, B + 1440);   // the chain: taking the crates in at the top of the ramp
   return vesselOverlay(segs, [at(560, 720, S.shop[0], 'ev-veyliVessel-shop'), at(795, VESSEL.leave - 30, S.shop[0], 'ev-veyliVessel-shop'), at(VESSEL.leave - 25, VESSEL.leave - 3, S.rampTop, 'leave'),
     at(VESSEL.leave - 3, VESSEL.leave, S.aisle, 'board'), away(VESSEL.leave, 1440)], B, B + 1440);
 }
@@ -46953,11 +46965,12 @@ function vesselCheer() {
   for (const a of DECK_CREW) if (a.p && /^ev-vesselLights/.test(a.tag || '') && Math.hypot(a.x - p.x, a.z - p.z) < 9) { a.talking = 2; a.face = Math.atan2(p.x - a.x, p.z - a.z); }
 }
 // who goes to the engine lights (the gathering's who: 1 or 0, pure): the people the lounge's talk needs (Saruth hosts),
-// and about half of everyone else by one hash a day (k 358, the gathering's own key); no guest but Saruth
+// and about four in ten of everyone else by one hash a day (k 358, the gathering's own key: no more meaning to go than
+// its 44 places); no guest but Saruth
 const VESSEL_LIGHTS_GO = ['saruth', 'calder', 'sato', 'tomas', 'torres-zeke', 'halloran-emeka', 'kovac-zainab', 'bramwell-basil', 'pell'];
 function vesselLightsWho(p, d) {
   if (!p || p.rank === 'guest' && p.id !== 'saruth') return 0;
-  return VESSEL_LIGHTS_GO.includes(p.id) || schedU(p.seed, d, 358) < .5 ? 1 : 0;
+  return VESSEL_LIGHTS_GO.includes(p.id) || schedU(p.seed, d, 358) < .4 ? 1 : 0;
 }
 // Taavek's sketch on your shelf (Tuesday, the beats table: "the next time you're in your cabin"): from Tuesday 12:00
 // (Taavek's letter) while you're on Deck 4, a level-1 arrow at your bed with the ring line; within reach of it, VB2's
@@ -46971,6 +46984,55 @@ function vesselShelf(v) {
     M['vessel:shelved'] = 1; if (typeof vesselShelve === 'function') vesselShelve();
     toast('Taavek\'s sketch', vesselW('tap.sketch.shelf', 'Taavek\'s sketch of your favourite machine, labelled in Veyli: "The one who meets."'));
   }
+}
+// ---- V-3 (VB1): the parts chain, Sunday 13:00-14:00. A gathering (vesselChain, k 359) in a line of VB2's 40 spots
+// from Main storage's door to the Tern's ramp (pool '@vessel-chain'), Zeke calling the count at his own spot; the day
+// shift stands easy for it (the Line's rule); you tap Zeke to take a gap. The crates are VB2's (vesselChainCrate: one
+// every 2.4 ship minutes, passed between the hands that are there); as one comes into your hands, the ring "Pass the
+// crate" on the next pair of hands (a tap passes it, or it goes on by itself a moment later), and Zeke calls it. Your
+// part counts as one of the event's jobs toward C1 once you've passed three. Flags: 'vessel:chain' (passed three),
+// 'vessel:chainN' (how many), 'notice:chain*'. In play only
+const VESSEL_CHAIN_GO = ['torres-zeke', 'calder', 'pell', 'kovac-zainab', 'halloran-emeka', 'brennan', 'bramwell-basil'];
+function vesselChainWho(p, d) {                           // the gathering's who: 1 or 0, pure (k 359, its own key)
+  if (!p || p.rank === 'guest') return 0;
+  return VESSEL_CHAIN_GO.includes(p.id) || p.dept === 'works' || p.dept === 'store' || schedU(p.seed, d, 359) < .75 ? 1 : 0;
+}
+const VCHAIN_YOU = { key: null, seen: new Set(), said: 0, ring: null };
+// your place in the line now: the index of your hands among those there (VB2's VCHAIN.occ, in line order), or -1
+function vesselChainYou() {
+  if (typeof VCHAIN === 'undefined' || !VCHAIN.occ || deckDef.num !== 5) return -1;
+  const p = player.obj.position; return VCHAIN.occ.findIndex(([x, z]) => Math.hypot(x - p.x, z - p.z) < .5);
+}
+function vesselChain(v) {                               // once a ship minute (vesselTick): the notice, the arrows, the talk
+  const e = v.e, M = e.mine, at = (k, m) => vesselAt(e, k, m), d = e.startDay + 1, W = vesselW;
+  if (v.k !== 1 || v.now < at(1, 765) || v.now >= at(1, 840)) return;
+  vesselNotice(v, 'chain', at(1, 765), at(1, 840), 'Zeke Torres', W('notice.chain', 'The parts chain starts at 13:00: Main storage to the Tern. Zeke\'s calling the count.'));
+  if (!SHIP.events.joined.includes('vesselChain@' + d)) {
+    vesselArrow('chain', 1, () => vesselCrewGoal('torres-zeke', W('ring.chain', 'Join the chain'), { room: 'w' }), at(1, 765), at(1, 840), () => !!SHIP.event && SHIP.events.joined.includes('vesselChain@' + d));
+    return;
+  }
+  const C = vesselChainCrate(v.now), on = C.left + C.moving.length > 0;
+  // in the line: the ring on the next pair of hands while crates are still coming (each one goes through yours)
+  vesselArrow('crate', 1, () => { const i = vesselChainYou(), O = typeof VCHAIN !== 'undefined' && VCHAIN.occ; if (i < 0 || !O) return null; const nx = O[Math.min(O.length - 1, i + 1)];
+    return { deck: 5, xz: { x: nx[0], z: nx[1] }, label: W('ring.crate', 'Pass the crate'), vessel: true }; }, at(1, 780), at(1, 840), () => { const c = vesselChainCrate(); return c.left + c.moving.length === 0; });
+  if (DIALOGUE) return;
+  const room = roomAt(...player.here());
+  if (on) vesselTalk('chain', 5, room, v.now, ['torres-zeke: Right, everyone! Storage door to the ramp. Arm\'s length. Face along.']);
+  else if (!M['notice:chainEnd']) { M['notice:chainEnd'] = 1; vesselTalk('chainEnd', 5, room, v.now + 9, ['torres-zeke: And that\'s the lot! Every crate, and not one dropped.']); }
+}
+// every frame while you're in the line (eventsTick): a crate coming through your hands is counted once, and Zeke calls it
+function vesselChainHands() {
+  const e = SHIP.event; if (!VESSEL || !e || e.id !== 'veyliVessel' || typeof deckDef === 'undefined' || !deckDef || deckDef.num !== 5) return;
+  const now = shipNow(), d = e.startDay + 1, M = e.mine; if (Math.floor(now / 1440) + 1 !== d || !SHIP.events.joined.includes('vesselChain@' + d)) return;
+  const i = vesselChainYou(); if (i < 0) return;
+  const C = vesselChainCrate(now), O = VCHAIN.occ, n = O.length - 1, Y = VCHAIN_YOU; if (Y.key !== d) { Y.key = d; Y.seen = new Set(); Y.said = 0; }
+  C.moving.forEach((f, k) => {
+    const g = f * n / 39, id = C.n + k; if (g < i || g >= i + 1 || Y.seen.has(id)) return;   // in your hands now (held, then swung on)
+    Y.seen.add(id); M['vessel:chainN'] = (M['vessel:chainN'] || 0) + 1;
+    if (M['vessel:chainN'] >= 3 && !M['vessel:chain']) { M['vessel:chain'] = 1; eventMine('jobs', 1); }   // your part: one of the event's jobs (C1)
+    const z = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(a => a.p && a.p.id === 'torres-zeke'), L = vesselWords('chain.count') || ['torres-zeke: Crate! Pass it.'];
+    if (z && typeof bubbleSay === 'function') { const t = L[Y.said++ % L.length]; bubbleSay(friSpeaker(z), evFill(t.slice(t.indexOf(': ') + 2), evCtx(e)), 4); }
+  });
 }
 // ---- end of slot: Vessel builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
