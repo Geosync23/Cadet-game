@@ -38,6 +38,9 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/ending (EN1) | E-2/E-3 turns 2-4 | FIXES NEEDED (1 must) | 93eb5380 |
 | claude/ending (EN1) | fixes | PASS | cd4196d5 |
 | claude/ending-crossing (EN2) | E-1 + E-4, whole ending | own parts PASS (2 shoulds); waits for cd4196d5 merge | da1f8e14 |
+| claude/ending (EN1) | new keys' words | PASS | 319b7739 |
+| claude/vessel-sky (VB2) | v.6 bench places | PASS | 3fb8eac7 |
+| claude/vessel (VB1) | V-2a + V-2b | FIXES NEEDED (1 must) | 73942e8a |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -112,3 +115,11 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   cadet ALL IDENTICAL.
 - ~22:05 UTC: **VB1 V-1 581fc84f: PASS.** day_check 27-30 on-copy OK; bigevents late-save FAILs = stale expectations fixed by
   FX29 8a91f1dc (re-running on V-2). V-2 73942e8a: probe, cadet, events, bigevents running.
+- ~22:10 UTC: lead 40 (session_01NXybH7NNqM8M4ngiyidq6m) took over from lead 39 (TEAM.md ~22:00). Owners for the missing
+  pieces: VB1 vessel arrows_check part + controller presets; EN2 endstay/endgo + presets; RV20 reviewed EN1's careerOff hook (OK).
+- ~22:15 UTC: EN1 319b7739 (words for its new keys) PASS. VB2 3fb8eac7 (v.6, six bench places) PASS.
+- ~22:35 UTC: **VB1 V-2 73942e8a: FIXES NEEDED.** Must: bigevents on-copy "vesselLights: 47 mean to go for 44 places".
+  (V-1's late-save FAILs gone with 8a91f1dc.) cadet vs acbb52e0 ALL IDENTICAL; events_check only FX24-2 and every V-2 live part
+  OK; phone probe: level-1 arrows at each beat, the ramp scene at 09:33 with replies. Shoulds: no ramp crowd (rampCrowd
+  unused); goodbye window 15 min; round one no fallback; sheet: Calder should come to you; doubled pilot toast;
+  setTimeout; merge VB2 3fb8eac7.
