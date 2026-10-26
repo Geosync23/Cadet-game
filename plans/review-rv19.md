@@ -353,3 +353,44 @@ check the same things; one web origin is how a player meets the game (RV19's own
 RV19: game sha256 confirmed unchanged; saves_check (all parts) SAVES CHECK OK; migrate alone 6 of 6 OK.
 
 **Verdict on a1df5739: PASS (test only).**
+
+## B1, Pillar 5 Step 5 skeleton (S5-1 turn 1): claude/p5s5-skeleton 5957d244 (game commit 2d679a85, sha256 97e104ed...63df; from d9c7e5f0)
+For lead 39, against plans/p5-step5-spec.html (claude/p5-specs db1313c1). I review section 18 for the events seat.
+Switch: `P5_STEP5 = URL_FLAGS.has('p5s5')` (off unless ?p5s5; "on" runs use a copy with `const P5_STEP5 = true;`).
+
+Diff read: section 13's six switch lines; section 18's `if (P5_STEP5)` block after the swap's (EV_BEATS); section 24
+core's `if (P5_STEP5)` block (nine ladder rows, WORK_TOOLS.arrayrig, WORK_BANDS[3] a copy of tier 2's); empty sections
+24u-24x with slots; owners.md, map.md, affected.py RULES, DEV_NOTES. Nothing calls R() at load.
+- EV_BEATS against the spec's section 4 table, row by row: tier3Test Day 15 09:00-15:00; seniorResult (new) Day 16
+  08:15-08:30; seniorOfficer Day 16 16:15-17:30; nightAssigned Day 22 09:15-09:30; nightShift1 Day 22 22:40-06:00;
+  nightShift2 Day 23 20:45-06:00; nightShift3 (new) Day 24 20:45-06:00; engineSpecialist Day 23 16:15-17:10 (kind
+  captain, as the table); caldersQuestion Day 26 18:40-19:30; seniorToast, shutdownsTraining, mondayBriefing untouched.
+  All match. Off: the block doesn't run, nothing moves.
+- Ladder rows inert: ladderTick only opens a row with WORK_MECH[r.id] registered, and none of the nine has one yet.
+- Job slots: the existing big rows are m1, m4, m5, m7, m6, t2, m8, m9, m15, m17 (slots 10-19); the new t3, m19, m18, m20
+  wrap to 10-13, m1/m4/m5/m7's. A clash needs both reserved at once (those four are first-week trainings), and B1's
+  handover and DEV_NOTES tell builders to reserve their own slot (20 is the Tier 2 test's, 24 the fix-scan's).
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs d9c7e5f0, alone | 5957d244 (off) | ALL IDENTICAL |
+| check_fast | 5957d244 | QUICK CHECK OK in 353 s |
+| bigevents_check | 5957d244 off | BIGEVENTS CHECK OK |
+| events_check | P5_STEP5 on copy | FAILED only on the known-old FX24-2 (farouk-olu, reading corner Day 7; accepted for 0.93.2) |
+| bigevents_check | P5_STEP5 on copy | FAILED: "the guard's samples [False, True, True, True, True, False] (want: test Day 15 no; Day 18 16:00 yes; Day 20 19:30-21:00 no; 19:00-20:15 yes; the night shift Day 21 05:00 no; Friday 16:00 no)" |
+
+### Findings
+**Must**
+- M1 (check only). bigevents_check fails with P5_STEP5 on: its guard samples still expect the old hours (the night
+  shifts on Days 19-21, so "Day 20 19:30-21:00 no" and "Day 21 05:00 no"). With v3.1 those hours are free (the
+  spec: the Captain's table back to 19:30 on Day 20; nights on Days 22-24), so the guard is right and the check is
+  stale. Give the check v3.1 samples when P5_STEP5 is on (e.g. Day 15 09:00-15:00 no, Day 16 08:15 and 16:30 no,
+  Day 22 23:00 no, Day 24 21:00 no, Day 20 19:30 yes), keep today's samples when it's off, and run it both ways.
+  bigevents_check is EC1's: agree the change with its owner. The game itself is right.
+
+**Should**
+- S1. The spec's S5-1 checks list day_check's EVENT_DAYS 15 and 16 and career/mech parts: fine for turns 2-3, as B1's
+  handover says; keep them on the list.
+
+**Verdict on 5957d244: FIXES NEEDED (M1, a check change only; the game skeleton is right and off is identical).** If
+lead 39 wants the skeleton merged now to unblock S5-2..S5-6, it is safe with the switch off; M1 then belongs to turn 2.
