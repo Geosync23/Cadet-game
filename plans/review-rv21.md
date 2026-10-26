@@ -28,6 +28,9 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | Branch | Piece | Verdict | Sha |
 |---|---|---|---|
 | claude/vessel-words (SW4) | V-6 words | PASS (4 shoulds) | 88128070 |
+| claude/vessel-words (SW4) | V-6 words, shoulds done | PASS | 7dd2eb5d (d75de7ab PASS too) |
+| claude/ending-words-b (SW5) | E-5 endgame pool (not baked) | PASS | 0d90de7a, 8ed1545a (should done) |
+| claude/ending-words-a (SW6) | E-5 week + both endings | FIXES NEEDED (1 must) | 6dd03f57 |
 
 ## Log
 - 2026-10-26 ~20:05 UTC: started; told all seven builders and lead 39 my session id. Read specs, RV18 handover, TEAM.md.
@@ -46,3 +49,16 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   (only the notice); add an in-person line or two (talk.rampFind) so it is said in person first. (3)
   gather.chain.thanks names Pell and Kovac as your neighbours: wrong when either is not in the line; neutral wording.
   (4) helpers speak only at steps 1, 3, 4; steps 2 and 5 have Taavek alone: add 2 and 5 for each of the four helpers.
+- ~20:20 UTC: user's ending answers (TEAM.md 20:07, spec 79c4d275): Q1 NO way back (no kept copy; end page = Keep this
+  ending + Start a new game); Q2 change your mind until the address; Q3 post by Calder's answer.
+- ~20:25 UTC: SW4 d75de7ab (one status line) PASS. SW5 0d90de7a PASS + should (time-bound lines in an endless pool);
+  8ed1545a moves 170 lines to `endgame:early` (diff: only "?" lines and comments) PASS. Scratch check (endgame ->
+  flag:end.stay): content_gen bakes, lines_check PASS 69 = base.
+- ~20:30 UTC: SW4 7dd2eb5d: all 4 shoulds done (commendation for every path, no promise; talk.rampFind; chain names
+  nobody; steps 2 and 5 per helper). PASS, final.
+- ~20:36 UTC: **SW6 claude/ending-words-a 6dd03f57: FIXES NEEDED.** Must: ending.offer.post.teach.1 reveals Marrow's
+  daughter at any tier (her card: secret until tier friend). Shoulds: end page lacks "Keep this ending" label; no
+  crossing-back address for a slow career (offer not yet made); friends' talks ignore an answer already given. Nits:
+  "by Friday" said on Saturday; crowd "Best four weeks" (five aboard); endingSearch's three "Ah." need chaining.
+  lines_check PASS 96 warnings (27 new: deliberate parallels, the oath reuse, "Attendance"); check_fast OK 425 s;
+  cadet_test vs d9c7e5f0 ALL IDENTICAL. Spec nit to lead/EP2: section 8 still says three end-page buttons.
