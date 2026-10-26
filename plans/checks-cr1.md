@@ -508,3 +508,6 @@ the storm board fix, the inspection fixes incl. up off your bunk, the workbench 
 | day_check 11 | **OK** | 266 s | DAY CHECK OK |
 
 No FAILs, so no OLD runs were needed.
+
+Extra for CR2 (agreed with CR2, BM18's ask): `lines_check.py starship-cadet.html --day` on d9c7e5f0, alone: exit 0,
+381 s, **lines_check --day: PASS (0 errors)**.
