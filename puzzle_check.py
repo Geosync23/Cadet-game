@@ -958,6 +958,9 @@ BOARD2 = r"""(() => {
   out.notes = CHIEF_NOTES.mys.open() && CHIEF_NOTES.mys.lines.length === 1 && /Day 21/.test(CHIEF_NOTES.mys.lines[0]);
   out.next = mysTake(out.order[1]); const j2 = mysJob(); out.next2 = j2 && j2.mys;
   W.side.mysOk = false; W.side.mys = { seen: 21, taken: 'nope', done: ['2', 'bad', 7], days: { 2: 22 } }; delete W.side.mysOk; out.clean = JSON.stringify(mysState());
+  // RV20's N1: Torres's pointer still on its way when you read the board: dropped, no word
+  window.__said.length = 0; CASE_COME.by = null; S.seen = 0; delete SHIP.flags['mys.word']; caseSayInPerson('torres-zeke', 'pointer', { skip: () => !!mysState().seen });
+  const going = CASE_COME.by; S.seen = 21; caseComeTick(shipNow()); out.n1 = [going, CASE_COME.by, window.__said.length];
   deviceClose(); worksSay = window.__ws;
   return out;
 })()"""
@@ -1089,6 +1092,7 @@ def part_board(g, path):
     check(not B['wrongDone'] and B['rightDone'] and B['status'] == 'done' and B['done'] == [B['order'][0]], f"a wrong pick isn't a fail; the right one solves it: {B['wrongDone']} {B['rightDone']} {B['status']} {B['done']}")
     check(B['xp'] >= 1 and B['use'] == 1 and B['notes'], f"solved: a small reputation gain, the row's use, the Chief's notes: {B['xp']} {B['use']} {B['notes']}")
     check(B['next'] and B['next2'] == B['order'][1], f"then the next can be taken: {B['next2']}")
+    check(B['n1'][1] is None and B['n1'][2] == 0, f"RV20 N1: read the board first, and Torres's pointer still on its way is dropped: {B['n1']}")
     check(B['clean'] == '{"seen":21,"taken":null,"done":["2"],"days":{"2":22}}', f"junk in the save cleaned: {B['clean']}")
     return 'done'
 

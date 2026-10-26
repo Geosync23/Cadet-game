@@ -56580,17 +56580,21 @@ if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(f3ScanWatch
 // over to a seat by you (section 10's crewComeTo, the friends' "come to find you") and say it there; not with you in 40 ship
 // minutes (another deck's lift, you asleep), the word comes as before (worksSay: a toast). Live only, nothing saved
 const CASE_COME = { by: null, lines: null, at: 0, stop: null };
-function caseSayInPerson(by, lines) {
+function caseSayInPerson(by, lines, o = {}) {             // o.skip(): true when the word is no longer needed (RV20's N1: you read the board before Torres got to you)
   const L = (Array.isArray(lines) ? lines : [lines]).filter(Boolean); if (!L.length) return;
-  const say = () => { CASE_COME.by = null; if (typeof worksSayAll === 'function') worksSayAll(by, L); else worksSay(by, L[0]); };
+  const say = () => { CASE_COME.by = null; if (o.skip && o.skip()) return; if (typeof worksSayAll === 'function') worksSayAll(by, L); else worksSay(by, L[0]); };
   let a = null; try { a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === by); } catch (e) { a = null; }
   if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 8) { say(); return; }
   let sp = null; try { sp = typeof seekSpot === 'function' && typeof crewComeTo === 'function' ? seekSpot() : null; } catch (e) { sp = null; }
   if (!sp) { say(); return; }
-  Object.assign(CASE_COME, { by, lines: L, at: shipNow() + 40 });
+  Object.assign(CASE_COME, { by, lines: L, at: shipNow() + 40, skip: o.skip || null });
   CASE_COME.stop = crewComeTo(by, sp.id, () => { if (CASE_COME.by === by) say(); }, { until: shipNow() + 50 });
 }
-function caseComeTick(now) { if (CASE_COME.by && now >= CASE_COME.at) { const by = CASE_COME.by, L = CASE_COME.lines; CASE_COME.by = null; if (CASE_COME.stop) CASE_COME.stop(); worksSay(by, L[0]); } }
+function caseComeTick(now) {
+  if (!CASE_COME.by) return;
+  if (CASE_COME.skip && CASE_COME.skip()) { CASE_COME.by = null; if (CASE_COME.stop) CASE_COME.stop(); return; }   // not needed any more: they go back to their day
+  if (now >= CASE_COME.at) { const by = CASE_COME.by, L = CASE_COME.lines; CASE_COME.by = null; if (CASE_COME.stop) CASE_COME.stop(); worksSay(by, L[0]); }
+}
 const P4_BAND = { sus: [3, 4], clues: [4, 5], fewest: 2, decks: 1 }, P4_SLOT = 28;
 const P4_GAUGE = { pump: 'the outlet pressure', seal: 'the drip tray', valve: 'the valve position', bearing: 'the vibration meter', relay: 'the relay counter',
   'fan belt': 'the belt speed', filter: 'the pressure across the filter', cartridge: 'the pressure across the cartridge', membrane: 'the flow through the membrane',
@@ -57041,7 +57045,7 @@ function mysAct(verb, arg) {
 // the tap (15b) and the first read: Torres's line by the board, once
 function mysOpen() {
   const S = mysState(); if (!S) return false;
-  if (mysOn() && !S.seen) { S.seen = worksDay(shipNow()); const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.seen'); if (v && typeof worksSayAll === 'function') worksSayAll('torres-zeke', v); else worksSay('torres-zeke', 'Old ones. Nobody\'s cracked them. Have a go, if you like.'); }
+  if (mysOn() && !S.seen) { S.seen = worksDay(shipNow()); const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.word'); if (v && typeof worksSayAll === 'function') worksSayAll('torres-zeke', v); else worksSay('torres-zeke', 'Old ones. Nobody\'s cracked them. Have a go, if you like.'); }
   if (typeof deviceShow === 'function') deviceShow('oldcases');
   return true;
 }
@@ -57052,8 +57056,8 @@ function mysTick(now, skip) {
   for (const x of SHIP.jobs) if (x.kind === MYS_KIND && x.workDone && x.status !== 'done') jobFinish(x, now, 'you');   // solved: done, no board turn-in
   const m = now % 1440; if (S.seen || flag('mys.word') || m < 540 || m > 1260 || !player || !deckDef) return;
   flagSet('mys.word', worksDay(now));
-  const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.word');
-  caseSayInPerson('torres-zeke', v || 'Calder\'s put the old mysteries up in the bay, by the lobby doors. Nobody\'s cracked them. Worth a look on a quiet day.');
+  const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.point');   // his pointer to it (a stand-in till a writer adds flag mys.point)
+  caseSayInPerson('torres-zeke', v || 'Calder\'s put the old mysteries up in the bay, by the Chief\'s office. Nobody\'s cracked them. Worth a look on a quiet day.', { skip: () => { const T = mysState(); return !!(T && T.seen); } });
   if (typeof guideAsk === 'function') guideAsk({ id: 'mys:board', level: 3, once: 1, owner: '24k', until: now + 180, goal: () => ({ deck: 5, room: 'w', item: /^old mysteries$/i, label: worksText('mys.arrow', 'The old-mysteries board, in the Works bay') }), done: () => { const T = mysState(); return !!(T && T.seen); } });
 }
 if (P5_CASES5) {

@@ -41,7 +41,7 @@
 SW3 (closed) wrote content on claude/p5s5-words (keys in content/works/keys-p5.md). The code reads SW3's keys; extra
 keys still stand-ins in code for the next writer: `case.p4.flat`, `.moving`, `.tap`, `case.p5.head`, `case.p9.log`, `.wash`,
 `.cal`, `.sus`, `.go`, `.another`, `mys.N.clue.1-3`, `mys.N.sus.1-3` (sus.1 the answer), `mys.head`, `.call`, `.not`,
-`.oncur`, `.arrow`, Torres's flag `mys.seen`; bank kind `p9.move` exists (SW3). The board's clue places are in `MYS_CASES`.
+`.oncur`, `.arrow`, Torres's flag `mys.point` (his pointer to the board on Day 21; SW3's `mys.word` lines are his words at the board); bank kind `p9.move` exists (SW3). The board's clue places are in `MYS_CASES`.
 
 ## Tests
 - `python3 puzzle_check.py BUILD.html [p4 p5 p9 board]`: the Step 5 parts run on a copy with P5_STEP5 on; "not yet"
