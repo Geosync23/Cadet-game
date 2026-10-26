@@ -182,3 +182,30 @@ Played (a Senior on Day 18 with m19 and everything before done):
 
 **Verdict on 5ad090ff: FIXES NEEDED (M1-M3).** The planner rule, the save, the screen and the day's arrow and notice are
 solid; off is identical.
+
+## B4, the old-mysteries board and turn 4: fd54ba5d, then 4e5c878f
+fd54ba5d: Deck 5's P5 places block (the board on the bay's south wall), one ixTap line in 15b (mysOpen), 24k's slot:
+MYS_CASES / words, mysState, mysStops (three looks, then "What was it?" at the job board, a wrong pick never fails),
+mysTake, mysView (a hidden device page, buttons), mysOpen, mysTick (Torres's word and a level 3 arrow, once),
+jobKindAdd('mysc', side). 4e5c878f: caseSayInPerson (the teacher walks over and says it; a toast only after 40 ship
+minutes), SW3's P4 title (no composed titles), SW3's keys, the scanner's third P4 reading, SW3's five mysteries.
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs 5957d244 | 4e5c878f off | ALL IDENTICAL (renderer noise only) |
+| check_fast | 4e5c878f | QUICK CHECK OK in 374 s |
+| puzzle_check board p4 p5 | 4e5c878f | PUZZLE CHECK OK (P4 first: Torres comes to you and says it; title "Cold store chiller: two gauges disagree") |
+| played, 390 x 844, ?p5s5 (plans/rv20-mys-live.py) | fd54ba5d, then 4e5c878f | below |
+
+Played (a Senior on Sunday Day 21, in the bay): the level 3 arrow "The old-mysteries board, in the Works bay" points
+at it from 09:02. Standing by it and tapping it: Torres on the deck says "Old ones. Nobody's cracked them. Have a go, if
+you like." in person; the board page lists SW3's five (Calder's clock, The cold cabin, The lift that waits, The garden
+flicker, The Tuesday hum) with Take buttons. Take: "Taken: Calder's clock. Follow the arrow to the first card." Each
+card read by a tap at its stop (5-junction-1, 5-inverter-1, 1-relay-1: "Done here. 2 stops to go: follow the marker."),
+then the call card at the job board with the suspects as buttons. (My setup had tracking off, so no job arrow showed;
+not judged.)
+
+**Verdict on 4e5c878f: PASS.** Notes:
+- N1. Torres's "Calder's put the old mysteries up in the bay..." came at 09:10, after I'd already read the board at
+  09:03. Skip the pointer word once you've seen it.
+- N2. +5 draw calls on Deck 5 (B4 merges the board in turn 5, as said).

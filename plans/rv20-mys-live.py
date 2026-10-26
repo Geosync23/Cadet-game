@@ -63,23 +63,21 @@ with sync_playwright() as pw:
     print('  takes', take.count())
     if take.count(): take.first.click(); step(10); flush(); shot('mys_taken'); print('  after take', ev("document.getElementById('devBody').innerText.slice(0, 800)"))
     ev("deviceClose()"); step(5)
-    for k in range(5):
-        g = ev("JSON.stringify(goalNow())"); print('  goal', g[:200])
+    print('  sides', ev("ixSides().map(j => j.id)"), 'chore', ev("(ixChore() || {}).id"), 'myJob', ev("(myJob() || {}).id"), 'track', ev("SHIP.player.track"))
+    for k in range(4):
         pid = ev("(() => { const j = SHIP.jobs.find(x => x.kind === 'mysc' && x.status !== 'done'); if (!j) return null; const st = jobStops(j); const n = st.findIndex(x => !x.done); return n < 0 ? null : st[n].places[0]; })()")
         if not pid: break
-        ev(f"(() => {{ const P = placeById('{pid}'); if (deckDef.num !== P.deck) goToDeck(P.deck); const sp = placeSpot('{pid}'); player.obj.position.set(sp.x, player.obj.position.y, sp.z + 0.6); player.stop(); }})()"); step(30)
-        xy = ev(f"(() => {{ const sp = placeSpot('{pid}'); const v = new THREE.Vector3(sp.x, 0.4, sp.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }})()")
-        page.mouse.click(xy[0], xy[1]); step(30)
-        for t in range(40):
-            if not ev("typeof ACT !== 'undefined' && !!ACT"): break
-            step(30)
-        flush(); shot(f'mys_step{k}')
-        btns = page.locator('button:visible'); labs = [btns.nth(i).inner_text() for i in range(btns.count())]
-        print('  step', k, pid, ev("(() => { const j = SHIP.jobs.find(x => x.kind === 'mysc'); return j && [j.status, j.stepsDone, j.wrong]; })()"), [l for l in labs if len(l) > 12][:6])
-        ch = [l for l in labs if len(l) > 14 and l.upper() != l] if ev("(() => { const j = SHIP.jobs.find(x => x.kind === 'mysc'); return !!j && (j.stepsDone || []).length >= 3; })()") else []
-        if ch:
-            page.locator('button:visible', has_text=ch[-1]).first.click(); step(20); flush(); shot('mys_pick1')
-            btns = page.locator('button:visible'); labs = [btns.nth(i).inner_text() for i in range(btns.count())]; print('   after pick', labs[:8], ev("(() => { const j = SHIP.jobs.find(x => x.kind === 'mysc'); return j && [j.status, j.stepsDone, j.wrong]; })()"))
+        ev(f"(() => {{ const P = placeById('{pid}'); if (deckDef.num !== P.deck) goToDeck(P.deck); const sp = placeSpot('{pid}'); player.obj.position.set(sp.x, player.obj.position.y, sp.z); player.stop(); }})()"); step(30)
+        for y, label in ((0.0, 'floor'), (0.9, 'machine')):
+            xy = ev(f"(() => {{ const sp = placeSpot('{pid}'); const v = new THREE.Vector3(sp.x, {y}, sp.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight]; }})()")
+            page.mouse.click(xy[0], xy[1]); step(30)
+            for t in range(40):
+                if not ev("typeof ACT !== 'undefined' && !!ACT"): break
+                step(30)
+            flush(); print('  step', k, pid, label, ev("(() => { const j = SHIP.jobs.find(x => x.kind === 'mysc'); return j && [j.status, j.stepsDone]; })()"))
+        shot(f'mys_card{k}')
+        # the job board's call
+    btns = page.locator('button:visible'); print('  buttons now', [btns.nth(i).inner_text() for i in range(btns.count())][:10])
     print('  state', ev("JSON.stringify(SHIP.works.side.mys)"))
     print('errors', errs[:4])
     page.context.browser.close()
