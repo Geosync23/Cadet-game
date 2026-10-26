@@ -44362,7 +44362,7 @@ if (TRAD_0932_ON) {
     'midnight-toast': { host: 'garcia-greta', pose: 'sit:drink', need: 'leisure', gain: 10, also: { social: 6, hunger: 8 }, verb: 'have some toast', what: 'have toast and tea with the night owls' },
     'whodunnit-club': { host: 'achterberg-lars', pose: 'sit:read', need: 'leisure', gain: 15, also: { social: 6 }, verb: 'guess whodunnit', what: 'listen to the mystery and write down who did it' },
     'windowsill-herbs': { host: 'janssen-hugo', pose: 'water', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'compare the herbs', what: 'compare windowsill herbs and swap a cutting' },
-    'sounds-from-home': { host: 'vasquez-uma', pose: 'sit', need: 'leisure', gain: 12, also: { social: 8 }, verb: 'listen with them', what: 'listen to sounds from home with the lights low' },
+    'sounds-from-home': { host: 'vasquez-uma', pose: 'sit:talk', need: 'leisure', gain: 12, also: { social: 8 }, verb: 'listen with them', what: 'listen to sounds from home with the lights low' },
     'row-for-the-board': { act: 'gym', host: 'lindqvist-isak', verb: 'row for the board', what: 'take a machine and race the clock with them' },
     'playlist-duel': { host: 'oneill-imani', pose: 'sit:talk', need: 'leisure', gain: 12, also: { social: 6 }, verb: 'judge the duel', what: 'listen to the playlists and pick a winner' },
     'rec-lamplight-paddle': { host: 'silva-bea', rec: 'kayak', verb: 'paddle with them', what: 'take a kayak and drift the slow channel by lamplight' },
@@ -44425,7 +44425,7 @@ function tastJoin(e, a, notice, lead) {
   const thanks = trLine('tasting.thanks', d, {}, ['Thank you, love. If it wins, it\'s on Sunday\'s table.']);
   MEETING_SCRIPTS['tasting.table'] = { title: e.name, noCount: true,
     onEnd: () => stay(),
-    onPick: k => { if (typeof galleyVote === 'function' && galleyVote(k)) toast(e.name, 'You drop your token in the jar for the ' + z.choices[k] + '.'); },
+    onPick: k => { if (typeof galleyVote === 'function' && galleyVote(k)) toast(e.name, notice + ' You drop your token in the jar for the ' + z.choices[k] + '.');   // the join notice kept (join_check) },
     lines: [{ who: q.id, text: trLine('tasting.greet', d, {}, ['Come through, love. Spoon\'s there. Two new ones tonight.']) },
       { who: q.id, text: set(0) }, { who: q.id, text: set(1) },
       { who: q.id, text: trLine('tasting.ask', d, {}, ['Right. Which jar gets your token? Don\'t be polite.']) },
