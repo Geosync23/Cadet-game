@@ -11,7 +11,7 @@ marrow > you: Not sure yet. That's honest. I'd rather have honest than quick.   
 marrow: Then you have until Sunday. At the Line, after the oath, I'll ask you. In front of everyone, I'm afraid.
 ? choice
 * In front of everyone?   flavour:share
-  marrow: It's a ship. They'll know by Friday anyway. Better from you.   [laugh]
+  marrow: It's a ship. They'll have heard most of it already. Better from you.   [laugh]
 * What would you do?   flavour:listen
   marrow: I was offered a desk once. I said no. I've never been sorry. That's me, though. Not you.
 marrow: Talk to people. Zeke. Your friends. Your family. Then come and tell me. Carry on, {me}.

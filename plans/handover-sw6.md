@@ -28,4 +28,4 @@ acorn and three from registry.npmjs.org tarballs into /tmp/cadet-work, `pip inst
 CS1's tools/near_dupes.py from claude/crew-stories-pitch. Don't re-bake while check_fast is running.
 
 ## Open
-Waiting for lead 39 / EN1 / EN2 on key names and for RV21's review.
+RV21 review 1 (FIXES NEEDED) answered in batch 2: daughter removed from the offer, slower-career versions (crossingBackAddress.plain, endingTell.unsure.slow, endingAsk.slow, slow Mails), friends talks neutral, nits. End page keeps one button per the user (lead 39), not two.

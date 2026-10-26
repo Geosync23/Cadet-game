@@ -1,7 +1,8 @@
 @meeting endingSearch
 // SW6 (ending writer A), Saturday 19:30: you haven't told her yet, so the Captain finds you (escort) and asks (ending
 // spec, "Your answer"). FOR EN1: the three replies set end.now.stay | end.now.go | end.now.unsure; then play
-// endingTell.stay | .go | .unsure from its SECOND line (her answer), or the whole scene if simpler.
+// endingTell.stay | .go | .unsure from its SECOND line (her answer). The bare "Ah." replies are only a bridge into
+// endingTell.*: never build this as the whole scene. (On a slower career, this is the Saturday after the offer.)
 title: The Captain finds you
 from: Captain Odile Marrow
 gist: On Saturday evening the Captain came to find you, to ask about the letter from headquarters.

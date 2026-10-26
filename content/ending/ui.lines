@@ -48,6 +48,23 @@
 == ending.tracked.change
 - You can change your mind until the Captain's address, Sunday
 
+// ---- a SLOWER CAREER (the offer comes the Thursday after Calder's question, after the crossing back): no address at
+// the Line, so the answer settles on Sunday evening (endingAsk.slow when it's still open). These replace their
+// namesakes above on that path.
+== mail.ending.offer.slow
+- A letter from headquarters | As we said in the ready room: Concord headquarters has offered you a post, and I've passed it on with my good wishes. Tell me your answer by Saturday at 20:00, in person, wherever I am. You can change your mind until Sunday evening. Either answer is a good one. Captain Odile Marrow
+== mail.ending.answer.unsure.slow
+- Your answer | Not sure yet is an honest answer. You have until Sunday evening, when I'll come and ask you. Talk to people. Captain Odile Marrow
+== ending.tracked.unsure.slow
+- The Captain will ask you on Sunday evening
+== ending.tracked.change.slow
+- You can change your mind until Sunday evening
+// the record for the crew once it's settled on that path (the Captain's Mail to everyone, Sunday night)
+== mail.ending.settled.slow.stay
+- A word from the Captain | Concord headquarters asked for one of ours this week, and I passed it on. {me} has said no, politely. We're keeping them. Carry on. Captain Odile Marrow
+== mail.ending.settled.slow.go
+- A word from the Captain | Concord headquarters asked for one of ours this week, and {me} has said yes. The Tern takes them on Monday at 10:00. The day shift is released from 09:30 to see them off. Captain Odile Marrow
+
 // ---- Zeke's two talks
 == ending.ring.zeke
 - Talk to Zeke
