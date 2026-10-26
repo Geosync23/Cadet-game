@@ -912,7 +912,7 @@ def parse_home_rest(lines, path, rel, cid, who, out):
 # "who > you: text", or "- text" (Marrow's). "? terms" limits the lines under it until the next "?" or "==" (a bare
 # "?" clears it): every term must hold, "!" turns one round, "a|b" inside a term is either. Read when she speaks
 # (section 18f), so the terms here are only checked for their words
-ADDR_KEYS = ('band', 'done', 'commended', 'arriving', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week', 'swap')   # swap: the event swap (0.93.2), section 13's EV_SWAP_ON
+ADDR_KEYS = ('band', 'done', 'commended', 'arriving', 'myrank', 'myshift', 'season', 'cue', 'nod', 'health', 'week', 'swap', 'comet')   # swap: the event swap (0.93.2), section 13's EV_SWAP_ON; comet: the comet on Day 22 (0.93.2, EV_COMET_ON)
 ADDR_SLOTS = ('me', 'stormjobs', 'myjobs', 'leavers', 'sunleavers', 'arrivals', 'dept', 'trad1', 'day1', 'winner')
 ADDR_POSES = ('nod', 'gesture', 'laugh', 'sigh', 'listen', 'play')
 ADDR_WHO = ('marrow', 'vance')
@@ -967,7 +967,7 @@ def parse_address(path, rel, out):
             terms = t[1:].split()
             for term in terms:                     # key:value, key:a|b (either value), !key:value; commended and arriving alone
                 k, _, v = term.lstrip('!').partition(':')
-                bare = k in ('commended', 'arriving', 'swap')
+                bare = k in ('commended', 'arriving', 'swap', 'comet')
                 if k not in ADDR_KEYS or bare == bool(v) or any(not x for x in v.split('|')) and not bare:
                     raise GenError(f'{where}: unknown condition "{term}" ({", ".join(ADDR_KEYS)}: see content/addresses/README.md)')
             cond = terms or None

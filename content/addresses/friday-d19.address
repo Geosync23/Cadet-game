@@ -29,9 +29,10 @@ marrow: Long blackouts, a scorched relay room, food lost. We're putting it right
 ?
 marrow: Storm jobs closed in four days: {stormjobs}. The Chief made it look easy. It wasn't.   [nod]
 marrow: And everyone who sat up with a neighbour by lantern light: that counted too.   #warm
-// beat 2: the comet, a gift after the storm (swap: the Veyli guests, who left this morning; the event swap, 0.93.2,
+// beat 2: the comet, a gift after the storm (comet: none, the comet is on Monday Day 22 since 0.93.2, FX25, still to come and
+// nobody knows yet; swap: the Veyli guests, who left this morning; the event swap, 0.93.2,
 // FX22b's draft for SW2 to polish: the visit was Tuesday to Friday, Days 16-19, the farewell at 09:00 today)
-? !swap
+? !swap !comet
 marrow: Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.   [gesture]
 marrow: Half of you were at the windows. The other half were asleep, and I don't blame you.   #funny
 ? swap

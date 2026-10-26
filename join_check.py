@@ -56,7 +56,10 @@ with sync_playwright() as pw:
     ids = g.ev("Object.keys(TRAD_JOIN).filter(id => TRAD_JOIN[id].act !== 'beam' && !/^appt-/.test(id))")   # appointments (appt-*): only on the calendar once booked (below)
     print(f"{len(ids)} joinable traditions (plus the beam): {', '.join(ids)}")
     for i in ids:
+        officer = i == 'cometCaptain'   # the comet's tea with the Captain is for Officers and up (FX25): joined as an Officer here; a Cadet's turn-away is interactions_check's
+        if officer: g.ev("window.__wk = SHIP.works; SHIP.works = { ...(SHIP.works || {}), rank: 'officer' }")
         r = g.ev(f"({EACH})('{i}')")
+        if officer: g.ev("SHIP.works = window.__wk")
         if r.get('err'): fail(f"{i}: {r['err']}"); continue
         print(f"  {i} day {r['d']}: leader {r['lead']}, arrow '{r['goal']}', marker {r['marked']}; tap -> joined {r['joined']} (+{r['social']:.0f} social), {('walk' if r['walk'] else r['act'])}")
         if r['passive']: fail(f"{i}: joined by being there (it's tap to join)")

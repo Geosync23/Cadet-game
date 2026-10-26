@@ -39,7 +39,9 @@ from playwright.sync_api import sync_playwright
 
 SRC = pathlib.Path(sys.argv[1]).read_text()
 SWAP = bool(re.search(r"^const EV_SWAP_ON = true", SRC, flags=re.M))   # the event swap (0.93.2): the visit (Day 16) is the one a Day 20 load passes over, not the comet
-PASSED = 'diplomatic' if SWAP else 'comet'
+COMET_ON = bool(re.search(r"^const EV_COMET_ON = true", SRC, flags=re.M))   # the comet (FX25, 0.93.2): on Monday Day 22, after a Day 20 load (so not passed over); a Day 23 load passes it over
+PASSED = 'diplomatic' if SWAP else None if COMET_ON else 'comet'
+PAST = [PASSED] if PASSED else []
 OFF_BUILD = sys.argv[1]          # the build switched off, for part 1
 ON_ALREADY = 'const EVENTS_ON = true;' in SRC
 if ON_ALREADY:                   # events on in the build (storm S10): parts 1-2 need the switched-off game, so make that copy
@@ -215,6 +217,14 @@ PLANT = r"""(() => {
   return t.id;
 })()"""
 PLANTED = ['plantHold', 'plantGuard', 'plantGath']
+# the comet (FX25, A8): a dressed copy of quiz night put in the bow lounge at 21:45 on the comet's day, during its gathering
+PLANT_COMET = r"""(() => {
+  if (!SHIP_EVENTS.comet) return null;
+  const p = EV_SHIPWIDE.find(g => g.id === 'cometLounge'), t = SHIP_TRADITIONS.find(e => e.id === 'quiz') || SHIP_TRADITIONS[1], pd = EV_CALENDAR.find(r => r.id === 'comet').day;
+  const copy = { ...t, where: p.where.map(w => ({ ...w })) }, on0 = eventsOn;
+  eventsOn = d => { const l = on0(d); return d === pd ? l.concat([{ id: t.id, name: t.name, ev: copy, day: d, from: 1305, to: 1335, honorees: [], names: '', first: '' }]) : l; };
+  return t.id;
+})()"""
 
 # F2, the phase notes, live on paper (EV1's part, made from the data): the clock run every 5 ship minutes from 05:00 on
 # the first built event's calendar day to 15:00 the next (the storm's warning and front) through eventAdvance(t, quiet)
@@ -649,12 +659,16 @@ with sync_playwright() as pw:
 
     # 4. the self-test: each planted clash is caught
     print('\n4. Self-test (clashes planted in a copy):')
-    g = Game(pw, variant('on', 'all')); dressed = g.ev(PLANT); a = g.ev(PAPER); g.close()
+    g = Game(pw, variant('on', 'all')); dressed = g.ev(PLANT); dressedC = g.ev(PLANT_COMET); a = g.ev(PAPER); g.close()
     SINK = []; judge(a, 'planted'); caught, SINK = SINK, None
     for p in PLANTED + [dressed + ' ']:
         hit = [c for c in caught if p in c and (p != dressed + ' ' or 'during party' in c)]
         print(f"  {p}: " + ('caught: ' + hit[0] if hit else 'NOT caught'))
         if not hit: fail(f'the self-test: the planted {p} was not caught')
+    if dressedC:
+        hit = [c for c in caught if dressedC + ' ' in c and 'during cometLounge' in c]
+        print(f"  {dressedC} in the comet's bow lounge: " + ('caught: ' + hit[0] if hit else 'NOT caught'))
+        if not hit: fail(f'the self-test: the planted {dressedC} in the comet\'s bow lounge was not caught')
 
     # 5. late saves (F0c, OR1): the skip comes from SHIP.evFrom, the day the calendar was first on in this game, set
     # once and saved (ship.evFrom), never from the day a page loads. On paper, evSkippedFor for any day; then real saves
@@ -681,7 +695,7 @@ with sync_playwright() as pw:
             print(f"  evSkippedFor({c['f']}, log {c['l']}, running {c['c']}) = {c['got']}")
             if c['got'] != c['want']: fail(f"evSkippedFor({c['f']}, {c['l']}, {c['c']}) = {c['got']}, want {c['want']}")
         if P5['late'] == 'skip':
-            named = {(20, ()): ['crossingLine', 'ionStorm', PASSED], (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine', PASSED], (0, ()): [], (1, ()): []}
+            named = {(20, ()): ['crossingLine', 'ionStorm'] + PAST, (9, ()): ['crossingLine'], (20, ('ionStorm',)): ['crossingLine'] + PAST, (0, ()): [], (1, ()): []}
             for c in P5['cases']:
                 k = (c['f'], tuple(c['l']))
                 if k in named and not c['c'] and c['got'] != named[k]: fail(f"evSkippedFor({c['f']}, {c['l']}): {c['got']}, the brief says {named[k]}")
@@ -720,10 +734,10 @@ with sync_playwright() as pw:
         big_but = lambda *skip: sorted({d for i, b in bigs.items() if i not in skip for d in b})
         slog = [f"{r['id']}:{r['day']}-{r['day'] + n}" for r, n in zip(P5['plan'], P5['days']) if r['day'] + n <= 20]
         for title, save, want in [
-            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': sorted([PASSED, 'crossingLine', 'ionStorm']), 'ed': big_but('crossingLine', 'ionStorm', PASSED), 'due': None, 'log': []}),
-            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
+            ('a Day 20 save, events first on at Day 20', mk(20, frm=20), {'evFrom': 20, 'sk': sorted(PAST + ['crossingLine', 'ionStorm']), 'ed': big_but('crossingLine', 'ionStorm', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON and not SWAP else None, 'log': []}),
+            ('a Day 20 save, events on from the start (evFrom 0)', mk(20, frm=0), {'evFrom': 0, 'sk': [], 'ed': big_but(), 'due': {'id': 'comet', 'day': 22} if COMET_ON else None, 'log': slog}),   # every event it missed is run on load, as an unbroken game ran them
             ('a Day 9 save, events first on at Day 9', mk(9, frm=9), {'evFrom': 9, 'sk': ['crossingLine'], 'ed': big_but('crossingLine'), 'due': {'id': 'ionStorm', 'day': 11} if storm else None, 'log': []}),
-            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': sorted([PASSED, 'crossingLine']), 'ed': big_but('crossingLine', PASSED), 'due': None})]:
+            ('a Day 20 save, evFrom 20, the storm logged', mk(20, [{'id': 'ionStorm', 'startDay': 11, 'endDay': 17}], 20), {'evFrom': 20, 'sk': sorted(PAST + ['crossingLine']), 'ed': big_but('crossingLine', *PAST), 'due': {'id': 'comet', 'day': 22} if COMET_ON and not SWAP else None})] + ([('a Day 23 save, events first on at Day 23 (the comet passed over)', mk(23, frm=23), {'evFrom': 23, 'sk': ['comet', 'crossingLine', 'ionStorm'], 'due': None})] if COMET_ON else []):
             pg = load(b, on_html, save, errs=errs); r = state(pg); pg.close()
             print(f"  {title}: evFrom {r['evFrom']}, passes over {r['sk']}, eventDay {r['ed']}, due {r['due']}, log {r['log']}, running {r['ev']}")
             for k in ('evFrom', 'sk', 'ed', 'due', 'log'):

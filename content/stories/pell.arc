@@ -52,12 +52,13 @@ them: Right. I've opened them. That's the hard bit done. Is it? It feels like th
 //   title: Pell's practical / invite: The practical | Tomorrow. Open door tea, the bench in the Works bay, 16:40.
 //   Calder's timing it. Stand where I can see you. Pell
 // quiet: 8 stays: if Day 24 passes without it, beat 8 (the quiet ending) comes next.
+// Not on the comet's Monday (Day 22, FX25; EP1's events-plan-2 A5): Raman's big moment has that day to itself.
 tone: resolution
 tier: friend
 gapDays: 2
 duty: true
 where: Works bay
-when: beat:pell.6 time:afternoon day:17-24
+when: beat:pell.6 time:afternoon day:17-24 !event:comet.warning
 quiet: 8
 hint: It's today. The practical. Stand where I can see you. Not too close.
 mem: passed

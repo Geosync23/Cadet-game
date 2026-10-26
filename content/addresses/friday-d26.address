@@ -39,11 +39,14 @@ marrow > you: {me}, four weeks with us. The good roads up are rarely quick.   #w
 marrow: Jobs on the Works board with your name on them: {myjobs}. The ship runs better for it.
 marrow: Rank is nice. The people you sit with at dinner matter more. Find them. Keep them.
 // beat 3: the Veyli, who they are and how we host them (swap: Monday's comet, looked back on; the event swap, 0.93.2,
-// FX22b's draft for SW2 to polish: the visit was Days 16-19, the comet Monday Day 22 at 21:30; no Veyli tomorrow)
+// FX22b's draft for SW2 to polish: the visit was Days 16-19, the comet Monday Day 22 at 21:30; no Veyli tomorrow;
+// comet without the swap: Monday's comet, looked back on, before the Veyli; FX25, 0.93.2)
 ? swap
 marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
 marrow: After a storm and a week of guests, I think the sky owed us that one.   #warm
 marrow: What I ask: keep looking up. Out here there's nearly always something worth seeing.   #warm
+? !swap comet
+marrow: On Monday night, the comet. Half the ship at the windows, and not a word said.   [gesture]
 ? !swap
 marrow: Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.
 marrow: The Veyli are our cousins out here. They came this way long before us.
