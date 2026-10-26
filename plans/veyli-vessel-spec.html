@@ -131,7 +131,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
     <div class="fact"><b>Pieces</b>Five building pieces, the words and the checks. One switch, <code>EV_VESSEL_ON</code>.</div>
     <div class="fact"><b>Builders at once</b>Two (an events builder and the deck and sky seat), plus the head writer and an events checker. About 7 build turns.</div>
     <div class="fact"><b>Can it start now?</b>Yes, on 0.93.3, beside Steps 5 and 6. It needs none of their code; section 7 lists the five places it shares with them and how they stay apart.</div>
-    <div class="fact"><b>Your answers</b>The plan's two questions (C1 the commendation, C2 the ship outside the window), unless you've already answered them, and one new small one.</div>
+    <div class="fact"><b>Your answers</b>All three answered (26 October): a commendation yes, the ship outside yes, and at the ramp Taavek and Calder wait for you up to an hour.</div>
   </div>
   <p class="note">Against claude/integration d9c7e5f0 (0.93.2); starts on 0.93.3. Sources: plans/events-plan-2.html Part C (EP1), plans/handover-ep1.md, the comet's build (section 18's comet block and the slot "Comet builder", FX25) as the model, the Step 5 and Step 6 specs on this branch.</p>
 </header>
@@ -171,8 +171,8 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
       <tr><td><b>It comes into view</b><br>Sat 14:00</td><td>A notice "The Veyli ship is off the bow: Deck 3's glass"; a level 2 arrow to the bow lounge once (optional to look).</td><td>Seen, or 18:00</td><td>Crew at the glass a few at a time; two or three lines about how small it is.</td><td>6</td></tr>
       <tr><td><b>Vance: tomorrow</b><br>Sat 18:00</td><td>Vance's Mail (the ship's notice of times, after Calder already told you yours); Tracked and Schedule "Meet Taavek, 09:30, the shuttle bay".</td><td>-</td><td>-</td><td>2</td></tr>
       <tr><td><b>The Tern goes across</b><br>Sun 08:00</td><td>Notice once you're up "Taavek arrives 09:30: you're meeting them at the ramp"; status line.</td><td>-</td><td>Shuttle bay: Lindqvist's word, the ramp shuts, the Tern flies out (rotation day's sequence).</td><td>3</td></tr>
-      <tr><td><b>Off the Tern</b><br>Sun 09:30-09:50</td><td>Arrow level 1 to the ramp's foot from 09:10; ring "Stand at the foot of the ramp"; Calder already there (called in).</td><td>The meeting ends</td><td>About 20 watch. The ramp opens; Taavek walks down with a crate and the broken part; the bow pose. "Hello! Taavek. Engineer. Yes. The round one. Broken. Very." Three replies (welcome / "Someone met me. Zeke." / coffee first?), each answered; Calder's close. Not there by 09:35: Zeke stands in, and you meet Taavek in the Works bay later, with the same lines.</td><td>14</td></tr>
-      <tr><td><b>The round one</b><br>Sun 10:00-11:30</td><td>Ring "Join Taavek at the bench" on Taavek; arrow level 1 to the Works bay at 09:55.</td><td>The meeting ends</td><td>The Works bay bench: Taavek lays the part down, sketches, points (the read-with-a-pad and point poses); you, Calder and Zeke work out what it is (one choice from you); "It will have to be made."</td><td>12</td></tr>
+      <tr><td><b>Off the Tern</b><br>Sun 09:30-09:50</td><td>Arrow level 1 to the ramp's foot from 09:10; ring "Stand at the foot of the ramp"; Calder already there (called in).</td><td>The meeting ends</td><td>About 20 watch. The ramp opens; Taavek walks down with a crate and the broken part; the bow pose. "Hello! Taavek. Engineer. Yes. The round one. Broken. Very." Three replies (welcome / "Someone met me. Zeke." / coffee first?), each answered; Calder's close. Not there yet: Taavek and Calder wait at the foot of the ramp up to an hour (your answer C3), with a notice and Calder coming to find you at 09:45; Taavek sketches the bay while they wait. Only after 10:30 does Zeke take Taavek to the Works bay, where you meet them with the same lines.</td><td>14</td></tr>
+      <tr><td><b>The round one</b><br>Sun 10:00-11:30</td><td>Ring "Join Taavek at the bench" on Taavek; arrow level 1 to the Works bay at 09:55.</td><td>The meeting ends</td><td>(Starts when you arrive from the ramp, by 10:30 at the latest.) The Works bay bench: Taavek lays the part down, sketches, points (the read-with-a-pad and point poses); you, Calder and Zeke work out what it is (one choice from you); "It will have to be made."</td><td>12</td></tr>
       <tr><td><b>The swap meet</b><br>Sun 10:30</td><td>As built (optional).</td><td>-</td><td>Taavek trades Veyli sweets for coffee, a mug at a time.</td><td>3</td></tr>
       <tr><td><b>The parts chain</b><br>Sun 13:00-14:00</td><td>Notice 12:45; arrow level 1 to Main storage from 12:45; ring "Join the chain" on Zeke; once in, a ring on each crate to pass (the lift pose).</td><td>The last crate, or 14:00</td><td>30-40 people in a line from the storage door to the Tern's ramp; Zeke calls the count ("Next one's heavy. Bend the knees."); cheers at the last one.</td><td>14</td></tr>
       <tr><td><b>Sunday evening</b><br>18:00-21:55</td><td>As built: the Sunday table, Lap of the Wren, the Sunday story, with Taavek in each (optional).</td><td>-</td><td>Taavek: "very bitter, very good" (Brennan's coffee); sketches the promenade; laughs at every voice.</td><td>6</td></tr>
@@ -234,9 +234,9 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
   <article class="piece">
     <header><h3>V-2 The ramp, the bench and the lights</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Events builder</span><span class="phase">2 turns</span></header>
     <dl>
-      <dt>What</dt><dd>Calder's sheet (Saturday 10:00, a place in the Works bay with its ring); the ramp scene (Sunday 09:30: both flights through the rotation's Tern code, the ramp's foot as yours, Zeke standing in if you're late); the round one at the bench (Sunday 10:00); Taavek going home (Monday 15:00); the engine lights at the bow glass (Monday 17:30, Saruth hosting, a gathering with the tap-to-join rule). Each with its arrow, ring, notice and Tracked row as the beats table says, through 15b's goal and the arrow queue (<code>guideAsk</code>, level 1).</dd>
+      <dt>What</dt><dd>Calder's sheet (Saturday 10:00, a place in the Works bay with its ring); the ramp scene (Sunday 09:30: both flights through the rotation's Tern code, the ramp's foot as yours; late, Taavek and Calder wait up to an hour, Calder comes to find you at 09:45, then Zeke after 10:30); the round one at the bench (Sunday 10:00); Taavek going home (Monday 15:00); the engine lights at the bow glass (Monday 17:30, Saruth hosting, a gathering with the tap-to-join rule). Each with its arrow, ring, notice and Tracked row as the beats table says, through 15b's goal and the arrow queue (<code>guideAsk</code>, level 1).</dd>
       <dt>Touches</dt><dd>The vessel's slot; section 14's Tern ramp (called, not changed).</dd>
-      <dt>Checks</dt><dd>interactions_check (the sheet, the ramp, Taavek, Calder, Saruth), events_check (each scene's lines heard, Zeke's stand-in), the arrow-follower part.</dd>
+      <dt>Checks</dt><dd>interactions_check (the sheet, the ramp, Taavek, Calder, Saruth), events_check (each scene's lines heard; the hour's wait at the ramp, then Zeke's stand-in after 10:30), the arrow-follower part.</dd>
     </dl>
   </article>
 
@@ -338,7 +338,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
     <thead><tr><th>File</th><th>What</th><th>About how many</th></tr></thead>
     <tbody>
       <tr><td>content/banks/event-veyliVessel.lines (new, beside event-comet.lines)</td><td>The call (night watch, Saruth); breakfast chatter; crew at the glass; the chain (Zeke's count, the line's banter); Sunday's traditions with Taavek; lunch; the afterglow retellings</td><td>about 50</td></tr>
-      <tr><td>vessel meetings</td><td>Calder's sheet; the ramp (Taavek, three replies, Calder's close; Zeke's stand-in version); the round one; the job and the helper card (each of four helpers' lines, by pair); the making steps; the test fit; Taavek goes home; the engine lights (Saruth)</td><td>about 90</td></tr>
+      <tr><td>vessel meetings</td><td>Calder's sheet; the ramp (Taavek, three replies, Calder's close; their lines while they wait; Zeke's version after the hour); the round one; the job and the helper card (each of four helpers' lines, by pair); the making steps; the test fit; Taavek goes home; the engine lights (Saruth)</td><td>about 90</td></tr>
       <tr><td>Addresses and Mails</td><td>The Captain Saturday 08:00 and Tuesday 09:15; Calder's parts list; Vance's "Tomorrow"; your commendation; Taavek's letter with the sketch</td><td>about 15</td></tr>
       <tr><td>Short UI words</td><td>Ring lines, notices, Tracked and Schedule rows, the three status lines, the Record line, the sketch's and the props' tap texts</td><td>about 45</td></tr>
     </tbody>
@@ -358,6 +358,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 
 <section id="questions">
   <h2>10. Your questions</h2>
+  <p><b>Answered (the user, 26 October):</b> C1 yes, a commendation by the usual rule; C2 yes, the ship outside the window; C3 Taavek and Calder wait at the ramp up to an hour, and Zeke takes over only after that. The form stays for any later comment.</p>
   <div class="q">
     <h3>C1. A commendation for helping the Veyli ship?</h3>
     <p>From the events plan. Should helping count toward a commendation, like the storm did?</p>
