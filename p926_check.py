@@ -12,8 +12,9 @@
 #       benches, the join is Orla's, her swap card opens on a tap, and the stalls talk (bubbles). Off: nobody at a stall, no card
 #   15  Spice shelf supper (Day 16, a Tuesday): Brennan comes out to the spice shelf (3-spice-host) by 18:40, opens and names three
 #       jars, the mess guesses (bubbles), she says whose, and joined you get the guess card. Off: Brennan never at the shelf, no card
-#   4   Reading corner (Day 14, 16:30): Esme Walsh there, everyone at it seated within 4.5 m of the bow window's sofa, at least 4
-#       bubbles about books in the room, a tap joins you with a book. Off: no host
+#   4   Reading corner (Day 21, 16:30; fortnightly, odd-week Sundays, since 0.93.2's FX24): Esme Walsh there, everyone at it seated
+#       within 4.5 m of the bow window's sofa, at least 4 bubbles about books in the room, a tap joins you with a book. Day 14 (an even
+#       week): nobody there, no host alone. Off (Day 14, as before): no host
 #   3   Winner stays on (Days 14 and 21): planned in the stands at 12:30, 13:30, 14:30 and 15:30: 9 or more, and 12 or more at 13:30 and
 #       14:30 (of about 30 crew off duty and aboard on a Sunday afternoon). Off: thinner (3-9) at least once
 #   7   the career's weeks: (b) a talk on every Monday from Day 36 to 78 and a chief's on Days 32, 46, 60, 74, each on the calendar;
@@ -193,10 +194,10 @@ with sync_playwright() as pw:
         check(r.get('held') == 'spice.guess', '15: the guess card is still open 3 ship minutes later, no input (RV14, FX22) (%s)' % r.get('held'))
         check(not err, '15: no errors: ' + ' | '.join(err[:5]))
     if want('4'):
-        def read4(path):
+        def read4(path, day):
             g = Game(pw, path, 900, 760)
-            g.ev("(() => { skipTo(13 * 1440 + 965); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
-            g.ev(INROOM % (14, 'reading-corner'))
+            g.ev("(() => { skipTo(" + str(day - 1) + " * 1440 + 965); goToDeck(3, null); SHIP.device.settings.tips = false; })()"); g.ev(SAYHOOK); g.step(10)
+            g.ev(INROOM % (day, 'reading-corner'))
             for _ in range(120):
                 g.step(30)
                 if g.ev('SHIP.time.min') >= 990: break
@@ -205,9 +206,11 @@ with sync_playwright() as pw:
               const host = at.find(a => a.p.id === 'walsh-esme'), out = { t: SHIP.time.min, at: far, host: !!host, said: window.__said.length };
               const a = host || at[0]; if (a) tradJoinTap(a); out.act = ACT && ACT.kind; return JSON.stringify(out); })()"""))
             err = g.errors; g.close(); return r, err
-        r, err = read4(woff); print('  4 off:', r)
+        r, err = read4(woff, 14); print('  4 off (Day 14):', r)
         check(not r['host'], '4 off: as 0.92.5, no host')
-        r, err = read4(won); print('  4 on:', r)
+        r, err = read4(won, 14); print('  4 on, Day 14 (an even week: none):', r)
+        check(not r['host'] and not r['at'] and r['act'] is None, '4: Day 14, an even week since FX24: no reading corner, no host alone (%s)' % r)
+        r, err = read4(won, 21); print('  4 on (Day 21):', r)
         check(r['host'] and len(r['at']) >= 3, '4: Esme Walsh hosts, %d at it' % len(r['at']))
         check(all(x[2] <= 4.5 and x[3] == 'sit' for x in r['at']), '4: everyone at it sits within 4.5 m of the window sofa (%s)' % [x for x in r['at'] if x[2] > 4.5 or x[3] != 'sit'])
         check(r['said'] >= 4, '4: they talk about their books (%d bubbles)' % r['said'])
