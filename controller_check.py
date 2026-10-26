@@ -1557,7 +1557,7 @@ def part_ending(pw, src, tag):
     if fr:
         r.ev(f"""(() => {{ const p = schedPeople().find(p => p.id === '{fr}'), w = whereIs(p, shipNow()); if (deckDef.num !== w.deck) goToDeck(w.deck); deckCrewFill(); const a = DECK_CREW.find(a => a.p && a.p.id === '{fr}');
           if (a) player.obj.position.copy(cellPos(...nearestOpen(a.x + 1.5, a.z + 1.5, player))); player.stop(); }})()"""); r.step(10)
-        g2 = end_near(r, fr) and ring_and_A(r, [fr.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{fr}').name").split()])
+        g2 = end_near(r, fr) and ring_and_A(r, [fr.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{fr}').name").split()], 24)
         fl = r.ev(f"(() => {{ const b = endFriendButton(schedPeople().find(p => p.id === '{fr}')); return b && b.label; }})()")
         res3 = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(fl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
         print(f'  Day 34: a friend ({fr}) by pad: ring {g2}, "{fl}" {res3}')
@@ -1599,7 +1599,7 @@ def part_ending(pw, src, tag):
         if not nx: break
         if not end_near(r, nx, 2.4): fails.append(f'Monday: could not walk to {nx} by the stick'); break
         if nx != 'torres-zeke':
-            h = ring_and_A(r, [nx.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{nx}').name").split()]); r.step(4)
+            h = ring_and_A(r, [nx.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{nx}').name").split()], 24); r.step(4)
             bl = r.ev("endText('ending.btn.bye', 'Goodbye')")
             res = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(bl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
             r.step(10)
