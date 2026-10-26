@@ -1513,3 +1513,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:29 UTC: **EN1 E-3 turn 4 93eb5380** (SW6 words wired everywhere, Zeke Sunday built by EN1, EN2 API used, plain Go notice; ending_check 9 OK; off identical) → RV21. EN2 told: drop any duplicate Zeke Sunday, merge 93eb5380.
 - ~21:34 UTC: FX29 interactions on doors bdb6f00a run alone: OK (shelf line was load). FX29 writing handover, then archive. B4 turn 4 4e5c878f; P9 design agreed with B3 (one hook). Waiting: RV18 doors verdict (last gate).
 - ~21:35 UTC: **RV18 PASS doors-3way bdb6f00a** (game 1dc48251, b0dd6aaa...99d9). BM18 GO: merge, gates, full round (OLD d9c7e5f0). Backlog RV18-D1 (hint title in all-tap mode).
+- ~21:35 UTC: FX29 handover e6a472ac (docs only on bdb6f00a); **FX29 archived** (17 closed).
