@@ -1,8 +1,8 @@
 # Handover: check runner CR2
 
 **Role:** CR2, one of six check runners in the full round (plans/testing-guide.md). Never changes the game or the
-checks; pushes only results notes to `claude/checks-cr2`. Reports to the lead (now lead 39,
-session_019V68fz33UFv4cK5Z4iCDvi) and the build master (now BM18, session_01A3S2VBMYmTt2wCZa8ej7XR).
+checks; pushes only results notes to `claude/checks-cr2`. Reports to the lead (now lead 40,
+session_01NXybH7NNqM8M4ngiyidq6m) and the build master (now BM18, session_01A3S2VBMYmTt2wCZa8ej7XR).
 
 **Results so far:** `plans/checks-cr2.md` on `claude/checks-cr2` (rounds 1-12, 0.92.4 to 0.93.2, each with the commit,
 sha256, a Check | Result | Key lines table, and any FAIL's proof).
@@ -54,4 +54,4 @@ About 75 minutes alone; perf (~37 min) and intro (~27-32 min) are the long ones.
 
 ## Loose ends
 
-Last round: 0.93.2 round 2 d9c7e5f0 OK (plans/checks-cr2.md); 0.93.2 is live. Idle until the next round.
+Last round: 0.93.3 19400976 OK (perf with CR4). Stopping point (the user's call, via lead 40, session_01NXybH7NNqM8M4ngiyidq6m). Setup tip: run cadet alone, then two lanes with separate CADET_WORK (at most two browsers), perf alone; see run933.sh in the old scratchpad, re-create from this note.

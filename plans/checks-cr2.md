@@ -406,3 +406,22 @@ Run in two parts to stay under the 2-hour background limit.
 | perf_check NEW OLD | OK (backlog 32) | Two one-off js flags: storm all-clear party trifold-folded-turned 2.11 -> 3.19 ms, Bread day trifold-open-turned 1.76 -> 2.81 ms; neither scene/shape flagged in round 1 (Bread day's shapes came out even in round 1's two re-measures), so not repeats; not re-measured (BM18's rule). Draw calls as round 1 (Every song +16, storm party -1; max 418). Memory flat (521/40/87). File 7.03 -> 7.23 MB; load 8.3-8.9 vs 8.4-8.9 s (round 1's slower load did not repeat). js mean 1.52 -> 1.66 ms over 106 measures. |
 | lines_check --day | OK (CR1) | PASS (0 errors), 381 s; handed over before it started |
 | p926_check | OK (CR3) | `P926 CHECK OK`, 677 s; handed over before it started |
+
+# 0.93.3 (claude/staging-0.93.3 19400976), CR2's share — **OK** (perf with CR4)
+
+NEW 19400976, sha256 `ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085` (matches BM18's).
+OLD d9c7e5f0 (0.93.2), sha256 `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3`.
+Order: cadet alone; then two lanes (path, arc, lines, intro | day 21, day 22, lines --day, p926), own CADET_WORK each.
+
+| Check | Result | Key lines |
+|---|---|---|
+| cadet_test OLD NEW (alone) | DIFFERENCES, expected | Exactly BM18's list: a_start 1228, b_wander10s 1228, c_rotated 1967, d_wallslow 1372, j_steer1 2420, j_steer2 341 px; a/b boxes are Bunk 1's doorway (OLD open, NEW shut door, checked by eye); state diffs only walk_j_steer1/2 You x -98750/-98751 and -181955/-181956 (1 unit); e-i 0 px; `errors A [] errors B []`; taps the same. |
+| path_check | OK | `PATH CHECK OK` |
+| arc_check | OK | `ARC CHECK OK` |
+| lines_check | OK | PASS (0 errors, 69 warnings; = 0.93.2) |
+| day_check 21 | OK | `DAY CHECK OK` (368 s), draw calls peak 295 |
+| day_check 22 (comet Monday) | OK | `DAY CHECK OK` (377 s), draw calls peak 280 |
+| lines_check --day | OK | PASS (0 errors) (553 s) |
+| p926_check | OK | `P926 CHECK OK` (945 s) |
+| intro_check (whole) | OK | `OK`, 0 FAIL lines (41 min) |
+| perf_check NEW OLD | CR4 | Handed to CR4 before it started (BM18's call); CR4 reports to BM18. |
