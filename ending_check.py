@@ -17,6 +17,10 @@
 #            a reload shows it again with its three buttons; "Back to before my choice" brings the copy back: the choice
 #            open, the page gone. With ?nosave no copy is made
 #   endpage: the end page on paper: its rows (name and rank, days, ranks, friends, Zeke), its buttons, the page's focus
+#   goodbye: (its own page at phone size, 390 x 844) Monday, gone: the notice at 06:00; from 09:15 the shuttle bay holds
+#            about 60 with the aisle clear; draw calls under 450; the arrow names each farewell in turn (friends, the Chief,
+#            Commander Vance, the Captain), each says goodbye as you reach them; Zeke's scene at the ramp; inside the Tern the
+#            ramp closes, the save is marked ended and the end page opens
 #   week:    Friday: the friends come to you one at a time (seek asks), each with "About the transfer" and their own take;
 #            Zeke after dinner (arrow level 1 "Talk to Zeke", he finds you, the scene); a call home plays your family's
 #            scene once; the Schedule's rows (your answer by Saturday 20:00, Zeke); the Record's lines
@@ -154,6 +158,40 @@ def part_endpage(g):
     check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
     check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")
 
+def part_goodbye(pw, on):
+    print('(goodbye) Monday, at phone size:')
+    g = Game(pw, str(on), w=390, h=844); g.step(2); g.ev(SETUP)
+    tick = "__tick()"
+    r = g.ev("""(() => { SHIP.player.name = 'Ada'; SHIP.end = endClean({ offer: { day: 32, met: true }, said: [[33, 'go']], settled: { day: 35, choice: 'go' }, f: { asks: 1 } });
+      setShipNow(35 * 1440 + 361); __tick(); const notes = __notes.slice(); setShipNow(35 * 1440 + 556); goToDeck(5); player.obj.position.copy(cellPos(9, 10)); __tick(); return notes; })()""")
+    check(any('10:00' in n for n in r), f"goodbye: the 06:00 notice names 10:00 ({r})")
+    g.step(120); g.ev(tick); g.step(30)
+    r = g.ev("""(() => { const bay = DECK_CREW.filter(a => a.p && roomAt(...cellAt(a.x, a.z)) === 'S'), aisle = new Set(END_BAY.aisle.map(t => t.join(',')));
+      const inAisle = bay.filter(a => { const c = cellAt(a.x, a.z); return aisle.has(c.join(',')) && !['torres-zeke'].includes(a.p.id); }).map(a => a.p.id);
+      renderer.render(scene, camera); return { bay: bay.length, inAisle, calls: renderer.info.render.calls, goal: (goalNow() || {}).label, level: __guide('end:bye') && __guide('end:bye').level }; })()""")
+    print('   ', r)
+    check(r['bay'] >= 45 and r['level'] == 1 and r['goal'] == 'Say goodbye to Pell', f"goodbye: the bay full (about 60), the arrow at level 1 on the first farewell ({r})")
+    check(r['calls'] < 450, f"goodbye: draw calls under 450 at phone size ({r['calls']})")
+    check(len(r['inAisle']) <= 3, f"goodbye: the aisle stays clear (people passing through aside) ({r['inAisle']})")
+    seen = []
+    for k in range(12):
+        who = g.ev("""(() => { const n = endByes().find(id => !SHIP.end.f['bye:' + id]); const who = n || (!SHIP.end.f.ramp ? 'torres-zeke' : null); if (!who) return null;
+          const a = DECK_CREW.find(x => x.p && x.p.id === who); if (a) player.obj.position.set(a.x + .4, player.obj.position.y, a.z + .4); return who + '|' + ((goalNow() || {}).label || ''); })()""")
+        if not who: break
+        g.ev(tick); g.step(2)
+        if g.ev("!!DIALOGUE"): seen.append('scene:' + g.ev("DIALOGUE.id")); g.ev("__run(0)")
+        seen.append(who)
+    print('   ', seen)
+    said = g.ev("__said.slice()")
+    check([x.split('|')[0] for x in seen if '|' in x][-4:] == ['calder', 'vance', 'marrow', 'torres-zeke'] and 'scene:moment:ending.ramp' in seen, f"goodbye: friends, then the Chief, Vance, the Captain; Zeke's scene last ({seen})")
+    check(any('the Captain' in x for x in seen) and len([x for x in said if x.split(':')[0] in ('calder', 'vance', 'marrow', 'pell')]) >= 4, f"goodbye: each says goodbye ({said})")
+    g.ev("player.obj.position.copy(cellPos(5, 7))"); g.ev(tick); g.step(200)
+    r = g.ev("""(() => { const el = document.getElementById('endPage'); return { aboard: !!SHIP.end.f.aboard, ended: !!SHIP.end.ended, page: !!el && !el.hidden, ramp: TERN.target }; })()""")
+    print('   ', r)
+    check(r['aboard'] and r['ended'] and r['page'] and r['ramp'] == 0, f"goodbye: aboard, the ramp closes, ended, the end page ({r})")
+    if g.errors: fail('page errors (goodbye): ' + ' | '.join(g.errors[:5]))
+    g.close()
+
 def part_week(g):
     print('(week) the friends, Zeke, the call home, the rows, the Record:')
     made(g)
@@ -252,6 +290,9 @@ with sync_playwright() as pw:
             except Exception as e: fail(f'{name}: {e}')
         if g.errors: fail('page errors (on): ' + ' | '.join(g.errors[:5]))
         g.close()
+        if not ONLY or 'goodbye' in ONLY:
+            try: part_goodbye(pw, on)
+            except Exception as e: fail(f'goodbye: {e}')
         if not ONLY or 'reload' in ONLY or 'keep' in ONLY:
             sv = WORK / 'test' / ('ending_save_' + pathlib.Path(sys.argv[1]).name); sv.write_text(instrument(src.replace(SWITCH, "const EV_ENDING_ON = true;")))
             b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
