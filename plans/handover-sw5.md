@@ -19,6 +19,10 @@ Commits: cd97eb3d (batch 1a), c9431963 (batch 1b), 8d3c8829 (batch 2).
 
 - **The gate:** every `?` line carries the bare word `endgame` (like `newhere`). EN2 adds it to content_gen's COND_KEYS
   (and so lines_check) and section 22's filter. If EN2 picks another word, it's one sed over `content/ending/`.
+- **First-weeks lines (RV21's should):** lines that only hold just after the Line (the week's news, "last week",
+  "Monday") carry `endgame:early` instead of `endgame`: 107 of the crew's 280, 42 of the bank's 80, 21 of the 25
+  overheard. EN2's gate: `endgame:early` holds for about two weeks after you stay, then stops; plain `endgame` holds
+  for good (about 220 lines carry on).
 - **Why per-person files:** section 22 scores own lines 300 and bank lines 100 (`LINE_SRC`), so a bank line with `who:`
   would never beat a person's own line. content_gen merges a second `@crew` file into the same person.
 - **Basil** is story-only (content/stories). The `@crew bramwell-basil` file makes a VOICE entry with only lines; the
@@ -32,7 +36,7 @@ Commits: cd97eb3d (batch 1a), c9431963 (batch 1b), 8d3c8829 (batch 2).
 ## How to check
 
 Plain lines_check fails on this branch until EN2's word is in. The scratch way: copy `*.py`, the game, `content/`,
-`plans/`, `tools/` to a scratch folder, `sed` `endgame` to `flag:end.stay` in `content/ending/`, then
+`plans/`, `tools/` to a scratch folder, `sed` `endgame:early` to `flag:end.early` and then `endgame` to `flag:end.stay` in `content/ending/`, then
 `python3 content_gen.py <copy>` and `python3 lines_check.py <copy>`: PASS, 0 errors, no new warnings (69, the same as
 the base). CS1's `near_dupes.py` on every file: zero EXACT, zero NEAR. names_check OK and check_fast QUICK CHECK OK
 on the scratch-baked copy (261 s).

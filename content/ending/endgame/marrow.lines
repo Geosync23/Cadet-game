@@ -1,17 +1,20 @@
 @crew marrow
 // SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
-// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
 
 == greet
-? endgame
+? endgame:early
 - {hi}. I half expected an empty chair at breakfast. Then there you were.   #warm
 ? endgame weekday:thu time:evening
 - Thursday. The piano. Sit at the back if you like. Everyone does, very quietly.
 
 == chat
-? endgame
+? endgame:early
 - Headquarters wrote again. A very polite letter. I wrote back a politer one.   #funny
+? endgame:early
 - The Admiral took your news calmly. He takes everything calmly. It's his great gift.   #funny
+? endgame
 - No more ladders to climb. So tell me. What does a Tuesday look like, now?
 - I asked you one question in your first week. Here's another. What does the ship need next?
 ? endgame tier>=friend

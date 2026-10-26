@@ -1,14 +1,16 @@
 @crew calder
 // SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
-// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
 
 == greet
 ? endgame time:morning
 - {hi}. Board's at fourteen. Ordinary day. Good.
 
 == chat
-? endgame
+? endgame:early
 - You stayed. Good. Training someone new takes a year. I'd rather not.   #funny
+? endgame
 - No more exams. There are still serial numbers. Learn them.   #funny
 - The board doesn't care about rank. Neither do I. Pick a job.
 - Quiet week. Nothing broke. That's yours, partly.   #warm

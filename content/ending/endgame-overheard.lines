@@ -1,13 +1,14 @@
 @overheard endgame
 // SW5, the endgame pool (plans/ending-spec.html section 9): two crew talking about you as you pass, only after
 // you choose to stay (the bare condition "endgame", EN2's gate). Bubbles: 60 characters. Named pairs use who:/with:.
+// "endgame:early": the news of the week, only in the first two weeks after you stay (RV21).
 
 == overheard
 ? endgame
 A: {me} turned down headquarters. Did you hear?
 B: For the Wren? Course they did. Have you had the porridge?   #funny
 
-? endgame
+? endgame:early
 A: I was sure {me} would go.
 B: You were sure the quiz was Thursday.
 A: It was Thursday once.   #funny
@@ -24,23 +25,23 @@ B: Ordinary-happy. That's the best sort.   #warm
 A: Who's the new hands' first stop now?
 B: {me}. Obviously. They ask the one who stayed.
 
-? endgame time:evening
+? endgame:early time:evening
 A: Quiet in here tonight.
 B: Everyone's tired from all the not-saying-goodbye.   #funny
 
-? endgame pair:friend
+? endgame:early pair:friend
 A: I had a card ready for {me}. "Good luck out there."
 B: Cross it out. "Good luck in here."   #funny
 
-? endgame pair:bunk
+? endgame:early pair:bunk
 A: Did you hear {me} come in last night? Humming.
 B: People who've decided something hum. It's known.   #funny
 
-? endgame pair:senior
+? endgame:early pair:senior
 A: You'd have signed {me}'s transfer, then?
 B: I'd have signed it. Slowly.   #warm
 
-? endgame
+? endgame:early
 A: Headquarters must be very surprised.
 B: Headquarters can come and try Brennan's Friday dish.   #funny
 
@@ -48,67 +49,67 @@ B: Headquarters can come and try Brennan's Friday dish.   #funny
 A: Bet {me} gets bored of ordinary days.
 B: Nobody gets bored here. We just get busy.
 
-? endgame act:meal
+? endgame:early act:meal
 A: Save {me} a seat?
 B: I always do. Now I don't feel silly about it.   #warm
 
-? endgame who:pell with:rina
+? endgame:early who:pell with:rina
 A: Told you {me} would stay.
 B: You said "probably". Then you ate my toast.
 A: Nerves.   #funny
 
-? endgame who:rina with:pell
+? endgame:early who:rina with:pell
 A: You cried at the address.
 B: Dust. Ship's very dusty.
 A: Honestly.   #funny
 
-? endgame who:torres-zeke with:calder
+? endgame:early who:torres-zeke with:calder
 A: {me}'s staying, Chief.
 B: I know.
 A: You're smiling.
 B: I'm not.   #funny
 
-? endgame who:calder with:torres-zeke
+? endgame:early who:calder with:torres-zeke
 A: I've moved {me}'s name off the transfer sheet.
 B: Did it take long?
 A: Four seconds. I timed it.   #funny
 
-? endgame who:vance with:marrow
+? endgame:early who:vance with:marrow
 A: The transfer paperwork, Captain. Returned, unsigned.
 B: My favourite kind, Commander.   #warm
 
-? endgame who:marrow with:vance
+? endgame:early who:marrow with:vance
 A: Did the Admiral say anything?
 B: Not a word, Captain.
 A: He approves, then.   #funny
 
-? endgame who:brennan with:dlamini-lukas
+? endgame:early who:brennan with:dlamini-lukas
 A: That goodbye supper I planned. Freeze it?
 B: Serve it Sunday. Call it a staying supper.   #funny
 
-? endgame who:holt with:mensah
+? endgame:early who:holt with:mensah
 A: You owe me a tea.
 B: You never bet, Chief.
 A: I didn't bet. I knew.   #funny
 
-? endgame who:tomas with:bramwell-basil
+? endgame:early who:tomas with:bramwell-basil
 A: My bunkmate stayed. Your mentor stayed.
 B: That's two people for one person!
 A: That's how it works, I think. Sort of.   #funny
 
-? endgame who:kovac-zainab with:dahl-mira
+? endgame:early who:kovac-zainab with:dahl-mira
 A: I'd started a goodbye scarf. For {me}.
 B: Finish it anyway. Call it a staying scarf.   #warm
 
-? endgame who:halloran-emeka with:pell
+? endgame:early who:halloran-emeka with:pell
 A: I nearly wrapped {me}'s mug. In paper.
 B: You'd never have got it off the hook.
 A: True. That hook's very loyal.   #funny
 
-? endgame who:saruth with:holt
+? endgame:early who:saruth with:holt
 A: Your crew is pleased. They are louder than usual.
 B: Hm. That's them pleased.   #funny
 
-? endgame who:oduya with:nandakumar
+? endgame:early who:oduya with:nandakumar
 A: Everyone's sleeping better this week.
 B: Everyone's stopped worrying about {me}.   #warm

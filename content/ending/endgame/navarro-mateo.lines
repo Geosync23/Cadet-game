@@ -1,10 +1,12 @@
 @crew navarro-mateo
 // SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
-// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
 
 == chat
-? endgame
+? endgame:early
 - There you are. Staying, I heard. Good. Your glove turned up, by the way. Left hand.   #funny
+? endgame
 - My handover note this morning said "Ordinary night." At the top. With a heading.   #funny
 - Quiet shift. Board's tidy. Every spanner on its hook. That's my ordinary.
 - Things turn up on the Wren. People too, sometimes. Then they stay. Glad you did.   #warm
