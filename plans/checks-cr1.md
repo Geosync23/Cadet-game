@@ -552,3 +552,24 @@ reaches Deck 4 at 20,9 and every 3 minutes taps "Spine trunks" (false) and the f
 never moving, not busy. Day 7 18:20 it stands at 5,1 on Deck 4 and every 3 minutes taps "Toilet" (true) and the floor
 at the pin "A toilet"; nothing starts and the arrow never clears. The week guide stall is known-old (also on d9c7e5f0),
 now with FX30.
+
+# 0.93.3 (claude/staging-0.93.3 19400976, 2026-10-26)
+
+**sha256 of starship-cadet.html: `ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085`** (matches BM18's;
+doors three ways, the diplomatic visit on). OLD = 0.93.2 d9c7e5f0 (c99ea59c…). One at a time, one browser, CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 338 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 226 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 354 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 58 s | PUZZLE CHECK OK |
+| social_check | **OK** | 24 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 30 s | TALK CHECK OK |
+| arrows_check (all parts) | **OK** | 1060 s | ARROWS CHECK OK |
+| arrows_pointer_check | **OK** | 117 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 29 s | DEV ARROW CHECK OK |
+| day_check 4 | **OK** | 219 s | DAY CHECK OK |
+| day_check 11 | **OK** | 232 s | DAY CHECK OK |
+
+No FAILs, so no OLD runs were needed.
