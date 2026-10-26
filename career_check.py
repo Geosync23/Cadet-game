@@ -473,7 +473,7 @@ with sync_playwright() as pw:
     if not ev("typeof promoPromote === 'function'"): print('  not in this build')
     else:
         SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
-        if (r && t >= r.at && t < r.at + r.len && t2 === 'real' && !r.met) { r.met = true; const sc = MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
+        if (r && t >= r.at - (typeof promoBeatsOn === 'function' && promoBeatsOn() ? 59 : 0) && t < r.at + r.len && t2 === 'real' && !r.met) {   /* FX28: 08:15 falls between this run's hourly steps */ r.met = true; const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
         if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m);
         const q = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');   // the ceremony: there at 17:15, or not
         if (q && t2 === 'real' && t >= q.at - 15 && t < q.at + q.len && !q.met) { worksCareerTick(q.at); q.met = true; const sc = MEETING_SCRIPTS['promo.ceremony']; sc.onPick(0, {}); sc.onEnd(true); }
@@ -494,19 +494,21 @@ with sync_playwright() as pw:
               const W = SHIP.works, C = worksClean(JSON.parse(JSON.stringify(W))); out.clean = ['tier', 'rank', 'xp', 'test', 'home', 'done', 'ms'].every(k => JSON.stringify(C[k]) === JSON.stringify(W[k]));
               out.xpAt = window.__xpAt; st(); sts.forEach(f => f()); return out; }})()""")
         sm = run('real', 12)
+        PB = ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28 (PROMO_BEATS_ON): the result at 08:15, the pip the same day at 16:30
+        S_AT, S_SEEK, C_DAY, C_AT, C_SEEK = ('08:15', '08:30', 10, '16:30', '16:45') if PB else ('11:00', '11:15', 11, '17:15', '17:30')
         print('   there:', sm['summ'], sm['promoted'], sm['rank'], 'reply', sm['reply'], sm['plan'])
-        check(sm['summ'] and sm['summ'][0][:2] == [10, '11:00'] and sm['summ'][0][3], f"the summons: Day 10 at 11:00 in Calder's office, warned at 10:30: {sm['summ']}")
+        check(sm['summ'] and sm['summ'][0][:2] == [10, S_AT] and sm['summ'][0][3], f"the summons: Day 10 at {S_AT} in Calder's office, warned before: {sm['summ']}")
         check(sm['promoted'] and sm['promoted'][0][0] == 10 and sm['promoted'][0][2] == 'met' and len(sm['promoted']) == 1, f"promoted once, on Day 10 at the scene: {sm['promoted']}")
         check(sm['rank'][:2] == [2, 'officer'] and sm['xpAt'] == [0, 'New officer'] and sm['rank'][4] == 2 and sm['rank'][5] == 'officer' and sm['reply'] == 3, f"Tier 2 officer, xp from 0 (New officer), the reply remembered: {sm['rank']}, {sm['xpAt']}, {sm['reply']}")
-        check(sm['works']['done'][:1] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == 11, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
+        check(sm['works']['done'][:1] == ['summons2'] and ['officer', 10] in sm['works']['ms'] and sm['plan']['move']['day'] == 10 and sm['plan']['ceremony']['day'] == C_DAY, f"done and milestones, the plan: {sm['works']['done']}, {sm['works']['ms']}, {sm['plan']}")
         check(not sm['juniorHeld'], 'a junior job is still held for you as an officer')
         print('   the move:', sm['moved'], sm['home'])
         check(sm['home'][0] == '4-23' and 'move2' in sm['home'][1] and sm['home'][2] and sm['home'][3] and not sm['home'][4], f"the move: 4-23 is yours (home, done, its door opens for you, not the other spare's): {sm['home']}")
         by = '22:00' if ev("typeof PROMO_SIGHT_ON !== 'undefined' && PROMO_SIGHT_ON") else '17:30'   # FX19 (0.92.6, the user: the walk can't be missed): open till 22:00 with the switch on
         check(sm['moved'] and sm['moved'][0][0] == 10 and sm['moved'][0][1] <= by and len(sm['moved']) == 1, f"moved once, on Day 10 by {by}: {sm['moved']}")
         print('   the ceremony:', sm['cer'], sm['com'], 'pip', sm['pip'], sm['keep'], sm['guests'], sm['mailCer'])
-        check(sm['cer'] and sm['cer'][0][:3] == [11, '17:15', '1/O'] and sm['com'] == [[11, 'met']], f"the ceremony on Day 11 at 17:15 in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
-        check(sm['pip'] == [1, 1] and sm['keep'] and 'commissioned officer, day 11' in (sm['head'] or '').lower() and 'ceremony2' in sm['works']['done'] and ['commissioned', 11] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
+        check(sm['cer'] and sm['cer'][0][:3] == [C_DAY, C_AT, '1/O'] and sm['com'] == [[C_DAY, 'met']], f"the ceremony on Day {C_DAY} at {C_AT} in the observation room, commissioned once: {sm['cer']}, {sm['com']}")
+        check(sm['pip'] == [1, 1] and sm['keep'] and f'commissioned officer, day {C_DAY}' in (sm['head'] or '').lower() and 'ceremony2' in sm['works']['done'] and ['commissioned', C_DAY] in sm['works']['ms'], f"the pip, the framed commission, the Record: {sm['pip']}, {sm['keep']}, {sm['head']}")
         check(sm['guests'][:4] == ['marrow', 'vance', 'calder', 'torres-zeke'] and len(sm['guests']) <= 7, f"the ceremony's guests: {sm['guests']}")
         check(sm['clean'], 'the save: worksClean keeps tier, rank, xp, test, home, done and ms after the promotion')
         sm2 = run('real', 12)
@@ -514,9 +516,9 @@ with sync_playwright() as pw:
         aw = run('away', 12)
         print('   away:', aw['summ'], aw['promoted'], aw['mailC'])
         print('   away, the ceremony:', aw['cer'], aw['com'])
-        check(aw['cer'] and aw['cer'][0][3] == '17:30' and aw['com'] == [[11, 'mail']], f"away: Calder sets off to walk you up at 17:30; commissioned by Mail by 19:00 anyway: {aw['cer']}, {aw['com']}")
+        check(aw['cer'] and aw['cer'][0][3] == C_SEEK and aw['com'] == [[C_DAY, 'mail']], f"away: Calder sets off to walk you up at {C_SEEK}; commissioned by Mail anyway: {aw['cer']}, {aw['com']}")
         ev("promoPip()")
-        check(aw['summ'] and aw['summ'][0][4] == '11:15' and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at 11:15; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
+        check(aw['summ'] and aw['summ'][0][4] == S_SEEK and aw['promoted'] and aw['promoted'][0][0] == 10 and aw['promoted'][0][2] == 'mail' and aw['rank'][1] == 'officer', f"away: Calder sets off to find you at {S_SEEK}; promoted by Mail the same day anyway: {aw['summ']}, {aw['promoted']}")
 
     print('(k) The turn-in card\'s gains (Step 3, for the HUD engineer):')
     tg = ev("""(() => { const j = { id: 'gaintest@1', kind: 'chore', machine: null, title: 'Test', stops: [], parts: [], status: 'claimed', claimedBy: 'you', workDone: true, meters: [{ key: 'air', name: 'Air', gain: 2.5 }, { key: 'power', name: 'Power', gain: 0 }] };

@@ -472,9 +472,10 @@ def part_set(b):
     T = pg.ev("({ clock: clockText(), room: ROOMS[roomAt(...player.here())].name, rank: SHIP.works.rank, test: SHIP.works.test, cur: SHIP.works.cur && SHIP.works.cur.id, tr: 't2' in SHIP.works.tr, m6: 'm6' in SHIP.works.tr })")
     check(T['clock'] == 'Day 9, Tuesday 08:50' and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day 9 test beat: {T}')
     beat('promo'); pg.step(20)
-    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + 11 * 60 + 2))")
+    PB = pg.ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28 (PROMO_BEATS_ON): the result at 08:15, not 11:00
+    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + {8 * 60 + 7 if PB else 11 * 60 + 2}))")
     P = pg.ev("({ clock: clockText(), rank: SHIP.works.rank, passed: SHIP.works.test && SHIP.works.test.passed, summons: SHIP.occasions.some(o => o.id === 'promoSummons') })")
-    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at 11:02 the summons is booked, still a junior): {P}')
+    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at {"08:07" if PB else "11:02"} the summons is booked, still a junior): {P}')
     # the panel's way: a day at a time under the fade, the progress on the panel, then one save
     pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 5; devmodeDraw()')
     pg.page.click('#dmSheet button:has-text("Set career to Day 5")'); pg.page.click('#dmSheet button:has-text("Tap again")')
@@ -536,7 +537,8 @@ def part_career(b):
         seen.append(pg.ev('clockText()'))
         if pg.ev("promoDone('ceremony2')"): break
         pg.ev("devmodeRun('Clock', () => devmodeSkipTo(shipNow() + 40))"); pg.step(5)
-    pg.ev("devmodeRun('Clock', () => devmodeSkipTo(devmodeNext(20 * 60)))")
+    PB = pg.ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28: the walk after your dinner, or at 20:00; 4-23 yours by 22:00 whatever happens
+    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(devmodeNext({22 * 60 + 5 if PB else 20 * 60})))")
     E = pg.ev("({ rank: SHIP.works.rank, done: SHIP.works.done, home: SHIP.works.home, pip: PLAYER_SPEC.rank || 0 })")
     check(E['rank'] == 'officer' and all(k in E['done'] for k in ('summons2', 'move2', 'ceremony2')) and E['home'] == '4-23' and E['pip'] == 1, f'career: the promotion didn\'t run to the ceremony: {E} (steps at {seen})')
     # the tab draws at phone size

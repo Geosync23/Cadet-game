@@ -125,7 +125,7 @@ def part_trade(g):
     s = g.ev("""(() => { BOARD_TRADE_ON = true; const a = { kind: 'tune' }, b = { kind: 'service' }; return [boardTrade(a), boardTrade(b)]; })()""")
     check(s == [True, False], f"trade: boardTrade knows your trade ({s})")
 
-MOVE = r"""(() => { window.__mv = (on, min, o = {}) => { PROMO_SIGHT_ON = on; const W = __w(10, min, { xp: 5 }); W.tier = 2; W.rank = 'officer'; W.test = { tier: 2, day: 9, tries: 1, passed: true };
+MOVE = r"""(() => { window.__mv = (on, min, o = {}) => { PROMO_SIGHT_ON = on; if (typeof PROMO_BEATS_ON !== 'undefined') { PROMO_BEATS_ON = false; promoBeatsApply(); }   /* FX28: FX19's 17:00 walk (after dinner: promo_beats_check.py) */ const W = __w(10, min, { xp: 5 }); W.tier = 2; W.rank = 'officer'; W.test = { tier: 2, day: 9, tries: 1, passed: true };
     W.done.push('summons2'); W.ms.push(['officer', 10]); W.home = 'bunk'; delete W.mv; __toasts.length = 0; if (typeof GUIDE !== 'undefined') GUIDE.list.length = 0; return W; };
   window.__mvLook = () => { const W = SHIP.works; return { mv: !!W.mv, moved: promoDone('move2'), home: W.home, bed: playerBed(), door: worksHomeOpen(4, 'W'), mail: SHIP.mail.map(m => m.subject),
     toasts: __toasts.map(t => t[1]), guide: (GUIDE.list.find(x => x.id === 'promo:home') || {}).id || null, seen: !!flag('promo.sight.home'), line: promoHomeLine().map(b => b.text) }; };

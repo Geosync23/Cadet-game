@@ -583,6 +583,19 @@
 - Your name's already up. Don't make me change it.
 ? flag:promo.walk.inside
 - Your things. Your key. Your cabin. Goodnight, Officer.
+// FX28 (2026-10-26, PROMO_BEATS_ON; drafted for SW2): the test morning in the bay, the result held at the turn-in, the
+// pip's half hour, and the walk to 4-23 after your dinner
+? flag:pb.promo.morning
+- Morning. Nine o'clock it goes on the board. Eat something first.
+? flag:pb.promo.passed
+- That's the test. Filter in, fan settled.
+- Result tomorrow, first thing. My office, 08:15. Not before.
+? flag:pb.promo.pip
+- Observation room. The Captain doesn't wait. Neither do I.
+? flag:pb.promo.fetch.move
+- Dinner's done, then. Walk with me.
+? flag:pb.promo.walk.start
+- Your things went up an hour ago. With me.
 // M8 team jobs: her calls when she leads
 ? flag:team.call.start
 - Spots. Nobody moves until I say.
