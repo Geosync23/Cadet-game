@@ -2678,8 +2678,9 @@ with sync_playwright() as pw:
             note = f'waits for package{"s" if len(missing) > 1 else ""} {", ".join(missing)}' if missing else 'built in this check later'
             print(f'  not yet ({note})'); RESULTS.append((part, 'not yet', note)); continue
         psrc = SRC if part in SELF_BOTH else ON_SRC
-        if part in P5_PARTS:                             # Step 5's: its switch on in the build, or CTL_P5S5=1 (a copy with it on)
-            if not (p5_on(SRC) or os.environ.get('CTL_P5S5')): print(f'  not yet ({P5_PARTS[part]}: P5_STEP5 is off)'); RESULTS.append((part, 'not yet', 'P5_STEP5 off')); continue
+        if part in P5_PARTS:                             # Step 5's: run on a copy with P5_STEP5 switched on, so the round tests them while it's off (RV21's S1); 'not yet' only with no switch line
+            if not p5_on(SRC) and p5_copy(psrc) == psrc: print(f'  not yet ({P5_PARTS[part]}: no P5_STEP5 switch line)'); RESULTS.append((part, 'not yet', 'no P5_STEP5 line')); continue
+            if not p5_on(SRC): print(f'  (on a copy with P5_STEP5 switched on)')
             psrc = p5_copy(psrc)
         fails = PART_FN[part](br, psrc, 'g')
         for f in fails: check(False, f'{part}: {f}')

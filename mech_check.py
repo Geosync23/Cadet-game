@@ -1425,7 +1425,7 @@ M20 = r"""(() => { const out = {};
  try { for (let t = 18 * 1440 + 300; t <= 18 * 1440 + 598; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true); } } finally { promoNotice = pn; }
  const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).filter(a => r && (a.occ === r.key || a.occ === r.key + ':2'));
  out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null; out.notice = notes;
- out.arrow = g ? [g.level, g.from % 1440] : null; worksTrained('m20'); out.later = flag('m20.mori.later') || null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
+ out.arrow = g ? [g.level, g.from % 1440] : null; out.mail = SHIP.mail.filter(x => /sensor array/i.test(x.subject)).map(x => Math.floor(x.at) % 1440); worksTrained('m20'); out.later = flag('m20.mori.later') || null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
  // a job of yours
  W = reset(22 * 1440 + 480); let j = arrJob(shipNow(), { key: 81 }); SHIP.jobs.push(j);
  out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
@@ -1457,6 +1457,7 @@ def part_m20(g):
     check(len(a['notice']) == 1 and a['notice'][0][0] == 570 and 'sensor array' in a['notice'][0][1], f"m20: one urgent notice at 09:30 naming it ({a['notice']})")
     check(a['arrow'] == [1, 585], f"m20: a level 1 arrow from 09:45 ({a['arrow']})")
     check(a['appt'] and a['appt'][0] == ['calder'] and a['appt'][1] == 595, f"m20: Calder (Mori is off on Fridays) booked at the array's panel from 09:55; Mori not brought in on her day off ({a['appt']})")
+    check(len(a['mail']) == 1 and a['mail'][0] >= 570, f"m20: one Mail, after the 09:30 notice (no Mail at the ask) ({a['mail']})")
     check(a['later'] == 1, f"m20: Mori's word saved for the next time you meet her ({a['later']})")
     check(a['board'] and a['claimed'], 'm20: a calibration job on the board for a Senior Officer, taken')
     check(a['stops'] == ['pick:choose', 'turn:turn', 'look:look', 'module:hold'], f"m20: the steps ({a['stops']})")
@@ -2139,14 +2140,10 @@ with sync_playwright() as pw:
     sr = ev(ROW_STAND)                                     # E2's rows (m13, m14) live in 24 core's table (E1); a stand-in only in a build without it
     if sr: print('stand-in ladder rows (24 core\'s table not in this build):', sr)
     rows = ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
-    for r in rows:
-        if only and r['id'] not in only: continue
-        if not r['inBuild']:
-            print(f"{r['id']} ({r['name']}): not in this build")
-            continue
+    def row_check(g, ev, r):
         if r['id'] == 't2' and ev("typeof promoPassed === 'function'"):   # 24p's test job (0.44.18) is no training: career_check (i)-(j) tests it
             print(f"t2 ({r['name']}): 24p's test job, not a training (career_check (i) and (j))")
-            continue
+            return
         a = ev(f"({TRAIN})('{r['id']}')")
         b = ev(f"({TRAIN})('{r['id']}')")
         print(f"{r['id']} ({r['name']}, {r['size']}): opened Day {a['day']}, trained Day {a['trained']}, steps {a['states']}, teacher's job by {a['teacher']}, yours by {a['yours']}, stage {a['stage']}")
@@ -2158,6 +2155,28 @@ with sync_playwright() as pw:
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f"{r['id']}: the training differs the second time")
         if r['id'] in PARTS:
             PARTS[r['id']](g)
+    for r in rows:
+        if only and r['id'] not in only: continue
+        if not r['inBuild']:
+            print(f"{r['id']} ({r['name']}): not in this build")
+            continue
+        row_check(g, ev, r)
+    # (RV21's S1) Pillar 5 Step 5's rows exist only with P5_STEP5 on: with it off in this build, they're run on a copy with
+    # it switched on (as saves_check's and controller_check's Step 5 parts do), so the round tests them before the switch-on
+    P5_LINE = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
+    src0 = pathlib.Path(sys.argv[1]).read_text()
+    if P5_LINE in src0 and (not only or only & {'ps', 't3', 'm19', 'm18', 'm20', 'p4', 'p5', 'p9', 'mys'}):
+        cp = WORK / 'test' / ('_mech_p5_' + str(os.getpid()) + '_' + pathlib.Path(sys.argv[1]).name); cp.write_text(src0.replace(P5_LINE, 'const P5_STEP5 = true;', 1))
+        try:
+            g5 = Game(pw, str(cp)); rows5 = g5.ev("CAREER_LADDER.map(r => ({ id: r.id, name: r.name, size: r.size, inBuild: !!WORK_MECH[r.id], stages: (r.stages || []).length }))")
+            base = {r['id'] for r in rows}
+            for r in rows5:
+                if r['id'] in base or (only and r['id'] not in only): continue
+                if not r['inBuild']: print(f"{r['id']} ({r['name']}): not in this build (P5_STEP5 on)"); continue
+                print(f"(on a copy with P5_STEP5 switched on)"); row_check(g5, g5.ev, r)
+            if g5.errors: fail('page errors (P5_STEP5 copy): ' + ' | '.join(g5.errors[:5]))
+            g5.close()
+        finally: cp.unlink(missing_ok=True)
     if not only or 'ps' in only: part_ps(g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)

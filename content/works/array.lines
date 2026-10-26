@@ -22,3 +22,13 @@
 // Mori wasn't at the lesson (her day off): her word the first time you're near her after it
 == m20.mori.later
 - Calder says you calibrated my array without me. I checked your numbers. Good.
+// the lesson in the teacher's own name (Calder on Mori's days off: RV21's S2; {name}: the teacher)
+== m20.ptr.with
+- The sensor array with {name}, {time}
+== m20.notice.with
+- The sensor array with {name} at {time}: the array room, Deck 2. Go at quarter to.
+== m20.ask.say.calder
+- The sensor array today, {time}, Deck 2. Hana's off, so it's me. Don't be late.
+// the Mail, after the word in person or the 09:30 notice (the record; "Subject | body")
+== m20.mail
+- Training: the sensor array | {time}, the array room on Deck 2, with {name}.
