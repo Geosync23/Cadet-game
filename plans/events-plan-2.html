@@ -1,0 +1,753 @@
+<title>Visit and Comet Plan</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Plan · ship-wide events · EP1 for lead 37 · 2026-10-26</p>
+  <h1>The Veyli visit and the comet, hour by hour</h1>
+  <p class="lead">You asked whether the next two ship-wide events were planned in detail for their new order. They weren't, so this page plans both: the short visit on Tuesday to Friday, Days 16-19, and the comet on Friday Day 26 at 21:30. Nothing here is built. FX22b is already moving the two events on the calendar, and this plan is what turns them into finished events you can play. Your answers go at the bottom.</p>
+  <div class="facts">
+    <div class="fact"><b>The visit</b>Tue 16 warning, Wed 17 the Veyli come aboard at 10:00, Thu 18 the formal dinner, Fri 19 the farewell at 09:00. Afterglow to Saturday night.</div>
+    <div class="fact"><b>The comet</b>Sato's Mail on Thursday 25 at 18:00. Friday 26, 21:30-22:40, at the bow windows and in the observatory. One evening, no score.</div>
+    <div class="fact"><b>Big groups</b>The greeting line (about 60), Veyli night in the mess (seated, up to 48 at once), the farewell line (about 60), the comet at the bow glass (about 50).</div>
+    <div class="fact"><b>Size</b>About 15-20 build turns plus the writers' words and two full rounds of checks. Both stay switched off until you say yes.</div>
+  </div>
+  <p class="note">Ranks: in today's game a steady player is an Officer during the visit (the Senior Officer step on Day 16 belongs to Pillar 5 and isn't built yet), and a slow player is still a Cadet. The plan gives a part to each rank, and the Senior parts switch on by themselves when Pillar 5 arrives.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#cal">The two weeks at a glance</a></li>
+    <li><a href="#visit">The visit: story and guests</a></li>
+    <li><a href="#vdays">The visit, hour by hour</a></li>
+    <li><a href="#rank">Your part, by rank</a></li>
+    <li><a href="#groups">Moments: host, tap, pose, words</a></li>
+    <li><a href="#vwords">The visit's words</a></li>
+    <li><a href="#comet">The comet, hour by hour</a></li>
+    <li><a href="#cwords">The comet's words</a></li>
+    <li><a href="#mail">Mail, news and heads-ups</a></li>
+    <li><a href="#trad">Traditions that pause or move</a></li>
+    <li><a href="#stories">Crew stories they touch</a></li>
+    <li><a href="#result">Commendation and how it went</a></li>
+    <li><a href="#device">On your device</a></li>
+    <li><a href="#sound">Sound and music</a></li>
+    <li><a href="#props">Poses, props: reused and new</a></li>
+    <li><a href="#risk">Draw calls and phones</a></li>
+    <li><a href="#checks">Checks to add</a></li>
+    <li><a href="#build">Build order and estimate</a></li>
+    <li><a href="#questions">Questions for you</a></li>
+  </ol>
+</nav>
+
+<section id="cal">
+  <h2>1. The two weeks at a glance</h2>
+  <p>The visit fills the middle of week 3 and is gone before your night shifts, the Captain's table, Theo's send-off and Basil's arrival. The comet closes the career's first stretch on the evening of Calder's question. Rows in red are Pillar 5's held hours (not built yet; the events already steer round them).</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Day</th><th>Event</th><th>What else is on</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Mon 15</td><td>The storm's afterglow ends at midnight</td><td>Tier 3 test (Pillar 5). Storm debrief Mail 18:00. Lap of the Wren 20:30.</td></tr>
+      <tr><td class="n">Tue 16</td><td><span class="tag v">Visit: warning</span> Vance's memo 07:30, prep jobs from 09:00</td><td>Senior Officer scene 10:00-12:00 (Pillar 5). Spice shelf supper, Knit and natter, Tiles night, late piano.</td></tr>
+      <tr><td class="n">Wed 17</td><td><span class="tag v">Visit: onset</span> senior briefing 08:30, the greeting 10:00, the engine room tour 14:00, the door 20:15</td><td>Open door 16:40 (Moleth comes). The Senior toast 19:00 (Pillar 5). Hum night 21:00 if you said yes to it.</td></tr>
+      <tr><td class="n">Thu 18</td><td><span class="tag v">Visit: escalation</span> Veyli night 18:00, the formal dinner 19:30</td><td>Calder's chief's talk 19:00 (Moleth asks). Quiz night 20:00 (Kesrin writes it all down). Late piano 21:40 (the Speaker listens). Pillar 5: training and your night shift assigned.</td></tr>
+      <tr><td class="n">Fri 19</td><td><span class="tag v">Visit: resolution</span> gift exchange 08:15, farewell 09:00</td><td>Short Friday, the Captain's address 16:00 (about the visit). Imani O'Neill's birthday. Your first night shift 21:00.</td></tr>
+      <tr><td class="n">Sat 20</td><td><span class="tag v">Visit: afterglow</span> to midnight</td><td>Theo's farewell supper. The Captain's table 19:00-20:15. Night shift 2.</td></tr>
+      <tr><td class="n">Sun 21</td><td>-</td><td>Theo's send-off 14:00, Basil off the Tern 17:40.</td></tr>
+      <tr><td class="n">Mon 22</td><td>-</td><td>The bridge invite at breakfast. Basil on the beam. The commendation summons 11:00 (question 3).</td></tr>
+      <tr><td class="n">Tue 23</td><td>-</td><td>Engine Specialist (Pillar 5).</td></tr>
+      <tr><td class="n">Thu 25</td><td><span class="tag c">Comet: warning</span> Survey talk from 09:00, Sato's Mail 18:00</td><td>Basil's new hand's tea 18:40. Tomas's Wren talk 19:00. Moleth's letter by Mail at 12:00.</td></tr>
+      <tr><td class="n">Fri 26</td><td><span class="tag c">Comet</span> 21:30-22:40</td><td>The Captain's address 16:00. Four weeks aboard 18:40. Calder's question. The jam 19:45. Tap night 20:00-21:15.</td></tr>
+      <tr><td class="n">Sat 27</td><td><span class="tag c">Comet: afterglow</span></td><td>Sato's comet log Mail 08:00. Observatory night 21:15.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="visit">
+  <h2>2. The diplomatic visit: story, guests and threads</h2>
+  <p>Four Veyli come aboard for two nights. They are proud, ritual-minded and courteous, hard to read, and very sure of who they are. The Wren is a guest in their sky, and for two days they are guests in the Wren's corridors. Both sides know it, and the visit is about being good at both at once. The words keep to the old rules: the Wren travels the reach "as guests", never by anyone's leave or permission; nobody aboard is a soldier; Holt's distrust is his own, about one day, and never a word against the Veyli as a people.</p>
+  <h3>The story: "Two at the door"</h3>
+  <p>Like the storm's "Sixty by lamplight" and the Line's "The one on watch", the visit has one small story with one choice for you. Ithra, the delegation's pilot, watches every door. So does Chief Holt. On Wednesday evening they end up standing at the same door on Deck 2, either side of nobody, for forty minutes, without a word. Kofi Mensah asks you to walk past. You can say a door has two sides, fetch Envoy Saruth, or leave them to it. What you chose shows at Thursday's dinner (who stands where), at the farewell (what Ithra says to Holt) and in the crew's talk afterwards. Every ending is kind: even left alone, the two of them end the visit with a nod.</p>
+  <h3>The guests</h3>
+  <div class="cards">
+    <div class="card visit"><h3>Speaker Teshavi</h3><p class="role">Leads the delegation; speaks for the Veyli council. Visitors' suite, Deck 2.</p><p>Grave, slow, ceremonial; every word chosen and long silences meant. Kind to juniors in a grand way. Brought the Captain a gift in seven knots and will not say what's in it. Sits in the garden at 07:00 in silence; you may sit too.</p></div>
+    <div class="card visit"><h3>Kesrin</h3><p class="role">The Speaker's aide. Guest cabin 4-01.</p><p>Quick, polite, a little breathless; carries the schedule in their head and a tea set in a satchel; writes everything down, jokes included. Secretly delighted by the vending machine on Deck 3. Goes to quiz night.</p></div>
+    <div class="card visit"><h3>Moleth</h3><p class="role">Scholar of human ships. Guest cabin 4-02.</p><p>Eager and formal, all questions: "May I ask..." and then four more. Forty questions for Chief Calder. Wants the engine room more than anything. Ambushes the Open door tea and Calder's chief's talk, and eats in the mess with the crew.</p></div>
+    <div class="card visit"><h3>Ithra</h3><p class="role">Pilot of the delegation's shuttle; watches the doors. Guest cabin 4-03.</p><p>Almost no words: one or two, then a nod. Runs laps of the promenade at 06:00 (you can run with them). The other half of "Two at the door".</p></div>
+    <div class="card visit"><h3>Envoy Saruth</h3><p class="role">Lives aboard (cabin E, Deck 2). Not one of the four.</p><p>Formal and exact, dry a sentence late. Old friend of the Speaker (students of the cord together). Goes between the two peoples without taking a side, and at the comet a week later ties the comet knot.</p></div>
+    <div class="card visit"><h3>The Wren's side</h3><p class="role">Who carries it.</p><p>Captain Marrow hosts. Commander Vance runs it, called in on both his days off (Wed and Thu) and says so. Chief Holt and Kofi Mensah keep the corridors. Brennan cooks, Lukas helps. Lucia Ferreira reads the Veyli hail and sings at the farewell with Femi Rossi. Zeke Torres gives the engine tour. Tove Cruz has the herbs. Sato (Survey) made the chart that is the Wren's gift.</p></div>
+  </div>
+  <h3>Threads (kept from the built visit, cut to two nights)</h3>
+  <div class="tbl"><table>
+    <thead><tr><th>Thread</th><th>Measured from</th><th>What helps</th></tr></thead>
+    <tbody>
+      <tr><td>Warm guest cabins</td><td>Hours a guest cabin is below Veyli comfort, Wed 10:00 to Fri 09:00 (the heaters' wear)</td><td>The heater job on Tuesday; fixing a heater fault if one comes</td></tr>
+      <tr><td>The dinner on time</td><td>Minutes the formal dinner's courses are late (the galley's extra batch)</td><td>The dinner service job (carry the courses up); the lamp job</td></tr>
+      <tr><td>Herbs from the garden</td><td>Whether the dinner had fresh herbs</td><td>The herb job on Thursday</td></tr>
+      <tr><td>Courtesy</td><td>The greeting line's turnout, the door story, replies in meetings, crew mood toward the guests</td><td>Signing the greeting sheet, the door, a kind reply</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Left alone it comes out bumpy; with your help, smooth. Rough is never failure: a cold cabin, dried herbs and a frosty door, and the guests leave politely anyway.</p>
+</section>
+
+<section id="vdays">
+  <h2>3. The visit, hour by hour</h2>
+
+  <article class="day visit">
+    <header><h3>Tuesday, Day 16</h3><span class="phase">Warning</span></header>
+    <ol class="tl">
+      <li><time>overnight</time><div class="what"><b>A Veyli hail</b><span class="where">Comms room, Deck 2</span>The delegation's shuttle calls ahead in the night. Lucia Ferreira (Comms Chief, learning Veyli) translates it before breakfast.</div></li>
+      <li><time>07:00</time><div class="what"><b>The mess hears first</b><span class="where">Mess hall, Deck 3</span>Ferreira tells her table at breakfast, and chatter spreads from Comms and Command through the morning.</div></li>
+      <li><time>07:30</time><div class="what"><b>Vance's memo</b><span class="where">Mail, every deck</span>The warning Mail: four Veyli guests tomorrow at ten in the shuttle bay; dress uniforms; visit jobs on the Works board from nine; volunteers for the greeting line on the sheet in the mess. This is the memo that used to come on Day 22, now in the visit's own week.</div></li>
+      <li><time>08:00</time><div class="what"><b>The greeting sheet goes up</b><span class="where">Mess hall, by the servery</span>"The greeting line: volunteers", with T. Vance and "B. Holt (under protest)" already on it. Tap it to add your name.<span class="you">Your part: sign the sheet (courtesy).</span></div></li>
+      <li><time>09:00</time><div class="what"><b>Five prep jobs on the Works board</b><span class="where">Works bay, Deck 5</span>Warm the guest cabins and the visitors' suite (heaters up, Decks 2 and 4). Fix the lamp in the Captain's dining room. Bring the gift crates up from the hold to the observation room. Set out the greeting line's posts and cord in the shuttle bay. Run the dress uniforms through the laundry. Each moves a thread. The one you pick is held for you until 14:00 (the Senior Officer scene may take your morning); after that the crew take any left, on the hour, and all are done by Wednesday 09:30 either way.<span class="you">Your part: take one or more, by your rank (section 4).</span></div></li>
+      <li class="career"><time>10:00-12:00</time><div class="what"><b>Senior Officer scene</b><span class="where">The ready room (Pillar 5, held)</span>The visit leaves these hours alone. The Captain may mention her guests in it (a note for Pillar 5's writer).</div></li>
+      <li><time>18:00</time><div class="what"><b>Vance: "Where to stand"</b><span class="where">Mail</span>The greeting line explained: where each rank stands, the Veyli bow and the crew's nod, no handshakes, and "if the Speaker is silent, so are you".</div></li>
+      <li><time>18:15</time><div class="what"><b>Spice shelf supper</b><span class="where">Mess hall</span>As built. One of the week's three jars is a smoked Veyli leaf Saruth gave Brennan, and the mess guesses whose (a words change only).</div></li>
+      <li><time>evening</time><div class="what"><b>The ship gets ready</b><span class="where">Everywhere</span>Knit and natter, Tiles night and late piano as usual. Crew iron, polish and practise the nod in corridors. Holt says he'll be polite. Moleth's forty questions are already a rumour.</div></li>
+    </ol>
+  </article>
+
+  <article class="day visit">
+    <header><h3>Wednesday, Day 17</h3><span class="phase">Onset</span></header>
+    <ol class="tl">
+      <li><time>08:30-09:00</time><div class="what"><b>The senior briefing</b><span class="where">Observation room, Deck 1</span>Vance with Holt, Brennan, Sato and Calder: four guests, two nights, one dinner; the door rota; what the Veyli like (warm, slow, quiet); "every star you see from the bow has a Veyli name: if the Speaker uses one, write it down". The briefing that used to be Day 29, now in the visit's week.<span class="you">Your part: Officers and up are in it (question 4). A Senior gets one question: "Where do you want me?" Cadets hear the gist from Zeke at the Works tables.</span></div></li>
+      <li><time>09:30</time><div class="what"><b>The bay is cleared</b><span class="where">Shuttle bay, Deck 5</span>The second pad cleared beside the Tern, the posts and Veyli cord making an aisle from the pad to the bay door.</div></li>
+      <li><time>09:45</time><div class="what"><b>Standing easy</b><span class="where">Every deck</span>The day shift stands easy 09:45-10:45, except the bridge, the engine watch and the galley line. The crowd sets off for the bay so most are in place by 09:55.</div></li>
+      <li><time>09:50</time><div class="what"><b>The Veyli shuttle comes in</b><span class="where">Felt on Deck 5; a one-line notice elsewhere</span>The bay lights turn amber, the outer doors open, and a slim pale shuttle settles on the second pad with a long soft rush and three clamps (question 1).</div></li>
+      <li class="big"><time>10:00-10:25</time><div class="what"><b>The greeting</b><span class="where">Shuttle bay, Deck 5 · about 60 lining the aisle</span>The Veyli bell (three low struck notes) and the ramp opens. The four walk down the aisle slowly. At the foot stand the Captain, Vance and Saruth. The Speaker stops, is silent for a long moment, and bows (palms to the chest); the whole line answers with the Concord's nod. The meeting plays: the Captain's welcome, the Speaker to Saruth, Kesrin's schedule, and the Speaker to you.<span class="you">Your part: tap Vance (marked) to join the line; your spot depends on your rank. The Speaker asks what you do, with three replies.</span></div></li>
+      <li><time>10:30</time><div class="what"><b>The Captain's address</b><span class="where">Banner on every deck, kept in Mail</span>"Our guests are aboard..." Crew turn to the nearest speaker and carry on.</div></li>
+      <li><time>10:45</time><div class="what"><b>To their cabins</b><span class="where">Decks 2 and 4</span>Vance walks the Speaker to the visitors' suite; Mensah walks the other three to Deck 4. Ithra checks every door on the way.</div></li>
+      <li><time>12:00</time><div class="what"><b>Lunch in the mess</b><span class="where">Mess hall</span>The guests eat with the crew (the delegates' habit), and the mess is quieter than it has ever been.</div></li>
+      <li><time>14:00-14:40</time><div class="what"><b>The engine room tour</b><span class="where">Engine room and overlook, Deck 6 · about 8</span>Zeke Torres shows Moleth the coils, thrilled. Moleth asks the coils questions. Calder comes down for the last ten minutes. (Wednesday, because Zeke is off on Thursday.)<span class="you">Your part: tap Zeke to join the tour. Moleth asks you one question, by your rank.</span></div></li>
+      <li><time>15:00-17:00</time><div class="what"><b>Kesrin and the vending machine</b><span class="where">Promenade, Deck 3</span>A small favour from Kesrin, if you meet them: "Is it true there is a machine that gives you a biscuit for a token?" You walk them there. They buy one of everything and write it all down.</div></li>
+      <li class="big"><time>16:40-17:50</time><div class="what"><b>Open door, with a visitor</b><span class="where">Works tea corner, Deck 5 · the usual tea and more</span>Calder's end-of-shift tea, as built. Moleth arrives with the list. "May I ask the first?" Calder allows one, on her tea. Half of Works stays to watch.<span class="you">Your part: tap Calder to join as usual; this week the tea has Moleth's first question in it.</span></div></li>
+      <li><time>18:00</time><div class="what"><b>Brennan: "Veyli night"</b><span class="where">Mail</span>Tomorrow the whole ship eats the menu she cooks for the Captain's table (question 5).</div></li>
+      <li class="career"><time>19:00-21:00</time><div class="what"><b>The Senior toast</b><span class="where">Pillar 5, held</span>The visit leaves it alone. It isn't in the Captain's quarters on Thursday, which are set for the dinner.</div></li>
+      <li><time>20:15-21:30</time><div class="what"><b>Two at the door</b><span class="where">The senior corridor, Deck 2, at the visitors' suite</span>Ithra and Holt at the same door. Mensah calls you on the comm ("would you walk past?") if you're free and on Decks 2-4; otherwise you can find them. A meeting with your one choice. If nobody comes by 21:30, Mensah takes them two teas and it settles itself.<span class="you">Your part: the visit's story choice.</span></div></li>
+      <li><time>21:00</time><div class="what"><b>Hum night</b><span class="where">If you said yes to CS1's Hum night</span>The Speaker comes and sits through a long hum without a word, which the hosts take as the highest praise.</div></li>
+    </ol>
+  </article>
+
+  <article class="day visit">
+    <header><h3>Thursday, Day 18</h3><span class="phase">Escalation</span></header>
+    <ol class="tl">
+      <li><time>06:00-06:30</time><div class="what"><b>Ithra's laps</b><span class="where">Promenade, Deck 3</span>Ithra runs the promenade at dawn, as their card says.<span class="you">Your part: tap Ithra and run a lap beside them (the Saturday run's line, at running pace). One word at the end.</span></div></li>
+      <li><time>07:00-07:30</time><div class="what"><b>The Speaker's silence</b><span class="where">Garden, Deck 3, a bench by the pond</span>Teshavi sits in the garden without a word.<span class="you">Your part: tap them to sit beside them. Nothing happens for five ship minutes. Then one line, and a friendship step.</span></div></li>
+      <li class="career"><time>09:00-12:00</time><div class="what"><b>Shutdowns training</b><span class="where">Pillar 5, held</span>The visit's jobs today wait for your afternoon.</div></li>
+      <li><time>12:00</time><div class="what"><b>The Captain's quarters close</b><span class="where">Deck 2, room C</span>Set for the dinner: the long cloth, six places, the lamp you fixed (or didn't).</div></li>
+      <li><time>13:00</time><div class="what"><b>The herb job</b><span class="where">Garden, then the cold store</span>Pick herbs with Tove Cruz for the dinner. Held for you until 15:30.</div></li>
+      <li class="career"><time>14:00-15:00</time><div class="what"><b>Calder assigns your night shift</b><span class="where">Pillar 5, held</span>No visit moment in these hours.</div></li>
+      <li><time>17:30</time><div class="what"><b>The mess is dressed</b><span class="where">Mess hall</span>A strip of Veyli cord along each long table; the menu board says "Veyli night".</div></li>
+      <li><time>18:00</time><div class="what"><b>Vance: "Nine tomorrow"</b><span class="where">Mail</span>The farewell, and the gift exchange for those invited.</div></li>
+      <li class="big"><time>18:00-19:45</time><div class="what"><b>Veyli night</b><span class="where">Mess hall · about 55, at most 48 seated at once</span>A meal tradition for one night: the Thursday dinner is the dinner's own menu, in seated sittings with staggered arrival like the lantern supper. Moleth, Kesrin and Ithra eat with the crew; Moleth goes table to table with the list.<span class="you">Your part: eat there. When Moleth reaches your table, one question for you.</span></div></li>
+      <li class="big"><time>19:00-19:45</time><div class="what"><b>Calder's chief's talk</b><span class="where">Auditorium, the rec deck</span>As built: "The Wren's first refit". Moleth leaves the mess early, sits in the front row and asks, as the Mail invites, a question. Then another.</div></li>
+      <li><time>19:15</time><div class="what"><b>Dinner service</b><span class="where">Galley to Deck 2</span>A job for two stewards: carry the courses up from the galley and pour. Moves "the dinner on time".<span class="you">Your part: Cadets and Officers can take it and stay at the sideboard through the dinner.</span></div></li>
+      <li><time>19:30-21:00</time><div class="what"><b>The formal dinner</b><span class="where">The Captain's quarters, Deck 2 · six seats</span>The Captain, the Speaker, Saruth, Vance (called in again), Kesrin, and the sixth seat: you if you're a Senior Officer, otherwise Dr. Sato. Ithra stands inside the door; Holt outside it, or with Ithra, as Wednesday went. A meeting with lines and one choice for a seated player.<span class="you">Your part: a seat (Senior), or the sideboard (steward), or the gist in Mail.</span></div></li>
+      <li><time>20:00-21:30</time><div class="what"><b>Quiz night</b><span class="where">Bow lounge, Deck 3</span>As built, hosted by Tomas. Kesrin comes and writes down every question and every answer, wrong ones included. One of the night's three questions is about the Veyli.</div></li>
+      <li><time>21:40-22:25</time><div class="what"><b>Late piano</b><span class="where">Music room, Deck 4</span>The Captain plays as usual. The Speaker and Saruth sit at the back, silent, to the end.</div></li>
+    </ol>
+  </article>
+
+  <article class="day visit">
+    <header><h3>Friday, Day 19</h3><span class="phase">Resolution</span></header>
+    <ol class="tl">
+      <li><time>06:00-06:30</time><div class="what"><b>Ithra's last laps</b><span class="where">Promenade</span>If you ran on Thursday, Ithra waits for you at the lift plaza.</div></li>
+      <li><time>06:30</time><div class="what"><b>Sunrise stretch</b><span class="where">Garden</span>As built with Rina. The Speaker watches from the bench.</div></li>
+      <li><time>08:15-08:40</time><div class="what"><b>The gift exchange</b><span class="where">Observation room, Deck 1 · about 10</span>The Speaker gives the Wren the seven knots: a cord sculpture to hang where the crew gather. The Captain gives the Veyli the Wren's chart of the reach, every star on it in its Veyli name, in Sato's hand. A long silence. Moleth says how many questions are left.<span class="you">Your part: invited if you're an Officer or up and did a visit job, or a Senior; you stand by the crates you carried. Others get the gist.</span></div></li>
+      <li><time>08:45</time><div class="what"><b>The bay fills again</b><span class="where">Shuttle bay</span>Standing easy 08:45-09:45 (the day shift starts with it).</div></li>
+      <li class="big"><time>09:00-09:40</time><div class="what"><b>The farewell</b><span class="where">Shuttle bay · about 60 in the line</span>The four walk back up the aisle. Ithra stops at Holt and says one word (it depends on the door). At 09:20 Femi Rossi and Lucia Ferreira, at the front of the line, sing a Veyli leave-taking (Rossi has been learning it in the music room, Ferreira has the words from Saruth); the line joins the last phrase. The Speaker's reply. 09:30 up the ramp; 09:40 the shuttle lifts and the line waves.<span class="you">Your part: tap Vance to join the line. The Speaker's last line to you depends on what you said at the greeting.</span></div></li>
+      <li><time>09:40</time><div class="what"><b>The threads settle; your commendation</b><span class="where">Mail</span>The result is settled as the farewell begins and the letter comes as it ends (section 12).</div></li>
+      <li><time>09:45</time><div class="what"><b>The Captain's address</b><span class="where">Banner</span>The built resolution words, fixed for the Speaker's pronouns (they/them).</div></li>
+      <li><time>11:00</time><div class="what"><b>Hang the Speaker's gift</b><span class="where">Bow lounge</span>A job: hang the cord sculpture from the ceiling by the bow glass. Smooth visit only (otherwise the gift is smaller and goes to the Captain's office). Held for you until 14:00.</div></li>
+      <li><time>15:30-16:50</time><div class="what"><b>Short Friday and the Captain's address</b><span class="where">Auditorium</span>Untouched: the visit is on the keep list, so nothing of it ever pauses the address. Its Day 19 words are rewritten to talk about the guests who left this morning (and Kovac's lift moment may happen on the way).</div></li>
+      <li><time>18:00</time><div class="what"><b>Vance's debrief</b><span class="where">Mail</span>"The visit: how it went", in words by band, with your part.</div></li>
+      <li><time>evening</time><div class="what"><b>Everything as usual</b><span class="where">-</span>Works Friday tea, the jam, tap night, Imani O'Neill's birthday. Your night shift at 21:00 (held from 20:30).</div></li>
+    </ol>
+  </article>
+
+  <article class="day quiet">
+    <header><h3>Saturday, Day 20, to Thursday, Day 25</h3><span class="phase">Afterglow</span></header>
+    <ol class="tl">
+      <li><time>Sat 20</time><div class="what"><b>Talk, and the sculpture</b><span class="where">Everywhere</span>The crew retell what really happened (the door, the song, Moleth's count). The cord sculpture turns slowly when the vents come on. The event ends at midnight.</div></li>
+      <li><time>Thu 25, 12:00</time><div class="what"><b>Moleth writes</b><span class="where">Mail</span>A letter with the questions still left (fewer if you carried the list to Calder) and one for you.</div></li>
+    </ol>
+  </article>
+</section>
+
+<section id="rank">
+  <h2>4. Your part, by rank</h2>
+  <p>The events come by the calendar; your rank changes your small parts. Anyone can do the favours, the laps, the silence, Veyli night and the door.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Moment</th><th>Cadet (a slow player)</th><th>Officer (today's steady player)</th><th>Senior Officer (with Pillar 5)</th></tr></thead>
+    <tbody>
+      <tr><td>Prep jobs</td><td>The posts and cord, the laundry, the crates</td><td>Those, and the heaters (tier 2)</td><td>Any, and a nod from Vance on the board</td></tr>
+      <tr><td>Senior briefing</td><td>The gist from Zeke at breakfast</td><td>In the room, listening (question 4)</td><td>In the room, with "Where do you want me?"</td></tr>
+      <tr><td>The greeting line</td><td>The far end by the bay door. The Speaker: "The young one at the end..."</td><td>Mid-line with Works</td><td>The front row, by the Captain</td></tr>
+      <tr><td>Moleth's tour question</td><td>"What does that sound mean?"</td><td>"What would you change, if it were yours?"</td><td>"Which part do you trust least?"</td></tr>
+      <tr><td>The formal dinner</td><td>Steward (job)</td><td>Steward (job)</td><td>A seat, with one choice</td></tr>
+      <tr><td>Gift exchange</td><td>The gist</td><td>Invited if you did a visit job</td><td>Invited</td></tr>
+      <tr><td>The comet</td><td colspan="3">The comet doesn't check rank: stand where you like. The Captain, at the bow glass, says one line to you that fits your rank and your month.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="groups">
+  <h2>5. Moments: who hosts, how you join, the pose, the words</h2>
+  <p>Your rule for traditions holds for every moment in both events: a host you tap to join (marker over their head, the arrow points at them, a tip says "Tap Vance to join the line"), a simple pose that fits, and words that are only theirs.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Moment</th><th>Host (tap to join)</th><th>What you do, pose</th><th>Size</th><th>Unique words</th></tr></thead>
+    <tbody>
+      <tr><td>The greeting line</td><td>Commander Vance</td><td>Stand in the line; the crew nod as the Veyli bow <span class="tag new">bow</span></td><td class="n">about 60</td><td>The greeting meeting; the line's own chatter</td></tr>
+      <tr><td>Engine room tour</td><td>Zeke Torres</td><td>Stand with the group at the overlook rail <span class="tag re">gesture</span></td><td class="n">about 8</td><td>Zeke, Moleth, Calder</td></tr>
+      <tr><td>Open door with Moleth</td><td>Chief Calder</td><td>Tea, as built <span class="tag re">drink</span></td><td class="n">usual</td><td>Moleth's first question</td></tr>
+      <tr><td>Two at the door</td><td>Holt and Ithra (a meeting)</td><td>Stand between them <span class="tag re">nod</span></td><td class="n">3-4</td><td>The story's lines</td></tr>
+      <tr><td>Ithra's laps</td><td>Ithra</td><td>Run a lap in line <span class="tag re">the run's line walk</span></td><td class="n">1-3</td><td>Ithra's one word</td></tr>
+      <tr><td>The Speaker's silence</td><td>Teshavi</td><td>Sit beside them on the bench <span class="tag re">sit</span></td><td class="n">2</td><td>One line after five minutes</td></tr>
+      <tr><td>Veyli night</td><td>Brennan (at the servery); Moleth comes to you</td><td>Eat <span class="tag re">sit, talk</span></td><td class="n">55, 48 at once</td><td>Moleth's table questions; Brennan's menu</td></tr>
+      <tr><td>The formal dinner</td><td>The Captain (a meeting)</td><td>Sit, or stand at the sideboard holding the teapot <span class="tag re">sit</span> <span class="tag new">pour</span></td><td class="n">6 + 2-3</td><td>The dinner's lines</td></tr>
+      <tr><td>Gift exchange</td><td>The Captain (a meeting)</td><td>Stand by the crates <span class="tag re">stand</span></td><td class="n">about 10</td><td>The seven knots, the chart</td></tr>
+      <tr><td>The farewell line</td><td>Commander Vance</td><td>Stand in the line, join the song's last phrase, wave <span class="tag new">wave</span></td><td class="n">about 60</td><td>Rossi and Ferreira's song; Ithra to Holt; the Speaker's goodbye</td></tr>
+      <tr><td>Comet at the bow glass</td><td>Dr. Imra Sato</td><td>Stand at the glass beside her, chin up <span class="tag new">look up</span></td><td class="n">about 50</td><td>Sato's commentary; naming the comet</td></tr>
+      <tr><td>Comet at the scope</td><td>Hana Mori</td><td>A turn at the observatory scope <span class="tag re">telescope</span></td><td class="n">about 10</td><td>Mori's lines at the eyepiece</td></tr>
+      <tr><td>The comet knot</td><td>Envoy Saruth</td><td>Tie a knot of cord from the basket <span class="tag re">fold</span></td><td class="n">whoever's near</td><td>Saruth's custom</td></tr>
+      <tr><td>The Comet Tail</td><td>Ivo Madsen at the bar</td><td>A drink in your hands <span class="tag re">drink, the cocoa mug</span></td><td class="n">-</td><td>Ivo's last call</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="vwords">
+  <h2>6. The visit's words: samples</h2>
+  <p class="note">Samples in each person's voice for the writers to build from; the head writer has the final words. Every Veyli is they/them; the Captain is she.</p>
+
+  <div class="script">
+    <h3>The greeting (Wednesday 10:00)</h3>
+    <p class="ctx">Built script, kept, with the Speaker's opening and the rank lines added.</p>
+    <div class="ln"><b>Marrow</b><span>Speaker Teshavi. Welcome aboard the Wren.</span></div>
+    <div class="ln"><b>Teshavi</b><span><i>(a long silence, then the bow)</i> Captain. On your ship, we are the guests. We will try to be good ones.</span></div>
+    <div class="ln"><b>Teshavi</b><span>Outside it, of course, you are ours. We have been expecting you for some time.</span></div>
+    <div class="ln"><b>Kesrin</b><span>Four minutes early. That has never happened. I am writing it down.</span></div>
+    <div class="ln"><b>Teshavi</b><span>(Cadet) You. The young one at the end, in Works grey. What do you do aboard?</span></div>
+    <div class="choice">I keep the lights on, Speaker. Mostly.</div>
+    <div class="choice">Welcome aboard. Ask me anything about the ship.</div>
+    <div class="choice">(A respectful nod)</div>
+  </div>
+
+  <div class="script">
+    <h3>The senior briefing (Wednesday 08:30)</h3>
+    <div class="ln"><b>Vance</b><span>Four guests. Two nights. One dinner. I'm off today and tomorrow, officially. Don't tell the rota.</span></div>
+    <div class="ln"><b>Vance</b><span>Out here we're guests. In here, for two days, we're hosts. Both at once. Mind it.</span></div>
+    <div class="ln"><b>Holt</b><span>I'll be polite.</span></div>
+    <div class="ln"><b>Vance</b><span>You'll be polite in a corridor, Chief, where I can't hear you either way.</span></div>
+    <div class="ln"><b>Brennan</b><span>They like it warm and they like it slow. Slow I can do. Warm is Works.</span></div>
+    <div class="ln"><b>Vance</b><span>(to a Senior) You. Where do you want me to put you?</span></div>
+    <div class="choice">At the door, with the Chief.</div>
+    <div class="choice">With the scholar. Someone has to answer the questions.</div>
+    <div class="choice">Wherever I'm useful.</div>
+  </div>
+
+  <div class="script">
+    <h3>Open door, with a visitor (Wednesday 16:40)</h3>
+    <div class="ln"><b>Moleth</b><span>Chief Calder. I have forty questions. May I ask the first?</span></div>
+    <div class="ln"><b>Calder</b><span>One. I'm on my tea.</span></div>
+    <div class="ln"><b>Moleth</b><span>Why is the tea corner a corner?</span></div>
+    <div class="ln"><b>Calder</b><span><i>(a pause)</i> That's a better question than I was ready for.</span></div>
+    <div class="ln"><b>Zeke</b><span>Thirty-nine to go, Chief.</span></div>
+  </div>
+
+  <div class="script">
+    <h3>Two at the door (Wednesday 20:15)</h3>
+    <p class="ctx">Mensah on the comm first: "Would you walk past the visitors' suite? The Chief and their pilot have been at the same door for forty minutes. Nobody's said a word. It's beautiful, honestly. But somebody should."</p>
+    <div class="ln"><b>Holt</b><span>Your pilot is standing on my patrol line.</span></div>
+    <div class="ln"><b>Ithra</b><span>Door.</span></div>
+    <div class="ln"><b>Holt</b><span>Yes. It's a door. I've watched it for nine years.</span></div>
+    <div class="ln"><b>Ithra</b><span>Tonight, I watch it.</span></div>
+    <div class="choice">A door has two sides.</div>
+    <div class="ln"><b>Ithra</b><span><i>(a long look, then one step left)</i> Left.</span></div>
+    <div class="ln"><b>Holt</b><span>...Right, then.</span></div>
+    <div class="choice">I'll fetch the Envoy.</div>
+    <div class="ln"><b>Saruth</b><span>Two people who watch doors. You will become friends, or the door will be very safe. Both are good outcomes.</span></div>
+    <div class="choice">You two will work it out.</div>
+    <div class="ln"><b>Holt</b><span>We will.</span></div>
+    <div class="ln"><b>Ithra</b><span>We will.</span></div>
+  </div>
+
+  <div class="script">
+    <h3>The formal dinner (Thursday 19:30)</h3>
+    <div class="ln"><b>Marrow</b><span>Chef Brennan cooked from the Envoy's notes. If it's wrong, that's my fault, not hers.</span></div>
+    <div class="ln"><b>Teshavi</b><span><i>(tastes; a long silence)</i> It is wrong. It is very good. Both.</span></div>
+    <div class="ln"><b>Kesrin</b><span>The Speaker means it is not Veyli and it is better than the reports said. I am writing down "better".</span></div>
+    <div class="ln"><b>Teshavi</b><span>(to a steward) You, with the teapot. You pour slowly. Good. Most of your crew pour as if they were late.</span></div>
+    <div class="ln"><b>Teshavi</b><span>(to a Senior) I am told you crossed into our sky on a Sunday, with punch. Why punch?</span></div>
+    <div class="choice">So the first-timers have something to hold.</div>
+    <div class="choice">Because Brennan makes it.</div>
+    <div class="choice">So we'd remember we came as guests.</div>
+    <div class="ln"><b>Brennan</b><span>(if no fresh herbs) No garden herbs tonight, Speaker. I used the dried. I'm sorry.</span></div>
+    <div class="ln"><b>Teshavi</b><span>Dried herbs remember the garden. It is enough.</span></div>
+  </div>
+
+  <div class="script">
+    <h3>The gift exchange and the farewell (Friday)</h3>
+    <div class="ln"><b>Teshavi</b><span>It is our custom to leave something of ourselves behind. Seven knots, tied by seven hands. Hang it where your crew gather. Nobody unties it.</span></div>
+    <div class="ln"><b>Marrow</b><span>And ours. The reach as we've charted it. Dr. Sato wrote the names.</span></div>
+    <div class="ln"><b>Teshavi</b><span><i>(unrolls it; a very long silence)</i> You wrote our names. Not yours. We will remember that.</span></div>
+    <div class="ln"><b>Moleth</b><span>I have thirty-one questions left. I will write.</span></div>
+    <div class="ln"><b>Ferreira</b><span>(at the farewell, before the song) We learnt one of yours. Forgive the accent. Rossi's, mostly.</span></div>
+    <div class="ln"><b>Teshavi</b><span><i>(after it)</i> You sang it badly. You sang it. That is the part that matters.</span></div>
+    <div class="ln"><b>Ithra</b><span>(to Holt; door story "two sides") Left. <i>(a nod)</i> Good watch.</span></div>
+    <div class="ln"><b>Teshavi</b><span>(to you, if you said "Mostly") Keep the lights on, cadet. Mostly.</span></div>
+  </div>
+
+  <div class="script">
+    <h3>Small ones</h3>
+    <div class="ln"><b>Kesrin</b><span>(at the vending machine) A biscuit. For a token. And it is warm. Nobody at home will believe this. I am writing it down twice.</span></div>
+    <div class="ln"><b>Teshavi</b><span>(after the silence in the garden) Thank you. That was a good silence. You did not fill it.</span></div>
+    <div class="ln"><b>Ithra</b><span>(after the lap) Faster. <i>(next day, a nod)</i> Good.</span></div>
+    <div class="ln"><b>Moleth</b><span>(at Veyli night) May I ask why humans say "cheers" and then do not cheer?</span></div>
+  </div>
+</section>
+
+<section id="comet">
+  <h2>7. The comet, hour by hour</h2>
+  <p>One gentle evening a week after the guests have gone, on the day of Calder's question: the end of the career's first stretch. It has no threads, no score and no commendation (like the Line), and it always goes well. It ties the month together: the comet's blue tail is blown by the same wind that gave the Wren the storm, Saruth ties a Veyli knot for it, and if the visit went smoothly the crew's knots go onto the Speaker's cord sculpture.</p>
+
+  <article class="day comet">
+    <header><h3>Thursday, Day 25</h3><span class="phase">Warning</span></header>
+    <ol class="tl">
+      <li><time>09:00</time><div class="what"><b>Mori finds it</b><span class="where">Survey lab, Deck 2</span>Hana Mori spots it on the long scope. Survey chatter all day: "Comet tomorrow night."</div></li>
+      <li><time>18:00</time><div class="what"><b>Sato's Mail</b><span class="where">Mail</span>"A comet tomorrow night", the evening before, as traditions are. Then Basil's new hand's tea and Tomas's Wren talk as usual.</div></li>
+    </ol>
+  </article>
+
+  <article class="day comet">
+    <header><h3>Friday, Day 26</h3><span class="phase">Onset and resolution</span></header>
+    <ol class="tl">
+      <li><time>16:00-16:50</time><div class="what"><b>The Captain's address</b><span class="where">Auditorium</span>The Day 26 speech, rewritten: a month, the Line, a storm, the Veyli, "and a comet tonight".</div></li>
+      <li class="career"><time>18:40-19:30</time><div class="what"><b>Four weeks aboard, the Works Friday tea, Calder's question</b><span class="where">Works tea corner, Deck 5</span>Untouched. The comet keeps clear of the whole evening up to 21:15.</div></li>
+      <li><time>19:45-21:15</time><div class="what"><b>The jam</b><span class="where">Music room, Deck 4</span>As built (it already ends at 21:15).</div></li>
+      <li><time>20:00-21:15</time><div class="what"><b>Tap night, shorter</b><span class="where">Bow lounge bar</span>The drink of the week is the Comet Tail (Ivo's name), and tap night ends at 21:15 so the lounge can go to the comet (question 6).</div></li>
+      <li><time>21:00</time><div class="what"><b>The crowd gathers</b><span class="where">Bow lounge, observatory</span>People drift in from the jam and the bar. Saruth sets a basket of cord on the lounge's coffee table.</div></li>
+      <li><time>21:15</time><div class="what"><b>Lights down</b><span class="where">Bow lounge, observatory, observation room</span>The lights dim like at First Light Cocoa. A heads-up on your device: "The comet at the bow windows in 15 minutes. Show on map."</div></li>
+      <li><time>21:30</time><div class="what"><b>The helm brings the bow round</b><span class="where">Felt everywhere</span>The bridge speaker: Sol Bakshi on the night helm, or Dev Raman (it depends on his story). The stars slide slowly across every bow window as the Wren turns, and the comet comes into the big windows: a bright head, a white dust tail and a faint blue one.</div></li>
+      <li class="big"><time>21:30-22:40</time><div class="what"><b>The comet at the bow glass</b><span class="where">Bow lounge, Deck 3 · about 50, seats and standing</span>Sato at the glass talks it through, line by line, as the Wren talks are spoken: the head, the two tails, the storm's wind. Crew stand at the glass with their chins up; the seats behind fill.<span class="you">Your part: tap Sato to stand beside her. At 21:50 she asks you to name it for the log (three replies).</span></div></li>
+      <li class="big"><time>21:30-22:40</time><div class="what"><b>The comet through the scope</b><span class="where">Observatory, Deck 2 · about 10</span>Mori runs the scope, turns of a few minutes each. Raman waits at the back window.<span class="you">Your part: tap Mori for a turn at the eyepiece.</span></div></li>
+      <li><time>22:00-22:10</time><div class="what"><b>The comet knot</b><span class="where">Bow lounge glass</span>Saruth explains the Veyli custom and ties a knot, slowly. Anyone near can tie one from the basket. After a smooth visit the knots go onto the Speaker's cord sculpture; otherwise along the rail.<span class="you">Your part: tap Saruth to tie yours. You keep a comet knot on your shelf.</span></div></li>
+      <li><time>22:10-22:40</time><div class="what"><b>Raman's story</b><span class="where">Observatory, the back window</span>"The same comet", his crew story's big moment, "after the knot", exactly where its notes put it (question 7).</div></li>
+      <li><time>22:40</time><div class="what"><b>It passes</b><span class="where">Everywhere</span>The comet slides past the frame, the lights come back up, and the crew drift off to bed. People whose bedtime falls inside it come from the start and leave 20 minutes before bed, as at the late traditions.</div></li>
+    </ol>
+  </article>
+
+  <article class="day quiet">
+    <header><h3>Saturday, Day 27, and the week after</h3><span class="phase">Afterglow</span></header>
+    <ol class="tl">
+      <li><time>08:00</time><div class="what"><b>Sato's comet log</b><span class="where">Mail</span>Its name in the log (your choice, or the crew's if you weren't there) and the head count.</div></li>
+      <li><time>all week</time><div class="what"><b>A sketch by the door</b><span class="where">Bow lounge door</span>A crew sketch of the comet, signed by whoever was there, pinned up for seven days. Chatter for a day or two. Observatory night that Saturday is full of people who want another look.</div></li>
+    </ol>
+  </article>
+</section>
+
+<section id="cwords">
+  <h2>8. The comet's words: samples</h2>
+  <div class="script comet">
+    <h3>At the bow glass</h3>
+    <div class="ln"><b>Ivo</b><span>(21:10) Last call on the Comet Tail. In five minutes nobody orders anything, because they're all at the window. Every time.</span></div>
+    <div class="ln"><b>Bakshi</b><span>(bridge speaker, 21:30) Bridge here. Bringing the bow round for the comet. Hold your tea.</span></div>
+    <div class="ln"><b>Sato</b><span>There. Left of the strut. That smudge is a mountain of ice the size of Deck 3, falling past us.</span></div>
+    <div class="ln"><b>Sato</b><span>Two tails. The white one's dust. The blue one is ions, blown straight back by the same wind that gave us the storm. So yes. The storm says hello.</span></div>
+    <div class="ln"><b>Tomas</b><span>Eighteen months out here and I've never seen one. Is that strange?</span></div>
+    <div class="ln"><b>Holt</b><span>It's very bright.</span></div>
+    <div class="ln"><b>Mensah</b><span>That's the whole point of it, Chief.</span></div>
+    <div class="ln"><b>Marrow</b><span>(to a Cadet) Your first one aboard? Look at it properly. You only get a first once.</span></div>
+  </div>
+  <div class="script comet">
+    <h3>Naming it (21:50, if you joined Sato)</h3>
+    <div class="ln"><b>Sato</b><span>Somebody has to name it for the log. I've named three. The third doesn't count. You do this one.</span></div>
+    <div class="choice">The Lantern. For the storm.</div>
+    <div class="ln"><b>Sato</b><span>The Lantern. Lukas will cry. Good.</span></div>
+    <div class="choice">Ask the Envoy. It'll have a Veyli name already.</div>
+    <div class="ln"><b>Saruth</b><span>It has one. It is old. You may use it the way a guest uses a host's name: kindly.</span></div>
+    <div class="choice">Sato's Fourth. Make it count.</div>
+    <div class="ln"><b>Sato</b><span>No. Absolutely not. <i>(writes it down)</i> Fine. It counts. Don't tell anyone.</span></div>
+  </div>
+  <div class="script comet">
+    <h3>The comet knot (22:00)</h3>
+    <div class="ln"><b>Saruth</b><span>When a guest crosses our sky, we tie a knot, so we remember it was here, and that we saw it.</span></div>
+    <div class="ln"><b>Saruth</b><span>Tie yours loose. It is still travelling.</span></div>
+    <div class="ln"><b>Saruth</b><span>(after a smooth visit, at the sculpture) The Speaker's seven, and now yours. Nobody unties these either.</span></div>
+  </div>
+  <p class="flagnote">For the head writer: the comet's Veyli name is new canon (facts.md says ask before adding names). The plan leaves it unspoken: Saruth says it has one and Sato logs "its Veyli name". The writer may give it a word if you like.</p>
+</section>
+
+<section id="mail">
+  <h2>9. Mail, news and heads-ups</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>When</th><th>From</th><th>Subject or line</th><th>Who gets it</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Tue 16 07:30</td><td>Commander Vance</td><td>A Veyli delegation, tomorrow at ten (the memo)</td><td>All hands</td></tr>
+      <tr><td class="n">Tue 16 18:00</td><td>Commander Vance</td><td>Where to stand (the line, the bow, the nod)</td><td>All hands</td></tr>
+      <tr><td class="n">Wed 17 09:05</td><td>Commander Vance</td><td>Notes from the briefing</td><td>Whoever wasn't in it</td></tr>
+      <tr><td class="n">Wed 17 10:30</td><td>Captain Marrow</td><td>Our guests are aboard (the address)</td><td>All hands</td></tr>
+      <tr><td class="n">Wed 17 18:00</td><td>Chef Brennan</td><td>Veyli night tomorrow</td><td>All hands</td></tr>
+      <tr><td class="n">Wed 17 18:00</td><td>Captain Marrow</td><td>Dinner with the Speaker, tomorrow at 19:30</td><td>A Senior Officer</td></tr>
+      <tr><td class="n">Wed 17 22:50</td><td>Kofi Mensah</td><td>The door (what happened without you)</td><td>If you weren't there</td></tr>
+      <tr><td class="n">Thu 18 18:00</td><td>Commander Vance</td><td>Nine tomorrow: the farewell</td><td>All hands; the gift exchange line for the invited</td></tr>
+      <tr><td class="n">Thu 18 21:05</td><td>Commander Vance</td><td>The dinner, in brief</td><td>If you weren't at it</td></tr>
+      <tr><td class="n">Fri 19 09:40</td><td>Captain Marrow</td><td>Commendation letter</td><td>If you earned it</td></tr>
+      <tr><td class="n">Fri 19 18:00</td><td>Commander Vance</td><td>The visit: how it went</td><td>All hands, with your part</td></tr>
+      <tr><td class="n">Thu 25 12:00</td><td>Moleth</td><td>Thirty-one questions (or fewer)</td><td>You</td></tr>
+      <tr><td class="n">Thu 25 18:00</td><td>Dr. Imra Sato</td><td>A comet tomorrow night</td><td>All hands</td></tr>
+      <tr><td class="n">Sat 27 08:00</td><td>Dr. Imra Sato</td><td>The comet log</td><td>All hands</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>News that spreads</b> (the one news model: it starts with a few and spreads by meals, rooms and bunks): the hail (from Comms, Tue morning); "Dress uniforms. Everyone." (Command); Holt's promise to be polite (Watch); Moleth's forty questions (Works, Wed); the door (Watch and Command, Wed night, the words by your choice); "Moleth asked Calder why the tea corner is a corner"; Kesrin and the biscuits; the song (everyone, Fri); afterglow retells by band; Survey's comet (Thu); "Did you see the blue tail?" and the name it got (Sat).</p>
+  <p><b>Heads-ups on the device</b>, 15 minutes before, with "show on map": the greeting (09:45), the engine tour (13:45), the door (when Mensah calls), Veyli night (17:45), the dinner (19:15, if you have a seat or the steward job), the gift exchange (08:00, if invited), the farewell (08:45), the comet (21:15).</p>
+</section>
+
+<section id="trad">
+  <h2>10. Traditions: what pauses, what moves</h2>
+  <p>Neither event closes the ship. The built visit paused every tradition for its whole onset; the short visit pauses nothing outright and only holds the two shuttle-bay hours. Its keep list is the birthday and the Captain's address, so Friday's address and Kovac's lift moment are never touched.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Day</th><th>Tradition</th><th>What happens</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Tue 16</td><td>Spice shelf supper</td><td>Kept; one jar is Saruth's smoked leaf (words)</td></tr>
+      <tr><td class="n">Wed 17</td><td>Pick-your-own breakfast, sunrise stretch</td><td>Kept (both over long before 09:45)</td></tr>
+      <tr><td class="n">Wed 17</td><td>Open door</td><td>Kept; Moleth comes (words)</td></tr>
+      <tr><td class="n">Wed 17</td><td>Hum night (if built)</td><td>Kept; the Speaker comes</td></tr>
+      <tr><td class="n">Thu 18</td><td>The ordinary dinner</td><td>Replaced, for whoever goes, by Veyli night (a meal tradition, seated sittings)</td></tr>
+      <tr><td class="n">Thu 18</td><td>Postcard night, Calder's chief's talk, quiz night, late piano</td><td>Kept, in their own rooms; guests at three of them</td></tr>
+      <tr><td class="n">Fri 19</td><td>Sunrise stretch, Short Friday address, Works tea, jam, tap night, O'Neill's birthday</td><td>Kept; the address's words change</td></tr>
+      <tr><td class="n">Fri 26</td><td>Tap night</td><td>Ends at 21:15 (it was 20:00-22:00); the drink is the Comet Tail (question 6)</td></tr>
+      <tr><td class="n">Fri 26</td><td>The bow lounge, 21:15-22:45</td><td>The comet's alone, as the Line ceremony had it</td></tr>
+      <tr><td class="n">Sat 27</td><td>Observatory night</td><td>Kept; fuller than usual</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Rooms the visit takes: the shuttle bay Wed 09:30-10:45 and Fri 08:45-09:45 (Theo's send-off on Day 21 is clear); the Captain's quarters Thu 12:00-21:30; the observation room Wed 08:30-09:00 and Fri 08:15-08:40. events_check's no-clash rule covers them.</p>
+</section>
+
+<section id="stories">
+  <h2>11. Crew stories they touch</h2>
+  <ul>
+    <li><b>Zainab Kovac</b> (the lift, Fridays 19 or 26 on the way to the address): untouched; the address is on both events' keep lists.</li>
+    <li><b>Dev Raman</b> ("The same comet"): its big moment moves with the comet to Day 26, 22:10-22:40 at the observatory's back window, "after the knot". Beat 4's window grows from Days 8-15 to Days 8-25. Bakshi is on the night helm on a Friday, as CS1 checked. Two big moments on Day 26 (Calder's, then Raman's) need your yes (question 7).</li>
+    <li><b>Chief Calder</b> (her question, Day 26, at the Friday tea): untouched; the comet starts after.</li>
+    <li><b>Pell</b> (the practical, a weekday afternoon, Days 17-24): the visit's moments count as busy hours, so it picks an afternoon clear of the tour and the dinner, most likely Day 22-24.</li>
+    <li><b>Emeka Halloran</b> (breakfast jokes, from Day 15): if Kesrin is at the Works tables, they write the joke down. One conditional line.</li>
+    <li><b>Theo Teague and Basil Bramwell</b> (Days 20-25): clear of the visit.</li>
+    <li><b>Holt's arc</b> (the Envoy's tea, the three knots): his door lines change if you've had his tea beat ("The Envoy taught me three knots. I could show your pilot."). His distrust is spoken about as his, never about the Veyli.</li>
+    <li><b>Femi Rossi and Lucia Ferreira</b> (practising Veyli, the song in the music room): their running fact pays off at the farewell.</li>
+  </ul>
+</section>
+
+<section id="result">
+  <h2>12. Commendation and how it went</h2>
+  <ul>
+    <li><b>Commendation (the visit):</b> two or more visit jobs, or one visit job and one visit meeting, counted up to the end of the farewell (Fri 09:40); the letter comes then. Meetings: the briefing, the greeting, the tour, the door, the dinner (seat or steward), the gift exchange. Favours (the vending machine, Moleth's list, the silence) count toward friendships and are named in Vance's debrief, not in the commendation.</li>
+    <li><b>The comet:</b> <code>commend: false</code>, no threads, Record line "Saw the comet from the bow lounge, Day 26."</li>
+    <li><b>The Captain's scenes</b> (one a day at most): the greeting and the farewell are crowds and don't count. The dinner counts for a seated player, and the gift exchange for an invited one. With the visit on, the commendation summons moves from Day 18 to Monday Day 22 at 11:00 (question 3), the same day in every game, when the Captain isn't hosting anyone.</li>
+    <li><b>Traces:</b> smooth: the cord sculpture in the bow lounge, turning with the vents (and the comet knots on it a week later). Bumpy: a single knot of cord on the Works tea corner's board. Rough: a polite letter framed in the Captain's office. Your keepsakes: a knot of Veyli cord from the Speaker if you sat the silence or stood the gift exchange; your comet knot.</li>
+    <li><b>Debrief words by band</b> (Vance): smooth, "They left delighted: warm cabins, dinner on time, and the door held from both sides."; bumpy, "They left on good terms: a cold cabin, the dried herbs, nothing the Concord will read about."; rough, "They left politely, which is the most I can say. We'll do better." Plus one line about your part.</li>
+  </ul>
+</section>
+
+<section id="device">
+  <h2>13. On your device</h2>
+  <ul>
+    <li><b>Calendar:</b> the visit as a band Tue-Fri; the comet on Friday 26 at 21:30.</li>
+    <li><b>Schedule:</b> a row for each moment you can go to, with its place: "The Veyli greeting, shuttle bay (Deck 5), 10:00"; your held job; the dinner (seat or steward); the farewell; the comet. Rank-only rows show only for that rank.</li>
+    <li><b>Tracked:</b> "Guests aboard: Speaker Teshavi and three others, until Friday 09:30", your visit jobs, and the next moment. No scores or bars (results are told as story).</li>
+    <li><b>Status line by phase:</b> "Guests tomorrow at ten" / "The Veyli are aboard" / "The formal dinner tonight" / "The delegation left this morning" / "A comet tonight at 21:30".</li>
+    <li><b>Record:</b> "Hosted the Veyli delegation, Days 16-19", your commendation, and the door ("Stood the door with Chief Holt and Ithra"); the comet line, with its name.</li>
+    <li><b>Maps:</b> "show on map" from each heads-up; the guests appear on Maps like crew you've met once you've spoken to them.</li>
+  </ul>
+</section>
+
+<section id="sound">
+  <h2>14. Sound and music</h2>
+  <p>All made live, like the rest of the soundscape: calm, under the hum, never an alarm.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Cue</th><th>When</th><th>Sound</th><th></th></tr></thead>
+    <tbody>
+      <tr><td>Mail, heads-ups, jobs posted and done</td><td>Throughout</td><td>The existing device sounds</td><td><span class="tag re">reused</span></td></tr>
+      <tr><td>The shuttle comes in</td><td>Wed 09:50, Fri 09:40 (lifts)</td><td>A long soft rush (the existing air swell) and three clamps (the hatch latch), only on Deck 5</td><td><span class="tag new">new, from parts</span></td></tr>
+      <tr><td>The Veyli bell</td><td>Ramp opens Wed 10:00; the bow Fri 09:00</td><td>Three low struck notes on the chime bar, in a key of their own</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>The Captain's addresses</td><td>Wed 10:30, Fri 09:45</td><td>The existing announce cue</td><td><span class="tag re">reused</span></td></tr>
+      <tr><td>The farewell song</td><td>Fri 09:20, about 40 seconds</td><td>A short, slow melody in the music's style, two voices then the line (question 8)</td><td><span class="tag new">new</span></td></tr>
+      <tr><td>Teapot and cups at the dinner</td><td>Thu 19:30</td><td>The existing pour and cup sounds</td><td><span class="tag re">reused</span></td></tr>
+      <tr><td>The bow turns</td><td>Fri 26, 21:30</td><td>A slow deep swell, like the storm's but with no bell and much softer</td><td><span class="tag new">new, from parts</span></td></tr>
+      <tr><td>The comet music</td><td>21:30-22:40 in the bow lounge, observatory and observation room</td><td>One planetarium track of its own; the usual night set is paused while you're there (question 8)</td><td><span class="tag new">new track</span></td></tr>
+      <tr><td>The scope, the knot</td><td>Fri 26</td><td>The existing telescope and knitting sounds</td><td><span class="tag re">reused</span></td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="props">
+  <h2>15. Poses, animations and props: reused and new</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece</th><th>Reused or new</th><th>Notes</th></tr></thead>
+    <tbody>
+      <tr><td>Event shape, phases, threads, jobs with holds, dressing, day-dress of traditions, called-in cast, standing easy, seated sittings, ownFor and lead, Mail by key, status, traces</td><td><span class="tag re">reused</span></td><td>All from the storm and the Line updates</td></tr>
+      <tr><td>The guests, their cabins, voices and lines</td><td><span class="tag re">reused</span></td><td>Already in the build (GUESTS, voices); their stay cut from five days to two nights</td></tr>
+      <tr><td>Greeting and gift exchange scripts</td><td><span class="tag re">reused, extended</span></td><td>Rank lines, the chart, pronoun fixes</td></tr>
+      <tr><td>The greeting sheet</td><td><span class="tag re">reused</span></td><td>The built "greeting line: volunteers" dressing</td></tr>
+      <tr><td>The Veyli shuttle on the second pad</td><td><span class="tag new">new prop</span></td><td>Only Wed 09:50 to Fri 09:40; merged into 3-4 draw calls (question 1)</td></tr>
+      <tr><td>Posts and cord for the aisle</td><td><span class="tag new">new prop</span></td><td>Raised posts, not floor markings (no coplanar surfaces); one merged mesh</td></tr>
+      <tr><td>Dress uniforms</td><td><span class="tag new">colour only</span></td><td>A gold trim through col(), no new model (question 2)</td></tr>
+      <tr><td>The bow (Veyli)</td><td><span class="tag new">anim</span></td><td>Palms to the chest, a slow bow, a hold; crowd and meeting pose</td></tr>
+      <tr><td>The wave</td><td><span class="tag new">anim</span></td><td>One arm up, slow; the farewell line</td></tr>
+      <tr><td>Look up</td><td><span class="tag new">anim</span></td><td>Chin up, still; at windows for the comet</td></tr>
+      <tr><td>Pour (steward)</td><td><span class="tag new">small pose</span></td><td>Standing with the teapot, a pour now and then</td></tr>
+      <tr><td>Nod, gesture, sit, drink, fold (knot), telescope, the run's line</td><td><span class="tag re">reused</span></td><td>Existing poses and activities</td></tr>
+      <tr><td>Place settings on the Captain's table; cord along the mess tables</td><td><span class="tag new">small props</span></td><td>Only while dressed</td></tr>
+      <tr><td>The cord sculpture</td><td><span class="tag new">prop, a trace</span></td><td>Bow lounge ceiling, sways with the vents; only after a smooth visit</td></tr>
+      <tr><td>The comet in the sky</td><td><span class="tag new">effect</span></td><td>One textured shape with two tails behind the windows, only 21:15-22:45 on Day 26</td></tr>
+      <tr><td>The turn</td><td><span class="tag new">effect</span></td><td>The star backdrop rotates a few degrees over ten minutes; the lighting doesn't move</td></tr>
+      <tr><td>Lights down</td><td><span class="tag re">reused</span></td><td>First Light Cocoa's dimming (uniforms only)</td></tr>
+      <tr><td>Cord basket, comet sketch, your two knots on the shelf</td><td><span class="tag new">small props</span></td><td>One call each, only when they're there</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="risk">
+  <h2>16. Draw calls and phones</h2>
+  <ul>
+    <li><b>The shuttle bay with 60 people, the Tern and the Veyli shuttle</b> <span class="tag risk">main risk</span>: the crowd is drawn 12 to a call, so it's about 5 calls; the cost that grows is triangles (about 4,000 a person, so about 240,000) plus the new shuttle. Measure at phone and TriFold sizes before switching on; if it's heavy, cap the line at 50 or simplify the shuttle.</li>
+    <li><b>The bow lounge at the comet</b>: about 50, like the Line ceremony (measured fine), plus one comet shape. The dimming changes uniforms only.</li>
+    <li><b>Veyli night</b>: the mess at 48 seats, the same as the lantern supper.</li>
+    <li><b>The turn</b>: rotating the stars must not move the sun or the shadows. Check it on a phone at 30 frames a second.</li>
+    <li><b>Pixel-identical when off</b>: everything behind <code>EV_VISIT_ON</code> and <code>EV_COMET_ON</code>, which follow FX22b's <code>EV_SWAP_ON</code>; props exist only in their hours, so the regressions on unchanged decks stay identical.</li>
+    <li><b>Determinism</b>: the guests' days, the cast and the knots never call <code>R()</code> at load; the crew's planner reads only the event table, not anything built while playing.</li>
+    <li><b>A test on your phone</b> before each switch-on, as with the crowds.</li>
+  </ul>
+</section>
+
+<section id="checks">
+  <h2>17. Checks to add</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>What it proves</th></tr></thead>
+    <tbody>
+      <tr><td>events_check: the visit</td><td>Days 16-19 and every phase at its minute; the guests aboard only Wed 09:50 to Fri 09:40; each Mail at its time; the greeting with 40-80 meaning to go; Veyli night never above 48 at once; the dinner's six seats; Calder's talk on with Moleth in it; nothing of it in the Friday hold; traces by band; and an identical game with the switch off</td></tr>
+      <tr><td>events_check: the comet</td><td>Sato's Mail on Day 25 at 18:00; the comet at 21:30 on Day 26; at least 30 at the bow glass and 5 at the scope; tap night ending 21:15; nothing else in the bow lounge 21:15-22:45; the knot at 22:00; smooth with no threads; the sky shape gone by 22:45</td></tr>
+      <tr><td>bigevents_check</td><td>Casts and who's called in (Vance both days); the career-beat guard with a seated dinner (the summons on Day 22); room clashes; a self-test with planted clashes (a tradition in the bay at 10:00, a Captain's table on Day 18); late saves (a save loaded on Day 17 skips the visit; one on Day 26 skips the comet)</td></tr>
+      <tr><td>day_check on Days 16-20 and 25-27</td><td>Nobody stuck; the guests' wake, meals and bed; standing easy ends; the bay empties</td></tr>
+      <tr><td>deck_check</td><td>Draw calls in the bay at 10:05 and the bow lounge at 21:45, phone sizes</td></tr>
+      <tr><td>interactions_check</td><td>Tap Vance, Zeke, Ithra, Teshavi, Sato, Mori and Saruth to join; the steward job; the sheet</td></tr>
+      <tr><td>bubble_check</td><td>Sato's commentary at the glass with 50 people; the song's bubbles in the bay</td></tr>
+      <tr><td>names_check, the stories' checks</td><td>New names and registrations unique; Raman's beat windows on the new days</td></tr>
+      <tr><td>Words</td><td>No "permission" or "leave" about the reach; every Veyli they/them; no repeated line</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="build">
+  <h2>18. Build order and estimate</h2>
+  <p>After FX22b's calendar swap is merged. Each event is built switched off, reviewed, then switched on with your yes and a full round of checks.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Who</th><th>Turns</th></tr></thead>
+    <tbody>
+      <tr><td>V1 The short shape: days, phases, the guests' stay, keep list, held rooms, guard rules</td><td>Events builder</td><td class="n">2</td></tr>
+      <tr><td>V2 Jobs, threads, holds, the sheet, the herbs and steward jobs</td><td>Events builder</td><td class="n">1-2</td></tr>
+      <tr><td>V3 Meetings: briefing, greeting by rank, tour, door story, dinner seats, gift exchange; the small favours</td><td>Events builder</td><td class="n">2-3</td></tr>
+      <tr><td>V4 Gatherings: the two lines, Veyli night, laps, the silence</td><td>Events builder</td><td class="n">2</td></tr>
+      <tr><td>V5 The shuttle, posts, trim, bow, wave, pour, sculpture</td><td>Performance seat</td><td class="n">1-2</td></tr>
+      <tr><td>C1 The comet on its day, its two gatherings, tap night, the knot, the naming</td><td>Events builder</td><td class="n">1-2</td></tr>
+      <tr><td>C2 The comet in the sky, the turn, lights down</td><td>Performance seat</td><td class="n">1-2</td></tr>
+      <tr><td>S1 Sound cues, the comet track, the song</td><td>Sound seat</td><td class="n">1-2</td></tr>
+      <tr><td>W The words: both events, the two Friday addresses, Raman's notes (about 6-8 hours)</td><td>Events writer</td><td class="n">-</td></tr>
+      <tr><td>T The checks above</td><td>Events checker</td><td class="n">2</td></tr>
+    </tbody>
+  </table></div>
+  <p>About 15-20 build turns. Three seats can work at once (events, performance, sound) with the writer alongside. Then a review and a full round of checks for each switch-on (about 30 minutes each on six runners).</p>
+</section>
+
+<section id="questions">
+  <h2>19. Questions for you</h2>
+  <p>Only the real choices. Each has a recommended answer.</p>
+  <div class="q"><h3>1. Where does the Veyli shuttle land?</h3><p class="rec"><b>Recommended: in the shuttle bay, beside the Tern.</b> The crew watch it come in, and the lines make an aisle from its ramp. One new prop, there for two days. Or: it docks outside and the guests walk in through the hatch (no prop, less to see).</p></div>
+  <div class="q"><h3>2. Dress uniforms</h3><p class="rec"><b>Recommended: shown, as a gold trim</b> on everyone's uniform at the greeting, the dinner and the farewell (a colour change only). Or: in the words only.</p></div>
+  <div class="q"><h3>3. The commendation summons</h3><p class="rec"><b>Recommended: Monday Day 22 at 11:00</b> in every game with the visit on, when the Captain isn't hosting (on Day 18 she has the dinner, and a seated player would get two of her scenes in one day). Or: keep Day 18 and let both happen this once.</p></div>
+  <div class="q"><h3>4. Who goes to the senior briefing on Wednesday</h3><p class="rec"><b>Recommended: Officers and up</b>, so today's steady player has it; Senior Officers get the extra question. Or: Senior Officers only (nobody has it until Pillar 5 is built).</p></div>
+  <div class="q"><h3>5. Veyli night in the mess on Thursday</h3><p class="rec"><b>Recommended: yes.</b> The whole ship eats the dinner's menu in seated sittings, with three of the guests among the crew: a big group moment. Or: an ordinary dinner and only the six at the Captain's table.</p></div>
+  <div class="q"><h3>6. Tap night on the comet night</h3><p class="rec"><b>Recommended: it ends at 21:15</b> and the bow lounge goes to the comet; its drink that week is the Comet Tail. Or: tap night carries on at the bar alongside the comet.</p></div>
+  <div class="q"><h3>7. Two crew-story big moments on Day 26</h3><p class="rec"><b>Recommended: allow both</b>, Calder's at 18:45 and Raman's at 22:10, more than three hours apart (the rule is one a day). Or: Raman's story takes its quiet ending the next morning.</p></div>
+  <div class="q"><h3>8. Music of their own</h3><p class="rec"><b>Recommended: both</b>, a comet track in the planetarium style and the short farewell song. Or: only the comet track, or neither.</p></div>
+
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything to change in the hour-by-hour, the guests or the words?</h3><textarea id="notes" aria-label="Anything to change"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the traditions pitch's form)
+  const items = [
+    ['shuttle', '1. The Veyli shuttle', [['bay', 'In the shuttle bay beside the Tern (recommended)'], ['hatch', 'Docks outside; they walk in through the hatch'], ['other', 'Something else (say)']]],
+    ['dress', '2. Dress uniforms', [['trim', 'Shown as a gold trim (recommended)'], ['words', 'Words only']]],
+    ['summons', '3. The commendation summons', [['d22', 'Monday Day 22 at 11:00 (recommended)'], ['d18', 'Keep Day 18; both scenes that day'], ['other', 'Something else (say)']]],
+    ['briefing', '4. The senior briefing', [['officers', 'Officers and up (recommended)'], ['seniors', 'Senior Officers only']]],
+    ['veyliNight', '5. Veyli night in the mess', [['yes', 'Yes (recommended)'], ['no', 'No, an ordinary dinner']]],
+    ['tapNight', '6. Tap night on the comet night', [['short', 'Ends at 21:15 (recommended)'], ['both', 'Carries on alongside']]],
+    ['twoStories', '7. Two big story moments on Day 26', [['allow', 'Allow both (recommended)'], ['quiet', 'Raman gets his quiet ending']]],
+    ['music', '8. Music of their own', [['both', 'Comet track and farewell song (recommended)'], ['comet', 'Comet track only'], ['none', 'Neither']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
