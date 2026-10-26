@@ -1,0 +1,38 @@
+@tradition beginners-guitar
+// Round 2: four people learning the guitar from one battered book play what they've learnt. Even weeks from week 4, in the late piano's freed Tuesday.
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1304
+title: Beginners' guitar, badly
+when: every 2 weeks tuesday week 2 from day 22
+at: 21:40-22:25
+min: 20
+to-bed: yes
+where: 4 pool music
+hold: 1
+who: larsen-hamid always, lindqvist-isak always, park-noor always, haddad-tamsin always, music 40%, musician 25%, night-owl 20%, everyone 6%
+anim: larsen-hamid play, lindqvist-isak play, park-noor play, haddad-tamsin play, everyone none
+host: larsen-hamid
+from: larsen-hamid
+invite: host=larsen-hamid odds=25% line="Guitar night. We're bad. You're welcome to be bad with us."
+
+== mail
+- Beginners' guitar tomorrow, {time}, the music room. Four of us, one book, whatever we've learnt. You get the guitar for one chord. It's not hard. It's quite hard.
+
+== ask
+- Guitar night in the music room. Bring earplugs. Kindly meant.   #funny
+- Hamid's lot are playing what they've learnt. Last time it was nearly a song.
+- Coming to beginners' guitar? You get one chord. Choose wisely.
+
+== here
+- G. No. That's not G. That's a noise.   #funny
+- Whose turn is it with the book?
+- Nearly a song! Nearly!
+- Fingers there, and there. Now strum. Gently.
+
+== thanks
+- Four people learning the guitar from the same battered book play what they've got, and then hand you the guitar for one chord.   #funny
+
+== chatter
+- The guitar lot played a whole verse last night. Mostly the same verse.   #funny
+- Hamid let me hold the guitar. One chord. Everyone clapped. A pity clap.   #funny
+- They're getting better, the guitar four. Slowly. Very slowly.

@@ -48,7 +48,7 @@ One tradition per file, the file named after its id.
 | Key | Required | What it says | Examples |
 | --- | --- | --- | --- |
 | `@tradition <id>` | yes | starts a tradition; the id is lower-case letters, digits and dashes, never changed once it's in the game | `@tradition tiles-night` |
-| `k:` | yes | its hash key, **given by the traditions engineer** (434-499, each once). Ask for one; never reuse one | `k: 435` |
+| `k:` | yes | its hash key, **given by the traditions engineer** (434-499, then 710-719 (0.92.6) and 1300-1349 (0.93.2; 1300-1314 used by FX24), each once). Ask for one; never reuse one | `k: 435` |
 | `title:` | yes | the name players see (Mail subject, Calendar) | `title: Tiles night` |
 | `when:` | yes | the rhythm (below) | `when: weekly tuesday` |
 | `at:` | yes | start and end, ship time | `at: 20:00-21:30` |
@@ -89,6 +89,7 @@ Crew ids are the roster's (`brennan`, `calder`, `torres-zeke`, `rina`, `tomas`, 
 | `every 2 weeks tuesday` / `every 2 weeks tuesday week 2` | every other Tuesday (week 1 = days 1-7, the default; week 2 = days 8-14) |
 | `every 4 weeks saturday week 3` | the Saturday of every fourth week, starting with week 3 (days 20, 48, 76...) |
 | `every 8 weeks monday week 5 from day 29` | the Monday of every eighth week, starting with week 5 (0.92.6, FX17: the new traditions of weeks 5-12) |
+| `every 3 weeks saturday week 2` / `every 6 weeks sunday week 4 from day 64` | every third (or sixth) week; the week is 1-3 (1-6) of the cycle counted from Day 1, so week 10 of the tour is week 4 of a 6-week cycle (0.93.2, FX24: Scone morning, Days 70, 112...) |
 | `quarter week 1 saturday` | the first Saturday of each season (days 6, 97, 188, 279) |
 | `quarter day 1` | the first day of each season |
 | `year day 182` | one day a year (the year is 364 days, Day 1 a Monday) |

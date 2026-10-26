@@ -1,0 +1,36 @@
+@tradition scone-morning
+// Round 1 (CS1's pitch, the user's yes): on his rest day Emeka Halloran bakes one batch of scones, Brennan inspects them, the Works tea corner gets them warm. Every 6 weeks from week 10 (Days 70, 112...).
+// Rules: FX24 (0.93.2, behind TRAD_0932_ON in section 13). Words: CS1 (plans/trad-0932-words.txt, claude/crew-stories-pitch 7b1e7300).
+k: 1300
+title: Scone morning
+when: every 6 weeks sunday week 4 from day 64
+at: 09:30-10:15
+min: 20
+where: 5 room Tea corner: lounge-seat
+who: halloran-emeka always, brennan 50%, works 45%, tea-break 35%, everyone 8%
+anim: halloran-emeka talk, everyone drink
+host: halloran-emeka
+from: halloran-emeka
+invite: host=halloran-emeka odds=25% line="Scones in the tea corner tomorrow morning. Warm ones. And a joke, free."
+
+== mail
+- Scone morning tomorrow, {time}, in the Works tea corner. One batch, Brennan's passed it. One joke per scone. You can't have one without the other.
+
+== ask
+- Halloran's baked. Tea corner, now, before Works eats the lot.
+- Scone morning! He's got the tin out. The one with the dent.
+- Going for a scone? Brace yourself for the joke.   #funny
+
+== here
+- Butter's there. Jam's there. Joke's coming.   #funny
+- Still warm. Mind your fingers.
+- This batch got a nod from Brennan. A nod!
+- Lovely. Have another. Go on.   #warm
+
+== thanks
+- Halloran hands you a warm scone from the dented tin, and a joke with it. The scone is excellent.   #warm
+
+== chatter
+- Halloran's scones were still warm at the tea corner. The joke wasn't.   #funny
+- I had two scones. I heard two jokes. Fair trade.   #funny
+- The tea corner smelled of baking all morning. Lovely way to start a Sunday.   #warm
