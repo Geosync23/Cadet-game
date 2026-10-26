@@ -1,0 +1,263 @@
+<title>Wren Traditions Round 2</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column; lists of what stays and what takes turns, a card per fresh tradition, a week-by-week table, the event swap as options and a table, then the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --sat: #2f6f9e; --satSoft: #dbe9f4; --sun: #b0631c; --sunSoft: #f6e4d2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --sat: #7fb7e3; --satSoft: #1b3347; --sun: #f0a565; --sunSoft: #43301c;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 70ch; }
+p { margin: 0; }
+ul { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--sun); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--sat); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--sun); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+
+/* the day strips */
+.strip-wrap { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 12px 12px 8px; }
+.strip { position: relative; min-width: 760px; font-size: 11.5px; }
+.hours { position: relative; height: 18px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.hours span { position: absolute; transform: translateX(-50%); }
+.lane { position: relative; height: 34px; margin-bottom: 6px; border-radius: 6px; background: repeating-linear-gradient(90deg, transparent 0 calc(100% / 18 - 1px), var(--line) calc(100% / 18 - 1px) calc(100% / 18)); }
+.lane-label { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 2px 0 3px; }
+.blk { position: absolute; top: 3px; bottom: 3px; border-radius: 5px; padding: 2px 6px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; line-height: 28px; font-weight: 700; }
+.blk.old { background: var(--old); color: var(--oldInk); }
+.blk.some { background: var(--some); color: var(--oldInk); border: 1px dashed var(--muted); }
+.blk.new-sat { background: var(--sat); color: var(--surface); }
+.blk.new-sun { background: var(--sun); color: var(--surface); }
+.blk.bday { background: transparent; border: 2px dotted var(--flag); color: var(--flag); }
+.key { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 13.5px; color: var(--muted); }
+.key i { display: inline-block; width: 14px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+
+/* tradition cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 440px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; align-content: start; }
+.card.sat { border-top: 4px solid var(--sat); }
+.card.sun { border-top: 4px solid var(--sun); }
+.card header { display: grid; gap: 4px; }
+.when { font: 700 13px var(--mono); color: var(--muted); }
+.card dl { display: grid; grid-template-columns: 92px 1fr; gap: 6px 12px; margin: 0; font-size: 14.5px; }
+.card dt { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 2px; }
+.card dd { margin: 0; min-width: 0; }
+.size { display: inline-block; font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.flagnote { font-size: 14px; color: var(--flag); }
+.mail { font-style: italic; color: var(--muted); }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 600px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* answers */
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--sat); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+.optcard { background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--sun); border-radius: 10px; padding: 14px 18px; display: grid; gap: 8px; }
+</style>
+<div class="wrap">
+  <header style="display:grid;gap:10px">
+    <span class="eyebrow">Plan, round 2 · more traditions · CS1 for lead 37 · 2026-10-26</span>
+    <h1>More traditions to choose from</h1>
+    <p class="lead">You said "good ideas but need more ideas for traditions". Here are 22 new ones, of every kind: food, games, music, crafts, garden and rec deck, quiet ones, competitive ones, silly ones, skills, ship work, home customs and one seasonal. They're spread across the week, from 08:30 to 23:30, on five decks and the rec deck, with 22 different hosts. Tick the ones you want at the bottom.</p>
+  </header>
+
+  <section class="optcard" aria-label="Since your answers">
+    <h2>Since your answers to round 1</h2>
+    <ul>
+      <li><b>Scone morning:</b> yes. It's in (Sundays 09:30, every 6 weeks from week 10, Halloran).</li>
+      <li><b>The other eight</b> (comics wall day, hum night, Sato's tea, map night, paper boat race, newsletter night, learn a dance, a thousand cranes): no. They're parked, not deleted, and none of them is reused below.</li>
+      <li><b>Six take turns:</b> yes. The slots they free are in the next section, with a new one suggested for each.</li>
+      <li><b>Week 1:</b> stays as it is. Every new one starts in week 2 or later.</li>
+      <li><b>The new hand's tea:</b> "this one can go". We've read that as retiring the Thursday welcome tea for new crew (parked). One knock-on: Basil's crew story has its big scene at that tea on Day 25, so it would need a new place (for example, his first Friday tea in Works). Tell us if you meant something else.</li>
+      <li><b>The event swap:</b> a short visit, Days 16-19; the comet on Friday Day 26 at 21:30; your night shifts stay on Days 19-20; Commander Vance's memo and the senior briefing move into the visit's week. These go to the builders as decided.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>The slots the six free up</h2>
+    <div class="tbl"><table>
+      <thead><tr><th>Freed slot</th><th>Which weeks</th><th>Suggested new one</th></tr></thead>
+      <tbody>
+        <tr><td>Saturday 15:00-16:30, bow lounge (Tiles ladder off)</td><td>even weeks</td><td>The coffee machine trials</td></tr>
+        <tr><td>Saturday 15:30-16:30, galley (cook-along off)</td><td>odd weeks</td><td>Jar day</td></tr>
+        <tr><td>Sunday 16:00-17:00 (reading corner off)</td><td>even weeks</td><td>Gallery evening (weeks 10 and 14, in the portrait gallery)</td></tr>
+        <tr><td>Thursday 18:45-19:45 (postcard night off)</td><td>odd weeks</td><td>Valo post day (in the comms room)</td></tr>
+        <tr><td>Tuesday 21:40-22:25, music room (late piano off)</td><td>even weeks</td><td>Beginners' guitar, badly</td></tr>
+      </tbody>
+    </table></div>
+    <p>The rest go into hours and rooms that are empty today. Each was checked against what's already in its room and hour on its weeks: never more than two traditions at once, never two in one room, and birthdays still get their hour. New ones start in a different week each (about two a week from week 2 to week 12), so something fresh keeps arriving. The builder confirms each host is free in their own day plan before it goes in.</p>
+  </section>
+
+  <section>
+    <h2>22 new traditions</h2>
+    <div class="cards">
+      <article class="card sat"><header><span class="when">MON 18:15-18:45 · every 2 weeks from week 2 (2, 4, 6 ... 12)</span><h3>Five-minute skills</h3><span class="size">Skill-sharing</span></header>
+        <p>Each time Bilal brings along a different crewmate to teach one small thing in five minutes: tie a bowline, fold a fitted sheet, splice a cable, fix a squeaky headphone. Then everyone tries.</p>
+        <dl><dt>Place</dt><dd>Bow lounge, Deck 3</dd><dt>Host</dt><dd>Bilal Nakamura (Watch; patient, proud)</dd><dt>Fits</dt><dd>Between shift end and gym club (19:15). Nothing else is in the bow lounge on a Monday evening.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SAT 15:00-16:00 · every 2 weeks from week 2 (even weeks)</span><h3>The coffee machine trials</h3><span class="size">Silly, competitive</span></header>
+        <p>Three people aboard each say they are the best at fixing the coffee machine. Every other Saturday each makes a cup, and the room tastes them blind and votes. Calder reminds everyone the machine is Works&#x27;s job.</p>
+        <dl><dt>Place</dt><dd>Bow lounge, Deck 3 (the bar)</dd><dt>Host</dt><dd>Maeve Volkov, with Elif Yoon and Dara Shah</dd><dt>Fits</dt><dd>Fills the Tiles ladder&#x27;s freed hour on even weeks.</dd></dl></article>
+      <article class="card sat"><header><span class="when">SAT 15:30-16:30 · every 2 weeks from week 3 (odd weeks)</span><h3>Jar day</h3><span class="size">Food</span></header>
+        <p>The garden always grows too much of something. Tariq turns it into jars: pickles, chutney, a jam that might be jam. Everyone fills, labels and lines up their jar on the spice shelf.</p>
+        <dl><dt>Place</dt><dd>Galley prep island, Deck 3</dd><dt>Host</dt><dd>Tariq Varga (galley; competitive, thoughtful)</dd><dt>Fits</dt><dd>Fills the cook-along&#x27;s freed galley hour on odd weeks.</dd></dl></article>
+      <article class="card sun"><header><span class="when">THU 18:45-19:30 · every 2 weeks from week 3 (odd weeks)</span><h3>Valo post day</h3><span class="size">Home custom</span></header>
+        <p>On Valo, letters go out with a sprig of something green folded inside. Vera and Tariq, both from Valo, show everyone how: write a page home on paper, fold it the Valo way, tuck in a leaf from the garden, into the bag.</p>
+        <dl><dt>Place</dt><dd>Comms room, Deck 2 (where the post bag waits)</dd><dt>Host</dt><dd>Vera Ueda, with Tariq Varga</dd><dt>Fits</dt><dd>Takes the postcard night hour on the weeks postcards are off, in a different room.</dd></dl></article>
+      <article class="card sat"><header><span class="when">TUE 21:40-22:25 · every 2 weeks from week 4 (even weeks)</span><h3>Beginners&#x27; guitar, badly</h3><span class="size">Music</span></header>
+        <p>Four people are learning the guitar from the same battered book and argue whose turn it is. Once a fortnight they play what they&#x27;ve learnt for whoever is brave enough to listen, and hand you the guitar for one chord.</p>
+        <dl><dt>Place</dt><dd>Music room, Deck 4</dd><dt>Host</dt><dd>Hamid Larsen, with Isak Lindqvist, Noor Park and Tamsin Haddad</dd><dt>Fits</dt><dd>Fills the late piano&#x27;s freed Tuesday on even weeks.</dd></dl></article>
+      <article class="card sun"><header><span class="when">FRI 23:00-23:30 · every 4 weeks from week 4 (4, 8, 12)</span><h3>Midnight toast</h3><span class="size">Food, late night</span></header>
+        <p>After tap night, Greta makes toast for the night shift going on and the night owls still up. Butter, jam from jar day, and a pot of tea. Quiet, sleepy, warm.</p>
+        <dl><dt>Place</dt><dd>Mess hall, Deck 3</dd><dt>Host</dt><dd>Greta Garcia (night Watch; sarcastic, gentle)</dd><dt>Fits</dt><dd>Nothing runs this late on a Friday. A late one: people leave 20 minutes before their bed.</dd></dl></article>
+      <article class="card sat"><header><span class="when">WED 12:30-13:00 · every 2 weeks from week 5 (odd weeks)</span><h3>Lunch-table quiz</h3><span class="size">Games, lunch</span></header>
+        <p>Five quick questions read out over lunch, one table against another. The winning table gets first go at the pudding.</p>
+        <dl><dt>Place</dt><dd>Mess hall, Deck 3 (it is that day&#x27;s lunch)</dd><dt>Host</dt><dd>Zofia Santos (comms; ambitious)</dd><dt>Fits</dt><dd>A meal tradition, so only the mess&#x27;s own seats. Lunch has nothing else.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SUN 13:00-13:45 · every 4 weeks from week 5 (5, 9)</span><h3>Cart bay derby</h3><span class="size">Silly, ship-work</span></header>
+        <p>Empty carts, the guide rail, a chalk finish line. The Works crew race them, slowly, because the carts only go one speed. Calder pretends she doesn&#x27;t know.</p>
+        <dl><dt>Place</dt><dd>Cart bay, Deck 5</dd><dt>Host</dt><dd>Marta Soto (Works; loyal, blunt)</dd><dt>Fits</dt><dd>The cart bay is empty on a Sunday. The big jigsaw runs on other Sundays.</dd></dl></article>
+      <article class="card sat"><header><span class="when">WED 19:30-20:30 · every 4 weeks from week 6 (6, 10)</span><h3>Whodunnit club</h3><span class="size">Quiet, games</span></header>
+        <p>Lars reads a short mystery aloud in three parts. After each, everyone writes down who did it. Somebody always guesses too early, and is right.</p>
+        <dl><dt>Place</dt><dd>Bow lounge, Deck 3</dd><dt>Host</dt><dd>Lars Achterberg (night Watch; dry humour), with Signe Moreau and Ilse Quist</dd><dt>Fits</dt><dd>After Brennan&#x27;s tasting table. Route night (week 6) is in the chart room.</dd></dl></article>
+      <article class="card sun"><header><span class="when">MON 17:30-18:00 · every 4 weeks from week 6 (6, 10)</span><h3>Windowsill herbs</h3><span class="size">Garden</span></header>
+        <p>Four people grow herbs on their windowsills for the galley. Once a month they bring the pots to the garden, compare, swap cuttings, and the best bunch goes to Brennan.</p>
+        <dl><dt>Place</dt><dd>Hydroponics garden, Deck 3</dd><dt>Host</dt><dd>Hugo Janssen (night helm; off Mondays), with Ilse Quist, Orla Ishikawa and Bilal Nakamura</dd><dt>Fits</dt><dd>Before dinner; the garden is quiet then.</dd></dl></article>
+      <article class="card sat"><header><span class="when">SAT 11:00-12:00 · every 4 weeks from week 7 (7, 11)</span><h3>Tiny portrait hour</h3><span class="size">Crafts</span></header>
+        <p>Tiny portraits of the crew turn up on bunks and nobody admits whose they are. For one hour the painters work in the open: sit for one, and a few days later a tiny you appears on your bunk.</p>
+        <dl><dt>Place</dt><dd>Junior common room, Deck 4</dd><dt>Host</dt><dd>Sol Bakshi (night helm; off Saturdays), with Erik Strand and Imani O&#x27;Neill</dd><dt>Fits</dt><dd>Window sketching (week 7, 11:45) is in the observatory.</dd></dl></article>
+      <article class="card sun"><header><span class="when">THU 20:00-20:45 · every 4 weeks from week 7 (7, 11)</span><h3>Sounds from home</h3><span class="size">Crew culture, reflective</span></header>
+        <p>Everyone brings one short recording of a sound from home: rain on a roof, a market, a dog, a sea. They play them one by one with the lights low, and say where it is.</p>
+        <dl><dt>Place</dt><dd>Music room, Deck 4</dd><dt>Host</dt><dd>Uma Vasquez (Watch; homesick, cheerful)</dd><dt>Fits</dt><dd>Quiz night is in the bow lounge at the same hour: two at once, different rooms.</dd></dl></article>
+      <article class="card sat"><header><span class="when">TUE 19:00-19:45 · every 4 weeks from week 8 (8, 12)</span><h3>Row for the board</h3><span class="size">Competitive</span></header>
+        <p>Two rowers are chasing Commander Vance&#x27;s name at the top of the rowing board. Once a month they race for it, two minutes each, and the gym shouts the numbers. Vance watches from the treadmill.</p>
+        <dl><dt>Place</dt><dd>Gym, Deck 3</dd><dt>Host</dt><dd>Isak Lindqvist, with Zofia Santos</dd><dt>Fits</dt><dd>The gym is free on Tuesday evenings.</dd></dl></article>
+      <article class="card sun"><header><span class="when">TUE 21:30-22:15 · every 4 weeks from week 8 (8, 12)</span><h3>Star journals</h3><span class="size">Quiet</span></header>
+        <p>Three crew keep a journal of every star they&#x27;ve seen. Once a month they read a page each by the big window, and you can start your own.</p>
+        <dl><dt>Place</dt><dd>Observation room, Deck 1</dd><dt>Host</dt><dd>Farah Rahman, with Wen Takahashi and Yara Esposito</dd><dt>Fits</dt><dd>The observation room, not the bridge. Beginners&#x27; guitar is in the music room.</dd></dl></article>
+      <article class="card sat"><header><span class="when">MON 21:00-21:45 · every 4 weeks from week 9 (9, 13)</span><h3>Playlist duel</h3><span class="size">Music</span></header>
+        <p>Imani makes a playlist for every week of the tour. Once a month two people play three songs each and the room picks a winner. Imani always loses and says she let them win.</p>
+        <dl><dt>Place</dt><dd>Music room, Deck 4</dd><dt>Host</dt><dd>Imani O&#x27;Neill (gardener; dry humour)</dd><dt>Fits</dt><dd>Book circle (week 9) is in the junior common room.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SUN 08:30-09:00 · every 4 weeks from week 9 (9, 13)</span><h3>The dawn chorus, dry</h3><span class="size">Silly, music, morning</span></header>
+        <p>The junior washrooms have a dawn chorus: five people who sing in the shower. Once a month they sing it properly, dressed, in the music room. It is not better.</p>
+        <dl><dt>Place</dt><dd>Music room, Deck 4</dd><dt>Host</dt><dd>Quinn Zamora, with Orla, Asha Amadi, Carmen Chen and Ivo Madsen</dd><dt>Fits</dt><dd>Before the swap meet. The slow stretch is on the rec deck.</dd></dl></article>
+      <article class="card sat"><header><span class="when">SAT 21:30-22:15 · every 4 weeks from week 10 (10, 14)</span><h3>Lamplight paddle</h3><span class="size">Rec deck, quiet</span></header>
+        <p>The river hall&#x27;s lights go down to lamps along the bank, and a few kayaks drift the slow channel with no racing. Bea leads, very slowly.</p>
+        <dl><dt>Place</dt><dd>River hall, the rec deck</dd><dt>Host</dt><dd>Bea Silva (Works; dreamy, reliable)</dd><dt>Fits</dt><dd>A rec deck one: film night is in the auditorium.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SUN 16:00-17:00 · every 4 weeks from week 10 (10, 14)</span><h3>Gallery evening</h3><span class="size">Reflective, ship history</span></header>
+        <p>Three crew whose parents served on the Wren walk the gallery of past captains and tell what they know of each. Somebody always finds a new face in an old photograph.</p>
+        <dl><dt>Place</dt><dd>The portrait gallery, Deck 2</dd><dt>Host</dt><dd>Mira Dahl, with Oona Zielinski and Dara Shah</dd><dt>Fits</dt><dd>Takes the reading corner&#x27;s hour on an off week, in a different room.</dd></dl></article>
+      <article class="card sat"><header><span class="when">MON 18:30-19:10 · every 4 weeks from week 11 (11, 15)</span><h3>Lost property night</h3><span class="size">Silly</span></header>
+        <p>Four people each think they run the lost-property box. There are four boxes now, on four decks. Once a month they bring them all to the stalls: claim what&#x27;s yours, and the rest gets a story and a new home.</p>
+        <dl><dt>Place</dt><dd>Promenade stalls, Deck 3</dd><dt>Host</dt><dd>Arjun Fonseca, with Mateo Navarro, Chloe Tran and Thea Grieve</dd><dt>Fits</dt><dd>Before gym club. The stalls are empty on weekdays.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SUN 14:00-15:00 · every 4 weeks from week 11 (11, 15)</span><h3>Ring the bell</h3><span class="size">Rec deck, competitive</span></header>
+        <p>One climb each, up the hardest route, to ring the brass bell at the top. Everyone below counts the seconds. Most don&#x27;t ring it. The ones who do get a cheer that shakes the hall.</p>
+        <dl><dt>Place</dt><dd>Climbing wall, the river hall, the rec deck</dd><dt>Host</dt><dd>Carmen Chen (Watch; dreamy, restless)</dd><dt>Fits</dt><dd>A rec deck one, in a different room from Winner Stays On.</dd></dl></article>
+      <article class="card sat"><header><span class="when">SUN 21:45-22:15 · every 4 weeks from week 12 (12, 16)</span><h3>Soup at shift change</h3><span class="size">Food, late</span></header>
+        <p>Before the night shift starts its week, Ivo makes a big pot of soup. The night crew eat before they go on, and anyone up late gets a bowl.</p>
+        <dl><dt>Place</dt><dd>Mess hall, Deck 3</dd><dt>Host</dt><dd>Ivo Madsen (galley late team; chatty)</dd><dt>Fits</dt><dd>The Sunday story (21:15) is in the junior common room.</dd></dl></article>
+      <article class="card sun"><header><span class="when">SAT 11:00-11:45 · once a season, week 4 (Day 27)</span><h3>Seed packet day</h3><span class="size">Seasonal, crafts</span></header>
+        <p>Ravi draws the seed packets for next season&#x27;s sowing, and everyone folds and fills one, with their own drawing on the front. They&#x27;re what Cruz sows next season.</p>
+        <dl><dt>Place</dt><dd>Hydroponics garden, Deck 3</dd><dt>Host</dt><dd>Ravi Hart (gardener; draws)</dd><dt>Fits</dt><dd>Before the garden picnic hour. Once a season, so it feels like a marker of time.</dd></dl></article>
+    </div>
+  </section>
+
+  <section>
+    <h2>Your answers</h2>
+    <p>Pick one for each. Notes are optional: a different day, host or room, or "more like this".</p>
+    <form id="answers">
+      <div id="rows"></div>
+      <div class="row"><h3>Anything else? More of a kind you liked, or a tradition you'd like that isn't here?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+      <button type="submit">Save my answers</button>
+      <p class="status" id="status" role="status">Loading any saved answers...</p>
+    </form>
+  </section>
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user
+  const yn = [['yes', 'Yes, now'], ['later', 'Later'], ['no', 'No']];
+  const items = [["fiveMin", "Five-minute skills"], ["coffee", "The coffee machine trials"], ["jars", "Jar day"], ["valo", "Valo post day"], ["guitar", "Beginners' guitar, badly"], ["toast", "Midnight toast"], ["lunchQuiz", "Lunch-table quiz"], ["derby", "Cart bay derby"], ["whodunnit", "Whodunnit club"], ["herbs", "Windowsill herbs"], ["portraits", "Tiny portrait hour"], ["homeSounds", "Sounds from home"], ["row", "Row for the board"], ["stars", "Star journals"], ["playlist", "Playlist duel"], ["chorus", "The dawn chorus, dry"], ["paddle", "Lamplight paddle"], ["gallery", "Gallery evening"], ["lostProperty", "Lost property night"], ["bell", "Ring the bell"], ["soup", "Soup at shift change"], ["seeds", "Seed packet day"]].map(([k, n]) => [k, n, yn]);
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
