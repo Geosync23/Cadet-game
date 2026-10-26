@@ -1481,3 +1481,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~20:20 UTC: RV21 PASS SW4 vessel words 88128070 (4 shoulds to SW4). **SW5 endgame pool DONE** 0d90de7a (420 lines; waits on EN2 `endgame` word to bake). **SW6 ending words DONE** 6dd03f57 (~650 lines; user answers applied; flags list to EN1/EN2) → RV21. EN2 nudged.
 - ~20:20 UTC: **FX29 doors 1dc4825e** (regression fix; check_fast OK; interactions running). RV18, CR6, CR1 switched to it.
 - ~20:22 UTC: **EN1 E-2 turn 2 ec26a14f** (offer scene, answers, settle at the address, ending_check new; off identical) → RV21. Correction sent: END_WAY_BACK false, no kept copy (user Q1). SW4 d75de7ab (+1 line for VB1).
+- ~20:23 UTC: BM18 staging-0.93.3 acbb52e0 (visit on + SW2 swap words; check_fast OK). Lead confirmed **0.93.3 set = doors 1dc4825e (on RV18 PASS) + visit on + SW2 words + events_check fix only**; Step 5 / vessel / ending land later as whole sets (0.93.4+).
