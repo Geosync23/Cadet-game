@@ -471,7 +471,8 @@ with sync_playwright() as pw:
         if (t.id === 'first-light' && !(typeof FLC_ON !== 'undefined' && FLC_ON)) continue;   // patch #26: loaded only with its switch on (section 15's FLC_ON)
         if (t.id === 'captains-address' && !(typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON)) continue;
         if (typeof P926_NEW !== 'undefined' && P926_NEW.has(t.id) && !P926_TRADS) continue;   // 0.92.6's new traditions (FX17): loaded only with P926_TRADS
-        if (typeof TRAD_0932_NEW !== 'undefined' && TRAD_0932_NEW.has(t.id) && !TRAD_0932_ON) continue;   // 0.93.2's new traditions (FX24): loaded only with TRAD_0932_ON
+        if (typeof TRAD_0932_NEW !== 'undefined' && TRAD_0932_NEW.has(t.id) && !TRAD_0932_ON) continue;
+        if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && t.id === 'crew-welcome-tea') { if (SHIP_TRADITIONS.some(e => e.id === t.id)) out.bad.push('crew-welcome-tea loaded with TRAD_0932_ON (retired)'); continue; }   // 0.93.2: retired   // 0.93.2's new traditions (FX24): loaded only with TRAD_0932_ON
         if (typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON && (t.id === 'tasting-table' || t.id === 'tasting-table-late')) { if (!SHIP_TRADITIONS.some(e => e.id === 'tasting-table' && e.k === 1314)) out.bad.push('tasting-table-late not loaded as tasting-table'); continue; }   // 0.93.2: the reworked one in the old one's place
         if (typeof WEEKEND_TRADS !== 'undefined' && WEEKEND_TRADS.has(t.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): loaded only with WEEKEND_ON   // Short Fridays: loaded only with its switch on (section 13's SHORT_FRIDAY; 18f) and the rec deck's traditions
         const ev = SHIP_TRADITIONS.find(e => e.id === t.id); if (!ev || !ev.baked) { out.bad.push('baked ' + t.id + ' not loaded'); continue; }
@@ -521,7 +522,7 @@ with sync_playwright() as pw:
     fri_on = g.ev("typeof SHORT_FRIDAY !== 'undefined' && SHORT_FRIDAY && REC_TRAD_ON")
     wk_off = g.ev("typeof WEEKEND_TRADS !== 'undefined' && !WEEKEND_ON ? [...WEEKEND_TRADS] : []")
     wk_off += g.ev("typeof P926_NEW !== 'undefined' && !P926_TRADS ? [...P926_NEW] : []")   # 0.92.6's (FX17): only with P926_TRADS
-    wk_off += g.ev("typeof TRAD_0932_NEW !== 'undefined' ? (TRAD_0932_ON ? ['tasting-table-late'] : [...TRAD_0932_NEW]) : []")   # 0.93.2's (FX24): only with TRAD_0932_ON; the reworked tasting table loads as tasting-table
+    wk_off += g.ev("typeof TRAD_0932_NEW !== 'undefined' ? (TRAD_0932_ON ? ['tasting-table-late', 'crew-welcome-tea'] : [...TRAD_0932_NEW]) : []")   # 0.93.2's (FX24): only with TRAD_0932_ON; the reworked tasting table loads as tasting-table
     for i in want_ids:
         if i.startswith('rec-') and not rec_on: continue    # the rec deck's own load only with the deck switched on (0.83)
         if i == 'first-light' and not flc_on: continue      # First Light Cocoa (patch #26) loads only with FLC_ON
@@ -854,7 +855,7 @@ with sync_playwright() as pw:
     # pinned here, so the tea's data moving off Thursday fails), and Off the Tern on the day itself (its arrivals, with ROT_TERN on; PT1); {names} filled; the
     # honorees' friends, department, cabin
     RT = g.ev("""(() => ROSTER_ROTATIONS.map(r => { const row = { day: r.day, teaWeekday: (SHIP_TRADITIONS.find(t => t.id === 'crew-welcome-tea') || { when: {} }).when.weekday }, tw = 3;
-      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out], ['crew-welcome-tea', r.day + 1 + (tw - weekday(r.day + 1) + 7) % 7, r.in]].concat(typeof ROT_TERN !== 'undefined' && ROT_TERN ? [['off-the-tern', r.day, r.in]] : [])) {
+      for (const [id, d, ids] of [['farewell-supper', r.day - 1, r.out]].concat(typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON ? [] : [['crew-welcome-tea', r.day + 1 + (tw - weekday(r.day + 1) + 7) % 7, r.in]]).concat(typeof ROT_TERN !== 'undefined' && ROT_TERN ? [['off-the-tern', r.day, r.in]] : [])) {
         const e = eventsOn(d).find(x => x.id === id), go = e ? schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-' + id))) : [];
         row[id] = e ? { d, hon: e.honorees.map(p => p.id).sort().join(',') === ids.slice().sort().join(','), names: e.names, mail: !!(e.ev.mail && e.ev.mail(e)), went: go.length,
           honWent: go.filter(p => e.honorees.includes(p)).map(p => p.id + (p.shift === 'night' ? '(night)' : '')), others: go.filter(p => !e.honorees.includes(p)).length } : { d, missing: true, dropped: (EV_DROPPED.get(d) || []).includes(id) };
@@ -862,7 +863,7 @@ with sync_playwright() as pw:
       return row; }))()""")
     for r in RT:
         print(f"  rotation day {r['day']}: " + '; '.join(f"{k} day {v['d']}: " + ('MISSING' if v.get('missing') else f"{v['names']} ({'honorees ok' if v['hon'] else 'WRONG honorees'}), went {v['went']}, honorees {v['honWent']}") for k, v in r.items() if k not in ('day', 'teaWeekday')))
-        if r['teaWeekday'] != 3: fail(f"crew-welcome-tea's weekday is {r['teaWeekday']}, not Thursday (3), the user's decision")
+        if r['teaWeekday'] != 3 and not g.ev("typeof TRAD_0932_ON !== 'undefined' && TRAD_0932_ON"): fail(f"crew-welcome-tea's weekday is {r['teaWeekday']}, not Thursday (3), the user's decision")
         for k, v in r.items():
             if k in ('day', 'teaWeekday'): continue
             if v.get('missing') or not v['hon'] or not v['mail'] or v['others'] < 2: fail(f"{k} for the rotation on day {r['day']}: {v}")

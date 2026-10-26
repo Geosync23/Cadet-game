@@ -41575,6 +41575,7 @@ for (const t of TRAD_LIST) {
   if (P926_NEW.has(ev.id) && !P926_TRADS) continue;    // 0.92.6's new traditions (FX17): only with their switch (section 13)
   if (WEEKEND_TRADS.has(ev.id) && !WEEKEND_ON) continue;   // the weekend traditions (0.92.5 item 16): only with their switch (section 13)
   if (TRAD_0932_NEW.has(ev.id) && !TRAD_0932_ON) continue;   // 0.93.2's new traditions (FX24): only with their switch (section 13)
+  if (TRAD_0932_ON && ev.id === 'crew-welcome-tea') continue;   // 0.93.2: the new hand's tea retired (the user, 2026-10-25: "this one can go"; lead 37: with this switch too, as EV_SWAP_ON's)
   if (TRAD_0932_ON && ev.id === 'tasting-table') continue;   // 0.93.2: Brennan's tasting table after dinner (tasting-table-late) instead
   if (TRAD_0932_ON && ev.id === 'tasting-table-late') ev.id = 'tasting-table';   // its id kept: the galley, the tally, the long table's side and the Mail know it
   if (TRAD_0932_ON && TRAD_0932_WHEN[ev.id]) ev.when = TRAD_0932_WHEN[ev.id];   // 0.93.2: six weekly ones take turns from week 2
