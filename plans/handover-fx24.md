@@ -29,3 +29,16 @@ Three jobs for 0.93.2, each on its own branch from claude/integration b957b92d (
 Setup as plans/testing-guide.md section 2 (pip install playwright numpy pillow; three r128 and acorn in CADET_WORK;
 CADET_CHROME=/opt/pw-browsers/chromium). Switch-on runs use a copy with the switch flipped by sed. Run long checks in
 separate CADET_WORK folders and separate log files (two runs writing one log file corrupt it).
+
+## Addendum (later on 2026-10-26, lead 38)
+- RV18 PASSed claude/trad-0932 (d126a657, incl. Row for the board: a rower if free, else you stand and shout),
+  claude/auto-doors-0932 (98768969, incl. a tap on yourself by a shut door opens it) and Take a seat; all three are merged
+  into claude/staging-0.93.2.
+- 4. claude/workbench-tap (from staging 52d5998a): a tap on a machine shop bench with a chore whose stop is there runs the
+  job, not crafting/tinkering (section 15's jobTap, one line; FX20b's arrows_check week Day 8, Fix an extractor hose
+  clamp at 5-shop-5). arrows_check week on staging + 57936267: FAILED without, OK with; interactions, player, check_fast
+  OK; cadet_test vs staging identical. Awaiting RV18. Open idea for lead 38: FIX_PARKED's sh-lamp, sh-press, sh-grinder
+  were parked for this same tap problem and could come back now (not done).
+- p926_check part 4 (reading corner with TRAD_0932_ON): BM18 took CR3's fix (claude/checks-cr3); mine was dropped.
+- Gotcha: pkill -f with a check's name also kills the shell running it; kill by pid. Heavy parallel runs cause
+  Page.goto timeouts in the checks (not game faults): re-run when the box is quieter.
