@@ -62596,7 +62596,7 @@ const SND = (() => {
     const verbOut = c.createGain(); verbOut.gain.value = 0.9; verb.connect(verbOut); verbOut.connect(master);
     const g = {};
     // fixed trims set by measuring each layer against the hum (plans/sound, the mockups' __measure)
-    const TRIM = { hum: 0.4, steps: 1.0, ui: 1, music: 1 };   // music: the music module applies its own level
+    const TRIM = { hum: 0.4, steps: 0.5, ui: 1, music: 1 };   // music: the music module applies its own level; steps 0.5: the player's footsteps half as loud (the user, 2026-10-26)
     for (const k of ['hum', 'steps', 'ui', 'music']) { g[k] = c.createGain(); const tr = c.createGain(); tr.gain.value = TRIM[k]; g[k].connect(tr); tr.connect(master); }
     return { buf, comp, master, verb, ...g };
   }
