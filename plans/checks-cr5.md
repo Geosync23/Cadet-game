@@ -16,6 +16,7 @@ on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying)
 |---|---|---|---|---|
 | `interactions_check.py BUILD` | OK | 0 | 2449 s | `INTERACTIONS CHECK OK` |
 | `career_check.py BUILD` | FAIL (known-old only) | 1 | 243 s | only FAIL: `busy: "Relied on" before Day 5` (backlog 12 / FX28-1) |
+| `join_check.py BUILD` (CR6's, handed over after a Page.goto timeout; run alone) | OK | 0 | 267 s | `JOIN CHECK OK` |
 
 No NEW FAILs. Setup proof before the round: sound_check on staging acbb52e0 (game e95cfe76...edd7) OK, 228 s.
 
