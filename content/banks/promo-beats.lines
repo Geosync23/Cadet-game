@@ -9,8 +9,9 @@
 == pb.soon
 ? day:-9
 - Your Tier 2 test? You've been aboard nine days.
-- Nine days and up for Tier 2. Took me three months.   #funny
 - Not even ten days aboard. Calder must rate you.
+? day:-9 dept:works
+- Nine days and up for Tier 2. Took me three months.   #funny
 ? day:10-14
 - Up for Tier 2 inside two weeks. That's quick.
 - Under two weeks aboard and a Tier 2 test. Not bad.
@@ -51,10 +52,10 @@
 == pb.passed
 ? tier>=friend
 - Done? How did it go? Tell me everything.   #warm
-- I bet you passed. I'd bet my dessert on it.   #funny
+- I bet you passed. I'd bet my pudding on it.   #funny
 - Results tomorrow? I'll be waiting. Tell me first.   #warm
 ?
-- Heard you did your Tier 2 test. How'd it go?
+- Heard you did your Tier 2 test. How was it?
 - Calder's face gives nothing away, does it?   #funny
 ? dept:works
 - Tidy job on that scrubber. Saw it on the board.
