@@ -573,3 +573,6 @@ doors three ways, the diplomatic visit on). OLD = 0.93.2 d9c7e5f0 (c99ea59c…).
 | day_check 11 | **OK** | 232 s | DAY CHECK OK |
 
 No FAILs, so no OLD runs were needed.
+
+Extras for CR3 (agreed with CR3, BM18's ask; CR3 stopped them first), on 19400976, each alone:
+`promo_sight_check.py`: exit 0, 15 s, **PROMO SIGHT CHECK OK**; `sound_check.py`: exit 0, 177 s, **SOUND CHECK OK**.
