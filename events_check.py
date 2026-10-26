@@ -1063,8 +1063,9 @@ with sync_playwright() as pw:
         g.step(10)
         if g.ev("!!SLICE"): break
     g.step(10); S1 = g.ev("[!!SLICE, player.holding, document.getElementById('tx').textContent]")
+    g.ev("window.__tst = []; const _ts = toast; toast = (t, x, o) => { __tst.push(String(x)); return _ts(t, x, o); }")   # every pop-up after the second tap (FX20b: the birthday's own thanks can land in the same frames and cover it)
     g.ev(TAP); g.step(4)
-    S2 = g.ev("document.getElementById('tx').textContent")
+    S2 = ' | '.join(g.ev("__tst")) or g.ev("document.getElementById('tx').textContent")
     for k in range(200):
         g.step(30)
         if not g.ev("!!SLICE"): break
