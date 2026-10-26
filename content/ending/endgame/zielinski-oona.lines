@@ -1,0 +1,16 @@
+@crew zielinski-oona
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- Oh, it's you. Staying, I hear. Good trade. You got the better side of it.   #funny
+- Headquarters offered you a post and you said no. Haggled them to nothing. I'm impressed.   #funny
+- Ordinary day on the bridge. Every little liar of a light is green. Suspicious, honestly.   #funny
+- I'd have priced your send-off at three cakes and a speech. You saved us all a fortune.   #funny
+? endgame tier>=friend
+- My parent served on the Wren years back. Stayed for ages. Must be something in the air.   #warm
+
+== bye
+? endgame
+- Off you go. Don't buy anything at the store till I've checked the price.

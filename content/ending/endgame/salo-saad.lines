@@ -1,0 +1,15 @@
+@crew salo-saad
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- Hello, hello. Last time on the Halcyon: my twin heard you stayed. He sent a cheer.   #funny
+- No rush now, is there? Good. I've always thought you were in a bit of a rush.
+- Ordinary day in the engine room. Floor clean, coils humming, bed by ten. Lovely.
+- I'll show you the slow way to clean a coil housing. Same as the quick way. Slower.   #funny
+- The Halcyon thinks the Wren's crew never leave. We don't, much. Now you're one of us.   #warm
+
+== bye
+? endgame
+- Off you go. Bed by ten, mind. You've no excuse now.   #funny

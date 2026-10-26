@@ -1,0 +1,15 @@
+@crew quist-ilse
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- You stayed. The basil on my sill perked up. Not because of you. Probably. Possibly.   #funny
+- Ordinary day. Grease, herbs, a mystery I've already solved. Lovely, really.
+- I guessed you'd stay by chapter two. Of the week. Thursday, I mean.   #funny
+- Brennan used my thyme on Sunday and said so. Then said you were staying. Good day.   #warm
+- The herbs like people who stay. They get used to your hands. So do I, a bit.   #warm
+
+== bye
+? endgame
+- Bye. Water something on your way. Anything. It helps.

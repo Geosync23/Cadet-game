@@ -1,0 +1,15 @@
+@crew dahl-mira
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- You stayed. Good. Now the useful question: do you want a scarf, or a hat?
+- I measured your week in rows. Thursday was a lot of rows. Sunday was fewer.   #warm
+- Ordinary days aboard. Patrols, tea, a scarf that grows. What more is there?
+- So you're staying. What will you do with your rest days? Think. Tell me Thursday.
+- Kovac knits perfect. I knit useful. Torres knits a lot. You'll own all three soon.   #funny
+
+== bye
+? endgame
+- Keep moving, or I'll knit you something. Bye.   #funny

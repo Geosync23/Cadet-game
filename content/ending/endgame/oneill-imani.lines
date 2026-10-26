@@ -1,0 +1,15 @@
+@crew oneill-imani
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22).
+
+== chat
+? endgame
+- You stayed. Great news. Delivered deadpan, as is my custom.   #funny
+- This week's playlist is called "Stayed". Teague would've said "Going". Wrong, as usual.   #funny
+- Ordinary late shift. Herbs picked, a song on, nobody in a hurry. Lovely.
+- Your song for this week is the slow one at the end. Don't argue. I've decided.
+- Painted a tiny portrait this week. Not saying who of. They stayed, though.   #warm
+
+== bye
+? endgame
+- Bye. Hum something. The garden likes it.
