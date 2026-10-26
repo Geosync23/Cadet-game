@@ -31,6 +31,7 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/vessel-words (SW4) | V-6 words, shoulds done | PASS | 7dd2eb5d (d75de7ab PASS too) |
 | claude/ending-words-b (SW5) | E-5 endgame pool (not baked) | PASS | 0d90de7a, 8ed1545a (should done) |
 | claude/ending-words-a (SW6) | E-5 week + both endings | FIXES NEEDED (1 must) | 6dd03f57 |
+| claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
 - 2026-10-26 ~20:05 UTC: started; told all seven builders and lead 39 my session id. Read specs, RV18 handover, TEAM.md.
@@ -62,3 +63,7 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   "by Friday" said on Saturday; crowd "Best four weeks" (five aboard); endingSearch's three "Ah." need chaining.
   lines_check PASS 96 warnings (27 new: deliberate parallels, the oath reuse, "Attendance"); check_fast OK 425 s;
   cadet_test vs d9c7e5f0 ALL IDENTICAL. Spec nit to lead/EP2: section 8 still says three end-page buttons.
+- ~20:42 UTC: **EN1 claude/ending 1c72a28d (skeleton): PASS.** EV_ENDING_ON off; empty section 29 (29a-29c slots) after 27,
+  before the main loop; cadet ALL IDENTICAL; check_fast OK 406 s. Should: 29b header, DEV_NOTES, owners, map still describe
+  the kept copy (user said no way back).
+- VB2 v.1 e21ade10 received; waiting for v.2 as VB2 asked.
