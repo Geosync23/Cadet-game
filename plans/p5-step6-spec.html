@@ -1,0 +1,534 @@
+<title>Step 6 Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.piece { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--visit); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.piece:nth-of-type(2n) { border-top-color: var(--comet); }
+.piece header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.piece dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.piece dt { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.piece dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .piece dl { grid-template-columns: 1fr; gap: 2px; } .piece dd { margin-bottom: 8px; } }
+</style>
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Build spec · Pillar 5 Step 6 · version 1 · EP2 for lead 39 · 2026-10-26</p>
+  <h1>Step 6: Engine Specialist and the end, the build spec</h1>
+  <p class="lead">The second half of the agreed plan (version 3.1): the Monday briefing and the Tier 4 test on Day 22, three night shifts after the comet, the result on the walk down from it, the Captain's badge, your quarters on Deck 2 after dinner on Thursday Day 25, mentoring Basil and Calder's question. Same layout as the Step 5 spec: the pieces, exactly what each touches, switches, seats, checks, the controller, the words, and the few things only you can decide.</p>
+  <div class="facts">
+    <div class="fact"><b>Pieces</b>Nine building pieces and the words. The night shift is built first, behind its own switch, with its own round.</div>
+    <div class="fact"><b>Builders at once</b>Five at the start (the player engineer with the sim engineer on the nights, mechanics seat A, the Works career engineer, the puzzles seat, the deck architect), then six once mechanics seat B joins for engine work. Plus the head writer.</div>
+    <div class="fact"><b>Size</b>About 37 turns after this page; the longest seat (the Works career engineer: the promotion, mentoring, the end) has about 10.</div>
+    <div class="fact"><b>Needs first</b>Step 5's pieces merged (its ranks, bands, held hours and section 24u). Step 6 can start while Step 5 is in review, on top of its branch.</div>
+  </div>
+  <p class="note">Built against claude/integration d9c7e5f0 (0.93.2) plus the Step 5 spec (plans/p5-step5-spec.html, 26f54636), whose switches, sections 24u-24x, shared data and held hours (including the night rows on Days 22-24) this page builds on. Line numbers drift; search for the names.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#rules">Ground rules and what Step 5 already gives</a></li>
+    <li><a href="#switches">Switches and section 28</a></li>
+    <li><a href="#data">Shared data, agreed up front</a></li>
+    <li><a href="#facts">Facts in the game the plan must meet</a></li>
+    <li><a href="#pieces">The pieces</a></li>
+    <li><a href="#order">Order, seats and who can work at once</a></li>
+    <li><a href="#overlap">Where pieces touch the same code</a></li>
+    <li><a href="#checks">Checks: new parts, new days, the rounds</a></li>
+    <li><a href="#pad">The game controller, piece by piece</a></li>
+    <li><a href="#words">Words for the head writer</a></li>
+    <li><a href="#calls">Judgement calls</a></li>
+    <li><a href="#questions">Your questions and the answers form</a></li>
+  </ol>
+</nav>
+
+<section id="rules">
+  <h2>1. Ground rules and what Step 5 already gives</h2>
+  <ul>
+    <li>Everything in the Step 5 spec's section 1 holds here too: off means today's game (cadet_test ALL IDENTICAL, every day_check day the same), the first promotion untouched, the planner rule, no <code>R()</code> at load, phones first, the controller, the turn routine.</li>
+    <li><b>Step 5 has already moved the held hours</b> (<code>EV_BEATS</code>: <code>nightAssigned</code> Day 22 09:15, <code>nightShift1</code>-<code>3</code> Days 22-24, <code>engineSpecialist</code> Day 23 16:15-17:10, <code>caldersQuestion</code> Day 26 18:40-19:30). Step 6 adds only its own: <code>p5Briefing</code> (beat, Day 22 08:30-09:15), <code>tier4Test</code> (test, Day 22 09:30-12:30), <code>deck2Move</code> (beat, Day 25 19:00-22:00) and <code>mentoring</code> (beat, Day 26 09:00-15:30), in the same block, behind <code>P5_STEP6</code>. The events seat reviews it.</li>
+    <li><b>Section 24u</b> (the later promotions) gets the Engine Specialist beside the Senior Officer, reusing the same functions with a tier argument where Step 5 wrote them that way.</li>
+    <li><b>The night shift is the biggest risk</b> (the plan's section 14): time, sleep, meals, the time clock, held jobs, clothes and the save all at once. It's built first and alone, and switched on only after its own full round.</li>
+  </ul>
+</section>
+
+<section id="switches">
+  <h2>2. Switches and section 28</h2>
+  <p>The first Step 6 turn (the Works career engineer) adds all the lines at once in section 13 beside Step 5's, so no two builders edit the same lines.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Switch</th><th>Line</th><th>What it turns on</th></tr></thead>
+    <tbody>
+      <tr><td><code>P5_STEP6</code></td><td><code>const P5_STEP6 = P5_STEP5 &amp;&amp; URL_FLAGS.has('p5s6');</code></td><td>The master; needs Step 5. <code>#p5s5.p5s6</code> previews both on a Dev link.</td></tr>
+      <tr><td><code>P5_NIGHT</code></td><td><code>const P5_NIGHT = P5_STEP6 &amp;&amp; true;</code></td><td>S6-1, the night shift (and Navarro's leave)</td></tr>
+      <tr><td><code>P5_M21</code></td><td>same pattern</td><td>S6-2, the Monday briefing</td></tr>
+      <tr><td><code>P5_PROMO4</code></td><td>same pattern</td><td>S6-3, the Engine Specialist promotion and the move to Deck 2</td></tr>
+      <tr><td><code>P5_DECK6</code></td><td>same pattern</td><td>S6-4, Deck 6's working engine machines, the dosimeter rack, the watch board, team spots; Deck 2's suite as yours</td></tr>
+      <tr><td><code>P5_M23</code></td><td>same pattern</td><td>S6-5, engine work and the reactor</td></tr>
+      <tr><td><code>P5_M24</code></td><td>same pattern</td><td>S6-6, leading a team</td></tr>
+      <tr><td><code>P5_M25</code></td><td>same pattern</td><td>S6-7, mentoring Basil</td></tr>
+      <tr><td><code>P5_CASES6</code></td><td>same pattern</td><td>S6-8, P6, P7, P8</td></tr>
+      <tr><td><code>P5_END</code></td><td>same pattern</td><td>S6-9, the end of the career</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Section 28.</b> Section 24's letters run out after 24x (24y and 24z are kept spare), so Step 6's new mechanics get a new main section, <code>// 28. THE ENGINE SPECIALIST (Pillar 5 Step 6)</code>, after 24x and before section 6, owned by the Works career engineer, with one sub-section and slot per piece:</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Section</th><th>Heading</th><th>Owner seat</th><th>Piece</th></tr></thead>
+    <tbody>
+      <tr><td><code>28</code></td><td>THE ENGINE SPECIALIST: shared helpers (night days, <code>p5NightOf(d)</code>)</td><td>Works career engineer</td><td>first turn</td></tr>
+      <tr><td><code>28a</code></td><td>THE NIGHT SHIFT (M22)</td><td>Player engineer</td><td>S6-1</td></tr>
+      <tr><td><code>28b</code></td><td>THE MONDAY BRIEFING (M21)</td><td>Mechanics seat A</td><td>S6-2</td></tr>
+      <tr><td><code>28c</code></td><td>ENGINE WORK AND THE REACTOR (M23)</td><td>Mechanics seat B</td><td>S6-5</td></tr>
+      <tr><td><code>28d</code></td><td>LEADING A TEAM (M24)</td><td>Mechanics seat A</td><td>S6-6</td></tr>
+      <tr><td><code>28e</code></td><td>MENTORING (M25)</td><td>Works career engineer</td><td>S6-7</td></tr>
+      <tr><td><code>28f</code></td><td>THE END OF THE CAREER</td><td>Works career engineer</td><td>S6-9</td></tr>
+    </tbody>
+  </table></div>
+  <p>The Engine Specialist promotion and the move go in 24u (S6-3); the cases in 24k's slot (S6-8); the deck work in section 4d (S6-4). The first turn also adds the rows to plans/owners.md, plans/map.md and tools/affected.py.</p>
+</section>
+
+<section id="data">
+  <h2>3. Shared data, agreed up front</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Where</th><th>Shape</th><th>Written by</th><th>Read by</th></tr></thead>
+    <tbody>
+      <tr><td><code>CAREER_LADDER</code></td><td>New rows in Step 5's <code>if (P5_STEP5)</code> block's sibling, <code>if (P5_STEP6)</code>: <code>m22</code> (the night shift, big, Day 22, any rank, by Calder; no training meeting), <code>m21</code> (big, Day 22, rank senior, the Captain), <code>t4</code> (big, Day 22, tier 3, needs <code>[{ rep: 'trusted' }, { trained: 'm19' }]</code>, Calder and Torres, Deck 6 <code>E</code>, job 'test'), <code>m23</code> (big, Day 22 night, tier 4, Reyes; Torres by day), <code>p6</code> (small, Day 22), <code>p7</code> (small, Day 23), <code>m24</code> (big, Day 24, tier 4, Calder), <code>p8</code> (small, Day 25, the machine shop tech), <code>m25</code> (big, Day 26, rank senior, Calder).</td><td>first turn</td><td>Every piece registers <code>WORK_MECH[id]</code></td></tr>
+      <tr><td><code>WORK_BANDS[4]</code></td><td>The Engine Specialist's bands (only shown; nothing waits on them in Pillar 5)</td><td>first turn</td><td>24 core, career_check</td></tr>
+      <tr><td><code>P5_NIGHTS</code> (28, fixed)</td><td><code>{ 22: [1365, 1800], 23: [1260, 1800], 24: [1260, 1800] }</code>: your night shifts, minutes from that day's midnight (22:45 or 21:00 to 06:00). Fixed by the day number, whatever your rank (your answer of 22 October), so the crew's planner may read it.</td><td>first turn</td><td>S6-1, S6-3, S6-5, S6-6, section 14's hooks</td></tr>
+      <tr><td><code>P5_LEAVE</code> (28, fixed)</td><td><code>{ 'navarro-mateo': [22, 23] }</code>: Navarro's leave, the nights of his rota that fall on your nights (see section 4)</td><td>first turn</td><td>Section 14's <code>isWorkDay</code> hook (S6-1)</td></tr>
+      <tr><td><code>SHIP.works.ns</code> (28a)</td><td><code>{ d: { in, out, jobs: [ids], inc: [ids], late } }</code> for each night: clocked in and out (ship minutes), its jobs and incidents, how late</td><td>S6-1</td><td>S6-5, S6-6, the Record</td></tr>
+      <tr><td><code>SHIP.works.pu.t4</code>, <code>.move</code></td><td>As Step 5's <code>t3</code>; <code>move: { ready, walked, refit }</code> (the day Deck 2 was ready, the day you were walked there, whether you took the refit job)</td><td>S6-3</td><td>S6-4 (the door plate, your touches), 21b (laundry), 24t</td></tr>
+      <tr><td><code>SHIP.works.home</code></td><td>Today <code>'bunk'</code> or <code>'4-23'</code>; from the move <code>'2-B'</code>. <code>worksHome</code>, <code>worksHomeOpen</code> and 24t's <code>cabinMine</code> learn the new value (24p and 24t, small edits, the same owner)</td><td>S6-3</td><td>Doors (the 3-way setting: a private room, yours), Deck 2's and Deck 4's plates, 21b, 24t</td></tr>
+      <tr><td><code>SHIP.works.mt</code> (28e), <code>SHIP.works.end</code> (28f)</td><td><code>mt: { day, set, steps: {}, late, clue }</code>: Basil's day, settled at 22:00 the evening before; <code>end: { answer, day }</code>: your answer to Calder's question</td><td>S6-7, S6-9</td><td>The Record, later content</td></tr>
+      <tr><td><code>TEAM_JOBS.coil</code> (24h)</td><td>A new kind in the team jobs table (the coil swap: its steps and parts), the table's shape unchanged; its owner is the Works career engineer</td><td>S6-6</td><td>24h's team engine</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="facts">
+  <h2>4. Facts in the game the plan must meet</h2>
+  <p>Found while writing this page; each is settled under "Judgement calls" or the questions.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Fact</th><th>Where</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Navarro works nights with Wednesday and Thursday off (<code>offDays [2, 3]</code>)</td><td>Section 9's roster</td><td>His "three days' leave" only needs to cover Monday and Tuesday night; Wednesday is his night off anyway. On Thursday morning he isn't "back tonight": his next night is Friday. Calder's words follow his real rota.</td></tr>
+      <tr><td>Reyes has Tuesday and Wednesday nights off (<code>offDays [1, 2]</code>)</td><td>Section 9</td><td>He's with you on night 1 only. Night 2's crew is Keane, Kowal and Jovanovic; night 3's is Keane and Kowal (Jovanovic off): your team on night 3 is two, not three.</td></tr>
+      <tr><td>Kowalczyk has Tuesday and Wednesday nights off</td><td>Section 9</td><td>The plan's "05:50 Kowalczyk's story on the bridge, end of night 2" (Wednesday morning) falls at the end of her Tuesday night off. The social engineer checks which night her beat really belongs to and, if needed, moves it to the end of night 1 (Tuesday 05:50); stories_check proves it.</td></tr>
+      <tr><td>Breakfast is served 07:00-09:00</td><td>Section 14's <code>MEALS</code></td><td>The plan's "breakfast at 06:15" after a night: a plate kept for you from 06:15 (the galley's late-meal pattern), and the servery from 07:00 as usual.</td></tr>
+      <tr><td>Engine machines (<code>ENGINE_KINDS</code>: reactor, coil) are never yours today; no coil or reactor machine exists on Deck 6, only the props</td><td>Section 17's <code>forYou</code>; Deck 6's <code>machines</code></td><td>S6-4 makes the three coils and the reactor real machines; section 17's <code>forYou</code> lets an Engine Specialist take engine jobs (one line, the systems engineer reviews).</td></tr>
+      <tr><td>Your shift is <code>DAY_SHIFT</code> (09:00-17:00), read in 43 places across 13 sections</td><td>Everywhere</td><td>S6-1 doesn't change <code>DAY_SHIFT</code>. It adds <code>yourShift(d)</code> (section 15) and moves only the readers that run in your night hours (the time clock, <code>shiftTick</code>, jobs held for you, incidents, the needs nudges, the Schedule); the rest are day jobs that simply aren't offered on your night days.</td></tr>
+      <tr><td>The visitors' suite is room <code>B</code> on Deck 2 (bed <code>2-B</code>); no guest is ever lodged there</td><td>Section 4d, the roster's cabins</td><td>Nothing moves out for you; the event swap's Veyli lodge in 2-U.</td></tr>
+      <tr><td>The conference table and its ten seats exist (the "conference" venue, appointments give seats)</td><td>Deck 1, section 14</td><td>M21 needs no deck work, only an appointment.</td></tr>
+      <tr><td>Basil arrives with the Day 21 rotation (<code>ROSTER_ROTATIONS</code>); his arc's beat 3 is set for Days 23-24</td><td>Sections 9, 20c</td><td>You sleep by day on 23-24: his beat waits for you (arcs never fail), as the plan's "Basil's story beat at dinner on Day 25" needs.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="pieces">
+  <h2>5. The pieces</h2>
+
+  <article class="piece" id="s61">
+    <header><h3>S6-1 The night shift (M22)</h3><span class="phase">P5_NIGHT</span><span class="phase">Player engineer with the sim engineer</span><span class="phase">6 turns</span></header>
+    <p>Days 22-24, three nights, any rank. Built first, alone, with its own full round.</p>
+    <dl>
+      <dt>Your hours</dt><dd><code>yourShift(d)</code> in section 15: <code>DAY_SHIFT</code>, except Day 22 (the morning to 12:30, then the night from 22:45) and Days 23-24 (no day shift; the night from 21:00), each night to 06:00. <code>playerShiftOn</code> stays true on Day 22 and false on 23-24 for the day; a new <code>playerNightOn(d)</code> says when a night is yours.</dd>
+      <dt>Calder on and off</dt><dd>Day 22 09:15, outside the observation room: Calder's word (a short meeting, script <code>night.on</code>): Navarro's leave, your nights Monday to Wednesday, "Watch your comet first. I'll come and get you." Calder's Mail as it happens; a notice at 20:30 on nights 2 and 3; the arrow to the engine room from 20:45. Thursday Day 25 06:00 she comes down (<code>night.off</code>): off nights, "You've a cadet tomorrow. Go to bed."</dd>
+      <dt>Night 1's start</dt><dd>Comes from S6-3 (Calder fetches you from the comet at 22:40). With <code>P5_PROMO4</code> off, night 1 starts with Calder's notice at 22:40 and the arrow, as nights 2 and 3.</dd>
+      <dt>Sleeping by day</dt><dd>On a night day your bed offers "Sleep until 16:45" (Day 22) or "until 15:45" (Days 23-25 mornings), through <code>sleepUntil</code> (section 13); the evening "time for bed" nudges are off on a night; your energy and sleep need count daytime sleep as sleep (player_check proves it).</dd>
+      <dt>Meals at the edges</dt><dd>Dinner as usual before a night; after it a plate kept for you from 06:15 (section 16's late-meal pattern; the galley engineer reviews); no "missed breakfast" on a night morning.</dd>
+      <dt>The time clock</dt><dd>Section 20's <code>CAREER</code> clock: clock in from the night's start, out at 06:00; late by the night's start. A missed night counts like a missed shift for your reputation, never toward being let go (the storm Saturday's rule).</dd>
+      <dt>Jobs and incidents</dt><dd>Jobs held for you (section 17's <code>jobReserve</code>) can carry night windows; 24f's incident plan adds one incident inside each of your nights (fixed by the day, so planner-safe); the night's own work comes from S6-5 and S6-6. With those off, a night is the night crew's ordinary jobs, a pair of hands (as for a player who isn't yet a Senior).</dd>
+      <dt>Navarro's leave</dt><dd>One <code>typeof</code>-guarded line in section 14's <code>isWorkDay</code> reads <code>P5_LEAVE</code> (the sim engineer owns it): his Monday and Tuesday nights off, a long call home at the booths in his plan. Fixed by the day, so the planner rule holds.</dd>
+      <dt>Clothes</dt><dd>21b's "yesterday's clothes" and wash days follow your wake on a night day, not midnight (one hook; the onboarding engineer reviews).</dd>
+      <dt>Saving</dt><dd><code>SHIP.works.ns</code> saved; a save at 03:00 loads into the same night, clocked in, its jobs still held.</dd>
+      <dt>Late saves</dt><dd>A game already past Day 22 when Step 6 is switched on skips the nights (as the events' <code>EV_LATE</code> 'skip'); the promotion still comes.</dd>
+      <dt>Touches</dt><dd>28a (new: nearly all); section 15 (<code>yourShift</code>, the bed's option, the nudges); 14 (<code>isWorkDay</code> hook, <code>shiftTick</code>, the Schedule's rows); 13 (none beyond the switch); 16 (the kept plate); 17 (held jobs' night windows); 20 (the clock's hours); 21b (the clothes day); 24f (the night incident). Every edit outside 28a is behind <code>P5_NIGHT</code> and one line where it can be.</dd>
+      <dt>Checks</dt><dd>day_check Days 22, 23, 24, 25 (new event days 23-25); player_check (daytime sleep, needs, meals at the edges, a save mid-night); clothes_check (a night day); saves_check (a save at 03:00); food_check (the plate; Navarro's meals); career_check on and off (nights at any rank; a missed night); events_check (the comet unchanged); arrows_check week over Days 21-25; leave_check (Navarro's leave isn't your leave); controller_check reach (the bed's option, Calder's meetings, night incident cards), unplug mid-night (stops you and pauses, as everywhere), and a whole night 2 played by pad; cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s62">
+    <header><h3>S6-2 M21 The Monday briefing</h3><span class="phase">P5_M21</span><span class="phase">Mechanics seat A</span><span class="phase">3 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Monday Day 22, 08:30-09:15, at the conference table in the observation room (Deck 1, <code>O</code>): the Captain, Vance, the department chiefs and you, through section 14's appointments (the "conference" venue already gives each a seat and <code>apptWhere</code> brings them). A meeting (script <code>m21.brief</code>): the week ahead (the comet tonight, Basil's first week, the parts order), then you choose what Works raises: a shutdown to book (with <code>P5_M18</code>: approved, added to your bookings for Tuesday), a worry about a machine (an inspection job on it), or a parts order (the parts arrive Thursday through section 17's supplies). What you raise happens. The briefing screen shows the agenda (<code>briefingScreen</code>, Deck 1).</dd>
+      <dt>Weekly?</dt><dd>Question 1. If weekly, from Day 29 on it's a shorter version (the memo and one choice).</dd>
+      <dt>Held hour</dt><dd><code>p5Briefing</code>, its own Day 22 hold; the event swap's Day 16 <code>mondayBriefing</code> memo hold is left alone.</dd>
+      <dt>Touches</dt><dd>28b (new); section 14 (the appointment for the chiefs: one entry, the sim engineer reviews); 24w (reads a booking: a call, no edit).</dd>
+      <dt>Checks</dt><dd>mech_check part m21 (each choice happens), bigevents_check (the hold, no clash with the bridge invite at breakfast), day_check Day 22, controller_check reach (the three choices).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s63">
+    <header><h3>S6-3 The Engine Specialist promotion and your Deck 2 quarters</h3><span class="phase">P5_PROMO4</span><span class="phase">Works career engineer; deck architect for the quarters</span><span class="phase">4 turns</span></header>
+    <dl>
+      <dt>The offer</dt><dd>In 24u: a Senior, "Trusted", power and relays (<code>m19</code>) done; from Day 19 (the test never before Day 22). Calder's word on Friday if you're near her, else her Mail on Sunday at 18:00 (with an urgent notice). Chatter over the weekend; friends' luck at Sunday dinner (after Basil's arrival at 17:40) and up to two Mails at 20:00. Schedule and Tracked "Your Tier 4 test, 09:30".</dd>
+      <dt>The test</dt><dd><code>WORK_MECH.t4</code>: Day 22, 09:30-12:30, a drive coil (one of S6-4's three, the worst), with Calder and Torres (<code>worksEscort</code>, <code>worksTeach</code> flags <code>train.t4.*</code>). The board's gold ring "Your Tier 4 test: take it". Delayed, never failed. On passing: "Your result when your shift starts. I'll find you." If it runs late, the daytime sleep shortens, never the comet or the night.</dd>
+      <dt>The result at the comet</dt><dd>22:40 Day 22: Calder comes to find you wherever you watched the comet (the escort pattern, <code>promoEscort</code>'s, carried by the walkers, never the plans), and on the walk down to Deck 6 tells you: Engine Specialist (script <code>pu4.stairs</code>). Mail and Tracked as it happens; <code>puPromote(4)</code>: tier 4, rank 'specialist'. On night 1 being in bed doesn't make her wait: she knocks (a notice), because the night is yours. Then night 1.</dd>
+      <dt>The crews' welcome</dt><dd>Tuesday 06:00 in the engine room at the shift change: both crews, Torres's speech, signatures on your certificate (script <code>pu4.welcome</code>, a ring of crew, the talk pose). Your name on the engine room's watch board (S6-4's prop reads your rank).</dd>
+      <dt>The Captain's badge</dt><dd>Tuesday 16:30 in the observation room with Calder, Torres and Vance (<code>promoCerTimes</code>, <code>promoGuests</code>; script <code>pu4.badge</code>, the pin pose); "Senior Officer, Engine Specialist" on your Record; then the bridge hour next door at 17:15. If you sleep through 16:30 the Captain waits until your next waking afternoon. Calder's Mail that day: your Deck 2 quarters are ready for Thursday.</dd>
+      <dt>The move</dt><dd>Thursday Day 25: Calder's Mail at 17:00; after dinner, once you've left the mess (or at 20:00), Vance walks you up the senior corridor to room <code>B</code> (24p's walk pattern: <code>promoBeatsWalkWait</code>, <code>promoMoveEscort</code>, with Deck 2 as the place). The door plate reads "Senior Officer, Engine Specialist"; your things are already there; 4-23 goes back to "Spare 4-23"; <code>W.home</code> is <code>'2-B'</code>; your laundry is collected from now on. Can't-miss: an urgent notice as the walk starts, he waits if you're busy, open until 22:00, then the next day at the end of your shift (Friday, after Four weeks aboard), the notice and arrow each day until you've stepped in.</dd>
+      <dt>The refit</dt><dd>From Tuesday Day 23 an odd job on the board, "Refit the visitors' suite" (section 17's odd-jobs table, one row); take it or leave it to the crew. If you took it, your cabin touches (24t) come with you and one more is yours to pick.</dd>
+      <dt>Laundry collected</dt><dd>21b: with <code>W.home</code> on Deck 2, your hamper is collected at 10:00 and your clothes come back clean the next morning (one rule in 21b; the onboarding engineer reviews).</dd>
+      <dt>Touches</dt><dd>24u (new parts); 24p (<code>worksHome</code>, <code>worksHomeOpen</code> learn '2-B'); 24t (<code>cabinMine</code>); 17 (<code>forYou</code>'s engine line; one odd-jobs row; the systems engineer reviews); 21b (laundry); section 14 (<code>puItems</code> already hooked by Step 5); section 25 (presets Days 21-26).</dd>
+      <dt>Checks</dt><dd>promo_beats_check Tier 4 parts (<code>t4off</code>, <code>t4before</code>, <code>t4passed</code>, <code>t4comet</code>, <code>t4welcome</code>, <code>t4badge</code>, <code>t4move</code>); promo_sight_check (the walk's fallbacks); career_check (both door plates; 4-23 back to spare; a steady and a slow player); clothes_check (laundry collected from Deck 2); saves_check (a save between the badge and the move); arrows_check week over Days 21-25; events_check (Calder at the comet, the comet unchanged otherwise); day_check Days 22, 23, 25; interactions_check (the Deck 2 door with each doors setting); controller_check reach, pick, and a whole Day 22 by pad; cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s64">
+    <header><h3>S6-4 Deck 6 and Deck 2: the places</h3><span class="phase">P5_DECK6</span><span class="phase">Deck architect</span><span class="phase">3 turns</span></header>
+    <dl>
+      <dt>Deck 6</dt><dd>The three drive coils (<code>E</code>) and the reactor (<code>R</code>) become machines (kinds <code>coil</code> and <code>reactor</code> already exist in section 17's <code>MACHINE_KINDS</code>, tier 4), added to <code>DECKS[6].machines</code> only behind the switch, their panels on the existing props' tiles. A dosimeter rack in engine control (take and return a badge), the engine room's watch board (a wall prop that names the night's senior Works officer: you, on your nights), and three team spots by the coils for M24. Merged meshes, every colour through <code>col()</code>.</dd>
+      <dt>Deck 2</dt><dd>Room <code>B</code>'s brass nameplate reads your name and "Senior Officer, Engine Specialist" once <code>W.home</code> is '2-B' (the deck build reads it, as Deck 4's "Spare 4-23" plate does today); cabin-touch spots in <code>B</code> so 24t's touches can follow you; its wardrobe as yours.</dd>
+      <dt>Note</dt><dd>Adding machines changes the ship's machine life with the switch on (the engine crew now has real coils to tend): machine_check's numbers with it on are new baselines, explained in the review, never waved through.</dd>
+      <dt>Touches</dt><dd>Section 4d (Deck 6 and Deck 2, in new <code>// P5 places</code> blocks), 4b (the rack and board kit pieces).</dd>
+      <dt>Checks</dt><dd>deck_check (Decks 2 and 6: reachability, draw calls under 450 at phone and TriFold sizes), perf_check, machine_check (with the switch on and off), controller_check pick (the rack, the coils' panels, the reactor door), cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s65">
+    <header><h3>S6-5 M23 Engine work and the reactor</h3><span class="phase">P5_M23</span><span class="phase">Mechanics seat B</span><span class="phase">5 turns</span></header>
+    <dl>
+      <dt>Night 1</dt><dd>With Reyes: service a coil, swap a control board (its steps on the device), balance two coils (two of tuning's dials in one card, each pulling on the other: 24e's turn control, used twice). Coolant readings become repairs (the old M16 merged in). The night's incident is yours to make safe. Small: P6 Does it add up?</dd>
+      <dt>Night 2</dt><dd>The reactor: a permit from the bridge's night watch (a "Sign the permit" card with the watch officer on Deck 1), a dosimeter badge from S6-4's rack, a short careful visit through the reactor's door (<code>R</code>'s shielded door opens for you with a permit, through section 14's <code>doorOpenFor</code>: one line, the sim engineer reviews), the Watch told in and out (a notice to the bridge), the badge returned. Small: P7 Faded labels.</dd>
+      <dt>After the nights</dt><dd>Engine jobs on the board for an Engine Specialist by day (section 17's <code>forYou</code> line, S6-3).</dd>
+      <dt>Touches</dt><dd>28c (new); section 14 (the reactor door, one line); 24e (its dial, called, not changed).</dd>
+      <dt>Checks</dt><dd>mech_check m23 and the reactor (permit missing: the door stays shut; badge not returned: a word from the Watch), machine_check, day_check Day 23, controller_check pick (the coils, the rack, the reactor door) and reach (the permit card, both dials, the board swap's steps).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s66">
+    <header><h3>S6-6 M24 Leading a team</h3><span class="phase">P5_M24</span><span class="phase">Mechanics seat A</span><span class="phase">4 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Night 3 (Wednesday): a coil swap while the drive runs slow, the new <code>TEAM_JOBS.coil</code> kind. You plan it: the team picker lists the night crew on shift (Keane and Kowal that night; a friend says yes at once, someone busy says "after my round"); book the slot with the bridge's night watch (the Watch gives you an hour); give each person a spot (S6-4's three); call each step as it runs (24h's step engine with you as the lead, <code>teamNext</code>, <code>teamStepDone</code>). A good team and good calls finish early; a poor pick runs slow, never fails. The team agrees "now" the way team jobs already do: the walkers carry it, not the plans. Small: P8 Swap testing (the machine shop's test rig, Day 25).</dd>
+      <dt>Touches</dt><dd>28d (new); 24h (<code>TEAM_JOBS</code>, <code>TEAM_NAME</code>, <code>TEAM_PARTS</code>: one new kind each, the owner's tables, the same owner seat).</dd>
+      <dt>Checks</dt><dd>mech_check m24 (a good and a poor pick; a friend, a busy one), 24h's existing team parts still OK, day_check Day 24, controller_check reach (the team picker: A toggles each person, Book the slot, each spot, Next step).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s67">
+    <header><h3>S6-7 M25 Mentoring Basil</h3><span class="phase">P5_M25</span><span class="phase">Works career engineer with the sim engineer</span><span class="phase">4 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Friday Day 26, 09:00-15:30, once you're a Senior Officer: Basil with you for a day. He watches you do a job (he follows: the escort's walk turned round); you watch him do one; a head-scratcher he's stuck on (you pick which clue to point him to, in the case panel); he's late once (you choose what to say: three replies). Calder gives him his first job alone; a line in your Record.</dd>
+      <dt>The planner</dt><dd>Basil's Day 26 plan (with you, not his usual) is settled at 22:00 the evening before (<code>mt.set</code>), as shutdown bookings are, read by one hook in section 14 (the sim engineer). Not a Senior by then: the first Friday after you are.</dd>
+      <dt>Touches</dt><dd>28e (new); section 14 (one hook); 24k (the "point him to a clue" choice, a call into the case panel the puzzles seat reviews).</dd>
+      <dt>Checks</dt><dd>mech_check m25, day_check Day 26 (Basil's day planned before and after 22:00 identical), stories_check (Basil), controller_check reach (the three replies, the clue choice).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s68">
+    <header><h3>S6-8 P6, P7, P8 and the T4 band</h3><span class="phase">P5_CASES6</span><span class="phase">Puzzles seat</span><span class="phase">4 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>In 24k's slot: <code>CASE_KINDS.p6</code> (Does it add up?: water sums at junctions, then battery balance with M19's third stage), <code>p7</code> (Faded labels: a logic grid in the relay room or a Tier 2 junction), <code>p8</code> (Swap testing at the bench: the machine shop's test rig, <code>calrig</code>, with coil modules or recycler cartridges). <code>CASE_BANDS.T4</code> exists; its rate and cap too.</dd>
+      <dt>Touches</dt><dd>24k (its slot); none outside.</dd>
+      <dt>Checks</dt><dd>puzzle_check parts p6, p7, p8 (solvable, the fewest-clues rule, a T4 example), controller_check reach (the existing case panel with the new kinds).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s69">
+    <header><h3>S6-9 The end of the career</h3><span class="phase">P5_END</span><span class="phase">Works career engineer</span><span class="phase">2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Friday Day 26, Four weeks aboard (the tradition, 18:40-19:30, the Works tea corner on Deck 5): cake; Calder's story's big moment; when it thins out she sits down beside you (the sit pose) and asks what you want next. Your answer (question 2) is kept in <code>W.end</code> and shown on your Record. Calder's Mail the evening before. The career story's milestones in <code>W.ms</code> (Engine Specialist, the nights, mentoring, the question), a last page in the Works app. After this the ship's life goes on as usual: the Midnight toast at 23:00, the Veyli vessel from Day 27 when it's built.</dd>
+      <dt>Touches</dt><dd>28f (new); 24 core (the Record's milestone rows, through its hook); the Four weeks aboard tradition's scene (section 18, a <code>typeof</code>-guarded call for the question at its end; the traditions engineer reviews).</dd>
+      <dt>Checks</dt><dd>career_check (Days 0-26, a steady and a slow player, run twice, identical), stories_check (Calder, Zeke on Day 23, Kowalczyk), fridays_check (Day 26: the address untouched), day_check Day 26, controller_check reach (the question's replies, the Record's new rows).</dd>
+    </dl>
+  </article>
+
+  <article class="piece" id="s610">
+    <header><h3>S6-10 Words</h3><span class="phase">no switch</span><span class="phase">Head writer</span><span class="phase">2 turns</span></header>
+    <p>All the words in section 10 of this page, baked with <code>content_gen.py</code>; builders use stand-ins until then.</p>
+    <dl><dt>Checks</dt><dd>check_fast, lines_check, controller_check reach (labels only).</dd></dl>
+  </article>
+</section>
+
+<section id="order">
+  <h2>6. Order, seats and who can work at once</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>When</th><th>Player engineer + sim</th><th>Mechanics A</th><th>Works career engineer</th><th>Puzzles seat</th><th>Deck architect</th><th>Mechanics B</th></tr></thead>
+    <tbody>
+      <tr><td>First</td><td colspan="6">The Works career engineer's first turn: switch lines, section 28 and its slots, the ladder rows, <code>P5_NIGHTS</code>, <code>P5_LEAVE</code>, the held hours; merged at once.</td></tr>
+      <tr><td>Wave 1</td><td>S6-1 the nights (6 turns)</td><td>S6-2 briefing (3)</td><td>S6-3's day parts: offer, test, badge, move (from 24u)</td><td>S6-8 cases (4)</td><td>S6-4 (3)</td><td>-</td></tr>
+      <tr><td>Wave 2</td><td>review fixes; the nights' round</td><td>S6-6 team (4)</td><td>S6-3's night parts (the comet, the welcome), then S6-7 (4)</td><td>helps S6-7's clue choice</td><td>fixes</td><td>S6-5 engine work (5), once S6-4's machines are in</td></tr>
+      <tr><td>End</td><td colspan="6">S6-9 the end (career engineer, 2), the words (head writer), reviews, the build master's staging, the full round, your playtest, then <code>P5_STEP6</code> on.</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>Builders at once: five in wave 1</b> (the player engineer, mechanics A, the Works career engineer, the puzzles seat and the deck architect), <b>six in wave 2</b> when mechanics seat B starts engine work. Plus the head writer and the sim engineer's reviews. More doesn't help: S6-3 and S6-7 share the career engineer's head (both use 24u's walk and escort code), and S6-1 is one tightly connected piece.</p>
+  <p><b>Rounds:</b> one after S6-1 (the nights alone, with the plan's own round), and one at Step 6's end before the switch-on. If you want to play the Engine Specialist early, a Dev link after wave 2.</p>
+</section>
+
+<section id="overlap">
+  <h2>7. Where pieces touch the same code</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Place</th><th>Who touches it</th><th>How it stays apart</th></tr></thead>
+    <tbody>
+      <tr><td>Section 14</td><td>S6-1 (<code>isWorkDay</code>, <code>shiftTick</code>, the Schedule), S6-2 (an appointment entry), S6-5 (the reactor door), S6-7 (Basil's settled day)</td><td>Four different functions, one line each where possible; the sim engineer reviews all four, S6-1's first</td></tr>
+      <tr><td>Section 17</td><td>S6-1 (night windows on held jobs), S6-3 (<code>forYou</code>'s engine line, the refit odd job)</td><td>Different functions; the systems engineer reviews</td></tr>
+      <tr><td>Section 21b</td><td>S6-1 (the clothes day), S6-3 (laundry collected)</td><td>Different functions; the onboarding engineer reviews</td></tr>
+      <tr><td>24u</td><td>S6-3, S6-7 (reads the walk helpers)</td><td>The same seat</td></tr>
+      <tr><td>24h</td><td>S6-6 only</td><td>One new kind in each table</td></tr>
+      <tr><td>24k</td><td>S6-8 (its slot), S6-7 (one call)</td><td>The puzzles seat reviews S6-7's call</td></tr>
+      <tr><td>Section 4d</td><td>S6-4 only</td><td>The deck architect alone</td></tr>
+      <tr><td>Section 25</td><td>S6-3 (presets Days 21-26)</td><td>One seat</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="checks">
+  <h2>8. Checks: new parts, new days, the rounds</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Check</th><th>What's added</th><th>By</th></tr></thead>
+    <tbody>
+      <tr><td>day_check</td><td>New event days 23, 24, 25 and 26 (Day 22 is already one: the comet); <code>EVENT_DAYS</code> and tools/affected.py</td><td>first turn</td></tr>
+      <tr><td>promo_beats_check</td><td>Seven Tier 4 parts</td><td>S6-3</td></tr>
+      <tr><td>player_check</td><td>A night part: daytime sleep, needs, the kept plate, a save mid-night</td><td>S6-1</td></tr>
+      <tr><td>mech_check</td><td>Parts m21, m22, m23 (and the reactor), m24, m25</td><td>each piece</td></tr>
+      <tr><td>puzzle_check</td><td>Parts p6, p7, p8</td><td>S6-8</td></tr>
+      <tr><td>career_check</td><td>Days 0-26, steady and slow, twice, identical; nights at any rank; door plates; 4-23 back to spare</td><td>S6-1, S6-3, S6-9</td></tr>
+      <tr><td>clothes_check, food_check, saves_check, leave_check</td><td>A night day; laundry collected from Deck 2; the kept plate; saves mid-night and before the move; Navarro's leave</td><td>S6-1, S6-3</td></tr>
+      <tr><td>arrows_check, dev_arrow_check, devmode_check</td><td>Week over Days 21-25; the career arrow to the end; presets</td><td>S6-3</td></tr>
+      <tr><td>stories_check, fridays_check, events_check, bigevents_check</td><td>Calder, Zeke, Kowalczyk, Basil; Day 26's address; the comet unchanged; the new holds</td><td>S6-1, S6-2, S6-7, S6-9</td></tr>
+      <tr><td>controller_check</td><td>reach, pick, unplug mid-night, a pad-played night 2 and Day 22</td><td>each piece</td></tr>
+      <tr><td>deck_check, perf_check, machine_check</td><td>Decks 2 and 6 with the switch on; the new machines</td><td>S6-4</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Four new day_check days add about 16 minutes to the round; the build master spreads them over the lightest shares in plans/testing-guide.md's table.</p>
+</section>
+
+<section id="pad">
+  <h2>9. The game controller, piece by piece</h2>
+  <p>As in Step 5: plain buttons in panels the controller walks, nothing held, and each piece gives controller_check a way to open its new panel (a Dev preset or the check's own setup) so "reach" sees it.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece</th><th>What the pad must reach or pick</th><th>How the check gets there</th></tr></thead>
+    <tbody>
+      <tr><td>S6-1</td><td>The bed's "Sleep until..." option; Calder's on and off meetings; night incident cards; the time clock as built. Unplugging mid-night stops you and pauses.</td><td>Presets Day 22 at 22:40 and Day 23 at 21:00; a whole night 2 by pad</td></tr>
+      <tr><td>S6-2</td><td>The briefing's three choices</td><td>A preset Day 22 at 08:25</td></tr>
+      <tr><td>S6-3</td><td>The notices; the board's ring and Take it; "Go with Calder" at the comet; the welcome and badge meetings; "Go with Vance" on Thursday; the Deck 2 door</td><td>Presets on Days 21, 22, 23, 25; a whole Day 22 by pad</td></tr>
+      <tr><td>S6-4</td><td>The rack (take and return), the coils' panels, the reactor door (ring and A)</td><td>A preset on Deck 6, Day 23 at 21:00</td></tr>
+      <tr><td>S6-5</td><td>"Sign the permit"; both coil dials; the board swap's steps</td><td>Presets on nights 1 and 2</td></tr>
+      <tr><td>S6-6</td><td>The team picker: each person's choose box (A toggles), Book the slot, each spot, Next step</td><td>A preset at night 3's start</td></tr>
+      <tr><td>S6-7</td><td>Basil's three replies; "point him to a clue"</td><td>A preset Day 26 at 09:00</td></tr>
+      <tr><td>S6-8, S6-9</td><td>The case panel with P6-P8; Calder's question's replies; the Record's new rows</td><td>Presets Day 25 and Day 26 at 19:00</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="words">
+  <h2>10. Words for the head writer</h2>
+  <p>New files in <code>content/works/</code>, keys in <code>keys-p5.md</code>. Two promotions a week apart use the same beats, so the words carry the difference: the storm's Senior Officer, the engine crew's specialist at night. Samples in the plan's section 8.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What</th><th>About how many</th></tr></thead>
+    <tbody>
+      <tr><td>night.lines</td><td>Calder's <code>night.on</code> (09:15) and <code>night.off</code> (Thursday 06:00, following Navarro's real rota: back Friday night); her Mails; the 20:30 notices; the bed's options; the night crew's lines (Reyes on night 1; Keane, Kowal and Jovanovic after); the time clock at night; the kept plate; Navarro's call home</td><td>about 45</td></tr>
+      <tr><td>promo-t4.lines</td><td>The offer (word, Sunday Mail, notice); chatter (the bay, Pell's "pretending not to be proud"); luck at Sunday dinner and two Mails; Calder and Torres at each test step (<code>train.t4.*</code>); passing; the night crew and the day crew after</td><td>about 55</td></tr>
+      <tr><td>promo-t4 meetings</td><td><code>pu4.stairs</code> (Calder on the walk down, about 5); <code>pu4.welcome</code> (Torres's speech, the crews, about 8); <code>pu4.badge</code> (the Captain about 5, Torres 1); the move: Vance's walk lines on Deck 2, the door plate, the certificate, the refit job's name and tap text</td><td>about 30</td></tr>
+      <tr><td>m21.lines</td><td>The briefing: the Captain's agenda, each chief's item, your three choices and what each leads to; the screen's agenda</td><td>about 20</td></tr>
+      <tr><td>m23.lines</td><td>Reyes and Torres teaching; the coil steps, the board swap, the balancing card; the permit card, the watch officer, the dosimeter rack's tap text; the Watch in and out</td><td>about 35</td></tr>
+      <tr><td>m24.lines</td><td>The team picker's labels; each crew member's yes, "after my round" and no; booking the slot with the Watch; your calls and their replies for each step</td><td>about 30</td></tr>
+      <tr><td>m25.lines</td><td>Basil all day: watching, doing, stuck, late (your three replies and his answers), Calder giving him his first job; your Record line</td><td>about 30</td></tr>
+      <tr><td>end.lines</td><td>Calder's question and the answers (question 2), her reply to each; the Record's last page; the career's milestones</td><td>about 15</td></tr>
+      <tr><td>cases.lines (additions)</td><td>P6, P7, P8 templates and their crew words</td><td>about 30</td></tr>
+      <tr><td>Short UI words</td><td>Schedule and Tracked rows ("Night shift, 21:00-06:00", "Your Tier 4 test, 09:30", "Your result: Calder will find you", "The Captain, 16:30", "Your new quarters, after dinner"); mech names; the watch board's text</td><td>about 20</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="calls">
+  <h2>11. Judgement calls (overrule any of them)</h2>
+  <ul>
+    <li><b>Navarro's leave follows his real rota.</b> He's on leave on his Monday and Tuesday nights; Wednesday is his night off anyway, and Calder says he's back Friday night, not "tonight" on Thursday.</li>
+    <li><b>Night 3's team is two</b> (Keane and Kowal), because Reyes and Jovanovic are off that night. The plan said "two or three"; two it is, with no roster change.</li>
+    <li><b>Kowalczyk's story</b> moves to the end of a night she's actually on the bridge, if her beat isn't already there.</li>
+    <li><b>Breakfast after a night</b> is a kept plate from 06:15; the servery still opens at 07:00.</li>
+    <li><b>Calder knocks on night 1.</b> The "they wait while you're asleep" rule doesn't apply to her fetching you for your own night shift.</li>
+    <li><b>A missed night</b> counts like a missed shift for your reputation, never toward being let go (the same rule as the storm Saturday).</li>
+    <li><b>A save past Day 22</b> when Step 6 is switched on skips the nights; the promotion and the move still come.</li>
+    <li><b>The refit job stays</b> (from version 2): optional, from Day 23, and it lets your cabin touches come with you.</li>
+    <li><b>Real engine machines on Deck 6</b> change the ship's machine numbers with the switch on: new baselines, explained in review.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>12. Your questions</h2>
+  <div class="q">
+    <h3>1. The Monday briefing: every week, or once?</h3>
+    <p>The plan has your first Monday briefing on Day 22. The original Pillar 5 plan called it the senior crew's weekly briefing.</p>
+    <p class="rec"><b>Recommended: every Monday from Day 22</b>, the first in full, later ones shorter (the week's memo and one choice of what Works raises). It gives a Senior Officer a weekly say after the career's month is over. The other choice: only Day 22 for now, weekly later.</p>
+  </div>
+  <div class="q">
+    <h3>2. Calder's question: what can you answer?</h3>
+    <p>At Four weeks aboard she asks what you want next. Your answer is kept for later content; nothing in play changes yet.</p>
+    <p class="rec"><b>Recommended: four answers</b>: stay with the engines and lead the night crew; learn the bridge; teach the new cadets; or "I don't know yet" (she likes that one too). The other choice: you suggest them in the notes.</p>
+  </div>
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything else about Step 6's build?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the plan page's form)
+  const items = [
+    ['weekly', '1. The Monday briefing: every week, or once?', [['weekly', 'Every Monday from Day 22, later ones shorter (recommended)'], ['once', 'Only Day 22 for now']]],
+    ['answers', "2. Calder's question: what can you answer?", [['four', 'The four answers (recommended)'], ['mine', 'My own, in the notes']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
