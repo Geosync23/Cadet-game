@@ -449,3 +449,17 @@ Both logs identical line for line, the same 7 FAILs as CR1's NEW: from Day 4 the
 never clocks in (Days 4, 5, 8), m5 / m7 / p3 not learned, scanner unused by Day 8. So neither switch is the cause.
 OLD 0.93.1 passes (CR1); BM18's INSPECT_ON-off copy passes, so it is the bunk inspection (the follower lies down on the
 bunk the inspection arrow points at and never gets up). FX20b is fixing it; the full round runs again on the new sha.
+
+### 0.93.2 extra: p926_check (taken from CR2, for BM18)
+
+41c8a7e0's p926_check.py, CADET_WORK=/tmp/work-cr3. **FAIL** (exit 1, 618 s): every part ok (1, 2, 15, 3, 7; 62 ok lines) but part 4:
+`FAIL 4: Esme Walsh hosts, 0 at it`, `FAIL 4: they talk about their books (0 bubbles)`, `FAIL 4: a tap joins you (None)`;
+on Day 14 at 16:30 nobody at the reading corner.
+
+**The check is out of date, not the game.** FX24's `TRAD_0932_WHEN` makes reading-corner `{ every: '2weeks', weekday: 6, week: 1 }`,
+odd weeks only (evDue: `wk = floor((d-1)/7)`, so Days 7, 21, 35 ... are due and Day 14 is not). Part 4 still looks at Day 14.
+- OLD b957b92d, the same script, part 4: P926 CHECK OK.
+- NEW with a scratch copy of the check moved to Day 21 (two numbers; not pushed): every 'on' line ok (Esme hosts, 4 at it,
+  9 bubbles, a tap joins). Its 'off' line fails only because on the off copy Esme happens to sit in the lounge on Day 21
+  (8.1 m from the sofa, no bubbles): keep 'off' on Day 14.
+Suggested to BM18 for the check's owner: part 4 'on' on Day 21, 'off' on Day 14.
