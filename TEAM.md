@@ -1325,3 +1325,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~04:38 UTC: CR6 fridays on event-swap 4e13d5e3: OFF OK; ON 1 real FAIL: Day 26 swap line too long (>90 chars, friFill drops it) → FX22b shortens (swap is off in 0.93.2 anyway).
 - ~04:45 UTC: **Lead 37 handing over (memory)**; user reminded. handover-lead37.md 'Latest' rewritten; starting lead 38.
 - ~04:46 UTC: **LEAD 38 started** session_01G2y9crUv6vDiiEB2q6Yo9W (claude/lead-38 from claude/lead-37 7fc292a4). Lead 37 relays anything that reaches it until lead 38 confirms, then idles.
+- ~04:47 UTC: FX24 'Take a seat' pushed claude/tray-seat-0932 44ba88d5 (outside switch; cadet identical) → relayed to lead 38.

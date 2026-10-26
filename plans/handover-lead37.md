@@ -12,7 +12,7 @@ Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-
   3. FX25 claude/comet (EV_COMET_ON, ON, standalone Monday Day 22 21:30-22:40, from EP1 Part A) + SD1 claude/sound-comet b6569d19 (comet track + turn swell). FX25 building c.1-c.4; must also make old Friday/Mail comet-day lines agree with Day 22.
   4. FX20 claude/inspection (INSPECT_ON, ON): bunk inspection walk; waiting SW2 words; FX20 ~58% (handover-fx20.md d712a821).
   5. FX26 claude/storm-sat (STORM_SAT_ON, ON): Captain stage clipping fix; storm Saturday Day 13 work shift 09:00-17:00, storm-only board, Works called in, lantern supper replaces dinner, "Storm stories by torchlight" (Oduya, 21:00, CS1 words plans/storm-stories-words.txt c7e67663).
-  6. FX24 claude/tray-seat: "Take a seat" button above "Put down" with a tray in the mess.
+  6. FX24 claude/tray-seat-0932 44ba88d5 (NOT claude/tray-seat, an old FX6 branch): "Take a seat" button above "Put down" with a tray in the mess.
   Then: HUD 0.93.2, full six-runner round (hire fresh CR3 first, plans/handover-cr3.md), PUB1 (session_01GnpjFR6oumvuvTrmcXSqeg) publishes BOTH links on GO; ask the user before fast-forwarding integration.
 - Events plan page https://claude.ai/artifact/7w7UgrR71rk5VknPhBExSc (EP1 session_01LjeoeX6qpCuwTV5UNVNwV5, claude/events-plan-2 4d31bde2): user answered all 10 = recommended (db answers/user). Visit (Days 16-19) and Veyli vessel (Days 27-30) are built AFTER 0.93.2; turning EV_SWAP_ON on goes with the visit.
 - Traditions pages: round 1 DfXQg3Ff4eX2hfoiTA86Jh, round 2 EFioZPqoM6X6BT7obruTgx (answered). User rule for every tradition/event moment: a host you tap to join, a simple fitting pose, unique dialogue.
