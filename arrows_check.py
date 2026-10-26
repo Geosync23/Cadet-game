@@ -515,7 +515,7 @@ END_PICK = r"""(() => {
       const b = [...dlg.querySelectorAll('button.act')][want === 'stay' ? 0 : 1]; if (b) { b.click(); return 'scene answer: ' + want; } } }
   const ch = document.getElementById('chat');
   if (ch && !ch.hidden && CHAT && CHAT.p) {              // a chat card: the ending's button on it, else close it
-    const eb = typeof endChatButton === 'function' ? endChatButton(CHAT.p) : null, b = eb && [...ch.querySelectorAll('.row button')].find(x => x.textContent === eb.label);
+    const eb = typeof endChatButton === 'function' ? endChatButton(CHAT.p) : null, b = eb && [...ch.querySelectorAll('button.act')].find(x => x.textContent === eb.label);
     if (b) { b.click(); return 'chat: ' + eb.label + ' (' + CHAT.p.id + ')'; }
     chatClose(); return 'close the chat card'; }
   const g = goalNow();

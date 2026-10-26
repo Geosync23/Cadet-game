@@ -1542,7 +1542,7 @@ def part_ending(pw, src, tag):
     got = end_near(r, 'marrow') and ring_and_A(r, ['captain', 'marrow', 'odile'])
     r.step(6)
     lab = r.ev("endText('ending.ui.captain.button', 'About the transfer')")
-    res = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(lab)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+    res = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(lab)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
     if res != 'ok': fails.append(f'Day 34: "{lab}" on the Captain\'s chat card by pad: {res} (the ring said {got})')
     r.step(6); cs = r.ev(DLG_BTNS) or []
     for i in range(len(cs)):
@@ -1559,7 +1559,7 @@ def part_ending(pw, src, tag):
           if (a) player.obj.position.copy(cellPos(...nearestOpen(a.x + 1.5, a.z + 1.5, player))); player.stop(); }})()"""); r.step(10)
         g2 = end_near(r, fr) and ring_and_A(r, [fr.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{fr}').name").split()])
         fl = r.ev(f"(() => {{ const b = endFriendButton(schedPeople().find(p => p.id === '{fr}')); return b && b.label; }})()")
-        res3 = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(fl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+        res3 = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(fl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
         print(f'  Day 34: a friend ({fr}) by pad: ring {g2}, "{fl}" {res3}')
         if res3 != 'ok': fails.append(f'Day 34: "{fl}" on {fr}\'s chat card by pad: {res3}')
     else: print('  Day 34: no friend with "About the transfer" today (the friends come on Friday)')
@@ -1601,7 +1601,7 @@ def part_ending(pw, src, tag):
         if nx != 'torres-zeke':
             h = ring_and_A(r, [nx.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{nx}').name").split()]); r.step(4)
             bl = r.ev("endText('ending.btn.bye', 'Goodbye')")
-            res = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(bl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+            res = press_in_panel(r, f"[...document.querySelectorAll('#chat button.act')].find(b => b.textContent === {json.dumps(bl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
             r.step(10)
             if not r.ev(f"!!SHIP.end.f['bye:{nx}']"):   # within reach the goodbye may have come by itself; else by the card
                 fails.append(f'Monday: the goodbye to {nx} by pad (ring {h}, "{bl}" {res})'); break
