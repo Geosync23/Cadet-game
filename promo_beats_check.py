@@ -12,6 +12,14 @@
 #            end you're promoted and the Captain's ceremony is booked the same day at 16:30 (17:15 on a Friday), its
 #            invite naming the time; Brennan's cake after it; Dev mode's beats in order
 #   cabin:   the walk waits for the pip, your dinner and your leaving the mess; it starts after; 20:00 at the latest
+# The Tier 3 parts (S5-2, B5; the Senior Officer promotion, 24u, behind P5_PROMO3; plans/p5-step5-spec.html "The beats"):
+#   t3off:    with P5_PROMO3 off (the build as shipped): no offer, no Tier 3 rows, no t3 record, nothing said; with it on: skipped
+#   t3before: (switch on) Day 14: Calder comes to find you (her escort follows you) and, beside you, her scene; at the
+#             storm's party in the bow lounge the party's twin; only then the test is set (Day 15), the urgent notice and
+#             the Mail; Schedule and Tracked rows, the Training tab and What's next; two friends' Mails at 20:00; the
+#             talk's beats (luck the evening before and the test morning); not found by 22:00: by Mail
+# The Tier 3 parts need a build with the switch on for everything but t3off: python3 promo_beats_check.py ON.html t3before
+# (ON.html: P5_STEP5 = true in a copy, plans/handover-b5.md).
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 promo_beats_check.py BUILD.html [part ...]   Good is PROMO BEATS CHECK OK (exit 0); a failure exits 1.
 import sys, pathlib
@@ -179,11 +187,62 @@ def part_review(g):
     check(r['early'] == 0 and r['at9'] == 1 and r['at9b'] == 1, f"review S1: her \"on the board\" word at 09:00, once, not at 06:01 ({r})")
     check(r['esc1'] == 'follow' and r['esc2'] == 'lead' and any('coming to find you' in n for n in r['notes']), f"review S4: the walk after dinner: she comes to you first, then leads ({r})")
 
+T3 = "typeof P5_PROMO3 !== 'undefined' && P5_PROMO3"
+def t3on(g, name):
+    on = g.ev(T3)
+    if not on: print(f'({name}) P5_PROMO3 off in this build: skipped (run it on a copy with the switch on)')
+    return on
+
+def part_t3off(g):
+    if g.ev(T3): print('(t3off) P5_PROMO3 on in this build: skipped'); return
+    print('(t3off) P5_PROMO3 off: nothing of the Senior Officer promotion:')
+    r = g.ev("""(() => { const W = __w(14, 1146, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends(); __bay();
+      for (const t of [13 * 1440 + 500, 13 * 1440 + 1146, 13 * 1440 + 1201, 13 * 1440 + 1330, 14 * 1440 + 400]) { setShipNow(t); __tick(); }
+      return { mech: !!WORK_MECH.t3, ready: typeof puReady === 'function' && puReady(14), pu: SHIP.works.pu || null, rows: __rows(15).filter(x => /Tier 3/.test(x)),
+        flags: Object.keys(SHIP.flags).filter(k => /pu3/.test(k)), mail: __mail().filter(m => /Tier 3/.test(m)), notes: __notes.filter(n => /Tier 3/.test(n)), said: __said.filter(x => /Tier 3|Relied on/.test(x)), dlg: DIALOGUE && DIALOGUE.id }; })()""")
+    print('   ', r)
+    check(not r['mech'] and not r['ready'] and not r['pu'] and not r['rows'] and not r['flags'] and not r['mail'] and not r['notes'] and not r['said'] and not r['dlg'], f"t3off: nothing happens ({r})")
+
+T3_W = "const W = __w(14, 470, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();"
+def part_t3before(g):
+    if not t3on(g, 't3before'): return
+    print('(t3before) the offer in person, then the record; the evening; the morning:')
+    r = g.ev("""(() => { """ + T3_W + """ __bay(); const out = { party: puPartyAt(14) };
+      setShipNow(13 * 1440 + 500); __tick(); out.earlySeek = !!PU_LIVE.seek;   // the party's day: she waits for the party
+      setShipNow(13 * 1440 + 1146); goToDeck(3); player.obj.position.copy(cellPos(...ROOM_TILES['L'][0])); __tick();
+      out.seek = !!PU_LIVE.seek; out.esc = (puEscort({ id: 'calder' }, shipNow()) || {}).mode; out.before = !!puT3();
+      const keep = puNearMe; puNearMe = id => id === 'calder' ? true : keep(id); __tick(); puNearMe = keep;
+      out.dlg = DIALOGUE ? DIALOGUE.m.id : null; out.first = DIALOGUE ? DIALOGUE.queue[0].text : null; out.during = !!puT3();
+      let n = 0; while (DIALOGUE && n++ < 30) { const l = DIALOGUE.queue[DIALOGUE.i]; dialogueStep(l && l.choice ? 1 : undefined); }
+      out.t3 = puT3(); out.reply = flag('pu3.reply'); out.notes = __notes.filter(x => /Tier 3/.test(x)); out.mail = __mail().filter(m => /Tier 3/.test(m));
+      out.rows = __rows(15); out.trk = trkItems().filter(x => /Tier 3/.test(x.title)).map(x => (x.later ? 'later ' : '') + x.tag + ' ' + x.title);
+      out.next = worksNext(); out.tab = JSON.stringify(puCheck()); out.esc2 = (puEscort({ id: 'calder' }, shipNow()) || {}).mode || null;
+      setShipNow(13 * 1440 + 1201); __tick(); out.luck = __mail().filter(m => /Good luck|Tomorrow \\|/.test(m));
+      out.kinds = [puTalkKind(13 * 1440 + 1100), puTalkKind(14 * 1440 + 480), puTalkKind(14 * 1440 + 600)].map(x => x && x[0]);
+      const p = SOC.crew.find(x => x.id === 'pell'), l1 = socLine(p, 'pu3.soon', { t: 13 * 1440 + 600, act: 'work', tier: 1, bubble: true }), l2 = socLine(p, 'pu3.luck', { t: 14 * 1440 + 480, act: 'breakfast', tier: 3, bubble: true });
+      out.lines = [l1 && l1.text, l2 && l2.text]; return out; })()""")
+    for k in ('party', 'earlySeek', 'seek', 'esc', 'before', 'dlg', 'first', 'during', 't3', 'reply', 'notes', 'rows', 'trk', 'next', 'esc2', 'kinds', 'lines'): print('   ', k, r[k])
+    print('    mail', r['mail'] + r['luck'])
+    check(r['party'] == 1140 and not r['earlySeek'] and r['seek'] and r['esc'] == 'follow' and not r['before'], f"t3before: on the party's day she comes to find you at the party (her escort follows you), the test not set yet ({r})")
+    check(r['dlg'] == 'pu3.offer.party' and r['first'] and not r['during'], f"t3before: next to you, her party scene, in person first ({r['dlg']}, {r['first']})")
+    check(r['t3'] and r['t3']['day'] == 15 and r['t3']['tries'] == 0 and not r['t3']['passed'] and r['reply'] == 2 and r['esc2'] is None, f"t3before: at its end the test is set for Day 15, your reply kept, she stops following ({r['t3']})")
+    check(any('tomorrow, 09:00' in n for n in r['notes']) and any(m.startswith('Chief Ines Calder: Your Tier 3 test |') and 'tomorrow' in m for m in r['mail']), f"t3before: then the urgent notice and the Mail, the record ({r['notes']}, {r['mail']})")
+    check('09:00 Your Tier 3 test' in r['rows'] and any(x.startswith('later 09:00 Your Tier 3 test') for x in r['trk']), f"t3before: the Schedule and Tracked have the test ({r['rows']}, {r['trk']})")
+    check('Tier 3 test' in r['next'] and 'Test job: tomorrow, 09:00' in r['tab'] and 'Power safety' in r['tab'], f"t3before: What's next and the Training tab ({r['next']}, {r['tab']})")
+    check(len(r['luck']) == 2, f"t3before: two friends wish you luck by Mail at 20:00 ({r['luck']})")
+    check(r['kinds'] == ['pu3.luck', 'pu3.luck', 'pu3.soon'] and all(r['lines']), f"t3before: the talk: luck from friends the evening before and the morning, then how fast it came; the crew have lines ({r['kinds']}, {r['lines']})")
+    r = g.ev("""(() => { """ + T3_W + """ __bay(); const out = {}; setShipNow(14 * 1440 + 490); __tick(); out.mon = PU_LIVE.seek && PU_LIVE.seek.d;   // Day 15, no party: from 08:00
+      const keep = puNearMe; puNearMe = id => id === 'calder' ? true : keep(id); __tick(); puNearMe = keep; out.dlg = DIALOGUE ? DIALOGUE.m.id : null; while (DIALOGUE) dialogueStep(0);
+      out.t3 = puT3(); (() => { """ + T3_W + """ })(); __bay(); setShipNow(14 * 1440 + 490); __tick(); setShipNow(14 * 1440 + 1321); __tick(); out.late = puT3(); out.lateMail = __mail().filter(m => /I came to find you/.test(m)).length; return out; })()""")
+    print('   ', r)
+    check(r['mon'] == 15 and r['dlg'] == 'pu3.offer' and r['t3'] and r['t3']['day'] == 16, f"t3before: on a later day, from 08:00, \"tomorrow\" ({r})")
+    check(r['late'] and r['late']['day'] == 16 and r['lateMail'] == 1, f"t3before: not found by 22:00, it comes by Mail ({r})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

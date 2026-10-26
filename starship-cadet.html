@@ -11747,6 +11747,7 @@ function devDay(d) {
   try { if (typeof introOn === 'function' && introOn() && typeof INTRO_WEEK !== 'undefined') for (const b of INTRO_WEEK)
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
+  try { if (typeof puItems === 'function') out.push(...puItems(d)); } catch (e) { /* not yet */ }   // 24u (S5-2): the Senior Officer promotion's steps, with P5_PROMO3
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
   return out.sort((x, y) => x.from - y.from);
 }
@@ -54310,6 +54311,7 @@ onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.tr
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
   { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const ue = p && typeof puEscort === 'function' ? puEscort(p, t) : null; if (ue) return ue; }   // 24u (S5-2): Calder comes to find you (the Tier 3 offer, your result)
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -54381,7 +54383,7 @@ function worksXp(n) { const W = worksInit(); if (!W || !n) return; const b0 = wo
 // your reputation said when its word changes (FX3, AR1: it moved and nobody told you; "Relied on" is what the test job waits for)
 function worksRepTell(b0, b1) {
   const B = WORK_BANDS[SHIP.works.tier] || WORK_BANDS[1], up = B.findIndex(x => x[1] === b1) > B.findIndex(x => x[1] === b0), band = worksBandWord();
-  try { toast(worksText('works.rep.title', 'Your reputation'), up ? (typeof promoRepUp === 'function' && promoRepUp(b1)) || worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
+  try { toast(worksText('works.rep.title', 'Your reputation'), up ? (typeof promoRepUp === 'function' && promoRepUp(b1)) || (typeof puRepUp === 'function' && puRepUp(b1)) || worksText('works.rep.up', 'Up to {band}. People are noticing your work.', { band }) : worksText('works.rep.down', 'Down to {band}.', { band })); } catch (e) { /* no UI */ }
   if (typeof DEV !== 'undefined' && DEV.notes && !DEV.notes.record) DEV.notes.record = 1;   // the Record's badge, once until you look
 }
 function worksBand() {                                   // 'new' ... 'relied', or null before SHIP.works (section 17 keeps today's order)
@@ -54425,6 +54427,7 @@ function worksNoticed(jobId, who) {                      // someone noticed a jo
 function worksNext() {
   const W = SHIP.works, k = Math.floor(schedU(851, SHIP.time.day, 851) * 8);
   if (!W) return worksText('next.band.new', 'Keep at it: Calder\'s watching your work.', null, k);
+  { const pn = typeof puNext === 'function' ? puNext(k) : null; if (pn) return pn; }   // 24u (S5-2): the Tier 3 test and the Senior Officer's beats
   const c = W.cur, row = c && ladderRow(c.id), low = s => s.replace(/^./, x => x.toLowerCase());
   if (row) { const who = worksFirst(c.by || row.by[0]), r = c.occ && SHIP.occasions.find(x => x.key === c.occ), v = { name: worksName(c.by || row.by[0]), first: who, mech: low(mechName(row.id)) };
     const say = c.st === 'meet' && r ? who + ' wants to show you ' + v.mech + ': ' + hhmm(r.at % 1440) + ', ' + (DECKS[r.deck].rooms[r.room] || { name: 'the Works bay' }).name + '.'
@@ -59251,15 +59254,19 @@ function psTick(now) {
 // an Officer's, from Steady (or once the offer's made, S5-2's SHIP.works.pu.t3) until the Tier 3 test is passed. The beats
 // table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
 function puCheck() {
-  const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier !== 2) return [];
-  const T = W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; if (T && T.passed) return [];
+  const W = SHIP.works, d = SHIP.time.day; if (!P5_STEP5 || !W || W.tier < 2) return [];
+  const T = puT3(); if (W.tier > 2 && !(P5_PROMO3 && T && T.passed && !T.toast)) return [];   // (S5-2: the rows run on to the toast)
   const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
-  if (at(worksBand()) < at('steady') && !T) return [];
-  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
-  const rows = [row(worksText('works.pu.check.rep', 'Relied on (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
-    row(worksText('works.pu.check.ps', 'Power safety'), W.tr.ps !== undefined), row(worksText('works.pu.check.day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
-  if (T && Number.isInteger(T.day) && T.day > 0) rows.push({ text: worksText('works.pu.check.set', 'Test job: {day}, 09:00', { day: T.day === d ? 'today' : T.day === d + 1 ? 'tomorrow' : dayName(T.day) }) });
-  return [{ kind: 'text', text: worksText('works.pu.check.title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
+  if (W.tier === 2 && at(worksBand()) < at('steady') && !T) return [];
+  const pk = (key, old, fb, v) => worksHas('pu3.check.' + key) ? worksText('pu3.check.' + key, fb, v) : worksText('works.pu.check.' + old, fb, v);   // SW3's words (pu3.check.*), else S5-1's stand-ins
+  const yes = pk('done', 'done', worksText('works.promo.check.done', 'Done')), no = pk('not', 'not', worksText('works.promo.check.not', 'Not yet')), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(pk('rep', 'rep', 'Relied on (you\'re {band})', { band: W.tier === 2 ? worksBandWord() : BAND_WORD.relied }), W.tier > 2 || ladderNeeds({ rep: 'relied' }, W)),
+    row(pk('ps', 'ps', 'Power safety'), W.tr.ps !== undefined), row(pk('day', 'day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
+  if (T && Number.isInteger(T.day) && T.day > 0) { const w = (x) => x === d ? 'today' : x === d + 1 ? 'tomorrow' : dayName(x);
+    rows.push(T.passed ? row(pk('set', 'set', 'Test job: {day}, 09:00', { day: 'Day ' + T.day }), true) : { text: pk('set', 'set', 'Test job: {day}, 09:00', { day: w(T.day) }) });
+    if (P5_PROMO3 && T.passed) { const R = typeof puResultDay === 'function' ? puResultDay() : null;
+      rows.push(row(pk('result', 'result', 'Your result: {day}, 08:15', { day: T.res ? 'Day ' + T.res : R ? w(R) : 'your next workday' }), !!T.res), row(pk('bar', 'bar', 'Your bar, from the Captain'), !!T.bar), row(pk('toast', 'toast', 'The Captain\'s toast'), !!T.toast)); } }
+  return [{ kind: 'text', text: pk('title', 'title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
 }
 // Dev mode's career arrow (section 25's dvCareerNext asks; a small row's own lesson): the appointment if it's made, else the
 // next workday morning's ask (from Day 12, an Officer's). null once trained or when it isn't yours yet
@@ -59287,6 +59294,159 @@ if (P5_STEP5) {
       { who: 'calder', text: 'One day soon you\'ll switch one of these off on your own. That\'s the next step up.' },
       { who: 'calder', text: 'That\'s it. Power safety. Don\'t make me say it twice.' }] };
   WORK_TICKS.push((now, skip) => { if (!skip) psTick(now); });
+}
+// ---- S5-2 (B5 for lead 39; plans/p5-step5-spec.html on claude/p5-specs, "The beats" and piece S5-2): the Senior Officer
+// promotion, behind P5_PROMO3. It follows the first promotion's beats (24p, FX28) and calls its helpers (promoWorkday,
+// promoNotice, promoMail, promoGuests, promoCerTimes, promoBusy, promoInBay); 24p itself is left as it is. The words are
+// SW3's pu3.* (content/works/promo-t3.lines, content/banks/promo-t3.lines, the meetings pu3.offer / .monday / .party).
+//   The offer: an Officer, Relied on and trained in Power safety (the t3 row's needs), from Day 14 (the test never before
+// Day 15). Calder comes to find you (worksEscort asks puEscort: she follows you) from 08:00 while you're up and free (the
+// storm's party evening from 19:05: she finds you at the party); next to you, her scene (pu3.offer for a test tomorrow,
+// .monday for a Monday one, .party in the bow lounge at the party, without anyone who isn't there), then an urgent notice
+// and the Mail as the record. Asleep: she waits for the morning. Not found by 22:00: it comes by Mail (mail.pu3.offer.late).
+// Only then is the test set: SHIP.works.pu.t3.day, your next workday after today (never before Day 15).
+//   Before: the crew's talk (puTalkTick: pu3.soon, then pu3.luck from friends the evening before and the test morning),
+// up to two friends' Mail at 20:00 the evening before (promoGuests' friends, schedU key 852), the Schedule's and Tracked's
+// rows (puItems; section 15's devDay asks), the Training tab (puCheck), What's next (puNext) and the reputation toasts at
+// Trusted and Relied on (puRepUp). Nearly there: at Trusted, Calder's word passing you in the bay, and Halloran's, once.
+// Saved: SHIP.works.pu = { t3: { day, tries, passed, res, bar, toast } } (the test's day, tries, passed; the days the result,
+// the bar and the toast were given, null until then), read back here (worksClean keeps only 24 core's fields), and flags
+// pu3.*. Nothing new calls R(); live state (who's seeking you, who has spoken) is in PU_LIVE, not saved.
+const PU = { offerFrom: 14, testFrom: 15, seekAt: 480, partyAt: 1145, seekBy: 1320, near: 2.2, luckAt: 1200, guests: 4 };
+const PU_LIVE = { seek: null, said: new Set(), talkAt: -1e9 };
+function puClean(s) {                                    // a save's pu, junk dropped
+  const int = (v, lo, hi) => Number.isInteger(v) && v >= lo && v <= hi ? v : null, t = s && typeof s === 'object' && s.t3 && typeof s.t3 === 'object' ? s.t3 : null;
+  return { t3: t && int(t.day, 1, 99999) ? { day: t.day, tries: int(t.tries, 0, 99) || 0, passed: t.passed === true, res: int(t.res, 1, 99999), bar: int(t.bar, 1, 99999), toast: int(t.toast, 1, 99999) } : null };
+}
+if (P5_PROMO3) { const s = SAVED && SAVED.ship && SAVED.ship.works; if (SHIP.works && s && s.pu) SHIP.works.pu = puClean(s.pu); }
+function puT3() { const W = SHIP.works; return W && W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; }   // the save's Tier 3 record, or null (a function: puCheck asks it with P5_STEP5 alone)
+function puSet(day) { const W = SHIP.works; if (!W.pu || typeof W.pu !== 'object') W.pu = { t3: null }; return W.pu.t3 = { day, tries: 0, passed: false, res: null, bar: null, toast: null }; }
+const puDayWord = (day, d) => day === d ? 'today' : day === d + 1 ? 'tomorrow' : dayName(day);
+function puReady(d) {                                    // the offer's needs hold today (and it isn't made yet)
+  const W = SHIP.works, row = ladderRow('t3');
+  return !!(P5_PROMO3 && W && W.tier === 2 && W.rank === 'officer' && row && !puT3() && d >= PU.offerFrom && ladderNeeds(row.needs, W));
+}
+function puPartyAt(d) {                                  // the storm's all-clear party on day d: its start (ship minutes of the day), else null
+  try { const r = EVENTS_ON && evCalPlan().find(x => x.id === 'ionStorm'), M = r && (SHIP_EVENTS.ionStorm.moments || []).find(x => x.id === 'party');
+    return M && r.day + M.at[0] === d ? M.at[1] : null; } catch (e) { return null; }
+}
+function puInLounge() { try { return deckDef.num === 3 && /^Bow lounge$/.test((deckDef.rooms[roomAt(...player.here())] || {}).name || ''); } catch (e) { return false; } }
+function puNearMe(id, r = PU.near) { try { const a = DECK_CREW.find(x => x.p && x.p.id === id), P = player.obj.position; return !!a && Math.hypot(a.x - P.x, a.z - P.z) < r ? a : null; } catch (e) { return null; } }
+function puScript(id, hook) {                            // a live copy of the writer's scene (else a stand-in), our hooks on it; the party's without anyone who isn't there
+  const base = MEETING_SCRIPTS[id] || MEETING_SCRIPTS[id.replace(/\.(monday|party|fri)$/, '')] || { title: 'Your next test', from: 'Chief Ines Calder', stub: true, gist: 'Calder told you in person: your Tier 3 test is set. Pass it and you\'re a Senior Officer.',
+    lines: [{ who: 'calder', text: 'There you are. Relied on, Power safety done. That\'s all of it.', to: 'you' }, { who: 'calder', text: 'Your Tier 3 test. Nine o\'clock, on the board. Pass it and you\'re a Senior Officer.' }] };
+  let lines = base.lines;
+  if (/\.party$/.test(id)) { const here = id2 => id2 === 'calder' || !!puNearMe(id2, CHATTER_NEAR + 3); lines = lines.filter(l => !l.who || l.who === 'you' || here(l.who)); }
+  const live = { ...base, lines, onPick: (k, c) => { if (hook.pick) hook.pick(k, c); }, onEnd: f => { if (hook.end) hook.end(f); } };
+  MEETING_SCRIPTS['pu3.live'] = live; return 'pu3.live';
+}
+function puOffered(now, how) {                           // the test is set; the notice and the Mail, the record of what she said
+  if (puT3()) return false;
+  const d = worksDay(now), T = puSet(Math.max(PU.testFrom, promoWorkday(d))), day = puDayWord(T.day, d);
+  flagSet('pu3.told', d); PU_LIVE.seek = null;
+  promoMail(how === 'mail' ? 'mail.pu3.offer.late' : 'mail.pu3.offer', 'Your Tier 3 test | {day}, 09:00, Works bay. A Deck 6 junction, switched off and back on, properly. Pass it and you\'re a Senior Officer.', { day }, now);
+  if (now >= shipNow() - 1 && !promoBusy() || how === 'person') { promoNotice(worksText('pu3.offer.notice', 'Your Tier 3 test: {day}, 09:00, the job board in the Works bay.', { day }), worksName('calder')); flagSet('pu3.notice', d); }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu3', { step: 'set', day: T.day, how });
+  return true;
+}
+function puOfferTick(now, skip) {                        // once a ship minute: she comes to find you, and tells you
+  const d = worksDay(now), m = now - (d - 1) * 1440, T = puT3();
+  if (T && flag('pu3.told') !== undefined && flag('pu3.notice') === undefined && !skip && now >= shipNow() - 1 && !promoBusy()) {   // set while you slept: the notice once you're up
+    flagSet('pu3.notice', d); promoNotice(worksText('pu3.offer.notice', 'Your Tier 3 test: {day}, 09:00, the job board in the Works bay.', { day: puDayWord(T.day, d) }), worksName('calder')); }
+  if (!puReady(d)) { PU_LIVE.seek = null; return; }
+  const party = puPartyAt(d), from = party !== null ? party + 5 : PU.seekAt;
+  if (m >= PU.seekBy) { if (flag('pu3.late') !== d) { flagSet('pu3.late', d); if (!(typeof sleeping !== 'undefined' && sleeping)) puOffered(now, 'mail'); } return; }   // not found by 22:00 (awake): by Mail; asleep: the morning
+  if (skip || now < shipNow() - 1 || m < from) return;
+  const S = PU_LIVE.seek;
+  if (!S) { if (!promoBusy() && guardFree(d, m, m + 15)) PU_LIVE.seek = { by: 'calder', at: Math.floor(now), d }; return; }   // (asleep, in a talk, or in a held hour: not yet)
+  if (typeof sleeping !== 'undefined' && sleeping) { PU_LIVE.seek = null; return; }   // gone to bed: the morning
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE || !puNearMe(S.by)) return;
+  const day = Math.max(PU.testFrom, promoWorkday(d)), mon = (() => { try { return weekday(day) === 0; } catch (e) { return false; } })();
+  const v = party !== null && m >= party && puInLounge() && day === d + 1 && mon ? '.party' : day !== d + 1 && mon ? '.monday' : '';
+  const id = puScript('pu3.offer' + v, { pick: k => flagSet('pu3.reply', k + 1), end: () => puOffered(shipNow(), 'person') });
+  S.met = true; flagSet('pu3.offer.at', v || 'tomorrow');
+  dialogueShow(id, { id: 'pu3.offer' + v, who: ['calder'], at: now, where: { any: true } });
+  if (v === '.party') puCupsUp(now);
+}
+function puCupsUp(now) {                                 // the party: friends near you raise a cup (their bubbles; Tomas's own line is in the scene)
+  try { const P = player.obj.position; let n = 0;
+    for (const a of DECK_CREW.filter(x => x.h && x.p && x.p.id !== 'calder' && x.p.id !== 'tomas' && relTier(x.p.id) >= 2 && Math.hypot(x.x - P.x, x.z - P.z) <= CHATTER_NEAR)) {
+      if (n >= 2) break; const l = socLine(a.p, 'pu3.luck', { t: now, tier: relTier(a.p.id), bubble: true, flags: { 'pu3.luck': true } }); if (!l) continue;
+      const k = n++; simTimeout(() => { try { bubbleSay(a.h, l.text, 5); } catch (e) { /* gone */ } }, 26000 + 5200 * k); PU_LIVE.said.add('pu3.luck@' + worksDay(now) + ':' + a.p.id); } } catch (e) { /* not in play */ }
+}
+function puEscort(p, t) {                                // worksEscort's 24u part: Calder walking over to find you
+  const S = PU_LIVE.seek; if (S && !S.met && p.id === S.by && puReady(worksDay(t))) return { mode: 'follow', to: null };
+  return null;
+}
+function puNearTick(now, skip) {                         // nearly there: at Trusted, passing you in the bay (once), Calder's word, then Halloran's
+  const W = SHIP.works; if (skip || !W || W.tier !== 2 || puT3() || flag('pu3.near') || now < shipNow() - 1 || worksBand() !== 'trusted' || !promoInBay() || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
+  if (!puNearMe('calder', CHATTER_NEAR)) return;
+  flagSet('pu3.near', worksDay(now));
+  worksSayAll('calder', worksVoice('calder', 'pu3.promo.near') || ['Trusted. One more step. And Power safety, with me.']);
+  if (puNearMe('halloran-emeka', CHATTER_NEAR)) { const l = worksVoice('halloran-emeka', 'pu3.promo.near'); if (l) simTimeout(() => worksSayAll('halloran-emeka', l), 5600); }
+}
+function puRepUp(b1) {                                   // worksRepTell's line as an Officer at Trusted and Relied on (null: its own)
+  const W = SHIP.works; if (!P5_PROMO3 || !W || W.tier !== 2 || puT3()) return null;
+  return b1 === 'trusted' ? worksText('works.rep.up2.trusted', 'Now Trusted. One more step, Relied on, and you\'re up for your Tier 3 test.') : b1 === 'relied' ? worksText('works.rep.up2.relied', 'Now Relied on. That\'s the reputation your Tier 3 test needs.') : null;
+}
+function puNext(k) {                                     // worksNext's line for the Tier 3 test and the Senior Officer's beats (null: its own)
+  const W = SHIP.works, T = puT3(), d = SHIP.time.day; if (!P5_PROMO3 || !W) return null;
+  if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
+    return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
+  if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
+  return null;
+}
+// the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
+function puItems(d) {
+  const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return [];
+  const out = [];
+  if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
+  return out;
+}
+// the crew's talk (live only, nothing saved): as 24p's promoTalkTick, with Tier 3's kinds. One line every few ship
+// minutes at most, never over a chat card, a dialogue or the other chatter's gap, from someone near you, each once a beat a day
+function puTalkKind(now) {                               // -> [kind, who ('any' | 'friend'), place ('any' | 'bay')] for now, or null
+  const T = puT3(), W = SHIP.works; if (!T || !W) return null;
+  const d = worksDay(now), m = now - (d - 1) * 1440, eve = m >= DAY_SHIFT[1];
+  if (W.tier === 2 && !T.passed) {
+    if (T.day === d + 1 && eve || T.day === d && m < 540) return ['pu3.luck', 'friend', 'any'];
+    return T.day >= d ? ['pu3.soon', 'any', 'any'] : null;
+  }
+  return null;
+}
+function puTalkTick(now) {
+  if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined' || typeof SOC === 'undefined') return;
+  if (typeof CHAT !== 'undefined' && CHAT || typeof sleeping !== 'undefined' && sleeping || typeof DIALOGUE !== 'undefined' && DIALOGUE) return;
+  const m = Math.floor(now); if (m - PU_LIVE.talkAt < 3 || typeof CHATTER_AT !== 'undefined' && simNow() - CHATTER_AT < CHATTER_GAP * 1000) return;
+  const k = puTalkKind(m); if (!k) return;
+  const [kind, who, where] = k, d = worksDay(m), here = promoInBay();
+  if (where === 'bay' && !here) return;
+  let P; try { P = player.obj.position; } catch (e) { return; }
+  const near = DECK_CREW.filter(a => a.h && a.p && SOC.idx.has(a.p.id) && a.p.id !== 'calder' && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR && !PU_LIVE.said.has(kind + '@' + d + ':' + a.p.id))
+    .sort((a, b) => Math.hypot(a.x - P.x, a.z - P.z) - Math.hypot(b.x - P.x, b.z - P.z));
+  for (const a of near) {
+    const w = whereIs(a.p, m), act = w && w.act; if (!act || act === 'sleep' || act === 'wash') continue;
+    const meal = act === 'breakfast' || act === 'dinner', tier = relTier(a.p.id);
+    const kd = who === 'friend' && tier < 2 ? 'pu3.soon' : kind;   // friends wish you luck; the rest say how fast it came
+    if (!here && !meal && !puInLounge() && kd === 'pu3.soon') continue;   // how fast: the bay, the mess and the lounge
+    const l = socLine(a.p, kd, { t: m, act, tier, bubble: true, flags: { [kd]: true } }); if (!l) continue;
+    if (bubbleSay(a.h, l.text, 5) === false) continue;
+    PU_LIVE.said.add(kind + '@' + d + ':' + a.p.id); PU_LIVE.talkAt = m; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();
+    return l.text;
+  }
+}
+function puBeatsTick(now, skip) {                        // once a ship minute (hourly while time skips): the Mails and notices of each step
+  const T = puT3(), W = SHIP.works; if (!T || !W) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, B = (d - 1) * 1440;
+  if (W.tier === 2 && !T.passed && T.day === d + 1 && m >= PU.luckAt && flag('mail.pu3.luck') !== d) { flagSet('mail.pu3.luck', d);   // the evening before: a word from up to two friends
+    promoGuests(T.day).slice(PU.guests, PU.guests + 2).forEach((id, k) => {
+      const t = worksText('mail.pu3.luck', 'Good luck | Tier 3 tomorrow. I\'m not worried, so you shouldn\'t be. Proper breakfast.', null, k), i = t.indexOf(' | ');
+      mailSend({ at: Math.max(now, B + PU.luckAt) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
+}
+if (P5_PROMO3) {
+  WORK_MECH.t3 = { offer() { return false; }, noJob: false };   // the test itself: turn 2 (the ladder asks; nothing until then)
+  WORK_TICKS.push((now, skip) => { puOfferTick(now, skip); puNearTick(now, skip); puBeatsTick(now, skip); if (!skip) puTalkTick(now); });
 }
 // ---- end of slot: Later promotions ----
 
