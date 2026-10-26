@@ -1,5 +1,25 @@
 # Check runner CR4: results
 
+## 0.93.3 full round (2026-10-26 ~21:45-22:35 UTC; fresh CR4 session_01RgnU5d6Um75LNznFSotXYH)
+
+- **Candidate:** `claude/staging-0.93.3` 19400976 (doors three ways FX29, diplomatic visit ON Days 16-19, SW2 swap words)
+- **starship-cadet.html sha256:** `ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085` (matches BM18's)
+- **OLD:** d9c7e5f0 (0.93.2); not needed, no FAIL
+- **Share:** day_check Days 6, 8, 12, 13, 16, 19; appt_check; saves_check. Two lanes side by side (BM18's limit: two browsers), `CADET_WORK=/tmp/work-cr4` (6, 8, 12, 13) and `/tmp/work-cr4b` (16, 19, appt, saves). Reported to BM18, lead 39/40.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 6 | OK (exit 0, 517 s) | `DAY CHECK OK`; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 501 s) | `DAY CHECK OK`; draw calls peak 278 / 450 |
+| day_check 12 | OK (exit 0, 462 s) | `DAY CHECK OK`; draw calls peak 249 / 450 |
+| day_check 13 (storm Saturday) | OK (exit 0, 467 s) | `DAY CHECK OK`; draw calls peak 262 / 450 |
+| day_check 16 (visit) | OK (exit 0, 529 s) | `DAY CHECK OK`; draw calls peak 281 / 450 |
+| day_check 19 (visit) | OK (exit 0, 491 s) | `DAY CHECK OK`; draw calls peak 247 / 450 |
+| appt_check | OK (exit 0, 1045 s) | `APPT CHECK OK`; FAIL lines only inside the planted self-test |
+| saves_check | OK (exit 0, 136 s) | `SAVES CHECK OK`; migrate passed first time (no FX27-1) |
+
+Times are with two lanes at once (about 1.8x a lone run). No FAIL; nothing new.
+
 ## 0.93.2 round 2 (2026-10-26; after FX26's fix for CR6's mech m9)
 
 - **Candidate:** `claude/staging-0.93.2` d9c7e5f0
