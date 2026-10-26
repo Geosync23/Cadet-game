@@ -44425,7 +44425,7 @@ function tastJoin(e, a, notice, lead) {
   const thanks = trLine('tasting.thanks', d, {}, ['Thank you, love. If it wins, it\'s on Sunday\'s table.']);
   MEETING_SCRIPTS['tasting.table'] = { title: e.name, noCount: true,
     onEnd: () => stay(),
-    onPick: k => { if (typeof galleyVote === 'function' && galleyVote(k)) toast(e.name, notice + ' You drop your token in the jar for the ' + z.choices[k] + '.');   // the join notice kept (join_check) },
+    onPick: k => { if (typeof galleyVote === 'function' && galleyVote(k)) toast(e.name, notice + ' You drop your token in the jar for the ' + z.choices[k] + '.'); },   // the join notice kept (join_check)
     lines: [{ who: q.id, text: trLine('tasting.greet', d, {}, ['Come through, love. Spoon\'s there. Two new ones tonight.']) },
       { who: q.id, text: set(0) }, { who: q.id, text: set(1) },
       { who: q.id, text: trLine('tasting.ask', d, {}, ['Right. Which jar gets your token? Don\'t be polite.']) },
