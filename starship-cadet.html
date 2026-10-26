@@ -59266,14 +59266,17 @@ function p5Escort(p, t) {                                // worksEscort's 24u pa
   return null;
 }
 // (RV20's find, for lead 40: the teacher came late to a Step 5 lesson's meeting, e.g. Calder to her 11:00 in the relay
-// room.) From 20 minutes before a Step 5 lesson's meeting until it's met or over, its teacher waits at the meeting's own
-// place (the appointment's, as section 14 gave it), so they're there before you are. Live only (worksEscort), nothing saved
-const P5_LESSONS = new Set(['ps', 'm19', 'm18', 'm20']);
+// room, Deck 5 to Deck 1 about 15-17 minutes.) From P5_TEACH_LEAD minutes before a Step 5 lesson's meeting until it's met
+// or over, its teacher goes to and waits at the meeting's own place (the appointment's, as section 14 gave it; else a place
+// in its room), so they're there before you are; and a self-led lesson's teacher (WORK_MECH[id].self: m18's screen) stays
+// with you while its step runs. Live only (worksEscort), nothing saved
+const P5_LESSONS = new Set(['ps', 'm19', 'm18', 'm20']), P5_TEACH_LEAD = 30;
 function p5TeacherWait(p, t) {
   const W = SHIP.works, c = W && W.cur; let r = null;
+  if (c && c.st === 'do' && P5_LESSONS.has(c.id) && (WORK_MECH[c.id] || {}).self && p.id === c.by && worksDay(t) === c.d) { const j = SHIP.jobs.find(x => x.id === c.j); if (j && j.status !== 'done') return { mode: 'follow', to: null }; }   // a self-led lesson: with you
   if (c && c.st === 'meet' && P5_LESSONS.has(c.id)) r = SHIP.occasions.find(x => x.key === c.occ) || null;
   if (!r && W && W.tr.ps === undefined) r = SHIP.occasions.filter(x => x.id === 'works.ps').pop() || null;   // Power safety's own appointment (not a W.cur lesson)
-  if (!r || r.met || r.status !== 'asked' || p.id !== r.by || t < r.at - 20 || t >= r.at + r.len || r.f && r.f.seek && !r.f.told) return null;
+  if (!r || r.met || r.status !== 'asked' || p.id !== r.by || t < r.at - P5_TEACH_LEAD || t >= r.at + r.len || r.f && r.f.seek && !r.f.told) return null;
   let pl = null; try { const a = apptList().find(x => x.occ === r.key); pl = a ? apptPlaceOf(a, p.id) : null; } catch (e) { pl = null; }
   if (!pl) { const q = ((DECKS[r.deck] || {}).places || []).find(x => x.room === r.room && Array.isArray(x.at) && !/bed|toilet|shower/.test(x.type || '')); pl = q ? { ...q, deck: r.deck } : null; }   // no appointment (a room with no meeting spot: Deck 6's junction rooms): a place in its room
   return pl && Array.isArray(pl.at) ? { mode: 'wait', to: { deck: pl.deck, tile: pl.at.slice() } } : null;
