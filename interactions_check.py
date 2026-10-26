@@ -1791,6 +1791,7 @@ with sync_playwright() as pw:
         ad = {'door': g.ev(AD)}
         g.ev(STEER); g.step(60); ad['steerOff'] = g.ev(AT); g.ev(BACK); g.step(20)
         g.ev("adoorTap(window.__door.key)"); g.step(40); g.ev(STEER); g.step(60); ad['afterTap'] = g.ev(AT); g.ev(BACK); g.step(20)
+        ad['self'] = g.ev("(() => { const ok = adoorTapSelf(); return [ok, ADOOR.tap === window.__door.key]; })()"); g.ev(BACK); g.step(20)   # a tap on yourself by the shut door is the door's (RV18)
         g.ev("playerGo(window.__door.b)"); mx = 0
         for i in range(12): g.step(10); mx = max(mx, g.ev(AT)[2])
         ad['walkIn'] = g.ev(AT); ad['walkOpen'] = mx; g.ev(BACK); g.step(20)
@@ -1802,6 +1803,7 @@ with sync_playwright() as pw:
         check(ad['steerOff'][0] and ad['steerOff'][2] < .05, f"Auto doors off: walking into a shut door yourself, you stop at it and it stays shut (0.93.2): {ad['steerOff']}")
         check(ad['afterTap'][1], f"Auto doors off: a tap on the door opens it and you can walk through (0.93.2): {ad['afterTap']}")
         check(ad['walkIn'][1] and ad['walkOpen'] > .5, f"Auto doors off: a tap in the room beyond walks you through, the door opening as you reach it (0.93.2): {ad['walkIn']} {ad['walkOpen']}")
+        check(ad.get('self') == [True, True], f"Auto doors off: a tap on yourself right by a shut door opens it (0.93.2, RV18): {ad.get('self')}")
         check(ad['steerOn'][1], f"Auto doors on: you walk straight through, as always (0.93.2): {ad['steerOn']}")
         check(ad['crew'] == [False, False], f"Auto doors: the crew are never stopped (0.93.2): {ad['crew']}")
         check(ad['saved'] == [False, False] and ad['savedOn'] is False, f"Auto doors: saved as off, loaded back; nothing saved when on (0.93.2): {ad['saved']} {ad['savedOn']}")

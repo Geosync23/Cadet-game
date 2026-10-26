@@ -16842,6 +16842,11 @@ function adoorTap(key) {                                  // a tap on a door wit
   ADOOR.tap = key; approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => {});
   return true;
 }
+function adoorTapSelf() {                                // a tap on you, within .9 m of a door that's shut to you: that door (your body covers its low strip)
+  if (autoDoors() || typeof DOOR_OBJS === 'undefined') return false;
+  const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorShut(o.e, player)).map(o => [o, Math.hypot(o.cx - p.x, o.cz - p.z)]).filter(([, m]) => m < .9).sort((x, y) => x[1] - y[1])[0];
+  return !!d && adoorTap(d[0].e.key);
+}
 function adoorSet(on) {                                   // the Settings row
   const st = SHIP.device.settings; if (on) delete st.autoDoors; else st.autoDoors = false;
   ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null;
@@ -60342,6 +60347,7 @@ function tap(cx, cy) {
   if (typeof shelfGlowTap === 'function' && shelfGlowTap(cx, cy)) return;   // the shelf lit up for the part you need (section 17, FX3): after the crew, so a tap on someone in front of it is still theirs (RV11)
   const h = pick(cx, cy); if (!h) return;
   const ud = h.object.userData;
+  if (ud.walker && ud.walker.isPlayer && adoorTapSelf()) return;   // 0.93.2: Auto doors off, a tap on yourself right by a shut door is a tap on the door (RV18: low cut-away walls)
   if (ud.walker && ud.walker.active) {
     const who = ud.walker, s = who.spec;
     who.stop(); who.talking = 6; who.faceToward(player); player.faceToward(who);
