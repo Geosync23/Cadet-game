@@ -23,3 +23,4 @@ plans/review-rv21.md. Verdicts PASS / FIXES NEEDED (must/should) with the exact 
   pushes on the three branches yet.
 - ~23:36 UTC: VB2: ending-checks not pushed; stay path (asis, teachoff, track) passing locally; change-of-mind, go runs and
   controller_check `ending` still in trial. Will send the sha, then day_check 31/50 ON copy.
+- ~23:45 UTC: lead 40: stopping point (the user's call). No review started; wrote plans/handover-rv22.md.
