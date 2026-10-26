@@ -224,3 +224,20 @@ teacher-at-the-meeting fix (repro sent to B5) and fixes from the B1 review.
 7. B5 claude/p5s5-promo (2dd1ec33 test, 2e38f733 result to toast; turn 4 + merges to come as one sha): when it
    passes, tell lead 40 at once (an early Dev link for the user).
 8. B3 fixes for shutdowns M2/M3 (M1 with B5's fix).
+
+## B2, the tap fix: claude/workstep-tap-fix c79a66dc (from staging-0.93.3 acbb52e0; no switch; ships alone as 0.93.4)
+Diff read: 15b ixStepwise(j) (a JOB_KINDS job on a machine whose stops aren't just the panel's one 'job' stop) lets
+ixChore take it; one line at the top of section 15's jobTap returns false for such a job, so jobBegin's plain repair never
+takes it. Who it touches on 0.93.3: only 'rewire' (tune has one 'job' stop and keeps jobBegin; team, drill, stocktake,
+shop, fcase and the other side kinds aren't myJob, so neither line sees them). mech_check part wstap taps through
+playerTap.
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs acbb52e0 | c79a66dc | ALL IDENTICAL |
+| mech_check m15 m5 wstap | c79a66dc | MECH CHECK OK |
+| player_check | c79a66dc | PLAYER CHECK OK |
+| interactions_check | c79a66dc | INTERACTIONS CHECK OK |
+| rewiring by real taps, 390 x 844 (plans/rv20-rewire-tap.py) | c79a66dc | the chart look ("T1 yellow · T2 white ..."), "Done here. 7 stops to go", then the card "Blue" with T1-T6 and Not now (before: "about 10 minutes" and done, no wires) |
+
+**Verdict on c79a66dc: PASS.**
