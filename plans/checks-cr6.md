@@ -7,6 +7,10 @@
   the same check, the 11 lines tagged `!swap`.
 - Everything else passes in both. The check's never-fill filter (~line 289) excuses the storm's other side but not the
   swap's; it needs a `swap` / `!swap` excuse. Reported to lead 37, FX22b and RV18.
+- Re-run on 4e13d5e3 (FX22b's check fix; game sha eb999383...b853): OFF exit 0 (1679 s) `FRIDAYS CHECK OK`. ON exit 1
+  (1677 s) `FRIDAYS CHECK FAILED (1)`: one line never fills, Day 26 `wiak8h` "A month ago {me} came aboard. Since then:
+  the Line, a storm, our first guests, and a comet." (tagged `swap`). It is 91 characters before {me} is filled, and
+  friFill drops any line over 90, so the game never says it. A real (small) game fault: the line needs shortening.
 
 ## 0.93.1 full round (2026-10-26): all 11 OK, plus CR3's 3 (OK after RV16's check fix)
 
