@@ -36315,6 +36315,18 @@ const LINES = JSON.parse([
   '{"text":"starboard","id":"zebfo8"}]',
   ',"m19.stage2":[',
   '{"text":"You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.","id":"1i6fifk"}]',
+  ',"m20.array.name":[',
+  '{"text":"the sensor array","id":"dq0hxx"}]',
+  ',"m20.ask.say":[',
+  '{"text":"You\'re the one Calder sent? {time}, the array room on Deck 2. Bring your eyes.","id":"zd0bea"}]',
+  ',"m20.card.cal":[',
+  '{"text":"Calibrate the sensor array","id":"exde74"}]',
+  ',"m20.card.sweep":[',
+  '{"text":"A full sweep: the sensor array","id":"sa4llt"}]',
+  ',"m20.module.amber":[',
+  '{"text":"amber","id":"9lf2tx"}]',
+  ',"m20.module.green":[',
+  '{"text":"green","id":"1ky65vx"}]',
   ',"mail.favour.clock":[',
   '{"text":"My clock | My clock loses a few minutes every day. I\'ve been late twice. Could you take a look?","id":"8uk2v5"}]',
   ',"mail.favour.cold":[',
@@ -58883,7 +58895,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
 // (WORK_MECH.m20.at), Hana Mori (Survey) with Calder in Deck 2's array room (A). Mori calibrates the array while you
 // watch, then one is yours: "Pick the star" (three reference stars, one of them yours if you've logged any: 24t's
 // starsLogged), turn the array's dial till the reading agrees with the star (a turn stop, as 24e's tuning), then swap the
-// rack's amber module. The calibration rig comes with it (the row's tool). Then about once a week (08:00 on a workday of
+// array's amber module. The calibration rig comes with it (the row's tool). Then about once a week (08:00 on a workday of
 // yours, not M19's day) a calibration job; from stage 2 (2 uses) a full sweep (three sensors to bring on); from stage 3 (4
 // uses) your sweeps feed Survey's charts (a word from Mori, a little friendship). The beats (spec "The beats"): said in
 // person when you're near her after the ask, an urgent notice at 09:30, a level 1 arrow with its ring line "The sensor
@@ -58930,9 +58942,9 @@ function arrJob(t, o = {}) {
   return j;
 }
 const arrDialWord = v => v === 0 ? worksText('m20.cal.on', 'On the star. The array agrees.') : Math.abs(v) <= 1 ? worksText('m20.cal.close', 'Close. Small turns now.') : worksText('m20.cal.far', 'Far off. Keep turning.');
-// the stops: the star (a pick; any is right), the dial (one turn stop a sensor; settled at 0), the rack's amber module (look, swap)
+// the stops, all at the array's panel: the star (a pick; any is right), the dial (one turn stop a sensor; settled at 0), the amber module (look, swap)
 function arrStops(j) {
-  const m = machineById(j.machine), pp = m && panelPlace(m.id), rp = panelPlace(arrRackOf(j)); if (!pp || !rp) return [];
+  const m = machineById(j.machine), pp = m && panelPlace(m.id), rp = pp; if (!pp) return [];   // all at the array's panel (its own sensor modules), so a tap or a pad's A on it plays each stop
   const st = (place, tag, how, mins, opts) => ({ deck: m.deck, placeId: place, mins, tag, how, ...(opts ? { opts } : {}) });
   const label = worksText('m20.cal.title', 'Calibrate · {machine}', { machine: worksText('m20.array.name', 'the sensor array') });
   const out = [st(pp, 'pick', 'choose', 1, { title: worksText('m20.pick.title', 'Pick the star'), text: worksText('m20.pick.text', 'Hana has three reference stars in view. Pick one to calibrate against.'), options: arrStars(j) })];
@@ -58964,7 +58976,7 @@ function arrDone(j, t, by) {
     if (!j.train) { worksUse('m20'); j.rightFirst = true; }
     try { toast(j.title, j.sweep ? worksText('m20.sweep.done', 'Full sweep done. Survey has your readings.') : worksText('m20.module.done', 'All green. The array sees cleanly again.')); } catch (e) { /* no UI */ }
     if (!j.train && worksStage('m20') >= 2 && !flag('m20.survey.' + worksDay(t))) {   // stage 3: your readings on Survey's chart, Mori's word and a little friendship
-      flagSet('m20.survey.' + worksDay(t), true); worksTeach('m20', 'mori', 'survey', [worksText('m20.survey', 'Your readings are on our chart now. That\'s your name in Survey\'s log, you know.')]);
+      flagSet('m20.survey.' + worksDay(t), true); { const v = worksVoice('mori', 'm20.survey'); if (v) worksSayAll('mori', v); else worksTeach('m20', 'mori', 'survey', [worksText('m20.survey', 'Your readings are on our chart now. That\'s your name in Survey\'s log, you know.')]); }   // Mori's own flag m20.survey (SW3)
       try { if (typeof relAdd === 'function') relAdd('mori', 'favour', 2); } catch (e) { /* no social */ }
     }
   }
@@ -58994,7 +59006,9 @@ function arrBeats(now) {
 function arrHost(now) {
   const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm20' || c.st !== 'meet' || typeof apptAdd !== 'function' || !SHIP.device) return;
   const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || now >= r.at + r.len) return;
-  if (!(SHIP.device.appts || []).some(a => a.occ === r.key || a.id === r.key)) apptAdd({ id: r.key, with: [...new Set(['mori', c.by, 'calder'])], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_ARRAY), kind: 'meeting', status: 'yes', by: c.by, title: (OCCASIONS['works.m20'] || {}).title || 'The sensor array' });
+  const title = (OCCASIONS['works.m20'] || {}).title || 'The sensor array';   // Mori at the array's panel, Calder at the first rack's (two spots: nobody stands inside anyone)
+  if (!(SHIP.device.appts || []).some(a => a.occ === r.key)) apptAdd({ id: r.key, with: ['mori'], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_ARRAY), kind: 'meeting', status: 'yes', by: 'mori', title });
+  if (!(SHIP.device.appts || []).some(a => a.occ === r.key + ':calder')) apptAdd({ id: r.key + ':calder', with: ['calder'], at: r.at - 5, len: r.len + 5, where: panelPlace(ARR_RACKS[0]), kind: 'meeting', status: 'yes', by: 'calder', title });
 }
 // said in person first: the first time you're near Mori after the ask (her deck, the same room or within 6 tiles), before
 // 09:30's notice, she tells you herself; the Mail stays the record
@@ -59034,7 +59048,7 @@ if (P5_M20 && typeof jobKindAdd === 'function') {
     watch: 10,
   };
   onSim('tool', n => { if (n && n.id === 'arrayrig') { try { toast(worksName('mori'), worksText('m20.rig.give', 'Hana Mori gave you the calibration rig. Survey\'s spare, now yours.')); } catch (e) { /* no UI */ } } });
-  onSim('trained', n => { if (n && n.mech === 'm20') worksTeach('m20', 'calder', 'calder', [worksText('m20.calder', 'Survey asks for you by name now. Don\'t make me regret it.')]); });   // Calder's one line
+  onSim('trained', n => { if (n && n.mech === 'm20') worksTeach('m20', 'calder', 'calder', [worksText('m20.calder', 'Survey asks for you by name now. Don\'t make me regret it.')]); });   // Calder's one line: her flag train.m20.calder (SW3), else the stand-in   // Calder's one line
   WORK_TICKS.push((now, skip) => {
     arrHost(now);
     if (!skip) { arrBeats(now); arrAskSay(now); }

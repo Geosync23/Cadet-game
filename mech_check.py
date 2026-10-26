@@ -1423,9 +1423,9 @@ M20 = r"""(() => { const out = {};
  // the ask and the beats
  let W = reset(18 * 1440 + 300); const notes = [], pn = promoNotice; promoNotice = (text) => notes.push([Math.floor(shipNow()) % 1440, text]);
  try { for (let t = 18 * 1440 + 300; t <= 18 * 1440 + 598; t += 1) { setShipNow(t); machinesNow(); worksCareerTick(t); if (DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true); } } finally { promoNotice = pn; }
- const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).find(a => r && a.occ === r.key);
+ const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ), g = guideList().find(e => /^m20:meet:/.test(e.id)), ap = (SHIP.device.appts || []).filter(a => r && (a.occ === r.key || a.occ === r.key + ':calder'));
  out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null; out.notice = notes;
- out.arrow = g ? [g.level, g.from % 1440] : null; out.appt = ap ? [ap.with.slice().sort(), ap.at % 1440, ap.where] : null;
+ out.arrow = g ? [g.level, g.from % 1440] : null; out.appt = ap.length ? [ap.flatMap(a => a.with).sort(), ap[0].at % 1440, [...new Set(ap.map(a => a.where))].length] : null;
  // a job of yours
  W = reset(22 * 1440 + 480); let j = arrJob(shipNow(), { key: 81 }); SHIP.jobs.push(j);
  out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id);
@@ -1443,8 +1443,8 @@ M20 = r"""(() => { const out = {};
    for (const x of SHIP.jobs) if (x.kind === 'arraycal' && x.status !== 'done' && !x.seen) { x.seen = true; weeks.push([worksDay(x.posted), x.posted % 1440, !!x.sweep, (x.offs || []).length]); x.status = 'done'; x.doneAt = t; W.use.m20 = (W.use.m20 || 0) + 1; } }
  out.weeks = weeks; out.stages = [0, 2, 4].map(n => { W.use.m20 = n; return worksStage('m20'); });
  W.use.m20 = 4; j = arrJob(41 * 1440 + 480, { key: 99 }); SHIP.jobs.push(j); setShipNow(41 * 1440 + 490); claimJob(j.id);
- const said = []; const ws = worksTeach; worksTeach = (m, who, k, fb) => { said.push(m + '.' + k); return fb; };
- try { jobStops(j).forEach((s2, k) => jobStepDone(j.id, k, s2.how === 'turn' ? { value: 0 } : s2.how === 'choose' ? { pick: arrStars(j)[0].id } : {})); turnInJob(j.id); } finally { worksTeach = ws; }
+ const said = []; const ws = worksTeach, wv = worksVoice; worksTeach = (m, who, k, fb) => { said.push(m + '.' + k); return fb; }; worksVoice = () => null;
+ try { jobStops(j).forEach((s2, k) => jobStepDone(j.id, k, s2.how === 'turn' ? { value: 0 } : s2.how === 'choose' ? { pick: arrStars(j)[0].id } : {})); turnInJob(j.id); } finally { worksTeach = ws; worksVoice = wv; }
  out.survey = said;
  // the save: junk cleaned
  const side = SHIP.works.side; side.ar = { star: 7, sweeps: 'x', day: 3, week: 'y' }; delete side.arOk; out.save = JSON.stringify(arrState());
@@ -1456,7 +1456,7 @@ def part_m20(g):
     check(a['ask'] and a['ask'][:5] == ['m20', 'meet', 600, 2, 'A'], f"m20: asked on Day 19 for 10:00 in the array room, Deck 2 ({a['ask']})")
     check(len(a['notice']) == 1 and a['notice'][0][0] == 570 and 'sensor array' in a['notice'][0][1], f"m20: one urgent notice at 09:30 naming it ({a['notice']})")
     check(a['arrow'] == [1, 585], f"m20: a level 1 arrow from 09:45 ({a['arrow']})")
-    check(a['appt'] and 'mori' in a['appt'][0] and 'calder' in a['appt'][0] and a['appt'][1] == 595, f"m20: Mori and Calder booked at the array's panel from 09:55 ({a['appt']})")
+    check(a['appt'] and a['appt'][0] == ['calder', 'mori'] and a['appt'][1] == 595 and a['appt'][2] == 2, f"m20: Mori and Calder booked from 09:55, each at their own panel in the array room ({a['appt']})")
     check(a['board'] and a['claimed'], 'm20: a calibration job on the board for a Senior Officer, taken')
     check(a['stops'] == ['pick:choose', 'turn:turn', 'look:look', 'module:hold'], f"m20: the steps ({a['stops']})")
     check(not a['badPick'] and a['pick'] and not a['dialOff'] and a['dialOn'] and a['turnin'], f"m20: a star picked, only a settled dial counts, turned in")
@@ -2053,6 +2053,11 @@ JOB_TAP_EXTRA['relayswap'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 +
   const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m19 = 17; toolGive('tester');
   SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = pwrJob('relayswap', '1-relay-1', shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
   if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(1); return { id: j.id, mach: '1-relay-1' }; })()""", "((j, k) => j.bad)")   # 24v (S5-3): a relay swap by tap, the failing relay picked
+JOB_TAP_EXTRA['arraycal'] = (r"""(() => { const d = 23; skipTo((d - 1) * 1440 + 600); machinesNow(); if (DIALOGUE) dialogueEnd(true);
+  const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.t3 = 15; W.tr.m20 = 19;
+  SHIP.jobs = SHIP.jobs.filter(x => x.claimedBy !== 'you'); const j = arrJob(shipNow(), { key: 91 }); SHIP.jobs.push(j); if (!claimJob(j.id)) return null;
+  if (ACT && typeof actEnd === 'function') actEnd(true); if (DEV.choose) devChosen(-1); goToDeck(2); return { id: j.id, mach: '2-array-1' }; })()""",
+  "((j, k) => { const st = jobStops(j)[k]; if (st.how !== 'turn') return 0; const w = SHIP.player.wsteps.find(x => x.job === j.id && x.k === k); return w && w.v > 0 ? 0 : 1; })")   # 24x (S5-5): a calibration by tap: the first star, the dial turned toward 0 (− or +)
 def part_wstap(pw):
     g = Game(pw, sys.argv[1], 390, 844)
     try:

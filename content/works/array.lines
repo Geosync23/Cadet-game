@@ -1,0 +1,21 @@
+@bank all
+// B3 (2026-10-26, Pillar 5 Step 5, S5-5; lead 40: no writer seat, the builder writes its own leftovers): M20 The sensor
+// array (24x), the keys the code reads that SW3's m20.lines (claude/p5s5-words) doesn't have. Same style. {time}: 10:00.
+// Keep these keys out of m20.lines (one home each).
+
+// the job board's cards
+== m20.card.cal
+- Calibrate the sensor array
+== m20.card.sweep
+- A full sweep: the sensor array
+// the dial's card title names it ({machine} in SW3's m20.cal.title)
+== m20.array.name
+- the sensor array
+// the array's modules, read at the panel ("M1 green · M2 amber ...")
+== m20.module.green
+- green
+== m20.module.amber
+- amber
+// said in person after the ask, the first time you're near the teacher (Mori, or Calder on Mori's days off)
+== m20.ask.say
+- You're the one Calder sent? {time}, the array room on Deck 2. Bring your eyes.
