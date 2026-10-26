@@ -1297,14 +1297,14 @@ M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.st
  const tick = (a, b, s = 10) => { for (let t = a; t <= b; t += s) { setShipNow(t); machinesNow(); worksCareerTick(t); } };
  // the lesson's beats on Day 17: asked at 06:00 for 11:00 in the relay room; the notice at 10:30, the level 1 arrow from 10:45
  const said = [], kn = promoNotice; promoNotice = (x, f) => said.push([Math.round(shipNow() % 1440), x]);
- let W = reset(16 * 1440 + 300); delete W.tr.m15; delete W.tools.tester; tick(16 * 1440 + 350, 16 * 1440 + 600);
+ let W = reset(16 * 1440 + 300); for (const k of ['m15', 'm17']) { delete W.tr[k]; delete W.use[k]; for (const d in W.op) W.op[d] = W.op[d].filter(x => x !== k); } delete W.tools.tester; tick(16 * 1440 + 350, 16 * 1440 + 600);   // a steady Senior: Rewiring and the lift roof not trained by hand (EP2's ladder order, B1's 24 core; RV20's M1)
  const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ); out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null;
  tick(16 * 1440 + 601, 16 * 1440 + 646, 1); const e = GUIDE.list.find(x => x.id === 'm19:meet:17'); let g = null; try { g = e && e.goal(); } catch (x) { g = null; }
  out.notice = said.slice(); out.arrow = e ? [e.level, e.from % 1440, g && g.deck, g && g.room, g && g.label] : null;
  promoNotice = kn;
  // the tester: new with M19 (Calder's line), or already M15's (no second one)
  const teach = []; const kt = worksTeach; worksTeach = (m, w, k, f) => { teach.push(m + '.' + k); return f; };
- W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; worksTrained('m19'); simFlush(); out.tester = [hasTool('tester'), teach.slice()];
+ W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; worksTrained('m19'); simFlush(); out.tester = [hasTool('tester'), teach.slice()]; out.fold = [W.tr.m15 === W.tr.m19, worksOpened(W).has('m15')];
  W = reset(16 * 1440 + 300); W.tr.m15 = 17; toolGive('tester'); const day0 = W.tools.tester[0]; W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; teach.length = 0; worksTrained('m19'); simFlush();
  out.tester2 = [W.tools.tester[0] === day0, teach.slice(), Object.keys(W.tools).filter(k => k === 'tester').length];
  worksTeach = kt;
@@ -1337,9 +1337,10 @@ def part_m19(g):
     print('  m19 ask', a['ask'], 'notice', a['notice'], 'arrow', a['arrow'])
     print('  m19 tester', a['tester'], a['tester2'], 'weeks', a['weeks'])
     print('  m19 stops', a['stops'], 'wrong', a['wrong'], 'after', a['after'], 'batt', a['batt'], 'repair use', a['repairUse'], 'stages', a['stages'], 'held', a['held'], 'crew', a['crew'])
-    check(a['ask'] and a['ask'][:6] == ['m19', 'meet', 660, 1, 'u', 'calder'], f"m19: the lesson asked for 11:00 in the relay room, Deck 1, with Calder ({a['ask']})")
+    check(a['ask'] and a['ask'][:6] == ['m19', 'meet', 660, 1, 'u', 'calder'], f"m19: a steady Senior (Rewiring and the lift roof untrained) asked on Day 17 for 11:00 in the relay room, Deck 1, with Calder ({a['ask']}; another lesson first means 24 core's ladder order, B1's, isn't in this build)")
     check(len(a['notice']) == 1 and a['notice'][0][0] == 630 and 'Power and relays' in a['notice'][0][1], f"m19: one urgent notice at 10:30 naming it ({a['notice']})")
     check(a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == 645 and a['arrow'][2] == 1 and a['arrow'][3] == 'u' and a['arrow'][4].startswith('Power and relays with Calder, 11:00'), f"m19: a level 1 arrow from 10:45 to the relay room, its ring line naming it ({a['arrow']})")
+    check(a.get('fold') == [True, True], f"m19: Rewiring folds into it: trained (and counted open) with it ({a.get('fold')})")
     check(a['tester'][0] and a['tester'][1] == ['m19.tester'], f"m19: the tester given with the lesson, Calder's word with it ({a['tester']})")
     check(a['tester2'][0] and a['tester2'][1] == [] and a['tester2'][2] == 1, f"m19: M15 gave it first: no second tester, no word ({a['tester2']})")
     W = a['weeks']

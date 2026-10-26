@@ -58611,6 +58611,25 @@ function pwrBeats(now) {
       goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: ring }),
       done: () => !!r.met || r.status !== 'asked' || !(SHIP.works && SHIP.works.cur && SHIP.works.cur.id === 'm19' && SHIP.works.cur.st === 'meet') });
 }
+// (RV20's M2) the teacher at the lesson before it starts: the relay room has no seat or standing place, so section 18's
+// occasionAdd books no appointment and Calder only came with the watch (11:17). Booked here at your rack's panel, so section
+// 14's apptWhere walks her there for five minutes before (she stays the whole lesson, as an occasion's host does)
+function pwrHost(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm19' || c.st !== 'meet' || typeof apptAdd !== 'function' || !SHIP.device) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || now >= r.at + r.len) return;
+  if (!(SHIP.device.appts || []).some(a => a.occ === r.key)) apptAdd({ id: r.key, with: [c.by], at: r.at - 5, len: r.len + 5, where: panelPlace(PWR_TRAIN[1]), kind: 'meeting', status: 'yes', by: c.by, title: (OCCASIONS['works.m19'] || {}).title || 'Power and relays' });
+}
+// (RV20's S1) said in person first: the first time you're near Calder after the ask, on her deck,
+// before 10:30's notice (same room, or within 6 tiles), she tells you herself; the Mail stays the record
+function pwrAskSay(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm19' || c.st !== 'meet' || flag('m19.said.' + c.d)) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || now >= r.at - 30) return;
+  let near = false; try { const a = (typeof DECK_CREW !== 'undefined' ? DECK_CREW : []).find(x => x.p && x.p.id === c.by), P = player.obj.position; near = !!a && (Math.hypot(a.x - P.x, a.z - P.z) <= 6 || roomAt(...cellAt(a.x, a.z)) === roomAt(...player.here())); } catch (e) { near = false; }   // (DECK_CREW: your deck's) in the same room or close
+  if (!near) return;
+  flagSet('m19.said.' + c.d, true);
+  const where = (((DECKS[r.deck] || {}).rooms || {})[r.room] || { name: 'the relay room' }).name.toLowerCase(), time = hhmm(r.at % 1440);
+  worksTeach('m19', c.by, 'ask', [worksText('m19.ask.say', '{time}, the bridge\'s {where}. Power and relays. I\'ll meet you there.', { time, where, name: worksFirst(c.by) })]);
+}
 if (P5_M19 && typeof jobKindAdd === 'function') {
   for (const [k, text] of [['relayswap', 'Swap a relay'], ['battcell', 'Check a battery bank']]) jobKindAdd(k, { tier: 3, work: 0, text, stops: pwrStops, stepDone: pwrStepDone, done: pwrDone, veto: true, crew: { can: incWorks, mins: PWR_CREW } });
   if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) { WORKS_SIDE_KINDS.add('relayswap'); WORKS_SIDE_KINDS.add('battcell'); }
@@ -58638,8 +58657,13 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     const j = (SHIP.jobs || []).find(x => x.id === n.id), m = j && j.machine && machineById(j.machine);
     if (j && m && !JOB_KINDS[j.kind] && /^(battery|relay)$/.test(m.kind) && j.doneBy === 'you') worksUse('m19');
   });
+  onSim('trained', n => {                               // (EP2's ladder order, RV20's M1) Rewiring folds into this lesson: trained with it (the tester once)
+    const W = SHIP.works; if (!n || n.mech !== 'm19' || !W || W.tr.m15 !== undefined || !ladderRow('m15')) return;
+    W.tr.m15 = W.tr.m19; const d = W.tr.m19; if (!worksOpened(W).has('m15')) (W.op[d] = W.op[d] || []).push('m15');
+  });
   WORK_TICKS.push((now, skip) => {
-    if (!skip) pwrBeats(now);
+    pwrHost(now);
+    if (!skip) { pwrBeats(now); pwrAskSay(now); }
     const W = SHIP.works; if (!W || W.tr.m19 === undefined || !pwrState()) return;   // the week's job at 08:00 on its day once you're trained
     const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
     if (m < PWR_POST || !playerShiftOn(d) || pwrDay(w) !== d) return;
@@ -58735,7 +58759,7 @@ function pdrillStepDone(j, k, res) {
   if (!Number.isFinite(j.wrongs)) j.wrongs = 0;
   if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;
   if ((res && res.pick) !== 'c' + k) { j.wrongs++; worksSay('calder', worksText('m19.drill.order', 'Muster, then the action, then the bridge. In that order.')); return false; }
-  const [who, a] = PDRILL_ANS[k]; worksSay(who, worksText('m19.drill.ans.' + k, typeof a === 'string' ? a : a[j.drill] || 'Done.'));
+  const [who, a] = PDRILL_ANS[k]; worksSay(who, worksText('m19.drill.ans.' + k + (typeof a === 'string' ? '' : '.' + j.drill), typeof a === 'string' ? a : a[j.drill] || 'Done.'));
   return true;
 }
 function pdrillClose(j, now, quiet) {
