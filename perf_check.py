@@ -72,6 +72,12 @@ SCENES = [
     {'name': 'weekend: the big jigsaw, observation room Sun 14:00', 'day': 21, 'time': '14:00', 'deck': 1, 'room': r'^Observation room$'},
     {'name': "weekend: night owls' cocoa, bow lounge Sat 22:55", 'day': 27, 'time': '22:55', 'deck': 3, 'room': r'^Bow lounge$'},
     {'name': 'weekend: the Sunday story, junior common room Sun 21:35', 'day': 28, 'time': '21:35', 'deck': 4, 'room': r'^Junior common room$'},
+    # A Veyli vessel needs help (VB1 and VB2, plans/veyli-vessel-spec.html; EV_VESSEL_ON): the parts chain (30-40 in a line from
+    # Main storage to the Tern's ramp, the crates passing; Works bay and shuttle bay), and the engine lighting at the bow glass
+    # (about 45, the little ship outside). `needs`: VB1's event (its block), so a build with only the looks waits
+    {'name': 'Veyli vessel: the parts chain, Works bay Sun 13:30', 'day': 28, 'time': '13:30', 'deck': 5, 'room': r'^Works bay$', 'cells': True, 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
+    {'name': 'Veyli vessel: the parts chain, shuttle bay Sun 13:30', 'day': 28, 'time': '13:30', 'deck': 5, 'room': r'^Shuttle bay', 'cells': True, 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
+    {'name': 'Veyli vessel: the engine lights, bow lounge Mon 17:41', 'day': 29, 'time': '17:41', 'deck': 3, 'room': r'^Bow lounge$', 'on': ['EV_VESSEL_ON'], 'busy': True, 'needs': "typeof SHIP_EVENTS !== 'undefined' && !!SHIP_EVENTS.veyliVessel"},
 ]
 
 SCENE_JS = r"""(sc => {
@@ -111,7 +117,7 @@ def switched(path, on):                                  # a copy of the build w
     src = open(path).read()
     for name in on:
         if re.search(r'const ' + name + r' = true\b', src): continue      # already on in the build (PR7's find: it shipped)
-        src, n = re.subn(r'const ' + name + r' = (?:false|[A-Z_]+);', 'const ' + name + ' = true;', src, count=1)
+        src, n = re.subn(r'const ' + name + r' = (?:false|[A-Z_]+|URL_FLAGS\.has\(\'[a-z0-9]+\'\));', 'const ' + name + ' = true;', src, count=1)   # or a preview switch (#evvessel)
         if not n: return None                                        # no such switch: its branch isn't in this build
     tmp = WORK / 'test' / ('_on_' + '_'.join(on) + '_' + os.path.basename(path)); tmp.write_text(src); return str(tmp)
 

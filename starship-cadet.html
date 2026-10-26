@@ -43559,6 +43559,7 @@ function eventsTick() {
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
   if (TRAD_0932_ON) t932Frame();                         // 0.93.2: the new traditions' talk and their hosts' closing lines (FX24, Traditions slot)
   if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
+  if (vesselOn()) vesselSkyFrame();                      // the little Veyli ship off the bow (slot 'Vessel sky', VB2; EV_VESSEL_ON)
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -47317,6 +47318,318 @@ if (P926_APPT) {
   if (SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the feast's spots: planned again
 }
 // ---- end of slot: Appointments builder ----
+
+// ---- slot: Vessel sky (section 18; VB2, A Veyli vessel needs help: V-5 and V-3's spots, plans/veyli-vessel-spec.html). New code of this seat's goes here ----
+// Behind EV_VESSEL_ON (section 13, the events builder VB1's switch) with the events base on; off: nothing here is made,
+// pushed or drawn (the game before it). VB1's 'Vessel builder' slot owns the event itself (SHIP_EVENTS.veyliVessel, its
+// beats, rings and arrows); this slot owns the looks: the little Veyli ship off the bow, the small props, and the parts
+// chain's line of places on Deck 5. No R(); every colour through col(); made on demand, never at load.
+const vesselOn = () => typeof EV_VESSEL_ON !== 'undefined' && !!EV_VESSEL_ON && EVENTS_ON;
+// minutes since the warning day's midnight (Saturday 00:00 = 0, Sunday = 1440, ...) while the event is on, else null.
+// Pure of the clock and SHIP.event
+function vesselT(now = shipNow()) {
+  const e = typeof SHIP !== 'undefined' && SHIP.event; if (!vesselOn() || !e || e.id !== 'veyliVessel' || !Number.isFinite(e.startDay)) return null;
+  const t = now - (e.startDay - 1) * 1440; return t >= 0 ? t : null;
+}
+// the times (event minutes): in view Saturday 14:00; the engine lights Monday 17:40; it leaves Tuesday 09:00, gone 09:05
+const VSKY_FROM = 840, VSKY_LIGHT = 2 * 1440 + 1060, VSKY_GO = 3 * 1440 + 540, VSKY_TO = 3 * 1440 + 545;
+// how the ship looks at event minute t (fractional): k its fade, s its size, go how far it has moved ahead (tiles),
+// lights its three lights (low while it holds station), engine the stern glow, flash the three slow flashes
+function vesselLook(t) {
+  const c = x => Math.max(0, Math.min(1, x));
+  const inn = c((t - VSKY_FROM) / 15), out = c((t - VSKY_GO) / (VSKY_TO - VSKY_GO)), e = c((t - VSKY_LIGHT) / .6);
+  const p = t - VSKY_LIGHT - .5, flash = p >= 0 && p < 3 ? Math.pow(Math.sin(Math.PI * (p % 1)), 2) : 0;   // three slow pulses, a ship minute each
+  return { k: inn * (1 - out * out), s: (.55 + .45 * inn) * (1 - .6 * out), go: 9 * out * out, lights: e > 0 ? .35 + .65 * e : .35, engine: e, flash };
+}
+// for VB1's scene at the glass: how bright the engine is now (0 dark, 1 lit), and the flash on top (0..1)
+function vesselShipFlash(now = shipNow()) { const t = vesselT(now); if (t == null || t < VSKY_FROM || t >= VSKY_TO) return { engine: 0, flash: 0 }; const L = vesselLook(t); return { engine: L.engine, flash: L.flash }; }
+// the ship in the sky: one small quad of its own (1 draw call) round the ship's point on screen, drawn just inside the far
+// plane like section 4b's SKY and the comet (so only where nothing else drew: off the bow and through the windows). Its
+// point is off the current deck's bow where you can see it (vesselAnchor); it flies the Wren's way (+x).
+// Premultiplied blending: the hull covers the stars behind it, the lights and the engine glow add
+const VSKY = { m: null, v: new THREE.Vector3(), w: new THREE.Vector3(), s: new THREE.Vector2(), key: '', next: 0, to: null, at: null };
+const _vsX = new THREE.Vector3(1, 0, 0);
+function vesselSkyMake() {
+  const C = h => new THREE.Color(col(h));
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uPR: { value: 1 }, uP: { value: new THREE.Vector2() }, uA: { value: new THREE.Vector2(1, 0) }, uC: { value: new THREE.Vector2() }, uR: { value: new THREE.Vector2() },
+      uS: { value: 20 }, uK: { value: 0 }, uL: { value: .35 }, uE: { value: 0 }, uF: { value: 0 },
+      cH: { value: C('#7c879b') }, cR: { value: C('#b9c8e6') }, cB: { value: C('#3f6fb0') }, cW: { value: C('#f2f6ff') }, cP: { value: C('#5fd6c6') }, cS: { value: C('#e8b05a') }, cE: { value: C('#9db4ff') } },
+    vertexShader: 'uniform vec2 uC, uR; void main() { gl_Position = vec4(uC + position.xy * uR, .9999, 1.0); }',
+    fragmentShader: `uniform float uPR, uS, uK, uL, uE, uF; uniform vec2 uP, uA; uniform vec3 cH, cR, cB, cW, cP, cS, cE;
+      float dot2(vec2 q) { return dot(q, q); }
+      void main() {
+        vec2 p = gl_FragCoord.xy / uPR - uP;
+        float u = dot(p, uA) / uS, v = (uA.x * p.y - uA.y * p.x) / uS;                   // along (bow +1, stern -1) and across, in half-lengths
+        float uu = clamp(u, -1.0, 1.0), w = .36 * pow(max(0.0, 1.0 - uu * uu), .4) * (1.0 - .32 * uu);   // a blunt teardrop: full stern, fine bow
+        w = max(w, .34 * pow(clamp((-.4 - u) / .6, 0.0, 1.0), 1.4));                         // two swept fins at the stern
+        float d = (abs(v) - w) * uS, a = clamp(.5 - d, 0.0, 1.0) * step(-1.02, u) * step(u, 1.0);
+        float lit = .5 + .5 * clamp(v / max(w, .05), -1.0, 1.0), rim = smoothstep(-2.0, 0.0, d);
+        vec3 hull = mix(cH * (.45 + .75 * lit), cR, .5 * rim);
+        hull = mix(hull, cB, .85 * step(abs(u + .1), .05) * step(abs(v), w - .02));                   // a blue band round the waist
+        hull += cS * .9 * uL * step(abs(v - .05), .035) * step(.4, fract(u * 9.0)) * step(.25, u) * step(u, .7);   // a row of warm windows
+        float r = max(1.2, .06 * uS), lv = uL * (1.0 + 2.2 * uF);
+        float sw = .37;                                                                  // the hull's half-width at u = -.5, where the side lights sit
+        vec2 q = vec2(u, v) * uS;
+        float bow = exp(-dot2(q - vec2(.86, 0.0) * uS) / (r * r)), pt = exp(-dot2(q - vec2(-.5, sw) * uS) / (r * r)), sb = exp(-dot2(q - vec2(-.5, -sw) * uS) / (r * r));
+        float halo = (exp(-length(q - vec2(.86, 0.0) * uS) / (4.0 * r)) + exp(-length(q - vec2(-.5, sw) * uS) / (4.0 * r)) + exp(-length(q - vec2(-.5, -sw) * uS) / (4.0 * r))) * (.12 + .4 * uF);
+        vec2 e = q - vec2(-1.04, 0.0) * uS; float re = .17 * uS;
+        float eng = exp(-dot2(e) / (re * re)) + .35 * exp(-length(e) / (.7 * uS)) + .5 * exp(-e.y * e.y / (re * re * .5)) * exp(min(e.x, 0.0) / (.9 * uS)) * step(e.x, 0.0);
+        vec3 glow = (cW * bow + cP * pt + cS * sb) * lv + cW * halo * uL + cE * uE * eng * (1.0 + .4 * uF);
+        gl_FragColor = vec4((hull * a + glow) * uK, a * uK);
+      }`,
+    transparent: true, depthWrite: false, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneMinusSrcAlphaFactor });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+  m.frustumCulled = false; m.renderOrder = 1e6 + 2; m.raycast = () => {}; scene.add(m); return m;
+}
+function vesselSkyDrop() { const m = VSKY.m; if (!m) return; scene.remove(m); m.geometry.dispose(); m.material.dispose(); VSKY.m = null; }
+// where it hangs: out in the space you can see from where you stand, off the bow: the nearest tile off the deck's map,
+// in the deck's forward part (from its hull's bow on, else its forward 40%), that shows on the screen clear of the top
+// bar, two tiles further out (as the comet's head, section 18's cometHead, but bow-ward). Looked up twice a second; the
+// point eases to a new spot rather than jumping. None on the screen: it waits beyond the bow (off the screen)
+function vesselAnchor(out) {
+  const S = VSKY, t = simNow() / 1000, [pi, pj] = player.here(), key = deckDef.num + ':' + pi + ',' + pj;
+  if (t >= (S.next || 0) || S.key !== key) {
+    S.next = t + .5; const moved = S.key !== key; S.key = key; let best = null;
+    const fwd = deckDef.hull && deckDef.hull.bowFrom ? deckDef.hull.bowFrom : Math.floor(W * .6);
+    const off = (i, j) => { const r = MAP[j]; return !r || r[i] === undefined || r[i] === '.' || r[i] === ' '; };
+    const pz = player.obj.position.clone().project(camera).z, w = new THREE.Vector3(), o = new THREE.Vector3(), dir = camera.getWorldDirection(new THREE.Vector3());
+    const onDeck = v => { o.set(v.x, v.y, -1).unproject(camera); const k = -o.y / dir.y, x = o.x + k * dir.x, z = o.z + k * dir.z; return !off(Math.floor(x + OX), Math.floor(z + OZ)); };   // the floor would be drawn over that point
+    for (let r = 1; r <= 18; r++) for (let i = pi - r; i <= pi + r; i++) for (let j = pj - r; j <= pj + r; j++) {
+      if (Math.max(Math.abs(i - pi), Math.abs(j - pj)) !== r || i < fwd || !off(i, j)) continue;
+      const dd = Math.hypot(i - pi, j - pj), c = cellPos(i + (i - pi) / dd, j + (j - pj) / dd);   // a tile further out
+      for (const y of w.set(c.x, 0, c.z).project(camera).z > pz ? [3, 1.4] : [-1.5, .4]) {   // the far side: above the hull wall, the near side: out under the cutaway; else level with the windows
+        const v = w.set(c.x, y, c.z).project(camera), sc = dd - .5 * (i - pi) + 3 * Math.abs(v.x);   // nearer, further forward and nearer the middle of the screen is better
+        if (Math.abs(v.x) < .88 && v.y < .7 && v.y > -.85 && !onDeck(v)) { if (!best || sc < best[2]) best = [c.x, c.z, sc, y]; break; }   // the ship's own point on the screen, clear of the top bar and of the deck's floor
+      }
+    }
+    const c = best ? null : cellPos(W + 6, D / 2);
+    S.to = best ? [best[0], best[3], best[1]] : [c.x, -1.5, c.z]; if (!S.at || moved && !best) S.at = S.to.slice();
+  }
+  for (let k = 0; k < 3; k++) S.at[k] += (S.to[k] - S.at[k]) * .06;
+  return out.set(S.at[0], S.at[1], S.at[2]);
+}
+// what the sky shows now: the vessel event's ship (unless VB1's VESSEL.sky, the user's C2, says words only), else the
+// ending's (EN2's crossingBackShip(now) in the slot 'Ending builder': null, or { pose: 'bow' | 'alongside', lights 0..1,
+// flash }, typeof-guarded; its comings and goings eased over about 10 seconds here). -> vesselLook's shape, or null
+function vesselSkyNow() {
+  const t = vesselT(), sky = typeof VESSEL === 'undefined' || !VESSEL || VESSEL.sky !== false, S = VSKY, r = simNow() / 1000, dt = Math.min(.1, Math.max(0, r - (S.rt || r)));
+  S.rt = r;
+  if (sky && t != null && t >= VSKY_FROM && t < VSKY_TO) { S.hk = 0; return vesselLook(t); }
+  const x = typeof crossingBackShip === 'function' ? crossingBackShip(shipNow()) : null;
+  if (x) { const al = x.pose === 'alongside', n = shipNow(); S.hook = { k: 1, s: al ? 1.35 : 1, go: 0, lights: .35 + .65 * Math.max(0, Math.min(1, +x.lights || 0)), engine: 1, flash: x.flash ? Math.pow(Math.sin(Math.PI * (n % 1)), 2) : 0 }; }
+  S.hk = Math.max(0, Math.min(1, (S.hk || 0) + (x ? 1 : -1) * dt / 10));
+  return S.hook && S.hk > 0 ? { ...S.hook, k: S.hk } : null;
+}
+// every frame from eventsTick (looks only, nothing saved): the ship outside, and the chain's moving crates on Deck 5
+function vesselSkyFrame() {
+  if (typeof deckDef !== 'undefined' && deckDef && deckRoot) vesselChainFrame();
+  const L = typeof deckDef !== 'undefined' && !!deckDef && typeof renderer !== 'undefined' ? vesselSkyNow() : null;
+  if (!L) return vesselSkyDrop();
+  const S = VSKY; if (!S.m) S.m = vesselSkyMake();
+  const U = S.m.material.uniforms, sz = renderer.getSize(S.s), px = v => [(v.x + 1) / 2 * sz.x, (v.y + 1) / 2 * sz.y];
+  vesselAnchor(S.v); if (L.go) S.v.x += L.go;
+  const h = px(S.w.copy(S.v).project(camera)), b = px(S.w.copy(S.v).add(_vsX).project(camera)), ax = b[0] - h[0], ay = b[1] - h[1], tile = Math.hypot(ax, ay) || 1;
+  const hs = Math.max(7, .8 * tile * L.s), R = 3 * hs;                    // half its length on screen; the quad reaches past the engine's plume
+  U.uPR.value = renderer.getPixelRatio(); U.uP.value.set(h[0], h[1]); U.uA.value.set(ax / tile, ay / tile); U.uS.value = hs;
+  U.uC.value.set(h[0] / sz.x * 2 - 1, h[1] / sz.y * 2 - 1); U.uR.value.set(R / sz.x * 2, R / sz.y * 2);
+  U.uK.value = L.k; U.uL.value = L.lights; U.uE.value = L.engine; U.uF.value = L.flash;
+}
+// ---- Veyli vessel places (Deck 5): the parts chain's line (V-3's spots, for VB1's gathering). Forty spots, about 0.7 apart,
+// from just inside Main storage's door (26, 6) out along the main corridor, through the lift lobby and the Works bay (the
+// lift car splits the lobby), the other lobby door and the haulway, into the shuttle bay and down beside the Tern's ramp
+// to its foot (5-vchain-40 stands beside ROT_TERN_FOOT, off the ramp's tiles, so the ramp can still close). Each faces
+// the next, anim 'lift'; type 'event', event 'vessel-chain' (the planner's pool 5|@vessel-chain, in order; nobody uses
+// them day to day). Zeke calls the count from 5-vchain-call in the Works bay (its own event, so not in the pool);
+// DECKS[5].vesselChain = { spots, call, you, path } (you: the spot nearest Zeke, for your turn in the line). Pushed only
+// with the switch on (vesselLooksInit)
+const VCHAIN_PATH = [[26.5, 6.4], [26.5, 7.5], [21.6, 7.5], [20.5, 6.6], [19.5, 5.5], [16.5, 5.5], [16.4, 6.5], [14.5, 7.4], [10.5, 7.5], [9.3, 7.6], [8.6, 8.6], [7.2, 9.6], [6.4, 10.5], [6.3, 11.4]];
+function vesselChainSpots(n = 40) {
+  const P = VCHAIN_PATH, len = [0]; for (let k = 1; k < P.length; k++) len.push(len[k - 1] + Math.hypot(P[k][0] - P[k - 1][0], P[k][1] - P[k - 1][1]));
+  const at = d => { let k = 1; while (k < P.length - 1 && len[k] < d) k++; const f = (d - len[k - 1]) / ((len[k] - len[k - 1]) || 1); return [P[k - 1][0] + f * (P[k][0] - P[k - 1][0]), P[k - 1][1] + f * (P[k][1] - P[k - 1][1])]; };
+  const pts = Array.from({ length: n }, (_, k) => at(len[len.length - 1] * k / (n - 1)));
+  const deg = (dx, dz) => Math.round(Math.atan2(dx, dz) * 180 / Math.PI), r2 = v => Math.round(v * 100) / 100;
+  return pts.map(([x, z], k) => { const [nx, nz] = pts[Math.min(n - 1, k + 1)], [px, pz] = pts[Math.max(0, k - 1)], i = Math.floor(x), j = Math.floor(z);
+    return { id: '5-vchain-' + (k + 1), type: 'event', event: 'vessel-chain', at: [i, j], xy: [r2(x), r2(z)], face: k < n - 1 ? deg(nx - x, nz - z) : deg(x - px, z - pz), pose: 'stand', anim: 'lift', room: roomOfTile(5, i, j) }; });
+}
+function vesselPlaces() {
+  if (DECKS[5].vesselChain) return;
+  const spots = vesselChainSpots(), call = { id: '5-vchain-call', type: 'event', event: 'vessel-chain-call', at: [17, 4], xy: [17.5, 4.45], face: 0, pose: 'stand', anim: 'talk', room: 'w' };
+  const you = spots.reduce((b, p) => Math.hypot(p.xy[0] - call.xy[0], p.xy[1] - call.xy[1]) < Math.hypot(b.xy[0] - call.xy[0], b.xy[1] - call.xy[1]) ? p : b);
+  DECKS[5].places.push(...spots, call);
+  DECKS[5].vesselChain = { spots: spots.map(p => p.id), call: call.id, you: you.id, path: VCHAIN_PATH };
+  if (typeof SCHED_DATA !== 'undefined' && SCHED_DATA) { SCHED_DATA = null; SHIP_DAYS.clear(); EV_DAYS.clear(); }   // planned before the spots: planned again
+}
+// ---- the small props (section 4d's DECK_DRESS shape, all behind the switch by `on`; dressShow merges each by colour, no
+// shadows). Shown through SHIP_EVENTS.veyliVessel.dressing (vesselLooksInit adds them to every phase, each with its own
+// window [event day, from, to], so they never hang on VB1's phase times), and the two sketches as lasting traces.
+// The round one (the Veyli coolant pump's impeller): a shroud disc, a hub and seven swept blades, lying flat; the broken
+// one tarnished bronze with a blade snapped off and one cracked short, the new one bright steel
+function vesselImpeller(s, x, y, z, broken) {
+  const m = dressMat(broken ? '#8a7650' : '#c9d2da'), dk = dressMat(broken ? '#4a4036' : '#8f9ba6');
+  const disc = new THREE.Mesh(new THREE.CylinderGeometry(.11, .11, .014, 20), m); disc.position.set(x, y + .007, z); s.add(disc);
+  const hub = new THREE.Mesh(new THREE.CylinderGeometry(.034, .04, .05, 12), dk); hub.position.set(x, y + .03, z); s.add(hub);
+  for (let k = 0; k < 7; k++) {
+    if (broken && k === 2) continue;                       // snapped off
+    const a = k * Math.PI * 2 / 7, l = broken && k === 5 ? .045 : .075, b = new THREE.Mesh(new THREE.BoxGeometry(l, .032, .011), m);
+    b.position.set(x + Math.cos(a) * (.036 + l / 2), y + .03, z - Math.sin(a) * (.036 + l / 2)); b.rotation.y = a + .5; s.add(b);   // swept: turned off the radius
+  }
+}
+// Taavek's crate: a Veyli travelling chest in Taavek's grey-blue, a teal band and a blue cord handle (2-3 draw calls)
+function vesselCrate(s, x, y, z, turn = 0) {
+  const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = turn; s.add(g);
+  dressBox(g, .5, .3, .36, '#3a4a5a', 0, .15, 0); dressBox(g, .52, .06, .38, '#4f6276', 0, .33, 0);   // the chest, its lid a little over
+  dressBox(g, .52, .05, .38, '#5fd6c6', 0, .16, 0);                                                    // the band round it
+  const h = new THREE.Mesh(new THREE.TorusGeometry(.06, .012, 6, 12, Math.PI), dressMat('#3f6fb0')); h.position.set(0, .36, 0); g.add(h);   // the handle, its ends in the lid
+  return g;
+}
+// a pencil sketch on a card (a canvas, no R()): what: 'works' (the Works bay: benches, the tool wall, people) or 'you'
+// (you at the ramp's foot, the round one in your hands), signed with Taavek's mark
+function vesselSketchTex(what) {
+  return tex(240, 180, (c, w, h) => {
+    c.fillStyle = '#f2ecdf'; c.fillRect(0, 0, w, h); c.strokeStyle = '#3b3b3b'; c.lineWidth = 1.6; c.lineCap = 'round';
+    const L = (...p) => { c.beginPath(); c.moveTo(p[0], p[1]); for (let k = 2; k < p.length; k += 2) c.lineTo(p[k], p[k + 1]); c.stroke(); };
+    if (what === 'works') {
+      L(10, 120, 230, 120); L(30, 120, 30, 60, 110, 60, 110, 120); for (let k = 0; k < 5; k++) L(40 + k * 14, 70, 40 + k * 14, 95);   // the floor, the tool wall and its tools
+      L(130, 100, 215, 100); L(135, 100, 135, 120); L(210, 100, 210, 120);                                                          // a bench
+      for (const [x, y] of [[150, 82], [185, 78]]) { c.beginPath(); c.arc(x, y, 7, 0, Math.PI * 2); c.stroke(); L(x, y + 7, x, y + 18); }   // two heads over the bench
+    } else {
+      L(10, 150, 230, 150); L(60, 150, 140, 70); L(150, 150, 150, 70, 140, 70);                                                    // the floor, the ramp
+      c.beginPath(); c.arc(185, 88, 9, 0, Math.PI * 2); c.stroke(); L(185, 97, 185, 130, 175, 150); L(185, 130, 195, 150);          // you, standing
+      c.beginPath(); c.arc(185, 112, 11, 0, Math.PI * 2); c.stroke(); for (let k = 0; k < 7; k++) { const a = k * .9; L(185, 112, 185 + 10 * Math.cos(a), 112 + 10 * Math.sin(a)); }   // the round one, held
+    }
+    c.strokeStyle = '#3f6fb0'; c.lineWidth = 2; c.beginPath(); c.moveTo(w - 46, h - 18); c.bezierCurveTo(w - 38, h - 34, w - 26, h - 4, w - 14, h - 20); c.stroke();   // Taavek's mark
+  });
+}
+function vesselCard(s, y, z, what, wd = .34, ht = .26) {
+  dressBox(s, wd + .02, ht + .02, .012, '#d8d0bd', 0, y, z + .006);                                  // the card's backing (z to z + .012)
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(wd, ht), new THREE.MeshBasicMaterial({ map: vesselSketchTex(what), toneMapped: false })); p.position.set(0, y, z + .018); s.add(p);   // .006 in front of the backing
+  dressBox(s, .025, .025, .02, '#3f6fb0', 0, y + ht / 2 - .03, z + .022);                             // a blue pin, through the card
+}
+const vesselW = (k, alt) => (typeof evWord === 'function' && evWord('event.veyliVessel.' + k)) || alt;
+// where the bench props sit: the Works bay's second bench (w, 8.7, 2.45, w 1.6) and the machine shop's bench (f, 3.3, 3.5,
+// w 1.6), both tops at .93, on their free front-right corner (clear of the vice, the unit, the slate and the task lamp)
+const VPROPS = { works: ['w', 8.7 + .6, 2.45 + .15], shop: ['f', 3.3 + .6, 3.5 + .14], shopOld: ['f', 3.3 + .62, 3.5 - .12], crate: ['w', 7.55, 2.5, .3], top: .93 };
+const vesselPartMade = () => { const e = SHIP.event; return !!(e && e.id === 'veyliVessel' && e.mine && e.mine['vessel:part']); };
+function vesselDress() {
+  const on = () => vesselOn();
+  Object.assign(DECK_DRESS, {
+    vesselCrate: { deck: 5, on, what: 'Taavek\'s crate by the Works bay bench', make(g) {
+      const [room, a, b, turn] = VPROPS.crate, s = dressAt(g, room, 'floor', a, b); vesselCrate(s, 0, 0, 0, turn);
+      return { t: vesselW('tap.crate.t', 'Taavek\'s crate'), x: vesselW('tap.crate', 'Taavek\'s travelling crate: Veyli tools in cord loops, a sketchbook, and a tin of sweets that is emptier every time you look.'), floor: [room, a, b], y: .3, w: .55, h: .4, d: .45 };
+    } },
+    // the broken round one: on the Works bay bench from Sunday's meeting, then on the machine shop's bench while you make the new one
+    vesselPartOld: { deck: 5, on, what: 'the broken round one on a bench', make(g, o) {
+      const [room, a, b] = o.shop ? VPROPS.shopOld : VPROPS.works, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, true);
+      return { t: vesselW('tap.partOld.t', 'The round one'), x: vesselW('tap.partOld', 'The Veyli ship\'s coolant pump impeller. One blade is gone and another is cracked short. Taavek calls it the round one, and pats it like a sick animal.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+    } },
+    // the new round one, on the machine shop's bench once it's made (VB1's SHIP.event.mine['vessel:part']), till Taavek takes it at 15:00
+    vesselPartNew: { deck: 5, on: () => vesselOn() && vesselPartMade(), what: 'the new round one, made in the machine shop', make(g) {
+      const [room, a, b] = VPROPS.shop, s = dressAt(g, room, 'floor', a, b); vesselImpeller(s, 0, VPROPS.top, 0, false);
+      return { t: vesselW('tap.partNew.t', 'The new round one'), x: vesselW('tap.partNew', 'The new impeller, turned on the Wren\'s lathe and balanced by hand. It spins true. Taavek has already sketched it twice.'), floor: [room, a, b], y: VPROPS.top + .04, w: .3, h: .12, d: .3 };
+    } },
+    // Taavek's sketch of the Works bay, pinned to the top right corner of the tool wall's pegboard (the board's face at .05),
+    // from Monday 15:20 (Taavek's goodbye), for good: a trace from the all-clear (settleTraces)
+    vesselSketchWorks: { deck: 5, on, what: 'Taavek\'s sketch of the Works bay, pinned to the tool wall', make(g) {
+      const s = dressAt(g, 'w', 'n', 9.3 + .55); vesselCard(s, 1.74, .057, 'works');   // .007 off the pegboard
+      return { t: vesselW('tap.sketchWorks.t', 'Taavek\'s sketch'), x: vesselW('tap.sketchWorks', 'Taavek\'s pencil sketch of the Works bay: the tool wall, a bench, two heads bent over the round one. Signed with a blue loop. Calder pinned it up herself.'), wall: ['w', 'n', 9.3 + .55], y: 1.74, w: .4, h: .32 };
+    } },
+    // Calder's parts chain sheet (VB1's ask): pinned to the bottom corner of the Works job board, where the storm's sign-up
+    // sheet goes (signupWorks; never out at once), Saturday 09:30 to Sunday 14:00; o.lines the names signed so far. Its item
+    // carries the tag { vesselSheet: true } for VB1's tap (signing; PLAYER_TAPS); its text by SHIP.event.mine['vessel:signed']
+    vesselSheet: { deck: 5, on, what: 'the parts chain sheet on the Works job board', make(g, o) {
+      const signed = !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed']);
+      dressSheet(dressAt(g, 'w', 'n', 6.65), { head: 'PARTS CHAIN', title: vesselW('sheet.title', 'Sunday 13:00\nMain storage to the Tern'), lines: o.lines || [] }, .088, 1.12);   // in front of the board's screen (.075)
+      return { t: vesselW('tap.sheet.t', 'Parts chain sheet'), x: signed ? vesselW('tap.sheet', 'The parts chain sheet. Your name is on it, in your own handwriting, between two of Zeke\'s friends.') : vesselW('tap.sheet.before', 'Calder\'s sheet for the parts chain: Sunday at 13:00, Main storage to the Tern\'s ramp. A line of names, and room for more.'),
+        wall: ['w', 'n', 6.65], y: 1.12, tag: { vesselSheet: true } };
+    } },
+    // the chain's two stacks: Main storage's, by its door, going down; the bay's, beside the ramp's foot, going up (o.n)
+    vesselChainFrom: { deck: 5, on, what: 'crates of parts for the Veyli ship, by Main storage\'s door', make(g, o) {
+      const r = ROOM_BOX.r, a = 25.6 - r.i0, b = 5.45 - r.j0, s = dressAt(g, 'r', 'floor', a, b); vesselStack(s, o.n == null ? VCHAIN.n : o.n);
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.stackFrom', 'Parts, seals and a spare pump body for the Veyli ship, packed by Zeke and labelled in two languages, one of them by Taavek.'), floor: ['r', a, b], y: .5, w: .9, h: 1, d: .7 };
+    } },
+    vesselChainTo: { deck: 5, on, what: 'the crates waiting by the Tern\'s ramp', make(g, o) {
+      const r = ROOM_BOX.S, a = 7.3 - r.i0, b = 11.55 - r.j0, s = dressAt(g, 'S', 'floor', a, b); vesselStack(s, o.n || 0);
+      return { t: vesselW('tap.stack.t', 'Crates for the Veyli ship'), x: vesselW('tap.stackTo', 'The crates from the chain, waiting at the foot of the Tern\'s ramp. Zeke has counted them twice.'), floor: ['S', a, b], y: .5, w: .9, h: 1, d: .7 };
+    } },
+    // the sketch Taavek gives you, leaning at the back of your keepsake shelf (the bunk's, or 4-23's once SHIP.works.home is
+    // '4-23'), between the Line certificate and the framed menu: a trace { id: 'vesselSketchShelf', day } (vesselShelve)
+    vesselSketchShelf: { deck: 4, on, what: 'Taavek\'s sketch on your shelf', make(g) {
+      const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .5 : 2.5;
+      const s = dressAt(g, room, 'n', along - .235), c = new THREE.Group(); c.position.set(0, 2.17, .03); c.rotation.x = -.13; s.add(c);   // its foot on the shelf (top 2.17), leaning back
+      vesselCard(c, .1, 0, 'you', .16, .19);
+      return { t: vesselW('tap.sketchShelf.t', 'Taavek\'s sketch'), x: vesselW('tap.sketchShelf', 'Taavek\'s sketch of you at the foot of the Tern\'s ramp. Underneath, in careful letters: For the one who meets.'), wall: [room, 'n', along - .235], y: 2.27, w: .2, h: .24 };
+    } },
+  });
+}
+// the names on the sheet: Calder's and Zeke's first, then the Works crew by roster order, and yours once you've signed
+function vesselSheetLines(c) {
+  const you = SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed'], n = dressNames('works', 9).filter(x => x !== 'Calder' && x !== 'Torres');
+  return ['I. Calder', 'Z. Torres'].concat(n.slice(0, you ? 4 : 5)).concat(you ? [(c && c.you) || 'Cadet'] : []).slice(0, 8);
+}
+// put the sketch on your shelf (VB1's ring "Put the sketch on your shelf" calls it): a lasting trace with today's day
+function vesselShelve(day = SHIP.time.day) { if (vesselOn()) traceAdd('vesselSketchShelf', day); }
+// the windows (event day, from, to) each prop shows in: Sunday's meeting to Monday's goodbye; the sketch from 15:20 on
+const VDRESS = [
+  { id: 'vesselCrate', at: [1, 590, 1440] }, { id: 'vesselCrate', at: [2, 0, 900] },
+  { id: 'vesselPartOld', at: [1, 600, 1440] }, { id: 'vesselPartOld', at: [2, 0, 570] }, { id: 'vesselPartOld', shop: 1, at: [2, 570, 900] },
+  { id: 'vesselPartNew', at: [2, 570, 900] },
+  { id: 'vesselSketchWorks', at: [2, 920, 1440] }, { id: 'vesselSketchWorks', at: [3, 0, 1440] },
+  { id: 'vesselSheet', at: [0, 570, 1440], lines: vesselSheetLines }, { id: 'vesselSheet', at: [1, 0, 840], lines: vesselSheetLines },
+  { id: 'vesselChainFrom', at: [1, 720, 830], get n() { return vesselChainCrate().left; } },   // the counts read as dressShow is handed the list (a minute's)
+  { id: 'vesselChainTo', at: [1, 781, 1440], get n() { return vesselChainCrate().n; } }, { id: 'vesselChainTo', at: [2, 0, 900], get n() { return VCHAIN.n; } }];
+// the parts chain's crates (V-3's looks; VB1's chain owns who stands where and your turn): Sunday 13:01, twenty crates set
+// off from Main storage's door, one every 2.4 minutes, hand to hand down the forty spots (a quarter of a ship minute a
+// hand, a little lift between hands), the last into the bay by about 13:56. vesselChainCrate(now) -> { n: crates in the
+// bay so far, left: still in storage, moving: [index along the spots (0 to 39, fractional)] } pure of the clock (your
+// ring on a crate can fire as one reaches your spot). Drawn on Deck 5 as one instanced mesh (1 draw call), and the two
+// stacks (storage end, bay end) as dressing with their counts
+const VCHAIN = { n: 20, from: 781, gap: 2.4, hand: .25, mesh: null, root: null };
+function vesselChainCrate(now = shipNow()) {
+  const t = vesselT(now), C = VCHAIN, out = { n: 0, left: C.n, moving: [] }; if (t == null || t < 1440 + C.from) return t != null && t >= 2 * 1440 ? { n: C.n, left: 0, moving: [] } : out;
+  const m = t - 1440;
+  for (let c = 0; c < C.n; c++) { const f = (m - C.from - c * C.gap) / C.hand; if (f < 0) continue; out.left--; if (f >= 39) out.n++; else out.moving.push(f); }
+  return out;
+}
+function vesselChainFrame() {
+  const C = VCHAIN, on = deckDef.num === 5 && DECKS[5].vesselChain, cr = on ? vesselChainCrate() : null, t = simNow() / 1000;
+  // the hands: the spots someone stands at (the crew, or you), in line order, looked up twice a second; the crates pass
+  // only between them, so a short line still passes hand to hand. Fewer than two: no crates in the air
+  if (cr && cr.moving.length && (t >= (C.next || 0) || C.root !== deckRoot)) {
+    C.next = t + .5; const who = (typeof DECK_CREW !== 'undefined' ? DECK_CREW.map(a => [a.x, a.z]) : []).concat([[player.obj.position.x, player.obj.position.z]]);
+    C.occ = DECKS[5].vesselChain.spots.map(id => placeSpot(id)).filter(sp => sp && who.some(([x, z]) => Math.hypot(x - sp.x, z - sp.z) < .45)).map(sp => [sp.x, sp.z]);
+  }
+  if (!cr || !cr.moving.length || !C.occ || C.occ.length < 2) { if (C.mesh) { C.mesh.parent && C.mesh.parent.remove(C.mesh); C.mesh.geometry.dispose(); C.mesh = null; } return; }
+  if (!C.mesh || C.root !== deckRoot) {
+    if (C.mesh) { C.mesh.parent && C.mesh.parent.remove(C.mesh); C.mesh.geometry.dispose(); }
+    C.mesh = new THREE.InstancedMesh(new THREE.BoxGeometry(.44, .3, .34), dressMat('#6f88a3'), 6); C.mesh.frustumCulled = false; C.mesh.raycast = () => {};
+    C.root = deckRoot; deckRoot.add(C.mesh);
+  }
+  const M = C.mesh, o = C.o || (C.o = new THREE.Object3D()), P = C.occ, n = P.length - 1;
+  cr.moving.slice(0, 6).forEach((f, k) => {
+    const g = f * n / 39, i = Math.min(n - 1, Math.floor(g)), u = g - i, e = u < .5 ? 0 : (u - .5) * 2, sm = e * e * (3 - 2 * e);   // held half the time, then swung to the next pair of hands
+    o.position.set(P[i][0] + sm * (P[i + 1][0] - P[i][0]), 1.0 + .1 * Math.sin(Math.PI * sm), P[i][1] + sm * (P[i + 1][1] - P[i][1]));
+    o.rotation.y = Math.atan2(P[i + 1][0] - P[i][0], P[i + 1][1] - P[i][1]); o.updateMatrix(); M.setMatrixAt(k, o.matrix);
+  });
+  M.count = Math.min(6, cr.moving.length); M.instanceMatrix.needsUpdate = true;
+}
+// a stack of n crates (up to 20: two by two, five high), its band in Works orange; 2 draw calls
+function vesselStack(s, n) {
+  for (let k = 0; k < Math.min(20, n); k++) { const x = (k % 2) * .48 - .24, z = (Math.floor(k / 2) % 2) * .38 - .19, y = Math.floor(k / 4) * .31;
+    dressBox(s, .44, .3, .34, '#6f88a3', x, y + .15, z); dressBox(s, .45, .06, .35, '#e07a3c', x, y + .2, z); }
+}
+// at load with the switch on, after VB1's block (this slot comes later in the file): the places, the props, and the
+// props' windows in every phase of the event; the Works bay sketch stays for good from the all-clear
+function vesselLooksInit() {
+  if (!vesselOn()) return;
+  vesselPlaces(); vesselDress();
+  const def = SHIP_EVENTS.veyliVessel; if (!def) return;
+  def.dressing = def.dressing || {};
+  for (const ph of def.phases || []) { const l = def.dressing[ph.id] || (def.dressing[ph.id] = []); for (const x of VDRESS) if (!l.some(y => y.id === x.id && y.at && y.at.join() === x.at.join())) l.push(x); }
+  def.settleTraces = [...new Set((def.settleTraces || []).concat('vesselSketchWorks'))];
+}
+vesselLooksInit();
+// ---- end of slot: Vessel sky ----
 
 // =====================================================================
 // 18f SHORT FRIDAYS AND THE CAPTAIN'S ADDRESS (the Fridays builder FR1; plans/fridays-plan.md rev 4, plans/fridays-build-brief.md)
@@ -61161,6 +61474,24 @@ if (typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON) {
     r.head.rotation.x = L(r.head.rotation.x, -.42, s); r.head.rotation.y = L(r.head.rotation.y, -.12, s); r.torso.rotation.x = L(r.torso.rotation.x, -.06, s);
   } };
   for (const k of ['look', 'point']) { ACT_SEATED.add(k); CROWD_ANIMS.add(k); }
+}
+// ---- A Veyli vessel needs help (VB2 for lead 39, plans/veyli-vessel-spec.html; the ending reuses the wave): 'bow' (Taavek's
+// hello at the ramp: a slow bow from the hips, hands together in front, held, then up again, every few seconds) and 'wave'
+// (the right arm up, the hand swinging side to side; seated too). Looks only: no props, no R(), no draw calls. Behind
+// EV_VESSEL_ON or the ending's EV_ENDING_ON (both declared in section 13, before this)
+if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON || typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON) {
+  ACTS.bow = { f(r, s, t, b, ph) {
+    const u = (t * .22 + ph) % 1, d = u < .25 ? ss(u / .25) : u < .6 ? 1 : u < .85 ? 1 - ss((u - .6) / .25) : 0;   // down, held, up, a pause
+    r.torso.rotation.x = L(r.torso.rotation.x, .55 * d, s); r.head.rotation.x = L(r.head.rotation.x, .25 * d, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);
+    for (const a of r.arms) armTo(a, s, -.45 - .25 * d, -.95, -.18, .1);   // the hands meet in front of the waist
+  } };
+  ACTS.wave = { f(r, s, t, b, ph) {
+    const R_ = r.arms.find(a => a.side < 0), sw = Math.sin(t * 7 + ph * 6.283);
+    R_.sh.rotation.x = L(R_.sh.rotation.x, -2.55, s); R_.el.rotation.x = L(R_.el.rotation.x, -.5, s);
+    R_.sh.rotation.z = L(R_.sh.rotation.z, R_.side * (.3 + .28 * sw), s); R_.hand.rotation.x = L(R_.hand.rotation.x, 0, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s); r.head.rotation.y = L(r.head.rotation.y, .08 * sw, s);
+  } };
+  ACT_SEATED.add('wave'); for (const k of ['bow', 'wave']) CROWD_ANIMS.add(k);
 }
 // ---- end of slot: Performance engineer ----
 
