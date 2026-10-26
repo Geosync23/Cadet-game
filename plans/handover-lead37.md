@@ -15,3 +15,4 @@ Read CLAUDE.md, this note, plans/handover-lead36.md (still valid for seats, gotc
 - Plan page for traditions + swap: https://claude.ai/artifact/DfXQg3Ff4eX2hfoiTA86Jh (answers in its db: ArtifactData get answers/user).
 - USER 23:22 UTC: 0.93.0 = base (BM18 ff integration df8d58b9); HOLD 0.93.1 round until the user's further changes arrive; traditions survey answers later.
 - Before next round: hire fresh CR3 (plans/handover-cr3.md on claude/checks-cr3); fresh reviewer for big jobs (plans/handover-rv17.md).
+- USER answers in: CS1 round-2 traditions pitch; FX22b event swap build (claude/event-swap). Next version (0.93.2) batches swap + traditions (scones, take-turns, picks from round 2, new hand's tea removed) + the user's other changes.
