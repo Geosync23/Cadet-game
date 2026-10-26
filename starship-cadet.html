@@ -11743,6 +11743,7 @@ function devDay(d) {
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
+  try { if (typeof endItems === 'function') out.push(...endItems(d)); } catch (e) { /* not yet */ }   // 29a: the ending's week (EN1), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -12676,6 +12677,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
   try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
+  try { if (typeof endRecord === 'function') B.push(...endRecord()); } catch (e) { /* not yet */ }   // 29a: the transfer offer and your answer (EN1), with EV_ENDING_ON
   if (P926_APPT) B.push(...apptRecord());                 // 0.92.6 item 9: appointments kept (FX22)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
@@ -65739,6 +65741,111 @@ function endTick(now, skip) {                            // once a ship minute (
   if (now >= settleAt && endFirm()) endSettle(now);      // the address: settled (E-1 may settle it a moment sooner, at her words)
 }
 if (EV_ENDING_ON) WORK_TICKS.push((now, skip) => endTick(now, skip));   // once a ship minute, and each hour of a skip (section 24's clock)
+// E-2 turn 3 (EN1): the rest of the week while the choice is open. The friends come to you on Friday, one at a time
+// (section 20's socialSeekAsk), and their chat card has "About the transfer": each their own take (Pell, Tomas, Kovac,
+// Basil, Halloran; up to three other friends, by how close you are, the generic ones). Zeke finds you after Friday's
+// dinner (arrow level 1 "Talk to Zeke"), walks you to the Works tea corner and talks (till Saturday 21:00 if you're
+// out of reach). A call home from the booths while it's open plays your family's scene, once (a level 2 arrow on Friday
+// after the shift, once). Schedule and Tracked rows (section 19's devDay hook: endItems), the Record's lines (endRecord).
+Object.assign(END_T, { friendsFrom: 480, friendGap: 80, friendStay: 150, zekeAt: 1185, zekeTo: 1260, zekeBy: 1260, callFrom: 1035, callTo: 1140 });
+const END_FRIENDS = ['pell', 'tomas', 'kovac-zainab', 'bramwell-basil', 'halloran-emeka'];   // each their own take; Halloran overheard it, Basil's your mentee: always
+const END_TAKES = {                                      // stand-ins till content/ending/friends.lines: [their side, what they say]
+  pell: ['stay', ['Go? You can\'t go. Who\'ll laugh at my jokes when Torres won\'t?', 'Fine. Do what you want. I\'ll be sulking either way.']],
+  tomas: ['go', ['Headquarters. That\'s the real thing. You should go.', 'I\'d miss you. Obviously. But you should go.']],
+  'kovac-zainab': ['none', ['I\'m not telling you what to do. You\'d only do the other thing to spite me.', 'Whatever you pick, pick it properly.']],
+  'bramwell-basil': ['stay', ['You can\'t go. You\'re my mentor. Is that allowed? Can they do that?', 'Sorry. I mean: congratulations. But you can\'t go.']],
+  'halloran-emeka': ['none', ['Don\'t look at me like that. It\'s a ship. Nothing\'s private.', 'For what it\'s worth, the mess would be quieter. Not better. Quieter.']],
+};
+const END_TAKE_TIER = { 3: ['It\'s all over the mess. Headquarters! Whatever you choose, I\'m glad I knew you here.'], 4: ['I heard. I don\'t know what I want you to say, so I won\'t say anything sensible. Just: you choose. Not them.'] };
+function endFriendsOf() {                                // who comes to you on Friday, in order: the named, then up to three close friends
+  const named = END_FRIENDS.filter(id => typeof SOC !== 'undefined' && SOC.idx && SOC.idx.has(id) && (typeof evPerson !== 'function' || evPerson(id)));
+  let more = []; try { more = Object.keys(SHIP.rel || {}).filter(id => !named.includes(id) && !['marrow', 'calder', 'vance', 'torres-zeke'].includes(id) && relTier(id) >= 3 && SOC.idx.has(id))
+    .sort((a, b) => (SHIP.rel[b].pts || 0) - (SHIP.rel[a].pts || 0) || (a < b ? -1 : 1)).slice(0, 3); } catch (e) { more = []; }
+  return named.concat(more);
+}
+function endFriendButton(p) {
+  const E = SHIP.end; if (!p || !E || !E.offer || !E.offer.met || E.f['fr:' + p.id]) return null;
+  const named = END_FRIENDS.includes(p.id), tier = typeof relTier === 'function' ? relTier(p.id) : 0;
+  if (!named && tier < 3) return null;
+  return { id: 'end:friend', label: endText('end.btn.friend', 'About the transfer') };
+}
+function endFriendDo(p, what) {
+  const E = SHIP.end; if (what !== 'friend' || !p || !E || E.f['fr:' + p.id]) return;
+  E.f['fr:' + p.id] = endDayOf(shipNow());
+  const t = END_TAKES[p.id], tier = typeof relTier === 'function' ? relTier(p.id) : 3;
+  const lines = (t ? t[1] : END_TAKE_TIER[tier >= 4 ? 4 : 3]).map((x, k) => endText('end.friend.' + p.id, x, null, k));
+  if (typeof chatSay === 'function') try { chatSay(lines[0]); } catch (e) { /* no card */ }
+  if (lines[1] && typeof simTimeout === 'function') simTimeout(() => { try { if (typeof CHAT !== 'undefined' && CHAT && CHAT.p === p) chatSay(lines[1]); } catch (e) { /* closed */ } }, 4200);
+  if (typeof simNote === 'function') simNote('endingFriend', { id: p.id, side: t ? t[0] : 'none' });
+}
+// Zeke's Friday talk and the call home
+function endZekeScript() {
+  MEETING_SCRIPTS['moment:ending.zeke'] = { title: endText('end.zeke.title', 'The tea corner'), from: 'Zeke Torres', noCount: true,
+    lines: [
+      { who: 'torres-zeke', text: endText('end.zeke.1', 'I\'m not going to tell you what to do. Calder told me not to, and for once I\'m listening.'), pose: 'gesture' },
+      { who: 'torres-zeke', text: endText('end.zeke.2', 'First evening you came aboard, you stood at the top of that ramp like it might bite.'), to: 'you' },
+      { who: 'torres-zeke', text: endText('end.zeke.3', 'Look at you now. Half the ship wants to keep you and the other half wants to brag about you.') },
+      { choice: [
+        { text: endText('end.zeke.r1', 'What would you do?'), rel: { 'torres-zeke': 1 }, reply: { who: 'torres-zeke', text: endText('end.zeke.r1.a', 'Me? I stayed. But I\'m not you. I like the noise down here.') } },
+        { text: endText('end.zeke.r2', 'I\'m scared of picking wrong.'), rel: { 'torres-zeke': 2 }, reply: { who: 'torres-zeke', text: endText('end.zeke.r2.a', 'There\'s no wrong one. There\'s just the one you pick, and then you make it right.'), pose: 'nod' } },
+      ] },
+      { who: 'torres-zeke', text: endText('end.zeke.4', 'Drink your tea. It\'s gone cold, but drink it.'), pose: 'nod' },
+    ],
+    onEnd: () => { endState().f.zeke = Math.floor(shipNow()); if (typeof crewSceneEnd === 'function') crewSceneEnd('torres-zeke'); if (typeof guideDrop === 'function') guideDrop('end:zeke'); } };
+}
+function endCallScript() {
+  MEETING_SCRIPTS['moment:ending.call'] = { title: endText('end.call.title', 'A call home'), from: 'Home', noCount: true,
+    lines: [
+      { who: 'Home', text: endText('end.call.1', 'Headquarters? Our headquarters? The Concord one?') },
+      { who: 'Home', text: endText('end.call.2', 'We\'re so proud of you. No, we are. Let us be.') },
+      { who: 'Home', text: endText('end.call.3', 'We\'re not going to tell you what to do. You sound happy up there. That\'s all we hear.') },
+      { who: 'Home', text: endText('end.call.4', 'Call us when you\'ve decided. Either way. And eat something.') },
+    ],
+    onEnd: () => { endState().f.call = Math.floor(shipNow()); if (typeof guideDrop === 'function') guideDrop('end:call'); } };
+}
+if (EV_ENDING_ON) { endZekeScript(); endCallScript(); }
+function endWeekTick(now, skip) {                        // endTick's part for the week (after the offer, while it's open)
+  const W = endWeek(), E = SHIP.end; if (!W || !E || !endOpen()) return;
+  const d = endDayOf(now), m = endMin(now), F = W.offer * 1440, live = !skip && now >= shipNow() - 1;   // F: the start of Friday (offer + 1)
+  if (!E.f.asks && d >= W.offer + 1 && typeof socialSeekAsk === 'function') {   // Friday: the friends, one at a time
+    E.f.asks = 1; endFriendsOf().forEach((id, k) => { const from = F + END_T.friendsFrom + k * END_T.friendGap; socialSeekAsk(id, { from, until: from + END_T.friendStay, why: 'ending' }); });
+  }
+  if (!E.f.zeke && now >= F + END_T.zekeAt && now < F + 1440 + END_T.zekeBy) {   // Zeke after Friday's dinner (till Saturday 21:00)
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:zeke', level: 1, owner: '29a', from: F + END_T.zekeAt, until: F + 1440 + END_T.zekeBy, done: () => !SHIP.end || !!SHIP.end.f.zeke,
+      goal: () => { const g = endWhere('torres-zeke', shipNow()); return g && { ...g, label: endText('end.ring.zeke', 'Talk to Zeke') }; } });
+    const free = live && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && !(typeof sleeping !== 'undefined' && sleeping);
+    if (free && typeof crewScene === 'function') crewScene('torres-zeke', E.f.zekeLed ? { mode: 'lead', to: '5-tea-3', until: now + 20 } : { mode: 'follow', until: now + 30 });
+    if (free && !E.f.zekeLed && endNear('torres-zeke', 2.4)) { E.f.zekeLed = now; if (typeof worksSayAll === 'function') worksSayAll('torres-zeke', [endText('end.zeke.found', 'There you are. Walk with me. Tea\'s on, and it\'s the good tin.')]); }
+    let atTea = false; try { atTea = deckDef.num === 5 && roomAt(...player.here()) === 't'; } catch (e) { atTea = false; }
+    if (free && E.f.zekeLed && endNear('torres-zeke', 3) && (atTea || now - E.f.zekeLed >= 20)) dialogueShow('moment:ending.zeke', { id: 'ending.zeke', who: ['torres-zeke'], at: now, where: { any: true } });
+  }
+  if (!E.f.call && now >= F + END_T.callFrom && now < F + END_T.callTo && typeof guideAsk === 'function')   // the booths, once, after Friday's shift
+    guideAsk({ id: 'end:call', level: 2, once: 1, owner: '29a', from: F + END_T.callFrom, until: F + END_T.callTo, done: () => !SHIP.end || !!SHIP.end.f.call || !endOpen(),
+      goal: () => ({ deck: 3, place: '3-callhome-1', room: 'B', label: endText('end.ring.call', 'Call home about the transfer') }) });
+  if (!E.f.call && live && typeof ACT !== 'undefined' && ACT && ACT.kind === 'call' && ACT.phase !== 'walk' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE))
+    dialogueShow('moment:ending.call', { id: 'ending.call', who: [], at: now, where: { any: true } });
+}
+if (EV_ENDING_ON) WORK_TICKS.push((now, skip) => endWeekTick(now, skip));
+// the Schedule and Tracked (section 19's devDay asks endItems(d)): what's coming that isn't booked as an appointment
+function endItems(d) {
+  if (!EV_ENDING_ON || !SHIP.end) return [];
+  const W = endWeek(), E = SHIP.end, out = []; if (!W || !E.offer) return out;
+  if (E.offer.met && !E.settled && !endFirm() && d >= W.offer && d <= W.due)
+    out.push({ from: d === W.due ? END_T.lastCall : d === W.offer ? END_T.offerAt + END_T.sceneLen : 480, to: END_T.dueAt, title: endText('end.row.answer', 'Your answer to the Captain: by Saturday 20:00'), where: endText('end.row.answer.where', 'the Captain, wherever she is'), kind: 'beat' });
+  if (E.offer.met && !E.settled && !endFirm() && d === W.settle)
+    out.push({ from: 480, to: END_T.addressAt, title: endText('end.row.address', 'Your answer to the Captain: before her address'), where: endText('end.row.answer.where', 'the Captain, wherever she is'), kind: 'beat' });
+  if (E.offer.met && !E.f.zeke && endOpen() && d === W.offer + 1)
+    out.push({ from: END_T.zekeAt, to: END_T.zekeTo, title: endText('end.row.zeke', 'Zeke wants a word'), where: endText('end.row.zeke.where', 'he\'ll find you'), kind: 'beat' });
+  return out;
+}
+// the Record (section 19's Record app asks endRecord()): the offer, and what you chose
+function endRecord() {
+  const E = EV_ENDING_ON && SHIP.end; if (!E || !E.offer || !E.offer.met) return [];
+  const rows = [{ text: endText('end.rec.offer', 'Concord headquarters offered you a transfer: ' + endPost() + '.', { post: endPost() }), sub: 'Day ' + E.offer.day }];
+  if (E.settled) rows.push({ text: E.settled.choice === 'stay' ? endText('end.rec.stay', 'You stayed aboard the Wren.') : endText('end.rec.go', 'You took the transfer.'), sub: 'Day ' + E.settled.day, mark: 'hot' });
+  else rows.push({ text: endText('end.rec.open', 'Your answer to the Captain: ' + ({ stay: 'staying', go: 'going', unsure: 'not sure yet' }[endSaid()] || 'not yet given') + '.'), sub: 'until her address at the line' });
+  return [{ kind: 'text', text: endText('end.rec.head', 'The transfer'), mark: 'head' }, { kind: 'list', rows }];
+}
 // ---- end of slot: Ending offer ----
 
 // ---------------------------------------------------------------------

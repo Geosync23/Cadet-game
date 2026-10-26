@@ -10,9 +10,14 @@
 #            mind; "Tell the Captain" at level 6, level 1 on Saturday from 18:00; her search at 19:30 with nothing said;
 #            settled at her address on Sunday (end.stay / end.go); Not sure at the address: she asks, Stay or Go only;
 #            nothing open after; a save and a reload keep it all
+#   reload:  a real save between the offer and the answer (served from a web address, as saves_check does), reloaded:
+#            SHIP.end the same, the offer's scene and "About the transfer" still there
+#   week:    Friday: the friends come to you one at a time (seek asks), each with "About the transfer" and their own take;
+#            Zeke after dinner (arrow level 1 "Talk to Zeke", he finds you, the scene); a call home plays your family's
+#            scene once; the Schedule's rows (your answer by Saturday 20:00, Zeke); the Record's lines
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 ending_check.py BUILD.html [part ...]   Good is ENDING CHECK OK (exit 0); a failure exits 1.
-import sys, pathlib
+import sys, pathlib, json
 exec(open(__file__.replace('ending_check.py', 'cadet_test.py')).read().split("a, shots = run(")[0])
 from playwright.sync_api import sync_playwright
 
@@ -132,6 +137,61 @@ def part_answers(g):
       const back = endClean(JSON.parse(JSON.stringify(s.ship.end))); return { same: JSON.stringify(back) === JSON.stringify(keep), saved: s.ship.end }; })()""")
     check(r['same'], f"answers: SHIP.end saved and read back the same ({r})")
 
+def part_week(g):
+    print('(week) the friends, Zeke, the call home, the rows, the Record:')
+    made(g)
+    r = g.ev("""(() => { socInit(); setShipNow(32 * 1440 + 470); __tick(); const asks = (SHIP.social.seekAsks || []).filter(a => a.why === 'ending').map(a => a.id + ' ' + hhmm(a.from % 1440));
+      const pell = SOC.crew[SOC.idx.get('pell')], btn = endFriendButton(pell); chatOpen(pell); chatDo('end:friend'); const said = CHAT && CHAT.line && CHAT.line.text; const after = endFriendButton(pell); chatClose();
+      const cap = endChatButton(__marrow()), str = SOC.crew.find(p => !END_FRIENDS.includes(p.id) && p.id !== 'marrow' && relTier(p.id) < 3), none = endChatButton(str);
+      return { asks, btn, said, after, cap, none, rows: devDay(33).filter(x => x.kind === 'beat').map(x => hhmm(x.from) + ' ' + x.title) }; })()""")
+    print('   ', r)
+    check(len(r['asks']) >= 5 and r['asks'][0].startswith('pell 08:00') and len(set(a.split()[1] for a in r['asks'])) == len(r['asks']), f"week: Friday, the friends come one at a time ({r['asks']})")
+    check(r['btn'] and r['btn']['label'] == 'About the transfer' and r['said'] and "can't go" in r['said'] and r['after'] is None, f"week: Pell's \"About the transfer\", her own take, once ({r})")
+    check(r['cap'] and r['none'] is None, f"week: the Captain's button stays; not on someone you barely know ({r['cap']}, {r['none']})")
+    check(any('Zeke' in x for x in r['rows']) and any('by Saturday 20:00' in x for x in r['rows']), f"week: Friday's rows: your answer, Zeke ({r['rows']})")
+    r = g.ev("""(() => { setShipNow(32 * 1440 + 1186); const p = schedPeople().find(x => x.id === 'torres-zeke'), w = whereIs(p, shipNow()); if (w && w.deck && deckDef.num !== w.deck) goToDeck(w.deck); deckCrewFill();
+      __tick(); const arrow = __guide('end:zeke'); const a = DECK_CREW.find(x => x.p && x.p.id === 'torres-zeke'); if (a) player.obj.position.set(a.x + .5, player.obj.position.y, a.z);
+      __said.length = 0; __tick(); const led = !!SHIP.end.f.zekeLed, said = __said.slice(); setShipNow(shipNow() + 21); if (a) player.obj.position.set(a.x + .5, player.obj.position.y, a.z); __tick();
+      const id = DIALOGUE && DIALOGUE.id; __run(1); return { deck: w && w.deck, here: !!a, arrow, led, said, id, done: !!SHIP.end.f.zeke }; })()""")
+    print('    Zeke:', r)
+    check(r['arrow'] and r['arrow']['level'] == 1, f"week: after Friday's dinner, the arrow to Zeke, level 1 ({r['arrow']})")
+    check(r['led'] and any(x.startswith('torres-zeke:') for x in r['said']) and r['id'] == 'moment:ending.zeke' and r['done'], f"week: Zeke finds you, walks you over, the talk ({r})")
+    r = g.ev("""(() => { setShipNow(32 * 1440 + 1040); __tick(); const arrow = __guide('end:call'); const keep = ACT; ACT = { kind: 'call', phase: 'sit' }; __tick(); const id = DIALOGUE && DIALOGUE.id; __run(0); ACT = keep;
+      const done = !!SHIP.end.f.call; ACT = { kind: 'call', phase: 'sit' }; __tick(); const again = DIALOGUE && DIALOGUE.id; ACT = keep; if (DIALOGUE) dialogueEnd(true);
+      return { arrow, id, done, again, rec: endRecord().map(b => b.text || (b.rows || []).map(x => x.text).join(' / ')) }; })()""")
+    print('    call:', r)
+    check(r['arrow'] and r['arrow']['level'] == 2 and r['id'] == 'moment:ending.call' and r['done'] and not r['again'], f"week: the booths' arrow (level 2), your family's scene, once ({r})")
+    check(any('offered you a transfer' in x for x in r['rec']), f"week: the Record has the offer ({r['rec']})")
+
+ORIGIN = 'http://ending-check.test/'
+def part_reload(b, on):
+    print('(reload) a save between the offer and the answer:')
+    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx.route(re.compile(r'^http://ending-check\.test/[^?#]*'), lambda r: r.fulfill(path=str(on), content_type='text/html'))
+    pg = ctx.new_page(); errs = []
+    pg.on('pageerror', lambda e: errs.append(f'pageerror: {e}'))
+    pg.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
+    pg.add_init_script(INIT)
+    def ready():
+        pg.wait_for_function('window.__sc !== undefined', timeout=90000)
+        pg.evaluate("s => window.__sc(s)", "(() => { const rr = renderer.render.bind(renderer); renderer.render = () => {}; })()")
+        pg.evaluate('window.__step(20, 33)')
+    ev = lambda src: pg.evaluate('s => window.__sc(s)', src)
+    pg.goto(ORIGIN + 'game.html', timeout=120000); ready()
+    if pg.locator('text=Sign and go aboard').count():
+        pg.fill('form input', 'Ada'); pg.click('text=Sign and go aboard'); pg.evaluate('window.__step(30, 33)')
+    ev(SETUP)
+    a = ev("""(() => { introSkip(); __reset(32, 361); __tick(); setShipNow(31 * 1440 + 960); __to(1, 'R'); occasionsTick(shipNow()); meetingsTick(shipNow()); __run(0);
+      setShipNow(32 * 1440 + 600); endChatDo(__marrow(), 'tell'); __lines(); dialogueChoose(1); __run(0); updateClock(); saveGame(); return JSON.stringify(SHIP.end); })()""")
+    pg.reload(timeout=120000); ready()
+    r = ev("""(() => ({ end: JSON.stringify(SHIP.end), day: SHIP.time.day, script: !!MEETING_SCRIPTS['moment:ending.offer'], btn: endChatButton(schedPeople().find(p => p.id === 'marrow')), said: endSaid() }))()""")
+    print('    before', a); print('    after ', r)
+    A, R = json.loads(a), json.loads(r['end'])
+    check(all(A[k] == R[k] for k in ('offer', 'said', 'settled')) and all(R['f'].get(k) == v for k, v in A['f'].items()) and r['day'] == 33 and r['said'] == 'go', f"reload: SHIP.end the same after a reload (the clock may add Friday's bookings) ({r})")
+    check(r['script'] and r['btn'] and r['btn']['label'] == 'About the transfer', f"reload: the offer's scene and \"About the transfer\" still there ({r})")
+    check(not errs, f'reload: page errors {errs[:3]}')
+    ctx.close()
+
 with sync_playwright() as pw:
     src = pathlib.Path(sys.argv[1]).read_text()
     if not ONLY or 'off' in ONLY:
@@ -144,17 +204,24 @@ with sync_playwright() as pw:
         g.close()
     if SWITCH not in src: fail('the switch line is not in the build'); src = None
     if src and (not ONLY or ONLY - {'off'}):
+        g = None
         on = WORK / 'test' / ('ending_on_' + pathlib.Path(sys.argv[1]).name)
         on.write_text(src.replace(SWITCH, "const EV_ENDING_ON = true;"))
         g = Game(pw, str(on))
         g.step(2)
         check(g.ev(SETUP), 'setup (on)')
-        for name, fn in [('offer', part_offer), ('answers', part_answers)]:
+        for name, fn in [('offer', part_offer), ('answers', part_answers), ('week', part_week)]:
             if ONLY and name not in ONLY: continue
             try: fn(g)
             except Exception as e: fail(f'{name}: {e}')
         if g.errors: fail('page errors (on): ' + ' | '.join(g.errors[:5]))
         g.close()
+        if not ONLY or 'reload' in ONLY:
+            sv = WORK / 'test' / ('ending_save_' + pathlib.Path(sys.argv[1]).name); sv.write_text(instrument(src.replace(SWITCH, "const EV_ENDING_ON = true;")))
+            b = pw.chromium.launch(executable_path=os.environ.get('CADET_CHROME') or None, args=['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist'])
+            try: part_reload(b, sv)
+            except Exception as e: fail(f'reload: {e}')
+            b.close(); sv.unlink()
         on.unlink()
 print('ENDING CHECK OK' if ok else 'ENDING CHECK FAILED')
 sys.exit(0 if ok else 1)
