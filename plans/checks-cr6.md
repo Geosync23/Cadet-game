@@ -1,5 +1,31 @@
 # CR6 check results
 
+## 0.93.2 round 2 (2026-10-26): all OK (m9 fixed); device_check rerun alone by CR1
+
+- **Build:** `claude/staging-0.93.2` d9c7e5f0 (FX26's m9 fix), game sha256
+  `c99ea59cc753e58b98f06f7fbc0d51eb8cac1da39849f881533adb96917dd5d3` (matches BM18's). OLD b957b92d (0.93.1).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | words, names, deck, machine, leave OK; device_check crashed (exit 1, 532 s) | `Page.goto: Timeout 30000ms` (overload, below) |
+| device_check, rerun alone by CR1 | OK (exit 0, 155 s) | `device_check: OK` |
+| stories_check | OK (exit 0, 74 s) | `STORIES CHECK OK` |
+| mech_check | OK (exit 0, 864 s) | `MECH CHECK OK` (m9 passes now) |
+| bigevents_check | OK (exit 0, 293 s) | `BIGEVENTS CHECK OK` |
+| join_check | OK (exit 0, 445 s) | `JOIN CHECK OK` |
+| tiles_check | OK (exit 0, 177 s) | `ALL OK` |
+| disc_check | OK (exit 0, 478 s) | `ALL OK` |
+| food_check 1 7 | OK (exit 0, 103 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 105 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 126 s) | `ALL OK` |
+| promo_beats_check | OK (exit 0, 24 s) | `PROMO BEATS CHECK OK` |
+| fridays_check | OK (exit 0, 1492 s) | `FRIDAYS CHECK OK` |
+| sound_check (taken from CR5) | OK (exit 0, 513 s) | `SOUND CHECK OK` |
+| events_check (taken from CR5) | crashed here (Page.goto timeout, 35 s); rerun alone by CR1: only known-old FX24-2 | |
+
+- Lesson: I started CR5's two in a second lane while check_fast ran its own two lanes: three browsers on 4 cores, and
+  both device_check and events_check timed out loading a page. Never start a second lane during check_fast.
+
 ## 0.93.2 full round (2026-10-26): 11 OK, mech FAIL m9 (NEW, the storm Saturday's board hide); plus CR5's 2
 
 - **Build:** `claude/staging-0.93.2` 41c8a7e0, game sha256 `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960`

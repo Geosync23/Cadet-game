@@ -63,7 +63,9 @@ then one `run` line per check (`run check_fast bash check_fast.sh`, `run mech py
   the wrong one (fixed in the checks by FX4/FX6/FX7/DS1/AC3).
 - fridays_check takes ~15-20 min here (the guide's ~4 is old). machine_check's gated repair share is now over Days 2-28;
   the Days 2-14 line is information only.
-- Monitors expire after 30 min; re-arm with `tail -n +N -f summary.txt | grep --line-buffered exit`.
+- **Never start a second lane while check_fast runs** (it already runs two browsers; a third on 4 cores made
+  device_check and events_check time out on Page.goto in 0.93.2 round 2). A second lane is fine beside one plain check.
+- Monitors expire after 30 min; and a Monitor on a file that doesn't exist yet fails at once (touch it first); re-arm with `tail -n +N -f summary.txt | grep --line-buffered exit`.
 
 ## Latest results
 - 0.92.6 (b78e1e22, sha 88f4cc8d...16fe4), CR6's last round: 8 OK; NEW FAILs mech m17, bigevents (the Captain at a
