@@ -1,0 +1,27 @@
+@meeting crossingBackAddress.go
+// SW6 (ending writer A), the Captain's final address at the crossing back: the version for GO (you told her Go, or
+// chose Go at crossingBackAddress.ask). After this it's settled (end.go) and the crew know; Monday 10:00 the Tern
+// leaves. The crowd reacts. No sad music in the words: proud, a bit wobbly, kind.
+title: The Captain's address
+from: Captain Odile Marrow
+gist: At the Line, the Captain told the crew you're leaving for Concord headquarters on Monday's Tern.
+== lines
+marrow: One more thing, and then you can all get back to your Sunday.   [gesture]
+marrow: Four weeks ago we crossed into the reach as guests. We were good ones. I'm proud of every one of you.
+marrow: A few days ago, Concord headquarters wrote to me. They asked for one of ours. A post at headquarters.   [nod]
+marrow > you: They asked for {me}. I passed it on, as I should. And {me} said yes.
+marrow: Monday, we lose them to the Concord. The Tern leaves at ten.   [sigh]
+pell: No. No, that's... no. Fine. Good. No.   [sigh]
+rina: Breathe, Pell. In through the nose.
+tomas: Monday? This Monday? That's tomorrow. That's nearly now.
+calder: They earned it.   [nod]
+marrow > you: Headquarters chose well. I'd have chosen you too. I did, once, from a list of names.
+? choice
+* I'll never forget this ship.   flavour:share
+  marrow: She won't forget you. Ships don't. Ask the Admiral.   [nod]
+* Somebody has to tell headquarters about coil three.   flavour:funny
+  torres-zeke: Tell them she's shy. Reyes will want that on record.   [laugh]
+* (Smile and say nothing)   flavour:listen
+  marrow: Quite right. Nothing else needs saying.   [nod]
+marrow: So. Tonight's supper is for them. Tomorrow at half nine, the shuttle bay. All of you who can.
+marrow: The Wren sees her people off properly. That's all. Carry on.

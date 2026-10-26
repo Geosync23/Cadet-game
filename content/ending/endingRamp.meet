@@ -1,0 +1,22 @@
+@meeting endingRamp
+// SW6 (ending writer A), Zeke at the ramp's foot (ending spec, "The goodbye", Monday Day 36, about 09:55, after the
+// aisle: each close friend, then Calder, Vance, the Captain, then Zeke last, as on Day 0). The mirror of his first
+// words ("Hello, {me}. I'm Zeke Torres. Welcome aboard." / "That's the Tern behind you. She brought you the whole
+// way." / "Bag all right? Right, onward. Stay close. She's big."). Then you go up the ramp: the wave pose, cheers
+// (ending.goodbye.crowd.cheer), the ramp closes.
+title: The Tern's ramp
+from: Zeke Torres
+gist: Zeke saw you off at the foot of the Tern's ramp, where he met you on your first night. Then you went up, and the Wren cheered.
+== lines
+torres-zeke: Hello, {me}. Here we are again. Same ramp. Other way.   [gesture]
+torres-zeke > you: That's the Tern behind me. She brought you the whole way. She'll take you the whole way.
+torres-zeke: I practised what I'd say. Four times. In the lift. I've forgotten all of it.   [laugh]
+torres-zeke: So. You came down this ramp and you made this ship better. Every bit of her. Coil three agrees.
+? choice
+* Thank you for meeting me, that first night.   flavour:share
+  torres-zeke: Thank you for coming down. Thank you for staying as long as you did.   [nod]
+* Look after coil three.   flavour:cheer
+  torres-zeke: Every day. I'll tell her you said. She'll pretend not to care.   [laugh]
+* (Shake his hand)   flavour:share
+  torres-zeke: A handshake. Very proper. Calder would approve. Oh, she's watching. Good.   [laugh]
+torres-zeke > you: Bag all right? Right, onward. Up you go. Get a window seat. Every time.   [nod]

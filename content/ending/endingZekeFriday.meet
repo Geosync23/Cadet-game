@@ -1,0 +1,22 @@
+@meeting endingZekeFriday
+// SW6 (ending writer A), Zeke on Friday evening (ending spec, "Zeke", Friday Day 33 after dinner; he finds you, the
+// escort; ring "Talk to Zeke"): the Works tea corner. He doesn't tell you what to do; he talks about the evening he
+// met you at the Tern's ramp (Day 0: "Hello, {me}. I'm Zeke Torres. Welcome aboard." / "Bag all right? Right,
+// onward. Stay close. She's big."; at dinner he asked what brought you out here: mem intro.dinner.*). Two replies.
+title: Zeke
+from: Zeke Torres
+gist: Zeke sat with you at the tea corner and talked about the night he met you at the Tern's ramp. He didn't tell you what to do.
+== lines
+torres-zeke: There you are. Sit. I've made tea. It's terrible. I made it with feeling.   [gesture]
+torres-zeke > you: I'm not going to tell you what to do. Calder told me not to. Pell told me to. I'm ignoring both.
+torres-zeke: Can I tell you about the night you came, though? I think about it sometimes.   [listen]
+torres-zeke: Calder sent me down to the ramp to meet the new hand. I practised what I'd say. Four times. In the lift.
+torres-zeke: Then the ramp came down and there you were, with your bag, looking at everything like it might bite.   [laugh]
+torres-zeke: And I said "Welcome aboard", and you said thank you like you meant it. I thought: oh, good. That one'll do.
+torres-zeke > you: At dinner I asked what brought you out here. Whatever you said then, I reckon it's still true. Ask it again.
+? choice
+* What if I don't know the answer any more?   flavour:listen
+  torres-zeke: Then you've learnt something. That's the whole job, really. Coils, people, all of it.   [nod]
+* Did I do all right? Since then?   flavour:share
+  torres-zeke: All right? You're leading the oath on Sunday. Four weeks ago you couldn't find the lift.   [laugh]
+torres-zeke: Whatever you pick, I'll be at the ramp. One way or the other. Right. Drink your tea. It's awful.
