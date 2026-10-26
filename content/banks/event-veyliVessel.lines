@@ -12,6 +12,9 @@
 - A Veyli ship has asked for company
 == event.veyliVessel.status.onset
 - Taavek is aboard
+// Sunday 08:00-09:30, before the Tern brings Taavek back
+== event.veyliVessel.status.onset.early
+- The Tern brings the Veyli engineer at 09:30
 == event.veyliVessel.status.escalation
 - Taavek is aboard: the part today
 == event.veyliVessel.status.resolution
