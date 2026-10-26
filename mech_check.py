@@ -1902,6 +1902,68 @@ def part_fx3(g):
     check(b['m2'] and b['m2Stays'], f"m2: Torres's word stays to be read ({b})")
 
 only = set(sys.argv[2:])
+# ---- ps, Power safety (S5-1 turn 2, B1; plans/p5-step5-spec.html question 2 and its beats table): with P5_STEP5 on,
+# an Officer on Day 12 (Tier 1 and Team jobs done; Tracing's lesson may be under way: ps doesn't wait for it): ps is the
+# day's one small row; Calder's ask, an appointment at 09:00 or 09:15 at the Deck 6 port junction (6/j) with her Mail; the
+# level 1 arrow there from 15 minutes before; the talk (met) and trained, no job of yours, its after-word marked given;
+# missed, asked again the next workday; the same twice. With the switch off: "not yet".
+PS_RUN = r"""(() => {
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; if (typeof GUIDE !== 'undefined') { GUIDE.list.length = 0; GUIDE.counted.clear(); }
+  const d = 12, t0 = (d - 1) * 1440; setShipNow(t0 - 1440 + 1200); machinesNow(); const W = worksInit();
+  for (const r of CAREER_LADDER) if (r.tier === 1 || r.id === 'm8') { W.tr[r.id] = r.id === 'm8' ? 11 : 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+  W.tier = 2; W.rank = 'officer'; W.xp = 10; W.test = { tier: 2, day: 9, tries: 1, passed: true };
+  const out = { arrow: null };
+  for (let m = t0 + 300; m <= t0 + 660; m += 5) {
+    setShipNow(m); machinesNow(); worksCareerTick(m);
+    if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true);
+    const r = SHIP.occasions.find(x => x.id === 'works.ps' && x.status === 'asked' && !x.met);
+    if (r) { out.occ = [r.deck, r.room, hhmm(r.at % 1440), r.len, r.by];
+      const g = typeof GUIDE !== 'undefined' ? GUIDE.list.find(x => x.id === 'ps:meet:' + d) : null;
+      if (g && !out.arrow) { const gl = g.goal(); out.arrow = [g.level, hhmm(m % 1440), gl && gl.deck, gl && gl.room, gl && gl.label]; }
+      if (m >= r.at) { r.met = true; worksCareerTick(m + 1); } }
+    if (W.tr.ps !== undefined) break;
+  }
+  out.opened = (W.op[d] || []).slice(); out.trained = W.tr.ps; out.brief = flag('works.brief.ps');
+  out.jobs = SHIP.jobs.filter(j => j.train === 'ps').length; out.mail = SHIP.mail.filter(m => /Calder/.test(m.from)).map(m => m.subject);
+  { const r = SHIP.occasions.find(x => x.id === 'works.ps'); out.told = r && r.f ? r.f.told || null : null; }
+  { // in person (the user's rule): Calder walks over (worksEscort's 24u part) and says it when she reaches you; the Mail after
+    SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); SHIP.mail = []; const t1 = (d + 2) * 1440 + 400; setShipNow(t1); psAsk(d + 3, t1);
+    const r = SHIP.occasions.find(x => x.id === 'works.ps'); const P = player.obj.position, fake = { p: { id: r.by }, h: {}, x: P.x, z: P.z }, said = [], keep = worksSayAll;
+    out.escort = [JSON.stringify(worksEscort({ id: r.by }, t1)), SHIP.mail.length];
+    DECK_CREW.push(fake); worksSayAll = (id, l) => said.push([id, l[0]]); try { psTellTick(t1); } finally { worksSayAll = keep; DECK_CREW.splice(DECK_CREW.indexOf(fake), 1); }
+    out.inPerson = [r.f.told, said.length ? said[0][0] : null, said.length && /Power safety/.test(said[0][1]), SHIP.mail.map(m => m.subject), JSON.stringify(worksEscort({ id: r.by }, t1))];
+    SHIP.occasions = SHIP.occasions.filter(x => x.id !== 'works.ps'); }
+  out.script = OCCASIONS['works.ps'] ? OCCASIONS['works.ps'].script : null; out.cur = W.cur && W.cur.id === 'ps' ? 'ps:' + W.cur.st : null;
+  return out;
+})()"""
+def part_ps(g):
+    print('ps (Power safety, S5-1):')
+    if not g.ev("typeof P5_STEP5 !== 'undefined' && P5_STEP5 && !!WORK_MECH.ps"):
+        print('  not yet (P5_STEP5 off)'); return
+    guide = g.ev("typeof GUIDE_ON !== 'undefined' && GUIDE_ON")
+    a, b = g.ev(PS_RUN), g.ev(PS_RUN)
+    print('  ', json.dumps(a))
+    smalls = g.ev("JSON.parse(JSON.stringify(CAREER_LADDER.filter(r => r.size === 'small').map(r => r.id)))")
+    check([i for i in a['opened'] if i in smalls] == ['ps'], f"ps: the day's one small row on Day 12 ({a['opened']})")
+    check(a.get('occ') and a['occ'][:2] == [6, 'j'] and a['occ'][2] in ('09:00', '09:15') and a['occ'][4] == 'calder', f"ps: Calder's appointment at the Deck 6 port junction, 09:00 or 09:15 ({a.get('occ')})")
+    check(any('Power safety' in s for s in a['mail']), f"ps: Calder's Mail for the lesson ({a['mail']})")
+    if guide: check(a['arrow'] and a['arrow'][0] == 1 and a['arrow'][2:4] == [6, 'j'], f"ps: the level 1 arrow to the junction before the talk ({a['arrow']})")
+    check(a['trained'] == 12 and a['jobs'] == 0 and a['brief'] and a['cur'] is None, f"ps: trained at the talk on Day 12, no job of yours, the after-word marked given ({a['trained']}, {a['jobs']}, {a['brief']}, {a['cur']})")
+    check(a.get('told') == 'notice', f"ps: not reached, told by the notice 20 minutes before ({a.get('told')})")
+    ip = a.get('inPerson') or []
+    check(a.get('escort') and '"follow"' in (a['escort'][0] or '') and a['escort'][1] == 0, f"ps: Calder walks over to you before she's said it, no Mail yet ({a.get('escort')})")
+    check(ip[:3] == ['met', 'calder', True] and ip[3] == ['Power safety'] and ip[4] == 'null', f"ps: in person, Calder says it, then the Mail as the record, and she stops walking over ({ip})")
+    check(a['script'] == 'train.ps.calder', f"ps: the talk is train.ps.calder ({a['script']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'ps: differs the second time')
+    ms = g.ev(PS_RUN.replace("if (m >= r.at) { r.met = true; worksCareerTick(m + 1); } }", "if (window.__psMiss ? false : m >= r.at) { r.met = true; worksCareerTick(m + 1); } }")
+      .replace("const out = { arrow: null };", "const out = { arrow: null }; window.__psMiss = true;")
+      .replace("  out.opened = (W.op[d] || []).slice();", "  window.__psMiss = false; occasionsTick(t0 + 700, true); const again = []; for (let m = t0 + 700; m <= t0 + 4 * 1440 + 660; m += 10) { setShipNow(m); machinesNow(); worksCareerTick(m); occasionsTick(m, true); } out.again = SHIP.occasions.filter(x => x.id === 'works.ps').map(x => [Math.floor(x.at / 1440) + 1, x.status]);\n  out.opened = (W.op[d] || []).slice();"))
+    print('   missed:', ms.get('again'))
+    nxt = g.ev("(() => { let d = 13; while (!playerShiftOn(d)) d++; return d; })()")
+    check(ms.get('again') and ms['again'][0] == [12, 'missed'] and len(ms['again']) >= 2 and ms['again'][1][0] == nxt, f"ps: missed on Day 12, asked again on the next workday, Day {nxt} ({ms.get('again')})")
+
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     ev = g.ev
@@ -1927,6 +1989,7 @@ with sync_playwright() as pw:
         check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), f"{r['id']}: the training differs the second time")
         if r['id'] in PARTS:
             PARTS[r['id']](g)
+    if not only or 'ps' in only: part_ps(g)
     if (not only or 'side' in only) and ev("typeof worksSideXp === 'function'"):
         print('side (Step 4\'s core: tool wear, the side-job cap, the texts):'); part_side(g)
     if (not only or 'side' in only or 'm4' in only) and ev("typeof manifestRun === 'function' && !!JOB_KINDS.haul"):

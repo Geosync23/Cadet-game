@@ -1,0 +1,23 @@
+@meeting train.m18.calder
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): M18 Shutdowns, Thursday Day 18, 09:00-12:00, the Deck 6 port junction (j).
+// Calder beside you at the planning screen (the Works app's Shutdowns tab opens after it, each step named): who it
+// feeds, a quiet hour, who to warn; Brennan in person if it's the galley. One choice. Her step words while you plan are
+// her own lines, flags train.m18.follow.*.
+title: Shutdowns
+from: Chief Ines Calder
+gist: Calder showed you how to plan a shutdown: what a junction feeds, a quiet hour, who to warn, and what keeps power. You booked a real one for tomorrow.
+== lines
+calder > you: Your device. Works app. There's a new tab now. Shutdowns.   [gesture]
+calder: Some Tier 3 jobs need the power off. You don't switch it off. You book it.
+calder: First, what it feeds. Read the rooms. Then tomorrow's hours, and who's in them.
+calder: Pick a quiet hour. Mealtimes and classes are marked. You can pick them. You'll hear about it.
+calder: Warn the people it touches. The galley, you tell Brennan to her face. Always.
+calder: Then what keeps power. The cold store, if it's the galley. You'll learn which.
+? choice
+* What if nobody's ever quiet?   rel:calder+2
+  calder: Somebody always is. Mid-morning. Mid-afternoon. Look harder.   [nod]
+* Why tell people in person? There's a notice.   rel:calder+2
+  calder: A notice tells them. A person tells them you thought about them. They remember that.   [nod]
+* (Just listen)
+  calder: Good. Your turn.   [nod]
+calder: Book it for tomorrow. At 22:00 it's settled. Then the ship plans round you. Don't miss your hour.
