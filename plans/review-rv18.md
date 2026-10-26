@@ -154,6 +154,7 @@ counts as a tap on that door. A tap beyond works, so not a must. cadet_test and 
 | claude/tray-seat-0932 | PASS | 5892511c (47b0e1d0...0074) |
 | claude/comet (includes sound-comet and event-swap) | PASS (c.2 was FIXES NEEDED: C1) | 157d1cfb (740a63a2...ac50) |
 | claude/storm-sat | handed to RV19 (lead 38) after my first look | 41d891b9 then 67e918f2 |
+| claude/inspection | PASS (the fix for BM18's FAIL; taken from RV19) | e45b7fe (64c9e6b4...bc0e) |
 
 ## trad-0932 final checks (d126a657)
 join_check alone with it on: JOIN CHECK OK. interactions_check alone with it on: OK. Row for the board: with the rowers
@@ -201,3 +202,14 @@ Note: my early comet probes jumped the clock with setShipNow; the crew only walk
 Play in real time (comet_real.py) before calling a host missing.
 
 ## Take a seat: PASS at 5892511c. interactions_check alone OK (its Take a seat part all true).
+
+## The bunk inspection fix (FX20b, claude/inspection e45b7fe, game 64c9e6b4...bc0e): PASS
+Taken from RV19 (lead 38) so RV19 could stay on storm-sat. BM18's FAIL with INSPECT_ON on.
+| Check | Build | Result |
+|---|---|---|
+| events_check | 9b7eae69, INSPECT_ON on | FAIL as BM18 said: rec-dawn-swim without Rina Days 4-39, madsen-ivo short Day 25, the cake second slice |
+| events_check | 9b7eae69, INSPECT_ON off | OK |
+| cadet_test vs b957b92d alone | e45b7fe off | ALL IDENTICAL |
+| events_check | e45b7fe on | EVENTS CHECK OK |
+| day_check 4, 11, 18, 25 | e45b7fe on | all OK |
+| RV19's live walker probe | e45b7fe on, Days 4 and 11 | all 8 rooms in route order a e b g c h f d (06:10-07:11), your result in person, the done toast |
