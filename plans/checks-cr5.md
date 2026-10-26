@@ -22,10 +22,12 @@ on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying)
 | `day_check.py BUILD 27` | OK | 0 | 290 s | `DAY CHECK OK` |
 | `career_check.py BUILD` | **known (backlog 12 / FX28-1)** | 1 | 157 s | only `FAIL busy: "Relied on" before Day 5` (numbers as in round 1); ship.works 2526 bytes |
 | `promo_sight_check.py BUILD` | OK | 0 | 16 s | `PROMO SIGHT CHECK OK` |
-| `events_check.py BUILD` | with CR1 (re-run alone) | | | (CR1's result to follow) |
+| `events_check.py BUILD` | **known (FX24-2)** (run by CR1, alone) | 1 | 738 s | only `not reached: farouk-olu>3-lounge-28 16:00` (Day 7 reading corner; CR1) |
 | `sound_check.py BUILD` | OK (run by CR6) | 0 | 513 s | `SOUND CHECK OK` (CR6) |
 
 **CR5's own part, round 2: OK** (interactions, Days 21, 22, 27, promo_sight OK; career the known line only).
+
+**CR5 share, round 2, whole: OK** (6 OK; career and events only their known lines). No NEW FAILs.
 
 ## 0.93.2 full round, first pass (2026-10-26, started 11:28 UTC, for BM18 and lead 38)
 
