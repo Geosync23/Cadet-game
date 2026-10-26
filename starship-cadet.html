@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-c.4
+   STARSHIP CADET: CSV Wren                           build 0.93.2-c.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9258,7 +9258,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-c.4';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-c.5';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -32513,7 +32513,7 @@ const LINES = JSON.parse([
   ',"event.comet.gather.cometCaptain.ask":[',
   '{"text":"The Captain\'s pouring tea for the comet in the observation room tonight. Officers.","id":"1318vr3"}]',
   ',"event.comet.gather.cometCaptain.here":[',
-  '{"text":"Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.","id":"9zg6sg"}]',
+  '{"text":"Tea\'s poured. The comet\'s on its way. Find yourself a window.","id":"1axuz7h"}]',
   ',"event.comet.gather.cometCaptain.name":[',
   '{"text":"Tea with the Captain","id":"11em7ci"}]',
   ',"event.comet.gather.cometCaptain.thanks":[',
@@ -32521,7 +32521,7 @@ const LINES = JSON.parse([
   ',"event.comet.gather.cometLounge.ask":[',
   '{"text":"The comet at half nine. The bow glass is the place.","id":"10jyvdn"}]',
   ',"event.comet.gather.cometLounge.here":[',
-  '{"text":"There. Left of the strut. That smudge is a mountain of ice.","id":"2sv1yt"}]',
+  '{"text":"Find a gap at the glass. It comes in from the left.","id":"4lmnqh"}]',
   ',"event.comet.gather.cometLounge.name":[',
   '{"text":"The comet at the bow glass","id":"fhfgqy"}]',
   ',"event.comet.gather.cometLounge.thanks":[',
@@ -32529,7 +32529,7 @@ const LINES = JSON.parse([
   ',"event.comet.gather.cometScope.ask":[',
   '{"text":"The observatory\'s open for the comet tonight. Five minutes each at the scope.","id":"1idwft"}]',
   ',"event.comet.gather.cometScope.here":[',
-  '{"text":"Five minutes each. Don\'t touch the focus. Everybody touches the focus.","id":"r2iut7"}]',
+  '{"text":"The queue\'s by the door. Five minutes each. It\'s worth the wait.","id":"3c88pv"}]',
   ',"event.comet.gather.cometScope.name":[',
   '{"text":"The comet at the scope","id":"1pcfbl4"}]',
   ',"event.comet.gather.cometScope.thanks":[',
@@ -32537,13 +32537,13 @@ const LINES = JSON.parse([
   ',"event.comet.gather.cometStern.ask":[',
   '{"text":"Blankets in the junior common room tonight. The stern windows get the tail.","id":"5hr8rk"}]',
   ',"event.comet.gather.cometStern.here":[',
-  '{"text":"Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.","id":"bg1cp6"}]',
+  '{"text":"Grab a blanket and a bit of sofa. The tail comes this way.","id":"1tfz7za"}]',
   ',"event.comet.gather.cometStern.name":[',
   '{"text":"The comet under blankets","id":"auh7xe"}]',
   ',"event.comet.gather.cometStern.thanks":[',
   '{"text":"Tomas hands you a blanket and shuffles up on the sofa. Everyone faces the stern windows and waits for the tail.","id":"1arnjmp"}]',
   ',"event.comet.knot.1":[',
-  '{"text":"When a guest crosses our sky, we tie a knot, so we remember it was here, and that we saw it.","id":"15z14a"}]',
+  '{"text":"When a guest crosses our sky, we tie a knot. So we remember it was here, and we saw it.","id":"1fbguwp"}]',
   ',"event.comet.knot.2":[',
   '{"text":"Tonight you are guests in our sky, watching another guest go by. That is worth a knot.","id":"10jur9t"}]',
   ',"event.comet.knot.3":[',
@@ -32551,7 +32551,7 @@ const LINES = JSON.parse([
   ',"event.comet.knot.tip":[',
   '{"text":"Tap Saruth to tie a comet knot","id":"1depesg"}]',
   ',"event.comet.mail.warning":[',
-  '{"text":"A comet tonight | A comet tonight. Sol Bakshi caught it on the bow scanner in the night and Hana Mori has it on the long scope. It crosses our bow from about half past nine. The helm will bring us round so the bow lounge gets the head and the stern windows get the tail. The observatory is open, five minutes each at the scope. Officers are welcome in the observation room; the Captain has offered tea. Wrap up warm. It isn\'t cold. I just like saying it.","id":"8khekd"}]',
+  '{"text":"A comet tonight | Sol Bakshi caught a comet on the bow scanner in the night, and Hana Mori has it on the long scope. It crosses our bow from about half past nine. The helm will turn us so the bow lounge gets the head and the stern windows the tail. The observatory\'s open, five minutes each. Officers: the Captain has offered tea. Wrap up warm. It isn\'t cold. I just like saying it.","id":"10ecu9q"}]',
   ',"event.comet.name.answer.1":[',
   '{"text":"The Lantern. Lukas will cry. Good.","id":"1t3hbbx"}]',
   ',"event.comet.name.answer.2":[',
@@ -32559,11 +32559,11 @@ const LINES = JSON.parse([
   ',"event.comet.name.answer.3":[',
   '{"text":"No. Absolutely not. Fine. It counts. Don\'t tell anyone.","id":"1hccuc7"}]',
   ',"event.comet.name.ask":[',
-  '{"text":"Somebody has to name it for the log. I\'ve named three. The third doesn\'t count. You do this one.","id":"1spwab5"}]',
+  '{"text":"It needs a name for the log. I\'ve named three. The third doesn\'t count. You do this one.","id":"19tr1js"}]',
   ',"event.comet.name.reply.1":[',
   '{"text":"The Lantern. For the storm.","id":"r0b4a1"}]',
   ',"event.comet.name.reply.2":[',
-  '{"text":"Ask the Envoy. It\'ll have a Veyli name already.","id":"vfyu18"}]',
+  '{"text":"Ask the Envoy. The Veyli must have named it.","id":"l2thi4"}]',
   ',"event.comet.name.reply.3":[',
   '{"text":"Sato\'s Fourth. Make it count.","id":"toqgi6"}]',
   ',"event.comet.news.coming.1":[',
@@ -32575,7 +32575,7 @@ const LINES = JSON.parse([
   ',"event.comet.news.lunch.1":[',
   '{"text":"Bow lounge or the blankets tonight? I can\'t decide.","id":"dqkd7f"}]',
   ',"event.comet.news.lunch.2":[',
-  '{"text":"Tomas has never seen a comet. Eighteen months out here and never one.","id":"1a6j9pl"}]',
+  '{"text":"Tomas has never seen a comet. Not one. He\'s been grinning since breakfast.","id":"bgizc7"}]',
   ',"event.comet.news.told.1":[',
   '{"text":"Did you see the blue tail? Sato says it\'s the storm\'s wind. I\'m choosing to believe her.","id":"1fjytas"}]',
   ',"event.comet.news.told.2":[',
@@ -32604,20 +32604,23 @@ const LINES = JSON.parse([
   '{"text":"marrow: Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.","id":"1855nb3"},',
   '{"text":"vance: I\'m here for the comet, not to talk about the rowing.","id":"j5okt1"}]',
   ',"event.comet.talk.cometLounge":[',
-  '{"text":"sato: There. Left of the strut. That smudge is a mountain of ice the size of Deck 3, falling past us.","id":"1tzys37"},',
+  '{"text":"sato: There. Left of the strut. That smudge is a mountain of ice, falling past us.","id":"w6nu3u"},',
   '{"text":"holt: It\'s very bright.","id":"1azp01p"},',
   '{"text":"mensah: That\'s the whole point of it, Chief.","id":"1xdsca1"},',
-  '{"text":"sato: The fuzz round the head is the coma. It\'s bigger than the Wren. A lot bigger. Don\'t tell the Wren.","id":"1guw5q7"},',
+  '{"text":"sato: The fuzz round the head is the coma. Bigger than the Wren. Much bigger.","id":"ikvf19"},',
+  '{"text":"sato: Don\'t tell the Wren.","id":"28vbs8"},',
   '{"text":"farouk-olu: On my birthday. I\'m counting it as mine.","id":"ro7adu"},',
-  '{"text":"sato: Two tails. The white one\'s dust. The blue one is ions, blown straight back by the same wind that gave us the storm. So yes. The storm says hello.","id":"1k10t1l"},',
+  '{"text":"sato: Two tails. The white one\'s dust. The blue one is ions.","id":"156c2wp"},',
+  '{"text":"sato: Blown back by the same wind that gave us the storm. So yes. The storm says hello.","id":"1nau6hs"},',
   '{"text":"haddad-tamsin: Fine. The bar closes at ten to eleven. Tonight only.","id":"7ilay6"}]',
   ',"event.comet.talk.cometScope":[',
   '{"text":"mori: Five minutes each. Don\'t touch the focus. Everybody touches the focus.","id":"1e9utbd"},',
-  '{"text":"mori: See the little jets on the bright side? That\'s ice turning straight to gas in the sunlight. It\'s fizzing. Like a tablet in water.","id":"cl3ttt"},',
+  '{"text":"mori: See the little jets on the bright side? Ice, turning straight to gas.","id":"rav9fo"},',
+  '{"text":"mori: It\'s fizzing. Like a tablet in a glass of water.","id":"zk846c"},',
   '{"text":"mori: You touched the focus. It\'s fine. Everyone does. I\'ll put it back.","id":"1ic6hr8"}]',
   ',"event.comet.talk.cometStern":[',
-  '{"text":"tomas: Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.","id":"2aj11h"},',
-  '{"text":"tomas: Eighteen months out here and I\'ve never seen one. Is that strange?","id":"sxk5yu"},',
+  '{"text":"tomas: Blankets on the sofa. Take one even if you\'re not cold. New rule. Mine.","id":"p9pd1p"},',
+  '{"text":"tomas: I\'ve never seen one. Not ever. Not even a small one. Is that strange?","id":"193yl4j"},',
   '{"text":"pell: My mum\'ll want it described. Properly. Twice.","id":"ri5i29"},',
   '{"text":"rina: Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.","id":"1nnh5b0"}]',
   ',"event.comet.turn.cadet":[',
@@ -43001,7 +43004,7 @@ if (EV_COMET_ON && EVENTS_ON) {
         lines: [w('news.coming.1') || 'Comet tonight. Get a window early.', w('news.coming.2') || 'Bakshi caught a comet on the bow scanner in the night. Mori\'s got it on the long scope.',
           w('news.coming.3') || 'The helm\'s bringing us round at half nine so the bow glass gets the head.'] },
       { id: 'comet-lunch', phase: 'warning', at: [0, 720], seed: ['all'], weight: 1,
-        lines: [w('news.lunch.1') || 'Bow lounge or the blankets tonight? I can\'t decide.', w('news.lunch.2') || 'Tomas has never seen a comet. Eighteen months out here and never one.'] },
+        lines: [w('news.lunch.1') || 'Bow lounge or the blankets tonight? I can\'t decide.', w('news.lunch.2') || 'Tomas has never seen a comet. Not one. He\'s been grinning since breakfast.'] },
       { id: 'comet-told', phase: 'afterglow', at: [1, 420], seed: ['all'], weight: 1,
         lines: [w('news.told.1') || 'Did you see the blue tail? Sato says it\'s the storm\'s wind. I\'m choosing to believe her.', w('news.told.2') || 'Half the ship was at the bow glass. The other half was under Tomas\'s blankets.'] },
     ],
@@ -45013,12 +45016,12 @@ function cometTap(a) {
 // host's own lines among the crowd's), from those settled at that gathering. Lines: the writers' event.comet.talk.<id>
 // ("who: text" each), else EP1's samples. Looks only, nothing saved
 const COMET_TALK = {
-  cometLounge: [['sato', 'There. Left of the strut. That smudge is a mountain of ice the size of Deck 3, falling past us.'], ['holt', 'It\'s very bright.'], ['mensah', 'That\'s the whole point of it, Chief.'],
+  cometLounge: [['sato', 'There. Left of the strut. That smudge is a mountain of ice, falling past us.'], ['holt', 'It\'s very bright.'], ['mensah', 'That\'s the whole point of it, Chief.'],
     ['sato', 'The fuzz round the head is the coma. It\'s bigger than the Wren. A lot bigger. Don\'t tell the Wren.'], ['farouk-olu', 'On my birthday. I\'m counting it as mine.'],
     ['sato', 'Two tails. The white one\'s dust. The blue one is ions, blown straight back by the same wind that gave us the storm. So yes. The storm says hello.'], ['haddad-tamsin', 'Fine. The bar closes at ten to eleven. Tonight only.']],
   cometScope: [['mori', 'Five minutes each. Don\'t touch the focus. Everybody touches the focus.'], ['mori', 'See the little jets on the bright side? That\'s ice turning straight to gas in the sunlight. It\'s fizzing. Like a tablet in water.'],
     ['mori', 'You touched the focus. It\'s fine. Everyone does. I\'ll put it back.']],
-  cometStern: [['tomas', 'Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.'], ['tomas', 'Eighteen months out here and I\'ve never seen one. Is that strange?'],
+  cometStern: [['tomas', 'Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.'], ['tomas', 'I\'ve never seen one. Not ever. Not even a small one. Is that strange?'],
     ['pell', 'My mum\'ll want it described. Properly. Twice.'], ['rina', 'Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.'], ['tomas', 'There it goes. This window\'s all the places we\'ve already been. Now that too.', 1340]],
   cometCaptain: [['marrow', 'Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.'], ['vance', 'I\'m here for the comet, not to talk about the rowing.'],
     ['marrow', () => playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
@@ -45147,7 +45150,8 @@ function cometFrame() {
   if (!up || m < 1290 || m >= 1360 || typeof DECK_CREW === 'undefined' || typeof CROWD_ANIMS === 'undefined' || !CROWD_ANIMS.has('look') || t < COMET_SKY.look) return;
   COMET_SKY.look = t + .5;
   for (const a of DECK_CREW) {
-    if (!a.settled || !a.p || !/^ev-comet(Lounge|Captain)/.test(a.tag || '')) continue;
+    if (!a.p || !/^ev-comet(Lounge|Captain)/.test(a.tag || '')) continue;
+    { const sp = a.spot ? (placeSpot(a.spot.id) || a.spot) : null; if (!a.settled && !(sp && sp.x != null && Math.hypot(a.x - sp.x, a.z - sp.z) < .6)) continue; }   // RV18: at their spot, settled or not (the hosts at the Line's lead spots never read as settled)
     if (/^sit/.test(a.pose || '')) continue;
     const want2 = idHash(a.p.id + ':' + Math.floor(m / 2)) % 6 === 0 ? 'point' : 'look';
     if (want2 && a.pose !== want2 && (a.pose === 'stand' || a.pose === 'talk' || a.pose === 'look' || a.pose === 'point')) a.pose = want2;
