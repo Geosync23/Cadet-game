@@ -46,6 +46,11 @@ class Page:
         self.page.on('console', lambda m: m.type == 'error' and self.errors.append(f'error: {m.text}'))
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
+        self.go(suffix, path)
+    # another build or link in this same tab (as a player opening the new link): never a closed tab and a new one, so
+    # the save is never handed between two browser processes (CR4's one-off "old save null" in migrate, 0.93.2 round)
+    def go(self, suffix='', path=TMP):
+        self.path = path
         self.page.goto('file://' + str(path) + suffix, timeout=120000); self.ready()   # a busy machine (straight after check_fast) can take over the default 30 s to load the game
     def ready(self):
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
@@ -83,15 +88,17 @@ def part_off(b):
     check(pg.ev("!DEVICE_APPS.has('saves')"), 'off: the Saves app is there with slots off')
     check(set(st) <= {K1, 'starship-cadet-arrived'}, f'off: storage holds more than the one save: {sorted(st)}')
     check(K1 in st and 'at' not in json.loads(st[K1]), 'off: no save, or the save carries save.at with slots off')
-    pg.close()
     print('  off: one save, no app, keys', sorted(st))
-    return ctx, st[K1]
+    return ctx, pg
 
 def part_migrate(b):
-    ctx, old = part_off(b)
-    ctx.add_init_script('window.__first = localStorage.getItem("starship-cadet-save")')   # before the game's script
-    pg = Page(ctx); old = pg.page.evaluate('window.__first')
-    check(old and 'at' not in json.loads(old), 'migrate: the save left by the build with slots off is not there')
+    ctx, pg = part_off(b)
+    check(not pg.errors, f'off: page errors: {pg.errors[:3]}')
+    pg.page.add_init_script('window.__first = localStorage.getItem("starship-cadet-save"); window.__keys = Object.keys(localStorage)')   # before the game's script
+    pg.go('', TMP); old = pg.page.evaluate('window.__first')   # the build with slots on, in the same tab
+    if not check(old and 'at' not in json.loads(old), 'migrate: the save left by the build with slots off is not there'):
+        print('   storage before the game ran:', pg.page.evaluate('window.__keys'), '| the game loaded:', pg.ev('SAVED ? clockText() : null'), '| storage now:', sorted(pg.store()))
+        pg.close(); return ctx
     o = json.loads(old)['time']
     check(pg.ev('SHIP.time.day') == o['day'] and abs(pg.ev('SHIP.time.min') - o['min']) < 5, f'migrate: the old save\'s time did not load ({pg.ev("clockText()")} vs {o})')
     check(pg.ev('SAVE_SLOT') == 1 and pg.ev('SAVE_KEY') == K1, 'migrate: an old save is not Slot 1')
@@ -196,11 +203,10 @@ def part_load(b):
 
 def part_nosave(b):
     ctx = b.new_context(viewport={'width': 390, 'height': 844})
-    pg = Page(ctx); monday_game(pg, 2); pg.page.evaluate('k => localStorage.setItem(k, "2")', KS); pg.close()
-    pg = Page(ctx, '?nosave')
+    pg = Page(ctx); monday_game(pg, 2); pg.page.evaluate('k => localStorage.setItem(k, "2")', KS)
+    pg.go('?nosave')
     check(pg.ev("SAVE_SLOT === 1 && !DEVICE_APPS.has('saves') && SLOT_NEW === null"), 'nosave: the slots or the app are on with ?nosave')
-    pg.close()
-    pg = Page(ctx, '#dev')
+    pg.go('#dev')
     check(pg.ev("SAVE_BASE === 'starship-cadet-save-dev' && slotKey(2) === 'starship-cadet-save-dev-2' && SAVE_KEY === 'starship-cadet-save-dev'"), 'nosave: the Dev slots don\'t carry -dev')
     # Dev mode's Copy my real game copies the Playtest slot being played (Slot 2 here, Day 11), not Slot 1 (Day 2)
     pg.page.evaluate('() => { const s = JSON.parse(localStorage.getItem("starship-cadet-save")); s.time.day = 11; localStorage.setItem("starship-cadet-save-2", JSON.stringify(s)); }')
