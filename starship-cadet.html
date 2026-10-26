@@ -10340,7 +10340,8 @@ function schedBuild(p, d, occ, S) {
     const l = segs[segs.length - 1];
     const solo = id => id === p.bed || (S.owner.get(id) || []).length === 1;   // yours alone: nobody else can want it
     const deskTwin = (id, a, b) => S.people.some(q => q !== p && S.desks.get(q.id) === id && aboard(q, d) && ((shiftBlocks(q, d) || {}).blocks || []).some(([x, y]) => x < b && a < y));   // the desk's other shift is on then
-    if (l && l.act !== 'commute' && l.act !== 'wash' && !(l.act === 'work' && l.placeId && deskTwin(l.placeId, t, to)) && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || solo(l.placeId) || isFree(l.placeId, t, to))) {   // not past the shift's end at a desk the next shift shares
+    const galleyTwin = (id, a, b) => p.dept === 'galley' && galleyRotaOn() && [...galleyRota(d)].some(([qid, g]) => qid !== p.id && g.blocks.some(x => x.placeId === id && x.from < b && a < x.to));   // a galley station another hand's stint has next (backlog FX24-1: Day 32's 3-galley-5)
+    if (l && l.act !== 'commute' && l.act !== 'wash' && !(l.act === 'work' && l.placeId && (deskTwin(l.placeId, t, to) || galleyTwin(l.placeId, t, to))) && !STOPS.has(l.tag) && l.to === t && l.deck === deck && (!l.placeId || solo(l.placeId) || isFree(l.placeId, t, to))) {   // not past the shift's end at a desk the next shift shares
       if (l.placeId && !solo(l.placeId)) hold(l.placeId, t, to);
       l.to = to; t = to;
     } else if (deck === bedDeck) seg('off', to, 'bed', p.bed); else seg('off', to, null, null);
