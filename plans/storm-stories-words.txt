@@ -1,0 +1,45 @@
+// CS1, 2026-10-26: words for "Storm stories by torchlight" (the user's pick, lead 37; builder FX26, claude/storm-sat).
+// Day 13, the ion storm's Saturday, 21:00-21:45, the junior common room, main lights off, torches. Host: Matthias Oduya.
+// Everyone tells the worst storm they've ever been in, torch under the chin, a little worse than the truth.
+// Pose: goers sit in a loose circle on the floor and sofas; the teller stands with a torch under their chin (anim: talk);
+// the rest listen (anim: listen). Layout as the other .trad words (plans/trad-0932-words.txt). Tone: cosy, not frightening;
+// nobody hurt in any story. Lines clear of tools/near_dupes.py.
+
+### storm-stories | Storm stories by torchlight | host oduya
+invite: Storm stories tonight, after the supper. Bring a torch and your worst storm.
+== mail
+- Storm stories tomorrow night, {time}, the junior common room, after the lantern supper. Lights off, torches on. Bring the worst storm you've ever been in. You may exaggerate.
+== ask
+- Storm stories after the supper. Oduya says to bring a torch.
+- Have you got a worst storm? Everyone's got a worst storm.
+- Torchlight in the common room tonight. I'm telling the one about the roof.   #funny
+== join
+- Come in, sit anywhere. Torch under your chin when it's your turn.
+- Ah, good. We were just getting to the frightening part. It isn't very.   #funny
+- Sit with us. Listen first. Tell yours if you want to. Nobody has to.   #warm
+== here
+- And then the window just... went. Whoosh. Well. Creaked.   #funny
+- Torch under your chin. No, higher. There. Terrifying.   #funny
+- That's not the worst storm. That's weather.   #funny
+- Shh, the lights. Oh. No, just a flicker. Carry on.
+- I'd have hidden under the table. I did hide under the table.   #funny
+- Tell it again, but bigger this time.
+== stories
+// short snippets crew tell (one each, said by the teller, 90 or fewer)
+- Hailstones the size of eggs on the farm moon. We ate the hail. It was not eggs.   #funny
+- Our station lost power for a whole night. We played cards by the light of the fish tank.
+- A dust storm on Marra. Three days indoors. My brother learnt every song I hate.   #funny
+- The ferry rocked so much the soup went sideways. All of it. Onto the captain.   #funny
+- Wind took our washing line clean off. We found a sock in the next village.   #funny
+- Lightning hit the radio mast. Every radio in town played the same song for a week.
+- I slept through the worst storm in forty years. I'm still annoyed about it.   #funny
+- Snowed in at Gran's with one book. I know that book by heart now.   #warm
+== close
+- That's the last torch. Lights stay low. Sleep well, and let the storm do its job.   #warm
+- Good stories. Mostly true. Off to bed, and leave your torch by the door.
+== thanks
+- In the dark common room, crewmates take turns telling the worst storm they've ever been in, torch under the chin. Each one a little worse than the truth.   #warm
+== chatter
+- Storm stories last night. Somebody's hail was the size of melons by the third telling.   #funny
+- I didn't think I'd laugh on a storm night. Then the torch stories.   #warm
+- Oduya told one too. Just one. It was the best one.
