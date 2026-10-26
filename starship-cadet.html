@@ -42705,7 +42705,7 @@ if (EV_STORM_ON) {
     // storm day. Doesn't make sense to have 2 dinners."): everyone free goes (a meal tradition is the goers' dinner,
     // section 14), Brennan as before, Lukas on the galley line never; the bridge's double shift eats from the trays
     const ls = S.moments.find(m => m.id === 'lanternSupper');
-    if (ls) ls.who = () => 1;
+    if (ls) { ls.who = () => 1; ls.stay = [35, 50]; }   // shorter sittings (45-60 before), so the whole ship's dinner fits the mess's 48 seats by 19:45 (bigevents_check: nobody eats standing)
     // tap Oduya to join (the user's rule for traditions: a host to tap, a fitting pose, its own words): sat in the circle,
     // listening and telling (CS1's join lines are the toast, join.storm-stories.notice)
     S.dressing.escalation.push({ id: 'stormTorches', title: 'Storm stories', at: [2, 1255, 1305] });   // the lanterns and the low light, 20:55-21:45 (DECK_DRESS.stormTorches)
