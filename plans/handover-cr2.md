@@ -9,7 +9,8 @@ sha256, a Check | Result | Key lines table, and any FAIL's proof).
 
 ## The share
 
-intro_check (whole), perf_check BUILD OLD, cadet_test OLD BUILD (strictly alone), path, arc, lines, lines_check --day.
+intro_check (whole), perf_check BUILD OLD, cadet_test OLD BUILD (strictly alone), path, arc, lines, lines_check --day,
+p926_check. CR4 (or CR3/CR6) usually offers to take lines --day and p926 once intro is done: hand them over.
 About 75 minutes alone; perf (~37 min) and intro (~27-32 min) are the long ones.
 
 ## How I run it
@@ -40,6 +41,17 @@ About 75 minutes alone; perf (~37 min) and intro (~27-32 min) are the long ones.
 - Bisect a new FAIL over the candidate's first-parent merges (`git log --first-parent OLD..NEW`), using the NEW
   commit's check file on each merge's game.
 
+## Learned in 0.92.6-0.93.2 (CR2 session_01DsTDi6xJcpdDVhSkELEm24)
+
+- The runner script needs `PYTHONUNBUFFERED=1` and must finish inside the 2-hour background limit: the whole share
+  alone is ~2 h (intro ~28-40 min, perf ~50-64 min); hand lines --day and p926 over early or run them separately.
+- Never `pkill -f <pattern>` from the Bash tool: it matches and kills its own shell (exit 144). Kill by pid from `ps`.
+- perf spikes: re-measure with `PERF_SCENES="regexp"` (only those scenes, no memory runs). If a scene keeps coming out
+  higher, do a back-to-back batch OLD, NEW, switch-off copies, NEW, OLD before calling it real: 0.93.2's Sunday dinner
+  looked like +0.8 ms over 3 runs and was 2.59 vs 2.57 ms in the batch (noise).
+- arc_check stalls with STORIES_ON were a stale check (no storyTick), fixed 70813dc8.
+- lines_check on OLD with the NEW check: expect one "baked blocks out of date" error; compare only the warnings.
+
 ## Loose ends
 
-None open. Last round: 0.92.5 53c11f8 OK. CR2 (this session) is idle; a fresh CR2 takes the next round.
+Last round: 0.93.2 first pass 41c8a7e0 OK (plans/checks-cr2.md). A second 0.93.2 pass on a new sha is due (FX26's fix).
