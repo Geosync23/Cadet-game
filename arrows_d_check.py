@@ -104,11 +104,16 @@ def part_on(pg):
     if not pg.ev("guideTakeable().length"): pg.ev(f"({JOB})('arrows-d1', false)")
     shift(pg); lab = pg.ev(LAB)
     e = pg.ev("guideList().find(e => e.id === 'shift:job:9') || null")
-    print('  S3:', lab)
-    check(e and e['level'] == 4 and lab == 'Take a job at the board', f'S3: clocked in, a job to take: "Take a job at the board" at level 4 ({lab}, {e})')
+    # (RV16, 0.93.1) Day 9 is the Tier 2 test day: with the test on the board the arrow names it ("Your Tier 2 test job") and
+    # the pointer marks its Take it (FX10/FX15's lesson rule). Before 0.93.1 this check's own clock step back (07:50.2 -> 07:50)
+    # let the board drop the not-yet-posted test job, so S3 saw a plain board; it no longer does
+    les = pg.ev("(() => { const l = boardLesson(); return l ? 'Your ' + boardLessonName(l) : null; })()")
+    print('  S3:', lab, '(a lesson on the board: ' + les + ')' if les else '')
+    want = les or 'Take a job at the board'
+    check(e and e['level'] == 4 and lab == want, f'S3: clocked in, a job to take: "{want}" at level 4 ({lab}, {e})')
     pg.ev("ixBoard.open()"); shift(pg); p = ptr(pg)
     print('  S3 pointer:', p)
-    check(p['up'] and p['now'] == 'p:board:take' and p['text'] == 'Take it', f'S3: on the board, the pointer on Take it ({p})')
+    check(p['up'] and p['text'] == 'Take it' and (p['now'].startswith('p:board:lesson:') if les else p['now'] == 'p:board:take'), f'S3: on the board, the pointer on Take it ({"the lesson" if les else "the first row"}) ({p})')
     pg.ev("POINT.aim.click()"); pg.step(2); shift(pg); lab = pg.ev(LAB); p = ptr(pg)
     mine = pg.ev("myJob() && myJob().id")
     check(mine and lab and lab != 'Take a job at the board' and not p['up'], f'S3: taken: the job\'s own arrow, no pointer ({mine}, {lab}, {p})')
