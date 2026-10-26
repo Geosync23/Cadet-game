@@ -9439,7 +9439,7 @@ const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 // six weekly ones take turns from week 2 (TRAD_0932_WHEN: their rhythm with it on; week 1 unchanged), the user's fourteen new ones
 // (TRAD_0932_NEW, loaded only with it) and Brennan's tasting table after dinner in the galley (tasting-table-late, loaded as
 // tasting-table in its place). off: the game as 0.93.1
-const TRAD_0932_ON = false, TRAD_0932_NEW = new Set(['scone-morning', 'five-minute-skills', 'coffee-trials', 'jar-day', 'beginners-guitar', 'midnight-toast', 'whodunnit-club', 'windowsill-herbs', 'sounds-from-home', 'row-for-the-board', 'playlist-duel', 'rec-lamplight-paddle', 'rec-ring-the-bell', 'seed-packet-day', 'tasting-table-late']);
+const TRAD_0932_ON = true, TRAD_0932_NEW = new Set(['scone-morning', 'five-minute-skills', 'coffee-trials', 'jar-day', 'beginners-guitar', 'midnight-toast', 'whodunnit-club', 'windowsill-herbs', 'sounds-from-home', 'row-for-the-board', 'playlist-duel', 'rec-lamplight-paddle', 'rec-ring-the-bell', 'seed-packet-day', 'tasting-table-late']);
 const TRAD_0932_WHEN = {                 // any: due when either rhythm is (section 18's evDue); weekdays 0 = Monday
   'tiles-ladder': { every: '2weeks', weekday: 5, week: 1 },                                        // odd weeks
   'cook-along': { any: [{ weekday: 5, until: 7 }, { every: '2weeks', weekday: 5, week: 2 }] },     // week 1, then even weeks
