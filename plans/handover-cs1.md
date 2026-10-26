@@ -52,3 +52,14 @@ free (planner hook A). A step whose day window passes without a quiet ending of 
 - The user's tradition decisions: round 1 noes (comics wall, hum night, Sato's tea, map night, paper boats, newsletter,
   learn a dance, cranes) and round 2 noes (dawn chorus, cart derby, gallery evening, lost property, lunch quiz, tiny
   portraits, soup, star journals) are parked: never reuse their names. Valo post day was left blank.
+
+## Since the note was first written (2026-10-26, about 55% memory)
+- 0.93.2 traditions: FX24 pasted CS1's words into claude/trad-0932 (0524738d: 15 .trad files and content/banks/trad-0932.lines);
+  CS1 reviewed them (PASS) and sent one fix: six hosts' Mails in the first person, on this branch at 2a0acd7d (six
+  content/traditions/*.trad files, for FX24 to check out). Tasting dishes and Brennan's lines: plans/tasting-table-late-words.md.
+- Bunk inspection walk (SW2, content/works/inspect-walk.lines, claude/stories-sw2 e4cf8a68): FINAL PASS.
+- Basil 4 is `where: meal`, `crescendo: meal:dinner`, Day 25 (matches FX22b's claude/event-swap 49cf5dc5).
+- Storm day (Day 13): the user picked "Storm stories by torchlight" (Oduya, junior common room, 21:00-21:45). Words:
+  plans/storm-stories-words.txt (c7e67663), sent to FX26 (session_01Mda2GWi1hRm17TjvYmHoED, claude/storm-sat).
+- Session ids: SW2 now session_017dLaLFBnRUQin3PQEQq6so (an earlier SW2 was session_01E4qPjPEbEsohiaqRLm3Nyb);
+  FX24 session_017zuWxNJfppnVwkQDtiwnb6; FX22b session_01Lzi6Fe2HQJsVbaJBFxXtyx.
