@@ -413,7 +413,7 @@ sha256 **6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee** (BM1
 | day_check 5 | **OK** | DAY CHECK OK; peak 254; worst stuck 0.0; 255 s |
 | day_check 7 | **OK** | DAY CHECK OK; peak 272; worst stuck 0.0; 262 s |
 | weekend_check | **OK** | WEEKEND CHECK OK; 485 s |
-| arrows_d, arrows_f, controller_check (minus reach) | **handed to CR6** (new session 013wLtAm…, BM18's suggestion to save my memory; agreed before any started) | see CR6's notes |
+| arrows_d, arrows_f, controller_check (minus reach) | **OK, run by CR6** (new session 013wLtAm…, BM18's suggestion to save my memory; agreed before any started) | CR6: arrows_d OK with b957b92d's fixed check (0a2fc617's own failed S3, 2 lines, stale check fixed by RV16, passes on OLD); arrows_f OK; controller_check CONTROLLER CHECK OK. plans/checks-cr6.md |
 
 No FAIL in my part. (Offer went to CR4 and CR6 at once and both took it; CR6 was first, CR4 stopped its arrows_d after
 ~40 s and kept nothing. Next time: offer to one runner at a time.)
