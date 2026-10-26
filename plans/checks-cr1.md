@@ -511,3 +511,9 @@ No FAILs, so no OLD runs were needed.
 
 Extra for CR2 (agreed with CR2, BM18's ask): `lines_check.py starship-cadet.html --day` on d9c7e5f0, alone: exit 0,
 381 s, **lines_check --day: PASS (0 errors)**.
+
+Extras for CR6 (agreed with CR6, BM18's ask; CR6 cancelled its own runs first), on d9c7e5f0, each alone:
+- `device_check.py starship-cadet.html`: exit 0, 155 s, **device_check: OK** (CR6's timed out under load).
+- `events_check.py starship-cadet.html` (CR5's, default args): exit 1, 738 s, EVENTS CHECK FAILED with **one** FAIL line,
+  the known-old **FX24-2**: `reading-corner day 7, Deck 3: 2/3 reached ... FAIL not reached: ['farouk-olu>3-lounge-28 16:00']`.
+  No other FAIL (the other "not reached" lines are notes, not FAILs).
