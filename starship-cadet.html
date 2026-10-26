@@ -9422,9 +9422,20 @@ const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [.
 const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-aboard', 'tool-night', 'route-night', 'window-sketch', 'open-house', 'garden-walk', 'spoon-band', 'card-night', 'worst-joke']);               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
 const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
-const SAVE_KEY = 'starship-cadet-save' + (DEVMODE ? '-dev' : ''), SAVE_V = 2;
+// save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
+// Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
+// and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
+// the page). SAVE_BASE + '-new' asks the next load to start a new game in an empty slot ('arrive' or 'monday', section
+// 21's INTRO_BOOT does it). SLOT_HOLD: a slot change on its way, nothing more is saved. Off (or ?nosave): one save, as 0.93.1
+const SAVE_SLOTS_ON = true, SLOT_N = 3, SAVE_BASE = 'starship-cadet-save' + (DEVMODE ? '-dev' : '');
+const slotKey = n => SAVE_BASE + (n > 1 ? '-' + n : '');
+const slotRead = (k, del) => { try { const v = localStorage.getItem(k); if (del && v !== null) localStorage.removeItem(k); return v; } catch (e) { return null; } };
+const SAVE_SLOT = SAVE_SLOTS_ON && !NOSAVE ? (n => n >= 1 && n <= SLOT_N && n % 1 === 0 ? n : 1)(+slotRead(SAVE_BASE + '-slot')) : 1;
+const SLOT_NEW = SAVE_SLOTS_ON && !NOSAVE ? (v => v === 'arrive' || v === 'monday' ? v : null)(slotRead(SAVE_BASE + '-new', true)) : null;
+var SLOT_HOLD = false;
+const SAVE_KEY = slotKey(SAVE_SLOT), SAVE_V = 2;
 function saveGame() {
-  if (NOSAVE || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
+  if (NOSAVE || SLOT_HOLD || typeof devmodeHold === 'function' && devmodeHold()) return;   // Dev mode (section 25): not while a Dev action works, nor over a save it's reloading into
   try {
     const decks = {};
     for (const n in SHIP.decks) if (SHIP.decks[n].open.size) decks[n] = { open: [...SHIP.decks[n].open] };
@@ -9442,12 +9453,15 @@ function loadGame() {
   if (NOSAVE) return null;
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
-    if (!s || !(s.v === 1 || s.v === SAVE_V)) return null;   // no save, or one this build doesn't know: start fresh
-    const t = s.time, p = s.player, tile = p && p.tile;
-    if (!t || !(t.day >= 0 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !DECKS[p.deck]) return null;
-    if (!Array.isArray(tile) || tile.length !== 2 || !tile.every(Number.isInteger) || !isFinite(p.facing)) return null;
-    return s;
+    return saveOk(s) ? s : null;
   } catch (e) { return null; }
+}
+function saveOk(s) {                                     // a save this build can play (loadGame; the Saves app checks a file the same way)
+  if (!s || typeof s !== 'object' || !(s.v === 1 || s.v === SAVE_V)) return false;   // no save, or one this build doesn't know: start fresh
+  const t = s.time, p = s.player, tile = p && p.tile;
+  if (!t || !(t.day >= 0 && t.day % 1 === 0) || !(t.min >= 0 && t.min < 1440) || !p || !DECKS[p.deck]) return false;
+  if (!Array.isArray(tile) || tile.length !== 2 || !tile.every(Number.isInteger) || !isFinite(p.facing)) return false;
+  return true;
 }
 const SAVED = loadGame();
 // where you start: the save's deck, tile and facing, or Deck 4 at PLAYER_SPEC.start (section 10 reads this)
@@ -11949,7 +11963,7 @@ function deviceRefresh() {
 const DEVICE_SKIN = (() => {
   const $ = id => document.getElementById(id);
   const el = $('device'), body = $('devBody'), btn = $('devBtn'), badge = $('devMail'), head = $('devT'), backB = $('devBack'), led = $('devLed');
-  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', dot: '•', track: '◎', music: '\u266A\uFE0E' };   // ♪ as text (U+FE0E), never a colour emoji (the user: no emojis)
+  const GLYPH = { hobby: '✿', home: '⌂', needs: '♥', wrench: '⚒', mail: '✉', wallet: '¤', schedule: '◷', calendar: '▦', memo: '✎', map: '⌖', ship: '◈', news: '☰', record: '★', crew: '☺', people: '♡', gear: '✲', saves: '▤', dot: '•', track: '◎', music: '\u266A\uFE0E' };   // ♪ as text (U+FE0E), never a colour emoji (the user: no emojis)
   const mk = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const acts = new WeakMap();                  // each button's action, for the panel pointer's buttonFor (the arrows plan, piece C)
   const act = (b, action) => { b.type = 'button'; b.onclick = e => { e.stopPropagation(); deviceDo(action); }; acts.set(b, action); return b; };
@@ -12934,6 +12948,172 @@ deviceApp({ id: 'wallet', title: 'Wallet', icon: 'wallet', order: 90, view: () =
 } });
 
 // ---- slot: Device engineer (section 19). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- Saves (0.93.2, FX27; the user's yes, 2026-10-26): section 13's three save slots, in their own app (Settings is
+// full). Each slot: Day, weekday and ship time, deck, build and when it was last played (save.at, real time, written
+// only with slots on), or Empty. Play saves this game, makes that slot the one played and reloads the page; New game
+// (an empty slot) asks arrive or skip as New game does and starts it there after the reload; Delete asks first and
+// never the slot being played. Download my save hands the game (saved first) over as starship-cadet-dayN-HHMM.json: on
+// a claude.ai page through its downloads capability (frame code can't download there; the publish declares
+// { downloads: true }), else a plain download link; when neither can, Copy save as text. Load a save file reads one
+// (checked like loadGame, section 13's saveOk), asks which slot (and before replacing a used one), then plays it.
+// A bad file changes nothing. Not there with ?nosave or slots off. Every storage call in try/catch.
+const SLOT_UI = { msg: '', sure: 0, copy: false, cache: null, cacheT: 0, input: null };
+if (SAVE_SLOTS_ON && !NOSAVE) SAVE_EXTRA.push(s => { s.at = Date.now(); });
+const SLOT_MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+function slotWhen(at) {                                  // '26 Oct 2026, 14:02' (this browser's time), or null
+  if (!Number.isFinite(at)) return null;
+  const d = new Date(at); return d.getDate() + ' ' + SLOT_MON[d.getMonth()] + ' ' + d.getFullYear() + ', ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+}
+function slotLine(s) {                                   // 'Day 12, Tuesday 09:30, Deck 4' for a save (or this game)
+  return 'Day ' + s.time.day + ', ' + WEEKDAYS[weekday(s.time.day)] + ' ' + hhmm(s.time.min) + ', ' + deckWord(s.player.deck);
+}
+function slotInfo() {                                    // [{ n, used, ok, line, build, at }] for the slots (read at most every 2 seconds)
+  const now = Date.now(); if (SLOT_UI.cache && now - SLOT_UI.cacheT < 2000) return SLOT_UI.cache;
+  const out = [];
+  for (let n = 1; n <= SLOT_N; n++) {
+    const raw = slotRead(slotKey(n)); let s = null; try { s = raw ? JSON.parse(raw) : null; } catch (e) { s = null; }
+    const ok = !!s && saveOk(s);
+    out.push({ n, used: raw !== null, ok, line: ok ? slotLine(s) : null, build: ok && typeof s.build === 'string' ? s.build : null, at: ok ? s.at : null });
+  }
+  SLOT_UI.cache = out; SLOT_UI.cacheT = now; return out;
+}
+const slotFresh = () => { SLOT_UI.cache = null; };
+function slotSay(t) { SLOT_UI.msg = t || ''; slotFresh(); deviceRefresh(); return false; }
+function slotBusy() { return typeof ride !== 'undefined' && ride ? 'Not during a lift ride. Try again when the doors open.' : null; }
+function slotGo(n, pend, why) {                          // play slot n: this game saved, n made the slot played, the page reloaded
+  saveGame();
+  try { localStorage.setItem(SAVE_BASE + '-slot', String(n)); if (pend) localStorage.setItem(SAVE_BASE + '-new', pend); }
+  catch (e) { try { localStorage.removeItem(SAVE_BASE + '-new'); } catch (e2) { /* nothing more to do */ } return slotSay('The browser wouldn\'t store it, so nothing changed.'); }
+  SLOT_HOLD = true; slotSay(why + ': loading…'); deviceClose();
+  try { location.reload(); } catch (e) { /* the message stays */ }
+  return true;
+}
+function slotPlay(n) {
+  if (n === SAVE_SLOT) return slotSay('You\'re playing Slot ' + n + ' now.');
+  const b = slotBusy(); if (b) return slotSay(b);
+  const I = slotInfo()[n - 1]; if (!I.used) return slotNew(n);
+  return slotGo(n, null, 'Slot ' + n);
+}
+function slotNew(n) {                                    // a new game in empty slot n, started after the reload (section 21's INTRO_BOOT)
+  if (n === SAVE_SLOT || slotInfo()[n - 1].used) return slotSay('Slot ' + n + ' isn\'t empty.');
+  const b = slotBusy(); if (b) return slotSay(b);
+  if (typeof introArrived !== 'function' || !introArrived() || typeof deviceChoose !== 'function') return slotGo(n, 'arrive', 'New game in Slot ' + n);
+  deviceClose();
+  deviceChoose({ title: 'New game in Slot ' + n, text: 'How do you want to start?', choices: ['Arrive by shuttle (Sunday evening)', 'Skip to Monday morning'] },
+    i => { if (i >= 0) slotGo(n, i === 0 ? 'arrive' : 'monday', 'New game in Slot ' + n); });
+  return true;
+}
+function slotDelete(n) {
+  if (n === SAVE_SLOT) return slotSay('That\'s the game you\'re playing, so it can\'t be deleted here. Play another slot first.');
+  try { localStorage.removeItem(slotKey(n)); } catch (e) { return slotSay('The browser wouldn\'t delete it.'); }
+  return slotSay('Slot ' + n + ' deleted.');
+}
+const slotFileName = () => 'starship-cadet-day' + SHIP.time.day + '-' + hhmm(SHIP.time.min).replace(':', '') + '.json';
+function slotText() { saveGame(); return slotRead(SAVE_KEY); }   // this game as saved, now
+async function slotDownload() {
+  const text = slotText(); if (!text) return slotSay('Nothing is saved yet to download.');
+  const name = slotFileName(), inClaude = !!(window.claude && typeof window.claude.use === 'function');
+  if (inClaude) {
+    slotSay('Getting the download ready…');
+    let dl = null; try { dl = await window.claude.use('downloads'); } catch (e) { dl = null; }
+    if (dl && typeof dl.save === 'function') {
+      try { await dl.save({ filename: name, data: text }); SLOT_UI.copy = false; return slotSay('Downloaded ' + name + '.'); }
+      catch (e) { if (e && e.code === 'declined') return slotSay('Not downloaded.'); if (e && e.code === 'rate_limited') return slotSay('A download is already waiting for your answer.'); }
+    }
+    SLOT_UI.copy = true; return slotSay('This page can\'t download files. Copy save as text instead, and keep it somewhere safe (a note or a .json file).');
+  }
+  try {
+    const url = URL.createObjectURL(new Blob([text], { type: 'application/json' })), a = document.createElement('a');
+    a.href = url; a.download = name; a.style.display = 'none'; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 30000);
+    SLOT_UI.copy = true; return slotSay('Downloaded ' + name + '. If no file appeared, Copy save as text instead.');
+  } catch (e) { SLOT_UI.copy = true; return slotSay('This browser wouldn\'t download it. Copy save as text instead.'); }
+}
+async function slotCopy() {                              // the save as text on the clipboard (the clipboard API, else the old copy command)
+  const text = slotText(); if (!text) return slotSay('Nothing is saved yet to copy.');
+  try { await navigator.clipboard.writeText(text); return slotSay('Copied your save (' + Math.ceil(text.length / 1024) + ' KB of text). Paste it into a note or a .json file to keep it.'); } catch (e) { /* try the old way */ }
+  try {
+    const t = document.createElement('textarea'); t.value = text; t.setAttribute('readonly', ''); t.style.cssText = 'position:fixed;left:-9999px;top:0';
+    document.body.appendChild(t); t.select(); const ok = document.execCommand('copy'); t.remove();
+    if (ok) return slotSay('Copied your save (' + Math.ceil(text.length / 1024) + ' KB of text). Paste it into a note or a .json file to keep it.');
+  } catch (e) { /* below */ }
+  return slotSay('This browser wouldn\'t copy it.');
+}
+function slotPick() {                                    // the file picker (opened from the button's tap, as browsers ask)
+  let inp = SLOT_UI.input;
+  if (!inp) {
+    inp = SLOT_UI.input = document.createElement('input'); inp.type = 'file'; inp.accept = '.json,application/json,text/plain'; inp.hidden = true; inp.id = 'slotFile';
+    inp.onchange = () => { const f = inp.files && inp.files[0]; inp.value = ''; if (f) slotFile(f); };
+    document.body.appendChild(inp);
+  }
+  inp.click();
+}
+function slotFile(f) {                                   // a picked file: read, checked, then which slot
+  if (!f || f.size > 8e6) return slotSay('That isn\'t a Starship Cadet save file, so nothing changed.');
+  const r = new FileReader();
+  r.onload = () => slotLoadText(String(r.result || ''));
+  r.onerror = () => slotSay('The file couldn\'t be read, so nothing changed.');
+  try { r.readAsText(f); } catch (e) { slotSay('The file couldn\'t be read, so nothing changed.'); }
+}
+function slotLoadText(text) {                            // a save as text: checked, then the slot asked (and a used one confirmed)
+  let s = null; try { s = JSON.parse(text); } catch (e) { s = null; }
+  if (!saveOk(s)) return slotSay('That isn\'t a Starship Cadet save file, so nothing changed.');
+  const b = slotBusy(); if (b) return slotSay(b);
+  const what = slotLine(s), I = slotInfo();
+  deviceClose();
+  const asked = deviceChoose({ title: 'Load a save file', text: 'The file holds ' + what + '. Which slot should it go in?',
+    choices: I.map(x => 'Slot ' + x.n + ': ' + (x.n === SAVE_SLOT ? 'the game you\'re playing' : x.ok ? x.line : x.used ? 'a save this build can\'t read' : 'Empty')) },
+    k => {
+      if (k < 0) return;
+      const x = I[k];
+      if (!x.used) return slotPut(x.n, s);
+      deviceChoose({ title: 'Replace Slot ' + x.n + '?', text: 'Slot ' + x.n + ' holds ' + (x.n === SAVE_SLOT ? 'the game you\'re playing' : x.line || 'a save') + '. Loading the file replaces it, and it can\'t be got back.',
+        choices: ['Replace it'], cancel: 'Keep it' }, j => { if (j === 0) slotPut(x.n, s); });
+    });
+  if (!asked) return slotSay('Close what\'s open on screen first, then load the file again.');
+  return true;
+}
+function slotPut(n, s) {                                 // the checked save into slot n, then played
+  if (n !== SAVE_SLOT) saveGame();                       // this game kept in its own slot first
+  SLOT_HOLD = n === SAVE_SLOT;                           // over the game being played: nothing more of it is saved
+  try { localStorage.setItem(slotKey(n), JSON.stringify(s)); }
+  catch (e) { SLOT_HOLD = false; return slotSay('The browser wouldn\'t store it (storage full or off), so nothing changed.'); }
+  return slotGo(n, null, 'Loading the save file into Slot ' + n);
+}
+function slotsAct(verb, arg) {
+  if (verb !== 'del' && verb !== 'delgo') SLOT_UI.sure = 0;
+  if (verb === 'play') slotPlay(arg);
+  else if (verb === 'new') slotNew(arg);
+  else if (verb === 'del') { SLOT_UI.sure = arg; SLOT_UI.msg = ''; }
+  else if (verb === 'delgo') { SLOT_UI.sure = 0; slotDelete(arg); }
+  else if (verb === 'keep') SLOT_UI.msg = '';
+  else if (verb === 'download') slotDownload();
+  else if (verb === 'copy') slotCopy();
+  else if (verb === 'load') { SLOT_UI.msg = ''; slotPick(); }
+  slotFresh();
+}
+function slotsView() {
+  const B = [{ kind: 'text', text: 'Three games, kept in this browser. The game you play saves itself in its slot.' }];
+  for (const x of slotInfo()) {
+    const me = x.n === SAVE_SLOT, line = me ? clockText() + ', ' + deckWord(player.deck) : x.line;
+    const sub = me ? line + '. Playing now.' : x.ok ? line + '. Build ' + (x.build || '?') + (slotWhen(x.at) ? '. Last played ' + slotWhen(x.at) : '') + '.' : x.used ? 'A save this build can\'t read.' : 'Empty';
+    B.push({ kind: 'list', rows: [{ text: 'Slot ' + x.n + (me ? ' (playing)' : ''), sub, mark: me ? 'new' : null }] });
+    if (me) continue;
+    if (SLOT_UI.sure === x.n) B.push({ kind: 'text', text: 'Delete Slot ' + x.n + '? That game will be lost.', mark: 'urgent' },
+      { kind: 'buttons', items: [{ label: 'Delete it', action: { app: 'saves', do: 'delgo', arg: x.n } }, { label: 'Keep it', action: { app: 'saves', do: 'keep' } }] });
+    else B.push({ kind: 'buttons', items: x.used ? [...(x.ok ? [{ label: 'Play', action: { app: 'saves', do: 'play', arg: x.n } }] : []), { label: 'Delete', action: { app: 'saves', do: 'del', arg: x.n } }]
+      : [{ label: 'New game', action: { app: 'saves', do: 'new', arg: x.n } }] });
+  }
+  if (SLOT_UI.msg) B.push({ kind: 'text', text: SLOT_UI.msg, mark: 'urgent' });
+  B.push({ kind: 'text', text: 'Keep a copy of this game, or bring one back' },
+    { kind: 'buttons', items: [{ label: 'Download my save', action: { app: 'saves', do: 'download' } }, ...(SLOT_UI.copy ? [{ label: 'Copy save as text', action: { app: 'saves', do: 'copy' } }] : []),
+      { label: 'Load a save file', action: { app: 'saves', do: 'load' } }] });
+  return { title: 'Saves', blocks: B };
+}
+if (SAVE_SLOTS_ON && !NOSAVE) {
+  deviceApp({ id: 'saves', title: 'Saves', icon: 'saves', order: 98, act: slotsAct, view: slotsView });
+  deviceOn('close', () => { SLOT_UI.sure = 0; });
+}
 // ---- the panel pointer (the arrows plan, piece C, AC1; plans/arrows-briefs.md): a gold ring on one button inside an
 // open panel (a device tile or button, a choice card, a job board row, the time clock), with a short label above or
 // below it. pointAsk({ id, path, done, until, once }): path = [{ open: () => bool, el: () => element | null, label }],
@@ -49193,7 +49373,7 @@ SHIP.intro = introLoad(SAVED);
 // a first launch arriving by shuttle (the lead's one design, with sim 0.26.25): section 13 starts every game as before
 // and this section decides; its first frame (introTick, once every section has run) calls section 13's
 // newGameStart(true) when there's no save, it isn't a test URL and this device has never arrived
-let INTRO_BOOT = typeof SAVED !== 'undefined' && !SAVED && !NOSAVE && introWanted();
+let INTRO_BOOT = typeof SAVED !== 'undefined' && !SAVED && !NOSAVE && (introWanted() || typeof SLOT_NEW !== 'undefined' && !!SLOT_NEW);   // SLOT_NEW: New game in an empty save slot (section 13)
 const introSave = () => JSON.parse(JSON.stringify(SHIP.intro));
 SAVE_EXTRA.push(s => { s.intro = introSave(); });
 const introOn = () => !!(SHIP.intro && SHIP.intro.on && !SHIP.intro.ended);
@@ -49990,7 +50170,7 @@ function introCalderIn() {
   return !!(a && sp && Math.hypot(a.x - sp.x, a.z - sp.z) <= 1.2);
 }
 function introTick() {
-  if (INTRO_BOOT) { INTRO_BOOT = false; if (typeof newGameStart === 'function') newGameStart(true); }
+  if (INTRO_BOOT) { INTRO_BOOT = false; const mon = typeof SLOT_NEW !== 'undefined' && SLOT_NEW === 'monday'; if (typeof newGameStart === 'function') newGameStart(!mon); if (mon) introSkip(); }   // (Monday: a new game in an empty save slot, skipping the arrival, as New game does)
   if (!introOn() || typeof player === 'undefined') { if (document.getElementById('devPoint') || INTRO_DEV_GLOW) introDevGlowTick(); return; }   // (the patch, #14: an intro skipped mid-glow)
   const I = SHIP.intro;
   if (I.step === 'manifest') { SHIP.time.day = INTRO_START.day; SHIP.time.min = INTRO_START.min; if (typeof ternRamp === 'function') ternRamp(false, 0); introManifest(); return; }
@@ -60957,8 +61137,9 @@ function devmodeUndo() {
   try { sessionStorage.setItem(DM_KEY.undo, '1'); } catch (e) { /* then it stays: a second Undo is harmless */ }   // the Undo is used: the new page drops it (devmodeBuild)
   devmodeLoad(u, 'Undo (' + u.label + ')');
 }
+const dmRealKey = () => { const n = SAVE_SLOTS_ON ? +slotRead(DM_REAL.save + '-slot') : 1; return n >= 2 && n <= SLOT_N && n % 1 === 0 ? DM_REAL.save + '-' + n : DM_REAL.save; };   // the Playtest save slot being played (section 13's slots; Slot 1 is DM_REAL.save)
 function devmodeCopyReal() {                              // your real game into the Dev save: read, never written
-  let real = null, arr = null; try { real = localStorage.getItem(DM_REAL.save); arr = localStorage.getItem(DM_REAL.arrived); } catch (e) { real = null; }
+  let real = null, arr = null; try { real = localStorage.getItem(dmRealKey()); arr = localStorage.getItem(DM_REAL.arrived); } catch (e) { real = null; }
   if (!real) return devmodeSay('There\'s no real game saved in this browser to copy.');
   const why = devmodeBusy(); if (why) return devmodeSay(why);
   const kept = devmodeKeep('Copy my real game'); if (kept) return devmodeSay('Not done: ' + kept);
