@@ -343,3 +343,13 @@ Checks (RV19): cadet_test vs b957b92d with STORM_SAT_ON false ALL IDENTICAL (ren
 OK; day_check 13 DAY CHECK OK. FX26: check_fast OK, cadet_test off/on identical.
 
 **Verdict on 6f19944d: PASS.**
+
+### Save slots, test-only follow-up: a1df5739 (saves_check.py only; game unchanged, d7b6a9f4...2e09)
+Since ba6b7b9a: longer waits (load 120 s, cards, picker, download 60 s), a stopped part prints its traceback, builds and
+links switched in the same tab, a diagnostic line if the old save is missing, and the game served from
+http://saves-check.test/ by a Playwright route (the same file) instead of file:// (FX27 measured a navigated file:// page
+now and then handed a fresh empty storage, with the slots-off build too: a check problem, not the game). The checks still
+check the same things; one web origin is how a player meets the game (RV19's own slots check used an http server too).
+RV19: game sha256 confirmed unchanged; saves_check (all parts) SAVES CHECK OK; migrate alone 6 of 6 OK.
+
+**Verdict on a1df5739: PASS (test only).**
