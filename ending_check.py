@@ -185,7 +185,7 @@ CROSS = r"""((ans) => { const out = { notes: [] }; if (DIALOGUE) dialogueEnd(tru
   T(d(34, 599)); T(d(34, 600)); const sh = GUIDE.list.find(x => x.id === 'end:cb:ship'); out.shipArrow = sh ? [sh.level, sh.goal().room] : null; out.saruth = CREW_SCENE.has('saruth') ? CREW_SCENE.get('saruth').to : null; out.notes.push(...__notes.splice(0));
   out.sky = [[34, 599], [34, 600], [35, 869], [35, 870], [35, 893], [35, 899], [35, 900]].map(([dd, m]) => { const x = crossingBackShip(d(dd, m)); return x ? x.pose + (x.flash ? '*' : '') : '-'; });
   T(d(35, 400)); T(d(35, 840)); const oa = GUIDE.list.find(x => x.id === 'end:cb:oath'); out.oathArrow = oa ? [oa.level, oa.goal().deck, oa.goal().room, oa.goal().label] : null;
-  T(d(35, 870)); out.notes.push(...__notes.splice(0)); out.cert0 = crossingBackDone();
+  T(d(35, 870)); goToDeck(4); CREW_SCENE.clear(); T(d(35, 875)); out.fetch = CREW_SCENE.has('vance') ? CREW_SCENE.get('vance').mode : null; CREW_SCENE.clear(); out.notes.push(...__notes.splice(0)); out.cert0 = crossingBackDone();
   goToDeck(3); player.obj.position.copy(cellPos(...ROOM_TILES['L'][Math.floor(ROOM_TILES['L'].length / 2)]));
   setShipNow(d(35, 880)); meetingsTick(shipNow()); out.oathShown = DIALOGUE ? DIALOGUE.id : null; out.oath = run();
   const seen = []; for (let i = 0; i < 4 && !M['story:address']; i++) { T(d(35, 900 + i)); if (DIALOGUE) { seen.push(DIALOGUE.id); out['run' + i] = run(0).join(','); } }
@@ -212,6 +212,7 @@ def part_crossing(g):
         n = ' | '.join(r['notes'])
         check('coming to find you' in n and 'leading the oath' in n and 'off the bow' in n and 'Today at 14:30' in n and 'horn' in n.lower(), f"crossing: the notices, Vance, the ship, the morning, the horn ({r['notes']})")
         check(r['shipArrow'] == [2, 'L'] and r['saruth'] == '3-bow-lounge-line-lead-4' and r['oathArrow'] and r['oathArrow'][:3] == [1, 3, 'L'] and 'Lead the oath' in r['oathArrow'][3], f"crossing: the ship's arrow (2), Saruth at the glass, the oath's arrow (1) ({r['shipArrow']}, {r['saruth']}, {r['oathArrow']})")
+        check(r['fetch'] == 'follow' and 'oath is waiting' in n, f"crossing: not in the lounge at 14:35, Vance comes to find you ({r['fetch']})")
         check(r['sky'] == ['-', 'bow', 'bow', 'alongside', 'alongside*', 'alongside', '-'], f"crossing: the Veyli ship's poses ({r['sky']})")
         check(r['oathShown'] == 'crossingBackOath' and r['oath'].count('?') >= 3, f"crossing: the oath played with your lines as one-reply choices ({r['oathShown']}, {r['oath']})")
         exp = ['moment:crossingBackSignal', 'moment:crossingBackAddress.' + ({None: 'ask', 'unsure': 'ask', 'plain': 'plain'}.get(ans) or want)]

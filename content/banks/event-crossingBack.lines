@@ -9,6 +9,14 @@
 // end.now.unsure (your answer so far, before the address).
 
 // ---- Wednesday Day 31: Vance's word (said in person first: meeting crossingBackWord), then these as the record
+// EN2 (RV21's should): the notice as Vance sets off to find you on Wednesday, and Sunday's fetch to the oath if
+// you're not in the bow lounge by 14:35 (his notice, then his line beside you, a bubble: 60 at most)
+== event.crossingBack.notice.vanceComing
+- Commander Vance is coming to find you.
+== event.crossingBack.notice.fetch
+- Commander Vance is coming to find you: the oath is waiting for you.
+== event.crossingBack.say.fetch
+- There you are. The bow lounge. They won't start without you.
 == event.crossingBack.notice.word
 - Sunday at 14:30 the Wren crosses back over the Line. You're leading the oath.
 == event.crossingBack.status.word

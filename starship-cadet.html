@@ -33826,10 +33826,14 @@ const LINES = JSON.parse([
   '{"text":"Sunday we cross back over the Line | On Sunday at 14:30 the Wren crosses back over the Line, four weeks to the hour after the first crossing. The ceremony is in the bow lounge. One first-timer: Cadet Bramwell. You will lead the oath, as discussed. Then the Line supper in the mess at 18:00. Attendance is not required. It is, however, expected. Vance","id":"8248fc"}]',
   ',"event.crossingBack.notice.ceremony":[',
   '{"text":"The crossing back: the oath in the bow lounge at 14:30. You\'re at the front this time.","id":"nbbroe"}]',
+  ',"event.crossingBack.notice.fetch":[',
+  '{"text":"Commander Vance is coming to find you: the oath is waiting for you.","id":"z3g208"}]',
   ',"event.crossingBack.notice.horn":[',
   '{"text":"The ship\'s horn: the Wren has crossed back over the Line.","id":"11mt4ye"}]',
   ',"event.crossingBack.notice.morning":[',
   '{"text":"Today at 14:30 the Wren crosses back over the Line. You lead the oath, the bow lounge.","id":"749wan"}]',
+  ',"event.crossingBack.notice.vanceComing":[',
+  '{"text":"Commander Vance is coming to find you.","id":"1qlfj4o"}]',
   ',"event.crossingBack.notice.vessel":[',
   '{"text":"Taavek\'s ship is off the bow again: the bow lounge glass, Deck 3.","id":"1rbu33k"}]',
   ',"event.crossingBack.notice.word":[',
@@ -33848,6 +33852,8 @@ const LINES = JSON.parse([
   '{"text":"Crossed back over the Line, Day 35.","id":"otlqy4"}]',
   ',"event.crossingBack.ring.oath":[',
   '{"text":"Lead the oath","id":"j60s7c"}]',
+  ',"event.crossingBack.say.fetch":[',
+  '{"text":"There you are. The bow lounge. They won\'t start without you.","id":"m23fm6"}]',
   ',"event.crossingBack.status.morning":[',
   '{"text":"Today 14:30: the Wren crosses back over the Line.","id":"d24nvf"}]',
   ',"event.crossingBack.status.onset":[',
@@ -47144,7 +47150,7 @@ function crossingBackTick(now) {
   const say = (a, text) => !!(a && text && typeof bubbleSay === 'function' && bubbleSay(a.h, text, 5));
   // Wednesday: Vance comes to find you (08:30 to 21:00), his word beside you, then the notice
   if (!M['story:vance'] && now >= at(0, 510) && now < at(0, 1260) && !busy) {
-    if (!M['notice:vanceComing']) { M['notice:vanceComing'] = 1; crossingBackNotice('Commander Vance is coming to find you.', false, 'Commander Teo Vance'); }
+    if (!M['notice:vanceComing']) { M['notice:vanceComing'] = 1; crossingBackNotice(w('notice.vanceComing') || 'Commander Vance is coming to find you.', false, 'Commander Teo Vance'); }
     if (typeof crewScene === 'function') crewScene('vance', { mode: 'follow', to: null, until: now + 3 });
     if (near('vance', 2.5)) crossingBackMoment('crossingBackWord', ['vance'], ['story:vance', 1]);
   }
@@ -47173,6 +47179,14 @@ function crossingBackTick(now) {
   const oathEnd = at(4, 880 + 35);
   if (now >= at(4, 840) && now < oathEnd && !M['met:crossingBackOath'] && typeof guideAsk === 'function')
     guideAsk({ id: 'end:cb:oath', level: 1, owner: '18 (EN2)', from: at(4, 840), until: oathEnd, goal: () => ({ deck: 3, room: 'L', label: (w('ring.oath') || 'Lead the oath') + ': the bow lounge' }), done: () => !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['met:crossingBackOath']) });
+  // not in the lounge by 14:35 (RV21: never missable): Vance comes to find you and walks you there; the oath waits for
+  // you (the meeting plays when you come in, to 15:15; the crowd stays to then)
+  if (!M['met:crossingBackOath'] && now >= at(4, 875) && now < at(4, 905) && up && room !== '3|Bow lounge' && typeof crewScene === 'function') {
+    if (!M['notice:fetch']) { M['notice:fetch'] = 1; crossingBackNotice(w('notice.fetch') || 'Commander Vance is coming to find you: the oath is waiting for you.', true, 'Commander Teo Vance'); }
+    if (!M['story:fetch'] && near('vance', 2.5)) { M['story:fetch'] = now; say(near('vance', 2.5), w('say.fetch') || 'There you are. The bow lounge. They won\'t start without you.'); }
+    crewScene('vance', M['story:fetch'] ? { mode: 'lead', to: '3-bow-lounge-line-crowd-12', until: now + 3 } : { mode: 'follow', to: null, until: now + 3 });
+  }
+  if (M['story:fetch'] && !M['story:fetchEnd'] && (room === '3|Bow lounge' || now >= at(4, 905))) { M['story:fetchEnd'] = 1; if (typeof crewSceneEnd === 'function') crewSceneEnd('vance'); }
   if (!M['notice:horn'] && now >= at(4, 870) && now < at(4, 876) && up) { M['notice:horn'] = 1; crossingBackNotice(w('notice.horn') || 'The ship\'s horn: the Wren has crossed back over the Line.'); }
   // after the oath, still in the lounge: Saruth's signal, then the address
   const inLounge = room === '3|Bow lounge', after = M['met:crossingBackOath'] && !M['open:crossingBackOath'] && !DIALOGUE && inLounge && now < at(4, 945);
@@ -66919,6 +66933,7 @@ function endTick(now, skip) {                            // once a ship minute (
     if (now < B + END_T.roomTo) occasionAdd('endingOffer', B + END_T.offerAt, !live, END_T.roomTo - END_T.offerAt);
   }
   if (!E.offer) return;
+  if (d < W.offer) return;                               // the clock before the offer's day (a check, or Dev mode, moved it back): nothing plays (EN2, events_check's storm parts)
   if (!E.offer.met) {
     if (live && !E.f.invite && d === W.offer && m < END_T.offerAt) { E.f.invite = now; endNotice(endText('ending.notice.invite', 'The Captain asks to see you: the ready room, Deck 1, at 16:00.'), 'Commander Teo Vance'); }
     if (live && !E.f.go && d === W.offer && m >= END_T.arrowFrom && m < END_T.offerAt && !endInRoom()) { E.f.go = now; endNotice(endText('ending.notice.go', 'The ready room, 16:00: time to go up. Deck 1.'), 'Commander Teo Vance'); }
