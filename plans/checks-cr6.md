@@ -1,5 +1,10 @@
 # CR6 check results
 
+## Side job for RV19 / lead 38 (2026-10-26): claude/storm-sat 402899bd (game sha c799f15e...7cd), as pushed
+
+- fridays_check: OK (exit 0, 1842 s), `FRIDAYS CHECK OK`.
+- arrows_check: OK (exit 0, 1848 s), `ARROWS CHECK OK`. (Side by side, own CADET_WORK each.)
+
 ## Side jobs for lead 38 (2026-10-26): fridays_check on claude/comet
 
 | Commit (game sha) | As shipped (EV_COMET_ON true, swap off) | Copy with EV_COMET_ON = false |
