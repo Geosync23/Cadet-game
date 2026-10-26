@@ -1,5 +1,25 @@
 # Check runner CR4: results
 
+## 0.93.1 full round (2026-10-26)
+
+- **Candidate:** `claude/staging-0.93.1` 0a2fc617 (HUD 0.93.1; arrows_check promo fix, boardLesson/promoTestDay)
+- **starship-cadet.html sha256:** `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee` (matches BM18's)
+- **OLD:** df8d58b9 (0.93.0, game 97f21893...f6a8); not needed, no FAIL
+- **Share:** day_check Days 12, 13, 16, 19, 6, 8, then appt_check. One at a time, alone, at 0a2fc617, `CADET_WORK=/tmp/work-cr4`. Reported to BM18 and lead 37.
+- **A race on CR3's three:** CR3 offered arrows_d, arrows_f and controller (minus reach) to CR6 and me at once; the new CR6 (session_013wLtAm...) replied 4 s first and runs them. I had started arrows_d in a second CADET_WORK (`/tmp/work-cr4b`) for about 40 s; killed, nothing kept.
+
+| Check | Result | Key lines |
+|---|---|---|
+| day_check 12 | OK (exit 0, 231 s) | `DAY CHECK OK`; plans the same twice; storm skip as designed; draw calls peak 249 / 450; nobody stuck; 0 arrivals drawn elsewhere |
+| day_check 13 | OK (exit 0, 213 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 252 / 450 |
+| day_check 16 | OK (exit 0, 225 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 281 / 450 |
+| day_check 19 | OK (exit 0, 219 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 247 / 450 |
+| day_check 6 | OK (exit 0, 210 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| day_check 8 | OK (exit 0, 213 s) | `DAY CHECK OK`; plans the same twice; draw calls peak 278 / 450 |
+| appt_check | OK (exit 0, 519 s) | `APPT CHECK OK`; 223 ok lines; FAIL lines only inside its planted self-tests |
+
+**CR4: OK.** No FAILs. Every number identical to 0.93.0.
+
 ## 0.93.0 full round (2026-10-25; sound and music)
 
 - **Candidate:** `claude/staging-0.93.0` 4f1e52bf (HUD 0.93.0)
