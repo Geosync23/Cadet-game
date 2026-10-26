@@ -18,6 +18,14 @@
 #             storm's party in the bow lounge the party's twin; only then the test is set (Day 15), the urgent notice and
 #             the Mail; Schedule and Tracked rows, the Training tab and What's next; two friends' Mails at 20:00; the
 #             talk's beats (luck the evening before and the test morning); not found by 22:00: by Mail
+#   t3pointer: (switch on) the test morning's notice, the level 1 arrow to the bay from 08:30; at 09:00 the job held for you
+#             on the worse Deck 6 junction (slot 25), the board's ring forced with Teaching arrows Off, "Your Tier 3 test:
+#             take it", the world arrow level 1; the Schedule's row; an hourly notice while you hold another job
+#   t3test:   (switch on) taken: Calder's word; level 1 arrows to each step; the plan names the two to warn; the switch
+#             refused before both know; "About the shutdown" on them in the chat card, their answer; one not found in 30
+#             minutes, Calder tells them; the breaker, back on, the junction put right; turned in: passed, still Tier 2,
+#             Calder's word, the Mail and the notice name tomorrow 08:15, the result's row; the crew watch, then talk of it.
+#             Not taken by 15:00: set again in two workdays, never failed
 # The Tier 3 parts need a build with the switch on for everything but t3off: python3 promo_beats_check.py ON.html t3before
 # (ON.html: P5_STEP5 = true in a copy, plans/handover-b5.md).
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
@@ -238,11 +246,67 @@ def part_t3before(g):
     check(r['mon'] == 15 and r['dlg'] == 'pu3.offer' and r['t3'] and r['t3']['day'] == 16, f"t3before: on a later day, from 08:00, \"tomorrow\" ({r})")
     check(r['late'] and r['late']['day'] == 16 and r['lateMail'] == 1, f"t3before: not found by 22:00, it comes by Mail ({r})")
 
+T3_TEST = """const W = __w(15, 300, { xp: 60, tr: { ps: 12, t2: 9 } }); W.tier = 2; W.rank = 'officer'; __friends();
+      for (const r of CAREER_LADDER) if (r.id !== 't3' && r.tier <= 2) { W.tr[r.id] = W.tr[r.id] || 9; (W.op[9] = W.op[9] || []).push(r.id); }
+      puSet(15); flagSet('pu3.told', 14); flagSet('pu3.notice', 14); setShipNow(14 * 1440 + 361); machinesNow(); careerClock(shipNow(), true); __bay();"""
+def part_t3pointer(g):
+    if not t3on(g, 't3pointer'): return
+    print('(t3pointer) the test morning and the board:')
+    r = g.ev("""(() => { """ + T3_TEST + """ __tick(); const out = { notes: __notes.slice() };
+      setShipNow(14 * 1440 + 515); goToDeck(4); __tick(); out.bay = GUIDE.list.filter(e => /^pu3/.test(e.id)).map(e => e.id + ' L' + e.level + ' ' + ((e.goal() || {}).label || ''));
+      __bay(); setShipNow(14 * 1440 + 541); __tick(); const c = W.cur, j = c && SHIP.jobs.find(x => x.id === c.j);
+      out.cur = c && c.id + ' ' + c.st; out.job = j && { slot: j.reserved, mach: j.mach, found: hhmm(j.found % 1440), until: hhmm(j.until % 1440), who: j.t3.who.length, store: SHIP.stores.breaker };
+      out.worse = puJunction() === (j && j.mach); out.rows = __rows(15);
+      SHIP.device.settings.teach = 'off'; SHIP.device.pointsSeen = {}; POINT_Q.length = 0; GUIDE.list.length = 0; ixBoard.open(); guideShift(); __tick();
+      const q = POINT_Q.find(x => x.id === 'p:board:lesson:t3'); out.ring = q ? { force: !!q.force, label: q.path.map(s => s.label || '').join('|') } : null;
+      const e = GUIDE.list.find(x => x.id === 'pu3:test:15'); out.level = e ? e.level : null; pointFrame(); const el = document.querySelector('#ptr .ptlab'); out.screen = el ? el.textContent : null; ixBoard.close(); SHIP.device.settings.teach = 'first';
+      const oid = jobReserve('washer', 15, 541, 98, { until: 14 * 1440 + 1000 }), o = SHIP.jobs.find(x => x.id === oid); __notes.length = 0; if (o && claimJob(o.id)) { setShipNow(14 * 1440 + 600); __tick(); setShipNow(14 * 1440 + 610); __tick(); setShipNow(14 * 1440 + 661); __tick(); out.busy = __notes.filter(n => /waits on the job board/.test(n)).length; dropJob(o.id); } else out.busy = 'no other job to hold';
+      return out; })()""")
+    print('   ', r)
+    check(any('Tier 3 test, 09:00' in n for n in r['notes']), f"t3pointer: the morning's notice once you're up ({r['notes']})")
+    check(any(x.startswith('pu3:testday:15 L1') and 'Works bay' in x for x in r['bay']), f"t3pointer: a level 1 arrow to the Works bay from 08:30 ({r['bay']})")
+    check(r['cur'] == 't3 do' and r['job'] and r['job']['slot'] == 25 and r['job']['found'] == '09:00' and r['job']['until'] == '15:00' and r['job']['who'] == 2 and r['job']['store'] >= 1 and r['worse'], f"t3pointer: the job held for you 09:00-15:00 in slot 25 on the worse junction, its breaker set aside, two to warn ({r['cur']}, {r['job']})")
+    check(r['ring'] and r['ring']['force'] and r['ring']['label'].endswith('Your Tier 3 test: take it') and r['level'] == 1 and 'Tier 3 test' in (r['screen'] or ''), f"t3pointer: the board's ring forced with Teaching arrows Off, named, on screen; the arrow level 1 ({r})")
+    check('09:00 Your Tier 3 test' in r['rows'], f"t3pointer: the Schedule's row ({r['rows']})")
+    check(r['busy'] == 2, f"t3pointer: one notice an hour while you hold another job: 10:00, not 10:10, 11:01 ({r['busy']})")
+
+def part_t3test(g):
+    if not t3on(g, 't3test'): return
+    print('(t3test) the test, step by step:')
+    r = g.ev("""(() => { """ + T3_TEST + """ __tick(); setShipNow(14 * 1440 + 541); __tick(); const c = W.cur, j = SHIP.jobs.find(x => x.id === c.j), out = {};
+      const st = () => jobStops(j).map(s => s.step + (s.done ? '+' : '-')).join(' '), arrow = () => GUIDE.list.filter(e => /^pu3:step/.test(e.id)).map(e => (e.goal() || {}).label || '').join('|');
+      __said.length = 0; out.take = claimJob(j.id); __tick(); out.said = __said.slice(); out.esc = (worksEscort({ id: 'calder' }, shipNow()) || {}).mode; out.a0 = arrow();
+      SHIP.player.carry.push('breaker'); jobStepDone(j.id, 0); out.a1 = arrow(); __said.length = 0; __toasts.length = 0; jobStepDone(j.id, 1); out.plan = __said.slice(); out.who = __toasts.slice(-1); out.a2 = arrow();
+      out.off = jobStepDone(j.id, 2).retry; out.offSay = __toasts.slice(-1);
+      const p0 = evPerson(j.t3.who[0]), p1 = evPerson(j.t3.who[1]); out.btn = (puChatButton(p0) || {}).label; out.say0 = puChatSay(p0); out.after = puChatButton(p0);
+      setShipNow(14 * 1440 + 541 + 31); __tick(); out.told = j.t3.told.slice(); out.by = j.t3.by; out.a3 = arrow();
+      out.r = [2, 3, 4].map(k => jobStepDone(j.id, k).ok); out.st = st(); out.done = !!j.workDone; out.cond = SHIP.machines[j.mach].cond; out.a4 = arrow();
+      out.watch = (() => { j.workDone = null; const k = (puTalkKind(shipNow()) || [])[0]; j.workDone = shipNow(); return k; })();
+      __said.length = 0; __notes.length = 0; out.turnin = turnInJob(j.id); __tick(); out.t3 = puT3(); out.tier = W.tier; out.cur = W.cur; out.passed = __said.slice();
+      out.mail = __mail().filter(m => /result/i.test(m)); out.notes = __notes.slice(); out.rows = __rows(16); out.next = worksNext(); out.kind = (puTalkKind(shipNow()) || [])[0]; return out; })()""")
+    for k, v in r.items(): print('   ', k, v)
+    check(r['take'] and any('Deck 6' in x for x in r['said']) and r['esc'] == 'follow', f"t3test: taken, Calder's word, she follows you ({r['said']}, {r['esc']})")
+    check('breaker from main storage' in r['a0'] and 'plan it with Calder' in r['a1'], f"t3test: the arrow names each step: the breaker, the plan ({r['a0']}, {r['a1']})")
+    check(len(r['plan']) >= 1 and r['who'] and 'Warn' in r['who'][0][1] and r['a2'].startswith('Warn '), f"t3test: the plan: Calder's talk, the two named, the arrow to the first ({r['plan']}, {r['who']}, {r['a2']})")
+    check(r['off'] and 'warn' in r['offSay'][0][1].lower(), f"t3test: the switch refused before both know ({r['offSay']})")
+    check(r['btn'] == 'About the shutdown' and r['say0'] and r['after'] is None, f"t3test: \"About the shutdown\" on them, their answer, then gone ({r['btn']}, {r['say0']})")
+    check(len(r['told']) == 2 and list(r['by'].values()).count('you') == 1 and list(r['by'].values()).count('calder') == 1, f"t3test: one not found in 30 minutes: Calder tells them ({r['by']})")
+    check(all(r['r']) and r['done'] and r['cond'] >= 95 and r['a4'] == 'Turn it in' and r['a3'] == 'Switch it off', f"t3test: switch off, the breaker, back on: the junction put right, the arrow to turn it in ({r['st']}, {r['cond']}, {r['a3']}, {r['a4']})")
+    check(r['watch'] == 'pu3.watch', f"t3test: the crew watch you at it ({r['watch']})")
+    check(r['turnin'] and r['t3']['passed'] and r['tier'] == 2 and r['cur'] is None and r['passed'], f"t3test: turned in: passed, still Tier 2 till the result, Calder's word ({r['t3']}, {r['passed']})")
+    check(any('tomorrow' in m and '08:15' in m for m in r['mail']) and any('tomorrow' in n and '08:15' in n for n in r['notes']), f"t3test: the Mail and the notice name tomorrow, 08:15 ({r['mail']}, {r['notes']})")
+    check(any(x.startswith('08:15') and 'result' in x.lower() for x in r['rows']) and 'result' in r['next'].lower() and r['kind'] == 'pu3.passed', f"t3test: the result's row, What's next, the crew's talk ({r['rows']}, {r['next']}, {r['kind']})")
+    r = g.ev("""(() => { """ + T3_TEST + """ __tick(); setShipNow(14 * 1440 + 541); __tick(); const c = W.cur;
+      for (const t of [14 * 1440 + 900, 14 * 1440 + 901, 14 * 1440 + 960]) { setShipNow(t); machinesNow(); trainTick(t); __tick(); }
+      return { t3: puT3(), cur: W.cur && W.cur.st, jobs: SHIP.jobs.filter(x => x.kind === 'tier3' && x.status !== 'done').length, mail: __mail().filter(m => /^Chief Ines Calder: Again/.test(m)), notes: __notes.filter(n => /set again/.test(n)) }; })()""")
+    print('   ', r)
+    check(r['t3'] and r['t3']['day'] == 17 and not r['t3']['passed'] and r['jobs'] == 0 and r['cur'] == 'ask' and r['mail'] and r['notes'], f"t3test: not taken by 15:00: set again in two workdays (Day 17), the job gone, never failed ({r})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review), ('t3off', part_t3off), ('t3before', part_t3before), ('t3pointer', part_t3pointer), ('t3test', part_t3test)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

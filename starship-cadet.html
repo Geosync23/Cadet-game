@@ -16663,7 +16663,7 @@ function boardLesson() {
 function boardLessonName(id = boardLesson()) {
   const c = SHIP.works && SHIP.works.cur, j = id && (SHIP.jobs || []).find(x => x.id === id);
   if (j && !(c && c.j === id)) return j.case ? 'head-scratcher lesson' : ({ 1: 'shadow job', 2: 'job to lead', 3: 'first solo job' })[j.reserved] || 'lesson';   // (FX15, patch 0.92.5 #22)
-  if (c && c.id === 't2') return 'Tier 2 test job';     // (FX15) 24p's test, not a lesson
+  if (c && (c.id === 't2' || c.id === 't3')) return 'Tier ' + c.id.slice(1) + ' test job';     // (FX15) 24p's test, not a lesson (24u's Tier 3 test too, S5-2)
   let n = ''; try { n = c && typeof mechName === 'function' ? mechName(c.id) : ''; } catch (e) { n = ''; }
   n = String(n || '').replace(/^the /i, '').toLowerCase(); return n ? n + ' lesson' : 'lesson';
 }
@@ -16679,7 +16679,7 @@ const ixBoard = (() => {
   }
   const PRI = ['routine', 'soon', 'urgent', 'urgent'];
   // what section 15 can walk you through today: machine jobs (and chores on a machine), and cart runs (cartTap)
-  const BOARD_KINDS = new Set(['rounds', 'haul']);     // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo)
+  const BOARD_KINDS = new Set(['rounds', 'haul', 'tier3']);   // the registered kinds taken at the board (lead 29: only these; never an incident, a leak, nozzles or the trace demo; 24u's Tier 3 test, S5-2)
   const doable = j => !!(j && (j.machine || j.kind === 'restock' || (j.kind === 'chore' || BOARD_KINDS.has(j.kind) && typeof JOB_KINDS === 'object' && JOB_KINDS[j.kind]) && typeof jobStepDone === 'function'));   // a round and a haul too (run by their stops; AC2, FX2's find): they said "coming soon", so Rounds and Hauling could never be taken
   const button = (txt, fn) => { const x = document.createElement('button'); x.type = 'button'; x.textContent = txt; x.onclick = fn; return x; };
   const LESSON = () => 'Your ' + boardLessonName() + ': take this one';   // FX10 (patch 0.92.3 item 29): the job a lesson's "your turn" put up for you (named: patch 0.92.5 #12)
@@ -49579,6 +49579,7 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && C.line.kind !== 'newcomer' && hostOk(p)) buttons.push(r.hostDay === today ? { id: 'host', label: 'Asked over', off: true } : { id: 'host', label: 'Come over' });   // A11: your own room
   if (!C.ask && !C.offer && !talking && p.id === 'calder' && guideOn()) buttons.push({ id: 'guide-back', label: 'Hand ' + shortName(socP(guideOn().id)) + ' back' });
   if (!C.ask && !C.offer && !talking && C.line.moment && typeof momentShow === 'function') buttons.splice(1, 0, { id: 'sit', label: 'Sit with them' });   // a moment is ready (20c)
+  if (!C.ask && !C.offer && !talking && typeof puChatButton === 'function') { const ub = puChatButton(p); if (ub) buttons.unshift(ub); }   // 24u (S5-2): warn them about your Tier 3 test's shutdown
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
   if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
@@ -49644,6 +49645,7 @@ function chatDo(id) {
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
+  else if (id === 'pu3-warn') chatSay((typeof puChatSay === 'function' && puChatSay(p)) || 'Thanks for telling me.');   // 24u (S5-2)
   else if (id === 'back') { C.ask = false; chatShow(); }
   else if (id === 'host') { if (r.hostDay !== SHIP.time.day) chatSay(socialHost(p) || 'Another time.'); }
   else if (id.startsWith('nq:')) chatSay(guideAnswer(p, +id.slice(3)) || 'Thanks.');
@@ -54246,8 +54248,8 @@ function trainTick(now) {                                // once a ship minute i
     else if (r.status === 'missed') c.st = 'ask';        // offered again on your next workday
     return;
   }
-  if (c.st === 'held' && c.id !== 't2' && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
-  if (/^(watch|do)$/.test(c.st) && c.id !== 't2' && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, which keeps its own hours)
+  if (c.st === 'held' && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { worksEscortEnd(c.id); return; }   // (patch 0.92.5 #15, RV13) its job turned in, only its case open: trained, and the teacher's free to go
+  if (/^(watch|do)$/.test(c.st) && !/^t[23]$/.test(c.id) && trainShiftOver(c, now)) { trainLapse(row, c, now); return; }   // (patch 0.92.5 #15; not 24p's promotion test, nor 24u's Tier 3 test: they keep their own hours)
   if (c.st === 'held') { if (!worksCaseOpen(c.j)) worksEscortEnd(c.id); return; }   // waiting on worksEscortEnd (the teacher stays with you), or its case closing
   if (c.st !== 'watch' && c.st !== 'do') return;
   const j = SHIP.jobs.find(x => x.id === c.j);
@@ -54295,7 +54297,7 @@ function worksAskSend(id, by, now) {
 // your training job turned in: trained, unless something holds the teacher with you (worksEscortHold: the designer's
 // Day 5, where Torres's scanner lesson runs on into the P3 training case); worksEscortEnd(id) then trains you
 const worksCaseOpen = jobId => { const C = SHIP.works && SHIP.works.cases; return !!(C && Array.isArray(C.open) && C.open.some(x => x && x.job === jobId)); };   // 24k's case on that job still open
-function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
+function worksDone(id, t) { const c = SHIP.works && SHIP.works.cur; if (!worksCounts(id, c)) return; if (c && c.id === id && c.hold && worksCaseOpen(c.j)) { c.st = 'held'; return; } if (id === 't2' && typeof promoPassed === 'function') { promoPassed(t); return; } if (id === 't3' && typeof puPassed === 'function') { puPassed(t); return; } worksTrained(id, t); }   // 24p: the test job is passed, not trained   // held only while its case is still open
 // a row's own say on whether your finished training job counts (WORK_MECH[id].counts(job); 24g's m7: only once you've
 // scanned it, p5-fix2). Not counted: no training now; trainTick sees the job done and offers the training again
 // the teacher's own job while you watch it (24 core's 'watch'): theirs, never on your board (AR2's B4, p5-fix2: taking it
@@ -59086,7 +59088,7 @@ function promoBeatsApply() {                             // PROMO's summons time
 promoBeatsApply();
 if (SHIP.occasions.some(r => r.id === 'promoSummons')) promoScript();   // a reload with the summons booked: promo.result hooked too
 function promoBeatsPtr(key) {                            // guideShift's pointer on the test's Take it: forced and named (else nothing added)
-  return key === 't2' && promoBeatsOn() ? { force: true, label: worksText('pb.ptr.test', 'Your Tier 2 test: take it') } : {};
+  return key === 't2' && promoBeatsOn() ? { force: true, label: worksText('pb.ptr.test', 'Your Tier 2 test: take it') } : (typeof puPtr === 'function' && puPtr(key)) || {};   // (24u, S5-2: the Tier 3 test's)
 }
 function promoInOffice() { try { return deckDef.num === 5 && roomAt(...player.here()) === 'o'; } catch (e) { return false; } }
 function promoNotice(text, from) {                       // an urgent device notice (its own pop-up), else a toast
@@ -59395,6 +59397,7 @@ function puNext(k) {                                     // worksNext's line for
   if (!T) { if (W.tier !== 2) return null; const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b);
     return at(worksBand()) >= at('steady') && !ladderNeeds({ rep: 'relied' }, W) ? worksText('next.t3.steps', 'Your Tier 3 test needs Relied on and Power safety. You\'re {band} now.', { band: worksBandWord() }, k) : null; }
   if (!T.passed) return worksText('next.wait.t3', 'Your Tier 3 test is set. The job board, the Works bay, 09:00.', null, k);
+  if (!T.res) { const R = puResultDay(); return worksText('next.pu3.result', 'Your result: {day}, 08:15, the Chief\'s office.', { day: R === d ? 'today' : R === d + 1 ? 'tomorrow' : R ? dayName(R) : 'your next workday' }, k); }
   return null;
 }
 // the Schedule's and Tracked's rows on day d (devDay asks): the test, then (turn 3) your result, the bar and the toast
@@ -59402,6 +59405,7 @@ function puItems(d) {
   const T = P5_PROMO3 && puT3(), W = SHIP.works; if (!T || !W) return [];
   const out = [];
   if (!T.passed && W.tier === 2 && T.day === d) out.push({ from: 540, to: 900, title: worksText('pu3.row.test', 'Your Tier 3 test'), where: 'the job board, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'w' });
+  if (T.passed && !T.res && W.tier === 2 && puResultDay() === d) out.push({ from: PU_R.at, to: PU_R.at + 30, title: worksText('pu3.row.result', 'Your result, 08:15'), where: 'the Chief\'s office, the Works bay, Deck 5', kind: 'beat', deck: 5, room: 'o' });
   return out;
 }
 // the crew's talk (live only, nothing saved): as 24p's promoTalkTick, with Tier 3's kinds. One line every few ship
@@ -59410,9 +59414,12 @@ function puTalkKind(now) {                               // -> [kind, who ('any'
   const T = puT3(), W = SHIP.works; if (!T || !W) return null;
   const d = worksDay(now), m = now - (d - 1) * 1440, eve = m >= DAY_SHIFT[1];
   if (W.tier === 2 && !T.passed) {
+    const j = typeof puTestJob === 'function' ? puTestJob() : null;
+    if (j && j.claimedBy === 'you' && !j.workDone) return ['pu3.watch', 'any', 'any'];   // at it: the bay and Deck 6
     if (T.day === d + 1 && eve || T.day === d && m < 540) return ['pu3.luck', 'friend', 'any'];
     return T.day >= d ? ['pu3.soon', 'any', 'any'] : null;
   }
+  if (W.tier === 2 && T.passed && !T.res) return ['pu3.passed', 'any', 'any'];   // the bay that evening, and anywhere after the shift
   return null;
 }
 function puTalkTick(now) {
@@ -59430,6 +59437,8 @@ function puTalkTick(now) {
     const meal = act === 'breakfast' || act === 'dinner', tier = relTier(a.p.id);
     const kd = who === 'friend' && tier < 2 ? 'pu3.soon' : kind;   // friends wish you luck; the rest say how fast it came
     if (!here && !meal && !puInLounge() && kd === 'pu3.soon') continue;   // how fast: the bay, the mess and the lounge
+    if (kd === 'pu3.watch' && !here && !(deckDef && deckDef.num === 6)) continue;   // watching you at it: the bay and Deck 6
+    if (kd === 'pu3.passed' && !here && Math.floor(m - (d - 1) * 1440) < DAY_SHIFT[1]) continue;   // the result's talk: the bay, then anywhere once the shift's over
     const l = socLine(a.p, kd, { t: m, act, tier, bubble: true, flags: { [kd]: true } }); if (!l) continue;
     if (bubbleSay(a.h, l.text, 5) === false) continue;
     PU_LIVE.said.add(kind + '@' + d + ':' + a.p.id); PU_LIVE.talkAt = m; if (typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();
@@ -59445,8 +59454,195 @@ function puBeatsTick(now, skip) {                        // once a ship minute (
       mailSend({ at: Math.max(now, B + PU.luckAt) + 10 * k, from: worksName(id), subject: i > 0 ? t.slice(0, i) : 'Good luck', body: i > 0 ? t.slice(i + 3) : t, quiet: true }); }); }
 }
 if (P5_PROMO3) {
-  WORK_MECH.t3 = { offer() { return false; }, noJob: false };   // the test itself: turn 2 (the ladder asks; nothing until then)
   WORK_TICKS.push((now, skip) => { puOfferTick(now, skip); puNearTick(now, skip); puBeatsTick(now, skip); if (!skip) puTalkTick(now); });
+}
+// ---- S5-2 turn 2: the Tier 3 test (spec piece S5-2 "The test"; the beats "Test morning", "The test", "Passing"). On its
+// day the ladder opens t3 (WORK_MECH.t3.offer, as t2's): a real Tier 3 job held for you from 09:00 to 15:00 (slot 25,
+// kind 'tier3', a job walked stop by stop: section 17's jobKindAdd) on whichever of Deck 6's two junctions is in the worse
+// state, its breaker set aside (promoPartsAside). Calder follows you (24 core's escort for a training's 'do') and says each
+// step (worksTeach: train.t3.*). Its stops: a breaker from main storage; at the junction, plan it with Calder (a look: the
+// branch it feeds, from S5-4's SHUT_BRANCHES, else the same table here; her planning talk); warn the two people the branch
+// affects (picked from that day's plans with schedU key 853: whoever is in its rooms at 10:00 first; tap them, "About the
+// shutdown"; one not found in 30 minutes, Calder tells them); switch it off (not before both know); change the breaker;
+// bring it back. Turned in: passed (puPassed: "Your result tomorrow, first thing", the Mail, the notice; Torres's word if he's
+// near). Never failed: not taken by 15:00, or still not done when the shift ends, Calder says what to practise and sets it
+// again in two workdays. On the day: the notice once you're up, her word in the bay, a level 1 arrow to the bay from 08:30
+// and to each step (to the person to warn), the board's ring "Your Tier 3 test: take it" forced (24p's promoBeatsPtr asks
+// puPtr), Schedule and Tracked rows, an hourly notice while you hold another job, the crew watching (pu3.watch)
+const PU_T = { jobAt: 540, until: 900, slot: 25, again: 2, warnBy: 30, keep: 95, junctions: ['6-junction-1', '6-junction-2'], kind: 'tier3' };
+const PU_BRANCHES = {                                    // S5-4's Deck 6 branches (24w's SHUT_BRANCHES), for a build without it
+  gym: { junction: '6-junction-1', name: 'the gym and laundry circuit', rooms: [[3, 'F'], [4, 'l']] },
+  galley: { junction: '6-junction-1', name: 'the galley circuit', rooms: [[3, 'K'], [3, 'M']] },
+  junior: { junction: '6-junction-2', name: 'the junior deck circuit', rooms: [[4, 'j'], [4, 'n']] },
+  lounge: { junction: '6-junction-2', name: 'the bow lounge circuit', rooms: [[3, 'L'], [3, 'B']] } };
+function puBranch(mid) {                                 // the branch the test cuts: the junction's first that isn't the galley's or the lounge's (no meal, no party)
+  let B = PU_BRANCHES; try { if (typeof sdBranches === 'function') B = sdBranches(); } catch (e) { B = PU_BRANCHES; }
+  const ids = Object.keys(B).filter(k => B[k].junction === mid), pick = ids.find(k => !/galley|lounge/.test(k)) || ids[0];
+  return pick ? { id: pick, ...B[pick] } : null;
+}
+function puJunction() {                                  // the one in the worse state
+  try { machinesNow(); } catch (e) { /* on paper */ }
+  const ms = PU_T.junctions.filter(id => typeof machineById === 'function' && machineById(id) && panelPlace(id));
+  return ms.sort((a, b) => ((SHIP.machines[a] || {}).cond || 100) - ((SHIP.machines[b] || {}).cond || 100) || (a < b ? -1 : 1))[0] || null;
+}
+const puRoomName = r => { const R = DECKS[r[0]] && DECKS[r[0]].rooms[r[1]]; return R ? R.name : 'a room'; };
+function puWho(d, br) {                                  // the two to warn: in the branch's rooms at 10:00 that day (its plans), then anyone aboard and up, by schedU 853
+  const rooms = new Set(br.rooms.map(r => r[0] + '|' + r[1])), t = (d - 1) * 1440 + 600, seen = new Map();
+  let D = null; try { D = shipDay(d); } catch (e) { D = null; }
+  if (D && D.plans) for (const [pid, segs] of D.plans) for (const s of segs) {
+    if (!s.placeId || !(s.from < t + 60 && t - 60 < s.to) || s.act === 'sleep') continue;
+    const pl = placeById(s.placeId); if (pl && rooms.has(pl.deck + '|' + pl.room) && !seen.has(pid)) seen.set(pid, Math.abs(s.from - t));
+  }
+  const u = id => schedU(strSeed(id), d, 853), bad = id => id === 'calder' || id === 'you' || id === 'marrow';
+  const first = [...seen.keys()].filter(id => !bad(id)).sort((a, b) => u(a) - u(b));
+  let rest = []; try { rest = schedPeople().filter(p => !bad(p.id) && !seen.has(p.id) && (w => w && w.act !== 'sleep' && Number.isInteger(w.deck))(whereIs(p, t))).map(p => p.id).sort((a, b) => u(a) - u(b)); } catch (e) { rest = []; }
+  return first.concat(rest).slice(0, 2);
+}
+function puTestJob() { const W = SHIP.works, c = W && W.cur; return c && c.id === 't3' && c.st === 'do' && c.j ? (SHIP.jobs || []).find(x => x.id === c.j) || null : null; }
+function puStops(j) {                                    // the junction's stops (after the breaker's fetch: jobStopsOf puts it first)
+  const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
+  const st = (tag, how, mins, opts) => ({ deck: m.deck, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) }), b = j.t3 || {};
+  return [st('plan', 'look', 1, { secs: 4, title: worksText('pu3.ptr.plan', 'Your Tier 3 test: plan it with Calder'), text: worksText('pu3.plan.feeds', 'The breaker\'s label: {where}. It feeds {text}.', { where: b.name || 'this branch', text: (b.rooms || []).map(puRoomName).join(' and ') }) }),
+    st('off', 'look', 1, { secs: 3, title: worksText('pu3.ptr.off', 'Switch it off'), text: worksText('pu3.off.text', 'You throw the switch. The tester on the feed: dead.') }),
+    st('breaker', 'hold', 6), st('back', 'look', 1, { secs: 3, title: worksText('pu3.ptr.back', 'Bring it back'), text: worksText('pu3.back.text', 'You bring it back slowly. The hum comes up, even.') })];
+}
+function puStepDone(j, k, res) {                         // in order; the switch not before both know
+  const all = jobStops(j), st = all[k]; if (!st) return true;
+  const done = new Set(j.stepsDone || []); if (k > 0 && !done.has(k - 1)) return false;
+  if (st.step === 'off') { const b = j.t3 || {}, left = (b.who || []).filter(id => !(b.told || []).includes(id));
+    if (left.length) { try { toast(worksText('pu3.ptr.off', 'Switch it off'), worksText('pu3.off.wait', 'Not yet: warn {name} first, in person.', { name: left.map(guideWho).join(' and ') })); } catch (e) { /* no UI */ } return false; } }
+  const c = SHIP.works && SHIP.works.cur, by = c && c.id === 't3' && c.by || 'calder';
+  if (st.step === 'plan') { const b = j.t3 || (j.t3 = {}); b.planAt = Math.floor(shipNow()); worksTeach('t3', by, 'plan', ['Before you touch it: what does it feed? Read it to me.', 'Two people will feel it. Go and tell them. In person.']);
+    const names = (b.who || []).map(guideWho).join(' and '); if (names) try { toast(worksName(by), worksText('pu3.warn.who', 'Warn {name} about the shutdown, in person.', { name: names })); } catch (e) { /* no UI */ } }
+  if (st.step === 'off') worksTeach('t3', by, 'off', ['Both told. Good. Now the switch. Then check it\'s dead.']);
+  if (st.step === 'breaker') worksTeach('t3', by, 'breaker', ['New one seated. Square. Push till it clicks.']);
+  if (st.step === 'back') worksTeach('t3', by, 'back', ['Bring it back. Slowly. Listen.']);
+  return true;
+}
+function puJobDone(j, t, by) {                           // the junction put right
+  const s = SHIP.machines && SHIP.machines[j.mach]; if (s) { s.cond = Math.max(s.cond, PU_T.keep); s.state = machineState(s.cond); }
+  if (by === 'you') worksTeach('t3', (SHIP.works && SHIP.works.cur && SHIP.works.cur.by) || 'calder', 'done', ['Turn it in. That\'s the job.']);
+  simNote('pu3', { step: 'work', job: j.id, by: by || null });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function puMakeJob(d, at) {                              // the test job, held for you in slot 25 (one that's there already, if it is)
+  const old = (SHIP.jobs || []).find(x => x.reserved === PU_T.slot && x.status !== 'done' && heldForYou(x)); if (old) return old.id;
+  const mid = puJunction(), m = mid && machineById(mid), br = mid && puBranch(mid); if (!m || !br) return null;
+  const t = (d - 1) * 1440 + at, j = jobMake(PU_T.kind, { id: PU_T.kind + ':' + mid + '@' + Math.floor(t / 60), mach: mid, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 1,
+    title: worksText('pu3.card', 'Your Tier 3 test: {where}', { where: (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name.replace(/^./, x => x.toLowerCase()) + ', Deck 6' }),
+    reserved: PU_T.slot, until: (d - 1) * 1440 + PU_T.until, train: 't3', t3: { br: br.id, name: br.name, rooms: br.rooms.map(r => r.slice()), who: puWho(d, br), told: [], by: {} } });
+  j.posted = j.found = t; j.stops = kindStops(j).map(plainStop);
+  SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  return j.id;
+}
+const puPtr = key => key === 't3' && P5_PROMO3 ? { force: true, label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') } : null;   // 24p's promoBeatsPtr asks
+// the result's day: the first workday of yours after the test with Calder on shift (Vance's a week on), as 24p's promoSummonsDay
+const PU_R = { at: 495, seek: 510, latest: 555, wake: 360 };
+function puResultDay() {
+  const T = puT3(); if (!T || !T.passed) return null;
+  for (let d = T.day + 1, n = 0; n < 14; d++, n++) if (playerShiftOn(d) && (n >= 7 || occOnShift('calder', d))) return d;
+  return null;
+}
+function puPassed(t) {                                   // turned in: passed, whatever it took
+  const W = SHIP.works, T = puT3(), c = W && W.cur; if (!W || !T || T.passed) return false;
+  const by = (c && c.by) || 'calder', d = worksDay(t);
+  T.passed = true; T.day = d; W.tr.t3 = d; if (c && c.id === 't3') W.cur = null;
+  const rd = puResultDay(), day = rd === d + 1 ? 'tomorrow' : rd ? dayName(rd) : 'your next workday', time = hhmm(PU_R.at);
+  worksSayAll(by, day === 'tomorrow' && worksVoice(by, 'pu3.promo.passed') || [worksText('pu3.passed.say', 'That\'s the test. Your result {day}, first thing. My office, {time}. Don\'t be early.', { day, time })]);
+  flagSet('pu3.passed', d);
+  promoMail('mail.pu3.passed', 'Your test | Done. Your result {day}, {time}, my office. Not before.', { day, time }, t);
+  if (t >= shipNow() - 1) promoNotice(worksText('pu3.passed.notice', 'Your Tier 3 test is done. Your result: {day}, {time}, the Chief\'s office.', { day, time }), worksName(by));
+  try { const a = puNearMe('torres-zeke', CHATTER_NEAR); if (a) { const l = worksVoice('torres-zeke', 'train.t3.torres'); if (l) simTimeout(() => worksSayAll('torres-zeke', l), 11000); } } catch (e) { /* not in play */ }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pu3', { step: 'passed', day: d });
+  return true;
+}
+function puDelay(now) {                                  // not taken by 15:00, or the shift over undone: set again in two workdays
+  const W = SHIP.works, c = W && W.cur, T = puT3(); if (!c || c.id !== 't3' || c.st !== 'again' || !T || T.passed) return;
+  const d = worksDay(now); T.day = promoWorkday(d, PU_T.again); c.st = 'ask'; c.d = d; c.j = null;
+  SHIP.jobs = SHIP.jobs.filter(j => !(j.kind === PU_T.kind && j.status !== 'done' && j.claimedBy !== 'you'));   // the test's job goes (the crew never take it)
+  const day = dayName(T.day);
+  worksSayAll(c.by || 'calder', worksVoice(c.by || 'calder', 'train.t3.again') || [worksText('pu3.again.say', 'Not today. That\'s not a fail. We go again in two days.')]);
+  promoMail('mail.pu3.again', 'Again | Not today. Practise your shutdowns: warn first, check it\'s dead, then touch it. We go again {day}, 09:00.', { day }, now);
+  if (now >= shipNow() - 1) promoNotice(worksText('pu3.again.notice', 'Your Tier 3 test is set again: {day}, 09:00, the Works bay.', { day }), worksName('calder'));
+  flagSet('pu3.morning', null); flagSet('pu3.morning.calder', null);
+  simNote('pu3', { step: 'again', day: T.day });
+}
+function puWarnTick(now) {                               // the two to warn: Calder tells one you couldn't find in 30 minutes
+  const j = puTestJob(), b = j && j.t3; if (!b || !b.planAt || j.claimedBy !== 'you' || j.workDone) return;
+  b.told = b.told || []; b.by = b.by || {};
+  const left = (b.who || []).filter(id => !b.told.includes(id)); if (!left.length || now - b.planAt < PU_T.warnBy) return;
+  const c = SHIP.works.cur, by = c.by || 'calder';
+  for (const id of left) { b.told.push(id); b.by[id] = by; try { toast(worksName(by), worksText('pu3.warn.calder', 'Calder told {name} for you. One less to find.', { name: guideWho(id) })); } catch (e) { /* no UI */ } }
+  worksTeach('t3', by, 'warn.late', ['I\'ll tell them. Note it. Next time, start looking sooner.']);
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+function puChatButton(p) {                               // section 20's chat card: "About the shutdown" on someone you have to warn
+  const j = P5_PROMO3 && p ? puTestJob() : null, b = j && j.t3; if (!b || !b.planAt || j.claimedBy !== 'you' || j.workDone) return null;
+  return (b.who || []).includes(p.id) && !(b.told || []).includes(p.id) ? { id: 'pu3-warn', label: worksText('pu3.warn.ask', 'About the shutdown') } : null;
+}
+function puChatSay(p) {
+  const j = puTestJob(), b = j && j.t3; if (!b || !p) return null;
+  b.told = b.told || []; b.by = b.by || {}; if (!b.told.includes(p.id)) { b.told.push(p.id); b.by[p.id] = 'you'; }
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  try { toast(worksText('pu3.ptr.warn', 'Warn {name} about the shutdown', { name: guideWho(p.id) }), worksText('pu3.warn.done', '{name} knows. Thank you.', { name: guideWho(p.id) })); } catch (e) { /* no UI */ }
+  const c = SHIP.works.cur; if (b.told.filter(id => b.by[id] === 'you').length === 1 && c) worksTeach('t3', c.by || 'calder', 'warn', ['Face to face. A notice is a backup, not a warning.']);
+  simNote('pu3', { step: 'warned', who: p.id });
+  let l = null; try { l = socLine(p, 'pu3.warned', { t: shipNow(), tier: relTier(p.id) }); } catch (e) { l = null; }
+  return l ? l.text : worksText('pu3.warned.say', 'An hour without power? Thanks for telling me. I\'ll work round it.');
+}
+function puTestGuide(now) {                              // the arrows: level 1 to the bay from 08:30, to the board, then each step and each person
+  const W = SHIP.works, T = puT3(); if (!W || !T || T.passed || W.tier !== 2 || typeof guideAsk !== 'function') return;
+  const d = worksDay(now), B = (d - 1) * 1440; if (T.day !== d || now < B + PU_T.jobAt - 30) return;
+  const j = (SHIP.jobs || []).find(x => x.kind === PU_T.kind && x.status !== 'done' && x.reserved === PU_T.slot && (x.claimedBy === 'you' || heldForYou(x))), owner = '24u (S5-2)';
+  const onBoard = j && !j.claimedBy && !(j.found > now);
+  if (!j || j.found > now) { if (now < B + PU_T.jobAt + 15) guideAsk({ id: 'pu3:testday:' + d, level: 1, owner, from: B + PU_T.jobAt - 30, until: B + PU_T.jobAt + 15,
+    goal: () => promoInBay() ? null : ({ deck: 5, room: 'w', label: worksText('pu3.ptr.day', 'Your Tier 3 test, 09:00: the Works bay') }), done: () => !!puT3() && puT3().passed }); return; }
+  let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+  if (onBoard && !(mj && mj.id !== j.id && !jobSide(mj) && !mj.workDone)) guideAsk({ id: 'pu3:test:' + d, level: 1, owner, until: j.until || B + PU_T.until,
+    goal: () => ({ deck: 5, item: /job board/i, room: 'w', label: worksText('pu3.ptr.test', 'Your Tier 3 test: take it') }), done: () => guideTaken(j.id) });
+  if (j.claimedBy !== 'you') return;
+  const label = () => { const b = j.t3 || {}, nx = !j.workDone && typeof ixNextStop === 'function' ? ixNextStop(j) : null, s = nx && nx.s;
+    if (j.workDone) return { deck: 5, item: /job board/i, room: 'w', label: worksText('pu3.ptr.turnin', 'Turn it in') };
+    if (!s) return null;
+    const left = (b.who || []).filter(id => !(b.told || []).includes(id));
+    if (s.step === 'off' && left.length) { const id = left[0], w = (() => { try { return whereIs(evPerson(id) || { id }, Math.floor(shipNow())); } catch (e) { return null; } })(), pl = w && w.placeId && placeById(w.placeId);
+      return w && Number.isInteger(w.deck) ? { deck: w.deck, crew: id, ...(pl ? { room: pl.room } : {}), label: worksText('pu3.ptr.warn', 'Warn {name} about the shutdown', { name: guideWho(id) }) } : null; }
+    const lab = { fetch: worksText('pu3.ptr.fetch', 'Your Tier 3 test: a breaker from main storage'), plan: worksText('pu3.ptr.plan', 'Your Tier 3 test: plan it with Calder'), off: worksText('pu3.ptr.off', 'Switch it off'), breaker: worksText('pu3.ptr.breaker', 'Change the breaker'), back: worksText('pu3.ptr.back', 'Bring it back') }[s.step];
+    return lab && s.places[0] ? { deck: s.deck, place: s.places[0], label: lab } : null; };
+  guideAsk({ id: 'pu3:step:' + d, level: 1, owner, until: B + dayShiftEnd(d) + 60, goal: label, done: () => j.status === 'done' || j.claimedBy !== 'you' });
+}
+function puTestBeats(now, skip) {                        // the morning's notice, her words, the hourly notice while you hold another job
+  const W = SHIP.works, T = puT3(); if (!W || !T || T.passed || W.tier !== 2) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = !skip && now >= shipNow() - 1; if (T.day !== d || !live) return;
+  if (m >= 360 && m < PU_T.jobAt && flag('pu3.morning') !== d && !promoBusy()) { flagSet('pu3.morning', d); promoNotice(worksText('pu3.morning.notice', 'Today: your Tier 3 test, 09:00. It goes up on the job board in the Works bay.')); }
+  if (m < PU_T.jobAt + 30 && promoInBay() && flag('pu3.morning.calder') !== d && puNearMe('calder', CHATTER_NEAR)) { flagSet('pu3.morning.calder', d);
+    worksSayAll('calder', worksVoice('calder', 'pu3.promo.morning') || [worksText('pu3.morning.say', 'Nine o\'clock. Take it when you\'re ready.')]); }
+  const j = puTestJob();
+  if (j && !j.claimedBy && !(j.found > now)) { let mj = null; try { mj = myJob(); } catch (e) { mj = null; }
+    if (mj && mj.id !== j.id && flag('pu3.busy') !== Math.floor(now / 60)) { flagSet('pu3.busy', Math.floor(now / 60));
+      promoNotice(worksText('pu3.busy.notice', 'Your Tier 3 test waits on the job board till {time}. Turn in or drop this job first.', { time: hhmm(PU_T.until) }), worksName('calder')); } }
+  if (j) promoPartsAside(j);
+}
+if (P5_PROMO3) {
+  jobKindAdd(PU_T.kind, { tier: 3, work: 0, text: 'Your Tier 3 test', parts: ['breaker'], stops: puStops, stepDone: puStepDone, done: puJobDone, veto: true, crew: { can: () => false, mins: 60 } });
+  WORK_MECH.t3 = {
+    offer(row, c, d, t) {                                // the test, on its day: the job held for you, Calder with you
+      const T = puT3(); if (!T || T.passed || d < T.day) return false;
+      const m = t - (d - 1) * 1440; if (m >= PU_T.until - 60) return false;
+      const id = puMakeJob(d, Math.max(m, PU_T.jobAt)); if (!id) return false;
+      c.st = 'do'; c.j = id; c.occ = null; c.told = true; T.tries++; T.day = d;
+      promoPartsAside(SHIP.jobs.find(x => x.id === id));
+      simNote('pu3', { step: 'start', day: d, job: id });
+      return true;
+    },
+    noJob: false,
+  };
+  onSim('job', n => {                                    // Calder at the board as you take it
+    const c = SHIP.works && SHIP.works.cur; if (!n || !c || c.id !== 't3' || c.st !== 'do' || n.id !== c.j || n.step !== 'take') return;
+    worksTeach('t3', c.by, 'take', ['That\'s the one. Deck 6. Bring a breaker.']);
+  });
+  WORK_TICKS.push((now, skip) => { puDelay(now); puTestBeats(now, skip); if (!skip) { puWarnTick(now); puTestGuide(now); } });
 }
 // ---- end of slot: Later promotions ----
 
