@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-i.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-i.2
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9276,7 +9276,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-i.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-i.2';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10739,7 +10739,7 @@ function schedBuild(p, d, occ, S) {
     wash(k);
     if (quiet && sty >= .5 && sty < .7 && by - t >= 95) leisureUntil(t + 20 + Math.round(20 * U(k + 14)), k + 15);
     if (INSPECT_ON && F.shape.inspect && p.id === inspectWalker(d) && t <= INSPECT_T0 + 20) {   // the walk (FX20): each bunk room's door, yours first
-      go(4); linger(INSPECT_T0 - 1);
+      go(4);                                             // straight to your room's door from the lift, there by 06:30
       for (const r of INSPECT_ROOMS) { const id = '4-inspect-' + r, to = Math.max(t, INSPECT_T0 + INSPECT_STEP * INSPECT_ROOMS.indexOf(r)) + INSPECT_STEP; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspect', anim: 'look' }); }
     } else if (stood) {                                  // stood for it already (FX20)
     } else if (INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) && t < inspectPass(S.byId.get(p.bed).room)) {   // a junior stands by their bunk till the walk has passed
@@ -52665,8 +52665,9 @@ function inspectRun(d, here) {
 // FX20 (INSPECT_ON): where the walker stands now on your deck (a bunk room's letter), or null
 function inspectWalkerAt(d) {
   if (!INSPECT_ON || typeof DECK_CREW === 'undefined' || !deckDef || deckDef.num !== 4) return null;
-  const by = inspectOfficer(d), a = DECK_CREW.find(x => x.p && x.p.id === by && x.settled && x.spot && /^4-inspect-/.test(x.spot.id || ''));
-  return a ? a.spot.id.slice(-1) : null;
+  const by = inspectOfficer(d), a = DECK_CREW.find(x => x.p && x.p.id === by && x.spot && /^4-inspect-/.test(x.spot.id || ''));
+  if (!a) return null; const r = a.spot.id.slice(-1); let inRoom = false; try { inRoom = roomAt(...cellAt(a.x, a.z)) === r; } catch (e) { inRoom = false; }
+  return inRoom ? r : null;   // in that bunk room, at or on the way to its door spot
 }
 const INSPECT_SAID = { d: 0, rooms: new Set(), away: false };
 function inspectWalkTick(d, m) {                         // the words as the walker goes round (never changes the result: inspectRun does that)
