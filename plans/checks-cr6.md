@@ -11,6 +11,8 @@
   (1677 s) `FRIDAYS CHECK FAILED (1)`: one line never fills, Day 26 `wiak8h` "A month ago {me} came aboard. Since then:
   the Line, a storm, our first guests, and a comet." (tagged `swap`). It is 91 characters before {me} is filled, and
   friFill drops any line over 90, so the game never says it. A real (small) game fault: the line needs shortening.
+- Re-run on 05a9e7db (line shortened; game sha e8768136...d7be): OFF exit 0 (1693 s) `FRIDAYS CHECK OK`; ON exit 0
+  (1693 s) `FRIDAYS CHECK OK`.
 
 ## 0.93.1 full round (2026-10-26): all 11 OK, plus CR3's 3 (OK after RV16's check fix)
 
