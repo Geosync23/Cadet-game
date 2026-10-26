@@ -232,14 +232,13 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
         <li>your answer to Calder;</li>
         <li>Zeke's last line.</li>
       </ul>
-      Then three buttons (question 1):
+      Then two buttons (your answer 1: no way back):
       <ul>
-        <li><b>Back to before my choice:</b> the kept copy, below.</li>
         <li><b>Keep this ending:</b> the save is marked ended; loading it shows this page again.</li>
         <li><b>Start a new game:</b> the Saves app's slot choice.</li>
       </ul>
     </li>
-    <li><b>The kept copy:</b> the moment you first tell the Captain "Go", the save is copied once to its own key beside its slot (<code>SAVE_KEY + '-before-end'</code>), never into another slot, and never with <code>?nosave</code>. "Back to before my choice" loads it: Saturday, the choice open again. The Saves app shows it under the slot as "Before the goodbye". Dev mode and Playtest keep theirs apart, as slots do.</li>
+    <li><b>No way back (your answer 1).</b> There is no kept copy: going is final for that save. "Keep this ending" marks the save ended (<code>SHIP.end.over</code>); loading it shows the end page again, with the same two buttons. Other slots are untouched, so a player who wants to try the other ending uses another slot, or saves to one before Saturday (the Saves app already allows it).</li>
   </ul>
 </section>
 
@@ -248,7 +247,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
   <ul>
     <li><b>Switch:</b> <code>const EV_ENDING_ON = URL_FLAGS.has('ending');</code> in section 13, on its own line after the Veyli vessel's (after <code>P926_APPT</code>), so no merge touches Step 5's or Step 6's lines. <code>?ending</code> or <code>#ending</code> previews it.</li>
     <li><b>The crossing back:</b> a ship-wide event, <code>SHIP_EVENTS.crossingBack</code>, in an <code>if (EV_ENDING_ON &amp;&amp; EVENTS_ON)</code> block in section 18 after the vessel's block, with its own slot "Ending builder". It reuses the Line's oath script (a variant, <code>crossingBack</code>, with you as host), the punch, the Line supper and the certificate trace (a second date). One <code>EV_BEATS</code> row: <code>endingOffer</code>, captain, Day 32, 15:45-16:45.</li>
-    <li><b>The offer, the answer, the goodbye, the end page, the kept copy:</b> a new section <code>// 29. THE ENDING</code> after section 28 (Step 6), with 29a THE OFFER, 29b THE GOODBYE AND THE END PAGE, 29c THE ENDGAME (the flag and "What's next"). Each has its own slot.</li>
+    <li><b>The offer, the answer, the goodbye, the end page:</b> a new section <code>// 29. THE ENDING</code> after section 28 (Step 6), with 29a THE OFFER, 29b THE GOODBYE AND THE END PAGE, 29c THE ENDGAME (the flag and "What's next"). Each has its own slot.</li>
   </ul>
 </section>
 
@@ -273,9 +272,9 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
   <article class="piece">
     <header><h3>E-3 The goodbye and the end page</h3><span class="phase">EV_ENDING_ON</span><span class="phase">Ending engineer, with the HUD seat for the page</span><span class="phase">4 turns</span></header>
     <dl>
-      <dt>What</dt><dd>29b: Monday's last morning (packed cabin, the friends' breakfast), the crowd of about 60 in the shuttle bay (the day shift released: a called-in style rule the other way), the aisle and the farewells in turn, Zeke at the ramp's foot, up the ramp (the rotation's Tern sequence, reversed), the fade; the end page (an HTML panel in the page's CSS, the HUD seat reviews); the kept copy and its restore (section 13's save code and the Saves app, FX27's owner reviews); the "ended" save.</dd>
-      <dt>Touches</dt><dd>29b (new); the page's CSS; section 13 (the kept copy and the ended mark: two small hooks); section 19's Saves app (one row); section 14's Tern (called).</dd>
-      <dt>Checks</dt><dd>ending_check (the goodbye with 60 in the bay, every close friend says theirs), deck_check (the bay's aisle; draw calls under 450 at phone size with the crowd), saves_check (the kept copy: made once, only on Go, never with nosave, restores to Saturday with the choice open; the ended save shows the end page; other slots untouched), day_check Day 36 (Go), controller_check (the end page's buttons).</dd>
+      <dt>What</dt><dd>29b: Monday's last morning (packed cabin, the friends' breakfast), the crowd of about 60 in the shuttle bay (the day shift released: a called-in style rule the other way), the aisle and the farewells in turn, Zeke at the ramp's foot, up the ramp (the rotation's Tern sequence, reversed), the fade; the end page (an HTML panel in the page's CSS, the HUD seat reviews); the "ended" save (section 13's save code, FX27's owner reviews).</dd>
+      <dt>Touches</dt><dd>29b (new); the page's CSS; section 13 (the ended mark: one small hook); section 19's Saves app (an ended slot says so); section 14's Tern (called).</dd>
+      <dt>Checks</dt><dd>ending_check (the goodbye with 60 in the bay, every close friend says theirs), deck_check (the bay's aisle; draw calls under 450 at phone size with the crowd), saves_check (the ended save shows the end page on load; no copy is made anywhere; other slots untouched), day_check Day 36 (Go), controller_check (the end page's buttons).</dd>
     </dl>
   </article>
   <article class="piece">
@@ -340,7 +339,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
       </ul>
       It goes to the runners with the lightest shares.</li>
     <li><b>arrows_check:</b> <code>endstay</code> and <code>endgo</code>, three ways each, plus the change-of-mind run.</li>
-    <li><b>saves_check:</b> the kept copy and the ended save, on every slot and on Dev, Playtest and nosave links.</li>
+    <li><b>saves_check:</b> the ended save, on every slot and on Dev, Playtest and nosave links; nothing else written.</li>
     <li><b>day_check:</b> Days 31, 35 and 36 (both endings), and 50 (the endgame).</li>
     <li><b>Also:</b> events_check, bigevents_check, lines_check, deck_check, controller_check, cadet_test identical off.</li>
   </ul>
@@ -370,7 +369,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
       <tr><td>content/ending/friends.lines</td><td>Each close friend's "About the transfer" talk (Pell, Tomas, Kovac, Basil, Halloran, Torres and the friend tiers' generic ones); Zeke's two talks; the call home</td><td>about 120</td></tr>
       <tr><td>content/ending/goodbye.lines</td><td>The last breakfast; the aisle: a goodbye from each close friend, then Calder, Vance, the Captain, Zeke at the ramp; the crowd's calls</td><td>about 100</td></tr>
       <tr><td>content/ending/endgame.lines</td><td>The pool. About 40 crew with 6 lines each that only exist now (about 240): about you staying, about life after the career, about the ship's ordinary days. Then overheard pairs about you (about 40), friends' tier lines (about 60), the Captain, Calder, Vance and Zeke's own (about 40), and remarks at traditions (about 20).</td><td>about 400</td></tr>
-      <tr><td>UI and Mail</td><td>Notices, Tracked and Schedule rows, the status lines, Mails as records, the end page's text, the Saves app's "Before the goodbye", the Works app's last page</td><td>about 70</td></tr>
+      <tr><td>UI and Mail</td><td>Notices, Tracked and Schedule rows, the status lines, Mails as records, the end page's text, the Saves app's "Ended" label, the Works app's last page</td><td>about 70</td></tr>
     </tbody>
   </table></div>
   <p class="note">Canon notes for the writers: the Admiral is the Captain's fish and is never explained; every Veyli is they/them; never "permission" or "leave" about the reach (say "cross back over the line"); the comet's Veyli name stays unspoken; no emojis.</p>
@@ -378,7 +377,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 
 <section id="doc">
   <h2>10. For the design doc (the builder adds it, in the commit that switches it on)</h2>
-  <p class="note">Add to design-doc.md's scope and its Pillar 6 events section: "The ending (the user, 2026-10-26). After the Veyli vessel the Wren crosses back over the Line (Sunday Day 35, four weeks after the first crossing): you lead the first-timers' oath, the Veyli ship flies alongside to the line, and the Captain gives her final address. On Thursday Day 32 the Captain offers you a transfer to Concord headquarters, in her ready room; you answer by Saturday and may change your mind until her address. Stay, and the game goes on for good with no more promotions or ship-wide events, and new endgame dialogue. Go, and a big crowd sees you off at the Tern's ramp on Monday Day 36, the mirror of your arrival; then an end page with your Record, and the choice to go back to before you answered. The scope sentence becomes: the events up to the career's end, the Veyli vessel, and the crossing back."</p>
+  <p class="note">Add to design-doc.md's scope and its Pillar 6 events section: "The ending (the user, 2026-10-26). After the Veyli vessel the Wren crosses back over the Line (Sunday Day 35, four weeks after the first crossing): you lead the first-timers' oath, the Veyli ship flies alongside to the line, and the Captain gives her final address. On Thursday Day 32 the Captain offers you a transfer to Concord headquarters, in her ready room; you answer by Saturday and may change your mind until her address. Stay, and the game goes on for good with no more promotions or ship-wide events, and new endgame dialogue. Go, and a big crowd sees you off at the Tern's ramp on Monday Day 36, the mirror of your arrival; then an end page with your Record. Going is final for that save. The scope sentence becomes: the events up to the career's end, the Veyli vessel, and the crossing back."</p>
 </section>
 
 <section id="calls">
@@ -395,6 +394,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
 
 <section id="questions">
   <h2>12. Your questions</h2>
+  <p><b>Answered (the user, 26 October):</b> 1: no way back from the end page (no kept copy); 2: you can change your mind until the Captain's address on Sunday; 3: the post is worded by your answer to Calder's question. The form stays for any later comment.</p>
   <div class="q">
     <h3>1. After the goodbye, can you go back?</h3>
     <p>If you choose to go, the game ends with an end page.</p>
