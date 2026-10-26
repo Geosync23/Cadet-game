@@ -1547,3 +1547,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:28 UTC: CR5 reran join_check for CR6 on 0.93.3: OK (267 s, alone). CR6 need not rerun.
 - ~22:29 UTC: **CR1 0.93.3 OK** (all 11 checks; claude/checks-cr1; ~55%). 3 of 6 done (CR1, CR4, CR5); CR2, CR3, CR6 running.
 - ~22:33 UTC: CR1 also ran CR3's promo_sight + sound_check on 0.93.3: OK (CR3 must not rerun them). CR1 idle.
+- ~22:39 UTC: **VB1 V-3 + V-4 6d4b5192** (chain + making the part; off identical bar known-old Oona bubble shots; ON checks running) -> RV21. VB1 writes stand-in keys itself; folds RV21 V-2 fixes first; then arrows part + controller presets. VB2 queue: Taavek places -> B5 bar + chair -> ending test parts. Both told (priority now).
