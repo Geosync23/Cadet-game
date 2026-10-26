@@ -4,6 +4,23 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## Pre-round job for RV19: FX26's storm Saturday (2026-10-26, 10:06 UTC, for RV19 and lead 38)
+
+- `claude/storm-sat` 402899bd ("0.93.2-w.5 (FX26): the lantern supper's sittings 35-50 minutes ..."), the game as
+  pushed; checks from a worktree of 402899bd. `starship-cadet.html` sha256
+  `c799f15eeccbe7f19a277981df442d2ca7c26fa57ee0e28959b1a346fbf6c7cd` (RV19: starts c799f15eeccbe7f1; matches).
+- Two lanes at once, each with its own CADET_WORK (`/tmp/work-cr5`, `/tmp/work-cr5b`), as RV19 allowed.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `events_check.py` | OK | 0 | 819 s | `EVENTS CHECK OK` (beside another lane part of the time) |
+| `devmode_check.py` | OK | 0 | 269 s | `DEVMODE CHECK OK` |
+| `bigevents_check.py` | OK | 0 | 221 s | `BIGEVENTS CHECK OK` (its own switched-on copy) |
+| `join_check.py`, first try (beside another lane) | crashed, not a FAIL | 1 | 235 s | `playwright TimeoutError: Page.goto: Timeout 30000ms exceeded` loading the page; no test line ran |
+| `join_check.py`, alone | OK | 0 | 272 s | `JOIN CHECK OK` |
+
+No FAIL lines, so no comparison with b957b92d (0.93.1) was needed. **All four OK.**
+
 ## 0.93.1 full round (2026-10-26, started 00:09 UTC, for BM18 and lead 37)
 
 - Candidate: `claude/staging-0.93.1` 0a2fc617 (0.93.1: RV16's promo-arrow fix; boardLesson/promoTestDay, the Tier 2
