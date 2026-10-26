@@ -1,0 +1,19 @@
+@meeting endingZekeSunday.go
+// SW6 (ending writer A), Zeke at the end of the day, Sunday Day 35, 21:00, by the Tern's ramp: GO version (end.go).
+// The Tern leaves at 10:00 tomorrow; he'll be at the ramp's foot (goodbye.lines, endingRamp). The close mirrors his
+// first words to you, turned round.
+title: The Tern's ramp
+from: Zeke Torres
+gist: At the end of the day Zeke took you down to the Tern's ramp, where he met you. Tomorrow you go up it.
+== lines
+torres-zeke: Here. This spot. Stand there. No, a bit left. There.   [gesture]
+torres-zeke > you: First night, you were the one on the ramp. Bag, big eyes. I was the one at the bottom, nervous.
+torres-zeke: Tomorrow it's the other way. You at the top, me at the bottom. I'll be nervous again. Watch.   [laugh]
+torres-zeke: I finished your scarf. Today. Ran out of time to make it longer. It's still too long.   [gesture]
+? choice
+* I'll wear it every day.   flavour:share
+  torres-zeke: You won't. It's enormous. Wear it on the cold days. Think of the coils.   [laugh]
+* I'll miss you, Zeke.   flavour:share
+  torres-zeke: Don't. I've been fine all day. I'm fine. Mostly fine.   [sigh]
+torres-zeke > you: You came down this ramp and you said thank you like you meant it. Go up it the same way.
+torres-zeke: Right. Bed. Half nine tomorrow. Bring your bag. I'll be at the bottom. Right, onward.
