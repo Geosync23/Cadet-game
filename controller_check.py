@@ -17,6 +17,8 @@
 #   pick      the ringed thing and A, against cadet_test's taps (pick)
 #   lift      by Deck 3's lift door with people about: the ring offers the lift, and A on it opens the panel after someone
 #             steps in front (CP5: KC1, KC2) (pick)
+#   door      (0.93.3) the Doors setting's default: at a bunk room's shut door the ring offers it, A opens it, you walk
+#             through; a public door (it opens by itself) is never offered (pick)
 #   reach     the non-circular sweep: the clickables are read from the page itself (every element that is a button,
 #             link or input, or has a click/pointer/touch listener, or shows a hand cursor), first by mouse through every
 #             panel and menu; then every one must be reached and pressed by pad (panels)
@@ -38,7 +40,7 @@ __import__('atexit').register(lambda: [f.unlink(missing_ok=True) for f in (WORK 
 ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
-ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'reach', 'day', 'games', 'unplug', 'odd',
+ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd',
              'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
@@ -1181,6 +1183,34 @@ def part_lift(pw, src, tag):
     elif not opened: fails.append('lift lobby, 22:00: A on "Lift" after someone stepped in front: the lift panel never opened')
     if r.errors: fails.append('lift lobby: page errors: ' + ' | '.join(r.errors[:3]))
     r.close(); return fails
+DOOR_SET = r"""(() => { goToDeck(4, null); actEnd(true); player.stop(); adoorSet('private');
+  const ds = DOOR_OBJS.filter(o => o.e.type === 'door' && adoorPrivate(o.e.key)).map(o => [o, doorSides(o.e)]).filter(([o, s]) => s.length === 2 && s.every(([i, j]) => free(i, j)));
+  if (!ds.length) return 'no private door';
+  const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; const A = cellPos(...s[0]); player.obj.position.copy(A); player.stop(); target.copy(A).setY(.7);
+  return o.e.key; })()"""
+DOOR_A = r"""(() => { const P = PAD_PICK, k = 'door:' + window.__door.key, L = padTargets(), t = L.find(o => o.key === k); if (!t) return 'not offered: ' + L.map(o => o.key).join(', ');
+  P.list = L; P.sel = t; P.chosen = true; P.n = 99; padFire('a'); return 'pressed'; })()"""
+def part_door(pw, src, tag):
+    """0.93.3 (FX24, the Doors setting; the user: every new piece works with a game controller): with 'private' (the
+    default), standing at a bunk room's shut door, the ring offers the door and A opens it (as a tap on it), and you can
+    walk through; a public door is never offered (it opens by itself)."""
+    fails = []
+    if 'function adoorPrivate' not in src: print('  door: not in this build (0.93.3)'); return fails
+    r = Run(pw, src, f'{tag}_door', mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false)"); r.step(10); r.press('B'); r.step(2)
+    key = r.ev(DOOR_SET); r.step(20)
+    res = r.ev(DOOR_A); r.step(30)
+    opened = r.ev("ADOOR.tap === window.__door.key")
+    r.ev("(() => { const { a, b } = window.__door, A = cellPos(...a), B = cellPos(...b), dx = B.x - A.x, dz = B.z - A.z, d = Math.hypot(dx, dz); player.obj.position.copy(A); player.stop(); player.steer = { x: dx / d, z: dz / d, k: 1 }; })()")
+    r.step(60); through = r.ev("(() => { const A = cellPos(...window.__door.a); endSteer(); return Math.hypot(player.obj.position.x - A.x, player.obj.position.z - A.z) > 1.2; })()")
+    pub = r.ev("(() => { goToDeck(3, null); return padTargets().filter(o => /^door:/.test(o.key) && !CLOSED_DOORS[o.key.slice(5)]).map(o => o.key); })()")
+    print(f'  door: a bunk room door {key}, the ring and A: {res}; opened {opened}; walked through {through}; public doors offered on Deck 3: {pub}')
+    if res != 'pressed': fails.append(f'door: the ring never offers the shut private door {key} ({res})')
+    elif not opened: fails.append(f'door: A on the shut private door {key} did not open it')
+    elif not through: fails.append(f'door: after A, you could not walk through {key}')
+    if pub: fails.append(f'door: a door that opens by itself is offered as a target ({pub})')
+    if r.errors: fails.append('door: page errors: ' + ' | '.join(r.errors[:3]))
+    r.close(); return fails
 def part_pick(pw, src, tag):
     fails = part_facing(pw, src, tag)
     fails += part_mess_seat(pw, src, tag)
@@ -2309,9 +2339,9 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
