@@ -21,10 +21,12 @@ on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying)
 | `day_check.py BUILD 27` | OK | 0 | 264 s | `DAY CHECK OK` |
 | `career_check.py BUILD` | **known (backlog 12)** | 1 | 130 s | only `FAIL busy: "Relied on" before Day 5`; identical busy-player numbers to my 0.93.0 run on OLD's file (30, 28, 28, 25, 24 jobs; xp 4, 16, 32, 40 relied, 59); ship.works 2571 bytes |
 | `promo_sight_check.py BUILD` | OK | 0 | 16 s | `PROMO SIGHT CHECK OK` |
-| `events_check.py BUILD` | run by CR1 | | | (CR1's result to follow) |
-| `sound_check.py BUILD` | run by CR1 | | | (CR1's result to follow) |
+| `events_check.py BUILD` | OK (run by CR1) | 0 | 589 s | `EVENTS CHECK OK`, no FAIL lines (CR1, same sha256, alone) |
+| `sound_check.py BUILD` | OK (run by CR1) | 0 | 167 s | `SOUND CHECK OK`, no FAIL lines (CR1) |
 
 **CR5's own part: OK** (interactions, day 21, 27, promo_sight OK; career the known backlog 12 line only).
+
+**CR5 share, whole (with CR1's two): OK** (6 OK, career known backlog 12).
 
 ## 0.93.0 full round (2026-10-25, started 21:13 UTC, for BM18 and lead 37)
 
