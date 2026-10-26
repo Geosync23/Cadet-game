@@ -13,12 +13,12 @@ calder: Your scrubber. Filter in, fan settled, nothing I had to say twice.
 calder: You passed. As of now you're an Officer. Technician, Tier 2.
 calder: The badge. Left side. Straight, please.
 ? choice
-* Thank you, Chief. I won't let you down.   rel:calder+2
-  calder: I know. That's why you're standing here.   [nod]
-* Me? Already?   rel:calder+1
-  calder: Already. I don't promote people to be kind. I promote them because they're ready.
-* About time, honestly.   rel:calder+1
-  calder: Hm. Torres said you'd say that. He owes me a biscuit.   [laugh]
+* Thank you, Chief. I'll do it properly.   rel:calder+2
+  calder: You already do. That's what the badge is for.   [nod]
+* Really? This soon?   rel:calder+1
+  calder: Really. Soon isn't the measure. Ready is. You're ready.
+* I wondered when you'd say so.   rel:calder+1
+  calder: Hm. So did Torres. Out loud. Daily.   [nod]
 calder: The pip isn't mine to give. The Captain pins it this afternoon, observation room. Clean uniform.
 calder: Tier 2 work on the board from tomorrow. Tonight, after dinner, I walk you to your cabin. 4-23.
 calder: Go on, then. They're waiting outside.
