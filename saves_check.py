@@ -51,7 +51,7 @@ class Page:
     # the save is never handed between two browser processes (CR4's one-off "old save null" in migrate, 0.93.2 round)
     def go(self, suffix='', path=TMP):
         self.path = path
-        self.page.goto('file://' + str(path) + suffix, timeout=120000); self.ready()   # a busy machine (straight after check_fast) can take over the default 30 s to load the game
+        self.page.goto(ORIGIN + path.name + suffix, timeout=120000); self.ready()   # a busy machine (straight after check_fast) can take over the default 30 s to load the game
     def ready(self):
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
         self.page.add_style_tag(content='*,*::before,*::after{transition:none!important;animation:none!important}')
@@ -74,6 +74,17 @@ class Page:
         check(not self.errors, f'page errors: {self.errors[:3]}')
         self.page.close()
 
+# the game is served from a made-up web address (ORIGIN), as players get it from a web page, never opened as a file: a
+# page opened from a file:// address was now and then given a fresh, empty storage of its own after a change of page
+# (the old save still there, seen from another page; CR4's one-off migrate FAIL in the 0.93.2 round, reproduced here
+# 2 in 30, and the same with the slots-off build on both sides). Pages of one web address always share their storage.
+ORIGIN = 'http://saves-check.test/'
+def new_ctx(b, **kw):
+    ctx = b.new_context(viewport={'width': 390, 'height': 844}, **kw)
+    ctx.route(re.compile(r'^http://saves-check\.test/[^?#]*'), lambda r: r.fulfill(path=str(WORK / 'test' / r.request.url.split('?')[0].split('#')[0][len(ORIGIN):]), content_type='text/html')
+              if r.request.url[len(ORIGIN):].split('?')[0].split('#')[0].endswith('.html') else r.continue_())
+    return ctx
+
 def day_of(text):
     return json.loads(text)['time']['day'] if text else None
 
@@ -81,7 +92,7 @@ def monday_game(pg, day):                             # a game on Monday-week `d
     pg.sign(); pg.ev(f'introSkip(); setShipNow(({day} - 1) * 1440 + 570); updateClock(); saveGame()'); pg.step(5)
 
 def part_off(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx = new_ctx(b)
     pg = Page(ctx, '', TMP_OFF); monday_game(pg, 3)
     st = pg.store()
     check(pg.ev('SAVE_SLOTS_ON') is False and pg.ev('SAVE_KEY') == K1, 'off: the save name moved with slots off')
@@ -110,7 +121,7 @@ def part_migrate(b):
     return ctx
 
 def part_switch(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx = new_ctx(b)
     pg = Page(ctx); monday_game(pg, 5)
     s1 = pg.store()[K1]
     check(pg.ev('slotNew(2)') is True and pg.ev('!!DEV.choose'), 'switch: New game in Slot 2 did not ask arrive or skip')
@@ -143,7 +154,7 @@ def part_switch(b):
     return ctx
 
 def part_download(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844}, accept_downloads=True)
+    ctx = new_ctx(b, accept_downloads=True)
     pg = Page(ctx); monday_game(pg, 12)
     with pg.page.expect_download(timeout=60000) as d:
         pg.ev('slotDownload()')
@@ -164,7 +175,7 @@ def part_download(b):
     print('  download: file and capability carry the save,', r['filename'])
 
 def part_load(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx = new_ctx(b)
     pg = Page(ctx); monday_game(pg, 4)
     good = pg.page.evaluate('k => localStorage.getItem(k)', K1)
     g9 = json.loads(good); g9['time']['day'] = 9; g9 = json.dumps(g9)
@@ -202,7 +213,7 @@ def part_load(b):
     print('  load: bad files refused, good ones played in Slots 3 and 1')
 
 def part_nosave(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx = new_ctx(b)
     pg = Page(ctx); monday_game(pg, 2); pg.page.evaluate('k => localStorage.setItem(k, "2")', KS)
     pg.go('?nosave')
     check(pg.ev("SAVE_SLOT === 1 && !DEVICE_APPS.has('saves') && SLOT_NEW === null"), 'nosave: the slots or the app are on with ?nosave')
@@ -218,7 +229,7 @@ def part_nosave(b):
     print('  nosave: no slots with ?nosave; Dev slots are -dev')
 
 def part_shot(b):
-    ctx = b.new_context(viewport={'width': 390, 'height': 844})
+    ctx = new_ctx(b)
     pg = Page(ctx); monday_game(pg, 6)
     pg.page.evaluate('k => localStorage.setItem(k, localStorage.getItem("starship-cadet-save").replace(\'"day":6\', \'"day":3\'))', K2)
     pg.ev("deviceShow('saves')"); pg.step(3)
