@@ -30,7 +30,7 @@
 #             What's next, a level 1 arrow from 08:00; not there at 08:30 she comes to find you and it plays where you are;
 #             at its end Tier 3, Senior Officer, xp 0, the Record's line, the friends' Mail, the bar booked the same day
 #   t3bar:    (switch on) the Captain's invite, the guests on the ceremony spots, the notice at 16:00 and Calder's "Go.",
-#             the level 1 arrow; the scene with the pin; the bar on your collar (a third pip), the certificate; the cake
+#             the level 1 arrow; the scene with the pin; the bar on your collar (spec.bar, the kit's mark), the certificate; the cake
 #             after it ("Take a slice", Brennan's line); on a Friday at 17:15; missed: by Mail by 18:15
 #   t3toast:  (switch on) the next day at 19:00 in her quarters: the invite, the notice at 18:30, the arrow, the scene,
 #             the framed menu; the Training tab's rows done and gone; missed: by Mail
@@ -344,7 +344,7 @@ def part_t3bar(g):
       out.next = worksNext(); __notes.length = 0; __said.length = 0; setShipNow(15 * 1440 + 961); __tick(); out.notice = __notes.slice(); out.go = __said.slice();
       setShipNow(15 * 1440 + 976); goToDeck(4); __tick(); out.arrow = GUIDE.list.filter(e => e.id === 'pu3:bar').map(e => e.level + ' ' + (e.goal() || {}).label + ' ' + (e.goal() || {}).place);
       setShipNow(15 * 1440 + 991); goToDeck(1); player.obj.position.copy(cellPos(...PLACE_OF.get('1-ceremony-you').at)); occasionsTick(shipNow()); meetingsTick(shipNow());
-      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(1) + """ out.t3 = puT3(); out.pip = PLAYER_SPEC.rank; out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what);
+      out.dlg = DIALOGUE && DIALOGUE.id; """ + dlg_run(1) + """ out.t3 = puT3(); out.pip = PLAYER_SPEC.rank; out.barMark = !!PLAYER_SPEC.bar; out.keep = (SHIP.social && SHIP.social.keepsakes || []).map(k => k.what);
       setShipNow(15 * 1440 + 1021); __bay(); __tick(); out.cake = GUIDE.list.filter(e => e.id === 'pu3:cake').map(e => e.level + ' ' + (e.goal() || {}).label);
       const keep = puNearMe; puNearMe = (id, r) => id === 'brennan' ? true : keep(id, r); __said.length = 0; __tick(); puNearMe = keep; out.slice = puT3().cake; out.brennan = __said.filter(x => /^brennan/.test(x));
       let fd = 16; while (weekday(fd) !== 4) fd++; out.fri = [fd, promoCerTimes(fd).at];
@@ -354,7 +354,7 @@ def part_t3bar(g):
     check(r['invite'] and '16:30' in r['invite'][0] and r['places'] and r['places'].get('marrow') == '1-ceremony-captain' and len(r['places']) >= 4 and 'vance' in r['with'], f"t3bar: the Captain's invite that morning; the guests on the ceremony spots ({r['invite']}, {r['places']})")
     check('16:30' in r['next'] and any('16:30' in n for n in r['notice']) and any(x.startswith('calder:') for x in r['go']), f"t3bar: What's next, the notice at 16:00, Calder's word in the bay ({r['next']}, {r['notice']}, {r['go']})")
     check(r['arrow'] and r['arrow'][0].startswith('1 ') and '1-ceremony-you' in r['arrow'][0], f"t3bar: a level 1 arrow from 16:15 to your spot ({r['arrow']})")
-    check(r['dlg'] == 'pu3.bar' and r.get('pin') and r['t3']['bar'] == 16 and r['pip'] == 2 and any('certificate' in k.lower() for k in r['keep']), f"t3bar: the scene with the pin; the bar on your collar (a third pip), the certificate ({r})")
+    check(r['dlg'] == 'pu3.bar' and r.get('pin') and r['t3']['bar'] == 16 and r['pip'] == 2 and r['barMark'] and any('certificate' in k.lower() for k in r['keep']), f"t3bar: the scene with the pin; the bar on your collar (spec.bar, the kit's mark), the certificate ({r})")
     check(r['cake'] and r['cake'][0] == '1 Take a slice' and r['slice'] == 16 and r['brennan'], f"t3bar: the cake after: \"Take a slice\", Brennan's line ({r['cake']}, {r['slice']}, {r['brennan']})")
     check(r['fri'][1] == 1035, f"t3bar: on a Friday at 17:15 ({r['fri']})")
     check(r['missed'] == [16, 1], f"t3bar: missed, by Mail by 18:15 ({r['missed']})")

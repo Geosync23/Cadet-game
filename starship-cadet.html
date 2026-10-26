@@ -58786,8 +58786,8 @@ function promoCommission(now, how) {                     // commissioned: once
 }
 function promoPip() {                                    // your collar: one pip more once commissioned (the kit's rank pips: makeCharacter's s.rank)
   const want = (typeof puRank === 'function' && puRank()) || (promoDone('ceremony2') ? 1 : 0);   // (24u, S5-2: a third pip once the Senior Officer's bar is given)
-  try { if (typeof player === 'undefined' || !player || (PLAYER_SPEC.rank || 0) === want) return false;
-    PLAYER_SPEC.rank = player.spec.rank = want; const w = player, old = w.rig;
+  try { if (typeof player === 'undefined' || !player || (PLAYER_SPEC.rank || 0) === want && !!PLAYER_SPEC.bar === (want >= 2)) return false;
+    PLAYER_SPEC.rank = player.spec.rank = want; if (want >= 2 || PLAYER_SPEC.bar) PLAYER_SPEC.bar = player.spec.bar = want >= 2;   // (S5-2: the Senior Officer's bar, the kit's spec.bar) const w = player, old = w.rig;
     w.obj.remove(old.root); old.root.traverse(o => { if (o.isMesh) o.geometry.dispose(); });
     w.rig = makeCharacter(w.spec); w.obj.add(w.rig.root); w.rig.root.traverse(o => { o.userData.walker = w; });
     w.propMeshes = []; w.propKey = ''; w.bodyProps = null;
@@ -59261,8 +59261,22 @@ function psTellTick(now) {                               // the user's rule: in 
 function p5Escort(p, t) {                                // worksEscort's 24u part (S5-1): Calder walking over to ask you for Power safety
   const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop();
   if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
+  { const w = p5TeacherWait(p, t); if (w) return w; }
   if (P5_PROMO3 && typeof puEscort === 'function') return puEscort(p, t) || puEscort2(p, t);   // S5-2: the Tier 3 offer, your result, up to the bar
   return null;
+}
+// (RV20's find, for lead 40: the teacher came late to a Step 5 lesson's meeting, e.g. Calder to her 11:00 in the relay
+// room.) From 20 minutes before a Step 5 lesson's meeting until it's met or over, its teacher waits at the meeting's own
+// place (the appointment's, as section 14 gave it), so they're there before you are. Live only (worksEscort), nothing saved
+const P5_LESSONS = new Set(['ps', 'm19', 'm18', 'm20']);
+function p5TeacherWait(p, t) {
+  const W = SHIP.works, c = W && W.cur; let r = null;
+  if (c && c.st === 'meet' && P5_LESSONS.has(c.id)) r = SHIP.occasions.find(x => x.key === c.occ) || null;
+  if (!r && W && W.tr.ps === undefined) r = SHIP.occasions.filter(x => x.id === 'works.ps').pop() || null;   // Power safety's own appointment (not a W.cur lesson)
+  if (!r || r.met || r.status !== 'asked' || p.id !== r.by || t < r.at - 20 || t >= r.at + r.len || r.f && r.f.seek && !r.f.told) return null;
+  let pl = null; try { const a = apptList().find(x => x.occ === r.key); pl = a ? apptPlaceOf(a, p.id) : null; } catch (e) { pl = null; }
+  if (!pl) { const q = ((DECKS[r.deck] || {}).places || []).find(x => x.room === r.room && Array.isArray(x.at) && !/bed|toilet|shower/.test(x.type || '')); pl = q ? { ...q, deck: r.deck } : null; }   // no appointment (a room with no meeting spot: Deck 6's junction rooms): a place in its room
+  return pl && Array.isArray(pl.at) ? { mode: 'wait', to: { deck: pl.deck, tile: pl.at.slice() } } : null;
 }
 function psTick(now) {
   const W = SHIP.works; if (!W || W.tr.ps !== undefined || !worksOpened(W).has('ps')) return;
@@ -59773,6 +59787,8 @@ function puResultTick(now, skip) {                       // the Mail at 06:00, t
   if (!r) return;
   if (live && m >= PU_R.at - 20 && m < PU_R.at + 30) {   // staging: Calder at her desk, Torres outside the glass
     try { crewScene('calder', { mode: 'wait', to: '5-office-1', until: r.at + 30 }); if (!r.met) crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: [13, 3] }, until: r.at + 40 }); } catch (e) { /* no scene */ } }
+  if (live && r.met && !(r.f || {}).sat && typeof DIALOGUE !== 'undefined' && DIALOGUE && DIALOGUE.m && DIALOGUE.m.id === r.key && promoInOffice() && !ACT && PLACE_OF.has('5-office-visit-sit')) {   // her scene in her office: you sit in the visitor's chair, across her desk
+    (r.f || (r.f = {})).sat = 1; try { actStart('sit', '5-office-visit-sit', { title: 'Visitor chair' }); } catch (e) { /* stand, then */ } }
   if (m >= PU_R.seek && !r.met && !promoInOffice() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && !PU_LIVE.rseek && live) PU_LIVE.rseek = { by: 'calder', at: Math.floor(now) };   // 08:30: she comes to you
   const S = PU_LIVE.rseek;
   if (S && !r.met && live && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && puNearMe('calder')) {
@@ -59878,7 +59894,7 @@ function puBeatsGuide(now) {                             // the level 1 arrows: 
   if (typeof guideAsk !== 'function') return; const owner = '24u (S5-2)';
   const rr = SHIP.occasions.find(x => x.id === 'pu3Result' && x.status === 'asked' && !x.met);
   if (rr && now >= rr.at - 15) guideAsk({ id: 'pu3:result', level: 1, owner, from: rr.at - 15, until: rr.at + rr.len,
-    goal: () => ({ deck: 5, room: 'o', place: '5-office-visit-1', label: worksText('pu3.ptr.result', 'Your result: Calder\'s office') + ', ' + hhmm(rr.at % 1440) }), done: () => !!rr.met || rr.status !== 'asked' || !!(puT3() || {}).res });
+    goal: () => ({ deck: 5, room: 'o', place: '5-office-visit-sit', label: worksText('pu3.ptr.result', 'Your result: Calder\'s office') + ', ' + hhmm(rr.at % 1440) }), done: () => !!rr.met || rr.status !== 'asked' || !!(puT3() || {}).res });
   const br = SHIP.occasions.find(x => x.id === 'pu3Bar' && x.status === 'asked' && !x.met);
   if (br && now >= br.at - 15) guideAsk({ id: 'pu3:bar', level: 1, owner, from: br.at - 15, until: br.at + br.len,
     goal: () => ({ deck: 1, room: 'O', place: '1-ceremony-you', label: worksText('pu3.ptr.bar', 'Your bar: the observation room') + ', ' + hhmm(br.at % 1440) }), done: () => !!br.met || !!(puT3() || {}).bar });
@@ -59913,7 +59929,7 @@ function puDevNext() {                                   // the Dev career arrow
   if (!T.passed) { const j = puTestJob(); if (j && j.claimedBy === 'you') { let g = null; try { g = typeof ixJobGoal !== 'undefined' && ixJobGoal ? { ...ixJobGoal } : null; } catch (e) { g = null; } return { when: now, g: g ? { ...g, label: 'Your Tier 3 test · ' + g.label } : { deck: 6, room: (machineById(j.mach) || {}).room, label: 'Your Tier 3 test' } }; }
     return { when: abs(T.day, PU_T.jobAt), soon: 30, g: { deck: 5, item: /job board/i, room: 'w', label: 'Your Tier 3 test job, at the board' } }; }
   const rd = T.res || puResultDay(); if (!rd) return null;
-  if (!T.res) return { when: abs(rd, PU_R.at), soon: 15, g: { deck: 5, place: '5-office-visit-1', room: 'o', label: 'Your Tier 3 result, Calder\'s office' } };
+  if (!T.res) return { when: abs(rd, PU_R.at), soon: 15, g: { deck: 5, place: '5-office-visit-sit', room: 'o', label: 'Your Tier 3 result, Calder\'s office' } };
   if (!T.bar) return { when: abs(rd, promoCerTimes(rd).at), soon: 15, g: { deck: 1, place: '1-ceremony-you', room: 'O', label: 'Your bar, the observation room' } };
   if (!T.toast) { const td = puToastDay(); return td ? { when: abs(td, PU_R.toastAt), soon: 15, g: { deck: 2, place: '2-captable-1', room: 'C', label: 'The Captain\'s toast, her quarters' } } : null; }
   return null;
