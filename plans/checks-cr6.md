@@ -1,5 +1,11 @@
 # CR6 check results
 
+## Side job for lead 38 (2026-10-26): join_check on claude/comet db72b2a and b957b92d
+
+- claude/comet db72b2a (game sha b26d7970...6c, EV_COMET_ON = true in the file): exit 0 (252 s), `JOIN CHECK OK`, alone.
+- b957b92d (0.93.1, sha 6cd54ab9...8eee): exit 0 (230 s), `JOIN CHECK OK`, alone.
+- The reload step that times out in FX25's container passes here. Reported to FX25, RV18 and lead 38.
+
 ## Side job for lead 37 (2026-10-26): fridays_check on claude/event-swap 56fa0ca5 (game sha 9387754f...222a)
 
 - OFF (file as is): exit 1 (1617 s), `FRIDAYS CHECK FAILED (1)`: "on: lines that never fill", the 7 Friday lines tagged `swap`.
