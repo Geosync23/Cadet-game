@@ -1491,3 +1491,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~20:36 UTC: **VB2 vessel-sky v.1 e21ade10** (Veyli ship sky quad 1 call, 40 chain spots, props, sketch; off identical, deck_check OK; bow lounge 279 calls, Works bay 206) → RV21. VB2 also takes bow/wave poses in 8b (no free seat; generic names for the ending).
 - ~20:36 UTC: RV21: PASS SW4 final 7dd2eb5d (**SW4 archived**); PASS SW5 8ed1545a; FIXES NEEDED SW6 6dd03f57 (must: offer reveals Marrow's daughter before friend tier; shoulds: Keep this ending label, slow-career address, friends assume no answer). SW6 fixing.
 - ~20:37 UTC: Old CR5: controller_check all 29 parts (no reach) OK on 329ad201; retired ~60%, **archived**. **Fresh CR5 session_01UH1U1UpsoL7viYaRRBu2bZ** (setup, ready for 0.93.3 round).
+- ~20:41 UTC: FX29 bigevents fix 8a91f1dc (BIGEVENTS OK on staging). Lead: merge into 0.93.3 (visit check fixes are in the set; test-only, run green, RV18 glance).
