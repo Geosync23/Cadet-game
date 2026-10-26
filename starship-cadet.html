@@ -11749,6 +11749,7 @@ function devDay(d) {
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
+  try { if (typeof sdItems === 'function') out.push(...sdItems(d)); } catch (e) { /* not yet */ }   // 24w (S5-4): your booked shutdown, with P5_M18
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -58535,7 +58536,7 @@ onSim('job', n => {                                      // B: Torres comes by a
 // kept ones, are closed for the hour, so the crew go elsewhere. A plan of that day made before 22:00 is dropped then and
 // made again (SHIP_DAYS, as machinesReset drops the rec deck's). Nothing reads a booking live.
 //   SHIP.works.sd (saved as ship.works.sd) = { book: [{ day, at, branch, keep: ['deck|room'], warned: [id], inPerson: [id],
-//   job, all? (a ship notice warned everyone) }], set: { day: [the same, settled] }, done: [day], miss: [day] }
+//   job, all? (a ship notice warned everyone), st? ('off' | 'done' | 'lapsed', on the day), said? (the day's beats given, bits) }], set: { day: [the same, settled] }, done: [day], miss: [day] }
 // Job slots: SD_TRAIN_SLOT 42 (the training's real job), SD_SLOT 43 (the jobs marked for a shutdown).
 // The tables are built on first use (sdBranches), so a plan made while the file is still loading never meets an
 // uninitialised name; the save's sd is read back below and any plan already made for a settled day is dropped.
@@ -58563,7 +58564,7 @@ const sdPeek = () => SHIP.works && SHIP.works.sd && Array.isArray(SHIP.works.sd.
 function sdData() { const W = SHIP.works; if (!W) return null; if (!W.sd || typeof W.sd !== 'object' || !Array.isArray(W.sd.book)) W.sd = { book: [], set: {}, done: [], miss: [] }; return W.sd; }
 function sdClean(s) {                                    // a save's sd read back: junk dropped
   const int = v => Number.isInteger(v) && v >= 0 && v < 99999, B = sdBranches(), ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 8).map(x => x.slice(0, 40)) : [];
-  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null, ...(b.all === true ? { all: true } : {}) } : null;
+  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null, ...(b.all === true ? { all: true } : {}), ...(/^(off|done|lapsed)$/.test(b.st) ? { st: b.st } : {}), ...(Number.isInteger(b.said) ? { said: b.said & 7 } : {}) } : null;
   const set = {}; if (s && s.set && typeof s.set === 'object') for (const k of Object.keys(s.set).slice(0, 20)) if (/^\d{1,4}$/.test(k) && Array.isArray(s.set[k])) set[k] = s.set[k].map(one).filter(Boolean).slice(0, 6);
   const days = a => Array.isArray(a) ? a.filter(int).slice(-20) : [];
   return { book: Array.isArray(s && s.book) ? s.book.map(one).filter(Boolean).slice(0, 6) : [], set, done: days(s && s.done), miss: days(s && s.miss) };
@@ -58610,7 +58611,7 @@ function sdBook(jobId, at, branch, keep = [], o = {}) {
   if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
   S.book = S.book.filter(b => b.job !== jobId);
   const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId, ...(o.all ? { all: true } : {}) };
-  S.book.push(b); j.sdDay = day; j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
+  S.book.push(b); j.sdDay = day; if (Number.isFinite(j.until)) j.until = Math.max(j.until, day * 1440 + dayShiftEnd(day + 1));   // held at least till the day after j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
   simNote('sdBooked', { day, at, branch, job: jobId });
   return b;
 }
@@ -58807,6 +58808,69 @@ function sdTrainBeats(now) {
   if (c.st === 'do' && now % 60 === 0 && !SIM_AT && !(typeof promoBusy === 'function' && promoBusy())) try { toast(worksName('calder'), worksText('sd.train.remind', SD_SAY.remind)); } catch (e) { /* no UI */ }
 }
 if (P5_M18) WORK_TICKS.push((t, skip) => { if (!skip) sdTrainBeats(Math.floor(t)); });
+// ---- the day itself (S5-4 turn 4): a settled booking (sd.set[today]). 30 minutes before: an urgent notice; from 15
+// before: the job opens for you, a level-1 arrow to the board and its Take it rung and named; taken, the job's own arrow
+// leads to the junction. Taken in the hour: the branch goes off (the crew in those rooms say so),
+// and when the work's done it's back on (thanks, or a grumble for a meal or tradition hour). Not taken by the hour's
+// end: the booking lapses, the crew moved their day for nothing (a grumble, a reputation dip), and the job waits for a
+// new booking. Brennan not told in person before a galley one: his grumble that morning and a small dip. Saved: sd.done,
+// sd.miss, and on each settled booking its state (st: 'off' | 'done' | 'lapsed', said: the morning beats given) ----
+const SD_BEAT = { notice: 30, arrow: 15 }, SD_XP = { done: 2, lapse: -3, grumble: -1 };
+const SD_CREW = { off: ['Lights! Oh, the shutdown.', 'There it goes. Right on time.', 'Power\'s off in here. As promised.'], back: ['And we\'re back. Thanks for the warning.', 'Lights on. Quick work.', 'Back on. Barely noticed.'],
+  grumble: ['In the middle of dinner? Really?', 'Whose idea was this hour?', 'Eating by torchlight. Lovely.'], brennan: 'Nobody told me about the galley going dark today. A note on a screen isn\'t telling me.' };
+function sdToday(now) { const S = SHIP.works && SHIP.works.sd, d = worksDay(now); return S && Array.isArray(S.set[d]) ? S.set[d] : []; }
+// the crew in the branch's rooms on your deck say a line in their bubbles (else nothing: a toast says it for you)
+function sdCrewSay(b, kind, now) {
+  const br = sdBranches()[b.branch], keep = new Set(b.keep || []), rooms = new Set(br.rooms.map(sdRoomKey).filter(k => !keep.has(k)));
+  let n = 0; const L = SD_CREW[kind] || SD_CREW.off;
+  try { for (const a of (typeof DECK_CREW !== 'undefined' ? DECK_CREW : [])) { if (n >= 3 || !a.p || !deckDef) break; const r = roomAt(Math.floor(a.x), Math.floor(a.z)); if (!rooms.has(deckDef.num + '|' + r)) continue;
+    const k = Math.floor(schedU(strSeed(a.p.id), worksDay(now), 853) * L.length); bubbleSay(a.h, worksText('sd.crew.' + kind, L[k], null, k), 5); n++; } } catch (e) { /* no deck */ }
+  return n;
+}
+function sdDayTick(now) {
+  const W = SHIP.works, S = W && W.sd; if (!S) return;
+  const d = worksDay(now), m = now - (d - 1) * 1440, live = now >= shipNow() - 1 && !SIM_AT;
+  for (const b of sdToday(now)) {
+    const j = SHIP.jobs.find(x => x.id === b.job); b.said = b.said || 0;
+    if (!b.st && m >= 360 && !(b.said & 1) && sdGalley(b) && !(b.inPerson || []).includes('brennan') && live) { b.said |= 1; worksSay('brennan', worksText('sd.brennan.grumble', SD_CREW.brennan)); worksXp(SD_XP.grumble); simNote('sdGrumble', { who: 'brennan', day: d }); }
+    if (!b.st && m >= b.at - SD_BEAT.notice && m < b.at + SD_LEN && !(b.said & 2) && live && !(typeof promoBusy === 'function' && promoBusy() && m < b.at)) {
+      b.said |= 2; const text = worksText('sd.day.notice', 'Your shutdown, {time}: {branch}. Take the job at the board on the hour, then the junction.', { time: hhmm(b.at), branch: sdBranches()[b.branch].name });
+      if (typeof promoNotice === 'function') promoNotice(text, worksName('calder')); else try { toast('Works', text); } catch (e) { /* no UI */ }
+    }
+    if (!j || j.status === 'done') { if (!b.st || b.st === 'off') { b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); } continue; }   // done (by you, or the crew got to it first)
+    if (!b.st && m >= b.at - SD_BEAT.arrow && m < b.at + SD_LEN && j.status === 'waiting') { j.status = 'open'; delete j.why; MACH_REV++; }   // the hour: it's yours to take
+    if (!b.st && m >= b.at - SD_BEAT.arrow && m < b.at + SD_LEN && typeof guideAsk === 'function') {
+      const lab = worksText('sd.day.arrow', 'Your shutdown, {time}: switch it off', { time: hhmm(b.at) });
+      guideAsk({ id: 'sd:day:' + d + ':' + b.at, level: 1, owner: '24w (S5-4)', from: (d - 1) * 1440 + b.at - SD_BEAT.arrow, until: (d - 1) * 1440 + b.at + SD_LEN,
+        goal: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } if (mj && mj.id === b.job) return null; return { deck: 5, item: /job board/i, room: 'w', label: lab }; },
+        done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj && mj.id === b.job || b.st === 'done' || b.st === 'lapsed'; } });
+      if (typeof pointAsk === 'function' && typeof pointBoard === 'function' && typeof POINT_ON !== 'undefined' && POINT_ON)
+        pointAsk({ id: 'p:sd:' + d + ':' + b.at, force: true, path: pointBoard(b.job, lab), until: (d - 1) * 1440 + b.at + SD_LEN, done: () => { let mj = null; try { mj = myJob(); } catch (e) { mj = null; } return !!mj; } });
+    }
+    if (!b.st && j.claimedBy === 'you' && m >= b.at && m < b.at + SD_LEN) { b.st = 'off'; simNote('sdOff', { day: d, branch: b.branch }); if (live && !sdCrewSay(b, 'off', now)) try { toast('Works', worksText('sd.day.off', '{branch}: power off.', { branch: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ } }
+    if (b.st === 'off' && j.workDone) {                  // the work's done: power back on
+      b.st = 'done'; if (!S.done.includes(d)) S.done.push(d); worksUse('m18'); worksXp(SD_XP.done);
+      const bad = sdHourMarks(sdAffected(d, b.branch, b.at, b.keep)).length > 0; if (bad) worksXp(SD_XP.grumble);
+      simNote('sdBack', { day: d, branch: b.branch, grumble: bad });
+      if (live && !sdCrewSay(b, bad ? 'grumble' : 'back', now)) try { toast('Works', worksText('sd.day.back', '{branch}: power back on.', { branch: sdBranches()[b.branch].name.replace(/^./, x => x.toUpperCase()) })); } catch (e) { /* no UI */ }
+    }
+    if (!b.st && m >= b.at + SD_LEN) {                   // missed: it lapses; book again
+      b.st = 'lapsed'; if (!S.miss.includes(d)) S.miss.push(d); worksXp(SD_XP.lapse);
+      if (j.claimedBy !== 'you') { j.status = 'waiting'; j.why = sdWhy(); delete j.sdDay; MACH_REV++; }
+      simNote('sdLapsed', { day: d, branch: b.branch, missed: true });
+      if (typeof mailSend === 'function') mailSend({ at: now, from: worksName('calder'), subject: worksText('sd.lapse.subject', 'Your shutdown'), body: worksText('sd.lapse.body', 'You booked {time} and never came. The crew moved their day for nothing. Book it again.', { time: hhmm(b.at) }) });
+      if (live) try { toast(worksName('calder'), worksText('sd.lapse.say', 'You missed your shutdown. Book it again.')); } catch (e) { /* no UI */ }
+    }
+  }
+}
+if (P5_M18) WORK_TICKS.push((t, skip) => sdDayTick(Math.floor(t)));
+// the Schedule and Tracked rows (section 15's devDay asks, one line): a settled or booked shutdown on day d; the training's meeting is the occasion's own row
+function sdItems(d) {
+  const S = P5_M18 && SHIP.works && SHIP.works.sd; if (!S) return [];
+  const all = (S.set[d] || []).concat(S.book.filter(b => b.day === d));
+  return all.filter(b => !b.st || b.st === 'off').map(b => { const j = SHIP.jobs.find(x => x.id === b.job), m = j && machineById(j.machine);
+    return { from: b.at, to: b.at + SD_LEN, title: worksText('sd.row', 'Your shutdown: {branch}', { branch: sdBranches()[b.branch].name }), where: m ? (DECKS[m.deck].rooms[m.room] || { name: 'the junction' }).name + ', ' + deckWord(m.deck) : 'the junction', kind: 'beat', deck: m ? m.deck : 6, room: m ? m.room : 'j' }; });
+}
 // ---- end of slot: Shutdowns ----
 
 // ---------------------------------------------------------------------
