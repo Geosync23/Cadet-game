@@ -4,6 +4,28 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## Early job for lead 39: FX24's doors change (2026-10-26, 19:09 UTC, for FX24, RV18, BM18, lead 39)
+
+- `claude/doors-3way` 3051de4e ("Handover note: the Doors setting (FX24)"); checks from a worktree of 3051de4e.
+  `starship-cadet.html` sha256 `008d3bd66fc74637ac054422b95553ad0cf3488cf5d037eb801b285299552a23` (FX24 confirmed).
+- OLD: integration d9c7e5f0 (`c99ea59c...d5d3`, the file of my 0.93.2 round 2).
+- saves_check: skipped (lead 39: already OK at FX24); it had started and was stopped after 20 s (exit 143), no result.
+- controller_check with all 29 parts but `reach` (the candidate's ALL_PARTS minus reach, incl. the new `door`).
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `controller_check.py BUILD` (29 parts) | **FAIL (NEW)** | 1 | 2108 s | 28 parts OK, incl. `door` (bunk door h,8,4: offered, opened, walked through; public doors offered on Deck 3: none); `day` FAIL, 3 problems |
+| `controller_check.py BUILD day` (again) | **FAIL**, the same | 1 | 281 s | the same 3 lines |
+| `controller_check.py OLD day` (OLD d9c7e5f0, same script) | OK | 0 | 288 s | `CONTROLLER CHECK OK` |
+
+The three lines (bedtime just before them OK, `now day 1 22:07`):
+- `FAIL day: breakfast: could not walk to the lift by the stick`
+- `FAIL day: talk: no crew member to walk to`
+- `FAIL day: the job board: could not walk to the lift by the stick`
+
+NEW: repeats on the doors build, passes on OLD with the same script. Likely the doors change stopping the stick walk
+out of the bunk room in the morning (my guess; not traced).
+
 ## 0.93.2 full round, round 2 (2026-10-26, started 15:58 UTC, for BM18 and lead 38)
 
 - Candidate: `claude/staging-0.93.2` d9c7e5f0 (round 2: FX26's game fix for CR6's m9, and FX24's workbench-pin fix).
