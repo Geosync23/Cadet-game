@@ -1807,7 +1807,7 @@ with sync_playwright() as pw:
         ad['hint'] = g.ev("[ADOOR.hints, document.getElementById('tx').textContent]"); g.ev(BACK)
         # FX29 (RV18's should): a real tap on your own body, standing by the bunk room's shut door, opens it (pick() never returns you)
         if g.ev("typeof adoorOnMe === 'function'"):
-            g.ev(PRIV % 'true'); g.ev("(() => { const p = player.obj.position; target.copy(p).setY(.7); placeCam(); })()"); g.step(5)
+            g.ev(PRIV % 'true'); g.ev("(() => { ADOOR.here = null; const p = player.obj.position; target.copy(p).setY(.7); placeCam(); })()"); g.step(5)   # (adoorSet in the doorway the last part left you in keeps that door open till you're clear: not this test's case)
             xy = g.ev("(() => { const p = player.obj.position, v = new THREE.Vector3(p.x, .9, p.z).project(camera); return [(v.x + 1) / 2 * innerWidth, (1 - v.y) / 2 * innerHeight, adoorSelfKey()]; })()")
             g.page.mouse.click(xy[0], xy[1]); g.step(3)
             ad['tapMe'] = g.ev("[ADOOR.tap === window.__door.key, ADOOR.tap]") + [xy[2]]; g.ev(BACK); g.ev("ADOOR.tap = null")
