@@ -473,7 +473,7 @@ with sync_playwright() as pw:
     if not ev("typeof promoPromote === 'function'"): print('  not in this build')
     else:
         SUM = PAPER.replace("      const W = SHIP.works, c = W && W.cur;\n", """      { const r = SHIP.occasions.find(x => x.id === 'promoSummons' && x.status === 'asked');   // the summons: there at 11:00 (t2: 'real'), or not ('away')
-        if (r && t >= r.at && t < r.at + r.len && t2 === 'real' && !r.met) { r.met = true; const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
+        if (r && t >= r.at - (typeof promoBeatsOn === 'function' && promoBeatsOn() ? 59 : 0) && t < r.at + r.len && t2 === 'real' && !r.met) {   /* FX28: 08:15 falls between this run's hourly steps */ r.met = true; const sc = MEETING_SCRIPTS[OCCASIONS.promoSummons.script] || MEETING_SCRIPTS['promo.officer']; sc.onPick(2, {}); sc.onEnd(true); }
         if (r && t2 === 'away') for (let m = 0; m < 60; m += 5) worksCareerTick(t + m);
         const q = SHIP.occasions.find(x => x.id === 'promoCeremony' && x.status === 'asked');   // the ceremony: there at 17:15, or not
         if (q && t2 === 'real' && t >= q.at - 15 && t < q.at + q.len && !q.met) { worksCareerTick(q.at); q.met = true; const sc = MEETING_SCRIPTS['promo.ceremony']; sc.onPick(0, {}); sc.onEnd(true); }

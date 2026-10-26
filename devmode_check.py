@@ -473,9 +473,9 @@ def part_set(b):
     check(T['clock'] == 'Day 9, Tuesday 08:50' and T['room'] == 'Works bay' and T['rank'] == 'junior' and T['test'] and not T['test']['passed'] and T['cur'] == 't2' and not T['tr'] and T['m6'], f'set: the Day 9 test beat: {T}')
     beat('promo'); pg.step(20)
     PB = pg.ev("typeof promoBeatsOn === 'function' && promoBeatsOn()")   # FX28 (PROMO_BEATS_ON): the result at 08:15, not 11:00
-    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + {8 if PB else 11} * 60 + 2))")
+    pg.ev(f"devmodeRun('Clock', () => devmodeSkipTo(9 * 1440 + {8 * 60 + 7 if PB else 11 * 60 + 2}))")
     P = pg.ev("({ clock: clockText(), rank: SHIP.works.rank, passed: SHIP.works.test && SHIP.works.test.passed, summons: SHIP.occasions.some(o => o.id === 'promoSummons') })")
-    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at {"08" if PB else "11"}:02 the summons is booked, still a junior): {P}')
+    check(P['rank'] == 'junior' and P['passed'] and P['summons'], f'set: the Day 10 promotion beat (at {"08:07" if PB else "11:02"} the summons is booked, still a junior): {P}')
     # the panel's way: a day at a time under the fade, the progress on the panel, then one save
     pg.ev('devmodeOpen(true); DM_UI.tab = "set"; DM_UI.day = 5; devmodeDraw()')
     pg.page.click('#dmSheet button:has-text("Set career to Day 5")'); pg.page.click('#dmSheet button:has-text("Tap again")')

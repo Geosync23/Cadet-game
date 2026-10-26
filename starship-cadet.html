@@ -61402,7 +61402,7 @@ function devmodeWake() {                                 // into your bed's room
 // day `by`, then the clock to `at` on `day` and you in the room, with `set` for what the beat waits on
 const DM_BEATS = [
   { id: 't2', label: 'Day 9: the test job', day: 9, by: 8, at: 530, where: { deck: 5, room: 'w' }, set: W => { W.test = { tier: 2, day: 9, tries: 0, passed: false }; } },   // 08:50 in the Works bay: Calder's test, held from 09:00
-  { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, at: 650, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00
+  { id: 'promo', label: 'Day 10: the promotion', day: 10, by: 9, get at() { return promoBeatsOn() ? PB_TIMES.summonsAt - 10 : 650; }, where: { deck: 5, room: 'w' } },   // 10:50 in the Works bay: her summons at 11:00 (08:05 for 08:15 with FX28's PROMO_BEATS_ON)
 ];
 // starting friendships (the user's q1: the people a steady player meets, approximate): [id, points by about Day 10, from day]
 // (REL_TIERS: 10 an acquaintance, 30 a colleague, 60 a friend), through section 20's relAdd ('intro:' so openness leaves them as given)
