@@ -1514,3 +1514,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~21:34 UTC: FX29 interactions on doors bdb6f00a run alone: OK (shelf line was load). FX29 writing handover, then archive. B4 turn 4 4e5c878f; P9 design agreed with B3 (one hook). Waiting: RV18 doors verdict (last gate).
 - ~21:35 UTC: **RV18 PASS doors-3way bdb6f00a** (game 1dc48251, b0dd6aaa...99d9). BM18 GO: merge, gates, full round (OLD d9c7e5f0). Backlog RV18-D1 (hint title in all-tap mode).
 - ~21:35 UTC: FX29 handover e6a472ac (docs only on bdb6f00a); **FX29 archived** (17 closed).
+- ~21:41 UTC: **0.93.3 ROUND STARTED** on staging-0.93.3 19400976 (game ec93b94d...d085; gates: check_fast OK, cadet only expected Bunk 1 door). ~65 min, OLD d9c7e5f0. ETA GO ~22:50 UTC (6:50 PM Eastern).
