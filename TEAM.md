@@ -1408,3 +1408,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~14:46 UTC: FX24 workbench-tap 484cde7d (jobTap: chore step beats bench crafting in the machine shop; arrows week fail→OK; interactions/player/check_fast OK; cadet identical) → RV18 (urgent, last gate). FIX_PARKED chores (sh-lamp/press/grinder) could return → 0.93.3 backlog. FX24 ~60% → handover addendum, idle.
 - ~15:00 UTC check-in (lead 38, memory ~61%): wrote plans/handover-lead38.md (pre-emptive). Plan: finish 0.93.2 publish (staying <75%), then hand over. Lineage depth 7/8: asked the user to start lead 39 directly.
 - ~15:46 UTC: **RV18 PASS workbench-tap 484cde7d** (arrows week fail→OK on a test merge; mech m10 crafting OK). BM18: merge + gate + round 2 now.
+- ~16:00 UTC: **0.93.2 ROUND 2 started** on staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3; gate: check_fast OK, arrows week OK, events only FX24-2, cadet only 3 Oona shots). ETA ~17:30 UTC (1:30 PM Eastern).
