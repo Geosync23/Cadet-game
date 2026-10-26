@@ -1398,3 +1398,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~13:24 UTC: FX20b inspection fix 5793626 ("Stand by your berths"; arrows week OK on branch; events OK; cadet off identical) → RV18. On staging+fix a different arrows-week FAIL Day 8: workbench chore tap starts hobby craft (pin/tap clash, likely latent) → FX24 fix on claude/workbench-tap, RV18 reviews, rides round 2.
 - ~13:41 UTC: CR6 mech_check alone on 41c8a7e0: promo parts PASS (FX26 flag = its own check/game copy). CR3 p926 part 4 FAIL: reading corner Day 14 nobody attends; checking OLD (maybe take-turns rotation).
 - ~13:43 UTC: **RV18 PASS inspection 5793626** (incl. 1872153 → now in 0.93.2). p926 part 4 = stale check (reading corner fortnightly, odd weeks): CR3 check fix. Round 2 waits for FX24 workbench fix (~14:55 UTC).
+- ~13:49 UTC: FX27 saves_check fix a1df5739 (serve from http route; migrate 30/30, +nosave 10/10; game unchanged) → round 2. p926: CR3 6a527c10.
