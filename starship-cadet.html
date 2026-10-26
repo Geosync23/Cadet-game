@@ -46615,7 +46615,7 @@ const COMET_TALK = {
   cometStern: [['tomas', 'Blankets are on the sofa. Take one even if you\'re not cold. That\'s a rule. I\'ve just made it.'], ['tomas', 'I\'ve never seen one. Not ever. Not even a small one. Is that strange?'],
     ['pell', 'My mum\'ll want it described. Properly. Twice.'], ['rina', 'Twelve people under blankets and nobody\'s coughing. Good. Keep it that way.'], ['tomas', 'There it goes. This window\'s all the places we\'ve already been. Now that too.', 1340]],
   cometCaptain: [['marrow', 'Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.'], ['vance', 'I\'m here for the comet, not to talk about the rowing.'],
-    ['marrow', () => playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
+    ['marrow', () => P5_STEP5 && playerRank() === 'senior' ? evWord('event.comet.captain.senior') || 'Senior Officers get the good window. And the tea from the tin. Don\'t tell the juniors.' : playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
 };
 const COMET_SAID = { key: null, said: new Set(), at: -99, n: 0 };
 // RV18's C1-C3: a line waits for its speaker (someone going tonight who isn't in the room yet is tried again at the next
@@ -54098,7 +54098,8 @@ function ladderTick(h) {
   if (c && c.d < d && (c.st === 'ask' || c.st === 'again') && !has('big') && m <= WORKS_ASK[1]) { const row = ladderRow(c.id); if (row && trainOffer(row, c, d, t)) { (W.op[d] = W.op[d] || []).push(row.id); out.push(row.id); } }
   for (const size of ['big', 'small']) {
     if ((W.op[d] || []).some(id => (ladderRow(id) || {}).size === size) || (size === 'big' && (W.cur || m > WORKS_ASK[1]))) continue;
-    const row = CAREER_LADDER.find(r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W));
+    const ok = r => r.size === size && !opened.has(r.id) && WORK_MECH[r.id] && d >= r.day && r.tier <= W.tier && (!r.fixed || weekday(d) + 1 === r.fixed.wd) && ladderNeeds(r.needs, W);
+    const row = size === 'big' && P5_STEP5 && typeof ladderBigP5 === 'function' ? ladderBigP5(ok, d, W) : CAREER_LADDER.find(ok);   // Pillar 5 Step 5 (24u): higher tier first (off: the table's order)
     if (row && ladderOpen(row, d, t)) out.push(row.id);
   }
   return out;
@@ -54309,7 +54310,8 @@ function worksEscortEnd(id) {
 onSim('caseCalled', n => { const c = SHIP.works && SHIP.works.cur; if (n && n.train && c && c.hold) worksEscortEnd(c.id); });   // 24k: the training case is called
 // the teacher's walk (section 14's escortPlanOf asks): lead you to the training job while you watch, follow you while you do one
 function worksEscort(p, t) {
-  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
+  { const pe = p && typeof promoEscort === 'function' ? promoEscort(p, t) || promoMoveEscort(p, t) || promoCerEscort(p, t) : null; if (pe) return pe; }
+  { const pe = p && P5_STEP5 && typeof p5Escort === 'function' ? p5Escort(p, t) : null; if (pe) return pe; }   // Pillar 5 Step 5 (24u): Calder comes to find you (Power safety's ask; S5-2 adds the promotion's)   // 24p: Calder comes to find you for the summons; the walk to your cabin; up to the ceremony
   const W = SHIP.works, c = W && W.cur; if (!c || !p || p.id !== c.by || (c.st !== 'watch' && c.st !== 'do' && c.st !== 'held') || worksDay(t) !== c.d) return null;
   const j = SHIP.jobs.find(x => x.id === c.j), spot = trainSpot(j);
   if (c.st === 'held') return spot ? { mode: 'follow', to: { deck: spot.deck, tile: spot.tile } } : null;   // they stay with you
@@ -59216,29 +59218,49 @@ onSim('job', n => {                                      // B: Torres comes by a
 // arrow level 1 to Deck 6's port junction at her time; a notice that morning"). From Day 12, an Officer's first small row
 // (24 core's table puts it first). A small row has no lesson of its own in 24 core (it trains on its first use), so this
 // one asks for itself: on a workday morning (06:00-10:30, once you're up) Calder makes an appointment at 09:00 or 09:15 at the
-// Deck 6 port junction (room j; trainSetup's occasion 'works.ps', as a big row's) with her Mail and a toast; the talk there
+// Deck 6 port junction (room j; trainSetup's occasion 'works.ps', as a big row's) and comes to tell you in person (the user's
+// rule: p5Escort walks her over, psTellTick has her say it when she reaches you, the Mail after as the record; not reached
+// by 20 minutes before, an urgent notice and the Mail instead); the talk there
 // (the head writer's train.ps.calder, a stand-in here until then) is the lesson, watch-only: trained when it's met. Missed:
 // asked again the next workday. The arrow: level 1 from 15 minutes before to the end (over Teaching arrows Off and a job in
 // hand, as the first promotion's beats). Saved: the occasion (section 18) and W.tr.ps. Behind P5_STEP5; t3 (S5-2) needs it
-function psAsk(d, now) {
+function psAsk(d, now) {                                 // the appointment; Calder then comes to tell you (psTellTick)
   const row = ladderRow('ps'), by = row && ladderTeacher(row, d); if (!by) return false;   // Calder off today: the next workday
-  const o = trainSetup(row), m = now - (d - 1) * 1440, at = Math.max(m + 45, DAY_SHIFT[0] + (schedU(machSeed('ps'), d, 851) < .5 ? 0 : 15));
+  const o = trainSetup(row), m = now - (d - 1) * 1440, at = Math.max(m + 60, DAY_SHIFT[0] + (schedU(machSeed('ps'), d, 851) < .5 ? 0 : 15));
   o.by = by; o.script = trainScript(row, by); o.len = 20; o.title = 'Power safety with ' + worksFirst(by);
-  const r = occasionAdd('works.ps', (d - 1) * 1440 + at, false, 20); if (!r) return false;
-  const place = (DECKS[6].rooms[row.where.room] || { name: 'the port junction room' }).name, when = hhmm(at);
-  const ask = worksText('works.ask.ps', 'Power safety | Meet me at the {place} on Deck 6 at {time}. Twenty minutes. Come and watch.', { time: when, place, name: worksName(by) }), cut = ask.indexOf(' | ');
-  const subject = cut > 0 ? ask.slice(0, cut) : 'Power safety', body = cut > 0 ? ask.slice(cut + 3) : ask;
-  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(by), subject, body, quiet: true });
-  try { toast(worksName(by), body); } catch (e) { /* no UI */ }
+  const r = occasionAdd('works.ps', (d - 1) * 1440 + at, true, 20); if (!r) return false;
+  r.f = { seek: true };                                  // she walks over to you (p5Escort) until she's said it
   flagSet('works.brief.ps', d);                          // the talk at the junction is the lesson's word (no after-word: worksTrained)
   return true;
+}
+function psAskWords(r) {                                 // her ask: 'Subject | body' (works.ask.ps), the time and place filled
+  const place = (DECKS[r.deck].rooms[r.room] || { name: 'the port junction room' }).name + ' on ' + deckIn(r.deck), when = hhmm(r.at % 1440);
+  const ask = worksText('works.ask.ps', 'Power safety | Before any Tier 3 work: Power safety, with me. Twenty minutes. You watch. {time}, {place}.', { time: when, place, name: worksName(r.by) }), cut = ask.indexOf(' | ');
+  return { subject: cut > 0 ? ask.slice(0, cut) : 'Power safety', body: cut > 0 ? ask.slice(cut + 3) : ask };
+}
+function psTold(r, now, how) {                           // said (in person, or the notice when she couldn't reach you): the Mail is the record
+  if (!r.f || r.f.told) return; r.f.told = how; const w = psAskWords(r);
+  if (typeof mailSend === 'function') mailSend({ at: now, from: worksName(r.by), subject: w.subject, body: w.body, quiet: true });
+  if (how === 'notice' && typeof promoNotice === 'function') promoNotice(w.body, worksName(r.by));
+}
+function psTellTick(now) {                               // the user's rule: in person first. She comes to you once you're up and free; 20 minutes before, the notice
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(); if (!r || r.status !== 'asked' || r.met || !r.f || r.f.told) return;
+  if (now >= r.at - 20) { psTold(r, now, 'notice'); return; }
+  if ((typeof DIALOGUE !== 'undefined' && DIALOGUE) || (typeof promoBusy === 'function' && promoBusy())) return;
+  try { const a = DECK_CREW.find(x => x.p && x.p.id === r.by), P = player.obj.position;
+    if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) < 2.2) { const w = psAskWords(r); worksSayAll(r.by, [w.body]); psTold(r, now, 'met'); } } catch (e) { /* not in play */ }
+}
+function p5Escort(p, t) {                                // worksEscort's 24u part (S5-1): Calder walking over to ask you for Power safety
+  const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop();
+  if (r && r.f && r.f.seek && !r.f.told && r.status === 'asked' && p.id === r.by && t < r.at - 20 && !(typeof promoBusy === 'function' && promoBusy())) return { mode: 'follow', to: null };
+  return null;
 }
 function psTick(now) {
   const W = SHIP.works; if (!W || W.tr.ps !== undefined || !worksOpened(W).has('ps')) return;
   const r = SHIP.occasions.filter(x => x.id === 'works.ps').pop(), d = worksDay(now), m = now - (d - 1) * 1440;
   if (r && (r.met || r.status === 'kept')) { if (!(typeof DIALOGUE !== 'undefined' && DIALOGUE)) worksTrained('ps', now); return; }
   if (r && r.status === 'asked' && now < r.at + r.len) {
-    if (typeof promoQueue === 'function' && promoQueue() && now >= r.at - 15)
+    if (typeof promoQueue === 'function' && promoQueue() && now >= r.at - 15 && (!r.f || r.f.told))
       guideAsk({ id: 'ps:meet:' + (Math.floor(r.at / 1440) + 1), level: 1, owner: '24u (S5-1)', from: r.at - 15, until: r.at + r.len,
         goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(r.by, r.deck, r.room) ? { crew: r.by } : {}), label: worksText('ps.arrow', 'Power safety with {name}, {time}', { name: worksFirst(r.by), time: hhmm(r.at % 1440) }) }),
         done: () => !!r.met || r.status !== 'asked' || guideTrained('ps') });
@@ -59247,6 +59269,26 @@ function psTick(now) {
   if (r && Math.floor(r.at / 1440) + 1 >= d) return;     // today's, gone by (missed): tomorrow's workday
   if (playerShiftOn(d) && m >= WORKS_ASK[0] && m <= WORKS_ASK[1]) psAsk(d, now);   // (minute ticks are play only: asked once you're up)
 }
+// ---- the ladder's order with P5_STEP5 on (S5-1, lead 39's call after RV20's review; plans/p5-step5-spec.html S5-1 "The
+// ladder's order", EP2). 24 core's ladderTick asks ladderBigP5 for the day's big row (off: its own find, unchanged):
+// higher tier first (the same tests, then a stable sort by tier, highest first), so a steady Senior gets m19 on Day 17,
+// m18 on 18, m20 on 19; m15 folds into m19 (a Senior who hasn't trained it never gets its own lesson: m19's training sets
+// W.tr.m15 that day, so rewiring opens; m19 gives the conduit tester once, toolGive's own rule); a big row below your tier
+// (m17 the lift roof) waits for a clear day: a workday with no career hold (beat, test, captain or night) between 06:00
+// and 16:00 and no ship-wide event's big day. Pure: from the ladder, the save's W, EV_BEATS and the calendar's plan
+function ladderClearDay(d) {
+  try { if (eventDay(d)) return false; return !evBeatsOn(d).some(b => ['beat', 'test', 'captain', 'night'].includes(b.kind) && b.from < 960 && b.to > 360); } catch (e) { return true; }
+}
+function ladderBigP5(ok, d, W) {
+  const list = CAREER_LADDER.filter(r => ok(r) && !(r.id === 'm15' && W.tier >= 3)).map((r, i) => [r, i]).sort((a, b) => (b[0].tier - a[0].tier) || (a[1] - b[1])).map(x => x[0]);
+  const top = list[0]; if (!top) return undefined;
+  if (W.tier >= 3 && top.tier < W.tier && !ladderClearDay(d)) return undefined;
+  return top;
+}
+if (P5_STEP5) onSim('trained', n => {                    // m15 folds into m19 (above)
+  const W = SHIP.works; if (!W || n.mech !== 'm19' || W.tr.m15 !== undefined || !ladderRow('m15')) return;
+  const d = W.tr.m19 || worksDay(n.t); W.tr.m15 = d; if (!worksOpened(W).has('m15')) (W.op[d] = W.op[d] || []).push('m15');
+});
 // the Training tab's "Your promotion" rows for Tier 3 (S5-1 turn 3; 24p's promoCheck pattern, its Done / Not yet words):
 // an Officer's, from Steady (or once the offer's made, S5-2's SHIP.works.pu.t3) until the Tier 3 test is passed. The beats
 // table's "Nearly there": the rows tick as each need holds. 24 core's Training tab asks it (one typeof-guarded line)
@@ -59255,11 +59297,11 @@ function puCheck() {
   const T = W.pu && typeof W.pu === 'object' && W.pu.t3 && typeof W.pu.t3 === 'object' ? W.pu.t3 : null; if (T && T.passed) return [];
   const B = WORK_BANDS[2], at = b => B.findIndex(x => x[1] === b), row3 = ladderRow('t3'), from = row3 ? row3.day : 15;
   if (at(worksBand()) < at('steady') && !T) return [];
-  const yes = worksText('works.promo.check.done', 'Done'), no = worksText('works.promo.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
-  const rows = [row(worksText('works.pu.check.rep', 'Relied on (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
-    row(worksText('works.pu.check.ps', 'Power safety'), W.tr.ps !== undefined), row(worksText('works.pu.check.day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
-  if (T && Number.isInteger(T.day) && T.day > 0) rows.push({ text: worksText('works.pu.check.set', 'Test job: {day}, 09:00', { day: T.day === d ? 'today' : T.day === d + 1 ? 'tomorrow' : dayName(T.day) }) });
-  return [{ kind: 'text', text: worksText('works.pu.check.title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
+  const yes = worksText('pu3.check.done', 'Done'), no = worksText('pu3.check.not', 'Not yet'), row = (text, ok) => ({ text, sub: ok ? yes : no });
+  const rows = [row(worksText('pu3.check.rep', 'Relied on (you\'re {band})', { band: worksBandWord() }), ladderNeeds({ rep: 'relied' }, W)),
+    row(worksText('pu3.check.ps', 'Power safety, with the Chief'), W.tr.ps !== undefined), row(worksText('pu3.check.day', 'The test from Day {day}', { day: from }), !!T || d >= from)];
+  if (T && Number.isInteger(T.day) && T.day > 0) rows.push({ text: worksText('pu3.check.set', 'Test job: {day}, 09:00', { day: T.day === d ? 'today' : T.day === d + 1 ? 'tomorrow' : dayName(T.day) }) });
+  return [{ kind: 'text', text: worksText('pu3.check.title', 'Your promotion: the Tier 3 test'), mark: 'head' }, { kind: 'list', rows }];
 }
 // Dev mode's career arrow (section 25's dvCareerNext asks; a small row's own lesson): the appointment if it's made, else the
 // next workday morning's ask (from Day 12, an Officer's). null once trained or when it isn't yours yet
@@ -59286,7 +59328,7 @@ if (P5_STEP5) {
         { text: 'Who do I tell?', reply: { who: 'calder', text: 'Whoever\'s in the rooms it feeds. The board shows you. Ask if it doesn\'t.' } }] },
       { who: 'calder', text: 'One day soon you\'ll switch one of these off on your own. That\'s the next step up.' },
       { who: 'calder', text: 'That\'s it. Power safety. Don\'t make me say it twice.' }] };
-  WORK_TICKS.push((now, skip) => { if (!skip) psTick(now); });
+  WORK_TICKS.push((now, skip) => { if (!skip) { psTick(now); psTellTick(now); } });
 }
 // ---- end of slot: Later promotions ----
 
