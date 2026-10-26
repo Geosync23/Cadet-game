@@ -1787,10 +1787,13 @@ with sync_playwright() as pw:
         tb = g.ev(r"""(() => { const out = {}, vis = () => (handTick(true), !document.getElementById('seatBtn').hidden), rect = id => { const b = document.getElementById(id).getBoundingClientRect(); return [b.top, b.bottom, b.right, b.height]; };
           const pl = [...PLACE_OF.values()].find(q => q.type === 'mess-seat' && !heldBy(q.id)), sp = placeSpot(pl.id);
           player.obj.position.set(sp.x + 1.0, 0, sp.z + .6); player.stop(); out.noTray = vis();
-          SHIP.player.tray = 'stew'; SHIP.player.trayLeft = 0; out.tray = vis(); out.near = (seatBtnSeat() || [{}])[0].id;
-          if (out.tray) { const s = rect('seatBtn'), p = rect('putDown'); out.above = s[1] <= p[0] && s[1] > p[0] - 30; out.same = Math.abs(s[3] - p[3]) <= 1; out.right = Math.abs(s[2] - p[2]) <= 1; }
-          const lp = [...PLACE_OF.values()].find(q => q.type === 'lounge-seat' && placeSpot(q.id)), ls = placeSpot(lp.id); player.obj.position.set(ls.x + .8, 0, ls.z); player.stop(); out.lounge = vis();
-          player.obj.position.set(sp.x + 1.0, 0, sp.z + .6); player.stop(); vis(); return out; })()""")
+          SHIP.player.tray = 'stew'; SHIP.player.trayLeft = 0; out.tray = vis(); out.near = (seatBtnSeat() || [{}])[0].id; return out; })()""")
+        g.step(10)   # Put down shows on its own tick: give it a few frames before measuring the two
+        tb.update(g.ev(r"""(() => { const out = {}, vis = () => (handTick(true), !document.getElementById('seatBtn').hidden), rect = id => { const b = document.getElementById(id).getBoundingClientRect(); return [b.top, b.bottom, b.right, b.height]; };
+          out.near = (seatBtnSeat() || [{}])[0].id;   // again: the crew move in those frames
+          if (vis()) { const s = rect('seatBtn'), p = rect('putDown'); out.above = s[1] <= p[0] && s[1] > p[0] - 30; out.same = Math.abs(s[3] - p[3]) <= 1; out.right = Math.abs(s[2] - p[2]) <= 1; }
+          const p0 = player.obj.position.clone(), lp = [...PLACE_OF.values()].find(q => q.type === 'lounge-seat' && placeSpot(q.id)), ls = placeSpot(lp.id); player.obj.position.set(ls.x + .8, 0, ls.z); player.stop(); out.lounge = vis();
+          player.obj.position.copy(p0); player.stop(); vis(); return out; })()"""))
         bb = g.ev("(() => { const b = document.getElementById('seatBtn').getBoundingClientRect(); return [Math.round(b.left + b.width / 2), Math.round(b.top + b.height / 2)]; })()")
         g.page.mouse.click(*bb); g.step(5)
         tb['tap'] = g.ev("[ACT && ACT.kind, ACT && !!ACT.o.fed, ACT && ACT.placeId, (handTick(true), document.getElementById('seatBtn').hidden)]")
