@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-c.2
+   STARSHIP CADET: CSV Wren                           build 0.93.2-c.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9237,6 +9237,7 @@ function applyLight(k) {
   if (ml) { hemi.color.multiply(ml.sky); hemi.intensity *= ml.hemi; sun.color.multiply(ml.sun); sun.intensity *= ml.sunI; }
   if (REC_SHOW.dim) { const q = 1 - REC_SHOW.dim; hemi.intensity *= q; sun.intensity *= q; }   // 0.84.8: the auditorium's house lights down for a show (8c)
   if (typeof flcDim === 'function' && flcDim()) { const q = 1 - flcDim(); hemi.intensity *= q; sun.intensity *= q; }   // patch #26: the bow lounge's lights down for First Light Cocoa (section 15's slot)
+  if (typeof cometDim === 'function' && cometDim()) { const q = 1 - cometDim(); hemi.intensity *= q; sun.intensity *= q; }   // the comet (FX25): the four rooms' lights down while you watch (section 18's slot 'Comet builder')
   for (const L of LAMPS) L.l.intensity = lerp(L.day, L.night, k);
   renderer.toneMappingExposure = lerp(DAY.exp, NIGHT.exp, k);
   scene.background.copy(DAY.bg).lerp(NIGHT.bg, k);
@@ -9257,7 +9258,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-c.2';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-c.3';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -42461,6 +42462,7 @@ function eventsTick() {
   if (P926_TRADS) talkTick();                            // 0.92.6 item 13: the Wren talks spoken from the stool (FX17, Traditions slot)
   if (P926_TRADS) p926Frame();                           // 0.92.6: the swap meet's, reading corner's and spice supper's talk (FX17, Traditions slot)
   if (P926_APPT) apptFrame();                            // 0.92.6 item 9: appointments (FX22, Appointments builder slot)
+  if (EV_COMET_ON && COMET) cometFrame();                // the comet in the sky, the turn, the dimming, the crowd looking up (slot 'Comet builder')
   if (DIALOGUE && !dialogueView().choices && performance.now() - DIALOGUE.at > DIALOGUE_AUTO) dialogueStep();
   const now = shipNow(), m = Math.floor(now);
   if (m === EV_MIN) return;
@@ -43053,6 +43055,60 @@ if (EV_COMET_ON && EVENTS_ON) {
     cometStern: { host: 'tomas', pose: 'sit:talk', need: 'leisure', gain: 15, also: { social: 6 }, verb: w('join.cometStern.verb') || 'take a blanket', what: w('join.cometStern.what') || 'take a blanket and a place on the sofa, facing the stern windows' },
     cometCaptain: { host: 'marrow', pose: MUG_ON ? 'cocoa' : 'drink', need: 'social', gain: 12, also: { leisure: 10 }, verb: w('join.cometCaptain.verb') || 'take a cup of tea', what: w('join.cometCaptain.what') || 'take a cup of the Captain\'s tea and a place at the window' } });
   tjActs();
+  // c.3, the dressing (section 4d's DECK_DRESS shape; dressShow merges each by colour, no shadows, colours through col()):
+  // from 21:00 the cord basket by the bow glass and the cord along the glass rail, the blankets on the junior common
+  // room's seats, the Captain's teapot; from the knot (22:00) the cord carries knots, and it stays for good (settleTraces,
+  // EP1's question A2's default); Ravi Hart's sketch by the bow lounge door for seven days from Day 23 10:00 (a trace with its day)
+  const L3 = () => ROOM_BOX.L, onC = () => EV_COMET_ON;
+  Object.assign(DECK_DRESS, {
+    cometBasket: { deck: 3, on: onC, what: 'a basket of Veyli cord on a stand by the bow glass', make(g) {
+      const r = L3(), s = dressAt(g, 'L', 'floor', 51.45 - r.i0, 12.45 - r.j0);
+      dressBox(s, .34, .03, .34, '#5a4632', 0, .62, 0); dressBox(s, .07, .6, .07, '#5a4632', 0, .3, 0); dressBox(s, .26, .03, .26, '#5a4632', 0, .02, 0);   // the stand
+      const b = new THREE.Mesh(new THREE.CylinderGeometry(.15, .12, .14, 14, 1, true), dressMat('#b98a52')); b.position.set(0, .71, 0); s.add(b);   // the basket (open)
+      for (let k = 0; k < 3; k++) { const c = new THREE.Mesh(new THREE.TorusGeometry(.09 - k * .025, .012, 6, 18), dressMat('#3f6fb0')); c.rotation.x = Math.PI / 2; c.position.set(.01 * k, .67 + .02 * k, 0); s.add(c); }   // coils of blue cord
+      return { t: 'Cord basket', x: evWord('event.comet.tap.basket') || 'A basket of thin blue Veyli cord. To the Veyli a comet is a guest crossing their sky, and you tie a knot to remember it.', floor: ['L', 51.45 - r.i0, 12.45 - r.j0], y: .7, w: .4, h: .3, d: .4 };
+    } },
+    // the cord along the bow glass, at the rail (the sill's top), rows 8.3-12.7; o.knots (or the trace's) knots along it
+    cometCord: { deck: 3, on: onC, what: 'the blue cord along the bow glass rail, with the comet knots', make(g, o) {
+      const r = L3(), s = dressAt(g, 'L', 'e', 7.5), n = o && o.knots != null ? o.knots : 9, y = SILL + .04;
+      const c = dressBox(s, 4.4, .014, .014, '#3f6fb0', 0, y, .06);
+      for (let k = 0; k < n; k++) { const kn = new THREE.Mesh(new THREE.SphereGeometry(.024, 8, 6), dressMat('#3f6fb0')); kn.position.set(-2 + 4 * (k + .5) / Math.max(1, n) + .05 * Math.sin(k * 2.1), y, .06); s.add(kn); }
+      return { t: 'Comet cord', x: n ? (evWord('event.comet.tap.cord') || 'The blue cord along the bow glass, knotted by everyone who watched the comet go by. Nobody unties these.') : (evWord('event.comet.tap.cord.bare') || 'A thin blue cord strung along the bow glass rail, waiting for knots.'), wall: ['L', 'e', 7.5], y, w: 4.4, h: .2 };
+    } },
+    // the blankets: one folded on each of the junior common room's seats (a box just above the seat's top, merged: 2 draw calls)
+    cometBlankets: { deck: 4, on: onC, what: 'blankets folded on the junior common room\'s sofa and cushions', make(g) {
+      const r = ROOM_BOX.j, s = dressAt(g, 'j', 'floor', 0, 0), P = (DECKS[4].places || []).filter(p => p.room === 'j' && p.pose === 'sit');
+      P.forEach((p, k) => { const sp = placeSpot(p.id); if (!sp) return; const m = dressBox(s, .46, .05, .34, k % 2 ? '#c45a3f' : '#e8c06a', sp.x - X0(r.i0), (sp.y || .475) + .03, sp.z - Z0(r.j0)); m.rotation.y = typeof p.face === 'number' ? p.face * Math.PI / 180 : 0; });
+      const c = P.length ? placeSpot(P[0].id) : null;
+      return { t: 'Blankets', x: evWord('event.comet.tap.blankets') || 'Spare blankets from Main storage, one on every seat. Tomas says you take one even if you\'re not cold. That\'s a rule.', floor: ['j', c ? c.x - X0(r.i0) : 1, c ? c.z - Z0(r.j0) : 1], y: .5, w: .5, h: .2, d: .4 };
+    } },
+    cometTeapot: { deck: 1, on: onC, what: 'the Captain\'s blue teapot and cups on a side table in the observation room', make(g) {
+      const r = ROOM_BOX.O, s = dressAt(g, 'O', 'floor', 2.5 - r.i0, .55 - r.j0);
+      dressBox(s, .42, .03, .32, '#3a3024', 0, .72, 0); dressBox(s, .05, .7, .05, '#3a3024', 0, .35, 0); dressBox(s, .24, .03, .24, '#3a3024', 0, .02, 0);   // the side table
+      const pot = new THREE.Mesh(new THREE.SphereGeometry(.075, 12, 9), dressMat('#2f6aa3')); pot.scale.y = .85; pot.position.set(-.08, .8, 0); s.add(pot);
+      dressBox(s, .07, .02, .02, '#2f6aa3', -.17, .81, 0);   // the spout
+      for (const z of [-.08, .08]) { const cup = new THREE.Mesh(new THREE.CylinderGeometry(.03, .025, .05, 10), dressMat('#efe6d4')); cup.position.set(.1, .762, z); s.add(cup); }
+      return { t: 'Teapot', x: evWord('event.comet.tap.teapot') || 'The Captain\'s blue teapot, and the tin beside it marked NOT FOR BRIEFINGS.', floor: ['O', 2.5 - r.i0, .55 - r.j0], y: .8, w: .45, h: .2, d: .35 };
+    } },
+    // Ravi Hart's sketch of the comet by the bow lounge door (the promenade's north wall, beside the Line's plaque), for
+    // seven days from Day 23 10:00: the trace { id: 'cometSketch', day } (its day the morning it goes up)
+    cometSketch: { deck: 3, on: () => EV_COMET_ON && (() => { const x = SHIP.traces.find(y => y && y.id === 'cometSketch'), t = shipNow(); return !!x && t >= (x.day - 1) * 1440 + 600 && t < (x.day + 6) * 1440; })(), what: 'Ravi Hart\'s sketch of the comet, pinned by the bow lounge door', make(g) {
+      const s = dressAt(g, '=', 'n', 27.55), e = SHIP.eventLog.slice().reverse().find(l => l.id === 'comet'), nm = e && e.mine && e.mine.named > 0 ? COMET_NAMES[e.mine.named - 1] : '';
+      dressBox(s, .5, .36, .012, '#d8d2c4', 0, 1.55, .006);   // the card, flat on the wall
+      const t = tex(250, 180, (c, w, h) => {
+        c.fillStyle = '#f4f0e6'; c.fillRect(0, 0, w, h); c.strokeStyle = '#3b3b3b'; c.lineWidth = 2;
+        c.beginPath(); c.arc(70, 70, 10, 0, Math.PI * 2); c.stroke();
+        for (let k = 0; k < 9; k++) { c.beginPath(); c.moveTo(76, 64 + k); c.quadraticCurveTo(140, 70 + 3 * k, 230, 40 + 9 * k); c.stroke(); }   // the head and the pencil tail
+        c.fillStyle = '#3b3b3b'; c.font = 'italic 600 15px Georgia,serif'; c.fillText(nm ? nm.replace(/^the /, 'The ') : 'The comet', 16, 150); c.font = '500 11px Georgia,serif'; c.fillText('R. Hart, Day 22', 150, 170);
+      });
+      const p = new THREE.Mesh(new THREE.PlaneGeometry(.46, .33), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 1.55, .014); s.add(p);
+      return { t: 'Comet sketch', x: evWord('event.comet.tap.sketch') || 'Ravi Hart\'s sketch of the comet from the bow lounge, signed by everyone who was there.', wall: ['=', 'n', 27.55], y: 1.55, w: .5, h: .4 };
+    } },
+  });
+  const dressAtM = (a, b) => ['cometBasket', 'cometCord', 'cometBlankets', 'cometTeapot'].map(id => ({ id, at: [0, a, b], ...(id === 'cometCord' ? { knots: a >= 1320 ? 9 : 0 } : {}) }));
+  SHIP_EVENTS.comet.dressing = { warning: dressAtM(1260, 1290), onset: dressAtM(1290, 1320).concat(dressAtM(1320, 1360)), resolution: dressAtM(1360, 1365) };
+  SHIP_EVENTS.comet.settleTraces = ['cometCord'];          // the knotted cord stays on the bow glass rail for good (from 22:40)
+  SHIP_EVENTS.comet.moments.push({ id: 'cometTurnBack', phase: 'resolution', at: [0, 1360], where: 'shipwide', feel: ['cometTurnBack'], len: 20 });   // the helm brings her back onto her course
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
@@ -44892,7 +44948,8 @@ function cometTick(now) {
   if (m >= 1275 && m < 1281) once('headsup', () => toast('Comet viewing', cometW('notice.headsup') || (playerRank() === 'junior'
     ? 'The comet, in 15 minutes: the bow lounge, the observatory or the junior common room.' : 'The comet, in 15 minutes: the bow lounge, the observatory, the junior common room or the observation room.')));
   if (m >= 1290 && m < 1296) once('turn', () => { const t = cometW('notice.turn') || 'The helm is bringing the bow round for the comet.';
-    toast('Bridge', t); if (typeof mailSend === 'function') mailSend({ at: now, from: 'The bridge', subject: 'Comet viewing', body: t, quiet: true }); });
+    toast('Bridge', t); if (typeof mailSend === 'function') mailSend({ at: now, from: 'The bridge', subject: 'Comet viewing', body: t, quiet: true }); sndFx('cometTurn'); });   // the swell under the hum (section 27's, SD1's: nothing until it's there)
+  if (m >= 1360 && !e.mine['notice:sketch']) { e.mine['notice:sketch'] = 1; traceAdd('cometSketch', d + 1); }   // Ravi's sketch goes up by the door tomorrow at 10:00 (c.3's DECK_DRESS.cometSketch, seven days)
   if (m < 1290 || m >= 1360 || typeof deckDef === 'undefined' || !deckDef) return;
   cometTalk(d, m);
   const here = roomAt(...player.here()), lounge = deckDef.num === 3 && here === 'L', joined = SHIP.events.joined.includes('cometLounge@' + d);
@@ -44931,7 +44988,8 @@ function cometKnot(a, d, now) {
       { who: 'saruth', text: W('3', 'Tie yours loose. It is still travelling.'), to: 'you' }],
     onEnd: () => { delete MEETING_SCRIPTS['moment:comet.knot']; } };
   if (typeof dialogueShow === 'function') dialogueShow('moment:comet.knot', { id: 'comet.knot@' + d, who: ['saruth'], at: now, where: { deck: 3, room: /^Bow lounge$/ } });
-  traceAdd('cometKnotYours', d);                          // your knot on your shelf (section 4d's DECK_DRESS.cometKnotYours, c.3)
+  traceAdd('cometKnotYours', d);                          // the knot you tied (the Record reads e.mine.knot; the trace keeps the day)
+  const sp = schedPeople().find(p => p.id === 'saruth'); if (sp && typeof giftKeepsake === 'function') giftKeepsake(sp, cometW('knot.keepsake') || 'a comet knot, tied loose');   // on your keepsake shelf (section 20c's), from Saruth
   return true;
 }
 // a tap during the comet (section 18's tradJoinTap asks first): Saruth's knot; a Cadet at the Captain's tea is sent down
@@ -44987,6 +45045,109 @@ function cometRecord(l) {
   if (m.namedBy === 'you' && m.named >= 1 && m.named <= 3) out.push(cometW('record.named.' + m.named) || ['Named it the Lantern.', 'Gave it its Veyli name.', 'Named it Sato\'s Fourth.'][m.named - 1]);
   if (m.knot) out.push(cometW('record.knot') || 'Tied a comet knot.');
   return out.join(' ');
+}
+// c.3, the look (every frame, from eventsTick; looks only, nothing saved, never R()):
+//  the comet in the sky: one screen quad of its own (COMET_SKY, 1 draw call) drawn like section 4b's SKY (just inside the
+//  far plane, additive, so only where nothing else drew: round the ship and through the windows), made at 21:15 and
+//  disposed at 22:45. Its head is a world point beside the ship that slides from ahead of the bow (21:30) down the
+//  ship's north side to aft of the stern (22:40), so the bow glass gets the head first and the stern windows the tail by
+//  22:20; its white dust tail and faint blue ion tail stream aft, projected each frame with the camera as drawn;
+//  the turn: while the felt moment 'cometTurn' (21:30, 20 s) or 'cometTurnBack' (22:40) is on, the star layers slide
+//  across (SKY.far and SKY.near, the accumulators the main loop drifts): the sun, the lamps and the shadows don't move;
+//  the dimming: the four rooms' lights down to 60% while you're in one, 21:15-22:40 (as First Light Cocoa's: section 5's
+//  applyLight asks cometDim);
+//  the crowd: at the glass, the standing crowd looks up (8b's 'look'), and now and then someone points ('point'); at the
+//  stern windows from 22:20 too
+const COMET_SKY = { m: null, v: new THREE.Vector3(), w: new THREE.Vector3(), s: new THREE.Vector2(), t: 0, look: 0, key: '', next: 0, sp: null, y: 0 };
+var COMET_DIM = 0;                                        // the four rooms' dimming now (0..COMET_DIM_TO); a var: section 5 may ask before this slot has run
+const COMET_DIM_TO = .4;
+function cometDim() { return COMET_DIM || 0; }
+function cometSkyMake() {
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uPR: { value: 1 }, uH: { value: new THREE.Vector4() }, uT: { value: new THREE.Vector4() }, uL: { value: 100 },
+      cH: { value: new THREE.Color(col('#fff6e4')) }, cD: { value: new THREE.Color(col('#e6dfd0')) }, cI: { value: new THREE.Color(col('#7fb2ff')) } },
+    vertexShader: 'void main() { gl_Position = vec4(position.xy, .9999, 1.0); }',
+    fragmentShader: `uniform float uPR, uL; uniform vec4 uH, uT; uniform vec3 cH, cD, cI;
+      void main() {
+        vec2 p = gl_FragCoord.xy / uPR, d = p - uH.xy; float r = uH.w;
+        float head = exp(-dot(d, d) / (r * r)), coma = .3 * exp(-length(d) / (r * 3.0));
+        float a = dot(d, uT.xy); vec2 q = d - a * uT.xy; float w = r * (.7 + 2.4 * clamp(a / uL, 0.0, 1.0));
+        float dust = a > 0.0 ? exp(-dot(q, q) / (w * w)) * exp(-a / (uL * .5)) : 0.0;
+        float b = dot(d, uT.zw); vec2 s = d - b * uT.zw; float wi = r * (.3 + .6 * clamp(b / uL, 0.0, 1.0));
+        float ion = b > 0.0 ? exp(-dot(s, s) / (wi * wi)) * exp(-b / (uL * .8)) : 0.0;
+        gl_FragColor = vec4(uH.z * (cH * (1.25 * head + coma) + cD * .55 * dust + cI * .6 * ion), 1.0);
+      }`,
+    transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), mat);
+  m.frustumCulled = false; m.renderOrder = 1e6 + 1; m.raycast = () => {}; scene.add(m); return m;
+}
+function cometSkyDrop() { const m = COMET_SKY.m; if (!m) return; scene.remove(m); m.geometry.dispose(); m.material.dispose(); COMET_SKY.m = null; }
+// the head's world point at minute m of the comet's day: out in the space you can see from where you stand (the
+// nearest tile off the deck's map that shows on the screen, clear of the top bar; else the nearest at all), a tile and
+// a half further out, drifting aft as it passes (21:30 to 22:40). Looked up twice a second. -> its weight: the stern
+// rooms (the junior common room, the observation room) see it faint until the tail comes past, strongest from 22:20
+function cometHead(m, out) {
+  const S = COMET_SKY, t = simNow() / 1000, [pi, pj] = player.here();
+  if (t >= S.next || S.key !== deckDef.num + ':' + pi + ',' + pj) {
+    S.key = deckDef.num + ':' + pi + ',' + pj; S.next = t + .5; let best = null, any = null;
+    const off = (i, j) => { const r = MAP[j]; return !r || r[i] === undefined || r[i] === '.' || r[i] === ' '; };
+    for (let r = 1; r <= 16 && !best; r++) for (let i = pi - r; i <= pi + r; i++) for (let j = pj - r; j <= pj + r; j++) {
+      if (Math.max(Math.abs(i - pi), Math.abs(j - pj)) !== r || !off(i, j)) continue;
+      const dd = Math.hypot(i - pi, j - pj), v = cellPos(i, j).project(camera);
+      if (!any || dd < any[2]) any = [i, j, dd];
+      if (Math.abs(v.x) < .84 && v.y < .2 && v.y > -.9 && (!best || dd < best[2])) best = [i, j, dd];
+    }
+    const b = best || any; S.sp = b ? [b[0] + 1.5 * (b[0] - pi) / b[2], b[1] + 1.5 * (b[1] - pj) / b[2]] : [W + 4, D / 2];
+    // on the far side of the deck the hull wall stands in front of it: lift it above the wall's top; on the near side,
+    // below the deck, out into the open space under the cutaway
+    S.y = cellPos(S.sp[0], S.sp[1]).project(camera).z > player.obj.position.clone().project(camera).z ? 3 : -2;
+  }
+  const rk = deckDef.num + '|' + roomAt(pi, pj), aft = rk === '4|j' || rk === '1|O';
+  const u = Math.max(0, Math.min(1, (m - 1290) / 70)), c = cellPos(S.sp[0] + 3 * (.5 - u), S.sp[1]);
+  out.set(c.x, S.y, c.z); S.aft = aft;
+  return aft ? .35 + .65 * Math.max(0, Math.min(1, (m - 1310) / 30)) : 1;
+}
+function cometFrame() {
+  const e = SHIP.event, now = shipNow(), d = Math.floor(now / 1440) + 1, m = now - (d - 1) * 1440;
+  const up = !!(COMET && e && e.id === 'comet' && d === e.startDay && m >= 1275 && m < 1365);
+  if (!up) { cometSkyDrop(); } else {
+    const S = COMET_SKY; if (!S.m) S.m = cometSkyMake();
+    const U = S.m.material.uniforms, sz = renderer.getSize(S.s), px = v => [(v.x + 1) / 2 * sz.x, (v.y + 1) / 2 * sz.y];
+    const k = Math.min(1, (m - 1275) / 15) * Math.min(1, (1365 - m) / 5);   // fades in from 21:15, out by 22:45
+    const kr = cometHead(m, S.v), h = px(S.w.copy(S.v).project(camera)), one = px(S.w.copy(S.v).add(_comX).project(camera));
+    const tile = Math.max(2, Math.hypot(one[0] - h[0], one[1] - h[1])), tail = (dx, dz) => { const t = px(S.w.copy(S.v).add(_comT.set(dx, 0, dz).multiplyScalar(14)).project(camera)); const l = Math.hypot(t[0] - h[0], t[1] - h[1]) || 1; return [(t[0] - h[0]) / l, (t[1] - h[1]) / l, l]; };
+    const dt = tail(-.94, .34), it = tail(-.99, .1);   // streaming aft
+    U.uPR.value = renderer.getPixelRatio(); U.uH.value.set(h[0], h[1], k * kr, Math.max(3, .45 * tile)); U.uT.value.set(dt[0], dt[1], it[0], it[1]); U.uL.value = Math.max(40, dt[2]) * (S.aft ? 1.6 : 1);
+  }
+  // the turn: the stars slide across every window (the felt moment's 20 s), and back at 22:40
+  const F = FEEL_S, t = simNow() / 1000, dts = Math.min(.1, Math.max(0, t - (COMET_SKY.t || t))); COMET_SKY.t = t;
+  if (t < F.until && (F.kinds.includes('cometTurn') || F.kinds.includes('cometTurnBack'))) {
+    const v = (F.kinds.includes('cometTurnBack') ? -1 : 1) * Math.sin(Math.PI * Math.min(1, (t - F.t0) / Math.max(.1, F.until - F.t0))) * 18 * (FEEL_CALM ? .25 : 1) * dts;
+    SKY.far.x = (SKY.far.x + v) % 512; SKY.near.x = (SKY.near.x + 2.6 * v) % 512;
+  }
+  // the dimming in the four rooms while you're in one
+  const here = up && typeof deckDef !== 'undefined' && deckDef ? deckDef.num + '|' + roomAt(...player.here()) : null;
+  const want = here && m < 1360 && COMET.rooms.some(r => r[0] === here) ? COMET_DIM_TO : 0, was = COMET_DIM;
+  COMET_DIM = Math.abs(want - COMET_DIM) < .01 ? want : COMET_DIM + (want - COMET_DIM) * .05;
+  if (COMET_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
+  // the crowd looks up (twice a second): those settled standing at the comet's gatherings; one in six points now and
+  // then (by a hash of the person and the ship's two minutes)
+  if (!up || m < 1290 || m >= 1360 || typeof DECK_CREW === 'undefined' || typeof CROWD_ANIMS === 'undefined' || !CROWD_ANIMS.has('look') || t < COMET_SKY.look) return;
+  COMET_SKY.look = t + .5;
+  for (const a of DECK_CREW) {
+    if (!a.settled || !a.p || !/^ev-comet(Lounge|Captain)/.test(a.tag || '')) continue;
+    if (/^sit/.test(a.pose || '')) continue;
+    const want2 = idHash(a.p.id + ':' + Math.floor(m / 2)) % 6 === 0 ? 'point' : 'look';
+    if (want2 && a.pose !== want2 && (a.pose === 'stand' || a.pose === 'talk' || a.pose === 'look' || a.pose === 'point')) a.pose = want2;
+  }
+}
+const _comX = new THREE.Vector3(1, 0, 0), _comT = new THREE.Vector3();
+// for the music (section 27's music slot, SD1): the comet's own track is wanted now: the comet passing (21:30-22:40,
+// its onset) and you in one of its four rooms. Pure of the clock and where you stand; false while it's off
+function cometMusicOn() {
+  const e = SHIP.event; if (!COMET || !e || e.id !== 'comet' || typeof deckDef === 'undefined' || !deckDef) return false;
+  const n = eventNow(); if (!n || n.id !== 'comet' || n.phase !== 'onset') return false;
+  const here = deckDef.num + '|' + roomAt(...player.here()); return COMET.rooms.some(r => r[0] === here);
 }
 // ---- end of slot: Comet builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
@@ -59029,6 +59190,18 @@ PROP_KIT.slice = p => {
   part(p, GEO.box, '#f7f1e8', 0, -.12, .145, .102, .072, .014);                      // the icing over its top, z .138-.152
 };
 HOLDS.slice = { prop: 'slice', bone: 'R', one: -1, sx: -.45, ex: -1.25, sz: .1, hx: .25, look: .14 };
+// ---- the comet (FX25, 0.93.2; plans/events-plan-2.html A7: new 'look up' and 'point' poses for the crowd at the comet's
+// windows; section 18's cometFrame sets them on those settled standing there, looks only). Standing or seated; no props, no R()
+if (typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON) {
+  ACTS.look = { f(r, s, t, b, ph) {                     // chin up at the glass, the head turning slowly to follow it
+    r.head.rotation.x = L(r.head.rotation.x, -.38, s); r.head.rotation.y = L(r.head.rotation.y, .18 * Math.sin(t * .23 + ph * 6.28), s); r.torso.rotation.x = L(r.torso.rotation.x, -.05, s);
+  } };
+  ACTS.point = { f(r, s, t, b, ph) {                    // the right arm up and out at the sky, the head with it
+    const R_ = r.arms.find(a => a.side < 0); armTo(R_, s, -2.45, -.12, .22, 0);
+    r.head.rotation.x = L(r.head.rotation.x, -.42, s); r.head.rotation.y = L(r.head.rotation.y, -.12, s); r.torso.rotation.x = L(r.torso.rotation.x, -.06, s);
+  } };
+  for (const k of ['look', 'point']) { ACT_SEATED.add(k); CROWD_ANIMS.add(k); }
+}
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================

@@ -1803,6 +1803,7 @@ COMET_LIVE = r"""(() => { const R = {}, d = 22, B = (d - 1) * 1440;
   into(4, 'j'); tick(B + 1324, B + 1325); R.tomas = tap('tomas');
   into(1, 'O'); tick(B + 1326, B + 1327); R.cadetMark = !!TJ_NOW; R.cadet = tap('marrow'); R.cadetGoal = IX_GOAL && [IX_GOAL.deck, IX_GOAL.room];
   const wk = SHIP.works; SHIP.works = { ...(wk || {}), rank: 'officer' }; clearGoal(); tick(B + 1328, B + 1329); R.officerMark = !!TJ_NOW; R.officer = tap('marrow'); SHIP.works = wk;
+  R.skyUp = !!COMET_SKY.m; tick(B + 1330, B + 1366); R.skyGone = !COMET_SKY.m;   // c.3: the sky shape up while it passes, gone by 22:46
   if (DIALOGUE) dialogueEnd(true); actEnd(true); return R; })()"""
 if True:
     print('\nThe comet (Day 22):')
@@ -1821,6 +1822,7 @@ if True:
                 check(C[k].get('ok') and C[k]['act'] == want, f"a tap on the host joins ({k}): {C[k]}")
             check(not C['cadetMark'] and C['cadet'].get('ok') and 'downstairs' in C['cadet']['toast'] and 'cometCaptain@22' not in C['cadet']['joined'] and C['cadetGoal'] == [3, 'L'] and C['officerMark'],
                   f"a Cadet at the Captain's tea is sent to the bow lounge, kindly; an Officer has the marker: {C['cadetMark']} {C['cadet']} {C['cadetGoal']} {C['officerMark']}")
+            check(C.get('skyUp') and C.get('skyGone'), f"the comet's sky shape up while it passes and gone by 22:46: {C.get('skyUp')} {C.get('skyGone')}")
         check(not g.errors, f'no console errors in the comet part ({g.errors[:3]})')
         g.close()
 

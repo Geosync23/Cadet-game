@@ -237,6 +237,24 @@ with sync_playwright() as pw:
         if pn != [[None, [False, False, False]], ['talent', [True, True, True]], [None, [False, False, False]]]: ok = False; print('  the piano should be on stage (and tappable) only during talent night')
     print('errors', g.errors)
     if g.errors: ok = False
-    print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')
     g.close()
+    # the comet (FX25, 0.93.2; plans/events-plan-2.html A8): draw calls at a phone's size (390 x 844) with the comet's crowd
+    # settled, the sky shape up and the dressing out: the bow lounge at 21:45 (about 30-45 at the glass) and the junior
+    # common room at 22:20 (the blankets, the tail); each under the 450 budget, the sky shape one draw call of its own
+    g = Game(pw, sys.argv[1], 390, 844)
+    if g.ev("typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON && !!SHIP_EVENTS.comet"):
+        g.ev("if (typeof GUIDE_ON !== 'undefined' && GUIDE_ON) { GUIDE.tq.length = 0; guideToast = () => false; }")
+        g.ev("skipTo(21 * 1440 + 1260)")
+        for name, deck, room, m in (('the bow lounge, 21:45', 3, 'L', 1305), ('the junior common room, 22:20', 4, 'j', 1340)):
+            g.ev(f"for (let t = Math.max(shipNow() + 1, 21 * 1440 + {m - 6}); t <= 21 * 1440 + {m}; t++) {{ setShipNow(t); EV_MIN = -1; eventsTick(); }}")
+            g.ev(f"(() => {{ goToDeck({deck}); deckCrewFill(); const tl = ROOM_TILES['{room}'], c = cellPos(...tl[Math.floor(tl.length / 2)]); player.obj.position.copy(cellPos(...nearestOpen(c.x, c.z, player))); player.stop(); target.copy(player.obj.position).setY(.7); eventsDress(shipNow()); }})()")
+            g.step(40)
+            c = g.ev("({ calls: renderer.info.render.calls, crew: DECK_CREW.filter(a => a.settled && a.spot && a.spot.room === roomAt(...player.here())).length, sky: !!COMET_SKY.m, dress: [...DRESS.on.keys()].filter(k => /^comet/.test(k)) })")
+            g.ev("COMET_SKY.m.visible = false"); g.step(1); c['noSky'] = g.ev("renderer.info.render.calls"); g.ev("COMET_SKY.m.visible = true")
+            print(f"The comet, {name}, phone size: draw calls {c['calls']} ({c['noSky']} without the sky shape), {c['crew']} settled in the room, the sky shape {c['sky']}, dressing {c['dress']}")
+            if c['calls'] >= 450 or not c['sky'] or c['calls'] - c['noSky'] > 1 or c['crew'] < 6: ok = False; print('  the comet scene: over budget, no sky shape, more than one call for it, or nobody there')
+        if g.errors: ok = False; print('errors (the comet)', g.errors[:4])
+    else: print('The comet: switched off')
+    g.close()
+    print('DECK CHECK OK' if ok else 'DECK CHECK FAILED')
     sys.exit(0 if ok else 1)   # so a failing check fails for the computer too (check_fast.sh, GitHub)
