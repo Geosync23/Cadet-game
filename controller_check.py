@@ -41,7 +41,7 @@ ARGS = [a for a in sys.argv[1:] if not a.startswith('--')]
 FLAGS = {a for a in sys.argv[1:] if a.startswith('--')}
 GAME = pathlib.Path(ARGS[0])
 ALL_PARTS = ['idle', 'save', 'calls', 'touch', 'walk', 'pick', 'lift', 'door', 'reach', 'day', 'games', 'unplug', 'odd',
-             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse']
+             'off', 'quiet', 'base', 'deck', 'pick1', 'panels', 'api', 'lists', 'tiles', 'disc', 'screens', 'marks', 'touch3', 'drop', 'settings', 'a11y', 'firstuse', 'ending']
 PARTS = ARGS[1:] or ALL_PARTS
 SHOTS = WORK / 'test' / 'ctl_shots'; SHOTS.mkdir(parents=True, exist_ok=True)
 ARGS_GL = ['--use-gl=angle', '--use-angle=swiftshader', '--enable-unsafe-swiftshader', '--ignore-gpu-blocklist']
@@ -1485,6 +1485,154 @@ OLD_FAKEPAD = r"""
   window.__padAxes = (i, a) => { window.__pads[i].axes = a.slice(); return true; };
 })();
 """
+# ---- the ending by pad (VB2 for lead 40; plans/ending-spec.html section 8): on a copy with the ending on too (EV_ENDING_ON),
+# from presets on Days 32, 34, 35 and 36 (the ending's state put in place with its own endClean, the clock set, as Dev mode's
+# presets do), the pad reaches and uses: the offer's three replies in the ready room; "About the transfer" on the Captain's
+# chat card and her Stay / Go / Not sure (each highlighted, one pressed); a friend's "About the transfer"; the oath at the
+# Line by A; and a whole Monday Day 36 (Go) by pad: the lift and the mess for breakfast, the bay, each farewell (the ring on
+# them, A, their "Goodbye"), Zeke's scene at the ramp, up the ramp into the Tern by the stick, and the end page's buttons
+# (the highlight on its first, the D-pad to the next, A on Keep this ending). No ending in the build: says so, nothing fails.
+def ending_src(src): return src.replace("const EV_ENDING_ON = URL_FLAGS.has('ending');", 'const EV_ENDING_ON = true;', 1)
+DLG_BTNS = "(() => { const d = document.getElementById('devDlg'); return d && !d.hidden ? [...d.querySelectorAll('button.act, button.next')].map(b => b.className + ':' + b.textContent.trim()) : null; })()"
+def end_dialogue(r, fails, scene, pick=0, cap=60):
+    """a scene on the phone, by pad: Go on with A on its next button; at a choice, every choice highlighted by the D-pad, then A on choice `pick`"""
+    seen = 0
+    for k in range(cap):
+        bs = r.ev(DLG_BTNS)
+        if not bs: break
+        acts = [b for b in bs if b.startswith('act:')]
+        if acts:
+            for i in range(len(acts)):
+                if not pad_to(r, f'#devDlg button.act:nth-of-type({i + 1})'): fails.append(f'{scene}: the D-pad never reaches the choice "{acts[i][4:]}"')
+            seen += 1
+            res = press_in_panel(r, f"document.querySelectorAll('#devDlg button.act')[{min(pick, len(acts) - 1)}]")
+            if res != 'ok': fails.append(f'{scene}: A on a choice: {res}')
+        else:
+            res = press_in_panel(r, "document.querySelector('#devDlg button.next')")
+            if res != 'ok': fails.append(f'{scene}: A on Go on: {res}'); break
+        r.step(6)
+    return seen
+def end_run(pw, src, tag, setup):
+    r = Run(pw, src, tag, mode='pad', plug={}, w=390, h=844)
+    r.ev("SHIP.device && SHIP.device.settings && (SHIP.device.settings.tips = false); if (typeof GUIDE !== 'undefined') GUIDE.tq.length = 0")
+    r.ev(setup); r.step(20); return r
+def end_near(r, who, d=2.2):                          # the stick to a spot about d from someone (not onto them)
+    w = r.ev(f"(() => {{ const a = DECK_CREW.find(a => a.p && a.p.id === '{who}'); if (!a) return null; const p = player.obj.position, l = Math.hypot(p.x - a.x, p.z - a.z) || 1; return [a.x + (p.x - a.x) / l * {d}, a.z + (p.z - a.z) / l * {d}]; }})()")
+    return bool(w) and walk_to(r, w[0], w[1])
+def part_ending(pw, src, tag):
+    fails = []
+    if "const EV_ENDING_ON = URL_FLAGS.has('ending');" not in src and 'const EV_ENDING_ON = true;' not in src: print('  no ending in this build (EV_ENDING_ON)'); return fails
+    es = ending_src(src)
+    # Day 32, 16:00: the offer in the ready room, its three replies by pad
+    r = end_run(pw, es, f'{tag}_end32', "SHIP.end = null; setShipNow(31 * 1440 + 958); goToDeck(1); player.obj.position.copy(cellPos(...ROOM_TILES.R[Math.floor(ROOM_TILES.R.length / 2)])); player.stop()")
+    for k in range(40):
+        if r.ev("!!DIALOGUE"): break
+        r.step(30)
+    n = end_dialogue(r, fails, 'the offer (Day 32)')
+    met = r.ev("!!(SHIP.end && SHIP.end.offer && SHIP.end.offer.met)")
+    print(f'  Day 32: the offer by pad: {n} choice screen(s), met {met}')
+    if not n: fails.append('the offer (Day 32): no choice by pad (its three replies)')
+    if not met: fails.append('the offer (Day 32): not met after its scene by pad')
+    if r.errors: fails.append(f'the offer: page errors {r.errors[:2]}')
+    r.close()
+    # Day 34: "About the transfer" on the Captain's chat card, Stay / Go / Not sure; a friend's own "About the transfer"
+    r = end_run(pw, es, f'{tag}_end34', """(() => { SHIP.end = endClean({ offer: { day: 32, met: true }, said: [], f: { asks: 1 } }); setShipNow(33 * 1440 + 720);
+      const p = schedPeople().find(p => p.id === 'marrow'), w = whereIs(p, shipNow()); goToDeck(w.deck); deckCrewFill(); const a = DECK_CREW.find(a => a.p && a.p.id === 'marrow');
+      if (a) player.obj.position.copy(cellPos(...nearestOpen(a.x + 1.5, a.z + 1.5, player))); player.stop(); })()""")
+    got = end_near(r, 'marrow') and ring_and_A(r, ['captain', 'marrow', 'odile'])
+    r.step(6)
+    lab = r.ev("endText('ending.ui.captain.button', 'About the transfer')")
+    res = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(lab)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+    if res != 'ok': fails.append(f'Day 34: "{lab}" on the Captain\'s chat card by pad: {res} (the ring said {got})')
+    r.step(6); cs = r.ev(DLG_BTNS) or []
+    for i in range(len(cs)):
+        if not pad_to(r, f'#devDlg button.act:nth-of-type({i + 1})'): fails.append(f'Day 34: the D-pad never reaches "{cs[i]}"')
+    pick = r.ev("endText('ending.ui.choice.unsure', 'I\\'m not sure yet.')")
+    res2 = press_in_panel(r, f"[...document.querySelectorAll('#devDlg button.act')].find(b => b.textContent.trim() === {json.dumps(pick)})") if cs else 'no choices'
+    r.step(10); end_dialogue(r, fails, 'her scene for Not sure (Day 34)')
+    said = r.ev("SHIP.end.said.slice()")
+    print(f'  Day 34: the Captain by pad: ring {got}, the button {res}, choices {cs}, Not sure {res2}, said {said}')
+    if not said or said[-1][1] != 'unsure': fails.append(f'Day 34: Not sure by pad not kept ({said})')
+    fr = r.ev("(() => { for (const id of (typeof endFriendsOf === 'function' ? endFriendsOf() : [])) { const p = schedPeople().find(p => p.id === id), b = p && endFriendButton(p); if (b) return id; } return null; })()")
+    if fr:
+        r.ev(f"""(() => {{ const p = schedPeople().find(p => p.id === '{fr}'), w = whereIs(p, shipNow()); if (deckDef.num !== w.deck) goToDeck(w.deck); deckCrewFill(); const a = DECK_CREW.find(a => a.p && a.p.id === '{fr}');
+          if (a) player.obj.position.copy(cellPos(...nearestOpen(a.x + 1.5, a.z + 1.5, player))); player.stop(); }})()"""); r.step(10)
+        g2 = end_near(r, fr) and ring_and_A(r, [fr.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{fr}').name").split()])
+        fl = r.ev(f"(() => {{ const b = endFriendButton(schedPeople().find(p => p.id === '{fr}')); return b && b.label; }})()")
+        res3 = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(fl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+        print(f'  Day 34: a friend ({fr}) by pad: ring {g2}, "{fl}" {res3}')
+        if res3 != 'ok': fails.append(f'Day 34: "{fl}" on {fr}\'s chat card by pad: {res3}')
+    else: print('  Day 34: no friend with "About the transfer" today (the friends come on Friday)')
+    if r.errors: fails.append(f'Day 34: page errors {r.errors[:2]}')
+    r.close()
+    # Day 35, 14:40: the oath, led by pad
+    r = end_run(pw, es, f'{tag}_end35', """(() => { SHIP.end = endClean({ offer: { day: 32, met: true }, said: [[34, 'stay']], f: { asks: 1 } });
+      if (!SHIP.event || SHIP.event.id !== 'crossingBack') eventStart('crossingBack', 31); setShipNow(34 * 1440 + 868); goToDeck(3); deckCrewFill(); player.obj.position.copy(cellPos(40, 10)); player.stop(); })()""")
+    lp = r.ev("(() => { const t = ROOM_TILES.L, c = t.filter(([i, j]) => free(i, j)).sort((a, b) => b[0] - a[0])[3]; return c ? [cellPos(...c).x, cellPos(...c).z] : null; })()")
+    walked = bool(lp) and walk_to(r, lp[0], lp[1], 1500)
+    for k in range(60):
+        if r.ev("!!DIALOGUE"): break
+        r.step(30)
+    n = end_dialogue(r, fails, 'the oath (Day 35)', cap=120)
+    led = r.ev("!!(SHIP.event && SHIP.event.mine && SHIP.event.mine['met:crossingBackOath'])")
+    print(f'  Day 35: the oath by pad: walked {walked}, {n} choice screen(s), led {led}')
+    if not led: fails.append(f'the oath (Day 35): not led by pad (walked {walked}, choices {n})')
+    if r.errors: fails.append(f'Day 35: page errors {r.errors[:2]}')
+    r.close()
+    # Monday Day 36 (Go), a whole morning by pad
+    r = end_run(pw, es, f'{tag}_end36', """(() => { SHIP.end = endClean({ offer: { day: 32, met: true }, said: [[33, 'go']], settled: { day: 35, choice: 'go' }, f: { asks: 1, zekeSun: 35 * 1440 - 120 } });
+      setShipNow(35 * 1440 + 400); })()""")
+    rode = ride(r, 3, fails, 'Monday breakfast')
+    mp = r.ev("(() => { const t = ROOM_TILES.M; const c = t[Math.floor(t.length / 2)]; return [cellPos(...c).x, cellPos(...c).z]; })()")
+    if rode: walk_to(r, mp[0], mp[1], 1500)
+    for k in range(40):
+        if r.ev("!!DIALOGUE"): break
+        r.step(30)
+    end_dialogue(r, fails, 'the last breakfast (Day 36)', cap=80)
+    bf = r.ev("!!SHIP.end.f.bf")
+    r.ev("setShipNow(35 * 1440 + 560)"); r.step(10)
+    rode5 = ride(r, 5, fails, 'Monday, to the bay')
+    if rode5: walk_to(r, *r.ev("[cellPos(9, 10).x, cellPos(9, 10).z]"), 1500)
+    r.step(60); byes = []
+    for k in range(14):
+        nx = r.ev("(() => { const n = endByes().find(id => !SHIP.end.f['bye:' + id]); return n || (!SHIP.end.f.ramp ? 'torres-zeke' : null); })()")
+        if not nx: break
+        if not end_near(r, nx, 2.4): fails.append(f'Monday: could not walk to {nx} by the stick'); break
+        if nx != 'torres-zeke':
+            h = ring_and_A(r, [nx.split('-')[0]] + [w.lower() for w in r.ev(f"schedPeople().find(p => p.id === '{nx}').name").split()]); r.step(4)
+            bl = r.ev("endText('ending.btn.bye', 'Goodbye')")
+            res = press_in_panel(r, f"[...document.querySelectorAll('#chat .row button')].find(b => b.textContent === {json.dumps(bl)})") if r.ev("!document.getElementById('chat').hidden") else 'no chat card'
+            r.step(10)
+            if not r.ev(f"!!SHIP.end.f['bye:{nx}']"):   # within reach the goodbye may have come by itself; else by the card
+                fails.append(f'Monday: the goodbye to {nx} by pad (ring {h}, "{bl}" {res})'); break
+            byes.append(nx)
+        else:
+            end_near(r, nx, 1.5)
+            for j in range(30):
+                if r.ev("!!DIALOGUE"): break
+                r.step(10)
+            end_dialogue(r, fails, "Zeke's scene at the ramp (Day 36)", cap=60); byes.append('ramp:' + str(r.ev("!!SHIP.end.f.ramp")))
+    inside = walk_to(r, *r.ev("[cellPos(5, 7).x, cellPos(5, 7).z]"), 1500)
+    for k in range(40):
+        if r.ev("!!document.querySelector('#endPage:not([hidden])')"): break
+        r.step(20)
+    page = r.ev("!!document.querySelector('#endPage:not([hidden])')")
+    fb = r.ev("(() => { const e = document.activeElement, p = document.getElementById('endPage'); return !!(p && e && p.contains(e) && e.tagName === 'BUTTON') ? e.textContent.trim() : null; })()")
+    r.press('RIGHT'); r.step(2); r.press('DOWN'); r.step(2)
+    fb2 = r.ev("(() => { const e = document.activeElement; return e && e.tagName === 'BUTTON' ? e.textContent.trim() : null; })()")
+    keep = r.ev("endText('ending.page.keep', 'Keep this ending')")
+    res = press_in_panel(r, f"[...document.querySelectorAll('#endPage button')].find(b => /keep/i.test(b.textContent))") if page else 'no end page'
+    r.step(10)
+    ended = r.ev("!!SHIP.end.ended")
+    print(f'  Day 36 (Go) by pad: lift {rode}, breakfast {bf}, the bay {rode5}, farewells {byes}, into the Tern {inside}, the end page {page} (first highlight "{fb}", then "{fb2}"), Keep this ending {res}, ended {ended}')
+    if not bf: fails.append('Monday: the last breakfast not had by pad')
+    if not page: fails.append(f'Monday: the end page never opened by pad (into the Tern {inside}; farewells {byes})')
+    if page and not fb: fails.append('Monday: the end page opened without the highlight on its first button')
+    if page and (not fb2 or fb2 == fb): fails.append(f'Monday: the D-pad did not move the end page\'s highlight ({fb} -> {fb2})')
+    if res != 'ok' or not ended: fails.append(f'Monday: Keep this ending by pad: {res}, ended {ended}')
+    if r.errors: fails.append(f'Day 36: page errors {r.errors[:2]}')
+    r.close()
+    return fails
 def old_game(pw, path, w, h):
     global INIT
     keep = INIT; INIT = keep + OLD_FAKEPAD   # cadet_test's Game installs INIT before the game loads
@@ -2353,9 +2501,9 @@ OLD_NEEDS = {'off': ['base'], 'quiet': ['base'], 'base': ['base'], 'deck': ['dec
 OLD_NAME = {'pick': 'pick1'}   # CT1's pick beside this check's own
 
 # parts that need a package: 'not yet' until PAD_BUILT names it
-NEEDS = {'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
+NEEDS = {'ending': ['base', 'deck', 'pick', 'panels'], 'touch': ['base'], 'walk': ['deck'], 'pick': ['pick'], 'lift': ['pick'], 'door': ['pick'], 'reach': ['panels'], 'day': ['base', 'deck', 'pick', 'panels', 'games'],
          'games': ['games'], 'unplug': ['deck', 'marks'], 'odd': ['deck']}
-PART_FN = {'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
+PART_FN = {'ending': part_ending, 'idle': part_idle, 'save': part_save, 'calls': part_calls, 'walk': part_walk, 'touch': part_touch, 'unplug': part_unplug, 'odd': part_odd, 'pick': part_pick, 'lift': part_lift, 'door': part_door, 'reach': part_reach, 'games': part_games, 'day': part_day}   # 'reach' joins when the pad half is written
 for k, v in OLD_NEEDS.items(): NEEDS[OLD_NAME.get(k, k)] = v; PART_FN[OLD_NAME.get(k, k)] = legacy(k)
 
 # ---- planted faults --------------------------------------------------------------------------------------------------
