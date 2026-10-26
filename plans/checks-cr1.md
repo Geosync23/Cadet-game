@@ -450,3 +450,40 @@ No FAILs, so no OLD runs were needed.
 
 On 0a2fc617 (sha256 6cd54ab9…5a8eee), default args, one after the other, alone: **events_check OK** (exit 0, 589 s,
 EVENTS CHECK OK); **sound_check OK** (exit 0, 167 s, SOUND CHECK OK). No FAIL lines. CR5 removed both from its run.
+
+# 0.93.2 (claude/staging-0.93.2 41c8a7e0, 2026-10-26)
+
+**sha256 of starship-cadet.html: `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960`** (matches BM18's).
+OLD = 0.93.1 b957b92d (6cd54ab9…8eee). One at a time (arrows_check alone), CADET_WORK=/tmp/work-cr1.
+
+| Check | Result | Time | Key lines |
+|---|---|---|---|
+| player_check | **OK** | 406 s | PLAYER CHECK OK |
+| devmode_check | **OK** | 291 s | DEVMODE CHECK OK |
+| bubble_check | **OK** | 433 s | BUBBLE CHECK OK |
+| puzzle_check | **OK** | 74 s | PUZZLE CHECK OK |
+| social_check | **OK** | 29 s | SOCIAL CHECK OK |
+| talk_check | **OK** | 37 s | TALK CHECK OK |
+| arrows_check (all parts) | **FAIL (NEW)** | 1233 s | week: 7 FAIL lines (below); queue, clockin, shift, promo OK |
+| arrows_pointer_check | **OK** | 150 s | arrows_pointer_check: OK |
+| dev_arrow_check | **OK** | 40 s | DEV ARROW CHECK OK |
+| day_check 4 | **OK** | 286 s | DAY CHECK OK; the inspection walked live, 30 of 46 juniors by their bunks |
+| day_check 11 | **OK** | 298 s | DAY CHECK OK |
+
+## arrows_check week: NEW, from the bunk inspection (INSPECT_ON)
+
+FAIL lines: Day 4 `never clocked in following the arrow (fix: FX1)`; Day 4 `"m5" not learned by following the arrow ...;
+training m5:ask, opened ['m5', 'm3i']`; Day 5 never clocked in; Day 5 m7 and p3 not learned; Day 8 never clocked in;
+`the scanner never counted as used by Day 8`. From Day 4 the follower stays on training m5:ask, clocked 0 min.
+
+| Run (41c8a7e0's check, week part, alone) | Who | Result |
+|---|---|---|
+| NEW 0.93.2 (twice) | CR1 | FAIL, the same 7 lines |
+| OLD 0.93.1 | CR1 | OK (m5 Day 4, clocked 556 min) |
+| NEW, INSPECT_ON off | FX20b (and BM18) | OK |
+| NEW, TRAD_0932_ON off / STORM_SAT_ON off | CR3 | (CR3's notes) |
+
+Cause, found by FX20b (the inspection's builder): at 06:29 on Day 4 the arrow says "Inspection at 06:30: your berth"
+and points at the bunk itself; the follower taps the bunk and lies down, the 'lie' activity never ends, so it counts
+itself busy all day and misses Calder's Tuning meeting and the clock-in. FX20b's game fix (the officer's result gets you
+up from the bunk) is in testing; the full round runs again on the new sha. Not fixed here (check runner).
