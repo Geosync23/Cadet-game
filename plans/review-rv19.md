@@ -334,3 +334,12 @@ Notes (not blocking):
   within one page (a new game without a reload) would keep the old day. New game reloads today, so no effect.
 
 **Verdict on 402899bd: PASS.**
+
+### Storm Saturday follow-up: 6f19944d (0.93.2-w.6, game sha256 1eb61da940e735a4...)
+BM18's mech_check m9 FAIL (lead 38: fix in the game): stormBoardMine(j) (held by you, train, case, symptom, reserved,
+heldForYou, or SHIP.works.cur.j); stormBoardHide now also needs !stormBoardMine, so the storm Saturday's board only hides
+unclaimed ordinary jobs and never your own work. Only that function changed (plus docs and FX26's handover note).
+Checks (RV19): cadet_test vs b957b92d with STORM_SAT_ON false ALL IDENTICAL (renderer noise only); mech_check MECH CHECK
+OK; day_check 13 DAY CHECK OK. FX26: check_fast OK, cadet_test off/on identical.
+
+**Verdict on 6f19944d: PASS.**
