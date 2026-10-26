@@ -58526,7 +58526,8 @@ onSim('job', n => {                                      // B: Torres comes by a
 // tester (S5-3 turn 2, feeding P5's power stage); 3 (6 uses) the batteries' balance (Step 6's P6). The beats (spec "The
 // beats"): an urgent notice at 10:30, a level 1 arrow and its ring line "Power and relays with Calder, 11:00" from
 // 10:45. Saved: SHIP.works.side.pwr = { done, wrongs, week } (cleaned on read); a job keeps its own bad relay or cell
-// (j.bad) and picks (j.picks). Job slot PWR_SLOT (24 core's default for this row, 11, is Hauling's). schedU keys
+// (j.bad) and picks (j.picks), and its machine as j.mach, not j.machine: a registered kind with j.machine is played at
+// its panel as a plain timed repair (section 15's jobBegin; 15b's ixChore leaves it out), so its steps never came up. Job slot PWR_SLOT (24 core's default for this row, 11, is Hauling's). schedU keys
 // 1060 (which machine), 1061 (the bad relay or cell), 1062 (the week's day). No R(). Off (P5_M19 false): nothing registers.
 const PWR_AT = 660, PWR_POST = 480, PWR_CREW = 40, PWR_KEEP = 90, PWR_SLOT = 32, PWR_RELAYS = 6, PWR_CELLS = 4;
 const PWR_TRAIN = ['1-relay-1', '1-relay-2'];            // Calder's, then yours
@@ -58549,7 +58550,7 @@ function pwrJob(kind, id, t, o = {}) {
   const d = worksDay(t), k = o.key !== undefined ? o.key : d, n = kind === 'battcell' ? PWR_CELLS : PWR_RELAYS;
   const bad = Math.floor(schedU(pwrSeed(), k, 1061) * n) % n;
   const title = kind === 'battcell' ? worksText('m19.card.batt', 'Check battery bank {n}', { n: id.split('-').pop() }) : worksText('m19.card.relay', 'Swap a failing relay: {place}', { place: pwrName(id) });
-  const j = jobMake(kind, { id: kind + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title, bad, picks: {}, wrongs: 0,
+  const j = jobMake(kind, { id: kind + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), mach: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title, bad, picks: {}, wrongs: 0,
     ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + dayShiftEnd(d) } : { leave: Math.max(60, (d - 1) * 1440 + dayShiftEnd(d) - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
     ...(o.train ? { train: o.train } : {}) });
   j.posted = j.found = t;
@@ -58557,7 +58558,7 @@ function pwrJob(kind, id, t, o = {}) {
 }
 // the stops, all at the machine's panel. A training job: Calder names the relay (no pick); a board job: read, pick, swap, test
 function pwrStops(j) {
-  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
+  const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
   const batt = j.kind === 'battcell', n = batt ? PWR_CELLS : PWR_RELAYS, st = (tag, how, mins, opts) => ({ deck: m.deck, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
   const lamps = batt ? pwrLamps(n, j.bad, worksText('m19.batt.ok', 'green'), worksText('m19.batt.low', 'amber, sagging')) : pwrLamps(n, j.bad, worksText('m19.relay.ok', 'steady'), worksText('m19.relay.bad', 'stutters'));
   if (j.train) return [st('open', 'look', 1, { secs: 3, text: worksText('m19.train.open', 'The rack hums. One lamp stutters: R{n}. That\'s the one.', { n: j.bad + 1 }) }),
@@ -58579,14 +58580,14 @@ function pwrStepDone(j, k, res) {
   return true;
 }
 function pwrDone(j, t, by) {
-  const s = SHIP.machines && SHIP.machines[j.machine];
+  const s = SHIP.machines && SHIP.machines[j.mach];
   if (s) { s.cond = Math.max(s.cond, PWR_KEEP); s.state = machineState(s.cond); }
   if (by === 'you') {
     const P = pwrState(); if (P && !j.train) { P.done++; P.wrongs += j.wrongs || 0; }
     if (!j.train) { worksUse('m19'); j.rightFirst = !j.wrongs; }
-    try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.done', 'Bank {n}\'s cells level again.', { n: j.machine.split('-').pop() }) : worksText('m19.relay.done', 'Relay swapped. The rack\'s steady.')); } catch (e) { /* no UI */ }
+    try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.done', 'Bank {n}\'s cells level again.', { n: String(j.mach).split('-').pop() }) : j.kind === 'conduitrun' ? worksText('m19.run.done', 'Feed tagged and logged. The run\'s sound again.') : worksText('m19.relay.done', 'Relay swapped. The rack\'s steady.')); } catch (e) { /* no UI */ }
   }
-  simNote('power', { id: j.id, kind: j.kind, machine: j.machine, by: by || null, wrongs: j.wrongs || 0 });
+  simNote('power', { id: j.id, kind: j.kind, machine: j.mach, by: by || null, wrongs: j.wrongs || 0 });
   if (typeof MACH_REV !== 'undefined') MACH_REV++;
 }
 // the week's day: a workday of yours after the lesson, not rewiring's, nor a test day; and the week's machine (one with no job open)
@@ -58595,15 +58596,16 @@ function pwrDay(w) {
   const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d > W.tr.m19 && playerShiftOn(d) && d !== R && !(W.test && W.test.day === d));
   return days.length ? days[Math.floor(schedU(pwrSeed(), w, 1062) * days.length) % days.length] : null;
 }
-const pwrKindOf = w => w % 2 ? 'battcell' : 'relayswap';
-const pwrBoxes = kind => machineList().filter(m => m.kind === (kind === 'battcell' ? 'battery' : 'relay') && !m.stub && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));
+const pwrKindOf = w => { const K = worksStage('m19') >= 1 && hasTool('tester') ? ['relayswap', 'conduitrun', 'battcell'] : ['relayswap', 'battcell']; return K[w % K.length]; };   // stage 2 (3 uses): conduit runs join, with the tester
+const PWR_MACH = { relayswap: 'relay', battcell: 'battery', conduitrun: 'conduit' };
+const pwrBoxes = kind => machineList().filter(m => m.kind === PWR_MACH[kind] && !m.stub && panelPlace(m.id) && !SHIP.jobs.some(j => (j.machine === m.id || j.mach === m.id) && j.status !== 'done'));
 // the beats (Day 17): the notice at 10:30, the level 1 arrow with its ring line from 10:45, both while the lesson is asked
 function pwrBeats(now) {
   const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm19' || c.st !== 'meet' || !c.told) return;
   const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || r.status !== 'asked' || now >= r.at + r.len) return;
   const place = ((DECKS[r.deck] || {}).rooms || {})[r.room], where = (place ? place.name : 'the relay room') + ', ' + deckIn(r.deck), who = typeof guideWho === 'function' ? guideWho(c.by) : worksFirst(c.by), when = hhmm(r.at % 1440);
   const ring = worksText('m19.ring', 'Power and relays with {name}, {time}', { name: who, time: when });
-  if (now >= r.at - 30 && !flag('m19.notice.' + c.d) && typeof promoNotice === 'function') { flagSet('m19.notice.' + c.d, true); promoNotice(worksText('m19.notice', '{ring}: {where}.', { ring, where }), worksName(c.by)); }
+  if (now >= r.at - 30 && !flag('m19.notice.' + c.d) && typeof promoNotice === 'function') { flagSet('m19.notice.' + c.d, true); promoNotice(worksText('m19.notice', '{ring}: {where}.', { ring, where, name: who, time: when }), worksName(c.by)); }
   if (now >= r.at - 15 && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm19:meet:' + c.d))
     guideAsk({ id: 'm19:meet:' + c.d, level: 1, owner: '24v', from: r.at - 15, until: r.at + r.len,
       goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: ring }),
@@ -58623,7 +58625,7 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     at: () => PWR_AT,                                    // the lesson at 11:00 (the beats table), after the visit's line breaks up
     reserve(d, at, slot, o = {}) {                       // Calder's on 1-relay-1, then yours on 1-relay-2, in this row's own slot
       const id = PWR_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
-      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === PWR_SLOT && heldForYou(x) && !x.claimedBy) && !(x.machine === id && x.status === 'open' && !x.claimedBy && !x.reserved));
+      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === PWR_SLOT && heldForYou(x) && !x.claimedBy) && !((x.machine === id || x.mach === id) && x.status === 'open' && !x.claimedBy && !x.reserved));
       const j = pwrJob('relayswap', id, t, { slot: PWR_SLOT, train: o.train || 'm19', key: d * 2 + (o.yours ? 1 : 0) }); if (!j) return null;
       SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
       return j.id;
@@ -58643,8 +58645,128 @@ if (P5_M19 && typeof jobKindAdd === 'function') {
     if (m < PWR_POST || !playerShiftOn(d) || pwrDay(w) !== d) return;
     const P = pwrState(); if (P.week >= w) return;
     const kind = pwrKindOf(w), boxes = pwrBoxes(kind); if (!boxes.length) return;
-    const id = boxes[Math.floor(schedU(pwrSeed(), w, 1060) * boxes.length) % boxes.length].id, j = pwrJob(kind, id, (d - 1) * 1440 + PWR_POST, { key: w * 7 + 5 });
+    const id = boxes[Math.floor(schedU(pwrSeed(), w, 1060) * boxes.length) % boxes.length].id, j = (kind === 'conduitrun' ? runJob : pwrJob)(kind, id, (d - 1) * 1440 + PWR_POST, { key: w * 7 + 5 });
     if (j) { SHIP.jobs.push(j); P.week = w; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  });
+}
+// ---- the power line and its faults (lead 39's addition to S5-3, for S5-6's P5 power stage and S5-4's shutdown jobs; data
+// in section 17's shapes, added here at load, only with P5_M19). The line: the battery banks (Deck 5, y) side by side, the
+// inverter, then the two crawlway conduits under Deck 6 as its branches (port to Decks 1-3, starboard to 4-6, as the water
+// galleries), each deck's power junction after its conduit (LINE_ENDS: a junction's decks are its own). The causes:
+// line 'power' on those that cut the feed (a junction kind's table is powerjunction's too: the same object). First drafts
+// of the words, for the Works writer (content/works/faults.lines, kind + '.' + id), as section 17's are ----
+const PWR_LINE = [['5-battery-1', '5-battery-2', '5-battery-3', '5-battery-4'], '5-inverter-1', { '6-conduit-1': [1, 2, 3], '6-conduit-2': [4, 5, 6] }];
+const PWR_ENDS = { '6-conduit-1': ['1-junction-1', '2-junction-1', '2-breaker-1'], '6-conduit-2': ['6-junction-1', '6-junction-2'] };
+const PWR_FAULTS = {
+  battery: [
+    { id: 'cell', part: 'cell', w: 3, shows: 'low charge', sign: 'one cell\'s bar amber all day, the rest green', when: 'always', still: 'New cable on the bus. That bar\'s still amber.', line: 'power' },
+    { id: 'bus', part: 'cable', w: 2, shows: 'charge drops at the busy hours', sign: 'the bus bar warm to the touch at shift change', when: 'peak', still: 'New cell. The charge still sags at shift change.', line: 'power' },
+    { id: 'relay', part: 'relay', w: 1, shows: 'stops charging', sign: 'the charge controller clicks off once it\'s warm', when: 'warm', still: 'New cell. The controller still clicks off.' } ],
+  inverter: [
+    { id: 'breaker', part: 'breaker', w: 3, shows: 'brownouts', sign: 'the output lamp flickers at the busy hours', when: 'peak', still: 'New card. Still browns out at dinner.', line: 'power' },
+    { id: 'fan', part: 'bearing', w: 2, shows: 'runs hot', sign: 'the cooling fan grinds; the case is hot', when: 'warm', still: 'New breaker. The fan still grinds.' },
+    { id: 'card', part: 'signal card', w: 1, shows: 'a hum on the lights', sign: 'a faint hum in every deck\'s lights, all day', when: 'always', still: 'New breaker. The lights still hum.', line: 'power', band: 3 } ],
+  conduit: [
+    { id: 'cable', part: 'cable', w: 3, shows: 'a feed reads low', sign: 'the tester reads low on one feed, all day', when: 'always', still: 'New joint. That feed still reads low.', line: 'power' },
+    { id: 'joint', part: 'cable', w: 2, shows: 'lights flicker on a deck', sign: 'a scorch mark at a joint; it flickers when the crawlway hatch slams', when: 'touched', still: 'New run of cable. Still flickers when the hatch goes.', line: 'power' } ],
+  junction: [
+    { id: 'breaker', part: 'breaker', w: 3, shows: 'lights brown out on its deck', sign: 'the breaker lamp lit; it trips at dinner', when: 'peak', still: 'New relay. Still trips at dinner.', line: 'power' },
+    { id: 'relay', part: 'relay', w: 2, shows: 'stops and starts', sign: 'it clicks over once warm, then back', when: 'warm', still: 'New breaker. Still clicks over once warm.' },
+    { id: 'cable', part: 'cable', w: 1, shows: 'lights flicker on its deck', sign: 'flickers when the closet door slams', when: 'touched', still: 'New breaker. Still flickers when the door goes.', line: 'power' } ],
+};
+if (P5_M19 && typeof MACHINE_LINKS !== 'undefined' && !MACHINE_LINKS.power) {
+  MACHINE_LINKS.power = PWR_LINE; LINE_ENDS.power = PWR_ENDS; SYMPTOM_TEXT.power = 'Lights browning out';
+  for (const k in PWR_FAULTS) if (!FAULT_CAUSES[k]) FAULT_CAUSES[k] = PWR_FAULTS[k];
+  if (!FAULT_CAUSES.powerjunction) FAULT_CAUSES.powerjunction = FAULT_CAUSES.junction;
+}
+// ---- stage 2 (3 uses): conduit runs. At a crawlway conduit's inspection box under Deck 6: open it, clip the conduit tester
+// on each of its three feeds and pick the one reading low (a wrong pick opens the stop again), tag it. Done: the conduit
+// put right, a use, simNote('conduitRun', { machine, deck: the low feed's deck }) for S5-6's P5. Needs your tester; the
+// readings are seeded (key 1063) ----
+const runFeeds = id => { const L = MACHINE_LINKS.power, b = L && L[L.length - 1]; return b && b[id] ? b[id].slice() : (/-2$/.test(id) ? [4, 5, 6] : [1, 2, 3]); };
+const runVolts = (j, i) => i === j.bad ? 190 + Math.floor(schedU(pwrSeed(), j.key || 0, 1063) * 12) : 228 + (i * 2 + (j.key || 0)) % 5;
+function runJob(kind, id, t, o = {}) {
+  const j = pwrJob('relayswap', id, t, o); if (!j) return null;   // the same shape, then made a conduit run
+  const n = runFeeds(id).length;
+  Object.assign(j, { id: j.id.replace(/^relayswap/, 'conduitrun'), kind: 'conduitrun', bad: Math.floor(schedU(pwrSeed(), o.key !== undefined ? o.key : worksDay(t), 1061) * n) % n, key: o.key !== undefined ? o.key : worksDay(t),
+    title: worksText('m19.card.run', 'Test the conduit run: {side} crawlway', { side: /-2$/.test(id) ? worksText('m19.side.stbd', 'starboard') : worksText('m19.side.port', 'port') }) });
+  j.stops = runStops(j).map(plainStop);
+  return j;
+}
+function runStops(j) {
+  const m = machineById(j.mach), pp = m && panelPlace(m.id); if (!pp) return [];
+  const F = runFeeds(j.mach), read = F.map((d, i) => worksText('m19.run.feed', 'Deck {deck}: {v}', { deck: d, v: runVolts(j, i) })).join(' · ');
+  return [{ deck: m.deck, placeId: pp, mins: 1, tag: 'open', how: 'look', opts: { secs: 3, text: worksText('m19.run.open', 'The inspection box. A feed for each deck above: {decks}.', { decks: F.join(', ') }) } },
+    { deck: m.deck, placeId: pp, mins: 1, tag: 'test', how: 'choose', opts: { tool: 'tester', title: worksText('m19.run.pick', 'Which feed reads low?'), text: worksText('m19.run.tester', 'The tester on each feed:') + ' ' + read,
+      options: F.map((d, i) => ({ id: 'x' + i, label: worksText('m19.run.option', 'Deck {deck}', { deck: d }) })) } },
+    { deck: m.deck, placeId: pp, mins: 2, tag: 'tag', how: 'hold' }];
+}
+function runStepDone(j, k, res) {
+  const st = runStops(j)[k]; if (!st) return true;
+  if (!j.picks || typeof j.picks !== 'object') j.picks = {}; if (!Number.isFinite(j.wrongs)) j.wrongs = 0;
+  if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;
+  if (st.tag === 'test') { const pick = res && res.pick; j.picks[k] = pick || null;
+    if (pick !== 'x' + j.bad) { j.wrongs++; try { toast(j.title, worksText('m19.run.wrong', 'That one reads normal. Look at the numbers again.')); } catch (e) { /* no UI */ } return false; } }
+  return true;
+}
+function runDone(j, t, by) {
+  pwrDone(j, t, by);
+  simNote('conduitRun', { id: j.id, machine: j.mach, deck: runFeeds(j.mach)[j.bad] || null, by: by || null });
+}
+// ---- the Senior's part of the Wednesday drill (the plan's "you run the Works part"; 24c's drill stays the juniors'):
+// once you're trained in M19, a side job yours at 14:50 on Wednesdays you're on shift, at the Works bay's muster hatch:
+// three calls on your device in order (muster the team, the week's action, report to the bridge), each answered by the
+// crew; a wrong call opens it again (Calder's word on the order); the all-clear at 15:15 ends it whatever the state. A
+// level 1 arrow from 14:50 with its ring line "Run the Works part of the drill". Key 1064: the order the calls are listed ----
+const PDRILL_CALL = { fire: 'Fire teams to the hatch, extinguishers out', pressure: 'Dog the bulkhead doors', power: 'The junior wing to reserve power' };
+const PDRILL_ANS = [['torres-zeke', 'Works team at stations.'], ['halloran-emeka', { fire: 'Extinguishers out. Hatch covered.', pressure: 'Bulkhead dogged.', power: 'Junior wing on reserve.' }], ['calder', 'Bridge copies. Good.']];
+const pdrillDue = d => { const W = SHIP.works; return !!W && W.tr.m19 !== undefined && W.rank !== 'junior' && W.rank !== 'officer' && weekday(d) === 2 && playerShiftOn(d) && typeof drillKind === 'function' && !!(typeof drillPlace === 'function' && drillPlace('hatch')); };
+const pdrillJobOf = d => SHIP.jobs.find(x => x.kind === 'pwrdrill' && Math.floor(x.posted / 1440) + 1 === d) || null;
+function pdrillCalls(j) {                                // the three calls, listed in a seeded order (the same each time for that day)
+  const kind = j.drill, all = [worksText('m19.drill.muster', 'Muster: Works team to stations'), worksText('m19.drill.' + kind, PDRILL_CALL[kind] || 'The drill\'s action'), worksText('m19.drill.report', 'Report to the bridge: Works ready')];
+  return all.map((c, i) => [schedU(pwrSeed(), j.day * 3 + i, 1064), i, c]).sort((a, b) => a[0] - b[0]).map(x => ({ id: 'c' + x[1], label: x[2] }));
+}
+function pdrillStops(j) {
+  const pl = typeof drillPlace === 'function' ? drillPlace('hatch') : null; if (!pl) return [];
+  const opts = pdrillCalls(j);
+  return [0, 1, 2].map(k => ({ deck: 5, placeId: pl, mins: 1, tag: 'call', how: 'choose', opts: { title: worksText('m19.drill.title', 'Your call {n} of 3', { n: k + 1 }), text: worksText('m19.drill.text', 'The bay\'s waiting on you. What\'s the call?'), options: opts } }));
+}
+function pdrillStepDone(j, k, res) {
+  if (!Number.isFinite(j.wrongs)) j.wrongs = 0;
+  if (k > 0 && !(j.stepsDone || []).includes(k - 1)) return false;
+  if ((res && res.pick) !== 'c' + k) { j.wrongs++; worksSay('calder', worksText('m19.drill.order', 'Muster, then the action, then the bridge. In that order.')); return false; }
+  const [who, a] = PDRILL_ANS[k]; worksSay(who, worksText('m19.drill.ans.' + k, typeof a === 'string' ? a : a[j.drill] || 'Done.'));
+  return true;
+}
+function pdrillClose(j, now, quiet) {
+  const did = !!j.workDone; j.status = 'done'; j.doneAt = now; j.doneBy = did ? 'you' : null; if (typeof MACH_REV !== 'undefined') MACH_REV++;
+  simNote('pwrDrill', { day: j.day, you: did, wrongs: j.wrongs || 0 });
+  if (did && typeof worksSideXp === 'function') worksSideXp(1, 'pwrdrill');
+  if (!quiet) { try { toast(worksName('calder'), worksText('drill.allclear', 'All clear. Drill over.')); } catch (e) { /* no UI */ }
+    worksSay('calder', !did ? worksText('m19.drill.missed', 'We ran it without your calls. Next Wednesday, they\'re yours.') : j.wrongs ? worksText('m19.drill.ok', 'Muster, act, report. Next time in that order first go.') : worksText('m19.drill.clean', 'Clean calls. That\'s how it\'s done.')); }
+}
+if (P5_M19 && typeof jobKindAdd === 'function') {
+  jobKindAdd('conduitrun', { tier: 3, work: 0, text: 'Test a conduit run', stops: runStops, stepDone: runStepDone, done: runDone, veto: true, crew: { can: incWorks, mins: PWR_CREW } });
+  if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add('conduitrun');
+  jobKindAdd('pwrdrill', { tier: 3, work: 0, side: true, text: 'The drill: the Works calls', stops: pdrillStops, stepDone: pdrillStepDone, veto: true,
+    post(h, jobs) {                                      // Wednesdays at 14:00's hour, found at 14:50, yours from the start
+      const d = Math.floor(h / 24) + 1; if ((h % 24 + 24) % 24 !== 14 || !pdrillDue(d) || jobs.some(x => x.kind === 'pwrdrill' && Math.floor(x.posted / 1440) + 1 === d)) return;
+      const kind = drillKind(d), t = (d - 1) * 1440 + DRILL_TOAST, j = jobMake('pwrdrill', { id: 'pwrdrill-' + kind + '@' + d, deck: 5, room: 'w', h, title: worksText('m19.drill.card', 'The drill: run the Works calls'), drill: kind, day: d, wrongs: 0, reserved: true, until: (d - 1) * 1440 + DRILL_END });
+      j.posted = j.found = t; j.claimedBy = 'you'; j.status = 'claimed'; j.start = t; jobs.push(j);
+    },
+    done(j, t, by) { if (by === 'you') j.drilled = true; },
+    crew: { can: () => false, mins: 0 } });
+  WORK_TICKS.push((now, skip) => {                       // stage 2's word, once; the drill's 14:50 word and arrow, and the all-clear
+    const W = SHIP.works; if (!W) return;
+    if (!skip && W.tr.m19 !== undefined && worksStage('m19') >= 1 && hasTool('tester') && !flag('m19.stage2')) { flagSet('m19.stage2', worksDay(now)); worksTeach('m19', 'calder', 'stage2', ['You\'ve got relays. Next: the conduit runs under Deck 6. Bring your tester.']); }
+    for (const x of SHIP.jobs) if (x.kind === 'pwrdrill' && x.status !== 'done' && now >= x.until) pdrillClose(x, now, skip || worksDay(now) !== x.day);
+    const d = worksDay(now), m = now - (d - 1) * 1440, j = weekday(d) === 2 ? pdrillJobOf(d) : null; if (!j || j.status === 'done' || skip) return;
+    if (m >= DRILL_TOAST && m < DRILL_END && !j.told) {
+      j.told = true;
+      try { toast(worksName('calder'), worksText('m19.drill.toast', 'Drill in ten minutes. You run the Works calls today. Muster hatch, Works bay.')); } catch (e) { /* no UI */ }
+      if (typeof guideAsk === 'function') guideAsk({ id: 'm19:drill:' + d, level: 1, owner: '24v', from: (d - 1) * 1440 + DRILL_TOAST, until: j.until,
+        goal: () => ({ deck: 5, room: 'w', place: drillPlace('hatch'), label: worksText('m19.drill.ring', 'Run the Works part of the drill') }), done: () => !!j.workDone || j.status === 'done' });
+    }
   });
 }
 // ---- end of slot: Power and relays ----
