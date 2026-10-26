@@ -1542,3 +1542,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:20 UTC: B1 (via lead 39): ladder order, ps in person, comet line done, in checks, push within the hour; takes the teacher-at-meeting fix (gated P5_STEP5, off identical).
 - ~22:23 UTC: **RV20 PASS B4 p5s5-puzzles 4e5c878f** (P4, P5, board, in-person/words; off identical; 390x844). Board arrow finding withdrawn (setup). B4 next P9 + t6.
 - ~22:23 UTC: **CR5 0.93.3 OK** (interactions OK 2449 s; career known-old backlog 12 only; claude/checks-cr5 54b1e52d). 2 of 6 runners done (CR4, CR5).
+- ~22:24 UTC: B2 workstep-tap-fix c79a66dc fully checked (interactions OK too); waits on RV20 jobTap verdict -> 0.93.4.
