@@ -2,7 +2,7 @@
 
 **Role:** the ending engineer: E-2 (the offer and your answer, section 29a) and E-3 (the goodbye, the end page, section 29b) of
 `plans/ending-spec.html` on claude/p5-specs (EP2). Session session_01Py28Kh6QV9kk64ri5AzQ5B.
-**Branch:** `claude/ending` from claude/staging-0.93.3 d9c7e5f0. Build-table rows ending-1 to ending-6. All behind
+**Branch:** `claude/ending` from claude/staging-0.93.3 d9c7e5f0 (SW6's claude/ending-words-a merged in). Build-table rows ending-1 to ending-7. All behind
 `EV_ENDING_ON` (section 13, `URL_FLAGS.has('ending')`, off; `?ending` / `#ending` previews). Off: cadet_test ALL IDENTICAL
 against d9c7e5f0 on every turn, check_fast OK.
 
@@ -30,7 +30,8 @@ against d9c7e5f0 on every turn, check_fast OK.
   ask at the front; give the address minute with `crossBackAddressAt()`; read `endingChoice()` / `endSaid()` for the address's
   two versions. 29a settles at Day 35 15:00 itself, and if nothing's firm she finds you 15 minutes after.
 - **E-4 (endgame):** `flag('end.stay')` is the day it settled as Stay (`end.go` for Go).
-- **Writers (E-5):** every line goes through `endText(key, stand-in)`; keys `end.*`, `mail.end.*`, `ending.endpage.btn.*`.
+- **Writers:** SW6's words are merged and wired (ending-7, 93eb5380). Keys used here that SW6 hasn't written (stand-ins in code; SW6's session has ended): `ending.notice.go.ends` (the plain "this save ends" notice on Go), `ending.btn.bye` (the "Goodbye" button in the bay). SW6 keys not yet used: ending.rumour, ending.friend.told, ending.friend.settled, ending.breakfast.here (chatter bubbles), ending.status.*, ending.saves.ended, ending.endpage.btn.new.sub (ending.works.* are EN2's).
+- **EN2's API (agreed):** `endAnswer()`, `endSettle(now, answer)` -> the choice (calls EN2's `endStaySet(leave day)` on Stay; end.stay is EN2's), `end.cb.stay` / `end.cb.go` final, `END_ITEMS` rows through `endItems`. Zeke's Sunday 21:00 talk is EN1's (29a, `endZekeSunTick`).
 
 ## Loose ends
 - The packed cabin on Monday (24t's touches shown boxed) is not built: a display change in 24t, its owner's.
