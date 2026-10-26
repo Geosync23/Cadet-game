@@ -794,6 +794,77 @@ def part_m9(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm9: differs the second time')
 PARTS['m9'] = part_m9
 
+# 24w shutdowns (S5-4, B3; P5_M18): the training on Day 18 (Calder's talk at the port junction, the planning screen opens
+# on a real job marked for a shutdown, the quietest hour, the kept rooms, the first booking trains you), the 22:00 settle,
+# Day 19's shutdown (the job opens with a level-1 arrow, taken in the hour: power off, the work done: back on; missed: it
+# lapses, Calder's Mail, the job waits for a new booking); the crew's plan for the booked hour (the mess empties of
+# diners, the same day planned before 22:00, after it, and fresh after it: the last two identical); the save's sd read back
+SD_RUN = r"""((miss) => {
+  const out = { log: [] }, L = x => out.log.push(x);
+  for (const e of guideList()) if (/^sd:/.test(e.id)) guideDrop(e.id); Object.assign(SD_UI, { job: null, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });   // the check's own leftovers from a run before
+  SHIP.works = null; SHIP.occasions.length = 0; SHIP.notes = []; SHIP.flags = {}; SHIP.jobs = []; SHIP.mail = [];
+  MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  const row = ladderRow('m18'); let d = 18; while (!playerShiftOn(d)) d++; out.day = d;
+  setShipNow((d - 1) * 1440 + 300); machinesNow(); const W = worksInit(); W.log.push(['earlier', 1, 0, 'service']); W.tier = 3; W.rank = 'senior';
+  for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(row))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); }
+  let booked = null;
+  for (let m = 360; m < 1020; m += 5) {
+    const t = (d - 1) * 1440 + m; setShipNow(t); machinesNow(); worksCareerTick(t);
+    if (typeof DIALOGUE !== 'undefined' && DIALOGUE && typeof dialogueEnd === 'function') dialogueEnd(true);
+    const c = SHIP.works.cur; if (c && out.log[out.log.length - 1] !== c.st) L(c.st);
+    if (c && c.st === 'meet') { const r = SHIP.occasions.find(x => x.key === c.occ); if (r && t >= r.at) { r.met = true; worksCareerTick(t + 1); } }
+    if (c && c.st === 'do' && !booked) { out.screen = sdView().filter(b => b.kind === 'text').map(b => b.text).slice(1, 2).join(' / '); out.badge = (WORKS_TABS.find(x => x.id === 'shut') || {}).badge(); sdAct('sd:quiet', 0); out.keep0 = sdAffected(d + 1, SD_UI.branch, SD_UI.at, []).length;
+      const kk = sdBranches()[SD_UI.branch].keep.map(sdRoomKey); for (const k of kk) sdAct('sd:keep', k); out.keep1 = sdAffected(d + 1, SD_UI.branch, SD_UI.at, SD_UI.keep).length; sdAct('sd:book', c.j); booked = sdData().book.find(x => x.job === c.j) || null; }
+    if (W.tr.m18 !== undefined) break;
+  }
+  out.trained = W.tr.m18; out.booked = booked && [booked.day, hhmm(booked.at), booked.branch];
+  out.guide = guideList().filter(e => /^sd:/.test(e.id)).map(e => e.id + ' L' + e.level);
+  const B2 = d * 1440;
+  for (let t = shipNow(); t <= B2 + 300; t += 30) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+  out.set = (SHIP.works.sd.set[d + 1] || []).map(x => [x.day, x.at, x.branch, x.keep.length]); out.round = JSON.stringify(sdClean(JSON.parse(JSON.stringify(SHIP.works.sd)))) === JSON.stringify(SHIP.works.sd); out.items = sdItems(d + 1).map(x => x.title + ' ' + hhmm(x.from) + ' ' + x.where);
+  const b = SHIP.works.sd.set[d + 1][0], j = SHIP.jobs.find(x => x.id === b.job);
+  for (let t = B2 + 300; t < B2 + b.at - 15; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+  out.before = [j.status, j.why];
+  setShipNow(B2 + b.at - 14); machinesNow(); worksCareerTick(shipNow()); out.atOpen = [j.status, guideList().filter(e => /^sd:/.test(e.id)).map(e => e.id + ' L' + e.level + (e.shown ? ' shown' : ''))];
+  if (!miss) { out.claim = claimJob(j.id); setShipNow(B2 + b.at + 1); machinesNow(); worksCareerTick(shipNow()); out.st1 = b.st;
+    jobStops(j).forEach((s, k) => jobStepDone(j.id, k)); setShipNow(B2 + b.at + 30); machinesNow(); worksCareerTick(shipNow()); out.st2 = b.st; out.turnin = turnInJob(j.id); }
+  else { for (let t = B2 + b.at; t <= B2 + b.at + 70; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); } out.st = b.st; out.after = [j.status, j.why]; out.mail = SHIP.mail.some(x => /shutdown/i.test(x.subject)); }
+  out.sd = JSON.stringify({ done: SHIP.works.sd.done, miss: SHIP.works.sd.miss }); out.use = W.use.m18; out.xp = W.xp;
+  out.notes = [...new Set(SHIP.notes.filter(n => /^sd/.test(n.kind)).map(n => n.kind))];
+  return out;
+})"""
+SD_PLAN = r"""(() => {
+  const out = {}, B = 17 * 1440;
+  SHIP.works = null; SHIP.jobs = []; SHIP.occasions.length = 0; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1;
+  setShipNow(B + 600); machinesNow(); const W = worksInit(); W.tier = 3; W.rank = 'senior'; W.tr.m18 = 18;
+  const id = jobReserve('6-junction-1', 18, 600, 43, { tier: 3 }); sdMark(shipNow());
+  const sig = d => { const day = shipDay(d), a = []; for (const [pid, segs] of day.plans) a.push(pid + ':' + segs.map(s => s.from + '-' + s.to + '@' + s.placeId).join(',')); return a.join(';'); };
+  const inMess = d => { let n = 0; for (const [pid, segs] of shipDay(d).plans) for (const s of segs) { const pl = s.placeId && placeById(s.placeId); if (pl && pl.deck === 3 && pl.room === 'M' && s.act !== 'work' && s.from < (d - 1) * 1440 + 1140 && (d - 1) * 1440 + 1080 < s.to) n++; } return n; };
+  out.messBefore = inMess(19); const s0 = sig(19);
+  out.book = !!sdBook(id, 1080, 'galley', []); out.same = sig(19) === s0;
+  for (let t = B + 610; t <= B + 1325; t += 5) { setShipNow(t); machinesNow(); worksCareerTick(t); }
+  out.messAfter = inMess(19); const s1 = sig(19); out.changed = s1 !== s0;
+  SHIP_DAYS.clear(); MACH_USE.clear(); out.again = sig(19) === s1;
+  out.saved = JSON.stringify(SHIP.works.sd.set[19].map(x => [x.at, x.branch]));
+  return out;
+})()"""
+def part_m18(g):
+    a = g.ev(SD_RUN + '(false)'); b = g.ev(SD_RUN + '(true)'); a2 = g.ev(SD_RUN + '(false)')
+    print(f"  m18: Day {a['day']}: steps {a['log']}, screen '{a['screen']}', badge {a['badge']}, quiet hour booked {a['booked']}, affected {a['keep0']} -> {a['keep1']} with the kept rooms; settled {a['set']}; Day 19: {a['before']} -> {a['atOpen']}; taken: {a['st1']} -> {a['st2']}, turned in {a['turnin']}, uses {a['use']}; notes {a['notes']}")
+    print(f"  m18 missed: {b['st']}, the job {b['after']}, Mail {b['mail']}, {b['sd']}")
+    check(a['trained'] == a['day'] and a['booked'] and a['booked'][0] == a['day'] + 1, f"m18: trained by the first booking for the next day ({a['trained']}, {a['booked']})")
+    check(a['screen'].startswith('1. The job') and a['badge'] == 1, f"m18: the screen opens on the job, its badge ({a['screen']}, {a['badge']})")
+    check(a['keep1'] <= a['keep0'], f"m18: keeping rooms on leaves no more people affected ({a['keep0']} -> {a['keep1']})")
+    check(a['round'], "m18: the save's sd reads back the same (sdClean)")
+    check(a['before'][0] == 'waiting' and a['atOpen'][0] == 'open' and any(x.startswith('sd:day:') and ' L1' in x for x in a['atOpen'][1]), f"m18: the booked hour opens the job with a level-1 arrow ({a['before']} -> {a['atOpen']})")
+    check(a['st1'] == 'off' and a['st2'] == 'done' and a['turnin'] and a['use'] == 1 and json.loads(a['sd'])['done'] == [a['day'] + 1], f"m18: power off, back on, done ({a['st1']}, {a['st2']}, {a['sd']})")
+    check(b['st'] == 'lapsed' and b['after'][0] == 'waiting' and b['mail'] and json.loads(b['sd'])['miss'] == [b['day'] + 1], f"m18: a missed hour lapses, says so and waits for a new booking ({b['st']}, {b['after']}, {b['mail']}, {b['sd']})")
+    check(json.dumps(a, sort_keys=True) == json.dumps(a2, sort_keys=True), "m18: the same twice")
+    p = g.ev(SD_PLAN)
+    print(f"  m18 plan: diners in the mess 18:00-19:00 on Day 19: {p['messBefore']} before the settle, {p['messAfter']} after; booking alone changed nothing {p['same']}; changed at 22:00 {p['changed']}; fresh plan the same {p['again']}; settled {p['saved']}")
+    check(p['book'] and p['same'] and p['changed'] and p['again'] and p['messBefore'] > 0 and p['messAfter'] == 0, f"m18: the booked hour in the crew's plans ({p})")
+PARTS['m18'] = part_m18
+
 # manifestRun (seat E1, 0.45.12; E2's team parts call it): two parts from their shelves to a machine's panel, held for
 # you only; taken, every stop done in turn: the parts off the shelves once, delivered (j.delivered, the note), turned in;
 # a second run nobody takes is withdrawn at its time; the Wednesday manifest still posts beside an open parts run

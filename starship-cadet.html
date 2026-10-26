@@ -48883,7 +48883,8 @@ function chatShow() {
   const gift = !C.ask && !C.offer && !talking && giftInHands(); if (gift) buttons.push(r.giftWeek === socWeek() + 1 ? { id: 'give', label: 'Given this week', off: true } : { id: 'give', label: 'Give ' + gift });
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
   if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
-  if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
+  if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }
+  if (!C.ask && !C.offer && !talking && typeof sdChatButton === 'function') { const sd = sdChatButton(p); if (sd) buttons.push(sd); }   // 24w (S5-4): Brennan, before a galley shutdown: tell him in person   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
   const v = { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -48942,6 +48943,7 @@ function chatDo(id) {
   else if (id === 'ask') { C.ask = true; chatShow(); }
   else if (id === 'shop-menu' && typeof shopMenuOpen === 'function') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
+  else if (id === 'sd-tell') chatSay((typeof sdChatSay === 'function' && sdChatSay(p)) || 'Thanks for telling me.');   // 24w (S5-4)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
@@ -58533,7 +58535,7 @@ onSim('job', n => {                                      // B: Torres comes by a
 // kept ones, are closed for the hour, so the crew go elsewhere. A plan of that day made before 22:00 is dropped then and
 // made again (SHIP_DAYS, as machinesReset drops the rec deck's). Nothing reads a booking live.
 //   SHIP.works.sd (saved as ship.works.sd) = { book: [{ day, at, branch, keep: ['deck|room'], warned: [id], inPerson: [id],
-//   job }], set: { day: [the same, settled] }, done: [day], miss: [day] }
+//   job, all? (a ship notice warned everyone) }], set: { day: [the same, settled] }, done: [day], miss: [day] }
 // Job slots: SD_TRAIN_SLOT 42 (the training's real job), SD_SLOT 43 (the jobs marked for a shutdown).
 // The tables are built on first use (sdBranches), so a plan made while the file is still loading never meets an
 // uninitialised name; the save's sd is read back below and any plan already made for a settled day is dropped.
@@ -58556,10 +58558,12 @@ const SD_FEEDS = { '2-junction-1': '2-breaker-1' };      // a machine that share
 function sdFeed(machineId) { const m = typeof machineById === 'function' ? machineById(machineId) : null; if (!m) return null; return SD_FEEDS[m.id] || (m.kind === 'battery' && m.deck === 5 ? '5-inverter-1' : m.id); }
 const sdBranchesFor = machineId => { const f = sdFeed(machineId), B = sdBranches(); return f ? Object.keys(B).filter(k => B[k].junction === f) : []; };
 const sdRoomKey = r => r[0] + '|' + r[1];
+const SD_NONE = Object.freeze({ book: Object.freeze([]), set: Object.freeze({}), done: Object.freeze([]), miss: Object.freeze([]) });
+const sdPeek = () => SHIP.works && SHIP.works.sd && Array.isArray(SHIP.works.sd.book) ? SHIP.works.sd : SD_NONE;   // read only: drawing the screen never makes the record
 function sdData() { const W = SHIP.works; if (!W) return null; if (!W.sd || typeof W.sd !== 'object' || !Array.isArray(W.sd.book)) W.sd = { book: [], set: {}, done: [], miss: [] }; return W.sd; }
 function sdClean(s) {                                    // a save's sd read back: junk dropped
   const int = v => Number.isInteger(v) && v >= 0 && v < 99999, B = sdBranches(), ids = a => Array.isArray(a) ? a.filter(x => typeof x === 'string').slice(0, 8).map(x => x.slice(0, 40)) : [];
-  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null } : null;
+  const one = b => b && int(b.day) && int(b.at) && B[b.branch] ? { day: b.day, at: b.at, branch: b.branch, keep: ids(b.keep).filter(k => B[b.branch].keep.some(r => sdRoomKey(r) === k)), warned: ids(b.warned), inPerson: ids(b.inPerson), job: typeof b.job === 'string' ? b.job.slice(0, 80) : null, ...(b.all === true ? { all: true } : {}) } : null;
   const set = {}; if (s && s.set && typeof s.set === 'object') for (const k of Object.keys(s.set).slice(0, 20)) if (/^\d{1,4}$/.test(k) && Array.isArray(s.set[k])) set[k] = s.set[k].map(one).filter(Boolean).slice(0, 6);
   const days = a => Array.isArray(a) ? a.filter(int).slice(-20) : [];
   return { book: Array.isArray(s && s.book) ? s.book.map(one).filter(Boolean).slice(0, 6) : [], set, done: days(s && s.done), miss: days(s && s.miss) };
@@ -58605,13 +58609,13 @@ function sdBook(jobId, at, branch, keep = [], o = {}) {
   const day = o.day || sdTarget(), br = sdBranches()[branch];
   if (day !== sdTarget() || !br || !sdBranchesFor(j.machine).includes(branch) || !Number.isInteger(at) || at < SD_HOURS[0] || at > SD_HOURS[1] || at % 60) return null;
   S.book = S.book.filter(b => b.job !== jobId);
-  const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId };
+  const b = { day, at, branch, keep: keep.filter(k => br.keep.some(r => sdRoomKey(r) === k)), warned: (o.warned || []).slice(0, 8), inPerson: (o.inPerson || []).slice(0, 8), job: jobId, ...(o.all ? { all: true } : {}) };
   S.book.push(b); j.sdDay = day; j.why = worksText('sd.why.booked', 'shutdown booked: {day}, {time}', { day: 'Day ' + day, time: hhmm(at) });
   simNote('sdBooked', { day, at, branch, job: jobId });
   return b;
 }
 function sdCancel(jobId) {
-  const S = sdData(), i = S ? S.book.findIndex(b => b.job === jobId) : -1; if (i < 0) return false;
+  const S = sdPeek(), i = S.book.findIndex(b => b.job === jobId); if (i < 0) return false;
   S.book.splice(i, 1); const j = SHIP.jobs.find(x => x.id === jobId); if (j) { delete j.sdDay; j.why = sdWhy(); }
   return true;
 }
@@ -58627,6 +58631,130 @@ function sdMark(t) {
   return n;
 }
 if (P5_M18) WORK_TICKS.push((t, skip) => { sdSettle(t); sdMark(t); });
+// ---- the planning screen: the Works app's Shutdowns tab (S5-4 turn 2). Every control is a plain button in the
+// device's panel (the controller walks it: section 26's padPanel). SD_UI is the draft on screen, live only (not saved):
+// the job, its branch, the hour, the rooms kept, who you warned; Book copies it into sd.book ----
+const SD_SHOW = 6;                                       // people listed by name to warn; more than that: one ship notice for all
+const SD_UI = { job: null, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false };
+function sdJobs() { return (SHIP.jobs || []).filter(j => j.shut && j.status !== 'done' && !(j.claimedBy && j.claimedBy !== 'you')); }   // the jobs that need one
+const sdJobName = j => { const m = machineById(j.machine), r = m && DECKS[m.deck] && DECKS[m.deck].rooms[m.room]; return (MACHINE_KINDS[m.kind] || { name: 'Machine' }).name + ', ' + (r ? r.name.replace(/^./, x => x.toLowerCase()) : 'the closet') + ' (' + deckWord(m.deck) + ')'; };
+const sdRoomName = k => { const [dk, rm] = k.split('|'), r = DECKS[dk] && DECKS[dk].rooms[rm]; return r ? r.name : k; };
+// who'd be in the branch's rooms (minus the kept ones) during that hour of `day`, from that day's plans as they stand
+// (the screen only: a plan made before 22:00 doesn't hold the shutdown yet, which is what you're asking). [{ id, rooms, acts }]
+function sdAffected(day, branch, at, keep = []) {
+  const br = sdBranches()[branch]; if (!br) return [];
+  const ks = new Set(keep), rooms = new Set(br.rooms.map(sdRoomKey).filter(k => !ks.has(k))), a = (day - 1) * 1440 + at, b = a + SD_LEN, who = new Map();
+  let D = null; try { D = shipDay(day); } catch (e) { D = null; } if (!D) return [];
+  for (const [pid, segs] of D.plans) for (const s of segs) {
+    if (!s.placeId || !(s.from < b && a < s.to)) continue;
+    const pl = placeById(s.placeId), k = pl && pl.deck + '|' + pl.room; if (!k || !rooms.has(k)) continue;
+    const e = who.get(pid) || who.set(pid, { id: pid, rooms: [], acts: [], tags: [] }).get(pid);
+    if (!e.rooms.includes(k)) e.rooms.push(k); if (!e.acts.includes(s.act)) e.acts.push(s.act); if (s.tag && !e.tags.includes(s.tag)) e.tags.push(s.tag);
+  }
+  return [...who.values()].sort((x, y) => x.id < y.id ? -1 : 1);
+}
+// what makes an hour a bad one (question 3): a meal in the branch's rooms, or a tradition there. [words]
+function sdHourMarks(aff) {
+  const out = [], acts = new Set(aff.flatMap(e => e.acts)), tags = new Set(aff.flatMap(e => e.tags));
+  if (acts.has('breakfast')) out.push(worksText('sd.mark.breakfast', 'breakfast'));
+  if (acts.has('dinner')) out.push(worksText('sd.mark.dinner', 'dinner'));
+  for (const tg of tags) { if (!/^ev-/.test(tg)) continue; const t = (typeof TRADITIONS !== 'undefined' ? TRADITIONS : []).find(x => tg === 'ev-' + x.id || tg.startsWith('ev-' + x.id + '-'));
+    const w = t ? t.name : worksText('sd.mark.event', 'a ship event'); if (!out.includes(w)) out.push(w); }
+  return out;
+}
+function sdDraft() {                                     // the draft kept in step with the board: a job that still needs one, its branch, an hour
+  const L = sdJobs(), S = sdPeek(); if (!L.length) { SD_UI.job = null; return null; }
+  let j = L.find(x => x.id === SD_UI.job); if (!j) { j = L[0]; Object.assign(SD_UI, { job: j.id, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false });
+    const b = S && S.book.find(x => x.job === j.id); if (b) Object.assign(SD_UI, { branch: b.branch, at: b.at, keep: b.keep.slice(), warned: b.warned.slice(), inPerson: b.inPerson.slice(), all: !!b.all }); }
+  const brs = sdBranchesFor(j.machine); if (!brs.includes(SD_UI.branch)) { SD_UI.branch = brs[0]; SD_UI.keep = []; }
+  if (!Number.isInteger(SD_UI.at)) SD_UI.at = 600;
+  SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at));
+  return j;
+}
+const sdBooked = jobId => { const S = SHIP.works && SHIP.works.sd; if (!S) return null; const b = S.book.find(x => x.job === jobId); if (b) return { b, set: false };
+  for (const k in S.set) { const x = S.set[k].find(y => y.job === jobId); if (x) return { b: x, set: true }; } return null; };
+const sdBtn = (label, verb, arg) => ({ label, action: { app: 'works', do: 'sd:' + verb, arg } });
+function sdView() {
+  const B = [], say = (text, mark) => B.push({ kind: 'text', text, mark }), W = SHIP.works;
+  if (!W || W.tr.m18 === undefined && !(W.cur && W.cur.id === 'm18')) { say(worksText('sd.none.untrained', 'Calder will show you shutdowns once you\'re a Senior Officer.')); return B; }
+  const j = sdDraft(), day = sdTarget(), S = sdPeek();
+  say(worksText('sd.head', 'Plan a shutdown for {day}. Bookings settle at 22:00 the evening before.', { day: day === SHIP.time.day + 1 ? 'tomorrow (Day ' + day + ')' : 'Day ' + day }), 'hot');
+  const all = [].concat(S.book.map(b => [b, false]), ...Object.keys(S.set).map(k => S.set[k].map(b => [b, true])));
+  if (all.length) { say(worksText('sd.booked.head', 'Booked'), 'head'); B.push({ kind: 'list', rows: all.map(([b, set]) => ({ text: 'Day ' + b.day + ', ' + hhmm(b.at) + '-' + hhmm(b.at + SD_LEN) + ': ' + sdBranches()[b.branch].name, sub: set ? worksText('sd.booked.set', 'settled: the crew have planned round it') : worksText('sd.booked.open', 'settles at 22:00 the evening before') })) }); }
+  if (!j) { say(worksText('sd.none', 'No jobs need the power off just now.')); return B; }
+  const L = sdJobs();
+  if (L.length > 1) { say(worksText('sd.step.job', '1. The job'), 'head'); B.push({ kind: 'buttons', items: L.map(x => ({ ...sdBtn(sdJobName(x), 'job', x.id), on: x.id === j.id })) }); }
+  else say(worksText('sd.job', '1. The job: {job}.', { job: sdJobName(j) }), 'head');
+  const bk = sdBooked(j.id);
+  if (bk && bk.set) { say(worksText('sd.settled', 'This one\'s settled: Day {day}, {time}. Be at the junction then.', { day: bk.b.day, time: hhmm(bk.b.at) }), 'urgent'); return B; }
+  const brs = sdBranchesFor(j.machine), br = sdBranches()[SD_UI.branch];
+  say(worksText('sd.step.branch', '2. The branch to switch off'), 'head');
+  if (brs.length > 1) B.push({ kind: 'buttons', items: brs.map(k => ({ ...sdBtn(sdBranches()[k].name.replace(/^./, x => x.toUpperCase()), 'branch', k), on: k === SD_UI.branch })) });
+  say(worksText('sd.feeds', 'Feeds: {rooms}.', { rooms: br.rooms.map(r => sdRoomName(sdRoomKey(r))).join(', ') }));
+  say(worksText('sd.step.keep', '3. Keep power to'), 'head');
+  B.push({ kind: 'buttons', items: br.keep.map(r => { const k = sdRoomKey(r), on = SD_UI.keep.includes(k); return { ...sdBtn((on ? worksText('sd.keep.on', 'Kept on: ') : worksText('sd.keep.off', 'Keep on: ')) + sdRoomName(k), 'keep', k), on }; }) });
+  const aff = sdAffected(day, SD_UI.branch, SD_UI.at, SD_UI.keep), marks = sdHourMarks(aff), bad = marks.length > 0;
+  say(worksText('sd.step.hour', '4. The hour'), 'head');
+  say(hhmm(SD_UI.at) + '-' + hhmm(SD_UI.at + SD_LEN) + ': ' + (aff.length ? worksText('sd.hour.n', '{n} affected', { n: aff.length }) : worksText('sd.hour.quiet', 'nobody affected')) + (bad ? '. ' + worksText('sd.hour.bad', 'Clashes with {what}.', { what: marks.join(', ') }) : '.'), bad ? 'urgent' : aff.length ? null : 'up');
+  B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.hour.prev', 'Earlier hour'), 'hour', -1), sdBtn(worksText('sd.hour.next', 'Later hour'), 'hour', 1), sdBtn(worksText('sd.hour.quietest', 'Quietest hour'), 'quiet', 0)] });
+  say(worksText('sd.step.warn', '5. Warn who\'s affected'), 'head');
+  if (!aff.length) say(worksText('sd.warn.none', 'Nobody to warn at that hour.'));
+  else {                                                 // the people who work there and Brennan first, then a few more; a crowd gets one ship notice
+    const key = e => (e.id === 'brennan' ? 0 : e.acts.includes('work') ? 1 : 2), shown = aff.slice().sort((x, y) => key(x) - key(y) || (x.id < y.id ? -1 : 1)).slice(0, SD_SHOW);
+    B.push({ kind: 'list', rows: shown.map(e => { const done = SD_UI.warned.includes(e.id) || SD_UI.inPerson.includes(e.id), brennan = e.id === 'brennan';
+      return { text: worksName(e.id), sub: e.rooms.map(sdRoomName).join(', ') + (brennan && !SD_UI.inPerson.includes('brennan') ? ' · ' + worksText('sd.warn.brennan', 'tell him in person before 22:00') : ''),
+        button: done ? null : worksText('sd.warn.btn', 'Warn'), action: done ? null : { app: 'works', do: 'sd:warn', arg: e.id }, mark: done ? 'up' : null }; }) });
+    if (aff.length > SD_SHOW) { const left = aff.filter(e => !SD_UI.warned.includes(e.id)).length;
+      if (left) B.push({ kind: 'buttons', items: [sdBtn(worksText('sd.warn.all', 'Post a ship notice: warn all {n}', { n: aff.length }), 'warnall', 0)] }); else say(worksText('sd.warn.alldone', 'Ship notice posted: all {n} warned.', { n: aff.length }), 'up'); }
+  }
+  const blocked = bad && !SD_MEALS_OK;
+  B.push({ kind: 'buttons', items: [sdBtn(bk ? worksText('sd.rebook', 'Change the booking') : worksText('sd.book', 'Book for {day}', { day: day === SHIP.time.day + 1 ? 'tomorrow' : 'Day ' + day }), 'book', j.id)].concat(bk ? [sdBtn(worksText('sd.cancel', 'Cancel the booking'), 'cancel', j.id)] : []) });
+  if (blocked) say(worksText('sd.blocked', 'That hour can\'t be booked: pick another.'), 'down');
+  else if (bad) say(worksText('sd.bad.warn', 'You can book it, but the crew will grumble.'), 'down');
+  return B;
+}
+function sdAct(verb, arg) {
+  const v = String(verb).replace(/^sd:/, ''), j = sdDraft(); if (!j && v !== 'job') return;
+  if (v === 'job') { if (sdJobs().some(x => x.id === arg)) { SD_UI.job = null; Object.assign(SD_UI, { job: arg, branch: null, at: null, keep: [], warned: [], inPerson: [], all: false }); const b = sdBooked(arg); if (b && !b.set) Object.assign(SD_UI, { branch: b.b.branch, at: b.b.at, keep: b.b.keep.slice(), warned: b.b.warned.slice(), inPerson: b.b.inPerson.slice(), all: !!b.b.all }); } }
+  else if (v === 'branch') { if (sdBranchesFor(j.machine).includes(arg)) { SD_UI.branch = arg; SD_UI.keep = []; } }
+  else if (v === 'keep') { const i = SD_UI.keep.indexOf(arg); if (i >= 0) SD_UI.keep.splice(i, 1); else if (sdBranches()[SD_UI.branch].keep.some(r => sdRoomKey(r) === arg)) SD_UI.keep.push(arg); }
+  else if (v === 'hour') SD_UI.at = Math.max(SD_HOURS[0], Math.min(SD_HOURS[1], SD_UI.at + 60 * (arg < 0 ? -1 : 1)));
+  else if (v === 'quiet') { let best = null; for (let at = SD_HOURS[0]; at <= SD_HOURS[1]; at += 60) { const a = sdAffected(sdTarget(), SD_UI.branch, at, SD_UI.keep), n = a.length + (sdHourMarks(a).length ? 100 : 0); if (!best || n < best[1]) best = [at, n]; } if (best) SD_UI.at = best[0]; }
+  else if (v === 'warn') sdWarn(arg);
+  else if (v === 'warnall') { const aff = sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep); for (const e of aff) if (e.id !== 'brennan' && !SD_UI.warned.includes(e.id)) sdWarn(e.id, true); SD_UI.all = true; { const b = sdPeek().book.find(x => x.job === SD_UI.job); if (b) b.all = true; }
+    try { toast(worksText('sd.notice.title', 'Ship notice'), worksText('sd.notice.posted', 'Posted: power off in {rooms}, {time}. {n} people warned.', { rooms: sdBranches()[SD_UI.branch].rooms.map(r => sdRoomName(sdRoomKey(r))).join(' and '), time: hhmm(SD_UI.at), n: aff.length })); } catch (e) { /* no UI */ } }
+  else if (v === 'book') { if (!SD_MEALS_OK && sdHourMarks(sdAffected(sdTarget(), SD_UI.branch, SD_UI.at, SD_UI.keep)).length) return;
+    const b = sdBook(j.id, SD_UI.at, SD_UI.branch, SD_UI.keep, { warned: SD_UI.warned, inPerson: SD_UI.inPerson, all: SD_UI.all });
+    if (b) { try { toast(worksText('sd.title', 'Shutdown booked'), worksText('sd.booked.toast', 'Day {day}, {time}: {branch}. It settles at 22:00 tonight.', { day: b.day, time: hhmm(b.at), branch: sdBranches()[b.branch].name })); } catch (e) { /* no UI */ }
+      if (typeof sdBookedHook === 'function') sdBookedHook(b); } }
+  else if (v === 'cancel') sdCancel(j.id);
+  if (typeof deviceRefresh === 'function') try { deviceRefresh(); } catch (e) { /* none */ }
+}
+// Warn: a note to their device, and their answer (stand-ins until the head writer's m18.lines)
+function sdWarn(id, quiet) {
+  if (SD_UI.warned.includes(id)) return false; SD_UI.warned.push(id);
+  const S = sdPeek(), b = S.book.find(x => x.job === SD_UI.job); if (b && !b.warned.includes(id) && b.warned.length < 8) b.warned.push(id);
+  const k = Math.floor(schedU(strSeed(id), SHIP.time.day, 853) * 3);
+  if (!quiet) try { toast(worksName(id), worksText('sd.warn.reply', ['Thanks for the warning. I\'ll work round it.', 'Noted. I\'ll be elsewhere.', 'An hour? Fine. Thanks for telling me.'][k], null, k)); } catch (e) { /* no UI */ }
+  simNote('sdWarned', { who: id, all: !!quiet });
+  return true;
+}
+// Brennan in person (section 20's chat card asks): before a galley one, a talk option. Told is kept on the draft and the booking
+const sdGalley = b => !!b && sdBranches()[b.branch].rooms.some(r => (r[0] === 3 && (r[1] === 'K' || r[1] === 'M')) && !(b.keep || []).includes(sdRoomKey(r)));
+function sdChatButton(p) {
+  if (!P5_M18 || !p || p.id !== 'brennan' || !SHIP.works) return null;
+  const S = sdPeek(), want = [SD_UI.job && sdJobs().some(x => x.id === SD_UI.job) ? { branch: SD_UI.branch, keep: SD_UI.keep, inPerson: SD_UI.inPerson } : null].concat(S.book).filter(sdGalley);
+  if (!want.length || want.every(b => (b.inPerson || []).includes('brennan'))) return null;
+  return { id: 'sd-tell', label: worksText('sd.chat.btn', 'About tomorrow\'s shutdown') };
+}
+function sdChatSay(p) {
+  if (!p || p.id !== 'brennan') return null;
+  if (!SD_UI.inPerson.includes('brennan')) SD_UI.inPerson.push('brennan');
+  for (const b of sdPeek().book) if (sdGalley(b) && !b.inPerson.includes('brennan')) b.inPerson.push('brennan');
+  simNote('sdWarned', { who: 'brennan', inPerson: true });
+  return worksText('sd.chat.brennan', 'Thanks for telling me to my face. I\'ll get the stock pot on early and we\'ll manage.');
+}
+if (P5_M18) worksTabAdd({ id: 'shut', title: worksText('sd.tab', 'Shutdowns'), order: 40, verbs: 'sd', view: sdView, act: sdAct, badge: () => SHIP.works && (SHIP.works.tr.m18 !== undefined || SHIP.works.cur && SHIP.works.cur.id === 'm18') ? sdJobs().filter(j => !sdBooked(j.id)).length : 0 });
 // ---- end of slot: Shutdowns ----
 
 // ---------------------------------------------------------------------
