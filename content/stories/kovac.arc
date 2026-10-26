@@ -68,7 +68,7 @@ tone: resolution
 when: beat:kovac.3 weekday:fri trad:captains-address day:19-26
 crescendo: trad:captains-address
 quiet: 5
-lead: 10
+lead: 28
 title: The lift with Kovac
 invite: Friday | Before the address tomorrow. The Deck 5 lift lobby, {at}. Will you come? Sorry. I mean, please. Zainab
 where: Lift lobby

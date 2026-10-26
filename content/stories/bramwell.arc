@@ -80,18 +80,18 @@ them: Does it stop? Feeling like a visitor? Like you're only borrowing the bunk?
 them: That's helped. Thanks, thanks. I'll still ask you a hundred things tomorrow. Sorry in advance.
 
 == beat 4
-// CRESCENDO rides on: Basil's new hand's tea (crew-welcome-tea, the mess, Thursday Day 25, 18:40); cast: none (everyone only if there; FX21's runs: Halloran isn't at the tea); quiet ending: beat 5
-// DAY: 25 (or the next tea the pace rule allows); plays only if the plant came back (flag:bramwell.plant.done)
+// CRESCENDO rides on: dinner in the mess on Thursday Day 25, the Works crew's welcome for him (the crew welcome tea is retired, the user 2026-10-26; lead 37 and FX22b); cast: none (everyone only if there); quiet ending: beat 5
+// DAY: 25; plays only if the plant came back (flag:bramwell.plant.done)
 tone: resolution
 tier: acquaintance
 gapDays: 0
 where: Mess hall
-when: beat:bramwell.3 trad:crew-welcome-tea flag:bramwell.plant.done day:25
-crescendo: trad:crew-welcome-tea
+when: beat:bramwell.3 flag:bramwell.plant.done day:25
+crescendo: meal:dinner
 quiet: 5
-title: Basil's new hand's tea
-invite: My tea! | It's my new hand's tea tomorrow, 18:40 in the mess. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
-hint: My new hand's tea! You're coming? Bring nothing. That's the rule, isn't it?
+title: Basil's welcome dinner
+invite: My dinner! | The Works lot are having dinner with me tomorrow, {at} in the mess. A welcome, Halloran says. Do I bring biscuits? Zeke says no. Pell says yes. Cruz says bring the plant. Basil
+hint: My welcome dinner! You're coming? Bring nothing. That's the rule, isn't it?
 mem: everybody
 keepsake: a little clay pot he painted, with the Wren on it
 them: Is that my mug? With my name on? Spelt right and everything. Brilliant.   [gesture]
@@ -125,8 +125,8 @@ when: beat=bramwell.3
 hint: Have you seen the shelf? My plant's on it! Well. It's a plant. But still.
 mem: shelfplant
 keepsake: a little clay pot he painted, with the Wren on it
-mail: 600 | My tea | You missed a good one! Pell wanted the plant to have a mug. Zeke said coil three was jealous. Halloran put it on the shelf and said it belongs to everyone now. See you at breakfast? I've got questions. Obviously. B.
+mail: 600 | My dinner | You missed a good one! Pell wanted the plant to have a mug. Zeke said coil three was jealous. Halloran put it on the shelf and said it belongs to everyone now. See you at breakfast? I've got questions. Obviously. B.
 them: My plant's on the mug-rack shelf in Works. Tove Cruz brought it back this morning. Green as anything.
 them: Cruz said it wanted less love and more light, then walked off. I think that's a lot of talking, for Cruz.   [laugh]
-them: My tea was brilliant. Halloran made room on the shelf for it. It's everyone's shelf, he said.
+them: My welcome dinner was brilliant. Halloran made room on the shelf for it. It's everyone's shelf, he said.
 them > you: Here. I painted it on the Tern. It's the Wren. It was for whoever helped. You answered all my questions.
