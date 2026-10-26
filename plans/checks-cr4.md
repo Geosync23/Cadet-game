@@ -20,6 +20,15 @@
 
 **CR4: OK.** No FAILs. Every number identical to 0.93.0.
 
+### Taken over from CR2 (0.93.1 0a2fc617, same sha256)
+
+BM18's idea; CR2 handed both over at 00:39 (in its skip list, neither started). Run one at a time, alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| lines_check --day | PASS (exit 0, 308 s) | `lines_check --day: PASS (0 errors)` |
+| p926_check | OK (exit 0, 519 s) | `P926 CHECK OK`; 64 ok lines, no FAIL |
+
 ## 0.93.0 full round (2026-10-25; sound and music)
 
 - **Candidate:** `claude/staging-0.93.0` 4f1e52bf (HUD 0.93.0)
