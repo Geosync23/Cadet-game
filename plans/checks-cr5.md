@@ -31,7 +31,12 @@ call; plus an interactions_check part). Game sha256 `1374048392ecd9eec81b889af9b
 `controller_check.py BUILD day door` from a worktree of 329ad201: exit 0, 322 s, `CONTROLLER CHECK OK`; day OK
 (breakfast, talk, the job board, bedtime, now day 2 06:01), door OK. Note for the reviewer: part of the fix is in the
 check itself (the walk now opens the door), so this pass shows the player's way through works, not that the walk is
-unchanged. Likely the doors change stopping the stick walk
+unchanged.
+
+**Lead 39's full re-run on 329ad201**: the other 27 parts (all but `reach`, `day`, `door`):
+`controller_check.py BUILD idle save calls ... firstuse` exit 0, 1817 s, `CONTROLLER CHECK OK`, 27 OK, no FAIL lines.
+So on 329ad201 all 29 parts but `reach` pass (`day` and `door` in the run above). The branch has since moved to
+1dc4825e (FX29: a tap-on-yourself fix in tap() only); not run here. Likely the doors change stopping the stick walk
 out of the bunk room in the morning (my guess; not traced).
 
 ## 0.93.2 full round, round 2 (2026-10-26, started 15:58 UTC, for BM18 and lead 38)
