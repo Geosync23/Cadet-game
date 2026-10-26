@@ -1,0 +1,450 @@
+// CS1, 2026-10-26: words for patch 0.9.32's traditions (lead 37; builder FX24, claude/trad-0932). The 14 the user said yes to
+// in round 2 (plans/trad-variety-pitch-2.html) and Brennan's reworked tasting table (after dinner, in the galley).
+// Per tradition: invite (the host's line when they ask you), == mail, == ask (before), == here (attendee chatter during),
+// == thanks (what you do, said by nobody), == chatter (after), pose (for the builder), == join (the host when you tap
+// to join), == close (the host at the end). Tags as in content/traditions. All lines clear of tools/near_dupes.py.
+
+### scone-morning | Scone morning | host halloran-emeka
+invite: Scones in the tea corner tomorrow morning. Warm ones. And a joke, free.
+== mail
+- Scone morning tomorrow, {time}, in the Works tea corner. One batch, Brennan's passed it. One joke per scone. You can't have one without the other.
+== ask
+- Halloran's baked. Tea corner, now, before Works eats the lot.
+- Scone morning! He's got the tin out. The one with the dent.
+- Going for a scone? Brace yourself for the joke.   #funny
+== here
+- Butter's there. Jam's there. Joke's coming.   #funny
+- Still warm. Mind your fingers.
+- This batch got a nod from Brennan. A nod!
+- Lovely. Have another. Go on.   #warm
+== thanks
+- Halloran hands you a warm scone from the dented tin, and a joke with it. The scone is excellent.   #warm
+== chatter
+- Halloran's scones were still warm at the tea corner. The joke wasn't.   #funny
+- I had two scones. I heard two jokes. Fair trade.   #funny
+- The tea corner smelled of baking all morning. Lovely way to start a Sunday.   #warm
+
+pose: stand at the tea corner counter, the dented tin open; goers sit with a scone (anim: eat)
+== join
+- Morning! Scone? Joke first or scone first? Scone first. I'm not a monster.
+- There you are. Warm one, from the middle of the tin. Best ones.
+- Sit, sit. Jam's there. Here's today's joke, you've been warned.
+== close
+- That's the tin empty. Lovely. Same again in a few weeks.
+- Last scone's yours. And the last joke. Sorry about the joke.
+
+### ring-the-bell | Ring the bell | host chen-carmen
+invite: Ring the bell, on the wall. One climb each. You could ring it. Maybe.
+== mail
+- Ring the bell tomorrow, {time}, the climbing wall in the river hall. One climb each, the hard route, the brass bell at the top. We'll count the seconds.
+== ask
+- Ring the bell at the wall. One try each. Most people don't make it.
+- Carmen's got the hard route chalked. Coming to watch, or to climb?
+- Has anyone rung it this month? Nobody? Good. Room for us.
+== here
+- Ten seconds! Eleven! Go on!
+- Left hand, the blue one. No, your other left.   #funny
+- So close. The rope's smiling at you.   #funny
+- Ding! Did you hear that? Ding!
+== thanks
+- You get one climb up the hardest route. Below you, everyone counts the seconds out loud, and the brass bell waits at the top.
+== chatter
+- Somebody rang the bell yesterday. The whole river hall cheered.
+- I got two holds from the top. Two! Next month.
+- Carmen climbs like she's thinking about something else. She still rang it.
+
+pose: goers stand at the foot of the climbing wall looking up; one climber on the wall at a time (anim: watch / climb)
+== join
+- Oh. You're climbing? Good. Chalk's there. The bell's waiting.
+- One climb, the hard route. Don't look down. Well, look a bit.
+- You're next. Everyone counts. It helps. It doesn't help.
+== close
+- That's everyone. The bell's still ringing in my ears. Or it isn't. Hard to say.
+- Next month, then. The bell isn't going anywhere.
+
+### coffee-trials | The coffee machine trials | host volkov-maeve
+invite: Coffee machine trials! Three cups, blind. I'm going to win. Probably.
+== mail
+- The coffee machine trials tomorrow, {time}, at the bow lounge bar. Maeve, Elif and Dara each make a cup, and you vote blind. Works reminds everyone the machine is Works's job.
+== ask
+- Coffee machine trials at the bar. Three cups, no names, you choose.
+- Maeve says she'll win. Elif says she'll win. Dara says nothing. Dara's dangerous.   #funny
+- Are you voting at the coffee trials? Cup B. Trust me.
+== here
+- Cup A, cup B, cup C. No peeking.
+- Ooh, that one's strong. That one could fix a pump.   #funny
+- Which one's Maeve's? Don't tell me. Tell me.   #funny
+- The machine's making a noise. Is that part of it?
+== thanks
+- Three people who each fix the coffee machine best make a cup each. You taste them blind and put your token by the one you like.   #funny
+== chatter
+- Dara won the coffee trials. Nobody saw it coming. Least of all Maeve.   #funny
+- Calder came to the coffee trials just to say the machine is Works's job.   #funny
+- I've had three coffees. I can hear colours.   #funny
+
+pose: stand at the bow lounge bar with three cups lined up; goers sip and drop a token (anim: drink)
+== join
+- Hiya! Three cups. No names. Taste, then vote. Cup B is not mine. Probably.
+- Here, sip. Don't say anything yet. Faces only.
+- You're a judge now. Very serious job. Have a biscuit.
+== close
+- Tokens are in. And the winner is... the coffee machine, honestly. Ta-ra!
+- That's the trials. Nobody tell Calder we used the machine three times.
+
+### five-minute-skills | Five-minute skills | host nakamura-bilal
+invite: Five-minute skills, the bow lounge. Someone teaches one thing. You learn it. That's all.
+== mail
+- Five-minute skills tomorrow, {time}, the bow lounge. One crewmate, one small skill, five minutes. Then everyone tries. This time's is a surprise.
+== ask
+- Five-minute skills in the bow lounge. Last time was tying a bowline.
+- Bilal's got someone teaching how to fold a fitted sheet. Nobody can.   #funny
+- Learn one thing in five minutes? I can manage that. Just.
+== here
+- Over, under, through. Pull. There.
+- Watch the hands, not the face.
+- Again. Slower this time. Good.
+- That's a skill now. Yours.   #warm
+== thanks
+- A crewmate teaches one small skill in five minutes, Bilal keeps time, and then everyone has a go. You leave knowing one more thing.   #warm
+== chatter
+- I can splice a cable now. Bilal timed it. Six minutes, but still.
+- Five-minute skills. I finally folded a fitted sheet. It took eleven.   #funny
+- Bilal says everyone aboard knows one thing worth teaching. He's working through the list.
+
+pose: host and that week's teacher stand by the bow lounge table; goers sit and try the skill with their hands (anim: talk / tinker)
+== join
+- Good, you came. Sit there. Five minutes, I'm timing it.
+- Today's skill is a small one. Small skills save big days.
+- Watch first. Then your hands. Then mine, if yours get stuck.
+== close
+- Five minutes. Well, eight. Everyone's got it. Mostly.
+- That's one more thing you know. Come back for the next one.
+
+### beginners-guitar | Beginners' guitar, badly | host larsen-hamid
+invite: Guitar night. We're bad. You're welcome to be bad with us.
+== mail
+- Beginners' guitar tomorrow, {time}, the music room. Four of us, one book, whatever we've learnt. You get the guitar for one chord. It's not hard. It's quite hard.
+== ask
+- Guitar night in the music room. Bring earplugs. Kindly meant.   #funny
+- Hamid's lot are playing what they've learnt. Last time it was nearly a song.
+- Coming to beginners' guitar? You get one chord. Choose wisely.
+== here
+- G. No. That's not G. That's a noise.   #funny
+- Whose turn is it with the book?
+- Nearly a song! Nearly!
+- Fingers there, and there. Now strum. Gently.
+== thanks
+- Four people learning the guitar from the same battered book play what they've got, and then hand you the guitar for one chord.   #funny
+== chatter
+- The guitar lot played a whole verse last night. Mostly the same verse.   #funny
+- Hamid let me hold the guitar. One chord. Everyone clapped. A pity clap.   #funny
+- They're getting better, the guitar four. Slowly. Very slowly.
+
+pose: goers sit in the music room; one guitarist plays at a time, the book open on a stand (anim: play / listen)
+== join
+- You came! Brave. Sit near the door, in case.
+- Right, you're our audience. Clap whatever happens.
+- Here's the guitar. One chord. G. Ish.
+== close
+- That's our set. All three songs. Two of them were the same song.
+- Thanks for listening. Your ears will recover.
+
+### windowsill-herbs | Windowsill herbs | host janssen-hugo
+invite: Windowsill herbs in the garden. Bring a pot, or just a nose.
+== mail
+- Windowsill herbs tomorrow, {time}, in the garden. The windowsill growers bring their pots, swap cuttings, and the best bunch goes to Brennan. Come and sniff.
+== ask
+- Herb swap in the garden later. Hugo's mint is enormous.
+- Windowsill herbs. Somebody's basil is going to the galley. Not mine.   #funny
+- Do you grow anything on your windowsill? Bring it. They'll judge it nicely.
+== here
+- Smell that. That's rosemary that loves you.   #warm
+- A cutting for a cutting. Fair.
+- Whose thyme is this? It's very tidy.
+- Brennan's coming to choose. Look busy.   #funny
+== thanks
+- The windowsill growers line up their pots in the garden, swap cuttings and argue gently about whose basil is best. The best bunch goes to the galley.
+== chatter
+- Hugo's mint won the windowsill herbs. Brennan took the lot.
+- I swapped a cutting at the herb swap. Now I have a plant. Help.   #funny
+- The garden smelled of basil all evening after the herb swap.
+
+pose: pots lined up on a garden bench; goers lean in to smell and swap cuttings (anim: garden)
+== join
+- Hello! Smell this one. No, closer. That's the good basil.
+- Brought a pot? Lovely. No pot? Have a cutting.
+- We're judging the parsley today. Gently. It's sensitive.
+== close
+- Best bunch goes to Brennan. Everyone else takes a cutting home.
+- That's the herbs swapped. The garden smells amazing now.
+
+### sounds-from-home | Sounds from home | host vasquez-uma
+invite: Sounds from home tonight. Bring one minute of home. Any sound at all.
+== mail
+- Sounds from home tomorrow, {time}, the music room. Bring one short recording from home: rain, a street, a kitchen, anything. Lights low. We'll listen together.
+== ask
+- Sounds from home in the music room. Uma's bringing rain.
+- Bring a sound from home tonight? Mine's a kettle. It's a very good kettle.   #funny
+- Sounds from home. It's quiet, mostly. In a good way.
+== here
+- Shh. Listen. That's a market.
+- Where's that? It sounds warm.
+- Play it again? Just once.   #warm
+- I know that bird. I don't know how I know it.
+== thanks
+- One by one, the crew play a short sound from home with the lights low, and say where it's from. Nobody talks much. Nobody needs to.   #warm
+== chatter
+- Somebody played a sea at sounds from home. Half the room went very quiet.   #warm
+- Uma played rain on a tin roof. She said it's her mum's porch.   #warm
+- I didn't think I'd miss traffic. Then someone played traffic.   #funny
+
+pose: goers sit in a loose circle in the music room, lights low, one small player in the middle (anim: listen)
+== join
+- Hi. Sit anywhere. We're about to play a harbour. Then someone's grandad's clock.
+- Have you brought a sound? If not, just listen. That's half of it.
+- Lights low. Ears open. That's all we need.
+== close
+- That's everyone's. Thank you for bringing a bit of home aboard.
+- Same time next month. Bring a different sound. Or the same one, if you miss it.
+
+### jar-day | Jar day | host varga-tariq
+invite: Jar day in the galley. Too much of something in the garden. Not for long.
+== mail
+- Jar day tomorrow, {time}, at the galley prep island. The garden's grown too much again. We're pickling it. Bring patience and a steady hand for the labels.
+== ask
+- Jar day in the galley. Tariq's got forty jars and a lot of beans.
+- Pickling later. Is it jam? Nobody knows yet.   #funny
+- Coming to jar day? Your jar goes on the spice shelf with your name on it.
+== here
+- Pack it tight. Tighter. Now the lid.
+- Label first, then shelf. Always.
+- Is this jam? It might be jam.   #funny
+- Smell that vinegar. That's work, that.
+== thanks
+- The garden grew too much again. Tariq turns it into jars, and you fill, seal and label one, and put it on the spice shelf.
+== chatter
+- My jar from jar day is on the spice shelf. Third from the left. It's beans.
+- Tariq's jars are perfect. Mine has a lean.   #funny
+- Jar day. The galley still smells of vinegar. In a nice way.
+
+pose: goers stand at the galley prep island filling and labelling jars (anim: cook)
+== join
+- Apron's on the hook. Jars are washed. Beans are waiting.
+- You fill, I seal, you label. Neat letters, please.
+- Today it's carrots. Last time it was a sort of jam. We don't talk about it.
+== close
+- Forty jars. Forty-one. Who brought an extra jar? Never mind. Shelf it.
+- That's jar day. Your name's on the spice shelf now.
+
+### lamplight-paddle | Lamplight paddle | host silva-bea
+invite: Lamplight paddle tonight. The river, the lamps, nobody racing. Come and drift.
+== mail
+- Lamplight paddle tomorrow, {time}, the river hall. Lights down to the bank lamps, a slow drift down the channel. No racing. Bea leads, very slowly.
+== ask
+- Lamplight paddle on the rec deck. It's lovely. You don't have to be good.
+- Bea's taking the kayaks down the slow channel. No racing allowed.
+- Going for the lamplight paddle? Wear something you don't mind splashing.
+== here
+- Just drift. The river does the work.
+- Look at the lamps on the water.   #warm
+- Slow. Slower. That's it.
+- Shh. Listen to the paddles.
+== thanks
+- The river hall goes down to lamplight, and a few kayaks drift the slow channel with Bea at the front. Nobody hurries.   #warm
+== chatter
+- The lamplight paddle was the calmest I've felt all week.   #warm
+- Bea fell asleep in her kayak. Briefly. She says she was resting her eyes.   #funny
+- The river hall by lamplight. You'd never know you were on a ship.
+
+pose: kayaks drifting slowly down the river hall channel, the lights down to the bank lamps (anim: paddle)
+== join
+- Hello. Grab a paddle. No racing. I mean it.
+- Slow is the only speed tonight.
+- Sit low, paddle soft. The lamps do the rest.
+== close
+- That's the river done. Out slowly, and mind the dock board.
+- Thank you for drifting with me. Sleep well tonight. You will.
+
+### playlist-duel | Playlist duel | host oneill-imani
+invite: Playlist duel. Three songs each, the room votes. I always lose. On purpose.
+== mail
+- Playlist duel tomorrow, {time}, the music room. Two playlists, three songs each, the room picks. Imani hosts, and says she lets them win.
+== ask
+- Playlist duel in the music room. Imani's lost four in a row. On purpose, she says.   #funny
+- Bring a song for the playlist duel. Not the lighthouse one. Everybody brings that.   #funny
+- Coming to the playlist duel? Vote for the one with the drums.
+== here
+- Song two. Oh, that's a good one.
+- Hands up for the left side. Now the right.
+- That's not fair. That's my favourite.   #funny
+- Next! No skipping.
+== thanks
+- Two people play three songs each, and the room votes for its favourite. Imani loses again, and insists she let them win.   #funny
+== chatter
+- Imani lost the playlist duel again. She says it was a strategy.   #funny
+- Somebody played a song from home at the playlist duel and won by a mile.
+- I've had one song in my head since the playlist duel. Send help.   #funny
+
+pose: goers sit facing the music room speaker; hands up to vote between songs (anim: listen / cheer)
+== join
+- You came! Pick a side. Left plays first.
+- Three songs each. Vote with your hands. I'll count. Honestly.
+- No skipping, no booing. Clapping's fine.
+== close
+- Left wins. I let them. Obviously.
+- Duel's done. Somebody's playlist goes on the jam's list on Friday.
+
+### row-for-the-board | Row for the board | host lindqvist-isak
+invite: Row for the board. Two minutes each. Vance's name comes down tonight.
+== mail
+- Row for the board tomorrow, {time}, in the gym. Two minutes on the rower each, the gym shouts the numbers. Commander Vance's name is at the top. For now.
+== ask
+- Row for the board in the gym. Isak says tonight's the night. He says it every time.   #funny
+- Vance is still top of the rowing board. Isak's taking it personally.
+- Coming to shout the numbers at the rowing? Bring a voice.
+== here
+- Pull! Pull! Thirty seconds!
+- Four hundred metres! Keep going!
+- Is Vance watching? He's watching.   #funny
+- Breathe. Then row. Then breathe.
+== thanks
+- Two rowers chase the name at the top of the rowing board, two minutes each, while the gym shouts the numbers. Commander Vance watches from the treadmill.
+== chatter
+- Isak got within three metres of Vance's time. Three!
+- Vance watched the whole rowing race and said nothing. Then he rowed. Then he left.   #funny
+- The rowing board hasn't changed yet. It will. Isak swears it will.
+
+pose: two rowers on the gym rowers, goers standing round them shouting the numbers (anim: row / cheer)
+== join
+- You're here to shout? Good. Loud's what I need.
+- Two minutes each. Vance's name is up there. Not for long.
+- Count the metres out loud. Every hundred. Please.
+== close
+- Not tonight. Close, though. Next month.
+- The board stays as it is. For now. Write that down.
+
+### seed-packet-day | Seed packet day | host hart-ravi
+invite: Seed packet day in the garden. Draw your packet. Cruz sows what's in it next season.
+== mail
+- Seed packet day tomorrow, {time}, in the garden. Fold a packet, fill it, draw on the front. Next season's sowing comes out of them. Ravi brings the pencils.
+== ask
+- Seed packet day in the garden. Ravi's drawing the beans. They look like ducks.   #funny
+- Making seed packets later. Your drawing goes in the garden for a season.
+- Coming to seed packet day? It's once a season. Don't miss it.
+== here
+- Fold, fill, seal. Then draw.
+- What's yours? Carrots? Draw a carrot.
+- That's a good packet. Cruz will like that one.
+- Don't drop the seeds. They're very small and very fast.   #funny
+== thanks
+- You fold a seed packet, fill it from the jar, and draw on the front. Next season, Cruz sows it.   #warm
+== chatter
+- My seed packet has a drawing of a tomato. It's mostly a circle.   #funny
+- Cruz kept all the seed packets in a tin. Every single one.   #warm
+- Seed packet day means a new season's coming. Feels like it, anyway.
+
+pose: goers sit at a garden bench folding and drawing on small paper packets (anim: craft)
+== join
+- Hello. Paper, seeds, pencils. Fold first. Draw after.
+- Pick your seeds from the jars. Then make the packet look like them.
+- Your drawing goes in Cruz's tin. For a whole season.
+== close
+- That's the packets done. Cruz will sow them next season. Your names and all.
+- Thank you. That's next season sorted.
+
+### midnight-toast | Midnight toast | host garcia-greta
+invite: Midnight toast in the mess. For the night lot, and anyone else still up.
+== mail
+- Midnight toast tomorrow, {time}, the mess. Toast, butter, jam, a pot of tea, for the night shift going on and the owls still up. Pyjamas don't count against you.
+== ask
+- Midnight toast in the mess. Greta's making it. She says she isn't, but she is.   #funny
+- Still up? There's toast in the mess. Night shift's treat.
+- Toast at eleven. The best kind of late.
+== here
+- Butter's soft. Jam's from jar day.
+- Another slice? Go on. Nobody's counting.   #warm
+- Quiet in here this late. Nice.
+- Tea's stewed. That's how the night shift likes it.   #funny
+== thanks
+- Greta makes toast and tea for the night shift going on and anyone still awake. The mess is quiet and warm.   #warm
+== chatter
+- Midnight toast last night. Best toast I've had aboard. Possibly because it was midnight.   #funny
+- Greta says she only makes the toast for the night shift. She made me two slices.   #warm
+- I went to bed full of toast. No regrets.   #funny
+
+pose: a plate stack and a toaster at the end of a mess table; goers sit with toast and tea (anim: eat / drink)
+== join
+- Still up? Fine. Sit. Toast's coming.
+- This is for the night shift. You can have some. Don't tell them.
+- Butter or jam? Wrong. Both.
+== close
+- Night shift's off to work. Go to bed, owls.
+- Last slice gone. Kitchen's closing. Sleep.
+
+### whodunnit-club | Whodunnit club | host achterberg-lars
+invite: Whodunnit club. Three parts, one culprit. Write your guess. Don't guess early.
+== mail
+- Whodunnit club tomorrow, {time}, the bow lounge. Lars reads a short mystery in three parts; after each, write who did it. Somebody always guesses too early.
+== ask
+- Whodunnit club in the bow lounge. Lars reads. Everyone accuses everyone.   #funny
+- Mystery night. I already know who did it. I always already know.   #funny
+- Coming to whodunnit club? Bring a pencil and a suspicious mind.
+== here
+- It's the gardener. It's always the gardener.   #funny
+- Write it down. No changing it later.
+- Wait. Read that bit again.
+- I knew it! No. I didn't know it.   #funny
+== thanks
+- Lars reads a short mystery aloud in three parts, and after each one everybody writes down who did it. Somebody guesses too early, and is right.   #funny
+== chatter
+- Somebody guessed the culprit in the first five minutes at whodunnit club. Again.   #funny
+- Lars reads the clues in a very flat voice. It makes them worse. Better. Worse.   #funny
+- Whodunnit club. I was wrong three times in one evening. A record.   #funny
+
+pose: goers sit round the bow lounge table with paper and pencils; the host reads from a book (anim: listen / write)
+== join
+- Pencil, paper. Sit. Part one starts in a minute.
+- No guessing out loud. Write it down. Fold it over.
+- Tonight's is short. The culprit isn't.
+== close
+- And it was... the one nobody wrote down. As usual.
+- That's the mystery. Same time next month. Bring suspicions.
+
+### tasting-table (reworked) | Brennan's tasting table | host brennan | after dinner, in the galley
+invite: After dinner, come through to the galley. Something new to try. Small spoons, honest answers.
+== mail
+- Tasting table tomorrow after dinner, {time}, in the galley itself. Brennan's cooking something you've never had. Small plates, one each. Honest answers only.
+== dishes
+// one or two a week, rotating; name | what Brennan says as she sets it down (60 or fewer)
+- Smoked salt caramels | Marra Station salt. Bite first, then tell me.
+- Seaweed crackers | Off the hydroponics wall. Crunchy. You'll see.
+- Spiced lentil dumplings | My mum's, by ear. Until it sounds right.
+- Green tomato chutney on oatcakes | The garden was too keen. This is the fix.
+- Cardamom rice pudding | Kovac sorted the pods. Every one.
+- Chilli-lime popcorn | Nandakumar's chillies. Have water ready.
+- Beetroot soup, cold | Cold soup. Don't make that face.
+- Honey and thyme flatbread | Hugo's thyme. He'll want a report.
+- Black bean fritters | Crisp outside. Hold it by the edge, love.
+- Mushroom broth in a cup | Drink it. It's soup you hold.
+- Pear and ginger crumble | Pears from the stores. Ginger for the cold.
+- Pickled carrot ribbons | From jar day. Tariq's jar, not yours.
+== here
+- Small spoon. Big opinion.   #funny
+- Go on, love. Tell me the truth.
+- That's new. That's very new.
+- Can I have the recipe? No? Fair.   #funny
+== thanks
+- After dinner Brennan brings you through to the galley and sets down something you've never tasted, and waits for your honest answer.   #warm
+== chatter
+- Brennan's tasting table last night. I've never had cold soup. I've now had cold soup.   #funny
+- The galley after dinner smells of whatever Brennan's trying. Last night it was caramel.   #warm
+- Brennan watched me taste it. I've never chewed so carefully.   #funny
+
+pose: after dinner, in the galley: Brennan at the counter plating small dishes; goers stand round it with a spoon (anim: eat)
+== join
+- Come through, love. Spoon. Try this before it cools.
+- Something new tonight. Sit, taste, tell me honestly.
+- You're my taster tonight. Don't be polite. Be right.
+== close
+- That's tonight's. Back to the mess with you, I've pans to do.
+- Thank you, loves. If it's good, it's on the menu. If not, it never happened.
