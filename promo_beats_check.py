@@ -162,11 +162,28 @@ def part_talk(g):
         x = r.get(day)
         check(isinstance(x, dict) and x['t'] and x['said'] == [x['t']], f"talk: {kind}, a line from someone beside you in the bay ({x})")
 
+def part_review(g):
+    print('(review) RV19 fixes: the result arrow at level 1, she comes out to you in the bay, the 09:00 word, the walk comes to you first:')
+    r = g.ev("""(() => { const out = {}; const W = __w(10, 300, { xp: 45, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 1, passed: true } }); W.tr.t2 = 9;
+      __tick(); __bay(); setShipNow(9 * 1440 + 470); GUIDE.list.length = 0; promoGuide(shipNow()); const e = GUIDE.list.find(x => x.id === 'promo:summons'); out.level = e ? e.level : null;
+      setShipNow(9 * 1440 + 511); __tick(); const sm = SHIP.occasions.find(x => x.id === 'promoSummons'); out.seek = !!(sm && sm.f && sm.f.seek);
+      const W2 = __w(9, 300, { xp: 45, tr: { m6: 8 }, test: { tier: 2, day: 9, tries: 0, passed: false } }); setShipNow(8 * 1440 + 361); machinesNow(); const c = { id: 't2', st: 'ask', by: 'calder', d: 9 }; W2.cur = c;
+      __said.length = 0; WORK_MECH.t2.offer(ladderRow('t2'), c, 9, shipNow()); out.early = __said.filter(x => /There it is/.test(x)).length;
+      setShipNow(8 * 1440 + 541); __tick(); out.at9 = __said.filter(x => /There it is/.test(x)).length; __tick(); out.at9b = __said.filter(x => /There it is/.test(x)).length;
+      const W3 = __w(10, 1201, { xp: 5, test: { tier: 2, day: 9, tries: 1, passed: true } }); W3.tier = 2; W3.rank = 'officer'; W3.done.push('summons2', 'ceremony2'); W3.ms.push(['officer', 10]); W3.home = 'bunk'; delete W3.mv;
+      __bay(); __notes.length = 0; promoMoveTick(shipNow()); out.notes = __notes.slice(); out.esc1 = (promoMoveEscort({ id: W3.mv && W3.mv.by }, shipNow()) || {}).mode;
+      setShipNow(9 * 1440 + 1217); __tick(); out.esc2 = (promoMoveEscort({ id: W3.mv && W3.mv.by }, shipNow()) || {}).mode; return out; })()""")
+    print('   ', r)
+    check(r['level'] == 1, f"review M1: the result's arrow is level 1 ({r['level']})")
+    check(r['seek'], f"review M2: waiting in the Works bay at 08:31, she comes out to you ({r['seek']})")
+    check(r['early'] == 0 and r['at9'] == 1 and r['at9b'] == 1, f"review S1: her \"on the board\" word at 09:00, once, not at 06:01 ({r})")
+    check(r['esc1'] == 'follow' and r['esc2'] == 'lead' and any('coming to find you' in n for n in r['notes']), f"review S4: the walk after dinner: she comes to you first, then leads ({r})")
+
 with sync_playwright() as pw:
     g = Game(pw, sys.argv[1])
     g.step(2)
     check(g.ev(SETUP), 'setup')
-    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk)]:
+    for name, fn in [('off', part_off), ('pointer', part_pointer), ('before', part_before), ('passed', part_passed), ('result', part_result), ('cabin', part_cabin), ('talk', part_talk), ('review', part_review)]:
         if ONLY and name not in ONLY: continue
         try: fn(g)
         except Exception as e: fail(f'{name}: {e}')

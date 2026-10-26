@@ -62,6 +62,11 @@
 == pb.pip.say
 - It's nearly time. Up to Deck 1. Don't keep the Captain waiting.
 
-// F: your cabin after dinner (Calder's Mail at 17:00)
+// F: your cabin after dinner. The notice as she sets off to find you ({name}: Calder, or Vance), and her word when she reaches you
+== pb.move.notice
+- Your cabin, 4-23: {name} is coming to find you and take you there.
+== pb.walk.met
+- There you are. Your cabin, then. With me.
+// Calder's Mail at 17:00
 == mail.pb.cabin
 - Your cabin | After dinner I'll walk you to 4-23. Eat first. Your things are on their way.
