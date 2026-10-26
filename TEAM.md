@@ -1548,3 +1548,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:29 UTC: **CR1 0.93.3 OK** (all 11 checks; claude/checks-cr1; ~55%). 3 of 6 done (CR1, CR4, CR5); CR2, CR3, CR6 running.
 - ~22:33 UTC: CR1 also ran CR3's promo_sight + sound_check on 0.93.3: OK (CR3 must not rerun them). CR1 idle.
 - ~22:39 UTC: **VB1 V-3 + V-4 6d4b5192** (chain + making the part; off identical bar known-old Oona bubble shots; ON checks running) -> RV21. VB1 writes stand-in keys itself; folds RV21 V-2 fixes first; then arrows part + controller presets. VB2 queue: Taavek places -> B5 bar + chair -> ending test parts. Both told (priority now).
+- ~22:39 UTC: VB2 got it (~40%): Taavek places already in 3fb8eac7; bar (makeCharacter collar spec flag, merged, no new calls) + chair (Calder's office, P5_STEP5, sit place) on claude/p5s5-kit from B5's branch; then ending test parts.
