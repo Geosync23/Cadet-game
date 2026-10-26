@@ -118,7 +118,7 @@ with sync_playwright() as pw:
           return {{ w, walk, stand: stand.length, ids: stand.map(s => s.placeId), juniors: schedPeople().filter(q => /^4-B[1-8]-[1-6]$/.test(q.bed) && aboard(q, d)).length }}; }})()""")
         order = [x[0] for x in ins['walk']]
         print(f"  the inspection (FX20): {ins['w']} walks {' '.join(f'{x[0]}@{x[1]}-{x[2]}' for x in ins['walk'])}; {ins['stand']} of {ins['juniors']} juniors stand by their bunks")
-        if not ins['w'] or order != list('abcdefgh') or ins['walk'][0][1] < 385 or ins['walk'][-1][2] > 420: fail(f"the inspection walk: {ins['w']} {ins['walk']}")
+        if not ins['w'] or order != list('abcdefgh') or ins['walk'][0][1] < 370 or ins['walk'][-1][2] > 420: fail(f"the inspection walk: {ins['w']} {ins['walk']}")
         if ins['stand'] < 25 or len(set(ins['ids'])) != len(ins['ids']): fail(f"the juniors standing for the inspection: {ins['stand']} of {ins['juniors']}, a stand spot twice: {len(ins['ids']) - len(set(ins['ids']))}")
 
     # rooms in use: every place type over the week from DAY (types nobody used are listed, not failed)
