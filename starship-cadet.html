@@ -16919,6 +16919,7 @@ function ixFrame() {
   const mj = typeof myJob === 'function' ? myJob() : null, m = Math.floor(shipNow()), key = m + '|' + (mj ? mj.id + (mj.workDone ? '+' : '') + (mj.stepsDone || []).length : '') + '|' + SHIP.player.carry.length + '|' + (SHIP.player.work ? SHIP.player.work.fitted.length + '|' + !!SHIP.player.work.make : '');
   if (ixGoalAt !== key) { ixGoalAt = key; try { ixJobGoal = ixJobStep(); } catch (e) { ixJobGoal = null; } }
   const g = goalNow();                                   // the job's step only while it's tracked (goalNow: the arrow queue first when it's on)
+  adoorWay(g);                                           // the doors on the arrow's way open by themselves (15b, FX29)
   if (!g) { if (!el.hidden) el.hidden = true; return; }
   if (typeof actProgress === 'function' && actProgress(ACT)) { if (!el.hidden) el.hidden = true; return; }   // section 15's progress bar is up over you: it says it all
   const here = deckDef.num === g.deck, w = here ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] };
@@ -17120,7 +17121,7 @@ var AUTO_DOORS_ON = true;
 // deck from its bed places' rooms and each door's two rooms; no R(), no geometry)
 const ADOOR_WORDS = 'Doors. Private rooms are cabins and bunk rooms (and the washroom inside a cabin). Lift doors always open.';
 const ADOOR_CHOICES = [['all', 'All open by themselves'], ['private', 'Private rooms: tap to open'], ['none', 'All doors: tap to open']];
-const ADOOR = { tap: null, here: null, route: new Set() };
+const ADOOR = { tap: null, here: null, route: new Set(), way: null };
 function doorsMode() {
   if (!AUTO_DOORS_ON || typeof SHIP === 'undefined' || !SHIP.device || !SHIP.device.settings) return 'all';
   const st = SHIP.device.settings; return st.doors === 'all' || st.doors === 'none' ? st.doors : st.autoDoors === false ? 'none' : 'private';
@@ -17144,7 +17145,30 @@ function adoorShut(e, who) {                              // true: this door kee
   if (!e || e.type !== 'door' || !who || !who.isPlayer || !adoorKind(e)) return false;
   if (ADOOR.tap === e.key) { if (adoorNear(e.key, 3)) return false; ADOOR.tap = null; }
   if (ADOOR.here === e.key) { if (adoorNear(e.key, 1.6)) return false; ADOOR.here = null; }
+  if (ADOOR.way && ADOOR.way.doors.has(e.key)) return false;   // on the arrow's way (adoorWay)
   return !(ADOOR.route.has(e.key) && who.path && who.path.length);
+}
+// FX29 for lead 39 (CR1's week guide stuck at a bunk-room door): the doors on the way to the arrow's goal open by themselves,
+// in every setting, however you walk (keys, touch, the controller). ixFrame hands in goalNow() each frame; the way is
+// found again when the goal's tile changes, you change deck, or you step off it. No arrow: nothing (your own walking keeps
+// the rule). Only the player's collisions ask it; no R(), nothing saved.
+function adoorWay(g) {
+  if (!g || autoDoors()) { ADOOR.way = null; return; }
+  const w = deckDef.num === g.deck ? ixGoalWorld(g) : ixLiftPanel() || { x: LIFT_AT[0], z: LIFT_AT[1] }; if (!w) { ADOOR.way = null; return; }
+  let to = cellAt(w.x, w.z);
+  const gk = deckDef.num + '|' + K(to), here = player.here(), W0 = ADOOR.way;
+  if (W0 && W0.key === gk && W0.cells.has(K(here))) return;
+  if (!onGrid(to) || !free(...to)) { let bd = 1e9; const p0 = cellPos(...to); to = null; for (let a = 0; a < W; a++) for (let b = 0; b < D; b++) if (free(a, b)) { const p = cellPos(a, b), d = (p.x - p0.x) ** 2 + (p.z - p0.z) ** 2; if (d < bd) { bd = d; to = [a, b]; } } }
+  const path = to && onGrid(here) ? (K(to) === K(here) ? [] : findPath(here, to, null, player)) : null, doors = new Set(), cells = new Set([K(here)]);
+  if (path) { let a = here; for (const b of path) {
+    const keys = [];
+    if (b[0] !== a[0]) for (const j of new Set([a[1], b[1]])) keys.push(`v,${Math.max(a[0], b[0])},${j}`);
+    if (b[1] !== a[1]) for (const i of new Set([a[0], b[0]])) keys.push(`h,${i},${Math.max(a[1], b[1])}`);
+    for (const k of keys) { const e = EDGES.get(k); if (adoorKind(e)) doors.add(k); }
+    cells.add(K(b)); a = b;
+  } }
+  if (W0) for (const k of W0.doors) if (adoorNear(k, 1.6)) doors.add(k);   // the door you're in stays open while you clear it
+  ADOOR.way = { key: gk, cells, doors };
 }
 function adoorRoute(w, path) {                            // the doors a planned walk crosses (a diagonal step: both edges at its corner)
   if (autoDoors()) return; ADOOR.route = new Set();   // (on: nothing, so a walk planned while the game loads never reaches ADOOR)
@@ -17172,7 +17196,7 @@ function adoorTapSelf() { const k = adoorSelfKey(); return !!k && adoorTap(k); }
 function adoorSet(mode) {                                 // the Settings row: 'all' | 'private' | 'none' (true / false: 0.93.2's on / off)
   mode = mode === true ? 'all' : mode === false ? 'none' : ADOOR_CHOICES.some(([k]) => k === mode) ? mode : 'private';
   const st = SHIP.device.settings; delete st.autoDoors; if (mode === 'private') delete st.doors; else st.doors = mode;
-  ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null;
+  ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null; ADOOR.way = null;
   if (mode !== 'all' && typeof DOOR_OBJS !== 'undefined') { const p = player.obj.position, d = DOOR_OBJS.filter(o => adoorKind(o.e)).sort((x, y) => Math.hypot(x.cx - p.x, x.cz - p.z) - Math.hypot(y.cx - p.x, y.cz - p.z))[0]; if (d && Math.hypot(d.cx - p.x, d.cz - p.z) < .55) ADOOR.here = d.e.key; }   // in a doorway: that one stays open till you're clear
 }
 // the patch, #11 (plans/patch-plan.html): a tracked arrow clears itself, by kind, so the next arrows (the arrival week's)

@@ -1804,6 +1804,16 @@ with sync_playwright() as pw:
           const [o, s] = ds[0]; window.__door = { key: o.e.key, a: s[0], b: s[1] }; player.obj.position.copy(cellPos(...s[0])); player.stop(); return [o.e.key, doorsMode(), 'doors' in SHIP.device.settings]; })(%s)"""
         ad['pubSet'] = g.ev(PRIV % 'false'); g.ev(STEER); g.step(60); ad['pub'] = g.ev(AT); g.ev(BACK)
         ad['privSet'] = g.ev(PRIV % 'true'); g.ev(STEER); g.step(60); ad['priv'] = g.ev(AT); g.ev(BACK)
+        # FX29 (lead 39, CR1's week guide): an arrow's way opens its doors, however you walk; with the arrow gone, the rule again
+        if g.ev("typeof adoorWay === 'function'"):
+            g.ev(PRIV % 'true'); g.ev("(() => { window.__trk = SHIP.player.track; SHIP.player.track = null; setGoal({ deck: 4, at: window.__door.b, label: 'FX29 test' }); adoorWay(goalNow()); })()")
+            ad['wayDoors'] = g.ev("!!ADOOR.way && ADOOR.way.doors.has(window.__door.key)")
+            g.ev(STEER); g.step(60); ad['way'] = g.ev(AT); g.ev(BACK); g.step(5)
+            g.ev("(() => { clearGoal(); adoorWay(goalNow()); })()"); g.ev(STEER); g.step(60); ad['wayGone'] = g.ev(AT); g.ev(BACK)
+            g.ev("(() => { SHIP.player.track = window.__trk; })()")
+            check(ad['wayDoors'] and ad['way'][1], f"Doors 'private': the arrow's way opens its bunk-room door to your own steering (FX29): {ad['wayDoors']} {ad['way']}")
+            check(ad['wayGone'][0] and ad['wayGone'][2] < .05, f"Doors 'private': the arrow gone, the bunk room's door is shut to your steering again (FX29): {ad['wayGone']}")
+        else: check(False, 'no adoorWay (FX29)')
         g.ev(AD)   # back to the Deck 3 door, all doors on a tap
         g.ev("adoorSet(true)"); g.ev(STEER); g.step(60); ad['steerOn'] = g.ev(AT); g.ev(BACK)
         ad['savedOn'] = g.ev("'autoDoors' in deviceLoad({ device: JSON.parse(JSON.stringify(SHIP.device)) }).settings")
