@@ -54,4 +54,4 @@ About 75 minutes alone; perf (~37 min) and intro (~27-32 min) are the long ones.
 
 ## Loose ends
 
-Last round: 0.93.2 first pass 41c8a7e0 OK (plans/checks-cr2.md). A second 0.93.2 pass on a new sha is due (FX26's fix).
+Last round: 0.93.2 round 2 d9c7e5f0 OK (plans/checks-cr2.md); 0.93.2 is live. Idle until the next round.
