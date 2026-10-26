@@ -31,6 +31,28 @@
 - A scene shown where you are (not in its room): set `r.f['met:' + r.key]` or its gist comes by Mail too.
 - 15b's board takes registered kinds only if they're in its BOARD_KINDS (I added 'tier3'; B2's relayswap/battcell?).
 
+## State at the stopping point (lead 40's call, 2026-10-26 ~23:40 UTC)
+- **Latest sha: claude/p5s5-promo e7ff9253** (S5-2 all four turns + the teacher fix). I own 24 core and 24u for Step 5 now
+  (B1 retired). RV20 has 762d9cb5 + e7ff9253 to review; no verdict yet.
+- **Teacher fix (e7ff9253):** `p5TeacherWait` in 24u via B1's `p5Escort`: for ps/m19/m18/m20 the teacher goes to the
+  meeting's place from 30 min before (`P5_TEACH_LEAD`; the appointment's place, else a place in the room), and a self-led
+  lesson's teacher follows you during 'do'. RV20's probes (claude/review-rv20 plans/rv20-m19-live.py, rv20-sd-live.py) on a
+  scratch merge with mech-a + mech-b: Calder in the relay room from 10:50 for 11:00 (B2's own early booking was in that
+  merge too, so this one alone doesn't prove the fix), at the port junction from 08:49 for 09:15 (no workaround there).
+  Not seen directly: Calder staying beside you on M18's screen (the probe saw her in the lift lobby at 09:18).
+  B2's and B3's own early appointments can go once merged.
+
+## The arrow-follower's three ways: redo on e7ff9253
+- As is: **OK** (on 762d9cb5): offer in person, test Day 15 first try, result, bar, cake, toast all met.
+- **Teaching arrows Off: FAILED** (on 762d9cb5), a real bug to fix next. On the test morning the follower ping-pongs
+  Deck 5 <-> Deck 3 from 09:00 to 09:14 ("walk to: Your Tier 3 test, 09:00: the Works bay", then "lift to Deck 3", over and
+  over: some other arrow pointing to Deck 3 alternates with pu3:testday, which stays up till 09:15 even once the job is
+  on the board); at 09:15 it takes another job (filter bank) and works it all morning; pu3:test never leads (by design it
+  yields while you hold another job), so the test lapses at 15:00 and is set again (Day 17, then 19). Fix ideas: end
+  pu3:testday as soon as the job is on the board; find what points to Deck 3 at 09:00 (scratch: arrows_check internals,
+  real_game(pg, 15), puSet(15), Follower.run to 13:00, print f.acts from 08:20); give the test's Take it priority over
+  other jobs on its morning.
+- Tracking another job (`track`): not run (stopped).
+
 ## Open
-- Lead 40's item 2: the teacher reaching a Step 5 lesson's meeting place before r.at (waiting on RV20's repro).
 - Known old: the team job's "hold it steady" arrow (FX30) shows as "stuck" in the follower; not Step 5's.
