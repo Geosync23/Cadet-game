@@ -209,3 +209,18 @@ not judged.)
 - N1. Torres's "Calder's put the old mysteries up in the bay..." came at 09:10, after I'd already read the board at
   09:03. Skip the pointer word once you've seen it.
 - N2. +5 draw calls on Deck 5 (B4 merges the board in turn 5, as said).
+
+## Queue (as of ~23:00 UTC)
+Lead 40: B1 archived; B5 (session_01CgbXRamJJp66pFTP43KYoB, claude/p5s5-promo) owns 24 core / 24u for Step 5, incl. the
+teacher-at-the-meeting fix (repro sent to B5) and fixes from the B1 review.
+1. B2 claude/workstep-tap-fix c79a66dc (ships alone as 0.93.4, the live M15 bug): in review; cadet vs acbb52e0
+   ALL IDENTICAL, mech m15 m5 wstap OK, player_check OK; interactions and my tap probe running.
+2. B2 claude/p5s5-mech-a 5c745377 (+ c32aab5d handover text): M19 fixes + turn 2 (conduit runs, the Senior's drill,
+   the power line and its faults). Slot diff read.
+3. B1 claude/p5s5-career 51b1a9c6 (S5-1 turns 2-3, the ladder order, Power safety in person).
+4. B3 claude/p5s5-m20 7c5d9f79 (S5-5 the sensor array).
+5. B4 claude/p5s5-puzzles 04ee2bee (P9 a064de76, the board moved, controller s5cases).
+6. VB2 claude/p5s5-kit 69eb706d (session_01KRBGtugjBpv5iGcV5WDvCP: the Senior's collar bar, Calder's visitor chair).
+7. B5 claude/p5s5-promo (2dd1ec33 test, 2e38f733 result to toast; turn 4 + merges to come as one sha): when it
+   passes, tell lead 40 at once (an early Dev link for the user).
+8. B3 fixes for shutdowns M2/M3 (M1 with B5's fix).
