@@ -42,6 +42,9 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
 | claude/vessel-sky (VB2) | v.6 bench places | PASS | 3fb8eac7 |
 | claude/vessel (VB1) | V-2a + V-2b | FIXES NEEDED (1 must) | 73942e8a |
 | claude/vessel (VB1) | V-3 + V-4 + lights fix | PASS (V-2 shoulds open) | 6d4b5192 |
+| claude/ending-crossing (EN2) | the whole ending (EN1 395fe62e + E-1/E-4 + words) | PASS | d1a61402 (b77733eb) |
+| claude/p5s5-puzzles (B4) | Step 5 S5-6 t5-t7 (for RV20) | PASS | 6b07b624 |
+| claude/p5s5-m20 (B3) | Step 5 S5-5 sensor array (for RV20) | PASS (4 shoulds) | 7c5d9f79 |
 | claude/ending (EN1) | E-2 turn 1 skeleton | PASS (1 should: docs) | 1c72a28d |
 
 ## Log
@@ -130,3 +133,12 @@ writers SW5 session_01FFW8ZfuaUqiPPqqhruwZhX (endgame pool), SW6 session_01Gy3XC
   crowd, goodbye window, round-one fallback, sheet fetch, doubled toast, setTimeout x7, VB2 3fb8eac7 not merged).
 - EN2 b77733eb (the combined ending: EN1 395fe62e + oath fetch + notice key) received; lead 40 says EN2 hands over; fixes to
   EN2, else VB2. Checks running.
+- ~23:40 UTC: **EN2 claude/ending-crossing d1a61402: PASS (the whole ending).** lines PASS, words up to date, cadet vs 19400976
+  ALL IDENTICAL, ending_check OK. Oath fetch (Vance from 14:35) and the notice key done. Still owed before switch-on (lead 40
+  assigned EN2 / successor): endstay/endgo arrows_check parts, controller presets, day_check 31/50 on-copy.
+- ~23:45 UTC (lead 40 asked me to take two of RV20's): **B4 p5s5-puzzles 6b07b624 PASS** (cadet vs 5957d244 identical,
+  puzzle_check OK, controller s5cases OK, rv20-mys-live.py by real taps: board by the Chief's glass, three cards, the call).
+  **B3 p5s5-m20 7c5d9f79 PASS, 4 shoulds** (cadet vs c32aab5d identical; mech_check/controller m20 parts SKIP without the
+  preview switch; live play m20_live.py: Day 19, both Mori and Calder in the array room at 10:00, scene plays; teacher name
+  mixed Mori/Calder; Tracked row doubled; Calder's 06:20 Mail before the in-person word; recheck after deefa61a).
+- ~23:50 UTC: memory ~61%: handover (plans/handover-rv21.md updated). Idle.
