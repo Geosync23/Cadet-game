@@ -34,3 +34,17 @@
 - `pgrep -f cadet_test.py` matches the waiting shell itself; wait on the background task instead.
 - controller_check's touch half lists only what's on screen: part `shut` uses a tall page (h=2400).
 - Don't run cadet_test alongside check_fast on 4 cores.
+
+## State at the stopping point (lead 40, 2026-10-26)
+- **S5-4 shutdowns:** `claude/p5s5-mech-b` 7e6bca4b (and this note on top). It holds RV20's FIXES NEEDED on 5ad090ff, all done (row 0.93.4-sd.10):
+  - M2: Brennan only when the screen asked.
+  - M3: the parts first; the power never stays off past the hour.
+  - S1 and S2.
+  - M1 (Calder at the 09:15 talk) is 24 core's teacher fix, from B5.
+- **Also in that sha:**
+  - B1's claude/p5s5-career 51b1a9c6 merged (the ladder order).
+  - B4's p9ShutClash hook on the screen (sd.11).
+- **Checks:** off: cadet_test ALL IDENTICAL, check_fast OK. On: mech m18, saves shut and controller shut all OK.
+- **Waiting:** RV20's re-review of 7e6bca4b. B4 tests P9 on a merge.
+- **S5-5 the sensor array:** `claude/p5s5-m20` 989b1759; see plans/handover-b3-m20.md there. RV21 PASSed it with 4 shoulds, all done; awaiting RV21's re-check.
+- **Nothing else open.** The shared section 14 hook (p9PlanRule / p9Settle by name, WORKS_PLAN_RULES / WORKS_SETTLE) is in DEV_NOTES "Shutdowns, M18".
