@@ -247,6 +247,6 @@ controller check presses A at a shut door), bdb6f00a (check only).
   on the corridor beyond walks you out; the Settings row; old saves migrate.
 - controller_check door + walk OK (mine), 29/29 (CR5); 'day' failed on 3051de4e (stick stopped at Bunk 1), fixed by the
   check pressing A, which matches the design. arrows all OK (CR1; 'week guide' fails the same on 0.93.2: old).
-  player + day 1 OK (CR6); interactions alone OK (FX29).
+  player + day 1 OK (CR6); interactions alone OK (FX29 and mine, 0 FAIL).
 - Optional: the hint's title "A private room" also shows in 'all doors tap' mode at a public door.
 Also: FX29's bigevents_check change 8a91f1dc (late saves follow EV_SWAP_ON) reads right.
