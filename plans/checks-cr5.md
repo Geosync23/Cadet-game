@@ -23,7 +23,15 @@ The three lines (bedtime just before them OK, `now day 1 22:07`):
 - `FAIL day: talk: no crew member to walk to`
 - `FAIL day: the job board: could not walk to the lift by the stick`
 
-NEW: repeats on the doors build, passes on OLD with the same script. Likely the doors change stopping the stick walk
+NEW: repeats on the doors build, passes on OLD with the same script.
+
+**Re-check on FX29's fix** (19:59 UTC): `claude/doors-3way` 329ad201 (two commits on 3051de4e: the game, 50 lines;
+controller_check.py, 15 lines: on the way, a door shut to the stick is picked on the ring and opened with A, lead 39's
+call; plus an interactions_check part). Game sha256 `1374048392ecd9eec81b889af9bafa2051e6d993e4de49ce72a2bc14a0c28f78`.
+`controller_check.py BUILD day door` from a worktree of 329ad201: exit 0, 322 s, `CONTROLLER CHECK OK`; day OK
+(breakfast, talk, the job board, bedtime, now day 2 06:01), door OK. Note for the reviewer: part of the fix is in the
+check itself (the walk now opens the door), so this pass shows the player's way through works, not that the walk is
+unchanged. Likely the doors change stopping the stick walk
 out of the bunk room in the morning (my guess; not traced).
 
 ## 0.93.2 full round, round 2 (2026-10-26, started 15:58 UTC, for BM18 and lead 38)
