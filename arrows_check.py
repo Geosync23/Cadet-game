@@ -501,8 +501,8 @@ def part_promo(ctx, path):
 # met), Go at the end page (the save marked ended); "Your answer" Mail only after you told her in person, "Tomorrow" only after
 # it's settled; at every waking minute while one of the ending's level-1 arrows is due, an ending arrow leads (none hidden by
 # another job's arrow, the needs nudges, or Teaching arrows Off); never stuck. Each part three ways: as is, with Teaching arrows
-# Off (teachoff), while tracking another job (track); endstay also the change of mind (change: Go on Thursday, Stay on
-# Saturday at noon by her button, ends in the endgame). Pick ways with the words asis, teachoff, track, change (default all).
+# Off (teachoff), while tracking another job (track); endstay also the change of mind (change: Go at the first "Tell the
+# Captain", Stay on Sunday at 10:00 by her button, before her address; ends in the endgame). Pick ways with the words asis, teachoff, track, change (default all).
 TRACE = r"""(() => { const g = goalNow(), n = shipNow(), due = GUIDE.list.filter(e => e.level === 1 && /^end:/.test(e.id) && (e.from == null || e.from <= n) && n < e.until && (() => { try { return !e.done || !e.done(); } catch (x) { return false; } })()).map(e => e.id);
   return [Math.floor(n), g && g.guide || null, g ? g.label : null, !!ACT || !!DIALOGUE || !!DEV.choose || (typeof sleeping !== 'undefined' && !!sleeping) || !!document.querySelector('#endPage:not([hidden])'), due]; })()"""
 END_PICK = r"""(() => {
@@ -560,11 +560,14 @@ def part_end(ctx, path, want, way):
         B = (d - 1) * 1440
         if way == 'track': pg.ev(track)
         for a, b in END_WINDOWS[d] if d < 36 else END_WINDOWS[36][want]:
-            if way == 'change' and d == 34 and a >= 1000 and pg.ev("window.__want") != 'stay':   # Saturday afternoon, before her deadline: you change your mind, at her button, as a player would
-                advance_to(B + 12 * 60); pg.ev("window.__want = 'stay'")
+            if way == 'change' and d == 35 and pg.ev("window.__want") != 'stay':   # Sunday 10:00, Go told on Saturday: you change your mind before her address, at her button, as a player would
+                advance_to(B + 10 * 60); pg.ev("window.__want = 'stay'")
                 r = pg.ev(CHANGE)
                 for _ in range(8): pg.step(3, 50); pg.ev(END_PICK)
-                print(f'  {tag}: Day 34 12:00, changing your mind: {r}; said {pg.ev("SHIP.end.said")}')
+                for _ in range(40):                    # her scene for the change, read through
+                    if not pg.ev("!!DIALOGUE"): break
+                    pg.ev(FOLLOW); pg.step(3, 50)
+                print(f'  {tag}: Day 35 10:00, changing your mind: {r}; said {pg.ev("SHIP.end.said")}')
             advance_to(B + a); f.run(B + b)
         st = pg.ev(END_STATE)
         print(f"  {tag}: Day {d}: offer {st['offer']}, said {st['said']}, settled {st['settled']}, oath {st['oath']}, zeke {st['zeke']}/{st['zekeSun']}, ended {st['ended']}, endgame {st['endgame']}, stuck {len(f.stuck)}")
