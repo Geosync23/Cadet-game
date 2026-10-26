@@ -58514,6 +58514,139 @@ onSim('job', n => {                                      // B: Torres comes by a
 // ---------------------------------------------------------------------
 
 // ---- slot: Power and relays (section 24v). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// M19 (S5-3, B2 for lead 39). The lesson, Wednesday Day 17 at 11:00 (WORK_MECH.m19.at), Calder in the bridge's relay room
+// (Deck 1, u): she swaps the stuttering relay on 1-relay-1 while you watch, then 1-relay-2 is yours (look at the rack,
+// pull the old one, seat the new one, test). The conduit tester comes with it (the row's tool, through 24 core's
+// worksTrained; a no-op when M15 rewiring gave it first) and Calder's "You'll want this" only when it's new. Then about
+// once a week (08:00 on a workday of yours, not rewiring's day) a job for you: a relay swap on a relay rack (read the lamps,
+// pick the failing relay, swap, test) or, the other weeks, a battery cell check in Deck 5's battery room (read the charge
+// bars, pick the low pair, swap the tired cell, check). A wrong pick is never a fail: that stop opens again. Not taken: held
+// to the end of your shift and an hour of the next, then the crew's. Uses: these jobs turned in by you, and any repair of
+// yours on a relay or battery machine once trained. Stages (24 core's row): 1 relays; 2 (3 uses) conduit runs with the
+// tester (S5-3 turn 2, feeding P5's power stage); 3 (6 uses) the batteries' balance (Step 6's P6). The beats (spec "The
+// beats"): an urgent notice at 10:30, a level 1 arrow and its ring line "Power and relays with Calder, 11:00" from
+// 10:45. Saved: SHIP.works.side.pwr = { done, wrongs, week } (cleaned on read); a job keeps its own bad relay or cell
+// (j.bad) and picks (j.picks). Job slot PWR_SLOT (24 core's default for this row, 11, is Hauling's). schedU keys
+// 1060 (which machine), 1061 (the bad relay or cell), 1062 (the week's day). No R(). Off (P5_M19 false): nothing registers.
+const PWR_AT = 660, PWR_POST = 480, PWR_CREW = 40, PWR_KEEP = 90, PWR_SLOT = 32, PWR_RELAYS = 6, PWR_CELLS = 4;
+const PWR_TRAIN = ['1-relay-1', '1-relay-2'];            // Calder's, then yours
+const pwrSeed = () => machSeed('power');
+function pwrState() {                                    // side.pwr, cleaned (a save may hold junk)
+  const s = typeof worksSide === 'function' ? worksSide() : null; if (!s) return null;
+  const P = s.pwr;
+  if (!P || typeof P !== 'object' || !s.pwrOk) {
+    const int = v => Number.isInteger(v) ? Math.max(0, Math.min(9999, v)) : 0;
+    s.pwr = { done: int(P && P.done), wrongs: int(P && P.wrongs), week: P && Number.isInteger(P.week) ? P.week : -1 };
+    Object.defineProperty(s, 'pwrOk', { value: true, enumerable: false, configurable: true });
+  }
+  return s.pwr;
+}
+const pwrName = id => { const m = machineById(id), D = m && DECKS[m.deck], r = D && D.rooms[m.room]; return (r ? r.name : 'the rack') + ', ' + (m ? deckIn(m.deck) : 'Deck 1'); };
+const pwrLamps = (n, bad, ok, sick) => Array.from({ length: n }, (_, i) => (n === PWR_CELLS ? 'Cells ' + (2 * i + 1) + '-' + (2 * i + 2) : 'R' + (i + 1)) + ' ' + (i === bad ? sick : ok)).join(' · ');
+// a job: kind 'relayswap' (a relay machine) or 'battcell' (a battery bank); o: { slot, train, key }
+function pwrJob(kind, id, t, o = {}) {
+  const m = machineById(id); if (!m || !panelPlace(id)) return null;
+  const d = worksDay(t), k = o.key !== undefined ? o.key : d, n = kind === 'battcell' ? PWR_CELLS : PWR_RELAYS;
+  const bad = Math.floor(schedU(pwrSeed(), k, 1061) * n) % n;
+  const title = kind === 'battcell' ? worksText('m19.card.batt', 'Check battery bank {n}', { n: id.split('-').pop() }) : worksText('m19.card.relay', 'Swap a failing relay: {place}', { place: pwrName(id) });
+  const j = jobMake(kind, { id: kind + (o.slot || '') + ':' + id + '@' + Math.floor(t / 60), machine: id, deck: m.deck, room: m.room, h: Math.floor(t / 60), tier: 3, urgency: 0, title, bad, picks: {}, wrongs: 0,
+    ...(o.slot ? { reserved: o.slot, until: (d - 1) * 1440 + dayShiftEnd(d) } : { leave: Math.max(60, (d - 1) * 1440 + dayShiftEnd(d) - Math.max(t, (d - 1) * 1440 + DAY_SHIFT[0])) + 60 }),
+    ...(o.train ? { train: o.train } : {}) });
+  j.posted = j.found = t;
+  return j;
+}
+// the stops, all at the machine's panel. A training job: Calder names the relay (no pick); a board job: read, pick, swap, test
+function pwrStops(j) {
+  const m = machineById(j.machine), pp = m && panelPlace(m.id); if (!pp) return [];
+  const batt = j.kind === 'battcell', n = batt ? PWR_CELLS : PWR_RELAYS, st = (tag, how, mins, opts) => ({ deck: m.deck, placeId: pp, mins, tag, how, ...(opts ? { opts } : {}) });
+  const lamps = batt ? pwrLamps(n, j.bad, worksText('m19.batt.ok', 'green'), worksText('m19.batt.low', 'amber, sagging')) : pwrLamps(n, j.bad, worksText('m19.relay.ok', 'steady'), worksText('m19.relay.bad', 'stutters'));
+  if (j.train) return [st('open', 'look', 1, { secs: 3, text: worksText('m19.train.open', 'The rack hums. One lamp stutters: R{n}. That\'s the one.', { n: j.bad + 1 }) }),
+    st('pull', 'hold', 2), st('seat', 'hold', 2), st('test', 'look', 1, { secs: 3, text: worksText('m19.train.test', 'Every lamp steady. Listen: it clicks over clean now.') })];
+  const opts = Array.from({ length: n }, (_, i) => ({ id: 'x' + i, label: batt ? 'Cells ' + (2 * i + 1) + '-' + (2 * i + 2) : 'R' + (i + 1) }));
+  return [st('read', 'look', 1, { secs: 3, text: lamps }),
+    st('pick', 'choose', 1, { title: batt ? worksText('m19.batt.pick', 'Which cells are low?') : worksText('m19.relay.pick', 'Which relay\'s failing?'), text: lamps, options: opts }),
+    st('swap', 'hold', batt ? 3 : 2), st('test', 'look', 1, { secs: 3, text: batt ? worksText('m19.batt.test', 'All the bars green and level.') : worksText('m19.relay.test', 'Every lamp steady.') })];
+}
+function pwrStepDone(j, k, res) {
+  const st = pwrStops(j)[k]; if (!st) return true;
+  if (!j.picks || typeof j.picks !== 'object') j.picks = {}; if (!Number.isFinite(j.wrongs)) j.wrongs = 0;   // (a junk job)
+  const done = new Set(j.stepsDone || []);
+  if (k > 0 && !done.has(k - 1)) return false;           // in order: read before you pick, pick before you swap
+  if (st.tag === 'pick') {
+    const pick = res && res.pick; j.picks[k] = pick || null;
+    if (pick !== 'x' + j.bad) { j.wrongs++; try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.wrong', 'Those read fine. Look at the bars again.') : worksText('m19.relay.wrong', 'That one\'s steady. Watch the lamps again.')); } catch (e) { /* no UI */ } return false; }
+  }
+  return true;
+}
+function pwrDone(j, t, by) {
+  const s = SHIP.machines && SHIP.machines[j.machine];
+  if (s) { s.cond = Math.max(s.cond, PWR_KEEP); s.state = machineState(s.cond); }
+  if (by === 'you') {
+    const P = pwrState(); if (P && !j.train) { P.done++; P.wrongs += j.wrongs || 0; }
+    if (!j.train) { worksUse('m19'); j.rightFirst = !j.wrongs; }
+    try { toast(j.title, j.kind === 'battcell' ? worksText('m19.batt.done', 'Bank {n}\'s cells level again.', { n: j.machine.split('-').pop() }) : worksText('m19.relay.done', 'Relay swapped. The rack\'s steady.')); } catch (e) { /* no UI */ }
+  }
+  simNote('power', { id: j.id, kind: j.kind, machine: j.machine, by: by || null, wrongs: j.wrongs || 0 });
+  if (typeof MACH_REV !== 'undefined') MACH_REV++;
+}
+// the week's day: a workday of yours after the lesson, not rewiring's, nor a test day; and the week's machine (one with no job open)
+function pwrDay(w) {
+  const W = SHIP.works; if (!W || W.tr.m19 === undefined) return null; const R = typeof rewDay === 'function' ? rewDay(w) : null;
+  const days = [0, 1, 2, 3, 4].map(k => w * 7 + 1 + k).filter(d => d > W.tr.m19 && playerShiftOn(d) && d !== R && !(W.test && W.test.day === d));
+  return days.length ? days[Math.floor(schedU(pwrSeed(), w, 1062) * days.length) % days.length] : null;
+}
+const pwrKindOf = w => w % 2 ? 'battcell' : 'relayswap';
+const pwrBoxes = kind => machineList().filter(m => m.kind === (kind === 'battcell' ? 'battery' : 'relay') && !m.stub && panelPlace(m.id) && !SHIP.jobs.some(j => j.machine === m.id && j.status !== 'done'));
+// the beats (Day 17): the notice at 10:30, the level 1 arrow with its ring line from 10:45, both while the lesson is asked
+function pwrBeats(now) {
+  const W = SHIP.works, c = W && W.cur; if (!c || c.id !== 'm19' || c.st !== 'meet' || !c.told) return;
+  const r = SHIP.occasions.find(x => x.key === c.occ); if (!r || r.met || r.status !== 'asked' || now >= r.at + r.len) return;
+  const place = ((DECKS[r.deck] || {}).rooms || {})[r.room], where = (place ? place.name : 'the relay room') + ', ' + deckIn(r.deck), who = typeof guideWho === 'function' ? guideWho(c.by) : worksFirst(c.by), when = hhmm(r.at % 1440);
+  const ring = worksText('m19.ring', 'Power and relays with {name}, {time}', { name: who, time: when });
+  if (now >= r.at - 30 && !flag('m19.notice.' + c.d) && typeof promoNotice === 'function') { flagSet('m19.notice.' + c.d, true); promoNotice(worksText('m19.notice', '{ring}: {where}.', { ring, where }), worksName(c.by)); }
+  if (now >= r.at - 15 && typeof guideAsk === 'function' && !(GUIDE.list || []).some(x => x.id === 'm19:meet:' + c.d))
+    guideAsk({ id: 'm19:meet:' + c.d, level: 1, owner: '24v', from: r.at - 15, until: r.at + r.len,
+      goal: () => ({ deck: r.deck, room: r.room, ...(typeof guideTeacherIn === 'function' && guideTeacherIn(c.by, r.deck, r.room) ? { crew: c.by } : {}), label: ring }),
+      done: () => !!r.met || r.status !== 'asked' || !(SHIP.works && SHIP.works.cur && SHIP.works.cur.id === 'm19' && SHIP.works.cur.st === 'meet') });
+}
+if (P5_M19 && typeof jobKindAdd === 'function') {
+  for (const [k, text] of [['relayswap', 'Swap a relay'], ['battcell', 'Check a battery bank']]) jobKindAdd(k, { tier: 3, work: 0, text, stops: pwrStops, stepDone: pwrStepDone, done: pwrDone, veto: true, crew: { can: incWorks, mins: PWR_CREW } });
+  if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) { WORKS_SIDE_KINDS.add('relayswap'); WORKS_SIDE_KINDS.add('battcell'); }
+  if (!MEETING_SCRIPTS['train.m19.calder']) MEETING_SCRIPTS['train.m19.calder'] = { title: 'Power and relays', from: 'Chief Ines Calder', stub: true,   // a stand-in until the head writer's words (content/works/m19.lines)
+    gist: 'Calder showed you the bridge\'s relay room: watch the lamps, pull the stuttering relay, seat a new one, test.',
+    lines: [{ who: 'calder', text: 'The bridge\'s relays. Every light and screen up there runs through this room.', pose: 'gesture' },
+      { who: 'calder', text: 'Watch the lamps. A relay going bad stutters before it dies.', to: 'you' },
+      { choice: [{ text: 'And if two stutter?', rel: { calder: 2 }, reply: { who: 'calder', text: 'Then you swap the worse one first and watch the other. Today it\'s one.' } },
+        { text: 'Pull it, seat a new one, test.', rel: { calder: 1 }, reply: { who: 'calder', text: 'In that order. Every time.' } }] },
+      { who: 'calder', text: 'I\'ll do this one. You watch. Then the next rack\'s yours.' }] };
+  WORK_MECH.m19 = {
+    at: () => PWR_AT,                                    // the lesson at 11:00 (the beats table), after the visit's line breaks up
+    reserve(d, at, slot, o = {}) {                       // Calder's on 1-relay-1, then yours on 1-relay-2, in this row's own slot
+      const id = PWR_TRAIN[o.yours ? 1 : 0], t = (d - 1) * 1440 + at; if (!machineById(id)) return null;
+      SHIP.jobs = SHIP.jobs.filter(x => !(x.reserved === PWR_SLOT && heldForYou(x) && !x.claimedBy) && !(x.machine === id && x.status === 'open' && !x.claimedBy && !x.reserved));
+      const j = pwrJob('relayswap', id, t, { slot: PWR_SLOT, train: o.train || 'm19', key: d * 2 + (o.yours ? 1 : 0) }); if (!j) return null;
+      SHIP.jobs.push(j); if (typeof MACH_REV !== 'undefined') MACH_REV++;
+      return j.id;
+    },
+    watch: 10,
+  };
+  onSim('tool', n => { const W = SHIP.works; if (n && n.id === 'tester' && W && W.tr.m19 !== undefined && W.tools.tester && W.tools.tester[0] === W.tr.m19) worksTeach('m19', 'calder', 'tester', ['You\'ll want this. The conduit tester: clip it on, read the feed. It\'s yours.']); });   // new with this lesson (M15 gave none first)
+  onSim('job', n => {                                    // a repair of yours on a relay or battery machine counts as a use once you're trained
+    if (!n || n.step !== 'turnin' || !SHIP.works || SHIP.works.tr.m19 === undefined) return;
+    const j = (SHIP.jobs || []).find(x => x.id === n.id), m = j && j.machine && machineById(j.machine);
+    if (j && m && !JOB_KINDS[j.kind] && /^(battery|relay)$/.test(m.kind) && j.doneBy === 'you') worksUse('m19');
+  });
+  WORK_TICKS.push((now, skip) => {
+    if (!skip) pwrBeats(now);
+    const W = SHIP.works; if (!W || W.tr.m19 === undefined || !pwrState()) return;   // the week's job at 08:00 on its day once you're trained
+    const d = worksDay(now), m = now - (d - 1) * 1440, w = incWeek(d);
+    if (m < PWR_POST || !playerShiftOn(d) || pwrDay(w) !== d) return;
+    const P = pwrState(); if (P.week >= w) return;
+    const kind = pwrKindOf(w), boxes = pwrBoxes(kind); if (!boxes.length) return;
+    const id = boxes[Math.floor(schedU(pwrSeed(), w, 1060) * boxes.length) % boxes.length].id, j = pwrJob(kind, id, (d - 1) * 1440 + PWR_POST, { key: w * 7 + 5 });
+    if (j) { SHIP.jobs.push(j); P.week = w; if (typeof MACH_REV !== 'undefined') MACH_REV++; }
+  });
+}
 // ---- end of slot: Power and relays ----
 
 // ---------------------------------------------------------------------

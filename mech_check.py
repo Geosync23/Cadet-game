@@ -1285,6 +1285,77 @@ def part_m15(g):
     check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm15: differs the second time')
 PARTS['m15'] = part_m15
 
+# ---- M19 power and relays (24v, mechanics seat A, S5-3): the lesson on Day 17 at 11:00 with its beats (an urgent notice at
+# 10:30, a level 1 arrow and its ring line from 10:45); the conduit tester given once, whichever of M15 and M19 comes first
+# (Calder's "You'll want this" only when it's new); then one job a week, 08:00 on a workday of yours, a relay swap or a
+# battery cell check by the week; read, pick, swap, test: a wrong pick opens that stop again (never a fail); done puts the
+# machine right and is a use; a repair of yours on a relay is a use too; stages at 3 and 6 uses; not taken, the crew's
+# the next day; the save cleaned; the same twice
+M19 = r"""(() => { const out = {}, W0 = JSON.stringify(SHIP.works), O0 = JSON.stringify(SHIP.occasions);
+ const reset = t => { machinesNew(); SHIP.jobs = []; SHIP.flags = {}; SHIP.occasions.length = 0; MACH_HOUR = null; MACH_SEEN = -1; WORKS_TICK.m = WORKS_TICK.h = -1; setShipNow(t); machinesNow(); SHIP.works = null; const W = worksInit(t); W.tier = 3; W.rank = 'senior'; for (const r of CAREER_LADDER.slice(0, CAREER_LADDER.indexOf(ladderRow('m19')))) { W.tr[r.id] = 1; W.use[r.id] = 9; (W.op[1] = W.op[1] || []).push(r.id); } W.xp = 999; delete worksSide().pwrOk; worksSide().pwr = null; W.inc = { plan: {}, open: null }; return W; };
+ const tick = (a, b, s = 10) => { for (let t = a; t <= b; t += s) { setShipNow(t); machinesNow(); worksCareerTick(t); } };
+ // the lesson's beats on Day 17: asked at 06:00 for 11:00 in the relay room; the notice at 10:30, the level 1 arrow from 10:45
+ const said = [], kn = promoNotice; promoNotice = (x, f) => said.push([Math.round(shipNow() % 1440), x]);
+ let W = reset(16 * 1440 + 300); delete W.tr.m15; delete W.tools.tester; tick(16 * 1440 + 350, 16 * 1440 + 600);
+ const c = W.cur, r = c && SHIP.occasions.find(x => x.key === c.occ); out.ask = c && r ? [c.id, c.st, r.at % 1440, r.deck, r.room, c.by] : null;
+ tick(16 * 1440 + 601, 16 * 1440 + 646, 1); const e = GUIDE.list.find(x => x.id === 'm19:meet:17'); let g = null; try { g = e && e.goal(); } catch (x) { g = null; }
+ out.notice = said.slice(); out.arrow = e ? [e.level, e.from % 1440, g && g.deck, g && g.room, g && g.label] : null;
+ promoNotice = kn;
+ // the tester: new with M19 (Calder's line), or already M15's (no second one)
+ const teach = []; const kt = worksTeach; worksTeach = (m, w, k, f) => { teach.push(m + '.' + k); return f; };
+ W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; worksTrained('m19'); simFlush(); out.tester = [hasTool('tester'), teach.slice()];
+ W = reset(16 * 1440 + 300); W.tr.m15 = 17; toolGive('tester'); const day0 = W.tools.tester[0]; W.cur = { id: 'm19', st: 'do', d: 17, by: 'calder', occ: null, j: null, w: 0 }; teach.length = 0; worksTrained('m19'); simFlush();
+ out.tester2 = [W.tools.tester[0] === day0, teach.slice(), Object.keys(W.tools).filter(k => k === 'tester').length];
+ worksTeach = kt;
+ // the weeks: one job a week from the week after the lesson, 08:00 on a workday of yours, relay and battery by turns
+ W = reset(17 * 1440 + 300); W.tr.m19 = 17; const seen = new Map();
+ for (let t = 17 * 1440 + 360; t <= 38 * 1440 + 500; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); for (const x of SHIP.jobs) if (/^(relayswap|battcell)$/.test(x.kind)) seen.set(x.id, x); }
+ out.weeks = [...seen.values()].map(x => [worksDay(x.posted), weekday(worksDay(x.posted)), Math.round(x.posted % 1440), x.kind, machineById(x.machine).kind, jobTier(x)]);
+ // a relay swap: read, a wrong pick (opens again), the right pick, swap, test; the machine put right; a use
+ W = reset(19 * 1440 + 480); W.tr.m19 = 17; W.use.m19 = 0; const rel = machineList().find(m => m.kind === 'relay' && panelPlace(m.id));
+ let j = pwrJob('relayswap', rel.id, shipNow(), { key: 91 }); SHIP.jobs.push(j); SHIP.machines[rel.id].cond = 30;
+ out.board = !!openJobs().find(x => x.id === j.id); out.claimed = claimJob(j.id); let S = jobStops(j); out.stops = S.map(s => s.step + ':' + s.how);
+ out.early = jobStepDone(j.id, 1, { pick: 'x' + j.bad }).ok; jobStepDone(j.id, 0, {});
+ out.wrong = jobStepDone(j.id, 1, { pick: 'x' + ((j.bad + 1) % 6) }); out.right = jobStepDone(j.id, 1, { pick: 'x' + j.bad }).ok;
+ jobStepDone(j.id, 2, {}); out.test = jobStepDone(j.id, 3, {}).ok; out.turnin = turnInJob(j.id);
+ out.after = [SHIP.machines[rel.id].cond >= 90, W.use.m19, worksSide().pwr.done, worksSide().pwr.wrongs, j.rightFirst];
+ // a battery cell check, right first time
+ const bat = machineList().find(m => m.kind === 'battery' && panelPlace(m.id)); j = pwrJob('battcell', bat.id, shipNow(), { key: 92 }); SHIP.jobs.push(j); claimJob(j.id); S = jobStops(j);
+ S.forEach((s, k) => jobStepDone(j.id, k, s.step === 'pick' ? { pick: 'x' + j.bad } : {})); out.batt = [S.map(s => s.step + ':' + s.how).join(' '), (S[1].opts.options || []).length, turnInJob(j.id), j.rightFirst, W.use.m19];
+ // an ordinary repair of yours on a relay counts; stages at 3 and 6
+ const rj = { id: 'pwr-test-repair', machine: rel.id, deck: rel.deck, kind: 'repair', urgency: 1, posted: shipNow(), found: shipNow(), claimedBy: 'you', status: 'done', doneBy: 'you', parts: [] }; SHIP.jobs.push(rj);
+ simNote('job', { step: 'turnin', id: rj.id, t: shipNow(), machine: rel.id, job: 'repair' }); simFlush(); out.repairUse = W.use.m19;
+ out.stages = [0, 2, 3, 5, 6].map(n => { W.use.m19 = n; return worksStage('m19'); });
+ // not taken: the crew's the next day
+ W = reset(22 * 1440 + 480); W.tr.m19 = 17; j = pwrJob('relayswap', rel.id, shipNow(), { key: 93 }); SHIP.jobs.push(j); out.held = leaveEnd(j) - 22 * 1440;
+ for (let t = 22 * 1440 + 490; t <= 23 * 1440 + 900; t += 10) { setShipNow(t); machinesNow(); for (const f of WORK_TICKS) f(t, false); } out.crew = [j.status, j.doneBy !== 'you' && !!j.doneBy];
+ worksSide().pwr = { done: 'x', wrongs: -4 }; delete worksSide().pwrOk; out.save = JSON.stringify(pwrState()); worksSide().pwr = { done: 3, wrongs: 1, week: 4 }; delete worksSide().pwrOk; out.save2 = JSON.stringify(pwrState());
+ SHIP.works = JSON.parse(W0); SHIP.occasions.length = 0; for (const o of JSON.parse(O0)) SHIP.occasions.push(o); SHIP.jobs = []; return out; })()"""
+def part_m19(g):
+    a, b = g.ev(M19), g.ev(M19)
+    print('  m19 ask', a['ask'], 'notice', a['notice'], 'arrow', a['arrow'])
+    print('  m19 tester', a['tester'], a['tester2'], 'weeks', a['weeks'])
+    print('  m19 stops', a['stops'], 'wrong', a['wrong'], 'after', a['after'], 'batt', a['batt'], 'repair use', a['repairUse'], 'stages', a['stages'], 'held', a['held'], 'crew', a['crew'])
+    check(a['ask'] and a['ask'][:6] == ['m19', 'meet', 660, 1, 'u', 'calder'], f"m19: the lesson asked for 11:00 in the relay room, Deck 1, with Calder ({a['ask']})")
+    check(len(a['notice']) == 1 and a['notice'][0][0] == 630 and 'Power and relays' in a['notice'][0][1], f"m19: one urgent notice at 10:30 naming it ({a['notice']})")
+    check(a['arrow'] and a['arrow'][0] == 1 and a['arrow'][1] == 645 and a['arrow'][2] == 1 and a['arrow'][3] == 'u' and a['arrow'][4].startswith('Power and relays with Calder, 11:00'), f"m19: a level 1 arrow from 10:45 to the relay room, its ring line naming it ({a['arrow']})")
+    check(a['tester'][0] and a['tester'][1] == ['m19.tester'], f"m19: the tester given with the lesson, Calder's word with it ({a['tester']})")
+    check(a['tester2'][0] and a['tester2'][1] == [] and a['tester2'][2] == 1, f"m19: M15 gave it first: no second tester, no word ({a['tester2']})")
+    W = a['weeks']
+    check(3 <= len(W) <= 4 and all(e[0] > 17 and e[1] <= 4 and e[2] == 480 and e[5] == 3 for e in W), f"m19: one a week after the lesson, 08:00 on a weekday, Tier 3 ({W})")
+    check(all((e[3] == 'relayswap') == (e[4] == 'relay') for e in W) and {e[3] for e in W} == {'relayswap', 'battcell'}, f"m19: relay swaps and battery checks by turns, each on its own kind of machine ({W})")
+    check(a['board'] and a['claimed'] and not a['early'], "m19: offered to a Senior Officer; read before you pick")
+    check(a['stops'] == ['read:look', 'pick:choose', 'swap:hold', 'test:look'], f"m19: the steps ({a['stops']})")
+    check(a['wrong'].get('retry') and a['right'] and a['test'] and a['turnin'], f"m19: a wrong pick opens the stop again, the right one goes on ({a['wrong']})")
+    check(a['after'] == [True, 1, 1, 1, False], f"m19: done puts the relay right, a use, the wrong pick kept (not right first time) ({a['after']})")
+    check(a['batt'][0] == 'read:look pick:choose swap:hold test:look' and a['batt'][1] == 4 and a['batt'][2] and a['batt'][3] is True and a['batt'][4] == 2, f"m19: a battery check, four pairs of cells, right first time ({a['batt']})")
+    check(a['repairUse'] == 3, f"m19: a repair of yours on a relay counts as a use ({a['repairUse']})")
+    check(a['stages'] == [0, 0, 1, 1, 2], f"m19: stages at 3 and 6 uses ({a['stages']})")
+    check(a['held'] == 1440 + 600 and a['crew'] == ['done', True], f"m19: not taken, the crew's the next day ({a['held']}, {a['crew']})")
+    check(json.loads(a['save']) == {'done': 0, 'wrongs': 0, 'week': -1} and json.loads(a['save2']) == {'done': 3, 'wrongs': 1, 'week': 4}, 'm19: the save read back, junk cleaned')
+    check(json.dumps(a, sort_keys=True) == json.dumps(b, sort_keys=True), 'm19: differs the second time')
+PARTS['m19'] = part_m19
+
 # ---- favour cases (24l, seat E2 on H's behalf; not a ladder row, so it runs after the rows as EXTRA['fcase']): every
 # script has three clue places and its answer (sus.1) among the options; a friend asks (Mail, an offered favour) on the
 # week's evening; accepted, the side job: the clues before the call, a wrong pick refused (never a fail), the right one
