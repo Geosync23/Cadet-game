@@ -213,3 +213,8 @@ Taken from RV19 (lead 38) so RV19 could stay on storm-sat. BM18's FAIL with INSP
 | events_check | e45b7fe on | EVENTS CHECK OK |
 | day_check 4, 11, 18, 25 | e45b7fe on | all OK |
 | RV19's live walker probe | e45b7fe on, Days 4 and 11 | all 8 rooms in route order a e b g c h f d (06:10-07:11), your result in person, the done toast |
+
+## The inspection guard for 0.93.3 (claude/inspection 1872153, game b21e0a55...dbb3): PASS
+Lead 38 moved it out of 0.93.2 (0.93.2 takes e45b7fe). Seven planner lines in section 14 gain `d >= 1` (the walker's
+early bed: `d >= 0`), all behind INSPECT_ON. cadet_test off ALL IDENTICAL; with it on: events_check OK, day_check 4 OK,
+machine_check OK.
