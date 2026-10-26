@@ -1,0 +1,20 @@
+@meeting vesselRamp.bench
+// SW4, the Veyli vessel: Sunday Day 28, you weren't at the ramp by 10:30; Zeke met Taavek and took them to the Works bay
+// bench, and you meet Taavek there ("Say hello to Taavek"). The ramp's words, at the bench. Then vesselRoundOne.
+title: Meeting Taavek
+from: Taavek
+gist: You met Taavek, the Veyli ship's engineer, at the Works bay bench. Zeke had met them at the ramp.
+== lines
+torres-zeke: Here they are. Taavek, this is {me}. The one who was meant to meet you.   [gesture]
+taavek: Hello! Taavek. Engineer, here, at your bench. Yes.   [gesture]
+taavek > you: Zeke met me. Good. And now you. Two who meet. Very good.   [laugh]
+taavek: And this. The round one. Very broken.   [sigh]
+taavek > you: You also, someone met you? When you came?   [listen]
+? choice
+* Welcome aboard. Sorry I missed the ramp.   flavour:practical rel:taavek+1
+  taavek: Not missed. Here is also a good place to meet. Look.   [nod]
+* Zeke did. He showed me my bunk.   flavour:share rel:taavek+1,torres-zeke+1
+  taavek: Zeke! Zeke meets everyone. Good. That is the way.   [laugh]
+* Has anyone got you a coffee?   flavour:cheer rel:taavek+1
+  taavek: Zeke. Two. Now you, three? You understand everything.   [laugh]
+torres-zeke: Right. Coffee, then the round one. Onward.   [nod]
