@@ -1,0 +1,22 @@
+@meeting pu3.toast
+// SW3 (2026-10-26, Pillar 5 Step 5; spec "The beats", the toast): the day after the bar (Wednesday Day 17), 19:00, a
+// Captain's table in her quarters on Deck 2 (section 18's captainsTable occasion, its own script). Seated, cups raised
+// (24u's sit and drink poses). Vance is called in on his day off, and says so. One choice; 24u can store pu3.toast 1-2.
+// The framed menu goes on your shelf (pu3.menu).
+title: The Captain's toast
+from: Captain Odile Marrow
+gist: The Captain gave a dinner in her quarters for your promotion, with the Commander and the Chief, and raised a toast to you. The framed menu is on your cabin shelf.
+== lines
+marrow > you: Come in. Sit there, by the window. The good chair. Tonight it's yours.   [gesture]
+vance: For the record, this is my day off. I came in. Noted, I hope.   [nod]
+marrow: Noted, Teo. Thank you. He ironed a shirt for it. I can tell.   [laugh]
+calder: Brennan sent the pie. She said "don't let the Chief talk shop". I won't.
+marrow: Cups up, then. To the Wren's newest Senior Officer. May every junction come back on.
+vance: And may it be booked in advance. To the Senior Officer.   [nod]
+? choice
+* To the Wren. And the people in it.   rel:marrow+1,vance+1
+  marrow: To the Wren. Good. Now eat, before it's cold and the Commander finds a regulation about it.   [laugh]
+* To the Chief, who made me take the test.   rel:calder+2
+  calder: Hm. To the test, then. Drink your tea.   [nod]
+marrow > you: The menu's yours to keep. Frame it, or don't. Calder framed hers.
+calder: I did not. It's in a drawer. In a frame.

@@ -238,3 +238,57 @@ and people's own lines; meetings `train.<id>.<teacher>`.
 | E3 M17 lift roof | meeting `train.m17.halloran-emeka`; Halloran `work` flags `roof.climb`, `roof.grease`, `roof.view`, `roof.done`; `roof.held`, `roof.result`, `roof.resume`; crew kind `roof.wait` |
 | FX3 (AR1's findings, 2026-10-22) | `next.t2.rep` ({band}), `next.t2.soon`, `next.t2.set` ({day}: today, tomorrow or a weekday); `works.rep.title`, `works.rep.up` / `works.rep.down` ({band}), `works.rep.missed` (Mail, "Subject \| body", {band}); `works.turnin.you`, `works.turnin.dept` ({dept}), `works.turnin.rep` now the Works team's standing; `inc.warn` (Mail, {time}), `inc.warn.soon`, `inc.goal.follow` ({name} {deck}), `inc.do.yours`, `inc.again` (Mail, {day} {time} {place}); the small rows' asks `works.ask.m3d`, `works.ask.m3i`, `works.ask.p3` are now sent; the inspection morning's arrows `inspect.goal.uniform`, `inspect.goal.bed`, `inspect.goal.locker`, `inspect.goal.here` |
 | FX4 (p5-fix4, 2026-10-23) | `inc.goal.wait` ({name}): the call's arrow in her office before the meeting starts (stand-in "Wait here for {name}") |
+
+## Step 5: Senior Officer (lead 39; plans/p5-step5-spec.html on claude/p5-specs; head writer SW3)
+
+Proposed by SW3 with the words already written. **If your code already uses another name, send SW3 your list in ONE
+message and SW3 adopts it as is.** Texts (said by nobody) are `@bank all` kinds read with `worksText(key, fallback, vars)`;
+people's own words are kind `work` under a flag in `content/lines/<id>.lines` (`worksVoice(id, flag)` / `worksTeach(mech,
+id, key)` = flag `train.<mech>.<key>`); the crew's chatter is kinds in a bank, read with `socLine(p, kind, ...)` as 24p's
+promoTalkTick does. Meetings are `MEETING_SCRIPTS[id]`; they fill only `{me}`, so any day or time is in the notice and
+Mail, and a scene has a twin where the day or time differs.
+
+### The Senior Officer promotion (S5-2, 24u; B1)
+
+| When | Key | Who / kind | Placeholders |
+| --- | --- | --- | --- |
+| Rep word changes as an Officer (toasts) | `works.rep.up2.trusted`, `works.rep.up2.relied` | text | |
+| Nearly there: passing you in the bay at Trusted (once) | `flag:pu3.promo.near` | calder `work`, then halloran-emeka `work` | |
+| What's next below Relied on | `next.t3.steps` | text | `{band}` |
+| The offer, in person (wherever you are) | meeting `pu3.offer` (test tomorrow), `pu3.offer.monday` (test Monday: offered Fri or Sat), `pu3.offer.party` (Day 14 storm party, bow lounge; cast calder, halloran-emeka, tomas) | two replies each, same order (keen, other); 24u may store `pu3.reply` 1-2 | |
+| ... then the urgent notice, the Mail | `pu3.offer.notice`, `mail.pu3.offer` | text | `{day}` |
+| ... the Mail when she couldn't find you by 22:00 | `mail.pu3.offer.late` | text | `{day}` |
+| Training tab "Your promotion" rows | `pu3.check.title`, `.day`, `.rep` ({band}), `.ps`, `.set` ({day}), `.result` ({day}), `.bar`, `.toast`, `.done`, `.not` | text | |
+| Schedule and Tracked rows | `pu3.row.test`, `pu3.row.result`, `pu3.row.bar` ({time}), `pu3.row.toast` | text | |
+| Chatter from the offer (how fast; Halloran's own beats the bank) | kind `pu3.soon` | `content/banks/promo-t3.lines`; halloran-emeka | |
+| Friends' luck: bubbles, the chat card, the party's raised cups | kind `pu3.luck` (Tomas's own, `place:lounge`, is the party's "Go to bed early. Not yet.") | bank; tomas | |
+| Two friends' Mail at 20:00 the evening before | `mail.pu3.luck` (index k = 0, 1) | text, Mail | |
+| Test morning: the notice once up; Calder in the bay | `pu3.morning.notice`; `flag:pu3.promo.morning` (calder), else `pu3.morning.say` | text; calder `work` | |
+| The board's gold ring on Take it | `pu3.ptr.test` | text | |
+| The ring at each step | `pu3.ptr.plan`, `pu3.ptr.warn` ({name}), `pu3.ptr.off`, `pu3.ptr.breaker`, `pu3.ptr.back`, `pu3.ptr.turnin` | text | `{name}` |
+| Calder at each step | `train.t3.take`, `.plan` (4 lines: the planning talk), `.warn`, `.warn.late` (one couldn't be found in 30 min: "I'll tell them"), `.off`, `.breaker`, `.back`, `.done`, `.again` | calder `work` (worksTeach('t3', 'calder', key)) | |
+| The talk option on someone to warn; the toasts | `pu3.warn.ask`; `pu3.warn.done`, `pu3.warn.calder` ({name}) | text | `{name}` |
+| The warned person's answer | kind `pu3.warned` | bank (by dept: works, command, galley, survey) | |
+| Crew watching the test | kind `pu3.watch` | bank | |
+| Holding another job (hourly) | `pu3.busy.notice` | text | `{time}` |
+| Not taken by 15:00 / dropped | `pu3.again.notice`, `mail.pu3.again` | text | `{day}` |
+| Torres at the end of the test, if near | `flag:train.t3.torres` | torres-zeke `work` | |
+| Passing | `flag:pu3.promo.passed` (calder; torres-zeke's for the bay that evening), `pu3.passed.say`, `mail.pu3.passed`, `pu3.passed.notice` | calder `work`; text | `{day}` `{time}` |
+| The bay that evening | kind `pu3.passed` | bank | |
+| Result: Mail 06:00, notice once up, ring and arrow | `mail.pu3.result`, `pu3.result.notice`, `pu3.ptr.result` | text | `{time}` |
+| The result scene (08:15, her office, seated) | meeting `pu3.result` (bar at 16:30), `pu3.result.fri` (bar at 17:15); two replies, same order | calder | |
+| She comes to find you at 08:30 | `flag:pu3.promo.fetch.result` | calder `work` | |
+| Torres outside the glass | `flag:pu3.promo.glass` | torres-zeke `work` | |
+| By Mail if you never came (09:15) | `mail.pu3.promo` | text | |
+| The day: chatter | kind `pu3.senior` (Halloran's and Tomas's own) | bank | |
+| Friends' Mail that day (up to two) | kind `mail.pu3.friend` | bank, by tier | `{me}` `{nick}` |
+| The bar: invite (morning), notice (30 min before), Calder's "Go.", the ring | `mail.pu3.invite`, `pu3.bar.notice`, `flag:pu3.promo.bar` (calder) else `pu3.bar.say`, `pu3.ptr.bar` | text; calder `work` | `{time}` |
+| The bar scene | meeting `pu3.bar` (cast marrow, vance, calder, torres-zeke; the line ending `{pin}` bakes pin: true; one choice after it, 3 replies with `mem:pu3.answer.people/next/torch`) | | |
+| Friends right after the bar | kind `pu3.bar.friend` | bank | |
+| By Mail if you never came | `mail.pu3.bar` | text | |
+| The certificate, the Record, the Ship app | `pu3.keepsake`, `pu3.keepsake.text`, `works.ms.senior` ({n}), `pu3.news` ({me}) | text | |
+| The cake | `pu3.ptr.cake`, `pu3.cake.toast`; `flag:pu3.cake` (brennan `work`), `flag:pu3.promo.cake` (calder); kind `pu3.cake` (two friends) | text; brennan, calder; bank | |
+| The toast: invite, notice, ring | `mail.pu3.toast`, `pu3.toast.notice`, `pu3.ptr.toast` | text | |
+| The toast scene | meeting `pu3.toast` (cast marrow, vance, calder; one choice, 2 replies) | | |
+| The framed menu; by Mail if missed | `pu3.menu`, `pu3.menu.text`; `mail.pu3.toast.missed` | text | |
+| What's next; the Training tab's home line | `next.pu3.result` ({day}), `next.pu3.bar` ({time}), `next.pu3.toast`; `works.pu3.home` | text | |

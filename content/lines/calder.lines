@@ -732,3 +732,61 @@
 == bday.thanks
 - Thank you. Back to work in ten minutes. Eleven.   #funny
 - Thanks. All of you. That's all I'll say.   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the Senior Officer promotion. Her words at each step of the Tier 3 test
+// (worksTeach('t3', 'calder', key): flag train.t3.<key>; every line under a flag plays in order), and around it
+// (flags pu3.promo.<beat>, read as the first promotion's pb.promo.*).
+== work
+// nearly there: passing you in the bay once you're Trusted as an Officer (once)
+? flag:pu3.promo.near
+- Trusted. One more step. And Power safety, with me.
+// the test: at the board as you take it
+? flag:train.t3.take
+- That's the one. Deck 6, port junction. Bring the clipboard.
+// the planning talk at the junction (the branch from SHUT_BRANCHES; she never names it, the screen does)
+? flag:train.t3.plan
+- Before you touch it: what does it feed? Read it to me.
+- Three rooms on that branch. Who's in them at ten?
+- Nobody's eating. No class. That's why ten. Quiet hour.
+- Two people will feel it. Go and tell them. In person.
+// as you set off to warn them
+? flag:train.t3.warn
+- Face to face. A notice is a backup, not a warning.
+// one of the two can't be found within 30 minutes
+? flag:train.t3.warn.late
+- I'll tell them. Note it. Next time, start looking sooner.
+// switching it off
+? flag:train.t3.off
+- Both told. Good. Now the switch. Then check it's dead.
+- Tester on it. Dead is a number, not a feeling.
+// changing the breaker by hand
+? flag:train.t3.breaker
+- Old breaker out. Look at the scorch on it. That's why.
+- New one seated. Square. Push till it clicks.
+// bringing it back
+? flag:train.t3.back
+- Bring it back. Slowly. Listen.
+- Hear that? That's three rooms with power. Nobody noticed.
+// turned in (pu3.passed.say follows)
+? flag:train.t3.done
+- Turn it in. That's the job.
+// not taken by 15:00, or dropped: what to practise (the Mail mail.pu3.again follows)
+? flag:train.t3.again
+- Not today. That's not a fail. We go again in two days.
+- Practise the order. Warn, off, check, then touch.
+// the test morning, as you come into the bay
+? flag:pu3.promo.morning
+- Morning. Nine o'clock it goes on the board. You've eaten?
+// at the turn-in, as for Tier 2
+? flag:pu3.promo.passed
+- That's the test. Warned, off, changed, back.
+- Result tomorrow, first thing. My office, 08:15. Don't be early.
+// 08:30: you weren't in her office, so she comes to find you (the meeting pu3.result plays where you are)
+? flag:pu3.promo.fetch.result
+- There you are. My office was empty. So we'll do it here.
+// in the bay as the bar nears (pu3.bar.say "Go." if this is missing)
+? flag:pu3.promo.bar
+- Observation room. Half four. Go.
+// the cake, after the bar (one line; she takes a slice too)
+? flag:pu3.promo.cake
+- One slice. Then back to work tomorrow. Not tonight.   #funny

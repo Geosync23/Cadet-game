@@ -706,3 +706,13 @@
 == bday.thanks
 - Thank you so much! Thank you. Sorry. Thank you!   #warm
 - This is the best birthday. I think. Yes. Thank you!   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): luck the evening before the Tier 3 test (his own beat the bank's)
+== pu3.luck
+? place:lounge
+- Tomorrow's the big one? Go to bed early. Not yet. After this song.   #funny
+?
+- Tier 3 tomorrow. I'm more nervous than you. Is that normal?   #funny
+- Good luck tomorrow. You'll be brilliant. I think. Yes.   #warm
+== pu3.senior
+- Senior Officer! I'm telling my brother. He won't know what it means.   #warm

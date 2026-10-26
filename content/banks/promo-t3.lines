@@ -1,0 +1,127 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5; plans/p5-step5-spec.html on claude/p5-specs, "The beats" and section 10): the crew's
+// talk around the Senior Officer promotion, for 24u's puTalkTick (modelled on 24p's promoTalkTick: one bubble from
+// someone near you, each person once a beat a day; the Works bay and meals, the evening's talk anywhere). Kinds mirror
+// the first promotion's pb.* (content/banks/promo-beats.lines): pu3.soon (from the offer: how fast, by days aboard),
+// pu3.luck (friends: the evening before and the test morning; also the chat card), pu3.watch (you at the test, in the bay
+// or on Deck 6), pu3.passed (the test done, the result not yet given; the bay that evening), pu3.senior (the day you're
+// made Senior Officer), pu3.bar.friend (friends right after the bar), pu3.cake (two friends at Brennan's cake),
+// pu3.warned (one of the two people you warn in the test: their answer). Spoken over heads: 60 characters or fewer.
+// You are "you" or {nick}; never a guess at your pronouns.
+
+== pu3.soon
+? day:-14
+- Tier 3 already? You've been aboard two weeks.
+- Two weeks aboard and up for Senior. Calder means it.
+- A Tier 3 test inside a fortnight. That's not normal.
+? day:-14 dept:works
+- Two weeks and up for Tier 3. Took me two years.   #funny
+- Tier 3 at two weeks. I'm telling the night crew.
+? day:15-
+- Up for Tier 3, I hear. That came round quick.
+- Senior Officer's test, then. Good. You've earned it.
+?
+- Heard you're up for Tier 3. A shutdown, isn't it?
+- Calder put you up for Senior? She doesn't do that lightly.
+- A Tier 3 test after the storm you had. Fair enough.
+- Tier 3 means you switch things off. On purpose.   #funny
+? dept:works
+- Tier 3 is a junction shutdown. Warn people first.
+- Your Tier 3's a junction. Rubber gloves, mind.
+- It's always the port junction on Deck 6. Always.   #funny
+? act:breakfast|dinner
+- So you're the one up for Tier 3. Everyone's saying.
+- Eat up. Senior test tomorrow, I hear.
+
+== pu3.luck
+? tier>=friend
+- Good luck tomorrow. You did the storm. This is nothing.   #warm
+- Big day tomorrow. Early night, all right?   #warm
+- Tier 3 tomorrow. I've got a cup up for you.   #warm
+- To your test. Cheers. No, really, cheers.   #funny
+? tier>=friend time:morning
+- Today's the day. Go and switch something off.   #funny
+- Good luck. Warn everyone twice. You'll be fine.   #warm
+- Eat something first. Shutdowns go better fed.   #funny
+? tier>=friend place:lounge
+- One more song, then bed. You've a test.   #warm
+- Raise a cup, everyone. Tier 3 tomorrow.   #warm
+
+== pu3.watch
+? dept:works
+- Don't mind us. We're just passing. Slowly.   #funny
+- Steady. Check it's dead before you touch it.
+- Calder's quiet. Quiet's good with Calder.   #funny
+?
+- That's the shutdown test, isn't it? Good luck.
+- Lights going off for the test? Fine by me.
+
+== pu3.passed
+? tier>=friend
+- How did it go? Your face says well. Does it?   #warm
+- Result tomorrow? I'll be outside the glass.   #warm
+- You passed. I know you passed. Tell me tomorrow.   #funny
+?
+- Heard the junction came back on first time.
+- Your Tier 3 test's done? That's a big one.
+? dept:works
+- Clean shutdown today. Nobody even spilt a tea.
+- The bay's talking about your junction. Good talk.
+- Calder said "Good." Twice, apparently.   #funny
+
+== pu3.senior
+? tier>=friend
+- Senior Officer! At this rate you'll be Captain.   #funny
+- Senior Officer. I knew it. I'm so pleased.   #warm
+- The bar this afternoon? I'm coming. Try and stop me.   #warm
+?
+- Congratulations, Senior Officer.
+- Senior Officer already? Well done.
+- The Captain pins your bar at half four, I hear.
+? dept:works
+- A Senior in the bay. Mind you still make the tea.   #funny
+- Tier 3 jobs on the board for you now. Lucky you.   #funny
+? act:breakfast|dinner
+- That's the new Senior Officer. Over there.
+
+== pu3.bar.friend
+? tier>=friend
+- Senior Officer. Look at you. Look at the bar.   #warm
+- It's straight. I checked. Calder checked too.   #funny
+- Well done. Properly. I'm so proud of you.   #warm
+?
+- Congratulations. Suits you.
+
+== pu3.cake
+? tier>=friend
+- Brennan made it for you. So you get the corner.   #warm
+- First slice is yours. Second's mine. That's the rule.   #funny
+?
+- Cake for the new Senior. Lovely.
+
+// one of the two people you warn in the test ({room} if the builder fills it; these never need it)
+== pu3.warned
+- A shutdown? Thanks for telling me. I'll go elsewhere.
+- How long? An hour? Fine. Thanks for the warning.
+- Right you are. I'll save my work first.
+- Off at ten? I'll take my tea break then. Thanks.
+- Thank you for coming to say. Most people don't.
+- Fine. Shout when it's back on, will you?
+? dept:works
+- Shutting it down? Good. That breaker's been noisy.
+- I'll keep clear. Gloves on, you.
+? dept:command
+- Noted. I'll let the bridge know. Thank you.
+? dept:galley
+- Off? Not the ovens, I hope. No? Then that's fine.
+? dept:survey
+- I'll back my readings up first. Thank you.
+
+// Mail from up to two friends the day you're made Senior Officer ("Subject | body", {me} and {nick})
+== mail.pu3.friend
+? tier=friend
+- Senior Officer! | Heard at lunch. Senior Officer {me}. You'll need a bigger mug. Come and find me later.   #funny
+- Well done | Two promotions in a month. I've had one in two years. Well done, properly. Tea soon?   #warm
+? tier=close
+- Told you, again | I said you'd make Senior. I was right again. I'm getting used to it. So proud of you.   #warm
+- Your bar | I want to see the bar up close. I'll be at the observation room door. Congratulations, {nick}.   #warm

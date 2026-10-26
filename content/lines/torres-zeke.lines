@@ -1029,3 +1029,16 @@
 == bday.thanks
 - Thanks, all! Right, cake. Then onward. Properly.   #warm
 - You lot. I'm going to hum. Sorry. Thank you.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the Senior Officer promotion
+== work
+// his word at the end of the Tier 3 test, if he's near (train.t3.torres)
+? flag:train.t3.torres
+- That came back on first time? Properly first time? Brilliant.
+- I'd have warned three people and the coils. Good job.   #funny
+// outside the glass during your result (pu3.promo.glass): a thumbs up, then this
+? flag:pu3.promo.glass
+- Well? Well? Your face. You passed. I knew it.   #warm
+// the bay that evening, after the test
+? flag:pu3.promo.passed
+- Don't tell me. I'll know tomorrow. I'll know by your walk.   #funny

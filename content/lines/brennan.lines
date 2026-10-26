@@ -654,3 +654,9 @@
 == bday.thanks
 - Thank you, loves. Now eat it before it goes cold. It's cake.   #funny
 - Oh, you lot. Who baked? Not me, for once. Thank you.   #warm
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-2): the cake after your bar (flag pu3.cake, as for your pip's promo.cake)
+== work
+? flag:pu3.cake
+- Cake for the new Senior. Corner piece, love. You've earned the icing.   #warm
+- Pell. Second slice. Not first. I can see you.   #funny
