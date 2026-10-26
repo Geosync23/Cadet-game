@@ -62,3 +62,4 @@ For the fresh seat. FX20 stopped here at ~66% memory, and nothing below is done 
 - **S3:** add a live part to the check: the walker inside each room in order.
 - **S4:** this note's older lines say STEP 3 / 06:29-06:54. It's STEP 5 now (06:30-07:10) and will change with M2.
 Branch claude/inspection, head after this note. Tell lead 38 (session_01G2y9crUv6vDiiEB2q6Yo9W) and RV19 (session_01V6FDCQp5Ejidi8Chpo2nJG) when the fixes are in.
+- **RV19's probe** for proving M2/M3 live: `git show origin/claude/review-rv19:plans/rv19-probe-inspect.py > probe.py`, then `OUT=. CADET_WORK=<own> CADET_CHROME=/opt/pw-browsers/chromium python3 probe.py GAME_ON.html 11 bunk` (walker's room, target and distance each minute, every worksSay/toast and the Mail; ~10 min a day).
