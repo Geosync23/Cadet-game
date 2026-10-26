@@ -7736,7 +7736,7 @@ for (const [r, c, j, f] of [['a', 8, 3, 'n'], ['b', 13, 3, 'n'], ['c', 17, 3, 'n
 // at each room's 4-inspect place, yours (Bunk 1, room a) first; the juniors stand in front of their bunk (a stand spot
 // per bunk, <bed>-stand, made here only while the switch is on) until the walk has passed their room. Section 14 plans
 // it; 24c says the words when the walker is really there. INSPECT_ON false: as before.
-var INSPECT_ON = false;
+var INSPECT_ON = true;
 // FX20b (RV19's M2): the rooms in deck order, the north side first (a e b g c: the rooms on rows 3 and 6 face each
 // other across one corridor), then across to the south side (h f d). Each with the path from the room before, in tiles
 // (findPath between the 4-inspect places on Deck 4, measured once). A room's time: the walk at the crew's pace (1.15
