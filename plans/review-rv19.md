@@ -252,3 +252,33 @@ before Day 5" (M3 done); devmode_check OK (M4 done). M1 (the result's arrow leve
 unchanged in the code (promoGuide, promoSummonsTick), so the live finding stands.
 
 **Verdict on 104420fd: FIXES NEEDED (M1, M2; S1-S6 as above).**
+
+### Step 2: 44a4565f (game sha256 e88aadfe...3575)
+Diff read (vs 104420fd): promo:summons level 1 with the switch on (M1); the summons seek checks the office
+(promoInOffice), not the bay, with the switch on (M2); "There it is. Yours." held to 09:00 when the test is made earlier,
+once (flag pb.tell; S1); the missed commission's Mail through promoBK to promo.ceremony.mail (S3); the evening walk's
+escort follows you first, then leads once she's within 2.5 tiles or 15 minutes on, W.mv.met, the notice and her word
+reworded (S4); promo.move.notice through promoBK. Off: every change is behind promoBeatsOn().
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d, alone | 44a4565f, PROMO_BEATS_ON false | ALL IDENTICAL (renderer noise only) |
+| career_check | 44a4565f | only the known-old "busy: Relied on before Day 5" (backlog FX28-1) |
+| promo_beats_check | 44a4565f | PROMO BEATS CHECK OK (new part `review`) |
+| check_fast, devmode_check, lines_check, names_check | 44a4565f | OK (FX28's runs) |
+
+Played again at 390 x 844 (plans/rv19-promo-live.py, the player left waiting in the Works bay, needs low, no top-up):
+- 08:20: the world arrow "Your result: the Chief's office, 08:15" and the banner "Your result: the Chief's office is
+  starting · Go there", over the hunger and shower nudges (M1 fixed).
+- 08:32: Calder comes out to you: "There you are. My office was the plan. Here will do.", then the promo.result card where
+  you stand, readable at phone size; through it you're an Officer, the Captain's and friends' Mails (M2 fixed).
+- Missed pip: the Mail now reads "We missed you at the ceremony, so the Captain signed it anyway..." (S3 fixed).
+- 20:00: "Chief Ines Calder is coming to find you and take you there."; at 20:03 she reaches you in the bay: "There you
+  are. Your cabin, then. With me." (S4 fixed; the walk itself needs you to follow her, so my standing probe stops there).
+
+Accepted, no change: S2 (the pip's seek at +15 and the room closing at its length, as 0.93.1 does), S5 (lead 38 asked
+FX28 to set 0.93.2-p.1), S6 (the "New officer" reputation toast comes from xp resetting at promotion, as before).
+Note N1: in my run the result card took about 30 ship minutes (my probe's slow taps), so section 18 also sent a
+"(notes)" Mail at 08:45 while the card was still open; at a normal reading pace the card ends well before.
+
+**Verdict on 44a4565f: PASS.**
