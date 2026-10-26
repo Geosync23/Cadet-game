@@ -4,6 +4,29 @@ Check runner 5. Share (plans/testing-guide.md, six-way split): `day_check` Days 
 career. Own `CADET_WORK=/tmp/work-cr5`, `CADET_CHROME=/opt/pw-browsers/chromium`, one browser check at a time, each
 on a copy of the game in `/tmp/work-cr5/new.html` (sha256 checked after copying).
 
+## 0.93.2 full round, first pass (2026-10-26, started 11:28 UTC, for BM18 and lead 38)
+
+- Candidate: `claude/staging-0.93.2` 41c8a7e0 (0.93.2; switches on: TRAD_0932, EV_COMET, INSPECT, STORM_SAT,
+  SAVE_SLOTS, AUTO_DOORS, PROMO_BEATS; EV_SWAP off). Checks run from a worktree of 41c8a7e0 (its own scripts).
+- `starship-cadet.html` sha256 `89eafdc1cc2f2cbcc77db9168b009cb19561b9efe9067aeedf6386947a704960`: matches BM18's.
+- OLD: 0.93.1 b957b92d (`6cd54ab9...8eee`, the file of my 0.93.1 round).
+- Day 22 (the comet) joins the share from 0.93.2. CR6 took **events_check and sound_check** (11:59 UTC, BM18's
+  suggestion; not started here, scripts moved out first, put back afterwards).
+- BM18 (11:43 UTC): CR6's mech m9 FAIL gets a game fix (FX26), then the whole round runs again on the new sha.
+
+| Check | Result | Exit | Time | Key lines |
+|---|---|---|---|---|
+| `interactions_check.py BUILD` | OK | 0 | 2712 s | `INTERACTIONS CHECK OK` |
+| `day_check.py BUILD 21` | OK | 0 | 324 s | `DAY CHECK OK`; draw calls peak 225 / 195 / 295 / 237 on Decks 1-4 (budget 450) |
+| `day_check.py BUILD 22` (new, the comet) | OK | 0 | 305 s | `DAY CHECK OK` |
+| `day_check.py BUILD 27` | OK | 0 | 291 s | `DAY CHECK OK` |
+| `career_check.py BUILD` | **known (backlog 12 / FX28-1)** | 1 | 152 s | only `FAIL busy: "Relied on" before Day 5` (busy player Days 1-5: 29, 29, 28, 26, 23 jobs; xp 3, 16, 32, 41 relied, 60); ship.works 2526 bytes |
+| `promo_sight_check.py BUILD` | OK | 0 | 17 s | `PROMO SIGHT CHECK OK` |
+| `events_check.py BUILD` | **known (FX24-2)** (run by CR6) | 1 | 1156 s | only `FAIL   not reached: ['farouk-olu>3-lounge-28 16:00']` (CR6) |
+| `sound_check.py BUILD` | OK (run by CR6) | 0 | 302 s | `SOUND CHECK OK` (CR6) |
+
+**CR5 share, first pass: OK** (6 OK; career and events only their known lines). No NEW FAILs.
+
 ## Pre-round job for RV19: FX26's storm Saturday (2026-10-26, 10:06 UTC, for RV19 and lead 38)
 
 - `claude/storm-sat` 402899bd ("0.93.2-w.5 (FX26): the lantern supper's sittings 35-50 minutes ..."), the game as
