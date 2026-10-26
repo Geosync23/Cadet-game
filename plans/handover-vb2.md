@@ -3,7 +3,7 @@
 Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired by lead 39 (session_019V68fz33UFv4cK5Z4iCDvi). Spec: plans/veyli-vessel-spec.html on claude/p5-specs (e9f0962c), pieces V-5 (the ship outside and the small props) and V-3's chain spots. The events builder VB1 (session_01UsjGN26E88zwrNPWwef4iT, claude/vessel) owns the event itself: V-1 to V-4, the switch `EV_VESSEL_ON`, SHIP_EVENTS.veyliVessel, the beats, rings, arrows, the chain's gathering.
 
 ## Branch and builds: claude/vessel-sky (from claude/staging-0.93.3 d9c7e5f)
-- vessel-sky v.1: everything below (build-table row "vessel-sky v.1"). DEV_NOTES "A Veyli vessel needs help: the looks" has the details.
+- vessel-sky v.1 e21ade10, v.2 (staging merged, vesselSheet, VESSEL.sky, EN2's crossingBackShip hook): everything below (build-table row "vessel-sky v.1"). DEV_NOTES "A Veyli vessel needs help: the looks" has the details.
 
 ## What I own
 - The slot `// ---- slot: Vessel sky` (section 18, after the Appointments builder's slot) and one line in eventsTick after the comet's (`if (vesselOn()) vesselSkyFrame();`).
@@ -17,6 +17,11 @@ Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired b
 - VB1's ring "Put the sketch on your shelf" calls `vesselShelve()`.
 - VB1's chain gathering uses the pool `{ deck: 5, pool: '@vessel-chain' }`, Zeke at `5-vchain-call`, you at DECKS[5].vesselChain.you; `vesselChainCrate(now).moving` tells when a crate reaches a spot.
 - Systems effect name 'skyVessel' (cosmetic).
+
+## Others
+- EN2 (session_013er8NqC8eftyZqXBzcSibF, the ending): its `crossingBackShip(now)` -> null | { pose: 'bow' | 'alongside', lights, flash } shows the ship again Days 34-35 (vesselSkyNow).
+- RV21 (session_01AmTyMHLr5UuCY9zo3nQcwS) reviews: send shas to RV21, lead 39 and BM18.
+- Poses bow/wave (VB1's ask): 8b's seat, not mine; told VB1 to ask lead 39.
 
 ## Loose ends
 - The shelf when your quarters move to Deck 2 (Step 6, Tier 4): no shelf spot there yet; the sketch shows only on Deck 4 (bunk or 4-23).

@@ -46534,13 +46534,25 @@ function vesselAnchor(out) {
   for (let k = 0; k < 3; k++) S.at[k] += (S.to[k] - S.at[k]) * .06;
   return out.set(S.at[0], S.at[1], S.at[2]);
 }
+// what the sky shows now: the vessel event's ship (unless VB1's VESSEL.sky, the user's C2, says words only), else the
+// ending's (EN2's crossingBackShip(now) in the slot 'Ending builder': null, or { pose: 'bow' | 'alongside', lights 0..1,
+// flash }, typeof-guarded; its comings and goings eased over about 10 seconds here). -> vesselLook's shape, or null
+function vesselSkyNow() {
+  const t = vesselT(), sky = typeof VESSEL === 'undefined' || !VESSEL || VESSEL.sky !== false, S = VSKY, r = simNow() / 1000, dt = Math.min(.1, Math.max(0, r - (S.rt || r)));
+  S.rt = r;
+  if (sky && t != null && t >= VSKY_FROM && t < VSKY_TO) { S.hk = 0; return vesselLook(t); }
+  const x = typeof crossingBackShip === 'function' ? crossingBackShip(shipNow()) : null;
+  if (x) { const al = x.pose === 'alongside', n = shipNow(); S.hook = { k: 1, s: al ? 1.35 : 1, go: 0, lights: .35 + .65 * Math.max(0, Math.min(1, +x.lights || 0)), engine: 1, flash: x.flash ? Math.pow(Math.sin(Math.PI * (n % 1)), 2) : 0 }; }
+  S.hk = Math.max(0, Math.min(1, (S.hk || 0) + (x ? 1 : -1) * dt / 10));
+  return S.hook && S.hk > 0 ? { ...S.hook, k: S.hk } : null;
+}
 // every frame from eventsTick (looks only, nothing saved): the ship outside, and the chain's moving crates on Deck 5
 function vesselSkyFrame() {
   if (typeof deckDef !== 'undefined' && deckDef && deckRoot) vesselChainFrame();
-  const t = vesselT(), up = t != null && t >= VSKY_FROM && t < VSKY_TO && typeof deckDef !== 'undefined' && !!deckDef && typeof renderer !== 'undefined';
-  if (!up) return vesselSkyDrop();
+  const L = typeof deckDef !== 'undefined' && !!deckDef && typeof renderer !== 'undefined' ? vesselSkyNow() : null;
+  if (!L) return vesselSkyDrop();
   const S = VSKY; if (!S.m) S.m = vesselSkyMake();
-  const L = vesselLook(t), U = S.m.material.uniforms, sz = renderer.getSize(S.s), px = v => [(v.x + 1) / 2 * sz.x, (v.y + 1) / 2 * sz.y];
+  const U = S.m.material.uniforms, sz = renderer.getSize(S.s), px = v => [(v.x + 1) / 2 * sz.x, (v.y + 1) / 2 * sz.y];
   vesselAnchor(S.v); if (L.go) S.v.x += L.go;
   const h = px(S.w.copy(S.v).project(camera)), b = px(S.w.copy(S.v).add(_vsX).project(camera)), ax = b[0] - h[0], ay = b[1] - h[1], tile = Math.hypot(ax, ay) || 1;
   const hs = Math.max(7, .8 * tile * L.s), R = 3 * hs;                    // half its length on screen; the quad reaches past the engine's plume
@@ -46647,6 +46659,15 @@ function vesselDress() {
       const s = dressAt(g, 'w', 'n', 9.3 + .55); vesselCard(s, 1.74, .057, 'works');   // .007 off the pegboard
       return { t: vesselW('tap.sketchWorks.t', 'Taavek\'s sketch'), x: vesselW('tap.sketchWorks', 'Taavek\'s pencil sketch of the Works bay: the tool wall, a bench, two heads bent over the round one. Signed with a blue loop. Calder pinned it up herself.'), wall: ['w', 'n', 9.3 + .55], y: 1.74, w: .4, h: .32 };
     } },
+    // Calder's parts chain sheet (VB1's ask): pinned to the bottom corner of the Works job board, where the storm's sign-up
+    // sheet goes (signupWorks; never out at once), Saturday 09:30 to Sunday 14:00; o.lines the names signed so far. Its item
+    // carries the tag { vesselSheet: true } for VB1's tap (signing; PLAYER_TAPS); its text by SHIP.event.mine['vessel:signed']
+    vesselSheet: { deck: 5, on, what: 'the parts chain sheet on the Works job board', make(g, o) {
+      const signed = !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed']);
+      dressSheet(dressAt(g, 'w', 'n', 6.65), { head: 'PARTS CHAIN', title: vesselW('sheet.title', 'Sunday 13:00\nMain storage to the Tern'), lines: o.lines || [] }, .088, 1.12);   // in front of the board's screen (.075)
+      return { t: vesselW('tap.sheet.t', 'Parts chain sheet'), x: signed ? vesselW('tap.sheet', 'The parts chain sheet. Your name is on it, in your own handwriting, between two of Zeke\'s friends.') : vesselW('tap.sheet.before', 'Calder\'s sheet for the parts chain: Sunday at 13:00, Main storage to the Tern\'s ramp. A line of names, and room for more.'),
+        wall: ['w', 'n', 6.65], y: 1.12, tag: { vesselSheet: true } };
+    } },
     // the chain's two stacks: Main storage's, by its door, going down; the bay's, beside the ramp's foot, going up (o.n)
     vesselChainFrom: { deck: 5, on, what: 'crates of parts for the Veyli ship, by Main storage\'s door', make(g, o) {
       const r = ROOM_BOX.r, a = 25.6 - r.i0, b = 5.45 - r.j0, s = dressAt(g, 'r', 'floor', a, b); vesselStack(s, o.n == null ? VCHAIN.n : o.n);
@@ -46666,6 +46687,11 @@ function vesselDress() {
     } },
   });
 }
+// the names on the sheet: Calder's and Zeke's first, then the Works crew by roster order, and yours once you've signed
+function vesselSheetLines(c) {
+  const you = SHIP.event && SHIP.event.mine && SHIP.event.mine['vessel:signed'], n = dressNames('works', 9).filter(x => x !== 'Calder' && x !== 'Torres');
+  return ['I. Calder', 'Z. Torres'].concat(n.slice(0, you ? 4 : 5)).concat(you ? [(c && c.you) || 'Cadet'] : []).slice(0, 8);
+}
 // put the sketch on your shelf (VB1's ring "Put the sketch on your shelf" calls it): a lasting trace with today's day
 function vesselShelve(day = SHIP.time.day) { if (vesselOn()) traceAdd('vesselSketchShelf', day); }
 // the windows (event day, from, to) each prop shows in: Sunday's meeting to Monday's goodbye; the sketch from 15:20 on
@@ -46674,6 +46700,7 @@ const VDRESS = [
   { id: 'vesselPartOld', at: [1, 600, 1440] }, { id: 'vesselPartOld', at: [2, 0, 570] }, { id: 'vesselPartOld', shop: 1, at: [2, 570, 900] },
   { id: 'vesselPartNew', at: [2, 570, 900] },
   { id: 'vesselSketchWorks', at: [2, 920, 1440] }, { id: 'vesselSketchWorks', at: [3, 0, 1440] },
+  { id: 'vesselSheet', at: [0, 570, 1440], lines: vesselSheetLines }, { id: 'vesselSheet', at: [1, 0, 840], lines: vesselSheetLines },
   { id: 'vesselChainFrom', at: [1, 720, 830], get n() { return vesselChainCrate().left; } },   // the counts read as dressShow is handed the list (a minute's)
   { id: 'vesselChainTo', at: [1, 781, 1440], get n() { return vesselChainCrate().n; } }, { id: 'vesselChainTo', at: [2, 0, 900], get n() { return VCHAIN.n; } }];
 // the parts chain's crates (V-3's looks; VB1's chain owns who stands where and your turn): Sunday 13:01, twenty crates set
