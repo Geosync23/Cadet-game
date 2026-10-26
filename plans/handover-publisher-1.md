@@ -1,6 +1,6 @@
 # Handover: publisher 1 (PUB1)
 
-Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note only). Started under lead 25; now reports to **lead 36** (session_015LyT1p2Kivp1eaMBC7dMQi). Before taking orders from a new lead or build master, check that TEAM.md on the previous lead's branch records the handover, or ask the previous lead.
+Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note only). Started under lead 25; now reports to **lead 38** (session_01G2y9crUv6vDiiEB2q6Yo9W). Before taking orders from a new lead or build master, check that TEAM.md on the previous lead's branch records the handover, or ask the previous lead.
 
 ## The user's standing rules for the pages
 - **The old Dev page https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq (Version 11 = 0.92.2) holds the user's longer playthrough save. Never publish over it unless the user explicitly says so** (lead 34, 2026-10-24).
@@ -10,8 +10,8 @@ Session session_01GnpjFR6oumvuvTrmcXSqeg, branch `claude/publish-25` (this note 
 ## Pages (all private to the user's account; sharing is the user's, from each page's Share menu)
 | Page | Link | Now | Scratchpad source (same path = same link) |
 |---|---|---|---|
-| Playtest (current) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v3 = 0.92.6 (staging-0.92.6 ec28a7f2) | play-0.92.3/starship-cadet-playtest-0.92.3.html |
-| Dev (current) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v3 = 0.92.6 | dev-0.92.3/starship-cadet-dev-0.92.3.html |
+| Playtest (current) | https://claude.ai/artifact/3HqM5XiXaHXzgrpq7JbesJ | v6 = 0.93.2 (staging-0.93.2 d9c7e5f0), capabilities {downloads: true} | play-0.92.3/starship-cadet-playtest-0.92.3.html |
+| Dev (current) | https://claude.ai/artifact/9ZWAgqiZCvkJvVjjhjVkEr | v6 = 0.93.2, capabilities {downloads: true} | dev-0.92.3/starship-cadet-dev-0.92.3.html |
 | Playtest (old, user's save) | https://claude.ai/artifact/Wn6mUGcxatoWVqhCNTa1vs | v11 = 0.92.2, **don't touch** | play/starship-cadet-playtest.html |
 | Dev (old, user's longer save) | https://claude.ai/artifact/6daNCLCJAcsLCZn27CEthq | v11 = 0.92.2, **don't touch** | dev/starship-cadet-dev.html |
 | Sim Bay Preview | https://claude.ai/artifact/G1fpE2YeMtPukqTZ2J3u77 | v1 = claude/rec-simbay cb4387e8 | simbay-preview/sim-bay-preview.html |
@@ -36,3 +36,5 @@ History of the old pairs: 0.64.12 (v1), 0.64.13, 0.64.14, 0.64.15, 0.64.16, 0.64
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>
 Claude-Session: https://claude.ai/code/session_01GnpjFR6oumvuvTrmcXSqeg" && git push -q -u origin claude/publish-25 2>&1 | tail -1; git log --oneline -1- **Phone-size check** (when a lead asks): headless Chromium (Playwright, NODE_PATH=$(npm root -g)) at 390x844 with touch, opening the scratchpad file; cdnjs is blocked in the container, so serve three.js from `npm pack three@0.128.0` with page.route, as cadet_test.py does. A fresh game opens on the shuttle manifest: fill the name and click "Sign and go aboard" to see the HUD. The build number is on screen only in Dev mode's Speed card.
+- **From 0.93.2 both current pages declare `capabilities: {downloads: true}`** (the Saves app's Download my save). A non-empty capabilities object replaces the stored set: keep passing it on every republish, or omit `capabilities` to carry it forward.
+- **Sound test**: the game mutes itself under automated browsers (navigator.webdriver) unless the link has `#sound` (`#dev.sound` on Dev); for Settings, Music and Saves, use a test-only copy with cadet_test.py's eval hook (`window.__sc = src => eval(src);` before the last `})();`), `introFlagSet('intro.device')`, then `deviceShow('settings' | 'music' | 'saves')`. Scripts: tools/build_pages.py, tools/instrument.py, tools/sound2.js in the scratchpad (rebuild them from this note in a new session).
