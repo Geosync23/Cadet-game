@@ -87,6 +87,37 @@ at phone size.
   FX20b for M2, M3, S1, S2 on claude/inspection (handover 9137785e carries these notes). The probe is
   plans/rv19-probe-inspect.py on this branch.
 
+### Re-review: FX20b (session_01ForKrDZQQCL59hA3yZDfD3), 9b7eae69 (game = 0bc18dc, sha256 29fd2411...4b1c; on copy c2e937ea...f1f8)
+Diff read (vs 03449ace): 4d INSPECT_ROUTE (a e b g c h f d, each leg's tiles), INSPECT_TIMES / inspectPass from it,
+inspectWalker skips anyone not aboard; 14 schedFrame (the walker in bed by 22:40 the night before), morning() (the walker's
+own block: a 5-min wash only if done before set-off, set-off from walkLead, each room's door till inspectPass; the juniors
+in their bunk till 10 min before the walker's due, then stand); withHold gives the walker the officers' datapad at each
+4-inspect place (the 'look' anim gone); 24c inspectWalkDo (words for the whole walk, the result in person when the walker
+reaches your room with you in it, there-from-06:30 safety net at 07:20 as their word, never the Mail). Off: the WORK_TICKS
+line returns into inspectWalkDo only with INSPECT_ON; the old two lines are unchanged. Nothing calls R() at load.
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d, alone | 9b7eae69 off | ALL IDENTICAL |
+| check_fast | 9b7eae69 on | QUICK CHECK OK in 559 s |
+| day_check 4 / 11 / 18 | 9b7eae69 on | DAY CHECK OK, all three; schedules 0/0/0/0/0; worst stuck 0.2 ship min; draw calls peak 345 |
+| day_check's new live part | same | a@06:20-06:23 (in 10-13 min), then e 06:36, b 06:41, g 06:45, c 06:49, h 07:01, f 07:07, d 07:12, 2-3 min inside each, all three days |
+
+Played (my probe, 390 x 844, a ship minute at a time):
+- Day 11 at the bunk: Tove Cruz in Bunk 1 from 06:10; 06:30 "Right, Bunk 1. Let's have a look at you."; 06:31 the result
+  in person (note here: true); no Mail. Then every room in route order, inside each 1-3 min; done toast 07:14. (M3 fixed.)
+- Day 4 following the walker room to room: Calder's arrival and result in Bunk 1, then a line in every room (Bunk 5, 2, 7,
+  3, 8, 6, 4) and the done toast at 07:14. (M2, S1 fixed.) Bubbles at phone size over the room, readable.
+- M1 and S3: day_check checks the route, the plan's times and the live walk; S2: datapad; S4: handover note updated.
+
+Notes (not blocking, no change asked):
+- N1. With the juniors up only 10 minutes before the walker's due, 4-10 are standing in the room being visited (8 in Bunk 1).
+  Enough to read as an inspection; a tuning item if the user wants a fuller line-up.
+- N2. In my Day 4 follow shots the bubbles in Bunks 2 and 3 are dimmed: Tomas's Day 4 card was still open (my probe's
+  setup jumps straight to the morning without closing it). Not judged.
+
+**Verdict on 9b7eae69: PASS.**
+
 ## FX28, promotion beats (claude/promo-beats, PROMO_BEATS_ON)
 Added by lead 38 at 05:07: the Tier 2 test and promotion made "very very hard to miss" (the user). Lands in steps over
 about 9-10 h; each step reviewed as it arrives, every one on a phone-size screen. Not pushed yet.
