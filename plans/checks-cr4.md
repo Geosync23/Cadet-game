@@ -43,6 +43,8 @@ SAVES CHECK FAILED
 
 **CR4:** day_check x6 and appt_check OK; saves_check NEW intermittent FAIL (1 of 4), reported.
 
+**Root cause follow-up (FX27, 12:13-12:40):** FX27 asked for the full output and more runs. On my scratchpad copy of the game the 41c8a7e0 saves_check failed 2 of 3, then 1 of 3 again (`migrate nosave`); on the repo's copy 0 of 3. FX27's test-only fix, claude/save-slots b6701992 (saves_check.py only: switches from the old build to the new one in the same tab instead of closing and reopening; prints "storage before ..." if the save is ever missing): **5 of 5 OK** on the same file and setup, no "storage before" lines. So the FAIL was the check's tab switch, not the game. $CADET_WORK/test held only other checks' leftovers (no _saves_* files) before the runs.
+
 ## 0.93.1 full round (2026-10-26)
 
 - **Candidate:** `claude/staging-0.93.1` 0a2fc617 (HUD 0.93.1; arrows_check promo fix, boardLesson/promoTestDay)
