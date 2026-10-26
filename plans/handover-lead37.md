@@ -17,6 +17,7 @@ Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-
 - Listening pass on sound: user hasn't given feedback yet; route to SD1 (core), FX20 (activities), FX22b (music). Listening list: plans/sound/audio-todo.md (dryer, airlock, shuttle bay not built).
 
 ## Seats (see TEAM.md CURRENT SEATS)
+FX25 (new) session_01V8edQWJxn9jX4Ddn19Jprf builds the comet (claude/comet). FX22b ~50% handing over after the swap.
 EP1 (new) session_01LjeoeX6qpCuwTV5UNVNwV5 (USER: comet ON in 0.93.2; FX22b builds it after the swap): detailed plan page for the visit + comet (claude/events-plan-2) → publish to the user.
 RV18 (new) session_01PMfvrCN6StPzwVSPGX7ijH reviews FX22b, FX24 and FX20.
 FX20: bunk inspection with a real supervisor (claude/inspection, INSPECT_ON).
