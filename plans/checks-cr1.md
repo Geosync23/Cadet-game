@@ -445,3 +445,8 @@ OLD = 0.93.0 df8d58b9 (97f21893…f6a8). One at a time (arrows_check alone), CAD
 | dev_arrow_check | **OK** | 33 s | DEV ARROW CHECK OK |
 
 No FAILs, so no OLD runs were needed.
+
+## 0.93.1 extra: CR5's events_check and sound_check (agreed with CR5, BM18's ask)
+
+On 0a2fc617 (sha256 6cd54ab9…5a8eee), default args, one after the other, alone: **events_check OK** (exit 0, 589 s,
+EVENTS CHECK OK); **sound_check OK** (exit 0, 167 s, SOUND CHECK OK). No FAIL lines. CR5 removed both from its run.
