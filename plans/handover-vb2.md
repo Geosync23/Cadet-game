@@ -26,7 +26,8 @@ Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired b
 ## Loose ends
 - The shelf when your quarters move to Deck 2 (Step 6, Tier 4): no shelf spot there yet; the sketch shows only on Deck 4 (bunk or 4-23).
 - The deck_check / perf_check scenes with crowds wait for VB1's event block; measured with a stand-in: bow lounge Mon 17:41 279 calls, Works bay Sun 13:30 206.
-- Words: `event.veyliVessel.tap.*` (crate, partOld, partNew, sketchWorks, sketchShelf, stack, stackFrom, stackTo, each with a `.t` title) for the head writer; stand-ins in code.
+- Words: SW4's keys are read (tap.part, tap.newpart, tap.sketch.wall, tap.sketch.shelf, tap.crate for the stacks, tap.sheet(.before)); still stand-ins: tap.taavekCrate and the `.t` titles. SW4's shelf text says "your favourite machine" but the drawing is you at the ramp: lead 39 routes that word fix.
+- RV21 PASS on c070862c (3 shoulds, fixed in v.4).
 
 ## How to test
 - A copy with the switch on: `python3 -c "s=open('starship-cadet.html').read(); open('/tmp/cadet-work/test/vsky.html','w').write(s.replace('const P926_APPT = true;', 'const EV_VESSEL_ON = true;\nconst P926_APPT = true;', 1))"`; without VB1's block, stub SHIP_EVENTS.veyliVessel (days 4, phases) then `vesselLooksInit(); eventStart('veyliVessel', 27)`.
