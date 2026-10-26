@@ -1539,3 +1539,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~22:16 UTC: **RV21 PASS VB2 vessel-sky 3fb8eac7** (v.6 bench places for VB1, behind the switch; final sky sha, includes cfc2dbe3). VB1 merges it.
 - ~22:17 UTC: CR6 0.93.3: stories, promo_beats, mech, bigevents OK; join_check crashed on page-load timeout (no FAIL; load), rerun alone at the end.
 - ~22:19 UTC: **CR4 0.93.3 OK** (day 6/8/12/13/16/19, appt, saves; notes claude/checks-cr4 74e34c76); offered BM18 spare capacity.
+- ~22:20 UTC: B1 (via lead 39): ladder order, ps in person, comet line done, in checks, push within the hour; takes the teacher-at-meeting fix (gated P5_STEP5, off identical).
