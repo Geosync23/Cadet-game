@@ -18,7 +18,8 @@ Lead 37 = session_019GcNZ4GGEqfiuYDYnue7nX, branch claude/lead-37, hourly check-
 
 ## Seats (see TEAM.md CURRENT SEATS)
 EP1 (new) session_01LjeoeX6qpCuwTV5UNVNwV5 (USER: comet ON in 0.93.2; FX22b builds it after the swap): detailed plan page for the visit + comet (claude/events-plan-2) → publish to the user.
-RV18 (new) session_01PMfvrCN6StPzwVSPGX7ijH reviews both FX22b and FX24.
+RV18 (new) session_01PMfvrCN6StPzwVSPGX7ijH reviews FX22b, FX24 and FX20.
+FX20: bunk inspection with a real supervisor (claude/inspection, INSPECT_ON).
 FX24 (new) session_017zuWxNJfppnVwkQDtiwnb6 (USER RULE: every tradition = host you tap to join + simple pose/animation for the event + unique dialogue): traditions on claude/trad-0932 (take-turns, 14 new, tasting table rework, tea retired). CS1 writes words. Round-2 answers in: 13 yes + scones; Valo undecided.
 BM18 session_01A3S2VBMYmTt2wCZa8ej7XR (fine). Runners CR1, CR2, CR4, CR5, new CR6 fine; CR3 ~59% retired -> hire fresh CR3 from plans/handover-cr3.md (claude/checks-cr3) before the next round. FX17, BM17, old CR6 retired.
 
