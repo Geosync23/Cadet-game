@@ -551,3 +551,6 @@
 - There. The ramp's opening.
 == event.veyliVessel.gather.arrival.thanks
 - You stand with the crowd in the shuttle bay as the Tern's ramp comes down.
+// Monday, a tap on the lathe while it turns the part (step 3's ten minutes)
+== event.veyliVessel.wait
+- The lathe's still turning. Taavek holds up ten fingers, then fewer.

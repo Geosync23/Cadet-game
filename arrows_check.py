@@ -26,7 +26,7 @@
 #          first workday after the scanner's first use (Day 9 at most); no arrow left up after its
 #          moment (the same label for over 3 ship hours)
 # On 0.64.15 (2b4a05db) both FAIL: that is the point. Which fixer turns which line green is printed with each FAIL.
-# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo; default all, about 45 minutes; promo alone about 30)
+# Run one part:  python3 arrows_check.py BUILD.html shift   (parts: queue, clockin, shift, week, promo, vessel; default all, about 70 minutes; promo alone about 30, vessel about 25)
 # Part "promo" (DV1, lead 34): Days 8-12 following only the arrows: the first promotion end to end (see part_promo)
 # Part "clockin" (patch 0.92.3 item 6, AC3): Days 1-3 into the Works bay before clocking in: the clock-in tip at once (Day 1: after
 # Zeke's line), Clock in tracked (not with Teaching arrows Off), both gone the moment you clock in. A real new game.
@@ -510,9 +510,55 @@ def part_clockin(ctx, path):                              # patch 0.92.3 item 6 
     print(f'  clockin: Day 1 {a} -> {b} -> {c}; Day 2 {d}; Day 3 (Off) {e}')
     pg.page.close()
 
+# Part "vessel" (VB1 for lead 40; plans/veyli-vessel-spec.html, "The arrow-follower check"): A Veyli vessel needs help in a
+# copy with EV_VESSEL_ON switched on, from the career set to the end of Day 26 (a Day 26 evening), playing as a player who
+# only follows the arrow and the rings (FOLLOW, plus a tap on the person the arrow names for a gathering: the chain's Zeke,
+# the lights' Saruth): Calder's sheet signed (Saturday), Taavek met at the ramp, the round one at the bench, the parts
+# chain joined (Sunday), two helpers picked, the part made with your own hands, the test fit, Taavek seen off and the
+# engine lights joined at the glass (Monday), each led by the queue's vessel:* entries, by Monday 18:00, in that order.
+# Variants (argv): 'teachoff' (Teaching arrows Off), 'senior' (a Senior Officer's rank, a slower player), and tracking
+# another job is the default here (real_game tracks one). About 25 minutes
+VTAP = r"""(() => {
+  const g = goalNow(); if (!g || !g.crew || !/^vessel:(chain|lights)$/.test(g.guide || '') || DIALOGUE || DEV.choose) return null;
+  const a = DECK_CREW.find(c => c.p && c.p.id === g.crew); if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > 2.5) return null;
+  const key = g.guide + '|' + Math.floor(shipNow() / 3); if (window.__vtap === key) return null; window.__vtap = key;
+  return 'tap ' + g.crew + ': ' + tradJoinTap(a);
+})()"""
+VFLAGS = ['vessel:signed', 'vessel:met', 'vessel:roundOne', 'vessel:chain', 'vessel:job', 'vessel:part', 'vessel:testfit', 'vessel:home', 'vessel:glass']
+def part_vessel(ctx, path):
+    src = pathlib.Path(path).read_text(); vs = re.sub(r"^const EV_VESSEL_ON = URL_FLAGS\.has\('evvessel'\);", 'const EV_VESSEL_ON = true;', src, count=1, flags=re.M)
+    vp = WORK / 'test' / ('_vessel_' + RUN_ID + pathlib.Path(path).name); vp.write_text(vs)
+    pg = Page(ctx, str(vp)); real_game(pg, 27); f = Follower(pg)
+    if not pg.ev("typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON && !!SHIP_EVENTS.veyliVessel"): fail('vessel: the switched-on copy has no vessel'); return
+    if 'senior' in sys.argv[2:]: pg.ev("SHIP.works.rank = 'senior'")   # a slower player: a Senior Officer, not yet on Deck 2
+    seen, guides = {}, {}
+    def run(until):
+        while pg.ev('shipNow()') < until:
+            pg.step(6, 50)
+            r = pg.ev(VTAP) or pg.ev(FOLLOW)
+            if isinstance(r, dict) and r.get('click'): pg.page.mouse.click(*r['click']); pg.step(2, 50)
+            s = pg.ev("(() => { const e = SHIP.event, g = goalNow(); return [Math.floor(shipNow()), e && e.id === 'veyliVessel' ? Object.fromEntries(" + json.dumps(VFLAGS) + ".map(k => [k, e.mine[k] || null])) : null, g ? g.guide || null : null, g ? g.label : null]; })()")
+            if s[2] and s[2].startswith('vessel:') and s[2] not in guides: guides[s[2]] = (s[0], s[3])
+            for k, v in (s[1] or {}).items():
+                if v and k not in seen: seen[k] = (s[0], v)
+    for d in (27, 28, 29):
+        run((d - 1) * 1440 + (18 * 60 + 5 if d == 29 else 21 * 60 + 30))
+        print(f"  vessel: Day {d}: {sorted((hhmm(t), k, v) for k, (t, v) in seen.items())}")
+        if d < 29: f.night(d)
+    order = [k for k in VFLAGS if k in seen]
+    for k in VFLAGS: check(k in seen, f"vessel: never {k} by following the arrows (seen {sorted(seen)}; the queue led with {sorted(guides)})")
+    times = [seen[k][0] for k in ['vessel:signed', 'vessel:met', 'vessel:roundOne', 'vessel:chain', 'vessel:job', 'vessel:part', 'vessel:testfit', 'vessel:home', 'vessel:glass'] if k in seen]
+    check(times == sorted(times), f"vessel: the beats out of order: {[(k, hhmm(seen[k][0])) for k in VFLAGS if k in seen]}")
+    check(seen.get('vessel:part', (0, None))[1] == 'you' and seen.get('vessel:home', (0, None))[1] == 1 and seen.get('vessel:roundOne', (0, None))[1] == 1, f"vessel: the part made by you, the round one seen and Taavek seen off in person: {seen}")
+    for g in ('vessel:sheet', 'vessel:ramp', 'vessel:bench', 'vessel:chain', 'vessel:job', 'vessel:step', 'vessel:testfit', 'vessel:home', 'vessel:lights'): check(g in guides, f"vessel: the queue never led with {g} (seen {sorted(guides)})")
+    for t, lab, dk in f.stuck: fail(f'vessel: stuck from Day {t // 1440 + 1} {hhmm(t)} at "{lab}" (Deck {dk})')
+    print(f"  vessel: led by {sorted((hhmm(t), g) for g, (t, l) in guides.items())}")
+    check(not pg.errors, f'vessel: page errors {pg.errors[:3]}')
+    pg.page.close()
+
 GUIDE = 'guide' in sys.argv[2:]                       # run shift and week with the arrow queue switched on
 TEACHOFF = 'teachoff' in sys.argv[2:]                 # with 'guide': Settings' Teaching arrows set to Off
-PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff')) or {'queue', 'clockin', 'shift', 'week', 'promo'}
+PARTS = set(a for a in sys.argv[2:] if a not in ('guide', 'teachoff', 'senior')) or {'queue', 'clockin', 'shift', 'week', 'promo', 'vessel'}
 with sync_playwright() as pw:
     path = sys.argv[1]; src = pathlib.Path(path).read_text(); off = arrows_off(src)
     if off != src: (WORK / 'test' / ('_off_' + RUN_ID + pathlib.Path(path).name)).write_text(off)
@@ -534,10 +580,10 @@ with sync_playwright() as pw:
         print('== clockin (patch 0.92.3 item 6)')
         try: part_clockin(ctx, path)
         except Exception as e: fail(f'clockin: stopped: {str(e)[:300]}')
-    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo)):
+    for name, part in (('shift', part_shift), ('week', part_week), ('promo', part_promo), ('vessel', part_vessel)):
         if name not in PARTS: continue
         print(f'== {name} (following only the arrow)')
-        try: part(ctx, path if GUIDE or name == 'promo' else off_path)   # promo: always the build as shipped (the arrows on)
+        try: part(ctx, path if GUIDE or name in ('promo', 'vessel') else off_path)   # promo and vessel: always the build as shipped (the arrows on)
         except Exception as e: fail(f'{name}: stopped: {str(e)[:300]}')
     b.close()
 

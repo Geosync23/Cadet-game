@@ -33613,6 +33613,8 @@ const LINES = JSON.parse([
   '{"text":"Taavek\'s part: balance it","id":"1ady05i"}]',
   ',"event.veyliVessel.tracked.testfit":[',
   '{"text":"Taavek\'s part: the test fit, 13:30","id":"eq4f1g"}]',
+  ',"event.veyliVessel.wait":[',
+  '{"text":"The lathe\'s still turning. Taavek holds up ten fingers, then fewer.","id":"189wplo"}]',
   ',"farewell.day":[',
   '{"text":"{bye}, {nick}. Safe trip on the Tern.","id":"1rz0hru","tier":[1,4]},',
   '{"text":"Off today, then. Good luck out there. I mean it.","id":"1etbqx6","tier":[1,4]},',
@@ -47004,7 +47006,7 @@ function vesselScenes2(v) {
   if (v.k === 2 && v.now >= at(2, VESSEL.leave - 30) && !M['vessel:home']) {
     if (v.now < at(2, VESSEL.leaveBy)) {
       vesselNotice(v, 'home', at(2, VESSEL.leave - 30), at(2, VESSEL.leaveBy), 'Chief Ines Calder', W('notice.home', 'Taavek goes home at 15:00. See them off at the Tern\'s ramp.'));
-      vesselArrow('home', 1, () => vesselCrewGoal('calder', W('ring.home', 'See Taavek off'), { room: 'S' }), at(2, VESSEL.leave - 30), at(2, VESSEL.leaveBy), () => !!(SHIP.event && SHIP.event.mine['vessel:home']));
+      vesselArrow('home', 1, () => ({ deck: 5, place: ROT_TERN_FOOT, room: 'S', label: W('ring.home', 'See Taavek off'), vessel: true }), at(2, VESSEL.leave - 30), at(2, VESSEL.leaveBy), () => !!(SHIP.event && SHIP.event.mine['vessel:home']));
       if (v.now >= at(2, VESSEL.leave) && !(deckDef.num === 5 && roomAt(...player.here()) === 'S')) vesselFetch(v, 'calder', 'vessel:fetch:home', 'talk.homeFind', ['calder: There you are. Taavek won\'t go without saying goodbye. The Tern\'s waiting. Come on.'], 15);
       if (deckDef.num === 5 && roomAt(...player.here()) === 'S' && (vesselReach('calder', 4) || vesselReach('taavek', 4)))
         vesselScene('home', 'vesselHome', ['calder', 'taavek', 'lindqvist-isak'], v, () => { M['vessel:home'] = 1; M['vessel:sketch'] = 'you'; });
@@ -47222,6 +47224,16 @@ function vesselTestFit(v) {
       M['vessel:testfit'] = 1;
       (M['vessel:helpers'] || []).forEach((id, k) => simTimeout(() => { const [w, t] = vesselLine('testfit.' + id, 'Look at it go!', id); vesselSay(w || id, t, 5); }, 1200 + 2500 * k));
     });
+}
+// a tap on the lathe or the fabricator while Taavek's part is on (24j's shopTap asks first): the step at that machine
+// starts (the walk there and its hold, as the ring), or a word that the part comes first. True when it handled the tap
+function vesselShopTap(it, at) {
+  const v = vesselNow(); if (!v || v.k !== 2 || !it || !shopMachineOf(it)) return false;
+  const M = v.e.mine, s = M['vessel:step'] | 0; if (!M['vessel:job'] || s < 1 || s > 5 || M['vessel:part']) return false;
+  if (DIALOGUE || typeof ACT !== 'undefined' && ACT && ACT.kind === 'vesselStep') return true;
+  if ((M['vessel:wait'] || 0) > v.now) { toast('Machine shop', vesselW('wait', 'The lathe\'s still turning. Taavek holds up ten fingers, then fewer.')); return true; }
+  if (shopMachineOf(it) !== VESSEL_STEPS[s].at) { toast('Machine shop', vesselW('ring.step.' + s, 'Taavek\'s part first') + ': ' + (VESSEL_STEPS[s].at === '5-shop-lathe' ? 'at the lathe.' : 'at the bench.')); return true; }
+  vesselStepStart(v, s); return true;
 }
 // live (vesselWhere asks): Monday, your two helpers in the machine shop with Taavek from the card to the test fit
 function vesselHelperWhere(p, t, v) {
@@ -56648,6 +56660,7 @@ function shopTinker(it, at) {
 // the place: its shelves in main storage, its part to make in the machine shop; tinkering only with no machine job
 function shopTap(it, at, mw) {
   if (typeof deckDef === 'undefined' || deckDef.num !== 5) return false;
+  if (typeof vesselShopTap === 'function' && vesselShopTap(it, at)) return true;   // the Veyli vessel's part (section 18's slot 'Vessel builder'): a tap on the lathe or the fabricator is its step, not tinkering
   const room = roomAt(...cellAt(at.x, at.z)), s = shopData(), P = SHIP.player;
   if (room === 'f' && /^order board$/i.test(it.t)) return shopBoard(it);
   const j = s && s.orders.map(shopJobOf).find(Boolean);
