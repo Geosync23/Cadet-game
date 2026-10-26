@@ -56774,6 +56774,166 @@ if (P5_CASES5) {
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p5 = { open() { p5Stage(); } };
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p5Stage(); });
 }
+// P9. The clash (Day 19, Calder; Tier 3). A fault that's two good things at the same time: a crew member's weekly wash
+// in the Deck 4 laundry that always lands on a fixed ship item (a tradition, the delivery: devDay's calendar), so a
+// washer stops mid-cycle, but only then. Found from the real plans of the last fortnight (planDay; the calendar):
+// one person's wash overlapped the same weekday's item at least twice, and nobody else's ever did. The case: the
+// washer they use (its fault table's `clash`, a load cause added here: nothing's worn); suspects the clash (their wash
+// at that hour), one or two other people's washes that week, one or two of the washer's parts. Clues: the trip log
+// taped to the job (the times it stopped: a worn part would stop on every wash, so it rules the parts out), the laundry
+// rota at the washer's panel (each person's washes; one never at a stop rules them out), the calendar (what else
+// happens then: rules out nothing, it's the why). Called right: the washer's reset (no part), then ask them in
+// person (the arrow to them, level 1; near them, your ask and their answer): their wash moves. The move is real: from
+// the next such weekday it's a record settled at 22:00 the evening before (p9Settle, from B3's 24w settle loop) that
+// section 14's planner reads through one hook (p9PlanRule, from B3's sdPlanShut): the laundry closed to them for that
+// hour, so the planner gives their wash another. Saved: SHIP.works.side.p9 = { ask, moves: [{ who, wd, a, b, from }],
+// set: { [day]: [{ who, a, b }] } } (cleaned on read). The first when the p9 row opens (slot 38); none fair: none.
+const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5;
+const P9_SKIP = new Set(['meal', 'shift', 'off', 'appt', 'beat', 'tea']);
+const p9Laundry = () => (DECKS[4] && DECKS[4].places || []).filter(q => q.type === 'laundry').map(q => q.id);
+function p9State() {
+  const s = worksSide(); if (!s) return null;
+  if (!s.p9 || typeof s.p9 !== 'object' || !s.p9Ok) {
+    const o = s.p9 && typeof s.p9 === 'object' ? s.p9 : {}, I = Number.isInteger, set = {};
+    const moves = (Array.isArray(o.moves) ? o.moves : []).filter(m => m && typeof m.who === 'string' && I(m.wd) && I(m.a) && I(m.b) && I(m.from)).slice(-8).map(m => ({ who: m.who.slice(0, 40), wd: m.wd, a: m.a, b: m.b, from: m.from }));
+    for (const k in o.set || {}) if (I(+k) && Array.isArray(o.set[k])) set[k] = o.set[k].filter(r => r && typeof r.who === 'string' && I(r.a) && I(r.b)).map(r => ({ who: r.who, a: r.a, b: r.b }));
+    const ask = o.ask && typeof o.ask === 'object' && typeof o.ask.who === 'string' && I(o.ask.wd) && I(o.ask.a) && I(o.ask.b) ? { who: o.ask.who, wd: o.ask.wd, a: o.ask.a, b: o.ask.b, thing: String(o.ask.thing || '').slice(0, 60) } : null;
+    s.p9 = { ask, moves, set };
+    Object.defineProperty(s, 'p9Ok', { value: true, enumerable: false, configurable: true });
+  }
+  return s.p9;
+}
+// the last fortnight's washes (person, day, from, to: minutes of the day, place) and the calendar's fixed items
+function p9Find(d) {
+  const L = new Set(p9Laundry()), washes = [], items = {};
+  for (let x = Math.max(1, d - P9_LOOK); x < d; x++) {
+    const B = (x - 1) * 1440;
+    try { items[x] = devDay(x).filter(i => !P9_SKIP.has(i.kind) && i.title); } catch (e) { items[x] = []; }
+    for (const p of schedPeople()) for (const s of planDay(p, x)) if (s.tag === 'laundry' && L.has(s.placeId)) washes.push({ who: p.id, d: x, a: s.from - B, b: s.to - B, pl: s.placeId });
+  }
+  const hit = (w, t) => (items[w.d] || []).find(i => i.title === t && i.from < w.b && w.a < i.to);
+  const titles = [...new Set(Object.values(items).flat().map(i => i.title))].sort();
+  for (const t of titles) {
+    const over = washes.filter(w => hit(w, t)), who = [...new Set(over.map(w => w.who))];
+    if (who.length !== 1 || over.length < 2 || new Set(over.map(w => weekday(w.d))).size !== 1) continue;   // one person, the same weekday, twice or more
+    const A = who[0], others = [...new Set(washes.filter(w => w.who !== A).map(w => w.who))].sort();
+    if (!others.length) continue;
+    const it = hit(over[0], t);
+    return { A, title: t, wd: weekday(over[0].d), item: { title: t, from: it.from, where: it.where || '' }, trips: over.map(w => { const i = hit(w, t); return { d: w.d, t: Math.floor((Math.max(w.a, i.from) + Math.min(w.b, i.to)) / 2) }; }), washes, others };
+  }
+  return null;
+}
+const p9Of = c => { const k = c && c.clues.find(x => x.src && x.src.p9); return k ? k.src.p9 : null; };   // the clash's who and when, kept on the trip log's clue (the case's own fields are the engine's)
+const p9Name = id => { const p = schedPeople().find(x => x.id === id); return p ? shortName(p) : id; };
+const p9Day = d => WEEKDAYS[weekday(d)] + ', Day ' + d;
+function p9Clues(j, c, F, seed) {
+  const sus = c.sus, out = [], parts = sus.filter(s => !/^r:/.test(s) && s !== c.cause), pp = panelPlace(j.machine);
+  out.push({ id: 't0', type: 'log', src: { trips: F.trips.map(x => [x.d, x.t]), p9: c.p9 }, at: 'board', kills: parts });   // stopped only then: not a worn part
+  const people = [F.A].concat(sus.filter(s => /^r:/.test(s)).map(s => s.slice(2)));
+  people.forEach((who, i) => { const ws = F.washes.filter(w => w.who === who).map(w => [w.d, w.a]);
+    out.push({ id: 'w' + i, type: 'calendar', src: { who, ws }, at: pp, kills: who === F.A ? [] : ['r:' + who] }); });
+  out.push({ id: 'k0', type: 'calendar', src: { item: F.item.title, wd: F.wd, at: F.item.from }, at: pp, kills: [] });   // the why
+  return out;
+}
+function p9Text(c, k) {
+  const s = k.src || {};
+  if (s.trips) return caseText('case.p9.log', 'Stopped mid-cycle: {text}.', { text: s.trips.map(([d, t]) => p9Day(d) + ' ' + hhmm(t)).join(', ') });
+  if (s.who) return caseText('case.p9.who', '{name}: {thing}, {time}', { name: p9Name(s.who), thing: caseText('case.p9.wash', 'the laundry wash'), time: s.ws.map(([d, a]) => p9Day(d) + ' ' + hhmm(a)).join(', ') || '-' });
+  if (s.item) return caseText('case.p9.cal', 'The calendar, {time}: {thing}.', { time: WEEKDAYS[s.wd] + 's ' + hhmm(s.at), thing: s.item });
+  return null;
+}
+function p9Sus(c, id) {
+  const j = caseJob(c), m = j && machineById(j.machine);
+  const P = p9Of(c); if (id === c.cause && P) return { label: caseText('case.p9.sus', '{name}\'s wash on {time}s', { name: p9Name(P.A), time: WEEKDAYS[P.wd] }), part: null };
+  if (/^r:/.test(id)) return { label: caseText('case.p9.sus', '{name}\'s wash', { name: p9Name(id.slice(2)), time: '' }).replace(/ on s$/, ''), part: null };
+  return null;
+}
+function p9Tick(c, j) {
+  if (c.wait && c.train) {
+    const now = shipNow(), d = caseDay(now), mn = now % 1440;
+    if (!caseOpened('p9') || !playerShiftOn(d) || mn < DAY_SHIFT[0] || mn >= 900) return;
+    const row = ladderRow('p9'); c.by = (row && ladderTeacher(row, d)) || 'calder';
+    caseShow(c, j);
+    const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p9.word');
+    caseSayInPerson(c.by, said || 'This one\'s odd. ' + c.title.replace(/^Head-scratcher: /, '') + '. Every part\'s fine. So what else is going on at that hour?');
+    return;
+  }
+  const P = p9Of(c), right = !c.wait && c.calls[c.calls.length - 1] === c.cause;
+  if (right && !j.workDone && !(j.stepsDone || []).includes(0)) { j.stepsDone = [0].concat(j.stepsDone || []); MACH_REV++; }   // no part to fetch: only the washer's reset at its panel
+  if (right && j.workDone && P) {                          // called right and reset: now the ask, in person
+    const S = p9State(); if (S && !S.ask && !S.moves.some(m => m.who === P.A && m.wd === P.wd)) S.ask = { who: P.A, wd: P.wd, a: P.a, b: P.b, thing: caseText('case.p9.wash', 'the laundry wash') };
+  }
+}
+// the ask (each ship minute): a level 1 arrow to them; near them on your deck, you ask and they answer; then it's a move
+function p9AskTick(now, skip) {
+  const S = p9State(); if (skip || !S || !S.ask) return;
+  const q = S.ask, p = schedPeople().find(x => x.id === q.who); if (!p) { S.ask = null; return; }
+  if (typeof guideAsk === 'function') guideAsk({ id: 'p9:ask', level: 1, owner: '24k', until: now + 60, goal: () => { const w = whereIs(p, shipNow()); return w && w.placeId && placeById(w.placeId) ? { deck: w.deck, place: w.placeId, label: caseText('case.p9.go', 'Ask {name} about their wash', { name: p9Name(q.who) }) } : null; }, done: () => !(p9State() || {}).ask });
+  let a = null; try { a = DECK_CREW.find(x => x.p && x.p.id === q.who); } catch (e) { a = null; }
+  if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > P9_ASK || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
+  const time = hhmm(q.a), ask = caseText('case.p9.move', 'Ask {name} to move {thing} to {time}?', { name: p9Name(q.who), thing: q.thing, time: caseText('case.p9.another', 'another hour') }).replace(/\?$/, '.');
+  let ans = null; try { const l = typeof lineFor === 'function' ? lineFor(q.who, 'p9.move', { t: now, thing: q.thing, time, peek: true }) : null; ans = l && l.text; } catch (e) { ans = null; }
+  worksSayAll(q.who, [ans || 'My ' + WEEKDAYS[q.wd] + ' wash? Fine. I\'ll find another hour. Didn\'t know it was me.']);
+  try { toast(caseText('works.mech.p9', 'The clash'), ask + ' ' + caseText('case.p9.moved', '{name} moves {thing} to {time}. Nothing broke. Nothing needed fixing.', { name: p9Name(q.who), thing: q.thing, time: caseText('case.p9.another', 'another hour') })); } catch (e) { /* no UI */ }
+  S.moves.push({ who: q.who, wd: q.wd, a: q.a, b: q.b, from: worksDay(now) + 1 }); if (S.moves.length > 8) S.moves.shift();
+  S.ask = null; simNote('p9Moved', { who: q.who, wd: q.wd }); MACH_REV++;
+}
+// B3's 24w calls these (typeof-guarded, by name): the settle at 22:00 for tomorrow, and the planner's rule
+function p9Settle(day) {
+  if (!P5_CASES5) return false;
+  const S = SHIP.works && p9State(); if (!S) return false;
+  const want = S.moves.filter(m => m.wd === weekday(day) && day >= m.from).map(m => ({ who: m.who, a: (day - 1) * 1440 + m.a, b: (day - 1) * 1440 + m.b }));
+  if (!want.length || S.set[day]) return false;
+  S.set[day] = want; for (const k of Object.keys(S.set)) if (+k < day - 7) delete S.set[k];
+  return true;
+}
+function p9PlanRule(d, occ, pl, a, b, p) {
+  if (!P5_CASES5 || !p || !pl) return false;
+  if (!occ.p9) { const S = SHIP.works && p9State(); occ.p9 = (S && S.set[d]) || []; }   // only the record settled the evening before
+  if (!occ.p9.length || pl.type !== 'laundry') return false;
+  return occ.p9.some(r => r.who === p.id && a < r.b && r.a < b);
+}
+// the case: staged when the row opens (and retried each ship hour till it is); the washer nearest their place
+function p9Stage() {
+  if (flag('case.p9.first') !== undefined || !SHIP.works || !caseOpened('p9')) return;
+  const W = SHIP.works, C = caseState(); if (!C) return;
+  if (W.tr && W.tr.p9 !== undefined) { flagSet('case.p9.first', 'none'); return; }
+  const now = shipNow(), d = caseDay(now), F = p9Find(d); if (!F) { flagSet('case.p9.first', 'none'); return; }
+  const wpl = placeById((F.washes.find(w => w.who === F.A) || {}).pl), ws = machineList().filter(m => m.kind === 'washer' && m.deck === 4 && caseCauses(m).some(x => x.id === 'clash'));
+  const m = ws.slice().sort((x, y) => { const px = placeById(panelPlace(x.id)), py = placeById(panelPlace(y.id)); const dx = q => q && wpl ? Math.hypot(q.at[0] - wpl.at[0], q.at[1] - wpl.at[1]) : 99; return dx(px) - dx(py) || (x.id < y.id ? -1 : 1); })
+    .find(x => !SHIP.jobs.some(j => j.machine === x.id && j.status !== 'done' && (j.claimedBy || j.case || j.reserved)));
+  if (!m) { flagSet('case.p9.first', 'none'); return; }
+  const id = jobReserve(m.id, d, now % 1440, P9_SLOT, { train: 'p9', tier: 1, until: now + 7 * 1440, cause: 'clash' }), j = id && SHIP.jobs.find(x => x.id === id);
+  if (!j) return;
+  delete j.make; delete j.makeMins; j.cause = 'clash'; j.parts = []; j.train = 'p9';
+  const seed = machSeed('p9-first'), others = F.others.map((o, i) => [schedU(seed, i, 892), o]).sort((x, y) => x[0] - y[0]).map(x => 'r:' + x[1]).slice(0, 2);
+  const parts = caseCauses(m).filter(x => x.part && x.shows === 'stops mid-cycle' || x.part && x.id === 'relay' || x.part && x.id === 'pump').map(x => x.id).slice(0, 5 - 1 - others.length > 2 ? 2 : 5 - 1 - others.length);
+  const sus = ['clash'].concat(others, parts).map((s, i) => [schedU(seed, i, 893), s]).sort((x, y) => x[0] - y[0]).map(x => x[1]);
+  const wA = F.washes.filter(w => w.who === F.A && weekday(w.d) === F.wd), c = { id: 'c' + j.id, job: j.id, kind: 'p9', k: 0, band: 'T3', cause: 'clash', sus, fewest: 0, clues: [], got: [], crossed: [], known: [], calls: [], fits: 0, posted: now, until: 0,
+    wait: true, taken: false, talk: false, long: false, train: true, told: false, title: '', p9: { A: F.A, wd: F.wd, a: Math.min(...wA.map(w => w.a)) - 15, b: Math.max(...wA.map(w => w.b)) + 15 } };
+  c.clues = p9Clues(j, c, F, seed);
+  const r = caseSolve(sus, c.clues, 'T3', 'clash', 'p9');
+  if (r.why) { flagSet('case.p9.first', 'none'); jobRelease(P9_SLOT); return; }
+  c.fewest = r.fewest; C.open.push(c); j.case = c.id; C.n++; flagSet('case.p9.first', c.id);
+  MACH_REV++;
+}
+if (P5_CASES5) {
+  if (typeof FAULT_CAUSES !== 'undefined' && FAULT_CAUSES.washer && !FAULT_CAUSES.washer.some(x => x.id === 'clash'))   // a load (never a real fault's cause, faultPick); its line for the writer
+    FAULT_CAUSES.washer.push({ id: 'clash', load: 'laundry', w: 0, shows: 'stops mid-cycle', sign: 'stops only at one hour, one day a week', when: 'clash', band: 3 });
+  CASE_KINDS.p9 = { name: 'The clash', ladder: 'p9', noScan: true,
+    fits: () => false,                                     // its own cases only (p9Stage): a clash is never a worn part
+    suspects: () => [], clues: () => [],
+    bands: { T3: P9_BAND, T4: P9_BAND },
+    sus: p9Sus, text: p9Text, tick: p9Tick,
+    title: (c, j) => caseText('case.title.p9', '{machine} {shows}, but only {when}. Nothing\'s worn', { machine: caseMachName(j), shows: 'stops mid-cycle', when: p9Of(c) ? 'on ' + WEEKDAYS[p9Of(c).wd] + 's' : 'now and then' }),
+    wrong: (c, s) => caseText('case.wrong.p9', 'New {part} in. Same hour tomorrow, same trouble. It isn\'t a part.', { part: (caseSus(c, s).part || caseSus(c, s).label) }),
+    hint: c => caseText('case.hint.p9.1', 'Every part is fine. So what else happens at that hour?') };
+  CHIEF_NOTES.p9 = { title: 'The clash', key: 'chief.p9', lines: [
+    'Some faults aren\'t parts. They\'re two good things at the same time.',
+    'The fix is a conversation. Ask nicely. Offer them a better hour.'] };
+  if (typeof WORK_MECH !== 'undefined') WORK_MECH.p9 = { open() { p9Stage(); } };
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p9Stage(); p9AskTick(now, skip); });
+}
 // The old-mysteries board (from Sunday Day 21, a Senior Officer's; optional). A corkboard on the Works bay's south wall
 // (Deck 5's P5 places block), tapped like the job board (15b's ixTap: mysOpen), a hidden device page: its five
 // old cases in the order schedU key 854 gives (MYS_CASES: fixed, the head writer's words, stand-ins here). Take one (one

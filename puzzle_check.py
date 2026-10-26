@@ -765,7 +765,7 @@ S5_ON = "const P5_STEP5 = URL_FLAGS.has('p5s5');"
 NOT_YET = []
 
 # the off build: no Step 5 kind or board registered
-S5_OFF = r"""(() => ({ app: typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases'), job: typeof JOB_KINDS !== 'undefined' && !!JOB_KINDS.mysc, kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
+S5_OFF = r"""(() => ({ clash: typeof FAULT_CAUSES !== 'undefined' && (FAULT_CAUSES.washer || []).some(x => x.id === 'clash'), app: typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('oldcases'), job: typeof JOB_KINDS !== 'undefined' && !!JOB_KINDS.mysc, kinds: Object.keys(CASE_KINDS).filter(k => ['p4', 'p5', 'p9'].includes(k)), mech: typeof WORK_MECH !== 'undefined' ? ['p4', 'p5', 'p9', 'mys'].filter(k => WORK_MECH[k]) : [], on: typeof P5_CASES5 !== 'undefined' && P5_CASES5 }))()"""
 
 # P4 on paper: a Senior Officer (Day 17 on), the p4 row open, every cause P4 fits on every machine at your tier becomes a
 # case (rate 1, P4 alone); each checked: the decoys' gauges each cross out their own decoy, the stuck gauge is the cause's
@@ -960,6 +960,76 @@ BOARD2 = r"""(() => {
   return out;
 })()"""
 
+# P9: the row opens on Day 19 (Calder): the clash found from the last fortnight's real plans (one person's wash on the same
+# weekday overlapping the same calendar item, nobody else's ever); the washer's case: the clash, other people's washes,
+# parts; each clue honest against the plans; shown with Calder's word; call it, reset, then the ask in person; the move
+# settled at 22:00 for the next such day (once), read by the planner's rule for that person, at that hour, in the laundry
+P9 = r"""(() => {
+  const out = {}, C = caseState(), W = SHIP.works, keep = { op: W.op, rank: W.rank, tier: W.tier, tr: W.tr, side: W.side };
+  C.open = []; delete SHIP.flags['case.p9.first']; W.rank = 'senior'; W.tier = 3; W.tr = { t3: 15 }; W.side = {};
+  const said = []; const ws = worksSay, wa = worksSayAll; worksSay = (id, t) => said.push([id, t]); worksSayAll = (id, L) => said.push([id, L[0]]);
+  W.op = { 19: ['p9'] }; setShipNow(18 * 1440 + 330); machinesNow();
+  const F = p9Find(19); out.find = F && { A: F.A, title: F.title, wd: F.wd, trips: F.trips, others: F.others.length };
+  WORK_MECH.p9.open(ladderRow('p9'), 19);
+  const id = flag('case.p9.first'), c = caseById(id), j = c && caseJob(c); out.staged = id;
+  if (!c) { worksSay = ws; worksSayAll = wa; Object.assign(W, keep); return out; }
+  const P = p9Of(c); out.machine = j.machine; out.cause = c.cause; out.sus = c.sus.slice(); out.reserved = j.reserved; out.hidden = caseHidden(j); out.fewest = c.fewest; out.lim = caseBandOf('p9', c.band);
+  out.clues = c.clues.map(k => ({ id: k.id, at: k.at, kills: k.kills.slice(), type: k.type, text: caseClueText(c, k), reach: caseReachable(k), deck: caseClueDeck(k) }));
+  // honesty: every trip is the person's wash overlapping the item; nobody else washed at a trip's time; the rota's washes are theirs
+  const L = new Set(p9Laundry()), washesOf = (pid, d) => planDay(schedPeople().find(x => x.id === pid), d).filter(s => s.tag === 'laundry' && L.has(s.placeId)).map(s => [s.from - (d - 1) * 1440, s.to - (d - 1) * 1440]);
+  const item = (d) => devDay(d).find(i => i.title === F.title);
+  out.tripsOk = F.trips.every(({ d: dd, t }) => { const it = item(dd); return weekday(dd) === P.wd && it && washesOf(P.A, dd).some(([a, b]) => a <= t && t < b && it.from < b && a < it.to); });
+  out.othersOk = c.sus.filter(s => /^r:/.test(s)).every(s => F.trips.every(({ d: dd, t }) => !washesOf(s.slice(2), dd).some(([a, b]) => a <= t && t < b)));
+  out.rotaOk = c.clues.filter(k => k.src.who).every(k => k.src.ws.every(([dd, a]) => washesOf(k.src.who, dd).some(([x]) => x === a)));
+  out.partsOut = c.clues.find(k => k.id === 't0').kills.slice().sort().join() === c.sus.filter(s => !/^r:/.test(s) && s !== 'clash').sort().join();
+  setShipNow(18 * 1440 + 545); machinesNow(); caseTick();
+  out.shown = !c.wait; out.title = j.title; out.by = c.by; out.come = CASE_COME.by; if (out.come) { CASE_COME.at = 0; caseComeTick(shipNow()); } out.said = said.slice();
+  out.labels = c.sus.map(s => caseSus(c, s).label);
+  claimJob(j.id); caseTick(); for (const k of c.clues) caseClue(c.id, k.id);
+  caseCall(c.id, 'clash'); caseTick(); out.stops = [jobStops(j).length, (j.stepsDone || []).slice()];
+  const n = jobStops(j).length; for (let k = 0; k < n; k++) if (!(j.stepsDone || []).includes(k)) jobStepDone(j.id, k);
+  out.fixed = !!j.workDone; caseTick(); const S = p9State(); out.ask = S.ask && S.ask.who;
+  turnInJob(j.id); caseTick(); out.closed = !caseById(c.id); out.trained = W.tr.p9;
+  // the ask, in person: away, nothing; beside them, the answer and the move
+  const pa = schedPeople().find(x => x.id === P.A); p9AskTick(shipNow(), false); out.askArrow = !!GUIDE.list.find(e => e.id === 'p9:ask' && e.level === 1); out.notYet = !!S.ask;
+  const fake = { p: pa, x: player.obj.position.x + 1, z: player.obj.position.z }; DECK_CREW.push(fake);
+  said.length = 0; p9AskTick(shipNow(), false); DECK_CREW.splice(DECK_CREW.indexOf(fake), 1);
+  out.answered = said.some(w => w[0] === P.A); out.moves = S.moves.slice(); out.askGone = !S.ask;
+  // settled at 22:00 for the next such weekday, once; the rule for them only, in the laundry, at that hour
+  let nd = 20; while (weekday(nd) !== P.wd) nd++;
+  out.settle = [p9Settle(nd), p9Settle(nd), p9Settle(nd - 1)]; out.set = S.set[nd];
+  const lp = placeById([...L][0]), occ = {}, A0 = (nd - 1) * 1440;
+  const other = schedPeople().find(x => x.id !== P.A);
+  out.rule = [p9PlanRule(nd, occ, lp, A0 + P.a + 5, A0 + P.a + 35, pa), p9PlanRule(nd, {}, lp, A0 + P.a + 5, A0 + P.a + 35, other), p9PlanRule(nd, {}, placeById('3-mess-1') || { type: 'mess' }, A0 + P.a + 5, A0 + P.a + 35, pa), p9PlanRule(nd - 7 + 14, {}, lp, A0 + P.a + 5, A0 + P.a + 35, pa)];
+  out.hook = typeof sdPlanShut === 'function';
+  W.side.p9Ok = false; W.side.p9 = { ask: { who: 7 }, moves: [{ who: 'x', wd: 2, a: 1, b: 2, from: 3 }, 'junk'], set: { 5: [{ who: 'x', a: 1, b: 2 }, null], bad: 1 } }; delete W.side.p9Ok; out.clean = JSON.stringify(p9State());
+  worksSay = ws; worksSayAll = wa; Object.assign(W, keep); C.open = [];
+  return out;
+})()"""
+
+def part_p9(g, path):
+    if not g.ev("typeof p9Stage === 'function'"): return 'not yet'
+    R = g.ev(P9); print('p9:', R)
+    check(R.get('find') and R.get('staged') and R['staged'] != 'none', f"p9: a clash found in the last fortnight's plans and staged: {R.get('find')} {R.get('staged')}")
+    if not R.get('staged') or R['staged'] == 'none': return 'done'
+    from itertools import combinations
+    sus, clues, L = R['sus'], R['clues'], R['lim']
+    left = lambda ks: [s for s in sus if not any(s in k['kills'] for k in ks)]
+    fewest = min((n for n in range(1, len(clues) + 1) for ks in combinations(clues, n) if len(left(list(ks))) == 1), default=99)
+    check(R['cause'] == 'clash' and R['reserved'] == 38 and R['hidden'] and R['machine'].startswith('4-washer-'), f"p9: the washer's clash, slot 38, hidden till shown: {R['machine']} {R['cause']}")
+    check(left(clues) == ['clash'] and all(len(left([k])) > 1 for k in clues) and fewest == R['fewest'] >= L['fewest'] and L['sus'][0] <= len(sus) <= L['sus'][1], f"p9: one left (the clash), no single clue solves it, the band: {left(clues)} {fewest} {sus}")
+    check(any(s.startswith('r:') for s in sus) and any(not s.startswith('r:') and s != 'clash' for s in sus), f"p9: suspects the clash, other people's washes and parts: {sus}")
+    check(R['tripsOk'] and R['othersOk'] and R['rotaOk'] and R['partsOut'], f"p9: honest against the plans: trips {R['tripsOk']}, others {R['othersOk']}, rota {R['rotaOk']}, the log rules the parts out {R['partsOut']}")
+    check(all(k['reach'] for k in clues) and len({k['deck'] for k in clues if k['deck'] is not None}) <= 1, f"p9: every clue reachable, one deck")
+    check(R['shown'] and 'only on' in R['title'] and R['by'] == 'calder' and any(w[0] == 'calder' for w in R['said']), f"p9: shown with Calder's word: {R['title']!r} {R['said']}")
+    check(R['stops'][1] and 0 in R['stops'][1] and R['fixed'] and R['ask'] == R['find']['A'] and R['closed'] and R['trained'] == 19, f"p9: called, no part to fetch, the reset fixes it, the ask is next, trained: {R['stops']} {R['fixed']} {R['ask']} {R['trained']}")
+    check(R['askArrow'] and R['notYet'] and R['answered'] and R['askGone'] and len(R['moves']) == 1 and R['moves'][0]['who'] == R['find']['A'], f"p9: a level 1 arrow to them; asked in person, their answer, the move: {R['askArrow']} {R['answered']} {R['moves']}")
+    check(R['settle'] == [True, False, False] and R['set'] and R['set'][0]['who'] == R['find']['A'], f"p9: settled once at 22:00 for the next such day only: {R['settle']} {R['set']}")
+    check(R['rule'] == [True, False, False, False], f"p9: the planner's rule closes the laundry for them only, at that hour, on that day: {R['rule']}")
+    check(R['clean'] == '{"ask":null,"moves":[{"who":"x","wd":2,"a":1,"b":2,"from":3}],"set":{"5":[{"who":"x","a":1,"b":2}]}}', f"p9: junk in the save cleaned: {R['clean']}")
+    if not R['hook']: print("  p9: section 14's hook (B3's sdPlanShut, 24w) is not in this build: the planner side is checked on a merge with claude/p5s5-mech-b")
+    return 'done'
+
 def s5_copy(path):
     src = pathlib.Path(path).read_text()
     if S5_ON not in src: return None
@@ -1017,13 +1087,13 @@ def part_board(g, path):
     check(B['clean'] == '{"seen":21,"taken":null,"done":["2"],"days":{"2":22}}', f"junk in the save cleaned: {B['clean']}")
     return 'done'
 
-S5_RUN = {'p4': part_p4, 'p5': part_p5, 'board': part_board}
+S5_RUN = {'p4': part_p4, 'p5': part_p5, 'p9': part_p9, 'board': part_board}
 
 def run_s5(path, parts):
     with sync_playwright() as pw:
         g = Game(pw, path, 390, 844); g.step(2)
         off = g.ev(S5_OFF); g.close()
-        check(not off['kinds'] and not off['mech'] and not off['on'] and not off['app'] and not off['job'], f"switch off: nothing of Step 5's registered: {off}")
+        check(not off['kinds'] and not off['mech'] and not off['on'] and not off['app'] and not off['job'] and not off['clash'], f"switch off: nothing of Step 5's registered: {off}")
         on = s5_copy(path)
         if not on:
             for p in parts: print(f'{p}: not yet (no P5_STEP5 switch line in this build)'); NOT_YET.append(p)
