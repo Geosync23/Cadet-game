@@ -53,6 +53,7 @@ CHECKS = {
     'arc': ('python3 arc_check.py {g}', 1), 'lines': ('python3 lines_check.py {g}', 1),
     'bigevents': ('python3 bigevents_check.py {g}', 5), 'fridays': ('python3 fridays_check.py {g}', 4),
     'sound': ('python3 sound_check.py {g}', 5),   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
+    'promo_beats': ('python3 promo_beats_check.py {g}', 3),   # the promotion beats on paper (0.93.2, FX28)   # section 27, sound and music (0.93.0; ~7.5 min beside two other checks)
     'saves': ('python3 saves_check.py {g}', 3),   # the save slots and the Saves app (0.93.2, FX27)
     # in check_fast already (listed only so a check file of theirs is known)
     'deck': ('python3 deck_check.py {g}', 4), 'machine': ('python3 machine_check.py {g}', 1),
