@@ -1,0 +1,561 @@
+<title>Pillar 5 Steps 5-6</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Plan · Pillar 5 Steps 5 and 6 · version 3 · EP1 for lead 38 · 2026-10-26</p>
+  <h1>Senior Officer, Engine Specialist and the end of the career, brought up to date</h1>
+  <p class="lead">You asked to pull up the Steps 5 and 6 plan, bring it in line with how the game works now, and make the next promotions match the one you have now. This is version 3. It keeps your answers from 22 October wherever the new calendar allows, moves the calendar to today's events (the storm with its working Saturday, the short visit, the comet on Monday Day 22, the Veyli vessel after the career), and gives both promotions the new promotion pattern from 0.93.2: talked about before, very hard to miss, the result first thing next shift, the Captain's insignia that same afternoon. Nothing is built from it until you've answered.</p>
+  <div class="facts">
+    <div class="fact"><b>Step 5: Senior Officer</b>Tier 3 test Monday Day 15; the result Tuesday 08:15 from Calder; the Captain's insignia 16:30; your suite on Deck 2 after dinner; the toast Wednesday. Then power and relays, shutdowns, the sensor array.</div>
+    <div class="fact"><b>Step 6: Engine Specialist</b>The Monday briefing and the Tier 4 test on Day 22; three night shifts (Days 22-24) starting after the comet; the result as Calder fetches you from it; the badge from the Captain on Day 23; mentoring Basil; Calder's question Day 26.</div>
+    <div class="fact"><b>Your answers</b>All kept except two details the calendar broke: the reason you cover the night shift (the visit has moved) and the first night's start (the comet is that evening). Six questions at the bottom.</div>
+    <div class="fact"><b>Size</b>About 26 turns for Step 5 and 38 for Step 6, about 12 switched pieces, each reviewed and run through the six runners before it's switched on.</div>
+  </div>
+  <p class="note">Sources: v2.1 (plans/pillar5-steps56-plan.html on claude/plan-p5-steps56, 99ed4964) and your answers of 22 October; plans/pillar5-plan.md; the design doc and the game as of 0.93.2 (claude/staging-0.93.2: STORM_SAT_ON, TRAD_0932_ON, EV_COMET_ON on; EV_SWAP_ON by link only); FX28's promotion beats (PROMO_BEATS_ON); plans/events-plan-2.html.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <ol>
+    <li><a href="#changed">What changed since v2</a></li>
+    <li><a href="#cal">The calendar, Days 13-27</a></li>
+    <li><a href="#clash">Every clash, checked</a></li>
+    <li><a href="#pattern">The promotion pattern, for both</a></li>
+    <li><a href="#step5">Step 5, day by day</a></li>
+    <li><a href="#step6">Step 6, day by day</a></li>
+    <li><a href="#moments">Moments: host, tap, pose, words</a></li>
+    <li><a href="#words">Words: samples</a></li>
+    <li><a href="#device">Arrows, Tracked, Schedule, Mail</a></li>
+    <li><a href="#stories">Crew stories and events</a></li>
+    <li><a href="#slow">A slower player</a></li>
+    <li><a href="#answers">Your earlier answers</a></li>
+    <li><a href="#build">Pieces, switches, team and checks</a></li>
+    <li><a href="#risk">Phones and risks</a></li>
+    <li><a href="#questions">Questions for you</a></li>
+  </ol>
+</nav>
+
+<section id="changed">
+  <h2>1. What changed since version 2</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>What</th><th>Version 2 (22 October)</th><th>Version 3 (now)</th><th>Why</th></tr></thead>
+    <tbody>
+      <tr><td>The promotion's shape</td><td>An urgent notice 10:30, Calder's office 11:00, straight on to the Captain's ready room; Vance's walk at 17:00</td><td>The new pattern: chatter before, the test's gold ring, "your result tomorrow, first thing", Calder at 08:15, the Captain's insignia at 16:30 the same day, cake, your suite after dinner, chatter after</td><td>Your playtest of the first promotion and FX28's promotion beats (0.93.2), which you asked both promotions to follow</td></tr>
+      <tr><td>The storm</td><td>Saturday Day 13 a day off</td><td>Saturday Day 13 a storm shift: its repairs count toward the Tier 3 offer</td><td>0.93.2 (STORM_SAT_ON). It also makes your answer 1 (storm jobs count) easier to reach</td></tr>
+      <tr><td>The visit</td><td>Days 26-30, the finale; the Monday briefing announces it</td><td>Days 16-19 (behind the event swap): it runs alongside your first Senior days</td><td>Your event swap, 26 October</td></tr>
+      <tr><td>The comet</td><td>Tuesday Day 16, your first night in the suite</td><td>Monday Day 22, 21:30-22:40, the first evening of your night shifts</td><td>The comet moved (0.93.2, on)</td></tr>
+      <tr><td>Why you cover nights</td><td>Navarro is moved onto days to get ready for the Veyli</td><td>Navarro takes three days' leave he's owed (question 2)</td><td>The Veyli have been and gone by Day 22</td></tr>
+      <tr><td>Night 1</td><td>Monday 21:00</td><td>Monday 22:45, straight after the comet; Calder walks you down from it (question 1)</td><td>The comet is that evening</td></tr>
+      <tr><td>The Engine Specialist moment</td><td>06:00 Day 23, the engine crews at the shift change</td><td>The result as Calder fetches you from the comet (22:40 Day 22); the crews' welcome at 06:00; the Captain's badge at 16:30 Day 23, before your first bridge hour</td><td>The new pattern (result first thing next shift; insignia the same afternoon)</td></tr>
+      <tr><td>Day 26</td><td>The visit's warning that evening</td><td>The address, mentoring, Four weeks aboard and Calder's question; the Veyli vessel starts Saturday Day 27 (Part C of the events plan, not built yet)</td><td>The new calendar</td></tr>
+      <tr><td>Basil's tea (Day 25)</td><td>His new hand's tea in the evening</td><td>Retired; his story beat is dinner in the mess on Day 25</td><td>0.93.2 (the new hand's tea removed)</td></tr>
+      <tr><td>Thursday</td><td>-</td><td>Bunk inspection (from 0.93.2): only for juniors in the Deck 4 bunks, so never you once an Officer</td><td>0.93.2</td></tr>
+      <tr><td>Traditions</td><td>The weekly set</td><td>The 14 new rotating traditions (TRAD_0932_ON) checked against every beat (section 3)</td><td>0.93.2</td></tr>
+      <tr><td>Team and checks</td><td>Seats and rough turns</td><td>Pieces with their own switches; builders, two reviewers, the build master and the six runners; which checks each piece needs</td><td>How we work now (full round on every change)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="cal">
+  <h2>2. The calendar, Days 13-27 (a steady player, a new game)</h2>
+  <p>Day 1 is a Monday. Red times are Pillar 5's own beats. "With the swap" marks the visit, which is built but only on by link until you switch it on; the plan works with it on or off.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Day</th><th>Already in the game (0.93.2)</th><th>Steps 5 and 6 add</th></tr></thead>
+    <tbody>
+      <tr><td class="n">Sat 13</td><td>The storm at its worst: a storm shift 09:00-17:00 (storm repairs only); the lantern supper 18:00</td><td>Storm repairs count toward Tier 3. If you reach the Tier 3 offer today, Calder says so in the bay</td></tr>
+      <tr><td class="n">Sun 14</td><td>The all-clear 10:00 (your storm commendation); the party in the bow lounge 19:00-21:00</td><td><b>The offer</b> (if not already): Calder at the party, "Monday. Your next test." Friends wish you luck there; up to two Mail you at 20:00; Schedule and Tracked show "Your Tier 3 test, 09:00"</td></tr>
+      <tr><td class="n">Mon 15</td><td>The storm's afterglow; its debrief Mail 18:00; Lap of the Wren 20:30</td><td><b>The Tier 3 test</b>, 09:00-15:00: a supervised shutdown of a Deck 6 power junction. Passing: "Your result tomorrow, first thing. My office, 08:15"</td></tr>
+      <tr><td class="n">Tue 16</td><td>With the swap: the visit's warning, Vance's memo 08:30, prep jobs. Spice shelf supper, Knit and natter, Tiles night</td><td><b>08:15 the result</b> (Calder's office): Senior Officer. <b>16:30 the Captain's insignia</b> in the ready room; 16:50 Brennan's cake in the observation room. <b>After dinner</b> Vance walks you to your suite on Deck 2</td></tr>
+      <tr><td class="n">Wed 17</td><td>With the swap: the Veyli come aboard 10:00; Open door 16:40. The drill 15:00. Tasting table 20:00 (galley)</td><td>M19 Power and relays from 11:00 (Calder); small: P4 Which gauge is lying?; you run the Works part of the drill; <b>19:00 the toast</b> at a Captain's table (Vance called in)</td></tr>
+      <tr><td class="n">Thu 18</td><td>With the swap: Veyli night, Calder's chief's talk 19:00, the formal dinner 19:30. Postcard night, quiz night, late piano</td><td>M18 Shutdowns 09:00-12:00 (book one for tomorrow); small: P5 Follow the line; <b>16:00 the commendation summons</b> (question 3); Pell's practical can come this afternoon</td></tr>
+      <tr><td class="n">Fri 19</td><td>With the swap: senior briefing 08:00, gift exchange 08:20, farewell 09:00. Short Friday; the address 16:00; Imani O'Neill's birthday</td><td>M20 the sensor array 10:00-12:00 (Mori); your booked shutdown at its hour; P9 on a real case when one comes. <i>No night shift</i> (moved to Days 22-24)</td></tr>
+      <tr><td class="n">Sat 20</td><td>Theo's farewell supper; the Captain's table 19:30 (for the commended)</td><td>A free day. The table goes back to its usual 19:30 (the early start was for a night shift that's moved)</td></tr>
+      <tr><td class="n">Sun 21</td><td>Theo's send-off 14:00; Basil off the Tern 17:40</td><td>The old-mysteries board opens. <b>The Tier 4 offer</b> by Calder's Mail at 18:00 if she told you on Friday, else her word on Monday; friends' luck at dinner and by Mail at 20:00</td></tr>
+      <tr><td class="n">Mon 22</td><td>The bridge invite at breakfast; Basil on the beam 17:05; gym club, the department cup; <b>the comet 21:30-22:40</b>; Olu Farouk's birthday</td><td>08:30 the Monday briefing (M21); 09:15 Calder: nights; <b>09:30-12:30 the Tier 4 test</b> (a drive coil); home to sleep 13:00-16:45; Basil's beam; dinner; the comet; <b>22:40 Calder fetches you</b>: the result on the way down; <b>night 1 from 22:45</b>: engine work with Reyes</td></tr>
+      <tr><td class="n">Tue 23</td><td>The first bridge hour 17:15; Knit and natter 20:00 (Zeke's story)</td><td>06:00 the engine crews' welcome at the shift change; sleep 06:45-15:45; <b>16:30 the Captain's badge</b> in the observation room; the bridge hour; Zeke's story, done by 20:45; <b>night 2</b> from 21:00: the reactor</td></tr>
+      <tr><td class="n">Wed 24</td><td>The drill 15:00; tasting table 20:00</td><td>05:50 Kowalczyk's story on the bridge (end of night 2); sleep; no drill for you; <b>night 3</b> from 21:00: leading a team job</td></tr>
+      <tr><td class="n">Thu 25</td><td>Bunk inspection (juniors); Basil's story beat at dinner; quiz night</td><td>06:00 Calder comes down: off nights; sleep to 13:00; the afternoon off</td></tr>
+      <tr><td class="n">Fri 26</td><td>Short Friday; the address 16:00; Four weeks aboard 18:40; Midnight toast 23:00 (new, every 4 weeks)</td><td>M25 mentoring Basil 09:00-15:30; <b>Calder's question</b> at Four weeks aboard</td></tr>
+      <tr><td class="n">Sat 27</td><td>The Veyli vessel (events plan Part C; not built)</td><td>Your first days in your new place</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="clash">
+  <h2>3. Every clash, checked</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Clash</th><th>Settled by</th></tr></thead>
+    <tbody>
+      <tr><td><b>The comet (Day 22, 21:30-22:40) and night 1 (21:00)</b></td><td>Night 1 starts at 22:45. You sleep after the test (13:00-16:45), are up for Basil's beam and dinner, watch the comet anywhere (Senior Officers have the Captain's tea in the observation room), and at 22:40 Calder comes to find you there and walks you down to Deck 6, telling you the Tier 4 result on the way. The night hold starts at 22:40 that day. Question 1.</td></tr>
+      <tr><td>The Tier 4 test and the Monday briefing, Day 22</td><td>As you answered: the briefing isn't a Captain's scene; briefing 08:30-09:15, the test 09:30-12:30. With the swap, the build moved the "mondayBriefing" hold to Day 16 for Vance's memo; Pillar 5 adds its own Day 22 hold.</td></tr>
+      <tr><td>The commendation summons and the visit's dinner, Day 18</td><td>The summons stays at 16:00; the formal dinner is the Speaker's evening, not one of your Captain's scenes (you're one of six; she hosts the guests). This replaces the events plan's question B3 (Day 22 11:00), which the Tier 4 test day now rules out. Question 3.</td></tr>
+      <tr><td>Day 16: the result, Vance's memo, the insignia</td><td>08:15-08:30 Calder; the memo (with the swap) is a Mail and a short word at 08:30; the insignia at 16:30 with Vance there (he walks you up after dinner). No Captain's scene in the morning.</td></tr>
+      <tr><td>Day 17: the greeting and the toast (with the swap)</td><td>Morning and evening; the greeting is a crowd, not your scene. M19 starts at 11:00, after the line breaks up. Vance is called in (his day off) for both.</td></tr>
+      <tr><td>Day 19: the visit's morning and the sensor array (with the swap)</td><td>The senior briefing 08:00 (you're in it, as a Senior), the gift exchange 08:20, the farewell 09:00-09:40; the sensor array 10:00-12:00; your booked shutdown at its hour after lunch; the address untouched.</td></tr>
+      <tr><td>Day 20: the Captain's table and the night shift</td><td>Gone: the nights are on Days 22-24 now, so the table is back at 19:30 (EV_TABLE_EARLY isn't needed for you).</td></tr>
+      <tr><td>Days 22-24: sleeping by day</td><td>Pell's practical (a weekday afternoon, Days 17-24) can't fall on them: it takes Day 17 or 18's afternoon. The Wednesday drill and Thursday's inspection aren't asked of you.</td></tr>
+      <tr><td>Day 23: Zeke's story at Knit and natter (20:00) and night 2 (21:00)</td><td>His big moment ends by 20:45 and you leave for the engine room with his blessing.</td></tr>
+      <tr><td>Day 23: the badge and the first bridge hour</td><td>The badge at 16:30 in the observation room, the bridge hour 17:15 next door. One Captain's scene (the badge); the bridge hour is a tradition.</td></tr>
+      <tr><td>Day 25: Basil's tea</td><td>Retired in 0.93.2; his story beat is at dinner, after your sleep.</td></tr>
+      <tr><td>Day 26: Midnight toast (23:00, new) and the Veyli vessel (Day 27)</td><td>After Calder's question; nothing to move.</td></tr>
+      <tr><td>The 14 new traditions on Days 13-27</td><td>Checked: Five-minute skills (Mondays 18:15, even weeks: Day 22, the bow lounge) is before the comet; Beginners' guitar (even weeks from week 4: Tuesday Day 23, 21:40) is after you've gone on shift; Midnight toast Day 26 23:00; the rest fall on days off or outside your beats. None takes a room a beat needs.</td></tr>
+      <tr><td>One Captain's scene a day</td><td>Day 14 the all-clear; 16 the insignia; 17 the toast; 18 the summons; 20 the table (if invited); 23 the badge. None on a test day (15, 22); none across a night shift.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="pattern">
+  <h2>4. The promotion pattern, for both promotions</h2>
+  <p>The first promotion's beats as they are in 0.93.2 (FX28's promotion beats), laid out for Tier 3 and Tier 4. Every step has an arrow, a Tracked row, a Schedule row and a Mail, and the gold ring and the arrow show whatever the Teaching arrows setting says. If you're asleep, in a talk or busy, the person waits and starts when you're free; if you're nowhere near, they come to find you; if all else fails, Mail.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Beat</th><th>Tier 2 (built, 0.93.2)</th><th>Senior Officer (Tier 3)</th><th>Engine Specialist (Tier 4)</th></tr></thead>
+    <tbody>
+      <tr><td>The offer</td><td>"Tomorrow, your test job", as soon as Reliable and Making it safe hold (from Day 8)</td><td>Officer "Relied on" (storm jobs count) and Power safety; from Day 14 (test never before 15). Calder's word in the bay, or at the all-clear party</td><td>Senior "Trusted" and power and relays done; from Day 19 (test never before 22). Calder's word on Friday, or her Mail on Sunday</td></tr>
+      <tr><td>Chatter before</td><td>"Nine days and up for Tier 2. Took me three months."</td><td>"Fifteen days aboard and up for Tier 3. Some of us took a year."</td><td>"A drive coil, at three weeks aboard. Torres is pretending not to be proud."</td></tr>
+      <tr><td>The evening before</td><td>Friends wish you luck; up to two Mail at 20:00; Schedule and Tracked from then</td><td>At the storm party; Mail at 20:00</td><td>At dinner after Basil's arrival; Mail at 20:00</td></tr>
+      <tr><td>The test</td><td>The board's gold ring "Your Tier 2 test: take it"; an hourly nudge; passers-by; Torres at the end</td><td>"Your Tier 3 test: take it": the junction shutdown with Calder</td><td>"Your Tier 4 test: take it": the drive coil with Calder and Torres</td></tr>
+      <tr><td>Passing</td><td>"Your result tomorrow, first thing. My office, 08:15"</td><td>The same, for Tuesday 08:15</td><td>"Your result when your shift starts. I'll find you." (question 4)</td></tr>
+      <tr><td>The result</td><td>Calder's office 08:15; she comes to find you at 08:30; Mail by 09:15</td><td>Calder's office, Tuesday 08:15: Senior Officer, the Senior Technician's card from her</td><td>Calder finds you at the comet, 22:40 Monday, and tells you on the walk down: Engine Specialist</td></tr>
+      <tr><td>The insignia</td><td>The pip from the Captain, 16:30 in the observation room (17:15 Fridays); Brennan's cake</td><td>The Senior Officer's bar, 16:30 in the Captain's ready room with Vance and Calder; Brennan's cake next door in the observation room at 16:50 with up to three friends (question 5)</td><td>The engine badge, 16:30 Day 23 in the observation room with Calder, Torres and Vance, before your first bridge hour; the night crews' welcome came at 06:00</td></tr>
+      <tr><td>New quarters</td><td>Cabin 4-23 after your dinner (Calder walks you)</td><td>Deck 2's suite after your dinner: Vance walks you (your things are already moved; 4-23 goes back to spare)</td><td>None: you keep the suite. Your name goes on the engine room's watch board</td></tr>
+      <tr><td>Chatter after</td><td>The bay and your friends that evening</td><td>The bay and the mess; Deck 2's neighbours ("lucky corridor")</td><td>The night crew, then the day crew; the bridge at bridge hour</td></tr>
+      <tr><td>Missed?</td><td>Fallbacks to 22:00 and the next day</td><td>The same rules</td><td>The same rules; if you sleep through 16:30 the Captain waits until your next waking afternoon</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="step5">
+  <h2>5. Step 5: Senior Officer, day by day</h2>
+  <article class="day visit">
+    <header><h3>Saturday 13 and Sunday 14: the offer</h3><span class="phase">Before</span></header>
+    <ol class="tl">
+      <li><time>Sat 09:00</time><div class="what"><b>The storm shift counts</b><span class="where">Works bay and the whole ship</span>Every storm repair moves your Works reputation, as you answered. Most steady players reach "Relied on" today or at the all-clear.</div></li>
+      <li><time>any hour</time><div class="what"><b>The offer</b><span class="where">Wherever Calder is, or Mail</span>The moment you're "Relied on" and trained in power safety (from Day 14): "Monday. Your next test." Her word if you're near, always a Mail and an urgent notice. "What's next" and the Works app's Training tab tick it off, as for Tier 2.</div></li>
+      <li class="big"><time>Sun 19:00</time><div class="what"><b>Luck at the party</b><span class="where">The storm's all-clear party, bow lounge</span>Friends wish you luck in speech bubbles and on your chat card; the crew in the lounge say how fast it came. Up to two Mail at 20:00. The Schedule and Tracked show "Your Tier 3 test, 09:00".</div></li>
+    </ol>
+  </article>
+  <article class="day visit">
+    <header><h3>Monday 15: the Tier 3 test</h3><span class="phase">Test day</span></header>
+    <ol class="tl">
+      <li><time>07:00</time><div class="what"><b>The morning</b><span class="where">Breakfast</span>A notice once you're up; a word or two at the Works tables.</div></li>
+      <li class="career"><time>09:00-15:00</time><div class="what"><b>The test</b><span class="where">Works bay, then Deck 6</span>The board's gold ring, "Your Tier 3 test: take it", shown whatever your arrow setting. A real Tier 3 job: a power junction on Deck 6 that has to come off. Calder walks you through planning it (who it feeds, when it's quiet), you warn the two people it affects, switch it off, change the breaker by hand, bring it back. Holding another job? A nudge each hour. It can be delayed, never failed.</div></li>
+      <li><time>on passing</time><div class="what"><b>"Your result tomorrow"</b><span class="where">Where you finish</span>"Your result tomorrow, first thing. My office, 08:15." Mail and a notice; Torres's word if he's near; the bay talks about it that evening.</div></li>
+    </ol>
+  </article>
+  <article class="day visit">
+    <header><h3>Tuesday 16: Senior Officer</h3><span class="phase">Result, insignia, suite</span></header>
+    <ol class="tl">
+      <li><time>06:00</time><div class="what"><b>Mail and the arrow</b><span class="where">Your device</span>"My office, 08:15." An urgent notice once you're up; the arrow and Tracked from then.</div></li>
+      <li class="career"><time>08:15</time><div class="what"><b>The result</b><span class="where">Calder's office, Deck 5</span>You passed: Senior Officer, Senior Technician (Tier 3). She gives you the Tier 3 card; "The bar's the Captain's. Half four." Not there by 08:30? She comes to find you; by 09:15 it comes by Mail.</div></li>
+      <li><time>08:30</time><div class="what"><b>(With the swap) Vance's memo</b><span class="where">Mail, and his word if you pass</span>The Veyli arrive tomorrow. Visit prep jobs on the board, as the events plan has them.</div></li>
+      <li><time>day</time><div class="what"><b>Chatter</b><span class="where">Works bay, the mess</span>The bay, then the ship, hear it; Tier 3 jobs start appearing for you.</div></li>
+      <li class="career"><time>16:30</time><div class="what"><b>The Captain's insignia</b><span class="where">The ready room, Deck 1</span>The Captain pins the Senior Officer's bar, with Vance and Calder there. A short meeting with lines; a framed certificate for your shelf; "Senior Officer" on your Record. The arrow from 16:15, an invite in the morning.</div></li>
+      <li class="big"><time>16:50</time><div class="what"><b>Cake</b><span class="where">Observation room, next door</span>Brennan's cake with up to three of your closest friends, Torres and whoever's near.</div></li>
+      <li class="career"><time>after dinner</time><div class="what"><b>Your suite</b><span class="where">Deck 2, the visitors' suite (room B), refitted as yours</span>Calder's Mail at 17:00 says so; Vance waits for you to leave the mess (or 20:00) and walks you up the senior corridor. The door plate has your name; your things are already there; if you took the refit job, it has your touches. Fallbacks to 22:00 and the next day, as for 4-23.</div></li>
+    </ol>
+  </article>
+  <article class="day visit">
+    <header><h3>Wednesday 17 to Sunday 21: the new work</h3><span class="phase">Senior days</span></header>
+    <ol class="tl">
+      <li><time>Wed 11:00</time><div class="what"><b>M19 Power and relays</b><span class="where">The relay room (Deck 1), the battery rows (Deck 5)</span>Calder trains you; the conduit tester if you haven't one. Small new thing: P4 Which gauge is lying? You run the Works part of the 15:00 drill.</div></li>
+      <li class="career"><time>Wed 19:00</time><div class="what"><b>The toast</b><span class="where">A Captain's table, her quarters</span>As you answered: a toast to you, a framed menu, Vance called in.</div></li>
+      <li><time>Thu 09:00-12:00</time><div class="what"><b>M18 Shutdowns</b><span class="where">Your device; Deck 6</span>See who and what a junction feeds, book a quiet hour for tomorrow, warn the people affected (Brennan in person before a galley one), choose what keeps power. Small: P5 Follow the line.</div></li>
+      <li class="career"><time>Thu 16:00</time><div class="what"><b>The commendation summons</b><span class="where">The ready room</span>If the storm commended you (question 3).</div></li>
+      <li><time>Fri 10:00-12:00</time><div class="what"><b>M20 The sensor array</b><span class="where">Deck 2's array room, with Hana Mori</span>Calibrating against a named star with the new calibration rig. Your booked shutdown happens at its hour after lunch. P9 The clash comes on a real case when one does.</div></li>
+      <li><time>Sun 21</time><div class="what"><b>The old-mysteries board</b><span class="where">Works bay, beside the job board</span>Optional old cases for a quiet Sunday.</div></li>
+    </ol>
+  </article>
+</section>
+
+<section id="step6">
+  <h2>6. Step 6: Engine Specialist and the end, day by day</h2>
+  <article class="day comet">
+    <header><h3>Friday 19 to Sunday 21: the offer</h3><span class="phase">Before</span></header>
+    <ol class="tl">
+      <li><time>Fri / Sun</time><div class="what"><b>The offer</b><span class="where">Calder's word on Friday, or her Mail Sunday 18:00</span>When you're "Trusted" as a Senior and power and relays is done: "Monday. A drive coil. Tier 4." The crew talk about it at the weekend; friends' luck at Sunday dinner (after Basil's arrival) and by Mail at 20:00; Schedule and Tracked "Your Tier 4 test, 09:30".</div></li>
+    </ol>
+  </article>
+  <article class="day comet">
+    <header><h3>Monday 22: the briefing, the test, the comet, night 1</h3><span class="phase">Test day</span></header>
+    <ol class="tl">
+      <li><time>07:00-09:00</time><div class="what"><b>The bridge invite</b><span class="where">Mess hall</span>As built: Vance at your table.</div></li>
+      <li class="career"><time>08:30-09:15</time><div class="what"><b>M21 The Monday briefing</b><span class="where">Observation room, the conference table</span>The Captain, Vance, the chiefs and you: the week ahead (the comet tonight, Basil's first week, the parts order). You choose what Works raises: a shutdown to book, a worry about a machine, or a parts order; what you raise happens.</div></li>
+      <li class="career"><time>09:15</time><div class="what"><b>Nights</b><span class="where">Outside the observation room</span>Calder: Navarro has three days' leave owed from tonight (question 2), so you cover his nights, Monday to Wednesday. "Watch your comet first. I'll come and get you."</div></li>
+      <li class="career"><time>09:30-12:30</time><div class="what"><b>The Tier 4 test</b><span class="where">Engine room, Deck 6</span>"Your Tier 4 test: take it." A drive coil with Calder and Torres. Delayed, never failed. On passing: "Your result when your shift starts. I'll find you."</div></li>
+      <li><time>13:00-16:45</time><div class="what"><b>Sleep</b><span class="where">Your suite</span>Curtains drawn; the bed's daytime sleep runs to 16:45.</div></li>
+      <li><time>17:05</time><div class="what"><b>Basil on the beam</b><span class="where">Works bay</span>As built, if you want to be there.</div></li>
+      <li class="big"><time>21:30-22:40</time><div class="what"><b>The comet</b><span class="where">Any of the four windows; the Captain's tea in the observation room for Officers and up</span>As built in 0.93.2. A Senior's line from the Captain.</div></li>
+      <li class="career"><time>22:40</time><div class="what"><b>Calder fetches you: the result</b><span class="where">From the window you watched it at, down to Deck 6</span>She comes to find you; on the walk down: you passed, Engine Specialist. "The badge is the Captain's. Tomorrow afternoon." A Mail and Tracked as it happens.</div></li>
+      <li class="career"><time>22:45-06:00</time><div class="what"><b>Night 1: engine work</b><span class="where">Engine room, with Alejandro Reyes</span>Service a coil, swap a control board, balance two coils; coolant readings become repairs; the night's incidents are yours to make safe. Small: P6 Does it add up?</div></li>
+    </ol>
+  </article>
+  <article class="day comet">
+    <header><h3>Tuesday 23 to Thursday 25: nights 2 and 3, the badge</h3><span class="phase">Nights</span></header>
+    <ol class="tl">
+      <li class="big"><time>Tue 06:00</time><div class="what"><b>The engine crews' welcome</b><span class="where">Engine room, the shift change</span>The day crew come in; both crews sign your certificate; Torres makes a speech that goes on too long. Breakfast at 06:15.</div></li>
+      <li class="career"><time>Tue 16:30</time><div class="what"><b>The Captain's badge</b><span class="where">Observation room, Deck 1</span>The engine badge on your uniform, with Calder, Torres and Vance; "Senior Officer, Engine Specialist" on your Record and door plate. Then your first bridge hour next door at 17:15.</div></li>
+      <li><time>Tue 20:00</time><div class="what"><b>Zeke's story</b><span class="where">Knit and natter, junior common room</span>His big moment, done by 20:45.</div></li>
+      <li class="career"><time>Tue 21:00</time><div class="what"><b>Night 2: the reactor</b><span class="where">Deck 6 and the bridge</span>A permit from the bridge's night watch, a dosimeter badge from the rack, a short careful visit, the Watch told in and out. Small: P7 Faded labels.</div></li>
+      <li><time>Wed 05:50</time><div class="what"><b>Kowalczyk's story</b><span class="where">The bridge</span>Its big moment at the end of night 2.</div></li>
+      <li class="career"><time>Wed 21:00</time><div class="what"><b>Night 3: leading a team</b><span class="where">Engine room</span>A coil swap while the drive runs slow: pick two or three of the night crew, book the slot with the night watch, give each a spot, call the steps. Small: P8 Swap testing.</div></li>
+      <li class="career"><time>Thu 06:00</time><div class="what"><b>Off nights</b><span class="where">Engine room</span>Calder comes down: Navarro's back tonight; "You've a cadet tomorrow. Go to bed." Sleep to 13:00; the afternoon off; Basil's story at dinner.</div></li>
+    </ol>
+  </article>
+  <article class="day comet">
+    <header><h3>Friday 26: mentoring and Calder's question</h3><span class="phase">The end</span></header>
+    <ol class="tl">
+      <li class="career"><time>09:00-15:30</time><div class="what"><b>M25 Mentoring Basil</b><span class="where">Works bay and a job</span>He watches you, then you watch him; a head-scratcher he's stuck on (you pick which clue to point to); he's late once (you choose what to say). Calder gives him his first job alone; a line in your Record.</div></li>
+      <li><time>16:00</time><div class="what"><b>The Captain's address</b><span class="where">Auditorium</span>As built; Kovac's lift moment may come on the way.</div></li>
+      <li class="big"><time>18:40-19:30</time><div class="what"><b>Four weeks aboard, and the question</b><span class="where">Works tea corner, Deck 5</span>Cake; Calder's story's big moment; when it thins out she sits down beside you and asks what you want next. Your answer is kept.</div></li>
+    </ol>
+  </article>
+</section>
+
+<section id="moments">
+  <h2>7. Moments: host, tap, pose, words</h2>
+  <p>Your rule for every moment: a host you tap to join, a simple pose that fits, words only they say.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Moment</th><th>Host (tap)</th><th>Pose</th><th>Words</th></tr></thead>
+    <tbody>
+      <tr><td>Luck at the storm party</td><td>Your friends come to you (bubbles, chat card)</td><td>Standing, a raised cup <span class="tag re">drink</span></td><td>Each friend's own good-luck line</td></tr>
+      <tr><td>The Tier 3 test</td><td>Calder (the board's ring)</td><td>Work at the junction <span class="tag re">work</span></td><td>Calder's planning lines; the two people you warn</td></tr>
+      <tr><td>The result, Tier 3</td><td>Calder in her office</td><td>Seated across her desk <span class="tag re">sit</span></td><td>Her result scene, Tier 3 version</td></tr>
+      <tr><td>The insignia</td><td>The Captain in the ready room</td><td>Stand; she pins it <span class="tag new">pin (a small two-handed gesture)</span></td><td>Her own words; Vance's one dry line</td></tr>
+      <tr><td>The cake</td><td>Brennan</td><td>Cake in hand <span class="tag re">the birthday slice</span></td><td>Friends' congratulations</td></tr>
+      <tr><td>The walk to the suite</td><td>Vance</td><td>Walking together <span class="tag re">the escort's walk</span></td><td>Vance on Deck 2 ("lucky corridor")</td></tr>
+      <tr><td>The toast</td><td>The Captain</td><td>Seated, cups raised <span class="tag re">sit, drink</span></td><td>The toast</td></tr>
+      <tr><td>The Monday briefing</td><td>Vance (chair)</td><td>Seated at the conference table <span class="tag re">sit</span></td><td>Each chief's item; your three choices</td></tr>
+      <tr><td>Calder fetches you</td><td>Calder comes to you at the comet</td><td>Walking down together</td><td>The result on the stairs</td></tr>
+      <tr><td>The crews' welcome</td><td>Torres</td><td>A ring of both crews <span class="tag re">talk</span></td><td>Torres's speech; signatures</td></tr>
+      <tr><td>The badge</td><td>The Captain</td><td><span class="tag new">pin</span></td><td>Her words; Torres's</td></tr>
+      <tr><td>Leading a team</td><td>You (pick your team)</td><td>Team spots <span class="tag re">work</span></td><td>Each crew member's yes</td></tr>
+      <tr><td>Mentoring</td><td>You and Basil</td><td>Basil follows you <span class="tag re">the escort's walk, turned round</span></td><td>Basil's lines and your three choices</td></tr>
+      <tr><td>Calder's question</td><td>Calder sits by you</td><td>Seated at the tea corner <span class="tag re">sit</span></td><td>Her question</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="words">
+  <h2>8. Words: samples</h2>
+  <p class="note">For the head writer to build from, in the voices on file.</p>
+  <div class="script">
+    <h3>Before and during</h3>
+    <div class="ln"><b>Halloran</b><span>Fifteen days aboard and up for Tier 3. Some of us took a year. I'm not bitter. I'm a little bitter.</span></div>
+    <div class="ln"><b>Tomas</b><span>(at the storm party) Tomorrow's the big one? Go to bed early. Not yet. After this song.</span></div>
+    <div class="ln"><b>Calder</b><span>(passing) Your result tomorrow, first thing. My office, quarter past eight. Don't be early, I won't have had my tea.</span></div>
+    <div class="ln"><b>Pell</b><span>(Tier 4 week) A drive coil, at three weeks. Torres is pretending not to be proud. He's terrible at it.</span></div>
+  </div>
+  <div class="script">
+    <h3>The result and the insignia</h3>
+    <div class="ln"><b>Calder</b><span>(08:15) Sit. You passed. Senior Officer, Senior Technician. The bar's the Captain's: half four. This card's mine.</span></div>
+    <div class="ln"><b>Marrow</b><span>(16:30) A storm, a test and a ship that noticed. Hold still. There. Senior Officer.</span></div>
+    <div class="ln"><b>Vance</b><span>(the walk) Deck 2. Lucky corridor. Shoes off inside, regulation six. I'll know.</span></div>
+  </div>
+  <div class="script">
+    <h3>Nights</h3>
+    <div class="ln"><b>Calder</b><span>(09:15) Navarro's got three days owed and a long call home to make. You'll cover his nights. Watch your comet first. I'll come and get you.</span></div>
+    <div class="ln"><b>Calder</b><span>(22:40, the stairs) Mind the step. You passed, by the way. Engine Specialist. The badge is the Captain's, tomorrow. Reyes has the kettle on.</span></div>
+    <div class="ln"><b>Torres</b><span>(06:00) I have prepared a few words. Seven pages. Reyes, sit down, this is important.</span></div>
+    <div class="ln"><b>Calder</b><span>(Thursday 06:00) Navarro's back tonight. You've a cadet tomorrow. Go to bed.</span></div>
+  </div>
+</section>
+
+<section id="device">
+  <h2>9. Arrows, Tracked, Schedule and Mail, at every step</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Step</th><th>Arrow (whatever the setting)</th><th>Tracked and Schedule</th><th>Mail and notice</th></tr></thead>
+    <tbody>
+      <tr><td>The offer</td><td>-</td><td>"Your Tier 3/4 test" from the offer</td><td>Calder's Mail; an urgent notice</td></tr>
+      <tr><td>The test</td><td>To the board, then the job; the gold ring on Take it</td><td>"Your test, 09:00" (09:30 for Tier 4)</td><td>A notice once you're up; an hourly nudge if you're on another job</td></tr>
+      <tr><td>The result</td><td>To Calder's office from 08:00 (Tier 3); none needed for Tier 4 (she comes to you)</td><td>"Your result, 08:15" / "Your result: Calder will find you"</td><td>06:00 Mail (Tier 3); Mail as it happens (Tier 4)</td></tr>
+      <tr><td>The insignia</td><td>To the ready room / observation room from 16:15</td><td>"The Captain, 16:30"</td><td>The Captain's invite that morning</td></tr>
+      <tr><td>The suite</td><td>To Vance after dinner, urgent</td><td>"Your suite, after dinner"</td><td>Calder's Mail 17:00</td></tr>
+      <tr><td>Each night</td><td>To the engine room from 20:45 (22:40 on Day 22)</td><td>"Night shift, 21:00-06:00"</td><td>Calder's Mail when you're put on; a notice at 20:30</td></tr>
+      <tr><td>Mentoring, the question</td><td>To Basil at 08:55; to the tea corner at 18:35</td><td>Rows for both</td><td>Calder's Mail the evening before each</td></tr>
+    </tbody>
+  </table></div>
+  <p class="note">Dev mode: career presets for Days 14-26 and the career arrow naming each new beat (dev_arrow_check).</p>
+</section>
+
+<section id="stories">
+  <h2>10. Crew stories and events that touch it</h2>
+  <ul>
+    <li><b>Zeke Torres</b>: "the evening you become Engine Specialist" is now Tuesday Day 23, at Knit and natter 20:00, done by 20:45 before night 2.</li>
+    <li><b>Kowalczyk</b>: your second night shift, the bridge, 05:50 on Day 24: unchanged, it already matched.</li>
+    <li><b>Calder</b>: her big moment at Four weeks aboard, just before her question: unchanged.</li>
+    <li><b>Dev Raman</b>: the comet, Day 22, 22:10-22:40: you can see it before Calder fetches you at 22:40.</li>
+    <li><b>Pell</b>: his practical on Day 17 or 18's afternoon (never Days 22-24).</li>
+    <li><b>Basil Bramwell</b>: his story beat at dinner on Day 25, then your mentoring day on Day 26.</li>
+    <li><b>Zainab Kovac</b>: the lift on the way to the address, Day 19 or 26: untouched.</li>
+    <li><b>The visit (with the swap)</b>: as a Senior you're in the senior briefing on Day 19 and have a seat at the dinner on Day 18; the events plan's rank parts take their Senior lines from this step.</li>
+    <li><b>The Veyli vessel</b> (Days 27-30, events plan Part C): your "first job in your new place" is Monday Day 29's part with Taavek, as an Engine Specialist.</li>
+  </ul>
+</section>
+
+<section id="slow">
+  <h2>11. A slower player</h2>
+  <ul>
+    <li>Every step waits and never fails; the first possible days stay (Tier 3 from Day 15, Tier 4 from Day 22). A slower player gets each beat on the first day the guard leaves free after their test, in the same order: result the next workday at 08:15, the insignia that afternoon, the suite after dinner.</li>
+    <li>The night shift comes on Days 22-24 whatever your rank (your answer). Not yet a Senior, you're a pair of hands on Reyes's crew; the Tier 4 work waits until after the nights. Night 1 still starts after the comet.</li>
+    <li>Mentoring once a Senior Officer, on Day 26 or the first Friday after; Calder's question the Friday after both.</li>
+  </ul>
+</section>
+
+<section id="answers">
+  <h2>12. Your answers of 22 October, now</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Your answer</th><th>Now</th></tr></thead>
+    <tbody>
+      <tr><td>1. Storm jobs count; Tier 2 bands re-tuned for the Day 15 test</td><td><span class="tag re">kept</span> Easier now: the storm Saturday is a work day full of storm repairs</td></tr>
+      <tr><td>2. The night shift: Days 22-24, three nights, no matter what; Calder puts you on and takes you off</td><td><span class="tag re">kept</span> The days and the rule. <span class="tag risk">changed</span> Night 1 starts at 22:45, after the comet (question 1); the reason is Navarro's leave, not the Veyli (question 2)</td></tr>
+      <tr><td>3. Shutdowns booked for tomorrow</td><td><span class="tag re">kept</span></td></tr>
+      <tr><td>4. The Monday briefing isn't a Captain's scene; the Tier 4 test stays on Day 22</td><td><span class="tag re">kept</span> It no longer announces the Veyli (they've been)</td></tr>
+      <tr><td>5. Vance called in for the toast</td><td><span class="tag re">kept</span></td></tr>
+      <tr><td>6. Calder's question at Four weeks aboard</td><td><span class="tag re">kept</span></td></tr>
+      <tr><td>7. (now answer 2)</td><td>-</td></tr>
+      <tr><td>8. The conduit tester from power and relays, a new calibration rig</td><td><span class="tag re">kept</span></td></tr>
+      <tr><td>9. One spec page per step</td><td><span class="tag re">kept</span> The spec page for each step now lists its pieces and switches (section 13)</td></tr>
+      <tr><td>10. Step 5 starts once the Line and the comet are on, alongside the visit</td><td><span class="tag re">kept</span> Both are on (the Line since 0.92.1, the comet in 0.93.2): Step 5 can start after 0.93.2, as your roadmap says</td></tr>
+      <tr><td>11. "Senior Officer, Engine Specialist"</td><td><span class="tag re">kept</span></td></tr>
+      <tr><td>The promotion's shape (v2: Calder 11:00, straight to the ready room, Vance 17:00)</td><td><span class="tag risk">changed</span> To your new pattern (section 4)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="build">
+  <h2>13. Pieces, switches, team and checks</h2>
+  <p>Each piece is built behind its own switch (off means the game exactly as today), reviewed by one of two reviewers, merged by the build master into staging, and switched on only after the full six-runner round and your yes. The steps' masters are <code>P5_STEP5</code> and <code>P5_STEP6</code>; the night shift has its own line inside Step 6 and is built first.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece</th><th>Switch</th><th>Who builds</th><th>Checks it needs</th><th>Turns</th></tr></thead>
+    <tbody>
+      <tr><td colspan="5"><b>Step 5: Senior Officer</b> (after the step's spec page, 2 turns)</td></tr>
+      <tr><td>S5-1 Career core: ladder rows (t3, m19, m18, m20, p4, p5, p9, the board), Tier 3 bands, the Tier 2 re-tune, milestones, the real held hours (with and without the swap)</td><td><code>P5_STEP5</code></td><td>Works career engineer; events seat for the held hours</td><td>career_check, bigevents_check, events_check, mech_check (ladder)</td><td class="n">3</td></tr>
+      <tr><td>S5-2 The Senior Officer promotion: offer, chatter, test, result, insignia, cake, Vance's walk, the suite (door plate, refit, 4-23 back to spare), the toast</td><td><code>P5_PROMO3</code></td><td>Works career engineer (from 24p and the promotion beats); deck architect for the suite</td><td>promo_beats_check (a Tier 3 part), promo_sight_check, career_check, arrows_check week (Days 14-17), dev_arrow_check, devmode_check, saves_check (a save mid-promotion), day_check Days 15, 16</td><td class="n">5</td></tr>
+      <tr><td>S5-3 M19 Power and relays, the conduit tester</td><td><code>P5_M19</code></td><td>Mechanics seat A</td><td>mech_check m19, machine_check</td><td class="n">2</td></tr>
+      <tr><td>S5-4 M18 Shutdowns: the planning screen, booking tomorrow, warnings, what keeps power, the crew's day changing (planned at 22:00 the evening before)</td><td><code>P5_M18</code></td><td>Mechanics seat A with the sim engineer</td><td>mech_check m18, day_check (a shutdown day, Day 19), food_check (a galley shutdown), machine_check</td><td class="n">5</td></tr>
+      <tr><td>S5-5 M20 The sensor array and the calibration rig</td><td><code>P5_M20</code></td><td>Mechanics seat B; deck architect for array-room spots</td><td>mech_check m20, deck_check (Deck 2)</td><td class="n">2</td></tr>
+      <tr><td>S5-6 P4, P5, P9, the T3 band and the old-mysteries board</td><td><code>P5_CASES5</code></td><td>Puzzles seat</td><td>puzzle_check</td><td class="n">5</td></tr>
+      <tr><td>S5-7 Words (all of the above), re-baked</td><td>-</td><td>Head writer</td><td>check_fast (words, names), lines_check</td><td class="n">2</td></tr>
+      <tr><td colspan="5"><b>Step 6: Engine Specialist and the end</b> (after its spec page, 2 turns)</td></tr>
+      <tr><td>S6-1 The night shift, built first: Days 22-24 (22:45 on Day 22), Navarro's leave, Calder on and off, sleeping by day, meals at the edges, the time clock, held jobs and night incidents, clothes, saving mid-shift, any rank</td><td><code>P5_NIGHT</code></td><td>Player engineer with the sim engineer</td><td>day_check Days 22, 23, 24, 25; player_check, clothes_check, saves_check, food_check, career_check (on and off), events_check (the comet unchanged), arrows_check week</td><td class="n">6</td></tr>
+      <tr><td>S6-2 M21 The Monday briefing (its own Day 22 hold; the swap's Day 16 memo hold is left alone)</td><td><code>P5_M21</code></td><td>Mechanics seat A</td><td>mech_check m21, bigevents_check</td><td class="n">3</td></tr>
+      <tr><td>S6-3 The Engine Specialist promotion: offer, test, the result at the comet, the crews' welcome, the Captain's badge, the watch board</td><td><code>P5_PROMO4</code></td><td>Works career engineer</td><td>promo_beats_check (a Tier 4 part), career_check, arrows_check week (Days 21-23), events_check (Calder at the comet), day_check Days 22, 23</td><td class="n">3</td></tr>
+      <tr><td>S6-4 Deck 6: the reactor drum and drive coils as real machines, the dosimeter rack, team spots, your seat at the conference table</td><td>with <code>P5_M23</code></td><td>Deck architect</td><td>deck_check (phone draw calls, 450 at most), perf_check, machine_check</td><td class="n">3</td></tr>
+      <tr><td>S6-5 M23 Engine work and the reactor (permit, dosimeter, the Watch's log)</td><td><code>P5_M23</code></td><td>Mechanics seat B</td><td>mech_check m23 and the reactor</td><td class="n">5</td></tr>
+      <tr><td>S6-6 M24 Leading a team</td><td><code>P5_M24</code></td><td>Mechanics seat A (team jobs' owner)</td><td>mech_check m24 (good and poor picks)</td><td class="n">4</td></tr>
+      <tr><td>S6-7 M25 Mentoring Basil (his plan for Day 26 made the evening before)</td><td><code>P5_M25</code></td><td>Works career engineer with the sim engineer</td><td>mech_check m25, day_check Day 26, stories_check (Basil)</td><td class="n">4</td></tr>
+      <tr><td>S6-8 P6, P7, P8 and the T4 band</td><td><code>P5_CASES6</code></td><td>Puzzles seat</td><td>puzzle_check</td><td class="n">4</td></tr>
+      <tr><td>S6-9 The end: the career story's beats, milestones, Calder's question, your answer kept</td><td><code>P5_END</code></td><td>Works career engineer</td><td>career_check (Days 0-26, a steady and a slow player, twice, identical), stories_check (Calder, Zeke, Kowalczyk), fridays_check (Day 26)</td><td class="n">2</td></tr>
+      <tr><td>S6-10 Words</td><td>-</td><td>Head writer</td><td>check_fast, lines_check</td><td class="n">2</td></tr>
+    </tbody>
+  </table></div>
+  <h3>The team, step by step</h3>
+  <ul>
+    <li><b>Step 5</b> (about 26 turns): four builders at once (the Works career engineer, mechanics seats A and B, the puzzles seat), the deck architect for the suite and the array room, the head writer; two reviewers taking pieces as they land; the build master merging into staging; the six runners for the full round. Order: the spec page, S5-1, then S5-2 (what you'll see first), then S5-3 to S5-6 side by side, then the words.</li>
+    <li><b>Step 6</b> (about 38 turns): five builders (the night shift seat, the Works career engineer, mechanics A and B, the puzzles seat), the deck architect for Deck 6, the head writer; the same two reviewers, build master and runners. Order: the spec page, S6-1 the night shift first (its own switch, its own round), then S6-2 to S6-4, then S6-5 to S6-8, then S6-9 and the words.</li>
+    <li><b>Rounds:</b> the full six-runner round (about 30 minutes) before each switch-on: after S5-2 (the promotion alone, so you can play it early if you like), at Step 5's end, after S6-1 (the nights), and at Step 6's end. The new day_check days (15, 16, 23, 24, 25, 26) and the promo_beats_check parts go to the runners with the lightest shares (the testing guide's table).</li>
+    <li><b>Owners:</b> sections 24 (career), 24h (team jobs), 24k (cases), 17, 14 and 13 (sim and player), 4d (decks), 18 (events: only the held-hours list), 22 (words). Shared tables changed: <code>EV_BEATS</code> (events seat first), <code>WORK_BANDS</code> (career engineer).</li>
+  </ul>
+</section>
+
+<section id="risk">
+  <h2>14. Phones and risks</h2>
+  <ul>
+    <li><b>The night shift</b> touches time, sleep, meals, the time clock, held jobs, clothes and the save at once: still the biggest risk. Built first, alone, behind its own switch, with day_check on each night and a save loaded mid-shift.</li>
+    <li><b>Day 22 is full:</b> the briefing, the test, a daytime sleep, Basil's beam, the comet and night 1. Each has its hour; if the test runs late, the sleep shortens, never the comet or the night's start.</li>
+    <li><b>Deck 6's draw calls:</b> the engine room gains a working reactor drum and coils; the phone budget (450) is the limit, measured at phone and TriFold sizes.</li>
+    <li><b>Shutdowns and team-picking</b> must never change anyone's plan the same day (the planner rule): bookings are read at 22:00 the evening before; a team agrees "now" the way team jobs already do (the walkers carry it, the plans don't).</li>
+    <li><b>Two promotions a week apart</b> both use the same beats: the words must make them feel different (the storm's Senior Officer; the engine crew's specialist at night).</li>
+    <li><b>Determinism and pixel-identical:</b> nothing new at load calls <code>R()</code>; with each switch off, every regression is identical.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>Questions for you</h2>
+  <p>Only the real choices, each with a recommended answer. Everything else keeps your answers of 22 October.</p>
+  <div class="q"><h3>1. Night 1 and the comet on Day 22</h3><p class="rec"><b>Recommended: night 1 starts at 22:45, straight after the comet;</b> you sleep after the test, watch the comet, and Calder comes to fetch you from the window. Or: night 1 at 21:00 as before (you miss the comet: the engine room has no windows). Or: the nights move a day later, Tuesday to Thursday (Days 23-25), which pushes into Basil's day.</p></div>
+  <div class="q"><h3>2. Why you cover the nights</h3><p class="rec"><b>Recommended: Mateo Navarro takes three days' leave he's owed</b> (it works with or without the visit). Or: Navarro goes on days to give Basil his first week on systems. Or: no reason, Calder just rotates you.</p></div>
+  <div class="q"><h3>3. The commendation summons and the visit's dinner on Day 18</h3><p class="rec"><b>Recommended: the summons stays at 16:00</b>, and the formal dinner (the Speaker's evening, you one of six) isn't counted as one of your Captain's scenes. Or: strictly one a day, so the summons moves to the next free afternoon (Day 25). This replaces the events plan's question B3, which pointed it at Day 22, now a test day.</p></div>
+  <div class="q"><h3>4. When you hear the Tier 4 result</h3><p class="rec"><b>Recommended: Calder fetches you from the comet at 22:40</b> and tells you on the walk down. Or: at 06:00 at the end of night 1, with both crews. Or: on Thursday when you come off nights.</p></div>
+  <div class="q"><h3>5. Where the Captain gives the Senior Officer's bar</h3><p class="rec"><b>Recommended: her ready room at 16:30</b> (with Vance and Calder), then cake next door in the observation room with your friends. Or: the observation room with friends, exactly like your first pip.</p></div>
+  <div class="q"><h3>6. The toast on Day 17</h3><p class="rec"><b>Recommended: keep it</b> (your earlier answer), as well as the insignia and cake. Or: drop it; the insignia and cake are enough.</p></div>
+
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything else about the promotions, the nights or the end of the career?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the traditions pitch's form)
+  const items = [
+    ['night1', '1. Night 1 and the comet on Day 22', [['after', 'Starts 22:45, after the comet (recommended)'], ['nine', '21:00 as before'], ['later', 'Nights move to Days 23-25']]],
+    ['reason', '2. Why you cover the nights', [['leave', "Navarro's leave (recommended)"], ['basil', "Navarro on days for Basil"], ['none', 'No reason']]],
+    ['summons', '3. The summons and the dinner on Day 18', [['keep', 'Summons 16:00; the dinner is not your scene (recommended)'], ['strict', 'Strict: the summons moves to Day 25']]],
+    ['result4', '4. When you hear the Tier 4 result', [['comet', 'Calder fetches you from the comet (recommended)'], ['six', '06:00 with both crews'], ['thu', 'Thursday after nights']]],
+    ['bar', "5. Where the Senior Officer's bar is given", [['ready', 'Ready room, then cake next door (recommended)'], ['obs', 'Observation room, like the first pip']]],
+    ['toast', '6. The toast on Day 17', [['keep', 'Keep it (recommended)'], ['drop', 'Drop it']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
