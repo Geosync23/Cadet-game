@@ -660,3 +660,16 @@
 ? flag:pu3.cake
 - Cake for the new Senior. Corner piece, love. You've earned the icing.   #warm
 - Pell. Second slice. Not first. I can see you.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): told in person about a galley shutdown (talk option sd.warn.ask), and the
+// grumble the next day if nobody told her by 22:00
+== work
+? flag:sd.warn.brennan
+- Tomorrow? Galley circuit? Thank you for telling me to my face, love.   #warm
+- I'll bake early. Bread at six, nothing in the ovens at your hour.
+- If my cold store warms up by one degree, I'm coming to find you.   #funny
+? flag:sd.grumble.brennan
+- Love. My ovens went off. Nobody told me. Next time, you tell me.
+- Half a tray of rolls, flat. Tell me first. That's all I ask.
+? flag:sd.thanks.brennan
+- Your shutdown was a dream, love. Didn't lose a single loaf.   #warm

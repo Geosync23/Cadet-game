@@ -1,0 +1,14 @@
+@bank dept:works
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): the Works crew answering your calls in the Wednesday drill, once you run the
+// Works part (kind drill.works.answer, a bubble; flag drill.works.call.<n> for the call they answer). 60 characters.
+== drill.works.answer
+? flag:drill.works.call.1
+- At my station.
+- Station. Ready when you are.
+- Here. Present. Mostly awake.   #funny
+? flag:drill.works.call.2
+- Non-essential's off on my side.
+- Isolated. Galley ovens stay on, as ever.   #funny
+? flag:drill.works.call.3
+- Present.
+- Here. Counted. Can I have a biscuit now?   #funny

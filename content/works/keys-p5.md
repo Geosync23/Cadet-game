@@ -292,3 +292,63 @@ Mail, and a scene has a twin where the day or time differs.
 | The toast scene | meeting `pu3.toast` (cast marrow, vance, calder; one choice, 2 replies) | | |
 | The framed menu; by Mail if missed | `pu3.menu`, `pu3.menu.text`; `mail.pu3.toast.missed` | text | |
 | What's next; the Training tab's home line | `next.pu3.result` ({day}), `next.pu3.bar` ({time}), `next.pu3.toast`; `works.pu3.home` | text | |
+
+### Power safety (ps, S5-1 turn 2)
+
+Meeting `train.ps.calder` (watch-only, Deck 6 port junction; one choice of three); `works.mech.ps`, `works.ask.ps`
+(`{time}` `{place}`), `next.ps`, `next.wait.ps`; the test row's `works.mech.t3`, `next.t3`, `next.wait.t3`
+(`content/works/promo-t3.lines`).
+
+### M19 Power and relays (S5-3, 24v; `content/works/m19.lines`)
+
+| What | Keys | Placeholders |
+| --- | --- | --- |
+| Ladder, ask, What's next, ring, notice | `works.mech.m19`, `works.ask.m19`, `next.m19`, `next.wait.m19`, `m19.ptr`, `m19.notice` | `{time}` `{place}` |
+| The training | meeting `train.m19.calder` (relay room; one choice of two) | |
+| Calder's steps | calder `work` flags `train.m19.tester` (the tester given, only if M15 hasn't), `train.m19.follow.look/pull/seat/test/wrong/done`, `.battery`, `.conduit` | |
+| The relay rack panel | `m19.relay.title` ({machine}), `.look`, `.pull`, `.seat`, `.test`, `.done`, `.wrong` | `{machine}` |
+| The battery banks | `m19.battery.title` ({machine}), `.read` ({n}), `.low`, `.even`, `.balance`, `.done` | |
+| Conduit runs (stage 2) | `m19.conduit.title` ({machine}), `.test`, `.good`, `.fault` | |
+| Tester toast, stage toasts | `m19.tester.give`, `m19.trained.stage2`, `m19.trained.stage3` | |
+| The drill: you run Works' part | `drill.works.ptr`, `.title`, `.text`, `.call.1-3` (stations, isolate, head count; in order), `.done` ({time}), `.order` (a call out of order); crew kind `drill.works.answer` under `flag:drill.works.call.<n>` (`content/banks/m19.lines`, Works bank); calder flags `drill.works.you`, `drill.works.you.done` | `{time}` |
+
+### M18 Shutdowns (S5-4, 24w; `content/works/m18.lines`)
+
+| What | Keys | Placeholders |
+| --- | --- | --- |
+| Ladder, ask, What's next, ring, notice | `works.mech.m18`, `works.ask.m18`, `next.m18`, `next.wait.m18`, `m18.ptr`, `m18.notice` | `{time}` `{place}` |
+| The training | meeting `train.m18.calder` (one choice of three); calder flags `train.m18.follow.feeds/hour/meal/warn/keep/book` | |
+| The planning screen | `sd.tab`, `sd.none`, `sd.head`, `sd.job` ({machine}), `sd.feeds`, `sd.feeds.rooms` ({where} = the branch, {text} = its rooms), `sd.when`, `sd.prev`, `sd.next`, `sd.who`, `sd.who.none`, `sd.who.n` ({n}), `sd.meal`, `sd.class`, `sd.trad`, `sd.warn`, `sd.warned`, `sd.keep`, `sd.keep.none`, `sd.book`, `sd.cancel`, `sd.booked` ({where} {time}), `sd.cancelled`, `sd.booked.row` ({time}), `sd.busyhour`, `sd.yes`, `sd.no`, `sd.needbook` | |
+| Warnings | `sd.warn.notice` ({name} {time} {where}), `sd.warn.sent` ({name}), the talk option `sd.warn.ask`; crew kind `sd.warned` (`content/banks/m18.lines`); Brennan in person: brennan `work` flag `sd.warn.brennan` | |
+| 22:00 settled; the day | `mail.sd.settled` ({where} {time}), `sd.notice` ({time} {deck}), `sd.ptr` ({time}), `sd.ptr.back`, `sd.done` ({where}), `sd.missed`, `mail.sd.missed`, `m18.trained`; calder flags `sd.day.off`, `sd.day.back` | |
+| The crew | kinds `sd.off` (in a fed room as it goes off), `sd.thanks` (warned, quiet hour), `sd.grumble` (a meal, a class, a tradition, or not told), `sd.lapsed` (a missed hour); Brennan's own flags `sd.grumble.brennan`, `sd.thanks.brennan` | |
+
+### M20 The sensor array (S5-5, 24x; `content/works/m20.lines`)
+
+| What | Keys | Placeholders |
+| --- | --- | --- |
+| Ladder, ask, What's next, ring, notice | `works.mech.m20`, `works.ask.m20`, `next.m20`, `next.wait.m20`, `m20.ptr`, `m20.notice` | `{time}` `{place}` |
+| The training | meeting `train.m20.mori` (Mori and Calder; one choice of three); mori flags `train.m20.follow.pick/turn/module/done`; calder flag `train.m20.calder` (her one line at the end) | |
+| The rig | `m20.rig.give`, `works.tool.arrayrig`, `works.tool.arrayrig.about` | |
+| Pick the star | `m20.pick.title`, `m20.pick.text`; five stars `m20.star.1`-`.5` (button) and `m20.star.<n>.line` (Mori's line); show three of the five; `m20.star.yours` ({star}) if it's in your 24t log | |
+| Calibrate, the module | `m20.cal.title` ({machine}), `.text`, `.far`, `.close`, `.on`; `m20.module.title` ({machine}), `.look`, `.swap`, `.done` | |
+| Stages, the friendship moment | `m20.trained.stage2`, `.stage3`, `m20.sweep.done`; mori flag `m20.survey` (your readings on Survey's chart) | |
+
+### P4, P5, P9 and the old-mysteries board (S5-6, 24k's slot; `content/works/cases.lines`)
+
+| What | Keys | Placeholders |
+| --- | --- | --- |
+| P4 Which gauge is lying? | `works.mech.p4`, `next.p4`, `next.wait.p4`, `case.title.p4`, `case.p4.head`, `case.p4.gauge` ({thing} = the gauge, {word} = its reading), `case.p4.scan` ({word}), `case.p4.call` ({thing}), `case.p4.right`, `case.wrong.p4` ({thing}), `case.hint.p4.1`, `chief.p4.title/.1/.2`; torres-zeke flag `train.p4.word` | |
+| P5 Follow the line | `works.mech.p5`, `next.p5`, `next.wait.p5`, `case.title.p5`, `case.p5.stop` ({machine} {word}), `case.p5.power`, `case.p5.notester`, `case.hint.p5.1`, `case.wrong.p5` ({part} {machine} {shows}), `chief.p5.title/.1/.2`; calder flag `train.p5.word` | |
+| P9 The clash | `works.mech.p9`, `next.p9`, `next.wait.p9`, `case.title.p9` ({machine} {shows} {when}), `case.p9.head`, `case.p9.who` ({name} {thing} {time}), `case.p9.move`, `case.p9.moved`, `case.p9.shut` (with P5_M18), `case.hint.p9.1`, `case.wrong.p9` ({part}), `chief.p9.title/.1/.2`; calder flag `train.p9.word`; the person you ask: kind `p9.move` (`content/banks/cases5.lines`; flag `p9.move.grumble` for a reluctant yes) | |
+| The board | `works.mech.mys`, `next.mys`, `next.wait.mys`, `mys.board`, `mys.board.tap`, `mys.board.none`, `mys.take`, `mys.taken`, `mys.solved`, `mys.rep`, `mys.chief` ({title} {me} {n}); five cases `mys.1`-`.5` `.title` and `.line`; torres-zeke flag `mys.word` (Day 21, by the board) | |
+
+Placeholders: lines_check accepts only its fixed list, so the branch is `{where}`, a branch's rooms `{text}`, a gauge or
+a crew routine `{thing}`, a reading `{word}`.
+
+### Existing lines changed (spec section 10)
+
+`content/addresses/friday-d19.address` (the Senior line no longer says Deck 2) and `friday-d26.address` (likewise).
+The comet's Senior line is in the code (section 18's comet talk, `'Deck 2 has its perks...'`), so SW3 wrote its new
+words as `event.comet.captain.senior` in `content/banks/event-comet.lines`; the events seat swaps the string for
+`evWordAt('event.comet.captain.senior', 0) || ...`.

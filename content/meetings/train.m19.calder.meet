@@ -1,0 +1,19 @@
+@meeting train.m19.calder
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): M19 Power and relays, Wednesday Day 17, 11:00, the relay room on Deck 1 (u).
+// Calder; you swap a relay. If you have no conduit tester yet (M15 didn't give it), 24v plays her flag
+// train.m19.tester after this. Then the relay rack's panel (m19.relay.*).
+title: Power and relays
+from: Chief Ines Calder
+gist: Calder showed you the relay room: the bridge relays, how to find a slow one, and the battery banks on Deck 5. Your first Senior training.
+== lines
+calder > you: Your first Senior training. Fitting, up here. Everything on the bridge runs through this room.   [gesture]
+calder: Twelve relays a rack. When one's slow, the bridge flickers. Then the bridge calls me.
+calder: Watch the lights. Eleven come on together. One comes on late. That's your relay.
+calder: Pull it straight. Seat the new one straight. Test the whole rack, not just the one.
+? choice
+* Why test the whole rack for one relay?   rel:calder+2
+  calder: Because the slow one was hiding a second. It usually is.   [nod]
+* (Just watch the lights)
+  calder: Good. Patience with lights. Most people blink first.   [nod]
+calder: Later, the batteries on Deck 5. Four banks. They have to share the load, like a good team.
+calder: Your turn. The rack on the left. Take your time. I'm not timing you.

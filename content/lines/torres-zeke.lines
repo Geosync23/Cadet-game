@@ -1042,3 +1042,13 @@
 // the bay that evening, after the test
 ? flag:pu3.promo.passed
 - Don't tell me. I'll know tomorrow. I'll know by your walk.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-6): his word for P4 (flag train.p4.word) and at the old-mysteries board (mys.word)
+== work
+? flag:train.p4.word
+- Two gauges on this one, and they don't agree. One's fibbing.
+- Get a third reading. The scanner doesn't take sides.
+? flag:mys.word
+- Old ones. Nobody's cracked them. I've tried the Tuesday hum twice.
+- Take one if you like. No rush. They've waited years.
+- Calder pinned the first. She says it's not personal. It's personal.   #funny

@@ -1,0 +1,82 @@
+@bank all
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3 words; spec section 10): M19 Power and relays (24v). The training is meeting
+// train.m19.calder in the relay room (Deck 1, u); Calder's step words are her own `work` lines, flags train.m19.*; the
+// crew's answers in the drill are content/banks/m19.lines. Said by nobody unless noted. No "!". Mails "Subject | body".
+
+== works.mech.m19
+- Power and relays
+// the ask ({time}, {place} filled by the game)
+== works.ask.m19
+- Power and relays | Your first Senior training. The relay room, Deck 1. Bring your hands; I'll bring the relays. {time}, {place}.
+== next.m19
+- Power and relays comes next: the relay room on Deck 1, with the Chief.
+== next.wait.m19
+- Power and relays: meet the Chief in the relay room, Deck 1.
+// the ring on the relay room's door, and the notice 30 minutes before
+== m19.ptr
+- Power and relays with Calder, {time}
+== m19.notice
+- Power and relays with the Chief at {time}: the relay room, Deck 1. Go at quarter to.
+
+// the relay panel (a bridge relay rack: 1-relay-1, 1-relay-2), tapped
+== m19.relay.title
+- Relay rack · {machine}
+== m19.relay.look
+- Twelve relays in a row. One light is slow to come on.
+== m19.relay.pull
+- Pull the slow one
+== m19.relay.seat
+- Seat the new relay
+== m19.relay.test
+- Test the rack
+== m19.relay.done
+- All twelve lights come on together. The bridge won't flicker.
+== m19.relay.wrong
+- That one's fine. Watch the lights again: which is slow?
+// the battery rows (Deck 5, y: 5-battery-1 to -4), tapped
+== m19.battery.title
+- Battery bank · {machine}
+== m19.battery.read
+- Charge: {n} in a hundred.
+== m19.battery.low
+- This bank is lower than the others.
+== m19.battery.even
+- All four banks within two of each other. Balanced.
+== m19.battery.balance
+- Balance the banks
+== m19.battery.done
+- The banks share the load evenly now.
+// stage 2: a conduit run with the conduit tester (6-conduit-1, -2)
+== m19.conduit.title
+- Conduit run · {machine}
+== m19.conduit.test
+- Test this length
+== m19.conduit.good
+- Clean all the way. Next length.
+== m19.conduit.fault
+- The tester drops here. The fault is in this length.
+// the tester given (toast; only if M15 hasn't given it)
+== m19.tester.give
+- The Chief gave you a conduit tester. It's in your locker.
+== m19.trained.stage2
+- Power and relays: you can test conduit runs now.
+== m19.trained.stage3
+- Power and relays: you can balance the battery banks now.
+
+// the drill (Wednesdays 15:00, once you're Senior): you run the Works part. The ring, the card, your calls
+== drill.works.ptr
+- Run the Works part of the drill
+== drill.works.title
+- The drill: Works
+== drill.works.text
+- You call Works' part. Three calls, in order. The crew answer on their devices.
+== drill.works.call.1
+- Works: all hands to your stations.
+== drill.works.call.2
+- Isolate the non-essential power. Report when done.
+== drill.works.call.3
+- Head count. Works, report in.
+== drill.works.done
+- Works reports all present and safe. Drill time: {time}.
+== drill.works.order
+- Not yet. Stations first, then power, then the count.

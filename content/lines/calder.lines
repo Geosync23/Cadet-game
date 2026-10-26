@@ -790,3 +790,63 @@
 // the cake, after the bar (one line; she takes a slice too)
 ? flag:pu3.promo.cake
 - One slice. Then back to work tomorrow. Not tonight.   #funny
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-3): M19 Power and relays (flags train.m19.<step>, as seat C's lead/follow steps)
+== work
+? flag:train.m19.tester
+- You'll want this. A conduit tester. Look after it.
+? flag:train.m19.follow.look
+- Watch the lights. Which one's late?
+? flag:train.m19.follow.pull
+- Straight out. Don't rock it.
+? flag:train.m19.follow.seat
+- Straight in. Push till it stops.
+? flag:train.m19.follow.test
+- Whole rack. All twelve.
+? flag:train.m19.follow.wrong
+- That one's on time. Look again. Count to one.
+? flag:train.m19.follow.done
+- All twelve. Good. The bridge won't notice. That's the point.
+// the battery banks (stage 3) and conduit runs (stage 2)
+? flag:train.m19.follow.battery
+- Four banks. One's carrying the others. Even them out.
+? flag:train.m19.follow.conduit
+- Test each length. The fault is where the reading drops.
+// the drill, the first time you run the Works part
+? flag:drill.works.you
+- Your drill now. Three calls. Clear voice. Don't rush.
+? flag:drill.works.you.done
+- Clean drill. Good. Good.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-4): M18 Shutdowns, at the planning screen with you (flags train.m18.follow.<step>)
+== work
+? flag:train.m18.follow.feeds
+- Read me what it feeds. All of it.
+? flag:train.m18.follow.hour
+- Who's in those rooms at that hour? Look before you pick.
+? flag:train.m18.follow.meal
+- That's dinner. You can. You'll hear about it. I would.
+? flag:train.m18.follow.warn
+- Warn them. Each one. Brennan in person, if it's hers.
+? flag:train.m18.follow.keep
+- What keeps power? Think of the cold store. Always.
+? flag:train.m18.follow.book
+- Book it. Then it's yours. Tomorrow, be there early.
+// the day itself, at the junction as you switch it off and bring it back
+? flag:sd.day.off
+- Your booking. Your switch. Check it's dead.
+? flag:sd.day.back
+- Back on. On time. Good.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-5): the sensor array, her one line at the end
+== work
+? flag:train.m20.calder
+- Survey's happy. That's rare. Back to Works after lunch.
+
+// SW3 (2026-10-26, Pillar 5 Step 5, S5-6): her words for P5 and P9 (flags train.p5.word, train.p9.word)
+== work
+? flag:train.p5.word
+- Long line. One fault. Don't walk it all. Halve it.
+? flag:train.p9.word
+- Every part's fine. Still goes wrong at the same hour. Think.
+- Some faults are people. Nicely. Ask, don't tell.
