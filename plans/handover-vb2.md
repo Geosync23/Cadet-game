@@ -21,7 +21,7 @@ Role: deck and sky builder for "A Veyli vessel needs help" (Days 27-30), hired b
 ## Others
 - EN2 (session_013er8NqC8eftyZqXBzcSibF, the ending): its `crossingBackShip(now)` -> null | { pose: 'bow' | 'alongside', lights, flash } shows the ship again Days 34-35 (vesselSkyNow).
 - RV21 (session_01AmTyMHLr5UuCY9zo3nQcwS) reviews: send shas to RV21, lead 39 and BM18.
-- Poses bow/wave (VB1's ask): 8b's seat, not mine; told VB1 to ask lead 39.
+- Poses 'bow' and 'wave' (v.3, section 8b's slot; lead 39 gave them to me; the ending reuses 'wave').
 
 ## Loose ends
 - The shelf when your quarters move to Deck 2 (Step 6, Tier 4): no shelf spot there yet; the sketch shows only on Deck 4 (bunk or 4-23).

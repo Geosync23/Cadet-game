@@ -60600,6 +60600,24 @@ if (typeof EV_COMET_ON !== 'undefined' && EV_COMET_ON) {
   } };
   for (const k of ['look', 'point']) { ACT_SEATED.add(k); CROWD_ANIMS.add(k); }
 }
+// ---- A Veyli vessel needs help (VB2 for lead 39, plans/veyli-vessel-spec.html; the ending reuses the wave): 'bow' (Taavek's
+// hello at the ramp: a slow bow from the hips, hands together in front, held, then up again, every few seconds) and 'wave'
+// (the right arm up, the hand swinging side to side; seated too). Looks only: no props, no R(), no draw calls. Behind
+// EV_VESSEL_ON or the ending's EV_ENDING_ON (both declared in section 13, before this)
+if (typeof EV_VESSEL_ON !== 'undefined' && EV_VESSEL_ON || typeof EV_ENDING_ON !== 'undefined' && EV_ENDING_ON) {
+  ACTS.bow = { f(r, s, t, b, ph) {
+    const u = (t * .22 + ph) % 1, d = u < .25 ? ss(u / .25) : u < .6 ? 1 : u < .85 ? 1 - ss((u - .6) / .25) : 0;   // down, held, up, a pause
+    r.torso.rotation.x = L(r.torso.rotation.x, .55 * d, s); r.head.rotation.x = L(r.head.rotation.x, .25 * d, s); r.head.rotation.y = L(r.head.rotation.y, 0, s);
+    for (const a of r.arms) armTo(a, s, -.45 - .25 * d, -.95, -.18, .1);   // the hands meet in front of the waist
+  } };
+  ACTS.wave = { f(r, s, t, b, ph) {
+    const R_ = r.arms.find(a => a.side < 0), sw = Math.sin(t * 7 + ph * 6.283);
+    R_.sh.rotation.x = L(R_.sh.rotation.x, -2.55, s); R_.el.rotation.x = L(R_.el.rotation.x, -.5, s);
+    R_.sh.rotation.z = L(R_.sh.rotation.z, R_.side * (.3 + .28 * sw), s); R_.hand.rotation.x = L(R_.hand.rotation.x, 0, s);
+    r.head.rotation.x = L(r.head.rotation.x, -.05, s); r.head.rotation.y = L(r.head.rotation.y, .08 * sw, s);
+  } };
+  ACT_SEATED.add('wave'); for (const k of ['bow', 'wave']) CROWD_ANIMS.add(k);
+}
 // ---- end of slot: Performance engineer ----
 
 // =====================================================================
