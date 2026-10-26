@@ -118,6 +118,55 @@ Notes (not blocking, no change asked):
 
 **Verdict on 9b7eae69: PASS.**
 
+## FX27, save slots: ba6b7b9a (game sha256 d7b6a9f4...2e09; first push 756b86d3)
+
+Diff read: section 13 (SAVE_SLOTS_ON, SAVE_BASE, slotKey, slotRead, SAVE_SLOT and SLOT_NEW read once at load, SLOT_HOLD in
+saveGame, saveOk split out of loadGame with the same checks plus `typeof s === 'object'` and `!p`), section 19 (the Saves
+app: slotInfo, slotPlay / slotNew / slotDelete / slotGo, slotDownload / slotCopy, slotPick / slotFile / slotLoadText /
+slotPut, the view; `s.at` in SAVE_EXTRA only with slots on and saving), section 21 (INTRO_BOOT with SLOT_NEW; Monday skips
+the arrival), section 25 (dmRealKey: Copy my real game copies the Playtest slot being played). Slot 1 keeps the old key
+for both links, so nothing is copied or moved. The Load button's file picker and the copy run straight from the button's
+click (deviceDo from onclick), so the browser's user-gesture rule holds. Download on claude.ai follows the platform's
+downloads contract (runtime 0.2.91 downloads.d.ts: `claude.use('downloads')`, `save({ filename, data })`, `.json` on the
+allowlist, `declined` and `rate_limited` handled, anything else falls back to Copy save as text).
+
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d, alone | ba6b7b9a, SAVE_SLOTS_ON false | ALL IDENTICAL |
+| cadet_test vs b957b92d, alone | ba6b7b9a as pushed (on) | ALL IDENTICAL (renderer noise only; tests use ?nosave) |
+| check_fast | ba6b7b9a | QUICK CHECK OK in 521 s |
+| saves_check (all parts) | ba6b7b9a | SAVES CHECK OK |
+| devmode_check | ba6b7b9a | DEVMODE CHECK OK |
+| RV19's own (plans/rv19-slots-check.py), 390 x 844, one http origin | 0.93.1 then ba6b7b9a | RV19 SLOTS OK |
+
+RV19's own check, with the real 0.93.1 build (not the switched-off copy) writing the saves:
+- 0.93.1 writes a Playtest save (Day 6 13:10) and a Dev save (Day 15 08:20). The new build on the Playtest link: Slot 1,
+  key starship-cadet-save, the game loads at Day 6 13:10, the save byte for byte at load, the Dev save untouched, no slot
+  keys made; the Saves app lists Slot 1 (playing), 2, 3. On the Dev link: Dev Slot 1 (starship-cadet-save-dev), Day 15
+  08:20; playing there leaves the Playtest save alone.
+- A broken -slot key ('abc', '7', '0', '2.5', '-1') plays Slot 1 every time.
+- Bad files refused with "That isn't a Starship Cadet save file, so nothing changed." and storage byte-identical, no card
+  opened: not JSON, empty, a JSON array, v 3, no player, deck 99, another JSON file.
+- A file that passes saveOk but holds almost nothing ({ v, time, player }) starts the game without page errors, with the
+  device (so the Saves app) reachable: a thin file can't lock the player out of their other slots.
+- After all of it, Slot 1 still the old Day 6 game.
+
+Phone look (saves_check's shot, 390 x 844): the slots, Play and Delete, readable; Download and Load a save file below,
+reached by scrolling the app. "Last played 1 Jan 1970" in that shot is the checks' frozen clock (cadet_test sets
+Date.now to the virtual time), not the game.
+
+Notes (not blocking):
+- N1. Inside a real claude.ai artifact page I can't press the platform's download confirmation from here (it needs a
+  viewer). The code matches the contract and saves_check mocks it both ways. For the release: BM18 must publish 0.93.2
+  with `capabilities: { downloads: true }` (FX27 told the lead), and someone opens the published page on a phone once and
+  taps Download my save, then Load a save file with that file.
+- N2. slotWhen shows any number as a date: a save from a browser with a wrong clock would say an odd "Last played". Only
+  cosmetic.
+- N3. The arrival flag (starship-cadet-arrived) is per link, shared by the three slots. It only matters for a slot with no
+  save, and New game in a slot sets SLOT_NEW, so nothing goes wrong; worth knowing for whoever touches section 21 next.
+
+**Verdict on ba6b7b9a: PASS.**
+
 ## FX28, promotion beats (claude/promo-beats, PROMO_BEATS_ON)
 Added by lead 38 at 05:07: the Tier 2 test and promotion made "very very hard to miss" (the user). Lands in steps over
 about 9-10 h; each step reviewed as it arrives, every one on a phone-size screen. Not pushed yet.
