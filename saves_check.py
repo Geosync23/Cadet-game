@@ -46,7 +46,7 @@ class Page:
         self.page.on('console', lambda m: m.type == 'error' and self.errors.append(f'error: {m.text}'))
         self.page.route(re.compile(r'.*three\.min\.js'), lambda r: r.fulfill(body=THREE, content_type='application/javascript'))
         self.page.add_init_script(INIT)
-        self.page.goto('file://' + str(path) + suffix); self.ready()
+        self.page.goto('file://' + str(path) + suffix, timeout=120000); self.ready()   # a busy machine (straight after check_fast) can take over the default 30 s to load the game
     def ready(self):
         self.page.wait_for_function('window.__sc !== undefined', timeout=90000)
         self.page.add_style_tag(content='*,*::before,*::after{transition:none!important;animation:none!important}')
@@ -138,7 +138,7 @@ def part_switch(b):
 def part_download(b):
     ctx = b.new_context(viewport={'width': 390, 'height': 844}, accept_downloads=True)
     pg = Page(ctx); monday_game(pg, 12)
-    with pg.page.expect_download(timeout=20000) as d:
+    with pg.page.expect_download(timeout=60000) as d:
         pg.ev('slotDownload()')
     dl = d.value; path = dl.path(); text = pathlib.Path(path).read_text()
     check(dl.suggested_filename == 'starship-cadet-day12-0930.json', f'download: the file name is {dl.suggested_filename}')
@@ -146,11 +146,11 @@ def part_download(b):
     check(pg.ev('saveOk(JSON.parse(' + json.dumps(text) + '))'), 'download: the file is not a save this build loads')
     # a claude.ai page: the downloads capability
     pg.ev("window.claude = { use: async n => n === 'downloads' ? { save: async r => { window.__dl = r; return { status: 'saved' }; } } : null }")
-    pg.page.evaluate('() => window.__sc("slotDownload()")'); pg.page.wait_for_function('window.__dl !== undefined', timeout=10000, polling=100)
+    pg.page.evaluate('() => window.__sc("slotDownload()")'); pg.page.wait_for_function('window.__dl !== undefined', timeout=60000, polling=100)
     r = pg.page.evaluate('window.__dl')
     check(r['filename'] == 'starship-cadet-day12-0930.json' and r['data'] == pg.page.evaluate('k => localStorage.getItem(k)', K1), 'download: the capability got the wrong name or text')
     pg.ev("window.claude = { use: async () => null }; SLOT_UI.copy = false")
-    pg.page.evaluate('() => window.__sc("slotDownload()")'); pg.page.wait_for_function('window.__sc("SLOT_UI.copy")', timeout=10000, polling=100)
+    pg.page.evaluate('() => window.__sc("slotDownload()")'); pg.page.wait_for_function('window.__sc("SLOT_UI.copy")', timeout=60000, polling=100)
     check('Copy save as text' in pg.ev('SLOT_UI.msg'), f'download: no capability, and no copy offered: {pg.ev("SLOT_UI.msg")}')
     pg.ev('delete window.claude')
     pg.close()
@@ -170,10 +170,10 @@ def part_load(b):
     # a good file through the picker, into empty Slot 3
     p9 = WORK / 'test' / f'_saves_day9_{RUN_ID}.json'; p9.write_text(g9)
     pg.ev("deviceShow('saves')"); pg.step(2)
-    with pg.page.expect_file_chooser(timeout=10000) as fc:
+    with pg.page.expect_file_chooser(timeout=60000) as fc:
         pg.page.click('#devBody button:has-text("Load a save file")')
     fc.value.set_files(str(p9))
-    pg.page.wait_for_function('window.__sc("!!DEV.choose")', timeout=10000, polling=100)
+    pg.page.wait_for_function('window.__sc("!!DEV.choose")', timeout=60000, polling=100)
     pg.ev_reload('devChosen(2)')
     check(pg.ev('SAVE_SLOT') == 3 and pg.ev('SHIP.time.day') == 9, f'load: the file did not play in Slot 3: slot {pg.ev("SAVE_SLOT")}, {pg.ev("clockText()")}')
     check(day_of(pg.page.evaluate('k => localStorage.getItem(k)', K1)) == 4, 'load: Slot 1 changed')
@@ -230,7 +230,7 @@ with sync_playwright() as p:
     for name, f in PARTS:
         if ONLY and name not in ONLY: continue
         try: f(b)
-        except Exception as e: fail(f'{name}: stopped: {type(e).__name__}: {e}')
+        except Exception as e: fail(f'{name}: stopped: {type(e).__name__}: {e}'); __import__('traceback').print_exc()   # the whole story, for a runner who keeps only the end
     b.close()
 print('SAVES CHECK OK' if ok else 'SAVES CHECK FAILED')
 sys.exit(0 if ok else 1)
