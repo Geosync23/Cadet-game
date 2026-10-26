@@ -66,6 +66,9 @@
 - **workstep-tap-fix c79a66dc:** check_fast OK; cadet_test against acbb52e0 ALL IDENTICAL (renderer noise only); mech_check m15, m5 and wstap OK. interactions_check was still running when I wrote this (no FAIL so far); see my message to lead 40.
 
 ## Loose ends
+- **Stopping point (lead 40, the user's call, 2026-10-26).** State at stop:
+  - `claude/workstep-tap-fix` b7e84f81 (rides 0.93.4): c79a66dc, the tap fix, PASSED by RV20; then b7e84f81 adds the stale team-job arrow fix (24h `teamGoalOff`: your turn's arrow, tagged `team: j.id`, goes when the step moves on, in teamLate and teamEnd; mech_check part `teamgoal` fails before, passes after; cadet_test ALL IDENTICAL vs c79a66dc, check_fast OK, arrows_check OK). **RV20's verdict on b7e84f81 is pending.** Seat M2 should look at the 24h lines; the player engineer at section 15's jobTap line.
+  - `claude/p5s5-mech-a` deefa61a (+ this note): M19 with B1's ladder order merged; **RV20's verdict pending** (under test). b7e84f81 is not yet merged into mech-a: merge it after RV20's verdicts (it touches only 24h, mech_check and the build table).
 - RV20's re-review of 5c745377 and c79a66dc is pending; I stand by for its fixes only.
 - B1's ladder order is merged (claude/p5s5-career 51b1a9c6): mech_check m19 passes in full on a switch-on copy, the Day 17 11:00 ask and the 10:30 notice included. 24v's own Rewiring fold-in hook is removed (24u's does it).
 - RV20's S2 (a stale team-job arrow over the lesson's step) is not touched: it looks older than Step 5.
