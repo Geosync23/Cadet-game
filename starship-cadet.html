@@ -48280,7 +48280,7 @@ function careerSick(d, on = true) {                      // a sick day: excused 
   if (c.md > 0 && c.md === d) { c.md = 0; c.ms = Math.max(0, c.ms - 1); repAdd('works', CAREER.hitDept, null, 'sickNote'); if (SHIP.rep && SHIP.rep.ship) SHIP.rep.ship.work = Math.min(100, careerWork() + (c.mx || 0)); }   // reviewer 1d: the work it took, not more
 }
 function careerOff(d) {                                  // no shift that day: leave, sick, or let go (section 14's playerShiftOn asks)
-  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go) || typeof devmodeExcused === 'function' && devmodeExcused(d));   // devmodeExcused: a workday Dev mode skipped (section 25; false with Dev mode off)
+  const c = SHIP.career; return !!c && (c.b.includes(d) || c.s.includes(d) || (c.go != null && d >= c.go) || typeof devmodeExcused === 'function' && devmodeExcused(d) || typeof endOffDay === 'function' && endOffDay(d));   // endOffDay: your last day, leaving on the Tern (section 29b, the ending; false with it off)   // devmodeExcused: a workday Dev mode skipped (section 25; false with Dev mode off)
 }
 const careerDeadline = d => (d - 1) * 1440 + CAREER.bookBy;
 function careerCanBook(d, now = shipNow()) {             // 'book', 'cancel' or null
@@ -66047,7 +66047,8 @@ const SND = (() => {
 // (arrow level 1 from 18:00, the Captain's search at 19:30), settled at her address at the line on Sunday (about 15:00;
 // E-1's block may say the minute through crossBackAddressAt), the goodbye on Monday. A slower career: the same week, a
 // week or more later (the Thursday after Calder's question), settled on its Sunday at 15:00 (the crossing back stays Day 35).
-// The user's three questions are open; built as recommended, each other choice one constant away:
+// The user's three questions are answered (2026-10-26): no way back; change your mind until the address; the post by your
+// answer to Calder. Each is one constant, so the other choice stays easy to switch:
 //   END_WAY_BACK   answered (the user, 2026-10-26): false, no way back from the end page. true (cut, parked): the kept copy and "Back to before my choice" (29b)
 //   END_CHANGE     'address': change your mind until the Captain's address; 'ramp': until the Tern's ramp on Monday
 //   END_POST_BY    true: the post worded by your answer to Calder's question; false: the same post for everyone
@@ -66524,9 +66525,22 @@ function endPageRows() {
   out.push([endText('ending.endpage.commendations', 'Commendations'), cm.length ? cm.join('; ') : endText('ending.endpage.commendations.none', 'None, and nobody minded')]);
   let fr = []; try { fr = Object.keys(SHIP.rel || {}).filter(id => typeof evPerson === 'function' && evPerson(id)).sort((a, b) => (SHIP.rel[b].pts || 0) - (SHIP.rel[a].pts || 0) || (a < b ? -1 : 1)).slice(0, 3).map(id => evPerson(id).name); } catch (e) { fr = []; }
   if (fr.length) out.push([endText('ending.endpage.friends', 'Your closest friends'), fr.join(', ')]);
-  const kept = (SHIP.traces || []).map(t => String(t).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()); if (kept.length) out.push([endText('ending.endpage.kept', 'What you kept'), kept.join(', ')]);
+  const kept = endKeepsakes(); if (kept.length) out.push([endText('ending.endpage.kept', 'What you kept'), kept.join('; ')]);
   const k = endPostKind(); out.push([endText('ending.endpage.calder', 'What you told Calder you wanted'), k === 'plain' ? endText('ending.endpage.calder.none', 'You never quite said. That\'s allowed.') : endText('ending.endpage.calder.' + k, String((endCareerEnd() || {}).answer || k))]);
   const z = endText('ending.endpage.zeke.line', 'Mind the step. Everyone trips on it, going either way.'); out.push([endText('ending.endpage.zeke', 'Zeke, at the ramp'), /^"/.test(z) ? z : '"' + z + '"']);
+  return out;
+}
+// what you kept: your own keepsakes among the traces, named (the rest are the ship's decor, left out); the Line certificate's
+// two dates when E-1 (EN2) gives them through endLineDates()
+const END_KEEPSAKES = { lineCertificate: 'Your Line certificate', linePlaque: 'Your name on the Line plaque', tilesTrophy: 'Your Tiles trophy', seedlingYours: 'Your seedling in the garden', mugYours: 'Your own mug at the tea corner',
+  nameYours: 'Your name on the Works beam', framedMenu: 'The framed menu from the Captain\'s table', cometSketch: 'Your sketch of the comet', stormLantern: 'A storm lantern from the lantern supper' };
+function endKeepsakes() {
+  const ids = (SHIP.traces || []).map(t => t && typeof t === 'object' ? t.id : t).filter(id => END_KEEPSAKES[id]), out = [];
+  for (const id of [...new Set(ids)]) {
+    let t = endText('ending.endpage.kept.' + id, END_KEEPSAKES[id]);
+    if (id === 'lineCertificate' && typeof endLineDates === 'function') try { const ds = endLineDates(); if (Array.isArray(ds) && ds.length) t += ', Days ' + ds.join(' and '); } catch (e) { /* EN2's */ }
+    out.push(t);
+  }
   return out;
 }
 const END_PAGE = { kept: false };
@@ -66578,9 +66592,10 @@ if (EV_ENDING_ON && SHIP.end && SHIP.end.ended) endPage(true);   // a save that 
 // friends, then Calder, Vance, the Captain): each says goodbye as you reach them (or tap them: "Goodbye" on their card);
 // Zeke last at the ramp's foot (his scene, mirroring Day 0); then "Walk to the Tern": up the ramp and inside, the crowd
 // cheers, the ramp closes, the view fades, the end page (endTheEnd). The Tern waits for you: nothing here is ever forced.
-Object.assign(END_T, { lastAt: 360, bfFrom: 420, bfTo: 540, bayAt: 555, crowd: 60 });
+Object.assign(END_T, { lastAt: 360, bfFrom: 420, bfTo: 540, bfFetch: 510, bfLate: 555, bayAt: 555, crowd: 60, byeFetch: 615, crowdTo: 720, night: [1320, 360] });
 const END_BAY = { aisle: [[9, 10], [8, 10], [7, 10], [6, 10], [5, 10], [9, 11], [8, 11], [7, 11], [6, 11], [5, 11], [5, 9], [5, 8]],   // the walk in from the hall to the ramp (kept clear)
   line: [[9, 12], [9, 9], [8, 12], [8, 9], [7, 12], [7, 9], [6, 12], [6, 9], [4, 12], [4, 10]], zeke: [4, 11], ramp: [5, 7] };   // the farewells along it, door to ramp; Zeke beside the ramp's foot; inside the Tern
+function endOffDay(d) { if (!EV_ENDING_ON) return false; const W = endWeek(), E = SHIP.end; return !!(W && E && E.settled && E.settled.choice === 'go' && d === W.leave); }   // your last day: no shift (careerOff asks; a function, so a call before section 29 has loaded is safe)
 function endGoing() { const W = endWeek(), E = SHIP.end; return !!(EV_ENDING_ON && W && E && E.settled && E.settled.choice === 'go' && !E.ended); }
 function endByes() {                                     // who says goodbye in the aisle, in order: friends, Brennan, then Calder, Vance, the Captain
   const fr = endFriendsOf().filter(id => id !== 'torres-zeke').slice(0, END_BAY.line.length - 4);
@@ -66597,10 +66612,11 @@ function endCrowd(now) {                                 // the rest of the crow
   }
   return out;
 }
-function endStage(now) {                                 // everyone to their spot until `until` (asked again each minute while it lasts)
+function endStage(now, all = true) {                     // everyone to their spot until `until` (asked again each minute while it lasts); all false: the farewells and Zeke only
   const until = now + 30, bye = endByes(), keep = new Set(END_BAY.aisle.concat(END_BAY.line, [END_BAY.zeke]).map(t => t.join(',')));
   bye.forEach((id, k) => crewScene(id, { mode: 'wait', to: { deck: 5, tile: END_BAY.line[k] }, until }));
-  crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: END_BAY.zeke }, until });
+  if (!(SHIP.end && SHIP.end.f.byeSeek && !endInBay())) crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: END_BAY.zeke }, until });
+  if (!all) return bye.length + 1;
   const spots = (typeof gatherSpots === 'function' ? gatherSpots('shuttle-bay') : []).filter(q => q.deck === 5 && !keep.has(q.at.join(',')));
   const crowd = END_PAGE.crowd || (END_PAGE.crowd = endCrowd(now));
   crowd.forEach((id, k) => { if (spots[k]) crewScene(id, { mode: 'wait', to: { deck: 5, tile: spots[k].at }, until }); });
@@ -66647,15 +66663,25 @@ function endByeTick(now, skip) {
   if (!E.f.last && now >= B + END_T.lastAt) { E.f.last = now;
     if (typeof mailSend === 'function') mailSend({ at: Math.max(now, B + END_T.lastAt), from: 'Chief Ines Calder', subject: endText('mail.end.last.s', 'Your last morning'), body: endText('mail.end.last', 'The Tern leaves at 10:00 from the shuttle bay. Breakfast first. Half the ship will be in that bay by half past nine, so don\'t be late. — C.'), quiet: true });
     if (live) endNotice(endText('ending.notice.lastMorning', 'Your last morning: the Tern leaves at 10:00.'), 'Chief Ines Calder'); }
-  if (!E.f.bf && now >= B + END_T.bfFrom && now < B + END_T.bfTo) {   // breakfast: the Captain and your friends in the mess
-    if (typeof guideAsk === 'function') guideAsk({ id: 'end:bf', level: 2, owner: '29b', from: B + END_T.bfFrom, until: B + END_T.bfTo, done: () => !SHIP.end || !!SHIP.end.f.bf, goal: () => ({ deck: 3, room: 'M', label: endText('ending.tracked.breakfast', 'Your last breakfast') }) });
-    if (live) { const sp = typeof gatherSpots === 'function' ? gatherSpots('mess') : []; ['marrow', 'pell', 'tomas', 'rina'].forEach((id, k) => { if (sp[k]) crewScene(id, { mode: 'wait', to: { deck: 3, tile: sp[k].at }, until: B + END_T.bfTo }); }); }
+  if (!E.f.bf && now >= B + END_T.bfFrom && now < B + (E.f.bfSeek ? END_T.bfLate : END_T.bfTo)) {   // breakfast: the Captain and your friends in the mess; from 08:30 Pell comes to get you
+    if (live && !E.f.bfSeek && now >= B + END_T.bfFetch && !(deckDef.num === 3 && roomAt(...player.here()) === 'M')) E.f.bfSeek = now;
+    if (live && E.f.bfSeek) { const sp = typeof gatherSpots === 'function' ? gatherSpots('mess') : [];
+      if (!E.f.bfLed && endNear('pell', 2.4)) { E.f.bfLed = now; if (typeof worksSayAll === 'function') worksSayAll('pell', [endLine('ending.breakfast.fetch', 'pell', 'There you are! Breakfast. Brennan\'s holding your plate hostage. Come on.')]); }
+      crewScene('pell', E.f.bfLed && sp[1] ? { mode: 'lead', to: { deck: 3, tile: sp[1].at }, until: B + END_T.bfLate } : { mode: 'follow', until: now + 30 }); }
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:bf', level: 1, owner: '29b', from: B + END_T.bfFrom, until: B + END_T.bfLate, done: () => !SHIP.end || !!SHIP.end.f.bf, goal: () => ({ deck: 3, room: 'M', label: endText('ending.tracked.breakfast', 'Your last breakfast') }) });
+    if (live) { const sp = typeof gatherSpots === 'function' ? gatherSpots('mess') : []; ['marrow', 'pell', 'tomas', 'rina'].filter(id => !(id === 'pell' && E.f.bfSeek && !(deckDef.num === 3 && roomAt(...player.here()) === 'M'))).forEach((id, k) => { if (sp[k]) crewScene(id, { mode: 'wait', to: { deck: 3, tile: sp[k].at }, until: B + END_T.bfTo }); }); }
     let inMess = false; try { inMess = deckDef.num === 3 && roomAt(...player.here()) === 'M'; } catch (e) { inMess = false; }
     if (live && inMess && !dlg && !endPlay('endingBreakfast', ['brennan', 'marrow', 'pell', 'tomas', 'rina'], { onEnd: () => { endState().f.bf = Math.floor(shipNow()); } }))
       dialogueShow('moment:ending.breakfast', { id: 'ending.breakfast', who: ['brennan', 'marrow'], at: now, where: { any: true } });
   }
   if (now < B + END_T.bayAt) return;
-  if (live) endStage(now);
+  const mm = endMin(now), night = mm >= END_T.night[0] || mm < END_T.night[1];   // the crowd waits till noon, or any time you're in the bay (not at night); the farewells and Zeke wait all day
+  if (live && !night) endStage(now, now < B + END_T.crowdTo || endInBay());
+  if (live && !E.f.byeSeek && now >= B + END_T.byeFetch && !endInBay() && !dlg) E.f.byeSeek = now;   // 10:15 and not there: Zeke comes to get you, then walks you down
+  if (live && E.f.byeSeek && !endInBay() && !night) {
+    if (!E.f.byeLed && endNear('torres-zeke', 2.4)) { E.f.byeLed = now; if (typeof worksSayAll === 'function') worksSayAll('torres-zeke', [endLine('ending.bay.fetch', 'torres-zeke', 'There you are. Half the ship\'s in the bay and the Tern\'s ticking over. With me.')]); }
+    crewScene('torres-zeke', E.f.byeLed ? { mode: 'lead', to: { deck: 5, tile: END_BAY.zeke }, until: now + 30 } : { mode: 'follow', until: now + 30 });
+  }
   const bye = endByes(), next = bye.find(id => !E.f['bye:' + id]);
   if (typeof guideAsk === 'function') guideAsk({ id: 'end:bye', level: 1, owner: '29b', from: B + END_T.bayAt, until: now + 1440, done: () => !endGoing(),
     goal: () => { const n = endByes().find(id => !SHIP.end.f['bye:' + id]);
