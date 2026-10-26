@@ -142,7 +142,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
     <li><a href="#rules">The ground rules for every piece</a></li>
     <li><a href="#switches">Switches and where new code goes</a></li>
     <li><a href="#data">Shared data, agreed up front</a></li>
-    <li><a href="#beats">The held hours (EV_BEATS), whole career</a></li>
+    <li><a href="#held">The held hours (EV_BEATS), whole career</a></li>
     <li><a href="#pieces">The pieces</a></li>
     <li><a href="#order">Order, seats and who can work at once</a></li>
     <li><a href="#overlap">Where pieces touch the same code</a></li>
@@ -250,7 +250,7 @@ code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-r
   </table></div>
 </section>
 
-<section id="beats">
+<section id="held">
   <h2>4. The held hours (EV_BEATS), whole career</h2>
   <p>Today's <code>EV_BEATS</code> (section 18) still holds the old estimates: night shifts on Days 19-20, the Senior Officer scene at 10:00 on Day 16. With <code>P5_STEP5</code> on, S5-1 moves every Pillar 5 row to the plan's hours in one block placed in section 18 straight after the event swap's block, so the guard (<code>guardFree</code>, <code>evBeatsOn</code>) sees the agreed career. Rows are only holds: nothing plays from them, so Step 6's rows are set now too and Step 6 doesn't need to touch this table again (except the one new hold it adds for its briefing). Values change and two rows are added; the table's shape doesn't, but it's a shared table: <b>the events seat reviews it first</b>.</p>
   <div class="tbl"><table>
