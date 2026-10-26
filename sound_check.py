@@ -316,12 +316,18 @@ def check_comet_sound(pw, path):
         check(g.ev("!!SND.music && SND.has('cometTurn')"), 'the music is up and the comet swell is registered')
         check(g.ev("SND.music.TRACKS.comet && SND.music.TRACKS.comet.time === 'Event' && !SND.music.LIST.some(x => x.tracks.some(t => t.key === 'comet'))"),
               'the comet track exists and is not on the Music app list')
-        g.ev("window.cometMusicOn = () => true"); g.step(3)
+        # section 18's own cometMusicOn (FX25, a function declaration in the game's scope) shadows a window stub: swap it in
+        # scope when it's there (and put it back), else stub it on window as before
+        real = g.ev("typeof cometMusicOn === 'function' && !window.hasOwnProperty('cometMusicOn')")
+        setc = (lambda v: g.ev(f"cometMusicOn = () => {v}")) if real else (lambda v: g.ev(f"window.cometMusicOn = () => {v}"))
+        if real: g.ev("window.__cmReal = cometMusicOn")
+        setc('true'); g.step(3)
         check(g.ev("SND.music.eventOn()") == 'comet', 'while cometMusicOn() is true the comet is the event')
-        g.ev("window.cometMusicOn = () => false"); g.step(3)
+        setc('false'); g.step(3)
         check(g.ev("SND.music.eventOn()") is None, 'after, back to the schedule')
-        g.ev("delete window.cometMusicOn"); g.step(2)
-        check(g.ev("SND.music.eventOn()") is None, 'with no cometMusicOn at all, nothing changes')
+        if real: g.ev("cometMusicOn = window.__cmReal"); g.step(2)
+        else: g.ev("delete window.cometMusicOn"); g.step(2)
+        check(g.ev("SND.music.eventOn()") is None, 'with no cometMusicOn at all (or the real one, on Day 1), nothing changes')
         n = g.ev("(() => { SND.log.length = 0; SND.fx('cometTurn', { long: 22 }); return SND.log.filter(e => e.name === 'cometTurn').length; })()")
         check(n == 1, 'the comet turn plays once')
     finally: g.close()

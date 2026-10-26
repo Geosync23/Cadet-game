@@ -66,7 +66,7 @@ PAPER = r"""(() => {
 
 # the speech on paper (turn 6): every line, every rank, the events base's readers there (stubbed) and missing
 SPEECH = r"""(() => {
-  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, rot21: typeof ROSTER_ROTATIONS !== 'undefined' && ROSTER_ROTATIONS.some(r => r.day > 19 && r.day <= 21 && (r.out || []).length), storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON };
+  const out = { bad: [], never: [], counts: {}, repeats: [], weekly: [], save: null, rot21: typeof ROSTER_ROTATIONS !== 'undefined' && ROSTER_ROTATIONS.some(r => r.day > 19 && r.day <= 21 && (r.out || []).length), storm: typeof EV_STORM_ON !== 'undefined' && !!EV_STORM_ON, swap: typeof EV_SWAP_ON !== 'undefined' && !!EV_SWAP_ON, comet: typeof EV_COMET_ON !== 'undefined' && !!EV_COMET_ON && !!SHIP_EVENTS.comet };
   const ranks = ['junior', 'officer', 'senior', 'specialist'], A = FRI_ADDRESSES, filled = new Set();
   // the events base's readers (stubbed: which storm jobs were done, and by you), the ship health boards, your repair
   // cue, a job of yours on the board, the Tiles ladder joined: each way, so every line gets its chance
@@ -286,7 +286,8 @@ check(not sp['bad'], 'on: lines showing a slot or a ?, too long, or not Marrow\'
 # claude/patch-crew brings it to Day 21); with the storm update
 # off (EV_STORM_ON, or none in the build), its own lines: done:storm*, band: and {stormjobs} (the game's readers say nothing)
 stormy = lambda x: not sp['storm'] and (any(re.search(r'(^|[ !|])(done:storm|band:)', c) for c in x[2]) or '{stormjobs}' in x[1])
-never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and ('{sunleavers}' in x[1] or 'arriving' in x[2]) and not sp['rot21']) and not stormy(x)]
+swapped = lambda x: ('swap' in x[2] and not sp.get('swap')) or ('!swap' in x[2] and sp.get('swap')) or ('comet' in x[2] and not sp.get('comet')) or ('!comet' in x[2] and sp.get('comet'))   # the event swap (0.93.2): its lines while off, today's while on (CR6's find)
+never = [x[1] for x in sp['never'] if not any('myshift:night' in c for c in x[2]) and not (x[0] == 'friday-d19' and ('{sunleavers}' in x[1] or 'arriving' in x[2]) and not sp['rot21']) and not stormy(x) and not swapped(x)]
 check(not never, 'on: lines that never fill %s' % never)
 check(all(9 <= n <= 22 for n in sp['counts'].values()) and all(9 <= len(t) <= 14 for _, t in sp['weekly']), 'on: a speech with too few or many lines %s' % sp['counts'])
 check(not sp['repeats'], 'on: weekly lines repeated within 6 weeks %s' % sp['repeats'][:4])

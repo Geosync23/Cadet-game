@@ -719,14 +719,14 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - **Monday Day 22, 21:30: comet viewing** (the user, 2026-10-26: earlier than first planned, Friday Day 26; EP1's `plans/events-plan-2.html` Part A has its hours), the evening after Theo's send-off and Basil's arrival.
   - **Days 27-30: A Veyli vessel needs help**, a new short event after Calder's question (EP1's Part C; not built yet: a parked calendar row).
   - **The new hand's tea after a rotation is removed** ("this one can go").
-  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "a storm, the Veyli and a comet" behind us.
+  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "the Line, a storm, our first guests, a comet".
 - **Comet viewing, Monday Day 22** (the user's yes: built and switched on in 0.93.2, `EV_COMET_ON`, with or without the swap; EP1's `plans/events-plan-2.html` Part A). One gentle evening, no threads, no score, no commendation (like the Line):
   - 07:00 the news at breakfast (Sol Bakshi caught it on the night helm, Hana Mori has it on the long scope); 08:00 Sato's Mail "A comet tonight"; 09:00 two small jobs, kept for you to 17:00: carry the spare blankets up to the junior common room (any rank), fit the cold filter on the observatory scope (Officers and up).
   - 21:30-22:40, four windows, each with a host you tap to join: Dr. Imra Sato at the bow lounge glass (about 35-45), Hana Mori at the observatory scope (about 6-10), Tomas Lind with blankets at the junior common room's stern windows (about 8-12, one place on the sofa kept for you), the Captain's tea in the observation room (Officers and up, about 4-8). The four rooms are the comet's alone from 21:15 to 22:45. Anyone whose bedtime falls inside it leaves 20 minutes before bed; the hosts, Saruth, Raman and Vance stay up to the end that night.
   - The helm brings the Wren round at 21:30 (felt everywhere); Sato asks you to name it at 21:50; Saruth's comet knot at 22:00; the tail reaches the stern windows at 22:20; gone at 22:40.
   - A birthday that day keeps an hour clear of it (the comet counts as a tradition for the birthday's hour). Raman's crew story has its big moment that night (22:10, the observatory's back window) and his beat 4 moves to Days 8-21; Pell's practical never falls on that Monday.
   - Day 23: the retelling, and Sato's comet log Mail at 08:00.
-  - Until the user answers EP1's two questions, the defaults: the comet gets its own music track, and the knotted cord stays on the bow glass rail for good.
+  - The user's answers to EP1's two questions (2026-10-26, via lead 37): the comet has its own music track (SD1's, in the four rooms 21:30-22:40), and the knotted cord stays on the bow glass rail for good.
 - **Before the swap** (kept as history): Tuesday Day 16, 21:30, comet viewing; Days 26-30 the diplomatic visit as a weekend finale (Day 22 named as next week's business, Friday 26 the warning after Calder's question, Saturday 27 the greeting, Sunday 28 one dinner, Monday 29 the farewell).
 
 Build order: the ion storm first, then Crossing the Line, the visit and the comet (the order they come in, since the swap). Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
@@ -956,14 +956,13 @@ Done so far:
 - Which phosphor colour does the device screen use: amber, green or the Wren's cyan? Chosen at Pillar 3's first check-in.
 - Does the diplomacy-and-story starship game become its own future project?
 
-- Comet viewing (EP1's `plans/events-plan-2.html`, questions A1 and A2): its own music track (built as the default), or the usual night music? The knotted cord on the bow glass rail: for good (the default), or down after a week with the sketch?
-
 **The decks:**
 
 - Who keeps the engine watch on Deck 6: is there a watch on both shifts, and are they Works crew?
 
 **Answered:**
 
+- Comet viewing (2026-10-26, the user's answers on EP1's `plans/events-plan-2.html`, A1 and A2, via lead 37): the comet gets its own music track, and the knotted cord stays on the bow glass rail for good.
 - The sim bay (2026-10-24, the user's answers on `plans/rec-simbay-plan.html`, passed on by lead 34): build the layout as planned; sim night now; no scores, just fly; the pods are machines that can break, now; the steerable landing mini-game kept on record as an idea for later ("Build prototype for mini game": a separate prototype, arranged by the lead). See "The rec deck (R)".
 - Scan first and the inspection's warning (2026-10-22, AR2's questions 3 and 4, as passed on by lead 27): every faulty-machine job starts with "Look it over" once you have the scanner; Tomas warns you on the first Wednesday evening, then the Thursday 06:00 arrows. See "Teaching arrows".
 - Dev mode's career arrow (2026-10-23, the user, via lead 31): a magenta DEV arrow in Dev mode only, always at the next career step, with a time when it waits; see "Dev mode" under the technical plan.

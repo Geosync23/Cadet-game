@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-c.3
+   STARSHIP CADET: CSV Wren                           build 0.93.2-c.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9258,7 +9258,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-c.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-c.4';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40219,10 +40219,10 @@ const FRI_ADDRESSES = {
       {"id": "1wljfqp", "who": "marrow", "text": "Long blackouts, a scorched relay room, food lost. We're putting it right, together.", "pose": "sigh", "if": ["band:rough"]},
       {"id": "1yhfej", "who": "marrow", "text": "Storm jobs closed in four days: {stormjobs}. The Chief made it look easy. It wasn't.", "pose": "nod"},
       {"id": "1ts9k26", "who": "marrow", "text": "And everyone who sat up with a neighbour by lantern light: that counted too.", "tone": "warm"},
-      {"id": "gj4ucn", "who": "marrow", "text": "Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.", "pose": "gesture", "if": ["!swap"]},
-      {"id": "r4oiw3", "who": "marrow", "text": "Half of you were at the windows. The other half were asleep, and I don't blame you.", "tone": "funny", "if": ["!swap"]},
+      {"id": "gj4ucn", "who": "marrow", "text": "Then on Tuesday, the comet. After a storm like that, I think the sky owed us one.", "pose": "gesture", "if": ["!swap", "!comet"]},
+      {"id": "r4oiw3", "who": "marrow", "text": "Half of you were at the windows. The other half were asleep, and I don't blame you.", "tone": "funny", "if": ["!swap", "!comet"]},
       {"id": "11vlapl", "who": "marrow", "text": "And this morning we saw our Veyli guests off. Three days, and they made every one count.", "pose": "gesture", "if": ["swap"]},
-      {"id": "xcyrw9", "who": "marrow", "text": "Speaker Teshavi asked if she might come back. I said yes before she'd finished asking.", "tone": "warm", "if": ["swap"]},
+      {"id": "o2desp", "who": "marrow", "text": "Speaker Teshavi asked if they might come back. I said yes before they'd finished asking.", "tone": "warm", "if": ["swap"]},
       {"id": "1qku5ad", "who": "marrow", "text": "My letters of thanks for the storm went out on Sunday. You know who you are."},
       {"id": "1uhcxva", "who": "marrow", "text": "{me} was on it. We talked in the ready room yesterday. Nobody tripped.", "tone": "funny", "if": ["commended"]},
       {"id": "5yz7bp", "who": "marrow", "text": "On Tuesday, Senior Officer {me} moved up to Deck 2. Lucky corridor.", "tone": "warm", "if": ["myrank:senior|specialist"]},
@@ -40241,7 +40241,7 @@ const FRI_ADDRESSES = {
       {"id": "1m1aw7p", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "85elit", "who": "marrow", "text": "Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had."},
       {"id": "mh0fnv", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, a comet.", "pose": "gesture", "if": ["!swap"]},
-      {"id": "kpxb64", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, the Veyli and a comet.", "pose": "gesture", "if": ["swap"]},
+      {"id": "1ocsrbc", "who": "marrow", "text": "A month since {me} came aboard: the Line, a storm, our first guests, a comet.", "pose": "gesture", "if": ["swap"]},
       {"id": "1qqedke", "who": "marrow", "text": "The storm crew's roster is still pinned up in the tea corner. I read it some evenings.", "tone": "warm", "if": ["band:smooth"]},
       {"id": "1dirk5", "who": "marrow", "text": "There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.", "if": ["band:bumpy|rough"]},
       {"id": "1qsc8i6", "who": "marrow", "text": "{me}: a junior four weeks ago, an Engine Specialist today. Rare.", "to": "you", "tone": "warm", "if": ["myrank:specialist"]},
@@ -40253,6 +40253,7 @@ const FRI_ADDRESSES = {
       {"id": "j1gnfw", "who": "marrow", "text": "On Monday night, the comet. Half the ship at the windows, and not a word said.", "pose": "gesture", "if": ["swap"]},
       {"id": "1mjqzq", "who": "marrow", "text": "After a storm and a week of guests, I think the sky owed us that one.", "tone": "warm", "if": ["swap"]},
       {"id": "1b58nnb", "who": "marrow", "text": "What I ask: keep looking up. Out here there's nearly always something worth seeing.", "tone": "warm", "if": ["swap"]},
+      {"id": "j1gnfw", "who": "marrow", "text": "On Monday night, the comet. Half the ship at the windows, and not a word said.", "pose": "gesture", "if": ["!swap", "comet"]},
       {"id": "euhh6a", "who": "marrow", "text": "Now, guests. Tomorrow at ten, a Veyli delegation comes aboard, led by Speaker Teshavi.", "if": ["!swap"]},
       {"id": "9a0dg3", "who": "marrow", "text": "The Veyli are our cousins out here. They came this way long before us.", "if": ["!swap"]},
       {"id": "i04lju", "who": "marrow", "text": "Proud, careful, and very good at noticing. Ask them about the long ship. They like that.", "if": ["!swap"]},
@@ -43047,6 +43048,7 @@ if (EV_COMET_ON && EVENTS_ON) {
     record: cometRecord,                                   // your Record's line (section 18's eventRecord): where you watched it, the name you gave it, your knot
   };
   C.places();                                              // the hosts' spots (the Line's venue gives the bow lounge's)
+  if (!EV_SWAP_ON) FRI_ADDRESSES['friday-d19'].mail = ['All hands: the Captain\'s Friday address', 'The storm\'s tally and my thanks, this week\'s commendations and ranks, and the weekend ahead. To the night watch tonight: good watch.'];   // the comet is still to come (Monday Day 22): no comet in Day 19's Mail
   // c.2, tap to join (the user's rule for every gathering: a host you tap, a simple fitting pose, words only they say):
   // section 18's TRAD_JOIN, read by tradJoinMinute (the marker over the host, the arrow, the tip) and tradJoin
   Object.assign(TRAD_JOIN, {
@@ -45021,19 +45023,28 @@ const COMET_TALK = {
   cometCaptain: [['marrow', 'Tea? It\'s from the tin. It says not for briefings, and this isn\'t one.'], ['vance', 'I\'m here for the comet, not to talk about the rowing.'],
     ['marrow', () => playerRank() === 'senior' || playerRank() === 'specialist' ? 'Deck 2 has its perks. This window is one of them. Don\'t tell the juniors.' : 'Your first month aboard, and the sky\'s already showing off for you.']],
 };
-const COMET_SAID = { key: null, said: new Set() };
+const COMET_SAID = { key: null, said: new Set(), at: -99, n: 0 };
+// RV18's C1-C3: a line waits for its speaker (someone going tonight who isn't in the room yet is tried again at the next
+// line's turn; only one not at the gathering at all is passed over); "there" is within 1.5 m of their spot, settled or
+// not (the hosts at the Line's lead spots never read as settled). A line every 4 ship minutes from when you're in the
+// room (walking in late starts with the next line, no catching up); once through, the room's lines come round again, so
+// a long evening isn't silent
 function cometTalk(d, m) {
   if (typeof bubbleSay !== 'function' || typeof DECK_CREW === 'undefined') return;
   const here = deckDef.num + '|' + roomAt(...player.here()), r = COMET.rooms.find(x => x[0] === here); if (!r) return;
-  const id = ['cometLounge', 'cometScope', 'cometStern', 'cometCaptain'][COMET.rooms.indexOf(r)], key = id + '@' + d;
-  if (COMET_SAID.key !== key) { COMET_SAID.key = key; COMET_SAID.said = new Set(); }
+  const id = ['cometLounge', 'cometScope', 'cometStern', 'cometCaptain'][COMET.rooms.indexOf(r)], key = id + '@' + d, S = COMET_SAID;
+  if (S.key !== key) { S.key = key; S.said = new Set(); S.at = -99; S.n = 0; }
+  if (m < 1292 || m - S.at < 4) return;
   const baked = typeof LINES !== 'undefined' && Array.isArray(LINES['event.comet.talk.' + id]) ? LINES['event.comet.talk.' + id].map(x => { const i = x.text.indexOf(': '); return [x.text.slice(0, i), x.text.slice(i + 2)]; }) : null;
-  const L = baked ? baked.concat(COMET_TALK[id].filter(x => x[2] || typeof x[1] === 'function')) : COMET_TALK[id], slot = Math.floor((m - 1292) / 3); if (slot < 0) return;
-  for (let i = 0; i < L.length && i <= slot; i++) {
-    if (COMET_SAID.said.has(i) || L[i][2] && m < L[i][2]) continue;
-    const a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0] && c.settled && c.spot && here === deckDef.num + '|' + c.spot.room);
-    COMET_SAID.said.add(i); if (!a) continue;              // not there tonight: their line is skipped
-    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); return;
+  const L = baked ? baked.concat(COMET_TALK[id].filter(x => x[2] || typeof x[1] === 'function')) : COMET_TALK[id];
+  const going = q => planDay(q, d).some(sg => sg.tag && sg.tag.startsWith('ev-' + id));
+  for (let k = 0; k < L.length; k++) {
+    const i = (S.n + k) % L.length; if (L[i][2] && m < L[i][2]) continue;
+    const p = schedPeople().find(q => q.id === L[i][0]); if (!p || !going(p)) continue;   // not at this window tonight: passed over
+    const a = DECK_CREW.find(c => c.h && c.p && c.p.id === L[i][0]);
+    const sp = a && a.spot ? (placeSpot(a.spot.id) || a.spot) : null;
+    if (!a || here !== deckDef.num + '|' + roomAt(...cellAt(a.x, a.z)) || (sp && sp.x != null && Math.hypot(a.x - sp.x, a.z - sp.z) > 1.5)) continue;   // still coming: tried again next time
+    bubbleSay(friSpeaker(a), typeof L[i][1] === 'function' ? L[i][1]() : L[i][1], 5); S.at = m; S.n = i + 1; return;
   }
 }
 // your Record's line for the comet (eventRecord asks the event's `record`): the window you joined (SHIP.events.joined),
@@ -45130,6 +45141,7 @@ function cometFrame() {
   const want = here && m < 1360 && COMET.rooms.some(r => r[0] === here) ? COMET_DIM_TO : 0, was = COMET_DIM;
   COMET_DIM = Math.abs(want - COMET_DIM) < .01 ? want : COMET_DIM + (want - COMET_DIM) * .05;
   if (COMET_DIM !== was && typeof applyLight === 'function') applyLight(nightT);
+  if (want && m >= 1290 && typeof CHATTER_AT !== 'undefined') CHATTER_AT = simNow();   // RV18's C2: the crew's everyday chatter and overheard lines hush in the comet's rooms while it passes (only the comet's own words there)
   // the crowd looks up (twice a second): those settled standing at the comet's gatherings; one in six points now and
   // then (by a hash of the person and the ship's two minutes)
   if (!up || m < 1290 || m >= 1360 || typeof DECK_CREW === 'undefined' || typeof CROWD_ANIMS === 'undefined' || !CROWD_ANIMS.has('look') || t < COMET_SKY.look) return;
@@ -45719,6 +45731,7 @@ function friCond(term, d) {
   else if (k === 'arriving') r = typeof ROSTER_ROTATIONS === 'undefined' ? null : ROSTER_ROTATIONS.some(x => x.day > d && x.day <= d + 2 && (x.in || []).length > 0);   // new crew on this weekend's rotation (PR8's find: Day 19's welcome)
   else if (k === 'myrank') r = vs.includes((SHIP.works && SHIP.works.rank) || 'junior');
   else if (k === 'myshift') r = false;                                  // your night shifts are Pillar 5's: none yet
+  else if (k === 'comet') r = EV_COMET_ON && EVENTS_ON;                // 0.93.2: the comet on Monday Day 22 (FX25), section 13's switch
   else if (k === 'swap') r = EV_SWAP_ON;                                // 0.93.2: the event swap (the visit before the comet), section 13's switch
   else if (k === 'season') r = vs.includes(seasonOf(d).id);
   else if (k === 'cue') r = typeof cue === 'function' ? vs.some(x => !!cue(x)) : null;
