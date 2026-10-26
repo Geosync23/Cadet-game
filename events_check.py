@@ -1189,7 +1189,7 @@ if re.search(r'^const EV_COMET_ON = true;', _src, re.M):
 # calendar's earlier events logged): due Saturday Day 27; the phases at their minutes (warning 06:10, onset Sunday 08:00,
 # escalation Monday 09:20, resolution Tuesday 09:15, afterglow 09:20, the end at midnight Tuesday); the Captain's two
 # addresses (Saturday 08:00, Tuesday 09:15), Vance's Mail Saturday 18:00 and Taavek's letter Tuesday 12:00; Taavek aboard
-# only Sunday 09:30 to Monday 15:00; the Captain, Calder and Lindqvist called in on their days off (Saturday, Sunday,
+# only Sunday 09:30 to Monday 15:30 at the latest (the Tern waits for you); the Captain, Calder and Lindqvist called in on their days off (Saturday, Sunday,
 # Monday); the commendation rule (C1): none with nothing done, one at Tuesday 09:30 with two of its jobs; no score; and
 # with the switch off nothing at all
 VESSEL_JS = r"""(() => {
@@ -1199,7 +1199,7 @@ VESSEL_JS = r"""(() => {
     SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('veyliVessel')); EV_DAYS.clear(); SHIP_DAYS.clear();
     const due = eventDueDay(), d = due ? due.day : 27, B = (d - 1) * 1440, tv = schedPeople().find(p => p.id === 'taavek');
     const away = (p, t) => { const w = whereIs(p, t); return w.act === 'away' || !w.deck; };
-    const aboardAt = tv ? [[1, 560], [1, 575], [2, 890], [2, 905], [0, 720], [3, 600]].map(([k, m]) => k + ' ' + hhmm(m) + ' ' + (away(tv, B + k * 1440 + m) ? 'away' : 'aboard')) : ['no Taavek'];
+    const aboardAt = tv ? [[1, 560], [1, 575], [2, 890], [2, 935], [0, 720], [3, 600]].map(([k, m]) => k + ' ' + hhmm(m) + ' ' + (away(tv, B + k * 1440 + m) ? 'away' : 'aboard')) : ['no Taavek'];
     const called = ['marrow', 'calder', 'lindqvist-isak'].map(id => { const q = schedPeople().find(x => x.id === id); return id + ' ' + [0, 1, 2, 3].filter(k => eventCalledIn(q, d + k)).join(','); });
     eventStart('veyliVessel', d); EV_DAYS.clear(); if (jobs) SHIP.event.mine.jobs = jobs;
     const mails = [], send = typeof mailSend === 'function' ? mailSend : null, steps = [], phase = {}, a0 = ADDRESSES.length, status = {};
@@ -1245,7 +1245,7 @@ if _von or _vline:
         if not any(x.startswith('4 00:00') and 'end smooth' in x for x in a['steps']) or a['left']: fail(f"the Veyli vessel's end (midnight Tuesday): {a['steps'][-2:]} left {a['left']}")
         if a['addr'] != ['0 08:00', '3 09:15']: fail(f"the Captain's addresses: {a['addr']}")
         if not any(x.startswith('0 18:00 Commander Teo Vance') for x in a['mails']) or not any(x.startswith('3 12:00 Taavek') for x in a['mails']): fail(f"the Veyli vessel's Mail: {a['mails']}")
-        if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:05 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:00: {a['aboardAt']}")
+        if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:35 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:30 (the Tern waits for you to 15:30; RV21): {a['aboardAt']}")
         if a['called'] != ['marrow 0', 'calder 0,1', 'lindqvist-isak 2']: fail(f"called in: {a['called']}")
         if a['meets'] != ['vesselCall 0 09:00', 'vesselSheet 0 10:00', 'vesselRamp 1 09:30', 'vesselJob 2 09:20', 'vesselHome 2 14:30']: fail(f"the Veyli vessel's meetings: {a['meets']}")
         if a['log'] != ['smooth {}'] or a['com']: fail(f"the Veyli vessel's end with nothing done: {a['log']} commendation {a['com']}")
@@ -1302,12 +1302,13 @@ if _von or _vline:
         if B1['dlg'] != 'vesselRoundOne' or not B1['done']: fail(f"the round one at the bench: {B1}")
         # V-3 live: the parts chain, Sunday 13:00 (the arrow at Zeke from 12:45, tapping Zeke takes a gap, crates through your
         # hands counted, three of them your part toward C1); turnout planned (the spec: 25 or more)
-        CH = g.ev("(() => { const d = 28; return { on: eventsOn(d).filter(x => x.id === 'vesselChain').map(x => hhmm(x.from) + '-' + hhmm(x.to)), going: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselChain'))).length }; })()")
+        CH = g.ev("(() => { const d = 28; return { on: eventsOn(d).filter(x => x.id === 'vesselChain').map(x => hhmm(x.from) + '-' + hhmm(x.to)), going: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselChain'))).length, arrival: schedPeople().filter(p => planDay(p, d).some(s => s.tag && s.tag.startsWith('ev-vesselArrival'))).length }; })()")
         g.ev("skipTo(27 * 1440 + 766); __vat(16, 3)"); vmins(15)
         CH.update(g.ev("({ arrow: guideList().filter(x => x.id === 'vessel:chain').map(x => x.level + (x.shown ? '*' : '')) })"))
         CH['tap'] = g.ev("(() => { const a = DECK_CREW.find(a => a.p.id === 'torres-zeke'); return a ? tradJoinTap(a) : 'no zeke'; })()"); vmins(18)
         CH.update(g.ev("({ t: hhmm(shipNow() % 1440), joined: SHIP.events.joined.includes('vesselChain@28'), passed: SHIP.event.mine['vessel:chainN'], part: SHIP.event.mine['vessel:chain'], ring: guideList().filter(x => x.id === 'vessel:crate').map(x => x.level + (x.shown ? '*' : '')) })"))
         print('  V-3 live, the parts chain:', CH)
+        if not 12 <= CH['arrival'] <= 30: fail(f"about twenty watching Taavek arrive (RV21): {CH['arrival']}")
         if CH['on'] != ['13:00-14:00'] or CH['going'] < 25 or not CH['arrow'] or CH['tap'] is not True or not CH['joined'] or (CH['passed'] or 0) < 3 or not CH['part'] or not CH['ring']: fail(f"the parts chain: {CH}")
         # V-4 live: Monday 09:15 in the Works bay: the arrow at Calder, Calder's word (vesselJob), the helper card twice (Kovac,
         # then Zeke), then the five steps in the machine shop (the stock card: a wrong pick first, ten minutes lost), the
@@ -1317,8 +1318,8 @@ if _von or _vline:
             vmins(1)
             if g.ev("!!DIALOGUE"): break
         MK = g.ev("({ t: hhmm(shipNow() % 1440), dlg: DIALOGUE && DIALOGUE.id, arrow: guideList().filter(x => x.id === 'vessel:job').map(x => x.level + (x.shown ? '*' : '')), row: vesselItems(29).map(x => x.title) })"); MK['lines'] = g.ev("__vplay()")
-        g.page.wait_for_timeout(900); g.step(2)   # the card comes once the scene's panel has closed (a moment of real time)
-        MK['card1'] = g.ev("DEV.choose ? (devChosen(0), SHIP.event.mine['vessel:helpers']) : 'no card'"); g.page.wait_for_timeout(900); g.step(2)
+        g.step(30)   # the card comes once the scene's panel has closed (a moment: simTimeout)
+        MK['card1'] = g.ev("DEV.choose ? (devChosen(0), SHIP.event.mine['vessel:helpers']) : 'no card'"); g.step(30)
         MK['card2'] = g.ev("DEV.choose ? (devChosen(vesselHelperIds(29).filter(id => id !== 'kovac-zainab').indexOf('torres-zeke')), SHIP.event.mine['vessel:helpers']) : 'no card'")
         g.ev("goToDeck(5); player.obj.position.copy(cellPos(24, 10)); target.copy(player.obj.position).setY(.7)")
         seen = []

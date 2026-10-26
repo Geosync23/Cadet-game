@@ -502,3 +502,52 @@
 - Kept a Veyli ship company, Days 27-30; made its part with Taavek.
 == event.veyliVessel.record.met
 - Met Taavek at the foot of the Tern's ramp.
+
+// ---- VB1's stand-ins (the writers closed, lead 39/40: written by the builder in SW4's voice; a writer may polish)
+// Saturday 10:00 and 11:30, if you're not in the Works bay: Calder comes to find you (the sheet)
+== event.veyliVessel.talk.sheetFind
+- calder: There you are. Day off, both of us. A minute?
+- calder: There's a sheet in the Works bay with a gap near the top. Your name goes in it.
+// Sunday 12:45, you weren't at the bench: Taavek comes to find you with the round one
+== event.veyliVessel.talk.roundOneFind
+- taavek: There! The one who meets. I bring the round one to you. Look.
+- taavek: Broken. Very. Come, the bench, quick, before the chain.
+// Sunday 13:00, the round one missed even so (a notice; its gist comes by Mail)
+== event.veyliVessel.notice.roundOne.missed
+- Taavek showed Calder and Zeke the round one at the bench: it will have to be made, tomorrow, in the machine shop.
+// Monday 15:00, you're not at the ramp: Calder comes to find you; the Tern waits to 15:30
+== event.veyliVessel.talk.homeFind
+- calder: There you are. Taavek won't go without saying goodbye.
+- calder: The Tern's waiting. So's Isak, on his day off. Come on.
+// Monday 15:30, the goodbye missed even so
+== event.veyliVessel.notice.home.missed
+- Taavek went home on the Tern. They left a sketch for you with Chief Calder: it's on your shelf.
+// the Record when Zeke met Taavek and you met them at the bench
+== event.veyliVessel.record.met.bench
+- Met Taavek at the Works bay bench.
+// Sunday 09:30, the pilot as the Tern comes back in (a notice from Lindqvist)
+== event.veyliVessel.tern.in
+- Down gently. One guest, one crate, one broken thing. Ramp's opening.
+// you sign the parts chain sheet
+== event.veyliVessel.signed
+- You sign the sheet: Sunday, 13:00, Main storage to the Tern. A pen on a string, and your name near the top.
+// Monday, making step 2: the stock card (stock.1 is the right one; the game shuffles them)
+== event.veyliVessel.stock.title
+- Choose the stock
+== event.veyliVessel.stock.text
+- Taavek taps each bar and listens.
+== event.veyliVessel.stock.1
+- The bronze bar, the one that sings
+== event.veyliVessel.stock.2
+- The soft alloy, the shiny one
+== event.veyliVessel.stock.3
+- The steel offcut from the bin
+// Sunday 09:20-09:50, the crowd watching Taavek come aboard (a turn-up gathering)
+== event.veyliVessel.gather.arrival.name
+- Taavek comes aboard
+== event.veyliVessel.gather.arrival.ask
+- Their engineer comes down the Tern's ramp at half nine. Come and see.
+== event.veyliVessel.gather.arrival.here
+- There. The ramp's opening.
+== event.veyliVessel.gather.arrival.thanks
+- You stand with the crowd in the shuttle bay as the Tern's ramp comes down.
