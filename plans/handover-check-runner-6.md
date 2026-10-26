@@ -4,7 +4,9 @@
 (session_019GcNZ4GGEqfiuYDYnue7nX). Build master now **BM18** (session_01A3S2VBMYmTt2wCZa8ej7XR). Setup done in
 /tmp/work-cr6 and proved with check_fast on claude/integration 5898c190 (sha 10f654de...f266): QUICK CHECK OK in 235 s.
 CR2 is now session_01DsTDi6xJcpdDVhSkELEm24 (per BM18); the others are unchanged.
-2026-10-26 ~18:00: lead **39** (session_019V68fz33UFv4cK5Z4iCDvi) took over, confirmed by lead 38; report to it and BM18.
+2026-10-26 ~22:00: lead **40** (session_01NXybH7NNqM8M4ngiyidq6m) took over, confirmed by lead 39; report to it and BM18.
+CR5 is now session_01UH1U1UpsoL7viYaRRBu2bZ. From 0.93.3 the share adds day 27 and events (interactions_check is ~65 min).
+Before: 2026-10-26 ~18:00: lead **39** (session_019V68fz33UFv4cK5Z4iCDvi) took over, confirmed by lead 38; report to it and BM18.
 Before that, lead **38** (session_01G2y9crUv6vDiiEB2q6Yo9W), confirmed by lead 37; fresh CR3 is
 session_01Pw3EQ24pSz4gjsFcLBMjUF. Rounds done since: 0.93.0 and 0.93.1 (all OK; see checks-cr6.md). Tip: run each
 round from its own worktree (`git worktree add -f --detach /tmp/work-cr6/bNNN <commit>`), so commits to this branch

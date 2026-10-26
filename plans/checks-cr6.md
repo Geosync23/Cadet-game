@@ -1,5 +1,34 @@
 # CR6 check results
 
+## 0.93.3 full round (2026-10-26): OK (only known-old FX24-2)
+
+- **Build:** `claude/staging-0.93.3` 19400976, game sha256 `ec93b94dfe01d8a9f392257bb1f026ea8b1ca1c0cc24bce3d154ea3d2bcad085`
+  (matches BM18's). OLD d9c7e5f0 (0.93.2). Doors three ways, diplomatic visit on (EV_SWAP_ON).
+- Two lanes (at most two browsers), check_fast last and alone.
+
+| Check | Result | Key lines |
+|---|---|---|
+| stories_check | OK (exit 0, 76 s) | `STORIES CHECK OK` |
+| promo_beats_check | OK (exit 0, 33 s) | `PROMO BEATS CHECK OK` |
+| mech_check | OK (exit 0, 1329 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 321 s) | `BIGEVENTS CHECK OK` |
+| join_check | crashed here (Page.goto timeout, load); **OK alone by CR5** (exit 0, 267 s) | `JOIN CHECK OK` |
+| tiles_check | OK (exit 0, 249 s) | `ALL OK` |
+| disc_check | OK (exit 0, 694 s) | `ALL OK` |
+| food_check 1 7 | OK (exit 0, 146 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 157 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 202 s) | `ALL OK` |
+| day_check 27 | OK (exit 0, 568 s) | `DAY CHECK OK` |
+| events_check | known-old only (exit 1, 1329 s) | `not reached: ['farouk-olu>3-lounge-28 16:00']` = FX24-2 |
+| fridays_check | OK (exit 0, 1386 s) | `FRIDAYS CHECK OK` |
+| check_fast.sh | OK (exit 0, 380 s, alone) | `QUICK CHECK OK in 380 s` |
+
+## Side job for lead 39 (2026-10-26): claude/doors-3way
+
+- 3051de4e: player OK (937 s), day 1 OK (618 s); interactions stopped at 50 min (no FAIL), superseded.
+- 329ad201: player OK (905 s); rest stopped, superseded. 1dc4825e (game sha b0dd6aaa...99d9): player OK (853 s),
+  day 1 OK (612 s). bdb6f00a (same game): interactions_check OK (exit 0, 4070 s), the Auto doors part passed.
+
 ## 0.93.2 round 2 (2026-10-26): all OK (m9 fixed); device_check rerun alone by CR1
 
 - **Build:** `claude/staging-0.93.2` d9c7e5f0 (FX26's m9 fix), game sha256
