@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-i.2
+   STARSHIP CADET: CSV Wren                           build 0.93.2-i.3
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9276,7 +9276,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-i.2';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-i.3';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -35487,6 +35487,44 @@ const LINES = JSON.parse([
   ',"inspect.uniform":[',
   '{"text":"Uniform\'s seen better days, cadet.","id":"9lwlya"},',
   '{"text":"Bed\'s good. Locker\'s good. The uniform isn\'t.","id":"1fvxc6g"}]',
+  ',"inspect.walk.arrive":[',
+  '{"text":"Morning, Bunk 1. Stand by your berths, please.","id":"9w7f40"},',
+  '{"text":"Right, Bunk 1. Let\'s have a look at you.","id":"19l4383"},',
+  '{"text":"Bunk 1 first, as always. Let\'s see how we\'re doing.","id":"1n0j6ha"}]',
+  ',"inspect.walk.away":[',
+  '{"text":"The duty officer\'s in Bunk 1 and you\'re not. Your berth will have to speak for itself.","id":"1aalk41"},',
+  '{"text":"Inspection has reached Bunk 1 without you. They\'ll look at your berth anyway.","id":"xjbta6"}]',
+  ',"inspect.walk.done":[',
+  '{"text":"Inspection\'s over for the week. The junior wing breathes out.","id":"h2hk3p"},',
+  '{"text":"The duty officer has finished the walk. Breakfast\'s on.","id":"z6rjv1"}]',
+  ',"inspect.walk.room.b":[',
+  '{"text":"Bunk 2. Journals stacked as a pillow again. Neatly, at least.","id":"sus361"},',
+  '{"text":"A spanner on a pillow. I won\'t ask whose. I know whose.","id":"1bbfxwf"},',
+  '{"text":"Beds made, lockers shut. Bunk 2 always scrubs up on a Thursday.","id":"qeqnb1"}]',
+  ',"inspect.walk.room.c":[',
+  '{"text":"Bunk 3. Old maps on the wall, every one of them straight.","id":"fe0nzt"},',
+  '{"text":"A sock on the lamp. Bunk 3, the lamp is not a drying rack.","id":"1kmcpoj"},',
+  '{"text":"Good corners in here. Somebody\'s been practising.","id":"13mq6sc"}]',
+  ',"inspect.walk.room.d":[',
+  '{"text":"Bunk 4. Very neat. Suspiciously neat. Good, all of you.","id":"18q7cdj"},',
+  '{"text":"Someone\'s alarm is going off under a pillow. I\'ll let it finish.","id":"1xowbs6"},',
+  '{"text":"A cactus on the shelf, Bunk 4. Gerald, I assume. He can stay.","id":"br3vg7"}]',
+  ',"inspect.walk.room.e":[',
+  '{"text":"Bunk 5. A star journal open on a bunk. I won\'t read it. Close it, though.","id":"3x0s80"},',
+  '{"text":"A comic taped to a locker. I\'m in it, apparently. Fair enough.","id":"1lvc2m9"},',
+  '{"text":"Shoes in a row, Bunk 5. Somebody tell the other rooms how.","id":"4fgyi1"}]',
+  ',"inspect.walk.room.f":[',
+  '{"text":"Bunk 6. Knitting on every other bunk. Mind the needles, everyone.","id":"n064pn"},',
+  '{"text":"Lockers shut, beds square. Bunk 6 never gives me anything to say.","id":"dcsswb"},',
+  '{"text":"A ball of wool under a bunk. Somebody\'s knitting has escaped.","id":"1m30h7"}]',
+  ',"inspect.walk.room.g":[',
+  '{"text":"Bunk 7. Cuttings in jars along the shelf. Tidy jars. I\'ll allow it.","id":"1pndmej"},',
+  '{"text":"Beds better made than mine, Bunk 7. Don\'t tell anyone.","id":"16uguxn"},',
+  '{"text":"Someone\'s bunk is all elbows and blankets. Straighten it, please.","id":"1f5zcze"}]',
+  ',"inspect.walk.room.h":[',
+  '{"text":"Shh. Night shift\'s asleep. Beds made round them. We\'ll tiptoe.","id":"cliczz"},',
+  '{"text":"Bunk 8\'s sleeping. Lockers shut. That\'ll do. Quietly, now.","id":"1va1pyf"},',
+  '{"text":"Curtains drawn, someone snoring. Good enough. Out we go, softly.","id":"demqak"}]',
   ',"irr.clear":[',
   '{"text":"Clear the nozzles","id":"f5thg2"}]',
   ',"irr.cleared":[',

@@ -1,0 +1,48 @@
+@bank all
+// SW2 for FX20 (0.93.2, the bunk inspection's real walk, Thursday 06:30). Said by the duty officer as they look over each
+// Deck 4 bunk room (Calder on your first, else any officer by rota: no personality, no deck numbers). Card lines.
+// inspect.walk.room.<b..h>: Bunks 2-8 (h is Bunk 8, the night shift's: they're asleep, so it's said quietly), three each;
+// the game picks one by the week. inspect.walk.arrive: stepping into Bunk 1 before your result. inspect.walk.away and
+// inspect.walk.done: toasts (plain text).
+
+== inspect.walk.room.b
+- Bunk 2. Journals stacked as a pillow again. Neatly, at least.
+- A spanner on a pillow. I won't ask whose. I know whose.
+- Beds made, lockers shut. Bunk 2 always scrubs up on a Thursday.
+== inspect.walk.room.c
+- Bunk 3. Old maps on the wall, every one of them straight.
+- A sock on the lamp. Bunk 3, the lamp is not a drying rack.
+- Good corners in here. Somebody's been practising.
+== inspect.walk.room.d
+- Bunk 4. Very neat. Suspiciously neat. Good, all of you.
+- Someone's alarm is going off under a pillow. I'll let it finish.
+- A cactus on the shelf, Bunk 4. Gerald, I assume. He can stay.
+== inspect.walk.room.e
+- Bunk 5. A star journal open on a bunk. I won't read it. Close it, though.
+- A comic taped to a locker. I'm in it, apparently. Fair enough.
+- Shoes in a row, Bunk 5. Somebody tell the other rooms how.
+== inspect.walk.room.f
+- Bunk 6. Knitting on every other bunk. Mind the needles, everyone.
+- Lockers shut, beds square. Bunk 6 never gives me anything to say.
+- A ball of wool under a bunk. Somebody's knitting has escaped.
+== inspect.walk.room.g
+- Bunk 7. Cuttings in jars along the shelf. Tidy jars. I'll allow it.
+- Beds better made than mine, Bunk 7. Don't tell anyone.
+- Someone's bunk is all elbows and blankets. Straighten it, please.
+== inspect.walk.room.h
+- Shh. Night shift's asleep. Beds made round them. We'll tiptoe.
+- Bunk 8's sleeping. Lockers shut. That'll do. Quietly, now.
+- Curtains drawn, someone snoring. Good enough. Out we go, softly.
+
+== inspect.walk.arrive
+- Morning, Bunk 1. Stand by your berths, please.
+- Right, Bunk 1. Let's have a look at you.
+- Bunk 1 first, as always. Let's see how we're doing.
+
+== inspect.walk.away
+- The duty officer's in Bunk 1 and you're not. Your berth will have to speak for itself.
+- Inspection has reached Bunk 1 without you. They'll look at your berth anyway.
+
+== inspect.walk.done
+- Inspection's over for the week. The junior wing breathes out.
+- The duty officer has finished the walk. Breakfast's on.
