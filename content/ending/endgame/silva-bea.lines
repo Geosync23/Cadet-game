@@ -1,0 +1,20 @@
+@crew silva-bea
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh. Hello. You stayed. The vents went soft this morning. Like drizzle. That'll be why.
+? endgame:early
+- I'm on my second tea, so I can say it now. I'm glad. Very.   #warm
+? endgame
+- Ordinary day. Filters, the sprinklers going, nearly rain. It's enough. It really is.
+? endgame:early
+- I'd have counted the days since you left. Now I've no count to keep. Nicer.   #warm
+? endgame
+- Your filters are getting good. Not mine-good. Getting there. There's time now.   #funny
+
+== bye
+? endgame
+- Bye. Mind the vents on Deck 4, they're a bit stormy today.

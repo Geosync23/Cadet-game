@@ -1,0 +1,18 @@
+@crew reyes-alejandro
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh, hi. You stayed! I told coil three. She's shy, so she didn't say much. Anyway.   #funny
+? endgame:early
+- I put you in my letter home. Page four. It ran to five, sorry. The cat says hello. Anyway.   #funny
+? endgame
+- Ordinary night shift. Notes for Torres, a hum from coil one, a cold tea. I like it.
+- Now you're staying, come and hear the coils one night? Just once? They're different.
+- The cat's furious I'm still away. You'd like her. She'd hate you. Fondly. Anyway.   #funny
+
+== bye
+? endgame
+- Right. Sorry. I talk too much. Night. Anyway. Night.   #funny

@@ -1,0 +1,34 @@
+@crew calder
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== greet
+? endgame time:morning
+- {hi}. Board's at fourteen. Ordinary day. Good.
+
+== chat
+? endgame:early
+- You stayed. Good. Training someone new takes a year. I'd rather not.   #funny
+? endgame
+- No more exams. There are still serial numbers. Learn them.   #funny
+- The board doesn't care about rank. Neither do I. Pick a job.
+- Quiet week. Nothing broke. That's yours, partly.   #warm
+? endgame tier>=friend
+- Your page in my list has a new note. One word. You don't get to read it.   #warm
+
+== life
+? endgame beat:calder.3
+- Fenn stayed on one ship for twenty years. I asked why. "It knew me." Took me a while.   #warm
+
+== feel
+? endgame
+- Pleased. Don't spread it about.   #funny
+
+== near
+? endgame act:work
+- Coil two's at eighty-four. You heard it before I said it. Good.
+
+== bye
+? endgame
+- Right. Tomorrow's board will look like today's. That's the point of it.

@@ -1,0 +1,20 @@
+@crew madsen-ivo
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Right, listen. Thursday I heard go. Friday I heard stay. I said stay. I was right.   #funny
+? endgame:early
+- Six trays at once this morning, and the news. Training for seven. And for you.   #funny
+? endgame
+- Ordinary lunch rush. Bowls stacked right, whatever Brennan says. I'll win one day.   #funny
+? endgame:early
+- The garden's full of new flowers this week. I pressed one. It's for the one who stayed.   #warm
+? endgame
+- You staying means I've someone to tell everything to. Everything. From the beginning.   #funny
+
+== bye
+? endgame
+- Right, off you go. I'll tell you the rest tomorrow. There's lots of rest.   #funny

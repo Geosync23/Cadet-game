@@ -1,0 +1,19 @@
+@crew cruz-tove
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh. Hello. You stayed. I've sown something for it. A week-thirty-six seedling. It's yours.   #warm
+? endgame
+- Ordinary day. Misting timer, soil, the beans doing beans. Good.
+- Your Gerald's doing well. Still a Gerald. They always are.   #funny
+? endgame:early
+- The lettuces didn't notice the crossing back. Lettuces are very calm.   #funny
+? endgame
+- Here. A watering can. You've time now. That's how we start.   #warm
+
+== bye
+? endgame
+- Bye. Um. Mind the hose.

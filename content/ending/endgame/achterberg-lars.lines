@@ -1,0 +1,18 @@
+@crew achterberg-lars
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- You stayed. The airlock seals are fine. Both of those are good news. Same voice.   #funny
+? endgame:early
+- I guessed you'd stay by chapter two. The week was chapter one. You were chapter two.   #funny
+? endgame
+- Ordinary night. Every form filled in properly. Nobody believes how happy that makes me.   #funny
+- Fill in the form, then tea. That's an ordinary night on Watch. You'll get the hang of it.
+- Every good mystery ends with someone staying. Usually the detective. Interesting.   #funny
+
+== bye
+? endgame
+- Evening. Or morning. Mind how you go either way.

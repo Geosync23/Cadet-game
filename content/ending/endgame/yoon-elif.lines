@@ -1,0 +1,18 @@
+@crew yoon-elif
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Oh, hello. Sorry. Joke: what did the cadet say to headquarters? "No thanks." Sorry.   #funny
+? endgame:early
+- I'm so glad. Sorry. Not sorry. Glad. Very glad. Sorry.   #warm
+? endgame
+- Ordinary nights in the infirmary are quiet. A hot drink, a book. I like them so much.
+- I fixed the coffee machine at three this morning. Volkov will say she did. She didn't.   #funny
+- You've time to sleep properly now. Please do. Doctor's view. Friend's view too.   #warm
+
+== bye
+? endgame
+- Night. Sorry. Morning, for you. Whichever. Goodbye.   #funny

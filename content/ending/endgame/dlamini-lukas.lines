@@ -1,0 +1,17 @@
+@crew dlamini-lukas
+// SW5, the endgame pool (plans/ending-spec.html section 9): said only after you choose to stay. Every line is
+// gated by the bare condition "endgame" (EN2 adds it to the line filter, section 22); "endgame:early" marks the
+// lines that only make sense in the first two weeks after you stay (RV21).
+
+== chat
+? endgame:early
+- Stayed. Good. One less goodbye. I've enough counting going on.   #warm
+? endgame
+- Ordinary morning. Up at five, ovens on, porridge right. The galley runs itself. Sort of.   #funny
+- Same stool, same drink, same view. You'll get one soon. A stool, I mean.   #funny
+- Port Halloran gets rain on Tuesdays. Here we get you on Tuesdays. It'll do.   #warm
+- You picked the ship over a desk. Sensible. Desks don't have a galley.
+
+== bye
+? endgame
+- Night. Breakfast's at seven. It always is. That's the good bit.
