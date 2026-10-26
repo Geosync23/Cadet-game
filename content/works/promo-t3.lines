@@ -190,3 +190,21 @@
 - The Captain's toast at 19:00, her quarters, Deck 2.
 == works.pu3.home
 - You stay in cabin 4-23 as a Senior Officer. Your laundry stays yours to do.
+
+// ---- Power safety (ps, S5-1 turn 2; the lesson is meeting train.ps.calder) ----
+== works.mech.ps
+- Power safety
+// the ask (toast and Mail; {time} and {place} filled by the game; never a time by hand)
+== works.ask.ps
+- Power safety | Before any Tier 3 work: Power safety, with me. Twenty minutes. You watch. {time}, {place}.
+== next.ps
+- Power safety comes next: a short lesson with the Chief at a Deck 6 junction.
+== next.wait.ps
+- Power safety: meet the Chief at the Deck 6 port junction. You only watch.
+// the Tier 3 test row's own ladder name (t3) and What's next for it
+== works.mech.t3
+- Your Tier 3 test job
+== next.t3
+- Next: your Tier 3 test. Relied on, and Power safety, and the Chief puts you up.
+== next.wait.t3
+- Your Tier 3 test is set. The job board, the Works bay, 09:00.
