@@ -304,6 +304,29 @@ def check_activities_silent(pw, path):
 
 CHECKS = [check_silent_by_default, check_start_and_fx, check_settings_rows, check_pause_suspends, check_core_hooks, check_activities, check_activities_silent]
 CHECKS += [check_music_schedule, check_music_app]   # music (FX22b)
+
+def check_comet_sound(pw, path):
+    """the comet (0.93.2, FX25 with SD1): its own track while section 18's cometMusicOn() is true, then back to the
+    schedule; the turn's swell is registered and soft. (Section 18 gives cometMusicOn; here a stand-in on window.)"""
+    g = Game(pw, path)
+    try:
+        open_with(g, '?nosave&debug&sound&soundlog'); g.step(30); click_world(g)
+        g.page.wait_for_function("window.__sc('SND._.state()') === 'running'", timeout=10000)
+        g.step(5)
+        check(g.ev("!!SND.music && SND.has('cometTurn')"), 'the music is up and the comet swell is registered')
+        check(g.ev("SND.music.TRACKS.comet && SND.music.TRACKS.comet.time === 'Event' && !SND.music.LIST.some(x => x.tracks.some(t => t.key === 'comet'))"),
+              'the comet track exists and is not on the Music app list')
+        g.ev("window.cometMusicOn = () => true"); g.step(3)
+        check(g.ev("SND.music.eventOn()") == 'comet', 'while cometMusicOn() is true the comet is the event')
+        g.ev("window.cometMusicOn = () => false"); g.step(3)
+        check(g.ev("SND.music.eventOn()") is None, 'after, back to the schedule')
+        g.ev("delete window.cometMusicOn"); g.step(2)
+        check(g.ev("SND.music.eventOn()") is None, 'with no cometMusicOn at all, nothing changes')
+        n = g.ev("(() => { SND.log.length = 0; SND.fx('cometTurn', { long: 22 }); return SND.log.filter(e => e.name === 'cometTurn').length; })()")
+        check(n == 1, 'the comet turn plays once')
+    finally: g.close()
+
+CHECKS += [check_comet_sound]   # the comet (SD1 for FX25)
 # (activities and music add theirs here)
 
 with sync_playwright() as pw:
