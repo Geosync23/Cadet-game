@@ -9448,7 +9448,7 @@ const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-a
 const EV_SWAP_ON = true;                                             // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
-const EV_ENDING_ON = URL_FLAGS.has('ending');        // the ending (lead 39; plans/ending-spec.html on claude/p5-specs): the crossing back, the offer, the goodbye and the endgame (section 29, section 18's 'Ending builder' block); off: the game before it (?ending or #ending previews it)
+const EV_ENDING_ON = URL_FLAGS.has('ending');          // the ending (EN1 for lead 39; plans/ending-spec.html on claude/p5-specs, EP2, the user's pick 2026-10-26): the offer from Concord headquarters, your answer, the goodbye, the end page and the endgame (section 29; the crossing back is section 18's); off: none of it (?ending or #ending previews it)
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
 // and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
@@ -11743,7 +11743,7 @@ function devDay(d) {
     if (b.day === d && DEV_BEATS[b.id] && b.where && Number.isInteger(b.where.deck))
       out.push({ from: b.at, to: b.until || b.at + 30, title: DEV_BEATS[b.id], where: b.where.room + ', ' + deckIn(b.where.deck), kind: 'beat', deck: b.where.deck, room: b.where.room, ...(b.stand ? { place: b.stand } : {}) }); } catch (e) { /* not yet */ }   // place: where you stand for it (item 81: the room's middle was the Chief's own seat, under her)
   try { if (typeof promoBeatsItems === 'function') out.push(...promoBeatsItems(d)); } catch (e) { /* not yet */ }   // FX28: the promotion's steps (24p), with PROMO_BEATS_ON
-  try { if (typeof endingItems === 'function') out.push(...endingItems(d)); } catch (e) { /* not yet */ }   // the ending's beats (section 29), with EV_ENDING_ON
+  try { if (typeof endItems === 'function') out.push(...endItems(d)); } catch (e) { /* not yet */ }   // 29a: the ending's week (EN1), with EV_ENDING_ON
   return out.sort((x, y) => x.from - y.from);
 }
 const DEV_BEATS = { 'd1-briefing': 'Morning briefing with the Chief', 'd2-solo': 'The Chief\'s office: your first solo job', 'd2-booths': 'Calling home', 'd3-store': 'The crew store' };   // titles (stand-ins; the beats' own words are section 21's)
@@ -12677,6 +12677,7 @@ deviceApp({ id: 'record', title: 'Record', icon: 'record', order: 70, view: () =
     if (rv.notes && rv.notes.length) { B.push({ kind: 'text', text: 'What people said', mark: 'head' }); B.push({ kind: 'list', rows: rv.notes.slice(0, 4).map(n => ({ text: n.text, sub: (n.from ? n.from + ', ' : '') + 'Day ' + n.day })) }); }
   } else B.push({ kind: 'text', text: 'The Chief\'s view and your road to certification will show here.' });
   try { if (typeof eventRecord === 'function') B.push(...eventRecord()); } catch (e) { /* not yet */ }   // section 18's ship-wide events lived through (the events base F3b)
+  try { if (typeof endRecord === 'function') B.push(...endRecord()); } catch (e) { /* not yet */ }   // 29a: the transfer offer and your answer (EN1), with EV_ENDING_ON
   if (P926_APPT) B.push(...apptRecord());                 // 0.92.6 item 9: appointments kept (FX22)
   const hw = typeof hobbyWords === 'function' ? hobbyWords() : [];   // your hobbies in words (0.28.63, the plan: no levels or points)
   if (hw.length) { B.push({ kind: 'text', text: 'Free time', mark: 'head' }); for (const t of hw) B.push({ kind: 'text', text: t }); }
@@ -41247,7 +41248,7 @@ function lineCond(k, v, p, ctx) {
     case 'day': { const d = Math.floor(t / 1440) + 1; return any(v, x => { if (/^\d+(,\d+)+$/.test(x)) return x.split(',').map(Number).includes(d); const m = /^(\d*)(-?)(\d*)$/.exec(x); if (!m || !(m[1] || m[3])) return false; const lo = m[1] ? +m[1] : 1, hi = m[2] ? (m[3] ? +m[3] : Infinity) : lo; return d >= lo && d <= hi; }); }   // crew stories (FX21): day:21, day:19,26, day:3-21, day:15-, day:-20
     case 'here': return any(v, x => !!lineQ('storyHere', x, p, ctx));
     case 'endgame': { const d = typeof endgameDay === 'function' ? endgameDay() : null, n = Math.floor(t / 1440) + 1, on = d !== null && n >= d;   // the ending (29c): you stayed (lineFor adds 250 to such a line: a shared one is heard over someone's own everyday line). 'true' every hour for the endgame's first 14 days,
-      return any(v, x => x === 'false' ? !on : on && (n - d < 14 || schedU(p.seed || 0, Math.floor(t / 60), 798) < .4)); }   // then about 4 hours in 10 (k 798), so the old lines come back; 'false': not stayed   // crew stories (FX21): that crew member is in the scene with the speaker (section 20c's storyHere)
+      return any(v, x => x === 'false' ? !on : on && (n - d < 14 || x !== 'early' && schedU(p.seed || 0, Math.floor(t / 60), 798) < .4)); }   // 'early': only in those 14 days   // then about 4 hours in 10 (k 798), so the old lines come back; 'false': not stayed   // crew stories (FX21): that crew member is in the scene with the speaker (section 20c's storyHere)
   }
   return false;
 }
@@ -41338,7 +41339,7 @@ function lineFor(who, kind, ctx = {}) {
   const v = VOICE[p.id], tp = VOICE_TEMPLATES[(v && v.tpl) || p.tpl];
   let off = 0; const pool = [], only = kind.startsWith('talk.') && typeof talkOnlyOwn === 'function' && talkOnlyOwn(p);   // Talk a while with an "only: own" person: their own talk.* lines, never the shared ones (item 15)
   for (const [src, list] of [['own', v && v.lines && v.lines[kind]], ['tpl', !only && tp && tp.lines && tp.lines[kind]], ['bank', !only && LINES[kind]]])
-    { (list || []).forEach((e, i) => { if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) + (e.endgame === 'true' ? 250 : 0), n: off + i }); }); off += (list || []).length; }   // n: its place in their whole pool (lineFresh)
+    { (list || []).forEach((e, i) => { if ((!ctx.keep || ctx.keep(e)) && lineQuick(e, p, c) && linesOk(e, p, c)) pool.push({ e, sc: LINE_SRC[src] + 10 * lineSpec(e) + (e.endgame === 'true' || e.endgame === 'early' ? 250 : 0), n: off + i }); }); off += (list || []).length; }   // n: its place in their whole pool (lineFresh)
   if (!pool.length) return null;
   const fresh = lineFreshFor(p, kind);                     // the chat card's everyday lines: none they've said again till they're all said (item 5)
   if (fresh) { const left = pool.filter(x => !freshHas(fresh.m, x.n)); if (left.length) pool.splice(0, pool.length, ...left); else if (!ctx.peek) fresh.clear(pool); }
@@ -49108,6 +49109,7 @@ function chatShow() {
   if (!C.ask && !C.offer && !talking && typeof caseAskButton === 'function') { const cb = caseAskButton(p); if (cb) buttons.push(cb); }
   if (!C.ask && !C.offer && !talking && typeof shopMenuButton === 'function') { const mb = shopMenuButton(p); if (mb) buttons.push(mb); }   // patch #24: Buy something, from a storekeeper at the counter
   if (!C.ask && !C.offer && !talking && typeof shopGiveButton === 'function') { const sb = shopGiveButton(p); if (sb) buttons.push(sb); }   // 24j: Give the thing you made them (M10)   // 24k P2: Ask about the fault (only a witness, only after Tomas's word)
+  if (!C.ask && !C.offer && !talking && typeof endChatButton === 'function') { const eb = endChatButton(p); if (eb) buttons.push(eb); }   // 29a: "About the transfer" (the ending, EN1; nothing with EV_ENDING_ON off)
   const v = { who: p.name, role: typeof rankCardRole === 'function' ? rankCardRole(p) : p.role, tier: REL_NAMES[relTier(p.id)],   /* patch #21: the rank first (off: p.role) */ line: C.line.text, say: C.line.say !== false, buttons };
   const el = chatEl(); el.hidden = false;
   (CHAT_SKIN.draw || chatDraw)(el, v);
@@ -49167,6 +49169,7 @@ function chatDo(id) {
   else if (id === 'shop-menu' && typeof shopMenuOpen === 'function') shopMenuOpen(p);   // patch #24
   else if (id === 'shop-give') chatSay((typeof shopGiveSay === 'function' && shopGiveSay(p)) || 'Thanks.');   // 24j: an order handed over (M10)
   else if (id === 'case-ask') chatSay((typeof caseAskSay === 'function' && caseAskSay(p)) || 'Didn\'t notice a thing. Sorry.');   // 24k P2: their witness line
+  else if (id.startsWith('end:') && typeof endChatDo === 'function') endChatDo(p, id.slice(4));   // 29a: the ending's buttons (EN1)
   else if (id === 'give') { const g = giftInHands(), res = g && giftGive(p, g); if (res) chatSay(res.text); }
   else if (id === 'sit') { const mo = C.line.moment; if (mo && typeof momentShow === 'function') { chatClose(); momentShow(mo); } }
   else if (id === 'back') { C.ask = false; chatShow(); }
@@ -58706,95 +58709,6 @@ onSim('job', n => {                                      // B: Torres comes by a
 });
 // ---- end of slot: Works career engineer ----
 
-// =====================================================================
-// 29. THE ENDING (lead 39; plans/ending-spec.html on claude/p5-specs, EP2). After the Veyli vessel the Wren crosses back
-// over the Line (section 18's 'Ending builder' block, SHIP_EVENTS.crossingBack); on Thursday Day 32 the Captain offers you
-// a transfer to Concord headquarters (29a); Go: the goodbye at the Tern's ramp and the end page (29b); Stay: the endgame
-// (29c). Everything behind EV_ENDING_ON (section 13); off: nothing here changes the game.
-// =====================================================================
-
-// ---------------------------------------------------------------------
-// 29c THE ENDGAME (E-4, EN2 for lead 39; plans/ending-spec.html section 2). You stayed: from the first morning after
-// the crossing back (Monday Day 36) the game goes on for good.
-//   endStaySet(day)  the Captain's address settles Stay: flag end.stay = the endgame's first day (Day 36 at the earliest)
-//   endgameDay()     that day, or null (the switch off, or not stayed); endgameOn(t) from that day on. Readers ask
-//                    these, never the flag (both are function declarations: sections 18 and 22 ask before this runs)
-//   endCalClosed(r)  section 18's evCalPlan passes over a calendar row after the crossing back once you've stayed:
-//                    no new ship-wide event, ever. No more promotions either: the ladder is done (Step 6 is its end)
-//   the 'endgame' line condition (section 22's lineCond): the endgame pool (content/ending/endgame.lines) only after
-//                    you stay; every hour for the first 14 days, then about 4 hours in 10, so the old lines come back
-//   endWorksNext(k)  "What's next" (worksNext's hook): the Wren is home; the Works app's last page (tab 'home')
-//   the first morning: the Captain sits with you at breakfast (OCCASIONS.endFirstMorning, a chance meeting like Vance's
-//                    bridge invite, script endFirstMorning), with a notice once you're up, a level 1 arrow to the mess
-//                    and a Schedule row (endingItems, devDay's hook; 29a and 29b push their rows to END_ITEMS too)
-// Saved: flags only (end.stay; end.fm.* the first morning's). Nothing calls R(); nothing runs at load while off.
-// ---------------------------------------------------------------------
-
-// ---- slot: Ending builder EN2 (section 29c). New code of this seat's goes here, above the end line (plans/owners.md) ----
-function endgameDay() {                                  // the endgame's first day, or null
-  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || typeof flag !== 'function') return null;
-  const d = flag('end.stay'); return Number.isInteger(d) && d > 0 ? d : null;
-}
-function endgameOn(t) { const d = endgameDay(); if (d === null) return false; return Math.floor((t == null ? shipNow() : t) / 1440) + 1 >= d; }
-function endStaySet(day) {                               // Stay, settled (the address): the endgame from `day` (36 at the earliest)
-  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || typeof flagSet !== 'function') return false;
-  flagSet('end.stay', Math.max(36, Math.floor(day) || 36)); return true;
-}
-function endCalClosed(r) { return !!r && endgameDay() !== null && r.id !== 'crossingBack' && r.day > 35; }   // Day 35: the crossing back
-function endWorksNext(k) { return endgameOn() ? worksText('next.end.home', 'The Wren is home. Live in it.', null, k) : null; }
-// the Schedule's and Tracked's rows of the ending (devDay asks endingItems(d)): END_ITEMS holds a function per piece,
-// f(d) -> [{ from, to, title, where, kind, deck?, room? }] in minutes of day d
-var END_ITEMS = [];                                      // var: devDay may ask before this line has run
-function endingItems(d) {
-  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || !Array.isArray(END_ITEMS)) return [];
-  const out = []; for (const f of END_ITEMS) try { out.push(...(f(d) || [])); } catch (e) { /* not yet */ }
-  return out;
-}
-if (EV_ENDING_ON) {
-  // the Works app's last page, from the endgame's first day (added and taken away by endHomeTab: tabs aren't saved)
-  const endHomeView = () => {
-    const W = SHIP.works, B = [], d = SHIP.time.day, st = endgameDay();
-    B.push({ kind: 'text', mark: 'head', text: worksText('end.works.title', 'The Wren is home') });
-    B.push({ kind: 'text', text: worksText('end.works.body', 'No more tests and no more ranks: the ladder\'s done. The board, the traditions and the crew go on, and so do you.') });
-    const rows = [{ text: worksRankTitle(W), sub: worksText('end.works.rank', 'Your rank') },
-      { text: worksText('end.works.days', '{n} days aboard', { n: d }), sub: worksText('end.works.since', 'Since the Tern brought you, Day 0') },
-      { text: worksText('end.works.stayed', 'You stayed'), sub: worksText('end.works.stayedDay', 'The crossing back, Day {n}', { n: Math.max(35, (st || 36) - 1) }) }];
-    const jobs = W && Array.isArray(W.log) ? W.log.length : 0, com = Array.isArray(SHIP.commendations) ? SHIP.commendations.length : 0;
-    rows.push({ text: worksText('end.works.jobs', '{n} jobs turned in', { n: jobs }) });
-    if (com) rows.push({ text: worksText('end.works.commended', 'Commended {n} times', { n: com }) });
-    B.push({ kind: 'list', rows });
-    return B;
-  };
-  const endHomeTab = () => {
-    const on = endgameOn(), i = Array.isArray(WORKS_TABS) ? WORKS_TABS.findIndex(x => x.id === 'home') : -1;
-    if (on && i < 0) worksTabAdd({ id: 'home', title: worksText('end.works.tab', 'Home'), order: 90, view: endHomeView });
-    else if (!on && i >= 0) { WORKS_TABS.splice(i, 1); if (WORKS_TAB === 'home') WORKS_TAB = 'training'; }
-  };
-  endHomeTab();
-  if (typeof onSim === 'function') onSim('newGame', () => endHomeTab());
-  // the first morning: the Captain at your table at breakfast (her own breakfast in the mess, else 07:30)
-  const endFmSlot = d => (typeof occMealSlot === 'function' && occMealSlot('marrow', d, '3-mess-', 300, 600)) || { at: 450, len: 40 };
-  OCCASIONS.endFirstMorning = { title: 'Breakfast with the Captain', kind: 'meeting', by: 'marrow', deck: 3, room: 'M', at: 450, len: 40, script: 'endFirstMorning',
-    once: true, chance: true, flag: 'end.fm.done', due: d => endgameDay() === d, slot: endFmSlot };
-  const endFmRec = () => (SHIP.occasions || []).find(x => x.id === 'endFirstMorning') || null;
-  END_ITEMS.push(d => { const r = endFmRec(); if (endgameDay() !== d || (r && r.status !== 'asked')) return [];
-    const s = r ? { at: r.at % 1440, len: r.len } : endFmSlot(d);
-    return [{ from: s.at, to: s.at + s.len, title: worksText('end.fm.row', 'Breakfast with the Captain'), where: 'the mess, Deck 3', kind: 'beat', deck: 3, room: 'M' }]; });
-  const endFmTick = (now, skip) => {
-    const d = endgameDay(); if (d === null) return;
-    endHomeTab();
-    if (skip || worksDay(now) !== d || now < shipNow() - 1 || (typeof sleeping !== 'undefined' && sleeping)) return;
-    const r = endFmRec(); if (!r || r.status !== 'asked' || r.met) return;
-    if (!flag('end.fm.notice')) { flagSet('end.fm.notice', d);   // once you're up
-      const text = worksText('end.fm.notice', 'The Wren is back on her course. The Captain is at breakfast in the mess.');
-      if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
-      else try { toast('The Wren', text); } catch (e) { /* no UI */ } }
-    if (typeof guideAsk === 'function') guideAsk({ id: 'end:fm', level: 1, owner: '29c (EN2)', from: r.at - 30, until: r.at + r.len,
-      goal: () => ({ deck: 3, room: 'M', label: worksText('end.fm.arrow', 'Breakfast: the Captain is waiting') }), done: () => { const x = endFmRec(); return !x || !!x.met || x.status !== 'asked'; } });
-  };
-  WORK_TICKS.push(endFmTick);
-}
-// ---- end of slot: Ending builder EN2 ----
 
 
 // =====================================================================
@@ -65840,6 +65754,633 @@ const SND = (() => {
   S._ = { FX, HUMS, STEP, LOOPS, startHum: (...a) => startHum(...a), state: () => ctx ? ctx.state : 'off', allowed: ALLOWED };
   return S;
 })();
+
+// =====================================================================
+// 29. THE ENDING (the ending engineer EN1 for lead 39; plans/ending-spec.html on claude/p5-specs by EP2, the user's pick
+// 2026-10-26). Behind EV_ENDING_ON (section 13); off: nothing here does anything. The crossing back (Sunday Day 35) is
+// section 18's block (E-1, the events builder); this section is the offer, your answer, the goodbye, the end page, the
+// kept copy and the endgame. Its save: SHIP.end = { offer, said: [[day, 'stay' | 'go' | 'unsure']], settled }. Step 6's
+// and the vessel's data are read only through typeof-guarded calls, with plain fallbacks. Placed after section 27, just
+// before the main loop, so it loads after everything it reads and no other branch adds lines at this spot.
+// =====================================================================
+// The ending's shared parts (EN1). Times are ship minutes of the day. The week (spec section 1): the offer Thursday 16:00
+// (arrow from 15:45, Calder comes to find you from 16:10, the ready room open till 18:00), your answer by Saturday 20:00
+// (arrow level 1 from 18:00, the Captain's search at 19:30), settled at her address at the line on Sunday (about 15:00;
+// E-1's block may say the minute through crossBackAddressAt), the goodbye on Monday. A slower career: the same week, a
+// week or more later (the Thursday after Calder's question), settled on its Sunday at 15:00 (the crossing back stays Day 35).
+// The user's three questions are open; built as recommended, each other choice one constant away:
+//   END_WAY_BACK   answered (the user, 2026-10-26): false, no way back from the end page. true (cut, parked): the kept copy and "Back to before my choice" (29b)
+//   END_CHANGE     'address': change your mind until the Captain's address; 'ramp': until the Tern's ramp on Monday
+//   END_POST_BY    true: the post worded by your answer to Calder's question; false: the same post for everyone
+const END_WAY_BACK = false, END_CHANGE = 'address', END_POST_BY = true;   // END_WAY_BACK: CUT (the user, 2026-10-26, question 1: no way back from the goodbye); its code in 29b stays parked and off
+const END_T = { offerDay: 32, offerAt: 960, arrowFrom: 945, seekAt: 970, roomTo: 1080, sceneLen: 45, inviteAt: 360, dueAt: 1200, lastCall: 1080, searchAt: 1170, addressAt: 900, rampAt: 595 };
+const END_CHOICES = ['stay', 'go', 'unsure'];
+const endDayOf = t => Math.floor(t / 1440) + 1, endMin = t => t - (endDayOf(t) - 1) * 1440;
+function endText(key, fallback, vars, k = 0) { return typeof worksText === 'function' ? worksText(key, fallback, vars, k) : fallback; }   // content/ending/*.lines once the writers' words are baked (E-5); stand-ins till then
+function endClean(e) {                                   // a saved SHIP.end, checked
+  const o = e && typeof e === 'object' ? e : {}, off = o.offer && Number.isInteger(o.offer.day) ? { day: o.offer.day, met: !!o.offer.met, how: typeof o.offer.how === 'string' ? o.offer.how : null } : null;
+  const said = Array.isArray(o.said) ? o.said.filter(x => Array.isArray(x) && Number.isInteger(x[0]) && END_CHOICES.includes(x[1])).slice(-40).map(x => [x[0], x[1]]) : [];
+  const settled = o.settled && Number.isInteger(o.settled.day) && (o.settled.choice === 'stay' || o.settled.choice === 'go') ? { day: o.settled.day, choice: o.settled.choice } : null;
+  const f = {}; if (o.f && typeof o.f === 'object') for (const k of Object.keys(o.f).slice(0, 80)) if (typeof k === 'string' && k.length < 40 && (Number.isFinite(o.f[k]) || o.f[k] === true)) f[k] = o.f[k];
+  return { offer: off, said, settled, f, ...(Number.isInteger(o.ended) ? { ended: o.ended } : {}) };
+}
+if (EV_ENDING_ON) {                                      // off: SHIP has no end, the save no ship.end
+  SHIP.end = SAVED && SAVED.ship && SAVED.ship.end ? endClean(SAVED.ship.end) : null;
+  SAVE_EXTRA.push(s => { if (SHIP.end) s.ship.end = { offer: SHIP.end.offer, said: SHIP.end.said.slice(-40), settled: SHIP.end.settled, f: { ...SHIP.end.f }, ...(SHIP.end.ended ? { ended: SHIP.end.ended } : {}) }; });
+  onSim('newGame', () => { SHIP.end = null; if (typeof crewSceneEnd === 'function') { crewSceneEnd('marrow'); crewSceneEnd('calder'); } });
+}
+const endState = () => SHIP.end || (SHIP.end = endClean(null));
+// Step 6's and the vessel's data, read only through guarded calls, with plain fallbacks
+const endStep6 = () => typeof P5_STEP6 !== 'undefined' && !!P5_STEP6;
+function endCareerEnd() { try { const e = SHIP.works && SHIP.works.end; return e && Number.isInteger(e.day) ? e : null; } catch (x) { return null; } }   // S6-9's { answer, day }: your answer to Calder's question
+function endPostKind() {                                  // which post headquarters offers: by your answer to Calder (question 3), else plain
+  if (!END_POST_BY) return 'plain';
+  const e = endCareerEnd(), a = e && String(e.answer || '').toLowerCase(); if (!a) return 'plain';
+  return /engine|night/.test(a) ? 'engines' : /teach|cadet|mentor/.test(a) ? 'teaching' : /bridge|command/.test(a) ? 'bridge' : 'unsure';
+}
+const END_POSTS = { engines: 'the fleet\'s engine office', teaching: 'the cadet academy', bridge: 'the command school', unsure: 'a post at headquarters, to come and find out what it is', plain: 'a place in headquarters\' engineering office' };
+const endPost = () => endText('end.post.' + endPostKind(), END_POSTS[endPostKind()]);
+function endRankWord() { try { return typeof playerRank === 'function' ? ({ junior: 'Cadet', officer: 'Officer', senior: 'Senior Officer', specialist: 'Engine Specialist' })[playerRank()] || 'Officer' : 'Officer'; } catch (e) { return 'Officer'; } }
+// the week: the offer's day (Day 32; with Step 6 on, the first Thursday from Day 32 after you've answered Calder's question,
+// null till then), then the answer's day, the settling day and the goodbye's
+function endOfferDay() {
+  const E = SHIP.end; if (E && E.offer) return E.offer.day;
+  if (!endStep6()) return END_T.offerDay;
+  const c = endCareerEnd(); if (!c) return null;
+  let d = END_T.offerDay; while (d <= c.day) d += 7; return d;
+}
+function endWeek() { const o = endOfferDay(); return o ? { offer: o, due: o + 2, settle: o + 3, leave: o + 4 } : null; }
+function endSettleAt() {                                  // absolute ship minutes: the Captain's address (or, with END_CHANGE 'ramp', the Tern's ramp)
+  const W = endWeek(); if (!W) return Infinity;
+  if (END_CHANGE === 'ramp') return (W.leave - 1) * 1440 + END_T.rampAt;
+  let a = END_T.addressAt; if (W.settle === 35 && typeof crossBackAddressAt === 'function') try { const x = crossBackAddressAt(); if (Number.isFinite(x)) a = x; } catch (e) { /* E-1's */ }
+  return (W.settle - 1) * 1440 + a;
+}
+const endSaid = () => { const E = SHIP.end, l = E && E.said.length ? E.said[E.said.length - 1] : null; return l ? l[1] : null; };   // your latest answer, or null
+const endFirm = () => endSaid() === 'stay' || endSaid() === 'go';
+const endingChoice = () => SHIP.end && SHIP.end.settled ? SHIP.end.settled.choice : null;   // 'stay' | 'go' once settled (E-1's address, E-3, E-4 read it)
+const endOpen = () => !!(EV_ENDING_ON && SHIP.end && SHIP.end.offer && SHIP.end.offer.met && !SHIP.end.settled);   // the choice is open: after the offer, until it's settled
+
+// ---------------------------------------------------------------------
+// 29a THE OFFER (E-2, the ending engineer). Thursday Day 32 at 16:00 in the Captain's ready room (the letter from Concord
+// headquarters, through the Captain; the Admiral is her fish), Calder's walk, the friends' "About the transfer" (section
+// 20's chat card, through its hook), Zeke's Friday talk, the call home (section 18's booths, through their hook), the
+// Captain's "About the transfer" until her address, her 19:30 Saturday search, "Not sure yet", a slower career's later days.
+// Empty until E-2 turn 2.
+// ---------------------------------------------------------------------
+
+// ---- slot: Ending offer (section 29a). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// E-2 (EN1). The offer: OCCASIONS.endingOffer, booked on its day at 06:00 (the appointment, the ready room's door open
+// 15:50-18:00, Vance's Mail as the record), its scene played by section 18's meetings when you're in the room; the
+// Captain at her desk and Calder beside her from 15:50 (crewScene). From 16:10 Calder comes to find you and leads you
+// up; still not there by 18:00 (or asleep through it), the scene plays where you are when she reaches you. Never missed.
+// Then Calder walks out with you, her words by your answer to her question. From then until it's settled: "About the
+// transfer" on the Captain's chat card (section 20's hook endChatButton / endChatDo), any time; "Tell the Captain" on
+// her (arrow level 6, level 1 on the answer's day from 18:00); her search at 19:30 if you haven't said anything; at
+// her address it's settled, and if your answer is still "Not sure" she asks you then, Stay or Go only (E-1 plays
+// endingAsk at the front; without it, she finds you just after). Saved in SHIP.end (section 29).
+if (EV_ENDING_ON) {
+  OCCASIONS.endingOffer = { title: 'The Captain\'s ready room', kind: 'summons', by: 'marrow', with: ['calder'], deck: 1, room: 'R', at: END_T.offerAt, len: END_T.sceneLen, script: 'moment:ending.offer', due: () => false,
+    mail: { from: 'Commander Teo Vance', subject: 'The Captain would like a word', body: () => endText('mail.end.invite', 'The Captain would like to see you in her ready room on Deck 1 at 16:00 today. Chief Calder will be there. No need to change.') } };
+  endOfferScript();
+}
+function endOfferScript() {                              // the ready room (stand-in words till content/ending/offer.lines)
+  const post = endPost(), plain = endPostKind() === 'plain';
+  MEETING_SCRIPTS['moment:ending.offer'] = { title: endText('end.offer.title', 'The ready room'), from: 'Captain Odile Marrow',
+    lines: [
+      { who: 'marrow', text: endText('end.offer.1', 'Come in. Sit. Mind the step.'), pose: 'gesture' },
+      { who: 'calder', text: endText('end.offer.2', 'She means sit. I\'m standing because I\'ve been sitting all day.') },
+      { who: 'marrow', text: endText('end.offer.3', 'This came in from Concord headquarters this morning. With your name on it.'), to: 'you' },
+      { who: 'marrow', text: c => endText('end.offer.4.' + endPostKind(), 'They\'re offering you a transfer. ' + post.charAt(0).toUpperCase() + post.slice(1) + '.', { post }) },
+      { who: 'calder', text: endText('end.offer.5.' + (plain ? 'plain' : endPostKind()), plain ? 'They don\'t send these to everyone. I checked.' : 'I may have mentioned what you told me at the tea corner. I may have mentioned it loudly.'), pose: 'nod' },
+      { who: 'marrow', text: endText('end.offer.6', 'The Tern could take you on Monday. Or you could stay, and the Wren keeps you.'), to: 'you' },
+      { choice: [
+        { text: endText('end.offer.r1', 'Thank you, Captain. I don\'t know what to say.'), rel: { marrow: 1 }, reply: { who: 'marrow', text: endText('end.offer.r1.a', 'Then don\'t say it yet.'), pose: 'nod' } },
+        { text: endText('end.offer.r2', 'What would I be doing there?'), rel: { calder: 1 }, reply: { who: 'calder', text: endText('end.offer.r2.a', 'Whatever they need, at first. Then whatever you make of it. Same as here.') } },
+        { text: endText('end.offer.r3', 'Can I think about it?'), rel: { marrow: 1, calder: 1 }, reply: { who: 'marrow', text: endText('end.offer.r3.a', 'I\'d think less of you if you didn\'t.'), pose: 'nod' } },
+      ] },
+      { who: 'marrow', text: endText('end.offer.7', 'The Admiral has read it too. He has no opinion. He never does.'), pose: 'gesture' },
+      { who: 'marrow', text: endText('end.offer.8', 'You don\'t have to answer now. Saturday evening. Tell me in person, wherever I am.'), to: 'you' },
+      { who: 'marrow', text: endText('end.offer.9', 'Go on. The Chief will walk you down.'), pose: 'nod' },
+    ],
+    onPick: () => { endState().f.picked = 1; },
+    onEnd: fin => { const E = endState(); if (fin || E.f.picked) endOfferDone(E.f.late ? 'late' : E.f.seek ? 'fetched' : 'room'); else if (!E.f.seek) E.f.seek = Math.floor(shipNow()); } };   // walked out before your reply: Calder comes after you and it finishes where you are
+}
+function endOfferDone(how) {                             // the offer's been made (any way it played): Calder's walk, the choice open
+  const E = endState(); if (!E.offer || E.offer.met) return;
+  E.offer.met = true; E.offer.how = how; const now = Math.floor(shipNow());
+  const r = SHIP.occasions.find(x => x.id === 'endingOffer' && x.status === 'asked'); if (r) r.met = true;
+  if (typeof guideDrop === 'function') guideDrop('end:offer');
+  if (typeof crewSceneEnd === 'function') crewSceneEnd('marrow');
+  if (typeof crewScene === 'function') crewScene('calder', { mode: 'follow', until: now + 12 });
+  E.f.walk = now; if (typeof worksSayAll === 'function') worksSayAll('calder', endWalkLines());
+  if (typeof simNote === 'function') simNote('endingOffer', { day: endDayOf(now), how });
+}
+function endWalkLines() {                                // Calder on the stairs, by your answer to her question (stand-ins)
+  const k = endPostKind();
+  const first = { engines: 'You said you wanted the engines. Well. The whole fleet\'s engines, now.', teaching: 'You said you wanted to teach. Well.', bridge: 'You said you wanted the bridge. Well. Their bridge school, anyway.',
+    unsure: 'You said you didn\'t know yet. Neither do they, apparently. That\'s not a bad sign.', plain: 'Well. That doesn\'t happen every week.' }[k];
+  return [endText('end.walk.1.' + k, first), endText('end.walk.2', 'Don\'t answer to please me. Or her. Or Torres, who will have an opinion by dinner.'), endText('end.walk.3', 'Saturday, then. Tell her yourself.')];
+}
+function endInRoom() { try { return deckDef.num === 1 && roomAt(...player.here()) === 'R'; } catch (e) { return false; } }
+function endNear(id, m) { try { const a = DECK_CREW.find(x => x.p && x.p.id === id), P = player.obj.position; return !!a && Math.hypot(a.x - P.x, a.z - P.z) < m; } catch (e) { return false; } }
+function endNotice(text, from) {                         // an urgent notice (its own pop-up), else a toast
+  if (!text) return; if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: true }); return; } catch (e) { /* no device */ }
+  try { toast(from || 'The Captain', text); } catch (e) { /* no UI */ }
+}
+function endWhere(id, t) {                               // a goal on someone wherever they are, or null
+  const p = typeof evPerson === 'function' ? evPerson(id) : null; let w = null; try { w = p && whereIs(p, t); } catch (e) { w = null; }
+  return w && w.deck ? { deck: w.deck, crew: id } : null;
+}
+// the answer: the Captain's scene, wherever she is (her chat card's button, her search, or at the address with ask)
+function endAnswerScript(why) {                          // why: 'tell' (you came to her), 'search' (19:30), 'ask' (the address: Stay or Go only)
+  const again = endState().said.length > 0, ask = why === 'ask';
+  const open = why === 'search' ? endText('end.ans.search', 'There you are. I said Saturday, and it\'s Saturday.') : ask ? endText('end.ans.ask', 'I won\'t decide this for you. But the ship\'s waiting. Stay, or go?')
+    : again ? endText('end.ans.again', 'Changed your mind? You\'re allowed. Once more, then.') : endText('end.ans.open', 'The transfer. Have you decided?');
+  const pick = (choice, text, reply, close) => ({ text, rel: { marrow: 1 }, reply: { who: 'marrow', text: reply, pose: 'nod' }, choice, close });
+  const choices = [
+    pick('stay', endText('end.ans.stay', 'I\'m staying. The Wren\'s home.'), endText('end.ans.stay.a', 'Good. Selfishly, good.'), endText('end.ans.stay.close', 'I\'ll tell headquarters they can\'t have you. They\'ll survive.')),
+    pick('go', endText('end.ans.go', 'I\'m going. I want to see what\'s there.'), endText('end.ans.go.a', 'Then we\'ll make it a proper send-off.'), endText('end.ans.go.close', 'The Tern leaves Monday at ten. Once you\'re aboard, this game ends there: there\'s no coming back to it. You can still change your mind until my address.')),
+  ];
+  if (!ask) choices.push(pick('unsure', endText('end.ans.unsure', 'I\'m not sure yet.'), endText('end.ans.unsure.a', 'Then you have until my address at the line. After that, the ship will know.'), endText('end.ans.unsure.close', 'Don\'t lose sleep over it. Lose a little.')));
+  MEETING_SCRIPTS['moment:ending.answer'] = { title: endText('end.ans.title', 'The transfer'), from: 'Captain Odile Marrow', noCount: true,
+    lines: [{ who: 'marrow', text: open, to: 'you' }, { choice: choices.map(({ choice, close, ...c }) => c) }, { who: 'marrow', text: () => (choices.find(c => c.choice === endSaid()) || {}).close || '' }],
+    onPick: k => { const c = choices[k]; if (c) endSay(c.choice); },
+    onEnd: () => { delete MEETING_SCRIPTS['moment:ending.answer']; } };
+  return 'moment:ending.answer';
+}
+function endAnswerShow(why) {
+  if (typeof DIALOGUE !== 'undefined' && DIALOGUE) return false;
+  const sc = endAnswerScript(why); return dialogueShow(sc, { id: 'ending.answer', who: ['marrow'], at: shipNow(), where: { any: true } });
+}
+const endingAsk = () => endOpen() && !endFirm() ? endAnswerShow('ask') : false;   // E-1: at the front, before the crowd, when she has to ask
+function endSay(choice, t = Math.floor(shipNow())) {      // you told her: kept with the day; the first "Go" makes the kept copy (29b)
+  const E = endState(); if (!END_CHOICES.includes(choice) || E.settled) return false;
+  const firstGo = choice === 'go' && !E.said.some(x => x[1] === 'go');
+  if (firstGo && END_WAY_BACK && typeof endKeepCopy === 'function') try { endKeepCopy(); } catch (e) { /* 29b's */ }   // before it's said: the copy has the choice open
+  E.said.push([endDayOf(t), choice]); if (E.said.length > 40) E.said.splice(0, E.said.length - 40);
+  if (typeof simNote === 'function') simNote('endingSaid', { choice, day: endDayOf(t) });
+  if (t >= endSettleAt() && (choice === 'stay' || choice === 'go')) endSettle(t);
+  return true;
+}
+function endSettle(t = Math.floor(shipNow())) {          // the address (or later, once you've answered): it's settled and the ship knows
+  const E = SHIP.end; if (!E || E.settled || !endFirm()) return false;
+  E.settled = { day: endDayOf(t), choice: endSaid() };
+  if (typeof flagSet === 'function') flagSet('end.' + E.settled.choice, E.settled.day);   // end.stay (E-4's line gate) or end.go
+  if (typeof guideDrop === 'function') guideDrop('end:tell');
+  if (typeof simNote === 'function') simNote('endingSettled', { choice: E.settled.choice, day: E.settled.day });
+  return true;
+}
+// section 20's chat card (one hook line each in chatShow and chatDo): "About the transfer" on the Captain while it's open
+function endChatButton(p) {
+  if (EV_ENDING_ON && typeof endByeChat === 'function') { const b = endByeChat(p); if (b) return b; }   // 29b: the goodbye's
+  if (!EV_ENDING_ON || !p || !endOpen()) return null;
+  if (p.id === 'marrow') return { id: 'end:tell', label: endText('end.btn.tell', 'About the transfer') };
+  return typeof endFriendButton === 'function' ? endFriendButton(p) : null;   // the friends' (E-2 turn 3)
+}
+function endChatDo(p, what) {
+  if (EV_ENDING_ON && what === 'bye' && p && typeof endByeSay === 'function') { if (endByeSay(p.id) && typeof chatClose === 'function') chatClose(); return; }
+  if (!EV_ENDING_ON || !endOpen()) return;
+  if (what === 'tell' && p && p.id === 'marrow') { if (typeof chatClose === 'function') chatClose(); endAnswerShow('tell'); return; }
+  if (typeof endFriendDo === 'function') endFriendDo(p, what);
+}
+function endTick(now, skip) {                            // once a ship minute (hourly while time skips)
+  if (!EV_ENDING_ON) return;
+  const W = endWeek(); if (!W) return;
+  const E = endState(), d = endDayOf(now), m = endMin(now), B = (W.offer - 1) * 1440, live = !skip && now >= shipNow() - 1;
+  if (!E.offer && (d > W.offer || d === W.offer && m >= END_T.inviteAt)) {   // the morning of the offer (or the first minute after it, if you skipped past)
+    E.offer = { day: W.offer, met: false, how: null }; endOfferScript();
+    if (now < B + END_T.roomTo) occasionAdd('endingOffer', B + END_T.offerAt, !live, END_T.roomTo - END_T.offerAt);
+  }
+  if (!E.offer) return;
+  if (!E.offer.met) {
+    if (live && !E.f.invite && d === W.offer && m < END_T.offerAt) { E.f.invite = now; endNotice(endText('end.invite.notice', 'The Captain would like to see you: her ready room, Deck 1, 16:00.'), 'Commander Teo Vance'); }
+    if (live && d === W.offer && m >= END_T.offerAt - 10 && m < END_T.roomTo && typeof crewScene === 'function') { crewScene('marrow', { mode: 'wait', to: '1-ready-1', until: B + END_T.roomTo }); if (!E.f.seek) crewScene('calder', { mode: 'wait', to: '1-ready-visit-2', until: B + END_T.roomTo }); }
+    if (typeof guideAsk === 'function' && now < B + END_T.roomTo) guideAsk({ id: 'end:offer', level: 1, owner: '29a', from: B + END_T.arrowFrom, until: B + END_T.roomTo, done: () => !SHIP.end || !SHIP.end.offer || SHIP.end.offer.met,
+      goal: () => ({ deck: 1, room: 'R', label: endText('end.ring.offer', 'The Captain, 16:00') }) });
+    const late = now >= B + END_T.seekAt && !endInRoom() && !(typeof DIALOGUE !== 'undefined' && DIALOGUE);
+    if (late && !E.f.seek) { E.f.seek = now; if (live) try { toast('Chief Ines Calder', endText('end.seek.toast', 'The Chief is coming to find you.')); } catch (e) { /* no UI */ } }
+    if (E.f.seek && !skip) {                             // she comes to you; within reach, her word, then she leads you up (after 18:00, or if you'd walked out of it, the scene where you are)
+      const room = now < B + END_T.roomTo && !E.f.picked && !SHIP.occasions.some(x => x.id === 'endingOffer' && x.f && x.f['met:' + x.key]);
+      if (typeof crewScene === 'function') crewScene('calder', E.f.led && room ? { mode: 'lead', to: '1-ready-visit-2', until: B + END_T.roomTo } : { mode: 'follow', until: now + 30 });
+      if (!E.f.led && endNear('calder', 2.4)) {
+        E.f.led = now;
+        if (room && typeof worksSayAll === 'function') worksSayAll('calder', [endText('end.seek.found', 'There you are. The Captain\'s waiting, and she doesn\'t, usually. With me.')]);
+      }
+      if (E.f.led && !room && !(typeof DIALOGUE !== 'undefined' && DIALOGUE)) {   // the scene where you are (Calder with the letter; the Captain's words the same)
+        E.f.late = 1; dialogueShow('moment:ending.offer', { id: 'ending.offer', who: ['marrow', 'calder'], at: now, where: { any: true } });
+      }
+    }
+    return;
+  }
+  if (E.settled) return;
+  const settleAt = endSettleAt(), due = (W.due - 1) * 1440;
+  if (endFirm() && now < settleAt) { if (typeof guideDrop === 'function') guideDrop('end:tell'); }   // told: no arrow (her button stays, to change your mind)
+  else if (typeof guideAsk === 'function') {             // "Tell the Captain": on her wherever she is, until it's settled (level 1 on the answer's day from 18:00, and at the end)
+    const urgent = !endFirm() && (now >= due + END_T.lastCall && now < due + END_T.dueAt && endSaid() !== 'unsure' || now >= settleAt);
+    guideAsk({ id: 'end:tell', level: urgent ? 1 : 6, owner: '29a', from: B + END_T.offerAt, until: Math.max(now, settleAt) + 7 * 1440, done: () => !endOpen() || endFirm() && shipNow() < settleAt,
+      goal: () => { const g = endWhere('marrow', shipNow()); return g && { ...g, label: endText('end.ring.tell', 'Tell the Captain') }; } });
+  }
+  if (!E.said.length && now >= due + END_T.searchAt && now < due + END_T.dueAt + 60 && !E.f.search) { E.f.search = now; if (live) endNotice(endText('end.search.notice', 'The Captain is coming to find you.'), 'Captain Odile Marrow'); }
+  const asking = E.f.search && !E.said.length || now >= settleAt + 15 && !endFirm();   // her 19:30 search; and after the address, an answer still owed
+  if (asking && !skip) {
+    if (typeof crewScene === 'function') crewScene('marrow', { mode: 'follow', until: now + 30 });
+    if (endNear('marrow', 2.4)) endAnswerShow(now >= settleAt ? 'ask' : 'search');
+  }
+  if (now >= settleAt && endFirm()) endSettle(now);      // the address: settled (E-1 may settle it a moment sooner, at her words)
+}
+if (EV_ENDING_ON) WORK_TICKS.push((now, skip) => endTick(now, skip));   // once a ship minute, and each hour of a skip (section 24's clock)
+// E-2 turn 3 (EN1): the rest of the week while the choice is open. The friends come to you on Friday, one at a time
+// (section 20's socialSeekAsk), and their chat card has "About the transfer": each their own take (Pell, Tomas, Kovac,
+// Basil, Halloran; up to three other friends, by how close you are, the generic ones). Zeke finds you after Friday's
+// dinner (arrow level 1 "Talk to Zeke"), walks you to the Works tea corner and talks (till Saturday 21:00 if you're
+// out of reach). A call home from the booths while it's open plays your family's scene, once (a level 2 arrow on Friday
+// after the shift, once). Schedule and Tracked rows (section 19's devDay hook: endItems), the Record's lines (endRecord).
+Object.assign(END_T, { friendsFrom: 480, friendGap: 80, friendStay: 150, zekeAt: 1185, zekeTo: 1260, zekeBy: 1260, callFrom: 1035, callTo: 1140 });
+const END_FRIENDS = ['pell', 'tomas', 'kovac-zainab', 'bramwell-basil', 'halloran-emeka'];   // each their own take; Halloran overheard it, Basil's your mentee: always
+const END_TAKES = {                                      // stand-ins till content/ending/friends.lines: [their side, what they say]
+  pell: ['stay', ['Go? You can\'t go. Who\'ll laugh at my jokes when Torres won\'t?', 'Fine. Do what you want. I\'ll be sulking either way.']],
+  tomas: ['go', ['Headquarters. That\'s the real thing. You should go.', 'I\'d miss you. Obviously. But you should go.']],
+  'kovac-zainab': ['none', ['I\'m not telling you what to do. You\'d only do the other thing to spite me.', 'Whatever you pick, pick it properly.']],
+  'bramwell-basil': ['stay', ['You can\'t go. You\'re my mentor. Is that allowed? Can they do that?', 'Sorry. I mean: congratulations. But you can\'t go.']],
+  'halloran-emeka': ['none', ['Don\'t look at me like that. It\'s a ship. Nothing\'s private.', 'For what it\'s worth, the mess would be quieter. Not better. Quieter.']],
+};
+const END_TAKE_TIER = { 3: ['It\'s all over the mess. Headquarters! Whatever you choose, I\'m glad I knew you here.'], 4: ['I heard. I don\'t know what I want you to say, so I won\'t say anything sensible. Just: you choose. Not them.'] };
+function endFriendsOf() {                                // who comes to you on Friday, in order: the named, then up to three close friends
+  const named = END_FRIENDS.filter(id => typeof SOC !== 'undefined' && SOC.idx && SOC.idx.has(id) && (typeof evPerson !== 'function' || evPerson(id)));
+  let more = []; try { more = Object.keys(SHIP.rel || {}).filter(id => !named.includes(id) && !['marrow', 'calder', 'vance', 'torres-zeke'].includes(id) && relTier(id) >= 3 && SOC.idx.has(id))
+    .sort((a, b) => (SHIP.rel[b].pts || 0) - (SHIP.rel[a].pts || 0) || (a < b ? -1 : 1)).slice(0, 3); } catch (e) { more = []; }
+  return named.concat(more);
+}
+function endFriendButton(p) {
+  const E = SHIP.end; if (!p || !E || !E.offer || !E.offer.met || E.f['fr:' + p.id]) return null;
+  const named = END_FRIENDS.includes(p.id), tier = typeof relTier === 'function' ? relTier(p.id) : 0;
+  if (!named && tier < 3) return null;
+  return { id: 'end:friend', label: endText('end.btn.friend', 'About the transfer') };
+}
+function endFriendDo(p, what) {
+  const E = SHIP.end; if (what !== 'friend' || !p || !E || E.f['fr:' + p.id]) return;
+  E.f['fr:' + p.id] = endDayOf(shipNow());
+  const t = END_TAKES[p.id], tier = typeof relTier === 'function' ? relTier(p.id) : 3;
+  const lines = (t ? t[1] : END_TAKE_TIER[tier >= 4 ? 4 : 3]).map((x, k) => endText('end.friend.' + p.id, x, null, k));
+  if (typeof chatSay === 'function') try { chatSay(lines[0]); } catch (e) { /* no card */ }
+  if (lines[1] && typeof simTimeout === 'function') simTimeout(() => { try { if (typeof CHAT !== 'undefined' && CHAT && CHAT.p === p) chatSay(lines[1]); } catch (e) { /* closed */ } }, 4200);
+  if (typeof simNote === 'function') simNote('endingFriend', { id: p.id, side: t ? t[0] : 'none' });
+}
+// Zeke's Friday talk and the call home
+function endZekeScript() {
+  MEETING_SCRIPTS['moment:ending.zeke'] = { title: endText('end.zeke.title', 'The tea corner'), from: 'Zeke Torres', noCount: true,
+    lines: [
+      { who: 'torres-zeke', text: endText('end.zeke.1', 'I\'m not going to tell you what to do. Calder told me not to, and for once I\'m listening.'), pose: 'gesture' },
+      { who: 'torres-zeke', text: endText('end.zeke.2', 'First evening you came aboard, you stood at the top of that ramp like it might bite.'), to: 'you' },
+      { who: 'torres-zeke', text: endText('end.zeke.3', 'Look at you now. Half the ship wants to keep you and the other half wants to brag about you.') },
+      { choice: [
+        { text: endText('end.zeke.r1', 'What would you do?'), rel: { 'torres-zeke': 1 }, reply: { who: 'torres-zeke', text: endText('end.zeke.r1.a', 'Me? I stayed. But I\'m not you. I like the noise down here.') } },
+        { text: endText('end.zeke.r2', 'I\'m scared of picking wrong.'), rel: { 'torres-zeke': 2 }, reply: { who: 'torres-zeke', text: endText('end.zeke.r2.a', 'There\'s no wrong one. There\'s just the one you pick, and then you make it right.'), pose: 'nod' } },
+      ] },
+      { who: 'torres-zeke', text: endText('end.zeke.4', 'Drink your tea. It\'s gone cold, but drink it.'), pose: 'nod' },
+    ],
+    onEnd: () => { endState().f.zeke = Math.floor(shipNow()); if (typeof crewSceneEnd === 'function') crewSceneEnd('torres-zeke'); if (typeof guideDrop === 'function') guideDrop('end:zeke'); } };
+}
+function endCallScript() {
+  MEETING_SCRIPTS['moment:ending.call'] = { title: endText('end.call.title', 'A call home'), from: 'Home', noCount: true,
+    lines: [
+      { who: 'Home', text: endText('end.call.1', 'Headquarters? Our headquarters? The Concord one?') },
+      { who: 'Home', text: endText('end.call.2', 'We\'re so proud of you. No, we are. Let us be.') },
+      { who: 'Home', text: endText('end.call.3', 'We\'re not going to tell you what to do. You sound happy up there. That\'s all we hear.') },
+      { who: 'Home', text: endText('end.call.4', 'Call us when you\'ve decided. Either way. And eat something.') },
+    ],
+    onEnd: () => { endState().f.call = Math.floor(shipNow()); if (typeof guideDrop === 'function') guideDrop('end:call'); } };
+}
+if (EV_ENDING_ON) { endZekeScript(); endCallScript(); }
+function endWeekTick(now, skip) {                        // endTick's part for the week (after the offer, while it's open)
+  const W = endWeek(), E = SHIP.end; if (!W || !E || !endOpen()) return;
+  const d = endDayOf(now), m = endMin(now), F = W.offer * 1440, live = !skip && now >= shipNow() - 1;   // F: the start of Friday (offer + 1)
+  if (!E.f.asks && d >= W.offer + 1 && typeof socialSeekAsk === 'function') {   // Friday: the friends, one at a time
+    E.f.asks = 1; endFriendsOf().forEach((id, k) => { const from = F + END_T.friendsFrom + k * END_T.friendGap; socialSeekAsk(id, { from, until: from + END_T.friendStay, why: 'ending' }); });
+  }
+  if (!E.f.zeke && now >= F + END_T.zekeAt && now < F + 1440 + END_T.zekeBy) {   // Zeke after Friday's dinner (till Saturday 21:00)
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:zeke', level: 1, owner: '29a', from: F + END_T.zekeAt, until: F + 1440 + END_T.zekeBy, done: () => !SHIP.end || !!SHIP.end.f.zeke,
+      goal: () => { const g = endWhere('torres-zeke', shipNow()); return g && { ...g, label: endText('end.ring.zeke', 'Talk to Zeke') }; } });
+    const free = live && !(typeof DIALOGUE !== 'undefined' && DIALOGUE) && !(typeof sleeping !== 'undefined' && sleeping);
+    if (free && typeof crewScene === 'function') crewScene('torres-zeke', E.f.zekeLed ? { mode: 'lead', to: '5-tea-3', until: now + 20 } : { mode: 'follow', until: now + 30 });
+    if (free && !E.f.zekeLed && endNear('torres-zeke', 2.4)) { E.f.zekeLed = now; if (typeof worksSayAll === 'function') worksSayAll('torres-zeke', [endText('end.zeke.found', 'There you are. Walk with me. Tea\'s on, and it\'s the good tin.')]); }
+    let atTea = false; try { atTea = deckDef.num === 5 && roomAt(...player.here()) === 't'; } catch (e) { atTea = false; }
+    if (free && E.f.zekeLed && endNear('torres-zeke', 3) && (atTea || now - E.f.zekeLed >= 20)) dialogueShow('moment:ending.zeke', { id: 'ending.zeke', who: ['torres-zeke'], at: now, where: { any: true } });
+  }
+  if (!E.f.call && now >= F + END_T.callFrom && now < F + END_T.callTo && typeof guideAsk === 'function')   // the booths, once, after Friday's shift
+    guideAsk({ id: 'end:call', level: 2, once: 1, owner: '29a', from: F + END_T.callFrom, until: F + END_T.callTo, done: () => !SHIP.end || !!SHIP.end.f.call || !endOpen(),
+      goal: () => ({ deck: 3, place: '3-callhome-1', room: 'B', label: endText('end.ring.call', 'Call home about the transfer') }) });
+  if (!E.f.call && live && typeof ACT !== 'undefined' && ACT && ACT.kind === 'call' && ACT.phase !== 'walk' && !(typeof DIALOGUE !== 'undefined' && DIALOGUE))
+    dialogueShow('moment:ending.call', { id: 'ending.call', who: [], at: now, where: { any: true } });
+}
+if (EV_ENDING_ON) WORK_TICKS.push((now, skip) => endWeekTick(now, skip));
+// the Schedule and Tracked (section 19's devDay asks endItems(d)): what's coming that isn't booked as an appointment
+function endItems(d) {
+  if (!EV_ENDING_ON || !SHIP.end) return [];
+  if (typeof endgameItems === 'function' && endgameItems(d).length) return endgameItems(d);   // 29c: the endgame's first morning
+  const W = endWeek(), E = SHIP.end, out = []; if (!W || !E.offer) return out;
+  if (E.offer.met && !E.settled && !endFirm() && d >= W.offer && d <= W.due)
+    out.push({ from: d === W.due ? END_T.lastCall : d === W.offer ? END_T.offerAt + END_T.sceneLen : 480, to: END_T.dueAt, title: endText('end.row.answer', 'Your answer to the Captain: by Saturday 20:00'), where: endText('end.row.answer.where', 'the Captain, wherever she is'), kind: 'beat' });
+  if (E.offer.met && !E.settled && !endFirm() && d === W.settle)
+    out.push({ from: 480, to: END_T.addressAt, title: endText('end.row.address', 'Your answer to the Captain: before her address'), where: endText('end.row.answer.where', 'the Captain, wherever she is'), kind: 'beat' });
+  if (E.offer.met && !E.f.zeke && endOpen() && d === W.offer + 1)
+    out.push({ from: END_T.zekeAt, to: END_T.zekeTo, title: endText('end.row.zeke', 'Zeke wants a word'), where: endText('end.row.zeke.where', 'he\'ll find you'), kind: 'beat' });
+  return out;
+}
+// the Record (section 19's Record app asks endRecord()): the offer, and what you chose
+function endRecord() {
+  const E = EV_ENDING_ON && SHIP.end; if (!E || !E.offer || !E.offer.met) return [];
+  const rows = [{ text: endText('end.rec.offer', 'Concord headquarters offered you a transfer: ' + endPost() + '.', { post: endPost() }), sub: 'Day ' + E.offer.day }];
+  if (E.settled) rows.push({ text: E.settled.choice === 'stay' ? endText('end.rec.stay', 'You stayed aboard the Wren.') : endText('end.rec.go', 'You took the transfer.'), sub: 'Day ' + E.settled.day, mark: 'hot' });
+  else rows.push({ text: endText('end.rec.open', 'Your answer to the Captain: ' + ({ stay: 'staying', go: 'going', unsure: 'not sure yet' }[endSaid()] || 'not yet given') + '.'), sub: 'until her address at the line' });
+  return [{ kind: 'text', text: endText('end.rec.head', 'The transfer'), mark: 'head' }, { kind: 'list', rows }];
+}
+// ---- end of slot: Ending offer ----
+
+// ---------------------------------------------------------------------
+// 29b THE GOODBYE AND THE END PAGE (E-3, the ending engineer; the HUD seat reviews the page, FX27's saves owner the kept
+// copy). Monday Day 36 if you go: the last morning, the crowd in the shuttle bay, the farewells up the aisle, Zeke at the
+// ramp's foot, the Tern leaving (section 14's, called), the end page; the kept copy (SAVE_KEY + '-before-end', made once on
+// your first "Go", never with nosave, never into another slot) and the ended save. Empty until E-3.
+// ---------------------------------------------------------------------
+
+// ---- slot: Ending goodbye (section 29b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// E-3 (EN1). CUT (the user, 2026-10-26, ending question 1: no way back): the kept copy and "Back to before my choice" below are
+// parked, switched off by END_WAY_BACK = false (section 29): no copy is ever written, no Back button, no Saves app row (its
+// two hook lines in section 19 were taken out). Kept on record, not to be reused; taking the code out is its own reviewed step.
+// As built: the kept copy: the moment you first tell the Captain "Go", this game as it stood just before is copied once to
+// its own key beside its slot (END_KEPT: SAVE_KEY + '-before-end'; Dev mode's SAVE_KEY has its '-dev', so Dev and Playtest
+// keep theirs apart), never into another slot and never with ?nosave. A new game in this slot clears it. "Back to before
+// my choice" (the end page) and the Saves app's "Before the goodbye" row (section 19's hooks endKeptRows / endSlotsAct)
+// put it back in the slot and reload: the choice open again. The end page (endPage): a full-screen panel over the deck,
+// the page's real focus (a screen reader reads it; the pad's panels package reaches its buttons); the save is marked
+// ended (SHIP.end.ended) when it opens, so loading it shows the page again. Its buttons: Back to before my choice (only
+// with END_WAY_BACK and a kept copy), Keep this ending, Start a new game (the Saves app's slots; without them, New game).
+const END_KEPT = SAVE_KEY + '-before-end';
+const endKeptKey = n => slotKey(n) + '-before-end';
+function endKeepCopy() {                                 // -> true when the copy was made now
+  if (!EV_ENDING_ON || !END_WAY_BACK || NOSAVE) return false;
+  try { if (localStorage.getItem(END_KEPT) !== null) return false; saveGame(); const t = localStorage.getItem(SAVE_KEY); if (!t) return false; localStorage.setItem(END_KEPT, t); return true; }
+  catch (e) { return false; }
+}
+function endKeptRead(key = END_KEPT) { let s = null; try { const t = slotRead(key); s = t ? JSON.parse(t) : null; } catch (e) { s = null; } return s && saveOk(s) ? s : null; }
+function endBack(n = SAVE_SLOT) {                         // the kept copy back into slot n, then played (cut: off)
+  if (!END_WAY_BACK) return false;
+  const s = endKeptRead(endKeptKey(n)); if (!s || NOSAVE) return false;
+  if (typeof slotPut === 'function' && SAVE_SLOTS_ON) return slotPut(n, s);
+  SLOT_HOLD = true; try { localStorage.setItem(slotKey(n), JSON.stringify(s)); location.reload(); } catch (e) { SLOT_HOLD = false; return false; }
+  return true;
+}
+if (EV_ENDING_ON) onSim('newGame', () => { if (END_WAY_BACK && !NOSAVE) try { localStorage.removeItem(END_KEPT); } catch (e) { /* no storage */ } endPage(false); });
+function endKeptRows(n) {                                // the Saves app: under slot n, its kept copy (a used slot only)
+  if (!EV_ENDING_ON || !END_WAY_BACK || NOSAVE) return [];
+  const used = slotRead(slotKey(n)) !== null, s = used && endKeptRead(endKeptKey(n)); if (!s) return [];
+  return [{ kind: 'list', rows: [{ text: endText('end.saves.row', 'Before the goodbye'), sub: slotLine(s) + '. ' + endText('end.saves.sub', 'Kept when you first told the Captain you\'d go.') }] },
+    { kind: 'buttons', items: [{ label: endText('end.saves.btn', 'Go back to before the goodbye'), action: { app: 'saves', do: 'endback', arg: n } }] }];
+}
+function endSlotsAct(verb, arg) { if (verb === 'endback' && EV_ENDING_ON && END_WAY_BACK) { endBack(arg); return true; } return false; }
+// the end page's rows
+function endPageRows() {
+  const out = [], W = SHIP.works || {}, name = (SHIP.player && SHIP.player.name) || 'Cadet';
+  out.push(['', name + ', ' + ({ junior: 'Cadet', officer: 'Officer, Technician', senior: 'Senior Officer', specialist: 'Senior Officer, Engine Specialist' })[typeof playerRank === 'function' ? playerRank() : 'junior']]);
+  out.push([endText('end.page.days', 'Days aboard'), String(Math.max(0, SHIP.time.day))]);
+  const ms = Array.isArray(W.ms) ? W.ms : [], RK = { officer: 'Officer', senior: 'Senior Officer', specialist: 'Engine Specialist' };
+  out.push([endText('end.page.ranks', 'Your ranks'), ['Cadet, Day 0'].concat(ms.filter(x => RK[x[0]]).map(x => RK[x[0]] + ', Day ' + x[1])).join('; ')]);
+  const cm = (SHIP.commendations || []).map(c => ((typeof SHIP_EVENTS !== 'undefined' && SHIP_EVENTS[c.event]) || { title: c.event }).title + ', Day ' + c.day);
+  out.push([endText('end.page.comm', 'Commendations'), cm.length ? cm.join('; ') : endText('end.page.none', 'None, and nobody minded')]);
+  let fr = []; try { fr = Object.keys(SHIP.rel || {}).filter(id => typeof evPerson === 'function' && evPerson(id)).sort((a, b) => (SHIP.rel[b].pts || 0) - (SHIP.rel[a].pts || 0) || (a < b ? -1 : 1)).slice(0, 3).map(id => evPerson(id).name); } catch (e) { fr = []; }
+  if (fr.length) out.push([endText('end.page.friends', 'Your closest friends'), fr.join(', ')]);
+  const kept = (SHIP.traces || []).map(t => String(t).replace(/([a-z])([A-Z])/g, '$1 $2').toLowerCase()); if (kept.length) out.push([endText('end.page.kept', 'What you kept'), kept.join(', ')]);
+  const c = endCareerEnd(); if (c && c.answer) out.push([endText('end.page.calder', 'What you told Calder you wanted'), String(c.answer)]);
+  out.push([endText('end.page.zeke', 'Zeke, at the ramp'), '"' + endText('end.zeke.last', 'Mind the step. Everyone trips on it, going either way.') + '"']);
+  return out;
+}
+const END_PAGE = { kept: false };
+function endPage(on) {
+  let el = document.getElementById('endPage');
+  if (!on) { if (el) el.hidden = true; return false; }
+  if (!el) {
+    const st = document.createElement('style');
+    st.textContent = '#endPage{position:fixed;inset:0;z-index:60;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,10,14,.95);color:#e6f0f1;overflow:auto}'
+      + '#endPage[hidden]{display:none}#endPage .in{max-width:460px;width:100%}#endPage h2{margin:0 0 4px;font-weight:600;font-size:22px;text-align:center}#endPage .sub{margin:0 0 16px;text-align:center;color:#8fa6ab;font-size:13px}'
+      + '#endPage dl{margin:0 0 18px;font-size:13.5px;line-height:1.45}#endPage dt{color:#8fa6ab;font-size:12px;margin-top:8px}#endPage dd{margin:0}#endPage .who{font-size:15px;color:#bdeee6;text-align:center;margin-bottom:6px}'
+      + '#endPage .btns{display:flex;flex-direction:column;gap:8px}#endPage button{font:inherit;min-height:44px;padding:10px 18px;border-radius:10px;border:1px solid #6fa8b0;background:#16323a;color:#e6f0f1}#endPage .note{text-align:center;color:#a9bcc0;font-size:12.5px;margin:10px 0 0}';
+    document.head.appendChild(st);
+    el = document.createElement('div'); el.id = 'endPage'; el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-labelledby', 'endPageH');
+    el.addEventListener('pointerdown', e => e.stopPropagation());
+    document.body.appendChild(el);
+  }
+  const rows = endPageRows(), back = END_WAY_BACK && !NOSAVE && !!endKeptRead() && !END_PAGE.kept;
+  el.innerHTML = '<div class="in"><h2 id="endPageH"></h2><p class="sub"></p><div class="who"></div><dl></dl><div class="btns"></div><p class="note"></p></div>';
+  el.querySelector('h2').textContent = endText('end.page.title', 'The Tern pulls away from the Wren');
+  el.querySelector('.sub').textContent = endText('end.page.sub', 'Concord headquarters, and whatever comes next.');
+  el.querySelector('.who').textContent = rows[0][1];
+  const dl = el.querySelector('dl');
+  for (const [k, v] of rows.slice(1)) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.appendChild(dt); dl.appendChild(dd); }
+  const btns = el.querySelector('.btns'), add = (id, label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.end = id; b.textContent = label; b.onclick = fn; btns.appendChild(b); return b; };
+  if (back) add('back', endText('end.page.back', 'Back to before my choice'), () => endBack());
+  if (!END_PAGE.kept) add('keep', endText('ending.endpage.btn.keep', 'Keep this ending'), () => { END_PAGE.kept = true; endPage(true); });
+  add('new', endText('ending.endpage.btn.new', 'Start a new game'), () => {
+    endPage(false);
+    if (SAVE_SLOTS_ON && !NOSAVE && typeof deviceDo === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('saves')) { try { deviceDo({ app: 'saves' }); } catch (e) { /* below */ } return; }
+    if (typeof newGameStart === 'function') newGameStart(!NOSAVE && typeof introArrived === 'function');
+  });
+  el.querySelector('.note').textContent = END_PAGE.kept ? endText('end.page.kept.note', 'This ending is kept. Opening this game shows this page again.') : '';
+  el.hidden = false;
+  try { (btns.querySelector('button') || el).focus(); } catch (e) { /* no focus */ }
+  return true;
+}
+function endTheEnd() {                                   // after the Tern: the save marked ended, then the page
+  const E = endState(); if (E.ended) return endPage(true);
+  E.ended = Math.floor(shipNow()); if (typeof simNote === 'function') simNote('endingEnd', { day: endDayOf(E.ended) });
+  saveGame(); return endPage(true);
+}
+if (EV_ENDING_ON && typeof padPanelAdd === 'function') padPanelAdd('endPage', { before: 'careerEnd', back: typeof PAD_MUST !== 'undefined' ? PAD_MUST : undefined });   // the controller: a panel of its own, B never closes it (as the let-go card)
+if (EV_ENDING_ON && SHIP.end && SHIP.end.ended) endPage(true);   // a save that ended: the page again
+// E-3 turn 2 (EN1): Monday, if you go. 06:00 the notice (and Calder's Mail as the record); breakfast in the mess with the
+// Captain, Brennan and your friends (a level 2 arrow 07:00-09:00; the scene when you come in); from 09:15 the shuttle bay
+// fills (about 60: everyone awake and aboard, the day shift released; live staging through crewScene, nothing planned)
+// with an aisle from the bay's door to the Tern's ramp; a level 1 arrow down it, a ring on each person in turn (your
+// friends, then Calder, Vance, the Captain): each says goodbye as you reach them (or tap them: "Goodbye" on their card);
+// Zeke last at the ramp's foot (his scene, mirroring Day 0); then "Walk to the Tern": up the ramp and inside, the crowd
+// cheers, the ramp closes, the view fades, the end page (endTheEnd). The Tern waits for you: nothing here is ever forced.
+Object.assign(END_T, { lastAt: 360, bfFrom: 420, bfTo: 540, bayAt: 555, crowd: 60 });
+const END_BAY = { aisle: [[9, 10], [8, 10], [7, 10], [6, 10], [5, 10], [9, 11], [8, 11], [7, 11], [6, 11], [5, 11], [5, 9], [5, 8]],   // the walk in from the hall to the ramp (kept clear)
+  line: [[9, 12], [9, 9], [8, 12], [8, 9], [7, 12], [7, 9], [6, 12], [6, 9]], zeke: [4, 11], ramp: [5, 7] };   // the farewells along it, door to ramp; Zeke beside the ramp's foot; inside the Tern
+function endGoing() { const W = endWeek(), E = SHIP.end; return !!(EV_ENDING_ON && W && E && E.settled && E.settled.choice === 'go' && !E.ended); }
+function endByes() {                                     // who says goodbye in the aisle, in order: friends, then Calder, Vance, the Captain
+  const fr = endFriendsOf().filter(id => id !== 'torres-zeke').slice(0, END_BAY.line.length - 3);
+  return fr.concat(['calder', 'vance', 'marrow']).filter(id => typeof evPerson === 'function' && evPerson(id));
+}
+function endCrowd(now) {                                 // the rest of the crowd: awake, aboard, not the farewells; at most END_T.crowd in all
+  const bye = new Set(endByes().concat(['torres-zeke'])), out = [];
+  for (const p of (typeof schedPeople === 'function' ? schedPeople() : [])) {
+    if (out.length + bye.size >= END_T.crowd) break;
+    if (!p || p.guest || bye.has(p.id) || p.id === 'you') continue;
+    let w = null; try { w = whereIs(p, now); } catch (e) { w = null; }
+    if (!w || !w.deck || w.act === 'sleep') continue;
+    out.push(p.id);
+  }
+  return out;
+}
+function endStage(now) {                                 // everyone to their spot until `until` (asked again each minute while it lasts)
+  const until = now + 30, bye = endByes(), keep = new Set(END_BAY.aisle.concat(END_BAY.line, [END_BAY.zeke]).map(t => t.join(',')));
+  bye.forEach((id, k) => crewScene(id, { mode: 'wait', to: { deck: 5, tile: END_BAY.line[k] }, until }));
+  crewScene('torres-zeke', { mode: 'wait', to: { deck: 5, tile: END_BAY.zeke }, until });
+  const spots = (typeof gatherSpots === 'function' ? gatherSpots('shuttle-bay') : []).filter(q => q.deck === 5 && !keep.has(q.at.join(',')));
+  const crowd = END_PAGE.crowd || (END_PAGE.crowd = endCrowd(now));
+  crowd.forEach((id, k) => { if (spots[k]) crewScene(id, { mode: 'wait', to: { deck: 5, tile: spots[k].at }, until }); });
+  return bye.length + 1 + Math.min(crowd.length, spots.length);
+}
+const END_BYE_LINES = { calder: 'Go on, then. Make them earn you.', vance: 'Headquarters gets the good one. Typical.', marrow: 'You were a credit to the Wren. Go and be a credit to them.' };
+const endByeName = id => ({ marrow: 'the Captain', vance: 'Commander Vance', calder: 'the Chief' })[id] || (() => { const p = evPerson(id); try { return typeof shortName === 'function' ? shortName(p) : p.name; } catch (e) { return p ? p.name : id; } })();
+function endByeSay(id) {                                 // one goodbye, in their bubble
+  const E = endState(); if (E.f['bye:' + id]) return false; E.f['bye:' + id] = Math.floor(shipNow());
+  const t = END_BYE_LINES[id] || (END_TAKES[id] ? 'Write to me. I mean it. Write.' : 'Safe trip. We\'ll miss you down here.');
+  if (typeof worksSay === 'function') worksSay(id, endText('end.bye.' + id, t));
+  return true;
+}
+function endRampScript() {
+  MEETING_SCRIPTS['moment:ending.ramp'] = { title: endText('end.ramp.title', 'The Tern\'s ramp'), from: 'Zeke Torres', noCount: true,
+    lines: [
+      { who: 'torres-zeke', text: endText('end.ramp.1', 'First night, you were the one on the ramp. Now look.'), pose: 'gesture', to: 'you' },
+      { who: 'torres-zeke', text: endText('end.ramp.2', 'I said "Ask me anything." You did. Every single thing.') },
+      { choice: [
+        { text: endText('end.ramp.r1', 'Thank you, Zeke. For all of it.'), rel: { 'torres-zeke': 2 }, reply: { who: 'torres-zeke', text: endText('end.ramp.r1.a', 'Don\'t. I\'ll cry on the ramp and Calder will never let me forget it.') } },
+        { text: endText('end.ramp.r2', 'Ask you anything? One more, then. Will you be all right?'), rel: { 'torres-zeke': 2 }, reply: { who: 'torres-zeke', text: endText('end.ramp.r2.a', 'Me? I\'ve got the engines. They never leave.'), pose: 'nod' } },
+      ] },
+      { who: 'torres-zeke', text: endText('end.zeke.last', 'Mind the step. Everyone trips on it, going either way.'), pose: 'nod' },
+    ],
+    onEnd: () => { endState().f.ramp = Math.floor(shipNow()); } };
+}
+function endBreakfastScript() {
+  MEETING_SCRIPTS['moment:ending.breakfast'] = { title: endText('end.bf.title', 'Your last breakfast'), from: 'Chef Auda Brennan', noCount: true,
+    lines: [
+      { who: 'brennan', text: endText('end.bf.1', 'Last plate. Eggs the way you like them, which took me four weeks to work out.'), pose: 'gesture' },
+      { who: 'marrow', text: endText('end.bf.2', 'Mind if I sit? The Admiral can spare me for one breakfast.') },
+      { who: 'marrow', text: endText('end.bf.3', 'Half past nine, the shuttle bay. Don\'t be early. People want to get there first.'), to: 'you' },
+    ],
+    onEnd: () => { endState().f.bf = Math.floor(shipNow()); } };
+}
+if (EV_ENDING_ON) { endRampScript(); endBreakfastScript(); }
+function endInBay() { try { return deckDef.num === 5 && roomAt(...player.here()) === 'S'; } catch (e) { return false; } }
+function endByeTick(now, skip) {
+  if (!endGoing()) return;
+  const W = endWeek(), E = SHIP.end, d = endDayOf(now), B = (W.leave - 1) * 1440, live = !skip && now >= shipNow() - 1;
+  if (d < W.leave) return;
+  const dlg = typeof DIALOGUE !== 'undefined' && DIALOGUE;
+  if (!E.f.last && now >= B + END_T.lastAt) { E.f.last = now;
+    if (typeof mailSend === 'function') mailSend({ at: Math.max(now, B + END_T.lastAt), from: 'Chief Ines Calder', subject: endText('mail.end.last.s', 'Your last morning'), body: endText('mail.end.last', 'The Tern leaves at 10:00 from the shuttle bay. Breakfast first. Half the ship will be in that bay by half past nine, so don\'t be late. — C.'), quiet: true });
+    if (live) endNotice(endText('end.last.notice', 'Your last morning: the Tern leaves at 10:00. The shuttle bay from 09:30.'), 'Chief Ines Calder'); }
+  if (!E.f.bf && now >= B + END_T.bfFrom && now < B + END_T.bfTo) {   // breakfast: the Captain and your friends in the mess
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:bf', level: 2, owner: '29b', from: B + END_T.bfFrom, until: B + END_T.bfTo, done: () => !SHIP.end || !!SHIP.end.f.bf, goal: () => ({ deck: 3, room: 'M', label: endText('end.ring.bf', 'Your last breakfast') }) });
+    if (live) { const sp = typeof gatherSpots === 'function' ? gatherSpots('mess') : []; ['marrow'].concat(endFriendsOf().slice(0, 3)).forEach((id, k) => { if (sp[k]) crewScene(id, { mode: 'wait', to: { deck: 3, tile: sp[k].at }, until: B + END_T.bfTo }); }); }
+    let inMess = false; try { inMess = deckDef.num === 3 && roomAt(...player.here()) === 'M'; } catch (e) { inMess = false; }
+    if (live && inMess && !dlg) dialogueShow('moment:ending.breakfast', { id: 'ending.breakfast', who: ['brennan', 'marrow'], at: now, where: { any: true } });
+  }
+  if (now < B + END_T.bayAt) return;
+  if (live) endStage(now);
+  const bye = endByes(), next = bye.find(id => !E.f['bye:' + id]);
+  if (typeof guideAsk === 'function') guideAsk({ id: 'end:bye', level: 1, owner: '29b', from: B + END_T.bayAt, until: now + 1440, done: () => !endGoing(),
+    goal: () => { const n = endByes().find(id => !SHIP.end.f['bye:' + id]);
+      if (!endInBay()) return { deck: 5, room: 'S', label: endText('end.ring.bay', 'The shuttle bay: walk to the Tern') };
+      if (n) return { deck: 5, crew: n, label: endText('end.ring.bye.' + n, 'Say goodbye to ' + endByeName(n)) };
+      if (!SHIP.end.f.ramp) return { deck: 5, crew: 'torres-zeke', label: endText('end.ring.zeke', 'Zeke, at the ramp') };
+      return { deck: 5, at: END_BAY.ramp, label: endText('end.ring.tern', 'Walk to the Tern') }; } });
+  if (!live || dlg) return;
+  if (next && endNear(next, 1.8)) endByeSay(next);
+  else if (!next && !E.f.ramp && endNear('torres-zeke', 2)) dialogueShow('moment:ending.ramp', { id: 'ending.ramp', who: ['torres-zeke'], at: now, where: { any: true } });
+  else if (!next && E.f.ramp && !E.f.aboard && typeof ternInside === 'function' && ternInside()) endAboard(now);
+}
+function endAboard(now) {                                // inside the Tern: the cheer, the ramp, the fade, the page
+  const E = endState(); E.f.aboard = now;
+  try { const said = ['Bye!', 'Safe trip!', 'Write to us!', 'We\'ll miss you!', 'Go on, then!']; let k = 0;
+    for (const a of DECK_CREW) if (a.h && a.p && k < 8 && typeof bubbleSay === 'function') bubbleSay(a.h, endText('end.cheer', said[k % said.length], null, k++), 5); } catch (e) { /* not drawn */ }
+  if (typeof ternRamp === 'function') ternRamp(false, 3);
+  const fin = () => { try { fadeEl.style.transition = 'opacity 1.5s'; fadeEl.style.opacity = 1; } catch (e) { /* no fade */ } endTheEnd(); };
+  if (typeof simTimeout === 'function') simTimeout(fin, 4000); else fin();
+}
+function endByeChat(p) { return endGoing() && p && endByes().includes(p.id) && !SHIP.end.f['bye:' + p.id] && endDayOf(shipNow()) >= endWeek().leave && endMin(shipNow()) >= END_T.bayAt ? { id: 'end:bye', label: endText('end.btn.bye', 'Goodbye') } : null; }
+if (EV_ENDING_ON) WORK_TICKS.push((now, skip) => endByeTick(now, skip));
+// ---- end of slot: Ending goodbye ----
+
+// ---------------------------------------------------------------------
+// 29c THE ENDGAME (E-4, the dialogue engineer for the line gate and the Works career engineer for "What's next"). If you
+// stay: the end.stay flag, the calendar closed for good, no more promotions, the first morning's scene. Empty until E-4.
+// ---------------------------------------------------------------------
+
+// ---- slot: Endgame (section 29c). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// The endgame (E-4, EN2 for lead 39; plans/ending-spec.html section 2). You stayed: from the morning after it was settled
+// (Monday Day 36 for a steady career) the game goes on for good.
+//   endgameDay()     the endgame's first day (29a's endSettle sets end.stay to the day it was settled; this is the next),
+//                    or null (the switch off, or not stayed); endgameOn(t) from that day on. Readers ask these, never the
+//                    flag (both are function declarations: sections 18 and 22 ask before this runs)
+//   endCalClosed(r)  section 18's evCalPlan passes over a calendar row after the crossing back once you've stayed: no new
+//                    ship-wide event, ever. No more promotions either: the ladder is done (Step 6 is its end)
+//   the line conditions (section 22's lineCond): `endgame` holds every hour for the endgame's first 14 days, then about
+//                    4 hours in 10, so the old lines come back; `endgame:early` only in those 14 days; `endgame:false`
+//                    not stayed. lineFor adds 250 to such a line (heard over the speaker's own everyday lines)
+//   endWorksNext(k)  "What's next" (worksNext's hook): the Wren is home; the Works app's last page (tab 'home')
+//   the first morning: the Captain sits with you at breakfast (OCCASIONS.endFirstMorning, a chance meeting like Vance's
+//                    bridge invite, script endFirstMorning), with a notice once you're up, a level 1 arrow to the mess and
+//                    a Schedule row (endgameItems, asked by 29a's endItems)
+// Saved: flags only (end.fm.* the first morning's; end.stay is 29a's). Nothing calls R(); nothing runs at load while off.
+function endgameDay() {                                  // the endgame's first day (the morning after it was settled: 29a's endSettle sets end.stay to that day), or null
+  if (typeof EV_ENDING_ON === 'undefined' || !EV_ENDING_ON || typeof flag !== 'function') return null;
+  const d = flag('end.stay'); return Number.isInteger(d) && d > 0 ? d + 1 : null;
+}
+function endgameOn(t) { const d = endgameDay(); if (d === null) return false; return Math.floor((t == null ? shipNow() : t) / 1440) + 1 >= d; }
+function endCalClosed(r) { return !!r && endgameDay() !== null && r.id !== 'crossingBack' && r.day > 35; }   // Day 35: the crossing back
+function endWorksNext(k) { return endgameOn() ? worksText('next.end.home', 'The Wren is home. Live in it.', null, k) : null; }
+// the endgame's Schedule and Tracked rows (29a's endItems asks): the first morning's
+var END_GAME_ITEMS = null;                               // set below while on (a var: endItems may ask before this line has run)
+function endgameItems(d) { return EV_ENDING_ON && typeof END_GAME_ITEMS === 'function' ? END_GAME_ITEMS(d) || [] : []; }
+if (EV_ENDING_ON) {
+  // the Works app's last page, from the endgame's first day (added and taken away by endHomeTab: tabs aren't saved)
+  const endHomeView = () => {
+    const W = SHIP.works, B = [], d = SHIP.time.day, st = endgameDay();
+    B.push({ kind: 'text', mark: 'head', text: worksText('end.works.title', 'The Wren is home') });
+    B.push({ kind: 'text', text: worksText('end.works.body', 'No more tests and no more ranks: the ladder\'s done. The board, the traditions and the crew go on, and so do you.') });
+    const rows = [{ text: worksRankTitle(W), sub: worksText('end.works.rank', 'Your rank') },
+      { text: worksText('end.works.days', '{n} days aboard', { n: d }), sub: worksText('end.works.since', 'Since the Tern brought you, Day 0') },
+      { text: worksText('end.works.stayed', 'You stayed'), sub: worksText('end.works.stayedDay', 'Settled at the Captain\'s address, Day {n}', { n: (st || 36) - 1 }) }];
+    const jobs = W && Array.isArray(W.log) ? W.log.length : 0, com = Array.isArray(SHIP.commendations) ? SHIP.commendations.length : 0;
+    rows.push({ text: worksText('end.works.jobs', '{n} jobs turned in', { n: jobs }) });
+    if (com) rows.push({ text: worksText('end.works.commended', 'Commended {n} times', { n: com }) });
+    B.push({ kind: 'list', rows });
+    return B;
+  };
+  const endHomeTab = () => {
+    const on = endgameOn(), i = Array.isArray(WORKS_TABS) ? WORKS_TABS.findIndex(x => x.id === 'home') : -1;
+    if (on && i < 0) worksTabAdd({ id: 'home', title: worksText('end.works.tab', 'Home'), order: 90, view: endHomeView });
+    else if (!on && i >= 0) { WORKS_TABS.splice(i, 1); if (WORKS_TAB === 'home') WORKS_TAB = 'training'; }
+  };
+  endHomeTab();
+  if (typeof onSim === 'function') onSim('newGame', () => endHomeTab());
+  // the first morning: the Captain at your table at breakfast (her own breakfast in the mess, else 07:30)
+  const endFmSlot = d => (typeof occMealSlot === 'function' && occMealSlot('marrow', d, '3-mess-', 300, 600)) || { at: 450, len: 40 };
+  OCCASIONS.endFirstMorning = { title: 'Breakfast with the Captain', kind: 'meeting', by: 'marrow', deck: 3, room: 'M', at: 450, len: 40, script: 'endFirstMorning',
+    once: true, chance: true, flag: 'end.fm.done', due: d => endgameDay() === d, slot: endFmSlot };
+  const endFmRec = () => (SHIP.occasions || []).find(x => x.id === 'endFirstMorning') || null;
+  END_GAME_ITEMS = d => { const r = endFmRec(); if (endgameDay() !== d || (r && r.status !== 'asked')) return [];
+    const s = r ? { at: r.at % 1440, len: r.len } : endFmSlot(d);
+    return [{ from: s.at, to: s.at + s.len, title: worksText('end.fm.row', 'Breakfast with the Captain'), where: 'the mess, Deck 3', kind: 'beat', deck: 3, room: 'M' }]; };
+  const endFmTick = (now, skip) => {
+    const d = endgameDay(); if (d === null) return;
+    endHomeTab();
+    if (skip || worksDay(now) !== d || now < shipNow() - 1 || (typeof sleeping !== 'undefined' && sleeping)) return;
+    const r = endFmRec(); if (!r || r.status !== 'asked' || r.met) return;
+    if (!flag('end.fm.notice')) { flagSet('end.fm.notice', d);   // once you're up
+      const text = worksText('end.fm.notice', 'The Wren is back on her course. The Captain is at breakfast in the mess.');
+      if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'works', text, urgent: true }); } catch (e) { /* no device */ }
+      else try { toast('The Wren', text); } catch (e) { /* no UI */ } }
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:fm', level: 1, owner: '29c (EN2)', from: r.at - 30, until: r.at + r.len,
+      goal: () => ({ deck: 3, room: 'M', label: worksText('end.fm.arrow', 'Breakfast: the Captain is waiting') }), done: () => { const x = endFmRec(); return !x || !!x.met || x.status !== 'asked'; } });
+  };
+  WORK_TICKS.push(endFmTick);
+}
+// ---- end of slot: Endgame ----
 
 // =====================================================================
 // 12. MAIN LOOP
