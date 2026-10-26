@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-i.4
+   STARSHIP CADET: CSV Wren                           build 0.93.2-i.5
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -7737,7 +7737,7 @@ for (const [r, c, j, f] of [['a', 8, 3, 'n'], ['b', 13, 3, 'n'], ['c', 17, 3, 'n
 // per bunk, <bed>-stand, made here only while the switch is on) until the walk has passed their room. Section 14 plans
 // it; 24c says the words when the walker is really there. INSPECT_ON false: as before.
 var INSPECT_ON = false;
-const INSPECT_ROOMS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], INSPECT_T0 = 390, INSPECT_STEP = 3;
+const INSPECT_ROOMS = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h'], INSPECT_T0 = 390, INSPECT_STEP = 5;   // 5 minutes a room: the walk between rooms takes a while at ship speed
 const inspectPass = r => INSPECT_T0 + INSPECT_STEP * (INSPECT_ROOMS.indexOf(r) + 1);   // when the walk leaves room r
 function inspectWalker(d) {
   const ppl = schedPeople(), on = p => !!p && !!p.work && p.shift !== 'night' && isWorkDay(p, d);
@@ -9276,7 +9276,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-i.4';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-i.5';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -10739,7 +10739,7 @@ function schedBuild(p, d, occ, S) {
     wash(k);
     if (quiet && sty >= .5 && sty < .7 && by - t >= 95) leisureUntil(t + 20 + Math.round(20 * U(k + 14)), k + 15);
     if (INSPECT_ON && F.shape.inspect && p.id === inspectWalker(d) && t <= INSPECT_T0 + 20) {   // the walk (FX20): each bunk room's door, yours first
-      linger(INSPECT_T0 - 6 - (deck !== 4 ? C : 0)); go(4);   // down to Deck 4 at about 06:20, then straight to your room's door, there by 06:30
+      linger(INSPECT_T0 - 25 - (deck !== 4 ? C : 0)); go(4);   // down to Deck 4 at about 06:05, then straight to your room's door (a long walk at ship speed), there by 06:30
       for (const r of INSPECT_ROOMS) { const id = '4-inspect-' + r, to = Math.max(t, INSPECT_T0 + INSPECT_STEP * INSPECT_ROOMS.indexOf(r)) + INSPECT_STEP; hold(id, t, to); seg('off', to, 'event', id, { tag: 'inspect', anim: 'look' }); }
     } else if (stood) {                                  // stood for it already (FX20)
     } else if (INSPECT_ON && F.shape.inspect && /^4-B[1-8]-[1-6]$/.test(p.bed) && t < inspectPass(S.byId.get(p.bed).room)) {   // a junior stands by their bunk till the walk has passed
