@@ -13139,7 +13139,6 @@ function slotsAct(verb, arg) {
   else if (verb === 'download') slotDownload();
   else if (verb === 'copy') slotCopy();
   else if (verb === 'load') { SLOT_UI.msg = ''; slotPick(); }
-  else if (typeof endSlotsAct === 'function') endSlotsAct(verb, arg);   // 29b: back to before the goodbye (EN1)
   slotFresh();
 }
 function slotsView() {
@@ -13148,7 +13147,6 @@ function slotsView() {
     const me = x.n === SAVE_SLOT, line = me ? clockText() + ', ' + deckWord(player.deck) : x.line;
     const sub = me ? line + '. Playing now.' : x.ok ? line + '. Build ' + (x.build || '?') + (slotWhen(x.at) ? '. Last played ' + slotWhen(x.at) : '') + '.' : x.used ? 'A save this build can\'t read.' : 'Empty';
     B.push({ kind: 'list', rows: [{ text: 'Slot ' + x.n + (me ? ' (playing)' : ''), sub, mark: me ? 'new' : null }] });
-    if (typeof endKeptRows === 'function') B.push(...endKeptRows(x.n));   // 29b: its kept copy, "Before the goodbye" (the ending, EN1; none with EV_ENDING_ON off)
     if (me) continue;
     if (SLOT_UI.sure === x.n) B.push({ kind: 'text', text: 'Delete Slot ' + x.n + '? That game will be lost.', mark: 'urgent' },
       { kind: 'buttons', items: [{ label: 'Delete it', action: { app: 'saves', do: 'delgo', arg: x.n } }, { label: 'Keep it', action: { app: 'saves', do: 'keep' } }] });
@@ -65524,10 +65522,10 @@ const SND = (() => {
 // E-1's block may say the minute through crossBackAddressAt), the goodbye on Monday. A slower career: the same week, a
 // week or more later (the Thursday after Calder's question), settled on its Sunday at 15:00 (the crossing back stays Day 35).
 // The user's three questions are open; built as recommended, each other choice one constant away:
-//   END_WAY_BACK   true: the kept copy and "Back to before my choice" (29b); false: no way back from the end page
+//   END_WAY_BACK   answered (the user, 2026-10-26): false, no way back from the end page. true (cut, parked): the kept copy and "Back to before my choice" (29b)
 //   END_CHANGE     'address': change your mind until the Captain's address; 'ramp': until the Tern's ramp on Monday
 //   END_POST_BY    true: the post worded by your answer to Calder's question; false: the same post for everyone
-const END_WAY_BACK = true, END_CHANGE = 'address', END_POST_BY = true;
+const END_WAY_BACK = false, END_CHANGE = 'address', END_POST_BY = true;   // END_WAY_BACK: CUT (the user, 2026-10-26, question 1: no way back from the goodbye); its code in 29b stays parked and off
 const END_T = { offerDay: 32, offerAt: 960, arrowFrom: 945, seekAt: 970, roomTo: 1080, sceneLen: 45, inviteAt: 360, dueAt: 1200, lastCall: 1080, searchAt: 1170, addressAt: 900, rampAt: 595 };
 const END_CHOICES = ['stay', 'go', 'unsure'];
 const endDayOf = t => Math.floor(t / 1440) + 1, endMin = t => t - (endDayOf(t) - 1) * 1440;
@@ -65655,7 +65653,7 @@ function endAnswerScript(why) {                          // why: 'tell' (you cam
   const pick = (choice, text, reply, close) => ({ text, rel: { marrow: 1 }, reply: { who: 'marrow', text: reply, pose: 'nod' }, choice, close });
   const choices = [
     pick('stay', endText('end.ans.stay', 'I\'m staying. The Wren\'s home.'), endText('end.ans.stay.a', 'Good. Selfishly, good.'), endText('end.ans.stay.close', 'I\'ll tell headquarters they can\'t have you. They\'ll survive.')),
-    pick('go', endText('end.ans.go', 'I\'m going. I want to see what\'s there.'), endText('end.ans.go.a', 'Then we\'ll make it a proper send-off.'), endText('end.ans.go.close', 'The Tern leaves Monday at ten. Until then, you\'re still mine.')),
+    pick('go', endText('end.ans.go', 'I\'m going. I want to see what\'s there.'), endText('end.ans.go.a', 'Then we\'ll make it a proper send-off.'), endText('end.ans.go.close', 'The Tern leaves Monday at ten. Once you\'re aboard, this game ends there: there\'s no coming back to it. You can still change your mind until my address.')),
   ];
   if (!ask) choices.push(pick('unsure', endText('end.ans.unsure', 'I\'m not sure yet.'), endText('end.ans.unsure.a', 'Then you have until my address at the line. After that, the ship will know.'), endText('end.ans.unsure.close', 'Don\'t lose sleep over it. Lose a little.')));
   MEETING_SCRIPTS['moment:ending.answer'] = { title: endText('end.ans.title', 'The transfer'), from: 'Captain Odile Marrow', noCount: true,
@@ -65860,7 +65858,10 @@ function endRecord() {
 // ---------------------------------------------------------------------
 
 // ---- slot: Ending goodbye (section 29b). New code of this seat's goes here, above the end line (plans/owners.md) ----
-// E-3 (EN1). The kept copy: the moment you first tell the Captain "Go", this game as it stood just before is copied once to
+// E-3 (EN1). CUT (the user, 2026-10-26, ending question 1: no way back): the kept copy and "Back to before my choice" below are
+// parked, switched off by END_WAY_BACK = false (section 29): no copy is ever written, no Back button, no Saves app row (its
+// two hook lines in section 19 were taken out). Kept on record, not to be reused; taking the code out is its own reviewed step.
+// As built: the kept copy: the moment you first tell the Captain "Go", this game as it stood just before is copied once to
 // its own key beside its slot (END_KEPT: SAVE_KEY + '-before-end'; Dev mode's SAVE_KEY has its '-dev', so Dev and Playtest
 // keep theirs apart), never into another slot and never with ?nosave. A new game in this slot clears it. "Back to before
 // my choice" (the end page) and the Saves app's "Before the goodbye" row (section 19's hooks endKeptRows / endSlotsAct)
@@ -65876,20 +65877,21 @@ function endKeepCopy() {                                 // -> true when the cop
   catch (e) { return false; }
 }
 function endKeptRead(key = END_KEPT) { let s = null; try { const t = slotRead(key); s = t ? JSON.parse(t) : null; } catch (e) { s = null; } return s && saveOk(s) ? s : null; }
-function endBack(n = SAVE_SLOT) {                         // the kept copy back into slot n, then played
+function endBack(n = SAVE_SLOT) {                         // the kept copy back into slot n, then played (cut: off)
+  if (!END_WAY_BACK) return false;
   const s = endKeptRead(endKeptKey(n)); if (!s || NOSAVE) return false;
   if (typeof slotPut === 'function' && SAVE_SLOTS_ON) return slotPut(n, s);
   SLOT_HOLD = true; try { localStorage.setItem(slotKey(n), JSON.stringify(s)); location.reload(); } catch (e) { SLOT_HOLD = false; return false; }
   return true;
 }
-if (EV_ENDING_ON) onSim('newGame', () => { if (!NOSAVE) try { localStorage.removeItem(END_KEPT); } catch (e) { /* no storage */ } endPage(false); });
+if (EV_ENDING_ON) onSim('newGame', () => { if (END_WAY_BACK && !NOSAVE) try { localStorage.removeItem(END_KEPT); } catch (e) { /* no storage */ } endPage(false); });
 function endKeptRows(n) {                                // the Saves app: under slot n, its kept copy (a used slot only)
   if (!EV_ENDING_ON || !END_WAY_BACK || NOSAVE) return [];
   const used = slotRead(slotKey(n)) !== null, s = used && endKeptRead(endKeptKey(n)); if (!s) return [];
   return [{ kind: 'list', rows: [{ text: endText('end.saves.row', 'Before the goodbye'), sub: slotLine(s) + '. ' + endText('end.saves.sub', 'Kept when you first told the Captain you\'d go.') }] },
     { kind: 'buttons', items: [{ label: endText('end.saves.btn', 'Go back to before the goodbye'), action: { app: 'saves', do: 'endback', arg: n } }] }];
 }
-function endSlotsAct(verb, arg) { if (verb === 'endback' && EV_ENDING_ON) { endBack(arg); return true; } return false; }
+function endSlotsAct(verb, arg) { if (verb === 'endback' && EV_ENDING_ON && END_WAY_BACK) { endBack(arg); return true; } return false; }
 // the end page's rows
 function endPageRows() {
   const out = [], W = SHIP.works || {}, name = (SHIP.player && SHIP.player.name) || 'Cadet';
@@ -65930,8 +65932,8 @@ function endPage(on) {
   for (const [k, v] of rows.slice(1)) { const dt = document.createElement('dt'), dd = document.createElement('dd'); dt.textContent = k; dd.textContent = v; dl.appendChild(dt); dl.appendChild(dd); }
   const btns = el.querySelector('.btns'), add = (id, label, fn) => { const b = document.createElement('button'); b.type = 'button'; b.dataset.end = id; b.textContent = label; b.onclick = fn; btns.appendChild(b); return b; };
   if (back) add('back', endText('end.page.back', 'Back to before my choice'), () => endBack());
-  if (!END_PAGE.kept) add('keep', endText('end.page.keep', 'Keep this ending'), () => { END_PAGE.kept = true; endPage(true); });
-  add('new', endText('end.page.new', 'Start a new game'), () => {
+  if (!END_PAGE.kept) add('keep', endText('ending.endpage.btn.keep', 'Keep this ending'), () => { END_PAGE.kept = true; endPage(true); });
+  add('new', endText('ending.endpage.btn.new', 'Start a new game'), () => {
     endPage(false);
     if (SAVE_SLOTS_ON && !NOSAVE && typeof deviceDo === 'function' && typeof DEVICE_APPS !== 'undefined' && DEVICE_APPS.has('saves')) { try { deviceDo({ app: 'saves' }); } catch (e) { /* below */ } return; }
     if (typeof newGameStart === 'function') newGameStart(!NOSAVE && typeof introArrived === 'function');
@@ -65946,6 +65948,7 @@ function endTheEnd() {                                   // after the Tern: the 
   E.ended = Math.floor(shipNow()); if (typeof simNote === 'function') simNote('endingEnd', { day: endDayOf(E.ended) });
   saveGame(); return endPage(true);
 }
+if (EV_ENDING_ON && typeof padPanelAdd === 'function') padPanelAdd('endPage', { before: 'careerEnd', back: typeof PAD_MUST !== 'undefined' ? PAD_MUST : undefined });   // the controller: a panel of its own, B never closes it (as the let-go card)
 if (EV_ENDING_ON && SHIP.end && SHIP.end.ended) endPage(true);   // a save that ended: the page again
 // E-3 turn 2 (EN1): Monday, if you go. 06:00 the notice (and Calder's Mail as the record); breakfast in the mess with the
 // Captain, Brennan and your friends (a level 2 arrow 07:00-09:00; the scene when you come in); from 09:15 the shuttle bay

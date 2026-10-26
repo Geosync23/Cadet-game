@@ -12,15 +12,15 @@
 #            nothing open after; a save and a reload keep it all
 #   reload:  a real save between the offer and the answer (served from a web address, as saves_check does), reloaded:
 #            SHIP.end the same, the offer's scene and "About the transfer" still there
-#   keep:    (the same web page) the kept copy: made at the first Go, from just before it, never again (Stay then Go keeps
-#            the first); only this slot's key; the Saves app's "Before the goodbye"; the end page marks the save ended and
-#            a reload shows it again with its three buttons; "Back to before my choice" brings the copy back: the choice
-#            open, the page gone. With ?nosave no copy is made
+#   keep:    (the same web page) no way back (the user, 2026-10-26): no copy of the save is ever written, nothing in the
+#            Saves app; the end page marks the save ended and a reload shows it again with Keep this ending and Start a new game
 #   endpage: the end page on paper: its rows (name and rank, days, ranks, friends, Zeke), its buttons, the page's focus
 #   goodbye: (its own page at phone size, 390 x 844) Monday, gone: the notice at 06:00; from 09:15 the shuttle bay holds
 #            about 60 with the aisle clear; draw calls under 450; the arrow names each farewell in turn (friends, the Chief,
 #            Commander Vance, the Captain), each says goodbye as you reach them; Zeke's scene at the ramp; inside the Tern the
 #            ramp closes, the save is marked ended and the end page opens
+#   pad:     (a copy with the controller on too, PAD_ON, and a pretend pad) the end page by pad: the highlight on its first
+#            button, the D-pad moves it to the second, A presses it, B does nothing (it must be answered)
 #   week:    Friday: the friends come to you one at a time (seek asks), each with "About the transfer" and their own take;
 #            Zeke after dinner (arrow level 1 "Talk to Zeke", he finds you, the scene); a call home plays your family's
 #            scene once; the Schedule's rows (your answer by Saturday 20:00, Zeke); the Record's lines
@@ -149,11 +149,12 @@ def part_answers(g):
 def part_endpage(g):
     print('(endpage) the end page on paper; no kept copy with ?nosave:')
     made(g)
-    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(1); __run(0);
+    r = g.ev("""(() => { const p = __marrow(); setShipNow(32 * 1440 + 600); endChatDo(p, 'tell'); __lines(); dialogueChoose(1); const after = __lines().out; __run(0);
       const keys = Object.keys(localStorage).filter(k => /before-end/.test(k)); SHIP.player.name = 'Ada'; SHIP.rel = SHIP.rel || {}; endPage(true);
       const el = document.getElementById('endPage'); const r = { keys, made: endKeepCopy(), shown: !el.hidden, text: el.innerText, btns: [...el.querySelectorAll('button')].map(b => b.dataset.end), role: el.getAttribute('role'), focus: document.activeElement && document.activeElement.dataset.end };
-      endPage(false); return r; })()""")
-    print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus')}); print('   ', r['text'][:300].replace('\n', ' | '))
+      r.after = after; endPage(false); return r; })()""")
+    print('   ', {k: r[k] for k in ('keys', 'made', 'btns', 'role', 'focus', 'after')})
+    check(any('this game ends' in x for x in r['after']), f"endpage: telling her Go says plainly it ends this game ({r['after']})"); print('   ', r['text'][:300].replace('\n', ' | '))
     check(r['keys'] == [] and r['made'] is False, f"endpage: no kept copy with ?nosave ({r['keys']})")
     check(r['shown'] and 'Ada' in r['text'] and 'Days aboard' in r['text'] and 'Zeke' in r['text'] and r['role'] == 'dialog', f"endpage: the rows ({r['text'][:200]})")
     check(r['btns'] == ['keep', 'new'] and r['focus'] == 'keep', f"endpage: with no kept copy, Keep this ending and Start a new game, the first focused ({r})")
@@ -191,6 +192,27 @@ def part_goodbye(pw, on):
     check(r['aboard'] and r['ended'] and r['page'] and r['ramp'] == 0, f"goodbye: aboard, the ramp closes, ended, the end page ({r})")
     if g.errors: fail('page errors (goodbye): ' + ' | '.join(g.errors[:5]))
     g.close()
+
+PAD_INIT = r"""(() => { const B = Array(17).fill(0); window.__padB = B;
+  Object.defineProperty(Navigator.prototype, 'getGamepads', { configurable: true, value: () => [{ id: 'Pretend pad (STANDARD GAMEPAD)', index: 0, connected: true, mapping: 'standard', timestamp: performance.now(),
+    buttons: B.map(v => ({ pressed: !!v, touched: !!v, value: v })), axes: [0, 0, 0, 0] }, null, null, null] }); })()"""
+def part_pad(pw, src):
+    print('(pad) the end page by controller:')
+    pc = WORK / 'test' / ('ending_pad_' + pathlib.Path(sys.argv[1]).name)
+    pc.write_text(src.replace(SWITCH, "const EV_ENDING_ON = true;").replace("const PAD_ON = false;", "const PAD_ON = true;"))
+    g = Game(pw, str(pc)); g.page.evaluate(PAD_INIT); g.step(2); g.ev(SETUP)
+    press = lambda b: (g.page.evaluate(f'__padB[{b}] = 1'), g.step(3), g.page.evaluate(f'__padB[{b}] = 0'), g.step(3))
+    g.ev("(() => { dispatchEvent(Object.assign(new Event('gamepadconnected'), { gamepad: navigator.getGamepads()[0] })); })()"); g.step(5)
+    press(12); press(13)   # a first press: the pad's in use
+    g.ev("(() => { SHIP.end = endClean({ offer: { day: 32, met: true }, said: [[33, 'go']], settled: { day: 35, choice: 'go' } }); endTheEnd(); })()"); g.step(5)
+    f = lambda: g.ev("(() => { const e = document.activeElement; return e && e.dataset ? e.dataset.end || e.id || e.tagName : null; })()")
+    a = f(); press(13); b = f(); press(1); c = f(); vis = g.ev("!document.getElementById('endPage').hidden")
+    press(12); press(0); d = g.ev("(() => ({ hidden: document.getElementById('endPage').hidden, note: document.querySelector('#endPage .note') && document.querySelector('#endPage .note').textContent }))()")
+    print('   ', a, b, c, vis, d)
+    check(a == 'keep' and b == 'new' and c == 'new' and vis, f"pad: the highlight on Keep this ending, the D-pad to Start a new game, B does nothing ({a}, {b}, {c}, {vis})")
+    check(not d['hidden'] and 'kept' in (d['note'] or ''), f"pad: A presses Keep this ending ({d})")
+    if g.errors: fail('page errors (pad): ' + ' | '.join(g.errors[:5]))
+    g.close(); pc.unlink()
 
 def part_week(g):
     print('(week) the friends, Zeke, the call home, the rows, the Record:')
@@ -245,24 +267,16 @@ def part_reload(b, on):
     A, R = json.loads(a), json.loads(r['end'])
     check(all(A[k] == R[k] for k in ('offer', 'said', 'settled')) and all(R['f'].get(k) == v for k, v in A['f'].items()) and r['day'] == 33 and r['said'] == 'go', f"reload: SHIP.end the same after a reload (the clock may add Friday's bookings) ({r})")
     check(r['script'] and r['btn'] and r['btn']['label'] == 'About the transfer', f"reload: the offer's scene and \"About the transfer\" still there ({r})")
-    print('(keep) the kept copy, the ended save, back to before your choice:')
+    print('(keep) no way back (the user, 2026-10-26): no copy is ever written; the ended save:')
     st = lambda: pg.evaluate('() => Object.fromEntries(Object.keys(localStorage).map(k => [k, localStorage.getItem(k)]))')
-    S = st(); K = 'starship-cadet-save-before-end'; kc = S.get(K)
-    check(kc and json.loads(kc)['ship']['end']['said'] == [] and [k for k in S if 'before-end' in k] == [K], f"keep: made at the first Go, from just before it, under this slot's key only ({[k for k in S]})")
     ev("""(() => { const p = __marrow(); for (const k of [0, 1]) { endChatDo(p, 'tell'); __lines(); dialogueChoose(k); __run(0); } saveGame(); })()""")
-    check(st().get(K) == kc, 'keep: a second Go leaves the copy as it was')
-    rows = ev("JSON.stringify(endKeptRows(1))")
-    check('Before the goodbye' in rows and 'endback' in rows, f"keep: the Saves app's row under the slot ({rows[:160]})")
+    keys = [k for k in st() if 'before-end' in k]
+    check(keys == [] and ev("endKeepCopy()") is False and ev("JSON.stringify(endKeptRows(1))") == '[]', f"keep: after Go, Stay, Go: no copy written, none in the Saves app ({keys})")
     ev("endTheEnd()")
     pg.reload(timeout=120000); ready()
-    r = ev("""(() => { const el = document.getElementById('endPage'); return { shown: !!el && !el.hidden, btns: el ? [...el.querySelectorAll('button')].map(b => b.dataset.end) : [], focus: document.activeElement && document.activeElement.dataset.end, ended: !!SHIP.end.ended }; })()""")
+    r = ev("""(() => { const el = document.getElementById('endPage'); return { shown: !!el && !el.hidden, btns: el ? [...el.querySelectorAll('button')].map(b => b.dataset.end) : [], focus: document.activeElement && document.activeElement.dataset.end, ended: !!SHIP.end.ended, keys: Object.keys(localStorage).filter(k => /before-end/.test(k)) }; })()""")
     print('    ended, reloaded:', r)
-    check(r['shown'] and r['btns'] == ['back', 'keep', 'new'] and r['focus'] == 'back' and r['ended'], f"keep: an ended save shows the end page again, its three buttons, the first focused ({r})")
-    with pg.expect_navigation(timeout=90000): pg.click('#endPage button[data-end="back"]')
-    ready()
-    r = ev("""(() => { const el = document.getElementById('endPage'); return { shown: !!el && !el.hidden, said: SHIP.end.said, ended: SHIP.end.ended || null, open: endOpen(), btn: !!endChatButton(__marrow()) }; })()""")
-    print('    back:', r)
-    check(not r['shown'] and r['said'] == [] and r['ended'] is None and r['open'] and r['btn'], f"keep: back to before your choice: the choice open, no page ({r})")
+    check(r['shown'] and r['btns'] == ['keep', 'new'] and r['focus'] == 'keep' and r['ended'] and r['keys'] == [], f"keep: an ended save shows the end page again: Keep this ending, Start a new game ({r})")
     check(not errs, f'reload: page errors {errs[:3]}')
     ctx.close()
 
@@ -290,6 +304,9 @@ with sync_playwright() as pw:
             except Exception as e: fail(f'{name}: {e}')
         if g.errors: fail('page errors (on): ' + ' | '.join(g.errors[:5]))
         g.close()
+        if not ONLY or 'pad' in ONLY:
+            try: part_pad(pw, src)
+            except Exception as e: fail(f'pad: {e}')
         if not ONLY or 'goodbye' in ONLY:
             try: part_goodbye(pw, on)
             except Exception as e: fail(f'goodbye: {e}')
