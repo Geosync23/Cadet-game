@@ -141,6 +141,7 @@ a { color: var(--visit); }
     <li><a href="#slow">A slower player</a></li>
     <li><a href="#answers">Your earlier answers</a></li>
     <li><a href="#build">Pieces, switches, team and checks</a></li>
+    <li><a href="#controller">Game controllers</a></li>
     <li><a href="#risk">Phones and risks</a></li>
     <li><a href="#questions">Questions for you</a></li>
   </ol>
@@ -435,29 +436,29 @@ a { color: var(--visit); }
 
 <section id="build">
   <h2>13. Pieces, switches, team and checks</h2>
-  <p>Each piece is built behind its own switch (off means the game exactly as today), reviewed by one of two reviewers, merged by the build master into staging, and switched on only after the full six-runner round and your yes. The steps' masters are <code>P5_STEP5</code> and <code>P5_STEP6</code>; the night shift has its own line inside Step 6 and is built first.</p>
+  <p>Each piece is built behind its own switch, works fully with a game controller (section 13a) (off means the game exactly as today), reviewed by one of two reviewers, merged by the build master into staging, and switched on only after the full six-runner round and your yes. The steps' masters are <code>P5_STEP5</code> and <code>P5_STEP6</code>; the night shift has its own line inside Step 6 and is built first.</p>
   <div class="tbl"><table>
     <thead><tr><th>Piece</th><th>Switch</th><th>Who builds</th><th>Checks it needs</th><th>Turns</th></tr></thead>
     <tbody>
       <tr><td colspan="5"><b>Step 5: Senior Officer</b> (after the step's spec page, 2 turns)</td></tr>
-      <tr><td>S5-1 Career core: ladder rows (t3, m19, m18, m20, p4, p5, p9, the board), Tier 3 bands, the Tier 2 re-tune, milestones, the real held hours (with and without the swap)</td><td><code>P5_STEP5</code></td><td>Works career engineer; events seat for the held hours</td><td>career_check, bigevents_check, events_check, mech_check (ladder)</td><td class="n">3</td></tr>
-      <tr><td>S5-2 The Senior Officer promotion: offer, chatter, test, result, insignia, cake, Vance's walk, the suite (door plate, refit, 4-23 back to spare), the toast</td><td><code>P5_PROMO3</code></td><td>Works career engineer (from 24p and the promotion beats); deck architect for the suite</td><td>promo_beats_check (a Tier 3 part), promo_sight_check, career_check, arrows_check week (Days 14-17), dev_arrow_check, devmode_check, saves_check (a save mid-promotion), day_check Days 15, 16</td><td class="n">5</td></tr>
-      <tr><td>S5-3 M19 Power and relays, the conduit tester</td><td><code>P5_M19</code></td><td>Mechanics seat A</td><td>mech_check m19, machine_check</td><td class="n">2</td></tr>
-      <tr><td>S5-4 M18 Shutdowns: the planning screen, booking tomorrow, warnings, what keeps power, the crew's day changing (planned at 22:00 the evening before)</td><td><code>P5_M18</code></td><td>Mechanics seat A with the sim engineer</td><td>mech_check m18, day_check (a shutdown day, Day 19), food_check (a galley shutdown), machine_check</td><td class="n">5</td></tr>
-      <tr><td>S5-5 M20 The sensor array and the calibration rig</td><td><code>P5_M20</code></td><td>Mechanics seat B; deck architect for array-room spots</td><td>mech_check m20, deck_check (Deck 2)</td><td class="n">2</td></tr>
-      <tr><td>S5-6 P4, P5, P9, the T3 band and the old-mysteries board</td><td><code>P5_CASES5</code></td><td>Puzzles seat</td><td>puzzle_check</td><td class="n">5</td></tr>
-      <tr><td>S5-7 Words (all of the above), re-baked</td><td>-</td><td>Head writer</td><td>check_fast (words, names), lines_check</td><td class="n">2</td></tr>
+      <tr><td>S5-1 Career core: ladder rows (t3, m19, m18, m20, p4, p5, p9, the board), Tier 3 bands, the Tier 2 re-tune, milestones, the real held hours (with and without the swap)</td><td><code>P5_STEP5</code></td><td>Works career engineer; events seat for the held hours</td><td>career_check, bigevents_check, events_check, mech_check (ladder), controller_check (reach: the Training tab rows)</td><td class="n">3</td></tr>
+      <tr><td>S5-2 The Senior Officer promotion: offer, chatter, test, result, insignia, cake, Vance's walk, the suite (door plate, refit, 4-23 back to spare), the toast</td><td><code>P5_PROMO3</code></td><td>Works career engineer (from 24p and the promotion beats); deck architect for the suite</td><td>promo_beats_check (a Tier 3 part), promo_sight_check, career_check, arrows_check week (Days 14-17), dev_arrow_check, devmode_check, saves_check (a save mid-promotion), day_check Days 15, 16, controller_check (reach, pick, and a pad-played Day 16)</td><td class="n">5</td></tr>
+      <tr><td>S5-3 M19 Power and relays, the conduit tester</td><td><code>P5_M19</code></td><td>Mechanics seat A</td><td>mech_check m19, machine_check, controller_check (pick, reach)</td><td class="n">2</td></tr>
+      <tr><td>S5-4 M18 Shutdowns: the planning screen, booking tomorrow, warnings, what keeps power, the crew's day changing (planned at 22:00 the evening before)</td><td><code>P5_M18</code></td><td>Mechanics seat A with the sim engineer</td><td>mech_check m18, day_check (a shutdown day, Day 19), food_check (a galley shutdown), machine_check, controller_check (reach: the planning screen)</td><td class="n">5</td></tr>
+      <tr><td>S5-5 M20 The sensor array and the calibration rig</td><td><code>P5_M20</code></td><td>Mechanics seat B; deck architect for array-room spots</td><td>mech_check m20, deck_check (Deck 2), controller_check (pick, reach)</td><td class="n">2</td></tr>
+      <tr><td>S5-6 P4, P5, P9, the T3 band and the old-mysteries board</td><td><code>P5_CASES5</code></td><td>Puzzles seat</td><td>puzzle_check, controller_check (pick: the board; reach)</td><td class="n">5</td></tr>
+      <tr><td>S5-7 Words (all of the above), re-baked</td><td>-</td><td>Head writer</td><td>check_fast (words, names), lines_check, controller_check (reach: no new buttons, labels only)</td><td class="n">2</td></tr>
       <tr><td colspan="5"><b>Step 6: Engine Specialist and the end</b> (after its spec page, 2 turns)</td></tr>
-      <tr><td>S6-1 The night shift, built first: Days 22-24 (22:45 on Day 22), Navarro's leave, Calder on and off, sleeping by day, meals at the edges, the time clock, held jobs and night incidents, clothes, saving mid-shift, any rank</td><td><code>P5_NIGHT</code></td><td>Player engineer with the sim engineer</td><td>day_check Days 22, 23, 24, 25; player_check, clothes_check, saves_check, food_check, career_check (on and off), events_check (the comet unchanged), arrows_check week</td><td class="n">6</td></tr>
-      <tr><td>S6-2 M21 The Monday briefing (its own Day 22 hold; the swap's Day 16 memo hold is left alone)</td><td><code>P5_M21</code></td><td>Mechanics seat A</td><td>mech_check m21, bigevents_check</td><td class="n">3</td></tr>
-      <tr><td>S6-3 The Engine Specialist promotion: offer, test, the result at the comet, the crews' welcome, the Captain's badge, the watch board</td><td><code>P5_PROMO4</code></td><td>Works career engineer</td><td>promo_beats_check (a Tier 4 part), career_check, arrows_check week (Days 21-23), events_check (Calder at the comet), day_check Days 22, 23</td><td class="n">3</td></tr>
-      <tr><td>S6-4 Deck 6: the reactor drum and drive coils as real machines, the dosimeter rack, team spots, your seat at the conference table</td><td>with <code>P5_M23</code></td><td>Deck architect</td><td>deck_check (phone draw calls, 450 at most), perf_check, machine_check</td><td class="n">3</td></tr>
-      <tr><td>S6-5 M23 Engine work and the reactor (permit, dosimeter, the Watch's log)</td><td><code>P5_M23</code></td><td>Mechanics seat B</td><td>mech_check m23 and the reactor</td><td class="n">5</td></tr>
-      <tr><td>S6-6 M24 Leading a team</td><td><code>P5_M24</code></td><td>Mechanics seat A (team jobs' owner)</td><td>mech_check m24 (good and poor picks)</td><td class="n">4</td></tr>
-      <tr><td>S6-7 M25 Mentoring Basil (his plan for Day 26 made the evening before)</td><td><code>P5_M25</code></td><td>Works career engineer with the sim engineer</td><td>mech_check m25, day_check Day 26, stories_check (Basil)</td><td class="n">4</td></tr>
-      <tr><td>S6-8 P6, P7, P8 and the T4 band</td><td><code>P5_CASES6</code></td><td>Puzzles seat</td><td>puzzle_check</td><td class="n">4</td></tr>
-      <tr><td>S6-9 The end: the career story's beats, milestones, Calder's question, your answer kept</td><td><code>P5_END</code></td><td>Works career engineer</td><td>career_check (Days 0-26, a steady and a slow player, twice, identical), stories_check (Calder, Zeke, Kowalczyk), fridays_check (Day 26)</td><td class="n">2</td></tr>
-      <tr><td>S6-10 Words</td><td>-</td><td>Head writer</td><td>check_fast, lines_check</td><td class="n">2</td></tr>
+      <tr><td>S6-1 The night shift, built first: Days 22-24 (22:45 on Day 22), Navarro's leave, Calder on and off, sleeping by day, meals at the edges, the time clock, held jobs and night incidents, clothes, saving mid-shift, any rank</td><td><code>P5_NIGHT</code></td><td>Player engineer with the sim engineer</td><td>day_check Days 22, 23, 24, 25; player_check, clothes_check, saves_check, food_check, career_check (on and off), events_check (the comet unchanged), arrows_check week, controller_check (reach, unplug mid-shift, and a pad-played night)</td><td class="n">6</td></tr>
+      <tr><td>S6-2 M21 The Monday briefing (its own Day 22 hold; the swap's Day 16 memo hold is left alone)</td><td><code>P5_M21</code></td><td>Mechanics seat A</td><td>mech_check m21, bigevents_check, controller_check (reach)</td><td class="n">3</td></tr>
+      <tr><td>S6-3 The Engine Specialist promotion: offer, test, the result at the comet, the crews' welcome, the Captain's badge, the watch board</td><td><code>P5_PROMO4</code></td><td>Works career engineer</td><td>promo_beats_check (a Tier 4 part), career_check, arrows_check week (Days 21-23), events_check (Calder at the comet), day_check Days 22, 23, controller_check (reach, pick, and a pad-played Day 22)</td><td class="n">3</td></tr>
+      <tr><td>S6-4 Deck 6: the reactor drum and drive coils as real machines, the dosimeter rack, team spots, your seat at the conference table</td><td>with <code>P5_M23</code></td><td>Deck architect</td><td>deck_check (phone draw calls, 450 at most), perf_check, machine_check, controller_check (pick: the rack; calls at phone size)</td><td class="n">3</td></tr>
+      <tr><td>S6-5 M23 Engine work and the reactor (permit, dosimeter, the Watch's log)</td><td><code>P5_M23</code></td><td>Mechanics seat B</td><td>mech_check m23 and the reactor, controller_check (pick, reach)</td><td class="n">5</td></tr>
+      <tr><td>S6-6 M24 Leading a team</td><td><code>P5_M24</code></td><td>Mechanics seat A (team jobs' owner)</td><td>mech_check m24 (good and poor picks), controller_check (reach: the team picker)</td><td class="n">4</td></tr>
+      <tr><td>S6-7 M25 Mentoring Basil (his plan for Day 26 made the evening before)</td><td><code>P5_M25</code></td><td>Works career engineer with the sim engineer</td><td>mech_check m25, day_check Day 26, stories_check (Basil), controller_check (reach)</td><td class="n">4</td></tr>
+      <tr><td>S6-8 P6, P7, P8 and the T4 band</td><td><code>P5_CASES6</code></td><td>Puzzles seat</td><td>puzzle_check, controller_check (reach)</td><td class="n">4</td></tr>
+      <tr><td>S6-9 The end: the career story's beats, milestones, Calder's question, your answer kept</td><td><code>P5_END</code></td><td>Works career engineer</td><td>career_check (Days 0-26, a steady and a slow player, twice, identical), stories_check (Calder, Zeke, Kowalczyk), fridays_check (Day 26), controller_check (reach)</td><td class="n">2</td></tr>
+      <tr><td>S6-10 Words</td><td>-</td><td>Head writer</td><td>check_fast, lines_check, controller_check (reach: labels only)</td><td class="n">2</td></tr>
     </tbody>
   </table></div>
   <h3>The team, step by step</h3>
@@ -469,6 +470,30 @@ a { color: var(--visit); }
   </ul>
 </section>
 
+
+<section id="controller">
+  <h2>13a. Every piece works with a game controller</h2>
+  <p>The controller support (plans/controller-plan.html, section 26 of the game) gives every panel a D-pad highlight with A to press and B to go back, a ring on the nearest thing you can use, Y for the device, X for the action button and View for Tracked. Every new piece keeps to its rules: nothing needs a held or fast press, every new button and card is reachable by D-pad in a sensible order, the highlight is the page's real focus (so screen readers read it), and vibration is never the only sign of anything. Each piece's checks include <code>controller_check</code>: <b>reach</b> (every new clickable found by mouse is reached and pressed by pad), <b>pick</b> (new things in the world get the ring and A works on them), and a whole day played by pad for the promotion days and the first night.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Piece</th><th>New buttons, cards and things the controller must reach</th></tr></thead>
+    <tbody>
+      <tr><td>S5-1 Career core</td><td>The Works app's Training tab: the "Your promotion" rows for Tier 3 and Tier 4 (read-only rows, reached in order)</td></tr>
+      <tr><td>S5-2 Senior Officer</td><td>The urgent notices (offer, result, insignia, "Go with Vance"); the gold ring's "Take it" on the board; the result and insignia meetings (Next and any replies); the cake (tap to take a slice, as at birthdays); the suite's door; the toast meeting</td></tr>
+      <tr><td>S5-3 Power and relays</td><td>Relay room and battery panels (ring and A); the conduit tester's steps</td></tr>
+      <tr><td>S5-4 Shutdowns</td><td>The new planning screen on the device: the list of junctions, what each feeds, an hour picker for tomorrow (D-pad left and right by the hour, never held), "Warn" for each person affected, a keep-power choice per machine, Book and Cancel. The biggest new panel: built with the controller from the start</td></tr>
+      <tr><td>S5-5 The sensor array</td><td>"Pick the star" card; the calibration rig's dial (tuning's turn control, already pad-ready)</td></tr>
+      <tr><td>S5-6 Cases and the board</td><td>The old-mysteries board in the Works bay (ring and A), its case list and Take; P4, P5, P9 in the existing case panel</td></tr>
+      <tr><td>S6-1 The night shift</td><td>The bed's daytime "Sleep until..." option; Calder's on and off meetings; night incident cards; the time clock as built. Unplugging mid-shift stops you and pauses, as everywhere</td></tr>
+      <tr><td>S6-2 The Monday briefing</td><td>The meeting's three choices</td></tr>
+      <tr><td>S6-3 Engine Specialist</td><td>The urgent notices; the gold ring's "Take it"; "Go with Calder" at the comet; the badge meeting</td></tr>
+      <tr><td>S6-4 Deck 6</td><td>The dosimeter rack (take and return a badge), the reactor door and the coils' panels (ring and A); the conference table seat</td></tr>
+      <tr><td>S6-5 Engine work and the reactor</td><td>"Sign the permit" card on the bridge; the coil-balancing dials; the control board swap's steps</td></tr>
+      <tr><td>S6-6 Leading a team</td><td>The new team picker: the night crew list with a choose box each (A toggles), "Book the slot", a spot for each person, then "Next step" to call each step</td></tr>
+      <tr><td>S6-7 Mentoring</td><td>Basil's three choice cards; "point him to a clue" in the case panel</td></tr>
+      <tr><td>S6-8, S6-9</td><td>The existing case panel; Calder's question's replies; the Record's new milestone rows</td></tr>
+    </tbody>
+  </table></div>
+</section>
 <section id="risk">
   <h2>14. Phones and risks</h2>
   <ul>
