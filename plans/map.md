@@ -11,7 +11,7 @@ Started by the ways-of-working engineer WW1 (2026-10-20). **Whoever moves code, 
 - **Who uses a function or table outside its section:** `node tools/shared.js --min 1 | grep -A1 ' NAME '`.
 - Plain grep still works: `grep -n "^function NAME\|^const NAME\|^let NAME" starship-cadet.html`.
 
-**The file's order is not the sections' number order.** Sections were added where they had to load (a section must come after what it reads at load). Today's order: page, 1, 2, 3, 4 (4a-4e), 5, **13, 14, 19, 15, 15b, 15r, 16, 17, 22, 18, 20, 20c, 21, 21b, 23, 23b, 24 (24a ... 24p)**, 6, 7, 8, 8b, 9, 10, 8c, 11, 25, 12. A section heading is a column-0 line `// 19. DEVICE` or `// 24a ROUNDS`, between two `// ====` or `// ----` rule lines.
+**The file's order is not the sections' number order.** Sections were added where they had to load (a section must come after what it reads at load). Today's order: page, 1, 2, 3, 4 (4a-4e), 5, **13, 14, 19, 15, 15b, 15r, 16, 17, 22, 18, 20, 20c, 21, 21b, 23, 23b, 24 (24a ... 24p, then 24u-24x)**, 6, 7, 8, 8b, 9, 10, 8c, 11, 25, 12. A section heading is a column-0 line `// 19. DEVICE` or `// 24a ROUNDS`, between two `// ====` or `// ----` rule lines.
 
 ## Each seat's slot (from step 2)
 
@@ -35,6 +35,10 @@ One labelled, empty block per seat at the end of its main section, where that se
 | Games engineer | 23b |
 | Puzzles seat | 24k |
 | Works career engineer | 24p |
+| Later promotions (Works career engineer, Pillar 5 Steps 5-6) | 24u |
+| Power and relays (mechanics seat A, M19) | 24v |
+| Shutdowns (mechanics seat B, M18) | 24w |
+| Sensor array (mechanics seat A, M20) | 24x |
 | Performance engineer | 8b |
 | HUD seat | 11 |
 | Fridays builder | 18f (its own section, after 18; the slot is at its end) |
@@ -75,7 +79,7 @@ No slot for the crew designer (section 9's roster is generated). A new feature (
 | Clothes, the hamper, the washers | `21b` | `uniformState`, `hamperHeld` |
 | Tiles; Lightdisc | `23`; `23b` | `SHIP.tiles`; `DISC` |
 | Your Works career: the ladder, training, teachers, xp, tools | `24` | `WORK_MECH`, `CAREER_LADDER`, `worksText`, `worksDay`, `worksXp`, `worksTabAdd`, `toolWear` |
-| A Works mechanic | `24a`-`24t` | rounds 24a, uniform 24b, drill 24c, hauling 24d, tuning 24e, incidents 24f, scanner 24g, team jobs 24h, tracing 24i, workshop 24j, cases 24k, favour cases 24l, tool upkeep 24m, logbook 24n, leak hunting 24o, the first promotion 24p, rewiring 24q, irrigation 24r, the lift roof 24s, off shift 24t (in the file in this order: a-d, m, n, g, i, j, t, s, k, e, f, h, l, o, q, r, p) |
+| A Works mechanic | `24a`-`24x` | rounds 24a, uniform 24b, drill 24c, hauling 24d, tuning 24e, incidents 24f, scanner 24g, team jobs 24h, tracing 24i, workshop 24j, cases 24k, favour cases 24l, tool upkeep 24m, logbook 24n, leak hunting 24o, the first promotion 24p, rewiring 24q, irrigation 24r, the lift roof 24s, off shift 24t; Pillar 5 Step 5 (S5-1, 2026-10-26): the later promotions 24u, power and relays 24v, shutdowns 24w, the sensor array 24x (in the file in this order: a-d, m, n, g, i, j, t, s, k, e, f, h, l, o, q, r, p, u, v, w, x; 24y and 24z free, Step 6 gets section 28) |
 | The camera, zoom | `6` | |
 | Walkable tiles, pathfinding, collision | `7` | `free`, `cellPos`, `findPath` (must match `findPathScan`: path_check) |
 | Characters: bodies, uniforms, walking | `8` | `makeCharacter`, `L` |

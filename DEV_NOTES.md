@@ -967,6 +967,14 @@ gives way to clock-out at the shift's end. Test: `python3 arrows_d_check.py BUIL
 - **Words:** `content/works/promo-beats.lines` (notices, rows, Mails: `mail.pb.*` keys for the 400 limit, `{time}` and `{day}`), `content/banks/promo-beats.lines` (the crew's bubbles, kinds `pb.soon|luck|watch|passed|officer`), Calder's `work` lines under `flag:pb.promo.*`, `content/meetings/promo.result.meet`.
 - **Test:** `promo_beats_check.py BUILD [off pointer before passed result cabin talk]` (about 2 minutes). promo_sight_check's `move` part runs with the switch off (FX19's 17:00 walk).
 
+## Pillar 5 Step 5, Senior Officer (S5-1 skeleton, B1 for lead 39, 2026-10-26; switch `P5_STEP5`, off)
+- **The spec:** `plans/p5-step5-spec.html` on claude/p5-specs (EP2), from plan v3.1 (`plans/pillar5-steps56-plan.html` on claude/events-plan-2). Pieces S5-1 to S5-7; this is S5-1's first turn.
+- **Switches (section 13, beside EV_COMET_ON):** `P5_STEP5 = URL_FLAGS.has('p5s5')` (the master; `?p5s5` previews), then `P5_PROMO3`, `P5_M19`, `P5_M18`, `P5_M20`, `P5_CASES5`, each `P5_STEP5 && true`.
+- **Section 24 core:** an `if (P5_STEP5)` block just after WORK_BANDS: the ladder rows ps, t3, m19, p4, m18, p5, m20, p9, mys (inert until each sub-block registers WORK_MECH[id]), WORK_TOOLS.arrayrig, and WORK_BANDS[3] as a stand-in copy of tier 2's (turn 2 sets the numbers).
+- **Section 18:** an `if (P5_STEP5)` block after the event swap's moves Pillar 5's EV_BEATS rows to v3.1's hours and adds seniorResult and nightShift3 (spec section 4).
+- **New sections 24u (later promotions), 24v (M19), 24w (M18), 24x (M20)** after 24p, each with its slot (`Later promotions`, `Power and relays`, `Shutdowns`, `Sensor array`). Empty so far.
+- Note for builders: the ladder's job slot is `10 + (index among big rows) % 10`, so the new big rows t3, m19, m18, m20 share slots 10-13 with m1, m4, m5, m7; reserve your own free slot (the Tier 2 test uses 20, the fix-scan 24).
+
 ## Hook register
 
 One-line, `typeof`-guarded calls from one section into another (plans/pillar4-plan.md, "Keeping the one file from colliding"). The lead keeps this list; owners add their rows.

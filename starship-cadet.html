@@ -9447,6 +9447,12 @@ const weekendTag = tag => typeof tag === 'string' && tag.startsWith('ev-') && [.
 const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-aboard', 'tool-night', 'route-night', 'window-sketch', 'open-house', 'garden-walk', 'spoon-band', 'card-night', 'worst-joke']);               // 0.92.6 (FX17, plans/patch-0.92.6.md items 2-5, 7, 8, 13, 15): the traditions that come alive (spoken talks, hosts, the swap, the guessing, the stands); off: 0.92.5. `?p926` previews
 const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
+const P5_STEP5 = URL_FLAGS.has('p5s5');                // Pillar 5 Step 5, Senior Officer (B1 for lead 39; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1): the master; off: the game before it (?p5s5 previews it while it's built, as ?evswap does)
+const P5_PROMO3 = P5_STEP5 && true;                       // S5-2: the Senior Officer promotion (section 24u)
+const P5_M19 = P5_STEP5 && true;                          // S5-3: power and relays (section 24v)
+const P5_M18 = P5_STEP5 && true;                          // S5-4: shutdowns (section 24w)
+const P5_M20 = P5_STEP5 && true;                          // S5-5: the sensor array (section 24x)
+const P5_CASES5 = P5_STEP5 && true;                       // S5-6: head-scratchers P4, P5, P9 and the old-mysteries board (24k's slot)
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
@@ -43678,6 +43684,22 @@ if (EV_SWAP_ON) {
   FRI_ADDRESSES['friday-d19'].mail = ['All hands: the Captain\'s Friday address', 'The storm\'s tally and my thanks, our Veyli guests, this week\'s commendations and ranks, and the weekend ahead. To the night watch tonight: good watch.'];
   FRI_ADDRESSES['friday-d26'].mail = ['All hands: the Captain\'s Friday address', 'Four Fridays, a storm, the Veyli and a comet behind us. What you\'ve become in four weeks, and four weeks aboard tonight.'];
 }
+// ---- Pillar 5's held hours at plan v3.1 (S5-1, B1 for lead 39; plans/p5-step5-spec.html section 4). Behind P5_STEP5
+// (section 13); off: the estimates above. Holds only (nothing plays from them), so Step 6's rows are set here too; Step 6
+// adds only its own new rows. After the swap's block, so the guard (guardFree, evBeatsOn) sees the agreed career.
+if (P5_STEP5) {
+  const hold = (id, o) => { const b = EV_BEATS.find(x => x.id === id); if (b) Object.assign(b, o); };
+  hold('tier3Test', { day: 15, at: [540, 900] });                       // the Tier 3 test's window, 09:00-15:00
+  hold('seniorOfficer', { kind: 'captain', day: 16, at: [975, 1050] });  // 16:15-17:30: the bar at 16:30 and the cake
+  hold('nightAssigned', { day: 22, at: [555, 570] });                    // 09:15-09:30: Calder's "nights" word
+  hold('nightShift1', { kind: 'night', day: 22, at: [1360, 1800] });     // 22:40 to 06:00, after the comet
+  hold('nightShift2', { kind: 'night', day: 23, at: [1245, 1800] });     // 20:45 to 06:00, after Zeke's story
+  hold('engineSpecialist', { kind: 'captain', day: 23, at: [975, 1030] });   // 16:15-17:10: the badge, before the bridge hour at 17:15
+  hold('caldersQuestion', { day: 26, at: [1120, 1170] });                // 18:40-19:30: four weeks aboard
+  EV_BEATS.push({ id: 'seniorResult', kind: 'beat', day: 16, at: [495, 510] },   // 08:15-08:30, Calder's office (her search after 08:30 needs no hold)
+    { id: 'nightShift3', kind: 'night', day: 24, at: [1245, 1800] });   // the third night, 20:45 to 06:00
+  // seniorToast (Day 17, 19:00-21:00) and shutdownsTraining (Day 18, 09:00-12:00) stay as they are; mondayBriefing is the swap's
+}
 // ---- the comet (FX25, 0.93.2; plans/events-plan-2.html Part A by EP1, the user's yes: on in 0.93.2). Behind
 // EV_COMET_ON (section 13) with the events base on; off: the game before it (the swap's draft above, or the calendar's
 // row passed over). One gentle evening on Monday Day 22: Bakshi caught it on the night helm, the news at breakfast, Sato's
@@ -53267,6 +53289,23 @@ const WORK_TOOLS = {
 // your Works reputation in your rank: five words; numbers stay inside. Tier 1 is tuned by career_check (a steady
 // player reaches "Relied on" by the end of Day 8, a very busy one not before Day 5); later tiers get theirs on their steps' pages
 const WORK_BANDS = { 1: [[0, 'new'], [8, 'steady'], [18, 'reliable'], [30, 'trusted'], [40, 'relied']], 2: [[0, 'new'], [12, 'steady'], [28, 'reliable'], [45, 'trusted'], [60, 'relied']] };   // 2: C2's 0.44.19 numbers, kept by Step 4's page (0.45.7): about a dozen steady workdays to "Relied on" as an officer; side jobs add +2 a day at most (worksSideXp)   // the page's; with section 17's real faults in (0.44.10): steady 45-48 by the end of Day 8, a very busy player 35 at the end of Day 4
+// Pillar 5 Step 5 (S5-1, B1 for lead 39; plans/p5-step5-spec.html section 3, plan v3.1): the Senior Officer's rows, the
+// calibration rig and the Tier 3 bands, behind P5_STEP5 (section 13). Each row is inert until its sub-block registers
+// WORK_MECH[id] (24u t3; 24v m19; 24w m18; 24x m20; 24k's slot p4, p5, p9, mys; ps: S5-1 turn 2). Off: nothing here.
+if (P5_STEP5) {
+  CAREER_LADDER.push(
+    { id: 'ps', name: 'Power safety', size: 'small', day: 12, tier: 2, rank: 'officer', needs: null, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] },   // a watch-only lesson at the Deck 6 port junction (spec question 2)
+    { id: 't3', name: 'Your Tier 3 test job', size: 'big', day: 15, tier: 2, rank: 'officer', needs: [{ rep: 'relied' }, { trained: 'ps' }], by: ['calder'], where: { deck: 5, room: 'o' }, job: 'test', stages: [{ uses: 0 }] },   // 24u (S5-2)
+    { id: 'm19', name: 'Power and relays', size: 'big', day: 17, tier: 3, rank: 'senior', needs: { trained: 't3' }, by: ['calder'], where: { deck: 1, room: 'u' }, tool: 'tester', stages: [{ uses: 0 }, { uses: 3 }, { uses: 6 }] },   // 24v (S5-3): relays; conduit runs; the batteries' balance (Step 6's P6)
+    { id: 'p4', name: 'Which gauge is lying?', size: 'small', day: 17, tier: 3, rank: 'senior', needs: null, by: ['torres-zeke'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
+    { id: 'm18', name: 'Shutdowns', size: 'big', day: 18, tier: 3, rank: 'senior', needs: { trained: 'm19' }, by: ['calder'], where: { deck: 6, room: 'j' }, stages: [{ uses: 0 }] },   // 24w (S5-4)
+    { id: 'p5', name: 'Follow the line', size: 'small', day: 18, tier: 3, rank: 'senior', needs: { trained: 'm18' }, by: ['calder'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
+    { id: 'm20', name: 'The sensor array', size: 'big', day: 19, tier: 3, rank: 'senior', needs: null, by: ['mori', 'calder'], where: { deck: 2, room: 'A' }, tool: 'arrayrig', stages: [{ uses: 0 }, { uses: 2 }, { uses: 4 }] },   // 24x (S5-5): one sensor; a full sweep; readings for Survey
+    { id: 'p9', name: 'The clash', size: 'small', day: 19, tier: 3, rank: 'senior', needs: null, by: ['calder'], stages: [{ uses: 0 }] },   // 24k's slot (S5-6)
+    { id: 'mys', name: 'The old-mysteries board', size: 'small', day: 21, tier: 3, rank: 'senior', needs: null, by: ['calder'], where: { deck: 5, room: 'w' }, stages: [{ uses: 0 }] });   // 24k's slot (S5-6)
+  WORK_TOOLS.arrayrig = { name: 'the calibration rig', mech: 'm20', wearPerUse: 0 };   // carried (calrig is the machine shop's test rig)
+  WORK_BANDS[3] = WORK_BANDS[2].map(b => b.slice());     // a stand-in until S5-1 turn 2 sets the Tier 3 numbers with career_check (a steady Senior "Trusted" by Day 19)
+}
 const BAND_WORD = { new: 'New', steady: 'Steady', reliable: 'Reliable', trusted: 'Trusted', relied: 'Relied on' };
 const WORK_XP = { service: 1, repair: 2, overhaul: 3, missed: -3, abandoned: -2 };
 const WORKS_RIGHT_FROM = 5;                              // "right first time" counts from Day 5 (the scanner)
@@ -58457,6 +58496,43 @@ onSim('job', n => {                                      // B: Torres comes by a
     if (a && a.h && Math.hypot(a.x - P.x, a.z - P.z) <= CHATTER_NEAR) { const l = worksVoice('torres-zeke', 'train.t2.torres'); if (l) simTimeout(() => worksSayAll('torres-zeke', l), 5600); } } catch (e) { /* not in play */ }
 });
 // ---- end of slot: Works career engineer ----
+
+// ---------------------------------------------------------------------
+// 24u THE LATER PROMOTIONS (Pillar 5 Steps 5-6, the Works career engineer; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1 plans/pillar5-steps56-plan.html).
+// S5-2, behind P5_PROMO3: the Senior Officer promotion (the offer, the Tier 3 test on a Deck 6 junction, the result in
+// Calder's office at 08:15, the bar in the observation room, the toast). Its save: SHIP.works.pu. Step 6 adds the Engine
+// Specialist here too. Empty until S5-2 (S5-1, the skeleton).
+// ---------------------------------------------------------------------
+
+// ---- slot: Later promotions (section 24u). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Later promotions ----
+
+// ---------------------------------------------------------------------
+// 24v POWER AND RELAYS (M19, mechanics seat A; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1 plans/pillar5-steps56-plan.html).
+// S5-3, behind P5_M19: WORK_MECH.m19, the relay room on Deck 1 (u), the batteries on Deck 5 (y), the conduit tester. Empty
+// until S5-3 (S5-1, the skeleton).
+// ---------------------------------------------------------------------
+
+// ---- slot: Power and relays (section 24v). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Power and relays ----
+
+// ---------------------------------------------------------------------
+// 24w SHUTDOWNS (M18, mechanics seat B with the sim engineer; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1 plans/pillar5-steps56-plan.html).
+// S5-4, behind P5_M18: WORK_MECH.m18, the Works app's Shutdowns tab, bookings settled at 22:00 (SHIP.works.sd), the
+// branches (SHUT_BRANCHES), the planner's hook sdPlanShut. Empty until S5-4 (S5-1, the skeleton).
+// ---------------------------------------------------------------------
+
+// ---- slot: Shutdowns (section 24w). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Shutdowns ----
+
+// ---------------------------------------------------------------------
+// 24x THE SENSOR ARRAY (M20, mechanics seat A; plans/p5-step5-spec.html on claude/p5-specs, plan v3.1 plans/pillar5-steps56-plan.html).
+// S5-5, behind P5_M20: WORK_MECH.m20, Deck 2's array room (A) with Hana Mori, the calibration rig (arrayrig), "Pick the
+// star" (SHIP.works.ar). Empty until S5-5 (S5-1, the skeleton).
+// ---------------------------------------------------------------------
+
+// ---- slot: Sensor array (section 24x). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- end of slot: Sensor array ----
 
 
 // =====================================================================
