@@ -175,3 +175,8 @@ counts the test only once found. cadet_test vs 0.93.0 df8d58b9 ALL IDENTICAL; da
 (promo queue now leads with promo:testday:9 and promo:test:9; test passed first try).
 Note: the build master is BM18, session_01A3S2VBMYmTt2wCZa8ej7XR (BM17 retired). 0.93.1 merged as claude/staging-0.93.1
 0a2fc617; send verdicts to BM18 and the lead.
+
+### RV16 arrows_d_check S3 fix: PASS at claude/fix-promo-arrow 350b860b (test only; game = 0.93.1 0a2fc617, 6cd54ab9...)
+New check: exit 0, S3 "Your Tier 2 test job", pointer p:board:lesson:t2 "Take it". Old check on the same game: the two S3
+FAILs CR6 saw. Optional: S3 takes its expected label from boardLesson() itself; since this step is always Day 9 09:05 it
+could expect "Your Tier 2 test job" outright (stronger).
