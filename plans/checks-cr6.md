@@ -1,5 +1,40 @@
 # CR6 check results
 
+## 0.93.1 full round (2026-10-26): all 11 OK, plus CR3's 3 (OK after RV16's check fix)
+
+- **Build:** `claude/staging-0.93.1` 0a2fc617 (RV16's promo-arrow fix; the Tier 2 test arrow names the job only once
+  it's on the board), game sha256 `6cd54ab97f4290aa5665ff40b5db35d0abc485dc8401d011084dfaa2f35a8eee` (matches BM18's).
+  Later b957b92d (arrows_d_check fix only, game byte-identical). OLD df8d58b9 (0.93.0).
+- Two lanes: my share in /tmp/work-cr6, CR3's three in /tmp/work-cr6b (so join and tiles ran beside controller_check,
+  not alone; both passed).
+
+| Check | Result | Key lines |
+|---|---|---|
+| check_fast.sh | OK (exit 0, 291 s) | `QUICK CHECK OK in 291 s` |
+| stories_check | OK (exit 0, 61 s) | `STORIES CHECK OK` |
+| mech_check | OK (exit 0, 750 s) | `MECH CHECK OK` |
+| bigevents_check | OK (exit 0, 198 s) | `BIGEVENTS CHECK OK` |
+| join_check | OK (exit 0, 359 s) | `JOIN CHECK OK` |
+| tiles_check | OK (exit 0, 166 s) | `ALL OK` |
+| disc_check | OK (exit 0, 471 s) | `ALL OK` |
+| food_check 1 7 | OK (exit 0, 143 s) | `FOOD CHECK OK` |
+| food_check 11 4 | OK (exit 0, 93 s) | `FOOD CHECK OK` |
+| clothes_check | OK (exit 0, 125 s) | `ALL OK` |
+| fridays_check | OK (exit 0, 1126 s) | `FRIDAYS CHECK OK` |
+| arrows_f_check (taken from CR3) | OK (exit 0, 54 s) | `arrows_f_check: OK` |
+| controller_check minus reach (taken from CR3) | OK (exit 0, 2853 s) | `CONTROLLER CHECK OK` |
+| arrows_d_check, 0a2fc617's check (taken from CR3) | **FAIL** (exit 1, 120 s) | 2 lines in S3 (below); stale check |
+| arrows_d_check, b957b92d's check | OK (exit 0, 86 s) | `arrows_d_check: OK` |
+
+### arrows_d_check S3: stale check, fixed by RV16 (b957b92d)
+```
+FAIL S3: clocked in, a job to take: "Take a job at the board" at level 4 (Your Tier 2 test job, {'id': 'shift:job:9', ...})
+FAIL S3: on the board, the pointer on Take it ({'up': True, 'now': 'p:board:lesson:t2', 'label': 'Take this one: your Tier 2 test job', 'text': 'Take it'})
+```
+- Same check on OLD df8d58b9's game: exit 0, S3 "Take a job at the board", pointer p:board:take. So the 0.93.1 game
+  change caused the difference; BM18 and RV16 judged the game right and the check stale. b957b92d's check passes on
+  the same game (S3 now reads the Tier 2 lesson).
+
 ## 0.93.0 full round (2026-10-25): all 11 OK, plus 2 taken from CR5 (OK)
 
 - **Build:** `claude/staging-0.93.0` 4f1e52bf (sound and music, section 27; FX17's reserved-job fix), `starship-cadet.html`
