@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.2-s.3
+   STARSHIP CADET: CSV Wren                           build 0.93.2-s.4
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -9257,7 +9257,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.2-s.3';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-s.4';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -40124,7 +40124,7 @@ const FRI_ADDRESSES = {
       {"id": "1m1aw7p", "who": "vance", "text": "Settle, please. The Captain.", "pose": "nod"},
       {"id": "85elit", "who": "marrow", "text": "Afternoon, everyone. Our fourth Friday. For some of you, that's every Friday you've had."},
       {"id": "mh0fnv", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, a comet.", "pose": "gesture", "if": ["!swap"]},
-      {"id": "wiak8h", "who": "marrow", "text": "A month ago {me} came aboard. Since then: the Line, a storm, our first guests, and a comet.", "pose": "gesture", "if": ["swap"]},
+      {"id": "1ocsrbc", "who": "marrow", "text": "A month since {me} came aboard: the Line, a storm, our first guests, a comet.", "pose": "gesture", "if": ["swap"]},
       {"id": "1qqedke", "who": "marrow", "text": "The storm crew's roster is still pinned up in the tea corner. I read it some evenings.", "tone": "warm", "if": ["band:smooth"]},
       {"id": "1dirk5", "who": "marrow", "text": "There's still a scorch mark in the relay room. Chief Calder wants to keep it. So do I.", "if": ["band:bumpy|rough"]},
       {"id": "1qsc8i6", "who": "marrow", "text": "{me}: a junior four weeks ago, an Engine Specialist today. Rare.", "to": "you", "tone": "warm", "if": ["myrank:specialist"]},

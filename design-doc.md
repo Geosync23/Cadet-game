@@ -719,7 +719,7 @@ Whatever you saw or missed, the crew retell it in chatter for a day or two, with
   - **Monday Day 22, 21:30: comet viewing** (the user, 2026-10-26: earlier than first planned, Friday Day 26; EP1's `plans/events-plan-2.html` Part A has its hours), the evening after Theo's send-off and Basil's arrival.
   - **Days 27-30: A Veyli vessel needs help**, a new short event after Calder's question (EP1's Part C; not built yet: a parked calendar row).
   - **The new hand's tea after a rotation is removed** ("this one can go").
-  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "the Line, a storm, our first guests, and a comet".
+  - **The Friday addresses** on Days 19 and 26 change with it: Day 19 "our guests left this morning", Day 26 "the Line, a storm, our first guests, a comet".
 - **Before the swap** (kept as history): Tuesday Day 16, 21:30, comet viewing; Days 26-30 the diplomatic visit as a weekend finale (Day 22 named as next week's business, Friday 26 the warning after Calder's question, Saturday 27 the greeting, Sunday 28 one dinner, Monday 29 the farewell).
 
 Build order: the ion storm first, then Crossing the Line, the visit and the comet (the order they come in, since the swap). Each event is built switched off, then switched on. **The ion storm update is built and switched on** (2026-10-21, with the user's yes): the events base and the storm's update together, Days 11-15 of a new game. **Crossing the Line is built and switched on** (the user, 2026-10-23, via lead 31; 0.92.1): Saturday Day 6 to Monday Day 8 of a new game, the oath and the supper on Sunday Day 7; it follows the events switch. Pillar 5 steps 5-6 come later and fit around these days.
