@@ -152,7 +152,7 @@
 ? flag:end.stay
 - The mess is full and loud. Every few minutes someone leans over to say they're glad you're staying.   #warm
 ?
-- The mess is full, every bench taken. Someone hands you a plate, and someone else budges up to make you room.   #warm
+- The mess is full again, every bench taken. Someone budges up, and someone else passes you a plate.   #warm
 // the toasts (tap lines at the supper; card lines, 90 at most)
 == event.crossingBack.gather.lineSupper.here
 - To the reach, and to everyone who crossed it twice.   #warm
