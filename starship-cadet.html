@@ -9448,6 +9448,7 @@ const P926_TRADS = true, P926_NEW = new Set(['six-weeks-aboard', 'twelve-weeks-a
 const EV_SWAP_ON = URL_FLAGS.has('evswap');            // 0.93.2 (FX22b; plans/trad-variety-pitch.html section 5, option A): the diplomatic visit before the comet (section 18's 'event swap' block); off: the order as before
 const EV_COMET_ON = true;                                 // 0.93.2 (FX25; plans/events-plan-2.html Part A, the user's yes): the comet viewing on Monday Day 22, 21:30-22:40 (section 18's 'comet' block, with the events base on); false: the game before it
 const P926_APPT = true;                 // 0.92.6 item 9 (FX22; plans/patch-0.92.6.md): appointments as small traditions, each with its scene, and a real talk at every appointment; off: none of it (the game as 0.92.5)
+const EV_VESSEL_ON = URL_FLAGS.has('evvessel');           // A Veyli vessel needs help, Days 27-30 (VB1 for lead 39; plans/veyli-vessel-spec.html, EP2): section 18's 'veyliVessel' block with the events base on (#evvessel previews it); false: the game before it
 // save slots (0.93.2, FX27; the user's yes, 2026-10-26; the Saves app, section 19): three games per link type (Playtest,
 // Dev) and browser. Slot 1 is the save's old name (SAVE_BASE), so a save from before slots is Slot 1, untouched; slots 2
 // and 3 add '-2' and '-3'. The slot being played is kept under SAVE_BASE + '-slot' (read here, once: switching reloads
@@ -10062,7 +10063,7 @@ function guestTrim(p, d, segs, spot) {
   if (aboardAllDay(p, d)) return segs;
   const B = (d - 1) * 1440, away = (from, to) => ({ from, to, act: 'away', deck: 0, type: null, placeId: null });
   if (!aboard(p, d)) return [away(B, B + 1440)];
-  const arriving = guestStay(p, d) === 'arrive', cut = B + (p.guest ? GUEST_AT : arriving ? ROTA_ON : ROTA_OFF), out = [];   // crew: off at 15:00, on at 17:40
+  const arriving = guestStay(p, d) === 'arrive', cut = B + (p.guest ? (typeof vesselGuestAt === 'function' && vesselGuestAt(p, arriving)) || GUEST_AT : arriving ? ROTA_ON : ROTA_OFF), out = [];   // the Veyli vessel's Taavek: 09:30 off the Tern, 15:00 home (section 18's slot 'Vessel builder'; null while off)   // crew: off at 15:00, on at 17:40
   const k = arriving && !p.guest && typeof rotTernIndex === 'function' ? rotTernIndex(p, d) : -1;
   if (k >= 0) {                                          // ROT_TERN: out of the Tern's aisle one every 3 minutes, down the ramp to a crowd spot (rotTernHold's)
     const t0 = cut + 3 * k, end = B + ROT_TERN_END;
@@ -43145,6 +43146,7 @@ function eventsTick() {
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
   if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
   if (EV_COMET_ON && COMET) cometTick(now);              // the comet's notices, the rooms' talk, the naming card and the knot, in play (slot 'Comet builder')
+  if (EV_VESSEL_ON && VESSEL) vesselTick(now);           // A Veyli vessel needs help: the Saturday address, the turns' swell, in play (slot 'Vessel builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -43816,6 +43818,78 @@ if (EV_COMET_ON && EVENTS_ON) {
   SHIP_EVENTS.comet.dressing = { warning: dressAtM(1260, 1290), onset: dressAtM(1290, 1320).concat(dressAtM(1320, 1360)), resolution: dressAtM(1360, 1365) };
   SHIP_EVENTS.comet.settleTraces = ['cometCord'];          // the knotted cord stays on the bow glass rail for good (from 22:40)
   SHIP_EVENTS.comet.moments.push({ id: 'cometTurnBack', phase: 'resolution', at: [0, 1360], where: 'shipwide', feel: ['cometTurnBack'], len: 20 });   // the helm brings her back onto her course
+}
+// ---- A Veyli vessel needs help (VB1 for lead 39, V-1; plans/veyli-vessel-spec.html by EP2, from EP1's plans/events-plan-2.html
+// Part C). Behind EV_VESSEL_ON (section 13; ?evvessel previews it) with the events base on; off: the game before it (the
+// swap's calendar row passed over, or no row). The coda after the career, Saturday Day 27 to Tuesday Day 30: a small Veyli
+// ship has lost its coolant pump and asks for company. Saturday the call, the news at breakfast, the Captain's address
+// at 08:00 and the turn toward it at 08:30, Calder's parts-chain sheet at 10:00; Sunday the Tern goes across and brings
+// back its engineer Taavek (09:30, the foot of the ramp), the round one at the bench, the parts chain at 13:00; Monday
+// making the impeller, the test fit, Taavek home at 15:00 and the engine lights at 17:40; Tuesday it leaves, the
+// Captain's thanks, your commendation (C1) and Taavek's letter. No threads, no score. The functions are in the slot
+// 'Vessel builder' (end of section 18); its fixed data is VESSEL (vesselData), a var
+if (EV_VESSEL_ON && EVENTS_ON) {
+  const w = (k, c) => evWord('event.veyliVessel.' + k, c), V = VESSEL = vesselData();
+  { const r = EV_CALENDAR.find(x => x.id === 'veyliVessel');   // the swap's row; without the swap, added here in day order
+    if (r) r.day = V.day; else { const i = EV_CALENDAR.findIndex(x => x.day > V.day); EV_CALENDAR.splice(i < 0 ? EV_CALENDAR.length : i, 0, { id: 'veyliVessel', day: V.day, kind: 'short' }); } }
+  if (!EVENT_ORDER.includes('veyliVessel')) EVENT_ORDER.push('veyliVessel');
+  SHIP_EVENTS.veyliVessel = {
+    title: 'A Veyli vessel needs help', days: 4, threads: [], pause: [], keep: ['birthday'],
+    // C1 (VESSEL.commend, vesselData): a commendation by the usual rule (two of its jobs, or one and a meeting), the
+    // letter a Mail on Tuesday at 09:30 (commendAt); false: never one, like the comet
+    commend: V.commend, ...(V.commend ? { commendAt: [3, 570] } : {}),
+    commendation: evBankMail('event.veyliVessel.mail.commendation', { subject: 'Commendation: the Veyli ship',
+      body: 'For your part in keeping the Veyli ship company: meeting their engineer, the parts chain and the round one you made with them. Noted on your record with thanks. Chief Calder says the part spins true.' }),
+    // Taavek aboard Sunday 09:30 to Monday 15:00 (section 14's guestTrim asks vesselGuestAt for the minutes): arriving the
+    // day after the call, one day's stay
+    guestsArrive: 1, guestStay: 1,
+    phases: [{ id: 'warning', at: [0, 370] }, { id: 'onset', at: [1, 480] }, { id: 'escalation', at: [2, 560] },
+      { id: 'resolution', at: [3, 555], clears: true }, { id: 'afterglow', at: [3, 560], clears: true }],
+    systems: { warning: { effects: ['skyVessel'] } },    // the little ship off the bow (C2, VB2's slot 'Vessel sky'; looks only), to the all-clear
+    routines: {}, galley: {},
+    status: { warning: c => w('status.warning', c) || 'A Veyli ship has asked for company', onset: c => vesselStatus('onset', c), escalation: c => w('status.escalation', c) || 'Taavek is aboard: the part today',
+      resolution: c => w('status.resolution', c) || 'The Veyli ship is under way', afterglow: c => w('status.afterglow', c) || 'The Veyli ship is under way' },
+    // the news (section 20 spreads it): at breakfast from Comms and Command, then everyone; the retellings Tuesday and
+    // Wednesday. The writers' event.veyliVessel.news.coming.1-8 and told.1-8 (vesselWords), else these
+    news: [
+      { id: 'vessel-coming', from: 'saruth', phase: 'warning', at: [0, 420], seed: ['dept:comms', 'dept:command', 'dept:helm'], weight: 3,
+        lines: () => vesselWords('news.coming', 1, 4, ['A Veyli ship\'s in trouble. Wen picked it up in the night.', 'Their pump\'s gone. They\'re drifting a day off our course.', 'Saruth was in comms at six. At six.', 'The Captain\'s coming in. On a Saturday. That\'s how you know.']) },
+      { id: 'vessel-coming-all', phase: 'warning', at: [0, 450], seed: ['all'], weight: 1,
+        lines: () => vesselWords('news.coming', 5, 8, ['They didn\'t ask for help, apparently. They asked for company.', 'If it\'s a pump, it\'s Works. Somebody tell the Chief.']) },
+      { id: 'vessel-told', phase: 'afterglow', at: [3, 720], seed: ['all'], weight: 2,
+        lines: () => vesselWords('news.told', 1, 8, ['Three slow flashes. Saruth says it means company kept.', 'Thirty of us in that chain. My arms still know about it.', 'The part ran true first time. Works will be unbearable for a week.']) },
+    ],
+    moments: [
+      // the turn toward the little ship, felt everywhere (the comet's, reused: the stars slide across every window and a soft
+      // swell under the hum), and back onto her course on Tuesday as it leaves
+      { id: 'vesselTurn', phase: 'warning', at: [0, 510], where: 'shipwide', feel: ['cometTurn'], len: 20 },
+      { id: 'vesselTurnBack', phase: 'afterglow', at: [3, 540], where: 'shipwide', feel: ['cometTurnBack'], len: 20 },
+    ],
+    // the scenes with a place and a cast (section 14 plans the named there, called in on a day off: the Captain on
+    // Saturday, Calder on Sunday, Lindqvist on Monday). Their arrows, rings and words are V-2's (the slot); until then
+    // stand-in scripts (vesselScripts, the slot)
+    meetings: [
+      { id: 'vesselCall', phase: 'warning', at: [0, 540], len: 20, where: { venue: 'observation', deck: 1, room: /^Observation room$/ }, script: 'vessel.captain', who: ['marrow'] },   // after her breakfast: the Captain at the glass as the Wren comes round
+      { id: 'vesselRamp', phase: 'onset', at: [1, 570], len: 20, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'vessel.ramp', who: ['calder', 'torres-zeke', 'lindqvist-isak'] },
+      { id: 'vesselHome', phase: 'escalation', at: [2, 900], len: 20, where: { venue: 'shuttle-bay', deck: 5, room: /^Shuttle bay$/ }, script: 'vessel.home', who: ['calder', 'lindqvist-isak'] },
+    ],
+    // the Captain's two addresses, Saturday 08:00 and Tuesday 09:15 (VESSEL.addressAt, sent by vesselTick: not phases'
+    // starts, and their Mail copy is the writers' record Mail, mail.address.sat|tue). The writers' address.sat|tue
+    // ("marrow: line" lists, Saruth reading the Veyli ship's thanks on Tuesday), else these
+    address: {
+      sat: ['This is the Captain. In the night a small Veyli ship asked us for company. Its coolant pump has failed and it is drifting, safe, but alone.',
+        'We were guests in their sky for a month. Tonight we can be good ones. At half past eight we turn toward them. Marrow out.'],
+      tue: ['This is the Captain. The Veyli ship is under way again, on its own engine, with a part made in our Works bay.',
+        'Envoy Saruth: They say the Wren kept company well. Their engine is warm.', c => 'Thank you, Works, and the chain. And ' + c.you + ', who met their engineer. Marrow out.'] },
+    mail: {
+      vanceTomorrow: { at: [0, 1080], from: 'Commander Teo Vance', ...evBankMail('event.veyliVessel.mail.tomorrow', { subject: 'Tomorrow: the Veyli engineer',
+        body: c => 'Times for tomorrow. 08:00 the Tern goes across to the Veyli ship. 09:30 it comes back with their engineer, Taavek, who stays with us until Monday afternoon: the foot of the ramp, shuttle bay, Deck 5 (' + c.you + ', you\'re meeting them, as Chief Calder said). 13:00 the parts chain from Main storage to the Tern. Everyone else as usual.' }) },
+      taavekLetter: { at: [3, 720], from: 'Taavek', ...evBankMail('event.veyliVessel.mail.letter', { subject: 'From the round one\'s ship',
+        body: 'Hello. Taavek. The round one spins. Very good. The ship is warm, all of us are warm. Thank you for meeting. Thank you for making. The sketch is for your shelf. You are the one who meets. Taavek.' }) },
+    },
+    traces: { smooth: [], bumpy: [], rough: [] },
+    record: vesselRecord,                                  // your Record's line (section 18's eventRecord): who you met, what you made, the glass
+  };
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
@@ -46036,6 +46110,112 @@ function cometMusicOn() {
   const here = deckDef.num + '|' + roomAt(...player.here()); return COMET.rooms.some(r => r[0] === here);
 }
 // ---- end of slot: Comet builder ----
+// ---- slot: Vessel builder (section 18; VB1, A Veyli vessel needs help V-1 to V-4, plans/veyli-vessel-spec.html). New code of this seat's goes here ----
+// VESSEL: the event's fixed data, made by its data block at load (vesselData), or left undefined while EV_VESSEL_ON or
+// the events base is off. A var, so section 14 can ask it before section 18 has run (it reads undefined then). Nothing
+// here calls R(); the crew's planner reads only VESSEL's fixed data, the calendar and the roster
+var VESSEL;
+function vesselData() {
+  return {
+    day: 27,                                               // Saturday Day 27, the day after Calder's question (EP1's Part C)
+    // the user's questions (answered 2026-10-26, via lead 39), each a one-line switch:
+    commend: true,                                         // C1, the user's yes (2026-10-26): a commendation by the usual rule (false: no score, like the comet)
+    sky: true,                                             // C2, the user's yes: the little ship off the bow, Saturday 14:00 to Tuesday 09:05 (VB2's slot 'Vessel sky'; false: words only, Saruth reads the signal)
+    rampWait: 60,                                          // C3, the user's answer: not at the ramp at 09:30, Taavek and Calder wait for you up to an hour, then Zeke stands in and you meet Taavek at the bench (0: Zeke stands in from 09:35, the spec's first choice)
+    guest: 'taavek', arrive: 570, leave: 900,              // Taavek off the Tern Sunday 09:30, back aboard it Monday 15:00 (section 14's guestTrim, vesselGuestAt)
+    addressAt: { sat: [0, 480], tue: [3, 555] },           // the Captain's addresses: Saturday 08:00, Tuesday 09:15 (the resolution's minute)
+    turns: { vesselTurn: [0, 510], vesselTurnBack: [3, 540] },   // the turn there (Saturday 08:30) and back (Tuesday 09:00): the comet's soft swell, its sound too
+    late: 28,                                              // a save first loaded with the vessel on from this day: passed over for good (EV_LATE 'skip')
+  };
+}
+// section 14's guestTrim: the minute an event guest comes aboard (arriving) or leaves on their day, when it isn't
+// GUEST_AT's 10:00. Taavek off the Tern Sunday 09:30, home on it Monday 15:00. null for anyone else, or while off. Pure
+function vesselGuestAt(p, arriving) { return VESSEL && p && p.id === VESSEL.guest && p.event === 'veyliVessel' ? (arriving ? VESSEL.arrive : VESSEL.leave) : null; }
+// the onset's status line: the Tern on its way until Taavek is aboard. What you see only
+function vesselStatus(ph, c) {
+  const e = SHIP.event, t = shipNow(), in_ = e && t >= (e.startDay - 1 + 1) * 1440 + VESSEL.arrive;
+  return in_ ? evWord('event.veyliVessel.status.onset', c) || 'Taavek is aboard' : evWord('event.veyliVessel.status.onset.early', c) || 'The Tern brings the Veyli engineer at 09:30';
+}
+// the passed-over rule for a late save: the day this game first loaded with the vessel on (SHIP.vesselFrom, set once,
+// saved only while on, like SHIP.evFrom); from VESSEL.late on, the vessel is passed over for good unless it already ran
+// or runs. Pure (bigevents_check calls it)
+function vesselLate(from, log, current) {
+  return !!VESSEL && Number.isInteger(from) && from >= VESSEL.late && !(log || []).some(l => l.id === 'veyliVessel') && !(current && current.id === 'veyliVessel');
+}
+if (EV_VESSEL_ON && EVENTS_ON && VESSEL) {
+  SHIP.vesselFrom = SAVED && SAVED.ship && Number.isInteger(SAVED.ship.vesselFrom) ? SAVED.ship.vesselFrom : SHIP.time ? SHIP.time.day : 0;
+  SAVE_EXTRA.push(s => { if (SHIP.vesselFrom != null) s.ship.vesselFrom = SHIP.vesselFrom; });
+  if (vesselLate(SHIP.vesselFrom, SHIP.eventLog, SHIP.event)) EV_SKIPPED.add('veyliVessel');
+  if (typeof onSim === 'function') onSim('newGame', () => { SHIP.vesselFrom = 0; });   // (the base's newGame clears EV_SKIPPED)
+  SIM_ADVANCE.push((from, to) => vesselTick(to, true));
+  vesselScripts();                                       // the scenes' stand-in scripts, the head writer's when baked
+}
+// the writers' words for the vessel: a list key's lines (event.veyliVessel.<key>, all of it, or <key>.<a> to <key>.<b>
+// for numbered keys), else alt. What you see and hear only
+function vesselWords(key, a, b, alt) {
+  if (typeof LINES === 'undefined') return alt;
+  const one = k => Array.isArray(LINES['event.veyliVessel.' + k]) ? LINES['event.veyliVessel.' + k].map(x => x.text).filter(t => typeof t === 'string') : [];
+  const out = a == null ? one(key) : Array.from({ length: b - a + 1 }, (_, i) => one(key + '.' + (a + i))).flat();
+  return out.length ? out : alt;
+}
+// an address's lines as said: the writers' "marrow: line" list (the Captain's own words bare, anyone else's with their
+// name: "Envoy Saruth: ..."), else the data's; {me} filled
+function vesselAddressLines(key, c) {
+  const L = vesselWords('address.' + key), def = SHIP_EVENTS.veyliVessel;
+  const raw = L ? L.map(t => { const i = t.indexOf(': '), who = i > 0 ? t.slice(0, i) : 'marrow', p = who !== 'marrow' && evPerson(who); return (p ? p.name + ': ' : '') + (i > 0 ? t.slice(i + 2) : t); }) : def.address[key].map(x => evText(x, c));
+  return raw.map(t => evFill(t, c));
+}
+// the Captain's address (the base's captainAddress: the banner on every deck, ADDRESSES), with the writers' record
+// Mail (mail.address.<key>) in place of its plain "All hands" copy when they've written one
+function vesselAddress(key, t, quiet) {
+  const e = SHIP.event, c = evCtx(e, t), m = evBankMail('event.veyliVessel.mail.address.' + key, null), send = typeof mailSend === 'function' ? mailSend : null;
+  if (m && send) mailSend = () => {};                    // (captainAddress's own copy, swapped for the record Mail)
+  try { captainAddress({ lines: vesselAddressLines(key, c), at: t, quiet }); } finally { if (m && send) mailSend = send; }
+  if (m && send) mailSend({ at: t, from: 'Captain Odile Marrow', subject: m.subject, body: evText(m.body, c), quiet: true });
+}
+// in play (from eventsTick once a ship minute) and after a sleep or skip (quiet): the Captain's two addresses at their
+// minutes (the banner, or quietly the Mail), and the comet's swell under the hum as the Wren turns, with the bridge's
+// notice. Flags in the running event's e.mine (saved with it): 'addr:<key>', 'snd:<moment>'
+function vesselTick(now, quiet) {
+  const e = SHIP.event, def = SHIP_EVENTS.veyliVessel; if (!VESSEL || !e || e.id !== 'veyliVessel' || !def) return;
+  for (const [key, at] of Object.entries(VESSEL.addressAt)) {
+    const t = evBeatAt(e.startDay, at); if (now < t || e.mine['addr:' + key]) continue;
+    e.mine['addr:' + key] = 1; vesselAddress(key, t, !!quiet || now - t > 5);
+  }
+  if (quiet) return;
+  for (const [id, at] of Object.entries(VESSEL.turns)) {
+    const t = evBeatAt(e.startDay, at); if (now < t || e.mine['snd:' + id]) continue;
+    e.mine['snd:' + id] = 1; if (now - t >= 3) continue;
+    sndFx('cometTurn', { long: 22 });                    // section 27's FX.cometTurn (SD1's), the comet's
+    toast('Bridge', evWord('event.veyliVessel.notice.' + (id === 'vesselTurn' ? 'turn' : 'turnBack')) || (id === 'vesselTurn' ? 'The Wren is turning toward the Veyli ship.' : 'The Veyli ship is under way. The Wren is turning back onto her course.'));
+  }
+}
+// the scenes' scripts until the head writer's are baked (content/meetings vessel.*: a baked one is kept as it is).
+// V-1 stand-ins: the Captain at the glass after the turn, the ramp, Taavek going home; V-2 makes them staged scenes
+function vesselScripts() {
+  const W = (k, fb) => evWord('event.veyliVessel.' + k) || fb, put = (id, sc) => { if (!MEETING_SCRIPTS[id]) MEETING_SCRIPTS[id] = sc; };
+  put('vessel.captain', { title: 'The Captain at the glass', from: 'Captain Odile Marrow', gist: 'A small Veyli ship called in the night: its coolant pump has failed. It asks for company, not rescue. The Captain has turned the Wren to keep it company.',
+    lines: [{ who: 'marrow', text: W('call.1', 'My day off, and the Veyli call at half five. Envoy Saruth read it to me twice.'), pose: 'gesture' },
+      { who: 'marrow', text: W('call.2', 'A small ship. Its pump has failed. They don\'t want a tow. Saruth says a tow is a story, and company is a kindness.') },
+      { who: 'marrow', text: W('call.3', 'So we keep them company. There, coming round off the bow, in a few hours. Chief Calder will want hands.'), to: 'you' }] });
+  put('vessel.ramp', { title: 'Off the Tern', from: 'Chief Ines Calder', gist: 'Taavek, the Veyli ship\'s engineer, came down the Tern\'s ramp with a crate and their broken pump\'s part.',
+    lines: [{ who: 'taavek', text: W('ramp.1', 'Hello! Taavek. Engineer. Yes. The round one. Broken. Very.'), pose: 'gesture' },
+      { who: 'calder', text: W('ramp.2', 'Welcome aboard the Wren. Let\'s get that round one to the bench.') }] });
+  put('vessel.home', { title: 'Taavek goes home', from: 'Chief Ines Calder', gist: 'Taavek went home on the Tern with the new part.',
+    lines: [{ who: 'taavek', text: W('home.1', 'Good. Very good. The round one goes home.'), pose: 'wave' },
+      { who: 'calder', text: W('home.2', 'Safe across. Tell your ship the Wren says hello.') }] });
+}
+// your Record's line (eventRecord asks the event's `record`): the part, the ramp, the chain. Words:
+// event.veyliVessel.record.* (the writers'), else these. The flags are V-2 to V-4's (e.mine, kept in the log; 'vessel:part' VB2's too)
+function vesselRecord(l) {
+  const m = l.mine || {}, W = (k, fb) => evWord('event.veyliVessel.record.' + k) || fb, out = [];
+  if (m['vessel:part']) out.push(W('done', 'Kept a Veyli ship company, Days 27-30; made its part with Taavek.'));
+  if (m['met:vesselRamp'] || m['vessel:met']) out.push(W('met', 'Met Taavek at the foot of the Tern\'s ramp.'));
+  if (m['vessel:chain']) out.push(W('chain', 'Passed crates in the parts chain.'));
+  const c = SHIP.commendations.find(x => x.event === 'veyliVessel' && x.day >= l.startDay);
+  return out.join(' ') + (c ? (out.length ? ' ' : '') + 'Commended by the Captain.' : '');
+}
+// ---- end of slot: Vessel builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
 // Behind P926_APPT (section 13; URL flag 'appt'). The user: "Appointments work almost exactly the same as ship traditions
 // but are usually one on one or very small group." Words: content/appointments/ (SW2's, CS1 passed), baked into APPT_WORDS.

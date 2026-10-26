@@ -1183,5 +1183,76 @@ if re.search(r'^const EV_COMET_ON = true;', _src, re.M):
         if g.errors: fail(f"console (comet off): {g.errors[:4]}")
         g.close()
 
+# A Veyli vessel needs help (VB1, V-1; plans/veyli-vessel-spec.html section 6), on paper with the events base on, in a
+# copy with EV_VESSEL_ON switched on when the build has it off (its URL-flag line), twice from a clean slate (the
+# calendar's earlier events logged): due Saturday Day 27; the phases at their minutes (warning 06:10, onset Sunday 08:00,
+# escalation Monday 09:20, resolution Tuesday 09:15, afterglow 09:20, the end at midnight Tuesday); the Captain's two
+# addresses (Saturday 08:00, Tuesday 09:15), Vance's Mail Saturday 18:00 and Taavek's letter Tuesday 12:00; Taavek aboard
+# only Sunday 09:30 to Monday 15:00; the Captain, Calder and Lindqvist called in on their days off (Saturday, Sunday,
+# Monday); the commendation rule (C1): none with nothing done, one at Tuesday 09:30 with two of its jobs; no score; and
+# with the switch off nothing at all
+VESSEL_JS = r"""(() => {
+  if (typeof EV_VESSEL_ON === 'undefined' || !EV_VESSEL_ON || !SHIP_EVENTS.veyliVessel) return { off: true, has: !!SHIP_EVENTS.veyliVessel, plan: evCalPlan().map(r => r.id), sw: EV_SHIPWIDE.filter(e => /^vessel/.test(e.id)).length, day28: eventsOn(28).map(e => e.id).filter(id => /^vessel/.test(id)) };
+  const run = jobs => {
+    const keep = { e: SHIP.event, log: SHIP.eventLog.slice(), tr: SHIP.traces.slice(), m: MEETINGS.splice(0), com: (SHIP.commendations || []).slice() };
+    SHIP.event = null; SHIP.eventLog.length = 0; SHIP.eventLog.push(...EV_BEFORE('veyliVessel')); EV_DAYS.clear(); SHIP_DAYS.clear();
+    const due = eventDueDay(), d = due ? due.day : 27, B = (d - 1) * 1440, tv = schedPeople().find(p => p.id === 'taavek');
+    const away = (p, t) => { const w = whereIs(p, t); return w.act === 'away' || !w.deck; };
+    const aboardAt = tv ? [[1, 560], [1, 575], [2, 890], [2, 905], [0, 720], [3, 600]].map(([k, m]) => k + ' ' + hhmm(m) + ' ' + (away(tv, B + k * 1440 + m) ? 'away' : 'aboard')) : ['no Taavek'];
+    const called = ['marrow', 'calder', 'lindqvist-isak'].map(id => { const q = schedPeople().find(x => x.id === id); return id + ' ' + [0, 1, 2, 3].filter(k => eventCalledIn(q, d + k)).join(','); });
+    eventStart('veyliVessel', d); EV_DAYS.clear(); if (jobs) SHIP.event.mine.jobs = jobs;
+    const mails = [], send = typeof mailSend === 'function' ? mailSend : null, steps = [], phase = {}, a0 = ADDRESSES.length, status = {};
+    if (send) mailSend = m => { if (m.at >= B - 60) mails.push(Math.floor(m.at / 1440) + 1 - d + ' ' + hhmm(m.at % 1440) + ' ' + m.from + ': ' + m.subject); };   // (not a tradition's old Mail sent as the clock jumps)
+    for (let t = B - 60; t <= B + 4 * 1440 + 60; t += 5) {
+      setShipNow(t); const o = eventAdvance(t, true); vesselTick(t, true); if (o.length) steps.push(Math.floor(t / 1440) + 1 - d + ' ' + hhmm(t % 1440) + ' ' + o.join(', '));
+      const n = eventNow(t); if (n && n.id === 'veyliVessel' && !phase[n.phase]) { phase[n.phase] = Math.floor(t / 1440) + 1 - d + ' ' + hhmm(t % 1440); status[n.phase] = eventStatus(t); }
+    }
+    if (send) mailSend = send;
+    const log = SHIP.eventLog.filter(l => l.id === 'veyliVessel').map(l => l.band + ' ' + JSON.stringify(l.threads)), com = (SHIP.commendations || []).filter(c => c.event === 'veyliVessel').map(c => c.day - d);
+    const R = { due, aboardAt, called, steps, phase, status, mails, addr: ADDRESSES.slice(a0).map(x => Math.floor(x.at / 1440) + 1 - d + ' ' + hhmm(x.at % 1440)),
+      meets: MEETINGS.filter(m => m.event === 'veyliVessel').map(m => m.id + ' ' + (Math.floor(m.at / 1440) + 1 - d) + ' ' + hhmm(m.at % 1440)), log, com, left: SHIP.event && SHIP.event.id,
+      late: [vesselLate(27, [], null), vesselLate(28, [], null), vesselLate(28, [{ id: 'veyliVessel' }], null), vesselLate(28, [], { id: 'veyliVessel' })] };
+    ADDRESSES.length = a0;
+    SHIP.event = keep.e; SHIP.eventLog.length = 0; SHIP.eventLog.push(...keep.log); SHIP.traces.length = 0; SHIP.traces.push(...keep.tr); MEETINGS.length = 0; MEETINGS.push(...keep.m); SHIP.commendations.length = 0; SHIP.commendations.push(...keep.com); EV_DAYS.clear(); SHIP_DAYS.clear();
+    return R;
+  };
+  const a = run(0), b = run(0), c = run(2);
+  return { a, same: JSON.stringify(a) === JSON.stringify(b), c };
+})()"""
+_src = pathlib.Path(sys.argv[1]).read_text()
+_von = re.search(r"^const EV_VESSEL_ON = true;", _src, re.M)
+_vline = re.search(r"^const EV_VESSEL_ON = URL_FLAGS\.has\('evvessel'\);", _src, re.M)
+if _von or _vline:
+    _vp = sys.argv[1]
+    if not _von:
+        _vp = str(WORK / 'test' / f'_vessel_on_{os.getpid()}.html'); pathlib.Path(_vp).write_text(_src.replace(_vline.group(0), 'const EV_VESSEL_ON = true;', 1)); _RUN_FILES.append(pathlib.Path(_vp))
+    with sync_playwright() as pw:
+        g = Game(pw, _vp)
+        if not _von:   # the build itself, switched off: nothing at all
+            g2 = Game(pw, sys.argv[1]); X = g2.ev(VESSEL_JS); g2.close()
+            print('The Veyli vessel switched off:', X)
+            if not X.get('off') or X['has'] or 'veyliVessel' in X['plan'] or X['sw'] or X['day28']: fail(f"the Veyli vessel switched off still shows: {X}")
+        g.ev("window.EV_BEFORE = id => { if (typeof EV_CAL_ON === 'undefined' || !EV_CAL_ON) return []; const r0 = EV_CALENDAR.find(r => r.id === id); return evCalPlan().filter(r => r.id !== id && r0 && r.day < r0.day).map(r => ({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth', threads: {}, mine: {} })); }")
+        VS = g.ev(VESSEL_JS); a = VS['a']; c = VS['c']
+        print('The Veyli vessel on paper' + (' (a copy switched on)' if not _von else '') + ': due', a['due'], '| the same twice:', VS['same'])
+        print('  phases:', a['phase']); print('  status:', a['status']); [print('    ' + x) for x in a['steps']]
+        print('  addresses:', a['addr'], '| Mail:', a['mails']); print('  meetings:', a['meets'])
+        print('  Taavek:', a['aboardAt'], '| called in (event days):', a['called'])
+        print('  result', a['log'], '| commendation (days from the start): none done', a['com'], '| two jobs', c['com'], '| late saves (27, 28, 28 logged, 28 running):', a['late'])
+        if not a['due'] or a['due'].get('id') != 'veyliVessel' or a['due'].get('day') != 27: fail(f"the Veyli vessel isn't due on Saturday Day 27: {a['due']}")
+        if a['phase'] != {'warning': '0 06:10', 'onset': '1 08:00', 'escalation': '2 09:20', 'resolution': '3 09:15', 'afterglow': '3 09:20'}: fail(f"the Veyli vessel's phases: {a['phase']}")
+        if not any(x.startswith('4 00:00') and 'end smooth' in x for x in a['steps']) or a['left']: fail(f"the Veyli vessel's end (midnight Tuesday): {a['steps'][-2:]} left {a['left']}")
+        if a['addr'] != ['0 08:00', '3 09:15']: fail(f"the Captain's addresses: {a['addr']}")
+        if not any(x.startswith('0 18:00 Commander Teo Vance') for x in a['mails']) or not any(x.startswith('3 12:00 Taavek') for x in a['mails']): fail(f"the Veyli vessel's Mail: {a['mails']}")
+        if a['aboardAt'] != ['1 09:20 away', '1 09:35 aboard', '2 14:50 aboard', '2 15:05 away', '0 12:00 away', '3 10:00 away']: fail(f"Taavek aboard only Sunday 09:30 to Monday 15:00: {a['aboardAt']}")
+        if a['called'] != ['marrow 0', 'calder 1', 'lindqvist-isak 2']: fail(f"called in: {a['called']}")
+        if a['meets'] != ['vesselCall 0 09:00', 'vesselRamp 1 09:30', 'vesselHome 2 15:00']: fail(f"the Veyli vessel's meetings: {a['meets']}")
+        if a['log'] != ['smooth {}'] or a['com']: fail(f"the Veyli vessel's end with nothing done: {a['log']} commendation {a['com']}")
+        if c['com'] != [3] or not any('3 09:30' in x and 'Commendation' in x for x in c['mails']): fail(f"the commendation rule (C1): two jobs, a commendation Tuesday 09:30: {c['com']} {c['mails']}")
+        if a['late'] != [False, True, False, False]: fail(f"the late-save rule: {a['late']}")
+        if not VS['same']: fail('the Veyli vessel ran differently the second time')
+        if g.errors: fail(f"console (vessel): {g.errors[:4]}")
+        g.close()
+
 print('EVENTS CHECK OK' if ok else 'EVENTS CHECK FAILED')
 sys.exit(0 if ok else 1)
