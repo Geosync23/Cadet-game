@@ -4821,7 +4821,7 @@ DECKS[5] = {
     // P5 places (S5-6, B4 for lead 39; plans/p5-step5-spec.html): the old-mysteries board, a corkboard on the bay's south
     // wall facing the job board (the hull wall is full), tapped like the job board (15b's ixTap asks 24k's mysOpen).
     // Only with P5_CASES5 (off: the deck as it was)
-    if (P5_CASES5) placeWall('w', 'notices', 's', 3.0, { hitW: 1.0, it: IT('Old mysteries', 'Yellowed cards pinned three deep: faults the crew never got to the bottom of, some older than the paint. Tap to read them.') });
+    if (P5_CASES5) placeWall('w', 'notices', 's', 3.0, { hitW: 1.0, it: IT('Old mysteries', worksText('mys.board.tap', 'Yellowed cards pinned three deep: faults the crew never got to the bottom of, some older than the paint.')) });
   },
 };
 for (const [key, r] of Object.entries(DECKS[5].sealed)) DECKS[5].closedDoors[key] = { t: DECKS[5].rooms[r].name, x: DECKS[5].rooms[r].tap };
@@ -56564,7 +56564,22 @@ if (typeof POINT_WATCH !== 'undefined' && POINT_ON) POINT_WATCH.push(f3ScanWatch
 // (it hides what they'd show). The first case (when the p4 row opens: the cold store's chiller, its display stuck at 3°;
 // else the first machine that fits, slot 28, held a week) shows with Torres's word. Flags case.p4.first (staged or
 // 'none'). No R(): suspects by key 892 inside caseDecoys, the shown order by 893.
-const P4_BAND = { sus: [3, 4], clues: [3, 5], fewest: 2, decks: 1 }, P4_SLOT = 28;
+// said in person (the user's rule, RV20's S1): on your deck and near, the teacher says it now in bubbles; else they walk
+// over to a seat by you (section 10's crewComeTo, the friends' "come to find you") and say it there; not with you in 40 ship
+// minutes (another deck's lift, you asleep), the word comes as before (worksSay: a toast). Live only, nothing saved
+const CASE_COME = { by: null, lines: null, at: 0, stop: null };
+function caseSayInPerson(by, lines) {
+  const L = (Array.isArray(lines) ? lines : [lines]).filter(Boolean); if (!L.length) return;
+  const say = () => { CASE_COME.by = null; if (typeof worksSayAll === 'function') worksSayAll(by, L); else worksSay(by, L[0]); };
+  let a = null; try { a = typeof DECK_CREW !== 'undefined' && DECK_CREW.find(x => x.p && x.p.id === by); } catch (e) { a = null; }
+  if (a && Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) <= 8) { say(); return; }
+  let sp = null; try { sp = typeof seekSpot === 'function' && typeof crewComeTo === 'function' ? seekSpot() : null; } catch (e) { sp = null; }
+  if (!sp) { say(); return; }
+  Object.assign(CASE_COME, { by, lines: L, at: shipNow() + 40 });
+  CASE_COME.stop = crewComeTo(by, sp.id, () => { if (CASE_COME.by === by) say(); }, { until: shipNow() + 50 });
+}
+function caseComeTick(now) { if (CASE_COME.by && now >= CASE_COME.at) { const by = CASE_COME.by, L = CASE_COME.lines; CASE_COME.by = null; if (CASE_COME.stop) CASE_COME.stop(); worksSay(by, L[0]); } }
+const P4_BAND = { sus: [3, 4], clues: [4, 5], fewest: 2, decks: 1 }, P4_SLOT = 28;
 const P4_GAUGE = { pump: 'the outlet pressure', seal: 'the drip tray', valve: 'the valve position', bearing: 'the vibration meter', relay: 'the relay counter',
   'fan belt': 'the belt speed', filter: 'the pressure across the filter', cartridge: 'the pressure across the cartridge', membrane: 'the flow through the membrane',
   compressor: 'the compressor\'s current', element: 'the element\'s current', lamp: 'the lamp current', breaker: 'the breaker load', cable: 'the cable continuity',
@@ -56583,24 +56598,28 @@ function p4Clues(j, cause, sus) {
   const m = machineById(j.machine), pp = panelPlace(m.id), part = id => (caseCauses(m).find(x => x.id === id) || {}).part;
   const out = sus.filter(s => s !== cause).map((s, i) => ({ id: 'g' + i, type: 'gauge', src: { part: part(s), read: 1, ...(i ? { tool: 'scanner' } : { by: caseTalker(caseDay(caseNow())) }) }, at: i ? pp : 'board', kills: [s] }));
   out.push({ id: 's0', type: 'gauge', src: { part: part(cause), read: 1, stuck: 1, tool: 'scanner' }, at: pp, kills: [] });   // the liar: kills nothing
+  const f = caseCauses(m).find(x => x.id === cause), d = sus.map(s => caseCauses(m).find(x => x.id === s)).find(x => x && x.id !== 'sensor'), sh = String((f && f.id === 'sensor' ? d && d.shows : f && f.shows) || '');
+  out.push({ id: 'x0', type: 'gauge', src: { scan: 1, word: /warm|hot/.test(sh) ? 'warm' : /cool|cold/.test(sh) ? 'cold' : 'low', tool: 'scanner' }, at: pp, kills: [] });   // the third reading: the machine really is off, so one gauge lies
   return out;
 }
 function p4Text(c, k) {
-  if (k.type !== 'gauge' || !k.src || !k.src.part) return null;
+  if (k.type !== 'gauge' || !k.src) return null;
+  if (k.src.scan) return caseText('case.p4.scan', 'Your scanner reads {word}', { word: k.src.word }).replace(/\.?$/, '.');
+  if (!k.src.part) return null;
   const g = p4Gauge(k.src.part), G = g.replace(/^./, x => x.toUpperCase()), p = k.src.by && schedPeople().find(x => x.id === k.src.by);
-  if (k.src.stuck) return caseText('case.p4.stuck', '{gauge}: normal, and it hasn\'t moved a hair all day.', { gauge: G });
-  if (p) return caseText('case.p4.taped', '{gauge}, read when it was found: normal, moving with the load.', { gauge: G }) + ' — ' + p.name.split(' ').slice(-1)[0];
-  return caseText('case.p4.read', '{gauge}: normal, moving with the load all day.', { gauge: G });
+  const read = caseText('case.p4.gauge', '{thing} reads {word}', { thing: G, word: 'normal' }).replace(/\.?$/, '.');   // SW3's words
+  if (k.src.stuck) return read + ' ' + caseText('case.p4.flat', 'It hasn\'t moved a hair all day.');
+  return read + ' ' + caseText('case.p4.moving', 'It moves with the load.') + (p ? ' — ' + p.name.split(' ').slice(-1)[0] : '');
 }
 function p4Title(c, j) {
   const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === c.cause), d = c.sus.map(s => caseCauses(m).find(x => x.id === s)).find(x => x && x.id !== 'sensor');
   const shows = (f && f.id === 'sensor' ? d && d.shows : f && f.shows) || 'acts up';   // a lying sensor: what the others would show (the chiller runs warm)
-  return caseText('case.title.p4', '{machine} {shows}, but its gauges say it\'s fine', { machine: caseMachName(j), shows: shows.split('|')[0] });
+  return caseText('case.title.p4', '{machine}: two gauges disagree', { machine: caseMachName(j), shows: shows.split('|')[0] });
 }
 function p4View(c) {                                     // the readings as a table: tap one if it doesn't match what you saw
-  const got = c.clues.filter(k => c.got.includes(k.id) && k.src && k.src.part); if (!got.length) return [];
-  return [{ kind: 'text', text: caseText('case.p4.head', 'The gauges (tap one if it doesn\'t match what you see)') },
-    devChips(got.map(k => ({ label: p4Gauge(k.src.part).replace(/^the /, '').replace(/^./, x => x.toUpperCase()) + ': normal', on: !(c.doubt || []).includes(k.id), action: { app: caseApp(), do: 'case:doubt', arg: c.id + '|' + k.id } })))];
+  const got = c.clues.filter(k => c.got.includes(k.id) && k.src && (k.src.part || k.src.scan)); if (!got.length) return [];
+  return [{ kind: 'text', text: caseText('case.p4.head', 'What each one says') + ' ' + caseText('case.p4.tap', '(tap a gauge if it doesn\'t match what you see)') },
+    devChips(got.map(k => ({ label: k.src.scan ? caseText('case.p4.scan', 'Your scanner reads {word}', { word: k.src.word }).replace(/\.$/, '') : p4Gauge(k.src.part).replace(/^the /, '').replace(/^./, x => x.toUpperCase()) + ': normal', on: !(c.doubt || []).includes(k.id), action: { app: caseApp(), do: 'case:doubt', arg: c.id + '|' + k.id } })))];
 }
 // the first case shows once the row has opened, inside your shift, with Torres's word (the row's teacher)
 function p4Tick(c, j) {
@@ -56610,8 +56629,7 @@ function p4Tick(c, j) {
   const row = ladderRow('p4'); c.by = (row && ladderTeacher(row, d)) || 'torres-zeke';
   caseShow(c, j);
   const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p4.word');
-  if (said && typeof worksSayAll === 'function') worksSayAll(c.by, said);
-  else worksSay(c.by, 'One for you. ' + c.title.replace(/^Head-scratcher: /, '') + '. Sometimes the gauge is the liar. Read them all, and watch for the one that never moves.');
+  caseSayInPerson(c.by, said || 'One for you. ' + c.title.replace(/^Head-scratcher: /, '') + '. Sometimes the gauge is the liar. Read them all, and watch for the one that never moves.');
 }
 // staged when the row opens (and retried each ship hour till it is): the chiller's stuck display, else the first
 // machine that fits, not busy; none: the first roll case is your first
@@ -56637,12 +56655,13 @@ function p4Stage() {
   MACH_REV++;
 }
 if (P5_CASES5) {
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) caseComeTick(now); });
   CASE_KINDS.p4 = { name: 'Which gauge is lying?', ladder: 'p4', noScan: true,
     fits: (cause, m) => !!cause.part && caseBand(caseRank()) !== 'T1' && caseBand(caseRank()) !== 'T2' && !!panelPlace(m.id) && p4Decoys(m, cause, 0).length >= 2,
     suspects: (j, seed, band) => { const m = machineById(j.machine), f = caseCauses(m).find(x => x.id === j.cause); return [j.cause].concat(p4Decoys(m, f, seed).slice(0, caseBandOf('p4', band).sus[1] - 1)); },
     clues: (j, cause, sus) => p4Clues(j, cause, sus),
     bands: { T3: P4_BAND, T4: P4_BAND },
-    title: p4Title, text: p4Text, view: p4View, tick: p4Tick, sus: (c, id) => id === 'sensor' ? { label: caseText('case.p4.sensor', 'temperature sensor'), part: 'signal card' } : null,
+    title: p4Title, text: p4Text, view: p4View, tick: p4Tick, wrong: (c, s) => caseText('case.wrong.p4', 'Replaced {thing}. They still disagree. The other one was lying.', { thing: 'the ' + (caseSus(c, s).label || s) }), sus: (c, id) => id === 'sensor' ? { label: caseText('case.p4.sensor', 'temperature sensor'), part: 'signal card' } : null,
     wait: j => j.train === 'p4',
     hint: c => caseText('case.hint.p4.1', 'If every gauge says it\'s fine and it still isn\'t, one of them is lying. Which one never moves?') };
   CHIEF_NOTES.p4 = { title: 'Which gauge is lying?', key: 'chief.p4', lines: [
@@ -56700,14 +56719,15 @@ function p5Clues(j, cause, sus) {
 function p5Text(c, k) {
   if (k.type !== 'gauge' || !k.src || !k.src.m || k.src.flow == null) return null;
   const w = typeof flowWord === 'function' ? flowWord(k.src.flow) : k.src.flow >= .8 ? 'full' : 'low';
-  return caseText('case.p5.read', '{machine}: flow {word}.', { machine: caseMachName({ machine: k.src.m }), word: w });
+  return caseText('case.p5.stop', '{machine}: flow {word}', { machine: caseMachName({ machine: k.src.m }), word: w });
 }
 function p5View(c) {                                     // the line in order, each reading filled in as you take it
   const j = caseJob(c), m = j && machineById(j.machine), f = m && caseCauses(m).find(x => x.id === c.cause), ids = (m && p5Line(m, f)) || [];
   const read = {}; for (const k of c.clues) if (c.got.includes(k.id) && k.src && k.src.m) read[k.src.m] = k;
   const rows = ids.filter(id => c.clues.some(k => k.src && k.src.m === id) || ids.indexOf(id) === 0).map(id => ({ text: caseMachName({ machine: id }), sub: read[id] ? (flowWord(read[id].src.flow)) : '?', ...(read[id] && read[id].src.flow < .8 ? { mark: 'hot' } : {}) }));
-  return [{ kind: 'text', text: caseText('case.p5.head', 'The line, top to bottom (the flow where you\'ve read it)') }, { kind: 'list', rows }];
+  return [{ kind: 'text', text: caseText('case.p5.head', 'The line, top to bottom (the flow where you\'ve read it)') }, ...(f && f.line === 'power' ? [{ kind: 'text', text: caseText('case.p5.power', 'A power line. Test each length with the conduit tester.') }] : []), { kind: 'list', rows }];
 }
+function p5Wrong(c, s) { const x = p1Sus(c, s), P = p1Where(c), at = caseSusAt(s); return caseText('case.wrong.p5', 'New {part} in at {machine}. {where} still {shows}: it\'s further along.', { part: x && x.part || 'part', machine: caseMachName({ machine: at || (caseJob(c) || {}).machine }), where: P.where, shows: P.shows }); }
 function p5Tick(c, j) {
   if (!c.wait || !c.train) return;
   const now = shipNow(), d = caseDay(now), mn = now % 1440;
@@ -56715,8 +56735,7 @@ function p5Tick(c, j) {
   const row = ladderRow('p5'); c.by = (row && ladderTeacher(row, d)) || 'calder';
   caseShow(c, j);
   const said = typeof worksVoice === 'function' && worksVoice(c.by, 'train.p5.word');
-  if (said && typeof worksSayAll === 'function') worksSayAll(c.by, said);
-  else worksSay(c.by, 'Here\'s a long one. ' + c.title.replace(/^Head-scratcher: /, '') + '. Follow the line: read the middle, then halve it. Where full turns to low, that\'s your fault.');
+  caseSayInPerson(c.by, said || 'Here\'s a long one. ' + c.title.replace(/^Head-scratcher: /, '') + '. Follow the line: read the middle, then halve it. Where full turns to low, that\'s your fault.');
 }
 // staged when the row opens (retried each ship hour): 3-pump-1's seal (its machine faulty now, as a reserved job's
 // would be within the hour, so the readings are honest); none fair: the first roll case is your first
@@ -56746,7 +56765,7 @@ if (P5_CASES5) {
       return [j.cause].concat(p5Pick(j, seed, band)); },
     clues: (j, cause, sus) => p5Clues(j, cause, sus),
     bands: { T3: P5_BAND, T4: P5_BAND },
-    sus: p1Sus, title: (c, j) => caseText('case.title.p5', '{machine} {shows}', { machine: p1Where(c).where, shows: p1Where(c).shows }), card: p1Card, start: p1Start, wrong: p1Wrong,
+    sus: p1Sus, title: (c, j) => caseText('case.title.p5', '{machine} {shows}', { machine: p1Where(c).where, shows: p1Where(c).shows }), card: p1Card, start: p1Start, wrong: p5Wrong,
     text: p5Text, view: p5View, tick: p5Tick,
     hint: c => caseText('case.hint.p5.1', 'Read the flow in the middle of the line. Full there? The fault\'s further down. Low? Further up.') };
   CHIEF_NOTES.p5 = { title: 'Follow the line', key: 'chief.p5', lines: [
@@ -56765,26 +56784,25 @@ if (P5_CASES5) {
 // points at the board, once; the first time you read it, his line by the board. Saved: SHIP.works.side.mys = { seen,
 // taken, done: [ids] } (cleaned on read). No R(): the order from key 854, the choices' from key 854 on the case's id.
 const MYS_FROM = 21, MYS_KIND = 'mysc';
-const MYS_CASES = {                                       // where each clue is looked at: a machine's panel (else the job board)
-  knock: ['4-heater-1', '5-manifold-1', '4-pump-1'], fog: ['3-galleyplant-1', '3-recycler-1', '2-extractor-1'],
-  blink: ['1-lights-1', '1-junction-1', '5-fan-1'], cold: ['5-damper-2', '4-scrubber-1', '4-heater-1'],
-  hum: ['4-washer-4', '4-junction-2', '5-pump-2'] };
-const MYS_WORDS = {                                       // stand-ins until the head writer's mys.* lines are in (S5-7)
-  knock: { title: 'The three o\'clock knock', line: 'Two winters back, Deck 4\'s pipes knocked at three every night for a month. Then it stopped.',
-    clue: ['The heating plant\'s old log: a night boost was set for 02:55 that month.', 'The manifold\'s tag: a new regulator went in the day the knocking stopped.', 'A note on the pump: "Not the pump. Checked it twice. — H."'],
-    sus: ['The night boost slamming a worn regulator shut', 'Air in the pipes', 'A pump bearing'], solved: 'The knock: a night boost slamming a worn regulator. Fixed when it was changed, never written up.' },
-  fog: { title: 'The foggy Tuesdays', line: 'One spring the mess fogged up every Tuesday at lunch, and only on Tuesdays.',
-    clue: ['The galley plant\'s old rota: Tuesday was the big soup boil.', 'The recycler\'s log: steady all week, Tuesdays too.', 'The extractor\'s card: its filter was changed on Wednesdays, a week\'s grease in it by Tuesday.'],
-    sus: ['A clogged extractor filter on soup day', 'The recycler', 'A leak over the mess'], solved: 'The fog: a week\'s grease in the extractor filter, on soup day.' },
-  blink: { title: 'The noon blink', line: 'For a year Deck 1\'s lights blinked once at noon sharp. Nobody could catch it.',
-    clue: ['The light relays\' log: one dip a day, 12:00, nothing else.', 'The junction\'s old load chart: the noon peak, the same every day.', 'The fan hall\'s card: the big fan was set to start a cleaning run at 12:00.'],
-    sus: ['The fan\'s noon run pulling on the junction', 'A loose lamp', 'The bridge clocks'], solved: 'The blink: the fan\'s noon cleaning run pulling on Deck 1\'s junction.' },
-  cold: { title: 'The cold cabin', line: 'Cabin 4-12 was always cold, whoever lived in it. Then one day it wasn\'t.',
-    clue: ['Damper 2\'s old card: its flap was found jammed a quarter shut, the week 4-12 warmed up.', 'The scrubber\'s log: running normally all along.', 'The heating plant\'s log: 4-12\'s loop as warm as any.'],
-    sus: ['Damper 2, jammed part shut', 'The heating loop', 'The scrubber'], solved: 'The cold cabin: damper 2 jammed a quarter shut, starving 4-12 of warm air.' },
-  hum: { title: 'The singing washer', line: 'Washer 4 used to hum a note on its spin, and the junction next door hummed back.',
-    clue: ['Washer 4\'s card: the hum only on the fast spin.', 'The junction\'s card: a loose cover plate, found and tightened.', 'The pump\'s log: nothing at all.'],
-    sus: ['A loose junction cover plate ringing with the spin', 'The washer\'s bearing', 'The pump'], solved: 'The singing washer: the junction\'s loose cover plate ringing along with the spin.' } };
+const MYS_CASES = {                                       // where each clue is looked at: a machine's panel (else the job board); the themes are SW3's mys.1-5
+  1: ['3-pump-1', '3-recycler-1', '4-washer-1'], 2: ['5-damper-2', '4-scrubber-1', '4-heater-1'], 3: ['5-mainlift-1', '3-lights-1', '1-databus-1'],
+  4: ['5-junction-1', '5-inverter-1', '1-relay-1'], 5: ['3-growlight-1', '3-growlight-2', '3-irrigation-1'] };
+const MYS_WORDS = {                                       // stand-ins until the head writer's mys.N.* lines are in (S5-7)
+  1: { title: 'The Tuesday hum', line: 'A hum in the Deck 3 pipes, every Tuesday at four. Only Tuesdays. Seven years.',
+    clue: ['The pump\'s old card: nothing wrong with it, Tuesdays included.', 'The recycler\'s log: its big backwash runs Tuesdays at 16:00.', 'The laundry rota, years old: the big wash on Tuesday afternoons too.'],
+    sus: ['The backwash and the big wash pulling at once', 'The pump\'s bearing', 'Air in the pipes'] },
+  2: { title: 'The cold cabin', line: 'One cabin on Deck 4 is always two degrees colder. Three crews have tried.',
+    clue: ['Damper 2\'s old card: its flap found a quarter shut, the week the cabin warmed up once.', 'The scrubber\'s log: running normally all along.', 'The heating plant\'s log: that cabin\'s loop as warm as any.'],
+    sus: ['Damper 2, sticking part shut', 'The heating loop', 'The scrubber'] },
+  3: { title: 'The lift that waits', line: 'The lift stops on Deck 3 by itself, late at night, and opens. Nobody\'s there.',
+    clue: ['The lift\'s log: the stops all at 23:00 sharp.', 'The Deck 3 lights card: the corridor dims to night lighting at 23:00.', 'The data bus card: the night lighting\'s switch shares the lift\'s call line.'],
+    sus: ['The night-lighting switch calling the lift on a shared line', 'A stuck call button', 'Someone pressing and running'] },
+  4: { title: 'Calder\'s clock', line: 'The bay\'s wall clock loses a minute a week. New clock, same minute.',
+    clue: ['The junction\'s card: the bay\'s circuit runs off the inverter.', 'The inverter\'s log: a short dip every Wednesday, the drill\'s power test.', 'The relay room\'s card: the ship\'s time signal is fine, every day.'],
+    sus: ['The drill\'s weekly power dip stopping the clock', 'A slow clock', 'The ship\'s time signal'] },
+  5: { title: 'The garden flicker', line: 'The garden lights dip for one second at dawn. Every dawn. Plants don\'t mind. Calder does.',
+    clue: ['Grow light 1\'s log: the dip at 06:00 each day, a second long.', 'Grow light 2\'s log: the same second.', 'The irrigation pump\'s card: it starts at 06:00 every day, on the same circuit.'],
+    sus: ['The irrigation pump starting on the lights\' circuit', 'Two worn lamps', 'A loose relay'] } };
 const MYS_IDS = Object.keys(MYS_CASES);
 const mysText = (c, k, fb) => worksText('mys.' + c + '.' + k, fb);
 const mysOn = () => { const W = SHIP.works; return !!(P5_CASES5 && W && (W.rank === 'senior' || W.rank === 'specialist') && worksDay(shipNow()) >= MYS_FROM); };
@@ -56792,7 +56810,9 @@ function mysState() {                                    // side.mys, cleaned (a
   const s = worksSide(); if (!s) return null;
   if (!s.mys || typeof s.mys !== 'object' || !s.mysOk) {
     const o = s.mys && typeof s.mys === 'object' ? s.mys : {};
-    s.mys = { seen: Number.isInteger(o.seen) ? o.seen : 0, taken: MYS_IDS.includes(o.taken) ? o.taken : null, done: (Array.isArray(o.done) ? o.done : []).filter(x => MYS_IDS.includes(x)).slice(0, 5) };
+    const done = (Array.isArray(o.done) ? o.done : []).filter(x => MYS_IDS.includes(x)).slice(0, 5), days = {};
+    for (const x of done) days[x] = o.days && Number.isInteger(o.days[x]) ? o.days[x] : 0;
+    s.mys = { seen: Number.isInteger(o.seen) ? o.seen : 0, taken: MYS_IDS.includes(o.taken) && !done.includes(o.taken) ? o.taken : null, done, days };
     Object.defineProperty(s, 'mysOk', { value: true, enumerable: false, configurable: true });
   }
   return s.mys;
@@ -56816,9 +56836,9 @@ function mysStepDone(j, k, res) {
 }
 function mysDone(j) {
   const S = mysState(); if (!S) return;
-  if (!S.done.includes(j.mys)) S.done.push(j.mys); if (S.taken === j.mys) S.taken = null;
+  if (!S.done.includes(j.mys)) { S.done.push(j.mys); S.days[j.mys] = worksDay(shipNow()); } if (S.taken === j.mys) S.taken = null;
   worksSideXp(1, 'mys'); worksUse('mys');
-  try { toast(mysText(j.mys, 'title', MYS_WORDS[j.mys].title), worksText('mys.solved', 'Solved. It\'s in the Chief\'s notes now.')); } catch (e) { /* no UI */ }
+  try { toast(mysText(j.mys, 'title', MYS_WORDS[j.mys].title), worksText('mys.solved', 'Solved. The card comes off the board. Calder adds a line to her notes.') + ' ' + worksText('mys.rep', 'Works reputation up: an old one cracked.')); } catch (e) { /* no UI */ }
   simNote('mystery', { id: j.mys, wrong: j.wrong || 0 });
   MACH_REV++;
 }
@@ -56832,23 +56852,23 @@ function mysTake(id) {
 // the board as a device page (the controller walks it): the five, solved ones ticked, Take on the rest, one at a time
 function mysView() {
   const S = mysState(), B = [], cur = mysJob();
-  B.push({ kind: 'text', text: worksText('mys.head', 'Old faults the crew never got to the bottom of. Take one when you like: one at a time.') });
+  B.push({ kind: 'text', text: worksText('mys.head', worksText('mys.board.tap', 'Old faults the crew never got to the bottom of.') + ' Take one when you like: one at a time.') });
   if (!S || !mysOn()) { B.push({ kind: 'text', text: worksText('mys.shut', 'Calder\'s pinning these up for her Senior Officers.') }); return { title: 'Old mysteries', blocks: B }; }
   const ids = mysOrder();
   B.push({ kind: 'list', rows: ids.map(id => ({ text: mysText(id, 'title', MYS_WORDS[id].title), sub: S.done.includes(id) ? worksText('mys.done', 'solved') : cur && cur.mys === id ? worksText('mys.on', 'yours: on it') : mysText(id, 'line', MYS_WORDS[id].line), ...(S.done.includes(id) ? {} : cur && cur.mys === id ? { mark: 'hot' } : {}) })) });
   if (cur) B.push({ kind: 'text', text: worksText('mys.oncur', 'You\'re on {title}. Read the three cards where they are, then call it at the job board.', { title: mysText(cur.mys, 'title', MYS_WORDS[cur.mys].title) }), mark: 'hot' });
-  else { const left = ids.filter(id => !S.done.includes(id)); if (left.length) B.push({ kind: 'buttons', items: left.map(id => ({ label: 'Take: ' + mysText(id, 'title', MYS_WORDS[id].title), action: { app: 'oldcases', do: 'take', arg: id } })) });
-    else B.push({ kind: 'text', text: worksText('mys.all', 'All five solved. Calder says she\'ll find more.') }); }
+  else { const left = ids.filter(id => !S.done.includes(id)); if (left.length) B.push({ kind: 'buttons', items: left.map(id => ({ label: worksText('mys.take', 'Take: {title}', { title: mysText(id, 'title', MYS_WORDS[id].title) }), action: { app: 'oldcases', do: 'take', arg: id } })) });
+    else B.push({ kind: 'text', text: worksText('mys.board.none', 'All five solved. The board is bare.') }); }
   return { title: 'Old mysteries', blocks: B };
 }
 function mysAct(verb, arg) {
-  if (verb === 'take' && mysTake(arg)) { try { toast('Old mysteries', worksText('mys.taken', 'Taken: {title}. The first card is marked on your map.', { title: mysText(arg, 'title', MYS_WORDS[arg].title) })); } catch (e) { /* no UI */ } }
+  if (verb === 'take' && mysTake(arg)) { try { toast('Old mysteries', worksText('mys.taken', 'Taken: {title}. Follow the arrow to the first card.', { title: mysText(arg, 'title', MYS_WORDS[arg].title) })); } catch (e) { /* no UI */ } }
   MACH_REV++;
 }
 // the tap (15b) and the first read: Torres's line by the board, once
 function mysOpen() {
   const S = mysState(); if (!S) return false;
-  if (mysOn() && !S.seen) { S.seen = worksDay(shipNow()); worksSay('torres-zeke', worksText('mys.torres.seen', 'Old ones. Nobody\'s cracked them. Have a go, if you like.')); }
+  if (mysOn() && !S.seen) { S.seen = worksDay(shipNow()); const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.seen'); if (v && typeof worksSayAll === 'function') worksSayAll('torres-zeke', v); else worksSay('torres-zeke', 'Old ones. Nobody\'s cracked them. Have a go, if you like.'); }
   if (typeof deviceShow === 'function') deviceShow('oldcases');
   return true;
 }
@@ -56859,7 +56879,8 @@ function mysTick(now, skip) {
   for (const x of SHIP.jobs) if (x.kind === MYS_KIND && x.workDone && x.status !== 'done') jobFinish(x, now, 'you');   // solved: done, no board turn-in
   const m = now % 1440; if (S.seen || flag('mys.word') || m < 540 || m > 1260 || !player || !deckDef) return;
   flagSet('mys.word', worksDay(now));
-  worksSay('torres-zeke', worksText('mys.torres.word', 'Calder\'s put the old mysteries up in the bay, by the lobby doors. Nobody\'s cracked them. Worth a look on a quiet day.'));
+  const v = typeof worksVoice === 'function' && worksVoice('torres-zeke', 'mys.word');
+  caseSayInPerson('torres-zeke', v || 'Calder\'s put the old mysteries up in the bay, by the lobby doors. Nobody\'s cracked them. Worth a look on a quiet day.');
   if (typeof guideAsk === 'function') guideAsk({ id: 'mys:board', level: 3, once: 1, owner: '24k', until: now + 180, goal: () => ({ deck: 5, room: 'w', item: /^old mysteries$/i, label: worksText('mys.arrow', 'The old-mysteries board, in the Works bay') }), done: () => { const T = mysState(); return !!(T && T.seen); } });
 }
 if (P5_CASES5) {
@@ -56867,7 +56888,7 @@ if (P5_CASES5) {
   if (typeof WORKS_SIDE_KINDS !== 'undefined' && WORKS_SIDE_KINDS.add) WORKS_SIDE_KINDS.add(MYS_KIND);
   deviceApp({ id: 'oldcases', title: 'Old mysteries', short: 'Mysteries', icon: 'wrench', order: 33, hidden: () => true, view: mysView, act: mysAct });
   CHIEF_NOTES.mys = { title: 'Old mysteries', key: null, open: () => { const S = SHIP.works && mysState(); return !!(S && S.done.length); },
-    get lines() { const S = SHIP.works && mysState(); return (S ? S.done : []).map(id => mysText(id, 'solved', MYS_WORDS[id].solved)); } };
+    get lines() { const S = SHIP.works && mysState(); return (S ? S.done : []).map(id => worksText('mys.chief', 'Old mystery cracked: {title}. Solved by {me}, Day {n}.', { title: mysText(id, 'title', MYS_WORDS[id].title), n: S.days[id] || '?' })); } };
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.mys = { open() { const W = SHIP.works; if (W && W.use && W.use.mys > 0) worksTrained('mys'); } };   // the board is there from Day 21 for a Senior Officer (mysOn); one solved before the row opened (a Sunday) trains it now
   if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push(mysTick);
 }
