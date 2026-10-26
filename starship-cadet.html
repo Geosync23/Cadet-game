@@ -56798,7 +56798,7 @@ if (P5_CASES5) {
 // person (the arrow to them, level 1; near them, your ask and their answer): their wash moves. The move is real: from
 // the next such weekday it's a record settled at 22:00 the evening before (p9Settle, from B3's 24w settle loop) that
 // section 14's planner reads through one hook (p9PlanRule, from B3's sdPlanShut): the laundry closed to them for that
-// hour, so the planner gives their wash another. Saved: SHIP.works.side.p9 = { ask, moves: [{ who, wd, a, b, from }],
+// hour, so their wash leaves that hour (the planner finds no other slot that evening: skipped that night, done another day; a true move needs a second section 14 hook, backlog). Saved: SHIP.works.side.p9 = { ask, moves: [{ who, wd, a, b, from }],
 // set: { [day]: [{ who, a, b }] } } (cleaned on read). The first when the p9 row opens (slot 38); none fair: none.
 const P9_BAND = { sus: [4, 5], clues: [3, 6], fewest: 2, decks: 1 }, P9_SLOT = 38, P9_LOOK = 14, P9_ASK = 2.5;
 const P9_SKIP = new Set(['meal', 'shift', 'off', 'appt', 'beat', 'tea']);
@@ -56883,10 +56883,11 @@ function p9AskTick(now, skip) {
   if (typeof guideAsk === 'function') guideAsk({ id: 'p9:ask', level: 1, owner: '24k', until: now + 60, goal: () => { const w = whereIs(p, shipNow()); return w && w.placeId && placeById(w.placeId) ? { deck: w.deck, place: w.placeId, label: caseText('case.p9.go', 'Ask {name} about their wash', { name: p9Name(q.who) }) } : null; }, done: () => !(p9State() || {}).ask });
   let a = null; try { a = DECK_CREW.find(x => x.p && x.p.id === q.who); } catch (e) { a = null; }
   if (!a || Math.hypot(a.x - player.obj.position.x, a.z - player.obj.position.z) > P9_ASK || (typeof DIALOGUE !== 'undefined' && DIALOGUE)) return;
-  const time = hhmm(q.a), ask = caseText('case.p9.move', 'Ask {name} to move {thing} to {time}?', { name: p9Name(q.who), thing: q.thing, time: caseText('case.p9.another', 'another hour') }).replace(/\?$/, '.');
-  let ans = null; try { const l = typeof lineFor === 'function' ? lineFor(q.who, 'p9.move', { t: now, thing: q.thing, time, peek: true }) : null; ans = l && l.text; } catch (e) { ans = null; }
-  worksSayAll(q.who, [ans || 'My ' + WEEKDAYS[q.wd] + ' wash? Fine. I\'ll find another hour. Didn\'t know it was me.']);
-  try { toast(caseText('works.mech.p9', 'The clash'), ask + ' ' + caseText('case.p9.moved', '{name} moves {thing} to {time}. Nothing broke. Nothing needed fixing.', { name: p9Name(q.who), thing: q.thing, time: caseText('case.p9.another', 'another hour') })); } catch (e) { /* no UI */ }
+  // (lead 40) honest words: the planner keeps them out of the laundry at that hour, and finds no other slot that evening,
+  // so the wash is skipped that night or done another day; SW3's p9.move lines ("Eight instead?") promise an hour, unused
+  const day = WEEKDAYS[q.wd], ask = caseText('case.p9.ask', 'You ask {name} about {thing} on {time}s.', { name: p9Name(q.who), thing: q.thing, time: day });
+  worksSayAll(q.who, [caseText('case.p9.answer', 'My {time} wash? Didn\'t know it was me. I\'ll leave it that night, do it another day.', { time: day })]);
+  try { toast(caseText('works.mech.p9', 'The clash'), ask + ' ' + caseText('case.p9.skip', '{name} won\'t wash on {time} evenings now. Nothing broke. Nothing needed fixing.', { name: p9Name(q.who), time: day })); } catch (e) { /* no UI */ }
   S.moves.push({ who: q.who, wd: q.wd, a: q.a, b: q.b, from: worksDay(now) + 1 }); if (S.moves.length > 8) S.moves.shift();
   S.ask = null; simNote('p9Moved', { who: q.who, wd: q.wd }); MACH_REV++;
 }
