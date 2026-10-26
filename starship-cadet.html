@@ -8219,16 +8219,16 @@ const DECK_DRESS = {
   // (moved with the next deck build, as framedMenu is). 2 draw calls
   lineCertificate: { deck: 4, on: () => typeof EV_LINE_ON !== 'undefined' && EV_LINE_ON, what: 'your Line certificate, framed above your shelf', make(g) {
     const cab = typeof SHIP !== 'undefined' && SHIP.works && SHIP.works.home === '4-23', room = cab ? 'W' : 'a', along = cab ? .9 : 2.05;
-    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet';
+    const s = dressAt(g, room, 'n', along), name = (typeof SHIP !== 'undefined' && SHIP.player && SHIP.player.name) || 'Cadet', back = typeof crossingBackDone === 'function' && crossingBackDone();
     dressBox(s, .22, .28, .025, '#3a3024', 0, 2.45, .0125);
     const t = tex(176, 224, (c, w, h) => {
       c.fillStyle = '#f6efd8'; c.fillRect(0, 0, w, h); c.strokeStyle = '#c9a23e'; c.lineWidth = 5; c.strokeRect(8, 8, w - 16, h - 16);
       c.fillStyle = '#7a5a1e'; c.textAlign = 'center'; c.font = '700 14px Georgia,serif'; c.fillText('THE LINE', w / 2, 40);
-      c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));
+      c.fillStyle = '#2b2b2b'; c.font = 'italic 500 12px Georgia,serif'; ['This is to say that', name, 'crossed into the', 'Veyli reach, Day 7'].concat(back ? ['and back, Day 35'] : []).forEach((l, k) => c.fillText(l, w / 2, 76 + k * 22));   // the ending (E-1): the second date
       c.strokeStyle = '#1f3c6e'; c.lineWidth = 1.5; c.beginPath(); c.moveTo(52, 192); for (let i = 1; i <= 16; i++) c.lineTo(52 + i * 4.5, 192 - 5 * Math.sin(i * 1.4)); c.stroke();   // the Captain's signature
     });
     const p = new THREE.Mesh(new THREE.PlaneGeometry(.18, .24), new THREE.MeshBasicMaterial({ map: t, toneMapped: false })); p.position.set(0, 2.45, .028); s.add(p);
-    return { t: 'Line certificate', x: (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
+    return { t: 'Line certificate', x: (back && typeof evWord === 'function' && evWord('event.crossingBack.keepsake')) || (typeof evWord === 'function' && evWord('event.crossingLine.keepsake')) || 'Your Line certificate, signed by the Captain.', wall: [room, 'n', along], y: 2.45, w: .24, h: .3 };
   } },
   // 0.38.31: spiceJars: the jars on the mess hall's spice shelf, one more after each Spice shelf supper. A trace ({ id:
   // 'spiceJars', day, n }): n jars when given, else one for each week since day (from the first supper), up to 12. 4 draw calls
@@ -32425,6 +32425,11 @@ const LINES = JSON.parse([
   '{"text":"Commissioned, then. Congratulations, Officer.","id":"cdtlyy","cue":["ceremony","ceremony.you"],"tier":[1,4]},',
   '{"text":"Did the Captain ask you her question? She always does.","id":"1hdrngm","cue":["ceremony","ceremony.you"],"tier":[1,4]},',
   '{"text":"There was a ceremony up top. A new officer.","id":"1gs1469","cue":"ceremony"},',
+  '{"text":"Sunday we cross back. Four weeks went fast.","id":"tpw8r3","cue":["event.crossingBack.warning","event.crossingBack.warning"]},',
+  '{"text":"Back over the Line on Sunday. I\'ll miss these stars.","id":"32slgg","tone":"warm","cue":["event.crossingBack.warning","event.crossingBack.warning"]},',
+  '{"text":"Remember the punch? Brennan\'s making more. Brace.","id":"sjrwk5","tone":"funny","cue":["event.crossingBack.warning","event.crossingBack.warning"]},',
+  '{"text":"You\'re leading the oath Sunday? Don\'t rush the words.","id":"16atk9o","cue":["event.crossingBack.warning","event.crossingBack.warning"],"tier":[1,4]},',
+  '{"text":"What\'s the oath like? Is there a test? Is it the punch?","id":"12zrob","tone":"funny","cue":["event.crossingBack.warning","event.crossingBack.warning"],"who":"bramwell-basil"},',
   '{"text":"Did you see the first-timers\' faces at the punch? I\'ll remember that for years.","id":"vvwnoh","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
   '{"text":"Zeke says his face at his first Line was worse. I don\'t believe him.","id":"m0wb1a","tone":"funny","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
   '{"text":"There\'s a plaque up now. With the date. We were there.","id":"yx2j91","tone":"warm","cue":["event.crossingLine.afterglow","event.crossingLine.afterglow"]},',
@@ -32989,6 +32994,76 @@ const LINES = JSON.parse([
   '{"text":"The best seat\'s downstairs tonight, cadet. The bow lounge. Go on, you\'ll miss the head.","id":"9yybc2"}]',
   ',"event.comet.turn.cadet.goal":[',
   '{"text":"The comet at the bow glass","id":"1p2v8qx"}]',
+  ',"event.crossingBack.address.go.1":[',
+  '{"text":"This is the Captain. We\'ve crossed back over the Line.","id":"rw527y"}]',
+  ',"event.crossingBack.address.go.2":[',
+  '{"text":"Monday {me} leaves us for Concord headquarters. The shuttle bay at ten.","id":"qgp4wh"}]',
+  ',"event.crossingBack.address.open.1":[',
+  '{"text":"This is the Captain. We\'ve crossed back over the Line.","id":"1ytqopc"}]',
+  ',"event.crossingBack.address.open.2":[',
+  '{"text":"Well done, all of you. The Line supper\'s at six. Marrow out.","id":"19pg29"}]',
+  ',"event.crossingBack.address.stay.1":[',
+  '{"text":"This is the Captain. We\'ve crossed back over the Line.","id":"1hjursj"}]',
+  ',"event.crossingBack.address.stay.2":[',
+  '{"text":"Some of you have heard: {me} stays with the Wren. We\'re keeping them.","id":"1crmtz4"}]',
+  ',"event.crossingBack.arrow.oath":[',
+  '{"text":"Lead the oath: the bow lounge, at the front","id":"1m0saiv"}]',
+  ',"event.crossingBack.arrow.ship":[',
+  '{"text":"Taavek\'s ship, off the bow: the bow lounge","id":"1q45a95"}]',
+  ',"event.crossingBack.gather.ceremony.ask":[',
+  '{"text":"Crossing back at half two. You\'re leading the oath, I hear.","id":"m2tc2v"},',
+  '{"text":"Bow lounge at half two. Come on, you\'re the one reading.","id":"2s2ymm"}]',
+  ',"event.crossingBack.gather.ceremony.here":[',
+  '{"text":"Four weeks. Feels like a year and a day.","id":"1jusulx","tone":"warm"},',
+  '{"text":"Basil\'s face when the punch comes. Watch it.","id":"15lzhgg","tone":"funny"}]',
+  ',"event.crossingBack.gather.ceremony.name":[',
+  '{"text":"Crossing back","id":"kgj6yy"}]',
+  ',"event.crossingBack.gather.ceremony.thanks":[',
+  '{"text":"You stand at the front of the bow lounge with the crowd behind you, and read the old oath for Basil. The Veyli ship\'s lights hang off the bow.","id":"jrj4m","tone":"warm"}]',
+  ',"event.crossingBack.gather.lineSupper.ask":[',
+  '{"text":"Line supper at six. Second one. Still no punch.","id":"1yy18v5","tone":"funny"}]',
+  ',"event.crossingBack.gather.lineSupper.here":[',
+  '{"text":"To the Line. Both ways.","id":"1l27zbk","tone":"warm"}]',
+  ',"event.crossingBack.gather.lineSupper.mail":[',
+  '{"text":"The Line supper | The Line supper again tonight at six, in the mess. Same rules as last time: proper food to take the taste away.","id":"17a21ss"}]',
+  ',"event.crossingBack.gather.lineSupper.name":[',
+  '{"text":"The Line supper","id":"xrx7w0"}]',
+  ',"event.crossingBack.gather.lineSupper.thanks":[',
+  '{"text":"The mess is full again, every bench taken, and someone has saved you a place.","id":"sz0zin","tone":"warm"}]',
+  ',"event.crossingBack.keepsake":[',
+  '{"text":"Your Line certificate, signed by the Captain twice: into the Veyli reach on Day 7, and back over the Line on Day 35.","id":"1m2e8w9"}]',
+  ',"event.crossingBack.mail.warning":[',
+  '{"text":"Sunday we cross back over the Line | Sunday at 14:30 the Wren crosses back over the Line. The horn on every deck, then the oath in the bow lounge. You lead it this time: Basil is our only first-timer. The Line supper in the mess at 18:00.","id":"1scwy7d"}]',
+  ',"event.crossingBack.notice.horn":[',
+  '{"text":"The horn. The Wren is crossing back over the Line. To the bow lounge: you lead the oath.","id":"1sv515t"}]',
+  ',"event.crossingBack.notice.morning":[',
+  '{"text":"Today at 14:30 the Wren crosses back over the Line. You lead the oath in the bow lounge.","id":"chq1h8"}]',
+  ',"event.crossingBack.notice.ship":[',
+  '{"text":"Taavek\'s ship is off the bow again. Look out of the bow glass.","id":"16lx1va"}]',
+  ',"event.crossingBack.notice.vance":[',
+  '{"text":"Sunday at 14:30 the Wren crosses back over the Line. You lead the oath, in the bow lounge.","id":"1d5noss"}]',
+  ',"event.crossingBack.notice.vanceComing":[',
+  '{"text":"Commander Vance is coming to find you.","id":"1qlfj4o"}]',
+  ',"event.crossingBack.record":[',
+  '{"text":"Crossed back over the Line, Day 35. Led the oath.","id":"l2lggr"}]',
+  ',"event.crossingBack.say.saruth":[',
+  '{"text":"Company, the other way.","id":"4hw6nk"}]',
+  ',"event.crossingBack.status.afterglow":[',
+  '{"text":"Back on our own side of the Line.","id":"2ifu7n"}]',
+  ',"event.crossingBack.status.onset":[',
+  '{"text":"Crossing back. The oath in the bow lounge: you lead it.","id":"e77kpg"}]',
+  ',"event.crossingBack.status.resolution":[',
+  '{"text":"Crossed back over the Line. The Line supper\'s at 18:00.","id":"vz4gde"}]',
+  ',"event.crossingBack.status.warning":[',
+  '{"text":"Sunday at 14:30: the Wren crosses back over the Line.","id":"5jwi27"}]',
+  ',"event.crossingBack.toast.go":[',
+  '{"text":"To {me}. Headquarters doesn\'t know what\'s coming.","id":"nf8tjc","tone":"warm"},',
+  '{"text":"To our Line-crosser, off to the Concord!","id":"1hxshez"}]',
+  ',"event.crossingBack.toast.open":[',
+  '{"text":"To the Line. Both ways, and all of us.","id":"a25ztk","tone":"warm"}]',
+  ',"event.crossingBack.toast.stay":[',
+  '{"text":"To {me}, who\'s staying! Somebody had to.","id":"1zw45m","tone":"warm"},',
+  '{"text":"To the one who said no to headquarters!","id":"1jd9r8q","tone":"funny"}]',
   ',"event.crossingLine.address.onset.1":[',
   '{"text":"This is the Captain. I\'m off today, so I\'ll be brief. We\'ve crossed the Line.","id":"134e870"}]',
   ',"event.crossingLine.address.onset.2":[',
@@ -40067,6 +40142,12 @@ const MEETINGS_BAKED = {
   "careerChief": {"title": "A word with the Chief", "from": "Chief Ines Calder", "gist": "You didn't come to my office. Missed shifts. Be in the bay at ten to nine, every workday. Need a day? Book leave.", "lines": [{"who": "calder", "text": "Door. Thank you. Sit.", "pose": "gesture"}, {"who": "calder", "text": "I'll be plain. You've missed shifts. Not one. Several.", "to": "you"}, {"who": "calder", "text": "The board doesn't wait. When you're not there, someone else takes your jobs. Then they're late on theirs."}, {"who": "calder", "text": "I'm not angry. I'm worried. Those are different, and I'd like you to know which."}, {"who": "calder", "text": "So. What's going on, {me}? Take your time.", "pose": "listen", "to": "you"}, {"choice": [{"text": "It's been hard. I've been tired.", "rel": {"calder": 1}, "flavour": "share", "mem": "career.chief.tired", "reply": {"who": "calder", "text": "Tired I can work with. If you're ill, the infirmary. Time there never counts against you."}}, {"text": "I don't have a good reason.", "rel": {"calder": 1}, "mem": "career.chief.honest", "reply": {"who": "calder", "text": "Honest. Good. I can work with honest.", "pose": "nod"}}, {"text": "It won't happen again.", "mem": "career.chief.promise", "reply": {"who": "calder", "text": "Don't promise me. Show the board."}}]}, {"who": "calder", "text": "Here's what changes. You're in the bay at ten to nine. Every workday."}, {"who": "calder", "text": "You take a job. You finish it. You turn it in at the board. Do that, and this goes away."}, {"who": "calder", "text": "Need a day? Book leave on your device. An empty slot on paper beats a surprise."}, {"who": "calder", "text": "If nothing changes, the Captain will want to see you. Neither of us wants that."}, {"who": "calder", "text": "Nobody thanks the air. But somebody has to turn up and keep it going. I'd like that to be you.", "to": "you"}, {"who": "calder", "text": "That's all. I won't say it twice. Board's there.", "pose": "nod"}]},
   "careerLetGo": {"title": "The Chief's office", "from": "Chief Ines Calder", "gist": "Chief Calder: the Wren is letting you go. The Tern leaves tomorrow.", "lines": [{"who": "calder", "text": "Sit. Please."}, {"who": "calder", "text": "I'll say it straight, because you'd want that. The Wren is letting you go.", "to": "you"}, {"who": "calder", "text": "The Tern leaves tomorrow. You'll be on it."}, {"who": "calder", "text": "This isn't about who you are. It's the shifts. Only the shifts."}, {"who": "calder", "text": "I keep a note on every tech I've trained. Yours isn't finished. That's the part I mind."}, {"who": "calder", "text": "Anything you want to say?", "pose": "listen", "to": "you"}, {"choice": [{"text": "I'm sorry.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "I know. So am I."}}, {"text": "Thank you for trying.", "rel": {"calder": 1}, "reply": {"who": "calder", "text": "You're welcome. I'd try again."}}, {"text": "(Say nothing)", "reply": {"who": "calder", "text": "Fine. Quiet's fine."}}]}, {"who": "calder", "text": "Wherever you go next, turn up. That's most of it. The rest you can learn."}, {"who": "calder", "text": "Go and say your goodbyes. People will want to.", "pose": "nod"}]},
   "careerSendoff": {"title": "The shuttle bay", "from": "Zeke Torres", "gist": "The Tern's ramp is down. Your friends came to see you off.", "lines": [{"who": "torres-zeke", "text": "Right where we started. Ramp down, Tern ticking over.", "pose": "gesture"}, {"who": "torres-zeke", "text": "I walked you up from here. Feels wrong walking you back.", "to": "you"}, {"who": "pell", "text": "Brought you a screw from the Wren. For your tin, when you start one. Every ship gets one.", "to": "you"}, {"who": "calder", "text": "The Tern's on time. It always is.", "pose": "nod"}, {"who": "torres-zeke", "text": "She came. She never comes to these."}, {"who": "calder", "text": "I came to check the ramp seals."}, {"who": "calder", "text": "Look after yourself, {me}.", "to": "you"}, {"choice": [{"text": "I'll miss this ship.", "flavour": "share", "reply": {"who": "torres-zeke", "text": "She'll miss you. Coil three most of all. She won't say so."}}, {"text": "Thank you. All of you.", "reply": {"who": "pell", "text": "Don't. You'll set me off.", "pose": "laugh"}}, {"text": "(Wave)", "reply": {"who": "torres-zeke", "text": "That'll do. That says it.", "pose": "nod"}}]}, {"who": "torres-zeke", "text": "Go on, then. Get a window seat. Every time."}, {"who": "pell", "text": "And write. I'll actually read it."}]},
+  "crossingBackAddress.ask": {"title": "The Captain's address", "from": "Captain Odile Marrow", "gist": "The Captain asked you before the crew: stay aboard the Wren, or go to headquarters.", "lines": [{"who": "marrow", "text": "One more thing. Headquarters offered {me} a post, and I said I'd ask them here, at the Line.", "pose": "gesture"}, {"who": "marrow", "text": "So. In front of everyone. The Wren, or headquarters?", "to": "you"}, {"choice": [{"text": "I'm staying.", "flag": "end.cb.stay"}, {"text": "I'm going.", "flag": "end.cb.go"}]}]},
+  "crossingBackAddress.go": {"title": "The Captain's address", "from": "Captain Odile Marrow", "gist": "The Captain told the crew you're leaving for Concord headquarters on Monday.", "lines": [{"who": "marrow", "text": "One more thing, and then the supper. Headquarters offered {me} a post, and they said yes.", "pose": "gesture"}, {"who": "marrow", "text": "Monday, we lose them to the Concord. The Tern leaves at ten. I expect the shuttle bay full."}, {"who": "tomas", "text": "Monday? This Monday?"}, {"who": "marrow", "text": "We'll make it a proper send-off. Until then, you're still ours.", "pose": "nod", "to": "you"}]},
+  "crossingBackAddress.stay": {"title": "The Captain's address", "from": "Captain Odile Marrow", "gist": "The Captain told the crew you're staying aboard the Wren.", "lines": [{"who": "marrow", "text": "One more thing, and then the supper. Some of you have heard. Headquarters offered {me} a post.", "pose": "gesture"}, {"who": "marrow", "text": "They said no. We're keeping them."}, {"who": "pell", "text": "Ha! Told you. Pay up, Halloran.", "pose": "laugh"}, {"who": "marrow", "text": "The Wren is home, then. Welcome home, {me}. Properly, this time.", "pose": "nod", "to": "you"}]},
+  "crossingBackOath": {"title": "Crossing back", "from": "Captain Odile Marrow", "gist": "The Wren crossed back over the Line. You led the oath for Basil, Saruth read the Veyli ship's last signal, and the Captain spoke to the crew.", "lines": [{"who": "marrow", "text": "Thank you all. Four weeks ago we crossed into the reach as guests. Today we cross back as friends of it.", "pose": "gesture"}, {"who": "marrow", "text": "This time the oath isn't mine to read. {me}, the front is yours.", "to": "you"}, {"who": "you", "text": "First-timers, step forward. Don't be shy."}, {"who": "bramwell-basil", "text": "That's just me, isn't it? Right. Stepping.", "pose": "laugh"}, {"who": "you", "text": "\"We have crossed the Line. We left the near stars behind us, and we did not go alone.\""}, {"who": "you", "text": "\"Whatever is out here, we meet it as one crew, and we bring each other home.\""}, {"who": "you", "text": "\"From today, this reach knows our names.\""}, {"who": "bramwell-basil", "text": "Do I say something now? I feel like I should say something."}, {"choice": [{"text": "Say what you like. It's yours.", "rel": {"bramwell-basil": 1}, "reply": {"who": "bramwell-basil", "text": "Then... thank you for having me. All of you. Even the punch.", "pose": "laugh"}}, {"text": "\"We're glad we came.\" That's what I'd say.", "rel": {"bramwell-basil": 1}, "reply": {"who": "bramwell-basil", "text": "We're glad we came. Yes. That.", "pose": "nod"}}]}, {"who": "brennan", "text": "Line punch. One mug each, first-timer first. Drink it all. No faces.", "pose": "gesture"}, {"who": "bramwell-basil", "text": "It's green. Why is it still green?"}, {"who": "brennan", "text": "Tradition. Drink.", "pose": "nod"}, {"who": "saruth", "text": "Captain. Taavek's ship sends its last signal. May I read it?", "pose": "gesture"}, {"who": "marrow", "text": "Please."}, {"who": "saruth", "text": "\"Go well, Wren. The reach remembers the ones who were kind in it. Come back over the Line again, one day.\""}, {"who": "marrow", "text": "Thank you, Saruth. Tell them the Wren says the same.", "pose": "nod"}]},
+  "crossingBackSaruth": {"title": "Company", "from": "Saruth", "gist": "Saruth: Taavek's ship will fly beside the Wren to the Line.", "lines": [{"who": "saruth", "text": "You have seen it? Off the bow. Taavek's ship, again.", "to": "you"}, {"who": "saruth", "text": "They will fly beside the Wren to the Line. Company, the other way."}, {"choice": [{"text": "That's kind of them.", "rel": {"saruth": 1}, "reply": {"who": "saruth", "text": "Kind, yes. And they want to see the Line for themselves. Both."}}, {"text": "Will you miss the reach?", "rel": {"saruth": 2}, "reply": {"who": "saruth", "text": "The reach does not stay behind at the Line. It comes with me. Like a coat."}}]}, {"who": "saruth", "text": "Tomorrow I read their last signal to the crew. The Captain asked. I said yes before she finished."}]},
+  "crossingBackVance": {"title": "Crossing back", "from": "Commander Teo Vance", "gist": "Commander Vance: Sunday at 14:30 the Wren crosses back over the Line, in the bow lounge. You lead the oath this time.", "lines": [{"who": "vance", "text": "{me}. A word. Walk with me, or stand still. Either.", "pose": "nod", "to": "you"}, {"who": "vance", "text": "Sunday at 14:30 the Wren crosses back over the Line. The bow lounge again, the horn again."}, {"who": "vance", "text": "And this time you'll lead the oath. Basil's the only first-timer. Be gentle. Or don't.", "to": "you"}, {"choice": [{"text": "I'll be there. I'll learn the words.", "rel": {"vance": 1}, "reply": {"who": "vance", "text": "You know them already. You heard them four weeks ago.", "pose": "nod"}}, {"text": "Me? Why me?", "rel": {"vance": 2}, "reply": {"who": "vance", "text": "The Captain asked for you by name. I didn't argue. I rarely do."}}]}, {"who": "vance", "text": "Clean boots. The punch is Brennan's problem, not yours. As you were.", "pose": "nod"}]},
   "crossingCeremony": {"title": "The Line oath", "from": "Captain Odile Marrow", "gist": "You crossed the Line into the Veyli reach. The Captain read the old oath, you answered for the first-timers, and you drank Brennan's Line punch. Your certificate is on your shelf.", "lines": [{"who": "marrow", "text": "Thank you all for coming. I'm off duty, so this is unofficial. Very old, and unofficial.", "pose": "gesture"}, {"who": "marrow", "text": "First-timers, step forward. Don't be shy. Everyone here stood where you're standing once."}, {"who": "first1", "text": "Do we have to say anything?"}, {"who": "marrow", "text": "One of you does, at the end. I do the hard part. Listen.", "pose": "laugh"}, {"who": "marrow", "text": "Past this point the stars have other names, and help is a long way off. We go as guests."}, {"who": "marrow", "text": "So we make each other a promise. Here it is.", "pose": "gesture"}, {"who": "marrow", "text": "\"We have crossed the Line. We left the near stars behind us, and we did not go alone.\""}, {"who": "marrow", "text": "\"Whatever is out here, we meet it as one crew, and we bring each other home.\"", "pose": "gesture"}, {"who": "marrow", "text": "\"From today, this reach knows our names.\" There. That's the oath. It's older than the ship."}, {"who": "marrow", "text": "Now. Who answers for the first-timers?", "pose": "listen"}, {"who": "first2", "text": "Not me. Don't look at me."}, {"who": "first1", "text": "{me}'ll do it. Won't you?", "pose": "laugh", "to": "you"}, {"choice": [{"text": "We came a long way. We're glad we did.", "rel": {"marrow": 1}, "flavour": "share", "flag": "line.answer.proud", "reply": {"who": "marrow", "text": "So are we. Write that down, somebody. It's going on the plaque.", "pose": "nod"}}, {"text": "We crossed together, all of us. Even the ones on watch.", "rel": {"marrow": 1}, "flavour": "warm", "flag": "line.answer.watch", "reply": {"who": "marrow", "text": "Even the ones on watch. Yes. That's going on the plaque.", "pose": "nod"}}, {"text": "Is this the part with the punch?", "rel": {"marrow": 1, "brennan": 1}, "flavour": "funny", "flag": "line.answer.punch", "reply": {"who": "marrow", "text": "It is. I'm so sorry. And yes, that's going on the plaque too.", "pose": "laugh"}}]}, {"who": "brennan", "text": "Line punch. One mug each. You drink it all. That's the dunking. No complaints.", "pose": "gesture"}, {"who": "first2", "text": "It's... green. Why is it green?"}, {"who": "brennan", "text": "Tradition. Drink.", "pose": "nod"}, {"who": "marrow", "text": "There. You're Line-crossers now. Supper's at six. Something to take the taste away.", "pose": "laugh"}]},
   "endFirstMorning": {"title": "Breakfast with the Captain", "from": "Captain Odile Marrow", "gist": "The Captain looked for you at breakfast: the Wren is back on her course, and she's glad you stayed.", "lines": [{"who": "marrow", "text": "Is this seat taken? It is now.", "pose": "gesture", "to": "you"}, {"who": "marrow", "text": "Back on our own side of the Line. Course laid in, nothing on the long-range. A quiet week, Vance promises."}, {"who": "marrow", "text": "He promises that every week."}, {"who": "marrow", "text": "I wrote to headquarters last night. Told them you're spoken for.", "to": "you"}, {"choice": [{"text": "Thank you, Captain.", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "Don't. It was the easiest letter I've written all year."}}, {"text": "What happens now?", "rel": {"marrow": 1}, "reply": {"who": "marrow", "text": "Now? Breakfast. Then the board, then dinner. Then tomorrow. That's the whole secret of a ship."}}, {"text": "(Raise your mug)", "rel": {"marrow": 2}, "reply": {"who": "marrow", "text": "To the Wren. And to the people who stay with her."}}]}, {"who": "marrow", "text": "The Admiral sends his regards. I'm told."}, {"who": "marrow", "text": "Eat up. The ship's not going anywhere without you. Not any more.", "pose": "nod", "to": "you"}]},
   "firstLightCocoa": {"title": "First Light Cocoa", "from": "Dev Raman", "gist": "First Light Cocoa: Dev Raman showed everyone where the Wren has been and where she's heading, the old hands gave their first-day tips, and you said what you've noticed.", "lines": [{"who": "raman", "text": "Lights down, please. Thank you. Right. Mugs up, everyone got one?", "pose": "gesture"}, {"who": "raman", "text": "Out there, port side. That smudge is the Pale Shoals. We left them six weeks ago."}, {"who": "raman", "text": "Dead ahead, too faint to see yet: Tavessa. The Veyli named it. That's where we're bound.", "pose": "gesture"}, {"who": "raman", "text": "And somewhere behind us, the little shuttle that brought you. I flew it. Gently.", "pose": "laugh", "to": "you"}, {"who": "raman", "text": "Old hands. One thing you wish you'd known on your first day. Go on."}, {"who": "holt", "text": "Never sit in my chair. Bridge lobby, by the door. That's the whole tip.", "pose": "nod"}, {"who": "kowalczyk", "text": "Track what matters. Tap it on your device and an arrow takes you there. Saved me years."}, {"who": "brennan", "text": "Breakfast is seven till nine. Miss it and the grab shelf's always open. Nobody goes hungry on my ship."}, {"who": "halloran-emeka", "text": "Write your jobs up in the Works log. You're quicker at them next time. Ask me how I know."}, {"who": "sato", "text": "The big windows on the promenade. Five minutes there and the day sits better."}, {"who": "raman", "text": "Now the new faces. One thing you've noticed about her. Tomas?", "pose": "listen"}, {"who": "tomas", "text": "The lift hums a different note on every deck. Deck 4's is the friendliest.", "pose": "laugh"}, {"who": "raman", "text": "{me}. Your turn. What have you noticed?", "pose": "listen", "to": "you"}, {"choice": [{"text": "She never stops. Even at night you can feel her going.", "rel": {"raman": 1}, "flavour": "share", "mem": "firstlight.going", "reply": {"who": "raman", "text": "That's the drive. Zeke'll tell you it's coil three. It's always coil three.", "pose": "laugh"}}, {"text": "Everyone says hello. Even the ones who look busy.", "rel": {"raman": 1, "tomas": 1}, "flavour": "warm", "mem": "firstlight.hello", "reply": {"who": "raman", "text": "That's the Wren. Small ship, long way from anywhere. We look after each other."}}, {"text": "The cocoa's better than the coffee.", "rel": {"raman": 1}, "flavour": "funny", "mem": "firstlight.cocoa", "reply": {"who": "raman", "text": "Don't let Brennan hear you. Actually, do. She'll be thrilled.", "pose": "laugh"}}]}, {"who": "raman", "text": "Right. To the next season, and the new faces in it. Drink up, it's going cold.", "pose": "gesture"}]},
@@ -43156,6 +43237,7 @@ function eventsTick() {
   if (EV_STORM_ON) stormStoryTick(now);                  // the storm update's story A, in play (slot 'Storm builder')
   if (EV_LINE_ON) lineStoryTick(now);                    // Crossing the Line's notices and story A, in play (slot 'Line builder')
   if (EV_COMET_ON && COMET) cometTick(now);              // the comet's notices, the rooms' talk, the naming card and the knot, in play (slot 'Comet builder')
+  if (EV_ENDING_ON && EVENTS_ON) crossingBackTick(now);   // the crossing back: Vance's word, the Veyli ship, the oath you lead, the address (slot 'Ending builder')
   if (prev >= 0) eventCallInTick(prev, m);               // F0b: the called-in notes as their meetings begin (inert while off)
   eventHelpKeep();                                       // the storm update S4: your prep jobs noted as they're done (inert while off)
   eventsDress(now);                                      // its dressing and the traces left by past events
@@ -43827,6 +43909,55 @@ if (EV_COMET_ON && EVENTS_ON) {
   SHIP_EVENTS.comet.dressing = { warning: dressAtM(1260, 1290), onset: dressAtM(1290, 1320).concat(dressAtM(1320, 1360)), resolution: dressAtM(1360, 1365) };
   SHIP_EVENTS.comet.settleTraces = ['cometCord'];          // the knotted cord stays on the bow glass rail for good (from 22:40)
   SHIP_EVENTS.comet.moments.push({ id: 'cometTurnBack', phase: 'resolution', at: [0, 1360], where: 'shipwide', feel: ['cometTurnBack'], len: 20 });   // the helm brings her back onto her course
+}
+// ---- the crossing back (the ending, E-1, EN2 for lead 39; plans/ending-spec.html "The week" and section 3, the user's
+// choice of 2026-10-26). Behind EV_ENDING_ON (section 13) with the events base on; off: no such event, nothing added.
+// After the Veyli vessel (Days 27-30), four weeks to the hour after the first crossing. Day 0 is Wednesday Day 31:
+// 08:00 the warning (Commander Vance comes to find you: you lead the oath this time; the crew talk), Saturday Day 34
+// 10:00 Taavek's ship off the bow again (Saruth), Sunday Day 35 14:30 the horn, 14:40 the oath in the bow lounge with you
+// as host (crossingBackOath: Basil the one first-timer, Brennan's punch, Saruth reads the Veyli ship's last signal), then
+// the Captain's final address by your answer to the offer (crossingBackAddress.stay | go, or .ask: Stay or Go before the
+// crowd), 15:15 the resolution (your answer settled), 18:00 the Line supper again, 19:15 the afterglow to midnight. No
+// score, no commendation (as the Line). Its play is the slot 'Ending builder' (end of section 18): crossingBackTick
+if (EV_ENDING_ON && EVENTS_ON) {
+  const w = k => evWord('event.crossingBack.' + k);
+  EV_CALENDAR.push({ id: 'crossingBack', day: 31, kind: 'short' });   // after the vessel's row (Day 27, four days)
+  SHIP_EVENTS.crossingBack = {
+    title: 'Crossing back', days: 5, commend: false, threads: [], pause: [], keep: [],
+    phases: [{ id: 'warning', at: [0, 480] }, { id: 'onset', at: [4, 870] }, { id: 'resolution', at: [4, 915], clears: true }, { id: 'afterglow', at: [4, 1155], clears: true }],
+    mail: {
+      vance: { ...evBankMail('event.crossingBack.mail.warning', { subject: 'Sunday we cross back over the Line', body: 'Sunday at 14:30 the Wren crosses back over the Line. You lead the oath, in the bow lounge.' }), at: [0, 1080], from: 'Commander Teo Vance' },   // the record of his word (18:00)
+      lineSupper: { ...evBankMail('event.crossingBack.gather.lineSupper.mail', { subject: 'The Line supper', body: 'The Line supper again tonight at six, in the mess.' }), at: [4, 915], from: 'Chef Auda Brennan' },
+    },
+    status: { warning: 'Sunday at 14:30: the Wren crosses back over the Line.', onset: 'Crossing back. The oath in the bow lounge: you lead it.', resolution: 'Crossed back over the Line. The Line supper\'s at 18:00.', afterglow: 'Back on our own side of the Line.' },   // the writers' status.<phase> first (eventStatus)
+    // the oath, you the host: the Captain, Brennan with the punch and Basil (the one first-timer, aboard from Day 21) at the
+    // Line's lead spots 1-3 (its venue, lineVenue); Saruth, with the Veyli ship's last signal, comes with the crowd to
+    // lead spot 4 (as at the comet: a guest is never called in). The address after it is crossingBackTick's
+    meetings: [{ id: 'crossingBackOath', phase: 'onset', at: [4, 880], len: 35, early: 25, where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, script: 'crossingBackOath',
+      who: ['marrow', 'brennan', 'bramwell-basil'], notify: w('notice.horn') || 'The crossing back: you lead the oath in the bow lounge.' }],
+  };
+  const C = SHIP_EVENTS.crossingBack, cer = C.meetings[0];
+  // the crowd, as the Line's (k 365): everyone free comes, the cast with the meeting; standing easy on shift; the lounge the
+  // ceremony's alone 14:30-15:15; the horn felt everywhere; the ribbons and the punch bowl (the Line's dressing)
+  C.moments = [{ id: 'crossingBackCeremony', phase: 'onset', at: [4, 870], len: 45, k: 365, where: { venue: 'bow-lounge-line', deck: 3, room: /^Bow lounge$/ }, gathering: true, easy: true,
+    who: p => cer.who.includes(p.id) ? 0 : 1, anim: 'talk', from: 'Captain Odile Marrow', whereFor: cometWhereFor({ saruth: [3, '@bow-lounge-line-lead-4'] }),
+    places: [{ deck: 3, pool: '@gather-bow-lounge-line' }, { deck: 3, room: /^Bow lounge$/, types: ['lounge-seat'] }, { deck: 3, pool: '@gather-plaza' }],
+    lead: lineLead, joinAt: 900, name: w('gather.ceremony.name') || 'Crossing back',
+    ask: (c, p) => evWordAt('event.crossingBack.gather.ceremony.ask', p ? p.seed + c.day : 0) || 'Crossing back at half two, the bow lounge. Coming?',
+    here: (c, p) => evWordAt('event.crossingBack.gather.ceremony.here', p ? p.seed + c.day : 0) || undefined,
+    thanks: c => evWordAt('event.crossingBack.gather.ceremony.thanks', 0, c) || 'You stand at the front of the bow lounge and read the old oath for Basil.' },
+    { id: 'crossingBackHorn', phase: 'onset', at: [4, 870], where: 'shipwide', feel: ['horn'], len: 3 }];
+  C.dressing = { onset: [{ id: 'lineRibbons', title: 'Crossing back', at: [4, 870, 915] }] };
+  C.routines = { onset: [{ who: 'all', rule: 'standEasy', at: [870, 915], not: ['dept:command', 'dept:helm', 'dept:watch', 'dept:galley'] },
+    { where: '3|L', name: 'the bow lounge', rule: 'closed', gather: true }] };
+  C.settle = 'resolution';
+  // the Line supper again (Sunday Day 35's table), seated as on Day 7, with Brennan's pudding; 12 more portions
+  C.galley = { resolution: { extra: 12 } };
+  C.dayDress = [{ trad: 'sunday-table', day: 4, set: { name: w('gather.lineSupper.name') || 'The Line supper', at: [1080, 1185], jitter: 0, who: [['everyone', 1]],
+    words: 'event.crossingBack.gather.lineSupper', mail: false, stay: [30, 45], min: 20, seated: true, pudding: true } }];
+  // the guard's rows: the crossing back is the Captain's scene that Sunday; the offer (29a, the ready room, Thursday
+  // Day 32 16:00) one of hers too (the spec's one row, endingOffer, 15:45-16:45)
+  EV_BEATS.push({ id: 'crossingBack', kind: 'captain', day: 35, at: [870, 930] }, { id: 'endingOffer', kind: 'captain', day: 32, at: [945, 1005] });
 }
 // the ship-wide events' gathering moments, shaped like traditions (EV_SHIPWIDE, read by eventsOn); each its own
 // hash key k (the storm's party 340, then 351 up), given in the moment's data (k) from the events base on. A moment may
@@ -46048,6 +46179,110 @@ function cometMusicOn() {
   const here = deckDef.num + '|' + roomAt(...player.here()); return COMET.rooms.some(r => r[0] === here);
 }
 // ---- end of slot: Comet builder ----
+// ---- slot: Ending builder (section 18; EN2 for lead 39, E-1 the crossing back, plans/ending-spec.html). New code of this seat's goes here ----
+// The crossing back in play, once a ship minute from eventsTick (never the crew's planner): it reads and writes the
+// running event's e.mine ('story:*', 'notice:*', saved with it) and the flags the address's choice sets (end.cb.stay,
+// end.cb.go). Wednesday from 08:30, once you're up and free: Vance comes to find you (crewScene 'follow'), his word when
+// he's beside you (crossingBackVance; notice.vance after it; his Mail at 18:00 is the record). Saturday from 10:00: the
+// notice "Taavek's ship is off the bow again" and a level 2 arrow to the bow lounge, once; near Saruth, their scene
+// (crossingBackSaruth), once. Sunday: the morning notice once you're up; from 14:00 a level 1 arrow to the bow lounge
+// ("Lead the oath"); the horn's notice at 14:30; the oath (the meeting crossingBackOath); then, still in the lounge, the
+// Captain's final address by your answer (crossingBackAnswer: the address's own choice, else 29a's), or .ask first;
+// 15:15 the answer settled (crossingBackSettle: Stay starts the endgame, 29c's endStaySet; 29a's endSettle if it's
+// there) and the address as the record (a banner if you weren't in the lounge to hear it); the Line supper's toasts
+// coloured by your answer. Off (EV_ENDING_ON false): nothing here runs (crossingBackShip and crossingBackDone say no)
+if (EV_ENDING_ON && EVENTS_ON) for (const t of ['ev-crossingBackCeremony', 'ev-crossingBackCeremony-talk']) EV_MEET_TAGS.add(t);
+function crossingBackOn() { return typeof EV_ENDING_ON !== 'undefined' && !!EV_ENDING_ON && typeof EVENTS_ON !== 'undefined' && !!EVENTS_ON && !!SHIP_EVENTS.crossingBack; }
+// your answer as it stands: the address's own choice (final), else 29a's (SHIP.end, through its endAnswer when built):
+// 'stay' | 'go', or null (not answered, or "not sure")
+function crossingBackAnswer() {
+  if (flag('end.cb.stay')) return 'stay'; if (flag('end.cb.go')) return 'go';
+  let a = null;
+  try { if (typeof endAnswer === 'function') a = endAnswer(); else { const s = SHIP.end && Array.isArray(SHIP.end.said) ? SHIP.end.said[SHIP.end.said.length - 1] : null; a = s ? s[1] : null; } } catch (e) { a = null; }
+  return a === 'stay' || a === 'go' ? a : null;
+}
+// settled at the address (15:15, or when the address's choice is made): once; Stay starts the endgame on Day 36 (29c)
+function crossingBackSettle(e, now) {
+  if (!e || e.mine['settled']) return e ? e.mine['settled'] : null;
+  const a = crossingBackAnswer(); if (!a) return null;   // never answered and not there: 29a's search asks you (the game never decides for you)
+  e.mine['settled'] = a;
+  try { if (typeof endSettle === 'function') endSettle(now, a); } catch (x) { /* 29a not built */ }
+  if (a === 'stay' && typeof endStaySet === 'function') endStaySet(e.startDay + 5);
+  return a;
+}
+// crossed back: the certificate's second date (section 4d's lineCertificate) and the keepsake's words
+function crossingBackDone() {
+  if (!crossingBackOn() || typeof SHIP === 'undefined') return false;
+  if ((SHIP.eventLog || []).some(l => l.id === 'crossingBack')) return true;
+  const e = SHIP.event; return !!(e && e.id === 'crossingBack' && shipNow() >= (e.startDay + 3) * 1440 + 915);
+}
+// the Veyli ship in the sky (VB2's sky ship asks this, typeof-guarded): off the bow from Saturday 10:00, alongside from
+// the horn, gone at 15:00; its three slow flashes as Saruth reads the signal (14:52-14:58). null: not shown
+function crossingBackShip(t) {
+  if (!crossingBackOn()) return null;
+  const e = SHIP.event; if (!e || e.id !== 'crossingBack') return null;
+  const B = (e.startDay - 1) * 1440, m = t - B;
+  if (m < 3 * 1440 + 600 || m >= 4 * 1440 + 900) return null;
+  const sun = m - 4 * 1440;
+  return { pose: sun >= 870 ? 'alongside' : 'bow', lights: 1, flash: sun >= 892 && sun < 898 };
+}
+function crossingBackMoment(id, who, done) {             // a scene where you are (as the Line's lineMoment); done: [key, value] in e.mine when it ends
+  const sc = MEETING_SCRIPTS[id]; if (!sc || DIALOGUE) return false;
+  const key = 'moment:' + id;
+  MEETING_SCRIPTS[key] = { ...sc, onEnd: () => { delete MEETING_SCRIPTS[key]; const e = SHIP.event; if (done && e && e.id === 'crossingBack') e.mine[done[0]] = done[1]; } };
+  return dialogueShow(key, { id: key, who, at: shipNow(), where: hereWhere() });
+}
+function crossingBackNotice(text, urgent) {
+  if (!text) return;
+  if (typeof deviceNotify === 'function') try { deviceNotify({ app: 'calendar', text, urgent: !!urgent }); return; } catch (e) { /* no device */ }
+  try { toast('Crossing back', text); } catch (e) { /* no UI */ }
+}
+function crossingBackTick(now) {
+  if (typeof FEEL_MOODS !== 'undefined' && FEEL_MOODS.crossingLine && !FEEL_MOODS.crossingBack) FEEL_MOODS.crossingBack = FEEL_MOODS.crossingLine;   // the gold hull lights, as the Line's (section 8b loads later)
+  const e = SHIP.event; if (!e || e.id !== 'crossingBack' || typeof DECK_CREW === 'undefined' || !deckDef) return;
+  const M = e.mine, at = (day, m) => (e.startDay - 1 + day) * 1440 + m, c = evCtx(e), P = player.obj.position, dn = deckDef.num;
+  const up = !(typeof sleeping !== 'undefined' && sleeping), busy = !up || !!DIALOGUE;
+  const near = (id, r) => DECK_CREW.find(a => a.p && a.p.id === id && a.h && Math.hypot(a.x - P.x, a.z - P.z) < r) || null;
+  let room = ''; try { const r = DECKS[dn].rooms[roomAt(...player.here())]; room = dn + '|' + (r && r.name || ''); } catch (x) { /* between rooms */ }
+  // Wednesday: Vance comes to find you (08:30 to 21:00), his word beside you, then the notice
+  if (!M['story:vance'] && now >= at(0, 510) && now < at(0, 1260) && !busy) {
+    if (!M['notice:vanceComing']) { M['notice:vanceComing'] = 1; crossingBackNotice(w2('notice.vanceComing') || 'Commander Vance is coming to find you.'); }
+    if (typeof crewScene === 'function') crewScene('vance', { mode: 'follow', to: null, until: now + 3 });
+    if (near('vance', 2.5)) crossingBackMoment('crossingBackVance', ['vance'], ['story:vance', 1]);
+  }
+  if (M['story:vance'] === 1 && !M['notice:vance']) { M['notice:vance'] = 1; if (typeof crewSceneEnd === 'function') crewSceneEnd('vance'); crossingBackNotice(w2('notice.vance') || 'Sunday at 14:30 the Wren crosses back over the Line. You lead the oath, in the bow lounge.', true); }
+  // Saturday: Taavek's ship off the bow again; Saruth
+  if (!M['notice:ship'] && now >= at(3, 600) && now < at(3, 1320) && up) { M['notice:ship'] = 1; crossingBackNotice(w2('notice.ship') || 'Taavek\'s ship is off the bow again. Look out of the bow glass.', true);
+    if (typeof guideAsk === 'function') guideAsk({ id: 'end:cb:ship', level: 2, owner: '18 (EN2)', once: 1, from: now, until: Math.min(now + 120, at(3, 1320)), goal: () => ({ deck: 3, room: 'L', label: w2('arrow.ship') || 'Taavek\'s ship, off the bow: the bow lounge' }), done: () => room === '3|Bow lounge' }); }
+  if (!M['story:saruth'] && now >= at(3, 600) && now < at(3, 1260) && !busy && near('saruth', 2.5)) crossingBackMoment('crossingBackSaruth', ['saruth'], ['story:saruth', 1]);
+  // Sunday: the morning's notice; the arrow to the front from 14:00; the horn
+  if (!M['notice:morning'] && now >= at(4, 360) && now < at(4, 870) && up) { M['notice:morning'] = 1; crossingBackNotice(w2('notice.morning') || 'Today at 14:30 the Wren crosses back over the Line. You lead the oath in the bow lounge.', true); }
+  const oathEnd = at(4, 880 + 35);
+  if (now >= at(4, 840) && now < oathEnd && !M['met:crossingBackOath'] && typeof guideAsk === 'function')
+    guideAsk({ id: 'end:cb:oath', level: 1, owner: '18 (EN2)', from: at(4, 840), until: oathEnd, goal: () => ({ deck: 3, room: 'L', label: w2('arrow.oath') || 'Lead the oath: the bow lounge, at the front' }), done: () => !!(SHIP.event && SHIP.event.mine && SHIP.event.mine['met:crossingBackOath']) });
+  if (!M['notice:horn'] && now >= at(4, 870) && now < at(4, 876) && up) { M['notice:horn'] = 1; crossingBackNotice(w2('notice.horn') || 'The horn. The Wren is crossing back over the Line.'); }
+  // the address, after the oath, while you're still in the lounge: by your answer, or the Captain asks first
+  if (M['met:crossingBackOath'] && !M['open:crossingBackOath'] && !DIALOGUE && !M['story:address'] && room === '3|Bow lounge' && now < at(4, 930)) {
+    const a = crossingBackAnswer();
+    if (a) { if (crossingBackMoment('crossingBackAddress.' + a, ['marrow'], ['story:address', a])) crossingBackSettle(e, now); }
+    else if (!M['story:ask']) crossingBackMoment('crossingBackAddress.ask', ['marrow'], ['story:ask', 1]);
+  }
+  // 15:15: settled; the address as the record (heard it: a quiet Mail; else the banner)
+  const inScene = !!DIALOGUE && (DIALOGUE.id === 'crossingBackOath' || /^moment:crossingBackAddress/.test(DIALOGUE.id));   // the oath or the address still on screen: wait (till 15:45)
+  if (!M['story:record'] && now >= at(4, 915) && (!inScene || now >= at(4, 945))) {
+    M['story:record'] = 1; const a = crossingBackSettle(e, now) || 'open';
+    const lines = [1, 2].map(i => evWord('event.crossingBack.address.' + a + '.' + i, c)).filter(Boolean);
+    captainAddress({ lines: lines.length ? lines : ['This is the Captain. We\'ve crossed back over the Line.'], at: now, quiet: !!M['story:address'] });
+  }
+  // the Line supper's toasts, in the mess (18:05-19:15), once, by your answer
+  if (!M['story:toast'] && room === '3|Mess hall' && now >= at(4, 1085) && now < at(4, 1155) && !busy) {
+    const a = M['settled'] || 'open', who = DECK_CREW.filter(x => x.p && x.h && x.p.id !== 'saruth' && Math.hypot(x.x - P.x, x.z - P.z) < 4).sort((x, y) => (x.p.seed || 0) - (y.p.seed || 0))[0];
+    const text = who && evWordAt('event.crossingBack.toast.' + a, who.p.seed || 0, c);
+    if (who && text && typeof bubbleSay === 'function' && bubbleSay(who.h, text, 5)) M['story:toast'] = 1;
+  }
+  function w2(k) { return evWord('event.crossingBack.' + k, c); }
+}
+// ---- end of slot: Ending builder ----
 // ---- slot: Appointments builder (section 18; FX22, 0.92.6 item 9, plans/patch-0.92.6.md). New code of this seat's goes here ----
 // Behind P926_APPT (section 13; URL flag 'appt'). The user: "Appointments work almost exactly the same as ship traditions
 // but are usually one on one or very small group." Words: content/appointments/ (SW2's, CS1 passed), baked into APPT_WORDS.

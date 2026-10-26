@@ -2,12 +2,17 @@
 # game's own functions at the times they'd run, no walking). Parts so far (EN2, E-4; EN1 adds offer, answers, goodbye
 # and endpage, EN2 crossing for E-1):
 #   off:      the build as it is (EV_ENDING_ON false): no endgame whatever the flag says, the endgame lines never hold,
-#             no first morning, no Schedule rows, "What's next" and the calendar as before
+#             no first morning, no Schedule rows, "What's next" and the calendar as before; no crossing back
 #   endgame:  a copy with the switch on: the endgame lines never before end.stay nor before its day; every hour of the
 #             first 14 days, about 4 hours in 10 after; endgame:false the other way round; no calendar row after the
 #             crossing back once you've stayed (one planted on Day 40); "What's next" and the Works app's last page;
 #             the first morning (booked on Day 36 at the Captain's breakfast, its Schedule row, the notice once, the
 #             level 1 arrow to the mess, cleared when met); a New game clears it all
+#   crossing: (E-1) the crossing back on paper, for each answer before the address (none, Go, Stay): the calendar's row on
+#             Day 31 after the vessel, its phases at their minutes, the oath's meeting, the guard's rows; Vance comes to
+#             you; the notices; the ship's arrow (2) and the oath's (1); the Veyli ship's poses; the oath with you as host;
+#             the address (asked first when not answered) and the answer settled at it, Stay starting the endgame; the
+#             record; the certificate's second date; the Line supper; nothing on the calendar after it
 # Setup and environment as for cadet_test.py (CADET_WORK, CADET_CHROME).
 # Run:  python3 ending_check.py BUILD.html [part ...]   Good is ENDING CHECK OK (exit 0); a failure exits 1.
 import sys, pathlib, os, re
@@ -60,8 +65,10 @@ def part_off(g):
       out.items = endingItems(36).length; out.rows = devDay(36).filter(x => /Captain/.test(x.title)).length;
       const p = ROSTER[3]; out.cond = [lineCond('endgame', 'true', p, { t: shipNow() }), lineCond('endgame', 'false', p, { t: shipNow() })];
       __tick(); out.tab = (WORKS_TABS || []).some(x => x.id === 'home'); out.notes = __notes.length;
+      out.cb = [!!SHIP_EVENTS.crossingBack, EV_CALENDAR.some(x => x.id === 'crossingBack'), crossingBackShip(34 * 1440), crossingBackDone()];
       flagSet('end.stay', null); return out; })()""")
     print('   ', r)
+    check(r['cb'] == [False, False, None, False], f"off: no crossing back ({r['cb']})")
     check(r['sw'] is False, f"off: EV_ENDING_ON is false in the build ({r['sw']})")
     check(r['day'] is None and not r['on'] and not r['set'], f"off: no endgame whatever the flag says ({r})")
     check(r['plan'] and r['next'] and r['occ'] == 'undefined' and r['items'] == 0 and r['rows'] == 0, f"off: the calendar, What's next, no first morning, no rows ({r})")
@@ -127,8 +134,69 @@ def part_endgame(g):
     check(r['done'] is True, f"first morning: the arrow clears when met ({r['done']})")
     check(r['after'] == [None, False], f"first morning: a New game clears the endgame ({r['after']})")
 
+CROSS = r"""((ans) => { const out = { notes: [], arrows: [] }; SHIP.flags = SHIP.flags || {}; for (const k of ['end.stay', 'end.cb.stay', 'end.cb.go']) flagSet(k, null);
+  SHIP.end = ans ? { said: [[33, ans]] } : undefined; if (!ans) delete SHIP.end;
+  // the calendar: the events before it logged as run, nothing running
+  const plan = evCalPlan(); out.row = plan.find(r => r.id === 'crossingBack') || null;
+  SHIP.event = null; SHIP.eventLog.length = 0; for (const r of plan) if (r.id !== 'crossingBack') SHIP.eventLog.push({ id: r.id, startDay: r.day, endDay: r.day + SHIP_EVENTS[r.id].days, band: 'smooth' });
+  out.due = eventDueDay(); __at(31, 1); eventAdvance(shipNow(), true); out.started = SHIP.event ? SHIP.event.id + '@' + SHIP.event.startDay : null;
+  const ph = []; for (const [d, m] of [[31, 479], [31, 480], [35, 869], [35, 870], [35, 914], [35, 915], [35, 1154], [35, 1155], [35, 1439]]) { const n = eventNow((d - 1) * 1440 + m); ph.push(d + ' ' + hhmm(m) + ' ' + (n ? n.id + '.' + n.phase : '-')); }
+  out.phases = ph; const mt = MEETINGS.find(x => x.id === 'crossingBackOath'); out.meet = mt ? [Math.floor(mt.at / 1440) + 1, hhmm(mt.at % 1440), mt.len, mt.script] : null;
+  out.beats = EV_BEATS.filter(b => b.id === 'crossingBack' || b.id === 'endingOffer').map(b => b.id + ' ' + b.kind + ' ' + b.day + ' ' + b.at.join('-'));
+  out.status31 = eventStatus((30) * 1440 + 600);
+  const M = SHIP.event.mine, T = m => { setShipNow(m); crossingBackTick(m); }, d = (day, m) => (day - 1) * 1440 + m;
+  __notes.length = 0; GUIDE.list.length = 0; CREW_SCENE.clear();
+  // Wednesday: Vance sets off to find you (a crewScene), the notice he's coming; his word ends with the record notice
+  T(d(31, 509)); out.vanceEarly = CREW_SCENE.has('vance'); T(d(31, 510)); out.vance = CREW_SCENE.has('vance') ? CREW_SCENE.get('vance').mode : null;
+  out.vanceFor = !!MEETING_SCRIPTS.crossingBackVance && crossingBackMoment('crossingBackVance', ['vance'], ['story:vance', 1]);
+  while (DIALOGUE) { const v = dialogueView(); if (!v) break; dialogueStep(v.choices ? 0 : undefined); }
+  T(d(31, 520)); out.vanceDone = [M['story:vance'], CREW_SCENE.has('vance')]; out.notes.push(...__notes.splice(0));
+  // Saturday 10:00: the ship, its arrow (level 2); the sky ship's poses
+  T(d(34, 599)); T(d(34, 600)); const sh = GUIDE.list.find(x => x.id === 'end:cb:ship'); out.shipArrow = sh ? [sh.level, sh.goal().room] : null; out.notes.push(...__notes.splice(0));
+  out.sky = [[34, 599], [34, 600], [35, 869], [35, 870], [35, 893], [35, 899], [35, 900]].map(([dd, m]) => { const x = crossingBackShip(d(dd, m)); return x ? x.pose + (x.flash ? '*' : '') : '-'; });
+  // Sunday: the morning notice, the oath's arrow from 14:00 (level 1), the horn
+  T(d(35, 400)); T(d(35, 840)); const oa = GUIDE.list.find(x => x.id === 'end:cb:oath'); out.oathArrow = oa ? [oa.level, oa.goal().deck, oa.goal().room, hhmm(oa.until % 1440)] : null;
+  T(d(35, 870)); out.notes.push(...__notes.splice(0)); out.cert0 = crossingBackDone();
+  // the oath, met in the lounge; then the address by the answer (or the Captain asks), settled
+  goToDeck(3); player.obj.position.copy(cellPos(...ROOM_TILES['L'][Math.floor(ROOM_TILES['L'].length / 2)]));
+  setShipNow(d(35, 880)); meetingsTick(shipNow()); out.oathShown = DIALOGUE ? DIALOGUE.id : null; const lines = [];
+  while (DIALOGUE) { const v = dialogueView(); if (!v) break; lines.push(v.who + ': ' + (v.text || v.choices.join(' / '))); dialogueStep(v.choices ? 0 : undefined); }
+  out.oathLines = lines.length; out.oathYou = lines.filter(l => l.startsWith((SHIP.player && SHIP.player.name) || 'Cadet')).length;
+  const addr = []; for (let i = 0; i < 3 && !M['story:address']; i++) { T(d(35, 900 + i)); const id = DIALOGUE ? DIALOGUE.id : null; if (id) addr.push(id);
+    while (DIALOGUE) { const v = dialogueView(); if (!v) break; dialogueStep(v.choices ? 0 : undefined); } }
+  out.address = addr; out.settled = M['settled'] || null; out.stay = endgameDay();
+  T(d(35, 915)); out.record = ADDRESSES.length ? ADDRESSES[ADDRESSES.length - 1].text : null; out.cert = crossingBackDone();
+  out.keep = (evWord('event.crossingBack.keepsake') || '').slice(0, 40);
+  out.supper = (EV_DAY_DRESS.get('sunday-table@35') || {}).o ? EV_DAY_DRESS.get('sunday-table@35').o.name : null;
+  // the event's end: logged, and nothing after it on the calendar
+  __at(36, 1); eventAdvance(shipNow(), true); out.logged = SHIP.eventLog.some(l => l.id === 'crossingBack'); out.next = eventDueDay();
+  goToDeck(4); return out; })"""
+
+def part_crossing(g):
+    for ans, want in [(None, 'stay'), ('go', 'go'), ('stay', 'stay')]:
+        print(f'(crossing) the answer before the address: {ans}')
+        r = g.ev(CROSS + f"({repr(ans) if ans else 'null'})".replace("'", "'"))
+        print('   ', {k: r[k] for k in r if k not in ('notes',)})
+        print('    notes:', r['notes'])
+        check(r['row'] and r['row']['day'] == 31 and r['due'] and r['due']['id'] == 'crossingBack' and r['started'] == 'crossingBack@31', f"crossing: the calendar's row on Day 31, due and started ({r['row']}, {r['due']}, {r['started']})")
+        check(r['phases'] == ['31 07:59 -', '31 08:00 crossingBack.warning', '35 14:29 crossingBack.warning', '35 14:30 crossingBack.onset', '35 15:14 crossingBack.onset', '35 15:15 crossingBack.resolution', '35 19:14 crossingBack.resolution', '35 19:15 crossingBack.afterglow', '35 23:59 crossingBack.afterglow'], f"crossing: the phases at their minutes ({r['phases']})")
+        check(r['meet'] == [35, '14:40', 35, 'crossingBackOath'], f"crossing: the oath's meeting Sunday 14:40 ({r['meet']})")
+        check(len(r['beats']) == 2 and r['status31'] and 'Sunday' in r['status31'], f"crossing: the guard's rows and the status line ({r['beats']}, {r['status31']})")
+        check(not r['vanceEarly'] and r['vance'] == 'follow' and r['vanceFor'] and r['vanceDone'] == [1, False], f"crossing: Vance comes to you from 08:30 and his word ends it ({r['vance']}, {r['vanceDone']})")
+        n = ' | '.join(r['notes'])
+        check('coming to find you' in n and 'You lead the oath' in n and 'off the bow' in n and 'Today at 14:30' in n and 'horn' in n.lower(), f"crossing: the notices, Vance, the ship, the morning, the horn ({r['notes']})")
+        check(r['shipArrow'] == [2, 'L'] and r['oathArrow'] and r['oathArrow'][:3] == [1, 3, 'L'], f"crossing: the ship's arrow level 2, the oath's level 1 to the bow lounge ({r['shipArrow']}, {r['oathArrow']})")
+        check(r['sky'] == ['-', 'bow', 'bow', 'alongside', 'alongside*', 'alongside', '-'], f"crossing: the Veyli ship off the bow from Saturday 10:00, alongside from the horn, the flashes, gone at 15:00 ({r['sky']})")
+        check(r['oathShown'] == 'crossingBackOath' and r['oathYou'] >= 4, f"crossing: the oath played with you as host ({r['oathShown']}, {r['oathYou']} of {r['oathLines']} lines yours)")
+        exp = (['moment:crossingBackAddress.ask'] if not ans else []) + ['moment:crossingBackAddress.' + want]
+        check(r['address'] == exp and r['settled'] == want, f"crossing: the address {exp} and settled {want} ({r['address']}, {r['settled']})")
+        check((r['stay'] == 36) == (want == 'stay'), f"crossing: Stay starts the endgame on Day 36, Go doesn't ({r['stay']})")
+        check(r['record'] and ('keeping them' in r['record'] if want == 'stay' else 'Concord' in r['record']), f"crossing: the address's record names your choice ({r['record']})")
+        check(not r['cert0'] and r['cert'] and r['keep'], f"crossing: the certificate's second date from 15:15 ({r['cert0']}, {r['cert']})")
+        check(r['supper'] == 'The Line supper' and r['logged'] and r['next'] is None, f"crossing: the Line supper, logged at its end, nothing after ({r['supper']}, {r['logged']}, {r['next']})")
+
 with sync_playwright() as pw:
-    parts = [('off', part_off, sys.argv[1]), ('endgame', part_endgame, None)]
+    parts = [('off', part_off, sys.argv[1]), ('endgame', part_endgame, None), ('crossing', part_crossing, None)]
     pages = {}
     for name, fn, build in parts:
         if ONLY and name not in ONLY: continue

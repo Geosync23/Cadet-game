@@ -1,0 +1,80 @@
+@bank all
+// The ending (E-1, EN2 for lead 39; plans/ending-spec.html, "The week"): the crossing back's own words in the events
+// base's keys (as content/banks/event-crossingLine.lines). Mail is "Subject | body", unsigned. Stand-ins for SW6
+// (about 110 lines with the meetings). Never "permission" or "leave" about the reach: the Wren "crosses back over the
+// Line". Every Veyli is they/them. The Admiral is the Captain's fish.
+== event.crossingBack.mail.warning
+- Sunday we cross back over the Line | Sunday at 14:30 the Wren crosses back over the Line. The horn on every deck, then the oath in the bow lounge. You lead it this time: Basil is our only first-timer. The Line supper in the mess at 18:00.
+== event.crossingBack.status.warning
+- Sunday at 14:30: the Wren crosses back over the Line.
+== event.crossingBack.status.onset
+- Crossing back. The oath in the bow lounge: you lead it.
+== event.crossingBack.status.resolution
+- Crossed back over the Line. The Line supper's at 18:00.
+== event.crossingBack.status.afterglow
+- Back on our own side of the Line.
+== event.crossingBack.notice.vanceComing
+- Commander Vance is coming to find you.
+== event.crossingBack.notice.vance
+- Sunday at 14:30 the Wren crosses back over the Line. You lead the oath, in the bow lounge.
+== event.crossingBack.notice.ship
+- Taavek's ship is off the bow again. Look out of the bow glass.
+== event.crossingBack.notice.morning
+- Today at 14:30 the Wren crosses back over the Line. You lead the oath in the bow lounge.
+== event.crossingBack.notice.horn
+- The horn. The Wren is crossing back over the Line. To the bow lounge: you lead the oath.
+== event.crossingBack.arrow.oath
+- Lead the oath: the bow lounge, at the front
+== event.crossingBack.arrow.ship
+- Taavek's ship, off the bow: the bow lounge
+== event.crossingBack.say.saruth
+- Company, the other way.
+// the ceremony's crowd (the gathering's tap lines, and asking you along 14:00-14:30)
+== event.crossingBack.gather.ceremony.name
+- Crossing back
+== event.crossingBack.gather.ceremony.ask
+- Crossing back at half two. You're leading the oath, I hear.
+- Bow lounge at half two. Come on, you're the one reading.
+== event.crossingBack.gather.ceremony.here
+- Four weeks. Feels like a year and a day.   #warm
+- Basil's face when the punch comes. Watch it.   #funny
+== event.crossingBack.gather.ceremony.thanks
+- You stand at the front of the bow lounge with the crowd behind you, and read the old oath for Basil. The Veyli ship's lights hang off the bow.   #warm
+// the Line supper, again (the Sunday table re-dressed on Day 35)
+== event.crossingBack.gather.lineSupper.name
+- The Line supper
+== event.crossingBack.gather.lineSupper.mail
+- The Line supper | The Line supper again tonight at six, in the mess. Same rules as last time: proper food to take the taste away.
+== event.crossingBack.gather.lineSupper.ask
+- Line supper at six. Second one. Still no punch.   #funny
+== event.crossingBack.gather.lineSupper.here
+- To the Line. Both ways.   #warm
+== event.crossingBack.gather.lineSupper.thanks
+- The mess is full again, every bench taken, and someone has saved you a place.   #warm
+// a toast at the supper, coloured by your answer (a bubble near you in the mess; 60 at most)
+== event.crossingBack.toast.stay
+- To {me}, who's staying! Somebody had to.   #warm
+- To the one who said no to headquarters!   #funny
+== event.crossingBack.toast.go
+- To {me}. Headquarters doesn't know what's coming.   #warm
+- To our Line-crosser, off to the Concord!
+== event.crossingBack.toast.open
+- To the Line. Both ways, and all of us.   #warm
+// the Captain's address as the record (a Mail, or the banner if you weren't in the lounge)
+== event.crossingBack.address.stay.1
+- This is the Captain. We've crossed back over the Line.
+== event.crossingBack.address.stay.2
+- Some of you have heard: {me} stays with the Wren. We're keeping them.
+== event.crossingBack.address.go.1
+- This is the Captain. We've crossed back over the Line.
+== event.crossingBack.address.go.2
+- Monday {me} leaves us for Concord headquarters. The shuttle bay at ten.
+== event.crossingBack.address.open.1
+- This is the Captain. We've crossed back over the Line.
+== event.crossingBack.address.open.2
+- Well done, all of you. The Line supper's at six. Marrow out.
+// your Line certificate's second date (the keepsake's tap text once you've crossed back), and the Record
+== event.crossingBack.keepsake
+- Your Line certificate, signed by the Captain twice: into the Veyli reach on Day 7, and back over the Line on Day 35.
+== event.crossingBack.record
+- Crossed back over the Line, Day 35. Led the oath.
