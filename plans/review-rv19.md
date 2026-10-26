@@ -80,3 +80,13 @@ at 06:43, then the same corridor chase as Day 4: Bunks 4-8 never reached.
 
 **Verdict on 03449ace: FIXES NEEDED (M1-M3).** Off is exactly 0.93.1; the Bunk 1 visit on Day 4 works and looks right
 at phone size.
+
+### After the verdict
+- FX20's final sha was f3cd2a9e (game unchanged from 03449ace); M1 done in eb87ab31 (day_check's start bound 355, check only).
+  Note for the fix: the check's `order != list('abcdefgh')` must follow M2's new route. FX20 retired at ~66%; lead 38 hired
+  FX20b for M2, M3, S1, S2 on claude/inspection (handover 9137785e carries these notes). The probe is
+  plans/rv19-probe-inspect.py on this branch.
+
+## FX28, promotion beats (claude/promo-beats, PROMO_BEATS_ON)
+Added by lead 38 at 05:07: the Tier 2 test and promotion made "very very hard to miss" (the user). Lands in steps over
+about 9-10 h; each step reviewed as it arrives, every one on a phone-size screen. Not pushed yet.
