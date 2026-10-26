@@ -288,7 +288,7 @@ body.dlgon .devhu{display:none}
 <script>
 (() => {
 /* =====================================================================
-   STARSHIP CADET: CSV Wren                           build 0.93.1
+   STARSHIP CADET: CSV Wren                           build 0.93.2-a.1
    Cozy starship life sim. Single file, three.js r128, no image assets.
 
    FILE MAP
@@ -3481,6 +3481,7 @@ function buildDeck(def) {
     if (CLOSED_DOORS[e.key]) hit.userData.closedDoor = e.key;
     if ((YOU_LOCKS[def.num] || []).some(L => L.keys.includes(e.key))) hit.userData.youLock = e.key;   // 0.47.11: shut to you until let in
     if (e.type === 'lift') hit.userData.liftDoor = e.key;
+    if (e.type === 'door') hit.userData.door = e.key;    // 0.93.2: Auto doors off, a tap on it opens it (section 15b's adoorTap)
     DOOR_OBJS.push({ e, g, leaves, open: 0, passable: e.type === 'door' || e.type === 'lift', svc: !!e.service, cx, cz, span });
   }
   DOOR_LEAVES = [];                                      // 0.27.21: one InstancedMesh per leaf material (2 draw calls each, not 2 a leaf)
@@ -9257,7 +9258,7 @@ function applyLight(k) {
 // use it); ?debug shows the Night/Day button (skip to 21:40, sleep to 07:40).
 // Nothing here calls R().
 // =====================================================================
-const GAME_BUILD = '0.93.1';                            // keep in step with the header's build line
+const GAME_BUILD = '0.93.2-a.1';                            // keep in step with the header's build line
 // ---- the ship notes bus and the flag store (Pillar 4): how every section tells the others what happened ----
 // simNote(kind, data) -> the note { kind, t (ship minute), ...data }: handed to every onSim(kind, fn) listener (and
 //   onSim('*', fn) ones), each in try/catch, so one bad listener never stops the rest. Each note is also kept for two
@@ -11548,7 +11549,7 @@ function deviceLoad(s) {
       ...(Number.isInteger(a.grp) ? { grp: a.grp } : {}), ...(a.places && typeof a.places === 'object' ? { places: Object.fromEntries(Object.entries(a.places).filter(([k, v]) => typeof v === 'string').slice(0, 8)) } : { places: undefined }) }));   // places: each person's seat (0.71.2)
   const pointsSeen = {}; if (d.pointsSeen && typeof d.pointsSeen === 'object') for (const k in d.pointsSeen) if (Number.isInteger(d.pointsSeen[k]) && d.pointsSeen[k] > 0 && k.length < 60) pointsSeen[k] = Math.min(99, d.pointsSeen[k]);
   return { memos, tipsSeen, appts, booted: d.booted === true, settings: { phosphor: PHOSPHORS[st.phosphor] ? st.phosphor : 'cyan', fx: st.fx !== false, tips: st.tips !== false, quiet: st.quiet === true,
-      ...(['all', 'first', 'off'].includes(st.teach) ? { teach: st.teach } : {}) },   // the arrows plan: Teaching arrows, kept only once chosen
+      ...(['all', 'first', 'off'].includes(st.teach) ? { teach: st.teach } : {}), ...(st.autoDoors === false ? { autoDoors: false } : {}) },   // autoDoors: 0.93.2, kept only when off   // the arrows plan: Teaching arrows, kept only once chosen
     ...(Object.keys(pointsSeen).length ? { pointsSeen } : {}),   // the panel pointer's counts (piece C), only once one has shown
     calendarRemind: { on: r.on !== false, ahead: [15, 30, 60].includes(r.ahead) ? r.ahead : 15, morning: r.morning !== false, per, everyday: r.everyday !== false,
       heard: (Array.isArray(r.heard) ? r.heard : []).filter(k => typeof k === 'string' && k.length < 120).slice(-80) } };   // 0.35.29: heads-ups
@@ -12855,7 +12856,8 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
   act(verb, arg) { if (devNewAct(verb)) return; if (SND.settingsAct(verb, arg)) return; const st = SHIP.device.settings; if (verb === 'phosphor' && PHOSPHORS[arg]) { st.phosphor = arg; devPhosphorPage(); deviceFire('phosphor'); } else if (verb === 'fx') st.fx = !!arg; else if (verb === 'tips') st.tips = !!arg; else if (verb === 'quiet') st.quiet = !!arg;
     else if (verb === 'heads') SHIP.device.calendarRemind.on = !!arg; else if (verb === 'everyday') SHIP.device.calendarRemind.everyday = !!arg;
     else if (verb === 'ahead' && [15, 30, 60].includes(arg)) SHIP.device.calendarRemind.ahead = arg;
-    else if (verb === 'teach' && TEACH_MODES[arg]) st.teach = arg; },
+    else if (verb === 'teach' && TEACH_MODES[arg]) st.teach = arg;
+    else if (verb === 'doors') adoorSet(!!arg); },           // 0.93.2: Auto doors (15b)
   view: () => {
     const st = SHIP.device.settings, R = SHIP.device.calendarRemind, on = (v, verb) => [{ label: 'On', action: { app: 'settings', do: verb, arg: true }, on: !!v }, { label: 'Off', action: { app: 'settings', do: verb, arg: false }, on: !v }];
     return { title: 'Settings', blocks: [
@@ -12864,6 +12866,7 @@ deviceApp({ id: 'settings', title: 'Settings', icon: 'gear', order: 99,
       { kind: 'text', text: 'Screen effects (flicker and roll)' }, { kind: 'buttons', items: on(st.fx, 'fx') },
       { kind: 'text', text: 'Tips' }, { kind: 'buttons', items: on(st.tips, 'tips') },
       { kind: 'text', text: 'Quiet off shift (work news as badges, no pop-ups, outside your shift)' }, { kind: 'buttons', items: on(st.quiet, 'quiet') },
+      ...(AUTO_DOORS_ON ? [{ kind: 'text', text: ADOOR_WORDS }, { kind: 'buttons', items: on(st.autoDoors !== false, 'doors') }] : []),   // 0.93.2: Auto doors (15b)
       ...SND.settingsBlocks(),                         // section 27: Sound On/Off and Volume
       ...(devNewSure ? [{ kind: 'text', text: 'Start a new game? Your current game will be lost.', mark: 'urgent' }, { kind: 'buttons', items: [{ label: 'Start over', action: { app: 'settings', do: 'newgo' } }, { label: 'Keep playing', action: { app: 'settings', do: 'newkeep' } }] }]
         : [{ kind: 'text', text: 'Start the game again from the beginning' }, { kind: 'buttons', items: [{ label: 'New game', action: { app: 'settings', do: 'newgame' } }] }]),
@@ -16802,6 +16805,48 @@ function turnInShow(j, a) {
 }
 
 // ---- slot: Interactions engineer (section 15b). New code of this seat's goes here, above the end line (plans/owners.md) ----
+// ---- Auto doors (0.93.2, FX24 for lead 38; the user's): a Settings row. On (the default): doors open as you walk up to
+// them, as always. Off, for you only: a door stays shut when you walk up to it yourself (press and hold, the controller)
+// and you stop at it; it opens when you tap the door itself (you walk up to it, and it stays open while you're within
+// 3 m), or tap somewhere in the room beyond (any walk the game plans for you, a tap's or a scripted one: an escort, the
+// cabin walk, an arrow's, crossing it opens it as you reach it: section 4's goTo hands its route to adoorRoute). Planned
+// walks don't collide with doors at all, so only your own steering is stopped (section 4's collide asks adoorShut). The
+// crew open doors as before (their walking never asks it). The lift and hatches aren't doors here. Switching it off in
+// a doorway leaves that door open until you're clear of it. AUTO_DOORS_ON: the feature's switch (on in 0.93.2); with it
+// off or the setting on, adoorShut is false and nothing changes. SHIP.device.settings.autoDoors (false when off, saved)
+var AUTO_DOORS_ON = true;
+const ADOOR_WORDS = 'Auto doors: doors open as you walk up to them. Off: tap a door, or somewhere in the room beyond, to open it.';
+const ADOOR = { tap: null, here: null, route: new Set() };
+const autoDoors = () => !AUTO_DOORS_ON || !(typeof SHIP !== 'undefined' && SHIP.device && SHIP.device.settings && SHIP.device.settings.autoDoors === false);
+function adoorNear(key, m) { const e = EDGES.get(key); if (!e || typeof player === 'undefined') return false; const p = player.obj.position; return Math.hypot(p.x - e.cx, p.z - e.cz) < m; }
+function adoorShut(e, who) {                              // true: this door keeps you out (Auto doors off, not opened for you)
+  if (!e || e.type !== 'door' || !who || !who.isPlayer || autoDoors()) return false;
+  if (ADOOR.tap === e.key) { if (adoorNear(e.key, 3)) return false; ADOOR.tap = null; }
+  if (ADOOR.here === e.key) { if (adoorNear(e.key, 1.6)) return false; ADOOR.here = null; }
+  return !(ADOOR.route.has(e.key) && who.path && who.path.length);
+}
+function adoorRoute(w, path) {                            // the doors a planned walk crosses (a diagonal step: both edges at its corner)
+  if (autoDoors()) return; ADOOR.route = new Set();   // (on: nothing, so a walk planned while the game loads never reaches ADOOR)
+  let a = w.here();
+  for (const b of path) {
+    const keys = [];
+    if (b[0] !== a[0]) for (const j of new Set([a[1], b[1]])) keys.push(`v,${Math.max(a[0], b[0])},${j}`);
+    if (b[1] !== a[1]) for (const i of new Set([a[0], b[0]])) keys.push(`h,${i},${Math.max(a[1], b[1])}`);
+    for (const k of keys) { const e = EDGES.get(k); if (e && e.type === 'door') ADOOR.route.add(k); }
+    a = b;
+  }
+}
+function adoorTap(key) {                                  // a tap on a door with Auto doors off: it opens, and you walk up to it
+  if (autoDoors()) return false;
+  const e = EDGES.get(key); if (!e || e.type !== 'door') return false;
+  ADOOR.tap = key; approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => {});
+  return true;
+}
+function adoorSet(on) {                                   // the Settings row
+  const st = SHIP.device.settings; if (on) delete st.autoDoors; else st.autoDoors = false;
+  ADOOR.tap = null; ADOOR.route = new Set(); ADOOR.here = null;
+  if (!on && typeof DOOR_OBJS !== 'undefined') { const p = player.obj.position, d = DOOR_OBJS.filter(o => o.e.type === 'door').sort((x, y) => Math.hypot(x.cx - p.x, x.cz - p.z) - Math.hypot(y.cx - p.x, y.cz - p.z))[0]; if (d && Math.hypot(d.cx - p.x, d.cz - p.z) < .55) ADOOR.here = d.e.key; }   // in a doorway: that one stays open till you're clear
+}
 // the patch, #11 (plans/patch-plan.html): a tracked arrow clears itself, by kind, so the next arrows (the arrival week's)
 // can show. Something on at a time (a meeting, tradition, appointment, meal...: the goal's trkFrom/trkTo, from Tracked):
 // once it has started with you in its room, or once it's over. A place: when you arrive (in its room, or within 1.5 m,
@@ -56981,8 +57026,8 @@ function collide(p, r, who) {
         if (sn) for (const b of sn) pushOutBox(p, b[0], b[1], b[2], b[3], r);
         else pushOutBox(p, X0(i), X0(i + 1), Z0(j), Z0(j + 1), r);
       }
-      if (i <= ci + 1 && innerBlocks(EDGES.get(`h,${i},${j}`), who)) pushOutBox(p, X0(i), X0(i + 1), Z0(j) - T / 2, Z0(j) + T / 2, r);
-      if (j <= cj + 1 && innerBlocks(EDGES.get(`v,${i},${j}`), who)) pushOutBox(p, X0(i) - T / 2, X0(i) + T / 2, Z0(j), Z0(j + 1), r);
+      if (i <= ci + 1 && (innerBlocks(EDGES.get(`h,${i},${j}`), who) || adoorShut(EDGES.get(`h,${i},${j}`), who))) pushOutBox(p, X0(i), X0(i + 1), Z0(j) - T / 2, Z0(j) + T / 2, r);   // adoorShut: Auto doors off, a door you haven't opened (15b)
+      if (j <= cj + 1 && (innerBlocks(EDGES.get(`v,${i},${j}`), who) || adoorShut(EDGES.get(`v,${i},${j}`), who))) pushOutBox(p, X0(i) - T / 2, X0(i) + T / 2, Z0(j), Z0(j + 1), r);
       const touch = [`h,${i - 1},${j}`, `h,${i},${j}`, `v,${i},${j - 1}`, `v,${i},${j}`].map(k => EDGES.get(k));
       if (touch.some(wallish) && !liftJoint(touch.filter(Boolean))) { const c = (1 - SEG) / 2 + .02; pushOutBox(p, X0(i) - c, X0(i) + c, Z0(j) - c, Z0(j) + c, r); }
     }
@@ -58908,6 +58953,7 @@ class Walker {
     if (!p && this.isPlayer && typeof squeezePath === 'function') p = squeezePath(this, goal, avoid);   // section 15: squeeze past settled crew
     if (!p) return false;
     this.path = p.length ? p : [goal]; this.goal = goal; this.onArrive = cb || null;
+    if (this.isPlayer) adoorRoute(this, this.path);     // 0.93.2: Auto doors off, the doors on this walk open as you reach them (15b)
     return true;
   }
   stop() { this.path = []; this.goal = null; this.onArrive = null; }
@@ -60322,6 +60368,7 @@ function tap(cx, cy) {
     approach(new THREE.Vector3(e.cx, 0, e.cz), reachableSide(e)[2], 0, () => toast(c.t, c.x));
     return;
   }
+  if (ud.door && adoorTap(ud.door)) return;             // 0.93.2: Auto doors off, a tap on a door opens it (15b)
   if (typeof playerFloorTap === 'function' && playerFloorTap(h.point)) return;   // section 15: a treadmill, seat or booth with no description of its own
   const to = nearestOpen(h.point.x, h.point.z, player); playerGo(typeof tapBeside === 'function' ? tapBeside(to) : to);   // the patch (#17): not onto someone standing there
 }
@@ -60358,7 +60405,7 @@ cv.addEventListener('pointermove', e => {
   if (pts.size === 2) { const [a, b] = [...pts.values()]; setZoom(zoom0 * Math.hypot(a[0] - b[0], a[1] - b[1]) / pinch0); }
   else if (!pts.size && e.pointerType === 'mouse') {
     const h = pick(e.clientX, e.clientY), u = h && h.object.userData;
-    cv.style.cursor = u && (u.item || u.closedDoor || u.liftDoor || (u.walker && !u.walker.isPlayer)) ? 'pointer' : 'default';
+    cv.style.cursor = u && (u.item || u.closedDoor || u.liftDoor || (u.walker && !u.walker.isPlayer) || u.door && !autoDoors()) ? 'pointer' : 'default';   // u.door: Auto doors off, a door is something to tap (0.93.2)
   }
 });
 const up = e => {
@@ -63902,7 +63949,7 @@ function loop() {
   for (let k = 0; k < DOOR_OBJS.length; k++) {
     const d = DOOR_OBJS[k], crewAt = d.force === undefined && crewNearDoor(d);   // section 10: crew open doors (and their own locked ones)
     if (!d.passable && !d.svc && d.force === undefined && d.open < 1e-4 && !crewAt) continue;
-    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && !youLock(d.e.key, w) && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
+    let walk = false; if (d.force === undefined && !crewAt && (d.passable || d.svc)) for (let j = 0; j < walkers.length && !walk; j++) { const w = walkers[j]; walk = w.active && !youLock(d.e.key, w) && !(w.isPlayer && adoorShut(d.e, w)) && Math.hypot(w.obj.position.x - d.cx, w.obj.position.z - d.cz) < 1.15 + (d.span - SEG) / 2; }
     const near = d.force !== undefined ? d.force > 0 : crewAt || walk;
     d.open += ((near ? 1 : 0) - d.open) * Math.min(1, dt * (d.force !== undefined ? 5 : d.svc ? 4 : 8));   // a service hatch is heavier
     if (d.e.type === 'lift') for (let j = 0; j < d.leaves.length; j++) { const l = d.leaves[j]; l.position.y = 1.1 - d.open * 2.3; l.visible = d.open < .995; }   // lift doors sink into the floor
