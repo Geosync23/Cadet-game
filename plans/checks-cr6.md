@@ -1,5 +1,14 @@
 # CR6 check results
 
+## Side jobs for lead 38 (2026-10-26): fridays_check on claude/comet
+
+| Commit (game sha) | As shipped (EV_COMET_ON true, swap off) | Copy with EV_COMET_ON = false |
+|---|---|---|
+| fda75fb2 (e00af1c4...20bc) | OK (exit 0, 1805 s) | OK (exit 0, 1809 s) |
+| 157d1cfb, SW2's polished words (740a63a2...ac50) | OK (exit 0, 1728 s) | OK (exit 0, 1731 s) |
+
+No FAIL lines. Reported to lead 38, BM18 and RV18 (fda75fb2 also asked for by FX25, since handed over).
+
 ## Side job for lead 38 (2026-10-26): join_check on claude/comet db72b2a and b957b92d
 
 - claude/comet db72b2a (game sha b26d7970...6c, EV_COMET_ON = true in the file): exit 0 (252 s), `JOIN CHECK OK`, alone.
