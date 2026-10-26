@@ -21,6 +21,7 @@ A cozy starship-life sim: a single-file three.js game (`starship-cadet.html`) se
 - `food_check.py`: runs the galley over whole ship days and checks food is ready, nobody waits too long, the dish pit clears and the rota holds.
 - `machine_check.py`: runs the ship's machines on paper and checks wear, faults, repairs, the jobs left for the player and ship health.
 - `clothes_check.py`: checks changing at your wardrobe, yesterday's clothes, the laundry hamper, the washers and saving mid-wash.
+- `saves_check.py`: the save slots and the Saves app: the old save as Slot 1, switching, New game in an empty slot, Delete's guard, Download my save (a file, or the claude.ai downloads capability), Load a save file (good and bad files), nothing with ?nosave or the switch off.
 - `interactions_check.py`: checks the places you can use, the job board and the goal pointer.
 - `bubble_check.py`: speech bubbles at phone size with uneven frames: they follow their speaker without shaking, jumping or swapping sides.
 - `devmode_check.py`: checks Dev mode (section 25, `#dev`): nothing without the Dev link, the real save untouched, Undo, Mark, the Dev clock, Take me to.
