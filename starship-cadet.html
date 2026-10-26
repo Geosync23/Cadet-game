@@ -56934,6 +56934,34 @@ function p9Stage() {
   c.fewest = r.fewest; C.open.push(c); j.case = c.id; C.n++; flagSet('case.p9.first', c.id);
   MACH_REV++;
 }
+// P9's shutdown form (with P5_M18; B3's planning screen asks, step 4, on every redraw): does a shutdown hour clash with
+// someone's routine? From B3's sdAffected (who's in the branch's rooms then, from that day's plans): a laundry wash first,
+// then a tradition or class. Pure and cached (the same booking, the same answer); the notice once a booking is made is
+// p9ShutTick's, from the clock. -> { who, thing, at } | null
+const P9_SHUT = { k: null, v: null }, P9_ROUTINE = [['laundry', 'laundry wash'], ['tradition', 'tradition'], ['class', 'class'], ['club', 'club']];
+function p9ShutClash(b) {
+  if (!P5_CASES5 || !P5_M18 || !b || typeof sdAffected !== 'function') return null;
+  const k = [b.day, b.at, b.branch, (b.keep || []).join(',')].join('/'); if (P9_SHUT.k === k) return P9_SHUT.v;
+  let v = null;
+  try {
+    const ppl = (sdAffected(b.day, b.branch, b.at, b.keep || []) || []).slice().sort((x, y) => x.id < y.id ? -1 : 1);
+    for (const [tag, thing] of P9_ROUTINE) {
+      const p = ppl.find(x => (x.tags || []).some(t => String(t).toLowerCase().includes(tag)) || (x.acts || []).some(t => String(t).toLowerCase().includes(tag)));
+      if (p) { v = { who: p.id, thing: caseText('case.p9.thing.' + tag, thing), at: b.at }; break; }
+    }
+  } catch (e) { v = null; }
+  P9_SHUT.k = k; P9_SHUT.v = v; return v;
+}
+// once a booking for tomorrow is made and it clashes: the notice, once per booking (flag p9.shut.<day>.<at>)
+function p9ShutTick(now, skip) {
+  if (skip || !P5_M18 || typeof sdPeek !== 'function') return;
+  let S = null; try { S = sdPeek(); } catch (e) { S = null; }
+  for (const b of (S && S.book) || []) {
+    const key = 'p9.shut.' + b.day + '.' + b.at; if (flag(key) !== undefined) continue;
+    const c = p9ShutClash(b); flagSet(key, c ? c.who : 0); if (!c) continue;
+    try { toast(caseText('works.mech.p9', 'The clash'), caseText('case.p9.shut', 'Your shutdown hour clashes with {name}\'s {thing}. Move one of them.', { name: worksName(c.who), thing: c.thing })); } catch (e) { /* no UI */ }
+  }
+}
 if (P5_CASES5) {
   if (typeof FAULT_CAUSES !== 'undefined' && FAULT_CAUSES.washer && !FAULT_CAUSES.washer.some(x => x.id === 'clash'))   // a load (never a real fault's cause, faultPick); its line for the writer
     FAULT_CAUSES.washer.push({ id: 'clash', load: 'laundry', w: 0, shows: 'stops mid-cycle', sign: 'stops only at one hour, one day a week', when: 'clash', band: 3 });
@@ -56949,7 +56977,7 @@ if (P5_CASES5) {
     'Some faults aren\'t parts. They\'re two good things at the same time.',
     'The fix is a conversation. Ask nicely. Offer them a better hour.'] };
   if (typeof WORK_MECH !== 'undefined') WORK_MECH.p9 = { open() { p9Stage(); } };
-  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p9Stage(); p9AskTick(now, skip); });
+  if (typeof WORK_TICKS !== 'undefined') WORK_TICKS.push((now, skip) => { if (!skip) p9Stage(); p9AskTick(now, skip); p9ShutTick(now, skip); });
 }
 // The old-mysteries board (from Sunday Day 21, a Senior Officer's; optional). A corkboard on the Works bay's south wall
 // (Deck 5's P5 places block), tapped like the job board (15b's ixTap: mysOpen), a hidden device page: its five

@@ -1012,6 +1012,22 @@ P9 = r"""(() => {
   return out;
 })()"""
 
+# P9's shutdown form (P5_M18): a booking whose branch has someone's wash then -> the clash line, the same answer each ask;
+# a booking over nobody's routine -> none; the notice once. B3's sdAffected stood in when 24w isn't in the build
+P9SHUT = r"""(() => {
+  const real = typeof sdAffected === 'function' && !window.__sdStub, out = { real };
+  if (!real) { window.__sdStub = true; window.sdAffected = (day, branch, at) => branch === 'b-laundry' ? [{ id: 'zz-nobody', rooms: ['4|x'], acts: ['work'], tags: ['job'] }, { id: 'navarro-mateo', rooms: ['4|l'], acts: ['leisure'], tags: ['laundry'] }] : [{ id: 'quist-ilse', rooms: ['6|j'], acts: ['work'], tags: ['job'] }]; }
+  P9_SHUT.k = null;
+  if (!real) { out.hit = p9ShutClash({ day: 24, at: 1140, branch: 'b-laundry', keep: [] }); out.again = p9ShutClash({ day: 24, at: 1140, branch: 'b-laundry', keep: [] }) === out.hit; out.none = p9ShutClash({ day: 24, at: 600, branch: 'b-other', keep: [] }); }
+  out.m18 = P5_M18;
+  return out;
+})()"""
+def p9_shut(g, path, m18_off=False):
+    R = g.ev(P9SHUT); print('p9 shut:', R)
+    if R['real']: print('  p9 shut: B3\'s sdAffected is in this build: checked on the merge with its planning screen'); return
+    if not R['m18']: check(R.get('hit') is None and R.get('none') is None, f"p9 shut: nothing with P5_M18 off: {R}"); return
+    check(R['hit'] and R['hit']['who'] == 'navarro-mateo' and 'laundry' in R['hit']['thing'] and R['again'] and R['none'] is None, f"p9 shut: the wash in the shutdown hour is the clash, the same each ask, none over nobody's routine: {R}")
+
 def part_p9(g, path):
     if not g.ev("typeof p9Stage === 'function'"): return 'not yet'
     R = g.ev(P9); print('p9:', R)
@@ -1032,6 +1048,12 @@ def part_p9(g, path):
     check(R['settle'] == [True, False, False] and R['set'] and R['set'][0]['who'] == R['find']['A'], f"p9: settled once at 22:00 for the next such day only: {R['settle']} {R['set']}")
     check(R['rule'] == [True, False, False, False], f"p9: the planner's rule closes the laundry for them only, at that hour, on that day: {R['rule']}")
     check(R['clean'] == '{"ask":null,"moves":[{"who":"x","wd":2,"a":1,"b":2,"from":3}],"set":{"5":[{"who":"x","a":1,"b":2}]}}', f"p9: junk in the save cleaned: {R['clean']}")
+    p9_shut(g, path)
+    src = pathlib.Path(path).read_text().replace(S5_ON, 'const P5_STEP5 = true;')
+    if 'const P5_M18 = P5_STEP5 && true;' in src:   # the shutdown form only with P5_M18: a copy with it off
+        off = WORK / 'test' / f'_s5m18off_{os.getpid()}_{pathlib.Path(path).name}'; off.write_text(src.replace('const P5_M18 = P5_STEP5 && true;', 'const P5_M18 = P5_STEP5 && false;')); _RUN_FILES.append(off)
+        h = Game(g._pw, str(off), 390, 844) if hasattr(g, '_pw') else None
+        if h: h.step(2); print('  (with P5_M18 off)'); p9_shut(h, path); h.close()
     if not R['hook']: print("  p9: section 14's hook (B3's sdPlanShut, 24w) is not in this build: the planner side is checked on a merge with claude/p5s5-mech-b")
     return 'done'
 
@@ -1107,7 +1129,7 @@ def run_s5(path, parts):
         if not on:
             for p in parts: print(f'{p}: not yet (no P5_STEP5 switch line in this build)'); NOT_YET.append(p)
             return
-        g = Game(pw, str(on), 390, 844); g.step(3)
+        g = Game(pw, str(on), 390, 844); g.step(3); g._pw = pw
         g.ev(SETUP)
         for p in parts:
             f = S5_RUN.get(p)

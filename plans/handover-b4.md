@@ -55,8 +55,10 @@ keys still stand-ins in code for the next writer: `case.p4.flat`, `.moving`, `.t
   writes side.p9.set[24]; Day 24's plan loses Mateo's 18:49 wash from the clashing hour, the same when planned again. But
   take() found no other laundry slot that evening, so the wash is skipped that week, not moved: a true move needs a
   second section 14 hook after schedBuild (lead 40: not now; backlog B4-1). The words say so: case.p9.ask/.answer/.skip (stand-ins); SW3's p9.move bank lines promise an hour and stay unused.
-- **P9's shutdown variant** (spec: "with P5_M18 it can also be a shutdown hour that clashes with someone's routine"):
-  lead 40: B4 builds it once B3's S5-4 fixes land on claude/p5s5-mech-b, booking shape agreed with B3; then one sha to RV20 and lead 40.
+- **P9's shutdown form**: `p9ShutClash(booking)` (for B3's planning screen, step 4) and `p9ShutTick` (the notice once per
+  booking). Checked with B3's sdAffected stood in; to check on a merge with B3's screen (sdAffected's real tags for a
+  laundry visit and a tradition: P9_ROUTINE matches 'laundry', 'tradition', 'class', 'club'). Reviewer now RV21
+  (session_01AmTyMHLr5UuCY9zo3nQcwS); lead 40 (session_01NXybH7NNqM8M4ngiyidq6m).
 - Later roll cases: P4 and P5 post on real faults at the Senior rate; P9 and the board have only their staged ones.
 - Traced power repairs read with the pipe kit (section 17's traceFor): B2 asked lead 39 whether to gate it on the tester.
 
