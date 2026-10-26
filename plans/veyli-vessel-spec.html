@@ -1,0 +1,440 @@
+<title>Veyli Vessel Spec</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<style>
+/* Layout: one reading column. A calendar table, then each event as day cards with an hour-by-hour list,
+   then the shared parts (rank, groups, dialogue, Mail, traditions, stories, device, sound, props, risks,
+   checks, estimate), then the questions and the answers form. */
+:root {
+  --bg: #f3f5f2; --surface: #ffffff; --ink: #18221c; --muted: #536159; --line: #d3dcd5;
+  --visit: #5b4a8f; --visitSoft: #e7e2f3; --comet: #a8741a; --cometSoft: #f6ead2;
+  --old: #c9d2cc; --oldInk: #3e4b43; --some: #e6ebe7; --flag: #9a3d2e;
+  --display: 'Bricolage Grotesque', 'Atkinson Hyperlegible', system-ui, sans-serif;
+  --body: 'Atkinson Hyperlegible', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: ui-monospace, 'SFMono-Regular', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f1512; --surface: #17201b; --ink: #e3ebe5; --muted: #9db0a4; --line: #2b3a31;
+  --visit: #b7a6ec; --visitSoft: #2a2440; --comet: #f0c060; --cometSoft: #3d3016;
+  --old: #3a4740; --oldInk: #cfdad3; --some: #24302a; --flag: #f09a8a; color-scheme: dark }
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font: 400 16px/1.55 var(--body); margin: 0;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 56px; }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 34px; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(30px, 5vw, 42px); font-weight: 800; line-height: 1.05; }
+h2 { font-size: 23px; font-weight: 800; }
+h3 { font-size: 18px; font-weight: 700; }
+p, li { max-width: 72ch; }
+p { margin: 0; }
+ul, ol { margin: 0; padding-left: 22px; display: grid; gap: 6px; }
+.eyebrow { font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--comet); }
+.lead { font-size: 18px; color: var(--muted); }
+section { display: grid; gap: 14px; }
+.facts { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; }
+.fact { border-top: 3px solid var(--visit); padding-top: 8px; font-size: 14.5px; }
+.fact:nth-child(2n) { border-top-color: var(--comet); }
+.fact b { display: block; font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+.note { font-size: 14.5px; color: var(--muted); }
+.flagnote { font-size: 14.5px; color: var(--flag); }
+
+/* day cards with an hour-by-hour list */
+.day { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.day.visit { border-top: 4px solid var(--visit); }
+.day.comet { border-top: 4px solid var(--comet); }
+.day.quiet { border-top: 4px solid var(--old); }
+.day header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.phase { font-size: 12px; font-weight: 700; letter-spacing: .1em; text-transform: uppercase; padding: 1px 8px; border-radius: 999px; background: var(--some); color: var(--oldInk); }
+.tl { list-style: none; padding: 0; margin: 0; display: grid; gap: 0; }
+.tl li { display: grid; grid-template-columns: 86px 1fr; gap: 4px 12px; padding: 8px 0; border-top: 1px solid var(--line); max-width: none; }
+.tl li:first-child { border-top: 0; }
+.tl time { font: 700 13.5px var(--mono); color: var(--muted); padding-top: 2px; }
+.tl .what b { display: inline; }
+.tl .where { display: block; font-size: 13px; color: var(--muted); }
+.tl .you { display: block; font-size: 14.5px; margin-top: 3px; padding-left: 10px; border-left: 3px solid var(--comet); }
+.tl li.big .what > b::after { content: "  big group"; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--visit); }
+.tl li.career time { color: var(--flag); }
+@media (max-width: 520px) { .tl li { grid-template-columns: 1fr; } }
+
+/* cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap: 14px; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; align-content: start; min-width: 0; }
+.card.visit { border-top: 4px solid var(--visit); }
+.card.comet { border-top: 4px solid var(--comet); }
+.card .role { font-size: 13px; color: var(--muted); }
+
+/* dialogue */
+.script { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.script h3 { font-size: 16px; }
+.script .ctx { font-size: 13.5px; color: var(--muted); }
+.ln { display: grid; grid-template-columns: 96px 1fr; gap: 10px; font-size: 15px; }
+.ln b { font-size: 13px; color: var(--visit); padding-top: 2px; }
+.script.comet .ln b { color: var(--comet); }
+.ln i { color: var(--muted); }
+.choice { font-size: 14.5px; padding-left: 106px; }
+.choice::before { content: "You: "; font-weight: 700; color: var(--muted); }
+@media (max-width: 520px) { .ln { grid-template-columns: 1fr; gap: 0; } .choice { padding-left: 0; } }
+
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; min-width: 620px; }
+th, td { text-align: left; vertical-align: top; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+th { font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+td.n { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tag { display: inline-block; font-size: 12px; font-weight: 700; padding: 0 7px; border-radius: 999px; margin: 1px 2px 1px 0; }
+.tag.v { background: var(--visitSoft); color: var(--visit); }
+.tag.c { background: var(--cometSoft); color: var(--comet); }
+.tag.new { background: var(--some); color: var(--ink); border: 1px dashed var(--muted); }
+.tag.re { background: var(--old); color: var(--oldInk); }
+.tag.risk { background: transparent; color: var(--flag); border: 1px solid var(--flag); }
+
+/* questions and answers */
+.q { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: grid; gap: 6px; }
+.q .rec { font-size: 14.5px; }
+.q .rec b { color: var(--visit); }
+form { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 20px; display: grid; gap: 16px; }
+.row { display: grid; gap: 8px; padding-bottom: 14px; border-bottom: 1px solid var(--line); }
+.row h3 { font-size: 16px; }
+.choices { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.opt { display: flex; gap: 8px; align-items: center; font-size: 15px; }
+input[type=text], textarea { width: 100%; font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--ink); }
+textarea { min-height: 110px; }
+button { justify-self: start; font: 700 15px var(--body); padding: 10px 18px; border-radius: 8px; border: 0; background: var(--visit); color: var(--surface); cursor: pointer; }
+button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 2px solid var(--comet); outline-offset: 2px; }
+.status { font-size: 14px; color: var(--muted); }
+nav.toc { font-size: 14.5px; }
+nav.toc ol { grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); column-gap: 24px; }
+a { color: var(--visit); }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+<style>
+code { font: 13px var(--mono); background: var(--some); padding: 0 4px; border-radius: 4px; overflow-wrap: anywhere; }
+.piece { background: var(--surface); border: 1px solid var(--line); border-top: 4px solid var(--visit); border-radius: 10px; padding: 16px 18px; display: grid; gap: 10px; min-width: 0; }
+.piece:nth-of-type(2n) { border-top-color: var(--comet); }
+.piece header { display: flex; flex-wrap: wrap; gap: 4px 14px; align-items: baseline; }
+.piece dl { display: grid; grid-template-columns: 150px 1fr; gap: 6px 14px; margin: 0; font-size: 15px; }
+.piece dt { font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); padding-top: 3px; }
+.piece dd { margin: 0; min-width: 0; }
+@media (max-width: 560px) { .piece dl { grid-template-columns: 1fr; gap: 2px; } .piece dd { margin-bottom: 8px; } }
+</style>
+<div class="wrap">
+
+<header style="display:grid;gap:12px">
+  <p class="eyebrow">Build spec · A Veyli vessel needs help · version 1 · EP2 for lead 39 · 2026-10-26</p>
+  <h1>A Veyli vessel needs help: the build spec</h1>
+  <p class="lead">The coda after the career, Saturday to Tuesday, Days 27-30, as EP1's events plan (plans/events-plan-2.html, Part C) agreed it. A small Veyli ship has lost its coolant pump. The Wren keeps it company. You meet its engineer Taavek at the foot of the Tern's ramp, join the parts chain, make the part with Taavek, and watch the little ship light its engine from the bow glass. This page turns that into pieces, under your rules for these updates: tons of arrows, super obvious progression, and pronounced moments with dialogue.</p>
+  <div class="facts">
+    <div class="fact"><b>Pieces</b>Five building pieces, the words and the checks. One switch, <code>EV_VESSEL_ON</code>.</div>
+    <div class="fact"><b>Builders at once</b>Two (an events builder and the deck and sky seat), plus the head writer and an events checker. About 7 build turns.</div>
+    <div class="fact"><b>Can it start now?</b>Yes, on 0.93.3, beside Steps 5 and 6. It needs none of their code; section 7 lists the five places it shares with them and how they stay apart.</div>
+    <div class="fact"><b>Your answers</b>The plan's two questions (C1 the commendation, C2 the ship outside the window), unless you've already answered them, and one new small one.</div>
+  </div>
+  <p class="note">Against claude/integration d9c7e5f0 (0.93.2); starts on 0.93.3. Sources: plans/events-plan-2.html Part C (EP1), plans/handover-ep1.md, the comet's build (section 18's comet block and the slot "Comet builder", FX25) as the model, the Step 5 and Step 6 specs on this branch.</p>
+</header>
+
+<nav class="toc" aria-label="Contents">
+  <p><a href="#beats">First: the beats, what you see and who speaks</a></p>
+  <ol>
+    <li><a href="#facts">Facts in the game the plan must meet</a></li>
+    <li><a href="#switch">The switch and where the code goes</a></li>
+    <li><a href="#pieces">The pieces</a></li>
+    <li><a href="#order">Seats, order, start</a></li>
+    <li><a href="#steps">Shared with Steps 5 and 6, and how it stays apart</a></li>
+    <li><a href="#checks">Checks</a></li>
+    <li><a href="#pad">The game controller</a></li>
+    <li><a href="#words">Words for the head writer</a></li>
+    <li><a href="#calls">Judgement calls</a></li>
+    <li><a href="#questions">Your questions</a></li>
+  </ol>
+</nav>
+
+<section id="beats">
+  <h2>The beats: what you see, when it clears, who speaks</h2>
+  <p>Your rules (26 October), the same as for Steps 5 and 6. Every moment that's yours has:</p>
+  <ul>
+    <li>a level 1 arrow on the day (<code>guideAsk({ level: 1 })</code>, not hidden by needs nudges, Teaching arrows Off or tracking another job);</li>
+    <li>a forced ring line naming it;</li>
+    <li>a notice, a Tracked row and a Schedule row.</li>
+  </ul>
+  <p>Nothing that's yours is learned first by Mail: the Mails are the ship's record (the Captain's address, the parts list), or come after a person has told you. Every key moment is a staged scene with dialogue, poses, others reacting nearby and a closing line. Gatherings follow the comet's rule: a host you tap to join.</p>
+  <div class="tbl"><table style="min-width:900px">
+    <thead><tr><th>Beat, when</th><th>What you see (ring line; arrow target, level; notice and Mail)</th><th>Clears when</th><th>The scene: who, where, the gist</th><th>Lines</th></tr></thead>
+    <tbody>
+      <tr><td><b>A call for company</b><br>Sat 05:40-06:30</td><td>The ship's status line "A Veyli ship has asked for company" from 06:10. Not yours yet: no arrow.</td><td>-</td><td>Comms room, Deck 2: the night watch wakes Saruth; Saruth reads the call.</td><td>4</td></tr>
+      <tr><td><b>Breakfast news</b><br>Sat 07:00-08:00</td><td>Chatter at every table; a notice when you sit down "Something's happening: a Veyli ship".</td><td>08:00</td><td>The mess: Comms and Command crew pass it on; Saruth, if you're near: "They ask for company."</td><td>8</td></tr>
+      <tr><td><b>The address and the turn</b><br>Sat 08:00, 08:30</td><td>The banner on every deck (kept in Mail as the record); the turn's soft swell, felt everywhere.</td><td>08:35</td><td>The Captain, called in on her day off: "We were guests in their sky for a month. Tonight we can be good ones."</td><td>5</td></tr>
+      <tr><td><b>The sheet</b><br>Sat 10:00</td><td>Calder comes to find you (Works bay, or wherever you are) and asks you to sign; ring "Sign the parts chain sheet" on the sheet in the Works bay; arrow level 1 there; notice; Calder's parts-list Mail as the record.</td><td>Signed</td><td>Calder: the chain at 13:00 tomorrow, and "You're meeting their engineer. Foot of the ramp, half nine." Two replies.</td><td>7</td></tr>
+      <tr><td><b>It comes into view</b><br>Sat 14:00</td><td>A notice "The Veyli ship is off the bow: Deck 3's glass"; a level 2 arrow to the bow lounge once (optional to look).</td><td>Seen, or 18:00</td><td>Crew at the glass a few at a time; two or three lines about how small it is.</td><td>6</td></tr>
+      <tr><td><b>Vance: tomorrow</b><br>Sat 18:00</td><td>Vance's Mail (the ship's notice of times, after Calder already told you yours); Tracked and Schedule "Meet Taavek, 09:30, the shuttle bay".</td><td>-</td><td>-</td><td>2</td></tr>
+      <tr><td><b>The Tern goes across</b><br>Sun 08:00</td><td>Notice once you're up "Taavek arrives 09:30: you're meeting them at the ramp"; status line.</td><td>-</td><td>Shuttle bay: Lindqvist's word, the ramp shuts, the Tern flies out (rotation day's sequence).</td><td>3</td></tr>
+      <tr><td><b>Off the Tern</b><br>Sun 09:30-09:50</td><td>Arrow level 1 to the ramp's foot from 09:10; ring "Stand at the foot of the ramp"; Calder already there (called in).</td><td>The meeting ends</td><td>About 20 watch. The ramp opens; Taavek walks down with a crate and the broken part; the bow pose. "Hello! Taavek. Engineer. Yes. The round one. Broken. Very." Three replies (welcome / "Someone met me. Zeke." / coffee first?), each answered; Calder's close. Not there by 09:35: Zeke stands in, and you meet Taavek in the Works bay later, with the same lines.</td><td>14</td></tr>
+      <tr><td><b>The round one</b><br>Sun 10:00-11:30</td><td>Ring "Join Taavek at the bench" on Taavek; arrow level 1 to the Works bay at 09:55.</td><td>The meeting ends</td><td>The Works bay bench: Taavek lays the part down, sketches, points (the read-with-a-pad and point poses); you, Calder and Zeke work out what it is (one choice from you); "It will have to be made."</td><td>12</td></tr>
+      <tr><td><b>The swap meet</b><br>Sun 10:30</td><td>As built (optional).</td><td>-</td><td>Taavek trades Veyli sweets for coffee, a mug at a time.</td><td>3</td></tr>
+      <tr><td><b>The parts chain</b><br>Sun 13:00-14:00</td><td>Notice 12:45; arrow level 1 to Main storage from 12:45; ring "Join the chain" on Zeke; once in, a ring on each crate to pass (the lift pose).</td><td>The last crate, or 14:00</td><td>30-40 people in a line from the storage door to the Tern's ramp; Zeke calls the count ("Next one's heavy. Bend the knees."); cheers at the last one.</td><td>14</td></tr>
+      <tr><td><b>Sunday evening</b><br>18:00-21:55</td><td>As built: the Sunday table, Lap of the Wren, the Sunday story, with Taavek in each (optional).</td><td>-</td><td>Taavek: "very bitter, very good" (Brennan's coffee); sketches the promenade; laughs at every voice.</td><td>6</td></tr>
+      <tr><td><b>The job</b><br>Mon 09:20</td><td>Calder comes to you in the Works bay (or finds you); a notice; ring "Pick two helpers"; a card with the four (Kovac, Pell, Basil, Zeke).</td><td>Two picked</td><td>Calder: "Taavek's part. Yours. Pick two. Don't pick me, I'll only hover." Each pick answers in their own way.</td><td>10</td></tr>
+      <tr><td><b>Making the round one</b><br>Mon 09:30-13:00</td><td>Arrow level 1 to the machine shop; a ring at each step (look at the sketch, choose the stock, turn it on the lathe, hold while a helper checks, balance it); Tracked shows the steps. Hourly notice if you hold another job.</td><td>Balanced (or the helpers finish by 15:00)</td><td>Taavek beside you, pointing and miming; each helper's own lines (Kovac counts the blades twice; Basil holds things); a small mistake costs time, never the part.</td><td>20</td></tr>
+      <tr><td><b>Lunch</b><br>Mon 12:00</td><td>As usual.</td><td>-</td><td>Taavek's sweets go round; Halloran's joke lands on the wrong word.</td><td>3</td></tr>
+      <tr><td><b>The test fit</b><br>Mon 13:30</td><td>Ring "The test fit" on the bench; arrow level 1 to the machine shop.</td><td>It spins</td><td>The part spins true; Taavek's long Veyli word, then "Good. Very good. The round one." Your helpers react.</td><td>6</td></tr>
+      <tr><td><b>Taavek goes home</b><br>Mon 15:00-15:20</td><td>Notice 14:45; arrow level 1 to the shuttle bay; ring "See Taavek off" on Calder.</td><td>The ramp shuts</td><td>About 15; the wave pose; Taavek gives you a sketch: "For you. The one who meets."</td><td>8</td></tr>
+      <tr><td><b>The engine lights</b><br>Mon 17:30-18:00</td><td>Notice 17:15; arrow level 1 to the bow lounge glass; ring "Stand at the glass" on Saruth.</td><td>18:00</td><td>About 45 at the glass (the look-up pose). 17:40: the engine glow, three slow flashes. Saruth: "They say: company kept." The lounge cheers and looks at you, briefly.</td><td>8</td></tr>
+      <tr><td><b>It leaves; the address</b><br>Tue 09:00, 09:15</td><td>The soft turn; the banner (kept in Mail); a line for Works and for you by name.</td><td>09:20</td><td>The Captain, with the Veyli ship's thanks read by Saruth.</td><td>5</td></tr>
+      <tr><td><b>Your commendation; Taavek's letter</b><br>Tue 09:30, 12:00</td><td>Mails: these are records of what's already happened, and the sketch goes on your shelf (a ring "Put the sketch on your shelf" in your cabin the next time you're there).</td><td>Shelved</td><td>Taavek's letter: a few careful words.</td><td>4</td></tr>
+      <tr><td><b>Afterglow</b><br>Tue-Wed</td><td>Taavek's sketch of the Works bay pinned by the tool wall, for good.</td><td>Midnight Tue</td><td>The crew retell it for two days.</td><td>8</td></tr>
+    </tbody>
+  </table></div>
+  <p><b>For the writer:</b> about 160 spoken and scene lines (the table's column), inside about 200 in all with the Mails, notices, labels, Taavek's letter and the status lines. The plan's estimate was about 3 hours of words. Taavek's voice is already on file (content/voices/taavek.voice, content/lines/taavek.lines); every Veyli is they/them; the comet's Veyli name stays unspoken; never "permission" or "leave" about the reach (EP1's notes).</p>
+  <p><b>The arrow-follower check</b> (new part <code>vessel</code> in arrows_check): from a Day 26 evening save, a player who only follows the arrow and the ring signs the sheet, meets Taavek at the ramp, joins the round one and the chain, picks two helpers, makes the part, sees Taavek off and stands at the glass, in that order, by Monday 18:00. At every waking minute of a beat's window an arrow or a ring names it; each of your beats is said in person or by notice before any Mail about it. It runs as is, with Teaching arrows Off, and while tracking another job. It runs again at the rank a slower player has on Day 27 (a Senior Officer, not yet in Deck 2) to prove nothing in it waits on Step 6.</p>
+</section>
+
+<section id="facts">
+  <h2>1. Facts in the game the plan must meet</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Fact</th><th>Where</th><th>What it means</th></tr></thead>
+    <tbody>
+      <tr><td>Taavek is already a guest: cabin 4-04, stay 3, <code>event: 'veyliVessel'</code>, works in the Works bay; voice and lines on file</td><td>Section 9's roster; content/</td><td>No roster work. The guest machinery (<code>eventGuestDays</code>: <code>guestsArrive</code>, <code>guestStay</code>) brings them aboard from Sunday.</td></tr>
+      <tr><td>Cabin 4-04 is also Dr. Lindgren's (the nebula event) when that runs</td><td>Section 9</td><td>Not built yet; noted for whoever builds the nebula: never both at once.</td></tr>
+      <tr><td>The calendar row <code>veyliVessel</code> (Day 27) exists only with the event swap on; with no <code>SHIP_EVENTS.veyliVessel</code> it's passed over</td><td>Section 18, the swap block</td><td>The vessel's block adds the row itself when it's missing (without the swap), and defines <code>SHIP_EVENTS.veyliVessel</code> only with its switch on.</td></tr>
+      <tr><td>Isak Lindqvist is off Mondays and Tuesdays</td><td>Section 9</td><td>He flies Sunday as planned; for Monday 15:00 he's called in (the events' called-in rule, as Calder on Sunday and the Captain on Saturday).</td></tr>
+      <tr><td>Calder and the Captain are off at weekends; Torres works Sundays; Kovac, Pell and Basil all work Mondays</td><td>Section 9</td><td>As the plan says: Calder called in on Sunday, the Captain on Saturday; the four helpers are all free on Monday.</td></tr>
+      <tr><td>Pell "if he stayed": no flag in the game says whether Pell's story kept him aboard</td><td>20c, Pell's arc</td><td>The events builder asks the social engineer for the flag; if the arc never sends him away, Pell is always offered.</td></tr>
+      <tr><td>The Tern's ramp, its aisle and its foot (<code>ternRamp</code>, <code>ROT_TERN_FOOT</code>) and the rotation's arrival are built</td><td>Sections 4d, 14</td><td>The ramp scene and both flights reuse them.</td></tr>
+      <tr><td>The machine shop's lathe (<code>5-shop-lathe</code>) and 24j's workshop orders exist: set the lathe going, a wait, a short hold to finish</td><td>Section 4d, 24j</td><td>The part is a one-off recipe for 24j's making steps (through one call), not a machine fault, so it never touches section 17's jobs or stock.</td></tr>
+      <tr><td>The comet's sky shape and its soft turn are built</td><td>Section 18's comet slot</td><td>The little ship outside reuses the sky pattern (one shape, three lights); the turn is the comet's, reused.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="switch">
+  <h2>2. The switch and where the code goes</h2>
+  <ul>
+    <li><b>Switch:</b> <code>const EV_VESSEL_ON = URL_FLAGS.has('evvessel');</code> in section 13, on its own line after the <code>P926_APPT</code> line (apart from Step 5's and Step 6's switch lines, which go after <code>EV_COMET_ON</code>, so the merges never touch). <code>#evvessel</code> previews it; the switch-on turn makes it <code>true</code>.</li>
+    <li><b>The event:</b> an <code>if (EV_VESSEL_ON &amp;&amp; EVENTS_ON) { ... }</code> block in section 18 straight after the comet's block, defining <code>SHIP_EVENTS.veyliVessel</code> (days 4, phases warning Sat, onset Sun, escalation Mon, resolution and afterglow Tue, <code>commend</code> by question C1, no threads, nothing paused), its calendar row, meetings, moments, news, guests and called-in rules.</li>
+    <li><b>The functions:</b> a new slot, <code>// ---- slot: Vessel builder (section 18; ...)</code>, after the Comet builder's slot, made with tools/add_slots.py; plans/owners.md, plans/map.md and tools/affected.py get its row.</li>
+    <li><b>Places:</b> a <code>// Veyli vessel places</code> block on Deck 5 (the chain's line spots, the sheet, the bench props, the sketch by the tool wall) and on Deck 3 (nothing new: the bow glass places exist), separate from Step 5's and Step 6's <code>// P5 places</code> blocks.</li>
+  </ul>
+</section>
+
+<section id="pieces">
+  <h2>3. The pieces</h2>
+
+  <article class="piece">
+    <header><h3>V-1 The event and its calendar</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Events builder</span><span class="phase">1 turn</span></header>
+    <dl>
+      <dt>What</dt><dd>The switch, the block, the calendar row (Day 27, after the career; added when missing), the phases and their times, the Captain's two addresses (<code>def.address</code>), the news, the turn there and back (the comet's), Taavek's stay (Sunday 09:30 to Monday 15:00, <code>guestsArrive</code> 1), the called-in rules (the Captain Saturday, Calder Sunday, Lindqvist Monday), the commendation rule (C1), the status lines and the Record line. A late save past Day 28 skips it (<code>EV_LATE</code>).</dd>
+      <dt>Touches</dt><dd>Section 13 (one line), section 18 (the block, the slot).</dd>
+      <dt>Checks</dt><dd>events_check (days, phases, Taavek aboard only Sunday 09:30 to Monday 15:00, the commendation rule), bigevents_check (the row on Day 27 after the career, in both event orders; called-in; room clashes; a late save), day_check Days 27-30, cadet_test identical off.</dd>
+    </dl>
+  </article>
+
+  <article class="piece">
+    <header><h3>V-2 The ramp, the bench and the lights</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Events builder</span><span class="phase">2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Calder's sheet (Saturday 10:00, a place in the Works bay with its ring); the ramp scene (Sunday 09:30: both flights through the rotation's Tern code, the ramp's foot as yours, Zeke standing in if you're late); the round one at the bench (Sunday 10:00); Taavek going home (Monday 15:00); the engine lights at the bow glass (Monday 17:30, Saruth hosting, a gathering with the tap-to-join rule). Each with its arrow, ring, notice and Tracked row as the beats table says, through 15b's goal and the arrow queue (<code>guideAsk</code>, level 1).</dd>
+      <dt>Touches</dt><dd>The vessel's slot; section 14's Tern ramp (called, not changed).</dd>
+      <dt>Checks</dt><dd>interactions_check (the sheet, the ramp, Taavek, Calder, Saruth), events_check (each scene's lines heard, Zeke's stand-in), the arrow-follower part.</dd>
+    </dl>
+  </article>
+
+  <article class="piece">
+    <header><h3>V-3 The parts chain</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Events builder, with the deck and sky seat for the spots</span><span class="phase">1-2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>Sunday 13:00-14:00: 30-40 volunteers in a line from Main storage's door (Deck 5, <code>r</code>) to the Tern's ramp; Zeke calls the count; a crate passes hand to hand (a prop moved along the line, the lift pose); you tap Zeke to take a spot and pass crates as they come. Modelled on Lap of the Wren's line of places. The crates are props, not section 17's stock.</dd>
+      <dt>Touches</dt><dd>The vessel's slot; Deck 5's <code>// Veyli vessel places</code> (the line's spots).</dd>
+      <dt>Checks</dt><dd>deck_check (the line's spots reachable; draw calls with 40 in the bay under 450 at phone size), events_check (turnout 25 or more), day_check Day 28.</dd>
+    </dl>
+  </article>
+
+  <article class="piece">
+    <header><h3>V-4 Making the round one</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Events builder (24j's owner reviews)</span><span class="phase">1 turn</span></header>
+    <dl>
+      <dt>What</dt><dd>Monday 09:20 Calder's word and the helper card (pick two of Kovac, Pell if he stayed, Basil, Zeke); then a one-off recipe, the impeller, run through 24j's making steps (look, choose the stock, the lathe at <code>5-shop-lathe</code>, hold while a helper checks, balance), Taavek and your helpers beside you, each pick changing the lines. Away or slow: the helpers carry on and it's done by about 15:00 anyway. The test fit at 13:30.</dd>
+      <dt>Touches</dt><dd>The vessel's slot; 24j (one <code>typeof</code>-guarded call to run a recipe it's handed; the Works career engineer reviews).</dd>
+      <dt>Checks</dt><dd>mech_check's workshop part still OK; events_check (the part done by 15:00 without you; each pair's lines), controller_check reach (the helper card, each step).</dd>
+    </dl>
+  </article>
+
+  <article class="piece">
+    <header><h3>V-5 The ship outside and the small props</h3><span class="phase">EV_VESSEL_ON</span><span class="phase">Deck and sky seat (the performance seat, or whoever built the comet's sky)</span><span class="phase">1-2 turns</span></header>
+    <dl>
+      <dt>What</dt><dd>The little Veyli ship off the bow (question C2): one sky shape with three lights, Saturday 14:00 to Tuesday 09:05, its lights low until the engine glow and the three slow flashes at 17:40 Monday; 1-2 draw calls. The broken part and the new one on the bench; the crate; Taavek's sketch pinned by the tool wall (a trace that stays); the sketch for your shelf.</dd>
+      <dt>Touches</dt><dd>Section 18's systems effect (a <code>skyVessel</code> beside <code>skyComet</code>, in the vessel's slot); section 4b (the small props' kit); Deck 5's <code>// Veyli vessel places</code>.</dd>
+      <dt>Checks</dt><dd>deck_check and perf_check (Deck 3's bow glass and Deck 5 with it on), cadet_test identical off, a screenshot at phone size for the review.</dd>
+    </dl>
+  </article>
+
+  <article class="piece">
+    <header><h3>V-6 Words</h3><span class="phase">no switch</span><span class="phase">Head writer</span><span class="phase">about 3 hours</span></header>
+    <p>Section 8. Builders use stand-ins until then.</p>
+  </article>
+</section>
+
+<section id="order">
+  <h2>4. Seats, order, start</h2>
+  <ul>
+    <li><b>Two builders at once:</b> the events builder (V-1, V-2, V-3, V-4, in that order) and the deck and sky seat (V-5, and V-3's spots). Plus the head writer, and an events checker for the new check parts (or the events builder adds them).</li>
+    <li><b>Start now, on 0.93.3.</b> Nothing in it waits on Step 5 or Step 6: the job is yours at any rank, and the words change with your rank where they need to (<code>myrank</code>). It merges into staging on its own switch; the full round before it's switched on.</li>
+    <li><b>Order of switch-on:</b> it can go on before, with or after Steps 5-6. Before Step 6 is on, a player on Day 27 is whatever rank they've reached and still in 4-23; the beats table holds either way.</li>
+  </ul>
+</section>
+
+<section id="steps">
+  <h2>5. Shared with Steps 5 and 6, and how it stays apart</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Place</th><th>Step 5/6 piece</th><th>The vessel</th><th>How it stays apart</th></tr></thead>
+    <tbody>
+      <tr><td>Section 13 switch lines</td><td>S5-1 and Step 6's first turn: after <code>EV_COMET_ON</code></td><td>One line after <code>P926_APPT</code></td><td>Different spots, two lines apart: no merge clash</td></tr>
+      <tr><td>Section 18: <code>EV_BEATS</code> and <code>EV_CALENDAR</code></td><td>S5-1's block after the event swap's block (the career's held hours); Step 6 adds four rows there</td><td>Its own block after the comet's block; adds only its calendar row, no <code>EV_BEATS</code> rows (the career holds nothing on Days 27-30 for a steady player)</td><td>Different blocks; the events seat reviews both. A slower player's late career beats (the Deck 2 move's fallback, the badge) are guarded by <code>guardFree</code> as now: the vessel's moments never take a held hour</td></tr>
+      <tr><td>Monday Day 29, 08:30-09:15</td><td>S6-2's Monday briefing, if weekly (question 4 on the Step 5/6 pages)</td><td>Calder's job word</td><td>The job word is at 09:20, after the briefing, in every game</td></tr>
+      <tr><td>Rooms: Deck 2 room B, Deck 4</td><td>S6-3: your quarters in room B from Day 25; 4-23 back to spare</td><td>Taavek in guest cabin 4-04</td><td>Different rooms; no vessel guest is lodged on Deck 2</td></tr>
+      <tr><td>Section 4d, Deck 5</td><td>S5-6's old-mysteries board in the Works bay (<code>// P5 places</code>)</td><td>The sheet, the chain's spots, the sketch by the tool wall (<code>// Veyli vessel places</code>)</td><td>Separate blocks; the deck architect keeps the sketch clear of the board's wall</td></tr>
+      <tr><td>Works jobs and stock (section 17)</td><td>S5-2's and S6-3's tests (<code>jobReserve</code> slots 25 and 26); S6-2's parts order</td><td>None: the part is a 24j recipe; the crates are props</td><td>The vessel never reserves a job or moves stock (slot 27 is kept for it should it ever need one)</td></tr>
+      <tr><td>24j, the workshop</td><td>S6-8's P8 at the test rig bench (Day 25)</td><td>The lathe (Day 29)</td><td>Different benches and days; 24j's owner reviews the vessel's one call</td></tr>
+      <tr><td>The Day 26-27 edge</td><td>S6-9: Four weeks aboard 18:40-19:30 and Calder's question; the Midnight toast at 23:00</td><td>The call at 05:40 Day 27</td><td>Six hours apart; a slower player's question moves to the next Friday (Day 33), past the vessel</td></tr>
+      <tr><td>Nights and leave</td><td>S6-1: nights Days 22-24, Navarro's leave 22-23</td><td>Days 27-30</td><td>No overlap. A save mid-night never reaches Day 27 in the same night</td></tr>
+      <tr><td>The Record and Mail</td><td>28f's end page and milestones</td><td>The event's Record line and its Mails</td><td>Different lines, written by different hooks (events already write Record lines)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="checks">
+  <h2>6. Checks</h2>
+  <ul>
+    <li><b>events_check:</b> a vessel part: days, phases, the Tern's two trips, Taavek aboard only Sunday 09:30 to Monday 15:00, the chain's turnout of 25 or more, the part done by 15:00 without you, the commendation rule, the traces.</li>
+    <li><b>bigevents_check:</b> the row on Day 27, in both event orders; called-in; room clashes; a late save on Day 28 skips it; nothing with the switch off.</li>
+    <li><b>day_check:</b> Days 27, 28, 29 and 30 (Day 27 is already an event day: it becomes the vessel's; the other three are new).</li>
+    <li><b>Other checks:</b>
+      <ul>
+        <li>arrows_check's <code>vessel</code> part (the arrow-follower, three ways and at a Senior's rank);</li>
+        <li>interactions_check;</li>
+        <li>deck_check and perf_check (the chain, the ship outside);</li>
+        <li>mech_check's workshop part;</li>
+        <li>join_check (the lights' gathering);</li>
+        <li>sound_check (reused cues only);</li>
+        <li>controller_check;</li>
+        <li>cadet_test identical off.</li>
+      </ul>
+    </li>
+  </ul>
+</section>
+
+<section id="pad">
+  <h2>7. The game controller</h2>
+  <ul>
+    <li><b>Things in the world to pick (ring, then A):</b> the sheet, Taavek, Zeke, Calder and Saruth.</li>
+    <li><b>Menus and cards to reach with the D-pad:</b> the ramp meeting's three replies, the helper card (A picks each of two), the making steps and the test fit.</li>
+    <li><b>In the chain:</b> the crate's ring works with A, one press per crate, never held.</li>
+    <li><b>How controller_check gets there:</b> Dev presets on Day 27 at 10:00, Day 28 at 09:25 and 12:55, and Day 29 at 09:15.</li>
+  </ul>
+</section>
+
+<section id="words">
+  <h2>8. Words for the head writer</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>File</th><th>What</th><th>About how many</th></tr></thead>
+    <tbody>
+      <tr><td>content/banks/event-veyliVessel.lines (new, beside event-comet.lines)</td><td>The call (night watch, Saruth); breakfast chatter; crew at the glass; the chain (Zeke's count, the line's banter); Sunday's traditions with Taavek; lunch; the afterglow retellings</td><td>about 50</td></tr>
+      <tr><td>vessel meetings</td><td>Calder's sheet; the ramp (Taavek, three replies, Calder's close; Zeke's stand-in version); the round one; the job and the helper card (each of four helpers' lines, by pair); the making steps; the test fit; Taavek goes home; the engine lights (Saruth)</td><td>about 90</td></tr>
+      <tr><td>Addresses and Mails</td><td>The Captain Saturday 08:00 and Tuesday 09:15; Calder's parts list; Vance's "Tomorrow"; your commendation; Taavek's letter with the sketch</td><td>about 15</td></tr>
+      <tr><td>Short UI words</td><td>Ring lines, notices, Tracked and Schedule rows, the three status lines, the Record line, the sketch's and the props' tap texts</td><td>about 45</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<section id="calls">
+  <h2>9. Judgement calls (overrule any of them)</h2>
+  <ul>
+    <li><b>Calder tells you on Saturday</b> that you're the one meeting Taavek. In the plan, the Schedule told you. Your rule wants it in person.</li>
+    <li><b>The job word moves to 09:20 on Monday</b>, after a weekly Monday briefing if there is one.</li>
+    <li><b>Lindqvist is called in on Monday</b> to fly Taavek home, since it's his day off.</li>
+    <li><b>The part is a workshop recipe, not a machine fault</b>, so the vessel never touches the ship's jobs or stores.</li>
+    <li><b>The ship coming into view on Saturday is optional</b>, so its arrow is level 2 and comes once.</li>
+  </ul>
+</section>
+
+<section id="questions">
+  <h2>10. Your questions</h2>
+  <div class="q">
+    <h3>C1. A commendation for helping the Veyli ship?</h3>
+    <p>From the events plan. Should helping count toward a commendation, like the storm did?</p>
+    <p class="rec"><b>Recommended: yes</b>, by the usual rule (two of its jobs, or one job and a meeting). It's real work, and your first in your new place. The other choice: no score, like the comet.</p>
+  </div>
+  <div class="q">
+    <h3>C2. See the Veyli ship outside the window?</h3>
+    <p>From the events plan.</p>
+    <p class="rec"><b>Recommended: yes</b>, a small ship with three lights off the bow from Saturday afternoon to Tuesday morning, so the engine lighting up on Monday is something you watch. The other choice: words only, and Saruth reads the signal on the comm.</p>
+  </div>
+  <div class="q">
+    <h3>C3. If you miss Taavek at the ramp</h3>
+    <p>If you're not at the ramp by 09:35 on Sunday, someone has to meet Taavek.</p>
+    <p class="rec"><b>Recommended: Zeke stands in</b>, and you meet Taavek at the Works bay bench a few minutes later, where Taavek says the same things to you. The other choice: Taavek and Calder wait at the ramp until you come (up to an hour).</p>
+  </div>
+  <form id="answers">
+    <div id="rows"></div>
+    <div class="row"><h3>Anything else about the Veyli vessel?</h3><textarea id="notes" aria-label="Anything else"></textarea></div>
+    <button type="submit">Save my answers</button>
+    <p class="status" id="status" role="status">Loading any saved answers...</p>
+  </form>
+</section>
+
+</div>
+<script>
+(() => {
+  // answers, kept in the page's own store at answers/user (the same shape as the plan page's form)
+  const items = [
+    ['c1', 'C1. A commendation for helping the Veyli ship?', [['yes', 'Yes, by the usual rule (recommended)'], ['no', 'No score, like the comet']]],
+    ['c2', 'C2. See the Veyli ship outside the window?', [['yes', 'Yes, a small ship with three lights (recommended)'], ['no', 'Words only']]],
+    ['c3', 'C3. If you miss Taavek at the ramp', [['zeke', 'Zeke stands in, you meet Taavek at the bench (recommended)'], ['wait', 'They wait at the ramp up to an hour']]],
+  ];
+  const rows = document.getElementById('rows');
+  for (const [k, name, opts] of items) {
+    const r = document.createElement('div'); r.className = 'row';
+    const h = document.createElement('h3'); h.textContent = name; r.appendChild(h);
+    const c = document.createElement('div'); c.className = 'choices'; c.setAttribute('role', 'radiogroup'); c.setAttribute('aria-label', name);
+    for (const [v, t] of opts) {
+      const lab = document.createElement('label'); lab.className = 'opt';
+      const i = document.createElement('input'); i.type = 'radio'; i.name = k; i.value = v; i.id = k + '-' + v;
+      lab.appendChild(i); lab.appendChild(document.createTextNode(t)); c.appendChild(lab);
+    }
+    r.appendChild(c);
+    const n = document.createElement('input'); n.type = 'text'; n.id = k + '-note'; n.placeholder = 'Notes (optional)';
+    n.setAttribute('aria-label', name + ' notes'); r.appendChild(n);
+    rows.appendChild(r);
+  }
+  const form = document.getElementById('answers'), status = document.getElementById('status');
+  let ref = null;
+  const fill = d => {
+    if (!d) return;
+    for (const [k] of items) {
+      const a = d[k] || {};
+      for (const i of form.querySelectorAll('input[name="' + k + '"]')) i.checked = i.value === a.choice;
+      document.getElementById(k + '-note').value = a.note || '';
+    }
+    document.getElementById('notes').value = d.notes || '';
+  };
+  const read = () => {
+    const o = {};
+    for (const [k, name] of items) o[k] = { name, choice: (form.querySelector('input[name="' + k + '"]:checked') || {}).value || '', note: document.getElementById(k + '-note').value.trim() };
+    o.notes = document.getElementById('notes').value.trim(); o.savedAt = new Date().toISOString(); return o;
+  };
+  (async () => {
+    let db = null;
+    try { db = window.claude && window.claude.use ? await window.claude.use('db') : null; } catch (e) { db = null; }
+    if (!db) { status.textContent = 'Answers can only be saved when you are signed in on claude.ai. You can still tick and write here.'; return; }
+    ref = db.doc('answers/user');
+    try { const s = await ref.get(); if (s.exists) { fill(s.data()); status.textContent = 'Your saved answers are shown. Change them and save again any time.'; } else status.textContent = 'Nothing saved yet.'; }
+    catch (e) { status.textContent = 'Could not load saved answers. You can still save new ones.'; }
+  })();
+  form.addEventListener('submit', async e => {
+    e.preventDefault();
+    if (!ref) { status.textContent = 'Saving is not available here. Please send your answers to the lead in chat.'; return; }
+    status.textContent = 'Saving...';
+    try { await ref.set(read()); status.textContent = 'Saved at ' + new Date().toLocaleTimeString() + '. You can change them and save again.'; }
+    catch (err) { status.textContent = 'That did not save (' + (err && err.code || 'error') + '). Please try again, or send your answers in chat.'; }
+  });
+})();
+</script>
