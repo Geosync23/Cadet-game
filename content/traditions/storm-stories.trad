@@ -5,14 +5,16 @@
 // a little worse than the truth. Never on its own rhythm: the storm adds it to its Saturday (STORM_SAT_ON, the storm's
 // dayDress), so a game without the storm (or with the switch off) never has it. Holt and Mensah are on duty then.
 // CS1's words (plans/storm-stories-words.txt on claude/crew-stories-pitch c7e67663); the eight tellers' snippets are
-// among the `here` lines (what someone there says when you tap them). Not wired yet (no place for them in a .trad):
-// Oduya's close lines, "That's the last torch. Lights stay low. Sleep well, and let the storm do its job." and "Good
+// among the `here` lines; while it runs they're also said aloud in turn (section 18's stormStoriesFrame), with Oduya's
+// close lines near the end (in the game, as the format has no place for them): "That's the last torch. Lights stay low. Sleep well, and let the storm do its job." and "Good
 // stories. Mostly true. Off to bed, and leave your torch by the door."; his join lines are the join toast (join.lines).
 k: 474
 title: Storm stories by torchlight
 when: year day 13 until day 1
 at: 21:00-21:45
 min: 20
+// a place kept for you in the circle (RV18's S1: the room filled and you stood in the corridor)
+spare: 1
 where: 4 pool common-room
 hold: 1
 who: oduya always, holt never, mensah never, night-owl 70%, juniors 40%, everyone 25%
