@@ -106,3 +106,40 @@ Monday Day 22; steps 3-4 the address lines and fridays_check's swap excuse. Noth
 Diff read (section 15: seatBtnSeat, seatBtnGo, the button, one handTick line). Played at 390 x 844: with a tray in the mess
 hall by a free seat the button shows straight above Put down at its size; a real tap sat me at 3-mess-8 and I ate the tray
 (ACT eat, fed); the button goes; none on Deck 4 with a tray. No page errors.
+
+## Event swap verdict: PASS at 05a9e7db (game e8768136...d7be), 05:10 UTC
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d (alone) | 05a9e7db off | ALL IDENTICAL |
+| events, bigevents, stories, arc, day_check 25 | 49cf5dc5 off | all OK |
+| events, bigevents, day_check 16, 19, 22 | 49cf5dc5 on (copy) | all OK |
+| fridays_check (CR6) | 05a9e7db off and on | FRIDAYS CHECK OK, both |
+| fridays_check (mine) | 05a9e7db | hangs in my container (timeout 2400 s, no output), as FX22b saw even on 0.93.1; CR6's runs count |
+Small, no fix needed: the build-number lines (BM18's); Day 26's "a week of guests" for a three-day visit (SW2's).
+
+## FX24 traditions, re-review of the fixes (c7867204, 4d38df29, c536ed00; then 4d1eca54, game ad6fc781...a31a)
+| Check | Build | Result |
+|---|---|---|
+| cadet_test vs b957b92d | 4d1eca54 off | ALL IDENTICAL (1-level noise; another browser was running) |
+| food_check 1 7 | 4d1eca54 on | FOOD CHECK OK (M3 fixed) |
+| events_check | 4d1eca54 on | only reading-corner Day 7 (FX24-2, accepted as known-old by lead 37) |
+| join_check | 4d1eca54 on | all 15 new ones "tap -> joined True" with an activity, no FAIL; then a page-load timeout under load (rerun alone queued) |
+Played again at phone size (switch on): the card stays open (3 s and more), every line plays, the tasting vote goes in
+("You drop your token in the jar for the ..."), no "(notes)" Mail (M1 fixed); you stand in the galley beside Brennan
+(S3); bubbles rotate through the lines, no one line over and over (S1); Brennan's "love" line only from her (S2); Isak
+rows on a rower (S4). Left, small: at Row for the board I got a weight bench (lie:lift) because the rowers were booked
+by the crew coming: the pose doesn't match the event. Suggest standing by the rowers and cheering when they're full.
+
+## SD1 steps-quiet (claude/steps-quiet 0d41441f, game 1260dfe1...fd79c)
+One line: TRIM.steps 1.0 -> 0.5. Only the player's footsteps use the steps bus (S.fx 'step' with layer 'steps', and the
+unused startWalk). cadet_test and sound_check queued.
+
+## FX24 auto doors (claude/auto-doors-0932 61893eae, game 76224623...ef16)
+Diff read: 15b's slot (AUTO_DOORS_ON on, setting default on), section 4's collide (adoorShut for the player only), the
+door-leaf walk test, Walker.goTo (adoorRoute for the player), the tap and cursor, Settings, deviceLoad keeps it only when
+off. With the setting on nothing changes. Played at 390 x 844, 03:00, public doors on Decks 2, 5, 3, setting off:
+steering into a shut door stops you and it stays shut; a real tap on the door opens it and you walk through; a real tap
+in the room beyond walks you through and the door opens as you reach it; setting on: straight through. No page errors.
+Should: a door on a near wall is drawn cut away, a low strip your own character mostly covers when you stand at it, so a
+tap there hits you (walker) and you walk off instead; suggest a tap on yourself (or the doorway floor) next to a shut door
+counts as a tap on that door. A tap beyond works, so not a must. cadet_test and interactions_check queued.
