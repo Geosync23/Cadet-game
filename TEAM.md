@@ -1411,3 +1411,4 @@ Merge order C, F, I, A, D, B, J, G, K, E, H. Pare-down to 8 workers at 06:00 UTC
 - ~16:00 UTC: **0.93.2 ROUND 2 started** on staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3; gate: check_fast OK, arrows week OK, events only FX24-2, cadet only 3 Oona shots). ETA ~17:30 UTC (1:30 PM Eastern).
 - ~16:25 UTC: USER: when 0.93.2 is published, send a push notification, then the lead 39 handoff prompt again; user will start lead 39 directly (lineage depth).
 - ~16:58 UTC check-in (lead 38): round 2: CR4 OK (stood down), CR1 OK; CR2/CR3/CR5/CR6 running; ETA ~17:30 UTC.
+- ~17:36 UTC: **0.93.2 GO** (BM18): staging-0.93.2 d9c7e5f0 (game c99ea59c...d5d3, 7.23 MB); all six OK; known-old 12/FX28-1, 32, FX24-2, 3 Oona shots; no new FAILs. **PUB1 GO** both links with {downloads: true}.
