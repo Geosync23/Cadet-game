@@ -226,7 +226,7 @@ with sync_playwright() as pw:
       out.again = careerClock(at(10, 600)) === 'out'; out.done = careerClock(at(10, 1000)); out.hours = [c.ci % 1440, c.co % 1440];
       careerTick(at(11, 0)); careerClock(at(11, 480)); careerTick(at(11, 1070)); out.notYet = !(c.co > c.ci); careerTick(at(11, 1090)); out.auto = c.co % 1440;
       careerTick(at(12, 0)); careerTick(at(12, 760)); out.missedNoClock = c.md === 12;
-      out.sat = careerClock(at(13, 600));
+      out.sat = careerClock(at(14, 600));   // a day off: Sunday Day 14 (FX26, 0.93.2: Saturday Day 13 is the storm's, when you're called in)
       careerTick(at(15, 0)); out.early = careerClock(at(15, 180)); flagSet('shiftSent', null); SHIP.notes = [];
       const sent = []; const stop = onSim('shiftStart', n => sent.push(n)); careerClock(at(15, 690)); shiftTick(); at(15, 691); shiftTick(); stop();
       out.lateNote = sent.map(n => [n.late, !!n.missed]);
